@@ -1,6 +1,7 @@
 module Main exposing (main)
 
 import Angle
+import BoundingBox3d
 import Browser exposing (application)
 import Browser.Navigation exposing (Key)
 import Camera3d
@@ -121,10 +122,11 @@ update msg (Model model) =
                 { model
                     | rawTrack = Just gpxTrack
                     , trackTree = trackTree
+                    , renderDepth = 2
                     , scene =
                         case model.trackTree of
                             Just tree ->
-                                render model.renderDepth tree []
+                                render 2 tree []
 
                             Nothing ->
                                 []
@@ -208,26 +210,38 @@ maximumLeftPane =
 contentArea : ModelRecord -> Element Msg
 contentArea model =
     let
-        cameraViewpoint =
-            Viewpoint3d.lookAt
-                { eyePoint = Point3d.meters -5000 -5000 2000
-                , focalPoint = Point3d.origin
-                , upDirection = Direction3d.positiveZ
-                }
-
-        perspectiveCamera =
-            Camera3d.perspective
-                { viewpoint = cameraViewpoint
-                , verticalFieldOfView = Angle.degrees 75
-                }
-
         leftPane =
             column
                 [ width fill, alignTop ]
                 [ case model.trackTree of
                     Just (Node topNode) ->
+                        let
+                            box = topNode.nodeContent.boundingBox
+
+                            cameraViewpoint =
+                                Viewpoint3d.lookAt
+                                    { eyePoint = Point3d.xyz
+                                        (BoundingBox3d.minX box)
+                                        (BoundingBox3d.minY box)
+                                        (BoundingBox3d.maxZ box)
+                                    , focalPoint = BoundingBox3d.centerPoint box
+                                    , upDirection = Direction3d.positiveZ
+                                    }
+
+                            perspectiveCamera =
+                                Camera3d.perspective
+                                    { viewpoint = cameraViewpoint
+                                    , verticalFieldOfView = Angle.degrees 60
+                                    }
+
+                        in
                         column []
-                            [ text <| String.fromFloat <| Length.inMeters topNode.nodeContent.trueLength
+                            [ text <|
+                                "Length: "
+                                    ++ (String.fromFloat <| Length.inMeters topNode.nodeContent.trueLength)
+                            , text <|
+                                "Points: "
+                                    ++ String.fromInt topNode.nodeContent.gpxGapCount
                             , html <|
                                 Scene3d.cloudy
                                     { camera = perspectiveCamera

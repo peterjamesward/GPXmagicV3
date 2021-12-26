@@ -11347,11 +11347,12 @@ var $author$project$Main$update = F2(
 							model,
 							{
 								rawTrack: $elm$core$Maybe$Just(gpxTrack),
+								renderDepth: 2,
 								scene: function () {
 									var _v2 = model.trackTree;
 									if (_v2.$ === 'Just') {
 										var tree = _v2.a;
-										return A3($author$project$DomainModel$render, model.renderDepth, tree, _List_Nil);
+										return A3($author$project$DomainModel$render, 2, tree, _List_Nil);
 									} else {
 										return _List_Nil;
 									}
@@ -19284,17 +19285,6 @@ var $author$project$Main$contentArea = function (model) {
 					value: model.renderDepth
 				})
 			]));
-	var cameraViewpoint = $ianmackenzie$elm_3d_camera$Viewpoint3d$lookAt(
-		{
-			eyePoint: A3($ianmackenzie$elm_geometry$Point3d$meters, -5000, -5000, 2000),
-			focalPoint: $ianmackenzie$elm_geometry$Point3d$origin,
-			upDirection: $ianmackenzie$elm_geometry$Direction3d$positiveZ
-		});
-	var perspectiveCamera = $ianmackenzie$elm_3d_camera$Camera3d$perspective(
-		{
-			verticalFieldOfView: $ianmackenzie$elm_units$Angle$degrees(75),
-			viewpoint: cameraViewpoint
-		});
 	var leftPane = A2(
 		$mdgriffith$elm_ui$Element$column,
 		_List_fromArray(
@@ -19308,14 +19298,32 @@ var $author$project$Main$contentArea = function (model) {
 				var _v0 = model.trackTree;
 				if ((_v0.$ === 'Just') && (_v0.a.$ === 'Node')) {
 					var topNode = _v0.a.a;
+					var box = topNode.nodeContent.boundingBox;
+					var cameraViewpoint = $ianmackenzie$elm_3d_camera$Viewpoint3d$lookAt(
+						{
+							eyePoint: A3(
+								$ianmackenzie$elm_geometry$Point3d$xyz,
+								$ianmackenzie$elm_geometry$BoundingBox3d$minX(box),
+								$ianmackenzie$elm_geometry$BoundingBox3d$minY(box),
+								$ianmackenzie$elm_geometry$BoundingBox3d$maxZ(box)),
+							focalPoint: $ianmackenzie$elm_geometry$BoundingBox3d$centerPoint(box),
+							upDirection: $ianmackenzie$elm_geometry$Direction3d$positiveZ
+						});
+					var perspectiveCamera = $ianmackenzie$elm_3d_camera$Camera3d$perspective(
+						{
+							verticalFieldOfView: $ianmackenzie$elm_units$Angle$degrees(60),
+							viewpoint: cameraViewpoint
+						});
 					return A2(
 						$mdgriffith$elm_ui$Element$column,
 						_List_Nil,
 						_List_fromArray(
 							[
 								$mdgriffith$elm_ui$Element$text(
-								$elm$core$String$fromFloat(
+								'Length: ' + $elm$core$String$fromFloat(
 									$ianmackenzie$elm_units$Length$inMeters(topNode.nodeContent.trueLength))),
+								$mdgriffith$elm_ui$Element$text(
+								'Points: ' + $elm$core$String$fromInt(topNode.nodeContent.gpxGapCount)),
 								$mdgriffith$elm_ui$Element$html(
 								$ianmackenzie$elm_3d_scene$Scene3d$cloudy(
 									{
