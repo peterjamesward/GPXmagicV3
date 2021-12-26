@@ -4,6 +4,7 @@ import Angle exposing (Angle)
 import BoundingBox3d exposing (BoundingBox3d)
 import Color exposing (black)
 import Length exposing (Meters)
+import LineSegment3d
 import List.Extra
 import LocalCoords exposing (LocalCoords)
 import Pixels
@@ -185,19 +186,21 @@ treeFromList track =
         |> treeFromRoadSections
 
 
-makeVisiblePoint pt =
-    Scene3d.point { radius = Pixels.pixels 1 } (Material.color black) pt
+makeVisiblePoint rd =
+    [ Scene3d.point { radius = Pixels.pixels 1 } (Material.color black) rd.startsAt
+    , Scene3d.lineSegment (Material.color black) <| LineSegment3d.from rd.startsAt rd.endsAt
+    ]
 
 
 render : Int -> PeteTree -> List (Entity LocalCoords) -> List (Entity LocalCoords)
 render depth someNode accum =
     case someNode of
         Leaf leafNode ->
-            makeVisiblePoint leafNode.startsAt :: accum
+            makeVisiblePoint leafNode ++ accum
 
         Node notLeaf ->
             if depth == 0 then
-                makeVisiblePoint notLeaf.nodeContent.startsAt :: accum
+                makeVisiblePoint notLeaf.nodeContent ++ accum
 
             else
                 accum

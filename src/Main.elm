@@ -216,14 +216,16 @@ contentArea model =
                 [ case model.trackTree of
                     Just (Node topNode) ->
                         let
-                            box = topNode.nodeContent.boundingBox
+                            box =
+                                topNode.nodeContent.boundingBox
 
                             cameraViewpoint =
                                 Viewpoint3d.lookAt
-                                    { eyePoint = Point3d.xyz
-                                        (BoundingBox3d.minX box)
-                                        (BoundingBox3d.minY box)
-                                        (BoundingBox3d.maxZ box)
+                                    { eyePoint =
+                                        Point3d.xyz
+                                            (BoundingBox3d.minX box)
+                                            (BoundingBox3d.minY box)
+                                            (BoundingBox3d.maxZ box)
                                     , focalPoint = BoundingBox3d.centerPoint box
                                     , upDirection = Direction3d.positiveZ
                                     }
@@ -233,7 +235,6 @@ contentArea model =
                                     { viewpoint = cameraViewpoint
                                     , verticalFieldOfView = Angle.degrees 60
                                     }
-
                         in
                         column []
                             [ text <|
@@ -259,30 +260,14 @@ contentArea model =
 
         rightPane =
             column [ spacing 5, padding 5, alignTop ]
-                [ Input.slider
-                    [ Element.height (Element.px 30)
-
-                    -- Here is where we're creating/styling the "track"
-                    , Element.behindContent
-                        (Element.el
-                            [ Element.width Element.fill
-                            , Element.height (Element.px 2)
-                            , Element.centerY
-                            , Border.rounded 2
-                            ]
-                            Element.none
-                        )
-                    ]
-                    { onChange = SetRenderDepth << round
-                    , label =
-                        Input.labelAbove []
-                            (text "Render depth")
-                    , min = 0
-                    , max = 10
-                    , step = Just 1
-                    , value = toFloat model.renderDepth
-                    , thumb =
-                        Input.defaultThumb
+                [ text <| "Render depth: " ++ String.fromInt model.renderDepth
+                , button []
+                    { label = text "More"
+                    , onPress = Just <| SetRenderDepth (min 25 (model.renderDepth + 1))
+                    }
+                , button []
+                    { label = text "Less"
+                    , onPress = Just <| SetRenderDepth (max 1 (model.renderDepth - 1))
                     }
                 ]
     in
