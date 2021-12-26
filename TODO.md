@@ -13,7 +13,7 @@ Put all GPXPoints into a binary tree. At each level hold:
 - Bounding box
 - (height gained, lost, max gradient up/down, ...)
   Use this for **everything**.
-- Selective renderig
+- Selective rendering
 - Click detection
 - Terrain
 - i.e. Replaces SpatialIndex (even if less optimal).

@@ -4813,6 +4813,107 @@ function _File_toUrl(blob)
 
 
 
+// CREATE
+
+var _Regex_never = /.^/;
+
+var _Regex_fromStringWith = F2(function(options, string)
+{
+	var flags = 'g';
+	if (options.multiline) { flags += 'm'; }
+	if (options.caseInsensitive) { flags += 'i'; }
+
+	try
+	{
+		return $elm$core$Maybe$Just(new RegExp(string, flags));
+	}
+	catch(error)
+	{
+		return $elm$core$Maybe$Nothing;
+	}
+});
+
+
+// USE
+
+var _Regex_contains = F2(function(re, string)
+{
+	return string.match(re) !== null;
+});
+
+
+var _Regex_findAtMost = F3(function(n, re, str)
+{
+	var out = [];
+	var number = 0;
+	var string = str;
+	var lastIndex = re.lastIndex;
+	var prevLastIndex = -1;
+	var result;
+	while (number++ < n && (result = re.exec(string)))
+	{
+		if (prevLastIndex == re.lastIndex) break;
+		var i = result.length - 1;
+		var subs = new Array(i);
+		while (i > 0)
+		{
+			var submatch = result[i];
+			subs[--i] = submatch
+				? $elm$core$Maybe$Just(submatch)
+				: $elm$core$Maybe$Nothing;
+		}
+		out.push(A4($elm$regex$Regex$Match, result[0], result.index, number, _List_fromArray(subs)));
+		prevLastIndex = re.lastIndex;
+	}
+	re.lastIndex = lastIndex;
+	return _List_fromArray(out);
+});
+
+
+var _Regex_replaceAtMost = F4(function(n, re, replacer, string)
+{
+	var count = 0;
+	function jsReplacer(match)
+	{
+		if (count++ >= n)
+		{
+			return match;
+		}
+		var i = arguments.length - 3;
+		var submatches = new Array(i);
+		while (i > 0)
+		{
+			var submatch = arguments[i];
+			submatches[--i] = submatch
+				? $elm$core$Maybe$Just(submatch)
+				: $elm$core$Maybe$Nothing;
+		}
+		return replacer(A4($elm$regex$Regex$Match, match, arguments[arguments.length - 2], count, _List_fromArray(submatches)));
+	}
+	return string.replace(re, jsReplacer);
+});
+
+var _Regex_splitAtMost = F3(function(n, re, str)
+{
+	var string = str;
+	var out = [];
+	var start = re.lastIndex;
+	var restoreLastIndex = re.lastIndex;
+	while (n--)
+	{
+		var result = re.exec(string);
+		if (!result) break;
+		out.push(string.slice(start, result.index));
+		start = re.lastIndex;
+	}
+	out.push(string.slice(start));
+	re.lastIndex = restoreLastIndex;
+	return _List_fromArray(out);
+});
+
+var _Regex_infinity = Infinity;
+
+
 
 // SEND REQUEST
 
@@ -7375,8 +7476,10 @@ var $author$project$Main$init = F3(
 			$author$project$Main$Model(
 				{
 					filename: $elm$core$Maybe$Nothing,
+					rawTrack: $elm$core$Maybe$Nothing,
 					stravaAuthentication: authData,
 					time: $elm$time$Time$millisToPosix(0),
+					trackTree: $elm$core$Maybe$Nothing,
 					zone: $elm$time$Time$utc
 				}),
 			$elm$core$Platform$Cmd$batch(
@@ -7438,7 +7541,647 @@ var $author$project$StravaAuth$getStravaToken = function (model) {
 };
 var $elm$core$Platform$Cmd$map = _Platform_map;
 var $elm$file$File$name = _File_name;
+var $elm$regex$Regex$Match = F4(
+	function (match, index, number, submatches) {
+		return {index: index, match: match, number: number, submatches: submatches};
+	});
+var $elm$regex$Regex$fromStringWith = _Regex_fromStringWith;
+var $elm$regex$Regex$fromString = function (string) {
+	return A2(
+		$elm$regex$Regex$fromStringWith,
+		{caseInsensitive: false, multiline: false},
+		string);
+};
+var $elm$regex$Regex$never = _Regex_never;
+var $author$project$GpxParser$asRegex = function (t) {
+	return A2(
+		$elm$core$Maybe$withDefault,
+		$elm$regex$Regex$never,
+		$elm$regex$Regex$fromString(t));
+};
+var $elm$core$Basics$pi = _Basics_pi;
+var $ianmackenzie$elm_units$Quantity$Quantity = function (a) {
+	return {$: 'Quantity', a: a};
+};
+var $ianmackenzie$elm_units$Angle$radians = function (numRadians) {
+	return $ianmackenzie$elm_units$Quantity$Quantity(numRadians);
+};
+var $ianmackenzie$elm_units$Angle$degrees = function (numDegrees) {
+	return $ianmackenzie$elm_units$Angle$radians($elm$core$Basics$pi * (numDegrees / 180));
+};
+var $elm$core$List$maybeCons = F3(
+	function (f, mx, xs) {
+		var _v0 = f(mx);
+		if (_v0.$ === 'Just') {
+			var x = _v0.a;
+			return A2($elm$core$List$cons, x, xs);
+		} else {
+			return xs;
+		}
+	});
+var $elm$core$List$filterMap = F2(
+	function (f, xs) {
+		return A3(
+			$elm$core$List$foldr,
+			$elm$core$List$maybeCons(f),
+			_List_Nil,
+			xs);
+	});
+var $elm$regex$Regex$find = _Regex_findAtMost(_Regex_infinity);
+var $ianmackenzie$elm_units$Quantity$interpolateFrom = F3(
+	function (_v0, _v1, parameter) {
+		var start = _v0.a;
+		var end = _v1.a;
+		return (parameter <= 0.5) ? $ianmackenzie$elm_units$Quantity$Quantity(start + (parameter * (end - start))) : $ianmackenzie$elm_units$Quantity$Quantity(end + ((1 - parameter) * (start - end)));
+	});
+var $ianmackenzie$elm_units$Quantity$max = F2(
+	function (_v0, _v1) {
+		var x = _v0.a;
+		var y = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(
+			A2($elm$core$Basics$max, x, y));
+	});
+var $ianmackenzie$elm_units$Quantity$maximum = function (quantities) {
+	if (!quantities.b) {
+		return $elm$core$Maybe$Nothing;
+	} else {
+		var first = quantities.a;
+		var rest = quantities.b;
+		return $elm$core$Maybe$Just(
+			A3($elm$core$List$foldl, $ianmackenzie$elm_units$Quantity$max, first, rest));
+	}
+};
+var $ianmackenzie$elm_units$Length$meters = function (numMeters) {
+	return $ianmackenzie$elm_units$Quantity$Quantity(numMeters);
+};
+var $elm$core$Basics$min = F2(
+	function (x, y) {
+		return (_Utils_cmp(x, y) < 0) ? x : y;
+	});
+var $ianmackenzie$elm_units$Quantity$min = F2(
+	function (_v0, _v1) {
+		var x = _v0.a;
+		var y = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(
+			A2($elm$core$Basics$min, x, y));
+	});
+var $ianmackenzie$elm_units$Quantity$minimum = function (quantities) {
+	if (!quantities.b) {
+		return $elm$core$Maybe$Nothing;
+	} else {
+		var first = quantities.a;
+		var rest = quantities.b;
+		return $elm$core$Maybe$Just(
+			A3($elm$core$List$foldl, $ianmackenzie$elm_units$Quantity$min, first, rest));
+	}
+};
+var $elm$core$String$toFloat = _String_toFloat;
+var $ianmackenzie$elm_units$Quantity$zero = $ianmackenzie$elm_units$Quantity$Quantity(0);
+var $author$project$GpxParser$parseGPXPoints = function (xml) {
+	var value = function (x) {
+		var _v9 = x.submatches;
+		if (_v9.b && (_v9.a.$ === 'Just')) {
+			var val = _v9.a.a;
+			return $elm$core$String$toFloat(val);
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	};
+	var trkpts = A2(
+		$elm$core$List$map,
+		function ($) {
+			return $.match;
+		},
+		A2(
+			$elm$regex$Regex$find,
+			$author$project$GpxParser$asRegex('<trkpt((.|\\n|\\r)*?)trkpt>'),
+			xml));
+	var matches = function (xs) {
+		return A2($elm$core$List$map, value, xs);
+	};
+	var longitude = function (trkpt) {
+		return matches(
+			A2(
+				$elm$regex$Regex$find,
+				$author$project$GpxParser$asRegex('lon=\\\"([\\d\\.-]*)\\\"'),
+				trkpt));
+	};
+	var latitude = function (trkpt) {
+		return matches(
+			A2(
+				$elm$regex$Regex$find,
+				$author$project$GpxParser$asRegex('lat=\\\"([\\d\\.-]*)\\\"'),
+				trkpt));
+	};
+	var elevation = function (trkpt) {
+		return matches(
+			A2(
+				$elm$regex$Regex$find,
+				$author$project$GpxParser$asRegex('<ele>([\\d\\.-]*)<\\/ele>'),
+				trkpt));
+	};
+	var trackPoint = function (trkpt) {
+		var _v3 = _Utils_Tuple3(
+			latitude(trkpt),
+			longitude(trkpt),
+			elevation(trkpt));
+		if (((_v3.a.b && (_v3.a.a.$ === 'Just')) && _v3.b.b) && (_v3.b.a.$ === 'Just')) {
+			if (_v3.c.b && (_v3.c.a.$ === 'Just')) {
+				var _v4 = _v3.a;
+				var lat = _v4.a.a;
+				var _v5 = _v3.b;
+				var lon = _v5.a.a;
+				var _v6 = _v3.c;
+				var ele = _v6.a.a;
+				return $elm$core$Maybe$Just(
+					{
+						altitude: $ianmackenzie$elm_units$Length$meters(ele),
+						latitude: $ianmackenzie$elm_units$Angle$degrees(lat),
+						longitude: $ianmackenzie$elm_units$Angle$degrees(lon)
+					});
+			} else {
+				var _v7 = _v3.a;
+				var lat = _v7.a.a;
+				var _v8 = _v3.b;
+				var lon = _v8.a.a;
+				return $elm$core$Maybe$Just(
+					{
+						altitude: $ianmackenzie$elm_units$Quantity$zero,
+						latitude: $ianmackenzie$elm_units$Angle$degrees(lat),
+						longitude: $ianmackenzie$elm_units$Angle$degrees(lon)
+					});
+			}
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	};
+	var trackPoints = A2(
+		$elm$core$List$filterMap,
+		$elm$core$Basics$identity,
+		A2($elm$core$List$map, trackPoint, trkpts));
+	var _v0 = _Utils_Tuple2(
+		A2(
+			$elm$core$List$map,
+			function ($) {
+				return $.longitude;
+			},
+			trackPoints),
+		A2(
+			$elm$core$List$map,
+			function ($) {
+				return $.latitude;
+			},
+			trackPoints));
+	var longitudes = _v0.a;
+	var latitudes = _v0.b;
+	var _v1 = _Utils_Tuple2(
+		A2(
+			$elm$core$Maybe$withDefault,
+			$ianmackenzie$elm_units$Quantity$zero,
+			$ianmackenzie$elm_units$Quantity$minimum(latitudes)),
+		A2(
+			$elm$core$Maybe$withDefault,
+			$ianmackenzie$elm_units$Quantity$zero,
+			$ianmackenzie$elm_units$Quantity$maximum(latitudes)));
+	var minLat = _v1.a;
+	var maxLat = _v1.b;
+	var _v2 = _Utils_Tuple2(
+		A2(
+			$elm$core$Maybe$withDefault,
+			$ianmackenzie$elm_units$Quantity$zero,
+			$ianmackenzie$elm_units$Quantity$minimum(longitudes)),
+		A2(
+			$elm$core$Maybe$withDefault,
+			$ianmackenzie$elm_units$Quantity$zero,
+			$ianmackenzie$elm_units$Quantity$maximum(longitudes)));
+	var minLon = _v2.a;
+	var maxLon = _v2.b;
+	var referencePoint = {
+		altitude: $ianmackenzie$elm_units$Quantity$zero,
+		latitude: A3($ianmackenzie$elm_units$Quantity$interpolateFrom, minLat, maxLat, 0.5),
+		longitude: A3($ianmackenzie$elm_units$Quantity$interpolateFrom, minLon, maxLon, 0.5)
+	};
+	return {points: trackPoints, referenceLonLat: referencePoint};
+};
 var $elm$file$File$toString = _File_toString;
+var $elm$core$Basics$cos = _Basics_cos;
+var $ianmackenzie$elm_units$Angle$inRadians = function (_v0) {
+	var numRadians = _v0.a;
+	return numRadians;
+};
+var $ianmackenzie$elm_units$Angle$inDegrees = function (angle) {
+	return 180 * ($ianmackenzie$elm_units$Angle$inRadians(angle) / $elm$core$Basics$pi);
+};
+var $ianmackenzie$elm_units$Length$inMeters = function (_v0) {
+	var numMeters = _v0.a;
+	return numMeters;
+};
+var $ianmackenzie$elm_geometry$Geometry$Types$Point3d = function (a) {
+	return {$: 'Point3d', a: a};
+};
+var $ianmackenzie$elm_geometry$Point3d$meters = F3(
+	function (x, y, z) {
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+			{x: x, y: y, z: z});
+	});
+var $author$project$Spherical$metresPerDegree = 78846.81;
+var $author$project$DomainModel$convertGpxWithReference = F2(
+	function (reference, point) {
+		var scale = $elm$core$Basics$cos(
+			$ianmackenzie$elm_units$Angle$inRadians(reference.latitude));
+		var _v0 = _Utils_Tuple2(
+			$ianmackenzie$elm_units$Angle$inDegrees(reference.longitude),
+			$ianmackenzie$elm_units$Angle$inDegrees(reference.latitude));
+		var refLon = _v0.a;
+		var refLat = _v0.b;
+		var _v1 = _Utils_Tuple2(
+			$ianmackenzie$elm_units$Angle$inDegrees(point.longitude),
+			$ianmackenzie$elm_units$Angle$inDegrees(point.latitude));
+		var pointLon = _v1.a;
+		var pointLat = _v1.b;
+		return A3(
+			$ianmackenzie$elm_geometry$Point3d$meters,
+			((pointLon - refLon) * scale) * $author$project$Spherical$metresPerDegree,
+			(pointLat - refLat) * $author$project$Spherical$metresPerDegree,
+			$ianmackenzie$elm_units$Length$inMeters(point.altitude));
+	});
+var $author$project$DomainModel$localPointsFromGpxTrack = function (_v0) {
+	var referenceLonLat = _v0.referenceLonLat;
+	var points = _v0.points;
+	return A2(
+		$elm$core$List$map,
+		function (gpx) {
+			return _Utils_Tuple2(
+				gpx,
+				A2($author$project$DomainModel$convertGpxWithReference, referenceLonLat, gpx));
+		},
+		points);
+};
+var $elm$core$List$drop = F2(
+	function (n, list) {
+		drop:
+		while (true) {
+			if (n <= 0) {
+				return list;
+			} else {
+				if (!list.b) {
+					return list;
+				} else {
+					var x = list.a;
+					var xs = list.b;
+					var $temp$n = n - 1,
+						$temp$list = xs;
+					n = $temp$n;
+					list = $temp$list;
+					continue drop;
+				}
+			}
+		}
+	});
+var $ianmackenzie$elm_geometry$Geometry$Types$BoundingBox3d = function (a) {
+	return {$: 'BoundingBox3d', a: a};
+};
+var $ianmackenzie$elm_geometry$Point3d$xCoordinate = function (_v0) {
+	var p = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(p.x);
+};
+var $ianmackenzie$elm_geometry$Point3d$yCoordinate = function (_v0) {
+	var p = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(p.y);
+};
+var $ianmackenzie$elm_geometry$Point3d$zCoordinate = function (_v0) {
+	var p = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(p.z);
+};
+var $ianmackenzie$elm_geometry$BoundingBox3d$from = F2(
+	function (firstPoint, secondPoint) {
+		var z2 = $ianmackenzie$elm_geometry$Point3d$zCoordinate(secondPoint);
+		var z1 = $ianmackenzie$elm_geometry$Point3d$zCoordinate(firstPoint);
+		var y2 = $ianmackenzie$elm_geometry$Point3d$yCoordinate(secondPoint);
+		var y1 = $ianmackenzie$elm_geometry$Point3d$yCoordinate(firstPoint);
+		var x2 = $ianmackenzie$elm_geometry$Point3d$xCoordinate(secondPoint);
+		var x1 = $ianmackenzie$elm_geometry$Point3d$xCoordinate(firstPoint);
+		return $ianmackenzie$elm_geometry$Geometry$Types$BoundingBox3d(
+			{
+				maxX: A2($ianmackenzie$elm_units$Quantity$max, x1, x2),
+				maxY: A2($ianmackenzie$elm_units$Quantity$max, y1, y2),
+				maxZ: A2($ianmackenzie$elm_units$Quantity$max, z1, z2),
+				minX: A2($ianmackenzie$elm_units$Quantity$min, x1, x2),
+				minY: A2($ianmackenzie$elm_units$Quantity$min, y1, y2),
+				minZ: A2($ianmackenzie$elm_units$Quantity$min, z1, z2)
+			});
+	});
+var $author$project$Spherical$meanRadius = 6371000;
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $elm$core$Basics$sqrt = _Basics_sqrt;
+var $author$project$Spherical$range = F2(
+	function (latLon1, latLon2) {
+		var _v0 = _Utils_Tuple2(
+			$ianmackenzie$elm_units$Angle$inRadians(latLon2.a),
+			$ianmackenzie$elm_units$Angle$inRadians(latLon2.b));
+		var lat2 = _v0.a;
+		var lon2 = _v0.b;
+		var _v1 = _Utils_Tuple2(
+			$ianmackenzie$elm_units$Angle$inRadians(latLon1.a),
+			$ianmackenzie$elm_units$Angle$inRadians(latLon1.b));
+		var lat1 = _v1.a;
+		var lon1 = _v1.b;
+		var y = lat2 - lat1;
+		var x = (lon2 - lon1) * $elm$core$Basics$cos((lat1 + lat2) / 2);
+		return $author$project$Spherical$meanRadius * $elm$core$Basics$sqrt((x * x) + (y * y));
+	});
+var $author$project$DomainModel$segmentsFromPoints = function (points) {
+	var makeRoadSection = F2(
+		function (_v0, _v1) {
+			var gpx1 = _v0.a;
+			var local1 = _v0.b;
+			var gpx2 = _v1.a;
+			var local2 = _v1.b;
+			return {
+				boundingBox: A2($ianmackenzie$elm_geometry$BoundingBox3d$from, local1, local2),
+				endsAt: local2,
+				gpxGapCount: 1,
+				startsAt: local1,
+				trueLength: $ianmackenzie$elm_units$Length$meters(
+					A2(
+						$author$project$Spherical$range,
+						_Utils_Tuple2(gpx1.latitude, gpx1.longitude),
+						_Utils_Tuple2(gpx2.latitude, gpx2.longitude)))
+			};
+		});
+	return A3(
+		$elm$core$List$map2,
+		makeRoadSection,
+		points,
+		A2($elm$core$List$drop, 1, points));
+};
+var $author$project$DomainModel$Leaf = function (a) {
+	return {$: 'Leaf', a: a};
+};
+var $author$project$DomainModel$Node = function (a) {
+	return {$: 'Node', a: a};
+};
+var $ianmackenzie$elm_units$Quantity$plus = F2(
+	function (_v0, _v1) {
+		var y = _v0.a;
+		var x = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(x + y);
+	});
+var $elm$core$List$takeReverse = F3(
+	function (n, list, kept) {
+		takeReverse:
+		while (true) {
+			if (n <= 0) {
+				return kept;
+			} else {
+				if (!list.b) {
+					return kept;
+				} else {
+					var x = list.a;
+					var xs = list.b;
+					var $temp$n = n - 1,
+						$temp$list = xs,
+						$temp$kept = A2($elm$core$List$cons, x, kept);
+					n = $temp$n;
+					list = $temp$list;
+					kept = $temp$kept;
+					continue takeReverse;
+				}
+			}
+		}
+	});
+var $elm$core$List$takeTailRec = F2(
+	function (n, list) {
+		return $elm$core$List$reverse(
+			A3($elm$core$List$takeReverse, n, list, _List_Nil));
+	});
+var $elm$core$List$takeFast = F3(
+	function (ctr, n, list) {
+		if (n <= 0) {
+			return _List_Nil;
+		} else {
+			var _v0 = _Utils_Tuple2(n, list);
+			_v0$1:
+			while (true) {
+				_v0$5:
+				while (true) {
+					if (!_v0.b.b) {
+						return list;
+					} else {
+						if (_v0.b.b.b) {
+							switch (_v0.a) {
+								case 1:
+									break _v0$1;
+								case 2:
+									var _v2 = _v0.b;
+									var x = _v2.a;
+									var _v3 = _v2.b;
+									var y = _v3.a;
+									return _List_fromArray(
+										[x, y]);
+								case 3:
+									if (_v0.b.b.b.b) {
+										var _v4 = _v0.b;
+										var x = _v4.a;
+										var _v5 = _v4.b;
+										var y = _v5.a;
+										var _v6 = _v5.b;
+										var z = _v6.a;
+										return _List_fromArray(
+											[x, y, z]);
+									} else {
+										break _v0$5;
+									}
+								default:
+									if (_v0.b.b.b.b && _v0.b.b.b.b.b) {
+										var _v7 = _v0.b;
+										var x = _v7.a;
+										var _v8 = _v7.b;
+										var y = _v8.a;
+										var _v9 = _v8.b;
+										var z = _v9.a;
+										var _v10 = _v9.b;
+										var w = _v10.a;
+										var tl = _v10.b;
+										return (ctr > 1000) ? A2(
+											$elm$core$List$cons,
+											x,
+											A2(
+												$elm$core$List$cons,
+												y,
+												A2(
+													$elm$core$List$cons,
+													z,
+													A2(
+														$elm$core$List$cons,
+														w,
+														A2($elm$core$List$takeTailRec, n - 4, tl))))) : A2(
+											$elm$core$List$cons,
+											x,
+											A2(
+												$elm$core$List$cons,
+												y,
+												A2(
+													$elm$core$List$cons,
+													z,
+													A2(
+														$elm$core$List$cons,
+														w,
+														A3($elm$core$List$takeFast, ctr + 1, n - 4, tl)))));
+									} else {
+										break _v0$5;
+									}
+							}
+						} else {
+							if (_v0.a === 1) {
+								break _v0$1;
+							} else {
+								break _v0$5;
+							}
+						}
+					}
+				}
+				return list;
+			}
+			var _v1 = _v0.b;
+			var x = _v1.a;
+			return _List_fromArray(
+				[x]);
+		}
+	});
+var $elm$core$List$take = F2(
+	function (n, list) {
+		return A3($elm$core$List$takeFast, 0, n, list);
+	});
+var $elm_community$list_extra$List$Extra$splitAt = F2(
+	function (n, xs) {
+		return _Utils_Tuple2(
+			A2($elm$core$List$take, n, xs),
+			A2($elm$core$List$drop, n, xs));
+	});
+var $ianmackenzie$elm_geometry$BoundingBox3d$extrema = function (_v0) {
+	var boundingBoxExtrema = _v0.a;
+	return boundingBoxExtrema;
+};
+var $ianmackenzie$elm_geometry$BoundingBox3d$union = F2(
+	function (firstBox, secondBox) {
+		var b2 = $ianmackenzie$elm_geometry$BoundingBox3d$extrema(secondBox);
+		var b1 = $ianmackenzie$elm_geometry$BoundingBox3d$extrema(firstBox);
+		return $ianmackenzie$elm_geometry$Geometry$Types$BoundingBox3d(
+			{
+				maxX: A2($ianmackenzie$elm_units$Quantity$max, b1.maxX, b2.maxX),
+				maxY: A2($ianmackenzie$elm_units$Quantity$max, b1.maxY, b2.maxY),
+				maxZ: A2($ianmackenzie$elm_units$Quantity$max, b1.maxZ, b2.maxZ),
+				minX: A2($ianmackenzie$elm_units$Quantity$min, b1.minX, b2.minX),
+				minY: A2($ianmackenzie$elm_units$Quantity$min, b1.minY, b2.minY),
+				minZ: A2($ianmackenzie$elm_units$Quantity$min, b1.minZ, b2.minZ)
+			});
+	});
+var $author$project$DomainModel$treeFromRoadSections = function (sections) {
+	var combineInfo = F2(
+		function (info1, info2) {
+			return {
+				boundingBox: A2($ianmackenzie$elm_geometry$BoundingBox3d$union, info1.boundingBox, info2.boundingBox),
+				endsAt: info2.endsAt,
+				gpxGapCount: info1.gpxGapCount + info2.gpxGapCount,
+				startsAt: info1.startsAt,
+				trueLength: A2($ianmackenzie$elm_units$Quantity$plus, info1.trueLength, info2.trueLength)
+			};
+		});
+	if (!sections.b) {
+		return $elm$core$Maybe$Nothing;
+	} else {
+		if (!sections.b.b) {
+			var s1 = sections.a;
+			return $elm$core$Maybe$Just(
+				$author$project$DomainModel$Leaf(s1));
+		} else {
+			var _v1 = A2(
+				$elm_community$list_extra$List$Extra$splitAt,
+				($elm$core$List$length(sections) / 2) | 0,
+				sections);
+			var firstHalf = _v1.a;
+			var secondHalf = _v1.b;
+			var _v2 = _Utils_Tuple2(
+				$author$project$DomainModel$treeFromRoadSections(firstHalf),
+				$author$project$DomainModel$treeFromRoadSections(secondHalf));
+			var leftChild = _v2.a;
+			var rightChild = _v2.b;
+			var _v3 = _Utils_Tuple2(leftChild, rightChild);
+			if (_v3.a.$ === 'Just') {
+				if (_v3.b.$ === 'Just') {
+					if (_v3.a.a.$ === 'Leaf') {
+						if (_v3.b.a.$ === 'Leaf') {
+							var left = _v3.a.a.a;
+							var right = _v3.b.a.a;
+							return $elm$core$Maybe$Just(
+								$author$project$DomainModel$Node(
+									{
+										left: $author$project$DomainModel$Leaf(left),
+										nodeContent: A2(combineInfo, left, right),
+										right: $author$project$DomainModel$Leaf(right)
+									}));
+						} else {
+							var left = _v3.a.a.a;
+							var right = _v3.b.a.a;
+							return $elm$core$Maybe$Just(
+								$author$project$DomainModel$Node(
+									{
+										left: $author$project$DomainModel$Leaf(left),
+										nodeContent: A2(combineInfo, left, right.nodeContent),
+										right: $author$project$DomainModel$Node(right)
+									}));
+						}
+					} else {
+						if (_v3.b.a.$ === 'Leaf') {
+							var left = _v3.a.a.a;
+							var right = _v3.b.a.a;
+							return $elm$core$Maybe$Just(
+								$author$project$DomainModel$Node(
+									{
+										left: $author$project$DomainModel$Node(left),
+										nodeContent: A2(combineInfo, left.nodeContent, right),
+										right: $author$project$DomainModel$Leaf(right)
+									}));
+						} else {
+							var left = _v3.a.a.a;
+							var right = _v3.b.a.a;
+							return $elm$core$Maybe$Just(
+								$author$project$DomainModel$Node(
+									{
+										left: $author$project$DomainModel$Node(left),
+										nodeContent: A2(combineInfo, left.nodeContent, right.nodeContent),
+										right: $author$project$DomainModel$Node(right)
+									}));
+						}
+					}
+				} else {
+					var left = _v3.a.a;
+					var _v4 = _v3.b;
+					return $elm$core$Maybe$Just(left);
+				}
+			} else {
+				if (_v3.b.$ === 'Just') {
+					var _v5 = _v3.a;
+					var right = _v3.b.a;
+					return $elm$core$Maybe$Just(right);
+				} else {
+					var _v6 = _v3.a;
+					var _v7 = _v3.b;
+					return $elm$core$Maybe$Nothing;
+				}
+			}
+		}
+	}
+};
+var $author$project$DomainModel$treeFromList = function (track) {
+	return $author$project$DomainModel$treeFromRoadSections(
+		$author$project$DomainModel$segmentsFromPoints(
+			$author$project$DomainModel$localPointsFromGpxTrack(track)));
+};
 var $author$project$OAuthTypes$UserInfo = F3(
 	function (id, firstname, lastname) {
 		return {firstname: firstname, id: id, lastname: lastname};
@@ -7910,24 +8653,6 @@ var $elm$http$Http$onEffects = F4(
 					A2($elm$http$Http$State, reqs, subs));
 			},
 			A3($elm$http$Http$updateReqs, router, cmds, state.reqs));
-	});
-var $elm$core$List$maybeCons = F3(
-	function (f, mx, xs) {
-		var _v0 = f(mx);
-		if (_v0.$ === 'Just') {
-			var x = _v0.a;
-			return A2($elm$core$List$cons, x, xs);
-		} else {
-			return xs;
-		}
-	});
-var $elm$core$List$filterMap = F2(
-	function (f, xs) {
-		return A3(
-			$elm$core$List$foldr,
-			$elm$core$List$maybeCons(f),
-			_List_Nil,
-			xs);
 	});
 var $elm$http$Http$maybeSend = F4(
 	function (router, desiredTracker, progress, _v0) {
@@ -8421,8 +9146,15 @@ var $author$project$Main$update = F2(
 						$elm$file$File$toString(file)));
 			case 'GpxLoaded':
 				var content = msg.a;
+				var gpxTrack = $author$project$GpxParser$parseGPXPoints(content);
 				return _Utils_Tuple2(
-					$author$project$Main$Model(model),
+					$author$project$Main$Model(
+						_Utils_update(
+							model,
+							{
+								rawTrack: $elm$core$Maybe$Just(gpxTrack),
+								trackTree: $author$project$DomainModel$treeFromList(gpxTrack)
+							})),
 					$elm$core$Platform$Cmd$none);
 			default:
 				var authMsg = msg.a;
@@ -8593,10 +9325,6 @@ var $mdgriffith$elm_ui$Internal$Model$lengthClassName = function (x) {
 			var len = x.b;
 			return 'max' + ($elm$core$String$fromInt(max) + $mdgriffith$elm_ui$Internal$Model$lengthClassName(len));
 	}
-};
-var $elm$core$Tuple$second = function (_v0) {
-	var y = _v0.b;
-	return y;
 };
 var $elm$core$Basics$round = _Basics_round;
 var $mdgriffith$elm_ui$Internal$Model$floatClass = function (x) {
@@ -11060,10 +11788,6 @@ var $mdgriffith$elm_ui$Internal$Model$hasSmallCaps = function (typeface) {
 		return false;
 	}
 };
-var $elm$core$Basics$min = F2(
-	function (x, y) {
-		return (_Utils_cmp(x, y) < 0) ? x : y;
-	});
 var $elm$core$Basics$negate = function (n) {
 	return -n;
 };
@@ -13977,6 +14701,12 @@ var $mdgriffith$elm_ui$Element$spacing = function (x) {
 			x,
 			x));
 };
+var $mdgriffith$elm_ui$Internal$Model$Text = function (a) {
+	return {$: 'Text', a: a};
+};
+var $mdgriffith$elm_ui$Element$text = function (content) {
+	return $mdgriffith$elm_ui$Internal$Model$Text(content);
+};
 var $author$project$Main$contentArea = function (model) {
 	var rightPane = A2(
 		$mdgriffith$elm_ui$Element$column,
@@ -13994,7 +14724,20 @@ var $author$project$Main$contentArea = function (model) {
 				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 				$mdgriffith$elm_ui$Element$alignTop
 			]),
-		_List_Nil);
+		_List_fromArray(
+			[
+				function () {
+				var _v0 = model.trackTree;
+				if ((_v0.$ === 'Just') && (_v0.a.$ === 'Node')) {
+					var topNode = _v0.a.a;
+					return $mdgriffith$elm_ui$Element$text(
+						$elm$core$String$fromFloat(
+							$ianmackenzie$elm_units$Length$inMeters(topNode.nodeContent.trueLength)));
+				} else {
+					return $mdgriffith$elm_ui$Element$text('No data');
+				}
+			}()
+			]));
 	return A2(
 		$mdgriffith$elm_ui$Element$column,
 		_List_fromArray(
@@ -14493,12 +15236,6 @@ var $mdgriffith$elm_ui$Element$Input$button = F2(
 				_List_fromArray(
 					[label])));
 	});
-var $mdgriffith$elm_ui$Internal$Model$Text = function (a) {
-	return {$: 'Text', a: a};
-};
-var $mdgriffith$elm_ui$Element$text = function (content) {
-	return $mdgriffith$elm_ui$Internal$Model$Text(content);
-};
 var $author$project$Main$topLoadingBar = function (model) {
 	var loadGpxButton = A2(
 		$mdgriffith$elm_ui$Element$Input$button,

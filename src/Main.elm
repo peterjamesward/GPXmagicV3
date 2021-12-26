@@ -1,15 +1,20 @@
 module Main exposing (main)
 
+import Angle
 import Browser exposing (application)
 import Browser.Navigation exposing (Key)
+import DomainModel exposing (GPXPoint, GPXTrack, PeteTree(..), RoadSection, treeFromList)
 import Element exposing (..)
 import Element.Font as Font
 import Element.Input as Input exposing (button)
 import File exposing (File)
 import File.Select as Select
+import GpxParser exposing (parseGPXPoints)
+import Length exposing (Meters, meters)
 import LocalCoords exposing (LocalCoords)
 import OAuthPorts exposing (randomBytes)
 import OAuthTypes as O exposing (..)
+import Point3d exposing (Point3d)
 import Scene3d exposing (Entity)
 import StravaAuth exposing (getStravaToken)
 import Task
@@ -29,13 +34,13 @@ type Model
     = Model ModelRecord
 
 
-
-
 type alias ModelRecord =
     { filename : Maybe String
     , time : Time.Posix
     , zone : Time.Zone
     , stravaAuthentication : O.Model
+    , rawTrack : Maybe GPXTrack
+    , trackTree : Maybe PeteTree
     }
 
 
@@ -64,6 +69,8 @@ init mflags origin navigationKey =
         , time = Time.millisToPosix 0
         , zone = Time.utc
         , stravaAuthentication = authData
+        , rawTrack = Nothing
+        , trackTree = Nothing
         }
     , Cmd.batch
         [ authCmd
@@ -91,7 +98,17 @@ update msg (Model model) =
             )
 
         GpxLoaded content ->
-            ( Model model, Cmd.none )
+            let
+                gpxTrack =
+                    parseGPXPoints content
+            in
+            ( Model
+                { model
+                    | rawTrack = Just gpxTrack
+                    , trackTree = treeFromList gpxTrack
+                }
+            , Cmd.none
+            )
 
         --Delegate wrapped OAuthmessages. Be bowled over if this works first time. Or fiftieth.
         --Maybe look after to see if there is yet a token. Easy way to know.
@@ -157,7 +174,13 @@ contentArea model =
         leftPane =
             column
                 [ width fill, alignTop ]
-                []
+                [ case model.trackTree of
+                    Just (Node topNode) ->
+                        text <| String.fromFloat <| Length.inMeters topNode.nodeContent.trueLength
+
+                    _ ->
+                        text "No data"
+                ]
 
         rightPane =
             column [ spacing 5, padding 5, alignTop ]

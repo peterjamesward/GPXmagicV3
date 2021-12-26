@@ -1,5 +1,9 @@
 module GpxParser exposing (..)
 
+import Angle
+import DomainModel exposing (GPXPoint, GPXTrack)
+import Length
+import Quantity
 import Regex
 
 
@@ -22,8 +26,8 @@ parseTrackName xml =
                     n
 
 
-parseTrackPoints : String -> List ( Float, Float, Float )
-parseTrackPoints xml =
+parseGPXPoints : String -> GPXTrack
+parseGPXPoints xml =
     let
         trkpts =
             Regex.find (asRegex "<trkpt((.|\\n|\\r)*?)trkpt>") xml |> List.map .match
@@ -40,10 +44,18 @@ parseTrackPoints xml =
         trackPoint trkpt =
             case ( latitude trkpt, longitude trkpt, elevation trkpt ) of
                 ( (Just lat) :: _, (Just lon) :: _, (Just ele) :: _ ) ->
-                    Just ( lon, lat, ele )
+                    Just
+                        { longitude = Angle.degrees lon
+                        , latitude = Angle.degrees lat
+                        , altitude = Length.meters ele
+                        }
 
                 ( (Just lat) :: _, (Just lon) :: _, _ ) ->
-                    Just ( lon, lat, 0.0 )
+                    Just
+                        { longitude = Angle.degrees lon
+                        , latitude = Angle.degrees lat
+                        , altitude = Quantity.zero
+                        }
 
                 _ ->
                     Nothing
@@ -63,5 +75,28 @@ parseTrackPoints xml =
             trkpts
                 |> List.map trackPoint
                 |> List.filterMap identity
+
+        ( longitudes, latitudes ) =
+            ( trackPoints |> List.map .longitude
+            , trackPoints |> List.map .latitude
+            )
+
+        ( minLon, maxLon ) =
+            ( Quantity.minimum longitudes |> Maybe.withDefault Quantity.zero
+            , Quantity.maximum longitudes |> Maybe.withDefault Quantity.zero
+            )
+
+        ( minLat, maxLat ) =
+            ( Quantity.minimum latitudes |> Maybe.withDefault Quantity.zero
+            , Quantity.maximum latitudes |> Maybe.withDefault Quantity.zero
+            )
+
+        referencePoint =
+            { longitude = Quantity.interpolateFrom minLon maxLon 0.5
+            , latitude = Quantity.interpolateFrom minLat maxLat 0.5
+            , altitude = Quantity.zero
+            }
     in
-    trackPoints
+    { points = trackPoints
+    , referenceLonLat = referencePoint
+    }
