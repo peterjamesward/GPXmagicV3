@@ -3,8 +3,13 @@ module Main exposing (main)
 import Angle
 import Browser exposing (application)
 import Browser.Navigation exposing (Key)
-import DomainModel exposing (GPXPoint, GPXTrack, PeteTree(..), RoadSection, treeFromList)
+import Camera3d
+import Color exposing (grey)
+import Direction3d exposing (negativeZ, positiveZ)
+import DomainModel exposing (GPXPoint, GPXTrack, PeteTree(..), RoadSection, render, treeFromList)
 import Element exposing (..)
+import Element.Background as Background
+import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input exposing (button)
 import File exposing (File)
@@ -14,12 +19,14 @@ import Length exposing (Meters, meters)
 import LocalCoords exposing (LocalCoords)
 import OAuthPorts exposing (randomBytes)
 import OAuthTypes as O exposing (..)
+import Pixels
 import Point3d exposing (Point3d)
-import Scene3d exposing (Entity)
+import Scene3d exposing (Entity, backgroundColor)
 import StravaAuth exposing (getStravaToken)
 import Task
 import Time
 import Url exposing (Url)
+import Viewpoint3d
 
 
 type Msg
@@ -28,6 +35,7 @@ type Msg
     | GpxLoaded String
     | OAuthMessage OAuthMsg
     | AdjustTimeZone Time.Zone
+    | SetRenderDepth Int
 
 
 type Model
@@ -41,6 +49,8 @@ type alias ModelRecord =
     , stravaAuthentication : O.Model
     , rawTrack : Maybe GPXTrack
     , trackTree : Maybe PeteTree
+    , renderDepth : Int
+    , scene : List (Entity LocalCoords)
     }
 
 
@@ -71,6 +81,8 @@ init mflags origin navigationKey =
         , stravaAuthentication = authData
         , rawTrack = Nothing
         , trackTree = Nothing
+        , renderDepth = 0
+        , scene = []
         }
     , Cmd.batch
         [ authCmd
@@ -101,11 +113,36 @@ update msg (Model model) =
             let
                 gpxTrack =
                     parseGPXPoints content
+
+                trackTree =
+                    treeFromList gpxTrack
             in
             ( Model
                 { model
                     | rawTrack = Just gpxTrack
-                    , trackTree = treeFromList gpxTrack
+                    , trackTree = trackTree
+                    , scene =
+                        case model.trackTree of
+                            Just tree ->
+                                render model.renderDepth tree []
+
+                            Nothing ->
+                                []
+                }
+            , Cmd.none
+            )
+
+        SetRenderDepth depth ->
+            ( Model
+                { model
+                    | renderDepth = depth
+                    , scene =
+                        case model.trackTree of
+                            Just tree ->
+                                render depth tree []
+
+                            Nothing ->
+                                []
                 }
             , Cmd.none
             )
@@ -171,12 +208,36 @@ maximumLeftPane =
 contentArea : ModelRecord -> Element Msg
 contentArea model =
     let
+        cameraViewpoint =
+            Viewpoint3d.lookAt
+                { eyePoint = Point3d.meters -5000 -5000 2000
+                , focalPoint = Point3d.origin
+                , upDirection = Direction3d.positiveZ
+                }
+
+        perspectiveCamera =
+            Camera3d.perspective
+                { viewpoint = cameraViewpoint
+                , verticalFieldOfView = Angle.degrees 75
+                }
+
         leftPane =
             column
                 [ width fill, alignTop ]
                 [ case model.trackTree of
                     Just (Node topNode) ->
-                        text <| String.fromFloat <| Length.inMeters topNode.nodeContent.trueLength
+                        column []
+                            [ text <| String.fromFloat <| Length.inMeters topNode.nodeContent.trueLength
+                            , html <|
+                                Scene3d.cloudy
+                                    { camera = perspectiveCamera
+                                    , dimensions = ( Pixels.pixels 800, Pixels.pixels 500 )
+                                    , background = backgroundColor Color.lightBlue
+                                    , clipDepth = Length.meters 1
+                                    , entities = model.scene
+                                    , upDirection = positiveZ
+                                    }
+                            ]
 
                     _ ->
                         text "No data"
@@ -184,7 +245,32 @@ contentArea model =
 
         rightPane =
             column [ spacing 5, padding 5, alignTop ]
-                []
+                [ Input.slider
+                    [ Element.height (Element.px 30)
+
+                    -- Here is where we're creating/styling the "track"
+                    , Element.behindContent
+                        (Element.el
+                            [ Element.width Element.fill
+                            , Element.height (Element.px 2)
+                            , Element.centerY
+                            , Border.rounded 2
+                            ]
+                            Element.none
+                        )
+                    ]
+                    { onChange = SetRenderDepth << round
+                    , label =
+                        Input.labelAbove []
+                            (text "Render depth")
+                    , min = 0
+                    , max = 10
+                    , step = Just 1
+                    , value = toFloat model.renderDepth
+                    , thumb =
+                        Input.defaultThumb
+                    }
+                ]
     in
     column [ width fill, padding 5 ]
         [ row []

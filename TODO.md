@@ -22,6 +22,19 @@ This is could be good.
 All edits are "local" (only "up the tree").
 Keep GPXPoints for Undo, not reverse delta.
 
+
+- Delete a leaf/leaves
+- Insert a leaf/leaves
+- Update leaves
+- Box content query
+- Box nearest query
+- Queries with filters
+- Queries with folds
+- Render to specified tree depth
+- Render to varying depth based on bounding box
+- See if visible area can best be done by pre-selecting view elements, or left to GPU.
+
+
 Possibly vary rendering with zoom level (maybe not constantly), and even on rotate/drag end.
 Marker is a "zip" along a tree path.
 - Purple is locked to Orange unless dropped, so no Maybe there.

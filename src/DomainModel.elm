@@ -2,11 +2,15 @@ module DomainModel exposing (..)
 
 import Angle exposing (Angle)
 import BoundingBox3d exposing (BoundingBox3d)
+import Color exposing (black)
 import Length exposing (Meters)
 import List.Extra
 import LocalCoords exposing (LocalCoords)
+import Pixels
 import Point3d exposing (Point3d)
 import Quantity exposing (Quantity)
+import Scene3d exposing (Entity)
+import Scene3d.Material as Material
 import Spherical as Spherical exposing (range)
 
 
@@ -181,12 +185,21 @@ treeFromList track =
         |> treeFromRoadSections
 
 
+makeVisiblePoint pt =
+    Scene3d.point { radius = Pixels.pixels 1 } (Material.color black) pt
 
---TODO: Build tree
---TODO: Delete a leaf/leaves
---TODO: Insert a leaf/leaves
---TODO: Update leaves
---TODO: Box content query
---TODO: Box nearest query
---TODO: Queries with filters
---TODO: Queries with folds
+
+render : Int -> PeteTree -> List (Entity LocalCoords) -> List (Entity LocalCoords)
+render depth someNode accum =
+    case someNode of
+        Leaf leafNode ->
+            makeVisiblePoint leafNode.startsAt :: accum
+
+        Node notLeaf ->
+            if depth == 0 then
+                makeVisiblePoint notLeaf.nodeContent.startsAt :: accum
+
+            else
+                accum
+                    |> render (depth - 1) notLeaf.left
+                    |> render (depth - 1) notLeaf.right
