@@ -9655,7 +9655,7 @@ var $avh4$elm_color$Color$RgbaSpace = F4(
 	function (a, b, c, d) {
 		return {$: 'RgbaSpace', a: a, b: b, c: c, d: d};
 	});
-var $avh4$elm_color$Color$orange = A4($avh4$elm_color$Color$RgbaSpace, 245 / 255, 121 / 255, 0 / 255, 1.0);
+var $avh4$elm_color$Color$lightOrange = A4($avh4$elm_color$Color$RgbaSpace, 252 / 255, 175 / 255, 62 / 255, 1.0);
 var $ianmackenzie$elm_units$Pixels$pixels = function (numPixels) {
 	return $ianmackenzie$elm_units$Quantity$Quantity(numPixels);
 };
@@ -9990,7 +9990,7 @@ var $author$project$Main$renderCurrentMarker = F2(
 				{
 					radius: $ianmackenzie$elm_units$Pixels$pixels(10)
 				},
-				$ianmackenzie$elm_3d_scene$Scene3d$Material$color($avh4$elm_color$Color$orange),
+				$ianmackenzie$elm_3d_scene$Scene3d$Material$color($avh4$elm_color$Color$lightOrange),
 				pt)
 			]);
 	});

@@ -1,61 +1,57 @@
 
 
-# 2.9 :: Optimisations?
+# WIP
 
-## WIP
-
-Add position slider, maintain current position.
+### Selective rendering
 Add selective rendering near current.
-Add position marker to rendering (if re-rendering, no point trying SVG).
 
-## What? Why?
+### Notes
+Do a write-up on Medium about why this structure is so cool (in this context).
 
-Yes, because Elm is **great** compared to Racket.
-> Indications are that going back to basics on data structure is better than viable, it's awesome.
+### Culling
+- See if visible area can best be done by pre-selecting view elements, or left to GPU.
+- (optimal culling view frustrum tricky combination of plane/bbox intersects and axis distance?)
 
-Put all GPXPoints into a binary tree. At each level hold:
-- (height gained, lost, max gradient up/down, ...)
+---
 
-Use this single structure for **everything**:
-- Selective rendering
-- Click detection
-- Terrain
-- i.e. Replaces SpatialIndex (even if less optimal).
+# Backlog
 
-This is could be good.
-All edits are "local" (only "up the tree").
+### Click detection
 
-Keep GPXPoints for Undo, not reverse delta.
+### Terrain
 
-Queries
+### Undo/Redo
+Keep GPXPoints for Undo, not reverse delta (2.7, not 2.8)
+
+### Queries
 - Box content query
 - Box nearest query
 - Queries with filters
 - Queries with folds
 
-(Algebraic) operations
+### (Algebraic) operations
 - Delete a leaf/leaves
 - Insert a leaf/leaves
-- Update leaves (and all their aggregate nodes) (note this is actually a top-down operation)
+- Update leaves (and all their aggregate nodes)  
+  (note this is actually a top-down operation)
 
-- Render to specified tree depth (done, nice).
-- Render to varying depth based on bounding box
-- See if visible area can best be done by pre-selecting view elements, or left to GPU.
-- (optimal culling view frustrum tricky combination of plane/bbox intersects and axis distance?)
+### SVG markers?
+Use an SVG overlay for markers? No, but maybe previews?
 
-Possibly vary rendering with zoom level (maybe not constantly), and even on rotate/drag end.
-
-Marker is a "zip" along a tree path, or just a number? (Number)
-- Purple is locked to Orange unless dropped, so no Maybe there?
-
+### Scale test
 Test with 1M TP (ask Steve).
 
+### Tools
 More progress along the "plug-in" tool pattern:
 - Tab Open and Close methods.
 - Generic type somehow for storing tool state (JSON session state?)
 
-Use an SVG overlay for markers? No, but maybe previews?
+### Multiple windows
 
+Check out Electron (again), see if that will allow multiple windows. (Dual monitor support wbn).
+
+Put back visual options  
+... but allow override for each window (too complex?).
 
 ---
 

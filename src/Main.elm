@@ -5,7 +5,7 @@ import BoundingBox3d
 import Browser exposing (application)
 import Browser.Navigation exposing (Key)
 import Camera3d
-import Color exposing (grey, orange)
+import Color exposing (grey, lightOrange, orange)
 import Direction3d exposing (negativeZ, positiveZ)
 import DomainModel exposing (GPXPoint, GPXTrack, PeteTree(..), RoadSection, pointFromIndex, renderTree, treeFromList)
 import Element exposing (..)
@@ -178,10 +178,11 @@ renderModel model =
 
 renderCurrentMarker : Int -> PeteTree -> List (Entity LocalCoords)
 renderCurrentMarker marker tree =
+    --TODO: Find a good home.
     let pt = pointFromIndex marker tree
     in
     [ Scene3d.point { radius = Pixels.pixels 10 }
-        (Material.color orange)
+        (Material.color lightOrange)
         pt
     ]
 
