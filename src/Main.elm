@@ -5,9 +5,9 @@ import BoundingBox3d
 import Browser exposing (application)
 import Browser.Navigation exposing (Key)
 import Camera3d
-import Color exposing (grey)
+import Color exposing (grey, orange)
 import Direction3d exposing (negativeZ, positiveZ)
-import DomainModel exposing (GPXPoint, GPXTrack, PeteTree(..), RoadSection, render, treeFromList)
+import DomainModel exposing (GPXPoint, GPXTrack, PeteTree(..), RoadSection, pointFromIndex, renderTree, treeFromList)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -23,10 +23,12 @@ import OAuthTypes as O exposing (..)
 import Pixels
 import Point3d exposing (Point3d)
 import Scene3d exposing (Entity, backgroundColor)
+import Scene3d.Material as Material
 import StravaAuth exposing (getStravaToken)
 import Task
 import Time
 import Url exposing (Url)
+import ViewPureStyles
 import Viewpoint3d
 
 
@@ -37,6 +39,7 @@ type Msg
     | OAuthMessage OAuthMsg
     | AdjustTimeZone Time.Zone
     | SetRenderDepth Int
+    | SetCurrentPosition Int
 
 
 type Model
@@ -52,6 +55,7 @@ type alias ModelRecord =
     , trackTree : Maybe PeteTree
     , renderDepth : Int
     , scene : List (Entity LocalCoords)
+    , currentPosition : Int
     }
 
 
@@ -84,6 +88,7 @@ init mflags origin navigationKey =
         , trackTree = Nothing
         , renderDepth = 0
         , scene = []
+        , currentPosition = 0
         }
     , Cmd.batch
         [ authCmd
@@ -118,34 +123,20 @@ update msg (Model model) =
                 trackTree =
                     treeFromList gpxTrack
             in
-            ( Model
-                { model
-                    | rawTrack = Just gpxTrack
-                    , trackTree = trackTree
-                    , renderDepth = 2
-                    , scene =
-                        case model.trackTree of
-                            Just tree ->
-                                render 2 tree []
-
-                            Nothing ->
-                                []
-                }
+            ( { model
+                | rawTrack = Just gpxTrack
+                , trackTree = trackTree
+                , renderDepth = 2
+              }
+                |> renderModel
+                |> Model
             , Cmd.none
             )
 
         SetRenderDepth depth ->
-            ( Model
-                { model
-                    | renderDepth = depth
-                    , scene =
-                        case model.trackTree of
-                            Just tree ->
-                                render depth tree []
-
-                            Nothing ->
-                                []
-                }
+            ( { model | renderDepth = depth }
+                |> renderModel
+                |> Model
             , Cmd.none
             )
 
@@ -162,6 +153,37 @@ update msg (Model model) =
             ( Model { model | stravaAuthentication = newAuthData }
             , Cmd.map OAuthMessage authCmd
             )
+
+        SetCurrentPosition pos ->
+            ( { model | currentPosition = pos }
+                |> renderModel
+                |> Model
+            , Cmd.none
+            )
+
+
+renderModel : ModelRecord -> ModelRecord
+renderModel model =
+    { model
+        | scene =
+            case model.trackTree of
+                Just tree ->
+                    renderTree model.renderDepth tree []
+                        ++ renderCurrentMarker model.currentPosition tree
+
+                Nothing ->
+                    []
+    }
+
+
+renderCurrentMarker : Int -> PeteTree -> List (Entity LocalCoords)
+renderCurrentMarker marker tree =
+    let pt = pointFromIndex marker tree
+    in
+    [ Scene3d.point { radius = Pixels.pixels 10 }
+        (Material.color orange)
+        pt
+    ]
 
 
 view : Model -> Browser.Document Msg
@@ -252,6 +274,16 @@ contentArea model =
                                     , entities = model.scene
                                     , upDirection = positiveZ
                                     }
+                            , Input.slider
+                                ViewPureStyles.wideSliderStyles
+                                { onChange = round >> SetCurrentPosition
+                                , value = toFloat model.currentPosition
+                                , label = Input.labelBelow [] (text "Label goes here")
+                                , min = 0
+                                , max = toFloat <| topNode.nodeContent.gpxGapCount + 1
+                                , step = Just 1
+                                , thumb = Input.defaultThumb
+                                }
                             ]
 
                     _ ->

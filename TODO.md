@@ -10,7 +10,7 @@ Add position marker to rendering (if re-rendering, no point trying SVG).
 
 ## What? Why?
 
-Yes, because Elm is great compared to Racket.
+Yes, because Elm is **great** compared to Racket.
 > Indications are that going back to basics on data structure is better than viable, it's awesome.
 
 Put all GPXPoints into a binary tree. At each level hold:

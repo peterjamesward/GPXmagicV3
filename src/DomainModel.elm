@@ -186,23 +186,48 @@ treeFromList track =
         |> treeFromRoadSections
 
 
-makeVisiblePoint rd =
+pointFromIndex : Int -> PeteTree -> LocalPoint
+pointFromIndex index treeNode =
+    --TODO: Figure out how to get to end point, probably jyst N >= count
+    case treeNode of
+        Leaf info ->
+            info.startsAt
+
+        Node info ->
+            let
+                quantityOnLeft =
+                    case info.left of
+                        Leaf _ ->
+                            1
+
+                        Node child ->
+                            child.nodeContent.gpxGapCount
+            in
+            if index < quantityOnLeft then
+                pointFromIndex index info.left
+
+            else
+                pointFromIndex (index - quantityOnLeft) info.right
+
+
+makeVisibleSegment rd =
+    --TODO: Find a new home.
     [ Scene3d.point { radius = Pixels.pixels 1 } (Material.color black) rd.startsAt
     , Scene3d.lineSegment (Material.color black) <| LineSegment3d.from rd.startsAt rd.endsAt
     ]
 
 
-render : Int -> PeteTree -> List (Entity LocalCoords) -> List (Entity LocalCoords)
-render depth someNode accum =
+renderTree : Int -> PeteTree -> List (Entity LocalCoords) -> List (Entity LocalCoords)
+renderTree depth someNode accum =
     case someNode of
         Leaf leafNode ->
-            makeVisiblePoint leafNode ++ accum
+            makeVisibleSegment leafNode ++ accum
 
         Node notLeaf ->
             if depth == 0 then
-                makeVisiblePoint notLeaf.nodeContent ++ accum
+                makeVisibleSegment notLeaf.nodeContent ++ accum
 
             else
                 accum
-                    |> render (depth - 1) notLeaf.left
-                    |> render (depth - 1) notLeaf.right
+                    |> renderTree (depth - 1) notLeaf.left
+                    |> renderTree (depth - 1) notLeaf.right
