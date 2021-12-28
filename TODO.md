@@ -2,19 +2,14 @@
 
 # WIP
 
-### Selective rendering
-Add selective rendering near current.
-
 ### Notes
 Do a write-up on Medium about why this structure is so cool (in this context).
-
-### Culling
-- See if visible area can best be done by pre-selecting view elements, or left to GPU.
-- (optimal culling view frustrum tricky combination of plane/bbox intersects and axis distance?)
 
 ---
 
 # Backlog
+
+### Curtain to show gradient
 
 ### Plan view
 Not 3d, just drawing, SVG or onto Canvas (better).
@@ -26,7 +21,6 @@ Altitude change from start, end; trueLength.
 ### Click detection
 
 ### Terrain
-
 Terrain 1 = simple tree walk
 Terrain 2 = Tree walk combined with whole (visible) tree query, because loops.
 (Expand bounding boxes to allow for road width.)
@@ -56,6 +50,10 @@ Test with 1M TP (ask Steve).
 More progress along the "plug-in" tool pattern:
 - Tab Open and Close methods.
 - Generic type somehow for storing tool state (JSON session state?)
+
+### Culling?
+- See if visible area can best be done by pre-selecting view elements, or left to GPU.
+- (optimal culling view frustrum tricky combination of plane/bbox intersects and axis distance?)
 
 ### Multiple windows
 

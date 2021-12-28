@@ -3,7 +3,7 @@ module DomainModel exposing (..)
 import Angle exposing (Angle)
 import BoundingBox3d exposing (BoundingBox3d)
 import Color exposing (black)
-import Length exposing (Meters)
+import Length exposing (Length, Meters)
 import LineSegment3d
 import List.Extra
 import LocalCoords exposing (LocalCoords)
@@ -53,6 +53,36 @@ type
         , left : PeteTree
         , right : PeteTree
         }
+
+
+startsAt : PeteTree -> LocalPoint
+startsAt treeNode =
+    case treeNode of
+        Leaf leaf ->
+            leaf.startsAt
+
+        Node node ->
+            node.nodeContent.startsAt
+
+
+endsAt : PeteTree -> LocalPoint
+endsAt treeNode =
+    case treeNode of
+        Leaf leaf ->
+            leaf.endsAt
+
+        Node node ->
+            node.nodeContent.endsAt
+
+
+trueLength : PeteTree -> Length
+trueLength treeNode =
+    case treeNode of
+        Leaf leaf ->
+            leaf.trueLength
+
+        Node node ->
+            node.nodeContent.trueLength
 
 
 convertGpxWithReference : GPXPoint -> GPXPoint -> LocalPoint
@@ -208,55 +238,3 @@ pointFromIndex index treeNode =
 
             else
                 pointFromIndex (index - quantityOnLeft) info.right
-
-
-makeVisibleSegment rd =
-    --TODO: Find a new home.
-    [ Scene3d.point { radius = Pixels.pixels 1 } (Material.color black) rd.startsAt
-    , Scene3d.lineSegment (Material.color black) <| LineSegment3d.from rd.startsAt rd.endsAt
-    ]
-
-
-renderTree : Int -> PeteTree -> List (Entity LocalCoords) -> List (Entity LocalCoords)
-renderTree depth someNode accum =
-    case someNode of
-        Leaf leafNode ->
-            makeVisibleSegment leafNode ++ accum
-
-        Node notLeaf ->
-            if depth <= 0 then
-                makeVisibleSegment notLeaf.nodeContent ++ accum
-
-            else
-                accum
-                    |> renderTree (depth - 1) notLeaf.left
-                    |> renderTree (depth - 1) notLeaf.right
-
-
-renderTreeSelectively :
-    BoundingBox3d Meters LocalCoords
-    -> Int
-    -> PeteTree
-    -> List (Entity LocalCoords)
-    -> List (Entity LocalCoords)
-renderTreeSelectively box depth someNode accum =
-    case someNode of
-        Leaf leafNode ->
-            if leafNode.boundingBox |> BoundingBox3d.intersects box then
-                makeVisibleSegment leafNode ++ accum
-
-            else
-                accum
-
-        Node notLeaf ->
-            if notLeaf.nodeContent.boundingBox |> BoundingBox3d.intersects box then
-                -- Ignore depth cutoff near or in the box
-                accum
-                    |> renderTreeSelectively box (depth - 1) notLeaf.left
-                    |> renderTreeSelectively box (depth - 1) notLeaf.right
-
-            else
-                -- Outside box, apply cutoff.
-                accum
-                    |> renderTree (depth - 1) notLeaf.left
-                    |> renderTree (depth - 1) notLeaf.right

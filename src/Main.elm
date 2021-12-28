@@ -5,9 +5,9 @@ import BoundingBox3d exposing (BoundingBox3d)
 import Browser exposing (application)
 import Browser.Navigation exposing (Key)
 import Camera3d
-import Color exposing (grey, lightOrange, orange)
+import Color
 import Direction3d exposing (negativeZ, positiveZ)
-import DomainModel exposing (GPXPoint, GPXTrack, PeteTree(..), RoadSection, pointFromIndex, renderTree, renderTreeSelectively, treeFromList)
+import DomainModel exposing (GPXPoint, GPXTrack, PeteTree(..), RoadSection, treeFromList)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -23,7 +23,7 @@ import OAuthTypes as O exposing (..)
 import Pixels
 import Point3d exposing (Point3d)
 import Scene3d exposing (Entity, backgroundColor)
-import Scene3d.Material as Material
+import SceneBuilder exposing (render3dView)
 import StravaAuth exposing (getStravaToken)
 import Task
 import Time
@@ -162,56 +162,10 @@ update msg (Model model) =
             )
 
 
-renderModelUniformDepth : ModelRecord -> ModelRecord
-renderModelUniformDepth model =
-    { model
-        | scene =
-            case model.trackTree of
-                Just tree ->
-                    renderTree model.renderDepth tree []
-                        ++ renderCurrentMarker model.currentPosition tree
-
-                Nothing ->
-                    []
-    }
-
-
 renderModel : ModelRecord -> ModelRecord
 renderModel model =
     -- SAme but always full depth with given region from marker.
-    --TODO: put box side in model
-    let
-        boxSide =
-            Length.kilometers 4
-    in
-    { model
-        | scene =
-            case model.trackTree of
-                Just tree ->
-                    let
-                        box =
-                            BoundingBox3d.withDimensions ( boxSide, boxSide, boxSide )
-                                (pointFromIndex model.currentPosition tree)
-                    in
-                    renderTreeSelectively box model.renderDepth tree []
-                        ++ renderCurrentMarker model.currentPosition tree
-
-                Nothing ->
-                    []
-    }
-
-
-renderCurrentMarker : Int -> PeteTree -> List (Entity LocalCoords)
-renderCurrentMarker marker tree =
-    --TODO: Find a good home.
-    let
-        pt =
-            pointFromIndex marker tree
-    in
-    [ Scene3d.point { radius = Pixels.pixels 10 }
-        (Material.color lightOrange)
-        pt
-    ]
+    { model | scene = render3dView model }
 
 
 view : Model -> Browser.Document Msg
