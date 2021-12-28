@@ -7,7 +7,7 @@ import Browser.Navigation exposing (Key)
 import Camera3d
 import Color
 import Direction3d exposing (negativeZ, positiveZ)
-import DomainModel exposing (GPXPoint, GPXTrack, PeteTree(..), RoadSection, treeFromList)
+import DomainModel exposing (GPXPoint, GPXTrack, PeteTree(..), RoadSection, nearestToRay, treeFromList)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -16,12 +16,16 @@ import Element.Input as Input exposing (button)
 import File exposing (File)
 import File.Select as Select
 import GpxParser exposing (parseGPXPoints)
+import Html.Events.Extra.Mouse as Mouse
 import Length exposing (Meters, meters)
 import LocalCoords exposing (LocalCoords)
 import OAuthPorts exposing (randomBytes)
 import OAuthTypes as O exposing (..)
 import Pixels
+import Point2d
 import Point3d exposing (Point3d)
+import Quantity exposing (toFloatQuantity)
+import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
 import SceneBuilder exposing (render3dView)
 import StravaAuth exposing (getStravaToken)
@@ -40,6 +44,7 @@ type Msg
     | AdjustTimeZone Time.Zone
     | SetRenderDepth Int
     | SetCurrentPosition Int
+    | ImageClick Mouse.Event
 
 
 type Model
@@ -57,6 +62,10 @@ type alias ModelRecord =
     , scene : List (Entity LocalCoords)
     , currentPosition : Int
     }
+
+
+viewDimensions =
+    ( Pixels.pixels 800, Pixels.pixels 500 )
 
 
 main : Program (Maybe (List Int)) Model Msg
@@ -161,11 +170,55 @@ update msg (Model model) =
             , Cmd.none
             )
 
+        ImageClick event ->
+            ( { model | currentPosition = detectHit event model }
+                |> renderModel
+                |> Model
+            , Cmd.none
+            )
+
 
 renderModel : ModelRecord -> ModelRecord
 renderModel model =
-    -- SAme but always full depth with given region from marker.
     { model | scene = render3dView model }
+
+
+detectHit : Mouse.Event -> ModelRecord -> Int
+detectHit event model =
+    --TODO: Move into view/pane/whatever it will be.
+    case model.trackTree of
+        Just (Node topNode) ->
+            let
+                box =
+                    topNode.nodeContent.boundingBox
+
+                ( x, y ) =
+                    event.offsetPos
+
+                screenPoint =
+                    Point2d.pixels x y
+
+                ( w, h ) =
+                    viewDimensions
+
+                ( wFloat, hFloat ) =
+                    ( toFloatQuantity w, toFloatQuantity h )
+
+                screenRectangle =
+                    Rectangle2d.from
+                        (Point2d.xy Quantity.zero hFloat)
+                        (Point2d.xy wFloat Quantity.zero)
+
+                camera =
+                    deriveCamera box
+
+                ray =
+                    Camera3d.ray camera screenRectangle screenPoint
+            in
+            nearestToRay ray (Node topNode)
+
+        _ ->
+            0
 
 
 view : Model -> Browser.Document Msg
@@ -211,6 +264,28 @@ maximumLeftPane =
     1400
 
 
+deriveCamera box =
+    let
+        cameraViewpoint =
+            Viewpoint3d.lookAt
+                { eyePoint =
+                    Point3d.xyz
+                        (BoundingBox3d.minX box)
+                        (BoundingBox3d.minY box)
+                        (BoundingBox3d.maxZ box)
+                , focalPoint = BoundingBox3d.centerPoint box
+                , upDirection = Direction3d.positiveZ
+                }
+
+        perspectiveCamera =
+            Camera3d.perspective
+                { viewpoint = cameraViewpoint
+                , verticalFieldOfView = Angle.degrees 60
+                }
+    in
+    perspectiveCamera
+
+
 contentArea : ModelRecord -> Element Msg
 contentArea model =
     let
@@ -222,23 +297,6 @@ contentArea model =
                         let
                             box =
                                 topNode.nodeContent.boundingBox
-
-                            cameraViewpoint =
-                                Viewpoint3d.lookAt
-                                    { eyePoint =
-                                        Point3d.xyz
-                                            (BoundingBox3d.minX box)
-                                            (BoundingBox3d.minY box)
-                                            (BoundingBox3d.maxZ box)
-                                    , focalPoint = BoundingBox3d.centerPoint box
-                                    , upDirection = Direction3d.positiveZ
-                                    }
-
-                            perspectiveCamera =
-                                Camera3d.perspective
-                                    { viewpoint = cameraViewpoint
-                                    , verticalFieldOfView = Angle.degrees 60
-                                    }
                         in
                         column []
                             [ text <|
@@ -246,23 +304,24 @@ contentArea model =
                                     ++ (String.fromFloat <| Length.inMeters topNode.nodeContent.trueLength)
                             , text <|
                                 "Points: "
-                                    ++ String.fromInt topNode.nodeContent.gpxGapCount
-                            , html <|
-                                Scene3d.cloudy
-                                    { camera = perspectiveCamera
-                                    , dimensions = ( Pixels.pixels 800, Pixels.pixels 500 )
-                                    , background = backgroundColor Color.lightBlue
-                                    , clipDepth = Length.meters 1
-                                    , entities = model.scene
-                                    , upDirection = positiveZ
-                                    }
+                                    ++ String.fromInt topNode.nodeContent.skipCount
+                            , el [ htmlAttribute <| Mouse.onClick ImageClick ] <|
+                                html <|
+                                    Scene3d.cloudy
+                                        { camera = deriveCamera box
+                                        , dimensions = viewDimensions
+                                        , background = backgroundColor Color.lightBlue
+                                        , clipDepth = Length.meters 1
+                                        , entities = model.scene
+                                        , upDirection = positiveZ
+                                        }
                             , Input.slider
                                 ViewPureStyles.wideSliderStyles
                                 { onChange = round >> SetCurrentPosition
                                 , value = toFloat model.currentPosition
                                 , label = Input.labelBelow [] (text "Label goes here")
                                 , min = 0
-                                , max = toFloat <| topNode.nodeContent.gpxGapCount + 1
+                                , max = toFloat <| topNode.nodeContent.skipCount + 1
                                 , step = Just 1
                                 , thumb = Input.defaultThumb
                                 }

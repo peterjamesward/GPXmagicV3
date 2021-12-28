@@ -9,18 +9,17 @@ Do a write-up on Medium about why this structure is so cool (in this context).
 
 # Backlog
 
-### Curtain to show gradient
+### Click detection
 
 ### Rotate, Zoom, Pan
 
 ### Plan view
 Not 3d, just drawing, SVG or onto Canvas (better).
+https://package.elm-lang.org/packages/joakin/elm-canvas/latest/
 
 ### Profile
 Not 3d, just drawing, SVG or onto Canvas (better).
 Altitude change from start, end; trueLength.
-
-### Click detection
 
 ### Terrain
 Terrain 1 = simple tree walk

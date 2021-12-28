@@ -1,6 +1,8 @@
 module DomainModel exposing (..)
 
 import Angle exposing (Angle)
+import Axis2d
+import Axis3d exposing (Axis3d)
 import BoundingBox3d exposing (BoundingBox3d)
 import Color exposing (black)
 import Length exposing (Length, Meters)
@@ -12,6 +14,7 @@ import Point3d exposing (Point3d)
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
 import Scene3d.Material as Material
+import SketchPlane3d
 import Spherical as Spherical exposing (range)
 
 
@@ -40,7 +43,7 @@ type alias RoadSection =
     , endsAt : LocalPoint
     , boundingBox : BoundingBox3d Meters LocalCoords
     , trueLength : Quantity Float Meters
-    , gpxGapCount : Int
+    , skipCount : Int
     }
 
 
@@ -53,6 +56,10 @@ type
         , left : PeteTree
         , right : PeteTree
         }
+
+
+
+-- The repetition here makes me think I could tidy up the base structure in some way.
 
 
 startsAt : PeteTree -> LocalPoint
@@ -75,6 +82,11 @@ endsAt treeNode =
             node.nodeContent.endsAt
 
 
+centre : PeteTree -> LocalPoint
+centre treeNode =
+    Point3d.interpolateFrom (startsAt treeNode) (endsAt treeNode) 0.5
+
+
 trueLength : PeteTree -> Length
 trueLength treeNode =
     case treeNode of
@@ -83,6 +95,16 @@ trueLength treeNode =
 
         Node node ->
             node.nodeContent.trueLength
+
+
+skipCount : PeteTree -> Int
+skipCount treeNode =
+    case treeNode of
+        Leaf leaf ->
+            1
+
+        Node node ->
+            node.nodeContent.skipCount
 
 
 convertGpxWithReference : GPXPoint -> GPXPoint -> LocalPoint
@@ -129,7 +151,7 @@ segmentsFromPoints points =
                     Spherical.range
                         ( gpx1.latitude, gpx1.longitude )
                         ( gpx2.latitude, gpx2.longitude )
-            , gpxGapCount = 1
+            , skipCount = 1
             }
     in
     List.map2
@@ -146,7 +168,7 @@ treeFromRoadSections sections =
             , endsAt = info2.endsAt
             , boundingBox = BoundingBox3d.union info1.boundingBox info2.boundingBox
             , trueLength = Quantity.plus info1.trueLength info2.trueLength
-            , gpxGapCount = info1.gpxGapCount + info2.gpxGapCount
+            , skipCount = info1.skipCount + info2.skipCount
             }
     in
     case sections of
@@ -231,10 +253,53 @@ pointFromIndex index treeNode =
                             1
 
                         Node child ->
-                            child.nodeContent.gpxGapCount
+                            child.nodeContent.skipCount
             in
             if index < quantityOnLeft then
                 pointFromIndex index info.left
 
             else
                 pointFromIndex (index - quantityOnLeft) info.right
+
+
+nearestToRay :
+    Axis3d Meters LocalCoords
+    -> PeteTree
+    -> Int
+nearestToRay ray treeNode =
+    -- Build a new query here.
+    -- Try: compute distance to each box centres.
+    -- At each level, pick "closest" child and recurse.
+    -- Bit of recursive magic to get the "index" number.
+    let
+        helper withNode skip =
+            case withNode of
+                Leaf leaf ->
+                    let
+                        startDistance =
+                            leaf.startsAt |> Point3d.distanceFromAxis ray
+
+                        endDistance =
+                            leaf.endsAt |> Point3d.distanceFromAxis ray
+                    in
+                    if startDistance |> Quantity.lessThanOrEqualTo endDistance then
+                        skip
+
+                    else
+                        skip + 1
+
+                Node node ->
+                    let
+                        leftDistance =
+                            centre node.left |> Point3d.distanceFromAxis ray
+
+                        rightDistance =
+                            centre node.right |> Point3d.distanceFromAxis ray
+                    in
+                    if leftDistance |> Quantity.lessThanOrEqualTo rightDistance then
+                        helper node.left skip
+
+                    else
+                        helper node.right (skip + skipCount node.left)
+    in
+    helper treeNode 0
