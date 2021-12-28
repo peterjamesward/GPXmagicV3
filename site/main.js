@@ -9832,60 +9832,9 @@ var $ianmackenzie$elm_geometry$Rectangle2d$from = F2(
 			$ianmackenzie$elm_geometry$Point2d$xCoordinate(p2),
 			$ianmackenzie$elm_geometry$Point2d$yCoordinate(p2));
 	});
-var $author$project$DomainModel$boundingBox = function (treeNode) {
-	if (treeNode.$ === 'Leaf') {
-		var leaf = treeNode.a;
-		return leaf.boundingBox;
-	} else {
-		var node = treeNode.a;
-		return node.nodeContent.boundingBox;
-	}
-};
-var $ianmackenzie$elm_units$Quantity$sqrt = function (_v0) {
-	var value = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(
-		$elm$core$Basics$sqrt(value));
-};
-var $ianmackenzie$elm_units$Quantity$squared = function (_v0) {
-	var value = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(value * value);
-};
-var $ianmackenzie$elm_units$Quantity$plus = F2(
-	function (_v0, _v1) {
-		var y = _v0.a;
-		var x = _v1.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(x + y);
-	});
-var $ianmackenzie$elm_units$Quantity$sum = function (quantities) {
-	return A3($elm$core$List$foldl, $ianmackenzie$elm_units$Quantity$plus, $ianmackenzie$elm_units$Quantity$zero, quantities);
-};
-var $ianmackenzie$elm_geometry$Geometry$Types$Sphere3d = function (a) {
-	return {$: 'Sphere3d', a: a};
-};
-var $ianmackenzie$elm_geometry$Sphere3d$withRadius = F2(
-	function (givenRadius, givenCenterPoint) {
-		return $ianmackenzie$elm_geometry$Geometry$Types$Sphere3d(
-			{
-				centerPoint: givenCenterPoint,
-				radius: $ianmackenzie$elm_units$Quantity$abs(givenRadius)
-			});
-	});
-var $author$project$DomainModel$containingSphere = function (box) {
-	var here = $ianmackenzie$elm_geometry$BoundingBox3d$centerPoint(box);
-	var _v0 = $ianmackenzie$elm_geometry$BoundingBox3d$dimensions(box);
-	var xs = _v0.a;
-	var ys = _v0.b;
-	var zs = _v0.c;
-	var radius = $ianmackenzie$elm_units$Quantity$half(
-		$ianmackenzie$elm_units$Quantity$sqrt(
-			$ianmackenzie$elm_units$Quantity$sum(
-				_List_fromArray(
-					[
-						$ianmackenzie$elm_units$Quantity$squared(xs),
-						$ianmackenzie$elm_units$Quantity$squared(ys),
-						$ianmackenzie$elm_units$Quantity$squared(zs)
-					]))));
-	return A2($ianmackenzie$elm_geometry$Sphere3d$withRadius, radius, here);
+var $ianmackenzie$elm_geometry$Sphere3d$centerPoint = function (_v0) {
+	var properties = _v0.a;
+	return properties.centerPoint;
 };
 var $ianmackenzie$elm_geometry$Point3d$distanceFromAxis = F2(
 	function (_v0, _v1) {
@@ -9919,12 +9868,74 @@ var $ianmackenzie$elm_geometry$Point3d$distanceFromAxis = F2(
 			return $ianmackenzie$elm_units$Quantity$Quantity(scaledDistance * largestComponent);
 		}
 	});
+var $ianmackenzie$elm_geometry$Point3d$along = F2(
+	function (_v0, _v1) {
+		var axis = _v0.a;
+		var distance = _v1.a;
+		var _v2 = axis.originPoint;
+		var p0 = _v2.a;
+		var _v3 = axis.direction;
+		var d = _v3.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+			{x: p0.x + (distance * d.x), y: p0.y + (distance * d.y), z: p0.z + (distance * d.z)});
+	});
+var $ianmackenzie$elm_geometry$Vector3d$componentIn = F2(
+	function (_v0, _v1) {
+		var d = _v0.a;
+		var v = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(((v.x * d.x) + (v.y * d.y)) + (v.z * d.z));
+	});
+var $ianmackenzie$elm_geometry$Axis3d$direction = function (_v0) {
+	var axis = _v0.a;
+	return axis.direction;
+};
+var $ianmackenzie$elm_geometry$Axis3d$originPoint = function (_v0) {
+	var axis = _v0.a;
+	return axis.originPoint;
+};
+var $elm$core$Basics$pow = _Basics_pow;
+var $ianmackenzie$elm_geometry$Axis3d$intersectionWithSphere = F2(
+	function (_v0, axis) {
+		var centerPoint = _v0.a.centerPoint;
+		var radius = _v0.a.radius;
+		var axisOrigin = $ianmackenzie$elm_geometry$Axis3d$originPoint(axis);
+		var circleCenterToOrigin = A2($ianmackenzie$elm_geometry$Vector3d$from, centerPoint, axisOrigin);
+		var axisDirection = $ianmackenzie$elm_geometry$Axis3d$direction(axis);
+		var _v1 = radius;
+		var r = _v1.a;
+		var _v2 = A2($ianmackenzie$elm_geometry$Vector3d$componentIn, axisDirection, circleCenterToOrigin);
+		var dotProduct = _v2.a;
+		var _v3 = circleCenterToOrigin;
+		var cto = _v3.a;
+		var ctoLengthSquared = (A2($elm$core$Basics$pow, cto.x, 2) + A2($elm$core$Basics$pow, cto.y, 2)) + A2($elm$core$Basics$pow, cto.z, 2);
+		var inRoot = (A2($elm$core$Basics$pow, dotProduct, 2) - ctoLengthSquared) + A2($elm$core$Basics$pow, r, 2);
+		if (inRoot < 0) {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var d2 = (-dotProduct) + $elm$core$Basics$sqrt(inRoot);
+			var d1 = (-dotProduct) - $elm$core$Basics$sqrt(inRoot);
+			return $elm$core$Maybe$Just(
+				_Utils_Tuple2(
+					A2(
+						$ianmackenzie$elm_geometry$Point3d$along,
+						axis,
+						$ianmackenzie$elm_units$Quantity$Quantity(d1)),
+					A2(
+						$ianmackenzie$elm_geometry$Point3d$along,
+						axis,
+						$ianmackenzie$elm_units$Quantity$Quantity(d2))));
+		}
+	});
 var $ianmackenzie$elm_units$Quantity$lessThanOrEqualTo = F2(
 	function (_v0, _v1) {
 		var y = _v0.a;
 		var x = _v1.a;
 		return _Utils_cmp(x, y) < 1;
 	});
+var $ianmackenzie$elm_geometry$Sphere3d$radius = function (_v0) {
+	var properties = _v0.a;
+	return properties.radius;
+};
 var $author$project$DomainModel$skipCount = function (treeNode) {
 	if (treeNode.$ === 'Leaf') {
 		var leaf = treeNode.a;
@@ -9934,34 +9945,105 @@ var $author$project$DomainModel$skipCount = function (treeNode) {
 		return node.nodeContent.skipCount;
 	}
 };
+var $author$project$DomainModel$sphere = function (treeNode) {
+	if (treeNode.$ === 'Leaf') {
+		var leaf = treeNode.a;
+		return leaf.sphere;
+	} else {
+		var node = treeNode.a;
+		return node.nodeContent.sphere;
+	}
+};
 var $author$project$DomainModel$nearestToRay = F2(
 	function (ray, treeNode) {
 		var helper = F2(
 			function (withNode, skip) {
-				if (withNode.$ === 'Leaf') {
-					var leaf = withNode.a;
-					var startDistance = A2($ianmackenzie$elm_geometry$Point3d$distanceFromAxis, ray, leaf.startsAt);
-					var endDistance = A2($ianmackenzie$elm_geometry$Point3d$distanceFromAxis, ray, leaf.endsAt);
-					return A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, endDistance, startDistance) ? _Utils_Tuple2(skip, startDistance) : _Utils_Tuple2(skip + 1, endDistance);
-				} else {
-					var node = withNode.a;
-					var _v1 = _Utils_Tuple2(
-						$author$project$DomainModel$containingSphere(
-							$author$project$DomainModel$boundingBox(node.left)),
-						$author$project$DomainModel$containingSphere(
-							$author$project$DomainModel$boundingBox(node.right)));
-					var leftSphere = _v1.a;
-					var rightSphere = _v1.b;
-					var _v2 = A2(
-						helper,
-						node.right,
-						skip + $author$project$DomainModel$skipCount(node.left));
-					var bestFromRightIndex = _v2.a;
-					var bestFromRightDistance = _v2.b;
-					var _v3 = A2(helper, node.left, skip);
-					var bestFromLeftIndex = _v3.a;
-					var bestFromLeftDistance = _v3.b;
-					return A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, bestFromRightDistance, bestFromLeftDistance) ? _Utils_Tuple2(bestFromLeftIndex, bestFromLeftDistance) : _Utils_Tuple2(bestFromRightIndex, bestFromRightDistance);
+				helper:
+				while (true) {
+					if (withNode.$ === 'Leaf') {
+						var leaf = withNode.a;
+						var startDistance = A2($ianmackenzie$elm_geometry$Point3d$distanceFromAxis, ray, leaf.startsAt);
+						var endDistance = A2($ianmackenzie$elm_geometry$Point3d$distanceFromAxis, ray, leaf.endsAt);
+						return A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, endDistance, startDistance) ? _Utils_Tuple2(skip, startDistance) : _Utils_Tuple2(skip + 1, endDistance);
+					} else {
+						var node = withNode.a;
+						var rightDistance = A2(
+							$ianmackenzie$elm_units$Quantity$minus,
+							$ianmackenzie$elm_geometry$Sphere3d$radius(
+								$author$project$DomainModel$sphere(node.right)),
+							A2(
+								$ianmackenzie$elm_geometry$Point3d$distanceFromAxis,
+								ray,
+								$ianmackenzie$elm_geometry$Sphere3d$centerPoint(
+									$author$project$DomainModel$sphere(node.right))));
+						var leftDistance = A2(
+							$ianmackenzie$elm_units$Quantity$minus,
+							$ianmackenzie$elm_geometry$Sphere3d$radius(
+								$author$project$DomainModel$sphere(node.left)),
+							A2(
+								$ianmackenzie$elm_geometry$Point3d$distanceFromAxis,
+								ray,
+								$ianmackenzie$elm_geometry$Sphere3d$centerPoint(
+									$author$project$DomainModel$sphere(node.left))));
+						var _v1 = _Utils_Tuple2(
+							!_Utils_eq(
+								A2(
+									$ianmackenzie$elm_geometry$Axis3d$intersectionWithSphere,
+									$author$project$DomainModel$sphere(node.left),
+									ray),
+								$elm$core$Maybe$Nothing),
+							!_Utils_eq(
+								A2(
+									$ianmackenzie$elm_geometry$Axis3d$intersectionWithSphere,
+									$author$project$DomainModel$sphere(node.right),
+									ray),
+								$elm$core$Maybe$Nothing));
+						var leftIntersects = _v1.a;
+						var rightIntersects = _v1.b;
+						var _v2 = _Utils_Tuple2(leftIntersects, rightIntersects);
+						if (_v2.a) {
+							if (_v2.b) {
+								var _v3 = A2(
+									helper,
+									node.right,
+									skip + $author$project$DomainModel$skipCount(node.left));
+								var rightBestIndex = _v3.a;
+								var rightBestDistance = _v3.b;
+								var _v4 = A2(helper, node.left, skip);
+								var leftBestIndex = _v4.a;
+								var leftBestDistance = _v4.b;
+								return A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, rightBestDistance, leftBestDistance) ? _Utils_Tuple2(leftBestIndex, leftBestDistance) : _Utils_Tuple2(rightBestIndex, rightBestDistance);
+							} else {
+								var $temp$withNode = node.left,
+									$temp$skip = skip;
+								withNode = $temp$withNode;
+								skip = $temp$skip;
+								continue helper;
+							}
+						} else {
+							if (_v2.b) {
+								var $temp$withNode = node.right,
+									$temp$skip = skip + $author$project$DomainModel$skipCount(node.left);
+								withNode = $temp$withNode;
+								skip = $temp$skip;
+								continue helper;
+							} else {
+								if (A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, rightDistance, leftDistance)) {
+									var $temp$withNode = node.left,
+										$temp$skip = skip;
+									withNode = $temp$withNode;
+									skip = $temp$skip;
+									continue helper;
+								} else {
+									var $temp$withNode = node.right,
+										$temp$skip = skip + $author$project$DomainModel$skipCount(node.left);
+									withNode = $temp$withNode;
+									skip = $temp$skip;
+									continue helper;
+								}
+							}
+						}
+					}
 				}
 			});
 		return A2(helper, treeNode, 0).a;
@@ -11855,6 +11937,12 @@ var $ianmackenzie$elm_geometry$Point3d$coordinates = function (_v0) {
 		$ianmackenzie$elm_units$Quantity$Quantity(p.y),
 		$ianmackenzie$elm_units$Quantity$Quantity(p.z));
 };
+var $ianmackenzie$elm_units$Quantity$plus = F2(
+	function (_v0, _v1) {
+		var y = _v0.a;
+		var x = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(x + y);
+	});
 var $ianmackenzie$elm_geometry$BoundingBox3d$withDimensions = F2(
 	function (_v0, givenCenterPoint) {
 		var givenLength = _v0.a;
@@ -12085,6 +12173,46 @@ var $author$project$DomainModel$localPointsFromGpxTrack = function (_v0) {
 		},
 		points);
 };
+var $ianmackenzie$elm_units$Quantity$sqrt = function (_v0) {
+	var value = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(
+		$elm$core$Basics$sqrt(value));
+};
+var $ianmackenzie$elm_units$Quantity$squared = function (_v0) {
+	var value = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(value * value);
+};
+var $ianmackenzie$elm_units$Quantity$sum = function (quantities) {
+	return A3($elm$core$List$foldl, $ianmackenzie$elm_units$Quantity$plus, $ianmackenzie$elm_units$Quantity$zero, quantities);
+};
+var $ianmackenzie$elm_geometry$Geometry$Types$Sphere3d = function (a) {
+	return {$: 'Sphere3d', a: a};
+};
+var $ianmackenzie$elm_geometry$Sphere3d$withRadius = F2(
+	function (givenRadius, givenCenterPoint) {
+		return $ianmackenzie$elm_geometry$Geometry$Types$Sphere3d(
+			{
+				centerPoint: givenCenterPoint,
+				radius: $ianmackenzie$elm_units$Quantity$abs(givenRadius)
+			});
+	});
+var $author$project$DomainModel$containingSphere = function (box) {
+	var here = $ianmackenzie$elm_geometry$BoundingBox3d$centerPoint(box);
+	var _v0 = $ianmackenzie$elm_geometry$BoundingBox3d$dimensions(box);
+	var xs = _v0.a;
+	var ys = _v0.b;
+	var zs = _v0.c;
+	var radius = $ianmackenzie$elm_units$Quantity$half(
+		$ianmackenzie$elm_units$Quantity$sqrt(
+			$ianmackenzie$elm_units$Quantity$sum(
+				_List_fromArray(
+					[
+						$ianmackenzie$elm_units$Quantity$squared(xs),
+						$ianmackenzie$elm_units$Quantity$squared(ys),
+						$ianmackenzie$elm_units$Quantity$squared(zs)
+					]))));
+	return A2($ianmackenzie$elm_geometry$Sphere3d$withRadius, radius, here);
+};
 var $elm$core$List$drop = F2(
 	function (n, list) {
 		drop:
@@ -12134,10 +12262,12 @@ var $author$project$DomainModel$segmentsFromPoints = function (points) {
 			var local1 = _v0.b;
 			var gpx2 = _v1.a;
 			var local2 = _v1.b;
+			var box = A2($ianmackenzie$elm_geometry$BoundingBox3d$from, local1, local2);
 			return {
-				boundingBox: A2($ianmackenzie$elm_geometry$BoundingBox3d$from, local1, local2),
+				boundingBox: box,
 				endsAt: local2,
 				skipCount: 1,
+				sphere: $author$project$DomainModel$containingSphere(box),
 				startsAt: local1,
 				trueLength: $ianmackenzie$elm_units$Length$meters(
 					A2(
@@ -12308,10 +12438,12 @@ var $ianmackenzie$elm_geometry$BoundingBox3d$union = F2(
 var $author$project$DomainModel$treeFromRoadSections = function (sections) {
 	var combineInfo = F2(
 		function (info1, info2) {
+			var box = A2($ianmackenzie$elm_geometry$BoundingBox3d$union, info1.boundingBox, info2.boundingBox);
 			return {
-				boundingBox: A2($ianmackenzie$elm_geometry$BoundingBox3d$union, info1.boundingBox, info2.boundingBox),
+				boundingBox: box,
 				endsAt: info2.endsAt,
 				skipCount: info1.skipCount + info2.skipCount,
+				sphere: $author$project$DomainModel$containingSphere(box),
 				startsAt: info1.startsAt,
 				trueLength: A2($ianmackenzie$elm_units$Quantity$plus, info1.trueLength, info2.trueLength)
 			};
@@ -19306,7 +19438,6 @@ var $ianmackenzie$elm_3d_scene$Scene3d$resetStencil = $ianmackenzie$elm_3d_scene
 	{fail: $elm_explorations$webgl$WebGL$Settings$StencilTest$replace, mask: 0, ref: $ianmackenzie$elm_3d_scene$Scene3d$initialStencilCount, test: $elm_explorations$webgl$WebGL$Settings$StencilTest$always, writeMask: $ianmackenzie$elm_3d_scene$Scene3d$lowerFourBits, zfail: $elm_explorations$webgl$WebGL$Settings$StencilTest$replace, zpass: $elm_explorations$webgl$WebGL$Settings$StencilTest$replace});
 var $elm_explorations$webgl$WebGL$Settings$StencilTest$greater = $elm_explorations$webgl$WebGL$Settings$StencilTest$Test(516);
 var $elm_explorations$webgl$WebGL$Settings$StencilTest$invert = $elm_explorations$webgl$WebGL$Settings$StencilTest$Operation(5386);
-var $elm$core$Basics$pow = _Basics_pow;
 var $ianmackenzie$elm_3d_scene$Scene3d$singleLightMask = function (index) {
 	return A2($elm$core$Basics$pow, 2, index + 4);
 };

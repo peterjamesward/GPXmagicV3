@@ -43,6 +43,7 @@ type alias RoadSection =
     { startsAt : LocalPoint
     , endsAt : LocalPoint
     , boundingBox : BoundingBox3d Meters LocalCoords
+    , sphere : Sphere3d Meters LocalCoords
     , trueLength : Quantity Float Meters
     , skipCount : Int
     }
@@ -118,6 +119,16 @@ boundingBox treeNode =
             node.nodeContent.boundingBox
 
 
+sphere : PeteTree -> Sphere3d Length.Meters LocalCoords
+sphere treeNode =
+    case treeNode of
+        Leaf leaf ->
+            leaf.sphere
+
+        Node node ->
+            node.nodeContent.sphere
+
+
 convertGpxWithReference : GPXPoint -> GPXPoint -> LocalPoint
 convertGpxWithReference reference point =
     let
@@ -154,9 +165,14 @@ segmentsFromPoints points =
     -- Start with lowest level, constructed directly from known points,
     let
         makeRoadSection ( gpx1, local1 ) ( gpx2, local2 ) =
+            let
+                box =
+                    BoundingBox3d.from local1 local2
+            in
             { startsAt = local1
             , endsAt = local2
-            , boundingBox = BoundingBox3d.from local1 local2
+            , boundingBox = box
+            , sphere = containingSphere box
             , trueLength =
                 Length.meters <|
                     Spherical.range
@@ -175,9 +191,14 @@ treeFromRoadSections : List RoadSection -> Maybe PeteTree
 treeFromRoadSections sections =
     let
         combineInfo info1 info2 =
+            let
+                box =
+                    BoundingBox3d.union info1.boundingBox info2.boundingBox
+            in
             { startsAt = info1.startsAt
             , endsAt = info2.endsAt
-            , boundingBox = BoundingBox3d.union info1.boundingBox info2.boundingBox
+            , boundingBox = box
+            , sphere = containingSphere box
             , trueLength = Quantity.plus info1.trueLength info2.trueLength
             , skipCount = info1.skipCount + info2.skipCount
             }
@@ -296,23 +317,51 @@ nearestToRay ray treeNode =
 
                 Node node ->
                     let
-                        ( leftSphere, rightSphere ) =
-                            --TODO: Put spheres in the tree?
-                            ( containingSphere <| boundingBox node.left
-                            , containingSphere <| boundingBox node.right
+                        ( leftIntersects, rightIntersects ) =
+                            ( Axis3d.intersectionWithSphere (sphere node.left) ray /= Nothing
+                            , Axis3d.intersectionWithSphere (sphere node.right) ray /= Nothing
                             )
 
-                        ( bestFromLeftIndex, bestFromLeftDistance ) =
+                        leftDistance =
+                            sphere node.left
+                                |> Sphere3d.centerPoint
+                                |> Point3d.distanceFromAxis ray
+                                |> Quantity.minus (sphere node.left |> Sphere3d.radius)
+
+                        rightDistance =
+                            sphere node.right
+                                |> Sphere3d.centerPoint
+                                |> Point3d.distanceFromAxis ray
+                                |> Quantity.minus (sphere node.right |> Sphere3d.radius)
+                    in
+                    case ( leftIntersects, rightIntersects ) of
+                        ( True, True ) ->
+                            -- Could go either way
+                            let
+                                ( leftBestIndex, leftBestDistance ) =
+                                    helper node.left skip
+
+                                ( rightBestIndex, rightBestDistance ) =
+                                    helper node.right (skip + skipCount node.left)
+                            in
+                            if leftBestDistance |> Quantity.lessThanOrEqualTo rightBestDistance then
+                                ( leftBestIndex, leftBestDistance )
+
+                            else
+                                ( rightBestIndex, rightBestDistance )
+
+                        ( True, False ) ->
                             helper node.left skip
 
-                        ( bestFromRightIndex, bestFromRightDistance ) =
+                        ( False, True ) ->
                             helper node.right (skip + skipCount node.left)
-                    in
-                    if bestFromLeftDistance |> Quantity.lessThanOrEqualTo bestFromRightDistance then
-                        ( bestFromLeftIndex, bestFromLeftDistance )
 
-                    else
-                        ( bestFromRightIndex, bestFromRightDistance )
+                        ( False, False ) ->
+                            if leftDistance |> Quantity.lessThanOrEqualTo rightDistance then
+                                helper node.left skip
+
+                            else
+                                helper node.right (skip + skipCount node.left)
     in
     Tuple.first <| helper treeNode 0
 
