@@ -126,7 +126,7 @@ update msg (Model model) =
             ( { model
                 | rawTrack = Just gpxTrack
                 , trackTree = trackTree
-                , renderDepth = 2
+                , renderDepth = 10
               }
                 |> renderModel
                 |> Model
