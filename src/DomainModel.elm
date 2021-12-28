@@ -224,10 +224,39 @@ renderTree depth someNode accum =
             makeVisibleSegment leafNode ++ accum
 
         Node notLeaf ->
-            if depth == 0 then
+            if depth <= 0 then
                 makeVisibleSegment notLeaf.nodeContent ++ accum
 
             else
+                accum
+                    |> renderTree (depth - 1) notLeaf.left
+                    |> renderTree (depth - 1) notLeaf.right
+
+
+renderTreeSelectively :
+    BoundingBox3d Meters LocalCoords
+    -> Int
+    -> PeteTree
+    -> List (Entity LocalCoords)
+    -> List (Entity LocalCoords)
+renderTreeSelectively box depth someNode accum =
+    case someNode of
+        Leaf leafNode ->
+            if leafNode.boundingBox |> BoundingBox3d.intersects box then
+                makeVisibleSegment leafNode ++ accum
+
+            else
+                accum
+
+        Node notLeaf ->
+            if notLeaf.nodeContent.boundingBox |> BoundingBox3d.intersects box then
+                -- Ignore depth cutoff near or in the box
+                accum
+                    |> renderTreeSelectively box (depth - 1) notLeaf.left
+                    |> renderTreeSelectively box (depth - 1) notLeaf.right
+
+            else
+                -- Outside box, apply cutoff.
                 accum
                     |> renderTree (depth - 1) notLeaf.left
                     |> renderTree (depth - 1) notLeaf.right

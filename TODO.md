@@ -16,9 +16,20 @@ Do a write-up on Medium about why this structure is so cool (in this context).
 
 # Backlog
 
+### Plan view
+Not 3d, just drawing, SVG or onto Canvas (better).
+
+### Profile
+Not 3d, just drawing, SVG or onto Canvas (better).
+Altitude change from start, end; trueLength.
+
 ### Click detection
 
 ### Terrain
+
+Terrain 1 = simple tree walk
+Terrain 2 = Tree walk combined with whole (visible) tree query, because loops.
+(Expand bounding boxes to allow for road width.)
 
 ### Undo/Redo
 Keep GPXPoints for Undo, not reverse delta (2.7, not 2.8)

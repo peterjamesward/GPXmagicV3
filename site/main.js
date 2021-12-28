@@ -9621,6 +9621,43 @@ var $author$project$GpxParser$parseGPXPoints = function (xml) {
 	};
 	return {points: trackPoints, referenceLonLat: referencePoint};
 };
+var $ianmackenzie$elm_units$Length$kilometers = function (numKilometers) {
+	return $ianmackenzie$elm_units$Length$meters(1000 * numKilometers);
+};
+var $author$project$DomainModel$pointFromIndex = F2(
+	function (index, treeNode) {
+		pointFromIndex:
+		while (true) {
+			if (treeNode.$ === 'Leaf') {
+				var info = treeNode.a;
+				return info.startsAt;
+			} else {
+				var info = treeNode.a;
+				var quantityOnLeft = function () {
+					var _v1 = info.left;
+					if (_v1.$ === 'Leaf') {
+						return 1;
+					} else {
+						var child = _v1.a;
+						return child.nodeContent.gpxGapCount;
+					}
+				}();
+				if (_Utils_cmp(index, quantityOnLeft) < 0) {
+					var $temp$index = index,
+						$temp$treeNode = info.left;
+					index = $temp$index;
+					treeNode = $temp$treeNode;
+					continue pointFromIndex;
+				} else {
+					var $temp$index = index - quantityOnLeft,
+						$temp$treeNode = info.right;
+					index = $temp$index;
+					treeNode = $temp$treeNode;
+					continue pointFromIndex;
+				}
+			}
+		}
+	});
 var $ianmackenzie$elm_3d_scene$Scene3d$Types$Constant = function (a) {
 	return {$: 'Constant', a: a};
 };
@@ -9946,40 +9983,6 @@ var $ianmackenzie$elm_3d_scene$Scene3d$point = F3(
 		var radius = _v0.radius;
 		return A3($ianmackenzie$elm_3d_scene$Scene3d$Entity$point, radius, givenMaterial, givenPoint);
 	});
-var $author$project$DomainModel$pointFromIndex = F2(
-	function (index, treeNode) {
-		pointFromIndex:
-		while (true) {
-			if (treeNode.$ === 'Leaf') {
-				var info = treeNode.a;
-				return info.startsAt;
-			} else {
-				var info = treeNode.a;
-				var quantityOnLeft = function () {
-					var _v1 = info.left;
-					if (_v1.$ === 'Leaf') {
-						return 1;
-					} else {
-						var child = _v1.a;
-						return child.nodeContent.gpxGapCount;
-					}
-				}();
-				if (_Utils_cmp(index, quantityOnLeft) < 0) {
-					var $temp$index = index,
-						$temp$treeNode = info.left;
-					index = $temp$index;
-					treeNode = $temp$treeNode;
-					continue pointFromIndex;
-				} else {
-					var $temp$index = index - quantityOnLeft,
-						$temp$treeNode = info.right;
-					index = $temp$index;
-					treeNode = $temp$treeNode;
-					continue pointFromIndex;
-				}
-			}
-		}
-	});
 var $author$project$Main$renderCurrentMarker = F2(
 	function (marker, tree) {
 		var pt = A2($author$project$DomainModel$pointFromIndex, marker, tree);
@@ -9993,6 +9996,41 @@ var $author$project$Main$renderCurrentMarker = F2(
 				$ianmackenzie$elm_3d_scene$Scene3d$Material$color($avh4$elm_color$Color$lightOrange),
 				pt)
 			]);
+	});
+var $elm$core$Basics$ge = _Utils_ge;
+var $ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo = F2(
+	function (_v0, _v1) {
+		var y = _v0.a;
+		var x = _v1.a;
+		return _Utils_cmp(x, y) > -1;
+	});
+var $ianmackenzie$elm_units$Quantity$lessThanOrEqualTo = F2(
+	function (_v0, _v1) {
+		var y = _v0.a;
+		var x = _v1.a;
+		return _Utils_cmp(x, y) < 1;
+	});
+var $ianmackenzie$elm_geometry$BoundingBox3d$intersects = F2(
+	function (other, boundingBox) {
+		return A2(
+			$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
+			$ianmackenzie$elm_geometry$BoundingBox3d$maxX(other),
+			$ianmackenzie$elm_geometry$BoundingBox3d$minX(boundingBox)) && (A2(
+			$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo,
+			$ianmackenzie$elm_geometry$BoundingBox3d$minX(other),
+			$ianmackenzie$elm_geometry$BoundingBox3d$maxX(boundingBox)) && (A2(
+			$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
+			$ianmackenzie$elm_geometry$BoundingBox3d$maxY(other),
+			$ianmackenzie$elm_geometry$BoundingBox3d$minY(boundingBox)) && (A2(
+			$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo,
+			$ianmackenzie$elm_geometry$BoundingBox3d$minY(other),
+			$ianmackenzie$elm_geometry$BoundingBox3d$maxY(boundingBox)) && (A2(
+			$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
+			$ianmackenzie$elm_geometry$BoundingBox3d$maxZ(other),
+			$ianmackenzie$elm_geometry$BoundingBox3d$minZ(boundingBox)) && A2(
+			$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo,
+			$ianmackenzie$elm_geometry$BoundingBox3d$minZ(other),
+			$ianmackenzie$elm_geometry$BoundingBox3d$maxZ(boundingBox))))));
 	});
 var $avh4$elm_color$Color$black = A4($avh4$elm_color$Color$RgbaSpace, 0 / 255, 0 / 255, 0 / 255, 1.0);
 var $ianmackenzie$elm_geometry$Geometry$Types$LineSegment3d = function (a) {
@@ -10173,7 +10211,7 @@ var $author$project$DomainModel$renderTree = F3(
 				accum);
 		} else {
 			var notLeaf = someNode.a;
-			return (!depth) ? _Utils_ap(
+			return (depth <= 0) ? _Utils_ap(
 				$author$project$DomainModel$makeVisibleSegment(notLeaf.nodeContent),
 				accum) : A3(
 				$author$project$DomainModel$renderTree,
@@ -10182,7 +10220,82 @@ var $author$project$DomainModel$renderTree = F3(
 				A3($author$project$DomainModel$renderTree, depth - 1, notLeaf.left, accum));
 		}
 	});
+var $author$project$DomainModel$renderTreeSelectively = F4(
+	function (box, depth, someNode, accum) {
+		if (someNode.$ === 'Leaf') {
+			var leafNode = someNode.a;
+			return A2($ianmackenzie$elm_geometry$BoundingBox3d$intersects, box, leafNode.boundingBox) ? _Utils_ap(
+				$author$project$DomainModel$makeVisibleSegment(leafNode),
+				accum) : accum;
+		} else {
+			var notLeaf = someNode.a;
+			return A2($ianmackenzie$elm_geometry$BoundingBox3d$intersects, box, notLeaf.nodeContent.boundingBox) ? A4(
+				$author$project$DomainModel$renderTreeSelectively,
+				box,
+				depth - 1,
+				notLeaf.right,
+				A4($author$project$DomainModel$renderTreeSelectively, box, depth - 1, notLeaf.left, accum)) : A3(
+				$author$project$DomainModel$renderTree,
+				depth - 1,
+				notLeaf.right,
+				A3($author$project$DomainModel$renderTree, depth - 1, notLeaf.left, accum));
+		}
+	});
+var $elm$core$Basics$negate = function (n) {
+	return -n;
+};
+var $elm$core$Basics$abs = function (n) {
+	return (n < 0) ? (-n) : n;
+};
+var $ianmackenzie$elm_units$Quantity$abs = function (_v0) {
+	var value = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(
+		$elm$core$Basics$abs(value));
+};
+var $ianmackenzie$elm_geometry$Point3d$coordinates = function (_v0) {
+	var p = _v0.a;
+	return _Utils_Tuple3(
+		$ianmackenzie$elm_units$Quantity$Quantity(p.x),
+		$ianmackenzie$elm_units$Quantity$Quantity(p.y),
+		$ianmackenzie$elm_units$Quantity$Quantity(p.z));
+};
+var $ianmackenzie$elm_units$Quantity$half = function (_v0) {
+	var value = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(0.5 * value);
+};
+var $ianmackenzie$elm_units$Quantity$plus = F2(
+	function (_v0, _v1) {
+		var y = _v0.a;
+		var x = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(x + y);
+	});
+var $ianmackenzie$elm_geometry$BoundingBox3d$withDimensions = F2(
+	function (_v0, givenCenterPoint) {
+		var givenLength = _v0.a;
+		var givenWidth = _v0.b;
+		var givenHeight = _v0.c;
+		var halfWidth = $ianmackenzie$elm_units$Quantity$half(
+			$ianmackenzie$elm_units$Quantity$abs(givenWidth));
+		var halfLength = $ianmackenzie$elm_units$Quantity$half(
+			$ianmackenzie$elm_units$Quantity$abs(givenLength));
+		var halfHeight = $ianmackenzie$elm_units$Quantity$half(
+			$ianmackenzie$elm_units$Quantity$abs(givenHeight));
+		var _v1 = $ianmackenzie$elm_geometry$Point3d$coordinates(givenCenterPoint);
+		var x0 = _v1.a;
+		var y0 = _v1.b;
+		var z0 = _v1.c;
+		return $ianmackenzie$elm_geometry$Geometry$Types$BoundingBox3d(
+			{
+				maxX: A2($ianmackenzie$elm_units$Quantity$plus, halfLength, x0),
+				maxY: A2($ianmackenzie$elm_units$Quantity$plus, halfWidth, y0),
+				maxZ: A2($ianmackenzie$elm_units$Quantity$plus, halfHeight, z0),
+				minX: A2($ianmackenzie$elm_units$Quantity$minus, halfLength, x0),
+				minY: A2($ianmackenzie$elm_units$Quantity$minus, halfWidth, y0),
+				minZ: A2($ianmackenzie$elm_units$Quantity$minus, halfHeight, z0)
+			});
+	});
 var $author$project$Main$renderModel = function (model) {
+	var boxSide = $ianmackenzie$elm_units$Length$kilometers(4);
 	return _Utils_update(
 		model,
 		{
@@ -10190,8 +10303,12 @@ var $author$project$Main$renderModel = function (model) {
 				var _v0 = model.trackTree;
 				if (_v0.$ === 'Just') {
 					var tree = _v0.a;
+					var box = A2(
+						$ianmackenzie$elm_geometry$BoundingBox3d$withDimensions,
+						_Utils_Tuple3(boxSide, boxSide, boxSide),
+						A2($author$project$DomainModel$pointFromIndex, model.currentPosition, tree));
 					return _Utils_ap(
-						A3($author$project$DomainModel$renderTree, model.renderDepth, tree, _List_Nil),
+						A4($author$project$DomainModel$renderTreeSelectively, box, model.renderDepth, tree, _List_Nil),
 						A2($author$project$Main$renderCurrentMarker, model.currentPosition, tree));
 				} else {
 					return _List_Nil;
@@ -10324,12 +10441,6 @@ var $author$project$DomainModel$Leaf = function (a) {
 var $author$project$DomainModel$Node = function (a) {
 	return {$: 'Node', a: a};
 };
-var $ianmackenzie$elm_units$Quantity$plus = F2(
-	function (_v0, _v1) {
-		var y = _v0.a;
-		var x = _v1.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(x + y);
-	});
 var $elm$core$List$takeReverse = F3(
 	function (n, list, kept) {
 		takeReverse:
@@ -14209,9 +14320,6 @@ var $mdgriffith$elm_ui$Internal$Model$hasSmallCaps = function (typeface) {
 		return false;
 	}
 };
-var $elm$core$Basics$negate = function (n) {
-	return -n;
-};
 var $mdgriffith$elm_ui$Internal$Model$renderProps = F3(
 	function (force, _v0, existing) {
 		var key = _v0.a;
@@ -16059,7 +16167,6 @@ var $mdgriffith$elm_ui$Internal$Model$renderWidth = function (w) {
 	}
 };
 var $mdgriffith$elm_ui$Internal$Flag$borderWidth = $mdgriffith$elm_ui$Internal$Flag$flag(27);
-var $elm$core$Basics$ge = _Utils_ge;
 var $mdgriffith$elm_ui$Internal$Model$skippable = F2(
 	function (flag, style) {
 		if (_Utils_eq(flag, $mdgriffith$elm_ui$Internal$Flag$borderWidth)) {
@@ -17263,14 +17370,6 @@ var $ianmackenzie$elm_units$Pixels$toInt = function (_v0) {
 	var numPixels = _v0.a;
 	return numPixels;
 };
-var $elm$core$Basics$abs = function (n) {
-	return (n < 0) ? (-n) : n;
-};
-var $ianmackenzie$elm_units$Quantity$abs = function (_v0) {
-	var value = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(
-		$elm$core$Basics$abs(value));
-};
 var $elm_explorations$linear_algebra$Math$Vector4$vec4 = _MJS_v4;
 var $ianmackenzie$elm_3d_scene$Scene3d$allLightsEnabled = A4($elm_explorations$linear_algebra$Math$Vector4$vec4, 1, 1, 1, 1);
 var $ianmackenzie$elm_3d_scene$Scene3d$call = F3(
@@ -17765,42 +17864,6 @@ var $ianmackenzie$elm_geometry$Direction3d$unwrap = function (_v0) {
 	var coordinates = _v0.a;
 	return coordinates;
 };
-var $ianmackenzie$elm_geometry$Point3d$coordinates = function (_v0) {
-	var p = _v0.a;
-	return _Utils_Tuple3(
-		$ianmackenzie$elm_units$Quantity$Quantity(p.x),
-		$ianmackenzie$elm_units$Quantity$Quantity(p.y),
-		$ianmackenzie$elm_units$Quantity$Quantity(p.z));
-};
-var $ianmackenzie$elm_units$Quantity$half = function (_v0) {
-	var value = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(0.5 * value);
-};
-var $ianmackenzie$elm_geometry$BoundingBox3d$withDimensions = F2(
-	function (_v0, givenCenterPoint) {
-		var givenLength = _v0.a;
-		var givenWidth = _v0.b;
-		var givenHeight = _v0.c;
-		var halfWidth = $ianmackenzie$elm_units$Quantity$half(
-			$ianmackenzie$elm_units$Quantity$abs(givenWidth));
-		var halfLength = $ianmackenzie$elm_units$Quantity$half(
-			$ianmackenzie$elm_units$Quantity$abs(givenLength));
-		var halfHeight = $ianmackenzie$elm_units$Quantity$half(
-			$ianmackenzie$elm_units$Quantity$abs(givenHeight));
-		var _v1 = $ianmackenzie$elm_geometry$Point3d$coordinates(givenCenterPoint);
-		var x0 = _v1.a;
-		var y0 = _v1.b;
-		var z0 = _v1.c;
-		return $ianmackenzie$elm_geometry$Geometry$Types$BoundingBox3d(
-			{
-				maxX: A2($ianmackenzie$elm_units$Quantity$plus, halfLength, x0),
-				maxY: A2($ianmackenzie$elm_units$Quantity$plus, halfWidth, y0),
-				maxZ: A2($ianmackenzie$elm_units$Quantity$plus, halfHeight, z0),
-				minX: A2($ianmackenzie$elm_units$Quantity$minus, halfLength, x0),
-				minY: A2($ianmackenzie$elm_units$Quantity$minus, halfWidth, y0),
-				minZ: A2($ianmackenzie$elm_units$Quantity$minus, halfHeight, z0)
-			});
-	});
 var $ianmackenzie$elm_3d_scene$Scene3d$updateViewBounds = F4(
 	function (viewFrame, scale, modelBounds, current) {
 		var originalCenter = modelBounds.centerPoint;
