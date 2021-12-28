@@ -32,6 +32,7 @@ import StravaAuth exposing (getStravaToken)
 import Task
 import Time
 import Url exposing (Url)
+import Vector3d
 import ViewPureStyles
 import Viewpoint3d
 
@@ -266,13 +267,19 @@ maximumLeftPane =
 
 deriveCamera box =
     let
+        ( xSize, ySize, zSize ) =
+            BoundingBox3d.dimensions box
+
+        largestEdge =
+            xSize |> Quantity.max ySize |> Quantity.max zSize
+
+        eyePoint =
+            Point3d.xyz largestEdge (Quantity.negate largestEdge) largestEdge
+
         cameraViewpoint =
+            -- Fixed for now.
             Viewpoint3d.lookAt
-                { eyePoint =
-                    Point3d.xyz
-                        (BoundingBox3d.minX box)
-                        (BoundingBox3d.minY box)
-                        (BoundingBox3d.maxZ box)
+                { eyePoint = eyePoint
                 , focalPoint = BoundingBox3d.centerPoint box
                 , upDirection = Direction3d.positiveZ
                 }

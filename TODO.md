@@ -9,9 +9,8 @@ Do a write-up on Medium about why this structure is so cool (in this context).
 
 # Backlog
 
-### Click detection
-
-### Rotate, Zoom, Pan
+### Decide how to organise windows, panes, views.
+What state lives where?
 
 ### Plan view
 Not 3d, just drawing, SVG or onto Canvas (better).
@@ -22,18 +21,15 @@ Not 3d, just drawing, SVG or onto Canvas (better).
 Altitude change from start, end; trueLength.
 
 ### Terrain
-Terrain 1 = simple tree walk
-Terrain 2 = Tree walk combined with whole (visible) tree query, because loops.
+Terrain 1 = Simple tree walk, in many cases will just work but not always.
+Terrain 2 = Tree walk combined with whole (visible) tree query, because <loops>.
 (Expand bounding boxes to allow for road width.)
 
-### Undo/Redo
-Keep GPXPoints for Undo, not reverse delta (2.7, not 2.8)
+### Rotate, Zoom, Pan
+This is copy & paste.
 
-### Queries
-- Box content query
-- Box nearest query
-- Queries with filters
-- Queries with folds
+### Undo/Redo
+Revert to keeping GPXPoints for Undo, not reverse delta (2.7, not 2.8)
 
 ### (Algebraic) operations
 - Delete a leaf/leaves
@@ -41,11 +37,14 @@ Keep GPXPoints for Undo, not reverse delta (2.7, not 2.8)
 - Update leaves (and all their aggregate nodes)  
   (note this is actually a top-down operation)
 
-### SVG markers?
-Use an SVG overlay for markers? No, but maybe previews?
+### Non-WebGL markers?
+Use an SVG overlay for markers? 
+No, but maybe previews?
+And not SVG but Canvas.
 
 ### Scale test
 Test with 1M TP (ask Steve).
+So far, looking awesome at 300K.
 
 ### Tools
 More progress along the "plug-in" tool pattern:
@@ -57,11 +56,8 @@ More progress along the "plug-in" tool pattern:
 - (optimal culling view frustrum tricky combination of plane/bbox intersects and axis distance?)
 
 ### Multiple windows
-
-Check out Electron (again), see if that will allow multiple windows. (Dual monitor support wbn).
-
-Put back visual options  
-... but allow override for each window (too complex?).
+Check out Electron (again), see if that will allow multiple windows. 
+> (Dual monitor support would be nice but not as good as being light and fast.)
 
 ---
 

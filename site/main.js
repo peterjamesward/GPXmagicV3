@@ -9425,6 +9425,51 @@ var $ianmackenzie$elm_units$Angle$radians = function (numRadians) {
 var $ianmackenzie$elm_units$Angle$degrees = function (numDegrees) {
 	return $ianmackenzie$elm_units$Angle$radians($elm$core$Basics$pi * (numDegrees / 180));
 };
+var $ianmackenzie$elm_geometry$BoundingBox3d$maxX = function (_v0) {
+	var boundingBox = _v0.a;
+	return boundingBox.maxX;
+};
+var $ianmackenzie$elm_geometry$BoundingBox3d$maxY = function (_v0) {
+	var boundingBox = _v0.a;
+	return boundingBox.maxY;
+};
+var $ianmackenzie$elm_geometry$BoundingBox3d$maxZ = function (_v0) {
+	var boundingBox = _v0.a;
+	return boundingBox.maxZ;
+};
+var $ianmackenzie$elm_geometry$BoundingBox3d$minX = function (_v0) {
+	var boundingBox = _v0.a;
+	return boundingBox.minX;
+};
+var $ianmackenzie$elm_geometry$BoundingBox3d$minY = function (_v0) {
+	var boundingBox = _v0.a;
+	return boundingBox.minY;
+};
+var $ianmackenzie$elm_geometry$BoundingBox3d$minZ = function (_v0) {
+	var boundingBox = _v0.a;
+	return boundingBox.minZ;
+};
+var $ianmackenzie$elm_units$Quantity$minus = F2(
+	function (_v0, _v1) {
+		var y = _v0.a;
+		var x = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(x - y);
+	});
+var $ianmackenzie$elm_geometry$BoundingBox3d$dimensions = function (boundingBox) {
+	return _Utils_Tuple3(
+		A2(
+			$ianmackenzie$elm_units$Quantity$minus,
+			$ianmackenzie$elm_geometry$BoundingBox3d$minX(boundingBox),
+			$ianmackenzie$elm_geometry$BoundingBox3d$maxX(boundingBox)),
+		A2(
+			$ianmackenzie$elm_units$Quantity$minus,
+			$ianmackenzie$elm_geometry$BoundingBox3d$minY(boundingBox),
+			$ianmackenzie$elm_geometry$BoundingBox3d$maxY(boundingBox)),
+		A2(
+			$ianmackenzie$elm_units$Quantity$minus,
+			$ianmackenzie$elm_geometry$BoundingBox3d$minZ(boundingBox),
+			$ianmackenzie$elm_geometry$BoundingBox3d$maxZ(boundingBox)));
+};
 var $ianmackenzie$elm_3d_camera$Camera3d$Types$Viewpoint3d = function (a) {
 	return {$: 'Viewpoint3d', a: a};
 };
@@ -9636,17 +9681,16 @@ var $ianmackenzie$elm_3d_camera$Viewpoint3d$lookAt = function (_arguments) {
 		}
 	}
 };
-var $ianmackenzie$elm_geometry$BoundingBox3d$maxZ = function (_v0) {
-	var boundingBox = _v0.a;
-	return boundingBox.maxZ;
-};
-var $ianmackenzie$elm_geometry$BoundingBox3d$minX = function (_v0) {
-	var boundingBox = _v0.a;
-	return boundingBox.minX;
-};
-var $ianmackenzie$elm_geometry$BoundingBox3d$minY = function (_v0) {
-	var boundingBox = _v0.a;
-	return boundingBox.minY;
+var $ianmackenzie$elm_units$Quantity$max = F2(
+	function (_v0, _v1) {
+		var x = _v0.a;
+		var y = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(
+			A2($elm$core$Basics$max, x, y));
+	});
+var $ianmackenzie$elm_units$Quantity$negate = function (_v0) {
+	var value = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(-value);
 };
 var $ianmackenzie$elm_3d_camera$Camera3d$Types$Camera3d = function (a) {
 	return {$: 'Camera3d', a: a};
@@ -9684,13 +9728,22 @@ var $ianmackenzie$elm_geometry$Direction3d$unsafe = function (givenComponents) {
 var $ianmackenzie$elm_geometry$Direction3d$positiveZ = $ianmackenzie$elm_geometry$Direction3d$unsafe(
 	{x: 0, y: 0, z: 1});
 var $author$project$Main$deriveCamera = function (box) {
+	var _v0 = $ianmackenzie$elm_geometry$BoundingBox3d$dimensions(box);
+	var xSize = _v0.a;
+	var ySize = _v0.b;
+	var zSize = _v0.c;
+	var largestEdge = A2(
+		$ianmackenzie$elm_units$Quantity$max,
+		zSize,
+		A2($ianmackenzie$elm_units$Quantity$max, ySize, xSize));
+	var eyePoint = A3(
+		$ianmackenzie$elm_geometry$Point3d$xyz,
+		largestEdge,
+		$ianmackenzie$elm_units$Quantity$negate(largestEdge),
+		largestEdge);
 	var cameraViewpoint = $ianmackenzie$elm_3d_camera$Viewpoint3d$lookAt(
 		{
-			eyePoint: A3(
-				$ianmackenzie$elm_geometry$Point3d$xyz,
-				$ianmackenzie$elm_geometry$BoundingBox3d$minX(box),
-				$ianmackenzie$elm_geometry$BoundingBox3d$minY(box),
-				$ianmackenzie$elm_geometry$BoundingBox3d$maxZ(box)),
+			eyePoint: eyePoint,
 			focalPoint: $ianmackenzie$elm_geometry$BoundingBox3d$centerPoint(box),
 			upDirection: $ianmackenzie$elm_geometry$Direction3d$positiveZ
 		});
@@ -9716,12 +9769,6 @@ var $ianmackenzie$elm_units$Quantity$midpoint = F2(
 		var x = _v0.a;
 		var y = _v1.a;
 		return $ianmackenzie$elm_units$Quantity$Quantity(x + (0.5 * (y - x)));
-	});
-var $ianmackenzie$elm_units$Quantity$minus = F2(
-	function (_v0, _v1) {
-		var y = _v0.a;
-		var x = _v1.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(x - y);
 	});
 var $ianmackenzie$elm_geometry$Geometry$Types$Direction2d = function (a) {
 	return {$: 'Direction2d', a: a};
@@ -9945,10 +9992,6 @@ var $ianmackenzie$elm_units$Quantity$multiplyBy = F2(
 		var value = _v0.a;
 		return $ianmackenzie$elm_units$Quantity$Quantity(scale * value);
 	});
-var $ianmackenzie$elm_units$Quantity$negate = function (_v0) {
-	var value = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(-value);
-};
 var $ianmackenzie$elm_geometry$Direction3d$negativeZ = $ianmackenzie$elm_geometry$Direction3d$unsafe(
 	{x: 0, y: 0, z: -1});
 var $ianmackenzie$elm_units$Quantity$per = F2(
@@ -10190,13 +10233,6 @@ var $elm$core$List$filterMap = F2(
 			xs);
 	});
 var $elm$regex$Regex$find = _Regex_findAtMost(_Regex_infinity);
-var $ianmackenzie$elm_units$Quantity$max = F2(
-	function (_v0, _v1) {
-		var x = _v0.a;
-		var y = _v1.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(
-			A2($elm$core$Basics$max, x, y));
-	});
 var $ianmackenzie$elm_units$Quantity$maximum = function (quantities) {
 	if (!quantities.b) {
 		return $elm$core$Maybe$Nothing;
@@ -10497,18 +10533,6 @@ var $avh4$elm_color$Color$hsl = F3(
 	function (h, s, l) {
 		return A4($avh4$elm_color$Color$hsla, h, s, l, 1.0);
 	});
-var $ianmackenzie$elm_geometry$BoundingBox3d$maxX = function (_v0) {
-	var boundingBox = _v0.a;
-	return boundingBox.maxX;
-};
-var $ianmackenzie$elm_geometry$BoundingBox3d$maxY = function (_v0) {
-	var boundingBox = _v0.a;
-	return boundingBox.maxY;
-};
-var $ianmackenzie$elm_geometry$BoundingBox3d$minZ = function (_v0) {
-	var boundingBox = _v0.a;
-	return boundingBox.minZ;
-};
 var $ianmackenzie$elm_geometry$BoundingBox3d$intersects = F2(
 	function (other, boundingBox) {
 		return A2(
@@ -10661,21 +10685,6 @@ var $ianmackenzie$elm_3d_scene$Scene3d$Entity$lineSegmentVertices = $elm_explora
 			{lineSegmentVertex: 1})
 		]));
 var $elm_explorations$linear_algebra$Math$Vector3$scale = _MJS_v3scale;
-var $ianmackenzie$elm_geometry$BoundingBox3d$dimensions = function (boundingBox) {
-	return _Utils_Tuple3(
-		A2(
-			$ianmackenzie$elm_units$Quantity$minus,
-			$ianmackenzie$elm_geometry$BoundingBox3d$minX(boundingBox),
-			$ianmackenzie$elm_geometry$BoundingBox3d$maxX(boundingBox)),
-		A2(
-			$ianmackenzie$elm_units$Quantity$minus,
-			$ianmackenzie$elm_geometry$BoundingBox3d$minY(boundingBox),
-			$ianmackenzie$elm_geometry$BoundingBox3d$maxY(boundingBox)),
-		A2(
-			$ianmackenzie$elm_units$Quantity$minus,
-			$ianmackenzie$elm_geometry$BoundingBox3d$minZ(boundingBox),
-			$ianmackenzie$elm_geometry$BoundingBox3d$maxZ(boundingBox)));
-};
 var $ianmackenzie$elm_geometry$Point3d$unwrap = function (_v0) {
 	var pointCoordinates = _v0.a;
 	return pointCoordinates;
