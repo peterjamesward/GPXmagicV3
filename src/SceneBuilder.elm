@@ -46,10 +46,12 @@ render3dView model =
             Length.kilometers 4
 
         gradientFromNode treeNode =
-            Point3d.zCoordinate (endsAt treeNode)
-                |> Quantity.minus
-                    (Point3d.zCoordinate (startsAt treeNode))
-                |> Quantity.ratio (trueLength treeNode)
+            Quantity.ratio
+                (Point3d.zCoordinate (endsAt treeNode)
+                    |> Quantity.minus
+                        (Point3d.zCoordinate (startsAt treeNode))
+                )
+                (trueLength treeNode)
                 |> (*) 100.0
 
         gradientCurtain : PeteTree -> List (Entity LocalCoords)
@@ -122,13 +124,9 @@ render3dView model =
 
         renderCurrentMarker : Int -> PeteTree -> List (Entity LocalCoords)
         renderCurrentMarker marker tree =
-            let
-                pt =
-                    pointFromIndex marker tree
-            in
             [ Scene3d.point { radius = Pixels.pixels 10 }
                 (Material.color lightOrange)
-                pt
+                (pointFromIndex marker tree)
             ]
     in
     case model.trackTree of

@@ -11,6 +11,8 @@ Do a write-up on Medium about why this structure is so cool (in this context).
 
 ### Curtain to show gradient
 
+### Rotate, Zoom, Pan
+
 ### Plan view
 Not 3d, just drawing, SVG or onto Canvas (better).
 

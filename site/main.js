@@ -11234,7 +11234,6 @@ var $ianmackenzie$elm_geometry$Plane3d$xy = A2($ianmackenzie$elm_geometry$Plane3
 var $author$project$SceneBuilder$render3dView = function (model) {
 	var renderCurrentMarker = F2(
 		function (marker, tree) {
-			var pt = A2($author$project$DomainModel$pointFromIndex, marker, tree);
 			return _List_fromArray(
 				[
 					A3(
@@ -11243,19 +11242,19 @@ var $author$project$SceneBuilder$render3dView = function (model) {
 						radius: $ianmackenzie$elm_units$Pixels$pixels(10)
 					},
 					$ianmackenzie$elm_3d_scene$Scene3d$Material$color($avh4$elm_color$Color$lightOrange),
-					pt)
+					A2($author$project$DomainModel$pointFromIndex, marker, tree))
 				]);
 		});
 	var gradientFromNode = function (treeNode) {
 		return 100.0 * A2(
 			$ianmackenzie$elm_units$Quantity$ratio,
-			$author$project$DomainModel$trueLength(treeNode),
 			A2(
 				$ianmackenzie$elm_units$Quantity$minus,
 				$ianmackenzie$elm_geometry$Point3d$zCoordinate(
 					$author$project$DomainModel$startsAt(treeNode)),
 				$ianmackenzie$elm_geometry$Point3d$zCoordinate(
-					$author$project$DomainModel$endsAt(treeNode))));
+					$author$project$DomainModel$endsAt(treeNode))),
+			$author$project$DomainModel$trueLength(treeNode));
 	};
 	var gradientColourPastel = function (slope) {
 		return A3(
