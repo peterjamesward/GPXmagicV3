@@ -287,7 +287,7 @@ deriveCamera box =
         perspectiveCamera =
             Camera3d.perspective
                 { viewpoint = cameraViewpoint
-                , verticalFieldOfView = Angle.degrees 60
+                , verticalFieldOfView = Angle.degrees 45
                 }
     in
     perspectiveCamera

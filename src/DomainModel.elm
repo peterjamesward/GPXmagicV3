@@ -243,23 +243,18 @@ pointFromIndex index treeNode =
     --TODO: Figure out how to get to end point, probably jyst N >= count
     case treeNode of
         Leaf info ->
-            info.startsAt
+            if index <= 0 then
+                info.startsAt
+
+            else
+                info.endsAt
 
         Node info ->
-            let
-                quantityOnLeft =
-                    case info.left of
-                        Leaf _ ->
-                            1
-
-                        Node child ->
-                            child.nodeContent.skipCount
-            in
-            if index < quantityOnLeft then
+            if index < (skipCount info.left) then
                 pointFromIndex index info.left
 
             else
-                pointFromIndex (index - quantityOnLeft) info.right
+                pointFromIndex (index - (skipCount info.left)) info.right
 
 
 nearestToRay :

@@ -9749,7 +9749,7 @@ var $author$project$Main$deriveCamera = function (box) {
 		});
 	var perspectiveCamera = $ianmackenzie$elm_3d_camera$Camera3d$perspective(
 		{
-			verticalFieldOfView: $ianmackenzie$elm_units$Angle$degrees(60),
+			verticalFieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
 			viewpoint: cameraViewpoint
 		});
 	return perspectiveCamera;
@@ -10968,7 +10968,7 @@ var $author$project$DomainModel$pointFromIndex = F2(
 		while (true) {
 			if (treeNode.$ === 'Leaf') {
 				var info = treeNode.a;
-				return info.startsAt;
+				return (index <= 0) ? info.startsAt : info.endsAt;
 			} else {
 				var info = treeNode.a;
 				var quantityOnLeft = function () {
