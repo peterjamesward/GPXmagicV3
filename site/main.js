@@ -9832,38 +9832,60 @@ var $ianmackenzie$elm_geometry$Rectangle2d$from = F2(
 			$ianmackenzie$elm_geometry$Point2d$xCoordinate(p2),
 			$ianmackenzie$elm_geometry$Point2d$yCoordinate(p2));
 	});
-var $author$project$DomainModel$endsAt = function (treeNode) {
+var $author$project$DomainModel$boundingBox = function (treeNode) {
 	if (treeNode.$ === 'Leaf') {
 		var leaf = treeNode.a;
-		return leaf.endsAt;
+		return leaf.boundingBox;
 	} else {
 		var node = treeNode.a;
-		return node.nodeContent.endsAt;
+		return node.nodeContent.boundingBox;
 	}
 };
-var $ianmackenzie$elm_geometry$Point3d$interpolateFrom = F3(
-	function (_v0, _v1, t) {
-		var p1 = _v0.a;
-		var p2 = _v1.a;
-		return (t <= 0.5) ? $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
-			{x: p1.x + (t * (p2.x - p1.x)), y: p1.y + (t * (p2.y - p1.y)), z: p1.z + (t * (p2.z - p1.z))}) : $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
-			{x: p2.x + ((1 - t) * (p1.x - p2.x)), y: p2.y + ((1 - t) * (p1.y - p2.y)), z: p2.z + ((1 - t) * (p1.z - p2.z))});
+var $ianmackenzie$elm_units$Quantity$sqrt = function (_v0) {
+	var value = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(
+		$elm$core$Basics$sqrt(value));
+};
+var $ianmackenzie$elm_units$Quantity$squared = function (_v0) {
+	var value = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(value * value);
+};
+var $ianmackenzie$elm_units$Quantity$plus = F2(
+	function (_v0, _v1) {
+		var y = _v0.a;
+		var x = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(x + y);
 	});
-var $author$project$DomainModel$startsAt = function (treeNode) {
-	if (treeNode.$ === 'Leaf') {
-		var leaf = treeNode.a;
-		return leaf.startsAt;
-	} else {
-		var node = treeNode.a;
-		return node.nodeContent.startsAt;
-	}
+var $ianmackenzie$elm_units$Quantity$sum = function (quantities) {
+	return A3($elm$core$List$foldl, $ianmackenzie$elm_units$Quantity$plus, $ianmackenzie$elm_units$Quantity$zero, quantities);
 };
-var $author$project$DomainModel$centre = function (treeNode) {
-	return A3(
-		$ianmackenzie$elm_geometry$Point3d$interpolateFrom,
-		$author$project$DomainModel$startsAt(treeNode),
-		$author$project$DomainModel$endsAt(treeNode),
-		0.5);
+var $ianmackenzie$elm_geometry$Geometry$Types$Sphere3d = function (a) {
+	return {$: 'Sphere3d', a: a};
+};
+var $ianmackenzie$elm_geometry$Sphere3d$withRadius = F2(
+	function (givenRadius, givenCenterPoint) {
+		return $ianmackenzie$elm_geometry$Geometry$Types$Sphere3d(
+			{
+				centerPoint: givenCenterPoint,
+				radius: $ianmackenzie$elm_units$Quantity$abs(givenRadius)
+			});
+	});
+var $author$project$DomainModel$containingSphere = function (box) {
+	var here = $ianmackenzie$elm_geometry$BoundingBox3d$centerPoint(box);
+	var _v0 = $ianmackenzie$elm_geometry$BoundingBox3d$dimensions(box);
+	var xs = _v0.a;
+	var ys = _v0.b;
+	var zs = _v0.c;
+	var radius = $ianmackenzie$elm_units$Quantity$half(
+		$ianmackenzie$elm_units$Quantity$sqrt(
+			$ianmackenzie$elm_units$Quantity$sum(
+				_List_fromArray(
+					[
+						$ianmackenzie$elm_units$Quantity$squared(xs),
+						$ianmackenzie$elm_units$Quantity$squared(ys),
+						$ianmackenzie$elm_units$Quantity$squared(zs)
+					]))));
+	return A2($ianmackenzie$elm_geometry$Sphere3d$withRadius, radius, here);
 };
 var $ianmackenzie$elm_geometry$Point3d$distanceFromAxis = F2(
 	function (_v0, _v1) {
@@ -9916,40 +9938,33 @@ var $author$project$DomainModel$nearestToRay = F2(
 	function (ray, treeNode) {
 		var helper = F2(
 			function (withNode, skip) {
-				helper:
-				while (true) {
-					if (withNode.$ === 'Leaf') {
-						var leaf = withNode.a;
-						var startDistance = A2($ianmackenzie$elm_geometry$Point3d$distanceFromAxis, ray, leaf.startsAt);
-						var endDistance = A2($ianmackenzie$elm_geometry$Point3d$distanceFromAxis, ray, leaf.endsAt);
-						return A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, endDistance, startDistance) ? skip : (skip + 1);
-					} else {
-						var node = withNode.a;
-						var rightDistance = A2(
-							$ianmackenzie$elm_geometry$Point3d$distanceFromAxis,
-							ray,
-							$author$project$DomainModel$centre(node.right));
-						var leftDistance = A2(
-							$ianmackenzie$elm_geometry$Point3d$distanceFromAxis,
-							ray,
-							$author$project$DomainModel$centre(node.left));
-						if (A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, rightDistance, leftDistance)) {
-							var $temp$withNode = node.left,
-								$temp$skip = skip;
-							withNode = $temp$withNode;
-							skip = $temp$skip;
-							continue helper;
-						} else {
-							var $temp$withNode = node.right,
-								$temp$skip = skip + $author$project$DomainModel$skipCount(node.left);
-							withNode = $temp$withNode;
-							skip = $temp$skip;
-							continue helper;
-						}
-					}
+				if (withNode.$ === 'Leaf') {
+					var leaf = withNode.a;
+					var startDistance = A2($ianmackenzie$elm_geometry$Point3d$distanceFromAxis, ray, leaf.startsAt);
+					var endDistance = A2($ianmackenzie$elm_geometry$Point3d$distanceFromAxis, ray, leaf.endsAt);
+					return A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, endDistance, startDistance) ? _Utils_Tuple2(skip, startDistance) : _Utils_Tuple2(skip + 1, endDistance);
+				} else {
+					var node = withNode.a;
+					var _v1 = _Utils_Tuple2(
+						$author$project$DomainModel$containingSphere(
+							$author$project$DomainModel$boundingBox(node.left)),
+						$author$project$DomainModel$containingSphere(
+							$author$project$DomainModel$boundingBox(node.right)));
+					var leftSphere = _v1.a;
+					var rightSphere = _v1.b;
+					var _v2 = A2(
+						helper,
+						node.right,
+						skip + $author$project$DomainModel$skipCount(node.left));
+					var bestFromRightIndex = _v2.a;
+					var bestFromRightDistance = _v2.b;
+					var _v3 = A2(helper, node.left, skip);
+					var bestFromLeftIndex = _v3.a;
+					var bestFromLeftDistance = _v3.b;
+					return A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, bestFromRightDistance, bestFromLeftDistance) ? _Utils_Tuple2(bestFromLeftIndex, bestFromLeftDistance) : _Utils_Tuple2(bestFromRightIndex, bestFromRightDistance);
 				}
 			});
-		return A2(helper, treeNode, 0);
+		return A2(helper, treeNode, 0).a;
 	});
 var $ianmackenzie$elm_geometry$Point2d$pixels = F2(
 	function (x, y) {
@@ -10433,6 +10448,15 @@ var $ianmackenzie$elm_geometry$LineSegment3d$endPoint = function (_v0) {
 	var _v1 = _v0.a;
 	var end = _v1.b;
 	return end;
+};
+var $author$project$DomainModel$endsAt = function (treeNode) {
+	if (treeNode.$ === 'Leaf') {
+		var leaf = treeNode.a;
+		return leaf.endsAt;
+	} else {
+		var node = treeNode.a;
+		return node.nodeContent.endsAt;
+	}
 };
 var $ianmackenzie$elm_geometry$Geometry$Types$LineSegment3d = function (a) {
 	return {$: 'LineSegment3d', a: a};
@@ -10971,23 +10995,16 @@ var $author$project$DomainModel$pointFromIndex = F2(
 				return (index <= 0) ? info.startsAt : info.endsAt;
 			} else {
 				var info = treeNode.a;
-				var quantityOnLeft = function () {
-					var _v1 = info.left;
-					if (_v1.$ === 'Leaf') {
-						return 1;
-					} else {
-						var child = _v1.a;
-						return child.nodeContent.skipCount;
-					}
-				}();
-				if (_Utils_cmp(index, quantityOnLeft) < 0) {
+				if (_Utils_cmp(
+					index,
+					$author$project$DomainModel$skipCount(info.left)) < 0) {
 					var $temp$index = index,
 						$temp$treeNode = info.left;
 					index = $temp$index;
 					treeNode = $temp$treeNode;
 					continue pointFromIndex;
 				} else {
-					var $temp$index = index - quantityOnLeft,
+					var $temp$index = index - $author$project$DomainModel$skipCount(info.left),
 						$temp$treeNode = info.right;
 					index = $temp$index;
 					treeNode = $temp$treeNode;
@@ -11813,6 +11830,15 @@ var $ianmackenzie$elm_geometry$LineSegment3d$startPoint = function (_v0) {
 	var start = _v1.a;
 	return start;
 };
+var $author$project$DomainModel$startsAt = function (treeNode) {
+	if (treeNode.$ === 'Leaf') {
+		var leaf = treeNode.a;
+		return leaf.startsAt;
+	} else {
+		var node = treeNode.a;
+		return node.nodeContent.startsAt;
+	}
+};
 var $author$project$DomainModel$trueLength = function (treeNode) {
 	if (treeNode.$ === 'Leaf') {
 		var leaf = treeNode.a;
@@ -11829,12 +11855,6 @@ var $ianmackenzie$elm_geometry$Point3d$coordinates = function (_v0) {
 		$ianmackenzie$elm_units$Quantity$Quantity(p.y),
 		$ianmackenzie$elm_units$Quantity$Quantity(p.z));
 };
-var $ianmackenzie$elm_units$Quantity$plus = F2(
-	function (_v0, _v1) {
-		var y = _v0.a;
-		var x = _v1.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(x + y);
-	});
 var $ianmackenzie$elm_geometry$BoundingBox3d$withDimensions = F2(
 	function (_v0, givenCenterPoint) {
 		var givenLength = _v0.a;

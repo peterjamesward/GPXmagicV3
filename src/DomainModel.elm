@@ -15,6 +15,7 @@ import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
 import Scene3d.Material as Material
 import SketchPlane3d
+import Sphere3d exposing (Sphere3d)
 import Spherical as Spherical exposing (range)
 
 
@@ -105,6 +106,16 @@ skipCount treeNode =
 
         Node node ->
             node.nodeContent.skipCount
+
+
+boundingBox : PeteTree -> BoundingBox3d Length.Meters LocalCoords
+boundingBox treeNode =
+    case treeNode of
+        Leaf leaf ->
+            leaf.boundingBox
+
+        Node node ->
+            node.nodeContent.boundingBox
 
 
 convertGpxWithReference : GPXPoint -> GPXPoint -> LocalPoint
@@ -240,7 +251,6 @@ treeFromList track =
 
 pointFromIndex : Int -> PeteTree -> LocalPoint
 pointFromIndex index treeNode =
-    --TODO: Figure out how to get to end point, probably jyst N >= count
     case treeNode of
         Leaf info ->
             if index <= 0 then
@@ -250,11 +260,11 @@ pointFromIndex index treeNode =
                 info.endsAt
 
         Node info ->
-            if index < (skipCount info.left) then
+            if index < skipCount info.left then
                 pointFromIndex index info.left
 
             else
-                pointFromIndex (index - (skipCount info.left)) info.right
+                pointFromIndex (index - skipCount info.left) info.right
 
 
 nearestToRay :
@@ -265,6 +275,7 @@ nearestToRay ray treeNode =
     -- Build a new query here.
     -- Try: compute distance to each box centres.
     -- At each level, pick "closest" child and recurse.
+    -- Not good enough. Need deeper search, say for all intersected boxes.
     -- Bit of recursive magic to get the "index" number.
     let
         helper withNode skip =
@@ -278,23 +289,50 @@ nearestToRay ray treeNode =
                             leaf.endsAt |> Point3d.distanceFromAxis ray
                     in
                     if startDistance |> Quantity.lessThanOrEqualTo endDistance then
-                        skip
+                        ( skip, startDistance )
 
                     else
-                        skip + 1
+                        ( skip + 1, endDistance )
 
                 Node node ->
                     let
-                        leftDistance =
-                            centre node.left |> Point3d.distanceFromAxis ray
+                        ( leftSphere, rightSphere ) =
+                            --TODO: Put spheres in the tree?
+                            ( containingSphere <| boundingBox node.left
+                            , containingSphere <| boundingBox node.right
+                            )
 
-                        rightDistance =
-                            centre node.right |> Point3d.distanceFromAxis ray
+                        ( bestFromLeftIndex, bestFromLeftDistance ) =
+                            helper node.left skip
+
+                        ( bestFromRightIndex, bestFromRightDistance ) =
+                            helper node.right (skip + skipCount node.left)
                     in
-                    if leftDistance |> Quantity.lessThanOrEqualTo rightDistance then
-                        helper node.left skip
+                    if bestFromLeftDistance |> Quantity.lessThanOrEqualTo bestFromRightDistance then
+                        ( bestFromLeftIndex, bestFromLeftDistance )
 
                     else
-                        helper node.right (skip + skipCount node.left)
+                        ( bestFromRightIndex, bestFromRightDistance )
     in
-    helper treeNode 0
+    Tuple.first <| helper treeNode 0
+
+
+containingSphere : BoundingBox3d Meters LocalCoords -> Sphere3d Meters LocalCoords
+containingSphere box =
+    let
+        here =
+            BoundingBox3d.centerPoint box
+
+        ( xs, ys, zs ) =
+            BoundingBox3d.dimensions box
+
+        radius =
+            Quantity.half <|
+                Quantity.sqrt <|
+                    Quantity.sum
+                        [ Quantity.squared xs
+                        , Quantity.squared ys
+                        , Quantity.squared zs
+                        ]
+    in
+    Sphere3d.withRadius radius here
