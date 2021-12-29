@@ -15,6 +15,9 @@ import Element.Font as Font
 import Element.Input as Input exposing (button)
 import File exposing (File)
 import File.Select as Select
+import FlatColors.BritishPalette
+import FlatColors.ChinesePalette
+import FlatColors.SwedishPalette
 import GpxParser exposing (parseGPXPoints)
 import Html.Events.Extra.Mouse as Mouse
 import Length exposing (Meters, meters)
@@ -232,6 +235,7 @@ view (Model model) =
             , spacing 10
             , Font.size 16
             , height fill
+            , Background.color FlatColors.ChinesePalette.antiFlashWhite
             ]
           <|
             column
@@ -247,7 +251,11 @@ topLoadingBar model =
     let
         loadGpxButton =
             button
-                []
+                [ padding 5
+                , Border.width 2
+                , Border.rounded 4
+                , Border.color FlatColors.BritishPalette.chainGangGrey
+                ]
                 { onPress = Just GpxRequested
                 , label = text "Load GPX from your computer"
                 }

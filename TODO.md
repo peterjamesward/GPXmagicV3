@@ -25,16 +25,17 @@ Not 3d, just drawing onto Canvas?
 Altitude change from start, end; trueLength.
 Combine with Charts, by adding the colours, ideally.
 
+### Rotate, Zoom, Pan
+This is copy & paste.
+
 ### Terrain
 Terrain 1 = Simple tree walk, in many cases will just work but not always.
 Terrain 2 = Tree walk combined with whole (visible) tree query, because <loops>.
 (Expand bounding boxes to allow for road width.)
 
-### Rotate, Zoom, Pan
-This is copy & paste.
-
 ### Undo/Redo
-Revert to keeping GPXPoints for Undo, not reverse delta (2.7, not 2.8)
+Revert to keeping GPXPoints for Undo, not reverse delta (2.7, not 2.8).
+Use Session state, to avoid taking up ram, with unlimited Undo.
 
 ### (Algebraic) operations
 As and when needed:
@@ -45,24 +46,24 @@ As and when needed:
 
 ### Scale test
 Test with 1M TP (ask Steve).
-So far, looking awesome at 300K.
+So far, looking awesome at 380K.
 
 ### Tools
 More progress along the "plug-in" tool pattern:
-- Tab Open and Close methods.
+- Tab Open and Close methods, and makePreview.
 - Generic type somehow for storing tool state (JSON session state?)
-
-### Culling?
-- See if visible area can best be done by pre-selecting view elements, or left to GPU.
-- (optimal culling view frustrum tricky combination of plane/bbox intersects and axis distance?)
-
-### Multiple windows
-Check out Electron (again), see if that will allow multiple windows. 
-> (Dual monitor support would be nice but not as good as being light and fast.)
 
 ---
 
 # Parked
+
+### Multiple windows
+Check out Electron (again), see if that will allow multiple windows.
+> (Dual monitor support would be nice but not as good as being light and fast.)
+
+### Culling?
+- See if visible area can best be done by pre-selecting view elements, or left to GPU.
+- (optimal culling view frustrum tricky combination of plane/bbox intersects and axis distance?)
 
 ### Non-WebGL markers?
 Use a Canvas overlay for markers?

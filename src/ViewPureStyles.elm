@@ -171,8 +171,8 @@ wideSliderStyles =
     , behindContent <|
         -- Slider track
         el
-            [ width <| px 360
-            , height <| px 20
+            [ width <| px 400
+            , height <| px 2
             , centerY
             , centerX
             , Background.color scrollbarBackground
