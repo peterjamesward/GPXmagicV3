@@ -298,14 +298,15 @@ contentArea model =
     let
         leftPane =
             column
-                [ width fill, alignTop ]
+                [ width fill, alignTop, spacing 10, padding 10, centerX ]
                 [ case model.trackTree of
                     Just (Node topNode) ->
                         let
                             box =
                                 topNode.nodeContent.boundingBox
                         in
-                        column []
+                        column
+                            [ width fill, alignTop, spacing 10, padding 10, centerX ]
                             [ text <|
                                 "Length: "
                                     ++ (String.fromFloat <| Length.inMeters topNode.nodeContent.trueLength)
@@ -340,15 +341,7 @@ contentArea model =
 
         rightPane =
             column [ spacing 5, padding 5, alignTop ]
-                [ text <| "Render depth: " ++ String.fromInt model.renderDepth
-                , button []
-                    { label = text "More"
-                    , onPress = Just <| SetRenderDepth (min 25 (model.renderDepth + 1))
-                    }
-                , button []
-                    { label = text "Less"
-                    , onPress = Just <| SetRenderDepth (max 1 (model.renderDepth - 1))
-                    }
+                [ text "Where are the tools?"
                 ]
     in
     column [ width fill, padding 5 ]

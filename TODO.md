@@ -2,23 +2,28 @@
 
 # WIP
 
-### Notes
-Do a write-up on Medium about why this structure is so cool (in this context).
-
 ---
 
 # Backlog
 
 ### Decide how to organise windows, panes, views.
 What state lives where?
+Also, need to see if we can live without PostUpdateAction, just let the tools do their thing.
+First pane is special, because of map, and because you must have it.
+Hence, one pane + list, or just four panes with visibility?
+
+### Map
+Mapbox should play well with PeteTree rendering.
+Need to think about where and how to generate commands.
 
 ### Plan view
-Not 3d, just drawing, SVG or onto Canvas (better).
-https://package.elm-lang.org/packages/joakin/elm-canvas/latest/
+Same as before. Use 3d-scene. Orthographic camera.
 
 ### Profile
-Not 3d, just drawing, SVG or onto Canvas (better).
+Not 3d, just drawing onto Canvas?
+(But what about zoom and pan?)
 Altitude change from start, end; trueLength.
+Combine with Charts, by adding the colours, ideally.
 
 ### Terrain
 Terrain 1 = Simple tree walk, in many cases will just work but not always.
@@ -32,15 +37,11 @@ This is copy & paste.
 Revert to keeping GPXPoints for Undo, not reverse delta (2.7, not 2.8)
 
 ### (Algebraic) operations
+As and when needed:
 - Delete a leaf/leaves
 - Insert a leaf/leaves
 - Update leaves (and all their aggregate nodes)  
   (note this is actually a top-down operation)
-
-### Non-WebGL markers?
-Use an SVG overlay for markers? 
-No, but maybe previews?
-And not SVG but Canvas.
 
 ### Scale test
 Test with 1M TP (ask Steve).
@@ -61,4 +62,15 @@ Check out Electron (again), see if that will allow multiple windows.
 
 ---
 
+# Parked
+
+### Non-WebGL markers?
+Use a Canvas overlay for markers?
+> Shall we test this idea with a popup, then adopt or abandon?
+(Parked as needless optimisation given apparent speed of rendering.)
+
+### New Plan view
+Not 3d, just drawing on Canvas.
+https://package.elm-lang.org/packages/joakin/elm-canvas/latest/
+Not sure, since we have the scene, so it's just orthographic view and we get free zoom & pan!
 

@@ -32,6 +32,7 @@ type alias LocalPoint =
 
 
 type alias GPXTrack =
+    -- The reference lonLat is essential to remove the cosine correction.
     { points : List GPXPoint
     , referenceLonLat : GPXPoint
     }
@@ -42,6 +43,8 @@ type alias RoadSection =
     -- Can be based between two 'fundamental' points from GPX, or an assembly of them.
     { startsAt : LocalPoint
     , endsAt : LocalPoint
+    , mapStartAt : GPXPoint
+    , mapEndAt : GPXPoint
     , boundingBox : BoundingBox3d Meters LocalCoords
     , sphere : Sphere3d Meters LocalCoords
     , trueLength : Quantity Float Meters
@@ -51,7 +54,7 @@ type alias RoadSection =
 
 type
     PeteTree
-    -- Absurdly simple tree may work.
+    -- Absurdly simple tree may work (does, rather spiffingly).
     = Leaf RoadSection
     | Node
         { nodeContent : RoadSection
@@ -153,6 +156,7 @@ convertGpxWithReference reference point =
 
 localPointsFromGpxTrack : GPXTrack -> List ( GPXPoint, LocalPoint )
 localPointsFromGpxTrack { referenceLonLat, points } =
+    -- Apply "conformal" map projection (or near enough).
     points
         |> List.map
             (\gpx ->
@@ -171,6 +175,8 @@ segmentsFromPoints points =
             in
             { startsAt = local1
             , endsAt = local2
+            , mapStartAt = gpx1
+            , mapEndAt = gpx2
             , boundingBox = box
             , sphere = containingSphere box
             , trueLength =
@@ -197,6 +203,8 @@ treeFromRoadSections sections =
             in
             { startsAt = info1.startsAt
             , endsAt = info2.endsAt
+            , mapStartAt = info1.mapStartAt
+            , mapEndAt = info2.mapEndAt
             , boundingBox = box
             , sphere = containingSphere box
             , trueLength = Quantity.plus info1.trueLength info2.trueLength
