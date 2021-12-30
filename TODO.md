@@ -16,6 +16,9 @@ Put track on Map only when track is shown!
 Possibly try a more graduated selective rendering. (Maybe 100km box at 14 deep?)
 Fix that initial map size problem (was a pain on V1).
 
+Is it possible to build the tree bottom-up direct from parsing, avoiding the list splitting?
+> 11.5s for 973K is great, but I think improvable.
+
 ---
 
 # Backlog

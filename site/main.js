@@ -14318,13 +14318,13 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					$author$project$Main$Model(
 						$author$project$Main$renderModel(modelWithTrack)),
-					$elm$core$Platform$Cmd$batch(
+					_Utils_eq(model.viewMode, $author$project$ViewingMode$ViewMap) ? $elm$core$Platform$Cmd$batch(
 						_List_fromArray(
 							[
 								$author$project$PortController$addTrackToMap(modelWithTrack),
 								$author$project$PortController$centreMapOnCurrent(modelWithTrack),
 								A2($andrewMacmurray$elm_delay$Delay$after, 100, $author$project$Msg$RepaintMap)
-							])));
+							])) : $elm$core$Platform$Cmd$none);
 			case 'RepaintMap':
 				return _Utils_Tuple2(
 					$author$project$Main$Model(model),
@@ -14358,12 +14358,13 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					$author$project$Main$Model(
 						$author$project$Main$renderModel(updatedModel)),
-					$elm$core$Platform$Cmd$batch(
+					_Utils_eq(model.viewMode, $author$project$ViewingMode$ViewMap) ? $elm$core$Platform$Cmd$batch(
 						_List_fromArray(
 							[
-								$author$project$PortController$addTrackToMap(updatedModel),
-								$author$project$PortController$centreMapOnCurrent(updatedModel)
-							])));
+								$author$project$PortController$addTrackToMap(model),
+								$author$project$PortController$centreMapOnCurrent(model),
+								A2($andrewMacmurray$elm_delay$Delay$after, 10, $author$project$Msg$RepaintMap)
+							])) : $elm$core$Platform$Cmd$none);
 			case 'ImageClick':
 				var event = msg.a;
 				return _Utils_Tuple2(
@@ -14376,13 +14377,19 @@ var $author$project$Main$update = F2(
 								}))),
 					$elm$core$Platform$Cmd$none);
 			case 'SetViewMode':
-				var viewMode = msg.a;
+				var newMode = msg.a;
 				return _Utils_Tuple2(
 					$author$project$Main$Model(
 						_Utils_update(
 							model,
-							{viewMode: viewMode})),
-					_Utils_eq(viewMode, $author$project$ViewingMode$ViewMap) ? $author$project$PortController$refreshMap : $elm$core$Platform$Cmd$none);
+							{viewMode: newMode})),
+					((!_Utils_eq(model.viewMode, $author$project$ViewingMode$ViewMap)) && _Utils_eq(newMode, $author$project$ViewingMode$ViewMap)) ? $elm$core$Platform$Cmd$batch(
+						_List_fromArray(
+							[
+								$author$project$PortController$addTrackToMap(model),
+								$author$project$PortController$centreMapOnCurrent(model),
+								A2($andrewMacmurray$elm_delay$Delay$after, 10, $author$project$Msg$RepaintMap)
+							])) : $elm$core$Platform$Cmd$none);
 			default:
 				var json = msg.a;
 				var _v4 = A2($author$project$PortController$processPortMessage, model, json);

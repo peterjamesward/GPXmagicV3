@@ -176,11 +176,15 @@ update msg (Model model) =
             ( modelWithTrack
                 |> renderModel
                 |> Model
-            , Cmd.batch
-                [ PortController.addTrackToMap modelWithTrack
-                , PortController.centreMapOnCurrent modelWithTrack
-                , after 100 RepaintMap
-                ]
+            , if model.viewMode == ViewingMode.ViewMap then
+                Cmd.batch
+                    [ PortController.addTrackToMap modelWithTrack
+                    , PortController.centreMapOnCurrent modelWithTrack
+                    , after 100 RepaintMap
+                    ]
+
+              else
+                Cmd.none
             )
 
         RepaintMap ->
@@ -215,11 +219,16 @@ update msg (Model model) =
             ( updatedModel
                 |> renderModel
                 |> Model
-            , Cmd.batch
-                -- Must repaint track on so that selective rendering works.
-                [ PortController.addTrackToMap updatedModel
-                , PortController.centreMapOnCurrent updatedModel
-                ]
+            , if model.viewMode == ViewMap then
+                Cmd.batch
+                    -- Must repaint track on so that selective rendering works.
+                    [ PortController.addTrackToMap model
+                    , PortController.centreMapOnCurrent model
+                    , after 10 RepaintMap
+                    ]
+
+              else
+                Cmd.none
             )
 
         ImageClick event ->
@@ -229,10 +238,15 @@ update msg (Model model) =
             , Cmd.none
             )
 
-        SetViewMode viewMode ->
-            ( Model { model | viewMode = viewMode }
-            , if viewMode == ViewMap then
-                PortController.refreshMap
+        SetViewMode newMode ->
+            ( Model { model | viewMode = newMode }
+            , if model.viewMode /= ViewMap && newMode == ViewMap then
+                Cmd.batch
+                    -- Must repaint track on so that selective rendering works.
+                    [ PortController.addTrackToMap model
+                    , PortController.centreMapOnCurrent model
+                    , after 10 RepaintMap
+                    ]
 
               else
                 Cmd.none
