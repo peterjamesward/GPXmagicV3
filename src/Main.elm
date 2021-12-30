@@ -57,6 +57,8 @@ type alias ModelRecord =
     , viewMode : ViewingMode
     , viewDimensions : ( Quantity Int Pixels, Quantity Int Pixels )
     , ipInfo : Maybe IpInfo
+    , mapClickDebounce : Bool
+    , lastMapClick : ( Float, Float )
     }
 
 
@@ -93,6 +95,8 @@ init mflags origin navigationKey =
         , viewMode = ViewThird
         , viewDimensions = ( Pixels.pixels 800, Pixels.pixels 500 )
         , ipInfo = Nothing
+        , mapClickDebounce = False
+        , lastMapClick = ( 0.0, 0.0 )
         }
     , Cmd.batch
         [ authCmd
@@ -107,6 +111,11 @@ update msg (Model model) =
         AdjustTimeZone newZone ->
             ( Model { model | zone = newZone }
             , MyIP.requestIpInformation ReceivedIpDetails
+            )
+
+        ClearMapClickDebounce ->
+            ( Model { model | mapClickDebounce = False }
+            , Cmd.none
             )
 
         ReceivedIpDetails response ->
@@ -132,6 +141,7 @@ update msg (Model model) =
             , Cmd.batch
                 [ MyIP.sendIpInfo model.time IpInfoAcknowledged ipInfo
                 , PortController.createMap mapInfoWithLocation
+                , after 100 RepaintMap
                 ]
             )
 
@@ -168,7 +178,7 @@ update msg (Model model) =
                 |> Model
             , Cmd.batch
                 [ PortController.addTrackToMap modelWithTrack
-                , PortController.centreMap modelWithTrack
+                , PortController.centreMapOnCurrent modelWithTrack
                 , after 100 RepaintMap
                 ]
             )
@@ -198,10 +208,18 @@ update msg (Model model) =
             )
 
         SetCurrentPosition pos ->
-            ( { model | currentPosition = pos }
+            let
+                updatedModel =
+                    { model | currentPosition = pos }
+            in
+            ( updatedModel
                 |> renderModel
                 |> Model
-            , Cmd.none
+            , Cmd.batch
+                -- Must repaint track on so that selective rendering works.
+                [ PortController.addTrackToMap updatedModel
+                , PortController.centreMapOnCurrent updatedModel
+                ]
             )
 
         ImageClick event ->
@@ -214,14 +232,18 @@ update msg (Model model) =
         SetViewMode viewMode ->
             ( Model { model | viewMode = viewMode }
             , if viewMode == ViewMap then
-                Cmd.none
+                PortController.refreshMap
 
               else
                 Cmd.none
             )
 
         PortMessage json ->
-            ( Model model, Cmd.none )
+            let
+                ( newModel, cmds ) =
+                    PortController.processPortMessage model json
+            in
+            ( Model newModel, cmds )
 
 
 renderModel : ModelRecord -> ModelRecord
@@ -352,7 +374,11 @@ contentArea model =
             column
                 [ width fill, alignTop, padding 10, centerX ]
                 [ column
-                    [ width fill, alignTop, padding 10, centerX ]
+                    [ width fill
+                    , alignTop
+                    , padding 10
+                    , centerX
+                    ]
                     [ viewModeChoices model
                     , conditionallyVisible (model.viewMode /= ViewMap) <| ViewThirdPerson.view model
                     , conditionallyVisible (model.viewMode == ViewMap) <| ViewMap.view model

@@ -1,13 +1,17 @@
 port module PortController exposing (..)
 
 import Angle
+import Axis3d
 import BoundingBox3d exposing (BoundingBox3d)
-import DomainModel exposing (PeteTree, convertLocalWithReference, mapStartAt)
-import Json.Decode exposing (Decoder, field, string)
+import Delay exposing (after)
+import Direction3d
+import DomainModel exposing (PeteTree, convertLocalWithReference, leafFromIndex, mapStartAt, pointFromIndex)
+import Json.Decode as D exposing (Decoder, field, string)
 import Json.Encode as E
 import Length
 import LocalCoords exposing (LocalCoords)
 import MapboxKey exposing (mapboxKey)
+import Msg exposing (Msg(..))
 import Point3d
 import SceneBuilder
 import ViewingContext exposing (ViewingContext)
@@ -92,20 +96,35 @@ centreMap model =
 --            , ( "token", E.string mapboxKey )
 --            , ( "zoom", E.float context.zoomLevel )
 --            ]
---centreMapOnCurrent : Track -> Cmd msg
---centreMapOnCurrent track =
---    let
---        ( lon, lat, _ ) =
---            track.currentNode.xyz
---                |> withoutGhanianTransform track
---    in
---    commandPort <|
---        E.object
---            [ ( "Cmd", E.string "Centre" )
---            , ( "token", E.string mapboxKey )
---            , ( "lon", E.float lon )
---            , ( "lat", E.float lat )
---            ]
+
+
+centreMapOnCurrent :
+    { m
+        | trackTree : Maybe PeteTree
+        , renderDepth : Int
+        , currentPosition : Int
+    }
+    -> Cmd msg
+centreMapOnCurrent model =
+    case model.trackTree of
+        Just tree ->
+            let
+                { longitude, latitude, altitude } =
+                    leafFromIndex model.currentPosition tree |> mapStartAt
+            in
+            commandPort <|
+                E.object
+                    [ ( "Cmd", E.string "Centre" )
+                    , ( "token", E.string mapboxKey )
+                    , ( "lon", E.float <| Angle.inDegrees longitude )
+                    , ( "lat", E.float <| Angle.inDegrees latitude )
+                    ]
+
+        Nothing ->
+            Cmd.none
+
+
+
 --toggleDragging : Bool -> Track -> Cmd msg
 --toggleDragging isDragging track =
 --    commandPort <|
@@ -221,3 +240,201 @@ storageClear =
 msgDecoder : Decoder String
 msgDecoder =
     field "msg" string
+
+
+processPortMessage :
+    { m
+        | trackTree : Maybe PeteTree
+        , lastMapClick : ( Float, Float )
+        , mapClickDebounce : Bool
+        , currentPosition : Int
+        , renderDepth : Int
+    }
+    -> E.Value
+    ->
+        ( { m
+            | trackTree : Maybe PeteTree
+            , lastMapClick : ( Float, Float )
+            , mapClickDebounce : Bool
+            , currentPosition : Int
+            , renderDepth : Int
+          }
+        , Cmd Msg
+        )
+processPortMessage model json =
+    -- So we don't need to keep going to the PortController.
+    -- These will be Model-domain messages.
+    let
+        jsonMsg =
+            D.decodeValue msgDecoder json
+
+        ( lat, lon ) =
+            ( D.decodeValue (D.field "lat" D.float) json
+            , D.decodeValue (D.field "lon" D.float) json
+            )
+    in
+    case ( jsonMsg, model.trackTree ) of
+        ( Ok "click", Just tree ) ->
+            --{ 'msg' : 'click'
+            --, 'lat' : e.lat()
+            --, 'lon' : e.lon()
+            --} );
+            case ( model.mapClickDebounce, lat, lon ) of
+                ( False, Ok lat1, Ok lon1 ) ->
+                    let
+                        gpxPoint =
+                            { longitude = Angle.degrees lon1
+                            , latitude = Angle.degrees lat1
+                            , altitude = Length.meters 0.0
+                            }
+
+                        localPoint =
+                            DomainModel.convertGpxWithReference (mapStartAt tree) gpxPoint
+
+                        searchRay =
+                            Axis3d.through localPoint Direction3d.positiveZ
+
+                        index =
+                            DomainModel.nearestToRay searchRay tree
+
+                        updatedModel =
+                            { model
+                                | lastMapClick = ( lon1, lat1 )
+                                , mapClickDebounce = True
+                                , currentPosition = index
+                            }
+                    in
+                    ( updatedModel
+                    , Cmd.batch
+                        [ -- Selective rendering requires we remove and add again.
+                          addTrackToMap updatedModel
+                        , after 100 ClearMapClickDebounce
+                        , after 100 RepaintMap
+                        ]
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        --( Ok "drag", Just track ) ->
+        --    case draggedOnMap json track of
+        --        Just undoEntry ->
+        --            processPostUpdateAction
+        --                model
+        --                (PostUpdateActions.ActionTrackChanged TrackEditType.EditPreservesIndex undoEntry)
+        --
+        --        Nothing ->
+        --            ( Model model, Cmd.none )
+        --
+        --( Ok "elevations", Just track ) ->
+        --    case elevations of
+        --        Ok mapElevations ->
+        --            processPostUpdateAction model
+        --                (PostUpdateActions.ActionTrackChanged
+        --                    TrackEditType.EditPreservesIndex
+        --                    (RotateRoute.buildMapElevations mapElevations track)
+        --                )
+        --
+        --        _ ->
+        --            ( Model model, Cmd.none )
+        --
+        --( Ok "sketch", _ ) ->
+        --    case ( longitudes, latitudes, elevations ) of
+        --        ( Ok mapLongitudes, Ok mapLatitudes, Ok mapElevations ) ->
+        --            let
+        --                newTrack =
+        --                    List.map3
+        --                        (\x y z -> ( x, y, z ))
+        --                        mapLongitudes
+        --                        mapLatitudes
+        --                        mapElevations
+        --                        |> Track.trackFromMap
+        --            in
+        --            case newTrack of
+        --                Just track ->
+        --                    applyTrack (Model model) track
+        --
+        --                Nothing ->
+        --                    ( Model model
+        --                    , Cmd.none
+        --                    )
+        --
+        --        _ ->
+        --            ( Model model, Cmd.none )
+        --
+        --( Ok "no node", _ ) ->
+        --    ( Model model
+        --    , Cmd.none
+        --    )
+        --
+        --( Ok "storage.got", _ ) ->
+        --    let
+        --        key =
+        --            D.decodeValue (D.field "key" D.string) json
+        --
+        --        value =
+        --            D.decodeValue (D.field "value" D.value) json
+        --    in
+        --    case ( key, value ) of
+        --        ( Ok "accordion", Ok saved ) ->
+        --            let
+        --                ( restoreAccordionState, restoreAccordion ) =
+        --                    Accordion.recoverStoredState
+        --                        saved
+        --                        model.toolsAccordion
+        --            in
+        --            ( Model
+        --                { model
+        --                    | accordionState = restoreAccordionState
+        --                    , toolsAccordion = restoreAccordion
+        --                }
+        --            , Cmd.none
+        --            )
+        --
+        --        ( Ok "splitter", Ok splitter ) ->
+        --            let
+        --                p =
+        --                    D.decodeValue D.int splitter
+        --            in
+        --            case p of
+        --                Ok pixels ->
+        --                    ( Model
+        --                        { model
+        --                            | splitInPixels = pixels
+        --                            , viewPanes = ViewPane.mapOverPanes (setViewPaneSize pixels) model.viewPanes
+        --                        }
+        --                    , Cmd.none
+        --                    )
+        --
+        --                _ ->
+        --                    ( Model model, Cmd.none )
+        --
+        --        ( Ok "panes", Ok saved ) ->
+        --            let
+        --                newPanes =
+        --                    ViewPane.restorePaneState saved model.viewPanes
+        --
+        --                newModel =
+        --                    { model
+        --                        | viewPanes =
+        --                            ViewPane.mapOverPanes
+        --                                (setViewPaneSize model.splitInPixels)
+        --                                newPanes
+        --                    }
+        --            in
+        --            processPostUpdateAction newModel ActionRerender
+        --
+        --        ( Ok "display", Ok saved ) ->
+        --            ( Model { model | displayOptions = DisplayOptions.decodeOptions saved }
+        --            , Cmd.none
+        --            )
+        --
+        --        _ ->
+        --            ( Model model, Cmd.none )
+        --
+        --( Ok "storage.keys", _ ) ->
+        --    ( Model model
+        --    , Cmd.none
+        --    )
+        _ ->
+            ( model, Cmd.none )

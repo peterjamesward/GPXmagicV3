@@ -334,6 +334,20 @@ pointFromIndex index treeNode =
                 pointFromIndex (index - skipCount info.left) info.right
 
 
+leafFromIndex : Int -> PeteTree -> PeteTree
+leafFromIndex index treeNode =
+    case treeNode of
+        Leaf info ->
+            treeNode
+
+        Node info ->
+            if index < skipCount info.left then
+                leafFromIndex index info.left
+
+            else
+                leafFromIndex (index - skipCount info.left) info.right
+
+
 nearestToRay :
     Axis3d Meters LocalCoords
     -> PeteTree

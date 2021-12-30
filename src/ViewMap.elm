@@ -55,6 +55,7 @@ view model =
     row
         [ spacing 0
         , padding 0
+
         --, inFront handyMapControls
         ]
         [ el
@@ -62,6 +63,8 @@ view model =
             , height <| px <| inPixels viewHeight
             , alignLeft
             , alignTop
+            , Border.width 2
+            , Border.color FlatColors.ChinesePalette.peace
             , htmlAttribute (id "map")
             ]
             none

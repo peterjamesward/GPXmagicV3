@@ -24,3 +24,4 @@ type Msg
     | IpInfoAcknowledged (Result Http.Error ())
     | PortMessage E.Value
     | RepaintMap
+    | ClearMapClickDebounce

@@ -253,7 +253,7 @@ function makeTheMap(msg) {
             zoom: msg.zoom
         });
 
-        map.on('load', function () {
+        map.on('load', function (m) {
             //console.log('tell Elm the map is ready');
             isMapCreated = true;
             canvas  = map.getCanvasContainer();
@@ -281,6 +281,7 @@ function makeTheMap(msg) {
             });
 
             app.ports.messageReceiver.send({ 'msg' : 'map ready' });
+            map.resize();
         });
 
     } else {
@@ -327,6 +328,15 @@ function addLineToMap(data, points) {
 
     trackAdded = true;
 //    setClickMode(clickToDrag, points);
+    map.on('click', function(e) {
+      app.ports.messageReceiver.send
+        ( { 'msg' : 'click'
+          , 'lon' : e.lngLat.lng
+          , 'lat' : e.lngLat.lat
+          }
+        );
+        e;
+    });
 
     app.ports.messageReceiver.send(
       { 'msg' : 'track ready' }
@@ -360,18 +370,21 @@ function setClickMode(newMode, points) {
         pointsLayerAdded = true;
 
         // When the cursor enters a feature in the point layer, prepare for dragging.
-        map.on('mouseenter', 'points', function () {
+        map.on('mouseenter', 'points', function (e) {
             canvas.style.cursor = 'move';
+            e;
         });
 
-        map.on('mouseleave', 'points', function () {
+        map.on('mouseleave', 'points', function (e) {
             canvas.style.cursor = '';
+            e;
         });
 
         map.on('mousedown', 'points', function (e) {
             // Prevent the default map drag behavior.
             e.preventDefault();
             startDraggingPoint(e);
+            e;
         });
 
         map.on('click', function(e) {
@@ -380,6 +393,7 @@ function setClickMode(newMode, points) {
                 , 'lon' : e.lngLat.lng
                 , 'lat' : e.lngLat.lat
             } );
+            e;
         });
     }
 };

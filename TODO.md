@@ -2,14 +2,23 @@
 
 # WIP
 
+Lazy selective re-render to reduce map flicker? (aka 2.8)
+
+### Round the world problems
+1. Crosses the data line, so we get weird bounding boxes.
+2. Defeats the assumption of locality for conformal projection.
+> Need to compute deltaLongitude from start.
+> Need "nearness" to use subtended angle or earth distance when culling.
+
+### Map
+Do an embedded version as iframe for Steve?
+Put track on Map only when track is shown!
+Possibly try a more graduated selective rendering. (Maybe 100km box at 14 deep?)
+Fix that initial map size problem (was a pain on V1).
+
 ---
 
 # Backlog
-
-### Map
-Mapbox should play well with PeteTree rendering.
-Need to think about where and how to generate commands.
-Do an embedded version as iframe for Steve?
 
 ### Decide how to organise windows, panes, views.
 What state lives where?
