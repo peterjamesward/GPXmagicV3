@@ -2,7 +2,7 @@ port module PortController exposing (..)
 
 import Angle
 import BoundingBox3d exposing (BoundingBox3d)
-import DomainModel exposing (PeteTree)
+import DomainModel exposing (PeteTree, convertLocalWithReference, mapStartAt)
 import Json.Decode exposing (Decoder, field, string)
 import Json.Encode as E
 import Length
@@ -54,21 +54,36 @@ refreshMap =
             ]
 
 
+centreMap :
+    { m
+        | trackTree : Maybe PeteTree
+        , renderDepth : Int
+        , currentPosition : Int
+    }
+    -> Cmd msg
+centreMap model =
+    -- Centre map
+    case model.trackTree of
+        Just tree ->
+            let
+                { longitude, latitude, altitude } =
+                    DomainModel.boundingBox tree
+                        |> BoundingBox3d.centerPoint
+                        |> convertLocalWithReference (mapStartAt tree)
+            in
+            commandPort <|
+                E.object
+                    [ ( "Cmd", E.string "Centre" )
+                    , ( "token", E.string mapboxKey )
+                    , ( "lon", E.float <| Angle.inDegrees longitude )
+                    , ( "lat", E.float <| Angle.inDegrees latitude )
+                    ]
 
---centreMap : ViewingContext -> Track -> Cmd msg
---centreMap context track =
---    let
---        ( lon, lat, _ ) =
---            context.focalPoint
---                |> withoutGhanianTransform track
---    in
---    commandPort <|
---        E.object
---            [ ( "Cmd", E.string "Centre" )
---            , ( "token", E.string mapboxKey )
---            , ( "lon", E.float lon )
---            , ( "lat", E.float lat )
---            ]
+        Nothing ->
+            Cmd.none
+
+
+
 --zoomMap : ViewingContext -> Cmd msg
 --zoomMap context =
 --    commandPort <|

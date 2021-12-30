@@ -23,3 +23,4 @@ type Msg
     | ReceivedIpDetails (Result Http.Error IpInfo)
     | IpInfoAcknowledged (Result Http.Error ())
     | PortMessage E.Value
+    | RepaintMap

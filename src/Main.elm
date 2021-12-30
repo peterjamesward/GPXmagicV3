@@ -3,6 +3,7 @@ module Main exposing (main)
 import Browser exposing (application)
 import Browser.Navigation exposing (Key)
 import Camera3d
+import Delay exposing (after)
 import DomainModel exposing (GPXPoint, GPXTrack, PeteTree(..), RoadSection, nearestToRay, skipCount, treeFromList, trueLength)
 import Element exposing (..)
 import Element.Background as Background
@@ -165,8 +166,15 @@ update msg (Model model) =
             ( modelWithTrack
                 |> renderModel
                 |> Model
-            , PortController.addTrackToMap modelWithTrack
+            , Cmd.batch
+                [ PortController.addTrackToMap modelWithTrack
+                , PortController.centreMap modelWithTrack
+                , after 100 RepaintMap
+                ]
             )
+
+        RepaintMap ->
+            ( Model model, PortController.refreshMap )
 
         SetRenderDepth depth ->
             ( { model | renderDepth = depth }

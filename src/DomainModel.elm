@@ -6,7 +6,7 @@ import Axis3d exposing (Axis3d)
 import BoundingBox3d exposing (BoundingBox3d)
 import Color exposing (black)
 import Json.Encode as E
-import Length exposing (Length, Meters)
+import Length exposing (Length, Meters, inMeters)
 import LineSegment3d
 import List.Extra
 import LocalCoords exposing (LocalCoords)
@@ -173,6 +173,23 @@ convertGpxWithReference reference point =
         ((pointLon - refLon) * scale * Spherical.metresPerDegree)
         ((pointLat - refLat) * Spherical.metresPerDegree)
         (point.altitude |> Length.inMeters)
+
+
+convertLocalWithReference : GPXPoint -> LocalPoint -> GPXPoint
+convertLocalWithReference reference point =
+    let
+        ( refLon, refLat ) =
+            ( reference.longitude |> Angle.inDegrees
+            , reference.latitude |> Angle.inDegrees
+            )
+
+        scale =
+            reference.latitude |> Angle.inRadians |> cos
+    in
+    { longitude = Angle.degrees <| refLon + ((inMeters <| Point3d.yCoordinate point) / Spherical.metresPerDegree / scale)
+    , latitude = Angle.degrees <| refLat + ((inMeters <| Point3d.xCoordinate point) / Spherical.metresPerDegree)
+    , altitude = Point3d.zCoordinate point
+    }
 
 
 localPointsFromGpxTrack : GPXTrack -> List ( GPXPoint, LocalPoint )

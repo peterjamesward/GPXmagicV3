@@ -9400,6 +9400,7 @@ var $author$project$Msg$IpInfoAcknowledged = function (a) {
 var $author$project$Msg$ReceivedIpDetails = function (a) {
 	return {$: 'ReceivedIpDetails', a: a};
 };
+var $author$project$Msg$RepaintMap = {$: 'RepaintMap'};
 var $author$project$ViewingMode$ViewMap = {$: 'ViewMap'};
 var $author$project$PortController$commandPort = _Platform_outgoingPort('commandPort', $elm$core$Basics$identity);
 var $elm$json$Json$Encode$float = _Json_wrap;
@@ -10048,6 +10049,81 @@ var $author$project$PortController$addTrackToMap = function (model) {
 		return $elm$core$Platform$Cmd$none;
 	}
 };
+var $author$project$DomainModel$boundingBox = function (treeNode) {
+	if (treeNode.$ === 'Leaf') {
+		var leaf = treeNode.a;
+		return leaf.boundingBox;
+	} else {
+		var node = treeNode.a;
+		return node.nodeContent.boundingBox;
+	}
+};
+var $elm$core$Basics$cos = _Basics_cos;
+var $ianmackenzie$elm_units$Angle$radians = function (numRadians) {
+	return $ianmackenzie$elm_units$Quantity$Quantity(numRadians);
+};
+var $ianmackenzie$elm_units$Angle$degrees = function (numDegrees) {
+	return $ianmackenzie$elm_units$Angle$radians($elm$core$Basics$pi * (numDegrees / 180));
+};
+var $ianmackenzie$elm_units$Length$inMeters = function (_v0) {
+	var numMeters = _v0.a;
+	return numMeters;
+};
+var $author$project$Spherical$metresPerDegree = 78846.81;
+var $author$project$DomainModel$convertLocalWithReference = F2(
+	function (reference, point) {
+		var scale = $elm$core$Basics$cos(
+			$ianmackenzie$elm_units$Angle$inRadians(reference.latitude));
+		var _v0 = _Utils_Tuple2(
+			$ianmackenzie$elm_units$Angle$inDegrees(reference.longitude),
+			$ianmackenzie$elm_units$Angle$inDegrees(reference.latitude));
+		var refLon = _v0.a;
+		var refLat = _v0.b;
+		return {
+			altitude: $ianmackenzie$elm_geometry$Point3d$zCoordinate(point),
+			latitude: $ianmackenzie$elm_units$Angle$degrees(
+				refLat + ($ianmackenzie$elm_units$Length$inMeters(
+					$ianmackenzie$elm_geometry$Point3d$xCoordinate(point)) / $author$project$Spherical$metresPerDegree)),
+			longitude: $ianmackenzie$elm_units$Angle$degrees(
+				refLon + (($ianmackenzie$elm_units$Length$inMeters(
+					$ianmackenzie$elm_geometry$Point3d$yCoordinate(point)) / $author$project$Spherical$metresPerDegree) / scale))
+		};
+	});
+var $author$project$PortController$centreMap = function (model) {
+	var _v0 = model.trackTree;
+	if (_v0.$ === 'Just') {
+		var tree = _v0.a;
+		var _v1 = A2(
+			$author$project$DomainModel$convertLocalWithReference,
+			$author$project$DomainModel$mapStartAt(tree),
+			$ianmackenzie$elm_geometry$BoundingBox3d$centerPoint(
+				$author$project$DomainModel$boundingBox(tree)));
+		var longitude = _v1.longitude;
+		var latitude = _v1.latitude;
+		var altitude = _v1.altitude;
+		return $author$project$PortController$commandPort(
+			$elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'Cmd',
+						$elm$json$Json$Encode$string('Centre')),
+						_Utils_Tuple2(
+						'token',
+						$elm$json$Json$Encode$string($author$project$MapboxKey$mapboxKey)),
+						_Utils_Tuple2(
+						'lon',
+						$elm$json$Json$Encode$float(
+							$ianmackenzie$elm_units$Angle$inDegrees(longitude))),
+						_Utils_Tuple2(
+						'lat',
+						$elm$json$Json$Encode$float(
+							$ianmackenzie$elm_units$Angle$inDegrees(latitude)))
+					])));
+	} else {
+		return $elm$core$Platform$Cmd$none;
+	}
+};
 var $author$project$PortController$createMap = function (info) {
 	return $author$project$PortController$commandPort(
 		$elm$json$Json$Encode$object(
@@ -10072,12 +10148,6 @@ var $author$project$PortController$createMap = function (info) {
 };
 var $author$project$DomainModel$Node = function (a) {
 	return {$: 'Node', a: a};
-};
-var $ianmackenzie$elm_units$Angle$radians = function (numRadians) {
-	return $ianmackenzie$elm_units$Quantity$Quantity(numRadians);
-};
-var $ianmackenzie$elm_units$Angle$degrees = function (numDegrees) {
-	return $ianmackenzie$elm_units$Angle$radians($elm$core$Basics$pi * (numDegrees / 180));
 };
 var $ianmackenzie$elm_3d_camera$Camera3d$Types$Viewpoint3d = function (a) {
 	return {$: 'Viewpoint3d', a: a};
@@ -11062,6 +11132,17 @@ var $author$project$MyIP$processIpInfo = function (response) {
 		return $elm$core$Maybe$Nothing;
 	}
 };
+var $author$project$PortController$refreshMap = $author$project$PortController$commandPort(
+	$elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'Cmd',
+				$elm$json$Json$Encode$string('Repaint')),
+				_Utils_Tuple2(
+				'token',
+				$elm$json$Json$Encode$string($author$project$MapboxKey$mapboxKey))
+			])));
 var $avh4$elm_color$Color$black = A4($avh4$elm_color$Color$RgbaSpace, 0 / 255, 0 / 255, 0 / 255, 1.0);
 var $ianmackenzie$elm_geometry$LineSegment3d$endPoint = function (_v0) {
 	var _v1 = _v0.a;
@@ -13031,17 +13112,11 @@ var $author$project$MyIP$sendIpInfo = F3(
 		}
 	});
 var $elm$file$File$toString = _File_toString;
-var $elm$core$Basics$cos = _Basics_cos;
-var $ianmackenzie$elm_units$Length$inMeters = function (_v0) {
-	var numMeters = _v0.a;
-	return numMeters;
-};
 var $ianmackenzie$elm_geometry$Point3d$meters = F3(
 	function (x, y, z) {
 		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
 			{x: x, y: y, z: z});
 	});
-var $author$project$Spherical$metresPerDegree = 78846.81;
 var $author$project$DomainModel$convertGpxWithReference = F2(
 	function (reference, point) {
 		var scale = $elm$core$Basics$cos(
@@ -14179,7 +14254,17 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					$author$project$Main$Model(
 						$author$project$Main$renderModel(modelWithTrack)),
-					$author$project$PortController$addTrackToMap(modelWithTrack));
+					$elm$core$Platform$Cmd$batch(
+						_List_fromArray(
+							[
+								$author$project$PortController$addTrackToMap(modelWithTrack),
+								$author$project$PortController$centreMap(modelWithTrack),
+								A2($andrewMacmurray$elm_delay$Delay$after, 100, $author$project$Msg$RepaintMap)
+							])));
+			case 'RepaintMap':
+				return _Utils_Tuple2(
+					$author$project$Main$Model(model),
+					$author$project$PortController$refreshMap);
 			case 'SetRenderDepth':
 				var depth = msg.a;
 				return _Utils_Tuple2(
@@ -20749,15 +20834,6 @@ var $ianmackenzie$elm_3d_scene$Scene3d$BackgroundColor = function (a) {
 };
 var $ianmackenzie$elm_3d_scene$Scene3d$backgroundColor = function (color) {
 	return $ianmackenzie$elm_3d_scene$Scene3d$BackgroundColor(color);
-};
-var $author$project$DomainModel$boundingBox = function (treeNode) {
-	if (treeNode.$ === 'Leaf') {
-		var leaf = treeNode.a;
-		return leaf.boundingBox;
-	} else {
-		var node = treeNode.a;
-		return node.nodeContent.boundingBox;
-	}
 };
 var $elm_explorations$webgl$WebGL$Internal$Alpha = function (a) {
 	return {$: 'Alpha', a: a};
