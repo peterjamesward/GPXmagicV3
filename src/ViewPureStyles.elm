@@ -6,8 +6,9 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
-import Element.Input as Input
+import Element.Input as Input exposing (Thumb, thumb)
 import FlatColors.BritishPalette
+import FlatColors.ChinesePalette
 import Html.Attributes exposing (style)
 
 
@@ -33,10 +34,10 @@ defaultColumnLayout =
 prettyButtonStyles =
     [ padding 10
     , Border.width 2
-    , Border.rounded 10
-    , Border.color buttonBackground
-    , Background.color buttonBackground
-    , Font.color buttonText
+    , Border.rounded 4
+    , Border.color FlatColors.ChinesePalette.bayWharf
+    , Background.color FlatColors.ChinesePalette.frenchSkyBlue
+    , Font.color FlatColors.ChinesePalette.prestigeBlue
     , Font.size 16
 
     --, mouseOver
@@ -45,13 +46,14 @@ prettyButtonStyles =
     --    [ Border.shadow { offset = ( 4, 0 ), size = 3, blur = 5, color = buttonShadow } ]
     ]
 
+
 disabledButtonStyles =
     [ padding 10
     , Border.width 2
-    , Border.rounded 10
+    , Border.rounded 4
     , Border.color FlatColors.BritishPalette.riseNShine
     , Background.color FlatColors.BritishPalette.riseNShine
-    , Font.color buttonText
+    , Font.color FlatColors.ChinesePalette.antiFlashWhite
     , Font.size 16
     , width fill
     ]
@@ -77,7 +79,7 @@ commonShortHorizontalSliderStyles =
         -- Slider track
         el
             [ width <| px 150
-            , height <| px 20
+            , height <| px 2
             , centerY
             , centerX
             , Background.color scrollbarBackground
@@ -95,7 +97,7 @@ commonShortVerticalSliderStyles =
     , behindContent <|
         -- Slider track
         el
-            [ width <| px 20
+            [ width <| px 2
             , height <| px 150
             , centerY
             , centerX
@@ -113,9 +115,9 @@ checkboxIcon isChecked =
         , height <| px 32
         , centerY
         , padding 4
-        , Border.rounded 6
+        , Border.rounded 4
         , Border.width 2
-        , Border.color buttonShadow
+        , Border.color FlatColors.ChinesePalette.frenchSkyBlue
         ]
     <|
         el
@@ -124,10 +126,10 @@ checkboxIcon isChecked =
             , Border.rounded 4
             , Background.color <|
                 if isChecked then
-                    buttonBackground
+                    FlatColors.ChinesePalette.bruschettaTomato
 
                 else
-                    collapsedTabBorder
+                    FlatColors.ChinesePalette.twinkleBlue
             ]
         <|
             none
@@ -135,17 +137,17 @@ checkboxIcon isChecked =
 
 radioButton label state =
     el
-        [ padding 10
+        [ paddingXY 8 4
         , spacing 2
         , Border.widthEach { left = 2, right = 2, top = 2, bottom = 0 }
-        , Border.roundEach { topLeft = 10, bottomLeft = 0, topRight = 10, bottomRight = 0 }
+        , Border.roundEach { topLeft = 6, bottomLeft = 0, topRight = 6, bottomRight = 0 }
         , Background.color <|
             if state == Input.Selected then
-                radioButtonSelected
+                FlatColors.ChinesePalette.goldenSand
 
             else
-                radioButtonDefault
-        , Font.color radioButtonText
+                FlatColors.ChinesePalette.twinkleBlue
+        , Font.color FlatColors.ChinesePalette.prestigeBlue
         , Font.size 16
         ]
     <|
@@ -164,8 +166,8 @@ displayName n =
 
 
 wideSliderStyles =
-    [ height <| px 20
-    , width <| px 360
+    [ height <| px 24
+    , width <| px 400
     , centerY
     , centerX
     , behindContent <|
@@ -180,3 +182,15 @@ wideSliderStyles =
             ]
             Element.none
     ]
+
+
+sliderThumb : Thumb
+sliderThumb =
+    thumb
+        [ Element.width (Element.px 16)
+        , Element.height (Element.px 16)
+        , Border.rounded 4
+        , Border.width 1
+        , Border.color (Element.rgb 0.5 0.5 0.5)
+        , Background.color (Element.rgb 1 1 1)
+        ]

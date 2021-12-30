@@ -2,9 +2,6 @@ module ViewingMode exposing (..)
 
 
 type ViewingMode
-    = ViewThirdPerson
-    | ViewFirstPerson
-    | ViewProfile
-    | ViewPlan
+    = ViewThird
     | ViewMap
-    | ViewAbout
+

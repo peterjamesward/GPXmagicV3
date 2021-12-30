@@ -6,15 +6,27 @@
 
 # Backlog
 
+### Map
+Mapbox should play well with PeteTree rendering.
+Need to think about where and how to generate commands.
+Do an embedded version as iframe for Steve?
+
 ### Decide how to organise windows, panes, views.
 What state lives where?
 Also, need to see if we can live without PostUpdateAction, just let the tools do their thing.
 First pane is special, because of map, and because you must have it.
 Hence, one pane + list, or just four panes with visibility?
 
-### Map
-Mapbox should play well with PeteTree rendering.
-Need to think about where and how to generate commands.
+### Multiple windows
+Check out Electron (again), see if that will allow multiple windows.
+> Keep putting this back. I worried that the internal comms might kill it,
+> but it remains an attractive option.
+> Second window would be view only.
+
+### Look and Feel
+Clean.
+Chinese FlatUI palette?
+Keep current track in indexDB to support a "restart/recover" option.
 
 ### Plan view
 Same as before. Use 3d-scene. Orthographic camera.
@@ -56,10 +68,6 @@ More progress along the "plug-in" tool pattern:
 ---
 
 # Parked
-
-### Multiple windows
-Check out Electron (again), see if that will allow multiple windows.
-> (Dual monitor support would be nice but not as good as being light and fast.)
 
 ### Culling?
 - See if visible area can best be done by pre-selecting view elements, or left to GPU.

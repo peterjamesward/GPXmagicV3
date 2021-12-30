@@ -1,12 +1,8 @@
 module Main exposing (main)
 
-import Angle
-import BoundingBox3d exposing (BoundingBox3d)
 import Browser exposing (application)
 import Browser.Navigation exposing (Key)
 import Camera3d
-import Color
-import Direction3d exposing (negativeZ, positiveZ)
 import DomainModel exposing (GPXPoint, GPXTrack, PeteTree(..), RoadSection, nearestToRay, treeFromList)
 import Element exposing (..)
 import Element.Background as Background
@@ -17,38 +13,26 @@ import File exposing (File)
 import File.Select as Select
 import FlatColors.BritishPalette
 import FlatColors.ChinesePalette
-import FlatColors.SwedishPalette
 import GpxParser exposing (parseGPXPoints)
 import Html.Events.Extra.Mouse as Mouse
 import Length exposing (Meters, meters)
 import LocalCoords exposing (LocalCoords)
+import Msg exposing (Msg(..))
 import OAuthPorts exposing (randomBytes)
 import OAuthTypes as O exposing (..)
-import Pixels
+import Pixels exposing (Pixels)
 import Point2d
-import Point3d exposing (Point3d)
-import Quantity exposing (toFloatQuantity)
+import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
-import Scene3d exposing (Entity, backgroundColor)
+import Scene3d exposing (Entity)
 import SceneBuilder exposing (render3dView)
 import StravaAuth exposing (getStravaToken)
 import Task
 import Time
 import Url exposing (Url)
-import Vector3d
-import ViewPureStyles
-import Viewpoint3d
-
-
-type Msg
-    = GpxRequested
-    | GpxSelected File
-    | GpxLoaded String
-    | OAuthMessage OAuthMsg
-    | AdjustTimeZone Time.Zone
-    | SetRenderDepth Int
-    | SetCurrentPosition Int
-    | ImageClick Mouse.Event
+import ViewPureStyles exposing (radioButton, sliderThumb)
+import ViewThirdPerson
+import ViewingMode exposing (ViewingMode(..))
 
 
 type Model
@@ -65,11 +49,9 @@ type alias ModelRecord =
     , renderDepth : Int
     , scene : List (Entity LocalCoords)
     , currentPosition : Int
+    , viewMode : ViewingMode
+    , viewDimensions : ( Quantity Int Pixels, Quantity Int Pixels )
     }
-
-
-viewDimensions =
-    ( Pixels.pixels 800, Pixels.pixels 500 )
 
 
 main : Program (Maybe (List Int)) Model Msg
@@ -102,6 +84,8 @@ init mflags origin navigationKey =
         , renderDepth = 0
         , scene = []
         , currentPosition = 0
+        , viewMode = ViewThird
+        , viewDimensions = ( Pixels.pixels 800, Pixels.pixels 500 )
         }
     , Cmd.batch
         [ authCmd
@@ -181,6 +165,15 @@ update msg (Model model) =
             , Cmd.none
             )
 
+        SetViewMode viewMode ->
+            ( Model { model | viewMode = viewMode }
+            , if viewMode == ViewMap then
+                Cmd.none
+
+              else
+                Cmd.none
+            )
+
 
 renderModel : ModelRecord -> ModelRecord
 renderModel model =
@@ -203,7 +196,7 @@ detectHit event model =
                     Point2d.pixels x y
 
                 ( w, h ) =
-                    viewDimensions
+                    model.viewDimensions
 
                 ( wFloat, hFloat ) =
                     ( toFloatQuantity w, toFloatQuantity h )
@@ -214,7 +207,7 @@ detectHit event model =
                         (Point2d.xy wFloat Quantity.zero)
 
                 camera =
-                    deriveCamera box
+                    ViewThirdPerson.deriveCamera box
 
                 ray =
                     Camera3d.ray camera screenRectangle screenPoint
@@ -273,32 +266,21 @@ maximumLeftPane =
     1400
 
 
-deriveCamera box =
+viewModeChoices : ModelRecord -> Element Msg
+viewModeChoices model =
     let
-        ( xSize, ySize, zSize ) =
-            BoundingBox3d.dimensions box
-
-        largestEdge =
-            xSize |> Quantity.max ySize |> Quantity.max zSize
-
-        eyePoint =
-            Point3d.xyz largestEdge (Quantity.negate largestEdge) largestEdge
-
-        cameraViewpoint =
-            -- Fixed for now.
-            Viewpoint3d.lookAt
-                { eyePoint = eyePoint
-                , focalPoint = BoundingBox3d.centerPoint box
-                , upDirection = Direction3d.positiveZ
-                }
-
-        perspectiveCamera =
-            Camera3d.perspective
-                { viewpoint = cameraViewpoint
-                , verticalFieldOfView = Angle.degrees 45
-                }
+        fullOptionList =
+            [ Input.optionWith ViewThird <| radioButton "Third person"
+            , Input.optionWith ViewMap <| radioButton "Map"
+            ]
     in
-    perspectiveCamera
+    Input.radioRow
+        [ Border.rounded 6 ]
+        { onChange = SetViewMode
+        , selected = Just model.viewMode
+        , label = Input.labelHidden "Choose view"
+        , options = fullOptionList
+        }
 
 
 contentArea : ModelRecord -> Element Msg
@@ -306,7 +288,7 @@ contentArea model =
     let
         leftPane =
             column
-                [ width fill, alignTop, spacing 10, padding 10, centerX ]
+                [ width fill, alignTop, padding 10, centerX ]
                 [ case model.trackTree of
                     Just (Node topNode) ->
                         let
@@ -314,23 +296,9 @@ contentArea model =
                                 topNode.nodeContent.boundingBox
                         in
                         column
-                            [ width fill, alignTop, spacing 10, padding 10, centerX ]
-                            [ text <|
-                                "Length: "
-                                    ++ (String.fromFloat <| Length.inMeters topNode.nodeContent.trueLength)
-                            , text <|
-                                "Points: "
-                                    ++ String.fromInt topNode.nodeContent.skipCount
-                            , el [ htmlAttribute <| Mouse.onClick ImageClick ] <|
-                                html <|
-                                    Scene3d.cloudy
-                                        { camera = deriveCamera box
-                                        , dimensions = viewDimensions
-                                        , background = backgroundColor Color.lightBlue
-                                        , clipDepth = Length.meters 1
-                                        , entities = model.scene
-                                        , upDirection = positiveZ
-                                        }
+                            [ width fill, alignTop, padding 10, centerX ]
+                            [ viewModeChoices model
+                            , ViewThirdPerson.view model
                             , Input.slider
                                 ViewPureStyles.wideSliderStyles
                                 { onChange = round >> SetCurrentPosition
@@ -339,8 +307,15 @@ contentArea model =
                                 , min = 0
                                 , max = toFloat <| topNode.nodeContent.skipCount + 1
                                 , step = Just 1
-                                , thumb = Input.defaultThumb
+                                , thumb = sliderThumb
                                 }
+                            , el [ height (px 10) ] none
+                            , text <|
+                                "Length: "
+                                    ++ (String.fromFloat <| Length.inMeters topNode.nodeContent.trueLength)
+                            , text <|
+                                "Points: "
+                                    ++ String.fromInt topNode.nodeContent.skipCount
                             ]
 
                     _ ->
