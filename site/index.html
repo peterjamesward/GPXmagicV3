@@ -52,7 +52,6 @@ var dragPointStart;
 var dragging = false;
 var clickToDrag = false;
 var pointsLayerAdded = false;
-var sketchMap;
 
 var canvas;
 // Make dummy feature just for making drag point feedback.
@@ -155,7 +154,6 @@ function incomingMessageHandler(msg) {
         case 'Repaint':
             if (isMapCreated) {
                 map.resize();
-                sketchMap.resize();
             }
             break;
 
@@ -206,14 +204,6 @@ function incomingMessageHandler(msg) {
                   }
                 );
             }
-            break;
-
-        case 'Sketch':
-            sketchMapEnable(msg.lon, msg.lat, msg.zoom);
-            break;
-
-        case 'ExitSketch':
-            sketchDataCapture();
             break;
 
         case 'storage.set':
@@ -297,9 +287,7 @@ function makeTheMap(msg) {
         //No 'map' node, we have to keep checking.
         //console.log('no map node');
         app.ports.messageReceiver.send({ 'msg' : 'no node' });
-    }
-
-    createSketchMap(msg);
+    };
 };
 
 function centreMap(lon, lat) {
@@ -307,7 +295,7 @@ function centreMap(lon, lat) {
 };
 
 function addLineToMap(data, points) {
-    //console.log('add line to map');
+//    console.log(data);
 
     if (trackAdded) {
         //console.log('removing existing track');
@@ -338,7 +326,7 @@ function addLineToMap(data, points) {
     });
 
     trackAdded = true;
-    setClickMode(clickToDrag, points);
+//    setClickMode(clickToDrag, points);
 
     app.ports.messageReceiver.send(
       { 'msg' : 'track ready' }
@@ -415,14 +403,6 @@ function addOptionals(msg) {
             .addTo(map);
     };
 
-//    if (typeof(msg.white) === 'undefined') {
-//        whiteMarker.remove();
-//    } else {
-//        whiteMarker
-//            .setLngLat([msg.white.lon, msg.white.lat])
-//            .addTo(map);
-//    };
-
 //    console.log(msg.previews);
     if (msg.previews != 'undefined' && typeof(msg.previews) != 'undefined') {
       msg.previews.forEach(addPreview);
@@ -457,81 +437,7 @@ function addPreview(preview) {
 
 };
 
-function createSketchMap(msg) {
-    // Make another map for route sketching.
-    sketchMap = new mapboxgl.Map({
-            container: 'sketchMap',
-            style: 'mapbox://styles/mapbox/streets-v11',
-            center: [msg.lon, msg.lat],
-            zoom: msg.zoom
-        });
 
-    sketchMap.on('load', () => {
-        completeSketchMapInitialisation()
-    });
-}
-
-var draw;
-
-function completeSketchMapInitialisation() {
-
-    draw = new MapboxDraw({
-        displayControlsDefault: false,
-
-        // Select which mapbox-gl-draw control buttons to add to the map.
-        controls: {
-            line_string: true,
-            // polygon: true,
-            trash: true
-        },
-
-        // Set mapbox-gl-draw to draw by default.
-        // The user does not have to click the polygon control button first.
-        defaultMode: 'draw_line_string'
-    });
-
-    // Add terrain source, so we can query elevations.
-    sketchMap.addSource('mapbox-dem', {
-      'type': 'raster-dem',
-      'url': 'mapbox://mapbox.terrain-rgb',
-      'tileSize': 512,
-      'maxzoom': 14
-    });
-
-    sketchMap
-      .addControl(draw)
-      .setTerrain({ 'source': 'mapbox-dem'})
-      ;
-};
-
-function sketchMapEnable(lon, lat, zoom) {
-    sketchMap
-      .resize()
-      ;
-};
-
-function sketchDataCapture() {
-    const data = draw.getAll();
-
-    if(typeof(data) != 'undefined' && data != null)
-    {
-
-        const points2d = data.features[0].geometry.coordinates;
-        const longitudes = points2d.map( p => p[0] );
-        const latitudes = points2d.map( p => p[1] );
-        const elevations = points2d.map( p => sketchMap.queryTerrainElevation(p) );
-
-        //console.log(data);
-
-        app.ports.messageReceiver.send(
-          { 'msg' : 'sketch'
-          , 'longitudes' : longitudes
-          , 'latitudes' : latitudes
-          , 'elevations' : elevations
-          }
-        );
-    };
-};
 
 </script>
 

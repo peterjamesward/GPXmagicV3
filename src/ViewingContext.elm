@@ -5,7 +5,7 @@ import Length
 import LocalCoords exposing (LocalCoords)
 import Point3d exposing (Point3d)
 import Quantity exposing (Quantity)
-import ViewingMode
+import ViewingMode exposing (ViewingMode)
 
 
 type alias ViewingContext =
@@ -43,7 +43,7 @@ defaultViewingContext =
     , zoomLevel = 12.0
     , defaultZoomLevel = 12.0
     , focalPoint = Point3d.origin
-    , viewingMode = ViewPlan
+    , viewingMode = ViewingMode.ViewThird
     , contextId = 0
     , waitingForClickDelay = False
     , mapClickToDrag = True

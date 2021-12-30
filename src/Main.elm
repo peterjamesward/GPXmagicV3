@@ -3,7 +3,7 @@ module Main exposing (main)
 import Browser exposing (application)
 import Browser.Navigation exposing (Key)
 import Camera3d
-import DomainModel exposing (GPXPoint, GPXTrack, PeteTree(..), RoadSection, nearestToRay, treeFromList)
+import DomainModel exposing (GPXPoint, GPXTrack, PeteTree(..), RoadSection, nearestToRay, skipCount, treeFromList, trueLength)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -13,15 +13,18 @@ import File exposing (File)
 import File.Select as Select
 import FlatColors.BritishPalette
 import FlatColors.ChinesePalette
+import GeoCodeDecoders exposing (IpInfo)
 import GpxParser exposing (parseGPXPoints)
 import Html.Events.Extra.Mouse as Mouse
 import Length exposing (Meters, meters)
 import LocalCoords exposing (LocalCoords)
 import Msg exposing (Msg(..))
+import MyIP
 import OAuthPorts exposing (randomBytes)
 import OAuthTypes as O exposing (..)
 import Pixels exposing (Pixels)
 import Point2d
+import PortController
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity)
@@ -30,7 +33,8 @@ import StravaAuth exposing (getStravaToken)
 import Task
 import Time
 import Url exposing (Url)
-import ViewPureStyles exposing (radioButton, sliderThumb)
+import ViewMap
+import ViewPureStyles exposing (conditionallyVisible, radioButton, sliderThumb)
 import ViewThirdPerson
 import ViewingMode exposing (ViewingMode(..))
 
@@ -51,6 +55,7 @@ type alias ModelRecord =
     , currentPosition : Int
     , viewMode : ViewingMode
     , viewDimensions : ( Quantity Int Pixels, Quantity Int Pixels )
+    , ipInfo : Maybe IpInfo
     }
 
 
@@ -86,6 +91,7 @@ init mflags origin navigationKey =
         , currentPosition = 0
         , viewMode = ViewThird
         , viewDimensions = ( Pixels.pixels 800, Pixels.pixels 500 )
+        , ipInfo = Nothing
         }
     , Cmd.batch
         [ authCmd
@@ -99,8 +105,37 @@ update msg (Model model) =
     case msg of
         AdjustTimeZone newZone ->
             ( Model { model | zone = newZone }
-            , Cmd.none
+            , MyIP.requestIpInformation ReceivedIpDetails
             )
+
+        ReceivedIpDetails response ->
+            let
+                ipInfo =
+                    MyIP.processIpInfo response
+
+                mapInfoWithLocation =
+                    case ipInfo of
+                        Just ip ->
+                            { mapZoom = 10.0
+                            , centreLon = ip.longitude
+                            , centreLat = ip.latitude
+                            }
+
+                        Nothing ->
+                            { mapZoom = 1.0
+                            , centreLon = 0.0
+                            , centreLat = 0.0
+                            }
+            in
+            ( Model { model | ipInfo = ipInfo }
+            , Cmd.batch
+                [ MyIP.sendIpInfo model.time IpInfoAcknowledged ipInfo
+                , PortController.createMap mapInfoWithLocation
+                ]
+            )
+
+        IpInfoAcknowledged _ ->
+            ( Model model, Cmd.none )
 
         GpxRequested ->
             ( Model model
@@ -119,15 +154,18 @@ update msg (Model model) =
 
                 trackTree =
                     treeFromList gpxTrack
+
+                modelWithTrack =
+                    { model
+                        | rawTrack = Just gpxTrack
+                        , trackTree = trackTree
+                        , renderDepth = 10
+                    }
             in
-            ( { model
-                | rawTrack = Just gpxTrack
-                , trackTree = trackTree
-                , renderDepth = 10
-              }
+            ( modelWithTrack
                 |> renderModel
                 |> Model
-            , Cmd.none
+            , PortController.addTrackToMap modelWithTrack
             )
 
         SetRenderDepth depth ->
@@ -173,6 +211,9 @@ update msg (Model model) =
               else
                 Cmd.none
             )
+
+        PortMessage json ->
+            ( Model model, Cmd.none )
 
 
 renderModel : ModelRecord -> ModelRecord
@@ -286,40 +327,40 @@ viewModeChoices model =
 contentArea : ModelRecord -> Element Msg
 contentArea model =
     let
+        slider trackLength =
+            Input.slider
+                ViewPureStyles.wideSliderStyles
+                { onChange = round >> SetCurrentPosition
+                , value = toFloat model.currentPosition
+                , label = Input.labelBelow [] (text "Label goes here")
+                , min = 0
+                , max = toFloat <| trackLength
+                , step = Just 1
+                , thumb = sliderThumb
+                }
+
         leftPane =
+            -- NOTE that the Map DIV must be constructed once only, or the map gets upset.
             column
                 [ width fill, alignTop, padding 10, centerX ]
-                [ case model.trackTree of
-                    Just (Node topNode) ->
-                        let
-                            box =
-                                topNode.nodeContent.boundingBox
-                        in
+                [ column
+                    [ width fill, alignTop, padding 10, centerX ]
+                    [ viewModeChoices model
+                    , conditionallyVisible (model.viewMode /= ViewMap) <| ViewThirdPerson.view model
+                    , conditionallyVisible (model.viewMode == ViewMap) <| ViewMap.view model
+                    ]
+                , el [ height (px 10) ] none
+                , case model.trackTree of
+                    Just treeNode ->
                         column
                             [ width fill, alignTop, padding 10, centerX ]
-                            [ viewModeChoices model
-                            , ViewThirdPerson.view model
-                            , Input.slider
-                                ViewPureStyles.wideSliderStyles
-                                { onChange = round >> SetCurrentPosition
-                                , value = toFloat model.currentPosition
-                                , label = Input.labelBelow [] (text "Label goes here")
-                                , min = 0
-                                , max = toFloat <| topNode.nodeContent.skipCount + 1
-                                , step = Just 1
-                                , thumb = sliderThumb
-                                }
-                            , el [ height (px 10) ] none
-                            , text <|
-                                "Length: "
-                                    ++ (String.fromFloat <| Length.inMeters topNode.nodeContent.trueLength)
-                            , text <|
-                                "Points: "
-                                    ++ String.fromInt topNode.nodeContent.skipCount
+                            [ slider <| 1 + skipCount treeNode
+                            , text <| "Length: " ++ (String.fromInt <| round <| Length.inMeters <| trueLength treeNode)
+                            , text <| "Points: " ++ (String.fromInt <| 1 + skipCount treeNode)
                             ]
 
-                    _ ->
-                        text "No data"
+                    Nothing ->
+                        text "Information will be shown here"
                 ]
 
         rightPane =
@@ -345,4 +386,5 @@ subscriptions : Model -> Sub Msg
 subscriptions (Model model) =
     Sub.batch
         [ randomBytes (\ints -> OAuthMessage (GotRandomBytes ints))
+        , PortController.messageReceiver PortMessage
         ]

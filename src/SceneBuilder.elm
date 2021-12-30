@@ -6,7 +6,8 @@ module SceneBuilder exposing (..)
 import BoundingBox3d exposing (BoundingBox3d)
 import Color exposing (Color, black, lightOrange)
 import ColourPalette exposing (gradientHue2)
-import DomainModel exposing (PeteTree(..), endsAt, pointFromIndex, startsAt, trueLength)
+import DomainModel exposing (PeteTree(..), endsAt, lngLatPair, mapStartAt, pointFromIndex, startsAt, trueLength)
+import Json.Encode as E
 import Length exposing (Meters)
 import LineSegment3d
 import LocalCoords exposing (LocalCoords)
@@ -141,3 +142,102 @@ render3dView model =
 
         Nothing ->
             []
+
+
+
+--TODO: Factor the recursion away from the rendering and these two large routines combine.
+
+
+renderMapJson :
+    { m
+        | trackTree : Maybe PeteTree
+        , renderDepth : Int
+        , currentPosition : Int
+    }
+    -> E.Value
+renderMapJson model =
+    let
+        boxSide =
+            --TODO: put box side in model
+            Length.kilometers 4
+
+        makeVisibleSegment : PeteTree -> E.Value
+        makeVisibleSegment node =
+            lngLatPair <| mapStartAt node
+
+        renderCurrentMarker : Int -> PeteTree -> List (Entity LocalCoords)
+        renderCurrentMarker marker tree =
+            [ Scene3d.point { radius = Pixels.pixels 10 }
+                (Material.color lightOrange)
+                (pointFromIndex marker tree)
+            ]
+
+        renderTree : Int -> PeteTree -> List E.Value -> List E.Value
+        renderTree depth someNode accum =
+            case someNode of
+                Leaf leafNode ->
+                    makeVisibleSegment someNode :: accum
+
+                Node notLeaf ->
+                    if depth <= 0 then
+                        makeVisibleSegment someNode :: accum
+
+                    else
+                        accum
+                            |> renderTree (depth - 1) notLeaf.left
+                            |> renderTree (depth - 1) notLeaf.right
+
+        renderTreeSelectively :
+            BoundingBox3d Meters LocalCoords
+            -> Int
+            -> PeteTree
+            -> List E.Value
+            -> List E.Value
+        renderTreeSelectively box depth someNode accum =
+            case someNode of
+                Leaf leafNode ->
+                    if leafNode.boundingBox |> BoundingBox3d.intersects box then
+                        makeVisibleSegment someNode :: accum
+
+                    else
+                        accum
+
+                Node notLeaf ->
+                    if notLeaf.nodeContent.boundingBox |> BoundingBox3d.intersects box then
+                        -- Ignore depth cutoff near or in the box
+                        accum
+                            |> renderTreeSelectively box (depth - 1) notLeaf.left
+                            |> renderTreeSelectively box (depth - 1) notLeaf.right
+
+                    else
+                        -- Outside box, apply cutoff.
+                        accum
+                            |> renderTree (depth - 1) notLeaf.left
+                            |> renderTree (depth - 1) notLeaf.right
+    in
+    case model.trackTree of
+        Just tree ->
+            let
+                box =
+                    BoundingBox3d.withDimensions ( boxSide, boxSide, boxSide )
+                        (pointFromIndex model.currentPosition tree)
+
+                geometry =
+                    E.object
+                        [ ( "type", E.string "LineString" )
+                        , ( "coordinates", E.list identity coordinates )
+                        ]
+
+                coordinates =
+                    renderTreeSelectively box model.renderDepth tree []
+
+            in
+            E.object
+                [ ( "type", E.string "Feature" )
+                , ( "properties", E.object [] )
+                , ( "geometry", geometry )
+                ]
+
+
+        Nothing ->
+            E.null

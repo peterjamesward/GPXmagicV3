@@ -5,6 +5,7 @@ import Axis2d
 import Axis3d exposing (Axis3d)
 import BoundingBox3d exposing (BoundingBox3d)
 import Color exposing (black)
+import Json.Encode as E
 import Length exposing (Length, Meters)
 import LineSegment3d
 import List.Extra
@@ -85,6 +86,26 @@ endsAt treeNode =
 
         Node node ->
             node.nodeContent.endsAt
+
+
+mapStartAt : PeteTree -> GPXPoint
+mapStartAt treeNode =
+    case treeNode of
+        Leaf leaf ->
+            leaf.mapStartAt
+
+        Node node ->
+            node.nodeContent.mapStartAt
+
+
+mapEndAt : PeteTree -> GPXPoint
+mapEndAt treeNode =
+    case treeNode of
+        Leaf leaf ->
+            leaf.mapEndAt
+
+        Node node ->
+            node.nodeContent.mapEndAt
 
 
 centre : PeteTree -> LocalPoint
@@ -393,3 +414,8 @@ containingSphere box =
                         ]
     in
     Sphere3d.withRadius radius here
+
+
+lngLatPair : GPXPoint -> E.Value
+lngLatPair { longitude, latitude, altitude } =
+    E.list E.float [ Angle.inDegrees longitude, Angle.inDegrees latitude ]

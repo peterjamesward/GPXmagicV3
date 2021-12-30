@@ -1,7 +1,10 @@
 module Msg exposing (..)
 
 import File exposing (File)
+import GeoCodeDecoders exposing (IpInfo)
 import Html.Events.Extra.Mouse as Mouse
+import Http
+import Json.Encode as E
 import OAuthTypes exposing (OAuthMsg)
 import Time
 import ViewingMode exposing (..)
@@ -17,3 +20,6 @@ type Msg
     | SetCurrentPosition Int
     | ImageClick Mouse.Event
     | SetViewMode ViewingMode
+    | ReceivedIpDetails (Result Http.Error IpInfo)
+    | IpInfoAcknowledged (Result Http.Error ())
+    | PortMessage E.Value

@@ -143,7 +143,7 @@ radioButton label state =
         , Border.roundEach { topLeft = 6, bottomLeft = 0, topRight = 6, bottomRight = 0 }
         , Background.color <|
             if state == Input.Selected then
-                FlatColors.ChinesePalette.goldenSand
+                FlatColors.ChinesePalette.limeSoap
 
             else
                 FlatColors.ChinesePalette.twinkleBlue
