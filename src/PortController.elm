@@ -5,7 +5,7 @@ import Axis3d
 import BoundingBox3d exposing (BoundingBox3d)
 import Delay exposing (after)
 import Direction3d
-import DomainModel exposing (PeteTree, convertLocalWithReference, leafFromIndex, mapStartAt, pointFromIndex)
+import DomainModel exposing (PeteTree, gpxFromVector, leafFromIndex, startVector)
 import Json.Decode as D exposing (Decoder, field, string)
 import Json.Encode as E
 import Length
@@ -71,9 +71,9 @@ centreMap model =
         Just tree ->
             let
                 { longitude, latitude, altitude } =
-                    DomainModel.boundingBox tree
-                        |> BoundingBox3d.centerPoint
-                        |> convertLocalWithReference (mapStartAt tree)
+                    leafFromIndex model.currentPosition tree
+                        |> startVector
+                        |> gpxFromVector
             in
             commandPort <|
                 E.object
@@ -110,7 +110,9 @@ centreMapOnCurrent model =
         Just tree ->
             let
                 { longitude, latitude, altitude } =
-                    leafFromIndex model.currentPosition tree |> mapStartAt
+                    leafFromIndex model.currentPosition tree
+                        |> startVector
+                        |> gpxFromVector
             in
             commandPort <|
                 E.object
@@ -155,7 +157,9 @@ addTrackToMap model =
         Just tree ->
             let
                 { longitude, latitude, altitude } =
-                    DomainModel.mapStartAt tree
+                    leafFromIndex model.currentPosition tree
+                        |> startVector
+                        |> gpxFromVector
             in
             commandPort <|
                 E.object
@@ -280,38 +284,29 @@ processPortMessage model json =
             --, 'lon' : e.lon()
             --} );
             case ( model.mapClickDebounce, lat, lon ) of
-                ( False, Ok lat1, Ok lon1 ) ->
-                    let
-                        gpxPoint =
-                            { longitude = Angle.degrees lon1
-                            , latitude = Angle.degrees lat1
-                            , altitude = Length.meters 0.0
-                            }
-
-                        localPoint =
-                            DomainModel.convertGpxWithReference (mapStartAt tree) gpxPoint
-
-                        searchRay =
-                            Axis3d.through localPoint Direction3d.positiveZ
-
-                        index =
-                            DomainModel.nearestToRay searchRay tree
-
-                        updatedModel =
-                            { model
-                                | lastMapClick = ( lon1, lat1 )
-                                , mapClickDebounce = True
-                                , currentPosition = index
-                            }
-                    in
-                    ( updatedModel
-                    , Cmd.batch
-                        [ -- Selective rendering requires we remove and add again.
-                          addTrackToMap updatedModel
-                        , after 100 ClearMapClickDebounce
-                        , after 100 RepaintMap
-                        ]
-                    )
+                --( False, Ok lat1, Ok lon1 ) ->
+                --    let
+                --        gpxPoint =
+                --            { longitude = Angle.degrees lon1
+                --            , latitude = Angle.degrees lat1
+                --            , altitude = Length.meters 0.0
+                --            }
+                --
+                --        updatedModel =
+                --            { model
+                --                | lastMapClick = ( lon1, lat1 )
+                --                , mapClickDebounce = True
+                --                , currentPosition = index
+                --            }
+                --    in
+                --    ( updatedModel
+                --    , Cmd.batch
+                --        [ -- Selective rendering requires we remove and add again.
+                --          addTrackToMap updatedModel
+                --        , after 100 ClearMapClickDebounce
+                --        , after 100 RepaintMap
+                --        ]
+                --    )
 
                 _ ->
                     ( model, Cmd.none )

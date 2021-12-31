@@ -2,23 +2,17 @@
 
 # WIP
 
-Lazy selective re-render to reduce map flicker? (aka 2.8)
-
-### Round the world problems
-1. Crosses the data line, so we get weird bounding boxes.
-2. Defeats the assumption of locality for conformal projection.
-> Need to compute deltaLongitude from start.
-> Need "nearness" to use subtended angle or earth distance when culling.
+Lazy selective re-render (aka 2.8) to reduce map flicker, improve slider response? 
 
 ### Map
-Do an embedded version as iframe for Steve?
-Put track on Map only when track is shown!
 Possibly try a more graduated selective rendering. (Maybe 100km box at 14 deep?)
-Fix that initial map size problem (was a pain on V1).
-Map click not very good, see 'Problems' above.
+Better, a progressive drop off with distance.
+Map click not very good, likely due to 'Problems' above.
 
-Is it possible to build the tree bottom-up direct from parsing, avoiding the list splitting?
-> 11.5s for 973K is great, but I think improvable.
+### iframe
+Do an embedded version as iframe for Steve?
+Binary file format for fastest load?
+> https://package.elm-lang.org/packages/elm-toulouse/cbor/latest/
 
 ---
 

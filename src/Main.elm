@@ -4,7 +4,7 @@ import Browser exposing (application)
 import Browser.Navigation exposing (Key)
 import Camera3d
 import Delay exposing (after)
-import DomainModel exposing (GPXPoint, GPXTrack, PeteTree(..), RoadSection, nearestToRay, skipCount, treeFromList, trueLength)
+import DomainModel exposing (GPXSource, PeteTree(..), RoadSection, nearestToRay, skipCount, treeFromList, trueLength)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -49,7 +49,6 @@ type alias ModelRecord =
     , time : Time.Posix
     , zone : Time.Zone
     , stravaAuthentication : O.Model
-    , rawTrack : Maybe GPXTrack
     , trackTree : Maybe PeteTree
     , renderDepth : Int
     , scene : List (Entity LocalCoords)
@@ -87,7 +86,6 @@ init mflags origin navigationKey =
         , time = Time.millisToPosix 0
         , zone = Time.utc
         , stravaAuthentication = authData
-        , rawTrack = Nothing
         , trackTree = Nothing
         , renderDepth = 0
         , scene = []
@@ -168,8 +166,7 @@ update msg (Model model) =
 
                 modelWithTrack =
                     { model
-                        | rawTrack = Just gpxTrack
-                        , trackTree = trackTree
+                        | trackTree = trackTree
                         , renderDepth = 10
                     }
             in
@@ -269,11 +266,8 @@ detectHit : Mouse.Event -> ModelRecord -> Int
 detectHit event model =
     --TODO: Move into view/pane/whatever it will be.
     case model.trackTree of
-        Just (Node topNode) ->
+        Just topNode ->
             let
-                box =
-                    topNode.nodeContent.boundingBox
-
                 ( x, y ) =
                     event.offsetPos
 
@@ -292,12 +286,13 @@ detectHit event model =
                         (Point2d.xy wFloat Quantity.zero)
 
                 camera =
-                    ViewThirdPerson.deriveCamera box
+                    -- Must use same camera derivation as for the 3D model, else pointless!
+                    ViewThirdPerson.deriveCamera topNode
 
                 ray =
                     Camera3d.ray camera screenRectangle screenPoint
             in
-            nearestToRay ray (Node topNode)
+            nearestToRay ray topNode
 
         _ ->
             0

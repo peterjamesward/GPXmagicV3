@@ -5,6 +5,7 @@ import Axis2d
 import Axis3d exposing (Axis3d)
 import BoundingBox3d exposing (BoundingBox3d)
 import Color exposing (black)
+import Direction3d
 import Json.Encode as E
 import Length exposing (Length, Meters, inMeters)
 import LineSegment3d
@@ -18,9 +19,10 @@ import Scene3d.Material as Material
 import SketchPlane3d
 import Sphere3d exposing (Sphere3d)
 import Spherical as Spherical exposing (range)
+import Vector3d exposing (Vector3d)
 
 
-type alias GPXPoint =
+type alias GPXSource =
     -- Being a raw line of data from GPX file.
     { longitude : Angle
     , latitude : Angle
@@ -28,24 +30,21 @@ type alias GPXPoint =
     }
 
 
-type alias LocalPoint =
+type alias EarthVector =
+    -- Experiment with polar coordinates direct from GPX data
+    Vector3d Meters LocalCoords
+
+
+type alias EarthPoint =
     Point3d Meters LocalCoords
 
 
-type alias GPXTrack =
-    -- The reference lonLat is essential to remove the cosine correction.
-    { points : List GPXPoint
-    , referenceLonLat : GPXPoint
-    }
-
-
 type alias RoadSection =
-    -- A piece of road, in local, conformal, space.
     -- Can be based between two 'fundamental' points from GPX, or an assembly of them.
-    { startsAt : LocalPoint
-    , endsAt : LocalPoint
-    , mapStartAt : GPXPoint
-    , mapEndAt : GPXPoint
+    -- I THINK it makes sense to store only the vectors.
+    -- Bounding box and Sphere needed for culling in nearness tests.
+    { startVector : EarthVector
+    , endVector : EarthVector
     , boundingBox : BoundingBox3d Meters LocalCoords
     , sphere : Sphere3d Meters LocalCoords
     , trueLength : Quantity Float Meters
@@ -64,53 +63,24 @@ type
         }
 
 
-
--- The repetition here makes me think I could tidy up the base structure in some way.
-
-
-startsAt : PeteTree -> LocalPoint
-startsAt treeNode =
+startVector : PeteTree -> EarthVector
+startVector treeNode =
     case treeNode of
         Leaf leaf ->
-            leaf.startsAt
+            leaf.startVector
 
         Node node ->
-            node.nodeContent.startsAt
+            node.nodeContent.startVector
 
 
-endsAt : PeteTree -> LocalPoint
-endsAt treeNode =
+endVector : PeteTree -> EarthVector
+endVector treeNode =
     case treeNode of
         Leaf leaf ->
-            leaf.endsAt
+            leaf.endVector
 
         Node node ->
-            node.nodeContent.endsAt
-
-
-mapStartAt : PeteTree -> GPXPoint
-mapStartAt treeNode =
-    case treeNode of
-        Leaf leaf ->
-            leaf.mapStartAt
-
-        Node node ->
-            node.nodeContent.mapStartAt
-
-
-mapEndAt : PeteTree -> GPXPoint
-mapEndAt treeNode =
-    case treeNode of
-        Leaf leaf ->
-            leaf.mapEndAt
-
-        Node node ->
-            node.nodeContent.mapEndAt
-
-
-centre : PeteTree -> LocalPoint
-centre treeNode =
-    Point3d.interpolateFrom (startsAt treeNode) (endsAt treeNode) 0.5
+            node.nodeContent.endVector
 
 
 trueLength : PeteTree -> Length
@@ -153,185 +123,118 @@ sphere treeNode =
             node.nodeContent.sphere
 
 
-convertGpxWithReference : GPXPoint -> GPXPoint -> LocalPoint
-convertGpxWithReference reference point =
+makeRoadSection : EarthVector -> EarthVector -> RoadSection
+makeRoadSection v1 v2 =
     let
-        ( refLon, refLat ) =
-            ( reference.longitude |> Angle.inDegrees
-            , reference.latitude |> Angle.inDegrees
+        ( local1, local2 ) =
+            ( Point3d.origin |> Point3d.translateBy v1
+            , Point3d.origin |> Point3d.translateBy v2
             )
 
-        ( pointLon, pointLat ) =
-            ( point.longitude |> Angle.inDegrees
-            , point.latitude |> Angle.inDegrees
-            )
+        box =
+            BoundingBox3d.from local1 local2
 
-        scale =
-            reference.latitude |> Angle.inRadians |> cos
+        ( earth1, earth2 ) =
+            ( gpxFromVector v1, gpxFromVector v2 )
+
+        range : Length.Length
+        range =
+            Length.meters <|
+                Spherical.range
+                    ( earth1.longitude, earth1.latitude )
+                    ( earth2.longitude, earth2.latitude )
     in
-    Point3d.meters
-        ((pointLon - refLon) * scale * Spherical.metresPerDegree)
-        ((pointLat - refLat) * Spherical.metresPerDegree)
-        (point.altitude |> Length.inMeters)
-
-
-convertLocalWithReference : GPXPoint -> LocalPoint -> GPXPoint
-convertLocalWithReference reference point =
-    let
-        ( refLon, refLat ) =
-            ( reference.longitude |> Angle.inDegrees
-            , reference.latitude |> Angle.inDegrees
-            )
-
-        scale =
-            reference.latitude |> Angle.inRadians |> cos
-    in
-    { longitude = Angle.degrees <| refLon + ((inMeters <| Point3d.yCoordinate point) / Spherical.metresPerDegree / scale)
-    , latitude = Angle.degrees <| refLat + ((inMeters <| Point3d.xCoordinate point) / Spherical.metresPerDegree)
-    , altitude = Point3d.zCoordinate point
+    { startVector = v1
+    , endVector = v2
+    , boundingBox = box
+    , sphere = containingSphere box
+    , trueLength = range
+    , skipCount = 1
     }
 
 
-localPointsFromGpxTrack : GPXTrack -> List ( GPXPoint, LocalPoint )
-localPointsFromGpxTrack { referenceLonLat, points } =
-    -- Apply "conformal" map projection (or near enough).
-    points
-        |> List.map
-            (\gpx ->
-                ( gpx, convertGpxWithReference referenceLonLat gpx )
-            )
-
-
-segmentsFromPoints : List ( GPXPoint, LocalPoint ) -> List RoadSection
-segmentsFromPoints points =
-    -- Start with lowest level, constructed directly from known points,
+treeFromList : List EarthVector -> Maybe PeteTree
+treeFromList track =
+    -- Build the skeletal tree of nodes, then attach the leaves from the input list.
+    -- Should be much quicker than recursively splitting the list, for large lists.
     let
-        makeRoadSection ( gpx1, local1 ) ( gpx2, local2 ) =
-            let
-                box =
-                    BoundingBox3d.from local1 local2
-            in
-            { startsAt = local1
-            , endsAt = local2
-            , mapStartAt = gpx1
-            , mapEndAt = gpx2
-            , boundingBox = box
-            , sphere = containingSphere box
-            , trueLength =
-                Length.meters <|
-                    Spherical.range
-                        ( gpx1.latitude, gpx1.longitude )
-                        ( gpx2.latitude, gpx2.longitude )
-            , skipCount = 1
-            }
-    in
-    List.map2
-        makeRoadSection
-        points
-        (List.drop 1 points)
+        numberOfSegments =
+            List.length track - 1
 
-
-treeFromRoadSections : List RoadSection -> Maybe PeteTree
-treeFromRoadSections sections =
-    let
+        combineInfo : PeteTree -> PeteTree -> RoadSection
         combineInfo info1 info2 =
             let
                 box =
-                    BoundingBox3d.union info1.boundingBox info2.boundingBox
+                    BoundingBox3d.union (boundingBox info1) (boundingBox info2)
             in
-            { startsAt = info1.startsAt
-            , endsAt = info2.endsAt
-            , mapStartAt = info1.mapStartAt
-            , mapEndAt = info2.mapEndAt
+            { startVector = startVector info1
+            , endVector = endVector info2
             , boundingBox = box
             , sphere = containingSphere box
-            , trueLength = Quantity.plus info1.trueLength info2.trueLength
-            , skipCount = info1.skipCount + info2.skipCount
+            , trueLength = Quantity.plus (trueLength info1) (trueLength info2)
+            , skipCount = skipCount info1 + skipCount info2
             }
+
+        treeBuilder : Int -> List EarthVector -> ( Maybe PeteTree, List EarthVector )
+        treeBuilder n vectorStream =
+            case ( n < 2, vectorStream ) of
+                ( True, v1 :: v2 :: vvvv ) ->
+                    -- Take two vectors for this Leaf, but only consume one.
+                    ( Just <| Leaf <| makeRoadSection v1 v2, v2 :: vvvv )
+
+                ( True, anythingElse ) ->
+                    -- Hmm. This shouldn't have happened if we've done our numbers right.
+                    ( Nothing, anythingElse )
+
+                ( False, vvvv ) ->
+                    -- Make a non-leaf Node, recursively
+                    let
+                        leftSize =
+                            n // 2
+
+                        rightSize =
+                            n - leftSize
+
+                        ( left, remainingAfterLeft ) =
+                            treeBuilder leftSize vvvv
+
+                        ( right, remainingAfterRight ) =
+                            treeBuilder rightSize remainingAfterLeft
+                    in
+                    case ( left, right ) of
+                        -- Should have returned _something_ but we're forced to check
+                        ( Just leftSubtree, Just rightSubtree ) ->
+                            ( Just <|
+                                Node
+                                    { nodeContent = combineInfo leftSubtree rightSubtree
+                                    , left = leftSubtree
+                                    , right = rightSubtree
+                                    }
+                            , remainingAfterRight
+                            )
+
+                        _ ->
+                            ( Nothing, remainingAfterRight )
     in
-    case sections of
-        [] ->
-            Nothing
-
-        [ s1 ] ->
-            Just <| Leaf s1
-
-        _ ->
-            let
-                ( firstHalf, secondHalf ) =
-                    sections |> List.Extra.splitAt (List.length sections // 2)
-
-                ( leftChild, rightChild ) =
-                    ( treeFromRoadSections firstHalf, treeFromRoadSections secondHalf )
-            in
-            case ( leftChild, rightChild ) of
-                -- Should get two back but compiler requires we be thorough, quite rightly.
-                ( Just (Leaf left), Just (Leaf right) ) ->
-                    Just <|
-                        Node
-                            { nodeContent = combineInfo left right
-                            , left = Leaf left
-                            , right = Leaf right
-                            }
-
-                ( Just (Leaf left), Just (Node right) ) ->
-                    Just <|
-                        Node
-                            { nodeContent = combineInfo left right.nodeContent
-                            , left = Leaf left
-                            , right = Node right
-                            }
-
-                ( Just (Node left), Just (Leaf right) ) ->
-                    Just <|
-                        Node
-                            { nodeContent = combineInfo left.nodeContent right
-                            , left = Node left
-                            , right = Leaf right
-                            }
-
-                ( Just (Node left), Just (Node right) ) ->
-                    Just <|
-                        Node
-                            { nodeContent = combineInfo left.nodeContent right.nodeContent
-                            , left = Node left
-                            , right = Node right
-                            }
-
-                ( Just left, Nothing ) ->
-                    Just left
-
-                ( Nothing, Just right ) ->
-                    Just right
-
-                ( Nothing, Nothing ) ->
-                    Nothing
+    treeBuilder numberOfSegments track |> Tuple.first
 
 
-treeFromList : GPXTrack -> Maybe PeteTree
-treeFromList track =
-    track
-        |> localPointsFromGpxTrack
-        |> segmentsFromPoints
-        |> treeFromRoadSections
-
-
-pointFromIndex : Int -> PeteTree -> LocalPoint
-pointFromIndex index treeNode =
+earthVectorFromIndex : Int -> PeteTree -> EarthVector
+earthVectorFromIndex index treeNode =
     case treeNode of
         Leaf info ->
             if index <= 0 then
-                info.startsAt
+                info.startVector
 
             else
-                info.endsAt
+                info.endVector
 
         Node info ->
             if index < skipCount info.left then
-                pointFromIndex index info.left
+                earthVectorFromIndex index info.left
 
             else
-                pointFromIndex (index - skipCount info.left) info.right
+                earthVectorFromIndex (index - skipCount info.left) info.right
 
 
 leafFromIndex : Int -> PeteTree -> PeteTree
@@ -364,10 +267,14 @@ nearestToRay ray treeNode =
                 Leaf leaf ->
                     let
                         startDistance =
-                            leaf.startsAt |> Point3d.distanceFromAxis ray
+                            Point3d.origin
+                                |> Point3d.translateBy leaf.startVector
+                                |> Point3d.distanceFromAxis ray
 
                         endDistance =
-                            leaf.endsAt |> Point3d.distanceFromAxis ray
+                            Point3d.origin
+                                |> Point3d.translateBy leaf.endVector
+                                |> Point3d.distanceFromAxis ray
                     in
                     if startDistance |> Quantity.lessThanOrEqualTo endDistance then
                         ( skip, startDistance )
@@ -447,6 +354,26 @@ containingSphere box =
     Sphere3d.withRadius radius here
 
 
-lngLatPair : GPXPoint -> E.Value
-lngLatPair { longitude, latitude, altitude } =
+lngLatPair : ( Angle, Angle ) -> E.Value
+lngLatPair ( longitude, latitude ) =
     E.list E.float [ Angle.inDegrees longitude, Angle.inDegrees latitude ]
+
+
+gpxFromVector : EarthVector -> GPXSource
+gpxFromVector vector =
+    let
+        direction =
+            Vector3d.direction vector
+    in
+    case direction of
+        Just d ->
+            { longitude = d |> Direction3d.azimuthIn SketchPlane3d.xy
+            , latitude = d |> Direction3d.elevationFrom SketchPlane3d.xy
+            , altitude = Vector3d.length vector
+            }
+
+        Nothing ->
+            { longitude = Quantity.zero
+            , latitude = Quantity.zero
+            , altitude = Length.meters Spherical.meanRadius
+            }

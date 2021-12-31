@@ -19,13 +19,15 @@ metresPerDegree =
 
 
 range : ( Angle, Angle ) -> ( Angle, Angle ) -> Float
-range latLon1 latLon2 =
+range lonLat1 lonLat2 =
     let
         ( lat1, lon1 ) =
-            ( Angle.inRadians <| Tuple.first latLon1, Angle.inRadians <| Tuple.second latLon1 )
+            ( Angle.inRadians <| Tuple.second lonLat1
+            , Angle.inRadians <| Tuple.first lonLat1 )
 
         ( lat2, lon2 ) =
-            ( Angle.inRadians <| Tuple.first latLon2, Angle.inRadians <| Tuple.second latLon2 )
+            ( Angle.inRadians <| Tuple.second lonLat2
+            , Angle.inRadians <| Tuple.first lonLat2 )
 
         x =
             (lon2 - lon1) * cos ((lat1 + lat2) / 2)

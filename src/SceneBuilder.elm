@@ -3,10 +3,12 @@ module SceneBuilder exposing (..)
 -- In V3 there is only one 3d model, used for first and third views.
 -- Plan and Profile are 2d drawings.
 
+import Angle exposing (Angle)
 import BoundingBox3d exposing (BoundingBox3d)
 import Color exposing (Color, black, lightOrange)
 import ColourPalette exposing (gradientHue2)
-import DomainModel exposing (PeteTree(..), endsAt, lngLatPair, mapStartAt, pointFromIndex, startsAt, trueLength)
+import Direction3d
+import DomainModel exposing (PeteTree(..), endVector, leafFromIndex, lngLatPair, startVector, trueLength)
 import Json.Encode as E
 import Length exposing (Meters)
 import LineSegment3d
@@ -17,6 +19,8 @@ import Point3d
 import Quantity
 import Scene3d exposing (Entity)
 import Scene3d.Material as Material
+import SketchPlane3d
+import Vector3d
 
 
 render3dView :
@@ -32,54 +36,52 @@ render3dView model =
         gradientColourPastel slope =
             Color.hsl (gradientHue2 slope) 0.6 0.7
 
-        floorPlane =
-            case model.trackTree of
-                Just (Node node) ->
-                    Plane3d.xy
-                        |> Plane3d.offsetBy
-                            (BoundingBox3d.minZ node.nodeContent.boundingBox)
-
-                _ ->
-                    Plane3d.xy
-
         boxSide =
             --TODO: put box side in model
             Length.kilometers 4
 
+        startPoint treeNode =
+            Point3d.origin |> Point3d.translateBy (startVector treeNode)
+
+        endPoint treeNode =
+            Point3d.origin |> Point3d.translateBy (endVector treeNode)
+
         gradientFromNode treeNode =
             Quantity.ratio
-                (Point3d.zCoordinate (endsAt treeNode)
+                (Point3d.zCoordinate (endPoint treeNode)
                     |> Quantity.minus
-                        (Point3d.zCoordinate (startsAt treeNode))
+                        (Point3d.zCoordinate (startPoint treeNode))
                 )
                 (trueLength treeNode)
                 |> (*) 100.0
 
-        gradientCurtain : PeteTree -> List (Entity LocalCoords)
-        gradientCurtain node =
-            let
-                gradient =
-                    gradientFromNode node
-
-                roadAsSegment =
-                    LineSegment3d.from (startsAt node) (endsAt node)
-
-                curtainHem =
-                    LineSegment3d.projectOnto floorPlane roadAsSegment
-            in
-            [ Scene3d.quad (Material.color <| gradientColourPastel gradient)
-                (LineSegment3d.startPoint roadAsSegment)
-                (LineSegment3d.endPoint roadAsSegment)
-                (LineSegment3d.endPoint curtainHem)
-                (LineSegment3d.startPoint curtainHem)
-            ]
-
+        --gradientCurtain : PeteTree -> List (Entity LocalCoords)
+        --gradientCurtain node =
+        --    let
+        --        gradient =
+        --            gradientFromNode node
+        --
+        --        roadAsSegment =
+        --            LineSegment3d.from (startsAt node) (endsAt node)
+        --
+        --        curtainHem =
+        --            LineSegment3d.projectOnto floorPlane roadAsSegment
+        --    in
+        --    [ Scene3d.quad (Material.color <| gradientColourPastel gradient)
+        --        (LineSegment3d.startPoint roadAsSegment)
+        --        (LineSegment3d.endPoint roadAsSegment)
+        --        (LineSegment3d.endPoint curtainHem)
+        --        (LineSegment3d.startPoint curtainHem)
+        --    ]
         makeVisibleSegment node =
-            [ Scene3d.point { radius = Pixels.pixels 1 } (Material.color black) (startsAt node)
-            , Scene3d.lineSegment (Material.color black) <| LineSegment3d.from (startsAt node) (endsAt node)
+            [ Scene3d.point { radius = Pixels.pixels 1 }
+                (Material.color black)
+                (startPoint node)
+            , Scene3d.lineSegment (Material.color black) <|
+                LineSegment3d.from (startPoint node) (endPoint node)
             ]
-                ++ gradientCurtain node
 
+        --++ gradientCurtain node
         renderTree : Int -> PeteTree -> List (Entity LocalCoords) -> List (Entity LocalCoords)
         renderTree depth someNode accum =
             case someNode of
@@ -127,7 +129,7 @@ render3dView model =
         renderCurrentMarker marker tree =
             [ Scene3d.point { radius = Pixels.pixels 10 }
                 (Material.color lightOrange)
-                (pointFromIndex marker tree)
+                (startPoint <| leafFromIndex marker tree)
             ]
     in
     case model.trackTree of
@@ -135,7 +137,7 @@ render3dView model =
             let
                 box =
                     BoundingBox3d.withDimensions ( boxSide, boxSide, boxSide )
-                        (pointFromIndex model.currentPosition tree)
+                        (startPoint <| leafFromIndex model.currentPosition tree)
             in
             renderTreeSelectively box model.renderDepth tree []
                 ++ renderCurrentMarker model.currentPosition tree
@@ -161,17 +163,27 @@ renderMapJson model =
             --TODO: put box side in model
             Length.kilometers 4
 
+        mapLocation : PeteTree -> ( Angle, Angle )
+        mapLocation node =
+            case Vector3d.direction (startVector node) of
+                Just direction ->
+                    ( Direction3d.azimuthIn SketchPlane3d.xy direction
+                    , Direction3d.elevationFrom SketchPlane3d.xy direction
+                    )
+
+                Nothing ->
+                    ( Quantity.zero, Quantity.zero )
+
         makeVisibleSegment : PeteTree -> E.Value
         makeVisibleSegment node =
-            lngLatPair <| mapStartAt node
+            lngLatPair <| mapLocation node
 
-        renderCurrentMarker : Int -> PeteTree -> List (Entity LocalCoords)
-        renderCurrentMarker marker tree =
-            [ Scene3d.point { radius = Pixels.pixels 10 }
-                (Material.color lightOrange)
-                (pointFromIndex marker tree)
-            ]
-
+        --renderCurrentMarker : Int -> PeteTree -> List (Entity LocalCoords)
+        --renderCurrentMarker marker tree =
+        --    [ Scene3d.point { radius = Pixels.pixels 10 }
+        --        (Material.color lightOrange)
+        --        (mapLocation <| leafFromIndex marker tree)
+        --    ]
         renderTree : Int -> PeteTree -> List E.Value -> List E.Value
         renderTree depth someNode accum =
             case someNode of
@@ -218,9 +230,13 @@ renderMapJson model =
     case model.trackTree of
         Just tree ->
             let
+                startPoint =
+                    Point3d.origin
+                        |> Point3d.translateBy
+                            (startVector <| leafFromIndex model.currentPosition tree)
+
                 box =
-                    BoundingBox3d.withDimensions ( boxSide, boxSide, boxSide )
-                        (pointFromIndex model.currentPosition tree)
+                    BoundingBox3d.withDimensions ( boxSide, boxSide, boxSide ) startPoint
 
                 geometry =
                     E.object
@@ -230,14 +246,12 @@ renderMapJson model =
 
                 coordinates =
                     renderTreeSelectively box model.renderDepth tree []
-
             in
             E.object
                 [ ( "type", E.string "Feature" )
                 , ( "properties", E.object [] )
                 , ( "geometry", geometry )
                 ]
-
 
         Nothing ->
             E.null

@@ -1,10 +1,13 @@
 module GpxParser exposing (..)
 
 import Angle
-import DomainModel exposing (GPXPoint, GPXTrack)
+import Direction3d
+import DomainModel exposing (EarthVector, GPXSource)
 import Length
 import Quantity
 import Regex
+import Spherical
+import Vector3d
 
 
 asRegex t =
@@ -26,7 +29,7 @@ parseTrackName xml =
                     n
 
 
-parseGPXPoints : String -> GPXTrack
+parseGPXPoints : String -> List EarthVector
 parseGPXPoints xml =
     let
         trkpts =
@@ -60,6 +63,28 @@ parseGPXPoints xml =
                 _ ->
                     Nothing
 
+        makeEarthVector lon lat alt =
+            let
+                direction =
+                    Direction3d.xyZ lon lat
+
+                radius =
+                    alt |> Quantity.plus (Length.meters Spherical.meanRadius)
+            in
+            Vector3d.withLength radius direction
+
+        earthVector trkpt =
+            -- This just to remove anything with a weird combination of values.
+            case ( latitude trkpt, longitude trkpt, elevation trkpt ) of
+                ( (Just lat) :: _, (Just lon) :: _, (Just alt) :: _ ) ->
+                    Just <| makeEarthVector (Angle.degrees lon) (Angle.degrees lat) (Length.meters alt)
+
+                ( (Just lat) :: _, (Just lon) :: _, _ ) ->
+                    Just <| makeEarthVector (Angle.degrees lon) (Angle.degrees lat) (Length.meters 0.0)
+
+                _ ->
+                    Nothing
+
         matches xs =
             List.map value xs
 
@@ -75,28 +100,5 @@ parseGPXPoints xml =
             trkpts
                 |> List.map trackPoint
                 |> List.filterMap identity
-
-        ( longitudes, latitudes ) =
-            ( trackPoints |> List.map .longitude
-            , trackPoints |> List.map .latitude
-            )
-
-        ( minLon, maxLon ) =
-            ( Quantity.minimum longitudes |> Maybe.withDefault Quantity.zero
-            , Quantity.maximum longitudes |> Maybe.withDefault Quantity.zero
-            )
-
-        ( minLat, maxLat ) =
-            ( Quantity.minimum latitudes |> Maybe.withDefault Quantity.zero
-            , Quantity.maximum latitudes |> Maybe.withDefault Quantity.zero
-            )
-
-        referencePoint =
-            { longitude = Quantity.interpolateFrom minLon maxLon 0.5
-            , latitude = Quantity.interpolateFrom minLat maxLat 0.5
-            , altitude = Quantity.zero
-            }
     in
-    { points = trackPoints
-    , referenceLonLat = referencePoint
-    }
+    trkpts |> List.map earthVector |> List.filterMap identity

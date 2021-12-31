@@ -17,6 +17,8 @@ import Pixels exposing (Pixels)
 import Point3d
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity, backgroundColor)
+import Spherical
+import Vector3d
 import Viewpoint3d
 
 
@@ -30,10 +32,6 @@ view :
 view model =
     case model.trackTree of
         Just treeNode ->
-            let
-                box =
-                    DomainModel.boundingBox treeNode
-            in
             el
                 [ htmlAttribute <| Mouse.onClick ImageClick
                 , Border.width 2
@@ -42,7 +40,7 @@ view model =
             <|
                 html <|
                     Scene3d.cloudy
-                        { camera = deriveCamera box
+                        { camera = deriveCamera treeNode
                         , dimensions = model.viewDimensions
                         , background = backgroundColor Color.lightBlue
                         , clipDepth = Length.meters 1
@@ -54,23 +52,20 @@ view model =
             text "No track to show"
 
 
-deriveCamera : BoundingBox3d Meters LocalCoords -> Camera3d Meters LocalCoords
-deriveCamera box =
+deriveCamera : PeteTree -> Camera3d Meters LocalCoords
+deriveCamera treeNode =
     let
-        ( xSize, ySize, zSize ) =
-            BoundingBox3d.dimensions box
-
-        largestEdge =
-            xSize |> Quantity.max ySize |> Quantity.max zSize
-
         eyePoint =
-            Point3d.xyz largestEdge (Quantity.negate largestEdge) largestEdge
+            -- Interesting scale factor
+            Point3d.origin
+                |> Point3d.translateBy
+                    (treeNode |> startVector |> Vector3d.scaleBy 1.01)
 
         cameraViewpoint =
             -- Fixed for now.
             Viewpoint3d.lookAt
                 { eyePoint = eyePoint
-                , focalPoint = BoundingBox3d.centerPoint box
+                , focalPoint = Point3d.origin
                 , upDirection = Direction3d.positiveZ
                 }
 
