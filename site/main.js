@@ -9322,6 +9322,11 @@ var $elm$time$Time$Posix = function (a) {
 	return {$: 'Posix', a: a};
 };
 var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
+var $ianmackenzie$elm_geometry$Geometry$Types$Point3d = function (a) {
+	return {$: 'Point3d', a: a};
+};
+var $ianmackenzie$elm_geometry$Point3d$origin = $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+	{x: 0, y: 0, z: 0});
 var $ianmackenzie$elm_units$Quantity$Quantity = function (a) {
 	return {$: 'Quantity', a: a};
 };
@@ -9339,6 +9344,7 @@ var $author$project$Main$init = F3(
 				{
 					currentPosition: 0,
 					filename: $elm$core$Maybe$Nothing,
+					focusPoint: $ianmackenzie$elm_geometry$Point3d$origin,
 					ipInfo: $elm$core$Maybe$Nothing,
 					lastMapClick: _Utils_Tuple2(0.0, 0.0),
 					mapClickDebounce: false,
@@ -9394,9 +9400,6 @@ var $author$project$Msg$GpxLoaded = function (a) {
 };
 var $author$project$Msg$GpxSelected = function (a) {
 	return {$: 'GpxSelected', a: a};
-};
-var $author$project$Msg$IpInfoAcknowledged = function (a) {
-	return {$: 'IpInfoAcknowledged', a: a};
 };
 var $author$project$Msg$ReceivedIpDetails = function (a) {
 	return {$: 'ReceivedIpDetails', a: a};
@@ -9494,11 +9497,6 @@ var $author$project$Spherical$meanRadius = 6371000;
 var $ianmackenzie$elm_units$Length$meters = function (numMeters) {
 	return $ianmackenzie$elm_units$Quantity$Quantity(numMeters);
 };
-var $ianmackenzie$elm_geometry$Geometry$Types$Point3d = function (a) {
-	return {$: 'Point3d', a: a};
-};
-var $ianmackenzie$elm_geometry$Point3d$origin = $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
-	{x: 0, y: 0, z: 0});
 var $ianmackenzie$elm_geometry$Geometry$Types$SketchPlane3d = function (a) {
 	return {$: 'SketchPlane3d', a: a};
 };
@@ -10147,29 +10145,25 @@ var $ianmackenzie$elm_3d_camera$Camera3d$perspective = function (_arguments) {
 };
 var $ianmackenzie$elm_geometry$Direction3d$positiveZ = $ianmackenzie$elm_geometry$Direction3d$unsafe(
 	{x: 0, y: 0, z: 1});
-var $ianmackenzie$elm_geometry$Vector3d$scaleBy = F2(
-	function (k, _v0) {
-		var v = _v0.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
-			{x: k * v.x, y: k * v.y, z: k * v.z});
+var $ianmackenzie$elm_geometry$Point3d$scaleAbout = F3(
+	function (_v0, k, _v1) {
+		var p0 = _v0.a;
+		var p = _v1.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+			{x: p0.x + (k * (p.x - p0.x)), y: p0.y + (k * (p.y - p0.y)), z: p0.z + (k * (p.z - p0.z))});
 	});
-var $author$project$ViewThirdPerson$deriveCamera = function (treeNode) {
-	var eyePoint = A2(
-		$ianmackenzie$elm_geometry$Point3d$translateBy,
-		A2(
-			$ianmackenzie$elm_geometry$Vector3d$scaleBy,
-			1.01,
-			$author$project$DomainModel$startVector(treeNode)),
-		$ianmackenzie$elm_geometry$Point3d$origin);
-	var cameraViewpoint = $ianmackenzie$elm_3d_camera$Viewpoint3d$lookAt(
-		{eyePoint: eyePoint, focalPoint: $ianmackenzie$elm_geometry$Point3d$origin, upDirection: $ianmackenzie$elm_geometry$Direction3d$positiveZ});
-	var perspectiveCamera = $ianmackenzie$elm_3d_camera$Camera3d$perspective(
-		{
-			verticalFieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
-			viewpoint: cameraViewpoint
-		});
-	return perspectiveCamera;
-};
+var $author$project$ViewThirdPerson$deriveCamera = F2(
+	function (treeNode, focusPoint) {
+		var eyePoint = A3($ianmackenzie$elm_geometry$Point3d$scaleAbout, $ianmackenzie$elm_geometry$Point3d$origin, 1.015, focusPoint);
+		var cameraViewpoint = $ianmackenzie$elm_3d_camera$Viewpoint3d$lookAt(
+			{eyePoint: eyePoint, focalPoint: focusPoint, upDirection: $ianmackenzie$elm_geometry$Direction3d$positiveZ});
+		var perspectiveCamera = $ianmackenzie$elm_3d_camera$Camera3d$perspective(
+			{
+				verticalFieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
+				viewpoint: cameraViewpoint
+			});
+		return perspectiveCamera;
+	});
 var $ianmackenzie$elm_geometry$Geometry$Types$Rectangle2d = function (a) {
 	return {$: 'Rectangle2d', a: a};
 };
@@ -10636,12 +10630,13 @@ var $ianmackenzie$elm_units$Quantity$toFloatQuantity = function (_v0) {
 	var value = _v0.a;
 	return $ianmackenzie$elm_units$Quantity$Quantity(value);
 };
-var $author$project$Main$detectHit = F2(
+var $author$project$ViewThirdPerson$detectHit = F2(
 	function (event, model) {
 		var _v0 = model.trackTree;
 		if (_v0.$ === 'Just') {
 			var topNode = _v0.a;
-			var camera = $author$project$ViewThirdPerson$deriveCamera(topNode);
+			var leaf = A2($author$project$DomainModel$leafFromIndex, model.currentPosition, topNode);
+			var camera = A2($author$project$ViewThirdPerson$deriveCamera, leaf, model.focusPoint);
 			var _v1 = event.offsetPos;
 			var x = _v1.a;
 			var y = _v1.b;
@@ -11955,348 +11950,6 @@ var $author$project$MyIP$requestIpInformation = function (msg) {
 				_List_Nil)
 		});
 };
-var $author$project$GeoCodeDecoders$encodeLogInfo = function (record) {
-	var data = $elm$json$Json$Encode$object(
-		_List_fromArray(
-			[
-				_Utils_Tuple2(
-				'timestamp',
-				$elm$json$Json$Encode$string(record.timestamp)),
-				_Utils_Tuple2(
-				'ip',
-				$elm$json$Json$Encode$string(record.ip)),
-				_Utils_Tuple2(
-				'country',
-				$elm$json$Json$Encode$string(record.country)),
-				_Utils_Tuple2(
-				'region',
-				$elm$json$Json$Encode$string(record.region)),
-				_Utils_Tuple2(
-				'city',
-				$elm$json$Json$Encode$string(record.city)),
-				_Utils_Tuple2(
-				'zip',
-				$elm$json$Json$Encode$string(record.zip)),
-				_Utils_Tuple2(
-				'lat',
-				$elm$json$Json$Encode$float(record.latitude)),
-				_Utils_Tuple2(
-				'lon',
-				$elm$json$Json$Encode$float(record.longitude))
-			]));
-	return $elm$json$Json$Encode$object(
-		_List_fromArray(
-			[
-				_Utils_Tuple2(
-				'table',
-				$elm$json$Json$Encode$string('GPXmagic')),
-				_Utils_Tuple2('record', data)
-			]));
-};
-var $elm$http$Http$expectBytesResponse = F2(
-	function (toMsg, toResult) {
-		return A3(
-			_Http_expect,
-			'arraybuffer',
-			_Http_toDataView,
-			A2($elm$core$Basics$composeR, toResult, toMsg));
-	});
-var $elm$http$Http$expectWhatever = function (toMsg) {
-	return A2(
-		$elm$http$Http$expectBytesResponse,
-		toMsg,
-		$elm$http$Http$resolve(
-			function (_v0) {
-				return $elm$core$Result$Ok(_Utils_Tuple0);
-			}));
-};
-var $rtfeldman$elm_iso8601_date_strings$Iso8601$fromMonth = function (month) {
-	switch (month.$) {
-		case 'Jan':
-			return 1;
-		case 'Feb':
-			return 2;
-		case 'Mar':
-			return 3;
-		case 'Apr':
-			return 4;
-		case 'May':
-			return 5;
-		case 'Jun':
-			return 6;
-		case 'Jul':
-			return 7;
-		case 'Aug':
-			return 8;
-		case 'Sep':
-			return 9;
-		case 'Oct':
-			return 10;
-		case 'Nov':
-			return 11;
-		default:
-			return 12;
-	}
-};
-var $elm$time$Time$flooredDiv = F2(
-	function (numerator, denominator) {
-		return $elm$core$Basics$floor(numerator / denominator);
-	});
-var $elm$time$Time$posixToMillis = function (_v0) {
-	var millis = _v0.a;
-	return millis;
-};
-var $elm$time$Time$toAdjustedMinutesHelp = F3(
-	function (defaultOffset, posixMinutes, eras) {
-		toAdjustedMinutesHelp:
-		while (true) {
-			if (!eras.b) {
-				return posixMinutes + defaultOffset;
-			} else {
-				var era = eras.a;
-				var olderEras = eras.b;
-				if (_Utils_cmp(era.start, posixMinutes) < 0) {
-					return posixMinutes + era.offset;
-				} else {
-					var $temp$defaultOffset = defaultOffset,
-						$temp$posixMinutes = posixMinutes,
-						$temp$eras = olderEras;
-					defaultOffset = $temp$defaultOffset;
-					posixMinutes = $temp$posixMinutes;
-					eras = $temp$eras;
-					continue toAdjustedMinutesHelp;
-				}
-			}
-		}
-	});
-var $elm$time$Time$toAdjustedMinutes = F2(
-	function (_v0, time) {
-		var defaultOffset = _v0.a;
-		var eras = _v0.b;
-		return A3(
-			$elm$time$Time$toAdjustedMinutesHelp,
-			defaultOffset,
-			A2(
-				$elm$time$Time$flooredDiv,
-				$elm$time$Time$posixToMillis(time),
-				60000),
-			eras);
-	});
-var $elm$time$Time$toCivil = function (minutes) {
-	var rawDay = A2($elm$time$Time$flooredDiv, minutes, 60 * 24) + 719468;
-	var era = (((rawDay >= 0) ? rawDay : (rawDay - 146096)) / 146097) | 0;
-	var dayOfEra = rawDay - (era * 146097);
-	var yearOfEra = ((((dayOfEra - ((dayOfEra / 1460) | 0)) + ((dayOfEra / 36524) | 0)) - ((dayOfEra / 146096) | 0)) / 365) | 0;
-	var dayOfYear = dayOfEra - (((365 * yearOfEra) + ((yearOfEra / 4) | 0)) - ((yearOfEra / 100) | 0));
-	var mp = (((5 * dayOfYear) + 2) / 153) | 0;
-	var month = mp + ((mp < 10) ? 3 : (-9));
-	var year = yearOfEra + (era * 400);
-	return {
-		day: (dayOfYear - ((((153 * mp) + 2) / 5) | 0)) + 1,
-		month: month,
-		year: year + ((month <= 2) ? 1 : 0)
-	};
-};
-var $elm$time$Time$toDay = F2(
-	function (zone, time) {
-		return $elm$time$Time$toCivil(
-			A2($elm$time$Time$toAdjustedMinutes, zone, time)).day;
-	});
-var $elm$core$Basics$modBy = _Basics_modBy;
-var $elm$time$Time$toHour = F2(
-	function (zone, time) {
-		return A2(
-			$elm$core$Basics$modBy,
-			24,
-			A2(
-				$elm$time$Time$flooredDiv,
-				A2($elm$time$Time$toAdjustedMinutes, zone, time),
-				60));
-	});
-var $elm$time$Time$toMillis = F2(
-	function (_v0, time) {
-		return A2(
-			$elm$core$Basics$modBy,
-			1000,
-			$elm$time$Time$posixToMillis(time));
-	});
-var $elm$time$Time$toMinute = F2(
-	function (zone, time) {
-		return A2(
-			$elm$core$Basics$modBy,
-			60,
-			A2($elm$time$Time$toAdjustedMinutes, zone, time));
-	});
-var $elm$time$Time$Apr = {$: 'Apr'};
-var $elm$time$Time$Aug = {$: 'Aug'};
-var $elm$time$Time$Dec = {$: 'Dec'};
-var $elm$time$Time$Feb = {$: 'Feb'};
-var $elm$time$Time$Jan = {$: 'Jan'};
-var $elm$time$Time$Jul = {$: 'Jul'};
-var $elm$time$Time$Jun = {$: 'Jun'};
-var $elm$time$Time$Mar = {$: 'Mar'};
-var $elm$time$Time$May = {$: 'May'};
-var $elm$time$Time$Nov = {$: 'Nov'};
-var $elm$time$Time$Oct = {$: 'Oct'};
-var $elm$time$Time$Sep = {$: 'Sep'};
-var $elm$time$Time$toMonth = F2(
-	function (zone, time) {
-		var _v0 = $elm$time$Time$toCivil(
-			A2($elm$time$Time$toAdjustedMinutes, zone, time)).month;
-		switch (_v0) {
-			case 1:
-				return $elm$time$Time$Jan;
-			case 2:
-				return $elm$time$Time$Feb;
-			case 3:
-				return $elm$time$Time$Mar;
-			case 4:
-				return $elm$time$Time$Apr;
-			case 5:
-				return $elm$time$Time$May;
-			case 6:
-				return $elm$time$Time$Jun;
-			case 7:
-				return $elm$time$Time$Jul;
-			case 8:
-				return $elm$time$Time$Aug;
-			case 9:
-				return $elm$time$Time$Sep;
-			case 10:
-				return $elm$time$Time$Oct;
-			case 11:
-				return $elm$time$Time$Nov;
-			default:
-				return $elm$time$Time$Dec;
-		}
-	});
-var $elm$core$String$cons = _String_cons;
-var $elm$core$String$fromChar = function (_char) {
-	return A2($elm$core$String$cons, _char, '');
-};
-var $elm$core$Bitwise$shiftRightBy = _Bitwise_shiftRightBy;
-var $elm$core$String$repeatHelp = F3(
-	function (n, chunk, result) {
-		return (n <= 0) ? result : A3(
-			$elm$core$String$repeatHelp,
-			n >> 1,
-			_Utils_ap(chunk, chunk),
-			(!(n & 1)) ? result : _Utils_ap(result, chunk));
-	});
-var $elm$core$String$repeat = F2(
-	function (n, chunk) {
-		return A3($elm$core$String$repeatHelp, n, chunk, '');
-	});
-var $elm$core$String$padLeft = F3(
-	function (n, _char, string) {
-		return _Utils_ap(
-			A2(
-				$elm$core$String$repeat,
-				n - $elm$core$String$length(string),
-				$elm$core$String$fromChar(_char)),
-			string);
-	});
-var $rtfeldman$elm_iso8601_date_strings$Iso8601$toPaddedString = F2(
-	function (digits, time) {
-		return A3(
-			$elm$core$String$padLeft,
-			digits,
-			_Utils_chr('0'),
-			$elm$core$String$fromInt(time));
-	});
-var $elm$time$Time$toSecond = F2(
-	function (_v0, time) {
-		return A2(
-			$elm$core$Basics$modBy,
-			60,
-			A2(
-				$elm$time$Time$flooredDiv,
-				$elm$time$Time$posixToMillis(time),
-				1000));
-	});
-var $elm$time$Time$toYear = F2(
-	function (zone, time) {
-		return $elm$time$Time$toCivil(
-			A2($elm$time$Time$toAdjustedMinutes, zone, time)).year;
-	});
-var $rtfeldman$elm_iso8601_date_strings$Iso8601$fromTime = function (time) {
-	return A2(
-		$rtfeldman$elm_iso8601_date_strings$Iso8601$toPaddedString,
-		4,
-		A2($elm$time$Time$toYear, $elm$time$Time$utc, time)) + ('-' + (A2(
-		$rtfeldman$elm_iso8601_date_strings$Iso8601$toPaddedString,
-		2,
-		$rtfeldman$elm_iso8601_date_strings$Iso8601$fromMonth(
-			A2($elm$time$Time$toMonth, $elm$time$Time$utc, time))) + ('-' + (A2(
-		$rtfeldman$elm_iso8601_date_strings$Iso8601$toPaddedString,
-		2,
-		A2($elm$time$Time$toDay, $elm$time$Time$utc, time)) + ('T' + (A2(
-		$rtfeldman$elm_iso8601_date_strings$Iso8601$toPaddedString,
-		2,
-		A2($elm$time$Time$toHour, $elm$time$Time$utc, time)) + (':' + (A2(
-		$rtfeldman$elm_iso8601_date_strings$Iso8601$toPaddedString,
-		2,
-		A2($elm$time$Time$toMinute, $elm$time$Time$utc, time)) + (':' + (A2(
-		$rtfeldman$elm_iso8601_date_strings$Iso8601$toPaddedString,
-		2,
-		A2($elm$time$Time$toSecond, $elm$time$Time$utc, time)) + ('.' + (A2(
-		$rtfeldman$elm_iso8601_date_strings$Iso8601$toPaddedString,
-		3,
-		A2($elm$time$Time$toMillis, $elm$time$Time$utc, time)) + 'Z'))))))))))));
-};
-var $elm$http$Http$Header = F2(
-	function (a, b) {
-		return {$: 'Header', a: a, b: b};
-	});
-var $elm$http$Http$header = $elm$http$Http$Header;
-var $elm$http$Http$jsonBody = function (value) {
-	return A2(
-		_Http_pair,
-		'application/json',
-		A2($elm$json$Json$Encode$encode, 0, value));
-};
-var $author$project$MyIP$loggerRoot = 'https://api.m3o.com';
-var $author$project$M3O$m3O_API_TOKEN = 'NzIyM2VjMzAtMTlkYS00MzNmLWE3NWEtNDdjZjRiMGE1ZGQ1';
-var $author$project$MyIP$sendIpInfo = F3(
-	function (time, msg, ipInfo) {
-		if (ipInfo.$ === 'Just') {
-			var info = ipInfo.a;
-			var logInfo = {
-				city: info.city,
-				country: info.country,
-				ip: info.ip,
-				latitude: info.latitude,
-				longitude: info.longitude,
-				region: info.region,
-				timestamp: A2(
-					$elm$core$String$left,
-					10,
-					$rtfeldman$elm_iso8601_date_strings$Iso8601$fromTime(time)),
-				zip: info.zip
-			};
-			return $elm$http$Http$request(
-				{
-					body: $elm$http$Http$jsonBody(
-						$author$project$GeoCodeDecoders$encodeLogInfo(logInfo)),
-					expect: $elm$http$Http$expectWhatever(msg),
-					headers: _List_fromArray(
-						[
-							A2($elm$http$Http$header, 'Authorization', 'Bearer ' + $author$project$M3O$m3O_API_TOKEN)
-						]),
-					method: 'POST',
-					timeout: $elm$core$Maybe$Nothing,
-					tracker: $elm$core$Maybe$Nothing,
-					url: A3(
-						$elm$url$Url$Builder$crossOrigin,
-						$author$project$MyIP$loggerRoot,
-						_List_fromArray(
-							['v1', 'db', 'Create']),
-						_List_Nil)
-				});
-		} else {
-			return $elm$core$Platform$Cmd$none;
-		}
-	});
 var $elm$file$File$toString = _File_toString;
 var $author$project$DomainModel$Leaf = function (a) {
 	return {$: 'Leaf', a: a};
@@ -12518,6 +12171,11 @@ var $author$project$StravaAuth$configuration = {
 var $author$project$OAuthTypes$GotAccessToken = function (a) {
 	return {$: 'GotAccessToken', a: a};
 };
+var $elm$http$Http$Header = F2(
+	function (a, b) {
+		return {$: 'Header', a: a, b: b};
+	});
+var $elm$http$Http$header = $elm$http$Http$Header;
 var $chelovek0v$bbase64$Base64$Encode$StringEncoder = function (a) {
 	return {$: 'StringEncoder', a: a};
 };
@@ -13186,7 +12844,6 @@ var $author$project$Main$update = F2(
 					$elm$core$Platform$Cmd$batch(
 						_List_fromArray(
 							[
-								A3($author$project$MyIP$sendIpInfo, model.time, $author$project$Msg$IpInfoAcknowledged, ipInfo),
 								$author$project$PortController$createMap(mapInfoWithLocation),
 								A2($andrewMacmurray$elm_delay$Delay$after, 100, $author$project$Msg$RepaintMap)
 							])));
@@ -13260,19 +12917,34 @@ var $author$project$Main$update = F2(
 					A2($elm$core$Platform$Cmd$map, $author$project$Msg$OAuthMessage, authCmd));
 			case 'SetCurrentPosition':
 				var pos = msg.a;
-				var updatedModel = _Utils_update(
-					model,
-					{currentPosition: pos});
-				return _Utils_Tuple2(
-					$author$project$Main$Model(
-						$author$project$Main$renderModel(updatedModel)),
-					_Utils_eq(model.viewMode, $author$project$ViewingMode$ViewMap) ? $elm$core$Platform$Cmd$batch(
-						_List_fromArray(
-							[
-								$author$project$PortController$addTrackToMap(model),
-								$author$project$PortController$centreMapOnCurrent(model),
-								A2($andrewMacmurray$elm_delay$Delay$after, 10, $author$project$Msg$RepaintMap)
-							])) : $elm$core$Platform$Cmd$none);
+				var _v4 = model.trackTree;
+				if (_v4.$ === 'Just') {
+					var treeTop = _v4.a;
+					var updatedModel = _Utils_update(
+						model,
+						{
+							currentPosition: pos,
+							focusPoint: A2(
+								$ianmackenzie$elm_geometry$Point3d$translateBy,
+								$author$project$DomainModel$startVector(
+									A2($author$project$DomainModel$leafFromIndex, model.currentPosition, treeTop)),
+								$ianmackenzie$elm_geometry$Point3d$origin)
+						});
+					return _Utils_Tuple2(
+						$author$project$Main$Model(
+							$author$project$Main$renderModel(updatedModel)),
+						_Utils_eq(model.viewMode, $author$project$ViewingMode$ViewMap) ? $elm$core$Platform$Cmd$batch(
+							_List_fromArray(
+								[
+									$author$project$PortController$addTrackToMap(model),
+									$author$project$PortController$centreMapOnCurrent(model),
+									A2($andrewMacmurray$elm_delay$Delay$after, 10, $author$project$Msg$RepaintMap)
+								])) : $elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(
+						$author$project$Main$Model(model),
+						$elm$core$Platform$Cmd$none);
+				}
 			case 'ImageClick':
 				var event = msg.a;
 				return _Utils_Tuple2(
@@ -13281,7 +12953,7 @@ var $author$project$Main$update = F2(
 							_Utils_update(
 								model,
 								{
-									currentPosition: A2($author$project$Main$detectHit, event, model)
+									currentPosition: A2($author$project$ViewThirdPerson$detectHit, event, model)
 								}))),
 					$elm$core$Platform$Cmd$none);
 			case 'SetViewMode':
@@ -13300,9 +12972,9 @@ var $author$project$Main$update = F2(
 							])) : $elm$core$Platform$Cmd$none);
 			default:
 				var json = msg.a;
-				var _v4 = A2($author$project$PortController$processPortMessage, model, json);
-				var newModel = _v4.a;
-				var cmds = _v4.b;
+				var _v5 = A2($author$project$PortController$processPortMessage, model, json);
+				var newModel = _v5.a;
+				var cmds = _v5.b;
 				return _Utils_Tuple2(
 					$author$project$Main$Model(newModel),
 					cmds);
@@ -20585,6 +20257,7 @@ var $ianmackenzie$elm_3d_camera$WebGL$Matrices$projectionMatrix = F2(
 				{m11: 2 / (aspectRatio * viewportHeight), m12: 0, m13: 0, m14: 0, m21: 0, m22: 2 / viewportHeight, m23: 0, m24: 0, m31: 0, m32: 0, m33: (-2) / (f - n), m34: (-(f + n)) / (f - n), m41: 0, m42: 0, m43: 0, m44: 1});
 		}
 	});
+var $elm$core$Bitwise$shiftRightBy = _Bitwise_shiftRightBy;
 var $ianmackenzie$elm_3d_scene$Scene3d$enabledFlag = F2(
 	function (lightMask, lightIndex) {
 		return ((1 & (lightMask >> lightIndex)) === 1) ? 0 : 1;
@@ -21170,7 +20843,10 @@ var $author$project$ViewThirdPerson$view = function (model) {
 				$ianmackenzie$elm_3d_scene$Scene3d$cloudy(
 					{
 						background: $ianmackenzie$elm_3d_scene$Scene3d$backgroundColor($avh4$elm_color$Color$lightBlue),
-						camera: $author$project$ViewThirdPerson$deriveCamera(treeNode),
+						camera: A2(
+							$author$project$ViewThirdPerson$deriveCamera,
+							A2($author$project$DomainModel$leafFromIndex, model.currentPosition, treeNode),
+							model.focusPoint),
 						clipDepth: $ianmackenzie$elm_units$Length$meters(1),
 						dimensions: model.viewDimensions,
 						entities: model.scene,

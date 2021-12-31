@@ -4,7 +4,7 @@ import Browser exposing (application)
 import Browser.Navigation exposing (Key)
 import Camera3d
 import Delay exposing (after)
-import DomainModel exposing (GPXSource, PeteTree(..), RoadSection, nearestToRay, skipCount, treeFromList, trueLength)
+import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), RoadSection, nearestToRay, skipCount, treeFromList, trueLength)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -25,6 +25,7 @@ import OAuthPorts exposing (randomBytes)
 import OAuthTypes as O exposing (..)
 import Pixels exposing (Pixels)
 import Point2d
+import Point3d
 import PortController
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
@@ -53,6 +54,7 @@ type alias ModelRecord =
     , renderDepth : Int
     , scene : List (Entity LocalCoords)
     , currentPosition : Int
+    , focusPoint : EarthPoint
     , viewMode : ViewingMode
     , viewDimensions : ( Quantity Int Pixels, Quantity Int Pixels )
     , ipInfo : Maybe IpInfo
@@ -90,6 +92,7 @@ init mflags origin navigationKey =
         , renderDepth = 0
         , scene = []
         , currentPosition = 0
+        , focusPoint = Point3d.origin
         , viewMode = ViewThird
         , viewDimensions = ( Pixels.pixels 800, Pixels.pixels 500 )
         , ipInfo = Nothing
@@ -137,8 +140,9 @@ update msg (Model model) =
             in
             ( Model { model | ipInfo = ipInfo }
             , Cmd.batch
-                [ MyIP.sendIpInfo model.time IpInfoAcknowledged ipInfo
-                , PortController.createMap mapInfoWithLocation
+                [ PortController.createMap mapInfoWithLocation
+
+                --, MyIP.sendIpInfo model.time IpInfoAcknowledged ipInfo
                 , after 100 RepaintMap
                 ]
             )
@@ -209,27 +213,42 @@ update msg (Model model) =
             )
 
         SetCurrentPosition pos ->
-            let
-                updatedModel =
-                    { model | currentPosition = pos }
-            in
-            ( updatedModel
-                |> renderModel
-                |> Model
-            , if model.viewMode == ViewMap then
-                Cmd.batch
-                    -- Must repaint track on so that selective rendering works.
-                    [ PortController.addTrackToMap model
-                    , PortController.centreMapOnCurrent model
-                    , after 10 RepaintMap
-                    ]
+            -- Slider moves pointer and recentres view.
+            case model.trackTree of
+                Just treeTop ->
+                    let
+                        updatedModel =
+                            { model
+                                | currentPosition = pos
+                                , focusPoint =
+                                    Point3d.origin
+                                        |> Point3d.translateBy
+                                            (DomainModel.leafFromIndex model.currentPosition treeTop
+                                                |> DomainModel.startVector
+                                            )
+                            }
+                    in
+                    ( updatedModel
+                        |> renderModel
+                        |> Model
+                    , if model.viewMode == ViewMap then
+                        Cmd.batch
+                            -- Must repaint track on so that selective rendering works.
+                            [ PortController.addTrackToMap model
+                            , PortController.centreMapOnCurrent model
+                            , after 10 RepaintMap
+                            ]
 
-              else
-                Cmd.none
-            )
+                      else
+                        Cmd.none
+                    )
+
+                Nothing ->
+                    ( Model model, Cmd.none )
 
         ImageClick event ->
-            ( { model | currentPosition = detectHit event model }
+            -- Click moves pointer but does not recentre view. (Double click will.)
+            ( { model | currentPosition = ViewThirdPerson.detectHit event model }
                 |> renderModel
                 |> Model
             , Cmd.none
@@ -260,42 +279,6 @@ update msg (Model model) =
 renderModel : ModelRecord -> ModelRecord
 renderModel model =
     { model | scene = render3dView model }
-
-
-detectHit : Mouse.Event -> ModelRecord -> Int
-detectHit event model =
-    --TODO: Move into view/pane/whatever it will be.
-    case model.trackTree of
-        Just topNode ->
-            let
-                ( x, y ) =
-                    event.offsetPos
-
-                screenPoint =
-                    Point2d.pixels x y
-
-                ( w, h ) =
-                    model.viewDimensions
-
-                ( wFloat, hFloat ) =
-                    ( toFloatQuantity w, toFloatQuantity h )
-
-                screenRectangle =
-                    Rectangle2d.from
-                        (Point2d.xy Quantity.zero hFloat)
-                        (Point2d.xy wFloat Quantity.zero)
-
-                camera =
-                    -- Must use same camera derivation as for the 3D model, else pointless!
-                    ViewThirdPerson.deriveCamera topNode
-
-                ray =
-                    Camera3d.ray camera screenRectangle screenPoint
-            in
-            nearestToRay ray topNode
-
-        _ ->
-            0
 
 
 view : Model -> Browser.Document Msg
