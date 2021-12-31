@@ -2,7 +2,7 @@ module GpxParser exposing (..)
 
 import Angle
 import Direction3d
-import DomainModel exposing (EarthVector, GPXSource)
+import DomainModel exposing (EarthVector, GPXSource, makeEarthVector)
 import Length
 import Quantity
 import Regex
@@ -63,15 +63,6 @@ parseGPXPoints xml =
                 _ ->
                     Nothing
 
-        makeEarthVector lon lat alt =
-            let
-                direction =
-                    Direction3d.xyZ lon lat
-
-                radius =
-                    alt |> Quantity.plus (Length.meters Spherical.meanRadius)
-            in
-            Vector3d.withLength radius direction
 
         earthVector trkpt =
             -- This just to remove anything with a weird combination of values.

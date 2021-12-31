@@ -284,29 +284,32 @@ processPortMessage model json =
             --, 'lon' : e.lon()
             --} );
             case ( model.mapClickDebounce, lat, lon ) of
-                --( False, Ok lat1, Ok lon1 ) ->
-                --    let
-                --        gpxPoint =
-                --            { longitude = Angle.degrees lon1
-                --            , latitude = Angle.degrees lat1
-                --            , altitude = Length.meters 0.0
-                --            }
-                --
-                --        updatedModel =
-                --            { model
-                --                | lastMapClick = ( lon1, lat1 )
-                --                , mapClickDebounce = True
-                --                , currentPosition = index
-                --            }
-                --    in
-                --    ( updatedModel
-                --    , Cmd.batch
-                --        [ -- Selective rendering requires we remove and add again.
-                --          addTrackToMap updatedModel
-                --        , after 100 ClearMapClickDebounce
-                --        , after 100 RepaintMap
-                --        ]
-                --    )
+                ( False, Ok lat1, Ok lon1 ) ->
+                    let
+                        gpxPoint =
+                            { longitude = Angle.degrees lon1
+                            , latitude = Angle.degrees lat1
+                            , altitude = Length.meters 0.0
+                            }
+
+                        index =
+                            DomainModel.nearestToLonLat gpxPoint tree
+
+                        updatedModel =
+                            { model
+                                | lastMapClick = ( lon1, lat1 )
+                                , mapClickDebounce = True
+                                , currentPosition = index
+                            }
+                    in
+                    ( updatedModel
+                    , Cmd.batch
+                        [ -- Selective rendering requires we remove and add again.
+                          addTrackToMap updatedModel
+                        , after 100 ClearMapClickDebounce
+                        , after 100 RepaintMap
+                        ]
+                    )
 
                 _ ->
                     ( model, Cmd.none )

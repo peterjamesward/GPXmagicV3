@@ -1,1 +1,22010 @@
-!function(n){"use strict";function r(n,r,e){return e.a=n,e.f=r,e}function l(e){return r(2,e,function(r){return function(n){return e(r,n)}})}function A(t){return r(3,t,function(e){return function(r){return function(n){return t(e,r,n)}}})}function f(a){return r(4,a,function(t){return function(e){return function(r){return function(n){return a(t,e,r,n)}}}})}function e(u){return r(5,u,function(a){return function(t){return function(e){return function(r){return function(n){return u(a,t,e,r,n)}}}}})}function t(i){return r(6,i,function(u){return function(a){return function(t){return function(e){return function(r){return function(n){return i(u,a,t,e,r,n)}}}}}})}function a(o){return r(7,o,function(i){return function(u){return function(a){return function(t){return function(e){return function(r){return function(n){return o(i,u,a,t,e,r,n)}}}}}}})}function u(c){return r(8,c,function(o){return function(i){return function(u){return function(a){return function(t){return function(e){return function(r){return function(n){return c(o,i,u,a,t,e,r,n)}}}}}}}})}function R(n,r,e){return 2===n.a?n.f(r,e):n(r)(e)}function S(n,r,e,t){return 3===n.a?n.f(r,e,t):n(r)(e)(t)}function C(n,r,e,t,a){return 4===n.a?n.f(r,e,t,a):n(r)(e)(t)(a)}function d(n,r,e,t,a,u){return 5===n.a?n.f(r,e,t,a,u):n(r)(e)(t)(a)(u)}function g(n,r,e,t,a,u,i){return 6===n.a?n.f(r,e,t,a,u,i):n(r)(e)(t)(a)(u)(i)}function s(n,r,e,t,a,u,i,o){return 7===n.a?n.f(r,e,t,a,u,i,o):n(r)(e)(t)(a)(u)(i)(o)}function i(n,r,e,t,a,u,i,o,c){return 8===n.a?n.f(r,e,t,a,u,i,o,c):n(r)(e)(t)(a)(u)(i)(o)(c)}function p(n,r){for(var e,t=[],a=o(n,r,0,t);a&&(e=t.pop());a=o(e.a,e.b,0,t));return a}function o(n,r,e,t){if(n===r)return!0;if("object"!=typeof n||null===n||null===r)return"function"==typeof n&&I(5),!1;if(100<e)return t.push({a:n,b:r}),!0;for(var a in n.$<0&&(n=wt(n),r=wt(r)),n)if(!o(n[a],r[a],e+1,t))return!1;return!0}var c=l(function(n,r){return!p(n,r)});function b(n,r,e){if("object"!=typeof n)return n===r?0:n<r?-1:1;if(void 0===n.$)return(e=b(n.a,r.a))||(e=b(n.b,r.b))?e:b(n.c,r.c);for(;n.b&&r.b&&!(e=b(n.a,r.a));n=n.b,r=r.b);return e||(n.b?1:r.b?-1:0)}var h=l(function(n,r){return b(n,r)<0}),v=l(function(n,r){return b(n,r)<1}),m=l(function(n,r){return 0<b(n,r)}),$=l(function(n,r){return 0<=b(n,r)}),x=l(function(n,r){r=b(n,r);return r<0?mt:r?vt:ht}),w=0;function y(n,r){var e,t={};for(e in n)t[e]=n[e];for(e in r)t[e]=r[e];return t}var T=l(L);function L(n,r){if("string"==typeof n)return n+r;if(!n.b)return r;var e={$:1,a:n.a,b:r};n=n.b;for(var t=e;n.b;n=n.b)t=t.b={$:1,a:n.a,b:r};return e}var k={$:0};function E(n,r){return{$:1,a:n,b:r}}var Z=l(E);function P(n){for(var r=k,e=n.length;e--;)r={$:1,a:n[e],b:r};return r}function M(n){for(var r=[];n.b;n=n.b)r.push(n.a);return r}var _=A(function(n,r,e){for(var t=[];r.b&&e.b;r=r.b,e=e.b)t.push(R(n,r.a,e.a));return P(t)}),j=A(function(n,r,e){for(var t=Array(n),a=0;a<n;a++)t[a]=e(r+a);return t}),F=l(function(n,r){for(var e=Array(n),t=0;t<n&&r.b;t++)e[t]=r.a,r=r.b;return e.length=t,{a:e,b:r}}),O=A(function(n,r,e){for(var t=e.length-1;0<=t;t--)r=R(n,e[t],r);return r});function I(n){throw Error("https://github.com/elm/core/blob/1.0.0/hints/"+n+".md")}var z=l(function(n,r){return n+r}),N=l(function(n,r){return n/r}),B=l(function(n,r){return n/r|0}),K=l(Math.pow),U=l(function(n,r){return r%n}),D=Math.cos,G=Math.sin,q=Math.tan,W=l(Math.atan2),J=Math.ceil,X=Math.floor,H=Math.round,V=Math.sqrt,Q=Math.log,Y=isNaN,nn=l(function(n,r){return n&&r}),rn=l(function(n,r){return r.split(n)}),en=l(function(n,r){return r.join(n)}),tn=A(function(n,r,e){return e.slice(n,r)}),an=l(function(n,r){for(var e=r.length;e--;){var t=r[e],a=r.charCodeAt(e);if(a<56320||57343<a||(t=r[--e]+t),!n(t))return!1}return!0}),un=l(function(n,r){return!!~r.indexOf(n)}),on=l(function(n,r){return 0==r.indexOf(n)}),cn=l(function(n,r){var e=n.length;if(e<1)return k;for(var t=0,a=[];-1<(t=r.indexOf(n,t));)a.push(t),t+=e;return P(a)});function fn(n){return n+""}var sn={$:2,b:function(n){return"number"!=typeof n||(n<=-2147483647||2147483647<=n||(0|n)!==n)&&(!isFinite(n)||n%1)?Pn("an INT",n):kt(n)}},bn={$:2,b:function(n){return"boolean"==typeof n?kt(n):Pn("a BOOL",n)}},ln={$:2,b:function(n){return"number"==typeof n?kt(n):Pn("a FLOAT",n)}},dn={$:2,b:function(n){return kt(n)}},gn={$:2,b:function(n){return"string"==typeof n?kt(n):n instanceof String?kt(n+""):Pn("a STRING",n)}},pn=l(function(n,r){return{$:6,d:n,b:r}}),hn=l(function(n,r){return{$:10,b:r,h:n}}),vn=l(function(n,r){return{$:9,f:n,g:[r]}}),mn=A(function(n,r,e){return{$:9,f:n,g:[r,e]}}),$n=f(function(n,r,e,t){return{$:9,f:n,g:[r,e,t]}}),xn=e(function(n,r,e,t,a){return{$:9,f:n,g:[r,e,t,a]}}),wn=a(function(n,r,e,t,a,u,i){return{$:9,f:n,g:[r,e,t,a,u,i]}}),yn=u(function(n,r,e,t,a,u,i,o){return{$:9,f:n,g:[r,e,t,a,u,i,o]}}),Tn=l(function(n,r){try{return Cn(n,JSON.parse(r))}catch(n){return yt(R(Tt,"This is not valid JSON! "+n.message,r))}}),An=l(Cn);function Cn(n,r){switch(n.$){case 2:return n.b(r);case 5:return null===r?kt(n.c):Pn("null",r);case 3:return En(r)?kn(n.b,r,P):Pn("a LIST",r);case 4:return En(r)?kn(n.b,r,Zn):Pn("an ARRAY",r);case 6:var e=n.d;if("object"!=typeof r||null===r||!(e in r))return Pn("an OBJECT with a field named `"+e+"`",r);var t=Cn(n.b,r[e]);return ia(t)?t:yt(R(At,e,t.a));case 7:e=n.e;if(!En(r))return Pn("an ARRAY",r);if(r.length<=e)return Pn("a LONGER array. Need index "+e+" but only see "+r.length+" entries",r);t=Cn(n.b,r[e]);return ia(t)?t:yt(R(Ct,e,t.a));case 8:if("object"!=typeof r||null===r||En(r))return Pn("an OBJECT",r);var a,u=k;for(a in r)if(r.hasOwnProperty(a)){t=Cn(n.b,r[a]);if(!ia(t))return yt(R(At,a,t.a));u={$:1,a:{a:a,b:t.a},b:u}}return kt(zt(u));case 9:for(var i=n.f,o=n.g,c=0;c<o.length;c++){t=Cn(o[c],r);if(!ia(t))return t;i=i(t.a)}return kt(i);case 10:t=Cn(n.b,r);return ia(t)?Cn(n.h(t.a),r):t;case 11:for(var f=k,s=n.g;s.b;s=s.b){t=Cn(s.a,r);if(ia(t))return t;f={$:1,a:t.a,b:f}}return yt(Et(zt(f)));case 1:return yt(R(Tt,n.a,r));case 0:return kt(n.a)}}function kn(n,r,e){for(var t=r.length,a=Array(t),u=0;u<t;u++){var i=Cn(n,r[u]);if(!ia(i))return yt(R(Ct,u,i.a));a[u]=i.a}return kt(e(a))}function En(n){return Array.isArray(n)||"undefined"!=typeof FileList&&n instanceof FileList}function Zn(r){return R(ua,r.length,function(n){return r[n]})}function Pn(n,r){return yt(R(Tt,"Expecting "+n,r))}function Mn(n,r){if(n===r)return!0;if(n.$!==r.$)return!1;switch(n.$){case 0:case 1:return n.a===r.a;case 2:return n.b===r.b;case 5:return n.c===r.c;case 3:case 4:case 8:return Mn(n.b,r.b);case 6:return n.d===r.d&&Mn(n.b,r.b);case 7:return n.e===r.e&&Mn(n.b,r.b);case 9:return n.f===r.f&&_n(n.g,r.g);case 10:return n.h===r.h&&Mn(n.b,r.b);case 11:return _n(n.g,r.g)}}function _n(n,r){var e=n.length;if(e!==r.length)return!1;for(var t=0;t<e;t++)if(!Mn(n[t],r[t]))return!1;return!0}var Rn=l(function(n,r){return JSON.stringify(r,null,n)+""});function Sn(n){return n}var Ln=A(function(n,r,e){return e[n]=r,e}),jn=null;function Fn(n){return{$:0,a:n}}var On=l(function(n,r){return{$:3,b:n,d:r}}),In=0;function zn(n){n={$:0,e:In++,f:n,g:null,h:[]};return Gn(n),n}function Nn(r){return{$:2,b:function(n){n({$:0,a:zn(r)})},c:null}}function Bn(n,r){n.h.push(r),Gn(n)}var Kn=l(function(r,e){return{$:2,b:function(n){Bn(r,e),n({$:0,a:w})},c:null}}),Un=!1,Dn=[];function Gn(n){if(Dn.push(n),!Un){for(Un=!0;n=Dn.shift();)!function(r){for(;r.f;){var n=r.f.$;if(0===n||1===n){for(;r.g&&r.g.$!==n;)r.g=r.g.i;if(!r.g)return;r.f=r.g.b(r.f.a),r.g=r.g.i}else{if(2===n)return r.f.c=r.f.b(function(n){r.f=n,Gn(r)});if(5===n){if(0===r.h.length)return;r.f=r.f.b(r.h.shift())}else r.g={$:3===n?0:1,b:r.f.b,i:r.g},r.f=r.f.d}}}(n);Un=!1}}function qn(e){return{$:2,b:function(n){var r=setTimeout(function(){n({$:0,a:w})},e);return function(){clearTimeout(r)}},c:null}}function Wn(n,r,e,t,a,u){r=R(An,n,r?r.flags:void 0);ia(r)||I(2);var i={},r=e(r.a),o=r.a,c=u(f,o),u=function(n,r){var e,t;for(t in Jn){var a=Jn[t];a.a&&((e=e||{})[t]=a.a(t,r)),n[t]=function(n,r){var t={g:r,h:void 0},a=n.c,u=n.d,i=n.e,o=n.f;function c(e){return R(On,c,{$:5,b:function(n){var r=n.a;return 0===n.$?S(u,t,r,e):i&&o?C(a,t,r.i,r.j,e):S(a,t,i?r.i:r.j,e)}})}return t.h=zn(R(On,c,n.b))}(a,r)}return e}(i,f);function f(n,r){n=R(t,n,o);c(o=n.a,r),er(i,n.b,a(o))}return er(i,r.b,a(o)),u?{ports:u}:{}}var Jn={},Xn=l(function(r,e){return{$:2,b:function(n){r.g(e),n({$:0,a:w})},c:null}}),Hn=l(function(n,r){return R(Kn,n.h,{$:0,a:r})});function Vn(r){return function(n){return{$:1,k:r,l:n}}}function Qn(n){return{$:2,m:n}}var Yn=l(function(n,r){return{$:3,n:n,o:r}}),nr=[],rr=!1;function er(n,r,e){if(nr.push({p:n,q:r,r:e}),!rr){rr=!0;for(var a;a=nr.shift();)!function(n,r){var e,t={};for(e in tr(!0,a.q,t,null),tr(!1,r,t,null),n)Bn(n[e],{$:"fx",a:t[e]||{i:k,j:k}})}(a.p,a.r);rr=!1}}function tr(n,r,e,t){switch(r.$){case 1:var a=r.k,u=function(n,r,e,t){function a(n){for(var r=e;r;r=r.t)n=r.s(n);return n}return R(n?Jn[r].e:Jn[r].f,a,t)}(n,a,t,r.l);return void(e[a]=function(n,r,e){return e=e||{i:k,j:k},n?e.i={$:1,a:r,b:e.i}:e.j={$:1,a:r,b:e.j},e}(n,u,e[a]));case 2:for(var i=r.m;i.b;i=i.b)tr(n,i.a,e,t);return;case 3:return void tr(n,r.o,e,{s:r.n,t:t})}}function ar(n){Jn[n]&&I(3)}function ur(n,r){return ar(n),Jn[n]={e:ir,u:r,a:or},Vn(n)}var ir=l(function(n,r){return r});function or(n){var u=[],i=Jn[n].u,o=qn(0);return Jn[n].b=o,Jn[n].c=A(function(n,r){for(;r.b;r=r.b)for(var e=u,t=i(r.a),a=0;a<e.length;a++)e[a](t);return o}),{subscribe:function(n){u.push(n)},unsubscribe:function(n){(n=(u=u.slice()).indexOf(n))<0||u.splice(n,1)}}}function cr(n,r){return ar(n),Jn[n]={f:sr,u:r,a:br},Vn(n)}var fr,sr=l(function(r,e){return function(n){return r(e(n))}});function br(n,t){var a=k,u=Jn[n].u,e={$:0,a:null};return Jn[n].b=e,Jn[n].c=A(function(n,r){return a=r,e}),{send:function(n){ia(n=R(An,u,n))||I(4);for(var r=n.a,e=a;e.b;e=e.b)t(e.a(r))}}}var lr="undefined"!=typeof document?document:{};function dr(n){return{$:0,a:n}}var gr=l(function(u,i){return l(function(n,r){for(var e=[],t=0;r.b;r=r.b){var a=r.a;t+=a.b||0,e.push(a)}return t+=e.length,{$:1,c:i,d:Er(n),e:e,f:u,b:t}})})(void 0),pr=l(function(u,i){return l(function(n,r){for(var e=[],t=0;r.b;r=r.b){var a=r.a;t+=a.b.b||0,e.push(a)}return t+=e.length,{$:2,c:i,d:Er(n),e:e,f:u,b:t}})})(void 0),hr=l(function(n,r){return{$:4,j:n,k:r,b:1+(r.b||0)}}),vr=l(function(n,r){return{$:"a0",n:n,o:r}}),mr=l(function(n,r){return{$:"a1",n:n,o:r}}),$r=l(function(n,r){return{$:"a2",n:n,o:r}}),xr=l(function(n,r){return{$:"a3",n:n,o:r}});function wr(n){return"script"==n?"p":n}function yr(n){return/^\s*(javascript:|data:text\/html)/i.test(n)?"":n}var Tr,Ar=l(function(n,r){return"a0"===r.$?R(vr,r.n,function(n,r){var e=sa(r);return{$:r.$,a:e?S(ca,e<3?Cr:kr,fa(n),r.a):R(oa,n,r.a)}}(n,r.o)):r}),Cr=l(function(n,r){return{a:n(r.a),b:r.b}}),kr=l(function(n,r){return{aF:n(r.aF),d3:r.d3,dU:r.dU}});function Er(n){for(var r={};n.b;n=n.b){var e=n.a,t=e.$,a=e.n,u=e.o;"a2"!==t?(e=r[t]||(r[t]={}),"a3"===t&&"class"===a?Zr(e,a,u):e[a]=u):"className"===a?Zr(r,a,u):r[a]=u}return r}function Zr(n,r,e){var t=n[r];n[r]=t?t+" "+e:e}function Pr(n,r){var e=n.$;if(5===e)return Pr(n.k||(n.k=n.m()),r);if(0===e)return lr.createTextNode(n.a);if(4===e){for(var t=n.k,a=n.j;4===t.$;)"object"!=typeof a?a=[a,t.j]:a.push(t.j),t=t.k;var u={j:a,p:r};return(i=Pr(t,u)).elm_event_node_ref=u,i}if(3===e)return Mr(i=n.h(n.g),r,n.d),i;var i=n.f?lr.createElementNS(n.f,n.c):lr.createElement(n.c);fr&&"a"==n.c&&i.addEventListener("click",fr(i)),Mr(i,r,n.d);for(var o=n.e,c=0;c<o.length;c++)i.appendChild(Pr(1===e?o[c]:o[c].b,r));return i}function Mr(n,r,e){for(var t in e){var a=e[t];"a1"===t?function(n,r){var e,t=n.style;for(e in r)t[e]=r[e]}(n,a):"a0"===t?function(n,r,e){var t,a=n.elmFs||(n.elmFs={});for(t in e){var u=e[t],i=a[t];if(u){if(i){if(i.q.$===u.$){i.q=u;continue}n.removeEventListener(t,i)}i=function(c,n){function f(n){var r=f.q,e=Cn(r.a,n);if(ia(e)){for(var t,a=sa(r),r=e.a,u=a?a<3?r.a:r.aF:r,e=1==a?r.b:3==a&&r.d3,i=(e&&n.stopPropagation(),(2==a?r.b:3==a&&r.dU)&&n.preventDefault(),c);t=i.j;){if("function"==typeof t)u=t(u);else for(var o=t.length;o--;)u=t[o](u);i=i.p}i(u,e)}}return f.q=n,f}(r,u),n.addEventListener(t,i,Tr&&{passive:sa(u)<2}),a[t]=i}else n.removeEventListener(t,i),a[t]=void 0}}(n,r,a):"a3"===t?function(n,r){for(var e in r){var t=r[e];void 0!==t?n.setAttribute(e,t):n.removeAttribute(e)}}(n,a):"a4"===t?function(n,r){for(var e in r){var t=r[e],a=t.f,t=t.o;void 0!==t?n.setAttributeNS(a,e,t):n.removeAttributeNS(a,e)}}(n,a):("value"!==t&&"checked"!==t||n[t]!==a)&&(n[t]=a)}}try{window.addEventListener("t",null,Object.defineProperty({},"passive",{get:function(){Tr=!0}}))}catch(n){}function _r(n,r){var e=[];return Sr(n,r,e,0),e}function Rr(n,r,e,t){t={$:r,r:e,s:t,t:void 0,u:void 0};return n.push(t),t}function Sr(n,r,e,t){if(n!==r){var a=n.$,u=r.$;if(a!==u){if(1!==a||2!==u)return void Rr(e,0,t,r);r=function(n){for(var r=n.e,e=r.length,t=Array(e),a=0;a<e;a++)t[a]=r[a].b;return{$:1,c:n.c,d:n.d,e:t,f:n.f,b:n.b}}(r),u=1}switch(u){case 5:for(var i=n.l,o=r.l,c=i.length,f=c===o.length;f&&c--;)f=i[c]===o[c];if(f)return void(r.k=n.k);r.k=r.m();var s=[];return Sr(n.k,r.k,s,0),void(0<s.length&&Rr(e,1,t,s));case 4:for(var b=n.j,l=r.j,d=!1,g=n.k;4===g.$;)d=!0,"object"!=typeof b?b=[b,g.j]:b.push(g.j),g=g.k;for(var p=r.k;4===p.$;)d=!0,"object"!=typeof l?l=[l,p.j]:l.push(p.j),p=p.k;return d&&b.length!==l.length?void Rr(e,0,t,r):((d?function(n,r){for(var e=0;e<n.length;e++)if(n[e]!==r[e])return!1;return!0}(b,l):b===l)||Rr(e,2,t,l),void Sr(g,p,e,t+1));case 0:return void(n.a!==r.a&&Rr(e,3,t,r.a));case 1:return void Lr(n,r,e,t,Fr);case 2:return void Lr(n,r,e,t,Or);case 3:if(n.h!==r.h)return void Rr(e,0,t,r);s=jr(n.d,r.d);s&&Rr(e,4,t,s);s=r.i(n.g,r.g);return void(s&&Rr(e,5,t,s))}}}function Lr(n,r,e,t,a){var u;n.c===r.c&&n.f===r.f?((u=jr(n.d,r.d))&&Rr(e,4,t,u),a(n,r,e,t)):Rr(e,0,t,r)}function jr(n,r,e){var t,a,u,i,o;for(a in n)"a1"!==a&&"a0"!==a&&"a3"!==a&&"a4"!==a?a in r?(u=n[a])===(i=r[a])&&"value"!==a&&"checked"!==a||"a0"===e&&function(n,r){return n.$==r.$&&Mn(n.a,r.a)}(u,i)||((t=t||{})[a]=i):(t=t||{})[a]=e?"a1"===e?"":"a0"===e||"a3"===e?void 0:{f:n[a].f,o:void 0}:"string"==typeof n[a]?"":null:(i=jr(n[a],r[a]||{},a))&&((t=t||{})[a]=i);for(o in r)o in n||((t=t||{})[o]=r[o]);return t}function Fr(n,r,e,t){var a=n.e,u=r.e,n=a.length,r=u.length;r<n?Rr(e,6,t,{v:r,i:n-r}):n<r&&Rr(e,7,t,{v:n,e:u});for(var i=n<r?n:r,o=0;o<i;o++){var c=a[o];Sr(c,u[o],e,++t),t+=c.b||0}}function Or(n,r,e,t){for(var a=[],u={},i=[],o=n.e,c=r.e,f=o.length,s=c.length,b=0,l=0,d=t;b<f&&l<s;){var g,p=(g=o[b]).a,h=(E=c[l]).a,v=g.b,m=E.b,$=void 0,x=void 0;if(p!==h){var w,y,T,A,C=o[b+1],k=c[l+1];if(C&&(y=C.b,x=h===(w=C.a)),k&&(A=k.b,$=p===(T=k.a)),$&&x)Sr(v,A,a,++d),zr(u,a,p,m,l,i),d+=v.b||0,Nr(u,a,p,y,++d),d+=y.b||0,b+=2,l+=2;else if($)d++,zr(u,a,h,m,l,i),Sr(v,A,a,d),d+=v.b||0,b+=1,l+=2;else if(x)Nr(u,a,p,v,++d),d+=v.b||0,Sr(y,m,a,++d),d+=y.b||0,b+=2,l+=1;else{if(!C||w!==T)break;Nr(u,a,p,v,++d),zr(u,a,h,m,l,i),d+=v.b||0,Sr(y,A,a,++d),d+=y.b||0,b+=2,l+=2}}else Sr(v,m,a,++d),d+=v.b||0,b++,l++}for(;b<f;)Nr(u,a,(g=o[b]).a,v=g.b,++d),d+=v.b||0,b++;for(;l<s;){var E,Z=Z||[];zr(u,a,(E=c[l]).a,E.b,void 0,Z),l++}(0<a.length||0<i.length||Z)&&Rr(e,8,t,{w:a,x:i,y:Z})}var Ir="_elmW6BL";function zr(n,r,e,t,a,u){var i=n[e];if(!i)return u.push({r:a,A:i={c:0,z:t,r:a,s:void 0}}),void(n[e]=i);if(1===i.c){u.push({r:a,A:i}),i.c=2;var o=[];return Sr(i.z,t,o,i.r),i.r=a,void(i.s.s={w:o,A:i})}zr(n,r,e+Ir,t,a,u)}function Nr(n,r,e,t,a){var u=n[e];if(u){if(0===u.c){u.c=2;var i=[];return Sr(t,u.z,i,a),void Rr(r,9,a,{w:i,A:u})}Nr(n,r,e+Ir,t,a)}else{r=Rr(r,9,a,void 0);n[e]={c:1,z:t,r:a,s:r}}}function Br(n,r,e,t){!function n(r,e,t,a,u,i,o){var c=t[a];var f=c.r;for(;f===u;){var s,b=c.$;if(1===b?Br(r,e.k,c.s,o):8===b?(c.t=r,c.u=o,0<(s=c.s.w).length&&n(r,e,s,0,u,i,o)):9===b?(c.t=r,c.u=o,(b=c.s)&&(b.A.s=r,0<(s=b.w).length&&n(r,e,s,0,u,i,o))):(c.t=r,c.u=o),!(c=t[++a])||(f=c.r)>i)return a}var l=e.$;if(4===l){for(var d=e.k;4===d.$;)d=d.k;return n(r,d,t,a,u+1,i,r.elm_event_node_ref)}var g=e.e;var p=r.childNodes;for(var h=0;h<g.length;h++){var v=1===l?g[h]:g[h].b,m=++u+(v.b||0);if(u<=f&&f<=m&&(a=n(p[h],v,t,a,u,m,o),!(c=t[a])||(f=c.r)>i))return a;u=m}return a}(n,r,e,0,0,r.b,t)}function Kr(n,r,e,t){return 0===e.length?n:(Br(n,r,e,t),Ur(n,e))}function Ur(n,r){for(var e=0;e<r.length;e++){var t=r[e],a=t.t,t=function(n,r){switch(r.$){case 0:return function(n,r,e){var t=n.parentNode,e=Pr(r,e);e.elm_event_node_ref||(e.elm_event_node_ref=n.elm_event_node_ref);t&&e!==n&&t.replaceChild(e,n);return e}(n,r.s,r.u);case 4:return Mr(n,r.u,r.s),n;case 3:return n.replaceData(0,n.length,r.s),n;case 1:return Ur(n,r.s);case 2:return n.elm_event_node_ref?n.elm_event_node_ref.j=r.s:n.elm_event_node_ref={j:r.s,p:r.u},n;case 6:for(var e=r.s,t=0;t<e.i;t++)n.removeChild(n.childNodes[e.v]);return n;case 7:for(var a=(e=r.s).e,u=n.childNodes[t=e.v];t<a.length;t++)n.insertBefore(Pr(a[t],r.u),u);return n;case 9:if(!(e=r.s))return n.parentNode.removeChild(n),n;var i=e.A;return void 0!==i.r&&n.parentNode.removeChild(n),i.s=Ur(n,e.w),n;case 8:return function(n,r){var e=r.s,t=function(n,r){if(!n)return;for(var e=lr.createDocumentFragment(),t=0;t<n.length;t++){var a=n[t].A;e.appendChild(2===a.c?a.s:Pr(a.z,r.u))}return e}(e.y,r);n=Ur(n,e.w);for(var a=e.x,u=0;u<a.length;u++){var i=a[u],o=i.A,o=2===o.c?o.s:Pr(o.z,r.u);n.insertBefore(o,n.childNodes[i.r])}t&&n.appendChild(t);return n}(n,r);case 5:return r.s(n);default:I(10)}}(a,t);a===n&&(n=t)}return n}function Dr(n){if(3===n.nodeType)return{$:0,a:n.textContent};if(1!==n.nodeType)return{$:0,a:""};for(var r=k,e=n.attributes,t=e.length;t--;)var a=e[t],r={$:1,a:R(xr,a.name,a.value),b:r};for(var u=n.tagName.toLowerCase(),i=k,o=n.childNodes,t=o.length;t--;)i={$:1,a:Dr(o[t]),b:i};return S(gr,u,r,i)}var Gr=f(function(r,n,e,t){return Wn(n,t,r.hX,r.ju,r.i4,function(t,n){var a=r.d1&&r.d1(t),u=r.jz,i=lr.title,o=lr.body,c=Dr(o);return Wr(n,function(n){fr=a;var r=u(n),e=gr("body")(k)(r.gS),n=_r(c,e);o=Kr(o,c,n,t),c=e,fr=0,i!==r.jn&&(lr.title=i=r.jn)})})}),qr="undefined"!=typeof requestAnimationFrame?requestAnimationFrame:function(n){return setTimeout(n,1e3/60)};function Wr(e,t){t(e);var a=0;function u(){a=1===a?0:(qr(u),t(e),1)}return function(n,r){e=n,r?(t(e),2===a&&(a=1)):(0===a&&qr(u),a=2)}}function Jr(){return Aa(lr.location.href).a||I(1)}var Xr=l(function(n,r){return R(ii,Ca,{$:2,b:function(){history.replaceState({},"",r),n()},c:null})}),Hr={addEventListener:function(){},removeEventListener:function(){}},Vr="undefined"!=typeof window?window:Hr;function Qr(n){return n.byteLength}var Yr,ne=A(function(n,r,e){return n.setInt8(r,e),r+1}),re=f(function(n,r,e,t){return n.setInt16(r,e,t),r+2}),ee=f(function(n,r,e,t){return n.setInt32(r,e,t),r+4}),te=A(function(n,r,e){return n.setUint8(r,e),r+1}),ae=f(function(n,r,e,t){return n.setUint16(r,e,t),r+2}),ue=f(function(n,r,e,t){return n.setUint32(r,e,t),r+4}),ie=f(function(n,r,e,t){return n.setFloat32(r,e,t),r+4}),oe=f(function(n,r,e,t){return n.setFloat64(r,e,t),r+8}),ce=A(function(n,r,e){for(var t=0,a=e.byteLength,u=a-4;t<=u;t+=4)n.setUint32(r+t,e.getUint32(t));for(;t<a;t++)n.setUint8(r+t,e.getUint8(t));return r+a}),fe=A(function(n,r,e){for(var t=0;t<e.length;t++){var a=e.charCodeAt(t);r+=a<128?(n.setUint8(r,a),1):a<2048?(n.setUint16(r,49280|(a>>>6&31)<<8|63&a),2):a<55296||56319<a?(n.setUint16(r,57472|(a>>>12&15)<<8|a>>>6&63),n.setUint8(r+2,128|63&a),3):(a=1024*(a-55296)+e.charCodeAt(++t)-56320+65536,n.setUint32(r,4034953344|(a>>>18&7)<<24|(a>>>12&63)<<16|(a>>>6&63)<<8|63&a),4)}return r}),se=l(function(n,r){try{return lt(R(n,r,0).b)}catch(n){return gt}}),be=l(function(n,r){return{a:r+1,b:n.getUint8(r)}}),le=l(function(n,r){return n|r}),de=l(function(n,r){return r>>>n});function ge(n){var r;"function"==typeof MouseEvent?n.dispatchEvent(new MouseEvent("click")):((r=document.createEvent("MouseEvents")).initMouseEvent("click",!0,!0,window,0,0,0,0,0,!1,!1,!1,!1,0,null),document.body.appendChild(n),n.dispatchEvent(r),document.body.removeChild(n))}var pe=l(function(n,r){var e="g";n.ig&&(e+="m"),n.g1&&(e+="i");try{return lt(RegExp(r,e))}catch(n){return gt}}),he=A(function(n,r,e){for(var t,a=[],u=0,i=e,e=r.lastIndex,o=-1;u++<n&&(t=r.exec(i))&&o!=r.lastIndex;){for(var c=t.length-1,f=Array(c);0<c;){var s=t[c];f[--c]=s?lt(s):gt}a.push(C(ef,t[0],t.index,u,P(f))),o=r.lastIndex}return r.lastIndex=e,P(a)}),ve=l(function(n,r){return new Float64Array([n,r])});new Float64Array(3),new Float64Array(3),new Float64Array(3);var me=A(function(n,r,e){return new Float64Array([n,r,e])}),$e=l(function(n,r){return new Float64Array([r[0]*n,r[1]*n,r[2]*n])}),xe=f(function(n,r,e,t){return new Float64Array([n,r,e,t])});new Float64Array(16),new Float64Array(16),new Float64Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]);var we=0;function ye(n,r){for(;r.b;r=r.b)n(r.a)}function Te(n){for(var r=0;n.b;n=n.b)r++;return r}function Ae(n){n.scissor.enabled&&(n.gl.disable(n.gl.SCISSOR_TEST),n.scissor.enabled=!1)}function Ce(n){var r=n.colorMask;r.a&&r.b&&r.c&&r.d||(n.gl.colorMask(!0,!0,!0,!0),r.a=!0,r.b=!0,r.c=!0,r.d=!0)}var ke="undefined"!=typeof requestAnimationFrame?requestAnimationFrame:function(n){setTimeout(n,1e3/60)},Ee=e(function(n,r,e,t,a){return{$:0,a:n,b:r,c:e,d:t,e:a}}),Ze=l(function(n,r){var e=n.blend;e.toggle=n.toggle,e.enabled||(n.gl.enable(n.gl.BLEND),e.enabled=!0),e.a===r.a&&e.d===r.d||(n.gl.blendEquationSeparate(r.a,r.d),e.a=r.a,e.d=r.d),e.b===r.b&&e.c===r.c&&e.e===r.e&&e.f===r.f||(n.gl.blendFuncSeparate(r.b,r.c,r.e,r.f),e.b=r.b,e.c=r.c,e.e=r.e,e.f=r.f),e.g===r.g&&e.h===r.h&&e.i===r.i&&e.j===r.j||(n.gl.blendColor(r.g,r.h,r.i,r.j),e.g=r.g,e.h=r.h,e.i=r.i,e.j=r.j)}),Pe=l(function(n,r){var e=n.depthTest;e.toggle=n.toggle,e.enabled||(n.gl.enable(n.gl.DEPTH_TEST),e.enabled=!0),e.a!==r.a&&(n.gl.depthFunc(r.a),e.a=r.a),e.b!==r.b&&(n.gl.depthMask(r.b),e.b=r.b),e.c===r.c&&e.d===r.d||(n.gl.depthRange(r.c,r.d),e.c=r.c,e.d=r.d)}),Me=l(function(n,r){var e=n.stencilTest;e.toggle=n.toggle,e.enabled||(n.gl.enable(n.gl.STENCIL_TEST),e.enabled=!0),e.d===r.d&&e.a===r.a&&e.b===r.b||(n.gl.stencilFuncSeparate(n.gl.FRONT,r.d,r.a,r.b),e.d=r.d),e.e===r.e&&e.f===r.f&&e.g===r.g||(n.gl.stencilOpSeparate(n.gl.FRONT,r.e,r.f,r.g),e.e=r.e,e.f=r.f,e.g=r.g),e.c!==r.c&&(n.gl.stencilMask(r.c),e.c=r.c),e.h===r.h&&e.a===r.a&&e.b===r.b||(n.gl.stencilFuncSeparate(n.gl.BACK,r.h,r.a,r.b),e.h=r.h,e.a=r.a,e.b=r.b),e.i===r.i&&e.j===r.j&&e.k===r.k||(n.gl.stencilOpSeparate(n.gl.BACK,r.i,r.j,r.k),e.i=r.i,e.j=r.j,e.k=r.k)}),_e=l(function(n,r){var e=n.scissor;e.toggle=n.toggle,e.enabled||(n.gl.enable(n.gl.SCISSOR_TEST),e.enabled=!0),e.a===r.a&&e.b===r.b&&e.c===r.c&&e.d===r.d||(n.gl.scissor(r.a,r.b,r.c,r.d),e.a=r.a,e.b=r.b,e.c=r.c,e.d=r.d)}),Re=l(function(n,r){var e=n.colorMask;e.toggle=n.toggle,e.enabled=!0,e.a===r.a&&e.b===r.b&&e.c===r.c&&e.d===r.d||(n.gl.colorMask(r.a,r.b,r.c,r.d),e.a=r.a,e.b=r.b,e.c=r.c,e.d=r.d)}),Se=l(function(n,r){var e=n.cullFace;e.toggle=n.toggle,e.enabled||(n.gl.enable(n.gl.CULL_FACE),e.enabled=!0),e.a!==r.a&&(n.gl.cullFace(r.a),e.a=r.a)}),Le=l(function(n,r){var e=n.polygonOffset;e.toggle=n.toggle,e.enabled||(n.gl.enable(n.gl.POLYGON_OFFSET_FILL),e.enabled=!0),e.a===r.a&&e.b===r.b||(n.gl.polygonOffset(r.a,r.b),e.a=r.a,e.b=r.b)}),je=l(function(n,r){var e=n.sampleCoverage;e.toggle=n.toggle,e.enabled||(n.gl.enable(n.gl.SAMPLE_COVERAGE),e.enabled=!0),e.a===r.a&&e.b===r.b||(n.gl.sampleCoverage(r.a,r.b),e.a=r.a,e.b=r.b)}),Fe=["blend","depthTest","stencilTest","scissor","colorMask","cullFace","polygonOffset","sampleCoverage","sampleAlphaToCoverage"],Oe=[function(n){n.blend.enabled&&(n.gl.disable(n.gl.BLEND),n.blend.enabled=!1)},function(n){n.depthTest.enabled&&(n.gl.disable(n.gl.DEPTH_TEST),n.depthTest.enabled=!1)},function(n){n.stencilTest.enabled&&(n.gl.disable(n.gl.STENCIL_TEST),n.stencilTest.enabled=!1)},Ae,Ce,function(n){n.gl.disable(n.gl.CULL_FACE)},function(n){n.gl.disable(n.gl.POLYGON_OFFSET_FILL)},function(n){n.gl.disable(n.gl.SAMPLE_COVERAGE)},function(n){n.gl.disable(n.gl.SAMPLE_ALPHA_TO_COVERAGE)}];function Ie(n,r,e){e=n.createShader(e);return n.shaderSource(e,"#extension GL_OES_standard_derivatives : enable\n"+r),n.compileShader(e),e}function ze(n,r){switch(r){case n.FLOAT:return{size:1,arraySize:1,type:Float32Array,baseType:n.FLOAT};case n.FLOAT_VEC2:return{size:2,arraySize:1,type:Float32Array,baseType:n.FLOAT};case n.FLOAT_VEC3:return{size:3,arraySize:1,type:Float32Array,baseType:n.FLOAT};case n.FLOAT_VEC4:return{size:4,arraySize:1,type:Float32Array,baseType:n.FLOAT};case n.FLOAT_MAT4:return{size:4,arraySize:4,type:Float32Array,baseType:n.FLOAT};case n.INT:return{size:1,arraySize:1,type:Int32Array,baseType:n.INT}}}function Ne(n,r,e,t){for(var o=e.a.eC,c=[],a=0;a<o;a++)c.push(String.fromCharCode(97+a));var u=ze(n,r.type);if(void 0===u)throw Error("No info available for: "+r.type);var i=0,f=u.size*u.arraySize*o,s=new u.type(Te(e.b)*f);ye(function(n){!function(r,e,t,a,u){var i;if(1===o)for(i=0;i<e;i++)r[t++]=1===e?a[u]:a[u][i];else c.forEach(function(n){for(i=0;i<e;i++)r[t++]=1===e?a[n][u]:a[n][u][i]})}(s,u.size*u.arraySize,i,n,t[r.name]||r.name),i+=f},e.b);e=n.createBuffer();return n.bindBuffer(n.ARRAY_BUFFER,e),n.bufferData(n.ARRAY_BUFFER,s,n.STATIC_DRAW),e}function Be(n,r){if(0<r.a.eV){var e=n.createBuffer(),t=function(n,r){var e,t=new Uint32Array(Te(n)*r),a=0;return ye(function(n){if(1===r)t[a++]=n;else for(e=0;e<r;e++)t[a++]=n[String.fromCharCode(97+e)]},n),t}(r.c,r.a.eV);return n.bindBuffer(n.ELEMENT_ARRAY_BUFFER,e),n.bufferData(n.ELEMENT_ARRAY_BUFFER,t,n.STATIC_DRAW),{numIndices:t.length,indexBuffer:e,buffers:{}}}return{numIndices:r.a.eC*Te(r.b),indexBuffer:null,buffers:{}}}var Ke=l(function(m,n){var $=m.f,x=$.gl;return x&&(x.viewport(0,0,x.drawingBufferWidth,x.drawingBufferHeight),$.depthTest.b||(x.depthMask(!0),$.depthTest.b=!0),$.stencilTest.c!==$.STENCIL_WRITEMASK&&(x.stencilMask($.STENCIL_WRITEMASK),$.stencilTest.c=$.STENCIL_WRITEMASK),Ae($),Ce($),x.clear(x.COLOR_BUFFER_BIT|x.DEPTH_BUFFER_BIT|x.STENCIL_BUFFER_BIT),ye(function(n){if(n.d.b.b){var r,e,t,a,u;if(n.b.id&&n.c.id&&(i=$.programs[r=n.b.id+"#"+n.c.id]),!i){n.b.id?e=$.shaders[n.b.id]:n.b.id=we++,e||(e=Ie(x,n.b.src,x.VERTEX_SHADER),$.shaders[n.b.id]=e),n.c.id?t=$.shaders[n.c.id]:n.c.id=we++,t||(t=Ie(x,n.c.src,x.FRAGMENT_SHADER),$.shaders[n.c.id]=t);var i,o=function(n,r,e){var t=n.createProgram();if(n.attachShader(t,r),n.attachShader(t,e),n.linkProgram(t),!n.getProgramParameter(t,n.LINK_STATUS))throw"Link failed: "+n.getProgramInfoLog(t)+"\nvs info-log: "+n.getShaderInfoLog(r)+"\nfs info-log: "+n.getShaderInfoLog(e);return t}(x,e,t);(i={glProgram:o,attributes:Object.assign({},n.b.attributes,n.c.attributes),currentUniforms:{},activeAttributes:[],activeAttributeLocations:[]}).uniformSetters=function(u,n,r,e){var t=r.glProgram,i=r.currentUniforms,o=0,c=n.f;for(var a={},f=u.getProgramParameter(t,u.ACTIVE_UNIFORMS),s=0;s<f;s++){var b=u.getActiveUniform(t,s);a[e[b.name]||b.name]=function(n,r){var e=r.name,t=u.getUniformLocation(n,e);switch(r.type){case u.INT:return function(n){i[e]!==n&&(u.uniform1i(t,n),i[e]=n)};case u.FLOAT:return function(n){i[e]!==n&&(u.uniform1f(t,n),i[e]=n)};case u.FLOAT_VEC2:return function(n){i[e]!==n&&(u.uniform2f(t,n[0],n[1]),i[e]=n)};case u.FLOAT_VEC3:return function(n){i[e]!==n&&(u.uniform3f(t,n[0],n[1],n[2]),i[e]=n)};case u.FLOAT_VEC4:return function(n){i[e]!==n&&(u.uniform4f(t,n[0],n[1],n[2],n[3]),i[e]=n)};case u.FLOAT_MAT4:return function(n){i[e]!==n&&(u.uniformMatrix4fv(t,!1,new Float32Array(n)),i[e]=n)};case u.SAMPLER_2D:var a=o++;return function(n){u.activeTexture(u.TEXTURE0+a);var r=c.textures.get(n);r||(r=n.hg(u),c.textures.set(n,r)),u.bindTexture(u.TEXTURE_2D,r),i[e]!==n&&(u.uniform1i(t,a),i[e]=n)};case u.BOOL:return function(n){i[e]!==n&&(u.uniform1i(t,n),i[e]=n)};default:return function(){}}}(t,b)}return a}(x,m,i,Object.assign({},n.b.uniforms,n.c.uniforms));for(var c=x.getProgramParameter(o,x.ACTIVE_ATTRIBUTES),f=0;f<c;f++){var s=x.getActiveAttrib(o,f),b=x.getAttribLocation(o,s.name);i.activeAttributes.push(s),i.activeAttributeLocations.push(b)}$.programs[r=n.b.id+"#"+n.c.id]=i}$.lastProgId!==r&&(x.useProgram(i.glProgram),$.lastProgId=r),a=i.uniformSetters,Object.keys(u=n.e).forEach(function(n){var r=a[n];r&&r(u[n])});var l=$.buffers.get(n.d);for(l||(l=Be(x,n.d),$.buffers.set(n.d,l)),f=0;f<i.activeAttributes.length;f++){b=i.activeAttributeLocations[f],void 0===l.buffers[(s=i.activeAttributes[f]).name]&&(l.buffers[s.name]=Ne(x,s,n.d,i.attributes)),x.bindBuffer(x.ARRAY_BUFFER,l.buffers[s.name]);var d=ze(x,s.type);if(1===d.arraySize)x.enableVertexAttribArray(b),x.vertexAttribPointer(b,d.size,d.baseType,!1,0,0);else for(var g=4*d.size,p=g*d.arraySize,h=0;h<d.arraySize;h++)x.enableVertexAttribArray(b+h),x.vertexAttribPointer(b+h,d.size,d.baseType,!1,p,g*h)}for($.toggle=!$.toggle,ye(Ff($),n.a),f=0;f<9;f++){var v=$[Fe[f]];v.toggle!==$.toggle&&v.enabled&&(Oe[f]($),v.enabled=!1,v.toggle=$.toggle)}l.indexBuffer?(x.bindBuffer(x.ELEMENT_ARRAY_BUFFER,l.indexBuffer),x.drawElements(n.d.a.fy,l.numIndices,x.UNSIGNED_INT,0)):x.drawArrays(n.d.a.fy,0,l.numIndices)}},m.g)),n}),Ue=A(function(n,r,e){return function(n,r,e,t){return{$:3,d:Er(n),g:r,h:e,i:t}}(r,{g:e,f:{},h:n},He,Ve)}),De=l(function(n,r){n.contextAttributes.alpha=!0,n.contextAttributes.premultipliedAlpha=r.a}),Ge=l(function(n,r){n.contextAttributes.depth=!0,n.sceneSettings.push(function(n){n.clearDepth(r.a)})}),qe=l(function(n,r){n.contextAttributes.stencil=!0,n.sceneSettings.push(function(n){n.clearStencil(r.a)})}),We=l(function(n){n.contextAttributes.antialias=!0}),Je=l(function(n,r){n.sceneSettings.push(function(n){n.clearColor(r.a,r.b,r.c,r.d)})}),Xe=l(function(n){n.contextAttributes.preserveDrawingBuffer=!0});function He(n){var r={contextAttributes:{alpha:!1,depth:!1,stencil:!1,antialias:!1,premultipliedAlpha:!1,preserveDrawingBuffer:!1},sceneSettings:[]};ye(function(n){return R(jf,r,n)},n.h);var e=lr.createElement("canvas"),t=e.getContext&&(e.getContext("webgl",r.contextAttributes)||e.getContext("experimental-webgl",r.contextAttributes));return t&&"undefined"!=typeof WeakMap?(r.sceneSettings.forEach(function(n){n(t)}),t.getExtension("OES_standard_derivatives"),t.getExtension("OES_element_index_uint"),n.f.gl=t,n.f.toggle=!1,n.f.blend={enabled:!1,toggle:!1},n.f.depthTest={enabled:!1,toggle:!1},n.f.stencilTest={enabled:!1,toggle:!1},n.f.scissor={enabled:!1,toggle:!1},n.f.colorMask={enabled:!1,toggle:!1},n.f.cullFace={enabled:!1,toggle:!1},n.f.polygonOffset={enabled:!1,toggle:!1},n.f.sampleCoverage={enabled:!1,toggle:!1},n.f.sampleAlphaToCoverage={enabled:!1,toggle:!1},n.f.shaders=[],n.f.programs={},n.f.lastProgId=null,n.f.buffers=new WeakMap,n.f.textures=new WeakMap,n.f.STENCIL_WRITEMASK=t.getParameter(t.STENCIL_WRITEMASK),ke(function(){return R(Ke,n,e)})):(e=lr.createElement("div")).innerHTML='<a href="https://get.webgl.org/">Enable WebGL</a> to see this content!',e}function Ve(n,r){return r.f=n.f,Ke(r)}var Qe=A(function(t,a,u){return{$:2,b:function(r){function e(n){r(a(u.eK.a(n)))}var n=new XMLHttpRequest;n.addEventListener("error",function(){e(ts)}),n.addEventListener("timeout",function(){e(is)}),n.addEventListener("load",function(){e(function(n,r){return R(200<=r.status&&r.status<300?es:ns,function(n){return{gh:n.responseURL,i_:n.status,i$:n.statusText,eQ:function(n){if(!n)return pi;for(var r=pi,e=n.split("\r\n"),t=e.length;t--;){var a,u,i=e[t],o=i.indexOf(": ");0<o&&(a=i.substring(0,o),u=i.substring(2+o),r=S(yo,a,function(n){return lt(os(n)?u+", "+n.a:u)},r))}return r}(n.getAllResponseHeaders())}}(r),n(r.response))}(u.eK.b,n))}),os(u.gc)&&function(r,e,t){e.upload.addEventListener("progress",function(n){e.c||zn(R(cs,r,{a:t,b:us({iP:n.loaded,f0:n.total})}))}),e.addEventListener("progress",function(n){e.c||zn(R(cs,r,{a:t,b:as({iD:n.loaded,f0:n.lengthComputable?lt(n.total):gt})}))})}(t,n,u.gc.a);try{n.open(u.ft,u.gh,!0)}catch(n){return e(rs(u.gh))}return function(n,r){for(var e=r.eQ;e.b;e=e.b)n.setRequestHeader(e.a.a,e.a.b);n.timeout=r.f8.a||0,n.responseType=r.eK.d,n.withCredentials=r.gF}(n,u),u.gS.a&&n.setRequestHeader("Content-Type",u.gS.a),n.send(u.gS.b),function(){n.c=!0,n.abort()}},c:null}}),Ye=A(function(n,r,e){return{$:0,d:n,b:r,a:e}}),nt=l(function(r,e){return{$:0,d:e.d,b:e.b,a:function(n){return r(e.a(n))}}}),rt=l(function(n,r){return{$:0,a:n,b:r}});function et(n){return{$:3,a:n}}function tt(n){return R(_t,"\n    ",R(Rt,"\n",n))}function at(n){return S(St,l(function(n,r){return r+1}),0,n)}function ut(n){return 97<=(n=It(n))&&n<=122}function it(n){return(n=It(n))<=90&&65<=n}function ot(n){return ut(n)||it(n)||function(n){n=It(n);return n<=57&&48<=n}(n)}function ct(n){return n}function ft(n){return n.a}function st(n){return n}function bt(n){return S(Za,Ra($t),ka(k),n)}var lt=function(n){return{$:0,a:n}},dt={$:0},gt={$:1},pt=l(function(n){return n}),ht=1,vt=2,mt=0,$t=Z,xt=A(function(n,r,e){for(;;){if(-2===e.$)return r;var t=e.d,a=n,u=S(n,e.b,e.c,S(xt,n,r,e.e));n=a,r=u,e=t}}),wt=function(n){return S(xt,A(function(n,r,e){return R($t,{a:n,b:r},e)}),k,n)},yt=function(n){return{$:1,a:n}},Tt=l(function(n,r){return{$:3,a:n,b:r}}),At=l(function(n,r){return{$:0,a:n,b:r}}),Ct=l(function(n,r){return{$:1,a:n,b:r}}),kt=function(n){return{$:0,a:n}},Et=function(n){return{$:2,a:n}},Zt=an,Pt=Rn,Mt=fn,_t=l(function(n,r){return R(en,n,M(r))}),Rt=l(function(n,r){return P(R(rn,n,r))}),St=A(function(n,r,e){for(;;){if(!e.b)return r;var t=e.b,a=n,u=R(n,e.a,r);n=a,r=u,e=t}}),Lt=_,jt=A(function(n,r,e){for(;;){if(1<=b(n,r))return e;var t=n,a=r-1,u=R($t,r,e);n=t,r=a,e=u}}),Ft=l(function(n,r){return S(jt,n,r,k)}),Ot=l(function(n,r){return S(Lt,n,R(Ft,0,at(r)-1),r)}),It=function(n){var r=n.charCodeAt(0);return r<55296||56319<r?r:1024*(r-55296)+n.charCodeAt(1)-56320+65536},zt=function(n){return S(St,$t,k,n)},Nt=function(n){var r=n.charCodeAt(0);return isNaN(r)?gt:lt(r<55296||56319<r?{a:n[0],b:n.slice(1)}:{a:n[0]+n[1],b:n.slice(2)})},Bt=l(function(n,r){return"\n\n("+Mt(n+1)+(") "+tt(Kt(r)))}),Kt=function(n){return R(Ut,n,k)},Ut=l(function(n,r){n:for(;;)switch(n.$){case 0:var e=n.a,t=n.b,a=function(){var n=Nt(e);if(1===n.$)return!1;var r=n.a,n=r.b;return function(n){return ut(n)||it(n)}(r.a)&&R(Zt,ot,n)}();n=t,r=R($t,a?"."+e:"['"+e+"']",r);continue n;case 1:var t=n.b,u="["+Mt(n.a)+"]";n=t,r=R($t,u,r);continue n;case 2:var i=n.a;if(i.b){if(i.b.b){var o=(r.b?"The Json.Decode.oneOf at json"+R(_t,"",zt(r)):"Json.Decode.oneOf")+" failed in the following "+Mt(at(i))+" ways:";return R(_t,"\n\n",R($t,o,R(Ot,Bt,i)))}n=t=i.a,r=r;continue n}return"Ran into a Json.Decode.oneOf with no possibilities"+(r.b?" at json"+R(_t,"",zt(r)):"!");default:u=n.a,i=n.b;return(o=r.b?"Problem with the value at json"+R(_t,"",zt(r))+":\n\n    ":"Problem with the given value:\n\n")+(tt(R(Pt,4,i))+"\n\n")+u}}),Dt=f(function(n,r,e,t){return{$:0,a:n,b:r,c:e,d:t}}),Gt=[],qt=J,Wt=l(function(n,r){return Q(r)/Q(n)}),Jt=qt(R(Wt,2,32)),Xt=C(Dt,0,Jt,Gt,Gt),Ht=j,Vt=X,Qt=function(n){return n.length},Yt=l(function(n,r){return 0<b(n,r)?n:r}),na=F,ra=l(function(n,r){for(;;){var e=R(na,32,n),t=e.b,e=R($t,{$:0,a:e.a},r);if(!t.b)return zt(e);n=t,r=e}}),ea=l(function(n,r){for(;;){var e=qt(r/32);if(1===e)return R(na,32,n).a;n=R(ra,n,k),r=e}}),ta=l(function(n,r){if(r.r){var e=32*r.r,t=Vt(R(Wt,32,e-1)),n=n?zt(r.E):r.E,n=R(ea,n,r.r);return C(Dt,Qt(r.u)+e,R(Yt,5,t*Jt),n,r.u)}return C(Dt,Qt(r.u),Jt,Gt,r.u)}),aa=e(function(n,r,e,t,a){for(;;){if(r<0)return R(ta,!1,{E:t,r:e/32|0,u:a});var u={$:1,a:S(Ht,32,r,n)};n=n,r=r-32,e=e,t=R($t,u,t),a=a}}),ua=l(function(n,r){if(0<n){var e=n%32;return d(aa,r,n-e-32,n,k,S(Ht,e,n-e,r))}return Xt}),ia=function(n){return!n.$},oa=vn,ca=mn,fa=function(n){return{$:0,a:n}},sa=function(n){switch(n.$){case 0:return 0;case 1:return 1;case 2:return 2;default:return 3}},ba=t(function(n,r,e,t,a,u){return{eO:u,hO:r,iw:t,iA:e,iC:n,cJ:a}}),la=un,da=function(n){return n.length},ga=tn,pa=l(function(n,r){return n<1?r:S(ga,n,da(r),r)}),ha=cn,va=l(function(n,r){return n<1?"":S(ga,0,n,r)}),ma=function(n){for(var r=0,e=n.charCodeAt(0),t=43==e||45==e?1:0,a=t;a<n.length;++a){var u=n.charCodeAt(a);if(u<48||57<u)return gt;r=10*r+u-48}return a==t?gt:lt(45==e?-r:r)},$a=e(function(n,r,e,t,a){if(""===a||R(la,"@",a))return gt;var u=R(ha,":",a);if(u.b){if(u.b.b)return gt;var i=u.a,u=ma(R(pa,i+1,a));if(1===u.$)return gt;u=u;return lt(g(ba,n,R(va,i,a),u,r,e,t))}return lt(g(ba,n,a,gt,r,e,t))}),xa=f(function(n,r,e,t){if(""===t)return gt;var a=R(ha,"/",t);if(a.b){a=a.a;return d($a,n,R(pa,a,t),r,e,R(va,a,t))}return d($a,n,"/",r,e,t)}),wa=A(function(n,r,e){if(""===e)return gt;var t=R(ha,"?",e);if(t.b){t=t.a;return C(xa,n,lt(R(pa,t+1,e)),r,R(va,t,e))}return C(xa,n,gt,r,e)}),ya=l(function(n,r){if(""===r)return gt;var e=R(ha,"#",r);if(e.b){e=e.a;return S(wa,n,lt(R(pa,e+1,r)),R(va,e,r))}return S(wa,n,gt,r)}),Ta=on,Aa=function(n){return R(Ta,"http://",n)?R(ya,0,R(pa,7,n)):R(Ta,"https://",n)?R(ya,1,R(pa,8,n)):gt},Ca=function(){for(;;)0},ka=Fn,Hr=ka(0),Ea=f(function(n,r,e,t){if(t.b){var a=t.a,u=t.b;if(u.b){var i=u.a,o=u.b;if(o.b){t=o.a,u=o.b;if(u.b){o=u.b;return R(n,a,R(n,i,R(n,t,R(n,u.a,500<e?S(St,n,r,zt(o)):C(Ea,n,r,e+1,o)))))}return R(n,a,R(n,i,R(n,t,r)))}return R(n,a,R(n,i,r))}return R(n,a,r)}return r}),Za=A(function(n,r,e){return C(Ea,n,r,0,e)}),Pa=l(function(e,n){return S(Za,l(function(n,r){return R($t,e(n),r)}),k,n)}),Ma=On,_a=l(function(r,n){return R(Ma,function(n){return ka(r(n))},n)}),Ra=A(function(e,n,t){return R(Ma,function(r){return R(Ma,function(n){return ka(R(e,r,n))},t)},n)}),Sa=Xn,La=l(function(n,r){return Nn(R(Ma,Sa(n),r))});function ja(n){switch(n.$){case 0:return 1;case 1:return 2;case 2:return 4;case 3:return 1;case 4:return 2;case 5:case 6:return 4;case 7:return 8;case 8:case 9:return n.a;default:return n.a.byteLength}}function Fa(n){return R(bi,function(n){for(var r=0,e=0;e<n.length;e++){var t=n.charCodeAt(e);r+=t<128?1:t<2048?2:t<55296||56319<t?3:(e++,4)}return r}(n),n)}function Oa(n){return(n=R(yi,n,wi)).$?"":n.a}function Ia(n){switch(n){case 0:return 0;case 1:return 2;case 2:return 4;default:return 6}}function za(n){var r=n.b,e=n.c;switch(n.a){case 3:return L(e,Oa(r));case 2:return e+(Oa(R(Ai,1,r))+"=");case 1:return e+(Oa(R(Ai,2,r))+"==");default:return e}}function Na(n){var r={a:Li(n),b:Pi},r=R(_i,r,Zi(Si));return R(Ri,za,R(li,r,n))}function Ba(n){return R(ji,"",Na(n.$?n.a:si(Fa(n.a))))}function Ka(n){return{$:4,a:n}}function Ua(n){return R(Xi,n,function(n){return!n.b||n.b.b?gt:lt(n.a)})}function Da(n){switch(n){case"invalid_request":return to;case"unauthorized_client":return oo;case"access_denied":return eo;case"unsupported_response_type":return co;case"invalid_scope":return ao;case"server_error":return uo;case"temporarily_unavailable":return io;default:return{$:7,a:n}}}function Ga(n){return{$:1,a:n}}function qa(n){return{$:2,a:n}}function Wa(n){if(-1!==n.$||-1!==n.d.$||-1!==n.e.$)return n;if(-1!==n.e.d.$||n.e.d.a){var r=n.d,e=n.e,t=e.b,a=e.c,u=e.d,i=e.e;return d(hi,1,n.b,n.c,d(hi,0,r.b,r.c,r.d,r.e),d(hi,0,t,a,u,i))}var u,o=n.d,c=n.e,t=c.b,a=c.c,e=(u=c.d).d,r=u.e,i=c.e;return d(hi,0,u.b,u.c,d(hi,1,n.b,n.c,d(hi,0,o.b,o.c,o.d,o.e),e),d(hi,1,t,a,r,i))}function Ja(n){if(-1!==n.$||-1!==n.d.$||-1!==n.e.$)return n;if(-1!==n.d.d.$||n.d.d.a){var r=n.d,e=r.d,t=n.e,a=t.b,u=t.c,i=t.d,o=t.e;return d(hi,1,c=n.b,f=n.c,d(hi,0,r.b,r.c,e,t=r.e),d(hi,0,a,u,i,o))}var c=n.b,f=n.c,t=(e=n.d).e,a=(n=n.e).b,u=n.c,i=n.d,o=n.e;return d(hi,0,e.b,e.c,d(hi,1,(r=e.d).b,r.c,r.d,r.e),d(hi,1,c,f,t,d(hi,0,a,u,i,o)))}function Xa(n){var e=n;return function(n){var r=n.a0;return P([d(lo,n.a6,n.aL,r,n.aW,(0,n.jx)(e(r)))])}}function Ha(n){return S(Za,ko,k,n)}function Va(n){return P([n])}function Qa(n){return S(So,"#",n.eO,S(So,"?",n.cJ,L(R(Ro,n.iA,L(n.iC?"https://":"http://",n.hO)),n.iw)))}function Ya(n){return{$:11,a:n}}function nu(n){return{$:2,a:n}}function ru(n){return{$:1,a:n}}function eu(n){return{$:9,a:n}}function tu(n){return n<0?-n:n}function au(n){if(t=R(Yt,tu((e=n).gr),R(Yt,tu(e.gs),tu(e.cZ)))){var r=e.cZ/t,n=e.gs/t,e=e.gr/t,t=Xo(e*e+n*n+r*r);return lt({gr:e/t,gs:n/t,cZ:r/t})}return gt}function uu(n){var r=R(Yt,tu((t=n).gr),R(Yt,tu(t.gs),tu(t.cZ)));if(r){var e=t.cZ/r,n=t.gs/r,t=t.gr/r;return Xo(t*t+n*n+e*e)*r}return 0}function iu(n){var r=au(n);return r.$?{c2:6371e3,bE:0,bI:0}:(r=r.a,{c2:uu(n),bE:R(Ho,Vo,r),bI:R(Jo,Vo,r)})}function ou(n){return n}function cu(n){return ou(n)/3.141592653589793*180}function fu(n){return n.$?n.a.a_.cT:1}function su(n){return S(St,l(function(n,r){return S(Ln,n.a,n.b,r)}),{},n)}function bu(n){return n.fq}function lu(n){return n.fr}function du(n){return n.fs}function gu(n){return n.fu}function pu(n){return n.fv}function hu(n){return n.fw}function vu(n){return(n.$?n.a.a_:n.a).a2}function mu(n){return tu(n)}function $u(n){return.5*n}function xu(n){function u(n){return n=function(n){n=au(vu(n));if(n.$)return{a:0,b:0};n=n.a;return{a:R(Jo,Vo,n),b:R(Ho,Vo,n)}}(n),R(ac,qo,P([cu(n.a),cu(n.b)]))}var i=A(function(n,r,e){if(r.$){var t=r.a;return 0<n?S(i,n-1,t.as,S(i,n-1,t.I,e)):R($t,u(r),e)}return R($t,u(r),e)}),o=f(function(n,r,e,t){if(e.$){var a=e.a;return R(tc,n,a.a_.bu)?C(o,n,r-1,a.as,C(o,n,r-1,a.I,t)):S(i,r-1,a.as,S(i,r-1,a.I,t))}return R(tc,n,e.a.bu)?R($t,u(e),t):t});if((r=n.bZ).$)return nc;var r=R(ic,vu(R(Qo,n.a9,e=r.a)),Fo),e=C(o,R(fc,{a:4e3,b:4e3,c:4e3},r),n.cN,e,k),e=su(P([{a:"type",b:uc("LineString")},{a:"coordinates",b:R(ac,st,e)}]));return su(P([{a:"type",b:uc("Feature")},{a:"properties",b:su(k)},{a:"geometry",b:e}]))}function wu(n){if((t=n.bZ).$)return Wi;var r=iu(vu(R(Qo,n.a9,t.a))),e=r.bI,t=r.bE;return Go(su(P([{a:"Cmd",b:uc("Track")},{a:"token",b:uc(Yo)},{a:"lon",b:qo(cu(e))},{a:"lat",b:qo(cu(t))},{a:"zoom",b:qo(10)},{a:"data",b:xu(n)},{a:"points",b:nc}])))}function yu(n){if((e=n.bZ).$)return Wi;var r=iu(vu(R(Qo,n.a9,e.a))),n=r.bI,e=r.bE;return Go(su(P([{a:"Cmd",b:uc("Centre")},{a:"token",b:uc(Yo)},{a:"lon",b:qo(cu(n))},{a:"lat",b:qo(cu(e))}])))}function Tu(n){var r=function(n){var r=n,e=tu(r.cZ),t=tu(r.gs),n=tu(r.gr);if(b(n,t)<1){if(b(n,e)<1){var a=Xo(r.cZ*r.cZ+r.gs*r.gs);return{gr:0,gs:-r.cZ/a,cZ:r.gs/a}}a=Xo(r.gs*r.gs+r.gr*r.gr);return{gr:-r.gs/a,gs:r.gr/a,cZ:0}}if(b(t,e)<1){a=Xo(r.cZ*r.cZ+r.gr*r.gr);return{gr:r.cZ/a,gs:0,cZ:-r.gr/a}}a=Xo(r.gr*r.gr+r.gs*r.gs);return{gr:-r.gs/a,gs:r.gr/a,cZ:0}}(n);return{a:r,b:{gr:n.gs*r.cZ-n.cZ*r.gs,gs:n.cZ*r.gr-n.gr*r.cZ,cZ:n.gr*r.gs-n.gs*r.gr}}}function Au(n){var r=$u(mu(n.jy));return{dV:{$:0,a:wc(r)},jA:n.jA}}function Cu(n){return n.gr}function ku(n){return n.gs}function Eu(n){return n.g3}function Zu(n){return n.fR}function Pu(n){return(n.$?n.a.a_:n.a).bQ}function Mu(n){return function(n){return n}(n.gM)}function _u(n){return n.dK}function Ru(n){return _u(n)}function Su(n){return-n}function Lu(n){return{gr:-n.gr,gs:-n.gs,cZ:-n.cZ}}function ju(n){return n.eg}function Fu(n){return Lu(ju(n))}function Ou(n){return n}function Iu(n){return R(ji,af,R(tf,{g1:!1,ig:!1},n))}function zu(n){function r(n){return!(n=n.f2).b||n.a.$?gt:ff(n.a.a)}function e(n){return R(Pa,r,n)}function t(n){return e(R(cf,Iu('lon=\\"([\\d\\.-]*)\\"'),n))}function a(n){return e(R(cf,Iu('lat=\\"([\\d\\.-]*)\\"'),n))}function u(n){return e(R(cf,Iu("<ele>([\\d\\.-]*)<\\/ele>"),n))}var n=R(Pa,function(n){return n.ib},R(cf,Iu("<trkpt((.|\\n|\\r)*?)trkpt>"),n)),i=A(function(n,r,e){return R(sf,R(cc,6371e3,e),R(df,n,r))});return R(of,st,R(Pa,function(n){n={a:a(n),b:t(n),c:u(n)};return!n.a.b||n.a.a.$||!n.b.b||n.b.a.$?gt:lt(S(i,n.b.a.a/180*3.141592653589793,n.a.a.a/180*3.141592653589793,!n.c.b||n.c.a.$?0:n.c.a.a))},n))}function Nu(n){return R(Tf,0,{$:0,a:function(n){n=function(n){return{gG:n.d,c9:n.c,dk:n.b,dW:n.a}}(n);return S(Af,n.dW,n.dk,n.c9)}(n)})}function Bu(n){return(n.$?n.a.a_:n.a).aV}function Ku(n){return n}function Uu(n){return n.gr}function Du(n){return n.gs}function Gu(n){return n.cZ}function qu(n){return n}function Wu(n){return S(Kf,S(Bf,(r=n).fu,r.fq,.5),function(n){return S(Bf,n.fv,n.fr,.5)}(n),function(n){return S(Bf,n.fw,n.fs,.5)}(n));var r}function Ju(n){return{a:R(oc,gu(n),bu(n)),b:R(oc,pu(n),lu(n)),c:R(oc,hu(n),du(n))}}function Xu(n){return n}function Hu(n){var r=(t=Ju(n)).a,e=t.b,t=t.c;return{g3:Xu(Wu(n)),hJ:r/2,hK:e/2,hL:t/2}}function Vu(n){return Uf(Xu(n))}function Qu(n){return n}function Yu(n){return(n.$?n.a.a_:n.a).b$}function ni(n){function e(n){return R(ic,vu(n),Fo)}function r(n){return R(ic,Bu(n),Fo)}function u(n){return P([S(Qf,{fR:1},Nu(yf),e(n)),R(Gf,Nu(yf),R(Cf,e(n),r(n)))])}var t=l(function(n,r){return P([S(Qf,{fR:10},Nu(Ef),e(R(Qo,n,r)))])}),i=A(function(n,r,e){if(r.$){var t=r.a;return 0<n?S(i,n-1,t.as,S(i,n-1,t.I,e)):L(u(r),e)}return L(u(r),e)}),o=f(function(n,r,e,t){if(e.$){var a=e.a;return R(tc,n,a.a_.bu)?C(o,n,r-1,a.as,C(o,n,r-1,a.I,t)):S(i,r-1,a.as,S(i,r-1,a.I,t))}return R(tc,n,e.a.bu)?L(u(e),t):t});if((c=n.bZ).$)return k;var a=c.a,c=R(fc,{a:4e3,b:4e3,c:4e3},e(R(Qo,n.a9,a)));return L(C(o,c,n.cN,a,k),R(t,n.a9,a))}function ri(n){return y(n,{d0:ni(n)})}function ei(n){return n.a+"="+n.b}function ti(n){return n.b?"?"+R(_t,"&",R(Pa,ei,n)):""}function ai(n){return{$:4,a:n}}Jn.Task={b:Hr,c:A(function(n,r){return R(_a,function(){return 0},bt(R(Pa,La(n),r)))}),d:A(function(){return ka(0)}),e:l(function(n,r){return R(_a,n,r)}),f:void 0};var ui=Vn("Task"),ii=l(function(n,r){return ui(R(_a,n,r))}),Z=function(r){var n=r.ip,a=r.iq,e=function(){e.a(n(Jr()))};return Gr({d1:function(t){return e.a=t,Vr.addEventListener("popstate",e),~Vr.navigator.userAgent.indexOf("Trident")&&Vr.addEventListener("hashchange",e),l(function(n,r){var e;r.ctrlKey||r.metaKey||r.shiftKey||1<=r.button||n.target||n.hasAttribute("download")||(r.preventDefault(),e=n.href,r=Jr(),n=Aa(e).a,t(a(n&&r.iC===n.iC&&r.hO===n.hO&&r.iA.a===n.iA.a?{$:0,a:n}:{$:1,a:e})))})},hX:function(n){return S(r.hX,n,Jr(),e)},jz:r.jz,ju:r.ju,i4:r.i4})},oi=A(function(n,r,e){return r(n(e))}),O=function(n){return{$:1,a:n}},ci=A(function(n,r,e){switch(n.$){case 0:return S(ne,r,e,n.a);case 1:return C(re,r,e,n.b,!n.a);case 2:return C(ee,r,e,n.b,!n.a);case 3:return S(te,r,e,n.a);case 4:return C(ae,r,e,n.b,!n.a);case 5:return C(ue,r,e,n.b,!n.a);case 6:return C(ie,r,e,n.b,!n.a);case 7:return C(oe,r,e,n.b,!n.a);case 8:return S(fi,n.b,r,e);case 9:return S(fe,r,e,n.b);default:return S(ce,r,e,n.a)}}),fi=A(function(n,r,e){for(;;){if(!n.b)return e;var t=n.b,a=r,u=S(ci,n.a,r,e);n=t,r=a,e=u}}),si=function(n){var r=new DataView(new ArrayBuffer(ja(n)));return ci(n)(r)(0),r},bi=l(function(n,r){return{$:9,a:n,b:r}}),li=l(function(n,r){return R(se,n,r)}),di=l(function(n,r){switch(n){case 0:return r;case 1:return 3&r;case 2:return 15&r;default:return 63&r}}),gi={$:-2},pi=gi,hi=e(function(n,r,e,t,a){return{$:-1,a:n,b:r,c:e,d:t,e:a}}),vi=e(function(n,r,e,t,a){if(-1!==a.$||a.a){if(-1!==t.$||t.a||-1!==t.d.$||t.d.a)return d(hi,n,r,e,t,a);var u=t.d,i=t.e;return d(hi,0,t.b,t.c,d(hi,1,u.b,u.c,u.d,u.e),d(hi,1,r,e,i,a))}var o=a.b,c=a.c,u=a.d,a=a.e;if(-1!==t.$||t.a)return d(hi,n,o,c,d(hi,0,r,e,t,u),a);var i;return d(hi,0,r,e,d(hi,1,t.b,t.c,t.d,i=t.e),d(hi,1,o,c,u,a))}),mi=x,$i=A(function(n,r,e){if(-2===e.$)return d(hi,0,n,r,gi,gi);var t=e.a,a=e.b,u=e.c,i=e.d,o=e.e;switch(R(mi,n,a)){case 0:return d(vi,t,a,u,S($i,n,r,i),o);case 1:return d(hi,t,a,r,i,o);default:return d(vi,t,a,u,i,S($i,n,r,o))}}),xi=A(function(n,r,e){e=S($i,n,r,e);if(-1!==e.$||e.a)return e;return d(hi,1,e.b,e.c,e.d,e.e)}),wi=(wb=P([{a:0,b:"A"},{a:1,b:"B"},{a:2,b:"C"},{a:3,b:"D"},{a:4,b:"E"},{a:5,b:"F"},{a:6,b:"G"},{a:7,b:"H"},{a:8,b:"I"},{a:9,b:"J"},{a:10,b:"K"},{a:11,b:"L"},{a:12,b:"M"},{a:13,b:"N"},{a:14,b:"O"},{a:15,b:"P"},{a:16,b:"Q"},{a:17,b:"R"},{a:18,b:"S"},{a:19,b:"T"},{a:20,b:"U"},{a:21,b:"V"},{a:22,b:"W"},{a:23,b:"X"},{a:24,b:"Y"},{a:25,b:"Z"},{a:26,b:"a"},{a:27,b:"b"},{a:28,b:"c"},{a:29,b:"d"},{a:30,b:"e"},{a:31,b:"f"},{a:32,b:"g"},{a:33,b:"h"},{a:34,b:"i"},{a:35,b:"j"},{a:36,b:"k"},{a:37,b:"l"},{a:38,b:"m"},{a:39,b:"n"},{a:40,b:"o"},{a:41,b:"p"},{a:42,b:"q"},{a:43,b:"r"},{a:44,b:"s"},{a:45,b:"t"},{a:46,b:"u"},{a:47,b:"v"},{a:48,b:"w"},{a:49,b:"x"},{a:50,b:"y"},{a:51,b:"z"},{a:52,b:"0"},{a:53,b:"1"},{a:54,b:"2"},{a:55,b:"3"},{a:56,b:"4"},{a:57,b:"5"},{a:58,b:"6"},{a:59,b:"7"},{a:60,b:"8"},{a:61,b:"9"},{a:62,b:"+"},{a:63,b:"/"}]),S(St,l(function(n,r){return S(xi,n.a,n.b,r)}),pi,wb)),yi=l(function(n,r){n:for(;;){if(-2===r.$)return gt;var e=r.c,t=r.d,a=r.e;switch(R(mi,n,r.b)){case 0:n=n,r=t;continue n;case 1:return lt(e);default:n=n,r=a;continue n}}}),Ti=l(function(n,r){return r>>>Ia(n)}),Ai=l(function(n,r){return r<<Ia(n)}),Ci=l(function(n,r){var e=r.b;switch(r.a){case 0:return R(Ti,1,n);case 1:return R(Ai,2,e)|R(Ti,2,n);case 2:return R(Ai,1,e)|R(Ti,3,n);default:return e}}),ki=l(function(n,r){var e=r.a,t=r.c,a=function(){switch(e){case 0:return R(di,1,n);case 1:return R(di,2,n);case 2:return R(di,3,n);default:return R(di,1,n)}}(),r=R(Ci,n,r),r=3===e?L(Oa(r),Oa(R(Ti,1,n))):Oa(r);return{a:function(n){switch(n){case 0:return 1;case 1:return 2;case 2:return 3;default:return 1}}(e),b:a,c:L(t,r)}}),Ei=l(function(e,n){var t=n;return l(function(n,r){r=R(t,n,r);return{a:r.a,b:e(r.b)}})}),Zi=l(function(n,r){var e,t=r.a,a=r.b;return 0<t?R(Ei,function(n){return{$:0,a:{a:t-1,b:R(ki,n,a)}}},n):(e={$:1,a:a},l(function(n,r){return{a:r,b:e}}))}),Pi={a:0,b:0,c:""},Mi=f(function(n,r,e,t){for(;;){var a=R(r(n),e,t),u=a.a,a=a.b;if(a.$)return{a:u,b:a.a};n=a.a,r=r,e=e,t=u}}),_i=l(function(n,r){return R(Mi,n,r)}),Ri=l(function(n,r){return r.$?gt:lt(n(r.a))}),Si=be,Li=Qr,ji=l(function(n,r){return r.$?n:r.a}),z=R(oi,O,Ba),Fi=l(function(n,r){return{$:8,a:n,b:r}}),Oi=l(function(n,r){for(;;){if(!r.b)return n;var e=r.b;n=n+ja(r.a),r=e}}),an=function(n){return R(Fi,R(Oi,0,n),n)},nn=R(oi,Pa(function(n){return{$:3,a:n}}),R(oi,an,si)),Ii=R(oi,nn,R(oi,z,function(n){return{bR:n}})),zi=Qn,Ni=T=l(function(n,r){return{$:0,a:n,b:r}}),Bi={$:2,b:function(n){n({$:0,a:R(Ni,-(new Date).getTimezoneOffset(),k)})},c:null},Ki={$:3},Ui={$:0},Di={$:0},Gi=qn,qi=l(function(n,r){return R(ii,pt(r),Gi(n))}),Wi=zi(k),Ji=f(function(n,r,e,t){return{eG:n,eH:r,eI:e,bR:t}}),Xi=l(function(r,e){return function(n){return e(R(ji,k,R(yi,r,n)))}}),Hi=Ua("error_description"),Vi=Ua("error_uri"),Qi=f(function(r,n,e,t){var a=n,u=e,i=t;return function(n){return S(r,a(n),u(n),i(n))}}),Yi=Ua("state"),Rn=function(n){return C(Qi,Ji(n),Hi,Vi,Yi)},no=l(function(n,r){return{da:n,bR:r}}),ro=l(function(r,n){var e=n;return function(n){return r(e(n))}}),_=Ua("code"),eo={$:2},to={$:0},ao={$:4},uo={$:5},io={$:6},oo={$:1},co={$:3},v={c3:Rn,c4:function(n){return R(ro,no(n),Yi)},db:_,dg:R(ro,Ri(Da),Ua("error"))},fo={$:0},so=A(function(r,n,e){var t=n,a=e;return function(n){return R(r,t(n),a(n))}}),bo=l(function(n,r){return{a:n,b:r}}),lo=e(function(n,r,e,t,a){return{aW:t,a0:e,aL:r,jx:a,a6:n}}),go=function(n){return n.b&&(""!==n.a||n.b.b)?R($t,n.a,go(n.b)):k},po=l(function(n,r){return lt(1===r.$?P([n]):R($t,n,r.a))}),ho=function(n){try{return lt(decodeURIComponent(n))}catch(n){return gt}},vo=a(function(n,r,e,t,a,u,i){if(-1!==u.$||u.a){n:for(;-1===i.$&&1===i.a;){if(-1===i.d.$){if(1!==i.d.a)break n;return Ja(r)}return Ja(r)}return r}return d(hi,e,u.b,u.c,u.d,d(hi,0,t,a,u.e,i))}),mo=function(n){if(-1!==n.$||-1!==n.d.$)return gi;var r=n.a,e=n.b,t=n.c,a=n.d,u=a.d,i=n.e;if(1!==a.a)return d(hi,r,e,t,mo(a),i);if(-1!==u.$||u.a){var o=Wa(n);if(-1!==o.$)return gi;n=o.e;return d(vi,o.a,o.b,o.c,mo(o.d),n)}return d(hi,r,e,t,mo(a),i)},$o=l(function(n,r){if(-2===r.$)return gi;var e=r.a,t=r.b,a=r.c,u=r.d,i=r.e;if(b(n,t)<0){if(-1!==u.$||1!==u.a)return d(hi,e,t,a,R($o,n,u),i);var o=u.d;if(-1!==o.$||o.a){var c=Wa(r);if(-1!==c.$)return gi;var f=c.e;return d(vi,c.a,c.b,c.c,R($o,n,c.d),f)}return d(hi,e,t,a,R($o,n,u),i)}return R(xo,n,s(vo,n,r,e,t,a,u,i))}),xo=l(function(n,r){if(-1!==r.$)return gi;var e=r.a,t=r.b,a=r.c,u=r.d,i=r.e;if(p(n,t)){r=function(n){for(;;){if(-1!==n.$||-1!==n.d.$)return n;n=n.d}}(i);return-1!==r.$?gi:d(vi,e,r.b,r.c,u,mo(i))}return d(vi,e,t,a,u,R($o,n,i))}),wo=l(function(n,r){r=R($o,n,r);if(-1!==r.$||r.a)return r;return d(hi,1,r.b,r.c,r.d,r.e)}),yo=A(function(n,r,e){r=r(R(yi,n,e));return r.$?R(wo,n,e):S(xi,n,r.a,e)}),To=l(function(n,r){var e=R(Rt,"=",n);if(e.b&&e.b.b&&!e.b.b.b){n=e.b.a,e=ho(e.a);if(1===e.$)return r;e=e.a,n=ho(n);return 1===n.$?r:S(yo,e,po(n.a),r)}return r}),Ao=l(function(n,r){return function(n){for(;;){if(!n.b)return gt;var r=n.a,e=n.b,t=r.aL;if(!t.b)return lt(r.jx);if(""===t.a&&!t.b.b)return lt(r.jx);n=e}}(n(d(lo,k,function(n){n=R(Rt,"/",n);return go(n.b&&""===n.a?n.b:n)}(r.iw),1===(n=r.cJ).$?pi:S(Za,To,pi,R(Rt,"&",n.a)),r.eO,st)))}),Co=A(function(n,r,e){return R(ji,r,R(Ao,Xa(e),n))}),ko=l(function(n,r){return r.b?S(Za,$t,r,n):n}),Eo=l(function(n,r){return Ha(R(Pa,n,r))}),Zo=l(function(n,r){var e=n,t=r;return function(n){return R(Eo,t,e(n))}}),Po=l(function(n,r){return R(Zo,n,Xa(r))}),Mo=l(function(n,r){var e=n.db,t=n.dg,a=n.c4,u=n.c3,i=y(r,{iw:"/"}),o=R(Ao,R(Po,Va,S(so,bo,e,t)),i);n:for(;!o.$;){if(o.a.a.$){if(o.a.b.$)break n;return S(Co,i,fo,R(ro,Ga,u(o.a.b.a)))}return S(Co,i,fo,R(ro,qa,a(o.a.a.a)))}return fo})(v),_o=Xr,Ro=l(function(n,r){return 1===n.$?r:r+(":"+Mt(n.a))}),So=A(function(n,r,e){return 1===r.$?e:L(e,L(n,r.a))}),Lo=f(function(n,r,e,t){var a=y(r,{eO:gt,cJ:gt}),u=R(_o,e,Qa(a)),i=Mo(r);switch(i.$){case 0:return{a:{hE:Di,bL:a},b:Wi};case 2:var o=i.a.da;return 1!==n.$&&p(i.a.bR,lt(n.a.bR))?{a:{hE:{$:1,a:o},bL:a},b:zi(P([R(qi,50,t(Ki)),u]))}:{a:{hE:{$:4,a:Ui},bL:a},b:u};default:return{a:{hE:{$:4,a:{$:1,a:i.a}},bL:a},b:u}}}),jo=st,Fo={gr:0,gs:0,cZ:0},Oo=R(T,0,k),Io=A(function(n,r,e){r=C(Lo,n,r,e,et),e=r.b;return{a:{a9:0,dh:gt,di:Fo,dq:gt,e0:{a:0,b:0},dA:!1,cN:0,d0:k,cU:r.a,f7:jo(0),bZ:gt,gk:{a:800,b:500},ax:0,eh:Oo},b:zi(P([e,R(ii,Ka,Bi)]))}}),zo=sn,J=function(n){return{$:3,b:n}},N=function(n){return{$:5,c:n}},No=function(n){return{$:11,g:n}},Bo=Qn,Ko=cr("messageReceiver",dn),Uo=cr("randomBytes",J(zo)),Do={$:12},Go=ur("commandPort",st),qo=Sn,Wo=W,Jo=l(function(n,r){var e=n.ef,n=n.ee;return R(Wo,r.gr*e.gr+r.gs*e.gs+r.cZ*e.cZ,r.gr*n.gr+r.gs*n.gs+r.cZ*n.cZ)}),Xo=V,Ho=l(function(n,r){var e=n.ef,t=r.gr*e.gr+r.gs*e.gs+r.cZ*e.cZ,a=n.ee,n=r.gr*a.gr+r.gs*a.gs+r.cZ*a.cZ;return R(Wo,r.gr*(a.gs*e.cZ-a.cZ*e.gs)+r.gs*(a.cZ*e.gr-a.gr*e.cZ)+r.cZ*(a.gr*e.gs-a.gs*e.gr),Xo(n*n+t*t))}),Vo=st({dK:Fo,ee:j={gr:1,gs:0,cZ:0},ef:Uv={gr:0,gs:1,cZ:0}}),Qo=l(function(n,r){for(;;){if(!r.$){var e=r.a;return r}r=b(n,fu((e=r.a).I))<0?(n=n,e.I):(n=n-fu(e.I),e.as)}}),Yo="pk.eyJ1IjoicGV0ZXJqYW1lc3dhcmQiLCJhIjoiY2tpdWswb3dsMm02bDMzcDMyNGw1bmh5aSJ9.Fk3ibin0PpeEGXlGsctP1g",nc=jn,rc=l(function(n,r){return-1<b(r,n)}),ec=l(function(n,r){return b(r,n)<1}),tc=l(function(n,r){return R(ec,bu(n),gu(r))&&R(rc,gu(n),bu(r))&&R(ec,lu(n),pu(r))&&R(rc,pu(n),lu(r))&&R(ec,du(n),hu(r))&&R(rc,hu(n),du(r))}),ac=l(function(n,r){return S(St,function(e){return l(function(n,r){return r.push(e(n)),r})}(n),[],r)}),uc=Sn,ic=l(function(n,r){return{gr:r.gr+n.gr,gs:r.gs+n.gs,cZ:r.cZ+n.cZ}}),oc=l(function(n,r){return r-n}),cc=l(function(n,r){return r+n}),fc=l(function(n,r){var e=$u(mu(n.b)),t=$u(mu(n.a)),a=$u(mu(n.c)),u=function(n){return{a:n.gr,b:n.gs,c:n.cZ}}(r),n=u.a,r=u.b,u=u.c;return{fq:R(cc,t,n),fr:R(cc,e,r),fs:R(cc,a,u),fu:R(oc,t,n),fv:R(oc,e,r),fw:R(oc,a,u)}}),sc=l(function(n,r){return{gr:r.gs*n.cZ-r.cZ*n.gs,gs:r.cZ*n.gr-r.gr*n.cZ,cZ:r.gr*n.gs-r.gs*n.gr}}),bc=l(function(n,r){return{gr:r.gr-n.gr,gs:r.gs-n.gs,cZ:r.cZ-n.cZ}}),lc=l(function(n,r){return r.$?gt:n(r.a)}),dc=l(function(n,r){return r.gr*n.gr+r.gs*n.gs+r.cZ*n.cZ}),gc=l(function(n,r){return 0<b(r,n)}),pc=l(function(n,r){return b(r,n)<0}),hc=l(function(n,r){return{gr:r.gr-n.gr,gs:r.gs-n.gs,cZ:r.cZ-n.cZ}}),vc=l(function(n,r){r=r.gr*n.gr+r.gs*n.gs+r.cZ*n.cZ;return{gr:n.gr*r,gs:n.gs*r,cZ:n.cZ*r}}),mc={gr:0,gs:0,cZ:0},$c=A(function(u,i,o){return R(lc,function(a){return R(lc,function(r){var n,e=R(sc,i,u),t=R(dc,o,e),n=R(gc,0,t)?e:R(pc,0,t)?{gr:-(n=e).gr,gs:-n.gs,cZ:-n.cZ}:mc;return R(Ri,function(n){return{a:a,b:r,c:n}},au(n))},au(R(hc,R(vc,a,i),i)))},au(u))}),xc=l(function(n,r){var e=Tu(n);return{dK:r,ee:e.a,ef:e.b,eg:n}}),wc=q,yc={gr:0,gs:0,cZ:1},Tc=A(function(n,r,e){return{gr:n.gr+r*(e.gr-n.gr),gs:n.gs+r*(e.gs-n.gs),cZ:n.cZ+r*(e.cZ-n.cZ)}}),Ac=l(function(n,r){r=function(n){var r=R(bc,n.hF,n.hz),e=function(n){return n}(n.gg),t=S($c,r,e,R(sc,r,e));if(t.$){e=au(r);if(e.$){r=Tu(n.gg);return{dK:n.hz,ee:r.b,ef:n.gg,eg:r.a}}return R(xc,e.a,n.hz)}t=t.a;return{dK:n.hz,ee:t.c,ef:t.b,eg:t.a}}({hz:S(Tc,Fo,1.015,r),hF:r,gg:yc});return Au({jy:.7853981633974483,jA:r})}),Cc=l(function(n,r){return n+.5*(r-n)}),kc={gr:-1,gs:0},Ec={gr:0,gs:-1},Zc={gr:1,gs:0},Pc={gr:0,gs:1},Mc=l(function(n,r){return{gr:n,gs:r}}),_c=f(function(n,r,e,t){var a=R(rc,r,t)?Pc:Ec,u=R(rc,n,e)?Zc:kc,i={a:mu(R(oc,n,e)),b:mu(R(oc,r,t))};return{gM:{dK:R(Mc,R(Cc,n,e),R(Cc,r,t)),ee:u,ef:a},hq:i}}),Rc=l(function(n,r){return C(_c,Cu(n),ku(n),Cu(r),ku(r))}),Sc=l(function(n,r){var e=n.dK,t=r.gr-e.gr,a=r.gs-e.gs,r=r.cZ-e.cZ,e=n.hr,n=t*e.gr+a*e.gs+r*e.cZ,t=t-n*e.gr,a=a-n*e.gs,n=r-n*e.cZ,e=R(Yt,tu(t),R(Yt,tu(a),tu(n)));if(e){n=n/e,a=a/e,t=t/e;return Xo(t*t+a*a+n*n)*e}return 0}),Lc=l(function(n,r){var e=n.dK,n=n.hr;return{gr:e.gr+r*n.gr,gs:e.gs+r*n.gs,cZ:e.cZ+r*n.cZ}}),jc=l(function(n,r){return r.gr*n.gr+r.gs*n.gs+r.cZ*n.cZ}),Fc=K,Oc=l(function(n,r){var e=n.fR,t=function(n){return n.dK}(r),n=R(bc,n.g3,t),t=function(n){return n.hr}(r),e=e,t=R(jc,t,n),n=n,n=R(Fc,n.gr,2)+R(Fc,n.gs,2)+R(Fc,n.cZ,2),n=R(Fc,t,2)-n+R(Fc,e,2);if(n<0)return gt;e=-t+Xo(n),n=-t-Xo(n);return lt({a:R(Lc,r,n),b:R(Lc,r,e)})}),Ic=l(function(s,n){var b=l(function(n,r){for(;;){if(!n.$){var e=n.a,t=R(Sc,s,R(ic,e.a2,Fo)),a=R(Sc,s,R(ic,e.aV,Fo));return R(ec,a,t)?{a:r,b:t}:{a:r+1,b:a}}var u=n.a,i=R(oc,Zu(Pu(u.as)),R(Sc,s,Eu(Pu(u.as)))),o=R(oc,Zu(Pu(u.I)),R(Sc,s,Eu(Pu(u.I)))),c={a:!p(R(Oc,Pu(u.I),s),gt),b:!p(R(Oc,Pu(u.as),s),gt)},f={a:c.a,b:c.b};if(f.a){if(f.b){e=R(b,u.as,r+fu(u.I)),t=e.a,a=e.b,c=R(b,u.I,r),e=c.a,c=c.b;return R(ec,a,c)?{a:e,b:c}:{a:t,b:a}}n=u.I,r=r}else r=!f.b&&R(ec,i,o)?(n=u.I,r):(n=u.as,r+fu(u.I))}});return R(b,n,0).a}),zc=l(function(n,r){return{gr:n,gs:r}}),Nc=l(function(n,r){return n*r}),Bc=l(function(n,r){return r/n}),Kc=l(function(n,r){return n*r}),Uc={gr:0,gs:0,cZ:-1},Dc=l(function(n,r){return r/n}),Gc=l(function(n,r){var e=n.eg,t=n.ef,n=n.ee;return{gr:n.gr*r.gr+t.gr*r.gs+e.gr*r.cZ,gs:n.gs*r.gr+t.gs*r.gs+e.gs*r.cZ,cZ:n.cZ*r.gr+t.cZ*r.gs+e.cZ*r.cZ}}),qc=l(function(n,r){return{hr:r,dK:n}}),Wc=l(function(n,r){var e=n.dK,n=n.ee;return(r.gr-e.gr)*n.gr+(r.gs-e.gs)*n.gs}),Jc=A(function(n,r,e){return{gr:n,gs:r,cZ:e}}),Xc=f(function(n,r,e,t){var a=n.dK,u=n.eg,i=n.ef,n=n.ee;return{gr:a.gr+r*n.gr+e*i.gr+t*u.gr,gs:a.gs+r*n.gs+e*i.gs+t*u.gs,cZ:a.cZ+r*n.cZ+e*i.cZ+t*u.cZ}}),Hc=l(function(n,r){var e=n.dK,n=n.ef;return(r.gr-e.gr)*n.gr+(r.gs-e.gs)*n.gs}),Vc=A(function(n,r,e){var t=n,a=R(Hc,Mu(r),e),u=R(Wc,Mu(r),e),i=t.jA,n=function(n){return n.hq}(r),e=n.b,r=t.dV;if(r.$){n=R(Dc,e,r.a);return R(qc,C(Xc,i,R(Nc,n,u),R(Nc,n,a),0),Fu(t.jA))}e=Su(R(Bc,r.a,R(Kc,.5,e))),e=R(Gc,i,R(ji,Uc,au(S(Jc,u,a,e))));return R(qc,Ru(t.jA),e)}),Qc=l(function(n,r){var e=r.bZ;if(e.$)return 0;var t=e.a,a=R(Ac,R(Qo,r.a9,t),r.di),e=n.il,n=R(zc,e.a,e.b),e=r.gk,r={a:Ou(e.a),b:Ou(e.b)},e=r.a;return R(Ic,S(Vc,a,R(Rc,R(Mc,0,r.b),R(Mc,e,0)),n),t)}),Yc=l(function(n,r){return R(ii,r,function(n){return{$:2,b:function(r){(Yr=document.createElement("input")).type="file",Yr.accept=R(_t,",",n),Yr.addEventListener("change",function(n){r({$:0,a:n.target.files[0]})}),ge(Yr)},c:null}}(n))}),nf=Yn,rf=function(n){return n.name},ef=f(function(n,r,e,t){return{hW:r,ib:n,ik:e,f2:t}}),tf=pe,af=/.^/,uf=A(function(n,r,e){r=n(r);return r.$?e:R($t,r.a,e)}),of=l(function(n,r){return S(Za,uf(n),k,r)}),cf=he(1/0),ff=function(n){return 0!==n.length&&!/[\sxbo]/.test(n)&&(n=+n)==n?lt(n):gt},sf=l(function(n,r){return{gr:n*r.gr,gs:n*r.gs,cZ:n*r.cZ}}),bf=D,lf=G,df=l(function(n,r){var e=n,n=r,r=bf(n);return{gr:r*bf(e),gs:r*lf(e),cZ:lf(n)}}),gf=An,pf=pn,hf=ln,vf=gn,mf=R(pf,"msg",vf),$f=l(function(n,r){var e=R(gf,mf,r),r={a:R(gf,R(pf,"lat",hf),r),b:R(gf,R(pf,"lon",hf),r)},e={a:e,b:n.bZ};if(e.a.$||"click"!==e.a.a||e.b.$)return{a:n,b:Wi};return{a:n,b:Wi}}),xf=Go(su(P([{a:"Cmd",b:uc("Repaint")},{a:"token",b:uc(Yo)}]))),wf=f(function(n,r,e,t){return{$:0,a:n,b:r,c:e,d:t}}),yf=C(wf,0,0,0,1),Tf=l(function(n,r){return{$:0,a:n,b:r}}),Af=me,Cf=l(function(n,r){return{a:n,b:r}}),kf=l(function(n,r){return b(n,r)<0?n:r}),Ef=C(wf,252/255,175/255,62/255,1),Zf=l(function(n,r){return{$:1,a:n,b:r}}),Pf=l(function(n,r){return R(Yt,n,r)}),Mf=l(function(n,r){return R(kf,n,r)}),_f=l(function(n,r){var e=Gu(r),t=Gu(n),a=Du(r),u=Du(n),r=Uu(r),n=Uu(n);return{fq:R(Pf,n,r),fr:R(Pf,u,a),fs:R(Pf,t,e),fu:R(Mf,n,r),fv:R(Mf,u,a),fw:R(Mf,t,e)}}),Rf={src:"\n        precision lowp float;\n        \n        uniform lowp vec3 constantColor;\n        \n        void main () {\n            gl_FragColor = vec4(constantColor, 1.0);\n        }\n    ",attributes:{},uniforms:{constantColor:"aU"}},Sf={src:"\n        precision mediump float;\n        \n        uniform mediump vec3 emissiveColor;\n        uniform highp mat4 sceneProperties;\n        \n        float gammaCorrect(float u) {\n            if (u <= 0.0031308) {\n                return 12.92 * u;\n            } else {\n                return 1.055 * pow(u, 1.0 / 2.4) - 0.055;\n            }\n        }\n        \n        vec3 gammaCorrectedColor(vec3 color) {\n            float red = gammaCorrect(color.r);\n            float green = gammaCorrect(color.g);\n            float blue = gammaCorrect(color.b);\n            return vec3(red, green, blue);\n        }\n        \n        vec3 reinhardLuminanceToneMap(vec3 color) {\n            float luminance = 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b;\n            float scale = 1.0 / (1.0 + luminance);\n            return gammaCorrectedColor(color * scale);\n        }\n        \n        vec3 reinhardPerChannelToneMap(vec3 color) {\n            return gammaCorrectedColor(color / (color + 1.0));\n        }\n        \n        float extendedReinhardToneMap(float x, float xMax) {\n            return x * (1.0 + (x / (xMax * xMax))) / (1.0 + x);\n        }\n        \n        vec3 extendedReinhardLuminanceToneMap(vec3 color, float overexposureLimit) {\n            float luminance = 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b;\n            float scaledLuminance = extendedReinhardToneMap(luminance, overexposureLimit);\n            float scale = scaledLuminance / luminance;\n            return gammaCorrectedColor(color * scale);\n        }\n        \n        vec3 extendedReinhardPerChannelToneMap(vec3 color, float overexposureLimit) {\n            float red = extendedReinhardToneMap(color.r, overexposureLimit);\n            float green = extendedReinhardToneMap(color.g, overexposureLimit);\n            float blue = extendedReinhardToneMap(color.b, overexposureLimit);\n            return gammaCorrectedColor(vec3(red, green, blue));\n        }\n        \n        vec3 hableFilmicHelper(vec3 color) {\n            float a = 0.15;\n            float b = 0.5;\n            float c = 0.1;\n            float d = 0.2;\n            float e = 0.02;\n            float f = 0.3;\n            return (color * (a * color + c * b) + d * e) / (color * (a * color + b) + d * f) - e / f;\n        }\n        \n        vec3 hableFilmicToneMap(vec3 color) {\n            float exposureBias = 2.0;\n            vec3 unscaled = hableFilmicHelper(exposureBias * color);\n            vec3 scale = 1.0 / hableFilmicHelper(vec3(11.2));\n            return gammaCorrectedColor(scale * unscaled);\n        }\n        \n        vec3 toneMap(vec3 color, float toneMapType, float toneMapParam) {\n            if (toneMapType == 0.0) {\n                return gammaCorrectedColor(color);\n            } else if (toneMapType == 1.0) {\n                return reinhardLuminanceToneMap(color);\n            } else if (toneMapType == 2.0) {\n                return reinhardPerChannelToneMap(color);\n            } else if (toneMapType == 3.0) {\n                return extendedReinhardLuminanceToneMap(color, toneMapParam);\n            } else if (toneMapType == 4.0) {\n                return extendedReinhardPerChannelToneMap(color, toneMapParam);\n            } else if (toneMapType == 5.0) {\n                return hableFilmicToneMap(color);\n            } else {\n                return vec3(0.0, 0.0, 0.0);\n            }\n        }\n        \n        vec4 toSrgb(vec3 linearColor, mat4 sceneProperties) {\n            vec3 referenceWhite = sceneProperties[2].rgb;\n            float unitR = linearColor.r / referenceWhite.r;\n            float unitG = linearColor.g / referenceWhite.g;\n            float unitB = linearColor.b / referenceWhite.b;\n            float toneMapType = sceneProperties[3][2];\n            float toneMapParam = sceneProperties[3][3];\n            vec3 toneMapped = toneMap(vec3(unitR, unitG, unitB), toneMapType, toneMapParam);\n            return vec4(toneMapped, 1.0);\n        }\n        \n        void main () {\n            gl_FragColor = toSrgb(emissiveColor, sceneProperties);\n        }\n    ",attributes:{},uniforms:{emissiveColor:"bb",sceneProperties:"g"}},Lf={$:0},jf=l(function(n,r){switch(r.$){case 0:return R(De,n,r);case 1:return R(Ge,n,r);case 2:return R(qe,n,r);case 3:return R(We,n,r);case 4:return R(Je,n,r);default:return R(Xe,n,r)}}),Ff=l(function(n,r){switch(r.$){case 0:return R(Ze,n,r);case 1:return R(Pe,n,r);case 2:return R(Me,n,r);case 3:return R(_e,n,r);case 4:return R(Re,n,r);case 5:return R(Se,n,r);case 6:return R(Le,n,r);case 7:return R(je,n,r);default:return function(n){var r=n.sampleAlphaToCoverage;r.toggle=n.toggle,r.enabled||(n.gl.enable(n.gl.SAMPLE_ALPHA_TO_COVERAGE),r.enabled=!0)}(n)}}),Of=Ee,If={src:"\n        precision highp float;\n        \n        attribute lowp float lineSegmentVertex;\n        \n        uniform highp vec4 modelScale;\n        uniform highp mat4 modelMatrix;\n        uniform highp mat4 viewMatrix;\n        uniform highp mat4 projectionMatrix;\n        uniform highp mat4 sceneProperties;\n        uniform highp vec3 lineSegmentStartPoint;\n        uniform highp vec3 lineSegmentEndPoint;\n        \n        vec4 getWorldPosition(vec3 modelPosition, vec4 modelScale, mat4 modelMatrix) {\n            vec4 scaledPosition = vec4(modelScale.xyz * modelPosition, 1.0);\n            return modelMatrix * scaledPosition;\n        }\n        \n        void main() {\n            vec3 position = (1.0 - lineSegmentVertex) * lineSegmentStartPoint + lineSegmentVertex * lineSegmentEndPoint;\n            vec4 worldPosition = getWorldPosition(position, modelScale, modelMatrix);\n            gl_Position = projectionMatrix * (viewMatrix * worldPosition);\n        }\n    ",attributes:{lineSegmentVertex:"e5"},uniforms:{lineSegmentEndPoint:"e3",lineSegmentStartPoint:"e4",modelMatrix:"d",modelScale:"e",projectionMatrix:"f",sceneProperties:"g",viewMatrix:"h"}},zf=l(function(n,r){return{$:1,a:n,b:r}})({eC:2,eV:0,fy:1})(P([{a:{e5:0},b:{e5:1}}])),Nf=$e,Bf=A(function(n,r,e){return.5<e?r+(1-e)*(n-r):n+e*(r-n)}),Kf=A(function(n,r,e){return{gr:n,gs:r,cZ:e}}),Uf=function(n){return new Float64Array([n.gr,n.gs,n.cZ])},Df=l(function(n,r){var e=function(n){n=Ku(n);return R(_f,n.a,n.b)}(r),t=Hu(e),r=Ku(r),c=r.a,f=r.b;switch(n.$){case 0:if(n.b.$)return Lf;var s=n.b.a;return R(Zf,t,u(function(n,r,e,t,a,u,i,o){return d(Of,o,If,Rf,zf,{aU:s,e3:Vu(f),e4:Vu(c),d:e,e:r,f:u,g:n,h:a})}));case 1:if(n.b.$)return Lf;var s=n.b.a,b=n.c;return R(Zf,t,u(function(n,r,e,t,a,u,i,o){return d(Of,o,If,Sf,zf,{bb:R(Nf,qu(b),s),e3:Vu(f),e4:Vu(c),d:e,e:r,f:u,g:n,h:a})}));case 2:default:return Lf}}),Gf=l(function(n,r){return R(Df,n,r)}),qf=l(function(n,r){return{$:3,a:n,b:r}}),Wf={src:"\n        precision lowp float;\n        \n        uniform lowp vec3 constantColor;\n        uniform lowp float pointRadius;\n        uniform highp mat4 sceneProperties;\n        \n        float pointAlpha(float pointRadius, vec2 pointCoord) {\n            float pointSize = 2.0 * pointRadius;\n            float x = (pointSize + 2.0) * (pointCoord.s - 0.5);\n            float y = (pointSize + 2.0) * (pointCoord.t - 0.5);\n            float r = sqrt(x * x + y * y);\n            float innerRadius = pointRadius;\n            float outerRadius = pointRadius + 1.0;\n            if (r > outerRadius) {\n                return 0.0;\n            } else if (r > innerRadius) {\n                return outerRadius - r;\n            } else {\n                return 1.0;\n            }\n        }\n        \n        void main () {\n            float supersampling = sceneProperties[3][0];\n            float alpha = pointAlpha(pointRadius * supersampling, gl_PointCoord);\n            gl_FragColor = vec4(constantColor, alpha);\n        }\n    ",attributes:{},uniforms:{constantColor:"aU",pointRadius:"cG",sceneProperties:"g"}},Jf=(X=l(function(n,r){return{$:0,a:n,b:r}}))({eC:1,eV:0,fy:0})(P([{ht:1}])),Xf={src:"\n        precision mediump float;\n        \n        uniform mediump vec3 emissiveColor;\n        uniform lowp float pointRadius;\n        uniform highp mat4 sceneProperties;\n        \n        float gammaCorrect(float u) {\n            if (u <= 0.0031308) {\n                return 12.92 * u;\n            } else {\n                return 1.055 * pow(u, 1.0 / 2.4) - 0.055;\n            }\n        }\n        \n        vec3 gammaCorrectedColor(vec3 color) {\n            float red = gammaCorrect(color.r);\n            float green = gammaCorrect(color.g);\n            float blue = gammaCorrect(color.b);\n            return vec3(red, green, blue);\n        }\n        \n        vec3 reinhardLuminanceToneMap(vec3 color) {\n            float luminance = 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b;\n            float scale = 1.0 / (1.0 + luminance);\n            return gammaCorrectedColor(color * scale);\n        }\n        \n        vec3 reinhardPerChannelToneMap(vec3 color) {\n            return gammaCorrectedColor(color / (color + 1.0));\n        }\n        \n        float extendedReinhardToneMap(float x, float xMax) {\n            return x * (1.0 + (x / (xMax * xMax))) / (1.0 + x);\n        }\n        \n        vec3 extendedReinhardLuminanceToneMap(vec3 color, float overexposureLimit) {\n            float luminance = 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b;\n            float scaledLuminance = extendedReinhardToneMap(luminance, overexposureLimit);\n            float scale = scaledLuminance / luminance;\n            return gammaCorrectedColor(color * scale);\n        }\n        \n        vec3 extendedReinhardPerChannelToneMap(vec3 color, float overexposureLimit) {\n            float red = extendedReinhardToneMap(color.r, overexposureLimit);\n            float green = extendedReinhardToneMap(color.g, overexposureLimit);\n            float blue = extendedReinhardToneMap(color.b, overexposureLimit);\n            return gammaCorrectedColor(vec3(red, green, blue));\n        }\n        \n        vec3 hableFilmicHelper(vec3 color) {\n            float a = 0.15;\n            float b = 0.5;\n            float c = 0.1;\n            float d = 0.2;\n            float e = 0.02;\n            float f = 0.3;\n            return (color * (a * color + c * b) + d * e) / (color * (a * color + b) + d * f) - e / f;\n        }\n        \n        vec3 hableFilmicToneMap(vec3 color) {\n            float exposureBias = 2.0;\n            vec3 unscaled = hableFilmicHelper(exposureBias * color);\n            vec3 scale = 1.0 / hableFilmicHelper(vec3(11.2));\n            return gammaCorrectedColor(scale * unscaled);\n        }\n        \n        vec3 toneMap(vec3 color, float toneMapType, float toneMapParam) {\n            if (toneMapType == 0.0) {\n                return gammaCorrectedColor(color);\n            } else if (toneMapType == 1.0) {\n                return reinhardLuminanceToneMap(color);\n            } else if (toneMapType == 2.0) {\n                return reinhardPerChannelToneMap(color);\n            } else if (toneMapType == 3.0) {\n                return extendedReinhardLuminanceToneMap(color, toneMapParam);\n            } else if (toneMapType == 4.0) {\n                return extendedReinhardPerChannelToneMap(color, toneMapParam);\n            } else if (toneMapType == 5.0) {\n                return hableFilmicToneMap(color);\n            } else {\n                return vec3(0.0, 0.0, 0.0);\n            }\n        }\n        \n        vec4 toSrgb(vec3 linearColor, mat4 sceneProperties) {\n            vec3 referenceWhite = sceneProperties[2].rgb;\n            float unitR = linearColor.r / referenceWhite.r;\n            float unitG = linearColor.g / referenceWhite.g;\n            float unitB = linearColor.b / referenceWhite.b;\n            float toneMapType = sceneProperties[3][2];\n            float toneMapParam = sceneProperties[3][3];\n            vec3 toneMapped = toneMap(vec3(unitR, unitG, unitB), toneMapType, toneMapParam);\n            return vec4(toneMapped, 1.0);\n        }\n        \n        float pointAlpha(float pointRadius, vec2 pointCoord) {\n            float pointSize = 2.0 * pointRadius;\n            float x = (pointSize + 2.0) * (pointCoord.s - 0.5);\n            float y = (pointSize + 2.0) * (pointCoord.t - 0.5);\n            float r = sqrt(x * x + y * y);\n            float innerRadius = pointRadius;\n            float outerRadius = pointRadius + 1.0;\n            if (r > outerRadius) {\n                return 0.0;\n            } else if (r > innerRadius) {\n                return outerRadius - r;\n            } else {\n                return 1.0;\n            }\n        }\n        \n        void main () {\n            vec4 color = toSrgb(emissiveColor, sceneProperties);\n            float supersampling = sceneProperties[3][0];\n            float alpha = pointAlpha(pointRadius * supersampling, gl_PointCoord);\n            gl_FragColor = vec4(color.rgb, alpha);\n        }\n    ",attributes:{},uniforms:{emissiveColor:"bb",pointRadius:"cG",sceneProperties:"g"}},Hf={src:"\n        precision highp float;\n        \n        attribute lowp float dummyAttribute;\n        \n        uniform highp vec4 modelScale;\n        uniform highp mat4 modelMatrix;\n        uniform lowp float pointRadius;\n        uniform highp mat4 viewMatrix;\n        uniform highp mat4 projectionMatrix;\n        uniform highp mat4 sceneProperties;\n        uniform highp vec3 pointPosition;\n        \n        vec4 getWorldPosition(vec3 modelPosition, vec4 modelScale, mat4 modelMatrix) {\n            vec4 scaledPosition = vec4(modelScale.xyz * modelPosition, 1.0);\n            return modelMatrix * scaledPosition;\n        }\n        \n        void main () {\n            vec4 worldPosition = getWorldPosition(pointPosition, modelScale, modelMatrix);\n            gl_Position = projectionMatrix * (viewMatrix * worldPosition);\n            float supersampling = sceneProperties[3][0];\n            gl_PointSize = 2.0 * pointRadius * supersampling * dummyAttribute + 2.0;\n        }\n    ",attributes:{dummyAttribute:"ht"},uniforms:{modelMatrix:"d",modelScale:"e",pointPosition:"fN",pointRadius:"cG",projectionMatrix:"f",sceneProperties:"g",viewMatrix:"h"}},Vf=A(function(c,n,f){var r,r={fq:Uu(r=f),fr:Du(r),fs:Gu(r),fu:Uu(r),fv:Du(r),fw:Gu(r)},e=Hu(r);switch(n.$){case 0:if(n.b.$)return Lf;var s=n.b.a;return R(qf,e,u(function(n,r,e,t,a,u,i,o){return d(Of,o,Hf,Wf,Jf,{aU:s,d:e,e:r,fN:Vu(f),cG:Qu(c),f:u,g:n,h:a})}));case 1:if(n.b.$)return Lf;var s=n.b.a,b=n.c;return R(qf,e,u(function(n,r,e,t,a,u,i,o){return d(Of,o,Hf,Xf,Jf,{bb:R(Nf,qu(b),s),d:e,e:r,fN:Vu(f),cG:Qu(c),f:u,g:n,h:a})}));case 2:default:return Lf}}),Qf=A(function(n,r,e){return S(Vf,n.fR,r,e)}),Yf=A(function(n,r,e){return n+("/"+(R(_t,"/",r)+ti(e)))}),ns=l(function(n,r){return{$:3,a:n,b:r}}),rs=function(n){return{$:0,a:n}},es=l(function(n,r){return{$:4,a:n,b:r}}),ts={$:2},as=function(n){return{$:1,a:n}},us=function(n){return{$:0,a:n}},is={$:1},os=function(n){return!n.$},cs=Hn,fs={$:0},ss=Tn,bs=l(function(n,r){return S(Ye,"",st,R(oi,r,n))}),ls=l(function(n,r){return r.$?yt(n(r.a)):kt(r.a)}),ds={$:2},gs={$:1},ps=l(function(n,r){switch(r.$){case 0:return yt({$:0,a:r.a});case 1:return yt(gs);case 2:return yt(ds);case 3:return yt({$:3,a:r.a.i_});default:return R(ls,ai,n(r.b))}}),hs=l(function(n,r){return R(bs,n,ps(function(n){return R(ls,Kt,R(ss,r,n))}))}),m=a(function(n,r,e,t,a,u,i){return{ca:t,cj:r,cr:n,bE:u,bI:i,cM:e,c_:a}}),vs=l(function(n,r){return S(Za,pf,r,n)}),ms=i(yn,m,R(vs,P(["query"]),vf),R(vs,P(["country"]),vf),R(vs,P(["region"]),vf),R(vs,P(["city"]),vf),R(vs,P(["zip"]),vf),R(vs,P(["lat"]),hf),R(vs,P(["lon"]),hf)),$s=l(function(n,r){return{fT:n,f3:r}}),F=ka(R($s,pi,k)),xs=function(e){return{$:2,b:function(n){var r=e.f;2===r.$&&r.c&&r.c(),e.f=null,n({$:0,a:w})},c:null}},ws=Nn,ys=A(function(e,n,t){for(;;){if(!n.b)return ka(t);var r=n.a,a=n.b;if(r.$){var u=r.a;return R(Ma,function(n){var r=u.gc;return S(ys,e,a,1===r.$?t:S(xi,r.a,n,t))},ws(S(Qe,e,Sa(e),u)))}var i=r.a,r=R(yi,i,t);if(1!==r.$)return R(Ma,function(){return S(ys,e,a,R(wo,i,t))},xs(r.a));e=e,n=a,t=t}}),B=f(function(n,r,e,t){return R(Ma,function(n){return ka(R($s,n,e))},S(ys,n,r,t.fT))}),Ts=f(function(n,r,e,t){var a=t.b;return p(r,t.a)?lt(R(Sa,n,a(e))):gt}),h=A(function(n,r,e){return R(Ma,function(){return ka(e)},bt(R(of,S(Ts,n,r.a,r.b),e.f3)))}),U=l(function(n,r){if(r.$){var e=r.a;return{$:1,a:{gF:e.gF,gS:e.gS,eK:R(nt,n,e.eK),eQ:e.eQ,ft:e.ft,f8:e.f8,gc:e.gc,gh:e.gh}}}return{$:0,a:r.a}}),As=l(function(n,r){return{$:0,a:n,b:r}});function Cs(n){return Ws({$:1,a:{gF:!1,gS:n.gS,eK:n.eK,eQ:n.eQ,ft:n.ft,f8:n.f8,gc:n.gc,gh:n.gh}})}function ks(n){return(n.$?n.a.a_:n.a).bu}function Es(n){return n*n}function Zs(n){var r=Wu(n),n=Ju(n),n=$u(function(n){return Xo(n)}((n=P([Es(n.a),Es(n.b),Es(n.c)]),S(St,cc,0,n))));return R(Xs,n,r)}function Ps(n){return n}function Ms(n){return{$:4,a:n}}function _s(n){return R(_t,"",n)}function Rs(n){return _s(P([n.iC?"https":"http","://",n.hO,R(ji,"",R(Ri,function(n){return":"+Mt(n)},n.iA)),n.iw,R(ji,"",R(Ri,function(n){return"?"+n},n.cJ))]))}function Ss(n){return{$:6,a:n}}function Ls(n){return $t(R(rb,"Authorization","Bearer "+n))}function js(n){return Mt(Bb(255*n))}function Fs(n){var r=n.b,e=n.c,t=n.d;return js(n.a)+("-"+js(r)+("-"+js(e)+("-"+js(t))))}function Os(n){return R(zb,Nb,S(Ib,"bg-"+Fs(n),"background-color",n))}function Is(n){switch(n.$){case 0:return gt;case 1:var r=n.a,e=r.b,t=r.c;return lt("mv-"+js(r.a)+("-"+js(e)+("-"+js(t))));default:var a=n.a,u=a.b,i=a.c,o=n.b,c=o.a,f=o.b,s=o.c,r=n.c,e=r.a,t=r.b,o=r.c,r=n.d;return lt("tfrm-"+js(a.a)+("-"+js(u)+("-"+js(i)+("-"+js(c)+("-"+js(f)+("-"+js(s)+("-"+js(e)+("-"+js(t)+("-"+js(o)+("-"+js(r)))))))))))}}function zs(n){return"."+n}function Ns(n){var r=n.b,e=n.c,t=n.d;return"rgba("+Mt(Bb(255*n.a))+(","+Mt(Bb(255*r))+","+Mt(Bb(255*e))+","+sd(t))+")"}function Bs(n){return R(_t," ",R(of,st,P([n.eX?lt("inset"):gt,lt(sd(n.a.a)+"px"),lt(sd(n.a.b)+"px"),lt(sd(n.a8)+"px"),lt(sd(n.f0)+"px"),lt(Ns(n.cd))])))}function Ks(n){return P([R(fd,"."+ll+":focus-within",R(of,st,P([R(Ri,function(n){return R(cd,"border-color",Ns(n))},n.gU),R(Ri,function(n){return R(cd,"background-color",Ns(n))},n.gO),R(Ri,function(n){return R(cd,"box-shadow",Bs({a8:n.a8,cd:n.cd,eX:!1,a:R(ld,ct,R(bd,ct,n.a)),f0:n.f0}))},n.iQ),lt(R(cd,"outline","none"))]))),R(fd,"."+rl+":focus .focusable, ."+rl+".focusable:focus, .ui-slide-bar:focus + ."+rl+" .focusable-thumb",R(of,st,P([R(Ri,function(n){return R(cd,"border-color",Ns(n))},n.gU),R(Ri,function(n){return R(cd,"background-color",Ns(n))},n.gO),R(Ri,function(n){return R(cd,"box-shadow",Bs({a8:n.a8,cd:n.cd,eX:!1,a:R(ld,ct,R(bd,ct,n.a)),f0:n.f0}))},n.iQ),lt(R(cd,"outline","none"))])))])}function Us(n){return gr(wr(n))}function Ds(n){switch(n){case 0:return"."+Qb;case 1:return"."+Ub;case 2:return"."+Vb;case 3:return"."+Hb;case 4:return"."+Db;default:return"."+Gb}}Jn.Http={b:F,c:B,d:h,e:U,f:l(function(n,r){return R(As,r.a,R(oi,r.b,n))})};var Gs,qs,Ws=Vn("Http"),Js=(Vn("Http"),function(e){return{$:2,b:function(n){var r=new FileReader;return r.addEventListener("loadend",function(){n({$:0,a:r.result})}),r.readAsText(e),function(){r.abort()}},c:null}}),Xs=l(function(n,r){return{g3:r,fR:mu(n)}}),Hs=l(function(n,r){var e={a:ou(r.b),b:ou(r.a)},t=e.a,a={a:ou(n.b),b:ou(n.a)},r=a.a,n=t-r,t=(e.b-a.b)*bf((r+t)/2);return 6371e3*Xo(t*t+n*n)}),Vs=l(function(n,r){var e={a:R(ic,n,Fo),b:R(ic,r,Fo)},t=R(_f,e.a,e.b),a={a:iu(n),b:iu(r)},e=a.a,a=a.b,a=R(Hs,{a:e.bI,b:e.bE},{a:a.bI,b:a.bE});return{bu:t,aV:r,cT:1,bQ:Zs(t),a2:n,b$:a}}),Qs=l(function(n,r){r=Ps(r),n=Ps(n);return{fq:R(Pf,n.fq,r.fq),fr:R(Pf,n.fr,r.fr),fs:R(Pf,n.fs,r.fs),fu:R(Mf,n.fu,r.fu),fv:R(Mf,n.fv,r.fv),fw:R(Mf,n.fw,r.fw)}}),vn=A(function(n,r,e){return{hD:r,hR:n,h8:e}}),Ys=$n,nb={gL:y(mn={eO:gt,hO:"",iw:"",iA:gt,iC:1,cJ:gt},{hO:"www.strava.com",iw:"/oauth/authorize"}),aT:"59195",g7:"01713301d9282956d3d182c1e01ce02c5e8620c3",cQ:P(["read_all"]),jp:y(mn,{hO:"www.strava.com",iw:"/oauth/token"}),jv:C(Ys,vn,R(pf,"id",zo),R(pf,"firstname",vf),R(pf,"lastname",vf)),jw:y(mn,{hO:"www.strava.com",iw:"/api/v3/athlete"})},rb=l(function(n,r){return{$:0,a:n,b:r}}),un=f(function(n,r,e,t){return{hx:e,iE:r,cQ:t,jo:n}}),cn=(tn=function(n){return No(P([R(oa,lt,n),fa(gt)]))})(R(pf,"expires_in",zo)),on=xn,eb=hn,tb=function(n){return{$:1,a:n}},Xn=function(n){return R(oi,Ri(fa),ji(tb(n)))},ab=A(function(n,r,e){return r.$||e.$?gt:R(n,r.a,e.a)}),ub=function(n){return n.toLowerCase()},ib=l(function(n,r){return"bearer"===ub(n)?lt(r):gt}),Hr=l(function(n,r){r={a:r,b:S(ab,ib,lt(n),r)};if(1!==r.a.$)return r.b.$?gt:lt(lt(r.b.a));return lt(gt)}),ob=R(eb,Xn("missing or invalid 'refresh_token' / 'token_type'"),S(ca,Hr,R(pf,"token_type",vf),tn(R(pf,"refresh_token",vf)))),x=R(oa,ji(k),tn(R(pf,"scope",J(vf)))),de=ab(ib),cb=d(on,un,R(eb,Xn("missing or invalid 'access_token' / 'token_type'"),S(ca,de,R(oa,lt,R(pf,"token_type",vf)),R(oa,lt,R(pf,"access_token",vf)))),ob,cn,x),fb=rt,sb=f(function(n,r,e,t){return{gS:R(fb,"application/x-www-form-urlencoded",t),eK:R(hs,n,cb),eQ:e,ft:"POST",f8:gt,gc:gt,gh:Qa(r)}}),bb=l(function(n,r){return{$:0,a:n,b:r}}),lb=function(n){return encodeURIComponent(n)},db=l(function(n,r){return R(bb,lb(n),lb(r))}),gb=l(function(n,r){var e,t=r.ew,a=r.da,u=r.gh,i=r.bL,r=function(n){return R(ji,k,R(Ri,function(n){return P([R(rb,"Authorization","Basic "+n)])},R(Ri,function(n){return Ba({$:0,a:n.aT+":"+n.cR})},n)))}(1===(e=t.cR).$?gt:lt({aT:t.aT,cR:e.a})),a=R(pa,1,ti(L((e=t.cR).$?k:P([R(db,"client_secret",e.a)]),P([R(db,"grant_type","authorization_code"),R(db,"client_id",t.aT),R(db,"redirect_uri",Rs(i)),R(db,"code",a)]))));return C(sb,n,u,r,a)}),pb=A(function(n,r,e){var t=n.jp;return Cs(R(gb,Ms,{da:e,ew:{aT:n.aT,cR:lt("01713301d9282956d3d182c1e01ce02c5e8620c3")},bL:r,gh:t}))}),hb=l(function(n,r){return{a:y(n,{hE:{$:1,a:r}}),b:S(pb,nb,n.bL,r)}}),vb={$:3},mb={$:5},$b=A(function(n,r,e){return{eG:n,eH:r,eI:e}}),xb=tn(R(pf,"error_description",vf)),wb=tn(R(pf,"error_uri",vf)),yb=C(Ys,$b,R(oa,Da,R(pf,"error",vf)),xb,wb),Tb=l(function(n,r){if(1!==r.$)return{a:y(n,{hE:{$:2,a:r.a.jo}}),b:R(qi,100,mb)};if(4!==r.a.$)return{a:y(n,{hE:{$:4,a:vb}}),b:Wi};r=R(ss,yb,r.a.a);return r.$?{a:y(n,{hE:{$:4,a:vb}}),b:Wi}:{a:y(n,{hE:{$:4,a:{$:2,a:r.a}}}),b:Wi}}),Ab=function(n){return R(ii,Ca,{$:2,b:function(){try{Vr.location=n}catch(n){lr.location.reload(!1)}},c:null})},Cb=A(function(n,r,e){return L(e,r.b?P([R(db,n,R(_t," ",r))]):k)}),kb=A(function(n,r,e){return L(e,1===r.$?k:P([R(db,n,r.a)]))}),Eb=l(function(n,r){var e=r.aT,t=r.gh,a=r.bL,u=r.cQ,i=r.bR,r=r.hc,a=R(pa,1,ti(S(kb,"code_challenge_method",R(Ri,pt("S256"),r),S(kb,"code_challenge",r,S(kb,"state",i,S(Cb,"scope",u,P([R(db,"client_id",e),R(db,"redirect_uri",Rs(a)),R(db,"response_type",n?"token":"code")]))))))),n=t.cJ;return y(t,1===n.$?{cJ:lt(a)}:{cJ:lt(n.a+"&"+a)})}),Zb=l(function(n,r){r=Ii(r),r={aT:nb.aT,bL:n.bL,cQ:nb.cQ,bR:lt(r.bR),gh:nb.gL};return{a:y(n,{hE:Di}),b:Ab(Qa(function(n){return R(Eb,0,{aT:n.aT,hc:gt,bL:n.bL,cQ:n.cQ,bR:n.bR,gh:n.gh})}(r)))}}),Pb=l(function(n,r){return{$:3,a:n,b:r}}),Mb={$:4},_b=l(function(n,r){r={a:n.hE,b:r};return 1===r.b.$?{a:y(n,{hE:{$:4,a:Mb}}),b:Wi}:2!==r.a.$?{a:y(n,{hE:{$:4,a:Ui}}),b:Wi}:{a:y(n,{hE:R(Pb,r.b.a,r.a.a)}),b:Wi}}),Rb=ur("genRandomBytes",Sn),Sb=l(function(n,r){var e=n.jw;return Cs({gS:fs,eK:R(hs,Ss,n.jv),eQ:R(Ls,r,k),ft:"GET",f8:gt,gc:gt,gh:Qa(e)})}),Lb=l(function(n,r){return{a:y(n,{hE:{$:2,a:r}}),b:R(Sb,nb,r)}}),jb=l(function(n,r){var e={a:r.hE,b:n};n:for(;;)switch(e.a.$){case 0:switch(e.b.$){case 1:return function(n){return{a:y(n,{hE:Di}),b:Rb(16)}}(r);case 2:return R(Zb,r,e.b.a);default:break n}case 1:switch(e.b.$){case 3:return R(hb,r,e.a.a);case 4:return R(Tb,r,e.b.a);default:break n}case 2:switch(e.b.$){case 5:return R(Lb,r,e.a.a);case 6:return R(_b,r,e.b.a);default:break n}case 3:if(7!==e.b.$)break n;return function(n){return{a:y(n,{hE:Di}),b:Ab(Qa(n.bL))}}(r);default:break n}return{a:r,b:Wi}}),le=l(function(n,r){var u,i,e=r;switch(n.$){case 4:return{a:y(e,{eh:n.a}),b:function(n){return Cs({gS:fs,eK:R(hs,n,ms),eQ:k,ft:"GET",f8:gt,gc:gt,gh:S(Yf,"http://ip-api.com",P(["json"]),k)})}(eu)};case 13:return{a:y(e,{dA:!1}),b:Wi};case 9:var t=function(n){return n.$?gt:lt(n.a)}(n.a),a=function(){if(t.$)return{eo:0,ep:0,fo:1};var n=t.a;return{eo:n.bE,ep:n.bI,fo:10}}();return{a:y(e,{dq:t}),b:zi(P([(a=a,Go(su(P([{a:"Cmd",b:uc("Init")},{a:"token",b:uc(Yo)},{a:"lon",b:qo(a.ep)},{a:"lat",b:qo(a.eo)},{a:"zoom",b:qo(a.fo)}])))),R(qi,100,Do)]))};case 10:return{a:e,b:Wi};case 0:return{a:e,b:R(Yc,P(["text/gpx"]),ru)};case 1:var o=n.a;return{a:y(e,{dh:lt(rf(o))}),b:R(ii,nu,Js(o))};case 2:var o=zu(n.a),c=y(e,{cN:10,bZ:(o=at(c=o)-1,u=l(function(n,r){var e=R(Qs,ks(n),ks(r));return{bu:e,aV:Bu(r),cT:fu(n)+fu(r),bQ:Zs(e),a2:vu(n),b$:R(cc,Yu(n),Yu(r))}}),R(i=l(function(n,r){var e={a:n<2,b:r};if(e.a){if(e.b.b&&e.b.b.b){var r=e.b,t=r.b,a=t.a,t=t.b;return{a:lt({$:0,a:R(Vs,r.a,a)}),b:R($t,a,t)}}return{a:gt,b:e.b}}a=n/2|0,n-=a,e=R(i,a,t=e.b),t=e.a,n=R(i,n,e.b),e=n.b,t={a:t,b:n.a};if(t.a.$||t.b.$)return{a:gt,b:e};n=t.a.a,t=t.b.a;return{a:lt({$:1,a:{I:n,a_:R(u,n,t),as:t}}),b:e}}),o,c).a)});return{a:ri(c),b:1===e.ax?zi(P([wu(c),yu(c),R(qi,100,Do)])):Wi};case 12:return{a:e,b:xf};case 5:return{a:ri(y(e,{cN:n.a})),b:Wi};case 3:var f=R(jb,n.a,e.cU),c=f.a,f=f.b;(function(n){var r=n.hE;switch(r.$){case 3:return lt(r.b);case 2:return lt(r.a);default:;}})(c);return{a:y(e,{cU:c}),b:R(nf,et,f)};case 6:f=e.bZ;if(f.$)return{a:e,b:Wi};f=y(e,{a9:n.a,di:R(ic,vu(R(Qo,e.a9,f.a)),Fo)});return{a:ri(f),b:1===e.ax?zi(P([wu(e),yu(e),R(qi,10,Do)])):Wi};case 7:return{a:ri(y(e,{a9:R(Qc,n.a,e)})),b:Wi};case 8:var s=n.a;return{a:y(e,{ax:s}),b:1!==e.ax&&1===s?zi(P([wu(e),yu(e),R(qi,10,Do)])):Wi};default:s=R($f,e,n.a);return{a:s.a,b:s.b}}}),Fb=f(function(n,r,e,t){return{$:0,a:n,b:r,c:e,d:t}}),wb=A(function(n,r,e){return C(Fb,n/255,r/255,e/255,1)}),Ob=S(wb,241,242,246),Ib=A(function(n,r,e){return{$:4,a:n,b:r,c:e}}),zb=l(function(n,r){return{$:4,a:n,b:r}}),Nb=(be=function(n){return 31<n?{$:1,a:1<<n-32}:{$:0,a:1<<n}})(8),Bb=H,Kb="a",O="atv",Ub="ab",Db="cx",Gb="cy",qb="acb",Wb="accx",Jb="accy",Xb="acr",Hb="al",Vb="ar",Qb="at",Yb="ah",nl="av",rl="s",el="bh",tl="b",an="w7",nn="bd",z="bdt",c="bn",Rn="bs",_="cpe",v="cp",Xr="cpx",T="cpy",al="c",ul="ctr",il="cb",ol="ccx",cl="ccy",fl="cl",sl="cr",bl="ct",sn="cptr",dn="ctxt",W="fcs",ll="focus-within",dl="fs",jn="hbh",gl="hc",pl="he",hl="hf",vl="hfp",$="hv",q="ic",ml="fr",$l="lbl",K="iml",Yn="imlf",pe="imlp",he="implw",D="it",G="i",pn="lnk",xl="nb",wl="notxt",yl="ol",Tl="or",ln="oq",Al="pg",Cl="p",gn="ppe",kl="ui",El="r",me="sb",Y="sbx",Ee="sby",Zl="sbt",Pl="e",Ml="cap",$e="sev",Hn="sk",_l="t",Tn="tc",yn="w8",m="w2",F="w9",B="tj",h="tja",U="tl",$n="w3",vn="w5",mn="w4",xn="tr",hn="w6",Hr="w1",on="tun",un="ts",Xn="clr",de="u",Rl="wc",Sl="we",Ll="wf",jl="wfp",Fl="wrp",Ol={$:0},Il={$:0},zl=rl+" "+al,Nl=rl+" "+(V="g"),Bl=rl+" "+Al,Kl=rl+" "+Cl,Ul=rl+" "+El,Dl=rl+" "+Pl,Gl={$:0},ob=function(n){return{$:0,a:n}},ql=l(function(n,r){switch(r.$){case 0:return n;case 1:return L(r.a,n);case 2:return L(n,r.a);default:return L(r.a,L(n,r.b))}}),Wl=A(function(r,n,e){switch(e.$){case 0:return n;case 1:return L(R(Pa,function(n){return{a:r,b:n}},e.a),n);case 2:return L(n,R(Pa,function(n){return{a:r,b:n}},t=e.a));default:var t=e.b;return L(R(Pa,function(n){return{a:r,b:n}},e.a),L(n,R(Pa,function(n){return{a:r,b:n}},t)))}}),Jl=be(41),Xl=be(40),Hl=be(42),Vl=be(43),Ql=l(function(n,r){return R($r,n,uc(r))}),Yl=Ql("className"),nd=gr("div"),rd=pi,ed=function(n){switch(n.$){case 0:return Mt(n.a)+"px";case 1:return"auto";case 2:return Mt(n.a)+"fr";case 3:var r=n.b;return"min"+(Mt(n.a)+ed(r));default:r=n.b;return"max"+(Mt(n.a)+ed(r))}},td=function(n){switch(n.$){case 13:return a=n.a;case 12:return a=n.a;case 0:return n.a;case 1:return a=n.a;case 2:return"font-size-"+Mt(n.a);case 3:case 4:return n.a;case 5:return n.a;case 7:case 6:return n.a;case 8:var r=n.a;return"grid-rows-"+R(_t,"-",R(Pa,ed,r.iH))+("-cols-"+R(_t,"-",R(Pa,ed,r.am))+("-space-x-"+ed(r.iW.a)+("-space-y-"+ed(r.iW.b))));case 9:var e=n.a;return"gp grid-pos-"+Mt(e.fX)+("-"+Mt(e.et)+("-"+Mt(e.go)+("-"+Mt(e.eR))));case 11:var t=n.a,e=n.b,a=function(){switch(t){case 0:return"fs";case 1:return"hv";default:return"act"}}();return R(_t," ",R(Pa,function(n){n=td(n);return""===n?"":n+"-"+a},e));default:return R(ji,"",Is(n.a))}},ad=l(function(n,r){return S(xi,n,0,r)}),ud=l(function(n,r){return!R(yi,n,r).$}),id=l(function(n,r){return R(ud,n,r)}),od=l(function(n,r){var e=r.a,t=r.b,a=td(n);return R(id,a,e)?r:{a:R(ad,a,e),b:R($t,n,t)}}),cd=l(function(n,r){return{$:0,a:n,b:r}}),fd=l(function(n,r){return{$:0,a:n,b:r}}),sd=fn,bd=l(function(n,r){var e=r.b;return{a:n(r.a),b:e}}),ld=l(function(n,r){return{a:r.a,b:n(r.b)}}),dd=l(function(n,r){return R($r,function(n){return"innerHTML"==n||"formAction"==n?"data-"+n:n}(n),yr(r))}),cn=l(function(n,r){return{$:2,a:n,b:r}}),gd=l(function(n,r){return{$:1,a:n,b:r}}),pd=l(function(n,r){return{$:0,a:n,b:r}}),hd=l(function(n,r){return{$:4,a:n,b:r}}),vd=l(function(n,r){return{$:0,a:n,b:r}}),x=l(function(n,r){return{$:3,a:n,b:r}}),md=P([0,1,2,3,4,5]),rt=function(t){return{$:6,a:R(Eo,function(n){var r=t(n),e=r.a,r=r.b;return P([R(hd,function(n){switch(n){case 0:return"."+bl;case 1:return"."+il;case 2:return"."+sl;case 3:return"."+fl;case 4:return"."+ol;default:return"."+cl}}(n),e),R(gd,"."+rl,P([R(hd,Ds(n),r)]))])},md)}},tn=P([R(vd,"display","flex"),R(vd,"flex-direction","column"),R(vd,"white-space","pre"),R(hd,"."+jn,P([R(vd,"z-index","0"),R(gd,"."+el,P([R(vd,"z-index","-1")]))])),R(hd,"."+Zl,P([R(gd,"."+_l,P([R(hd,"."+hl,P([R(vd,"flex-grow","0")])),R(hd,"."+Ll,P([R(vd,"align-self","auto !important")]))]))])),R(gd,"."+gl,P([R(vd,"height","auto")])),R(gd,"."+hl,P([R(vd,"flex-grow","100000")])),R(gd,"."+Ll,P([R(vd,"width","100%")])),R(gd,"."+jl,P([R(vd,"width","100%")])),R(gd,"."+Rl,P([R(vd,"align-self","flex-start")])),rt(function(n){switch(n){case 0:return{a:P([R(vd,"justify-content","flex-start")]),b:P([R(vd,"margin-bottom","auto !important"),R(vd,"margin-top","0 !important")])};case 1:return{a:P([R(vd,"justify-content","flex-end")]),b:P([R(vd,"margin-top","auto !important"),R(vd,"margin-bottom","0 !important")])};case 2:return{a:P([R(vd,"align-items","flex-end")]),b:P([R(vd,"align-self","flex-end")])};case 3:return{a:P([R(vd,"align-items","flex-start")]),b:P([R(vd,"align-self","flex-start")])};case 4:return{a:P([R(vd,"align-items","center")]),b:P([R(vd,"align-self","center")])};default:return{a:P([R(gd,"."+rl,P([R(vd,"margin-top","auto"),R(vd,"margin-bottom","auto")]))]),b:P([R(vd,"margin-top","auto !important"),R(vd,"margin-bottom","auto !important")])}}})]),H=P([0,1,2,3,4,5]),Tn=P([R(pd,"html,body",P([R(vd,"height","100%"),R(vd,"padding","0"),R(vd,"margin","0")])),R(pd,L("."+rl,L("."+Pl,"."+q)),P([R(vd,"display","block"),R(hd,"."+hl,P([R(gd,"img",P([R(vd,"max-height","100%"),R(vd,"object-fit","cover")]))])),R(hd,"."+Ll,P([R(gd,"img",P([R(vd,"max-width","100%"),R(vd,"object-fit","cover")]))]))])),R(pd,"."+rl+":focus",P([R(vd,"outline","none")])),R(pd,"."+kl,P([R(vd,"width","100%"),R(vd,"height","auto"),R(vd,"min-height","100%"),R(vd,"z-index","0"),R(hd,L("."+rl,"."+hl),P([R(vd,"height","100%"),R(gd,"."+hl,P([R(vd,"height","100%")]))])),R(gd,"."+ml,P([R(hd,"."+xl,P([R(vd,"position","fixed"),R(vd,"z-index","20")]))]))])),R(pd,"."+xl,P([R(vd,"position","relative"),R(vd,"border","none"),R(vd,"display","flex"),R(vd,"flex-direction","row"),R(vd,"flex-basis","auto"),R(hd,"."+Pl,tn),{$:6,a:R(Pa,function(n){switch(n){case 0:return R(hd,zs(Kb),P([R(vd,"position","absolute"),R(vd,"bottom","100%"),R(vd,"left","0"),R(vd,"width","100%"),R(vd,"z-index","20"),R(vd,"margin","0 !important"),R(gd,zs(hl),P([R(vd,"height","auto")])),R(gd,zs(Ll),P([R(vd,"width","100%")])),R(vd,"pointer-events","none"),R(gd,"*",P([R(vd,"pointer-events","auto")]))]));case 1:return R(hd,zs(tl),P([R(vd,"position","absolute"),R(vd,"bottom","0"),R(vd,"left","0"),R(vd,"height","0"),R(vd,"width","100%"),R(vd,"z-index","20"),R(vd,"margin","0 !important"),R(vd,"pointer-events","none"),R(gd,"*",P([R(vd,"pointer-events","auto")])),R(gd,zs(hl),P([R(vd,"height","auto")]))]));case 2:return R(hd,zs(Tl),P([R(vd,"position","absolute"),R(vd,"left","100%"),R(vd,"top","0"),R(vd,"height","100%"),R(vd,"margin","0 !important"),R(vd,"z-index","20"),R(vd,"pointer-events","none"),R(gd,"*",P([R(vd,"pointer-events","auto")]))]));case 3:return R(hd,zs(yl),P([R(vd,"position","absolute"),R(vd,"right","100%"),R(vd,"top","0"),R(vd,"height","100%"),R(vd,"margin","0 !important"),R(vd,"z-index","20"),R(vd,"pointer-events","none"),R(gd,"*",P([R(vd,"pointer-events","auto")]))]));case 4:return R(hd,zs(ml),P([R(vd,"position","absolute"),R(vd,"width","100%"),R(vd,"height","100%"),R(vd,"left","0"),R(vd,"top","0"),R(vd,"margin","0 !important"),R(vd,"pointer-events","none"),R(gd,"*",P([R(vd,"pointer-events","auto")]))]));default:return R(hd,zs(el),P([R(vd,"position","absolute"),R(vd,"width","100%"),R(vd,"height","100%"),R(vd,"left","0"),R(vd,"top","0"),R(vd,"margin","0 !important"),R(vd,"z-index","0"),R(vd,"pointer-events","none"),R(gd,"*",P([R(vd,"pointer-events","auto")]))]))}},H)}])),R(pd,"."+rl,P([R(vd,"position","relative"),R(vd,"border","none"),R(vd,"flex-shrink","0"),R(vd,"display","flex"),R(vd,"flex-direction","row"),R(vd,"flex-basis","auto"),R(vd,"resize","none"),R(vd,"font-feature-settings","inherit"),R(vd,"box-sizing","border-box"),R(vd,"margin","0"),R(vd,"padding","0"),R(vd,"border-width","0"),R(vd,"border-style","solid"),R(vd,"font-size","inherit"),R(vd,"color","inherit"),R(vd,"font-family","inherit"),R(vd,"line-height","1"),R(vd,"font-weight","inherit"),R(vd,"text-decoration","none"),R(vd,"font-style","inherit"),R(hd,"."+Fl,P([R(vd,"flex-wrap","wrap")])),R(hd,"."+wl,P([R(vd,"-moz-user-select","none"),R(vd,"-webkit-user-select","none"),R(vd,"-ms-user-select","none"),R(vd,"user-select","none")])),R(hd,"."+sn,P([R(vd,"cursor","pointer")])),R(hd,"."+dn,P([R(vd,"cursor","text")])),R(hd,"."+gn,P([R(vd,"pointer-events","none !important")])),R(hd,"."+_,P([R(vd,"pointer-events","auto !important")])),R(hd,"."+Xn,P([R(vd,"opacity","0")])),R(hd,"."+ln,P([R(vd,"opacity","1")])),R(hd,"."+L($,Xn)+":hover",P([R(vd,"opacity","0")])),R(hd,"."+L($,ln)+":hover",P([R(vd,"opacity","1")])),R(hd,"."+L(W,Xn)+":focus",P([R(vd,"opacity","0")])),R(hd,"."+L(W,ln)+":focus",P([R(vd,"opacity","1")])),R(hd,"."+L(O,Xn)+":active",P([R(vd,"opacity","0")])),R(hd,"."+L(O,ln)+":active",P([R(vd,"opacity","1")])),R(hd,"."+un,P([R(vd,"transition",R(_t,", ",R(Pa,function(n){return n+" 160ms"},P(["transform","opacity","filter","background-color","color","font-size"]))))])),R(hd,"."+me,P([R(vd,"overflow","auto"),R(vd,"flex-shrink","1")])),R(hd,"."+Y,P([R(vd,"overflow-x","auto"),R(hd,"."+El,P([R(vd,"flex-shrink","1")]))])),R(hd,"."+Ee,P([R(vd,"overflow-y","auto"),R(hd,"."+al,P([R(vd,"flex-shrink","1")])),R(hd,"."+Pl,P([R(vd,"flex-shrink","1")]))])),R(hd,"."+v,P([R(vd,"overflow","hidden")])),R(hd,"."+Xr,P([R(vd,"overflow-x","hidden")])),R(hd,"."+T,P([R(vd,"overflow-y","hidden")])),R(hd,"."+Rl,P([R(vd,"width","auto")])),R(hd,"."+c,P([R(vd,"border-width","0")])),R(hd,"."+nn,P([R(vd,"border-style","dashed")])),R(hd,"."+z,P([R(vd,"border-style","dotted")])),R(hd,"."+Rn,P([R(vd,"border-style","solid")])),R(hd,"."+_l,P([R(vd,"white-space","pre"),R(vd,"display","inline-block")])),R(hd,"."+D,P([R(vd,"line-height","1.05"),R(vd,"background","transparent"),R(vd,"text-align","inherit")])),R(hd,"."+Pl,tn),R(hd,"."+El,P([R(vd,"display","flex"),R(vd,"flex-direction","row"),R(gd,"."+rl,P([R(vd,"flex-basis","0%"),R(hd,"."+Sl,P([R(vd,"flex-basis","auto")])),R(hd,"."+pn,P([R(vd,"flex-basis","auto")]))])),R(gd,"."+hl,P([R(vd,"align-self","stretch !important")])),R(gd,"."+vl,P([R(vd,"align-self","stretch !important")])),R(gd,"."+Ll,P([R(vd,"flex-grow","100000")])),R(gd,"."+ul,P([R(vd,"flex-grow","0"),R(vd,"flex-basis","auto"),R(vd,"align-self","stretch")])),R(gd,"u:first-of-type."+Xb,P([R(vd,"flex-grow","1")])),R(gd,"s:first-of-type."+Wb,P([R(vd,"flex-grow","1"),R(gd,"."+Db,P([R(vd,"margin-left","auto !important")]))])),R(gd,"s:last-of-type."+Wb,P([R(vd,"flex-grow","1"),R(gd,"."+Db,P([R(vd,"margin-right","auto !important")]))])),R(gd,"s:only-of-type."+Wb,P([R(vd,"flex-grow","1"),R(gd,"."+Gb,P([R(vd,"margin-top","auto !important"),R(vd,"margin-bottom","auto !important")]))])),R(gd,"s:last-of-type."+Wb+" ~ u",P([R(vd,"flex-grow","0")])),R(gd,"u:first-of-type."+Xb+" ~ s."+Wb,P([R(vd,"flex-grow","0")])),rt(function(n){switch(n){case 0:return{a:P([R(vd,"align-items","flex-start")]),b:P([R(vd,"align-self","flex-start")])};case 1:return{a:P([R(vd,"align-items","flex-end")]),b:P([R(vd,"align-self","flex-end")])};case 2:return{a:P([R(vd,"justify-content","flex-end")]),b:k};case 3:return{a:P([R(vd,"justify-content","flex-start")]),b:k};case 4:return{a:P([R(vd,"justify-content","center")]),b:k};default:return{a:P([R(vd,"align-items","center")]),b:P([R(vd,"align-self","center")])}}}),R(hd,"."+$e,P([R(vd,"justify-content","space-between")])),R(hd,"."+$l,P([R(vd,"align-items","baseline")]))])),R(hd,"."+al,P([R(vd,"display","flex"),R(vd,"flex-direction","column"),R(gd,"."+rl,P([R(vd,"flex-basis","0px"),R(vd,"min-height","min-content"),R(hd,"."+pl,P([R(vd,"flex-basis","auto")]))])),R(gd,"."+hl,P([R(vd,"flex-grow","100000")])),R(gd,"."+Ll,P([R(vd,"width","100%")])),R(gd,"."+jl,P([R(vd,"width","100%")])),R(gd,"."+Rl,P([R(vd,"align-self","flex-start")])),R(gd,"u:first-of-type."+qb,P([R(vd,"flex-grow","1")])),R(gd,"s:first-of-type."+Jb,P([R(vd,"flex-grow","1"),R(gd,"."+Gb,P([R(vd,"margin-top","auto !important"),R(vd,"margin-bottom","0 !important")]))])),R(gd,"s:last-of-type."+Jb,P([R(vd,"flex-grow","1"),R(gd,"."+Gb,P([R(vd,"margin-bottom","auto !important"),R(vd,"margin-top","0 !important")]))])),R(gd,"s:only-of-type."+Jb,P([R(vd,"flex-grow","1"),R(gd,"."+Gb,P([R(vd,"margin-top","auto !important"),R(vd,"margin-bottom","auto !important")]))])),R(gd,"s:last-of-type."+Jb+" ~ u",P([R(vd,"flex-grow","0")])),R(gd,"u:first-of-type."+qb+" ~ s."+Jb,P([R(vd,"flex-grow","0")])),rt(function(n){switch(n){case 0:return{a:P([R(vd,"justify-content","flex-start")]),b:P([R(vd,"margin-bottom","auto")])};case 1:return{a:P([R(vd,"justify-content","flex-end")]),b:P([R(vd,"margin-top","auto")])};case 2:return{a:P([R(vd,"align-items","flex-end")]),b:P([R(vd,"align-self","flex-end")])};case 3:return{a:P([R(vd,"align-items","flex-start")]),b:P([R(vd,"align-self","flex-start")])};case 4:return{a:P([R(vd,"align-items","center")]),b:P([R(vd,"align-self","center")])};default:return{a:P([R(vd,"justify-content","center")]),b:k}}}),R(gd,"."+ul,P([R(vd,"flex-grow","0"),R(vd,"flex-basis","auto"),R(vd,"width","100%"),R(vd,"align-self","stretch !important")])),R(hd,"."+$e,P([R(vd,"justify-content","space-between")]))])),R(hd,"."+V,P([R(vd,"display","-ms-grid"),R(gd,".gp",P([R(gd,"."+rl,P([R(vd,"width","100%")]))])),R(x,{a:"display",b:"grid"},P([{a:"display",b:"grid"}])),(Gs=function(n){switch(n){case 0:return P([R(vd,"justify-content","flex-start")]);case 1:return P([R(vd,"justify-content","flex-end")]);case 2:return P([R(vd,"align-items","flex-end")]);case 3:return P([R(vd,"align-items","flex-start")]);case 4:return P([R(vd,"align-items","center")]);default:return P([R(vd,"justify-content","center")])}},{$:6,a:R(Eo,function(n){return P([R(gd,"."+rl,P([R(hd,Ds(n),Gs(n))]))])},md)})])),R(hd,"."+Al,P([R(vd,"display","block"),R(gd,"."+rl+":first-child",P([R(vd,"margin","0 !important")])),R(gd,"."+rl+(Ds(3)+":first-child + .")+rl,P([R(vd,"margin","0 !important")])),R(gd,"."+rl+(Ds(2)+":first-child + .")+rl,P([R(vd,"margin","0 !important")])),rt(function(n){switch(n){case 0:case 1:return{a:k,b:k};case 2:return{a:k,b:P([R(vd,"float","right"),R(hd,"::after",P([R(vd,"content",'""'),R(vd,"display","table"),R(vd,"clear","both")]))])};case 3:return{a:k,b:P([R(vd,"float","left"),R(hd,"::after",P([R(vd,"content",'""'),R(vd,"display","table"),R(vd,"clear","both")]))])};case 4:default:return{a:k,b:k}}})])),R(hd,"."+K,P([R(vd,"white-space","pre-wrap !important"),R(vd,"height","100%"),R(vd,"width","100%"),R(vd,"background-color","transparent")])),R(hd,"."+he,P([R(hd,"."+Pl,P([R(vd,"flex-basis","auto")]))])),R(hd,"."+pe,P([R(vd,"white-space","pre-wrap !important"),R(vd,"cursor","text"),R(gd,"."+Yn,P([R(vd,"white-space","pre-wrap !important"),R(vd,"color","transparent")]))])),R(hd,"."+Cl,P([R(vd,"display","block"),R(vd,"white-space","normal"),R(vd,"overflow-wrap","break-word"),R(hd,"."+jn,P([R(vd,"z-index","0"),R(gd,"."+el,P([R(vd,"z-index","-1")]))])),R(cn,"."+_l,P([R(vd,"display","inline"),R(vd,"white-space","normal")])),R(cn,"."+Cl,P([R(vd,"display","inline"),R(hd,"::after",P([R(vd,"content","none")])),R(hd,"::before",P([R(vd,"content","none")]))])),R(cn,"."+Pl,P([R(vd,"display","inline"),R(vd,"white-space","normal"),R(hd,"."+Sl,P([R(vd,"display","inline-block")])),R(hd,"."+ml,P([R(vd,"display","flex")])),R(hd,"."+el,P([R(vd,"display","flex")])),R(hd,"."+Kb,P([R(vd,"display","flex")])),R(hd,"."+tl,P([R(vd,"display","flex")])),R(hd,"."+Tl,P([R(vd,"display","flex")])),R(hd,"."+yl,P([R(vd,"display","flex")])),R(gd,"."+_l,P([R(vd,"display","inline"),R(vd,"white-space","normal")]))])),R(gd,"."+El,P([R(vd,"display","inline")])),R(gd,"."+al,P([R(vd,"display","inline-flex")])),R(gd,"."+V,P([R(vd,"display","inline-grid")])),rt(function(n){switch(n){case 0:case 1:return{a:k,b:k};case 2:return{a:k,b:P([R(vd,"float","right")])};case 3:return{a:k,b:P([R(vd,"float","left")])};case 4:default:return{a:k,b:k}}})])),R(hd,".hidden",P([R(vd,"display","none")])),R(hd,"."+Hr,P([R(vd,"font-weight","100")])),R(hd,"."+m,P([R(vd,"font-weight","200")])),R(hd,"."+$n,P([R(vd,"font-weight","300")])),R(hd,"."+mn,P([R(vd,"font-weight","400")])),R(hd,"."+vn,P([R(vd,"font-weight","500")])),R(hd,"."+hn,P([R(vd,"font-weight","600")])),R(hd,"."+an,P([R(vd,"font-weight","700")])),R(hd,"."+yn,P([R(vd,"font-weight","800")])),R(hd,"."+F,P([R(vd,"font-weight","900")])),R(hd,"."+G,P([R(vd,"font-style","italic")])),R(hd,"."+Hn,P([R(vd,"text-decoration","line-through")])),R(hd,"."+de,P([R(vd,"text-decoration","underline"),R(vd,"text-decoration-skip-ink","auto"),R(vd,"text-decoration-skip","ink")])),R(hd,L("."+de,"."+Hn),P([R(vd,"text-decoration","line-through underline"),R(vd,"text-decoration-skip-ink","auto"),R(vd,"text-decoration-skip","ink")])),R(hd,"."+on,P([R(vd,"font-style","normal")])),R(hd,"."+B,P([R(vd,"text-align","justify")])),R(hd,"."+h,P([R(vd,"text-align","justify-all")])),R(hd,"."+Tn,P([R(vd,"text-align","center")])),R(hd,"."+xn,P([R(vd,"text-align","right")])),R(hd,"."+U,P([R(vd,"text-align","left")])),R(hd,".modal",P([R(vd,"position","fixed"),R(vd,"left","0"),R(vd,"top","0"),R(vd,"width","100%"),R(vd,"height","100%"),R(vd,"pointer-events","none")]))]))]),xn=function(n){return P([R(pd,".v-"+n,P([R(vd,"font-feature-settings",'"'+n+'"')])),R(pd,".v-"+n+"-off",P([R(vd,"font-feature-settings",'"'+n+'" 0')]))])},U=Ha(P([R(Pa,function(n){return R(pd,".border-"+Mt(n),P([R(vd,"border-width",Mt(n)+"px")]))},R(Ft,0,6)),R(Pa,function(n){return R(pd,".font-size-"+Mt(n),P([R(vd,"font-size",Mt(n)+"px")]))},R(Ft,8,32)),R(Pa,function(n){return R(pd,".p-"+Mt(n),P([R(vd,"padding",Mt(n)+"px")]))},R(Ft,0,24)),P([R(pd,".v-smcp",P([R(vd,"font-variant","small-caps")])),R(pd,".v-smcp-off",P([R(vd,"font-variant","normal")]))]),xn("zero"),xn("onum"),xn("liga"),xn("dlig"),xn("ordn"),xn("tnum"),xn("afrc"),xn("frac")])),xn="@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {."+rl+"."+El+" > ."+rl+" { flex-basis: auto !important; } ."+rl+"."+El+" > ."+rl+"."+ul+' { flex-basis: auto !important; }}\ninput[type="search"],\ninput[type="search"]::-webkit-search-decoration,\ninput[type="search"]::-webkit-search-cancel-button,\ninput[type="search"]::-webkit-search-results-button,\ninput[type="search"]::-webkit-search-results-decoration {\n  -webkit-appearance:none;\n}\n\ninput[type=range] {\n  -webkit-appearance: none; \n  background: transparent;\n  position:absolute;\n  left:0;\n  top:0;\n  z-index:10;\n  width: 100%;\n  outline: dashed 1px;\n  height: 100%;\n  opacity: 0;\n}\n\ninput[type=range]::-moz-range-track {\n    background: transparent;\n    cursor: pointer;\n}\ninput[type=range]::-ms-track {\n    background: transparent;\n    cursor: pointer;\n}\ninput[type=range]::-webkit-slider-runnable-track {\n    background: transparent;\n    cursor: pointer;\n}\n\ninput[type=range]::-webkit-slider-thumb {\n    -webkit-appearance: none;\n    opacity: 0.5;\n    width: 80px;\n    height: 80px;\n    background-color: black;\n    border:none;\n    border-radius: 5px;\n}\ninput[type=range]::-moz-range-thumb {\n    opacity: 0.5;\n    width: 80px;\n    height: 80px;\n    background-color: black;\n    border:none;\n    border-radius: 5px;\n}\ninput[type=range]::-ms-thumb {\n    opacity: 0.5;\n    width: 80px;\n    height: 80px;\n    background-color: black;\n    border:none;\n    border-radius: 5px;\n}\ninput[type=range][orient=vertical]{\n    writing-mode: bt-lr; /* IE */\n    -webkit-appearance: slider-vertical;  /* WebKit */\n}\n'+("\n.explain {\n    border: 6px solid rgb(174, 121, 15) !important;\n}\n.explain > ."+rl+" {\n    border: 4px dashed rgb(0, 151, 167) !important;\n}\n\n.ctr {\n    border: none !important;\n}\n.explain > .ctr > ."+rl+" {\n    border: 4px dashed rgb(0, 151, 167) !important;\n}\n\n"),$d=l(function(n,r){return{cc:r,J:k,aI:k,ai:n}}),xd=l(function(n,r){var u=n;return S(Za,l(function(n,r){switch(n.$){case 0:return y(r,{aI:R($t,{a:n.a,b:n.b},r.aI)});case 3:var e=n.a;return y(r,{J:R($t,{cc:"\n}",J:k,aI:n.b,ai:"@supports ("+e.a+":"+e.b+") {"+u.ai},r.J)});case 5:e=n.b;return y(r,{J:R($t,R(xd,R($d,u.ai+" + "+n.a,""),e),r.J)});case 1:var t=n.b;return y(r,{J:R($t,R(xd,R($d,u.ai+" > "+n.a,""),t),r.J)});case 2:t=n.b;return y(r,{J:R($t,R(xd,R($d,u.ai+" "+n.a,""),t),r.J)});case 4:var a=n.b;return y(r,{J:R($t,R(xd,R($d,L(u.ai,n.a),""),a),r.J)});default:a=n.a;return y(r,{J:R($t,R(xd,R($d,u.ai,""),a),r.J)})}}),u,r)}),wd=L(xn,(xn=L(Tn,U),_s(R(Pa,qs=function(n){return L(yd(n),_s(R(Pa,qs,n.J)))},S(Za,l(function(n,r){var e=n.b;return R($t,R(xd,R($d,n.a,""),e),r)}),k,xn)))));function yd(n){return n.aI.b?n.ai+("{"+(_s(R(Pa,function(n){return n.a+":"+n.b+";"},n.aI))+(n.cc+"}"))):""}function Td(n){switch(n.fy){case 0:return S(Us,"div",k,P([S(Us,"style",k,P([xg(wd)]))]));case 1:return xg("");default:return S(Us,"elm-ui-static-rules",P([R(dd,"rules",uc(wd))]),k)}}function Ad(n){switch(n.$){case 0:return"serif";case 1:return"sans-serif";case 2:return"monospace";case 3:return'"'+n.a+'"';case 4:return'"'+n.a+'"';default:return'"'+n.a.ih+'"'}}function Cd(n){switch(n.$){case 0:return"smcp"===n.a;case 1:return!1;default:return"smcp"===n.a&&1===n.b}}function kd(n){return 5===n.$&&R(wg,Cd,n.a.gi)}function Ed(n){switch(n.$){case 0:return'"'+n.a+'"';case 1:return'"'+n.a+'" 0';default:return'"'+n.a+('" '+Mt(n.b))}}function Zd(n){return 5!==n.$?gt:lt(R(_t,", ",R(Pa,Ed,n.a.gi)))}function Pd(n){return n.b?lt(S(St,kf,n.a,n.b)):gt}function Md(n){var r=P([n.g0,n.gP,n.ho,n.ia]),e=R(ji,n.ho,Pd(r)),t=R(ji,n.gP,Pd(R(_g,function(n){return!p(n,e)},r))),r=1/((n=R(ji,n.g0,(a=r).b?lt(S(St,Yt,a.a,a.b)):gt))-e),a=1-n;return{g0:S(Mg,1/(n-t),n-t,1-n),eP:S(Mg,r,n-e,a)}}function _d(n){return{a:P([{a:"display",b:"block"}]),b:P([{a:"display",b:"inline-block"},{a:"line-height",b:sd(n.eR)},{a:"vertical-align",b:sd(n.gj)+"em"},{a:"font-size",b:sd(n.f0)+"em"}])}}function Rd(n){function r(n){return 4!==n.$?gt:lt("@import url('"+n.b+"');")}function e(n){return R(_t,"\n",R(of,r,n.b))}function t(n){var r=n.a,n=function(n){return S(St,l(function(n,r){if(1!==r.$)return r;if(5!==n.$)return r;n=n.a.gw;if(1===n.$)return r;n=n.a;return lt({a:_d(Md(n).eP),b:_d(Md(n).g0)})}),gt,n)}(n.b);return R(_t,"",R(Pa,1===n.$?Pg(r):R(Zg,r,n.a),a))}var a=R(Pa,ft,n);return L(R(_t,"\n",R(Pa,e,n)),R(_t,"\n",R(Pa,t,n)))}function Sd(n){return pr(wr(n))}function Ld(n){return R(nd,P([Yl(qg)]),P([Gg(n)]))}function jd(n){return R(nd,P([Yl(Wg)]),P([Gg(n)]))}function Fd(n){return{$:1,a:Yl(n)}}function Od(n){return{$:6,a:n}}function Id(n){return n}function zd(n){var r=n;return R(zb,Fp,d(jp,"p-"+Mt(n),r,r,r,r))}function Nd(n){return R(Gp,5,n)}function Bd(n){return S(Za,l(function(n,r){return r.$?8!==n.$?gt:lt(n.a):lt(r.a)}),gt,n)}function Kd(n){return S(Za,l(function(n,r){return r.$?7!==n.$?gt:lt(n.a):lt(r.a)}),gt,n)}function Ud(n){return 1!==n.$?zp:{$:2,a:{$:5,a:n.a}}}function Dd(n){return{a:n,b:!0}}function Gd(n){return R(zb,mh,S(Ib,"bc-"+Fs(n),"border-color",n))}function qd(n){return R(zb,$h,S(Xg,"br-"+Mt(n),"border-radius",Mt(n)+"px"))}function Wd(n){return R(zb,dp,d(xh,"b-"+Mt(n),n,n,n,n))}function Jd(n){return R(zb,rh,S(nh,R(eh,n,n),n,n))}function Xd(n){return 4===n.$&&11===n.b.$&&!n.b.a}function Hd(r){return{$:1,a:R(Ph,"keydown",R(oa,function(n){return{a:n,b:!0}},R(eb,function(n){n=r(n);return 1===n.$?tb("No key matched"):fa(n.a)},R(pf,"key",vf))))}}function Vd(n){return R(xr,"tabIndex",Mt(n))}function Qd(n){return n}function Yd(n){return R(zb,Fh,{$:2,a:n})}function ng(n){P([Cp,Th,R(fh,Sh,{$:1,a:100}),R(fh,Lh,{$:0,a:-10}),Os(Ob),Yd(40),zd(6),Jd(8)]),P([R(_h,k,{dr:{$:2,a:"x"},$9:gt})]);var n=(r=n.gk).a,r=r.b;return R(Ip,P([Jd(0),zd(0)]),P([R(Ep,P([Tp(Op(Qd(n))),wp(Op(Qd(r))),yh,Cp,Wd(2),Gd(jh),Zp(Rh("map"))]),Lp)]))}function rg(n){return{$:7,a:n}}function eg(n){return n}function tg(s){return function(f){return function(c){return function(o){return function(i){return function(u){return function(a){return function(t){return function(e){return function(r){return function(n){return{$:2,a:s,b:f,c:c,d:o,e:i,f:u,g:a,h:t,i:e,j:r,k:n}}}}}}}}}}}}function ag(n){return S(iv,{dB:n.dB,dX:n.dX,ed:n.ed},{bA:n.bA,bT:n.bT,b2:n.b2,b3:n.b3},{bA:n.bA,bT:n.bT,b2:n.b2,b3:n.b3})}function ug(n){return d(Of,P([ag(n),C(nv,!1,!1,!1,!1)]),uv,tv,av,{})}function ig(n){return ug({bA:7680,dB:15,dX:8,bT:516,ed:R(Fc,2,n+4),b2:5386,b3:5386})}function og(n){return n.ee}function cg(n){return n.ef}function fg(n){return n}function sg(n){return C(rv,515,n.ak,n.af,n.ae)}function bg(r){var n=function(n){return n.jA}(r.g$),e={dK:Ru(n),ee:function(n){return og(n)}(n),ef:function(n){return cg(n)}(n),eg:Lu(Fu(n))},t={$:4,a:R(yv,r.hw,k)},a=C(mv,e,1,gt,P([t]));if(1===a.$)return k;var u=a.a,i=R(jv,Lv,n),o=R(Kc,.99,R(Pf,mu(r.g9),Su(du(u)))),c=Ju(u),f=uu(S(Jc,c.a,c.b,c.c)),e=R(Kc,1.01,R(cc,f,Su(hu(u)))),u=(c=Sv(a=R(Mv,r.g$,{gK:r.gK,hB:e,ii:o})).fm)?fg(Lu(Fu(n))):function(n){return n}(Ru(n)),o=(e=function(){var n=r.aK;switch(n.$){case 0:return{a:0,b:0};case 1:return{a:1,b:0};case 2:return{a:2,b:0};case 3:return{a:3,b:n.a};case 4:return{a:4,b:n.a};default:return{a:5,b:0}}}()).a,n=e.b,n=Vh({e7:0,e8:u.gr,e9:$v(e=R(Xh,r.aC,r.aN)),fa:r.f4,fb:0,fc:u.gs,fd:xv(e),fe:Id(f),ff:0,fg:u.cZ,fh:wv(e),fi:o,fj:0,fk:c,fl:0,fm:n}),s=g(Yh,n,i,a,Tv,t,{T:k,ab:k,ac:k}),b=r.aE;switch(b.$){case 0:return Ha(P([S(qh,s.T,{a:l=b.a,b:Gh},lv),S(qh,s.ab,Ev,lv)]));case 1:var l=b.a;return Ha(P([S(qh,s.T,Ev,lv),P([Av]),S(qh,s.ac,l.bG,ev),P([ig(0)]),S(qh,s.T,{a:l,b:Gh},Zv),S(qh,s.ab,Ev,lv)]));default:var d=b.a,l=b.b;return Ha(P([S(qh,s.T,{a:l,b:Gh},lv),P([Av]),R(fv,s.ac,d),S(Rv,s.T,l,at(d)),S(qh,s.ab,Ev,lv)]))}}function lg(n){return n}function dg(n){return function(n){return R(Fv,{a7:n.a7,gN:n.gN,g$:n.g$,g9:n.g9,hq:n.hq},P([{hw:n.hw,aC:n.aC,aE:n.aE,aK:n.aK,aN:n.aN}]))}({a7:Iv,gN:n.gN,g$:n.g$,g9:n.g9,hq:n.hq,hw:n.hw,aC:1.2*R(Fc,2,9),aE:(r=function(n){for(;;){if(p(n.h1,0)&&p(n.h2,0))return Cv;if(!R(gc,mu(n.h1),mu(n.h2))){var r=tu(lg(n.h2)/3.141592653589793),e=tu(lg(n.h1)/3.141592653589793),t=fg(n.gg),a=t.gr,u=t.gs,i=t.cZ,t=R(Xh,1,n.b9);return{b6:e*wv(t),g2:!1,cm:e*xv(t),dT:r/e,cK:e*$v(t),d5:3,gr:a,gs:u,cZ:i}}n={b9:n.b9,h1:n.h2,h2:n.h1,gg:Lu(n.gg)}}}({b9:Ov,h1:1e3,h2:200,gg:n.gg}),n={bG:R(kv,r,Cv),cu:R(kv,Cv,Cv),cv:R(kv,Cv,Cv),cw:R(kv,Cv,Cv)},r.g2?{$:1,a:n}:{$:0,a:n}),aK:zv,aN:Ov});var r}function gg(n){return{$:8,a:n}}function pg(e){var n=R(Ap,P([Jd(5),zd(5),Cp]),P([{$:2,a:"Where are the tools?"}])),r=R(Ap,P([Tp(_p),Cp,zd(10),kp]),P([R(Ap,P([Tp(_p),Cp,zd(10),kp]),P([function(n){var r=P([R(Jv,0,rm("Third person")),R(Jv,1,rm("Map"))]);return R(im,P([qd(6)]),{dr:qv("Choose view"),fD:gg,is:r,iO:lt(n.ax)})}(e),R(Mp,1!==e.ax,function(n){var r=n.bZ;if(r.$)return{$:2,a:"No track to show"};r=r.a;return R(Ep,P([Zp(Gv(rg)),Wd(2),Gd(jh)]),Nv(dg({gN:Bv,g$:R(Ac,R(Qo,n.a9,r),n.di),g9:1,hq:n.gk,hw:n.d0,gg:yc})))}(e)),R(Mp,1===e.ax,ng(e))])),R(Ep,P([wp(Op(10))]),Lp),function(){var n=e.bZ;if(n.$)return{$:2,a:"Information will be shown here"};var r=n.a;return R(Ap,P([Tp(_p),Cp,zd(10),kp]),P([(n=1+fu(r),R(vh,om,{dr:R(Rp,k,{$:2,a:"Label goes here"}),ic:n,ie:0,fD:R(oi,Bb,Od),i0:lt(1),jk:wh,jx:e.a9})),{$:2,a:"Length: "+Mt(Bb(Id(Yu(r))))},{$:2,a:"Points: "+Mt(1+fu(r))}]))}()]));return R(Ap,P([Tp(_p),zd(5)]),P([R(Ip,k,P([R(Ep,P([Tp(Op(600))]),Lp)])),R(Ip,P([Tp(_p),Jd(5),zd(5)]),P([R(Ep,P([Tp(_p),Cp]),r),R(Ep,P([Cp,Tp(_p)]),n)])),R(Ip,k,P([R(Ep,P([Tp(Op(600))]),Lp)]))]))}var hg,vg,mg,$g,xg=dr,wg=l(function(n,r){for(;;){if(!r.b)return!1;var e=r.b;if(n(r.a))return!0;n=n,r=e}}),yg=A(function(n,r,e){var t=r.a,r=r.b;return n?e+"\n  "+t+": "+r+" !important;":e+"\n  "+t+": "+r+";"}),Tg=f(function(n,r,e,t){if(1===r.$)return P([e+("{"+S(St,yg(!1),"",t))+"\n}"]);switch(r.a){case 1:switch(n.hP){case 0:return k;case 2:return P([e+("-hv {"+S(St,yg(!0),"",t))+"\n}"]);default:return P([e+("-hv:hover {"+S(St,yg(!1),"",t))+"\n}"])}case 0:var a=S(St,yg(!1),"",t);return P([e+"-fs:focus {"+a+"\n}","."+rl+":focus "+e+"-fs  {"+a+"\n}",e+"-fs:focus-within {"+a+"\n}",".ui-slide-bar:focus + ."+rl+" .focusable-thumb"+e+"-fs {"+a+"\n}"]);default:return P([e+("-act:active {"+S(St,yg(!1),"",t))+"\n}"])}}),Ag=A(function(r,n,e){switch(n.$){case 0:return C(Tg,r,e,n.a,n.b);case 13:return C(Tg,r,e,"."+(a=n.a),P([R(cd,"box-shadow",n.b)]));case 12:return C(Tg,r,e,"."+(a=n.a),P([R(cd,"opacity",sd(R(Yt,0,R(kf,1,1-n.b))))]));case 2:var t=n.a;return C(Tg,r,e,".font-size-"+Mt(t),P([R(cd,"font-size",Mt(t)+"px")]));case 1:var a=n.a,u=n.b,i=R(_t,", ",R(of,Zd,u)),o=P([R(cd,"font-family",R(_t,", ",R(Pa,Ad,u))),R(cd,"font-feature-settings",i),R(cd,"font-variant",R(wg,kd,u)?"small-caps":"normal")]);return C(Tg,r,e,"."+a,o);case 3:return C(Tg,r,e,"."+(y=n.a),P([R(cd,n.b,T=n.c)]));case 4:return C(Tg,r,e,"."+(y=n.a),P([R(cd,n.b,Ns(n.c))]));case 5:var c=n.a,f=n.b,s=n.c,b=Mt(s)+"px",l=Mt(f)+"px",d="."+El,t="."+Fl+d,g="."+Vb,p="."+Cl,i="."+Al,h="."+Hb,u=sd(s/2)+"px",a=sd(f/2)+"px",o="."+al,f="."+rl;return Ha(P([C(Tg,r,e,(y="."+c)+d+" > "+f+" + "+f,P([R(cd,"margin-left",l)])),C(Tg,r,e,y+t+" > "+f,P([R(cd,"margin",u+" "+a)])),C(Tg,r,e,y+o+" > "+f+" + "+f,P([R(cd,"margin-top",b)])),C(Tg,r,e,y+i+" > "+f+" + "+f,P([R(cd,"margin-top",b)])),C(Tg,r,e,y+i+" > "+h,P([R(cd,"margin-right",l)])),C(Tg,r,e,y+i+" > "+g,P([R(cd,"margin-left",l)])),C(Tg,r,e,L(y,p),P([R(cd,"line-height","calc(1em + "+Mt(s)+"px)")])),C(Tg,r,e,"textarea"+f+y,P([R(cd,"line-height","calc(1em + "+Mt(s)+"px)"),R(cd,"height","calc(100% + "+Mt(s)+"px)")])),C(Tg,r,e,y+p+" > "+h,P([R(cd,"margin-right",l)])),C(Tg,r,e,y+p+" > "+g,P([R(cd,"margin-left",l)])),C(Tg,r,e,y+p+"::after",P([R(cd,"content","''"),R(cd,"display","block"),R(cd,"height","0"),R(cd,"width","0"),R(cd,"margin-top",Mt(-1*(s/2|0))+"px")])),C(Tg,r,e,y+p+"::before",P([R(cd,"content","''"),R(cd,"display","block"),R(cd,"height","0"),R(cd,"width","0"),R(cd,"margin-bottom",Mt(-1*(s/2|0))+"px")]))]));case 7:var g=n.c,v=n.d,h=n.e;return C(Tg,r,e,y="."+(c=n.a),P([R(cd,"padding",sd(n.b)+("px "+sd(g)+("px "+sd(v)+("px "+sd(h))))+"px")]));case 6:g=n.c,v=n.d,h=n.e;return C(Tg,r,e,y="."+(c=n.a),P([R(cd,"border-width",Mt(n.b)+("px "+Mt(g)+("px "+Mt(v)+("px "+Mt(h))))+"px")]));case 8:var p=n.a,m=A(function(n,r,e){n:for(;;)switch(e.$){case 0:return Mt(e.a)+"px";case 1:var t={a:n,b:r};if(1===t.a.$){if(1===t.b.$)return"max-content";return"minmax(max-content, "+Mt(a=t.b.a)+"px)"}if(1===t.b.$)return"minmax("+Mt(t.a.a)+"px, max-content)";var a=t.b.a;return"minmax("+Mt(t.a.a)+("px, "+Mt(a))+"px)";case 2:var u=e.a,t={a:n,b:r};if(1===t.a.$){if(1===t.b.$)return Mt(u)+"fr";return"minmax(max-content, "+Mt(a=t.b.a)+"px)"}if(1===t.b.$)return"minmax("+Mt(t.a.a)+("px, "+Mt(u))+"frfr)";a=t.b.a;return"minmax("+Mt(t.a.a)+("px, "+Mt(a))+"px)";case 3:var i=e.b;n=lt(e.a),r=r,e=i;continue n;default:i=e.b;n=n,r=lt(e.a),e=i;continue n}}),s=function(n){return S(m,gt,gt,n)},$=(s(p.iW.a),s(p.iW.b)),g="grid-template-rows: "+R(_t," ",R(Pa,s,p.iH))+";",v="-ms-grid-rows: "+R(_t,$,R(Pa,s,p.am))+";",h="-ms-grid-columns: "+R(_t,$,R(Pa,s,p.am))+";",x="grid-row-gap:"+s(p.iW.b)+";",$="grid-column-gap:"+s(p.iW.a)+";",s="grid-template-columns: "+R(_t," ",R(Pa,s,p.am))+";";return P([(y=".grid-rows-"+R(_t,"-",R(Pa,ed,p.iH))+("-cols-"+R(_t,"-",R(Pa,ed,p.am))+("-space-x-"+ed(p.iW.a)+("-space-y-"+ed(p.iW.b)))))+"{"+h+v+"}","@supports (display:grid) {"+(y+"{"+s+g+$+x+"}")+"}"]);case 9:var $=n.a,x=R(_t," ",P(["-ms-grid-row: "+Mt($.fX)+";","-ms-grid-row-span: "+Mt($.eR)+";","-ms-grid-column: "+Mt($.et)+";","-ms-grid-column-span: "+Mt($.go)+";"])),w=R(_t," ",P(["grid-row: "+Mt($.fX)+(" / "+Mt($.fX+$.eR))+";","grid-column: "+Mt($.et)+(" / "+Mt($.et+$.go))+";"]));return P([(y=".grid-pos-"+Mt($.fX)+("-"+Mt($.et)+("-"+Mt($.go)+("-"+Mt($.eR)))))+"{"+x+"}","@supports (display:grid) {"+(y+"{"+w+"}")+"}"]);case 11:var y=n.a;return R(Eo,function(n){return S(Ag,r,n,lt(y))},n.b);default:var w=n.a,T=function(n){switch(n.$){case 0:return gt;case 1:var r=n.a,e=r.b,t=r.c;return lt("translate3d("+sd(r.a)+("px, "+sd(e)+("px, "+sd(t)))+"px)");default:var a=n.a,u=a.b,i=a.c,o=n.b,c=o.a,f=o.b,s=o.c,r=n.c,e=r.a,t=r.b,o=r.c,r=n.d,i="translate3d("+sd(a.a)+("px, "+sd(u)+("px, "+sd(i)))+"px)",s="scale3d("+sd(c)+(", "+sd(f)+(", "+sd(s)))+")",r="rotate3d("+sd(e)+(", "+sd(t)+(", "+sd(o)+(", "+sd(r))))+"rad)";return lt(i+" "+s+" "+r)}}(w),T={a:y=Is(w),b:T};return T.a.$||T.b.$?k:C(Tg,r,e,"."+(c=T.a.a),P([R(cd,"transform",T.b.a)]))}}),Cg=l(function(e,n){return su(R(Pa,function(n){var r=S(Ag,e,n,gt);return{a:td(n),b:R(ac,uc,r)}},n))}),kg=l(function(n,r){return n+" {"+R(_t,"",R(Pa,function(n){return n.a+": "+n.b+";"},r))+"}"}),Eg=A(function(n,r,e){var t=e.b;return P([R(kg,"."+n+"."+r+", ."+n+" ."+r,e.a),R(kg,"."+n+"."+r+"> ."+_l+", ."+n+" ."+r+" > ."+_l,t)])}),Zg=A(function(n,r,e){var t=r.a,r=r.b,n=p(n,e)?n:e+" ."+n;return R(_t," ",L(S(Eg,n,Ml,r),S(Eg,n,dl,t)))}),Pg=l(function(n,r){n=p(n,r)?n:r+" ."+n;return R(_t," ",P([R(kg,"."+n+"."+Ml+", ."+n+" ."+Ml,P([{a:"line-height",b:"1"}])),R(kg,"."+n+"."+Ml+"> ."+_l+", ."+n+" ."+Ml+" > ."+_l,P([{a:"vertical-align",b:"0"},{a:"line-height",b:"1"}]))]))}),Mg=A(function(n,r,e){return{eR:r/n,f0:n,gj:e}}),_g=l(function(e,n){return S(Za,l(function(n,r){return e(n)?R($t,n,r):r}),k,n)}),Rg=l(function(e,n){var r=S(St,l(function(n,r){return{cO:L(r.cO,S(Ag,e,n,gt)),bY:1===(n=1!==(n=n).$?gt:lt({a:n.a,b:n.b})).$?r.bY:R($t,n.a,r.bY)}}),{cO:k,bY:k},n),n=r.cO;return L(Rd(r.bY),_s(n))}),Sg=l(function(n,r){switch(n.fy){case 0:case 1:return S(Us,"div",k,P([S(Us,"style",k,P([xg(R(Rg,n,r))]))]));default:return S(Us,"elm-ui-rules",P([R(dd,"rules",R(Cg,n,r))]),k)}}),Lg=f(function(n,r,e,t){e=R(Sg,r,S(St,od,{a:rd,b:Ks(r.hG)},e).b);return n?R($t,{a:"static-stylesheet",b:Td(r)},R($t,{a:"dynamic-stylesheet",b:e},t)):R($t,{a:"dynamic-stylesheet",b:e},t)}),jg=f(function(n,r,e,t){e=R(Sg,r,S(St,od,{a:rd,b:Ks(r.hG)},e).b);return n?R($t,Td(r),R($t,e,t)):R($t,e,t)}),Fg=be(45),Og=be(37),Ig=gr("p"),zg=l(function(n,r){var e=r.a;if(n.$){var t=n.a;return p(t&r.b,t)}n=n.a;return p(n&e,n)}),Ng=gr("s"),Bg=gr("u"),Kg=be(44),Ug=be(39),Dg=t(function(n,r,e,a,u,t){var i=l(function(n,r){if(1===a.$){var e=a.a;return S(Sd,n,r,function(){switch(u.$){case 0:return e;case 2:return C(Lg,!1,u.a,u.b,e);default:return C(Lg,!0,u.a,u.b,e)}}())}var t=a.a;return R(function(){switch(n){case"div":return nd;case"p":return Ig;default:return Us(n)}}(),r,function(){switch(u.$){case 0:return t;case 2:return C(jg,!1,u.a,u.b,t);default:return C(jg,!0,u.a,u.b,t)}}())}),o=function(){switch(r.$){case 0:return R(i,"div",e);case 1:return R(i,r.a,e);default:return S(Us,r.a,e,P([R(i,r.b,P([Yl(rl+" "+Pl)]))]))}}();switch(t){case 0:return R(zg,Ug,n)&&!R(zg,Kg,n)?o:R(zg,Xl,n)?R(Bg,P([Yl(R(_t," ",P([rl,Pl,ul,cl,Xb])))]),P([o])):R(zg,Hl,n)?R(Ng,P([Yl(R(_t," ",P([rl,Pl,ul,cl,Wb])))]),P([o])):o;case 1:return R(zg,Og,n)&&!R(zg,Fg,n)?o:R(zg,Vl,n)?R(Ng,P([Yl(R(_t," ",P([rl,Pl,ul,Jb])))]),P([o])):R(zg,Jl,n)?R(Bg,P([Yl(R(_t," ",P([rl,Pl,ul,qb])))]),P([o])):o;default:return o}}),Gg=xg,qg=rl+" "+_l+" "+Rl+" "+gl,Wg=rl+" "+_l+" "+Ll+" "+hl,Jg=A(function(c,n,r){var e=l(function(n,r){var e=n.a,t=n.b,a=r.a,u=r.b;switch(t.$){case 0:var i=t.a;return p(c,4),{a:R($t,{a:e,b:i(c)},a),b:u};case 1:var o=t.a;return p(c,4),{a:R($t,{a:e,b:R(o.hQ,Gl,c)},a),b:u.b?L(o.i3,u):o.i3};case 2:o=t.a;return{a:R($t,{a:e,b:(p(c,2)?jd:Ld)(o)},a),b:u};default:return{a:a,b:u}}}),t=l(function(n,r){var e=r.a,t=r.b;switch(n.$){case 0:var a=n.a;return p(c,4),{a:R($t,a(c),e),b:t};case 1:var u=n.a;return p(c,4),{a:R($t,R(u.hQ,Gl,c),e),b:t.b?L(u.i3,t):u.i3};case 2:u=n.a;return{a:R($t,(p(c,2)?jd:Ld)(u),e),b:t};default:return{a:e,b:t}}});if(1===n.$){var a=S(Za,e,{a:k,b:k},n.a),e=a.a;if((a=(i=a.b).b?L(r.i3,i):r.i3).b){var u=a;return{$:1,a:{hQ:C(Dg,r.aX,r.aZ,r.aP,{$:1,a:S(Wl,"nearby-element-pls",e,r.aS)}),i3:u}}}return{$:0,a:d(Dg,r.aX,r.aZ,r.aP,{$:1,a:S(Wl,"nearby-element-pls",e,r.aS)},Gl)}}var i,t=S(Za,t,{a:k,b:k},n.a),n=t.a;if((a=(i=t.b).b?L(r.i3,i):r.i3).b){u=a;return{$:1,a:{hQ:C(Dg,r.aX,r.aZ,r.aP,{$:0,a:R(ql,n,r.aS)}),i3:u}}}return{$:0,a:d(Dg,r.aX,r.aZ,r.aP,{$:0,a:R(ql,n,r.aS)},Gl)}}),Xg=A(function(n,r,e){return{$:3,a:n,b:r,c:e}}),Hg=l(function(n,r){return{$:0,a:n,b:r}}),Vg=l(function(n,r){var e=r.a,r=r.b;return n.$?R(Hg,e,n.a|r):R(Hg,n.a|e,r)}),Qg=l(function(n,r){return{$:3,a:n,b:r}}),Yg=l(function(n,r){return R(nd,P([Yl(function(){switch(n){case 0:return R(_t," ",P([xl,Pl,Kb]));case 1:return R(_t," ",P([xl,Pl,tl]));case 2:return R(_t," ",P([xl,Pl,Tl]));case 3:return R(_t," ",P([xl,Pl,yl]));case 4:return R(_t," ",P([xl,Pl,ml]));default:return R(_t," ",P([xl,Pl,el]))}}())]),P([function(){switch(r.$){case 3:return xg("");case 2:return Ld(r.a);case 0:return(0,r.a)(2);default:return R(r.a.hQ,Gl,2)}}()]))}),np=A(function(n,r,e){var t=R(Yg,n,r);switch(e.$){case 0:return 5===n?{$:1,a:P([t])}:{$:2,a:P([t])};case 1:var a=e.a;return 5===n?{$:1,a:R($t,t,a)}:R(Qg,a,P([t]));case 2:var u=e.a;return 5===n?R(Qg,P([t]),u):{$:2,a:R($t,t,u)};default:a=e.a,u=e.b;return 5===n?R(Qg,R($t,t,a),u):R(Qg,a,R($t,t,u))}}),rp=l(function(n,r){return{$:2,a:n,b:r}}),ep=l(function(n,r){switch(r.$){case 0:return{$:1,a:n};case 1:return R(rp,r.a,n);default:return R(rp,r.a,r.b)}}),tp=l(function(n,r){return R(xr,function(n){return/^(on|formAction$)/i.test(n)?"data-"+n:n}(n),yr(r))}),ap=f(function(n,r,e,t){return{$:2,a:n,b:r,c:e,d:t}}),up=l(function(n,r){switch(n.$){case 0:switch(r.$){case 0:return{$:1,a:{a:e=r.a,b:0,c:0}};case 1:return{$:1,a:{a:0,b:t=r.a,c:0}};case 2:return{$:1,a:{a:0,b:0,c:a=r.a}};case 3:return{$:1,a:r.a};case 4:return C(ap,{a:0,b:0,c:0},{a:1,b:1,c:1},r.a,c=r.b);default:return C(ap,{a:0,b:0,c:0},r.a,{a:0,b:0,c:1},0)}case 1:var e=(u=n.a).a,t=u.b,a=u.c;switch(r.$){case 0:return{$:1,a:{a:r.a,b:t,c:a}};case 1:return{$:1,a:{a:e,b:r.a,c:a}};case 2:return{$:1,a:{a:e,b:t,c:r.a}};case 3:return{$:1,a:r.a};case 4:return C(ap,u,{a:1,b:1,c:1},r.a,c=r.b);default:return C(ap,u,r.a,{a:0,b:0,c:1},0)}default:var u,e=(u=n.a).a,t=u.b,a=u.c,i=n.b,o=n.c,c=n.d;switch(r.$){case 0:return C(ap,{a:r.a,b:t,c:a},i,o,c);case 1:return C(ap,{a:e,b:r.a,c:a},i,o,c);case 2:return C(ap,{a:e,b:t,c:r.a},i,o,c);case 3:return C(ap,r.a,i,o,c);case 4:return C(ap,u,i,r.a,r.b);default:return C(ap,u,r.a,o,c)}}}),ip=be(7),op=be(36),cp=l(function(n,r){return R(Hg,n.a|r.a,n.b|r.b)}),fp=R(Hg,0,0),sp=function(n){switch(n.$){case 0:var r=Mt(n.a),e="height-px-"+r;return{a:fp,b:pl+" "+e,c:P([S(Xg,e,"height",r+"px")])};case 1:return{a:R(Vg,op,fp),b:gl,c:k};case 2:r=n.a;return 1===r?{a:R(Vg,Og,fp),b:hl,c:k}:{a:R(Vg,Og,fp),b:vl+(" height-fill-"+Mt(r)),c:P([S(Xg,rl+("."+al+(" > .height-fill-"+Mt(r))),"flex-grow",Mt(1e5*r))])};case 3:var t=n.a,a=n.b,u="min-height-"+Mt(t),i=S(Xg,u,"min-height",Mt(t)+"px !important"),o=sp(a),c=o.b,t=o.c;return{a:R(Vg,Fg,o.a),b:u+" "+c,c:R($t,i,t)};default:o=n.a,a=n.b,u="max-height-"+Mt(o),i=S(Xg,u,"max-height",Mt(o)+"px"),a=sp(a),c=a.b,t=a.c;return{a:R(Vg,Fg,a.a),b:u+" "+c,c:R($t,i,t)}}},bp=be(38),lp=function(n){switch(n.$){case 0:var r=n.a;return{a:fp,b:Sl+(" width-px-"+Mt(r)),c:P([S(Xg,"width-px-"+Mt(r),"width",Mt(r)+"px")])};case 1:return{a:R(Vg,bp,fp),b:Rl,c:k};case 2:r=n.a;return 1===r?{a:R(Vg,Ug,fp),b:Ll,c:k}:{a:R(Vg,Ug,fp),b:jl+(" width-fill-"+Mt(r)),c:P([S(Xg,rl+("."+El+(" > .width-fill-"+Mt(r))),"flex-grow",Mt(1e5*r))])};case 3:var e=n.a,t=n.b,a="min-width-"+Mt(e),u=S(Xg,a,"min-width",Mt(e)+"px"),i=lp(t),o=i.b,e=i.c;return{a:R(Vg,Kg,i.a),b:a+" "+o,c:R($t,u,e)};default:i=n.a,t=n.b,a="max-width-"+Mt(i),u=S(Xg,a,"max-width",Mt(i)+"px"),t=lp(t),o=t.b,e=t.c;return{a:R(Vg,Kg,t.a),b:a+" "+o,c:R($t,u,e)}}},dp=be(27),gp=l(function(n,r){if(p(n,dp)){if(3!==r.$)return!1;switch(r.c){case"0px":case"1px":case"2px":case"3px":case"4px":case"5px":case"6px":return!0;default:return!1}}else switch(r.$){case 2:var e=r.a;return 8<=e&&e<=32;case 7:var t=r.b,a=r.c,e=r.e;return p(t,r.d)&&p(t,a)&&p(t,e)&&0<=t&&t<=24;default:return!1}}),pp=be(6),hp=be(30),vp=be(29),mp=u(function(n,r,e,t,a,u,i,o){n:for(;;){if(!o.b){var c=Is(t);return 1===c.$?{aP:R($t,Yl(n),u),aS:i,aX:e,aZ:r,i3:a}:{aP:R($t,Yl(n+" "+c.a),u),aS:i,aX:e,aZ:r,i3:R($t,{$:10,a:t},a)}}var f=o.a,s=o.b;switch(f.$){case 0:n=p=n,r=h=r,e=v=e,t=m=t,a=$=a,u=u,i=i,o=s;continue n;case 3:var b=f.b;if(R(zg,l=f.a,e)){n=p=n,r=h=r,e=v=e,t=m=t,a=$=a,u=u,i=i,o=s;continue n}n=p=b+" "+n,r=h=r,e=v=R(Vg,l,e),t=m=t,a=$=a,u=u,i=i,o=s;continue n;case 1:n=p=n,r=h=r,e=v=e,t=m=t,a=$=a,u=R($t,f.a,u),i=i,o=s;continue n;case 4:b=f.b;if(R(zg,l=f.a,e)){n=p=n,r=h=r,e=v=e,t=m=t,a=$=a,u=u,i=i,o=s;continue n}if(R(gp,l,b)){n=p=td(b)+" "+n,r=h=r,e=v=R(Vg,l,e),t=m=t,a=$=a,u=u,i=i,o=s;continue n}n=p=td(b)+" "+n,r=h=r,e=v=R(Vg,l,e),t=m=t,a=$=R($t,b,a),u=u,i=i,o=s;continue n;case 10:var l,d=f.b;n=p=n,r=h=r,e=v=R(Vg,l=f.a,e),t=m=R(up,t,d),a=$=a,u=u,i=i,o=s;continue n;case 7:var g=f.a;if(R(zg,pp,e)){n=p=n,r=h=r,e=v=e,t=m=t,a=$=a,u=u,i=i,o=s;continue n}switch(g.$){case 0:var p=Sl+(" width-px-"+Mt(A=g.a))+" "+n,h=r,v=R(Vg,pp,e),m=t,$=R($t,S(Xg,"width-px-"+Mt(A),"width",Mt(A)+"px"),a);n=p,r=h,e=v,t=m,a=$,u=u,i=i,o=s;continue n;case 1:n=p=n+" "+Rl,r=h=r,e=v=R(Vg,bp,R(Vg,pp,e)),t=m=t,a=$=a,u=u,i=i,o=s;continue n;case 2:if(1===(y=g.a)){n=p=n+" "+Ll,r=h=r,e=v=R(Vg,Ug,R(Vg,pp,e)),t=m=t,a=$=a,u=u,i=i,o=s;continue n}p=n+(" "+jl+(" width-fill-"+Mt(y))),h=r,v=R(Vg,Ug,R(Vg,pp,e)),m=t,$=R($t,S(Xg,rl+("."+El+(" > .width-fill-"+Mt(y))),"flex-grow",Mt(1e5*y)),a);n=p,r=h,e=v,t=m,a=$,u=u,i=i,o=s;continue n;default:var x=lp(g),w=x.c,p=n+" "+x.b,h=r,v=R(cp,x.a,R(Vg,pp,e)),m=t,$=L(w,a);n=p,r=h,e=v,t=m,a=$,u=u,i=i,o=s;continue n}case 8:var y,T=f.a;if(R(zg,ip,e)){n=p=n,r=h=r,e=v=e,t=m=t,a=$=a,u=u,i=i,o=s;continue n}switch(T.$){case 0:var A,C=Mt(A=T.a)+"px",k="height-px-"+C;n=p=pl+" "+k+" "+n,r=h=r,e=v=R(Vg,ip,e),t=m=t,a=$=R($t,S(Xg,k,"height ",C),a),u=u,i=i,o=s;continue n;case 1:n=p=gl+" "+n,r=h=r,e=v=R(Vg,op,R(Vg,ip,e)),t=m=t,a=$=a,u=u,i=i,o=s;continue n;case 2:if(1===(y=T.a)){n=p=hl+" "+n,r=h=r,e=v=R(Vg,Og,R(Vg,ip,e)),t=m=t,a=$=a,u=u,i=i,o=s;continue n}p=n+(" "+vl+(" height-fill-"+Mt(y))),h=r,v=R(Vg,Og,R(Vg,ip,e)),m=t,$=R($t,S(Xg,rl+("."+al+(" > .height-fill-"+Mt(y))),"flex-grow",Mt(1e5*y)),a);n=p,r=h,e=v,t=m,a=$,u=u,i=i,o=s;continue n;default:C=sp(T),w=C.c,p=n+" "+C.b,h=r,v=R(cp,C.a,R(Vg,ip,e)),m=t,$=L(w,a);n=p,r=h,e=v,t=m,a=$,u=u,i=i,o=s;continue n}case 2:var E=f.a;switch(E.$){case 0:n=p=n,r=h=R(ep,"main",r),e=v=e,t=m=t,a=$=a,u=u,i=i,o=s;continue n;case 1:n=p=n,r=h=R(ep,"nav",r),e=v=e,t=m=t,a=$=a,u=u,i=i,o=s;continue n;case 2:n=p=n,r=h=R(ep,"footer",r),e=v=e,t=m=t,a=$=a,u=u,i=i,o=s;continue n;case 3:n=p=n,r=h=R(ep,"aside",r),e=v=e,t=m=t,a=$=a,u=u,i=i,o=s;continue n;case 4:var Z=E.a;if(1<Z){if(Z<7){n=p=n,r=h=R(ep,"h"+Mt(Z),r),e=v=e,t=m=t,a=$=a,u=u,i=i,o=s;continue n}n=p=n,r=h=R(ep,"h6",r),e=v=e,t=m=t,a=$=a,u=u,i=i,o=s;continue n}n=p=n,r=h=R(ep,"h1",r),e=v=e,t=m=t,a=$=a,u=u,i=i,o=s;continue n;case 9:n=p=n,r=h=r,e=v=e,t=m=t,a=$=a,u=u,i=i,o=s;continue n;case 8:n=p=n,r=h=r,e=v=e,t=m=t,a=$=a,u=R($t,R(tp,"role","button"),u),i=i,o=s;continue n;case 5:n=p=n,r=h=r,e=v=e,t=m=t,a=$=a,u=R($t,R(tp,"aria-label",E.a),u),i=i,o=s;continue n;case 6:n=p=n,r=h=r,e=v=e,t=m=t,a=$=a,u=R($t,R(tp,"aria-live","polite"),u),i=i,o=s;continue n;default:n=p=n,r=h=r,e=v=e,t=m=t,a=$=a,u=R($t,R(tp,"aria-live","assertive"),u),i=i,o=s;continue n}case 9:var d=f.a,P=f.b,w=function(){switch(P.$){case 3:return a;case 2:return a;case 0:return a;default:return L(a,P.a.i3)}}();n=p=n,r=h=r,e=v=e,t=m=t,a=$=w,u=u,i=S(np,d,P,i),o=s;continue n;case 6:var M=f.a;if(R(zg,hp,e)){n=p=n,r=h=r,e=v=e,t=m=t,a=$=a,u=u,i=i,o=s;continue n}n=p=function(n){switch(n){case 0:return Yb+" "+Hb;case 2:return Yb+" "+Vb;default:return Yb+" "+Db}}(M)+" "+n,r=h=r,e=v=function(n){switch(M){case 1:return R(Vg,Hl,n);case 2:return R(Vg,Xl,n);default:return n}}(R(Vg,hp,e)),t=m=t,a=$=a,u=u,i=i,o=s;continue n;default:var _=f.a;if(R(zg,vp,e)){n=p=n,r=h=r,e=v=e,t=m=t,a=$=a,u=u,i=i,o=s;continue n}n=p=function(n){switch(n){case 0:return nl+" "+Qb;case 2:return nl+" "+Ub;default:return nl+" "+Gb}}(_)+" "+n,r=h=r,e=v=function(n){switch(_){case 1:return R(Vg,Vl,n);case 2:return R(Vg,Jl,n);default:return n}}(R(Vg,vp,e)),t=m=t,a=$=a,u=u,i=i,o=s;continue n}}}),$p={$:0},xp=f(function(n,r,e,t){return S(Jg,n,t,i(mp,function(n){switch(n){case 0:return Ul;case 1:return zl;case 2:return Dl;case 3:return Nl;case 4:return Kl;default:return Bl}}(n),r,fp,$p,k,k,Il,zt(e)))}),wp=Tn=function(n){return{$:8,a:n}},U=function(n){return{$:1,a:n}},yp={$:1},Tp=Tn=function(n){return{$:7,a:n}},Ap=l(function(n,r){return C(xp,1,Ol,R($t,Fd(bl+" "+fl),R($t,wp(yp),R($t,Tp(yp),n))),{$:0,a:r})}),Cp={$:5,a:0},kp={$:6,a:1},Ep=l(function(n,r){return C(xp,2,Ol,R($t,Tp(yp),R($t,wp(yp),n)),{$:0,a:P([r])})}),Zp=U,Pp=mr,Mp=l(function(n,r){return R(Ep,n?k:P([Zp(R(Pp,"display","none"))]),r)}),mr=function(n){return{$:2,a:n}},_p={$:2,a:1},Rp=A(function(n,r,e){return{$:0,a:n,b:r,c:e}})(3),Sp={$:3},Lp=Sp,jp=e(function(n,r,e,t,a){return{$:7,a:n,b:r,c:e,d:t,e:a}}),Fp=be(2),Op=function(n){return{$:0,a:n}},Ip=l(function(n,r){return C(xp,0,Ol,R($t,Fd(fl+" "+cl),R($t,Tp(yp),R($t,wp(yp),n))),{$:0,a:r})}),zp={$:0},Np=be(32),Bp={$:2,a:{$:6}},Kp=A(function(n,r,e){if(1===r.$)return C(xp,1,{$:1,a:"label"},n,{$:0,a:P([e])});var t=r.a,a=C(xp,2,Ol,r.b,{$:0,a:P([r.c])});switch(t){case 2:return C(xp,1,{$:1,a:"label"},R($t,Fd($l),n),{$:0,a:P([a,e])});case 3:return C(xp,1,{$:1,a:"label"},R($t,Fd($l),n),{$:0,a:P([e,a])});case 0:return C(xp,0,{$:1,a:"label"},R($t,Fd($l),n),{$:0,a:P([e,a])});default:return C(xp,0,{$:1,a:"label"},R($t,Fd($l),n),{$:0,a:P([a,e])})}}),Up=tp,Dp=l(function(n,r){return{$:9,a:n,b:r}}),Gp=l(function(n,r){return 3===r.$?zp:R(Dp,n,r)}),qp=be(31),Wp=l(function(n,r){return R(ji,r,S(Za,l(function(n,r){if(r.$){if(4!==n.$||5!==n.b.$)return gt;n=n.b;return lt({a:n.b,b:n.c})}return lt(r.a)}),gt,n))}),Jp=be(33),Xp=Ql("max"),Hp=Ql("min"),Vp=vr,Qp=l(function(n,r){return R(Vp,n,{$:1,a:r})}),Yp=R(vs,P(["target","value"]),vf),nh=A(function(n,r,e){return{$:5,a:n,b:r,c:e}}),rh=be(3),eh=l(function(n,r){return"spacing-"+Mt(n)+("-"+Mt(r))}),th=l(function(n,r){return R(zb,rh,S(nh,R(eh,n,r),n,r))}),ah=Ql("type"),uh=Ql("value"),ih={$:5,a:1},oh=mr,ch=l(function(n,r){return{$:3,a:n,b:r}}),fh=l(function(n,r){return{$:10,a:n,b:r}}),sh=A(function(n,r,e){return n(r(e))}),bh=hr,lh=l(function(e,n){switch(n.$){case 1:var t=n.a;return{$:1,a:{hQ:l(function(n,r){return R(bh,e,R(t.hQ,n,r))}),i3:t.i3}};case 0:var r=n.a;return{$:0,a:R(sh,bh(e),r)};case 2:return{$:2,a:n.a};default:return Sp}}),dh=Ar,gh=l(function(n,r){switch(r.$){case 0:return zp;case 2:return{$:2,a:r.a};case 6:return{$:6,a:r.a};case 5:return{$:5,a:r.a};case 7:return{$:7,a:r.a};case 8:return{$:8,a:r.a};case 3:return R(ch,r.a,r.b);case 4:return R(zb,r.a,r.b);case 9:return R(Dp,r.a,R(lh,n,r.b));case 1:return{$:1,a:R(dh,n,r.a)};default:return R(fh,r.a,r.b)}}),ph=A(function(n,r,e){return R(Ip,P([Tp(_p),wp(R(ji,_p,e)),ih]),P([R(Ep,P([Tp(oh(Bb(1e4*n)))]),Lp),R(Ep,R($t,ih,R(Pa,gh(Ca),r)),Lp),R(Ep,P([Tp(oh(Bb(1e4*tu(1-n))))]),Lp)]))}),hh=A(function(n,r,e){return R(Ap,P([wp(_p),Tp(R(ji,_p,e)),kp]),P([R(Ep,P([wp(oh(Bb(1e4*tu(1-n))))]),Lp),R(Ep,R($t,kp,R(Pa,gh(Ca),r)),Lp),R(Ep,P([wp(oh(Bb(1e4*n)))]),Lp)]))}),vh=l(function(n,r){var e=Kd(n),t=Bd(n),a=function(){var n={a:e,b:t};n:for(;;){if(1===n.a.$){if(1!==n.b.$)break n;return!1}if(n.a.a.$||n.b.$)break n;switch(n.b.a.$){case 0:return 0<b(n.b.a.a,n.a.a.a);case 2:return!0;default:break n}}return!1}(),u=(r.jx-r.ie)/(r.ic-r.ie),i=r.jk,o=Bd(i),c=1===o.$?"20px":o.a.$?"100%":Mt(o.a.a)+"px",f=Kd(i),o=1===f.$?"20px":f.a.$?"100%":Mt(f.a.a)+"px",f="thmb-"+o+"-"+c,o=P([R(cd,"width",o),R(cd,"height",c)]),c=R(Wp,n,{a:5,b:5});return S(Kp,P([1===r.dr.$?zp:R(th,c.a,c.b),Bp,Tp(1===e.$?_p:e.a.$?e.a:yp),wp(1!==t.$&&t.a.$?t.a:yp)]),r.dr,R(Ip,P([Tp(R(ji,_p,e)),wp(R(ji,Op(20),t))]),P([C(xp,2,{$:1,a:"input"},P([Ud(r.dr),R(zb,Np,R(fd,'input[type="range"].'+f+"::-moz-range-thumb",o)),R(zb,Jp,R(fd,'input[type="range"].'+f+"::-webkit-slider-thumb",o)),R(zb,qp,R(fd,'input[type="range"].'+f+"::-ms-thumb",o)),{$:1,a:Yl(f+" ui-slide-bar focusable-parent")},{$:1,a:R(Qp,"input",R(oa,Dd,R(oa,function(n){n=ff(n);return r.fD(1===n.$?0:n.a)},Yp)))},{$:1,a:ah("range")},{$:1,a:(f=1===(f=r.i0).$?"any":sd(f.a),R(Ql,"step",f))},{$:1,a:Hp(sd(r.ie))},{$:1,a:Xp(sd(r.ic))},{$:1,a:uh(sd(r.jx))},a?{$:1,a:R(Up,"orient","vertical")}:zp,Tp(a?R(ji,Op(20),t):R(ji,_p,e)),wp(a?R(ji,_p,e):R(ji,Op(20),t))]),{$:0,a:k}),R(Ep,R($t,Tp(R(ji,_p,e)),R($t,wp(R(ji,Op(20),t)),L(n,P([Nd(a?S(hh,u,R($t,{$:1,a:Yl("focusable-thumb")},i),e):S(ph,u,R($t,{$:1,a:Yl("focusable-thumb")},i),t))])))),Lp)])))}),mh=be(28),hr=A(function(n,r,e){return C(Fb,n,r,e,1)}),$h=be(17),Ar=st,xh=e(function(n,r,e,t,a){return{$:6,a:n,b:r,c:e,d:t,e:a}}),wh=Ar(P([Tp(Op(16)),wp(Op(16)),qd(4),Wd(1),Gd(S(hr,.5,.5,.5)),Os(S(hr,1,1,1))])),yh={$:6,a:0},Th={$:6,a:2},Ah={$:8},Ch=Sn,kh=l(function(n,r){return R($r,n,Ch(r))})("disabled"),Eh=l(function(n,r){return R(Vp,n,{$:0,a:r})}),Zh=R(sh,U,function(n){return R(Eh,"click",fa(n))}),Ph=l(function(n,r){return R(Vp,n,{$:2,a:r})}),hr=be(21),Mh=R(ch,hr,sn),_h=l(function(n,r){var e=r.$9,r=r.dr;return C(xp,2,Ol,R($t,Tp(yp),R($t,wp(yp),R($t,Fd(ol+" "+cl+" "+Zl+" "+wl),R($t,Mh,R($t,function(n){return R(wg,Xd,n)?zp:{$:1,a:Yl("focusable")}}(n),R($t,{$:2,a:Ah},R($t,{$:1,a:Vd(0)},function(){if(1===e.$)return R($t,{$:1,a:kh(!0)},n);var r=e.a;return R($t,Zh(r),R($t,Hd(function(n){return p(n,"Enter")||p(n," ")?lt(r):gt}),n))}()))))))),{$:0,a:P([r])})}),Rh=Ql("id"),Sh=be(26),Lh=be(25),jh=S(wb,164,176,190),Fh=be(4),Oh=function(n){return{$:0,a:n}},Ih={$:3},zh=f(function(n,r,e,t){return{$:4,a:n,b:r,c:e,d:t}}),Nh=function(n){return{$:1,a:n}},Bh=Sd,Kh=function(n){return{$:2,a:n}},Uh=A(function(n,r,e){return S(Ue,n,r,e)}),Dh=xe,Gh=C(Dh,1,1,1,1),qh=A(function(n,r,e){return R(Pa,function(n){return R(n,r,e)},n)}),Wh=A(function(n,r,e){return{$:0,a:n,b:r,c:e}}),Jh=l(function(n,r){var e=r.gr,r=r.gs;return S(Wh,n*e/r,n,n*(1-e-r)/r)}),Xh=l(function(n,r){return S(Af,3.2406*(n=(e=R(Jh,n,r)).a)-1.5372*(r=e.b)-.4986*(e=e.c),-.9689*n+1.8758*r+.0415*e,.0557*n-.204*r+1.057*e);var e}),Hh=l(function(n,r){return{eZ:p(n.eZ,r.eZ),v:n.v*r.v+n.w*r.y+n.x*r.B,w:n.v*r.w+n.w*r.z+n.x*r.C,x:n.v*r.x+n.w*r.A+n.x*r.D,y:n.y*r.v+n.z*r.y+n.A*r.B,z:n.y*r.w+n.z*r.z+n.A*r.C,A:n.y*r.x+n.z*r.A+n.A*r.D,B:n.B*r.v+n.C*r.y+n.D*r.B,C:n.B*r.w+n.C*r.z+n.D*r.C,D:n.B*r.x+n.C*r.A+n.D*r.D,N:r.N+(n.N*r.v+n.O*r.y+n.P*r.B)*r.cP,O:r.O+(n.N*r.w+n.O*r.z+n.P*r.C)*r.cP,P:r.P+(n.N*r.x+n.O*r.A+n.P*r.D)*r.cP,cP:n.cP*r.cP}}),Vh=function(n){var r=new Float64Array(16);return r[0]=n.e7,r[1]=n.fb,r[2]=n.ff,r[3]=n.fj,r[4]=n.e8,r[5]=n.fc,r[6]=n.fg,r[7]=n.fk,r[8]=n.e9,r[9]=n.fd,r[10]=n.fh,r[11]=n.fl,r[12]=n.fa,r[13]=n.fe,r[14]=n.fi,r[15]=n.fm,r},Qh=e(function(n,r,e,t,a){return g(a,n,C(Dh,t.cP,t.cP,t.cP,t.eZ?1:-1),function(n){return Vh({e7:n.v,e8:n.y,e9:n.B,fa:n.N,fb:n.w,fc:n.z,fd:n.C,fe:n.O,ff:n.x,fg:n.A,fh:n.D,fi:n.P,fj:0,fk:0,fl:0,fm:1})}(t),t.eZ,r,e)}),Yh=t(function(n,r,e,t,a,u){n:for(;;)switch(a.$){case 0:return u;case 5:var i=a.b;n=n,r=r,e=e,t=R(Hh,a.a,t),a=i,u=u;continue n;case 1:return{T:R($t,d(Qh,n,r,e,t,a.b),u.T),ab:u.ab,ac:u.ac};case 3:return{T:u.T,ab:R($t,d(Qh,n,r,e,t,a.b),u.ab),ac:u.ac};case 2:return{T:u.T,ab:u.ab,ac:R($t,d(Qh,n,r,e,t,a.a),u.ac)};default:i=a.a;return S(St,C(Yh,n,r,e,t),u,i)}}),nv=f(function(n,r,e,t){return{$:4,a:n,b:r,c:e,d:t}}),rv=f(function(n,r,e,t){return{$:1,a:n,b:r,c:e,d:t}}),xe=l(function(n,r){return{$:6,a:n,b:r}}),ev=P([C(rv,518,(sn={ae:1,af:0,ak:!1}).ak,sn.af,sn.ae),C(nv,!1,!1,!1,!1),R(xe,0,1)]),tv={src:"\n        precision lowp float;\n\n        void main() {\n            gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n        }\n    ",attributes:{},uniforms:{}},ve=ve,av=X({eC:1,eV:0,fy:5})(P([{cH:R(ve,-1,-1)},{cH:R(ve,1,-1)},{cH:R(ve,-1,1)},{cH:R(ve,1,1)}])),uv={src:"\n        precision lowp float;\n\n        attribute vec2 position;\n\n        void main() {\n            gl_Position = vec4(position, 0.0, 1.0);\n        }\n    ",attributes:{position:"cH"},uniforms:{}},iv=A(function(n,r,e){var t=n.dX,a=n.dB,u=n.ed,i=l(function(n,r){return r(n)}),o=l(function(n,r){return r(n)}),n=function(n){return R(oi,i(n.bT),R(oi,o(n.bA),R(oi,o(n.b2),o(n.b3))))};return R(n,e,R(n,r,S(tg,t,a,u)))}),ov=ug({bA:7681,dB:0,dX:8,bT:519,ed:15,b2:7681,b3:7681}),cv=A(function(n,r,e){return Ha(P([S(qh,n,e,ev),P([ig(r),ov])]))}),fv=l(function(n,r){return Ha(R(Ot,cv(n),r))}),ve=function(n){return C(rv,513,n.ak,n.af,n.ae)}({ae:1,af:0,ak:!0}),sv=A(function(n,r,e){return{$:0,a:n,b:r,c:e}}),xe=l(function(n,r){return S(sv,32774,n,r)}),bv=(hg=(X={b4:0,gG:R(xe,1,771),b6:0,cd:R(xe,770,771),cm:0,cK:0}).cK,vg=X.cm,mg=X.b6,$g=X.b4,xe=X.cd,X=X.gG,R(l(function(n,r){var e=n.c,t=r.a,a=r.b,r=r.c;return function(f){return function(c){return function(o){return function(i){return function(u){return function(a){return function(t){return function(e){return function(r){return function(n){return{$:0,a:f,b:c,c:o,d:i,e:u,f:a,g:t,h:e,i:r,j:n}}}}}}}}}}}(n.a)(n.b)(e)(t)(a)(r)(hg)(vg)(mg)($g)}),xe,X)),lv=P([ve,bv]),dv=l(function(n,r){var e=n.eg,t=n.ef,n=n.ee;return{gr:r.gr*n.gr+r.gs*n.gs+r.cZ*n.cZ,gs:r.gr*t.gr+r.gs*t.gs+r.cZ*t.cZ,cZ:r.gr*e.gr+r.gs*e.gs+r.cZ*e.cZ}}),gv=l(function(n,r){var e=n.dK,t=r.gr-e.gr,a=r.gs-e.gs,u=r.cZ-e.cZ,r=n.eg,e=n.ef,n=n.ee;return{gr:t*n.gr+a*n.gs+u*n.cZ,gs:t*e.gr+a*e.gs+u*e.cZ,cZ:t*r.gr+a*r.gs+u*r.cZ}}),pv=l(function(n,r){return{dK:R(gv,n,_u(r)),ee:R(dv,n,og(r)),ef:R(dv,n,cg(r)),eg:R(dv,n,ju(r))}}),hv=A(function(n,r,e){return{gr:n,gs:r,cZ:e}}),vv=f(function(n,r,e,t){var a=e.g3,u=2*e.hL*r,i=2*e.hK*r,o=2*e.hJ*r,c=fg(ju(n)),f=tu(o*c.gr)+tu(i*c.gs)+tu(u*c.cZ),e=fg(cg(n)),c=tu(o*e.gr)+tu(i*e.gs)+tu(u*e.cZ),e=fg(og(n)),e=tu(o*e.gr)+tu(i*e.gs)+tu(u*e.cZ),r=R(fc,{a:e,b:c,c:f},R(gv,n,S(hv,a.gr*r,a.gs*r,a.cZ*r)));return lt(t.$?r:R(Qs,t.a,r))}),mv=f(function(n,r,e,t){n:for(;;){if(!t.b)return e;var a=t.a,u=t.b;switch(a.$){case 0:n=o=n,r=c=r,e=f=e,t=u;continue n;case 1:var i=C(vv,n,r,a.a,e);n=o=n,r=c=r,e=f=i,t=u;continue n;case 2:n=o=n,r=c=r,e=f=e,t=u;continue n;case 3:i=C(vv,n,r,a.a,e);n=o=n,r=c=r,e=f=i,t=u;continue n;case 4:var o=n,c=r,f=C(mv,n,r,e,a.a);n=o,r=c,e=f,t=u;continue n;default:var s=a.a,b=a.b,l=R(pv,function(n){return{dK:{gr:n.N,gs:n.O,cZ:n.P},ee:{gr:n.v,gs:n.w,cZ:n.x},ef:{gr:n.y,gs:n.z,cZ:n.A},eg:{gr:n.B,gs:n.C,cZ:n.D}}}(s),n),s=r*s.cP;n=o=n,r=c=r,e=f=C(mv,l,s,e,P([b])),t=u;continue n}}}),$v=function(n){return n[0]},xv=function(n){return n[1]},wv=function(n){return n[2]},yv=l(function(n,r){for(;;){if(!n.b)return r;var e=n.a;n=n.b,r=R($t,e,r)}}),Tv={eZ:!0,v:1,w:0,x:0,y:0,z:1,A:0,B:0,C:0,D:1,N:0,O:0,P:0,cP:1},Av=ug({bA:7681,dB:0,dX:8,bT:519,ed:255,b2:7681,b3:7681}),Cv={b6:0,g2:!1,cm:0,dT:0,cK:0,d5:0,gr:0,gs:0,cZ:0},kv=l(function(n,r){return Vh({e7:n.gr,e8:n.cK,e9:r.gr,fa:r.cK,fb:n.gs,fc:n.cm,fd:r.gs,fe:r.cm,ff:n.cZ,fg:n.b6,fh:r.cZ,fi:r.b6,fj:n.d5,fk:n.dT,fl:r.d5,fm:r.dT})}),Ev={a:{bG:R(kv,Cv,Cv),cu:R(kv,Cv,Cv),cv:R(kv,Cv,Cv),cw:R(kv,Cv,Cv)},b:C(Dh,0,0,0,0)},Zv=P([sg({ae:1,af:0,ak:!0}),ag({bA:7680,dB:240,dX:0,bT:514,ed:0,b2:7680,b3:7680}),bv]),Pv=function(n){return n===1/0||n===-1/0},Mv=l(function(n,r){var e=r.gK,t=mu(r.ii),a=mu(r.hB),r=n.dV;if(r.$){n=r.a;return Pv(a)?Vh({e7:2/(e*n),e8:0,e9:0,fa:0,fb:0,fc:2/n,fd:0,fe:0,ff:0,fg:0,fh:0,fi:-1,fj:0,fk:0,fl:0,fm:1}):Vh({e7:2/(e*n),e8:0,e9:0,fa:0,fb:0,fc:2/n,fd:0,fe:0,ff:0,fg:0,fh:-2/(a-t),fi:-(a+t)/(a-t),fj:0,fk:0,fl:0,fm:1})}r=r.a;return Pv(a)?Vh({e7:1/(e*r),e8:0,e9:0,fa:0,fb:0,fc:1/r,fd:0,fe:0,ff:0,fg:0,fh:-1,fi:-2*t,fj:0,fk:0,fl:-1,fm:0}):Vh({e7:1/(e*r),e8:0,e9:0,fa:0,fb:0,fc:1/r,fd:0,fe:0,ff:0,fg:0,fh:-(a+t)/(a-t),fi:-2*a*t/(a-t),fj:0,fk:0,fl:-1,fm:0})}),_v=l(function(n,r){return 1==(1&n>>r)?0:1}),Rv=A(function(e,t,n){return Ha(R(Pa,function(n){var r=n<<4;return S(qh,e,{a:t,b:C(Dh,R(_v,n,0),R(_v,n,1),R(_v,n,2),R(_v,n,3))},function(n){return P([sg({ae:1,af:0,ak:!0}),ag({bA:7680,dB:240,dX:n,bT:514,ed:0,b2:7680,b3:7680}),bv])}(r))},R(Ft,1,R(Fc,2,n)-1)))}),Sv=function(n){return{e7:n[0],fb:n[1],ff:n[2],fj:n[3],e8:n[4],fc:n[5],fg:n[6],fk:n[7],e9:n[8],fd:n[9],fh:n[10],fl:n[11],fa:n[12],fe:n[13],fi:n[14],fm:n[15]}},Lv={dK:Fo,ee:j,ef:Uv,eg:yc},jv=l(function(n,r){var e,t;return t=Xu(_u(e=R(pv,r,n))),r=fg(ju(e)),n=fg(cg(e)),e=fg(og(e)),Vh({e7:e.gr,e8:n.gr,e9:r.gr,fa:t.gr,fb:e.gs,fc:n.gs,fd:r.gs,fe:t.gs,ff:e.cZ,fg:n.cZ,fh:r.cZ,fi:t.cZ,fj:0,fk:0,fl:0,fm:1})}),Fv=l(function(r,n){var e=P([Nh(1),Kh(0),Oh(!0),C(zh,0,0,0,0)]),t=function(){var n=r.a7;switch(n.$){case 0:return{a:e,b:"0",c:1};case 1:return{a:R($t,Ih,e),b:"1",c:1};default:return{a:e,b:"0",c:n.a}}}(),a=t.a,u=t.b,i=t.c,o=r.hq,c=o.a,f=eg(o.b),s=R(Pp,"height",Mt(f)+"px"),t=eg(c),b=t/f,o=R(Eo,function(n){return bg({gK:b,g$:r.g$,g9:r.g9,hw:n.hw,aC:n.aC,aE:n.aE,f4:i,aK:n.aK,aN:n.aN})},n),c=R(Pp,"width",Mt(t)+"px"),n=function(n){function r(n){return Bb(1e4*n)/100}var e=n.b,t=n.c,a=n.d;return _s(P(["rgba(",sd(r(n.a)),"%,",sd(r(e)),"%,",sd(r(t)),"%,",sd(Bb(1e3*a)/1e3),")"]))}(r.gN);return S(Bh,"div",P([R(Pp,"padding","0px"),c,s]),P([{a:u,b:S(Uh,a,P([(t=Bb(t*i),R(xr,"width",Mt(t))),function(n){return R(xr,"height",Mt(n))}(Bb(f*i)),c,s,R(Pp,"display","block"),R(Pp,"background-color",n)]),o)}]))}),Ov={gr:.31271,gs:.32902},Iv={$:1},zv={$:0},Nv=R(sh,ob,pt),Bv=C(wf,114/255,159/255,207/255,1),wf={dU:!0,d3:!1},Kv=l(function(n,r){return R(Vp,n,{$:3,a:r})}),j=t(function(n,r,e,t,a,u){return{g_:r,g6:e,h7:n,il:t,iu:a,iJ:u}}),Uv=R(oa,function(n){switch(n){case 0:return 1;case 1:return 2;case 2:return 3;case 3:return 4;case 4:return 5;default:return 0}},R(pf,"button",zo)),ob=S(ca,l(function(n,r){return{a:n,b:r}}),R(pf,"clientX",hf),R(pf,"clientY",hf)),bn=bn,Dv=s(wn,j,C(Ys,A(function(n,r,e){return{gH:n,hh:r,iR:e}}),R(pf,"altKey",bn),R(pf,"ctrlKey",bn),R(pf,"shiftKey",bn)),Uv,ob,S(ca,l(function(n,r){return{a:n,b:r}}),R(pf,"offsetX",hf),R(pf,"offsetY",hf)),S(ca,l(function(n,r){return{a:n,b:r}}),R(pf,"pageX",hf),R(pf,"pageY",hf)),S(ca,l(function(n,r){return{a:n,b:r}}),R(pf,"screenX",hf),R(pf,"screenY",hf))),Gv=R(A(function(n,r,e){return R(Kv,n,R(oa,function(n){return{aF:e(n),dU:r.dU,d3:r.d3}},Dv))}),"click",wf),qv=function(n){return{$:1,a:n}},Wv=l(function(n,r){return{$:0,a:n,b:r}}),Jv=l(function(n,r){return R(Wv,n,r)}),Xv=be(14),Hv=S(wb,123,237,159),Vv=l(function(n,r){if(p(n,r)){var e=n;return R(zb,Fp,d(jp,"p-"+Mt(n),e,e,e,e))}var t=r,e=n;return R(zb,Fp,d(jp,"p-"+Mt(n)+("-"+Mt(r)),t,e,t,e))}),Qv=S(wb,47,53,66),Yv=S(wb,206,214,224),nm=l(function(n,r){return R(zb,dp,d(xh,"b-"+Mt(n)+("-"+Mt(r)),r,n,r,n))}),rm=l(function(n,r){return R(Ep,P([R(Vv,8,4),Jd(2),(t=(e={en:0,I:2,as:2,gb:2}).en,a=e.gb,u=e.I,e=e.as,p(a,t)&&p(u,e)?p(a,e)?Wd(a):R(nm,u,a):R(zb,dp,d(xh,"b-"+Mt(a)+("-"+Mt(e)+("-"+Mt(t)+("-"+Mt(u)))),a,e,t,u))),(e=(a={gY:0,gZ:0,jq:6,jr:6}).jq,t=a.jr,u=a.gY,a=a.gZ,R(zb,$h,S(Xg,"br-"+Mt(e)+("-"+Mt(t)+(Mt(u)+("-"+Mt(a)))),"border-radius",Mt(e)+("px "+Mt(t)+("px "+Mt(a)+("px "+Mt(u))))+"px"))),Os(2===r?Hv:Yv),R(zb,Xv,S(Ib,"fc-"+Fs(r=Qv),"color",r)),Yd(16)]),R(Ep,P([kp,ih]),{$:2,a:n}));var e,t,a,u}),em=l(function(n,r){return C(xp,1,Ol,R($t,wp(yp),R($t,Tp(_p),n)),{$:0,a:r})}),tm=l(function(n,e){return S(Za,l(function(n,r){return e(n)?R($t,n,r):r}),k,function(n){return S(Za,l(function(n,r){var e=r.a,t=r.b;switch(n.$){case 0:return{a:e,b:t};case 3:return{a:R($t,n,e),b:t};case 1:return{a:R($t,n,e),b:t};case 4:return{a:R($t,n,e),b:t};case 7:return R(id,"width",t)?{a:e,b:t}:{a:R($t,n,e),b:R(ad,"width",t)};case 8:return R(id,"height",t)?{a:e,b:t}:{a:R($t,n,e),b:R(ad,"height",t)};case 2:return R(id,"described",t)?{a:e,b:t}:{a:R($t,n,e),b:R(ad,"described",t)};case 9:return{a:R($t,n,e),b:t};case 6:return R(id,"align-x",t)?{a:e,b:t}:{a:R($t,n,e),b:R(ad,"align-x",t)};case 5:return R(id,"align-y",t)?{a:e,b:t}:{a:R($t,n,e),b:R(ad,"align-y",t)};default:return R(id,"transform",t)?{a:e,b:t}:{a:R($t,n,e),b:R(ad,"transform",t)}}}),{a:k,b:rd},n).a}(n))}),am=l(function(n,r){return C(xp,0,Ol,R($t,Tp(_p),n),{$:0,a:r})}),um=R(sh,U,Vd),im=A(function(t,n,i){var r=l(function(n,r){var e=r.a,t=r.b,a=r.c,u=n.a;switch(e){case 0:return p(lt(u),i.iO)?{a:1,b:t,c:a}:{a:e,b:u,c:a};case 1:return{a:2,b:t,c:u};default:return{a:e,b:t,c:a}}}),e=function(n){var r=n.a,e=n.b,n=p(lt(r),i.iO)?2:0;return R(Ep,P([Mh,Tp(t?_p:yp),Zh(i.fD(r)),2==n?{$:1,a:R(Up,"aria-checked","true")}:{$:1,a:R(Up,"aria-checked","false")},{$:1,a:R(Up,"role","radio")}]),e(n))},a=function(){var n=i.is;if(n.b){var t=n.a.a;return function(n){var r=n.b,e=n.c;switch(n.a){case 0:case 1:return lt({a:r,b:t});default:return lt({a:r,b:e})}}(S(St,r,{a:0,b:t,c:t},i.is))}return gt}(),e=R(t?em:am,R($t,Ud(i.dr),n),R(Pa,e,i.is)),n=R(tm,n,function(n){n:for(;;)switch(n.$){case 7:case 8:if(2===n.a.$)return!0;break n;case 1:return!0;default:break n}return!1});return S(Kp,L(R(of,st,P([lt(yh),lt(um(0)),lt({$:1,a:Yl("focus")}),lt(Bp),lt({$:1,a:R(Up,"role","radiogroup")}),function(){if(1===a.$)return gt;var n=a.a,r=n.a,e=n.b;return lt(Hd(function(n){return p(n,"ArrowLeft")||p(n,"ArrowUp")?lt(i.fD(r)):p(n,"ArrowRight")||p(n,"ArrowDown")?lt(i.fD(e)):p(n," ")&&1===i.iO.$?lt(i.fD(r)):gt}))}()])),n),i.dr,e)})(0),ob=S(wb,127,140,141),om=P([wp(Op(24)),Tp(Op(400)),ih,kp,Nd(R(Ep,P([Tp(Op(400)),wp(Op(2)),ih,kp,Os(ob),qd(6)]),Lp))]),cm=l(function(n,r){return{$:2,a:n,b:r}}),fm=l(function(n,r){return{$:1,a:n,b:r}}),sm={gO:gt,gU:gt,iQ:lt({a8:0,cd:C(Fb,155/255,203/255,1,1),a:{a:0,b:0},f0:3})},bm=l(function(n,r){switch(r.$){case 0:return(0,r.a)(2);case 1:return R(r.a.hQ,n(r.a.i3),2);case 2:return Ld(r.a);default:return Ld("")}}),lm=A(function(n,r,e){n=function(n){var r,e;return{hG:1===(e=(r=S(Za,l(function(n,r){switch(n.$){case 0:return 1===r.hP.$?y(r,{hP:lt(n.a)}):r;case 1:return 1===r.hG.$?y(r,{hG:lt(n.a)}):r;default:return 1===r.fy.$?y(r,{fy:lt(n.a)}):r}}),{hG:gt,hP:gt,fy:gt},n)).hG).$?sm:e.a,hP:1===(e=r.hP).$?1:e.a,fy:1===(r=r.fy).$?0:r.a}}(n),n=(1===n.fy?cm:fm)(n);return R(bm,n,C(xp,2,Ol,r,{$:0,a:P([e])}))}),wf=l(function(n,r){return{$:1,a:n,b:r}}),U={$:1},ob=be(5),dm=function(n){return P(n.trim().split(/\s+/g))},be=l(function(n,r){return L(r,function(){switch(n.$){case 0:return"serif";case 1:return"sans-serif";case 2:return"monospace";case 3:return R(_t,"-",dm(ub(n.a)));case 4:return R(_t,"-",dm(ub(n.a)));default:return R(_t,"-",dm(ub(n.a.ih)))}}())}),gm=(U=P([{$:3,a:"Open Sans"},{$:3,a:"Helvetica"},{$:3,a:"Verdana"},U]),P([R(zb,Nb,S(Ib,"bg-"+Fs(C(Fb,1,1,1,0)),"background-color",C(Fb,1,1,1,0))),R(zb,Xv,S(Ib,"fc-"+Fs(C(Fb,0,0,0,1)),"color",C(Fb,0,0,0,1))),R(zb,Fh,{$:2,a:20}),R(zb,ob,R(wf,S(St,be,"font-",U),U))])),pm=A(function(n,r,e){return S(lm,n.is,R($t,Fd(R(_t," ",P([kl,rl,Pl]))),L(gm,r)),e)})({is:k}),hm={$:0},vm=S(wb,113,128,147),le=Z({hX:R(oi,Ri(Ii),Io),ip:pt({$:3,a:dt}),iq:pt({$:3,a:dt}),i4:function(){return Bo(P([Uo(function(n){return{$:3,a:{$:2,a:n}}}),Ko(Ya)]))},ju:le,jz:function(n){var r=n;return{gS:P([R(pm,P([Tp(_p),zd(10),Jd(10),Yd(16),wp(_p),Os(Ob)]),R(Ap,P([Tp(_p)]),P([(n=R(_h,P([zd(5),Wd(2),qd(4),Gd(vm)]),{dr:{$:2,a:"Load GPX from your computer"},$9:lt(hm)}),R(Ip,P([Jd(20),zd(10)]),P([n]))),pg(r)])))]),jn:"GPXmagic 2.0"}}});zo={Main:{init:le(No(P([N(gt),R(oa,lt,J(zo))])))(0)}},n.Elm?function n(r,e){for(var t in e)t in r?"init"==t?I(6):n(r[t],e[t]):r[t]=e[t]}(n.Elm,zo):n.Elm=zo}(this);
+(function(scope){
+'use strict';
+
+function F(arity, fun, wrapper) {
+  wrapper.a = arity;
+  wrapper.f = fun;
+  return wrapper;
+}
+
+function F2(fun) {
+  return F(2, fun, function(a) { return function(b) { return fun(a,b); }; })
+}
+function F3(fun) {
+  return F(3, fun, function(a) {
+    return function(b) { return function(c) { return fun(a, b, c); }; };
+  });
+}
+function F4(fun) {
+  return F(4, fun, function(a) { return function(b) { return function(c) {
+    return function(d) { return fun(a, b, c, d); }; }; };
+  });
+}
+function F5(fun) {
+  return F(5, fun, function(a) { return function(b) { return function(c) {
+    return function(d) { return function(e) { return fun(a, b, c, d, e); }; }; }; };
+  });
+}
+function F6(fun) {
+  return F(6, fun, function(a) { return function(b) { return function(c) {
+    return function(d) { return function(e) { return function(f) {
+    return fun(a, b, c, d, e, f); }; }; }; }; };
+  });
+}
+function F7(fun) {
+  return F(7, fun, function(a) { return function(b) { return function(c) {
+    return function(d) { return function(e) { return function(f) {
+    return function(g) { return fun(a, b, c, d, e, f, g); }; }; }; }; }; };
+  });
+}
+function F8(fun) {
+  return F(8, fun, function(a) { return function(b) { return function(c) {
+    return function(d) { return function(e) { return function(f) {
+    return function(g) { return function(h) {
+    return fun(a, b, c, d, e, f, g, h); }; }; }; }; }; }; };
+  });
+}
+function F9(fun) {
+  return F(9, fun, function(a) { return function(b) { return function(c) {
+    return function(d) { return function(e) { return function(f) {
+    return function(g) { return function(h) { return function(i) {
+    return fun(a, b, c, d, e, f, g, h, i); }; }; }; }; }; }; }; };
+  });
+}
+
+function A2(fun, a, b) {
+  return fun.a === 2 ? fun.f(a, b) : fun(a)(b);
+}
+function A3(fun, a, b, c) {
+  return fun.a === 3 ? fun.f(a, b, c) : fun(a)(b)(c);
+}
+function A4(fun, a, b, c, d) {
+  return fun.a === 4 ? fun.f(a, b, c, d) : fun(a)(b)(c)(d);
+}
+function A5(fun, a, b, c, d, e) {
+  return fun.a === 5 ? fun.f(a, b, c, d, e) : fun(a)(b)(c)(d)(e);
+}
+function A6(fun, a, b, c, d, e, f) {
+  return fun.a === 6 ? fun.f(a, b, c, d, e, f) : fun(a)(b)(c)(d)(e)(f);
+}
+function A7(fun, a, b, c, d, e, f, g) {
+  return fun.a === 7 ? fun.f(a, b, c, d, e, f, g) : fun(a)(b)(c)(d)(e)(f)(g);
+}
+function A8(fun, a, b, c, d, e, f, g, h) {
+  return fun.a === 8 ? fun.f(a, b, c, d, e, f, g, h) : fun(a)(b)(c)(d)(e)(f)(g)(h);
+}
+function A9(fun, a, b, c, d, e, f, g, h, i) {
+  return fun.a === 9 ? fun.f(a, b, c, d, e, f, g, h, i) : fun(a)(b)(c)(d)(e)(f)(g)(h)(i);
+}
+
+console.warn('Compiled in DEV mode. Follow the advice at https://elm-lang.org/0.19.1/optimize for better performance and smaller assets.');
+
+
+// EQUALITY
+
+function _Utils_eq(x, y)
+{
+	for (
+		var pair, stack = [], isEqual = _Utils_eqHelp(x, y, 0, stack);
+		isEqual && (pair = stack.pop());
+		isEqual = _Utils_eqHelp(pair.a, pair.b, 0, stack)
+		)
+	{}
+
+	return isEqual;
+}
+
+function _Utils_eqHelp(x, y, depth, stack)
+{
+	if (x === y)
+	{
+		return true;
+	}
+
+	if (typeof x !== 'object' || x === null || y === null)
+	{
+		typeof x === 'function' && _Debug_crash(5);
+		return false;
+	}
+
+	if (depth > 100)
+	{
+		stack.push(_Utils_Tuple2(x,y));
+		return true;
+	}
+
+	/**/
+	if (x.$ === 'Set_elm_builtin')
+	{
+		x = $elm$core$Set$toList(x);
+		y = $elm$core$Set$toList(y);
+	}
+	if (x.$ === 'RBNode_elm_builtin' || x.$ === 'RBEmpty_elm_builtin')
+	{
+		x = $elm$core$Dict$toList(x);
+		y = $elm$core$Dict$toList(y);
+	}
+	//*/
+
+	/**_UNUSED/
+	if (x.$ < 0)
+	{
+		x = $elm$core$Dict$toList(x);
+		y = $elm$core$Dict$toList(y);
+	}
+	//*/
+
+	for (var key in x)
+	{
+		if (!_Utils_eqHelp(x[key], y[key], depth + 1, stack))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+var _Utils_equal = F2(_Utils_eq);
+var _Utils_notEqual = F2(function(a, b) { return !_Utils_eq(a,b); });
+
+
+
+// COMPARISONS
+
+// Code in Generate/JavaScript.hs, Basics.js, and List.js depends on
+// the particular integer values assigned to LT, EQ, and GT.
+
+function _Utils_cmp(x, y, ord)
+{
+	if (typeof x !== 'object')
+	{
+		return x === y ? /*EQ*/ 0 : x < y ? /*LT*/ -1 : /*GT*/ 1;
+	}
+
+	/**/
+	if (x instanceof String)
+	{
+		var a = x.valueOf();
+		var b = y.valueOf();
+		return a === b ? 0 : a < b ? -1 : 1;
+	}
+	//*/
+
+	/**_UNUSED/
+	if (typeof x.$ === 'undefined')
+	//*/
+	/**/
+	if (x.$[0] === '#')
+	//*/
+	{
+		return (ord = _Utils_cmp(x.a, y.a))
+			? ord
+			: (ord = _Utils_cmp(x.b, y.b))
+				? ord
+				: _Utils_cmp(x.c, y.c);
+	}
+
+	// traverse conses until end of a list or a mismatch
+	for (; x.b && y.b && !(ord = _Utils_cmp(x.a, y.a)); x = x.b, y = y.b) {} // WHILE_CONSES
+	return ord || (x.b ? /*GT*/ 1 : y.b ? /*LT*/ -1 : /*EQ*/ 0);
+}
+
+var _Utils_lt = F2(function(a, b) { return _Utils_cmp(a, b) < 0; });
+var _Utils_le = F2(function(a, b) { return _Utils_cmp(a, b) < 1; });
+var _Utils_gt = F2(function(a, b) { return _Utils_cmp(a, b) > 0; });
+var _Utils_ge = F2(function(a, b) { return _Utils_cmp(a, b) >= 0; });
+
+var _Utils_compare = F2(function(x, y)
+{
+	var n = _Utils_cmp(x, y);
+	return n < 0 ? $elm$core$Basics$LT : n ? $elm$core$Basics$GT : $elm$core$Basics$EQ;
+});
+
+
+// COMMON VALUES
+
+var _Utils_Tuple0_UNUSED = 0;
+var _Utils_Tuple0 = { $: '#0' };
+
+function _Utils_Tuple2_UNUSED(a, b) { return { a: a, b: b }; }
+function _Utils_Tuple2(a, b) { return { $: '#2', a: a, b: b }; }
+
+function _Utils_Tuple3_UNUSED(a, b, c) { return { a: a, b: b, c: c }; }
+function _Utils_Tuple3(a, b, c) { return { $: '#3', a: a, b: b, c: c }; }
+
+function _Utils_chr_UNUSED(c) { return c; }
+function _Utils_chr(c) { return new String(c); }
+
+
+// RECORDS
+
+function _Utils_update(oldRecord, updatedFields)
+{
+	var newRecord = {};
+
+	for (var key in oldRecord)
+	{
+		newRecord[key] = oldRecord[key];
+	}
+
+	for (var key in updatedFields)
+	{
+		newRecord[key] = updatedFields[key];
+	}
+
+	return newRecord;
+}
+
+
+// APPEND
+
+var _Utils_append = F2(_Utils_ap);
+
+function _Utils_ap(xs, ys)
+{
+	// append Strings
+	if (typeof xs === 'string')
+	{
+		return xs + ys;
+	}
+
+	// append Lists
+	if (!xs.b)
+	{
+		return ys;
+	}
+	var root = _List_Cons(xs.a, ys);
+	xs = xs.b
+	for (var curr = root; xs.b; xs = xs.b) // WHILE_CONS
+	{
+		curr = curr.b = _List_Cons(xs.a, ys);
+	}
+	return root;
+}
+
+
+
+var _List_Nil_UNUSED = { $: 0 };
+var _List_Nil = { $: '[]' };
+
+function _List_Cons_UNUSED(hd, tl) { return { $: 1, a: hd, b: tl }; }
+function _List_Cons(hd, tl) { return { $: '::', a: hd, b: tl }; }
+
+
+var _List_cons = F2(_List_Cons);
+
+function _List_fromArray(arr)
+{
+	var out = _List_Nil;
+	for (var i = arr.length; i--; )
+	{
+		out = _List_Cons(arr[i], out);
+	}
+	return out;
+}
+
+function _List_toArray(xs)
+{
+	for (var out = []; xs.b; xs = xs.b) // WHILE_CONS
+	{
+		out.push(xs.a);
+	}
+	return out;
+}
+
+var _List_map2 = F3(function(f, xs, ys)
+{
+	for (var arr = []; xs.b && ys.b; xs = xs.b, ys = ys.b) // WHILE_CONSES
+	{
+		arr.push(A2(f, xs.a, ys.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_map3 = F4(function(f, xs, ys, zs)
+{
+	for (var arr = []; xs.b && ys.b && zs.b; xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
+	{
+		arr.push(A3(f, xs.a, ys.a, zs.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_map4 = F5(function(f, ws, xs, ys, zs)
+{
+	for (var arr = []; ws.b && xs.b && ys.b && zs.b; ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
+	{
+		arr.push(A4(f, ws.a, xs.a, ys.a, zs.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_map5 = F6(function(f, vs, ws, xs, ys, zs)
+{
+	for (var arr = []; vs.b && ws.b && xs.b && ys.b && zs.b; vs = vs.b, ws = ws.b, xs = xs.b, ys = ys.b, zs = zs.b) // WHILE_CONSES
+	{
+		arr.push(A5(f, vs.a, ws.a, xs.a, ys.a, zs.a));
+	}
+	return _List_fromArray(arr);
+});
+
+var _List_sortBy = F2(function(f, xs)
+{
+	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
+		return _Utils_cmp(f(a), f(b));
+	}));
+});
+
+var _List_sortWith = F2(function(f, xs)
+{
+	return _List_fromArray(_List_toArray(xs).sort(function(a, b) {
+		var ord = A2(f, a, b);
+		return ord === $elm$core$Basics$EQ ? 0 : ord === $elm$core$Basics$LT ? -1 : 1;
+	}));
+});
+
+
+
+var _JsArray_empty = [];
+
+function _JsArray_singleton(value)
+{
+    return [value];
+}
+
+function _JsArray_length(array)
+{
+    return array.length;
+}
+
+var _JsArray_initialize = F3(function(size, offset, func)
+{
+    var result = new Array(size);
+
+    for (var i = 0; i < size; i++)
+    {
+        result[i] = func(offset + i);
+    }
+
+    return result;
+});
+
+var _JsArray_initializeFromList = F2(function (max, ls)
+{
+    var result = new Array(max);
+
+    for (var i = 0; i < max && ls.b; i++)
+    {
+        result[i] = ls.a;
+        ls = ls.b;
+    }
+
+    result.length = i;
+    return _Utils_Tuple2(result, ls);
+});
+
+var _JsArray_unsafeGet = F2(function(index, array)
+{
+    return array[index];
+});
+
+var _JsArray_unsafeSet = F3(function(index, value, array)
+{
+    var length = array.length;
+    var result = new Array(length);
+
+    for (var i = 0; i < length; i++)
+    {
+        result[i] = array[i];
+    }
+
+    result[index] = value;
+    return result;
+});
+
+var _JsArray_push = F2(function(value, array)
+{
+    var length = array.length;
+    var result = new Array(length + 1);
+
+    for (var i = 0; i < length; i++)
+    {
+        result[i] = array[i];
+    }
+
+    result[length] = value;
+    return result;
+});
+
+var _JsArray_foldl = F3(function(func, acc, array)
+{
+    var length = array.length;
+
+    for (var i = 0; i < length; i++)
+    {
+        acc = A2(func, array[i], acc);
+    }
+
+    return acc;
+});
+
+var _JsArray_foldr = F3(function(func, acc, array)
+{
+    for (var i = array.length - 1; i >= 0; i--)
+    {
+        acc = A2(func, array[i], acc);
+    }
+
+    return acc;
+});
+
+var _JsArray_map = F2(function(func, array)
+{
+    var length = array.length;
+    var result = new Array(length);
+
+    for (var i = 0; i < length; i++)
+    {
+        result[i] = func(array[i]);
+    }
+
+    return result;
+});
+
+var _JsArray_indexedMap = F3(function(func, offset, array)
+{
+    var length = array.length;
+    var result = new Array(length);
+
+    for (var i = 0; i < length; i++)
+    {
+        result[i] = A2(func, offset + i, array[i]);
+    }
+
+    return result;
+});
+
+var _JsArray_slice = F3(function(from, to, array)
+{
+    return array.slice(from, to);
+});
+
+var _JsArray_appendN = F3(function(n, dest, source)
+{
+    var destLen = dest.length;
+    var itemsToCopy = n - destLen;
+
+    if (itemsToCopy > source.length)
+    {
+        itemsToCopy = source.length;
+    }
+
+    var size = destLen + itemsToCopy;
+    var result = new Array(size);
+
+    for (var i = 0; i < destLen; i++)
+    {
+        result[i] = dest[i];
+    }
+
+    for (var i = 0; i < itemsToCopy; i++)
+    {
+        result[i + destLen] = source[i];
+    }
+
+    return result;
+});
+
+
+
+// LOG
+
+var _Debug_log_UNUSED = F2(function(tag, value)
+{
+	return value;
+});
+
+var _Debug_log = F2(function(tag, value)
+{
+	console.log(tag + ': ' + _Debug_toString(value));
+	return value;
+});
+
+
+// TODOS
+
+function _Debug_todo(moduleName, region)
+{
+	return function(message) {
+		_Debug_crash(8, moduleName, region, message);
+	};
+}
+
+function _Debug_todoCase(moduleName, region, value)
+{
+	return function(message) {
+		_Debug_crash(9, moduleName, region, value, message);
+	};
+}
+
+
+// TO STRING
+
+function _Debug_toString_UNUSED(value)
+{
+	return '<internals>';
+}
+
+function _Debug_toString(value)
+{
+	return _Debug_toAnsiString(false, value);
+}
+
+function _Debug_toAnsiString(ansi, value)
+{
+	if (typeof value === 'function')
+	{
+		return _Debug_internalColor(ansi, '<function>');
+	}
+
+	if (typeof value === 'boolean')
+	{
+		return _Debug_ctorColor(ansi, value ? 'True' : 'False');
+	}
+
+	if (typeof value === 'number')
+	{
+		return _Debug_numberColor(ansi, value + '');
+	}
+
+	if (value instanceof String)
+	{
+		return _Debug_charColor(ansi, "'" + _Debug_addSlashes(value, true) + "'");
+	}
+
+	if (typeof value === 'string')
+	{
+		return _Debug_stringColor(ansi, '"' + _Debug_addSlashes(value, false) + '"');
+	}
+
+	if (typeof value === 'object' && '$' in value)
+	{
+		var tag = value.$;
+
+		if (typeof tag === 'number')
+		{
+			return _Debug_internalColor(ansi, '<internals>');
+		}
+
+		if (tag[0] === '#')
+		{
+			var output = [];
+			for (var k in value)
+			{
+				if (k === '$') continue;
+				output.push(_Debug_toAnsiString(ansi, value[k]));
+			}
+			return '(' + output.join(',') + ')';
+		}
+
+		if (tag === 'Set_elm_builtin')
+		{
+			return _Debug_ctorColor(ansi, 'Set')
+				+ _Debug_fadeColor(ansi, '.fromList') + ' '
+				+ _Debug_toAnsiString(ansi, $elm$core$Set$toList(value));
+		}
+
+		if (tag === 'RBNode_elm_builtin' || tag === 'RBEmpty_elm_builtin')
+		{
+			return _Debug_ctorColor(ansi, 'Dict')
+				+ _Debug_fadeColor(ansi, '.fromList') + ' '
+				+ _Debug_toAnsiString(ansi, $elm$core$Dict$toList(value));
+		}
+
+		if (tag === 'Array_elm_builtin')
+		{
+			return _Debug_ctorColor(ansi, 'Array')
+				+ _Debug_fadeColor(ansi, '.fromList') + ' '
+				+ _Debug_toAnsiString(ansi, $elm$core$Array$toList(value));
+		}
+
+		if (tag === '::' || tag === '[]')
+		{
+			var output = '[';
+
+			value.b && (output += _Debug_toAnsiString(ansi, value.a), value = value.b)
+
+			for (; value.b; value = value.b) // WHILE_CONS
+			{
+				output += ',' + _Debug_toAnsiString(ansi, value.a);
+			}
+			return output + ']';
+		}
+
+		var output = '';
+		for (var i in value)
+		{
+			if (i === '$') continue;
+			var str = _Debug_toAnsiString(ansi, value[i]);
+			var c0 = str[0];
+			var parenless = c0 === '{' || c0 === '(' || c0 === '[' || c0 === '<' || c0 === '"' || str.indexOf(' ') < 0;
+			output += ' ' + (parenless ? str : '(' + str + ')');
+		}
+		return _Debug_ctorColor(ansi, tag) + output;
+	}
+
+	if (typeof DataView === 'function' && value instanceof DataView)
+	{
+		return _Debug_stringColor(ansi, '<' + value.byteLength + ' bytes>');
+	}
+
+	if (typeof File !== 'undefined' && value instanceof File)
+	{
+		return _Debug_internalColor(ansi, '<' + value.name + '>');
+	}
+
+	if (typeof value === 'object')
+	{
+		var output = [];
+		for (var key in value)
+		{
+			var field = key[0] === '_' ? key.slice(1) : key;
+			output.push(_Debug_fadeColor(ansi, field) + ' = ' + _Debug_toAnsiString(ansi, value[key]));
+		}
+		if (output.length === 0)
+		{
+			return '{}';
+		}
+		return '{ ' + output.join(', ') + ' }';
+	}
+
+	return _Debug_internalColor(ansi, '<internals>');
+}
+
+function _Debug_addSlashes(str, isChar)
+{
+	var s = str
+		.replace(/\\/g, '\\\\')
+		.replace(/\n/g, '\\n')
+		.replace(/\t/g, '\\t')
+		.replace(/\r/g, '\\r')
+		.replace(/\v/g, '\\v')
+		.replace(/\0/g, '\\0');
+
+	if (isChar)
+	{
+		return s.replace(/\'/g, '\\\'');
+	}
+	else
+	{
+		return s.replace(/\"/g, '\\"');
+	}
+}
+
+function _Debug_ctorColor(ansi, string)
+{
+	return ansi ? '\x1b[96m' + string + '\x1b[0m' : string;
+}
+
+function _Debug_numberColor(ansi, string)
+{
+	return ansi ? '\x1b[95m' + string + '\x1b[0m' : string;
+}
+
+function _Debug_stringColor(ansi, string)
+{
+	return ansi ? '\x1b[93m' + string + '\x1b[0m' : string;
+}
+
+function _Debug_charColor(ansi, string)
+{
+	return ansi ? '\x1b[92m' + string + '\x1b[0m' : string;
+}
+
+function _Debug_fadeColor(ansi, string)
+{
+	return ansi ? '\x1b[37m' + string + '\x1b[0m' : string;
+}
+
+function _Debug_internalColor(ansi, string)
+{
+	return ansi ? '\x1b[36m' + string + '\x1b[0m' : string;
+}
+
+function _Debug_toHexDigit(n)
+{
+	return String.fromCharCode(n < 10 ? 48 + n : 55 + n);
+}
+
+
+// CRASH
+
+
+function _Debug_crash_UNUSED(identifier)
+{
+	throw new Error('https://github.com/elm/core/blob/1.0.0/hints/' + identifier + '.md');
+}
+
+
+function _Debug_crash(identifier, fact1, fact2, fact3, fact4)
+{
+	switch(identifier)
+	{
+		case 0:
+			throw new Error('What node should I take over? In JavaScript I need something like:\n\n    Elm.Main.init({\n        node: document.getElementById("elm-node")\n    })\n\nYou need to do this with any Browser.sandbox or Browser.element program.');
+
+		case 1:
+			throw new Error('Browser.application programs cannot handle URLs like this:\n\n    ' + document.location.href + '\n\nWhat is the root? The root of your file system? Try looking at this program with `elm reactor` or some other server.');
+
+		case 2:
+			var jsonErrorString = fact1;
+			throw new Error('Problem with the flags given to your Elm program on initialization.\n\n' + jsonErrorString);
+
+		case 3:
+			var portName = fact1;
+			throw new Error('There can only be one port named `' + portName + '`, but your program has multiple.');
+
+		case 4:
+			var portName = fact1;
+			var problem = fact2;
+			throw new Error('Trying to send an unexpected type of value through port `' + portName + '`:\n' + problem);
+
+		case 5:
+			throw new Error('Trying to use `(==)` on functions.\nThere is no way to know if functions are "the same" in the Elm sense.\nRead more about this at https://package.elm-lang.org/packages/elm/core/latest/Basics#== which describes why it is this way and what the better version will look like.');
+
+		case 6:
+			var moduleName = fact1;
+			throw new Error('Your page is loading multiple Elm scripts with a module named ' + moduleName + '. Maybe a duplicate script is getting loaded accidentally? If not, rename one of them so I know which is which!');
+
+		case 8:
+			var moduleName = fact1;
+			var region = fact2;
+			var message = fact3;
+			throw new Error('TODO in module `' + moduleName + '` ' + _Debug_regionToString(region) + '\n\n' + message);
+
+		case 9:
+			var moduleName = fact1;
+			var region = fact2;
+			var value = fact3;
+			var message = fact4;
+			throw new Error(
+				'TODO in module `' + moduleName + '` from the `case` expression '
+				+ _Debug_regionToString(region) + '\n\nIt received the following value:\n\n    '
+				+ _Debug_toString(value).replace('\n', '\n    ')
+				+ '\n\nBut the branch that handles it says:\n\n    ' + message.replace('\n', '\n    ')
+			);
+
+		case 10:
+			throw new Error('Bug in https://github.com/elm/virtual-dom/issues');
+
+		case 11:
+			throw new Error('Cannot perform mod 0. Division by zero error.');
+	}
+}
+
+function _Debug_regionToString(region)
+{
+	if (region.start.line === region.end.line)
+	{
+		return 'on line ' + region.start.line;
+	}
+	return 'on lines ' + region.start.line + ' through ' + region.end.line;
+}
+
+
+
+// MATH
+
+var _Basics_add = F2(function(a, b) { return a + b; });
+var _Basics_sub = F2(function(a, b) { return a - b; });
+var _Basics_mul = F2(function(a, b) { return a * b; });
+var _Basics_fdiv = F2(function(a, b) { return a / b; });
+var _Basics_idiv = F2(function(a, b) { return (a / b) | 0; });
+var _Basics_pow = F2(Math.pow);
+
+var _Basics_remainderBy = F2(function(b, a) { return a % b; });
+
+// https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/divmodnote-letter.pdf
+var _Basics_modBy = F2(function(modulus, x)
+{
+	var answer = x % modulus;
+	return modulus === 0
+		? _Debug_crash(11)
+		:
+	((answer > 0 && modulus < 0) || (answer < 0 && modulus > 0))
+		? answer + modulus
+		: answer;
+});
+
+
+// TRIGONOMETRY
+
+var _Basics_pi = Math.PI;
+var _Basics_e = Math.E;
+var _Basics_cos = Math.cos;
+var _Basics_sin = Math.sin;
+var _Basics_tan = Math.tan;
+var _Basics_acos = Math.acos;
+var _Basics_asin = Math.asin;
+var _Basics_atan = Math.atan;
+var _Basics_atan2 = F2(Math.atan2);
+
+
+// MORE MATH
+
+function _Basics_toFloat(x) { return x; }
+function _Basics_truncate(n) { return n | 0; }
+function _Basics_isInfinite(n) { return n === Infinity || n === -Infinity; }
+
+var _Basics_ceiling = Math.ceil;
+var _Basics_floor = Math.floor;
+var _Basics_round = Math.round;
+var _Basics_sqrt = Math.sqrt;
+var _Basics_log = Math.log;
+var _Basics_isNaN = isNaN;
+
+
+// BOOLEANS
+
+function _Basics_not(bool) { return !bool; }
+var _Basics_and = F2(function(a, b) { return a && b; });
+var _Basics_or  = F2(function(a, b) { return a || b; });
+var _Basics_xor = F2(function(a, b) { return a !== b; });
+
+
+
+var _String_cons = F2(function(chr, str)
+{
+	return chr + str;
+});
+
+function _String_uncons(string)
+{
+	var word = string.charCodeAt(0);
+	return !isNaN(word)
+		? $elm$core$Maybe$Just(
+			0xD800 <= word && word <= 0xDBFF
+				? _Utils_Tuple2(_Utils_chr(string[0] + string[1]), string.slice(2))
+				: _Utils_Tuple2(_Utils_chr(string[0]), string.slice(1))
+		)
+		: $elm$core$Maybe$Nothing;
+}
+
+var _String_append = F2(function(a, b)
+{
+	return a + b;
+});
+
+function _String_length(str)
+{
+	return str.length;
+}
+
+var _String_map = F2(function(func, string)
+{
+	var len = string.length;
+	var array = new Array(len);
+	var i = 0;
+	while (i < len)
+	{
+		var word = string.charCodeAt(i);
+		if (0xD800 <= word && word <= 0xDBFF)
+		{
+			array[i] = func(_Utils_chr(string[i] + string[i+1]));
+			i += 2;
+			continue;
+		}
+		array[i] = func(_Utils_chr(string[i]));
+		i++;
+	}
+	return array.join('');
+});
+
+var _String_filter = F2(function(isGood, str)
+{
+	var arr = [];
+	var len = str.length;
+	var i = 0;
+	while (i < len)
+	{
+		var char = str[i];
+		var word = str.charCodeAt(i);
+		i++;
+		if (0xD800 <= word && word <= 0xDBFF)
+		{
+			char += str[i];
+			i++;
+		}
+
+		if (isGood(_Utils_chr(char)))
+		{
+			arr.push(char);
+		}
+	}
+	return arr.join('');
+});
+
+function _String_reverse(str)
+{
+	var len = str.length;
+	var arr = new Array(len);
+	var i = 0;
+	while (i < len)
+	{
+		var word = str.charCodeAt(i);
+		if (0xD800 <= word && word <= 0xDBFF)
+		{
+			arr[len - i] = str[i + 1];
+			i++;
+			arr[len - i] = str[i - 1];
+			i++;
+		}
+		else
+		{
+			arr[len - i] = str[i];
+			i++;
+		}
+	}
+	return arr.join('');
+}
+
+var _String_foldl = F3(function(func, state, string)
+{
+	var len = string.length;
+	var i = 0;
+	while (i < len)
+	{
+		var char = string[i];
+		var word = string.charCodeAt(i);
+		i++;
+		if (0xD800 <= word && word <= 0xDBFF)
+		{
+			char += string[i];
+			i++;
+		}
+		state = A2(func, _Utils_chr(char), state);
+	}
+	return state;
+});
+
+var _String_foldr = F3(function(func, state, string)
+{
+	var i = string.length;
+	while (i--)
+	{
+		var char = string[i];
+		var word = string.charCodeAt(i);
+		if (0xDC00 <= word && word <= 0xDFFF)
+		{
+			i--;
+			char = string[i] + char;
+		}
+		state = A2(func, _Utils_chr(char), state);
+	}
+	return state;
+});
+
+var _String_split = F2(function(sep, str)
+{
+	return str.split(sep);
+});
+
+var _String_join = F2(function(sep, strs)
+{
+	return strs.join(sep);
+});
+
+var _String_slice = F3(function(start, end, str) {
+	return str.slice(start, end);
+});
+
+function _String_trim(str)
+{
+	return str.trim();
+}
+
+function _String_trimLeft(str)
+{
+	return str.replace(/^\s+/, '');
+}
+
+function _String_trimRight(str)
+{
+	return str.replace(/\s+$/, '');
+}
+
+function _String_words(str)
+{
+	return _List_fromArray(str.trim().split(/\s+/g));
+}
+
+function _String_lines(str)
+{
+	return _List_fromArray(str.split(/\r\n|\r|\n/g));
+}
+
+function _String_toUpper(str)
+{
+	return str.toUpperCase();
+}
+
+function _String_toLower(str)
+{
+	return str.toLowerCase();
+}
+
+var _String_any = F2(function(isGood, string)
+{
+	var i = string.length;
+	while (i--)
+	{
+		var char = string[i];
+		var word = string.charCodeAt(i);
+		if (0xDC00 <= word && word <= 0xDFFF)
+		{
+			i--;
+			char = string[i] + char;
+		}
+		if (isGood(_Utils_chr(char)))
+		{
+			return true;
+		}
+	}
+	return false;
+});
+
+var _String_all = F2(function(isGood, string)
+{
+	var i = string.length;
+	while (i--)
+	{
+		var char = string[i];
+		var word = string.charCodeAt(i);
+		if (0xDC00 <= word && word <= 0xDFFF)
+		{
+			i--;
+			char = string[i] + char;
+		}
+		if (!isGood(_Utils_chr(char)))
+		{
+			return false;
+		}
+	}
+	return true;
+});
+
+var _String_contains = F2(function(sub, str)
+{
+	return str.indexOf(sub) > -1;
+});
+
+var _String_startsWith = F2(function(sub, str)
+{
+	return str.indexOf(sub) === 0;
+});
+
+var _String_endsWith = F2(function(sub, str)
+{
+	return str.length >= sub.length &&
+		str.lastIndexOf(sub) === str.length - sub.length;
+});
+
+var _String_indexes = F2(function(sub, str)
+{
+	var subLen = sub.length;
+
+	if (subLen < 1)
+	{
+		return _List_Nil;
+	}
+
+	var i = 0;
+	var is = [];
+
+	while ((i = str.indexOf(sub, i)) > -1)
+	{
+		is.push(i);
+		i = i + subLen;
+	}
+
+	return _List_fromArray(is);
+});
+
+
+// TO STRING
+
+function _String_fromNumber(number)
+{
+	return number + '';
+}
+
+
+// INT CONVERSIONS
+
+function _String_toInt(str)
+{
+	var total = 0;
+	var code0 = str.charCodeAt(0);
+	var start = code0 == 0x2B /* + */ || code0 == 0x2D /* - */ ? 1 : 0;
+
+	for (var i = start; i < str.length; ++i)
+	{
+		var code = str.charCodeAt(i);
+		if (code < 0x30 || 0x39 < code)
+		{
+			return $elm$core$Maybe$Nothing;
+		}
+		total = 10 * total + code - 0x30;
+	}
+
+	return i == start
+		? $elm$core$Maybe$Nothing
+		: $elm$core$Maybe$Just(code0 == 0x2D ? -total : total);
+}
+
+
+// FLOAT CONVERSIONS
+
+function _String_toFloat(s)
+{
+	// check if it is a hex, octal, or binary number
+	if (s.length === 0 || /[\sxbo]/.test(s))
+	{
+		return $elm$core$Maybe$Nothing;
+	}
+	var n = +s;
+	// faster isNaN check
+	return n === n ? $elm$core$Maybe$Just(n) : $elm$core$Maybe$Nothing;
+}
+
+function _String_fromList(chars)
+{
+	return _List_toArray(chars).join('');
+}
+
+
+
+
+function _Char_toCode(char)
+{
+	var code = char.charCodeAt(0);
+	if (0xD800 <= code && code <= 0xDBFF)
+	{
+		return (code - 0xD800) * 0x400 + char.charCodeAt(1) - 0xDC00 + 0x10000
+	}
+	return code;
+}
+
+function _Char_fromCode(code)
+{
+	return _Utils_chr(
+		(code < 0 || 0x10FFFF < code)
+			? '\uFFFD'
+			:
+		(code <= 0xFFFF)
+			? String.fromCharCode(code)
+			:
+		(code -= 0x10000,
+			String.fromCharCode(Math.floor(code / 0x400) + 0xD800, code % 0x400 + 0xDC00)
+		)
+	);
+}
+
+function _Char_toUpper(char)
+{
+	return _Utils_chr(char.toUpperCase());
+}
+
+function _Char_toLower(char)
+{
+	return _Utils_chr(char.toLowerCase());
+}
+
+function _Char_toLocaleUpper(char)
+{
+	return _Utils_chr(char.toLocaleUpperCase());
+}
+
+function _Char_toLocaleLower(char)
+{
+	return _Utils_chr(char.toLocaleLowerCase());
+}
+
+
+
+/**/
+function _Json_errorToString(error)
+{
+	return $elm$json$Json$Decode$errorToString(error);
+}
+//*/
+
+
+// CORE DECODERS
+
+function _Json_succeed(msg)
+{
+	return {
+		$: 0,
+		a: msg
+	};
+}
+
+function _Json_fail(msg)
+{
+	return {
+		$: 1,
+		a: msg
+	};
+}
+
+function _Json_decodePrim(decoder)
+{
+	return { $: 2, b: decoder };
+}
+
+var _Json_decodeInt = _Json_decodePrim(function(value) {
+	return (typeof value !== 'number')
+		? _Json_expecting('an INT', value)
+		:
+	(-2147483647 < value && value < 2147483647 && (value | 0) === value)
+		? $elm$core$Result$Ok(value)
+		:
+	(isFinite(value) && !(value % 1))
+		? $elm$core$Result$Ok(value)
+		: _Json_expecting('an INT', value);
+});
+
+var _Json_decodeBool = _Json_decodePrim(function(value) {
+	return (typeof value === 'boolean')
+		? $elm$core$Result$Ok(value)
+		: _Json_expecting('a BOOL', value);
+});
+
+var _Json_decodeFloat = _Json_decodePrim(function(value) {
+	return (typeof value === 'number')
+		? $elm$core$Result$Ok(value)
+		: _Json_expecting('a FLOAT', value);
+});
+
+var _Json_decodeValue = _Json_decodePrim(function(value) {
+	return $elm$core$Result$Ok(_Json_wrap(value));
+});
+
+var _Json_decodeString = _Json_decodePrim(function(value) {
+	return (typeof value === 'string')
+		? $elm$core$Result$Ok(value)
+		: (value instanceof String)
+			? $elm$core$Result$Ok(value + '')
+			: _Json_expecting('a STRING', value);
+});
+
+function _Json_decodeList(decoder) { return { $: 3, b: decoder }; }
+function _Json_decodeArray(decoder) { return { $: 4, b: decoder }; }
+
+function _Json_decodeNull(value) { return { $: 5, c: value }; }
+
+var _Json_decodeField = F2(function(field, decoder)
+{
+	return {
+		$: 6,
+		d: field,
+		b: decoder
+	};
+});
+
+var _Json_decodeIndex = F2(function(index, decoder)
+{
+	return {
+		$: 7,
+		e: index,
+		b: decoder
+	};
+});
+
+function _Json_decodeKeyValuePairs(decoder)
+{
+	return {
+		$: 8,
+		b: decoder
+	};
+}
+
+function _Json_mapMany(f, decoders)
+{
+	return {
+		$: 9,
+		f: f,
+		g: decoders
+	};
+}
+
+var _Json_andThen = F2(function(callback, decoder)
+{
+	return {
+		$: 10,
+		b: decoder,
+		h: callback
+	};
+});
+
+function _Json_oneOf(decoders)
+{
+	return {
+		$: 11,
+		g: decoders
+	};
+}
+
+
+// DECODING OBJECTS
+
+var _Json_map1 = F2(function(f, d1)
+{
+	return _Json_mapMany(f, [d1]);
+});
+
+var _Json_map2 = F3(function(f, d1, d2)
+{
+	return _Json_mapMany(f, [d1, d2]);
+});
+
+var _Json_map3 = F4(function(f, d1, d2, d3)
+{
+	return _Json_mapMany(f, [d1, d2, d3]);
+});
+
+var _Json_map4 = F5(function(f, d1, d2, d3, d4)
+{
+	return _Json_mapMany(f, [d1, d2, d3, d4]);
+});
+
+var _Json_map5 = F6(function(f, d1, d2, d3, d4, d5)
+{
+	return _Json_mapMany(f, [d1, d2, d3, d4, d5]);
+});
+
+var _Json_map6 = F7(function(f, d1, d2, d3, d4, d5, d6)
+{
+	return _Json_mapMany(f, [d1, d2, d3, d4, d5, d6]);
+});
+
+var _Json_map7 = F8(function(f, d1, d2, d3, d4, d5, d6, d7)
+{
+	return _Json_mapMany(f, [d1, d2, d3, d4, d5, d6, d7]);
+});
+
+var _Json_map8 = F9(function(f, d1, d2, d3, d4, d5, d6, d7, d8)
+{
+	return _Json_mapMany(f, [d1, d2, d3, d4, d5, d6, d7, d8]);
+});
+
+
+// DECODE
+
+var _Json_runOnString = F2(function(decoder, string)
+{
+	try
+	{
+		var value = JSON.parse(string);
+		return _Json_runHelp(decoder, value);
+	}
+	catch (e)
+	{
+		return $elm$core$Result$Err(A2($elm$json$Json$Decode$Failure, 'This is not valid JSON! ' + e.message, _Json_wrap(string)));
+	}
+});
+
+var _Json_run = F2(function(decoder, value)
+{
+	return _Json_runHelp(decoder, _Json_unwrap(value));
+});
+
+function _Json_runHelp(decoder, value)
+{
+	switch (decoder.$)
+	{
+		case 2:
+			return decoder.b(value);
+
+		case 5:
+			return (value === null)
+				? $elm$core$Result$Ok(decoder.c)
+				: _Json_expecting('null', value);
+
+		case 3:
+			if (!_Json_isArray(value))
+			{
+				return _Json_expecting('a LIST', value);
+			}
+			return _Json_runArrayDecoder(decoder.b, value, _List_fromArray);
+
+		case 4:
+			if (!_Json_isArray(value))
+			{
+				return _Json_expecting('an ARRAY', value);
+			}
+			return _Json_runArrayDecoder(decoder.b, value, _Json_toElmArray);
+
+		case 6:
+			var field = decoder.d;
+			if (typeof value !== 'object' || value === null || !(field in value))
+			{
+				return _Json_expecting('an OBJECT with a field named `' + field + '`', value);
+			}
+			var result = _Json_runHelp(decoder.b, value[field]);
+			return ($elm$core$Result$isOk(result)) ? result : $elm$core$Result$Err(A2($elm$json$Json$Decode$Field, field, result.a));
+
+		case 7:
+			var index = decoder.e;
+			if (!_Json_isArray(value))
+			{
+				return _Json_expecting('an ARRAY', value);
+			}
+			if (index >= value.length)
+			{
+				return _Json_expecting('a LONGER array. Need index ' + index + ' but only see ' + value.length + ' entries', value);
+			}
+			var result = _Json_runHelp(decoder.b, value[index]);
+			return ($elm$core$Result$isOk(result)) ? result : $elm$core$Result$Err(A2($elm$json$Json$Decode$Index, index, result.a));
+
+		case 8:
+			if (typeof value !== 'object' || value === null || _Json_isArray(value))
+			{
+				return _Json_expecting('an OBJECT', value);
+			}
+
+			var keyValuePairs = _List_Nil;
+			// TODO test perf of Object.keys and switch when support is good enough
+			for (var key in value)
+			{
+				if (value.hasOwnProperty(key))
+				{
+					var result = _Json_runHelp(decoder.b, value[key]);
+					if (!$elm$core$Result$isOk(result))
+					{
+						return $elm$core$Result$Err(A2($elm$json$Json$Decode$Field, key, result.a));
+					}
+					keyValuePairs = _List_Cons(_Utils_Tuple2(key, result.a), keyValuePairs);
+				}
+			}
+			return $elm$core$Result$Ok($elm$core$List$reverse(keyValuePairs));
+
+		case 9:
+			var answer = decoder.f;
+			var decoders = decoder.g;
+			for (var i = 0; i < decoders.length; i++)
+			{
+				var result = _Json_runHelp(decoders[i], value);
+				if (!$elm$core$Result$isOk(result))
+				{
+					return result;
+				}
+				answer = answer(result.a);
+			}
+			return $elm$core$Result$Ok(answer);
+
+		case 10:
+			var result = _Json_runHelp(decoder.b, value);
+			return (!$elm$core$Result$isOk(result))
+				? result
+				: _Json_runHelp(decoder.h(result.a), value);
+
+		case 11:
+			var errors = _List_Nil;
+			for (var temp = decoder.g; temp.b; temp = temp.b) // WHILE_CONS
+			{
+				var result = _Json_runHelp(temp.a, value);
+				if ($elm$core$Result$isOk(result))
+				{
+					return result;
+				}
+				errors = _List_Cons(result.a, errors);
+			}
+			return $elm$core$Result$Err($elm$json$Json$Decode$OneOf($elm$core$List$reverse(errors)));
+
+		case 1:
+			return $elm$core$Result$Err(A2($elm$json$Json$Decode$Failure, decoder.a, _Json_wrap(value)));
+
+		case 0:
+			return $elm$core$Result$Ok(decoder.a);
+	}
+}
+
+function _Json_runArrayDecoder(decoder, value, toElmValue)
+{
+	var len = value.length;
+	var array = new Array(len);
+	for (var i = 0; i < len; i++)
+	{
+		var result = _Json_runHelp(decoder, value[i]);
+		if (!$elm$core$Result$isOk(result))
+		{
+			return $elm$core$Result$Err(A2($elm$json$Json$Decode$Index, i, result.a));
+		}
+		array[i] = result.a;
+	}
+	return $elm$core$Result$Ok(toElmValue(array));
+}
+
+function _Json_isArray(value)
+{
+	return Array.isArray(value) || (typeof FileList !== 'undefined' && value instanceof FileList);
+}
+
+function _Json_toElmArray(array)
+{
+	return A2($elm$core$Array$initialize, array.length, function(i) { return array[i]; });
+}
+
+function _Json_expecting(type, value)
+{
+	return $elm$core$Result$Err(A2($elm$json$Json$Decode$Failure, 'Expecting ' + type, _Json_wrap(value)));
+}
+
+
+// EQUALITY
+
+function _Json_equality(x, y)
+{
+	if (x === y)
+	{
+		return true;
+	}
+
+	if (x.$ !== y.$)
+	{
+		return false;
+	}
+
+	switch (x.$)
+	{
+		case 0:
+		case 1:
+			return x.a === y.a;
+
+		case 2:
+			return x.b === y.b;
+
+		case 5:
+			return x.c === y.c;
+
+		case 3:
+		case 4:
+		case 8:
+			return _Json_equality(x.b, y.b);
+
+		case 6:
+			return x.d === y.d && _Json_equality(x.b, y.b);
+
+		case 7:
+			return x.e === y.e && _Json_equality(x.b, y.b);
+
+		case 9:
+			return x.f === y.f && _Json_listEquality(x.g, y.g);
+
+		case 10:
+			return x.h === y.h && _Json_equality(x.b, y.b);
+
+		case 11:
+			return _Json_listEquality(x.g, y.g);
+	}
+}
+
+function _Json_listEquality(aDecoders, bDecoders)
+{
+	var len = aDecoders.length;
+	if (len !== bDecoders.length)
+	{
+		return false;
+	}
+	for (var i = 0; i < len; i++)
+	{
+		if (!_Json_equality(aDecoders[i], bDecoders[i]))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+
+// ENCODE
+
+var _Json_encode = F2(function(indentLevel, value)
+{
+	return JSON.stringify(_Json_unwrap(value), null, indentLevel) + '';
+});
+
+function _Json_wrap(value) { return { $: 0, a: value }; }
+function _Json_unwrap(value) { return value.a; }
+
+function _Json_wrap_UNUSED(value) { return value; }
+function _Json_unwrap_UNUSED(value) { return value; }
+
+function _Json_emptyArray() { return []; }
+function _Json_emptyObject() { return {}; }
+
+var _Json_addField = F3(function(key, value, object)
+{
+	object[key] = _Json_unwrap(value);
+	return object;
+});
+
+function _Json_addEntry(func)
+{
+	return F2(function(entry, array)
+	{
+		array.push(_Json_unwrap(func(entry)));
+		return array;
+	});
+}
+
+var _Json_encodeNull = _Json_wrap(null);
+
+
+
+// TASKS
+
+function _Scheduler_succeed(value)
+{
+	return {
+		$: 0,
+		a: value
+	};
+}
+
+function _Scheduler_fail(error)
+{
+	return {
+		$: 1,
+		a: error
+	};
+}
+
+function _Scheduler_binding(callback)
+{
+	return {
+		$: 2,
+		b: callback,
+		c: null
+	};
+}
+
+var _Scheduler_andThen = F2(function(callback, task)
+{
+	return {
+		$: 3,
+		b: callback,
+		d: task
+	};
+});
+
+var _Scheduler_onError = F2(function(callback, task)
+{
+	return {
+		$: 4,
+		b: callback,
+		d: task
+	};
+});
+
+function _Scheduler_receive(callback)
+{
+	return {
+		$: 5,
+		b: callback
+	};
+}
+
+
+// PROCESSES
+
+var _Scheduler_guid = 0;
+
+function _Scheduler_rawSpawn(task)
+{
+	var proc = {
+		$: 0,
+		e: _Scheduler_guid++,
+		f: task,
+		g: null,
+		h: []
+	};
+
+	_Scheduler_enqueue(proc);
+
+	return proc;
+}
+
+function _Scheduler_spawn(task)
+{
+	return _Scheduler_binding(function(callback) {
+		callback(_Scheduler_succeed(_Scheduler_rawSpawn(task)));
+	});
+}
+
+function _Scheduler_rawSend(proc, msg)
+{
+	proc.h.push(msg);
+	_Scheduler_enqueue(proc);
+}
+
+var _Scheduler_send = F2(function(proc, msg)
+{
+	return _Scheduler_binding(function(callback) {
+		_Scheduler_rawSend(proc, msg);
+		callback(_Scheduler_succeed(_Utils_Tuple0));
+	});
+});
+
+function _Scheduler_kill(proc)
+{
+	return _Scheduler_binding(function(callback) {
+		var task = proc.f;
+		if (task.$ === 2 && task.c)
+		{
+			task.c();
+		}
+
+		proc.f = null;
+
+		callback(_Scheduler_succeed(_Utils_Tuple0));
+	});
+}
+
+
+/* STEP PROCESSES
+
+type alias Process =
+  { $ : tag
+  , id : unique_id
+  , root : Task
+  , stack : null | { $: SUCCEED | FAIL, a: callback, b: stack }
+  , mailbox : [msg]
+  }
+
+*/
+
+
+var _Scheduler_working = false;
+var _Scheduler_queue = [];
+
+
+function _Scheduler_enqueue(proc)
+{
+	_Scheduler_queue.push(proc);
+	if (_Scheduler_working)
+	{
+		return;
+	}
+	_Scheduler_working = true;
+	while (proc = _Scheduler_queue.shift())
+	{
+		_Scheduler_step(proc);
+	}
+	_Scheduler_working = false;
+}
+
+
+function _Scheduler_step(proc)
+{
+	while (proc.f)
+	{
+		var rootTag = proc.f.$;
+		if (rootTag === 0 || rootTag === 1)
+		{
+			while (proc.g && proc.g.$ !== rootTag)
+			{
+				proc.g = proc.g.i;
+			}
+			if (!proc.g)
+			{
+				return;
+			}
+			proc.f = proc.g.b(proc.f.a);
+			proc.g = proc.g.i;
+		}
+		else if (rootTag === 2)
+		{
+			proc.f.c = proc.f.b(function(newRoot) {
+				proc.f = newRoot;
+				_Scheduler_enqueue(proc);
+			});
+			return;
+		}
+		else if (rootTag === 5)
+		{
+			if (proc.h.length === 0)
+			{
+				return;
+			}
+			proc.f = proc.f.b(proc.h.shift());
+		}
+		else // if (rootTag === 3 || rootTag === 4)
+		{
+			proc.g = {
+				$: rootTag === 3 ? 0 : 1,
+				b: proc.f.b,
+				i: proc.g
+			};
+			proc.f = proc.f.d;
+		}
+	}
+}
+
+
+
+function _Process_sleep(time)
+{
+	return _Scheduler_binding(function(callback) {
+		var id = setTimeout(function() {
+			callback(_Scheduler_succeed(_Utils_Tuple0));
+		}, time);
+
+		return function() { clearTimeout(id); };
+	});
+}
+
+
+
+
+// PROGRAMS
+
+
+var _Platform_worker = F4(function(impl, flagDecoder, debugMetadata, args)
+{
+	return _Platform_initialize(
+		flagDecoder,
+		args,
+		impl.init,
+		impl.update,
+		impl.subscriptions,
+		function() { return function() {} }
+	);
+});
+
+
+
+// INITIALIZE A PROGRAM
+
+
+function _Platform_initialize(flagDecoder, args, init, update, subscriptions, stepperBuilder)
+{
+	var result = A2(_Json_run, flagDecoder, _Json_wrap(args ? args['flags'] : undefined));
+	$elm$core$Result$isOk(result) || _Debug_crash(2 /**/, _Json_errorToString(result.a) /**/);
+	var managers = {};
+	var initPair = init(result.a);
+	var model = initPair.a;
+	var stepper = stepperBuilder(sendToApp, model);
+	var ports = _Platform_setupEffects(managers, sendToApp);
+
+	function sendToApp(msg, viewMetadata)
+	{
+		var pair = A2(update, msg, model);
+		stepper(model = pair.a, viewMetadata);
+		_Platform_enqueueEffects(managers, pair.b, subscriptions(model));
+	}
+
+	_Platform_enqueueEffects(managers, initPair.b, subscriptions(model));
+
+	return ports ? { ports: ports } : {};
+}
+
+
+
+// TRACK PRELOADS
+//
+// This is used by code in elm/browser and elm/http
+// to register any HTTP requests that are triggered by init.
+//
+
+
+var _Platform_preload;
+
+
+function _Platform_registerPreload(url)
+{
+	_Platform_preload.add(url);
+}
+
+
+
+// EFFECT MANAGERS
+
+
+var _Platform_effectManagers = {};
+
+
+function _Platform_setupEffects(managers, sendToApp)
+{
+	var ports;
+
+	// setup all necessary effect managers
+	for (var key in _Platform_effectManagers)
+	{
+		var manager = _Platform_effectManagers[key];
+
+		if (manager.a)
+		{
+			ports = ports || {};
+			ports[key] = manager.a(key, sendToApp);
+		}
+
+		managers[key] = _Platform_instantiateManager(manager, sendToApp);
+	}
+
+	return ports;
+}
+
+
+function _Platform_createManager(init, onEffects, onSelfMsg, cmdMap, subMap)
+{
+	return {
+		b: init,
+		c: onEffects,
+		d: onSelfMsg,
+		e: cmdMap,
+		f: subMap
+	};
+}
+
+
+function _Platform_instantiateManager(info, sendToApp)
+{
+	var router = {
+		g: sendToApp,
+		h: undefined
+	};
+
+	var onEffects = info.c;
+	var onSelfMsg = info.d;
+	var cmdMap = info.e;
+	var subMap = info.f;
+
+	function loop(state)
+	{
+		return A2(_Scheduler_andThen, loop, _Scheduler_receive(function(msg)
+		{
+			var value = msg.a;
+
+			if (msg.$ === 0)
+			{
+				return A3(onSelfMsg, router, value, state);
+			}
+
+			return cmdMap && subMap
+				? A4(onEffects, router, value.i, value.j, state)
+				: A3(onEffects, router, cmdMap ? value.i : value.j, state);
+		}));
+	}
+
+	return router.h = _Scheduler_rawSpawn(A2(_Scheduler_andThen, loop, info.b));
+}
+
+
+
+// ROUTING
+
+
+var _Platform_sendToApp = F2(function(router, msg)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		router.g(msg);
+		callback(_Scheduler_succeed(_Utils_Tuple0));
+	});
+});
+
+
+var _Platform_sendToSelf = F2(function(router, msg)
+{
+	return A2(_Scheduler_send, router.h, {
+		$: 0,
+		a: msg
+	});
+});
+
+
+
+// BAGS
+
+
+function _Platform_leaf(home)
+{
+	return function(value)
+	{
+		return {
+			$: 1,
+			k: home,
+			l: value
+		};
+	};
+}
+
+
+function _Platform_batch(list)
+{
+	return {
+		$: 2,
+		m: list
+	};
+}
+
+
+var _Platform_map = F2(function(tagger, bag)
+{
+	return {
+		$: 3,
+		n: tagger,
+		o: bag
+	}
+});
+
+
+
+// PIPE BAGS INTO EFFECT MANAGERS
+//
+// Effects must be queued!
+//
+// Say your init contains a synchronous command, like Time.now or Time.here
+//
+//   - This will produce a batch of effects (FX_1)
+//   - The synchronous task triggers the subsequent `update` call
+//   - This will produce a batch of effects (FX_2)
+//
+// If we just start dispatching FX_2, subscriptions from FX_2 can be processed
+// before subscriptions from FX_1. No good! Earlier versions of this code had
+// this problem, leading to these reports:
+//
+//   https://github.com/elm/core/issues/980
+//   https://github.com/elm/core/pull/981
+//   https://github.com/elm/compiler/issues/1776
+//
+// The queue is necessary to avoid ordering issues for synchronous commands.
+
+
+// Why use true/false here? Why not just check the length of the queue?
+// The goal is to detect "are we currently dispatching effects?" If we
+// are, we need to bail and let the ongoing while loop handle things.
+//
+// Now say the queue has 1 element. When we dequeue the final element,
+// the queue will be empty, but we are still actively dispatching effects.
+// So you could get queue jumping in a really tricky category of cases.
+//
+var _Platform_effectsQueue = [];
+var _Platform_effectsActive = false;
+
+
+function _Platform_enqueueEffects(managers, cmdBag, subBag)
+{
+	_Platform_effectsQueue.push({ p: managers, q: cmdBag, r: subBag });
+
+	if (_Platform_effectsActive) return;
+
+	_Platform_effectsActive = true;
+	for (var fx; fx = _Platform_effectsQueue.shift(); )
+	{
+		_Platform_dispatchEffects(fx.p, fx.q, fx.r);
+	}
+	_Platform_effectsActive = false;
+}
+
+
+function _Platform_dispatchEffects(managers, cmdBag, subBag)
+{
+	var effectsDict = {};
+	_Platform_gatherEffects(true, cmdBag, effectsDict, null);
+	_Platform_gatherEffects(false, subBag, effectsDict, null);
+
+	for (var home in managers)
+	{
+		_Scheduler_rawSend(managers[home], {
+			$: 'fx',
+			a: effectsDict[home] || { i: _List_Nil, j: _List_Nil }
+		});
+	}
+}
+
+
+function _Platform_gatherEffects(isCmd, bag, effectsDict, taggers)
+{
+	switch (bag.$)
+	{
+		case 1:
+			var home = bag.k;
+			var effect = _Platform_toEffect(isCmd, home, taggers, bag.l);
+			effectsDict[home] = _Platform_insert(isCmd, effect, effectsDict[home]);
+			return;
+
+		case 2:
+			for (var list = bag.m; list.b; list = list.b) // WHILE_CONS
+			{
+				_Platform_gatherEffects(isCmd, list.a, effectsDict, taggers);
+			}
+			return;
+
+		case 3:
+			_Platform_gatherEffects(isCmd, bag.o, effectsDict, {
+				s: bag.n,
+				t: taggers
+			});
+			return;
+	}
+}
+
+
+function _Platform_toEffect(isCmd, home, taggers, value)
+{
+	function applyTaggers(x)
+	{
+		for (var temp = taggers; temp; temp = temp.t)
+		{
+			x = temp.s(x);
+		}
+		return x;
+	}
+
+	var map = isCmd
+		? _Platform_effectManagers[home].e
+		: _Platform_effectManagers[home].f;
+
+	return A2(map, applyTaggers, value)
+}
+
+
+function _Platform_insert(isCmd, newEffect, effects)
+{
+	effects = effects || { i: _List_Nil, j: _List_Nil };
+
+	isCmd
+		? (effects.i = _List_Cons(newEffect, effects.i))
+		: (effects.j = _List_Cons(newEffect, effects.j));
+
+	return effects;
+}
+
+
+
+// PORTS
+
+
+function _Platform_checkPortName(name)
+{
+	if (_Platform_effectManagers[name])
+	{
+		_Debug_crash(3, name)
+	}
+}
+
+
+
+// OUTGOING PORTS
+
+
+function _Platform_outgoingPort(name, converter)
+{
+	_Platform_checkPortName(name);
+	_Platform_effectManagers[name] = {
+		e: _Platform_outgoingPortMap,
+		u: converter,
+		a: _Platform_setupOutgoingPort
+	};
+	return _Platform_leaf(name);
+}
+
+
+var _Platform_outgoingPortMap = F2(function(tagger, value) { return value; });
+
+
+function _Platform_setupOutgoingPort(name)
+{
+	var subs = [];
+	var converter = _Platform_effectManagers[name].u;
+
+	// CREATE MANAGER
+
+	var init = _Process_sleep(0);
+
+	_Platform_effectManagers[name].b = init;
+	_Platform_effectManagers[name].c = F3(function(router, cmdList, state)
+	{
+		for ( ; cmdList.b; cmdList = cmdList.b) // WHILE_CONS
+		{
+			// grab a separate reference to subs in case unsubscribe is called
+			var currentSubs = subs;
+			var value = _Json_unwrap(converter(cmdList.a));
+			for (var i = 0; i < currentSubs.length; i++)
+			{
+				currentSubs[i](value);
+			}
+		}
+		return init;
+	});
+
+	// PUBLIC API
+
+	function subscribe(callback)
+	{
+		subs.push(callback);
+	}
+
+	function unsubscribe(callback)
+	{
+		// copy subs into a new array in case unsubscribe is called within a
+		// subscribed callback
+		subs = subs.slice();
+		var index = subs.indexOf(callback);
+		if (index >= 0)
+		{
+			subs.splice(index, 1);
+		}
+	}
+
+	return {
+		subscribe: subscribe,
+		unsubscribe: unsubscribe
+	};
+}
+
+
+
+// INCOMING PORTS
+
+
+function _Platform_incomingPort(name, converter)
+{
+	_Platform_checkPortName(name);
+	_Platform_effectManagers[name] = {
+		f: _Platform_incomingPortMap,
+		u: converter,
+		a: _Platform_setupIncomingPort
+	};
+	return _Platform_leaf(name);
+}
+
+
+var _Platform_incomingPortMap = F2(function(tagger, finalTagger)
+{
+	return function(value)
+	{
+		return tagger(finalTagger(value));
+	};
+});
+
+
+function _Platform_setupIncomingPort(name, sendToApp)
+{
+	var subs = _List_Nil;
+	var converter = _Platform_effectManagers[name].u;
+
+	// CREATE MANAGER
+
+	var init = _Scheduler_succeed(null);
+
+	_Platform_effectManagers[name].b = init;
+	_Platform_effectManagers[name].c = F3(function(router, subList, state)
+	{
+		subs = subList;
+		return init;
+	});
+
+	// PUBLIC API
+
+	function send(incomingValue)
+	{
+		var result = A2(_Json_run, converter, _Json_wrap(incomingValue));
+
+		$elm$core$Result$isOk(result) || _Debug_crash(4, name, result.a);
+
+		var value = result.a;
+		for (var temp = subs; temp.b; temp = temp.b) // WHILE_CONS
+		{
+			sendToApp(temp.a(value));
+		}
+	}
+
+	return { send: send };
+}
+
+
+
+// EXPORT ELM MODULES
+//
+// Have DEBUG and PROD versions so that we can (1) give nicer errors in
+// debug mode and (2) not pay for the bits needed for that in prod mode.
+//
+
+
+function _Platform_export_UNUSED(exports)
+{
+	scope['Elm']
+		? _Platform_mergeExportsProd(scope['Elm'], exports)
+		: scope['Elm'] = exports;
+}
+
+
+function _Platform_mergeExportsProd(obj, exports)
+{
+	for (var name in exports)
+	{
+		(name in obj)
+			? (name == 'init')
+				? _Debug_crash(6)
+				: _Platform_mergeExportsProd(obj[name], exports[name])
+			: (obj[name] = exports[name]);
+	}
+}
+
+
+function _Platform_export(exports)
+{
+	scope['Elm']
+		? _Platform_mergeExportsDebug('Elm', scope['Elm'], exports)
+		: scope['Elm'] = exports;
+}
+
+
+function _Platform_mergeExportsDebug(moduleName, obj, exports)
+{
+	for (var name in exports)
+	{
+		(name in obj)
+			? (name == 'init')
+				? _Debug_crash(6, moduleName)
+				: _Platform_mergeExportsDebug(moduleName + '.' + name, obj[name], exports[name])
+			: (obj[name] = exports[name]);
+	}
+}
+
+
+
+
+// HELPERS
+
+
+var _VirtualDom_divertHrefToApp;
+
+var _VirtualDom_doc = typeof document !== 'undefined' ? document : {};
+
+
+function _VirtualDom_appendChild(parent, child)
+{
+	parent.appendChild(child);
+}
+
+var _VirtualDom_init = F4(function(virtualNode, flagDecoder, debugMetadata, args)
+{
+	// NOTE: this function needs _Platform_export available to work
+
+	/**_UNUSED/
+	var node = args['node'];
+	//*/
+	/**/
+	var node = args && args['node'] ? args['node'] : _Debug_crash(0);
+	//*/
+
+	node.parentNode.replaceChild(
+		_VirtualDom_render(virtualNode, function() {}),
+		node
+	);
+
+	return {};
+});
+
+
+
+// TEXT
+
+
+function _VirtualDom_text(string)
+{
+	return {
+		$: 0,
+		a: string
+	};
+}
+
+
+
+// NODE
+
+
+var _VirtualDom_nodeNS = F2(function(namespace, tag)
+{
+	return F2(function(factList, kidList)
+	{
+		for (var kids = [], descendantsCount = 0; kidList.b; kidList = kidList.b) // WHILE_CONS
+		{
+			var kid = kidList.a;
+			descendantsCount += (kid.b || 0);
+			kids.push(kid);
+		}
+		descendantsCount += kids.length;
+
+		return {
+			$: 1,
+			c: tag,
+			d: _VirtualDom_organizeFacts(factList),
+			e: kids,
+			f: namespace,
+			b: descendantsCount
+		};
+	});
+});
+
+
+var _VirtualDom_node = _VirtualDom_nodeNS(undefined);
+
+
+
+// KEYED NODE
+
+
+var _VirtualDom_keyedNodeNS = F2(function(namespace, tag)
+{
+	return F2(function(factList, kidList)
+	{
+		for (var kids = [], descendantsCount = 0; kidList.b; kidList = kidList.b) // WHILE_CONS
+		{
+			var kid = kidList.a;
+			descendantsCount += (kid.b.b || 0);
+			kids.push(kid);
+		}
+		descendantsCount += kids.length;
+
+		return {
+			$: 2,
+			c: tag,
+			d: _VirtualDom_organizeFacts(factList),
+			e: kids,
+			f: namespace,
+			b: descendantsCount
+		};
+	});
+});
+
+
+var _VirtualDom_keyedNode = _VirtualDom_keyedNodeNS(undefined);
+
+
+
+// CUSTOM
+
+
+function _VirtualDom_custom(factList, model, render, diff)
+{
+	return {
+		$: 3,
+		d: _VirtualDom_organizeFacts(factList),
+		g: model,
+		h: render,
+		i: diff
+	};
+}
+
+
+
+// MAP
+
+
+var _VirtualDom_map = F2(function(tagger, node)
+{
+	return {
+		$: 4,
+		j: tagger,
+		k: node,
+		b: 1 + (node.b || 0)
+	};
+});
+
+
+
+// LAZY
+
+
+function _VirtualDom_thunk(refs, thunk)
+{
+	return {
+		$: 5,
+		l: refs,
+		m: thunk,
+		k: undefined
+	};
+}
+
+var _VirtualDom_lazy = F2(function(func, a)
+{
+	return _VirtualDom_thunk([func, a], function() {
+		return func(a);
+	});
+});
+
+var _VirtualDom_lazy2 = F3(function(func, a, b)
+{
+	return _VirtualDom_thunk([func, a, b], function() {
+		return A2(func, a, b);
+	});
+});
+
+var _VirtualDom_lazy3 = F4(function(func, a, b, c)
+{
+	return _VirtualDom_thunk([func, a, b, c], function() {
+		return A3(func, a, b, c);
+	});
+});
+
+var _VirtualDom_lazy4 = F5(function(func, a, b, c, d)
+{
+	return _VirtualDom_thunk([func, a, b, c, d], function() {
+		return A4(func, a, b, c, d);
+	});
+});
+
+var _VirtualDom_lazy5 = F6(function(func, a, b, c, d, e)
+{
+	return _VirtualDom_thunk([func, a, b, c, d, e], function() {
+		return A5(func, a, b, c, d, e);
+	});
+});
+
+var _VirtualDom_lazy6 = F7(function(func, a, b, c, d, e, f)
+{
+	return _VirtualDom_thunk([func, a, b, c, d, e, f], function() {
+		return A6(func, a, b, c, d, e, f);
+	});
+});
+
+var _VirtualDom_lazy7 = F8(function(func, a, b, c, d, e, f, g)
+{
+	return _VirtualDom_thunk([func, a, b, c, d, e, f, g], function() {
+		return A7(func, a, b, c, d, e, f, g);
+	});
+});
+
+var _VirtualDom_lazy8 = F9(function(func, a, b, c, d, e, f, g, h)
+{
+	return _VirtualDom_thunk([func, a, b, c, d, e, f, g, h], function() {
+		return A8(func, a, b, c, d, e, f, g, h);
+	});
+});
+
+
+
+// FACTS
+
+
+var _VirtualDom_on = F2(function(key, handler)
+{
+	return {
+		$: 'a0',
+		n: key,
+		o: handler
+	};
+});
+var _VirtualDom_style = F2(function(key, value)
+{
+	return {
+		$: 'a1',
+		n: key,
+		o: value
+	};
+});
+var _VirtualDom_property = F2(function(key, value)
+{
+	return {
+		$: 'a2',
+		n: key,
+		o: value
+	};
+});
+var _VirtualDom_attribute = F2(function(key, value)
+{
+	return {
+		$: 'a3',
+		n: key,
+		o: value
+	};
+});
+var _VirtualDom_attributeNS = F3(function(namespace, key, value)
+{
+	return {
+		$: 'a4',
+		n: key,
+		o: { f: namespace, o: value }
+	};
+});
+
+
+
+// XSS ATTACK VECTOR CHECKS
+
+
+function _VirtualDom_noScript(tag)
+{
+	return tag == 'script' ? 'p' : tag;
+}
+
+function _VirtualDom_noOnOrFormAction(key)
+{
+	return /^(on|formAction$)/i.test(key) ? 'data-' + key : key;
+}
+
+function _VirtualDom_noInnerHtmlOrFormAction(key)
+{
+	return key == 'innerHTML' || key == 'formAction' ? 'data-' + key : key;
+}
+
+function _VirtualDom_noJavaScriptUri_UNUSED(value)
+{
+	return /^javascript:/i.test(value.replace(/\s/g,'')) ? '' : value;
+}
+
+function _VirtualDom_noJavaScriptUri(value)
+{
+	return /^javascript:/i.test(value.replace(/\s/g,''))
+		? 'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'
+		: value;
+}
+
+function _VirtualDom_noJavaScriptOrHtmlUri_UNUSED(value)
+{
+	return /^\s*(javascript:|data:text\/html)/i.test(value) ? '' : value;
+}
+
+function _VirtualDom_noJavaScriptOrHtmlUri(value)
+{
+	return /^\s*(javascript:|data:text\/html)/i.test(value)
+		? 'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'
+		: value;
+}
+
+
+
+// MAP FACTS
+
+
+var _VirtualDom_mapAttribute = F2(function(func, attr)
+{
+	return (attr.$ === 'a0')
+		? A2(_VirtualDom_on, attr.n, _VirtualDom_mapHandler(func, attr.o))
+		: attr;
+});
+
+function _VirtualDom_mapHandler(func, handler)
+{
+	var tag = $elm$virtual_dom$VirtualDom$toHandlerInt(handler);
+
+	// 0 = Normal
+	// 1 = MayStopPropagation
+	// 2 = MayPreventDefault
+	// 3 = Custom
+
+	return {
+		$: handler.$,
+		a:
+			!tag
+				? A2($elm$json$Json$Decode$map, func, handler.a)
+				:
+			A3($elm$json$Json$Decode$map2,
+				tag < 3
+					? _VirtualDom_mapEventTuple
+					: _VirtualDom_mapEventRecord,
+				$elm$json$Json$Decode$succeed(func),
+				handler.a
+			)
+	};
+}
+
+var _VirtualDom_mapEventTuple = F2(function(func, tuple)
+{
+	return _Utils_Tuple2(func(tuple.a), tuple.b);
+});
+
+var _VirtualDom_mapEventRecord = F2(function(func, record)
+{
+	return {
+		message: func(record.message),
+		stopPropagation: record.stopPropagation,
+		preventDefault: record.preventDefault
+	}
+});
+
+
+
+// ORGANIZE FACTS
+
+
+function _VirtualDom_organizeFacts(factList)
+{
+	for (var facts = {}; factList.b; factList = factList.b) // WHILE_CONS
+	{
+		var entry = factList.a;
+
+		var tag = entry.$;
+		var key = entry.n;
+		var value = entry.o;
+
+		if (tag === 'a2')
+		{
+			(key === 'className')
+				? _VirtualDom_addClass(facts, key, _Json_unwrap(value))
+				: facts[key] = _Json_unwrap(value);
+
+			continue;
+		}
+
+		var subFacts = facts[tag] || (facts[tag] = {});
+		(tag === 'a3' && key === 'class')
+			? _VirtualDom_addClass(subFacts, key, value)
+			: subFacts[key] = value;
+	}
+
+	return facts;
+}
+
+function _VirtualDom_addClass(object, key, newClass)
+{
+	var classes = object[key];
+	object[key] = classes ? classes + ' ' + newClass : newClass;
+}
+
+
+
+// RENDER
+
+
+function _VirtualDom_render(vNode, eventNode)
+{
+	var tag = vNode.$;
+
+	if (tag === 5)
+	{
+		return _VirtualDom_render(vNode.k || (vNode.k = vNode.m()), eventNode);
+	}
+
+	if (tag === 0)
+	{
+		return _VirtualDom_doc.createTextNode(vNode.a);
+	}
+
+	if (tag === 4)
+	{
+		var subNode = vNode.k;
+		var tagger = vNode.j;
+
+		while (subNode.$ === 4)
+		{
+			typeof tagger !== 'object'
+				? tagger = [tagger, subNode.j]
+				: tagger.push(subNode.j);
+
+			subNode = subNode.k;
+		}
+
+		var subEventRoot = { j: tagger, p: eventNode };
+		var domNode = _VirtualDom_render(subNode, subEventRoot);
+		domNode.elm_event_node_ref = subEventRoot;
+		return domNode;
+	}
+
+	if (tag === 3)
+	{
+		var domNode = vNode.h(vNode.g);
+		_VirtualDom_applyFacts(domNode, eventNode, vNode.d);
+		return domNode;
+	}
+
+	// at this point `tag` must be 1 or 2
+
+	var domNode = vNode.f
+		? _VirtualDom_doc.createElementNS(vNode.f, vNode.c)
+		: _VirtualDom_doc.createElement(vNode.c);
+
+	if (_VirtualDom_divertHrefToApp && vNode.c == 'a')
+	{
+		domNode.addEventListener('click', _VirtualDom_divertHrefToApp(domNode));
+	}
+
+	_VirtualDom_applyFacts(domNode, eventNode, vNode.d);
+
+	for (var kids = vNode.e, i = 0; i < kids.length; i++)
+	{
+		_VirtualDom_appendChild(domNode, _VirtualDom_render(tag === 1 ? kids[i] : kids[i].b, eventNode));
+	}
+
+	return domNode;
+}
+
+
+
+// APPLY FACTS
+
+
+function _VirtualDom_applyFacts(domNode, eventNode, facts)
+{
+	for (var key in facts)
+	{
+		var value = facts[key];
+
+		key === 'a1'
+			? _VirtualDom_applyStyles(domNode, value)
+			:
+		key === 'a0'
+			? _VirtualDom_applyEvents(domNode, eventNode, value)
+			:
+		key === 'a3'
+			? _VirtualDom_applyAttrs(domNode, value)
+			:
+		key === 'a4'
+			? _VirtualDom_applyAttrsNS(domNode, value)
+			:
+		((key !== 'value' && key !== 'checked') || domNode[key] !== value) && (domNode[key] = value);
+	}
+}
+
+
+
+// APPLY STYLES
+
+
+function _VirtualDom_applyStyles(domNode, styles)
+{
+	var domNodeStyle = domNode.style;
+
+	for (var key in styles)
+	{
+		domNodeStyle[key] = styles[key];
+	}
+}
+
+
+
+// APPLY ATTRS
+
+
+function _VirtualDom_applyAttrs(domNode, attrs)
+{
+	for (var key in attrs)
+	{
+		var value = attrs[key];
+		typeof value !== 'undefined'
+			? domNode.setAttribute(key, value)
+			: domNode.removeAttribute(key);
+	}
+}
+
+
+
+// APPLY NAMESPACED ATTRS
+
+
+function _VirtualDom_applyAttrsNS(domNode, nsAttrs)
+{
+	for (var key in nsAttrs)
+	{
+		var pair = nsAttrs[key];
+		var namespace = pair.f;
+		var value = pair.o;
+
+		typeof value !== 'undefined'
+			? domNode.setAttributeNS(namespace, key, value)
+			: domNode.removeAttributeNS(namespace, key);
+	}
+}
+
+
+
+// APPLY EVENTS
+
+
+function _VirtualDom_applyEvents(domNode, eventNode, events)
+{
+	var allCallbacks = domNode.elmFs || (domNode.elmFs = {});
+
+	for (var key in events)
+	{
+		var newHandler = events[key];
+		var oldCallback = allCallbacks[key];
+
+		if (!newHandler)
+		{
+			domNode.removeEventListener(key, oldCallback);
+			allCallbacks[key] = undefined;
+			continue;
+		}
+
+		if (oldCallback)
+		{
+			var oldHandler = oldCallback.q;
+			if (oldHandler.$ === newHandler.$)
+			{
+				oldCallback.q = newHandler;
+				continue;
+			}
+			domNode.removeEventListener(key, oldCallback);
+		}
+
+		oldCallback = _VirtualDom_makeCallback(eventNode, newHandler);
+		domNode.addEventListener(key, oldCallback,
+			_VirtualDom_passiveSupported
+			&& { passive: $elm$virtual_dom$VirtualDom$toHandlerInt(newHandler) < 2 }
+		);
+		allCallbacks[key] = oldCallback;
+	}
+}
+
+
+
+// PASSIVE EVENTS
+
+
+var _VirtualDom_passiveSupported;
+
+try
+{
+	window.addEventListener('t', null, Object.defineProperty({}, 'passive', {
+		get: function() { _VirtualDom_passiveSupported = true; }
+	}));
+}
+catch(e) {}
+
+
+
+// EVENT HANDLERS
+
+
+function _VirtualDom_makeCallback(eventNode, initialHandler)
+{
+	function callback(event)
+	{
+		var handler = callback.q;
+		var result = _Json_runHelp(handler.a, event);
+
+		if (!$elm$core$Result$isOk(result))
+		{
+			return;
+		}
+
+		var tag = $elm$virtual_dom$VirtualDom$toHandlerInt(handler);
+
+		// 0 = Normal
+		// 1 = MayStopPropagation
+		// 2 = MayPreventDefault
+		// 3 = Custom
+
+		var value = result.a;
+		var message = !tag ? value : tag < 3 ? value.a : value.message;
+		var stopPropagation = tag == 1 ? value.b : tag == 3 && value.stopPropagation;
+		var currentEventNode = (
+			stopPropagation && event.stopPropagation(),
+			(tag == 2 ? value.b : tag == 3 && value.preventDefault) && event.preventDefault(),
+			eventNode
+		);
+		var tagger;
+		var i;
+		while (tagger = currentEventNode.j)
+		{
+			if (typeof tagger == 'function')
+			{
+				message = tagger(message);
+			}
+			else
+			{
+				for (var i = tagger.length; i--; )
+				{
+					message = tagger[i](message);
+				}
+			}
+			currentEventNode = currentEventNode.p;
+		}
+		currentEventNode(message, stopPropagation); // stopPropagation implies isSync
+	}
+
+	callback.q = initialHandler;
+
+	return callback;
+}
+
+function _VirtualDom_equalEvents(x, y)
+{
+	return x.$ == y.$ && _Json_equality(x.a, y.a);
+}
+
+
+
+// DIFF
+
+
+// TODO: Should we do patches like in iOS?
+//
+// type Patch
+//   = At Int Patch
+//   | Batch (List Patch)
+//   | Change ...
+//
+// How could it not be better?
+//
+function _VirtualDom_diff(x, y)
+{
+	var patches = [];
+	_VirtualDom_diffHelp(x, y, patches, 0);
+	return patches;
+}
+
+
+function _VirtualDom_pushPatch(patches, type, index, data)
+{
+	var patch = {
+		$: type,
+		r: index,
+		s: data,
+		t: undefined,
+		u: undefined
+	};
+	patches.push(patch);
+	return patch;
+}
+
+
+function _VirtualDom_diffHelp(x, y, patches, index)
+{
+	if (x === y)
+	{
+		return;
+	}
+
+	var xType = x.$;
+	var yType = y.$;
+
+	// Bail if you run into different types of nodes. Implies that the
+	// structure has changed significantly and it's not worth a diff.
+	if (xType !== yType)
+	{
+		if (xType === 1 && yType === 2)
+		{
+			y = _VirtualDom_dekey(y);
+			yType = 1;
+		}
+		else
+		{
+			_VirtualDom_pushPatch(patches, 0, index, y);
+			return;
+		}
+	}
+
+	// Now we know that both nodes are the same $.
+	switch (yType)
+	{
+		case 5:
+			var xRefs = x.l;
+			var yRefs = y.l;
+			var i = xRefs.length;
+			var same = i === yRefs.length;
+			while (same && i--)
+			{
+				same = xRefs[i] === yRefs[i];
+			}
+			if (same)
+			{
+				y.k = x.k;
+				return;
+			}
+			y.k = y.m();
+			var subPatches = [];
+			_VirtualDom_diffHelp(x.k, y.k, subPatches, 0);
+			subPatches.length > 0 && _VirtualDom_pushPatch(patches, 1, index, subPatches);
+			return;
+
+		case 4:
+			// gather nested taggers
+			var xTaggers = x.j;
+			var yTaggers = y.j;
+			var nesting = false;
+
+			var xSubNode = x.k;
+			while (xSubNode.$ === 4)
+			{
+				nesting = true;
+
+				typeof xTaggers !== 'object'
+					? xTaggers = [xTaggers, xSubNode.j]
+					: xTaggers.push(xSubNode.j);
+
+				xSubNode = xSubNode.k;
+			}
+
+			var ySubNode = y.k;
+			while (ySubNode.$ === 4)
+			{
+				nesting = true;
+
+				typeof yTaggers !== 'object'
+					? yTaggers = [yTaggers, ySubNode.j]
+					: yTaggers.push(ySubNode.j);
+
+				ySubNode = ySubNode.k;
+			}
+
+			// Just bail if different numbers of taggers. This implies the
+			// structure of the virtual DOM has changed.
+			if (nesting && xTaggers.length !== yTaggers.length)
+			{
+				_VirtualDom_pushPatch(patches, 0, index, y);
+				return;
+			}
+
+			// check if taggers are "the same"
+			if (nesting ? !_VirtualDom_pairwiseRefEqual(xTaggers, yTaggers) : xTaggers !== yTaggers)
+			{
+				_VirtualDom_pushPatch(patches, 2, index, yTaggers);
+			}
+
+			// diff everything below the taggers
+			_VirtualDom_diffHelp(xSubNode, ySubNode, patches, index + 1);
+			return;
+
+		case 0:
+			if (x.a !== y.a)
+			{
+				_VirtualDom_pushPatch(patches, 3, index, y.a);
+			}
+			return;
+
+		case 1:
+			_VirtualDom_diffNodes(x, y, patches, index, _VirtualDom_diffKids);
+			return;
+
+		case 2:
+			_VirtualDom_diffNodes(x, y, patches, index, _VirtualDom_diffKeyedKids);
+			return;
+
+		case 3:
+			if (x.h !== y.h)
+			{
+				_VirtualDom_pushPatch(patches, 0, index, y);
+				return;
+			}
+
+			var factsDiff = _VirtualDom_diffFacts(x.d, y.d);
+			factsDiff && _VirtualDom_pushPatch(patches, 4, index, factsDiff);
+
+			var patch = y.i(x.g, y.g);
+			patch && _VirtualDom_pushPatch(patches, 5, index, patch);
+
+			return;
+	}
+}
+
+// assumes the incoming arrays are the same length
+function _VirtualDom_pairwiseRefEqual(as, bs)
+{
+	for (var i = 0; i < as.length; i++)
+	{
+		if (as[i] !== bs[i])
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+function _VirtualDom_diffNodes(x, y, patches, index, diffKids)
+{
+	// Bail if obvious indicators have changed. Implies more serious
+	// structural changes such that it's not worth it to diff.
+	if (x.c !== y.c || x.f !== y.f)
+	{
+		_VirtualDom_pushPatch(patches, 0, index, y);
+		return;
+	}
+
+	var factsDiff = _VirtualDom_diffFacts(x.d, y.d);
+	factsDiff && _VirtualDom_pushPatch(patches, 4, index, factsDiff);
+
+	diffKids(x, y, patches, index);
+}
+
+
+
+// DIFF FACTS
+
+
+// TODO Instead of creating a new diff object, it's possible to just test if
+// there *is* a diff. During the actual patch, do the diff again and make the
+// modifications directly. This way, there's no new allocations. Worth it?
+function _VirtualDom_diffFacts(x, y, category)
+{
+	var diff;
+
+	// look for changes and removals
+	for (var xKey in x)
+	{
+		if (xKey === 'a1' || xKey === 'a0' || xKey === 'a3' || xKey === 'a4')
+		{
+			var subDiff = _VirtualDom_diffFacts(x[xKey], y[xKey] || {}, xKey);
+			if (subDiff)
+			{
+				diff = diff || {};
+				diff[xKey] = subDiff;
+			}
+			continue;
+		}
+
+		// remove if not in the new facts
+		if (!(xKey in y))
+		{
+			diff = diff || {};
+			diff[xKey] =
+				!category
+					? (typeof x[xKey] === 'string' ? '' : null)
+					:
+				(category === 'a1')
+					? ''
+					:
+				(category === 'a0' || category === 'a3')
+					? undefined
+					:
+				{ f: x[xKey].f, o: undefined };
+
+			continue;
+		}
+
+		var xValue = x[xKey];
+		var yValue = y[xKey];
+
+		// reference equal, so don't worry about it
+		if (xValue === yValue && xKey !== 'value' && xKey !== 'checked'
+			|| category === 'a0' && _VirtualDom_equalEvents(xValue, yValue))
+		{
+			continue;
+		}
+
+		diff = diff || {};
+		diff[xKey] = yValue;
+	}
+
+	// add new stuff
+	for (var yKey in y)
+	{
+		if (!(yKey in x))
+		{
+			diff = diff || {};
+			diff[yKey] = y[yKey];
+		}
+	}
+
+	return diff;
+}
+
+
+
+// DIFF KIDS
+
+
+function _VirtualDom_diffKids(xParent, yParent, patches, index)
+{
+	var xKids = xParent.e;
+	var yKids = yParent.e;
+
+	var xLen = xKids.length;
+	var yLen = yKids.length;
+
+	// FIGURE OUT IF THERE ARE INSERTS OR REMOVALS
+
+	if (xLen > yLen)
+	{
+		_VirtualDom_pushPatch(patches, 6, index, {
+			v: yLen,
+			i: xLen - yLen
+		});
+	}
+	else if (xLen < yLen)
+	{
+		_VirtualDom_pushPatch(patches, 7, index, {
+			v: xLen,
+			e: yKids
+		});
+	}
+
+	// PAIRWISE DIFF EVERYTHING ELSE
+
+	for (var minLen = xLen < yLen ? xLen : yLen, i = 0; i < minLen; i++)
+	{
+		var xKid = xKids[i];
+		_VirtualDom_diffHelp(xKid, yKids[i], patches, ++index);
+		index += xKid.b || 0;
+	}
+}
+
+
+
+// KEYED DIFF
+
+
+function _VirtualDom_diffKeyedKids(xParent, yParent, patches, rootIndex)
+{
+	var localPatches = [];
+
+	var changes = {}; // Dict String Entry
+	var inserts = []; // Array { index : Int, entry : Entry }
+	// type Entry = { tag : String, vnode : VNode, index : Int, data : _ }
+
+	var xKids = xParent.e;
+	var yKids = yParent.e;
+	var xLen = xKids.length;
+	var yLen = yKids.length;
+	var xIndex = 0;
+	var yIndex = 0;
+
+	var index = rootIndex;
+
+	while (xIndex < xLen && yIndex < yLen)
+	{
+		var x = xKids[xIndex];
+		var y = yKids[yIndex];
+
+		var xKey = x.a;
+		var yKey = y.a;
+		var xNode = x.b;
+		var yNode = y.b;
+
+		var newMatch = undefined;
+		var oldMatch = undefined;
+
+		// check if keys match
+
+		if (xKey === yKey)
+		{
+			index++;
+			_VirtualDom_diffHelp(xNode, yNode, localPatches, index);
+			index += xNode.b || 0;
+
+			xIndex++;
+			yIndex++;
+			continue;
+		}
+
+		// look ahead 1 to detect insertions and removals.
+
+		var xNext = xKids[xIndex + 1];
+		var yNext = yKids[yIndex + 1];
+
+		if (xNext)
+		{
+			var xNextKey = xNext.a;
+			var xNextNode = xNext.b;
+			oldMatch = yKey === xNextKey;
+		}
+
+		if (yNext)
+		{
+			var yNextKey = yNext.a;
+			var yNextNode = yNext.b;
+			newMatch = xKey === yNextKey;
+		}
+
+
+		// swap x and y
+		if (newMatch && oldMatch)
+		{
+			index++;
+			_VirtualDom_diffHelp(xNode, yNextNode, localPatches, index);
+			_VirtualDom_insertNode(changes, localPatches, xKey, yNode, yIndex, inserts);
+			index += xNode.b || 0;
+
+			index++;
+			_VirtualDom_removeNode(changes, localPatches, xKey, xNextNode, index);
+			index += xNextNode.b || 0;
+
+			xIndex += 2;
+			yIndex += 2;
+			continue;
+		}
+
+		// insert y
+		if (newMatch)
+		{
+			index++;
+			_VirtualDom_insertNode(changes, localPatches, yKey, yNode, yIndex, inserts);
+			_VirtualDom_diffHelp(xNode, yNextNode, localPatches, index);
+			index += xNode.b || 0;
+
+			xIndex += 1;
+			yIndex += 2;
+			continue;
+		}
+
+		// remove x
+		if (oldMatch)
+		{
+			index++;
+			_VirtualDom_removeNode(changes, localPatches, xKey, xNode, index);
+			index += xNode.b || 0;
+
+			index++;
+			_VirtualDom_diffHelp(xNextNode, yNode, localPatches, index);
+			index += xNextNode.b || 0;
+
+			xIndex += 2;
+			yIndex += 1;
+			continue;
+		}
+
+		// remove x, insert y
+		if (xNext && xNextKey === yNextKey)
+		{
+			index++;
+			_VirtualDom_removeNode(changes, localPatches, xKey, xNode, index);
+			_VirtualDom_insertNode(changes, localPatches, yKey, yNode, yIndex, inserts);
+			index += xNode.b || 0;
+
+			index++;
+			_VirtualDom_diffHelp(xNextNode, yNextNode, localPatches, index);
+			index += xNextNode.b || 0;
+
+			xIndex += 2;
+			yIndex += 2;
+			continue;
+		}
+
+		break;
+	}
+
+	// eat up any remaining nodes with removeNode and insertNode
+
+	while (xIndex < xLen)
+	{
+		index++;
+		var x = xKids[xIndex];
+		var xNode = x.b;
+		_VirtualDom_removeNode(changes, localPatches, x.a, xNode, index);
+		index += xNode.b || 0;
+		xIndex++;
+	}
+
+	while (yIndex < yLen)
+	{
+		var endInserts = endInserts || [];
+		var y = yKids[yIndex];
+		_VirtualDom_insertNode(changes, localPatches, y.a, y.b, undefined, endInserts);
+		yIndex++;
+	}
+
+	if (localPatches.length > 0 || inserts.length > 0 || endInserts)
+	{
+		_VirtualDom_pushPatch(patches, 8, rootIndex, {
+			w: localPatches,
+			x: inserts,
+			y: endInserts
+		});
+	}
+}
+
+
+
+// CHANGES FROM KEYED DIFF
+
+
+var _VirtualDom_POSTFIX = '_elmW6BL';
+
+
+function _VirtualDom_insertNode(changes, localPatches, key, vnode, yIndex, inserts)
+{
+	var entry = changes[key];
+
+	// never seen this key before
+	if (!entry)
+	{
+		entry = {
+			c: 0,
+			z: vnode,
+			r: yIndex,
+			s: undefined
+		};
+
+		inserts.push({ r: yIndex, A: entry });
+		changes[key] = entry;
+
+		return;
+	}
+
+	// this key was removed earlier, a match!
+	if (entry.c === 1)
+	{
+		inserts.push({ r: yIndex, A: entry });
+
+		entry.c = 2;
+		var subPatches = [];
+		_VirtualDom_diffHelp(entry.z, vnode, subPatches, entry.r);
+		entry.r = yIndex;
+		entry.s.s = {
+			w: subPatches,
+			A: entry
+		};
+
+		return;
+	}
+
+	// this key has already been inserted or moved, a duplicate!
+	_VirtualDom_insertNode(changes, localPatches, key + _VirtualDom_POSTFIX, vnode, yIndex, inserts);
+}
+
+
+function _VirtualDom_removeNode(changes, localPatches, key, vnode, index)
+{
+	var entry = changes[key];
+
+	// never seen this key before
+	if (!entry)
+	{
+		var patch = _VirtualDom_pushPatch(localPatches, 9, index, undefined);
+
+		changes[key] = {
+			c: 1,
+			z: vnode,
+			r: index,
+			s: patch
+		};
+
+		return;
+	}
+
+	// this key was inserted earlier, a match!
+	if (entry.c === 0)
+	{
+		entry.c = 2;
+		var subPatches = [];
+		_VirtualDom_diffHelp(vnode, entry.z, subPatches, index);
+
+		_VirtualDom_pushPatch(localPatches, 9, index, {
+			w: subPatches,
+			A: entry
+		});
+
+		return;
+	}
+
+	// this key has already been removed or moved, a duplicate!
+	_VirtualDom_removeNode(changes, localPatches, key + _VirtualDom_POSTFIX, vnode, index);
+}
+
+
+
+// ADD DOM NODES
+//
+// Each DOM node has an "index" assigned in order of traversal. It is important
+// to minimize our crawl over the actual DOM, so these indexes (along with the
+// descendantsCount of virtual nodes) let us skip touching entire subtrees of
+// the DOM if we know there are no patches there.
+
+
+function _VirtualDom_addDomNodes(domNode, vNode, patches, eventNode)
+{
+	_VirtualDom_addDomNodesHelp(domNode, vNode, patches, 0, 0, vNode.b, eventNode);
+}
+
+
+// assumes `patches` is non-empty and indexes increase monotonically.
+function _VirtualDom_addDomNodesHelp(domNode, vNode, patches, i, low, high, eventNode)
+{
+	var patch = patches[i];
+	var index = patch.r;
+
+	while (index === low)
+	{
+		var patchType = patch.$;
+
+		if (patchType === 1)
+		{
+			_VirtualDom_addDomNodes(domNode, vNode.k, patch.s, eventNode);
+		}
+		else if (patchType === 8)
+		{
+			patch.t = domNode;
+			patch.u = eventNode;
+
+			var subPatches = patch.s.w;
+			if (subPatches.length > 0)
+			{
+				_VirtualDom_addDomNodesHelp(domNode, vNode, subPatches, 0, low, high, eventNode);
+			}
+		}
+		else if (patchType === 9)
+		{
+			patch.t = domNode;
+			patch.u = eventNode;
+
+			var data = patch.s;
+			if (data)
+			{
+				data.A.s = domNode;
+				var subPatches = data.w;
+				if (subPatches.length > 0)
+				{
+					_VirtualDom_addDomNodesHelp(domNode, vNode, subPatches, 0, low, high, eventNode);
+				}
+			}
+		}
+		else
+		{
+			patch.t = domNode;
+			patch.u = eventNode;
+		}
+
+		i++;
+
+		if (!(patch = patches[i]) || (index = patch.r) > high)
+		{
+			return i;
+		}
+	}
+
+	var tag = vNode.$;
+
+	if (tag === 4)
+	{
+		var subNode = vNode.k;
+
+		while (subNode.$ === 4)
+		{
+			subNode = subNode.k;
+		}
+
+		return _VirtualDom_addDomNodesHelp(domNode, subNode, patches, i, low + 1, high, domNode.elm_event_node_ref);
+	}
+
+	// tag must be 1 or 2 at this point
+
+	var vKids = vNode.e;
+	var childNodes = domNode.childNodes;
+	for (var j = 0; j < vKids.length; j++)
+	{
+		low++;
+		var vKid = tag === 1 ? vKids[j] : vKids[j].b;
+		var nextLow = low + (vKid.b || 0);
+		if (low <= index && index <= nextLow)
+		{
+			i = _VirtualDom_addDomNodesHelp(childNodes[j], vKid, patches, i, low, nextLow, eventNode);
+			if (!(patch = patches[i]) || (index = patch.r) > high)
+			{
+				return i;
+			}
+		}
+		low = nextLow;
+	}
+	return i;
+}
+
+
+
+// APPLY PATCHES
+
+
+function _VirtualDom_applyPatches(rootDomNode, oldVirtualNode, patches, eventNode)
+{
+	if (patches.length === 0)
+	{
+		return rootDomNode;
+	}
+
+	_VirtualDom_addDomNodes(rootDomNode, oldVirtualNode, patches, eventNode);
+	return _VirtualDom_applyPatchesHelp(rootDomNode, patches);
+}
+
+function _VirtualDom_applyPatchesHelp(rootDomNode, patches)
+{
+	for (var i = 0; i < patches.length; i++)
+	{
+		var patch = patches[i];
+		var localDomNode = patch.t
+		var newNode = _VirtualDom_applyPatch(localDomNode, patch);
+		if (localDomNode === rootDomNode)
+		{
+			rootDomNode = newNode;
+		}
+	}
+	return rootDomNode;
+}
+
+function _VirtualDom_applyPatch(domNode, patch)
+{
+	switch (patch.$)
+	{
+		case 0:
+			return _VirtualDom_applyPatchRedraw(domNode, patch.s, patch.u);
+
+		case 4:
+			_VirtualDom_applyFacts(domNode, patch.u, patch.s);
+			return domNode;
+
+		case 3:
+			domNode.replaceData(0, domNode.length, patch.s);
+			return domNode;
+
+		case 1:
+			return _VirtualDom_applyPatchesHelp(domNode, patch.s);
+
+		case 2:
+			if (domNode.elm_event_node_ref)
+			{
+				domNode.elm_event_node_ref.j = patch.s;
+			}
+			else
+			{
+				domNode.elm_event_node_ref = { j: patch.s, p: patch.u };
+			}
+			return domNode;
+
+		case 6:
+			var data = patch.s;
+			for (var i = 0; i < data.i; i++)
+			{
+				domNode.removeChild(domNode.childNodes[data.v]);
+			}
+			return domNode;
+
+		case 7:
+			var data = patch.s;
+			var kids = data.e;
+			var i = data.v;
+			var theEnd = domNode.childNodes[i];
+			for (; i < kids.length; i++)
+			{
+				domNode.insertBefore(_VirtualDom_render(kids[i], patch.u), theEnd);
+			}
+			return domNode;
+
+		case 9:
+			var data = patch.s;
+			if (!data)
+			{
+				domNode.parentNode.removeChild(domNode);
+				return domNode;
+			}
+			var entry = data.A;
+			if (typeof entry.r !== 'undefined')
+			{
+				domNode.parentNode.removeChild(domNode);
+			}
+			entry.s = _VirtualDom_applyPatchesHelp(domNode, data.w);
+			return domNode;
+
+		case 8:
+			return _VirtualDom_applyPatchReorder(domNode, patch);
+
+		case 5:
+			return patch.s(domNode);
+
+		default:
+			_Debug_crash(10); // 'Ran into an unknown patch!'
+	}
+}
+
+
+function _VirtualDom_applyPatchRedraw(domNode, vNode, eventNode)
+{
+	var parentNode = domNode.parentNode;
+	var newNode = _VirtualDom_render(vNode, eventNode);
+
+	if (!newNode.elm_event_node_ref)
+	{
+		newNode.elm_event_node_ref = domNode.elm_event_node_ref;
+	}
+
+	if (parentNode && newNode !== domNode)
+	{
+		parentNode.replaceChild(newNode, domNode);
+	}
+	return newNode;
+}
+
+
+function _VirtualDom_applyPatchReorder(domNode, patch)
+{
+	var data = patch.s;
+
+	// remove end inserts
+	var frag = _VirtualDom_applyPatchReorderEndInsertsHelp(data.y, patch);
+
+	// removals
+	domNode = _VirtualDom_applyPatchesHelp(domNode, data.w);
+
+	// inserts
+	var inserts = data.x;
+	for (var i = 0; i < inserts.length; i++)
+	{
+		var insert = inserts[i];
+		var entry = insert.A;
+		var node = entry.c === 2
+			? entry.s
+			: _VirtualDom_render(entry.z, patch.u);
+		domNode.insertBefore(node, domNode.childNodes[insert.r]);
+	}
+
+	// add end inserts
+	if (frag)
+	{
+		_VirtualDom_appendChild(domNode, frag);
+	}
+
+	return domNode;
+}
+
+
+function _VirtualDom_applyPatchReorderEndInsertsHelp(endInserts, patch)
+{
+	if (!endInserts)
+	{
+		return;
+	}
+
+	var frag = _VirtualDom_doc.createDocumentFragment();
+	for (var i = 0; i < endInserts.length; i++)
+	{
+		var insert = endInserts[i];
+		var entry = insert.A;
+		_VirtualDom_appendChild(frag, entry.c === 2
+			? entry.s
+			: _VirtualDom_render(entry.z, patch.u)
+		);
+	}
+	return frag;
+}
+
+
+function _VirtualDom_virtualize(node)
+{
+	// TEXT NODES
+
+	if (node.nodeType === 3)
+	{
+		return _VirtualDom_text(node.textContent);
+	}
+
+
+	// WEIRD NODES
+
+	if (node.nodeType !== 1)
+	{
+		return _VirtualDom_text('');
+	}
+
+
+	// ELEMENT NODES
+
+	var attrList = _List_Nil;
+	var attrs = node.attributes;
+	for (var i = attrs.length; i--; )
+	{
+		var attr = attrs[i];
+		var name = attr.name;
+		var value = attr.value;
+		attrList = _List_Cons( A2(_VirtualDom_attribute, name, value), attrList );
+	}
+
+	var tag = node.tagName.toLowerCase();
+	var kidList = _List_Nil;
+	var kids = node.childNodes;
+
+	for (var i = kids.length; i--; )
+	{
+		kidList = _List_Cons(_VirtualDom_virtualize(kids[i]), kidList);
+	}
+	return A3(_VirtualDom_node, tag, attrList, kidList);
+}
+
+function _VirtualDom_dekey(keyedNode)
+{
+	var keyedKids = keyedNode.e;
+	var len = keyedKids.length;
+	var kids = new Array(len);
+	for (var i = 0; i < len; i++)
+	{
+		kids[i] = keyedKids[i].b;
+	}
+
+	return {
+		$: 1,
+		c: keyedNode.c,
+		d: keyedNode.d,
+		e: kids,
+		f: keyedNode.f,
+		b: keyedNode.b
+	};
+}
+
+
+
+
+// ELEMENT
+
+
+var _Debugger_element;
+
+var _Browser_element = _Debugger_element || F4(function(impl, flagDecoder, debugMetadata, args)
+{
+	return _Platform_initialize(
+		flagDecoder,
+		args,
+		impl.init,
+		impl.update,
+		impl.subscriptions,
+		function(sendToApp, initialModel) {
+			var view = impl.view;
+			/**_UNUSED/
+			var domNode = args['node'];
+			//*/
+			/**/
+			var domNode = args && args['node'] ? args['node'] : _Debug_crash(0);
+			//*/
+			var currNode = _VirtualDom_virtualize(domNode);
+
+			return _Browser_makeAnimator(initialModel, function(model)
+			{
+				var nextNode = view(model);
+				var patches = _VirtualDom_diff(currNode, nextNode);
+				domNode = _VirtualDom_applyPatches(domNode, currNode, patches, sendToApp);
+				currNode = nextNode;
+			});
+		}
+	);
+});
+
+
+
+// DOCUMENT
+
+
+var _Debugger_document;
+
+var _Browser_document = _Debugger_document || F4(function(impl, flagDecoder, debugMetadata, args)
+{
+	return _Platform_initialize(
+		flagDecoder,
+		args,
+		impl.init,
+		impl.update,
+		impl.subscriptions,
+		function(sendToApp, initialModel) {
+			var divertHrefToApp = impl.setup && impl.setup(sendToApp)
+			var view = impl.view;
+			var title = _VirtualDom_doc.title;
+			var bodyNode = _VirtualDom_doc.body;
+			var currNode = _VirtualDom_virtualize(bodyNode);
+			return _Browser_makeAnimator(initialModel, function(model)
+			{
+				_VirtualDom_divertHrefToApp = divertHrefToApp;
+				var doc = view(model);
+				var nextNode = _VirtualDom_node('body')(_List_Nil)(doc.body);
+				var patches = _VirtualDom_diff(currNode, nextNode);
+				bodyNode = _VirtualDom_applyPatches(bodyNode, currNode, patches, sendToApp);
+				currNode = nextNode;
+				_VirtualDom_divertHrefToApp = 0;
+				(title !== doc.title) && (_VirtualDom_doc.title = title = doc.title);
+			});
+		}
+	);
+});
+
+
+
+// ANIMATION
+
+
+var _Browser_cancelAnimationFrame =
+	typeof cancelAnimationFrame !== 'undefined'
+		? cancelAnimationFrame
+		: function(id) { clearTimeout(id); };
+
+var _Browser_requestAnimationFrame =
+	typeof requestAnimationFrame !== 'undefined'
+		? requestAnimationFrame
+		: function(callback) { return setTimeout(callback, 1000 / 60); };
+
+
+function _Browser_makeAnimator(model, draw)
+{
+	draw(model);
+
+	var state = 0;
+
+	function updateIfNeeded()
+	{
+		state = state === 1
+			? 0
+			: ( _Browser_requestAnimationFrame(updateIfNeeded), draw(model), 1 );
+	}
+
+	return function(nextModel, isSync)
+	{
+		model = nextModel;
+
+		isSync
+			? ( draw(model),
+				state === 2 && (state = 1)
+				)
+			: ( state === 0 && _Browser_requestAnimationFrame(updateIfNeeded),
+				state = 2
+				);
+	};
+}
+
+
+
+// APPLICATION
+
+
+function _Browser_application(impl)
+{
+	var onUrlChange = impl.onUrlChange;
+	var onUrlRequest = impl.onUrlRequest;
+	var key = function() { key.a(onUrlChange(_Browser_getUrl())); };
+
+	return _Browser_document({
+		setup: function(sendToApp)
+		{
+			key.a = sendToApp;
+			_Browser_window.addEventListener('popstate', key);
+			_Browser_window.navigator.userAgent.indexOf('Trident') < 0 || _Browser_window.addEventListener('hashchange', key);
+
+			return F2(function(domNode, event)
+			{
+				if (!event.ctrlKey && !event.metaKey && !event.shiftKey && event.button < 1 && !domNode.target && !domNode.hasAttribute('download'))
+				{
+					event.preventDefault();
+					var href = domNode.href;
+					var curr = _Browser_getUrl();
+					var next = $elm$url$Url$fromString(href).a;
+					sendToApp(onUrlRequest(
+						(next
+							&& curr.protocol === next.protocol
+							&& curr.host === next.host
+							&& curr.port_.a === next.port_.a
+						)
+							? $elm$browser$Browser$Internal(next)
+							: $elm$browser$Browser$External(href)
+					));
+				}
+			});
+		},
+		init: function(flags)
+		{
+			return A3(impl.init, flags, _Browser_getUrl(), key);
+		},
+		view: impl.view,
+		update: impl.update,
+		subscriptions: impl.subscriptions
+	});
+}
+
+function _Browser_getUrl()
+{
+	return $elm$url$Url$fromString(_VirtualDom_doc.location.href).a || _Debug_crash(1);
+}
+
+var _Browser_go = F2(function(key, n)
+{
+	return A2($elm$core$Task$perform, $elm$core$Basics$never, _Scheduler_binding(function() {
+		n && history.go(n);
+		key();
+	}));
+});
+
+var _Browser_pushUrl = F2(function(key, url)
+{
+	return A2($elm$core$Task$perform, $elm$core$Basics$never, _Scheduler_binding(function() {
+		history.pushState({}, '', url);
+		key();
+	}));
+});
+
+var _Browser_replaceUrl = F2(function(key, url)
+{
+	return A2($elm$core$Task$perform, $elm$core$Basics$never, _Scheduler_binding(function() {
+		history.replaceState({}, '', url);
+		key();
+	}));
+});
+
+
+
+// GLOBAL EVENTS
+
+
+var _Browser_fakeNode = { addEventListener: function() {}, removeEventListener: function() {} };
+var _Browser_doc = typeof document !== 'undefined' ? document : _Browser_fakeNode;
+var _Browser_window = typeof window !== 'undefined' ? window : _Browser_fakeNode;
+
+var _Browser_on = F3(function(node, eventName, sendToSelf)
+{
+	return _Scheduler_spawn(_Scheduler_binding(function(callback)
+	{
+		function handler(event)	{ _Scheduler_rawSpawn(sendToSelf(event)); }
+		node.addEventListener(eventName, handler, _VirtualDom_passiveSupported && { passive: true });
+		return function() { node.removeEventListener(eventName, handler); };
+	}));
+});
+
+var _Browser_decodeEvent = F2(function(decoder, event)
+{
+	var result = _Json_runHelp(decoder, event);
+	return $elm$core$Result$isOk(result) ? $elm$core$Maybe$Just(result.a) : $elm$core$Maybe$Nothing;
+});
+
+
+
+// PAGE VISIBILITY
+
+
+function _Browser_visibilityInfo()
+{
+	return (typeof _VirtualDom_doc.hidden !== 'undefined')
+		? { hidden: 'hidden', change: 'visibilitychange' }
+		:
+	(typeof _VirtualDom_doc.mozHidden !== 'undefined')
+		? { hidden: 'mozHidden', change: 'mozvisibilitychange' }
+		:
+	(typeof _VirtualDom_doc.msHidden !== 'undefined')
+		? { hidden: 'msHidden', change: 'msvisibilitychange' }
+		:
+	(typeof _VirtualDom_doc.webkitHidden !== 'undefined')
+		? { hidden: 'webkitHidden', change: 'webkitvisibilitychange' }
+		: { hidden: 'hidden', change: 'visibilitychange' };
+}
+
+
+
+// ANIMATION FRAMES
+
+
+function _Browser_rAF()
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var id = _Browser_requestAnimationFrame(function() {
+			callback(_Scheduler_succeed(Date.now()));
+		});
+
+		return function() {
+			_Browser_cancelAnimationFrame(id);
+		};
+	});
+}
+
+
+function _Browser_now()
+{
+	return _Scheduler_binding(function(callback)
+	{
+		callback(_Scheduler_succeed(Date.now()));
+	});
+}
+
+
+
+// DOM STUFF
+
+
+function _Browser_withNode(id, doStuff)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		_Browser_requestAnimationFrame(function() {
+			var node = document.getElementById(id);
+			callback(node
+				? _Scheduler_succeed(doStuff(node))
+				: _Scheduler_fail($elm$browser$Browser$Dom$NotFound(id))
+			);
+		});
+	});
+}
+
+
+function _Browser_withWindow(doStuff)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		_Browser_requestAnimationFrame(function() {
+			callback(_Scheduler_succeed(doStuff()));
+		});
+	});
+}
+
+
+// FOCUS and BLUR
+
+
+var _Browser_call = F2(function(functionName, id)
+{
+	return _Browser_withNode(id, function(node) {
+		node[functionName]();
+		return _Utils_Tuple0;
+	});
+});
+
+
+
+// WINDOW VIEWPORT
+
+
+function _Browser_getViewport()
+{
+	return {
+		scene: _Browser_getScene(),
+		viewport: {
+			x: _Browser_window.pageXOffset,
+			y: _Browser_window.pageYOffset,
+			width: _Browser_doc.documentElement.clientWidth,
+			height: _Browser_doc.documentElement.clientHeight
+		}
+	};
+}
+
+function _Browser_getScene()
+{
+	var body = _Browser_doc.body;
+	var elem = _Browser_doc.documentElement;
+	return {
+		width: Math.max(body.scrollWidth, body.offsetWidth, elem.scrollWidth, elem.offsetWidth, elem.clientWidth),
+		height: Math.max(body.scrollHeight, body.offsetHeight, elem.scrollHeight, elem.offsetHeight, elem.clientHeight)
+	};
+}
+
+var _Browser_setViewport = F2(function(x, y)
+{
+	return _Browser_withWindow(function()
+	{
+		_Browser_window.scroll(x, y);
+		return _Utils_Tuple0;
+	});
+});
+
+
+
+// ELEMENT VIEWPORT
+
+
+function _Browser_getViewportOf(id)
+{
+	return _Browser_withNode(id, function(node)
+	{
+		return {
+			scene: {
+				width: node.scrollWidth,
+				height: node.scrollHeight
+			},
+			viewport: {
+				x: node.scrollLeft,
+				y: node.scrollTop,
+				width: node.clientWidth,
+				height: node.clientHeight
+			}
+		};
+	});
+}
+
+
+var _Browser_setViewportOf = F3(function(id, x, y)
+{
+	return _Browser_withNode(id, function(node)
+	{
+		node.scrollLeft = x;
+		node.scrollTop = y;
+		return _Utils_Tuple0;
+	});
+});
+
+
+
+// ELEMENT
+
+
+function _Browser_getElement(id)
+{
+	return _Browser_withNode(id, function(node)
+	{
+		var rect = node.getBoundingClientRect();
+		var x = _Browser_window.pageXOffset;
+		var y = _Browser_window.pageYOffset;
+		return {
+			scene: _Browser_getScene(),
+			viewport: {
+				x: x,
+				y: y,
+				width: _Browser_doc.documentElement.clientWidth,
+				height: _Browser_doc.documentElement.clientHeight
+			},
+			element: {
+				x: x + rect.left,
+				y: y + rect.top,
+				width: rect.width,
+				height: rect.height
+			}
+		};
+	});
+}
+
+
+
+// LOAD and RELOAD
+
+
+function _Browser_reload(skipCache)
+{
+	return A2($elm$core$Task$perform, $elm$core$Basics$never, _Scheduler_binding(function(callback)
+	{
+		_VirtualDom_doc.location.reload(skipCache);
+	}));
+}
+
+function _Browser_load(url)
+{
+	return A2($elm$core$Task$perform, $elm$core$Basics$never, _Scheduler_binding(function(callback)
+	{
+		try
+		{
+			_Browser_window.location = url;
+		}
+		catch(err)
+		{
+			// Only Firefox can throw a NS_ERROR_MALFORMED_URI exception here.
+			// Other browsers reload the page, so let's be consistent about that.
+			_VirtualDom_doc.location.reload(false);
+		}
+	}));
+}
+
+
+// BYTES
+
+function _Bytes_width(bytes)
+{
+	return bytes.byteLength;
+}
+
+var _Bytes_getHostEndianness = F2(function(le, be)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		callback(_Scheduler_succeed(new Uint8Array(new Uint32Array([1]))[0] === 1 ? le : be));
+	});
+});
+
+
+// ENCODERS
+
+function _Bytes_encode(encoder)
+{
+	var mutableBytes = new DataView(new ArrayBuffer($elm$bytes$Bytes$Encode$getWidth(encoder)));
+	$elm$bytes$Bytes$Encode$write(encoder)(mutableBytes)(0);
+	return mutableBytes;
+}
+
+
+// SIGNED INTEGERS
+
+var _Bytes_write_i8  = F3(function(mb, i, n) { mb.setInt8(i, n); return i + 1; });
+var _Bytes_write_i16 = F4(function(mb, i, n, isLE) { mb.setInt16(i, n, isLE); return i + 2; });
+var _Bytes_write_i32 = F4(function(mb, i, n, isLE) { mb.setInt32(i, n, isLE); return i + 4; });
+
+
+// UNSIGNED INTEGERS
+
+var _Bytes_write_u8  = F3(function(mb, i, n) { mb.setUint8(i, n); return i + 1 ;});
+var _Bytes_write_u16 = F4(function(mb, i, n, isLE) { mb.setUint16(i, n, isLE); return i + 2; });
+var _Bytes_write_u32 = F4(function(mb, i, n, isLE) { mb.setUint32(i, n, isLE); return i + 4; });
+
+
+// FLOATS
+
+var _Bytes_write_f32 = F4(function(mb, i, n, isLE) { mb.setFloat32(i, n, isLE); return i + 4; });
+var _Bytes_write_f64 = F4(function(mb, i, n, isLE) { mb.setFloat64(i, n, isLE); return i + 8; });
+
+
+// BYTES
+
+var _Bytes_write_bytes = F3(function(mb, offset, bytes)
+{
+	for (var i = 0, len = bytes.byteLength, limit = len - 4; i <= limit; i += 4)
+	{
+		mb.setUint32(offset + i, bytes.getUint32(i));
+	}
+	for (; i < len; i++)
+	{
+		mb.setUint8(offset + i, bytes.getUint8(i));
+	}
+	return offset + len;
+});
+
+
+// STRINGS
+
+function _Bytes_getStringWidth(string)
+{
+	for (var width = 0, i = 0; i < string.length; i++)
+	{
+		var code = string.charCodeAt(i);
+		width +=
+			(code < 0x80) ? 1 :
+			(code < 0x800) ? 2 :
+			(code < 0xD800 || 0xDBFF < code) ? 3 : (i++, 4);
+	}
+	return width;
+}
+
+var _Bytes_write_string = F3(function(mb, offset, string)
+{
+	for (var i = 0; i < string.length; i++)
+	{
+		var code = string.charCodeAt(i);
+		offset +=
+			(code < 0x80)
+				? (mb.setUint8(offset, code)
+				, 1
+				)
+				:
+			(code < 0x800)
+				? (mb.setUint16(offset, 0xC080 /* 0b1100000010000000 */
+					| (code >>> 6 & 0x1F /* 0b00011111 */) << 8
+					| code & 0x3F /* 0b00111111 */)
+				, 2
+				)
+				:
+			(code < 0xD800 || 0xDBFF < code)
+				? (mb.setUint16(offset, 0xE080 /* 0b1110000010000000 */
+					| (code >>> 12 & 0xF /* 0b00001111 */) << 8
+					| code >>> 6 & 0x3F /* 0b00111111 */)
+				, mb.setUint8(offset + 2, 0x80 /* 0b10000000 */
+					| code & 0x3F /* 0b00111111 */)
+				, 3
+				)
+				:
+			(code = (code - 0xD800) * 0x400 + string.charCodeAt(++i) - 0xDC00 + 0x10000
+			, mb.setUint32(offset, 0xF0808080 /* 0b11110000100000001000000010000000 */
+				| (code >>> 18 & 0x7 /* 0b00000111 */) << 24
+				| (code >>> 12 & 0x3F /* 0b00111111 */) << 16
+				| (code >>> 6 & 0x3F /* 0b00111111 */) << 8
+				| code & 0x3F /* 0b00111111 */)
+			, 4
+			);
+	}
+	return offset;
+});
+
+
+// DECODER
+
+var _Bytes_decode = F2(function(decoder, bytes)
+{
+	try {
+		return $elm$core$Maybe$Just(A2(decoder, bytes, 0).b);
+	} catch(e) {
+		return $elm$core$Maybe$Nothing;
+	}
+});
+
+var _Bytes_read_i8  = F2(function(      bytes, offset) { return _Utils_Tuple2(offset + 1, bytes.getInt8(offset)); });
+var _Bytes_read_i16 = F3(function(isLE, bytes, offset) { return _Utils_Tuple2(offset + 2, bytes.getInt16(offset, isLE)); });
+var _Bytes_read_i32 = F3(function(isLE, bytes, offset) { return _Utils_Tuple2(offset + 4, bytes.getInt32(offset, isLE)); });
+var _Bytes_read_u8  = F2(function(      bytes, offset) { return _Utils_Tuple2(offset + 1, bytes.getUint8(offset)); });
+var _Bytes_read_u16 = F3(function(isLE, bytes, offset) { return _Utils_Tuple2(offset + 2, bytes.getUint16(offset, isLE)); });
+var _Bytes_read_u32 = F3(function(isLE, bytes, offset) { return _Utils_Tuple2(offset + 4, bytes.getUint32(offset, isLE)); });
+var _Bytes_read_f32 = F3(function(isLE, bytes, offset) { return _Utils_Tuple2(offset + 4, bytes.getFloat32(offset, isLE)); });
+var _Bytes_read_f64 = F3(function(isLE, bytes, offset) { return _Utils_Tuple2(offset + 8, bytes.getFloat64(offset, isLE)); });
+
+var _Bytes_read_bytes = F3(function(len, bytes, offset)
+{
+	return _Utils_Tuple2(offset + len, new DataView(bytes.buffer, bytes.byteOffset + offset, len));
+});
+
+var _Bytes_read_string = F3(function(len, bytes, offset)
+{
+	var string = '';
+	var end = offset + len;
+	for (; offset < end;)
+	{
+		var byte = bytes.getUint8(offset++);
+		string +=
+			(byte < 128)
+				? String.fromCharCode(byte)
+				:
+			((byte & 0xE0 /* 0b11100000 */) === 0xC0 /* 0b11000000 */)
+				? String.fromCharCode((byte & 0x1F /* 0b00011111 */) << 6 | bytes.getUint8(offset++) & 0x3F /* 0b00111111 */)
+				:
+			((byte & 0xF0 /* 0b11110000 */) === 0xE0 /* 0b11100000 */)
+				? String.fromCharCode(
+					(byte & 0xF /* 0b00001111 */) << 12
+					| (bytes.getUint8(offset++) & 0x3F /* 0b00111111 */) << 6
+					| bytes.getUint8(offset++) & 0x3F /* 0b00111111 */
+				)
+				:
+				(byte =
+					((byte & 0x7 /* 0b00000111 */) << 18
+						| (bytes.getUint8(offset++) & 0x3F /* 0b00111111 */) << 12
+						| (bytes.getUint8(offset++) & 0x3F /* 0b00111111 */) << 6
+						| bytes.getUint8(offset++) & 0x3F /* 0b00111111 */
+					) - 0x10000
+				, String.fromCharCode(Math.floor(byte / 0x400) + 0xD800, byte % 0x400 + 0xDC00)
+				);
+	}
+	return _Utils_Tuple2(offset, string);
+});
+
+var _Bytes_decodeFailure = F2(function() { throw 0; });
+
+
+
+var _Bitwise_and = F2(function(a, b)
+{
+	return a & b;
+});
+
+var _Bitwise_or = F2(function(a, b)
+{
+	return a | b;
+});
+
+var _Bitwise_xor = F2(function(a, b)
+{
+	return a ^ b;
+});
+
+function _Bitwise_complement(a)
+{
+	return ~a;
+};
+
+var _Bitwise_shiftLeftBy = F2(function(offset, a)
+{
+	return a << offset;
+});
+
+var _Bitwise_shiftRightBy = F2(function(offset, a)
+{
+	return a >> offset;
+});
+
+var _Bitwise_shiftRightZfBy = F2(function(offset, a)
+{
+	return a >>> offset;
+});
+
+
+
+function _Time_now(millisToPosix)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		callback(_Scheduler_succeed(millisToPosix(Date.now())));
+	});
+}
+
+var _Time_setInterval = F2(function(interval, task)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var id = setInterval(function() { _Scheduler_rawSpawn(task); }, interval);
+		return function() { clearInterval(id); };
+	});
+});
+
+function _Time_here()
+{
+	return _Scheduler_binding(function(callback)
+	{
+		callback(_Scheduler_succeed(
+			A2($elm$time$Time$customZone, -(new Date().getTimezoneOffset()), _List_Nil)
+		));
+	});
+}
+
+
+function _Time_getZoneName()
+{
+	return _Scheduler_binding(function(callback)
+	{
+		try
+		{
+			var name = $elm$time$Time$Name(Intl.DateTimeFormat().resolvedOptions().timeZone);
+		}
+		catch (e)
+		{
+			var name = $elm$time$Time$Offset(new Date().getTimezoneOffset());
+		}
+		callback(_Scheduler_succeed(name));
+	});
+}
+
+
+function _Url_percentEncode(string)
+{
+	return encodeURIComponent(string);
+}
+
+function _Url_percentDecode(string)
+{
+	try
+	{
+		return $elm$core$Maybe$Just(decodeURIComponent(string));
+	}
+	catch (e)
+	{
+		return $elm$core$Maybe$Nothing;
+	}
+}
+
+
+// DECODER
+
+var _File_decoder = _Json_decodePrim(function(value) {
+	// NOTE: checks if `File` exists in case this is run on node
+	return (typeof File !== 'undefined' && value instanceof File)
+		? $elm$core$Result$Ok(value)
+		: _Json_expecting('a FILE', value);
+});
+
+
+// METADATA
+
+function _File_name(file) { return file.name; }
+function _File_mime(file) { return file.type; }
+function _File_size(file) { return file.size; }
+
+function _File_lastModified(file)
+{
+	return $elm$time$Time$millisToPosix(file.lastModified);
+}
+
+
+// DOWNLOAD
+
+var _File_downloadNode;
+
+function _File_getDownloadNode()
+{
+	return _File_downloadNode || (_File_downloadNode = document.createElement('a'));
+}
+
+var _File_download = F3(function(name, mime, content)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var blob = new Blob([content], {type: mime});
+
+		// for IE10+
+		if (navigator.msSaveOrOpenBlob)
+		{
+			navigator.msSaveOrOpenBlob(blob, name);
+			return;
+		}
+
+		// for HTML5
+		var node = _File_getDownloadNode();
+		var objectUrl = URL.createObjectURL(blob);
+		node.href = objectUrl;
+		node.download = name;
+		_File_click(node);
+		URL.revokeObjectURL(objectUrl);
+	});
+});
+
+function _File_downloadUrl(href)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var node = _File_getDownloadNode();
+		node.href = href;
+		node.download = '';
+		node.origin === location.origin || (node.target = '_blank');
+		_File_click(node);
+	});
+}
+
+
+// IE COMPATIBILITY
+
+function _File_makeBytesSafeForInternetExplorer(bytes)
+{
+	// only needed by IE10 and IE11 to fix https://github.com/elm/file/issues/10
+	// all other browsers can just run `new Blob([bytes])` directly with no problem
+	//
+	return new Uint8Array(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+}
+
+function _File_click(node)
+{
+	// only needed by IE10 and IE11 to fix https://github.com/elm/file/issues/11
+	// all other browsers have MouseEvent and do not need this conditional stuff
+	//
+	if (typeof MouseEvent === 'function')
+	{
+		node.dispatchEvent(new MouseEvent('click'));
+	}
+	else
+	{
+		var event = document.createEvent('MouseEvents');
+		event.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+		document.body.appendChild(node);
+		node.dispatchEvent(event);
+		document.body.removeChild(node);
+	}
+}
+
+
+// UPLOAD
+
+var _File_node;
+
+function _File_uploadOne(mimes)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		_File_node = document.createElement('input');
+		_File_node.type = 'file';
+		_File_node.accept = A2($elm$core$String$join, ',', mimes);
+		_File_node.addEventListener('change', function(event)
+		{
+			callback(_Scheduler_succeed(event.target.files[0]));
+		});
+		_File_click(_File_node);
+	});
+}
+
+function _File_uploadOneOrMore(mimes)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		_File_node = document.createElement('input');
+		_File_node.type = 'file';
+		_File_node.multiple = true;
+		_File_node.accept = A2($elm$core$String$join, ',', mimes);
+		_File_node.addEventListener('change', function(event)
+		{
+			var elmFiles = _List_fromArray(event.target.files);
+			callback(_Scheduler_succeed(_Utils_Tuple2(elmFiles.a, elmFiles.b)));
+		});
+		_File_click(_File_node);
+	});
+}
+
+
+// CONTENT
+
+function _File_toString(blob)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var reader = new FileReader();
+		reader.addEventListener('loadend', function() {
+			callback(_Scheduler_succeed(reader.result));
+		});
+		reader.readAsText(blob);
+		return function() { reader.abort(); };
+	});
+}
+
+function _File_toBytes(blob)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var reader = new FileReader();
+		reader.addEventListener('loadend', function() {
+			callback(_Scheduler_succeed(new DataView(reader.result)));
+		});
+		reader.readAsArrayBuffer(blob);
+		return function() { reader.abort(); };
+	});
+}
+
+function _File_toUrl(blob)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var reader = new FileReader();
+		reader.addEventListener('loadend', function() {
+			callback(_Scheduler_succeed(reader.result));
+		});
+		reader.readAsDataURL(blob);
+		return function() { reader.abort(); };
+	});
+}
+
+
+
+// CREATE
+
+var _Regex_never = /.^/;
+
+var _Regex_fromStringWith = F2(function(options, string)
+{
+	var flags = 'g';
+	if (options.multiline) { flags += 'm'; }
+	if (options.caseInsensitive) { flags += 'i'; }
+
+	try
+	{
+		return $elm$core$Maybe$Just(new RegExp(string, flags));
+	}
+	catch(error)
+	{
+		return $elm$core$Maybe$Nothing;
+	}
+});
+
+
+// USE
+
+var _Regex_contains = F2(function(re, string)
+{
+	return string.match(re) !== null;
+});
+
+
+var _Regex_findAtMost = F3(function(n, re, str)
+{
+	var out = [];
+	var number = 0;
+	var string = str;
+	var lastIndex = re.lastIndex;
+	var prevLastIndex = -1;
+	var result;
+	while (number++ < n && (result = re.exec(string)))
+	{
+		if (prevLastIndex == re.lastIndex) break;
+		var i = result.length - 1;
+		var subs = new Array(i);
+		while (i > 0)
+		{
+			var submatch = result[i];
+			subs[--i] = submatch
+				? $elm$core$Maybe$Just(submatch)
+				: $elm$core$Maybe$Nothing;
+		}
+		out.push(A4($elm$regex$Regex$Match, result[0], result.index, number, _List_fromArray(subs)));
+		prevLastIndex = re.lastIndex;
+	}
+	re.lastIndex = lastIndex;
+	return _List_fromArray(out);
+});
+
+
+var _Regex_replaceAtMost = F4(function(n, re, replacer, string)
+{
+	var count = 0;
+	function jsReplacer(match)
+	{
+		if (count++ >= n)
+		{
+			return match;
+		}
+		var i = arguments.length - 3;
+		var submatches = new Array(i);
+		while (i > 0)
+		{
+			var submatch = arguments[i];
+			submatches[--i] = submatch
+				? $elm$core$Maybe$Just(submatch)
+				: $elm$core$Maybe$Nothing;
+		}
+		return replacer(A4($elm$regex$Regex$Match, match, arguments[arguments.length - 2], count, _List_fromArray(submatches)));
+	}
+	return string.replace(re, jsReplacer);
+});
+
+var _Regex_splitAtMost = F3(function(n, re, str)
+{
+	var string = str;
+	var out = [];
+	var start = re.lastIndex;
+	var restoreLastIndex = re.lastIndex;
+	while (n--)
+	{
+		var result = re.exec(string);
+		if (!result) break;
+		out.push(string.slice(start, result.index));
+		start = re.lastIndex;
+	}
+	out.push(string.slice(start));
+	re.lastIndex = restoreLastIndex;
+	return _List_fromArray(out);
+});
+
+var _Regex_infinity = Infinity;
+
+
+/*
+ * Copyright (c) 2010 Mozilla Corporation
+ * Copyright (c) 2010 Vladimir Vukicevic
+ * Copyright (c) 2013 John Mayer
+ * Copyright (c) 2018 Andrey Kuzmin
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without
+ * restriction, including without limitation the rights to use,
+ * copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following
+ * conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+ * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+// Vector2
+
+var _MJS_v2 = F2(function(x, y) {
+    return new Float64Array([x, y]);
+});
+
+var _MJS_v2getX = function(a) {
+    return a[0];
+};
+
+var _MJS_v2getY = function(a) {
+    return a[1];
+};
+
+var _MJS_v2setX = F2(function(x, a) {
+    return new Float64Array([x, a[1]]);
+});
+
+var _MJS_v2setY = F2(function(y, a) {
+    return new Float64Array([a[0], y]);
+});
+
+var _MJS_v2toRecord = function(a) {
+    return { x: a[0], y: a[1] };
+};
+
+var _MJS_v2fromRecord = function(r) {
+    return new Float64Array([r.x, r.y]);
+};
+
+var _MJS_v2add = F2(function(a, b) {
+    var r = new Float64Array(2);
+    r[0] = a[0] + b[0];
+    r[1] = a[1] + b[1];
+    return r;
+});
+
+var _MJS_v2sub = F2(function(a, b) {
+    var r = new Float64Array(2);
+    r[0] = a[0] - b[0];
+    r[1] = a[1] - b[1];
+    return r;
+});
+
+var _MJS_v2negate = function(a) {
+    var r = new Float64Array(2);
+    r[0] = -a[0];
+    r[1] = -a[1];
+    return r;
+};
+
+var _MJS_v2direction = F2(function(a, b) {
+    var r = new Float64Array(2);
+    r[0] = a[0] - b[0];
+    r[1] = a[1] - b[1];
+    var im = 1.0 / _MJS_v2lengthLocal(r);
+    r[0] = r[0] * im;
+    r[1] = r[1] * im;
+    return r;
+});
+
+function _MJS_v2lengthLocal(a) {
+    return Math.sqrt(a[0] * a[0] + a[1] * a[1]);
+}
+var _MJS_v2length = _MJS_v2lengthLocal;
+
+var _MJS_v2lengthSquared = function(a) {
+    return a[0] * a[0] + a[1] * a[1];
+};
+
+var _MJS_v2distance = F2(function(a, b) {
+    var dx = a[0] - b[0];
+    var dy = a[1] - b[1];
+    return Math.sqrt(dx * dx + dy * dy);
+});
+
+var _MJS_v2distanceSquared = F2(function(a, b) {
+    var dx = a[0] - b[0];
+    var dy = a[1] - b[1];
+    return dx * dx + dy * dy;
+});
+
+var _MJS_v2normalize = function(a) {
+    var r = new Float64Array(2);
+    var im = 1.0 / _MJS_v2lengthLocal(a);
+    r[0] = a[0] * im;
+    r[1] = a[1] * im;
+    return r;
+};
+
+var _MJS_v2scale = F2(function(k, a) {
+    var r = new Float64Array(2);
+    r[0] = a[0] * k;
+    r[1] = a[1] * k;
+    return r;
+});
+
+var _MJS_v2dot = F2(function(a, b) {
+    return a[0] * b[0] + a[1] * b[1];
+});
+
+// Vector3
+
+var _MJS_v3temp1Local = new Float64Array(3);
+var _MJS_v3temp2Local = new Float64Array(3);
+var _MJS_v3temp3Local = new Float64Array(3);
+
+var _MJS_v3 = F3(function(x, y, z) {
+    return new Float64Array([x, y, z]);
+});
+
+var _MJS_v3getX = function(a) {
+    return a[0];
+};
+
+var _MJS_v3getY = function(a) {
+    return a[1];
+};
+
+var _MJS_v3getZ = function(a) {
+    return a[2];
+};
+
+var _MJS_v3setX = F2(function(x, a) {
+    return new Float64Array([x, a[1], a[2]]);
+});
+
+var _MJS_v3setY = F2(function(y, a) {
+    return new Float64Array([a[0], y, a[2]]);
+});
+
+var _MJS_v3setZ = F2(function(z, a) {
+    return new Float64Array([a[0], a[1], z]);
+});
+
+var _MJS_v3toRecord = function(a) {
+    return { x: a[0], y: a[1], z: a[2] };
+};
+
+var _MJS_v3fromRecord = function(r) {
+    return new Float64Array([r.x, r.y, r.z]);
+};
+
+var _MJS_v3add = F2(function(a, b) {
+    var r = new Float64Array(3);
+    r[0] = a[0] + b[0];
+    r[1] = a[1] + b[1];
+    r[2] = a[2] + b[2];
+    return r;
+});
+
+function _MJS_v3subLocal(a, b, r) {
+    if (r === undefined) {
+        r = new Float64Array(3);
+    }
+    r[0] = a[0] - b[0];
+    r[1] = a[1] - b[1];
+    r[2] = a[2] - b[2];
+    return r;
+}
+var _MJS_v3sub = F2(_MJS_v3subLocal);
+
+var _MJS_v3negate = function(a) {
+    var r = new Float64Array(3);
+    r[0] = -a[0];
+    r[1] = -a[1];
+    r[2] = -a[2];
+    return r;
+};
+
+function _MJS_v3directionLocal(a, b, r) {
+    if (r === undefined) {
+        r = new Float64Array(3);
+    }
+    return _MJS_v3normalizeLocal(_MJS_v3subLocal(a, b, r), r);
+}
+var _MJS_v3direction = F2(_MJS_v3directionLocal);
+
+function _MJS_v3lengthLocal(a) {
+    return Math.sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2]);
+}
+var _MJS_v3length = _MJS_v3lengthLocal;
+
+var _MJS_v3lengthSquared = function(a) {
+    return a[0] * a[0] + a[1] * a[1] + a[2] * a[2];
+};
+
+var _MJS_v3distance = F2(function(a, b) {
+    var dx = a[0] - b[0];
+    var dy = a[1] - b[1];
+    var dz = a[2] - b[2];
+    return Math.sqrt(dx * dx + dy * dy + dz * dz);
+});
+
+var _MJS_v3distanceSquared = F2(function(a, b) {
+    var dx = a[0] - b[0];
+    var dy = a[1] - b[1];
+    var dz = a[2] - b[2];
+    return dx * dx + dy * dy + dz * dz;
+});
+
+function _MJS_v3normalizeLocal(a, r) {
+    if (r === undefined) {
+        r = new Float64Array(3);
+    }
+    var im = 1.0 / _MJS_v3lengthLocal(a);
+    r[0] = a[0] * im;
+    r[1] = a[1] * im;
+    r[2] = a[2] * im;
+    return r;
+}
+var _MJS_v3normalize = _MJS_v3normalizeLocal;
+
+var _MJS_v3scale = F2(function(k, a) {
+    return new Float64Array([a[0] * k, a[1] * k, a[2] * k]);
+});
+
+var _MJS_v3dotLocal = function(a, b) {
+    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+};
+var _MJS_v3dot = F2(_MJS_v3dotLocal);
+
+function _MJS_v3crossLocal(a, b, r) {
+    if (r === undefined) {
+        r = new Float64Array(3);
+    }
+    r[0] = a[1] * b[2] - a[2] * b[1];
+    r[1] = a[2] * b[0] - a[0] * b[2];
+    r[2] = a[0] * b[1] - a[1] * b[0];
+    return r;
+}
+var _MJS_v3cross = F2(_MJS_v3crossLocal);
+
+var _MJS_v3mul4x4 = F2(function(m, v) {
+    var w;
+    var tmp = _MJS_v3temp1Local;
+    var r = new Float64Array(3);
+
+    tmp[0] = m[3];
+    tmp[1] = m[7];
+    tmp[2] = m[11];
+    w = _MJS_v3dotLocal(v, tmp) + m[15];
+    tmp[0] = m[0];
+    tmp[1] = m[4];
+    tmp[2] = m[8];
+    r[0] = (_MJS_v3dotLocal(v, tmp) + m[12]) / w;
+    tmp[0] = m[1];
+    tmp[1] = m[5];
+    tmp[2] = m[9];
+    r[1] = (_MJS_v3dotLocal(v, tmp) + m[13]) / w;
+    tmp[0] = m[2];
+    tmp[1] = m[6];
+    tmp[2] = m[10];
+    r[2] = (_MJS_v3dotLocal(v, tmp) + m[14]) / w;
+    return r;
+});
+
+// Vector4
+
+var _MJS_v4 = F4(function(x, y, z, w) {
+    return new Float64Array([x, y, z, w]);
+});
+
+var _MJS_v4getX = function(a) {
+    return a[0];
+};
+
+var _MJS_v4getY = function(a) {
+    return a[1];
+};
+
+var _MJS_v4getZ = function(a) {
+    return a[2];
+};
+
+var _MJS_v4getW = function(a) {
+    return a[3];
+};
+
+var _MJS_v4setX = F2(function(x, a) {
+    return new Float64Array([x, a[1], a[2], a[3]]);
+});
+
+var _MJS_v4setY = F2(function(y, a) {
+    return new Float64Array([a[0], y, a[2], a[3]]);
+});
+
+var _MJS_v4setZ = F2(function(z, a) {
+    return new Float64Array([a[0], a[1], z, a[3]]);
+});
+
+var _MJS_v4setW = F2(function(w, a) {
+    return new Float64Array([a[0], a[1], a[2], w]);
+});
+
+var _MJS_v4toRecord = function(a) {
+    return { x: a[0], y: a[1], z: a[2], w: a[3] };
+};
+
+var _MJS_v4fromRecord = function(r) {
+    return new Float64Array([r.x, r.y, r.z, r.w]);
+};
+
+var _MJS_v4add = F2(function(a, b) {
+    var r = new Float64Array(4);
+    r[0] = a[0] + b[0];
+    r[1] = a[1] + b[1];
+    r[2] = a[2] + b[2];
+    r[3] = a[3] + b[3];
+    return r;
+});
+
+var _MJS_v4sub = F2(function(a, b) {
+    var r = new Float64Array(4);
+    r[0] = a[0] - b[0];
+    r[1] = a[1] - b[1];
+    r[2] = a[2] - b[2];
+    r[3] = a[3] - b[3];
+    return r;
+});
+
+var _MJS_v4negate = function(a) {
+    var r = new Float64Array(4);
+    r[0] = -a[0];
+    r[1] = -a[1];
+    r[2] = -a[2];
+    r[3] = -a[3];
+    return r;
+};
+
+var _MJS_v4direction = F2(function(a, b) {
+    var r = new Float64Array(4);
+    r[0] = a[0] - b[0];
+    r[1] = a[1] - b[1];
+    r[2] = a[2] - b[2];
+    r[3] = a[3] - b[3];
+    var im = 1.0 / _MJS_v4lengthLocal(r);
+    r[0] = r[0] * im;
+    r[1] = r[1] * im;
+    r[2] = r[2] * im;
+    r[3] = r[3] * im;
+    return r;
+});
+
+function _MJS_v4lengthLocal(a) {
+    return Math.sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2] + a[3] * a[3]);
+}
+var _MJS_v4length = _MJS_v4lengthLocal;
+
+var _MJS_v4lengthSquared = function(a) {
+    return a[0] * a[0] + a[1] * a[1] + a[2] * a[2] + a[3] * a[3];
+};
+
+var _MJS_v4distance = F2(function(a, b) {
+    var dx = a[0] - b[0];
+    var dy = a[1] - b[1];
+    var dz = a[2] - b[2];
+    var dw = a[3] - b[3];
+    return Math.sqrt(dx * dx + dy * dy + dz * dz + dw * dw);
+});
+
+var _MJS_v4distanceSquared = F2(function(a, b) {
+    var dx = a[0] - b[0];
+    var dy = a[1] - b[1];
+    var dz = a[2] - b[2];
+    var dw = a[3] - b[3];
+    return dx * dx + dy * dy + dz * dz + dw * dw;
+});
+
+var _MJS_v4normalize = function(a) {
+    var r = new Float64Array(4);
+    var im = 1.0 / _MJS_v4lengthLocal(a);
+    r[0] = a[0] * im;
+    r[1] = a[1] * im;
+    r[2] = a[2] * im;
+    r[3] = a[3] * im;
+    return r;
+};
+
+var _MJS_v4scale = F2(function(k, a) {
+    var r = new Float64Array(4);
+    r[0] = a[0] * k;
+    r[1] = a[1] * k;
+    r[2] = a[2] * k;
+    r[3] = a[3] * k;
+    return r;
+});
+
+var _MJS_v4dot = F2(function(a, b) {
+    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
+});
+
+// Matrix4
+
+var _MJS_m4x4temp1Local = new Float64Array(16);
+var _MJS_m4x4temp2Local = new Float64Array(16);
+
+var _MJS_m4x4identity = new Float64Array([
+    1.0, 0.0, 0.0, 0.0,
+    0.0, 1.0, 0.0, 0.0,
+    0.0, 0.0, 1.0, 0.0,
+    0.0, 0.0, 0.0, 1.0
+]);
+
+var _MJS_m4x4fromRecord = function(r) {
+    var m = new Float64Array(16);
+    m[0] = r.m11;
+    m[1] = r.m21;
+    m[2] = r.m31;
+    m[3] = r.m41;
+    m[4] = r.m12;
+    m[5] = r.m22;
+    m[6] = r.m32;
+    m[7] = r.m42;
+    m[8] = r.m13;
+    m[9] = r.m23;
+    m[10] = r.m33;
+    m[11] = r.m43;
+    m[12] = r.m14;
+    m[13] = r.m24;
+    m[14] = r.m34;
+    m[15] = r.m44;
+    return m;
+};
+
+var _MJS_m4x4toRecord = function(m) {
+    return {
+        m11: m[0], m21: m[1], m31: m[2], m41: m[3],
+        m12: m[4], m22: m[5], m32: m[6], m42: m[7],
+        m13: m[8], m23: m[9], m33: m[10], m43: m[11],
+        m14: m[12], m24: m[13], m34: m[14], m44: m[15]
+    };
+};
+
+var _MJS_m4x4inverse = function(m) {
+    var r = new Float64Array(16);
+
+    r[0] = m[5] * m[10] * m[15] - m[5] * m[11] * m[14] - m[9] * m[6] * m[15] +
+        m[9] * m[7] * m[14] + m[13] * m[6] * m[11] - m[13] * m[7] * m[10];
+    r[4] = -m[4] * m[10] * m[15] + m[4] * m[11] * m[14] + m[8] * m[6] * m[15] -
+        m[8] * m[7] * m[14] - m[12] * m[6] * m[11] + m[12] * m[7] * m[10];
+    r[8] = m[4] * m[9] * m[15] - m[4] * m[11] * m[13] - m[8] * m[5] * m[15] +
+        m[8] * m[7] * m[13] + m[12] * m[5] * m[11] - m[12] * m[7] * m[9];
+    r[12] = -m[4] * m[9] * m[14] + m[4] * m[10] * m[13] + m[8] * m[5] * m[14] -
+        m[8] * m[6] * m[13] - m[12] * m[5] * m[10] + m[12] * m[6] * m[9];
+    r[1] = -m[1] * m[10] * m[15] + m[1] * m[11] * m[14] + m[9] * m[2] * m[15] -
+        m[9] * m[3] * m[14] - m[13] * m[2] * m[11] + m[13] * m[3] * m[10];
+    r[5] = m[0] * m[10] * m[15] - m[0] * m[11] * m[14] - m[8] * m[2] * m[15] +
+        m[8] * m[3] * m[14] + m[12] * m[2] * m[11] - m[12] * m[3] * m[10];
+    r[9] = -m[0] * m[9] * m[15] + m[0] * m[11] * m[13] + m[8] * m[1] * m[15] -
+        m[8] * m[3] * m[13] - m[12] * m[1] * m[11] + m[12] * m[3] * m[9];
+    r[13] = m[0] * m[9] * m[14] - m[0] * m[10] * m[13] - m[8] * m[1] * m[14] +
+        m[8] * m[2] * m[13] + m[12] * m[1] * m[10] - m[12] * m[2] * m[9];
+    r[2] = m[1] * m[6] * m[15] - m[1] * m[7] * m[14] - m[5] * m[2] * m[15] +
+        m[5] * m[3] * m[14] + m[13] * m[2] * m[7] - m[13] * m[3] * m[6];
+    r[6] = -m[0] * m[6] * m[15] + m[0] * m[7] * m[14] + m[4] * m[2] * m[15] -
+        m[4] * m[3] * m[14] - m[12] * m[2] * m[7] + m[12] * m[3] * m[6];
+    r[10] = m[0] * m[5] * m[15] - m[0] * m[7] * m[13] - m[4] * m[1] * m[15] +
+        m[4] * m[3] * m[13] + m[12] * m[1] * m[7] - m[12] * m[3] * m[5];
+    r[14] = -m[0] * m[5] * m[14] + m[0] * m[6] * m[13] + m[4] * m[1] * m[14] -
+        m[4] * m[2] * m[13] - m[12] * m[1] * m[6] + m[12] * m[2] * m[5];
+    r[3] = -m[1] * m[6] * m[11] + m[1] * m[7] * m[10] + m[5] * m[2] * m[11] -
+        m[5] * m[3] * m[10] - m[9] * m[2] * m[7] + m[9] * m[3] * m[6];
+    r[7] = m[0] * m[6] * m[11] - m[0] * m[7] * m[10] - m[4] * m[2] * m[11] +
+        m[4] * m[3] * m[10] + m[8] * m[2] * m[7] - m[8] * m[3] * m[6];
+    r[11] = -m[0] * m[5] * m[11] + m[0] * m[7] * m[9] + m[4] * m[1] * m[11] -
+        m[4] * m[3] * m[9] - m[8] * m[1] * m[7] + m[8] * m[3] * m[5];
+    r[15] = m[0] * m[5] * m[10] - m[0] * m[6] * m[9] - m[4] * m[1] * m[10] +
+        m[4] * m[2] * m[9] + m[8] * m[1] * m[6] - m[8] * m[2] * m[5];
+
+    var det = m[0] * r[0] + m[1] * r[4] + m[2] * r[8] + m[3] * r[12];
+
+    if (det === 0) {
+        return $elm$core$Maybe$Nothing;
+    }
+
+    det = 1.0 / det;
+
+    for (var i = 0; i < 16; i = i + 1) {
+        r[i] = r[i] * det;
+    }
+
+    return $elm$core$Maybe$Just(r);
+};
+
+var _MJS_m4x4inverseOrthonormal = function(m) {
+    var r = _MJS_m4x4transposeLocal(m);
+    var t = [m[12], m[13], m[14]];
+    r[3] = r[7] = r[11] = 0;
+    r[12] = -_MJS_v3dotLocal([r[0], r[4], r[8]], t);
+    r[13] = -_MJS_v3dotLocal([r[1], r[5], r[9]], t);
+    r[14] = -_MJS_v3dotLocal([r[2], r[6], r[10]], t);
+    return r;
+};
+
+function _MJS_m4x4makeFrustumLocal(left, right, bottom, top, znear, zfar) {
+    var r = new Float64Array(16);
+
+    r[0] = 2 * znear / (right - left);
+    r[1] = 0;
+    r[2] = 0;
+    r[3] = 0;
+    r[4] = 0;
+    r[5] = 2 * znear / (top - bottom);
+    r[6] = 0;
+    r[7] = 0;
+    r[8] = (right + left) / (right - left);
+    r[9] = (top + bottom) / (top - bottom);
+    r[10] = -(zfar + znear) / (zfar - znear);
+    r[11] = -1;
+    r[12] = 0;
+    r[13] = 0;
+    r[14] = -2 * zfar * znear / (zfar - znear);
+    r[15] = 0;
+
+    return r;
+}
+var _MJS_m4x4makeFrustum = F6(_MJS_m4x4makeFrustumLocal);
+
+var _MJS_m4x4makePerspective = F4(function(fovy, aspect, znear, zfar) {
+    var ymax = znear * Math.tan(fovy * Math.PI / 360.0);
+    var ymin = -ymax;
+    var xmin = ymin * aspect;
+    var xmax = ymax * aspect;
+
+    return _MJS_m4x4makeFrustumLocal(xmin, xmax, ymin, ymax, znear, zfar);
+});
+
+function _MJS_m4x4makeOrthoLocal(left, right, bottom, top, znear, zfar) {
+    var r = new Float64Array(16);
+
+    r[0] = 2 / (right - left);
+    r[1] = 0;
+    r[2] = 0;
+    r[3] = 0;
+    r[4] = 0;
+    r[5] = 2 / (top - bottom);
+    r[6] = 0;
+    r[7] = 0;
+    r[8] = 0;
+    r[9] = 0;
+    r[10] = -2 / (zfar - znear);
+    r[11] = 0;
+    r[12] = -(right + left) / (right - left);
+    r[13] = -(top + bottom) / (top - bottom);
+    r[14] = -(zfar + znear) / (zfar - znear);
+    r[15] = 1;
+
+    return r;
+}
+var _MJS_m4x4makeOrtho = F6(_MJS_m4x4makeOrthoLocal);
+
+var _MJS_m4x4makeOrtho2D = F4(function(left, right, bottom, top) {
+    return _MJS_m4x4makeOrthoLocal(left, right, bottom, top, -1, 1);
+});
+
+function _MJS_m4x4mulLocal(a, b) {
+    var r = new Float64Array(16);
+    var a11 = a[0];
+    var a21 = a[1];
+    var a31 = a[2];
+    var a41 = a[3];
+    var a12 = a[4];
+    var a22 = a[5];
+    var a32 = a[6];
+    var a42 = a[7];
+    var a13 = a[8];
+    var a23 = a[9];
+    var a33 = a[10];
+    var a43 = a[11];
+    var a14 = a[12];
+    var a24 = a[13];
+    var a34 = a[14];
+    var a44 = a[15];
+    var b11 = b[0];
+    var b21 = b[1];
+    var b31 = b[2];
+    var b41 = b[3];
+    var b12 = b[4];
+    var b22 = b[5];
+    var b32 = b[6];
+    var b42 = b[7];
+    var b13 = b[8];
+    var b23 = b[9];
+    var b33 = b[10];
+    var b43 = b[11];
+    var b14 = b[12];
+    var b24 = b[13];
+    var b34 = b[14];
+    var b44 = b[15];
+
+    r[0] = a11 * b11 + a12 * b21 + a13 * b31 + a14 * b41;
+    r[1] = a21 * b11 + a22 * b21 + a23 * b31 + a24 * b41;
+    r[2] = a31 * b11 + a32 * b21 + a33 * b31 + a34 * b41;
+    r[3] = a41 * b11 + a42 * b21 + a43 * b31 + a44 * b41;
+    r[4] = a11 * b12 + a12 * b22 + a13 * b32 + a14 * b42;
+    r[5] = a21 * b12 + a22 * b22 + a23 * b32 + a24 * b42;
+    r[6] = a31 * b12 + a32 * b22 + a33 * b32 + a34 * b42;
+    r[7] = a41 * b12 + a42 * b22 + a43 * b32 + a44 * b42;
+    r[8] = a11 * b13 + a12 * b23 + a13 * b33 + a14 * b43;
+    r[9] = a21 * b13 + a22 * b23 + a23 * b33 + a24 * b43;
+    r[10] = a31 * b13 + a32 * b23 + a33 * b33 + a34 * b43;
+    r[11] = a41 * b13 + a42 * b23 + a43 * b33 + a44 * b43;
+    r[12] = a11 * b14 + a12 * b24 + a13 * b34 + a14 * b44;
+    r[13] = a21 * b14 + a22 * b24 + a23 * b34 + a24 * b44;
+    r[14] = a31 * b14 + a32 * b24 + a33 * b34 + a34 * b44;
+    r[15] = a41 * b14 + a42 * b24 + a43 * b34 + a44 * b44;
+
+    return r;
+}
+var _MJS_m4x4mul = F2(_MJS_m4x4mulLocal);
+
+var _MJS_m4x4mulAffine = F2(function(a, b) {
+    var r = new Float64Array(16);
+    var a11 = a[0];
+    var a21 = a[1];
+    var a31 = a[2];
+    var a12 = a[4];
+    var a22 = a[5];
+    var a32 = a[6];
+    var a13 = a[8];
+    var a23 = a[9];
+    var a33 = a[10];
+    var a14 = a[12];
+    var a24 = a[13];
+    var a34 = a[14];
+
+    var b11 = b[0];
+    var b21 = b[1];
+    var b31 = b[2];
+    var b12 = b[4];
+    var b22 = b[5];
+    var b32 = b[6];
+    var b13 = b[8];
+    var b23 = b[9];
+    var b33 = b[10];
+    var b14 = b[12];
+    var b24 = b[13];
+    var b34 = b[14];
+
+    r[0] = a11 * b11 + a12 * b21 + a13 * b31;
+    r[1] = a21 * b11 + a22 * b21 + a23 * b31;
+    r[2] = a31 * b11 + a32 * b21 + a33 * b31;
+    r[3] = 0;
+    r[4] = a11 * b12 + a12 * b22 + a13 * b32;
+    r[5] = a21 * b12 + a22 * b22 + a23 * b32;
+    r[6] = a31 * b12 + a32 * b22 + a33 * b32;
+    r[7] = 0;
+    r[8] = a11 * b13 + a12 * b23 + a13 * b33;
+    r[9] = a21 * b13 + a22 * b23 + a23 * b33;
+    r[10] = a31 * b13 + a32 * b23 + a33 * b33;
+    r[11] = 0;
+    r[12] = a11 * b14 + a12 * b24 + a13 * b34 + a14;
+    r[13] = a21 * b14 + a22 * b24 + a23 * b34 + a24;
+    r[14] = a31 * b14 + a32 * b24 + a33 * b34 + a34;
+    r[15] = 1;
+
+    return r;
+});
+
+var _MJS_m4x4makeRotate = F2(function(angle, axis) {
+    var r = new Float64Array(16);
+    axis = _MJS_v3normalizeLocal(axis, _MJS_v3temp1Local);
+    var x = axis[0];
+    var y = axis[1];
+    var z = axis[2];
+    var c = Math.cos(angle);
+    var c1 = 1 - c;
+    var s = Math.sin(angle);
+
+    r[0] = x * x * c1 + c;
+    r[1] = y * x * c1 + z * s;
+    r[2] = z * x * c1 - y * s;
+    r[3] = 0;
+    r[4] = x * y * c1 - z * s;
+    r[5] = y * y * c1 + c;
+    r[6] = y * z * c1 + x * s;
+    r[7] = 0;
+    r[8] = x * z * c1 + y * s;
+    r[9] = y * z * c1 - x * s;
+    r[10] = z * z * c1 + c;
+    r[11] = 0;
+    r[12] = 0;
+    r[13] = 0;
+    r[14] = 0;
+    r[15] = 1;
+
+    return r;
+});
+
+var _MJS_m4x4rotate = F3(function(angle, axis, m) {
+    var r = new Float64Array(16);
+    var im = 1.0 / _MJS_v3lengthLocal(axis);
+    var x = axis[0] * im;
+    var y = axis[1] * im;
+    var z = axis[2] * im;
+    var c = Math.cos(angle);
+    var c1 = 1 - c;
+    var s = Math.sin(angle);
+    var xs = x * s;
+    var ys = y * s;
+    var zs = z * s;
+    var xyc1 = x * y * c1;
+    var xzc1 = x * z * c1;
+    var yzc1 = y * z * c1;
+    var t11 = x * x * c1 + c;
+    var t21 = xyc1 + zs;
+    var t31 = xzc1 - ys;
+    var t12 = xyc1 - zs;
+    var t22 = y * y * c1 + c;
+    var t32 = yzc1 + xs;
+    var t13 = xzc1 + ys;
+    var t23 = yzc1 - xs;
+    var t33 = z * z * c1 + c;
+    var m11 = m[0], m21 = m[1], m31 = m[2], m41 = m[3];
+    var m12 = m[4], m22 = m[5], m32 = m[6], m42 = m[7];
+    var m13 = m[8], m23 = m[9], m33 = m[10], m43 = m[11];
+    var m14 = m[12], m24 = m[13], m34 = m[14], m44 = m[15];
+
+    r[0] = m11 * t11 + m12 * t21 + m13 * t31;
+    r[1] = m21 * t11 + m22 * t21 + m23 * t31;
+    r[2] = m31 * t11 + m32 * t21 + m33 * t31;
+    r[3] = m41 * t11 + m42 * t21 + m43 * t31;
+    r[4] = m11 * t12 + m12 * t22 + m13 * t32;
+    r[5] = m21 * t12 + m22 * t22 + m23 * t32;
+    r[6] = m31 * t12 + m32 * t22 + m33 * t32;
+    r[7] = m41 * t12 + m42 * t22 + m43 * t32;
+    r[8] = m11 * t13 + m12 * t23 + m13 * t33;
+    r[9] = m21 * t13 + m22 * t23 + m23 * t33;
+    r[10] = m31 * t13 + m32 * t23 + m33 * t33;
+    r[11] = m41 * t13 + m42 * t23 + m43 * t33;
+    r[12] = m14,
+    r[13] = m24;
+    r[14] = m34;
+    r[15] = m44;
+
+    return r;
+});
+
+function _MJS_m4x4makeScale3Local(x, y, z) {
+    var r = new Float64Array(16);
+
+    r[0] = x;
+    r[1] = 0;
+    r[2] = 0;
+    r[3] = 0;
+    r[4] = 0;
+    r[5] = y;
+    r[6] = 0;
+    r[7] = 0;
+    r[8] = 0;
+    r[9] = 0;
+    r[10] = z;
+    r[11] = 0;
+    r[12] = 0;
+    r[13] = 0;
+    r[14] = 0;
+    r[15] = 1;
+
+    return r;
+}
+var _MJS_m4x4makeScale3 = F3(_MJS_m4x4makeScale3Local);
+
+var _MJS_m4x4makeScale = function(v) {
+    return _MJS_m4x4makeScale3Local(v[0], v[1], v[2]);
+};
+
+var _MJS_m4x4scale3 = F4(function(x, y, z, m) {
+    var r = new Float64Array(16);
+
+    r[0] = m[0] * x;
+    r[1] = m[1] * x;
+    r[2] = m[2] * x;
+    r[3] = m[3] * x;
+    r[4] = m[4] * y;
+    r[5] = m[5] * y;
+    r[6] = m[6] * y;
+    r[7] = m[7] * y;
+    r[8] = m[8] * z;
+    r[9] = m[9] * z;
+    r[10] = m[10] * z;
+    r[11] = m[11] * z;
+    r[12] = m[12];
+    r[13] = m[13];
+    r[14] = m[14];
+    r[15] = m[15];
+
+    return r;
+});
+
+var _MJS_m4x4scale = F2(function(v, m) {
+    var r = new Float64Array(16);
+    var x = v[0];
+    var y = v[1];
+    var z = v[2];
+
+    r[0] = m[0] * x;
+    r[1] = m[1] * x;
+    r[2] = m[2] * x;
+    r[3] = m[3] * x;
+    r[4] = m[4] * y;
+    r[5] = m[5] * y;
+    r[6] = m[6] * y;
+    r[7] = m[7] * y;
+    r[8] = m[8] * z;
+    r[9] = m[9] * z;
+    r[10] = m[10] * z;
+    r[11] = m[11] * z;
+    r[12] = m[12];
+    r[13] = m[13];
+    r[14] = m[14];
+    r[15] = m[15];
+
+    return r;
+});
+
+function _MJS_m4x4makeTranslate3Local(x, y, z) {
+    var r = new Float64Array(16);
+
+    r[0] = 1;
+    r[1] = 0;
+    r[2] = 0;
+    r[3] = 0;
+    r[4] = 0;
+    r[5] = 1;
+    r[6] = 0;
+    r[7] = 0;
+    r[8] = 0;
+    r[9] = 0;
+    r[10] = 1;
+    r[11] = 0;
+    r[12] = x;
+    r[13] = y;
+    r[14] = z;
+    r[15] = 1;
+
+    return r;
+}
+var _MJS_m4x4makeTranslate3 = F3(_MJS_m4x4makeTranslate3Local);
+
+var _MJS_m4x4makeTranslate = function(v) {
+    return _MJS_m4x4makeTranslate3Local(v[0], v[1], v[2]);
+};
+
+var _MJS_m4x4translate3 = F4(function(x, y, z, m) {
+    var r = new Float64Array(16);
+    var m11 = m[0];
+    var m21 = m[1];
+    var m31 = m[2];
+    var m41 = m[3];
+    var m12 = m[4];
+    var m22 = m[5];
+    var m32 = m[6];
+    var m42 = m[7];
+    var m13 = m[8];
+    var m23 = m[9];
+    var m33 = m[10];
+    var m43 = m[11];
+
+    r[0] = m11;
+    r[1] = m21;
+    r[2] = m31;
+    r[3] = m41;
+    r[4] = m12;
+    r[5] = m22;
+    r[6] = m32;
+    r[7] = m42;
+    r[8] = m13;
+    r[9] = m23;
+    r[10] = m33;
+    r[11] = m43;
+    r[12] = m11 * x + m12 * y + m13 * z + m[12];
+    r[13] = m21 * x + m22 * y + m23 * z + m[13];
+    r[14] = m31 * x + m32 * y + m33 * z + m[14];
+    r[15] = m41 * x + m42 * y + m43 * z + m[15];
+
+    return r;
+});
+
+var _MJS_m4x4translate = F2(function(v, m) {
+    var r = new Float64Array(16);
+    var x = v[0];
+    var y = v[1];
+    var z = v[2];
+    var m11 = m[0];
+    var m21 = m[1];
+    var m31 = m[2];
+    var m41 = m[3];
+    var m12 = m[4];
+    var m22 = m[5];
+    var m32 = m[6];
+    var m42 = m[7];
+    var m13 = m[8];
+    var m23 = m[9];
+    var m33 = m[10];
+    var m43 = m[11];
+
+    r[0] = m11;
+    r[1] = m21;
+    r[2] = m31;
+    r[3] = m41;
+    r[4] = m12;
+    r[5] = m22;
+    r[6] = m32;
+    r[7] = m42;
+    r[8] = m13;
+    r[9] = m23;
+    r[10] = m33;
+    r[11] = m43;
+    r[12] = m11 * x + m12 * y + m13 * z + m[12];
+    r[13] = m21 * x + m22 * y + m23 * z + m[13];
+    r[14] = m31 * x + m32 * y + m33 * z + m[14];
+    r[15] = m41 * x + m42 * y + m43 * z + m[15];
+
+    return r;
+});
+
+var _MJS_m4x4makeLookAt = F3(function(eye, center, up) {
+    var z = _MJS_v3directionLocal(eye, center, _MJS_v3temp1Local);
+    var x = _MJS_v3normalizeLocal(_MJS_v3crossLocal(up, z, _MJS_v3temp2Local), _MJS_v3temp2Local);
+    var y = _MJS_v3normalizeLocal(_MJS_v3crossLocal(z, x, _MJS_v3temp3Local), _MJS_v3temp3Local);
+    var tm1 = _MJS_m4x4temp1Local;
+    var tm2 = _MJS_m4x4temp2Local;
+
+    tm1[0] = x[0];
+    tm1[1] = y[0];
+    tm1[2] = z[0];
+    tm1[3] = 0;
+    tm1[4] = x[1];
+    tm1[5] = y[1];
+    tm1[6] = z[1];
+    tm1[7] = 0;
+    tm1[8] = x[2];
+    tm1[9] = y[2];
+    tm1[10] = z[2];
+    tm1[11] = 0;
+    tm1[12] = 0;
+    tm1[13] = 0;
+    tm1[14] = 0;
+    tm1[15] = 1;
+
+    tm2[0] = 1; tm2[1] = 0; tm2[2] = 0; tm2[3] = 0;
+    tm2[4] = 0; tm2[5] = 1; tm2[6] = 0; tm2[7] = 0;
+    tm2[8] = 0; tm2[9] = 0; tm2[10] = 1; tm2[11] = 0;
+    tm2[12] = -eye[0]; tm2[13] = -eye[1]; tm2[14] = -eye[2]; tm2[15] = 1;
+
+    return _MJS_m4x4mulLocal(tm1, tm2);
+});
+
+
+function _MJS_m4x4transposeLocal(m) {
+    var r = new Float64Array(16);
+
+    r[0] = m[0]; r[1] = m[4]; r[2] = m[8]; r[3] = m[12];
+    r[4] = m[1]; r[5] = m[5]; r[6] = m[9]; r[7] = m[13];
+    r[8] = m[2]; r[9] = m[6]; r[10] = m[10]; r[11] = m[14];
+    r[12] = m[3]; r[13] = m[7]; r[14] = m[11]; r[15] = m[15];
+
+    return r;
+}
+var _MJS_m4x4transpose = _MJS_m4x4transposeLocal;
+
+var _MJS_m4x4makeBasis = F3(function(vx, vy, vz) {
+    var r = new Float64Array(16);
+
+    r[0] = vx[0];
+    r[1] = vx[1];
+    r[2] = vx[2];
+    r[3] = 0;
+    r[4] = vy[0];
+    r[5] = vy[1];
+    r[6] = vy[2];
+    r[7] = 0;
+    r[8] = vz[0];
+    r[9] = vz[1];
+    r[10] = vz[2];
+    r[11] = 0;
+    r[12] = 0;
+    r[13] = 0;
+    r[14] = 0;
+    r[15] = 1;
+
+    return r;
+});
+
+
+var _WebGL_guid = 0;
+
+function _WebGL_listEach(fn, list) {
+  for (; list.b; list = list.b) {
+    fn(list.a);
+  }
+}
+
+function _WebGL_listLength(list) {
+  var length = 0;
+  for (; list.b; list = list.b) {
+    length++;
+  }
+  return length;
+}
+
+var _WebGL_rAF = typeof requestAnimationFrame !== 'undefined' ?
+  requestAnimationFrame :
+  function (cb) { setTimeout(cb, 1000 / 60); };
+
+// eslint-disable-next-line no-unused-vars
+var _WebGL_entity = F5(function (settings, vert, frag, mesh, uniforms) {
+  return {
+    $: 0,
+    a: settings,
+    b: vert,
+    c: frag,
+    d: mesh,
+    e: uniforms
+  };
+});
+
+// eslint-disable-next-line no-unused-vars
+var _WebGL_enableBlend = F2(function (cache, setting) {
+  var blend = cache.blend;
+  blend.toggle = cache.toggle;
+
+  if (!blend.enabled) {
+    cache.gl.enable(cache.gl.BLEND);
+    blend.enabled = true;
+  }
+
+  // a   b   c   d   e   f   g h i j
+  // eq1 f11 f12 eq2 f21 f22 r g b a
+  if (blend.a !== setting.a || blend.d !== setting.d) {
+    cache.gl.blendEquationSeparate(setting.a, setting.d);
+    blend.a = setting.a;
+    blend.d = setting.d;
+  }
+  if (blend.b !== setting.b || blend.c !== setting.c || blend.e !== setting.e || blend.f !== setting.f) {
+    cache.gl.blendFuncSeparate(setting.b, setting.c, setting.e, setting.f);
+    blend.b = setting.b;
+    blend.c = setting.c;
+    blend.e = setting.e;
+    blend.f = setting.f;
+  }
+  if (blend.g !== setting.g || blend.h !== setting.h || blend.i !== setting.i || blend.j !== setting.j) {
+    cache.gl.blendColor(setting.g, setting.h, setting.i, setting.j);
+    blend.g = setting.g;
+    blend.h = setting.h;
+    blend.i = setting.i;
+    blend.j = setting.j;
+  }
+});
+
+// eslint-disable-next-line no-unused-vars
+var _WebGL_enableDepthTest = F2(function (cache, setting) {
+  var depthTest = cache.depthTest;
+  depthTest.toggle = cache.toggle;
+
+  if (!depthTest.enabled) {
+    cache.gl.enable(cache.gl.DEPTH_TEST);
+    depthTest.enabled = true;
+  }
+
+  // a    b    c    d
+  // func mask near far
+  if (depthTest.a !== setting.a) {
+    cache.gl.depthFunc(setting.a);
+    depthTest.a = setting.a;
+  }
+  if (depthTest.b !== setting.b) {
+    cache.gl.depthMask(setting.b);
+    depthTest.b = setting.b;
+  }
+  if (depthTest.c !== setting.c || depthTest.d !== setting.d) {
+    cache.gl.depthRange(setting.c, setting.d);
+    depthTest.c = setting.c;
+    depthTest.d = setting.d;
+  }
+});
+
+// eslint-disable-next-line no-unused-vars
+var _WebGL_enableStencilTest = F2(function (cache, setting) {
+  var stencilTest = cache.stencilTest;
+  stencilTest.toggle = cache.toggle;
+
+  if (!stencilTest.enabled) {
+    cache.gl.enable(cache.gl.STENCIL_TEST);
+    stencilTest.enabled = true;
+  }
+
+  // a   b    c         d     e     f      g      h     i     j      k
+  // ref mask writeMask test1 fail1 zfail1 zpass1 test2 fail2 zfail2 zpass2
+  if (stencilTest.d !== setting.d || stencilTest.a !== setting.a || stencilTest.b !== setting.b) {
+    cache.gl.stencilFuncSeparate(cache.gl.FRONT, setting.d, setting.a, setting.b);
+    stencilTest.d = setting.d;
+    // a and b are set in the cache.gl.BACK diffing because they should be the same
+  }
+  if (stencilTest.e !== setting.e || stencilTest.f !== setting.f || stencilTest.g !== setting.g) {
+    cache.gl.stencilOpSeparate(cache.gl.FRONT, setting.e, setting.f, setting.g);
+    stencilTest.e = setting.e;
+    stencilTest.f = setting.f;
+    stencilTest.g = setting.g;
+  }
+  if (stencilTest.c !== setting.c) {
+    cache.gl.stencilMask(setting.c);
+    stencilTest.c = setting.c;
+  }
+  if (stencilTest.h !== setting.h || stencilTest.a !== setting.a || stencilTest.b !== setting.b) {
+    cache.gl.stencilFuncSeparate(cache.gl.BACK, setting.h, setting.a, setting.b);
+    stencilTest.h = setting.h;
+    stencilTest.a = setting.a;
+    stencilTest.b = setting.b;
+  }
+  if (stencilTest.i !== setting.i || stencilTest.j !== setting.j || stencilTest.k !== setting.k) {
+    cache.gl.stencilOpSeparate(cache.gl.BACK, setting.i, setting.j, setting.k);
+    stencilTest.i = setting.i;
+    stencilTest.j = setting.j;
+    stencilTest.k = setting.k;
+  }
+});
+
+// eslint-disable-next-line no-unused-vars
+var _WebGL_enableScissor = F2(function (cache, setting) {
+  var scissor = cache.scissor;
+  scissor.toggle = cache.toggle;
+
+  if (!scissor.enabled) {
+    cache.gl.enable(cache.gl.SCISSOR_TEST);
+    scissor.enabled = true;
+  }
+
+  if (scissor.a !== setting.a || scissor.b !== setting.b || scissor.c !== setting.c || scissor.d !== setting.d) {
+    cache.gl.scissor(setting.a, setting.b, setting.c, setting.d);
+    scissor.a = setting.a;
+    scissor.b = setting.b;
+    scissor.c = setting.c;
+    scissor.d = setting.d;
+  }
+});
+
+// eslint-disable-next-line no-unused-vars
+var _WebGL_enableColorMask = F2(function (cache, setting) {
+  var colorMask = cache.colorMask;
+  colorMask.toggle = cache.toggle;
+  colorMask.enabled = true;
+
+  if (colorMask.a !== setting.a || colorMask.b !== setting.b || colorMask.c !== setting.c || colorMask.d !== setting.d) {
+    cache.gl.colorMask(setting.a, setting.b, setting.c, setting.d);
+    colorMask.a = setting.a;
+    colorMask.b = setting.b;
+    colorMask.c = setting.c;
+    colorMask.d = setting.d;
+  }
+});
+
+// eslint-disable-next-line no-unused-vars
+var _WebGL_enableCullFace = F2(function (cache, setting) {
+  var cullFace = cache.cullFace;
+  cullFace.toggle = cache.toggle;
+
+  if (!cullFace.enabled) {
+    cache.gl.enable(cache.gl.CULL_FACE);
+    cullFace.enabled = true;
+  }
+
+  if (cullFace.a !== setting.a) {
+    cache.gl.cullFace(setting.a);
+    cullFace.a = setting.a;
+  }
+});
+
+// eslint-disable-next-line no-unused-vars
+var _WebGL_enablePolygonOffset = F2(function (cache, setting) {
+  var polygonOffset = cache.polygonOffset;
+  polygonOffset.toggle = cache.toggle;
+
+  if (!polygonOffset.enabled) {
+    cache.gl.enable(cache.gl.POLYGON_OFFSET_FILL);
+    polygonOffset.enabled = true;
+  }
+
+  if (polygonOffset.a !== setting.a || polygonOffset.b !== setting.b) {
+    cache.gl.polygonOffset(setting.a, setting.b);
+    polygonOffset.a = setting.a;
+    polygonOffset.b = setting.b;
+  }
+});
+
+// eslint-disable-next-line no-unused-vars
+var _WebGL_enableSampleCoverage = F2(function (cache, setting) {
+  var sampleCoverage = cache.sampleCoverage;
+  sampleCoverage.toggle = cache.toggle;
+
+  if (!sampleCoverage.enabled) {
+    cache.gl.enable(cache.gl.SAMPLE_COVERAGE);
+    sampleCoverage.enabled = true;
+  }
+
+  if (sampleCoverage.a !== setting.a || sampleCoverage.b !== setting.b) {
+    cache.gl.sampleCoverage(setting.a, setting.b);
+    sampleCoverage.a = setting.a;
+    sampleCoverage.b = setting.b;
+  }
+});
+
+// eslint-disable-next-line no-unused-vars
+var _WebGL_enableSampleAlphaToCoverage = function (cache) {
+  var sampleAlphaToCoverage = cache.sampleAlphaToCoverage;
+  sampleAlphaToCoverage.toggle = cache.toggle;
+
+  if (!sampleAlphaToCoverage.enabled) {
+    cache.gl.enable(cache.gl.SAMPLE_ALPHA_TO_COVERAGE);
+    sampleAlphaToCoverage.enabled = true;
+  }
+};
+
+var _WebGL_disableBlend = function (cache) {
+  if (cache.blend.enabled) {
+    cache.gl.disable(cache.gl.BLEND);
+    cache.blend.enabled = false;
+  }
+};
+
+var _WebGL_disableDepthTest = function (cache) {
+  if (cache.depthTest.enabled) {
+    cache.gl.disable(cache.gl.DEPTH_TEST);
+    cache.depthTest.enabled = false;
+  }
+};
+
+var _WebGL_disableStencilTest = function (cache) {
+  if (cache.stencilTest.enabled) {
+    cache.gl.disable(cache.gl.STENCIL_TEST);
+    cache.stencilTest.enabled = false;
+  }
+};
+
+var _WebGL_disableScissor = function (cache) {
+  if (cache.scissor.enabled) {
+    cache.gl.disable(cache.gl.SCISSOR_TEST);
+    cache.scissor.enabled = false;
+  }
+};
+
+var _WebGL_disableColorMask = function (cache) {
+  var colorMask = cache.colorMask;
+  if (!colorMask.a || !colorMask.b || !colorMask.c || !colorMask.d) {
+    cache.gl.colorMask(true, true, true, true);
+    colorMask.a = true;
+    colorMask.b = true;
+    colorMask.c = true;
+    colorMask.d = true;
+  }
+};
+
+var _WebGL_disableCullFace = function (cache) {
+  cache.gl.disable(cache.gl.CULL_FACE);
+};
+
+var _WebGL_disablePolygonOffset = function (cache) {
+  cache.gl.disable(cache.gl.POLYGON_OFFSET_FILL);
+};
+
+var _WebGL_disableSampleCoverage = function (cache) {
+  cache.gl.disable(cache.gl.SAMPLE_COVERAGE);
+};
+
+var _WebGL_disableSampleAlphaToCoverage = function (cache) {
+  cache.gl.disable(cache.gl.SAMPLE_ALPHA_TO_COVERAGE);
+};
+
+var _WebGL_settings = ['blend', 'depthTest', 'stencilTest', 'scissor', 'colorMask', 'cullFace', 'polygonOffset', 'sampleCoverage', 'sampleAlphaToCoverage'];
+var _WebGL_disableFunctions = [_WebGL_disableBlend, _WebGL_disableDepthTest, _WebGL_disableStencilTest, _WebGL_disableScissor, _WebGL_disableColorMask, _WebGL_disableCullFace, _WebGL_disablePolygonOffset, _WebGL_disableSampleCoverage, _WebGL_disableSampleAlphaToCoverage];
+
+function _WebGL_doCompile(gl, src, type) {
+  var shader = gl.createShader(type);
+  // Enable OES_standard_derivatives extension
+  gl.shaderSource(shader, '#extension GL_OES_standard_derivatives : enable\n' + src);
+  gl.compileShader(shader);
+  return shader;
+}
+
+function _WebGL_doLink(gl, vshader, fshader) {
+  var program = gl.createProgram();
+
+  gl.attachShader(program, vshader);
+  gl.attachShader(program, fshader);
+  gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    throw ('Link failed: ' + gl.getProgramInfoLog(program) +
+      '\nvs info-log: ' + gl.getShaderInfoLog(vshader) +
+      '\nfs info-log: ' + gl.getShaderInfoLog(fshader));
+  }
+
+  return program;
+}
+
+function _WebGL_getAttributeInfo(gl, type) {
+  switch (type) {
+    case gl.FLOAT:
+      return { size: 1, arraySize: 1, type: Float32Array, baseType: gl.FLOAT };
+    case gl.FLOAT_VEC2:
+      return { size: 2, arraySize: 1, type: Float32Array, baseType: gl.FLOAT };
+    case gl.FLOAT_VEC3:
+      return { size: 3, arraySize: 1, type: Float32Array, baseType: gl.FLOAT };
+    case gl.FLOAT_VEC4:
+      return { size: 4, arraySize: 1, type: Float32Array, baseType: gl.FLOAT };
+    case gl.FLOAT_MAT4:
+      return { size: 4, arraySize: 4, type: Float32Array, baseType: gl.FLOAT };
+    case gl.INT:
+      return { size: 1, arraySize: 1, type: Int32Array, baseType: gl.INT };
+  }
+}
+
+/**
+ *  Form the buffer for a given attribute.
+ *
+ *  @param {WebGLRenderingContext} gl context
+ *  @param {WebGLActiveInfo} attribute the attribute to bind to.
+ *         We use its name to grab the record by name and also to know
+ *         how many elements we need to grab.
+ *  @param {Mesh} mesh The mesh coming in from Elm.
+ *  @param {Object} attributes The mapping between the attribute names and Elm fields
+ *  @return {WebGLBuffer}
+ */
+function _WebGL_doBindAttribute(gl, attribute, mesh, attributes) {
+  // The length of the number of vertices that
+  // complete one 'thing' based on the drawing mode.
+  // ie, 2 for Lines, 3 for Triangles, etc.
+  var elemSize = mesh.a.elemSize;
+
+  var idxKeys = [];
+  for (var i = 0; i < elemSize; i++) {
+    idxKeys.push(String.fromCharCode(97 + i));
+  }
+
+  function dataFill(data, cnt, fillOffset, elem, key) {
+    var i;
+    if (elemSize === 1) {
+      for (i = 0; i < cnt; i++) {
+        data[fillOffset++] = cnt === 1 ? elem[key] : elem[key][i];
+      }
+    } else {
+      idxKeys.forEach(function (idx) {
+        for (i = 0; i < cnt; i++) {
+          data[fillOffset++] = cnt === 1 ? elem[idx][key] : elem[idx][key][i];
+        }
+      });
+    }
+  }
+
+  var attributeInfo = _WebGL_getAttributeInfo(gl, attribute.type);
+
+  if (attributeInfo === undefined) {
+    throw new Error('No info available for: ' + attribute.type);
+  }
+
+  var dataIdx = 0;
+  var dataOffset = attributeInfo.size * attributeInfo.arraySize * elemSize;
+  var array = new attributeInfo.type(_WebGL_listLength(mesh.b) * dataOffset);
+
+  _WebGL_listEach(function (elem) {
+    dataFill(array, attributeInfo.size * attributeInfo.arraySize, dataIdx, elem, attributes[attribute.name] || attribute.name);
+    dataIdx += dataOffset;
+  }, mesh.b);
+
+  var buffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  gl.bufferData(gl.ARRAY_BUFFER, array, gl.STATIC_DRAW);
+  return buffer;
+}
+
+/**
+ *  This sets up the binding caching buffers.
+ *
+ *  We don't actually bind any buffers now except for the indices buffer.
+ *  The problem with filling the buffers here is that it is possible to
+ *  have a buffer shared between two webgl shaders;
+ *  which could have different active attributes. If we bind it here against
+ *  a particular program, we might not bind them all. That final bind is now
+ *  done right before drawing.
+ *
+ *  @param {WebGLRenderingContext} gl context
+ *  @param {Mesh} mesh a mesh object from Elm
+ *  @return {Object} buffer - an object with the following properties
+ *  @return {Number} buffer.numIndices
+ *  @return {WebGLBuffer|null} buffer.indexBuffer - optional index buffer
+ *  @return {Object} buffer.buffers - will be used to buffer attributes
+ */
+function _WebGL_doBindSetup(gl, mesh) {
+  if (mesh.a.indexSize > 0) {
+    var indexBuffer = gl.createBuffer();
+    var indices = _WebGL_makeIndexedBuffer(mesh.c, mesh.a.indexSize);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+    return {
+      numIndices: indices.length,
+      indexBuffer: indexBuffer,
+      buffers: {}
+    };
+  } else {
+    return {
+      numIndices: mesh.a.elemSize * _WebGL_listLength(mesh.b),
+      indexBuffer: null,
+      buffers: {}
+    };
+  }
+}
+
+/**
+ *  Create an indices array and fill it from indices
+ *  based on the size of the index
+ *
+ *  @param {List} indicesList the list of indices
+ *  @param {Number} indexSize the size of the index
+ *  @return {Uint32Array} indices
+ */
+function _WebGL_makeIndexedBuffer(indicesList, indexSize) {
+  var indices = new Uint32Array(_WebGL_listLength(indicesList) * indexSize);
+  var fillOffset = 0;
+  var i;
+  _WebGL_listEach(function (elem) {
+    if (indexSize === 1) {
+      indices[fillOffset++] = elem;
+    } else {
+      for (i = 0; i < indexSize; i++) {
+        indices[fillOffset++] = elem[String.fromCharCode(97 + i)];
+      }
+    }
+  }, indicesList);
+  return indices;
+}
+
+function _WebGL_getProgID(vertID, fragID) {
+  return vertID + '#' + fragID;
+}
+
+var _WebGL_drawGL = F2(function (model, domNode) {
+  var cache = model.f;
+  var gl = cache.gl;
+
+  if (!gl) {
+    return domNode;
+  }
+
+  gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+
+  if (!cache.depthTest.b) {
+    gl.depthMask(true);
+    cache.depthTest.b = true;
+  }
+  if (cache.stencilTest.c !== cache.STENCIL_WRITEMASK) {
+    gl.stencilMask(cache.STENCIL_WRITEMASK);
+    cache.stencilTest.c = cache.STENCIL_WRITEMASK;
+  }
+  _WebGL_disableScissor(cache);
+  _WebGL_disableColorMask(cache);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
+
+  function drawEntity(entity) {
+    if (!entity.d.b.b) {
+      return; // Empty list
+    }
+
+    var progid;
+    var program;
+    var i;
+
+    if (entity.b.id && entity.c.id) {
+      progid = _WebGL_getProgID(entity.b.id, entity.c.id);
+      program = cache.programs[progid];
+    }
+
+    if (!program) {
+
+      var vshader;
+      if (entity.b.id) {
+        vshader = cache.shaders[entity.b.id];
+      } else {
+        entity.b.id = _WebGL_guid++;
+      }
+
+      if (!vshader) {
+        vshader = _WebGL_doCompile(gl, entity.b.src, gl.VERTEX_SHADER);
+        cache.shaders[entity.b.id] = vshader;
+      }
+
+      var fshader;
+      if (entity.c.id) {
+        fshader = cache.shaders[entity.c.id];
+      } else {
+        entity.c.id = _WebGL_guid++;
+      }
+
+      if (!fshader) {
+        fshader = _WebGL_doCompile(gl, entity.c.src, gl.FRAGMENT_SHADER);
+        cache.shaders[entity.c.id] = fshader;
+      }
+
+      var glProgram = _WebGL_doLink(gl, vshader, fshader);
+
+      program = {
+        glProgram: glProgram,
+        attributes: Object.assign({}, entity.b.attributes, entity.c.attributes),
+        currentUniforms: {},
+        activeAttributes: [],
+        activeAttributeLocations: []
+      };
+
+      program.uniformSetters = _WebGL_createUniformSetters(
+        gl,
+        model,
+        program,
+        Object.assign({}, entity.b.uniforms, entity.c.uniforms)
+      );
+
+      var numActiveAttributes = gl.getProgramParameter(glProgram, gl.ACTIVE_ATTRIBUTES);
+      for (i = 0; i < numActiveAttributes; i++) {
+        var attribute = gl.getActiveAttrib(glProgram, i);
+        var attribLocation = gl.getAttribLocation(glProgram, attribute.name);
+        program.activeAttributes.push(attribute);
+        program.activeAttributeLocations.push(attribLocation);
+      }
+
+      progid = _WebGL_getProgID(entity.b.id, entity.c.id);
+      cache.programs[progid] = program;
+    }
+
+    if (cache.lastProgId !== progid) {
+      gl.useProgram(program.glProgram);
+      cache.lastProgId = progid;
+    }
+
+    _WebGL_setUniforms(program.uniformSetters, entity.e);
+
+    var buffer = cache.buffers.get(entity.d);
+
+    if (!buffer) {
+      buffer = _WebGL_doBindSetup(gl, entity.d);
+      cache.buffers.set(entity.d, buffer);
+    }
+
+    for (i = 0; i < program.activeAttributes.length; i++) {
+      attribute = program.activeAttributes[i];
+      attribLocation = program.activeAttributeLocations[i];
+
+      if (buffer.buffers[attribute.name] === undefined) {
+        buffer.buffers[attribute.name] = _WebGL_doBindAttribute(gl, attribute, entity.d, program.attributes);
+      }
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer.buffers[attribute.name]);
+
+      var attributeInfo = _WebGL_getAttributeInfo(gl, attribute.type);
+      if (attributeInfo.arraySize === 1) {
+        gl.enableVertexAttribArray(attribLocation);
+        gl.vertexAttribPointer(attribLocation, attributeInfo.size, attributeInfo.baseType, false, 0, 0);
+      } else {
+        // Point to four vec4 in case of mat4
+        var offset = attributeInfo.size * 4; // float32 takes 4 bytes
+        var stride = offset * attributeInfo.arraySize;
+        for (var m = 0; m < attributeInfo.arraySize; m++) {
+          gl.enableVertexAttribArray(attribLocation + m);
+          gl.vertexAttribPointer(attribLocation + m, attributeInfo.size, attributeInfo.baseType, false, stride, offset * m);
+        }
+      }
+    }
+
+    // Apply all the new settings
+    cache.toggle = !cache.toggle;
+    _WebGL_listEach($elm_explorations$webgl$WebGL$Internal$enableSetting(cache), entity.a);
+    // Disable the settings that were applied in the previous draw call
+    for (i = 0; i < _WebGL_settings.length; i++) {
+      var setting = cache[_WebGL_settings[i]];
+      if (setting.toggle !== cache.toggle && setting.enabled) {
+        _WebGL_disableFunctions[i](cache);
+        setting.enabled = false;
+        setting.toggle = cache.toggle;
+      }
+    }
+
+    if (buffer.indexBuffer) {
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer.indexBuffer);
+      gl.drawElements(entity.d.a.mode, buffer.numIndices, gl.UNSIGNED_INT, 0);
+    } else {
+      gl.drawArrays(entity.d.a.mode, 0, buffer.numIndices);
+    }
+  }
+
+  _WebGL_listEach(drawEntity, model.g);
+  return domNode;
+});
+
+function _WebGL_createUniformSetters(gl, model, program, uniformsMap) {
+  var glProgram = program.glProgram;
+  var currentUniforms = program.currentUniforms;
+  var textureCounter = 0;
+  var cache = model.f;
+  function createUniformSetter(glProgram, uniform) {
+    var uniformName = uniform.name;
+    var uniformLocation = gl.getUniformLocation(glProgram, uniformName);
+    switch (uniform.type) {
+      case gl.INT:
+        return function (value) {
+          if (currentUniforms[uniformName] !== value) {
+            gl.uniform1i(uniformLocation, value);
+            currentUniforms[uniformName] = value;
+          }
+        };
+      case gl.FLOAT:
+        return function (value) {
+          if (currentUniforms[uniformName] !== value) {
+            gl.uniform1f(uniformLocation, value);
+            currentUniforms[uniformName] = value;
+          }
+        };
+      case gl.FLOAT_VEC2:
+        return function (value) {
+          if (currentUniforms[uniformName] !== value) {
+            gl.uniform2f(uniformLocation, value[0], value[1]);
+            currentUniforms[uniformName] = value;
+          }
+        };
+      case gl.FLOAT_VEC3:
+        return function (value) {
+          if (currentUniforms[uniformName] !== value) {
+            gl.uniform3f(uniformLocation, value[0], value[1], value[2]);
+            currentUniforms[uniformName] = value;
+          }
+        };
+      case gl.FLOAT_VEC4:
+        return function (value) {
+          if (currentUniforms[uniformName] !== value) {
+            gl.uniform4f(uniformLocation, value[0], value[1], value[2], value[3]);
+            currentUniforms[uniformName] = value;
+          }
+        };
+      case gl.FLOAT_MAT4:
+        return function (value) {
+          if (currentUniforms[uniformName] !== value) {
+            gl.uniformMatrix4fv(uniformLocation, false, new Float32Array(value));
+            currentUniforms[uniformName] = value;
+          }
+        };
+      case gl.SAMPLER_2D:
+        var currentTexture = textureCounter++;
+        return function (texture) {
+          gl.activeTexture(gl.TEXTURE0 + currentTexture);
+          var tex = cache.textures.get(texture);
+          if (!tex) {
+            tex = texture.createTexture(gl);
+            cache.textures.set(texture, tex);
+          }
+          gl.bindTexture(gl.TEXTURE_2D, tex);
+          if (currentUniforms[uniformName] !== texture) {
+            gl.uniform1i(uniformLocation, currentTexture);
+            currentUniforms[uniformName] = texture;
+          }
+        };
+      case gl.BOOL:
+        return function (value) {
+          if (currentUniforms[uniformName] !== value) {
+            gl.uniform1i(uniformLocation, value);
+            currentUniforms[uniformName] = value;
+          }
+        };
+      default:
+        return function () { };
+    }
+  }
+
+  var uniformSetters = {};
+  var numUniforms = gl.getProgramParameter(glProgram, gl.ACTIVE_UNIFORMS);
+  for (var i = 0; i < numUniforms; i++) {
+    var uniform = gl.getActiveUniform(glProgram, i);
+    uniformSetters[uniformsMap[uniform.name] || uniform.name] = createUniformSetter(glProgram, uniform);
+  }
+
+  return uniformSetters;
+}
+
+function _WebGL_setUniforms(setters, values) {
+  Object.keys(values).forEach(function (name) {
+    var setter = setters[name];
+    if (setter) {
+      setter(values[name]);
+    }
+  });
+}
+
+// VIRTUAL-DOM WIDGET
+
+// eslint-disable-next-line no-unused-vars
+var _WebGL_toHtml = F3(function (options, factList, entities) {
+  return _VirtualDom_custom(
+    factList,
+    {
+      g: entities,
+      f: {},
+      h: options
+    },
+    _WebGL_render,
+    _WebGL_diff
+  );
+});
+
+// eslint-disable-next-line no-unused-vars
+var _WebGL_enableAlpha = F2(function (options, option) {
+  options.contextAttributes.alpha = true;
+  options.contextAttributes.premultipliedAlpha = option.a;
+});
+
+// eslint-disable-next-line no-unused-vars
+var _WebGL_enableDepth = F2(function (options, option) {
+  options.contextAttributes.depth = true;
+  options.sceneSettings.push(function (gl) {
+    gl.clearDepth(option.a);
+  });
+});
+
+// eslint-disable-next-line no-unused-vars
+var _WebGL_enableStencil = F2(function (options, option) {
+  options.contextAttributes.stencil = true;
+  options.sceneSettings.push(function (gl) {
+    gl.clearStencil(option.a);
+  });
+});
+
+// eslint-disable-next-line no-unused-vars
+var _WebGL_enableAntialias = F2(function (options, option) {
+  options.contextAttributes.antialias = true;
+});
+
+// eslint-disable-next-line no-unused-vars
+var _WebGL_enableClearColor = F2(function (options, option) {
+  options.sceneSettings.push(function (gl) {
+    gl.clearColor(option.a, option.b, option.c, option.d);
+  });
+});
+
+// eslint-disable-next-line no-unused-vars
+var _WebGL_enablePreserveDrawingBuffer = F2(function (options, option) {
+  options.contextAttributes.preserveDrawingBuffer = true;
+});
+
+/**
+ *  Creates canvas and schedules initial _WebGL_drawGL
+ *  @param {Object} model
+ *  @param {Object} model.f that may contain the following properties:
+           gl, shaders, programs, buffers, textures
+ *  @param {List<Option>} model.h list of options coming from Elm
+ *  @param {List<Entity>} model.g list of entities coming from Elm
+ *  @return {HTMLElement} <canvas> if WebGL is supported, otherwise a <div>
+ */
+function _WebGL_render(model) {
+  var options = {
+    contextAttributes: {
+      alpha: false,
+      depth: false,
+      stencil: false,
+      antialias: false,
+      premultipliedAlpha: false,
+      preserveDrawingBuffer: false
+    },
+    sceneSettings: []
+  };
+
+  _WebGL_listEach(function (option) {
+    return A2($elm_explorations$webgl$WebGL$Internal$enableOption, options, option);
+  }, model.h);
+
+  var canvas = _VirtualDom_doc.createElement('canvas');
+  var gl = canvas.getContext && (
+    canvas.getContext('webgl', options.contextAttributes) ||
+    canvas.getContext('experimental-webgl', options.contextAttributes)
+  );
+
+  if (gl && typeof WeakMap !== 'undefined') {
+    options.sceneSettings.forEach(function (sceneSetting) {
+      sceneSetting(gl);
+    });
+
+    // Activate extensions
+    gl.getExtension('OES_standard_derivatives');
+    gl.getExtension('OES_element_index_uint');
+
+    model.f.gl = gl;
+
+    // Cache the current settings in order to diff them to avoid redundant calls
+    // https://emscripten.org/docs/optimizing/Optimizing-WebGL.html#avoid-redundant-calls
+    model.f.toggle = false; // used to diff the settings from the previous and current draw calls
+    model.f.blend = { enabled: false, toggle: false };
+    model.f.depthTest = { enabled: false, toggle: false };
+    model.f.stencilTest = { enabled: false, toggle: false };
+    model.f.scissor = { enabled: false, toggle: false };
+    model.f.colorMask = { enabled: false, toggle: false };
+    model.f.cullFace = { enabled: false, toggle: false };
+    model.f.polygonOffset = { enabled: false, toggle: false };
+    model.f.sampleCoverage = { enabled: false, toggle: false };
+    model.f.sampleAlphaToCoverage = { enabled: false, toggle: false };
+
+    model.f.shaders = [];
+    model.f.programs = {};
+    model.f.lastProgId = null;
+    model.f.buffers = new WeakMap();
+    model.f.textures = new WeakMap();
+    // Memorize the initial stencil write mask, because
+    // browsers may have different number of stencil bits
+    model.f.STENCIL_WRITEMASK = gl.getParameter(gl.STENCIL_WRITEMASK);
+
+    // Render for the first time.
+    // This has to be done in animation frame,
+    // because the canvas is not in the DOM yet
+    _WebGL_rAF(function () {
+      return A2(_WebGL_drawGL, model, canvas);
+    });
+
+  } else {
+    canvas = _VirtualDom_doc.createElement('div');
+    canvas.innerHTML = '<a href="https://get.webgl.org/">Enable WebGL</a> to see this content!';
+  }
+
+  return canvas;
+}
+
+function _WebGL_diff(oldModel, newModel) {
+  newModel.f = oldModel.f;
+  return _WebGL_drawGL(newModel);
+}
+
+
+
+// SEND REQUEST
+
+var _Http_toTask = F3(function(router, toTask, request)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		function done(response) {
+			callback(toTask(request.expect.a(response)));
+		}
+
+		var xhr = new XMLHttpRequest();
+		xhr.addEventListener('error', function() { done($elm$http$Http$NetworkError_); });
+		xhr.addEventListener('timeout', function() { done($elm$http$Http$Timeout_); });
+		xhr.addEventListener('load', function() { done(_Http_toResponse(request.expect.b, xhr)); });
+		$elm$core$Maybe$isJust(request.tracker) && _Http_track(router, xhr, request.tracker.a);
+
+		try {
+			xhr.open(request.method, request.url, true);
+		} catch (e) {
+			return done($elm$http$Http$BadUrl_(request.url));
+		}
+
+		_Http_configureRequest(xhr, request);
+
+		request.body.a && xhr.setRequestHeader('Content-Type', request.body.a);
+		xhr.send(request.body.b);
+
+		return function() { xhr.c = true; xhr.abort(); };
+	});
+});
+
+
+// CONFIGURE
+
+function _Http_configureRequest(xhr, request)
+{
+	for (var headers = request.headers; headers.b; headers = headers.b) // WHILE_CONS
+	{
+		xhr.setRequestHeader(headers.a.a, headers.a.b);
+	}
+	xhr.timeout = request.timeout.a || 0;
+	xhr.responseType = request.expect.d;
+	xhr.withCredentials = request.allowCookiesFromOtherDomains;
+}
+
+
+// RESPONSES
+
+function _Http_toResponse(toBody, xhr)
+{
+	return A2(
+		200 <= xhr.status && xhr.status < 300 ? $elm$http$Http$GoodStatus_ : $elm$http$Http$BadStatus_,
+		_Http_toMetadata(xhr),
+		toBody(xhr.response)
+	);
+}
+
+
+// METADATA
+
+function _Http_toMetadata(xhr)
+{
+	return {
+		url: xhr.responseURL,
+		statusCode: xhr.status,
+		statusText: xhr.statusText,
+		headers: _Http_parseHeaders(xhr.getAllResponseHeaders())
+	};
+}
+
+
+// HEADERS
+
+function _Http_parseHeaders(rawHeaders)
+{
+	if (!rawHeaders)
+	{
+		return $elm$core$Dict$empty;
+	}
+
+	var headers = $elm$core$Dict$empty;
+	var headerPairs = rawHeaders.split('\r\n');
+	for (var i = headerPairs.length; i--; )
+	{
+		var headerPair = headerPairs[i];
+		var index = headerPair.indexOf(': ');
+		if (index > 0)
+		{
+			var key = headerPair.substring(0, index);
+			var value = headerPair.substring(index + 2);
+
+			headers = A3($elm$core$Dict$update, key, function(oldValue) {
+				return $elm$core$Maybe$Just($elm$core$Maybe$isJust(oldValue)
+					? value + ', ' + oldValue.a
+					: value
+				);
+			}, headers);
+		}
+	}
+	return headers;
+}
+
+
+// EXPECT
+
+var _Http_expect = F3(function(type, toBody, toValue)
+{
+	return {
+		$: 0,
+		d: type,
+		b: toBody,
+		a: toValue
+	};
+});
+
+var _Http_mapExpect = F2(function(func, expect)
+{
+	return {
+		$: 0,
+		d: expect.d,
+		b: expect.b,
+		a: function(x) { return func(expect.a(x)); }
+	};
+});
+
+function _Http_toDataView(arrayBuffer)
+{
+	return new DataView(arrayBuffer);
+}
+
+
+// BODY and PARTS
+
+var _Http_emptyBody = { $: 0 };
+var _Http_pair = F2(function(a, b) { return { $: 0, a: a, b: b }; });
+
+function _Http_toFormData(parts)
+{
+	for (var formData = new FormData(); parts.b; parts = parts.b) // WHILE_CONS
+	{
+		var part = parts.a;
+		formData.append(part.a, part.b);
+	}
+	return formData;
+}
+
+var _Http_bytesToBlob = F2(function(mime, bytes)
+{
+	return new Blob([bytes], { type: mime });
+});
+
+
+// PROGRESS
+
+function _Http_track(router, xhr, tracker)
+{
+	// TODO check out lengthComputable on loadstart event
+
+	xhr.upload.addEventListener('progress', function(event) {
+		if (xhr.c) { return; }
+		_Scheduler_rawSpawn(A2($elm$core$Platform$sendToSelf, router, _Utils_Tuple2(tracker, $elm$http$Http$Sending({
+			sent: event.loaded,
+			size: event.total
+		}))));
+	});
+	xhr.addEventListener('progress', function(event) {
+		if (xhr.c) { return; }
+		_Scheduler_rawSpawn(A2($elm$core$Platform$sendToSelf, router, _Utils_Tuple2(tracker, $elm$http$Http$Receiving({
+			received: event.loaded,
+			size: event.lengthComputable ? $elm$core$Maybe$Just(event.total) : $elm$core$Maybe$Nothing
+		}))));
+	});
+}var $elm$core$Maybe$Just = function (a) {
+	return {$: 'Just', a: a};
+};
+var $author$project$OAuthTypes$NoOp = {$: 'NoOp'};
+var $elm$core$Maybe$Nothing = {$: 'Nothing'};
+var $author$project$Msg$OAuthMessage = function (a) {
+	return {$: 'OAuthMessage', a: a};
+};
+var $elm$core$Basics$always = F2(
+	function (a, _v0) {
+		return a;
+	});
+var $elm$core$Basics$EQ = {$: 'EQ'};
+var $elm$core$Basics$GT = {$: 'GT'};
+var $elm$core$Basics$LT = {$: 'LT'};
+var $elm$core$List$cons = _List_cons;
+var $elm$core$Dict$foldr = F3(
+	function (func, acc, t) {
+		foldr:
+		while (true) {
+			if (t.$ === 'RBEmpty_elm_builtin') {
+				return acc;
+			} else {
+				var key = t.b;
+				var value = t.c;
+				var left = t.d;
+				var right = t.e;
+				var $temp$func = func,
+					$temp$acc = A3(
+					func,
+					key,
+					value,
+					A3($elm$core$Dict$foldr, func, acc, right)),
+					$temp$t = left;
+				func = $temp$func;
+				acc = $temp$acc;
+				t = $temp$t;
+				continue foldr;
+			}
+		}
+	});
+var $elm$core$Dict$toList = function (dict) {
+	return A3(
+		$elm$core$Dict$foldr,
+		F3(
+			function (key, value, list) {
+				return A2(
+					$elm$core$List$cons,
+					_Utils_Tuple2(key, value),
+					list);
+			}),
+		_List_Nil,
+		dict);
+};
+var $elm$core$Dict$keys = function (dict) {
+	return A3(
+		$elm$core$Dict$foldr,
+		F3(
+			function (key, value, keyList) {
+				return A2($elm$core$List$cons, key, keyList);
+			}),
+		_List_Nil,
+		dict);
+};
+var $elm$core$Set$toList = function (_v0) {
+	var dict = _v0.a;
+	return $elm$core$Dict$keys(dict);
+};
+var $elm$core$Elm$JsArray$foldr = _JsArray_foldr;
+var $elm$core$Array$foldr = F3(
+	function (func, baseCase, _v0) {
+		var tree = _v0.c;
+		var tail = _v0.d;
+		var helper = F2(
+			function (node, acc) {
+				if (node.$ === 'SubTree') {
+					var subTree = node.a;
+					return A3($elm$core$Elm$JsArray$foldr, helper, acc, subTree);
+				} else {
+					var values = node.a;
+					return A3($elm$core$Elm$JsArray$foldr, func, acc, values);
+				}
+			});
+		return A3(
+			$elm$core$Elm$JsArray$foldr,
+			helper,
+			A3($elm$core$Elm$JsArray$foldr, func, baseCase, tail),
+			tree);
+	});
+var $elm$core$Array$toList = function (array) {
+	return A3($elm$core$Array$foldr, $elm$core$List$cons, _List_Nil, array);
+};
+var $elm$core$Result$Err = function (a) {
+	return {$: 'Err', a: a};
+};
+var $elm$json$Json$Decode$Failure = F2(
+	function (a, b) {
+		return {$: 'Failure', a: a, b: b};
+	});
+var $elm$json$Json$Decode$Field = F2(
+	function (a, b) {
+		return {$: 'Field', a: a, b: b};
+	});
+var $elm$json$Json$Decode$Index = F2(
+	function (a, b) {
+		return {$: 'Index', a: a, b: b};
+	});
+var $elm$core$Result$Ok = function (a) {
+	return {$: 'Ok', a: a};
+};
+var $elm$json$Json$Decode$OneOf = function (a) {
+	return {$: 'OneOf', a: a};
+};
+var $elm$core$Basics$False = {$: 'False'};
+var $elm$core$Basics$add = _Basics_add;
+var $elm$core$String$all = _String_all;
+var $elm$core$Basics$and = _Basics_and;
+var $elm$core$Basics$append = _Utils_append;
+var $elm$json$Json$Encode$encode = _Json_encode;
+var $elm$core$String$fromInt = _String_fromNumber;
+var $elm$core$String$join = F2(
+	function (sep, chunks) {
+		return A2(
+			_String_join,
+			sep,
+			_List_toArray(chunks));
+	});
+var $elm$core$String$split = F2(
+	function (sep, string) {
+		return _List_fromArray(
+			A2(_String_split, sep, string));
+	});
+var $elm$json$Json$Decode$indent = function (str) {
+	return A2(
+		$elm$core$String$join,
+		'\n    ',
+		A2($elm$core$String$split, '\n', str));
+};
+var $elm$core$List$foldl = F3(
+	function (func, acc, list) {
+		foldl:
+		while (true) {
+			if (!list.b) {
+				return acc;
+			} else {
+				var x = list.a;
+				var xs = list.b;
+				var $temp$func = func,
+					$temp$acc = A2(func, x, acc),
+					$temp$list = xs;
+				func = $temp$func;
+				acc = $temp$acc;
+				list = $temp$list;
+				continue foldl;
+			}
+		}
+	});
+var $elm$core$List$length = function (xs) {
+	return A3(
+		$elm$core$List$foldl,
+		F2(
+			function (_v0, i) {
+				return i + 1;
+			}),
+		0,
+		xs);
+};
+var $elm$core$List$map2 = _List_map2;
+var $elm$core$Basics$le = _Utils_le;
+var $elm$core$Basics$sub = _Basics_sub;
+var $elm$core$List$rangeHelp = F3(
+	function (lo, hi, list) {
+		rangeHelp:
+		while (true) {
+			if (_Utils_cmp(lo, hi) < 1) {
+				var $temp$lo = lo,
+					$temp$hi = hi - 1,
+					$temp$list = A2($elm$core$List$cons, hi, list);
+				lo = $temp$lo;
+				hi = $temp$hi;
+				list = $temp$list;
+				continue rangeHelp;
+			} else {
+				return list;
+			}
+		}
+	});
+var $elm$core$List$range = F2(
+	function (lo, hi) {
+		return A3($elm$core$List$rangeHelp, lo, hi, _List_Nil);
+	});
+var $elm$core$List$indexedMap = F2(
+	function (f, xs) {
+		return A3(
+			$elm$core$List$map2,
+			f,
+			A2(
+				$elm$core$List$range,
+				0,
+				$elm$core$List$length(xs) - 1),
+			xs);
+	});
+var $elm$core$Char$toCode = _Char_toCode;
+var $elm$core$Char$isLower = function (_char) {
+	var code = $elm$core$Char$toCode(_char);
+	return (97 <= code) && (code <= 122);
+};
+var $elm$core$Char$isUpper = function (_char) {
+	var code = $elm$core$Char$toCode(_char);
+	return (code <= 90) && (65 <= code);
+};
+var $elm$core$Basics$or = _Basics_or;
+var $elm$core$Char$isAlpha = function (_char) {
+	return $elm$core$Char$isLower(_char) || $elm$core$Char$isUpper(_char);
+};
+var $elm$core$Char$isDigit = function (_char) {
+	var code = $elm$core$Char$toCode(_char);
+	return (code <= 57) && (48 <= code);
+};
+var $elm$core$Char$isAlphaNum = function (_char) {
+	return $elm$core$Char$isLower(_char) || ($elm$core$Char$isUpper(_char) || $elm$core$Char$isDigit(_char));
+};
+var $elm$core$List$reverse = function (list) {
+	return A3($elm$core$List$foldl, $elm$core$List$cons, _List_Nil, list);
+};
+var $elm$core$String$uncons = _String_uncons;
+var $elm$json$Json$Decode$errorOneOf = F2(
+	function (i, error) {
+		return '\n\n(' + ($elm$core$String$fromInt(i + 1) + (') ' + $elm$json$Json$Decode$indent(
+			$elm$json$Json$Decode$errorToString(error))));
+	});
+var $elm$json$Json$Decode$errorToString = function (error) {
+	return A2($elm$json$Json$Decode$errorToStringHelp, error, _List_Nil);
+};
+var $elm$json$Json$Decode$errorToStringHelp = F2(
+	function (error, context) {
+		errorToStringHelp:
+		while (true) {
+			switch (error.$) {
+				case 'Field':
+					var f = error.a;
+					var err = error.b;
+					var isSimple = function () {
+						var _v1 = $elm$core$String$uncons(f);
+						if (_v1.$ === 'Nothing') {
+							return false;
+						} else {
+							var _v2 = _v1.a;
+							var _char = _v2.a;
+							var rest = _v2.b;
+							return $elm$core$Char$isAlpha(_char) && A2($elm$core$String$all, $elm$core$Char$isAlphaNum, rest);
+						}
+					}();
+					var fieldName = isSimple ? ('.' + f) : ('[\'' + (f + '\']'));
+					var $temp$error = err,
+						$temp$context = A2($elm$core$List$cons, fieldName, context);
+					error = $temp$error;
+					context = $temp$context;
+					continue errorToStringHelp;
+				case 'Index':
+					var i = error.a;
+					var err = error.b;
+					var indexName = '[' + ($elm$core$String$fromInt(i) + ']');
+					var $temp$error = err,
+						$temp$context = A2($elm$core$List$cons, indexName, context);
+					error = $temp$error;
+					context = $temp$context;
+					continue errorToStringHelp;
+				case 'OneOf':
+					var errors = error.a;
+					if (!errors.b) {
+						return 'Ran into a Json.Decode.oneOf with no possibilities' + function () {
+							if (!context.b) {
+								return '!';
+							} else {
+								return ' at json' + A2(
+									$elm$core$String$join,
+									'',
+									$elm$core$List$reverse(context));
+							}
+						}();
+					} else {
+						if (!errors.b.b) {
+							var err = errors.a;
+							var $temp$error = err,
+								$temp$context = context;
+							error = $temp$error;
+							context = $temp$context;
+							continue errorToStringHelp;
+						} else {
+							var starter = function () {
+								if (!context.b) {
+									return 'Json.Decode.oneOf';
+								} else {
+									return 'The Json.Decode.oneOf at json' + A2(
+										$elm$core$String$join,
+										'',
+										$elm$core$List$reverse(context));
+								}
+							}();
+							var introduction = starter + (' failed in the following ' + ($elm$core$String$fromInt(
+								$elm$core$List$length(errors)) + ' ways:'));
+							return A2(
+								$elm$core$String$join,
+								'\n\n',
+								A2(
+									$elm$core$List$cons,
+									introduction,
+									A2($elm$core$List$indexedMap, $elm$json$Json$Decode$errorOneOf, errors)));
+						}
+					}
+				default:
+					var msg = error.a;
+					var json = error.b;
+					var introduction = function () {
+						if (!context.b) {
+							return 'Problem with the given value:\n\n';
+						} else {
+							return 'Problem with the value at json' + (A2(
+								$elm$core$String$join,
+								'',
+								$elm$core$List$reverse(context)) + ':\n\n    ');
+						}
+					}();
+					return introduction + ($elm$json$Json$Decode$indent(
+						A2($elm$json$Json$Encode$encode, 4, json)) + ('\n\n' + msg));
+			}
+		}
+	});
+var $elm$core$Array$branchFactor = 32;
+var $elm$core$Array$Array_elm_builtin = F4(
+	function (a, b, c, d) {
+		return {$: 'Array_elm_builtin', a: a, b: b, c: c, d: d};
+	});
+var $elm$core$Elm$JsArray$empty = _JsArray_empty;
+var $elm$core$Basics$ceiling = _Basics_ceiling;
+var $elm$core$Basics$fdiv = _Basics_fdiv;
+var $elm$core$Basics$logBase = F2(
+	function (base, number) {
+		return _Basics_log(number) / _Basics_log(base);
+	});
+var $elm$core$Basics$toFloat = _Basics_toFloat;
+var $elm$core$Array$shiftStep = $elm$core$Basics$ceiling(
+	A2($elm$core$Basics$logBase, 2, $elm$core$Array$branchFactor));
+var $elm$core$Array$empty = A4($elm$core$Array$Array_elm_builtin, 0, $elm$core$Array$shiftStep, $elm$core$Elm$JsArray$empty, $elm$core$Elm$JsArray$empty);
+var $elm$core$Elm$JsArray$initialize = _JsArray_initialize;
+var $elm$core$Array$Leaf = function (a) {
+	return {$: 'Leaf', a: a};
+};
+var $elm$core$Basics$apL = F2(
+	function (f, x) {
+		return f(x);
+	});
+var $elm$core$Basics$apR = F2(
+	function (x, f) {
+		return f(x);
+	});
+var $elm$core$Basics$eq = _Utils_equal;
+var $elm$core$Basics$floor = _Basics_floor;
+var $elm$core$Elm$JsArray$length = _JsArray_length;
+var $elm$core$Basics$gt = _Utils_gt;
+var $elm$core$Basics$max = F2(
+	function (x, y) {
+		return (_Utils_cmp(x, y) > 0) ? x : y;
+	});
+var $elm$core$Basics$mul = _Basics_mul;
+var $elm$core$Array$SubTree = function (a) {
+	return {$: 'SubTree', a: a};
+};
+var $elm$core$Elm$JsArray$initializeFromList = _JsArray_initializeFromList;
+var $elm$core$Array$compressNodes = F2(
+	function (nodes, acc) {
+		compressNodes:
+		while (true) {
+			var _v0 = A2($elm$core$Elm$JsArray$initializeFromList, $elm$core$Array$branchFactor, nodes);
+			var node = _v0.a;
+			var remainingNodes = _v0.b;
+			var newAcc = A2(
+				$elm$core$List$cons,
+				$elm$core$Array$SubTree(node),
+				acc);
+			if (!remainingNodes.b) {
+				return $elm$core$List$reverse(newAcc);
+			} else {
+				var $temp$nodes = remainingNodes,
+					$temp$acc = newAcc;
+				nodes = $temp$nodes;
+				acc = $temp$acc;
+				continue compressNodes;
+			}
+		}
+	});
+var $elm$core$Tuple$first = function (_v0) {
+	var x = _v0.a;
+	return x;
+};
+var $elm$core$Array$treeFromBuilder = F2(
+	function (nodeList, nodeListSize) {
+		treeFromBuilder:
+		while (true) {
+			var newNodeSize = $elm$core$Basics$ceiling(nodeListSize / $elm$core$Array$branchFactor);
+			if (newNodeSize === 1) {
+				return A2($elm$core$Elm$JsArray$initializeFromList, $elm$core$Array$branchFactor, nodeList).a;
+			} else {
+				var $temp$nodeList = A2($elm$core$Array$compressNodes, nodeList, _List_Nil),
+					$temp$nodeListSize = newNodeSize;
+				nodeList = $temp$nodeList;
+				nodeListSize = $temp$nodeListSize;
+				continue treeFromBuilder;
+			}
+		}
+	});
+var $elm$core$Array$builderToArray = F2(
+	function (reverseNodeList, builder) {
+		if (!builder.nodeListSize) {
+			return A4(
+				$elm$core$Array$Array_elm_builtin,
+				$elm$core$Elm$JsArray$length(builder.tail),
+				$elm$core$Array$shiftStep,
+				$elm$core$Elm$JsArray$empty,
+				builder.tail);
+		} else {
+			var treeLen = builder.nodeListSize * $elm$core$Array$branchFactor;
+			var depth = $elm$core$Basics$floor(
+				A2($elm$core$Basics$logBase, $elm$core$Array$branchFactor, treeLen - 1));
+			var correctNodeList = reverseNodeList ? $elm$core$List$reverse(builder.nodeList) : builder.nodeList;
+			var tree = A2($elm$core$Array$treeFromBuilder, correctNodeList, builder.nodeListSize);
+			return A4(
+				$elm$core$Array$Array_elm_builtin,
+				$elm$core$Elm$JsArray$length(builder.tail) + treeLen,
+				A2($elm$core$Basics$max, 5, depth * $elm$core$Array$shiftStep),
+				tree,
+				builder.tail);
+		}
+	});
+var $elm$core$Basics$idiv = _Basics_idiv;
+var $elm$core$Basics$lt = _Utils_lt;
+var $elm$core$Array$initializeHelp = F5(
+	function (fn, fromIndex, len, nodeList, tail) {
+		initializeHelp:
+		while (true) {
+			if (fromIndex < 0) {
+				return A2(
+					$elm$core$Array$builderToArray,
+					false,
+					{nodeList: nodeList, nodeListSize: (len / $elm$core$Array$branchFactor) | 0, tail: tail});
+			} else {
+				var leaf = $elm$core$Array$Leaf(
+					A3($elm$core$Elm$JsArray$initialize, $elm$core$Array$branchFactor, fromIndex, fn));
+				var $temp$fn = fn,
+					$temp$fromIndex = fromIndex - $elm$core$Array$branchFactor,
+					$temp$len = len,
+					$temp$nodeList = A2($elm$core$List$cons, leaf, nodeList),
+					$temp$tail = tail;
+				fn = $temp$fn;
+				fromIndex = $temp$fromIndex;
+				len = $temp$len;
+				nodeList = $temp$nodeList;
+				tail = $temp$tail;
+				continue initializeHelp;
+			}
+		}
+	});
+var $elm$core$Basics$remainderBy = _Basics_remainderBy;
+var $elm$core$Array$initialize = F2(
+	function (len, fn) {
+		if (len <= 0) {
+			return $elm$core$Array$empty;
+		} else {
+			var tailLen = len % $elm$core$Array$branchFactor;
+			var tail = A3($elm$core$Elm$JsArray$initialize, tailLen, len - tailLen, fn);
+			var initialFromIndex = (len - tailLen) - $elm$core$Array$branchFactor;
+			return A5($elm$core$Array$initializeHelp, fn, initialFromIndex, len, _List_Nil, tail);
+		}
+	});
+var $elm$core$Basics$True = {$: 'True'};
+var $elm$core$Result$isOk = function (result) {
+	if (result.$ === 'Ok') {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $elm$json$Json$Decode$map = _Json_map1;
+var $elm$json$Json$Decode$map2 = _Json_map2;
+var $elm$json$Json$Decode$succeed = _Json_succeed;
+var $elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
+	switch (handler.$) {
+		case 'Normal':
+			return 0;
+		case 'MayStopPropagation':
+			return 1;
+		case 'MayPreventDefault':
+			return 2;
+		default:
+			return 3;
+	}
+};
+var $elm$browser$Browser$External = function (a) {
+	return {$: 'External', a: a};
+};
+var $elm$browser$Browser$Internal = function (a) {
+	return {$: 'Internal', a: a};
+};
+var $elm$core$Basics$identity = function (x) {
+	return x;
+};
+var $elm$browser$Browser$Dom$NotFound = function (a) {
+	return {$: 'NotFound', a: a};
+};
+var $elm$url$Url$Http = {$: 'Http'};
+var $elm$url$Url$Https = {$: 'Https'};
+var $elm$url$Url$Url = F6(
+	function (protocol, host, port_, path, query, fragment) {
+		return {fragment: fragment, host: host, path: path, port_: port_, protocol: protocol, query: query};
+	});
+var $elm$core$String$contains = _String_contains;
+var $elm$core$String$length = _String_length;
+var $elm$core$String$slice = _String_slice;
+var $elm$core$String$dropLeft = F2(
+	function (n, string) {
+		return (n < 1) ? string : A3(
+			$elm$core$String$slice,
+			n,
+			$elm$core$String$length(string),
+			string);
+	});
+var $elm$core$String$indexes = _String_indexes;
+var $elm$core$String$isEmpty = function (string) {
+	return string === '';
+};
+var $elm$core$String$left = F2(
+	function (n, string) {
+		return (n < 1) ? '' : A3($elm$core$String$slice, 0, n, string);
+	});
+var $elm$core$String$toInt = _String_toInt;
+var $elm$url$Url$chompBeforePath = F5(
+	function (protocol, path, params, frag, str) {
+		if ($elm$core$String$isEmpty(str) || A2($elm$core$String$contains, '@', str)) {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var _v0 = A2($elm$core$String$indexes, ':', str);
+			if (!_v0.b) {
+				return $elm$core$Maybe$Just(
+					A6($elm$url$Url$Url, protocol, str, $elm$core$Maybe$Nothing, path, params, frag));
+			} else {
+				if (!_v0.b.b) {
+					var i = _v0.a;
+					var _v1 = $elm$core$String$toInt(
+						A2($elm$core$String$dropLeft, i + 1, str));
+					if (_v1.$ === 'Nothing') {
+						return $elm$core$Maybe$Nothing;
+					} else {
+						var port_ = _v1;
+						return $elm$core$Maybe$Just(
+							A6(
+								$elm$url$Url$Url,
+								protocol,
+								A2($elm$core$String$left, i, str),
+								port_,
+								path,
+								params,
+								frag));
+					}
+				} else {
+					return $elm$core$Maybe$Nothing;
+				}
+			}
+		}
+	});
+var $elm$url$Url$chompBeforeQuery = F4(
+	function (protocol, params, frag, str) {
+		if ($elm$core$String$isEmpty(str)) {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var _v0 = A2($elm$core$String$indexes, '/', str);
+			if (!_v0.b) {
+				return A5($elm$url$Url$chompBeforePath, protocol, '/', params, frag, str);
+			} else {
+				var i = _v0.a;
+				return A5(
+					$elm$url$Url$chompBeforePath,
+					protocol,
+					A2($elm$core$String$dropLeft, i, str),
+					params,
+					frag,
+					A2($elm$core$String$left, i, str));
+			}
+		}
+	});
+var $elm$url$Url$chompBeforeFragment = F3(
+	function (protocol, frag, str) {
+		if ($elm$core$String$isEmpty(str)) {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var _v0 = A2($elm$core$String$indexes, '?', str);
+			if (!_v0.b) {
+				return A4($elm$url$Url$chompBeforeQuery, protocol, $elm$core$Maybe$Nothing, frag, str);
+			} else {
+				var i = _v0.a;
+				return A4(
+					$elm$url$Url$chompBeforeQuery,
+					protocol,
+					$elm$core$Maybe$Just(
+						A2($elm$core$String$dropLeft, i + 1, str)),
+					frag,
+					A2($elm$core$String$left, i, str));
+			}
+		}
+	});
+var $elm$url$Url$chompAfterProtocol = F2(
+	function (protocol, str) {
+		if ($elm$core$String$isEmpty(str)) {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var _v0 = A2($elm$core$String$indexes, '#', str);
+			if (!_v0.b) {
+				return A3($elm$url$Url$chompBeforeFragment, protocol, $elm$core$Maybe$Nothing, str);
+			} else {
+				var i = _v0.a;
+				return A3(
+					$elm$url$Url$chompBeforeFragment,
+					protocol,
+					$elm$core$Maybe$Just(
+						A2($elm$core$String$dropLeft, i + 1, str)),
+					A2($elm$core$String$left, i, str));
+			}
+		}
+	});
+var $elm$core$String$startsWith = _String_startsWith;
+var $elm$url$Url$fromString = function (str) {
+	return A2($elm$core$String$startsWith, 'http://', str) ? A2(
+		$elm$url$Url$chompAfterProtocol,
+		$elm$url$Url$Http,
+		A2($elm$core$String$dropLeft, 7, str)) : (A2($elm$core$String$startsWith, 'https://', str) ? A2(
+		$elm$url$Url$chompAfterProtocol,
+		$elm$url$Url$Https,
+		A2($elm$core$String$dropLeft, 8, str)) : $elm$core$Maybe$Nothing);
+};
+var $elm$core$Basics$never = function (_v0) {
+	never:
+	while (true) {
+		var nvr = _v0.a;
+		var $temp$_v0 = nvr;
+		_v0 = $temp$_v0;
+		continue never;
+	}
+};
+var $elm$core$Task$Perform = function (a) {
+	return {$: 'Perform', a: a};
+};
+var $elm$core$Task$succeed = _Scheduler_succeed;
+var $elm$core$Task$init = $elm$core$Task$succeed(_Utils_Tuple0);
+var $elm$core$List$foldrHelper = F4(
+	function (fn, acc, ctr, ls) {
+		if (!ls.b) {
+			return acc;
+		} else {
+			var a = ls.a;
+			var r1 = ls.b;
+			if (!r1.b) {
+				return A2(fn, a, acc);
+			} else {
+				var b = r1.a;
+				var r2 = r1.b;
+				if (!r2.b) {
+					return A2(
+						fn,
+						a,
+						A2(fn, b, acc));
+				} else {
+					var c = r2.a;
+					var r3 = r2.b;
+					if (!r3.b) {
+						return A2(
+							fn,
+							a,
+							A2(
+								fn,
+								b,
+								A2(fn, c, acc)));
+					} else {
+						var d = r3.a;
+						var r4 = r3.b;
+						var res = (ctr > 500) ? A3(
+							$elm$core$List$foldl,
+							fn,
+							acc,
+							$elm$core$List$reverse(r4)) : A4($elm$core$List$foldrHelper, fn, acc, ctr + 1, r4);
+						return A2(
+							fn,
+							a,
+							A2(
+								fn,
+								b,
+								A2(
+									fn,
+									c,
+									A2(fn, d, res))));
+					}
+				}
+			}
+		}
+	});
+var $elm$core$List$foldr = F3(
+	function (fn, acc, ls) {
+		return A4($elm$core$List$foldrHelper, fn, acc, 0, ls);
+	});
+var $elm$core$List$map = F2(
+	function (f, xs) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, acc) {
+					return A2(
+						$elm$core$List$cons,
+						f(x),
+						acc);
+				}),
+			_List_Nil,
+			xs);
+	});
+var $elm$core$Task$andThen = _Scheduler_andThen;
+var $elm$core$Task$map = F2(
+	function (func, taskA) {
+		return A2(
+			$elm$core$Task$andThen,
+			function (a) {
+				return $elm$core$Task$succeed(
+					func(a));
+			},
+			taskA);
+	});
+var $elm$core$Task$map2 = F3(
+	function (func, taskA, taskB) {
+		return A2(
+			$elm$core$Task$andThen,
+			function (a) {
+				return A2(
+					$elm$core$Task$andThen,
+					function (b) {
+						return $elm$core$Task$succeed(
+							A2(func, a, b));
+					},
+					taskB);
+			},
+			taskA);
+	});
+var $elm$core$Task$sequence = function (tasks) {
+	return A3(
+		$elm$core$List$foldr,
+		$elm$core$Task$map2($elm$core$List$cons),
+		$elm$core$Task$succeed(_List_Nil),
+		tasks);
+};
+var $elm$core$Platform$sendToApp = _Platform_sendToApp;
+var $elm$core$Task$spawnCmd = F2(
+	function (router, _v0) {
+		var task = _v0.a;
+		return _Scheduler_spawn(
+			A2(
+				$elm$core$Task$andThen,
+				$elm$core$Platform$sendToApp(router),
+				task));
+	});
+var $elm$core$Task$onEffects = F3(
+	function (router, commands, state) {
+		return A2(
+			$elm$core$Task$map,
+			function (_v0) {
+				return _Utils_Tuple0;
+			},
+			$elm$core$Task$sequence(
+				A2(
+					$elm$core$List$map,
+					$elm$core$Task$spawnCmd(router),
+					commands)));
+	});
+var $elm$core$Task$onSelfMsg = F3(
+	function (_v0, _v1, _v2) {
+		return $elm$core$Task$succeed(_Utils_Tuple0);
+	});
+var $elm$core$Task$cmdMap = F2(
+	function (tagger, _v0) {
+		var task = _v0.a;
+		return $elm$core$Task$Perform(
+			A2($elm$core$Task$map, tagger, task));
+	});
+_Platform_effectManagers['Task'] = _Platform_createManager($elm$core$Task$init, $elm$core$Task$onEffects, $elm$core$Task$onSelfMsg, $elm$core$Task$cmdMap);
+var $elm$core$Task$command = _Platform_leaf('Task');
+var $elm$core$Task$perform = F2(
+	function (toMessage, task) {
+		return $elm$core$Task$command(
+			$elm$core$Task$Perform(
+				A2($elm$core$Task$map, toMessage, task)));
+	});
+var $elm$browser$Browser$application = _Browser_application;
+var $elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
+	});
+var $chelovek0v$bbase64$Base64$Encode$BytesEncoder = function (a) {
+	return {$: 'BytesEncoder', a: a};
+};
+var $chelovek0v$bbase64$Base64$Encode$bytes = function (input) {
+	return $chelovek0v$bbase64$Base64$Encode$BytesEncoder(input);
+};
+var $elm$bytes$Bytes$Encode$getWidth = function (builder) {
+	switch (builder.$) {
+		case 'I8':
+			return 1;
+		case 'I16':
+			return 2;
+		case 'I32':
+			return 4;
+		case 'U8':
+			return 1;
+		case 'U16':
+			return 2;
+		case 'U32':
+			return 4;
+		case 'F32':
+			return 4;
+		case 'F64':
+			return 8;
+		case 'Seq':
+			var w = builder.a;
+			return w;
+		case 'Utf8':
+			var w = builder.a;
+			return w;
+		default:
+			var bs = builder.a;
+			return _Bytes_width(bs);
+	}
+};
+var $elm$bytes$Bytes$LE = {$: 'LE'};
+var $elm$bytes$Bytes$Encode$write = F3(
+	function (builder, mb, offset) {
+		switch (builder.$) {
+			case 'I8':
+				var n = builder.a;
+				return A3(_Bytes_write_i8, mb, offset, n);
+			case 'I16':
+				var e = builder.a;
+				var n = builder.b;
+				return A4(
+					_Bytes_write_i16,
+					mb,
+					offset,
+					n,
+					_Utils_eq(e, $elm$bytes$Bytes$LE));
+			case 'I32':
+				var e = builder.a;
+				var n = builder.b;
+				return A4(
+					_Bytes_write_i32,
+					mb,
+					offset,
+					n,
+					_Utils_eq(e, $elm$bytes$Bytes$LE));
+			case 'U8':
+				var n = builder.a;
+				return A3(_Bytes_write_u8, mb, offset, n);
+			case 'U16':
+				var e = builder.a;
+				var n = builder.b;
+				return A4(
+					_Bytes_write_u16,
+					mb,
+					offset,
+					n,
+					_Utils_eq(e, $elm$bytes$Bytes$LE));
+			case 'U32':
+				var e = builder.a;
+				var n = builder.b;
+				return A4(
+					_Bytes_write_u32,
+					mb,
+					offset,
+					n,
+					_Utils_eq(e, $elm$bytes$Bytes$LE));
+			case 'F32':
+				var e = builder.a;
+				var n = builder.b;
+				return A4(
+					_Bytes_write_f32,
+					mb,
+					offset,
+					n,
+					_Utils_eq(e, $elm$bytes$Bytes$LE));
+			case 'F64':
+				var e = builder.a;
+				var n = builder.b;
+				return A4(
+					_Bytes_write_f64,
+					mb,
+					offset,
+					n,
+					_Utils_eq(e, $elm$bytes$Bytes$LE));
+			case 'Seq':
+				var bs = builder.b;
+				return A3($elm$bytes$Bytes$Encode$writeSequence, bs, mb, offset);
+			case 'Utf8':
+				var s = builder.b;
+				return A3(_Bytes_write_string, mb, offset, s);
+			default:
+				var bs = builder.a;
+				return A3(_Bytes_write_bytes, mb, offset, bs);
+		}
+	});
+var $elm$bytes$Bytes$Encode$writeSequence = F3(
+	function (builders, mb, offset) {
+		writeSequence:
+		while (true) {
+			if (!builders.b) {
+				return offset;
+			} else {
+				var b = builders.a;
+				var bs = builders.b;
+				var $temp$builders = bs,
+					$temp$mb = mb,
+					$temp$offset = A3($elm$bytes$Bytes$Encode$write, b, mb, offset);
+				builders = $temp$builders;
+				mb = $temp$mb;
+				offset = $temp$offset;
+				continue writeSequence;
+			}
+		}
+	});
+var $elm$bytes$Bytes$Encode$encode = _Bytes_encode;
+var $elm$bytes$Bytes$Encode$Utf8 = F2(
+	function (a, b) {
+		return {$: 'Utf8', a: a, b: b};
+	});
+var $elm$bytes$Bytes$Encode$string = function (str) {
+	return A2(
+		$elm$bytes$Bytes$Encode$Utf8,
+		_Bytes_getStringWidth(str),
+		str);
+};
+var $elm$bytes$Bytes$Decode$decode = F2(
+	function (_v0, bs) {
+		var decoder = _v0.a;
+		return A2(_Bytes_decode, decoder, bs);
+	});
+var $elm$bytes$Bytes$Decode$Done = function (a) {
+	return {$: 'Done', a: a};
+};
+var $elm$bytes$Bytes$Decode$Loop = function (a) {
+	return {$: 'Loop', a: a};
+};
+var $chelovek0v$bbase64$Base64$Shift$Shift2 = {$: 'Shift2'};
+var $chelovek0v$bbase64$Base64$Shift$Shift4 = {$: 'Shift4'};
+var $chelovek0v$bbase64$Base64$Shift$Shift6 = {$: 'Shift6'};
+var $elm$core$Bitwise$and = _Bitwise_and;
+var $chelovek0v$bbase64$Base64$Shift$and = F2(
+	function (shift, value) {
+		switch (shift.$) {
+			case 'Shift0':
+				return value;
+			case 'Shift2':
+				return 3 & value;
+			case 'Shift4':
+				return 15 & value;
+			default:
+				return 63 & value;
+		}
+	});
+var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
+var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
+var $elm$core$Dict$Black = {$: 'Black'};
+var $elm$core$Dict$RBNode_elm_builtin = F5(
+	function (a, b, c, d, e) {
+		return {$: 'RBNode_elm_builtin', a: a, b: b, c: c, d: d, e: e};
+	});
+var $elm$core$Dict$Red = {$: 'Red'};
+var $elm$core$Dict$balance = F5(
+	function (color, key, value, left, right) {
+		if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Red')) {
+			var _v1 = right.a;
+			var rK = right.b;
+			var rV = right.c;
+			var rLeft = right.d;
+			var rRight = right.e;
+			if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
+				var _v3 = left.a;
+				var lK = left.b;
+				var lV = left.c;
+				var lLeft = left.d;
+				var lRight = left.e;
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Red,
+					key,
+					value,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, rK, rV, rLeft, rRight));
+			} else {
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					color,
+					rK,
+					rV,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, left, rLeft),
+					rRight);
+			}
+		} else {
+			if ((((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) && (left.d.$ === 'RBNode_elm_builtin')) && (left.d.a.$ === 'Red')) {
+				var _v5 = left.a;
+				var lK = left.b;
+				var lV = left.c;
+				var _v6 = left.d;
+				var _v7 = _v6.a;
+				var llK = _v6.b;
+				var llV = _v6.c;
+				var llLeft = _v6.d;
+				var llRight = _v6.e;
+				var lRight = left.e;
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Red,
+					lK,
+					lV,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, llK, llV, llLeft, llRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, key, value, lRight, right));
+			} else {
+				return A5($elm$core$Dict$RBNode_elm_builtin, color, key, value, left, right);
+			}
+		}
+	});
+var $elm$core$Basics$compare = _Utils_compare;
+var $elm$core$Dict$insertHelp = F3(
+	function (key, value, dict) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, $elm$core$Dict$RBEmpty_elm_builtin, $elm$core$Dict$RBEmpty_elm_builtin);
+		} else {
+			var nColor = dict.a;
+			var nKey = dict.b;
+			var nValue = dict.c;
+			var nLeft = dict.d;
+			var nRight = dict.e;
+			var _v1 = A2($elm$core$Basics$compare, key, nKey);
+			switch (_v1.$) {
+				case 'LT':
+					return A5(
+						$elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						A3($elm$core$Dict$insertHelp, key, value, nLeft),
+						nRight);
+				case 'EQ':
+					return A5($elm$core$Dict$RBNode_elm_builtin, nColor, nKey, value, nLeft, nRight);
+				default:
+					return A5(
+						$elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						nLeft,
+						A3($elm$core$Dict$insertHelp, key, value, nRight));
+			}
+		}
+	});
+var $elm$core$Dict$insert = F3(
+	function (key, value, dict) {
+		var _v0 = A3($elm$core$Dict$insertHelp, key, value, dict);
+		if ((_v0.$ === 'RBNode_elm_builtin') && (_v0.a.$ === 'Red')) {
+			var _v1 = _v0.a;
+			var k = _v0.b;
+			var v = _v0.c;
+			var l = _v0.d;
+			var r = _v0.e;
+			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, l, r);
+		} else {
+			var x = _v0;
+			return x;
+		}
+	});
+var $elm$core$Dict$fromList = function (assocs) {
+	return A3(
+		$elm$core$List$foldl,
+		F2(
+			function (_v0, dict) {
+				var key = _v0.a;
+				var value = _v0.b;
+				return A3($elm$core$Dict$insert, key, value, dict);
+			}),
+		$elm$core$Dict$empty,
+		assocs);
+};
+var $chelovek0v$bbase64$Base64$Table$codeToCharMap = $elm$core$Dict$fromList(
+	_List_fromArray(
+		[
+			_Utils_Tuple2(0, 'A'),
+			_Utils_Tuple2(1, 'B'),
+			_Utils_Tuple2(2, 'C'),
+			_Utils_Tuple2(3, 'D'),
+			_Utils_Tuple2(4, 'E'),
+			_Utils_Tuple2(5, 'F'),
+			_Utils_Tuple2(6, 'G'),
+			_Utils_Tuple2(7, 'H'),
+			_Utils_Tuple2(8, 'I'),
+			_Utils_Tuple2(9, 'J'),
+			_Utils_Tuple2(10, 'K'),
+			_Utils_Tuple2(11, 'L'),
+			_Utils_Tuple2(12, 'M'),
+			_Utils_Tuple2(13, 'N'),
+			_Utils_Tuple2(14, 'O'),
+			_Utils_Tuple2(15, 'P'),
+			_Utils_Tuple2(16, 'Q'),
+			_Utils_Tuple2(17, 'R'),
+			_Utils_Tuple2(18, 'S'),
+			_Utils_Tuple2(19, 'T'),
+			_Utils_Tuple2(20, 'U'),
+			_Utils_Tuple2(21, 'V'),
+			_Utils_Tuple2(22, 'W'),
+			_Utils_Tuple2(23, 'X'),
+			_Utils_Tuple2(24, 'Y'),
+			_Utils_Tuple2(25, 'Z'),
+			_Utils_Tuple2(26, 'a'),
+			_Utils_Tuple2(27, 'b'),
+			_Utils_Tuple2(28, 'c'),
+			_Utils_Tuple2(29, 'd'),
+			_Utils_Tuple2(30, 'e'),
+			_Utils_Tuple2(31, 'f'),
+			_Utils_Tuple2(32, 'g'),
+			_Utils_Tuple2(33, 'h'),
+			_Utils_Tuple2(34, 'i'),
+			_Utils_Tuple2(35, 'j'),
+			_Utils_Tuple2(36, 'k'),
+			_Utils_Tuple2(37, 'l'),
+			_Utils_Tuple2(38, 'm'),
+			_Utils_Tuple2(39, 'n'),
+			_Utils_Tuple2(40, 'o'),
+			_Utils_Tuple2(41, 'p'),
+			_Utils_Tuple2(42, 'q'),
+			_Utils_Tuple2(43, 'r'),
+			_Utils_Tuple2(44, 's'),
+			_Utils_Tuple2(45, 't'),
+			_Utils_Tuple2(46, 'u'),
+			_Utils_Tuple2(47, 'v'),
+			_Utils_Tuple2(48, 'w'),
+			_Utils_Tuple2(49, 'x'),
+			_Utils_Tuple2(50, 'y'),
+			_Utils_Tuple2(51, 'z'),
+			_Utils_Tuple2(52, '0'),
+			_Utils_Tuple2(53, '1'),
+			_Utils_Tuple2(54, '2'),
+			_Utils_Tuple2(55, '3'),
+			_Utils_Tuple2(56, '4'),
+			_Utils_Tuple2(57, '5'),
+			_Utils_Tuple2(58, '6'),
+			_Utils_Tuple2(59, '7'),
+			_Utils_Tuple2(60, '8'),
+			_Utils_Tuple2(61, '9'),
+			_Utils_Tuple2(62, '+'),
+			_Utils_Tuple2(63, '/')
+		]));
+var $elm$core$Dict$get = F2(
+	function (targetKey, dict) {
+		get:
+		while (true) {
+			if (dict.$ === 'RBEmpty_elm_builtin') {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var key = dict.b;
+				var value = dict.c;
+				var left = dict.d;
+				var right = dict.e;
+				var _v1 = A2($elm$core$Basics$compare, targetKey, key);
+				switch (_v1.$) {
+					case 'LT':
+						var $temp$targetKey = targetKey,
+							$temp$dict = left;
+						targetKey = $temp$targetKey;
+						dict = $temp$dict;
+						continue get;
+					case 'EQ':
+						return $elm$core$Maybe$Just(value);
+					default:
+						var $temp$targetKey = targetKey,
+							$temp$dict = right;
+						targetKey = $temp$targetKey;
+						dict = $temp$dict;
+						continue get;
+				}
+			}
+		}
+	});
+var $chelovek0v$bbase64$Base64$Table$encode = function (code) {
+	var _v0 = A2($elm$core$Dict$get, code, $chelovek0v$bbase64$Base64$Table$codeToCharMap);
+	if (_v0.$ === 'Just') {
+		var char_ = _v0.a;
+		return char_;
+	} else {
+		return '';
+	}
+};
+var $chelovek0v$bbase64$Base64$Shift$next = function (shift) {
+	switch (shift.$) {
+		case 'Shift0':
+			return $chelovek0v$bbase64$Base64$Shift$Shift2;
+		case 'Shift2':
+			return $chelovek0v$bbase64$Base64$Shift$Shift4;
+		case 'Shift4':
+			return $chelovek0v$bbase64$Base64$Shift$Shift6;
+		default:
+			return $chelovek0v$bbase64$Base64$Shift$Shift2;
+	}
+};
+var $elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
+var $chelovek0v$bbase64$Base64$Shift$toInt = function (shift) {
+	switch (shift.$) {
+		case 'Shift0':
+			return 0;
+		case 'Shift2':
+			return 2;
+		case 'Shift4':
+			return 4;
+		default:
+			return 6;
+	}
+};
+var $chelovek0v$bbase64$Base64$Shift$shiftRightZfBy = F2(
+	function (shift, value) {
+		return value >>> $chelovek0v$bbase64$Base64$Shift$toInt(shift);
+	});
+var $elm$core$Bitwise$or = _Bitwise_or;
+var $elm$core$Bitwise$shiftLeftBy = _Bitwise_shiftLeftBy;
+var $chelovek0v$bbase64$Base64$Shift$shiftLeftBy = F2(
+	function (shift, value) {
+		return value << $chelovek0v$bbase64$Base64$Shift$toInt(shift);
+	});
+var $chelovek0v$bbase64$Base64$Encode$sixtet = F2(
+	function (octet, _v0) {
+		var shift = _v0.a;
+		var sixtet_ = _v0.b;
+		var strAcc = _v0.c;
+		switch (shift.$) {
+			case 'Shift0':
+				return A2($chelovek0v$bbase64$Base64$Shift$shiftRightZfBy, $chelovek0v$bbase64$Base64$Shift$Shift2, octet);
+			case 'Shift2':
+				return A2($chelovek0v$bbase64$Base64$Shift$shiftLeftBy, $chelovek0v$bbase64$Base64$Shift$Shift4, sixtet_) | A2($chelovek0v$bbase64$Base64$Shift$shiftRightZfBy, $chelovek0v$bbase64$Base64$Shift$Shift4, octet);
+			case 'Shift4':
+				return A2($chelovek0v$bbase64$Base64$Shift$shiftLeftBy, $chelovek0v$bbase64$Base64$Shift$Shift2, sixtet_) | A2($chelovek0v$bbase64$Base64$Shift$shiftRightZfBy, $chelovek0v$bbase64$Base64$Shift$Shift6, octet);
+			default:
+				return sixtet_;
+		}
+	});
+var $chelovek0v$bbase64$Base64$Encode$encodeStep = F2(
+	function (octet, encodeState) {
+		var shift = encodeState.a;
+		var strAcc = encodeState.c;
+		var nextSixtet = function () {
+			switch (shift.$) {
+				case 'Shift0':
+					return A2($chelovek0v$bbase64$Base64$Shift$and, $chelovek0v$bbase64$Base64$Shift$Shift2, octet);
+				case 'Shift2':
+					return A2($chelovek0v$bbase64$Base64$Shift$and, $chelovek0v$bbase64$Base64$Shift$Shift4, octet);
+				case 'Shift4':
+					return A2($chelovek0v$bbase64$Base64$Shift$and, $chelovek0v$bbase64$Base64$Shift$Shift6, octet);
+				default:
+					return A2($chelovek0v$bbase64$Base64$Shift$and, $chelovek0v$bbase64$Base64$Shift$Shift2, octet);
+			}
+		}();
+		var currentSixtet = A2($chelovek0v$bbase64$Base64$Encode$sixtet, octet, encodeState);
+		var base64Char = function () {
+			if (shift.$ === 'Shift6') {
+				return _Utils_ap(
+					$chelovek0v$bbase64$Base64$Table$encode(currentSixtet),
+					$chelovek0v$bbase64$Base64$Table$encode(
+						A2($chelovek0v$bbase64$Base64$Shift$shiftRightZfBy, $chelovek0v$bbase64$Base64$Shift$Shift2, octet)));
+			} else {
+				return $chelovek0v$bbase64$Base64$Table$encode(currentSixtet);
+			}
+		}();
+		return _Utils_Tuple3(
+			$chelovek0v$bbase64$Base64$Shift$next(shift),
+			nextSixtet,
+			_Utils_ap(strAcc, base64Char));
+	});
+var $elm$bytes$Bytes$Decode$Decoder = function (a) {
+	return {$: 'Decoder', a: a};
+};
+var $elm$bytes$Bytes$Decode$map = F2(
+	function (func, _v0) {
+		var decodeA = _v0.a;
+		return $elm$bytes$Bytes$Decode$Decoder(
+			F2(
+				function (bites, offset) {
+					var _v1 = A2(decodeA, bites, offset);
+					var aOffset = _v1.a;
+					var a = _v1.b;
+					return _Utils_Tuple2(
+						aOffset,
+						func(a));
+				}));
+	});
+var $elm$bytes$Bytes$Decode$succeed = function (a) {
+	return $elm$bytes$Bytes$Decode$Decoder(
+		F2(
+			function (_v0, offset) {
+				return _Utils_Tuple2(offset, a);
+			}));
+};
+var $chelovek0v$bbase64$Base64$Encode$decodeStep = F2(
+	function (octetDecoder, _v0) {
+		var n = _v0.a;
+		var encodeState = _v0.b;
+		return (n <= 0) ? $elm$bytes$Bytes$Decode$succeed(
+			$elm$bytes$Bytes$Decode$Done(encodeState)) : A2(
+			$elm$bytes$Bytes$Decode$map,
+			function (octet) {
+				return $elm$bytes$Bytes$Decode$Loop(
+					_Utils_Tuple2(
+						n - 1,
+						A2($chelovek0v$bbase64$Base64$Encode$encodeStep, octet, encodeState)));
+			},
+			octetDecoder);
+	});
+var $chelovek0v$bbase64$Base64$Encode$finalize = function (_v0) {
+	var shift = _v0.a;
+	var sixtet_ = _v0.b;
+	var strAcc = _v0.c;
+	switch (shift.$) {
+		case 'Shift6':
+			return _Utils_ap(
+				strAcc,
+				$chelovek0v$bbase64$Base64$Table$encode(sixtet_));
+		case 'Shift4':
+			return strAcc + ($chelovek0v$bbase64$Base64$Table$encode(
+				A2($chelovek0v$bbase64$Base64$Shift$shiftLeftBy, $chelovek0v$bbase64$Base64$Shift$Shift2, sixtet_)) + '=');
+		case 'Shift2':
+			return strAcc + ($chelovek0v$bbase64$Base64$Table$encode(
+				A2($chelovek0v$bbase64$Base64$Shift$shiftLeftBy, $chelovek0v$bbase64$Base64$Shift$Shift4, sixtet_)) + '==');
+		default:
+			return strAcc;
+	}
+};
+var $chelovek0v$bbase64$Base64$Shift$Shift0 = {$: 'Shift0'};
+var $chelovek0v$bbase64$Base64$Encode$initialEncodeState = _Utils_Tuple3($chelovek0v$bbase64$Base64$Shift$Shift0, 0, '');
+var $elm$bytes$Bytes$Decode$loopHelp = F4(
+	function (state, callback, bites, offset) {
+		loopHelp:
+		while (true) {
+			var _v0 = callback(state);
+			var decoder = _v0.a;
+			var _v1 = A2(decoder, bites, offset);
+			var newOffset = _v1.a;
+			var step = _v1.b;
+			if (step.$ === 'Loop') {
+				var newState = step.a;
+				var $temp$state = newState,
+					$temp$callback = callback,
+					$temp$bites = bites,
+					$temp$offset = newOffset;
+				state = $temp$state;
+				callback = $temp$callback;
+				bites = $temp$bites;
+				offset = $temp$offset;
+				continue loopHelp;
+			} else {
+				var result = step.a;
+				return _Utils_Tuple2(newOffset, result);
+			}
+		}
+	});
+var $elm$bytes$Bytes$Decode$loop = F2(
+	function (state, callback) {
+		return $elm$bytes$Bytes$Decode$Decoder(
+			A2($elm$bytes$Bytes$Decode$loopHelp, state, callback));
+	});
+var $elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return $elm$core$Maybe$Just(
+				f(value));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $elm$bytes$Bytes$Decode$unsignedInt8 = $elm$bytes$Bytes$Decode$Decoder(_Bytes_read_u8);
+var $elm$bytes$Bytes$width = _Bytes_width;
+var $chelovek0v$bbase64$Base64$Encode$tryEncode = function (input) {
+	var decoderInitialState = _Utils_Tuple2(
+		$elm$bytes$Bytes$width(input),
+		$chelovek0v$bbase64$Base64$Encode$initialEncodeState);
+	var base64Decoder = A2(
+		$elm$bytes$Bytes$Decode$loop,
+		decoderInitialState,
+		$chelovek0v$bbase64$Base64$Encode$decodeStep($elm$bytes$Bytes$Decode$unsignedInt8));
+	return A2(
+		$elm$core$Maybe$map,
+		$chelovek0v$bbase64$Base64$Encode$finalize,
+		A2($elm$bytes$Bytes$Decode$decode, base64Decoder, input));
+};
+var $elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
+var $chelovek0v$bbase64$Base64$Encode$encode = function (encoder) {
+	if (encoder.$ === 'StringEncoder') {
+		var input = encoder.a;
+		return A2(
+			$elm$core$Maybe$withDefault,
+			'',
+			$chelovek0v$bbase64$Base64$Encode$tryEncode(
+				$elm$bytes$Bytes$Encode$encode(
+					$elm$bytes$Bytes$Encode$string(input))));
+	} else {
+		var input = encoder.a;
+		return A2(
+			$elm$core$Maybe$withDefault,
+			'',
+			$chelovek0v$bbase64$Base64$Encode$tryEncode(input));
+	}
+};
+var $author$project$StravaAuth$base64 = A2($elm$core$Basics$composeR, $chelovek0v$bbase64$Base64$Encode$bytes, $chelovek0v$bbase64$Base64$Encode$encode);
+var $elm$bytes$Bytes$Encode$Seq = F2(
+	function (a, b) {
+		return {$: 'Seq', a: a, b: b};
+	});
+var $elm$bytes$Bytes$Encode$getWidths = F2(
+	function (width, builders) {
+		getWidths:
+		while (true) {
+			if (!builders.b) {
+				return width;
+			} else {
+				var b = builders.a;
+				var bs = builders.b;
+				var $temp$width = width + $elm$bytes$Bytes$Encode$getWidth(b),
+					$temp$builders = bs;
+				width = $temp$width;
+				builders = $temp$builders;
+				continue getWidths;
+			}
+		}
+	});
+var $elm$bytes$Bytes$Encode$sequence = function (builders) {
+	return A2(
+		$elm$bytes$Bytes$Encode$Seq,
+		A2($elm$bytes$Bytes$Encode$getWidths, 0, builders),
+		builders);
+};
+var $elm$bytes$Bytes$Encode$U8 = function (a) {
+	return {$: 'U8', a: a};
+};
+var $elm$bytes$Bytes$Encode$unsignedInt8 = $elm$bytes$Bytes$Encode$U8;
+var $author$project$StravaAuth$toBytes = A2(
+	$elm$core$Basics$composeR,
+	$elm$core$List$map($elm$bytes$Bytes$Encode$unsignedInt8),
+	A2($elm$core$Basics$composeR, $elm$bytes$Bytes$Encode$sequence, $elm$bytes$Bytes$Encode$encode));
+var $author$project$StravaAuth$convertBytes = A2(
+	$elm$core$Basics$composeR,
+	$author$project$StravaAuth$toBytes,
+	A2(
+		$elm$core$Basics$composeR,
+		$author$project$StravaAuth$base64,
+		function (state) {
+			return {state: state};
+		}));
+var $author$project$Msg$AdjustTimeZone = function (a) {
+	return {$: 'AdjustTimeZone', a: a};
+};
+var $author$project$Main$Model = function (a) {
+	return {$: 'Model', a: a};
+};
+var $author$project$ViewingMode$ViewThird = {$: 'ViewThird'};
+var $elm$core$Platform$Cmd$batch = _Platform_batch;
+var $elm$time$Time$Name = function (a) {
+	return {$: 'Name', a: a};
+};
+var $elm$time$Time$Offset = function (a) {
+	return {$: 'Offset', a: a};
+};
+var $elm$time$Time$Zone = F2(
+	function (a, b) {
+		return {$: 'Zone', a: a, b: b};
+	});
+var $elm$time$Time$customZone = $elm$time$Time$Zone;
+var $elm$time$Time$here = _Time_here(_Utils_Tuple0);
+var $author$project$OAuthTypes$AccessTokenRequested = {$: 'AccessTokenRequested'};
+var $author$project$OAuthTypes$Authorized = function (a) {
+	return {$: 'Authorized', a: a};
+};
+var $author$project$OAuthTypes$ErrAuthorization = function (a) {
+	return {$: 'ErrAuthorization', a: a};
+};
+var $author$project$OAuthTypes$ErrStateMismatch = {$: 'ErrStateMismatch'};
+var $author$project$OAuthTypes$Errored = function (a) {
+	return {$: 'Errored', a: a};
+};
+var $author$project$OAuthTypes$Idle = {$: 'Idle'};
+var $elm$core$Process$sleep = _Process_sleep;
+var $andrewMacmurray$elm_delay$Delay$after = F2(
+	function (time, msg) {
+		return A2(
+			$elm$core$Task$perform,
+			$elm$core$Basics$always(msg),
+			$elm$core$Process$sleep(time));
+	});
+var $elm$core$Basics$neq = _Utils_notEqual;
+var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+var $author$project$OAuth$Internal$AuthorizationError = F4(
+	function (error, errorDescription, errorUri, state) {
+		return {error: error, errorDescription: errorDescription, errorUri: errorUri, state: state};
+	});
+var $elm$url$Url$Parser$Internal$Parser = function (a) {
+	return {$: 'Parser', a: a};
+};
+var $elm$url$Url$Parser$Query$custom = F2(
+	function (key, func) {
+		return $elm$url$Url$Parser$Internal$Parser(
+			function (dict) {
+				return func(
+					A2(
+						$elm$core$Maybe$withDefault,
+						_List_Nil,
+						A2($elm$core$Dict$get, key, dict)));
+			});
+	});
+var $elm$url$Url$Parser$Query$string = function (key) {
+	return A2(
+		$elm$url$Url$Parser$Query$custom,
+		key,
+		function (stringList) {
+			if (stringList.b && (!stringList.b.b)) {
+				var str = stringList.a;
+				return $elm$core$Maybe$Just(str);
+			} else {
+				return $elm$core$Maybe$Nothing;
+			}
+		});
+};
+var $author$project$OAuth$Internal$errorDescriptionParser = $elm$url$Url$Parser$Query$string('error_description');
+var $author$project$OAuth$Internal$errorUriParser = $elm$url$Url$Parser$Query$string('error_uri');
+var $elm$url$Url$Parser$Query$map3 = F4(
+	function (func, _v0, _v1, _v2) {
+		var a = _v0.a;
+		var b = _v1.a;
+		var c = _v2.a;
+		return $elm$url$Url$Parser$Internal$Parser(
+			function (dict) {
+				return A3(
+					func,
+					a(dict),
+					b(dict),
+					c(dict));
+			});
+	});
+var $author$project$OAuth$Internal$stateParser = $elm$url$Url$Parser$Query$string('state');
+var $author$project$OAuth$Internal$authorizationErrorParser = function (errorCode) {
+	return A4(
+		$elm$url$Url$Parser$Query$map3,
+		$author$project$OAuth$Internal$AuthorizationError(errorCode),
+		$author$project$OAuth$Internal$errorDescriptionParser,
+		$author$project$OAuth$Internal$errorUriParser,
+		$author$project$OAuth$Internal$stateParser);
+};
+var $author$project$OAuth$AuthorizationCode$defaultAuthorizationErrorParser = $author$project$OAuth$Internal$authorizationErrorParser;
+var $author$project$OAuth$AuthorizationCode$AuthorizationSuccess = F2(
+	function (code, state) {
+		return {code: code, state: state};
+	});
+var $elm$url$Url$Parser$Query$map = F2(
+	function (func, _v0) {
+		var a = _v0.a;
+		return $elm$url$Url$Parser$Internal$Parser(
+			function (dict) {
+				return func(
+					a(dict));
+			});
+	});
+var $author$project$OAuth$AuthorizationCode$defaultAuthorizationSuccessParser = function (code) {
+	return A2(
+		$elm$url$Url$Parser$Query$map,
+		$author$project$OAuth$AuthorizationCode$AuthorizationSuccess(code),
+		$author$project$OAuth$Internal$stateParser);
+};
+var $author$project$OAuth$AuthorizationCode$defaultCodeParser = $elm$url$Url$Parser$Query$string('code');
+var $author$project$OAuth$AccessDenied = {$: 'AccessDenied'};
+var $author$project$OAuth$Custom = function (a) {
+	return {$: 'Custom', a: a};
+};
+var $author$project$OAuth$InvalidRequest = {$: 'InvalidRequest'};
+var $author$project$OAuth$InvalidScope = {$: 'InvalidScope'};
+var $author$project$OAuth$ServerError = {$: 'ServerError'};
+var $author$project$OAuth$TemporarilyUnavailable = {$: 'TemporarilyUnavailable'};
+var $author$project$OAuth$UnauthorizedClient = {$: 'UnauthorizedClient'};
+var $author$project$OAuth$UnsupportedResponseType = {$: 'UnsupportedResponseType'};
+var $author$project$OAuth$errorCodeFromString = function (str) {
+	switch (str) {
+		case 'invalid_request':
+			return $author$project$OAuth$InvalidRequest;
+		case 'unauthorized_client':
+			return $author$project$OAuth$UnauthorizedClient;
+		case 'access_denied':
+			return $author$project$OAuth$AccessDenied;
+		case 'unsupported_response_type':
+			return $author$project$OAuth$UnsupportedResponseType;
+		case 'invalid_scope':
+			return $author$project$OAuth$InvalidScope;
+		case 'server_error':
+			return $author$project$OAuth$ServerError;
+		case 'temporarily_unavailable':
+			return $author$project$OAuth$TemporarilyUnavailable;
+		default:
+			return $author$project$OAuth$Custom(str);
+	}
+};
+var $author$project$OAuth$Internal$errorParser = function (errorCodeFromString) {
+	return A2(
+		$elm$url$Url$Parser$Query$map,
+		$elm$core$Maybe$map(errorCodeFromString),
+		$elm$url$Url$Parser$Query$string('error'));
+};
+var $author$project$OAuth$AuthorizationCode$defaultErrorParser = $author$project$OAuth$Internal$errorParser($author$project$OAuth$errorCodeFromString);
+var $author$project$OAuth$AuthorizationCode$defaultParsers = {authorizationErrorParser: $author$project$OAuth$AuthorizationCode$defaultAuthorizationErrorParser, authorizationSuccessParser: $author$project$OAuth$AuthorizationCode$defaultAuthorizationSuccessParser, codeParser: $author$project$OAuth$AuthorizationCode$defaultCodeParser, errorParser: $author$project$OAuth$AuthorizationCode$defaultErrorParser};
+var $author$project$OAuth$AuthorizationCode$Empty = {$: 'Empty'};
+var $author$project$OAuth$AuthorizationCode$Error = function (a) {
+	return {$: 'Error', a: a};
+};
+var $author$project$OAuth$AuthorizationCode$Success = function (a) {
+	return {$: 'Success', a: a};
+};
+var $elm$url$Url$Parser$Query$map2 = F3(
+	function (func, _v0, _v1) {
+		var a = _v0.a;
+		var b = _v1.a;
+		return $elm$url$Url$Parser$Internal$Parser(
+			function (dict) {
+				return A2(
+					func,
+					a(dict),
+					b(dict));
+			});
+	});
+var $elm$core$Tuple$pair = F2(
+	function (a, b) {
+		return _Utils_Tuple2(a, b);
+	});
+var $elm$url$Url$Parser$State = F5(
+	function (visited, unvisited, params, frag, value) {
+		return {frag: frag, params: params, unvisited: unvisited, value: value, visited: visited};
+	});
+var $elm$url$Url$Parser$getFirstMatch = function (states) {
+	getFirstMatch:
+	while (true) {
+		if (!states.b) {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var state = states.a;
+			var rest = states.b;
+			var _v1 = state.unvisited;
+			if (!_v1.b) {
+				return $elm$core$Maybe$Just(state.value);
+			} else {
+				if ((_v1.a === '') && (!_v1.b.b)) {
+					return $elm$core$Maybe$Just(state.value);
+				} else {
+					var $temp$states = rest;
+					states = $temp$states;
+					continue getFirstMatch;
+				}
+			}
+		}
+	}
+};
+var $elm$url$Url$Parser$removeFinalEmpty = function (segments) {
+	if (!segments.b) {
+		return _List_Nil;
+	} else {
+		if ((segments.a === '') && (!segments.b.b)) {
+			return _List_Nil;
+		} else {
+			var segment = segments.a;
+			var rest = segments.b;
+			return A2(
+				$elm$core$List$cons,
+				segment,
+				$elm$url$Url$Parser$removeFinalEmpty(rest));
+		}
+	}
+};
+var $elm$url$Url$Parser$preparePath = function (path) {
+	var _v0 = A2($elm$core$String$split, '/', path);
+	if (_v0.b && (_v0.a === '')) {
+		var segments = _v0.b;
+		return $elm$url$Url$Parser$removeFinalEmpty(segments);
+	} else {
+		var segments = _v0;
+		return $elm$url$Url$Parser$removeFinalEmpty(segments);
+	}
+};
+var $elm$url$Url$Parser$addToParametersHelp = F2(
+	function (value, maybeList) {
+		if (maybeList.$ === 'Nothing') {
+			return $elm$core$Maybe$Just(
+				_List_fromArray(
+					[value]));
+		} else {
+			var list = maybeList.a;
+			return $elm$core$Maybe$Just(
+				A2($elm$core$List$cons, value, list));
+		}
+	});
+var $elm$url$Url$percentDecode = _Url_percentDecode;
+var $elm$core$Dict$getMin = function (dict) {
+	getMin:
+	while (true) {
+		if ((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) {
+			var left = dict.d;
+			var $temp$dict = left;
+			dict = $temp$dict;
+			continue getMin;
+		} else {
+			return dict;
+		}
+	}
+};
+var $elm$core$Dict$moveRedLeft = function (dict) {
+	if (((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) && (dict.e.$ === 'RBNode_elm_builtin')) {
+		if ((dict.e.d.$ === 'RBNode_elm_builtin') && (dict.e.d.a.$ === 'Red')) {
+			var clr = dict.a;
+			var k = dict.b;
+			var v = dict.c;
+			var _v1 = dict.d;
+			var lClr = _v1.a;
+			var lK = _v1.b;
+			var lV = _v1.c;
+			var lLeft = _v1.d;
+			var lRight = _v1.e;
+			var _v2 = dict.e;
+			var rClr = _v2.a;
+			var rK = _v2.b;
+			var rV = _v2.c;
+			var rLeft = _v2.d;
+			var _v3 = rLeft.a;
+			var rlK = rLeft.b;
+			var rlV = rLeft.c;
+			var rlL = rLeft.d;
+			var rlR = rLeft.e;
+			var rRight = _v2.e;
+			return A5(
+				$elm$core$Dict$RBNode_elm_builtin,
+				$elm$core$Dict$Red,
+				rlK,
+				rlV,
+				A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Black,
+					k,
+					v,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					rlL),
+				A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, rK, rV, rlR, rRight));
+		} else {
+			var clr = dict.a;
+			var k = dict.b;
+			var v = dict.c;
+			var _v4 = dict.d;
+			var lClr = _v4.a;
+			var lK = _v4.b;
+			var lV = _v4.c;
+			var lLeft = _v4.d;
+			var lRight = _v4.e;
+			var _v5 = dict.e;
+			var rClr = _v5.a;
+			var rK = _v5.b;
+			var rV = _v5.c;
+			var rLeft = _v5.d;
+			var rRight = _v5.e;
+			if (clr.$ === 'Black') {
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Black,
+					k,
+					v,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight));
+			} else {
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Black,
+					k,
+					v,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight));
+			}
+		}
+	} else {
+		return dict;
+	}
+};
+var $elm$core$Dict$moveRedRight = function (dict) {
+	if (((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) && (dict.e.$ === 'RBNode_elm_builtin')) {
+		if ((dict.d.d.$ === 'RBNode_elm_builtin') && (dict.d.d.a.$ === 'Red')) {
+			var clr = dict.a;
+			var k = dict.b;
+			var v = dict.c;
+			var _v1 = dict.d;
+			var lClr = _v1.a;
+			var lK = _v1.b;
+			var lV = _v1.c;
+			var _v2 = _v1.d;
+			var _v3 = _v2.a;
+			var llK = _v2.b;
+			var llV = _v2.c;
+			var llLeft = _v2.d;
+			var llRight = _v2.e;
+			var lRight = _v1.e;
+			var _v4 = dict.e;
+			var rClr = _v4.a;
+			var rK = _v4.b;
+			var rV = _v4.c;
+			var rLeft = _v4.d;
+			var rRight = _v4.e;
+			return A5(
+				$elm$core$Dict$RBNode_elm_builtin,
+				$elm$core$Dict$Red,
+				lK,
+				lV,
+				A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, llK, llV, llLeft, llRight),
+				A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Black,
+					k,
+					v,
+					lRight,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight)));
+		} else {
+			var clr = dict.a;
+			var k = dict.b;
+			var v = dict.c;
+			var _v5 = dict.d;
+			var lClr = _v5.a;
+			var lK = _v5.b;
+			var lV = _v5.c;
+			var lLeft = _v5.d;
+			var lRight = _v5.e;
+			var _v6 = dict.e;
+			var rClr = _v6.a;
+			var rK = _v6.b;
+			var rV = _v6.c;
+			var rLeft = _v6.d;
+			var rRight = _v6.e;
+			if (clr.$ === 'Black') {
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Black,
+					k,
+					v,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight));
+			} else {
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					$elm$core$Dict$Black,
+					k,
+					v,
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, lK, lV, lLeft, lRight),
+					A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, rK, rV, rLeft, rRight));
+			}
+		}
+	} else {
+		return dict;
+	}
+};
+var $elm$core$Dict$removeHelpPrepEQGT = F7(
+	function (targetKey, dict, color, key, value, left, right) {
+		if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Red')) {
+			var _v1 = left.a;
+			var lK = left.b;
+			var lV = left.c;
+			var lLeft = left.d;
+			var lRight = left.e;
+			return A5(
+				$elm$core$Dict$RBNode_elm_builtin,
+				color,
+				lK,
+				lV,
+				lLeft,
+				A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Red, key, value, lRight, right));
+		} else {
+			_v2$2:
+			while (true) {
+				if ((right.$ === 'RBNode_elm_builtin') && (right.a.$ === 'Black')) {
+					if (right.d.$ === 'RBNode_elm_builtin') {
+						if (right.d.a.$ === 'Black') {
+							var _v3 = right.a;
+							var _v4 = right.d;
+							var _v5 = _v4.a;
+							return $elm$core$Dict$moveRedRight(dict);
+						} else {
+							break _v2$2;
+						}
+					} else {
+						var _v6 = right.a;
+						var _v7 = right.d;
+						return $elm$core$Dict$moveRedRight(dict);
+					}
+				} else {
+					break _v2$2;
+				}
+			}
+			return dict;
+		}
+	});
+var $elm$core$Dict$removeMin = function (dict) {
+	if ((dict.$ === 'RBNode_elm_builtin') && (dict.d.$ === 'RBNode_elm_builtin')) {
+		var color = dict.a;
+		var key = dict.b;
+		var value = dict.c;
+		var left = dict.d;
+		var lColor = left.a;
+		var lLeft = left.d;
+		var right = dict.e;
+		if (lColor.$ === 'Black') {
+			if ((lLeft.$ === 'RBNode_elm_builtin') && (lLeft.a.$ === 'Red')) {
+				var _v3 = lLeft.a;
+				return A5(
+					$elm$core$Dict$RBNode_elm_builtin,
+					color,
+					key,
+					value,
+					$elm$core$Dict$removeMin(left),
+					right);
+			} else {
+				var _v4 = $elm$core$Dict$moveRedLeft(dict);
+				if (_v4.$ === 'RBNode_elm_builtin') {
+					var nColor = _v4.a;
+					var nKey = _v4.b;
+					var nValue = _v4.c;
+					var nLeft = _v4.d;
+					var nRight = _v4.e;
+					return A5(
+						$elm$core$Dict$balance,
+						nColor,
+						nKey,
+						nValue,
+						$elm$core$Dict$removeMin(nLeft),
+						nRight);
+				} else {
+					return $elm$core$Dict$RBEmpty_elm_builtin;
+				}
+			}
+		} else {
+			return A5(
+				$elm$core$Dict$RBNode_elm_builtin,
+				color,
+				key,
+				value,
+				$elm$core$Dict$removeMin(left),
+				right);
+		}
+	} else {
+		return $elm$core$Dict$RBEmpty_elm_builtin;
+	}
+};
+var $elm$core$Dict$removeHelp = F2(
+	function (targetKey, dict) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return $elm$core$Dict$RBEmpty_elm_builtin;
+		} else {
+			var color = dict.a;
+			var key = dict.b;
+			var value = dict.c;
+			var left = dict.d;
+			var right = dict.e;
+			if (_Utils_cmp(targetKey, key) < 0) {
+				if ((left.$ === 'RBNode_elm_builtin') && (left.a.$ === 'Black')) {
+					var _v4 = left.a;
+					var lLeft = left.d;
+					if ((lLeft.$ === 'RBNode_elm_builtin') && (lLeft.a.$ === 'Red')) {
+						var _v6 = lLeft.a;
+						return A5(
+							$elm$core$Dict$RBNode_elm_builtin,
+							color,
+							key,
+							value,
+							A2($elm$core$Dict$removeHelp, targetKey, left),
+							right);
+					} else {
+						var _v7 = $elm$core$Dict$moveRedLeft(dict);
+						if (_v7.$ === 'RBNode_elm_builtin') {
+							var nColor = _v7.a;
+							var nKey = _v7.b;
+							var nValue = _v7.c;
+							var nLeft = _v7.d;
+							var nRight = _v7.e;
+							return A5(
+								$elm$core$Dict$balance,
+								nColor,
+								nKey,
+								nValue,
+								A2($elm$core$Dict$removeHelp, targetKey, nLeft),
+								nRight);
+						} else {
+							return $elm$core$Dict$RBEmpty_elm_builtin;
+						}
+					}
+				} else {
+					return A5(
+						$elm$core$Dict$RBNode_elm_builtin,
+						color,
+						key,
+						value,
+						A2($elm$core$Dict$removeHelp, targetKey, left),
+						right);
+				}
+			} else {
+				return A2(
+					$elm$core$Dict$removeHelpEQGT,
+					targetKey,
+					A7($elm$core$Dict$removeHelpPrepEQGT, targetKey, dict, color, key, value, left, right));
+			}
+		}
+	});
+var $elm$core$Dict$removeHelpEQGT = F2(
+	function (targetKey, dict) {
+		if (dict.$ === 'RBNode_elm_builtin') {
+			var color = dict.a;
+			var key = dict.b;
+			var value = dict.c;
+			var left = dict.d;
+			var right = dict.e;
+			if (_Utils_eq(targetKey, key)) {
+				var _v1 = $elm$core$Dict$getMin(right);
+				if (_v1.$ === 'RBNode_elm_builtin') {
+					var minKey = _v1.b;
+					var minValue = _v1.c;
+					return A5(
+						$elm$core$Dict$balance,
+						color,
+						minKey,
+						minValue,
+						left,
+						$elm$core$Dict$removeMin(right));
+				} else {
+					return $elm$core$Dict$RBEmpty_elm_builtin;
+				}
+			} else {
+				return A5(
+					$elm$core$Dict$balance,
+					color,
+					key,
+					value,
+					left,
+					A2($elm$core$Dict$removeHelp, targetKey, right));
+			}
+		} else {
+			return $elm$core$Dict$RBEmpty_elm_builtin;
+		}
+	});
+var $elm$core$Dict$remove = F2(
+	function (key, dict) {
+		var _v0 = A2($elm$core$Dict$removeHelp, key, dict);
+		if ((_v0.$ === 'RBNode_elm_builtin') && (_v0.a.$ === 'Red')) {
+			var _v1 = _v0.a;
+			var k = _v0.b;
+			var v = _v0.c;
+			var l = _v0.d;
+			var r = _v0.e;
+			return A5($elm$core$Dict$RBNode_elm_builtin, $elm$core$Dict$Black, k, v, l, r);
+		} else {
+			var x = _v0;
+			return x;
+		}
+	});
+var $elm$core$Dict$update = F3(
+	function (targetKey, alter, dictionary) {
+		var _v0 = alter(
+			A2($elm$core$Dict$get, targetKey, dictionary));
+		if (_v0.$ === 'Just') {
+			var value = _v0.a;
+			return A3($elm$core$Dict$insert, targetKey, value, dictionary);
+		} else {
+			return A2($elm$core$Dict$remove, targetKey, dictionary);
+		}
+	});
+var $elm$url$Url$Parser$addParam = F2(
+	function (segment, dict) {
+		var _v0 = A2($elm$core$String$split, '=', segment);
+		if ((_v0.b && _v0.b.b) && (!_v0.b.b.b)) {
+			var rawKey = _v0.a;
+			var _v1 = _v0.b;
+			var rawValue = _v1.a;
+			var _v2 = $elm$url$Url$percentDecode(rawKey);
+			if (_v2.$ === 'Nothing') {
+				return dict;
+			} else {
+				var key = _v2.a;
+				var _v3 = $elm$url$Url$percentDecode(rawValue);
+				if (_v3.$ === 'Nothing') {
+					return dict;
+				} else {
+					var value = _v3.a;
+					return A3(
+						$elm$core$Dict$update,
+						key,
+						$elm$url$Url$Parser$addToParametersHelp(value),
+						dict);
+				}
+			}
+		} else {
+			return dict;
+		}
+	});
+var $elm$url$Url$Parser$prepareQuery = function (maybeQuery) {
+	if (maybeQuery.$ === 'Nothing') {
+		return $elm$core$Dict$empty;
+	} else {
+		var qry = maybeQuery.a;
+		return A3(
+			$elm$core$List$foldr,
+			$elm$url$Url$Parser$addParam,
+			$elm$core$Dict$empty,
+			A2($elm$core$String$split, '&', qry));
+	}
+};
+var $elm$url$Url$Parser$parse = F2(
+	function (_v0, url) {
+		var parser = _v0.a;
+		return $elm$url$Url$Parser$getFirstMatch(
+			parser(
+				A5(
+					$elm$url$Url$Parser$State,
+					_List_Nil,
+					$elm$url$Url$Parser$preparePath(url.path),
+					$elm$url$Url$Parser$prepareQuery(url.query),
+					url.fragment,
+					$elm$core$Basics$identity)));
+	});
+var $elm$url$Url$Parser$Parser = function (a) {
+	return {$: 'Parser', a: a};
+};
+var $elm$url$Url$Parser$query = function (_v0) {
+	var queryParser = _v0.a;
+	return $elm$url$Url$Parser$Parser(
+		function (_v1) {
+			var visited = _v1.visited;
+			var unvisited = _v1.unvisited;
+			var params = _v1.params;
+			var frag = _v1.frag;
+			var value = _v1.value;
+			return _List_fromArray(
+				[
+					A5(
+					$elm$url$Url$Parser$State,
+					visited,
+					unvisited,
+					params,
+					frag,
+					value(
+						queryParser(params)))
+				]);
+		});
+};
+var $author$project$OAuth$Internal$parseUrlQuery = F3(
+	function (url, def, parser) {
+		return A2(
+			$elm$core$Maybe$withDefault,
+			def,
+			A2(
+				$elm$url$Url$Parser$parse,
+				$elm$url$Url$Parser$query(parser),
+				url));
+	});
+var $elm$core$List$append = F2(
+	function (xs, ys) {
+		if (!ys.b) {
+			return xs;
+		} else {
+			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
+		}
+	});
+var $elm$core$List$concat = function (lists) {
+	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
+};
+var $elm$core$List$concatMap = F2(
+	function (f, list) {
+		return $elm$core$List$concat(
+			A2($elm$core$List$map, f, list));
+	});
+var $elm$url$Url$Parser$slash = F2(
+	function (_v0, _v1) {
+		var parseBefore = _v0.a;
+		var parseAfter = _v1.a;
+		return $elm$url$Url$Parser$Parser(
+			function (state) {
+				return A2(
+					$elm$core$List$concatMap,
+					parseAfter,
+					parseBefore(state));
+			});
+	});
+var $elm$url$Url$Parser$questionMark = F2(
+	function (parser, queryParser) {
+		return A2(
+			$elm$url$Url$Parser$slash,
+			parser,
+			$elm$url$Url$Parser$query(queryParser));
+	});
+var $elm$url$Url$Parser$top = $elm$url$Url$Parser$Parser(
+	function (state) {
+		return _List_fromArray(
+			[state]);
+	});
+var $author$project$OAuth$AuthorizationCode$parseCodeWith = F2(
+	function (_v0, url_) {
+		var codeParser = _v0.codeParser;
+		var errorParser = _v0.errorParser;
+		var authorizationSuccessParser = _v0.authorizationSuccessParser;
+		var authorizationErrorParser = _v0.authorizationErrorParser;
+		var url = _Utils_update(
+			url_,
+			{path: '/'});
+		var _v1 = A2(
+			$elm$url$Url$Parser$parse,
+			A2(
+				$elm$url$Url$Parser$questionMark,
+				$elm$url$Url$Parser$top,
+				A3($elm$url$Url$Parser$Query$map2, $elm$core$Tuple$pair, codeParser, errorParser)),
+			url);
+		_v1$2:
+		while (true) {
+			if (_v1.$ === 'Just') {
+				if (_v1.a.a.$ === 'Just') {
+					var _v2 = _v1.a;
+					var code = _v2.a.a;
+					return A3(
+						$author$project$OAuth$Internal$parseUrlQuery,
+						url,
+						$author$project$OAuth$AuthorizationCode$Empty,
+						A2(
+							$elm$url$Url$Parser$Query$map,
+							$author$project$OAuth$AuthorizationCode$Success,
+							authorizationSuccessParser(code)));
+				} else {
+					if (_v1.a.b.$ === 'Just') {
+						var _v3 = _v1.a;
+						var error = _v3.b.a;
+						return A3(
+							$author$project$OAuth$Internal$parseUrlQuery,
+							url,
+							$author$project$OAuth$AuthorizationCode$Empty,
+							A2(
+								$elm$url$Url$Parser$Query$map,
+								$author$project$OAuth$AuthorizationCode$Error,
+								authorizationErrorParser(error)));
+					} else {
+						break _v1$2;
+					}
+				}
+			} else {
+				break _v1$2;
+			}
+		}
+		return $author$project$OAuth$AuthorizationCode$Empty;
+	});
+var $author$project$OAuth$AuthorizationCode$parseCode = $author$project$OAuth$AuthorizationCode$parseCodeWith($author$project$OAuth$AuthorizationCode$defaultParsers);
+var $elm$browser$Browser$Navigation$replaceUrl = _Browser_replaceUrl;
+var $elm$url$Url$addPort = F2(
+	function (maybePort, starter) {
+		if (maybePort.$ === 'Nothing') {
+			return starter;
+		} else {
+			var port_ = maybePort.a;
+			return starter + (':' + $elm$core$String$fromInt(port_));
+		}
+	});
+var $elm$url$Url$addPrefixed = F3(
+	function (prefix, maybeSegment, starter) {
+		if (maybeSegment.$ === 'Nothing') {
+			return starter;
+		} else {
+			var segment = maybeSegment.a;
+			return _Utils_ap(
+				starter,
+				_Utils_ap(prefix, segment));
+		}
+	});
+var $elm$url$Url$toString = function (url) {
+	var http = function () {
+		var _v0 = url.protocol;
+		if (_v0.$ === 'Http') {
+			return 'http://';
+		} else {
+			return 'https://';
+		}
+	}();
+	return A3(
+		$elm$url$Url$addPrefixed,
+		'#',
+		url.fragment,
+		A3(
+			$elm$url$Url$addPrefixed,
+			'?',
+			url.query,
+			_Utils_ap(
+				A2(
+					$elm$url$Url$addPort,
+					url.port_,
+					_Utils_ap(http, url.host)),
+				url.path)));
+};
+var $author$project$StravaAuth$init = F4(
+	function (mflags, origin, navigationKey, wrapperMsg) {
+		var redirectUri = _Utils_update(
+			origin,
+			{fragment: $elm$core$Maybe$Nothing, query: $elm$core$Maybe$Nothing});
+		var clearUrl = A2(
+			$elm$browser$Browser$Navigation$replaceUrl,
+			navigationKey,
+			$elm$url$Url$toString(redirectUri));
+		var _v0 = $author$project$OAuth$AuthorizationCode$parseCode(origin);
+		switch (_v0.$) {
+			case 'Empty':
+				return _Utils_Tuple2(
+					{flow: $author$project$OAuthTypes$Idle, redirectUri: redirectUri},
+					$elm$core$Platform$Cmd$none);
+			case 'Success':
+				var code = _v0.a.code;
+				var state = _v0.a.state;
+				if (mflags.$ === 'Nothing') {
+					return _Utils_Tuple2(
+						{
+							flow: $author$project$OAuthTypes$Errored($author$project$OAuthTypes$ErrStateMismatch),
+							redirectUri: redirectUri
+						},
+						clearUrl);
+				} else {
+					var flags = mflags.a;
+					return (!_Utils_eq(
+						state,
+						$elm$core$Maybe$Just(flags.state))) ? _Utils_Tuple2(
+						{
+							flow: $author$project$OAuthTypes$Errored($author$project$OAuthTypes$ErrStateMismatch),
+							redirectUri: redirectUri
+						},
+						clearUrl) : _Utils_Tuple2(
+						{
+							flow: $author$project$OAuthTypes$Authorized(code),
+							redirectUri: redirectUri
+						},
+						$elm$core$Platform$Cmd$batch(
+							_List_fromArray(
+								[
+									A2(
+									$andrewMacmurray$elm_delay$Delay$after,
+									50,
+									wrapperMsg($author$project$OAuthTypes$AccessTokenRequested)),
+									clearUrl
+								])));
+				}
+			default:
+				var error = _v0.a;
+				return _Utils_Tuple2(
+					{
+						flow: $author$project$OAuthTypes$Errored(
+							$author$project$OAuthTypes$ErrAuthorization(error)),
+						redirectUri: redirectUri
+					},
+					clearUrl);
+		}
+	});
+var $elm$time$Time$Posix = function (a) {
+	return {$: 'Posix', a: a};
+};
+var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
+var $ianmackenzie$elm_geometry$Geometry$Types$Point3d = function (a) {
+	return {$: 'Point3d', a: a};
+};
+var $ianmackenzie$elm_geometry$Point3d$origin = $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+	{x: 0, y: 0, z: 0});
+var $ianmackenzie$elm_units$Quantity$Quantity = function (a) {
+	return {$: 'Quantity', a: a};
+};
+var $ianmackenzie$elm_units$Pixels$pixels = function (numPixels) {
+	return $ianmackenzie$elm_units$Quantity$Quantity(numPixels);
+};
+var $elm$time$Time$utc = A2($elm$time$Time$Zone, 0, _List_Nil);
+var $author$project$Main$init = F3(
+	function (mflags, origin, navigationKey) {
+		var _v0 = A4($author$project$StravaAuth$init, mflags, origin, navigationKey, $author$project$Msg$OAuthMessage);
+		var authData = _v0.a;
+		var authCmd = _v0.b;
+		return _Utils_Tuple2(
+			$author$project$Main$Model(
+				{
+					currentPosition: 0,
+					filename: $elm$core$Maybe$Nothing,
+					focusPoint: $ianmackenzie$elm_geometry$Point3d$origin,
+					ipInfo: $elm$core$Maybe$Nothing,
+					lastMapClick: _Utils_Tuple2(0.0, 0.0),
+					mapClickDebounce: false,
+					renderDepth: 0,
+					scene: _List_Nil,
+					stravaAuthentication: authData,
+					time: $elm$time$Time$millisToPosix(0),
+					trackTree: $elm$core$Maybe$Nothing,
+					viewDimensions: _Utils_Tuple2(
+						$ianmackenzie$elm_units$Pixels$pixels(800),
+						$ianmackenzie$elm_units$Pixels$pixels(500)),
+					viewMode: $author$project$ViewingMode$ViewThird,
+					zone: $elm$time$Time$utc
+				}),
+			$elm$core$Platform$Cmd$batch(
+				_List_fromArray(
+					[
+						authCmd,
+						A2($elm$core$Task$perform, $author$project$Msg$AdjustTimeZone, $elm$time$Time$here)
+					])));
+	});
+var $elm$json$Json$Decode$int = _Json_decodeInt;
+var $elm$json$Json$Decode$list = _Json_decodeList;
+var $elm$json$Json$Decode$null = _Json_decodeNull;
+var $elm$json$Json$Decode$oneOf = _Json_oneOf;
+var $author$project$OAuthTypes$GotRandomBytes = function (a) {
+	return {$: 'GotRandomBytes', a: a};
+};
+var $author$project$Msg$PortMessage = function (a) {
+	return {$: 'PortMessage', a: a};
+};
+var $elm$core$Platform$Sub$batch = _Platform_batch;
+var $elm$json$Json$Decode$value = _Json_decodeValue;
+var $author$project$PortController$messageReceiver = _Platform_incomingPort('messageReceiver', $elm$json$Json$Decode$value);
+var $author$project$OAuthPorts$randomBytes = _Platform_incomingPort(
+	'randomBytes',
+	$elm$json$Json$Decode$list($elm$json$Json$Decode$int));
+var $author$project$Main$subscriptions = function (_v0) {
+	var model = _v0.a;
+	return $elm$core$Platform$Sub$batch(
+		_List_fromArray(
+			[
+				$author$project$OAuthPorts$randomBytes(
+				function (ints) {
+					return $author$project$Msg$OAuthMessage(
+						$author$project$OAuthTypes$GotRandomBytes(ints));
+				}),
+				$author$project$PortController$messageReceiver($author$project$Msg$PortMessage)
+			]));
+};
+var $author$project$Msg$GpxLoaded = function (a) {
+	return {$: 'GpxLoaded', a: a};
+};
+var $author$project$Msg$GpxSelected = function (a) {
+	return {$: 'GpxSelected', a: a};
+};
+var $author$project$Msg$ReceivedIpDetails = function (a) {
+	return {$: 'ReceivedIpDetails', a: a};
+};
+var $author$project$Msg$RepaintMap = {$: 'RepaintMap'};
+var $author$project$ViewingMode$ViewMap = {$: 'ViewMap'};
+var $author$project$PortController$commandPort = _Platform_outgoingPort('commandPort', $elm$core$Basics$identity);
+var $elm$json$Json$Encode$float = _Json_wrap;
+var $elm$core$Basics$atan2 = _Basics_atan2;
+var $ianmackenzie$elm_geometry$Direction3d$azimuthIn = F2(
+	function (_v0, _v1) {
+		var sketchPlane = _v0.a;
+		var d = _v1.a;
+		var _v2 = sketchPlane.yDirection;
+		var j = _v2.a;
+		var sketchY = ((d.x * j.x) + (d.y * j.y)) + (d.z * j.z);
+		var _v3 = sketchPlane.xDirection;
+		var i = _v3.a;
+		var sketchX = ((d.x * i.x) + (d.y * i.y)) + (d.z * i.z);
+		return $ianmackenzie$elm_units$Quantity$Quantity(
+			A2($elm$core$Basics$atan2, sketchY, sketchX));
+	});
+var $ianmackenzie$elm_geometry$Geometry$Types$Direction3d = function (a) {
+	return {$: 'Direction3d', a: a};
+};
+var $elm$core$Basics$negate = function (n) {
+	return -n;
+};
+var $elm$core$Basics$abs = function (n) {
+	return (n < 0) ? (-n) : n;
+};
+var $elm$core$Basics$sqrt = _Basics_sqrt;
+var $ianmackenzie$elm_geometry$Vector3d$direction = function (_v0) {
+	var v = _v0.a;
+	var largestComponent = A2(
+		$elm$core$Basics$max,
+		$elm$core$Basics$abs(v.x),
+		A2(
+			$elm$core$Basics$max,
+			$elm$core$Basics$abs(v.y),
+			$elm$core$Basics$abs(v.z)));
+	if (!largestComponent) {
+		return $elm$core$Maybe$Nothing;
+	} else {
+		var scaledZ = v.z / largestComponent;
+		var scaledY = v.y / largestComponent;
+		var scaledX = v.x / largestComponent;
+		var scaledLength = $elm$core$Basics$sqrt(((scaledX * scaledX) + (scaledY * scaledY)) + (scaledZ * scaledZ));
+		return $elm$core$Maybe$Just(
+			$ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
+				{x: scaledX / scaledLength, y: scaledY / scaledLength, z: scaledZ / scaledLength}));
+	}
+};
+var $ianmackenzie$elm_geometry$Direction3d$elevationFrom = F2(
+	function (_v0, _v1) {
+		var sketchPlane = _v0.a;
+		var d = _v1.a;
+		var _v2 = sketchPlane.yDirection;
+		var j = _v2.a;
+		var sketchY = ((d.x * j.x) + (d.y * j.y)) + (d.z * j.z);
+		var _v3 = sketchPlane.xDirection;
+		var i = _v3.a;
+		var kx = (i.y * j.z) - (i.z * j.y);
+		var ky = (i.z * j.x) - (i.x * j.z);
+		var kz = (i.x * j.y) - (i.y * j.x);
+		var sketchZ = ((d.x * kx) + (d.y * ky)) + (d.z * kz);
+		var sketchX = ((d.x * i.x) + (d.y * i.y)) + (d.z * i.z);
+		return $ianmackenzie$elm_units$Quantity$Quantity(
+			A2(
+				$elm$core$Basics$atan2,
+				sketchZ,
+				$elm$core$Basics$sqrt((sketchX * sketchX) + (sketchY * sketchY))));
+	});
+var $ianmackenzie$elm_units$Quantity$zero = $ianmackenzie$elm_units$Quantity$Quantity(0);
+var $ianmackenzie$elm_geometry$Vector3d$length = function (_v0) {
+	var v = _v0.a;
+	var largestComponent = A2(
+		$elm$core$Basics$max,
+		$elm$core$Basics$abs(v.x),
+		A2(
+			$elm$core$Basics$max,
+			$elm$core$Basics$abs(v.y),
+			$elm$core$Basics$abs(v.z)));
+	if (!largestComponent) {
+		return $ianmackenzie$elm_units$Quantity$zero;
+	} else {
+		var scaledZ = v.z / largestComponent;
+		var scaledY = v.y / largestComponent;
+		var scaledX = v.x / largestComponent;
+		var scaledLength = $elm$core$Basics$sqrt(((scaledX * scaledX) + (scaledY * scaledY)) + (scaledZ * scaledZ));
+		return $ianmackenzie$elm_units$Quantity$Quantity(scaledLength * largestComponent);
+	}
+};
+var $author$project$Spherical$meanRadius = 6371000;
+var $ianmackenzie$elm_units$Length$meters = function (numMeters) {
+	return $ianmackenzie$elm_units$Quantity$Quantity(numMeters);
+};
+var $ianmackenzie$elm_geometry$Geometry$Types$SketchPlane3d = function (a) {
+	return {$: 'SketchPlane3d', a: a};
+};
+var $ianmackenzie$elm_geometry$SketchPlane3d$unsafe = $ianmackenzie$elm_geometry$Geometry$Types$SketchPlane3d;
+var $ianmackenzie$elm_geometry$Direction3d$unsafe = function (givenComponents) {
+	return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(givenComponents);
+};
+var $ianmackenzie$elm_geometry$Direction3d$positiveX = $ianmackenzie$elm_geometry$Direction3d$unsafe(
+	{x: 1, y: 0, z: 0});
+var $ianmackenzie$elm_geometry$Direction3d$x = $ianmackenzie$elm_geometry$Direction3d$positiveX;
+var $ianmackenzie$elm_geometry$Direction3d$positiveY = $ianmackenzie$elm_geometry$Direction3d$unsafe(
+	{x: 0, y: 1, z: 0});
+var $ianmackenzie$elm_geometry$Direction3d$y = $ianmackenzie$elm_geometry$Direction3d$positiveY;
+var $ianmackenzie$elm_geometry$SketchPlane3d$xy = $ianmackenzie$elm_geometry$SketchPlane3d$unsafe(
+	{originPoint: $ianmackenzie$elm_geometry$Point3d$origin, xDirection: $ianmackenzie$elm_geometry$Direction3d$x, yDirection: $ianmackenzie$elm_geometry$Direction3d$y});
+var $author$project$DomainModel$gpxFromVector = function (vector) {
+	var direction = $ianmackenzie$elm_geometry$Vector3d$direction(vector);
+	if (direction.$ === 'Just') {
+		var d = direction.a;
+		return {
+			altitude: $ianmackenzie$elm_geometry$Vector3d$length(vector),
+			latitude: A2($ianmackenzie$elm_geometry$Direction3d$elevationFrom, $ianmackenzie$elm_geometry$SketchPlane3d$xy, d),
+			longitude: A2($ianmackenzie$elm_geometry$Direction3d$azimuthIn, $ianmackenzie$elm_geometry$SketchPlane3d$xy, d)
+		};
+	} else {
+		return {
+			altitude: $ianmackenzie$elm_units$Length$meters($author$project$Spherical$meanRadius),
+			latitude: $ianmackenzie$elm_units$Quantity$zero,
+			longitude: $ianmackenzie$elm_units$Quantity$zero
+		};
+	}
+};
+var $ianmackenzie$elm_units$Angle$inRadians = function (_v0) {
+	var numRadians = _v0.a;
+	return numRadians;
+};
+var $elm$core$Basics$pi = _Basics_pi;
+var $ianmackenzie$elm_units$Angle$inDegrees = function (angle) {
+	return 180 * ($ianmackenzie$elm_units$Angle$inRadians(angle) / $elm$core$Basics$pi);
+};
+var $author$project$DomainModel$skipCount = function (treeNode) {
+	if (treeNode.$ === 'Leaf') {
+		var leaf = treeNode.a;
+		return 1;
+	} else {
+		var node = treeNode.a;
+		return node.nodeContent.skipCount;
+	}
+};
+var $author$project$DomainModel$leafFromIndex = F2(
+	function (index, treeNode) {
+		leafFromIndex:
+		while (true) {
+			if (treeNode.$ === 'Leaf') {
+				var info = treeNode.a;
+				return treeNode;
+			} else {
+				var info = treeNode.a;
+				if (_Utils_cmp(
+					index,
+					$author$project$DomainModel$skipCount(info.left)) < 0) {
+					var $temp$index = index,
+						$temp$treeNode = info.left;
+					index = $temp$index;
+					treeNode = $temp$treeNode;
+					continue leafFromIndex;
+				} else {
+					var $temp$index = index - $author$project$DomainModel$skipCount(info.left),
+						$temp$treeNode = info.right;
+					index = $temp$index;
+					treeNode = $temp$treeNode;
+					continue leafFromIndex;
+				}
+			}
+		}
+	});
+var $author$project$MapboxKey$mapboxKey = 'pk.eyJ1IjoicGV0ZXJqYW1lc3dhcmQiLCJhIjoiY2tpdWswb3dsMm02bDMzcDMyNGw1bmh5aSJ9.Fk3ibin0PpeEGXlGsctP1g';
+var $elm$json$Json$Encode$null = _Json_encodeNull;
+var $elm$json$Json$Encode$object = function (pairs) {
+	return _Json_wrap(
+		A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v0, obj) {
+					var k = _v0.a;
+					var v = _v0.b;
+					return A3(_Json_addField, k, v, obj);
+				}),
+			_Json_emptyObject(_Utils_Tuple0),
+			pairs));
+};
+var $elm$core$Basics$ge = _Utils_ge;
+var $ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo = F2(
+	function (_v0, _v1) {
+		var y = _v0.a;
+		var x = _v1.a;
+		return _Utils_cmp(x, y) > -1;
+	});
+var $ianmackenzie$elm_units$Quantity$lessThanOrEqualTo = F2(
+	function (_v0, _v1) {
+		var y = _v0.a;
+		var x = _v1.a;
+		return _Utils_cmp(x, y) < 1;
+	});
+var $ianmackenzie$elm_geometry$BoundingBox3d$maxX = function (_v0) {
+	var boundingBox = _v0.a;
+	return boundingBox.maxX;
+};
+var $ianmackenzie$elm_geometry$BoundingBox3d$maxY = function (_v0) {
+	var boundingBox = _v0.a;
+	return boundingBox.maxY;
+};
+var $ianmackenzie$elm_geometry$BoundingBox3d$maxZ = function (_v0) {
+	var boundingBox = _v0.a;
+	return boundingBox.maxZ;
+};
+var $ianmackenzie$elm_geometry$BoundingBox3d$minX = function (_v0) {
+	var boundingBox = _v0.a;
+	return boundingBox.minX;
+};
+var $ianmackenzie$elm_geometry$BoundingBox3d$minY = function (_v0) {
+	var boundingBox = _v0.a;
+	return boundingBox.minY;
+};
+var $ianmackenzie$elm_geometry$BoundingBox3d$minZ = function (_v0) {
+	var boundingBox = _v0.a;
+	return boundingBox.minZ;
+};
+var $ianmackenzie$elm_geometry$BoundingBox3d$intersects = F2(
+	function (other, boundingBox) {
+		return A2(
+			$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
+			$ianmackenzie$elm_geometry$BoundingBox3d$maxX(other),
+			$ianmackenzie$elm_geometry$BoundingBox3d$minX(boundingBox)) && (A2(
+			$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo,
+			$ianmackenzie$elm_geometry$BoundingBox3d$minX(other),
+			$ianmackenzie$elm_geometry$BoundingBox3d$maxX(boundingBox)) && (A2(
+			$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
+			$ianmackenzie$elm_geometry$BoundingBox3d$maxY(other),
+			$ianmackenzie$elm_geometry$BoundingBox3d$minY(boundingBox)) && (A2(
+			$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo,
+			$ianmackenzie$elm_geometry$BoundingBox3d$minY(other),
+			$ianmackenzie$elm_geometry$BoundingBox3d$maxY(boundingBox)) && (A2(
+			$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
+			$ianmackenzie$elm_geometry$BoundingBox3d$maxZ(other),
+			$ianmackenzie$elm_geometry$BoundingBox3d$minZ(boundingBox)) && A2(
+			$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo,
+			$ianmackenzie$elm_geometry$BoundingBox3d$minZ(other),
+			$ianmackenzie$elm_geometry$BoundingBox3d$maxZ(boundingBox))))));
+	});
+var $ianmackenzie$elm_units$Length$kilometers = function (numKilometers) {
+	return $ianmackenzie$elm_units$Length$meters(1000 * numKilometers);
+};
+var $elm$json$Json$Encode$list = F2(
+	function (func, entries) {
+		return _Json_wrap(
+			A3(
+				$elm$core$List$foldl,
+				_Json_addEntry(func),
+				_Json_emptyArray(_Utils_Tuple0),
+				entries));
+	});
+var $author$project$DomainModel$lngLatPair = function (_v0) {
+	var longitude = _v0.a;
+	var latitude = _v0.b;
+	return A2(
+		$elm$json$Json$Encode$list,
+		$elm$json$Json$Encode$float,
+		_List_fromArray(
+			[
+				$ianmackenzie$elm_units$Angle$inDegrees(longitude),
+				$ianmackenzie$elm_units$Angle$inDegrees(latitude)
+			]));
+};
+var $author$project$DomainModel$startVector = function (treeNode) {
+	if (treeNode.$ === 'Leaf') {
+		var leaf = treeNode.a;
+		return leaf.startVector;
+	} else {
+		var node = treeNode.a;
+		return node.nodeContent.startVector;
+	}
+};
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $ianmackenzie$elm_geometry$Point3d$translateBy = F2(
+	function (_v0, _v1) {
+		var v = _v0.a;
+		var p = _v1.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+			{x: p.x + v.x, y: p.y + v.y, z: p.z + v.z});
+	});
+var $ianmackenzie$elm_geometry$Geometry$Types$BoundingBox3d = function (a) {
+	return {$: 'BoundingBox3d', a: a};
+};
+var $ianmackenzie$elm_units$Quantity$abs = function (_v0) {
+	var value = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(
+		$elm$core$Basics$abs(value));
+};
+var $ianmackenzie$elm_geometry$Point3d$coordinates = function (_v0) {
+	var p = _v0.a;
+	return _Utils_Tuple3(
+		$ianmackenzie$elm_units$Quantity$Quantity(p.x),
+		$ianmackenzie$elm_units$Quantity$Quantity(p.y),
+		$ianmackenzie$elm_units$Quantity$Quantity(p.z));
+};
+var $ianmackenzie$elm_units$Quantity$half = function (_v0) {
+	var value = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(0.5 * value);
+};
+var $ianmackenzie$elm_units$Quantity$minus = F2(
+	function (_v0, _v1) {
+		var y = _v0.a;
+		var x = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(x - y);
+	});
+var $ianmackenzie$elm_units$Quantity$plus = F2(
+	function (_v0, _v1) {
+		var y = _v0.a;
+		var x = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(x + y);
+	});
+var $ianmackenzie$elm_geometry$BoundingBox3d$withDimensions = F2(
+	function (_v0, givenCenterPoint) {
+		var givenLength = _v0.a;
+		var givenWidth = _v0.b;
+		var givenHeight = _v0.c;
+		var halfWidth = $ianmackenzie$elm_units$Quantity$half(
+			$ianmackenzie$elm_units$Quantity$abs(givenWidth));
+		var halfLength = $ianmackenzie$elm_units$Quantity$half(
+			$ianmackenzie$elm_units$Quantity$abs(givenLength));
+		var halfHeight = $ianmackenzie$elm_units$Quantity$half(
+			$ianmackenzie$elm_units$Quantity$abs(givenHeight));
+		var _v1 = $ianmackenzie$elm_geometry$Point3d$coordinates(givenCenterPoint);
+		var x0 = _v1.a;
+		var y0 = _v1.b;
+		var z0 = _v1.c;
+		return $ianmackenzie$elm_geometry$Geometry$Types$BoundingBox3d(
+			{
+				maxX: A2($ianmackenzie$elm_units$Quantity$plus, halfLength, x0),
+				maxY: A2($ianmackenzie$elm_units$Quantity$plus, halfWidth, y0),
+				maxZ: A2($ianmackenzie$elm_units$Quantity$plus, halfHeight, z0),
+				minX: A2($ianmackenzie$elm_units$Quantity$minus, halfLength, x0),
+				minY: A2($ianmackenzie$elm_units$Quantity$minus, halfWidth, y0),
+				minZ: A2($ianmackenzie$elm_units$Quantity$minus, halfHeight, z0)
+			});
+	});
+var $author$project$SceneBuilder$renderMapJson = function (model) {
+	var mapLocation = function (node) {
+		var _v3 = $ianmackenzie$elm_geometry$Vector3d$direction(
+			$author$project$DomainModel$startVector(node));
+		if (_v3.$ === 'Just') {
+			var direction = _v3.a;
+			return _Utils_Tuple2(
+				A2($ianmackenzie$elm_geometry$Direction3d$azimuthIn, $ianmackenzie$elm_geometry$SketchPlane3d$xy, direction),
+				A2($ianmackenzie$elm_geometry$Direction3d$elevationFrom, $ianmackenzie$elm_geometry$SketchPlane3d$xy, direction));
+		} else {
+			return _Utils_Tuple2($ianmackenzie$elm_units$Quantity$zero, $ianmackenzie$elm_units$Quantity$zero);
+		}
+	};
+	var makeVisibleSegment = function (node) {
+		return $author$project$DomainModel$lngLatPair(
+			mapLocation(node));
+	};
+	var renderTree = F3(
+		function (depth, someNode, accum) {
+			if (someNode.$ === 'Leaf') {
+				var leafNode = someNode.a;
+				return A2(
+					$elm$core$List$cons,
+					makeVisibleSegment(someNode),
+					accum);
+			} else {
+				var notLeaf = someNode.a;
+				return (depth <= 0) ? A2(
+					$elm$core$List$cons,
+					makeVisibleSegment(someNode),
+					accum) : A3(
+					renderTree,
+					depth - 1,
+					notLeaf.right,
+					A3(renderTree, depth - 1, notLeaf.left, accum));
+			}
+		});
+	var renderTreeSelectively = F4(
+		function (box, depth, someNode, accum) {
+			if (someNode.$ === 'Leaf') {
+				var leafNode = someNode.a;
+				return A2($ianmackenzie$elm_geometry$BoundingBox3d$intersects, box, leafNode.boundingBox) ? A2(
+					$elm$core$List$cons,
+					makeVisibleSegment(someNode),
+					accum) : accum;
+			} else {
+				var notLeaf = someNode.a;
+				return A2($ianmackenzie$elm_geometry$BoundingBox3d$intersects, box, notLeaf.nodeContent.boundingBox) ? A4(
+					renderTreeSelectively,
+					box,
+					depth - 1,
+					notLeaf.right,
+					A4(renderTreeSelectively, box, depth - 1, notLeaf.left, accum)) : A3(
+					renderTree,
+					depth - 1,
+					notLeaf.right,
+					A3(renderTree, depth - 1, notLeaf.left, accum));
+			}
+		});
+	var boxSide = $ianmackenzie$elm_units$Length$kilometers(4);
+	var _v2 = model.trackTree;
+	if (_v2.$ === 'Just') {
+		var tree = _v2.a;
+		var startPoint = A2(
+			$ianmackenzie$elm_geometry$Point3d$translateBy,
+			$author$project$DomainModel$startVector(
+				A2($author$project$DomainModel$leafFromIndex, model.currentPosition, tree)),
+			$ianmackenzie$elm_geometry$Point3d$origin);
+		var box = A2(
+			$ianmackenzie$elm_geometry$BoundingBox3d$withDimensions,
+			_Utils_Tuple3(boxSide, boxSide, boxSide),
+			startPoint);
+		var coordinates = A4(renderTreeSelectively, box, model.renderDepth, tree, _List_Nil);
+		var geometry = $elm$json$Json$Encode$object(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'type',
+					$elm$json$Json$Encode$string('LineString')),
+					_Utils_Tuple2(
+					'coordinates',
+					A2($elm$json$Json$Encode$list, $elm$core$Basics$identity, coordinates))
+				]));
+		return $elm$json$Json$Encode$object(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'type',
+					$elm$json$Json$Encode$string('Feature')),
+					_Utils_Tuple2(
+					'properties',
+					$elm$json$Json$Encode$object(_List_Nil)),
+					_Utils_Tuple2('geometry', geometry)
+				]));
+	} else {
+		return $elm$json$Json$Encode$null;
+	}
+};
+var $author$project$PortController$addTrackToMap = function (model) {
+	var _v0 = model.trackTree;
+	if (_v0.$ === 'Just') {
+		var tree = _v0.a;
+		var _v1 = $author$project$DomainModel$gpxFromVector(
+			$author$project$DomainModel$startVector(
+				A2($author$project$DomainModel$leafFromIndex, model.currentPosition, tree)));
+		var longitude = _v1.longitude;
+		var latitude = _v1.latitude;
+		var altitude = _v1.altitude;
+		return $author$project$PortController$commandPort(
+			$elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'Cmd',
+						$elm$json$Json$Encode$string('Track')),
+						_Utils_Tuple2(
+						'token',
+						$elm$json$Json$Encode$string($author$project$MapboxKey$mapboxKey)),
+						_Utils_Tuple2(
+						'lon',
+						$elm$json$Json$Encode$float(
+							$ianmackenzie$elm_units$Angle$inDegrees(longitude))),
+						_Utils_Tuple2(
+						'lat',
+						$elm$json$Json$Encode$float(
+							$ianmackenzie$elm_units$Angle$inDegrees(latitude))),
+						_Utils_Tuple2(
+						'zoom',
+						$elm$json$Json$Encode$float(10.0)),
+						_Utils_Tuple2(
+						'data',
+						$author$project$SceneBuilder$renderMapJson(model)),
+						_Utils_Tuple2('points', $elm$json$Json$Encode$null)
+					])));
+	} else {
+		return $elm$core$Platform$Cmd$none;
+	}
+};
+var $author$project$PortController$centreMapOnCurrent = function (model) {
+	var _v0 = model.trackTree;
+	if (_v0.$ === 'Just') {
+		var tree = _v0.a;
+		var _v1 = $author$project$DomainModel$gpxFromVector(
+			$author$project$DomainModel$startVector(
+				A2($author$project$DomainModel$leafFromIndex, model.currentPosition, tree)));
+		var longitude = _v1.longitude;
+		var latitude = _v1.latitude;
+		var altitude = _v1.altitude;
+		return $author$project$PortController$commandPort(
+			$elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'Cmd',
+						$elm$json$Json$Encode$string('Centre')),
+						_Utils_Tuple2(
+						'token',
+						$elm$json$Json$Encode$string($author$project$MapboxKey$mapboxKey)),
+						_Utils_Tuple2(
+						'lon',
+						$elm$json$Json$Encode$float(
+							$ianmackenzie$elm_units$Angle$inDegrees(longitude))),
+						_Utils_Tuple2(
+						'lat',
+						$elm$json$Json$Encode$float(
+							$ianmackenzie$elm_units$Angle$inDegrees(latitude)))
+					])));
+	} else {
+		return $elm$core$Platform$Cmd$none;
+	}
+};
+var $author$project$PortController$createMap = function (info) {
+	return $author$project$PortController$commandPort(
+		$elm$json$Json$Encode$object(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'Cmd',
+					$elm$json$Json$Encode$string('Init')),
+					_Utils_Tuple2(
+					'token',
+					$elm$json$Json$Encode$string($author$project$MapboxKey$mapboxKey)),
+					_Utils_Tuple2(
+					'lon',
+					$elm$json$Json$Encode$float(info.centreLon)),
+					_Utils_Tuple2(
+					'lat',
+					$elm$json$Json$Encode$float(info.centreLat)),
+					_Utils_Tuple2(
+					'zoom',
+					$elm$json$Json$Encode$float(info.mapZoom))
+				])));
+};
+var $ianmackenzie$elm_units$Angle$radians = function (numRadians) {
+	return $ianmackenzie$elm_units$Quantity$Quantity(numRadians);
+};
+var $ianmackenzie$elm_units$Angle$degrees = function (numDegrees) {
+	return $ianmackenzie$elm_units$Angle$radians($elm$core$Basics$pi * (numDegrees / 180));
+};
+var $ianmackenzie$elm_3d_camera$Camera3d$Types$Viewpoint3d = function (a) {
+	return {$: 'Viewpoint3d', a: a};
+};
+var $ianmackenzie$elm_geometry$Geometry$Types$Vector3d = function (a) {
+	return {$: 'Vector3d', a: a};
+};
+var $ianmackenzie$elm_geometry$Vector3d$cross = F2(
+	function (_v0, _v1) {
+		var v2 = _v0.a;
+		var v1 = _v1.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
+			{x: (v1.y * v2.z) - (v1.z * v2.y), y: (v1.z * v2.x) - (v1.x * v2.z), z: (v1.x * v2.y) - (v1.y * v2.x)});
+	});
+var $ianmackenzie$elm_geometry$Vector3d$from = F2(
+	function (_v0, _v1) {
+		var p1 = _v0.a;
+		var p2 = _v1.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
+			{x: p2.x - p1.x, y: p2.y - p1.y, z: p2.z - p1.z});
+	});
+var $elm$core$Maybe$andThen = F2(
+	function (callback, maybeValue) {
+		if (maybeValue.$ === 'Just') {
+			var value = maybeValue.a;
+			return callback(value);
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $ianmackenzie$elm_geometry$Vector3d$dot = F2(
+	function (_v0, _v1) {
+		var v2 = _v0.a;
+		var v1 = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(((v1.x * v2.x) + (v1.y * v2.y)) + (v1.z * v2.z));
+	});
+var $ianmackenzie$elm_units$Quantity$greaterThan = F2(
+	function (_v0, _v1) {
+		var y = _v0.a;
+		var x = _v1.a;
+		return _Utils_cmp(x, y) > 0;
+	});
+var $ianmackenzie$elm_units$Quantity$lessThan = F2(
+	function (_v0, _v1) {
+		var y = _v0.a;
+		var x = _v1.a;
+		return _Utils_cmp(x, y) < 0;
+	});
+var $ianmackenzie$elm_geometry$Vector3d$minus = F2(
+	function (_v0, _v1) {
+		var v2 = _v0.a;
+		var v1 = _v1.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
+			{x: v1.x - v2.x, y: v1.y - v2.y, z: v1.z - v2.z});
+	});
+var $ianmackenzie$elm_geometry$Vector3d$projectionIn = F2(
+	function (_v0, _v1) {
+		var d = _v0.a;
+		var v = _v1.a;
+		var projectedLength = ((v.x * d.x) + (v.y * d.y)) + (v.z * d.z);
+		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
+			{x: d.x * projectedLength, y: d.y * projectedLength, z: d.z * projectedLength});
+	});
+var $ianmackenzie$elm_geometry$Vector3d$reverse = function (_v0) {
+	var v = _v0.a;
+	return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
+		{x: -v.x, y: -v.y, z: -v.z});
+};
+var $ianmackenzie$elm_geometry$Vector3d$zero = $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
+	{x: 0, y: 0, z: 0});
+var $ianmackenzie$elm_geometry$Direction3d$orthonormalize = F3(
+	function (xVector, xyVector, xyzVector) {
+		return A2(
+			$elm$core$Maybe$andThen,
+			function (xDirection) {
+				var yVector = A2(
+					$ianmackenzie$elm_geometry$Vector3d$minus,
+					A2($ianmackenzie$elm_geometry$Vector3d$projectionIn, xDirection, xyVector),
+					xyVector);
+				return A2(
+					$elm$core$Maybe$andThen,
+					function (yDirection) {
+						var rightHandedZVector = A2($ianmackenzie$elm_geometry$Vector3d$cross, xyVector, xVector);
+						var tripleProduct = A2($ianmackenzie$elm_geometry$Vector3d$dot, xyzVector, rightHandedZVector);
+						var zVector = A2($ianmackenzie$elm_units$Quantity$greaterThan, $ianmackenzie$elm_units$Quantity$zero, tripleProduct) ? rightHandedZVector : (A2($ianmackenzie$elm_units$Quantity$lessThan, $ianmackenzie$elm_units$Quantity$zero, tripleProduct) ? $ianmackenzie$elm_geometry$Vector3d$reverse(rightHandedZVector) : $ianmackenzie$elm_geometry$Vector3d$zero);
+						return A2(
+							$elm$core$Maybe$map,
+							function (zDirection) {
+								return _Utils_Tuple3(xDirection, yDirection, zDirection);
+							},
+							$ianmackenzie$elm_geometry$Vector3d$direction(zVector));
+					},
+					$ianmackenzie$elm_geometry$Vector3d$direction(yVector));
+			},
+			$ianmackenzie$elm_geometry$Vector3d$direction(xVector));
+	});
+var $ianmackenzie$elm_geometry$Direction3d$perpendicularTo = function (_v0) {
+	var d = _v0.a;
+	var absZ = $elm$core$Basics$abs(d.z);
+	var absY = $elm$core$Basics$abs(d.y);
+	var absX = $elm$core$Basics$abs(d.x);
+	if (_Utils_cmp(absX, absY) < 1) {
+		if (_Utils_cmp(absX, absZ) < 1) {
+			var scale = $elm$core$Basics$sqrt((d.z * d.z) + (d.y * d.y));
+			return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
+				{x: 0, y: (-d.z) / scale, z: d.y / scale});
+		} else {
+			var scale = $elm$core$Basics$sqrt((d.y * d.y) + (d.x * d.x));
+			return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
+				{x: (-d.y) / scale, y: d.x / scale, z: 0});
+		}
+	} else {
+		if (_Utils_cmp(absY, absZ) < 1) {
+			var scale = $elm$core$Basics$sqrt((d.z * d.z) + (d.x * d.x));
+			return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
+				{x: d.z / scale, y: 0, z: (-d.x) / scale});
+		} else {
+			var scale = $elm$core$Basics$sqrt((d.x * d.x) + (d.y * d.y));
+			return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
+				{x: (-d.y) / scale, y: d.x / scale, z: 0});
+		}
+	}
+};
+var $ianmackenzie$elm_geometry$Direction3d$perpendicularBasis = function (direction) {
+	var xDirection = $ianmackenzie$elm_geometry$Direction3d$perpendicularTo(direction);
+	var _v0 = xDirection;
+	var dX = _v0.a;
+	var _v1 = direction;
+	var d = _v1.a;
+	var yDirection = $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
+		{x: (d.y * dX.z) - (d.z * dX.y), y: (d.z * dX.x) - (d.x * dX.z), z: (d.x * dX.y) - (d.y * dX.x)});
+	return _Utils_Tuple2(xDirection, yDirection);
+};
+var $ianmackenzie$elm_geometry$Direction3d$toVector = function (_v0) {
+	var directionComponents = _v0.a;
+	return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(directionComponents);
+};
+var $ianmackenzie$elm_geometry$Geometry$Types$Frame3d = function (a) {
+	return {$: 'Frame3d', a: a};
+};
+var $ianmackenzie$elm_geometry$Frame3d$unsafe = function (properties) {
+	return $ianmackenzie$elm_geometry$Geometry$Types$Frame3d(properties);
+};
+var $ianmackenzie$elm_geometry$Frame3d$withZDirection = F2(
+	function (givenZDirection, givenOrigin) {
+		var _v0 = $ianmackenzie$elm_geometry$Direction3d$perpendicularBasis(givenZDirection);
+		var computedXDirection = _v0.a;
+		var computedYDirection = _v0.b;
+		return $ianmackenzie$elm_geometry$Frame3d$unsafe(
+			{originPoint: givenOrigin, xDirection: computedXDirection, yDirection: computedYDirection, zDirection: givenZDirection});
+	});
+var $ianmackenzie$elm_3d_camera$Viewpoint3d$lookAt = function (_arguments) {
+	var zVector = A2($ianmackenzie$elm_geometry$Vector3d$from, _arguments.focalPoint, _arguments.eyePoint);
+	var yVector = $ianmackenzie$elm_geometry$Direction3d$toVector(_arguments.upDirection);
+	var xVector = A2($ianmackenzie$elm_geometry$Vector3d$cross, zVector, yVector);
+	var _v0 = A3($ianmackenzie$elm_geometry$Direction3d$orthonormalize, zVector, yVector, xVector);
+	if (_v0.$ === 'Just') {
+		var _v1 = _v0.a;
+		var normalizedZDirection = _v1.a;
+		var normalizedYDirection = _v1.b;
+		var normalizedXDirection = _v1.c;
+		return $ianmackenzie$elm_3d_camera$Camera3d$Types$Viewpoint3d(
+			$ianmackenzie$elm_geometry$Frame3d$unsafe(
+				{originPoint: _arguments.eyePoint, xDirection: normalizedXDirection, yDirection: normalizedYDirection, zDirection: normalizedZDirection}));
+	} else {
+		var _v2 = $ianmackenzie$elm_geometry$Vector3d$direction(zVector);
+		if (_v2.$ === 'Just') {
+			var zDirection = _v2.a;
+			return $ianmackenzie$elm_3d_camera$Camera3d$Types$Viewpoint3d(
+				A2($ianmackenzie$elm_geometry$Frame3d$withZDirection, zDirection, _arguments.eyePoint));
+		} else {
+			var _v3 = $ianmackenzie$elm_geometry$Direction3d$perpendicularBasis(_arguments.upDirection);
+			var arbitraryZDirection = _v3.a;
+			var arbitraryXDirection = _v3.b;
+			return $ianmackenzie$elm_3d_camera$Camera3d$Types$Viewpoint3d(
+				$ianmackenzie$elm_geometry$Frame3d$unsafe(
+					{originPoint: _arguments.eyePoint, xDirection: arbitraryXDirection, yDirection: _arguments.upDirection, zDirection: arbitraryZDirection}));
+		}
+	}
+};
+var $ianmackenzie$elm_3d_camera$Camera3d$Types$Camera3d = function (a) {
+	return {$: 'Camera3d', a: a};
+};
+var $ianmackenzie$elm_3d_camera$Camera3d$Types$Perspective = function (a) {
+	return {$: 'Perspective', a: a};
+};
+var $elm$core$Basics$tan = _Basics_tan;
+var $ianmackenzie$elm_units$Angle$tan = function (_v0) {
+	var angle = _v0.a;
+	return $elm$core$Basics$tan(angle);
+};
+var $ianmackenzie$elm_3d_camera$Camera3d$perspective = function (_arguments) {
+	var halfFieldOfView = $ianmackenzie$elm_units$Quantity$half(
+		$ianmackenzie$elm_units$Quantity$abs(_arguments.verticalFieldOfView));
+	var frustumSlope = $ianmackenzie$elm_units$Angle$tan(halfFieldOfView);
+	return $ianmackenzie$elm_3d_camera$Camera3d$Types$Camera3d(
+		{
+			projection: $ianmackenzie$elm_3d_camera$Camera3d$Types$Perspective(frustumSlope),
+			viewpoint: _arguments.viewpoint
+		});
+};
+var $ianmackenzie$elm_geometry$Direction3d$positiveZ = $ianmackenzie$elm_geometry$Direction3d$unsafe(
+	{x: 0, y: 0, z: 1});
+var $ianmackenzie$elm_geometry$Point3d$scaleAbout = F3(
+	function (_v0, k, _v1) {
+		var p0 = _v0.a;
+		var p = _v1.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+			{x: p0.x + (k * (p.x - p0.x)), y: p0.y + (k * (p.y - p0.y)), z: p0.z + (k * (p.z - p0.z))});
+	});
+var $author$project$ViewThirdPerson$deriveCamera = F2(
+	function (treeNode, focusPoint) {
+		var eyePoint = A3($ianmackenzie$elm_geometry$Point3d$scaleAbout, $ianmackenzie$elm_geometry$Point3d$origin, 1.015, focusPoint);
+		var cameraViewpoint = $ianmackenzie$elm_3d_camera$Viewpoint3d$lookAt(
+			{eyePoint: eyePoint, focalPoint: focusPoint, upDirection: $ianmackenzie$elm_geometry$Direction3d$positiveZ});
+		var perspectiveCamera = $ianmackenzie$elm_3d_camera$Camera3d$perspective(
+			{
+				verticalFieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
+				viewpoint: cameraViewpoint
+			});
+		return perspectiveCamera;
+	});
+var $ianmackenzie$elm_geometry$Geometry$Types$Rectangle2d = function (a) {
+	return {$: 'Rectangle2d', a: a};
+};
+var $ianmackenzie$elm_units$Quantity$midpoint = F2(
+	function (_v0, _v1) {
+		var x = _v0.a;
+		var y = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(x + (0.5 * (y - x)));
+	});
+var $ianmackenzie$elm_geometry$Geometry$Types$Direction2d = function (a) {
+	return {$: 'Direction2d', a: a};
+};
+var $ianmackenzie$elm_geometry$Direction2d$negativeX = $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
+	{x: -1, y: 0});
+var $ianmackenzie$elm_geometry$Direction2d$negativeY = $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
+	{x: 0, y: -1});
+var $ianmackenzie$elm_geometry$Direction2d$positiveX = $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
+	{x: 1, y: 0});
+var $ianmackenzie$elm_geometry$Direction2d$positiveY = $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
+	{x: 0, y: 1});
+var $ianmackenzie$elm_geometry$Geometry$Types$Frame2d = function (a) {
+	return {$: 'Frame2d', a: a};
+};
+var $ianmackenzie$elm_geometry$Frame2d$unsafe = function (properties) {
+	return $ianmackenzie$elm_geometry$Geometry$Types$Frame2d(properties);
+};
+var $ianmackenzie$elm_geometry$Geometry$Types$Point2d = function (a) {
+	return {$: 'Point2d', a: a};
+};
+var $ianmackenzie$elm_geometry$Point2d$xy = F2(
+	function (_v0, _v1) {
+		var x = _v0.a;
+		var y = _v1.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point2d(
+			{x: x, y: y});
+	});
+var $ianmackenzie$elm_geometry$Rectangle2d$axisAligned = F4(
+	function (x1, y1, x2, y2) {
+		var computedYDirection = A2($ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo, y1, y2) ? $ianmackenzie$elm_geometry$Direction2d$positiveY : $ianmackenzie$elm_geometry$Direction2d$negativeY;
+		var computedXDirection = A2($ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo, x1, x2) ? $ianmackenzie$elm_geometry$Direction2d$positiveX : $ianmackenzie$elm_geometry$Direction2d$negativeX;
+		var computedDimensions = _Utils_Tuple2(
+			$ianmackenzie$elm_units$Quantity$abs(
+				A2($ianmackenzie$elm_units$Quantity$minus, x1, x2)),
+			$ianmackenzie$elm_units$Quantity$abs(
+				A2($ianmackenzie$elm_units$Quantity$minus, y1, y2)));
+		var computedCenterPoint = A2(
+			$ianmackenzie$elm_geometry$Point2d$xy,
+			A2($ianmackenzie$elm_units$Quantity$midpoint, x1, x2),
+			A2($ianmackenzie$elm_units$Quantity$midpoint, y1, y2));
+		var computedAxes = $ianmackenzie$elm_geometry$Frame2d$unsafe(
+			{originPoint: computedCenterPoint, xDirection: computedXDirection, yDirection: computedYDirection});
+		return $ianmackenzie$elm_geometry$Geometry$Types$Rectangle2d(
+			{axes: computedAxes, dimensions: computedDimensions});
+	});
+var $ianmackenzie$elm_geometry$Point2d$xCoordinate = function (_v0) {
+	var p = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(p.x);
+};
+var $ianmackenzie$elm_geometry$Point2d$yCoordinate = function (_v0) {
+	var p = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(p.y);
+};
+var $ianmackenzie$elm_geometry$Rectangle2d$from = F2(
+	function (p1, p2) {
+		return A4(
+			$ianmackenzie$elm_geometry$Rectangle2d$axisAligned,
+			$ianmackenzie$elm_geometry$Point2d$xCoordinate(p1),
+			$ianmackenzie$elm_geometry$Point2d$yCoordinate(p1),
+			$ianmackenzie$elm_geometry$Point2d$xCoordinate(p2),
+			$ianmackenzie$elm_geometry$Point2d$yCoordinate(p2));
+	});
+var $ianmackenzie$elm_geometry$Sphere3d$centerPoint = function (_v0) {
+	var properties = _v0.a;
+	return properties.centerPoint;
+};
+var $ianmackenzie$elm_geometry$Point3d$distanceFromAxis = F2(
+	function (_v0, _v1) {
+		var axis = _v0.a;
+		var p = _v1.a;
+		var _v2 = axis.originPoint;
+		var p0 = _v2.a;
+		var deltaX = p.x - p0.x;
+		var deltaY = p.y - p0.y;
+		var deltaZ = p.z - p0.z;
+		var _v3 = axis.direction;
+		var d = _v3.a;
+		var projection = ((deltaX * d.x) + (deltaY * d.y)) + (deltaZ * d.z);
+		var perpX = deltaX - (projection * d.x);
+		var perpY = deltaY - (projection * d.y);
+		var perpZ = deltaZ - (projection * d.z);
+		var largestComponent = A2(
+			$elm$core$Basics$max,
+			$elm$core$Basics$abs(perpX),
+			A2(
+				$elm$core$Basics$max,
+				$elm$core$Basics$abs(perpY),
+				$elm$core$Basics$abs(perpZ)));
+		if (!largestComponent) {
+			return $ianmackenzie$elm_units$Quantity$zero;
+		} else {
+			var scaledZ = perpZ / largestComponent;
+			var scaledY = perpY / largestComponent;
+			var scaledX = perpX / largestComponent;
+			var scaledDistance = $elm$core$Basics$sqrt(((scaledX * scaledX) + (scaledY * scaledY)) + (scaledZ * scaledZ));
+			return $ianmackenzie$elm_units$Quantity$Quantity(scaledDistance * largestComponent);
+		}
+	});
+var $ianmackenzie$elm_geometry$Point3d$along = F2(
+	function (_v0, _v1) {
+		var axis = _v0.a;
+		var distance = _v1.a;
+		var _v2 = axis.originPoint;
+		var p0 = _v2.a;
+		var _v3 = axis.direction;
+		var d = _v3.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+			{x: p0.x + (distance * d.x), y: p0.y + (distance * d.y), z: p0.z + (distance * d.z)});
+	});
+var $ianmackenzie$elm_geometry$Vector3d$componentIn = F2(
+	function (_v0, _v1) {
+		var d = _v0.a;
+		var v = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(((v.x * d.x) + (v.y * d.y)) + (v.z * d.z));
+	});
+var $ianmackenzie$elm_geometry$Axis3d$direction = function (_v0) {
+	var axis = _v0.a;
+	return axis.direction;
+};
+var $ianmackenzie$elm_geometry$Axis3d$originPoint = function (_v0) {
+	var axis = _v0.a;
+	return axis.originPoint;
+};
+var $elm$core$Basics$pow = _Basics_pow;
+var $ianmackenzie$elm_geometry$Axis3d$intersectionWithSphere = F2(
+	function (_v0, axis) {
+		var centerPoint = _v0.a.centerPoint;
+		var radius = _v0.a.radius;
+		var axisOrigin = $ianmackenzie$elm_geometry$Axis3d$originPoint(axis);
+		var circleCenterToOrigin = A2($ianmackenzie$elm_geometry$Vector3d$from, centerPoint, axisOrigin);
+		var axisDirection = $ianmackenzie$elm_geometry$Axis3d$direction(axis);
+		var _v1 = radius;
+		var r = _v1.a;
+		var _v2 = A2($ianmackenzie$elm_geometry$Vector3d$componentIn, axisDirection, circleCenterToOrigin);
+		var dotProduct = _v2.a;
+		var _v3 = circleCenterToOrigin;
+		var cto = _v3.a;
+		var ctoLengthSquared = (A2($elm$core$Basics$pow, cto.x, 2) + A2($elm$core$Basics$pow, cto.y, 2)) + A2($elm$core$Basics$pow, cto.z, 2);
+		var inRoot = (A2($elm$core$Basics$pow, dotProduct, 2) - ctoLengthSquared) + A2($elm$core$Basics$pow, r, 2);
+		if (inRoot < 0) {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var d2 = (-dotProduct) + $elm$core$Basics$sqrt(inRoot);
+			var d1 = (-dotProduct) - $elm$core$Basics$sqrt(inRoot);
+			return $elm$core$Maybe$Just(
+				_Utils_Tuple2(
+					A2(
+						$ianmackenzie$elm_geometry$Point3d$along,
+						axis,
+						$ianmackenzie$elm_units$Quantity$Quantity(d1)),
+					A2(
+						$ianmackenzie$elm_geometry$Point3d$along,
+						axis,
+						$ianmackenzie$elm_units$Quantity$Quantity(d2))));
+		}
+	});
+var $ianmackenzie$elm_geometry$Sphere3d$radius = function (_v0) {
+	var properties = _v0.a;
+	return properties.radius;
+};
+var $author$project$DomainModel$sphere = function (treeNode) {
+	if (treeNode.$ === 'Leaf') {
+		var leaf = treeNode.a;
+		return leaf.sphere;
+	} else {
+		var node = treeNode.a;
+		return node.nodeContent.sphere;
+	}
+};
+var $author$project$DomainModel$nearestToRay = F2(
+	function (ray, treeNode) {
+		var helper = F2(
+			function (withNode, skip) {
+				helper:
+				while (true) {
+					if (withNode.$ === 'Leaf') {
+						var leaf = withNode.a;
+						var startDistance = A2(
+							$ianmackenzie$elm_geometry$Point3d$distanceFromAxis,
+							ray,
+							A2($ianmackenzie$elm_geometry$Point3d$translateBy, leaf.startVector, $ianmackenzie$elm_geometry$Point3d$origin));
+						var endDistance = A2(
+							$ianmackenzie$elm_geometry$Point3d$distanceFromAxis,
+							ray,
+							A2($ianmackenzie$elm_geometry$Point3d$translateBy, leaf.endVector, $ianmackenzie$elm_geometry$Point3d$origin));
+						return A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, endDistance, startDistance) ? _Utils_Tuple2(skip, startDistance) : _Utils_Tuple2(skip + 1, endDistance);
+					} else {
+						var node = withNode.a;
+						var rightDistance = A2(
+							$ianmackenzie$elm_units$Quantity$minus,
+							$ianmackenzie$elm_geometry$Sphere3d$radius(
+								$author$project$DomainModel$sphere(node.right)),
+							A2(
+								$ianmackenzie$elm_geometry$Point3d$distanceFromAxis,
+								ray,
+								$ianmackenzie$elm_geometry$Sphere3d$centerPoint(
+									$author$project$DomainModel$sphere(node.right))));
+						var leftDistance = A2(
+							$ianmackenzie$elm_units$Quantity$minus,
+							$ianmackenzie$elm_geometry$Sphere3d$radius(
+								$author$project$DomainModel$sphere(node.left)),
+							A2(
+								$ianmackenzie$elm_geometry$Point3d$distanceFromAxis,
+								ray,
+								$ianmackenzie$elm_geometry$Sphere3d$centerPoint(
+									$author$project$DomainModel$sphere(node.left))));
+						var _v1 = _Utils_Tuple2(
+							!_Utils_eq(
+								A2(
+									$ianmackenzie$elm_geometry$Axis3d$intersectionWithSphere,
+									$author$project$DomainModel$sphere(node.left),
+									ray),
+								$elm$core$Maybe$Nothing),
+							!_Utils_eq(
+								A2(
+									$ianmackenzie$elm_geometry$Axis3d$intersectionWithSphere,
+									$author$project$DomainModel$sphere(node.right),
+									ray),
+								$elm$core$Maybe$Nothing));
+						var leftIntersects = _v1.a;
+						var rightIntersects = _v1.b;
+						var _v2 = _Utils_Tuple2(leftIntersects, rightIntersects);
+						if (_v2.a) {
+							if (_v2.b) {
+								var _v3 = A2(
+									helper,
+									node.right,
+									skip + $author$project$DomainModel$skipCount(node.left));
+								var rightBestIndex = _v3.a;
+								var rightBestDistance = _v3.b;
+								var _v4 = A2(helper, node.left, skip);
+								var leftBestIndex = _v4.a;
+								var leftBestDistance = _v4.b;
+								return A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, rightBestDistance, leftBestDistance) ? _Utils_Tuple2(leftBestIndex, leftBestDistance) : _Utils_Tuple2(rightBestIndex, rightBestDistance);
+							} else {
+								var $temp$withNode = node.left,
+									$temp$skip = skip;
+								withNode = $temp$withNode;
+								skip = $temp$skip;
+								continue helper;
+							}
+						} else {
+							if (_v2.b) {
+								var $temp$withNode = node.right,
+									$temp$skip = skip + $author$project$DomainModel$skipCount(node.left);
+								withNode = $temp$withNode;
+								skip = $temp$skip;
+								continue helper;
+							} else {
+								if (A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, rightDistance, leftDistance)) {
+									var $temp$withNode = node.left,
+										$temp$skip = skip;
+									withNode = $temp$withNode;
+									skip = $temp$skip;
+									continue helper;
+								} else {
+									var $temp$withNode = node.right,
+										$temp$skip = skip + $author$project$DomainModel$skipCount(node.left);
+									withNode = $temp$withNode;
+									skip = $temp$skip;
+									continue helper;
+								}
+							}
+						}
+					}
+				}
+			});
+		return A2(helper, treeNode, 0).a;
+	});
+var $ianmackenzie$elm_geometry$Point2d$pixels = F2(
+	function (x, y) {
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point2d(
+			{x: x, y: y});
+	});
+var $ianmackenzie$elm_units$Quantity$at = F2(
+	function (_v0, _v1) {
+		var rateOfChange = _v0.a;
+		var independentValue = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(rateOfChange * independentValue);
+	});
+var $ianmackenzie$elm_geometry$Frame2d$copy = function (_v0) {
+	var properties = _v0.a;
+	return $ianmackenzie$elm_geometry$Geometry$Types$Frame2d(properties);
+};
+var $ianmackenzie$elm_geometry$Rectangle2d$axes = function (_v0) {
+	var rectangle = _v0.a;
+	return $ianmackenzie$elm_geometry$Frame2d$copy(rectangle.axes);
+};
+var $ianmackenzie$elm_geometry$Rectangle2d$dimensions = function (_v0) {
+	var rectangle = _v0.a;
+	return rectangle.dimensions;
+};
+var $ianmackenzie$elm_units$Quantity$divideBy = F2(
+	function (divisor, _v0) {
+		var value = _v0.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(value / divisor);
+	});
+var $ianmackenzie$elm_geometry$Frame3d$originPoint = function (_v0) {
+	var properties = _v0.a;
+	return properties.originPoint;
+};
+var $ianmackenzie$elm_3d_camera$Viewpoint3d$eyePoint = function (_v0) {
+	var frame = _v0.a;
+	return $ianmackenzie$elm_geometry$Frame3d$originPoint(frame);
+};
+var $ianmackenzie$elm_units$Quantity$multiplyBy = F2(
+	function (scale, _v0) {
+		var value = _v0.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(scale * value);
+	});
+var $ianmackenzie$elm_units$Quantity$negate = function (_v0) {
+	var value = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(-value);
+};
+var $ianmackenzie$elm_geometry$Direction3d$negativeZ = $ianmackenzie$elm_geometry$Direction3d$unsafe(
+	{x: 0, y: 0, z: -1});
+var $ianmackenzie$elm_units$Quantity$per = F2(
+	function (_v0, _v1) {
+		var independentValue = _v0.a;
+		var dependentValue = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(dependentValue / independentValue);
+	});
+var $ianmackenzie$elm_geometry$Direction3d$placeIn = F2(
+	function (_v0, _v1) {
+		var frame = _v0.a;
+		var d = _v1.a;
+		var _v2 = frame.zDirection;
+		var k = _v2.a;
+		var _v3 = frame.yDirection;
+		var j = _v3.a;
+		var _v4 = frame.xDirection;
+		var i = _v4.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
+			{x: ((i.x * d.x) + (j.x * d.y)) + (k.x * d.z), y: ((i.y * d.x) + (j.y * d.y)) + (k.y * d.z), z: ((i.z * d.x) + (j.z * d.y)) + (k.z * d.z)});
+	});
+var $ianmackenzie$elm_geometry$Geometry$Types$Axis3d = function (a) {
+	return {$: 'Axis3d', a: a};
+};
+var $ianmackenzie$elm_geometry$Axis3d$through = F2(
+	function (givenPoint, givenDirection) {
+		return $ianmackenzie$elm_geometry$Geometry$Types$Axis3d(
+			{direction: givenDirection, originPoint: givenPoint});
+	});
+var $ianmackenzie$elm_geometry$Direction3d$reverse = function (_v0) {
+	var d = _v0.a;
+	return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
+		{x: -d.x, y: -d.y, z: -d.z});
+};
+var $ianmackenzie$elm_geometry$Frame3d$zDirection = function (_v0) {
+	var properties = _v0.a;
+	return properties.zDirection;
+};
+var $ianmackenzie$elm_3d_camera$Viewpoint3d$viewDirection = function (_v0) {
+	var frame = _v0.a;
+	return $ianmackenzie$elm_geometry$Direction3d$reverse(
+		$ianmackenzie$elm_geometry$Frame3d$zDirection(frame));
+};
+var $ianmackenzie$elm_geometry$Point2d$xCoordinateIn = F2(
+	function (_v0, _v1) {
+		var frame = _v0.a;
+		var p = _v1.a;
+		var _v2 = frame.originPoint;
+		var p0 = _v2.a;
+		var _v3 = frame.xDirection;
+		var d = _v3.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(((p.x - p0.x) * d.x) + ((p.y - p0.y) * d.y));
+	});
+var $ianmackenzie$elm_geometry$Vector3d$xyz = F3(
+	function (_v0, _v1, _v2) {
+		var x = _v0.a;
+		var y = _v1.a;
+		var z = _v2.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
+			{x: x, y: y, z: z});
+	});
+var $ianmackenzie$elm_geometry$Point3d$xyzIn = F4(
+	function (_v0, _v1, _v2, _v3) {
+		var frame = _v0.a;
+		var x = _v1.a;
+		var y = _v2.a;
+		var z = _v3.a;
+		var _v4 = frame.originPoint;
+		var p0 = _v4.a;
+		var _v5 = frame.zDirection;
+		var k = _v5.a;
+		var _v6 = frame.yDirection;
+		var j = _v6.a;
+		var _v7 = frame.xDirection;
+		var i = _v7.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+			{x: ((p0.x + (x * i.x)) + (y * j.x)) + (z * k.x), y: ((p0.y + (x * i.y)) + (y * j.y)) + (z * k.y), z: ((p0.z + (x * i.z)) + (y * j.z)) + (z * k.z)});
+	});
+var $ianmackenzie$elm_geometry$Point2d$yCoordinateIn = F2(
+	function (_v0, _v1) {
+		var frame = _v0.a;
+		var p = _v1.a;
+		var _v2 = frame.originPoint;
+		var p0 = _v2.a;
+		var _v3 = frame.yDirection;
+		var d = _v3.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(((p.x - p0.x) * d.x) + ((p.y - p0.y) * d.y));
+	});
+var $ianmackenzie$elm_3d_camera$Camera3d$ray = F3(
+	function (_v0, screen, point) {
+		var camera = _v0.a;
+		var screenY = A2(
+			$ianmackenzie$elm_geometry$Point2d$yCoordinateIn,
+			$ianmackenzie$elm_geometry$Rectangle2d$axes(screen),
+			point);
+		var screenX = A2(
+			$ianmackenzie$elm_geometry$Point2d$xCoordinateIn,
+			$ianmackenzie$elm_geometry$Rectangle2d$axes(screen),
+			point);
+		var _v1 = camera.viewpoint;
+		var viewpointFrame = _v1.a;
+		var _v2 = $ianmackenzie$elm_geometry$Rectangle2d$dimensions(screen);
+		var screenWidth = _v2.a;
+		var screenHeight = _v2.b;
+		var _v3 = camera.projection;
+		if (_v3.$ === 'Perspective') {
+			var frustumSlope = _v3.a;
+			var screenZ = $ianmackenzie$elm_units$Quantity$negate(
+				A2(
+					$ianmackenzie$elm_units$Quantity$divideBy,
+					frustumSlope,
+					A2($ianmackenzie$elm_units$Quantity$multiplyBy, 0.5, screenHeight)));
+			var direction = A2(
+				$ianmackenzie$elm_geometry$Direction3d$placeIn,
+				viewpointFrame,
+				A2(
+					$elm$core$Maybe$withDefault,
+					$ianmackenzie$elm_geometry$Direction3d$negativeZ,
+					$ianmackenzie$elm_geometry$Vector3d$direction(
+						A3($ianmackenzie$elm_geometry$Vector3d$xyz, screenX, screenY, screenZ))));
+			return A2(
+				$ianmackenzie$elm_geometry$Axis3d$through,
+				$ianmackenzie$elm_3d_camera$Viewpoint3d$eyePoint(camera.viewpoint),
+				direction);
+		} else {
+			var viewpointHeight = _v3.a;
+			var resolution = A2($ianmackenzie$elm_units$Quantity$per, screenHeight, viewpointHeight);
+			var origin = A4(
+				$ianmackenzie$elm_geometry$Point3d$xyzIn,
+				viewpointFrame,
+				A2($ianmackenzie$elm_units$Quantity$at, resolution, screenX),
+				A2($ianmackenzie$elm_units$Quantity$at, resolution, screenY),
+				$ianmackenzie$elm_units$Quantity$zero);
+			return A2(
+				$ianmackenzie$elm_geometry$Axis3d$through,
+				origin,
+				$ianmackenzie$elm_3d_camera$Viewpoint3d$viewDirection(camera.viewpoint));
+		}
+	});
+var $ianmackenzie$elm_units$Quantity$toFloatQuantity = function (_v0) {
+	var value = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(value);
+};
+var $author$project$ViewThirdPerson$detectHit = F2(
+	function (event, model) {
+		var _v0 = model.trackTree;
+		if (_v0.$ === 'Just') {
+			var topNode = _v0.a;
+			var leaf = A2($author$project$DomainModel$leafFromIndex, model.currentPosition, topNode);
+			var camera = A2($author$project$ViewThirdPerson$deriveCamera, leaf, model.focusPoint);
+			var _v1 = event.offsetPos;
+			var x = _v1.a;
+			var y = _v1.b;
+			var screenPoint = A2($ianmackenzie$elm_geometry$Point2d$pixels, x, y);
+			var _v2 = model.viewDimensions;
+			var w = _v2.a;
+			var h = _v2.b;
+			var _v3 = _Utils_Tuple2(
+				$ianmackenzie$elm_units$Quantity$toFloatQuantity(w),
+				$ianmackenzie$elm_units$Quantity$toFloatQuantity(h));
+			var wFloat = _v3.a;
+			var hFloat = _v3.b;
+			var screenRectangle = A2(
+				$ianmackenzie$elm_geometry$Rectangle2d$from,
+				A2($ianmackenzie$elm_geometry$Point2d$xy, $ianmackenzie$elm_units$Quantity$zero, hFloat),
+				A2($ianmackenzie$elm_geometry$Point2d$xy, wFloat, $ianmackenzie$elm_units$Quantity$zero));
+			var ray = A3($ianmackenzie$elm_3d_camera$Camera3d$ray, camera, screenRectangle, screenPoint);
+			return A2($author$project$DomainModel$nearestToRay, ray, topNode);
+		} else {
+			return 0;
+		}
+	});
+var $elm$file$File$Select$file = F2(
+	function (mimes, toMsg) {
+		return A2(
+			$elm$core$Task$perform,
+			toMsg,
+			_File_uploadOne(mimes));
+	});
+var $author$project$StravaAuth$getStravaToken = function (model) {
+	var _v0 = model.flow;
+	switch (_v0.$) {
+		case 'Done':
+			var info = _v0.a;
+			var token = _v0.b;
+			return $elm$core$Maybe$Just(token);
+		case 'Authenticated':
+			var token = _v0.a;
+			return $elm$core$Maybe$Just(token);
+		default:
+			return $elm$core$Maybe$Nothing;
+	}
+};
+var $elm$core$Platform$Cmd$map = _Platform_map;
+var $elm$file$File$name = _File_name;
+var $elm$regex$Regex$Match = F4(
+	function (match, index, number, submatches) {
+		return {index: index, match: match, number: number, submatches: submatches};
+	});
+var $elm$regex$Regex$fromStringWith = _Regex_fromStringWith;
+var $elm$regex$Regex$fromString = function (string) {
+	return A2(
+		$elm$regex$Regex$fromStringWith,
+		{caseInsensitive: false, multiline: false},
+		string);
+};
+var $elm$regex$Regex$never = _Regex_never;
+var $author$project$GpxParser$asRegex = function (t) {
+	return A2(
+		$elm$core$Maybe$withDefault,
+		$elm$regex$Regex$never,
+		$elm$regex$Regex$fromString(t));
+};
+var $elm$core$List$maybeCons = F3(
+	function (f, mx, xs) {
+		var _v0 = f(mx);
+		if (_v0.$ === 'Just') {
+			var x = _v0.a;
+			return A2($elm$core$List$cons, x, xs);
+		} else {
+			return xs;
+		}
+	});
+var $elm$core$List$filterMap = F2(
+	function (f, xs) {
+		return A3(
+			$elm$core$List$foldr,
+			$elm$core$List$maybeCons(f),
+			_List_Nil,
+			xs);
+	});
+var $elm$regex$Regex$find = _Regex_findAtMost(_Regex_infinity);
+var $ianmackenzie$elm_geometry$Vector3d$withLength = F2(
+	function (_v0, _v1) {
+		var a = _v0.a;
+		var d = _v1.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
+			{x: a * d.x, y: a * d.y, z: a * d.z});
+	});
+var $elm$core$Basics$cos = _Basics_cos;
+var $elm$core$Basics$sin = _Basics_sin;
+var $ianmackenzie$elm_geometry$Direction3d$xyZ = F2(
+	function (_v0, _v1) {
+		var theta = _v0.a;
+		var phi = _v1.a;
+		var cosPhi = $elm$core$Basics$cos(phi);
+		return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
+			{
+				x: cosPhi * $elm$core$Basics$cos(theta),
+				y: cosPhi * $elm$core$Basics$sin(theta),
+				z: $elm$core$Basics$sin(phi)
+			});
+	});
+var $author$project$DomainModel$makeEarthVector = F3(
+	function (lon, lat, alt) {
+		var radius = A2(
+			$ianmackenzie$elm_units$Quantity$plus,
+			$ianmackenzie$elm_units$Length$meters($author$project$Spherical$meanRadius),
+			alt);
+		var direction = A2($ianmackenzie$elm_geometry$Direction3d$xyZ, lon, lat);
+		return A2($ianmackenzie$elm_geometry$Vector3d$withLength, radius, direction);
+	});
+var $elm$core$String$toFloat = _String_toFloat;
+var $author$project$GpxParser$parseGPXPoints = function (xml) {
+	var value = function (x) {
+		var _v12 = x.submatches;
+		if (_v12.b && (_v12.a.$ === 'Just')) {
+			var val = _v12.a.a;
+			return $elm$core$String$toFloat(val);
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	};
+	var trkpts = A2(
+		$elm$core$List$map,
+		function ($) {
+			return $.match;
+		},
+		A2(
+			$elm$regex$Regex$find,
+			$author$project$GpxParser$asRegex('<trkpt((.|\\n|\\r)*?)trkpt>'),
+			xml));
+	var matches = function (xs) {
+		return A2($elm$core$List$map, value, xs);
+	};
+	var longitude = function (trkpt) {
+		return matches(
+			A2(
+				$elm$regex$Regex$find,
+				$author$project$GpxParser$asRegex('lon=\\\"([\\d\\.-]*)\\\"'),
+				trkpt));
+	};
+	var latitude = function (trkpt) {
+		return matches(
+			A2(
+				$elm$regex$Regex$find,
+				$author$project$GpxParser$asRegex('lat=\\\"([\\d\\.-]*)\\\"'),
+				trkpt));
+	};
+	var elevation = function (trkpt) {
+		return matches(
+			A2(
+				$elm$regex$Regex$find,
+				$author$project$GpxParser$asRegex('<ele>([\\d\\.-]*)<\\/ele>'),
+				trkpt));
+	};
+	var trackPoint = function (trkpt) {
+		var _v6 = _Utils_Tuple3(
+			latitude(trkpt),
+			longitude(trkpt),
+			elevation(trkpt));
+		if (((_v6.a.b && (_v6.a.a.$ === 'Just')) && _v6.b.b) && (_v6.b.a.$ === 'Just')) {
+			if (_v6.c.b && (_v6.c.a.$ === 'Just')) {
+				var _v7 = _v6.a;
+				var lat = _v7.a.a;
+				var _v8 = _v6.b;
+				var lon = _v8.a.a;
+				var _v9 = _v6.c;
+				var ele = _v9.a.a;
+				return $elm$core$Maybe$Just(
+					{
+						altitude: $ianmackenzie$elm_units$Length$meters(ele),
+						latitude: $ianmackenzie$elm_units$Angle$degrees(lat),
+						longitude: $ianmackenzie$elm_units$Angle$degrees(lon)
+					});
+			} else {
+				var _v10 = _v6.a;
+				var lat = _v10.a.a;
+				var _v11 = _v6.b;
+				var lon = _v11.a.a;
+				return $elm$core$Maybe$Just(
+					{
+						altitude: $ianmackenzie$elm_units$Quantity$zero,
+						latitude: $ianmackenzie$elm_units$Angle$degrees(lat),
+						longitude: $ianmackenzie$elm_units$Angle$degrees(lon)
+					});
+			}
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	};
+	var trackPoints = A2(
+		$elm$core$List$filterMap,
+		$elm$core$Basics$identity,
+		A2($elm$core$List$map, trackPoint, trkpts));
+	var earthVector = function (trkpt) {
+		var _v0 = _Utils_Tuple3(
+			latitude(trkpt),
+			longitude(trkpt),
+			elevation(trkpt));
+		if (((_v0.a.b && (_v0.a.a.$ === 'Just')) && _v0.b.b) && (_v0.b.a.$ === 'Just')) {
+			if (_v0.c.b && (_v0.c.a.$ === 'Just')) {
+				var _v1 = _v0.a;
+				var lat = _v1.a.a;
+				var _v2 = _v0.b;
+				var lon = _v2.a.a;
+				var _v3 = _v0.c;
+				var alt = _v3.a.a;
+				return $elm$core$Maybe$Just(
+					A3(
+						$author$project$DomainModel$makeEarthVector,
+						$ianmackenzie$elm_units$Angle$degrees(lon),
+						$ianmackenzie$elm_units$Angle$degrees(lat),
+						$ianmackenzie$elm_units$Length$meters(alt)));
+			} else {
+				var _v4 = _v0.a;
+				var lat = _v4.a.a;
+				var _v5 = _v0.b;
+				var lon = _v5.a.a;
+				return $elm$core$Maybe$Just(
+					A3(
+						$author$project$DomainModel$makeEarthVector,
+						$ianmackenzie$elm_units$Angle$degrees(lon),
+						$ianmackenzie$elm_units$Angle$degrees(lat),
+						$ianmackenzie$elm_units$Length$meters(0.0)));
+			}
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	};
+	return A2(
+		$elm$core$List$filterMap,
+		$elm$core$Basics$identity,
+		A2($elm$core$List$map, earthVector, trkpts));
+};
+var $author$project$MyIP$processIpInfo = function (response) {
+	if (response.$ === 'Ok') {
+		var ipInfo = response.a;
+		return $elm$core$Maybe$Just(ipInfo);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$Msg$ClearMapClickDebounce = {$: 'ClearMapClickDebounce'};
+var $elm$json$Json$Decode$decodeValue = _Json_run;
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $elm$json$Json$Decode$float = _Json_decodeFloat;
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $author$project$PortController$msgDecoder = A2($elm$json$Json$Decode$field, 'msg', $elm$json$Json$Decode$string);
+var $author$project$DomainModel$endVector = function (treeNode) {
+	if (treeNode.$ === 'Leaf') {
+		var leaf = treeNode.a;
+		return leaf.endVector;
+	} else {
+		var node = treeNode.a;
+		return node.nodeContent.endVector;
+	}
+};
+var $ianmackenzie$elm_geometry$Direction3d$from = F2(
+	function (_v0, _v1) {
+		var p1 = _v0.a;
+		var p2 = _v1.a;
+		var deltaZ = p2.z - p1.z;
+		var deltaY = p2.y - p1.y;
+		var deltaX = p2.x - p1.x;
+		var largestComponent = A2(
+			$elm$core$Basics$max,
+			$elm$core$Basics$abs(deltaX),
+			A2(
+				$elm$core$Basics$max,
+				$elm$core$Basics$abs(deltaY),
+				$elm$core$Basics$abs(deltaZ)));
+		if (!largestComponent) {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var scaledZ = deltaZ / largestComponent;
+			var scaledY = deltaY / largestComponent;
+			var scaledX = deltaX / largestComponent;
+			var scaledLength = $elm$core$Basics$sqrt(((scaledX * scaledX) + (scaledY * scaledY)) + (scaledZ * scaledZ));
+			return $elm$core$Maybe$Just(
+				$ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
+					{x: scaledX / scaledLength, y: scaledY / scaledLength, z: scaledZ / scaledLength}));
+		}
+	});
+var $ianmackenzie$elm_geometry$Axis3d$throughPoints = F2(
+	function (firstPoint, secondPoint) {
+		var _v0 = A2($ianmackenzie$elm_geometry$Direction3d$from, firstPoint, secondPoint);
+		if (_v0.$ === 'Just') {
+			var axisDirection = _v0.a;
+			return $elm$core$Maybe$Just(
+				A2($ianmackenzie$elm_geometry$Axis3d$through, firstPoint, axisDirection));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $ianmackenzie$elm_geometry$Axis3d$x = A2($ianmackenzie$elm_geometry$Axis3d$through, $ianmackenzie$elm_geometry$Point3d$origin, $ianmackenzie$elm_geometry$Direction3d$x);
+var $author$project$DomainModel$nearestToLonLat = F2(
+	function (click, treeNode) {
+		var searchVector = A3($author$project$DomainModel$makeEarthVector, click.longitude, click.latitude, click.altitude);
+		var searchAxis = A2(
+			$elm$core$Maybe$withDefault,
+			$ianmackenzie$elm_geometry$Axis3d$x,
+			A2(
+				$ianmackenzie$elm_geometry$Axis3d$throughPoints,
+				$ianmackenzie$elm_geometry$Point3d$origin,
+				A2($ianmackenzie$elm_geometry$Point3d$translateBy, searchVector, $ianmackenzie$elm_geometry$Point3d$origin)));
+		var helper = F2(
+			function (withNode, skip) {
+				helper:
+				while (true) {
+					if (withNode.$ === 'Leaf') {
+						var leaf = withNode.a;
+						var _v1 = _Utils_Tuple2(
+							A2(
+								$ianmackenzie$elm_geometry$Vector3d$dot,
+								$author$project$DomainModel$startVector(withNode),
+								searchVector),
+							A2(
+								$ianmackenzie$elm_geometry$Vector3d$dot,
+								$author$project$DomainModel$endVector(withNode),
+								searchVector));
+						var startDistance = _v1.a;
+						var endDistance = _v1.b;
+						return A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, endDistance, startDistance) ? _Utils_Tuple2(skip, startDistance) : _Utils_Tuple2(skip + 1, endDistance);
+					} else {
+						var node = withNode.a;
+						var _v2 = _Utils_Tuple2(
+							!_Utils_eq(
+								A2(
+									$ianmackenzie$elm_geometry$Axis3d$intersectionWithSphere,
+									$author$project$DomainModel$sphere(node.left),
+									searchAxis),
+								$elm$core$Maybe$Nothing),
+							!_Utils_eq(
+								A2(
+									$ianmackenzie$elm_geometry$Axis3d$intersectionWithSphere,
+									$author$project$DomainModel$sphere(node.right),
+									searchAxis),
+								$elm$core$Maybe$Nothing));
+						var leftIntersects = _v2.a;
+						var rightIntersects = _v2.b;
+						var _v3 = _Utils_Tuple2(
+							A2(
+								$ianmackenzie$elm_geometry$Vector3d$dot,
+								$author$project$DomainModel$startVector(withNode),
+								searchVector),
+							A2(
+								$ianmackenzie$elm_geometry$Vector3d$dot,
+								$author$project$DomainModel$endVector(withNode),
+								searchVector));
+						var leftDistance = _v3.a;
+						var rightDistance = _v3.b;
+						var _v4 = _Utils_Tuple2(leftIntersects, rightIntersects);
+						if (_v4.a) {
+							if (_v4.b) {
+								var _v5 = A2(
+									helper,
+									node.right,
+									skip + $author$project$DomainModel$skipCount(node.left));
+								var rightBestIndex = _v5.a;
+								var rightBestDistance = _v5.b;
+								var _v6 = A2(helper, node.left, skip);
+								var leftBestIndex = _v6.a;
+								var leftBestDistance = _v6.b;
+								return A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, rightBestDistance, leftBestDistance) ? _Utils_Tuple2(leftBestIndex, leftBestDistance) : _Utils_Tuple2(rightBestIndex, rightBestDistance);
+							} else {
+								var $temp$withNode = node.left,
+									$temp$skip = skip;
+								withNode = $temp$withNode;
+								skip = $temp$skip;
+								continue helper;
+							}
+						} else {
+							if (_v4.b) {
+								var $temp$withNode = node.right,
+									$temp$skip = skip + $author$project$DomainModel$skipCount(node.left);
+								withNode = $temp$withNode;
+								skip = $temp$skip;
+								continue helper;
+							} else {
+								if (A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, rightDistance, leftDistance)) {
+									var $temp$withNode = node.left,
+										$temp$skip = skip;
+									withNode = $temp$withNode;
+									skip = $temp$skip;
+									continue helper;
+								} else {
+									var $temp$withNode = node.right,
+										$temp$skip = skip + $author$project$DomainModel$skipCount(node.left);
+									withNode = $temp$withNode;
+									skip = $temp$skip;
+									continue helper;
+								}
+							}
+						}
+					}
+				}
+			});
+		return A2(helper, treeNode, 0).a;
+	});
+var $author$project$PortController$processPortMessage = F2(
+	function (model, json) {
+		var jsonMsg = A2($elm$json$Json$Decode$decodeValue, $author$project$PortController$msgDecoder, json);
+		var _v0 = _Utils_Tuple2(
+			A2(
+				$elm$json$Json$Decode$decodeValue,
+				A2($elm$json$Json$Decode$field, 'lat', $elm$json$Json$Decode$float),
+				json),
+			A2(
+				$elm$json$Json$Decode$decodeValue,
+				A2($elm$json$Json$Decode$field, 'lon', $elm$json$Json$Decode$float),
+				json));
+		var lat = _v0.a;
+		var lon = _v0.b;
+		var _v1 = _Utils_Tuple2(jsonMsg, model.trackTree);
+		if (((_v1.a.$ === 'Ok') && (_v1.a.a === 'click')) && (_v1.b.$ === 'Just')) {
+			var tree = _v1.b.a;
+			var _v2 = _Utils_Tuple3(model.mapClickDebounce, lat, lon);
+			if (((!_v2.a) && (_v2.b.$ === 'Ok')) && (_v2.c.$ === 'Ok')) {
+				var lat1 = _v2.b.a;
+				var lon1 = _v2.c.a;
+				var gpxPoint = {
+					altitude: $ianmackenzie$elm_units$Length$meters(0.0),
+					latitude: $ianmackenzie$elm_units$Angle$degrees(lat1),
+					longitude: $ianmackenzie$elm_units$Angle$degrees(lon1)
+				};
+				var index = A2($author$project$DomainModel$nearestToLonLat, gpxPoint, tree);
+				var updatedModel = _Utils_update(
+					model,
+					{
+						currentPosition: index,
+						lastMapClick: _Utils_Tuple2(lon1, lat1),
+						mapClickDebounce: true
+					});
+				return _Utils_Tuple2(
+					updatedModel,
+					$elm$core$Platform$Cmd$batch(
+						_List_fromArray(
+							[
+								$author$project$PortController$addTrackToMap(updatedModel),
+								A2($andrewMacmurray$elm_delay$Delay$after, 100, $author$project$Msg$ClearMapClickDebounce),
+								A2($andrewMacmurray$elm_delay$Delay$after, 100, $author$project$Msg$RepaintMap)
+							])));
+			} else {
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			}
+		} else {
+			return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$PortController$refreshMap = $author$project$PortController$commandPort(
+	$elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'Cmd',
+				$elm$json$Json$Encode$string('Repaint')),
+				_Utils_Tuple2(
+				'token',
+				$elm$json$Json$Encode$string($author$project$MapboxKey$mapboxKey))
+			])));
+var $avh4$elm_color$Color$RgbaSpace = F4(
+	function (a, b, c, d) {
+		return {$: 'RgbaSpace', a: a, b: b, c: c, d: d};
+	});
+var $avh4$elm_color$Color$black = A4($avh4$elm_color$Color$RgbaSpace, 0 / 255, 0 / 255, 0 / 255, 1.0);
+var $ianmackenzie$elm_3d_scene$Scene3d$Types$Constant = function (a) {
+	return {$: 'Constant', a: a};
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$Types$UnlitMaterial = F2(
+	function (a, b) {
+		return {$: 'UnlitMaterial', a: a, b: b};
+	});
+var $ianmackenzie$elm_3d_scene$Scene3d$Types$UseMeshUvs = {$: 'UseMeshUvs'};
+var $avh4$elm_color$Color$toRgba = function (_v0) {
+	var r = _v0.a;
+	var g = _v0.b;
+	var b = _v0.c;
+	var a = _v0.d;
+	return {alpha: a, blue: b, green: g, red: r};
+};
+var $elm_explorations$linear_algebra$Math$Vector3$vec3 = _MJS_v3;
+var $ianmackenzie$elm_3d_scene$Scene3d$Material$toVec3 = function (givenColor) {
+	var _v0 = $avh4$elm_color$Color$toRgba(givenColor);
+	var red = _v0.red;
+	var green = _v0.green;
+	var blue = _v0.blue;
+	return A3($elm_explorations$linear_algebra$Math$Vector3$vec3, red, green, blue);
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$Material$color = function (givenColor) {
+	return A2(
+		$ianmackenzie$elm_3d_scene$Scene3d$Types$UnlitMaterial,
+		$ianmackenzie$elm_3d_scene$Scene3d$Types$UseMeshUvs,
+		$ianmackenzie$elm_3d_scene$Scene3d$Types$Constant(
+			$ianmackenzie$elm_3d_scene$Scene3d$Material$toVec3(givenColor)));
+};
+var $ianmackenzie$elm_geometry$Geometry$Types$LineSegment3d = function (a) {
+	return {$: 'LineSegment3d', a: a};
+};
+var $ianmackenzie$elm_geometry$LineSegment3d$fromEndpoints = function (givenEndpoints) {
+	return $ianmackenzie$elm_geometry$Geometry$Types$LineSegment3d(givenEndpoints);
+};
+var $ianmackenzie$elm_geometry$LineSegment3d$from = F2(
+	function (givenStartPoint, givenEndPoint) {
+		return $ianmackenzie$elm_geometry$LineSegment3d$fromEndpoints(
+			_Utils_Tuple2(givenStartPoint, givenEndPoint));
+	});
+var $elm$core$Basics$clamp = F3(
+	function (low, high, number) {
+		return (_Utils_cmp(number, low) < 0) ? low : ((_Utils_cmp(number, high) > 0) ? high : number);
+	});
+var $avh4$elm_color$Color$purple = A4($avh4$elm_color$Color$RgbaSpace, 117 / 255, 80 / 255, 123 / 255, 1.0);
+var $avh4$elm_color$Color$red = A4($avh4$elm_color$Color$RgbaSpace, 204 / 255, 0 / 255, 0 / 255, 1.0);
+var $elm$core$Basics$isNaN = _Basics_isNaN;
+var $elm$core$Basics$min = F2(
+	function (x, y) {
+		return (_Utils_cmp(x, y) < 0) ? x : y;
+	});
+var $avh4$elm_color$Color$toHsla = function (_v0) {
+	var r = _v0.a;
+	var g = _v0.b;
+	var b = _v0.c;
+	var a = _v0.d;
+	var minColor = A2(
+		$elm$core$Basics$min,
+		r,
+		A2($elm$core$Basics$min, g, b));
+	var maxColor = A2(
+		$elm$core$Basics$max,
+		r,
+		A2($elm$core$Basics$max, g, b));
+	var l = (minColor + maxColor) / 2;
+	var s = _Utils_eq(minColor, maxColor) ? 0 : ((l < 0.5) ? ((maxColor - minColor) / (maxColor + minColor)) : ((maxColor - minColor) / ((2 - maxColor) - minColor)));
+	var h1 = _Utils_eq(maxColor, r) ? ((g - b) / (maxColor - minColor)) : (_Utils_eq(maxColor, g) ? (2 + ((b - r) / (maxColor - minColor))) : (4 + ((r - g) / (maxColor - minColor))));
+	var h2 = h1 * (1 / 6);
+	var h3 = $elm$core$Basics$isNaN(h2) ? 0 : ((h2 < 0) ? (h2 + 1) : h2);
+	return {alpha: a, hue: h3, lightness: l, saturation: s};
+};
+var $author$project$ColourPalette$gradientHue = function (slope) {
+	var x = (A3($elm$core$Basics$clamp, -20.0, 20.0, slope) + 20.0) / 40.0;
+	var steepestDescentHue = $avh4$elm_color$Color$toHsla($avh4$elm_color$Color$purple).hue;
+	var steepestAscentHue = $avh4$elm_color$Color$toHsla($avh4$elm_color$Color$red).hue;
+	return (x * steepestAscentHue) + ((1.0 - x) * steepestDescentHue);
+};
+var $author$project$ColourPalette$interpolate = F3(
+	function (x, a, b) {
+		return (x * a) + ((1.0 - x) * b);
+	});
+var $avh4$elm_color$Color$lightGreen = A4($avh4$elm_color$Color$RgbaSpace, 138 / 255, 226 / 255, 52 / 255, 1.0);
+var $avh4$elm_color$Color$orange = A4($avh4$elm_color$Color$RgbaSpace, 245 / 255, 121 / 255, 0 / 255, 1.0);
+var $avh4$elm_color$Color$yellow = A4($avh4$elm_color$Color$RgbaSpace, 237 / 255, 212 / 255, 0 / 255, 1.0);
+var $author$project$ColourPalette$gradientHue2 = function (slope) {
+	var hueOf = function (col) {
+		var _v0 = $avh4$elm_color$Color$toHsla(col);
+		var hue = _v0.hue;
+		var saturation = _v0.saturation;
+		var lightness = _v0.lightness;
+		var alpha = _v0.alpha;
+		return hue;
+	};
+	return (slope < 0) ? $author$project$ColourPalette$gradientHue(slope) : ((slope <= 6.0) ? A3(
+		$author$project$ColourPalette$interpolate,
+		slope / 6.0,
+		hueOf($avh4$elm_color$Color$lightGreen),
+		hueOf($avh4$elm_color$Color$yellow)) : ((slope <= 9.0) ? A3(
+		$author$project$ColourPalette$interpolate,
+		(slope - 6.0) / 3.0,
+		hueOf($avh4$elm_color$Color$yellow),
+		hueOf($avh4$elm_color$Color$orange)) : ((slope <= 12.0) ? A3(
+		$author$project$ColourPalette$interpolate,
+		(slope - 9.0) / 3.0,
+		hueOf($avh4$elm_color$Color$orange),
+		hueOf($avh4$elm_color$Color$red)) : A3(
+		$author$project$ColourPalette$interpolate,
+		(A3($elm$core$Basics$clamp, 12, 30, slope) - 12.0) / 18.0,
+		hueOf($avh4$elm_color$Color$red),
+		hueOf($avh4$elm_color$Color$black)))));
+};
+var $avh4$elm_color$Color$hsla = F4(
+	function (hue, sat, light, alpha) {
+		var _v0 = _Utils_Tuple3(hue, sat, light);
+		var h = _v0.a;
+		var s = _v0.b;
+		var l = _v0.c;
+		var m2 = (l <= 0.5) ? (l * (s + 1)) : ((l + s) - (l * s));
+		var m1 = (l * 2) - m2;
+		var hueToRgb = function (h__) {
+			var h_ = (h__ < 0) ? (h__ + 1) : ((h__ > 1) ? (h__ - 1) : h__);
+			return ((h_ * 6) < 1) ? (m1 + (((m2 - m1) * h_) * 6)) : (((h_ * 2) < 1) ? m2 : (((h_ * 3) < 2) ? (m1 + (((m2 - m1) * ((2 / 3) - h_)) * 6)) : m1));
+		};
+		var b = hueToRgb(h - (1 / 3));
+		var g = hueToRgb(h);
+		var r = hueToRgb(h + (1 / 3));
+		return A4($avh4$elm_color$Color$RgbaSpace, r, g, b, alpha);
+	});
+var $avh4$elm_color$Color$hsl = F3(
+	function (h, s, l) {
+		return A4($avh4$elm_color$Color$hsla, h, s, l, 1.0);
+	});
+var $avh4$elm_color$Color$lightOrange = A4($avh4$elm_color$Color$RgbaSpace, 252 / 255, 175 / 255, 62 / 255, 1.0);
+var $ianmackenzie$elm_3d_scene$Scene3d$Types$Entity = function (a) {
+	return {$: 'Entity', a: a};
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$Types$MeshNode = F2(
+	function (a, b) {
+		return {$: 'MeshNode', a: a, b: b};
+	});
+var $ianmackenzie$elm_geometry$LineSegment3d$endpoints = function (_v0) {
+	var lineSegmentEndpoints = _v0.a;
+	return lineSegmentEndpoints;
+};
+var $ianmackenzie$elm_units$Quantity$max = F2(
+	function (_v0, _v1) {
+		var x = _v0.a;
+		var y = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(
+			A2($elm$core$Basics$max, x, y));
+	});
+var $ianmackenzie$elm_units$Quantity$min = F2(
+	function (_v0, _v1) {
+		var x = _v0.a;
+		var y = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(
+			A2($elm$core$Basics$min, x, y));
+	});
+var $ianmackenzie$elm_geometry$Point3d$xCoordinate = function (_v0) {
+	var p = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(p.x);
+};
+var $ianmackenzie$elm_geometry$Point3d$yCoordinate = function (_v0) {
+	var p = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(p.y);
+};
+var $ianmackenzie$elm_geometry$Point3d$zCoordinate = function (_v0) {
+	var p = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(p.z);
+};
+var $ianmackenzie$elm_geometry$BoundingBox3d$from = F2(
+	function (firstPoint, secondPoint) {
+		var z2 = $ianmackenzie$elm_geometry$Point3d$zCoordinate(secondPoint);
+		var z1 = $ianmackenzie$elm_geometry$Point3d$zCoordinate(firstPoint);
+		var y2 = $ianmackenzie$elm_geometry$Point3d$yCoordinate(secondPoint);
+		var y1 = $ianmackenzie$elm_geometry$Point3d$yCoordinate(firstPoint);
+		var x2 = $ianmackenzie$elm_geometry$Point3d$xCoordinate(secondPoint);
+		var x1 = $ianmackenzie$elm_geometry$Point3d$xCoordinate(firstPoint);
+		return $ianmackenzie$elm_geometry$Geometry$Types$BoundingBox3d(
+			{
+				maxX: A2($ianmackenzie$elm_units$Quantity$max, x1, x2),
+				maxY: A2($ianmackenzie$elm_units$Quantity$max, y1, y2),
+				maxZ: A2($ianmackenzie$elm_units$Quantity$max, z1, z2),
+				minX: A2($ianmackenzie$elm_units$Quantity$min, x1, x2),
+				minY: A2($ianmackenzie$elm_units$Quantity$min, y1, y2),
+				minZ: A2($ianmackenzie$elm_units$Quantity$min, z1, z2)
+			});
+	});
+var $ianmackenzie$elm_geometry$LineSegment3d$boundingBox = function (lineSegment) {
+	var _v0 = $ianmackenzie$elm_geometry$LineSegment3d$endpoints(lineSegment);
+	var p1 = _v0.a;
+	var p2 = _v0.b;
+	return A2($ianmackenzie$elm_geometry$BoundingBox3d$from, p1, p2);
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$UnoptimizedShaders$constantFragment = {
+	src: '\n        precision lowp float;\n        \n        uniform lowp vec3 constantColor;\n        \n        void main () {\n            gl_FragColor = vec4(constantColor, 1.0);\n        }\n    ',
+	attributes: {},
+	uniforms: {constantColor: 'constantColor'}
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$UnoptimizedShaders$emissiveFragment = {
+	src: '\n        precision mediump float;\n        \n        uniform mediump vec3 emissiveColor;\n        uniform highp mat4 sceneProperties;\n        \n        float gammaCorrect(float u) {\n            if (u <= 0.0031308) {\n                return 12.92 * u;\n            } else {\n                return 1.055 * pow(u, 1.0 / 2.4) - 0.055;\n            }\n        }\n        \n        vec3 gammaCorrectedColor(vec3 color) {\n            float red = gammaCorrect(color.r);\n            float green = gammaCorrect(color.g);\n            float blue = gammaCorrect(color.b);\n            return vec3(red, green, blue);\n        }\n        \n        vec3 reinhardLuminanceToneMap(vec3 color) {\n            float luminance = 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b;\n            float scale = 1.0 / (1.0 + luminance);\n            return gammaCorrectedColor(color * scale);\n        }\n        \n        vec3 reinhardPerChannelToneMap(vec3 color) {\n            return gammaCorrectedColor(color / (color + 1.0));\n        }\n        \n        float extendedReinhardToneMap(float x, float xMax) {\n            return x * (1.0 + (x / (xMax * xMax))) / (1.0 + x);\n        }\n        \n        vec3 extendedReinhardLuminanceToneMap(vec3 color, float overexposureLimit) {\n            float luminance = 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b;\n            float scaledLuminance = extendedReinhardToneMap(luminance, overexposureLimit);\n            float scale = scaledLuminance / luminance;\n            return gammaCorrectedColor(color * scale);\n        }\n        \n        vec3 extendedReinhardPerChannelToneMap(vec3 color, float overexposureLimit) {\n            float red = extendedReinhardToneMap(color.r, overexposureLimit);\n            float green = extendedReinhardToneMap(color.g, overexposureLimit);\n            float blue = extendedReinhardToneMap(color.b, overexposureLimit);\n            return gammaCorrectedColor(vec3(red, green, blue));\n        }\n        \n        vec3 hableFilmicHelper(vec3 color) {\n            float a = 0.15;\n            float b = 0.5;\n            float c = 0.1;\n            float d = 0.2;\n            float e = 0.02;\n            float f = 0.3;\n            return (color * (a * color + c * b) + d * e) / (color * (a * color + b) + d * f) - e / f;\n        }\n        \n        vec3 hableFilmicToneMap(vec3 color) {\n            float exposureBias = 2.0;\n            vec3 unscaled = hableFilmicHelper(exposureBias * color);\n            vec3 scale = 1.0 / hableFilmicHelper(vec3(11.2));\n            return gammaCorrectedColor(scale * unscaled);\n        }\n        \n        vec3 toneMap(vec3 color, float toneMapType, float toneMapParam) {\n            if (toneMapType == 0.0) {\n                return gammaCorrectedColor(color);\n            } else if (toneMapType == 1.0) {\n                return reinhardLuminanceToneMap(color);\n            } else if (toneMapType == 2.0) {\n                return reinhardPerChannelToneMap(color);\n            } else if (toneMapType == 3.0) {\n                return extendedReinhardLuminanceToneMap(color, toneMapParam);\n            } else if (toneMapType == 4.0) {\n                return extendedReinhardPerChannelToneMap(color, toneMapParam);\n            } else if (toneMapType == 5.0) {\n                return hableFilmicToneMap(color);\n            } else {\n                return vec3(0.0, 0.0, 0.0);\n            }\n        }\n        \n        vec4 toSrgb(vec3 linearColor, mat4 sceneProperties) {\n            vec3 referenceWhite = sceneProperties[2].rgb;\n            float unitR = linearColor.r / referenceWhite.r;\n            float unitG = linearColor.g / referenceWhite.g;\n            float unitB = linearColor.b / referenceWhite.b;\n            float toneMapType = sceneProperties[3][2];\n            float toneMapParam = sceneProperties[3][3];\n            vec3 toneMapped = toneMap(vec3(unitR, unitG, unitB), toneMapType, toneMapParam);\n            return vec4(toneMapped, 1.0);\n        }\n        \n        void main () {\n            gl_FragColor = toSrgb(emissiveColor, sceneProperties);\n        }\n    ',
+	attributes: {},
+	uniforms: {emissiveColor: 'emissiveColor', sceneProperties: 'sceneProperties'}
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$Types$EmptyNode = {$: 'EmptyNode'};
+var $ianmackenzie$elm_3d_scene$Scene3d$Entity$empty = $ianmackenzie$elm_3d_scene$Scene3d$Types$Entity($ianmackenzie$elm_3d_scene$Scene3d$Types$EmptyNode);
+var $elm_explorations$webgl$WebGL$Internal$enableOption = F2(
+	function (ctx, option) {
+		switch (option.$) {
+			case 'Alpha':
+				return A2(_WebGL_enableAlpha, ctx, option);
+			case 'Depth':
+				return A2(_WebGL_enableDepth, ctx, option);
+			case 'Stencil':
+				return A2(_WebGL_enableStencil, ctx, option);
+			case 'Antialias':
+				return A2(_WebGL_enableAntialias, ctx, option);
+			case 'ClearColor':
+				return A2(_WebGL_enableClearColor, ctx, option);
+			default:
+				return A2(_WebGL_enablePreserveDrawingBuffer, ctx, option);
+		}
+	});
+var $elm_explorations$webgl$WebGL$Internal$enableSetting = F2(
+	function (cache, setting) {
+		switch (setting.$) {
+			case 'Blend':
+				return A2(_WebGL_enableBlend, cache, setting);
+			case 'DepthTest':
+				return A2(_WebGL_enableDepthTest, cache, setting);
+			case 'StencilTest':
+				return A2(_WebGL_enableStencilTest, cache, setting);
+			case 'Scissor':
+				return A2(_WebGL_enableScissor, cache, setting);
+			case 'ColorMask':
+				return A2(_WebGL_enableColorMask, cache, setting);
+			case 'CullFace':
+				return A2(_WebGL_enableCullFace, cache, setting);
+			case 'PolygonOffset':
+				return A2(_WebGL_enablePolygonOffset, cache, setting);
+			case 'SampleCoverage':
+				return A2(_WebGL_enableSampleCoverage, cache, setting);
+			default:
+				return _WebGL_enableSampleAlphaToCoverage(cache);
+		}
+	});
+var $elm_explorations$webgl$WebGL$entityWith = _WebGL_entity;
+var $ianmackenzie$elm_units$Luminance$inNits = function (_v0) {
+	var numNits = _v0.a;
+	return numNits;
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$UnoptimizedShaders$lineSegmentVertex = {
+	src: '\n        precision highp float;\n        \n        attribute lowp float lineSegmentVertex;\n        \n        uniform highp vec4 modelScale;\n        uniform highp mat4 modelMatrix;\n        uniform highp mat4 viewMatrix;\n        uniform highp mat4 projectionMatrix;\n        uniform highp mat4 sceneProperties;\n        uniform highp vec3 lineSegmentStartPoint;\n        uniform highp vec3 lineSegmentEndPoint;\n        \n        vec4 getWorldPosition(vec3 modelPosition, vec4 modelScale, mat4 modelMatrix) {\n            vec4 scaledPosition = vec4(modelScale.xyz * modelPosition, 1.0);\n            return modelMatrix * scaledPosition;\n        }\n        \n        void main() {\n            vec3 position = (1.0 - lineSegmentVertex) * lineSegmentStartPoint + lineSegmentVertex * lineSegmentEndPoint;\n            vec4 worldPosition = getWorldPosition(position, modelScale, modelMatrix);\n            gl_Position = projectionMatrix * (viewMatrix * worldPosition);\n        }\n    ',
+	attributes: {lineSegmentVertex: 'lineSegmentVertex'},
+	uniforms: {lineSegmentEndPoint: 'lineSegmentEndPoint', lineSegmentStartPoint: 'lineSegmentStartPoint', modelMatrix: 'modelMatrix', modelScale: 'modelScale', projectionMatrix: 'projectionMatrix', sceneProperties: 'sceneProperties', viewMatrix: 'viewMatrix'}
+};
+var $elm_explorations$webgl$WebGL$Mesh2 = F2(
+	function (a, b) {
+		return {$: 'Mesh2', a: a, b: b};
+	});
+var $elm_explorations$webgl$WebGL$lines = $elm_explorations$webgl$WebGL$Mesh2(
+	{elemSize: 2, indexSize: 0, mode: 1});
+var $ianmackenzie$elm_3d_scene$Scene3d$Entity$lineSegmentVertices = $elm_explorations$webgl$WebGL$lines(
+	_List_fromArray(
+		[
+			_Utils_Tuple2(
+			{lineSegmentVertex: 0},
+			{lineSegmentVertex: 1})
+		]));
+var $elm_explorations$linear_algebra$Math$Vector3$scale = _MJS_v3scale;
+var $ianmackenzie$elm_units$Quantity$interpolateFrom = F3(
+	function (_v0, _v1, parameter) {
+		var start = _v0.a;
+		var end = _v1.a;
+		return (parameter <= 0.5) ? $ianmackenzie$elm_units$Quantity$Quantity(start + (parameter * (end - start))) : $ianmackenzie$elm_units$Quantity$Quantity(end + ((1 - parameter) * (start - end)));
+	});
+var $ianmackenzie$elm_geometry$BoundingBox3d$midX = function (_v0) {
+	var boundingBox = _v0.a;
+	return A3($ianmackenzie$elm_units$Quantity$interpolateFrom, boundingBox.minX, boundingBox.maxX, 0.5);
+};
+var $ianmackenzie$elm_geometry$BoundingBox3d$midY = function (_v0) {
+	var boundingBox = _v0.a;
+	return A3($ianmackenzie$elm_units$Quantity$interpolateFrom, boundingBox.minY, boundingBox.maxY, 0.5);
+};
+var $ianmackenzie$elm_geometry$BoundingBox3d$midZ = function (_v0) {
+	var boundingBox = _v0.a;
+	return A3($ianmackenzie$elm_units$Quantity$interpolateFrom, boundingBox.minZ, boundingBox.maxZ, 0.5);
+};
+var $ianmackenzie$elm_geometry$Point3d$xyz = F3(
+	function (_v0, _v1, _v2) {
+		var x = _v0.a;
+		var y = _v1.a;
+		var z = _v2.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+			{x: x, y: y, z: z});
+	});
+var $ianmackenzie$elm_geometry$BoundingBox3d$centerPoint = function (boundingBox) {
+	return A3(
+		$ianmackenzie$elm_geometry$Point3d$xyz,
+		$ianmackenzie$elm_geometry$BoundingBox3d$midX(boundingBox),
+		$ianmackenzie$elm_geometry$BoundingBox3d$midY(boundingBox),
+		$ianmackenzie$elm_geometry$BoundingBox3d$midZ(boundingBox));
+};
+var $ianmackenzie$elm_geometry$BoundingBox3d$dimensions = function (boundingBox) {
+	return _Utils_Tuple3(
+		A2(
+			$ianmackenzie$elm_units$Quantity$minus,
+			$ianmackenzie$elm_geometry$BoundingBox3d$minX(boundingBox),
+			$ianmackenzie$elm_geometry$BoundingBox3d$maxX(boundingBox)),
+		A2(
+			$ianmackenzie$elm_units$Quantity$minus,
+			$ianmackenzie$elm_geometry$BoundingBox3d$minY(boundingBox),
+			$ianmackenzie$elm_geometry$BoundingBox3d$maxY(boundingBox)),
+		A2(
+			$ianmackenzie$elm_units$Quantity$minus,
+			$ianmackenzie$elm_geometry$BoundingBox3d$minZ(boundingBox),
+			$ianmackenzie$elm_geometry$BoundingBox3d$maxZ(boundingBox)));
+};
+var $ianmackenzie$elm_geometry$Point3d$unwrap = function (_v0) {
+	var pointCoordinates = _v0.a;
+	return pointCoordinates;
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$Entity$toBounds = function (boundingBox) {
+	var _v0 = $ianmackenzie$elm_geometry$BoundingBox3d$dimensions(boundingBox);
+	var xDimension = _v0.a.a;
+	var yDimension = _v0.b.a;
+	var zDimension = _v0.c.a;
+	return {
+		centerPoint: $ianmackenzie$elm_geometry$Point3d$unwrap(
+			$ianmackenzie$elm_geometry$BoundingBox3d$centerPoint(boundingBox)),
+		halfX: xDimension / 2,
+		halfY: yDimension / 2,
+		halfZ: zDimension / 2
+	};
+};
+var $elm_explorations$linear_algebra$Math$Vector3$fromRecord = _MJS_v3fromRecord;
+var $ianmackenzie$elm_geometry_linear_algebra_interop$Geometry$Interop$LinearAlgebra$Point3d$toVec3 = function (point) {
+	return $elm_explorations$linear_algebra$Math$Vector3$fromRecord(
+		$ianmackenzie$elm_geometry$Point3d$unwrap(point));
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$Entity$lineSegment = F2(
+	function (givenMaterial, givenLineSegment) {
+		var boundingBox = $ianmackenzie$elm_geometry$LineSegment3d$boundingBox(givenLineSegment);
+		var bounds = $ianmackenzie$elm_3d_scene$Scene3d$Entity$toBounds(boundingBox);
+		var _v0 = $ianmackenzie$elm_geometry$LineSegment3d$endpoints(givenLineSegment);
+		var p1 = _v0.a;
+		var p2 = _v0.b;
+		switch (givenMaterial.$) {
+			case 'UnlitMaterial':
+				if (givenMaterial.b.$ === 'Constant') {
+					var color = givenMaterial.b.a;
+					return $ianmackenzie$elm_3d_scene$Scene3d$Types$Entity(
+						A2(
+							$ianmackenzie$elm_3d_scene$Scene3d$Types$MeshNode,
+							bounds,
+							F8(
+								function (sceneProperties, modelScale, modelMatrix, isRightHanded, viewMatrix, projectionMatrix, lights, settings) {
+									return A5(
+										$elm_explorations$webgl$WebGL$entityWith,
+										settings,
+										$ianmackenzie$elm_3d_scene$Scene3d$UnoptimizedShaders$lineSegmentVertex,
+										$ianmackenzie$elm_3d_scene$Scene3d$UnoptimizedShaders$constantFragment,
+										$ianmackenzie$elm_3d_scene$Scene3d$Entity$lineSegmentVertices,
+										{
+											constantColor: color,
+											lineSegmentEndPoint: $ianmackenzie$elm_geometry_linear_algebra_interop$Geometry$Interop$LinearAlgebra$Point3d$toVec3(p2),
+											lineSegmentStartPoint: $ianmackenzie$elm_geometry_linear_algebra_interop$Geometry$Interop$LinearAlgebra$Point3d$toVec3(p1),
+											modelMatrix: modelMatrix,
+											modelScale: modelScale,
+											projectionMatrix: projectionMatrix,
+											sceneProperties: sceneProperties,
+											viewMatrix: viewMatrix
+										});
+								})));
+				} else {
+					var _v2 = givenMaterial.a;
+					var data = givenMaterial.b.a.data;
+					return $ianmackenzie$elm_3d_scene$Scene3d$Entity$empty;
+				}
+			case 'EmissiveMaterial':
+				if (givenMaterial.b.$ === 'Constant') {
+					var color = givenMaterial.b.a.a;
+					var backlight = givenMaterial.c;
+					return $ianmackenzie$elm_3d_scene$Scene3d$Types$Entity(
+						A2(
+							$ianmackenzie$elm_3d_scene$Scene3d$Types$MeshNode,
+							bounds,
+							F8(
+								function (sceneProperties, modelScale, modelMatrix, isRightHanded, viewMatrix, projectionMatrix, lights, settings) {
+									return A5(
+										$elm_explorations$webgl$WebGL$entityWith,
+										settings,
+										$ianmackenzie$elm_3d_scene$Scene3d$UnoptimizedShaders$lineSegmentVertex,
+										$ianmackenzie$elm_3d_scene$Scene3d$UnoptimizedShaders$emissiveFragment,
+										$ianmackenzie$elm_3d_scene$Scene3d$Entity$lineSegmentVertices,
+										{
+											emissiveColor: A2(
+												$elm_explorations$linear_algebra$Math$Vector3$scale,
+												$ianmackenzie$elm_units$Luminance$inNits(backlight),
+												color),
+											lineSegmentEndPoint: $ianmackenzie$elm_geometry_linear_algebra_interop$Geometry$Interop$LinearAlgebra$Point3d$toVec3(p2),
+											lineSegmentStartPoint: $ianmackenzie$elm_geometry_linear_algebra_interop$Geometry$Interop$LinearAlgebra$Point3d$toVec3(p1),
+											modelMatrix: modelMatrix,
+											modelScale: modelScale,
+											projectionMatrix: projectionMatrix,
+											sceneProperties: sceneProperties,
+											viewMatrix: viewMatrix
+										});
+								})));
+				} else {
+					return $ianmackenzie$elm_3d_scene$Scene3d$Entity$empty;
+				}
+			case 'LambertianMaterial':
+				return $ianmackenzie$elm_3d_scene$Scene3d$Entity$empty;
+			default:
+				return $ianmackenzie$elm_3d_scene$Scene3d$Entity$empty;
+		}
+	});
+var $ianmackenzie$elm_3d_scene$Scene3d$lineSegment = F2(
+	function (givenMaterial, givenLineSegment) {
+		return A2($ianmackenzie$elm_3d_scene$Scene3d$Entity$lineSegment, givenMaterial, givenLineSegment);
+	});
+var $ianmackenzie$elm_3d_scene$Scene3d$Types$PointNode = F2(
+	function (a, b) {
+		return {$: 'PointNode', a: a, b: b};
+	});
+var $ianmackenzie$elm_3d_scene$Scene3d$UnoptimizedShaders$constantPointFragment = {
+	src: '\n        precision lowp float;\n        \n        uniform lowp vec3 constantColor;\n        uniform lowp float pointRadius;\n        uniform highp mat4 sceneProperties;\n        \n        float pointAlpha(float pointRadius, vec2 pointCoord) {\n            float pointSize = 2.0 * pointRadius;\n            float x = (pointSize + 2.0) * (pointCoord.s - 0.5);\n            float y = (pointSize + 2.0) * (pointCoord.t - 0.5);\n            float r = sqrt(x * x + y * y);\n            float innerRadius = pointRadius;\n            float outerRadius = pointRadius + 1.0;\n            if (r > outerRadius) {\n                return 0.0;\n            } else if (r > innerRadius) {\n                return outerRadius - r;\n            } else {\n                return 1.0;\n            }\n        }\n        \n        void main () {\n            float supersampling = sceneProperties[3][0];\n            float alpha = pointAlpha(pointRadius * supersampling, gl_PointCoord);\n            gl_FragColor = vec4(constantColor, alpha);\n        }\n    ',
+	attributes: {},
+	uniforms: {constantColor: 'constantColor', pointRadius: 'pointRadius', sceneProperties: 'sceneProperties'}
+};
+var $elm_explorations$webgl$WebGL$Mesh1 = F2(
+	function (a, b) {
+		return {$: 'Mesh1', a: a, b: b};
+	});
+var $elm_explorations$webgl$WebGL$points = $elm_explorations$webgl$WebGL$Mesh1(
+	{elemSize: 1, indexSize: 0, mode: 0});
+var $ianmackenzie$elm_3d_scene$Scene3d$Entity$dummyVertex = $elm_explorations$webgl$WebGL$points(
+	_List_fromArray(
+		[
+			{dummyAttribute: 1}
+		]));
+var $ianmackenzie$elm_3d_scene$Scene3d$UnoptimizedShaders$emissivePointFragment = {
+	src: '\n        precision mediump float;\n        \n        uniform mediump vec3 emissiveColor;\n        uniform lowp float pointRadius;\n        uniform highp mat4 sceneProperties;\n        \n        float gammaCorrect(float u) {\n            if (u <= 0.0031308) {\n                return 12.92 * u;\n            } else {\n                return 1.055 * pow(u, 1.0 / 2.4) - 0.055;\n            }\n        }\n        \n        vec3 gammaCorrectedColor(vec3 color) {\n            float red = gammaCorrect(color.r);\n            float green = gammaCorrect(color.g);\n            float blue = gammaCorrect(color.b);\n            return vec3(red, green, blue);\n        }\n        \n        vec3 reinhardLuminanceToneMap(vec3 color) {\n            float luminance = 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b;\n            float scale = 1.0 / (1.0 + luminance);\n            return gammaCorrectedColor(color * scale);\n        }\n        \n        vec3 reinhardPerChannelToneMap(vec3 color) {\n            return gammaCorrectedColor(color / (color + 1.0));\n        }\n        \n        float extendedReinhardToneMap(float x, float xMax) {\n            return x * (1.0 + (x / (xMax * xMax))) / (1.0 + x);\n        }\n        \n        vec3 extendedReinhardLuminanceToneMap(vec3 color, float overexposureLimit) {\n            float luminance = 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b;\n            float scaledLuminance = extendedReinhardToneMap(luminance, overexposureLimit);\n            float scale = scaledLuminance / luminance;\n            return gammaCorrectedColor(color * scale);\n        }\n        \n        vec3 extendedReinhardPerChannelToneMap(vec3 color, float overexposureLimit) {\n            float red = extendedReinhardToneMap(color.r, overexposureLimit);\n            float green = extendedReinhardToneMap(color.g, overexposureLimit);\n            float blue = extendedReinhardToneMap(color.b, overexposureLimit);\n            return gammaCorrectedColor(vec3(red, green, blue));\n        }\n        \n        vec3 hableFilmicHelper(vec3 color) {\n            float a = 0.15;\n            float b = 0.5;\n            float c = 0.1;\n            float d = 0.2;\n            float e = 0.02;\n            float f = 0.3;\n            return (color * (a * color + c * b) + d * e) / (color * (a * color + b) + d * f) - e / f;\n        }\n        \n        vec3 hableFilmicToneMap(vec3 color) {\n            float exposureBias = 2.0;\n            vec3 unscaled = hableFilmicHelper(exposureBias * color);\n            vec3 scale = 1.0 / hableFilmicHelper(vec3(11.2));\n            return gammaCorrectedColor(scale * unscaled);\n        }\n        \n        vec3 toneMap(vec3 color, float toneMapType, float toneMapParam) {\n            if (toneMapType == 0.0) {\n                return gammaCorrectedColor(color);\n            } else if (toneMapType == 1.0) {\n                return reinhardLuminanceToneMap(color);\n            } else if (toneMapType == 2.0) {\n                return reinhardPerChannelToneMap(color);\n            } else if (toneMapType == 3.0) {\n                return extendedReinhardLuminanceToneMap(color, toneMapParam);\n            } else if (toneMapType == 4.0) {\n                return extendedReinhardPerChannelToneMap(color, toneMapParam);\n            } else if (toneMapType == 5.0) {\n                return hableFilmicToneMap(color);\n            } else {\n                return vec3(0.0, 0.0, 0.0);\n            }\n        }\n        \n        vec4 toSrgb(vec3 linearColor, mat4 sceneProperties) {\n            vec3 referenceWhite = sceneProperties[2].rgb;\n            float unitR = linearColor.r / referenceWhite.r;\n            float unitG = linearColor.g / referenceWhite.g;\n            float unitB = linearColor.b / referenceWhite.b;\n            float toneMapType = sceneProperties[3][2];\n            float toneMapParam = sceneProperties[3][3];\n            vec3 toneMapped = toneMap(vec3(unitR, unitG, unitB), toneMapType, toneMapParam);\n            return vec4(toneMapped, 1.0);\n        }\n        \n        float pointAlpha(float pointRadius, vec2 pointCoord) {\n            float pointSize = 2.0 * pointRadius;\n            float x = (pointSize + 2.0) * (pointCoord.s - 0.5);\n            float y = (pointSize + 2.0) * (pointCoord.t - 0.5);\n            float r = sqrt(x * x + y * y);\n            float innerRadius = pointRadius;\n            float outerRadius = pointRadius + 1.0;\n            if (r > outerRadius) {\n                return 0.0;\n            } else if (r > innerRadius) {\n                return outerRadius - r;\n            } else {\n                return 1.0;\n            }\n        }\n        \n        void main () {\n            vec4 color = toSrgb(emissiveColor, sceneProperties);\n            float supersampling = sceneProperties[3][0];\n            float alpha = pointAlpha(pointRadius * supersampling, gl_PointCoord);\n            gl_FragColor = vec4(color.rgb, alpha);\n        }\n    ',
+	attributes: {},
+	uniforms: {emissiveColor: 'emissiveColor', pointRadius: 'pointRadius', sceneProperties: 'sceneProperties'}
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$UnoptimizedShaders$singlePointVertex = {
+	src: '\n        precision highp float;\n        \n        attribute lowp float dummyAttribute;\n        \n        uniform highp vec4 modelScale;\n        uniform highp mat4 modelMatrix;\n        uniform lowp float pointRadius;\n        uniform highp mat4 viewMatrix;\n        uniform highp mat4 projectionMatrix;\n        uniform highp mat4 sceneProperties;\n        uniform highp vec3 pointPosition;\n        \n        vec4 getWorldPosition(vec3 modelPosition, vec4 modelScale, mat4 modelMatrix) {\n            vec4 scaledPosition = vec4(modelScale.xyz * modelPosition, 1.0);\n            return modelMatrix * scaledPosition;\n        }\n        \n        void main () {\n            vec4 worldPosition = getWorldPosition(pointPosition, modelScale, modelMatrix);\n            gl_Position = projectionMatrix * (viewMatrix * worldPosition);\n            float supersampling = sceneProperties[3][0];\n            gl_PointSize = 2.0 * pointRadius * supersampling * dummyAttribute + 2.0;\n        }\n    ',
+	attributes: {dummyAttribute: 'dummyAttribute'},
+	uniforms: {modelMatrix: 'modelMatrix', modelScale: 'modelScale', pointPosition: 'pointPosition', pointRadius: 'pointRadius', projectionMatrix: 'projectionMatrix', sceneProperties: 'sceneProperties', viewMatrix: 'viewMatrix'}
+};
+var $ianmackenzie$elm_geometry$BoundingBox3d$singleton = function (point) {
+	return $ianmackenzie$elm_geometry$Geometry$Types$BoundingBox3d(
+		{
+			maxX: $ianmackenzie$elm_geometry$Point3d$xCoordinate(point),
+			maxY: $ianmackenzie$elm_geometry$Point3d$yCoordinate(point),
+			maxZ: $ianmackenzie$elm_geometry$Point3d$zCoordinate(point),
+			minX: $ianmackenzie$elm_geometry$Point3d$xCoordinate(point),
+			minY: $ianmackenzie$elm_geometry$Point3d$yCoordinate(point),
+			minZ: $ianmackenzie$elm_geometry$Point3d$zCoordinate(point)
+		});
+};
+var $ianmackenzie$elm_units$Pixels$toFloat = function (_v0) {
+	var numPixels = _v0.a;
+	return numPixels;
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$Entity$point = F3(
+	function (givenRadius, givenMaterial, givenPoint) {
+		var boundingBox = $ianmackenzie$elm_geometry$BoundingBox3d$singleton(givenPoint);
+		var bounds = $ianmackenzie$elm_3d_scene$Scene3d$Entity$toBounds(boundingBox);
+		switch (givenMaterial.$) {
+			case 'UnlitMaterial':
+				if (givenMaterial.b.$ === 'Constant') {
+					var color = givenMaterial.b.a;
+					return $ianmackenzie$elm_3d_scene$Scene3d$Types$Entity(
+						A2(
+							$ianmackenzie$elm_3d_scene$Scene3d$Types$PointNode,
+							bounds,
+							F8(
+								function (sceneProperties, modelScale, modelMatrix, isRightHanded, viewMatrix, projectionMatrix, lights, settings) {
+									return A5(
+										$elm_explorations$webgl$WebGL$entityWith,
+										settings,
+										$ianmackenzie$elm_3d_scene$Scene3d$UnoptimizedShaders$singlePointVertex,
+										$ianmackenzie$elm_3d_scene$Scene3d$UnoptimizedShaders$constantPointFragment,
+										$ianmackenzie$elm_3d_scene$Scene3d$Entity$dummyVertex,
+										{
+											constantColor: color,
+											modelMatrix: modelMatrix,
+											modelScale: modelScale,
+											pointPosition: $ianmackenzie$elm_geometry_linear_algebra_interop$Geometry$Interop$LinearAlgebra$Point3d$toVec3(givenPoint),
+											pointRadius: $ianmackenzie$elm_units$Pixels$toFloat(givenRadius),
+											projectionMatrix: projectionMatrix,
+											sceneProperties: sceneProperties,
+											viewMatrix: viewMatrix
+										});
+								})));
+				} else {
+					var data = givenMaterial.b.a.data;
+					return $ianmackenzie$elm_3d_scene$Scene3d$Entity$empty;
+				}
+			case 'EmissiveMaterial':
+				if (givenMaterial.b.$ === 'Constant') {
+					var color = givenMaterial.b.a.a;
+					var backlight = givenMaterial.c;
+					return $ianmackenzie$elm_3d_scene$Scene3d$Types$Entity(
+						A2(
+							$ianmackenzie$elm_3d_scene$Scene3d$Types$PointNode,
+							bounds,
+							F8(
+								function (sceneProperties, modelScale, modelMatrix, isRightHanded, viewMatrix, projectionMatrix, lights, settings) {
+									return A5(
+										$elm_explorations$webgl$WebGL$entityWith,
+										settings,
+										$ianmackenzie$elm_3d_scene$Scene3d$UnoptimizedShaders$singlePointVertex,
+										$ianmackenzie$elm_3d_scene$Scene3d$UnoptimizedShaders$emissivePointFragment,
+										$ianmackenzie$elm_3d_scene$Scene3d$Entity$dummyVertex,
+										{
+											emissiveColor: A2(
+												$elm_explorations$linear_algebra$Math$Vector3$scale,
+												$ianmackenzie$elm_units$Luminance$inNits(backlight),
+												color),
+											modelMatrix: modelMatrix,
+											modelScale: modelScale,
+											pointPosition: $ianmackenzie$elm_geometry_linear_algebra_interop$Geometry$Interop$LinearAlgebra$Point3d$toVec3(givenPoint),
+											pointRadius: $ianmackenzie$elm_units$Pixels$toFloat(givenRadius),
+											projectionMatrix: projectionMatrix,
+											sceneProperties: sceneProperties,
+											viewMatrix: viewMatrix
+										});
+								})));
+				} else {
+					return $ianmackenzie$elm_3d_scene$Scene3d$Entity$empty;
+				}
+			case 'LambertianMaterial':
+				return $ianmackenzie$elm_3d_scene$Scene3d$Entity$empty;
+			default:
+				return $ianmackenzie$elm_3d_scene$Scene3d$Entity$empty;
+		}
+	});
+var $ianmackenzie$elm_3d_scene$Scene3d$point = F3(
+	function (_v0, givenMaterial, givenPoint) {
+		var radius = _v0.radius;
+		return A3($ianmackenzie$elm_3d_scene$Scene3d$Entity$point, radius, givenMaterial, givenPoint);
+	});
+var $ianmackenzie$elm_units$Quantity$ratio = F2(
+	function (_v0, _v1) {
+		var x = _v0.a;
+		var y = _v1.a;
+		return x / y;
+	});
+var $author$project$DomainModel$trueLength = function (treeNode) {
+	if (treeNode.$ === 'Leaf') {
+		var leaf = treeNode.a;
+		return leaf.trueLength;
+	} else {
+		var node = treeNode.a;
+		return node.nodeContent.trueLength;
+	}
+};
+var $author$project$SceneBuilder$render3dView = function (model) {
+	var startPoint = function (treeNode) {
+		return A2(
+			$ianmackenzie$elm_geometry$Point3d$translateBy,
+			$author$project$DomainModel$startVector(treeNode),
+			$ianmackenzie$elm_geometry$Point3d$origin);
+	};
+	var renderCurrentMarker = F2(
+		function (marker, tree) {
+			return _List_fromArray(
+				[
+					A3(
+					$ianmackenzie$elm_3d_scene$Scene3d$point,
+					{
+						radius: $ianmackenzie$elm_units$Pixels$pixels(10)
+					},
+					$ianmackenzie$elm_3d_scene$Scene3d$Material$color($avh4$elm_color$Color$lightOrange),
+					startPoint(
+						A2($author$project$DomainModel$leafFromIndex, marker, tree)))
+				]);
+		});
+	var gradientColourPastel = function (slope) {
+		return A3(
+			$avh4$elm_color$Color$hsl,
+			$author$project$ColourPalette$gradientHue2(slope),
+			0.6,
+			0.7);
+	};
+	var endPoint = function (treeNode) {
+		return A2(
+			$ianmackenzie$elm_geometry$Point3d$translateBy,
+			$author$project$DomainModel$endVector(treeNode),
+			$ianmackenzie$elm_geometry$Point3d$origin);
+	};
+	var gradientFromNode = function (treeNode) {
+		return 100.0 * A2(
+			$ianmackenzie$elm_units$Quantity$ratio,
+			A2(
+				$ianmackenzie$elm_units$Quantity$minus,
+				$ianmackenzie$elm_geometry$Point3d$zCoordinate(
+					startPoint(treeNode)),
+				$ianmackenzie$elm_geometry$Point3d$zCoordinate(
+					endPoint(treeNode))),
+			$author$project$DomainModel$trueLength(treeNode));
+	};
+	var makeVisibleSegment = function (node) {
+		return _List_fromArray(
+			[
+				A3(
+				$ianmackenzie$elm_3d_scene$Scene3d$point,
+				{
+					radius: $ianmackenzie$elm_units$Pixels$pixels(1)
+				},
+				$ianmackenzie$elm_3d_scene$Scene3d$Material$color($avh4$elm_color$Color$black),
+				startPoint(node)),
+				A2(
+				$ianmackenzie$elm_3d_scene$Scene3d$lineSegment,
+				$ianmackenzie$elm_3d_scene$Scene3d$Material$color($avh4$elm_color$Color$black),
+				A2(
+					$ianmackenzie$elm_geometry$LineSegment3d$from,
+					startPoint(node),
+					endPoint(node)))
+			]);
+	};
+	var renderTree = F3(
+		function (depth, someNode, accum) {
+			if (someNode.$ === 'Leaf') {
+				var leafNode = someNode.a;
+				return _Utils_ap(
+					makeVisibleSegment(someNode),
+					accum);
+			} else {
+				var notLeaf = someNode.a;
+				return (depth <= 0) ? _Utils_ap(
+					makeVisibleSegment(someNode),
+					accum) : A3(
+					renderTree,
+					depth - 1,
+					notLeaf.right,
+					A3(renderTree, depth - 1, notLeaf.left, accum));
+			}
+		});
+	var renderTreeSelectively = F4(
+		function (box, depth, someNode, accum) {
+			if (someNode.$ === 'Leaf') {
+				var leafNode = someNode.a;
+				return A2($ianmackenzie$elm_geometry$BoundingBox3d$intersects, box, leafNode.boundingBox) ? _Utils_ap(
+					makeVisibleSegment(someNode),
+					accum) : accum;
+			} else {
+				var notLeaf = someNode.a;
+				return A2($ianmackenzie$elm_geometry$BoundingBox3d$intersects, box, notLeaf.nodeContent.boundingBox) ? A4(
+					renderTreeSelectively,
+					box,
+					depth - 1,
+					notLeaf.right,
+					A4(renderTreeSelectively, box, depth - 1, notLeaf.left, accum)) : A3(
+					renderTree,
+					depth - 1,
+					notLeaf.right,
+					A3(renderTree, depth - 1, notLeaf.left, accum));
+			}
+		});
+	var boxSide = $ianmackenzie$elm_units$Length$kilometers(4);
+	var _v2 = model.trackTree;
+	if (_v2.$ === 'Just') {
+		var tree = _v2.a;
+		var box = A2(
+			$ianmackenzie$elm_geometry$BoundingBox3d$withDimensions,
+			_Utils_Tuple3(boxSide, boxSide, boxSide),
+			startPoint(
+				A2($author$project$DomainModel$leafFromIndex, model.currentPosition, tree)));
+		return _Utils_ap(
+			A4(renderTreeSelectively, box, model.renderDepth, tree, _List_Nil),
+			A2(renderCurrentMarker, model.currentPosition, tree));
+	} else {
+		return _List_Nil;
+	}
+};
+var $author$project$Main$renderModel = function (model) {
+	return _Utils_update(
+		model,
+		{
+			scene: $author$project$SceneBuilder$render3dView(model)
+		});
+};
+var $author$project$MyIP$apiRoot = 'http://ip-api.com';
+var $elm$url$Url$Builder$toQueryPair = function (_v0) {
+	var key = _v0.a;
+	var value = _v0.b;
+	return key + ('=' + value);
+};
+var $elm$url$Url$Builder$toQuery = function (parameters) {
+	if (!parameters.b) {
+		return '';
+	} else {
+		return '?' + A2(
+			$elm$core$String$join,
+			'&',
+			A2($elm$core$List$map, $elm$url$Url$Builder$toQueryPair, parameters));
+	}
+};
+var $elm$url$Url$Builder$crossOrigin = F3(
+	function (prePath, pathSegments, parameters) {
+		return prePath + ('/' + (A2($elm$core$String$join, '/', pathSegments) + $elm$url$Url$Builder$toQuery(parameters)));
+	});
+var $elm$http$Http$BadStatus_ = F2(
+	function (a, b) {
+		return {$: 'BadStatus_', a: a, b: b};
+	});
+var $elm$http$Http$BadUrl_ = function (a) {
+	return {$: 'BadUrl_', a: a};
+};
+var $elm$http$Http$GoodStatus_ = F2(
+	function (a, b) {
+		return {$: 'GoodStatus_', a: a, b: b};
+	});
+var $elm$http$Http$NetworkError_ = {$: 'NetworkError_'};
+var $elm$http$Http$Receiving = function (a) {
+	return {$: 'Receiving', a: a};
+};
+var $elm$http$Http$Sending = function (a) {
+	return {$: 'Sending', a: a};
+};
+var $elm$http$Http$Timeout_ = {$: 'Timeout_'};
+var $elm$core$Maybe$isJust = function (maybe) {
+	if (maybe.$ === 'Just') {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
+var $elm$http$Http$emptyBody = _Http_emptyBody;
+var $elm$json$Json$Decode$decodeString = _Json_runOnString;
+var $elm$http$Http$expectStringResponse = F2(
+	function (toMsg, toResult) {
+		return A3(
+			_Http_expect,
+			'',
+			$elm$core$Basics$identity,
+			A2($elm$core$Basics$composeR, toResult, toMsg));
+	});
+var $elm$core$Result$mapError = F2(
+	function (f, result) {
+		if (result.$ === 'Ok') {
+			var v = result.a;
+			return $elm$core$Result$Ok(v);
+		} else {
+			var e = result.a;
+			return $elm$core$Result$Err(
+				f(e));
+		}
+	});
+var $elm$http$Http$BadBody = function (a) {
+	return {$: 'BadBody', a: a};
+};
+var $elm$http$Http$BadStatus = function (a) {
+	return {$: 'BadStatus', a: a};
+};
+var $elm$http$Http$BadUrl = function (a) {
+	return {$: 'BadUrl', a: a};
+};
+var $elm$http$Http$NetworkError = {$: 'NetworkError'};
+var $elm$http$Http$Timeout = {$: 'Timeout'};
+var $elm$http$Http$resolve = F2(
+	function (toResult, response) {
+		switch (response.$) {
+			case 'BadUrl_':
+				var url = response.a;
+				return $elm$core$Result$Err(
+					$elm$http$Http$BadUrl(url));
+			case 'Timeout_':
+				return $elm$core$Result$Err($elm$http$Http$Timeout);
+			case 'NetworkError_':
+				return $elm$core$Result$Err($elm$http$Http$NetworkError);
+			case 'BadStatus_':
+				var metadata = response.a;
+				return $elm$core$Result$Err(
+					$elm$http$Http$BadStatus(metadata.statusCode));
+			default:
+				var body = response.b;
+				return A2(
+					$elm$core$Result$mapError,
+					$elm$http$Http$BadBody,
+					toResult(body));
+		}
+	});
+var $elm$http$Http$expectJson = F2(
+	function (toMsg, decoder) {
+		return A2(
+			$elm$http$Http$expectStringResponse,
+			toMsg,
+			$elm$http$Http$resolve(
+				function (string) {
+					return A2(
+						$elm$core$Result$mapError,
+						$elm$json$Json$Decode$errorToString,
+						A2($elm$json$Json$Decode$decodeString, decoder, string));
+				}));
+	});
+var $author$project$GeoCodeDecoders$IpInfo = F7(
+	function (ip, country, region, city, zip, latitude, longitude) {
+		return {city: city, country: country, ip: ip, latitude: latitude, longitude: longitude, region: region, zip: zip};
+	});
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
+var $elm$json$Json$Decode$map7 = _Json_map7;
+var $author$project$GeoCodeDecoders$ipInfoDecoder = A8(
+	$elm$json$Json$Decode$map7,
+	$author$project$GeoCodeDecoders$IpInfo,
+	A2(
+		$elm$json$Json$Decode$at,
+		_List_fromArray(
+			['query']),
+		$elm$json$Json$Decode$string),
+	A2(
+		$elm$json$Json$Decode$at,
+		_List_fromArray(
+			['country']),
+		$elm$json$Json$Decode$string),
+	A2(
+		$elm$json$Json$Decode$at,
+		_List_fromArray(
+			['region']),
+		$elm$json$Json$Decode$string),
+	A2(
+		$elm$json$Json$Decode$at,
+		_List_fromArray(
+			['city']),
+		$elm$json$Json$Decode$string),
+	A2(
+		$elm$json$Json$Decode$at,
+		_List_fromArray(
+			['zip']),
+		$elm$json$Json$Decode$string),
+	A2(
+		$elm$json$Json$Decode$at,
+		_List_fromArray(
+			['lat']),
+		$elm$json$Json$Decode$float),
+	A2(
+		$elm$json$Json$Decode$at,
+		_List_fromArray(
+			['lon']),
+		$elm$json$Json$Decode$float));
+var $elm$http$Http$Request = function (a) {
+	return {$: 'Request', a: a};
+};
+var $elm$http$Http$State = F2(
+	function (reqs, subs) {
+		return {reqs: reqs, subs: subs};
+	});
+var $elm$http$Http$init = $elm$core$Task$succeed(
+	A2($elm$http$Http$State, $elm$core$Dict$empty, _List_Nil));
+var $elm$core$Process$kill = _Scheduler_kill;
+var $elm$core$Process$spawn = _Scheduler_spawn;
+var $elm$http$Http$updateReqs = F3(
+	function (router, cmds, reqs) {
+		updateReqs:
+		while (true) {
+			if (!cmds.b) {
+				return $elm$core$Task$succeed(reqs);
+			} else {
+				var cmd = cmds.a;
+				var otherCmds = cmds.b;
+				if (cmd.$ === 'Cancel') {
+					var tracker = cmd.a;
+					var _v2 = A2($elm$core$Dict$get, tracker, reqs);
+					if (_v2.$ === 'Nothing') {
+						var $temp$router = router,
+							$temp$cmds = otherCmds,
+							$temp$reqs = reqs;
+						router = $temp$router;
+						cmds = $temp$cmds;
+						reqs = $temp$reqs;
+						continue updateReqs;
+					} else {
+						var pid = _v2.a;
+						return A2(
+							$elm$core$Task$andThen,
+							function (_v3) {
+								return A3(
+									$elm$http$Http$updateReqs,
+									router,
+									otherCmds,
+									A2($elm$core$Dict$remove, tracker, reqs));
+							},
+							$elm$core$Process$kill(pid));
+					}
+				} else {
+					var req = cmd.a;
+					return A2(
+						$elm$core$Task$andThen,
+						function (pid) {
+							var _v4 = req.tracker;
+							if (_v4.$ === 'Nothing') {
+								return A3($elm$http$Http$updateReqs, router, otherCmds, reqs);
+							} else {
+								var tracker = _v4.a;
+								return A3(
+									$elm$http$Http$updateReqs,
+									router,
+									otherCmds,
+									A3($elm$core$Dict$insert, tracker, pid, reqs));
+							}
+						},
+						$elm$core$Process$spawn(
+							A3(
+								_Http_toTask,
+								router,
+								$elm$core$Platform$sendToApp(router),
+								req)));
+				}
+			}
+		}
+	});
+var $elm$http$Http$onEffects = F4(
+	function (router, cmds, subs, state) {
+		return A2(
+			$elm$core$Task$andThen,
+			function (reqs) {
+				return $elm$core$Task$succeed(
+					A2($elm$http$Http$State, reqs, subs));
+			},
+			A3($elm$http$Http$updateReqs, router, cmds, state.reqs));
+	});
+var $elm$http$Http$maybeSend = F4(
+	function (router, desiredTracker, progress, _v0) {
+		var actualTracker = _v0.a;
+		var toMsg = _v0.b;
+		return _Utils_eq(desiredTracker, actualTracker) ? $elm$core$Maybe$Just(
+			A2(
+				$elm$core$Platform$sendToApp,
+				router,
+				toMsg(progress))) : $elm$core$Maybe$Nothing;
+	});
+var $elm$http$Http$onSelfMsg = F3(
+	function (router, _v0, state) {
+		var tracker = _v0.a;
+		var progress = _v0.b;
+		return A2(
+			$elm$core$Task$andThen,
+			function (_v1) {
+				return $elm$core$Task$succeed(state);
+			},
+			$elm$core$Task$sequence(
+				A2(
+					$elm$core$List$filterMap,
+					A3($elm$http$Http$maybeSend, router, tracker, progress),
+					state.subs)));
+	});
+var $elm$http$Http$Cancel = function (a) {
+	return {$: 'Cancel', a: a};
+};
+var $elm$http$Http$cmdMap = F2(
+	function (func, cmd) {
+		if (cmd.$ === 'Cancel') {
+			var tracker = cmd.a;
+			return $elm$http$Http$Cancel(tracker);
+		} else {
+			var r = cmd.a;
+			return $elm$http$Http$Request(
+				{
+					allowCookiesFromOtherDomains: r.allowCookiesFromOtherDomains,
+					body: r.body,
+					expect: A2(_Http_mapExpect, func, r.expect),
+					headers: r.headers,
+					method: r.method,
+					timeout: r.timeout,
+					tracker: r.tracker,
+					url: r.url
+				});
+		}
+	});
+var $elm$http$Http$MySub = F2(
+	function (a, b) {
+		return {$: 'MySub', a: a, b: b};
+	});
+var $elm$http$Http$subMap = F2(
+	function (func, _v0) {
+		var tracker = _v0.a;
+		var toMsg = _v0.b;
+		return A2(
+			$elm$http$Http$MySub,
+			tracker,
+			A2($elm$core$Basics$composeR, toMsg, func));
+	});
+_Platform_effectManagers['Http'] = _Platform_createManager($elm$http$Http$init, $elm$http$Http$onEffects, $elm$http$Http$onSelfMsg, $elm$http$Http$cmdMap, $elm$http$Http$subMap);
+var $elm$http$Http$command = _Platform_leaf('Http');
+var $elm$http$Http$subscription = _Platform_leaf('Http');
+var $elm$http$Http$request = function (r) {
+	return $elm$http$Http$command(
+		$elm$http$Http$Request(
+			{allowCookiesFromOtherDomains: false, body: r.body, expect: r.expect, headers: r.headers, method: r.method, timeout: r.timeout, tracker: r.tracker, url: r.url}));
+};
+var $author$project$MyIP$requestIpInformation = function (msg) {
+	return $elm$http$Http$request(
+		{
+			body: $elm$http$Http$emptyBody,
+			expect: A2($elm$http$Http$expectJson, msg, $author$project$GeoCodeDecoders$ipInfoDecoder),
+			headers: _List_Nil,
+			method: 'GET',
+			timeout: $elm$core$Maybe$Nothing,
+			tracker: $elm$core$Maybe$Nothing,
+			url: A3(
+				$elm$url$Url$Builder$crossOrigin,
+				$author$project$MyIP$apiRoot,
+				_List_fromArray(
+					['json']),
+				_List_Nil)
+		});
+};
+var $elm$file$File$toString = _File_toString;
+var $author$project$DomainModel$Leaf = function (a) {
+	return {$: 'Leaf', a: a};
+};
+var $author$project$DomainModel$Node = function (a) {
+	return {$: 'Node', a: a};
+};
+var $author$project$DomainModel$boundingBox = function (treeNode) {
+	if (treeNode.$ === 'Leaf') {
+		var leaf = treeNode.a;
+		return leaf.boundingBox;
+	} else {
+		var node = treeNode.a;
+		return node.nodeContent.boundingBox;
+	}
+};
+var $ianmackenzie$elm_units$Quantity$sqrt = function (_v0) {
+	var value = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(
+		$elm$core$Basics$sqrt(value));
+};
+var $ianmackenzie$elm_units$Quantity$squared = function (_v0) {
+	var value = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(value * value);
+};
+var $ianmackenzie$elm_units$Quantity$sum = function (quantities) {
+	return A3($elm$core$List$foldl, $ianmackenzie$elm_units$Quantity$plus, $ianmackenzie$elm_units$Quantity$zero, quantities);
+};
+var $ianmackenzie$elm_geometry$Geometry$Types$Sphere3d = function (a) {
+	return {$: 'Sphere3d', a: a};
+};
+var $ianmackenzie$elm_geometry$Sphere3d$withRadius = F2(
+	function (givenRadius, givenCenterPoint) {
+		return $ianmackenzie$elm_geometry$Geometry$Types$Sphere3d(
+			{
+				centerPoint: givenCenterPoint,
+				radius: $ianmackenzie$elm_units$Quantity$abs(givenRadius)
+			});
+	});
+var $author$project$DomainModel$containingSphere = function (box) {
+	var here = $ianmackenzie$elm_geometry$BoundingBox3d$centerPoint(box);
+	var _v0 = $ianmackenzie$elm_geometry$BoundingBox3d$dimensions(box);
+	var xs = _v0.a;
+	var ys = _v0.b;
+	var zs = _v0.c;
+	var radius = $ianmackenzie$elm_units$Quantity$half(
+		$ianmackenzie$elm_units$Quantity$sqrt(
+			$ianmackenzie$elm_units$Quantity$sum(
+				_List_fromArray(
+					[
+						$ianmackenzie$elm_units$Quantity$squared(xs),
+						$ianmackenzie$elm_units$Quantity$squared(ys),
+						$ianmackenzie$elm_units$Quantity$squared(zs)
+					]))));
+	return A2($ianmackenzie$elm_geometry$Sphere3d$withRadius, radius, here);
+};
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $author$project$Spherical$range = F2(
+	function (lonLat1, lonLat2) {
+		var _v0 = _Utils_Tuple2(
+			$ianmackenzie$elm_units$Angle$inRadians(lonLat2.b),
+			$ianmackenzie$elm_units$Angle$inRadians(lonLat2.a));
+		var lat2 = _v0.a;
+		var lon2 = _v0.b;
+		var _v1 = _Utils_Tuple2(
+			$ianmackenzie$elm_units$Angle$inRadians(lonLat1.b),
+			$ianmackenzie$elm_units$Angle$inRadians(lonLat1.a));
+		var lat1 = _v1.a;
+		var lon1 = _v1.b;
+		var y = lat2 - lat1;
+		var x = (lon2 - lon1) * $elm$core$Basics$cos((lat1 + lat2) / 2);
+		return $author$project$Spherical$meanRadius * $elm$core$Basics$sqrt((x * x) + (y * y));
+	});
+var $author$project$DomainModel$makeRoadSection = F2(
+	function (v1, v2) {
+		var _v0 = _Utils_Tuple2(
+			A2($ianmackenzie$elm_geometry$Point3d$translateBy, v1, $ianmackenzie$elm_geometry$Point3d$origin),
+			A2($ianmackenzie$elm_geometry$Point3d$translateBy, v2, $ianmackenzie$elm_geometry$Point3d$origin));
+		var local1 = _v0.a;
+		var local2 = _v0.b;
+		var box = A2($ianmackenzie$elm_geometry$BoundingBox3d$from, local1, local2);
+		var _v1 = _Utils_Tuple2(
+			$author$project$DomainModel$gpxFromVector(v1),
+			$author$project$DomainModel$gpxFromVector(v2));
+		var earth1 = _v1.a;
+		var earth2 = _v1.b;
+		var range = $ianmackenzie$elm_units$Length$meters(
+			A2(
+				$author$project$Spherical$range,
+				_Utils_Tuple2(earth1.longitude, earth1.latitude),
+				_Utils_Tuple2(earth2.longitude, earth2.latitude)));
+		return {
+			boundingBox: box,
+			endVector: v2,
+			skipCount: 1,
+			sphere: $author$project$DomainModel$containingSphere(box),
+			startVector: v1,
+			trueLength: range
+		};
+	});
+var $ianmackenzie$elm_geometry$BoundingBox3d$extrema = function (_v0) {
+	var boundingBoxExtrema = _v0.a;
+	return boundingBoxExtrema;
+};
+var $ianmackenzie$elm_geometry$BoundingBox3d$union = F2(
+	function (firstBox, secondBox) {
+		var b2 = $ianmackenzie$elm_geometry$BoundingBox3d$extrema(secondBox);
+		var b1 = $ianmackenzie$elm_geometry$BoundingBox3d$extrema(firstBox);
+		return $ianmackenzie$elm_geometry$Geometry$Types$BoundingBox3d(
+			{
+				maxX: A2($ianmackenzie$elm_units$Quantity$max, b1.maxX, b2.maxX),
+				maxY: A2($ianmackenzie$elm_units$Quantity$max, b1.maxY, b2.maxY),
+				maxZ: A2($ianmackenzie$elm_units$Quantity$max, b1.maxZ, b2.maxZ),
+				minX: A2($ianmackenzie$elm_units$Quantity$min, b1.minX, b2.minX),
+				minY: A2($ianmackenzie$elm_units$Quantity$min, b1.minY, b2.minY),
+				minZ: A2($ianmackenzie$elm_units$Quantity$min, b1.minZ, b2.minZ)
+			});
+	});
+var $author$project$DomainModel$treeFromList = function (track) {
+	var numberOfSegments = $elm$core$List$length(track) - 1;
+	var combineInfo = F2(
+		function (info1, info2) {
+			var box = A2(
+				$ianmackenzie$elm_geometry$BoundingBox3d$union,
+				$author$project$DomainModel$boundingBox(info1),
+				$author$project$DomainModel$boundingBox(info2));
+			return {
+				boundingBox: box,
+				endVector: $author$project$DomainModel$endVector(info2),
+				skipCount: $author$project$DomainModel$skipCount(info1) + $author$project$DomainModel$skipCount(info2),
+				sphere: $author$project$DomainModel$containingSphere(box),
+				startVector: $author$project$DomainModel$startVector(info1),
+				trueLength: A2(
+					$ianmackenzie$elm_units$Quantity$plus,
+					$author$project$DomainModel$trueLength(info1),
+					$author$project$DomainModel$trueLength(info2))
+			};
+		});
+	var treeBuilder = F2(
+		function (n, vectorStream) {
+			var _v0 = _Utils_Tuple2(n < 2, vectorStream);
+			if (_v0.a) {
+				if (_v0.b.b && _v0.b.b.b) {
+					var _v1 = _v0.b;
+					var v1 = _v1.a;
+					var _v2 = _v1.b;
+					var v2 = _v2.a;
+					var vvvv = _v2.b;
+					return _Utils_Tuple2(
+						$elm$core$Maybe$Just(
+							$author$project$DomainModel$Leaf(
+								A2($author$project$DomainModel$makeRoadSection, v1, v2))),
+						A2($elm$core$List$cons, v2, vvvv));
+				} else {
+					var anythingElse = _v0.b;
+					return _Utils_Tuple2($elm$core$Maybe$Nothing, anythingElse);
+				}
+			} else {
+				var vvvv = _v0.b;
+				var leftSize = (n / 2) | 0;
+				var rightSize = n - leftSize;
+				var _v3 = A2(treeBuilder, leftSize, vvvv);
+				var left = _v3.a;
+				var remainingAfterLeft = _v3.b;
+				var _v4 = A2(treeBuilder, rightSize, remainingAfterLeft);
+				var right = _v4.a;
+				var remainingAfterRight = _v4.b;
+				var _v5 = _Utils_Tuple2(left, right);
+				if ((_v5.a.$ === 'Just') && (_v5.b.$ === 'Just')) {
+					var leftSubtree = _v5.a.a;
+					var rightSubtree = _v5.b.a;
+					return _Utils_Tuple2(
+						$elm$core$Maybe$Just(
+							$author$project$DomainModel$Node(
+								{
+									left: leftSubtree,
+									nodeContent: A2(combineInfo, leftSubtree, rightSubtree),
+									right: rightSubtree
+								})),
+						remainingAfterRight);
+				} else {
+					return _Utils_Tuple2($elm$core$Maybe$Nothing, remainingAfterRight);
+				}
+			}
+		});
+	return A2(treeBuilder, numberOfSegments, track).a;
+};
+var $author$project$OAuthTypes$UserInfo = F3(
+	function (id, firstname, lastname) {
+		return {firstname: firstname, id: id, lastname: lastname};
+	});
+var $author$project$StravaClientSecret$clientSecret = '01713301d9282956d3d182c1e01ce02c5e8620c3';
+var $author$project$StravaAuth$defaultHttpsUrl = {fragment: $elm$core$Maybe$Nothing, host: '', path: '', port_: $elm$core$Maybe$Nothing, protocol: $elm$url$Url$Https, query: $elm$core$Maybe$Nothing};
+var $elm$json$Json$Decode$map3 = _Json_map3;
+var $author$project$StravaAuth$configuration = {
+	authorizationEndpoint: _Utils_update(
+		$author$project$StravaAuth$defaultHttpsUrl,
+		{host: 'www.strava.com', path: '/oauth/authorize'}),
+	clientId: '59195',
+	clientSecret: $author$project$StravaClientSecret$clientSecret,
+	scope: _List_fromArray(
+		['read_all']),
+	tokenEndpoint: _Utils_update(
+		$author$project$StravaAuth$defaultHttpsUrl,
+		{host: 'www.strava.com', path: '/oauth/token'}),
+	userInfoDecoder: A4(
+		$elm$json$Json$Decode$map3,
+		$author$project$OAuthTypes$UserInfo,
+		A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$int),
+		A2($elm$json$Json$Decode$field, 'firstname', $elm$json$Json$Decode$string),
+		A2($elm$json$Json$Decode$field, 'lastname', $elm$json$Json$Decode$string)),
+	userInfoEndpoint: _Utils_update(
+		$author$project$StravaAuth$defaultHttpsUrl,
+		{host: 'www.strava.com', path: '/api/v3/athlete'})
+};
+var $author$project$OAuthTypes$GotAccessToken = function (a) {
+	return {$: 'GotAccessToken', a: a};
+};
+var $elm$http$Http$Header = F2(
+	function (a, b) {
+		return {$: 'Header', a: a, b: b};
+	});
+var $elm$http$Http$header = $elm$http$Http$Header;
+var $chelovek0v$bbase64$Base64$Encode$StringEncoder = function (a) {
+	return {$: 'StringEncoder', a: a};
+};
+var $chelovek0v$bbase64$Base64$Encode$string = function (input) {
+	return $chelovek0v$bbase64$Base64$Encode$StringEncoder(input);
+};
+var $author$project$OAuth$Internal$makeHeaders = function (credentials) {
+	return A2(
+		$elm$core$Maybe$withDefault,
+		_List_Nil,
+		A2(
+			$elm$core$Maybe$map,
+			function (s) {
+				return _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Basic ' + s)
+					]);
+			},
+			A2(
+				$elm$core$Maybe$map,
+				function (_v0) {
+					var clientId = _v0.clientId;
+					var secret = _v0.secret;
+					return $chelovek0v$bbase64$Base64$Encode$encode(
+						$chelovek0v$bbase64$Base64$Encode$string(clientId + (':' + secret)));
+				},
+				credentials)));
+};
+var $elm$core$String$concat = function (strings) {
+	return A2($elm$core$String$join, '', strings);
+};
+var $author$project$OAuth$Internal$protocolToString = function (protocol) {
+	if (protocol.$ === 'Http') {
+		return 'http';
+	} else {
+		return 'https';
+	}
+};
+var $author$project$OAuth$Internal$makeRedirectUri = function (url) {
+	return $elm$core$String$concat(
+		_List_fromArray(
+			[
+				$author$project$OAuth$Internal$protocolToString(url.protocol),
+				'://',
+				url.host,
+				A2(
+				$elm$core$Maybe$withDefault,
+				'',
+				A2(
+					$elm$core$Maybe$map,
+					function (i) {
+						return ':' + $elm$core$String$fromInt(i);
+					},
+					url.port_)),
+				url.path,
+				A2(
+				$elm$core$Maybe$withDefault,
+				'',
+				A2(
+					$elm$core$Maybe$map,
+					function (q) {
+						return '?' + q;
+					},
+					url.query))
+			]));
+};
+var $author$project$OAuth$Internal$AuthenticationSuccess = F4(
+	function (token, refreshToken, expiresIn, scope) {
+		return {expiresIn: expiresIn, refreshToken: refreshToken, scope: scope, token: token};
+	});
+var $elm$json$Json$Decode$maybe = function (decoder) {
+	return $elm$json$Json$Decode$oneOf(
+		_List_fromArray(
+			[
+				A2($elm$json$Json$Decode$map, $elm$core$Maybe$Just, decoder),
+				$elm$json$Json$Decode$succeed($elm$core$Maybe$Nothing)
+			]));
+};
+var $author$project$OAuth$Internal$expiresInDecoder = $elm$json$Json$Decode$maybe(
+	A2($elm$json$Json$Decode$field, 'expires_in', $elm$json$Json$Decode$int));
+var $elm$json$Json$Decode$map4 = _Json_map4;
+var $elm$json$Json$Decode$andThen = _Json_andThen;
+var $elm$json$Json$Decode$fail = _Json_fail;
+var $author$project$OAuth$Internal$decoderFromJust = function (msg) {
+	return A2(
+		$elm$core$Basics$composeR,
+		$elm$core$Maybe$map($elm$json$Json$Decode$succeed),
+		$elm$core$Maybe$withDefault(
+			$elm$json$Json$Decode$fail(msg)));
+};
+var $elm_community$maybe_extra$Maybe$Extra$andThen2 = F3(
+	function (func, ma, mb) {
+		if (ma.$ === 'Just') {
+			var a = ma.a;
+			if (mb.$ === 'Just') {
+				var b = mb.a;
+				return A2(func, a, b);
+			} else {
+				return $elm$core$Maybe$Nothing;
+			}
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $author$project$OAuth$Bearer = function (a) {
+	return {$: 'Bearer', a: a};
+};
+var $elm$core$String$toLower = _String_toLower;
+var $author$project$OAuth$tryMakeToken = F2(
+	function (tokenType, token) {
+		var _v0 = $elm$core$String$toLower(tokenType);
+		if (_v0 === 'bearer') {
+			return $elm$core$Maybe$Just(
+				$author$project$OAuth$Bearer(token));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $author$project$OAuth$makeRefreshToken = F2(
+	function (tokenType, mToken) {
+		var _v0 = _Utils_Tuple2(
+			mToken,
+			A3(
+				$elm_community$maybe_extra$Maybe$Extra$andThen2,
+				$author$project$OAuth$tryMakeToken,
+				$elm$core$Maybe$Just(tokenType),
+				mToken));
+		if (_v0.a.$ === 'Nothing') {
+			var _v1 = _v0.a;
+			return $elm$core$Maybe$Just($elm$core$Maybe$Nothing);
+		} else {
+			if (_v0.b.$ === 'Just') {
+				var token = _v0.b.a;
+				return $elm$core$Maybe$Just(
+					$elm$core$Maybe$Just(token));
+			} else {
+				return $elm$core$Maybe$Nothing;
+			}
+		}
+	});
+var $author$project$OAuth$Internal$refreshTokenDecoder = A2(
+	$elm$json$Json$Decode$andThen,
+	$author$project$OAuth$Internal$decoderFromJust('missing or invalid \'refresh_token\' / \'token_type\''),
+	A3(
+		$elm$json$Json$Decode$map2,
+		$author$project$OAuth$makeRefreshToken,
+		A2($elm$json$Json$Decode$field, 'token_type', $elm$json$Json$Decode$string),
+		$elm$json$Json$Decode$maybe(
+			A2($elm$json$Json$Decode$field, 'refresh_token', $elm$json$Json$Decode$string))));
+var $author$project$OAuth$Internal$scopeDecoder = A2(
+	$elm$json$Json$Decode$map,
+	$elm$core$Maybe$withDefault(_List_Nil),
+	$elm$json$Json$Decode$maybe(
+		A2(
+			$elm$json$Json$Decode$field,
+			'scope',
+			$elm$json$Json$Decode$list($elm$json$Json$Decode$string))));
+var $author$project$OAuth$makeToken = $elm_community$maybe_extra$Maybe$Extra$andThen2($author$project$OAuth$tryMakeToken);
+var $author$project$OAuth$Internal$tokenDecoder = A2(
+	$elm$json$Json$Decode$andThen,
+	$author$project$OAuth$Internal$decoderFromJust('missing or invalid \'access_token\' / \'token_type\''),
+	A3(
+		$elm$json$Json$Decode$map2,
+		$author$project$OAuth$makeToken,
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$core$Maybe$Just,
+			A2($elm$json$Json$Decode$field, 'token_type', $elm$json$Json$Decode$string)),
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$core$Maybe$Just,
+			A2($elm$json$Json$Decode$field, 'access_token', $elm$json$Json$Decode$string))));
+var $author$project$OAuth$Internal$authenticationSuccessDecoder = A5($elm$json$Json$Decode$map4, $author$project$OAuth$Internal$AuthenticationSuccess, $author$project$OAuth$Internal$tokenDecoder, $author$project$OAuth$Internal$refreshTokenDecoder, $author$project$OAuth$Internal$expiresInDecoder, $author$project$OAuth$Internal$scopeDecoder);
+var $elm$http$Http$stringBody = _Http_pair;
+var $author$project$OAuth$Internal$makeRequest = F4(
+	function (toMsg, url, headers, body) {
+		return {
+			body: A2($elm$http$Http$stringBody, 'application/x-www-form-urlencoded', body),
+			expect: A2($elm$http$Http$expectJson, toMsg, $author$project$OAuth$Internal$authenticationSuccessDecoder),
+			headers: headers,
+			method: 'POST',
+			timeout: $elm$core$Maybe$Nothing,
+			tracker: $elm$core$Maybe$Nothing,
+			url: $elm$url$Url$toString(url)
+		};
+	});
+var $elm$url$Url$Builder$QueryParameter = F2(
+	function (a, b) {
+		return {$: 'QueryParameter', a: a, b: b};
+	});
+var $elm$url$Url$percentEncode = _Url_percentEncode;
+var $elm$url$Url$Builder$string = F2(
+	function (key, value) {
+		return A2(
+			$elm$url$Url$Builder$QueryParameter,
+			$elm$url$Url$percentEncode(key),
+			$elm$url$Url$percentEncode(value));
+	});
+var $author$project$OAuth$AuthorizationCode$makeTokenRequest = F2(
+	function (toMsg, _v0) {
+		var credentials = _v0.credentials;
+		var code = _v0.code;
+		var url = _v0.url;
+		var redirectUri = _v0.redirectUri;
+		var headers = $author$project$OAuth$Internal$makeHeaders(
+			function () {
+				var _v2 = credentials.secret;
+				if (_v2.$ === 'Nothing') {
+					return $elm$core$Maybe$Nothing;
+				} else {
+					var secret = _v2.a;
+					return $elm$core$Maybe$Just(
+						{clientId: credentials.clientId, secret: secret});
+				}
+			}());
+		var body = A2(
+			$elm$core$String$dropLeft,
+			1,
+			$elm$url$Url$Builder$toQuery(
+				_Utils_ap(
+					function () {
+						var _v1 = credentials.secret;
+						if (_v1.$ === 'Just') {
+							var secret = _v1.a;
+							return _List_fromArray(
+								[
+									A2($elm$url$Url$Builder$string, 'client_secret', secret)
+								]);
+						} else {
+							return _List_Nil;
+						}
+					}(),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'grant_type', 'authorization_code'),
+							A2($elm$url$Url$Builder$string, 'client_id', credentials.clientId),
+							A2(
+							$elm$url$Url$Builder$string,
+							'redirect_uri',
+							$author$project$OAuth$Internal$makeRedirectUri(redirectUri)),
+							A2($elm$url$Url$Builder$string, 'code', code)
+						]))));
+		return A4($author$project$OAuth$Internal$makeRequest, toMsg, url, headers, body);
+	});
+var $author$project$StravaAuth$getAccessToken = F3(
+	function (_v0, redirectUri, code) {
+		var clientId = _v0.clientId;
+		var tokenEndpoint = _v0.tokenEndpoint;
+		return $elm$http$Http$request(
+			A2(
+				$author$project$OAuth$AuthorizationCode$makeTokenRequest,
+				$author$project$OAuthTypes$GotAccessToken,
+				{
+					code: code,
+					credentials: {
+						clientId: clientId,
+						secret: $elm$core$Maybe$Just($author$project$StravaClientSecret$clientSecret)
+					},
+					redirectUri: redirectUri,
+					url: tokenEndpoint
+				}));
+	});
+var $author$project$StravaAuth$accessTokenRequested = F2(
+	function (model, code) {
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{
+					flow: $author$project$OAuthTypes$Authorized(code)
+				}),
+			A3($author$project$StravaAuth$getAccessToken, $author$project$StravaAuth$configuration, model.redirectUri, code));
+	});
+var $author$project$OAuthTypes$Authenticated = function (a) {
+	return {$: 'Authenticated', a: a};
+};
+var $author$project$OAuthTypes$ErrAuthentication = function (a) {
+	return {$: 'ErrAuthentication', a: a};
+};
+var $author$project$OAuthTypes$ErrHTTPGetAccessToken = {$: 'ErrHTTPGetAccessToken'};
+var $author$project$OAuthTypes$UserInfoRequested = {$: 'UserInfoRequested'};
+var $author$project$OAuth$Internal$AuthenticationError = F3(
+	function (error, errorDescription, errorUri) {
+		return {error: error, errorDescription: errorDescription, errorUri: errorUri};
+	});
+var $author$project$OAuth$Internal$errorDescriptionDecoder = $elm$json$Json$Decode$maybe(
+	A2($elm$json$Json$Decode$field, 'error_description', $elm$json$Json$Decode$string));
+var $author$project$OAuth$Internal$errorUriDecoder = $elm$json$Json$Decode$maybe(
+	A2($elm$json$Json$Decode$field, 'error_uri', $elm$json$Json$Decode$string));
+var $author$project$OAuth$Internal$authenticationErrorDecoder = function (errorCodeDecoder) {
+	return A4($elm$json$Json$Decode$map3, $author$project$OAuth$Internal$AuthenticationError, errorCodeDecoder, $author$project$OAuth$Internal$errorDescriptionDecoder, $author$project$OAuth$Internal$errorUriDecoder);
+};
+var $author$project$OAuth$Internal$errorDecoder = function (errorCodeFromString) {
+	return A2(
+		$elm$json$Json$Decode$map,
+		errorCodeFromString,
+		A2($elm$json$Json$Decode$field, 'error', $elm$json$Json$Decode$string));
+};
+var $author$project$OAuth$AuthorizationCode$defaultErrorDecoder = $author$project$OAuth$Internal$errorDecoder($author$project$OAuth$errorCodeFromString);
+var $author$project$OAuth$AuthorizationCode$defaultAuthenticationErrorDecoder = $author$project$OAuth$Internal$authenticationErrorDecoder($author$project$OAuth$AuthorizationCode$defaultErrorDecoder);
+var $author$project$StravaAuth$gotAccessToken = F2(
+	function (model, authenticationResponse) {
+		if (authenticationResponse.$ === 'Err') {
+			if (authenticationResponse.a.$ === 'BadBody') {
+				var body = authenticationResponse.a.a;
+				var _v1 = A2($elm$json$Json$Decode$decodeString, $author$project$OAuth$AuthorizationCode$defaultAuthenticationErrorDecoder, body);
+				if (_v1.$ === 'Ok') {
+					var error = _v1.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								flow: $author$project$OAuthTypes$Errored(
+									$author$project$OAuthTypes$ErrAuthentication(error))
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								flow: $author$project$OAuthTypes$Errored($author$project$OAuthTypes$ErrHTTPGetAccessToken)
+							}),
+						$elm$core$Platform$Cmd$none);
+				}
+			} else {
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							flow: $author$project$OAuthTypes$Errored($author$project$OAuthTypes$ErrHTTPGetAccessToken)
+						}),
+					$elm$core$Platform$Cmd$none);
+			}
+		} else {
+			var token = authenticationResponse.a.token;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						flow: $author$project$OAuthTypes$Authenticated(token)
+					}),
+				A2($andrewMacmurray$elm_delay$Delay$after, 100, $author$project$OAuthTypes$UserInfoRequested));
+		}
+	});
+var $elm$browser$Browser$Navigation$load = _Browser_load;
+var $author$project$OAuth$Internal$Code = {$: 'Code'};
+var $author$project$OAuth$Internal$responseTypeToString = function (r) {
+	if (r.$ === 'Code') {
+		return 'code';
+	} else {
+		return 'token';
+	}
+};
+var $author$project$OAuth$Internal$urlAddList = F3(
+	function (param, xs, qs) {
+		return _Utils_ap(
+			qs,
+			function () {
+				if (!xs.b) {
+					return _List_Nil;
+				} else {
+					return _List_fromArray(
+						[
+							A2(
+							$elm$url$Url$Builder$string,
+							param,
+							A2($elm$core$String$join, ' ', xs))
+						]);
+				}
+			}());
+	});
+var $author$project$OAuth$Internal$urlAddMaybe = F3(
+	function (param, ms, qs) {
+		return _Utils_ap(
+			qs,
+			function () {
+				if (ms.$ === 'Nothing') {
+					return _List_Nil;
+				} else {
+					var s = ms.a;
+					return _List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, param, s)
+						]);
+				}
+			}());
+	});
+var $author$project$OAuth$Internal$makeAuthorizationUrl = F2(
+	function (responseType, _v0) {
+		var clientId = _v0.clientId;
+		var url = _v0.url;
+		var redirectUri = _v0.redirectUri;
+		var scope = _v0.scope;
+		var state = _v0.state;
+		var codeChallenge = _v0.codeChallenge;
+		var query = A2(
+			$elm$core$String$dropLeft,
+			1,
+			$elm$url$Url$Builder$toQuery(
+				A3(
+					$author$project$OAuth$Internal$urlAddMaybe,
+					'code_challenge_method',
+					A2(
+						$elm$core$Maybe$map,
+						$elm$core$Basics$always('S256'),
+						codeChallenge),
+					A3(
+						$author$project$OAuth$Internal$urlAddMaybe,
+						'code_challenge',
+						codeChallenge,
+						A3(
+							$author$project$OAuth$Internal$urlAddMaybe,
+							'state',
+							state,
+							A3(
+								$author$project$OAuth$Internal$urlAddList,
+								'scope',
+								scope,
+								_List_fromArray(
+									[
+										A2($elm$url$Url$Builder$string, 'client_id', clientId),
+										A2(
+										$elm$url$Url$Builder$string,
+										'redirect_uri',
+										$author$project$OAuth$Internal$makeRedirectUri(redirectUri)),
+										A2(
+										$elm$url$Url$Builder$string,
+										'response_type',
+										$author$project$OAuth$Internal$responseTypeToString(responseType))
+									])))))));
+		var _v1 = url.query;
+		if (_v1.$ === 'Nothing') {
+			return _Utils_update(
+				url,
+				{
+					query: $elm$core$Maybe$Just(query)
+				});
+		} else {
+			var baseQuery = _v1.a;
+			return _Utils_update(
+				url,
+				{
+					query: $elm$core$Maybe$Just(baseQuery + ('&' + query))
+				});
+		}
+	});
+var $author$project$OAuth$AuthorizationCode$makeAuthorizationUrl = function (_v0) {
+	var clientId = _v0.clientId;
+	var url = _v0.url;
+	var redirectUri = _v0.redirectUri;
+	var scope = _v0.scope;
+	var state = _v0.state;
+	return A2(
+		$author$project$OAuth$Internal$makeAuthorizationUrl,
+		$author$project$OAuth$Internal$Code,
+		{clientId: clientId, codeChallenge: $elm$core$Maybe$Nothing, redirectUri: redirectUri, scope: scope, state: state, url: url});
+};
+var $author$project$StravaAuth$gotRandomBytes = F2(
+	function (model, bytes) {
+		var _v0 = $author$project$StravaAuth$convertBytes(bytes);
+		var state = _v0.state;
+		var authorization = {
+			clientId: $author$project$StravaAuth$configuration.clientId,
+			redirectUri: model.redirectUri,
+			scope: $author$project$StravaAuth$configuration.scope,
+			state: $elm$core$Maybe$Just(state),
+			url: $author$project$StravaAuth$configuration.authorizationEndpoint
+		};
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{flow: $author$project$OAuthTypes$Idle}),
+			$elm$browser$Browser$Navigation$load(
+				$elm$url$Url$toString(
+					$author$project$OAuth$AuthorizationCode$makeAuthorizationUrl(authorization))));
+	});
+var $author$project$OAuthTypes$Done = F2(
+	function (a, b) {
+		return {$: 'Done', a: a, b: b};
+	});
+var $author$project$OAuthTypes$ErrHTTPGetUserInfo = {$: 'ErrHTTPGetUserInfo'};
+var $author$project$StravaAuth$gotUserInfo = F2(
+	function (model, userInfoResponse) {
+		var _v0 = _Utils_Tuple2(model.flow, userInfoResponse);
+		if (_v0.b.$ === 'Err') {
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						flow: $author$project$OAuthTypes$Errored($author$project$OAuthTypes$ErrHTTPGetUserInfo)
+					}),
+				$elm$core$Platform$Cmd$none);
+		} else {
+			if (_v0.a.$ === 'Authenticated') {
+				var token = _v0.a.a;
+				var userInfo = _v0.b.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							flow: A2($author$project$OAuthTypes$Done, userInfo, token)
+						}),
+					$elm$core$Platform$Cmd$none);
+			} else {
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							flow: $author$project$OAuthTypes$Errored($author$project$OAuthTypes$ErrStateMismatch)
+						}),
+					$elm$core$Platform$Cmd$none);
+			}
+		}
+	});
+var $author$project$StravaAuth$noOp = function (model) {
+	return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+};
+var $elm$json$Json$Encode$int = _Json_wrap;
+var $author$project$OAuthPorts$genRandomBytes = _Platform_outgoingPort('genRandomBytes', $elm$json$Json$Encode$int);
+var $author$project$StravaAuth$signInRequested = function (model) {
+	return _Utils_Tuple2(
+		_Utils_update(
+			model,
+			{flow: $author$project$OAuthTypes$Idle}),
+		$author$project$OAuthPorts$genRandomBytes(16));
+};
+var $author$project$StravaAuth$signOutRequested = function (model) {
+	return _Utils_Tuple2(
+		_Utils_update(
+			model,
+			{flow: $author$project$OAuthTypes$Idle}),
+		$elm$browser$Browser$Navigation$load(
+			$elm$url$Url$toString(model.redirectUri)));
+};
+var $author$project$OAuthTypes$GotUserInfo = function (a) {
+	return {$: 'GotUserInfo', a: a};
+};
+var $author$project$OAuth$tokenToString = function (_v0) {
+	var t = _v0.a;
+	return 'Bearer ' + t;
+};
+var $author$project$OAuth$useToken = function (token) {
+	return $elm$core$List$cons(
+		A2(
+			$elm$http$Http$header,
+			'Authorization',
+			$author$project$OAuth$tokenToString(token)));
+};
+var $author$project$StravaAuth$getUserInfo = F2(
+	function (_v0, token) {
+		var userInfoDecoder = _v0.userInfoDecoder;
+		var userInfoEndpoint = _v0.userInfoEndpoint;
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$emptyBody,
+				expect: A2($elm$http$Http$expectJson, $author$project$OAuthTypes$GotUserInfo, userInfoDecoder),
+				headers: A2($author$project$OAuth$useToken, token, _List_Nil),
+				method: 'GET',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: $elm$url$Url$toString(userInfoEndpoint)
+			});
+	});
+var $author$project$StravaAuth$userInfoRequested = F2(
+	function (model, token) {
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{
+					flow: $author$project$OAuthTypes$Authenticated(token)
+				}),
+			A2($author$project$StravaAuth$getUserInfo, $author$project$StravaAuth$configuration, token));
+	});
+var $author$project$StravaAuth$update = F2(
+	function (msg, model) {
+		var _v0 = _Utils_Tuple2(model.flow, msg);
+		_v0$7:
+		while (true) {
+			switch (_v0.a.$) {
+				case 'Idle':
+					switch (_v0.b.$) {
+						case 'SignInRequested':
+							var _v1 = _v0.a;
+							var _v2 = _v0.b;
+							return $author$project$StravaAuth$signInRequested(model);
+						case 'GotRandomBytes':
+							var _v3 = _v0.a;
+							var bytes = _v0.b.a;
+							return A2($author$project$StravaAuth$gotRandomBytes, model, bytes);
+						default:
+							break _v0$7;
+					}
+				case 'Authorized':
+					switch (_v0.b.$) {
+						case 'AccessTokenRequested':
+							var code = _v0.a.a;
+							var _v4 = _v0.b;
+							return A2($author$project$StravaAuth$accessTokenRequested, model, code);
+						case 'GotAccessToken':
+							var authenticationResponse = _v0.b.a;
+							return A2($author$project$StravaAuth$gotAccessToken, model, authenticationResponse);
+						default:
+							break _v0$7;
+					}
+				case 'Authenticated':
+					switch (_v0.b.$) {
+						case 'UserInfoRequested':
+							var token = _v0.a.a;
+							var _v5 = _v0.b;
+							return A2($author$project$StravaAuth$userInfoRequested, model, token);
+						case 'GotUserInfo':
+							var userInfoResponse = _v0.b.a;
+							return A2($author$project$StravaAuth$gotUserInfo, model, userInfoResponse);
+						default:
+							break _v0$7;
+					}
+				case 'Done':
+					if (_v0.b.$ === 'SignOutRequested') {
+						var _v6 = _v0.a;
+						var _v7 = _v0.b;
+						return $author$project$StravaAuth$signOutRequested(model);
+					} else {
+						break _v0$7;
+					}
+				default:
+					break _v0$7;
+			}
+		}
+		return $author$project$StravaAuth$noOp(model);
+	});
+var $author$project$Main$update = F2(
+	function (msg, _v0) {
+		var model = _v0.a;
+		switch (msg.$) {
+			case 'AdjustTimeZone':
+				var newZone = msg.a;
+				return _Utils_Tuple2(
+					$author$project$Main$Model(
+						_Utils_update(
+							model,
+							{zone: newZone})),
+					$author$project$MyIP$requestIpInformation($author$project$Msg$ReceivedIpDetails));
+			case 'ClearMapClickDebounce':
+				return _Utils_Tuple2(
+					$author$project$Main$Model(
+						_Utils_update(
+							model,
+							{mapClickDebounce: false})),
+					$elm$core$Platform$Cmd$none);
+			case 'ReceivedIpDetails':
+				var response = msg.a;
+				var ipInfo = $author$project$MyIP$processIpInfo(response);
+				var mapInfoWithLocation = function () {
+					if (ipInfo.$ === 'Just') {
+						var ip = ipInfo.a;
+						return {centreLat: ip.latitude, centreLon: ip.longitude, mapZoom: 10.0};
+					} else {
+						return {centreLat: 0.0, centreLon: 0.0, mapZoom: 1.0};
+					}
+				}();
+				return _Utils_Tuple2(
+					$author$project$Main$Model(
+						_Utils_update(
+							model,
+							{ipInfo: ipInfo})),
+					$elm$core$Platform$Cmd$batch(
+						_List_fromArray(
+							[
+								$author$project$PortController$createMap(mapInfoWithLocation),
+								A2($andrewMacmurray$elm_delay$Delay$after, 100, $author$project$Msg$RepaintMap)
+							])));
+			case 'IpInfoAcknowledged':
+				return _Utils_Tuple2(
+					$author$project$Main$Model(model),
+					$elm$core$Platform$Cmd$none);
+			case 'GpxRequested':
+				return _Utils_Tuple2(
+					$author$project$Main$Model(model),
+					A2(
+						$elm$file$File$Select$file,
+						_List_fromArray(
+							['text/gpx']),
+						$author$project$Msg$GpxSelected));
+			case 'GpxSelected':
+				var file = msg.a;
+				return _Utils_Tuple2(
+					$author$project$Main$Model(
+						_Utils_update(
+							model,
+							{
+								filename: $elm$core$Maybe$Just(
+									$elm$file$File$name(file))
+							})),
+					A2(
+						$elm$core$Task$perform,
+						$author$project$Msg$GpxLoaded,
+						$elm$file$File$toString(file)));
+			case 'GpxLoaded':
+				var content = msg.a;
+				var gpxTrack = $author$project$GpxParser$parseGPXPoints(content);
+				var trackTree = $author$project$DomainModel$treeFromList(gpxTrack);
+				var modelWithTrack = _Utils_update(
+					model,
+					{renderDepth: 10, trackTree: trackTree});
+				return _Utils_Tuple2(
+					$author$project$Main$Model(
+						$author$project$Main$renderModel(modelWithTrack)),
+					_Utils_eq(model.viewMode, $author$project$ViewingMode$ViewMap) ? $elm$core$Platform$Cmd$batch(
+						_List_fromArray(
+							[
+								$author$project$PortController$addTrackToMap(modelWithTrack),
+								$author$project$PortController$centreMapOnCurrent(modelWithTrack),
+								A2($andrewMacmurray$elm_delay$Delay$after, 100, $author$project$Msg$RepaintMap)
+							])) : $elm$core$Platform$Cmd$none);
+			case 'RepaintMap':
+				return _Utils_Tuple2(
+					$author$project$Main$Model(model),
+					$author$project$PortController$refreshMap);
+			case 'SetRenderDepth':
+				var depth = msg.a;
+				return _Utils_Tuple2(
+					$author$project$Main$Model(
+						$author$project$Main$renderModel(
+							_Utils_update(
+								model,
+								{renderDepth: depth}))),
+					$elm$core$Platform$Cmd$none);
+			case 'OAuthMessage':
+				var authMsg = msg.a;
+				var _v3 = A2($author$project$StravaAuth$update, authMsg, model.stravaAuthentication);
+				var newAuthData = _v3.a;
+				var authCmd = _v3.b;
+				var isToken = $author$project$StravaAuth$getStravaToken(newAuthData);
+				return _Utils_Tuple2(
+					$author$project$Main$Model(
+						_Utils_update(
+							model,
+							{stravaAuthentication: newAuthData})),
+					A2($elm$core$Platform$Cmd$map, $author$project$Msg$OAuthMessage, authCmd));
+			case 'SetCurrentPosition':
+				var pos = msg.a;
+				var _v4 = model.trackTree;
+				if (_v4.$ === 'Just') {
+					var treeTop = _v4.a;
+					var updatedModel = _Utils_update(
+						model,
+						{
+							currentPosition: pos,
+							focusPoint: A2(
+								$ianmackenzie$elm_geometry$Point3d$translateBy,
+								$author$project$DomainModel$startVector(
+									A2($author$project$DomainModel$leafFromIndex, model.currentPosition, treeTop)),
+								$ianmackenzie$elm_geometry$Point3d$origin)
+						});
+					return _Utils_Tuple2(
+						$author$project$Main$Model(
+							$author$project$Main$renderModel(updatedModel)),
+						_Utils_eq(model.viewMode, $author$project$ViewingMode$ViewMap) ? $elm$core$Platform$Cmd$batch(
+							_List_fromArray(
+								[
+									$author$project$PortController$addTrackToMap(model),
+									$author$project$PortController$centreMapOnCurrent(model),
+									A2($andrewMacmurray$elm_delay$Delay$after, 10, $author$project$Msg$RepaintMap)
+								])) : $elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(
+						$author$project$Main$Model(model),
+						$elm$core$Platform$Cmd$none);
+				}
+			case 'ImageClick':
+				var event = msg.a;
+				return _Utils_Tuple2(
+					$author$project$Main$Model(
+						$author$project$Main$renderModel(
+							_Utils_update(
+								model,
+								{
+									currentPosition: A2($author$project$ViewThirdPerson$detectHit, event, model)
+								}))),
+					$elm$core$Platform$Cmd$none);
+			case 'SetViewMode':
+				var newMode = msg.a;
+				return _Utils_Tuple2(
+					$author$project$Main$Model(
+						_Utils_update(
+							model,
+							{viewMode: newMode})),
+					((!_Utils_eq(model.viewMode, $author$project$ViewingMode$ViewMap)) && _Utils_eq(newMode, $author$project$ViewingMode$ViewMap)) ? $elm$core$Platform$Cmd$batch(
+						_List_fromArray(
+							[
+								$author$project$PortController$addTrackToMap(model),
+								$author$project$PortController$centreMapOnCurrent(model),
+								A2($andrewMacmurray$elm_delay$Delay$after, 10, $author$project$Msg$RepaintMap)
+							])) : $elm$core$Platform$Cmd$none);
+			default:
+				var json = msg.a;
+				var _v5 = A2($author$project$PortController$processPortMessage, model, json);
+				var newModel = _v5.a;
+				var cmds = _v5.b;
+				return _Utils_Tuple2(
+					$author$project$Main$Model(newModel),
+					cmds);
+		}
+	});
+var $mdgriffith$elm_ui$Internal$Model$Rgba = F4(
+	function (a, b, c, d) {
+		return {$: 'Rgba', a: a, b: b, c: c, d: d};
+	});
+var $mdgriffith$elm_ui$Element$rgb255 = F3(
+	function (red, green, blue) {
+		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, red / 255, green / 255, blue / 255, 1);
+	});
+var $smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite = A3($mdgriffith$elm_ui$Element$rgb255, 241, 242, 246);
+var $mdgriffith$elm_ui$Internal$Model$Colored = F3(
+	function (a, b, c) {
+		return {$: 'Colored', a: a, b: b, c: c};
+	});
+var $mdgriffith$elm_ui$Internal$Model$StyleClass = F2(
+	function (a, b) {
+		return {$: 'StyleClass', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Flag$Flag = function (a) {
+	return {$: 'Flag', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Flag$Second = function (a) {
+	return {$: 'Second', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Flag$flag = function (i) {
+	return (i > 31) ? $mdgriffith$elm_ui$Internal$Flag$Second(1 << (i - 32)) : $mdgriffith$elm_ui$Internal$Flag$Flag(1 << i);
+};
+var $mdgriffith$elm_ui$Internal$Flag$bgColor = $mdgriffith$elm_ui$Internal$Flag$flag(8);
+var $elm$core$Basics$round = _Basics_round;
+var $mdgriffith$elm_ui$Internal$Model$floatClass = function (x) {
+	return $elm$core$String$fromInt(
+		$elm$core$Basics$round(x * 255));
+};
+var $mdgriffith$elm_ui$Internal$Model$formatColorClass = function (_v0) {
+	var red = _v0.a;
+	var green = _v0.b;
+	var blue = _v0.c;
+	var alpha = _v0.d;
+	return $mdgriffith$elm_ui$Internal$Model$floatClass(red) + ('-' + ($mdgriffith$elm_ui$Internal$Model$floatClass(green) + ('-' + ($mdgriffith$elm_ui$Internal$Model$floatClass(blue) + ('-' + $mdgriffith$elm_ui$Internal$Model$floatClass(alpha))))));
+};
+var $mdgriffith$elm_ui$Element$Background$color = function (clr) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$bgColor,
+		A3(
+			$mdgriffith$elm_ui$Internal$Model$Colored,
+			'bg-' + $mdgriffith$elm_ui$Internal$Model$formatColorClass(clr),
+			'background-color',
+			clr));
+};
+var $mdgriffith$elm_ui$Internal$Model$Unkeyed = function (a) {
+	return {$: 'Unkeyed', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$AsColumn = {$: 'AsColumn'};
+var $mdgriffith$elm_ui$Internal$Model$asColumn = $mdgriffith$elm_ui$Internal$Model$AsColumn;
+var $mdgriffith$elm_ui$Internal$Style$classes = {above: 'a', active: 'atv', alignBottom: 'ab', alignCenterX: 'cx', alignCenterY: 'cy', alignContainerBottom: 'acb', alignContainerCenterX: 'accx', alignContainerCenterY: 'accy', alignContainerRight: 'acr', alignLeft: 'al', alignRight: 'ar', alignTop: 'at', alignedHorizontally: 'ah', alignedVertically: 'av', any: 's', behind: 'bh', below: 'b', bold: 'w7', borderDashed: 'bd', borderDotted: 'bdt', borderNone: 'bn', borderSolid: 'bs', capturePointerEvents: 'cpe', clip: 'cp', clipX: 'cpx', clipY: 'cpy', column: 'c', container: 'ctr', contentBottom: 'cb', contentCenterX: 'ccx', contentCenterY: 'ccy', contentLeft: 'cl', contentRight: 'cr', contentTop: 'ct', cursorPointer: 'cptr', cursorText: 'ctxt', focus: 'fcs', focusedWithin: 'focus-within', fullSize: 'fs', grid: 'g', hasBehind: 'hbh', heightContent: 'hc', heightExact: 'he', heightFill: 'hf', heightFillPortion: 'hfp', hover: 'hv', imageContainer: 'ic', inFront: 'fr', inputLabel: 'lbl', inputMultiline: 'iml', inputMultilineFiller: 'imlf', inputMultilineParent: 'imlp', inputMultilineWrapper: 'implw', inputText: 'it', italic: 'i', link: 'lnk', nearby: 'nb', noTextSelection: 'notxt', onLeft: 'ol', onRight: 'or', opaque: 'oq', overflowHidden: 'oh', page: 'pg', paragraph: 'p', passPointerEvents: 'ppe', root: 'ui', row: 'r', scrollbars: 'sb', scrollbarsX: 'sbx', scrollbarsY: 'sby', seButton: 'sbt', single: 'e', sizeByCapital: 'cap', spaceEvenly: 'sev', strike: 'sk', text: 't', textCenter: 'tc', textExtraBold: 'w8', textExtraLight: 'w2', textHeavy: 'w9', textJustify: 'tj', textJustifyAll: 'tja', textLeft: 'tl', textLight: 'w3', textMedium: 'w5', textNormalWeight: 'w4', textRight: 'tr', textSemiBold: 'w6', textThin: 'w1', textUnitalicized: 'tun', transition: 'ts', transparent: 'clr', underline: 'u', widthContent: 'wc', widthExact: 'we', widthFill: 'wf', widthFillPortion: 'wfp', wrapped: 'wrp'};
+var $mdgriffith$elm_ui$Internal$Model$Generic = {$: 'Generic'};
+var $mdgriffith$elm_ui$Internal$Model$div = $mdgriffith$elm_ui$Internal$Model$Generic;
+var $mdgriffith$elm_ui$Internal$Model$NoNearbyChildren = {$: 'NoNearbyChildren'};
+var $mdgriffith$elm_ui$Internal$Model$columnClass = $mdgriffith$elm_ui$Internal$Style$classes.any + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.column);
+var $mdgriffith$elm_ui$Internal$Model$gridClass = $mdgriffith$elm_ui$Internal$Style$classes.any + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.grid);
+var $mdgriffith$elm_ui$Internal$Model$pageClass = $mdgriffith$elm_ui$Internal$Style$classes.any + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.page);
+var $mdgriffith$elm_ui$Internal$Model$paragraphClass = $mdgriffith$elm_ui$Internal$Style$classes.any + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.paragraph);
+var $mdgriffith$elm_ui$Internal$Model$rowClass = $mdgriffith$elm_ui$Internal$Style$classes.any + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.row);
+var $mdgriffith$elm_ui$Internal$Model$singleClass = $mdgriffith$elm_ui$Internal$Style$classes.any + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.single);
+var $mdgriffith$elm_ui$Internal$Model$contextClasses = function (context) {
+	switch (context.$) {
+		case 'AsRow':
+			return $mdgriffith$elm_ui$Internal$Model$rowClass;
+		case 'AsColumn':
+			return $mdgriffith$elm_ui$Internal$Model$columnClass;
+		case 'AsEl':
+			return $mdgriffith$elm_ui$Internal$Model$singleClass;
+		case 'AsGrid':
+			return $mdgriffith$elm_ui$Internal$Model$gridClass;
+		case 'AsParagraph':
+			return $mdgriffith$elm_ui$Internal$Model$paragraphClass;
+		default:
+			return $mdgriffith$elm_ui$Internal$Model$pageClass;
+	}
+};
+var $mdgriffith$elm_ui$Internal$Model$Keyed = function (a) {
+	return {$: 'Keyed', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$NoStyleSheet = {$: 'NoStyleSheet'};
+var $mdgriffith$elm_ui$Internal$Model$Styled = function (a) {
+	return {$: 'Styled', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$Unstyled = function (a) {
+	return {$: 'Unstyled', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$addChildren = F2(
+	function (existing, nearbyChildren) {
+		switch (nearbyChildren.$) {
+			case 'NoNearbyChildren':
+				return existing;
+			case 'ChildrenBehind':
+				var behind = nearbyChildren.a;
+				return _Utils_ap(behind, existing);
+			case 'ChildrenInFront':
+				var inFront = nearbyChildren.a;
+				return _Utils_ap(existing, inFront);
+			default:
+				var behind = nearbyChildren.a;
+				var inFront = nearbyChildren.b;
+				return _Utils_ap(
+					behind,
+					_Utils_ap(existing, inFront));
+		}
+	});
+var $mdgriffith$elm_ui$Internal$Model$addKeyedChildren = F3(
+	function (key, existing, nearbyChildren) {
+		switch (nearbyChildren.$) {
+			case 'NoNearbyChildren':
+				return existing;
+			case 'ChildrenBehind':
+				var behind = nearbyChildren.a;
+				return _Utils_ap(
+					A2(
+						$elm$core$List$map,
+						function (x) {
+							return _Utils_Tuple2(key, x);
+						},
+						behind),
+					existing);
+			case 'ChildrenInFront':
+				var inFront = nearbyChildren.a;
+				return _Utils_ap(
+					existing,
+					A2(
+						$elm$core$List$map,
+						function (x) {
+							return _Utils_Tuple2(key, x);
+						},
+						inFront));
+			default:
+				var behind = nearbyChildren.a;
+				var inFront = nearbyChildren.b;
+				return _Utils_ap(
+					A2(
+						$elm$core$List$map,
+						function (x) {
+							return _Utils_Tuple2(key, x);
+						},
+						behind),
+					_Utils_ap(
+						existing,
+						A2(
+							$elm$core$List$map,
+							function (x) {
+								return _Utils_Tuple2(key, x);
+							},
+							inFront)));
+		}
+	});
+var $mdgriffith$elm_ui$Internal$Model$AsEl = {$: 'AsEl'};
+var $mdgriffith$elm_ui$Internal$Model$asEl = $mdgriffith$elm_ui$Internal$Model$AsEl;
+var $mdgriffith$elm_ui$Internal$Model$AsParagraph = {$: 'AsParagraph'};
+var $mdgriffith$elm_ui$Internal$Model$asParagraph = $mdgriffith$elm_ui$Internal$Model$AsParagraph;
+var $mdgriffith$elm_ui$Internal$Flag$alignBottom = $mdgriffith$elm_ui$Internal$Flag$flag(41);
+var $mdgriffith$elm_ui$Internal$Flag$alignRight = $mdgriffith$elm_ui$Internal$Flag$flag(40);
+var $mdgriffith$elm_ui$Internal$Flag$centerX = $mdgriffith$elm_ui$Internal$Flag$flag(42);
+var $mdgriffith$elm_ui$Internal$Flag$centerY = $mdgriffith$elm_ui$Internal$Flag$flag(43);
+var $elm$html$Html$Attributes$stringProperty = F2(
+	function (key, string) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$string(string));
+	});
+var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
+var $elm$html$Html$div = _VirtualDom_node('div');
+var $elm$core$Set$Set_elm_builtin = function (a) {
+	return {$: 'Set_elm_builtin', a: a};
+};
+var $elm$core$Set$empty = $elm$core$Set$Set_elm_builtin($elm$core$Dict$empty);
+var $mdgriffith$elm_ui$Internal$Model$lengthClassName = function (x) {
+	switch (x.$) {
+		case 'Px':
+			var px = x.a;
+			return $elm$core$String$fromInt(px) + 'px';
+		case 'Content':
+			return 'auto';
+		case 'Fill':
+			var i = x.a;
+			return $elm$core$String$fromInt(i) + 'fr';
+		case 'Min':
+			var min = x.a;
+			var len = x.b;
+			return 'min' + ($elm$core$String$fromInt(min) + $mdgriffith$elm_ui$Internal$Model$lengthClassName(len));
+		default:
+			var max = x.a;
+			var len = x.b;
+			return 'max' + ($elm$core$String$fromInt(max) + $mdgriffith$elm_ui$Internal$Model$lengthClassName(len));
+	}
+};
+var $mdgriffith$elm_ui$Internal$Model$transformClass = function (transform) {
+	switch (transform.$) {
+		case 'Untransformed':
+			return $elm$core$Maybe$Nothing;
+		case 'Moved':
+			var _v1 = transform.a;
+			var x = _v1.a;
+			var y = _v1.b;
+			var z = _v1.c;
+			return $elm$core$Maybe$Just(
+				'mv-' + ($mdgriffith$elm_ui$Internal$Model$floatClass(x) + ('-' + ($mdgriffith$elm_ui$Internal$Model$floatClass(y) + ('-' + $mdgriffith$elm_ui$Internal$Model$floatClass(z))))));
+		default:
+			var _v2 = transform.a;
+			var tx = _v2.a;
+			var ty = _v2.b;
+			var tz = _v2.c;
+			var _v3 = transform.b;
+			var sx = _v3.a;
+			var sy = _v3.b;
+			var sz = _v3.c;
+			var _v4 = transform.c;
+			var ox = _v4.a;
+			var oy = _v4.b;
+			var oz = _v4.c;
+			var angle = transform.d;
+			return $elm$core$Maybe$Just(
+				'tfrm-' + ($mdgriffith$elm_ui$Internal$Model$floatClass(tx) + ('-' + ($mdgriffith$elm_ui$Internal$Model$floatClass(ty) + ('-' + ($mdgriffith$elm_ui$Internal$Model$floatClass(tz) + ('-' + ($mdgriffith$elm_ui$Internal$Model$floatClass(sx) + ('-' + ($mdgriffith$elm_ui$Internal$Model$floatClass(sy) + ('-' + ($mdgriffith$elm_ui$Internal$Model$floatClass(sz) + ('-' + ($mdgriffith$elm_ui$Internal$Model$floatClass(ox) + ('-' + ($mdgriffith$elm_ui$Internal$Model$floatClass(oy) + ('-' + ($mdgriffith$elm_ui$Internal$Model$floatClass(oz) + ('-' + $mdgriffith$elm_ui$Internal$Model$floatClass(angle))))))))))))))))))));
+	}
+};
+var $mdgriffith$elm_ui$Internal$Model$getStyleName = function (style) {
+	switch (style.$) {
+		case 'Shadows':
+			var name = style.a;
+			return name;
+		case 'Transparency':
+			var name = style.a;
+			var o = style.b;
+			return name;
+		case 'Style':
+			var _class = style.a;
+			return _class;
+		case 'FontFamily':
+			var name = style.a;
+			return name;
+		case 'FontSize':
+			var i = style.a;
+			return 'font-size-' + $elm$core$String$fromInt(i);
+		case 'Single':
+			var _class = style.a;
+			return _class;
+		case 'Colored':
+			var _class = style.a;
+			return _class;
+		case 'SpacingStyle':
+			var cls = style.a;
+			var x = style.b;
+			var y = style.c;
+			return cls;
+		case 'PaddingStyle':
+			var cls = style.a;
+			var top = style.b;
+			var right = style.c;
+			var bottom = style.d;
+			var left = style.e;
+			return cls;
+		case 'BorderWidth':
+			var cls = style.a;
+			var top = style.b;
+			var right = style.c;
+			var bottom = style.d;
+			var left = style.e;
+			return cls;
+		case 'GridTemplateStyle':
+			var template = style.a;
+			return 'grid-rows-' + (A2(
+				$elm$core$String$join,
+				'-',
+				A2($elm$core$List$map, $mdgriffith$elm_ui$Internal$Model$lengthClassName, template.rows)) + ('-cols-' + (A2(
+				$elm$core$String$join,
+				'-',
+				A2($elm$core$List$map, $mdgriffith$elm_ui$Internal$Model$lengthClassName, template.columns)) + ('-space-x-' + ($mdgriffith$elm_ui$Internal$Model$lengthClassName(template.spacing.a) + ('-space-y-' + $mdgriffith$elm_ui$Internal$Model$lengthClassName(template.spacing.b)))))));
+		case 'GridPosition':
+			var pos = style.a;
+			return 'gp grid-pos-' + ($elm$core$String$fromInt(pos.row) + ('-' + ($elm$core$String$fromInt(pos.col) + ('-' + ($elm$core$String$fromInt(pos.width) + ('-' + $elm$core$String$fromInt(pos.height)))))));
+		case 'PseudoSelector':
+			var selector = style.a;
+			var subStyle = style.b;
+			var name = function () {
+				switch (selector.$) {
+					case 'Focus':
+						return 'fs';
+					case 'Hover':
+						return 'hv';
+					default:
+						return 'act';
+				}
+			}();
+			return A2(
+				$elm$core$String$join,
+				' ',
+				A2(
+					$elm$core$List$map,
+					function (sty) {
+						var _v1 = $mdgriffith$elm_ui$Internal$Model$getStyleName(sty);
+						if (_v1 === '') {
+							return '';
+						} else {
+							var styleName = _v1;
+							return styleName + ('-' + name);
+						}
+					},
+					subStyle));
+		default:
+			var x = style.a;
+			return A2(
+				$elm$core$Maybe$withDefault,
+				'',
+				$mdgriffith$elm_ui$Internal$Model$transformClass(x));
+	}
+};
+var $elm$core$Set$insert = F2(
+	function (key, _v0) {
+		var dict = _v0.a;
+		return $elm$core$Set$Set_elm_builtin(
+			A3($elm$core$Dict$insert, key, _Utils_Tuple0, dict));
+	});
+var $elm$core$Dict$member = F2(
+	function (key, dict) {
+		var _v0 = A2($elm$core$Dict$get, key, dict);
+		if (_v0.$ === 'Just') {
+			return true;
+		} else {
+			return false;
+		}
+	});
+var $elm$core$Set$member = F2(
+	function (key, _v0) {
+		var dict = _v0.a;
+		return A2($elm$core$Dict$member, key, dict);
+	});
+var $mdgriffith$elm_ui$Internal$Model$reduceStyles = F2(
+	function (style, nevermind) {
+		var cache = nevermind.a;
+		var existing = nevermind.b;
+		var styleName = $mdgriffith$elm_ui$Internal$Model$getStyleName(style);
+		return A2($elm$core$Set$member, styleName, cache) ? nevermind : _Utils_Tuple2(
+			A2($elm$core$Set$insert, styleName, cache),
+			A2($elm$core$List$cons, style, existing));
+	});
+var $mdgriffith$elm_ui$Internal$Model$Property = F2(
+	function (a, b) {
+		return {$: 'Property', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Model$Style = F2(
+	function (a, b) {
+		return {$: 'Style', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Style$dot = function (c) {
+	return '.' + c;
+};
+var $elm$core$String$fromFloat = _String_fromNumber;
+var $mdgriffith$elm_ui$Internal$Model$formatColor = function (_v0) {
+	var red = _v0.a;
+	var green = _v0.b;
+	var blue = _v0.c;
+	var alpha = _v0.d;
+	return 'rgba(' + ($elm$core$String$fromInt(
+		$elm$core$Basics$round(red * 255)) + ((',' + $elm$core$String$fromInt(
+		$elm$core$Basics$round(green * 255))) + ((',' + $elm$core$String$fromInt(
+		$elm$core$Basics$round(blue * 255))) + (',' + ($elm$core$String$fromFloat(alpha) + ')')))));
+};
+var $mdgriffith$elm_ui$Internal$Model$formatBoxShadow = function (shadow) {
+	return A2(
+		$elm$core$String$join,
+		' ',
+		A2(
+			$elm$core$List$filterMap,
+			$elm$core$Basics$identity,
+			_List_fromArray(
+				[
+					shadow.inset ? $elm$core$Maybe$Just('inset') : $elm$core$Maybe$Nothing,
+					$elm$core$Maybe$Just(
+					$elm$core$String$fromFloat(shadow.offset.a) + 'px'),
+					$elm$core$Maybe$Just(
+					$elm$core$String$fromFloat(shadow.offset.b) + 'px'),
+					$elm$core$Maybe$Just(
+					$elm$core$String$fromFloat(shadow.blur) + 'px'),
+					$elm$core$Maybe$Just(
+					$elm$core$String$fromFloat(shadow.size) + 'px'),
+					$elm$core$Maybe$Just(
+					$mdgriffith$elm_ui$Internal$Model$formatColor(shadow.color))
+				])));
+};
+var $elm$core$Tuple$mapFirst = F2(
+	function (func, _v0) {
+		var x = _v0.a;
+		var y = _v0.b;
+		return _Utils_Tuple2(
+			func(x),
+			y);
+	});
+var $elm$core$Tuple$mapSecond = F2(
+	function (func, _v0) {
+		var x = _v0.a;
+		var y = _v0.b;
+		return _Utils_Tuple2(
+			x,
+			func(y));
+	});
+var $mdgriffith$elm_ui$Internal$Model$renderFocusStyle = function (focus) {
+	return _List_fromArray(
+		[
+			A2(
+			$mdgriffith$elm_ui$Internal$Model$Style,
+			$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.focusedWithin) + ':focus-within',
+			A2(
+				$elm$core$List$filterMap,
+				$elm$core$Basics$identity,
+				_List_fromArray(
+					[
+						A2(
+						$elm$core$Maybe$map,
+						function (color) {
+							return A2(
+								$mdgriffith$elm_ui$Internal$Model$Property,
+								'border-color',
+								$mdgriffith$elm_ui$Internal$Model$formatColor(color));
+						},
+						focus.borderColor),
+						A2(
+						$elm$core$Maybe$map,
+						function (color) {
+							return A2(
+								$mdgriffith$elm_ui$Internal$Model$Property,
+								'background-color',
+								$mdgriffith$elm_ui$Internal$Model$formatColor(color));
+						},
+						focus.backgroundColor),
+						A2(
+						$elm$core$Maybe$map,
+						function (shadow) {
+							return A2(
+								$mdgriffith$elm_ui$Internal$Model$Property,
+								'box-shadow',
+								$mdgriffith$elm_ui$Internal$Model$formatBoxShadow(
+									{
+										blur: shadow.blur,
+										color: shadow.color,
+										inset: false,
+										offset: A2(
+											$elm$core$Tuple$mapSecond,
+											$elm$core$Basics$toFloat,
+											A2($elm$core$Tuple$mapFirst, $elm$core$Basics$toFloat, shadow.offset)),
+										size: shadow.size
+									}));
+						},
+						focus.shadow),
+						$elm$core$Maybe$Just(
+						A2($mdgriffith$elm_ui$Internal$Model$Property, 'outline', 'none'))
+					]))),
+			A2(
+			$mdgriffith$elm_ui$Internal$Model$Style,
+			($mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.any) + ':focus .focusable, ') + (($mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.any) + '.focusable:focus, ') + ('.ui-slide-bar:focus + ' + ($mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.any) + ' .focusable-thumb'))),
+			A2(
+				$elm$core$List$filterMap,
+				$elm$core$Basics$identity,
+				_List_fromArray(
+					[
+						A2(
+						$elm$core$Maybe$map,
+						function (color) {
+							return A2(
+								$mdgriffith$elm_ui$Internal$Model$Property,
+								'border-color',
+								$mdgriffith$elm_ui$Internal$Model$formatColor(color));
+						},
+						focus.borderColor),
+						A2(
+						$elm$core$Maybe$map,
+						function (color) {
+							return A2(
+								$mdgriffith$elm_ui$Internal$Model$Property,
+								'background-color',
+								$mdgriffith$elm_ui$Internal$Model$formatColor(color));
+						},
+						focus.backgroundColor),
+						A2(
+						$elm$core$Maybe$map,
+						function (shadow) {
+							return A2(
+								$mdgriffith$elm_ui$Internal$Model$Property,
+								'box-shadow',
+								$mdgriffith$elm_ui$Internal$Model$formatBoxShadow(
+									{
+										blur: shadow.blur,
+										color: shadow.color,
+										inset: false,
+										offset: A2(
+											$elm$core$Tuple$mapSecond,
+											$elm$core$Basics$toFloat,
+											A2($elm$core$Tuple$mapFirst, $elm$core$Basics$toFloat, shadow.offset)),
+										size: shadow.size
+									}));
+						},
+						focus.shadow),
+						$elm$core$Maybe$Just(
+						A2($mdgriffith$elm_ui$Internal$Model$Property, 'outline', 'none'))
+					])))
+		]);
+};
+var $elm$virtual_dom$VirtualDom$node = function (tag) {
+	return _VirtualDom_node(
+		_VirtualDom_noScript(tag));
+};
+var $elm$virtual_dom$VirtualDom$property = F2(
+	function (key, value) {
+		return A2(
+			_VirtualDom_property,
+			_VirtualDom_noInnerHtmlOrFormAction(key),
+			_VirtualDom_noJavaScriptOrHtmlUri(value));
+	});
+var $mdgriffith$elm_ui$Internal$Style$AllChildren = F2(
+	function (a, b) {
+		return {$: 'AllChildren', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Style$Batch = function (a) {
+	return {$: 'Batch', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Style$Child = F2(
+	function (a, b) {
+		return {$: 'Child', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Style$Class = F2(
+	function (a, b) {
+		return {$: 'Class', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Style$Descriptor = F2(
+	function (a, b) {
+		return {$: 'Descriptor', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Style$Left = {$: 'Left'};
+var $mdgriffith$elm_ui$Internal$Style$Prop = F2(
+	function (a, b) {
+		return {$: 'Prop', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Style$Right = {$: 'Right'};
+var $mdgriffith$elm_ui$Internal$Style$Self = function (a) {
+	return {$: 'Self', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Style$Supports = F2(
+	function (a, b) {
+		return {$: 'Supports', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Style$Content = function (a) {
+	return {$: 'Content', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Style$Bottom = {$: 'Bottom'};
+var $mdgriffith$elm_ui$Internal$Style$CenterX = {$: 'CenterX'};
+var $mdgriffith$elm_ui$Internal$Style$CenterY = {$: 'CenterY'};
+var $mdgriffith$elm_ui$Internal$Style$Top = {$: 'Top'};
+var $mdgriffith$elm_ui$Internal$Style$alignments = _List_fromArray(
+	[$mdgriffith$elm_ui$Internal$Style$Top, $mdgriffith$elm_ui$Internal$Style$Bottom, $mdgriffith$elm_ui$Internal$Style$Right, $mdgriffith$elm_ui$Internal$Style$Left, $mdgriffith$elm_ui$Internal$Style$CenterX, $mdgriffith$elm_ui$Internal$Style$CenterY]);
+var $mdgriffith$elm_ui$Internal$Style$contentName = function (desc) {
+	switch (desc.a.$) {
+		case 'Top':
+			var _v1 = desc.a;
+			return $mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.contentTop);
+		case 'Bottom':
+			var _v2 = desc.a;
+			return $mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.contentBottom);
+		case 'Right':
+			var _v3 = desc.a;
+			return $mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.contentRight);
+		case 'Left':
+			var _v4 = desc.a;
+			return $mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.contentLeft);
+		case 'CenterX':
+			var _v5 = desc.a;
+			return $mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.contentCenterX);
+		default:
+			var _v6 = desc.a;
+			return $mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY);
+	}
+};
+var $mdgriffith$elm_ui$Internal$Style$selfName = function (desc) {
+	switch (desc.a.$) {
+		case 'Top':
+			var _v1 = desc.a;
+			return $mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.alignTop);
+		case 'Bottom':
+			var _v2 = desc.a;
+			return $mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.alignBottom);
+		case 'Right':
+			var _v3 = desc.a;
+			return $mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.alignRight);
+		case 'Left':
+			var _v4 = desc.a;
+			return $mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.alignLeft);
+		case 'CenterX':
+			var _v5 = desc.a;
+			return $mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.alignCenterX);
+		default:
+			var _v6 = desc.a;
+			return $mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.alignCenterY);
+	}
+};
+var $mdgriffith$elm_ui$Internal$Style$describeAlignment = function (values) {
+	var createDescription = function (alignment) {
+		var _v0 = values(alignment);
+		var content = _v0.a;
+		var indiv = _v0.b;
+		return _List_fromArray(
+			[
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$contentName(
+					$mdgriffith$elm_ui$Internal$Style$Content(alignment)),
+				content),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Child,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.any),
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Descriptor,
+						$mdgriffith$elm_ui$Internal$Style$selfName(
+							$mdgriffith$elm_ui$Internal$Style$Self(alignment)),
+						indiv)
+					]))
+			]);
+	};
+	return $mdgriffith$elm_ui$Internal$Style$Batch(
+		A2($elm$core$List$concatMap, createDescription, $mdgriffith$elm_ui$Internal$Style$alignments));
+};
+var $mdgriffith$elm_ui$Internal$Style$elDescription = _List_fromArray(
+	[
+		A2($mdgriffith$elm_ui$Internal$Style$Prop, 'display', 'flex'),
+		A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-direction', 'column'),
+		A2($mdgriffith$elm_ui$Internal$Style$Prop, 'white-space', 'pre'),
+		A2(
+		$mdgriffith$elm_ui$Internal$Style$Descriptor,
+		$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.hasBehind),
+		_List_fromArray(
+			[
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'z-index', '0'),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Child,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.behind),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'z-index', '-1')
+					]))
+			])),
+		A2(
+		$mdgriffith$elm_ui$Internal$Style$Descriptor,
+		$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.seButton),
+		_List_fromArray(
+			[
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Child,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.text),
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Descriptor,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.heightFill),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-grow', '0')
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Descriptor,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.widthFill),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'align-self', 'auto !important')
+							]))
+					]))
+			])),
+		A2(
+		$mdgriffith$elm_ui$Internal$Style$Child,
+		$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.heightContent),
+		_List_fromArray(
+			[
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'height', 'auto')
+			])),
+		A2(
+		$mdgriffith$elm_ui$Internal$Style$Child,
+		$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.heightFill),
+		_List_fromArray(
+			[
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-grow', '100000')
+			])),
+		A2(
+		$mdgriffith$elm_ui$Internal$Style$Child,
+		$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.widthFill),
+		_List_fromArray(
+			[
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'width', '100%')
+			])),
+		A2(
+		$mdgriffith$elm_ui$Internal$Style$Child,
+		$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.widthFillPortion),
+		_List_fromArray(
+			[
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'width', '100%')
+			])),
+		A2(
+		$mdgriffith$elm_ui$Internal$Style$Child,
+		$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.widthContent),
+		_List_fromArray(
+			[
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'align-self', 'flex-start')
+			])),
+		$mdgriffith$elm_ui$Internal$Style$describeAlignment(
+		function (alignment) {
+			switch (alignment.$) {
+				case 'Top':
+					return _Utils_Tuple2(
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'justify-content', 'flex-start')
+							]),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin-bottom', 'auto !important'),
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin-top', '0 !important')
+							]));
+				case 'Bottom':
+					return _Utils_Tuple2(
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'justify-content', 'flex-end')
+							]),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin-top', 'auto !important'),
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin-bottom', '0 !important')
+							]));
+				case 'Right':
+					return _Utils_Tuple2(
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'align-items', 'flex-end')
+							]),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'align-self', 'flex-end')
+							]));
+				case 'Left':
+					return _Utils_Tuple2(
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'align-items', 'flex-start')
+							]),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'align-self', 'flex-start')
+							]));
+				case 'CenterX':
+					return _Utils_Tuple2(
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'align-items', 'center')
+							]),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'align-self', 'center')
+							]));
+				default:
+					return _Utils_Tuple2(
+						_List_fromArray(
+							[
+								A2(
+								$mdgriffith$elm_ui$Internal$Style$Child,
+								$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.any),
+								_List_fromArray(
+									[
+										A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin-top', 'auto'),
+										A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin-bottom', 'auto')
+									]))
+							]),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin-top', 'auto !important'),
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin-bottom', 'auto !important')
+							]));
+			}
+		})
+	]);
+var $mdgriffith$elm_ui$Internal$Style$gridAlignments = function (values) {
+	var createDescription = function (alignment) {
+		return _List_fromArray(
+			[
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Child,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.any),
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Descriptor,
+						$mdgriffith$elm_ui$Internal$Style$selfName(
+							$mdgriffith$elm_ui$Internal$Style$Self(alignment)),
+						values(alignment))
+					]))
+			]);
+	};
+	return $mdgriffith$elm_ui$Internal$Style$Batch(
+		A2($elm$core$List$concatMap, createDescription, $mdgriffith$elm_ui$Internal$Style$alignments));
+};
+var $mdgriffith$elm_ui$Internal$Style$Above = {$: 'Above'};
+var $mdgriffith$elm_ui$Internal$Style$Behind = {$: 'Behind'};
+var $mdgriffith$elm_ui$Internal$Style$Below = {$: 'Below'};
+var $mdgriffith$elm_ui$Internal$Style$OnLeft = {$: 'OnLeft'};
+var $mdgriffith$elm_ui$Internal$Style$OnRight = {$: 'OnRight'};
+var $mdgriffith$elm_ui$Internal$Style$Within = {$: 'Within'};
+var $mdgriffith$elm_ui$Internal$Style$locations = function () {
+	var loc = $mdgriffith$elm_ui$Internal$Style$Above;
+	var _v0 = function () {
+		switch (loc.$) {
+			case 'Above':
+				return _Utils_Tuple0;
+			case 'Below':
+				return _Utils_Tuple0;
+			case 'OnRight':
+				return _Utils_Tuple0;
+			case 'OnLeft':
+				return _Utils_Tuple0;
+			case 'Within':
+				return _Utils_Tuple0;
+			default:
+				return _Utils_Tuple0;
+		}
+	}();
+	return _List_fromArray(
+		[$mdgriffith$elm_ui$Internal$Style$Above, $mdgriffith$elm_ui$Internal$Style$Below, $mdgriffith$elm_ui$Internal$Style$OnRight, $mdgriffith$elm_ui$Internal$Style$OnLeft, $mdgriffith$elm_ui$Internal$Style$Within, $mdgriffith$elm_ui$Internal$Style$Behind]);
+}();
+var $mdgriffith$elm_ui$Internal$Style$baseSheet = _List_fromArray(
+	[
+		A2(
+		$mdgriffith$elm_ui$Internal$Style$Class,
+		'html,body',
+		_List_fromArray(
+			[
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'height', '100%'),
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'padding', '0'),
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin', '0')
+			])),
+		A2(
+		$mdgriffith$elm_ui$Internal$Style$Class,
+		_Utils_ap(
+			$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.any),
+			_Utils_ap(
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.single),
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.imageContainer))),
+		_List_fromArray(
+			[
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'display', 'block'),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.heightFill),
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						'img',
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'max-height', '100%'),
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'object-fit', 'cover')
+							]))
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.widthFill),
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						'img',
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'max-width', '100%'),
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'object-fit', 'cover')
+							]))
+					]))
+			])),
+		A2(
+		$mdgriffith$elm_ui$Internal$Style$Class,
+		$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.any) + ':focus',
+		_List_fromArray(
+			[
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'outline', 'none')
+			])),
+		A2(
+		$mdgriffith$elm_ui$Internal$Style$Class,
+		$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.root),
+		_List_fromArray(
+			[
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'width', '100%'),
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'height', 'auto'),
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'min-height', '100%'),
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'z-index', '0'),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				_Utils_ap(
+					$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.any),
+					$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.heightFill)),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'height', '100%'),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.heightFill),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'height', '100%')
+							]))
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Child,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.inFront),
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Descriptor,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.nearby),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'position', 'fixed'),
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'z-index', '20')
+							]))
+					]))
+			])),
+		A2(
+		$mdgriffith$elm_ui$Internal$Style$Class,
+		$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.nearby),
+		_List_fromArray(
+			[
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'position', 'relative'),
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'border', 'none'),
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'display', 'flex'),
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-direction', 'row'),
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-basis', 'auto'),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.single),
+				$mdgriffith$elm_ui$Internal$Style$elDescription),
+				$mdgriffith$elm_ui$Internal$Style$Batch(
+				function (fn) {
+					return A2($elm$core$List$map, fn, $mdgriffith$elm_ui$Internal$Style$locations);
+				}(
+					function (loc) {
+						switch (loc.$) {
+							case 'Above':
+								return A2(
+									$mdgriffith$elm_ui$Internal$Style$Descriptor,
+									$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.above),
+									_List_fromArray(
+										[
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'position', 'absolute'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'bottom', '100%'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'left', '0'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'width', '100%'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'z-index', '20'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin', '0 !important'),
+											A2(
+											$mdgriffith$elm_ui$Internal$Style$Child,
+											$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.heightFill),
+											_List_fromArray(
+												[
+													A2($mdgriffith$elm_ui$Internal$Style$Prop, 'height', 'auto')
+												])),
+											A2(
+											$mdgriffith$elm_ui$Internal$Style$Child,
+											$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.widthFill),
+											_List_fromArray(
+												[
+													A2($mdgriffith$elm_ui$Internal$Style$Prop, 'width', '100%')
+												])),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'pointer-events', 'none'),
+											A2(
+											$mdgriffith$elm_ui$Internal$Style$Child,
+											'*',
+											_List_fromArray(
+												[
+													A2($mdgriffith$elm_ui$Internal$Style$Prop, 'pointer-events', 'auto')
+												]))
+										]));
+							case 'Below':
+								return A2(
+									$mdgriffith$elm_ui$Internal$Style$Descriptor,
+									$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.below),
+									_List_fromArray(
+										[
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'position', 'absolute'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'bottom', '0'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'left', '0'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'height', '0'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'width', '100%'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'z-index', '20'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin', '0 !important'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'pointer-events', 'none'),
+											A2(
+											$mdgriffith$elm_ui$Internal$Style$Child,
+											'*',
+											_List_fromArray(
+												[
+													A2($mdgriffith$elm_ui$Internal$Style$Prop, 'pointer-events', 'auto')
+												])),
+											A2(
+											$mdgriffith$elm_ui$Internal$Style$Child,
+											$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.heightFill),
+											_List_fromArray(
+												[
+													A2($mdgriffith$elm_ui$Internal$Style$Prop, 'height', 'auto')
+												]))
+										]));
+							case 'OnRight':
+								return A2(
+									$mdgriffith$elm_ui$Internal$Style$Descriptor,
+									$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.onRight),
+									_List_fromArray(
+										[
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'position', 'absolute'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'left', '100%'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'top', '0'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'height', '100%'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin', '0 !important'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'z-index', '20'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'pointer-events', 'none'),
+											A2(
+											$mdgriffith$elm_ui$Internal$Style$Child,
+											'*',
+											_List_fromArray(
+												[
+													A2($mdgriffith$elm_ui$Internal$Style$Prop, 'pointer-events', 'auto')
+												]))
+										]));
+							case 'OnLeft':
+								return A2(
+									$mdgriffith$elm_ui$Internal$Style$Descriptor,
+									$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.onLeft),
+									_List_fromArray(
+										[
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'position', 'absolute'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'right', '100%'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'top', '0'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'height', '100%'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin', '0 !important'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'z-index', '20'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'pointer-events', 'none'),
+											A2(
+											$mdgriffith$elm_ui$Internal$Style$Child,
+											'*',
+											_List_fromArray(
+												[
+													A2($mdgriffith$elm_ui$Internal$Style$Prop, 'pointer-events', 'auto')
+												]))
+										]));
+							case 'Within':
+								return A2(
+									$mdgriffith$elm_ui$Internal$Style$Descriptor,
+									$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.inFront),
+									_List_fromArray(
+										[
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'position', 'absolute'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'width', '100%'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'height', '100%'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'left', '0'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'top', '0'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin', '0 !important'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'pointer-events', 'none'),
+											A2(
+											$mdgriffith$elm_ui$Internal$Style$Child,
+											'*',
+											_List_fromArray(
+												[
+													A2($mdgriffith$elm_ui$Internal$Style$Prop, 'pointer-events', 'auto')
+												]))
+										]));
+							default:
+								return A2(
+									$mdgriffith$elm_ui$Internal$Style$Descriptor,
+									$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.behind),
+									_List_fromArray(
+										[
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'position', 'absolute'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'width', '100%'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'height', '100%'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'left', '0'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'top', '0'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin', '0 !important'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'z-index', '0'),
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'pointer-events', 'none'),
+											A2(
+											$mdgriffith$elm_ui$Internal$Style$Child,
+											'*',
+											_List_fromArray(
+												[
+													A2($mdgriffith$elm_ui$Internal$Style$Prop, 'pointer-events', 'auto')
+												]))
+										]));
+						}
+					}))
+			])),
+		A2(
+		$mdgriffith$elm_ui$Internal$Style$Class,
+		$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.any),
+		_List_fromArray(
+			[
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'position', 'relative'),
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'border', 'none'),
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-shrink', '0'),
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'display', 'flex'),
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-direction', 'row'),
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-basis', 'auto'),
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'resize', 'none'),
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'font-feature-settings', 'inherit'),
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'box-sizing', 'border-box'),
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin', '0'),
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'padding', '0'),
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'border-width', '0'),
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'border-style', 'solid'),
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'font-size', 'inherit'),
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'color', 'inherit'),
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'font-family', 'inherit'),
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'line-height', '1'),
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'font-weight', 'inherit'),
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'text-decoration', 'none'),
+				A2($mdgriffith$elm_ui$Internal$Style$Prop, 'font-style', 'inherit'),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.wrapped),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-wrap', 'wrap')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.noTextSelection),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, '-moz-user-select', 'none'),
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, '-webkit-user-select', 'none'),
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, '-ms-user-select', 'none'),
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'user-select', 'none')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.cursorPointer),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'cursor', 'pointer')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.cursorText),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'cursor', 'text')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.passPointerEvents),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'pointer-events', 'none !important')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.capturePointerEvents),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'pointer-events', 'auto !important')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.transparent),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'opacity', '0')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.opaque),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'opacity', '1')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot(
+					_Utils_ap($mdgriffith$elm_ui$Internal$Style$classes.hover, $mdgriffith$elm_ui$Internal$Style$classes.transparent)) + ':hover',
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'opacity', '0')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot(
+					_Utils_ap($mdgriffith$elm_ui$Internal$Style$classes.hover, $mdgriffith$elm_ui$Internal$Style$classes.opaque)) + ':hover',
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'opacity', '1')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot(
+					_Utils_ap($mdgriffith$elm_ui$Internal$Style$classes.focus, $mdgriffith$elm_ui$Internal$Style$classes.transparent)) + ':focus',
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'opacity', '0')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot(
+					_Utils_ap($mdgriffith$elm_ui$Internal$Style$classes.focus, $mdgriffith$elm_ui$Internal$Style$classes.opaque)) + ':focus',
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'opacity', '1')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot(
+					_Utils_ap($mdgriffith$elm_ui$Internal$Style$classes.active, $mdgriffith$elm_ui$Internal$Style$classes.transparent)) + ':active',
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'opacity', '0')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot(
+					_Utils_ap($mdgriffith$elm_ui$Internal$Style$classes.active, $mdgriffith$elm_ui$Internal$Style$classes.opaque)) + ':active',
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'opacity', '1')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.transition),
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Prop,
+						'transition',
+						A2(
+							$elm$core$String$join,
+							', ',
+							A2(
+								$elm$core$List$map,
+								function (x) {
+									return x + ' 160ms';
+								},
+								_List_fromArray(
+									['transform', 'opacity', 'filter', 'background-color', 'color', 'font-size']))))
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.scrollbars),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'overflow', 'auto'),
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-shrink', '1')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.scrollbarsX),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'overflow-x', 'auto'),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Descriptor,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.row),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-shrink', '1')
+							]))
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.scrollbarsY),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'overflow-y', 'auto'),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Descriptor,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.column),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-shrink', '1')
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Descriptor,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.single),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-shrink', '1')
+							]))
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.clip),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'overflow', 'hidden')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.clipX),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'overflow-x', 'hidden')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.clipY),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'overflow-y', 'hidden')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.widthContent),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'width', 'auto')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.borderNone),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'border-width', '0')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.borderDashed),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'border-style', 'dashed')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.borderDotted),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'border-style', 'dotted')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.borderSolid),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'border-style', 'solid')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.text),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'white-space', 'pre'),
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'display', 'inline-block')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.inputText),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'line-height', '1.05'),
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'background', 'transparent'),
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'text-align', 'inherit')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.single),
+				$mdgriffith$elm_ui$Internal$Style$elDescription),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.row),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'display', 'flex'),
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-direction', 'row'),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.any),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-basis', '0%'),
+								A2(
+								$mdgriffith$elm_ui$Internal$Style$Descriptor,
+								$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.widthExact),
+								_List_fromArray(
+									[
+										A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-basis', 'auto')
+									])),
+								A2(
+								$mdgriffith$elm_ui$Internal$Style$Descriptor,
+								$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.link),
+								_List_fromArray(
+									[
+										A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-basis', 'auto')
+									]))
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.heightFill),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'align-self', 'stretch !important')
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.heightFillPortion),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'align-self', 'stretch !important')
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.widthFill),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-grow', '100000')
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.container),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-grow', '0'),
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-basis', 'auto'),
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'align-self', 'stretch')
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						'u:first-of-type.' + $mdgriffith$elm_ui$Internal$Style$classes.alignContainerRight,
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-grow', '1')
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						's:first-of-type.' + $mdgriffith$elm_ui$Internal$Style$classes.alignContainerCenterX,
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-grow', '1'),
+								A2(
+								$mdgriffith$elm_ui$Internal$Style$Child,
+								$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.alignCenterX),
+								_List_fromArray(
+									[
+										A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin-left', 'auto !important')
+									]))
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						's:last-of-type.' + $mdgriffith$elm_ui$Internal$Style$classes.alignContainerCenterX,
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-grow', '1'),
+								A2(
+								$mdgriffith$elm_ui$Internal$Style$Child,
+								$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.alignCenterX),
+								_List_fromArray(
+									[
+										A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin-right', 'auto !important')
+									]))
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						's:only-of-type.' + $mdgriffith$elm_ui$Internal$Style$classes.alignContainerCenterX,
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-grow', '1'),
+								A2(
+								$mdgriffith$elm_ui$Internal$Style$Child,
+								$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.alignCenterY),
+								_List_fromArray(
+									[
+										A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin-top', 'auto !important'),
+										A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin-bottom', 'auto !important')
+									]))
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						's:last-of-type.' + ($mdgriffith$elm_ui$Internal$Style$classes.alignContainerCenterX + ' ~ u'),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-grow', '0')
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						'u:first-of-type.' + ($mdgriffith$elm_ui$Internal$Style$classes.alignContainerRight + (' ~ s.' + $mdgriffith$elm_ui$Internal$Style$classes.alignContainerCenterX)),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-grow', '0')
+							])),
+						$mdgriffith$elm_ui$Internal$Style$describeAlignment(
+						function (alignment) {
+							switch (alignment.$) {
+								case 'Top':
+									return _Utils_Tuple2(
+										_List_fromArray(
+											[
+												A2($mdgriffith$elm_ui$Internal$Style$Prop, 'align-items', 'flex-start')
+											]),
+										_List_fromArray(
+											[
+												A2($mdgriffith$elm_ui$Internal$Style$Prop, 'align-self', 'flex-start')
+											]));
+								case 'Bottom':
+									return _Utils_Tuple2(
+										_List_fromArray(
+											[
+												A2($mdgriffith$elm_ui$Internal$Style$Prop, 'align-items', 'flex-end')
+											]),
+										_List_fromArray(
+											[
+												A2($mdgriffith$elm_ui$Internal$Style$Prop, 'align-self', 'flex-end')
+											]));
+								case 'Right':
+									return _Utils_Tuple2(
+										_List_fromArray(
+											[
+												A2($mdgriffith$elm_ui$Internal$Style$Prop, 'justify-content', 'flex-end')
+											]),
+										_List_Nil);
+								case 'Left':
+									return _Utils_Tuple2(
+										_List_fromArray(
+											[
+												A2($mdgriffith$elm_ui$Internal$Style$Prop, 'justify-content', 'flex-start')
+											]),
+										_List_Nil);
+								case 'CenterX':
+									return _Utils_Tuple2(
+										_List_fromArray(
+											[
+												A2($mdgriffith$elm_ui$Internal$Style$Prop, 'justify-content', 'center')
+											]),
+										_List_Nil);
+								default:
+									return _Utils_Tuple2(
+										_List_fromArray(
+											[
+												A2($mdgriffith$elm_ui$Internal$Style$Prop, 'align-items', 'center')
+											]),
+										_List_fromArray(
+											[
+												A2($mdgriffith$elm_ui$Internal$Style$Prop, 'align-self', 'center')
+											]));
+							}
+						}),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Descriptor,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.spaceEvenly),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'justify-content', 'space-between')
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Descriptor,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.inputLabel),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'align-items', 'baseline')
+							]))
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.column),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'display', 'flex'),
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-direction', 'column'),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.any),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-basis', '0px'),
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'min-height', 'min-content'),
+								A2(
+								$mdgriffith$elm_ui$Internal$Style$Descriptor,
+								$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.heightExact),
+								_List_fromArray(
+									[
+										A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-basis', 'auto')
+									]))
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.heightFill),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-grow', '100000')
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.widthFill),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'width', '100%')
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.widthFillPortion),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'width', '100%')
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.widthContent),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'align-self', 'flex-start')
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						'u:first-of-type.' + $mdgriffith$elm_ui$Internal$Style$classes.alignContainerBottom,
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-grow', '1')
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						's:first-of-type.' + $mdgriffith$elm_ui$Internal$Style$classes.alignContainerCenterY,
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-grow', '1'),
+								A2(
+								$mdgriffith$elm_ui$Internal$Style$Child,
+								$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.alignCenterY),
+								_List_fromArray(
+									[
+										A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin-top', 'auto !important'),
+										A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin-bottom', '0 !important')
+									]))
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						's:last-of-type.' + $mdgriffith$elm_ui$Internal$Style$classes.alignContainerCenterY,
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-grow', '1'),
+								A2(
+								$mdgriffith$elm_ui$Internal$Style$Child,
+								$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.alignCenterY),
+								_List_fromArray(
+									[
+										A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin-bottom', 'auto !important'),
+										A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin-top', '0 !important')
+									]))
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						's:only-of-type.' + $mdgriffith$elm_ui$Internal$Style$classes.alignContainerCenterY,
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-grow', '1'),
+								A2(
+								$mdgriffith$elm_ui$Internal$Style$Child,
+								$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.alignCenterY),
+								_List_fromArray(
+									[
+										A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin-top', 'auto !important'),
+										A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin-bottom', 'auto !important')
+									]))
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						's:last-of-type.' + ($mdgriffith$elm_ui$Internal$Style$classes.alignContainerCenterY + ' ~ u'),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-grow', '0')
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						'u:first-of-type.' + ($mdgriffith$elm_ui$Internal$Style$classes.alignContainerBottom + (' ~ s.' + $mdgriffith$elm_ui$Internal$Style$classes.alignContainerCenterY)),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-grow', '0')
+							])),
+						$mdgriffith$elm_ui$Internal$Style$describeAlignment(
+						function (alignment) {
+							switch (alignment.$) {
+								case 'Top':
+									return _Utils_Tuple2(
+										_List_fromArray(
+											[
+												A2($mdgriffith$elm_ui$Internal$Style$Prop, 'justify-content', 'flex-start')
+											]),
+										_List_fromArray(
+											[
+												A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin-bottom', 'auto')
+											]));
+								case 'Bottom':
+									return _Utils_Tuple2(
+										_List_fromArray(
+											[
+												A2($mdgriffith$elm_ui$Internal$Style$Prop, 'justify-content', 'flex-end')
+											]),
+										_List_fromArray(
+											[
+												A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin-top', 'auto')
+											]));
+								case 'Right':
+									return _Utils_Tuple2(
+										_List_fromArray(
+											[
+												A2($mdgriffith$elm_ui$Internal$Style$Prop, 'align-items', 'flex-end')
+											]),
+										_List_fromArray(
+											[
+												A2($mdgriffith$elm_ui$Internal$Style$Prop, 'align-self', 'flex-end')
+											]));
+								case 'Left':
+									return _Utils_Tuple2(
+										_List_fromArray(
+											[
+												A2($mdgriffith$elm_ui$Internal$Style$Prop, 'align-items', 'flex-start')
+											]),
+										_List_fromArray(
+											[
+												A2($mdgriffith$elm_ui$Internal$Style$Prop, 'align-self', 'flex-start')
+											]));
+								case 'CenterX':
+									return _Utils_Tuple2(
+										_List_fromArray(
+											[
+												A2($mdgriffith$elm_ui$Internal$Style$Prop, 'align-items', 'center')
+											]),
+										_List_fromArray(
+											[
+												A2($mdgriffith$elm_ui$Internal$Style$Prop, 'align-self', 'center')
+											]));
+								default:
+									return _Utils_Tuple2(
+										_List_fromArray(
+											[
+												A2($mdgriffith$elm_ui$Internal$Style$Prop, 'justify-content', 'center')
+											]),
+										_List_Nil);
+							}
+						}),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.container),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-grow', '0'),
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-basis', 'auto'),
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'width', '100%'),
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'align-self', 'stretch !important')
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Descriptor,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.spaceEvenly),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'justify-content', 'space-between')
+							]))
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.grid),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'display', '-ms-grid'),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						'.gp',
+						_List_fromArray(
+							[
+								A2(
+								$mdgriffith$elm_ui$Internal$Style$Child,
+								$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.any),
+								_List_fromArray(
+									[
+										A2($mdgriffith$elm_ui$Internal$Style$Prop, 'width', '100%')
+									]))
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Supports,
+						_Utils_Tuple2('display', 'grid'),
+						_List_fromArray(
+							[
+								_Utils_Tuple2('display', 'grid')
+							])),
+						$mdgriffith$elm_ui$Internal$Style$gridAlignments(
+						function (alignment) {
+							switch (alignment.$) {
+								case 'Top':
+									return _List_fromArray(
+										[
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'justify-content', 'flex-start')
+										]);
+								case 'Bottom':
+									return _List_fromArray(
+										[
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'justify-content', 'flex-end')
+										]);
+								case 'Right':
+									return _List_fromArray(
+										[
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'align-items', 'flex-end')
+										]);
+								case 'Left':
+									return _List_fromArray(
+										[
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'align-items', 'flex-start')
+										]);
+								case 'CenterX':
+									return _List_fromArray(
+										[
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'align-items', 'center')
+										]);
+								default:
+									return _List_fromArray(
+										[
+											A2($mdgriffith$elm_ui$Internal$Style$Prop, 'justify-content', 'center')
+										]);
+							}
+						})
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.page),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'display', 'block'),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.any + ':first-child'),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin', '0 !important')
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						$mdgriffith$elm_ui$Internal$Style$dot(
+							$mdgriffith$elm_ui$Internal$Style$classes.any + ($mdgriffith$elm_ui$Internal$Style$selfName(
+								$mdgriffith$elm_ui$Internal$Style$Self($mdgriffith$elm_ui$Internal$Style$Left)) + (':first-child + .' + $mdgriffith$elm_ui$Internal$Style$classes.any))),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin', '0 !important')
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						$mdgriffith$elm_ui$Internal$Style$dot(
+							$mdgriffith$elm_ui$Internal$Style$classes.any + ($mdgriffith$elm_ui$Internal$Style$selfName(
+								$mdgriffith$elm_ui$Internal$Style$Self($mdgriffith$elm_ui$Internal$Style$Right)) + (':first-child + .' + $mdgriffith$elm_ui$Internal$Style$classes.any))),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'margin', '0 !important')
+							])),
+						$mdgriffith$elm_ui$Internal$Style$describeAlignment(
+						function (alignment) {
+							switch (alignment.$) {
+								case 'Top':
+									return _Utils_Tuple2(_List_Nil, _List_Nil);
+								case 'Bottom':
+									return _Utils_Tuple2(_List_Nil, _List_Nil);
+								case 'Right':
+									return _Utils_Tuple2(
+										_List_Nil,
+										_List_fromArray(
+											[
+												A2($mdgriffith$elm_ui$Internal$Style$Prop, 'float', 'right'),
+												A2(
+												$mdgriffith$elm_ui$Internal$Style$Descriptor,
+												'::after',
+												_List_fromArray(
+													[
+														A2($mdgriffith$elm_ui$Internal$Style$Prop, 'content', '\"\"'),
+														A2($mdgriffith$elm_ui$Internal$Style$Prop, 'display', 'table'),
+														A2($mdgriffith$elm_ui$Internal$Style$Prop, 'clear', 'both')
+													]))
+											]));
+								case 'Left':
+									return _Utils_Tuple2(
+										_List_Nil,
+										_List_fromArray(
+											[
+												A2($mdgriffith$elm_ui$Internal$Style$Prop, 'float', 'left'),
+												A2(
+												$mdgriffith$elm_ui$Internal$Style$Descriptor,
+												'::after',
+												_List_fromArray(
+													[
+														A2($mdgriffith$elm_ui$Internal$Style$Prop, 'content', '\"\"'),
+														A2($mdgriffith$elm_ui$Internal$Style$Prop, 'display', 'table'),
+														A2($mdgriffith$elm_ui$Internal$Style$Prop, 'clear', 'both')
+													]))
+											]));
+								case 'CenterX':
+									return _Utils_Tuple2(_List_Nil, _List_Nil);
+								default:
+									return _Utils_Tuple2(_List_Nil, _List_Nil);
+							}
+						})
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.inputMultiline),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'white-space', 'pre-wrap !important'),
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'height', '100%'),
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'width', '100%'),
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'background-color', 'transparent')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.inputMultilineWrapper),
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Descriptor,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.single),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'flex-basis', 'auto')
+							]))
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.inputMultilineParent),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'white-space', 'pre-wrap !important'),
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'cursor', 'text'),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.inputMultilineFiller),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'white-space', 'pre-wrap !important'),
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'color', 'transparent')
+							]))
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.paragraph),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'display', 'block'),
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'white-space', 'normal'),
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'overflow-wrap', 'break-word'),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Descriptor,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.hasBehind),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'z-index', '0'),
+								A2(
+								$mdgriffith$elm_ui$Internal$Style$Child,
+								$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.behind),
+								_List_fromArray(
+									[
+										A2($mdgriffith$elm_ui$Internal$Style$Prop, 'z-index', '-1')
+									]))
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$AllChildren,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.text),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'display', 'inline'),
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'white-space', 'normal')
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$AllChildren,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.paragraph),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'display', 'inline'),
+								A2(
+								$mdgriffith$elm_ui$Internal$Style$Descriptor,
+								'::after',
+								_List_fromArray(
+									[
+										A2($mdgriffith$elm_ui$Internal$Style$Prop, 'content', 'none')
+									])),
+								A2(
+								$mdgriffith$elm_ui$Internal$Style$Descriptor,
+								'::before',
+								_List_fromArray(
+									[
+										A2($mdgriffith$elm_ui$Internal$Style$Prop, 'content', 'none')
+									]))
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$AllChildren,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.single),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'display', 'inline'),
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'white-space', 'normal'),
+								A2(
+								$mdgriffith$elm_ui$Internal$Style$Descriptor,
+								$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.widthExact),
+								_List_fromArray(
+									[
+										A2($mdgriffith$elm_ui$Internal$Style$Prop, 'display', 'inline-block')
+									])),
+								A2(
+								$mdgriffith$elm_ui$Internal$Style$Descriptor,
+								$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.inFront),
+								_List_fromArray(
+									[
+										A2($mdgriffith$elm_ui$Internal$Style$Prop, 'display', 'flex')
+									])),
+								A2(
+								$mdgriffith$elm_ui$Internal$Style$Descriptor,
+								$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.behind),
+								_List_fromArray(
+									[
+										A2($mdgriffith$elm_ui$Internal$Style$Prop, 'display', 'flex')
+									])),
+								A2(
+								$mdgriffith$elm_ui$Internal$Style$Descriptor,
+								$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.above),
+								_List_fromArray(
+									[
+										A2($mdgriffith$elm_ui$Internal$Style$Prop, 'display', 'flex')
+									])),
+								A2(
+								$mdgriffith$elm_ui$Internal$Style$Descriptor,
+								$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.below),
+								_List_fromArray(
+									[
+										A2($mdgriffith$elm_ui$Internal$Style$Prop, 'display', 'flex')
+									])),
+								A2(
+								$mdgriffith$elm_ui$Internal$Style$Descriptor,
+								$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.onRight),
+								_List_fromArray(
+									[
+										A2($mdgriffith$elm_ui$Internal$Style$Prop, 'display', 'flex')
+									])),
+								A2(
+								$mdgriffith$elm_ui$Internal$Style$Descriptor,
+								$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.onLeft),
+								_List_fromArray(
+									[
+										A2($mdgriffith$elm_ui$Internal$Style$Prop, 'display', 'flex')
+									])),
+								A2(
+								$mdgriffith$elm_ui$Internal$Style$Child,
+								$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.text),
+								_List_fromArray(
+									[
+										A2($mdgriffith$elm_ui$Internal$Style$Prop, 'display', 'inline'),
+										A2($mdgriffith$elm_ui$Internal$Style$Prop, 'white-space', 'normal')
+									]))
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.row),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'display', 'inline')
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.column),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'display', 'inline-flex')
+							])),
+						A2(
+						$mdgriffith$elm_ui$Internal$Style$Child,
+						$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.grid),
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Style$Prop, 'display', 'inline-grid')
+							])),
+						$mdgriffith$elm_ui$Internal$Style$describeAlignment(
+						function (alignment) {
+							switch (alignment.$) {
+								case 'Top':
+									return _Utils_Tuple2(_List_Nil, _List_Nil);
+								case 'Bottom':
+									return _Utils_Tuple2(_List_Nil, _List_Nil);
+								case 'Right':
+									return _Utils_Tuple2(
+										_List_Nil,
+										_List_fromArray(
+											[
+												A2($mdgriffith$elm_ui$Internal$Style$Prop, 'float', 'right')
+											]));
+								case 'Left':
+									return _Utils_Tuple2(
+										_List_Nil,
+										_List_fromArray(
+											[
+												A2($mdgriffith$elm_ui$Internal$Style$Prop, 'float', 'left')
+											]));
+								case 'CenterX':
+									return _Utils_Tuple2(_List_Nil, _List_Nil);
+								default:
+									return _Utils_Tuple2(_List_Nil, _List_Nil);
+							}
+						})
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				'.hidden',
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'display', 'none')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.textThin),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'font-weight', '100')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.textExtraLight),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'font-weight', '200')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.textLight),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'font-weight', '300')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.textNormalWeight),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'font-weight', '400')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.textMedium),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'font-weight', '500')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.textSemiBold),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'font-weight', '600')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.bold),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'font-weight', '700')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.textExtraBold),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'font-weight', '800')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.textHeavy),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'font-weight', '900')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.italic),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'font-style', 'italic')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.strike),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'text-decoration', 'line-through')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.underline),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'text-decoration', 'underline'),
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'text-decoration-skip-ink', 'auto'),
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'text-decoration-skip', 'ink')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				_Utils_ap(
+					$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.underline),
+					$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.strike)),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'text-decoration', 'line-through underline'),
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'text-decoration-skip-ink', 'auto'),
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'text-decoration-skip', 'ink')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.textUnitalicized),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'font-style', 'normal')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.textJustify),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'text-align', 'justify')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.textJustifyAll),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'text-align', 'justify-all')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.textCenter),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'text-align', 'center')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.textRight),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'text-align', 'right')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				$mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.textLeft),
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'text-align', 'left')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Descriptor,
+				'.modal',
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'position', 'fixed'),
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'left', '0'),
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'top', '0'),
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'width', '100%'),
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'height', '100%'),
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'pointer-events', 'none')
+					]))
+			]))
+	]);
+var $mdgriffith$elm_ui$Internal$Style$fontVariant = function (_var) {
+	return _List_fromArray(
+		[
+			A2(
+			$mdgriffith$elm_ui$Internal$Style$Class,
+			'.v-' + _var,
+			_List_fromArray(
+				[
+					A2($mdgriffith$elm_ui$Internal$Style$Prop, 'font-feature-settings', '\"' + (_var + '\"'))
+				])),
+			A2(
+			$mdgriffith$elm_ui$Internal$Style$Class,
+			'.v-' + (_var + '-off'),
+			_List_fromArray(
+				[
+					A2($mdgriffith$elm_ui$Internal$Style$Prop, 'font-feature-settings', '\"' + (_var + '\" 0'))
+				]))
+		]);
+};
+var $mdgriffith$elm_ui$Internal$Style$commonValues = $elm$core$List$concat(
+	_List_fromArray(
+		[
+			A2(
+			$elm$core$List$map,
+			function (x) {
+				return A2(
+					$mdgriffith$elm_ui$Internal$Style$Class,
+					'.border-' + $elm$core$String$fromInt(x),
+					_List_fromArray(
+						[
+							A2(
+							$mdgriffith$elm_ui$Internal$Style$Prop,
+							'border-width',
+							$elm$core$String$fromInt(x) + 'px')
+						]));
+			},
+			A2($elm$core$List$range, 0, 6)),
+			A2(
+			$elm$core$List$map,
+			function (i) {
+				return A2(
+					$mdgriffith$elm_ui$Internal$Style$Class,
+					'.font-size-' + $elm$core$String$fromInt(i),
+					_List_fromArray(
+						[
+							A2(
+							$mdgriffith$elm_ui$Internal$Style$Prop,
+							'font-size',
+							$elm$core$String$fromInt(i) + 'px')
+						]));
+			},
+			A2($elm$core$List$range, 8, 32)),
+			A2(
+			$elm$core$List$map,
+			function (i) {
+				return A2(
+					$mdgriffith$elm_ui$Internal$Style$Class,
+					'.p-' + $elm$core$String$fromInt(i),
+					_List_fromArray(
+						[
+							A2(
+							$mdgriffith$elm_ui$Internal$Style$Prop,
+							'padding',
+							$elm$core$String$fromInt(i) + 'px')
+						]));
+			},
+			A2($elm$core$List$range, 0, 24)),
+			_List_fromArray(
+			[
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Class,
+				'.v-smcp',
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'font-variant', 'small-caps')
+					])),
+				A2(
+				$mdgriffith$elm_ui$Internal$Style$Class,
+				'.v-smcp-off',
+				_List_fromArray(
+					[
+						A2($mdgriffith$elm_ui$Internal$Style$Prop, 'font-variant', 'normal')
+					]))
+			]),
+			$mdgriffith$elm_ui$Internal$Style$fontVariant('zero'),
+			$mdgriffith$elm_ui$Internal$Style$fontVariant('onum'),
+			$mdgriffith$elm_ui$Internal$Style$fontVariant('liga'),
+			$mdgriffith$elm_ui$Internal$Style$fontVariant('dlig'),
+			$mdgriffith$elm_ui$Internal$Style$fontVariant('ordn'),
+			$mdgriffith$elm_ui$Internal$Style$fontVariant('tnum'),
+			$mdgriffith$elm_ui$Internal$Style$fontVariant('afrc'),
+			$mdgriffith$elm_ui$Internal$Style$fontVariant('frac')
+		]));
+var $mdgriffith$elm_ui$Internal$Style$explainer = '\n.explain {\n    border: 6px solid rgb(174, 121, 15) !important;\n}\n.explain > .' + ($mdgriffith$elm_ui$Internal$Style$classes.any + (' {\n    border: 4px dashed rgb(0, 151, 167) !important;\n}\n\n.ctr {\n    border: none !important;\n}\n.explain > .ctr > .' + ($mdgriffith$elm_ui$Internal$Style$classes.any + ' {\n    border: 4px dashed rgb(0, 151, 167) !important;\n}\n\n')));
+var $mdgriffith$elm_ui$Internal$Style$inputTextReset = '\ninput[type="search"],\ninput[type="search"]::-webkit-search-decoration,\ninput[type="search"]::-webkit-search-cancel-button,\ninput[type="search"]::-webkit-search-results-button,\ninput[type="search"]::-webkit-search-results-decoration {\n  -webkit-appearance:none;\n}\n';
+var $mdgriffith$elm_ui$Internal$Style$sliderReset = '\ninput[type=range] {\n  -webkit-appearance: none; \n  background: transparent;\n  position:absolute;\n  left:0;\n  top:0;\n  z-index:10;\n  width: 100%;\n  outline: dashed 1px;\n  height: 100%;\n  opacity: 0;\n}\n';
+var $mdgriffith$elm_ui$Internal$Style$thumbReset = '\ninput[type=range]::-webkit-slider-thumb {\n    -webkit-appearance: none;\n    opacity: 0.5;\n    width: 80px;\n    height: 80px;\n    background-color: black;\n    border:none;\n    border-radius: 5px;\n}\ninput[type=range]::-moz-range-thumb {\n    opacity: 0.5;\n    width: 80px;\n    height: 80px;\n    background-color: black;\n    border:none;\n    border-radius: 5px;\n}\ninput[type=range]::-ms-thumb {\n    opacity: 0.5;\n    width: 80px;\n    height: 80px;\n    background-color: black;\n    border:none;\n    border-radius: 5px;\n}\ninput[type=range][orient=vertical]{\n    writing-mode: bt-lr; /* IE */\n    -webkit-appearance: slider-vertical;  /* WebKit */\n}\n';
+var $mdgriffith$elm_ui$Internal$Style$trackReset = '\ninput[type=range]::-moz-range-track {\n    background: transparent;\n    cursor: pointer;\n}\ninput[type=range]::-ms-track {\n    background: transparent;\n    cursor: pointer;\n}\ninput[type=range]::-webkit-slider-runnable-track {\n    background: transparent;\n    cursor: pointer;\n}\n';
+var $mdgriffith$elm_ui$Internal$Style$overrides = '@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {' + ($mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.any) + ($mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.row) + (' > ' + ($mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.any) + (' { flex-basis: auto !important; } ' + ($mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.any) + ($mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.row) + (' > ' + ($mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.any) + ($mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.container) + (' { flex-basis: auto !important; }}' + ($mdgriffith$elm_ui$Internal$Style$inputTextReset + ($mdgriffith$elm_ui$Internal$Style$sliderReset + ($mdgriffith$elm_ui$Internal$Style$trackReset + ($mdgriffith$elm_ui$Internal$Style$thumbReset + $mdgriffith$elm_ui$Internal$Style$explainer)))))))))))))));
+var $mdgriffith$elm_ui$Internal$Style$Intermediate = function (a) {
+	return {$: 'Intermediate', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Style$emptyIntermediate = F2(
+	function (selector, closing) {
+		return $mdgriffith$elm_ui$Internal$Style$Intermediate(
+			{closing: closing, others: _List_Nil, props: _List_Nil, selector: selector});
+	});
+var $mdgriffith$elm_ui$Internal$Style$renderRules = F2(
+	function (_v0, rulesToRender) {
+		var parent = _v0.a;
+		var generateIntermediates = F2(
+			function (rule, rendered) {
+				switch (rule.$) {
+					case 'Prop':
+						var name = rule.a;
+						var val = rule.b;
+						return _Utils_update(
+							rendered,
+							{
+								props: A2(
+									$elm$core$List$cons,
+									_Utils_Tuple2(name, val),
+									rendered.props)
+							});
+					case 'Supports':
+						var _v2 = rule.a;
+						var prop = _v2.a;
+						var value = _v2.b;
+						var props = rule.b;
+						return _Utils_update(
+							rendered,
+							{
+								others: A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_ui$Internal$Style$Intermediate(
+										{closing: '\n}', others: _List_Nil, props: props, selector: '@supports (' + (prop + (':' + (value + (') {' + parent.selector))))}),
+									rendered.others)
+							});
+					case 'Adjacent':
+						var selector = rule.a;
+						var adjRules = rule.b;
+						return _Utils_update(
+							rendered,
+							{
+								others: A2(
+									$elm$core$List$cons,
+									A2(
+										$mdgriffith$elm_ui$Internal$Style$renderRules,
+										A2($mdgriffith$elm_ui$Internal$Style$emptyIntermediate, parent.selector + (' + ' + selector), ''),
+										adjRules),
+									rendered.others)
+							});
+					case 'Child':
+						var child = rule.a;
+						var childRules = rule.b;
+						return _Utils_update(
+							rendered,
+							{
+								others: A2(
+									$elm$core$List$cons,
+									A2(
+										$mdgriffith$elm_ui$Internal$Style$renderRules,
+										A2($mdgriffith$elm_ui$Internal$Style$emptyIntermediate, parent.selector + (' > ' + child), ''),
+										childRules),
+									rendered.others)
+							});
+					case 'AllChildren':
+						var child = rule.a;
+						var childRules = rule.b;
+						return _Utils_update(
+							rendered,
+							{
+								others: A2(
+									$elm$core$List$cons,
+									A2(
+										$mdgriffith$elm_ui$Internal$Style$renderRules,
+										A2($mdgriffith$elm_ui$Internal$Style$emptyIntermediate, parent.selector + (' ' + child), ''),
+										childRules),
+									rendered.others)
+							});
+					case 'Descriptor':
+						var descriptor = rule.a;
+						var descriptorRules = rule.b;
+						return _Utils_update(
+							rendered,
+							{
+								others: A2(
+									$elm$core$List$cons,
+									A2(
+										$mdgriffith$elm_ui$Internal$Style$renderRules,
+										A2(
+											$mdgriffith$elm_ui$Internal$Style$emptyIntermediate,
+											_Utils_ap(parent.selector, descriptor),
+											''),
+										descriptorRules),
+									rendered.others)
+							});
+					default:
+						var batched = rule.a;
+						return _Utils_update(
+							rendered,
+							{
+								others: A2(
+									$elm$core$List$cons,
+									A2(
+										$mdgriffith$elm_ui$Internal$Style$renderRules,
+										A2($mdgriffith$elm_ui$Internal$Style$emptyIntermediate, parent.selector, ''),
+										batched),
+									rendered.others)
+							});
+				}
+			});
+		return $mdgriffith$elm_ui$Internal$Style$Intermediate(
+			A3($elm$core$List$foldr, generateIntermediates, parent, rulesToRender));
+	});
+var $mdgriffith$elm_ui$Internal$Style$renderCompact = function (styleClasses) {
+	var renderValues = function (values) {
+		return $elm$core$String$concat(
+			A2(
+				$elm$core$List$map,
+				function (_v3) {
+					var x = _v3.a;
+					var y = _v3.b;
+					return x + (':' + (y + ';'));
+				},
+				values));
+	};
+	var renderClass = function (rule) {
+		var _v2 = rule.props;
+		if (!_v2.b) {
+			return '';
+		} else {
+			return rule.selector + ('{' + (renderValues(rule.props) + (rule.closing + '}')));
+		}
+	};
+	var renderIntermediate = function (_v0) {
+		var rule = _v0.a;
+		return _Utils_ap(
+			renderClass(rule),
+			$elm$core$String$concat(
+				A2($elm$core$List$map, renderIntermediate, rule.others)));
+	};
+	return $elm$core$String$concat(
+		A2(
+			$elm$core$List$map,
+			renderIntermediate,
+			A3(
+				$elm$core$List$foldr,
+				F2(
+					function (_v1, existing) {
+						var name = _v1.a;
+						var styleRules = _v1.b;
+						return A2(
+							$elm$core$List$cons,
+							A2(
+								$mdgriffith$elm_ui$Internal$Style$renderRules,
+								A2($mdgriffith$elm_ui$Internal$Style$emptyIntermediate, name, ''),
+								styleRules),
+							existing);
+					}),
+				_List_Nil,
+				styleClasses)));
+};
+var $mdgriffith$elm_ui$Internal$Style$rules = _Utils_ap(
+	$mdgriffith$elm_ui$Internal$Style$overrides,
+	$mdgriffith$elm_ui$Internal$Style$renderCompact(
+		_Utils_ap($mdgriffith$elm_ui$Internal$Style$baseSheet, $mdgriffith$elm_ui$Internal$Style$commonValues)));
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $mdgriffith$elm_ui$Internal$Model$staticRoot = function (opts) {
+	var _v0 = opts.mode;
+	switch (_v0.$) {
+		case 'Layout':
+			return A3(
+				$elm$virtual_dom$VirtualDom$node,
+				'div',
+				_List_Nil,
+				_List_fromArray(
+					[
+						A3(
+						$elm$virtual_dom$VirtualDom$node,
+						'style',
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$virtual_dom$VirtualDom$text($mdgriffith$elm_ui$Internal$Style$rules)
+							]))
+					]));
+		case 'NoStaticStyleSheet':
+			return $elm$virtual_dom$VirtualDom$text('');
+		default:
+			return A3(
+				$elm$virtual_dom$VirtualDom$node,
+				'elm-ui-static-rules',
+				_List_fromArray(
+					[
+						A2(
+						$elm$virtual_dom$VirtualDom$property,
+						'rules',
+						$elm$json$Json$Encode$string($mdgriffith$elm_ui$Internal$Style$rules))
+					]),
+				_List_Nil);
+	}
+};
+var $elm$core$List$any = F2(
+	function (isOkay, list) {
+		any:
+		while (true) {
+			if (!list.b) {
+				return false;
+			} else {
+				var x = list.a;
+				var xs = list.b;
+				if (isOkay(x)) {
+					return true;
+				} else {
+					var $temp$isOkay = isOkay,
+						$temp$list = xs;
+					isOkay = $temp$isOkay;
+					list = $temp$list;
+					continue any;
+				}
+			}
+		}
+	});
+var $mdgriffith$elm_ui$Internal$Model$fontName = function (font) {
+	switch (font.$) {
+		case 'Serif':
+			return 'serif';
+		case 'SansSerif':
+			return 'sans-serif';
+		case 'Monospace':
+			return 'monospace';
+		case 'Typeface':
+			var name = font.a;
+			return '\"' + (name + '\"');
+		case 'ImportFont':
+			var name = font.a;
+			var url = font.b;
+			return '\"' + (name + '\"');
+		default:
+			var name = font.a.name;
+			return '\"' + (name + '\"');
+	}
+};
+var $mdgriffith$elm_ui$Internal$Model$isSmallCaps = function (_var) {
+	switch (_var.$) {
+		case 'VariantActive':
+			var name = _var.a;
+			return name === 'smcp';
+		case 'VariantOff':
+			var name = _var.a;
+			return false;
+		default:
+			var name = _var.a;
+			var index = _var.b;
+			return (name === 'smcp') && (index === 1);
+	}
+};
+var $mdgriffith$elm_ui$Internal$Model$hasSmallCaps = function (typeface) {
+	if (typeface.$ === 'FontWith') {
+		var font = typeface.a;
+		return A2($elm$core$List$any, $mdgriffith$elm_ui$Internal$Model$isSmallCaps, font.variants);
+	} else {
+		return false;
+	}
+};
+var $mdgriffith$elm_ui$Internal$Model$renderProps = F3(
+	function (force, _v0, existing) {
+		var key = _v0.a;
+		var val = _v0.b;
+		return force ? (existing + ('\n  ' + (key + (': ' + (val + ' !important;'))))) : (existing + ('\n  ' + (key + (': ' + (val + ';')))));
+	});
+var $mdgriffith$elm_ui$Internal$Model$renderStyle = F4(
+	function (options, maybePseudo, selector, props) {
+		if (maybePseudo.$ === 'Nothing') {
+			return _List_fromArray(
+				[
+					selector + ('{' + (A3(
+					$elm$core$List$foldl,
+					$mdgriffith$elm_ui$Internal$Model$renderProps(false),
+					'',
+					props) + '\n}'))
+				]);
+		} else {
+			var pseudo = maybePseudo.a;
+			switch (pseudo.$) {
+				case 'Hover':
+					var _v2 = options.hover;
+					switch (_v2.$) {
+						case 'NoHover':
+							return _List_Nil;
+						case 'ForceHover':
+							return _List_fromArray(
+								[
+									selector + ('-hv {' + (A3(
+									$elm$core$List$foldl,
+									$mdgriffith$elm_ui$Internal$Model$renderProps(true),
+									'',
+									props) + '\n}'))
+								]);
+						default:
+							return _List_fromArray(
+								[
+									selector + ('-hv:hover {' + (A3(
+									$elm$core$List$foldl,
+									$mdgriffith$elm_ui$Internal$Model$renderProps(false),
+									'',
+									props) + '\n}'))
+								]);
+					}
+				case 'Focus':
+					var renderedProps = A3(
+						$elm$core$List$foldl,
+						$mdgriffith$elm_ui$Internal$Model$renderProps(false),
+						'',
+						props);
+					return _List_fromArray(
+						[
+							selector + ('-fs:focus {' + (renderedProps + '\n}')),
+							('.' + ($mdgriffith$elm_ui$Internal$Style$classes.any + (':focus ' + (selector + '-fs  {')))) + (renderedProps + '\n}'),
+							(selector + '-fs:focus-within {') + (renderedProps + '\n}'),
+							('.ui-slide-bar:focus + ' + ($mdgriffith$elm_ui$Internal$Style$dot($mdgriffith$elm_ui$Internal$Style$classes.any) + (' .focusable-thumb' + (selector + '-fs {')))) + (renderedProps + '\n}')
+						]);
+				default:
+					return _List_fromArray(
+						[
+							selector + ('-act:active {' + (A3(
+							$elm$core$List$foldl,
+							$mdgriffith$elm_ui$Internal$Model$renderProps(false),
+							'',
+							props) + '\n}'))
+						]);
+			}
+		}
+	});
+var $mdgriffith$elm_ui$Internal$Model$renderVariant = function (_var) {
+	switch (_var.$) {
+		case 'VariantActive':
+			var name = _var.a;
+			return '\"' + (name + '\"');
+		case 'VariantOff':
+			var name = _var.a;
+			return '\"' + (name + '\" 0');
+		default:
+			var name = _var.a;
+			var index = _var.b;
+			return '\"' + (name + ('\" ' + $elm$core$String$fromInt(index)));
+	}
+};
+var $mdgriffith$elm_ui$Internal$Model$renderVariants = function (typeface) {
+	if (typeface.$ === 'FontWith') {
+		var font = typeface.a;
+		return $elm$core$Maybe$Just(
+			A2(
+				$elm$core$String$join,
+				', ',
+				A2($elm$core$List$map, $mdgriffith$elm_ui$Internal$Model$renderVariant, font.variants)));
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $mdgriffith$elm_ui$Internal$Model$transformValue = function (transform) {
+	switch (transform.$) {
+		case 'Untransformed':
+			return $elm$core$Maybe$Nothing;
+		case 'Moved':
+			var _v1 = transform.a;
+			var x = _v1.a;
+			var y = _v1.b;
+			var z = _v1.c;
+			return $elm$core$Maybe$Just(
+				'translate3d(' + ($elm$core$String$fromFloat(x) + ('px, ' + ($elm$core$String$fromFloat(y) + ('px, ' + ($elm$core$String$fromFloat(z) + 'px)'))))));
+		default:
+			var _v2 = transform.a;
+			var tx = _v2.a;
+			var ty = _v2.b;
+			var tz = _v2.c;
+			var _v3 = transform.b;
+			var sx = _v3.a;
+			var sy = _v3.b;
+			var sz = _v3.c;
+			var _v4 = transform.c;
+			var ox = _v4.a;
+			var oy = _v4.b;
+			var oz = _v4.c;
+			var angle = transform.d;
+			var translate = 'translate3d(' + ($elm$core$String$fromFloat(tx) + ('px, ' + ($elm$core$String$fromFloat(ty) + ('px, ' + ($elm$core$String$fromFloat(tz) + 'px)')))));
+			var scale = 'scale3d(' + ($elm$core$String$fromFloat(sx) + (', ' + ($elm$core$String$fromFloat(sy) + (', ' + ($elm$core$String$fromFloat(sz) + ')')))));
+			var rotate = 'rotate3d(' + ($elm$core$String$fromFloat(ox) + (', ' + ($elm$core$String$fromFloat(oy) + (', ' + ($elm$core$String$fromFloat(oz) + (', ' + ($elm$core$String$fromFloat(angle) + 'rad)')))))));
+			return $elm$core$Maybe$Just(translate + (' ' + (scale + (' ' + rotate))));
+	}
+};
+var $mdgriffith$elm_ui$Internal$Model$renderStyleRule = F3(
+	function (options, rule, maybePseudo) {
+		switch (rule.$) {
+			case 'Style':
+				var selector = rule.a;
+				var props = rule.b;
+				return A4($mdgriffith$elm_ui$Internal$Model$renderStyle, options, maybePseudo, selector, props);
+			case 'Shadows':
+				var name = rule.a;
+				var prop = rule.b;
+				return A4(
+					$mdgriffith$elm_ui$Internal$Model$renderStyle,
+					options,
+					maybePseudo,
+					'.' + name,
+					_List_fromArray(
+						[
+							A2($mdgriffith$elm_ui$Internal$Model$Property, 'box-shadow', prop)
+						]));
+			case 'Transparency':
+				var name = rule.a;
+				var transparency = rule.b;
+				var opacity = A2(
+					$elm$core$Basics$max,
+					0,
+					A2($elm$core$Basics$min, 1, 1 - transparency));
+				return A4(
+					$mdgriffith$elm_ui$Internal$Model$renderStyle,
+					options,
+					maybePseudo,
+					'.' + name,
+					_List_fromArray(
+						[
+							A2(
+							$mdgriffith$elm_ui$Internal$Model$Property,
+							'opacity',
+							$elm$core$String$fromFloat(opacity))
+						]));
+			case 'FontSize':
+				var i = rule.a;
+				return A4(
+					$mdgriffith$elm_ui$Internal$Model$renderStyle,
+					options,
+					maybePseudo,
+					'.font-size-' + $elm$core$String$fromInt(i),
+					_List_fromArray(
+						[
+							A2(
+							$mdgriffith$elm_ui$Internal$Model$Property,
+							'font-size',
+							$elm$core$String$fromInt(i) + 'px')
+						]));
+			case 'FontFamily':
+				var name = rule.a;
+				var typefaces = rule.b;
+				var features = A2(
+					$elm$core$String$join,
+					', ',
+					A2($elm$core$List$filterMap, $mdgriffith$elm_ui$Internal$Model$renderVariants, typefaces));
+				var families = _List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Internal$Model$Property,
+						'font-family',
+						A2(
+							$elm$core$String$join,
+							', ',
+							A2($elm$core$List$map, $mdgriffith$elm_ui$Internal$Model$fontName, typefaces))),
+						A2($mdgriffith$elm_ui$Internal$Model$Property, 'font-feature-settings', features),
+						A2(
+						$mdgriffith$elm_ui$Internal$Model$Property,
+						'font-variant',
+						A2($elm$core$List$any, $mdgriffith$elm_ui$Internal$Model$hasSmallCaps, typefaces) ? 'small-caps' : 'normal')
+					]);
+				return A4($mdgriffith$elm_ui$Internal$Model$renderStyle, options, maybePseudo, '.' + name, families);
+			case 'Single':
+				var _class = rule.a;
+				var prop = rule.b;
+				var val = rule.c;
+				return A4(
+					$mdgriffith$elm_ui$Internal$Model$renderStyle,
+					options,
+					maybePseudo,
+					'.' + _class,
+					_List_fromArray(
+						[
+							A2($mdgriffith$elm_ui$Internal$Model$Property, prop, val)
+						]));
+			case 'Colored':
+				var _class = rule.a;
+				var prop = rule.b;
+				var color = rule.c;
+				return A4(
+					$mdgriffith$elm_ui$Internal$Model$renderStyle,
+					options,
+					maybePseudo,
+					'.' + _class,
+					_List_fromArray(
+						[
+							A2(
+							$mdgriffith$elm_ui$Internal$Model$Property,
+							prop,
+							$mdgriffith$elm_ui$Internal$Model$formatColor(color))
+						]));
+			case 'SpacingStyle':
+				var cls = rule.a;
+				var x = rule.b;
+				var y = rule.c;
+				var yPx = $elm$core$String$fromInt(y) + 'px';
+				var xPx = $elm$core$String$fromInt(x) + 'px';
+				var single = '.' + $mdgriffith$elm_ui$Internal$Style$classes.single;
+				var row = '.' + $mdgriffith$elm_ui$Internal$Style$classes.row;
+				var wrappedRow = '.' + ($mdgriffith$elm_ui$Internal$Style$classes.wrapped + row);
+				var right = '.' + $mdgriffith$elm_ui$Internal$Style$classes.alignRight;
+				var paragraph = '.' + $mdgriffith$elm_ui$Internal$Style$classes.paragraph;
+				var page = '.' + $mdgriffith$elm_ui$Internal$Style$classes.page;
+				var left = '.' + $mdgriffith$elm_ui$Internal$Style$classes.alignLeft;
+				var halfY = $elm$core$String$fromFloat(y / 2) + 'px';
+				var halfX = $elm$core$String$fromFloat(x / 2) + 'px';
+				var column = '.' + $mdgriffith$elm_ui$Internal$Style$classes.column;
+				var _class = '.' + cls;
+				var any = '.' + $mdgriffith$elm_ui$Internal$Style$classes.any;
+				return $elm$core$List$concat(
+					_List_fromArray(
+						[
+							A4(
+							$mdgriffith$elm_ui$Internal$Model$renderStyle,
+							options,
+							maybePseudo,
+							_class + (row + (' > ' + (any + (' + ' + any)))),
+							_List_fromArray(
+								[
+									A2($mdgriffith$elm_ui$Internal$Model$Property, 'margin-left', xPx)
+								])),
+							A4(
+							$mdgriffith$elm_ui$Internal$Model$renderStyle,
+							options,
+							maybePseudo,
+							_class + (wrappedRow + (' > ' + any)),
+							_List_fromArray(
+								[
+									A2($mdgriffith$elm_ui$Internal$Model$Property, 'margin', halfY + (' ' + halfX))
+								])),
+							A4(
+							$mdgriffith$elm_ui$Internal$Model$renderStyle,
+							options,
+							maybePseudo,
+							_class + (column + (' > ' + (any + (' + ' + any)))),
+							_List_fromArray(
+								[
+									A2($mdgriffith$elm_ui$Internal$Model$Property, 'margin-top', yPx)
+								])),
+							A4(
+							$mdgriffith$elm_ui$Internal$Model$renderStyle,
+							options,
+							maybePseudo,
+							_class + (page + (' > ' + (any + (' + ' + any)))),
+							_List_fromArray(
+								[
+									A2($mdgriffith$elm_ui$Internal$Model$Property, 'margin-top', yPx)
+								])),
+							A4(
+							$mdgriffith$elm_ui$Internal$Model$renderStyle,
+							options,
+							maybePseudo,
+							_class + (page + (' > ' + left)),
+							_List_fromArray(
+								[
+									A2($mdgriffith$elm_ui$Internal$Model$Property, 'margin-right', xPx)
+								])),
+							A4(
+							$mdgriffith$elm_ui$Internal$Model$renderStyle,
+							options,
+							maybePseudo,
+							_class + (page + (' > ' + right)),
+							_List_fromArray(
+								[
+									A2($mdgriffith$elm_ui$Internal$Model$Property, 'margin-left', xPx)
+								])),
+							A4(
+							$mdgriffith$elm_ui$Internal$Model$renderStyle,
+							options,
+							maybePseudo,
+							_Utils_ap(_class, paragraph),
+							_List_fromArray(
+								[
+									A2(
+									$mdgriffith$elm_ui$Internal$Model$Property,
+									'line-height',
+									'calc(1em + ' + ($elm$core$String$fromInt(y) + 'px)'))
+								])),
+							A4(
+							$mdgriffith$elm_ui$Internal$Model$renderStyle,
+							options,
+							maybePseudo,
+							'textarea' + (any + _class),
+							_List_fromArray(
+								[
+									A2(
+									$mdgriffith$elm_ui$Internal$Model$Property,
+									'line-height',
+									'calc(1em + ' + ($elm$core$String$fromInt(y) + 'px)')),
+									A2(
+									$mdgriffith$elm_ui$Internal$Model$Property,
+									'height',
+									'calc(100% + ' + ($elm$core$String$fromInt(y) + 'px)'))
+								])),
+							A4(
+							$mdgriffith$elm_ui$Internal$Model$renderStyle,
+							options,
+							maybePseudo,
+							_class + (paragraph + (' > ' + left)),
+							_List_fromArray(
+								[
+									A2($mdgriffith$elm_ui$Internal$Model$Property, 'margin-right', xPx)
+								])),
+							A4(
+							$mdgriffith$elm_ui$Internal$Model$renderStyle,
+							options,
+							maybePseudo,
+							_class + (paragraph + (' > ' + right)),
+							_List_fromArray(
+								[
+									A2($mdgriffith$elm_ui$Internal$Model$Property, 'margin-left', xPx)
+								])),
+							A4(
+							$mdgriffith$elm_ui$Internal$Model$renderStyle,
+							options,
+							maybePseudo,
+							_class + (paragraph + '::after'),
+							_List_fromArray(
+								[
+									A2($mdgriffith$elm_ui$Internal$Model$Property, 'content', '\'\''),
+									A2($mdgriffith$elm_ui$Internal$Model$Property, 'display', 'block'),
+									A2($mdgriffith$elm_ui$Internal$Model$Property, 'height', '0'),
+									A2($mdgriffith$elm_ui$Internal$Model$Property, 'width', '0'),
+									A2(
+									$mdgriffith$elm_ui$Internal$Model$Property,
+									'margin-top',
+									$elm$core$String$fromInt((-1) * ((y / 2) | 0)) + 'px')
+								])),
+							A4(
+							$mdgriffith$elm_ui$Internal$Model$renderStyle,
+							options,
+							maybePseudo,
+							_class + (paragraph + '::before'),
+							_List_fromArray(
+								[
+									A2($mdgriffith$elm_ui$Internal$Model$Property, 'content', '\'\''),
+									A2($mdgriffith$elm_ui$Internal$Model$Property, 'display', 'block'),
+									A2($mdgriffith$elm_ui$Internal$Model$Property, 'height', '0'),
+									A2($mdgriffith$elm_ui$Internal$Model$Property, 'width', '0'),
+									A2(
+									$mdgriffith$elm_ui$Internal$Model$Property,
+									'margin-bottom',
+									$elm$core$String$fromInt((-1) * ((y / 2) | 0)) + 'px')
+								]))
+						]));
+			case 'PaddingStyle':
+				var cls = rule.a;
+				var top = rule.b;
+				var right = rule.c;
+				var bottom = rule.d;
+				var left = rule.e;
+				var _class = '.' + cls;
+				return A4(
+					$mdgriffith$elm_ui$Internal$Model$renderStyle,
+					options,
+					maybePseudo,
+					_class,
+					_List_fromArray(
+						[
+							A2(
+							$mdgriffith$elm_ui$Internal$Model$Property,
+							'padding',
+							$elm$core$String$fromFloat(top) + ('px ' + ($elm$core$String$fromFloat(right) + ('px ' + ($elm$core$String$fromFloat(bottom) + ('px ' + ($elm$core$String$fromFloat(left) + 'px')))))))
+						]));
+			case 'BorderWidth':
+				var cls = rule.a;
+				var top = rule.b;
+				var right = rule.c;
+				var bottom = rule.d;
+				var left = rule.e;
+				var _class = '.' + cls;
+				return A4(
+					$mdgriffith$elm_ui$Internal$Model$renderStyle,
+					options,
+					maybePseudo,
+					_class,
+					_List_fromArray(
+						[
+							A2(
+							$mdgriffith$elm_ui$Internal$Model$Property,
+							'border-width',
+							$elm$core$String$fromInt(top) + ('px ' + ($elm$core$String$fromInt(right) + ('px ' + ($elm$core$String$fromInt(bottom) + ('px ' + ($elm$core$String$fromInt(left) + 'px')))))))
+						]));
+			case 'GridTemplateStyle':
+				var template = rule.a;
+				var toGridLengthHelper = F3(
+					function (minimum, maximum, x) {
+						toGridLengthHelper:
+						while (true) {
+							switch (x.$) {
+								case 'Px':
+									var px = x.a;
+									return $elm$core$String$fromInt(px) + 'px';
+								case 'Content':
+									var _v2 = _Utils_Tuple2(minimum, maximum);
+									if (_v2.a.$ === 'Nothing') {
+										if (_v2.b.$ === 'Nothing') {
+											var _v3 = _v2.a;
+											var _v4 = _v2.b;
+											return 'max-content';
+										} else {
+											var _v6 = _v2.a;
+											var maxSize = _v2.b.a;
+											return 'minmax(max-content, ' + ($elm$core$String$fromInt(maxSize) + 'px)');
+										}
+									} else {
+										if (_v2.b.$ === 'Nothing') {
+											var minSize = _v2.a.a;
+											var _v5 = _v2.b;
+											return 'minmax(' + ($elm$core$String$fromInt(minSize) + ('px, ' + 'max-content)'));
+										} else {
+											var minSize = _v2.a.a;
+											var maxSize = _v2.b.a;
+											return 'minmax(' + ($elm$core$String$fromInt(minSize) + ('px, ' + ($elm$core$String$fromInt(maxSize) + 'px)')));
+										}
+									}
+								case 'Fill':
+									var i = x.a;
+									var _v7 = _Utils_Tuple2(minimum, maximum);
+									if (_v7.a.$ === 'Nothing') {
+										if (_v7.b.$ === 'Nothing') {
+											var _v8 = _v7.a;
+											var _v9 = _v7.b;
+											return $elm$core$String$fromInt(i) + 'fr';
+										} else {
+											var _v11 = _v7.a;
+											var maxSize = _v7.b.a;
+											return 'minmax(max-content, ' + ($elm$core$String$fromInt(maxSize) + 'px)');
+										}
+									} else {
+										if (_v7.b.$ === 'Nothing') {
+											var minSize = _v7.a.a;
+											var _v10 = _v7.b;
+											return 'minmax(' + ($elm$core$String$fromInt(minSize) + ('px, ' + ($elm$core$String$fromInt(i) + ('fr' + 'fr)'))));
+										} else {
+											var minSize = _v7.a.a;
+											var maxSize = _v7.b.a;
+											return 'minmax(' + ($elm$core$String$fromInt(minSize) + ('px, ' + ($elm$core$String$fromInt(maxSize) + 'px)')));
+										}
+									}
+								case 'Min':
+									var m = x.a;
+									var len = x.b;
+									var $temp$minimum = $elm$core$Maybe$Just(m),
+										$temp$maximum = maximum,
+										$temp$x = len;
+									minimum = $temp$minimum;
+									maximum = $temp$maximum;
+									x = $temp$x;
+									continue toGridLengthHelper;
+								default:
+									var m = x.a;
+									var len = x.b;
+									var $temp$minimum = minimum,
+										$temp$maximum = $elm$core$Maybe$Just(m),
+										$temp$x = len;
+									minimum = $temp$minimum;
+									maximum = $temp$maximum;
+									x = $temp$x;
+									continue toGridLengthHelper;
+							}
+						}
+					});
+				var toGridLength = function (x) {
+					return A3(toGridLengthHelper, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing, x);
+				};
+				var xSpacing = toGridLength(template.spacing.a);
+				var ySpacing = toGridLength(template.spacing.b);
+				var rows = function (x) {
+					return 'grid-template-rows: ' + (x + ';');
+				}(
+					A2(
+						$elm$core$String$join,
+						' ',
+						A2($elm$core$List$map, toGridLength, template.rows)));
+				var msRows = function (x) {
+					return '-ms-grid-rows: ' + (x + ';');
+				}(
+					A2(
+						$elm$core$String$join,
+						ySpacing,
+						A2($elm$core$List$map, toGridLength, template.columns)));
+				var msColumns = function (x) {
+					return '-ms-grid-columns: ' + (x + ';');
+				}(
+					A2(
+						$elm$core$String$join,
+						ySpacing,
+						A2($elm$core$List$map, toGridLength, template.columns)));
+				var gapY = 'grid-row-gap:' + (toGridLength(template.spacing.b) + ';');
+				var gapX = 'grid-column-gap:' + (toGridLength(template.spacing.a) + ';');
+				var columns = function (x) {
+					return 'grid-template-columns: ' + (x + ';');
+				}(
+					A2(
+						$elm$core$String$join,
+						' ',
+						A2($elm$core$List$map, toGridLength, template.columns)));
+				var _class = '.grid-rows-' + (A2(
+					$elm$core$String$join,
+					'-',
+					A2($elm$core$List$map, $mdgriffith$elm_ui$Internal$Model$lengthClassName, template.rows)) + ('-cols-' + (A2(
+					$elm$core$String$join,
+					'-',
+					A2($elm$core$List$map, $mdgriffith$elm_ui$Internal$Model$lengthClassName, template.columns)) + ('-space-x-' + ($mdgriffith$elm_ui$Internal$Model$lengthClassName(template.spacing.a) + ('-space-y-' + $mdgriffith$elm_ui$Internal$Model$lengthClassName(template.spacing.b)))))));
+				var modernGrid = _class + ('{' + (columns + (rows + (gapX + (gapY + '}')))));
+				var supports = '@supports (display:grid) {' + (modernGrid + '}');
+				var base = _class + ('{' + (msColumns + (msRows + '}')));
+				return _List_fromArray(
+					[base, supports]);
+			case 'GridPosition':
+				var position = rule.a;
+				var msPosition = A2(
+					$elm$core$String$join,
+					' ',
+					_List_fromArray(
+						[
+							'-ms-grid-row: ' + ($elm$core$String$fromInt(position.row) + ';'),
+							'-ms-grid-row-span: ' + ($elm$core$String$fromInt(position.height) + ';'),
+							'-ms-grid-column: ' + ($elm$core$String$fromInt(position.col) + ';'),
+							'-ms-grid-column-span: ' + ($elm$core$String$fromInt(position.width) + ';')
+						]));
+				var modernPosition = A2(
+					$elm$core$String$join,
+					' ',
+					_List_fromArray(
+						[
+							'grid-row: ' + ($elm$core$String$fromInt(position.row) + (' / ' + ($elm$core$String$fromInt(position.row + position.height) + ';'))),
+							'grid-column: ' + ($elm$core$String$fromInt(position.col) + (' / ' + ($elm$core$String$fromInt(position.col + position.width) + ';')))
+						]));
+				var _class = '.grid-pos-' + ($elm$core$String$fromInt(position.row) + ('-' + ($elm$core$String$fromInt(position.col) + ('-' + ($elm$core$String$fromInt(position.width) + ('-' + $elm$core$String$fromInt(position.height)))))));
+				var modernGrid = _class + ('{' + (modernPosition + '}'));
+				var supports = '@supports (display:grid) {' + (modernGrid + '}');
+				var base = _class + ('{' + (msPosition + '}'));
+				return _List_fromArray(
+					[base, supports]);
+			case 'PseudoSelector':
+				var _class = rule.a;
+				var styles = rule.b;
+				var renderPseudoRule = function (style) {
+					return A3(
+						$mdgriffith$elm_ui$Internal$Model$renderStyleRule,
+						options,
+						style,
+						$elm$core$Maybe$Just(_class));
+				};
+				return A2($elm$core$List$concatMap, renderPseudoRule, styles);
+			default:
+				var transform = rule.a;
+				var val = $mdgriffith$elm_ui$Internal$Model$transformValue(transform);
+				var _class = $mdgriffith$elm_ui$Internal$Model$transformClass(transform);
+				var _v12 = _Utils_Tuple2(_class, val);
+				if ((_v12.a.$ === 'Just') && (_v12.b.$ === 'Just')) {
+					var cls = _v12.a.a;
+					var v = _v12.b.a;
+					return A4(
+						$mdgriffith$elm_ui$Internal$Model$renderStyle,
+						options,
+						maybePseudo,
+						'.' + cls,
+						_List_fromArray(
+							[
+								A2($mdgriffith$elm_ui$Internal$Model$Property, 'transform', v)
+							]));
+				} else {
+					return _List_Nil;
+				}
+		}
+	});
+var $mdgriffith$elm_ui$Internal$Model$encodeStyles = F2(
+	function (options, stylesheet) {
+		return $elm$json$Json$Encode$object(
+			A2(
+				$elm$core$List$map,
+				function (style) {
+					var styled = A3($mdgriffith$elm_ui$Internal$Model$renderStyleRule, options, style, $elm$core$Maybe$Nothing);
+					return _Utils_Tuple2(
+						$mdgriffith$elm_ui$Internal$Model$getStyleName(style),
+						A2($elm$json$Json$Encode$list, $elm$json$Json$Encode$string, styled));
+				},
+				stylesheet));
+	});
+var $mdgriffith$elm_ui$Internal$Model$bracket = F2(
+	function (selector, rules) {
+		var renderPair = function (_v0) {
+			var name = _v0.a;
+			var val = _v0.b;
+			return name + (': ' + (val + ';'));
+		};
+		return selector + (' {' + (A2(
+			$elm$core$String$join,
+			'',
+			A2($elm$core$List$map, renderPair, rules)) + '}'));
+	});
+var $mdgriffith$elm_ui$Internal$Model$fontRule = F3(
+	function (name, modifier, _v0) {
+		var parentAdj = _v0.a;
+		var textAdjustment = _v0.b;
+		return _List_fromArray(
+			[
+				A2($mdgriffith$elm_ui$Internal$Model$bracket, '.' + (name + ('.' + (modifier + (', ' + ('.' + (name + (' .' + modifier))))))), parentAdj),
+				A2($mdgriffith$elm_ui$Internal$Model$bracket, '.' + (name + ('.' + (modifier + ('> .' + ($mdgriffith$elm_ui$Internal$Style$classes.text + (', .' + (name + (' .' + (modifier + (' > .' + $mdgriffith$elm_ui$Internal$Style$classes.text)))))))))), textAdjustment)
+			]);
+	});
+var $mdgriffith$elm_ui$Internal$Model$renderFontAdjustmentRule = F3(
+	function (fontToAdjust, _v0, otherFontName) {
+		var full = _v0.a;
+		var capital = _v0.b;
+		var name = _Utils_eq(fontToAdjust, otherFontName) ? fontToAdjust : (otherFontName + (' .' + fontToAdjust));
+		return A2(
+			$elm$core$String$join,
+			' ',
+			_Utils_ap(
+				A3($mdgriffith$elm_ui$Internal$Model$fontRule, name, $mdgriffith$elm_ui$Internal$Style$classes.sizeByCapital, capital),
+				A3($mdgriffith$elm_ui$Internal$Model$fontRule, name, $mdgriffith$elm_ui$Internal$Style$classes.fullSize, full)));
+	});
+var $mdgriffith$elm_ui$Internal$Model$renderNullAdjustmentRule = F2(
+	function (fontToAdjust, otherFontName) {
+		var name = _Utils_eq(fontToAdjust, otherFontName) ? fontToAdjust : (otherFontName + (' .' + fontToAdjust));
+		return A2(
+			$elm$core$String$join,
+			' ',
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Internal$Model$bracket,
+					'.' + (name + ('.' + ($mdgriffith$elm_ui$Internal$Style$classes.sizeByCapital + (', ' + ('.' + (name + (' .' + $mdgriffith$elm_ui$Internal$Style$classes.sizeByCapital))))))),
+					_List_fromArray(
+						[
+							_Utils_Tuple2('line-height', '1')
+						])),
+					A2(
+					$mdgriffith$elm_ui$Internal$Model$bracket,
+					'.' + (name + ('.' + ($mdgriffith$elm_ui$Internal$Style$classes.sizeByCapital + ('> .' + ($mdgriffith$elm_ui$Internal$Style$classes.text + (', .' + (name + (' .' + ($mdgriffith$elm_ui$Internal$Style$classes.sizeByCapital + (' > .' + $mdgriffith$elm_ui$Internal$Style$classes.text)))))))))),
+					_List_fromArray(
+						[
+							_Utils_Tuple2('vertical-align', '0'),
+							_Utils_Tuple2('line-height', '1')
+						]))
+				]));
+	});
+var $mdgriffith$elm_ui$Internal$Model$adjust = F3(
+	function (size, height, vertical) {
+		return {height: height / size, size: size, vertical: vertical};
+	});
+var $elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
+var $elm$core$List$maximum = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(
+			A3($elm$core$List$foldl, $elm$core$Basics$max, x, xs));
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $elm$core$List$minimum = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(
+			A3($elm$core$List$foldl, $elm$core$Basics$min, x, xs));
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $mdgriffith$elm_ui$Internal$Model$convertAdjustment = function (adjustment) {
+	var lines = _List_fromArray(
+		[adjustment.capital, adjustment.baseline, adjustment.descender, adjustment.lowercase]);
+	var lineHeight = 1.5;
+	var normalDescender = (lineHeight - 1) / 2;
+	var oldMiddle = lineHeight / 2;
+	var descender = A2(
+		$elm$core$Maybe$withDefault,
+		adjustment.descender,
+		$elm$core$List$minimum(lines));
+	var newBaseline = A2(
+		$elm$core$Maybe$withDefault,
+		adjustment.baseline,
+		$elm$core$List$minimum(
+			A2(
+				$elm$core$List$filter,
+				function (x) {
+					return !_Utils_eq(x, descender);
+				},
+				lines)));
+	var base = lineHeight;
+	var ascender = A2(
+		$elm$core$Maybe$withDefault,
+		adjustment.capital,
+		$elm$core$List$maximum(lines));
+	var capitalSize = 1 / (ascender - newBaseline);
+	var capitalVertical = 1 - ascender;
+	var fullSize = 1 / (ascender - descender);
+	var fullVertical = 1 - ascender;
+	var newCapitalMiddle = ((ascender - newBaseline) / 2) + newBaseline;
+	var newFullMiddle = ((ascender - descender) / 2) + descender;
+	return {
+		capital: A3($mdgriffith$elm_ui$Internal$Model$adjust, capitalSize, ascender - newBaseline, capitalVertical),
+		full: A3($mdgriffith$elm_ui$Internal$Model$adjust, fullSize, ascender - descender, fullVertical)
+	};
+};
+var $mdgriffith$elm_ui$Internal$Model$fontAdjustmentRules = function (converted) {
+	return _Utils_Tuple2(
+		_List_fromArray(
+			[
+				_Utils_Tuple2('display', 'block')
+			]),
+		_List_fromArray(
+			[
+				_Utils_Tuple2('display', 'inline-block'),
+				_Utils_Tuple2(
+				'line-height',
+				$elm$core$String$fromFloat(converted.height)),
+				_Utils_Tuple2(
+				'vertical-align',
+				$elm$core$String$fromFloat(converted.vertical) + 'em'),
+				_Utils_Tuple2(
+				'font-size',
+				$elm$core$String$fromFloat(converted.size) + 'em')
+			]));
+};
+var $mdgriffith$elm_ui$Internal$Model$typefaceAdjustment = function (typefaces) {
+	return A3(
+		$elm$core$List$foldl,
+		F2(
+			function (face, found) {
+				if (found.$ === 'Nothing') {
+					if (face.$ === 'FontWith') {
+						var _with = face.a;
+						var _v2 = _with.adjustment;
+						if (_v2.$ === 'Nothing') {
+							return found;
+						} else {
+							var adjustment = _v2.a;
+							return $elm$core$Maybe$Just(
+								_Utils_Tuple2(
+									$mdgriffith$elm_ui$Internal$Model$fontAdjustmentRules(
+										function ($) {
+											return $.full;
+										}(
+											$mdgriffith$elm_ui$Internal$Model$convertAdjustment(adjustment))),
+									$mdgriffith$elm_ui$Internal$Model$fontAdjustmentRules(
+										function ($) {
+											return $.capital;
+										}(
+											$mdgriffith$elm_ui$Internal$Model$convertAdjustment(adjustment)))));
+						}
+					} else {
+						return found;
+					}
+				} else {
+					return found;
+				}
+			}),
+		$elm$core$Maybe$Nothing,
+		typefaces);
+};
+var $mdgriffith$elm_ui$Internal$Model$renderTopLevelValues = function (rules) {
+	var withImport = function (font) {
+		if (font.$ === 'ImportFont') {
+			var url = font.b;
+			return $elm$core$Maybe$Just('@import url(\'' + (url + '\');'));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	};
+	var fontImports = function (_v2) {
+		var name = _v2.a;
+		var typefaces = _v2.b;
+		var imports = A2(
+			$elm$core$String$join,
+			'\n',
+			A2($elm$core$List$filterMap, withImport, typefaces));
+		return imports;
+	};
+	var allNames = A2($elm$core$List$map, $elm$core$Tuple$first, rules);
+	var fontAdjustments = function (_v1) {
+		var name = _v1.a;
+		var typefaces = _v1.b;
+		var _v0 = $mdgriffith$elm_ui$Internal$Model$typefaceAdjustment(typefaces);
+		if (_v0.$ === 'Nothing') {
+			return A2(
+				$elm$core$String$join,
+				'',
+				A2(
+					$elm$core$List$map,
+					$mdgriffith$elm_ui$Internal$Model$renderNullAdjustmentRule(name),
+					allNames));
+		} else {
+			var adjustment = _v0.a;
+			return A2(
+				$elm$core$String$join,
+				'',
+				A2(
+					$elm$core$List$map,
+					A2($mdgriffith$elm_ui$Internal$Model$renderFontAdjustmentRule, name, adjustment),
+					allNames));
+		}
+	};
+	return _Utils_ap(
+		A2(
+			$elm$core$String$join,
+			'\n',
+			A2($elm$core$List$map, fontImports, rules)),
+		A2(
+			$elm$core$String$join,
+			'\n',
+			A2($elm$core$List$map, fontAdjustments, rules)));
+};
+var $mdgriffith$elm_ui$Internal$Model$topLevelValue = function (rule) {
+	if (rule.$ === 'FontFamily') {
+		var name = rule.a;
+		var typefaces = rule.b;
+		return $elm$core$Maybe$Just(
+			_Utils_Tuple2(name, typefaces));
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $mdgriffith$elm_ui$Internal$Model$toStyleSheetString = F2(
+	function (options, stylesheet) {
+		var combine = F2(
+			function (style, rendered) {
+				return {
+					rules: _Utils_ap(
+						rendered.rules,
+						A3($mdgriffith$elm_ui$Internal$Model$renderStyleRule, options, style, $elm$core$Maybe$Nothing)),
+					topLevel: function () {
+						var _v1 = $mdgriffith$elm_ui$Internal$Model$topLevelValue(style);
+						if (_v1.$ === 'Nothing') {
+							return rendered.topLevel;
+						} else {
+							var topLevel = _v1.a;
+							return A2($elm$core$List$cons, topLevel, rendered.topLevel);
+						}
+					}()
+				};
+			});
+		var _v0 = A3(
+			$elm$core$List$foldl,
+			combine,
+			{rules: _List_Nil, topLevel: _List_Nil},
+			stylesheet);
+		var topLevel = _v0.topLevel;
+		var rules = _v0.rules;
+		return _Utils_ap(
+			$mdgriffith$elm_ui$Internal$Model$renderTopLevelValues(topLevel),
+			$elm$core$String$concat(rules));
+	});
+var $mdgriffith$elm_ui$Internal$Model$toStyleSheet = F2(
+	function (options, styleSheet) {
+		var _v0 = options.mode;
+		switch (_v0.$) {
+			case 'Layout':
+				return A3(
+					$elm$virtual_dom$VirtualDom$node,
+					'div',
+					_List_Nil,
+					_List_fromArray(
+						[
+							A3(
+							$elm$virtual_dom$VirtualDom$node,
+							'style',
+							_List_Nil,
+							_List_fromArray(
+								[
+									$elm$virtual_dom$VirtualDom$text(
+									A2($mdgriffith$elm_ui$Internal$Model$toStyleSheetString, options, styleSheet))
+								]))
+						]));
+			case 'NoStaticStyleSheet':
+				return A3(
+					$elm$virtual_dom$VirtualDom$node,
+					'div',
+					_List_Nil,
+					_List_fromArray(
+						[
+							A3(
+							$elm$virtual_dom$VirtualDom$node,
+							'style',
+							_List_Nil,
+							_List_fromArray(
+								[
+									$elm$virtual_dom$VirtualDom$text(
+									A2($mdgriffith$elm_ui$Internal$Model$toStyleSheetString, options, styleSheet))
+								]))
+						]));
+			default:
+				return A3(
+					$elm$virtual_dom$VirtualDom$node,
+					'elm-ui-rules',
+					_List_fromArray(
+						[
+							A2(
+							$elm$virtual_dom$VirtualDom$property,
+							'rules',
+							A2($mdgriffith$elm_ui$Internal$Model$encodeStyles, options, styleSheet))
+						]),
+					_List_Nil);
+		}
+	});
+var $mdgriffith$elm_ui$Internal$Model$embedKeyed = F4(
+	function (_static, opts, styles, children) {
+		var dynamicStyleSheet = A2(
+			$mdgriffith$elm_ui$Internal$Model$toStyleSheet,
+			opts,
+			A3(
+				$elm$core$List$foldl,
+				$mdgriffith$elm_ui$Internal$Model$reduceStyles,
+				_Utils_Tuple2(
+					$elm$core$Set$empty,
+					$mdgriffith$elm_ui$Internal$Model$renderFocusStyle(opts.focus)),
+				styles).b);
+		return _static ? A2(
+			$elm$core$List$cons,
+			_Utils_Tuple2(
+				'static-stylesheet',
+				$mdgriffith$elm_ui$Internal$Model$staticRoot(opts)),
+			A2(
+				$elm$core$List$cons,
+				_Utils_Tuple2('dynamic-stylesheet', dynamicStyleSheet),
+				children)) : A2(
+			$elm$core$List$cons,
+			_Utils_Tuple2('dynamic-stylesheet', dynamicStyleSheet),
+			children);
+	});
+var $mdgriffith$elm_ui$Internal$Model$embedWith = F4(
+	function (_static, opts, styles, children) {
+		var dynamicStyleSheet = A2(
+			$mdgriffith$elm_ui$Internal$Model$toStyleSheet,
+			opts,
+			A3(
+				$elm$core$List$foldl,
+				$mdgriffith$elm_ui$Internal$Model$reduceStyles,
+				_Utils_Tuple2(
+					$elm$core$Set$empty,
+					$mdgriffith$elm_ui$Internal$Model$renderFocusStyle(opts.focus)),
+				styles).b);
+		return _static ? A2(
+			$elm$core$List$cons,
+			$mdgriffith$elm_ui$Internal$Model$staticRoot(opts),
+			A2($elm$core$List$cons, dynamicStyleSheet, children)) : A2($elm$core$List$cons, dynamicStyleSheet, children);
+	});
+var $mdgriffith$elm_ui$Internal$Flag$heightBetween = $mdgriffith$elm_ui$Internal$Flag$flag(45);
+var $mdgriffith$elm_ui$Internal$Flag$heightFill = $mdgriffith$elm_ui$Internal$Flag$flag(37);
+var $elm$virtual_dom$VirtualDom$keyedNode = function (tag) {
+	return _VirtualDom_keyedNode(
+		_VirtualDom_noScript(tag));
+};
+var $elm$core$Basics$not = _Basics_not;
+var $elm$html$Html$p = _VirtualDom_node('p');
+var $mdgriffith$elm_ui$Internal$Flag$present = F2(
+	function (myFlag, _v0) {
+		var fieldOne = _v0.a;
+		var fieldTwo = _v0.b;
+		if (myFlag.$ === 'Flag') {
+			var first = myFlag.a;
+			return _Utils_eq(first & fieldOne, first);
+		} else {
+			var second = myFlag.a;
+			return _Utils_eq(second & fieldTwo, second);
+		}
+	});
+var $elm$html$Html$s = _VirtualDom_node('s');
+var $elm$html$Html$u = _VirtualDom_node('u');
+var $mdgriffith$elm_ui$Internal$Flag$widthBetween = $mdgriffith$elm_ui$Internal$Flag$flag(44);
+var $mdgriffith$elm_ui$Internal$Flag$widthFill = $mdgriffith$elm_ui$Internal$Flag$flag(39);
+var $mdgriffith$elm_ui$Internal$Model$finalizeNode = F6(
+	function (has, node, attributes, children, embedMode, parentContext) {
+		var createNode = F2(
+			function (nodeName, attrs) {
+				if (children.$ === 'Keyed') {
+					var keyed = children.a;
+					return A3(
+						$elm$virtual_dom$VirtualDom$keyedNode,
+						nodeName,
+						attrs,
+						function () {
+							switch (embedMode.$) {
+								case 'NoStyleSheet':
+									return keyed;
+								case 'OnlyDynamic':
+									var opts = embedMode.a;
+									var styles = embedMode.b;
+									return A4($mdgriffith$elm_ui$Internal$Model$embedKeyed, false, opts, styles, keyed);
+								default:
+									var opts = embedMode.a;
+									var styles = embedMode.b;
+									return A4($mdgriffith$elm_ui$Internal$Model$embedKeyed, true, opts, styles, keyed);
+							}
+						}());
+				} else {
+					var unkeyed = children.a;
+					return A2(
+						function () {
+							switch (nodeName) {
+								case 'div':
+									return $elm$html$Html$div;
+								case 'p':
+									return $elm$html$Html$p;
+								default:
+									return $elm$virtual_dom$VirtualDom$node(nodeName);
+							}
+						}(),
+						attrs,
+						function () {
+							switch (embedMode.$) {
+								case 'NoStyleSheet':
+									return unkeyed;
+								case 'OnlyDynamic':
+									var opts = embedMode.a;
+									var styles = embedMode.b;
+									return A4($mdgriffith$elm_ui$Internal$Model$embedWith, false, opts, styles, unkeyed);
+								default:
+									var opts = embedMode.a;
+									var styles = embedMode.b;
+									return A4($mdgriffith$elm_ui$Internal$Model$embedWith, true, opts, styles, unkeyed);
+							}
+						}());
+				}
+			});
+		var html = function () {
+			switch (node.$) {
+				case 'Generic':
+					return A2(createNode, 'div', attributes);
+				case 'NodeName':
+					var nodeName = node.a;
+					return A2(createNode, nodeName, attributes);
+				default:
+					var nodeName = node.a;
+					var internal = node.b;
+					return A3(
+						$elm$virtual_dom$VirtualDom$node,
+						nodeName,
+						attributes,
+						_List_fromArray(
+							[
+								A2(
+								createNode,
+								internal,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class($mdgriffith$elm_ui$Internal$Style$classes.any + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.single))
+									]))
+							]));
+			}
+		}();
+		switch (parentContext.$) {
+			case 'AsRow':
+				return (A2($mdgriffith$elm_ui$Internal$Flag$present, $mdgriffith$elm_ui$Internal$Flag$widthFill, has) && (!A2($mdgriffith$elm_ui$Internal$Flag$present, $mdgriffith$elm_ui$Internal$Flag$widthBetween, has))) ? html : (A2($mdgriffith$elm_ui$Internal$Flag$present, $mdgriffith$elm_ui$Internal$Flag$alignRight, has) ? A2(
+					$elm$html$Html$u,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class(
+							A2(
+								$elm$core$String$join,
+								' ',
+								_List_fromArray(
+									[$mdgriffith$elm_ui$Internal$Style$classes.any, $mdgriffith$elm_ui$Internal$Style$classes.single, $mdgriffith$elm_ui$Internal$Style$classes.container, $mdgriffith$elm_ui$Internal$Style$classes.contentCenterY, $mdgriffith$elm_ui$Internal$Style$classes.alignContainerRight])))
+						]),
+					_List_fromArray(
+						[html])) : (A2($mdgriffith$elm_ui$Internal$Flag$present, $mdgriffith$elm_ui$Internal$Flag$centerX, has) ? A2(
+					$elm$html$Html$s,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class(
+							A2(
+								$elm$core$String$join,
+								' ',
+								_List_fromArray(
+									[$mdgriffith$elm_ui$Internal$Style$classes.any, $mdgriffith$elm_ui$Internal$Style$classes.single, $mdgriffith$elm_ui$Internal$Style$classes.container, $mdgriffith$elm_ui$Internal$Style$classes.contentCenterY, $mdgriffith$elm_ui$Internal$Style$classes.alignContainerCenterX])))
+						]),
+					_List_fromArray(
+						[html])) : html));
+			case 'AsColumn':
+				return (A2($mdgriffith$elm_ui$Internal$Flag$present, $mdgriffith$elm_ui$Internal$Flag$heightFill, has) && (!A2($mdgriffith$elm_ui$Internal$Flag$present, $mdgriffith$elm_ui$Internal$Flag$heightBetween, has))) ? html : (A2($mdgriffith$elm_ui$Internal$Flag$present, $mdgriffith$elm_ui$Internal$Flag$centerY, has) ? A2(
+					$elm$html$Html$s,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class(
+							A2(
+								$elm$core$String$join,
+								' ',
+								_List_fromArray(
+									[$mdgriffith$elm_ui$Internal$Style$classes.any, $mdgriffith$elm_ui$Internal$Style$classes.single, $mdgriffith$elm_ui$Internal$Style$classes.container, $mdgriffith$elm_ui$Internal$Style$classes.alignContainerCenterY])))
+						]),
+					_List_fromArray(
+						[html])) : (A2($mdgriffith$elm_ui$Internal$Flag$present, $mdgriffith$elm_ui$Internal$Flag$alignBottom, has) ? A2(
+					$elm$html$Html$u,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class(
+							A2(
+								$elm$core$String$join,
+								' ',
+								_List_fromArray(
+									[$mdgriffith$elm_ui$Internal$Style$classes.any, $mdgriffith$elm_ui$Internal$Style$classes.single, $mdgriffith$elm_ui$Internal$Style$classes.container, $mdgriffith$elm_ui$Internal$Style$classes.alignContainerBottom])))
+						]),
+					_List_fromArray(
+						[html])) : html));
+			default:
+				return html;
+		}
+	});
+var $elm$core$List$isEmpty = function (xs) {
+	if (!xs.b) {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $mdgriffith$elm_ui$Internal$Model$textElementClasses = $mdgriffith$elm_ui$Internal$Style$classes.any + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.text + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.widthContent + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.heightContent)))));
+var $mdgriffith$elm_ui$Internal$Model$textElement = function (str) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class($mdgriffith$elm_ui$Internal$Model$textElementClasses)
+			]),
+		_List_fromArray(
+			[
+				$elm$html$Html$text(str)
+			]));
+};
+var $mdgriffith$elm_ui$Internal$Model$textElementFillClasses = $mdgriffith$elm_ui$Internal$Style$classes.any + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.text + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.widthFill + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.heightFill)))));
+var $mdgriffith$elm_ui$Internal$Model$textElementFill = function (str) {
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class($mdgriffith$elm_ui$Internal$Model$textElementFillClasses)
+			]),
+		_List_fromArray(
+			[
+				$elm$html$Html$text(str)
+			]));
+};
+var $mdgriffith$elm_ui$Internal$Model$createElement = F3(
+	function (context, children, rendered) {
+		var gatherKeyed = F2(
+			function (_v8, _v9) {
+				var key = _v8.a;
+				var child = _v8.b;
+				var htmls = _v9.a;
+				var existingStyles = _v9.b;
+				switch (child.$) {
+					case 'Unstyled':
+						var html = child.a;
+						return _Utils_eq(context, $mdgriffith$elm_ui$Internal$Model$asParagraph) ? _Utils_Tuple2(
+							A2(
+								$elm$core$List$cons,
+								_Utils_Tuple2(
+									key,
+									html(context)),
+								htmls),
+							existingStyles) : _Utils_Tuple2(
+							A2(
+								$elm$core$List$cons,
+								_Utils_Tuple2(
+									key,
+									html(context)),
+								htmls),
+							existingStyles);
+					case 'Styled':
+						var styled = child.a;
+						return _Utils_eq(context, $mdgriffith$elm_ui$Internal$Model$asParagraph) ? _Utils_Tuple2(
+							A2(
+								$elm$core$List$cons,
+								_Utils_Tuple2(
+									key,
+									A2(styled.html, $mdgriffith$elm_ui$Internal$Model$NoStyleSheet, context)),
+								htmls),
+							$elm$core$List$isEmpty(existingStyles) ? styled.styles : _Utils_ap(styled.styles, existingStyles)) : _Utils_Tuple2(
+							A2(
+								$elm$core$List$cons,
+								_Utils_Tuple2(
+									key,
+									A2(styled.html, $mdgriffith$elm_ui$Internal$Model$NoStyleSheet, context)),
+								htmls),
+							$elm$core$List$isEmpty(existingStyles) ? styled.styles : _Utils_ap(styled.styles, existingStyles));
+					case 'Text':
+						var str = child.a;
+						return _Utils_Tuple2(
+							A2(
+								$elm$core$List$cons,
+								_Utils_Tuple2(
+									key,
+									_Utils_eq(context, $mdgriffith$elm_ui$Internal$Model$asEl) ? $mdgriffith$elm_ui$Internal$Model$textElementFill(str) : $mdgriffith$elm_ui$Internal$Model$textElement(str)),
+								htmls),
+							existingStyles);
+					default:
+						return _Utils_Tuple2(htmls, existingStyles);
+				}
+			});
+		var gather = F2(
+			function (child, _v6) {
+				var htmls = _v6.a;
+				var existingStyles = _v6.b;
+				switch (child.$) {
+					case 'Unstyled':
+						var html = child.a;
+						return _Utils_eq(context, $mdgriffith$elm_ui$Internal$Model$asParagraph) ? _Utils_Tuple2(
+							A2(
+								$elm$core$List$cons,
+								html(context),
+								htmls),
+							existingStyles) : _Utils_Tuple2(
+							A2(
+								$elm$core$List$cons,
+								html(context),
+								htmls),
+							existingStyles);
+					case 'Styled':
+						var styled = child.a;
+						return _Utils_eq(context, $mdgriffith$elm_ui$Internal$Model$asParagraph) ? _Utils_Tuple2(
+							A2(
+								$elm$core$List$cons,
+								A2(styled.html, $mdgriffith$elm_ui$Internal$Model$NoStyleSheet, context),
+								htmls),
+							$elm$core$List$isEmpty(existingStyles) ? styled.styles : _Utils_ap(styled.styles, existingStyles)) : _Utils_Tuple2(
+							A2(
+								$elm$core$List$cons,
+								A2(styled.html, $mdgriffith$elm_ui$Internal$Model$NoStyleSheet, context),
+								htmls),
+							$elm$core$List$isEmpty(existingStyles) ? styled.styles : _Utils_ap(styled.styles, existingStyles));
+					case 'Text':
+						var str = child.a;
+						return _Utils_Tuple2(
+							A2(
+								$elm$core$List$cons,
+								_Utils_eq(context, $mdgriffith$elm_ui$Internal$Model$asEl) ? $mdgriffith$elm_ui$Internal$Model$textElementFill(str) : $mdgriffith$elm_ui$Internal$Model$textElement(str),
+								htmls),
+							existingStyles);
+					default:
+						return _Utils_Tuple2(htmls, existingStyles);
+				}
+			});
+		if (children.$ === 'Keyed') {
+			var keyedChildren = children.a;
+			var _v1 = A3(
+				$elm$core$List$foldr,
+				gatherKeyed,
+				_Utils_Tuple2(_List_Nil, _List_Nil),
+				keyedChildren);
+			var keyed = _v1.a;
+			var styles = _v1.b;
+			var newStyles = $elm$core$List$isEmpty(styles) ? rendered.styles : _Utils_ap(rendered.styles, styles);
+			if (!newStyles.b) {
+				return $mdgriffith$elm_ui$Internal$Model$Unstyled(
+					A5(
+						$mdgriffith$elm_ui$Internal$Model$finalizeNode,
+						rendered.has,
+						rendered.node,
+						rendered.attributes,
+						$mdgriffith$elm_ui$Internal$Model$Keyed(
+							A3($mdgriffith$elm_ui$Internal$Model$addKeyedChildren, 'nearby-element-pls', keyed, rendered.children)),
+						$mdgriffith$elm_ui$Internal$Model$NoStyleSheet));
+			} else {
+				var allStyles = newStyles;
+				return $mdgriffith$elm_ui$Internal$Model$Styled(
+					{
+						html: A4(
+							$mdgriffith$elm_ui$Internal$Model$finalizeNode,
+							rendered.has,
+							rendered.node,
+							rendered.attributes,
+							$mdgriffith$elm_ui$Internal$Model$Keyed(
+								A3($mdgriffith$elm_ui$Internal$Model$addKeyedChildren, 'nearby-element-pls', keyed, rendered.children))),
+						styles: allStyles
+					});
+			}
+		} else {
+			var unkeyedChildren = children.a;
+			var _v3 = A3(
+				$elm$core$List$foldr,
+				gather,
+				_Utils_Tuple2(_List_Nil, _List_Nil),
+				unkeyedChildren);
+			var unkeyed = _v3.a;
+			var styles = _v3.b;
+			var newStyles = $elm$core$List$isEmpty(styles) ? rendered.styles : _Utils_ap(rendered.styles, styles);
+			if (!newStyles.b) {
+				return $mdgriffith$elm_ui$Internal$Model$Unstyled(
+					A5(
+						$mdgriffith$elm_ui$Internal$Model$finalizeNode,
+						rendered.has,
+						rendered.node,
+						rendered.attributes,
+						$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+							A2($mdgriffith$elm_ui$Internal$Model$addChildren, unkeyed, rendered.children)),
+						$mdgriffith$elm_ui$Internal$Model$NoStyleSheet));
+			} else {
+				var allStyles = newStyles;
+				return $mdgriffith$elm_ui$Internal$Model$Styled(
+					{
+						html: A4(
+							$mdgriffith$elm_ui$Internal$Model$finalizeNode,
+							rendered.has,
+							rendered.node,
+							rendered.attributes,
+							$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+								A2($mdgriffith$elm_ui$Internal$Model$addChildren, unkeyed, rendered.children))),
+						styles: allStyles
+					});
+			}
+		}
+	});
+var $mdgriffith$elm_ui$Internal$Model$Single = F3(
+	function (a, b, c) {
+		return {$: 'Single', a: a, b: b, c: c};
+	});
+var $mdgriffith$elm_ui$Internal$Model$Transform = function (a) {
+	return {$: 'Transform', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Flag$Field = F2(
+	function (a, b) {
+		return {$: 'Field', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Flag$add = F2(
+	function (myFlag, _v0) {
+		var one = _v0.a;
+		var two = _v0.b;
+		if (myFlag.$ === 'Flag') {
+			var first = myFlag.a;
+			return A2($mdgriffith$elm_ui$Internal$Flag$Field, first | one, two);
+		} else {
+			var second = myFlag.a;
+			return A2($mdgriffith$elm_ui$Internal$Flag$Field, one, second | two);
+		}
+	});
+var $mdgriffith$elm_ui$Internal$Model$ChildrenBehind = function (a) {
+	return {$: 'ChildrenBehind', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$ChildrenBehindAndInFront = F2(
+	function (a, b) {
+		return {$: 'ChildrenBehindAndInFront', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Model$ChildrenInFront = function (a) {
+	return {$: 'ChildrenInFront', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$nearbyElement = F2(
+	function (location, elem) {
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class(
+					function () {
+						switch (location.$) {
+							case 'Above':
+								return A2(
+									$elm$core$String$join,
+									' ',
+									_List_fromArray(
+										[$mdgriffith$elm_ui$Internal$Style$classes.nearby, $mdgriffith$elm_ui$Internal$Style$classes.single, $mdgriffith$elm_ui$Internal$Style$classes.above]));
+							case 'Below':
+								return A2(
+									$elm$core$String$join,
+									' ',
+									_List_fromArray(
+										[$mdgriffith$elm_ui$Internal$Style$classes.nearby, $mdgriffith$elm_ui$Internal$Style$classes.single, $mdgriffith$elm_ui$Internal$Style$classes.below]));
+							case 'OnRight':
+								return A2(
+									$elm$core$String$join,
+									' ',
+									_List_fromArray(
+										[$mdgriffith$elm_ui$Internal$Style$classes.nearby, $mdgriffith$elm_ui$Internal$Style$classes.single, $mdgriffith$elm_ui$Internal$Style$classes.onRight]));
+							case 'OnLeft':
+								return A2(
+									$elm$core$String$join,
+									' ',
+									_List_fromArray(
+										[$mdgriffith$elm_ui$Internal$Style$classes.nearby, $mdgriffith$elm_ui$Internal$Style$classes.single, $mdgriffith$elm_ui$Internal$Style$classes.onLeft]));
+							case 'InFront':
+								return A2(
+									$elm$core$String$join,
+									' ',
+									_List_fromArray(
+										[$mdgriffith$elm_ui$Internal$Style$classes.nearby, $mdgriffith$elm_ui$Internal$Style$classes.single, $mdgriffith$elm_ui$Internal$Style$classes.inFront]));
+							default:
+								return A2(
+									$elm$core$String$join,
+									' ',
+									_List_fromArray(
+										[$mdgriffith$elm_ui$Internal$Style$classes.nearby, $mdgriffith$elm_ui$Internal$Style$classes.single, $mdgriffith$elm_ui$Internal$Style$classes.behind]));
+						}
+					}())
+				]),
+			_List_fromArray(
+				[
+					function () {
+					switch (elem.$) {
+						case 'Empty':
+							return $elm$virtual_dom$VirtualDom$text('');
+						case 'Text':
+							var str = elem.a;
+							return $mdgriffith$elm_ui$Internal$Model$textElement(str);
+						case 'Unstyled':
+							var html = elem.a;
+							return html($mdgriffith$elm_ui$Internal$Model$asEl);
+						default:
+							var styled = elem.a;
+							return A2(styled.html, $mdgriffith$elm_ui$Internal$Model$NoStyleSheet, $mdgriffith$elm_ui$Internal$Model$asEl);
+					}
+				}()
+				]));
+	});
+var $mdgriffith$elm_ui$Internal$Model$addNearbyElement = F3(
+	function (location, elem, existing) {
+		var nearby = A2($mdgriffith$elm_ui$Internal$Model$nearbyElement, location, elem);
+		switch (existing.$) {
+			case 'NoNearbyChildren':
+				if (location.$ === 'Behind') {
+					return $mdgriffith$elm_ui$Internal$Model$ChildrenBehind(
+						_List_fromArray(
+							[nearby]));
+				} else {
+					return $mdgriffith$elm_ui$Internal$Model$ChildrenInFront(
+						_List_fromArray(
+							[nearby]));
+				}
+			case 'ChildrenBehind':
+				var existingBehind = existing.a;
+				if (location.$ === 'Behind') {
+					return $mdgriffith$elm_ui$Internal$Model$ChildrenBehind(
+						A2($elm$core$List$cons, nearby, existingBehind));
+				} else {
+					return A2(
+						$mdgriffith$elm_ui$Internal$Model$ChildrenBehindAndInFront,
+						existingBehind,
+						_List_fromArray(
+							[nearby]));
+				}
+			case 'ChildrenInFront':
+				var existingInFront = existing.a;
+				if (location.$ === 'Behind') {
+					return A2(
+						$mdgriffith$elm_ui$Internal$Model$ChildrenBehindAndInFront,
+						_List_fromArray(
+							[nearby]),
+						existingInFront);
+				} else {
+					return $mdgriffith$elm_ui$Internal$Model$ChildrenInFront(
+						A2($elm$core$List$cons, nearby, existingInFront));
+				}
+			default:
+				var existingBehind = existing.a;
+				var existingInFront = existing.b;
+				if (location.$ === 'Behind') {
+					return A2(
+						$mdgriffith$elm_ui$Internal$Model$ChildrenBehindAndInFront,
+						A2($elm$core$List$cons, nearby, existingBehind),
+						existingInFront);
+				} else {
+					return A2(
+						$mdgriffith$elm_ui$Internal$Model$ChildrenBehindAndInFront,
+						existingBehind,
+						A2($elm$core$List$cons, nearby, existingInFront));
+				}
+		}
+	});
+var $mdgriffith$elm_ui$Internal$Model$Embedded = F2(
+	function (a, b) {
+		return {$: 'Embedded', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Model$NodeName = function (a) {
+	return {$: 'NodeName', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$addNodeName = F2(
+	function (newNode, old) {
+		switch (old.$) {
+			case 'Generic':
+				return $mdgriffith$elm_ui$Internal$Model$NodeName(newNode);
+			case 'NodeName':
+				var name = old.a;
+				return A2($mdgriffith$elm_ui$Internal$Model$Embedded, name, newNode);
+			default:
+				var x = old.a;
+				var y = old.b;
+				return A2($mdgriffith$elm_ui$Internal$Model$Embedded, x, y);
+		}
+	});
+var $mdgriffith$elm_ui$Internal$Model$alignXName = function (align) {
+	switch (align.$) {
+		case 'Left':
+			return $mdgriffith$elm_ui$Internal$Style$classes.alignedHorizontally + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.alignLeft);
+		case 'Right':
+			return $mdgriffith$elm_ui$Internal$Style$classes.alignedHorizontally + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.alignRight);
+		default:
+			return $mdgriffith$elm_ui$Internal$Style$classes.alignedHorizontally + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.alignCenterX);
+	}
+};
+var $mdgriffith$elm_ui$Internal$Model$alignYName = function (align) {
+	switch (align.$) {
+		case 'Top':
+			return $mdgriffith$elm_ui$Internal$Style$classes.alignedVertically + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.alignTop);
+		case 'Bottom':
+			return $mdgriffith$elm_ui$Internal$Style$classes.alignedVertically + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.alignBottom);
+		default:
+			return $mdgriffith$elm_ui$Internal$Style$classes.alignedVertically + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.alignCenterY);
+	}
+};
+var $elm$virtual_dom$VirtualDom$attribute = F2(
+	function (key, value) {
+		return A2(
+			_VirtualDom_attribute,
+			_VirtualDom_noOnOrFormAction(key),
+			_VirtualDom_noJavaScriptOrHtmlUri(value));
+	});
+var $mdgriffith$elm_ui$Internal$Model$FullTransform = F4(
+	function (a, b, c, d) {
+		return {$: 'FullTransform', a: a, b: b, c: c, d: d};
+	});
+var $mdgriffith$elm_ui$Internal$Model$Moved = function (a) {
+	return {$: 'Moved', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$composeTransformation = F2(
+	function (transform, component) {
+		switch (transform.$) {
+			case 'Untransformed':
+				switch (component.$) {
+					case 'MoveX':
+						var x = component.a;
+						return $mdgriffith$elm_ui$Internal$Model$Moved(
+							_Utils_Tuple3(x, 0, 0));
+					case 'MoveY':
+						var y = component.a;
+						return $mdgriffith$elm_ui$Internal$Model$Moved(
+							_Utils_Tuple3(0, y, 0));
+					case 'MoveZ':
+						var z = component.a;
+						return $mdgriffith$elm_ui$Internal$Model$Moved(
+							_Utils_Tuple3(0, 0, z));
+					case 'MoveXYZ':
+						var xyz = component.a;
+						return $mdgriffith$elm_ui$Internal$Model$Moved(xyz);
+					case 'Rotate':
+						var xyz = component.a;
+						var angle = component.b;
+						return A4(
+							$mdgriffith$elm_ui$Internal$Model$FullTransform,
+							_Utils_Tuple3(0, 0, 0),
+							_Utils_Tuple3(1, 1, 1),
+							xyz,
+							angle);
+					default:
+						var xyz = component.a;
+						return A4(
+							$mdgriffith$elm_ui$Internal$Model$FullTransform,
+							_Utils_Tuple3(0, 0, 0),
+							xyz,
+							_Utils_Tuple3(0, 0, 1),
+							0);
+				}
+			case 'Moved':
+				var moved = transform.a;
+				var x = moved.a;
+				var y = moved.b;
+				var z = moved.c;
+				switch (component.$) {
+					case 'MoveX':
+						var newX = component.a;
+						return $mdgriffith$elm_ui$Internal$Model$Moved(
+							_Utils_Tuple3(newX, y, z));
+					case 'MoveY':
+						var newY = component.a;
+						return $mdgriffith$elm_ui$Internal$Model$Moved(
+							_Utils_Tuple3(x, newY, z));
+					case 'MoveZ':
+						var newZ = component.a;
+						return $mdgriffith$elm_ui$Internal$Model$Moved(
+							_Utils_Tuple3(x, y, newZ));
+					case 'MoveXYZ':
+						var xyz = component.a;
+						return $mdgriffith$elm_ui$Internal$Model$Moved(xyz);
+					case 'Rotate':
+						var xyz = component.a;
+						var angle = component.b;
+						return A4(
+							$mdgriffith$elm_ui$Internal$Model$FullTransform,
+							moved,
+							_Utils_Tuple3(1, 1, 1),
+							xyz,
+							angle);
+					default:
+						var scale = component.a;
+						return A4(
+							$mdgriffith$elm_ui$Internal$Model$FullTransform,
+							moved,
+							scale,
+							_Utils_Tuple3(0, 0, 1),
+							0);
+				}
+			default:
+				var moved = transform.a;
+				var x = moved.a;
+				var y = moved.b;
+				var z = moved.c;
+				var scaled = transform.b;
+				var origin = transform.c;
+				var angle = transform.d;
+				switch (component.$) {
+					case 'MoveX':
+						var newX = component.a;
+						return A4(
+							$mdgriffith$elm_ui$Internal$Model$FullTransform,
+							_Utils_Tuple3(newX, y, z),
+							scaled,
+							origin,
+							angle);
+					case 'MoveY':
+						var newY = component.a;
+						return A4(
+							$mdgriffith$elm_ui$Internal$Model$FullTransform,
+							_Utils_Tuple3(x, newY, z),
+							scaled,
+							origin,
+							angle);
+					case 'MoveZ':
+						var newZ = component.a;
+						return A4(
+							$mdgriffith$elm_ui$Internal$Model$FullTransform,
+							_Utils_Tuple3(x, y, newZ),
+							scaled,
+							origin,
+							angle);
+					case 'MoveXYZ':
+						var newMove = component.a;
+						return A4($mdgriffith$elm_ui$Internal$Model$FullTransform, newMove, scaled, origin, angle);
+					case 'Rotate':
+						var newOrigin = component.a;
+						var newAngle = component.b;
+						return A4($mdgriffith$elm_ui$Internal$Model$FullTransform, moved, scaled, newOrigin, newAngle);
+					default:
+						var newScale = component.a;
+						return A4($mdgriffith$elm_ui$Internal$Model$FullTransform, moved, newScale, origin, angle);
+				}
+		}
+	});
+var $mdgriffith$elm_ui$Internal$Flag$height = $mdgriffith$elm_ui$Internal$Flag$flag(7);
+var $mdgriffith$elm_ui$Internal$Flag$heightContent = $mdgriffith$elm_ui$Internal$Flag$flag(36);
+var $mdgriffith$elm_ui$Internal$Flag$merge = F2(
+	function (_v0, _v1) {
+		var one = _v0.a;
+		var two = _v0.b;
+		var three = _v1.a;
+		var four = _v1.b;
+		return A2($mdgriffith$elm_ui$Internal$Flag$Field, one | three, two | four);
+	});
+var $mdgriffith$elm_ui$Internal$Flag$none = A2($mdgriffith$elm_ui$Internal$Flag$Field, 0, 0);
+var $mdgriffith$elm_ui$Internal$Model$renderHeight = function (h) {
+	switch (h.$) {
+		case 'Px':
+			var px = h.a;
+			var val = $elm$core$String$fromInt(px);
+			var name = 'height-px-' + val;
+			return _Utils_Tuple3(
+				$mdgriffith$elm_ui$Internal$Flag$none,
+				$mdgriffith$elm_ui$Internal$Style$classes.heightExact + (' ' + name),
+				_List_fromArray(
+					[
+						A3($mdgriffith$elm_ui$Internal$Model$Single, name, 'height', val + 'px')
+					]));
+		case 'Content':
+			return _Utils_Tuple3(
+				A2($mdgriffith$elm_ui$Internal$Flag$add, $mdgriffith$elm_ui$Internal$Flag$heightContent, $mdgriffith$elm_ui$Internal$Flag$none),
+				$mdgriffith$elm_ui$Internal$Style$classes.heightContent,
+				_List_Nil);
+		case 'Fill':
+			var portion = h.a;
+			return (portion === 1) ? _Utils_Tuple3(
+				A2($mdgriffith$elm_ui$Internal$Flag$add, $mdgriffith$elm_ui$Internal$Flag$heightFill, $mdgriffith$elm_ui$Internal$Flag$none),
+				$mdgriffith$elm_ui$Internal$Style$classes.heightFill,
+				_List_Nil) : _Utils_Tuple3(
+				A2($mdgriffith$elm_ui$Internal$Flag$add, $mdgriffith$elm_ui$Internal$Flag$heightFill, $mdgriffith$elm_ui$Internal$Flag$none),
+				$mdgriffith$elm_ui$Internal$Style$classes.heightFillPortion + (' height-fill-' + $elm$core$String$fromInt(portion)),
+				_List_fromArray(
+					[
+						A3(
+						$mdgriffith$elm_ui$Internal$Model$Single,
+						$mdgriffith$elm_ui$Internal$Style$classes.any + ('.' + ($mdgriffith$elm_ui$Internal$Style$classes.column + (' > ' + $mdgriffith$elm_ui$Internal$Style$dot(
+							'height-fill-' + $elm$core$String$fromInt(portion))))),
+						'flex-grow',
+						$elm$core$String$fromInt(portion * 100000))
+					]));
+		case 'Min':
+			var minSize = h.a;
+			var len = h.b;
+			var cls = 'min-height-' + $elm$core$String$fromInt(minSize);
+			var style = A3(
+				$mdgriffith$elm_ui$Internal$Model$Single,
+				cls,
+				'min-height',
+				$elm$core$String$fromInt(minSize) + 'px !important');
+			var _v1 = $mdgriffith$elm_ui$Internal$Model$renderHeight(len);
+			var newFlag = _v1.a;
+			var newAttrs = _v1.b;
+			var newStyle = _v1.c;
+			return _Utils_Tuple3(
+				A2($mdgriffith$elm_ui$Internal$Flag$add, $mdgriffith$elm_ui$Internal$Flag$heightBetween, newFlag),
+				cls + (' ' + newAttrs),
+				A2($elm$core$List$cons, style, newStyle));
+		default:
+			var maxSize = h.a;
+			var len = h.b;
+			var cls = 'max-height-' + $elm$core$String$fromInt(maxSize);
+			var style = A3(
+				$mdgriffith$elm_ui$Internal$Model$Single,
+				cls,
+				'max-height',
+				$elm$core$String$fromInt(maxSize) + 'px');
+			var _v2 = $mdgriffith$elm_ui$Internal$Model$renderHeight(len);
+			var newFlag = _v2.a;
+			var newAttrs = _v2.b;
+			var newStyle = _v2.c;
+			return _Utils_Tuple3(
+				A2($mdgriffith$elm_ui$Internal$Flag$add, $mdgriffith$elm_ui$Internal$Flag$heightBetween, newFlag),
+				cls + (' ' + newAttrs),
+				A2($elm$core$List$cons, style, newStyle));
+	}
+};
+var $mdgriffith$elm_ui$Internal$Flag$widthContent = $mdgriffith$elm_ui$Internal$Flag$flag(38);
+var $mdgriffith$elm_ui$Internal$Model$renderWidth = function (w) {
+	switch (w.$) {
+		case 'Px':
+			var px = w.a;
+			return _Utils_Tuple3(
+				$mdgriffith$elm_ui$Internal$Flag$none,
+				$mdgriffith$elm_ui$Internal$Style$classes.widthExact + (' width-px-' + $elm$core$String$fromInt(px)),
+				_List_fromArray(
+					[
+						A3(
+						$mdgriffith$elm_ui$Internal$Model$Single,
+						'width-px-' + $elm$core$String$fromInt(px),
+						'width',
+						$elm$core$String$fromInt(px) + 'px')
+					]));
+		case 'Content':
+			return _Utils_Tuple3(
+				A2($mdgriffith$elm_ui$Internal$Flag$add, $mdgriffith$elm_ui$Internal$Flag$widthContent, $mdgriffith$elm_ui$Internal$Flag$none),
+				$mdgriffith$elm_ui$Internal$Style$classes.widthContent,
+				_List_Nil);
+		case 'Fill':
+			var portion = w.a;
+			return (portion === 1) ? _Utils_Tuple3(
+				A2($mdgriffith$elm_ui$Internal$Flag$add, $mdgriffith$elm_ui$Internal$Flag$widthFill, $mdgriffith$elm_ui$Internal$Flag$none),
+				$mdgriffith$elm_ui$Internal$Style$classes.widthFill,
+				_List_Nil) : _Utils_Tuple3(
+				A2($mdgriffith$elm_ui$Internal$Flag$add, $mdgriffith$elm_ui$Internal$Flag$widthFill, $mdgriffith$elm_ui$Internal$Flag$none),
+				$mdgriffith$elm_ui$Internal$Style$classes.widthFillPortion + (' width-fill-' + $elm$core$String$fromInt(portion)),
+				_List_fromArray(
+					[
+						A3(
+						$mdgriffith$elm_ui$Internal$Model$Single,
+						$mdgriffith$elm_ui$Internal$Style$classes.any + ('.' + ($mdgriffith$elm_ui$Internal$Style$classes.row + (' > ' + $mdgriffith$elm_ui$Internal$Style$dot(
+							'width-fill-' + $elm$core$String$fromInt(portion))))),
+						'flex-grow',
+						$elm$core$String$fromInt(portion * 100000))
+					]));
+		case 'Min':
+			var minSize = w.a;
+			var len = w.b;
+			var cls = 'min-width-' + $elm$core$String$fromInt(minSize);
+			var style = A3(
+				$mdgriffith$elm_ui$Internal$Model$Single,
+				cls,
+				'min-width',
+				$elm$core$String$fromInt(minSize) + 'px');
+			var _v1 = $mdgriffith$elm_ui$Internal$Model$renderWidth(len);
+			var newFlag = _v1.a;
+			var newAttrs = _v1.b;
+			var newStyle = _v1.c;
+			return _Utils_Tuple3(
+				A2($mdgriffith$elm_ui$Internal$Flag$add, $mdgriffith$elm_ui$Internal$Flag$widthBetween, newFlag),
+				cls + (' ' + newAttrs),
+				A2($elm$core$List$cons, style, newStyle));
+		default:
+			var maxSize = w.a;
+			var len = w.b;
+			var cls = 'max-width-' + $elm$core$String$fromInt(maxSize);
+			var style = A3(
+				$mdgriffith$elm_ui$Internal$Model$Single,
+				cls,
+				'max-width',
+				$elm$core$String$fromInt(maxSize) + 'px');
+			var _v2 = $mdgriffith$elm_ui$Internal$Model$renderWidth(len);
+			var newFlag = _v2.a;
+			var newAttrs = _v2.b;
+			var newStyle = _v2.c;
+			return _Utils_Tuple3(
+				A2($mdgriffith$elm_ui$Internal$Flag$add, $mdgriffith$elm_ui$Internal$Flag$widthBetween, newFlag),
+				cls + (' ' + newAttrs),
+				A2($elm$core$List$cons, style, newStyle));
+	}
+};
+var $mdgriffith$elm_ui$Internal$Flag$borderWidth = $mdgriffith$elm_ui$Internal$Flag$flag(27);
+var $mdgriffith$elm_ui$Internal$Model$skippable = F2(
+	function (flag, style) {
+		if (_Utils_eq(flag, $mdgriffith$elm_ui$Internal$Flag$borderWidth)) {
+			if (style.$ === 'Single') {
+				var val = style.c;
+				switch (val) {
+					case '0px':
+						return true;
+					case '1px':
+						return true;
+					case '2px':
+						return true;
+					case '3px':
+						return true;
+					case '4px':
+						return true;
+					case '5px':
+						return true;
+					case '6px':
+						return true;
+					default:
+						return false;
+				}
+			} else {
+				return false;
+			}
+		} else {
+			switch (style.$) {
+				case 'FontSize':
+					var i = style.a;
+					return (i >= 8) && (i <= 32);
+				case 'PaddingStyle':
+					var name = style.a;
+					var t = style.b;
+					var r = style.c;
+					var b = style.d;
+					var l = style.e;
+					return _Utils_eq(t, b) && (_Utils_eq(t, r) && (_Utils_eq(t, l) && ((t >= 0) && (t <= 24))));
+				default:
+					return false;
+			}
+		}
+	});
+var $mdgriffith$elm_ui$Internal$Flag$width = $mdgriffith$elm_ui$Internal$Flag$flag(6);
+var $mdgriffith$elm_ui$Internal$Flag$xAlign = $mdgriffith$elm_ui$Internal$Flag$flag(30);
+var $mdgriffith$elm_ui$Internal$Flag$yAlign = $mdgriffith$elm_ui$Internal$Flag$flag(29);
+var $mdgriffith$elm_ui$Internal$Model$gatherAttrRecursive = F8(
+	function (classes, node, has, transform, styles, attrs, children, elementAttrs) {
+		gatherAttrRecursive:
+		while (true) {
+			if (!elementAttrs.b) {
+				var _v1 = $mdgriffith$elm_ui$Internal$Model$transformClass(transform);
+				if (_v1.$ === 'Nothing') {
+					return {
+						attributes: A2(
+							$elm$core$List$cons,
+							$elm$html$Html$Attributes$class(classes),
+							attrs),
+						children: children,
+						has: has,
+						node: node,
+						styles: styles
+					};
+				} else {
+					var _class = _v1.a;
+					return {
+						attributes: A2(
+							$elm$core$List$cons,
+							$elm$html$Html$Attributes$class(classes + (' ' + _class)),
+							attrs),
+						children: children,
+						has: has,
+						node: node,
+						styles: A2(
+							$elm$core$List$cons,
+							$mdgriffith$elm_ui$Internal$Model$Transform(transform),
+							styles)
+					};
+				}
+			} else {
+				var attribute = elementAttrs.a;
+				var remaining = elementAttrs.b;
+				switch (attribute.$) {
+					case 'NoAttribute':
+						var $temp$classes = classes,
+							$temp$node = node,
+							$temp$has = has,
+							$temp$transform = transform,
+							$temp$styles = styles,
+							$temp$attrs = attrs,
+							$temp$children = children,
+							$temp$elementAttrs = remaining;
+						classes = $temp$classes;
+						node = $temp$node;
+						has = $temp$has;
+						transform = $temp$transform;
+						styles = $temp$styles;
+						attrs = $temp$attrs;
+						children = $temp$children;
+						elementAttrs = $temp$elementAttrs;
+						continue gatherAttrRecursive;
+					case 'Class':
+						var flag = attribute.a;
+						var exactClassName = attribute.b;
+						if (A2($mdgriffith$elm_ui$Internal$Flag$present, flag, has)) {
+							var $temp$classes = classes,
+								$temp$node = node,
+								$temp$has = has,
+								$temp$transform = transform,
+								$temp$styles = styles,
+								$temp$attrs = attrs,
+								$temp$children = children,
+								$temp$elementAttrs = remaining;
+							classes = $temp$classes;
+							node = $temp$node;
+							has = $temp$has;
+							transform = $temp$transform;
+							styles = $temp$styles;
+							attrs = $temp$attrs;
+							children = $temp$children;
+							elementAttrs = $temp$elementAttrs;
+							continue gatherAttrRecursive;
+						} else {
+							var $temp$classes = exactClassName + (' ' + classes),
+								$temp$node = node,
+								$temp$has = A2($mdgriffith$elm_ui$Internal$Flag$add, flag, has),
+								$temp$transform = transform,
+								$temp$styles = styles,
+								$temp$attrs = attrs,
+								$temp$children = children,
+								$temp$elementAttrs = remaining;
+							classes = $temp$classes;
+							node = $temp$node;
+							has = $temp$has;
+							transform = $temp$transform;
+							styles = $temp$styles;
+							attrs = $temp$attrs;
+							children = $temp$children;
+							elementAttrs = $temp$elementAttrs;
+							continue gatherAttrRecursive;
+						}
+					case 'Attr':
+						var actualAttribute = attribute.a;
+						var $temp$classes = classes,
+							$temp$node = node,
+							$temp$has = has,
+							$temp$transform = transform,
+							$temp$styles = styles,
+							$temp$attrs = A2($elm$core$List$cons, actualAttribute, attrs),
+							$temp$children = children,
+							$temp$elementAttrs = remaining;
+						classes = $temp$classes;
+						node = $temp$node;
+						has = $temp$has;
+						transform = $temp$transform;
+						styles = $temp$styles;
+						attrs = $temp$attrs;
+						children = $temp$children;
+						elementAttrs = $temp$elementAttrs;
+						continue gatherAttrRecursive;
+					case 'StyleClass':
+						var flag = attribute.a;
+						var style = attribute.b;
+						if (A2($mdgriffith$elm_ui$Internal$Flag$present, flag, has)) {
+							var $temp$classes = classes,
+								$temp$node = node,
+								$temp$has = has,
+								$temp$transform = transform,
+								$temp$styles = styles,
+								$temp$attrs = attrs,
+								$temp$children = children,
+								$temp$elementAttrs = remaining;
+							classes = $temp$classes;
+							node = $temp$node;
+							has = $temp$has;
+							transform = $temp$transform;
+							styles = $temp$styles;
+							attrs = $temp$attrs;
+							children = $temp$children;
+							elementAttrs = $temp$elementAttrs;
+							continue gatherAttrRecursive;
+						} else {
+							if (A2($mdgriffith$elm_ui$Internal$Model$skippable, flag, style)) {
+								var $temp$classes = $mdgriffith$elm_ui$Internal$Model$getStyleName(style) + (' ' + classes),
+									$temp$node = node,
+									$temp$has = A2($mdgriffith$elm_ui$Internal$Flag$add, flag, has),
+									$temp$transform = transform,
+									$temp$styles = styles,
+									$temp$attrs = attrs,
+									$temp$children = children,
+									$temp$elementAttrs = remaining;
+								classes = $temp$classes;
+								node = $temp$node;
+								has = $temp$has;
+								transform = $temp$transform;
+								styles = $temp$styles;
+								attrs = $temp$attrs;
+								children = $temp$children;
+								elementAttrs = $temp$elementAttrs;
+								continue gatherAttrRecursive;
+							} else {
+								var $temp$classes = $mdgriffith$elm_ui$Internal$Model$getStyleName(style) + (' ' + classes),
+									$temp$node = node,
+									$temp$has = A2($mdgriffith$elm_ui$Internal$Flag$add, flag, has),
+									$temp$transform = transform,
+									$temp$styles = A2($elm$core$List$cons, style, styles),
+									$temp$attrs = attrs,
+									$temp$children = children,
+									$temp$elementAttrs = remaining;
+								classes = $temp$classes;
+								node = $temp$node;
+								has = $temp$has;
+								transform = $temp$transform;
+								styles = $temp$styles;
+								attrs = $temp$attrs;
+								children = $temp$children;
+								elementAttrs = $temp$elementAttrs;
+								continue gatherAttrRecursive;
+							}
+						}
+					case 'TransformComponent':
+						var flag = attribute.a;
+						var component = attribute.b;
+						var $temp$classes = classes,
+							$temp$node = node,
+							$temp$has = A2($mdgriffith$elm_ui$Internal$Flag$add, flag, has),
+							$temp$transform = A2($mdgriffith$elm_ui$Internal$Model$composeTransformation, transform, component),
+							$temp$styles = styles,
+							$temp$attrs = attrs,
+							$temp$children = children,
+							$temp$elementAttrs = remaining;
+						classes = $temp$classes;
+						node = $temp$node;
+						has = $temp$has;
+						transform = $temp$transform;
+						styles = $temp$styles;
+						attrs = $temp$attrs;
+						children = $temp$children;
+						elementAttrs = $temp$elementAttrs;
+						continue gatherAttrRecursive;
+					case 'Width':
+						var width = attribute.a;
+						if (A2($mdgriffith$elm_ui$Internal$Flag$present, $mdgriffith$elm_ui$Internal$Flag$width, has)) {
+							var $temp$classes = classes,
+								$temp$node = node,
+								$temp$has = has,
+								$temp$transform = transform,
+								$temp$styles = styles,
+								$temp$attrs = attrs,
+								$temp$children = children,
+								$temp$elementAttrs = remaining;
+							classes = $temp$classes;
+							node = $temp$node;
+							has = $temp$has;
+							transform = $temp$transform;
+							styles = $temp$styles;
+							attrs = $temp$attrs;
+							children = $temp$children;
+							elementAttrs = $temp$elementAttrs;
+							continue gatherAttrRecursive;
+						} else {
+							switch (width.$) {
+								case 'Px':
+									var px = width.a;
+									var $temp$classes = ($mdgriffith$elm_ui$Internal$Style$classes.widthExact + (' width-px-' + $elm$core$String$fromInt(px))) + (' ' + classes),
+										$temp$node = node,
+										$temp$has = A2($mdgriffith$elm_ui$Internal$Flag$add, $mdgriffith$elm_ui$Internal$Flag$width, has),
+										$temp$transform = transform,
+										$temp$styles = A2(
+										$elm$core$List$cons,
+										A3(
+											$mdgriffith$elm_ui$Internal$Model$Single,
+											'width-px-' + $elm$core$String$fromInt(px),
+											'width',
+											$elm$core$String$fromInt(px) + 'px'),
+										styles),
+										$temp$attrs = attrs,
+										$temp$children = children,
+										$temp$elementAttrs = remaining;
+									classes = $temp$classes;
+									node = $temp$node;
+									has = $temp$has;
+									transform = $temp$transform;
+									styles = $temp$styles;
+									attrs = $temp$attrs;
+									children = $temp$children;
+									elementAttrs = $temp$elementAttrs;
+									continue gatherAttrRecursive;
+								case 'Content':
+									var $temp$classes = classes + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.widthContent),
+										$temp$node = node,
+										$temp$has = A2(
+										$mdgriffith$elm_ui$Internal$Flag$add,
+										$mdgriffith$elm_ui$Internal$Flag$widthContent,
+										A2($mdgriffith$elm_ui$Internal$Flag$add, $mdgriffith$elm_ui$Internal$Flag$width, has)),
+										$temp$transform = transform,
+										$temp$styles = styles,
+										$temp$attrs = attrs,
+										$temp$children = children,
+										$temp$elementAttrs = remaining;
+									classes = $temp$classes;
+									node = $temp$node;
+									has = $temp$has;
+									transform = $temp$transform;
+									styles = $temp$styles;
+									attrs = $temp$attrs;
+									children = $temp$children;
+									elementAttrs = $temp$elementAttrs;
+									continue gatherAttrRecursive;
+								case 'Fill':
+									var portion = width.a;
+									if (portion === 1) {
+										var $temp$classes = classes + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.widthFill),
+											$temp$node = node,
+											$temp$has = A2(
+											$mdgriffith$elm_ui$Internal$Flag$add,
+											$mdgriffith$elm_ui$Internal$Flag$widthFill,
+											A2($mdgriffith$elm_ui$Internal$Flag$add, $mdgriffith$elm_ui$Internal$Flag$width, has)),
+											$temp$transform = transform,
+											$temp$styles = styles,
+											$temp$attrs = attrs,
+											$temp$children = children,
+											$temp$elementAttrs = remaining;
+										classes = $temp$classes;
+										node = $temp$node;
+										has = $temp$has;
+										transform = $temp$transform;
+										styles = $temp$styles;
+										attrs = $temp$attrs;
+										children = $temp$children;
+										elementAttrs = $temp$elementAttrs;
+										continue gatherAttrRecursive;
+									} else {
+										var $temp$classes = classes + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.widthFillPortion + (' width-fill-' + $elm$core$String$fromInt(portion)))),
+											$temp$node = node,
+											$temp$has = A2(
+											$mdgriffith$elm_ui$Internal$Flag$add,
+											$mdgriffith$elm_ui$Internal$Flag$widthFill,
+											A2($mdgriffith$elm_ui$Internal$Flag$add, $mdgriffith$elm_ui$Internal$Flag$width, has)),
+											$temp$transform = transform,
+											$temp$styles = A2(
+											$elm$core$List$cons,
+											A3(
+												$mdgriffith$elm_ui$Internal$Model$Single,
+												$mdgriffith$elm_ui$Internal$Style$classes.any + ('.' + ($mdgriffith$elm_ui$Internal$Style$classes.row + (' > ' + $mdgriffith$elm_ui$Internal$Style$dot(
+													'width-fill-' + $elm$core$String$fromInt(portion))))),
+												'flex-grow',
+												$elm$core$String$fromInt(portion * 100000)),
+											styles),
+											$temp$attrs = attrs,
+											$temp$children = children,
+											$temp$elementAttrs = remaining;
+										classes = $temp$classes;
+										node = $temp$node;
+										has = $temp$has;
+										transform = $temp$transform;
+										styles = $temp$styles;
+										attrs = $temp$attrs;
+										children = $temp$children;
+										elementAttrs = $temp$elementAttrs;
+										continue gatherAttrRecursive;
+									}
+								default:
+									var _v4 = $mdgriffith$elm_ui$Internal$Model$renderWidth(width);
+									var addToFlags = _v4.a;
+									var newClass = _v4.b;
+									var newStyles = _v4.c;
+									var $temp$classes = classes + (' ' + newClass),
+										$temp$node = node,
+										$temp$has = A2(
+										$mdgriffith$elm_ui$Internal$Flag$merge,
+										addToFlags,
+										A2($mdgriffith$elm_ui$Internal$Flag$add, $mdgriffith$elm_ui$Internal$Flag$width, has)),
+										$temp$transform = transform,
+										$temp$styles = _Utils_ap(newStyles, styles),
+										$temp$attrs = attrs,
+										$temp$children = children,
+										$temp$elementAttrs = remaining;
+									classes = $temp$classes;
+									node = $temp$node;
+									has = $temp$has;
+									transform = $temp$transform;
+									styles = $temp$styles;
+									attrs = $temp$attrs;
+									children = $temp$children;
+									elementAttrs = $temp$elementAttrs;
+									continue gatherAttrRecursive;
+							}
+						}
+					case 'Height':
+						var height = attribute.a;
+						if (A2($mdgriffith$elm_ui$Internal$Flag$present, $mdgriffith$elm_ui$Internal$Flag$height, has)) {
+							var $temp$classes = classes,
+								$temp$node = node,
+								$temp$has = has,
+								$temp$transform = transform,
+								$temp$styles = styles,
+								$temp$attrs = attrs,
+								$temp$children = children,
+								$temp$elementAttrs = remaining;
+							classes = $temp$classes;
+							node = $temp$node;
+							has = $temp$has;
+							transform = $temp$transform;
+							styles = $temp$styles;
+							attrs = $temp$attrs;
+							children = $temp$children;
+							elementAttrs = $temp$elementAttrs;
+							continue gatherAttrRecursive;
+						} else {
+							switch (height.$) {
+								case 'Px':
+									var px = height.a;
+									var val = $elm$core$String$fromInt(px) + 'px';
+									var name = 'height-px-' + val;
+									var $temp$classes = $mdgriffith$elm_ui$Internal$Style$classes.heightExact + (' ' + (name + (' ' + classes))),
+										$temp$node = node,
+										$temp$has = A2($mdgriffith$elm_ui$Internal$Flag$add, $mdgriffith$elm_ui$Internal$Flag$height, has),
+										$temp$transform = transform,
+										$temp$styles = A2(
+										$elm$core$List$cons,
+										A3($mdgriffith$elm_ui$Internal$Model$Single, name, 'height ', val),
+										styles),
+										$temp$attrs = attrs,
+										$temp$children = children,
+										$temp$elementAttrs = remaining;
+									classes = $temp$classes;
+									node = $temp$node;
+									has = $temp$has;
+									transform = $temp$transform;
+									styles = $temp$styles;
+									attrs = $temp$attrs;
+									children = $temp$children;
+									elementAttrs = $temp$elementAttrs;
+									continue gatherAttrRecursive;
+								case 'Content':
+									var $temp$classes = $mdgriffith$elm_ui$Internal$Style$classes.heightContent + (' ' + classes),
+										$temp$node = node,
+										$temp$has = A2(
+										$mdgriffith$elm_ui$Internal$Flag$add,
+										$mdgriffith$elm_ui$Internal$Flag$heightContent,
+										A2($mdgriffith$elm_ui$Internal$Flag$add, $mdgriffith$elm_ui$Internal$Flag$height, has)),
+										$temp$transform = transform,
+										$temp$styles = styles,
+										$temp$attrs = attrs,
+										$temp$children = children,
+										$temp$elementAttrs = remaining;
+									classes = $temp$classes;
+									node = $temp$node;
+									has = $temp$has;
+									transform = $temp$transform;
+									styles = $temp$styles;
+									attrs = $temp$attrs;
+									children = $temp$children;
+									elementAttrs = $temp$elementAttrs;
+									continue gatherAttrRecursive;
+								case 'Fill':
+									var portion = height.a;
+									if (portion === 1) {
+										var $temp$classes = $mdgriffith$elm_ui$Internal$Style$classes.heightFill + (' ' + classes),
+											$temp$node = node,
+											$temp$has = A2(
+											$mdgriffith$elm_ui$Internal$Flag$add,
+											$mdgriffith$elm_ui$Internal$Flag$heightFill,
+											A2($mdgriffith$elm_ui$Internal$Flag$add, $mdgriffith$elm_ui$Internal$Flag$height, has)),
+											$temp$transform = transform,
+											$temp$styles = styles,
+											$temp$attrs = attrs,
+											$temp$children = children,
+											$temp$elementAttrs = remaining;
+										classes = $temp$classes;
+										node = $temp$node;
+										has = $temp$has;
+										transform = $temp$transform;
+										styles = $temp$styles;
+										attrs = $temp$attrs;
+										children = $temp$children;
+										elementAttrs = $temp$elementAttrs;
+										continue gatherAttrRecursive;
+									} else {
+										var $temp$classes = classes + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.heightFillPortion + (' height-fill-' + $elm$core$String$fromInt(portion)))),
+											$temp$node = node,
+											$temp$has = A2(
+											$mdgriffith$elm_ui$Internal$Flag$add,
+											$mdgriffith$elm_ui$Internal$Flag$heightFill,
+											A2($mdgriffith$elm_ui$Internal$Flag$add, $mdgriffith$elm_ui$Internal$Flag$height, has)),
+											$temp$transform = transform,
+											$temp$styles = A2(
+											$elm$core$List$cons,
+											A3(
+												$mdgriffith$elm_ui$Internal$Model$Single,
+												$mdgriffith$elm_ui$Internal$Style$classes.any + ('.' + ($mdgriffith$elm_ui$Internal$Style$classes.column + (' > ' + $mdgriffith$elm_ui$Internal$Style$dot(
+													'height-fill-' + $elm$core$String$fromInt(portion))))),
+												'flex-grow',
+												$elm$core$String$fromInt(portion * 100000)),
+											styles),
+											$temp$attrs = attrs,
+											$temp$children = children,
+											$temp$elementAttrs = remaining;
+										classes = $temp$classes;
+										node = $temp$node;
+										has = $temp$has;
+										transform = $temp$transform;
+										styles = $temp$styles;
+										attrs = $temp$attrs;
+										children = $temp$children;
+										elementAttrs = $temp$elementAttrs;
+										continue gatherAttrRecursive;
+									}
+								default:
+									var _v6 = $mdgriffith$elm_ui$Internal$Model$renderHeight(height);
+									var addToFlags = _v6.a;
+									var newClass = _v6.b;
+									var newStyles = _v6.c;
+									var $temp$classes = classes + (' ' + newClass),
+										$temp$node = node,
+										$temp$has = A2(
+										$mdgriffith$elm_ui$Internal$Flag$merge,
+										addToFlags,
+										A2($mdgriffith$elm_ui$Internal$Flag$add, $mdgriffith$elm_ui$Internal$Flag$height, has)),
+										$temp$transform = transform,
+										$temp$styles = _Utils_ap(newStyles, styles),
+										$temp$attrs = attrs,
+										$temp$children = children,
+										$temp$elementAttrs = remaining;
+									classes = $temp$classes;
+									node = $temp$node;
+									has = $temp$has;
+									transform = $temp$transform;
+									styles = $temp$styles;
+									attrs = $temp$attrs;
+									children = $temp$children;
+									elementAttrs = $temp$elementAttrs;
+									continue gatherAttrRecursive;
+							}
+						}
+					case 'Describe':
+						var description = attribute.a;
+						switch (description.$) {
+							case 'Main':
+								var $temp$classes = classes,
+									$temp$node = A2($mdgriffith$elm_ui$Internal$Model$addNodeName, 'main', node),
+									$temp$has = has,
+									$temp$transform = transform,
+									$temp$styles = styles,
+									$temp$attrs = attrs,
+									$temp$children = children,
+									$temp$elementAttrs = remaining;
+								classes = $temp$classes;
+								node = $temp$node;
+								has = $temp$has;
+								transform = $temp$transform;
+								styles = $temp$styles;
+								attrs = $temp$attrs;
+								children = $temp$children;
+								elementAttrs = $temp$elementAttrs;
+								continue gatherAttrRecursive;
+							case 'Navigation':
+								var $temp$classes = classes,
+									$temp$node = A2($mdgriffith$elm_ui$Internal$Model$addNodeName, 'nav', node),
+									$temp$has = has,
+									$temp$transform = transform,
+									$temp$styles = styles,
+									$temp$attrs = attrs,
+									$temp$children = children,
+									$temp$elementAttrs = remaining;
+								classes = $temp$classes;
+								node = $temp$node;
+								has = $temp$has;
+								transform = $temp$transform;
+								styles = $temp$styles;
+								attrs = $temp$attrs;
+								children = $temp$children;
+								elementAttrs = $temp$elementAttrs;
+								continue gatherAttrRecursive;
+							case 'ContentInfo':
+								var $temp$classes = classes,
+									$temp$node = A2($mdgriffith$elm_ui$Internal$Model$addNodeName, 'footer', node),
+									$temp$has = has,
+									$temp$transform = transform,
+									$temp$styles = styles,
+									$temp$attrs = attrs,
+									$temp$children = children,
+									$temp$elementAttrs = remaining;
+								classes = $temp$classes;
+								node = $temp$node;
+								has = $temp$has;
+								transform = $temp$transform;
+								styles = $temp$styles;
+								attrs = $temp$attrs;
+								children = $temp$children;
+								elementAttrs = $temp$elementAttrs;
+								continue gatherAttrRecursive;
+							case 'Complementary':
+								var $temp$classes = classes,
+									$temp$node = A2($mdgriffith$elm_ui$Internal$Model$addNodeName, 'aside', node),
+									$temp$has = has,
+									$temp$transform = transform,
+									$temp$styles = styles,
+									$temp$attrs = attrs,
+									$temp$children = children,
+									$temp$elementAttrs = remaining;
+								classes = $temp$classes;
+								node = $temp$node;
+								has = $temp$has;
+								transform = $temp$transform;
+								styles = $temp$styles;
+								attrs = $temp$attrs;
+								children = $temp$children;
+								elementAttrs = $temp$elementAttrs;
+								continue gatherAttrRecursive;
+							case 'Heading':
+								var i = description.a;
+								if (i <= 1) {
+									var $temp$classes = classes,
+										$temp$node = A2($mdgriffith$elm_ui$Internal$Model$addNodeName, 'h1', node),
+										$temp$has = has,
+										$temp$transform = transform,
+										$temp$styles = styles,
+										$temp$attrs = attrs,
+										$temp$children = children,
+										$temp$elementAttrs = remaining;
+									classes = $temp$classes;
+									node = $temp$node;
+									has = $temp$has;
+									transform = $temp$transform;
+									styles = $temp$styles;
+									attrs = $temp$attrs;
+									children = $temp$children;
+									elementAttrs = $temp$elementAttrs;
+									continue gatherAttrRecursive;
+								} else {
+									if (i < 7) {
+										var $temp$classes = classes,
+											$temp$node = A2(
+											$mdgriffith$elm_ui$Internal$Model$addNodeName,
+											'h' + $elm$core$String$fromInt(i),
+											node),
+											$temp$has = has,
+											$temp$transform = transform,
+											$temp$styles = styles,
+											$temp$attrs = attrs,
+											$temp$children = children,
+											$temp$elementAttrs = remaining;
+										classes = $temp$classes;
+										node = $temp$node;
+										has = $temp$has;
+										transform = $temp$transform;
+										styles = $temp$styles;
+										attrs = $temp$attrs;
+										children = $temp$children;
+										elementAttrs = $temp$elementAttrs;
+										continue gatherAttrRecursive;
+									} else {
+										var $temp$classes = classes,
+											$temp$node = A2($mdgriffith$elm_ui$Internal$Model$addNodeName, 'h6', node),
+											$temp$has = has,
+											$temp$transform = transform,
+											$temp$styles = styles,
+											$temp$attrs = attrs,
+											$temp$children = children,
+											$temp$elementAttrs = remaining;
+										classes = $temp$classes;
+										node = $temp$node;
+										has = $temp$has;
+										transform = $temp$transform;
+										styles = $temp$styles;
+										attrs = $temp$attrs;
+										children = $temp$children;
+										elementAttrs = $temp$elementAttrs;
+										continue gatherAttrRecursive;
+									}
+								}
+							case 'Paragraph':
+								var $temp$classes = classes,
+									$temp$node = node,
+									$temp$has = has,
+									$temp$transform = transform,
+									$temp$styles = styles,
+									$temp$attrs = attrs,
+									$temp$children = children,
+									$temp$elementAttrs = remaining;
+								classes = $temp$classes;
+								node = $temp$node;
+								has = $temp$has;
+								transform = $temp$transform;
+								styles = $temp$styles;
+								attrs = $temp$attrs;
+								children = $temp$children;
+								elementAttrs = $temp$elementAttrs;
+								continue gatherAttrRecursive;
+							case 'Button':
+								var $temp$classes = classes,
+									$temp$node = node,
+									$temp$has = has,
+									$temp$transform = transform,
+									$temp$styles = styles,
+									$temp$attrs = A2(
+									$elm$core$List$cons,
+									A2($elm$virtual_dom$VirtualDom$attribute, 'role', 'button'),
+									attrs),
+									$temp$children = children,
+									$temp$elementAttrs = remaining;
+								classes = $temp$classes;
+								node = $temp$node;
+								has = $temp$has;
+								transform = $temp$transform;
+								styles = $temp$styles;
+								attrs = $temp$attrs;
+								children = $temp$children;
+								elementAttrs = $temp$elementAttrs;
+								continue gatherAttrRecursive;
+							case 'Label':
+								var label = description.a;
+								var $temp$classes = classes,
+									$temp$node = node,
+									$temp$has = has,
+									$temp$transform = transform,
+									$temp$styles = styles,
+									$temp$attrs = A2(
+									$elm$core$List$cons,
+									A2($elm$virtual_dom$VirtualDom$attribute, 'aria-label', label),
+									attrs),
+									$temp$children = children,
+									$temp$elementAttrs = remaining;
+								classes = $temp$classes;
+								node = $temp$node;
+								has = $temp$has;
+								transform = $temp$transform;
+								styles = $temp$styles;
+								attrs = $temp$attrs;
+								children = $temp$children;
+								elementAttrs = $temp$elementAttrs;
+								continue gatherAttrRecursive;
+							case 'LivePolite':
+								var $temp$classes = classes,
+									$temp$node = node,
+									$temp$has = has,
+									$temp$transform = transform,
+									$temp$styles = styles,
+									$temp$attrs = A2(
+									$elm$core$List$cons,
+									A2($elm$virtual_dom$VirtualDom$attribute, 'aria-live', 'polite'),
+									attrs),
+									$temp$children = children,
+									$temp$elementAttrs = remaining;
+								classes = $temp$classes;
+								node = $temp$node;
+								has = $temp$has;
+								transform = $temp$transform;
+								styles = $temp$styles;
+								attrs = $temp$attrs;
+								children = $temp$children;
+								elementAttrs = $temp$elementAttrs;
+								continue gatherAttrRecursive;
+							default:
+								var $temp$classes = classes,
+									$temp$node = node,
+									$temp$has = has,
+									$temp$transform = transform,
+									$temp$styles = styles,
+									$temp$attrs = A2(
+									$elm$core$List$cons,
+									A2($elm$virtual_dom$VirtualDom$attribute, 'aria-live', 'assertive'),
+									attrs),
+									$temp$children = children,
+									$temp$elementAttrs = remaining;
+								classes = $temp$classes;
+								node = $temp$node;
+								has = $temp$has;
+								transform = $temp$transform;
+								styles = $temp$styles;
+								attrs = $temp$attrs;
+								children = $temp$children;
+								elementAttrs = $temp$elementAttrs;
+								continue gatherAttrRecursive;
+						}
+					case 'Nearby':
+						var location = attribute.a;
+						var elem = attribute.b;
+						var newStyles = function () {
+							switch (elem.$) {
+								case 'Empty':
+									return styles;
+								case 'Text':
+									var str = elem.a;
+									return styles;
+								case 'Unstyled':
+									var html = elem.a;
+									return styles;
+								default:
+									var styled = elem.a;
+									return _Utils_ap(styles, styled.styles);
+							}
+						}();
+						var $temp$classes = classes,
+							$temp$node = node,
+							$temp$has = has,
+							$temp$transform = transform,
+							$temp$styles = newStyles,
+							$temp$attrs = attrs,
+							$temp$children = A3($mdgriffith$elm_ui$Internal$Model$addNearbyElement, location, elem, children),
+							$temp$elementAttrs = remaining;
+						classes = $temp$classes;
+						node = $temp$node;
+						has = $temp$has;
+						transform = $temp$transform;
+						styles = $temp$styles;
+						attrs = $temp$attrs;
+						children = $temp$children;
+						elementAttrs = $temp$elementAttrs;
+						continue gatherAttrRecursive;
+					case 'AlignX':
+						var x = attribute.a;
+						if (A2($mdgriffith$elm_ui$Internal$Flag$present, $mdgriffith$elm_ui$Internal$Flag$xAlign, has)) {
+							var $temp$classes = classes,
+								$temp$node = node,
+								$temp$has = has,
+								$temp$transform = transform,
+								$temp$styles = styles,
+								$temp$attrs = attrs,
+								$temp$children = children,
+								$temp$elementAttrs = remaining;
+							classes = $temp$classes;
+							node = $temp$node;
+							has = $temp$has;
+							transform = $temp$transform;
+							styles = $temp$styles;
+							attrs = $temp$attrs;
+							children = $temp$children;
+							elementAttrs = $temp$elementAttrs;
+							continue gatherAttrRecursive;
+						} else {
+							var $temp$classes = $mdgriffith$elm_ui$Internal$Model$alignXName(x) + (' ' + classes),
+								$temp$node = node,
+								$temp$has = function (flags) {
+								switch (x.$) {
+									case 'CenterX':
+										return A2($mdgriffith$elm_ui$Internal$Flag$add, $mdgriffith$elm_ui$Internal$Flag$centerX, flags);
+									case 'Right':
+										return A2($mdgriffith$elm_ui$Internal$Flag$add, $mdgriffith$elm_ui$Internal$Flag$alignRight, flags);
+									default:
+										return flags;
+								}
+							}(
+								A2($mdgriffith$elm_ui$Internal$Flag$add, $mdgriffith$elm_ui$Internal$Flag$xAlign, has)),
+								$temp$transform = transform,
+								$temp$styles = styles,
+								$temp$attrs = attrs,
+								$temp$children = children,
+								$temp$elementAttrs = remaining;
+							classes = $temp$classes;
+							node = $temp$node;
+							has = $temp$has;
+							transform = $temp$transform;
+							styles = $temp$styles;
+							attrs = $temp$attrs;
+							children = $temp$children;
+							elementAttrs = $temp$elementAttrs;
+							continue gatherAttrRecursive;
+						}
+					default:
+						var y = attribute.a;
+						if (A2($mdgriffith$elm_ui$Internal$Flag$present, $mdgriffith$elm_ui$Internal$Flag$yAlign, has)) {
+							var $temp$classes = classes,
+								$temp$node = node,
+								$temp$has = has,
+								$temp$transform = transform,
+								$temp$styles = styles,
+								$temp$attrs = attrs,
+								$temp$children = children,
+								$temp$elementAttrs = remaining;
+							classes = $temp$classes;
+							node = $temp$node;
+							has = $temp$has;
+							transform = $temp$transform;
+							styles = $temp$styles;
+							attrs = $temp$attrs;
+							children = $temp$children;
+							elementAttrs = $temp$elementAttrs;
+							continue gatherAttrRecursive;
+						} else {
+							var $temp$classes = $mdgriffith$elm_ui$Internal$Model$alignYName(y) + (' ' + classes),
+								$temp$node = node,
+								$temp$has = function (flags) {
+								switch (y.$) {
+									case 'CenterY':
+										return A2($mdgriffith$elm_ui$Internal$Flag$add, $mdgriffith$elm_ui$Internal$Flag$centerY, flags);
+									case 'Bottom':
+										return A2($mdgriffith$elm_ui$Internal$Flag$add, $mdgriffith$elm_ui$Internal$Flag$alignBottom, flags);
+									default:
+										return flags;
+								}
+							}(
+								A2($mdgriffith$elm_ui$Internal$Flag$add, $mdgriffith$elm_ui$Internal$Flag$yAlign, has)),
+								$temp$transform = transform,
+								$temp$styles = styles,
+								$temp$attrs = attrs,
+								$temp$children = children,
+								$temp$elementAttrs = remaining;
+							classes = $temp$classes;
+							node = $temp$node;
+							has = $temp$has;
+							transform = $temp$transform;
+							styles = $temp$styles;
+							attrs = $temp$attrs;
+							children = $temp$children;
+							elementAttrs = $temp$elementAttrs;
+							continue gatherAttrRecursive;
+						}
+				}
+			}
+		}
+	});
+var $mdgriffith$elm_ui$Internal$Model$Untransformed = {$: 'Untransformed'};
+var $mdgriffith$elm_ui$Internal$Model$untransformed = $mdgriffith$elm_ui$Internal$Model$Untransformed;
+var $mdgriffith$elm_ui$Internal$Model$element = F4(
+	function (context, node, attributes, children) {
+		return A3(
+			$mdgriffith$elm_ui$Internal$Model$createElement,
+			context,
+			children,
+			A8(
+				$mdgriffith$elm_ui$Internal$Model$gatherAttrRecursive,
+				$mdgriffith$elm_ui$Internal$Model$contextClasses(context),
+				node,
+				$mdgriffith$elm_ui$Internal$Flag$none,
+				$mdgriffith$elm_ui$Internal$Model$untransformed,
+				_List_Nil,
+				_List_Nil,
+				$mdgriffith$elm_ui$Internal$Model$NoNearbyChildren,
+				$elm$core$List$reverse(attributes)));
+	});
+var $mdgriffith$elm_ui$Internal$Model$Height = function (a) {
+	return {$: 'Height', a: a};
+};
+var $mdgriffith$elm_ui$Element$height = $mdgriffith$elm_ui$Internal$Model$Height;
+var $mdgriffith$elm_ui$Internal$Model$Attr = function (a) {
+	return {$: 'Attr', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$htmlClass = function (cls) {
+	return $mdgriffith$elm_ui$Internal$Model$Attr(
+		$elm$html$Html$Attributes$class(cls));
+};
+var $mdgriffith$elm_ui$Internal$Model$Content = {$: 'Content'};
+var $mdgriffith$elm_ui$Element$shrink = $mdgriffith$elm_ui$Internal$Model$Content;
+var $mdgriffith$elm_ui$Internal$Model$Width = function (a) {
+	return {$: 'Width', a: a};
+};
+var $mdgriffith$elm_ui$Element$width = $mdgriffith$elm_ui$Internal$Model$Width;
+var $mdgriffith$elm_ui$Element$column = F2(
+	function (attrs, children) {
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asColumn,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentTop + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.contentLeft)),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+						attrs))),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+	});
+var $author$project$Msg$SetCurrentPosition = function (a) {
+	return {$: 'SetCurrentPosition', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$AlignY = function (a) {
+	return {$: 'AlignY', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$Top = {$: 'Top'};
+var $mdgriffith$elm_ui$Element$alignTop = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$Top);
+var $mdgriffith$elm_ui$Internal$Model$AlignX = function (a) {
+	return {$: 'AlignX', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$CenterX = {$: 'CenterX'};
+var $mdgriffith$elm_ui$Element$centerX = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$CenterX);
+var $mdgriffith$elm_ui$Element$el = F2(
+	function (attrs, child) {
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asEl,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+					attrs)),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+				_List_fromArray(
+					[child])));
+	});
+var $mdgriffith$elm_ui$Element$htmlAttribute = $mdgriffith$elm_ui$Internal$Model$Attr;
+var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
+var $author$project$ViewPureStyles$conditionallyVisible = F2(
+	function (test, element) {
+		return test ? A2($mdgriffith$elm_ui$Element$el, _List_Nil, element) : A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$htmlAttribute(
+					A2($elm$html$Html$Attributes$style, 'display', 'none'))
+				]),
+			element);
+	});
+var $mdgriffith$elm_ui$Internal$Model$Fill = function (a) {
+	return {$: 'Fill', a: a};
+};
+var $mdgriffith$elm_ui$Element$fill = $mdgriffith$elm_ui$Internal$Model$Fill(1);
+var $ianmackenzie$elm_units$Length$inMeters = function (_v0) {
+	var numMeters = _v0.a;
+	return numMeters;
+};
+var $mdgriffith$elm_ui$Element$Input$Below = {$: 'Below'};
+var $mdgriffith$elm_ui$Element$Input$Label = F3(
+	function (a, b, c) {
+		return {$: 'Label', a: a, b: b, c: c};
+	});
+var $mdgriffith$elm_ui$Element$Input$labelBelow = $mdgriffith$elm_ui$Element$Input$Label($mdgriffith$elm_ui$Element$Input$Below);
+var $author$project$Main$minimumLeftPane = 600;
+var $mdgriffith$elm_ui$Internal$Model$Empty = {$: 'Empty'};
+var $mdgriffith$elm_ui$Element$none = $mdgriffith$elm_ui$Internal$Model$Empty;
+var $mdgriffith$elm_ui$Internal$Model$PaddingStyle = F5(
+	function (a, b, c, d, e) {
+		return {$: 'PaddingStyle', a: a, b: b, c: c, d: d, e: e};
+	});
+var $mdgriffith$elm_ui$Internal$Flag$padding = $mdgriffith$elm_ui$Internal$Flag$flag(2);
+var $mdgriffith$elm_ui$Element$padding = function (x) {
+	var f = x;
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$padding,
+		A5(
+			$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
+			'p-' + $elm$core$String$fromInt(x),
+			f,
+			f,
+			f,
+			f));
+};
+var $mdgriffith$elm_ui$Internal$Model$Px = function (a) {
+	return {$: 'Px', a: a};
+};
+var $mdgriffith$elm_ui$Element$px = $mdgriffith$elm_ui$Internal$Model$Px;
+var $mdgriffith$elm_ui$Internal$Model$AsRow = {$: 'AsRow'};
+var $mdgriffith$elm_ui$Internal$Model$asRow = $mdgriffith$elm_ui$Internal$Model$AsRow;
+var $mdgriffith$elm_ui$Element$row = F2(
+	function (attrs, children) {
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asRow,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.contentCenterY)),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+						attrs))),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+	});
+var $mdgriffith$elm_ui$Internal$Model$NoAttribute = {$: 'NoAttribute'};
+var $mdgriffith$elm_ui$Internal$Flag$active = $mdgriffith$elm_ui$Internal$Flag$flag(32);
+var $mdgriffith$elm_ui$Internal$Model$Describe = function (a) {
+	return {$: 'Describe', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$LivePolite = {$: 'LivePolite'};
+var $mdgriffith$elm_ui$Element$Region$announce = $mdgriffith$elm_ui$Internal$Model$Describe($mdgriffith$elm_ui$Internal$Model$LivePolite);
+var $mdgriffith$elm_ui$Element$Input$applyLabel = F3(
+	function (attrs, label, input) {
+		if (label.$ === 'HiddenLabel') {
+			var labelText = label.a;
+			return A4(
+				$mdgriffith$elm_ui$Internal$Model$element,
+				$mdgriffith$elm_ui$Internal$Model$asColumn,
+				$mdgriffith$elm_ui$Internal$Model$NodeName('label'),
+				attrs,
+				$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+					_List_fromArray(
+						[input])));
+		} else {
+			var position = label.a;
+			var labelAttrs = label.b;
+			var labelChild = label.c;
+			var labelElement = A4(
+				$mdgriffith$elm_ui$Internal$Model$element,
+				$mdgriffith$elm_ui$Internal$Model$asEl,
+				$mdgriffith$elm_ui$Internal$Model$div,
+				labelAttrs,
+				$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+					_List_fromArray(
+						[labelChild])));
+			switch (position.$) {
+				case 'Above':
+					return A4(
+						$mdgriffith$elm_ui$Internal$Model$element,
+						$mdgriffith$elm_ui$Internal$Model$asColumn,
+						$mdgriffith$elm_ui$Internal$Model$NodeName('label'),
+						A2(
+							$elm$core$List$cons,
+							$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.inputLabel),
+							attrs),
+						$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+							_List_fromArray(
+								[labelElement, input])));
+				case 'Below':
+					return A4(
+						$mdgriffith$elm_ui$Internal$Model$element,
+						$mdgriffith$elm_ui$Internal$Model$asColumn,
+						$mdgriffith$elm_ui$Internal$Model$NodeName('label'),
+						A2(
+							$elm$core$List$cons,
+							$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.inputLabel),
+							attrs),
+						$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+							_List_fromArray(
+								[input, labelElement])));
+				case 'OnRight':
+					return A4(
+						$mdgriffith$elm_ui$Internal$Model$element,
+						$mdgriffith$elm_ui$Internal$Model$asRow,
+						$mdgriffith$elm_ui$Internal$Model$NodeName('label'),
+						A2(
+							$elm$core$List$cons,
+							$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.inputLabel),
+							attrs),
+						$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+							_List_fromArray(
+								[input, labelElement])));
+				default:
+					return A4(
+						$mdgriffith$elm_ui$Internal$Model$element,
+						$mdgriffith$elm_ui$Internal$Model$asRow,
+						$mdgriffith$elm_ui$Internal$Model$NodeName('label'),
+						A2(
+							$elm$core$List$cons,
+							$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.inputLabel),
+							attrs),
+						$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+							_List_fromArray(
+								[labelElement, input])));
+			}
+		}
+	});
+var $elm$html$Html$Attributes$attribute = $elm$virtual_dom$VirtualDom$attribute;
+var $mdgriffith$elm_ui$Internal$Model$Behind = {$: 'Behind'};
+var $mdgriffith$elm_ui$Internal$Model$Nearby = F2(
+	function (a, b) {
+		return {$: 'Nearby', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Element$createNearby = F2(
+	function (loc, element) {
+		if (element.$ === 'Empty') {
+			return $mdgriffith$elm_ui$Internal$Model$NoAttribute;
+		} else {
+			return A2($mdgriffith$elm_ui$Internal$Model$Nearby, loc, element);
+		}
+	});
+var $mdgriffith$elm_ui$Element$behindContent = function (element) {
+	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$Behind, element);
+};
+var $mdgriffith$elm_ui$Internal$Flag$focus = $mdgriffith$elm_ui$Internal$Flag$flag(31);
+var $mdgriffith$elm_ui$Internal$Model$getHeight = function (attrs) {
+	return A3(
+		$elm$core$List$foldr,
+		F2(
+			function (attr, acc) {
+				if (acc.$ === 'Just') {
+					var x = acc.a;
+					return $elm$core$Maybe$Just(x);
+				} else {
+					if (attr.$ === 'Height') {
+						var len = attr.a;
+						return $elm$core$Maybe$Just(len);
+					} else {
+						return $elm$core$Maybe$Nothing;
+					}
+				}
+			}),
+		$elm$core$Maybe$Nothing,
+		attrs);
+};
+var $mdgriffith$elm_ui$Internal$Model$getSpacing = F2(
+	function (attrs, _default) {
+		return A2(
+			$elm$core$Maybe$withDefault,
+			_default,
+			A3(
+				$elm$core$List$foldr,
+				F2(
+					function (attr, acc) {
+						if (acc.$ === 'Just') {
+							var x = acc.a;
+							return $elm$core$Maybe$Just(x);
+						} else {
+							if ((attr.$ === 'StyleClass') && (attr.b.$ === 'SpacingStyle')) {
+								var _v2 = attr.b;
+								var x = _v2.b;
+								var y = _v2.c;
+								return $elm$core$Maybe$Just(
+									_Utils_Tuple2(x, y));
+							} else {
+								return $elm$core$Maybe$Nothing;
+							}
+						}
+					}),
+				$elm$core$Maybe$Nothing,
+				attrs));
+	});
+var $mdgriffith$elm_ui$Internal$Model$getWidth = function (attrs) {
+	return A3(
+		$elm$core$List$foldr,
+		F2(
+			function (attr, acc) {
+				if (acc.$ === 'Just') {
+					var x = acc.a;
+					return $elm$core$Maybe$Just(x);
+				} else {
+					if (attr.$ === 'Width') {
+						var len = attr.a;
+						return $elm$core$Maybe$Just(len);
+					} else {
+						return $elm$core$Maybe$Nothing;
+					}
+				}
+			}),
+		$elm$core$Maybe$Nothing,
+		attrs);
+};
+var $mdgriffith$elm_ui$Internal$Model$Label = function (a) {
+	return {$: 'Label', a: a};
+};
+var $mdgriffith$elm_ui$Element$Input$hiddenLabelAttribute = function (label) {
+	if (label.$ === 'HiddenLabel') {
+		var textLabel = label.a;
+		return $mdgriffith$elm_ui$Internal$Model$Describe(
+			$mdgriffith$elm_ui$Internal$Model$Label(textLabel));
+	} else {
+		return $mdgriffith$elm_ui$Internal$Model$NoAttribute;
+	}
+};
+var $mdgriffith$elm_ui$Internal$Flag$hover = $mdgriffith$elm_ui$Internal$Flag$flag(33);
+var $mdgriffith$elm_ui$Element$Input$isHiddenLabel = function (label) {
+	if (label.$ === 'HiddenLabel') {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $elm$html$Html$Attributes$max = $elm$html$Html$Attributes$stringProperty('max');
+var $elm$html$Html$Attributes$min = $elm$html$Html$Attributes$stringProperty('min');
+var $elm$html$Html$Events$alwaysStop = function (x) {
+	return _Utils_Tuple2(x, true);
+};
+var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
+	return {$: 'MayStopPropagation', a: a};
+};
+var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var $elm$html$Html$Events$stopPropagationOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+	});
+var $elm$html$Html$Events$targetValue = A2(
+	$elm$json$Json$Decode$at,
+	_List_fromArray(
+		['target', 'value']),
+	$elm$json$Json$Decode$string);
+var $elm$html$Html$Events$onInput = function (tagger) {
+	return A2(
+		$elm$html$Html$Events$stopPropagationOn,
+		'input',
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$html$Html$Events$alwaysStop,
+			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
+};
+var $mdgriffith$elm_ui$Internal$Model$SpacingStyle = F3(
+	function (a, b, c) {
+		return {$: 'SpacingStyle', a: a, b: b, c: c};
+	});
+var $mdgriffith$elm_ui$Internal$Flag$spacing = $mdgriffith$elm_ui$Internal$Flag$flag(3);
+var $mdgriffith$elm_ui$Internal$Model$spacingName = F2(
+	function (x, y) {
+		return 'spacing-' + ($elm$core$String$fromInt(x) + ('-' + $elm$core$String$fromInt(y)));
+	});
+var $mdgriffith$elm_ui$Element$spacingXY = F2(
+	function (x, y) {
+		return A2(
+			$mdgriffith$elm_ui$Internal$Model$StyleClass,
+			$mdgriffith$elm_ui$Internal$Flag$spacing,
+			A3(
+				$mdgriffith$elm_ui$Internal$Model$SpacingStyle,
+				A2($mdgriffith$elm_ui$Internal$Model$spacingName, x, y),
+				x,
+				y));
+	});
+var $elm$html$Html$Attributes$step = function (n) {
+	return A2($elm$html$Html$Attributes$stringProperty, 'step', n);
+};
+var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
+var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
+var $mdgriffith$elm_ui$Internal$Model$CenterY = {$: 'CenterY'};
+var $mdgriffith$elm_ui$Element$centerY = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$CenterY);
+var $mdgriffith$elm_ui$Element$fillPortion = $mdgriffith$elm_ui$Internal$Model$Fill;
+var $mdgriffith$elm_ui$Internal$Model$Class = F2(
+	function (a, b) {
+		return {$: 'Class', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Model$TransformComponent = F2(
+	function (a, b) {
+		return {$: 'TransformComponent', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Model$Text = function (a) {
+	return {$: 'Text', a: a};
+};
+var $elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
+	});
+var $elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
+var $mdgriffith$elm_ui$Internal$Model$map = F2(
+	function (fn, el) {
+		switch (el.$) {
+			case 'Styled':
+				var styled = el.a;
+				return $mdgriffith$elm_ui$Internal$Model$Styled(
+					{
+						html: F2(
+							function (add, context) {
+								return A2(
+									$elm$virtual_dom$VirtualDom$map,
+									fn,
+									A2(styled.html, add, context));
+							}),
+						styles: styled.styles
+					});
+			case 'Unstyled':
+				var html = el.a;
+				return $mdgriffith$elm_ui$Internal$Model$Unstyled(
+					A2(
+						$elm$core$Basics$composeL,
+						$elm$virtual_dom$VirtualDom$map(fn),
+						html));
+			case 'Text':
+				var str = el.a;
+				return $mdgriffith$elm_ui$Internal$Model$Text(str);
+			default:
+				return $mdgriffith$elm_ui$Internal$Model$Empty;
+		}
+	});
+var $elm$virtual_dom$VirtualDom$mapAttribute = _VirtualDom_mapAttribute;
+var $mdgriffith$elm_ui$Internal$Model$mapAttr = F2(
+	function (fn, attr) {
+		switch (attr.$) {
+			case 'NoAttribute':
+				return $mdgriffith$elm_ui$Internal$Model$NoAttribute;
+			case 'Describe':
+				var description = attr.a;
+				return $mdgriffith$elm_ui$Internal$Model$Describe(description);
+			case 'AlignX':
+				var x = attr.a;
+				return $mdgriffith$elm_ui$Internal$Model$AlignX(x);
+			case 'AlignY':
+				var y = attr.a;
+				return $mdgriffith$elm_ui$Internal$Model$AlignY(y);
+			case 'Width':
+				var x = attr.a;
+				return $mdgriffith$elm_ui$Internal$Model$Width(x);
+			case 'Height':
+				var x = attr.a;
+				return $mdgriffith$elm_ui$Internal$Model$Height(x);
+			case 'Class':
+				var x = attr.a;
+				var y = attr.b;
+				return A2($mdgriffith$elm_ui$Internal$Model$Class, x, y);
+			case 'StyleClass':
+				var flag = attr.a;
+				var style = attr.b;
+				return A2($mdgriffith$elm_ui$Internal$Model$StyleClass, flag, style);
+			case 'Nearby':
+				var location = attr.a;
+				var elem = attr.b;
+				return A2(
+					$mdgriffith$elm_ui$Internal$Model$Nearby,
+					location,
+					A2($mdgriffith$elm_ui$Internal$Model$map, fn, elem));
+			case 'Attr':
+				var htmlAttr = attr.a;
+				return $mdgriffith$elm_ui$Internal$Model$Attr(
+					A2($elm$virtual_dom$VirtualDom$mapAttribute, fn, htmlAttr));
+			default:
+				var fl = attr.a;
+				var trans = attr.b;
+				return A2($mdgriffith$elm_ui$Internal$Model$TransformComponent, fl, trans);
+		}
+	});
+var $mdgriffith$elm_ui$Element$Input$viewHorizontalThumb = F3(
+	function (factor, thumbAttributes, trackHeight) {
+		return A2(
+			$mdgriffith$elm_ui$Element$row,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$height(
+					A2($elm$core$Maybe$withDefault, $mdgriffith$elm_ui$Element$fill, trackHeight)),
+					$mdgriffith$elm_ui$Element$centerY
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width(
+							$mdgriffith$elm_ui$Element$fillPortion(
+								$elm$core$Basics$round(factor * 10000)))
+						]),
+					$mdgriffith$elm_ui$Element$none),
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$centerY,
+						A2(
+							$elm$core$List$map,
+							$mdgriffith$elm_ui$Internal$Model$mapAttr($elm$core$Basics$never),
+							thumbAttributes)),
+					$mdgriffith$elm_ui$Element$none),
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width(
+							$mdgriffith$elm_ui$Element$fillPortion(
+								$elm$core$Basics$round(
+									$elm$core$Basics$abs(1 - factor) * 10000)))
+						]),
+					$mdgriffith$elm_ui$Element$none)
+				]));
+	});
+var $mdgriffith$elm_ui$Element$Input$viewVerticalThumb = F3(
+	function (factor, thumbAttributes, trackWidth) {
+		return A2(
+			$mdgriffith$elm_ui$Element$column,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$width(
+					A2($elm$core$Maybe$withDefault, $mdgriffith$elm_ui$Element$fill, trackWidth)),
+					$mdgriffith$elm_ui$Element$centerX
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$height(
+							$mdgriffith$elm_ui$Element$fillPortion(
+								$elm$core$Basics$round(
+									$elm$core$Basics$abs(1 - factor) * 10000)))
+						]),
+					$mdgriffith$elm_ui$Element$none),
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$centerX,
+						A2(
+							$elm$core$List$map,
+							$mdgriffith$elm_ui$Internal$Model$mapAttr($elm$core$Basics$never),
+							thumbAttributes)),
+					$mdgriffith$elm_ui$Element$none),
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$height(
+							$mdgriffith$elm_ui$Element$fillPortion(
+								$elm$core$Basics$round(factor * 10000)))
+						]),
+					$mdgriffith$elm_ui$Element$none)
+				]));
+	});
+var $mdgriffith$elm_ui$Element$Input$slider = F2(
+	function (attributes, input) {
+		var trackWidth = $mdgriffith$elm_ui$Internal$Model$getWidth(attributes);
+		var trackHeight = $mdgriffith$elm_ui$Internal$Model$getHeight(attributes);
+		var vertical = function () {
+			var _v8 = _Utils_Tuple2(trackWidth, trackHeight);
+			_v8$3:
+			while (true) {
+				if (_v8.a.$ === 'Nothing') {
+					if (_v8.b.$ === 'Nothing') {
+						var _v9 = _v8.a;
+						var _v10 = _v8.b;
+						return false;
+					} else {
+						break _v8$3;
+					}
+				} else {
+					if ((_v8.a.a.$ === 'Px') && (_v8.b.$ === 'Just')) {
+						switch (_v8.b.a.$) {
+							case 'Px':
+								var w = _v8.a.a.a;
+								var h = _v8.b.a.a;
+								return _Utils_cmp(h, w) > 0;
+							case 'Fill':
+								return true;
+							default:
+								break _v8$3;
+						}
+					} else {
+						break _v8$3;
+					}
+				}
+			}
+			return false;
+		}();
+		var factor = (input.value - input.min) / (input.max - input.min);
+		var _v0 = input.thumb;
+		var thumbAttributes = _v0.a;
+		var height = $mdgriffith$elm_ui$Internal$Model$getHeight(thumbAttributes);
+		var thumbHeightString = function () {
+			if (height.$ === 'Nothing') {
+				return '20px';
+			} else {
+				if (height.a.$ === 'Px') {
+					var px = height.a.a;
+					return $elm$core$String$fromInt(px) + 'px';
+				} else {
+					return '100%';
+				}
+			}
+		}();
+		var width = $mdgriffith$elm_ui$Internal$Model$getWidth(thumbAttributes);
+		var thumbWidthString = function () {
+			if (width.$ === 'Nothing') {
+				return '20px';
+			} else {
+				if (width.a.$ === 'Px') {
+					var px = width.a.a;
+					return $elm$core$String$fromInt(px) + 'px';
+				} else {
+					return '100%';
+				}
+			}
+		}();
+		var className = 'thmb-' + (thumbWidthString + ('-' + thumbHeightString));
+		var thumbShadowStyle = _List_fromArray(
+			[
+				A2($mdgriffith$elm_ui$Internal$Model$Property, 'width', thumbWidthString),
+				A2($mdgriffith$elm_ui$Internal$Model$Property, 'height', thumbHeightString)
+			]);
+		var _v1 = A2(
+			$mdgriffith$elm_ui$Internal$Model$getSpacing,
+			attributes,
+			_Utils_Tuple2(5, 5));
+		var spacingX = _v1.a;
+		var spacingY = _v1.b;
+		return A3(
+			$mdgriffith$elm_ui$Element$Input$applyLabel,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$Input$isHiddenLabel(input.label) ? $mdgriffith$elm_ui$Internal$Model$NoAttribute : A2($mdgriffith$elm_ui$Element$spacingXY, spacingX, spacingY),
+					$mdgriffith$elm_ui$Element$Region$announce,
+					$mdgriffith$elm_ui$Element$width(
+					function () {
+						if (trackWidth.$ === 'Nothing') {
+							return $mdgriffith$elm_ui$Element$fill;
+						} else {
+							if (trackWidth.a.$ === 'Px') {
+								return $mdgriffith$elm_ui$Element$shrink;
+							} else {
+								var x = trackWidth.a;
+								return x;
+							}
+						}
+					}()),
+					$mdgriffith$elm_ui$Element$height(
+					function () {
+						if (trackHeight.$ === 'Nothing') {
+							return $mdgriffith$elm_ui$Element$shrink;
+						} else {
+							if (trackHeight.a.$ === 'Px') {
+								return $mdgriffith$elm_ui$Element$shrink;
+							} else {
+								var x = trackHeight.a;
+								return x;
+							}
+						}
+					}())
+				]),
+			input.label,
+			A2(
+				$mdgriffith$elm_ui$Element$row,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width(
+						A2($elm$core$Maybe$withDefault, $mdgriffith$elm_ui$Element$fill, trackWidth)),
+						$mdgriffith$elm_ui$Element$height(
+						A2(
+							$elm$core$Maybe$withDefault,
+							$mdgriffith$elm_ui$Element$px(20),
+							trackHeight))
+					]),
+				_List_fromArray(
+					[
+						A4(
+						$mdgriffith$elm_ui$Internal$Model$element,
+						$mdgriffith$elm_ui$Internal$Model$asEl,
+						$mdgriffith$elm_ui$Internal$Model$NodeName('input'),
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$Input$hiddenLabelAttribute(input.label),
+								A2(
+								$mdgriffith$elm_ui$Internal$Model$StyleClass,
+								$mdgriffith$elm_ui$Internal$Flag$active,
+								A2($mdgriffith$elm_ui$Internal$Model$Style, 'input[type=\"range\"].' + (className + '::-moz-range-thumb'), thumbShadowStyle)),
+								A2(
+								$mdgriffith$elm_ui$Internal$Model$StyleClass,
+								$mdgriffith$elm_ui$Internal$Flag$hover,
+								A2($mdgriffith$elm_ui$Internal$Model$Style, 'input[type=\"range\"].' + (className + '::-webkit-slider-thumb'), thumbShadowStyle)),
+								A2(
+								$mdgriffith$elm_ui$Internal$Model$StyleClass,
+								$mdgriffith$elm_ui$Internal$Flag$focus,
+								A2($mdgriffith$elm_ui$Internal$Model$Style, 'input[type=\"range\"].' + (className + '::-ms-thumb'), thumbShadowStyle)),
+								$mdgriffith$elm_ui$Internal$Model$Attr(
+								$elm$html$Html$Attributes$class(className + ' ui-slide-bar focusable-parent')),
+								$mdgriffith$elm_ui$Internal$Model$Attr(
+								$elm$html$Html$Events$onInput(
+									function (str) {
+										var _v4 = $elm$core$String$toFloat(str);
+										if (_v4.$ === 'Nothing') {
+											return input.onChange(0);
+										} else {
+											var val = _v4.a;
+											return input.onChange(val);
+										}
+									})),
+								$mdgriffith$elm_ui$Internal$Model$Attr(
+								$elm$html$Html$Attributes$type_('range')),
+								$mdgriffith$elm_ui$Internal$Model$Attr(
+								$elm$html$Html$Attributes$step(
+									function () {
+										var _v5 = input.step;
+										if (_v5.$ === 'Nothing') {
+											return 'any';
+										} else {
+											var step = _v5.a;
+											return $elm$core$String$fromFloat(step);
+										}
+									}())),
+								$mdgriffith$elm_ui$Internal$Model$Attr(
+								$elm$html$Html$Attributes$min(
+									$elm$core$String$fromFloat(input.min))),
+								$mdgriffith$elm_ui$Internal$Model$Attr(
+								$elm$html$Html$Attributes$max(
+									$elm$core$String$fromFloat(input.max))),
+								$mdgriffith$elm_ui$Internal$Model$Attr(
+								$elm$html$Html$Attributes$value(
+									$elm$core$String$fromFloat(input.value))),
+								vertical ? $mdgriffith$elm_ui$Internal$Model$Attr(
+								A2($elm$html$Html$Attributes$attribute, 'orient', 'vertical')) : $mdgriffith$elm_ui$Internal$Model$NoAttribute,
+								$mdgriffith$elm_ui$Element$width(
+								vertical ? A2(
+									$elm$core$Maybe$withDefault,
+									$mdgriffith$elm_ui$Element$px(20),
+									trackHeight) : A2($elm$core$Maybe$withDefault, $mdgriffith$elm_ui$Element$fill, trackWidth)),
+								$mdgriffith$elm_ui$Element$height(
+								vertical ? A2($elm$core$Maybe$withDefault, $mdgriffith$elm_ui$Element$fill, trackWidth) : A2(
+									$elm$core$Maybe$withDefault,
+									$mdgriffith$elm_ui$Element$px(20),
+									trackHeight))
+							]),
+						$mdgriffith$elm_ui$Internal$Model$Unkeyed(_List_Nil)),
+						A2(
+						$mdgriffith$elm_ui$Element$el,
+						A2(
+							$elm$core$List$cons,
+							$mdgriffith$elm_ui$Element$width(
+								A2($elm$core$Maybe$withDefault, $mdgriffith$elm_ui$Element$fill, trackWidth)),
+							A2(
+								$elm$core$List$cons,
+								$mdgriffith$elm_ui$Element$height(
+									A2(
+										$elm$core$Maybe$withDefault,
+										$mdgriffith$elm_ui$Element$px(20),
+										trackHeight)),
+								_Utils_ap(
+									attributes,
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$behindContent(
+											vertical ? A3(
+												$mdgriffith$elm_ui$Element$Input$viewVerticalThumb,
+												factor,
+												A2(
+													$elm$core$List$cons,
+													$mdgriffith$elm_ui$Internal$Model$htmlClass('focusable-thumb'),
+													thumbAttributes),
+												trackWidth) : A3(
+												$mdgriffith$elm_ui$Element$Input$viewHorizontalThumb,
+												factor,
+												A2(
+													$elm$core$List$cons,
+													$mdgriffith$elm_ui$Internal$Model$htmlClass('focusable-thumb'),
+													thumbAttributes),
+												trackHeight))
+										])))),
+						$mdgriffith$elm_ui$Element$none)
+					])));
+	});
+var $mdgriffith$elm_ui$Internal$Flag$borderColor = $mdgriffith$elm_ui$Internal$Flag$flag(28);
+var $mdgriffith$elm_ui$Element$Border$color = function (clr) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$borderColor,
+		A3(
+			$mdgriffith$elm_ui$Internal$Model$Colored,
+			'bc-' + $mdgriffith$elm_ui$Internal$Model$formatColorClass(clr),
+			'border-color',
+			clr));
+};
+var $mdgriffith$elm_ui$Element$rgb = F3(
+	function (r, g, b) {
+		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, r, g, b, 1);
+	});
+var $mdgriffith$elm_ui$Internal$Flag$borderRound = $mdgriffith$elm_ui$Internal$Flag$flag(17);
+var $mdgriffith$elm_ui$Element$Border$rounded = function (radius) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$borderRound,
+		A3(
+			$mdgriffith$elm_ui$Internal$Model$Single,
+			'br-' + $elm$core$String$fromInt(radius),
+			'border-radius',
+			$elm$core$String$fromInt(radius) + 'px'));
+};
+var $mdgriffith$elm_ui$Element$Input$Thumb = function (a) {
+	return {$: 'Thumb', a: a};
+};
+var $mdgriffith$elm_ui$Element$Input$thumb = $mdgriffith$elm_ui$Element$Input$Thumb;
+var $mdgriffith$elm_ui$Internal$Model$BorderWidth = F5(
+	function (a, b, c, d, e) {
+		return {$: 'BorderWidth', a: a, b: b, c: c, d: d, e: e};
+	});
+var $mdgriffith$elm_ui$Element$Border$width = function (v) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$borderWidth,
+		A5(
+			$mdgriffith$elm_ui$Internal$Model$BorderWidth,
+			'b-' + $elm$core$String$fromInt(v),
+			v,
+			v,
+			v,
+			v));
+};
+var $author$project$ViewPureStyles$sliderThumb = $mdgriffith$elm_ui$Element$Input$thumb(
+	_List_fromArray(
+		[
+			$mdgriffith$elm_ui$Element$width(
+			$mdgriffith$elm_ui$Element$px(16)),
+			$mdgriffith$elm_ui$Element$height(
+			$mdgriffith$elm_ui$Element$px(16)),
+			$mdgriffith$elm_ui$Element$Border$rounded(4),
+			$mdgriffith$elm_ui$Element$Border$width(1),
+			$mdgriffith$elm_ui$Element$Border$color(
+			A3($mdgriffith$elm_ui$Element$rgb, 0.5, 0.5, 0.5)),
+			$mdgriffith$elm_ui$Element$Background$color(
+			A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1))
+		]));
+var $mdgriffith$elm_ui$Element$spacing = function (x) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$spacing,
+		A3(
+			$mdgriffith$elm_ui$Internal$Model$SpacingStyle,
+			A2($mdgriffith$elm_ui$Internal$Model$spacingName, x, x),
+			x,
+			x));
+};
+var $mdgriffith$elm_ui$Element$text = function (content) {
+	return $mdgriffith$elm_ui$Internal$Model$Text(content);
+};
+var $mdgriffith$elm_ui$Internal$Model$Left = {$: 'Left'};
+var $mdgriffith$elm_ui$Element$alignLeft = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Left);
+var $mdgriffith$elm_ui$Internal$Model$Right = {$: 'Right'};
+var $mdgriffith$elm_ui$Element$alignRight = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Right);
+var $mdgriffith$elm_ui$Internal$Model$Button = {$: 'Button'};
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $elm$html$Html$Attributes$boolProperty = F2(
+	function (key, bool) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$bool(bool));
+	});
+var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
+var $mdgriffith$elm_ui$Element$Input$enter = 'Enter';
+var $mdgriffith$elm_ui$Element$Input$hasFocusStyle = function (attr) {
+	if (((attr.$ === 'StyleClass') && (attr.b.$ === 'PseudoSelector')) && (attr.b.a.$ === 'Focus')) {
+		var _v1 = attr.b;
+		var _v2 = _v1.a;
+		return true;
+	} else {
+		return false;
+	}
+};
+var $mdgriffith$elm_ui$Element$Input$focusDefault = function (attrs) {
+	return A2($elm$core$List$any, $mdgriffith$elm_ui$Element$Input$hasFocusStyle, attrs) ? $mdgriffith$elm_ui$Internal$Model$NoAttribute : $mdgriffith$elm_ui$Internal$Model$htmlClass('focusable');
+};
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'click',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $mdgriffith$elm_ui$Element$Events$onClick = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onClick);
+var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
+	return {$: 'MayPreventDefault', a: a};
+};
+var $elm$html$Html$Events$preventDefaultOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayPreventDefault(decoder));
+	});
+var $mdgriffith$elm_ui$Element$Input$onKeyLookup = function (lookup) {
+	var decode = function (code) {
+		var _v0 = lookup(code);
+		if (_v0.$ === 'Nothing') {
+			return $elm$json$Json$Decode$fail('No key matched');
+		} else {
+			var msg = _v0.a;
+			return $elm$json$Json$Decode$succeed(msg);
+		}
+	};
+	var isKey = A2(
+		$elm$json$Json$Decode$andThen,
+		decode,
+		A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string));
+	return $mdgriffith$elm_ui$Internal$Model$Attr(
+		A2(
+			$elm$html$Html$Events$preventDefaultOn,
+			'keydown',
+			A2(
+				$elm$json$Json$Decode$map,
+				function (fired) {
+					return _Utils_Tuple2(fired, true);
+				},
+				isKey)));
+};
+var $mdgriffith$elm_ui$Internal$Flag$cursor = $mdgriffith$elm_ui$Internal$Flag$flag(21);
+var $mdgriffith$elm_ui$Element$pointer = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$cursor, $mdgriffith$elm_ui$Internal$Style$classes.cursorPointer);
+var $mdgriffith$elm_ui$Element$Input$space = ' ';
+var $elm$html$Html$Attributes$tabindex = function (n) {
+	return A2(
+		_VirtualDom_attribute,
+		'tabIndex',
+		$elm$core$String$fromInt(n));
+};
+var $mdgriffith$elm_ui$Element$Input$button = F2(
+	function (attrs, _v0) {
+		var onPress = _v0.onPress;
+		var label = _v0.label;
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asEl,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentCenterX + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.seButton + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.noTextSelection)))))),
+						A2(
+							$elm$core$List$cons,
+							$mdgriffith$elm_ui$Element$pointer,
+							A2(
+								$elm$core$List$cons,
+								$mdgriffith$elm_ui$Element$Input$focusDefault(attrs),
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_ui$Internal$Model$Describe($mdgriffith$elm_ui$Internal$Model$Button),
+									A2(
+										$elm$core$List$cons,
+										$mdgriffith$elm_ui$Internal$Model$Attr(
+											$elm$html$Html$Attributes$tabindex(0)),
+										function () {
+											if (onPress.$ === 'Nothing') {
+												return A2(
+													$elm$core$List$cons,
+													$mdgriffith$elm_ui$Internal$Model$Attr(
+														$elm$html$Html$Attributes$disabled(true)),
+													attrs);
+											} else {
+												var msg = onPress.a;
+												return A2(
+													$elm$core$List$cons,
+													$mdgriffith$elm_ui$Element$Events$onClick(msg),
+													A2(
+														$elm$core$List$cons,
+														$mdgriffith$elm_ui$Element$Input$onKeyLookup(
+															function (code) {
+																return _Utils_eq(code, $mdgriffith$elm_ui$Element$Input$enter) ? $elm$core$Maybe$Just(msg) : (_Utils_eq(code, $mdgriffith$elm_ui$Element$Input$space) ? $elm$core$Maybe$Just(msg) : $elm$core$Maybe$Nothing);
+															}),
+														attrs));
+											}
+										}()))))))),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+				_List_fromArray(
+					[label])));
+	});
+var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
+var $ianmackenzie$elm_units$Pixels$inPixels = function (_v0) {
+	var numPixels = _v0.a;
+	return numPixels;
+};
+var $mdgriffith$elm_ui$Internal$Model$MoveY = function (a) {
+	return {$: 'MoveY', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Flag$moveY = $mdgriffith$elm_ui$Internal$Flag$flag(26);
+var $mdgriffith$elm_ui$Element$moveDown = function (y) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$TransformComponent,
+		$mdgriffith$elm_ui$Internal$Flag$moveY,
+		$mdgriffith$elm_ui$Internal$Model$MoveY(y));
+};
+var $mdgriffith$elm_ui$Internal$Model$MoveX = function (a) {
+	return {$: 'MoveX', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Flag$moveX = $mdgriffith$elm_ui$Internal$Flag$flag(25);
+var $mdgriffith$elm_ui$Element$moveLeft = function (x) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$TransformComponent,
+		$mdgriffith$elm_ui$Internal$Flag$moveX,
+		$mdgriffith$elm_ui$Internal$Model$MoveX(-x));
+};
+var $smucode$elm_flat_colors$FlatColors$ChinesePalette$peace = A3($mdgriffith$elm_ui$Element$rgb255, 164, 176, 190);
+var $mdgriffith$elm_ui$Internal$Model$FontSize = function (a) {
+	return {$: 'FontSize', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Flag$fontSize = $mdgriffith$elm_ui$Internal$Flag$flag(4);
+var $mdgriffith$elm_ui$Element$Font$size = function (i) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$fontSize,
+		$mdgriffith$elm_ui$Internal$Model$FontSize(i));
+};
+var $author$project$ViewMap$view = function (model) {
+	var handyMapControls = A2(
+		$mdgriffith$elm_ui$Element$column,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$alignTop,
+				$mdgriffith$elm_ui$Element$alignRight,
+				$mdgriffith$elm_ui$Element$moveDown(100),
+				$mdgriffith$elm_ui$Element$moveLeft(10),
+				$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite),
+				$mdgriffith$elm_ui$Element$Font$size(40),
+				$mdgriffith$elm_ui$Element$padding(6),
+				$mdgriffith$elm_ui$Element$spacing(8)
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$mdgriffith$elm_ui$Element$Input$button,
+				_List_Nil,
+				{
+					label: $mdgriffith$elm_ui$Element$text('x'),
+					onPress: $elm$core$Maybe$Nothing
+				})
+			]));
+	var _v0 = model.viewDimensions;
+	var viewWidth = _v0.a;
+	var viewHeight = _v0.b;
+	return A2(
+		$mdgriffith$elm_ui$Element$row,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$spacing(0),
+				$mdgriffith$elm_ui$Element$padding(0)
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$mdgriffith$elm_ui$Element$el,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width(
+						$mdgriffith$elm_ui$Element$px(
+							$ianmackenzie$elm_units$Pixels$inPixels(viewWidth))),
+						$mdgriffith$elm_ui$Element$height(
+						$mdgriffith$elm_ui$Element$px(
+							$ianmackenzie$elm_units$Pixels$inPixels(viewHeight))),
+						$mdgriffith$elm_ui$Element$alignLeft,
+						$mdgriffith$elm_ui$Element$alignTop,
+						$mdgriffith$elm_ui$Element$Border$width(2),
+						$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$peace),
+						$mdgriffith$elm_ui$Element$htmlAttribute(
+						$elm$html$Html$Attributes$id('map'))
+					]),
+				$mdgriffith$elm_ui$Element$none)
+			]));
+};
+var $author$project$Msg$ImageClick = function (a) {
+	return {$: 'ImageClick', a: a};
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$BackgroundColor = function (a) {
+	return {$: 'BackgroundColor', a: a};
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$backgroundColor = function (color) {
+	return $ianmackenzie$elm_3d_scene$Scene3d$BackgroundColor(color);
+};
+var $elm_explorations$webgl$WebGL$Internal$Alpha = function (a) {
+	return {$: 'Alpha', a: a};
+};
+var $elm_explorations$webgl$WebGL$alpha = $elm_explorations$webgl$WebGL$Internal$Alpha;
+var $elm_explorations$webgl$WebGL$Internal$Antialias = {$: 'Antialias'};
+var $elm_explorations$webgl$WebGL$antialias = $elm_explorations$webgl$WebGL$Internal$Antialias;
+var $elm_explorations$webgl$WebGL$Internal$ClearColor = F4(
+	function (a, b, c, d) {
+		return {$: 'ClearColor', a: a, b: b, c: c, d: d};
+	});
+var $elm_explorations$webgl$WebGL$clearColor = $elm_explorations$webgl$WebGL$Internal$ClearColor;
+var $elm_explorations$webgl$WebGL$Internal$Depth = function (a) {
+	return {$: 'Depth', a: a};
+};
+var $elm_explorations$webgl$WebGL$depth = $elm_explorations$webgl$WebGL$Internal$Depth;
+var $elm$html$Html$Attributes$height = function (n) {
+	return A2(
+		_VirtualDom_attribute,
+		'height',
+		$elm$core$String$fromInt(n));
+};
+var $elm$html$Html$Keyed$node = $elm$virtual_dom$VirtualDom$keyedNode;
+var $elm_explorations$webgl$WebGL$Internal$Stencil = function (a) {
+	return {$: 'Stencil', a: a};
+};
+var $elm_explorations$webgl$WebGL$stencil = $elm_explorations$webgl$WebGL$Internal$Stencil;
+var $avh4$elm_color$Color$toCssString = function (_v0) {
+	var r = _v0.a;
+	var g = _v0.b;
+	var b = _v0.c;
+	var a = _v0.d;
+	var roundTo = function (x) {
+		return $elm$core$Basics$round(x * 1000) / 1000;
+	};
+	var pct = function (x) {
+		return $elm$core$Basics$round(x * 10000) / 100;
+	};
+	return $elm$core$String$concat(
+		_List_fromArray(
+			[
+				'rgba(',
+				$elm$core$String$fromFloat(
+				pct(r)),
+				'%,',
+				$elm$core$String$fromFloat(
+				pct(g)),
+				'%,',
+				$elm$core$String$fromFloat(
+				pct(b)),
+				'%,',
+				$elm$core$String$fromFloat(
+				roundTo(a)),
+				')'
+			]));
+};
+var $elm_explorations$webgl$WebGL$toHtmlWith = F3(
+	function (options, attributes, entities) {
+		return A3(_WebGL_toHtml, options, attributes, entities);
+	});
+var $ianmackenzie$elm_units$Pixels$toInt = function (_v0) {
+	var numPixels = _v0.a;
+	return numPixels;
+};
+var $elm_explorations$linear_algebra$Math$Vector4$vec4 = _MJS_v4;
+var $ianmackenzie$elm_3d_scene$Scene3d$allLightsEnabled = A4($elm_explorations$linear_algebra$Math$Vector4$vec4, 1, 1, 1, 1);
+var $ianmackenzie$elm_3d_scene$Scene3d$call = F3(
+	function (renderPasses, lights, settings) {
+		return A2(
+			$elm$core$List$map,
+			function (renderPass) {
+				return A2(renderPass, lights, settings);
+			},
+			renderPasses);
+	});
+var $ianmackenzie$elm_3d_scene$Scene3d$Types$CieXyz = F3(
+	function (a, b, c) {
+		return {$: 'CieXyz', a: a, b: b, c: c};
+	});
+var $ianmackenzie$elm_3d_scene$Scene3d$ColorConversions$chromaticityToCieXyz = F2(
+	function (_v0, _v1) {
+		var intensity = _v0.a;
+		var x = _v1.a.x;
+		var y = _v1.a.y;
+		return A3($ianmackenzie$elm_3d_scene$Scene3d$Types$CieXyz, (intensity * x) / y, intensity, (intensity * ((1 - x) - y)) / y);
+	});
+var $ianmackenzie$elm_3d_scene$Scene3d$Types$LinearRgb = function (a) {
+	return {$: 'LinearRgb', a: a};
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$ColorConversions$cieXyzToLinearRgb = function (_v0) {
+	var bigX = _v0.a;
+	var bigY = _v0.b;
+	var bigZ = _v0.c;
+	return $ianmackenzie$elm_3d_scene$Scene3d$Types$LinearRgb(
+		A3($elm_explorations$linear_algebra$Math$Vector3$vec3, ((3.2406 * bigX) - (1.5372 * bigY)) - (0.4986 * bigZ), (((-0.9689) * bigX) + (1.8758 * bigY)) + (0.0415 * bigZ), ((0.0557 * bigX) - (0.204 * bigY)) + (1.057 * bigZ)));
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$ColorConversions$chromaticityToLinearRgb = F2(
+	function (intensity, chromaticity) {
+		return $ianmackenzie$elm_3d_scene$Scene3d$ColorConversions$cieXyzToLinearRgb(
+			A2($ianmackenzie$elm_3d_scene$Scene3d$ColorConversions$chromaticityToCieXyz, intensity, chromaticity));
+	});
+var $ianmackenzie$elm_3d_scene$Scene3d$Transformation$compose = F2(
+	function (t1, t2) {
+		return {
+			isRightHanded: _Utils_eq(t1.isRightHanded, t2.isRightHanded),
+			ix: ((t1.ix * t2.ix) + (t1.iy * t2.jx)) + (t1.iz * t2.kx),
+			iy: ((t1.ix * t2.iy) + (t1.iy * t2.jy)) + (t1.iz * t2.ky),
+			iz: ((t1.ix * t2.iz) + (t1.iy * t2.jz)) + (t1.iz * t2.kz),
+			jx: ((t1.jx * t2.ix) + (t1.jy * t2.jx)) + (t1.jz * t2.kx),
+			jy: ((t1.jx * t2.iy) + (t1.jy * t2.jy)) + (t1.jz * t2.ky),
+			jz: ((t1.jx * t2.iz) + (t1.jy * t2.jz)) + (t1.jz * t2.kz),
+			kx: ((t1.kx * t2.ix) + (t1.ky * t2.jx)) + (t1.kz * t2.kx),
+			ky: ((t1.kx * t2.iy) + (t1.ky * t2.jy)) + (t1.kz * t2.ky),
+			kz: ((t1.kx * t2.iz) + (t1.ky * t2.jz)) + (t1.kz * t2.kz),
+			px: t2.px + ((((t1.px * t2.ix) + (t1.py * t2.jx)) + (t1.pz * t2.kx)) * t2.scale),
+			py: t2.py + ((((t1.px * t2.iy) + (t1.py * t2.jy)) + (t1.pz * t2.ky)) * t2.scale),
+			pz: t2.pz + ((((t1.px * t2.iz) + (t1.py * t2.jz)) + (t1.pz * t2.kz)) * t2.scale),
+			scale: t1.scale * t2.scale
+		};
+	});
+var $elm_explorations$linear_algebra$Math$Matrix4$fromRecord = _MJS_m4x4fromRecord;
+var $ianmackenzie$elm_3d_scene$Scene3d$Transformation$modelMatrix = function (transformation) {
+	return $elm_explorations$linear_algebra$Math$Matrix4$fromRecord(
+		{m11: transformation.ix, m12: transformation.jx, m13: transformation.kx, m14: transformation.px, m21: transformation.iy, m22: transformation.jy, m23: transformation.ky, m24: transformation.py, m31: transformation.iz, m32: transformation.jz, m33: transformation.kz, m34: transformation.pz, m41: 0, m42: 0, m43: 0, m44: 1});
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$createRenderPass = F5(
+	function (sceneProperties, viewMatrix, projectionMatrix, transformation, drawFunction) {
+		var normalSign = transformation.isRightHanded ? 1 : (-1);
+		var modelScale = A4($elm_explorations$linear_algebra$Math$Vector4$vec4, transformation.scale, transformation.scale, transformation.scale, normalSign);
+		return A6(
+			drawFunction,
+			sceneProperties,
+			modelScale,
+			$ianmackenzie$elm_3d_scene$Scene3d$Transformation$modelMatrix(transformation),
+			transformation.isRightHanded,
+			viewMatrix,
+			projectionMatrix);
+	});
+var $ianmackenzie$elm_3d_scene$Scene3d$collectRenderPasses = F6(
+	function (sceneProperties, viewMatrix, projectionMatrix, currentTransformation, node, accumulated) {
+		collectRenderPasses:
+		while (true) {
+			switch (node.$) {
+				case 'EmptyNode':
+					return accumulated;
+				case 'Transformed':
+					var transformation = node.a;
+					var childNode = node.b;
+					var $temp$sceneProperties = sceneProperties,
+						$temp$viewMatrix = viewMatrix,
+						$temp$projectionMatrix = projectionMatrix,
+						$temp$currentTransformation = A2($ianmackenzie$elm_3d_scene$Scene3d$Transformation$compose, transformation, currentTransformation),
+						$temp$node = childNode,
+						$temp$accumulated = accumulated;
+					sceneProperties = $temp$sceneProperties;
+					viewMatrix = $temp$viewMatrix;
+					projectionMatrix = $temp$projectionMatrix;
+					currentTransformation = $temp$currentTransformation;
+					node = $temp$node;
+					accumulated = $temp$accumulated;
+					continue collectRenderPasses;
+				case 'MeshNode':
+					var meshDrawFunction = node.b;
+					var updatedMeshes = A2(
+						$elm$core$List$cons,
+						A5($ianmackenzie$elm_3d_scene$Scene3d$createRenderPass, sceneProperties, viewMatrix, projectionMatrix, currentTransformation, meshDrawFunction),
+						accumulated.meshes);
+					return {meshes: updatedMeshes, points: accumulated.points, shadows: accumulated.shadows};
+				case 'PointNode':
+					var pointDrawFunction = node.b;
+					var updatedPoints = A2(
+						$elm$core$List$cons,
+						A5($ianmackenzie$elm_3d_scene$Scene3d$createRenderPass, sceneProperties, viewMatrix, projectionMatrix, currentTransformation, pointDrawFunction),
+						accumulated.points);
+					return {meshes: accumulated.meshes, points: updatedPoints, shadows: accumulated.shadows};
+				case 'ShadowNode':
+					var shadowDrawFunction = node.a;
+					var updatedShadows = A2(
+						$elm$core$List$cons,
+						A5($ianmackenzie$elm_3d_scene$Scene3d$createRenderPass, sceneProperties, viewMatrix, projectionMatrix, currentTransformation, shadowDrawFunction),
+						accumulated.shadows);
+					return {meshes: accumulated.meshes, points: accumulated.points, shadows: updatedShadows};
+				default:
+					var childNodes = node.a;
+					return A3(
+						$elm$core$List$foldl,
+						A4($ianmackenzie$elm_3d_scene$Scene3d$collectRenderPasses, sceneProperties, viewMatrix, projectionMatrix, currentTransformation),
+						accumulated,
+						childNodes);
+			}
+		}
+	});
+var $elm_explorations$webgl$WebGL$Internal$ColorMask = F4(
+	function (a, b, c, d) {
+		return {$: 'ColorMask', a: a, b: b, c: c, d: d};
+	});
+var $elm_explorations$webgl$WebGL$Settings$colorMask = $elm_explorations$webgl$WebGL$Internal$ColorMask;
+var $elm_explorations$webgl$WebGL$Internal$DepthTest = F4(
+	function (a, b, c, d) {
+		return {$: 'DepthTest', a: a, b: b, c: c, d: d};
+	});
+var $elm_explorations$webgl$WebGL$Settings$DepthTest$greaterOrEqual = function (_v0) {
+	var write = _v0.write;
+	var near = _v0.near;
+	var far = _v0.far;
+	return A4($elm_explorations$webgl$WebGL$Internal$DepthTest, 518, write, near, far);
+};
+var $elm_explorations$webgl$WebGL$Internal$PolygonOffset = F2(
+	function (a, b) {
+		return {$: 'PolygonOffset', a: a, b: b};
+	});
+var $elm_explorations$webgl$WebGL$Settings$polygonOffset = $elm_explorations$webgl$WebGL$Internal$PolygonOffset;
+var $ianmackenzie$elm_3d_scene$Scene3d$createShadowStencil = _List_fromArray(
+	[
+		$elm_explorations$webgl$WebGL$Settings$DepthTest$greaterOrEqual(
+		{far: 1, near: 0, write: false}),
+		A4($elm_explorations$webgl$WebGL$Settings$colorMask, false, false, false, false),
+		A2($elm_explorations$webgl$WebGL$Settings$polygonOffset, 0.0, 1.0)
+	]);
+var $elm_explorations$webgl$WebGL$Settings$StencilTest$Test = function (a) {
+	return {$: 'Test', a: a};
+};
+var $elm_explorations$webgl$WebGL$Settings$StencilTest$always = $elm_explorations$webgl$WebGL$Settings$StencilTest$Test(519);
+var $ianmackenzie$elm_3d_scene$Scene3d$initialStencilCount = 8;
+var $ianmackenzie$elm_3d_scene$Scene3d$lowerFourBits = 15;
+var $elm_explorations$webgl$WebGL$Settings$StencilTest$Operation = function (a) {
+	return {$: 'Operation', a: a};
+};
+var $elm_explorations$webgl$WebGL$Settings$StencilTest$replace = $elm_explorations$webgl$WebGL$Settings$StencilTest$Operation(7681);
+var $ianmackenzie$elm_3d_scene$Scene3d$dummyFragmentShader = {
+	src: '\n        precision lowp float;\n\n        void main() {\n            gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n        }\n    ',
+	attributes: {},
+	uniforms: {}
+};
+var $elm_explorations$webgl$WebGL$triangleStrip = $elm_explorations$webgl$WebGL$Mesh1(
+	{elemSize: 1, indexSize: 0, mode: 5});
+var $elm_explorations$linear_algebra$Math$Vector2$vec2 = _MJS_v2;
+var $ianmackenzie$elm_3d_scene$Scene3d$fullScreenQuadMesh = $elm_explorations$webgl$WebGL$triangleStrip(
+	_List_fromArray(
+		[
+			{
+			position: A2($elm_explorations$linear_algebra$Math$Vector2$vec2, -1, -1)
+		},
+			{
+			position: A2($elm_explorations$linear_algebra$Math$Vector2$vec2, 1, -1)
+		},
+			{
+			position: A2($elm_explorations$linear_algebra$Math$Vector2$vec2, -1, 1)
+		},
+			{
+			position: A2($elm_explorations$linear_algebra$Math$Vector2$vec2, 1, 1)
+		}
+		]));
+var $ianmackenzie$elm_3d_scene$Scene3d$fullScreenQuadVertexShader = {
+	src: '\n        precision lowp float;\n\n        attribute vec2 position;\n\n        void main() {\n            gl_Position = vec4(position, 0.0, 1.0);\n        }\n    ',
+	attributes: {position: 'position'},
+	uniforms: {}
+};
+var $elm_explorations$webgl$WebGL$Internal$StencilTest = function (a) {
+	return function (b) {
+		return function (c) {
+			return function (d) {
+				return function (e) {
+					return function (f) {
+						return function (g) {
+							return function (h) {
+								return function (i) {
+									return function (j) {
+										return function (k) {
+											return {$: 'StencilTest', a: a, b: b, c: c, d: d, e: e, f: f, g: g, h: h, i: i, j: j, k: k};
+										};
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+};
+var $elm_explorations$webgl$WebGL$Settings$StencilTest$testSeparate = F3(
+	function (_v0, options1, options2) {
+		var ref = _v0.ref;
+		var mask = _v0.mask;
+		var writeMask = _v0.writeMask;
+		var expandTest = F2(
+			function (_v2, fn) {
+				var expandedTest = _v2.a;
+				return fn(expandedTest);
+			});
+		var expandOp = F2(
+			function (_v1, fn) {
+				var op = _v1.a;
+				return fn(op);
+			});
+		var expand = function (options) {
+			return A2(
+				$elm$core$Basics$composeR,
+				expandTest(options.test),
+				A2(
+					$elm$core$Basics$composeR,
+					expandOp(options.fail),
+					A2(
+						$elm$core$Basics$composeR,
+						expandOp(options.zfail),
+						expandOp(options.zpass))));
+		};
+		return A2(
+			expand,
+			options2,
+			A2(
+				expand,
+				options1,
+				A3($elm_explorations$webgl$WebGL$Internal$StencilTest, ref, mask, writeMask)));
+	});
+var $elm_explorations$webgl$WebGL$Settings$StencilTest$test = function (stencilTest) {
+	return A3(
+		$elm_explorations$webgl$WebGL$Settings$StencilTest$testSeparate,
+		{mask: stencilTest.mask, ref: stencilTest.ref, writeMask: stencilTest.writeMask},
+		{fail: stencilTest.fail, test: stencilTest.test, zfail: stencilTest.zfail, zpass: stencilTest.zpass},
+		{fail: stencilTest.fail, test: stencilTest.test, zfail: stencilTest.zfail, zpass: stencilTest.zpass});
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$updateStencil = function (test) {
+	return A5(
+		$elm_explorations$webgl$WebGL$entityWith,
+		_List_fromArray(
+			[
+				$elm_explorations$webgl$WebGL$Settings$StencilTest$test(test),
+				A4($elm_explorations$webgl$WebGL$Settings$colorMask, false, false, false, false)
+			]),
+		$ianmackenzie$elm_3d_scene$Scene3d$fullScreenQuadVertexShader,
+		$ianmackenzie$elm_3d_scene$Scene3d$dummyFragmentShader,
+		$ianmackenzie$elm_3d_scene$Scene3d$fullScreenQuadMesh,
+		{});
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$resetStencil = $ianmackenzie$elm_3d_scene$Scene3d$updateStencil(
+	{fail: $elm_explorations$webgl$WebGL$Settings$StencilTest$replace, mask: 0, ref: $ianmackenzie$elm_3d_scene$Scene3d$initialStencilCount, test: $elm_explorations$webgl$WebGL$Settings$StencilTest$always, writeMask: $ianmackenzie$elm_3d_scene$Scene3d$lowerFourBits, zfail: $elm_explorations$webgl$WebGL$Settings$StencilTest$replace, zpass: $elm_explorations$webgl$WebGL$Settings$StencilTest$replace});
+var $elm_explorations$webgl$WebGL$Settings$StencilTest$greater = $elm_explorations$webgl$WebGL$Settings$StencilTest$Test(516);
+var $elm_explorations$webgl$WebGL$Settings$StencilTest$invert = $elm_explorations$webgl$WebGL$Settings$StencilTest$Operation(5386);
+var $elm_explorations$webgl$WebGL$Settings$StencilTest$keep = $elm_explorations$webgl$WebGL$Settings$StencilTest$Operation(7680);
+var $ianmackenzie$elm_3d_scene$Scene3d$singleLightMask = function (index) {
+	return A2($elm$core$Basics$pow, 2, index + 4);
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$storeStencilValue = function (lightIndex) {
+	return $ianmackenzie$elm_3d_scene$Scene3d$updateStencil(
+		{
+			fail: $elm_explorations$webgl$WebGL$Settings$StencilTest$keep,
+			mask: $ianmackenzie$elm_3d_scene$Scene3d$lowerFourBits,
+			ref: $ianmackenzie$elm_3d_scene$Scene3d$initialStencilCount,
+			test: $elm_explorations$webgl$WebGL$Settings$StencilTest$greater,
+			writeMask: $ianmackenzie$elm_3d_scene$Scene3d$singleLightMask(lightIndex),
+			zfail: $elm_explorations$webgl$WebGL$Settings$StencilTest$invert,
+			zpass: $elm_explorations$webgl$WebGL$Settings$StencilTest$invert
+		});
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$createShadow = F3(
+	function (shadowRenderPasses, lightIndex, lightMatrix) {
+		return $elm$core$List$concat(
+			_List_fromArray(
+				[
+					A3($ianmackenzie$elm_3d_scene$Scene3d$call, shadowRenderPasses, lightMatrix, $ianmackenzie$elm_3d_scene$Scene3d$createShadowStencil),
+					_List_fromArray(
+					[
+						$ianmackenzie$elm_3d_scene$Scene3d$storeStencilValue(lightIndex),
+						$ianmackenzie$elm_3d_scene$Scene3d$resetStencil
+					])
+				]));
+	});
+var $ianmackenzie$elm_3d_scene$Scene3d$createShadows = F2(
+	function (shadowRenderPasses, shadowCasters) {
+		return $elm$core$List$concat(
+			A2(
+				$elm$core$List$indexedMap,
+				$ianmackenzie$elm_3d_scene$Scene3d$createShadow(shadowRenderPasses),
+				shadowCasters));
+	});
+var $elm_explorations$webgl$WebGL$Settings$DepthTest$less = function (_v0) {
+	var write = _v0.write;
+	var near = _v0.near;
+	var far = _v0.far;
+	return A4($elm_explorations$webgl$WebGL$Internal$DepthTest, 513, write, near, far);
+};
+var $elm_explorations$webgl$WebGL$Settings$DepthTest$default = $elm_explorations$webgl$WebGL$Settings$DepthTest$less(
+	{far: 1, near: 0, write: true});
+var $elm_explorations$webgl$WebGL$Internal$Blend = function (a) {
+	return function (b) {
+		return function (c) {
+			return function (d) {
+				return function (e) {
+					return function (f) {
+						return function (g) {
+							return function (h) {
+								return function (i) {
+									return function (j) {
+										return {$: 'Blend', a: a, b: b, c: c, d: d, e: e, f: f, g: g, h: h, i: i, j: j};
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+};
+var $elm_explorations$webgl$WebGL$Settings$Blend$custom = function (_v0) {
+	var r = _v0.r;
+	var g = _v0.g;
+	var b = _v0.b;
+	var a = _v0.a;
+	var color = _v0.color;
+	var alpha = _v0.alpha;
+	var expand = F2(
+		function (_v1, _v2) {
+			var eq1 = _v1.a;
+			var f11 = _v1.b;
+			var f12 = _v1.c;
+			var eq2 = _v2.a;
+			var f21 = _v2.b;
+			var f22 = _v2.c;
+			return $elm_explorations$webgl$WebGL$Internal$Blend(eq1)(f11)(f12)(eq2)(f21)(f22)(r)(g)(b)(a);
+		});
+	return A2(expand, color, alpha);
+};
+var $elm_explorations$webgl$WebGL$Settings$Blend$Blender = F3(
+	function (a, b, c) {
+		return {$: 'Blender', a: a, b: b, c: c};
+	});
+var $elm_explorations$webgl$WebGL$Settings$Blend$customAdd = F2(
+	function (_v0, _v1) {
+		var factor1 = _v0.a;
+		var factor2 = _v1.a;
+		return A3($elm_explorations$webgl$WebGL$Settings$Blend$Blender, 32774, factor1, factor2);
+	});
+var $elm_explorations$webgl$WebGL$Settings$Blend$Factor = function (a) {
+	return {$: 'Factor', a: a};
+};
+var $elm_explorations$webgl$WebGL$Settings$Blend$one = $elm_explorations$webgl$WebGL$Settings$Blend$Factor(1);
+var $elm_explorations$webgl$WebGL$Settings$Blend$oneMinusSrcAlpha = $elm_explorations$webgl$WebGL$Settings$Blend$Factor(771);
+var $elm_explorations$webgl$WebGL$Settings$Blend$srcAlpha = $elm_explorations$webgl$WebGL$Settings$Blend$Factor(770);
+var $ianmackenzie$elm_3d_scene$Scene3d$defaultBlend = $elm_explorations$webgl$WebGL$Settings$Blend$custom(
+	{
+		a: 0,
+		alpha: A2($elm_explorations$webgl$WebGL$Settings$Blend$customAdd, $elm_explorations$webgl$WebGL$Settings$Blend$one, $elm_explorations$webgl$WebGL$Settings$Blend$oneMinusSrcAlpha),
+		b: 0,
+		color: A2($elm_explorations$webgl$WebGL$Settings$Blend$customAdd, $elm_explorations$webgl$WebGL$Settings$Blend$srcAlpha, $elm_explorations$webgl$WebGL$Settings$Blend$oneMinusSrcAlpha),
+		g: 0,
+		r: 0
+	});
+var $ianmackenzie$elm_3d_scene$Scene3d$depthTestDefault = _List_fromArray(
+	[$elm_explorations$webgl$WebGL$Settings$DepthTest$default, $ianmackenzie$elm_3d_scene$Scene3d$defaultBlend]);
+var $ianmackenzie$elm_geometry$Point3d$unsafe = function (givenCoordinates) {
+	return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(givenCoordinates);
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$Transformation$placementFrame = function (transformation) {
+	return $ianmackenzie$elm_geometry$Frame3d$unsafe(
+		{
+			originPoint: $ianmackenzie$elm_geometry$Point3d$unsafe(
+				{x: transformation.px, y: transformation.py, z: transformation.pz}),
+			xDirection: $ianmackenzie$elm_geometry$Direction3d$unsafe(
+				{x: transformation.ix, y: transformation.iy, z: transformation.iz}),
+			yDirection: $ianmackenzie$elm_geometry$Direction3d$unsafe(
+				{x: transformation.jx, y: transformation.jy, z: transformation.jz}),
+			zDirection: $ianmackenzie$elm_geometry$Direction3d$unsafe(
+				{x: transformation.kx, y: transformation.ky, z: transformation.kz})
+		});
+};
+var $ianmackenzie$elm_geometry$Direction3d$relativeTo = F2(
+	function (_v0, _v1) {
+		var frame = _v0.a;
+		var d = _v1.a;
+		var _v2 = frame.zDirection;
+		var k = _v2.a;
+		var _v3 = frame.yDirection;
+		var j = _v3.a;
+		var _v4 = frame.xDirection;
+		var i = _v4.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
+			{x: ((d.x * i.x) + (d.y * i.y)) + (d.z * i.z), y: ((d.x * j.x) + (d.y * j.y)) + (d.z * j.z), z: ((d.x * k.x) + (d.y * k.y)) + (d.z * k.z)});
+	});
+var $ianmackenzie$elm_geometry$Point3d$relativeTo = F2(
+	function (_v0, _v1) {
+		var frame = _v0.a;
+		var p = _v1.a;
+		var _v2 = frame.originPoint;
+		var p0 = _v2.a;
+		var deltaX = p.x - p0.x;
+		var deltaY = p.y - p0.y;
+		var deltaZ = p.z - p0.z;
+		var _v3 = frame.zDirection;
+		var k = _v3.a;
+		var _v4 = frame.yDirection;
+		var j = _v4.a;
+		var _v5 = frame.xDirection;
+		var i = _v5.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+			{x: ((deltaX * i.x) + (deltaY * i.y)) + (deltaZ * i.z), y: ((deltaX * j.x) + (deltaY * j.y)) + (deltaZ * j.z), z: ((deltaX * k.x) + (deltaY * k.y)) + (deltaZ * k.z)});
+	});
+var $ianmackenzie$elm_geometry$Frame3d$xDirection = function (_v0) {
+	var properties = _v0.a;
+	return properties.xDirection;
+};
+var $ianmackenzie$elm_geometry$Frame3d$yDirection = function (_v0) {
+	var properties = _v0.a;
+	return properties.yDirection;
+};
+var $ianmackenzie$elm_geometry$Frame3d$relativeTo = F2(
+	function (otherFrame, frame) {
+		return $ianmackenzie$elm_geometry$Geometry$Types$Frame3d(
+			{
+				originPoint: A2(
+					$ianmackenzie$elm_geometry$Point3d$relativeTo,
+					otherFrame,
+					$ianmackenzie$elm_geometry$Frame3d$originPoint(frame)),
+				xDirection: A2(
+					$ianmackenzie$elm_geometry$Direction3d$relativeTo,
+					otherFrame,
+					$ianmackenzie$elm_geometry$Frame3d$xDirection(frame)),
+				yDirection: A2(
+					$ianmackenzie$elm_geometry$Direction3d$relativeTo,
+					otherFrame,
+					$ianmackenzie$elm_geometry$Frame3d$yDirection(frame)),
+				zDirection: A2(
+					$ianmackenzie$elm_geometry$Direction3d$relativeTo,
+					otherFrame,
+					$ianmackenzie$elm_geometry$Frame3d$zDirection(frame))
+			});
+	});
+var $ianmackenzie$elm_geometry$Point3d$meters = F3(
+	function (x, y, z) {
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+			{x: x, y: y, z: z});
+	});
+var $ianmackenzie$elm_geometry$Direction3d$unwrap = function (_v0) {
+	var coordinates = _v0.a;
+	return coordinates;
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$updateViewBounds = F4(
+	function (viewFrame, scale, modelBounds, current) {
+		var originalCenter = modelBounds.centerPoint;
+		var modelZDimension = (2 * modelBounds.halfZ) * scale;
+		var modelYDimension = (2 * modelBounds.halfY) * scale;
+		var modelXDimension = (2 * modelBounds.halfX) * scale;
+		var modelCenterZ = originalCenter.z * scale;
+		var modelCenterY = originalCenter.y * scale;
+		var modelCenterX = originalCenter.x * scale;
+		var k = $ianmackenzie$elm_geometry$Direction3d$unwrap(
+			$ianmackenzie$elm_geometry$Frame3d$zDirection(viewFrame));
+		var zDimension = ($elm$core$Basics$abs(modelXDimension * k.x) + $elm$core$Basics$abs(modelYDimension * k.y)) + $elm$core$Basics$abs(modelZDimension * k.z);
+		var j = $ianmackenzie$elm_geometry$Direction3d$unwrap(
+			$ianmackenzie$elm_geometry$Frame3d$yDirection(viewFrame));
+		var yDimension = ($elm$core$Basics$abs(modelXDimension * j.x) + $elm$core$Basics$abs(modelYDimension * j.y)) + $elm$core$Basics$abs(modelZDimension * j.z);
+		var i = $ianmackenzie$elm_geometry$Direction3d$unwrap(
+			$ianmackenzie$elm_geometry$Frame3d$xDirection(viewFrame));
+		var xDimension = ($elm$core$Basics$abs(modelXDimension * i.x) + $elm$core$Basics$abs(modelYDimension * i.y)) + $elm$core$Basics$abs(modelZDimension * i.z);
+		var nodeBounds = A2(
+			$ianmackenzie$elm_geometry$BoundingBox3d$withDimensions,
+			_Utils_Tuple3(
+				$ianmackenzie$elm_units$Quantity$Quantity(xDimension),
+				$ianmackenzie$elm_units$Quantity$Quantity(yDimension),
+				$ianmackenzie$elm_units$Quantity$Quantity(zDimension)),
+			A2(
+				$ianmackenzie$elm_geometry$Point3d$relativeTo,
+				viewFrame,
+				A3($ianmackenzie$elm_geometry$Point3d$meters, modelCenterX, modelCenterY, modelCenterZ)));
+		if (current.$ === 'Just') {
+			var currentBounds = current.a;
+			return $elm$core$Maybe$Just(
+				A2($ianmackenzie$elm_geometry$BoundingBox3d$union, currentBounds, nodeBounds));
+		} else {
+			return $elm$core$Maybe$Just(nodeBounds);
+		}
+	});
+var $ianmackenzie$elm_3d_scene$Scene3d$getViewBounds = F4(
+	function (viewFrame, scale, current, nodes) {
+		getViewBounds:
+		while (true) {
+			if (nodes.b) {
+				var first = nodes.a;
+				var rest = nodes.b;
+				switch (first.$) {
+					case 'EmptyNode':
+						var $temp$viewFrame = viewFrame,
+							$temp$scale = scale,
+							$temp$current = current,
+							$temp$nodes = rest;
+						viewFrame = $temp$viewFrame;
+						scale = $temp$scale;
+						current = $temp$current;
+						nodes = $temp$nodes;
+						continue getViewBounds;
+					case 'MeshNode':
+						var modelBounds = first.a;
+						var updated = A4($ianmackenzie$elm_3d_scene$Scene3d$updateViewBounds, viewFrame, scale, modelBounds, current);
+						var $temp$viewFrame = viewFrame,
+							$temp$scale = scale,
+							$temp$current = updated,
+							$temp$nodes = rest;
+						viewFrame = $temp$viewFrame;
+						scale = $temp$scale;
+						current = $temp$current;
+						nodes = $temp$nodes;
+						continue getViewBounds;
+					case 'ShadowNode':
+						var $temp$viewFrame = viewFrame,
+							$temp$scale = scale,
+							$temp$current = current,
+							$temp$nodes = rest;
+						viewFrame = $temp$viewFrame;
+						scale = $temp$scale;
+						current = $temp$current;
+						nodes = $temp$nodes;
+						continue getViewBounds;
+					case 'PointNode':
+						var modelBounds = first.a;
+						var updated = A4($ianmackenzie$elm_3d_scene$Scene3d$updateViewBounds, viewFrame, scale, modelBounds, current);
+						var $temp$viewFrame = viewFrame,
+							$temp$scale = scale,
+							$temp$current = updated,
+							$temp$nodes = rest;
+						viewFrame = $temp$viewFrame;
+						scale = $temp$scale;
+						current = $temp$current;
+						nodes = $temp$nodes;
+						continue getViewBounds;
+					case 'Group':
+						var childNodes = first.a;
+						var $temp$viewFrame = viewFrame,
+							$temp$scale = scale,
+							$temp$current = A4($ianmackenzie$elm_3d_scene$Scene3d$getViewBounds, viewFrame, scale, current, childNodes),
+							$temp$nodes = rest;
+						viewFrame = $temp$viewFrame;
+						scale = $temp$scale;
+						current = $temp$current;
+						nodes = $temp$nodes;
+						continue getViewBounds;
+					default:
+						var transformation = first.a;
+						var childNode = first.b;
+						var localViewFrame = A2(
+							$ianmackenzie$elm_geometry$Frame3d$relativeTo,
+							$ianmackenzie$elm_3d_scene$Scene3d$Transformation$placementFrame(transformation),
+							viewFrame);
+						var localScale = scale * transformation.scale;
+						var $temp$viewFrame = viewFrame,
+							$temp$scale = scale,
+							$temp$current = A4(
+							$ianmackenzie$elm_3d_scene$Scene3d$getViewBounds,
+							localViewFrame,
+							localScale,
+							current,
+							_List_fromArray(
+								[childNode])),
+							$temp$nodes = rest;
+						viewFrame = $temp$viewFrame;
+						scale = $temp$scale;
+						current = $temp$current;
+						nodes = $temp$nodes;
+						continue getViewBounds;
+				}
+			} else {
+				return current;
+			}
+		}
+	});
+var $elm_explorations$linear_algebra$Math$Vector3$getX = _MJS_v3getX;
+var $elm_explorations$linear_algebra$Math$Vector3$getY = _MJS_v3getY;
+var $elm_explorations$linear_algebra$Math$Vector3$getZ = _MJS_v3getZ;
+var $ianmackenzie$elm_3d_scene$Scene3d$Types$Group = function (a) {
+	return {$: 'Group', a: a};
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$Entity$collectNodes = F2(
+	function (drawables, accumulated) {
+		collectNodes:
+		while (true) {
+			if (!drawables.b) {
+				return accumulated;
+			} else {
+				var node = drawables.a.a;
+				var rest = drawables.b;
+				var $temp$drawables = rest,
+					$temp$accumulated = A2($elm$core$List$cons, node, accumulated);
+				drawables = $temp$drawables;
+				accumulated = $temp$accumulated;
+				continue collectNodes;
+			}
+		}
+	});
+var $ianmackenzie$elm_3d_scene$Scene3d$Entity$group = function (drawables) {
+	return $ianmackenzie$elm_3d_scene$Scene3d$Types$Entity(
+		$ianmackenzie$elm_3d_scene$Scene3d$Types$Group(
+			A2($ianmackenzie$elm_3d_scene$Scene3d$Entity$collectNodes, drawables, _List_Nil)));
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$Transformation$identity = {isRightHanded: true, ix: 1, iy: 0, iz: 0, jx: 0, jy: 1, jz: 0, kx: 0, ky: 0, kz: 1, px: 0, py: 0, pz: 0, scale: 1};
+var $ianmackenzie$elm_3d_scene$Scene3d$initStencil = $ianmackenzie$elm_3d_scene$Scene3d$updateStencil(
+	{fail: $elm_explorations$webgl$WebGL$Settings$StencilTest$replace, mask: 0, ref: $ianmackenzie$elm_3d_scene$Scene3d$initialStencilCount, test: $elm_explorations$webgl$WebGL$Settings$StencilTest$always, writeMask: 255, zfail: $elm_explorations$webgl$WebGL$Settings$StencilTest$replace, zpass: $elm_explorations$webgl$WebGL$Settings$StencilTest$replace});
+var $ianmackenzie$elm_3d_scene$Scene3d$Types$Light = function (a) {
+	return {$: 'Light', a: a};
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$Light$disabled = $ianmackenzie$elm_3d_scene$Scene3d$Types$Light(
+	{b: 0, castsShadows: false, g: 0, parameter: 0, r: 0, type_: 0, x: 0, y: 0, z: 0});
+var $ianmackenzie$elm_3d_scene$Scene3d$lightPair = F2(
+	function (_v0, _v1) {
+		var first = _v0.a;
+		var second = _v1.a;
+		return $elm_explorations$linear_algebra$Math$Matrix4$fromRecord(
+			{m11: first.x, m12: first.r, m13: second.x, m14: second.r, m21: first.y, m22: first.g, m23: second.y, m24: second.g, m31: first.z, m32: first.b, m33: second.z, m34: second.b, m41: first.type_, m42: first.parameter, m43: second.type_, m44: second.parameter});
+	});
+var $ianmackenzie$elm_3d_scene$Scene3d$lightingDisabled = _Utils_Tuple2(
+	{
+		lights12: A2($ianmackenzie$elm_3d_scene$Scene3d$lightPair, $ianmackenzie$elm_3d_scene$Scene3d$Light$disabled, $ianmackenzie$elm_3d_scene$Scene3d$Light$disabled),
+		lights34: A2($ianmackenzie$elm_3d_scene$Scene3d$lightPair, $ianmackenzie$elm_3d_scene$Scene3d$Light$disabled, $ianmackenzie$elm_3d_scene$Scene3d$Light$disabled),
+		lights56: A2($ianmackenzie$elm_3d_scene$Scene3d$lightPair, $ianmackenzie$elm_3d_scene$Scene3d$Light$disabled, $ianmackenzie$elm_3d_scene$Scene3d$Light$disabled),
+		lights78: A2($ianmackenzie$elm_3d_scene$Scene3d$lightPair, $ianmackenzie$elm_3d_scene$Scene3d$Light$disabled, $ianmackenzie$elm_3d_scene$Scene3d$Light$disabled)
+	},
+	A4($elm_explorations$linear_algebra$Math$Vector4$vec4, 0, 0, 0, 0));
+var $elm_explorations$webgl$WebGL$Settings$StencilTest$equal = $elm_explorations$webgl$WebGL$Settings$StencilTest$Test(514);
+var $elm_explorations$webgl$WebGL$Settings$DepthTest$lessOrEqual = function (_v0) {
+	var write = _v0.write;
+	var near = _v0.near;
+	var far = _v0.far;
+	return A4($elm_explorations$webgl$WebGL$Internal$DepthTest, 515, write, near, far);
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$upperFourBits = 240;
+var $ianmackenzie$elm_3d_scene$Scene3d$outsideStencil = _List_fromArray(
+	[
+		$elm_explorations$webgl$WebGL$Settings$DepthTest$lessOrEqual(
+		{far: 1, near: 0, write: true}),
+		$elm_explorations$webgl$WebGL$Settings$StencilTest$test(
+		{fail: $elm_explorations$webgl$WebGL$Settings$StencilTest$keep, mask: $ianmackenzie$elm_3d_scene$Scene3d$upperFourBits, ref: 0, test: $elm_explorations$webgl$WebGL$Settings$StencilTest$equal, writeMask: 0, zfail: $elm_explorations$webgl$WebGL$Settings$StencilTest$keep, zpass: $elm_explorations$webgl$WebGL$Settings$StencilTest$keep}),
+		$ianmackenzie$elm_3d_scene$Scene3d$defaultBlend
+	]);
+var $elm$core$Basics$isInfinite = _Basics_isInfinite;
+var $ianmackenzie$elm_3d_camera$WebGL$Matrices$projectionMatrix = F2(
+	function (_v0, _v1) {
+		var camera = _v0.a;
+		var nearClipDepth = _v1.nearClipDepth;
+		var farClipDepth = _v1.farClipDepth;
+		var aspectRatio = _v1.aspectRatio;
+		var _v2 = $ianmackenzie$elm_units$Quantity$abs(nearClipDepth);
+		var n = _v2.a;
+		var _v3 = $ianmackenzie$elm_units$Quantity$abs(farClipDepth);
+		var f = _v3.a;
+		var _v4 = camera.projection;
+		if (_v4.$ === 'Perspective') {
+			var frustumSlope = _v4.a;
+			return $elm$core$Basics$isInfinite(f) ? $elm_explorations$linear_algebra$Math$Matrix4$fromRecord(
+				{m11: 1 / (aspectRatio * frustumSlope), m12: 0, m13: 0, m14: 0, m21: 0, m22: 1 / frustumSlope, m23: 0, m24: 0, m31: 0, m32: 0, m33: -1, m34: (-2) * n, m41: 0, m42: 0, m43: -1, m44: 0}) : $elm_explorations$linear_algebra$Math$Matrix4$fromRecord(
+				{m11: 1 / (aspectRatio * frustumSlope), m12: 0, m13: 0, m14: 0, m21: 0, m22: 1 / frustumSlope, m23: 0, m24: 0, m31: 0, m32: 0, m33: (-(f + n)) / (f - n), m34: (((-2) * f) * n) / (f - n), m41: 0, m42: 0, m43: -1, m44: 0});
+		} else {
+			var viewportHeight = _v4.a.a;
+			return $elm$core$Basics$isInfinite(f) ? $elm_explorations$linear_algebra$Math$Matrix4$fromRecord(
+				{m11: 2 / (aspectRatio * viewportHeight), m12: 0, m13: 0, m14: 0, m21: 0, m22: 2 / viewportHeight, m23: 0, m24: 0, m31: 0, m32: 0, m33: 0, m34: -1, m41: 0, m42: 0, m43: 0, m44: 1}) : $elm_explorations$linear_algebra$Math$Matrix4$fromRecord(
+				{m11: 2 / (aspectRatio * viewportHeight), m12: 0, m13: 0, m14: 0, m21: 0, m22: 2 / viewportHeight, m23: 0, m24: 0, m31: 0, m32: 0, m33: (-2) / (f - n), m34: (-(f + n)) / (f - n), m41: 0, m42: 0, m43: 0, m44: 1});
+		}
+	});
+var $elm$core$Bitwise$shiftRightBy = _Bitwise_shiftRightBy;
+var $ianmackenzie$elm_3d_scene$Scene3d$enabledFlag = F2(
+	function (lightMask, lightIndex) {
+		return ((1 & (lightMask >> lightIndex)) === 1) ? 0 : 1;
+	});
+var $ianmackenzie$elm_3d_scene$Scene3d$insideStencil = function (lightMask) {
+	return _List_fromArray(
+		[
+			$elm_explorations$webgl$WebGL$Settings$DepthTest$lessOrEqual(
+			{far: 1, near: 0, write: true}),
+			$elm_explorations$webgl$WebGL$Settings$StencilTest$test(
+			{fail: $elm_explorations$webgl$WebGL$Settings$StencilTest$keep, mask: $ianmackenzie$elm_3d_scene$Scene3d$upperFourBits, ref: lightMask, test: $elm_explorations$webgl$WebGL$Settings$StencilTest$equal, writeMask: 0, zfail: $elm_explorations$webgl$WebGL$Settings$StencilTest$keep, zpass: $elm_explorations$webgl$WebGL$Settings$StencilTest$keep}),
+			$ianmackenzie$elm_3d_scene$Scene3d$defaultBlend
+		]);
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$renderWithinShadows = F3(
+	function (meshRenderPasses, lightMatrices, numShadowingLights) {
+		return $elm$core$List$concat(
+			A2(
+				$elm$core$List$map,
+				function (lightMask) {
+					var stencilMask = lightMask << 4;
+					var enabledLights = A4(
+						$elm_explorations$linear_algebra$Math$Vector4$vec4,
+						A2($ianmackenzie$elm_3d_scene$Scene3d$enabledFlag, lightMask, 0),
+						A2($ianmackenzie$elm_3d_scene$Scene3d$enabledFlag, lightMask, 1),
+						A2($ianmackenzie$elm_3d_scene$Scene3d$enabledFlag, lightMask, 2),
+						A2($ianmackenzie$elm_3d_scene$Scene3d$enabledFlag, lightMask, 3));
+					return A3(
+						$ianmackenzie$elm_3d_scene$Scene3d$call,
+						meshRenderPasses,
+						_Utils_Tuple2(lightMatrices, enabledLights),
+						$ianmackenzie$elm_3d_scene$Scene3d$insideStencil(stencilMask));
+				},
+				A2(
+					$elm$core$List$range,
+					1,
+					A2($elm$core$Basics$pow, 2, numShadowingLights) - 1)));
+	});
+var $ianmackenzie$elm_geometry$Point3d$toMeters = function (_v0) {
+	var pointCoordinates = _v0.a;
+	return pointCoordinates;
+};
+var $elm_explorations$linear_algebra$Math$Matrix4$toRecord = _MJS_m4x4toRecord;
+var $ianmackenzie$elm_geometry$Direction3d$z = $ianmackenzie$elm_geometry$Direction3d$positiveZ;
+var $ianmackenzie$elm_geometry$Frame3d$atOrigin = $ianmackenzie$elm_geometry$Geometry$Types$Frame3d(
+	{originPoint: $ianmackenzie$elm_geometry$Point3d$origin, xDirection: $ianmackenzie$elm_geometry$Direction3d$x, yDirection: $ianmackenzie$elm_geometry$Direction3d$y, zDirection: $ianmackenzie$elm_geometry$Direction3d$z});
+var $ianmackenzie$elm_geometry_linear_algebra_interop$Geometry$Interop$LinearAlgebra$Frame3d$toMat4 = function (frame) {
+	var p = $ianmackenzie$elm_geometry$Point3d$unwrap(
+		$ianmackenzie$elm_geometry$Frame3d$originPoint(frame));
+	var k = $ianmackenzie$elm_geometry$Direction3d$unwrap(
+		$ianmackenzie$elm_geometry$Frame3d$zDirection(frame));
+	var j = $ianmackenzie$elm_geometry$Direction3d$unwrap(
+		$ianmackenzie$elm_geometry$Frame3d$yDirection(frame));
+	var i = $ianmackenzie$elm_geometry$Direction3d$unwrap(
+		$ianmackenzie$elm_geometry$Frame3d$xDirection(frame));
+	return $elm_explorations$linear_algebra$Math$Matrix4$fromRecord(
+		{m11: i.x, m12: j.x, m13: k.x, m14: p.x, m21: i.y, m22: j.y, m23: k.y, m24: p.y, m31: i.z, m32: j.z, m33: k.z, m34: p.z, m41: 0, m42: 0, m43: 0, m44: 1});
+};
+var $ianmackenzie$elm_3d_camera$WebGL$Matrices$modelViewMatrix = F2(
+	function (modelFrame, _v0) {
+		var viewpointFrame = _v0.a;
+		return $ianmackenzie$elm_geometry_linear_algebra_interop$Geometry$Interop$LinearAlgebra$Frame3d$toMat4(
+			A2($ianmackenzie$elm_geometry$Frame3d$relativeTo, viewpointFrame, modelFrame));
+	});
+var $ianmackenzie$elm_3d_camera$WebGL$Matrices$viewMatrix = function (camera) {
+	return A2($ianmackenzie$elm_3d_camera$WebGL$Matrices$modelViewMatrix, $ianmackenzie$elm_geometry$Frame3d$atOrigin, camera);
+};
+var $ianmackenzie$elm_3d_camera$Camera3d$viewpoint = function (_v0) {
+	var camera = _v0.a;
+	return camera.viewpoint;
+};
+var $ianmackenzie$elm_3d_camera$Viewpoint3d$xDirection = function (_v0) {
+	var frame = _v0.a;
+	return $ianmackenzie$elm_geometry$Frame3d$xDirection(frame);
+};
+var $ianmackenzie$elm_3d_camera$Viewpoint3d$yDirection = function (_v0) {
+	var frame = _v0.a;
+	return $ianmackenzie$elm_geometry$Frame3d$yDirection(frame);
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$toWebGLEntities = function (_arguments) {
+	var viewpoint = $ianmackenzie$elm_3d_camera$Camera3d$viewpoint(_arguments.camera);
+	var viewFrame = $ianmackenzie$elm_geometry$Frame3d$unsafe(
+		{
+			originPoint: $ianmackenzie$elm_3d_camera$Viewpoint3d$eyePoint(viewpoint),
+			xDirection: $ianmackenzie$elm_3d_camera$Viewpoint3d$xDirection(viewpoint),
+			yDirection: $ianmackenzie$elm_3d_camera$Viewpoint3d$yDirection(viewpoint),
+			zDirection: $ianmackenzie$elm_geometry$Direction3d$reverse(
+				$ianmackenzie$elm_3d_camera$Viewpoint3d$viewDirection(viewpoint))
+		});
+	var _v0 = $ianmackenzie$elm_3d_scene$Scene3d$Entity$group(_arguments.entities);
+	var rootNode = _v0.a;
+	var _v1 = A4(
+		$ianmackenzie$elm_3d_scene$Scene3d$getViewBounds,
+		viewFrame,
+		1,
+		$elm$core$Maybe$Nothing,
+		_List_fromArray(
+			[rootNode]));
+	if (_v1.$ === 'Nothing') {
+		return _List_Nil;
+	} else {
+		var viewBounds = _v1.a;
+		var viewMatrix = $ianmackenzie$elm_3d_camera$WebGL$Matrices$viewMatrix(viewpoint);
+		var nearClipDepth = A2(
+			$ianmackenzie$elm_units$Quantity$multiplyBy,
+			0.99,
+			A2(
+				$ianmackenzie$elm_units$Quantity$max,
+				$ianmackenzie$elm_units$Quantity$abs(_arguments.clipDepth),
+				$ianmackenzie$elm_units$Quantity$negate(
+					$ianmackenzie$elm_geometry$BoundingBox3d$maxZ(viewBounds))));
+		var _v2 = $ianmackenzie$elm_geometry$BoundingBox3d$dimensions(viewBounds);
+		var xDimension = _v2.a;
+		var yDimension = _v2.b;
+		var zDimension = _v2.c;
+		var sceneDiameter = $ianmackenzie$elm_geometry$Vector3d$length(
+			A3($ianmackenzie$elm_geometry$Vector3d$xyz, xDimension, yDimension, zDimension));
+		var farClipDepth = A2(
+			$ianmackenzie$elm_units$Quantity$multiplyBy,
+			1.01,
+			A2(
+				$ianmackenzie$elm_units$Quantity$plus,
+				sceneDiameter,
+				$ianmackenzie$elm_units$Quantity$negate(
+					$ianmackenzie$elm_geometry$BoundingBox3d$minZ(viewBounds))));
+		var projectionMatrix = A2(
+			$ianmackenzie$elm_3d_camera$WebGL$Matrices$projectionMatrix,
+			_arguments.camera,
+			{aspectRatio: _arguments.aspectRatio, farClipDepth: farClipDepth, nearClipDepth: nearClipDepth});
+		var projectionType = $elm_explorations$linear_algebra$Math$Matrix4$toRecord(projectionMatrix).m44;
+		var eyePointOrDirectionToCamera = (!projectionType) ? $ianmackenzie$elm_geometry$Point3d$toMeters(
+			$ianmackenzie$elm_3d_camera$Viewpoint3d$eyePoint(viewpoint)) : $ianmackenzie$elm_geometry$Direction3d$unwrap(
+			$ianmackenzie$elm_geometry$Direction3d$reverse(
+				$ianmackenzie$elm_3d_camera$Viewpoint3d$viewDirection(viewpoint)));
+		var _v3 = function () {
+			var _v4 = _arguments.toneMapping;
+			switch (_v4.$) {
+				case 'NoToneMapping':
+					return _Utils_Tuple2(0, 0);
+				case 'ReinhardLuminanceToneMapping':
+					return _Utils_Tuple2(1, 0);
+				case 'ReinhardPerChannelToneMapping':
+					return _Utils_Tuple2(2, 0);
+				case 'ExtendedReinhardLuminanceToneMapping':
+					var overexposureLimit = _v4.a;
+					return _Utils_Tuple2(3, overexposureLimit);
+				case 'ExtendedReinhardPerChannelToneMapping':
+					var overexposureLimit = _v4.a;
+					return _Utils_Tuple2(4, overexposureLimit);
+				default:
+					return _Utils_Tuple2(5, 0);
+			}
+		}();
+		var toneMapType = _v3.a;
+		var toneMapParam = _v3.b;
+		var _v5 = _arguments.exposure;
+		var exposureLuminance = _v5.a;
+		var _v6 = A2($ianmackenzie$elm_3d_scene$Scene3d$ColorConversions$chromaticityToLinearRgb, exposureLuminance, _arguments.whiteBalance);
+		var referenceWhite = _v6.a;
+		var sceneProperties = $elm_explorations$linear_algebra$Math$Matrix4$fromRecord(
+			{
+				m11: 0,
+				m12: eyePointOrDirectionToCamera.x,
+				m13: $elm_explorations$linear_algebra$Math$Vector3$getX(referenceWhite),
+				m14: _arguments.supersampling,
+				m21: 0,
+				m22: eyePointOrDirectionToCamera.y,
+				m23: $elm_explorations$linear_algebra$Math$Vector3$getY(referenceWhite),
+				m24: $ianmackenzie$elm_units$Length$inMeters(sceneDiameter),
+				m31: 0,
+				m32: eyePointOrDirectionToCamera.z,
+				m33: $elm_explorations$linear_algebra$Math$Vector3$getZ(referenceWhite),
+				m34: toneMapType,
+				m41: 0,
+				m42: projectionType,
+				m43: 0,
+				m44: toneMapParam
+			});
+		var renderPasses = A6(
+			$ianmackenzie$elm_3d_scene$Scene3d$collectRenderPasses,
+			sceneProperties,
+			viewMatrix,
+			projectionMatrix,
+			$ianmackenzie$elm_3d_scene$Scene3d$Transformation$identity,
+			rootNode,
+			{meshes: _List_Nil, points: _List_Nil, shadows: _List_Nil});
+		var _v7 = _arguments.lights;
+		switch (_v7.$) {
+			case 'SingleUnshadowedPass':
+				var lightMatrices = _v7.a;
+				return $elm$core$List$concat(
+					_List_fromArray(
+						[
+							A3(
+							$ianmackenzie$elm_3d_scene$Scene3d$call,
+							renderPasses.meshes,
+							_Utils_Tuple2(lightMatrices, $ianmackenzie$elm_3d_scene$Scene3d$allLightsEnabled),
+							$ianmackenzie$elm_3d_scene$Scene3d$depthTestDefault),
+							A3($ianmackenzie$elm_3d_scene$Scene3d$call, renderPasses.points, $ianmackenzie$elm_3d_scene$Scene3d$lightingDisabled, $ianmackenzie$elm_3d_scene$Scene3d$depthTestDefault)
+						]));
+			case 'SingleShadowedPass':
+				var lightMatrices = _v7.a;
+				return $elm$core$List$concat(
+					_List_fromArray(
+						[
+							A3($ianmackenzie$elm_3d_scene$Scene3d$call, renderPasses.meshes, $ianmackenzie$elm_3d_scene$Scene3d$lightingDisabled, $ianmackenzie$elm_3d_scene$Scene3d$depthTestDefault),
+							_List_fromArray(
+							[$ianmackenzie$elm_3d_scene$Scene3d$initStencil]),
+							A3($ianmackenzie$elm_3d_scene$Scene3d$call, renderPasses.shadows, lightMatrices.lights12, $ianmackenzie$elm_3d_scene$Scene3d$createShadowStencil),
+							_List_fromArray(
+							[
+								$ianmackenzie$elm_3d_scene$Scene3d$storeStencilValue(0)
+							]),
+							A3(
+							$ianmackenzie$elm_3d_scene$Scene3d$call,
+							renderPasses.meshes,
+							_Utils_Tuple2(lightMatrices, $ianmackenzie$elm_3d_scene$Scene3d$allLightsEnabled),
+							$ianmackenzie$elm_3d_scene$Scene3d$outsideStencil),
+							A3($ianmackenzie$elm_3d_scene$Scene3d$call, renderPasses.points, $ianmackenzie$elm_3d_scene$Scene3d$lightingDisabled, $ianmackenzie$elm_3d_scene$Scene3d$depthTestDefault)
+						]));
+			default:
+				var shadowCasters = _v7.a;
+				var allLightMatrices = _v7.b;
+				return $elm$core$List$concat(
+					_List_fromArray(
+						[
+							A3(
+							$ianmackenzie$elm_3d_scene$Scene3d$call,
+							renderPasses.meshes,
+							_Utils_Tuple2(allLightMatrices, $ianmackenzie$elm_3d_scene$Scene3d$allLightsEnabled),
+							$ianmackenzie$elm_3d_scene$Scene3d$depthTestDefault),
+							_List_fromArray(
+							[$ianmackenzie$elm_3d_scene$Scene3d$initStencil]),
+							A2($ianmackenzie$elm_3d_scene$Scene3d$createShadows, renderPasses.shadows, shadowCasters),
+							A3(
+							$ianmackenzie$elm_3d_scene$Scene3d$renderWithinShadows,
+							renderPasses.meshes,
+							allLightMatrices,
+							$elm$core$List$length(shadowCasters)),
+							A3($ianmackenzie$elm_3d_scene$Scene3d$call, renderPasses.points, $ianmackenzie$elm_3d_scene$Scene3d$lightingDisabled, $ianmackenzie$elm_3d_scene$Scene3d$depthTestDefault)
+						]));
+		}
+	}
+};
+var $elm$html$Html$Attributes$width = function (n) {
+	return A2(
+		_VirtualDom_attribute,
+		'width',
+		$elm$core$String$fromInt(n));
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$composite = F2(
+	function (_arguments, scenes) {
+		var commonWebGLOptions = _List_fromArray(
+			[
+				$elm_explorations$webgl$WebGL$depth(1),
+				$elm_explorations$webgl$WebGL$stencil(0),
+				$elm_explorations$webgl$WebGL$alpha(true),
+				A4($elm_explorations$webgl$WebGL$clearColor, 0, 0, 0, 0)
+			]);
+		var _v0 = function () {
+			var _v1 = _arguments.antialiasing;
+			switch (_v1.$) {
+				case 'NoAntialiasing':
+					return _Utils_Tuple3(commonWebGLOptions, '0', 1);
+				case 'Multisampling':
+					return _Utils_Tuple3(
+						A2($elm$core$List$cons, $elm_explorations$webgl$WebGL$antialias, commonWebGLOptions),
+						'1',
+						1);
+				default:
+					var value = _v1.a;
+					return _Utils_Tuple3(commonWebGLOptions, '0', value);
+			}
+		}();
+		var webGLOptions = _v0.a;
+		var key = _v0.b;
+		var scalingFactor = _v0.c;
+		var _v2 = _arguments.dimensions;
+		var width = _v2.a;
+		var height = _v2.b;
+		var heightInPixels = $ianmackenzie$elm_units$Pixels$toInt(height);
+		var heightCss = A2(
+			$elm$html$Html$Attributes$style,
+			'height',
+			$elm$core$String$fromInt(heightInPixels) + 'px');
+		var widthInPixels = $ianmackenzie$elm_units$Pixels$toInt(width);
+		var aspectRatio = widthInPixels / heightInPixels;
+		var webGLEntities = A2(
+			$elm$core$List$concatMap,
+			function (scene) {
+				return $ianmackenzie$elm_3d_scene$Scene3d$toWebGLEntities(
+					{aspectRatio: aspectRatio, camera: _arguments.camera, clipDepth: _arguments.clipDepth, entities: scene.entities, exposure: scene.exposure, lights: scene.lights, supersampling: scalingFactor, toneMapping: scene.toneMapping, whiteBalance: scene.whiteBalance});
+			},
+			scenes);
+		var widthCss = A2(
+			$elm$html$Html$Attributes$style,
+			'width',
+			$elm$core$String$fromInt(widthInPixels) + 'px');
+		var _v3 = _arguments.background;
+		var givenBackgroundColor = _v3.a;
+		var backgroundColorString = $avh4$elm_color$Color$toCssString(givenBackgroundColor);
+		return A3(
+			$elm$html$Html$Keyed$node,
+			'div',
+			_List_fromArray(
+				[
+					A2($elm$html$Html$Attributes$style, 'padding', '0px'),
+					widthCss,
+					heightCss
+				]),
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					key,
+					A3(
+						$elm_explorations$webgl$WebGL$toHtmlWith,
+						webGLOptions,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$width(
+								$elm$core$Basics$round(widthInPixels * scalingFactor)),
+								$elm$html$Html$Attributes$height(
+								$elm$core$Basics$round(heightInPixels * scalingFactor)),
+								widthCss,
+								heightCss,
+								A2($elm$html$Html$Attributes$style, 'display', 'block'),
+								A2($elm$html$Html$Attributes$style, 'background-color', backgroundColorString)
+							]),
+						webGLEntities))
+				]));
+	});
+var $ianmackenzie$elm_3d_scene$Scene3d$custom = function (_arguments) {
+	return A2(
+		$ianmackenzie$elm_3d_scene$Scene3d$composite,
+		{antialiasing: _arguments.antialiasing, background: _arguments.background, camera: _arguments.camera, clipDepth: _arguments.clipDepth, dimensions: _arguments.dimensions},
+		_List_fromArray(
+			[
+				{entities: _arguments.entities, exposure: _arguments.exposure, lights: _arguments.lights, toneMapping: _arguments.toneMapping, whiteBalance: _arguments.whiteBalance}
+			]));
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$Types$Chromaticity = function (a) {
+	return {$: 'Chromaticity', a: a};
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$Light$chromaticity = function (xy) {
+	return $ianmackenzie$elm_3d_scene$Scene3d$Types$Chromaticity(xy);
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$Light$daylight = $ianmackenzie$elm_3d_scene$Scene3d$Light$chromaticity(
+	{x: 0.31271, y: 0.32902});
+var $ianmackenzie$elm_3d_scene$Scene3d$Exposure = function (a) {
+	return {$: 'Exposure', a: a};
+};
+var $ianmackenzie$elm_units$Luminance$nits = function (numNits) {
+	return $ianmackenzie$elm_units$Quantity$Quantity(numNits);
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$exposureValue = function (ev100) {
+	return $ianmackenzie$elm_3d_scene$Scene3d$Exposure(
+		$ianmackenzie$elm_units$Luminance$nits(
+			1.2 * A2($elm$core$Basics$pow, 2, ev100)));
+};
+var $ianmackenzie$elm_units$Illuminance$lux = function (numLux) {
+	return $ianmackenzie$elm_units$Quantity$Quantity(numLux);
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$Multisampling = {$: 'Multisampling'};
+var $ianmackenzie$elm_3d_scene$Scene3d$multisampling = $ianmackenzie$elm_3d_scene$Scene3d$Multisampling;
+var $ianmackenzie$elm_3d_scene$Scene3d$NoToneMapping = {$: 'NoToneMapping'};
+var $ianmackenzie$elm_3d_scene$Scene3d$noToneMapping = $ianmackenzie$elm_3d_scene$Scene3d$NoToneMapping;
+var $ianmackenzie$elm_3d_scene$Scene3d$SingleShadowedPass = function (a) {
+	return {$: 'SingleShadowedPass', a: a};
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$SingleUnshadowedPass = function (a) {
+	return {$: 'SingleUnshadowedPass', a: a};
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$lightCastsShadows = function (_v0) {
+	var properties = _v0.a;
+	return properties.castsShadows;
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$oneLight = function (light) {
+	var lightMatrices = {
+		lights12: A2($ianmackenzie$elm_3d_scene$Scene3d$lightPair, light, $ianmackenzie$elm_3d_scene$Scene3d$Light$disabled),
+		lights34: A2($ianmackenzie$elm_3d_scene$Scene3d$lightPair, $ianmackenzie$elm_3d_scene$Scene3d$Light$disabled, $ianmackenzie$elm_3d_scene$Scene3d$Light$disabled),
+		lights56: A2($ianmackenzie$elm_3d_scene$Scene3d$lightPair, $ianmackenzie$elm_3d_scene$Scene3d$Light$disabled, $ianmackenzie$elm_3d_scene$Scene3d$Light$disabled),
+		lights78: A2($ianmackenzie$elm_3d_scene$Scene3d$lightPair, $ianmackenzie$elm_3d_scene$Scene3d$Light$disabled, $ianmackenzie$elm_3d_scene$Scene3d$Light$disabled)
+	};
+	return $ianmackenzie$elm_3d_scene$Scene3d$lightCastsShadows(light) ? $ianmackenzie$elm_3d_scene$Scene3d$SingleShadowedPass(lightMatrices) : $ianmackenzie$elm_3d_scene$Scene3d$SingleUnshadowedPass(lightMatrices);
+};
+var $ianmackenzie$elm_units$Quantity$float = function (value) {
+	return $ianmackenzie$elm_units$Quantity$Quantity(value);
+};
+var $ianmackenzie$elm_units$Illuminance$inLux = function (_v0) {
+	var numLux = _v0.a;
+	return numLux;
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$Light$soft = function (light) {
+	soft:
+	while (true) {
+		if (_Utils_eq(light.intensityAbove, $ianmackenzie$elm_units$Quantity$zero) && _Utils_eq(light.intensityBelow, $ianmackenzie$elm_units$Quantity$zero)) {
+			return $ianmackenzie$elm_3d_scene$Scene3d$Light$disabled;
+		} else {
+			if (A2(
+				$ianmackenzie$elm_units$Quantity$greaterThan,
+				$ianmackenzie$elm_units$Quantity$abs(light.intensityAbove),
+				$ianmackenzie$elm_units$Quantity$abs(light.intensityBelow))) {
+				var $temp$light = {
+					chromaticity: light.chromaticity,
+					intensityAbove: light.intensityBelow,
+					intensityBelow: light.intensityAbove,
+					upDirection: $ianmackenzie$elm_geometry$Direction3d$reverse(light.upDirection)
+				};
+				light = $temp$light;
+				continue soft;
+			} else {
+				var nitsBelow = $elm$core$Basics$abs(
+					$ianmackenzie$elm_units$Illuminance$inLux(light.intensityBelow) / $elm$core$Basics$pi);
+				var nitsAbove = $elm$core$Basics$abs(
+					$ianmackenzie$elm_units$Illuminance$inLux(light.intensityAbove) / $elm$core$Basics$pi);
+				var _v0 = $ianmackenzie$elm_geometry$Direction3d$unwrap(light.upDirection);
+				var x = _v0.x;
+				var y = _v0.y;
+				var z = _v0.z;
+				var _v1 = A2(
+					$ianmackenzie$elm_3d_scene$Scene3d$ColorConversions$chromaticityToLinearRgb,
+					$ianmackenzie$elm_units$Quantity$float(1),
+					light.chromaticity);
+				var rgb = _v1.a;
+				return $ianmackenzie$elm_3d_scene$Scene3d$Types$Light(
+					{
+						b: nitsAbove * $elm_explorations$linear_algebra$Math$Vector3$getZ(rgb),
+						castsShadows: false,
+						g: nitsAbove * $elm_explorations$linear_algebra$Math$Vector3$getY(rgb),
+						parameter: nitsBelow / nitsAbove,
+						r: nitsAbove * $elm_explorations$linear_algebra$Math$Vector3$getX(rgb),
+						type_: 3,
+						x: x,
+						y: y,
+						z: z
+					});
+			}
+		}
+	}
+};
+var $ianmackenzie$elm_3d_scene$Scene3d$cloudy = function (_arguments) {
+	return $ianmackenzie$elm_3d_scene$Scene3d$custom(
+		{
+			antialiasing: $ianmackenzie$elm_3d_scene$Scene3d$multisampling,
+			background: _arguments.background,
+			camera: _arguments.camera,
+			clipDepth: _arguments.clipDepth,
+			dimensions: _arguments.dimensions,
+			entities: _arguments.entities,
+			exposure: $ianmackenzie$elm_3d_scene$Scene3d$exposureValue(9),
+			lights: $ianmackenzie$elm_3d_scene$Scene3d$oneLight(
+				$ianmackenzie$elm_3d_scene$Scene3d$Light$soft(
+					{
+						chromaticity: $ianmackenzie$elm_3d_scene$Scene3d$Light$daylight,
+						intensityAbove: $ianmackenzie$elm_units$Illuminance$lux(1000),
+						intensityBelow: $ianmackenzie$elm_units$Illuminance$lux(200),
+						upDirection: _arguments.upDirection
+					})),
+			toneMapping: $ianmackenzie$elm_3d_scene$Scene3d$noToneMapping,
+			whiteBalance: $ianmackenzie$elm_3d_scene$Scene3d$Light$daylight
+		});
+};
+var $mdgriffith$elm_ui$Internal$Model$unstyled = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Unstyled, $elm$core$Basics$always);
+var $mdgriffith$elm_ui$Element$html = $mdgriffith$elm_ui$Internal$Model$unstyled;
+var $avh4$elm_color$Color$lightBlue = A4($avh4$elm_color$Color$RgbaSpace, 114 / 255, 159 / 255, 207 / 255, 1.0);
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$defaultOptions = {preventDefault: true, stopPropagation: false};
+var $elm$virtual_dom$VirtualDom$Custom = function (a) {
+	return {$: 'Custom', a: a};
+};
+var $elm$html$Html$Events$custom = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Custom(decoder));
+	});
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$Event = F6(
+	function (keys, button, clientPos, offsetPos, pagePos, screenPos) {
+		return {button: button, clientPos: clientPos, keys: keys, offsetPos: offsetPos, pagePos: pagePos, screenPos: screenPos};
+	});
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$BackButton = {$: 'BackButton'};
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$ErrorButton = {$: 'ErrorButton'};
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$ForwardButton = {$: 'ForwardButton'};
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$MainButton = {$: 'MainButton'};
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$MiddleButton = {$: 'MiddleButton'};
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$SecondButton = {$: 'SecondButton'};
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$buttonFromId = function (id) {
+	switch (id) {
+		case 0:
+			return $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$MainButton;
+		case 1:
+			return $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$MiddleButton;
+		case 2:
+			return $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$SecondButton;
+		case 3:
+			return $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$BackButton;
+		case 4:
+			return $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$ForwardButton;
+		default:
+			return $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$ErrorButton;
+	}
+};
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$buttonDecoder = A2(
+	$elm$json$Json$Decode$map,
+	$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$buttonFromId,
+	A2($elm$json$Json$Decode$field, 'button', $elm$json$Json$Decode$int));
+var $mpizenberg$elm_pointer_events$Internal$Decode$clientPos = A3(
+	$elm$json$Json$Decode$map2,
+	F2(
+		function (a, b) {
+			return _Utils_Tuple2(a, b);
+		}),
+	A2($elm$json$Json$Decode$field, 'clientX', $elm$json$Json$Decode$float),
+	A2($elm$json$Json$Decode$field, 'clientY', $elm$json$Json$Decode$float));
+var $mpizenberg$elm_pointer_events$Internal$Decode$Keys = F3(
+	function (alt, ctrl, shift) {
+		return {alt: alt, ctrl: ctrl, shift: shift};
+	});
+var $elm$json$Json$Decode$bool = _Json_decodeBool;
+var $mpizenberg$elm_pointer_events$Internal$Decode$keys = A4(
+	$elm$json$Json$Decode$map3,
+	$mpizenberg$elm_pointer_events$Internal$Decode$Keys,
+	A2($elm$json$Json$Decode$field, 'altKey', $elm$json$Json$Decode$bool),
+	A2($elm$json$Json$Decode$field, 'ctrlKey', $elm$json$Json$Decode$bool),
+	A2($elm$json$Json$Decode$field, 'shiftKey', $elm$json$Json$Decode$bool));
+var $elm$json$Json$Decode$map6 = _Json_map6;
+var $mpizenberg$elm_pointer_events$Internal$Decode$offsetPos = A3(
+	$elm$json$Json$Decode$map2,
+	F2(
+		function (a, b) {
+			return _Utils_Tuple2(a, b);
+		}),
+	A2($elm$json$Json$Decode$field, 'offsetX', $elm$json$Json$Decode$float),
+	A2($elm$json$Json$Decode$field, 'offsetY', $elm$json$Json$Decode$float));
+var $mpizenberg$elm_pointer_events$Internal$Decode$pagePos = A3(
+	$elm$json$Json$Decode$map2,
+	F2(
+		function (a, b) {
+			return _Utils_Tuple2(a, b);
+		}),
+	A2($elm$json$Json$Decode$field, 'pageX', $elm$json$Json$Decode$float),
+	A2($elm$json$Json$Decode$field, 'pageY', $elm$json$Json$Decode$float));
+var $mpizenberg$elm_pointer_events$Internal$Decode$screenPos = A3(
+	$elm$json$Json$Decode$map2,
+	F2(
+		function (a, b) {
+			return _Utils_Tuple2(a, b);
+		}),
+	A2($elm$json$Json$Decode$field, 'screenX', $elm$json$Json$Decode$float),
+	A2($elm$json$Json$Decode$field, 'screenY', $elm$json$Json$Decode$float));
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$eventDecoder = A7($elm$json$Json$Decode$map6, $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$Event, $mpizenberg$elm_pointer_events$Internal$Decode$keys, $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$buttonDecoder, $mpizenberg$elm_pointer_events$Internal$Decode$clientPos, $mpizenberg$elm_pointer_events$Internal$Decode$offsetPos, $mpizenberg$elm_pointer_events$Internal$Decode$pagePos, $mpizenberg$elm_pointer_events$Internal$Decode$screenPos);
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions = F3(
+	function (event, options, tag) {
+		return A2(
+			$elm$html$Html$Events$custom,
+			event,
+			A2(
+				$elm$json$Json$Decode$map,
+				function (ev) {
+					return {
+						message: tag(ev),
+						preventDefault: options.preventDefault,
+						stopPropagation: options.stopPropagation
+					};
+				},
+				$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$eventDecoder));
+	});
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onClick = A2($mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions, 'click', $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$defaultOptions);
+var $author$project$ViewThirdPerson$view = function (model) {
+	var _v0 = model.trackTree;
+	if (_v0.$ === 'Just') {
+		var treeNode = _v0.a;
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$htmlAttribute(
+					$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onClick($author$project$Msg$ImageClick)),
+					$mdgriffith$elm_ui$Element$Border$width(2),
+					$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$peace)
+				]),
+			$mdgriffith$elm_ui$Element$html(
+				$ianmackenzie$elm_3d_scene$Scene3d$cloudy(
+					{
+						background: $ianmackenzie$elm_3d_scene$Scene3d$backgroundColor($avh4$elm_color$Color$lightBlue),
+						camera: A2(
+							$author$project$ViewThirdPerson$deriveCamera,
+							A2($author$project$DomainModel$leafFromIndex, model.currentPosition, treeNode),
+							model.focusPoint),
+						clipDepth: $ianmackenzie$elm_units$Length$meters(1),
+						dimensions: model.viewDimensions,
+						entities: model.scene,
+						upDirection: $ianmackenzie$elm_geometry$Direction3d$positiveZ
+					})));
+	} else {
+		return $mdgriffith$elm_ui$Element$text('No track to show');
+	}
+};
+var $author$project$Msg$SetViewMode = function (a) {
+	return {$: 'SetViewMode', a: a};
+};
+var $mdgriffith$elm_ui$Element$Input$HiddenLabel = function (a) {
+	return {$: 'HiddenLabel', a: a};
+};
+var $mdgriffith$elm_ui$Element$Input$labelHidden = $mdgriffith$elm_ui$Element$Input$HiddenLabel;
+var $mdgriffith$elm_ui$Element$Input$Option = F2(
+	function (a, b) {
+		return {$: 'Option', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Element$Input$optionWith = F2(
+	function (val, view) {
+		return A2($mdgriffith$elm_ui$Element$Input$Option, val, view);
+	});
+var $mdgriffith$elm_ui$Element$Input$Selected = {$: 'Selected'};
+var $mdgriffith$elm_ui$Internal$Flag$fontColor = $mdgriffith$elm_ui$Internal$Flag$flag(14);
+var $mdgriffith$elm_ui$Element$Font$color = function (fontColor) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$fontColor,
+		A3(
+			$mdgriffith$elm_ui$Internal$Model$Colored,
+			'fc-' + $mdgriffith$elm_ui$Internal$Model$formatColorClass(fontColor),
+			'color',
+			fontColor));
+};
+var $smucode$elm_flat_colors$FlatColors$ChinesePalette$limeSoap = A3($mdgriffith$elm_ui$Element$rgb255, 123, 237, 159);
+var $mdgriffith$elm_ui$Element$paddingXY = F2(
+	function (x, y) {
+		if (_Utils_eq(x, y)) {
+			var f = x;
+			return A2(
+				$mdgriffith$elm_ui$Internal$Model$StyleClass,
+				$mdgriffith$elm_ui$Internal$Flag$padding,
+				A5(
+					$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
+					'p-' + $elm$core$String$fromInt(x),
+					f,
+					f,
+					f,
+					f));
+		} else {
+			var yFloat = y;
+			var xFloat = x;
+			return A2(
+				$mdgriffith$elm_ui$Internal$Model$StyleClass,
+				$mdgriffith$elm_ui$Internal$Flag$padding,
+				A5(
+					$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
+					'p-' + ($elm$core$String$fromInt(x) + ('-' + $elm$core$String$fromInt(y))),
+					yFloat,
+					xFloat,
+					yFloat,
+					xFloat));
+		}
+	});
+var $smucode$elm_flat_colors$FlatColors$ChinesePalette$prestigeBlue = A3($mdgriffith$elm_ui$Element$rgb255, 47, 53, 66);
+var $mdgriffith$elm_ui$Element$Border$roundEach = function (_v0) {
+	var topLeft = _v0.topLeft;
+	var topRight = _v0.topRight;
+	var bottomLeft = _v0.bottomLeft;
+	var bottomRight = _v0.bottomRight;
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$borderRound,
+		A3(
+			$mdgriffith$elm_ui$Internal$Model$Single,
+			'br-' + ($elm$core$String$fromInt(topLeft) + ('-' + ($elm$core$String$fromInt(topRight) + ($elm$core$String$fromInt(bottomLeft) + ('-' + $elm$core$String$fromInt(bottomRight)))))),
+			'border-radius',
+			$elm$core$String$fromInt(topLeft) + ('px ' + ($elm$core$String$fromInt(topRight) + ('px ' + ($elm$core$String$fromInt(bottomRight) + ('px ' + ($elm$core$String$fromInt(bottomLeft) + 'px'))))))));
+};
+var $smucode$elm_flat_colors$FlatColors$ChinesePalette$twinkleBlue = A3($mdgriffith$elm_ui$Element$rgb255, 206, 214, 224);
+var $mdgriffith$elm_ui$Element$Border$widthXY = F2(
+	function (x, y) {
+		return A2(
+			$mdgriffith$elm_ui$Internal$Model$StyleClass,
+			$mdgriffith$elm_ui$Internal$Flag$borderWidth,
+			A5(
+				$mdgriffith$elm_ui$Internal$Model$BorderWidth,
+				'b-' + ($elm$core$String$fromInt(x) + ('-' + $elm$core$String$fromInt(y))),
+				y,
+				x,
+				y,
+				x));
+	});
+var $mdgriffith$elm_ui$Element$Border$widthEach = function (_v0) {
+	var bottom = _v0.bottom;
+	var top = _v0.top;
+	var left = _v0.left;
+	var right = _v0.right;
+	return (_Utils_eq(top, bottom) && _Utils_eq(left, right)) ? (_Utils_eq(top, right) ? $mdgriffith$elm_ui$Element$Border$width(top) : A2($mdgriffith$elm_ui$Element$Border$widthXY, left, top)) : A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$borderWidth,
+		A5(
+			$mdgriffith$elm_ui$Internal$Model$BorderWidth,
+			'b-' + ($elm$core$String$fromInt(top) + ('-' + ($elm$core$String$fromInt(right) + ('-' + ($elm$core$String$fromInt(bottom) + ('-' + $elm$core$String$fromInt(left))))))),
+			top,
+			right,
+			bottom,
+			left));
+};
+var $author$project$ViewPureStyles$radioButton = F2(
+	function (label, state) {
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					A2($mdgriffith$elm_ui$Element$paddingXY, 8, 4),
+					$mdgriffith$elm_ui$Element$spacing(2),
+					$mdgriffith$elm_ui$Element$Border$widthEach(
+					{bottom: 0, left: 2, right: 2, top: 2}),
+					$mdgriffith$elm_ui$Element$Border$roundEach(
+					{bottomLeft: 0, bottomRight: 0, topLeft: 6, topRight: 6}),
+					$mdgriffith$elm_ui$Element$Background$color(
+					_Utils_eq(state, $mdgriffith$elm_ui$Element$Input$Selected) ? $smucode$elm_flat_colors$FlatColors$ChinesePalette$limeSoap : $smucode$elm_flat_colors$FlatColors$ChinesePalette$twinkleBlue),
+					$mdgriffith$elm_ui$Element$Font$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$prestigeBlue),
+					$mdgriffith$elm_ui$Element$Font$size(16)
+				]),
+			A2(
+				$mdgriffith$elm_ui$Element$el,
+				_List_fromArray(
+					[$mdgriffith$elm_ui$Element$centerX, $mdgriffith$elm_ui$Element$centerY]),
+				$mdgriffith$elm_ui$Element$text(label)));
+	});
+var $mdgriffith$elm_ui$Element$Input$Row = {$: 'Row'};
+var $mdgriffith$elm_ui$Element$Input$AfterFound = {$: 'AfterFound'};
+var $mdgriffith$elm_ui$Element$Input$BeforeFound = {$: 'BeforeFound'};
+var $mdgriffith$elm_ui$Element$Input$Idle = {$: 'Idle'};
+var $mdgriffith$elm_ui$Element$Input$NotFound = {$: 'NotFound'};
+var $mdgriffith$elm_ui$Element$Input$column = F2(
+	function (attributes, children) {
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asColumn,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					attributes)),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+	});
+var $mdgriffith$elm_ui$Element$Input$downArrow = 'ArrowDown';
+var $mdgriffith$elm_ui$Internal$Model$filter = function (attrs) {
+	return A3(
+		$elm$core$List$foldr,
+		F2(
+			function (x, _v0) {
+				var found = _v0.a;
+				var has = _v0.b;
+				switch (x.$) {
+					case 'NoAttribute':
+						return _Utils_Tuple2(found, has);
+					case 'Class':
+						var key = x.a;
+						return _Utils_Tuple2(
+							A2($elm$core$List$cons, x, found),
+							has);
+					case 'Attr':
+						var attr = x.a;
+						return _Utils_Tuple2(
+							A2($elm$core$List$cons, x, found),
+							has);
+					case 'StyleClass':
+						var style = x.b;
+						return _Utils_Tuple2(
+							A2($elm$core$List$cons, x, found),
+							has);
+					case 'Width':
+						var width = x.a;
+						return A2($elm$core$Set$member, 'width', has) ? _Utils_Tuple2(found, has) : _Utils_Tuple2(
+							A2($elm$core$List$cons, x, found),
+							A2($elm$core$Set$insert, 'width', has));
+					case 'Height':
+						var height = x.a;
+						return A2($elm$core$Set$member, 'height', has) ? _Utils_Tuple2(found, has) : _Utils_Tuple2(
+							A2($elm$core$List$cons, x, found),
+							A2($elm$core$Set$insert, 'height', has));
+					case 'Describe':
+						var description = x.a;
+						return A2($elm$core$Set$member, 'described', has) ? _Utils_Tuple2(found, has) : _Utils_Tuple2(
+							A2($elm$core$List$cons, x, found),
+							A2($elm$core$Set$insert, 'described', has));
+					case 'Nearby':
+						var location = x.a;
+						var elem = x.b;
+						return _Utils_Tuple2(
+							A2($elm$core$List$cons, x, found),
+							has);
+					case 'AlignX':
+						return A2($elm$core$Set$member, 'align-x', has) ? _Utils_Tuple2(found, has) : _Utils_Tuple2(
+							A2($elm$core$List$cons, x, found),
+							A2($elm$core$Set$insert, 'align-x', has));
+					case 'AlignY':
+						return A2($elm$core$Set$member, 'align-y', has) ? _Utils_Tuple2(found, has) : _Utils_Tuple2(
+							A2($elm$core$List$cons, x, found),
+							A2($elm$core$Set$insert, 'align-y', has));
+					default:
+						return A2($elm$core$Set$member, 'transform', has) ? _Utils_Tuple2(found, has) : _Utils_Tuple2(
+							A2($elm$core$List$cons, x, found),
+							A2($elm$core$Set$insert, 'transform', has));
+				}
+			}),
+		_Utils_Tuple2(_List_Nil, $elm$core$Set$empty),
+		attrs).a;
+};
+var $mdgriffith$elm_ui$Internal$Model$get = F2(
+	function (attrs, isAttr) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, found) {
+					return isAttr(x) ? A2($elm$core$List$cons, x, found) : found;
+				}),
+			_List_Nil,
+			$mdgriffith$elm_ui$Internal$Model$filter(attrs));
+	});
+var $mdgriffith$elm_ui$Element$Input$leftArrow = 'ArrowLeft';
+var $mdgriffith$elm_ui$Element$Input$rightArrow = 'ArrowRight';
+var $mdgriffith$elm_ui$Element$Input$row = F2(
+	function (attributes, children) {
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asRow,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+				attributes),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+	});
+var $mdgriffith$elm_ui$Element$Input$tabindex = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Attributes$tabindex);
+var $mdgriffith$elm_ui$Element$Input$upArrow = 'ArrowUp';
+var $mdgriffith$elm_ui$Element$Input$radioHelper = F3(
+	function (orientation, attrs, input) {
+		var track = F2(
+			function (opt, _v14) {
+				var found = _v14.a;
+				var prev = _v14.b;
+				var nxt = _v14.c;
+				var val = opt.a;
+				switch (found.$) {
+					case 'NotFound':
+						return _Utils_eq(
+							$elm$core$Maybe$Just(val),
+							input.selected) ? _Utils_Tuple3($mdgriffith$elm_ui$Element$Input$BeforeFound, prev, nxt) : _Utils_Tuple3(found, val, nxt);
+					case 'BeforeFound':
+						return _Utils_Tuple3($mdgriffith$elm_ui$Element$Input$AfterFound, prev, val);
+					default:
+						return _Utils_Tuple3(found, prev, nxt);
+				}
+			});
+		var renderOption = function (_v11) {
+			var val = _v11.a;
+			var view = _v11.b;
+			var status = _Utils_eq(
+				$elm$core$Maybe$Just(val),
+				input.selected) ? $mdgriffith$elm_ui$Element$Input$Selected : $mdgriffith$elm_ui$Element$Input$Idle;
+			return A2(
+				$mdgriffith$elm_ui$Element$el,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$pointer,
+						function () {
+						if (orientation.$ === 'Row') {
+							return $mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink);
+						} else {
+							return $mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill);
+						}
+					}(),
+						$mdgriffith$elm_ui$Element$Events$onClick(
+						input.onChange(val)),
+						function () {
+						if (status.$ === 'Selected') {
+							return $mdgriffith$elm_ui$Internal$Model$Attr(
+								A2($elm$html$Html$Attributes$attribute, 'aria-checked', 'true'));
+						} else {
+							return $mdgriffith$elm_ui$Internal$Model$Attr(
+								A2($elm$html$Html$Attributes$attribute, 'aria-checked', 'false'));
+						}
+					}(),
+						$mdgriffith$elm_ui$Internal$Model$Attr(
+						A2($elm$html$Html$Attributes$attribute, 'role', 'radio'))
+					]),
+				view(status));
+		};
+		var prevNext = function () {
+			var _v5 = input.options;
+			if (!_v5.b) {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var _v6 = _v5.a;
+				var val = _v6.a;
+				return function (_v7) {
+					var found = _v7.a;
+					var b = _v7.b;
+					var a = _v7.c;
+					switch (found.$) {
+						case 'NotFound':
+							return $elm$core$Maybe$Just(
+								_Utils_Tuple2(b, val));
+						case 'BeforeFound':
+							return $elm$core$Maybe$Just(
+								_Utils_Tuple2(b, val));
+						default:
+							return $elm$core$Maybe$Just(
+								_Utils_Tuple2(b, a));
+					}
+				}(
+					A3(
+						$elm$core$List$foldl,
+						track,
+						_Utils_Tuple3($mdgriffith$elm_ui$Element$Input$NotFound, val, val),
+						input.options));
+			}
+		}();
+		var optionArea = function () {
+			if (orientation.$ === 'Row') {
+				return A2(
+					$mdgriffith$elm_ui$Element$Input$row,
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$Input$hiddenLabelAttribute(input.label),
+						attrs),
+					A2($elm$core$List$map, renderOption, input.options));
+			} else {
+				return A2(
+					$mdgriffith$elm_ui$Element$Input$column,
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$Input$hiddenLabelAttribute(input.label),
+						attrs),
+					A2($elm$core$List$map, renderOption, input.options));
+			}
+		}();
+		var events = A2(
+			$mdgriffith$elm_ui$Internal$Model$get,
+			attrs,
+			function (attr) {
+				_v3$3:
+				while (true) {
+					switch (attr.$) {
+						case 'Width':
+							if (attr.a.$ === 'Fill') {
+								return true;
+							} else {
+								break _v3$3;
+							}
+						case 'Height':
+							if (attr.a.$ === 'Fill') {
+								return true;
+							} else {
+								break _v3$3;
+							}
+						case 'Attr':
+							return true;
+						default:
+							break _v3$3;
+					}
+				}
+				return false;
+			});
+		return A3(
+			$mdgriffith$elm_ui$Element$Input$applyLabel,
+			_Utils_ap(
+				A2(
+					$elm$core$List$filterMap,
+					$elm$core$Basics$identity,
+					_List_fromArray(
+						[
+							$elm$core$Maybe$Just($mdgriffith$elm_ui$Element$alignLeft),
+							$elm$core$Maybe$Just(
+							$mdgriffith$elm_ui$Element$Input$tabindex(0)),
+							$elm$core$Maybe$Just(
+							$mdgriffith$elm_ui$Internal$Model$htmlClass('focus')),
+							$elm$core$Maybe$Just($mdgriffith$elm_ui$Element$Region$announce),
+							$elm$core$Maybe$Just(
+							$mdgriffith$elm_ui$Internal$Model$Attr(
+								A2($elm$html$Html$Attributes$attribute, 'role', 'radiogroup'))),
+							function () {
+							if (prevNext.$ === 'Nothing') {
+								return $elm$core$Maybe$Nothing;
+							} else {
+								var _v1 = prevNext.a;
+								var prev = _v1.a;
+								var next = _v1.b;
+								return $elm$core$Maybe$Just(
+									$mdgriffith$elm_ui$Element$Input$onKeyLookup(
+										function (code) {
+											if (_Utils_eq(code, $mdgriffith$elm_ui$Element$Input$leftArrow)) {
+												return $elm$core$Maybe$Just(
+													input.onChange(prev));
+											} else {
+												if (_Utils_eq(code, $mdgriffith$elm_ui$Element$Input$upArrow)) {
+													return $elm$core$Maybe$Just(
+														input.onChange(prev));
+												} else {
+													if (_Utils_eq(code, $mdgriffith$elm_ui$Element$Input$rightArrow)) {
+														return $elm$core$Maybe$Just(
+															input.onChange(next));
+													} else {
+														if (_Utils_eq(code, $mdgriffith$elm_ui$Element$Input$downArrow)) {
+															return $elm$core$Maybe$Just(
+																input.onChange(next));
+														} else {
+															if (_Utils_eq(code, $mdgriffith$elm_ui$Element$Input$space)) {
+																var _v2 = input.selected;
+																if (_v2.$ === 'Nothing') {
+																	return $elm$core$Maybe$Just(
+																		input.onChange(prev));
+																} else {
+																	return $elm$core$Maybe$Nothing;
+																}
+															} else {
+																return $elm$core$Maybe$Nothing;
+															}
+														}
+													}
+												}
+											}
+										}));
+							}
+						}()
+						])),
+				events),
+			input.label,
+			optionArea);
+	});
+var $mdgriffith$elm_ui$Element$Input$radioRow = $mdgriffith$elm_ui$Element$Input$radioHelper($mdgriffith$elm_ui$Element$Input$Row);
+var $author$project$Main$viewModeChoices = function (model) {
+	var fullOptionList = _List_fromArray(
+		[
+			A2(
+			$mdgriffith$elm_ui$Element$Input$optionWith,
+			$author$project$ViewingMode$ViewThird,
+			$author$project$ViewPureStyles$radioButton('Third person')),
+			A2(
+			$mdgriffith$elm_ui$Element$Input$optionWith,
+			$author$project$ViewingMode$ViewMap,
+			$author$project$ViewPureStyles$radioButton('Map'))
+		]);
+	return A2(
+		$mdgriffith$elm_ui$Element$Input$radioRow,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$Border$rounded(6)
+			]),
+		{
+			label: $mdgriffith$elm_ui$Element$Input$labelHidden('Choose view'),
+			onChange: $author$project$Msg$SetViewMode,
+			options: fullOptionList,
+			selected: $elm$core$Maybe$Just(model.viewMode)
+		});
+};
+var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$asbestos = A3($mdgriffith$elm_ui$Element$rgb255, 127, 140, 141);
+var $author$project$ColourPalette$scrollbarBackground = $smucode$elm_flat_colors$FlatColors$FlatUIPalette$asbestos;
+var $author$project$ViewPureStyles$wideSliderStyles = _List_fromArray(
+	[
+		$mdgriffith$elm_ui$Element$height(
+		$mdgriffith$elm_ui$Element$px(24)),
+		$mdgriffith$elm_ui$Element$width(
+		$mdgriffith$elm_ui$Element$px(400)),
+		$mdgriffith$elm_ui$Element$centerY,
+		$mdgriffith$elm_ui$Element$centerX,
+		$mdgriffith$elm_ui$Element$behindContent(
+		A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width(
+					$mdgriffith$elm_ui$Element$px(400)),
+					$mdgriffith$elm_ui$Element$height(
+					$mdgriffith$elm_ui$Element$px(2)),
+					$mdgriffith$elm_ui$Element$centerY,
+					$mdgriffith$elm_ui$Element$centerX,
+					$mdgriffith$elm_ui$Element$Background$color($author$project$ColourPalette$scrollbarBackground),
+					$mdgriffith$elm_ui$Element$Border$rounded(6)
+				]),
+			$mdgriffith$elm_ui$Element$none))
+	]);
+var $author$project$Main$contentArea = function (model) {
+	var slider = function (trackLength) {
+		return A2(
+			$mdgriffith$elm_ui$Element$Input$slider,
+			$author$project$ViewPureStyles$wideSliderStyles,
+			{
+				label: A2(
+					$mdgriffith$elm_ui$Element$Input$labelBelow,
+					_List_Nil,
+					$mdgriffith$elm_ui$Element$text('Label goes here')),
+				max: trackLength,
+				min: 0,
+				onChange: A2($elm$core$Basics$composeR, $elm$core$Basics$round, $author$project$Msg$SetCurrentPosition),
+				step: $elm$core$Maybe$Just(1),
+				thumb: $author$project$ViewPureStyles$sliderThumb,
+				value: model.currentPosition
+			});
+	};
+	var rightPane = A2(
+		$mdgriffith$elm_ui$Element$column,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$spacing(5),
+				$mdgriffith$elm_ui$Element$padding(5),
+				$mdgriffith$elm_ui$Element$alignTop
+			]),
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$text('Where are the tools?')
+			]));
+	var leftPane = A2(
+		$mdgriffith$elm_ui$Element$column,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+				$mdgriffith$elm_ui$Element$alignTop,
+				$mdgriffith$elm_ui$Element$padding(10),
+				$mdgriffith$elm_ui$Element$centerX
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$mdgriffith$elm_ui$Element$column,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$alignTop,
+						$mdgriffith$elm_ui$Element$padding(10),
+						$mdgriffith$elm_ui$Element$centerX
+					]),
+				_List_fromArray(
+					[
+						$author$project$Main$viewModeChoices(model),
+						A2(
+						$author$project$ViewPureStyles$conditionallyVisible,
+						!_Utils_eq(model.viewMode, $author$project$ViewingMode$ViewMap),
+						$author$project$ViewThirdPerson$view(model)),
+						A2(
+						$author$project$ViewPureStyles$conditionallyVisible,
+						_Utils_eq(model.viewMode, $author$project$ViewingMode$ViewMap),
+						$author$project$ViewMap$view(model))
+					])),
+				A2(
+				$mdgriffith$elm_ui$Element$el,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$height(
+						$mdgriffith$elm_ui$Element$px(10))
+					]),
+				$mdgriffith$elm_ui$Element$none),
+				function () {
+				var _v0 = model.trackTree;
+				if (_v0.$ === 'Just') {
+					var treeNode = _v0.a;
+					return A2(
+						$mdgriffith$elm_ui$Element$column,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+								$mdgriffith$elm_ui$Element$alignTop,
+								$mdgriffith$elm_ui$Element$padding(10),
+								$mdgriffith$elm_ui$Element$centerX
+							]),
+						_List_fromArray(
+							[
+								slider(
+								1 + $author$project$DomainModel$skipCount(treeNode)),
+								$mdgriffith$elm_ui$Element$text(
+								'Length: ' + $elm$core$String$fromInt(
+									$elm$core$Basics$round(
+										$ianmackenzie$elm_units$Length$inMeters(
+											$author$project$DomainModel$trueLength(treeNode))))),
+								$mdgriffith$elm_ui$Element$text(
+								'Points: ' + $elm$core$String$fromInt(
+									1 + $author$project$DomainModel$skipCount(treeNode)))
+							]));
+				} else {
+					return $mdgriffith$elm_ui$Element$text('Information will be shown here');
+				}
+			}()
+			]));
+	return A2(
+		$mdgriffith$elm_ui$Element$column,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+				$mdgriffith$elm_ui$Element$padding(5)
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$mdgriffith$elm_ui$Element$row,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$width(
+								$mdgriffith$elm_ui$Element$px($author$project$Main$minimumLeftPane))
+							]),
+						$mdgriffith$elm_ui$Element$none)
+					])),
+				A2(
+				$mdgriffith$elm_ui$Element$row,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$spacing(5),
+						$mdgriffith$elm_ui$Element$padding(5)
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+								$mdgriffith$elm_ui$Element$alignTop
+							]),
+						leftPane),
+						A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$alignTop,
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+							]),
+						rightPane)
+					])),
+				A2(
+				$mdgriffith$elm_ui$Element$row,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$width(
+								$mdgriffith$elm_ui$Element$px($author$project$Main$minimumLeftPane))
+							]),
+						$mdgriffith$elm_ui$Element$none)
+					]))
+			]));
+};
+var $mdgriffith$elm_ui$Internal$Model$OnlyDynamic = F2(
+	function (a, b) {
+		return {$: 'OnlyDynamic', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Model$StaticRootAndDynamic = F2(
+	function (a, b) {
+		return {$: 'StaticRootAndDynamic', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Model$AllowHover = {$: 'AllowHover'};
+var $mdgriffith$elm_ui$Internal$Model$Layout = {$: 'Layout'};
+var $mdgriffith$elm_ui$Internal$Model$focusDefaultStyle = {
+	backgroundColor: $elm$core$Maybe$Nothing,
+	borderColor: $elm$core$Maybe$Nothing,
+	shadow: $elm$core$Maybe$Just(
+		{
+			blur: 0,
+			color: A4($mdgriffith$elm_ui$Internal$Model$Rgba, 155 / 255, 203 / 255, 1, 1),
+			offset: _Utils_Tuple2(0, 0),
+			size: 3
+		})
+};
+var $mdgriffith$elm_ui$Internal$Model$optionsToRecord = function (options) {
+	var combine = F2(
+		function (opt, record) {
+			switch (opt.$) {
+				case 'HoverOption':
+					var hoverable = opt.a;
+					var _v4 = record.hover;
+					if (_v4.$ === 'Nothing') {
+						return _Utils_update(
+							record,
+							{
+								hover: $elm$core$Maybe$Just(hoverable)
+							});
+					} else {
+						return record;
+					}
+				case 'FocusStyleOption':
+					var focusStyle = opt.a;
+					var _v5 = record.focus;
+					if (_v5.$ === 'Nothing') {
+						return _Utils_update(
+							record,
+							{
+								focus: $elm$core$Maybe$Just(focusStyle)
+							});
+					} else {
+						return record;
+					}
+				default:
+					var renderMode = opt.a;
+					var _v6 = record.mode;
+					if (_v6.$ === 'Nothing') {
+						return _Utils_update(
+							record,
+							{
+								mode: $elm$core$Maybe$Just(renderMode)
+							});
+					} else {
+						return record;
+					}
+			}
+		});
+	var andFinally = function (record) {
+		return {
+			focus: function () {
+				var _v0 = record.focus;
+				if (_v0.$ === 'Nothing') {
+					return $mdgriffith$elm_ui$Internal$Model$focusDefaultStyle;
+				} else {
+					var focusable = _v0.a;
+					return focusable;
+				}
+			}(),
+			hover: function () {
+				var _v1 = record.hover;
+				if (_v1.$ === 'Nothing') {
+					return $mdgriffith$elm_ui$Internal$Model$AllowHover;
+				} else {
+					var hoverable = _v1.a;
+					return hoverable;
+				}
+			}(),
+			mode: function () {
+				var _v2 = record.mode;
+				if (_v2.$ === 'Nothing') {
+					return $mdgriffith$elm_ui$Internal$Model$Layout;
+				} else {
+					var actualMode = _v2.a;
+					return actualMode;
+				}
+			}()
+		};
+	};
+	return andFinally(
+		A3(
+			$elm$core$List$foldr,
+			combine,
+			{focus: $elm$core$Maybe$Nothing, hover: $elm$core$Maybe$Nothing, mode: $elm$core$Maybe$Nothing},
+			options));
+};
+var $mdgriffith$elm_ui$Internal$Model$toHtml = F2(
+	function (mode, el) {
+		switch (el.$) {
+			case 'Unstyled':
+				var html = el.a;
+				return html($mdgriffith$elm_ui$Internal$Model$asEl);
+			case 'Styled':
+				var styles = el.a.styles;
+				var html = el.a.html;
+				return A2(
+					html,
+					mode(styles),
+					$mdgriffith$elm_ui$Internal$Model$asEl);
+			case 'Text':
+				var text = el.a;
+				return $mdgriffith$elm_ui$Internal$Model$textElement(text);
+			default:
+				return $mdgriffith$elm_ui$Internal$Model$textElement('');
+		}
+	});
+var $mdgriffith$elm_ui$Internal$Model$renderRoot = F3(
+	function (optionList, attributes, child) {
+		var options = $mdgriffith$elm_ui$Internal$Model$optionsToRecord(optionList);
+		var embedStyle = function () {
+			var _v0 = options.mode;
+			if (_v0.$ === 'NoStaticStyleSheet') {
+				return $mdgriffith$elm_ui$Internal$Model$OnlyDynamic(options);
+			} else {
+				return $mdgriffith$elm_ui$Internal$Model$StaticRootAndDynamic(options);
+			}
+		}();
+		return A2(
+			$mdgriffith$elm_ui$Internal$Model$toHtml,
+			embedStyle,
+			A4(
+				$mdgriffith$elm_ui$Internal$Model$element,
+				$mdgriffith$elm_ui$Internal$Model$asEl,
+				$mdgriffith$elm_ui$Internal$Model$div,
+				attributes,
+				$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+					_List_fromArray(
+						[child]))));
+	});
+var $mdgriffith$elm_ui$Internal$Model$FontFamily = F2(
+	function (a, b) {
+		return {$: 'FontFamily', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Model$SansSerif = {$: 'SansSerif'};
+var $mdgriffith$elm_ui$Internal$Model$Typeface = function (a) {
+	return {$: 'Typeface', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Flag$fontFamily = $mdgriffith$elm_ui$Internal$Flag$flag(5);
+var $elm$core$String$words = _String_words;
+var $mdgriffith$elm_ui$Internal$Model$renderFontClassName = F2(
+	function (font, current) {
+		return _Utils_ap(
+			current,
+			function () {
+				switch (font.$) {
+					case 'Serif':
+						return 'serif';
+					case 'SansSerif':
+						return 'sans-serif';
+					case 'Monospace':
+						return 'monospace';
+					case 'Typeface':
+						var name = font.a;
+						return A2(
+							$elm$core$String$join,
+							'-',
+							$elm$core$String$words(
+								$elm$core$String$toLower(name)));
+					case 'ImportFont':
+						var name = font.a;
+						var url = font.b;
+						return A2(
+							$elm$core$String$join,
+							'-',
+							$elm$core$String$words(
+								$elm$core$String$toLower(name)));
+					default:
+						var name = font.a.name;
+						return A2(
+							$elm$core$String$join,
+							'-',
+							$elm$core$String$words(
+								$elm$core$String$toLower(name)));
+				}
+			}());
+	});
+var $mdgriffith$elm_ui$Internal$Model$rootStyle = function () {
+	var families = _List_fromArray(
+		[
+			$mdgriffith$elm_ui$Internal$Model$Typeface('Open Sans'),
+			$mdgriffith$elm_ui$Internal$Model$Typeface('Helvetica'),
+			$mdgriffith$elm_ui$Internal$Model$Typeface('Verdana'),
+			$mdgriffith$elm_ui$Internal$Model$SansSerif
+		]);
+	return _List_fromArray(
+		[
+			A2(
+			$mdgriffith$elm_ui$Internal$Model$StyleClass,
+			$mdgriffith$elm_ui$Internal$Flag$bgColor,
+			A3(
+				$mdgriffith$elm_ui$Internal$Model$Colored,
+				'bg-' + $mdgriffith$elm_ui$Internal$Model$formatColorClass(
+					A4($mdgriffith$elm_ui$Internal$Model$Rgba, 1, 1, 1, 0)),
+				'background-color',
+				A4($mdgriffith$elm_ui$Internal$Model$Rgba, 1, 1, 1, 0))),
+			A2(
+			$mdgriffith$elm_ui$Internal$Model$StyleClass,
+			$mdgriffith$elm_ui$Internal$Flag$fontColor,
+			A3(
+				$mdgriffith$elm_ui$Internal$Model$Colored,
+				'fc-' + $mdgriffith$elm_ui$Internal$Model$formatColorClass(
+					A4($mdgriffith$elm_ui$Internal$Model$Rgba, 0, 0, 0, 1)),
+				'color',
+				A4($mdgriffith$elm_ui$Internal$Model$Rgba, 0, 0, 0, 1))),
+			A2(
+			$mdgriffith$elm_ui$Internal$Model$StyleClass,
+			$mdgriffith$elm_ui$Internal$Flag$fontSize,
+			$mdgriffith$elm_ui$Internal$Model$FontSize(20)),
+			A2(
+			$mdgriffith$elm_ui$Internal$Model$StyleClass,
+			$mdgriffith$elm_ui$Internal$Flag$fontFamily,
+			A2(
+				$mdgriffith$elm_ui$Internal$Model$FontFamily,
+				A3($elm$core$List$foldl, $mdgriffith$elm_ui$Internal$Model$renderFontClassName, 'font-', families),
+				families))
+		]);
+}();
+var $mdgriffith$elm_ui$Element$layoutWith = F3(
+	function (_v0, attrs, child) {
+		var options = _v0.options;
+		return A3(
+			$mdgriffith$elm_ui$Internal$Model$renderRoot,
+			options,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Internal$Model$htmlClass(
+					A2(
+						$elm$core$String$join,
+						' ',
+						_List_fromArray(
+							[$mdgriffith$elm_ui$Internal$Style$classes.root, $mdgriffith$elm_ui$Internal$Style$classes.any, $mdgriffith$elm_ui$Internal$Style$classes.single]))),
+				_Utils_ap($mdgriffith$elm_ui$Internal$Model$rootStyle, attrs)),
+			child);
+	});
+var $mdgriffith$elm_ui$Element$layout = $mdgriffith$elm_ui$Element$layoutWith(
+	{options: _List_Nil});
+var $author$project$Msg$GpxRequested = {$: 'GpxRequested'};
+var $smucode$elm_flat_colors$FlatColors$BritishPalette$chainGangGrey = A3($mdgriffith$elm_ui$Element$rgb255, 113, 128, 147);
+var $author$project$Main$topLoadingBar = function (model) {
+	var loadGpxButton = A2(
+		$mdgriffith$elm_ui$Element$Input$button,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$padding(5),
+				$mdgriffith$elm_ui$Element$Border$width(2),
+				$mdgriffith$elm_ui$Element$Border$rounded(4),
+				$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$BritishPalette$chainGangGrey)
+			]),
+		{
+			label: $mdgriffith$elm_ui$Element$text('Load GPX from your computer'),
+			onPress: $elm$core$Maybe$Just($author$project$Msg$GpxRequested)
+		});
+	return A2(
+		$mdgriffith$elm_ui$Element$row,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$spacing(20),
+				$mdgriffith$elm_ui$Element$padding(10)
+			]),
+		_List_fromArray(
+			[loadGpxButton]));
+};
+var $author$project$Main$view = function (_v0) {
+	var model = _v0.a;
+	return {
+		body: _List_fromArray(
+			[
+				A2(
+				$mdgriffith$elm_ui$Element$layout,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$padding(10),
+						$mdgriffith$elm_ui$Element$spacing(10),
+						$mdgriffith$elm_ui$Element$Font$size(16),
+						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite)
+					]),
+				A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+						]),
+					_List_fromArray(
+						[
+							$author$project$Main$topLoadingBar(model),
+							$author$project$Main$contentArea(model)
+						])))
+			]),
+		title: 'GPXmagic 2.0'
+	};
+};
+var $author$project$Main$main = $elm$browser$Browser$application(
+	{
+		init: A2(
+			$elm$core$Basics$composeR,
+			$elm$core$Maybe$map($author$project$StravaAuth$convertBytes),
+			$author$project$Main$init),
+		onUrlChange: $elm$core$Basics$always(
+			$author$project$Msg$OAuthMessage($author$project$OAuthTypes$NoOp)),
+		onUrlRequest: $elm$core$Basics$always(
+			$author$project$Msg$OAuthMessage($author$project$OAuthTypes$NoOp)),
+		subscriptions: $author$project$Main$subscriptions,
+		update: $author$project$Main$update,
+		view: $author$project$Main$view
+	});
+_Platform_export({'Main':{'init':$author$project$Main$main(
+	$elm$json$Json$Decode$oneOf(
+		_List_fromArray(
+			[
+				$elm$json$Json$Decode$null($elm$core$Maybe$Nothing),
+				A2(
+				$elm$json$Json$Decode$map,
+				$elm$core$Maybe$Just,
+				$elm$json$Json$Decode$list($elm$json$Json$Decode$int))
+			])))(0)}});}(this));

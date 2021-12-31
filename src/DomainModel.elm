@@ -1,21 +1,14 @@
 module DomainModel exposing (..)
 
 import Angle exposing (Angle)
-import Axis2d
 import Axis3d exposing (Axis3d)
 import BoundingBox3d exposing (BoundingBox3d)
-import Color exposing (black)
 import Direction3d
 import Json.Encode as E
 import Length exposing (Length, Meters, inMeters)
-import LineSegment3d
-import List.Extra
 import LocalCoords exposing (LocalCoords)
-import Pixels
 import Point3d exposing (Point3d)
 import Quantity exposing (Quantity)
-import Scene3d exposing (Entity)
-import Scene3d.Material as Material
 import SketchPlane3d
 import Sphere3d exposing (Sphere3d)
 import Spherical as Spherical exposing (range)
@@ -300,6 +293,99 @@ nearestToRay ray treeNode =
                                 |> Sphere3d.centerPoint
                                 |> Point3d.distanceFromAxis ray
                                 |> Quantity.minus (sphere node.right |> Sphere3d.radius)
+                    in
+                    case ( leftIntersects, rightIntersects ) of
+                        ( True, True ) ->
+                            -- Could go either way
+                            let
+                                ( leftBestIndex, leftBestDistance ) =
+                                    helper node.left skip
+
+                                ( rightBestIndex, rightBestDistance ) =
+                                    helper node.right (skip + skipCount node.left)
+                            in
+                            if leftBestDistance |> Quantity.lessThanOrEqualTo rightBestDistance then
+                                ( leftBestIndex, leftBestDistance )
+
+                            else
+                                ( rightBestIndex, rightBestDistance )
+
+                        ( True, False ) ->
+                            helper node.left skip
+
+                        ( False, True ) ->
+                            helper node.right (skip + skipCount node.left)
+
+                        ( False, False ) ->
+                            if leftDistance |> Quantity.lessThanOrEqualTo rightDistance then
+                                helper node.left skip
+
+                            else
+                                helper node.right (skip + skipCount node.left)
+    in
+    Tuple.first <| helper treeNode 0
+
+
+makeEarthVector lon lat alt =
+    let
+        direction =
+            Direction3d.xyZ lon lat
+
+        radius =
+            alt |> Quantity.plus (Length.meters Spherical.meanRadius)
+    in
+    Vector3d.withLength radius direction
+
+
+nearestToLonLat :
+    GPXSource
+    -> PeteTree
+    -> Int
+nearestToLonLat click treeNode =
+    -- Try: compute distance to each box centres.
+    -- At each level, pick "closest" child and recurse.
+    -- Not good enough. Need deeper search, say for all intersected boxes.
+    -- Bit of recursive magic to get the "index" number.
+    let
+        searchVector =
+            makeEarthVector click.longitude click.latitude click.altitude
+
+        searchAxis =
+            Axis3d.throughPoints
+                Point3d.origin
+                (Point3d.origin |> Point3d.translateBy searchVector)
+                |> Maybe.withDefault Axis3d.x
+
+        helper withNode skip =
+            case withNode of
+                Leaf leaf ->
+                    -- Use whichever point is closest.
+                    let
+                        -- Using dot product as closeness comparator. Nearest to +1 wins.
+                        ( startDistance, endDistance ) =
+                            ( Vector3d.dot (startVector withNode) searchVector
+                            , Vector3d.dot (endVector withNode) searchVector
+                            )
+                    in
+                    if startDistance |> Quantity.lessThanOrEqualTo endDistance then
+                        ( skip, startDistance )
+
+                    else
+                        ( skip + 1, endDistance )
+
+                Node node ->
+                    -- Let's try using the bounding boxes, though they're really intended
+                    -- for the 3D globe.
+                    let
+                        ( leftIntersects, rightIntersects ) =
+                            ( Axis3d.intersectionWithSphere (sphere node.left) searchAxis /= Nothing
+                            , Axis3d.intersectionWithSphere (sphere node.right) searchAxis /= Nothing
+                            )
+
+                        ( leftDistance, rightDistance ) =
+                            ( Vector3d.dot (startVector withNode) searchVector
+                            , Vector3d.dot (endVector withNode) searchVector
+                            )
                     in
                     case ( leftIntersects, rightIntersects ) of
                         ( True, True ) ->
