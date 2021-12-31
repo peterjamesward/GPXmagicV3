@@ -1,0 +1,70 @@
+HI Peter,
+Hope you had a good Christmas.
+
+You mentioned v3 in our previous emails, I wanted to think about it
+and let you know my thoughts on what would help my workflow, now i may
+well not be the typical user so I fully understand if you ignore all
+my points :)
+
+I have 3 main areas that I feel need either improving or having added
+functionality.
+
+Buttons.
+The buttons.. and the sea of green you have when you use several
+regularly and struggle to see which is which at times... I know you
+mentioned you will be looking at them.. Here is something I thought
+would make it easier.
+The map full screen with the buttons in a vertical line switchable to
+either side of the screen, click on a button and it opens a movable
+dockable window with just that buttons options, you can then move that
+window wherever you want, and create dockable groups if you want to.
+My thoughts are if the main screen was full screen then i would have
+smaller logical groups of button controls in each corner.
+I read somewhere that you were adding multiscreen support, that could
+be amazing but the above would be better for those without access to a
+second screen.
+
+Gpx set points on the map
+I have often thought these would be a lot more helpful if they changed
+colour based on issues, i have a tendency to zoom in and follow the
+full course looking for issues, it would be good if for example you
+had set the bend issues to say 70% it then changed the colour of those
+gpx points as well as detailing their position, and yes i do click on
+those positon buttons but when i am scrolling along a course i could
+kill 2 birds with one stone if those were highlighted by colour. Again
+the same with sharp gradients etc..
+
+Gradient smoothing.
+I still find myself using GPX Smoother, I find it easier to see the
+difference using the different algorithms made on the course and which
+I need to use where to keep the course as faithful as possible whilst
+making them smoother. I would really like the options they use, my go
+to is the Slope box smoothing followed by the Kalman filter then
+elevation box smoothing, but its not just those options that make it
+good its the visual way of seeing the changes with the Elevation
+chart, Slope and Elevation profile making it easy to see exactly what
+the changes are doing.
+
+Okay there is a 4th point, smoothness of moving the map around, it can
+be slow at times especially in 3D trying to get a particular angle to
+check vertical differences etc.
+
+I have to ask is this a bug, I am finding that when i am moving along
+a course if i click on a set point to move the cursor to it, the
+screen then moves instantly to where it was before so i have to then
+move the map to get where i just clicked to back on screen, if that
+makes sense.
+
+What you have created is incredible, I believe with the above
+features/options it could mature into an easier and more complete
+package that I know I would love to use.... of course along with the
+button that turns any A-B course into a vertically matched, 5m
+separated out/back course along with the hairpin at the end :)  it
+would then be perfect!
+
+Have a good New Year!
+
+--
+Regards
+John Bytheway
+Community Manager

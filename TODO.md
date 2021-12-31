@@ -4,7 +4,9 @@
 
 Lazy selective re-render (aka 2.8) to reduce map flicker, improve slider response? 
 
-### Map
+## Zoom, Pan, Rotate.
+
+### Map / General
 Possibly try a more graduated selective rendering. (Maybe 100km box at 14 deep?)
 Better, a progressive drop off with distance.
 Map click not very good, likely due to 'Problems' above.
@@ -33,7 +35,7 @@ Check out Electron (again), see if that will allow multiple windows.
 ### Look and Feel
 Clean.
 Chinese FlatUI palette?
-Keep current track in indexDB to support a "restart/recover" option.
+Keep current track in indexDB to support a "restart/recover" option?
 
 ### Plan view
 Same as before. Use 3d-scene. Orthographic camera.
