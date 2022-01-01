@@ -374,20 +374,45 @@ nearestToLonLat click treeNode =
                         ( skip + 1, endDistance )
 
                 Node node ->
-                    -- Let's try using the bounding boxes, though they're really intended
-                    -- for the 3D globe.
+                    -- Culling experiment. Use dot products to see if the search vector is
+                    -- "in the region" of the left or right child?
+                    -- If we are in the region of one only, use that one.
+                    -- If both, try both.
+                    -- If neither, use the closeness test and choose the closest...
                     let
-                        ( leftIntersects, rightIntersects ) =
-                            ( Axis3d.intersectionWithSphere (sphere node.left) searchAxis /= Nothing
-                            , Axis3d.intersectionWithSphere (sphere node.right) searchAxis /= Nothing
+                        leftSpan =
+                            Vector3d.dot (startVector node.left) (endVector node.left)
+
+                        rightSpan =
+                            Vector3d.dot (startVector node.right) (endVector node.right)
+
+                        leftProximity =
+                            -- Remember, for dots, greater is closer.
+                            (Vector3d.dot searchVector (startVector node.left)
+                                |> Quantity.greaterThanOrEqualTo leftSpan
                             )
+                                && (Vector3d.dot searchVector (endVector node.left)
+                                        |> Quantity.greaterThanOrEqualTo leftSpan
+                                   )
+
+                        rightProximity =
+                            (Vector3d.dot searchVector (startVector node.right)
+                                |> Quantity.greaterThanOrEqualTo rightSpan
+                            )
+                                && (Vector3d.dot searchVector (endVector node.right)
+                                        |> Quantity.greaterThanOrEqualTo rightSpan
+                                   )
 
                         ( leftDistance, rightDistance ) =
-                            ( Vector3d.dot (startVector withNode) searchVector
-                            , Vector3d.dot (endVector withNode) searchVector
+                            ( Quantity.max
+                                (Vector3d.dot searchVector (startVector node.left))
+                                (Vector3d.dot searchVector (endVector node.left))
+                            , Quantity.max
+                                (Vector3d.dot searchVector (startVector node.right))
+                                (Vector3d.dot searchVector (endVector node.right))
                             )
                     in
-                    case ( leftIntersects, rightIntersects ) of
+                    case ( leftProximity, rightProximity ) of
                         ( True, True ) ->
                             -- Could go either way
                             let
@@ -397,7 +422,7 @@ nearestToLonLat click treeNode =
                                 ( rightBestIndex, rightBestDistance ) =
                                     helper node.right (skip + skipCount node.left)
                             in
-                            if leftBestDistance |> Quantity.lessThanOrEqualTo rightBestDistance then
+                            if leftBestDistance |> Quantity.greaterThanOrEqualTo rightBestDistance then
                                 ( leftBestIndex, leftBestDistance )
 
                             else

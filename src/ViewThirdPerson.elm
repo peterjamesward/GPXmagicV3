@@ -72,7 +72,7 @@ deriveCamera treeNode focusPoint =
         perspectiveCamera =
             Camera3d.perspective
                 { viewpoint = cameraViewpoint
-                , verticalFieldOfView = Angle.degrees 45
+                , verticalFieldOfView = Angle.degrees 20
                 }
     in
     perspectiveCamera

@@ -10159,7 +10159,7 @@ var $author$project$ViewThirdPerson$deriveCamera = F2(
 			{eyePoint: eyePoint, focalPoint: focusPoint, upDirection: $ianmackenzie$elm_geometry$Direction3d$positiveZ});
 		var perspectiveCamera = $ianmackenzie$elm_3d_camera$Camera3d$perspective(
 			{
-				verticalFieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
+				verticalFieldOfView: $ianmackenzie$elm_units$Angle$degrees(20),
 				viewpoint: cameraViewpoint
 			});
 		return perspectiveCamera;
@@ -10895,6 +10895,13 @@ var $author$project$DomainModel$endVector = function (treeNode) {
 		return node.nodeContent.endVector;
 	}
 };
+var $ianmackenzie$elm_units$Quantity$max = F2(
+	function (_v0, _v1) {
+		var x = _v0.a;
+		var y = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(
+			A2($elm$core$Basics$max, x, y));
+	});
 var $ianmackenzie$elm_geometry$Direction3d$from = F2(
 	function (_v0, _v1) {
 		var p1 = _v0.a;
@@ -10963,45 +10970,76 @@ var $author$project$DomainModel$nearestToLonLat = F2(
 						return A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, endDistance, startDistance) ? _Utils_Tuple2(skip, startDistance) : _Utils_Tuple2(skip + 1, endDistance);
 					} else {
 						var node = withNode.a;
+						var rightSpan = A2(
+							$ianmackenzie$elm_geometry$Vector3d$dot,
+							$author$project$DomainModel$startVector(node.right),
+							$author$project$DomainModel$endVector(node.right));
+						var rightProximity = A2(
+							$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo,
+							rightSpan,
+							A2(
+								$ianmackenzie$elm_geometry$Vector3d$dot,
+								searchVector,
+								$author$project$DomainModel$startVector(node.right))) && A2(
+							$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo,
+							rightSpan,
+							A2(
+								$ianmackenzie$elm_geometry$Vector3d$dot,
+								searchVector,
+								$author$project$DomainModel$endVector(node.right)));
+						var leftSpan = A2(
+							$ianmackenzie$elm_geometry$Vector3d$dot,
+							$author$project$DomainModel$startVector(node.left),
+							$author$project$DomainModel$endVector(node.left));
+						var leftProximity = A2(
+							$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo,
+							leftSpan,
+							A2(
+								$ianmackenzie$elm_geometry$Vector3d$dot,
+								searchVector,
+								$author$project$DomainModel$startVector(node.left))) && A2(
+							$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo,
+							leftSpan,
+							A2(
+								$ianmackenzie$elm_geometry$Vector3d$dot,
+								searchVector,
+								$author$project$DomainModel$endVector(node.left)));
 						var _v2 = _Utils_Tuple2(
-							!_Utils_eq(
-								A2(
-									$ianmackenzie$elm_geometry$Axis3d$intersectionWithSphere,
-									$author$project$DomainModel$sphere(node.left),
-									searchAxis),
-								$elm$core$Maybe$Nothing),
-							!_Utils_eq(
-								A2(
-									$ianmackenzie$elm_geometry$Axis3d$intersectionWithSphere,
-									$author$project$DomainModel$sphere(node.right),
-									searchAxis),
-								$elm$core$Maybe$Nothing));
-						var leftIntersects = _v2.a;
-						var rightIntersects = _v2.b;
-						var _v3 = _Utils_Tuple2(
 							A2(
-								$ianmackenzie$elm_geometry$Vector3d$dot,
-								$author$project$DomainModel$startVector(withNode),
-								searchVector),
+								$ianmackenzie$elm_units$Quantity$max,
+								A2(
+									$ianmackenzie$elm_geometry$Vector3d$dot,
+									searchVector,
+									$author$project$DomainModel$startVector(node.left)),
+								A2(
+									$ianmackenzie$elm_geometry$Vector3d$dot,
+									searchVector,
+									$author$project$DomainModel$endVector(node.left))),
 							A2(
-								$ianmackenzie$elm_geometry$Vector3d$dot,
-								$author$project$DomainModel$endVector(withNode),
-								searchVector));
-						var leftDistance = _v3.a;
-						var rightDistance = _v3.b;
-						var _v4 = _Utils_Tuple2(leftIntersects, rightIntersects);
-						if (_v4.a) {
-							if (_v4.b) {
-								var _v5 = A2(
+								$ianmackenzie$elm_units$Quantity$max,
+								A2(
+									$ianmackenzie$elm_geometry$Vector3d$dot,
+									searchVector,
+									$author$project$DomainModel$startVector(node.right)),
+								A2(
+									$ianmackenzie$elm_geometry$Vector3d$dot,
+									searchVector,
+									$author$project$DomainModel$endVector(node.right))));
+						var leftDistance = _v2.a;
+						var rightDistance = _v2.b;
+						var _v3 = _Utils_Tuple2(leftProximity, rightProximity);
+						if (_v3.a) {
+							if (_v3.b) {
+								var _v4 = A2(
 									helper,
 									node.right,
 									skip + $author$project$DomainModel$skipCount(node.left));
-								var rightBestIndex = _v5.a;
-								var rightBestDistance = _v5.b;
-								var _v6 = A2(helper, node.left, skip);
-								var leftBestIndex = _v6.a;
-								var leftBestDistance = _v6.b;
-								return A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, rightBestDistance, leftBestDistance) ? _Utils_Tuple2(leftBestIndex, leftBestDistance) : _Utils_Tuple2(rightBestIndex, rightBestDistance);
+								var rightBestIndex = _v4.a;
+								var rightBestDistance = _v4.b;
+								var _v5 = A2(helper, node.left, skip);
+								var leftBestIndex = _v5.a;
+								var leftBestDistance = _v5.b;
+								return A2($ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo, rightBestDistance, leftBestDistance) ? _Utils_Tuple2(leftBestIndex, leftBestDistance) : _Utils_Tuple2(rightBestIndex, rightBestDistance);
 							} else {
 								var $temp$withNode = node.left,
 									$temp$skip = skip;
@@ -11010,7 +11048,7 @@ var $author$project$DomainModel$nearestToLonLat = F2(
 								continue helper;
 							}
 						} else {
-							if (_v4.b) {
+							if (_v3.b) {
 								var $temp$withNode = node.right,
 									$temp$skip = skip + $author$project$DomainModel$skipCount(node.left);
 								withNode = $temp$withNode;
@@ -11248,13 +11286,6 @@ var $ianmackenzie$elm_geometry$LineSegment3d$endpoints = function (_v0) {
 	var lineSegmentEndpoints = _v0.a;
 	return lineSegmentEndpoints;
 };
-var $ianmackenzie$elm_units$Quantity$max = F2(
-	function (_v0, _v1) {
-		var x = _v0.a;
-		var y = _v1.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(
-			A2($elm$core$Basics$max, x, y));
-	});
 var $ianmackenzie$elm_units$Quantity$min = F2(
 	function (_v0, _v1) {
 		var x = _v0.a;

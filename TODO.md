@@ -2,14 +2,18 @@
 
 # WIP
 
-Lazy selective re-render (aka 2.8) to reduce map flicker, improve slider response? 
+Map click terrible.
+Moves map when switching views.
+No initial 3rd view.
+
 
 ## Zoom, Pan, Rotate.
 
 ### Map / General
 Possibly try a more graduated selective rendering. (Maybe 100km box at 14 deep?)
 Better, a progressive drop off with distance.
-Map click not very good, likely due to 'Problems' above.
+Lazy selective re-render (aka 2.8) to reduce map flicker, improve slider response?
+
 
 ### iframe
 Do an embedded version as iframe for Steve?
