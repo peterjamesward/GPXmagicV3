@@ -255,7 +255,9 @@ update msg (Model model) =
             )
 
         SetViewMode newMode ->
-            ( Model { model | viewMode = newMode }
+            ( { model | viewMode = newMode }
+                |> renderModel
+                |> Model
             , if model.viewMode /= ViewMap && newMode == ViewMap then
                 Cmd.batch
                     -- Must repaint track on so that selective rendering works.

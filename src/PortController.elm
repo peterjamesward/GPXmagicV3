@@ -267,8 +267,6 @@ processPortMessage :
         , Cmd Msg
         )
 processPortMessage model json =
-    -- So we don't need to keep going to the PortController.
-    -- These will be Model-domain messages.
     let
         jsonMsg =
             D.decodeValue msgDecoder json

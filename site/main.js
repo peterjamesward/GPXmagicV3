@@ -11006,16 +11006,16 @@ var $author$project$DomainModel$isLongitudeContained = F2(
 			$author$project$DomainModel$longitudeFromVector(
 				$author$project$DomainModel$startVector(treeNode)),
 			longitude);
-		return ($ianmackenzie$elm_units$Quantity$greaterThanOrEqualToZero(turnFromStart) && ($ianmackenzie$elm_units$Quantity$greaterThanOrEqualToZero(turnToEnd) && (A2(
+		return ($ianmackenzie$elm_units$Quantity$greaterThanOrEqualToZero(turnFromStart) && (A2(
 			$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
 			$ianmackenzie$elm_units$Angle$degrees(90),
-			turnFromStart) && A2(
+			turnFromStart) && ($ianmackenzie$elm_units$Quantity$greaterThanOrEqualToZero(turnToEnd) && A2(
 			$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
 			$ianmackenzie$elm_units$Angle$degrees(90),
-			turnToEnd)))) ? true : (($ianmackenzie$elm_units$Quantity$lessThanOrEqualToZero(turnFromStart) && ($ianmackenzie$elm_units$Quantity$lessThanOrEqualToZero(turnToEnd) && (A2(
+			turnToEnd)))) ? true : (($ianmackenzie$elm_units$Quantity$lessThanOrEqualToZero(turnFromStart) && (A2(
 			$ianmackenzie$elm_units$Quantity$greaterThan,
 			$ianmackenzie$elm_units$Angle$degrees(-90),
-			turnFromStart) && A2(
+			turnFromStart) && ($ianmackenzie$elm_units$Quantity$lessThanOrEqualToZero(turnToEnd) && A2(
 			$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo,
 			$ianmackenzie$elm_units$Angle$degrees(-90),
 			turnToEnd)))) ? true : false);
@@ -11050,11 +11050,7 @@ var $author$project$DomainModel$rotationAwayFrom = F2(
 	});
 var $author$project$DomainModel$nearestToLonLat = F2(
 	function (click, treeNode) {
-		var searchVector = A3(
-			$author$project$DomainModel$makeEarthVector,
-			click.longitude,
-			click.latitude,
-			$ianmackenzie$elm_units$Length$meters($author$project$Spherical$meanRadius));
+		var searchVector = A3($author$project$DomainModel$makeEarthVector, click.longitude, click.latitude, $ianmackenzie$elm_units$Quantity$zero);
 		var searchPoint = A2($ianmackenzie$elm_geometry$Point3d$translateBy, searchVector, $ianmackenzie$elm_geometry$Point3d$origin);
 		var helper = F2(
 			function (withNode, skip) {
@@ -13221,9 +13217,10 @@ var $author$project$Main$update = F2(
 				var newMode = msg.a;
 				return _Utils_Tuple2(
 					$author$project$Main$Model(
-						_Utils_update(
-							model,
-							{viewMode: newMode})),
+						$author$project$Main$renderModel(
+							_Utils_update(
+								model,
+								{viewMode: newMode}))),
 					((!_Utils_eq(model.viewMode, $author$project$ViewingMode$ViewMap)) && _Utils_eq(newMode, $author$project$ViewingMode$ViewMap)) ? $elm$core$Platform$Cmd$batch(
 						_List_fromArray(
 							[

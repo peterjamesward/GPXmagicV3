@@ -93,16 +93,16 @@ isLongitudeContained longitude treeNode =
     -- I think this way of writing it is clear.
     if
         (turnFromStart |> Quantity.greaterThanOrEqualToZero)
-            && (turnToEnd |> Quantity.greaterThanOrEqualToZero)
             && (turnFromStart |> Quantity.lessThanOrEqualTo (Angle.degrees 90))
+            && (turnToEnd |> Quantity.greaterThanOrEqualToZero)
             && (turnToEnd |> Quantity.lessThanOrEqualTo (Angle.degrees 90))
     then
         True
 
     else if
         (turnFromStart |> Quantity.lessThanOrEqualToZero)
-            && (turnToEnd |> Quantity.lessThanOrEqualToZero)
             && (turnFromStart |> Quantity.greaterThan (Angle.degrees -90))
+            && (turnToEnd |> Quantity.lessThanOrEqualToZero)
             && (turnToEnd |> Quantity.greaterThanOrEqualTo (Angle.degrees -90))
     then
         True
@@ -415,7 +415,8 @@ nearestToLonLat click treeNode =
     -- Bit of recursive magic to get the "index" number.
     let
         searchVector =
-            makeEarthVector click.longitude click.latitude (Length.meters Spherical.meanRadius)
+            -- Earth radius is added on for us.
+            makeEarthVector click.longitude click.latitude Quantity.zero
 
         searchPoint =
             Point3d.origin |> Point3d.translateBy searchVector
