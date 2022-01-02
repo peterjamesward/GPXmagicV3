@@ -3,9 +3,14 @@
 # WIP
 
 Map click terrible.
+> Keep median longitude and range either side. 
+> Test modulo something. Variant bounding box.
+> 
 Moves map when switching views.
+
 No initial 3rd view.
 
+Add sphere at minimum radius in 3D.
 
 ## Zoom, Pan, Rotate.
 
@@ -24,22 +29,23 @@ Binary file format for fastest load?
 
 # Backlog
 
-### Decide how to organise windows, panes, views.
-What state lives where?
-Also, need to see if we can live without PostUpdateAction, just let the tools do their thing.
-First pane is special, because of map, and because you must have it.
-Hence, one pane + list, or just four panes with visibility?
-
 ### Multiple windows
 Check out Electron (again), see if that will allow multiple windows.
 > Keep putting this back. I worried that the internal comms might kill it,
 > but it remains an attractive option.
 > Second window would be view only.
 
+### Decide how to organise windows, panes, views.
+What state lives where?
+Also, need to see if we can live without PostUpdateAction, just let the tools do their thing.
+First pane is special, because of map, and because you must have it.
+Hence, one pane + list, or just four panes with visibility?
+
 ### Look and Feel
 Clean.
 Chinese FlatUI palette?
 Keep current track in indexDB to support a "restart/recover" option?
+JB suggests heavily customisable to support differing "workflows".
 
 ### Plan view
 Same as before. Use 3d-scene. Orthographic camera.
@@ -49,9 +55,6 @@ Not 3d, just drawing onto Canvas?
 (But what about zoom and pan?)
 Altitude change from start, end; trueLength.
 Combine with Charts, by adding the colours, ideally.
-
-### Rotate, Zoom, Pan
-This is copy & paste.
 
 ### Terrain
 Terrain 1 = Simple tree walk, in many cases will just work but not always.
@@ -71,7 +74,7 @@ As and when needed:
 
 ### Scale test
 Test with 1M TP (ask Steve).
-So far, looking awesome at 380K.
+So far, looking awesome at 937K (!).
 
 ### Tools
 More progress along the "plug-in" tool pattern:

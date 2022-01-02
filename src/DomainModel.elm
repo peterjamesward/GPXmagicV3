@@ -3,6 +3,7 @@ module DomainModel exposing (..)
 import Angle exposing (Angle)
 import Axis3d exposing (Axis3d)
 import BoundingBox3d exposing (BoundingBox3d)
+import Direction2d exposing (Direction2d)
 import Direction3d
 import Json.Encode as E
 import Length exposing (Length, Meters, inMeters)
@@ -17,8 +18,8 @@ import Vector3d exposing (Vector3d)
 
 type alias GPXSource =
     -- Being a raw line of data from GPX file.
-    { longitude : Angle
-    , latitude : Angle
+    { longitude : Angle.Angle
+    , latitude : Angle.Angle
     , altitude : Quantity Float Meters
     }
 
@@ -36,12 +37,16 @@ type alias RoadSection =
     -- Can be based between two 'fundamental' points from GPX, or an assembly of them.
     -- I THINK it makes sense to store only the vectors.
     -- Bounding box and Sphere needed for culling in nearness tests.
+    -- Keeping track of longitude tricky because of IDL.
     { startVector : EarthVector
     , endVector : EarthVector
     , boundingBox : BoundingBox3d Meters LocalCoords
     , sphere : Sphere3d Meters LocalCoords
     , trueLength : Quantity Float Meters
     , skipCount : Int
+    , startLongitude : Direction2d LocalCoords
+    , westward : Angle.Angle
+    , eastward : Angle.Angle
     }
 
 
@@ -115,6 +120,33 @@ sphere treeNode =
         Node node ->
             node.nodeContent.sphere
 
+startLongitude : PeteTree -> Direction2d LocalCoords
+startLongitude treeNode =
+    case treeNode of
+        Leaf leaf ->
+            leaf.startLongitude
+
+        Node node ->
+            node.nodeContent.startLongitude
+
+eastward : PeteTree -> Angle
+eastward treeNode =
+    case treeNode of
+        Leaf leaf ->
+            leaf.eastward
+
+        Node node ->
+            node.nodeContent.eastward
+
+westward : PeteTree -> Angle
+westward treeNode =
+    case treeNode of
+        Leaf leaf ->
+            leaf.westward
+
+        Node node ->
+            node.nodeContent.westward
+
 
 makeRoadSection : EarthVector -> EarthVector -> RoadSection
 makeRoadSection v1 v2 =
@@ -136,6 +168,21 @@ makeRoadSection v1 v2 =
                 Spherical.range
                     ( earth1.longitude, earth1.latitude )
                     ( earth2.longitude, earth2.latitude )
+
+        startLon =
+            Vector3d.direction v1
+                |> Maybe.withDefault Direction3d.x
+                |> Direction3d.projectInto SketchPlane3d.xy
+                |> Maybe.withDefault Direction2d.x
+
+        endLon =
+            Vector3d.direction v2
+                |> Maybe.withDefault Direction3d.x
+                |> Direction3d.projectInto SketchPlane3d.xy
+                |> Maybe.withDefault Direction2d.x
+
+        longitudeChange =
+            Direction2d.angleFrom startLon endLon
     in
     { startVector = v1
     , endVector = v2
@@ -143,6 +190,9 @@ makeRoadSection v1 v2 =
     , sphere = containingSphere box
     , trueLength = range
     , skipCount = 1
+    , startLongitude = startLon
+    , westward = Quantity.max Quantity.zero longitudeChange
+    , eastward = Quantity.min Quantity.zero longitudeChange
     }
 
 
@@ -166,6 +216,9 @@ treeFromList track =
             , sphere = containingSphere box
             , trueLength = Quantity.plus (trueLength info1) (trueLength info2)
             , skipCount = skipCount info1 + skipCount info2
+            , startLongitude = startLongitude info1
+            , westward = Quantity.max (westward info1) (westward info2)
+            , eastward = Quantity.min (eastward info1) (eastward info2)
             }
 
         treeBuilder : Int -> List EarthVector -> ( Maybe PeteTree, List EarthVector )

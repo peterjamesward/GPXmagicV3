@@ -10154,12 +10154,12 @@ var $ianmackenzie$elm_geometry$Point3d$scaleAbout = F3(
 	});
 var $author$project$ViewThirdPerson$deriveCamera = F2(
 	function (treeNode, focusPoint) {
-		var eyePoint = A3($ianmackenzie$elm_geometry$Point3d$scaleAbout, $ianmackenzie$elm_geometry$Point3d$origin, 1.015, focusPoint);
+		var eyePoint = A3($ianmackenzie$elm_geometry$Point3d$scaleAbout, $ianmackenzie$elm_geometry$Point3d$origin, 1.01, focusPoint);
 		var cameraViewpoint = $ianmackenzie$elm_3d_camera$Viewpoint3d$lookAt(
 			{eyePoint: eyePoint, focalPoint: focusPoint, upDirection: $ianmackenzie$elm_geometry$Direction3d$positiveZ});
 		var perspectiveCamera = $ianmackenzie$elm_3d_camera$Camera3d$perspective(
 			{
-				verticalFieldOfView: $ianmackenzie$elm_units$Angle$degrees(20),
+				verticalFieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
 				viewpoint: cameraViewpoint
 			});
 		return perspectiveCamera;
@@ -21084,7 +21084,6 @@ var $mdgriffith$elm_ui$Element$Font$color = function (fontColor) {
 			'color',
 			fontColor));
 };
-var $smucode$elm_flat_colors$FlatColors$ChinesePalette$limeSoap = A3($mdgriffith$elm_ui$Element$rgb255, 123, 237, 159);
 var $mdgriffith$elm_ui$Element$paddingXY = F2(
 	function (x, y) {
 		if (_Utils_eq(x, y)) {
@@ -21172,7 +21171,7 @@ var $author$project$ViewPureStyles$radioButton = F2(
 					$mdgriffith$elm_ui$Element$Border$roundEach(
 					{bottomLeft: 0, bottomRight: 0, topLeft: 6, topRight: 6}),
 					$mdgriffith$elm_ui$Element$Background$color(
-					_Utils_eq(state, $mdgriffith$elm_ui$Element$Input$Selected) ? $smucode$elm_flat_colors$FlatColors$ChinesePalette$limeSoap : $smucode$elm_flat_colors$FlatColors$ChinesePalette$twinkleBlue),
+					_Utils_eq(state, $mdgriffith$elm_ui$Element$Input$Selected) ? $smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite : $smucode$elm_flat_colors$FlatColors$ChinesePalette$twinkleBlue),
 					$mdgriffith$elm_ui$Element$Font$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$prestigeBlue),
 					$mdgriffith$elm_ui$Element$Font$size(16)
 				]),
