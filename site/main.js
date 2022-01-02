@@ -11090,7 +11090,7 @@ var $author$project$DomainModel$nearestToLonLat = F2(
 								var _v4 = A2(helper, node.left, skip);
 								var leftBestIndex = _v4.a;
 								var leftBestDistance = _v4.b;
-								return A2($ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo, rightBestDistance, leftBestDistance) ? _Utils_Tuple2(leftBestIndex, leftBestDistance) : _Utils_Tuple2(rightBestIndex, rightBestDistance);
+								return A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, rightBestDistance, leftBestDistance) ? _Utils_Tuple2(leftBestIndex, leftBestDistance) : _Utils_Tuple2(rightBestIndex, rightBestDistance);
 							} else {
 								var $temp$withNode = node.left,
 									$temp$skip = skip;

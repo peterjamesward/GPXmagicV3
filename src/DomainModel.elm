@@ -460,7 +460,7 @@ nearestToLonLat click treeNode =
                                 ( rightBestIndex, rightBestDistance ) =
                                     helper node.right (skip + skipCount node.left)
                             in
-                            if leftBestDistance |> Quantity.greaterThanOrEqualTo rightBestDistance then
+                            if leftBestDistance |> Quantity.lessThanOrEqualTo rightBestDistance then
                                 ( leftBestIndex, leftBestDistance )
 
                             else
