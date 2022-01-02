@@ -10154,12 +10154,12 @@ var $ianmackenzie$elm_geometry$Point3d$scaleAbout = F3(
 	});
 var $author$project$ViewThirdPerson$deriveCamera = F2(
 	function (treeNode, focusPoint) {
-		var eyePoint = A3($ianmackenzie$elm_geometry$Point3d$scaleAbout, $ianmackenzie$elm_geometry$Point3d$origin, 1.01, focusPoint);
+		var eyePoint = A3($ianmackenzie$elm_geometry$Point3d$scaleAbout, $ianmackenzie$elm_geometry$Point3d$origin, 1.015, focusPoint);
 		var cameraViewpoint = $ianmackenzie$elm_3d_camera$Viewpoint3d$lookAt(
 			{eyePoint: eyePoint, focalPoint: focusPoint, upDirection: $ianmackenzie$elm_geometry$Direction3d$positiveZ});
 		var perspectiveCamera = $ianmackenzie$elm_3d_camera$Camera3d$perspective(
 			{
-				verticalFieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
+				verticalFieldOfView: $ianmackenzie$elm_units$Angle$degrees(20),
 				viewpoint: cameraViewpoint
 			});
 		return perspectiveCamera;
@@ -10902,54 +10902,13 @@ var $ianmackenzie$elm_units$Quantity$max = F2(
 		return $ianmackenzie$elm_units$Quantity$Quantity(
 			A2($elm$core$Basics$max, x, y));
 	});
-var $ianmackenzie$elm_geometry$Direction3d$from = F2(
-	function (_v0, _v1) {
-		var p1 = _v0.a;
-		var p2 = _v1.a;
-		var deltaZ = p2.z - p1.z;
-		var deltaY = p2.y - p1.y;
-		var deltaX = p2.x - p1.x;
-		var largestComponent = A2(
-			$elm$core$Basics$max,
-			$elm$core$Basics$abs(deltaX),
-			A2(
-				$elm$core$Basics$max,
-				$elm$core$Basics$abs(deltaY),
-				$elm$core$Basics$abs(deltaZ)));
-		if (!largestComponent) {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			var scaledZ = deltaZ / largestComponent;
-			var scaledY = deltaY / largestComponent;
-			var scaledX = deltaX / largestComponent;
-			var scaledLength = $elm$core$Basics$sqrt(((scaledX * scaledX) + (scaledY * scaledY)) + (scaledZ * scaledZ));
-			return $elm$core$Maybe$Just(
-				$ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
-					{x: scaledX / scaledLength, y: scaledY / scaledLength, z: scaledZ / scaledLength}));
-		}
-	});
-var $ianmackenzie$elm_geometry$Axis3d$throughPoints = F2(
-	function (firstPoint, secondPoint) {
-		var _v0 = A2($ianmackenzie$elm_geometry$Direction3d$from, firstPoint, secondPoint);
-		if (_v0.$ === 'Just') {
-			var axisDirection = _v0.a;
-			return $elm$core$Maybe$Just(
-				A2($ianmackenzie$elm_geometry$Axis3d$through, firstPoint, axisDirection));
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
-var $ianmackenzie$elm_geometry$Axis3d$x = A2($ianmackenzie$elm_geometry$Axis3d$through, $ianmackenzie$elm_geometry$Point3d$origin, $ianmackenzie$elm_geometry$Direction3d$x);
 var $author$project$DomainModel$nearestToLonLat = F2(
 	function (click, treeNode) {
-		var searchVector = A3($author$project$DomainModel$makeEarthVector, click.longitude, click.latitude, click.altitude);
-		var searchAxis = A2(
-			$elm$core$Maybe$withDefault,
-			$ianmackenzie$elm_geometry$Axis3d$x,
-			A2(
-				$ianmackenzie$elm_geometry$Axis3d$throughPoints,
-				$ianmackenzie$elm_geometry$Point3d$origin,
-				A2($ianmackenzie$elm_geometry$Point3d$translateBy, searchVector, $ianmackenzie$elm_geometry$Point3d$origin)));
+		var searchVector = A3(
+			$author$project$DomainModel$makeEarthVector,
+			click.longitude,
+			click.latitude,
+			$ianmackenzie$elm_units$Length$meters($author$project$Spherical$meanRadius));
 		var helper = F2(
 			function (withNode, skip) {
 				helper:
@@ -12207,6 +12166,49 @@ var $author$project$DomainModel$containingSphere = function (box) {
 					]))));
 	return A2($ianmackenzie$elm_geometry$Sphere3d$withRadius, radius, here);
 };
+var $author$project$DomainModel$eastward = function (treeNode) {
+	if (treeNode.$ === 'Leaf') {
+		var leaf = treeNode.a;
+		return leaf.eastward;
+	} else {
+		var node = treeNode.a;
+		return node.nodeContent.eastward;
+	}
+};
+var $ianmackenzie$elm_geometry$Direction2d$angleFrom = F2(
+	function (_v0, _v1) {
+		var d1 = _v0.a;
+		var d2 = _v1.a;
+		var relativeY = (d1.x * d2.y) - (d1.y * d2.x);
+		var relativeX = (d1.x * d2.x) + (d1.y * d2.y);
+		return $ianmackenzie$elm_units$Quantity$Quantity(
+			A2($elm$core$Basics$atan2, relativeY, relativeX));
+	});
+var $ianmackenzie$elm_geometry$Direction3d$projectInto = F2(
+	function (_v0, _v1) {
+		var sketchPlane = _v0.a;
+		var d = _v1.a;
+		var _v2 = sketchPlane.yDirection;
+		var j = _v2.a;
+		var projectedY = ((d.x * j.x) + (d.y * j.y)) + (d.z * j.z);
+		var _v3 = sketchPlane.xDirection;
+		var i = _v3.a;
+		var projectedX = ((d.x * i.x) + (d.y * i.y)) + (d.z * i.z);
+		var largestComponent = A2(
+			$elm$core$Basics$max,
+			$elm$core$Basics$abs(projectedX),
+			$elm$core$Basics$abs(projectedY));
+		if (!largestComponent) {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var scaledY = projectedY / largestComponent;
+			var scaledX = projectedX / largestComponent;
+			var scaledLength = $elm$core$Basics$sqrt((scaledX * scaledX) + (scaledY * scaledY));
+			return $elm$core$Maybe$Just(
+				$ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
+					{x: scaledX / scaledLength, y: scaledY / scaledLength}));
+		}
+	});
 var $elm$core$Tuple$second = function (_v0) {
 	var y = _v0.b;
 	return y;
@@ -12227,8 +12229,30 @@ var $author$project$Spherical$range = F2(
 		var x = (lon2 - lon1) * $elm$core$Basics$cos((lat1 + lat2) / 2);
 		return $author$project$Spherical$meanRadius * $elm$core$Basics$sqrt((x * x) + (y * y));
 	});
+var $ianmackenzie$elm_geometry$Direction2d$x = $ianmackenzie$elm_geometry$Direction2d$positiveX;
 var $author$project$DomainModel$makeRoadSection = F2(
 	function (v1, v2) {
+		var startLon = A2(
+			$elm$core$Maybe$withDefault,
+			$ianmackenzie$elm_geometry$Direction2d$x,
+			A2(
+				$ianmackenzie$elm_geometry$Direction3d$projectInto,
+				$ianmackenzie$elm_geometry$SketchPlane3d$xy,
+				A2(
+					$elm$core$Maybe$withDefault,
+					$ianmackenzie$elm_geometry$Direction3d$x,
+					$ianmackenzie$elm_geometry$Vector3d$direction(v1))));
+		var endLon = A2(
+			$elm$core$Maybe$withDefault,
+			$ianmackenzie$elm_geometry$Direction2d$x,
+			A2(
+				$ianmackenzie$elm_geometry$Direction3d$projectInto,
+				$ianmackenzie$elm_geometry$SketchPlane3d$xy,
+				A2(
+					$elm$core$Maybe$withDefault,
+					$ianmackenzie$elm_geometry$Direction3d$x,
+					$ianmackenzie$elm_geometry$Vector3d$direction(v2))));
+		var longitudeChange = A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, startLon, endLon);
 		var _v0 = _Utils_Tuple2(
 			A2($ianmackenzie$elm_geometry$Point3d$translateBy, v1, $ianmackenzie$elm_geometry$Point3d$origin),
 			A2($ianmackenzie$elm_geometry$Point3d$translateBy, v2, $ianmackenzie$elm_geometry$Point3d$origin));
@@ -12247,13 +12271,25 @@ var $author$project$DomainModel$makeRoadSection = F2(
 				_Utils_Tuple2(earth2.longitude, earth2.latitude)));
 		return {
 			boundingBox: box,
+			eastward: A2($ianmackenzie$elm_units$Quantity$max, $ianmackenzie$elm_units$Quantity$zero, longitudeChange),
 			endVector: v2,
 			skipCount: 1,
 			sphere: $author$project$DomainModel$containingSphere(box),
+			startLongitude: startLon,
 			startVector: v1,
-			trueLength: range
+			trueLength: range,
+			westward: A2($ianmackenzie$elm_units$Quantity$min, $ianmackenzie$elm_units$Quantity$zero, longitudeChange)
 		};
 	});
+var $author$project$DomainModel$startLongitude = function (treeNode) {
+	if (treeNode.$ === 'Leaf') {
+		var leaf = treeNode.a;
+		return leaf.startLongitude;
+	} else {
+		var node = treeNode.a;
+		return node.nodeContent.startLongitude;
+	}
+};
 var $ianmackenzie$elm_geometry$BoundingBox3d$extrema = function (_v0) {
 	var boundingBoxExtrema = _v0.a;
 	return boundingBoxExtrema;
@@ -12272,6 +12308,15 @@ var $ianmackenzie$elm_geometry$BoundingBox3d$union = F2(
 				minZ: A2($ianmackenzie$elm_units$Quantity$min, b1.minZ, b2.minZ)
 			});
 	});
+var $author$project$DomainModel$westward = function (treeNode) {
+	if (treeNode.$ === 'Leaf') {
+		var leaf = treeNode.a;
+		return leaf.westward;
+	} else {
+		var node = treeNode.a;
+		return node.nodeContent.westward;
+	}
+};
 var $author$project$DomainModel$treeFromList = function (track) {
 	var numberOfSegments = $elm$core$List$length(track) - 1;
 	var combineInfo = F2(
@@ -12282,14 +12327,23 @@ var $author$project$DomainModel$treeFromList = function (track) {
 				$author$project$DomainModel$boundingBox(info2));
 			return {
 				boundingBox: box,
+				eastward: A2(
+					$ianmackenzie$elm_units$Quantity$max,
+					$author$project$DomainModel$eastward(info1),
+					$author$project$DomainModel$eastward(info2)),
 				endVector: $author$project$DomainModel$endVector(info2),
 				skipCount: $author$project$DomainModel$skipCount(info1) + $author$project$DomainModel$skipCount(info2),
 				sphere: $author$project$DomainModel$containingSphere(box),
+				startLongitude: $author$project$DomainModel$startLongitude(info1),
 				startVector: $author$project$DomainModel$startVector(info1),
 				trueLength: A2(
 					$ianmackenzie$elm_units$Quantity$plus,
 					$author$project$DomainModel$trueLength(info1),
-					$author$project$DomainModel$trueLength(info2))
+					$author$project$DomainModel$trueLength(info2)),
+				westward: A2(
+					$ianmackenzie$elm_units$Quantity$min,
+					$author$project$DomainModel$westward(info1),
+					$author$project$DomainModel$westward(info2))
 			};
 		});
 	var treeBuilder = F2(
@@ -21084,6 +21138,7 @@ var $mdgriffith$elm_ui$Element$Font$color = function (fontColor) {
 			'color',
 			fontColor));
 };
+var $smucode$elm_flat_colors$FlatColors$ChinesePalette$limeSoap = A3($mdgriffith$elm_ui$Element$rgb255, 123, 237, 159);
 var $mdgriffith$elm_ui$Element$paddingXY = F2(
 	function (x, y) {
 		if (_Utils_eq(x, y)) {
@@ -21171,7 +21226,7 @@ var $author$project$ViewPureStyles$radioButton = F2(
 					$mdgriffith$elm_ui$Element$Border$roundEach(
 					{bottomLeft: 0, bottomRight: 0, topLeft: 6, topRight: 6}),
 					$mdgriffith$elm_ui$Element$Background$color(
-					_Utils_eq(state, $mdgriffith$elm_ui$Element$Input$Selected) ? $smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite : $smucode$elm_flat_colors$FlatColors$ChinesePalette$twinkleBlue),
+					_Utils_eq(state, $mdgriffith$elm_ui$Element$Input$Selected) ? $smucode$elm_flat_colors$FlatColors$ChinesePalette$limeSoap : $smucode$elm_flat_colors$FlatColors$ChinesePalette$twinkleBlue),
 					$mdgriffith$elm_ui$Element$Font$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$prestigeBlue),
 					$mdgriffith$elm_ui$Element$Font$size(16)
 				]),

@@ -191,8 +191,8 @@ makeRoadSection v1 v2 =
     , trueLength = range
     , skipCount = 1
     , startLongitude = startLon
-    , westward = Quantity.max Quantity.zero longitudeChange
-    , eastward = Quantity.min Quantity.zero longitudeChange
+    , eastward = Quantity.max Quantity.zero longitudeChange
+    , westward = Quantity.min Quantity.zero longitudeChange
     }
 
 
@@ -217,8 +217,8 @@ treeFromList track =
             , trueLength = Quantity.plus (trueLength info1) (trueLength info2)
             , skipCount = skipCount info1 + skipCount info2
             , startLongitude = startLongitude info1
-            , westward = Quantity.max (westward info1) (westward info2)
-            , eastward = Quantity.min (eastward info1) (eastward info2)
+            , eastward = Quantity.max (eastward info1) (eastward info2)
+            , westward = Quantity.min (westward info1) (westward info2)
             }
 
         treeBuilder : Int -> List EarthVector -> ( Maybe PeteTree, List EarthVector )
@@ -401,19 +401,14 @@ nearestToLonLat click treeNode =
     -- Bit of recursive magic to get the "index" number.
     let
         searchVector =
-            makeEarthVector click.longitude click.latitude click.altitude
-
-        searchAxis =
-            Axis3d.throughPoints
-                Point3d.origin
-                (Point3d.origin |> Point3d.translateBy searchVector)
-                |> Maybe.withDefault Axis3d.x
+            makeEarthVector click.longitude click.latitude (Length.meters Spherical.meanRadius)
 
         helper withNode skip =
             case withNode of
                 Leaf leaf ->
                     -- Use whichever point is closest.
                     let
+                        -- At leaf level, surely simple metric will suffice
                         -- Using dot product as closeness comparator. Nearest to +1 wins.
                         ( startDistance, endDistance ) =
                             ( Vector3d.dot (startVector withNode) searchVector
