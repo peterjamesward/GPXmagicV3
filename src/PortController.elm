@@ -4,6 +4,7 @@ import Angle
 import Axis3d
 import BoundingBox3d exposing (BoundingBox3d)
 import Delay exposing (after)
+import Direction2d
 import Direction3d
 import DomainModel exposing (PeteTree, gpxFromVector, leafFromIndex, startVector)
 import Json.Decode as D exposing (Decoder, field, string)
@@ -79,7 +80,7 @@ centreMap model =
                 E.object
                     [ ( "Cmd", E.string "Centre" )
                     , ( "token", E.string mapboxKey )
-                    , ( "lon", E.float <| Angle.inDegrees longitude )
+                    , ( "lon", E.float <| Angle.inDegrees <| Direction2d.toAngle longitude )
                     , ( "lat", E.float <| Angle.inDegrees latitude )
                     ]
 
@@ -118,7 +119,7 @@ centreMapOnCurrent model =
                 E.object
                     [ ( "Cmd", E.string "Centre" )
                     , ( "token", E.string mapboxKey )
-                    , ( "lon", E.float <| Angle.inDegrees longitude )
+                    , ( "lon", E.float <| Angle.inDegrees <| Direction2d.toAngle longitude )
                     , ( "lat", E.float <| Angle.inDegrees latitude )
                     ]
 
@@ -165,7 +166,7 @@ addTrackToMap model =
                 E.object
                     [ ( "Cmd", E.string "Track" )
                     , ( "token", E.string mapboxKey )
-                    , ( "lon", E.float <| Angle.inDegrees longitude )
+                    , ( "lon", E.float <| Angle.inDegrees <| Direction2d.toAngle longitude )
                     , ( "lat", E.float <| Angle.inDegrees latitude )
                     , ( "zoom", E.float 10.0 )
                     , ( "data", SceneBuilder.renderMapJson model ) -- Route as polyline
@@ -287,7 +288,7 @@ processPortMessage model json =
                 ( False, Ok lat1, Ok lon1 ) ->
                     let
                         gpxPoint =
-                            { longitude = Angle.degrees lon1
+                            { longitude = Direction2d.fromAngle <| Angle.degrees lon1
                             , latitude = Angle.degrees lat1
                             , altitude = Length.meters 0.0
                             }

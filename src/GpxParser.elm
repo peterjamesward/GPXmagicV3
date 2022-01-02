@@ -1,6 +1,7 @@
 module GpxParser exposing (..)
 
 import Angle
+import Direction2d
 import Direction3d
 import DomainModel exposing (EarthVector, GPXSource, makeEarthVector)
 import Length
@@ -63,15 +64,22 @@ parseGPXPoints xml =
                 _ ->
                     Nothing
 
-
         earthVector trkpt =
             -- This just to remove anything with a weird combination of values.
             case ( latitude trkpt, longitude trkpt, elevation trkpt ) of
                 ( (Just lat) :: _, (Just lon) :: _, (Just alt) :: _ ) ->
-                    Just <| makeEarthVector (Angle.degrees lon) (Angle.degrees lat) (Length.meters alt)
+                    Just <|
+                        makeEarthVector
+                            (Direction2d.fromAngle <| Angle.degrees lon)
+                            (Angle.degrees lat)
+                            (Length.meters alt)
 
                 ( (Just lat) :: _, (Just lon) :: _, _ ) ->
-                    Just <| makeEarthVector (Angle.degrees lon) (Angle.degrees lat) (Length.meters 0.0)
+                    Just <|
+                        makeEarthVector
+                            (Direction2d.fromAngle <| Angle.degrees lon)
+                            (Angle.degrees lat)
+                            (Length.meters 0.0)
 
                 _ ->
                     Nothing

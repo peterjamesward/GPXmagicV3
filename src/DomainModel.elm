@@ -18,8 +18,8 @@ import Vector3d exposing (Vector3d)
 
 type alias GPXSource =
     -- Being a raw line of data from GPX file.
-    { longitude : Angle.Angle
-    , latitude : Angle.Angle
+    { longitude : Direction2d LocalCoords
+    , latitude : Angle
     , altitude : Quantity Float Meters
     }
 
@@ -44,9 +44,6 @@ type alias RoadSection =
     , sphere : Sphere3d Meters LocalCoords
     , trueLength : Quantity Float Meters
     , skipCount : Int
-    , startLongitude : Direction2d LocalCoords
-    , westward : Angle.Angle
-    , eastward : Angle.Angle
     }
 
 
@@ -79,6 +76,53 @@ endVector treeNode =
 
         Node node ->
             node.nodeContent.endVector
+
+
+isLongitudeContained : Direction2d LocalCoords -> PeteTree -> Bool
+isLongitudeContained longitude treeNode =
+    -- If we make a "small" turn from Start to target and a "small" turn
+    -- in the same direction to End, then it's "contained".
+    let
+        turnFromStart =
+            Direction2d.angleFrom (longitudeFromVector <| startVector treeNode) longitude
+
+        turnToEnd =
+            Direction2d.angleFrom longitude (longitudeFromVector <| endVector treeNode)
+    in
+    --both < 90 degree turns and matching sign.
+    -- I think this way of writing it is clear.
+    if
+        (turnFromStart |> Quantity.greaterThanOrEqualToZero)
+            && (turnToEnd |> Quantity.greaterThanOrEqualToZero)
+            && (turnFromStart |> Quantity.lessThanOrEqualTo (Angle.degrees 90))
+            && (turnToEnd |> Quantity.lessThanOrEqualTo (Angle.degrees 90))
+    then
+        True
+
+    else if
+        (turnFromStart |> Quantity.lessThanOrEqualToZero)
+            && (turnToEnd |> Quantity.lessThanOrEqualToZero)
+            && (turnFromStart |> Quantity.greaterThan (Angle.degrees -90))
+            && (turnToEnd |> Quantity.greaterThanOrEqualTo (Angle.degrees -90))
+    then
+        True
+
+    else
+        False
+
+
+rotationAwayFrom : Direction2d LocalCoords -> PeteTree -> Angle
+rotationAwayFrom longitude treeNode =
+    -- By how much, in any direction, would we need to move the longitude
+    -- to make it "contained". This is for selecting a branch if neither side is "contained".
+    let
+        turnFromStart =
+            Direction2d.angleFrom (longitudeFromVector <| startVector treeNode) longitude
+
+        turnToEnd =
+            Direction2d.angleFrom longitude (longitudeFromVector <| endVector treeNode)
+    in
+    Quantity.min (Quantity.abs turnFromStart) (Quantity.abs turnToEnd)
 
 
 trueLength : PeteTree -> Length
@@ -120,32 +164,13 @@ sphere treeNode =
         Node node ->
             node.nodeContent.sphere
 
-startLongitude : PeteTree -> Direction2d LocalCoords
-startLongitude treeNode =
-    case treeNode of
-        Leaf leaf ->
-            leaf.startLongitude
 
-        Node node ->
-            node.nodeContent.startLongitude
-
-eastward : PeteTree -> Angle
-eastward treeNode =
-    case treeNode of
-        Leaf leaf ->
-            leaf.eastward
-
-        Node node ->
-            node.nodeContent.eastward
-
-westward : PeteTree -> Angle
-westward treeNode =
-    case treeNode of
-        Leaf leaf ->
-            leaf.westward
-
-        Node node ->
-            node.nodeContent.westward
+longitudeFromVector : EarthVector -> Direction2d LocalCoords
+longitudeFromVector v =
+    Vector3d.direction v
+        |> Maybe.withDefault Direction3d.x
+        |> Direction3d.projectInto SketchPlane3d.xy
+        |> Maybe.withDefault Direction2d.x
 
 
 makeRoadSection : EarthVector -> EarthVector -> RoadSection
@@ -166,20 +191,14 @@ makeRoadSection v1 v2 =
         range =
             Length.meters <|
                 Spherical.range
-                    ( earth1.longitude, earth1.latitude )
-                    ( earth2.longitude, earth2.latitude )
+                    ( Direction2d.toAngle earth1.longitude, earth1.latitude )
+                    ( Direction2d.toAngle earth2.longitude, earth2.latitude )
 
         startLon =
-            Vector3d.direction v1
-                |> Maybe.withDefault Direction3d.x
-                |> Direction3d.projectInto SketchPlane3d.xy
-                |> Maybe.withDefault Direction2d.x
+            longitudeFromVector v1
 
         endLon =
-            Vector3d.direction v2
-                |> Maybe.withDefault Direction3d.x
-                |> Direction3d.projectInto SketchPlane3d.xy
-                |> Maybe.withDefault Direction2d.x
+            longitudeFromVector v2
 
         longitudeChange =
             Direction2d.angleFrom startLon endLon
@@ -190,9 +209,6 @@ makeRoadSection v1 v2 =
     , sphere = containingSphere box
     , trueLength = range
     , skipCount = 1
-    , startLongitude = startLon
-    , eastward = Quantity.max Quantity.zero longitudeChange
-    , westward = Quantity.min Quantity.zero longitudeChange
     }
 
 
@@ -216,9 +232,6 @@ treeFromList track =
             , sphere = containingSphere box
             , trueLength = Quantity.plus (trueLength info1) (trueLength info2)
             , skipCount = skipCount info1 + skipCount info2
-            , startLongitude = startLongitude info1
-            , eastward = Quantity.max (eastward info1) (eastward info2)
-            , westward = Quantity.min (westward info1) (westward info2)
             }
 
         treeBuilder : Int -> List EarthVector -> ( Maybe PeteTree, List EarthVector )
@@ -379,10 +392,11 @@ nearestToRay ray treeNode =
     Tuple.first <| helper treeNode 0
 
 
+makeEarthVector : Direction2d LocalCoords -> Angle -> Length -> Vector3d Length.Meters LocalCoords
 makeEarthVector lon lat alt =
     let
         direction =
-            Direction3d.xyZ lon lat
+            Direction3d.xyZ (Direction2d.toAngle lon) lat
 
         radius =
             alt |> Quantity.plus (Length.meters Spherical.meanRadius)
@@ -403,17 +417,23 @@ nearestToLonLat click treeNode =
         searchVector =
             makeEarthVector click.longitude click.latitude (Length.meters Spherical.meanRadius)
 
+        searchPoint =
+            Point3d.origin |> Point3d.translateBy searchVector
+
         helper withNode skip =
             case withNode of
                 Leaf leaf ->
-                    -- Use whichever point is closest.
+                    -- Use whichever point is closest. At leaf level, simple Euclidean metric,
                     let
-                        -- At leaf level, surely simple metric will suffice
-                        -- Using dot product as closeness comparator. Nearest to +1 wins.
-                        ( startDistance, endDistance ) =
-                            ( Vector3d.dot (startVector withNode) searchVector
-                            , Vector3d.dot (endVector withNode) searchVector
-                            )
+                        startDistance =
+                            Point3d.origin
+                                |> Point3d.translateBy leaf.startVector
+                                |> Point3d.distanceFrom searchPoint
+
+                        endDistance =
+                            Point3d.origin
+                                |> Point3d.translateBy leaf.endVector
+                                |> Point3d.distanceFrom searchPoint
                     in
                     if startDistance |> Quantity.lessThanOrEqualTo endDistance then
                         ( skip, startDistance )
@@ -422,47 +442,17 @@ nearestToLonLat click treeNode =
                         ( skip + 1, endDistance )
 
                 Node node ->
-                    -- Culling experiment. Use dot products to see if the search vector is
-                    -- "in the region" of the left or right child?
-                    -- If we are in the region of one only, use that one.
-                    -- If both, try both.
-                    -- If neither, use the closeness test and choose the closest...
+                    -- The trick here is effective culling, but better to search
+                    -- unnecessarily than to miss the right point.
                     let
-                        leftSpan =
-                            Vector3d.dot (startVector node.left) (endVector node.left)
-
-                        rightSpan =
-                            Vector3d.dot (startVector node.right) (endVector node.right)
-
-                        leftProximity =
-                            -- Remember, for dots, greater is closer.
-                            (Vector3d.dot searchVector (startVector node.left)
-                                |> Quantity.greaterThanOrEqualTo leftSpan
-                            )
-                                && (Vector3d.dot searchVector (endVector node.left)
-                                        |> Quantity.greaterThanOrEqualTo leftSpan
-                                   )
-
-                        rightProximity =
-                            (Vector3d.dot searchVector (startVector node.right)
-                                |> Quantity.greaterThanOrEqualTo rightSpan
-                            )
-                                && (Vector3d.dot searchVector (endVector node.right)
-                                        |> Quantity.greaterThanOrEqualTo rightSpan
-                                   )
-
-                        ( leftDistance, rightDistance ) =
-                            ( Quantity.max
-                                (Vector3d.dot searchVector (startVector node.left))
-                                (Vector3d.dot searchVector (endVector node.left))
-                            , Quantity.max
-                                (Vector3d.dot searchVector (startVector node.right))
-                                (Vector3d.dot searchVector (endVector node.right))
+                        ( inLeftSpan, inRightSpan ) =
+                            ( isLongitudeContained click.longitude node.left
+                            , isLongitudeContained click.longitude node.right
                             )
                     in
-                    case ( leftProximity, rightProximity ) of
+                    case ( inLeftSpan, inRightSpan ) of
                         ( True, True ) ->
-                            -- Could go either way
+                            -- Could go either way, best check both.
                             let
                                 ( leftBestIndex, leftBestDistance ) =
                                     helper node.left skip
@@ -483,6 +473,12 @@ nearestToLonLat click treeNode =
                             helper node.right (skip + skipCount node.left)
 
                         ( False, False ) ->
+                            let
+                                ( leftDistance, rightDistance ) =
+                                    ( rotationAwayFrom click.longitude node.left
+                                    , rotationAwayFrom click.longitude node.right
+                                    )
+                            in
                             if leftDistance |> Quantity.lessThanOrEqualTo rightDistance then
                                 helper node.left skip
 
@@ -526,13 +522,13 @@ gpxFromVector vector =
     in
     case direction of
         Just d ->
-            { longitude = d |> Direction3d.azimuthIn SketchPlane3d.xy
+            { longitude = longitudeFromVector vector
             , latitude = d |> Direction3d.elevationFrom SketchPlane3d.xy
             , altitude = Vector3d.length vector
             }
 
         Nothing ->
-            { longitude = Quantity.zero
+            { longitude = Direction2d.x
             , latitude = Quantity.zero
             , altitude = Length.meters Spherical.meanRadius
             }

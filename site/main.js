@@ -9408,20 +9408,6 @@ var $author$project$Msg$RepaintMap = {$: 'RepaintMap'};
 var $author$project$ViewingMode$ViewMap = {$: 'ViewMap'};
 var $author$project$PortController$commandPort = _Platform_outgoingPort('commandPort', $elm$core$Basics$identity);
 var $elm$json$Json$Encode$float = _Json_wrap;
-var $elm$core$Basics$atan2 = _Basics_atan2;
-var $ianmackenzie$elm_geometry$Direction3d$azimuthIn = F2(
-	function (_v0, _v1) {
-		var sketchPlane = _v0.a;
-		var d = _v1.a;
-		var _v2 = sketchPlane.yDirection;
-		var j = _v2.a;
-		var sketchY = ((d.x * j.x) + (d.y * j.y)) + (d.z * j.z);
-		var _v3 = sketchPlane.xDirection;
-		var i = _v3.a;
-		var sketchX = ((d.x * i.x) + (d.y * i.y)) + (d.z * i.z);
-		return $ianmackenzie$elm_units$Quantity$Quantity(
-			A2($elm$core$Basics$atan2, sketchY, sketchX));
-	});
 var $ianmackenzie$elm_geometry$Geometry$Types$Direction3d = function (a) {
 	return {$: 'Direction3d', a: a};
 };
@@ -9453,6 +9439,7 @@ var $ianmackenzie$elm_geometry$Vector3d$direction = function (_v0) {
 				{x: scaledX / scaledLength, y: scaledY / scaledLength, z: scaledZ / scaledLength}));
 	}
 };
+var $elm$core$Basics$atan2 = _Basics_atan2;
 var $ianmackenzie$elm_geometry$Direction3d$elevationFrom = F2(
 	function (_v0, _v1) {
 		var sketchPlane = _v0.a;
@@ -9493,25 +9480,68 @@ var $ianmackenzie$elm_geometry$Vector3d$length = function (_v0) {
 		return $ianmackenzie$elm_units$Quantity$Quantity(scaledLength * largestComponent);
 	}
 };
-var $author$project$Spherical$meanRadius = 6371000;
-var $ianmackenzie$elm_units$Length$meters = function (numMeters) {
-	return $ianmackenzie$elm_units$Quantity$Quantity(numMeters);
+var $ianmackenzie$elm_geometry$Geometry$Types$Direction2d = function (a) {
+	return {$: 'Direction2d', a: a};
 };
-var $ianmackenzie$elm_geometry$Geometry$Types$SketchPlane3d = function (a) {
-	return {$: 'SketchPlane3d', a: a};
-};
-var $ianmackenzie$elm_geometry$SketchPlane3d$unsafe = $ianmackenzie$elm_geometry$Geometry$Types$SketchPlane3d;
+var $ianmackenzie$elm_geometry$Direction3d$projectInto = F2(
+	function (_v0, _v1) {
+		var sketchPlane = _v0.a;
+		var d = _v1.a;
+		var _v2 = sketchPlane.yDirection;
+		var j = _v2.a;
+		var projectedY = ((d.x * j.x) + (d.y * j.y)) + (d.z * j.z);
+		var _v3 = sketchPlane.xDirection;
+		var i = _v3.a;
+		var projectedX = ((d.x * i.x) + (d.y * i.y)) + (d.z * i.z);
+		var largestComponent = A2(
+			$elm$core$Basics$max,
+			$elm$core$Basics$abs(projectedX),
+			$elm$core$Basics$abs(projectedY));
+		if (!largestComponent) {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var scaledY = projectedY / largestComponent;
+			var scaledX = projectedX / largestComponent;
+			var scaledLength = $elm$core$Basics$sqrt((scaledX * scaledX) + (scaledY * scaledY));
+			return $elm$core$Maybe$Just(
+				$ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
+					{x: scaledX / scaledLength, y: scaledY / scaledLength}));
+		}
+	});
+var $ianmackenzie$elm_geometry$Direction2d$positiveX = $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
+	{x: 1, y: 0});
+var $ianmackenzie$elm_geometry$Direction2d$x = $ianmackenzie$elm_geometry$Direction2d$positiveX;
 var $ianmackenzie$elm_geometry$Direction3d$unsafe = function (givenComponents) {
 	return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(givenComponents);
 };
 var $ianmackenzie$elm_geometry$Direction3d$positiveX = $ianmackenzie$elm_geometry$Direction3d$unsafe(
 	{x: 1, y: 0, z: 0});
 var $ianmackenzie$elm_geometry$Direction3d$x = $ianmackenzie$elm_geometry$Direction3d$positiveX;
+var $ianmackenzie$elm_geometry$Geometry$Types$SketchPlane3d = function (a) {
+	return {$: 'SketchPlane3d', a: a};
+};
+var $ianmackenzie$elm_geometry$SketchPlane3d$unsafe = $ianmackenzie$elm_geometry$Geometry$Types$SketchPlane3d;
 var $ianmackenzie$elm_geometry$Direction3d$positiveY = $ianmackenzie$elm_geometry$Direction3d$unsafe(
 	{x: 0, y: 1, z: 0});
 var $ianmackenzie$elm_geometry$Direction3d$y = $ianmackenzie$elm_geometry$Direction3d$positiveY;
 var $ianmackenzie$elm_geometry$SketchPlane3d$xy = $ianmackenzie$elm_geometry$SketchPlane3d$unsafe(
 	{originPoint: $ianmackenzie$elm_geometry$Point3d$origin, xDirection: $ianmackenzie$elm_geometry$Direction3d$x, yDirection: $ianmackenzie$elm_geometry$Direction3d$y});
+var $author$project$DomainModel$longitudeFromVector = function (v) {
+	return A2(
+		$elm$core$Maybe$withDefault,
+		$ianmackenzie$elm_geometry$Direction2d$x,
+		A2(
+			$ianmackenzie$elm_geometry$Direction3d$projectInto,
+			$ianmackenzie$elm_geometry$SketchPlane3d$xy,
+			A2(
+				$elm$core$Maybe$withDefault,
+				$ianmackenzie$elm_geometry$Direction3d$x,
+				$ianmackenzie$elm_geometry$Vector3d$direction(v))));
+};
+var $author$project$Spherical$meanRadius = 6371000;
+var $ianmackenzie$elm_units$Length$meters = function (numMeters) {
+	return $ianmackenzie$elm_units$Quantity$Quantity(numMeters);
+};
 var $author$project$DomainModel$gpxFromVector = function (vector) {
 	var direction = $ianmackenzie$elm_geometry$Vector3d$direction(vector);
 	if (direction.$ === 'Just') {
@@ -9519,13 +9549,13 @@ var $author$project$DomainModel$gpxFromVector = function (vector) {
 		return {
 			altitude: $ianmackenzie$elm_geometry$Vector3d$length(vector),
 			latitude: A2($ianmackenzie$elm_geometry$Direction3d$elevationFrom, $ianmackenzie$elm_geometry$SketchPlane3d$xy, d),
-			longitude: A2($ianmackenzie$elm_geometry$Direction3d$azimuthIn, $ianmackenzie$elm_geometry$SketchPlane3d$xy, d)
+			longitude: $author$project$DomainModel$longitudeFromVector(vector)
 		};
 	} else {
 		return {
 			altitude: $ianmackenzie$elm_units$Length$meters($author$project$Spherical$meanRadius),
 			latitude: $ianmackenzie$elm_units$Quantity$zero,
-			longitude: $ianmackenzie$elm_units$Quantity$zero
+			longitude: $ianmackenzie$elm_geometry$Direction2d$x
 		};
 	}
 };
@@ -9588,6 +9618,19 @@ var $elm$json$Json$Encode$object = function (pairs) {
 			_Json_emptyObject(_Utils_Tuple0),
 			pairs));
 };
+var $ianmackenzie$elm_geometry$Direction3d$azimuthIn = F2(
+	function (_v0, _v1) {
+		var sketchPlane = _v0.a;
+		var d = _v1.a;
+		var _v2 = sketchPlane.yDirection;
+		var j = _v2.a;
+		var sketchY = ((d.x * j.x) + (d.y * j.y)) + (d.z * j.z);
+		var _v3 = sketchPlane.xDirection;
+		var i = _v3.a;
+		var sketchX = ((d.x * i.x) + (d.y * i.y)) + (d.z * i.z);
+		return $ianmackenzie$elm_units$Quantity$Quantity(
+			A2($elm$core$Basics$atan2, sketchY, sketchX));
+	});
 var $elm$core$Basics$ge = _Utils_ge;
 var $ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo = F2(
 	function (_v0, _v1) {
@@ -9842,6 +9885,11 @@ var $author$project$SceneBuilder$renderMapJson = function (model) {
 		return $elm$json$Json$Encode$null;
 	}
 };
+var $ianmackenzie$elm_geometry$Direction2d$toAngle = function (_v0) {
+	var d = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(
+		A2($elm$core$Basics$atan2, d.y, d.x));
+};
 var $author$project$PortController$addTrackToMap = function (model) {
 	var _v0 = model.trackTree;
 	if (_v0.$ === 'Just') {
@@ -9865,7 +9913,8 @@ var $author$project$PortController$addTrackToMap = function (model) {
 						_Utils_Tuple2(
 						'lon',
 						$elm$json$Json$Encode$float(
-							$ianmackenzie$elm_units$Angle$inDegrees(longitude))),
+							$ianmackenzie$elm_units$Angle$inDegrees(
+								$ianmackenzie$elm_geometry$Direction2d$toAngle(longitude)))),
 						_Utils_Tuple2(
 						'lat',
 						$elm$json$Json$Encode$float(
@@ -9905,7 +9954,8 @@ var $author$project$PortController$centreMapOnCurrent = function (model) {
 						_Utils_Tuple2(
 						'lon',
 						$elm$json$Json$Encode$float(
-							$ianmackenzie$elm_units$Angle$inDegrees(longitude))),
+							$ianmackenzie$elm_units$Angle$inDegrees(
+								$ianmackenzie$elm_geometry$Direction2d$toAngle(longitude)))),
 						_Utils_Tuple2(
 						'lat',
 						$elm$json$Json$Encode$float(
@@ -10173,15 +10223,10 @@ var $ianmackenzie$elm_units$Quantity$midpoint = F2(
 		var y = _v1.a;
 		return $ianmackenzie$elm_units$Quantity$Quantity(x + (0.5 * (y - x)));
 	});
-var $ianmackenzie$elm_geometry$Geometry$Types$Direction2d = function (a) {
-	return {$: 'Direction2d', a: a};
-};
 var $ianmackenzie$elm_geometry$Direction2d$negativeX = $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
 	{x: -1, y: 0});
 var $ianmackenzie$elm_geometry$Direction2d$negativeY = $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
 	{x: 0, y: -1});
-var $ianmackenzie$elm_geometry$Direction2d$positiveX = $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
-	{x: 1, y: 0});
 var $ianmackenzie$elm_geometry$Direction2d$positiveY = $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
 	{x: 0, y: 1});
 var $ianmackenzie$elm_geometry$Geometry$Types$Frame2d = function (a) {
@@ -10719,6 +10764,16 @@ var $elm$core$List$filterMap = F2(
 			xs);
 	});
 var $elm$regex$Regex$find = _Regex_findAtMost(_Regex_infinity);
+var $elm$core$Basics$cos = _Basics_cos;
+var $elm$core$Basics$sin = _Basics_sin;
+var $ianmackenzie$elm_geometry$Direction2d$fromAngle = function (_v0) {
+	var angle = _v0.a;
+	return $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
+		{
+			x: $elm$core$Basics$cos(angle),
+			y: $elm$core$Basics$sin(angle)
+		});
+};
 var $ianmackenzie$elm_geometry$Vector3d$withLength = F2(
 	function (_v0, _v1) {
 		var a = _v0.a;
@@ -10726,8 +10781,6 @@ var $ianmackenzie$elm_geometry$Vector3d$withLength = F2(
 		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
 			{x: a * d.x, y: a * d.y, z: a * d.z});
 	});
-var $elm$core$Basics$cos = _Basics_cos;
-var $elm$core$Basics$sin = _Basics_sin;
 var $ianmackenzie$elm_geometry$Direction3d$xyZ = F2(
 	function (_v0, _v1) {
 		var theta = _v0.a;
@@ -10746,7 +10799,10 @@ var $author$project$DomainModel$makeEarthVector = F3(
 			$ianmackenzie$elm_units$Quantity$plus,
 			$ianmackenzie$elm_units$Length$meters($author$project$Spherical$meanRadius),
 			alt);
-		var direction = A2($ianmackenzie$elm_geometry$Direction3d$xyZ, lon, lat);
+		var direction = A2(
+			$ianmackenzie$elm_geometry$Direction3d$xyZ,
+			$ianmackenzie$elm_geometry$Direction2d$toAngle(lon),
+			lat);
 		return A2($ianmackenzie$elm_geometry$Vector3d$withLength, radius, direction);
 	});
 var $elm$core$String$toFloat = _String_toFloat;
@@ -10848,7 +10904,8 @@ var $author$project$GpxParser$parseGPXPoints = function (xml) {
 				return $elm$core$Maybe$Just(
 					A3(
 						$author$project$DomainModel$makeEarthVector,
-						$ianmackenzie$elm_units$Angle$degrees(lon),
+						$ianmackenzie$elm_geometry$Direction2d$fromAngle(
+							$ianmackenzie$elm_units$Angle$degrees(lon)),
 						$ianmackenzie$elm_units$Angle$degrees(lat),
 						$ianmackenzie$elm_units$Length$meters(alt)));
 			} else {
@@ -10859,7 +10916,8 @@ var $author$project$GpxParser$parseGPXPoints = function (xml) {
 				return $elm$core$Maybe$Just(
 					A3(
 						$author$project$DomainModel$makeEarthVector,
-						$ianmackenzie$elm_units$Angle$degrees(lon),
+						$ianmackenzie$elm_geometry$Direction2d$fromAngle(
+							$ianmackenzie$elm_units$Angle$degrees(lon)),
 						$ianmackenzie$elm_units$Angle$degrees(lat),
 						$ianmackenzie$elm_units$Length$meters(0.0)));
 			}
@@ -10886,6 +10944,39 @@ var $elm$json$Json$Decode$field = _Json_decodeField;
 var $elm$json$Json$Decode$float = _Json_decodeFloat;
 var $elm$json$Json$Decode$string = _Json_decodeString;
 var $author$project$PortController$msgDecoder = A2($elm$json$Json$Decode$field, 'msg', $elm$json$Json$Decode$string);
+var $ianmackenzie$elm_geometry$Point3d$distanceFrom = F2(
+	function (_v0, _v1) {
+		var p1 = _v0.a;
+		var p2 = _v1.a;
+		var deltaZ = p2.z - p1.z;
+		var deltaY = p2.y - p1.y;
+		var deltaX = p2.x - p1.x;
+		var largestComponent = A2(
+			$elm$core$Basics$max,
+			$elm$core$Basics$abs(deltaX),
+			A2(
+				$elm$core$Basics$max,
+				$elm$core$Basics$abs(deltaY),
+				$elm$core$Basics$abs(deltaZ)));
+		if (!largestComponent) {
+			return $ianmackenzie$elm_units$Quantity$zero;
+		} else {
+			var scaledZ = deltaZ / largestComponent;
+			var scaledY = deltaY / largestComponent;
+			var scaledX = deltaX / largestComponent;
+			var scaledLength = $elm$core$Basics$sqrt(((scaledX * scaledX) + (scaledY * scaledY)) + (scaledZ * scaledZ));
+			return $ianmackenzie$elm_units$Quantity$Quantity(scaledLength * largestComponent);
+		}
+	});
+var $ianmackenzie$elm_geometry$Direction2d$angleFrom = F2(
+	function (_v0, _v1) {
+		var d1 = _v0.a;
+		var d2 = _v1.a;
+		var relativeY = (d1.x * d2.y) - (d1.y * d2.x);
+		var relativeX = (d1.x * d2.x) + (d1.y * d2.y);
+		return $ianmackenzie$elm_units$Quantity$Quantity(
+			A2($elm$core$Basics$atan2, relativeY, relativeX));
+	});
 var $author$project$DomainModel$endVector = function (treeNode) {
 	if (treeNode.$ === 'Leaf') {
 		var leaf = treeNode.a;
@@ -10895,12 +10986,67 @@ var $author$project$DomainModel$endVector = function (treeNode) {
 		return node.nodeContent.endVector;
 	}
 };
-var $ianmackenzie$elm_units$Quantity$max = F2(
+var $ianmackenzie$elm_units$Quantity$greaterThanOrEqualToZero = function (_v0) {
+	var x = _v0.a;
+	return x >= 0;
+};
+var $ianmackenzie$elm_units$Quantity$lessThanOrEqualToZero = function (_v0) {
+	var x = _v0.a;
+	return x <= 0;
+};
+var $author$project$DomainModel$isLongitudeContained = F2(
+	function (longitude, treeNode) {
+		var turnToEnd = A2(
+			$ianmackenzie$elm_geometry$Direction2d$angleFrom,
+			longitude,
+			$author$project$DomainModel$longitudeFromVector(
+				$author$project$DomainModel$endVector(treeNode)));
+		var turnFromStart = A2(
+			$ianmackenzie$elm_geometry$Direction2d$angleFrom,
+			$author$project$DomainModel$longitudeFromVector(
+				$author$project$DomainModel$startVector(treeNode)),
+			longitude);
+		return ($ianmackenzie$elm_units$Quantity$greaterThanOrEqualToZero(turnFromStart) && ($ianmackenzie$elm_units$Quantity$greaterThanOrEqualToZero(turnToEnd) && (A2(
+			$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
+			$ianmackenzie$elm_units$Angle$degrees(90),
+			turnFromStart) && A2(
+			$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
+			$ianmackenzie$elm_units$Angle$degrees(90),
+			turnToEnd)))) ? true : (($ianmackenzie$elm_units$Quantity$lessThanOrEqualToZero(turnFromStart) && ($ianmackenzie$elm_units$Quantity$lessThanOrEqualToZero(turnToEnd) && (A2(
+			$ianmackenzie$elm_units$Quantity$greaterThan,
+			$ianmackenzie$elm_units$Angle$degrees(-90),
+			turnFromStart) && A2(
+			$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo,
+			$ianmackenzie$elm_units$Angle$degrees(-90),
+			turnToEnd)))) ? true : false);
+	});
+var $elm$core$Basics$min = F2(
+	function (x, y) {
+		return (_Utils_cmp(x, y) < 0) ? x : y;
+	});
+var $ianmackenzie$elm_units$Quantity$min = F2(
 	function (_v0, _v1) {
 		var x = _v0.a;
 		var y = _v1.a;
 		return $ianmackenzie$elm_units$Quantity$Quantity(
-			A2($elm$core$Basics$max, x, y));
+			A2($elm$core$Basics$min, x, y));
+	});
+var $author$project$DomainModel$rotationAwayFrom = F2(
+	function (longitude, treeNode) {
+		var turnToEnd = A2(
+			$ianmackenzie$elm_geometry$Direction2d$angleFrom,
+			longitude,
+			$author$project$DomainModel$longitudeFromVector(
+				$author$project$DomainModel$endVector(treeNode)));
+		var turnFromStart = A2(
+			$ianmackenzie$elm_geometry$Direction2d$angleFrom,
+			$author$project$DomainModel$longitudeFromVector(
+				$author$project$DomainModel$startVector(treeNode)),
+			longitude);
+		return A2(
+			$ianmackenzie$elm_units$Quantity$min,
+			$ianmackenzie$elm_units$Quantity$abs(turnFromStart),
+			$ianmackenzie$elm_units$Quantity$abs(turnToEnd));
 	});
 var $author$project$DomainModel$nearestToLonLat = F2(
 	function (click, treeNode) {
@@ -10909,95 +11055,41 @@ var $author$project$DomainModel$nearestToLonLat = F2(
 			click.longitude,
 			click.latitude,
 			$ianmackenzie$elm_units$Length$meters($author$project$Spherical$meanRadius));
+		var searchPoint = A2($ianmackenzie$elm_geometry$Point3d$translateBy, searchVector, $ianmackenzie$elm_geometry$Point3d$origin);
 		var helper = F2(
 			function (withNode, skip) {
 				helper:
 				while (true) {
 					if (withNode.$ === 'Leaf') {
 						var leaf = withNode.a;
-						var _v1 = _Utils_Tuple2(
-							A2(
-								$ianmackenzie$elm_geometry$Vector3d$dot,
-								$author$project$DomainModel$startVector(withNode),
-								searchVector),
-							A2(
-								$ianmackenzie$elm_geometry$Vector3d$dot,
-								$author$project$DomainModel$endVector(withNode),
-								searchVector));
-						var startDistance = _v1.a;
-						var endDistance = _v1.b;
+						var startDistance = A2(
+							$ianmackenzie$elm_geometry$Point3d$distanceFrom,
+							searchPoint,
+							A2($ianmackenzie$elm_geometry$Point3d$translateBy, leaf.startVector, $ianmackenzie$elm_geometry$Point3d$origin));
+						var endDistance = A2(
+							$ianmackenzie$elm_geometry$Point3d$distanceFrom,
+							searchPoint,
+							A2($ianmackenzie$elm_geometry$Point3d$translateBy, leaf.endVector, $ianmackenzie$elm_geometry$Point3d$origin));
 						return A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, endDistance, startDistance) ? _Utils_Tuple2(skip, startDistance) : _Utils_Tuple2(skip + 1, endDistance);
 					} else {
 						var node = withNode.a;
-						var rightSpan = A2(
-							$ianmackenzie$elm_geometry$Vector3d$dot,
-							$author$project$DomainModel$startVector(node.right),
-							$author$project$DomainModel$endVector(node.right));
-						var rightProximity = A2(
-							$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo,
-							rightSpan,
-							A2(
-								$ianmackenzie$elm_geometry$Vector3d$dot,
-								searchVector,
-								$author$project$DomainModel$startVector(node.right))) && A2(
-							$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo,
-							rightSpan,
-							A2(
-								$ianmackenzie$elm_geometry$Vector3d$dot,
-								searchVector,
-								$author$project$DomainModel$endVector(node.right)));
-						var leftSpan = A2(
-							$ianmackenzie$elm_geometry$Vector3d$dot,
-							$author$project$DomainModel$startVector(node.left),
-							$author$project$DomainModel$endVector(node.left));
-						var leftProximity = A2(
-							$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo,
-							leftSpan,
-							A2(
-								$ianmackenzie$elm_geometry$Vector3d$dot,
-								searchVector,
-								$author$project$DomainModel$startVector(node.left))) && A2(
-							$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo,
-							leftSpan,
-							A2(
-								$ianmackenzie$elm_geometry$Vector3d$dot,
-								searchVector,
-								$author$project$DomainModel$endVector(node.left)));
-						var _v2 = _Utils_Tuple2(
-							A2(
-								$ianmackenzie$elm_units$Quantity$max,
-								A2(
-									$ianmackenzie$elm_geometry$Vector3d$dot,
-									searchVector,
-									$author$project$DomainModel$startVector(node.left)),
-								A2(
-									$ianmackenzie$elm_geometry$Vector3d$dot,
-									searchVector,
-									$author$project$DomainModel$endVector(node.left))),
-							A2(
-								$ianmackenzie$elm_units$Quantity$max,
-								A2(
-									$ianmackenzie$elm_geometry$Vector3d$dot,
-									searchVector,
-									$author$project$DomainModel$startVector(node.right)),
-								A2(
-									$ianmackenzie$elm_geometry$Vector3d$dot,
-									searchVector,
-									$author$project$DomainModel$endVector(node.right))));
-						var leftDistance = _v2.a;
-						var rightDistance = _v2.b;
-						var _v3 = _Utils_Tuple2(leftProximity, rightProximity);
-						if (_v3.a) {
-							if (_v3.b) {
-								var _v4 = A2(
+						var _v1 = _Utils_Tuple2(
+							A2($author$project$DomainModel$isLongitudeContained, click.longitude, node.left),
+							A2($author$project$DomainModel$isLongitudeContained, click.longitude, node.right));
+						var inLeftSpan = _v1.a;
+						var inRightSpan = _v1.b;
+						var _v2 = _Utils_Tuple2(inLeftSpan, inRightSpan);
+						if (_v2.a) {
+							if (_v2.b) {
+								var _v3 = A2(
 									helper,
 									node.right,
 									skip + $author$project$DomainModel$skipCount(node.left));
-								var rightBestIndex = _v4.a;
-								var rightBestDistance = _v4.b;
-								var _v5 = A2(helper, node.left, skip);
-								var leftBestIndex = _v5.a;
-								var leftBestDistance = _v5.b;
+								var rightBestIndex = _v3.a;
+								var rightBestDistance = _v3.b;
+								var _v4 = A2(helper, node.left, skip);
+								var leftBestIndex = _v4.a;
+								var leftBestDistance = _v4.b;
 								return A2($ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo, rightBestDistance, leftBestDistance) ? _Utils_Tuple2(leftBestIndex, leftBestDistance) : _Utils_Tuple2(rightBestIndex, rightBestDistance);
 							} else {
 								var $temp$withNode = node.left,
@@ -11007,13 +11099,18 @@ var $author$project$DomainModel$nearestToLonLat = F2(
 								continue helper;
 							}
 						} else {
-							if (_v3.b) {
+							if (_v2.b) {
 								var $temp$withNode = node.right,
 									$temp$skip = skip + $author$project$DomainModel$skipCount(node.left);
 								withNode = $temp$withNode;
 								skip = $temp$skip;
 								continue helper;
 							} else {
+								var _v5 = _Utils_Tuple2(
+									A2($author$project$DomainModel$rotationAwayFrom, click.longitude, node.left),
+									A2($author$project$DomainModel$rotationAwayFrom, click.longitude, node.right));
+								var leftDistance = _v5.a;
+								var rightDistance = _v5.b;
 								if (A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, rightDistance, leftDistance)) {
 									var $temp$withNode = node.left,
 										$temp$skip = skip;
@@ -11058,7 +11155,8 @@ var $author$project$PortController$processPortMessage = F2(
 				var gpxPoint = {
 					altitude: $ianmackenzie$elm_units$Length$meters(0.0),
 					latitude: $ianmackenzie$elm_units$Angle$degrees(lat1),
-					longitude: $ianmackenzie$elm_units$Angle$degrees(lon1)
+					longitude: $ianmackenzie$elm_geometry$Direction2d$fromAngle(
+						$ianmackenzie$elm_units$Angle$degrees(lon1))
 				};
 				var index = A2($author$project$DomainModel$nearestToLonLat, gpxPoint, tree);
 				var updatedModel = _Utils_update(
@@ -11148,10 +11246,6 @@ var $elm$core$Basics$clamp = F3(
 var $avh4$elm_color$Color$purple = A4($avh4$elm_color$Color$RgbaSpace, 117 / 255, 80 / 255, 123 / 255, 1.0);
 var $avh4$elm_color$Color$red = A4($avh4$elm_color$Color$RgbaSpace, 204 / 255, 0 / 255, 0 / 255, 1.0);
 var $elm$core$Basics$isNaN = _Basics_isNaN;
-var $elm$core$Basics$min = F2(
-	function (x, y) {
-		return (_Utils_cmp(x, y) < 0) ? x : y;
-	});
 var $avh4$elm_color$Color$toHsla = function (_v0) {
 	var r = _v0.a;
 	var g = _v0.b;
@@ -11245,12 +11339,12 @@ var $ianmackenzie$elm_geometry$LineSegment3d$endpoints = function (_v0) {
 	var lineSegmentEndpoints = _v0.a;
 	return lineSegmentEndpoints;
 };
-var $ianmackenzie$elm_units$Quantity$min = F2(
+var $ianmackenzie$elm_units$Quantity$max = F2(
 	function (_v0, _v1) {
 		var x = _v0.a;
 		var y = _v1.a;
 		return $ianmackenzie$elm_units$Quantity$Quantity(
-			A2($elm$core$Basics$min, x, y));
+			A2($elm$core$Basics$max, x, y));
 	});
 var $ianmackenzie$elm_geometry$Point3d$xCoordinate = function (_v0) {
 	var p = _v0.a;
@@ -12166,49 +12260,6 @@ var $author$project$DomainModel$containingSphere = function (box) {
 					]))));
 	return A2($ianmackenzie$elm_geometry$Sphere3d$withRadius, radius, here);
 };
-var $author$project$DomainModel$eastward = function (treeNode) {
-	if (treeNode.$ === 'Leaf') {
-		var leaf = treeNode.a;
-		return leaf.eastward;
-	} else {
-		var node = treeNode.a;
-		return node.nodeContent.eastward;
-	}
-};
-var $ianmackenzie$elm_geometry$Direction2d$angleFrom = F2(
-	function (_v0, _v1) {
-		var d1 = _v0.a;
-		var d2 = _v1.a;
-		var relativeY = (d1.x * d2.y) - (d1.y * d2.x);
-		var relativeX = (d1.x * d2.x) + (d1.y * d2.y);
-		return $ianmackenzie$elm_units$Quantity$Quantity(
-			A2($elm$core$Basics$atan2, relativeY, relativeX));
-	});
-var $ianmackenzie$elm_geometry$Direction3d$projectInto = F2(
-	function (_v0, _v1) {
-		var sketchPlane = _v0.a;
-		var d = _v1.a;
-		var _v2 = sketchPlane.yDirection;
-		var j = _v2.a;
-		var projectedY = ((d.x * j.x) + (d.y * j.y)) + (d.z * j.z);
-		var _v3 = sketchPlane.xDirection;
-		var i = _v3.a;
-		var projectedX = ((d.x * i.x) + (d.y * i.y)) + (d.z * i.z);
-		var largestComponent = A2(
-			$elm$core$Basics$max,
-			$elm$core$Basics$abs(projectedX),
-			$elm$core$Basics$abs(projectedY));
-		if (!largestComponent) {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			var scaledY = projectedY / largestComponent;
-			var scaledX = projectedX / largestComponent;
-			var scaledLength = $elm$core$Basics$sqrt((scaledX * scaledX) + (scaledY * scaledY));
-			return $elm$core$Maybe$Just(
-				$ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
-					{x: scaledX / scaledLength, y: scaledY / scaledLength}));
-		}
-	});
 var $elm$core$Tuple$second = function (_v0) {
 	var y = _v0.b;
 	return y;
@@ -12229,29 +12280,10 @@ var $author$project$Spherical$range = F2(
 		var x = (lon2 - lon1) * $elm$core$Basics$cos((lat1 + lat2) / 2);
 		return $author$project$Spherical$meanRadius * $elm$core$Basics$sqrt((x * x) + (y * y));
 	});
-var $ianmackenzie$elm_geometry$Direction2d$x = $ianmackenzie$elm_geometry$Direction2d$positiveX;
 var $author$project$DomainModel$makeRoadSection = F2(
 	function (v1, v2) {
-		var startLon = A2(
-			$elm$core$Maybe$withDefault,
-			$ianmackenzie$elm_geometry$Direction2d$x,
-			A2(
-				$ianmackenzie$elm_geometry$Direction3d$projectInto,
-				$ianmackenzie$elm_geometry$SketchPlane3d$xy,
-				A2(
-					$elm$core$Maybe$withDefault,
-					$ianmackenzie$elm_geometry$Direction3d$x,
-					$ianmackenzie$elm_geometry$Vector3d$direction(v1))));
-		var endLon = A2(
-			$elm$core$Maybe$withDefault,
-			$ianmackenzie$elm_geometry$Direction2d$x,
-			A2(
-				$ianmackenzie$elm_geometry$Direction3d$projectInto,
-				$ianmackenzie$elm_geometry$SketchPlane3d$xy,
-				A2(
-					$elm$core$Maybe$withDefault,
-					$ianmackenzie$elm_geometry$Direction3d$x,
-					$ianmackenzie$elm_geometry$Vector3d$direction(v2))));
+		var startLon = $author$project$DomainModel$longitudeFromVector(v1);
+		var endLon = $author$project$DomainModel$longitudeFromVector(v2);
 		var longitudeChange = A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, startLon, endLon);
 		var _v0 = _Utils_Tuple2(
 			A2($ianmackenzie$elm_geometry$Point3d$translateBy, v1, $ianmackenzie$elm_geometry$Point3d$origin),
@@ -12267,29 +12299,21 @@ var $author$project$DomainModel$makeRoadSection = F2(
 		var range = $ianmackenzie$elm_units$Length$meters(
 			A2(
 				$author$project$Spherical$range,
-				_Utils_Tuple2(earth1.longitude, earth1.latitude),
-				_Utils_Tuple2(earth2.longitude, earth2.latitude)));
+				_Utils_Tuple2(
+					$ianmackenzie$elm_geometry$Direction2d$toAngle(earth1.longitude),
+					earth1.latitude),
+				_Utils_Tuple2(
+					$ianmackenzie$elm_geometry$Direction2d$toAngle(earth2.longitude),
+					earth2.latitude)));
 		return {
 			boundingBox: box,
-			eastward: A2($ianmackenzie$elm_units$Quantity$max, $ianmackenzie$elm_units$Quantity$zero, longitudeChange),
 			endVector: v2,
 			skipCount: 1,
 			sphere: $author$project$DomainModel$containingSphere(box),
-			startLongitude: startLon,
 			startVector: v1,
-			trueLength: range,
-			westward: A2($ianmackenzie$elm_units$Quantity$min, $ianmackenzie$elm_units$Quantity$zero, longitudeChange)
+			trueLength: range
 		};
 	});
-var $author$project$DomainModel$startLongitude = function (treeNode) {
-	if (treeNode.$ === 'Leaf') {
-		var leaf = treeNode.a;
-		return leaf.startLongitude;
-	} else {
-		var node = treeNode.a;
-		return node.nodeContent.startLongitude;
-	}
-};
 var $ianmackenzie$elm_geometry$BoundingBox3d$extrema = function (_v0) {
 	var boundingBoxExtrema = _v0.a;
 	return boundingBoxExtrema;
@@ -12308,15 +12332,6 @@ var $ianmackenzie$elm_geometry$BoundingBox3d$union = F2(
 				minZ: A2($ianmackenzie$elm_units$Quantity$min, b1.minZ, b2.minZ)
 			});
 	});
-var $author$project$DomainModel$westward = function (treeNode) {
-	if (treeNode.$ === 'Leaf') {
-		var leaf = treeNode.a;
-		return leaf.westward;
-	} else {
-		var node = treeNode.a;
-		return node.nodeContent.westward;
-	}
-};
 var $author$project$DomainModel$treeFromList = function (track) {
 	var numberOfSegments = $elm$core$List$length(track) - 1;
 	var combineInfo = F2(
@@ -12327,23 +12342,14 @@ var $author$project$DomainModel$treeFromList = function (track) {
 				$author$project$DomainModel$boundingBox(info2));
 			return {
 				boundingBox: box,
-				eastward: A2(
-					$ianmackenzie$elm_units$Quantity$max,
-					$author$project$DomainModel$eastward(info1),
-					$author$project$DomainModel$eastward(info2)),
 				endVector: $author$project$DomainModel$endVector(info2),
 				skipCount: $author$project$DomainModel$skipCount(info1) + $author$project$DomainModel$skipCount(info2),
 				sphere: $author$project$DomainModel$containingSphere(box),
-				startLongitude: $author$project$DomainModel$startLongitude(info1),
 				startVector: $author$project$DomainModel$startVector(info1),
 				trueLength: A2(
 					$ianmackenzie$elm_units$Quantity$plus,
 					$author$project$DomainModel$trueLength(info1),
-					$author$project$DomainModel$trueLength(info2)),
-				westward: A2(
-					$ianmackenzie$elm_units$Quantity$min,
-					$author$project$DomainModel$westward(info1),
-					$author$project$DomainModel$westward(info2))
+					$author$project$DomainModel$trueLength(info2))
 			};
 		});
 	var treeBuilder = F2(
