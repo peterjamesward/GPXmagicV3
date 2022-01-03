@@ -196,8 +196,8 @@ renderMapJson model =
 
                     else
                         accum
-                            |> renderTree (depth - 1) notLeaf.left
                             |> renderTree (depth - 1) notLeaf.right
+                            |> renderTree (depth - 1) notLeaf.left
 
         renderTreeSelectively :
             BoundingBox3d Meters LocalCoords
@@ -214,14 +214,14 @@ renderMapJson model =
                     if notLeaf.nodeContent.boundingBox |> BoundingBox3d.intersects box then
                         -- Ignore depth cutoff near or in the box
                         accum
-                            |> renderTreeSelectively box (depth - 1) notLeaf.left
                             |> renderTreeSelectively box (depth - 1) notLeaf.right
+                            |> renderTreeSelectively box (depth - 1) notLeaf.left
 
                     else
                         -- Outside box, apply cutoff.
                         accum
-                            |> renderTree (depth - 1) notLeaf.left
                             |> renderTree (depth - 1) notLeaf.right
+                            |> renderTree (depth - 1) notLeaf.left
 
         renderLastPoint treeNode =
             lngLatPair <| mapLocation <| endVector treeNode

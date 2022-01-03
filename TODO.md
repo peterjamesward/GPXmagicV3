@@ -2,11 +2,18 @@
 
 # WIP
 
-- Leaf distances look too large.
+- Map points in JSON in wrong order, so tree walk not as it seems.
+> Doesn't show in the 3D, because that's segments.
 
-- Moves map when switching views.
+- Leaf distances look too large, although hit detect seems to come out OK.
+
+- Slider does not cause selective render.
+
+- Moves map when switching views, and paints too small again.
 - No initial 3rd view.
 - Add sphere at minimum radius in 3D.
+
+Check road rendering in globe non-projection!
 
 ## Zoom, Pan, Rotate.
 

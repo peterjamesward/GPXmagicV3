@@ -224,13 +224,15 @@ makeRoadSection v1 v2 =
     , skipCount = 1
     , medianLongitude = medianLon
     , eastwardTurn =
-        Quantity.max
-            (Direction2d.angleFrom medianLon startLon)
-            (Direction2d.angleFrom medianLon endLon)
+        Quantity.max Quantity.zero <|
+            Quantity.max
+                (Direction2d.angleFrom medianLon startLon)
+                (Direction2d.angleFrom medianLon endLon)
     , westwardTurn =
-        Quantity.min
-            (Direction2d.angleFrom medianLon startLon)
-            (Direction2d.angleFrom medianLon endLon)
+        Quantity.min Quantity.zero <|
+            Quantity.min
+                (Direction2d.angleFrom medianLon startLon)
+                (Direction2d.angleFrom medianLon endLon)
     }
 
 
@@ -462,16 +464,14 @@ nearestToLonLat click treeNode =
     -- Not good enough. Need deeper search, say for all intersected boxes.
     -- Bit of recursive magic to get the "index" number.
     let
-        _ =
-            Debug.log "CLICK" click
-
+        --_ =
+        --    Debug.log "CLICK" click
         searchVector =
             -- Earth radius is added on for us.
             makeEarthVector click.longitude click.latitude Quantity.zero
 
-        _ =
-            Debug.log "SEARCH" searchVector
-
+        --_ =
+        --    Debug.log "SEARCH" searchVector
         searchPoint =
             Point3d.origin |> Point3d.translateBy searchVector
 
@@ -490,8 +490,8 @@ nearestToLonLat click treeNode =
                                 |> Point3d.translateBy leaf.endVector
                                 |> Point3d.distanceFrom searchPoint
 
-                        _ =
-                            Debug.log "LEAF" ( startDistance, endDistance )
+                        --_ =
+                        --    Debug.log "LEAF" ( startDistance, endDistance )
                     in
                     if startDistance |> Quantity.lessThanOrEqualTo endDistance then
                         ( skip, startDistance )
@@ -508,8 +508,8 @@ nearestToLonLat click treeNode =
                             , isLongitudeContained click.longitude node.right
                             )
 
-                        _ =
-                            Debug.log "SPANS" ( inLeftSpan, inRightSpan )
+                        --_ =
+                        --    Debug.log "SPANS" ( inLeftSpan, inRightSpan )
                     in
                     case ( inLeftSpan, inRightSpan ) of
                         ( True, True ) ->
