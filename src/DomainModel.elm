@@ -47,6 +47,7 @@ type alias RoadSection =
     , medianLongitude : Direction2d LocalCoords
     , eastwardTurn : Angle
     , westwardTurn : Angle
+    , minAltitude : Length
     }
 
 
@@ -115,6 +116,16 @@ trueLength treeNode =
 
         Node node ->
             node.nodeContent.trueLength
+
+
+minAltitude : PeteTree -> Length
+minAltitude treeNode =
+    case treeNode of
+        Leaf leaf ->
+            leaf.minAltitude
+
+        Node node ->
+            node.nodeContent.minAltitude
 
 
 skipCount : PeteTree -> Int
@@ -206,6 +217,10 @@ makeRoadSection v1 v2 =
                     ( Direction2d.toAngle earth1.longitude, earth1.latitude )
                     ( Direction2d.toAngle earth2.longitude, earth2.latitude )
 
+        minAlt =
+            Quantity.min (Vector3d.length v1) (Vector3d.length v2)
+                |> Quantity.minus (Length.meters Spherical.meanRadius)
+
         startLon =
             longitudeFromVector v1
 
@@ -219,6 +234,7 @@ makeRoadSection v1 v2 =
     { startVector = v1
     , endVector = v2
     , boundingBox = box
+    , minAltitude = minAlt
     , sphere = containingSphere box
     , trueLength = range
     , skipCount = 1
@@ -258,6 +274,7 @@ treeFromList track =
             { startVector = startVector info1
             , endVector = endVector info2
             , boundingBox = box
+            , minAltitude = Quantity.min (minAltitude info1) (minAltitude info2)
             , sphere = containingSphere box
             , trueLength = Quantity.plus (trueLength info1) (trueLength info2)
             , skipCount = skipCount info1 + skipCount info2
@@ -449,7 +466,9 @@ makeEarthVector lon lat alt =
             Direction3d.xyZ (Direction2d.toAngle lon) lat
 
         radius =
-            alt |> Quantity.plus (Length.meters Spherical.meanRadius)
+            alt
+
+        --|> Quantity.plus (Length.meters Spherical.meanRadius)
     in
     Vector3d.withLength radius direction
 
@@ -467,13 +486,13 @@ nearestToLonLat click treeNode =
         --_ =
         --    Debug.log "CLICK" click
         searchVector =
-            -- Earth radius is added on for us.
-            makeEarthVector click.longitude click.latitude Quantity.zero
+            makeEarthVector
+                click.longitude
+                click.latitude
+                (minAltitude treeNode |> Quantity.plus (Length.meters Spherical.meanRadius))
 
-        --_ =
-        --    Debug.log "SEARCH" searchVector
-        searchPoint =
-            Point3d.origin |> Point3d.translateBy searchVector
+        _ =
+            Debug.log "SEARCH" searchVector
 
         helper withNode skip =
             case withNode of
@@ -481,17 +500,13 @@ nearestToLonLat click treeNode =
                     -- Use whichever point is closest. At leaf level, simple Euclidean metric,
                     let
                         startDistance =
-                            Point3d.origin
-                                |> Point3d.translateBy leaf.startVector
-                                |> Point3d.distanceFrom searchPoint
+                            leaf.startVector |> Vector3d.minus searchVector |> Vector3d.length
 
                         endDistance =
-                            Point3d.origin
-                                |> Point3d.translateBy leaf.endVector
-                                |> Point3d.distanceFrom searchPoint
+                            leaf.endVector |> Vector3d.minus searchVector |> Vector3d.length
 
-                        --_ =
-                        --    Debug.log "LEAF" ( startDistance, endDistance )
+                        _ =
+                            Debug.log "LEAF" ( startDistance, endDistance )
                     in
                     if startDistance |> Quantity.lessThanOrEqualTo endDistance then
                         ( skip, startDistance )

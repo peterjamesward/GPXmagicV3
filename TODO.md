@@ -2,10 +2,8 @@
 
 # WIP
 
-- Map points in JSON in wrong order, so tree walk not as it seems.
-> Doesn't show in the 3D, because that's segments.
-
-- Leaf distances look too large, although hit detect seems to come out OK.
+- Leaf distances look too large, although hit detect seems to come out OK. 
+- Could be altitude? In which case may need to use bounding box to add some height.
 
 - Slider does not cause selective render.
 

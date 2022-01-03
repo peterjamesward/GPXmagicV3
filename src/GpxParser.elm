@@ -72,14 +72,14 @@ parseGPXPoints xml =
                         makeEarthVector
                             (Direction2d.fromAngle <| Angle.degrees lon)
                             (Angle.degrees lat)
-                            (Length.meters alt)
+                            (Length.meters <| alt + Spherical.meanRadius)
 
                 ( (Just lat) :: _, (Just lon) :: _, _ ) ->
                     Just <|
                         makeEarthVector
                             (Direction2d.fromAngle <| Angle.degrees lon)
                             (Angle.degrees lat)
-                            (Length.meters 0.0)
+                            (Length.meters Spherical.meanRadius)
 
                 _ ->
                     Nothing
