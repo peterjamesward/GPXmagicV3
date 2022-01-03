@@ -4,7 +4,7 @@ import Browser exposing (application)
 import Browser.Navigation exposing (Key)
 import Camera3d
 import Delay exposing (after)
-import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), RoadSection, nearestToRay, skipCount, treeFromList, trueLength)
+import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), RoadSection, nearestToRay, pointFromVector, skipCount, treeFromList, trueLength)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -38,6 +38,7 @@ import Url exposing (Url)
 import ViewMap
 import ViewPureStyles exposing (conditionallyVisible, radioButton, sliderThumb)
 import ViewThirdPerson
+import ViewingContext
 import ViewingMode exposing (ViewingMode(..))
 
 
@@ -54,12 +55,12 @@ type alias ModelRecord =
     , renderDepth : Int
     , scene : List (Entity LocalCoords)
     , currentPosition : Int
-    , focusPoint : EarthPoint
     , viewMode : ViewingMode
     , viewDimensions : ( Quantity Int Pixels, Quantity Int Pixels )
     , ipInfo : Maybe IpInfo
     , mapClickDebounce : Bool
     , lastMapClick : ( Float, Float )
+    , viewContext : ViewingContext.ViewingContext
     }
 
 
@@ -92,12 +93,12 @@ init mflags origin navigationKey =
         , renderDepth = 0
         , scene = []
         , currentPosition = 0
-        , focusPoint = Point3d.origin
         , viewMode = ViewThird
         , viewDimensions = ( Pixels.pixels 800, Pixels.pixels 500 )
         , ipInfo = Nothing
         , mapClickDebounce = False
         , lastMapClick = ( 0.0, 0.0 )
+        , viewContext = ViewingContext.newViewingContext ViewingMode.ViewThird
         }
     , Cmd.batch
         [ authCmd
@@ -172,6 +173,7 @@ update msg (Model model) =
                     { model
                         | trackTree = trackTree
                         , renderDepth = 10
+                        , viewContext = ViewingContext.initialiseView model.viewContext trackTree
                     }
             in
             ( modelWithTrack
@@ -218,15 +220,7 @@ update msg (Model model) =
                 Just treeTop ->
                     let
                         updatedModel =
-                            { model
-                                | currentPosition = pos
-                                , focusPoint =
-                                    Point3d.origin
-                                        |> Point3d.translateBy
-                                            (DomainModel.leafFromIndex model.currentPosition treeTop
-                                                |> DomainModel.startVector
-                                            )
-                            }
+                            { model | currentPosition = pos }
                     in
                     ( updatedModel
                         |> renderModel
@@ -248,7 +242,7 @@ update msg (Model model) =
 
         ImageClick event ->
             -- Click moves pointer but does not recentre view. (Double click will.)
-            ( { model | currentPosition = ViewThirdPerson.detectHit event model }
+            ( { model | currentPosition = ViewThirdPerson.detectHit event model model.viewContext }
                 |> renderModel
                 |> Model
             , Cmd.none
@@ -374,8 +368,10 @@ contentArea model =
                     , centerX
                     ]
                     [ viewModeChoices model
-                    , conditionallyVisible (model.viewMode /= ViewMap) <| ViewThirdPerson.view model
-                    , conditionallyVisible (model.viewMode == ViewMap) <| ViewMap.view model
+                    , conditionallyVisible (model.viewMode /= ViewMap) <|
+                        ViewThirdPerson.view model model.viewContext
+                    , conditionallyVisible (model.viewMode == ViewMap) <|
+                        ViewMap.view model
                     ]
                 , el [ height (px 10) ] none
                 , case model.trackTree of

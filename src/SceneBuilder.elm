@@ -8,7 +8,7 @@ import BoundingBox3d exposing (BoundingBox3d)
 import Color exposing (Color, black, lightOrange)
 import ColourPalette exposing (gradientHue2)
 import Direction3d
-import DomainModel exposing (EarthVector, PeteTree(..), endVector, leafFromIndex, lngLatPair, skipCount, startVector, trueLength)
+import DomainModel exposing (EarthVector, PeteTree(..), endVector, leafFromIndex, lngLatPair, pointFromVector, skipCount, startVector, trueLength)
 import Json.Encode as E
 import Length exposing (Meters)
 import LineSegment3d
@@ -41,10 +41,10 @@ render3dView model =
             Length.kilometers 4
 
         startPoint treeNode =
-            Point3d.origin |> Point3d.translateBy (startVector treeNode)
+            pointFromVector (startVector treeNode)
 
         endPoint treeNode =
-            Point3d.origin |> Point3d.translateBy (endVector treeNode)
+            pointFromVector (endVector treeNode)
 
         gradientFromNode treeNode =
             Quantity.ratio
@@ -230,9 +230,7 @@ renderMapJson model =
         Just tree ->
             let
                 startPoint =
-                    Point3d.origin
-                        |> Point3d.translateBy
-                            (startVector <| leafFromIndex model.currentPosition tree)
+                    pointFromVector <| startVector <| leafFromIndex model.currentPosition tree
 
                 box =
                     BoundingBox3d.withDimensions ( boxSide, boxSide, boxSide ) startPoint

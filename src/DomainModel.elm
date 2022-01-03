@@ -200,8 +200,8 @@ makeRoadSection : EarthVector -> EarthVector -> RoadSection
 makeRoadSection v1 v2 =
     let
         ( local1, local2 ) =
-            ( Point3d.origin |> Point3d.translateBy v1
-            , Point3d.origin |> Point3d.translateBy v2
+            ( pointFromVector v1
+            , pointFromVector v2
             )
 
         box =
@@ -377,6 +377,10 @@ leafFromIndex index treeNode =
                 leafFromIndex (index - skipCount info.left) info.right
 
 
+pointFromVector v =
+    Point3d.origin |> Point3d.translateBy v
+
+
 nearestToRay :
     Axis3d Meters LocalCoords
     -> PeteTree
@@ -393,14 +397,10 @@ nearestToRay ray treeNode =
                 Leaf leaf ->
                     let
                         startDistance =
-                            Point3d.origin
-                                |> Point3d.translateBy leaf.startVector
-                                |> Point3d.distanceFromAxis ray
+                            pointFromVector leaf.startVector |> Point3d.distanceFromAxis ray
 
                         endDistance =
-                            Point3d.origin
-                                |> Point3d.translateBy leaf.endVector
-                                |> Point3d.distanceFromAxis ray
+                            pointFromVector leaf.endVector |> Point3d.distanceFromAxis ray
                     in
                     if startDistance |> Quantity.lessThanOrEqualTo endDistance then
                         ( skip, startDistance )

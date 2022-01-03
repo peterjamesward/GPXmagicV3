@@ -2,11 +2,6 @@
 
 # WIP
 
-- Leaf distances look too large, although hit detect seems to come out OK. 
-- Could be altitude? In which case may need to use bounding box to add some height.
-
-- Slider does not cause selective render.
-
 - Moves map when switching views, and paints too small again.
 - No initial 3rd view.
 - Add sphere at minimum radius in 3D.

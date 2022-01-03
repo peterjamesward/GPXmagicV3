@@ -19,6 +19,7 @@ import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
 import Vector3d
+import ViewingContext exposing (ViewingContext)
 import Viewpoint3d
 
 
@@ -28,10 +29,10 @@ view :
         , viewDimensions : ( Quantity Int Pixels, Quantity Int Pixels )
         , trackTree : Maybe PeteTree
         , currentPosition : Int
-        , focusPoint : EarthPoint
     }
+    -> ViewingContext
     -> Element Msg
-view model =
+view model context =
     case model.trackTree of
         Just treeNode ->
             el
@@ -42,7 +43,7 @@ view model =
             <|
                 html <|
                     Scene3d.cloudy
-                        { camera = deriveCamera (leafFromIndex model.currentPosition treeNode) model.focusPoint
+                        { camera = context.camera
                         , dimensions = model.viewDimensions
                         , background = backgroundColor Color.lightBlue
                         , clipDepth = Length.meters 1
@@ -78,17 +79,18 @@ deriveCamera treeNode focusPoint =
     perspectiveCamera
 
 
+
 detectHit :
     Mouse.Event
     ->
         { m
             | trackTree : Maybe PeteTree
             , currentPosition : Int
-            , focusPoint : EarthPoint
             , viewDimensions : ( Quantity Int Pixels, Quantity Int Pixels )
         }
+        -> ViewingContext
     -> Int
-detectHit event model =
+detectHit event model context =
     --TODO: Move into view/pane/whatever it will be.
     case model.trackTree of
         Just topNode ->
@@ -115,7 +117,7 @@ detectHit event model =
 
                 camera =
                     -- Must use same camera derivation as for the 3D model, else pointless!
-                    deriveCamera leaf model.focusPoint
+                    deriveCamera leaf context.focalPoint
 
                 ray =
                     Camera3d.ray camera screenRectangle screenPoint
