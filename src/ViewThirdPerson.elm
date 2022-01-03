@@ -3,6 +3,7 @@ module ViewThirdPerson exposing (..)
 import Angle
 import Camera3d exposing (Camera3d)
 import Color
+import Direction2d
 import Direction3d exposing (positiveZ)
 import DomainModel exposing (..)
 import Element exposing (..)
@@ -23,7 +24,8 @@ import Point3d
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
-import SceneBuilder
+import SceneBuilder exposing (render3dView)
+import Spherical
 import Vector3d
 import ViewingContext exposing (ViewingContext)
 import Viewpoint3d
@@ -100,25 +102,28 @@ view model context =
             text "No track to show"
 
 
-deriveCamera : PeteTree -> EarthPoint -> Camera3d Meters LocalCoords
-deriveCamera treeNode focusPoint =
+deriveCamera : PeteTree -> ViewingContext -> Camera3d Meters LocalCoords
+deriveCamera treeNode context =
     let
         eyePoint =
-            -- Interesting scale factor
-            focusPoint |> Point3d.scaleAbout Point3d.origin 1.015
+            pointFromVector <|
+                makeEarthVector
+                    (Direction2d.fromAngle context.azimuth)
+                    context.elevation
+                    (context.distance |> Quantity.plus (Length.meters Spherical.meanRadius))
 
         cameraViewpoint =
             -- Fixed for now.
             Viewpoint3d.lookAt
                 { eyePoint = eyePoint
-                , focalPoint = focusPoint
+                , focalPoint = context.focalPoint
                 , upDirection = Direction3d.positiveZ
                 }
 
         perspectiveCamera =
             Camera3d.perspective
                 { viewpoint = cameraViewpoint
-                , verticalFieldOfView = Angle.degrees 20
+                , verticalFieldOfView = Angle.degrees 30
                 }
     in
     perspectiveCamera
@@ -161,7 +166,7 @@ detectHit event model context =
 
                 camera =
                     -- Must use same camera derivation as for the 3D model, else pointless!
-                    deriveCamera leaf context.focalPoint
+                    deriveCamera leaf context
 
                 ray =
                     Camera3d.ray camera screenRectangle screenPoint
@@ -177,27 +182,61 @@ update :
     -> ModelRecord
     -> ( ModelRecord, Cmd Msg )
 update msg model =
-    case msg of
-        ImageZoomIn ->
+    case model.trackTree of
+        Nothing ->
             ( model, Cmd.none )
 
-        ImageZoomOut ->
-            ( model, Cmd.none )
+        Just treeNode ->
+            case msg of
+                ImageZoomIn ->
+                    let
+                        oldContext =
+                            model.viewContext
 
-        ImageReset ->
-            ( model, Cmd.none )
+                        newDistance =
+                            oldContext.distance |> Quantity.multiplyBy 0.7
 
-        ImageNoOp ->
-            ( model, Cmd.none )
+                        newFocalPoint =
+                            treeNode
+                                |> leafFromIndex model.currentPosition
+                                |> startVector
+                                |> pointFromVector
 
-        ImageClick event ->
-            -- Click moves pointer but does not recentre view. (Double click will.)
-            ( { model
-                | currentPosition = detectHit event model model.viewContext
-                , scene = SceneBuilder.render3dView model
-              }
-            , Cmd.none
-            )
+                        newContext =
+                            { oldContext
+                                | distance = newDistance
+                                , focalPoint = newFocalPoint
+                            }
 
-        _ ->
-            ( model, Cmd.none )
+                        newCamera =
+                            deriveCamera treeNode newContext
+
+                        finalContext =
+                            { newContext | camera = newCamera }
+                    in
+                    ( { model
+                        | viewContext = finalContext
+                      }
+                    , Cmd.none
+                    )
+
+                ImageZoomOut ->
+                    ( model, Cmd.none )
+
+                ImageReset ->
+                    ( model, Cmd.none )
+
+                ImageNoOp ->
+                    ( model, Cmd.none )
+
+                ImageClick event ->
+                    -- Click moves pointer but does not recentre view. (Double click will.)
+                    ( { model
+                        | currentPosition = detectHit event model model.viewContext
+                        , scene = SceneBuilder.render3dView model
+                      }
+                    , Cmd.none
+                    )
+
+                _ ->
+                    ( model, Cmd.none )

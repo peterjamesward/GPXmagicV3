@@ -2,13 +2,12 @@
 
 # WIP
 
+## Zoom, Pan, Rotate.
+
+- Focal point not good for zooming.
 - Moves map when switching views, and paints too small again.
-- No initial 3rd view.
-- Add sphere at minimum radius in 3D.
 
 Check road rendering in globe non-projection!
-
-## Zoom, Pan, Rotate.
 
 ### Map / General
 Possibly try a more graduated selective rendering. (Maybe 100km box at 14 deep?)

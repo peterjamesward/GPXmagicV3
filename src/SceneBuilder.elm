@@ -5,7 +5,7 @@ module SceneBuilder exposing (..)
 
 import Angle exposing (Angle)
 import BoundingBox3d exposing (BoundingBox3d)
-import Color exposing (Color, black, lightOrange)
+import Color exposing (Color, black, darkGreen, green, lightOrange)
 import ColourPalette exposing (gradientHue2)
 import Direction3d
 import DomainModel exposing (EarthVector, PeteTree(..), endVector, leafFromIndex, lngLatPair, pointFromVector, skipCount, startVector, trueLength)
@@ -20,7 +20,14 @@ import Quantity
 import Scene3d exposing (Entity)
 import Scene3d.Material as Material
 import SketchPlane3d
+import Sphere3d
+import Spherical
 import Vector3d
+
+
+globe =
+    Scene3d.sphere (Material.color darkGreen)
+        (Sphere3d.withRadius (Length.meters Spherical.meanRadius) Point3d.origin)
 
 
 render3dView :
@@ -55,6 +62,7 @@ render3dView model =
                 (trueLength treeNode)
                 |> (*) 100.0
 
+        --TODO: Gradient has to drop to sphere, not bounding box!
         --gradientCurtain : PeteTree -> List (Entity LocalCoords)
         --gradientCurtain node =
         --    let
@@ -139,8 +147,9 @@ render3dView model =
                     BoundingBox3d.withDimensions ( boxSide, boxSide, boxSide )
                         (startPoint <| leafFromIndex model.currentPosition tree)
             in
-            renderTreeSelectively box model.renderDepth tree []
-                ++ renderCurrentMarker model.currentPosition tree
+            globe
+                :: renderCurrentMarker model.currentPosition tree
+                ++ renderTreeSelectively box model.renderDepth tree []
 
         Nothing ->
             []
