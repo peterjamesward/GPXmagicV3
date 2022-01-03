@@ -358,7 +358,7 @@ contentArea model =
                 , value = toFloat model.currentPosition
                 , label = Input.labelBelow [] (text "Label goes here")
                 , min = 0
-                , max = toFloat <| trackLength
+                , max = toFloat <| trackLength - 1
                 , step = Just 1
                 , thumb = sliderThumb
                 }

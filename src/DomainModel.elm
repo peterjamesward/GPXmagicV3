@@ -44,6 +44,9 @@ type alias RoadSection =
     , sphere : Sphere3d Meters LocalCoords
     , trueLength : Quantity Float Meters
     , skipCount : Int
+    , medianLongitude : Direction2d LocalCoords
+    , eastwardTurn : Angle
+    , westwardTurn : Angle
     }
 
 
@@ -80,35 +83,12 @@ endVector treeNode =
 
 isLongitudeContained : Direction2d LocalCoords -> PeteTree -> Bool
 isLongitudeContained longitude treeNode =
-    -- If we make a "small" turn from Start to target and a "small" turn
-    -- in the same direction to End, then it's "contained".
     let
-        turnFromStart =
-            Direction2d.angleFrom (longitudeFromVector <| startVector treeNode) longitude
-
-        turnToEnd =
-            Direction2d.angleFrom longitude (longitudeFromVector <| endVector treeNode)
+        turnFromMedianToGiven =
+            Direction2d.angleFrom (medianLongitude treeNode) longitude
     in
-    --both < 90 degree turns and matching sign.
-    -- I think this way of writing it is clear.
-    if
-        (turnFromStart |> Quantity.greaterThanOrEqualToZero)
-            && (turnFromStart |> Quantity.lessThanOrEqualTo (Angle.degrees 90))
-            && (turnToEnd |> Quantity.greaterThanOrEqualToZero)
-            && (turnToEnd |> Quantity.lessThanOrEqualTo (Angle.degrees 90))
-    then
-        True
-
-    else if
-        (turnFromStart |> Quantity.lessThanOrEqualToZero)
-            && (turnFromStart |> Quantity.greaterThan (Angle.degrees -90))
-            && (turnToEnd |> Quantity.lessThanOrEqualToZero)
-            && (turnToEnd |> Quantity.greaterThanOrEqualTo (Angle.degrees -90))
-    then
-        True
-
-    else
-        False
+    (turnFromMedianToGiven |> Quantity.greaterThanOrEqualTo (westwardTurn treeNode))
+        && (turnFromMedianToGiven |> Quantity.lessThanOrEqualTo (eastwardTurn treeNode))
 
 
 rotationAwayFrom : Direction2d LocalCoords -> PeteTree -> Angle
@@ -116,13 +96,15 @@ rotationAwayFrom longitude treeNode =
     -- By how much, in any direction, would we need to move the longitude
     -- to make it "contained". This is for selecting a branch if neither side is "contained".
     let
-        turnFromStart =
-            Direction2d.angleFrom (longitudeFromVector <| startVector treeNode) longitude
+        nodeEast =
+            medianLongitude treeNode |> Direction2d.rotateBy (eastwardTurn treeNode)
 
-        turnToEnd =
-            Direction2d.angleFrom longitude (longitudeFromVector <| endVector treeNode)
+        nodeWest =
+            medianLongitude treeNode |> Direction2d.rotateBy (westwardTurn treeNode)
     in
-    Quantity.min (Quantity.abs turnFromStart) (Quantity.abs turnToEnd)
+    Quantity.min
+        (Quantity.abs <| Direction2d.angleFrom longitude nodeEast)
+        (Quantity.abs <| Direction2d.angleFrom longitude nodeWest)
 
 
 trueLength : PeteTree -> Length
@@ -165,6 +147,36 @@ sphere treeNode =
             node.nodeContent.sphere
 
 
+medianLongitude : PeteTree -> Direction2d LocalCoords
+medianLongitude treeNode =
+    case treeNode of
+        Leaf leaf ->
+            leaf.medianLongitude
+
+        Node node ->
+            node.nodeContent.medianLongitude
+
+
+eastwardTurn : PeteTree -> Angle
+eastwardTurn treeNode =
+    case treeNode of
+        Leaf leaf ->
+            leaf.eastwardTurn
+
+        Node node ->
+            node.nodeContent.eastwardTurn
+
+
+westwardTurn : PeteTree -> Angle
+westwardTurn treeNode =
+    case treeNode of
+        Leaf leaf ->
+            leaf.westwardTurn
+
+        Node node ->
+            node.nodeContent.westwardTurn
+
+
 longitudeFromVector : EarthVector -> Direction2d LocalCoords
 longitudeFromVector v =
     Vector3d.direction v
@@ -200,8 +212,9 @@ makeRoadSection v1 v2 =
         endLon =
             longitudeFromVector v2
 
-        longitudeChange =
-            Direction2d.angleFrom startLon endLon
+        medianLon =
+            -- Careful, don't average because of -pi/+pi, work out half the turn.
+            startLon |> Direction2d.rotateBy (Direction2d.angleFrom startLon endLon |> Quantity.half)
     in
     { startVector = v1
     , endVector = v2
@@ -209,6 +222,15 @@ makeRoadSection v1 v2 =
     , sphere = containingSphere box
     , trueLength = range
     , skipCount = 1
+    , medianLongitude = medianLon
+    , eastwardTurn =
+        Quantity.max
+            (Direction2d.angleFrom medianLon startLon)
+            (Direction2d.angleFrom medianLon endLon)
+    , westwardTurn =
+        Quantity.min
+            (Direction2d.angleFrom medianLon startLon)
+            (Direction2d.angleFrom medianLon endLon)
     }
 
 
@@ -225,6 +247,11 @@ treeFromList track =
             let
                 box =
                     BoundingBox3d.union (boundingBox info1) (boundingBox info2)
+
+                sharedMedian =
+                    medianLongitude info1
+                        |> Direction2d.rotateBy
+                            (Direction2d.angleFrom (medianLongitude info1) (medianLongitude info2) |> Quantity.half)
             in
             { startVector = startVector info1
             , endVector = endVector info2
@@ -232,6 +259,27 @@ treeFromList track =
             , sphere = containingSphere box
             , trueLength = Quantity.plus (trueLength info1) (trueLength info2)
             , skipCount = skipCount info1 + skipCount info2
+            , medianLongitude = sharedMedian
+            , eastwardTurn =
+                Quantity.max
+                    (medianLongitude info1
+                        |> Direction2d.rotateBy (eastwardTurn info1)
+                        |> Direction2d.angleFrom sharedMedian
+                    )
+                    (medianLongitude info2
+                        |> Direction2d.rotateBy (eastwardTurn info2)
+                        |> Direction2d.angleFrom sharedMedian
+                    )
+            , westwardTurn =
+                Quantity.min
+                    (medianLongitude info1
+                        |> Direction2d.rotateBy (westwardTurn info1)
+                        |> Direction2d.angleFrom sharedMedian
+                    )
+                    (medianLongitude info2
+                        |> Direction2d.rotateBy (westwardTurn info2)
+                        |> Direction2d.angleFrom sharedMedian
+                    )
             }
 
         treeBuilder : Int -> List EarthVector -> ( Maybe PeteTree, List EarthVector )
@@ -414,9 +462,15 @@ nearestToLonLat click treeNode =
     -- Not good enough. Need deeper search, say for all intersected boxes.
     -- Bit of recursive magic to get the "index" number.
     let
+        _ =
+            Debug.log "CLICK" click
+
         searchVector =
             -- Earth radius is added on for us.
             makeEarthVector click.longitude click.latitude Quantity.zero
+
+        _ =
+            Debug.log "SEARCH" searchVector
 
         searchPoint =
             Point3d.origin |> Point3d.translateBy searchVector
@@ -435,6 +489,9 @@ nearestToLonLat click treeNode =
                             Point3d.origin
                                 |> Point3d.translateBy leaf.endVector
                                 |> Point3d.distanceFrom searchPoint
+
+                        _ =
+                            Debug.log "LEAF" ( startDistance, endDistance )
                     in
                     if startDistance |> Quantity.lessThanOrEqualTo endDistance then
                         ( skip, startDistance )
@@ -450,6 +507,9 @@ nearestToLonLat click treeNode =
                             ( isLongitudeContained click.longitude node.left
                             , isLongitudeContained click.longitude node.right
                             )
+
+                        _ =
+                            Debug.log "SPANS" ( inLeftSpan, inRightSpan )
                     in
                     case ( inLeftSpan, inRightSpan ) of
                         ( True, True ) ->

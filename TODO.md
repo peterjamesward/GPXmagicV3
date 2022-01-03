@@ -2,15 +2,11 @@
 
 # WIP
 
-Map click terrible.
-> Keep median longitude and range either side. 
-> Test modulo something. Variant bounding box.
-> 
-Moves map when switching views.
+- Leaf distances look too large.
 
-No initial 3rd view.
-
-Add sphere at minimum radius in 3D.
+- Moves map when switching views.
+- No initial 3rd view.
+- Add sphere at minimum radius in 3D.
 
 ## Zoom, Pan, Rotate.
 
@@ -18,7 +14,6 @@ Add sphere at minimum radius in 3D.
 Possibly try a more graduated selective rendering. (Maybe 100km box at 14 deep?)
 Better, a progressive drop off with distance.
 Lazy selective re-render (aka 2.8) to reduce map flicker, improve slider response?
-
 
 ### iframe
 Do an embedded version as iframe for Steve?

@@ -8,7 +8,7 @@ import BoundingBox3d exposing (BoundingBox3d)
 import Color exposing (Color, black, lightOrange)
 import ColourPalette exposing (gradientHue2)
 import Direction3d
-import DomainModel exposing (PeteTree(..), endVector, leafFromIndex, lngLatPair, startVector, trueLength)
+import DomainModel exposing (EarthVector, PeteTree(..), endVector, leafFromIndex, lngLatPair, skipCount, startVector, trueLength)
 import Json.Encode as E
 import Length exposing (Meters)
 import LineSegment3d
@@ -163,9 +163,9 @@ renderMapJson model =
             --TODO: put box side in model
             Length.kilometers 4
 
-        mapLocation : PeteTree -> ( Angle, Angle )
-        mapLocation node =
-            case Vector3d.direction (startVector node) of
+        mapLocation : EarthVector -> ( Angle, Angle )
+        mapLocation vector =
+            case Vector3d.direction vector of
                 Just direction ->
                     ( Direction3d.azimuthIn SketchPlane3d.xy direction
                     , Direction3d.elevationFrom SketchPlane3d.xy direction
@@ -176,7 +176,7 @@ renderMapJson model =
 
         makeVisibleSegment : PeteTree -> E.Value
         makeVisibleSegment node =
-            lngLatPair <| mapLocation node
+            lngLatPair <| mapLocation <| startVector node
 
         --renderCurrentMarker : Int -> PeteTree -> List (Entity LocalCoords)
         --renderCurrentMarker marker tree =
@@ -208,11 +208,7 @@ renderMapJson model =
         renderTreeSelectively box depth someNode accum =
             case someNode of
                 Leaf leafNode ->
-                    if leafNode.boundingBox |> BoundingBox3d.intersects box then
-                        makeVisibleSegment someNode :: accum
-
-                    else
-                        accum
+                    makeVisibleSegment someNode :: accum
 
                 Node notLeaf ->
                     if notLeaf.nodeContent.boundingBox |> BoundingBox3d.intersects box then
@@ -226,6 +222,14 @@ renderMapJson model =
                         accum
                             |> renderTree (depth - 1) notLeaf.left
                             |> renderTree (depth - 1) notLeaf.right
+
+        renderLastPoint treeNode =
+            -- Because we generally only output the start point of a segment.
+            let
+                lastLeaf =
+                    treeNode |> leafFromIndex (skipCount treeNode)
+            in
+            lngLatPair <| mapLocation <| endVector lastLeaf
     in
     case model.trackTree of
         Just tree ->
@@ -246,6 +250,7 @@ renderMapJson model =
 
                 coordinates =
                     renderTreeSelectively box model.renderDepth tree []
+                        ++ [ renderLastPoint tree ]
             in
             E.object
                 [ ( "type", E.string "Feature" )
