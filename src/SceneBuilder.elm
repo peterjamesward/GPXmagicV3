@@ -224,12 +224,7 @@ renderMapJson model =
                             |> renderTree (depth - 1) notLeaf.right
 
         renderLastPoint treeNode =
-            -- Because we generally only output the start point of a segment.
-            let
-                lastLeaf =
-                    treeNode |> leafFromIndex (skipCount treeNode)
-            in
-            lngLatPair <| mapLocation <| endVector lastLeaf
+            lngLatPair <| mapLocation <| endVector treeNode
     in
     case model.trackTree of
         Just tree ->

@@ -14567,13 +14567,9 @@ var $author$project$SceneBuilder$renderMapJson = function (model) {
 		}
 	};
 	var renderLastPoint = function (treeNode) {
-		var lastLeaf = A2(
-			$author$project$DomainModel$leafFromIndex,
-			$author$project$DomainModel$skipCount(treeNode),
-			treeNode);
 		return $author$project$DomainModel$lngLatPair(
 			mapLocation(
-				$author$project$DomainModel$endVector(lastLeaf)));
+				$author$project$DomainModel$endVector(treeNode)));
 	};
 	var makeVisibleSegment = function (node) {
 		return $author$project$DomainModel$lngLatPair(
