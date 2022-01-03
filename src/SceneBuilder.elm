@@ -176,7 +176,7 @@ renderMapJson model =
 
         makeVisibleSegment : PeteTree -> E.Value
         makeVisibleSegment node =
-            lngLatPair <| mapLocation <| startVector node
+            lngLatPair <| mapLocation <| endVector node
 
         --renderCurrentMarker : Int -> PeteTree -> List (Entity LocalCoords)
         --renderCurrentMarker marker tree =
@@ -223,8 +223,8 @@ renderMapJson model =
                             |> renderTree (depth - 1) notLeaf.right
                             |> renderTree (depth - 1) notLeaf.left
 
-        renderLastPoint treeNode =
-            lngLatPair <| mapLocation <| endVector treeNode
+        renderFirstPoint treeNode =
+            lngLatPair <| mapLocation <| startVector treeNode
     in
     case model.trackTree of
         Just tree ->
@@ -244,8 +244,8 @@ renderMapJson model =
                         ]
 
                 coordinates =
-                    renderTreeSelectively box model.renderDepth tree []
-                        ++ [ renderLastPoint tree ]
+                    renderFirstPoint tree
+                        :: renderTreeSelectively box model.renderDepth tree []
             in
             E.object
                 [ ( "type", E.string "Feature" )
