@@ -88,3 +88,4 @@ newViewingContext mode =
 initialiseView : ViewingContext -> Maybe PeteTree -> ViewingContext
 initialiseView context perhapsTree =
     context
+

@@ -9697,6 +9697,7 @@ var $author$project$Msg$GpxLoaded = function (a) {
 var $author$project$Msg$GpxSelected = function (a) {
 	return {$: 'GpxSelected', a: a};
 };
+var $author$project$Msg$ImageZoomIn = {$: 'ImageZoomIn'};
 var $author$project$Msg$ReceivedIpDetails = function (a) {
 	return {$: 'ReceivedIpDetails', a: a};
 };
@@ -13187,6 +13188,31 @@ var $author$project$StravaAuth$update = F2(
 		}
 		return $author$project$StravaAuth$noOp(model);
 	});
+var $author$project$ViewThirdPerson$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'ImageZoomIn':
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			case 'ImageZoomOut':
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			case 'ImageReset':
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			case 'ImageNoOp':
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			case 'ImageClick':
+				var event = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							currentPosition: A3($author$project$ViewThirdPerson$detectHit, event, model, model.viewContext),
+							scene: $author$project$SceneBuilder$render3dView(model)
+						}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+		}
+	});
 var $author$project$Main$update = F2(
 	function (msg, _v0) {
 		var model = _v0.a;
@@ -13323,17 +13349,6 @@ var $author$project$Main$update = F2(
 						$author$project$Main$Model(model),
 						$elm$core$Platform$Cmd$none);
 				}
-			case 'ImageClick':
-				var event = msg.a;
-				return _Utils_Tuple2(
-					$author$project$Main$Model(
-						$author$project$Main$renderModel(
-							_Utils_update(
-								model,
-								{
-									currentPosition: A3($author$project$ViewThirdPerson$detectHit, event, model, model.viewContext)
-								}))),
-					$elm$core$Platform$Cmd$none);
 			case 'SetViewMode':
 				var newMode = msg.a;
 				return _Utils_Tuple2(
@@ -13349,7 +13364,7 @@ var $author$project$Main$update = F2(
 								$author$project$PortController$centreMapOnCurrent(model),
 								A2($andrewMacmurray$elm_delay$Delay$after, 10, $author$project$Msg$RepaintMap)
 							])) : $elm$core$Platform$Cmd$none);
-			default:
+			case 'PortMessage':
 				var json = msg.a;
 				var _v5 = A2($author$project$PortController$processPortMessage, model, json);
 				var newModel = _v5.a;
@@ -13357,6 +13372,36 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					$author$project$Main$Model(newModel),
 					cmds);
+			case 'ImageZoomIn':
+				var _v6 = A2($author$project$ViewThirdPerson$update, $author$project$Msg$ImageZoomIn, model);
+				var newModel = _v6.a;
+				var cmds = _v6.b;
+				return _Utils_Tuple2(
+					$author$project$Main$Model(newModel),
+					cmds);
+			case 'ImageZoomOut':
+				return _Utils_Tuple2(
+					$author$project$Main$Model(model),
+					$elm$core$Platform$Cmd$none);
+			case 'ImageReset':
+				return _Utils_Tuple2(
+					$author$project$Main$Model(model),
+					$elm$core$Platform$Cmd$none);
+			case 'ImageNoOp':
+				return _Utils_Tuple2(
+					$author$project$Main$Model(model),
+					$elm$core$Platform$Cmd$none);
+			default:
+				var event = msg.a;
+				return _Utils_Tuple2(
+					$author$project$Main$Model(
+						$author$project$Main$renderModel(
+							_Utils_update(
+								model,
+								{
+									currentPosition: A3($author$project$ViewThirdPerson$detectHit, event, model, model.viewContext)
+								}))),
+					$elm$core$Platform$Cmd$none);
 		}
 	});
 var $mdgriffith$elm_ui$Internal$Model$Rgba = F4(
@@ -21096,6 +21141,10 @@ var $ianmackenzie$elm_3d_scene$Scene3d$cloudy = function (_arguments) {
 };
 var $mdgriffith$elm_ui$Internal$Model$unstyled = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Unstyled, $elm$core$Basics$always);
 var $mdgriffith$elm_ui$Element$html = $mdgriffith$elm_ui$Internal$Model$unstyled;
+var $mdgriffith$elm_ui$Internal$Model$InFront = {$: 'InFront'};
+var $mdgriffith$elm_ui$Element$inFront = function (element) {
+	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$InFront, element);
+};
 var $avh4$elm_color$Color$lightBlue = A4($avh4$elm_color$Color$RgbaSpace, 114 / 255, 159 / 255, 207 / 255, 1.0);
 var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$defaultOptions = {preventDefault: true, stopPropagation: false};
 var $elm$virtual_dom$VirtualDom$Custom = function (a) {
@@ -21200,6 +21249,226 @@ var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions = F3(
 				$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$eventDecoder));
 	});
 var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onClick = A2($mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions, 'click', $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$defaultOptions);
+var $author$project$Msg$ImageNoOp = {$: 'ImageNoOp'};
+var $author$project$Msg$ImageReset = {$: 'ImageReset'};
+var $author$project$Msg$ImageZoomOut = {$: 'ImageZoomOut'};
+var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
+var $feathericons$elm_feather$FeatherIcons$Icon = function (a) {
+	return {$: 'Icon', a: a};
+};
+var $feathericons$elm_feather$FeatherIcons$defaultAttributes = function (name) {
+	return {
+		_class: $elm$core$Maybe$Just('feather feather-' + name),
+		size: 24,
+		sizeUnit: '',
+		strokeWidth: 2,
+		viewBox: '0 0 24 24'
+	};
+};
+var $feathericons$elm_feather$FeatherIcons$makeBuilder = F2(
+	function (name, src) {
+		return $feathericons$elm_feather$FeatherIcons$Icon(
+			{
+				attrs: $feathericons$elm_feather$FeatherIcons$defaultAttributes(name),
+				src: src
+			});
+	});
+var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
+var $elm$svg$Svg$path = $elm$svg$Svg$trustedNode('path');
+var $feathericons$elm_feather$FeatherIcons$maximize = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'maximize',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$path,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$d('M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3')
+				]),
+			_List_Nil)
+		]));
+var $elm$svg$Svg$line = $elm$svg$Svg$trustedNode('line');
+var $elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
+var $elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
+var $elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
+var $elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
+var $feathericons$elm_feather$FeatherIcons$minus = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'minus',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x1('5'),
+					$elm$svg$Svg$Attributes$y1('12'),
+					$elm$svg$Svg$Attributes$x2('19'),
+					$elm$svg$Svg$Attributes$y2('12')
+				]),
+			_List_Nil)
+		]));
+var $feathericons$elm_feather$FeatherIcons$plus = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'plus',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x1('12'),
+					$elm$svg$Svg$Attributes$y1('5'),
+					$elm$svg$Svg$Attributes$x2('12'),
+					$elm$svg$Svg$Attributes$y2('19')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x1('5'),
+					$elm$svg$Svg$Attributes$y1('12'),
+					$elm$svg$Svg$Attributes$x2('19'),
+					$elm$svg$Svg$Attributes$y2('12')
+				]),
+			_List_Nil)
+		]));
+var $author$project$ViewThirdPerson$stopProp = {preventDefault: false, stopPropagation: true};
+var $elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
+var $elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
+var $elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
+var $elm$svg$Svg$map = $elm$virtual_dom$VirtualDom$map;
+var $elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
+var $elm$svg$Svg$Attributes$strokeLinecap = _VirtualDom_attribute('stroke-linecap');
+var $elm$svg$Svg$Attributes$strokeLinejoin = _VirtualDom_attribute('stroke-linejoin');
+var $elm$svg$Svg$Attributes$strokeWidth = _VirtualDom_attribute('stroke-width');
+var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
+var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
+var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
+var $feathericons$elm_feather$FeatherIcons$toHtml = F2(
+	function (attributes, _v0) {
+		var src = _v0.a.src;
+		var attrs = _v0.a.attrs;
+		var strSize = $elm$core$String$fromFloat(attrs.size);
+		var baseAttributes = _List_fromArray(
+			[
+				$elm$svg$Svg$Attributes$fill('none'),
+				$elm$svg$Svg$Attributes$height(
+				_Utils_ap(strSize, attrs.sizeUnit)),
+				$elm$svg$Svg$Attributes$width(
+				_Utils_ap(strSize, attrs.sizeUnit)),
+				$elm$svg$Svg$Attributes$stroke('currentColor'),
+				$elm$svg$Svg$Attributes$strokeLinecap('round'),
+				$elm$svg$Svg$Attributes$strokeLinejoin('round'),
+				$elm$svg$Svg$Attributes$strokeWidth(
+				$elm$core$String$fromFloat(attrs.strokeWidth)),
+				$elm$svg$Svg$Attributes$viewBox(attrs.viewBox)
+			]);
+		var combinedAttributes = _Utils_ap(
+			function () {
+				var _v1 = attrs._class;
+				if (_v1.$ === 'Just') {
+					var c = _v1.a;
+					return A2(
+						$elm$core$List$cons,
+						$elm$svg$Svg$Attributes$class(c),
+						baseAttributes);
+				} else {
+					return baseAttributes;
+				}
+			}(),
+			attributes);
+		return A2(
+			$elm$svg$Svg$svg,
+			combinedAttributes,
+			A2(
+				$elm$core$List$map,
+				$elm$svg$Svg$map($elm$core$Basics$never),
+				src));
+	});
+var $feathericons$elm_feather$FeatherIcons$withSize = F2(
+	function (size, _v0) {
+		var attrs = _v0.a.attrs;
+		var src = _v0.a.src;
+		return $feathericons$elm_feather$FeatherIcons$Icon(
+			{
+				attrs: _Utils_update(
+					attrs,
+					{size: size}),
+				src: src
+			});
+	});
+var $author$project$ViewThirdPerson$useIcon = A2(
+	$elm$core$Basics$composeL,
+	A2(
+		$elm$core$Basics$composeL,
+		$mdgriffith$elm_ui$Element$html,
+		$feathericons$elm_feather$FeatherIcons$toHtml(_List_Nil)),
+	$feathericons$elm_feather$FeatherIcons$withSize(20));
+var $smucode$elm_flat_colors$FlatColors$ChinesePalette$white = A3($mdgriffith$elm_ui$Element$rgb255, 255, 255, 255);
+var $author$project$ViewThirdPerson$zoomButtons = A2(
+	$mdgriffith$elm_ui$Element$column,
+	_List_fromArray(
+		[
+			$mdgriffith$elm_ui$Element$alignTop,
+			$mdgriffith$elm_ui$Element$alignRight,
+			$mdgriffith$elm_ui$Element$moveDown(5),
+			$mdgriffith$elm_ui$Element$moveLeft(5),
+			$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$white),
+			$mdgriffith$elm_ui$Element$Font$size(40),
+			$mdgriffith$elm_ui$Element$padding(6),
+			$mdgriffith$elm_ui$Element$spacing(8),
+			$mdgriffith$elm_ui$Element$htmlAttribute(
+			A3(
+				$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
+				'click',
+				$author$project$ViewThirdPerson$stopProp,
+				$elm$core$Basics$always($author$project$Msg$ImageNoOp))),
+			$mdgriffith$elm_ui$Element$htmlAttribute(
+			A3(
+				$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
+				'dblclick',
+				$author$project$ViewThirdPerson$stopProp,
+				$elm$core$Basics$always($author$project$Msg$ImageNoOp))),
+			$mdgriffith$elm_ui$Element$htmlAttribute(
+			A3(
+				$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
+				'mousedown',
+				$author$project$ViewThirdPerson$stopProp,
+				$elm$core$Basics$always($author$project$Msg$ImageNoOp))),
+			$mdgriffith$elm_ui$Element$htmlAttribute(
+			A3(
+				$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
+				'mouseup',
+				$author$project$ViewThirdPerson$stopProp,
+				$elm$core$Basics$always($author$project$Msg$ImageNoOp)))
+		]),
+	_List_fromArray(
+		[
+			A2(
+			$mdgriffith$elm_ui$Element$Input$button,
+			_List_Nil,
+			{
+				label: $author$project$ViewThirdPerson$useIcon($feathericons$elm_feather$FeatherIcons$plus),
+				onPress: $elm$core$Maybe$Just($author$project$Msg$ImageZoomIn)
+			}),
+			A2(
+			$mdgriffith$elm_ui$Element$Input$button,
+			_List_Nil,
+			{
+				label: $author$project$ViewThirdPerson$useIcon($feathericons$elm_feather$FeatherIcons$minus),
+				onPress: $elm$core$Maybe$Just($author$project$Msg$ImageZoomOut)
+			}),
+			A2(
+			$mdgriffith$elm_ui$Element$Input$button,
+			_List_Nil,
+			{
+				label: $author$project$ViewThirdPerson$useIcon($feathericons$elm_feather$FeatherIcons$maximize),
+				onPress: $elm$core$Maybe$Just($author$project$Msg$ImageReset)
+			})
+		]));
 var $author$project$ViewThirdPerson$view = F2(
 	function (model, context) {
 		var _v0 = model.trackTree;
@@ -21212,7 +21481,8 @@ var $author$project$ViewThirdPerson$view = F2(
 						$mdgriffith$elm_ui$Element$htmlAttribute(
 						$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onClick($author$project$Msg$ImageClick)),
 						$mdgriffith$elm_ui$Element$Border$width(2),
-						$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$peace)
+						$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$peace),
+						$mdgriffith$elm_ui$Element$inFront($author$project$ViewThirdPerson$zoomButtons)
 					]),
 				$mdgriffith$elm_ui$Element$html(
 					$ianmackenzie$elm_3d_scene$Scene3d$cloudy(

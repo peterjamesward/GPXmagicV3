@@ -6,11 +6,16 @@ import Color
 import Direction3d exposing (positiveZ)
 import DomainModel exposing (..)
 import Element exposing (..)
+import Element.Background as Background
 import Element.Border as Border
-import FlatColors.ChinesePalette
+import Element.Font as Font
+import Element.Input as Input
+import FeatherIcons
+import FlatColors.ChinesePalette exposing (white)
 import Html.Events.Extra.Mouse as Mouse
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
+import ModelRecord exposing (ModelRecord)
 import Msg exposing (Msg(..))
 import Pixels exposing (Pixels)
 import Point2d
@@ -18,9 +23,48 @@ import Point3d
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
+import SceneBuilder
 import Vector3d
 import ViewingContext exposing (ViewingContext)
 import Viewpoint3d
+
+
+stopProp =
+    { stopPropagation = True, preventDefault = False }
+
+
+zoomButtons =
+    column
+        [ alignTop
+        , alignRight
+        , moveDown 5
+        , moveLeft 5
+        , Background.color white
+        , Font.size 40
+        , padding 6
+        , spacing 8
+        , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always ImageNoOp)
+        , htmlAttribute <| Mouse.onWithOptions "dblclick" stopProp (always ImageNoOp)
+        , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ImageNoOp)
+        , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always ImageNoOp)
+        ]
+        [ Input.button []
+            { onPress = Just ImageZoomIn
+            , label = useIcon FeatherIcons.plus
+            }
+        , Input.button []
+            { onPress = Just ImageZoomOut
+            , label = useIcon FeatherIcons.minus
+            }
+        , Input.button []
+            { onPress = Just ImageReset
+            , label = useIcon FeatherIcons.maximize
+            }
+        ]
+
+
+useIcon =
+    html << FeatherIcons.toHtml [] << FeatherIcons.withSize 20
 
 
 view :
@@ -39,6 +83,7 @@ view model context =
                 [ htmlAttribute <| Mouse.onClick ImageClick
                 , Border.width 2
                 , Border.color FlatColors.ChinesePalette.peace
+                , inFront zoomButtons
                 ]
             <|
                 html <|
@@ -79,7 +124,6 @@ deriveCamera treeNode focusPoint =
     perspectiveCamera
 
 
-
 detectHit :
     Mouse.Event
     ->
@@ -88,7 +132,7 @@ detectHit :
             , currentPosition : Int
             , viewDimensions : ( Quantity Int Pixels, Quantity Int Pixels )
         }
-        -> ViewingContext
+    -> ViewingContext
     -> Int
 detectHit event model context =
     --TODO: Move into view/pane/whatever it will be.
@@ -126,3 +170,34 @@ detectHit event model context =
 
         _ ->
             0
+
+
+update :
+    Msg
+    -> ModelRecord
+    -> ( ModelRecord, Cmd Msg )
+update msg model =
+    case msg of
+        ImageZoomIn ->
+            ( model, Cmd.none )
+
+        ImageZoomOut ->
+            ( model, Cmd.none )
+
+        ImageReset ->
+            ( model, Cmd.none )
+
+        ImageNoOp ->
+            ( model, Cmd.none )
+
+        ImageClick event ->
+            -- Click moves pointer but does not recentre view. (Double click will.)
+            ( { model
+                | currentPosition = detectHit event model model.viewContext
+                , scene = SceneBuilder.render3dView model
+              }
+            , Cmd.none
+            )
+
+        _ ->
+            ( model, Cmd.none )

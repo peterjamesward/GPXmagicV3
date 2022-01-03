@@ -19,6 +19,7 @@ import GpxParser exposing (parseGPXPoints)
 import Html.Events.Extra.Mouse as Mouse
 import Length exposing (Meters, meters)
 import LocalCoords exposing (LocalCoords)
+import ModelRecord exposing (ModelRecord)
 import Msg exposing (Msg(..))
 import MyIP
 import OAuthPorts exposing (randomBytes)
@@ -44,24 +45,6 @@ import ViewingMode exposing (ViewingMode(..))
 
 type Model
     = Model ModelRecord
-
-
-type alias ModelRecord =
-    { filename : Maybe String
-    , time : Time.Posix
-    , zone : Time.Zone
-    , stravaAuthentication : O.Model
-    , trackTree : Maybe PeteTree
-    , renderDepth : Int
-    , scene : List (Entity LocalCoords)
-    , currentPosition : Int
-    , viewMode : ViewingMode
-    , viewDimensions : ( Quantity Int Pixels, Quantity Int Pixels )
-    , ipInfo : Maybe IpInfo
-    , mapClickDebounce : Bool
-    , lastMapClick : ( Float, Float )
-    , viewContext : ViewingContext.ViewingContext
-    }
 
 
 main : Program (Maybe (List Int)) Model Msg
@@ -240,14 +223,6 @@ update msg (Model model) =
                 Nothing ->
                     ( Model model, Cmd.none )
 
-        ImageClick event ->
-            -- Click moves pointer but does not recentre view. (Double click will.)
-            ( { model | currentPosition = ViewThirdPerson.detectHit event model model.viewContext }
-                |> renderModel
-                |> Model
-            , Cmd.none
-            )
-
         SetViewMode newMode ->
             ( { model | viewMode = newMode }
                 |> renderModel
@@ -270,6 +245,30 @@ update msg (Model model) =
                     PortController.processPortMessage model json
             in
             ( Model newModel, cmds )
+
+        ImageZoomIn ->
+            let
+                ( newModel, cmds ) =
+                    ViewThirdPerson.update ImageZoomIn model
+            in
+            ( Model newModel, cmds )
+
+        ImageZoomOut ->
+            ( Model model, Cmd.none )
+
+        ImageReset ->
+            ( Model model, Cmd.none )
+
+        ImageNoOp ->
+            ( Model model, Cmd.none )
+
+        ImageClick event ->
+            -- Click moves pointer but does not recentre view. (Double click will.)
+            ( { model | currentPosition = ViewThirdPerson.detectHit event model model.viewContext }
+                |> renderModel
+                |> Model
+            , Cmd.none
+            )
 
 
 renderModel : ModelRecord -> ModelRecord

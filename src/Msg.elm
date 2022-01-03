@@ -19,6 +19,10 @@ type Msg
     | SetRenderDepth Int
     | SetCurrentPosition Int
     | ImageClick Mouse.Event
+    | ImageZoomIn
+    | ImageZoomOut
+    | ImageReset
+    | ImageNoOp
     | SetViewMode ViewingMode
     | ReceivedIpDetails (Result Http.Error IpInfo)
     | IpInfoAcknowledged (Result Http.Error ())
