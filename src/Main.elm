@@ -2,9 +2,8 @@ module Main exposing (main)
 
 import Browser exposing (application)
 import Browser.Navigation exposing (Key)
-import Camera3d
 import Delay exposing (after)
-import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), RoadSection, nearestToRay, pointFromVector, skipCount, treeFromList, trueLength)
+import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -16,21 +15,14 @@ import FlatColors.BritishPalette
 import FlatColors.ChinesePalette
 import GeoCodeDecoders exposing (IpInfo)
 import GpxParser exposing (parseGPXPoints)
-import Html.Events.Extra.Mouse as Mouse
 import Length exposing (Meters, meters)
-import LocalCoords exposing (LocalCoords)
 import ModelRecord exposing (ModelRecord)
 import Msg exposing (Msg(..))
 import MyIP
 import OAuthPorts exposing (randomBytes)
 import OAuthTypes as O exposing (..)
 import Pixels exposing (Pixels)
-import Point2d
-import Point3d
 import PortController
-import Quantity exposing (Quantity, toFloatQuantity)
-import Rectangle2d
-import Scene3d exposing (Entity)
 import SceneBuilder exposing (render3dView)
 import StravaAuth exposing (getStravaToken)
 import Task
@@ -155,7 +147,7 @@ update msg (Model model) =
                     { model
                         | trackTree = trackTree
                         , renderDepth = 10
-                        , viewContext = Maybe.map ViewThirdPerson.initialiseView trackTree
+                        , viewContext = Maybe.map (ViewThirdPerson.initialiseView 0) trackTree
                     }
             in
             ( modelWithTrack
@@ -251,7 +243,6 @@ update msg (Model model) =
                     ViewThirdPerson.update imageMsg model ImageMessage
             in
             ( Model newModel, cmds )
-
 
 
 renderModel : ModelRecord -> ModelRecord

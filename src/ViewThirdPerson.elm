@@ -13,12 +13,16 @@ import Element.Font as Font
 import Element.Input as Input
 import FeatherIcons
 import FlatColors.ChinesePalette exposing (white)
+import Html.Events as HE
 import Html.Events.Extra.Mouse as Mouse
+import Html.Events.Extra.Wheel as Wheel
+import Json.Decode as D
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
 import ModelRecord exposing (ModelRecord)
 import Pixels exposing (Pixels)
 import Point2d
+import Point3d
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
@@ -29,11 +33,17 @@ import Viewpoint3d
 
 
 type Msg
-    = ImageClick Mouse.Event
+    = ImageMouseWheel Float
+    | ImageGrab Mouse.Event
+    | ImageDrag Mouse.Event
+    | ImageRelease Mouse.Event
+    | ImageNoOp
+    | ImageClick Mouse.Event
+    | ImageDoubleClick Mouse.Event
     | ImageZoomIn
     | ImageZoomOut
     | ImageReset
-    | ImageNoOp
+    | ClickDelayExpired
 
 
 stopProp =
@@ -85,7 +95,15 @@ view model msgWrapper =
     case ( model.trackTree, model.viewContext ) of
         ( Just treeNode, Just context ) ->
             el
-                [ htmlAttribute <| Mouse.onClick (msgWrapper << ImageClick)
+                [ htmlAttribute <| Mouse.onDown (ImageGrab >> msgWrapper)
+                , htmlAttribute <| Mouse.onMove (ImageDrag >> msgWrapper)
+                , htmlAttribute <| Mouse.onUp (ImageRelease >> msgWrapper)
+                , htmlAttribute <| Mouse.onClick (ImageClick >> msgWrapper)
+                , htmlAttribute <| Mouse.onDoubleClick (ImageDoubleClick >> msgWrapper)
+                , htmlAttribute <| Wheel.onWheel (\event -> msgWrapper (ImageMouseWheel event.deltaY))
+                , onContextMenu (msgWrapper ImageNoOp)
+                , width fill
+                , pointer
                 , Border.width 2
                 , Border.color FlatColors.ChinesePalette.peace
                 , inFront <| zoomButtons msgWrapper
@@ -105,6 +123,18 @@ view model msgWrapper =
             text "No track to show"
 
 
+onContextMenu : a -> Element.Attribute a
+onContextMenu msg =
+    HE.custom "contextmenu"
+        (D.succeed
+            { message = msg
+            , stopPropagation = True
+            , preventDefault = True
+            }
+        )
+        |> htmlAttribute
+
+
 deriveCamera : PeteTree -> ContextThirdPerson -> Camera3d Meters LocalCoords
 deriveCamera treeNode context =
     let
@@ -119,7 +149,7 @@ deriveCamera treeNode context =
             -- Fixed for now.
             Viewpoint3d.lookAt
                 { eyePoint = eyePoint
-                , focalPoint = context.focalPoint
+                , focalPoint = Point3d.origin
                 , upDirection = Direction3d.positiveZ
                 }
 
@@ -190,28 +220,19 @@ update msg model msgWrapper =
         ( Just treeNode, Just context ) ->
             case msg of
                 ImageZoomIn ->
-                    let
-                        newContext =
-                            { context
-                                | cameraDistance = context.cameraDistance |> Quantity.multiplyBy 0.7
-                                , focalPoint =
-                                    treeNode
-                                        |> leafFromIndex model.currentPosition
-                                        |> startVector
-                                        |> pointFromVector
-                            }
-                    in
-                    ( { model
-                        | viewContext = Just newContext
-                      }
+                    ( { model | viewContext = multiplyDistanceBy 0.7 context }
                     , Cmd.none
                     )
 
                 ImageZoomOut ->
-                    ( model, Cmd.none )
+                    ( { model | viewContext = multiplyDistanceBy (1 / 0.7) context }
+                    , Cmd.none
+                    )
 
                 ImageReset ->
-                    ( model, Cmd.none )
+                    ( { model | viewContext = Just <| initialiseView model.currentPosition treeNode }
+                    , Cmd.none
+                    )
 
                 ImageNoOp ->
                     ( model, Cmd.none )
@@ -222,12 +243,48 @@ update msg model msgWrapper =
                     , Cmd.none
                     )
 
+                ImageMouseWheel deltaY ->
+                    let
+                        increment =
+                            -0.001 * deltaY
+                    in
+                    ( { model  | viewContext = multiplyDistanceBy (1.001 ^ deltaY) context }
+                    , Cmd.none
+                    )
+
+
+                ImageGrab event ->
+                    ( model, Cmd.none )
+
+
+                ImageDrag event ->
+                    ( model, Cmd.none )
+
+
+                ImageRelease event ->
+                    ( model, Cmd.none )
+
+
+                ImageDoubleClick event ->
+                    ( model, Cmd.none )
+
+
+                ClickDelayExpired ->
+                    ( { model | viewContext = Just { context | waitingForClickDelay = False }}
+                    , Cmd.none
+                    )
+
         _ ->
-            ( model, Cmd.map msgWrapper Cmd.none )
+            ( model, Cmd.none )
 
 
-initialiseView : PeteTree -> ContextThirdPerson
-initialiseView treeNode =
+multiplyDistanceBy : Float -> ContextThirdPerson -> Maybe ContextThirdPerson
+multiplyDistanceBy factor context =
+    Just { context | cameraDistance = context.cameraDistance |> Quantity.multiplyBy factor }
+
+
+initialiseView : Int -> PeteTree -> ContextThirdPerson
+initialiseView current treeNode =
     { earthAzimuth = Direction2d.x
     , earthElevation = Angle.degrees 0
     , cameraAzimuth = Direction2d.x
@@ -238,6 +295,10 @@ initialiseView treeNode =
     , dragAction = DragNone
     , zoomLevel = 10.0
     , defaultZoomLevel = 10.0
-    , focalPoint = treeNode |> startVector |> pointFromVector
+    , focalPoint =
+        treeNode
+            |> leafFromIndex current
+            |> startVector
+            |> pointFromVector
     , waitingForClickDelay = False
     }

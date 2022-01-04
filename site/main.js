@@ -10036,23 +10036,25 @@ var $ianmackenzie$elm_units$Angle$radians = function (numRadians) {
 var $ianmackenzie$elm_units$Angle$degrees = function (numDegrees) {
 	return $ianmackenzie$elm_units$Angle$radians($elm$core$Basics$pi * (numDegrees / 180));
 };
-var $author$project$ViewThirdPerson$initialiseView = function (treeNode) {
-	return {
-		cameraAzimuth: $ianmackenzie$elm_geometry$Direction2d$x,
-		cameraDistance: $ianmackenzie$elm_units$Length$kilometers(1000),
-		cameraElevation: $ianmackenzie$elm_units$Angle$degrees(0),
-		defaultZoomLevel: 10.0,
-		dragAction: $author$project$ViewContextThirdPerson$DragNone,
-		earthAzimuth: $ianmackenzie$elm_geometry$Direction2d$x,
-		earthElevation: $ianmackenzie$elm_units$Angle$degrees(0),
-		fieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
-		focalPoint: $author$project$DomainModel$pointFromVector(
-			$author$project$DomainModel$startVector(treeNode)),
-		orbiting: $elm$core$Maybe$Nothing,
-		waitingForClickDelay: false,
-		zoomLevel: 10.0
-	};
-};
+var $author$project$ViewThirdPerson$initialiseView = F2(
+	function (current, treeNode) {
+		return {
+			cameraAzimuth: $ianmackenzie$elm_geometry$Direction2d$x,
+			cameraDistance: $ianmackenzie$elm_units$Length$kilometers(1000),
+			cameraElevation: $ianmackenzie$elm_units$Angle$degrees(0),
+			defaultZoomLevel: 10.0,
+			dragAction: $author$project$ViewContextThirdPerson$DragNone,
+			earthAzimuth: $ianmackenzie$elm_geometry$Direction2d$x,
+			earthElevation: $ianmackenzie$elm_units$Angle$degrees(0),
+			fieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
+			focalPoint: $author$project$DomainModel$pointFromVector(
+				$author$project$DomainModel$startVector(
+					A2($author$project$DomainModel$leafFromIndex, current, treeNode))),
+			orbiting: $elm$core$Maybe$Nothing,
+			waitingForClickDelay: false,
+			zoomLevel: 10.0
+		};
+	});
 var $elm$core$Platform$Cmd$map = _Platform_map;
 var $elm$file$File$name = _File_name;
 var $elm$regex$Regex$Match = F4(
@@ -14588,7 +14590,7 @@ var $author$project$ViewThirdPerson$deriveCamera = F2(
 					$ianmackenzie$elm_units$Length$meters($author$project$Spherical$meanRadius),
 					context.cameraDistance)));
 		var cameraViewpoint = $ianmackenzie$elm_3d_camera$Viewpoint3d$lookAt(
-			{eyePoint: eyePoint, focalPoint: context.focalPoint, upDirection: $ianmackenzie$elm_geometry$Direction3d$positiveZ});
+			{eyePoint: eyePoint, focalPoint: $ianmackenzie$elm_geometry$Point3d$origin, upDirection: $ianmackenzie$elm_geometry$Direction3d$positiveZ});
 		var perspectiveCamera = $ianmackenzie$elm_3d_camera$Camera3d$perspective(
 			{
 				verticalFieldOfView: $ianmackenzie$elm_units$Angle$degrees(30),
@@ -15074,6 +15076,15 @@ var $author$project$ViewThirdPerson$detectHit = F2(
 			return 0;
 		}
 	});
+var $author$project$ViewThirdPerson$multiplyDistanceBy = F2(
+	function (factor, context) {
+		return $elm$core$Maybe$Just(
+			_Utils_update(
+				context,
+				{
+					cameraDistance: A2($ianmackenzie$elm_units$Quantity$multiplyBy, factor, context.cameraDistance)
+				}));
+	});
 var $author$project$ViewThirdPerson$update = F3(
 	function (msg, model, msgWrapper) {
 		var _v0 = _Utils_Tuple2(model.trackTree, model.viewContext);
@@ -15082,28 +15093,33 @@ var $author$project$ViewThirdPerson$update = F3(
 			var context = _v0.b.a;
 			switch (msg.$) {
 				case 'ImageZoomIn':
-					var newContext = _Utils_update(
-						context,
-						{
-							cameraDistance: A2($ianmackenzie$elm_units$Quantity$multiplyBy, 0.7, context.cameraDistance),
-							focalPoint: $author$project$DomainModel$pointFromVector(
-								$author$project$DomainModel$startVector(
-									A2($author$project$DomainModel$leafFromIndex, model.currentPosition, treeNode)))
-						});
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
 							{
-								viewContext: $elm$core$Maybe$Just(newContext)
+								viewContext: A2($author$project$ViewThirdPerson$multiplyDistanceBy, 0.7, context)
 							}),
 						$elm$core$Platform$Cmd$none);
 				case 'ImageZoomOut':
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								viewContext: A2($author$project$ViewThirdPerson$multiplyDistanceBy, 1 / 0.7, context)
+							}),
+						$elm$core$Platform$Cmd$none);
 				case 'ImageReset':
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								viewContext: $elm$core$Maybe$Just(
+									A2($author$project$ViewThirdPerson$initialiseView, model.currentPosition, treeNode))
+							}),
+						$elm$core$Platform$Cmd$none);
 				case 'ImageNoOp':
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				default:
+				case 'ImageClick':
 					var event = msg.a;
 					return _Utils_Tuple2(
 						_Utils_update(
@@ -15112,11 +15128,45 @@ var $author$project$ViewThirdPerson$update = F3(
 								currentPosition: A2($author$project$ViewThirdPerson$detectHit, event, model)
 							}),
 						$elm$core$Platform$Cmd$none);
+				case 'ImageMouseWheel':
+					var deltaY = msg.a;
+					var increment = (-0.001) * deltaY;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								viewContext: A2(
+									$author$project$ViewThirdPerson$multiplyDistanceBy,
+									A2($elm$core$Basics$pow, 1.001, deltaY),
+									context)
+							}),
+						$elm$core$Platform$Cmd$none);
+				case 'ImageGrab':
+					var event = msg.a;
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				case 'ImageDrag':
+					var event = msg.a;
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				case 'ImageRelease':
+					var event = msg.a;
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				case 'ImageDoubleClick':
+					var event = msg.a;
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				default:
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								viewContext: $elm$core$Maybe$Just(
+									_Utils_update(
+										context,
+										{waitingForClickDelay: false}))
+							}),
+						$elm$core$Platform$Cmd$none);
 			}
 		} else {
-			return _Utils_Tuple2(
-				model,
-				A2($elm$core$Platform$Cmd$map, msgWrapper, $elm$core$Platform$Cmd$none));
+			return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 		}
 	});
 var $author$project$Main$update = F2(
@@ -15195,7 +15245,10 @@ var $author$project$Main$update = F2(
 					{
 						renderDepth: 10,
 						trackTree: trackTree,
-						viewContext: A2($elm$core$Maybe$map, $author$project$ViewThirdPerson$initialiseView, trackTree)
+						viewContext: A2(
+							$elm$core$Maybe$map,
+							$author$project$ViewThirdPerson$initialiseView(0),
+							trackTree)
 					});
 				return _Utils_Tuple2(
 					$author$project$Main$Model(
@@ -21765,6 +21818,22 @@ var $author$project$ViewMap$view = function (model) {
 var $author$project$ViewThirdPerson$ImageClick = function (a) {
 	return {$: 'ImageClick', a: a};
 };
+var $author$project$ViewThirdPerson$ImageDoubleClick = function (a) {
+	return {$: 'ImageDoubleClick', a: a};
+};
+var $author$project$ViewThirdPerson$ImageDrag = function (a) {
+	return {$: 'ImageDrag', a: a};
+};
+var $author$project$ViewThirdPerson$ImageGrab = function (a) {
+	return {$: 'ImageGrab', a: a};
+};
+var $author$project$ViewThirdPerson$ImageMouseWheel = function (a) {
+	return {$: 'ImageMouseWheel', a: a};
+};
+var $author$project$ViewThirdPerson$ImageNoOp = {$: 'ImageNoOp'};
+var $author$project$ViewThirdPerson$ImageRelease = function (a) {
+	return {$: 'ImageRelease', a: a};
+};
 var $ianmackenzie$elm_3d_scene$Scene3d$BackgroundColor = function (a) {
 	return {$: 'BackgroundColor', a: a};
 };
@@ -22985,7 +23054,62 @@ var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions = F3(
 				$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$eventDecoder));
 	});
 var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onClick = A2($mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions, 'click', $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$defaultOptions);
-var $author$project$ViewThirdPerson$ImageNoOp = {$: 'ImageNoOp'};
+var $author$project$ViewThirdPerson$onContextMenu = function (msg) {
+	return $mdgriffith$elm_ui$Element$htmlAttribute(
+		A2(
+			$elm$html$Html$Events$custom,
+			'contextmenu',
+			$elm$json$Json$Decode$succeed(
+				{message: msg, preventDefault: true, stopPropagation: true})));
+};
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onDoubleClick = A2($mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions, 'dblclick', $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$defaultOptions);
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onDown = A2($mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions, 'mousedown', $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$defaultOptions);
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onMove = A2($mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions, 'mousemove', $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$defaultOptions);
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onUp = A2($mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions, 'mouseup', $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$defaultOptions);
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$defaultOptions = {preventDefault: true, stopPropagation: false};
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$Event = F3(
+	function (mouseEvent, deltaY, deltaMode) {
+		return {deltaMode: deltaMode, deltaY: deltaY, mouseEvent: mouseEvent};
+	});
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$DeltaLine = {$: 'DeltaLine'};
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$DeltaPage = {$: 'DeltaPage'};
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$DeltaPixel = {$: 'DeltaPixel'};
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$deltaModeDecoder = function () {
+	var intToMode = function (_int) {
+		switch (_int) {
+			case 1:
+				return $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$DeltaLine;
+			case 2:
+				return $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$DeltaPage;
+			default:
+				return $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$DeltaPixel;
+		}
+	};
+	return A2($elm$json$Json$Decode$map, intToMode, $elm$json$Json$Decode$int);
+}();
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$eventDecoder = A4(
+	$elm$json$Json$Decode$map3,
+	$mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$Event,
+	$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$eventDecoder,
+	A2($elm$json$Json$Decode$field, 'deltaY', $elm$json$Json$Decode$float),
+	A2($elm$json$Json$Decode$field, 'deltaMode', $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$deltaModeDecoder));
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWithOptions = F2(
+	function (options, tag) {
+		return A2(
+			$elm$html$Html$Events$custom,
+			'wheel',
+			A2(
+				$elm$json$Json$Decode$map,
+				function (ev) {
+					return {
+						message: tag(ev),
+						preventDefault: options.preventDefault,
+						stopPropagation: options.stopPropagation
+					};
+				},
+				$mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$eventDecoder));
+	});
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWheel = $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWithOptions($mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$defaultOptions);
 var $author$project$ViewThirdPerson$ImageReset = {$: 'ImageReset'};
 var $author$project$ViewThirdPerson$ImageZoomIn = {$: 'ImageZoomIn'};
 var $author$project$ViewThirdPerson$ImageZoomOut = {$: 'ImageZoomOut'};
@@ -23234,8 +23358,30 @@ var $author$project$ViewThirdPerson$view = F2(
 				_List_fromArray(
 					[
 						$mdgriffith$elm_ui$Element$htmlAttribute(
+						$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onDown(
+							A2($elm$core$Basics$composeR, $author$project$ViewThirdPerson$ImageGrab, msgWrapper))),
+						$mdgriffith$elm_ui$Element$htmlAttribute(
+						$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onMove(
+							A2($elm$core$Basics$composeR, $author$project$ViewThirdPerson$ImageDrag, msgWrapper))),
+						$mdgriffith$elm_ui$Element$htmlAttribute(
+						$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onUp(
+							A2($elm$core$Basics$composeR, $author$project$ViewThirdPerson$ImageRelease, msgWrapper))),
+						$mdgriffith$elm_ui$Element$htmlAttribute(
 						$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onClick(
-							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ViewThirdPerson$ImageClick))),
+							A2($elm$core$Basics$composeR, $author$project$ViewThirdPerson$ImageClick, msgWrapper))),
+						$mdgriffith$elm_ui$Element$htmlAttribute(
+						$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onDoubleClick(
+							A2($elm$core$Basics$composeR, $author$project$ViewThirdPerson$ImageDoubleClick, msgWrapper))),
+						$mdgriffith$elm_ui$Element$htmlAttribute(
+						$mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWheel(
+							function (event) {
+								return msgWrapper(
+									$author$project$ViewThirdPerson$ImageMouseWheel(event.deltaY));
+							})),
+						$author$project$ViewThirdPerson$onContextMenu(
+						msgWrapper($author$project$ViewThirdPerson$ImageNoOp)),
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$pointer,
 						$mdgriffith$elm_ui$Element$Border$width(2),
 						$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$peace),
 						$mdgriffith$elm_ui$Element$inFront(
