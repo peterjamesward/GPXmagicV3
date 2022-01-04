@@ -3,6 +3,7 @@ module ViewThirdPerson exposing (..)
 import Angle exposing (Angle)
 import Camera3d exposing (Camera3d)
 import Color
+import Delay
 import Direction2d exposing (Direction2d)
 import Direction3d exposing (positiveZ)
 import DomainModel exposing (..)
@@ -14,7 +15,7 @@ import Element.Input as Input
 import FeatherIcons
 import FlatColors.ChinesePalette exposing (white)
 import Html.Events as HE
-import Html.Events.Extra.Mouse as Mouse
+import Html.Events.Extra.Mouse as Mouse exposing (Button(..))
 import Html.Events.Extra.Wheel as Wheel
 import Json.Decode as D
 import Length exposing (Meters)
@@ -27,9 +28,10 @@ import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
 import Spherical
+import Vector3d
 import ViewContextThirdPerson exposing (ContextThirdPerson, DragAction(..))
 import ViewPureStyles exposing (useIcon)
-import Viewpoint3d
+import Viewpoint3d exposing (Viewpoint3d)
 
 
 type Msg
@@ -133,6 +135,15 @@ onContextMenu msg =
             }
         )
         |> htmlAttribute
+
+
+viewpoint : Viewpoint3d Meters LocalCoords
+viewpoint =
+    Viewpoint3d.lookAt
+        { focalPoint = Point3d.origin
+        , eyePoint = Point3d.centimeters 20 10 10
+        , upDirection = Direction3d.positiveZ
+        }
 
 
 deriveCamera : PeteTree -> ContextThirdPerson -> Camera3d Meters LocalCoords
@@ -244,33 +255,94 @@ update msg model msgWrapper =
                     )
 
                 ImageMouseWheel deltaY ->
-                    let
-                        increment =
-                            -0.001 * deltaY
-                    in
-                    ( { model  | viewContext = multiplyDistanceBy (1.001 ^ deltaY) context }
+                    ( { model | viewContext = multiplyDistanceBy (1.001 ^ deltaY) context }
                     , Cmd.none
                     )
 
-
                 ImageGrab event ->
-                    ( model, Cmd.none )
+                    -- Mouse behaviour depends which view is in use...
+                    -- Right-click or ctrl-click to mean rotate; otherwise pan.
+                    let
+                        alternate =
+                            event.keys.ctrl || event.button == SecondButton
 
+                        newContext =
+                            Just
+                                { context
+                                    | orbiting = Just event.offsetPos
+                                    , dragAction =
+                                        if alternate then
+                                            DragRotate
+
+                                        else
+                                            DragPan
+                                    , waitingForClickDelay = True
+                                }
+                    in
+                    ( { model | viewContext = newContext }
+                    , Delay.after 250 (msgWrapper ClickDelayExpired)
+                    )
 
                 ImageDrag event ->
-                    ( model, Cmd.none )
+                    let
+                        ( dx, dy ) =
+                            event.offsetPos
+                    in
+                    case ( context.dragAction, context.orbiting ) of
+                        ( DragRotate, Just ( startX, startY ) ) ->
+                            -- Change the camera azimuth and elevation
+                            ( model, Cmd.none )
 
+                        ( DragPan, Just ( startX, startY ) ) ->
+                            -- Change the earth azimuth and elevation
+                            let
+                                rotationRate =
+                                    Angle.degrees 1 |> Quantity.per Pixels.pixel
+
+                                azimuthChange =
+                                    (startX - dx) |> Pixels.pixels |> Quantity.at rotationRate
+
+                                elevationChange =
+                                    (dy - startY) |> Pixels.pixels |> Quantity.at rotationRate
+
+                                newContext =
+                                    Just
+                                        { context
+                                            | orbiting = Just ( dx, dy )
+                                            , earthAzimuth =
+                                                context.earthAzimuth
+                                                    |> Direction2d.rotateBy azimuthChange
+                                            , earthElevation =
+                                                context.earthElevation
+                                                    |> Quantity.plus elevationChange
+                                        }
+                            in
+                            ( { model | viewContext = newContext }
+                            , Cmd.none
+                            )
+
+                        _ ->
+                            ( model, Cmd.none )
 
                 ImageRelease event ->
-                    ( model, Cmd.none )
-
+                    let
+                        newContext =
+                            Just
+                                { context
+                                    | orbiting = Nothing
+                                    , dragAction = DragNone
+                                    , waitingForClickDelay = False
+                                }
+                    in
+                    ( { model | viewContext = newContext }
+                    , Cmd.none
+                    )
 
                 ImageDoubleClick event ->
                     ( model, Cmd.none )
 
-
                 ClickDelayExpired ->
-                    ( { model | viewContext = Just { context | waitingForClickDelay = False }}
+                    ( { model | viewContext = Just { context | waitingForClickDelay = False } }
                     , Cmd.none
                     )
 
@@ -285,8 +357,8 @@ multiplyDistanceBy factor context =
 
 initialiseView : Int -> PeteTree -> ContextThirdPerson
 initialiseView current treeNode =
-    { earthAzimuth = Direction2d.x
-    , earthElevation = Angle.degrees 0
+    { earthElevation = Angle.degrees 0
+    , earthAzimuth = Direction2d.y
     , cameraAzimuth = Direction2d.x
     , cameraElevation = Angle.degrees 0
     , cameraDistance = Length.kilometers 1000

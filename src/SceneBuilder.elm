@@ -147,8 +147,9 @@ render3dView model =
                     BoundingBox3d.withDimensions ( boxSide, boxSide, boxSide )
                         (startPoint <| leafFromIndex model.currentPosition tree)
             in
-            globe
-                :: renderCurrentMarker model.currentPosition tree
+            --globe
+            --    ::
+                 renderCurrentMarker model.currentPosition tree
                 ++ renderTreeSelectively box model.renderDepth tree []
 
         Nothing ->
