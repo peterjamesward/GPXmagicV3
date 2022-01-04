@@ -39,7 +39,6 @@ import Url exposing (Url)
 import ViewMap
 import ViewPureStyles exposing (conditionallyVisible, radioButton, sliderThumb)
 import ViewThirdPerson
-import ViewingContext
 import ViewingMode exposing (ViewingMode(..))
 
 
@@ -81,7 +80,7 @@ init mflags origin navigationKey =
         , ipInfo = Nothing
         , mapClickDebounce = False
         , lastMapClick = ( 0.0, 0.0 )
-        , viewContext = ViewingContext.newViewingContext ViewingMode.ViewThird
+        , viewContext = Nothing
         }
     , Cmd.batch
         [ authCmd
@@ -156,7 +155,7 @@ update msg (Model model) =
                     { model
                         | trackTree = trackTree
                         , renderDepth = 10
-                        , viewContext = ViewingContext.initialiseView model.viewContext trackTree
+                        , viewContext = Maybe.map ViewThirdPerson.initialiseView trackTree
                     }
             in
             ( modelWithTrack
@@ -246,29 +245,13 @@ update msg (Model model) =
             in
             ( Model newModel, cmds )
 
-        ImageZoomIn ->
+        ImageMessage imageMsg ->
             let
                 ( newModel, cmds ) =
-                    ViewThirdPerson.update ImageZoomIn model
+                    ViewThirdPerson.update imageMsg model ImageMessage
             in
             ( Model newModel, cmds )
 
-        ImageZoomOut ->
-            ( Model model, Cmd.none )
-
-        ImageReset ->
-            ( Model model, Cmd.none )
-
-        ImageNoOp ->
-            ( Model model, Cmd.none )
-
-        ImageClick event ->
-            -- Click moves pointer but does not recentre view. (Double click will.)
-            ( { model | currentPosition = ViewThirdPerson.detectHit event model model.viewContext }
-                |> renderModel
-                |> Model
-            , Cmd.none
-            )
 
 
 renderModel : ModelRecord -> ModelRecord
@@ -368,7 +351,7 @@ contentArea model =
                     ]
                     [ viewModeChoices model
                     , conditionallyVisible (model.viewMode /= ViewMap) <|
-                        ViewThirdPerson.view model model.viewContext
+                        ViewThirdPerson.view model ImageMessage
                     , conditionallyVisible (model.viewMode == ViewMap) <|
                         ViewMap.view model
                     ]

@@ -15,7 +15,6 @@ import MapboxKey exposing (mapboxKey)
 import Msg exposing (Msg(..))
 import Point3d
 import SceneBuilder
-import ViewingContext exposing (ViewingContext)
 
 
 type MapStyle

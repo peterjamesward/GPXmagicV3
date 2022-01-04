@@ -4,15 +4,24 @@
 
 ## Zoom, Pan, Rotate.
 
-- Focal point not good for zooming.
-- Moves map when switching views, and paints too small again.
+- Set earthAzimuth and earthElevation based on track.
+- Plain drag affects earthAzimuth/Elevation.
+- Right-drag affects camera azimuth/elevation around focal point.
+
+- https://ellie-app.com/9g2R9VDG6NHa1 
+- (but that does some weird Frame rotation.)
+
+- Zoom affects camera distance from focal point.
 
 Check road rendering in globe non-projection!
 
+- Moves map when switching views, and paints it too small again.
+- (No idea where that smaller size comes from.)
+
 ### Map / General
-Possibly try a more graduated selective rendering. (Maybe 100km box at 14 deep?)
-Better, a progressive drop off with distance.
-Lazy selective re-render (aka 2.8) to reduce map flicker, improve slider response?
+Possibly try a more graduated selective rendering. 
+Better, a gradual drop off with distance.
+Lazy (or less aggressive) selective re-render (aka 2.8) to reduce map flicker, improve slider response?
 
 ### iframe
 Do an embedded version as iframe for Steve?

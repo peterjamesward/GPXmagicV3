@@ -1,9 +1,9 @@
 module ViewThirdPerson exposing (..)
 
-import Angle
+import Angle exposing (Angle)
 import Camera3d exposing (Camera3d)
 import Color
-import Direction2d
+import Direction2d exposing (Direction2d)
 import Direction3d exposing (positiveZ)
 import DomainModel exposing (..)
 import Element exposing (..)
@@ -17,25 +17,31 @@ import Html.Events.Extra.Mouse as Mouse
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
 import ModelRecord exposing (ModelRecord)
-import Msg exposing (Msg(..))
 import Pixels exposing (Pixels)
 import Point2d
-import Point3d
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
-import SceneBuilder exposing (render3dView)
 import Spherical
-import Vector3d
-import ViewingContext exposing (ViewingContext)
+import ViewContextThirdPerson exposing (ContextThirdPerson, DragAction(..))
+import ViewPureStyles exposing (useIcon)
 import Viewpoint3d
+
+
+type Msg
+    = ImageClick Mouse.Event
+    | ImageZoomIn
+    | ImageZoomOut
+    | ImageReset
+    | ImageNoOp
 
 
 stopProp =
     { stopPropagation = True, preventDefault = False }
 
 
-zoomButtons =
+zoomButtons : (Msg -> msg) -> Element msg
+zoomButtons msgWrapper =
     column
         [ alignTop
         , alignRight
@@ -45,28 +51,24 @@ zoomButtons =
         , Font.size 40
         , padding 6
         , spacing 8
-        , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always ImageNoOp)
-        , htmlAttribute <| Mouse.onWithOptions "dblclick" stopProp (always ImageNoOp)
-        , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ImageNoOp)
-        , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always ImageNoOp)
+        , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always ImageNoOp >> msgWrapper)
+        , htmlAttribute <| Mouse.onWithOptions "dblclick" stopProp (always ImageNoOp >> msgWrapper)
+        , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ImageNoOp >> msgWrapper)
+        , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always ImageNoOp >> msgWrapper)
         ]
         [ Input.button []
-            { onPress = Just ImageZoomIn
+            { onPress = Just <| msgWrapper ImageZoomIn
             , label = useIcon FeatherIcons.plus
             }
         , Input.button []
-            { onPress = Just ImageZoomOut
+            { onPress = Just <| msgWrapper ImageZoomOut
             , label = useIcon FeatherIcons.minus
             }
         , Input.button []
-            { onPress = Just ImageReset
+            { onPress = Just <| msgWrapper ImageReset
             , label = useIcon FeatherIcons.maximize
             }
         ]
-
-
-useIcon =
-    html << FeatherIcons.toHtml [] << FeatherIcons.withSize 20
 
 
 view :
@@ -75,22 +77,23 @@ view :
         , viewDimensions : ( Quantity Int Pixels, Quantity Int Pixels )
         , trackTree : Maybe PeteTree
         , currentPosition : Int
+        , viewContext : Maybe ContextThirdPerson
     }
-    -> ViewingContext
-    -> Element Msg
-view model context =
-    case model.trackTree of
-        Just treeNode ->
+    -> (Msg -> msg)
+    -> Element msg
+view model msgWrapper =
+    case ( model.trackTree, model.viewContext ) of
+        ( Just treeNode, Just context ) ->
             el
-                [ htmlAttribute <| Mouse.onClick ImageClick
+                [ htmlAttribute <| Mouse.onClick (msgWrapper << ImageClick)
                 , Border.width 2
                 , Border.color FlatColors.ChinesePalette.peace
-                , inFront zoomButtons
+                , inFront <| zoomButtons msgWrapper
                 ]
             <|
                 html <|
                     Scene3d.cloudy
-                        { camera = context.camera
+                        { camera = deriveCamera treeNode context
                         , dimensions = model.viewDimensions
                         , background = backgroundColor Color.lightBlue
                         , clipDepth = Length.meters 1
@@ -102,15 +105,15 @@ view model context =
             text "No track to show"
 
 
-deriveCamera : PeteTree -> ViewingContext -> Camera3d Meters LocalCoords
+deriveCamera : PeteTree -> ContextThirdPerson -> Camera3d Meters LocalCoords
 deriveCamera treeNode context =
     let
         eyePoint =
             pointFromVector <|
                 makeEarthVector
-                    (Direction2d.fromAngle context.azimuth)
-                    context.elevation
-                    (context.distance |> Quantity.plus (Length.meters Spherical.meanRadius))
+                    context.earthAzimuth
+                    context.earthElevation
+                    (context.cameraDistance |> Quantity.plus (Length.meters Spherical.meanRadius))
 
         cameraViewpoint =
             -- Fixed for now.
@@ -136,13 +139,13 @@ detectHit :
             | trackTree : Maybe PeteTree
             , currentPosition : Int
             , viewDimensions : ( Quantity Int Pixels, Quantity Int Pixels )
+            , viewContext : Maybe ContextThirdPerson
         }
-    -> ViewingContext
     -> Int
-detectHit event model context =
+detectHit event model =
     --TODO: Move into view/pane/whatever it will be.
-    case model.trackTree of
-        Just topNode ->
+    case ( model.trackTree, model.viewContext ) of
+        ( Just topNode, Just context ) ->
             let
                 leaf =
                     leafFromIndex model.currentPosition topNode
@@ -180,42 +183,26 @@ detectHit event model context =
 update :
     Msg
     -> ModelRecord
-    -> ( ModelRecord, Cmd Msg )
-update msg model =
-    case model.trackTree of
-        Nothing ->
-            ( model, Cmd.none )
-
-        Just treeNode ->
+    -> (Msg -> msg)
+    -> ( ModelRecord, Cmd msg )
+update msg model msgWrapper =
+    case ( model.trackTree, model.viewContext ) of
+        ( Just treeNode, Just context ) ->
             case msg of
                 ImageZoomIn ->
                     let
-                        oldContext =
-                            model.viewContext
-
-                        newDistance =
-                            oldContext.distance |> Quantity.multiplyBy 0.7
-
-                        newFocalPoint =
-                            treeNode
-                                |> leafFromIndex model.currentPosition
-                                |> startVector
-                                |> pointFromVector
-
                         newContext =
-                            { oldContext
-                                | distance = newDistance
-                                , focalPoint = newFocalPoint
+                            { context
+                                | cameraDistance = context.cameraDistance |> Quantity.multiplyBy 0.7
+                                , focalPoint =
+                                    treeNode
+                                        |> leafFromIndex model.currentPosition
+                                        |> startVector
+                                        |> pointFromVector
                             }
-
-                        newCamera =
-                            deriveCamera treeNode newContext
-
-                        finalContext =
-                            { newContext | camera = newCamera }
                     in
                     ( { model
-                        | viewContext = finalContext
+                        | viewContext = Just newContext
                       }
                     , Cmd.none
                     )
@@ -231,12 +218,26 @@ update msg model =
 
                 ImageClick event ->
                     -- Click moves pointer but does not recentre view. (Double click will.)
-                    ( { model
-                        | currentPosition = detectHit event model model.viewContext
-                        , scene = SceneBuilder.render3dView model
-                      }
+                    ( { model | currentPosition = detectHit event model }
                     , Cmd.none
                     )
 
-                _ ->
-                    ( model, Cmd.none )
+        _ ->
+            ( model, Cmd.map msgWrapper Cmd.none )
+
+
+initialiseView : PeteTree -> ContextThirdPerson
+initialiseView treeNode =
+    { earthAzimuth = Direction2d.x
+    , earthElevation = Angle.degrees 0
+    , cameraAzimuth = Direction2d.x
+    , cameraElevation = Angle.degrees 0
+    , cameraDistance = Length.kilometers 1000
+    , fieldOfView = Angle.degrees 45
+    , orbiting = Nothing
+    , dragAction = DragNone
+    , zoomLevel = 10.0
+    , defaultZoomLevel = 10.0
+    , focalPoint = treeNode |> startVector |> pointFromVector
+    , waitingForClickDelay = False
+    }

@@ -7,6 +7,7 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input exposing (Thumb, thumb)
+import FeatherIcons
 import FlatColors.BritishPalette
 import FlatColors.ChinesePalette
 import Html.Attributes exposing (style)
@@ -194,3 +195,7 @@ sliderThumb =
         , Border.color (Element.rgb 0.5 0.5 0.5)
         , Background.color (Element.rgb 1 1 1)
         ]
+
+
+useIcon =
+    html << FeatherIcons.toHtml [] << FeatherIcons.withSize 20

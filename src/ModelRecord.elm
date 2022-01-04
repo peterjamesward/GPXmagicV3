@@ -1,6 +1,5 @@
 module ModelRecord exposing (..)
 
-
 import DomainModel exposing (PeteTree)
 import GeoCodeDecoders exposing (IpInfo)
 import LocalCoords exposing (LocalCoords)
@@ -9,8 +8,10 @@ import Pixels exposing (Pixels)
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
 import Time
-import ViewingContext
+import ViewContextThirdPerson
 import ViewingMode exposing (ViewingMode)
+
+
 type alias ModelRecord =
     { filename : Maybe String
     , time : Time.Posix
@@ -25,6 +26,5 @@ type alias ModelRecord =
     , ipInfo : Maybe IpInfo
     , mapClickDebounce : Bool
     , lastMapClick : ( Float, Float )
-    , viewContext : ViewingContext.ViewingContext
+    , viewContext : Maybe ViewContextThirdPerson.ContextThirdPerson
     }
-
