@@ -11,6 +11,11 @@ import Time
 import ViewContextThirdPerson
 import ViewingMode exposing (ViewingMode)
 
+--TODO: Try distinct records for Loaded and NotLoaded state, avoiding Maybes.
+
+type Model
+    = Model ModelRecord
+
 
 type alias ModelRecord =
     { filename : Maybe String

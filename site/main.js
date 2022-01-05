@@ -4914,6 +4914,181 @@ var _Regex_splitAtMost = F3(function(n, re, str)
 var _Regex_infinity = Infinity;
 
 
+
+// SEND REQUEST
+
+var _Http_toTask = F3(function(router, toTask, request)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		function done(response) {
+			callback(toTask(request.expect.a(response)));
+		}
+
+		var xhr = new XMLHttpRequest();
+		xhr.addEventListener('error', function() { done($elm$http$Http$NetworkError_); });
+		xhr.addEventListener('timeout', function() { done($elm$http$Http$Timeout_); });
+		xhr.addEventListener('load', function() { done(_Http_toResponse(request.expect.b, xhr)); });
+		$elm$core$Maybe$isJust(request.tracker) && _Http_track(router, xhr, request.tracker.a);
+
+		try {
+			xhr.open(request.method, request.url, true);
+		} catch (e) {
+			return done($elm$http$Http$BadUrl_(request.url));
+		}
+
+		_Http_configureRequest(xhr, request);
+
+		request.body.a && xhr.setRequestHeader('Content-Type', request.body.a);
+		xhr.send(request.body.b);
+
+		return function() { xhr.c = true; xhr.abort(); };
+	});
+});
+
+
+// CONFIGURE
+
+function _Http_configureRequest(xhr, request)
+{
+	for (var headers = request.headers; headers.b; headers = headers.b) // WHILE_CONS
+	{
+		xhr.setRequestHeader(headers.a.a, headers.a.b);
+	}
+	xhr.timeout = request.timeout.a || 0;
+	xhr.responseType = request.expect.d;
+	xhr.withCredentials = request.allowCookiesFromOtherDomains;
+}
+
+
+// RESPONSES
+
+function _Http_toResponse(toBody, xhr)
+{
+	return A2(
+		200 <= xhr.status && xhr.status < 300 ? $elm$http$Http$GoodStatus_ : $elm$http$Http$BadStatus_,
+		_Http_toMetadata(xhr),
+		toBody(xhr.response)
+	);
+}
+
+
+// METADATA
+
+function _Http_toMetadata(xhr)
+{
+	return {
+		url: xhr.responseURL,
+		statusCode: xhr.status,
+		statusText: xhr.statusText,
+		headers: _Http_parseHeaders(xhr.getAllResponseHeaders())
+	};
+}
+
+
+// HEADERS
+
+function _Http_parseHeaders(rawHeaders)
+{
+	if (!rawHeaders)
+	{
+		return $elm$core$Dict$empty;
+	}
+
+	var headers = $elm$core$Dict$empty;
+	var headerPairs = rawHeaders.split('\r\n');
+	for (var i = headerPairs.length; i--; )
+	{
+		var headerPair = headerPairs[i];
+		var index = headerPair.indexOf(': ');
+		if (index > 0)
+		{
+			var key = headerPair.substring(0, index);
+			var value = headerPair.substring(index + 2);
+
+			headers = A3($elm$core$Dict$update, key, function(oldValue) {
+				return $elm$core$Maybe$Just($elm$core$Maybe$isJust(oldValue)
+					? value + ', ' + oldValue.a
+					: value
+				);
+			}, headers);
+		}
+	}
+	return headers;
+}
+
+
+// EXPECT
+
+var _Http_expect = F3(function(type, toBody, toValue)
+{
+	return {
+		$: 0,
+		d: type,
+		b: toBody,
+		a: toValue
+	};
+});
+
+var _Http_mapExpect = F2(function(func, expect)
+{
+	return {
+		$: 0,
+		d: expect.d,
+		b: expect.b,
+		a: function(x) { return func(expect.a(x)); }
+	};
+});
+
+function _Http_toDataView(arrayBuffer)
+{
+	return new DataView(arrayBuffer);
+}
+
+
+// BODY and PARTS
+
+var _Http_emptyBody = { $: 0 };
+var _Http_pair = F2(function(a, b) { return { $: 0, a: a, b: b }; });
+
+function _Http_toFormData(parts)
+{
+	for (var formData = new FormData(); parts.b; parts = parts.b) // WHILE_CONS
+	{
+		var part = parts.a;
+		formData.append(part.a, part.b);
+	}
+	return formData;
+}
+
+var _Http_bytesToBlob = F2(function(mime, bytes)
+{
+	return new Blob([bytes], { type: mime });
+});
+
+
+// PROGRESS
+
+function _Http_track(router, xhr, tracker)
+{
+	// TODO check out lengthComputable on loadstart event
+
+	xhr.upload.addEventListener('progress', function(event) {
+		if (xhr.c) { return; }
+		_Scheduler_rawSpawn(A2($elm$core$Platform$sendToSelf, router, _Utils_Tuple2(tracker, $elm$http$Http$Sending({
+			sent: event.loaded,
+			size: event.total
+		}))));
+	});
+	xhr.addEventListener('progress', function(event) {
+		if (xhr.c) { return; }
+		_Scheduler_rawSpawn(A2($elm$core$Platform$sendToSelf, router, _Utils_Tuple2(tracker, $elm$http$Http$Receiving({
+			received: event.loaded,
+			size: event.lengthComputable ? $elm$core$Maybe$Just(event.total) : $elm$core$Maybe$Nothing
+		}))));
+	});
+}
+
 /*
  * Copyright (c) 2010 Mozilla Corporation
  * Copyright (c) 2010 Vladimir Vukicevic
@@ -6767,182 +6942,7 @@ function _WebGL_diff(oldModel, newModel) {
   newModel.f = oldModel.f;
   return _WebGL_drawGL(newModel);
 }
-
-
-
-// SEND REQUEST
-
-var _Http_toTask = F3(function(router, toTask, request)
-{
-	return _Scheduler_binding(function(callback)
-	{
-		function done(response) {
-			callback(toTask(request.expect.a(response)));
-		}
-
-		var xhr = new XMLHttpRequest();
-		xhr.addEventListener('error', function() { done($elm$http$Http$NetworkError_); });
-		xhr.addEventListener('timeout', function() { done($elm$http$Http$Timeout_); });
-		xhr.addEventListener('load', function() { done(_Http_toResponse(request.expect.b, xhr)); });
-		$elm$core$Maybe$isJust(request.tracker) && _Http_track(router, xhr, request.tracker.a);
-
-		try {
-			xhr.open(request.method, request.url, true);
-		} catch (e) {
-			return done($elm$http$Http$BadUrl_(request.url));
-		}
-
-		_Http_configureRequest(xhr, request);
-
-		request.body.a && xhr.setRequestHeader('Content-Type', request.body.a);
-		xhr.send(request.body.b);
-
-		return function() { xhr.c = true; xhr.abort(); };
-	});
-});
-
-
-// CONFIGURE
-
-function _Http_configureRequest(xhr, request)
-{
-	for (var headers = request.headers; headers.b; headers = headers.b) // WHILE_CONS
-	{
-		xhr.setRequestHeader(headers.a.a, headers.a.b);
-	}
-	xhr.timeout = request.timeout.a || 0;
-	xhr.responseType = request.expect.d;
-	xhr.withCredentials = request.allowCookiesFromOtherDomains;
-}
-
-
-// RESPONSES
-
-function _Http_toResponse(toBody, xhr)
-{
-	return A2(
-		200 <= xhr.status && xhr.status < 300 ? $elm$http$Http$GoodStatus_ : $elm$http$Http$BadStatus_,
-		_Http_toMetadata(xhr),
-		toBody(xhr.response)
-	);
-}
-
-
-// METADATA
-
-function _Http_toMetadata(xhr)
-{
-	return {
-		url: xhr.responseURL,
-		statusCode: xhr.status,
-		statusText: xhr.statusText,
-		headers: _Http_parseHeaders(xhr.getAllResponseHeaders())
-	};
-}
-
-
-// HEADERS
-
-function _Http_parseHeaders(rawHeaders)
-{
-	if (!rawHeaders)
-	{
-		return $elm$core$Dict$empty;
-	}
-
-	var headers = $elm$core$Dict$empty;
-	var headerPairs = rawHeaders.split('\r\n');
-	for (var i = headerPairs.length; i--; )
-	{
-		var headerPair = headerPairs[i];
-		var index = headerPair.indexOf(': ');
-		if (index > 0)
-		{
-			var key = headerPair.substring(0, index);
-			var value = headerPair.substring(index + 2);
-
-			headers = A3($elm$core$Dict$update, key, function(oldValue) {
-				return $elm$core$Maybe$Just($elm$core$Maybe$isJust(oldValue)
-					? value + ', ' + oldValue.a
-					: value
-				);
-			}, headers);
-		}
-	}
-	return headers;
-}
-
-
-// EXPECT
-
-var _Http_expect = F3(function(type, toBody, toValue)
-{
-	return {
-		$: 0,
-		d: type,
-		b: toBody,
-		a: toValue
-	};
-});
-
-var _Http_mapExpect = F2(function(func, expect)
-{
-	return {
-		$: 0,
-		d: expect.d,
-		b: expect.b,
-		a: function(x) { return func(expect.a(x)); }
-	};
-});
-
-function _Http_toDataView(arrayBuffer)
-{
-	return new DataView(arrayBuffer);
-}
-
-
-// BODY and PARTS
-
-var _Http_emptyBody = { $: 0 };
-var _Http_pair = F2(function(a, b) { return { $: 0, a: a, b: b }; });
-
-function _Http_toFormData(parts)
-{
-	for (var formData = new FormData(); parts.b; parts = parts.b) // WHILE_CONS
-	{
-		var part = parts.a;
-		formData.append(part.a, part.b);
-	}
-	return formData;
-}
-
-var _Http_bytesToBlob = F2(function(mime, bytes)
-{
-	return new Blob([bytes], { type: mime });
-});
-
-
-// PROGRESS
-
-function _Http_track(router, xhr, tracker)
-{
-	// TODO check out lengthComputable on loadstart event
-
-	xhr.upload.addEventListener('progress', function(event) {
-		if (xhr.c) { return; }
-		_Scheduler_rawSpawn(A2($elm$core$Platform$sendToSelf, router, _Utils_Tuple2(tracker, $elm$http$Http$Sending({
-			sent: event.loaded,
-			size: event.total
-		}))));
-	});
-	xhr.addEventListener('progress', function(event) {
-		if (xhr.c) { return; }
-		_Scheduler_rawSpawn(A2($elm$core$Platform$sendToSelf, router, _Utils_Tuple2(tracker, $elm$http$Http$Receiving({
-			received: event.loaded,
-			size: event.lengthComputable ? $elm$core$Maybe$Just(event.total) : $elm$core$Maybe$Nothing
-		}))));
-	});
-}var $elm$core$Maybe$Just = function (a) {
+var $elm$core$Maybe$Just = function (a) {
 	return {$: 'Just', a: a};
 };
 var $author$project$OAuthTypes$NoOp = {$: 'NoOp'};
@@ -8420,7 +8420,7 @@ var $author$project$DomainModel$GPXSource = F3(
 	function (longitude, latitude, altitude) {
 		return {altitude: altitude, latitude: latitude, longitude: longitude};
 	});
-var $author$project$Main$Model = function (a) {
+var $author$project$ModelRecord$Model = function (a) {
 	return {$: 'Model', a: a};
 };
 var $author$project$ViewingMode$ViewThird = {$: 'ViewThird'};
@@ -9346,7 +9346,7 @@ var $author$project$Main$init = F3(
 		var authData = _v0.a;
 		var authCmd = _v0.b;
 		return _Utils_Tuple2(
-			$author$project$Main$Model(
+			$author$project$ModelRecord$Model(
 				{
 					currentPosition: 0,
 					filename: $elm$core$Maybe$Nothing,
@@ -9415,10 +9415,76 @@ var $author$project$Msg$ReceivedIpDetails = function (a) {
 	return {$: 'ReceivedIpDetails', a: a};
 };
 var $author$project$Msg$RepaintMap = {$: 'RepaintMap'};
-var $author$project$ViewingMode$ViewMap = {$: 'ViewMap'};
 var $author$project$PortController$commandPort = _Platform_outgoingPort('commandPort', $elm$core$Basics$identity);
 var $elm$json$Json$Encode$float = _Json_wrap;
-var $elm$core$Basics$cos = _Basics_cos;
+var $author$project$MapboxKey$mapboxKey = 'pk.eyJ1IjoicGV0ZXJqYW1lc3dhcmQiLCJhIjoiY2tpdWswb3dsMm02bDMzcDMyNGw1bmh5aSJ9.Fk3ibin0PpeEGXlGsctP1g';
+var $elm$json$Json$Encode$object = function (pairs) {
+	return _Json_wrap(
+		A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v0, obj) {
+					var k = _v0.a;
+					var v = _v0.b;
+					return A3(_Json_addField, k, v, obj);
+				}),
+			_Json_emptyObject(_Utils_Tuple0),
+			pairs));
+};
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $author$project$PortController$createMap = function (info) {
+	return $author$project$PortController$commandPort(
+		$elm$json$Json$Encode$object(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'Cmd',
+					$elm$json$Json$Encode$string('Init')),
+					_Utils_Tuple2(
+					'token',
+					$elm$json$Json$Encode$string($author$project$MapboxKey$mapboxKey)),
+					_Utils_Tuple2(
+					'lon',
+					$elm$json$Json$Encode$float(info.centreLon)),
+					_Utils_Tuple2(
+					'lat',
+					$elm$json$Json$Encode$float(info.centreLat)),
+					_Utils_Tuple2(
+					'zoom',
+					$elm$json$Json$Encode$float(info.mapZoom))
+				])));
+};
+var $elm$file$File$Select$file = F2(
+	function (mimes, toMsg) {
+		return A2(
+			$elm$core$Task$perform,
+			toMsg,
+			_File_uploadOne(mimes));
+	});
+var $author$project$StravaAuth$getStravaToken = function (model) {
+	var _v0 = model.flow;
+	switch (_v0.$) {
+		case 'Done':
+			var info = _v0.a;
+			var token = _v0.b;
+			return $elm$core$Maybe$Just(token);
+		case 'Authenticated':
+			var token = _v0.a;
+			return $elm$core$Maybe$Just(token);
+		default:
+			return $elm$core$Maybe$Nothing;
+	}
+};
+var $elm$core$List$head = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(x);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$ViewContextThirdPerson$DragNone = {$: 'DragNone'};
 var $elm$core$Basics$pi = _Basics_pi;
 var $ianmackenzie$elm_units$Angle$radians = function (numRadians) {
 	return $ianmackenzie$elm_units$Quantity$Quantity(numRadians);
@@ -9426,6 +9492,114 @@ var $ianmackenzie$elm_units$Angle$radians = function (numRadians) {
 var $ianmackenzie$elm_units$Angle$degrees = function (numDegrees) {
 	return $ianmackenzie$elm_units$Angle$radians($elm$core$Basics$pi * (numDegrees / 180));
 };
+var $ianmackenzie$elm_units$Length$meters = function (numMeters) {
+	return $ianmackenzie$elm_units$Quantity$Quantity(numMeters);
+};
+var $ianmackenzie$elm_units$Length$kilometers = function (numKilometers) {
+	return $ianmackenzie$elm_units$Length$meters(1000 * numKilometers);
+};
+var $author$project$DomainModel$skipCount = function (treeNode) {
+	if (treeNode.$ === 'Leaf') {
+		var leaf = treeNode.a;
+		return 1;
+	} else {
+		var node = treeNode.a;
+		return node.nodeContent.skipCount;
+	}
+};
+var $author$project$DomainModel$leafFromIndex = F2(
+	function (index, treeNode) {
+		leafFromIndex:
+		while (true) {
+			if (treeNode.$ === 'Leaf') {
+				var info = treeNode.a;
+				return treeNode;
+			} else {
+				var info = treeNode.a;
+				if (_Utils_cmp(
+					index,
+					$author$project$DomainModel$skipCount(info.left)) < 0) {
+					var $temp$index = index,
+						$temp$treeNode = info.left;
+					index = $temp$index;
+					treeNode = $temp$treeNode;
+					continue leafFromIndex;
+				} else {
+					var $temp$index = index - $author$project$DomainModel$skipCount(info.left),
+						$temp$treeNode = info.right;
+					index = $temp$index;
+					treeNode = $temp$treeNode;
+					continue leafFromIndex;
+				}
+			}
+		}
+	});
+var $author$project$DomainModel$startPoint = function (treeNode) {
+	if (treeNode.$ === 'Leaf') {
+		var leaf = treeNode.a;
+		return leaf.startPoint;
+	} else {
+		var node = treeNode.a;
+		return node.nodeContent.startPoint;
+	}
+};
+var $author$project$ViewThirdPerson$initialiseView = F2(
+	function (current, treeNode) {
+		return {
+			cameraAzimuth: $ianmackenzie$elm_geometry$Direction2d$x,
+			cameraDistance: $ianmackenzie$elm_units$Length$kilometers(1000),
+			cameraElevation: $ianmackenzie$elm_units$Angle$degrees(0),
+			defaultZoomLevel: 10.0,
+			dragAction: $author$project$ViewContextThirdPerson$DragNone,
+			fieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
+			focalPoint: $author$project$DomainModel$startPoint(
+				A2($author$project$DomainModel$leafFromIndex, current, treeNode)),
+			followSelectedPoint: true,
+			orbiting: $elm$core$Maybe$Nothing,
+			waitingForClickDelay: false,
+			zoomLevel: 10.0
+		};
+	});
+var $elm$core$Platform$Cmd$map = _Platform_map;
+var $elm$file$File$name = _File_name;
+var $elm$regex$Regex$Match = F4(
+	function (match, index, number, submatches) {
+		return {index: index, match: match, number: number, submatches: submatches};
+	});
+var $elm$regex$Regex$fromStringWith = _Regex_fromStringWith;
+var $elm$regex$Regex$fromString = function (string) {
+	return A2(
+		$elm$regex$Regex$fromStringWith,
+		{caseInsensitive: false, multiline: false},
+		string);
+};
+var $elm$regex$Regex$never = _Regex_never;
+var $author$project$GpxParser$asRegex = function (t) {
+	return A2(
+		$elm$core$Maybe$withDefault,
+		$elm$regex$Regex$never,
+		$elm$regex$Regex$fromString(t));
+};
+var $elm$core$List$maybeCons = F3(
+	function (f, mx, xs) {
+		var _v0 = f(mx);
+		if (_v0.$ === 'Just') {
+			var x = _v0.a;
+			return A2($elm$core$List$cons, x, xs);
+		} else {
+			return xs;
+		}
+	});
+var $elm$core$List$filterMap = F2(
+	function (f, xs) {
+		return A3(
+			$elm$core$List$foldr,
+			$elm$core$List$maybeCons(f),
+			_List_Nil,
+			xs);
+	});
+var $elm$regex$Regex$find = _Regex_findAtMost(_Regex_infinity);
+var $elm$core$Basics$cos = _Basics_cos;
 var $elm$core$Basics$sin = _Basics_sin;
 var $ianmackenzie$elm_geometry$Direction2d$fromAngle = function (_v0) {
 	var angle = _v0.a;
@@ -9435,6 +9609,137 @@ var $ianmackenzie$elm_geometry$Direction2d$fromAngle = function (_v0) {
 			y: $elm$core$Basics$sin(angle)
 		});
 };
+var $author$project$Spherical$meanRadius = 6371000;
+var $elm$core$String$toFloat = _String_toFloat;
+var $author$project$GpxParser$parseGPXPoints = function (xml) {
+	var value = function (x) {
+		var _v12 = x.submatches;
+		if (_v12.b && (_v12.a.$ === 'Just')) {
+			var val = _v12.a.a;
+			return $elm$core$String$toFloat(val);
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	};
+	var trkpts = A2(
+		$elm$core$List$map,
+		function ($) {
+			return $.match;
+		},
+		A2(
+			$elm$regex$Regex$find,
+			$author$project$GpxParser$asRegex('<trkpt((.|\\n|\\r)*?)trkpt>'),
+			xml));
+	var matches = function (xs) {
+		return A2($elm$core$List$map, value, xs);
+	};
+	var longitude = function (trkpt) {
+		return matches(
+			A2(
+				$elm$regex$Regex$find,
+				$author$project$GpxParser$asRegex('lon=\\\"([\\d\\.-]*)\\\"'),
+				trkpt));
+	};
+	var latitude = function (trkpt) {
+		return matches(
+			A2(
+				$elm$regex$Regex$find,
+				$author$project$GpxParser$asRegex('lat=\\\"([\\d\\.-]*)\\\"'),
+				trkpt));
+	};
+	var elevation = function (trkpt) {
+		return matches(
+			A2(
+				$elm$regex$Regex$find,
+				$author$project$GpxParser$asRegex('<ele>([\\d\\.-]*)<\\/ele>'),
+				trkpt));
+	};
+	var trackPoint = function (trkpt) {
+		var _v6 = _Utils_Tuple3(
+			latitude(trkpt),
+			longitude(trkpt),
+			elevation(trkpt));
+		if (((_v6.a.b && (_v6.a.a.$ === 'Just')) && _v6.b.b) && (_v6.b.a.$ === 'Just')) {
+			if (_v6.c.b && (_v6.c.a.$ === 'Just')) {
+				var _v7 = _v6.a;
+				var lat = _v7.a.a;
+				var _v8 = _v6.b;
+				var lon = _v8.a.a;
+				var _v9 = _v6.c;
+				var ele = _v9.a.a;
+				return $elm$core$Maybe$Just(
+					{
+						altitude: $ianmackenzie$elm_units$Length$meters(ele),
+						latitude: $ianmackenzie$elm_units$Angle$degrees(lat),
+						longitude: $ianmackenzie$elm_units$Angle$degrees(lon)
+					});
+			} else {
+				var _v10 = _v6.a;
+				var lat = _v10.a.a;
+				var _v11 = _v6.b;
+				var lon = _v11.a.a;
+				return $elm$core$Maybe$Just(
+					{
+						altitude: $ianmackenzie$elm_units$Quantity$zero,
+						latitude: $ianmackenzie$elm_units$Angle$degrees(lat),
+						longitude: $ianmackenzie$elm_units$Angle$degrees(lon)
+					});
+			}
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	};
+	var earthVector = function (trkpt) {
+		var _v0 = _Utils_Tuple3(
+			latitude(trkpt),
+			longitude(trkpt),
+			elevation(trkpt));
+		if (((_v0.a.b && (_v0.a.a.$ === 'Just')) && _v0.b.b) && (_v0.b.a.$ === 'Just')) {
+			if (_v0.c.b && (_v0.c.a.$ === 'Just')) {
+				var _v1 = _v0.a;
+				var lat = _v1.a.a;
+				var _v2 = _v0.b;
+				var lon = _v2.a.a;
+				var _v3 = _v0.c;
+				var alt = _v3.a.a;
+				return $elm$core$Maybe$Just(
+					A3(
+						$author$project$DomainModel$GPXSource,
+						$ianmackenzie$elm_geometry$Direction2d$fromAngle(
+							$ianmackenzie$elm_units$Angle$degrees(lon)),
+						$ianmackenzie$elm_units$Angle$degrees(lat),
+						$ianmackenzie$elm_units$Length$meters(alt + $author$project$Spherical$meanRadius)));
+			} else {
+				var _v4 = _v0.a;
+				var lat = _v4.a.a;
+				var _v5 = _v0.b;
+				var lon = _v5.a.a;
+				return $elm$core$Maybe$Just(
+					A3(
+						$author$project$DomainModel$GPXSource,
+						$ianmackenzie$elm_geometry$Direction2d$fromAngle(
+							$ianmackenzie$elm_units$Angle$degrees(lon)),
+						$ianmackenzie$elm_units$Angle$degrees(lat),
+						$ianmackenzie$elm_units$Length$meters($author$project$Spherical$meanRadius)));
+			}
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	};
+	return A2(
+		$elm$core$List$filterMap,
+		$elm$core$Basics$identity,
+		A2($elm$core$List$map, earthVector, trkpts));
+};
+var $author$project$MyIP$processIpInfo = function (response) {
+	if (response.$ === 'Ok') {
+		var ipInfo = response.a;
+		return $elm$core$Maybe$Just(ipInfo);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$Msg$ClearMapClickDebounce = {$: 'ClearMapClickDebounce'};
 var $ianmackenzie$elm_units$Angle$inRadians = function (_v0) {
 	var numRadians = _v0.a;
 	return numRadians;
@@ -9445,9 +9750,6 @@ var $ianmackenzie$elm_units$Angle$inDegrees = function (angle) {
 var $ianmackenzie$elm_units$Length$inMeters = function (_v0) {
 	var numMeters = _v0.a;
 	return numMeters;
-};
-var $ianmackenzie$elm_units$Length$meters = function (numMeters) {
-	return $ianmackenzie$elm_units$Quantity$Quantity(numMeters);
 };
 var $author$project$Spherical$metresPerDegree = 78846.81;
 var $elm$core$Basics$atan2 = _Basics_atan2;
@@ -9495,57 +9797,7 @@ var $author$project$DomainModel$gpxFromPointWithReference = F2(
 			$ianmackenzie$elm_units$Angle$degrees(latitude),
 			$ianmackenzie$elm_units$Length$meters(altitude));
 	});
-var $author$project$DomainModel$skipCount = function (treeNode) {
-	if (treeNode.$ === 'Leaf') {
-		var leaf = treeNode.a;
-		return 1;
-	} else {
-		var node = treeNode.a;
-		return node.nodeContent.skipCount;
-	}
-};
-var $author$project$DomainModel$leafFromIndex = F2(
-	function (index, treeNode) {
-		leafFromIndex:
-		while (true) {
-			if (treeNode.$ === 'Leaf') {
-				var info = treeNode.a;
-				return treeNode;
-			} else {
-				var info = treeNode.a;
-				if (_Utils_cmp(
-					index,
-					$author$project$DomainModel$skipCount(info.left)) < 0) {
-					var $temp$index = index,
-						$temp$treeNode = info.left;
-					index = $temp$index;
-					treeNode = $temp$treeNode;
-					continue leafFromIndex;
-				} else {
-					var $temp$index = index - $author$project$DomainModel$skipCount(info.left),
-						$temp$treeNode = info.right;
-					index = $temp$index;
-					treeNode = $temp$treeNode;
-					continue leafFromIndex;
-				}
-			}
-		}
-	});
-var $author$project$MapboxKey$mapboxKey = 'pk.eyJ1IjoicGV0ZXJqYW1lc3dhcmQiLCJhIjoiY2tpdWswb3dsMm02bDMzcDMyNGw1bmh5aSJ9.Fk3ibin0PpeEGXlGsctP1g';
 var $elm$json$Json$Encode$null = _Json_encodeNull;
-var $elm$json$Json$Encode$object = function (pairs) {
-	return _Json_wrap(
-		A3(
-			$elm$core$List$foldl,
-			F2(
-				function (_v0, obj) {
-					var k = _v0.a;
-					var v = _v0.b;
-					return A3(_Json_addField, k, v, obj);
-				}),
-			_Json_emptyObject(_Utils_Tuple0),
-			pairs));
-};
 var $author$project$DomainModel$endPoint = function (treeNode) {
 	if (treeNode.$ === 'Leaf') {
 		var leaf = treeNode.a;
@@ -9614,9 +9866,6 @@ var $ianmackenzie$elm_geometry$BoundingBox3d$intersects = F2(
 			$ianmackenzie$elm_geometry$BoundingBox3d$minZ(other),
 			$ianmackenzie$elm_geometry$BoundingBox3d$maxZ(boundingBox))))));
 	});
-var $ianmackenzie$elm_units$Length$kilometers = function (numKilometers) {
-	return $ianmackenzie$elm_units$Length$meters(1000 * numKilometers);
-};
 var $elm$json$Json$Encode$list = F2(
 	function (func, entries) {
 		return _Json_wrap(
@@ -9638,16 +9887,6 @@ var $author$project$DomainModel$lngLatPair = function (_v0) {
 				$ianmackenzie$elm_units$Angle$inDegrees(latitude)
 			]));
 };
-var $author$project$DomainModel$startPoint = function (treeNode) {
-	if (treeNode.$ === 'Leaf') {
-		var leaf = treeNode.a;
-		return leaf.startPoint;
-	} else {
-		var node = treeNode.a;
-		return node.nodeContent.startPoint;
-	}
-};
-var $elm$json$Json$Encode$string = _Json_wrap;
 var $ianmackenzie$elm_geometry$Geometry$Types$BoundingBox3d = function (a) {
 	return {$: 'BoundingBox3d', a: a};
 };
@@ -9851,282 +10090,6 @@ var $author$project$PortController$addTrackToMap = function (model) {
 		return $elm$core$Platform$Cmd$none;
 	}
 };
-var $author$project$PortController$centreMapOnCurrent = function (model) {
-	var _v0 = model.trackTree;
-	if (_v0.$ === 'Just') {
-		var tree = _v0.a;
-		var _v1 = A2(
-			$author$project$DomainModel$gpxFromPointWithReference,
-			model.referenceLonLat,
-			$author$project$DomainModel$startPoint(
-				A2($author$project$DomainModel$leafFromIndex, model.currentPosition, tree)));
-		var longitude = _v1.longitude;
-		var latitude = _v1.latitude;
-		var altitude = _v1.altitude;
-		return $author$project$PortController$commandPort(
-			$elm$json$Json$Encode$object(
-				_List_fromArray(
-					[
-						_Utils_Tuple2(
-						'Cmd',
-						$elm$json$Json$Encode$string('Centre')),
-						_Utils_Tuple2(
-						'token',
-						$elm$json$Json$Encode$string($author$project$MapboxKey$mapboxKey)),
-						_Utils_Tuple2(
-						'lon',
-						$elm$json$Json$Encode$float(
-							$ianmackenzie$elm_units$Angle$inDegrees(
-								$ianmackenzie$elm_geometry$Direction2d$toAngle(longitude)))),
-						_Utils_Tuple2(
-						'lat',
-						$elm$json$Json$Encode$float(
-							$ianmackenzie$elm_units$Angle$inDegrees(latitude)))
-					])));
-	} else {
-		return $elm$core$Platform$Cmd$none;
-	}
-};
-var $author$project$PortController$createMap = function (info) {
-	return $author$project$PortController$commandPort(
-		$elm$json$Json$Encode$object(
-			_List_fromArray(
-				[
-					_Utils_Tuple2(
-					'Cmd',
-					$elm$json$Json$Encode$string('Init')),
-					_Utils_Tuple2(
-					'token',
-					$elm$json$Json$Encode$string($author$project$MapboxKey$mapboxKey)),
-					_Utils_Tuple2(
-					'lon',
-					$elm$json$Json$Encode$float(info.centreLon)),
-					_Utils_Tuple2(
-					'lat',
-					$elm$json$Json$Encode$float(info.centreLat)),
-					_Utils_Tuple2(
-					'zoom',
-					$elm$json$Json$Encode$float(info.mapZoom))
-				])));
-};
-var $elm$file$File$Select$file = F2(
-	function (mimes, toMsg) {
-		return A2(
-			$elm$core$Task$perform,
-			toMsg,
-			_File_uploadOne(mimes));
-	});
-var $author$project$StravaAuth$getStravaToken = function (model) {
-	var _v0 = model.flow;
-	switch (_v0.$) {
-		case 'Done':
-			var info = _v0.a;
-			var token = _v0.b;
-			return $elm$core$Maybe$Just(token);
-		case 'Authenticated':
-			var token = _v0.a;
-			return $elm$core$Maybe$Just(token);
-		default:
-			return $elm$core$Maybe$Nothing;
-	}
-};
-var $elm$core$List$head = function (list) {
-	if (list.b) {
-		var x = list.a;
-		var xs = list.b;
-		return $elm$core$Maybe$Just(x);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
-};
-var $author$project$ViewContextThirdPerson$DragNone = {$: 'DragNone'};
-var $author$project$ViewThirdPerson$initialiseView = F2(
-	function (current, treeNode) {
-		return {
-			cameraAzimuth: $ianmackenzie$elm_geometry$Direction2d$x,
-			cameraDistance: $ianmackenzie$elm_units$Length$kilometers(1000),
-			cameraElevation: $ianmackenzie$elm_units$Angle$degrees(0),
-			defaultZoomLevel: 10.0,
-			dragAction: $author$project$ViewContextThirdPerson$DragNone,
-			fieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
-			focalPoint: $author$project$DomainModel$startPoint(
-				A2($author$project$DomainModel$leafFromIndex, current, treeNode)),
-			followSelectedPoint: true,
-			orbiting: $elm$core$Maybe$Nothing,
-			waitingForClickDelay: false,
-			zoomLevel: 10.0
-		};
-	});
-var $elm$core$Platform$Cmd$map = _Platform_map;
-var $elm$file$File$name = _File_name;
-var $elm$regex$Regex$Match = F4(
-	function (match, index, number, submatches) {
-		return {index: index, match: match, number: number, submatches: submatches};
-	});
-var $elm$regex$Regex$fromStringWith = _Regex_fromStringWith;
-var $elm$regex$Regex$fromString = function (string) {
-	return A2(
-		$elm$regex$Regex$fromStringWith,
-		{caseInsensitive: false, multiline: false},
-		string);
-};
-var $elm$regex$Regex$never = _Regex_never;
-var $author$project$GpxParser$asRegex = function (t) {
-	return A2(
-		$elm$core$Maybe$withDefault,
-		$elm$regex$Regex$never,
-		$elm$regex$Regex$fromString(t));
-};
-var $elm$core$List$maybeCons = F3(
-	function (f, mx, xs) {
-		var _v0 = f(mx);
-		if (_v0.$ === 'Just') {
-			var x = _v0.a;
-			return A2($elm$core$List$cons, x, xs);
-		} else {
-			return xs;
-		}
-	});
-var $elm$core$List$filterMap = F2(
-	function (f, xs) {
-		return A3(
-			$elm$core$List$foldr,
-			$elm$core$List$maybeCons(f),
-			_List_Nil,
-			xs);
-	});
-var $elm$regex$Regex$find = _Regex_findAtMost(_Regex_infinity);
-var $author$project$Spherical$meanRadius = 6371000;
-var $elm$core$String$toFloat = _String_toFloat;
-var $author$project$GpxParser$parseGPXPoints = function (xml) {
-	var value = function (x) {
-		var _v12 = x.submatches;
-		if (_v12.b && (_v12.a.$ === 'Just')) {
-			var val = _v12.a.a;
-			return $elm$core$String$toFloat(val);
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	};
-	var trkpts = A2(
-		$elm$core$List$map,
-		function ($) {
-			return $.match;
-		},
-		A2(
-			$elm$regex$Regex$find,
-			$author$project$GpxParser$asRegex('<trkpt((.|\\n|\\r)*?)trkpt>'),
-			xml));
-	var matches = function (xs) {
-		return A2($elm$core$List$map, value, xs);
-	};
-	var longitude = function (trkpt) {
-		return matches(
-			A2(
-				$elm$regex$Regex$find,
-				$author$project$GpxParser$asRegex('lon=\\\"([\\d\\.-]*)\\\"'),
-				trkpt));
-	};
-	var latitude = function (trkpt) {
-		return matches(
-			A2(
-				$elm$regex$Regex$find,
-				$author$project$GpxParser$asRegex('lat=\\\"([\\d\\.-]*)\\\"'),
-				trkpt));
-	};
-	var elevation = function (trkpt) {
-		return matches(
-			A2(
-				$elm$regex$Regex$find,
-				$author$project$GpxParser$asRegex('<ele>([\\d\\.-]*)<\\/ele>'),
-				trkpt));
-	};
-	var trackPoint = function (trkpt) {
-		var _v6 = _Utils_Tuple3(
-			latitude(trkpt),
-			longitude(trkpt),
-			elevation(trkpt));
-		if (((_v6.a.b && (_v6.a.a.$ === 'Just')) && _v6.b.b) && (_v6.b.a.$ === 'Just')) {
-			if (_v6.c.b && (_v6.c.a.$ === 'Just')) {
-				var _v7 = _v6.a;
-				var lat = _v7.a.a;
-				var _v8 = _v6.b;
-				var lon = _v8.a.a;
-				var _v9 = _v6.c;
-				var ele = _v9.a.a;
-				return $elm$core$Maybe$Just(
-					{
-						altitude: $ianmackenzie$elm_units$Length$meters(ele),
-						latitude: $ianmackenzie$elm_units$Angle$degrees(lat),
-						longitude: $ianmackenzie$elm_units$Angle$degrees(lon)
-					});
-			} else {
-				var _v10 = _v6.a;
-				var lat = _v10.a.a;
-				var _v11 = _v6.b;
-				var lon = _v11.a.a;
-				return $elm$core$Maybe$Just(
-					{
-						altitude: $ianmackenzie$elm_units$Quantity$zero,
-						latitude: $ianmackenzie$elm_units$Angle$degrees(lat),
-						longitude: $ianmackenzie$elm_units$Angle$degrees(lon)
-					});
-			}
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	};
-	var earthVector = function (trkpt) {
-		var _v0 = _Utils_Tuple3(
-			latitude(trkpt),
-			longitude(trkpt),
-			elevation(trkpt));
-		if (((_v0.a.b && (_v0.a.a.$ === 'Just')) && _v0.b.b) && (_v0.b.a.$ === 'Just')) {
-			if (_v0.c.b && (_v0.c.a.$ === 'Just')) {
-				var _v1 = _v0.a;
-				var lat = _v1.a.a;
-				var _v2 = _v0.b;
-				var lon = _v2.a.a;
-				var _v3 = _v0.c;
-				var alt = _v3.a.a;
-				return $elm$core$Maybe$Just(
-					A3(
-						$author$project$DomainModel$GPXSource,
-						$ianmackenzie$elm_geometry$Direction2d$fromAngle(
-							$ianmackenzie$elm_units$Angle$degrees(lon)),
-						$ianmackenzie$elm_units$Angle$degrees(lat),
-						$ianmackenzie$elm_units$Length$meters(alt + $author$project$Spherical$meanRadius)));
-			} else {
-				var _v4 = _v0.a;
-				var lat = _v4.a.a;
-				var _v5 = _v0.b;
-				var lon = _v5.a.a;
-				return $elm$core$Maybe$Just(
-					A3(
-						$author$project$DomainModel$GPXSource,
-						$ianmackenzie$elm_geometry$Direction2d$fromAngle(
-							$ianmackenzie$elm_units$Angle$degrees(lon)),
-						$ianmackenzie$elm_units$Angle$degrees(lat),
-						$ianmackenzie$elm_units$Length$meters($author$project$Spherical$meanRadius)));
-			}
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	};
-	return A2(
-		$elm$core$List$filterMap,
-		$elm$core$Basics$identity,
-		A2($elm$core$List$map, earthVector, trkpts));
-};
-var $author$project$MyIP$processIpInfo = function (response) {
-	if (response.$ === 'Ok') {
-		var ipInfo = response.a;
-		return $elm$core$Maybe$Just(ipInfo);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
-};
-var $author$project$Msg$ClearMapClickDebounce = {$: 'ClearMapClickDebounce'};
 var $elm$json$Json$Decode$decodeValue = _Json_run;
 var $elm$json$Json$Decode$field = _Json_decodeField;
 var $elm$json$Json$Decode$float = _Json_decodeFloat;
@@ -10388,11 +10351,342 @@ var $author$project$PortController$refreshMap = $author$project$PortController$c
 				'token',
 				$elm$json$Json$Encode$string($author$project$MapboxKey$mapboxKey))
 			])));
-var $avh4$elm_color$Color$RgbaSpace = F4(
-	function (a, b, c, d) {
-		return {$: 'RgbaSpace', a: a, b: b, c: c, d: d};
+var $author$project$MyIP$apiRoot = 'http://ip-api.com';
+var $elm$url$Url$Builder$toQueryPair = function (_v0) {
+	var key = _v0.a;
+	var value = _v0.b;
+	return key + ('=' + value);
+};
+var $elm$url$Url$Builder$toQuery = function (parameters) {
+	if (!parameters.b) {
+		return '';
+	} else {
+		return '?' + A2(
+			$elm$core$String$join,
+			'&',
+			A2($elm$core$List$map, $elm$url$Url$Builder$toQueryPair, parameters));
+	}
+};
+var $elm$url$Url$Builder$crossOrigin = F3(
+	function (prePath, pathSegments, parameters) {
+		return prePath + ('/' + (A2($elm$core$String$join, '/', pathSegments) + $elm$url$Url$Builder$toQuery(parameters)));
 	});
-var $avh4$elm_color$Color$black = A4($avh4$elm_color$Color$RgbaSpace, 0 / 255, 0 / 255, 0 / 255, 1.0);
+var $elm$http$Http$BadStatus_ = F2(
+	function (a, b) {
+		return {$: 'BadStatus_', a: a, b: b};
+	});
+var $elm$http$Http$BadUrl_ = function (a) {
+	return {$: 'BadUrl_', a: a};
+};
+var $elm$http$Http$GoodStatus_ = F2(
+	function (a, b) {
+		return {$: 'GoodStatus_', a: a, b: b};
+	});
+var $elm$http$Http$NetworkError_ = {$: 'NetworkError_'};
+var $elm$http$Http$Receiving = function (a) {
+	return {$: 'Receiving', a: a};
+};
+var $elm$http$Http$Sending = function (a) {
+	return {$: 'Sending', a: a};
+};
+var $elm$http$Http$Timeout_ = {$: 'Timeout_'};
+var $elm$core$Maybe$isJust = function (maybe) {
+	if (maybe.$ === 'Just') {
+		return true;
+	} else {
+		return false;
+	}
+};
+var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
+var $elm$http$Http$emptyBody = _Http_emptyBody;
+var $elm$json$Json$Decode$decodeString = _Json_runOnString;
+var $elm$http$Http$expectStringResponse = F2(
+	function (toMsg, toResult) {
+		return A3(
+			_Http_expect,
+			'',
+			$elm$core$Basics$identity,
+			A2($elm$core$Basics$composeR, toResult, toMsg));
+	});
+var $elm$core$Result$mapError = F2(
+	function (f, result) {
+		if (result.$ === 'Ok') {
+			var v = result.a;
+			return $elm$core$Result$Ok(v);
+		} else {
+			var e = result.a;
+			return $elm$core$Result$Err(
+				f(e));
+		}
+	});
+var $elm$http$Http$BadBody = function (a) {
+	return {$: 'BadBody', a: a};
+};
+var $elm$http$Http$BadStatus = function (a) {
+	return {$: 'BadStatus', a: a};
+};
+var $elm$http$Http$BadUrl = function (a) {
+	return {$: 'BadUrl', a: a};
+};
+var $elm$http$Http$NetworkError = {$: 'NetworkError'};
+var $elm$http$Http$Timeout = {$: 'Timeout'};
+var $elm$http$Http$resolve = F2(
+	function (toResult, response) {
+		switch (response.$) {
+			case 'BadUrl_':
+				var url = response.a;
+				return $elm$core$Result$Err(
+					$elm$http$Http$BadUrl(url));
+			case 'Timeout_':
+				return $elm$core$Result$Err($elm$http$Http$Timeout);
+			case 'NetworkError_':
+				return $elm$core$Result$Err($elm$http$Http$NetworkError);
+			case 'BadStatus_':
+				var metadata = response.a;
+				return $elm$core$Result$Err(
+					$elm$http$Http$BadStatus(metadata.statusCode));
+			default:
+				var body = response.b;
+				return A2(
+					$elm$core$Result$mapError,
+					$elm$http$Http$BadBody,
+					toResult(body));
+		}
+	});
+var $elm$http$Http$expectJson = F2(
+	function (toMsg, decoder) {
+		return A2(
+			$elm$http$Http$expectStringResponse,
+			toMsg,
+			$elm$http$Http$resolve(
+				function (string) {
+					return A2(
+						$elm$core$Result$mapError,
+						$elm$json$Json$Decode$errorToString,
+						A2($elm$json$Json$Decode$decodeString, decoder, string));
+				}));
+	});
+var $author$project$GeoCodeDecoders$IpInfo = F7(
+	function (ip, country, region, city, zip, latitude, longitude) {
+		return {city: city, country: country, ip: ip, latitude: latitude, longitude: longitude, region: region, zip: zip};
+	});
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
+var $elm$json$Json$Decode$map7 = _Json_map7;
+var $author$project$GeoCodeDecoders$ipInfoDecoder = A8(
+	$elm$json$Json$Decode$map7,
+	$author$project$GeoCodeDecoders$IpInfo,
+	A2(
+		$elm$json$Json$Decode$at,
+		_List_fromArray(
+			['query']),
+		$elm$json$Json$Decode$string),
+	A2(
+		$elm$json$Json$Decode$at,
+		_List_fromArray(
+			['country']),
+		$elm$json$Json$Decode$string),
+	A2(
+		$elm$json$Json$Decode$at,
+		_List_fromArray(
+			['region']),
+		$elm$json$Json$Decode$string),
+	A2(
+		$elm$json$Json$Decode$at,
+		_List_fromArray(
+			['city']),
+		$elm$json$Json$Decode$string),
+	A2(
+		$elm$json$Json$Decode$at,
+		_List_fromArray(
+			['zip']),
+		$elm$json$Json$Decode$string),
+	A2(
+		$elm$json$Json$Decode$at,
+		_List_fromArray(
+			['lat']),
+		$elm$json$Json$Decode$float),
+	A2(
+		$elm$json$Json$Decode$at,
+		_List_fromArray(
+			['lon']),
+		$elm$json$Json$Decode$float));
+var $elm$http$Http$Request = function (a) {
+	return {$: 'Request', a: a};
+};
+var $elm$http$Http$State = F2(
+	function (reqs, subs) {
+		return {reqs: reqs, subs: subs};
+	});
+var $elm$http$Http$init = $elm$core$Task$succeed(
+	A2($elm$http$Http$State, $elm$core$Dict$empty, _List_Nil));
+var $elm$core$Process$kill = _Scheduler_kill;
+var $elm$core$Process$spawn = _Scheduler_spawn;
+var $elm$http$Http$updateReqs = F3(
+	function (router, cmds, reqs) {
+		updateReqs:
+		while (true) {
+			if (!cmds.b) {
+				return $elm$core$Task$succeed(reqs);
+			} else {
+				var cmd = cmds.a;
+				var otherCmds = cmds.b;
+				if (cmd.$ === 'Cancel') {
+					var tracker = cmd.a;
+					var _v2 = A2($elm$core$Dict$get, tracker, reqs);
+					if (_v2.$ === 'Nothing') {
+						var $temp$router = router,
+							$temp$cmds = otherCmds,
+							$temp$reqs = reqs;
+						router = $temp$router;
+						cmds = $temp$cmds;
+						reqs = $temp$reqs;
+						continue updateReqs;
+					} else {
+						var pid = _v2.a;
+						return A2(
+							$elm$core$Task$andThen,
+							function (_v3) {
+								return A3(
+									$elm$http$Http$updateReqs,
+									router,
+									otherCmds,
+									A2($elm$core$Dict$remove, tracker, reqs));
+							},
+							$elm$core$Process$kill(pid));
+					}
+				} else {
+					var req = cmd.a;
+					return A2(
+						$elm$core$Task$andThen,
+						function (pid) {
+							var _v4 = req.tracker;
+							if (_v4.$ === 'Nothing') {
+								return A3($elm$http$Http$updateReqs, router, otherCmds, reqs);
+							} else {
+								var tracker = _v4.a;
+								return A3(
+									$elm$http$Http$updateReqs,
+									router,
+									otherCmds,
+									A3($elm$core$Dict$insert, tracker, pid, reqs));
+							}
+						},
+						$elm$core$Process$spawn(
+							A3(
+								_Http_toTask,
+								router,
+								$elm$core$Platform$sendToApp(router),
+								req)));
+				}
+			}
+		}
+	});
+var $elm$http$Http$onEffects = F4(
+	function (router, cmds, subs, state) {
+		return A2(
+			$elm$core$Task$andThen,
+			function (reqs) {
+				return $elm$core$Task$succeed(
+					A2($elm$http$Http$State, reqs, subs));
+			},
+			A3($elm$http$Http$updateReqs, router, cmds, state.reqs));
+	});
+var $elm$http$Http$maybeSend = F4(
+	function (router, desiredTracker, progress, _v0) {
+		var actualTracker = _v0.a;
+		var toMsg = _v0.b;
+		return _Utils_eq(desiredTracker, actualTracker) ? $elm$core$Maybe$Just(
+			A2(
+				$elm$core$Platform$sendToApp,
+				router,
+				toMsg(progress))) : $elm$core$Maybe$Nothing;
+	});
+var $elm$http$Http$onSelfMsg = F3(
+	function (router, _v0, state) {
+		var tracker = _v0.a;
+		var progress = _v0.b;
+		return A2(
+			$elm$core$Task$andThen,
+			function (_v1) {
+				return $elm$core$Task$succeed(state);
+			},
+			$elm$core$Task$sequence(
+				A2(
+					$elm$core$List$filterMap,
+					A3($elm$http$Http$maybeSend, router, tracker, progress),
+					state.subs)));
+	});
+var $elm$http$Http$Cancel = function (a) {
+	return {$: 'Cancel', a: a};
+};
+var $elm$http$Http$cmdMap = F2(
+	function (func, cmd) {
+		if (cmd.$ === 'Cancel') {
+			var tracker = cmd.a;
+			return $elm$http$Http$Cancel(tracker);
+		} else {
+			var r = cmd.a;
+			return $elm$http$Http$Request(
+				{
+					allowCookiesFromOtherDomains: r.allowCookiesFromOtherDomains,
+					body: r.body,
+					expect: A2(_Http_mapExpect, func, r.expect),
+					headers: r.headers,
+					method: r.method,
+					timeout: r.timeout,
+					tracker: r.tracker,
+					url: r.url
+				});
+		}
+	});
+var $elm$http$Http$MySub = F2(
+	function (a, b) {
+		return {$: 'MySub', a: a, b: b};
+	});
+var $elm$http$Http$subMap = F2(
+	function (func, _v0) {
+		var tracker = _v0.a;
+		var toMsg = _v0.b;
+		return A2(
+			$elm$http$Http$MySub,
+			tracker,
+			A2($elm$core$Basics$composeR, toMsg, func));
+	});
+_Platform_effectManagers['Http'] = _Platform_createManager($elm$http$Http$init, $elm$http$Http$onEffects, $elm$http$Http$onSelfMsg, $elm$http$Http$cmdMap, $elm$http$Http$subMap);
+var $elm$http$Http$command = _Platform_leaf('Http');
+var $elm$http$Http$subscription = _Platform_leaf('Http');
+var $elm$http$Http$request = function (r) {
+	return $elm$http$Http$command(
+		$elm$http$Http$Request(
+			{allowCookiesFromOtherDomains: false, body: r.body, expect: r.expect, headers: r.headers, method: r.method, timeout: r.timeout, tracker: r.tracker, url: r.url}));
+};
+var $author$project$MyIP$requestIpInformation = function (msg) {
+	return $elm$http$Http$request(
+		{
+			body: $elm$http$Http$emptyBody,
+			expect: A2($elm$http$Http$expectJson, msg, $author$project$GeoCodeDecoders$ipInfoDecoder),
+			headers: _List_Nil,
+			method: 'GET',
+			timeout: $elm$core$Maybe$Nothing,
+			tracker: $elm$core$Maybe$Nothing,
+			url: A3(
+				$elm$url$Url$Builder$crossOrigin,
+				$author$project$MyIP$apiRoot,
+				_List_fromArray(
+					['json']),
+				_List_Nil)
+		});
+};
+var $elm$file$File$toString = _File_toString;
+var $author$project$DomainModel$Leaf = function (a) {
+	return {$: 'Leaf', a: a};
+};
+var $author$project$DomainModel$Node = function (a) {
+	return {$: 'Node', a: a};
+};
 var $author$project$DomainModel$boundingBox = function (treeNode) {
 	if (treeNode.$ === 'Leaf') {
 		var leaf = treeNode.a;
@@ -10402,6 +10696,1977 @@ var $author$project$DomainModel$boundingBox = function (treeNode) {
 		return node.nodeContent.boundingBox;
 	}
 };
+var $ianmackenzie$elm_units$Quantity$interpolateFrom = F3(
+	function (_v0, _v1, parameter) {
+		var start = _v0.a;
+		var end = _v1.a;
+		return (parameter <= 0.5) ? $ianmackenzie$elm_units$Quantity$Quantity(start + (parameter * (end - start))) : $ianmackenzie$elm_units$Quantity$Quantity(end + ((1 - parameter) * (start - end)));
+	});
+var $ianmackenzie$elm_geometry$BoundingBox3d$midX = function (_v0) {
+	var boundingBox = _v0.a;
+	return A3($ianmackenzie$elm_units$Quantity$interpolateFrom, boundingBox.minX, boundingBox.maxX, 0.5);
+};
+var $ianmackenzie$elm_geometry$BoundingBox3d$midY = function (_v0) {
+	var boundingBox = _v0.a;
+	return A3($ianmackenzie$elm_units$Quantity$interpolateFrom, boundingBox.minY, boundingBox.maxY, 0.5);
+};
+var $ianmackenzie$elm_geometry$BoundingBox3d$midZ = function (_v0) {
+	var boundingBox = _v0.a;
+	return A3($ianmackenzie$elm_units$Quantity$interpolateFrom, boundingBox.minZ, boundingBox.maxZ, 0.5);
+};
+var $ianmackenzie$elm_geometry$Geometry$Types$Point3d = function (a) {
+	return {$: 'Point3d', a: a};
+};
+var $ianmackenzie$elm_geometry$Point3d$xyz = F3(
+	function (_v0, _v1, _v2) {
+		var x = _v0.a;
+		var y = _v1.a;
+		var z = _v2.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+			{x: x, y: y, z: z});
+	});
+var $ianmackenzie$elm_geometry$BoundingBox3d$centerPoint = function (boundingBox) {
+	return A3(
+		$ianmackenzie$elm_geometry$Point3d$xyz,
+		$ianmackenzie$elm_geometry$BoundingBox3d$midX(boundingBox),
+		$ianmackenzie$elm_geometry$BoundingBox3d$midY(boundingBox),
+		$ianmackenzie$elm_geometry$BoundingBox3d$midZ(boundingBox));
+};
+var $ianmackenzie$elm_geometry$BoundingBox3d$dimensions = function (boundingBox) {
+	return _Utils_Tuple3(
+		A2(
+			$ianmackenzie$elm_units$Quantity$minus,
+			$ianmackenzie$elm_geometry$BoundingBox3d$minX(boundingBox),
+			$ianmackenzie$elm_geometry$BoundingBox3d$maxX(boundingBox)),
+		A2(
+			$ianmackenzie$elm_units$Quantity$minus,
+			$ianmackenzie$elm_geometry$BoundingBox3d$minY(boundingBox),
+			$ianmackenzie$elm_geometry$BoundingBox3d$maxY(boundingBox)),
+		A2(
+			$ianmackenzie$elm_units$Quantity$minus,
+			$ianmackenzie$elm_geometry$BoundingBox3d$minZ(boundingBox),
+			$ianmackenzie$elm_geometry$BoundingBox3d$maxZ(boundingBox)));
+};
+var $ianmackenzie$elm_units$Quantity$sqrt = function (_v0) {
+	var value = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(
+		$elm$core$Basics$sqrt(value));
+};
+var $ianmackenzie$elm_units$Quantity$squared = function (_v0) {
+	var value = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(value * value);
+};
+var $ianmackenzie$elm_units$Quantity$sum = function (quantities) {
+	return A3($elm$core$List$foldl, $ianmackenzie$elm_units$Quantity$plus, $ianmackenzie$elm_units$Quantity$zero, quantities);
+};
+var $ianmackenzie$elm_geometry$Geometry$Types$Sphere3d = function (a) {
+	return {$: 'Sphere3d', a: a};
+};
+var $ianmackenzie$elm_geometry$Sphere3d$withRadius = F2(
+	function (givenRadius, givenCenterPoint) {
+		return $ianmackenzie$elm_geometry$Geometry$Types$Sphere3d(
+			{
+				centerPoint: givenCenterPoint,
+				radius: $ianmackenzie$elm_units$Quantity$abs(givenRadius)
+			});
+	});
+var $author$project$DomainModel$containingSphere = function (box) {
+	var here = $ianmackenzie$elm_geometry$BoundingBox3d$centerPoint(box);
+	var _v0 = $ianmackenzie$elm_geometry$BoundingBox3d$dimensions(box);
+	var xs = _v0.a;
+	var ys = _v0.b;
+	var zs = _v0.c;
+	var radius = $ianmackenzie$elm_units$Quantity$half(
+		$ianmackenzie$elm_units$Quantity$sqrt(
+			$ianmackenzie$elm_units$Quantity$sum(
+				_List_fromArray(
+					[
+						$ianmackenzie$elm_units$Quantity$squared(xs),
+						$ianmackenzie$elm_units$Quantity$squared(ys),
+						$ianmackenzie$elm_units$Quantity$squared(zs)
+					]))));
+	return A2($ianmackenzie$elm_geometry$Sphere3d$withRadius, radius, here);
+};
+var $ianmackenzie$elm_units$Quantity$max = F2(
+	function (_v0, _v1) {
+		var x = _v0.a;
+		var y = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(
+			A2($elm$core$Basics$max, x, y));
+	});
+var $ianmackenzie$elm_geometry$BoundingBox3d$from = F2(
+	function (firstPoint, secondPoint) {
+		var z2 = $ianmackenzie$elm_geometry$Point3d$zCoordinate(secondPoint);
+		var z1 = $ianmackenzie$elm_geometry$Point3d$zCoordinate(firstPoint);
+		var y2 = $ianmackenzie$elm_geometry$Point3d$yCoordinate(secondPoint);
+		var y1 = $ianmackenzie$elm_geometry$Point3d$yCoordinate(firstPoint);
+		var x2 = $ianmackenzie$elm_geometry$Point3d$xCoordinate(secondPoint);
+		var x1 = $ianmackenzie$elm_geometry$Point3d$xCoordinate(firstPoint);
+		return $ianmackenzie$elm_geometry$Geometry$Types$BoundingBox3d(
+			{
+				maxX: A2($ianmackenzie$elm_units$Quantity$max, x1, x2),
+				maxY: A2($ianmackenzie$elm_units$Quantity$max, y1, y2),
+				maxZ: A2($ianmackenzie$elm_units$Quantity$max, z1, z2),
+				minX: A2($ianmackenzie$elm_units$Quantity$min, x1, x2),
+				minY: A2($ianmackenzie$elm_units$Quantity$min, y1, y2),
+				minZ: A2($ianmackenzie$elm_units$Quantity$min, z1, z2)
+			});
+	});
+var $ianmackenzie$elm_units$Angle$cos = function (_v0) {
+	var angle = _v0.a;
+	return $elm$core$Basics$cos(angle);
+};
+var $author$project$DomainModel$pointFromGpxWithReference = F2(
+	function (reference, gpx) {
+		return A3(
+			$ianmackenzie$elm_geometry$Point3d$xyz,
+			$ianmackenzie$elm_units$Length$meters(
+				$author$project$Spherical$metresPerDegree * $ianmackenzie$elm_units$Angle$inDegrees(
+					A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, reference.longitude, gpx.longitude))),
+			$ianmackenzie$elm_units$Length$meters(
+				$ianmackenzie$elm_units$Angle$cos(reference.latitude) * ($author$project$Spherical$metresPerDegree * $ianmackenzie$elm_units$Angle$inDegrees(
+					A2($ianmackenzie$elm_units$Quantity$minus, reference.latitude, gpx.latitude)))),
+			A2($ianmackenzie$elm_units$Quantity$minus, reference.altitude, gpx.altitude));
+	});
+var $author$project$DomainModel$makeRoadSection = F3(
+	function (reference, earth1, earth2) {
+		var range = $ianmackenzie$elm_units$Length$meters(
+			A2(
+				$author$project$Spherical$range,
+				_Utils_Tuple2(
+					$ianmackenzie$elm_geometry$Direction2d$toAngle(earth1.longitude),
+					earth1.latitude),
+				_Utils_Tuple2(
+					$ianmackenzie$elm_geometry$Direction2d$toAngle(earth2.longitude),
+					earth2.latitude)));
+		var medianLon = A2(
+			$ianmackenzie$elm_geometry$Direction2d$rotateBy,
+			$ianmackenzie$elm_units$Quantity$half(
+				A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, earth1.longitude, earth2.longitude)),
+			earth1.longitude);
+		var local2 = A2($author$project$DomainModel$pointFromGpxWithReference, reference, earth2);
+		var local1 = A2($author$project$DomainModel$pointFromGpxWithReference, reference, earth1);
+		var box = A2($ianmackenzie$elm_geometry$BoundingBox3d$from, local1, local2);
+		return {
+			boundingBox: box,
+			eastwardTurn: A2(
+				$ianmackenzie$elm_units$Quantity$max,
+				$ianmackenzie$elm_units$Quantity$zero,
+				A2(
+					$ianmackenzie$elm_units$Quantity$max,
+					A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, medianLon, earth1.longitude),
+					A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, medianLon, earth2.longitude))),
+			endPoint: local2,
+			medianLongitude: medianLon,
+			skipCount: 1,
+			sourceData: _Utils_Tuple2(earth1, earth2),
+			sphere: $author$project$DomainModel$containingSphere(box),
+			startPoint: local1,
+			trueLength: range,
+			westwardTurn: A2(
+				$ianmackenzie$elm_units$Quantity$min,
+				$ianmackenzie$elm_units$Quantity$zero,
+				A2(
+					$ianmackenzie$elm_units$Quantity$min,
+					A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, medianLon, earth1.longitude),
+					A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, medianLon, earth2.longitude)))
+		};
+	});
+var $author$project$DomainModel$sourceData = function (treeNode) {
+	if (treeNode.$ === 'Leaf') {
+		var leaf = treeNode.a;
+		return leaf.sourceData;
+	} else {
+		var node = treeNode.a;
+		return node.nodeContent.sourceData;
+	}
+};
+var $author$project$DomainModel$trueLength = function (treeNode) {
+	if (treeNode.$ === 'Leaf') {
+		var leaf = treeNode.a;
+		return leaf.trueLength;
+	} else {
+		var node = treeNode.a;
+		return node.nodeContent.trueLength;
+	}
+};
+var $ianmackenzie$elm_geometry$BoundingBox3d$extrema = function (_v0) {
+	var boundingBoxExtrema = _v0.a;
+	return boundingBoxExtrema;
+};
+var $ianmackenzie$elm_geometry$BoundingBox3d$union = F2(
+	function (firstBox, secondBox) {
+		var b2 = $ianmackenzie$elm_geometry$BoundingBox3d$extrema(secondBox);
+		var b1 = $ianmackenzie$elm_geometry$BoundingBox3d$extrema(firstBox);
+		return $ianmackenzie$elm_geometry$Geometry$Types$BoundingBox3d(
+			{
+				maxX: A2($ianmackenzie$elm_units$Quantity$max, b1.maxX, b2.maxX),
+				maxY: A2($ianmackenzie$elm_units$Quantity$max, b1.maxY, b2.maxY),
+				maxZ: A2($ianmackenzie$elm_units$Quantity$max, b1.maxZ, b2.maxZ),
+				minX: A2($ianmackenzie$elm_units$Quantity$min, b1.minX, b2.minX),
+				minY: A2($ianmackenzie$elm_units$Quantity$min, b1.minY, b2.minY),
+				minZ: A2($ianmackenzie$elm_units$Quantity$min, b1.minZ, b2.minZ)
+			});
+	});
+var $author$project$DomainModel$treeFromList = function (track) {
+	var referencePoint = A2(
+		$elm$core$Maybe$withDefault,
+		A3($author$project$DomainModel$GPXSource, $ianmackenzie$elm_geometry$Direction2d$x, $ianmackenzie$elm_units$Quantity$zero, $ianmackenzie$elm_units$Quantity$zero),
+		$elm$core$List$head(track));
+	var numberOfSegments = $elm$core$List$length(track) - 1;
+	var combineInfo = F2(
+		function (info1, info2) {
+			var sharedMedian = A2(
+				$ianmackenzie$elm_geometry$Direction2d$rotateBy,
+				$ianmackenzie$elm_units$Quantity$half(
+					A2(
+						$ianmackenzie$elm_geometry$Direction2d$angleFrom,
+						$author$project$DomainModel$medianLongitude(info1),
+						$author$project$DomainModel$medianLongitude(info2))),
+				$author$project$DomainModel$medianLongitude(info1));
+			var box = A2(
+				$ianmackenzie$elm_geometry$BoundingBox3d$union,
+				$author$project$DomainModel$boundingBox(info1),
+				$author$project$DomainModel$boundingBox(info2));
+			return {
+				boundingBox: box,
+				eastwardTurn: A2(
+					$ianmackenzie$elm_units$Quantity$max,
+					A2(
+						$ianmackenzie$elm_geometry$Direction2d$angleFrom,
+						sharedMedian,
+						A2(
+							$ianmackenzie$elm_geometry$Direction2d$rotateBy,
+							$author$project$DomainModel$eastwardTurn(info1),
+							$author$project$DomainModel$medianLongitude(info1))),
+					A2(
+						$ianmackenzie$elm_geometry$Direction2d$angleFrom,
+						sharedMedian,
+						A2(
+							$ianmackenzie$elm_geometry$Direction2d$rotateBy,
+							$author$project$DomainModel$eastwardTurn(info2),
+							$author$project$DomainModel$medianLongitude(info2)))),
+				endPoint: $author$project$DomainModel$endPoint(info2),
+				medianLongitude: sharedMedian,
+				skipCount: $author$project$DomainModel$skipCount(info1) + $author$project$DomainModel$skipCount(info2),
+				sourceData: _Utils_Tuple2(
+					$author$project$DomainModel$sourceData(info1).a,
+					$author$project$DomainModel$sourceData(info2).b),
+				sphere: $author$project$DomainModel$containingSphere(box),
+				startPoint: $author$project$DomainModel$startPoint(info1),
+				trueLength: A2(
+					$ianmackenzie$elm_units$Quantity$plus,
+					$author$project$DomainModel$trueLength(info1),
+					$author$project$DomainModel$trueLength(info2)),
+				westwardTurn: A2(
+					$ianmackenzie$elm_units$Quantity$min,
+					A2(
+						$ianmackenzie$elm_geometry$Direction2d$angleFrom,
+						sharedMedian,
+						A2(
+							$ianmackenzie$elm_geometry$Direction2d$rotateBy,
+							$author$project$DomainModel$westwardTurn(info1),
+							$author$project$DomainModel$medianLongitude(info1))),
+					A2(
+						$ianmackenzie$elm_geometry$Direction2d$angleFrom,
+						sharedMedian,
+						A2(
+							$ianmackenzie$elm_geometry$Direction2d$rotateBy,
+							$author$project$DomainModel$westwardTurn(info2),
+							$author$project$DomainModel$medianLongitude(info2))))
+			};
+		});
+	var treeBuilder = F2(
+		function (n, pointStream) {
+			var _v0 = _Utils_Tuple2(n < 2, pointStream);
+			if (_v0.a) {
+				if (_v0.b.b && _v0.b.b.b) {
+					var _v1 = _v0.b;
+					var v1 = _v1.a;
+					var _v2 = _v1.b;
+					var v2 = _v2.a;
+					var vvvv = _v2.b;
+					return _Utils_Tuple2(
+						$elm$core$Maybe$Just(
+							$author$project$DomainModel$Leaf(
+								A3($author$project$DomainModel$makeRoadSection, referencePoint, v1, v2))),
+						A2($elm$core$List$cons, v2, vvvv));
+				} else {
+					var anythingElse = _v0.b;
+					return _Utils_Tuple2($elm$core$Maybe$Nothing, anythingElse);
+				}
+			} else {
+				var vvvv = _v0.b;
+				var leftSize = (n / 2) | 0;
+				var rightSize = n - leftSize;
+				var _v3 = A2(treeBuilder, leftSize, vvvv);
+				var left = _v3.a;
+				var remainingAfterLeft = _v3.b;
+				var _v4 = A2(treeBuilder, rightSize, remainingAfterLeft);
+				var right = _v4.a;
+				var remainingAfterRight = _v4.b;
+				var _v5 = _Utils_Tuple2(left, right);
+				if ((_v5.a.$ === 'Just') && (_v5.b.$ === 'Just')) {
+					var leftSubtree = _v5.a.a;
+					var rightSubtree = _v5.b.a;
+					return _Utils_Tuple2(
+						$elm$core$Maybe$Just(
+							$author$project$DomainModel$Node(
+								{
+									left: leftSubtree,
+									nodeContent: A2(combineInfo, leftSubtree, rightSubtree),
+									right: rightSubtree
+								})),
+						remainingAfterRight);
+				} else {
+					return _Utils_Tuple2($elm$core$Maybe$Nothing, remainingAfterRight);
+				}
+			}
+		});
+	return A2(treeBuilder, numberOfSegments, track).a;
+};
+var $author$project$OAuthTypes$UserInfo = F3(
+	function (id, firstname, lastname) {
+		return {firstname: firstname, id: id, lastname: lastname};
+	});
+var $author$project$StravaClientSecret$clientSecret = '01713301d9282956d3d182c1e01ce02c5e8620c3';
+var $author$project$StravaAuth$defaultHttpsUrl = {fragment: $elm$core$Maybe$Nothing, host: '', path: '', port_: $elm$core$Maybe$Nothing, protocol: $elm$url$Url$Https, query: $elm$core$Maybe$Nothing};
+var $elm$json$Json$Decode$map3 = _Json_map3;
+var $author$project$StravaAuth$configuration = {
+	authorizationEndpoint: _Utils_update(
+		$author$project$StravaAuth$defaultHttpsUrl,
+		{host: 'www.strava.com', path: '/oauth/authorize'}),
+	clientId: '59195',
+	clientSecret: $author$project$StravaClientSecret$clientSecret,
+	scope: _List_fromArray(
+		['read_all']),
+	tokenEndpoint: _Utils_update(
+		$author$project$StravaAuth$defaultHttpsUrl,
+		{host: 'www.strava.com', path: '/oauth/token'}),
+	userInfoDecoder: A4(
+		$elm$json$Json$Decode$map3,
+		$author$project$OAuthTypes$UserInfo,
+		A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$int),
+		A2($elm$json$Json$Decode$field, 'firstname', $elm$json$Json$Decode$string),
+		A2($elm$json$Json$Decode$field, 'lastname', $elm$json$Json$Decode$string)),
+	userInfoEndpoint: _Utils_update(
+		$author$project$StravaAuth$defaultHttpsUrl,
+		{host: 'www.strava.com', path: '/api/v3/athlete'})
+};
+var $author$project$OAuthTypes$GotAccessToken = function (a) {
+	return {$: 'GotAccessToken', a: a};
+};
+var $elm$http$Http$Header = F2(
+	function (a, b) {
+		return {$: 'Header', a: a, b: b};
+	});
+var $elm$http$Http$header = $elm$http$Http$Header;
+var $chelovek0v$bbase64$Base64$Encode$StringEncoder = function (a) {
+	return {$: 'StringEncoder', a: a};
+};
+var $chelovek0v$bbase64$Base64$Encode$string = function (input) {
+	return $chelovek0v$bbase64$Base64$Encode$StringEncoder(input);
+};
+var $author$project$OAuth$Internal$makeHeaders = function (credentials) {
+	return A2(
+		$elm$core$Maybe$withDefault,
+		_List_Nil,
+		A2(
+			$elm$core$Maybe$map,
+			function (s) {
+				return _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Basic ' + s)
+					]);
+			},
+			A2(
+				$elm$core$Maybe$map,
+				function (_v0) {
+					var clientId = _v0.clientId;
+					var secret = _v0.secret;
+					return $chelovek0v$bbase64$Base64$Encode$encode(
+						$chelovek0v$bbase64$Base64$Encode$string(clientId + (':' + secret)));
+				},
+				credentials)));
+};
+var $elm$core$String$concat = function (strings) {
+	return A2($elm$core$String$join, '', strings);
+};
+var $author$project$OAuth$Internal$protocolToString = function (protocol) {
+	if (protocol.$ === 'Http') {
+		return 'http';
+	} else {
+		return 'https';
+	}
+};
+var $author$project$OAuth$Internal$makeRedirectUri = function (url) {
+	return $elm$core$String$concat(
+		_List_fromArray(
+			[
+				$author$project$OAuth$Internal$protocolToString(url.protocol),
+				'://',
+				url.host,
+				A2(
+				$elm$core$Maybe$withDefault,
+				'',
+				A2(
+					$elm$core$Maybe$map,
+					function (i) {
+						return ':' + $elm$core$String$fromInt(i);
+					},
+					url.port_)),
+				url.path,
+				A2(
+				$elm$core$Maybe$withDefault,
+				'',
+				A2(
+					$elm$core$Maybe$map,
+					function (q) {
+						return '?' + q;
+					},
+					url.query))
+			]));
+};
+var $author$project$OAuth$Internal$AuthenticationSuccess = F4(
+	function (token, refreshToken, expiresIn, scope) {
+		return {expiresIn: expiresIn, refreshToken: refreshToken, scope: scope, token: token};
+	});
+var $elm$json$Json$Decode$maybe = function (decoder) {
+	return $elm$json$Json$Decode$oneOf(
+		_List_fromArray(
+			[
+				A2($elm$json$Json$Decode$map, $elm$core$Maybe$Just, decoder),
+				$elm$json$Json$Decode$succeed($elm$core$Maybe$Nothing)
+			]));
+};
+var $author$project$OAuth$Internal$expiresInDecoder = $elm$json$Json$Decode$maybe(
+	A2($elm$json$Json$Decode$field, 'expires_in', $elm$json$Json$Decode$int));
+var $elm$json$Json$Decode$map4 = _Json_map4;
+var $elm$json$Json$Decode$andThen = _Json_andThen;
+var $elm$json$Json$Decode$fail = _Json_fail;
+var $author$project$OAuth$Internal$decoderFromJust = function (msg) {
+	return A2(
+		$elm$core$Basics$composeR,
+		$elm$core$Maybe$map($elm$json$Json$Decode$succeed),
+		$elm$core$Maybe$withDefault(
+			$elm$json$Json$Decode$fail(msg)));
+};
+var $elm_community$maybe_extra$Maybe$Extra$andThen2 = F3(
+	function (func, ma, mb) {
+		if (ma.$ === 'Just') {
+			var a = ma.a;
+			if (mb.$ === 'Just') {
+				var b = mb.a;
+				return A2(func, a, b);
+			} else {
+				return $elm$core$Maybe$Nothing;
+			}
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $author$project$OAuth$Bearer = function (a) {
+	return {$: 'Bearer', a: a};
+};
+var $elm$core$String$toLower = _String_toLower;
+var $author$project$OAuth$tryMakeToken = F2(
+	function (tokenType, token) {
+		var _v0 = $elm$core$String$toLower(tokenType);
+		if (_v0 === 'bearer') {
+			return $elm$core$Maybe$Just(
+				$author$project$OAuth$Bearer(token));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $author$project$OAuth$makeRefreshToken = F2(
+	function (tokenType, mToken) {
+		var _v0 = _Utils_Tuple2(
+			mToken,
+			A3(
+				$elm_community$maybe_extra$Maybe$Extra$andThen2,
+				$author$project$OAuth$tryMakeToken,
+				$elm$core$Maybe$Just(tokenType),
+				mToken));
+		if (_v0.a.$ === 'Nothing') {
+			var _v1 = _v0.a;
+			return $elm$core$Maybe$Just($elm$core$Maybe$Nothing);
+		} else {
+			if (_v0.b.$ === 'Just') {
+				var token = _v0.b.a;
+				return $elm$core$Maybe$Just(
+					$elm$core$Maybe$Just(token));
+			} else {
+				return $elm$core$Maybe$Nothing;
+			}
+		}
+	});
+var $author$project$OAuth$Internal$refreshTokenDecoder = A2(
+	$elm$json$Json$Decode$andThen,
+	$author$project$OAuth$Internal$decoderFromJust('missing or invalid \'refresh_token\' / \'token_type\''),
+	A3(
+		$elm$json$Json$Decode$map2,
+		$author$project$OAuth$makeRefreshToken,
+		A2($elm$json$Json$Decode$field, 'token_type', $elm$json$Json$Decode$string),
+		$elm$json$Json$Decode$maybe(
+			A2($elm$json$Json$Decode$field, 'refresh_token', $elm$json$Json$Decode$string))));
+var $author$project$OAuth$Internal$scopeDecoder = A2(
+	$elm$json$Json$Decode$map,
+	$elm$core$Maybe$withDefault(_List_Nil),
+	$elm$json$Json$Decode$maybe(
+		A2(
+			$elm$json$Json$Decode$field,
+			'scope',
+			$elm$json$Json$Decode$list($elm$json$Json$Decode$string))));
+var $author$project$OAuth$makeToken = $elm_community$maybe_extra$Maybe$Extra$andThen2($author$project$OAuth$tryMakeToken);
+var $author$project$OAuth$Internal$tokenDecoder = A2(
+	$elm$json$Json$Decode$andThen,
+	$author$project$OAuth$Internal$decoderFromJust('missing or invalid \'access_token\' / \'token_type\''),
+	A3(
+		$elm$json$Json$Decode$map2,
+		$author$project$OAuth$makeToken,
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$core$Maybe$Just,
+			A2($elm$json$Json$Decode$field, 'token_type', $elm$json$Json$Decode$string)),
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$core$Maybe$Just,
+			A2($elm$json$Json$Decode$field, 'access_token', $elm$json$Json$Decode$string))));
+var $author$project$OAuth$Internal$authenticationSuccessDecoder = A5($elm$json$Json$Decode$map4, $author$project$OAuth$Internal$AuthenticationSuccess, $author$project$OAuth$Internal$tokenDecoder, $author$project$OAuth$Internal$refreshTokenDecoder, $author$project$OAuth$Internal$expiresInDecoder, $author$project$OAuth$Internal$scopeDecoder);
+var $elm$http$Http$stringBody = _Http_pair;
+var $author$project$OAuth$Internal$makeRequest = F4(
+	function (toMsg, url, headers, body) {
+		return {
+			body: A2($elm$http$Http$stringBody, 'application/x-www-form-urlencoded', body),
+			expect: A2($elm$http$Http$expectJson, toMsg, $author$project$OAuth$Internal$authenticationSuccessDecoder),
+			headers: headers,
+			method: 'POST',
+			timeout: $elm$core$Maybe$Nothing,
+			tracker: $elm$core$Maybe$Nothing,
+			url: $elm$url$Url$toString(url)
+		};
+	});
+var $elm$url$Url$Builder$QueryParameter = F2(
+	function (a, b) {
+		return {$: 'QueryParameter', a: a, b: b};
+	});
+var $elm$url$Url$percentEncode = _Url_percentEncode;
+var $elm$url$Url$Builder$string = F2(
+	function (key, value) {
+		return A2(
+			$elm$url$Url$Builder$QueryParameter,
+			$elm$url$Url$percentEncode(key),
+			$elm$url$Url$percentEncode(value));
+	});
+var $author$project$OAuth$AuthorizationCode$makeTokenRequest = F2(
+	function (toMsg, _v0) {
+		var credentials = _v0.credentials;
+		var code = _v0.code;
+		var url = _v0.url;
+		var redirectUri = _v0.redirectUri;
+		var headers = $author$project$OAuth$Internal$makeHeaders(
+			function () {
+				var _v2 = credentials.secret;
+				if (_v2.$ === 'Nothing') {
+					return $elm$core$Maybe$Nothing;
+				} else {
+					var secret = _v2.a;
+					return $elm$core$Maybe$Just(
+						{clientId: credentials.clientId, secret: secret});
+				}
+			}());
+		var body = A2(
+			$elm$core$String$dropLeft,
+			1,
+			$elm$url$Url$Builder$toQuery(
+				_Utils_ap(
+					function () {
+						var _v1 = credentials.secret;
+						if (_v1.$ === 'Just') {
+							var secret = _v1.a;
+							return _List_fromArray(
+								[
+									A2($elm$url$Url$Builder$string, 'client_secret', secret)
+								]);
+						} else {
+							return _List_Nil;
+						}
+					}(),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'grant_type', 'authorization_code'),
+							A2($elm$url$Url$Builder$string, 'client_id', credentials.clientId),
+							A2(
+							$elm$url$Url$Builder$string,
+							'redirect_uri',
+							$author$project$OAuth$Internal$makeRedirectUri(redirectUri)),
+							A2($elm$url$Url$Builder$string, 'code', code)
+						]))));
+		return A4($author$project$OAuth$Internal$makeRequest, toMsg, url, headers, body);
+	});
+var $author$project$StravaAuth$getAccessToken = F3(
+	function (_v0, redirectUri, code) {
+		var clientId = _v0.clientId;
+		var tokenEndpoint = _v0.tokenEndpoint;
+		return $elm$http$Http$request(
+			A2(
+				$author$project$OAuth$AuthorizationCode$makeTokenRequest,
+				$author$project$OAuthTypes$GotAccessToken,
+				{
+					code: code,
+					credentials: {
+						clientId: clientId,
+						secret: $elm$core$Maybe$Just($author$project$StravaClientSecret$clientSecret)
+					},
+					redirectUri: redirectUri,
+					url: tokenEndpoint
+				}));
+	});
+var $author$project$StravaAuth$accessTokenRequested = F2(
+	function (model, code) {
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{
+					flow: $author$project$OAuthTypes$Authorized(code)
+				}),
+			A3($author$project$StravaAuth$getAccessToken, $author$project$StravaAuth$configuration, model.redirectUri, code));
+	});
+var $author$project$OAuthTypes$Authenticated = function (a) {
+	return {$: 'Authenticated', a: a};
+};
+var $author$project$OAuthTypes$ErrAuthentication = function (a) {
+	return {$: 'ErrAuthentication', a: a};
+};
+var $author$project$OAuthTypes$ErrHTTPGetAccessToken = {$: 'ErrHTTPGetAccessToken'};
+var $author$project$OAuthTypes$UserInfoRequested = {$: 'UserInfoRequested'};
+var $author$project$OAuth$Internal$AuthenticationError = F3(
+	function (error, errorDescription, errorUri) {
+		return {error: error, errorDescription: errorDescription, errorUri: errorUri};
+	});
+var $author$project$OAuth$Internal$errorDescriptionDecoder = $elm$json$Json$Decode$maybe(
+	A2($elm$json$Json$Decode$field, 'error_description', $elm$json$Json$Decode$string));
+var $author$project$OAuth$Internal$errorUriDecoder = $elm$json$Json$Decode$maybe(
+	A2($elm$json$Json$Decode$field, 'error_uri', $elm$json$Json$Decode$string));
+var $author$project$OAuth$Internal$authenticationErrorDecoder = function (errorCodeDecoder) {
+	return A4($elm$json$Json$Decode$map3, $author$project$OAuth$Internal$AuthenticationError, errorCodeDecoder, $author$project$OAuth$Internal$errorDescriptionDecoder, $author$project$OAuth$Internal$errorUriDecoder);
+};
+var $author$project$OAuth$Internal$errorDecoder = function (errorCodeFromString) {
+	return A2(
+		$elm$json$Json$Decode$map,
+		errorCodeFromString,
+		A2($elm$json$Json$Decode$field, 'error', $elm$json$Json$Decode$string));
+};
+var $author$project$OAuth$AuthorizationCode$defaultErrorDecoder = $author$project$OAuth$Internal$errorDecoder($author$project$OAuth$errorCodeFromString);
+var $author$project$OAuth$AuthorizationCode$defaultAuthenticationErrorDecoder = $author$project$OAuth$Internal$authenticationErrorDecoder($author$project$OAuth$AuthorizationCode$defaultErrorDecoder);
+var $author$project$StravaAuth$gotAccessToken = F2(
+	function (model, authenticationResponse) {
+		if (authenticationResponse.$ === 'Err') {
+			if (authenticationResponse.a.$ === 'BadBody') {
+				var body = authenticationResponse.a.a;
+				var _v1 = A2($elm$json$Json$Decode$decodeString, $author$project$OAuth$AuthorizationCode$defaultAuthenticationErrorDecoder, body);
+				if (_v1.$ === 'Ok') {
+					var error = _v1.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								flow: $author$project$OAuthTypes$Errored(
+									$author$project$OAuthTypes$ErrAuthentication(error))
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								flow: $author$project$OAuthTypes$Errored($author$project$OAuthTypes$ErrHTTPGetAccessToken)
+							}),
+						$elm$core$Platform$Cmd$none);
+				}
+			} else {
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							flow: $author$project$OAuthTypes$Errored($author$project$OAuthTypes$ErrHTTPGetAccessToken)
+						}),
+					$elm$core$Platform$Cmd$none);
+			}
+		} else {
+			var token = authenticationResponse.a.token;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						flow: $author$project$OAuthTypes$Authenticated(token)
+					}),
+				A2($andrewMacmurray$elm_delay$Delay$after, 100, $author$project$OAuthTypes$UserInfoRequested));
+		}
+	});
+var $elm$browser$Browser$Navigation$load = _Browser_load;
+var $author$project$OAuth$Internal$Code = {$: 'Code'};
+var $author$project$OAuth$Internal$responseTypeToString = function (r) {
+	if (r.$ === 'Code') {
+		return 'code';
+	} else {
+		return 'token';
+	}
+};
+var $author$project$OAuth$Internal$urlAddList = F3(
+	function (param, xs, qs) {
+		return _Utils_ap(
+			qs,
+			function () {
+				if (!xs.b) {
+					return _List_Nil;
+				} else {
+					return _List_fromArray(
+						[
+							A2(
+							$elm$url$Url$Builder$string,
+							param,
+							A2($elm$core$String$join, ' ', xs))
+						]);
+				}
+			}());
+	});
+var $author$project$OAuth$Internal$urlAddMaybe = F3(
+	function (param, ms, qs) {
+		return _Utils_ap(
+			qs,
+			function () {
+				if (ms.$ === 'Nothing') {
+					return _List_Nil;
+				} else {
+					var s = ms.a;
+					return _List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, param, s)
+						]);
+				}
+			}());
+	});
+var $author$project$OAuth$Internal$makeAuthorizationUrl = F2(
+	function (responseType, _v0) {
+		var clientId = _v0.clientId;
+		var url = _v0.url;
+		var redirectUri = _v0.redirectUri;
+		var scope = _v0.scope;
+		var state = _v0.state;
+		var codeChallenge = _v0.codeChallenge;
+		var query = A2(
+			$elm$core$String$dropLeft,
+			1,
+			$elm$url$Url$Builder$toQuery(
+				A3(
+					$author$project$OAuth$Internal$urlAddMaybe,
+					'code_challenge_method',
+					A2(
+						$elm$core$Maybe$map,
+						$elm$core$Basics$always('S256'),
+						codeChallenge),
+					A3(
+						$author$project$OAuth$Internal$urlAddMaybe,
+						'code_challenge',
+						codeChallenge,
+						A3(
+							$author$project$OAuth$Internal$urlAddMaybe,
+							'state',
+							state,
+							A3(
+								$author$project$OAuth$Internal$urlAddList,
+								'scope',
+								scope,
+								_List_fromArray(
+									[
+										A2($elm$url$Url$Builder$string, 'client_id', clientId),
+										A2(
+										$elm$url$Url$Builder$string,
+										'redirect_uri',
+										$author$project$OAuth$Internal$makeRedirectUri(redirectUri)),
+										A2(
+										$elm$url$Url$Builder$string,
+										'response_type',
+										$author$project$OAuth$Internal$responseTypeToString(responseType))
+									])))))));
+		var _v1 = url.query;
+		if (_v1.$ === 'Nothing') {
+			return _Utils_update(
+				url,
+				{
+					query: $elm$core$Maybe$Just(query)
+				});
+		} else {
+			var baseQuery = _v1.a;
+			return _Utils_update(
+				url,
+				{
+					query: $elm$core$Maybe$Just(baseQuery + ('&' + query))
+				});
+		}
+	});
+var $author$project$OAuth$AuthorizationCode$makeAuthorizationUrl = function (_v0) {
+	var clientId = _v0.clientId;
+	var url = _v0.url;
+	var redirectUri = _v0.redirectUri;
+	var scope = _v0.scope;
+	var state = _v0.state;
+	return A2(
+		$author$project$OAuth$Internal$makeAuthorizationUrl,
+		$author$project$OAuth$Internal$Code,
+		{clientId: clientId, codeChallenge: $elm$core$Maybe$Nothing, redirectUri: redirectUri, scope: scope, state: state, url: url});
+};
+var $author$project$StravaAuth$gotRandomBytes = F2(
+	function (model, bytes) {
+		var _v0 = $author$project$StravaAuth$convertBytes(bytes);
+		var state = _v0.state;
+		var authorization = {
+			clientId: $author$project$StravaAuth$configuration.clientId,
+			redirectUri: model.redirectUri,
+			scope: $author$project$StravaAuth$configuration.scope,
+			state: $elm$core$Maybe$Just(state),
+			url: $author$project$StravaAuth$configuration.authorizationEndpoint
+		};
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{flow: $author$project$OAuthTypes$Idle}),
+			$elm$browser$Browser$Navigation$load(
+				$elm$url$Url$toString(
+					$author$project$OAuth$AuthorizationCode$makeAuthorizationUrl(authorization))));
+	});
+var $author$project$OAuthTypes$Done = F2(
+	function (a, b) {
+		return {$: 'Done', a: a, b: b};
+	});
+var $author$project$OAuthTypes$ErrHTTPGetUserInfo = {$: 'ErrHTTPGetUserInfo'};
+var $author$project$StravaAuth$gotUserInfo = F2(
+	function (model, userInfoResponse) {
+		var _v0 = _Utils_Tuple2(model.flow, userInfoResponse);
+		if (_v0.b.$ === 'Err') {
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						flow: $author$project$OAuthTypes$Errored($author$project$OAuthTypes$ErrHTTPGetUserInfo)
+					}),
+				$elm$core$Platform$Cmd$none);
+		} else {
+			if (_v0.a.$ === 'Authenticated') {
+				var token = _v0.a.a;
+				var userInfo = _v0.b.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							flow: A2($author$project$OAuthTypes$Done, userInfo, token)
+						}),
+					$elm$core$Platform$Cmd$none);
+			} else {
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							flow: $author$project$OAuthTypes$Errored($author$project$OAuthTypes$ErrStateMismatch)
+						}),
+					$elm$core$Platform$Cmd$none);
+			}
+		}
+	});
+var $author$project$StravaAuth$noOp = function (model) {
+	return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+};
+var $elm$json$Json$Encode$int = _Json_wrap;
+var $author$project$OAuthPorts$genRandomBytes = _Platform_outgoingPort('genRandomBytes', $elm$json$Json$Encode$int);
+var $author$project$StravaAuth$signInRequested = function (model) {
+	return _Utils_Tuple2(
+		_Utils_update(
+			model,
+			{flow: $author$project$OAuthTypes$Idle}),
+		$author$project$OAuthPorts$genRandomBytes(16));
+};
+var $author$project$StravaAuth$signOutRequested = function (model) {
+	return _Utils_Tuple2(
+		_Utils_update(
+			model,
+			{flow: $author$project$OAuthTypes$Idle}),
+		$elm$browser$Browser$Navigation$load(
+			$elm$url$Url$toString(model.redirectUri)));
+};
+var $author$project$OAuthTypes$GotUserInfo = function (a) {
+	return {$: 'GotUserInfo', a: a};
+};
+var $author$project$OAuth$tokenToString = function (_v0) {
+	var t = _v0.a;
+	return 'Bearer ' + t;
+};
+var $author$project$OAuth$useToken = function (token) {
+	return $elm$core$List$cons(
+		A2(
+			$elm$http$Http$header,
+			'Authorization',
+			$author$project$OAuth$tokenToString(token)));
+};
+var $author$project$StravaAuth$getUserInfo = F2(
+	function (_v0, token) {
+		var userInfoDecoder = _v0.userInfoDecoder;
+		var userInfoEndpoint = _v0.userInfoEndpoint;
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$emptyBody,
+				expect: A2($elm$http$Http$expectJson, $author$project$OAuthTypes$GotUserInfo, userInfoDecoder),
+				headers: A2($author$project$OAuth$useToken, token, _List_Nil),
+				method: 'GET',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: $elm$url$Url$toString(userInfoEndpoint)
+			});
+	});
+var $author$project$StravaAuth$userInfoRequested = F2(
+	function (model, token) {
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{
+					flow: $author$project$OAuthTypes$Authenticated(token)
+				}),
+			A2($author$project$StravaAuth$getUserInfo, $author$project$StravaAuth$configuration, token));
+	});
+var $author$project$StravaAuth$update = F2(
+	function (msg, model) {
+		var _v0 = _Utils_Tuple2(model.flow, msg);
+		_v0$7:
+		while (true) {
+			switch (_v0.a.$) {
+				case 'Idle':
+					switch (_v0.b.$) {
+						case 'SignInRequested':
+							var _v1 = _v0.a;
+							var _v2 = _v0.b;
+							return $author$project$StravaAuth$signInRequested(model);
+						case 'GotRandomBytes':
+							var _v3 = _v0.a;
+							var bytes = _v0.b.a;
+							return A2($author$project$StravaAuth$gotRandomBytes, model, bytes);
+						default:
+							break _v0$7;
+					}
+				case 'Authorized':
+					switch (_v0.b.$) {
+						case 'AccessTokenRequested':
+							var code = _v0.a.a;
+							var _v4 = _v0.b;
+							return A2($author$project$StravaAuth$accessTokenRequested, model, code);
+						case 'GotAccessToken':
+							var authenticationResponse = _v0.b.a;
+							return A2($author$project$StravaAuth$gotAccessToken, model, authenticationResponse);
+						default:
+							break _v0$7;
+					}
+				case 'Authenticated':
+					switch (_v0.b.$) {
+						case 'UserInfoRequested':
+							var token = _v0.a.a;
+							var _v5 = _v0.b;
+							return A2($author$project$StravaAuth$userInfoRequested, model, token);
+						case 'GotUserInfo':
+							var userInfoResponse = _v0.b.a;
+							return A2($author$project$StravaAuth$gotUserInfo, model, userInfoResponse);
+						default:
+							break _v0$7;
+					}
+				case 'Done':
+					if (_v0.b.$ === 'SignOutRequested') {
+						var _v6 = _v0.a;
+						var _v7 = _v0.b;
+						return $author$project$StravaAuth$signOutRequested(model);
+					} else {
+						break _v0$7;
+					}
+				default:
+					break _v0$7;
+			}
+		}
+		return $author$project$StravaAuth$noOp(model);
+	});
+var $author$project$ViewThirdPerson$ClickDelayExpired = {$: 'ClickDelayExpired'};
+var $author$project$ViewContextThirdPerson$DragPan = {$: 'DragPan'};
+var $author$project$ViewContextThirdPerson$DragRotate = {$: 'DragRotate'};
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$SecondButton = {$: 'SecondButton'};
+var $ianmackenzie$elm_units$Quantity$at = F2(
+	function (_v0, _v1) {
+		var rateOfChange = _v0.a;
+		var independentValue = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(rateOfChange * independentValue);
+	});
+var $ianmackenzie$elm_3d_camera$Camera3d$Types$Viewpoint3d = function (a) {
+	return {$: 'Viewpoint3d', a: a};
+};
+var $ianmackenzie$elm_geometry$Geometry$Types$Vector3d = function (a) {
+	return {$: 'Vector3d', a: a};
+};
+var $ianmackenzie$elm_geometry$Vector3d$cross = F2(
+	function (_v0, _v1) {
+		var v2 = _v0.a;
+		var v1 = _v1.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
+			{x: (v1.y * v2.z) - (v1.z * v2.y), y: (v1.z * v2.x) - (v1.x * v2.z), z: (v1.x * v2.y) - (v1.y * v2.x)});
+	});
+var $ianmackenzie$elm_geometry$Geometry$Types$Direction3d = function (a) {
+	return {$: 'Direction3d', a: a};
+};
+var $ianmackenzie$elm_geometry$Vector3d$direction = function (_v0) {
+	var v = _v0.a;
+	var largestComponent = A2(
+		$elm$core$Basics$max,
+		$elm$core$Basics$abs(v.x),
+		A2(
+			$elm$core$Basics$max,
+			$elm$core$Basics$abs(v.y),
+			$elm$core$Basics$abs(v.z)));
+	if (!largestComponent) {
+		return $elm$core$Maybe$Nothing;
+	} else {
+		var scaledZ = v.z / largestComponent;
+		var scaledY = v.y / largestComponent;
+		var scaledX = v.x / largestComponent;
+		var scaledLength = $elm$core$Basics$sqrt(((scaledX * scaledX) + (scaledY * scaledY)) + (scaledZ * scaledZ));
+		return $elm$core$Maybe$Just(
+			$ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
+				{x: scaledX / scaledLength, y: scaledY / scaledLength, z: scaledZ / scaledLength}));
+	}
+};
+var $ianmackenzie$elm_geometry$Vector3d$from = F2(
+	function (_v0, _v1) {
+		var p1 = _v0.a;
+		var p2 = _v1.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
+			{x: p2.x - p1.x, y: p2.y - p1.y, z: p2.z - p1.z});
+	});
+var $elm$core$Maybe$andThen = F2(
+	function (callback, maybeValue) {
+		if (maybeValue.$ === 'Just') {
+			var value = maybeValue.a;
+			return callback(value);
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $ianmackenzie$elm_geometry$Vector3d$dot = F2(
+	function (_v0, _v1) {
+		var v2 = _v0.a;
+		var v1 = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(((v1.x * v2.x) + (v1.y * v2.y)) + (v1.z * v2.z));
+	});
+var $ianmackenzie$elm_units$Quantity$greaterThan = F2(
+	function (_v0, _v1) {
+		var y = _v0.a;
+		var x = _v1.a;
+		return _Utils_cmp(x, y) > 0;
+	});
+var $ianmackenzie$elm_units$Quantity$lessThan = F2(
+	function (_v0, _v1) {
+		var y = _v0.a;
+		var x = _v1.a;
+		return _Utils_cmp(x, y) < 0;
+	});
+var $ianmackenzie$elm_geometry$Vector3d$minus = F2(
+	function (_v0, _v1) {
+		var v2 = _v0.a;
+		var v1 = _v1.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
+			{x: v1.x - v2.x, y: v1.y - v2.y, z: v1.z - v2.z});
+	});
+var $ianmackenzie$elm_geometry$Vector3d$projectionIn = F2(
+	function (_v0, _v1) {
+		var d = _v0.a;
+		var v = _v1.a;
+		var projectedLength = ((v.x * d.x) + (v.y * d.y)) + (v.z * d.z);
+		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
+			{x: d.x * projectedLength, y: d.y * projectedLength, z: d.z * projectedLength});
+	});
+var $ianmackenzie$elm_geometry$Vector3d$reverse = function (_v0) {
+	var v = _v0.a;
+	return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
+		{x: -v.x, y: -v.y, z: -v.z});
+};
+var $ianmackenzie$elm_geometry$Vector3d$zero = $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
+	{x: 0, y: 0, z: 0});
+var $ianmackenzie$elm_geometry$Direction3d$orthonormalize = F3(
+	function (xVector, xyVector, xyzVector) {
+		return A2(
+			$elm$core$Maybe$andThen,
+			function (xDirection) {
+				var yVector = A2(
+					$ianmackenzie$elm_geometry$Vector3d$minus,
+					A2($ianmackenzie$elm_geometry$Vector3d$projectionIn, xDirection, xyVector),
+					xyVector);
+				return A2(
+					$elm$core$Maybe$andThen,
+					function (yDirection) {
+						var rightHandedZVector = A2($ianmackenzie$elm_geometry$Vector3d$cross, xyVector, xVector);
+						var tripleProduct = A2($ianmackenzie$elm_geometry$Vector3d$dot, xyzVector, rightHandedZVector);
+						var zVector = A2($ianmackenzie$elm_units$Quantity$greaterThan, $ianmackenzie$elm_units$Quantity$zero, tripleProduct) ? rightHandedZVector : (A2($ianmackenzie$elm_units$Quantity$lessThan, $ianmackenzie$elm_units$Quantity$zero, tripleProduct) ? $ianmackenzie$elm_geometry$Vector3d$reverse(rightHandedZVector) : $ianmackenzie$elm_geometry$Vector3d$zero);
+						return A2(
+							$elm$core$Maybe$map,
+							function (zDirection) {
+								return _Utils_Tuple3(xDirection, yDirection, zDirection);
+							},
+							$ianmackenzie$elm_geometry$Vector3d$direction(zVector));
+					},
+					$ianmackenzie$elm_geometry$Vector3d$direction(yVector));
+			},
+			$ianmackenzie$elm_geometry$Vector3d$direction(xVector));
+	});
+var $ianmackenzie$elm_geometry$Direction3d$perpendicularTo = function (_v0) {
+	var d = _v0.a;
+	var absZ = $elm$core$Basics$abs(d.z);
+	var absY = $elm$core$Basics$abs(d.y);
+	var absX = $elm$core$Basics$abs(d.x);
+	if (_Utils_cmp(absX, absY) < 1) {
+		if (_Utils_cmp(absX, absZ) < 1) {
+			var scale = $elm$core$Basics$sqrt((d.z * d.z) + (d.y * d.y));
+			return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
+				{x: 0, y: (-d.z) / scale, z: d.y / scale});
+		} else {
+			var scale = $elm$core$Basics$sqrt((d.y * d.y) + (d.x * d.x));
+			return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
+				{x: (-d.y) / scale, y: d.x / scale, z: 0});
+		}
+	} else {
+		if (_Utils_cmp(absY, absZ) < 1) {
+			var scale = $elm$core$Basics$sqrt((d.z * d.z) + (d.x * d.x));
+			return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
+				{x: d.z / scale, y: 0, z: (-d.x) / scale});
+		} else {
+			var scale = $elm$core$Basics$sqrt((d.x * d.x) + (d.y * d.y));
+			return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
+				{x: (-d.y) / scale, y: d.x / scale, z: 0});
+		}
+	}
+};
+var $ianmackenzie$elm_geometry$Direction3d$perpendicularBasis = function (direction) {
+	var xDirection = $ianmackenzie$elm_geometry$Direction3d$perpendicularTo(direction);
+	var _v0 = xDirection;
+	var dX = _v0.a;
+	var _v1 = direction;
+	var d = _v1.a;
+	var yDirection = $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
+		{x: (d.y * dX.z) - (d.z * dX.y), y: (d.z * dX.x) - (d.x * dX.z), z: (d.x * dX.y) - (d.y * dX.x)});
+	return _Utils_Tuple2(xDirection, yDirection);
+};
+var $ianmackenzie$elm_geometry$Direction3d$toVector = function (_v0) {
+	var directionComponents = _v0.a;
+	return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(directionComponents);
+};
+var $ianmackenzie$elm_geometry$Geometry$Types$Frame3d = function (a) {
+	return {$: 'Frame3d', a: a};
+};
+var $ianmackenzie$elm_geometry$Frame3d$unsafe = function (properties) {
+	return $ianmackenzie$elm_geometry$Geometry$Types$Frame3d(properties);
+};
+var $ianmackenzie$elm_geometry$Frame3d$withZDirection = F2(
+	function (givenZDirection, givenOrigin) {
+		var _v0 = $ianmackenzie$elm_geometry$Direction3d$perpendicularBasis(givenZDirection);
+		var computedXDirection = _v0.a;
+		var computedYDirection = _v0.b;
+		return $ianmackenzie$elm_geometry$Frame3d$unsafe(
+			{originPoint: givenOrigin, xDirection: computedXDirection, yDirection: computedYDirection, zDirection: givenZDirection});
+	});
+var $ianmackenzie$elm_3d_camera$Viewpoint3d$lookAt = function (_arguments) {
+	var zVector = A2($ianmackenzie$elm_geometry$Vector3d$from, _arguments.focalPoint, _arguments.eyePoint);
+	var yVector = $ianmackenzie$elm_geometry$Direction3d$toVector(_arguments.upDirection);
+	var xVector = A2($ianmackenzie$elm_geometry$Vector3d$cross, zVector, yVector);
+	var _v0 = A3($ianmackenzie$elm_geometry$Direction3d$orthonormalize, zVector, yVector, xVector);
+	if (_v0.$ === 'Just') {
+		var _v1 = _v0.a;
+		var normalizedZDirection = _v1.a;
+		var normalizedYDirection = _v1.b;
+		var normalizedXDirection = _v1.c;
+		return $ianmackenzie$elm_3d_camera$Camera3d$Types$Viewpoint3d(
+			$ianmackenzie$elm_geometry$Frame3d$unsafe(
+				{originPoint: _arguments.eyePoint, xDirection: normalizedXDirection, yDirection: normalizedYDirection, zDirection: normalizedZDirection}));
+	} else {
+		var _v2 = $ianmackenzie$elm_geometry$Vector3d$direction(zVector);
+		if (_v2.$ === 'Just') {
+			var zDirection = _v2.a;
+			return $ianmackenzie$elm_3d_camera$Camera3d$Types$Viewpoint3d(
+				A2($ianmackenzie$elm_geometry$Frame3d$withZDirection, zDirection, _arguments.eyePoint));
+		} else {
+			var _v3 = $ianmackenzie$elm_geometry$Direction3d$perpendicularBasis(_arguments.upDirection);
+			var arbitraryZDirection = _v3.a;
+			var arbitraryXDirection = _v3.b;
+			return $ianmackenzie$elm_3d_camera$Camera3d$Types$Viewpoint3d(
+				$ianmackenzie$elm_geometry$Frame3d$unsafe(
+					{originPoint: _arguments.eyePoint, xDirection: arbitraryXDirection, yDirection: _arguments.upDirection, zDirection: arbitraryZDirection}));
+		}
+	}
+};
+var $ianmackenzie$elm_3d_camera$Camera3d$Types$Camera3d = function (a) {
+	return {$: 'Camera3d', a: a};
+};
+var $ianmackenzie$elm_3d_camera$Camera3d$Types$Perspective = function (a) {
+	return {$: 'Perspective', a: a};
+};
+var $elm$core$Basics$tan = _Basics_tan;
+var $ianmackenzie$elm_units$Angle$tan = function (_v0) {
+	var angle = _v0.a;
+	return $elm$core$Basics$tan(angle);
+};
+var $ianmackenzie$elm_3d_camera$Camera3d$perspective = function (_arguments) {
+	var halfFieldOfView = $ianmackenzie$elm_units$Quantity$half(
+		$ianmackenzie$elm_units$Quantity$abs(_arguments.verticalFieldOfView));
+	var frustumSlope = $ianmackenzie$elm_units$Angle$tan(halfFieldOfView);
+	return $ianmackenzie$elm_3d_camera$Camera3d$Types$Camera3d(
+		{
+			projection: $ianmackenzie$elm_3d_camera$Camera3d$Types$Perspective(frustumSlope),
+			viewpoint: _arguments.viewpoint
+		});
+};
+var $ianmackenzie$elm_geometry$Direction3d$unsafe = function (givenComponents) {
+	return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(givenComponents);
+};
+var $ianmackenzie$elm_geometry$Direction3d$positiveZ = $ianmackenzie$elm_geometry$Direction3d$unsafe(
+	{x: 0, y: 0, z: 1});
+var $ianmackenzie$elm_geometry$Point3d$translateBy = F2(
+	function (_v0, _v1) {
+		var v = _v0.a;
+		var p = _v1.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+			{x: p.x + v.x, y: p.y + v.y, z: p.z + v.z});
+	});
+var $ianmackenzie$elm_geometry$Vector3d$withLength = F2(
+	function (_v0, _v1) {
+		var a = _v0.a;
+		var d = _v1.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
+			{x: a * d.x, y: a * d.y, z: a * d.z});
+	});
+var $ianmackenzie$elm_geometry$Direction3d$xyZ = F2(
+	function (_v0, _v1) {
+		var theta = _v0.a;
+		var phi = _v1.a;
+		var cosPhi = $elm$core$Basics$cos(phi);
+		return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
+			{
+				x: cosPhi * $elm$core$Basics$cos(theta),
+				y: cosPhi * $elm$core$Basics$sin(theta),
+				z: $elm$core$Basics$sin(phi)
+			});
+	});
+var $author$project$ViewThirdPerson$deriveCamera = F3(
+	function (treeNode, context, currentPosition) {
+		var lookingAt = context.followSelectedPoint ? $author$project$DomainModel$startPoint(
+			A2($author$project$DomainModel$leafFromIndex, currentPosition, treeNode)) : context.focalPoint;
+		var directionToEye = A2(
+			$ianmackenzie$elm_geometry$Direction3d$xyZ,
+			$ianmackenzie$elm_geometry$Direction2d$toAngle(context.cameraAzimuth),
+			context.cameraElevation);
+		var eyePoint = A2(
+			$ianmackenzie$elm_geometry$Point3d$translateBy,
+			A2($ianmackenzie$elm_geometry$Vector3d$withLength, context.cameraDistance, directionToEye),
+			lookingAt);
+		var cameraViewpoint = $ianmackenzie$elm_3d_camera$Viewpoint3d$lookAt(
+			{eyePoint: eyePoint, focalPoint: lookingAt, upDirection: $ianmackenzie$elm_geometry$Direction3d$positiveZ});
+		var perspectiveCamera = $ianmackenzie$elm_3d_camera$Camera3d$perspective(
+			{
+				verticalFieldOfView: $ianmackenzie$elm_units$Angle$degrees(30),
+				viewpoint: cameraViewpoint
+			});
+		return perspectiveCamera;
+	});
+var $ianmackenzie$elm_geometry$Geometry$Types$Rectangle2d = function (a) {
+	return {$: 'Rectangle2d', a: a};
+};
+var $ianmackenzie$elm_units$Quantity$midpoint = F2(
+	function (_v0, _v1) {
+		var x = _v0.a;
+		var y = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(x + (0.5 * (y - x)));
+	});
+var $ianmackenzie$elm_geometry$Direction2d$negativeX = $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
+	{x: -1, y: 0});
+var $ianmackenzie$elm_geometry$Direction2d$negativeY = $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
+	{x: 0, y: -1});
+var $ianmackenzie$elm_geometry$Direction2d$positiveY = $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
+	{x: 0, y: 1});
+var $ianmackenzie$elm_geometry$Geometry$Types$Frame2d = function (a) {
+	return {$: 'Frame2d', a: a};
+};
+var $ianmackenzie$elm_geometry$Frame2d$unsafe = function (properties) {
+	return $ianmackenzie$elm_geometry$Geometry$Types$Frame2d(properties);
+};
+var $ianmackenzie$elm_geometry$Geometry$Types$Point2d = function (a) {
+	return {$: 'Point2d', a: a};
+};
+var $ianmackenzie$elm_geometry$Point2d$xy = F2(
+	function (_v0, _v1) {
+		var x = _v0.a;
+		var y = _v1.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point2d(
+			{x: x, y: y});
+	});
+var $ianmackenzie$elm_geometry$Rectangle2d$axisAligned = F4(
+	function (x1, y1, x2, y2) {
+		var computedYDirection = A2($ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo, y1, y2) ? $ianmackenzie$elm_geometry$Direction2d$positiveY : $ianmackenzie$elm_geometry$Direction2d$negativeY;
+		var computedXDirection = A2($ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo, x1, x2) ? $ianmackenzie$elm_geometry$Direction2d$positiveX : $ianmackenzie$elm_geometry$Direction2d$negativeX;
+		var computedDimensions = _Utils_Tuple2(
+			$ianmackenzie$elm_units$Quantity$abs(
+				A2($ianmackenzie$elm_units$Quantity$minus, x1, x2)),
+			$ianmackenzie$elm_units$Quantity$abs(
+				A2($ianmackenzie$elm_units$Quantity$minus, y1, y2)));
+		var computedCenterPoint = A2(
+			$ianmackenzie$elm_geometry$Point2d$xy,
+			A2($ianmackenzie$elm_units$Quantity$midpoint, x1, x2),
+			A2($ianmackenzie$elm_units$Quantity$midpoint, y1, y2));
+		var computedAxes = $ianmackenzie$elm_geometry$Frame2d$unsafe(
+			{originPoint: computedCenterPoint, xDirection: computedXDirection, yDirection: computedYDirection});
+		return $ianmackenzie$elm_geometry$Geometry$Types$Rectangle2d(
+			{axes: computedAxes, dimensions: computedDimensions});
+	});
+var $ianmackenzie$elm_geometry$Point2d$xCoordinate = function (_v0) {
+	var p = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(p.x);
+};
+var $ianmackenzie$elm_geometry$Point2d$yCoordinate = function (_v0) {
+	var p = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(p.y);
+};
+var $ianmackenzie$elm_geometry$Rectangle2d$from = F2(
+	function (p1, p2) {
+		return A4(
+			$ianmackenzie$elm_geometry$Rectangle2d$axisAligned,
+			$ianmackenzie$elm_geometry$Point2d$xCoordinate(p1),
+			$ianmackenzie$elm_geometry$Point2d$yCoordinate(p1),
+			$ianmackenzie$elm_geometry$Point2d$xCoordinate(p2),
+			$ianmackenzie$elm_geometry$Point2d$yCoordinate(p2));
+	});
+var $ianmackenzie$elm_geometry$Sphere3d$centerPoint = function (_v0) {
+	var properties = _v0.a;
+	return properties.centerPoint;
+};
+var $ianmackenzie$elm_geometry$Point3d$distanceFromAxis = F2(
+	function (_v0, _v1) {
+		var axis = _v0.a;
+		var p = _v1.a;
+		var _v2 = axis.originPoint;
+		var p0 = _v2.a;
+		var deltaX = p.x - p0.x;
+		var deltaY = p.y - p0.y;
+		var deltaZ = p.z - p0.z;
+		var _v3 = axis.direction;
+		var d = _v3.a;
+		var projection = ((deltaX * d.x) + (deltaY * d.y)) + (deltaZ * d.z);
+		var perpX = deltaX - (projection * d.x);
+		var perpY = deltaY - (projection * d.y);
+		var perpZ = deltaZ - (projection * d.z);
+		var largestComponent = A2(
+			$elm$core$Basics$max,
+			$elm$core$Basics$abs(perpX),
+			A2(
+				$elm$core$Basics$max,
+				$elm$core$Basics$abs(perpY),
+				$elm$core$Basics$abs(perpZ)));
+		if (!largestComponent) {
+			return $ianmackenzie$elm_units$Quantity$zero;
+		} else {
+			var scaledZ = perpZ / largestComponent;
+			var scaledY = perpY / largestComponent;
+			var scaledX = perpX / largestComponent;
+			var scaledDistance = $elm$core$Basics$sqrt(((scaledX * scaledX) + (scaledY * scaledY)) + (scaledZ * scaledZ));
+			return $ianmackenzie$elm_units$Quantity$Quantity(scaledDistance * largestComponent);
+		}
+	});
+var $ianmackenzie$elm_geometry$Point3d$along = F2(
+	function (_v0, _v1) {
+		var axis = _v0.a;
+		var distance = _v1.a;
+		var _v2 = axis.originPoint;
+		var p0 = _v2.a;
+		var _v3 = axis.direction;
+		var d = _v3.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+			{x: p0.x + (distance * d.x), y: p0.y + (distance * d.y), z: p0.z + (distance * d.z)});
+	});
+var $ianmackenzie$elm_geometry$Vector3d$componentIn = F2(
+	function (_v0, _v1) {
+		var d = _v0.a;
+		var v = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(((v.x * d.x) + (v.y * d.y)) + (v.z * d.z));
+	});
+var $ianmackenzie$elm_geometry$Axis3d$direction = function (_v0) {
+	var axis = _v0.a;
+	return axis.direction;
+};
+var $ianmackenzie$elm_geometry$Axis3d$originPoint = function (_v0) {
+	var axis = _v0.a;
+	return axis.originPoint;
+};
+var $elm$core$Basics$pow = _Basics_pow;
+var $ianmackenzie$elm_geometry$Axis3d$intersectionWithSphere = F2(
+	function (_v0, axis) {
+		var centerPoint = _v0.a.centerPoint;
+		var radius = _v0.a.radius;
+		var axisOrigin = $ianmackenzie$elm_geometry$Axis3d$originPoint(axis);
+		var circleCenterToOrigin = A2($ianmackenzie$elm_geometry$Vector3d$from, centerPoint, axisOrigin);
+		var axisDirection = $ianmackenzie$elm_geometry$Axis3d$direction(axis);
+		var _v1 = radius;
+		var r = _v1.a;
+		var _v2 = A2($ianmackenzie$elm_geometry$Vector3d$componentIn, axisDirection, circleCenterToOrigin);
+		var dotProduct = _v2.a;
+		var _v3 = circleCenterToOrigin;
+		var cto = _v3.a;
+		var ctoLengthSquared = (A2($elm$core$Basics$pow, cto.x, 2) + A2($elm$core$Basics$pow, cto.y, 2)) + A2($elm$core$Basics$pow, cto.z, 2);
+		var inRoot = (A2($elm$core$Basics$pow, dotProduct, 2) - ctoLengthSquared) + A2($elm$core$Basics$pow, r, 2);
+		if (inRoot < 0) {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var d2 = (-dotProduct) + $elm$core$Basics$sqrt(inRoot);
+			var d1 = (-dotProduct) - $elm$core$Basics$sqrt(inRoot);
+			return $elm$core$Maybe$Just(
+				_Utils_Tuple2(
+					A2(
+						$ianmackenzie$elm_geometry$Point3d$along,
+						axis,
+						$ianmackenzie$elm_units$Quantity$Quantity(d1)),
+					A2(
+						$ianmackenzie$elm_geometry$Point3d$along,
+						axis,
+						$ianmackenzie$elm_units$Quantity$Quantity(d2))));
+		}
+	});
+var $ianmackenzie$elm_geometry$Sphere3d$radius = function (_v0) {
+	var properties = _v0.a;
+	return properties.radius;
+};
+var $author$project$DomainModel$sphere = function (treeNode) {
+	if (treeNode.$ === 'Leaf') {
+		var leaf = treeNode.a;
+		return leaf.sphere;
+	} else {
+		var node = treeNode.a;
+		return node.nodeContent.sphere;
+	}
+};
+var $author$project$DomainModel$nearestToRay = F2(
+	function (ray, treeNode) {
+		var helper = F2(
+			function (withNode, skip) {
+				helper:
+				while (true) {
+					if (withNode.$ === 'Leaf') {
+						var leaf = withNode.a;
+						var startDistance = A2($ianmackenzie$elm_geometry$Point3d$distanceFromAxis, ray, leaf.startPoint);
+						var endDistance = A2($ianmackenzie$elm_geometry$Point3d$distanceFromAxis, ray, leaf.endPoint);
+						return A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, endDistance, startDistance) ? _Utils_Tuple2(skip, startDistance) : _Utils_Tuple2(skip + 1, endDistance);
+					} else {
+						var node = withNode.a;
+						var rightDistance = A2(
+							$ianmackenzie$elm_units$Quantity$minus,
+							$ianmackenzie$elm_geometry$Sphere3d$radius(
+								$author$project$DomainModel$sphere(node.right)),
+							A2(
+								$ianmackenzie$elm_geometry$Point3d$distanceFromAxis,
+								ray,
+								$ianmackenzie$elm_geometry$Sphere3d$centerPoint(
+									$author$project$DomainModel$sphere(node.right))));
+						var leftDistance = A2(
+							$ianmackenzie$elm_units$Quantity$minus,
+							$ianmackenzie$elm_geometry$Sphere3d$radius(
+								$author$project$DomainModel$sphere(node.left)),
+							A2(
+								$ianmackenzie$elm_geometry$Point3d$distanceFromAxis,
+								ray,
+								$ianmackenzie$elm_geometry$Sphere3d$centerPoint(
+									$author$project$DomainModel$sphere(node.left))));
+						var _v1 = _Utils_Tuple2(
+							!_Utils_eq(
+								A2(
+									$ianmackenzie$elm_geometry$Axis3d$intersectionWithSphere,
+									$author$project$DomainModel$sphere(node.left),
+									ray),
+								$elm$core$Maybe$Nothing),
+							!_Utils_eq(
+								A2(
+									$ianmackenzie$elm_geometry$Axis3d$intersectionWithSphere,
+									$author$project$DomainModel$sphere(node.right),
+									ray),
+								$elm$core$Maybe$Nothing));
+						var leftIntersects = _v1.a;
+						var rightIntersects = _v1.b;
+						var _v2 = _Utils_Tuple2(leftIntersects, rightIntersects);
+						if (_v2.a) {
+							if (_v2.b) {
+								var _v3 = A2(
+									helper,
+									node.right,
+									skip + $author$project$DomainModel$skipCount(node.left));
+								var rightBestIndex = _v3.a;
+								var rightBestDistance = _v3.b;
+								var _v4 = A2(helper, node.left, skip);
+								var leftBestIndex = _v4.a;
+								var leftBestDistance = _v4.b;
+								return A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, rightBestDistance, leftBestDistance) ? _Utils_Tuple2(leftBestIndex, leftBestDistance) : _Utils_Tuple2(rightBestIndex, rightBestDistance);
+							} else {
+								var $temp$withNode = node.left,
+									$temp$skip = skip;
+								withNode = $temp$withNode;
+								skip = $temp$skip;
+								continue helper;
+							}
+						} else {
+							if (_v2.b) {
+								var $temp$withNode = node.right,
+									$temp$skip = skip + $author$project$DomainModel$skipCount(node.left);
+								withNode = $temp$withNode;
+								skip = $temp$skip;
+								continue helper;
+							} else {
+								if (A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, rightDistance, leftDistance)) {
+									var $temp$withNode = node.left,
+										$temp$skip = skip;
+									withNode = $temp$withNode;
+									skip = $temp$skip;
+									continue helper;
+								} else {
+									var $temp$withNode = node.right,
+										$temp$skip = skip + $author$project$DomainModel$skipCount(node.left);
+									withNode = $temp$withNode;
+									skip = $temp$skip;
+									continue helper;
+								}
+							}
+						}
+					}
+				}
+			});
+		return A2(helper, treeNode, 0).a;
+	});
+var $ianmackenzie$elm_geometry$Point2d$pixels = F2(
+	function (x, y) {
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point2d(
+			{x: x, y: y});
+	});
+var $ianmackenzie$elm_geometry$Frame2d$copy = function (_v0) {
+	var properties = _v0.a;
+	return $ianmackenzie$elm_geometry$Geometry$Types$Frame2d(properties);
+};
+var $ianmackenzie$elm_geometry$Rectangle2d$axes = function (_v0) {
+	var rectangle = _v0.a;
+	return $ianmackenzie$elm_geometry$Frame2d$copy(rectangle.axes);
+};
+var $ianmackenzie$elm_geometry$Rectangle2d$dimensions = function (_v0) {
+	var rectangle = _v0.a;
+	return rectangle.dimensions;
+};
+var $ianmackenzie$elm_units$Quantity$divideBy = F2(
+	function (divisor, _v0) {
+		var value = _v0.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(value / divisor);
+	});
+var $ianmackenzie$elm_geometry$Frame3d$originPoint = function (_v0) {
+	var properties = _v0.a;
+	return properties.originPoint;
+};
+var $ianmackenzie$elm_3d_camera$Viewpoint3d$eyePoint = function (_v0) {
+	var frame = _v0.a;
+	return $ianmackenzie$elm_geometry$Frame3d$originPoint(frame);
+};
+var $ianmackenzie$elm_units$Quantity$multiplyBy = F2(
+	function (scale, _v0) {
+		var value = _v0.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(scale * value);
+	});
+var $ianmackenzie$elm_units$Quantity$negate = function (_v0) {
+	var value = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(-value);
+};
+var $ianmackenzie$elm_geometry$Direction3d$negativeZ = $ianmackenzie$elm_geometry$Direction3d$unsafe(
+	{x: 0, y: 0, z: -1});
+var $ianmackenzie$elm_units$Quantity$per = F2(
+	function (_v0, _v1) {
+		var independentValue = _v0.a;
+		var dependentValue = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(dependentValue / independentValue);
+	});
+var $ianmackenzie$elm_geometry$Direction3d$placeIn = F2(
+	function (_v0, _v1) {
+		var frame = _v0.a;
+		var d = _v1.a;
+		var _v2 = frame.zDirection;
+		var k = _v2.a;
+		var _v3 = frame.yDirection;
+		var j = _v3.a;
+		var _v4 = frame.xDirection;
+		var i = _v4.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
+			{x: ((i.x * d.x) + (j.x * d.y)) + (k.x * d.z), y: ((i.y * d.x) + (j.y * d.y)) + (k.y * d.z), z: ((i.z * d.x) + (j.z * d.y)) + (k.z * d.z)});
+	});
+var $ianmackenzie$elm_geometry$Geometry$Types$Axis3d = function (a) {
+	return {$: 'Axis3d', a: a};
+};
+var $ianmackenzie$elm_geometry$Axis3d$through = F2(
+	function (givenPoint, givenDirection) {
+		return $ianmackenzie$elm_geometry$Geometry$Types$Axis3d(
+			{direction: givenDirection, originPoint: givenPoint});
+	});
+var $ianmackenzie$elm_geometry$Direction3d$reverse = function (_v0) {
+	var d = _v0.a;
+	return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
+		{x: -d.x, y: -d.y, z: -d.z});
+};
+var $ianmackenzie$elm_geometry$Frame3d$zDirection = function (_v0) {
+	var properties = _v0.a;
+	return properties.zDirection;
+};
+var $ianmackenzie$elm_3d_camera$Viewpoint3d$viewDirection = function (_v0) {
+	var frame = _v0.a;
+	return $ianmackenzie$elm_geometry$Direction3d$reverse(
+		$ianmackenzie$elm_geometry$Frame3d$zDirection(frame));
+};
+var $ianmackenzie$elm_geometry$Point2d$xCoordinateIn = F2(
+	function (_v0, _v1) {
+		var frame = _v0.a;
+		var p = _v1.a;
+		var _v2 = frame.originPoint;
+		var p0 = _v2.a;
+		var _v3 = frame.xDirection;
+		var d = _v3.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(((p.x - p0.x) * d.x) + ((p.y - p0.y) * d.y));
+	});
+var $ianmackenzie$elm_geometry$Vector3d$xyz = F3(
+	function (_v0, _v1, _v2) {
+		var x = _v0.a;
+		var y = _v1.a;
+		var z = _v2.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
+			{x: x, y: y, z: z});
+	});
+var $ianmackenzie$elm_geometry$Point3d$xyzIn = F4(
+	function (_v0, _v1, _v2, _v3) {
+		var frame = _v0.a;
+		var x = _v1.a;
+		var y = _v2.a;
+		var z = _v3.a;
+		var _v4 = frame.originPoint;
+		var p0 = _v4.a;
+		var _v5 = frame.zDirection;
+		var k = _v5.a;
+		var _v6 = frame.yDirection;
+		var j = _v6.a;
+		var _v7 = frame.xDirection;
+		var i = _v7.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+			{x: ((p0.x + (x * i.x)) + (y * j.x)) + (z * k.x), y: ((p0.y + (x * i.y)) + (y * j.y)) + (z * k.y), z: ((p0.z + (x * i.z)) + (y * j.z)) + (z * k.z)});
+	});
+var $ianmackenzie$elm_geometry$Point2d$yCoordinateIn = F2(
+	function (_v0, _v1) {
+		var frame = _v0.a;
+		var p = _v1.a;
+		var _v2 = frame.originPoint;
+		var p0 = _v2.a;
+		var _v3 = frame.yDirection;
+		var d = _v3.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(((p.x - p0.x) * d.x) + ((p.y - p0.y) * d.y));
+	});
+var $ianmackenzie$elm_3d_camera$Camera3d$ray = F3(
+	function (_v0, screen, point) {
+		var camera = _v0.a;
+		var screenY = A2(
+			$ianmackenzie$elm_geometry$Point2d$yCoordinateIn,
+			$ianmackenzie$elm_geometry$Rectangle2d$axes(screen),
+			point);
+		var screenX = A2(
+			$ianmackenzie$elm_geometry$Point2d$xCoordinateIn,
+			$ianmackenzie$elm_geometry$Rectangle2d$axes(screen),
+			point);
+		var _v1 = camera.viewpoint;
+		var viewpointFrame = _v1.a;
+		var _v2 = $ianmackenzie$elm_geometry$Rectangle2d$dimensions(screen);
+		var screenWidth = _v2.a;
+		var screenHeight = _v2.b;
+		var _v3 = camera.projection;
+		if (_v3.$ === 'Perspective') {
+			var frustumSlope = _v3.a;
+			var screenZ = $ianmackenzie$elm_units$Quantity$negate(
+				A2(
+					$ianmackenzie$elm_units$Quantity$divideBy,
+					frustumSlope,
+					A2($ianmackenzie$elm_units$Quantity$multiplyBy, 0.5, screenHeight)));
+			var direction = A2(
+				$ianmackenzie$elm_geometry$Direction3d$placeIn,
+				viewpointFrame,
+				A2(
+					$elm$core$Maybe$withDefault,
+					$ianmackenzie$elm_geometry$Direction3d$negativeZ,
+					$ianmackenzie$elm_geometry$Vector3d$direction(
+						A3($ianmackenzie$elm_geometry$Vector3d$xyz, screenX, screenY, screenZ))));
+			return A2(
+				$ianmackenzie$elm_geometry$Axis3d$through,
+				$ianmackenzie$elm_3d_camera$Viewpoint3d$eyePoint(camera.viewpoint),
+				direction);
+		} else {
+			var viewpointHeight = _v3.a;
+			var resolution = A2($ianmackenzie$elm_units$Quantity$per, screenHeight, viewpointHeight);
+			var origin = A4(
+				$ianmackenzie$elm_geometry$Point3d$xyzIn,
+				viewpointFrame,
+				A2($ianmackenzie$elm_units$Quantity$at, resolution, screenX),
+				A2($ianmackenzie$elm_units$Quantity$at, resolution, screenY),
+				$ianmackenzie$elm_units$Quantity$zero);
+			return A2(
+				$ianmackenzie$elm_geometry$Axis3d$through,
+				origin,
+				$ianmackenzie$elm_3d_camera$Viewpoint3d$viewDirection(camera.viewpoint));
+		}
+	});
+var $ianmackenzie$elm_units$Quantity$toFloatQuantity = function (_v0) {
+	var value = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(value);
+};
+var $author$project$ViewThirdPerson$detectHit = F2(
+	function (event, model) {
+		var _v0 = _Utils_Tuple2(model.trackTree, model.viewContext);
+		if ((_v0.a.$ === 'Just') && (_v0.b.$ === 'Just')) {
+			var topNode = _v0.a.a;
+			var context = _v0.b.a;
+			var leaf = A2($author$project$DomainModel$leafFromIndex, model.currentPosition, topNode);
+			var camera = A3($author$project$ViewThirdPerson$deriveCamera, leaf, context, model.currentPosition);
+			var _v1 = event.offsetPos;
+			var x = _v1.a;
+			var y = _v1.b;
+			var screenPoint = A2($ianmackenzie$elm_geometry$Point2d$pixels, x, y);
+			var _v2 = model.viewDimensions;
+			var w = _v2.a;
+			var h = _v2.b;
+			var _v3 = _Utils_Tuple2(
+				$ianmackenzie$elm_units$Quantity$toFloatQuantity(w),
+				$ianmackenzie$elm_units$Quantity$toFloatQuantity(h));
+			var wFloat = _v3.a;
+			var hFloat = _v3.b;
+			var screenRectangle = A2(
+				$ianmackenzie$elm_geometry$Rectangle2d$from,
+				A2($ianmackenzie$elm_geometry$Point2d$xy, $ianmackenzie$elm_units$Quantity$zero, hFloat),
+				A2($ianmackenzie$elm_geometry$Point2d$xy, wFloat, $ianmackenzie$elm_units$Quantity$zero));
+			var ray = A3($ianmackenzie$elm_3d_camera$Camera3d$ray, camera, screenRectangle, screenPoint);
+			return A2($author$project$DomainModel$nearestToRay, ray, topNode);
+		} else {
+			return 0;
+		}
+	});
+var $author$project$ViewThirdPerson$multiplyDistanceBy = F2(
+	function (factor, context) {
+		return $elm$core$Maybe$Just(
+			_Utils_update(
+				context,
+				{
+					cameraDistance: A2($ianmackenzie$elm_units$Quantity$multiplyBy, factor, context.cameraDistance)
+				}));
+	});
+var $ianmackenzie$elm_units$Pixels$pixel = $ianmackenzie$elm_units$Pixels$pixels(1);
+var $author$project$ViewThirdPerson$update = F3(
+	function (msg, model, msgWrapper) {
+		var _v0 = _Utils_Tuple2(model.trackTree, model.viewContext);
+		if ((_v0.a.$ === 'Just') && (_v0.b.$ === 'Just')) {
+			var treeNode = _v0.a.a;
+			var context = _v0.b.a;
+			switch (msg.$) {
+				case 'ImageZoomIn':
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								viewContext: A2($author$project$ViewThirdPerson$multiplyDistanceBy, 0.7, context)
+							}),
+						$elm$core$Platform$Cmd$none);
+				case 'ImageZoomOut':
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								viewContext: A2($author$project$ViewThirdPerson$multiplyDistanceBy, 1 / 0.7, context)
+							}),
+						$elm$core$Platform$Cmd$none);
+				case 'ImageReset':
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								viewContext: $elm$core$Maybe$Just(
+									A2($author$project$ViewThirdPerson$initialiseView, model.currentPosition, treeNode))
+							}),
+						$elm$core$Platform$Cmd$none);
+				case 'ImageNoOp':
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				case 'ImageClick':
+					var event = msg.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								currentPosition: A2($author$project$ViewThirdPerson$detectHit, event, model)
+							}),
+						$elm$core$Platform$Cmd$none);
+				case 'ImageMouseWheel':
+					var deltaY = msg.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								viewContext: A2(
+									$author$project$ViewThirdPerson$multiplyDistanceBy,
+									A2($elm$core$Basics$pow, 1.001, deltaY),
+									context)
+							}),
+						$elm$core$Platform$Cmd$none);
+				case 'ImageGrab':
+					var event = msg.a;
+					var alternate = event.keys.ctrl || _Utils_eq(event.button, $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$SecondButton);
+					var newContext = $elm$core$Maybe$Just(
+						_Utils_update(
+							context,
+							{
+								dragAction: alternate ? $author$project$ViewContextThirdPerson$DragRotate : $author$project$ViewContextThirdPerson$DragPan,
+								orbiting: $elm$core$Maybe$Just(event.offsetPos),
+								waitingForClickDelay: true
+							}));
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{viewContext: newContext}),
+						A2(
+							$andrewMacmurray$elm_delay$Delay$after,
+							250,
+							msgWrapper($author$project$ViewThirdPerson$ClickDelayExpired)));
+				case 'ImageDrag':
+					var event = msg.a;
+					var _v2 = event.offsetPos;
+					var dx = _v2.a;
+					var dy = _v2.b;
+					var _v3 = _Utils_Tuple2(context.dragAction, context.orbiting);
+					_v3$2:
+					while (true) {
+						if (_v3.b.$ === 'Just') {
+							switch (_v3.a.$) {
+								case 'DragRotate':
+									var _v4 = _v3.a;
+									var _v5 = _v3.b.a;
+									var startX = _v5.a;
+									var startY = _v5.b;
+									return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+								case 'DragPan':
+									var _v6 = _v3.a;
+									var _v7 = _v3.b.a;
+									var startX = _v7.a;
+									var startY = _v7.b;
+									var rotationRate = A2(
+										$ianmackenzie$elm_units$Quantity$per,
+										$ianmackenzie$elm_units$Pixels$pixel,
+										$ianmackenzie$elm_units$Angle$degrees(1));
+									var elevationChange = A2(
+										$ianmackenzie$elm_units$Quantity$at,
+										rotationRate,
+										$ianmackenzie$elm_units$Pixels$pixels(dy - startY));
+									var azimuthChange = A2(
+										$ianmackenzie$elm_units$Quantity$at,
+										rotationRate,
+										$ianmackenzie$elm_units$Pixels$pixels(startX - dx));
+									var newContext = $elm$core$Maybe$Just(
+										_Utils_update(
+											context,
+											{
+												cameraAzimuth: A2($ianmackenzie$elm_geometry$Direction2d$rotateBy, azimuthChange, context.cameraAzimuth),
+												cameraElevation: A2($ianmackenzie$elm_units$Quantity$plus, elevationChange, context.cameraElevation),
+												orbiting: $elm$core$Maybe$Just(
+													_Utils_Tuple2(dx, dy))
+											}));
+									return _Utils_Tuple2(
+										_Utils_update(
+											model,
+											{viewContext: newContext}),
+										$elm$core$Platform$Cmd$none);
+								default:
+									break _v3$2;
+							}
+						} else {
+							break _v3$2;
+						}
+					}
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				case 'ImageRelease':
+					var event = msg.a;
+					var newContext = $elm$core$Maybe$Just(
+						_Utils_update(
+							context,
+							{dragAction: $author$project$ViewContextThirdPerson$DragNone, orbiting: $elm$core$Maybe$Nothing, waitingForClickDelay: false}));
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{viewContext: newContext}),
+						$elm$core$Platform$Cmd$none);
+				case 'ImageDoubleClick':
+					var event = msg.a;
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				default:
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								viewContext: $elm$core$Maybe$Just(
+									_Utils_update(
+										context,
+										{waitingForClickDelay: false}))
+							}),
+						$elm$core$Platform$Cmd$none);
+			}
+		} else {
+			return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$ViewingMode$ViewMap = {$: 'ViewMap'};
+var $author$project$PortController$centreMapOnCurrent = function (model) {
+	var _v0 = model.trackTree;
+	if (_v0.$ === 'Just') {
+		var tree = _v0.a;
+		var _v1 = A2(
+			$author$project$DomainModel$gpxFromPointWithReference,
+			model.referenceLonLat,
+			$author$project$DomainModel$startPoint(
+				A2($author$project$DomainModel$leafFromIndex, model.currentPosition, tree)));
+		var longitude = _v1.longitude;
+		var latitude = _v1.latitude;
+		var altitude = _v1.altitude;
+		return $author$project$PortController$commandPort(
+			$elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'Cmd',
+						$elm$json$Json$Encode$string('Centre')),
+						_Utils_Tuple2(
+						'token',
+						$elm$json$Json$Encode$string($author$project$MapboxKey$mapboxKey)),
+						_Utils_Tuple2(
+						'lon',
+						$elm$json$Json$Encode$float(
+							$ianmackenzie$elm_units$Angle$inDegrees(
+								$ianmackenzie$elm_geometry$Direction2d$toAngle(longitude)))),
+						_Utils_Tuple2(
+						'lat',
+						$elm$json$Json$Encode$float(
+							$ianmackenzie$elm_units$Angle$inDegrees(latitude)))
+					])));
+	} else {
+		return $elm$core$Platform$Cmd$none;
+	}
+};
+var $avh4$elm_color$Color$RgbaSpace = F4(
+	function (a, b, c, d) {
+		return {$: 'RgbaSpace', a: a, b: b, c: c, d: d};
+	});
+var $avh4$elm_color$Color$black = A4($avh4$elm_color$Color$RgbaSpace, 0 / 255, 0 / 255, 0 / 255, 1.0);
 var $ianmackenzie$elm_3d_scene$Scene3d$Types$Constant = function (a) {
 	return {$: 'Constant', a: a};
 };
@@ -10514,31 +12779,6 @@ var $ianmackenzie$elm_geometry$LineSegment3d$endpoints = function (_v0) {
 	var lineSegmentEndpoints = _v0.a;
 	return lineSegmentEndpoints;
 };
-var $ianmackenzie$elm_units$Quantity$max = F2(
-	function (_v0, _v1) {
-		var x = _v0.a;
-		var y = _v1.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(
-			A2($elm$core$Basics$max, x, y));
-	});
-var $ianmackenzie$elm_geometry$BoundingBox3d$from = F2(
-	function (firstPoint, secondPoint) {
-		var z2 = $ianmackenzie$elm_geometry$Point3d$zCoordinate(secondPoint);
-		var z1 = $ianmackenzie$elm_geometry$Point3d$zCoordinate(firstPoint);
-		var y2 = $ianmackenzie$elm_geometry$Point3d$yCoordinate(secondPoint);
-		var y1 = $ianmackenzie$elm_geometry$Point3d$yCoordinate(firstPoint);
-		var x2 = $ianmackenzie$elm_geometry$Point3d$xCoordinate(secondPoint);
-		var x1 = $ianmackenzie$elm_geometry$Point3d$xCoordinate(firstPoint);
-		return $ianmackenzie$elm_geometry$Geometry$Types$BoundingBox3d(
-			{
-				maxX: A2($ianmackenzie$elm_units$Quantity$max, x1, x2),
-				maxY: A2($ianmackenzie$elm_units$Quantity$max, y1, y2),
-				maxZ: A2($ianmackenzie$elm_units$Quantity$max, z1, z2),
-				minX: A2($ianmackenzie$elm_units$Quantity$min, x1, x2),
-				minY: A2($ianmackenzie$elm_units$Quantity$min, y1, y2),
-				minZ: A2($ianmackenzie$elm_units$Quantity$min, z1, z2)
-			});
-	});
 var $ianmackenzie$elm_geometry$LineSegment3d$boundingBox = function (lineSegment) {
 	var _v0 = $ianmackenzie$elm_geometry$LineSegment3d$endpoints(lineSegment);
 	var p1 = _v0.a;
@@ -10621,57 +12861,6 @@ var $ianmackenzie$elm_3d_scene$Scene3d$Entity$lineSegmentVertices = $elm_explora
 			{lineSegmentVertex: 1})
 		]));
 var $elm_explorations$linear_algebra$Math$Vector3$scale = _MJS_v3scale;
-var $ianmackenzie$elm_units$Quantity$interpolateFrom = F3(
-	function (_v0, _v1, parameter) {
-		var start = _v0.a;
-		var end = _v1.a;
-		return (parameter <= 0.5) ? $ianmackenzie$elm_units$Quantity$Quantity(start + (parameter * (end - start))) : $ianmackenzie$elm_units$Quantity$Quantity(end + ((1 - parameter) * (start - end)));
-	});
-var $ianmackenzie$elm_geometry$BoundingBox3d$midX = function (_v0) {
-	var boundingBox = _v0.a;
-	return A3($ianmackenzie$elm_units$Quantity$interpolateFrom, boundingBox.minX, boundingBox.maxX, 0.5);
-};
-var $ianmackenzie$elm_geometry$BoundingBox3d$midY = function (_v0) {
-	var boundingBox = _v0.a;
-	return A3($ianmackenzie$elm_units$Quantity$interpolateFrom, boundingBox.minY, boundingBox.maxY, 0.5);
-};
-var $ianmackenzie$elm_geometry$BoundingBox3d$midZ = function (_v0) {
-	var boundingBox = _v0.a;
-	return A3($ianmackenzie$elm_units$Quantity$interpolateFrom, boundingBox.minZ, boundingBox.maxZ, 0.5);
-};
-var $ianmackenzie$elm_geometry$Geometry$Types$Point3d = function (a) {
-	return {$: 'Point3d', a: a};
-};
-var $ianmackenzie$elm_geometry$Point3d$xyz = F3(
-	function (_v0, _v1, _v2) {
-		var x = _v0.a;
-		var y = _v1.a;
-		var z = _v2.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
-			{x: x, y: y, z: z});
-	});
-var $ianmackenzie$elm_geometry$BoundingBox3d$centerPoint = function (boundingBox) {
-	return A3(
-		$ianmackenzie$elm_geometry$Point3d$xyz,
-		$ianmackenzie$elm_geometry$BoundingBox3d$midX(boundingBox),
-		$ianmackenzie$elm_geometry$BoundingBox3d$midY(boundingBox),
-		$ianmackenzie$elm_geometry$BoundingBox3d$midZ(boundingBox));
-};
-var $ianmackenzie$elm_geometry$BoundingBox3d$dimensions = function (boundingBox) {
-	return _Utils_Tuple3(
-		A2(
-			$ianmackenzie$elm_units$Quantity$minus,
-			$ianmackenzie$elm_geometry$BoundingBox3d$minX(boundingBox),
-			$ianmackenzie$elm_geometry$BoundingBox3d$maxX(boundingBox)),
-		A2(
-			$ianmackenzie$elm_units$Quantity$minus,
-			$ianmackenzie$elm_geometry$BoundingBox3d$minY(boundingBox),
-			$ianmackenzie$elm_geometry$BoundingBox3d$maxY(boundingBox)),
-		A2(
-			$ianmackenzie$elm_units$Quantity$minus,
-			$ianmackenzie$elm_geometry$BoundingBox3d$minZ(boundingBox),
-			$ianmackenzie$elm_geometry$BoundingBox3d$maxZ(boundingBox)));
-};
 var $ianmackenzie$elm_geometry$Point3d$unwrap = function (_v0) {
 	var pointCoordinates = _v0.a;
 	return pointCoordinates;
@@ -10780,13 +12969,6 @@ var $ianmackenzie$elm_geometry$Plane3d$normalDirection = function (_v0) {
 	var plane = _v0.a;
 	return plane.normalDirection;
 };
-var $ianmackenzie$elm_geometry$Point3d$translateBy = F2(
-	function (_v0, _v1) {
-		var v = _v0.a;
-		var p = _v1.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
-			{x: p.x + v.x, y: p.y + v.y, z: p.z + v.z});
-	});
 var $ianmackenzie$elm_geometry$Geometry$Types$Plane3d = function (a) {
 	return {$: 'Plane3d', a: a};
 };
@@ -10802,16 +12984,6 @@ var $ianmackenzie$elm_geometry$Plane3d$translateBy = F2(
 			$ianmackenzie$elm_geometry$Plane3d$withNormalDirection,
 			plane.normalDirection,
 			A2($ianmackenzie$elm_geometry$Point3d$translateBy, vector, plane.originPoint));
-	});
-var $ianmackenzie$elm_geometry$Geometry$Types$Vector3d = function (a) {
-	return {$: 'Vector3d', a: a};
-};
-var $ianmackenzie$elm_geometry$Vector3d$withLength = F2(
-	function (_v0, _v1) {
-		var a = _v0.a;
-		var d = _v1.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
-			{x: a * d.x, y: a * d.y, z: a * d.z});
 	});
 var $ianmackenzie$elm_geometry$Plane3d$translateIn = F3(
 	function (direction, distance, plane) {
@@ -11771,28 +13943,11 @@ var $ianmackenzie$elm_geometry$LineSegment3d$startPoint = function (_v0) {
 	var start = _v1.a;
 	return start;
 };
-var $author$project$DomainModel$trueLength = function (treeNode) {
-	if (treeNode.$ === 'Leaf') {
-		var leaf = treeNode.a;
-		return leaf.trueLength;
-	} else {
-		var node = treeNode.a;
-		return node.nodeContent.trueLength;
-	}
-};
 var $ianmackenzie$elm_geometry$Plane3d$through = F2(
 	function (givenPoint, givenNormalDirection) {
 		return $ianmackenzie$elm_geometry$Geometry$Types$Plane3d(
 			{normalDirection: givenNormalDirection, originPoint: givenPoint});
 	});
-var $ianmackenzie$elm_geometry$Geometry$Types$Direction3d = function (a) {
-	return {$: 'Direction3d', a: a};
-};
-var $ianmackenzie$elm_geometry$Direction3d$unsafe = function (givenComponents) {
-	return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(givenComponents);
-};
-var $ianmackenzie$elm_geometry$Direction3d$positiveZ = $ianmackenzie$elm_geometry$Direction3d$unsafe(
-	{x: 0, y: 0, z: 1});
 var $ianmackenzie$elm_geometry$Direction3d$z = $ianmackenzie$elm_geometry$Direction3d$positiveZ;
 var $ianmackenzie$elm_geometry$Plane3d$xy = A2($ianmackenzie$elm_geometry$Plane3d$through, $ianmackenzie$elm_geometry$Point3d$origin, $ianmackenzie$elm_geometry$Direction3d$z);
 var $author$project$SceneBuilder$render3dView = function (model) {
@@ -11945,2168 +14100,25 @@ var $author$project$SceneBuilder$render3dView = function (model) {
 		return _List_Nil;
 	}
 };
-var $author$project$Main$renderModel = function (model) {
+var $author$project$Actions$renderModel = function (model) {
 	return _Utils_update(
 		model,
 		{
 			scene: $author$project$SceneBuilder$render3dView(model)
 		});
 };
-var $author$project$MyIP$apiRoot = 'http://ip-api.com';
-var $elm$url$Url$Builder$toQueryPair = function (_v0) {
-	var key = _v0.a;
-	var value = _v0.b;
-	return key + ('=' + value);
-};
-var $elm$url$Url$Builder$toQuery = function (parameters) {
-	if (!parameters.b) {
-		return '';
-	} else {
-		return '?' + A2(
-			$elm$core$String$join,
-			'&',
-			A2($elm$core$List$map, $elm$url$Url$Builder$toQueryPair, parameters));
-	}
-};
-var $elm$url$Url$Builder$crossOrigin = F3(
-	function (prePath, pathSegments, parameters) {
-		return prePath + ('/' + (A2($elm$core$String$join, '/', pathSegments) + $elm$url$Url$Builder$toQuery(parameters)));
-	});
-var $elm$http$Http$BadStatus_ = F2(
-	function (a, b) {
-		return {$: 'BadStatus_', a: a, b: b};
-	});
-var $elm$http$Http$BadUrl_ = function (a) {
-	return {$: 'BadUrl_', a: a};
-};
-var $elm$http$Http$GoodStatus_ = F2(
-	function (a, b) {
-		return {$: 'GoodStatus_', a: a, b: b};
-	});
-var $elm$http$Http$NetworkError_ = {$: 'NetworkError_'};
-var $elm$http$Http$Receiving = function (a) {
-	return {$: 'Receiving', a: a};
-};
-var $elm$http$Http$Sending = function (a) {
-	return {$: 'Sending', a: a};
-};
-var $elm$http$Http$Timeout_ = {$: 'Timeout_'};
-var $elm$core$Maybe$isJust = function (maybe) {
-	if (maybe.$ === 'Just') {
-		return true;
-	} else {
-		return false;
-	}
-};
-var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
-var $elm$http$Http$emptyBody = _Http_emptyBody;
-var $elm$json$Json$Decode$decodeString = _Json_runOnString;
-var $elm$http$Http$expectStringResponse = F2(
-	function (toMsg, toResult) {
-		return A3(
-			_Http_expect,
-			'',
-			$elm$core$Basics$identity,
-			A2($elm$core$Basics$composeR, toResult, toMsg));
-	});
-var $elm$core$Result$mapError = F2(
-	function (f, result) {
-		if (result.$ === 'Ok') {
-			var v = result.a;
-			return $elm$core$Result$Ok(v);
-		} else {
-			var e = result.a;
-			return $elm$core$Result$Err(
-				f(e));
-		}
-	});
-var $elm$http$Http$BadBody = function (a) {
-	return {$: 'BadBody', a: a};
-};
-var $elm$http$Http$BadStatus = function (a) {
-	return {$: 'BadStatus', a: a};
-};
-var $elm$http$Http$BadUrl = function (a) {
-	return {$: 'BadUrl', a: a};
-};
-var $elm$http$Http$NetworkError = {$: 'NetworkError'};
-var $elm$http$Http$Timeout = {$: 'Timeout'};
-var $elm$http$Http$resolve = F2(
-	function (toResult, response) {
-		switch (response.$) {
-			case 'BadUrl_':
-				var url = response.a;
-				return $elm$core$Result$Err(
-					$elm$http$Http$BadUrl(url));
-			case 'Timeout_':
-				return $elm$core$Result$Err($elm$http$Http$Timeout);
-			case 'NetworkError_':
-				return $elm$core$Result$Err($elm$http$Http$NetworkError);
-			case 'BadStatus_':
-				var metadata = response.a;
-				return $elm$core$Result$Err(
-					$elm$http$Http$BadStatus(metadata.statusCode));
-			default:
-				var body = response.b;
-				return A2(
-					$elm$core$Result$mapError,
-					$elm$http$Http$BadBody,
-					toResult(body));
-		}
-	});
-var $elm$http$Http$expectJson = F2(
-	function (toMsg, decoder) {
-		return A2(
-			$elm$http$Http$expectStringResponse,
-			toMsg,
-			$elm$http$Http$resolve(
-				function (string) {
-					return A2(
-						$elm$core$Result$mapError,
-						$elm$json$Json$Decode$errorToString,
-						A2($elm$json$Json$Decode$decodeString, decoder, string));
-				}));
-	});
-var $author$project$GeoCodeDecoders$IpInfo = F7(
-	function (ip, country, region, city, zip, latitude, longitude) {
-		return {city: city, country: country, ip: ip, latitude: latitude, longitude: longitude, region: region, zip: zip};
-	});
-var $elm$json$Json$Decode$at = F2(
-	function (fields, decoder) {
-		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
-	});
-var $elm$json$Json$Decode$map7 = _Json_map7;
-var $author$project$GeoCodeDecoders$ipInfoDecoder = A8(
-	$elm$json$Json$Decode$map7,
-	$author$project$GeoCodeDecoders$IpInfo,
-	A2(
-		$elm$json$Json$Decode$at,
-		_List_fromArray(
-			['query']),
-		$elm$json$Json$Decode$string),
-	A2(
-		$elm$json$Json$Decode$at,
-		_List_fromArray(
-			['country']),
-		$elm$json$Json$Decode$string),
-	A2(
-		$elm$json$Json$Decode$at,
-		_List_fromArray(
-			['region']),
-		$elm$json$Json$Decode$string),
-	A2(
-		$elm$json$Json$Decode$at,
-		_List_fromArray(
-			['city']),
-		$elm$json$Json$Decode$string),
-	A2(
-		$elm$json$Json$Decode$at,
-		_List_fromArray(
-			['zip']),
-		$elm$json$Json$Decode$string),
-	A2(
-		$elm$json$Json$Decode$at,
-		_List_fromArray(
-			['lat']),
-		$elm$json$Json$Decode$float),
-	A2(
-		$elm$json$Json$Decode$at,
-		_List_fromArray(
-			['lon']),
-		$elm$json$Json$Decode$float));
-var $elm$http$Http$Request = function (a) {
-	return {$: 'Request', a: a};
-};
-var $elm$http$Http$State = F2(
-	function (reqs, subs) {
-		return {reqs: reqs, subs: subs};
-	});
-var $elm$http$Http$init = $elm$core$Task$succeed(
-	A2($elm$http$Http$State, $elm$core$Dict$empty, _List_Nil));
-var $elm$core$Process$kill = _Scheduler_kill;
-var $elm$core$Process$spawn = _Scheduler_spawn;
-var $elm$http$Http$updateReqs = F3(
-	function (router, cmds, reqs) {
-		updateReqs:
-		while (true) {
-			if (!cmds.b) {
-				return $elm$core$Task$succeed(reqs);
-			} else {
-				var cmd = cmds.a;
-				var otherCmds = cmds.b;
-				if (cmd.$ === 'Cancel') {
-					var tracker = cmd.a;
-					var _v2 = A2($elm$core$Dict$get, tracker, reqs);
-					if (_v2.$ === 'Nothing') {
-						var $temp$router = router,
-							$temp$cmds = otherCmds,
-							$temp$reqs = reqs;
-						router = $temp$router;
-						cmds = $temp$cmds;
-						reqs = $temp$reqs;
-						continue updateReqs;
-					} else {
-						var pid = _v2.a;
-						return A2(
-							$elm$core$Task$andThen,
-							function (_v3) {
-								return A3(
-									$elm$http$Http$updateReqs,
-									router,
-									otherCmds,
-									A2($elm$core$Dict$remove, tracker, reqs));
-							},
-							$elm$core$Process$kill(pid));
-					}
-				} else {
-					var req = cmd.a;
-					return A2(
-						$elm$core$Task$andThen,
-						function (pid) {
-							var _v4 = req.tracker;
-							if (_v4.$ === 'Nothing') {
-								return A3($elm$http$Http$updateReqs, router, otherCmds, reqs);
-							} else {
-								var tracker = _v4.a;
-								return A3(
-									$elm$http$Http$updateReqs,
-									router,
-									otherCmds,
-									A3($elm$core$Dict$insert, tracker, pid, reqs));
-							}
-						},
-						$elm$core$Process$spawn(
-							A3(
-								_Http_toTask,
-								router,
-								$elm$core$Platform$sendToApp(router),
-								req)));
-				}
-			}
-		}
-	});
-var $elm$http$Http$onEffects = F4(
-	function (router, cmds, subs, state) {
-		return A2(
-			$elm$core$Task$andThen,
-			function (reqs) {
-				return $elm$core$Task$succeed(
-					A2($elm$http$Http$State, reqs, subs));
-			},
-			A3($elm$http$Http$updateReqs, router, cmds, state.reqs));
-	});
-var $elm$http$Http$maybeSend = F4(
-	function (router, desiredTracker, progress, _v0) {
-		var actualTracker = _v0.a;
-		var toMsg = _v0.b;
-		return _Utils_eq(desiredTracker, actualTracker) ? $elm$core$Maybe$Just(
-			A2(
-				$elm$core$Platform$sendToApp,
-				router,
-				toMsg(progress))) : $elm$core$Maybe$Nothing;
-	});
-var $elm$http$Http$onSelfMsg = F3(
-	function (router, _v0, state) {
-		var tracker = _v0.a;
-		var progress = _v0.b;
-		return A2(
-			$elm$core$Task$andThen,
-			function (_v1) {
-				return $elm$core$Task$succeed(state);
-			},
-			$elm$core$Task$sequence(
-				A2(
-					$elm$core$List$filterMap,
-					A3($elm$http$Http$maybeSend, router, tracker, progress),
-					state.subs)));
-	});
-var $elm$http$Http$Cancel = function (a) {
-	return {$: 'Cancel', a: a};
-};
-var $elm$http$Http$cmdMap = F2(
-	function (func, cmd) {
-		if (cmd.$ === 'Cancel') {
-			var tracker = cmd.a;
-			return $elm$http$Http$Cancel(tracker);
-		} else {
-			var r = cmd.a;
-			return $elm$http$Http$Request(
-				{
-					allowCookiesFromOtherDomains: r.allowCookiesFromOtherDomains,
-					body: r.body,
-					expect: A2(_Http_mapExpect, func, r.expect),
-					headers: r.headers,
-					method: r.method,
-					timeout: r.timeout,
-					tracker: r.tracker,
-					url: r.url
-				});
-		}
-	});
-var $elm$http$Http$MySub = F2(
-	function (a, b) {
-		return {$: 'MySub', a: a, b: b};
-	});
-var $elm$http$Http$subMap = F2(
-	function (func, _v0) {
-		var tracker = _v0.a;
-		var toMsg = _v0.b;
-		return A2(
-			$elm$http$Http$MySub,
-			tracker,
-			A2($elm$core$Basics$composeR, toMsg, func));
-	});
-_Platform_effectManagers['Http'] = _Platform_createManager($elm$http$Http$init, $elm$http$Http$onEffects, $elm$http$Http$onSelfMsg, $elm$http$Http$cmdMap, $elm$http$Http$subMap);
-var $elm$http$Http$command = _Platform_leaf('Http');
-var $elm$http$Http$subscription = _Platform_leaf('Http');
-var $elm$http$Http$request = function (r) {
-	return $elm$http$Http$command(
-		$elm$http$Http$Request(
-			{allowCookiesFromOtherDomains: false, body: r.body, expect: r.expect, headers: r.headers, method: r.method, timeout: r.timeout, tracker: r.tracker, url: r.url}));
-};
-var $author$project$MyIP$requestIpInformation = function (msg) {
-	return $elm$http$Http$request(
-		{
-			body: $elm$http$Http$emptyBody,
-			expect: A2($elm$http$Http$expectJson, msg, $author$project$GeoCodeDecoders$ipInfoDecoder),
-			headers: _List_Nil,
-			method: 'GET',
-			timeout: $elm$core$Maybe$Nothing,
-			tracker: $elm$core$Maybe$Nothing,
-			url: A3(
-				$elm$url$Url$Builder$crossOrigin,
-				$author$project$MyIP$apiRoot,
-				_List_fromArray(
-					['json']),
-				_List_Nil)
-		});
-};
-var $elm$file$File$toString = _File_toString;
-var $author$project$DomainModel$Leaf = function (a) {
-	return {$: 'Leaf', a: a};
-};
-var $author$project$DomainModel$Node = function (a) {
-	return {$: 'Node', a: a};
-};
-var $ianmackenzie$elm_units$Quantity$sqrt = function (_v0) {
-	var value = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(
-		$elm$core$Basics$sqrt(value));
-};
-var $ianmackenzie$elm_units$Quantity$squared = function (_v0) {
-	var value = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(value * value);
-};
-var $ianmackenzie$elm_units$Quantity$sum = function (quantities) {
-	return A3($elm$core$List$foldl, $ianmackenzie$elm_units$Quantity$plus, $ianmackenzie$elm_units$Quantity$zero, quantities);
-};
-var $ianmackenzie$elm_geometry$Geometry$Types$Sphere3d = function (a) {
-	return {$: 'Sphere3d', a: a};
-};
-var $ianmackenzie$elm_geometry$Sphere3d$withRadius = F2(
-	function (givenRadius, givenCenterPoint) {
-		return $ianmackenzie$elm_geometry$Geometry$Types$Sphere3d(
-			{
-				centerPoint: givenCenterPoint,
-				radius: $ianmackenzie$elm_units$Quantity$abs(givenRadius)
-			});
-	});
-var $author$project$DomainModel$containingSphere = function (box) {
-	var here = $ianmackenzie$elm_geometry$BoundingBox3d$centerPoint(box);
-	var _v0 = $ianmackenzie$elm_geometry$BoundingBox3d$dimensions(box);
-	var xs = _v0.a;
-	var ys = _v0.b;
-	var zs = _v0.c;
-	var radius = $ianmackenzie$elm_units$Quantity$half(
-		$ianmackenzie$elm_units$Quantity$sqrt(
-			$ianmackenzie$elm_units$Quantity$sum(
-				_List_fromArray(
-					[
-						$ianmackenzie$elm_units$Quantity$squared(xs),
-						$ianmackenzie$elm_units$Quantity$squared(ys),
-						$ianmackenzie$elm_units$Quantity$squared(zs)
-					]))));
-	return A2($ianmackenzie$elm_geometry$Sphere3d$withRadius, radius, here);
-};
-var $ianmackenzie$elm_units$Angle$cos = function (_v0) {
-	var angle = _v0.a;
-	return $elm$core$Basics$cos(angle);
-};
-var $author$project$DomainModel$pointFromGpxWithReference = F2(
-	function (reference, gpx) {
-		return A3(
-			$ianmackenzie$elm_geometry$Point3d$xyz,
-			$ianmackenzie$elm_units$Length$meters(
-				$author$project$Spherical$metresPerDegree * $ianmackenzie$elm_units$Angle$inDegrees(
-					A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, reference.longitude, gpx.longitude))),
-			$ianmackenzie$elm_units$Length$meters(
-				$ianmackenzie$elm_units$Angle$cos(reference.latitude) * ($author$project$Spherical$metresPerDegree * $ianmackenzie$elm_units$Angle$inDegrees(
-					A2($ianmackenzie$elm_units$Quantity$minus, reference.latitude, gpx.latitude)))),
-			A2($ianmackenzie$elm_units$Quantity$minus, reference.altitude, gpx.altitude));
-	});
-var $author$project$DomainModel$makeRoadSection = F3(
-	function (reference, earth1, earth2) {
-		var range = $ianmackenzie$elm_units$Length$meters(
-			A2(
-				$author$project$Spherical$range,
-				_Utils_Tuple2(
-					$ianmackenzie$elm_geometry$Direction2d$toAngle(earth1.longitude),
-					earth1.latitude),
-				_Utils_Tuple2(
-					$ianmackenzie$elm_geometry$Direction2d$toAngle(earth2.longitude),
-					earth2.latitude)));
-		var medianLon = A2(
-			$ianmackenzie$elm_geometry$Direction2d$rotateBy,
-			$ianmackenzie$elm_units$Quantity$half(
-				A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, earth1.longitude, earth2.longitude)),
-			earth1.longitude);
-		var local2 = A2($author$project$DomainModel$pointFromGpxWithReference, reference, earth2);
-		var local1 = A2($author$project$DomainModel$pointFromGpxWithReference, reference, earth1);
-		var box = A2($ianmackenzie$elm_geometry$BoundingBox3d$from, local1, local2);
-		return {
-			boundingBox: box,
-			eastwardTurn: A2(
-				$ianmackenzie$elm_units$Quantity$max,
-				$ianmackenzie$elm_units$Quantity$zero,
-				A2(
-					$ianmackenzie$elm_units$Quantity$max,
-					A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, medianLon, earth1.longitude),
-					A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, medianLon, earth2.longitude))),
-			endPoint: local2,
-			medianLongitude: medianLon,
-			skipCount: 1,
-			sourceData: _Utils_Tuple2(earth1, earth2),
-			sphere: $author$project$DomainModel$containingSphere(box),
-			startPoint: local1,
-			trueLength: range,
-			westwardTurn: A2(
-				$ianmackenzie$elm_units$Quantity$min,
-				$ianmackenzie$elm_units$Quantity$zero,
-				A2(
-					$ianmackenzie$elm_units$Quantity$min,
-					A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, medianLon, earth1.longitude),
-					A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, medianLon, earth2.longitude)))
-		};
-	});
-var $author$project$DomainModel$sourceData = function (treeNode) {
-	if (treeNode.$ === 'Leaf') {
-		var leaf = treeNode.a;
-		return leaf.sourceData;
-	} else {
-		var node = treeNode.a;
-		return node.nodeContent.sourceData;
-	}
-};
-var $ianmackenzie$elm_geometry$BoundingBox3d$extrema = function (_v0) {
-	var boundingBoxExtrema = _v0.a;
-	return boundingBoxExtrema;
-};
-var $ianmackenzie$elm_geometry$BoundingBox3d$union = F2(
-	function (firstBox, secondBox) {
-		var b2 = $ianmackenzie$elm_geometry$BoundingBox3d$extrema(secondBox);
-		var b1 = $ianmackenzie$elm_geometry$BoundingBox3d$extrema(firstBox);
-		return $ianmackenzie$elm_geometry$Geometry$Types$BoundingBox3d(
-			{
-				maxX: A2($ianmackenzie$elm_units$Quantity$max, b1.maxX, b2.maxX),
-				maxY: A2($ianmackenzie$elm_units$Quantity$max, b1.maxY, b2.maxY),
-				maxZ: A2($ianmackenzie$elm_units$Quantity$max, b1.maxZ, b2.maxZ),
-				minX: A2($ianmackenzie$elm_units$Quantity$min, b1.minX, b2.minX),
-				minY: A2($ianmackenzie$elm_units$Quantity$min, b1.minY, b2.minY),
-				minZ: A2($ianmackenzie$elm_units$Quantity$min, b1.minZ, b2.minZ)
-			});
-	});
-var $author$project$DomainModel$treeFromList = function (track) {
-	var referencePoint = A2(
-		$elm$core$Maybe$withDefault,
-		A3($author$project$DomainModel$GPXSource, $ianmackenzie$elm_geometry$Direction2d$x, $ianmackenzie$elm_units$Quantity$zero, $ianmackenzie$elm_units$Quantity$zero),
-		$elm$core$List$head(track));
-	var numberOfSegments = $elm$core$List$length(track) - 1;
-	var combineInfo = F2(
-		function (info1, info2) {
-			var sharedMedian = A2(
-				$ianmackenzie$elm_geometry$Direction2d$rotateBy,
-				$ianmackenzie$elm_units$Quantity$half(
-					A2(
-						$ianmackenzie$elm_geometry$Direction2d$angleFrom,
-						$author$project$DomainModel$medianLongitude(info1),
-						$author$project$DomainModel$medianLongitude(info2))),
-				$author$project$DomainModel$medianLongitude(info1));
-			var box = A2(
-				$ianmackenzie$elm_geometry$BoundingBox3d$union,
-				$author$project$DomainModel$boundingBox(info1),
-				$author$project$DomainModel$boundingBox(info2));
-			return {
-				boundingBox: box,
-				eastwardTurn: A2(
-					$ianmackenzie$elm_units$Quantity$max,
-					A2(
-						$ianmackenzie$elm_geometry$Direction2d$angleFrom,
-						sharedMedian,
-						A2(
-							$ianmackenzie$elm_geometry$Direction2d$rotateBy,
-							$author$project$DomainModel$eastwardTurn(info1),
-							$author$project$DomainModel$medianLongitude(info1))),
-					A2(
-						$ianmackenzie$elm_geometry$Direction2d$angleFrom,
-						sharedMedian,
-						A2(
-							$ianmackenzie$elm_geometry$Direction2d$rotateBy,
-							$author$project$DomainModel$eastwardTurn(info2),
-							$author$project$DomainModel$medianLongitude(info2)))),
-				endPoint: $author$project$DomainModel$endPoint(info2),
-				medianLongitude: sharedMedian,
-				skipCount: $author$project$DomainModel$skipCount(info1) + $author$project$DomainModel$skipCount(info2),
-				sourceData: _Utils_Tuple2(
-					$author$project$DomainModel$sourceData(info1).a,
-					$author$project$DomainModel$sourceData(info2).b),
-				sphere: $author$project$DomainModel$containingSphere(box),
-				startPoint: $author$project$DomainModel$startPoint(info1),
-				trueLength: A2(
-					$ianmackenzie$elm_units$Quantity$plus,
-					$author$project$DomainModel$trueLength(info1),
-					$author$project$DomainModel$trueLength(info2)),
-				westwardTurn: A2(
-					$ianmackenzie$elm_units$Quantity$min,
-					A2(
-						$ianmackenzie$elm_geometry$Direction2d$angleFrom,
-						sharedMedian,
-						A2(
-							$ianmackenzie$elm_geometry$Direction2d$rotateBy,
-							$author$project$DomainModel$westwardTurn(info1),
-							$author$project$DomainModel$medianLongitude(info1))),
-					A2(
-						$ianmackenzie$elm_geometry$Direction2d$angleFrom,
-						sharedMedian,
-						A2(
-							$ianmackenzie$elm_geometry$Direction2d$rotateBy,
-							$author$project$DomainModel$westwardTurn(info2),
-							$author$project$DomainModel$medianLongitude(info2))))
-			};
-		});
-	var treeBuilder = F2(
-		function (n, pointStream) {
-			var _v0 = _Utils_Tuple2(n < 2, pointStream);
-			if (_v0.a) {
-				if (_v0.b.b && _v0.b.b.b) {
-					var _v1 = _v0.b;
-					var v1 = _v1.a;
-					var _v2 = _v1.b;
-					var v2 = _v2.a;
-					var vvvv = _v2.b;
-					return _Utils_Tuple2(
-						$elm$core$Maybe$Just(
-							$author$project$DomainModel$Leaf(
-								A3($author$project$DomainModel$makeRoadSection, referencePoint, v1, v2))),
-						A2($elm$core$List$cons, v2, vvvv));
-				} else {
-					var anythingElse = _v0.b;
-					return _Utils_Tuple2($elm$core$Maybe$Nothing, anythingElse);
-				}
-			} else {
-				var vvvv = _v0.b;
-				var leftSize = (n / 2) | 0;
-				var rightSize = n - leftSize;
-				var _v3 = A2(treeBuilder, leftSize, vvvv);
-				var left = _v3.a;
-				var remainingAfterLeft = _v3.b;
-				var _v4 = A2(treeBuilder, rightSize, remainingAfterLeft);
-				var right = _v4.a;
-				var remainingAfterRight = _v4.b;
-				var _v5 = _Utils_Tuple2(left, right);
-				if ((_v5.a.$ === 'Just') && (_v5.b.$ === 'Just')) {
-					var leftSubtree = _v5.a.a;
-					var rightSubtree = _v5.b.a;
-					return _Utils_Tuple2(
-						$elm$core$Maybe$Just(
-							$author$project$DomainModel$Node(
-								{
-									left: leftSubtree,
-									nodeContent: A2(combineInfo, leftSubtree, rightSubtree),
-									right: rightSubtree
-								})),
-						remainingAfterRight);
-				} else {
-					return _Utils_Tuple2($elm$core$Maybe$Nothing, remainingAfterRight);
-				}
-			}
-		});
-	return A2(treeBuilder, numberOfSegments, track).a;
-};
-var $author$project$OAuthTypes$UserInfo = F3(
-	function (id, firstname, lastname) {
-		return {firstname: firstname, id: id, lastname: lastname};
-	});
-var $author$project$StravaClientSecret$clientSecret = '01713301d9282956d3d182c1e01ce02c5e8620c3';
-var $author$project$StravaAuth$defaultHttpsUrl = {fragment: $elm$core$Maybe$Nothing, host: '', path: '', port_: $elm$core$Maybe$Nothing, protocol: $elm$url$Url$Https, query: $elm$core$Maybe$Nothing};
-var $elm$json$Json$Decode$map3 = _Json_map3;
-var $author$project$StravaAuth$configuration = {
-	authorizationEndpoint: _Utils_update(
-		$author$project$StravaAuth$defaultHttpsUrl,
-		{host: 'www.strava.com', path: '/oauth/authorize'}),
-	clientId: '59195',
-	clientSecret: $author$project$StravaClientSecret$clientSecret,
-	scope: _List_fromArray(
-		['read_all']),
-	tokenEndpoint: _Utils_update(
-		$author$project$StravaAuth$defaultHttpsUrl,
-		{host: 'www.strava.com', path: '/oauth/token'}),
-	userInfoDecoder: A4(
-		$elm$json$Json$Decode$map3,
-		$author$project$OAuthTypes$UserInfo,
-		A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$int),
-		A2($elm$json$Json$Decode$field, 'firstname', $elm$json$Json$Decode$string),
-		A2($elm$json$Json$Decode$field, 'lastname', $elm$json$Json$Decode$string)),
-	userInfoEndpoint: _Utils_update(
-		$author$project$StravaAuth$defaultHttpsUrl,
-		{host: 'www.strava.com', path: '/api/v3/athlete'})
-};
-var $author$project$OAuthTypes$GotAccessToken = function (a) {
-	return {$: 'GotAccessToken', a: a};
-};
-var $elm$http$Http$Header = F2(
-	function (a, b) {
-		return {$: 'Header', a: a, b: b};
-	});
-var $elm$http$Http$header = $elm$http$Http$Header;
-var $chelovek0v$bbase64$Base64$Encode$StringEncoder = function (a) {
-	return {$: 'StringEncoder', a: a};
-};
-var $chelovek0v$bbase64$Base64$Encode$string = function (input) {
-	return $chelovek0v$bbase64$Base64$Encode$StringEncoder(input);
-};
-var $author$project$OAuth$Internal$makeHeaders = function (credentials) {
-	return A2(
-		$elm$core$Maybe$withDefault,
-		_List_Nil,
-		A2(
-			$elm$core$Maybe$map,
-			function (s) {
-				return _List_fromArray(
-					[
-						A2($elm$http$Http$header, 'Authorization', 'Basic ' + s)
-					]);
-			},
-			A2(
-				$elm$core$Maybe$map,
-				function (_v0) {
-					var clientId = _v0.clientId;
-					var secret = _v0.secret;
-					return $chelovek0v$bbase64$Base64$Encode$encode(
-						$chelovek0v$bbase64$Base64$Encode$string(clientId + (':' + secret)));
-				},
-				credentials)));
-};
-var $elm$core$String$concat = function (strings) {
-	return A2($elm$core$String$join, '', strings);
-};
-var $author$project$OAuth$Internal$protocolToString = function (protocol) {
-	if (protocol.$ === 'Http') {
-		return 'http';
-	} else {
-		return 'https';
-	}
-};
-var $author$project$OAuth$Internal$makeRedirectUri = function (url) {
-	return $elm$core$String$concat(
-		_List_fromArray(
-			[
-				$author$project$OAuth$Internal$protocolToString(url.protocol),
-				'://',
-				url.host,
-				A2(
-				$elm$core$Maybe$withDefault,
-				'',
-				A2(
-					$elm$core$Maybe$map,
-					function (i) {
-						return ':' + $elm$core$String$fromInt(i);
-					},
-					url.port_)),
-				url.path,
-				A2(
-				$elm$core$Maybe$withDefault,
-				'',
-				A2(
-					$elm$core$Maybe$map,
-					function (q) {
-						return '?' + q;
-					},
-					url.query))
-			]));
-};
-var $author$project$OAuth$Internal$AuthenticationSuccess = F4(
-	function (token, refreshToken, expiresIn, scope) {
-		return {expiresIn: expiresIn, refreshToken: refreshToken, scope: scope, token: token};
-	});
-var $elm$json$Json$Decode$maybe = function (decoder) {
-	return $elm$json$Json$Decode$oneOf(
-		_List_fromArray(
-			[
-				A2($elm$json$Json$Decode$map, $elm$core$Maybe$Just, decoder),
-				$elm$json$Json$Decode$succeed($elm$core$Maybe$Nothing)
-			]));
-};
-var $author$project$OAuth$Internal$expiresInDecoder = $elm$json$Json$Decode$maybe(
-	A2($elm$json$Json$Decode$field, 'expires_in', $elm$json$Json$Decode$int));
-var $elm$json$Json$Decode$map4 = _Json_map4;
-var $elm$json$Json$Decode$andThen = _Json_andThen;
-var $elm$json$Json$Decode$fail = _Json_fail;
-var $author$project$OAuth$Internal$decoderFromJust = function (msg) {
-	return A2(
-		$elm$core$Basics$composeR,
-		$elm$core$Maybe$map($elm$json$Json$Decode$succeed),
-		$elm$core$Maybe$withDefault(
-			$elm$json$Json$Decode$fail(msg)));
-};
-var $elm_community$maybe_extra$Maybe$Extra$andThen2 = F3(
-	function (func, ma, mb) {
-		if (ma.$ === 'Just') {
-			var a = ma.a;
-			if (mb.$ === 'Just') {
-				var b = mb.a;
-				return A2(func, a, b);
-			} else {
-				return $elm$core$Maybe$Nothing;
-			}
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
-var $author$project$OAuth$Bearer = function (a) {
-	return {$: 'Bearer', a: a};
-};
-var $elm$core$String$toLower = _String_toLower;
-var $author$project$OAuth$tryMakeToken = F2(
-	function (tokenType, token) {
-		var _v0 = $elm$core$String$toLower(tokenType);
-		if (_v0 === 'bearer') {
-			return $elm$core$Maybe$Just(
-				$author$project$OAuth$Bearer(token));
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
-var $author$project$OAuth$makeRefreshToken = F2(
-	function (tokenType, mToken) {
-		var _v0 = _Utils_Tuple2(
-			mToken,
-			A3(
-				$elm_community$maybe_extra$Maybe$Extra$andThen2,
-				$author$project$OAuth$tryMakeToken,
-				$elm$core$Maybe$Just(tokenType),
-				mToken));
-		if (_v0.a.$ === 'Nothing') {
-			var _v1 = _v0.a;
-			return $elm$core$Maybe$Just($elm$core$Maybe$Nothing);
-		} else {
-			if (_v0.b.$ === 'Just') {
-				var token = _v0.b.a;
-				return $elm$core$Maybe$Just(
-					$elm$core$Maybe$Just(token));
-			} else {
-				return $elm$core$Maybe$Nothing;
-			}
-		}
-	});
-var $author$project$OAuth$Internal$refreshTokenDecoder = A2(
-	$elm$json$Json$Decode$andThen,
-	$author$project$OAuth$Internal$decoderFromJust('missing or invalid \'refresh_token\' / \'token_type\''),
-	A3(
-		$elm$json$Json$Decode$map2,
-		$author$project$OAuth$makeRefreshToken,
-		A2($elm$json$Json$Decode$field, 'token_type', $elm$json$Json$Decode$string),
-		$elm$json$Json$Decode$maybe(
-			A2($elm$json$Json$Decode$field, 'refresh_token', $elm$json$Json$Decode$string))));
-var $author$project$OAuth$Internal$scopeDecoder = A2(
-	$elm$json$Json$Decode$map,
-	$elm$core$Maybe$withDefault(_List_Nil),
-	$elm$json$Json$Decode$maybe(
-		A2(
-			$elm$json$Json$Decode$field,
-			'scope',
-			$elm$json$Json$Decode$list($elm$json$Json$Decode$string))));
-var $author$project$OAuth$makeToken = $elm_community$maybe_extra$Maybe$Extra$andThen2($author$project$OAuth$tryMakeToken);
-var $author$project$OAuth$Internal$tokenDecoder = A2(
-	$elm$json$Json$Decode$andThen,
-	$author$project$OAuth$Internal$decoderFromJust('missing or invalid \'access_token\' / \'token_type\''),
-	A3(
-		$elm$json$Json$Decode$map2,
-		$author$project$OAuth$makeToken,
-		A2(
-			$elm$json$Json$Decode$map,
-			$elm$core$Maybe$Just,
-			A2($elm$json$Json$Decode$field, 'token_type', $elm$json$Json$Decode$string)),
-		A2(
-			$elm$json$Json$Decode$map,
-			$elm$core$Maybe$Just,
-			A2($elm$json$Json$Decode$field, 'access_token', $elm$json$Json$Decode$string))));
-var $author$project$OAuth$Internal$authenticationSuccessDecoder = A5($elm$json$Json$Decode$map4, $author$project$OAuth$Internal$AuthenticationSuccess, $author$project$OAuth$Internal$tokenDecoder, $author$project$OAuth$Internal$refreshTokenDecoder, $author$project$OAuth$Internal$expiresInDecoder, $author$project$OAuth$Internal$scopeDecoder);
-var $elm$http$Http$stringBody = _Http_pair;
-var $author$project$OAuth$Internal$makeRequest = F4(
-	function (toMsg, url, headers, body) {
-		return {
-			body: A2($elm$http$Http$stringBody, 'application/x-www-form-urlencoded', body),
-			expect: A2($elm$http$Http$expectJson, toMsg, $author$project$OAuth$Internal$authenticationSuccessDecoder),
-			headers: headers,
-			method: 'POST',
-			timeout: $elm$core$Maybe$Nothing,
-			tracker: $elm$core$Maybe$Nothing,
-			url: $elm$url$Url$toString(url)
-		};
-	});
-var $elm$url$Url$Builder$QueryParameter = F2(
-	function (a, b) {
-		return {$: 'QueryParameter', a: a, b: b};
-	});
-var $elm$url$Url$percentEncode = _Url_percentEncode;
-var $elm$url$Url$Builder$string = F2(
-	function (key, value) {
-		return A2(
-			$elm$url$Url$Builder$QueryParameter,
-			$elm$url$Url$percentEncode(key),
-			$elm$url$Url$percentEncode(value));
-	});
-var $author$project$OAuth$AuthorizationCode$makeTokenRequest = F2(
-	function (toMsg, _v0) {
-		var credentials = _v0.credentials;
-		var code = _v0.code;
-		var url = _v0.url;
-		var redirectUri = _v0.redirectUri;
-		var headers = $author$project$OAuth$Internal$makeHeaders(
-			function () {
-				var _v2 = credentials.secret;
-				if (_v2.$ === 'Nothing') {
-					return $elm$core$Maybe$Nothing;
-				} else {
-					var secret = _v2.a;
-					return $elm$core$Maybe$Just(
-						{clientId: credentials.clientId, secret: secret});
-				}
-			}());
-		var body = A2(
-			$elm$core$String$dropLeft,
-			1,
-			$elm$url$Url$Builder$toQuery(
-				_Utils_ap(
-					function () {
-						var _v1 = credentials.secret;
-						if (_v1.$ === 'Just') {
-							var secret = _v1.a;
-							return _List_fromArray(
-								[
-									A2($elm$url$Url$Builder$string, 'client_secret', secret)
-								]);
-						} else {
-							return _List_Nil;
-						}
-					}(),
-					_List_fromArray(
-						[
-							A2($elm$url$Url$Builder$string, 'grant_type', 'authorization_code'),
-							A2($elm$url$Url$Builder$string, 'client_id', credentials.clientId),
-							A2(
-							$elm$url$Url$Builder$string,
-							'redirect_uri',
-							$author$project$OAuth$Internal$makeRedirectUri(redirectUri)),
-							A2($elm$url$Url$Builder$string, 'code', code)
-						]))));
-		return A4($author$project$OAuth$Internal$makeRequest, toMsg, url, headers, body);
-	});
-var $author$project$StravaAuth$getAccessToken = F3(
-	function (_v0, redirectUri, code) {
-		var clientId = _v0.clientId;
-		var tokenEndpoint = _v0.tokenEndpoint;
-		return $elm$http$Http$request(
-			A2(
-				$author$project$OAuth$AuthorizationCode$makeTokenRequest,
-				$author$project$OAuthTypes$GotAccessToken,
-				{
-					code: code,
-					credentials: {
-						clientId: clientId,
-						secret: $elm$core$Maybe$Just($author$project$StravaClientSecret$clientSecret)
-					},
-					redirectUri: redirectUri,
-					url: tokenEndpoint
-				}));
-	});
-var $author$project$StravaAuth$accessTokenRequested = F2(
-	function (model, code) {
-		return _Utils_Tuple2(
-			_Utils_update(
-				model,
-				{
-					flow: $author$project$OAuthTypes$Authorized(code)
-				}),
-			A3($author$project$StravaAuth$getAccessToken, $author$project$StravaAuth$configuration, model.redirectUri, code));
-	});
-var $author$project$OAuthTypes$Authenticated = function (a) {
-	return {$: 'Authenticated', a: a};
-};
-var $author$project$OAuthTypes$ErrAuthentication = function (a) {
-	return {$: 'ErrAuthentication', a: a};
-};
-var $author$project$OAuthTypes$ErrHTTPGetAccessToken = {$: 'ErrHTTPGetAccessToken'};
-var $author$project$OAuthTypes$UserInfoRequested = {$: 'UserInfoRequested'};
-var $author$project$OAuth$Internal$AuthenticationError = F3(
-	function (error, errorDescription, errorUri) {
-		return {error: error, errorDescription: errorDescription, errorUri: errorUri};
-	});
-var $author$project$OAuth$Internal$errorDescriptionDecoder = $elm$json$Json$Decode$maybe(
-	A2($elm$json$Json$Decode$field, 'error_description', $elm$json$Json$Decode$string));
-var $author$project$OAuth$Internal$errorUriDecoder = $elm$json$Json$Decode$maybe(
-	A2($elm$json$Json$Decode$field, 'error_uri', $elm$json$Json$Decode$string));
-var $author$project$OAuth$Internal$authenticationErrorDecoder = function (errorCodeDecoder) {
-	return A4($elm$json$Json$Decode$map3, $author$project$OAuth$Internal$AuthenticationError, errorCodeDecoder, $author$project$OAuth$Internal$errorDescriptionDecoder, $author$project$OAuth$Internal$errorUriDecoder);
-};
-var $author$project$OAuth$Internal$errorDecoder = function (errorCodeFromString) {
-	return A2(
-		$elm$json$Json$Decode$map,
-		errorCodeFromString,
-		A2($elm$json$Json$Decode$field, 'error', $elm$json$Json$Decode$string));
-};
-var $author$project$OAuth$AuthorizationCode$defaultErrorDecoder = $author$project$OAuth$Internal$errorDecoder($author$project$OAuth$errorCodeFromString);
-var $author$project$OAuth$AuthorizationCode$defaultAuthenticationErrorDecoder = $author$project$OAuth$Internal$authenticationErrorDecoder($author$project$OAuth$AuthorizationCode$defaultErrorDecoder);
-var $author$project$StravaAuth$gotAccessToken = F2(
-	function (model, authenticationResponse) {
-		if (authenticationResponse.$ === 'Err') {
-			if (authenticationResponse.a.$ === 'BadBody') {
-				var body = authenticationResponse.a.a;
-				var _v1 = A2($elm$json$Json$Decode$decodeString, $author$project$OAuth$AuthorizationCode$defaultAuthenticationErrorDecoder, body);
-				if (_v1.$ === 'Ok') {
-					var error = _v1.a;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								flow: $author$project$OAuthTypes$Errored(
-									$author$project$OAuthTypes$ErrAuthentication(error))
-							}),
-						$elm$core$Platform$Cmd$none);
-				} else {
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								flow: $author$project$OAuthTypes$Errored($author$project$OAuthTypes$ErrHTTPGetAccessToken)
-							}),
-						$elm$core$Platform$Cmd$none);
-				}
-			} else {
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							flow: $author$project$OAuthTypes$Errored($author$project$OAuthTypes$ErrHTTPGetAccessToken)
-						}),
-					$elm$core$Platform$Cmd$none);
-			}
-		} else {
-			var token = authenticationResponse.a.token;
-			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{
-						flow: $author$project$OAuthTypes$Authenticated(token)
-					}),
-				A2($andrewMacmurray$elm_delay$Delay$after, 100, $author$project$OAuthTypes$UserInfoRequested));
-		}
-	});
-var $elm$browser$Browser$Navigation$load = _Browser_load;
-var $author$project$OAuth$Internal$Code = {$: 'Code'};
-var $author$project$OAuth$Internal$responseTypeToString = function (r) {
-	if (r.$ === 'Code') {
-		return 'code';
-	} else {
-		return 'token';
-	}
-};
-var $author$project$OAuth$Internal$urlAddList = F3(
-	function (param, xs, qs) {
-		return _Utils_ap(
-			qs,
-			function () {
-				if (!xs.b) {
-					return _List_Nil;
-				} else {
-					return _List_fromArray(
-						[
-							A2(
-							$elm$url$Url$Builder$string,
-							param,
-							A2($elm$core$String$join, ' ', xs))
-						]);
-				}
-			}());
-	});
-var $author$project$OAuth$Internal$urlAddMaybe = F3(
-	function (param, ms, qs) {
-		return _Utils_ap(
-			qs,
-			function () {
-				if (ms.$ === 'Nothing') {
-					return _List_Nil;
-				} else {
-					var s = ms.a;
-					return _List_fromArray(
-						[
-							A2($elm$url$Url$Builder$string, param, s)
-						]);
-				}
-			}());
-	});
-var $author$project$OAuth$Internal$makeAuthorizationUrl = F2(
-	function (responseType, _v0) {
-		var clientId = _v0.clientId;
-		var url = _v0.url;
-		var redirectUri = _v0.redirectUri;
-		var scope = _v0.scope;
-		var state = _v0.state;
-		var codeChallenge = _v0.codeChallenge;
-		var query = A2(
-			$elm$core$String$dropLeft,
-			1,
-			$elm$url$Url$Builder$toQuery(
-				A3(
-					$author$project$OAuth$Internal$urlAddMaybe,
-					'code_challenge_method',
-					A2(
-						$elm$core$Maybe$map,
-						$elm$core$Basics$always('S256'),
-						codeChallenge),
-					A3(
-						$author$project$OAuth$Internal$urlAddMaybe,
-						'code_challenge',
-						codeChallenge,
-						A3(
-							$author$project$OAuth$Internal$urlAddMaybe,
-							'state',
-							state,
-							A3(
-								$author$project$OAuth$Internal$urlAddList,
-								'scope',
-								scope,
-								_List_fromArray(
-									[
-										A2($elm$url$Url$Builder$string, 'client_id', clientId),
-										A2(
-										$elm$url$Url$Builder$string,
-										'redirect_uri',
-										$author$project$OAuth$Internal$makeRedirectUri(redirectUri)),
-										A2(
-										$elm$url$Url$Builder$string,
-										'response_type',
-										$author$project$OAuth$Internal$responseTypeToString(responseType))
-									])))))));
-		var _v1 = url.query;
-		if (_v1.$ === 'Nothing') {
-			return _Utils_update(
-				url,
-				{
-					query: $elm$core$Maybe$Just(query)
-				});
-		} else {
-			var baseQuery = _v1.a;
-			return _Utils_update(
-				url,
-				{
-					query: $elm$core$Maybe$Just(baseQuery + ('&' + query))
-				});
-		}
-	});
-var $author$project$OAuth$AuthorizationCode$makeAuthorizationUrl = function (_v0) {
-	var clientId = _v0.clientId;
-	var url = _v0.url;
-	var redirectUri = _v0.redirectUri;
-	var scope = _v0.scope;
-	var state = _v0.state;
-	return A2(
-		$author$project$OAuth$Internal$makeAuthorizationUrl,
-		$author$project$OAuth$Internal$Code,
-		{clientId: clientId, codeChallenge: $elm$core$Maybe$Nothing, redirectUri: redirectUri, scope: scope, state: state, url: url});
-};
-var $author$project$StravaAuth$gotRandomBytes = F2(
-	function (model, bytes) {
-		var _v0 = $author$project$StravaAuth$convertBytes(bytes);
-		var state = _v0.state;
-		var authorization = {
-			clientId: $author$project$StravaAuth$configuration.clientId,
-			redirectUri: model.redirectUri,
-			scope: $author$project$StravaAuth$configuration.scope,
-			state: $elm$core$Maybe$Just(state),
-			url: $author$project$StravaAuth$configuration.authorizationEndpoint
-		};
-		return _Utils_Tuple2(
-			_Utils_update(
-				model,
-				{flow: $author$project$OAuthTypes$Idle}),
-			$elm$browser$Browser$Navigation$load(
-				$elm$url$Url$toString(
-					$author$project$OAuth$AuthorizationCode$makeAuthorizationUrl(authorization))));
-	});
-var $author$project$OAuthTypes$Done = F2(
-	function (a, b) {
-		return {$: 'Done', a: a, b: b};
-	});
-var $author$project$OAuthTypes$ErrHTTPGetUserInfo = {$: 'ErrHTTPGetUserInfo'};
-var $author$project$StravaAuth$gotUserInfo = F2(
-	function (model, userInfoResponse) {
-		var _v0 = _Utils_Tuple2(model.flow, userInfoResponse);
-		if (_v0.b.$ === 'Err') {
-			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{
-						flow: $author$project$OAuthTypes$Errored($author$project$OAuthTypes$ErrHTTPGetUserInfo)
-					}),
-				$elm$core$Platform$Cmd$none);
-		} else {
-			if (_v0.a.$ === 'Authenticated') {
-				var token = _v0.a.a;
-				var userInfo = _v0.b.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							flow: A2($author$project$OAuthTypes$Done, userInfo, token)
-						}),
-					$elm$core$Platform$Cmd$none);
-			} else {
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							flow: $author$project$OAuthTypes$Errored($author$project$OAuthTypes$ErrStateMismatch)
-						}),
-					$elm$core$Platform$Cmd$none);
-			}
-		}
-	});
-var $author$project$StravaAuth$noOp = function (model) {
-	return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-};
-var $elm$json$Json$Encode$int = _Json_wrap;
-var $author$project$OAuthPorts$genRandomBytes = _Platform_outgoingPort('genRandomBytes', $elm$json$Json$Encode$int);
-var $author$project$StravaAuth$signInRequested = function (model) {
+var $author$project$Actions$updateAllDisplays = function (model) {
 	return _Utils_Tuple2(
-		_Utils_update(
-			model,
-			{flow: $author$project$OAuthTypes$Idle}),
-		$author$project$OAuthPorts$genRandomBytes(16));
+		$author$project$ModelRecord$Model(
+			$author$project$Actions$renderModel(model)),
+		_Utils_eq(model.viewMode, $author$project$ViewingMode$ViewMap) ? $elm$core$Platform$Cmd$batch(
+			_List_fromArray(
+				[
+					$author$project$PortController$addTrackToMap(model),
+					$author$project$PortController$centreMapOnCurrent(model),
+					A2($andrewMacmurray$elm_delay$Delay$after, 10, $author$project$Msg$RepaintMap)
+				])) : $elm$core$Platform$Cmd$none);
 };
-var $author$project$StravaAuth$signOutRequested = function (model) {
-	return _Utils_Tuple2(
-		_Utils_update(
-			model,
-			{flow: $author$project$OAuthTypes$Idle}),
-		$elm$browser$Browser$Navigation$load(
-			$elm$url$Url$toString(model.redirectUri)));
-};
-var $author$project$OAuthTypes$GotUserInfo = function (a) {
-	return {$: 'GotUserInfo', a: a};
-};
-var $author$project$OAuth$tokenToString = function (_v0) {
-	var t = _v0.a;
-	return 'Bearer ' + t;
-};
-var $author$project$OAuth$useToken = function (token) {
-	return $elm$core$List$cons(
-		A2(
-			$elm$http$Http$header,
-			'Authorization',
-			$author$project$OAuth$tokenToString(token)));
-};
-var $author$project$StravaAuth$getUserInfo = F2(
-	function (_v0, token) {
-		var userInfoDecoder = _v0.userInfoDecoder;
-		var userInfoEndpoint = _v0.userInfoEndpoint;
-		return $elm$http$Http$request(
-			{
-				body: $elm$http$Http$emptyBody,
-				expect: A2($elm$http$Http$expectJson, $author$project$OAuthTypes$GotUserInfo, userInfoDecoder),
-				headers: A2($author$project$OAuth$useToken, token, _List_Nil),
-				method: 'GET',
-				timeout: $elm$core$Maybe$Nothing,
-				tracker: $elm$core$Maybe$Nothing,
-				url: $elm$url$Url$toString(userInfoEndpoint)
-			});
-	});
-var $author$project$StravaAuth$userInfoRequested = F2(
-	function (model, token) {
-		return _Utils_Tuple2(
-			_Utils_update(
-				model,
-				{
-					flow: $author$project$OAuthTypes$Authenticated(token)
-				}),
-			A2($author$project$StravaAuth$getUserInfo, $author$project$StravaAuth$configuration, token));
-	});
-var $author$project$StravaAuth$update = F2(
-	function (msg, model) {
-		var _v0 = _Utils_Tuple2(model.flow, msg);
-		_v0$7:
-		while (true) {
-			switch (_v0.a.$) {
-				case 'Idle':
-					switch (_v0.b.$) {
-						case 'SignInRequested':
-							var _v1 = _v0.a;
-							var _v2 = _v0.b;
-							return $author$project$StravaAuth$signInRequested(model);
-						case 'GotRandomBytes':
-							var _v3 = _v0.a;
-							var bytes = _v0.b.a;
-							return A2($author$project$StravaAuth$gotRandomBytes, model, bytes);
-						default:
-							break _v0$7;
-					}
-				case 'Authorized':
-					switch (_v0.b.$) {
-						case 'AccessTokenRequested':
-							var code = _v0.a.a;
-							var _v4 = _v0.b;
-							return A2($author$project$StravaAuth$accessTokenRequested, model, code);
-						case 'GotAccessToken':
-							var authenticationResponse = _v0.b.a;
-							return A2($author$project$StravaAuth$gotAccessToken, model, authenticationResponse);
-						default:
-							break _v0$7;
-					}
-				case 'Authenticated':
-					switch (_v0.b.$) {
-						case 'UserInfoRequested':
-							var token = _v0.a.a;
-							var _v5 = _v0.b;
-							return A2($author$project$StravaAuth$userInfoRequested, model, token);
-						case 'GotUserInfo':
-							var userInfoResponse = _v0.b.a;
-							return A2($author$project$StravaAuth$gotUserInfo, model, userInfoResponse);
-						default:
-							break _v0$7;
-					}
-				case 'Done':
-					if (_v0.b.$ === 'SignOutRequested') {
-						var _v6 = _v0.a;
-						var _v7 = _v0.b;
-						return $author$project$StravaAuth$signOutRequested(model);
-					} else {
-						break _v0$7;
-					}
-				default:
-					break _v0$7;
-			}
-		}
-		return $author$project$StravaAuth$noOp(model);
-	});
-var $author$project$ViewThirdPerson$ClickDelayExpired = {$: 'ClickDelayExpired'};
-var $author$project$ViewContextThirdPerson$DragPan = {$: 'DragPan'};
-var $author$project$ViewContextThirdPerson$DragRotate = {$: 'DragRotate'};
-var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$SecondButton = {$: 'SecondButton'};
-var $ianmackenzie$elm_units$Quantity$at = F2(
-	function (_v0, _v1) {
-		var rateOfChange = _v0.a;
-		var independentValue = _v1.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(rateOfChange * independentValue);
-	});
-var $ianmackenzie$elm_3d_camera$Camera3d$Types$Viewpoint3d = function (a) {
-	return {$: 'Viewpoint3d', a: a};
-};
-var $ianmackenzie$elm_geometry$Vector3d$cross = F2(
-	function (_v0, _v1) {
-		var v2 = _v0.a;
-		var v1 = _v1.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
-			{x: (v1.y * v2.z) - (v1.z * v2.y), y: (v1.z * v2.x) - (v1.x * v2.z), z: (v1.x * v2.y) - (v1.y * v2.x)});
-	});
-var $ianmackenzie$elm_geometry$Vector3d$direction = function (_v0) {
-	var v = _v0.a;
-	var largestComponent = A2(
-		$elm$core$Basics$max,
-		$elm$core$Basics$abs(v.x),
-		A2(
-			$elm$core$Basics$max,
-			$elm$core$Basics$abs(v.y),
-			$elm$core$Basics$abs(v.z)));
-	if (!largestComponent) {
-		return $elm$core$Maybe$Nothing;
-	} else {
-		var scaledZ = v.z / largestComponent;
-		var scaledY = v.y / largestComponent;
-		var scaledX = v.x / largestComponent;
-		var scaledLength = $elm$core$Basics$sqrt(((scaledX * scaledX) + (scaledY * scaledY)) + (scaledZ * scaledZ));
-		return $elm$core$Maybe$Just(
-			$ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
-				{x: scaledX / scaledLength, y: scaledY / scaledLength, z: scaledZ / scaledLength}));
-	}
-};
-var $ianmackenzie$elm_geometry$Vector3d$from = F2(
-	function (_v0, _v1) {
-		var p1 = _v0.a;
-		var p2 = _v1.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
-			{x: p2.x - p1.x, y: p2.y - p1.y, z: p2.z - p1.z});
-	});
-var $elm$core$Maybe$andThen = F2(
-	function (callback, maybeValue) {
-		if (maybeValue.$ === 'Just') {
-			var value = maybeValue.a;
-			return callback(value);
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
-var $ianmackenzie$elm_geometry$Vector3d$dot = F2(
-	function (_v0, _v1) {
-		var v2 = _v0.a;
-		var v1 = _v1.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(((v1.x * v2.x) + (v1.y * v2.y)) + (v1.z * v2.z));
-	});
-var $ianmackenzie$elm_units$Quantity$greaterThan = F2(
-	function (_v0, _v1) {
-		var y = _v0.a;
-		var x = _v1.a;
-		return _Utils_cmp(x, y) > 0;
-	});
-var $ianmackenzie$elm_units$Quantity$lessThan = F2(
-	function (_v0, _v1) {
-		var y = _v0.a;
-		var x = _v1.a;
-		return _Utils_cmp(x, y) < 0;
-	});
-var $ianmackenzie$elm_geometry$Vector3d$minus = F2(
-	function (_v0, _v1) {
-		var v2 = _v0.a;
-		var v1 = _v1.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
-			{x: v1.x - v2.x, y: v1.y - v2.y, z: v1.z - v2.z});
-	});
-var $ianmackenzie$elm_geometry$Vector3d$projectionIn = F2(
-	function (_v0, _v1) {
-		var d = _v0.a;
-		var v = _v1.a;
-		var projectedLength = ((v.x * d.x) + (v.y * d.y)) + (v.z * d.z);
-		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
-			{x: d.x * projectedLength, y: d.y * projectedLength, z: d.z * projectedLength});
-	});
-var $ianmackenzie$elm_geometry$Vector3d$reverse = function (_v0) {
-	var v = _v0.a;
-	return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
-		{x: -v.x, y: -v.y, z: -v.z});
-};
-var $ianmackenzie$elm_geometry$Vector3d$zero = $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
-	{x: 0, y: 0, z: 0});
-var $ianmackenzie$elm_geometry$Direction3d$orthonormalize = F3(
-	function (xVector, xyVector, xyzVector) {
-		return A2(
-			$elm$core$Maybe$andThen,
-			function (xDirection) {
-				var yVector = A2(
-					$ianmackenzie$elm_geometry$Vector3d$minus,
-					A2($ianmackenzie$elm_geometry$Vector3d$projectionIn, xDirection, xyVector),
-					xyVector);
-				return A2(
-					$elm$core$Maybe$andThen,
-					function (yDirection) {
-						var rightHandedZVector = A2($ianmackenzie$elm_geometry$Vector3d$cross, xyVector, xVector);
-						var tripleProduct = A2($ianmackenzie$elm_geometry$Vector3d$dot, xyzVector, rightHandedZVector);
-						var zVector = A2($ianmackenzie$elm_units$Quantity$greaterThan, $ianmackenzie$elm_units$Quantity$zero, tripleProduct) ? rightHandedZVector : (A2($ianmackenzie$elm_units$Quantity$lessThan, $ianmackenzie$elm_units$Quantity$zero, tripleProduct) ? $ianmackenzie$elm_geometry$Vector3d$reverse(rightHandedZVector) : $ianmackenzie$elm_geometry$Vector3d$zero);
-						return A2(
-							$elm$core$Maybe$map,
-							function (zDirection) {
-								return _Utils_Tuple3(xDirection, yDirection, zDirection);
-							},
-							$ianmackenzie$elm_geometry$Vector3d$direction(zVector));
-					},
-					$ianmackenzie$elm_geometry$Vector3d$direction(yVector));
-			},
-			$ianmackenzie$elm_geometry$Vector3d$direction(xVector));
-	});
-var $ianmackenzie$elm_geometry$Direction3d$perpendicularTo = function (_v0) {
-	var d = _v0.a;
-	var absZ = $elm$core$Basics$abs(d.z);
-	var absY = $elm$core$Basics$abs(d.y);
-	var absX = $elm$core$Basics$abs(d.x);
-	if (_Utils_cmp(absX, absY) < 1) {
-		if (_Utils_cmp(absX, absZ) < 1) {
-			var scale = $elm$core$Basics$sqrt((d.z * d.z) + (d.y * d.y));
-			return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
-				{x: 0, y: (-d.z) / scale, z: d.y / scale});
-		} else {
-			var scale = $elm$core$Basics$sqrt((d.y * d.y) + (d.x * d.x));
-			return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
-				{x: (-d.y) / scale, y: d.x / scale, z: 0});
-		}
-	} else {
-		if (_Utils_cmp(absY, absZ) < 1) {
-			var scale = $elm$core$Basics$sqrt((d.z * d.z) + (d.x * d.x));
-			return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
-				{x: d.z / scale, y: 0, z: (-d.x) / scale});
-		} else {
-			var scale = $elm$core$Basics$sqrt((d.x * d.x) + (d.y * d.y));
-			return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
-				{x: (-d.y) / scale, y: d.x / scale, z: 0});
-		}
-	}
-};
-var $ianmackenzie$elm_geometry$Direction3d$perpendicularBasis = function (direction) {
-	var xDirection = $ianmackenzie$elm_geometry$Direction3d$perpendicularTo(direction);
-	var _v0 = xDirection;
-	var dX = _v0.a;
-	var _v1 = direction;
-	var d = _v1.a;
-	var yDirection = $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
-		{x: (d.y * dX.z) - (d.z * dX.y), y: (d.z * dX.x) - (d.x * dX.z), z: (d.x * dX.y) - (d.y * dX.x)});
-	return _Utils_Tuple2(xDirection, yDirection);
-};
-var $ianmackenzie$elm_geometry$Direction3d$toVector = function (_v0) {
-	var directionComponents = _v0.a;
-	return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(directionComponents);
-};
-var $ianmackenzie$elm_geometry$Geometry$Types$Frame3d = function (a) {
-	return {$: 'Frame3d', a: a};
-};
-var $ianmackenzie$elm_geometry$Frame3d$unsafe = function (properties) {
-	return $ianmackenzie$elm_geometry$Geometry$Types$Frame3d(properties);
-};
-var $ianmackenzie$elm_geometry$Frame3d$withZDirection = F2(
-	function (givenZDirection, givenOrigin) {
-		var _v0 = $ianmackenzie$elm_geometry$Direction3d$perpendicularBasis(givenZDirection);
-		var computedXDirection = _v0.a;
-		var computedYDirection = _v0.b;
-		return $ianmackenzie$elm_geometry$Frame3d$unsafe(
-			{originPoint: givenOrigin, xDirection: computedXDirection, yDirection: computedYDirection, zDirection: givenZDirection});
-	});
-var $ianmackenzie$elm_3d_camera$Viewpoint3d$lookAt = function (_arguments) {
-	var zVector = A2($ianmackenzie$elm_geometry$Vector3d$from, _arguments.focalPoint, _arguments.eyePoint);
-	var yVector = $ianmackenzie$elm_geometry$Direction3d$toVector(_arguments.upDirection);
-	var xVector = A2($ianmackenzie$elm_geometry$Vector3d$cross, zVector, yVector);
-	var _v0 = A3($ianmackenzie$elm_geometry$Direction3d$orthonormalize, zVector, yVector, xVector);
-	if (_v0.$ === 'Just') {
-		var _v1 = _v0.a;
-		var normalizedZDirection = _v1.a;
-		var normalizedYDirection = _v1.b;
-		var normalizedXDirection = _v1.c;
-		return $ianmackenzie$elm_3d_camera$Camera3d$Types$Viewpoint3d(
-			$ianmackenzie$elm_geometry$Frame3d$unsafe(
-				{originPoint: _arguments.eyePoint, xDirection: normalizedXDirection, yDirection: normalizedYDirection, zDirection: normalizedZDirection}));
-	} else {
-		var _v2 = $ianmackenzie$elm_geometry$Vector3d$direction(zVector);
-		if (_v2.$ === 'Just') {
-			var zDirection = _v2.a;
-			return $ianmackenzie$elm_3d_camera$Camera3d$Types$Viewpoint3d(
-				A2($ianmackenzie$elm_geometry$Frame3d$withZDirection, zDirection, _arguments.eyePoint));
-		} else {
-			var _v3 = $ianmackenzie$elm_geometry$Direction3d$perpendicularBasis(_arguments.upDirection);
-			var arbitraryZDirection = _v3.a;
-			var arbitraryXDirection = _v3.b;
-			return $ianmackenzie$elm_3d_camera$Camera3d$Types$Viewpoint3d(
-				$ianmackenzie$elm_geometry$Frame3d$unsafe(
-					{originPoint: _arguments.eyePoint, xDirection: arbitraryXDirection, yDirection: _arguments.upDirection, zDirection: arbitraryZDirection}));
-		}
-	}
-};
-var $ianmackenzie$elm_3d_camera$Camera3d$Types$Camera3d = function (a) {
-	return {$: 'Camera3d', a: a};
-};
-var $ianmackenzie$elm_3d_camera$Camera3d$Types$Perspective = function (a) {
-	return {$: 'Perspective', a: a};
-};
-var $elm$core$Basics$tan = _Basics_tan;
-var $ianmackenzie$elm_units$Angle$tan = function (_v0) {
-	var angle = _v0.a;
-	return $elm$core$Basics$tan(angle);
-};
-var $ianmackenzie$elm_3d_camera$Camera3d$perspective = function (_arguments) {
-	var halfFieldOfView = $ianmackenzie$elm_units$Quantity$half(
-		$ianmackenzie$elm_units$Quantity$abs(_arguments.verticalFieldOfView));
-	var frustumSlope = $ianmackenzie$elm_units$Angle$tan(halfFieldOfView);
-	return $ianmackenzie$elm_3d_camera$Camera3d$Types$Camera3d(
-		{
-			projection: $ianmackenzie$elm_3d_camera$Camera3d$Types$Perspective(frustumSlope),
-			viewpoint: _arguments.viewpoint
-		});
-};
-var $ianmackenzie$elm_geometry$Direction3d$xyZ = F2(
-	function (_v0, _v1) {
-		var theta = _v0.a;
-		var phi = _v1.a;
-		var cosPhi = $elm$core$Basics$cos(phi);
-		return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
-			{
-				x: cosPhi * $elm$core$Basics$cos(theta),
-				y: cosPhi * $elm$core$Basics$sin(theta),
-				z: $elm$core$Basics$sin(phi)
-			});
-	});
-var $author$project$ViewThirdPerson$deriveCamera = F3(
-	function (treeNode, context, currentPosition) {
-		var lookingAt = context.followSelectedPoint ? $author$project$DomainModel$startPoint(
-			A2($author$project$DomainModel$leafFromIndex, currentPosition, treeNode)) : context.focalPoint;
-		var directionToEye = A2(
-			$ianmackenzie$elm_geometry$Direction3d$xyZ,
-			$ianmackenzie$elm_geometry$Direction2d$toAngle(context.cameraAzimuth),
-			context.cameraElevation);
-		var eyePoint = A2(
-			$ianmackenzie$elm_geometry$Point3d$translateBy,
-			A2($ianmackenzie$elm_geometry$Vector3d$withLength, context.cameraDistance, directionToEye),
-			lookingAt);
-		var cameraViewpoint = $ianmackenzie$elm_3d_camera$Viewpoint3d$lookAt(
-			{eyePoint: eyePoint, focalPoint: lookingAt, upDirection: $ianmackenzie$elm_geometry$Direction3d$positiveZ});
-		var perspectiveCamera = $ianmackenzie$elm_3d_camera$Camera3d$perspective(
-			{
-				verticalFieldOfView: $ianmackenzie$elm_units$Angle$degrees(30),
-				viewpoint: cameraViewpoint
-			});
-		return perspectiveCamera;
-	});
-var $ianmackenzie$elm_geometry$Geometry$Types$Rectangle2d = function (a) {
-	return {$: 'Rectangle2d', a: a};
-};
-var $ianmackenzie$elm_units$Quantity$midpoint = F2(
-	function (_v0, _v1) {
-		var x = _v0.a;
-		var y = _v1.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(x + (0.5 * (y - x)));
-	});
-var $ianmackenzie$elm_geometry$Direction2d$negativeX = $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
-	{x: -1, y: 0});
-var $ianmackenzie$elm_geometry$Direction2d$negativeY = $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
-	{x: 0, y: -1});
-var $ianmackenzie$elm_geometry$Direction2d$positiveY = $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
-	{x: 0, y: 1});
-var $ianmackenzie$elm_geometry$Geometry$Types$Frame2d = function (a) {
-	return {$: 'Frame2d', a: a};
-};
-var $ianmackenzie$elm_geometry$Frame2d$unsafe = function (properties) {
-	return $ianmackenzie$elm_geometry$Geometry$Types$Frame2d(properties);
-};
-var $ianmackenzie$elm_geometry$Geometry$Types$Point2d = function (a) {
-	return {$: 'Point2d', a: a};
-};
-var $ianmackenzie$elm_geometry$Point2d$xy = F2(
-	function (_v0, _v1) {
-		var x = _v0.a;
-		var y = _v1.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Point2d(
-			{x: x, y: y});
-	});
-var $ianmackenzie$elm_geometry$Rectangle2d$axisAligned = F4(
-	function (x1, y1, x2, y2) {
-		var computedYDirection = A2($ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo, y1, y2) ? $ianmackenzie$elm_geometry$Direction2d$positiveY : $ianmackenzie$elm_geometry$Direction2d$negativeY;
-		var computedXDirection = A2($ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo, x1, x2) ? $ianmackenzie$elm_geometry$Direction2d$positiveX : $ianmackenzie$elm_geometry$Direction2d$negativeX;
-		var computedDimensions = _Utils_Tuple2(
-			$ianmackenzie$elm_units$Quantity$abs(
-				A2($ianmackenzie$elm_units$Quantity$minus, x1, x2)),
-			$ianmackenzie$elm_units$Quantity$abs(
-				A2($ianmackenzie$elm_units$Quantity$minus, y1, y2)));
-		var computedCenterPoint = A2(
-			$ianmackenzie$elm_geometry$Point2d$xy,
-			A2($ianmackenzie$elm_units$Quantity$midpoint, x1, x2),
-			A2($ianmackenzie$elm_units$Quantity$midpoint, y1, y2));
-		var computedAxes = $ianmackenzie$elm_geometry$Frame2d$unsafe(
-			{originPoint: computedCenterPoint, xDirection: computedXDirection, yDirection: computedYDirection});
-		return $ianmackenzie$elm_geometry$Geometry$Types$Rectangle2d(
-			{axes: computedAxes, dimensions: computedDimensions});
-	});
-var $ianmackenzie$elm_geometry$Point2d$xCoordinate = function (_v0) {
-	var p = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(p.x);
-};
-var $ianmackenzie$elm_geometry$Point2d$yCoordinate = function (_v0) {
-	var p = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(p.y);
-};
-var $ianmackenzie$elm_geometry$Rectangle2d$from = F2(
-	function (p1, p2) {
-		return A4(
-			$ianmackenzie$elm_geometry$Rectangle2d$axisAligned,
-			$ianmackenzie$elm_geometry$Point2d$xCoordinate(p1),
-			$ianmackenzie$elm_geometry$Point2d$yCoordinate(p1),
-			$ianmackenzie$elm_geometry$Point2d$xCoordinate(p2),
-			$ianmackenzie$elm_geometry$Point2d$yCoordinate(p2));
-	});
-var $ianmackenzie$elm_geometry$Sphere3d$centerPoint = function (_v0) {
-	var properties = _v0.a;
-	return properties.centerPoint;
-};
-var $ianmackenzie$elm_geometry$Point3d$distanceFromAxis = F2(
-	function (_v0, _v1) {
-		var axis = _v0.a;
-		var p = _v1.a;
-		var _v2 = axis.originPoint;
-		var p0 = _v2.a;
-		var deltaX = p.x - p0.x;
-		var deltaY = p.y - p0.y;
-		var deltaZ = p.z - p0.z;
-		var _v3 = axis.direction;
-		var d = _v3.a;
-		var projection = ((deltaX * d.x) + (deltaY * d.y)) + (deltaZ * d.z);
-		var perpX = deltaX - (projection * d.x);
-		var perpY = deltaY - (projection * d.y);
-		var perpZ = deltaZ - (projection * d.z);
-		var largestComponent = A2(
-			$elm$core$Basics$max,
-			$elm$core$Basics$abs(perpX),
-			A2(
-				$elm$core$Basics$max,
-				$elm$core$Basics$abs(perpY),
-				$elm$core$Basics$abs(perpZ)));
-		if (!largestComponent) {
-			return $ianmackenzie$elm_units$Quantity$zero;
-		} else {
-			var scaledZ = perpZ / largestComponent;
-			var scaledY = perpY / largestComponent;
-			var scaledX = perpX / largestComponent;
-			var scaledDistance = $elm$core$Basics$sqrt(((scaledX * scaledX) + (scaledY * scaledY)) + (scaledZ * scaledZ));
-			return $ianmackenzie$elm_units$Quantity$Quantity(scaledDistance * largestComponent);
-		}
-	});
-var $ianmackenzie$elm_geometry$Point3d$along = F2(
-	function (_v0, _v1) {
-		var axis = _v0.a;
-		var distance = _v1.a;
-		var _v2 = axis.originPoint;
-		var p0 = _v2.a;
-		var _v3 = axis.direction;
-		var d = _v3.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
-			{x: p0.x + (distance * d.x), y: p0.y + (distance * d.y), z: p0.z + (distance * d.z)});
-	});
-var $ianmackenzie$elm_geometry$Vector3d$componentIn = F2(
-	function (_v0, _v1) {
-		var d = _v0.a;
-		var v = _v1.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(((v.x * d.x) + (v.y * d.y)) + (v.z * d.z));
-	});
-var $ianmackenzie$elm_geometry$Axis3d$direction = function (_v0) {
-	var axis = _v0.a;
-	return axis.direction;
-};
-var $ianmackenzie$elm_geometry$Axis3d$originPoint = function (_v0) {
-	var axis = _v0.a;
-	return axis.originPoint;
-};
-var $elm$core$Basics$pow = _Basics_pow;
-var $ianmackenzie$elm_geometry$Axis3d$intersectionWithSphere = F2(
-	function (_v0, axis) {
-		var centerPoint = _v0.a.centerPoint;
-		var radius = _v0.a.radius;
-		var axisOrigin = $ianmackenzie$elm_geometry$Axis3d$originPoint(axis);
-		var circleCenterToOrigin = A2($ianmackenzie$elm_geometry$Vector3d$from, centerPoint, axisOrigin);
-		var axisDirection = $ianmackenzie$elm_geometry$Axis3d$direction(axis);
-		var _v1 = radius;
-		var r = _v1.a;
-		var _v2 = A2($ianmackenzie$elm_geometry$Vector3d$componentIn, axisDirection, circleCenterToOrigin);
-		var dotProduct = _v2.a;
-		var _v3 = circleCenterToOrigin;
-		var cto = _v3.a;
-		var ctoLengthSquared = (A2($elm$core$Basics$pow, cto.x, 2) + A2($elm$core$Basics$pow, cto.y, 2)) + A2($elm$core$Basics$pow, cto.z, 2);
-		var inRoot = (A2($elm$core$Basics$pow, dotProduct, 2) - ctoLengthSquared) + A2($elm$core$Basics$pow, r, 2);
-		if (inRoot < 0) {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			var d2 = (-dotProduct) + $elm$core$Basics$sqrt(inRoot);
-			var d1 = (-dotProduct) - $elm$core$Basics$sqrt(inRoot);
-			return $elm$core$Maybe$Just(
-				_Utils_Tuple2(
-					A2(
-						$ianmackenzie$elm_geometry$Point3d$along,
-						axis,
-						$ianmackenzie$elm_units$Quantity$Quantity(d1)),
-					A2(
-						$ianmackenzie$elm_geometry$Point3d$along,
-						axis,
-						$ianmackenzie$elm_units$Quantity$Quantity(d2))));
-		}
-	});
-var $ianmackenzie$elm_geometry$Sphere3d$radius = function (_v0) {
-	var properties = _v0.a;
-	return properties.radius;
-};
-var $author$project$DomainModel$sphere = function (treeNode) {
-	if (treeNode.$ === 'Leaf') {
-		var leaf = treeNode.a;
-		return leaf.sphere;
-	} else {
-		var node = treeNode.a;
-		return node.nodeContent.sphere;
-	}
-};
-var $author$project$DomainModel$nearestToRay = F2(
-	function (ray, treeNode) {
-		var helper = F2(
-			function (withNode, skip) {
-				helper:
-				while (true) {
-					if (withNode.$ === 'Leaf') {
-						var leaf = withNode.a;
-						var startDistance = A2($ianmackenzie$elm_geometry$Point3d$distanceFromAxis, ray, leaf.startPoint);
-						var endDistance = A2($ianmackenzie$elm_geometry$Point3d$distanceFromAxis, ray, leaf.endPoint);
-						return A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, endDistance, startDistance) ? _Utils_Tuple2(skip, startDistance) : _Utils_Tuple2(skip + 1, endDistance);
-					} else {
-						var node = withNode.a;
-						var rightDistance = A2(
-							$ianmackenzie$elm_units$Quantity$minus,
-							$ianmackenzie$elm_geometry$Sphere3d$radius(
-								$author$project$DomainModel$sphere(node.right)),
-							A2(
-								$ianmackenzie$elm_geometry$Point3d$distanceFromAxis,
-								ray,
-								$ianmackenzie$elm_geometry$Sphere3d$centerPoint(
-									$author$project$DomainModel$sphere(node.right))));
-						var leftDistance = A2(
-							$ianmackenzie$elm_units$Quantity$minus,
-							$ianmackenzie$elm_geometry$Sphere3d$radius(
-								$author$project$DomainModel$sphere(node.left)),
-							A2(
-								$ianmackenzie$elm_geometry$Point3d$distanceFromAxis,
-								ray,
-								$ianmackenzie$elm_geometry$Sphere3d$centerPoint(
-									$author$project$DomainModel$sphere(node.left))));
-						var _v1 = _Utils_Tuple2(
-							!_Utils_eq(
-								A2(
-									$ianmackenzie$elm_geometry$Axis3d$intersectionWithSphere,
-									$author$project$DomainModel$sphere(node.left),
-									ray),
-								$elm$core$Maybe$Nothing),
-							!_Utils_eq(
-								A2(
-									$ianmackenzie$elm_geometry$Axis3d$intersectionWithSphere,
-									$author$project$DomainModel$sphere(node.right),
-									ray),
-								$elm$core$Maybe$Nothing));
-						var leftIntersects = _v1.a;
-						var rightIntersects = _v1.b;
-						var _v2 = _Utils_Tuple2(leftIntersects, rightIntersects);
-						if (_v2.a) {
-							if (_v2.b) {
-								var _v3 = A2(
-									helper,
-									node.right,
-									skip + $author$project$DomainModel$skipCount(node.left));
-								var rightBestIndex = _v3.a;
-								var rightBestDistance = _v3.b;
-								var _v4 = A2(helper, node.left, skip);
-								var leftBestIndex = _v4.a;
-								var leftBestDistance = _v4.b;
-								return A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, rightBestDistance, leftBestDistance) ? _Utils_Tuple2(leftBestIndex, leftBestDistance) : _Utils_Tuple2(rightBestIndex, rightBestDistance);
-							} else {
-								var $temp$withNode = node.left,
-									$temp$skip = skip;
-								withNode = $temp$withNode;
-								skip = $temp$skip;
-								continue helper;
-							}
-						} else {
-							if (_v2.b) {
-								var $temp$withNode = node.right,
-									$temp$skip = skip + $author$project$DomainModel$skipCount(node.left);
-								withNode = $temp$withNode;
-								skip = $temp$skip;
-								continue helper;
-							} else {
-								if (A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, rightDistance, leftDistance)) {
-									var $temp$withNode = node.left,
-										$temp$skip = skip;
-									withNode = $temp$withNode;
-									skip = $temp$skip;
-									continue helper;
-								} else {
-									var $temp$withNode = node.right,
-										$temp$skip = skip + $author$project$DomainModel$skipCount(node.left);
-									withNode = $temp$withNode;
-									skip = $temp$skip;
-									continue helper;
-								}
-							}
-						}
-					}
-				}
-			});
-		return A2(helper, treeNode, 0).a;
-	});
-var $ianmackenzie$elm_geometry$Point2d$pixels = F2(
-	function (x, y) {
-		return $ianmackenzie$elm_geometry$Geometry$Types$Point2d(
-			{x: x, y: y});
-	});
-var $ianmackenzie$elm_geometry$Frame2d$copy = function (_v0) {
-	var properties = _v0.a;
-	return $ianmackenzie$elm_geometry$Geometry$Types$Frame2d(properties);
-};
-var $ianmackenzie$elm_geometry$Rectangle2d$axes = function (_v0) {
-	var rectangle = _v0.a;
-	return $ianmackenzie$elm_geometry$Frame2d$copy(rectangle.axes);
-};
-var $ianmackenzie$elm_geometry$Rectangle2d$dimensions = function (_v0) {
-	var rectangle = _v0.a;
-	return rectangle.dimensions;
-};
-var $ianmackenzie$elm_units$Quantity$divideBy = F2(
-	function (divisor, _v0) {
-		var value = _v0.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(value / divisor);
-	});
-var $ianmackenzie$elm_geometry$Frame3d$originPoint = function (_v0) {
-	var properties = _v0.a;
-	return properties.originPoint;
-};
-var $ianmackenzie$elm_3d_camera$Viewpoint3d$eyePoint = function (_v0) {
-	var frame = _v0.a;
-	return $ianmackenzie$elm_geometry$Frame3d$originPoint(frame);
-};
-var $ianmackenzie$elm_units$Quantity$multiplyBy = F2(
-	function (scale, _v0) {
-		var value = _v0.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(scale * value);
-	});
-var $ianmackenzie$elm_units$Quantity$negate = function (_v0) {
-	var value = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(-value);
-};
-var $ianmackenzie$elm_geometry$Direction3d$negativeZ = $ianmackenzie$elm_geometry$Direction3d$unsafe(
-	{x: 0, y: 0, z: -1});
-var $ianmackenzie$elm_units$Quantity$per = F2(
-	function (_v0, _v1) {
-		var independentValue = _v0.a;
-		var dependentValue = _v1.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(dependentValue / independentValue);
-	});
-var $ianmackenzie$elm_geometry$Direction3d$placeIn = F2(
-	function (_v0, _v1) {
-		var frame = _v0.a;
-		var d = _v1.a;
-		var _v2 = frame.zDirection;
-		var k = _v2.a;
-		var _v3 = frame.yDirection;
-		var j = _v3.a;
-		var _v4 = frame.xDirection;
-		var i = _v4.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
-			{x: ((i.x * d.x) + (j.x * d.y)) + (k.x * d.z), y: ((i.y * d.x) + (j.y * d.y)) + (k.y * d.z), z: ((i.z * d.x) + (j.z * d.y)) + (k.z * d.z)});
-	});
-var $ianmackenzie$elm_geometry$Geometry$Types$Axis3d = function (a) {
-	return {$: 'Axis3d', a: a};
-};
-var $ianmackenzie$elm_geometry$Axis3d$through = F2(
-	function (givenPoint, givenDirection) {
-		return $ianmackenzie$elm_geometry$Geometry$Types$Axis3d(
-			{direction: givenDirection, originPoint: givenPoint});
-	});
-var $ianmackenzie$elm_geometry$Direction3d$reverse = function (_v0) {
-	var d = _v0.a;
-	return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
-		{x: -d.x, y: -d.y, z: -d.z});
-};
-var $ianmackenzie$elm_geometry$Frame3d$zDirection = function (_v0) {
-	var properties = _v0.a;
-	return properties.zDirection;
-};
-var $ianmackenzie$elm_3d_camera$Viewpoint3d$viewDirection = function (_v0) {
-	var frame = _v0.a;
-	return $ianmackenzie$elm_geometry$Direction3d$reverse(
-		$ianmackenzie$elm_geometry$Frame3d$zDirection(frame));
-};
-var $ianmackenzie$elm_geometry$Point2d$xCoordinateIn = F2(
-	function (_v0, _v1) {
-		var frame = _v0.a;
-		var p = _v1.a;
-		var _v2 = frame.originPoint;
-		var p0 = _v2.a;
-		var _v3 = frame.xDirection;
-		var d = _v3.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(((p.x - p0.x) * d.x) + ((p.y - p0.y) * d.y));
-	});
-var $ianmackenzie$elm_geometry$Vector3d$xyz = F3(
-	function (_v0, _v1, _v2) {
-		var x = _v0.a;
-		var y = _v1.a;
-		var z = _v2.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
-			{x: x, y: y, z: z});
-	});
-var $ianmackenzie$elm_geometry$Point3d$xyzIn = F4(
-	function (_v0, _v1, _v2, _v3) {
-		var frame = _v0.a;
-		var x = _v1.a;
-		var y = _v2.a;
-		var z = _v3.a;
-		var _v4 = frame.originPoint;
-		var p0 = _v4.a;
-		var _v5 = frame.zDirection;
-		var k = _v5.a;
-		var _v6 = frame.yDirection;
-		var j = _v6.a;
-		var _v7 = frame.xDirection;
-		var i = _v7.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
-			{x: ((p0.x + (x * i.x)) + (y * j.x)) + (z * k.x), y: ((p0.y + (x * i.y)) + (y * j.y)) + (z * k.y), z: ((p0.z + (x * i.z)) + (y * j.z)) + (z * k.z)});
-	});
-var $ianmackenzie$elm_geometry$Point2d$yCoordinateIn = F2(
-	function (_v0, _v1) {
-		var frame = _v0.a;
-		var p = _v1.a;
-		var _v2 = frame.originPoint;
-		var p0 = _v2.a;
-		var _v3 = frame.yDirection;
-		var d = _v3.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(((p.x - p0.x) * d.x) + ((p.y - p0.y) * d.y));
-	});
-var $ianmackenzie$elm_3d_camera$Camera3d$ray = F3(
-	function (_v0, screen, point) {
-		var camera = _v0.a;
-		var screenY = A2(
-			$ianmackenzie$elm_geometry$Point2d$yCoordinateIn,
-			$ianmackenzie$elm_geometry$Rectangle2d$axes(screen),
-			point);
-		var screenX = A2(
-			$ianmackenzie$elm_geometry$Point2d$xCoordinateIn,
-			$ianmackenzie$elm_geometry$Rectangle2d$axes(screen),
-			point);
-		var _v1 = camera.viewpoint;
-		var viewpointFrame = _v1.a;
-		var _v2 = $ianmackenzie$elm_geometry$Rectangle2d$dimensions(screen);
-		var screenWidth = _v2.a;
-		var screenHeight = _v2.b;
-		var _v3 = camera.projection;
-		if (_v3.$ === 'Perspective') {
-			var frustumSlope = _v3.a;
-			var screenZ = $ianmackenzie$elm_units$Quantity$negate(
-				A2(
-					$ianmackenzie$elm_units$Quantity$divideBy,
-					frustumSlope,
-					A2($ianmackenzie$elm_units$Quantity$multiplyBy, 0.5, screenHeight)));
-			var direction = A2(
-				$ianmackenzie$elm_geometry$Direction3d$placeIn,
-				viewpointFrame,
-				A2(
-					$elm$core$Maybe$withDefault,
-					$ianmackenzie$elm_geometry$Direction3d$negativeZ,
-					$ianmackenzie$elm_geometry$Vector3d$direction(
-						A3($ianmackenzie$elm_geometry$Vector3d$xyz, screenX, screenY, screenZ))));
-			return A2(
-				$ianmackenzie$elm_geometry$Axis3d$through,
-				$ianmackenzie$elm_3d_camera$Viewpoint3d$eyePoint(camera.viewpoint),
-				direction);
-		} else {
-			var viewpointHeight = _v3.a;
-			var resolution = A2($ianmackenzie$elm_units$Quantity$per, screenHeight, viewpointHeight);
-			var origin = A4(
-				$ianmackenzie$elm_geometry$Point3d$xyzIn,
-				viewpointFrame,
-				A2($ianmackenzie$elm_units$Quantity$at, resolution, screenX),
-				A2($ianmackenzie$elm_units$Quantity$at, resolution, screenY),
-				$ianmackenzie$elm_units$Quantity$zero);
-			return A2(
-				$ianmackenzie$elm_geometry$Axis3d$through,
-				origin,
-				$ianmackenzie$elm_3d_camera$Viewpoint3d$viewDirection(camera.viewpoint));
-		}
-	});
-var $ianmackenzie$elm_units$Quantity$toFloatQuantity = function (_v0) {
-	var value = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(value);
-};
-var $author$project$ViewThirdPerson$detectHit = F2(
-	function (event, model) {
-		var _v0 = _Utils_Tuple2(model.trackTree, model.viewContext);
-		if ((_v0.a.$ === 'Just') && (_v0.b.$ === 'Just')) {
-			var topNode = _v0.a.a;
-			var context = _v0.b.a;
-			var leaf = A2($author$project$DomainModel$leafFromIndex, model.currentPosition, topNode);
-			var camera = A3($author$project$ViewThirdPerson$deriveCamera, leaf, context, model.currentPosition);
-			var _v1 = event.offsetPos;
-			var x = _v1.a;
-			var y = _v1.b;
-			var screenPoint = A2($ianmackenzie$elm_geometry$Point2d$pixels, x, y);
-			var _v2 = model.viewDimensions;
-			var w = _v2.a;
-			var h = _v2.b;
-			var _v3 = _Utils_Tuple2(
-				$ianmackenzie$elm_units$Quantity$toFloatQuantity(w),
-				$ianmackenzie$elm_units$Quantity$toFloatQuantity(h));
-			var wFloat = _v3.a;
-			var hFloat = _v3.b;
-			var screenRectangle = A2(
-				$ianmackenzie$elm_geometry$Rectangle2d$from,
-				A2($ianmackenzie$elm_geometry$Point2d$xy, $ianmackenzie$elm_units$Quantity$zero, hFloat),
-				A2($ianmackenzie$elm_geometry$Point2d$xy, wFloat, $ianmackenzie$elm_units$Quantity$zero));
-			var ray = A3($ianmackenzie$elm_3d_camera$Camera3d$ray, camera, screenRectangle, screenPoint);
-			return A2($author$project$DomainModel$nearestToRay, ray, topNode);
-		} else {
-			return 0;
-		}
-	});
-var $author$project$ViewThirdPerson$multiplyDistanceBy = F2(
-	function (factor, context) {
-		return $elm$core$Maybe$Just(
-			_Utils_update(
-				context,
-				{
-					cameraDistance: A2($ianmackenzie$elm_units$Quantity$multiplyBy, factor, context.cameraDistance)
-				}));
-	});
-var $ianmackenzie$elm_units$Pixels$pixel = $ianmackenzie$elm_units$Pixels$pixels(1);
-var $author$project$ViewThirdPerson$update = F3(
-	function (msg, model, msgWrapper) {
-		var _v0 = _Utils_Tuple2(model.trackTree, model.viewContext);
-		if ((_v0.a.$ === 'Just') && (_v0.b.$ === 'Just')) {
-			var treeNode = _v0.a.a;
-			var context = _v0.b.a;
-			switch (msg.$) {
-				case 'ImageZoomIn':
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								viewContext: A2($author$project$ViewThirdPerson$multiplyDistanceBy, 0.7, context)
-							}),
-						$elm$core$Platform$Cmd$none);
-				case 'ImageZoomOut':
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								viewContext: A2($author$project$ViewThirdPerson$multiplyDistanceBy, 1 / 0.7, context)
-							}),
-						$elm$core$Platform$Cmd$none);
-				case 'ImageReset':
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								viewContext: $elm$core$Maybe$Just(
-									A2($author$project$ViewThirdPerson$initialiseView, model.currentPosition, treeNode))
-							}),
-						$elm$core$Platform$Cmd$none);
-				case 'ImageNoOp':
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				case 'ImageClick':
-					var event = msg.a;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								currentPosition: A2($author$project$ViewThirdPerson$detectHit, event, model)
-							}),
-						$elm$core$Platform$Cmd$none);
-				case 'ImageMouseWheel':
-					var deltaY = msg.a;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								viewContext: A2(
-									$author$project$ViewThirdPerson$multiplyDistanceBy,
-									A2($elm$core$Basics$pow, 1.001, deltaY),
-									context)
-							}),
-						$elm$core$Platform$Cmd$none);
-				case 'ImageGrab':
-					var event = msg.a;
-					var alternate = event.keys.ctrl || _Utils_eq(event.button, $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$SecondButton);
-					var newContext = $elm$core$Maybe$Just(
-						_Utils_update(
-							context,
-							{
-								dragAction: alternate ? $author$project$ViewContextThirdPerson$DragRotate : $author$project$ViewContextThirdPerson$DragPan,
-								orbiting: $elm$core$Maybe$Just(event.offsetPos),
-								waitingForClickDelay: true
-							}));
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{viewContext: newContext}),
-						A2(
-							$andrewMacmurray$elm_delay$Delay$after,
-							250,
-							msgWrapper($author$project$ViewThirdPerson$ClickDelayExpired)));
-				case 'ImageDrag':
-					var event = msg.a;
-					var _v2 = event.offsetPos;
-					var dx = _v2.a;
-					var dy = _v2.b;
-					var _v3 = _Utils_Tuple2(context.dragAction, context.orbiting);
-					_v3$2:
-					while (true) {
-						if (_v3.b.$ === 'Just') {
-							switch (_v3.a.$) {
-								case 'DragRotate':
-									var _v4 = _v3.a;
-									var _v5 = _v3.b.a;
-									var startX = _v5.a;
-									var startY = _v5.b;
-									return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-								case 'DragPan':
-									var _v6 = _v3.a;
-									var _v7 = _v3.b.a;
-									var startX = _v7.a;
-									var startY = _v7.b;
-									var rotationRate = A2(
-										$ianmackenzie$elm_units$Quantity$per,
-										$ianmackenzie$elm_units$Pixels$pixel,
-										$ianmackenzie$elm_units$Angle$degrees(1));
-									var elevationChange = A2(
-										$ianmackenzie$elm_units$Quantity$at,
-										rotationRate,
-										$ianmackenzie$elm_units$Pixels$pixels(dy - startY));
-									var azimuthChange = A2(
-										$ianmackenzie$elm_units$Quantity$at,
-										rotationRate,
-										$ianmackenzie$elm_units$Pixels$pixels(startX - dx));
-									var newContext = $elm$core$Maybe$Just(
-										_Utils_update(
-											context,
-											{
-												cameraAzimuth: A2($ianmackenzie$elm_geometry$Direction2d$rotateBy, azimuthChange, context.cameraAzimuth),
-												cameraElevation: A2($ianmackenzie$elm_units$Quantity$plus, elevationChange, context.cameraElevation),
-												orbiting: $elm$core$Maybe$Just(
-													_Utils_Tuple2(dx, dy))
-											}));
-									return _Utils_Tuple2(
-										_Utils_update(
-											model,
-											{viewContext: newContext}),
-										$elm$core$Platform$Cmd$none);
-								default:
-									break _v3$2;
-							}
-						} else {
-							break _v3$2;
-						}
-					}
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				case 'ImageRelease':
-					var event = msg.a;
-					var newContext = $elm$core$Maybe$Just(
-						_Utils_update(
-							context,
-							{dragAction: $author$project$ViewContextThirdPerson$DragNone, orbiting: $elm$core$Maybe$Nothing, waitingForClickDelay: false}));
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{viewContext: newContext}),
-						$elm$core$Platform$Cmd$none);
-				case 'ImageDoubleClick':
-					var event = msg.a;
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				default:
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								viewContext: $elm$core$Maybe$Just(
-									_Utils_update(
-										context,
-										{waitingForClickDelay: false}))
-							}),
-						$elm$core$Platform$Cmd$none);
-			}
-		} else {
-			return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-		}
-	});
 var $author$project$Main$update = F2(
 	function (msg, _v0) {
 		var model = _v0.a;
@@ -14114,14 +14126,14 @@ var $author$project$Main$update = F2(
 			case 'AdjustTimeZone':
 				var newZone = msg.a;
 				return _Utils_Tuple2(
-					$author$project$Main$Model(
+					$author$project$ModelRecord$Model(
 						_Utils_update(
 							model,
 							{zone: newZone})),
 					$author$project$MyIP$requestIpInformation($author$project$Msg$ReceivedIpDetails));
 			case 'ClearMapClickDebounce':
 				return _Utils_Tuple2(
-					$author$project$Main$Model(
+					$author$project$ModelRecord$Model(
 						_Utils_update(
 							model,
 							{mapClickDebounce: false})),
@@ -14138,7 +14150,7 @@ var $author$project$Main$update = F2(
 					}
 				}();
 				return _Utils_Tuple2(
-					$author$project$Main$Model(
+					$author$project$ModelRecord$Model(
 						_Utils_update(
 							model,
 							{ipInfo: ipInfo})),
@@ -14150,11 +14162,11 @@ var $author$project$Main$update = F2(
 							])));
 			case 'IpInfoAcknowledged':
 				return _Utils_Tuple2(
-					$author$project$Main$Model(model),
+					$author$project$ModelRecord$Model(model),
 					$elm$core$Platform$Cmd$none);
 			case 'GpxRequested':
 				return _Utils_Tuple2(
-					$author$project$Main$Model(model),
+					$author$project$ModelRecord$Model(model),
 					A2(
 						$elm$file$File$Select$file,
 						_List_fromArray(
@@ -14163,7 +14175,7 @@ var $author$project$Main$update = F2(
 			case 'GpxSelected':
 				var file = msg.a;
 				return _Utils_Tuple2(
-					$author$project$Main$Model(
+					$author$project$ModelRecord$Model(
 						_Utils_update(
 							model,
 							{
@@ -14192,29 +14204,17 @@ var $author$project$Main$update = F2(
 							$author$project$ViewThirdPerson$initialiseView(0),
 							trackTree)
 					});
-				return _Utils_Tuple2(
-					$author$project$Main$Model(
-						$author$project$Main$renderModel(modelWithTrack)),
-					_Utils_eq(model.viewMode, $author$project$ViewingMode$ViewMap) ? $elm$core$Platform$Cmd$batch(
-						_List_fromArray(
-							[
-								$author$project$PortController$addTrackToMap(modelWithTrack),
-								$author$project$PortController$centreMapOnCurrent(modelWithTrack),
-								A2($andrewMacmurray$elm_delay$Delay$after, 100, $author$project$Msg$RepaintMap)
-							])) : $elm$core$Platform$Cmd$none);
+				return $author$project$Actions$updateAllDisplays(modelWithTrack);
 			case 'RepaintMap':
 				return _Utils_Tuple2(
-					$author$project$Main$Model(model),
+					$author$project$ModelRecord$Model(model),
 					$author$project$PortController$refreshMap);
 			case 'SetRenderDepth':
 				var depth = msg.a;
-				return _Utils_Tuple2(
-					$author$project$Main$Model(
-						$author$project$Main$renderModel(
-							_Utils_update(
-								model,
-								{renderDepth: depth}))),
-					$elm$core$Platform$Cmd$none);
+				return $author$project$Actions$updateAllDisplays(
+					_Utils_update(
+						model,
+						{renderDepth: depth}));
 			case 'OAuthMessage':
 				var authMsg = msg.a;
 				var _v3 = A2($author$project$StravaAuth$update, authMsg, model.stravaAuthentication);
@@ -14222,7 +14222,7 @@ var $author$project$Main$update = F2(
 				var authCmd = _v3.b;
 				var isToken = $author$project$StravaAuth$getStravaToken(newAuthData);
 				return _Utils_Tuple2(
-					$author$project$Main$Model(
+					$author$project$ModelRecord$Model(
 						_Utils_update(
 							model,
 							{stravaAuthentication: newAuthData})),
@@ -14232,46 +14232,28 @@ var $author$project$Main$update = F2(
 				var _v4 = model.trackTree;
 				if (_v4.$ === 'Just') {
 					var treeTop = _v4.a;
-					var updatedModel = _Utils_update(
-						model,
-						{currentPosition: pos});
-					return _Utils_Tuple2(
-						$author$project$Main$Model(
-							$author$project$Main$renderModel(updatedModel)),
-						_Utils_eq(model.viewMode, $author$project$ViewingMode$ViewMap) ? $elm$core$Platform$Cmd$batch(
-							_List_fromArray(
-								[
-									$author$project$PortController$addTrackToMap(model),
-									$author$project$PortController$centreMapOnCurrent(model),
-									A2($andrewMacmurray$elm_delay$Delay$after, 10, $author$project$Msg$RepaintMap)
-								])) : $elm$core$Platform$Cmd$none);
+					return $author$project$Actions$updateAllDisplays(
+						_Utils_update(
+							model,
+							{currentPosition: pos}));
 				} else {
 					return _Utils_Tuple2(
-						$author$project$Main$Model(model),
+						$author$project$ModelRecord$Model(model),
 						$elm$core$Platform$Cmd$none);
 				}
 			case 'SetViewMode':
 				var newMode = msg.a;
-				return _Utils_Tuple2(
-					$author$project$Main$Model(
-						$author$project$Main$renderModel(
-							_Utils_update(
-								model,
-								{viewMode: newMode}))),
-					((!_Utils_eq(model.viewMode, $author$project$ViewingMode$ViewMap)) && _Utils_eq(newMode, $author$project$ViewingMode$ViewMap)) ? $elm$core$Platform$Cmd$batch(
-						_List_fromArray(
-							[
-								$author$project$PortController$addTrackToMap(model),
-								$author$project$PortController$centreMapOnCurrent(model),
-								A2($andrewMacmurray$elm_delay$Delay$after, 10, $author$project$Msg$RepaintMap)
-							])) : $elm$core$Platform$Cmd$none);
+				return $author$project$Actions$updateAllDisplays(
+					_Utils_update(
+						model,
+						{viewMode: newMode}));
 			case 'PortMessage':
 				var json = msg.a;
 				var _v5 = A2($author$project$PortController$processPortMessage, model, json);
 				var newModel = _v5.a;
 				var cmds = _v5.b;
 				return _Utils_Tuple2(
-					$author$project$Main$Model(newModel),
+					$author$project$ModelRecord$Model(newModel),
 					cmds);
 			default:
 				var imageMsg = msg.a;
@@ -14279,7 +14261,7 @@ var $author$project$Main$update = F2(
 				var newModel = _v6.a;
 				var cmds = _v6.b;
 				return _Utils_Tuple2(
-					$author$project$Main$Model(newModel),
+					$author$project$ModelRecord$Model(newModel),
 					cmds);
 		}
 	});

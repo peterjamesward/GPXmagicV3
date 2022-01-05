@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import Actions
 import Browser exposing (application)
 import Browser.Navigation exposing (Key)
 import Delay exposing (after)
@@ -17,15 +18,14 @@ import FlatColors.ChinesePalette
 import GeoCodeDecoders exposing (IpInfo)
 import GpxParser exposing (parseGPXPoints)
 import Length exposing (Meters, meters)
-import ModelRecord exposing (ModelRecord)
+import ModelRecord exposing (Model(..), ModelRecord)
 import Msg exposing (Msg(..))
 import MyIP
-import OAuthPorts exposing (randomBytes)
-import OAuthTypes as O exposing (..)
+import OAuthPorts as O exposing (randomBytes)
+import OAuthTypes as O exposing (OAuthMsg(..))
 import Pixels exposing (Pixels)
 import PortController
 import Quantity
-import SceneBuilder exposing (render3dView)
 import StravaAuth exposing (getStravaToken)
 import Task
 import Time
@@ -36,10 +36,6 @@ import ViewThirdPerson
 import ViewingMode exposing (ViewingMode(..))
 
 
-type Model
-    = Model ModelRecord
-
-
 main : Program (Maybe (List Int)) Model Msg
 main =
     -- This is the 'main' from OAuth example/
@@ -47,8 +43,8 @@ main =
         { init = Maybe.map StravaAuth.convertBytes >> init
         , update = update
         , subscriptions = subscriptions
-        , onUrlRequest = always (OAuthMessage NoOp)
-        , onUrlChange = always (OAuthMessage NoOp)
+        , onUrlRequest = always (OAuthMessage O.NoOp)
+        , onUrlChange = always (OAuthMessage O.NoOp)
         , view = view
         }
 
@@ -156,29 +152,13 @@ update msg (Model model) =
                                 |> Maybe.withDefault (GPXSource Direction2d.x Quantity.zero Quantity.zero)
                     }
             in
-            ( modelWithTrack
-                |> renderModel
-                |> Model
-            , if model.viewMode == ViewingMode.ViewMap then
-                Cmd.batch
-                    [ PortController.addTrackToMap modelWithTrack
-                    , PortController.centreMapOnCurrent modelWithTrack
-                    , after 100 RepaintMap
-                    ]
-
-              else
-                Cmd.none
-            )
+            modelWithTrack |> Actions.updateAllDisplays
 
         RepaintMap ->
             ( Model model, PortController.refreshMap )
 
         SetRenderDepth depth ->
-            ( { model | renderDepth = depth }
-                |> renderModel
-                |> Model
-            , Cmd.none
-            )
+            { model | renderDepth = depth } |> Actions.updateAllDisplays
 
         --Delegate wrapped OAuthmessages. Be bowled over if this works first time. Or fiftieth.
         --Maybe look after to see if there is yet a token. Easy way to know.
@@ -198,43 +178,14 @@ update msg (Model model) =
             -- Slider moves pointer and recentres view.
             case model.trackTree of
                 Just treeTop ->
-                    let
-                        updatedModel =
-                            { model | currentPosition = pos }
-                    in
-                    ( updatedModel
-                        |> renderModel
-                        |> Model
-                    , if model.viewMode == ViewMap then
-                        Cmd.batch
-                            -- Must repaint track on so that selective rendering works.
-                            [ PortController.addTrackToMap model
-                            , PortController.centreMapOnCurrent model
-                            , after 10 RepaintMap
-                            ]
-
-                      else
-                        Cmd.none
-                    )
+                    { model | currentPosition = pos }
+                        |> Actions.updateAllDisplays
 
                 Nothing ->
                     ( Model model, Cmd.none )
 
         SetViewMode newMode ->
-            ( { model | viewMode = newMode }
-                |> renderModel
-                |> Model
-            , if model.viewMode /= ViewMap && newMode == ViewMap then
-                Cmd.batch
-                    -- Must repaint track on so that selective rendering works.
-                    [ PortController.addTrackToMap model
-                    , PortController.centreMapOnCurrent model
-                    , after 10 RepaintMap
-                    ]
-
-              else
-                Cmd.none
-            )
+            { model | viewMode = newMode } |> Actions.updateAllDisplays
 
         PortMessage json ->
             let
@@ -249,11 +200,6 @@ update msg (Model model) =
                     ViewThirdPerson.update imageMsg model ImageMessage
             in
             ( Model newModel, cmds )
-
-
-renderModel : ModelRecord -> ModelRecord
-renderModel model =
-    { model | scene = render3dView model }
 
 
 view : Model -> Browser.Document Msg

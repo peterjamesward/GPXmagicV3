@@ -2,7 +2,11 @@
 
 # WIP
 
-Projection looks rather crap.
+Projection looks rather crap (been there before).
+
+Hit detect needs to set current.
+
+Map is messed up (not surprising).
 
 ## Zoom, Pan, Rotate.
 Copy old stuff when conformal projection is back, but cleaner.
@@ -10,6 +14,10 @@ Copy old stuff when conformal projection is back, but cleaner.
 ### Map / General rendering
 Use a graduated drop off with distance, compute at each tree level.
 On Map, work out the depth to fit (say) 1000 points within visible region.
+
+### Editing?
+Should probably try an edit function soon, to get the feel of working with PeteTree.
+Also, to decide how to replace `processPostUpdateAction`.
 
 ### iframe
 Do an embedded version as iframe for Steve?

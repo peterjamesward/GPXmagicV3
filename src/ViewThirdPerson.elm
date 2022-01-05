@@ -259,7 +259,9 @@ update msg model msgWrapper =
                     ( model, Cmd.none )
 
                 ImageClick event ->
-                    -- Click moves pointer but does not recentre view. (Double click will.)
+                    -- Click moves pointer but does not re-centre view. (Double click will.)
+                    --TODO: How to share action here with Main:update for slider,
+                    --TODO: without passing control back? Separate module?
                     ( { model | currentPosition = detectHit event model }
                     , Cmd.none
                     )
