@@ -225,7 +225,7 @@ makeRoadSection : GPXSource -> GPXSource -> GPXSource -> RoadSection
 makeRoadSection reference earth1 earth2 =
     let
         local1 =
-            pointFromGpxWithReference reference earth2
+            pointFromGpxWithReference reference earth1
 
         local2 =
             pointFromGpxWithReference reference earth2

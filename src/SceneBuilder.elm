@@ -112,14 +112,14 @@ render3dView model =
                 Leaf leafNode ->
                     makeVisibleSegment someNode ++ accum
 
-                Node notLeaf ->
+                Node unLeaf ->
                     if depth <= 0 then
                         makeVisibleSegment someNode ++ accum
 
                     else
                         accum
-                            |> renderTree (depth - 1) notLeaf.left
-                            |> renderTree (depth - 1) notLeaf.right
+                            |> renderTree (depth - 1) unLeaf.left
+                            |> renderTree (depth - 1) unLeaf.right
 
         renderTreeSelectively :
             Int
@@ -131,18 +131,18 @@ render3dView model =
                 Leaf leafNode ->
                     makeVisibleSegment someNode ++ accum
 
-                Node notLeaf ->
-                    if notLeaf.nodeContent.boundingBox |> BoundingBox3d.intersects fullRenderingZone then
+                Node unLeaf ->
+                    if unLeaf.nodeContent.boundingBox |> BoundingBox3d.intersects fullRenderingZone then
                         -- Ignore depth cutoff near or in the box
                         accum
-                            |> renderTreeSelectively (depth - 1) notLeaf.left
-                            |> renderTreeSelectively (depth - 1) notLeaf.right
+                            |> renderTreeSelectively (depth - 1) unLeaf.left
+                            |> renderTreeSelectively (depth - 1) unLeaf.right
 
                     else
                         -- Outside box, apply cutoff.
                         accum
-                            |> renderTree (depth - 1) notLeaf.left
-                            |> renderTree (depth - 1) notLeaf.right
+                            |> renderTree (depth - 1) unLeaf.left
+                            |> renderTree (depth - 1) unLeaf.right
 
         renderCurrentMarker : Int -> PeteTree -> List (Entity LocalCoords)
         renderCurrentMarker marker tree =
@@ -153,8 +153,8 @@ render3dView model =
     in
     case model.trackTree of
         Just tree ->
-            renderCurrentMarker model.currentPosition tree
-                ++ renderTreeSelectively model.renderDepth tree []
+            renderTreeSelectively model.renderDepth tree <|
+                renderCurrentMarker model.currentPosition tree
 
         Nothing ->
             []

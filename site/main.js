@@ -11888,14 +11888,14 @@ var $author$project$SceneBuilder$render3dView = function (model) {
 					makeVisibleSegment(someNode),
 					accum);
 			} else {
-				var notLeaf = someNode.a;
+				var unLeaf = someNode.a;
 				return (depth <= 0) ? _Utils_ap(
 					makeVisibleSegment(someNode),
 					accum) : A3(
 					renderTree,
 					depth - 1,
-					notLeaf.right,
-					A3(renderTree, depth - 1, notLeaf.left, accum));
+					unLeaf.right,
+					A3(renderTree, depth - 1, unLeaf.left, accum));
 			}
 		});
 	var boxSide = $ianmackenzie$elm_units$Length$kilometers(4);
@@ -11920,24 +11920,26 @@ var $author$project$SceneBuilder$render3dView = function (model) {
 					makeVisibleSegment(someNode),
 					accum);
 			} else {
-				var notLeaf = someNode.a;
-				return A2($ianmackenzie$elm_geometry$BoundingBox3d$intersects, fullRenderingZone, notLeaf.nodeContent.boundingBox) ? A3(
+				var unLeaf = someNode.a;
+				return A2($ianmackenzie$elm_geometry$BoundingBox3d$intersects, fullRenderingZone, unLeaf.nodeContent.boundingBox) ? A3(
 					renderTreeSelectively,
 					depth - 1,
-					notLeaf.right,
-					A3(renderTreeSelectively, depth - 1, notLeaf.left, accum)) : A3(
+					unLeaf.right,
+					A3(renderTreeSelectively, depth - 1, unLeaf.left, accum)) : A3(
 					renderTree,
 					depth - 1,
-					notLeaf.right,
-					A3(renderTree, depth - 1, notLeaf.left, accum));
+					unLeaf.right,
+					A3(renderTree, depth - 1, unLeaf.left, accum));
 			}
 		});
 	var _v2 = model.trackTree;
 	if (_v2.$ === 'Just') {
 		var tree = _v2.a;
-		return _Utils_ap(
-			A2(renderCurrentMarker, model.currentPosition, tree),
-			A3(renderTreeSelectively, model.renderDepth, tree, _List_Nil));
+		return A3(
+			renderTreeSelectively,
+			model.renderDepth,
+			tree,
+			A2(renderCurrentMarker, model.currentPosition, tree));
 	} else {
 		return _List_Nil;
 	}
@@ -12358,7 +12360,7 @@ var $author$project$DomainModel$makeRoadSection = F3(
 				A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, earth1.longitude, earth2.longitude)),
 			earth1.longitude);
 		var local2 = A2($author$project$DomainModel$pointFromGpxWithReference, reference, earth2);
-		var local1 = A2($author$project$DomainModel$pointFromGpxWithReference, reference, earth2);
+		var local1 = A2($author$project$DomainModel$pointFromGpxWithReference, reference, earth1);
 		var box = A2($ianmackenzie$elm_geometry$BoundingBox3d$from, local1, local2);
 		return {
 			boundingBox: box,
