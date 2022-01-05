@@ -5,6 +5,7 @@
 Figure out how to do actions and commands without import loops.
 May involve quite a lot of wrappping and delegation (if you raise a msg, you handle it).
 > All messaging in & out is map-related (ignoring OAuth), so a well-sorted MapView.elm might fix it all.
+> Failing that: https://github.com/FabienHenon/app-object/tree/1.0.0
 
 Projection distorted (been there before).
 
