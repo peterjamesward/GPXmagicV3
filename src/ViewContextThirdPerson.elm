@@ -17,9 +17,7 @@ type DragAction
 
 
 type alias ContextThirdPerson =
-    { earthAzimuth : Direction2d LocalCoords -- Which meridian is towards us
-    , earthElevation : Angle -- Polar tilt
-    , cameraAzimuth : Direction2d LocalCoords --Camera relative to plane normal at focus point
+    { cameraAzimuth : Direction2d LocalCoords --Camera relative to plane normal at focus point
     , cameraElevation : Angle -- Above local horizon plane
     , cameraDistance : Quantity Float Length.Meters
     , fieldOfView : Angle

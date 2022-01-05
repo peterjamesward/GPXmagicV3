@@ -7,14 +7,15 @@ import Angle exposing (Angle)
 import BoundingBox3d exposing (BoundingBox3d)
 import Color exposing (Color, black, darkGreen, green, lightOrange)
 import ColourPalette exposing (gradientHue2)
+import Direction2d
 import Direction3d
-import DomainModel exposing (EarthVector, PeteTree(..), endVector, leafFromIndex, lngLatPair, pointFromVector, skipCount, startVector, trueLength)
+import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), boundingBox, endPoint, gpxFromPointWithReference, leafFromIndex, lngLatPair, startPoint, trueLength)
 import Json.Encode as E
 import Length exposing (Meters)
 import LineSegment3d
 import LocalCoords exposing (LocalCoords)
 import Pixels
-import Plane3d
+import Plane3d exposing (Plane3d)
 import Point3d
 import Quantity
 import Scene3d exposing (Entity)
@@ -39,6 +40,14 @@ render3dView :
     -> List (Entity LocalCoords)
 render3dView model =
     let
+        floorPlane =
+            case model.trackTree of
+                Just aTree ->
+                    Plane3d.xy |> Plane3d.offsetBy (BoundingBox3d.minZ <| boundingBox aTree)
+
+                Nothing ->
+                    Plane3d.xy
+
         gradientColourPastel : Float -> Color.Color
         gradientColourPastel slope =
             Color.hsl (gradientHue2 slope) 0.6 0.7
@@ -46,12 +55,6 @@ render3dView model =
         boxSide =
             --TODO: put box side in model
             Length.kilometers 4
-
-        startPoint treeNode =
-            pointFromVector (startVector treeNode)
-
-        endPoint treeNode =
-            pointFromVector (endVector treeNode)
 
         gradientFromNode treeNode =
             Quantity.ratio
@@ -62,25 +65,25 @@ render3dView model =
                 (trueLength treeNode)
                 |> (*) 100.0
 
-        --TODO: Gradient has to drop to sphere, not bounding box!
-        --gradientCurtain : PeteTree -> List (Entity LocalCoords)
-        --gradientCurtain node =
-        --    let
-        --        gradient =
-        --            gradientFromNode node
-        --
-        --        roadAsSegment =
-        --            LineSegment3d.from (startsAt node) (endsAt node)
-        --
-        --        curtainHem =
-        --            LineSegment3d.projectOnto floorPlane roadAsSegment
-        --    in
-        --    [ Scene3d.quad (Material.color <| gradientColourPastel gradient)
-        --        (LineSegment3d.startPoint roadAsSegment)
-        --        (LineSegment3d.endPoint roadAsSegment)
-        --        (LineSegment3d.endPoint curtainHem)
-        --        (LineSegment3d.startPoint curtainHem)
-        --    ]
+        gradientCurtain : PeteTree -> List (Entity LocalCoords)
+        gradientCurtain node =
+            let
+                gradient =
+                    gradientFromNode node
+
+                roadAsSegment =
+                    LineSegment3d.from (startPoint node) (endPoint node)
+
+                curtainHem =
+                    LineSegment3d.projectOnto floorPlane roadAsSegment
+            in
+            [ Scene3d.quad (Material.color <| gradientColourPastel gradient)
+                (LineSegment3d.startPoint roadAsSegment)
+                (LineSegment3d.endPoint roadAsSegment)
+                (LineSegment3d.endPoint curtainHem)
+                (LineSegment3d.startPoint curtainHem)
+            ]
+
         makeVisibleSegment node =
             [ Scene3d.point { radius = Pixels.pixels 1 }
                 (Material.color black)
@@ -88,9 +91,13 @@ render3dView model =
             , Scene3d.lineSegment (Material.color black) <|
                 LineSegment3d.from (startPoint node) (endPoint node)
             ]
+                ++ gradientCurtain node
 
-        --++ gradientCurtain node
-        renderTree : Int -> PeteTree -> List (Entity LocalCoords) -> List (Entity LocalCoords)
+        renderTree :
+            Int
+            -> PeteTree
+            -> List (Entity LocalCoords)
+            -> List (Entity LocalCoords)
         renderTree depth someNode accum =
             case someNode of
                 Leaf leafNode ->
@@ -143,14 +150,12 @@ render3dView model =
     case model.trackTree of
         Just tree ->
             let
-                box =
+                fullRenderingZone =
                     BoundingBox3d.withDimensions ( boxSide, boxSide, boxSide )
                         (startPoint <| leafFromIndex model.currentPosition tree)
             in
-            --globe
-            --    ::
-                 renderCurrentMarker model.currentPosition tree
-                ++ renderTreeSelectively box model.renderDepth tree []
+            renderCurrentMarker model.currentPosition tree
+                ++ renderTreeSelectively fullRenderingZone model.renderDepth tree []
 
         Nothing ->
             []
@@ -165,6 +170,7 @@ renderMapJson :
         | trackTree : Maybe PeteTree
         , renderDepth : Int
         , currentPosition : Int
+        , referenceLonLat : GPXSource
     }
     -> E.Value
 renderMapJson model =
@@ -173,20 +179,17 @@ renderMapJson model =
             --TODO: put box side in model
             Length.kilometers 4
 
-        mapLocation : EarthVector -> ( Angle, Angle )
-        mapLocation vector =
-            case Vector3d.direction vector of
-                Just direction ->
-                    ( Direction3d.azimuthIn SketchPlane3d.xy direction
-                    , Direction3d.elevationFrom SketchPlane3d.xy direction
-                    )
-
-                Nothing ->
-                    ( Quantity.zero, Quantity.zero )
+        mapLocation : EarthPoint -> ( Angle, Angle )
+        mapLocation point =
+            let
+                gpx =
+                    gpxFromPointWithReference model.referenceLonLat point
+            in
+            ( Direction2d.toAngle gpx.longitude, gpx.latitude )
 
         makeVisibleSegment : PeteTree -> E.Value
         makeVisibleSegment node =
-            lngLatPair <| mapLocation <| endVector node
+            lngLatPair <| mapLocation <| endPoint node
 
         --renderCurrentMarker : Int -> PeteTree -> List (Entity LocalCoords)
         --renderCurrentMarker marker tree =
@@ -234,16 +237,16 @@ renderMapJson model =
                             |> renderTree (depth - 1) notLeaf.left
 
         renderFirstPoint treeNode =
-            lngLatPair <| mapLocation <| startVector treeNode
+            lngLatPair <| mapLocation <| startPoint treeNode
     in
     case model.trackTree of
         Just tree ->
             let
-                startPoint =
-                    pointFromVector <| startVector <| leafFromIndex model.currentPosition tree
+                start =
+                    startPoint <| leafFromIndex model.currentPosition tree
 
                 box =
-                    BoundingBox3d.withDimensions ( boxSide, boxSide, boxSide ) startPoint
+                    BoundingBox3d.withDimensions ( boxSide, boxSide, boxSide ) start
 
                 geometry =
                     E.object

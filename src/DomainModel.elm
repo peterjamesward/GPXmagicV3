@@ -4,50 +4,41 @@ import Angle exposing (Angle)
 import Axis3d exposing (Axis3d)
 import BoundingBox3d exposing (BoundingBox3d)
 import Direction2d exposing (Direction2d)
-import Direction3d
 import Json.Encode as E
 import Length exposing (Length, Meters, inMeters)
 import LocalCoords exposing (LocalCoords)
 import Point3d exposing (Point3d)
 import Quantity exposing (Quantity)
-import SketchPlane3d
 import Sphere3d exposing (Sphere3d)
 import Spherical as Spherical exposing (range)
-import Vector3d exposing (Vector3d)
 
 
 type alias GPXSource =
     -- Being a raw line of data from GPX file.
     { longitude : Direction2d LocalCoords
     , latitude : Angle
-    , altitude : Quantity Float Meters
+    , altitude : Length.Length
     }
 
 
-type alias EarthVector =
-    -- Experiment with polar coordinates direct from GPX data
-    Vector3d Meters LocalCoords
-
-
 type alias EarthPoint =
-    Point3d Meters LocalCoords
+    Point3d Length.Meters LocalCoords
 
 
 type alias RoadSection =
     -- Can be based between two 'fundamental' points from GPX, or an assembly of them.
-    -- I THINK it makes sense to store only the vectors.
     -- Bounding box and Sphere needed for culling in nearness tests.
     -- Keeping track of longitude tricky because of IDL.
-    { startVector : EarthVector
-    , endVector : EarthVector
+    { sourceData : ( GPXSource, GPXSource )
+    , startPoint : EarthPoint
+    , endPoint : EarthPoint
     , boundingBox : BoundingBox3d Meters LocalCoords
     , sphere : Sphere3d Meters LocalCoords
-    , trueLength : Quantity Float Meters
+    , trueLength : Length.Length
     , skipCount : Int
     , medianLongitude : Direction2d LocalCoords
     , eastwardTurn : Angle
     , westwardTurn : Angle
-    , minAltitude : Length
     }
 
 
@@ -62,24 +53,34 @@ type
         }
 
 
-startVector : PeteTree -> EarthVector
-startVector treeNode =
+sourceData : PeteTree -> ( GPXSource, GPXSource )
+sourceData treeNode =
     case treeNode of
         Leaf leaf ->
-            leaf.startVector
+            leaf.sourceData
 
         Node node ->
-            node.nodeContent.startVector
+            node.nodeContent.sourceData
 
 
-endVector : PeteTree -> EarthVector
-endVector treeNode =
+startPoint : PeteTree -> EarthPoint
+startPoint treeNode =
     case treeNode of
         Leaf leaf ->
-            leaf.endVector
+            leaf.startPoint
 
         Node node ->
-            node.nodeContent.endVector
+            node.nodeContent.startPoint
+
+
+endPoint : PeteTree -> EarthPoint
+endPoint treeNode =
+    case treeNode of
+        Leaf leaf ->
+            leaf.endPoint
+
+        Node node ->
+            node.nodeContent.endPoint
 
 
 isLongitudeContained : Direction2d LocalCoords -> PeteTree -> Bool
@@ -116,16 +117,6 @@ trueLength treeNode =
 
         Node node ->
             node.nodeContent.trueLength
-
-
-minAltitude : PeteTree -> Length
-minAltitude treeNode =
-    case treeNode of
-        Leaf leaf ->
-            leaf.minAltitude
-
-        Node node ->
-            node.nodeContent.minAltitude
 
 
 skipCount : PeteTree -> Int
@@ -188,27 +179,59 @@ westwardTurn treeNode =
             node.nodeContent.westwardTurn
 
 
-longitudeFromVector : EarthVector -> Direction2d LocalCoords
-longitudeFromVector v =
-    Vector3d.direction v
-        |> Maybe.withDefault Direction3d.x
-        |> Direction3d.projectInto SketchPlane3d.xy
-        |> Maybe.withDefault Direction2d.x
+pointFromGpxWithReference : GPXSource -> GPXSource -> EarthPoint
+pointFromGpxWithReference reference gpx =
+    Point3d.xyz
+        (Direction2d.angleFrom reference.longitude gpx.longitude
+            |> Angle.inDegrees
+            |> (*) Spherical.metresPerDegree
+            |> Length.meters
+        )
+        (gpx.latitude
+            |> Quantity.minus reference.latitude
+            |> Angle.inDegrees
+            |> (*) Spherical.metresPerDegree
+            |> (*) (Angle.cos reference.latitude)
+            |> Length.meters
+        )
+        (gpx.altitude |> Quantity.minus reference.altitude)
 
 
-makeRoadSection : EarthVector -> EarthVector -> RoadSection
-makeRoadSection v1 v2 =
+gpxFromPointWithReference : GPXSource -> EarthPoint -> GPXSource
+gpxFromPointWithReference reference point =
     let
-        ( local1, local2 ) =
-            ( pointFromVector v1
-            , pointFromVector v2
-            )
+        ( x, y, z ) =
+            Point3d.toTuple inMeters point
+
+        longitude =
+            x
+                / cos latitude
+                / Spherical.metresPerDegree
+                + (Angle.inDegrees <| Direction2d.toAngle reference.longitude)
+
+        latitude =
+            y / Spherical.metresPerDegree + Angle.inDegrees reference.latitude
+
+        altitude =
+            z
+    in
+    GPXSource
+        (Direction2d.fromAngle <| Angle.degrees longitude)
+        (Angle.degrees latitude)
+        (Length.meters altitude)
+
+
+makeRoadSection : GPXSource -> GPXSource -> GPXSource -> RoadSection
+makeRoadSection reference earth1 earth2 =
+    let
+        local1 =
+            pointFromGpxWithReference reference earth2
+
+        local2 =
+            pointFromGpxWithReference reference earth2
 
         box =
             BoundingBox3d.from local1 local2
-
-        ( earth1, earth2 ) =
-            ( gpxFromVector v1, gpxFromVector v2 )
 
         range : Length.Length
         range =
@@ -217,24 +240,16 @@ makeRoadSection v1 v2 =
                     ( Direction2d.toAngle earth1.longitude, earth1.latitude )
                     ( Direction2d.toAngle earth2.longitude, earth2.latitude )
 
-        minAlt =
-            Quantity.min (Vector3d.length v1) (Vector3d.length v2)
-                |> Quantity.minus (Length.meters Spherical.meanRadius)
-
-        startLon =
-            longitudeFromVector v1
-
-        endLon =
-            longitudeFromVector v2
-
         medianLon =
             -- Careful, don't average because of -pi/+pi, work out half the turn.
-            startLon |> Direction2d.rotateBy (Direction2d.angleFrom startLon endLon |> Quantity.half)
+            earth1.longitude
+                |> Direction2d.rotateBy
+                    (Direction2d.angleFrom earth1.longitude earth2.longitude |> Quantity.half)
     in
-    { startVector = v1
-    , endVector = v2
+    { sourceData = ( earth1, earth2 )
+    , startPoint = local1
+    , endPoint = local2
     , boundingBox = box
-    , minAltitude = minAlt
     , sphere = containingSphere box
     , trueLength = range
     , skipCount = 1
@@ -242,21 +257,28 @@ makeRoadSection v1 v2 =
     , eastwardTurn =
         Quantity.max Quantity.zero <|
             Quantity.max
-                (Direction2d.angleFrom medianLon startLon)
-                (Direction2d.angleFrom medianLon endLon)
+                (Direction2d.angleFrom medianLon earth1.longitude)
+                (Direction2d.angleFrom medianLon earth2.longitude)
     , westwardTurn =
         Quantity.min Quantity.zero <|
             Quantity.min
-                (Direction2d.angleFrom medianLon startLon)
-                (Direction2d.angleFrom medianLon endLon)
+                (Direction2d.angleFrom medianLon earth1.longitude)
+                (Direction2d.angleFrom medianLon earth2.longitude)
     }
 
 
-treeFromList : List EarthVector -> Maybe PeteTree
+treeFromList : List GPXSource -> Maybe PeteTree
 treeFromList track =
     -- Build the skeletal tree of nodes, then attach the leaves from the input list.
     -- Should be much quicker than recursively splitting the list, for large lists.
+    -- First point is arbitrary reference for conformal projection (TBC).
     let
+        referencePoint =
+            -- From which, arbitrarily, we compute metre offsets.
+            -- We won't be here without a track, so default is harmless.
+            List.head track
+                |> Maybe.withDefault (GPXSource Direction2d.x Quantity.zero Quantity.zero)
+
         numberOfSegments =
             List.length track - 1
 
@@ -271,10 +293,10 @@ treeFromList track =
                         |> Direction2d.rotateBy
                             (Direction2d.angleFrom (medianLongitude info1) (medianLongitude info2) |> Quantity.half)
             in
-            { startVector = startVector info1
-            , endVector = endVector info2
+            { sourceData = ( Tuple.first (sourceData info1), Tuple.second (sourceData info2) )
+            , startPoint = startPoint info1
+            , endPoint = endPoint info2
             , boundingBox = box
-            , minAltitude = Quantity.min (minAltitude info1) (minAltitude info2)
             , sphere = containingSphere box
             , trueLength = Quantity.plus (trueLength info1) (trueLength info2)
             , skipCount = skipCount info1 + skipCount info2
@@ -301,12 +323,12 @@ treeFromList track =
                     )
             }
 
-        treeBuilder : Int -> List EarthVector -> ( Maybe PeteTree, List EarthVector )
-        treeBuilder n vectorStream =
-            case ( n < 2, vectorStream ) of
+        treeBuilder : Int -> List GPXSource -> ( Maybe PeteTree, List GPXSource )
+        treeBuilder n pointStream =
+            case ( n < 2, pointStream ) of
                 ( True, v1 :: v2 :: vvvv ) ->
                     -- Take two vectors for this Leaf, but only consume one.
-                    ( Just <| Leaf <| makeRoadSection v1 v2, v2 :: vvvv )
+                    ( Just <| Leaf <| makeRoadSection referencePoint v1 v2, v2 :: vvvv )
 
                 ( True, anythingElse ) ->
                     -- Hmm. This shouldn't have happened if we've done our numbers right.
@@ -345,22 +367,22 @@ treeFromList track =
     treeBuilder numberOfSegments track |> Tuple.first
 
 
-earthVectorFromIndex : Int -> PeteTree -> EarthVector
-earthVectorFromIndex index treeNode =
+earthPointFromIndex : Int -> PeteTree -> EarthPoint
+earthPointFromIndex index treeNode =
     case treeNode of
         Leaf info ->
             if index <= 0 then
-                info.startVector
+                info.startPoint
 
             else
-                info.endVector
+                info.endPoint
 
         Node info ->
             if index < skipCount info.left then
-                earthVectorFromIndex index info.left
+                earthPointFromIndex index info.left
 
             else
-                earthVectorFromIndex (index - skipCount info.left) info.right
+                earthPointFromIndex (index - skipCount info.left) info.right
 
 
 leafFromIndex : Int -> PeteTree -> PeteTree
@@ -375,10 +397,6 @@ leafFromIndex index treeNode =
 
             else
                 leafFromIndex (index - skipCount info.left) info.right
-
-
-pointFromVector v =
-    Point3d.origin |> Point3d.translateBy v
 
 
 nearestToRay :
@@ -397,10 +415,10 @@ nearestToRay ray treeNode =
                 Leaf leaf ->
                     let
                         startDistance =
-                            pointFromVector leaf.startVector |> Point3d.distanceFromAxis ray
+                            leaf.startPoint |> Point3d.distanceFromAxis ray
 
                         endDistance =
-                            pointFromVector leaf.endVector |> Point3d.distanceFromAxis ray
+                            leaf.endPoint |> Point3d.distanceFromAxis ray
                     in
                     if startDistance |> Quantity.lessThanOrEqualTo endDistance then
                         ( skip, startDistance )
@@ -459,18 +477,16 @@ nearestToRay ray treeNode =
     Tuple.first <| helper treeNode 0
 
 
-makeEarthVector : Direction2d LocalCoords -> Angle -> Length -> Vector3d Length.Meters LocalCoords
-makeEarthVector lon lat alt =
+gpxDistance : GPXSource -> GPXSource -> Length.Length
+gpxDistance p1 p2 =
     let
-        direction =
-            Direction3d.xyZ (Direction2d.toAngle lon) lat
-
-        radius =
-            alt
-
-        --|> Quantity.plus (Length.meters Spherical.meanRadius)
+        lon p =
+            p.longitude |> Direction2d.toAngle
     in
-    Vector3d.withLength radius direction
+    Length.meters <|
+        range
+            ( Direction2d.toAngle p1.longitude, p1.latitude )
+            ( Direction2d.toAngle p2.longitude, p2.latitude )
 
 
 nearestToLonLat :
@@ -478,35 +494,18 @@ nearestToLonLat :
     -> PeteTree
     -> Int
 nearestToLonLat click treeNode =
-    -- Try: compute distance to each box centres.
-    -- At each level, pick "closest" child and recurse.
-    -- Not good enough. Need deeper search, say for all intersected boxes.
-    -- Bit of recursive magic to get the "index" number.
+    -- Only for click detect on Map view.
     let
-        --_ =
-        --    Debug.log "CLICK" click
-        searchVector =
-            makeEarthVector
-                click.longitude
-                click.latitude
-                (minAltitude treeNode |> Quantity.plus (Length.meters Spherical.meanRadius))
-
-        _ =
-            Debug.log "SEARCH" searchVector
-
         helper withNode skip =
             case withNode of
                 Leaf leaf ->
-                    -- Use whichever point is closest. At leaf level, simple Euclidean metric,
+                    -- Use whichever point is closest.
                     let
                         startDistance =
-                            leaf.startVector |> Vector3d.minus searchVector |> Vector3d.length
+                            gpxDistance click <| Tuple.first leaf.sourceData
 
                         endDistance =
-                            leaf.endVector |> Vector3d.minus searchVector |> Vector3d.length
-
-                        _ =
-                            Debug.log "LEAF" ( startDistance, endDistance )
+                            gpxDistance click <| Tuple.second leaf.sourceData
                     in
                     if startDistance |> Quantity.lessThanOrEqualTo endDistance then
                         ( skip, startDistance )
@@ -588,23 +587,3 @@ containingSphere box =
 lngLatPair : ( Angle, Angle ) -> E.Value
 lngLatPair ( longitude, latitude ) =
     E.list E.float [ Angle.inDegrees longitude, Angle.inDegrees latitude ]
-
-
-gpxFromVector : EarthVector -> GPXSource
-gpxFromVector vector =
-    let
-        direction =
-            Vector3d.direction vector
-    in
-    case direction of
-        Just d ->
-            { longitude = longitudeFromVector vector
-            , latitude = d |> Direction3d.elevationFrom SketchPlane3d.xy
-            , altitude = Vector3d.length vector
-            }
-
-        Nothing ->
-            { longitude = Direction2d.x
-            , latitude = Quantity.zero
-            , altitude = Length.meters Spherical.meanRadius
-            }

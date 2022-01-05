@@ -6,7 +6,7 @@ import BoundingBox3d exposing (BoundingBox3d)
 import Delay exposing (after)
 import Direction2d
 import Direction3d
-import DomainModel exposing (PeteTree, gpxFromVector, leafFromIndex, startVector)
+import DomainModel exposing (GPXSource, PeteTree, gpxFromPointWithReference, leafFromIndex, startPoint)
 import Json.Decode as D exposing (Decoder, field, string)
 import Json.Encode as E
 import Length
@@ -63,6 +63,7 @@ centreMap :
         | trackTree : Maybe PeteTree
         , renderDepth : Int
         , currentPosition : Int
+        , referenceLonLat : GPXSource
     }
     -> Cmd msg
 centreMap model =
@@ -72,8 +73,8 @@ centreMap model =
             let
                 { longitude, latitude, altitude } =
                     leafFromIndex model.currentPosition tree
-                        |> startVector
-                        |> gpxFromVector
+                        |> startPoint
+                        |> gpxFromPointWithReference model.referenceLonLat
             in
             commandPort <|
                 E.object
@@ -103,6 +104,7 @@ centreMapOnCurrent :
         | trackTree : Maybe PeteTree
         , renderDepth : Int
         , currentPosition : Int
+        , referenceLonLat : GPXSource
     }
     -> Cmd msg
 centreMapOnCurrent model =
@@ -111,8 +113,8 @@ centreMapOnCurrent model =
             let
                 { longitude, latitude, altitude } =
                     leafFromIndex model.currentPosition tree
-                        |> startVector
-                        |> gpxFromVector
+                        |> startPoint
+                        |> gpxFromPointWithReference model.referenceLonLat
             in
             commandPort <|
                 E.object
@@ -148,6 +150,7 @@ addTrackToMap :
         | trackTree : Maybe PeteTree
         , renderDepth : Int
         , currentPosition : Int
+        , referenceLonLat : GPXSource
     }
     -> Cmd msg
 addTrackToMap model =
@@ -158,8 +161,8 @@ addTrackToMap model =
             let
                 { longitude, latitude, altitude } =
                     leafFromIndex model.currentPosition tree
-                        |> startVector
-                        |> gpxFromVector
+                        |> startPoint
+                        |> gpxFromPointWithReference model.referenceLonLat
             in
             commandPort <|
                 E.object
@@ -253,6 +256,7 @@ processPortMessage :
         , mapClickDebounce : Bool
         , currentPosition : Int
         , renderDepth : Int
+        , referenceLonLat : GPXSource
     }
     -> E.Value
     ->
@@ -262,6 +266,7 @@ processPortMessage :
             , mapClickDebounce : Bool
             , currentPosition : Int
             , renderDepth : Int
+            , referenceLonLat : GPXSource
           }
         , Cmd Msg
         )

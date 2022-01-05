@@ -23,11 +23,13 @@ range lonLat1 lonLat2 =
     let
         ( lat1, lon1 ) =
             ( Angle.inRadians <| Tuple.second lonLat1
-            , Angle.inRadians <| Tuple.first lonLat1 )
+            , Angle.inRadians <| Tuple.first lonLat1
+            )
 
         ( lat2, lon2 ) =
             ( Angle.inRadians <| Tuple.second lonLat2
-            , Angle.inRadians <| Tuple.first lonLat2 )
+            , Angle.inRadians <| Tuple.first lonLat2
+            )
 
         x =
             (lon2 - lon1) * cos ((lat1 + lat2) / 2)

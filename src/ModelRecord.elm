@@ -1,6 +1,6 @@
 module ModelRecord exposing (..)
 
-import DomainModel exposing (PeteTree)
+import DomainModel exposing (GPXSource, PeteTree)
 import GeoCodeDecoders exposing (IpInfo)
 import LocalCoords exposing (LocalCoords)
 import OAuthTypes as O
@@ -18,6 +18,7 @@ type alias ModelRecord =
     , zone : Time.Zone
     , stravaAuthentication : O.Model
     , trackTree : Maybe PeteTree
+    , referenceLonLat : GPXSource
     , renderDepth : Int
     , scene : List (Entity LocalCoords)
     , currentPosition : Int

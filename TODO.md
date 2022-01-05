@@ -2,26 +2,16 @@
 
 # WIP
 
+Will go back to **conformal** projection.
+Add option to switch to **Web Mercator**.
+Keep the longitude extents, as needed for Map display culling and hit detection.
+
 ## Zoom, Pan, Rotate.
+Copy old stuff when conformal projection is back.
 
-- Set earthAzimuth and earthElevation based on track.
-- Plain drag affects earthAzimuth/Elevation.
-- Right-drag affects camera azimuth/elevation around focal point.
-
-- https://ellie-app.com/9g2R9VDG6NHa1 
-- (but that does some weird Frame rotation.)
-
-- Zoom affects camera distance from focal point.
-
-Check road rendering in globe non-projection!
-
-- Moves map when switching views, and paints it too small again.
-- (No idea where that smaller size comes from.)
-
-### Map / General
-Possibly try a more graduated selective rendering. 
-Better, a gradual drop off with distance.
-Lazy (or less aggressive) selective re-render (aka 2.8) to reduce map flicker, improve slider response?
+### Map / General rendering
+Use a graduated drop off with distance, compute at each tree level.
+On Map, work out the depth to fit (say) 1000 points within visible region.
 
 ### iframe
 Do an embedded version as iframe for Steve?

@@ -3,6 +3,7 @@ module Main exposing (main)
 import Browser exposing (application)
 import Browser.Navigation exposing (Key)
 import Delay exposing (after)
+import Direction2d
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
@@ -23,6 +24,7 @@ import OAuthPorts exposing (randomBytes)
 import OAuthTypes as O exposing (..)
 import Pixels exposing (Pixels)
 import PortController
+import Quantity
 import SceneBuilder exposing (render3dView)
 import StravaAuth exposing (getStravaToken)
 import Task
@@ -73,6 +75,7 @@ init mflags origin navigationKey =
         , mapClickDebounce = False
         , lastMapClick = ( 0.0, 0.0 )
         , viewContext = Nothing
+        , referenceLonLat = GPXSource Direction2d.x Quantity.zero Quantity.zero
         }
     , Cmd.batch
         [ authCmd
@@ -148,6 +151,9 @@ update msg (Model model) =
                         | trackTree = trackTree
                         , renderDepth = 10
                         , viewContext = Maybe.map (ViewThirdPerson.initialiseView 0) trackTree
+                        , referenceLonLat =
+                            List.head gpxTrack
+                                |> Maybe.withDefault (GPXSource Direction2d.x Quantity.zero Quantity.zero)
                     }
             in
             ( modelWithTrack

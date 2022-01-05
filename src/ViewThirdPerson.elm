@@ -150,17 +150,13 @@ deriveCamera : PeteTree -> ContextThirdPerson -> Camera3d Meters LocalCoords
 deriveCamera treeNode context =
     let
         eyePoint =
-            pointFromVector <|
-                makeEarthVector
-                    context.earthAzimuth
-                    context.earthElevation
-                    (context.cameraDistance |> Quantity.plus (Length.meters Spherical.meanRadius))
+            Point3d.fromTuple Length.kilometers ( 10, 10, 1 )
 
         cameraViewpoint =
             -- Fixed for now.
             Viewpoint3d.lookAt
                 { eyePoint = eyePoint
-                , focalPoint = Point3d.origin
+                , focalPoint = startPoint treeNode
                 , upDirection = Direction3d.positiveZ
                 }
 
@@ -309,11 +305,11 @@ update msg model msgWrapper =
                                     Just
                                         { context
                                             | orbiting = Just ( dx, dy )
-                                            , earthAzimuth =
-                                                context.earthAzimuth
+                                            , cameraAzimuth =
+                                                context.cameraAzimuth
                                                     |> Direction2d.rotateBy azimuthChange
-                                            , earthElevation =
-                                                context.earthElevation
+                                            , cameraElevation =
+                                                context.cameraElevation
                                                     |> Quantity.plus elevationChange
                                         }
                             in
@@ -357,9 +353,7 @@ multiplyDistanceBy factor context =
 
 initialiseView : Int -> PeteTree -> ContextThirdPerson
 initialiseView current treeNode =
-    { earthElevation = Angle.degrees 0
-    , earthAzimuth = Direction2d.y
-    , cameraAzimuth = Direction2d.x
+    { cameraAzimuth = Direction2d.x
     , cameraElevation = Angle.degrees 0
     , cameraDistance = Length.kilometers 1000
     , fieldOfView = Angle.degrees 45
@@ -368,9 +362,6 @@ initialiseView current treeNode =
     , zoomLevel = 10.0
     , defaultZoomLevel = 10.0
     , focalPoint =
-        treeNode
-            |> leafFromIndex current
-            |> startVector
-            |> pointFromVector
+        treeNode |> leafFromIndex current |> startPoint
     , waitingForClickDelay = False
     }

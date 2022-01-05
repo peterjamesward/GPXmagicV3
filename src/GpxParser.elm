@@ -2,13 +2,11 @@ module GpxParser exposing (..)
 
 import Angle
 import Direction2d
-import Direction3d
-import DomainModel exposing (EarthVector, GPXSource, makeEarthVector)
+import DomainModel exposing (GPXSource)
 import Length
 import Quantity
 import Regex
 import Spherical
-import Vector3d
 
 
 asRegex t =
@@ -30,7 +28,7 @@ parseTrackName xml =
                     n
 
 
-parseGPXPoints : String -> List EarthVector
+parseGPXPoints : String -> List GPXSource
 parseGPXPoints xml =
     let
         trkpts =
@@ -69,14 +67,14 @@ parseGPXPoints xml =
             case ( latitude trkpt, longitude trkpt, elevation trkpt ) of
                 ( (Just lat) :: _, (Just lon) :: _, (Just alt) :: _ ) ->
                     Just <|
-                        makeEarthVector
+                        GPXSource
                             (Direction2d.fromAngle <| Angle.degrees lon)
                             (Angle.degrees lat)
                             (Length.meters <| alt + Spherical.meanRadius)
 
                 ( (Just lat) :: _, (Just lon) :: _, _ ) ->
                     Just <|
-                        makeEarthVector
+                        GPXSource
                             (Direction2d.fromAngle <| Angle.degrees lon)
                             (Angle.degrees lat)
                             (Length.meters Spherical.meanRadius)
@@ -94,10 +92,5 @@ parseGPXPoints xml =
 
                 _ ->
                     Nothing
-
-        trackPoints =
-            trkpts
-                |> List.map trackPoint
-                |> List.filterMap identity
     in
     trkpts |> List.map earthVector |> List.filterMap identity
