@@ -9,7 +9,7 @@ import Color exposing (Color, black, darkGreen, green, lightOrange)
 import ColourPalette exposing (gradientHue, gradientHue2)
 import Direction2d
 import Direction3d
-import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), boundingBox, endPoint, gpxFromPointWithReference, leafFromIndex, lngLatPair, startPoint, trueLength)
+import DomainModel exposing (..)
 import Json.Encode as E
 import Length exposing (Meters)
 import LineSegment3d

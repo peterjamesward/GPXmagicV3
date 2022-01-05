@@ -27,4 +27,5 @@ type alias ContextThirdPerson =
     , defaultZoomLevel : Float
     , focalPoint : EarthPoint
     , waitingForClickDelay : Bool
+    , followSelectedPoint : Bool
     }

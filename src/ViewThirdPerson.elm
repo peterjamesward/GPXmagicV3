@@ -115,7 +115,7 @@ view model msgWrapper =
             <|
                 html <|
                     Scene3d.cloudy
-                        { camera = deriveCamera treeNode context
+                        { camera = deriveCamera treeNode context model.currentPosition
                         , dimensions = model.viewDimensions
                         , background = backgroundColor Color.lightBlue
                         , clipDepth = Length.meters 1
@@ -148,22 +148,29 @@ viewpoint =
         }
 
 
-deriveCamera : PeteTree -> ContextThirdPerson -> Camera3d Meters LocalCoords
-deriveCamera treeNode context =
+deriveCamera : PeteTree -> ContextThirdPerson -> Int -> Camera3d Meters LocalCoords
+deriveCamera treeNode context currentPosition =
     let
         directionToEye =
             Direction3d.xyZ
                 (context.cameraAzimuth |> Direction2d.toAngle)
                 context.cameraElevation
 
+        lookingAt =
+            if context.followSelectedPoint then
+                startPoint <| leafFromIndex currentPosition treeNode
+
+            else
+                context.focalPoint
+
         eyePoint =
-            context.focalPoint
+            lookingAt
                 |> Point3d.translateBy (Vector3d.withLength context.cameraDistance directionToEye)
 
         cameraViewpoint =
             Viewpoint3d.lookAt
                 { eyePoint = eyePoint
-                , focalPoint = context.focalPoint
+                , focalPoint = lookingAt
                 , upDirection = Direction3d.positiveZ
                 }
 
@@ -213,7 +220,7 @@ detectHit event model =
 
                 camera =
                     -- Must use same camera derivation as for the 3D model, else pointless!
-                    deriveCamera leaf context
+                    deriveCamera leaf context model.currentPosition
 
                 ray =
                     Camera3d.ray camera screenRectangle screenPoint
@@ -371,4 +378,5 @@ initialiseView current treeNode =
     , focalPoint =
         treeNode |> leafFromIndex current |> startPoint
     , waitingForClickDelay = False
+    , followSelectedPoint = True
     }

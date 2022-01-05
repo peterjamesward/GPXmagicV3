@@ -9951,6 +9951,7 @@ var $author$project$ViewThirdPerson$initialiseView = F2(
 			fieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
 			focalPoint: $author$project$DomainModel$startPoint(
 				A2($author$project$DomainModel$leafFromIndex, current, treeNode)),
+			followSelectedPoint: true,
 			orbiting: $elm$core$Maybe$Nothing,
 			waitingForClickDelay: false,
 			zoomLevel: 10.0
@@ -13437,8 +13438,10 @@ var $ianmackenzie$elm_geometry$Direction3d$xyZ = F2(
 				z: $elm$core$Basics$sin(phi)
 			});
 	});
-var $author$project$ViewThirdPerson$deriveCamera = F2(
-	function (treeNode, context) {
+var $author$project$ViewThirdPerson$deriveCamera = F3(
+	function (treeNode, context, currentPosition) {
+		var lookingAt = context.followSelectedPoint ? $author$project$DomainModel$startPoint(
+			A2($author$project$DomainModel$leafFromIndex, currentPosition, treeNode)) : context.focalPoint;
 		var directionToEye = A2(
 			$ianmackenzie$elm_geometry$Direction3d$xyZ,
 			$ianmackenzie$elm_geometry$Direction2d$toAngle(context.cameraAzimuth),
@@ -13446,9 +13449,9 @@ var $author$project$ViewThirdPerson$deriveCamera = F2(
 		var eyePoint = A2(
 			$ianmackenzie$elm_geometry$Point3d$translateBy,
 			A2($ianmackenzie$elm_geometry$Vector3d$withLength, context.cameraDistance, directionToEye),
-			context.focalPoint);
+			lookingAt);
 		var cameraViewpoint = $ianmackenzie$elm_3d_camera$Viewpoint3d$lookAt(
-			{eyePoint: eyePoint, focalPoint: context.focalPoint, upDirection: $ianmackenzie$elm_geometry$Direction3d$positiveZ});
+			{eyePoint: eyePoint, focalPoint: lookingAt, upDirection: $ianmackenzie$elm_geometry$Direction3d$positiveZ});
 		var perspectiveCamera = $ianmackenzie$elm_3d_camera$Camera3d$perspective(
 			{
 				verticalFieldOfView: $ianmackenzie$elm_units$Angle$degrees(30),
@@ -13912,7 +13915,7 @@ var $author$project$ViewThirdPerson$detectHit = F2(
 			var topNode = _v0.a.a;
 			var context = _v0.b.a;
 			var leaf = A2($author$project$DomainModel$leafFromIndex, model.currentPosition, topNode);
-			var camera = A2($author$project$ViewThirdPerson$deriveCamera, leaf, context);
+			var camera = A3($author$project$ViewThirdPerson$deriveCamera, leaf, context, model.currentPosition);
 			var _v1 = event.offsetPos;
 			var x = _v1.a;
 			var y = _v1.b;
@@ -22401,7 +22404,7 @@ var $author$project$ViewThirdPerson$view = F2(
 					$ianmackenzie$elm_3d_scene$Scene3d$cloudy(
 						{
 							background: $ianmackenzie$elm_3d_scene$Scene3d$backgroundColor($avh4$elm_color$Color$lightBlue),
-							camera: A2($author$project$ViewThirdPerson$deriveCamera, treeNode, context),
+							camera: A3($author$project$ViewThirdPerson$deriveCamera, treeNode, context, model.currentPosition),
 							clipDepth: $ianmackenzie$elm_units$Length$meters(1),
 							dimensions: model.viewDimensions,
 							entities: model.scene,

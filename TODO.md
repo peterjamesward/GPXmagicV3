@@ -2,12 +2,10 @@
 
 # WIP
 
-Will go back to **conformal** projection.
-Add option to switch to **Web Mercator**.
-Keep the longitude extents, as needed for Map display culling and hit detection.
+Projection looks rather crap.
 
 ## Zoom, Pan, Rotate.
-Copy old stuff when conformal projection is back.
+Copy old stuff when conformal projection is back, but cleaner.
 
 ### Map / General rendering
 Use a graduated drop off with distance, compute at each tree level.
