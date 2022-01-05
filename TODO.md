@@ -2,9 +2,13 @@
 
 # WIP
 
-Projection looks rather crap (been there before).
+Figure out how to do actions and commands without import loops.
+May involve quite a lot of wrappping and delegation (if you raise a msg, you handle it).
+> All messaging in & out is map-related (ignoring OAuth), so a well-sorted MapView.elm might fix it all.
 
-Hit detect needs to set current.
+Projection distorted (been there before).
+
+Hit detect needs to set current. (Does, but does not repaint, I think.)
 
 Map is messed up (not surprising).
 
@@ -18,11 +22,6 @@ On Map, work out the depth to fit (say) 1000 points within visible region.
 ### Editing?
 Should probably try an edit function soon, to get the feel of working with PeteTree.
 Also, to decide how to replace `processPostUpdateAction`.
-
-### iframe
-Do an embedded version as iframe for Steve?
-Binary file format for fastest load?
-> https://package.elm-lang.org/packages/elm-toulouse/cbor/latest/
 
 ---
 
@@ -79,6 +78,12 @@ So far, looking awesome at 937K (!).
 More progress along the "plug-in" tool pattern:
 - Tab Open and Close methods, and makePreview.
 - Generic type somehow for storing tool state (JSON session state?)
+- Highly configurable (John Bytheway).
+
+### iframe
+Do an embedded version of Map with Round the World route as iframe for Steve?
+Binary file format for fastest load?
+> https://package.elm-lang.org/packages/elm-toulouse/cbor/latest/
 
 ---
 
