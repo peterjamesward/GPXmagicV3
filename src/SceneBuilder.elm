@@ -6,7 +6,7 @@ module SceneBuilder exposing (..)
 import Angle exposing (Angle)
 import BoundingBox3d exposing (BoundingBox3d)
 import Color exposing (Color, black, darkGreen, green, lightOrange)
-import ColourPalette exposing (gradientHue2)
+import ColourPalette exposing (gradientHue, gradientHue2)
 import Direction2d
 import Direction3d
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), boundingBox, endPoint, gpxFromPointWithReference, leafFromIndex, lngLatPair, startPoint, trueLength)
@@ -48,9 +48,18 @@ render3dView model =
                 Nothing ->
                     Plane3d.xy
 
+        fullRenderingZone =
+            case model.trackTree of
+                Just aTree ->
+                    BoundingBox3d.withDimensions ( boxSide, boxSide, boxSide )
+                        (startPoint <| leafFromIndex model.currentPosition aTree)
+
+                Nothing ->
+                    BoundingBox3d.singleton Point3d.origin
+
         gradientColourPastel : Float -> Color.Color
         gradientColourPastel slope =
-            Color.hsl (gradientHue2 slope) 0.6 0.7
+            Color.hsl (gradientHue slope) 0.6 0.7
 
         boxSide =
             --TODO: put box side in model
@@ -113,26 +122,21 @@ render3dView model =
                             |> renderTree (depth - 1) notLeaf.right
 
         renderTreeSelectively :
-            BoundingBox3d Meters LocalCoords
-            -> Int
+            Int
             -> PeteTree
             -> List (Entity LocalCoords)
             -> List (Entity LocalCoords)
-        renderTreeSelectively box depth someNode accum =
+        renderTreeSelectively depth someNode accum =
             case someNode of
                 Leaf leafNode ->
-                    if leafNode.boundingBox |> BoundingBox3d.intersects box then
-                        makeVisibleSegment someNode ++ accum
-
-                    else
-                        accum
+                    makeVisibleSegment someNode ++ accum
 
                 Node notLeaf ->
-                    if notLeaf.nodeContent.boundingBox |> BoundingBox3d.intersects box then
+                    if notLeaf.nodeContent.boundingBox |> BoundingBox3d.intersects fullRenderingZone then
                         -- Ignore depth cutoff near or in the box
                         accum
-                            |> renderTreeSelectively box (depth - 1) notLeaf.left
-                            |> renderTreeSelectively box (depth - 1) notLeaf.right
+                            |> renderTreeSelectively (depth - 1) notLeaf.left
+                            |> renderTreeSelectively (depth - 1) notLeaf.right
 
                     else
                         -- Outside box, apply cutoff.
@@ -149,13 +153,8 @@ render3dView model =
     in
     case model.trackTree of
         Just tree ->
-            let
-                fullRenderingZone =
-                    BoundingBox3d.withDimensions ( boxSide, boxSide, boxSide )
-                        (startPoint <| leafFromIndex model.currentPosition tree)
-            in
             renderCurrentMarker model.currentPosition tree
-                ++ renderTreeSelectively fullRenderingZone model.renderDepth tree []
+                ++ renderTreeSelectively model.renderDepth tree []
 
         Nothing ->
             []

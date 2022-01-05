@@ -10480,40 +10480,6 @@ var $author$project$ColourPalette$gradientHue = function (slope) {
 	var steepestAscentHue = $avh4$elm_color$Color$toHsla($avh4$elm_color$Color$red).hue;
 	return (x * steepestAscentHue) + ((1.0 - x) * steepestDescentHue);
 };
-var $author$project$ColourPalette$interpolate = F3(
-	function (x, a, b) {
-		return (x * a) + ((1.0 - x) * b);
-	});
-var $avh4$elm_color$Color$lightGreen = A4($avh4$elm_color$Color$RgbaSpace, 138 / 255, 226 / 255, 52 / 255, 1.0);
-var $avh4$elm_color$Color$orange = A4($avh4$elm_color$Color$RgbaSpace, 245 / 255, 121 / 255, 0 / 255, 1.0);
-var $avh4$elm_color$Color$yellow = A4($avh4$elm_color$Color$RgbaSpace, 237 / 255, 212 / 255, 0 / 255, 1.0);
-var $author$project$ColourPalette$gradientHue2 = function (slope) {
-	var hueOf = function (col) {
-		var _v0 = $avh4$elm_color$Color$toHsla(col);
-		var hue = _v0.hue;
-		var saturation = _v0.saturation;
-		var lightness = _v0.lightness;
-		var alpha = _v0.alpha;
-		return hue;
-	};
-	return (slope < 0) ? $author$project$ColourPalette$gradientHue(slope) : ((slope <= 6.0) ? A3(
-		$author$project$ColourPalette$interpolate,
-		slope / 6.0,
-		hueOf($avh4$elm_color$Color$lightGreen),
-		hueOf($avh4$elm_color$Color$yellow)) : ((slope <= 9.0) ? A3(
-		$author$project$ColourPalette$interpolate,
-		(slope - 6.0) / 3.0,
-		hueOf($avh4$elm_color$Color$yellow),
-		hueOf($avh4$elm_color$Color$orange)) : ((slope <= 12.0) ? A3(
-		$author$project$ColourPalette$interpolate,
-		(slope - 9.0) / 3.0,
-		hueOf($avh4$elm_color$Color$orange),
-		hueOf($avh4$elm_color$Color$red)) : A3(
-		$author$project$ColourPalette$interpolate,
-		(A3($elm$core$Basics$clamp, 12, 30, slope) - 12.0) / 18.0,
-		hueOf($avh4$elm_color$Color$red),
-		hueOf($avh4$elm_color$Color$black)))));
-};
 var $avh4$elm_color$Color$hsla = F4(
 	function (hue, sat, light, alpha) {
 		var _v0 = _Utils_Tuple3(hue, sat, light);
@@ -10861,6 +10827,8 @@ var $ianmackenzie$elm_geometry$Plane3d$offsetBy = F2(
 			distance,
 			plane);
 	});
+var $ianmackenzie$elm_geometry$Point3d$origin = $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+	{x: 0, y: 0, z: 0});
 var $ianmackenzie$elm_3d_scene$Scene3d$Types$PointNode = F2(
 	function (a, b) {
 		return {$: 'PointNode', a: a, b: b};
@@ -11811,8 +11779,6 @@ var $author$project$DomainModel$trueLength = function (treeNode) {
 		return node.nodeContent.trueLength;
 	}
 };
-var $ianmackenzie$elm_geometry$Point3d$origin = $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
-	{x: 0, y: 0, z: 0});
 var $ianmackenzie$elm_geometry$Plane3d$through = F2(
 	function (givenPoint, givenNormalDirection) {
 		return $ianmackenzie$elm_geometry$Geometry$Types$Plane3d(
@@ -11857,14 +11823,14 @@ var $author$project$SceneBuilder$render3dView = function (model) {
 	var gradientColourPastel = function (slope) {
 		return A3(
 			$avh4$elm_color$Color$hsl,
-			$author$project$ColourPalette$gradientHue2(slope),
+			$author$project$ColourPalette$gradientHue(slope),
 			0.6,
 			0.7);
 	};
 	var floorPlane = function () {
-		var _v3 = model.trackTree;
-		if (_v3.$ === 'Just') {
-			var aTree = _v3.a;
+		var _v4 = model.trackTree;
+		if (_v4.$ === 'Just') {
+			var aTree = _v4.a;
 			return A2(
 				$ianmackenzie$elm_geometry$Plane3d$offsetBy,
 				$ianmackenzie$elm_geometry$BoundingBox3d$minZ(
@@ -11932,39 +11898,46 @@ var $author$project$SceneBuilder$render3dView = function (model) {
 					A3(renderTree, depth - 1, notLeaf.left, accum));
 			}
 		});
-	var renderTreeSelectively = F4(
-		function (box, depth, someNode, accum) {
+	var boxSide = $ianmackenzie$elm_units$Length$kilometers(4);
+	var fullRenderingZone = function () {
+		var _v3 = model.trackTree;
+		if (_v3.$ === 'Just') {
+			var aTree = _v3.a;
+			return A2(
+				$ianmackenzie$elm_geometry$BoundingBox3d$withDimensions,
+				_Utils_Tuple3(boxSide, boxSide, boxSide),
+				$author$project$DomainModel$startPoint(
+					A2($author$project$DomainModel$leafFromIndex, model.currentPosition, aTree)));
+		} else {
+			return $ianmackenzie$elm_geometry$BoundingBox3d$singleton($ianmackenzie$elm_geometry$Point3d$origin);
+		}
+	}();
+	var renderTreeSelectively = F3(
+		function (depth, someNode, accum) {
 			if (someNode.$ === 'Leaf') {
 				var leafNode = someNode.a;
-				return A2($ianmackenzie$elm_geometry$BoundingBox3d$intersects, box, leafNode.boundingBox) ? _Utils_ap(
+				return _Utils_ap(
 					makeVisibleSegment(someNode),
-					accum) : accum;
+					accum);
 			} else {
 				var notLeaf = someNode.a;
-				return A2($ianmackenzie$elm_geometry$BoundingBox3d$intersects, box, notLeaf.nodeContent.boundingBox) ? A4(
+				return A2($ianmackenzie$elm_geometry$BoundingBox3d$intersects, fullRenderingZone, notLeaf.nodeContent.boundingBox) ? A3(
 					renderTreeSelectively,
-					box,
 					depth - 1,
 					notLeaf.right,
-					A4(renderTreeSelectively, box, depth - 1, notLeaf.left, accum)) : A3(
+					A3(renderTreeSelectively, depth - 1, notLeaf.left, accum)) : A3(
 					renderTree,
 					depth - 1,
 					notLeaf.right,
 					A3(renderTree, depth - 1, notLeaf.left, accum));
 			}
 		});
-	var boxSide = $ianmackenzie$elm_units$Length$kilometers(4);
 	var _v2 = model.trackTree;
 	if (_v2.$ === 'Just') {
 		var tree = _v2.a;
-		var fullRenderingZone = A2(
-			$ianmackenzie$elm_geometry$BoundingBox3d$withDimensions,
-			_Utils_Tuple3(boxSide, boxSide, boxSide),
-			$author$project$DomainModel$startPoint(
-				A2($author$project$DomainModel$leafFromIndex, model.currentPosition, tree)));
 		return _Utils_ap(
 			A2(renderCurrentMarker, model.currentPosition, tree),
-			A4(renderTreeSelectively, fullRenderingZone, model.renderDepth, tree, _List_Nil));
+			A3(renderTreeSelectively, model.renderDepth, tree, _List_Nil));
 	} else {
 		return _List_Nil;
 	}
