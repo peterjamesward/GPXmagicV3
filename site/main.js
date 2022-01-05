@@ -13207,17 +13207,6 @@ var $ianmackenzie$elm_units$Quantity$at = F2(
 		var independentValue = _v1.a;
 		return $ianmackenzie$elm_units$Quantity$Quantity(rateOfChange * independentValue);
 	});
-var $ianmackenzie$elm_geometry$Point3d$fromTuple = F2(
-	function (toQuantity, _v0) {
-		var x = _v0.a;
-		var y = _v0.b;
-		var z = _v0.c;
-		return A3(
-			$ianmackenzie$elm_geometry$Point3d$xyz,
-			toQuantity(x),
-			toQuantity(y),
-			toQuantity(z));
-	});
 var $ianmackenzie$elm_3d_camera$Camera3d$Types$Viewpoint3d = function (a) {
 	return {$: 'Viewpoint3d', a: a};
 };
@@ -13436,18 +13425,30 @@ var $ianmackenzie$elm_3d_camera$Camera3d$perspective = function (_arguments) {
 			viewpoint: _arguments.viewpoint
 		});
 };
+var $ianmackenzie$elm_geometry$Direction3d$xyZ = F2(
+	function (_v0, _v1) {
+		var theta = _v0.a;
+		var phi = _v1.a;
+		var cosPhi = $elm$core$Basics$cos(phi);
+		return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
+			{
+				x: cosPhi * $elm$core$Basics$cos(theta),
+				y: cosPhi * $elm$core$Basics$sin(theta),
+				z: $elm$core$Basics$sin(phi)
+			});
+	});
 var $author$project$ViewThirdPerson$deriveCamera = F2(
 	function (treeNode, context) {
+		var directionToEye = A2(
+			$ianmackenzie$elm_geometry$Direction3d$xyZ,
+			$ianmackenzie$elm_geometry$Direction2d$toAngle(context.cameraAzimuth),
+			context.cameraElevation);
 		var eyePoint = A2(
-			$ianmackenzie$elm_geometry$Point3d$fromTuple,
-			$ianmackenzie$elm_units$Length$kilometers,
-			_Utils_Tuple3(10, 10, 1));
+			$ianmackenzie$elm_geometry$Point3d$translateBy,
+			A2($ianmackenzie$elm_geometry$Vector3d$withLength, context.cameraDistance, directionToEye),
+			context.focalPoint);
 		var cameraViewpoint = $ianmackenzie$elm_3d_camera$Viewpoint3d$lookAt(
-			{
-				eyePoint: eyePoint,
-				focalPoint: $author$project$DomainModel$startPoint(treeNode),
-				upDirection: $ianmackenzie$elm_geometry$Direction3d$positiveZ
-			});
+			{eyePoint: eyePoint, focalPoint: context.focalPoint, upDirection: $ianmackenzie$elm_geometry$Direction3d$positiveZ});
 		var perspectiveCamera = $ianmackenzie$elm_3d_camera$Camera3d$perspective(
 			{
 				verticalFieldOfView: $ianmackenzie$elm_units$Angle$degrees(30),

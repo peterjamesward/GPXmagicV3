@@ -1,6 +1,7 @@
 module ViewThirdPerson exposing (..)
 
 import Angle exposing (Angle)
+import Axis3d
 import Camera3d exposing (Camera3d)
 import Color
 import Delay
@@ -22,6 +23,7 @@ import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
 import ModelRecord exposing (ModelRecord)
 import Pixels exposing (Pixels)
+import Plane3d
 import Point2d
 import Point3d
 import Quantity exposing (Quantity, toFloatQuantity)
@@ -149,14 +151,19 @@ viewpoint =
 deriveCamera : PeteTree -> ContextThirdPerson -> Camera3d Meters LocalCoords
 deriveCamera treeNode context =
     let
+        directionToEye =
+            Direction3d.xyZ
+                (context.cameraAzimuth |> Direction2d.toAngle)
+                context.cameraElevation
+
         eyePoint =
-            Point3d.fromTuple Length.kilometers ( 10, 10, 1 )
+            context.focalPoint
+                |> Point3d.translateBy (Vector3d.withLength context.cameraDistance directionToEye)
 
         cameraViewpoint =
-            -- Fixed for now.
             Viewpoint3d.lookAt
                 { eyePoint = eyePoint
-                , focalPoint = startPoint treeNode
+                , focalPoint = context.focalPoint
                 , upDirection = Direction3d.positiveZ
                 }
 
@@ -290,7 +297,7 @@ update msg model msgWrapper =
                             ( model, Cmd.none )
 
                         ( DragPan, Just ( startX, startY ) ) ->
-                            -- Change the earth azimuth and elevation
+                            -- Change the camera azimuth and elevation
                             let
                                 rotationRate =
                                     Angle.degrees 1 |> Quantity.per Pixels.pixel
