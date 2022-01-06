@@ -26,7 +26,7 @@ Also, to decide how to replace `processPostUpdateAction`.
 
 ---
 
-# Backlog
+# More V3 stuff
 
 ### Multiple windows
 Check out Electron (again), see if that will allow multiple windows.
@@ -54,6 +54,21 @@ Not 3d, just drawing onto Canvas?
 (But what about zoom and pan?)
 Altitude change from start, end; trueLength.
 Combine with Charts, by adding the colours, ideally.
+
+### Charts
+D3 with https://github.com/seliopou/elm-d3/blob/master/README.md ?
+(Only need to write the JS once, then just pass data.)
+https://observablehq.com/@d3/gradient-encoding
+https://observablehq.com/@d3/line-with-tooltip
+https://observablehq.com/@d3/pannable-chart
+https://observablehq.com/@d3/zoomable-area-chart
+... and there's this ... https://blog.scottlogic.com/2020/05/01/rendering-one-million-points-with-d3.html
+Remember that most routes will be <10K, not 1M points!
+Therefore, Canvas may be best option.
+Or, given Elm, and the current charting library, and the nature of the tree, we could probably
+show a decent zoomable plot that perhaps shows error bars or a candle plot for non-leaf tree entries.
+Though, by the same argument, we could ship 10K points to JS no problem.
+PARK THIS FOR NOW; we have options!
 
 ### Terrain
 Terrain 1 = Simple tree walk, in many cases will just work but not always.
