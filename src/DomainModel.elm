@@ -63,6 +63,11 @@ sourceData treeNode =
             node.nodeContent.sourceData
 
 
+effectiveLatitude : PeteTree -> Angle
+effectiveLatitude treeNode =
+    treeNode |> sourceData |> Tuple.first |> .latitude
+
+
 startPoint : PeteTree -> EarthPoint
 startPoint treeNode =
     case treeNode of
@@ -185,13 +190,13 @@ pointFromGpxWithReference reference gpx =
         (Direction2d.angleFrom reference.longitude gpx.longitude
             |> Angle.inDegrees
             |> (*) Spherical.metresPerDegree
+            |> (*) (Angle.cos gpx.latitude)
             |> Length.meters
         )
         (gpx.latitude
             |> Quantity.minus reference.latitude
             |> Angle.inDegrees
             |> (*) Spherical.metresPerDegree
-            |> (*) (Angle.cos reference.latitude)
             |> Length.meters
         )
         (gpx.altitude |> Quantity.minus reference.altitude)

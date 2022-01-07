@@ -151,10 +151,8 @@ viewpoint =
 deriveCamera : PeteTree -> ContextThirdPerson -> Int -> Camera3d Meters LocalCoords
 deriveCamera treeNode context currentPosition =
     let
-        directionToEye =
-            Direction3d.xyZ
-                (context.cameraAzimuth |> Direction2d.toAngle)
-                context.cameraElevation
+        latitude =
+            leafFromIndex currentPosition treeNode |> effectiveLatitude
 
         lookingAt =
             if context.followSelectedPoint then
@@ -163,15 +161,13 @@ deriveCamera treeNode context currentPosition =
             else
                 context.focalPoint
 
-        eyePoint =
-            lookingAt
-                |> Point3d.translateBy (Vector3d.withLength context.cameraDistance directionToEye)
-
         cameraViewpoint =
-            Viewpoint3d.lookAt
-                { eyePoint = eyePoint
-                , focalPoint = lookingAt
-                , upDirection = Direction3d.positiveZ
+            Viewpoint3d.orbitZ
+                { focalPoint = lookingAt
+                , azimuth = Direction2d.toAngle context.cameraAzimuth
+                , elevation = context.cameraElevation
+                , distance =
+                    Length.meters <| 100.0 * Spherical.metresPerPixel context.zoomLevel latitude
                 }
 
         perspectiveCamera =
@@ -241,12 +237,26 @@ update msg model msgWrapper =
         ( Just treeNode, Just context ) ->
             case msg of
                 ImageZoomIn ->
-                    ( { model | viewContext = multiplyDistanceBy 0.7 context }
+                    let
+                        increment =
+                            0.5
+
+                        newContext =
+                            { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + increment }
+                    in
+                    ( { model | viewContext = Just newContext }
                     , Cmd.none
                     )
 
                 ImageZoomOut ->
-                    ( { model | viewContext = multiplyDistanceBy (1 / 0.7) context }
+                    let
+                        increment =
+                            -0.5
+
+                        newContext =
+                            { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + increment }
+                    in
+                    ( { model | viewContext = Just newContext }
                     , Cmd.none
                     )
 
@@ -267,7 +277,14 @@ update msg model msgWrapper =
                     )
 
                 ImageMouseWheel deltaY ->
-                    ( { model | viewContext = multiplyDistanceBy (1.001 ^ deltaY) context }
+                    let
+                        increment =
+                            -0.001 * deltaY
+
+                        newContext =
+                            { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + increment }
+                    in
+                    ( { model | viewContext = Just newContext }
                     , Cmd.none
                     )
 
@@ -303,33 +320,49 @@ update msg model msgWrapper =
                     case ( context.dragAction, context.orbiting ) of
                         ( DragRotate, Just ( startX, startY ) ) ->
                             -- Change the camera azimuth and elevation
-                            ( model, Cmd.none )
-
-                        ( DragPan, Just ( startX, startY ) ) ->
-                            -- Change the camera azimuth and elevation
                             let
-                                rotationRate =
-                                    Angle.degrees 1 |> Quantity.per Pixels.pixel
+                                newAzimuth =
+                                    Angle.degrees <|
+                                        (Angle.inDegrees <| Direction2d.toAngle context.cameraAzimuth)
+                                            - (dx - startX)
 
-                                azimuthChange =
-                                    (startX - dx) |> Pixels.pixels |> Quantity.at rotationRate
-
-                                elevationChange =
-                                    (dy - startY) |> Pixels.pixels |> Quantity.at rotationRate
+                                newElevation =
+                                    Angle.degrees <|
+                                        Angle.inDegrees context.cameraElevation
+                                            + (dy - startY)
 
                                 newContext =
-                                    Just
-                                        { context
-                                            | orbiting = Just ( dx, dy )
-                                            , cameraAzimuth =
-                                                context.cameraAzimuth
-                                                    |> Direction2d.rotateBy azimuthChange
-                                            , cameraElevation =
-                                                context.cameraElevation
-                                                    |> Quantity.plus elevationChange
-                                        }
+                                    { context
+                                        | cameraAzimuth = Direction2d.fromAngle newAzimuth
+                                        , cameraElevation = newElevation
+                                        , orbiting = Just ( dx, dy )
+                                    }
                             in
-                            ( { model | viewContext = newContext }
+                            ( { model | viewContext = Just newContext }
+                            , Cmd.none
+                            )
+
+                        ( DragPan, Just ( startX, startY ) ) ->
+                            let
+                                shiftVector =
+                                    Vector3d.meters
+                                        ((startY - dy) * Angle.sin context.cameraElevation)
+                                        (startX - dx)
+                                        ((dy - startY) * Angle.cos context.cameraElevation)
+                                        |> Vector3d.rotateAround
+                                            Axis3d.z
+                                            (Direction2d.toAngle context.cameraAzimuth)
+                                        |> Vector3d.scaleBy
+                                            (Spherical.metresPerPixel context.zoomLevel (Angle.degrees 30))
+
+                                newContext =
+                                    { context
+                                        | focalPoint =
+                                            context.focalPoint |> Point3d.translateBy shiftVector
+                                        , orbiting = Just ( dx, dy )
+                                    }
+                            in
+                            ( { model | viewContext = Just newContext }
                             , Cmd.none
                             )
 

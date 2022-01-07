@@ -7,8 +7,6 @@ May involve quite a lot of wrappping and delegation (if you raise a msg, you han
 > All messaging in & out is map-related (ignoring OAuth), so a well-sorted MapView.elm might fix it all.
 > Failing that: https://github.com/FabienHenon/app-object/tree/1.0.0
 
-Projection distorted (been there before).
-
 Hit detect needs to set current. (Does, but does not repaint, I think.)
 
 Map is messed up (not surprising).
@@ -44,7 +42,7 @@ Hence, one pane + list, or just four panes with visibility?
 Clean.
 Chinese FlatUI palette?
 Keep current track in indexDB to support a "restart/recover" option?
-JB suggests heavily customisable to support differing "workflows".
+JB suggests heavily customisable tools layout to support differing "workflows".
 
 ### Plan view
 Same as before. Use 3d-scene. Orthographic camera.
@@ -53,7 +51,7 @@ Same as before. Use 3d-scene. Orthographic camera.
 Not 3d, just drawing onto Canvas?
 (But what about zoom and pan?)
 Altitude change from start, end; trueLength.
-Combine with Charts, by adding the colours, ideally.
+> Combine with Charts, by adding the colours, ideally. See below.
 
 ### Charts
 D3 with https://github.com/seliopou/elm-d3/blob/master/README.md ?
@@ -63,6 +61,9 @@ https://observablehq.com/@d3/line-with-tooltip
 https://observablehq.com/@d3/pannable-chart
 https://observablehq.com/@d3/zoomable-area-chart
 ... and there's this ... https://blog.scottlogic.com/2020/05/01/rendering-one-million-points-with-d3.html
+
+https://medium.com/@ColinEberhardt/extending-d3-with-higher-order-components-d58cd40b7efd
+
 Remember that most routes will be <10K, not 1M points!
 Therefore, Canvas may be best option.
 Or, given Elm, and the current charting library, and the nature of the tree, we could probably

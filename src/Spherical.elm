@@ -15,6 +15,15 @@ metresPerDegree =
 
 
 
+metresPerPixelAtEquatorZoomZero =
+    78271.484
+
+
+metresPerPixel : Float -> Angle -> Float
+metresPerPixel zoomLevel latitude =
+    Angle.cos latitude * metresPerPixelAtEquatorZoomZero / 2.0 ^ zoomLevel
+
+
 -- Equirectangular approximation
 
 
