@@ -2,14 +2,12 @@
 
 # WIP
 
+Hit detect needs to set current. (Does, but does not repaint, I think.)
+
 Figure out how to do actions and commands without import loops.
 May involve quite a lot of wrappping and delegation (if you raise a msg, you handle it).
 > All messaging in & out is map-related (ignoring OAuth), so a well-sorted MapView.elm might fix it all.
 > Failing that: https://github.com/FabienHenon/app-object/tree/1.0.0
-
-Hit detect needs to set current. (Does, but does not repaint, I think.)
-
-Map is messed up (not surprising).
 
 ## Zoom, Pan, Rotate.
 Copy old stuff when conformal projection is back, but cleaner.

@@ -178,17 +178,17 @@ renderMapJson model =
             --TODO: put box side in model
             Length.kilometers 4
 
-        mapLocation : EarthPoint -> ( Angle, Angle )
+        mapLocation : GPXSource -> ( Angle, Angle )
         mapLocation point =
             let
-                gpx =
-                    gpxFromPointWithReference model.referenceLonLat point
+                { longitude, latitude, altitude } =
+                    point
             in
-            ( Direction2d.toAngle gpx.longitude, gpx.latitude )
+            ( Direction2d.toAngle longitude, latitude )
 
         makeVisibleSegment : PeteTree -> E.Value
         makeVisibleSegment node =
-            lngLatPair <| mapLocation <| endPoint node
+            lngLatPair <| mapLocation <| Tuple.second <| sourceData node
 
         --renderCurrentMarker : Int -> PeteTree -> List (Entity LocalCoords)
         --renderCurrentMarker marker tree =
@@ -236,7 +236,7 @@ renderMapJson model =
                             |> renderTree (depth - 1) notLeaf.left
 
         renderFirstPoint treeNode =
-            lngLatPair <| mapLocation <| startPoint treeNode
+            lngLatPair <| mapLocation <| Tuple.first <| sourceData treeNode
     in
     case model.trackTree of
         Just tree ->

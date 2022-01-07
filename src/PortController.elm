@@ -161,8 +161,8 @@ addTrackToMap model =
             let
                 { longitude, latitude, altitude } =
                     leafFromIndex model.currentPosition tree
-                        |> startPoint
-                        |> gpxFromPointWithReference model.referenceLonLat
+                        |> DomainModel.sourceData
+                        |> Tuple.first
             in
             commandPort <|
                 E.object

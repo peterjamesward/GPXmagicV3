@@ -9747,66 +9747,7 @@ var $ianmackenzie$elm_units$Angle$inRadians = function (_v0) {
 var $ianmackenzie$elm_units$Angle$inDegrees = function (angle) {
 	return 180 * ($ianmackenzie$elm_units$Angle$inRadians(angle) / $elm$core$Basics$pi);
 };
-var $ianmackenzie$elm_units$Length$inMeters = function (_v0) {
-	var numMeters = _v0.a;
-	return numMeters;
-};
-var $author$project$Spherical$metresPerDegree = 78846.81;
-var $elm$core$Basics$atan2 = _Basics_atan2;
-var $ianmackenzie$elm_geometry$Direction2d$toAngle = function (_v0) {
-	var d = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(
-		A2($elm$core$Basics$atan2, d.y, d.x));
-};
-var $ianmackenzie$elm_geometry$Point3d$xCoordinate = function (_v0) {
-	var p = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(p.x);
-};
-var $ianmackenzie$elm_geometry$Point3d$yCoordinate = function (_v0) {
-	var p = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(p.y);
-};
-var $ianmackenzie$elm_geometry$Point3d$zCoordinate = function (_v0) {
-	var p = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(p.z);
-};
-var $ianmackenzie$elm_geometry$Point3d$toTuple = F2(
-	function (fromQuantity, point) {
-		return _Utils_Tuple3(
-			fromQuantity(
-				$ianmackenzie$elm_geometry$Point3d$xCoordinate(point)),
-			fromQuantity(
-				$ianmackenzie$elm_geometry$Point3d$yCoordinate(point)),
-			fromQuantity(
-				$ianmackenzie$elm_geometry$Point3d$zCoordinate(point)));
-	});
-var $author$project$DomainModel$gpxFromPointWithReference = F2(
-	function (reference, point) {
-		var _v0 = A2($ianmackenzie$elm_geometry$Point3d$toTuple, $ianmackenzie$elm_units$Length$inMeters, point);
-		var x = _v0.a;
-		var y = _v0.b;
-		var z = _v0.c;
-		var latitude = (y / $author$project$Spherical$metresPerDegree) + $ianmackenzie$elm_units$Angle$inDegrees(reference.latitude);
-		var longitude = ((x / $elm$core$Basics$cos(latitude)) / $author$project$Spherical$metresPerDegree) + $ianmackenzie$elm_units$Angle$inDegrees(
-			$ianmackenzie$elm_geometry$Direction2d$toAngle(reference.longitude));
-		var altitude = z;
-		return A3(
-			$author$project$DomainModel$GPXSource,
-			$ianmackenzie$elm_geometry$Direction2d$fromAngle(
-				$ianmackenzie$elm_units$Angle$degrees(longitude)),
-			$ianmackenzie$elm_units$Angle$degrees(latitude),
-			$ianmackenzie$elm_units$Length$meters(altitude));
-	});
 var $elm$json$Json$Encode$null = _Json_encodeNull;
-var $author$project$DomainModel$endPoint = function (treeNode) {
-	if (treeNode.$ === 'Leaf') {
-		var leaf = treeNode.a;
-		return leaf.endPoint;
-	} else {
-		var node = treeNode.a;
-		return node.nodeContent.endPoint;
-	}
-};
 var $elm$core$Basics$ge = _Utils_ge;
 var $ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo = F2(
 	function (_v0, _v1) {
@@ -9887,6 +9828,25 @@ var $author$project$DomainModel$lngLatPair = function (_v0) {
 				$ianmackenzie$elm_units$Angle$inDegrees(latitude)
 			]));
 };
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $author$project$DomainModel$sourceData = function (treeNode) {
+	if (treeNode.$ === 'Leaf') {
+		var leaf = treeNode.a;
+		return leaf.sourceData;
+	} else {
+		var node = treeNode.a;
+		return node.nodeContent.sourceData;
+	}
+};
+var $elm$core$Basics$atan2 = _Basics_atan2;
+var $ianmackenzie$elm_geometry$Direction2d$toAngle = function (_v0) {
+	var d = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(
+		A2($elm$core$Basics$atan2, d.y, d.x));
+};
 var $ianmackenzie$elm_geometry$Geometry$Types$BoundingBox3d = function (a) {
 	return {$: 'BoundingBox3d', a: a};
 };
@@ -9951,20 +9911,23 @@ var $ianmackenzie$elm_geometry$BoundingBox3d$withDimensions = F2(
 	});
 var $author$project$SceneBuilder$renderMapJson = function (model) {
 	var mapLocation = function (point) {
-		var gpx = A2($author$project$DomainModel$gpxFromPointWithReference, model.referenceLonLat, point);
+		var _v3 = point;
+		var longitude = _v3.longitude;
+		var latitude = _v3.latitude;
+		var altitude = _v3.altitude;
 		return _Utils_Tuple2(
-			$ianmackenzie$elm_geometry$Direction2d$toAngle(gpx.longitude),
-			gpx.latitude);
+			$ianmackenzie$elm_geometry$Direction2d$toAngle(longitude),
+			latitude);
 	};
 	var renderFirstPoint = function (treeNode) {
 		return $author$project$DomainModel$lngLatPair(
 			mapLocation(
-				$author$project$DomainModel$startPoint(treeNode)));
+				$author$project$DomainModel$sourceData(treeNode).a));
 	};
 	var makeVisibleSegment = function (node) {
 		return $author$project$DomainModel$lngLatPair(
 			mapLocation(
-				$author$project$DomainModel$endPoint(node)));
+				$author$project$DomainModel$sourceData(node).b));
 	};
 	var renderTree = F3(
 		function (depth, someNode, accum) {
@@ -10051,11 +10014,8 @@ var $author$project$PortController$addTrackToMap = function (model) {
 	var _v0 = model.trackTree;
 	if (_v0.$ === 'Just') {
 		var tree = _v0.a;
-		var _v1 = A2(
-			$author$project$DomainModel$gpxFromPointWithReference,
-			model.referenceLonLat,
-			$author$project$DomainModel$startPoint(
-				A2($author$project$DomainModel$leafFromIndex, model.currentPosition, tree)));
+		var _v1 = $author$project$DomainModel$sourceData(
+			A2($author$project$DomainModel$leafFromIndex, model.currentPosition, tree)).a;
 		var longitude = _v1.longitude;
 		var latitude = _v1.latitude;
 		var altitude = _v1.altitude;
@@ -10095,10 +10055,6 @@ var $elm$json$Json$Decode$field = _Json_decodeField;
 var $elm$json$Json$Decode$float = _Json_decodeFloat;
 var $elm$json$Json$Decode$string = _Json_decodeString;
 var $author$project$PortController$msgDecoder = A2($elm$json$Json$Decode$field, 'msg', $elm$json$Json$Decode$string);
-var $elm$core$Tuple$second = function (_v0) {
-	var y = _v0.b;
-	return y;
-};
 var $elm$core$Basics$sqrt = _Basics_sqrt;
 var $author$project$Spherical$range = F2(
 	function (lonLat1, lonLat2) {
@@ -10787,6 +10743,15 @@ var $author$project$DomainModel$containingSphere = function (box) {
 					]))));
 	return A2($ianmackenzie$elm_geometry$Sphere3d$withRadius, radius, here);
 };
+var $author$project$DomainModel$endPoint = function (treeNode) {
+	if (treeNode.$ === 'Leaf') {
+		var leaf = treeNode.a;
+		return leaf.endPoint;
+	} else {
+		var node = treeNode.a;
+		return node.nodeContent.endPoint;
+	}
+};
 var $ianmackenzie$elm_units$Quantity$max = F2(
 	function (_v0, _v1) {
 		var x = _v0.a;
@@ -10794,6 +10759,18 @@ var $ianmackenzie$elm_units$Quantity$max = F2(
 		return $ianmackenzie$elm_units$Quantity$Quantity(
 			A2($elm$core$Basics$max, x, y));
 	});
+var $ianmackenzie$elm_geometry$Point3d$xCoordinate = function (_v0) {
+	var p = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(p.x);
+};
+var $ianmackenzie$elm_geometry$Point3d$yCoordinate = function (_v0) {
+	var p = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(p.y);
+};
+var $ianmackenzie$elm_geometry$Point3d$zCoordinate = function (_v0) {
+	var p = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(p.z);
+};
 var $ianmackenzie$elm_geometry$BoundingBox3d$from = F2(
 	function (firstPoint, secondPoint) {
 		var z2 = $ianmackenzie$elm_geometry$Point3d$zCoordinate(secondPoint);
@@ -10816,6 +10793,7 @@ var $ianmackenzie$elm_units$Angle$cos = function (_v0) {
 	var angle = _v0.a;
 	return $elm$core$Basics$cos(angle);
 };
+var $author$project$Spherical$metresPerDegree = 78846.81;
 var $author$project$DomainModel$pointFromGpxWithReference = F2(
 	function (reference, gpx) {
 		return A3(
@@ -10872,15 +10850,6 @@ var $author$project$DomainModel$makeRoadSection = F3(
 					A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, medianLon, earth2.longitude)))
 		};
 	});
-var $author$project$DomainModel$sourceData = function (treeNode) {
-	if (treeNode.$ === 'Leaf') {
-		var leaf = treeNode.a;
-		return leaf.sourceData;
-	} else {
-		var node = treeNode.a;
-		return node.nodeContent.sourceData;
-	}
-};
 var $author$project$DomainModel$trueLength = function (treeNode) {
 	if (treeNode.$ === 'Leaf') {
 		var leaf = treeNode.a;
@@ -12762,6 +12731,37 @@ var $author$project$ViewThirdPerson$update = F3(
 		}
 	});
 var $author$project$ViewingMode$ViewMap = {$: 'ViewMap'};
+var $ianmackenzie$elm_units$Length$inMeters = function (_v0) {
+	var numMeters = _v0.a;
+	return numMeters;
+};
+var $ianmackenzie$elm_geometry$Point3d$toTuple = F2(
+	function (fromQuantity, point) {
+		return _Utils_Tuple3(
+			fromQuantity(
+				$ianmackenzie$elm_geometry$Point3d$xCoordinate(point)),
+			fromQuantity(
+				$ianmackenzie$elm_geometry$Point3d$yCoordinate(point)),
+			fromQuantity(
+				$ianmackenzie$elm_geometry$Point3d$zCoordinate(point)));
+	});
+var $author$project$DomainModel$gpxFromPointWithReference = F2(
+	function (reference, point) {
+		var _v0 = A2($ianmackenzie$elm_geometry$Point3d$toTuple, $ianmackenzie$elm_units$Length$inMeters, point);
+		var x = _v0.a;
+		var y = _v0.b;
+		var z = _v0.c;
+		var latitude = (y / $author$project$Spherical$metresPerDegree) + $ianmackenzie$elm_units$Angle$inDegrees(reference.latitude);
+		var longitude = ((x / $elm$core$Basics$cos(latitude)) / $author$project$Spherical$metresPerDegree) + $ianmackenzie$elm_units$Angle$inDegrees(
+			$ianmackenzie$elm_geometry$Direction2d$toAngle(reference.longitude));
+		var altitude = z;
+		return A3(
+			$author$project$DomainModel$GPXSource,
+			$ianmackenzie$elm_geometry$Direction2d$fromAngle(
+				$ianmackenzie$elm_units$Angle$degrees(longitude)),
+			$ianmackenzie$elm_units$Angle$degrees(latitude),
+			$ianmackenzie$elm_units$Length$meters(altitude));
+	});
 var $author$project$PortController$centreMapOnCurrent = function (model) {
 	var _v0 = model.trackTree;
 	if (_v0.$ === 'Just') {
