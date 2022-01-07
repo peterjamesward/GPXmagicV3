@@ -1,26 +1,21 @@
-port module PortController exposing (..)
+port module MapPortsController exposing (..)
 
 import Angle
-import Axis3d
-import BoundingBox3d exposing (BoundingBox3d)
 import Delay exposing (after)
 import Direction2d
-import Direction3d
 import DomainModel exposing (GPXSource, PeteTree, gpxFromPointWithReference, leafFromIndex, startPoint)
 import Json.Decode as D exposing (Decoder, field, string)
 import Json.Encode as E
 import Length
-import LocalCoords exposing (LocalCoords)
 import MapboxKey exposing (mapboxKey)
-import Msg exposing (Msg(..))
-import Point3d
+import ModelRecord exposing (Model(..))
 import SceneBuilder
 
 
-type MapStyle
-    = MapStyleStreets
-    | MapStyleOutdoors
-    | MapStyleSatellite
+type MapMsg
+    = MapPortMessage E.Value
+    | RepaintMap
+    | ClearMapClickDebounce
 
 
 type alias MapInfo =
@@ -31,15 +26,15 @@ type alias MapInfo =
     }
 
 
-port commandPort : E.Value -> Cmd msg
+port mapCommands : E.Value -> Cmd msg
 
 
-port messageReceiver : (E.Value -> msg) -> Sub msg
+port mapResponses : (E.Value -> msg) -> Sub msg
 
 
 createMap : MapInfo -> Cmd msg
 createMap info =
-    commandPort <|
+    mapCommands <|
         E.object
             [ ( "Cmd", E.string "Init" )
             , ( "token", E.string mapboxKey )
@@ -51,7 +46,7 @@ createMap info =
 
 refreshMap : Cmd msg
 refreshMap =
-    commandPort <|
+    mapCommands <|
         E.object
             [ ( "Cmd", E.string "Repaint" )
             , ( "token", E.string mapboxKey )
@@ -76,7 +71,7 @@ centreMap model =
                         |> startPoint
                         |> gpxFromPointWithReference model.referenceLonLat
             in
-            commandPort <|
+            mapCommands <|
                 E.object
                     [ ( "Cmd", E.string "Centre" )
                     , ( "token", E.string mapboxKey )
@@ -86,17 +81,6 @@ centreMap model =
 
         Nothing ->
             Cmd.none
-
-
-
---zoomMap : ViewingContext -> Cmd msg
---zoomMap context =
---    commandPort <|
---        E.object
---            [ ( "Cmd", E.string "Zoom" )
---            , ( "token", E.string mapboxKey )
---            , ( "zoom", E.float context.zoomLevel )
---            ]
 
 
 centreMapOnCurrent :
@@ -106,8 +90,9 @@ centreMapOnCurrent :
         , currentPosition : Int
         , referenceLonLat : GPXSource
     }
+    -> (MapMsg -> msg)
     -> Cmd msg
-centreMapOnCurrent model =
+centreMapOnCurrent model msgWrapper =
     case model.trackTree of
         Just tree ->
             let
@@ -116,7 +101,7 @@ centreMapOnCurrent model =
                         |> startPoint
                         |> gpxFromPointWithReference model.referenceLonLat
             in
-            commandPort <|
+            mapCommands <|
                 E.object
                     [ ( "Cmd", E.string "Centre" )
                     , ( "token", E.string mapboxKey )
@@ -126,6 +111,47 @@ centreMapOnCurrent model =
 
         Nothing ->
             Cmd.none
+
+
+deferredMapRepaint msgWrapper =
+    after 50 (RepaintMap |> msgWrapper)
+
+
+update :
+    MapMsg
+    ->
+        { model
+            | trackTree : Maybe PeteTree
+            , lastMapClick : ( Float, Float )
+            , mapClickDebounce : Bool
+            , currentPosition : Int
+            , renderDepth : Int
+            , referenceLonLat : GPXSource
+        }
+    -> (MapMsg -> msg)
+    ->
+        ( { model
+            | trackTree : Maybe PeteTree
+            , lastMapClick : ( Float, Float )
+            , mapClickDebounce : Bool
+            , currentPosition : Int
+            , renderDepth : Int
+            , referenceLonLat : GPXSource
+          }
+        , Cmd msg
+        )
+update mapMsg model msgWrapper =
+    case mapMsg of
+        ClearMapClickDebounce ->
+            (  { model | mapClickDebounce = False }
+            , Cmd.none
+            )
+
+        MapPortMessage value ->
+            processMapPortMessage model value msgWrapper
+
+        RepaintMap ->
+            (  model, refreshMap )
 
 
 
@@ -152,8 +178,9 @@ addTrackToMap :
         , currentPosition : Int
         , referenceLonLat : GPXSource
     }
+    -> (MapMsg -> msg)
     -> Cmd msg
-addTrackToMap model =
+addTrackToMap model msgWrapper =
     -- This is to add the route as a polyline.
     -- We will separately add track points as draggable features.
     case model.trackTree of
@@ -164,7 +191,7 @@ addTrackToMap model =
                         |> DomainModel.sourceData
                         |> Tuple.first
             in
-            commandPort <|
+            mapCommands <|
                 E.object
                     [ ( "Cmd", E.string "Track" )
                     , ( "token", E.string mapboxKey )
@@ -209,47 +236,12 @@ addTrackToMap model =
 --            ]
 
 
-storageSetItem : String -> E.Value -> Cmd msg
-storageSetItem key value =
-    commandPort <|
-        E.object
-            [ ( "Cmd", E.string "storage.set" )
-            , ( "key", E.string key )
-            , ( "value", value )
-            ]
-
-
-storageGetItem : String -> Cmd msg
-storageGetItem key =
-    commandPort <|
-        E.object
-            [ ( "Cmd", E.string "storage.get" )
-            , ( "key", E.string key )
-            ]
-
-
-storageListKeys : Cmd msg
-storageListKeys =
-    commandPort <|
-        E.object
-            [ ( "Cmd", E.string "storage.list" )
-            ]
-
-
-storageClear : Cmd msg
-storageClear =
-    commandPort <|
-        E.object
-            [ ( "Cmd", E.string "storage.clear" )
-            ]
-
-
 msgDecoder : Decoder String
 msgDecoder =
     field "msg" string
 
 
-processPortMessage :
+processMapPortMessage :
     { m
         | trackTree : Maybe PeteTree
         , lastMapClick : ( Float, Float )
@@ -259,6 +251,7 @@ processPortMessage :
         , referenceLonLat : GPXSource
     }
     -> E.Value
+    -> (MapMsg -> msg)
     ->
         ( { m
             | trackTree : Maybe PeteTree
@@ -268,9 +261,9 @@ processPortMessage :
             , renderDepth : Int
             , referenceLonLat : GPXSource
           }
-        , Cmd Msg
+        , Cmd msg
         )
-processPortMessage model json =
+processMapPortMessage model json msgWrapper =
     let
         jsonMsg =
             D.decodeValue msgDecoder json
@@ -308,9 +301,9 @@ processPortMessage model json =
                     ( updatedModel
                     , Cmd.batch
                         [ -- Selective rendering requires we remove and add again.
-                          addTrackToMap updatedModel
-                        , after 100 ClearMapClickDebounce
-                        , after 100 RepaintMap
+                          addTrackToMap updatedModel msgWrapper
+                        , after 100 (ClearMapClickDebounce |> msgWrapper)
+                        , after 100 (RepaintMap |> msgWrapper)
                         ]
                     )
 
@@ -368,74 +361,5 @@ processPortMessage model json =
         --    , Cmd.none
         --    )
         --
-        --( Ok "storage.got", _ ) ->
-        --    let
-        --        key =
-        --            D.decodeValue (D.field "key" D.string) json
-        --
-        --        value =
-        --            D.decodeValue (D.field "value" D.value) json
-        --    in
-        --    case ( key, value ) of
-        --        ( Ok "accordion", Ok saved ) ->
-        --            let
-        --                ( restoreAccordionState, restoreAccordion ) =
-        --                    Accordion.recoverStoredState
-        --                        saved
-        --                        model.toolsAccordion
-        --            in
-        --            ( Model
-        --                { model
-        --                    | accordionState = restoreAccordionState
-        --                    , toolsAccordion = restoreAccordion
-        --                }
-        --            , Cmd.none
-        --            )
-        --
-        --        ( Ok "splitter", Ok splitter ) ->
-        --            let
-        --                p =
-        --                    D.decodeValue D.int splitter
-        --            in
-        --            case p of
-        --                Ok pixels ->
-        --                    ( Model
-        --                        { model
-        --                            | splitInPixels = pixels
-        --                            , viewPanes = ViewPane.mapOverPanes (setViewPaneSize pixels) model.viewPanes
-        --                        }
-        --                    , Cmd.none
-        --                    )
-        --
-        --                _ ->
-        --                    ( Model model, Cmd.none )
-        --
-        --        ( Ok "panes", Ok saved ) ->
-        --            let
-        --                newPanes =
-        --                    ViewPane.restorePaneState saved model.viewPanes
-        --
-        --                newModel =
-        --                    { model
-        --                        | viewPanes =
-        --                            ViewPane.mapOverPanes
-        --                                (setViewPaneSize model.splitInPixels)
-        --                                newPanes
-        --                    }
-        --            in
-        --            processPostUpdateAction newModel ActionRerender
-        --
-        --        ( Ok "display", Ok saved ) ->
-        --            ( Model { model | displayOptions = DisplayOptions.decodeOptions saved }
-        --            , Cmd.none
-        --            )
-        --
-        --        _ ->
-        --            ( Model model, Cmd.none )
-        --
-        --( Ok "storage.keys", _ ) ->
-        --    ( Model model
-        --    , Cmd.none
-        --    )
         _ ->
             ( model, Cmd.none )

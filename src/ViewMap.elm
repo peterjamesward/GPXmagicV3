@@ -13,15 +13,9 @@ import Element.Font as Font
 import Element.Input exposing (button)
 import FlatColors.ChinesePalette
 import Html.Attributes exposing (id)
-import Html.Events.Extra.Mouse as Mouse
-import Length exposing (Meters)
-import LocalCoords exposing (LocalCoords)
-import Msg exposing (Msg(..))
+import MapPortsController
 import Pixels exposing (Pixels, inPixels)
-import Point3d
 import Quantity exposing (Quantity)
-import Scene3d exposing (Entity, backgroundColor)
-import Viewpoint3d
 
 
 view :
@@ -29,8 +23,9 @@ view :
         | viewDimensions : ( Quantity Int Pixels, Quantity Int Pixels )
         , trackTree : Maybe PeteTree
     }
-    -> Element Msg
-view model =
+    -> (MapPortsController.MapMsg -> msg)
+    -> Element msg
+view model msgWrapper =
     let
         ( viewWidth, viewHeight ) =
             model.viewDimensions

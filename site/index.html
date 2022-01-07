@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>GPXmagic</title>
+  <title>GPXmagic Labs</title>
   <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
   <script type="text/javascript" src="main.js"></script>
   <script src='https://api.mapbox.com/mapbox-gl-js/v2.4.1/mapbox-gl.js'></script>
@@ -42,7 +42,8 @@ app.ports.genRandomBytes.subscribe(n => {
 });
 
 // Was Mapbox integration, now more a general port for commands from Elm.
-app.ports.commandPort.subscribe(incomingMessageHandler);
+app.ports.mapCommands.subscribe(mapMessageHandler);
+app.ports.storageCommands.subscribe(storageMessageHandler);
 
 // We use port messages to synchronise our state here with Elm.
 var map;
@@ -140,7 +141,7 @@ function onUp(e) {
       } );
 };
 
-function incomingMessageHandler(msg) {
+function mapMessageHandler(msg) {
 //    console.log('behold, a message from the land of Elm');
 //    console.log(msg);
 
@@ -205,6 +206,14 @@ function incomingMessageHandler(msg) {
                 );
             }
             break;
+    };
+};
+
+function storageMessageHandler(msg) {
+//    console.log('behold, a message from the land of Elm');
+//    console.log(msg);
+
+    switch (msg.Cmd) {
 
         case 'storage.set':
             //console.log(msg.key); console.log(msg.value);

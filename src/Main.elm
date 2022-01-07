@@ -17,14 +17,14 @@ import FlatColors.BritishPalette
 import FlatColors.ChinesePalette
 import GeoCodeDecoders exposing (IpInfo)
 import GpxParser exposing (parseGPXPoints)
-import Length exposing (Meters, meters)
+import Http
+import Length exposing (Meters)
+import MapPortsController
 import ModelRecord exposing (Model(..), ModelRecord)
-import Msg exposing (Msg(..))
 import MyIP
 import OAuthPorts as O exposing (randomBytes)
 import OAuthTypes as O exposing (OAuthMsg(..))
 import Pixels exposing (Pixels)
-import PortController
 import Quantity
 import StravaAuth exposing (getStravaToken)
 import Task
@@ -34,6 +34,21 @@ import ViewMap
 import ViewPureStyles exposing (conditionallyVisible, radioButton, sliderThumb)
 import ViewThirdPerson
 import ViewingMode exposing (ViewingMode(..))
+
+
+type Msg
+    = GpxRequested
+    | GpxSelected File
+    | GpxLoaded String
+    | OAuthMessage OAuthMsg
+    | AdjustTimeZone Time.Zone
+    | SetRenderDepth Int
+    | SetCurrentPosition Int
+    | SetViewMode ViewingMode
+    | ReceivedIpDetails (Result Http.Error IpInfo)
+    | IpInfoAcknowledged (Result Http.Error ())
+    | ImageMessage ViewThirdPerson.Msg
+    | MapPortsMessage MapPortsController.MapMsg
 
 
 main : Program (Maybe (List Int)) Model Msg
@@ -88,10 +103,12 @@ update msg (Model model) =
             , MyIP.requestIpInformation ReceivedIpDetails
             )
 
-        ClearMapClickDebounce ->
-            ( Model { model | mapClickDebounce = False }
-            , Cmd.none
-            )
+        MapPortsMessage mapMsg ->
+            let
+                ( newModel, cmd ) =
+                    MapPortsController.update mapMsg model MapPortsMessage
+            in
+            ( Model model, cmd )
 
         ReceivedIpDetails response ->
             let
@@ -114,10 +131,10 @@ update msg (Model model) =
             in
             ( Model { model | ipInfo = ipInfo }
             , Cmd.batch
-                [ PortController.createMap mapInfoWithLocation
+                [ MapPortsController.createMap mapInfoWithLocation
 
                 --, MyIP.sendIpInfo model.time IpInfoAcknowledged ipInfo
-                , after 100 RepaintMap
+                , MapPortsController.deferredMapRepaint MapPortsMessage
                 ]
             )
 
@@ -152,13 +169,10 @@ update msg (Model model) =
                                 |> Maybe.withDefault (GPXSource Direction2d.x Quantity.zero Quantity.zero)
                     }
             in
-            modelWithTrack |> Actions.updateAllDisplays
-
-        RepaintMap ->
-            ( Model model, PortController.refreshMap )
+            modelWithTrack |> Actions.updateAllDisplays MapPortsMessage
 
         SetRenderDepth depth ->
-            { model | renderDepth = depth } |> Actions.updateAllDisplays
+            { model | renderDepth = depth } |> Actions.updateAllDisplays MapPortsMessage
 
         --Delegate wrapped OAuthmessages. Be bowled over if this works first time. Or fiftieth.
         --Maybe look after to see if there is yet a token. Easy way to know.
@@ -179,20 +193,14 @@ update msg (Model model) =
             case model.trackTree of
                 Just treeTop ->
                     { model | currentPosition = pos }
-                        |> Actions.updateAllDisplays
+                        |> Actions.updateAllDisplays MapPortsMessage
 
                 Nothing ->
                     ( Model model, Cmd.none )
 
         SetViewMode newMode ->
-            { model | viewMode = newMode } |> Actions.updateAllDisplays
-
-        PortMessage json ->
-            let
-                ( newModel, cmds ) =
-                    PortController.processPortMessage model json
-            in
-            ( Model newModel, cmds )
+            { model | viewMode = newMode }
+                |> Actions.updateAllDisplays MapPortsMessage
 
         ImageMessage imageMsg ->
             let
@@ -204,7 +212,7 @@ update msg (Model model) =
 
 view : Model -> Browser.Document Msg
 view (Model model) =
-    { title = "GPXmagic 2.0"
+    { title = "GPXmagic Labs"
     , body =
         [ layout
             [ width fill
@@ -296,7 +304,7 @@ contentArea model =
                     , conditionallyVisible (model.viewMode /= ViewMap) <|
                         ViewThirdPerson.view model ImageMessage
                     , conditionallyVisible (model.viewMode == ViewMap) <|
-                        ViewMap.view model
+                        ViewMap.view model MapPortsMessage
                     ]
                 , el [ height (px 10) ] none
                 , case model.trackTree of
@@ -335,5 +343,5 @@ subscriptions : Model -> Sub Msg
 subscriptions (Model model) =
     Sub.batch
         [ randomBytes (\ints -> OAuthMessage (GotRandomBytes ints))
-        , PortController.messageReceiver PortMessage
+        , MapPortsController.mapResponses (MapPortsMessage << MapPortsController.MapPortMessage)
         ]
