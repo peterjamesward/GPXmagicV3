@@ -1,4 +1,4 @@
-module LocalStorage exposing (..)
+port module LocalStorage exposing (..)
 
 import Json.Decode as D exposing (Decoder, field, string)
 import Json.Encode as E

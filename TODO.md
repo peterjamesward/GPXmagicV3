@@ -2,18 +2,17 @@
 
 # WIP
 
-Figure out how to do actions and commands **without import loops**.
-May involve quite a lot of wrappping and delegation (if you raise a msg, you handle it).
-> All messaging in & out is map-related (ignoring OAuth), so a well-sorted MapView.elm might fix it all.
-> Failing that: https://github.com/FabienHenon/app-object/tree/1.0.0
-
-Hit detect needs to set current. (Does, but does not repaint, I think.)
-> Requires sorting out the above.
-
 ## Zoom, Pan, Rotate.
-Copy old stuff when conformal projection is back, but cleaner.
+Rotate is not rotating about the right place.
+Pan feels slippy. Sometimes goes the wrong way. 
+All to do with getting the right focal point?
+> (Sure these were v1 problems!)
 
 ### Map / General rendering
+
+Map needs deferred repaint, but how to do that?
+Maybe in JS (on load finished --> resize ?)
+
 Use a graduated drop off with distance, compute at each tree level.
 On Map, work out the depth to fit (say) 1000 points within visible region.
 

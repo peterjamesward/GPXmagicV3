@@ -90,9 +90,8 @@ centreMapOnCurrent :
         , currentPosition : Int
         , referenceLonLat : GPXSource
     }
-    -> (MapMsg -> msg)
     -> Cmd msg
-centreMapOnCurrent model msgWrapper =
+centreMapOnCurrent model  =
     case model.trackTree of
         Just tree ->
             let
@@ -178,9 +177,8 @@ addTrackToMap :
         , currentPosition : Int
         , referenceLonLat : GPXSource
     }
-    -> (MapMsg -> msg)
     -> Cmd msg
-addTrackToMap model msgWrapper =
+addTrackToMap model  =
     -- This is to add the route as a polyline.
     -- We will separately add track points as draggable features.
     case model.trackTree of
@@ -301,7 +299,7 @@ processMapPortMessage model json msgWrapper =
                     ( updatedModel
                     , Cmd.batch
                         [ -- Selective rendering requires we remove and add again.
-                          addTrackToMap updatedModel msgWrapper
+                          addTrackToMap updatedModel
                         , after 100 (ClearMapClickDebounce |> msgWrapper)
                         , after 100 (RepaintMap |> msgWrapper)
                         ]

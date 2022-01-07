@@ -1,5 +1,6 @@
 module ViewThirdPerson exposing (..)
 
+import Actions
 import Angle exposing (Angle)
 import Axis3d
 import Camera3d exposing (Camera3d)
@@ -21,6 +22,7 @@ import Html.Events.Extra.Wheel as Wheel
 import Json.Decode as D
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
+import MapPortsController exposing (MapMsg)
 import ModelRecord exposing (ModelRecord)
 import Pixels exposing (Pixels)
 import Plane3d
@@ -173,7 +175,7 @@ deriveCamera treeNode context currentPosition =
         perspectiveCamera =
             Camera3d.perspective
                 { viewpoint = cameraViewpoint
-                , verticalFieldOfView = Angle.degrees 30
+                , verticalFieldOfView = Angle.degrees 45
                 }
     in
     perspectiveCamera
@@ -238,11 +240,8 @@ update msg model msgWrapper =
             case msg of
                 ImageZoomIn ->
                     let
-                        increment =
-                            0.5
-
                         newContext =
-                            { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + increment }
+                            { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + 0.5 }
                     in
                     ( { model | viewContext = Just newContext }
                     , Cmd.none
@@ -250,11 +249,8 @@ update msg model msgWrapper =
 
                 ImageZoomOut ->
                     let
-                        increment =
-                            -0.5
-
                         newContext =
-                            { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + increment }
+                            { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel - 0.5 }
                     in
                     ( { model | viewContext = Just newContext }
                     , Cmd.none
@@ -272,9 +268,12 @@ update msg model msgWrapper =
                     -- Click moves pointer but does not re-centre view. (Double click will.)
                     --TODO: How to share action here with Main:update for slider,
                     --TODO: without passing control back? Separate module?
-                    ( { model | currentPosition = detectHit event model }
-                    , Cmd.none
-                    )
+                    if context.waitingForClickDelay then
+                        { model | currentPosition = detectHit event model }
+                            |> Actions.updateAllDisplays
+
+                    else
+                        ( model, Cmd.none )
 
                 ImageMouseWheel deltaY ->
                     let
@@ -353,7 +352,10 @@ update msg model msgWrapper =
                                             Axis3d.z
                                             (Direction2d.toAngle context.cameraAzimuth)
                                         |> Vector3d.scaleBy
-                                            (Spherical.metresPerPixel context.zoomLevel (Angle.degrees 30))
+                                            (Spherical.metresPerPixel
+                                                context.zoomLevel
+                                                (effectiveLatitude treeNode)
+                                            )
 
                                 newContext =
                                     { context
@@ -376,7 +378,6 @@ update msg model msgWrapper =
                                 { context
                                     | orbiting = Nothing
                                     , dragAction = DragNone
-                                    , waitingForClickDelay = False
                                 }
                     in
                     ( { model | viewContext = newContext }
@@ -413,5 +414,5 @@ initialiseView current treeNode =
     , focalPoint =
         treeNode |> leafFromIndex current |> startPoint
     , waitingForClickDelay = False
-    , followSelectedPoint = True
+    , followSelectedPoint = False
     }

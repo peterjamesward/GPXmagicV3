@@ -9386,6 +9386,9 @@ var $author$project$MapPortsController$MapPortMessage = function (a) {
 var $author$project$Main$MapPortsMessage = function (a) {
 	return {$: 'MapPortsMessage', a: a};
 };
+var $author$project$Main$StorageMessage = function (a) {
+	return {$: 'StorageMessage', a: a};
+};
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Basics$composeL = F3(
 	function (g, f, x) {
@@ -9397,6 +9400,7 @@ var $author$project$MapPortsController$mapResponses = _Platform_incomingPort('ma
 var $author$project$OAuthPorts$randomBytes = _Platform_incomingPort(
 	'randomBytes',
 	$elm$json$Json$Decode$list($elm$json$Json$Decode$int));
+var $author$project$LocalStorage$storageResponses = _Platform_incomingPort('storageResponses', $elm$json$Json$Decode$value);
 var $author$project$Main$subscriptions = function (_v0) {
 	var model = _v0.a;
 	return $elm$core$Platform$Sub$batch(
@@ -9408,7 +9412,8 @@ var $author$project$Main$subscriptions = function (_v0) {
 						$author$project$OAuthTypes$GotRandomBytes(ints));
 				}),
 				$author$project$MapPortsController$mapResponses(
-				A2($elm$core$Basics$composeL, $author$project$Main$MapPortsMessage, $author$project$MapPortsController$MapPortMessage))
+				A2($elm$core$Basics$composeL, $author$project$Main$MapPortsMessage, $author$project$MapPortsController$MapPortMessage)),
+				$author$project$LocalStorage$storageResponses($author$project$Main$StorageMessage)
 			]));
 };
 var $author$project$Main$GpxLoaded = function (a) {
@@ -9461,13 +9466,6 @@ var $author$project$MapPortsController$createMap = function (info) {
 					'zoom',
 					$elm$json$Json$Encode$float(info.mapZoom))
 				])));
-};
-var $author$project$MapPortsController$RepaintMap = {$: 'RepaintMap'};
-var $author$project$MapPortsController$deferredMapRepaint = function (msgWrapper) {
-	return A2(
-		$andrewMacmurray$elm_delay$Delay$after,
-		50,
-		msgWrapper($author$project$MapPortsController$RepaintMap));
 };
 var $elm$file$File$Select$file = F2(
 	function (mimes, toMsg) {
@@ -9569,7 +9567,7 @@ var $author$project$ViewThirdPerson$initialiseView = F2(
 			fieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
 			focalPoint: $author$project$DomainModel$startPoint(
 				A2($author$project$DomainModel$leafFromIndex, current, treeNode)),
-			followSelectedPoint: true,
+			followSelectedPoint: false,
 			orbiting: $elm$core$Maybe$Nothing,
 			waitingForClickDelay: false,
 			zoomLevel: 10.0
@@ -10598,6 +10596,7 @@ var $author$project$DomainModel$treeFromList = function (track) {
 	return A2(treeBuilder, numberOfSegments, track).a;
 };
 var $author$project$MapPortsController$ClearMapClickDebounce = {$: 'ClearMapClickDebounce'};
+var $author$project$MapPortsController$RepaintMap = {$: 'RepaintMap'};
 var $elm$json$Json$Encode$null = _Json_encodeNull;
 var $elm$core$Basics$ge = _Utils_ge;
 var $ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo = F2(
@@ -10788,47 +10787,46 @@ var $author$project$SceneBuilder$renderMapJson = function (model) {
 		return $elm$json$Json$Encode$null;
 	}
 };
-var $author$project$MapPortsController$addTrackToMap = F2(
-	function (model, msgWrapper) {
-		var _v0 = model.trackTree;
-		if (_v0.$ === 'Just') {
-			var tree = _v0.a;
-			var _v1 = $author$project$DomainModel$sourceData(
-				A2($author$project$DomainModel$leafFromIndex, model.currentPosition, tree)).a;
-			var longitude = _v1.longitude;
-			var latitude = _v1.latitude;
-			var altitude = _v1.altitude;
-			return $author$project$MapPortsController$mapCommands(
-				$elm$json$Json$Encode$object(
-					_List_fromArray(
-						[
-							_Utils_Tuple2(
-							'Cmd',
-							$elm$json$Json$Encode$string('Track')),
-							_Utils_Tuple2(
-							'token',
-							$elm$json$Json$Encode$string($author$project$MapboxKey$mapboxKey)),
-							_Utils_Tuple2(
-							'lon',
-							$elm$json$Json$Encode$float(
-								$ianmackenzie$elm_units$Angle$inDegrees(
-									$ianmackenzie$elm_geometry$Direction2d$toAngle(longitude)))),
-							_Utils_Tuple2(
-							'lat',
-							$elm$json$Json$Encode$float(
-								$ianmackenzie$elm_units$Angle$inDegrees(latitude))),
-							_Utils_Tuple2(
-							'zoom',
-							$elm$json$Json$Encode$float(10.0)),
-							_Utils_Tuple2(
-							'data',
-							$author$project$SceneBuilder$renderMapJson(model)),
-							_Utils_Tuple2('points', $elm$json$Json$Encode$null)
-						])));
-		} else {
-			return $elm$core$Platform$Cmd$none;
-		}
-	});
+var $author$project$MapPortsController$addTrackToMap = function (model) {
+	var _v0 = model.trackTree;
+	if (_v0.$ === 'Just') {
+		var tree = _v0.a;
+		var _v1 = $author$project$DomainModel$sourceData(
+			A2($author$project$DomainModel$leafFromIndex, model.currentPosition, tree)).a;
+		var longitude = _v1.longitude;
+		var latitude = _v1.latitude;
+		var altitude = _v1.altitude;
+		return $author$project$MapPortsController$mapCommands(
+			$elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'Cmd',
+						$elm$json$Json$Encode$string('Track')),
+						_Utils_Tuple2(
+						'token',
+						$elm$json$Json$Encode$string($author$project$MapboxKey$mapboxKey)),
+						_Utils_Tuple2(
+						'lon',
+						$elm$json$Json$Encode$float(
+							$ianmackenzie$elm_units$Angle$inDegrees(
+								$ianmackenzie$elm_geometry$Direction2d$toAngle(longitude)))),
+						_Utils_Tuple2(
+						'lat',
+						$elm$json$Json$Encode$float(
+							$ianmackenzie$elm_units$Angle$inDegrees(latitude))),
+						_Utils_Tuple2(
+						'zoom',
+						$elm$json$Json$Encode$float(10.0)),
+						_Utils_Tuple2(
+						'data',
+						$author$project$SceneBuilder$renderMapJson(model)),
+						_Utils_Tuple2('points', $elm$json$Json$Encode$null)
+					])));
+	} else {
+		return $elm$core$Platform$Cmd$none;
+	}
+};
 var $elm$json$Json$Decode$decodeValue = _Json_run;
 var $author$project$MapPortsController$msgDecoder = A2($elm$json$Json$Decode$field, 'msg', $elm$json$Json$Decode$string);
 var $author$project$DomainModel$gpxDistance = F2(
@@ -10988,7 +10986,7 @@ var $author$project$MapPortsController$processMapPortMessage = F3(
 					$elm$core$Platform$Cmd$batch(
 						_List_fromArray(
 							[
-								A2($author$project$MapPortsController$addTrackToMap, updatedModel, msgWrapper),
+								$author$project$MapPortsController$addTrackToMap(updatedModel),
 								A2(
 								$andrewMacmurray$elm_delay$Delay$after,
 								100,
@@ -12026,7 +12024,7 @@ var $author$project$ViewThirdPerson$deriveCamera = F3(
 			});
 		var perspectiveCamera = $ianmackenzie$elm_3d_camera$Camera3d$perspective(
 			{
-				verticalFieldOfView: $ianmackenzie$elm_units$Angle$degrees(30),
+				verticalFieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
 				viewpoint: cameraViewpoint
 			});
 		return perspectiveCamera;
@@ -12568,206 +12566,6 @@ var $ianmackenzie$elm_units$Angle$sin = function (_v0) {
 	var angle = _v0.a;
 	return $elm$core$Basics$sin(angle);
 };
-var $ianmackenzie$elm_geometry$Direction3d$positiveZ = $ianmackenzie$elm_geometry$Direction3d$unsafe(
-	{x: 0, y: 0, z: 1});
-var $ianmackenzie$elm_geometry$Direction3d$z = $ianmackenzie$elm_geometry$Direction3d$positiveZ;
-var $ianmackenzie$elm_geometry$Axis3d$z = A2($ianmackenzie$elm_geometry$Axis3d$through, $ianmackenzie$elm_geometry$Point3d$origin, $ianmackenzie$elm_geometry$Direction3d$z);
-var $author$project$ViewThirdPerson$update = F3(
-	function (msg, model, msgWrapper) {
-		var _v0 = _Utils_Tuple2(model.trackTree, model.viewContext);
-		if ((_v0.a.$ === 'Just') && (_v0.b.$ === 'Just')) {
-			var treeNode = _v0.a.a;
-			var context = _v0.b.a;
-			switch (msg.$) {
-				case 'ImageZoomIn':
-					var increment = 0.5;
-					var newContext = _Utils_update(
-						context,
-						{
-							zoomLevel: A3($elm$core$Basics$clamp, 0.0, 22.0, context.zoomLevel + increment)
-						});
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								viewContext: $elm$core$Maybe$Just(newContext)
-							}),
-						$elm$core$Platform$Cmd$none);
-				case 'ImageZoomOut':
-					var increment = -0.5;
-					var newContext = _Utils_update(
-						context,
-						{
-							zoomLevel: A3($elm$core$Basics$clamp, 0.0, 22.0, context.zoomLevel + increment)
-						});
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								viewContext: $elm$core$Maybe$Just(newContext)
-							}),
-						$elm$core$Platform$Cmd$none);
-				case 'ImageReset':
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								viewContext: $elm$core$Maybe$Just(
-									A2($author$project$ViewThirdPerson$initialiseView, model.currentPosition, treeNode))
-							}),
-						$elm$core$Platform$Cmd$none);
-				case 'ImageNoOp':
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				case 'ImageClick':
-					var event = msg.a;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								currentPosition: A2($author$project$ViewThirdPerson$detectHit, event, model)
-							}),
-						$elm$core$Platform$Cmd$none);
-				case 'ImageMouseWheel':
-					var deltaY = msg.a;
-					var increment = (-0.001) * deltaY;
-					var newContext = _Utils_update(
-						context,
-						{
-							zoomLevel: A3($elm$core$Basics$clamp, 0.0, 22.0, context.zoomLevel + increment)
-						});
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								viewContext: $elm$core$Maybe$Just(newContext)
-							}),
-						$elm$core$Platform$Cmd$none);
-				case 'ImageGrab':
-					var event = msg.a;
-					var alternate = event.keys.ctrl || _Utils_eq(event.button, $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$SecondButton);
-					var newContext = $elm$core$Maybe$Just(
-						_Utils_update(
-							context,
-							{
-								dragAction: alternate ? $author$project$ViewContextThirdPerson$DragRotate : $author$project$ViewContextThirdPerson$DragPan,
-								orbiting: $elm$core$Maybe$Just(event.offsetPos),
-								waitingForClickDelay: true
-							}));
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{viewContext: newContext}),
-						A2(
-							$andrewMacmurray$elm_delay$Delay$after,
-							250,
-							msgWrapper($author$project$ViewThirdPerson$ClickDelayExpired)));
-				case 'ImageDrag':
-					var event = msg.a;
-					var _v2 = event.offsetPos;
-					var dx = _v2.a;
-					var dy = _v2.b;
-					var _v3 = _Utils_Tuple2(context.dragAction, context.orbiting);
-					_v3$2:
-					while (true) {
-						if (_v3.b.$ === 'Just') {
-							switch (_v3.a.$) {
-								case 'DragRotate':
-									var _v4 = _v3.a;
-									var _v5 = _v3.b.a;
-									var startX = _v5.a;
-									var startY = _v5.b;
-									var newElevation = $ianmackenzie$elm_units$Angle$degrees(
-										$ianmackenzie$elm_units$Angle$inDegrees(context.cameraElevation) + (dy - startY));
-									var newAzimuth = $ianmackenzie$elm_units$Angle$degrees(
-										$ianmackenzie$elm_units$Angle$inDegrees(
-											$ianmackenzie$elm_geometry$Direction2d$toAngle(context.cameraAzimuth)) - (dx - startX));
-									var newContext = _Utils_update(
-										context,
-										{
-											cameraAzimuth: $ianmackenzie$elm_geometry$Direction2d$fromAngle(newAzimuth),
-											cameraElevation: newElevation,
-											orbiting: $elm$core$Maybe$Just(
-												_Utils_Tuple2(dx, dy))
-										});
-									return _Utils_Tuple2(
-										_Utils_update(
-											model,
-											{
-												viewContext: $elm$core$Maybe$Just(newContext)
-											}),
-										$elm$core$Platform$Cmd$none);
-								case 'DragPan':
-									var _v6 = _v3.a;
-									var _v7 = _v3.b.a;
-									var startX = _v7.a;
-									var startY = _v7.b;
-									var shiftVector = A2(
-										$ianmackenzie$elm_geometry$Vector3d$scaleBy,
-										A2(
-											$author$project$Spherical$metresPerPixel,
-											context.zoomLevel,
-											$ianmackenzie$elm_units$Angle$degrees(30)),
-										A3(
-											$ianmackenzie$elm_geometry$Vector3d$rotateAround,
-											$ianmackenzie$elm_geometry$Axis3d$z,
-											$ianmackenzie$elm_geometry$Direction2d$toAngle(context.cameraAzimuth),
-											A3(
-												$ianmackenzie$elm_geometry$Vector3d$meters,
-												(startY - dy) * $ianmackenzie$elm_units$Angle$sin(context.cameraElevation),
-												startX - dx,
-												(dy - startY) * $ianmackenzie$elm_units$Angle$cos(context.cameraElevation))));
-									var newContext = _Utils_update(
-										context,
-										{
-											focalPoint: A2($ianmackenzie$elm_geometry$Point3d$translateBy, shiftVector, context.focalPoint),
-											orbiting: $elm$core$Maybe$Just(
-												_Utils_Tuple2(dx, dy))
-										});
-									return _Utils_Tuple2(
-										_Utils_update(
-											model,
-											{
-												viewContext: $elm$core$Maybe$Just(newContext)
-											}),
-										$elm$core$Platform$Cmd$none);
-								default:
-									break _v3$2;
-							}
-						} else {
-							break _v3$2;
-						}
-					}
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				case 'ImageRelease':
-					var event = msg.a;
-					var newContext = $elm$core$Maybe$Just(
-						_Utils_update(
-							context,
-							{dragAction: $author$project$ViewContextThirdPerson$DragNone, orbiting: $elm$core$Maybe$Nothing, waitingForClickDelay: false}));
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{viewContext: newContext}),
-						$elm$core$Platform$Cmd$none);
-				case 'ImageDoubleClick':
-					var event = msg.a;
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				default:
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								viewContext: $elm$core$Maybe$Just(
-									_Utils_update(
-										context,
-										{waitingForClickDelay: false}))
-							}),
-						$elm$core$Platform$Cmd$none);
-			}
-		} else {
-			return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-		}
-	});
 var $author$project$ViewingMode$ViewMap = {$: 'ViewMap'};
 var $ianmackenzie$elm_units$Length$inMeters = function (_v0) {
 	var numMeters = _v0.a;
@@ -12800,43 +12598,42 @@ var $author$project$DomainModel$gpxFromPointWithReference = F2(
 			$ianmackenzie$elm_units$Angle$degrees(latitude),
 			$ianmackenzie$elm_units$Length$meters(altitude));
 	});
-var $author$project$MapPortsController$centreMapOnCurrent = F2(
-	function (model, msgWrapper) {
-		var _v0 = model.trackTree;
-		if (_v0.$ === 'Just') {
-			var tree = _v0.a;
-			var _v1 = A2(
-				$author$project$DomainModel$gpxFromPointWithReference,
-				model.referenceLonLat,
-				$author$project$DomainModel$startPoint(
-					A2($author$project$DomainModel$leafFromIndex, model.currentPosition, tree)));
-			var longitude = _v1.longitude;
-			var latitude = _v1.latitude;
-			var altitude = _v1.altitude;
-			return $author$project$MapPortsController$mapCommands(
-				$elm$json$Json$Encode$object(
-					_List_fromArray(
-						[
-							_Utils_Tuple2(
-							'Cmd',
-							$elm$json$Json$Encode$string('Centre')),
-							_Utils_Tuple2(
-							'token',
-							$elm$json$Json$Encode$string($author$project$MapboxKey$mapboxKey)),
-							_Utils_Tuple2(
-							'lon',
-							$elm$json$Json$Encode$float(
-								$ianmackenzie$elm_units$Angle$inDegrees(
-									$ianmackenzie$elm_geometry$Direction2d$toAngle(longitude)))),
-							_Utils_Tuple2(
-							'lat',
-							$elm$json$Json$Encode$float(
-								$ianmackenzie$elm_units$Angle$inDegrees(latitude)))
-						])));
-		} else {
-			return $elm$core$Platform$Cmd$none;
-		}
-	});
+var $author$project$MapPortsController$centreMapOnCurrent = function (model) {
+	var _v0 = model.trackTree;
+	if (_v0.$ === 'Just') {
+		var tree = _v0.a;
+		var _v1 = A2(
+			$author$project$DomainModel$gpxFromPointWithReference,
+			model.referenceLonLat,
+			$author$project$DomainModel$startPoint(
+				A2($author$project$DomainModel$leafFromIndex, model.currentPosition, tree)));
+		var longitude = _v1.longitude;
+		var latitude = _v1.latitude;
+		var altitude = _v1.altitude;
+		return $author$project$MapPortsController$mapCommands(
+			$elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'Cmd',
+						$elm$json$Json$Encode$string('Centre')),
+						_Utils_Tuple2(
+						'token',
+						$elm$json$Json$Encode$string($author$project$MapboxKey$mapboxKey)),
+						_Utils_Tuple2(
+						'lon',
+						$elm$json$Json$Encode$float(
+							$ianmackenzie$elm_units$Angle$inDegrees(
+								$ianmackenzie$elm_geometry$Direction2d$toAngle(longitude)))),
+						_Utils_Tuple2(
+						'lat',
+						$elm$json$Json$Encode$float(
+							$ianmackenzie$elm_units$Angle$inDegrees(latitude)))
+					])));
+	} else {
+		return $elm$core$Platform$Cmd$none;
+	}
+};
 var $avh4$elm_color$Color$RgbaSpace = F4(
 	function (a, b, c, d) {
 		return {$: 'RgbaSpace', a: a, b: b, c: c, d: d};
@@ -14117,6 +13914,9 @@ var $ianmackenzie$elm_geometry$Plane3d$through = F2(
 		return $ianmackenzie$elm_geometry$Geometry$Types$Plane3d(
 			{normalDirection: givenNormalDirection, originPoint: givenPoint});
 	});
+var $ianmackenzie$elm_geometry$Direction3d$positiveZ = $ianmackenzie$elm_geometry$Direction3d$unsafe(
+	{x: 0, y: 0, z: 1});
+var $ianmackenzie$elm_geometry$Direction3d$z = $ianmackenzie$elm_geometry$Direction3d$positiveZ;
 var $ianmackenzie$elm_geometry$Plane3d$xy = A2($ianmackenzie$elm_geometry$Plane3d$through, $ianmackenzie$elm_geometry$Point3d$origin, $ianmackenzie$elm_geometry$Direction3d$z);
 var $author$project$SceneBuilder$render3dView = function (model) {
 	var renderCurrentMarker = F2(
@@ -14275,18 +14075,209 @@ var $author$project$Actions$renderModel = function (model) {
 			scene: $author$project$SceneBuilder$render3dView(model)
 		});
 };
-var $author$project$Actions$updateAllDisplays = F2(
-	function (msgWrapper, model) {
-		return _Utils_Tuple2(
-			$author$project$ModelRecord$Model(
-				$author$project$Actions$renderModel(model)),
-			_Utils_eq(model.viewMode, $author$project$ViewingMode$ViewMap) ? $elm$core$Platform$Cmd$batch(
-				_List_fromArray(
-					[
-						A2($author$project$MapPortsController$addTrackToMap, model, msgWrapper),
-						A2($author$project$MapPortsController$centreMapOnCurrent, model, msgWrapper),
-						$author$project$MapPortsController$deferredMapRepaint(msgWrapper)
-					])) : $elm$core$Platform$Cmd$none);
+var $author$project$Actions$updateAllDisplays = function (model) {
+	return _Utils_Tuple2(
+		$author$project$Actions$renderModel(model),
+		_Utils_eq(model.viewMode, $author$project$ViewingMode$ViewMap) ? $elm$core$Platform$Cmd$batch(
+			_List_fromArray(
+				[
+					$author$project$MapPortsController$addTrackToMap(model),
+					$author$project$MapPortsController$centreMapOnCurrent(model)
+				])) : $elm$core$Platform$Cmd$none);
+};
+var $ianmackenzie$elm_geometry$Axis3d$z = A2($ianmackenzie$elm_geometry$Axis3d$through, $ianmackenzie$elm_geometry$Point3d$origin, $ianmackenzie$elm_geometry$Direction3d$z);
+var $author$project$ViewThirdPerson$update = F3(
+	function (msg, model, msgWrapper) {
+		var _v0 = _Utils_Tuple2(model.trackTree, model.viewContext);
+		if ((_v0.a.$ === 'Just') && (_v0.b.$ === 'Just')) {
+			var treeNode = _v0.a.a;
+			var context = _v0.b.a;
+			switch (msg.$) {
+				case 'ImageZoomIn':
+					var newContext = _Utils_update(
+						context,
+						{
+							zoomLevel: A3($elm$core$Basics$clamp, 0.0, 22.0, context.zoomLevel + 0.5)
+						});
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								viewContext: $elm$core$Maybe$Just(newContext)
+							}),
+						$elm$core$Platform$Cmd$none);
+				case 'ImageZoomOut':
+					var newContext = _Utils_update(
+						context,
+						{
+							zoomLevel: A3($elm$core$Basics$clamp, 0.0, 22.0, context.zoomLevel - 0.5)
+						});
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								viewContext: $elm$core$Maybe$Just(newContext)
+							}),
+						$elm$core$Platform$Cmd$none);
+				case 'ImageReset':
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								viewContext: $elm$core$Maybe$Just(
+									A2($author$project$ViewThirdPerson$initialiseView, model.currentPosition, treeNode))
+							}),
+						$elm$core$Platform$Cmd$none);
+				case 'ImageNoOp':
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				case 'ImageClick':
+					var event = msg.a;
+					return context.waitingForClickDelay ? $author$project$Actions$updateAllDisplays(
+						_Utils_update(
+							model,
+							{
+								currentPosition: A2($author$project$ViewThirdPerson$detectHit, event, model)
+							})) : _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				case 'ImageMouseWheel':
+					var deltaY = msg.a;
+					var increment = (-0.001) * deltaY;
+					var newContext = _Utils_update(
+						context,
+						{
+							zoomLevel: A3($elm$core$Basics$clamp, 0.0, 22.0, context.zoomLevel + increment)
+						});
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								viewContext: $elm$core$Maybe$Just(newContext)
+							}),
+						$elm$core$Platform$Cmd$none);
+				case 'ImageGrab':
+					var event = msg.a;
+					var alternate = event.keys.ctrl || _Utils_eq(event.button, $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$SecondButton);
+					var newContext = $elm$core$Maybe$Just(
+						_Utils_update(
+							context,
+							{
+								dragAction: alternate ? $author$project$ViewContextThirdPerson$DragRotate : $author$project$ViewContextThirdPerson$DragPan,
+								orbiting: $elm$core$Maybe$Just(event.offsetPos),
+								waitingForClickDelay: true
+							}));
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{viewContext: newContext}),
+						A2(
+							$andrewMacmurray$elm_delay$Delay$after,
+							250,
+							msgWrapper($author$project$ViewThirdPerson$ClickDelayExpired)));
+				case 'ImageDrag':
+					var event = msg.a;
+					var _v2 = event.offsetPos;
+					var dx = _v2.a;
+					var dy = _v2.b;
+					var _v3 = _Utils_Tuple2(context.dragAction, context.orbiting);
+					_v3$2:
+					while (true) {
+						if (_v3.b.$ === 'Just') {
+							switch (_v3.a.$) {
+								case 'DragRotate':
+									var _v4 = _v3.a;
+									var _v5 = _v3.b.a;
+									var startX = _v5.a;
+									var startY = _v5.b;
+									var newElevation = $ianmackenzie$elm_units$Angle$degrees(
+										$ianmackenzie$elm_units$Angle$inDegrees(context.cameraElevation) + (dy - startY));
+									var newAzimuth = $ianmackenzie$elm_units$Angle$degrees(
+										$ianmackenzie$elm_units$Angle$inDegrees(
+											$ianmackenzie$elm_geometry$Direction2d$toAngle(context.cameraAzimuth)) - (dx - startX));
+									var newContext = _Utils_update(
+										context,
+										{
+											cameraAzimuth: $ianmackenzie$elm_geometry$Direction2d$fromAngle(newAzimuth),
+											cameraElevation: newElevation,
+											orbiting: $elm$core$Maybe$Just(
+												_Utils_Tuple2(dx, dy))
+										});
+									return _Utils_Tuple2(
+										_Utils_update(
+											model,
+											{
+												viewContext: $elm$core$Maybe$Just(newContext)
+											}),
+										$elm$core$Platform$Cmd$none);
+								case 'DragPan':
+									var _v6 = _v3.a;
+									var _v7 = _v3.b.a;
+									var startX = _v7.a;
+									var startY = _v7.b;
+									var shiftVector = A2(
+										$ianmackenzie$elm_geometry$Vector3d$scaleBy,
+										A2(
+											$author$project$Spherical$metresPerPixel,
+											context.zoomLevel,
+											$author$project$DomainModel$effectiveLatitude(treeNode)),
+										A3(
+											$ianmackenzie$elm_geometry$Vector3d$rotateAround,
+											$ianmackenzie$elm_geometry$Axis3d$z,
+											$ianmackenzie$elm_geometry$Direction2d$toAngle(context.cameraAzimuth),
+											A3(
+												$ianmackenzie$elm_geometry$Vector3d$meters,
+												(startY - dy) * $ianmackenzie$elm_units$Angle$sin(context.cameraElevation),
+												startX - dx,
+												(dy - startY) * $ianmackenzie$elm_units$Angle$cos(context.cameraElevation))));
+									var newContext = _Utils_update(
+										context,
+										{
+											focalPoint: A2($ianmackenzie$elm_geometry$Point3d$translateBy, shiftVector, context.focalPoint),
+											orbiting: $elm$core$Maybe$Just(
+												_Utils_Tuple2(dx, dy))
+										});
+									return _Utils_Tuple2(
+										_Utils_update(
+											model,
+											{
+												viewContext: $elm$core$Maybe$Just(newContext)
+											}),
+										$elm$core$Platform$Cmd$none);
+								default:
+									break _v3$2;
+							}
+						} else {
+							break _v3$2;
+						}
+					}
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				case 'ImageRelease':
+					var event = msg.a;
+					var newContext = $elm$core$Maybe$Just(
+						_Utils_update(
+							context,
+							{dragAction: $author$project$ViewContextThirdPerson$DragNone, orbiting: $elm$core$Maybe$Nothing}));
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{viewContext: newContext}),
+						$elm$core$Platform$Cmd$none);
+				case 'ImageDoubleClick':
+					var event = msg.a;
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				default:
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								viewContext: $elm$core$Maybe$Just(
+									_Utils_update(
+										context,
+										{waitingForClickDelay: false}))
+							}),
+						$elm$core$Platform$Cmd$none);
+			}
+		} else {
+			return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+		}
 	});
 var $author$project$Main$update = F2(
 	function (msg, _v0) {
@@ -14327,8 +14318,7 @@ var $author$project$Main$update = F2(
 					$elm$core$Platform$Cmd$batch(
 						_List_fromArray(
 							[
-								$author$project$MapPortsController$createMap(mapInfoWithLocation),
-								$author$project$MapPortsController$deferredMapRepaint($author$project$Main$MapPortsMessage)
+								$author$project$MapPortsController$createMap(mapInfoWithLocation)
 							])));
 			case 'IpInfoAcknowledged':
 				return _Utils_Tuple2(
@@ -14374,20 +14364,28 @@ var $author$project$Main$update = F2(
 							$author$project$ViewThirdPerson$initialiseView(0),
 							trackTree)
 					});
-				return A2($author$project$Actions$updateAllDisplays, $author$project$Main$MapPortsMessage, modelWithTrack);
+				var _v4 = $author$project$Actions$updateAllDisplays(modelWithTrack);
+				var finalModel = _v4.a;
+				var cmd = _v4.b;
+				return _Utils_Tuple2(
+					$author$project$ModelRecord$Model(finalModel),
+					cmd);
 			case 'SetRenderDepth':
 				var depth = msg.a;
-				return A2(
-					$author$project$Actions$updateAllDisplays,
-					$author$project$Main$MapPortsMessage,
+				var _v5 = $author$project$Actions$updateAllDisplays(
 					_Utils_update(
 						model,
 						{renderDepth: depth}));
+				var finalModel = _v5.a;
+				var cmd = _v5.b;
+				return _Utils_Tuple2(
+					$author$project$ModelRecord$Model(finalModel),
+					cmd);
 			case 'OAuthMessage':
 				var authMsg = msg.a;
-				var _v4 = A2($author$project$StravaAuth$update, authMsg, model.stravaAuthentication);
-				var newAuthData = _v4.a;
-				var authCmd = _v4.b;
+				var _v6 = A2($author$project$StravaAuth$update, authMsg, model.stravaAuthentication);
+				var newAuthData = _v6.a;
+				var authCmd = _v6.b;
 				var isToken = $author$project$StravaAuth$getStravaToken(newAuthData);
 				return _Utils_Tuple2(
 					$author$project$ModelRecord$Model(
@@ -14397,15 +14395,18 @@ var $author$project$Main$update = F2(
 					A2($elm$core$Platform$Cmd$map, $author$project$Main$OAuthMessage, authCmd));
 			case 'SetCurrentPosition':
 				var pos = msg.a;
-				var _v5 = model.trackTree;
-				if (_v5.$ === 'Just') {
-					var treeTop = _v5.a;
-					return A2(
-						$author$project$Actions$updateAllDisplays,
-						$author$project$Main$MapPortsMessage,
+				var _v7 = model.trackTree;
+				if (_v7.$ === 'Just') {
+					var treeTop = _v7.a;
+					var _v8 = $author$project$Actions$updateAllDisplays(
 						_Utils_update(
 							model,
 							{currentPosition: pos}));
+					var finalModel = _v8.a;
+					var cmd = _v8.b;
+					return _Utils_Tuple2(
+						$author$project$ModelRecord$Model(finalModel),
+						cmd);
 				} else {
 					return _Utils_Tuple2(
 						$author$project$ModelRecord$Model(model),
@@ -14413,20 +14414,28 @@ var $author$project$Main$update = F2(
 				}
 			case 'SetViewMode':
 				var newMode = msg.a;
-				return A2(
-					$author$project$Actions$updateAllDisplays,
-					$author$project$Main$MapPortsMessage,
+				var _v9 = $author$project$Actions$updateAllDisplays(
 					_Utils_update(
 						model,
 						{viewMode: newMode}));
-			default:
+				var finalModel = _v9.a;
+				var cmd = _v9.b;
+				return _Utils_Tuple2(
+					$author$project$ModelRecord$Model(finalModel),
+					cmd);
+			case 'ImageMessage':
 				var imageMsg = msg.a;
-				var _v6 = A3($author$project$ViewThirdPerson$update, imageMsg, model, $author$project$Main$ImageMessage);
-				var newModel = _v6.a;
-				var cmds = _v6.b;
+				var _v10 = A3($author$project$ViewThirdPerson$update, imageMsg, model, $author$project$Main$ImageMessage);
+				var newModel = _v10.a;
+				var cmds = _v10.b;
 				return _Utils_Tuple2(
 					$author$project$ModelRecord$Model(newModel),
 					cmds);
+			default:
+				var json = msg.a;
+				return _Utils_Tuple2(
+					$author$project$ModelRecord$Model(model),
+					$elm$core$Platform$Cmd$none);
 		}
 	});
 var $mdgriffith$elm_ui$Internal$Model$Rgba = F4(

@@ -3,7 +3,6 @@ module Main exposing (main)
 import Actions
 import Browser exposing (application)
 import Browser.Navigation exposing (Key)
-import Delay exposing (after)
 import Direction2d
 import DomainModel exposing (..)
 import Element exposing (..)
@@ -18,7 +17,9 @@ import FlatColors.ChinesePalette
 import GeoCodeDecoders exposing (IpInfo)
 import GpxParser exposing (parseGPXPoints)
 import Http
+import Json.Encode as E
 import Length exposing (Meters)
+import LocalStorage
 import MapPortsController
 import ModelRecord exposing (Model(..), ModelRecord)
 import MyIP
@@ -49,11 +50,12 @@ type Msg
     | IpInfoAcknowledged (Result Http.Error ())
     | ImageMessage ViewThirdPerson.Msg
     | MapPortsMessage MapPortsController.MapMsg
+    | StorageMessage E.Value
 
 
 main : Program (Maybe (List Int)) Model Msg
 main =
-    -- This is the 'main' from OAuth example/
+    -- This is the 'main' from OAuth example.
     application
         { init = Maybe.map StravaAuth.convertBytes >> init
         , update = update
@@ -134,7 +136,6 @@ update msg (Model model) =
                 [ MapPortsController.createMap mapInfoWithLocation
 
                 --, MyIP.sendIpInfo model.time IpInfoAcknowledged ipInfo
-                , MapPortsController.deferredMapRepaint MapPortsMessage
                 ]
             )
 
@@ -168,11 +169,18 @@ update msg (Model model) =
                             List.head gpxTrack
                                 |> Maybe.withDefault (GPXSource Direction2d.x Quantity.zero Quantity.zero)
                     }
+
+                ( finalModel, cmd ) =
+                    modelWithTrack |> Actions.updateAllDisplays
             in
-            modelWithTrack |> Actions.updateAllDisplays MapPortsMessage
+            ( Model finalModel, cmd )
 
         SetRenderDepth depth ->
-            { model | renderDepth = depth } |> Actions.updateAllDisplays MapPortsMessage
+            let
+                ( finalModel, cmd ) =
+                    { model | renderDepth = depth } |> Actions.updateAllDisplays
+            in
+            ( Model finalModel, cmd )
 
         --Delegate wrapped OAuthmessages. Be bowled over if this works first time. Or fiftieth.
         --Maybe look after to see if there is yet a token. Easy way to know.
@@ -192,15 +200,23 @@ update msg (Model model) =
             -- Slider moves pointer and recentres view.
             case model.trackTree of
                 Just treeTop ->
-                    { model | currentPosition = pos }
-                        |> Actions.updateAllDisplays MapPortsMessage
+                    let
+                        ( finalModel, cmd ) =
+                            { model | currentPosition = pos }
+                                |> Actions.updateAllDisplays
+                    in
+                    ( Model finalModel, cmd )
 
                 Nothing ->
                     ( Model model, Cmd.none )
 
         SetViewMode newMode ->
-            { model | viewMode = newMode }
-                |> Actions.updateAllDisplays MapPortsMessage
+            let
+                ( finalModel, cmd ) =
+                    { model | viewMode = newMode }
+                        |> Actions.updateAllDisplays
+            in
+            ( Model finalModel, cmd )
 
         ImageMessage imageMsg ->
             let
@@ -208,6 +224,9 @@ update msg (Model model) =
                     ViewThirdPerson.update imageMsg model ImageMessage
             in
             ( Model newModel, cmds )
+
+        StorageMessage json ->
+            ( Model model, Cmd.none )
 
 
 view : Model -> Browser.Document Msg
@@ -344,4 +363,5 @@ subscriptions (Model model) =
     Sub.batch
         [ randomBytes (\ints -> OAuthMessage (GotRandomBytes ints))
         , MapPortsController.mapResponses (MapPortsMessage << MapPortsController.MapPortMessage)
+        , LocalStorage.storageResponses StorageMessage
         ]

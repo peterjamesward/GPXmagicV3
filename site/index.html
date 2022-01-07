@@ -41,7 +41,6 @@ app.ports.genRandomBytes.subscribe(n => {
     app.ports.randomBytes.send(bytes);
 });
 
-// Was Mapbox integration, now more a general port for commands from Elm.
 app.ports.mapCommands.subscribe(mapMessageHandler);
 app.ports.storageCommands.subscribe(storageMessageHandler);
 
@@ -134,7 +133,7 @@ function onUp(e) {
     map.off('mousemove', onMove);
     map.off('touchmove', onMove);
 
-    app.ports.messageReceiver.send
+    app.ports.mapResponses.send
         ( { 'msg' : 'drag'
           , 'start' : dragPointStart
           , 'end' : coords
@@ -199,7 +198,7 @@ function mapMessageHandler(msg) {
                     );
                 //console.log(elevations);
 
-                app.ports.messageReceiver.send(
+                app.ports.mapResponses.send(
                   { 'msg' : 'elevations'
                   , 'elevations' : elevations
                   }
@@ -226,7 +225,7 @@ function storageMessageHandler(msg) {
               val = JSON.parse(localStorage.getItem(msg.key))
             } catch (e) {
             };
-            app.ports.messageReceiver.send({ 'msg' : 'storage.got', 'key' : msg.key, 'value' : val });
+            app.ports.mapResponses.send({ 'msg' : 'storage.got', 'key' : msg.key, 'value' : val });
             break;
 
         case 'storage.list':
@@ -237,7 +236,7 @@ function storageMessageHandler(msg) {
                 keys.push(key);
             };
             //console.log(keys);
-            app.ports.messageReceiver.send({ 'msg' : 'storage.keys', 'keys' : keys });
+            app.ports.mapResponses.send({ 'msg' : 'storage.keys', 'keys' : keys });
             break;
 
         case 'storage.clear':
@@ -289,14 +288,15 @@ function makeTheMap(msg) {
               }
             });
 
-            app.ports.messageReceiver.send({ 'msg' : 'map ready' });
+            app.ports.mapResponses.send({ 'msg' : 'map ready' });
             map.resize();
+            map.triggerRepaint();
         });
 
     } else {
         //No 'map' node, we have to keep checking.
         //console.log('no map node');
-        app.ports.messageReceiver.send({ 'msg' : 'no node' });
+        app.ports.mapResponses.send({ 'msg' : 'no node' });
     };
 };
 
@@ -338,7 +338,7 @@ function addLineToMap(data, points) {
     trackAdded = true;
 //    setClickMode(clickToDrag, points);
     map.on('click', function(e) {
-      app.ports.messageReceiver.send
+      app.ports.mapResponses.send
         ( { 'msg' : 'click'
           , 'lon' : e.lngLat.lng
           , 'lat' : e.lngLat.lat
@@ -347,9 +347,10 @@ function addLineToMap(data, points) {
         e;
     });
 
-    app.ports.messageReceiver.send(
+    app.ports.mapResponses.send(
       { 'msg' : 'track ready' }
     );
+
 };
 
 function setClickMode(newMode, points) {
@@ -397,7 +398,7 @@ function setClickMode(newMode, points) {
         });
 
         map.on('click', function(e) {
-          app.ports.messageReceiver.send
+          app.ports.mapResponses.send
               ( { 'msg' : 'click'
                 , 'lon' : e.lngLat.lng
                 , 'lat' : e.lngLat.lat
@@ -430,6 +431,9 @@ function addOptionals(msg) {
     if (msg.previews != 'undefined' && typeof(msg.previews) != 'undefined') {
       msg.previews.forEach(addPreview);
     };
+
+    map.triggerRepaint();
+
 };
 
 function addPreview(preview) {

@@ -2,23 +2,20 @@ module Actions exposing (..)
 
 -- Not sure, thinking about putting post-update stuff here so it's commonly accessible.
 
-import ModelRecord exposing (Model (..), ModelRecord)
 import MapPortsController
+import ModelRecord exposing (Model(..), ModelRecord)
 import SceneBuilder exposing (render3dView)
 import ViewingMode exposing (ViewingMode(..))
 
 
-updateAllDisplays : (MapPortsController.MapMsg -> msgB) -> ModelRecord -> ( Model, Cmd msgB )
-updateAllDisplays  msgWrapper model =
-    ( model
-        |> renderModel
-        |> Model
+updateAllDisplays : ModelRecord -> ( ModelRecord, Cmd msgB )
+updateAllDisplays model =
+    ( model |> renderModel
     , if model.viewMode == ViewMap then
         Cmd.batch
             -- Must repaint track on so that selective rendering works.
-            [ MapPortsController.addTrackToMap model msgWrapper
-            , MapPortsController.centreMapOnCurrent model msgWrapper
-            , MapPortsController.deferredMapRepaint msgWrapper
+            [ MapPortsController.addTrackToMap model
+            , MapPortsController.centreMapOnCurrent model
             ]
 
       else
