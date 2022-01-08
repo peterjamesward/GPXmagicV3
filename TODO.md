@@ -3,10 +3,8 @@
 # WIP
 
 ### Multiple windows (up this week)
-Check out Electron (again), see if that will allow multiple windows.
-> Keep putting this back. I worried that the internal comms might kill it,
-> but it remains an attractive option.
-> Second window would be view only.
+Tauri looks interesting as we don't need node.js
+> https://tauri.studio/en/docs/getting-started/intro/
 
 ### Rendering
 Use a graduated drop off with distance, compute at each tree level.
@@ -21,7 +19,7 @@ Also, to validate the Actions concept.
 # Backlog
 
 ## Zoom, Pan, Rotate.
-Pan feels slippy. Sometimes goes the wrong way.
+Pan feels slippy. Is the scaling wrong?
 All to do with getting the right focal point?
 > (Sure these were v1 problems!)
 
@@ -33,6 +31,7 @@ Hence, one pane + list, or just four panes with visibility?
 
 ### Look and Feel
 Clean.
+Menu bar?
 Chinese FlatUI palette?
 Keep current track in indexDB to support a "restart/recover" option?
 JB suggests heavily customisable tools layout to support differing "workflows".

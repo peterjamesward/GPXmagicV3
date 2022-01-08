@@ -19863,6 +19863,8 @@ var $author$project$Main$SetCurrentPosition = function (a) {
 var $mdgriffith$elm_ui$Internal$Model$AlignY = function (a) {
 	return {$: 'AlignY', a: a};
 };
+var $mdgriffith$elm_ui$Internal$Model$Bottom = {$: 'Bottom'};
+var $mdgriffith$elm_ui$Element$alignBottom = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$Bottom);
 var $mdgriffith$elm_ui$Internal$Model$Top = {$: 'Top'};
 var $mdgriffith$elm_ui$Element$alignTop = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$Top);
 var $mdgriffith$elm_ui$Internal$Model$AlignX = function (a) {
@@ -19905,16 +19907,10 @@ var $mdgriffith$elm_ui$Internal$Model$Fill = function (a) {
 	return {$: 'Fill', a: a};
 };
 var $mdgriffith$elm_ui$Element$fill = $mdgriffith$elm_ui$Internal$Model$Fill(1);
-var $ianmackenzie$elm_units$Length$inMeters = function (_v0) {
-	var numMeters = _v0.a;
-	return numMeters;
+var $mdgriffith$elm_ui$Element$Input$HiddenLabel = function (a) {
+	return {$: 'HiddenLabel', a: a};
 };
-var $mdgriffith$elm_ui$Element$Input$Below = {$: 'Below'};
-var $mdgriffith$elm_ui$Element$Input$Label = F3(
-	function (a, b, c) {
-		return {$: 'Label', a: a, b: b, c: c};
-	});
-var $mdgriffith$elm_ui$Element$Input$labelBelow = $mdgriffith$elm_ui$Element$Input$Label($mdgriffith$elm_ui$Element$Input$Below);
+var $mdgriffith$elm_ui$Element$Input$labelHidden = $mdgriffith$elm_ui$Element$Input$HiddenLabel;
 var $author$project$Main$minimumLeftPane = 600;
 var $mdgriffith$elm_ui$Internal$Model$Empty = {$: 'Empty'};
 var $mdgriffith$elm_ui$Element$none = $mdgriffith$elm_ui$Internal$Model$Empty;
@@ -20681,8 +20677,547 @@ var $mdgriffith$elm_ui$Element$spacing = function (x) {
 			x,
 			x));
 };
+var $smucode$elm_flat_colors$FlatColors$AussiePalette$beekeeper = A3($mdgriffith$elm_ui$Element$rgb255, 246, 229, 141);
 var $mdgriffith$elm_ui$Element$text = function (content) {
 	return $mdgriffith$elm_ui$Internal$Model$Text(content);
+};
+var $ianmackenzie$elm_units$Length$inMeters = function (_v0) {
+	var numMeters = _v0.a;
+	return numMeters;
+};
+var $ianmackenzie$elm_units$Constants$meter = 1.0;
+var $ianmackenzie$elm_units$Constants$inch = 0.0254 * $ianmackenzie$elm_units$Constants$meter;
+var $ianmackenzie$elm_units$Constants$foot = 12 * $ianmackenzie$elm_units$Constants$inch;
+var $ianmackenzie$elm_units$Constants$mile = 5280 * $ianmackenzie$elm_units$Constants$foot;
+var $ianmackenzie$elm_units$Length$inMiles = function (length) {
+	return $ianmackenzie$elm_units$Length$inMeters(length) / $ianmackenzie$elm_units$Constants$mile;
+};
+var $cuducos$elm_format_number$FormatNumber$Locales$Exact = function (a) {
+	return {$: 'Exact', a: a};
+};
+var $cuducos$elm_format_number$FormatNumber$Parser$FormattedNumber = F5(
+	function (original, integers, decimals, prefix, suffix) {
+		return {decimals: decimals, integers: integers, original: original, prefix: prefix, suffix: suffix};
+	});
+var $cuducos$elm_format_number$FormatNumber$Parser$Negative = {$: 'Negative'};
+var $cuducos$elm_format_number$FormatNumber$Parser$Positive = {$: 'Positive'};
+var $cuducos$elm_format_number$FormatNumber$Parser$Zero = {$: 'Zero'};
+var $elm$core$List$singleton = function (value) {
+	return _List_fromArray(
+		[value]);
+};
+var $cuducos$elm_format_number$FormatNumber$Parser$classify = function (formatted) {
+	var onlyZeros = A2(
+		$elm$core$String$all,
+		function (_char) {
+			return _Utils_eq(
+				_char,
+				_Utils_chr('0'));
+		},
+		$elm$core$String$concat(
+			A2(
+				$elm$core$List$append,
+				formatted.integers,
+				$elm$core$List$singleton(formatted.decimals))));
+	return onlyZeros ? $cuducos$elm_format_number$FormatNumber$Parser$Zero : ((formatted.original < 0) ? $cuducos$elm_format_number$FormatNumber$Parser$Negative : $cuducos$elm_format_number$FormatNumber$Parser$Positive);
+};
+var $elm$core$String$filter = _String_filter;
+var $elm$core$Bitwise$shiftRightBy = _Bitwise_shiftRightBy;
+var $elm$core$String$repeatHelp = F3(
+	function (n, chunk, result) {
+		return (n <= 0) ? result : A3(
+			$elm$core$String$repeatHelp,
+			n >> 1,
+			_Utils_ap(chunk, chunk),
+			(!(n & 1)) ? result : _Utils_ap(result, chunk));
+	});
+var $elm$core$String$repeat = F2(
+	function (n, chunk) {
+		return A3($elm$core$String$repeatHelp, n, chunk, '');
+	});
+var $cuducos$elm_format_number$FormatNumber$Parser$addZerosToFit = F2(
+	function (desiredLength, value) {
+		var length = $elm$core$String$length(value);
+		var missing = (_Utils_cmp(length, desiredLength) < 0) ? $elm$core$Basics$abs(desiredLength - length) : 0;
+		return _Utils_ap(
+			value,
+			A2($elm$core$String$repeat, missing, '0'));
+	});
+var $elm$core$String$dropRight = F2(
+	function (n, string) {
+		return (n < 1) ? string : A3($elm$core$String$slice, 0, -n, string);
+	});
+var $elm$core$String$right = F2(
+	function (n, string) {
+		return (n < 1) ? '' : A3(
+			$elm$core$String$slice,
+			-n,
+			$elm$core$String$length(string),
+			string);
+	});
+var $cuducos$elm_format_number$FormatNumber$Parser$removeZeros = function (decimals) {
+	return (A2($elm$core$String$right, 1, decimals) !== '0') ? decimals : $cuducos$elm_format_number$FormatNumber$Parser$removeZeros(
+		A2($elm$core$String$dropRight, 1, decimals));
+};
+var $cuducos$elm_format_number$FormatNumber$Parser$getDecimals = F2(
+	function (locale, digits) {
+		var _v0 = locale.decimals;
+		switch (_v0.$) {
+			case 'Max':
+				return $cuducos$elm_format_number$FormatNumber$Parser$removeZeros(digits);
+			case 'Exact':
+				return digits;
+			default:
+				var min = _v0.a;
+				return A2($cuducos$elm_format_number$FormatNumber$Parser$addZerosToFit, min, digits);
+		}
+	});
+var $elm$core$String$foldr = _String_foldr;
+var $elm$core$String$toList = function (string) {
+	return A3($elm$core$String$foldr, $elm$core$List$cons, _List_Nil, string);
+};
+var $myrho$elm_round$Round$addSign = F2(
+	function (signed, str) {
+		var isNotZero = A2(
+			$elm$core$List$any,
+			function (c) {
+				return (!_Utils_eq(
+					c,
+					_Utils_chr('0'))) && (!_Utils_eq(
+					c,
+					_Utils_chr('.')));
+			},
+			$elm$core$String$toList(str));
+		return _Utils_ap(
+			(signed && isNotZero) ? '-' : '',
+			str);
+	});
+var $elm$core$String$cons = _String_cons;
+var $elm$core$Char$fromCode = _Char_fromCode;
+var $myrho$elm_round$Round$increaseNum = function (_v0) {
+	var head = _v0.a;
+	var tail = _v0.b;
+	if (_Utils_eq(
+		head,
+		_Utils_chr('9'))) {
+		var _v1 = $elm$core$String$uncons(tail);
+		if (_v1.$ === 'Nothing') {
+			return '01';
+		} else {
+			var headtail = _v1.a;
+			return A2(
+				$elm$core$String$cons,
+				_Utils_chr('0'),
+				$myrho$elm_round$Round$increaseNum(headtail));
+		}
+	} else {
+		var c = $elm$core$Char$toCode(head);
+		return ((c >= 48) && (c < 57)) ? A2(
+			$elm$core$String$cons,
+			$elm$core$Char$fromCode(c + 1),
+			tail) : '0';
+	}
+};
+var $elm$core$Basics$isInfinite = _Basics_isInfinite;
+var $elm$core$String$fromChar = function (_char) {
+	return A2($elm$core$String$cons, _char, '');
+};
+var $elm$core$String$padRight = F3(
+	function (n, _char, string) {
+		return _Utils_ap(
+			string,
+			A2(
+				$elm$core$String$repeat,
+				n - $elm$core$String$length(string),
+				$elm$core$String$fromChar(_char)));
+	});
+var $elm$core$String$reverse = _String_reverse;
+var $myrho$elm_round$Round$splitComma = function (str) {
+	var _v0 = A2($elm$core$String$split, '.', str);
+	if (_v0.b) {
+		if (_v0.b.b) {
+			var before = _v0.a;
+			var _v1 = _v0.b;
+			var after = _v1.a;
+			return _Utils_Tuple2(before, after);
+		} else {
+			var before = _v0.a;
+			return _Utils_Tuple2(before, '0');
+		}
+	} else {
+		return _Utils_Tuple2('0', '0');
+	}
+};
+var $myrho$elm_round$Round$toDecimal = function (fl) {
+	var _v0 = A2(
+		$elm$core$String$split,
+		'e',
+		$elm$core$String$fromFloat(
+			$elm$core$Basics$abs(fl)));
+	if (_v0.b) {
+		if (_v0.b.b) {
+			var num = _v0.a;
+			var _v1 = _v0.b;
+			var exp = _v1.a;
+			var e = A2(
+				$elm$core$Maybe$withDefault,
+				0,
+				$elm$core$String$toInt(
+					A2($elm$core$String$startsWith, '+', exp) ? A2($elm$core$String$dropLeft, 1, exp) : exp));
+			var _v2 = $myrho$elm_round$Round$splitComma(num);
+			var before = _v2.a;
+			var after = _v2.b;
+			var total = _Utils_ap(before, after);
+			var zeroed = (e < 0) ? A2(
+				$elm$core$Maybe$withDefault,
+				'0',
+				A2(
+					$elm$core$Maybe$map,
+					function (_v3) {
+						var a = _v3.a;
+						var b = _v3.b;
+						return a + ('.' + b);
+					},
+					A2(
+						$elm$core$Maybe$map,
+						$elm$core$Tuple$mapFirst($elm$core$String$fromChar),
+						$elm$core$String$uncons(
+							_Utils_ap(
+								A2(
+									$elm$core$String$repeat,
+									$elm$core$Basics$abs(e),
+									'0'),
+								total))))) : A3(
+				$elm$core$String$padRight,
+				e + 1,
+				_Utils_chr('0'),
+				total);
+			return _Utils_ap(
+				(fl < 0) ? '-' : '',
+				zeroed);
+		} else {
+			var num = _v0.a;
+			return _Utils_ap(
+				(fl < 0) ? '-' : '',
+				num);
+		}
+	} else {
+		return '';
+	}
+};
+var $myrho$elm_round$Round$roundFun = F3(
+	function (functor, s, fl) {
+		if ($elm$core$Basics$isInfinite(fl) || $elm$core$Basics$isNaN(fl)) {
+			return $elm$core$String$fromFloat(fl);
+		} else {
+			var signed = fl < 0;
+			var _v0 = $myrho$elm_round$Round$splitComma(
+				$myrho$elm_round$Round$toDecimal(
+					$elm$core$Basics$abs(fl)));
+			var before = _v0.a;
+			var after = _v0.b;
+			var r = $elm$core$String$length(before) + s;
+			var normalized = _Utils_ap(
+				A2($elm$core$String$repeat, (-r) + 1, '0'),
+				A3(
+					$elm$core$String$padRight,
+					r,
+					_Utils_chr('0'),
+					_Utils_ap(before, after)));
+			var totalLen = $elm$core$String$length(normalized);
+			var roundDigitIndex = A2($elm$core$Basics$max, 1, r);
+			var increase = A2(
+				functor,
+				signed,
+				A3($elm$core$String$slice, roundDigitIndex, totalLen, normalized));
+			var remains = A3($elm$core$String$slice, 0, roundDigitIndex, normalized);
+			var num = increase ? $elm$core$String$reverse(
+				A2(
+					$elm$core$Maybe$withDefault,
+					'1',
+					A2(
+						$elm$core$Maybe$map,
+						$myrho$elm_round$Round$increaseNum,
+						$elm$core$String$uncons(
+							$elm$core$String$reverse(remains))))) : remains;
+			var numLen = $elm$core$String$length(num);
+			var numZeroed = (num === '0') ? num : ((s <= 0) ? _Utils_ap(
+				num,
+				A2(
+					$elm$core$String$repeat,
+					$elm$core$Basics$abs(s),
+					'0')) : ((_Utils_cmp(
+				s,
+				$elm$core$String$length(after)) < 0) ? (A3($elm$core$String$slice, 0, numLen - s, num) + ('.' + A3($elm$core$String$slice, numLen - s, numLen, num))) : _Utils_ap(
+				before + '.',
+				A3(
+					$elm$core$String$padRight,
+					s,
+					_Utils_chr('0'),
+					after))));
+			return A2($myrho$elm_round$Round$addSign, signed, numZeroed);
+		}
+	});
+var $myrho$elm_round$Round$round = $myrho$elm_round$Round$roundFun(
+	F2(
+		function (signed, str) {
+			var _v0 = $elm$core$String$uncons(str);
+			if (_v0.$ === 'Nothing') {
+				return false;
+			} else {
+				if ('5' === _v0.a.a.valueOf()) {
+					if (_v0.a.b === '') {
+						var _v1 = _v0.a;
+						return !signed;
+					} else {
+						var _v2 = _v0.a;
+						return true;
+					}
+				} else {
+					var _v3 = _v0.a;
+					var _int = _v3.a;
+					return function (i) {
+						return ((i > 53) && signed) || ((i >= 53) && (!signed));
+					}(
+						$elm$core$Char$toCode(_int));
+				}
+			}
+		}));
+var $elm$core$List$tail = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(xs);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $cuducos$elm_format_number$FormatNumber$Parser$splitInParts = F2(
+	function (locale, value) {
+		var toString = function () {
+			var _v1 = locale.decimals;
+			switch (_v1.$) {
+				case 'Max':
+					var max = _v1.a;
+					return $myrho$elm_round$Round$round(max);
+				case 'Min':
+					return $elm$core$String$fromFloat;
+				default:
+					var exact = _v1.a;
+					return $myrho$elm_round$Round$round(exact);
+			}
+		}();
+		var asList = A2(
+			$elm$core$String$split,
+			'.',
+			toString(value));
+		var decimals = function () {
+			var _v0 = $elm$core$List$tail(asList);
+			if (_v0.$ === 'Just') {
+				var values = _v0.a;
+				return A2(
+					$elm$core$Maybe$withDefault,
+					'',
+					$elm$core$List$head(values));
+			} else {
+				return '';
+			}
+		}();
+		var integers = A2(
+			$elm$core$Maybe$withDefault,
+			'',
+			$elm$core$List$head(asList));
+		return _Utils_Tuple2(integers, decimals);
+	});
+var $cuducos$elm_format_number$FormatNumber$Parser$splitByIndian = function (integers) {
+	var thousand = ($elm$core$String$length(integers) > 3) ? A2($elm$core$String$right, 3, integers) : integers;
+	var reversedSplitHundreds = function (value) {
+		return ($elm$core$String$length(value) > 2) ? A2(
+			$elm$core$List$cons,
+			A2($elm$core$String$right, 2, value),
+			reversedSplitHundreds(
+				A2($elm$core$String$dropRight, 2, value))) : ((!$elm$core$String$length(value)) ? _List_Nil : _List_fromArray(
+			[value]));
+	};
+	return $elm$core$List$reverse(
+		A2(
+			$elm$core$List$cons,
+			thousand,
+			reversedSplitHundreds(
+				A2($elm$core$String$dropRight, 3, integers))));
+};
+var $cuducos$elm_format_number$FormatNumber$Parser$splitByWestern = function (integers) {
+	var reversedSplitThousands = function (value) {
+		return ($elm$core$String$length(value) > 3) ? A2(
+			$elm$core$List$cons,
+			A2($elm$core$String$right, 3, value),
+			reversedSplitThousands(
+				A2($elm$core$String$dropRight, 3, value))) : _List_fromArray(
+			[value]);
+	};
+	return $elm$core$List$reverse(
+		reversedSplitThousands(integers));
+};
+var $cuducos$elm_format_number$FormatNumber$Parser$splitIntegers = F2(
+	function (system, integers) {
+		if (system.$ === 'Western') {
+			return $cuducos$elm_format_number$FormatNumber$Parser$splitByWestern(
+				A2($elm$core$String$filter, $elm$core$Char$isDigit, integers));
+		} else {
+			return $cuducos$elm_format_number$FormatNumber$Parser$splitByIndian(
+				A2($elm$core$String$filter, $elm$core$Char$isDigit, integers));
+		}
+	});
+var $cuducos$elm_format_number$FormatNumber$Parser$parse = F2(
+	function (locale, original) {
+		var parts = A2($cuducos$elm_format_number$FormatNumber$Parser$splitInParts, locale, original);
+		var integers = A2(
+			$cuducos$elm_format_number$FormatNumber$Parser$splitIntegers,
+			locale.system,
+			A2($elm$core$String$filter, $elm$core$Char$isDigit, parts.a));
+		var decimals = A2($cuducos$elm_format_number$FormatNumber$Parser$getDecimals, locale, parts.b);
+		var partial = A5($cuducos$elm_format_number$FormatNumber$Parser$FormattedNumber, original, integers, decimals, '', '');
+		var _v0 = $cuducos$elm_format_number$FormatNumber$Parser$classify(partial);
+		switch (_v0.$) {
+			case 'Negative':
+				return _Utils_update(
+					partial,
+					{prefix: locale.negativePrefix, suffix: locale.negativeSuffix});
+			case 'Positive':
+				return _Utils_update(
+					partial,
+					{prefix: locale.positivePrefix, suffix: locale.positiveSuffix});
+			default:
+				return _Utils_update(
+					partial,
+					{prefix: locale.zeroPrefix, suffix: locale.zeroSuffix});
+		}
+	});
+var $cuducos$elm_format_number$FormatNumber$Stringfy$formatDecimals = F2(
+	function (locale, decimals) {
+		return (decimals === '') ? '' : _Utils_ap(locale.decimalSeparator, decimals);
+	});
+var $cuducos$elm_format_number$FormatNumber$Stringfy$stringfy = F2(
+	function (locale, formatted) {
+		var stringfyDecimals = $cuducos$elm_format_number$FormatNumber$Stringfy$formatDecimals(locale);
+		var integers = A2($elm$core$String$join, locale.thousandSeparator, formatted.integers);
+		var decimals = stringfyDecimals(formatted.decimals);
+		return $elm$core$String$concat(
+			_List_fromArray(
+				[formatted.prefix, integers, decimals, formatted.suffix]));
+	});
+var $cuducos$elm_format_number$FormatNumber$format = F2(
+	function (locale, number_) {
+		return A2(
+			$cuducos$elm_format_number$FormatNumber$Stringfy$stringfy,
+			locale,
+			A2($cuducos$elm_format_number$FormatNumber$Parser$parse, locale, number_));
+	});
+var $cuducos$elm_format_number$FormatNumber$Locales$Min = function (a) {
+	return {$: 'Min', a: a};
+};
+var $cuducos$elm_format_number$FormatNumber$Locales$Western = {$: 'Western'};
+var $cuducos$elm_format_number$FormatNumber$Locales$base = {
+	decimalSeparator: '.',
+	decimals: $cuducos$elm_format_number$FormatNumber$Locales$Min(0),
+	negativePrefix: '−',
+	negativeSuffix: '',
+	positivePrefix: '',
+	positiveSuffix: '',
+	system: $cuducos$elm_format_number$FormatNumber$Locales$Western,
+	thousandSeparator: '',
+	zeroPrefix: '',
+	zeroSuffix: ''
+};
+var $cuducos$elm_format_number$FormatNumber$Locales$usLocale = _Utils_update(
+	$cuducos$elm_format_number$FormatNumber$Locales$base,
+	{
+		decimals: $cuducos$elm_format_number$FormatNumber$Locales$Exact(2),
+		thousandSeparator: ','
+	});
+var $author$project$UtilsForViews$showDecimal2 = function (x) {
+	var locale = _Utils_update(
+		$cuducos$elm_format_number$FormatNumber$Locales$usLocale,
+		{
+			decimals: $cuducos$elm_format_number$FormatNumber$Locales$Exact(2),
+			negativePrefix: '-',
+			thousandSeparator: ''
+		});
+	return A2($cuducos$elm_format_number$FormatNumber$format, locale, x);
+};
+var $author$project$UtilsForViews$showLongMeasure = F2(
+	function (imperial, distance) {
+		return imperial ? ($author$project$UtilsForViews$showDecimal2(
+			$ianmackenzie$elm_units$Length$inMiles(distance)) + ' miles') : ($author$project$UtilsForViews$showDecimal2(
+			$ianmackenzie$elm_units$Length$inMeters(distance)) + 'm');
+	});
+var $author$project$TrackInfoBox$trackInfoList = _List_fromArray(
+	[
+		_Utils_Tuple2(
+		$mdgriffith$elm_ui$Element$text('Points'),
+		function (tree) {
+			return $mdgriffith$elm_ui$Element$text(
+				$elm$core$String$fromInt(
+					$author$project$DomainModel$skipCount(tree) + 1));
+		}),
+		_Utils_Tuple2(
+		$mdgriffith$elm_ui$Element$text('Length'),
+		function (tree) {
+			return $mdgriffith$elm_ui$Element$text(
+				A2(
+					$author$project$UtilsForViews$showLongMeasure,
+					false,
+					$author$project$DomainModel$trueLength(tree)));
+		})
+	]);
+var $author$project$TrackInfoBox$trackInfoBox = function (maybeTree) {
+	if (maybeTree.$ === 'Just') {
+		var trackTree = maybeTree.a;
+		return A2(
+			$mdgriffith$elm_ui$Element$row,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$AussiePalette$beekeeper),
+					$mdgriffith$elm_ui$Element$Border$rounded(10),
+					$mdgriffith$elm_ui$Element$padding(10),
+					$mdgriffith$elm_ui$Element$spacing(5)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$spacing(5)
+						]),
+					A2(
+						$elm$core$List$map,
+						function (_v1) {
+							var txt = _v1.a;
+							return txt;
+						},
+						$author$project$TrackInfoBox$trackInfoList)),
+					A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$spacing(5)
+						]),
+					A2(
+						$elm$core$List$map,
+						function (_v2) {
+							var fn = _v2.b;
+							return fn(trackTree);
+						},
+						$author$project$TrackInfoBox$trackInfoList))
+				]));
+	} else {
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[$mdgriffith$elm_ui$Element$centerX, $mdgriffith$elm_ui$Element$centerY]),
+			$mdgriffith$elm_ui$Element$text('No track loaded'));
+	}
 };
 var $mdgriffith$elm_ui$Internal$Model$Left = {$: 'Left'};
 var $mdgriffith$elm_ui$Element$alignLeft = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Left);
@@ -21591,7 +22126,6 @@ var $ianmackenzie$elm_3d_scene$Scene3d$outsideStencil = _List_fromArray(
 		{fail: $elm_explorations$webgl$WebGL$Settings$StencilTest$keep, mask: $ianmackenzie$elm_3d_scene$Scene3d$upperFourBits, ref: 0, test: $elm_explorations$webgl$WebGL$Settings$StencilTest$equal, writeMask: 0, zfail: $elm_explorations$webgl$WebGL$Settings$StencilTest$keep, zpass: $elm_explorations$webgl$WebGL$Settings$StencilTest$keep}),
 		$ianmackenzie$elm_3d_scene$Scene3d$defaultBlend
 	]);
-var $elm$core$Basics$isInfinite = _Basics_isInfinite;
 var $ianmackenzie$elm_3d_camera$WebGL$Matrices$projectionMatrix = F2(
 	function (_v0, _v1) {
 		var camera = _v0.a;
@@ -21615,7 +22149,6 @@ var $ianmackenzie$elm_3d_camera$WebGL$Matrices$projectionMatrix = F2(
 				{m11: 2 / (aspectRatio * viewportHeight), m12: 0, m13: 0, m14: 0, m21: 0, m22: 2 / viewportHeight, m23: 0, m24: 0, m31: 0, m32: 0, m33: (-2) / (f - n), m34: (-(f + n)) / (f - n), m41: 0, m42: 0, m43: 0, m44: 1});
 		}
 	});
-var $elm$core$Bitwise$shiftRightBy = _Bitwise_shiftRightBy;
 var $ianmackenzie$elm_3d_scene$Scene3d$enabledFlag = F2(
 	function (lightMask, lightIndex) {
 		return ((1 & (lightMask >> lightIndex)) === 1) ? 0 : 1;
@@ -22538,10 +23071,6 @@ var $author$project$ViewThirdPerson$view = F2(
 var $author$project$Main$SetViewMode = function (a) {
 	return {$: 'SetViewMode', a: a};
 };
-var $mdgriffith$elm_ui$Element$Input$HiddenLabel = function (a) {
-	return {$: 'HiddenLabel', a: a};
-};
-var $mdgriffith$elm_ui$Element$Input$labelHidden = $mdgriffith$elm_ui$Element$Input$HiddenLabel;
 var $mdgriffith$elm_ui$Element$Input$Option = F2(
 	function (a, b) {
 		return {$: 'Option', a: a, b: b};
@@ -23024,10 +23553,7 @@ var $author$project$Main$contentArea = function (model) {
 			$mdgriffith$elm_ui$Element$Input$slider,
 			$author$project$ViewPureStyles$wideSliderStyles,
 			{
-				label: A2(
-					$mdgriffith$elm_ui$Element$Input$labelBelow,
-					_List_Nil,
-					$mdgriffith$elm_ui$Element$text('Label goes here')),
+				label: $mdgriffith$elm_ui$Element$Input$labelHidden('Current position slider'),
 				max: trackLength - 1,
 				min: 0,
 				onChange: A2($elm$core$Basics$composeR, $elm$core$Basics$round, $author$project$Main$SetCurrentPosition),
@@ -23036,18 +23562,6 @@ var $author$project$Main$contentArea = function (model) {
 				value: model.currentPosition
 			});
 	};
-	var rightPane = A2(
-		$mdgriffith$elm_ui$Element$column,
-		_List_fromArray(
-			[
-				$mdgriffith$elm_ui$Element$spacing(5),
-				$mdgriffith$elm_ui$Element$padding(5),
-				$mdgriffith$elm_ui$Element$alignTop
-			]),
-		_List_fromArray(
-			[
-				$mdgriffith$elm_ui$Element$text('Where are the tools?')
-			]));
 	var leftPane = A2(
 		$mdgriffith$elm_ui$Element$column,
 		_List_fromArray(
@@ -23080,42 +23594,14 @@ var $author$project$Main$contentArea = function (model) {
 						_Utils_eq(model.viewMode, $author$project$ViewingMode$ViewMap),
 						A2($author$project$ViewMap$view, model, $author$project$Main$MapPortsMessage))
 					])),
-				A2(
-				$mdgriffith$elm_ui$Element$el,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$height(
-						$mdgriffith$elm_ui$Element$px(10))
-					]),
-				$mdgriffith$elm_ui$Element$none),
 				function () {
 				var _v0 = model.trackTree;
 				if (_v0.$ === 'Just') {
 					var treeNode = _v0.a;
-					return A2(
-						$mdgriffith$elm_ui$Element$column,
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-								$mdgriffith$elm_ui$Element$alignTop,
-								$mdgriffith$elm_ui$Element$padding(10),
-								$mdgriffith$elm_ui$Element$centerX
-							]),
-						_List_fromArray(
-							[
-								slider(
-								1 + $author$project$DomainModel$skipCount(treeNode)),
-								$mdgriffith$elm_ui$Element$text(
-								'Length: ' + $elm$core$String$fromInt(
-									$elm$core$Basics$round(
-										$ianmackenzie$elm_units$Length$inMeters(
-											$author$project$DomainModel$trueLength(treeNode))))),
-								$mdgriffith$elm_ui$Element$text(
-								'Points: ' + $elm$core$String$fromInt(
-									1 + $author$project$DomainModel$skipCount(treeNode)))
-							]));
+					return slider(
+						1 + $author$project$DomainModel$skipCount(treeNode));
 				} else {
-					return $mdgriffith$elm_ui$Element$text('Information will be shown here');
+					return $mdgriffith$elm_ui$Element$none;
 				}
 			}()
 			]));
@@ -23124,7 +23610,8 @@ var $author$project$Main$contentArea = function (model) {
 		_List_fromArray(
 			[
 				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-				$mdgriffith$elm_ui$Element$padding(5)
+				$mdgriffith$elm_ui$Element$padding(5),
+				$mdgriffith$elm_ui$Element$alignBottom
 			]),
 		_List_fromArray(
 			[
@@ -23159,29 +23646,19 @@ var $author$project$Main$contentArea = function (model) {
 								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 								$mdgriffith$elm_ui$Element$alignTop
 							]),
-						leftPane),
-						A2(
-						$mdgriffith$elm_ui$Element$el,
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$alignTop,
-								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-							]),
-						rightPane)
+						leftPane)
 					])),
 				A2(
 				$mdgriffith$elm_ui$Element$row,
-				_List_Nil,
 				_List_fromArray(
 					[
-						A2(
-						$mdgriffith$elm_ui$Element$el,
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$width(
-								$mdgriffith$elm_ui$Element$px($author$project$Main$minimumLeftPane))
-							]),
-						$mdgriffith$elm_ui$Element$none)
+						$mdgriffith$elm_ui$Element$width(
+						$mdgriffith$elm_ui$Element$px($author$project$Main$minimumLeftPane)),
+						$mdgriffith$elm_ui$Element$alignBottom
+					]),
+				_List_fromArray(
+					[
+						$author$project$TrackInfoBox$trackInfoBox(model.trackTree)
 					]))
 			]));
 };

@@ -30,6 +30,7 @@ import Quantity
 import StravaAuth exposing (getStravaToken)
 import Task
 import Time
+import TrackInfoBox exposing (trackInfoBox)
 import Url exposing (Url)
 import ViewMap
 import ViewPureStyles exposing (conditionallyVisible, radioButton, sliderThumb)
@@ -303,7 +304,7 @@ contentArea model =
                 ViewPureStyles.wideSliderStyles
                 { onChange = round >> SetCurrentPosition
                 , value = toFloat model.currentPosition
-                , label = Input.labelBelow [] (text "Label goes here")
+                , label = Input.labelHidden "Current position slider"
                 , min = 0
                 , max = toFloat <| trackLength - 1
                 , step = Just 1
@@ -326,35 +327,23 @@ contentArea model =
                     , conditionallyVisible (model.viewMode == ViewMap) <|
                         ViewMap.view model MapPortsMessage
                     ]
-                , el [ height (px 10) ] none
                 , case model.trackTree of
                     Just treeNode ->
-                        column
-                            [ width fill, alignTop, padding 10, centerX ]
-                            [ slider <| 1 + skipCount treeNode
-                            , text <| "Length: " ++ (String.fromInt <| round <| Length.inMeters <| trueLength treeNode)
-                            , text <| "Points: " ++ (String.fromInt <| 1 + skipCount treeNode)
-                            ]
+                        slider <| 1 + skipCount treeNode
 
                     Nothing ->
-                        text "Information will be shown here"
-                ]
-
-        rightPane =
-            column [ spacing 5, padding 5, alignTop ]
-                [ text "Where are the tools?"
+                        none
                 ]
     in
-    column [ width fill, padding 5 ]
+    column [ width fill, padding 5, alignBottom ]
         [ row []
             [ el [ width <| px minimumLeftPane ] none
             ]
         , row [ width fill, spacing 5, padding 5 ]
             [ el [ width fill, alignTop ] leftPane
-            , el [ alignTop, width fill ] rightPane
             ]
-        , row []
-            [ el [ width <| px minimumLeftPane ] none
+        , row [ width <| px minimumLeftPane, alignBottom ]
+            [ trackInfoBox model.trackTree
             ]
         ]
 
