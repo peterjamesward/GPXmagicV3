@@ -9560,14 +9560,14 @@ var $author$project$ViewThirdPerson$initialiseView = F2(
 	function (current, treeNode) {
 		return {
 			cameraAzimuth: $ianmackenzie$elm_geometry$Direction2d$x,
-			cameraDistance: $ianmackenzie$elm_units$Length$kilometers(1000),
-			cameraElevation: $ianmackenzie$elm_units$Angle$degrees(0),
+			cameraDistance: $ianmackenzie$elm_units$Length$kilometers(10),
+			cameraElevation: $ianmackenzie$elm_units$Angle$degrees(30),
 			defaultZoomLevel: 10.0,
 			dragAction: $author$project$ViewContextThirdPerson$DragNone,
 			fieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
 			focalPoint: $author$project$DomainModel$startPoint(
 				A2($author$project$DomainModel$leafFromIndex, current, treeNode)),
-			followSelectedPoint: false,
+			followSelectedPoint: true,
 			orbiting: $elm$core$Maybe$Nothing,
 			waitingForClickDelay: false,
 			zoomLevel: 10.0
@@ -12023,10 +12023,7 @@ var $author$project$ViewThirdPerson$deriveCamera = F3(
 				focalPoint: lookingAt
 			});
 		var perspectiveCamera = $ianmackenzie$elm_3d_camera$Camera3d$perspective(
-			{
-				verticalFieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
-				viewpoint: cameraViewpoint
-			});
+			{verticalFieldOfView: context.fieldOfView, viewpoint: cameraViewpoint});
 		return perspectiveCamera;
 	});
 var $ianmackenzie$elm_geometry$Geometry$Types$Rectangle2d = function (a) {
@@ -14161,6 +14158,7 @@ var $author$project$ViewThirdPerson$update = F3(
 							context,
 							{
 								dragAction: alternate ? $author$project$ViewContextThirdPerson$DragRotate : $author$project$ViewContextThirdPerson$DragPan,
+								followSelectedPoint: false,
 								orbiting: $elm$core$Maybe$Just(event.offsetPos),
 								waitingForClickDelay: true
 							}));
@@ -14214,7 +14212,7 @@ var $author$project$ViewThirdPerson$update = F3(
 									var startY = _v7.b;
 									var shiftVector = A2(
 										$ianmackenzie$elm_geometry$Vector3d$scaleBy,
-										A2(
+										0.1 * A2(
 											$author$project$Spherical$metresPerPixel,
 											context.zoomLevel,
 											$author$project$DomainModel$effectiveLatitude(treeNode)),

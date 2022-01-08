@@ -175,7 +175,7 @@ deriveCamera treeNode context currentPosition =
         perspectiveCamera =
             Camera3d.perspective
                 { viewpoint = cameraViewpoint
-                , verticalFieldOfView = Angle.degrees 45
+                , verticalFieldOfView = context.fieldOfView
                 }
     in
     perspectiveCamera
@@ -305,6 +305,7 @@ update msg model msgWrapper =
                                         else
                                             DragPan
                                     , waitingForClickDelay = True
+                                    , followSelectedPoint = False
                                 }
                     in
                     ( { model | viewContext = newContext }
@@ -352,9 +353,11 @@ update msg model msgWrapper =
                                             Axis3d.z
                                             (Direction2d.toAngle context.cameraAzimuth)
                                         |> Vector3d.scaleBy
-                                            (Spherical.metresPerPixel
-                                                context.zoomLevel
-                                                (effectiveLatitude treeNode)
+                                            (0.1
+                                                -- Empirical
+                                                * Spherical.metresPerPixel
+                                                    context.zoomLevel
+                                                    (effectiveLatitude treeNode)
                                             )
 
                                 newContext =
@@ -404,8 +407,8 @@ multiplyDistanceBy factor context =
 initialiseView : Int -> PeteTree -> ContextThirdPerson
 initialiseView current treeNode =
     { cameraAzimuth = Direction2d.x
-    , cameraElevation = Angle.degrees 0
-    , cameraDistance = Length.kilometers 1000
+    , cameraElevation = Angle.degrees 30
+    , cameraDistance = Length.kilometers 10
     , fieldOfView = Angle.degrees 45
     , orbiting = Nothing
     , dragAction = DragNone
@@ -414,5 +417,5 @@ initialiseView current treeNode =
     , focalPoint =
         treeNode |> leafFromIndex current |> startPoint
     , waitingForClickDelay = False
-    , followSelectedPoint = False
+    , followSelectedPoint = True
     }

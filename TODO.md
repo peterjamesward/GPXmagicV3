@@ -3,32 +3,36 @@
 # WIP
 
 ## Zoom, Pan, Rotate.
-Rotate is not rotating about the right place.
 Pan feels slippy. Sometimes goes the wrong way. 
 All to do with getting the right focal point?
 > (Sure these were v1 problems!)
 
-### Map / General rendering
+### Map
+Centering wrong. (Probably "old" code.)
+Map needs deferred repaint, but how to do that without the good ol' import loop?
+> Maybe in JS?
 
-Map needs deferred repaint, but how to do that?
-Maybe in JS (on load finished --> resize ?)
+### Multiple windows (up this week)
+Check out Electron (again), see if that will allow multiple windows.
+> Keep putting this back. I worried that the internal comms might kill it,
+> but it remains an attractive option.
+> Second window would be view only.
 
+### Rendering
 Use a graduated drop off with distance, compute at each tree level.
 On Map, work out the depth to fit (say) 1000 points within visible region.
 
 ### Editing?
 Should probably try an edit function soon, to get the feel of working with PeteTree.
-Also, to decide how to replace `processPostUpdateAction`.
+Also, to validate the Actions concept.
+
+## Other
+
+JS problem with LocalStorage port. May go away when port is used in the code.
 
 ---
 
 # More V3 stuff
-
-### Multiple windows
-Check out Electron (again), see if that will allow multiple windows.
-> Keep putting this back. I worried that the internal comms might kill it,
-> but it remains an attractive option.
-> Second window would be view only.
 
 ### Decide how to organise windows, panes, views.
 What state lives where?
