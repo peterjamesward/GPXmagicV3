@@ -10111,6 +10111,15 @@ var $ianmackenzie$elm_geometry$Direction2d$angleFrom = F2(
 		return $ianmackenzie$elm_units$Quantity$Quantity(
 			A2($elm$core$Basics$atan2, relativeY, relativeX));
 	});
+var $author$project$DomainModel$asRecord = function (treeNode) {
+	if (treeNode.$ === 'Leaf') {
+		var section = treeNode.a;
+		return section;
+	} else {
+		var node = treeNode.a;
+		return node.nodeContent;
+	}
+};
 var $author$project$DomainModel$boundingBox = function (treeNode) {
 	if (treeNode.$ === 'Leaf') {
 		var leaf = treeNode.a;
@@ -10332,6 +10341,18 @@ var $ianmackenzie$elm_geometry$BoundingBox3d$from = F2(
 				minZ: A2($ianmackenzie$elm_units$Quantity$min, z1, z2)
 			});
 	});
+var $ianmackenzie$elm_units$Quantity$greaterThanZero = function (_v0) {
+	var x = _v0.a;
+	return x > 0;
+};
+var $ianmackenzie$elm_units$Quantity$lessThanZero = function (_v0) {
+	var x = _v0.a;
+	return x < 0;
+};
+var $ianmackenzie$elm_units$Quantity$negate = function (_v0) {
+	var value = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(-value);
+};
 var $ianmackenzie$elm_units$Angle$cos = function (_v0) {
 	var angle = _v0.a;
 	return $elm$core$Basics$cos(angle);
@@ -10376,6 +10397,12 @@ var $author$project$Spherical$range = F2(
 		var x = (lon2 - lon1) * $elm$core$Basics$cos((lat1 + lat2) / 2);
 		return $author$project$Spherical$meanRadius * $elm$core$Basics$sqrt((x * x) + (y * y));
 	});
+var $ianmackenzie$elm_units$Quantity$ratio = F2(
+	function (_v0, _v1) {
+		var x = _v0.a;
+		var y = _v1.a;
+		return x / y;
+	});
 var $ianmackenzie$elm_geometry$Direction2d$rotateBy = F2(
 	function (_v0, _v1) {
 		var angle = _v0.a;
@@ -10409,8 +10436,19 @@ var $author$project$DomainModel$makeRoadSection = F3(
 		var local2 = A2($author$project$DomainModel$pointFromGpxWithReference, reference, earth2);
 		var local1 = A2($author$project$DomainModel$pointFromGpxWithReference, reference, earth1);
 		var box = A2($ianmackenzie$elm_geometry$BoundingBox3d$from, local1, local2);
+		var altitudeChange = A2(
+			$ianmackenzie$elm_units$Quantity$minus,
+			$ianmackenzie$elm_geometry$Point3d$zCoordinate(local1),
+			$ianmackenzie$elm_geometry$Point3d$zCoordinate(local2));
 		return {
+			altitudeGained: A2($ianmackenzie$elm_units$Quantity$max, $ianmackenzie$elm_units$Quantity$zero, altitudeChange),
+			altitudeLost: A2(
+				$ianmackenzie$elm_units$Quantity$max,
+				$ianmackenzie$elm_units$Quantity$zero,
+				$ianmackenzie$elm_units$Quantity$negate(altitudeChange)),
 			boundingBox: box,
+			distanceClimbing: $ianmackenzie$elm_units$Quantity$greaterThanZero(altitudeChange) ? range : $ianmackenzie$elm_units$Quantity$zero,
+			distanceDescending: $ianmackenzie$elm_units$Quantity$lessThanZero(altitudeChange) ? range : $ianmackenzie$elm_units$Quantity$zero,
 			eastwardTurn: A2(
 				$ianmackenzie$elm_units$Quantity$max,
 				$ianmackenzie$elm_units$Quantity$zero,
@@ -10424,6 +10462,10 @@ var $author$project$DomainModel$makeRoadSection = F3(
 			sourceData: _Utils_Tuple2(earth1, earth2),
 			sphere: $author$project$DomainModel$containingSphere(box),
 			startPoint: local1,
+			steepestClimb: ($ianmackenzie$elm_units$Quantity$greaterThanZero(range) && $ianmackenzie$elm_units$Quantity$greaterThanZero(altitudeChange)) ? A2(
+				$elm$core$Basics$max,
+				0.0,
+				100.0 * A2($ianmackenzie$elm_units$Quantity$ratio, altitudeChange, range)) : 0.0,
 			trueLength: range,
 			westwardTurn: A2(
 				$ianmackenzie$elm_units$Quantity$min,
@@ -10509,7 +10551,23 @@ var $author$project$DomainModel$treeFromList = function (track) {
 				$author$project$DomainModel$boundingBox(info1),
 				$author$project$DomainModel$boundingBox(info2));
 			return {
+				altitudeGained: A2(
+					$ianmackenzie$elm_units$Quantity$plus,
+					$author$project$DomainModel$asRecord(info1).altitudeGained,
+					$author$project$DomainModel$asRecord(info2).altitudeGained),
+				altitudeLost: A2(
+					$ianmackenzie$elm_units$Quantity$plus,
+					$author$project$DomainModel$asRecord(info1).altitudeLost,
+					$author$project$DomainModel$asRecord(info2).altitudeLost),
 				boundingBox: box,
+				distanceClimbing: A2(
+					$ianmackenzie$elm_units$Quantity$plus,
+					$author$project$DomainModel$asRecord(info1).distanceClimbing,
+					$author$project$DomainModel$asRecord(info2).distanceClimbing),
+				distanceDescending: A2(
+					$ianmackenzie$elm_units$Quantity$plus,
+					$author$project$DomainModel$asRecord(info1).distanceDescending,
+					$author$project$DomainModel$asRecord(info2).distanceDescending),
 				eastwardTurn: A2(
 					$ianmackenzie$elm_units$Quantity$max,
 					A2(
@@ -10534,6 +10592,10 @@ var $author$project$DomainModel$treeFromList = function (track) {
 					$author$project$DomainModel$sourceData(info2).b),
 				sphere: $author$project$DomainModel$containingSphere(box),
 				startPoint: $author$project$DomainModel$startPoint(info1),
+				steepestClimb: A2(
+					$elm$core$Basics$max,
+					$author$project$DomainModel$asRecord(info1).steepestClimb,
+					$author$project$DomainModel$asRecord(info2).steepestClimb),
 				trueLength: A2(
 					$ianmackenzie$elm_units$Quantity$plus,
 					$author$project$DomainModel$trueLength(info1),
@@ -11725,10 +11787,6 @@ var $author$project$Spherical$metresPerPixel = F2(
 	});
 var $ianmackenzie$elm_3d_camera$Camera3d$Types$Viewpoint3d = function (a) {
 	return {$: 'Viewpoint3d', a: a};
-};
-var $ianmackenzie$elm_units$Quantity$negate = function (_v0) {
-	var value = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(-value);
 };
 var $ianmackenzie$elm_geometry$Geometry$Types$Direction3d = function (a) {
 	return {$: 'Direction3d', a: a};
@@ -13870,12 +13928,6 @@ var $ianmackenzie$elm_3d_scene$Scene3d$Entity$quad = F7(
 var $ianmackenzie$elm_3d_scene$Scene3d$quad = F5(
 	function (givenMaterial, p1, p2, p3, p4) {
 		return A7($ianmackenzie$elm_3d_scene$Scene3d$Entity$quad, true, false, givenMaterial, p1, p2, p3, p4);
-	});
-var $ianmackenzie$elm_units$Quantity$ratio = F2(
-	function (_v0, _v1) {
-		var x = _v0.a;
-		var y = _v1.a;
-		return x / y;
 	});
 var $ianmackenzie$elm_geometry$LineSegment3d$startPoint = function (_v0) {
 	var _v1 = _v0.a;
@@ -21155,20 +21207,96 @@ var $author$project$TrackInfoBox$trackInfoList = _List_fromArray(
 	[
 		_Utils_Tuple2(
 		$mdgriffith$elm_ui$Element$text('Points'),
-		function (tree) {
-			return $mdgriffith$elm_ui$Element$text(
-				$elm$core$String$fromInt(
-					$author$project$DomainModel$skipCount(tree) + 1));
-		}),
+		A2(
+			$elm$core$Basics$composeR,
+			$author$project$DomainModel$asRecord,
+			A2(
+				$elm$core$Basics$composeR,
+				function ($) {
+					return $.skipCount;
+				},
+				A2($elm$core$Basics$composeR, $elm$core$String$fromInt, $mdgriffith$elm_ui$Element$text)))),
 		_Utils_Tuple2(
 		$mdgriffith$elm_ui$Element$text('Length'),
-		function (tree) {
-			return $mdgriffith$elm_ui$Element$text(
+		A2(
+			$elm$core$Basics$composeR,
+			$author$project$DomainModel$asRecord,
+			A2(
+				$elm$core$Basics$composeR,
+				function ($) {
+					return $.trueLength;
+				},
 				A2(
-					$author$project$UtilsForViews$showLongMeasure,
-					false,
-					$author$project$DomainModel$trueLength(tree)));
-		})
+					$elm$core$Basics$composeR,
+					$author$project$UtilsForViews$showLongMeasure(false),
+					$mdgriffith$elm_ui$Element$text)))),
+		_Utils_Tuple2(
+		$mdgriffith$elm_ui$Element$text('Ascent'),
+		A2(
+			$elm$core$Basics$composeR,
+			$author$project$DomainModel$asRecord,
+			A2(
+				$elm$core$Basics$composeR,
+				function ($) {
+					return $.altitudeGained;
+				},
+				A2(
+					$elm$core$Basics$composeR,
+					$author$project$UtilsForViews$showLongMeasure(false),
+					$mdgriffith$elm_ui$Element$text)))),
+		_Utils_Tuple2(
+		$mdgriffith$elm_ui$Element$text('Descent'),
+		A2(
+			$elm$core$Basics$composeR,
+			$author$project$DomainModel$asRecord,
+			A2(
+				$elm$core$Basics$composeR,
+				function ($) {
+					return $.altitudeLost;
+				},
+				A2(
+					$elm$core$Basics$composeR,
+					$author$project$UtilsForViews$showLongMeasure(false),
+					$mdgriffith$elm_ui$Element$text)))),
+		_Utils_Tuple2(
+		$mdgriffith$elm_ui$Element$text('Climb distance'),
+		A2(
+			$elm$core$Basics$composeR,
+			$author$project$DomainModel$asRecord,
+			A2(
+				$elm$core$Basics$composeR,
+				function ($) {
+					return $.distanceClimbing;
+				},
+				A2(
+					$elm$core$Basics$composeR,
+					$author$project$UtilsForViews$showLongMeasure(false),
+					$mdgriffith$elm_ui$Element$text)))),
+		_Utils_Tuple2(
+		$mdgriffith$elm_ui$Element$text('Descent distance'),
+		A2(
+			$elm$core$Basics$composeR,
+			$author$project$DomainModel$asRecord,
+			A2(
+				$elm$core$Basics$composeR,
+				function ($) {
+					return $.distanceDescending;
+				},
+				A2(
+					$elm$core$Basics$composeR,
+					$author$project$UtilsForViews$showLongMeasure(false),
+					$mdgriffith$elm_ui$Element$text)))),
+		_Utils_Tuple2(
+		$mdgriffith$elm_ui$Element$text('Steepest'),
+		A2(
+			$elm$core$Basics$composeR,
+			$author$project$DomainModel$asRecord,
+			A2(
+				$elm$core$Basics$composeR,
+				function ($) {
+					return $.steepestClimb;
+				},
+				A2($elm$core$Basics$composeR, $elm$core$String$fromFloat, $mdgriffith$elm_ui$Element$text))))
 	]);
 var $author$project$TrackInfoBox$trackInfoBox = function (maybeTree) {
 	if (maybeTree.$ === 'Just') {

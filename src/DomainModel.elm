@@ -39,6 +39,11 @@ type alias RoadSection =
     , medianLongitude : Direction2d LocalCoords
     , eastwardTurn : Angle
     , westwardTurn : Angle
+    , altitudeGained : Length.Length
+    , altitudeLost : Length.Length
+    , distanceClimbing : Length.Length
+    , distanceDescending : Length.Length
+    , steepestClimb : Float
     }
 
 
@@ -51,6 +56,16 @@ type
         , left : PeteTree
         , right : PeteTree
         }
+
+
+asRecord : PeteTree -> RoadSection
+asRecord treeNode =
+    case treeNode of
+        Leaf section ->
+            section
+
+        Node node ->
+            node.nodeContent
 
 
 sourceData : PeteTree -> ( GPXSource, GPXSource )
@@ -250,6 +265,9 @@ makeRoadSection reference earth1 earth2 =
             earth1.longitude
                 |> Direction2d.rotateBy
                     (Direction2d.angleFrom earth1.longitude earth2.longitude |> Quantity.half)
+
+        altitudeChange =
+            Point3d.zCoordinate local2 |> Quantity.minus (Point3d.zCoordinate local1)
     in
     { sourceData = ( earth1, earth2 )
     , startPoint = local1
@@ -269,6 +287,26 @@ makeRoadSection reference earth1 earth2 =
             Quantity.min
                 (Direction2d.angleFrom medianLon earth1.longitude)
                 (Direction2d.angleFrom medianLon earth2.longitude)
+    , altitudeGained = Quantity.max Quantity.zero altitudeChange
+    , altitudeLost = Quantity.max Quantity.zero <| Quantity.negate altitudeChange
+    , distanceClimbing =
+        if altitudeChange |> Quantity.greaterThanZero then
+            range
+
+        else
+            Quantity.zero
+    , distanceDescending =
+        if altitudeChange |> Quantity.lessThanZero then
+            range
+
+        else
+            Quantity.zero
+    , steepestClimb =
+        if (range |> Quantity.greaterThanZero) && (altitudeChange |> Quantity.greaterThanZero) then
+            max 0.0 <| 100.0 * Quantity.ratio altitudeChange range
+
+        else
+            0.0
     }
 
 
@@ -326,6 +364,25 @@ treeFromList track =
                         |> Direction2d.rotateBy (westwardTurn info2)
                         |> Direction2d.angleFrom sharedMedian
                     )
+            , altitudeGained =
+                Quantity.plus
+                    (info1 |> asRecord |> .altitudeGained)
+                    (info2 |> asRecord |> .altitudeGained)
+            , altitudeLost =
+                Quantity.plus
+                    (info1 |> asRecord |> .altitudeLost)
+                    (info2 |> asRecord |> .altitudeLost)
+            , distanceClimbing =
+                Quantity.plus
+                    (info1 |> asRecord |> .distanceClimbing)
+                    (info2 |> asRecord |> .distanceClimbing)
+            , distanceDescending =
+                Quantity.plus
+                    (info1 |> asRecord |> .distanceDescending)
+                    (info2 |> asRecord |> .distanceDescending)
+            , steepestClimb =
+                max (info1 |> asRecord |> .steepestClimb)
+                    (info2 |> asRecord |> .steepestClimb)
             }
 
         treeBuilder : Int -> List GPXSource -> ( Maybe PeteTree, List GPXSource )
