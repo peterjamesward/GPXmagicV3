@@ -16,10 +16,6 @@ On Map, work out the depth to fit (say) 1000 points within visible region.
 Should probably try an edit function soon, to get the feel of working with PeteTree.
 Also, to validate the Actions concept.
 
-## Other
-
-JS problem with LocalStorage port. May go away when port is used in the code.
-
 ---
 
 # Backlog
@@ -30,7 +26,7 @@ All to do with getting the right focal point?
 > (Sure these were v1 problems!)
 
 ### Decide how to organise windows, panes, views.
-What state lives where?
+What state lives where? (This relates to the multi-window decision.)
 Also, need to see if we can live without PostUpdateAction, just let the tools do their thing.
 First pane is special, because of map, and because you must have it.
 Hence, one pane + list, or just four panes with visibility?

@@ -289,9 +289,14 @@ function makeTheMap(msg) {
             });
 
             app.ports.mapResponses.send({ 'msg' : 'map ready' });
-            map.resize();
-            map.triggerRepaint();
+
         });
+
+        setTimeout(function()
+          {
+            map.resize();
+          }, 50);
+
 
     } else {
         //No 'map' node, we have to keep checking.
@@ -351,6 +356,10 @@ function addLineToMap(data, points) {
       { 'msg' : 'track ready' }
     );
 
+    setTimeout(function()
+      {
+        map.resize();
+      }, 50);
 };
 
 function setClickMode(newMode, points) {
@@ -432,7 +441,10 @@ function addOptionals(msg) {
       msg.previews.forEach(addPreview);
     };
 
-    map.triggerRepaint();
+    setTimeout(function()
+      {
+        map.resize();
+      }, 50);
 
 };
 
