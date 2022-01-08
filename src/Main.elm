@@ -93,6 +93,7 @@ init mflags origin navigationKey =
     , Cmd.batch
         [ authCmd
         , Task.perform AdjustTimeZone Time.here
+        , LocalStorage.storageListKeys
         ]
     )
 

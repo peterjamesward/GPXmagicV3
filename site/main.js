@@ -9332,6 +9332,29 @@ var $ianmackenzie$elm_units$Quantity$Quantity = function (a) {
 var $ianmackenzie$elm_units$Pixels$pixels = function (numPixels) {
 	return $ianmackenzie$elm_units$Quantity$Quantity(numPixels);
 };
+var $elm$json$Json$Encode$object = function (pairs) {
+	return _Json_wrap(
+		A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v0, obj) {
+					var k = _v0.a;
+					var v = _v0.b;
+					return A3(_Json_addField, k, v, obj);
+				}),
+			_Json_emptyObject(_Utils_Tuple0),
+			pairs));
+};
+var $author$project$LocalStorage$storageCommands = _Platform_outgoingPort('storageCommands', $elm$core$Basics$identity);
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $author$project$LocalStorage$storageListKeys = $author$project$LocalStorage$storageCommands(
+	$elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'Cmd',
+				$elm$json$Json$Encode$string('storage.list'))
+			])));
 var $elm$time$Time$utc = A2($elm$time$Time$Zone, 0, _List_Nil);
 var $ianmackenzie$elm_geometry$Geometry$Types$Direction2d = function (a) {
 	return {$: 'Direction2d', a: a};
@@ -9370,7 +9393,8 @@ var $author$project$Main$init = F3(
 				_List_fromArray(
 					[
 						authCmd,
-						A2($elm$core$Task$perform, $author$project$Main$AdjustTimeZone, $elm$time$Time$here)
+						A2($elm$core$Task$perform, $author$project$Main$AdjustTimeZone, $elm$time$Time$here),
+						$author$project$LocalStorage$storageListKeys
 					])));
 	});
 var $elm$json$Json$Decode$int = _Json_decodeInt;
@@ -9431,20 +9455,6 @@ var $author$project$Main$ReceivedIpDetails = function (a) {
 var $elm$json$Json$Encode$float = _Json_wrap;
 var $author$project$MapPortsController$mapCommands = _Platform_outgoingPort('mapCommands', $elm$core$Basics$identity);
 var $author$project$MapboxKey$mapboxKey = 'pk.eyJ1IjoicGV0ZXJqYW1lc3dhcmQiLCJhIjoiY2tpdWswb3dsMm02bDMzcDMyNGw1bmh5aSJ9.Fk3ibin0PpeEGXlGsctP1g';
-var $elm$json$Json$Encode$object = function (pairs) {
-	return _Json_wrap(
-		A3(
-			$elm$core$List$foldl,
-			F2(
-				function (_v0, obj) {
-					var k = _v0.a;
-					var v = _v0.b;
-					return A3(_Json_addField, k, v, obj);
-				}),
-			_Json_emptyObject(_Utils_Tuple0),
-			pairs));
-};
-var $elm$json$Json$Encode$string = _Json_wrap;
 var $author$project$MapPortsController$createMap = function (info) {
 	return $author$project$MapPortsController$mapCommands(
 		$elm$json$Json$Encode$object(
@@ -12564,46 +12574,12 @@ var $ianmackenzie$elm_units$Angle$sin = function (_v0) {
 	return $elm$core$Basics$sin(angle);
 };
 var $author$project$ViewingMode$ViewMap = {$: 'ViewMap'};
-var $ianmackenzie$elm_units$Length$inMeters = function (_v0) {
-	var numMeters = _v0.a;
-	return numMeters;
-};
-var $ianmackenzie$elm_geometry$Point3d$toTuple = F2(
-	function (fromQuantity, point) {
-		return _Utils_Tuple3(
-			fromQuantity(
-				$ianmackenzie$elm_geometry$Point3d$xCoordinate(point)),
-			fromQuantity(
-				$ianmackenzie$elm_geometry$Point3d$yCoordinate(point)),
-			fromQuantity(
-				$ianmackenzie$elm_geometry$Point3d$zCoordinate(point)));
-	});
-var $author$project$DomainModel$gpxFromPointWithReference = F2(
-	function (reference, point) {
-		var _v0 = A2($ianmackenzie$elm_geometry$Point3d$toTuple, $ianmackenzie$elm_units$Length$inMeters, point);
-		var x = _v0.a;
-		var y = _v0.b;
-		var z = _v0.c;
-		var latitude = (y / $author$project$Spherical$metresPerDegree) + $ianmackenzie$elm_units$Angle$inDegrees(reference.latitude);
-		var longitude = ((x / $elm$core$Basics$cos(latitude)) / $author$project$Spherical$metresPerDegree) + $ianmackenzie$elm_units$Angle$inDegrees(
-			$ianmackenzie$elm_geometry$Direction2d$toAngle(reference.longitude));
-		var altitude = z;
-		return A3(
-			$author$project$DomainModel$GPXSource,
-			$ianmackenzie$elm_geometry$Direction2d$fromAngle(
-				$ianmackenzie$elm_units$Angle$degrees(longitude)),
-			$ianmackenzie$elm_units$Angle$degrees(latitude),
-			$ianmackenzie$elm_units$Length$meters(altitude));
-	});
 var $author$project$MapPortsController$centreMapOnCurrent = function (model) {
 	var _v0 = model.trackTree;
 	if (_v0.$ === 'Just') {
 		var tree = _v0.a;
-		var _v1 = A2(
-			$author$project$DomainModel$gpxFromPointWithReference,
-			model.referenceLonLat,
-			$author$project$DomainModel$startPoint(
-				A2($author$project$DomainModel$leafFromIndex, model.currentPosition, tree)));
+		var _v1 = $author$project$DomainModel$sourceData(
+			A2($author$project$DomainModel$leafFromIndex, model.currentPosition, tree)).a;
 		var longitude = _v1.longitude;
 		var latitude = _v1.latitude;
 		var altitude = _v1.altitude;
@@ -19929,6 +19905,10 @@ var $mdgriffith$elm_ui$Internal$Model$Fill = function (a) {
 	return {$: 'Fill', a: a};
 };
 var $mdgriffith$elm_ui$Element$fill = $mdgriffith$elm_ui$Internal$Model$Fill(1);
+var $ianmackenzie$elm_units$Length$inMeters = function (_v0) {
+	var numMeters = _v0.a;
+	return numMeters;
+};
 var $mdgriffith$elm_ui$Element$Input$Below = {$: 'Below'};
 var $mdgriffith$elm_ui$Element$Input$Label = F3(
 	function (a, b, c) {

@@ -2,16 +2,6 @@
 
 # WIP
 
-## Zoom, Pan, Rotate.
-Pan feels slippy. Sometimes goes the wrong way. 
-All to do with getting the right focal point?
-> (Sure these were v1 problems!)
-
-### Map
-Centering wrong. (Probably "old" code.)
-Map needs deferred repaint, but how to do that without the good ol' import loop?
-> Maybe in JS?
-
 ### Multiple windows (up this week)
 Check out Electron (again), see if that will allow multiple windows.
 > Keep putting this back. I worried that the internal comms might kill it,
@@ -32,7 +22,12 @@ JS problem with LocalStorage port. May go away when port is used in the code.
 
 ---
 
-# More V3 stuff
+# Backlog
+
+## Zoom, Pan, Rotate.
+Pan feels slippy. Sometimes goes the wrong way.
+All to do with getting the right focal point?
+> (Sure these were v1 problems!)
 
 ### Decide how to organise windows, panes, views.
 What state lives where?
