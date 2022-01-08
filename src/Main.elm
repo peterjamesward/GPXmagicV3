@@ -283,12 +283,17 @@ viewModeChoices : ModelRecord -> Element Msg
 viewModeChoices model =
     let
         fullOptionList =
+            --[ Input.option ViewThird <| text "Third person"
+            --, Input.option ViewMap <| text "Map"
+            --]
             [ Input.optionWith ViewThird <| radioButton "Third person"
             , Input.optionWith ViewMap <| radioButton "Map"
             ]
     in
     Input.radioRow
-        [ Border.rounded 6 ]
+        [ spacing 5
+        , padding 5
+        ]
         { onChange = SetViewMode
         , selected = Just model.viewMode
         , label = Input.labelHidden "Choose view"

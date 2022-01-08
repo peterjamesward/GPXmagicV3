@@ -138,17 +138,29 @@ checkboxIcon isChecked =
 
 radioButton label state =
     el
-        [ paddingXY 8 4
-        , spacing 2
-        , Border.widthEach { left = 2, right = 2, top = 2, bottom = 0 }
-        , Border.roundEach { topLeft = 6, bottomLeft = 0, topRight = 6, bottomRight = 0 }
-        , Background.color <|
+        [ spacing 1
+        , padding 6
+        , Border.color FlatColors.ChinesePalette.clearChill
+        , Border.widthEach <|
             if state == Input.Selected then
-                FlatColors.ChinesePalette.limeSoap
+                { left = 2, right = 2, top = 2, bottom = 0 }
 
             else
-                FlatColors.ChinesePalette.twinkleBlue
-        , Font.color FlatColors.ChinesePalette.prestigeBlue
+                { left = 1, right = 1, top = 1, bottom = 0 }
+
+        --, Border.roundEach { topLeft = 6, bottomLeft = 0, topRight = 6, bottomRight = 0 }
+        , Background.color <|
+            if state == Input.Selected then
+                FlatColors.ChinesePalette.bayWharf
+
+            else
+                FlatColors.ChinesePalette.antiFlashWhite
+        , Font.color <|
+            if state == Input.Selected then
+                FlatColors.ChinesePalette.antiFlashWhite
+
+            else
+                FlatColors.ChinesePalette.bayWharf
         , Font.size 16
         ]
     <|

@@ -23208,6 +23208,8 @@ var $mdgriffith$elm_ui$Element$Input$optionWith = F2(
 		return A2($mdgriffith$elm_ui$Element$Input$Option, val, view);
 	});
 var $mdgriffith$elm_ui$Element$Input$Selected = {$: 'Selected'};
+var $smucode$elm_flat_colors$FlatColors$ChinesePalette$bayWharf = A3($mdgriffith$elm_ui$Element$rgb255, 116, 125, 140);
+var $smucode$elm_flat_colors$FlatColors$ChinesePalette$clearChill = A3($mdgriffith$elm_ui$Element$rgb255, 30, 144, 255);
 var $mdgriffith$elm_ui$Internal$Flag$fontColor = $mdgriffith$elm_ui$Internal$Flag$flag(14);
 var $mdgriffith$elm_ui$Element$Font$color = function (fontColor) {
 	return A2(
@@ -23219,52 +23221,6 @@ var $mdgriffith$elm_ui$Element$Font$color = function (fontColor) {
 			'color',
 			fontColor));
 };
-var $smucode$elm_flat_colors$FlatColors$ChinesePalette$limeSoap = A3($mdgriffith$elm_ui$Element$rgb255, 123, 237, 159);
-var $mdgriffith$elm_ui$Element$paddingXY = F2(
-	function (x, y) {
-		if (_Utils_eq(x, y)) {
-			var f = x;
-			return A2(
-				$mdgriffith$elm_ui$Internal$Model$StyleClass,
-				$mdgriffith$elm_ui$Internal$Flag$padding,
-				A5(
-					$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
-					'p-' + $elm$core$String$fromInt(x),
-					f,
-					f,
-					f,
-					f));
-		} else {
-			var yFloat = y;
-			var xFloat = x;
-			return A2(
-				$mdgriffith$elm_ui$Internal$Model$StyleClass,
-				$mdgriffith$elm_ui$Internal$Flag$padding,
-				A5(
-					$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
-					'p-' + ($elm$core$String$fromInt(x) + ('-' + $elm$core$String$fromInt(y))),
-					yFloat,
-					xFloat,
-					yFloat,
-					xFloat));
-		}
-	});
-var $smucode$elm_flat_colors$FlatColors$ChinesePalette$prestigeBlue = A3($mdgriffith$elm_ui$Element$rgb255, 47, 53, 66);
-var $mdgriffith$elm_ui$Element$Border$roundEach = function (_v0) {
-	var topLeft = _v0.topLeft;
-	var topRight = _v0.topRight;
-	var bottomLeft = _v0.bottomLeft;
-	var bottomRight = _v0.bottomRight;
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$borderRound,
-		A3(
-			$mdgriffith$elm_ui$Internal$Model$Single,
-			'br-' + ($elm$core$String$fromInt(topLeft) + ('-' + ($elm$core$String$fromInt(topRight) + ($elm$core$String$fromInt(bottomLeft) + ('-' + $elm$core$String$fromInt(bottomRight)))))),
-			'border-radius',
-			$elm$core$String$fromInt(topLeft) + ('px ' + ($elm$core$String$fromInt(topRight) + ('px ' + ($elm$core$String$fromInt(bottomRight) + ('px ' + ($elm$core$String$fromInt(bottomLeft) + 'px'))))))));
-};
-var $smucode$elm_flat_colors$FlatColors$ChinesePalette$twinkleBlue = A3($mdgriffith$elm_ui$Element$rgb255, 206, 214, 224);
 var $mdgriffith$elm_ui$Element$Border$widthXY = F2(
 	function (x, y) {
 		return A2(
@@ -23300,15 +23256,15 @@ var $author$project$ViewPureStyles$radioButton = F2(
 			$mdgriffith$elm_ui$Element$el,
 			_List_fromArray(
 				[
-					A2($mdgriffith$elm_ui$Element$paddingXY, 8, 4),
-					$mdgriffith$elm_ui$Element$spacing(2),
+					$mdgriffith$elm_ui$Element$spacing(1),
+					$mdgriffith$elm_ui$Element$padding(6),
+					$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$clearChill),
 					$mdgriffith$elm_ui$Element$Border$widthEach(
-					{bottom: 0, left: 2, right: 2, top: 2}),
-					$mdgriffith$elm_ui$Element$Border$roundEach(
-					{bottomLeft: 0, bottomRight: 0, topLeft: 6, topRight: 6}),
+					_Utils_eq(state, $mdgriffith$elm_ui$Element$Input$Selected) ? {bottom: 0, left: 2, right: 2, top: 2} : {bottom: 0, left: 1, right: 1, top: 1}),
 					$mdgriffith$elm_ui$Element$Background$color(
-					_Utils_eq(state, $mdgriffith$elm_ui$Element$Input$Selected) ? $smucode$elm_flat_colors$FlatColors$ChinesePalette$limeSoap : $smucode$elm_flat_colors$FlatColors$ChinesePalette$twinkleBlue),
-					$mdgriffith$elm_ui$Element$Font$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$prestigeBlue),
+					_Utils_eq(state, $mdgriffith$elm_ui$Element$Input$Selected) ? $smucode$elm_flat_colors$FlatColors$ChinesePalette$bayWharf : $smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite),
+					$mdgriffith$elm_ui$Element$Font$color(
+					_Utils_eq(state, $mdgriffith$elm_ui$Element$Input$Selected) ? $smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite : $smucode$elm_flat_colors$FlatColors$ChinesePalette$bayWharf),
 					$mdgriffith$elm_ui$Element$Font$size(16)
 				]),
 			A2(
@@ -23640,7 +23596,8 @@ var $author$project$Main$viewModeChoices = function (model) {
 		$mdgriffith$elm_ui$Element$Input$radioRow,
 		_List_fromArray(
 			[
-				$mdgriffith$elm_ui$Element$Border$rounded(6)
+				$mdgriffith$elm_ui$Element$spacing(5),
+				$mdgriffith$elm_ui$Element$padding(5)
 			]),
 		{
 			label: $mdgriffith$elm_ui$Element$Input$labelHidden('Choose view'),

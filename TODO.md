@@ -2,26 +2,31 @@
 
 # WIP
 
-### Multiple windows (up this week)
-Tauri looks interesting as we don't need node.js
-> https://tauri.studio/en/docs/getting-started/intro/
-
-### Rendering
-Use a graduated drop off with distance, compute at each tree level.
-On Map, work out the depth to fit (say) 1000 points within visible region.
+## Zoom, Pan, Rotate.
+Pan feels slippy. Is the scaling wrong?
+All to do with getting the right focal point?
+> Try the basic V2 code.
 
 ### Editing?
-Should probably try an edit function soon, to get the feel of working with PeteTree.
-Also, to validate the Actions concept.
+>> Take a couple of tools, do them as better tabs:
+ - dockable any side,
+ - user choice of colour,
+ - clean UI (?),
+ - fully pluggable,
+ - previews in all views,
+ - validate Actions concept,
+ - decide best approach to Undo & Redo
+
+### Profile & Charts
+Details in Backlog.
 
 ---
 
 # Backlog
 
-## Zoom, Pan, Rotate.
-Pan feels slippy. Is the scaling wrong?
-All to do with getting the right focal point?
-> (Sure these were v1 problems!)
+### Rendering
+Use a graduated drop off with distance, compute at each tree level.
+On Map, work out the depth to fit (say) 1000 points within visible region.
 
 ### Decide how to organise windows, panes, views.
 What state lives where? (This relates to the multi-window decision.)
@@ -97,6 +102,10 @@ Binary file format for fastest load?
 ---
 
 # Parked
+
+### Multiple windows (demoted again; more value in better tool layout and customisation)
+Tauri looks interesting as we would not need node.js
+> https://tauri.studio/en/docs/getting-started/intro/
 
 ### Culling?
 - See if visible area can best be done by pre-selecting view elements, or left to GPU.
