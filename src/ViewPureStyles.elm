@@ -32,6 +32,18 @@ defaultColumnLayout =
     [ spacing 5, padding 5, alignTop, width fill ]
 
 
+commonLayoutStyles =
+    [ padding 2
+    , spacing 5
+    , height fill
+    , Font.size 14
+    , Font.family
+        [ Font.typeface "Open Sans"
+        , Font.sansSerif
+        ]
+    ]
+
+
 prettyButtonStyles =
     [ padding 10
     , Border.width 2
@@ -161,11 +173,6 @@ radioButton label state =
 
             else
                 FlatColors.ChinesePalette.antiFlashWhite
-        , Font.size 14
-        , Font.family
-            [ Font.typeface "Open Sans"
-            , Font.sansSerif
-            ]
         ]
     <|
         el [ centerX, centerY ] <|

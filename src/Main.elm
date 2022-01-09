@@ -45,7 +45,7 @@ import Time
 import TrackInfoBox exposing (trackInfoBox)
 import Url exposing (Url)
 import ViewMap
-import ViewPureStyles exposing (conditionallyVisible, radioButton, sliderThumb)
+import ViewPureStyles exposing (commonLayoutStyles, conditionallyVisible, radioButton, sliderThumb)
 import ViewThirdPerson
 import ViewingMode exposing (ViewingMode(..))
 
@@ -298,7 +298,7 @@ view (Model model) =
             , spacing 10
             , Font.size 16
             , height fill
-            , Background.color FlatColors.ChinesePalette.bayWharf
+            , Background.color FlatColors.ChinesePalette.peace
             ]
           <|
             column [ width fill, height fill ]
@@ -371,7 +371,7 @@ leftDockView model =
 upperLeftDockView : ModelRecord -> Html Msg
 upperLeftDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
-        [ padding 2, spacing 5, height fill ]
+        commonLayoutStyles
     <|
         trackInfoBox model.trackTree
 
@@ -379,7 +379,7 @@ upperLeftDockView model =
 lowerLeftDockView : ModelRecord -> Html Msg
 lowerLeftDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
-        [ padding 2, spacing 5, height fill ]
+        commonLayoutStyles
     <|
         trackInfoBox model.trackTree
 
@@ -396,7 +396,7 @@ rightDockView model =
 upperRightDockView : ModelRecord -> Html Msg
 upperRightDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
-        [ padding 2, spacing 5, height fill ]
+        commonLayoutStyles
     <|
         trackInfoBox model.trackTree
 
@@ -404,7 +404,7 @@ upperRightDockView model =
 lowerRightDockView : ModelRecord -> Html Msg
 lowerRightDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
-        [ padding 2, spacing 5, height fill ]
+        commonLayoutStyles
     <|
         trackInfoBox model.trackTree
 
@@ -412,7 +412,7 @@ lowerRightDockView model =
 bottomDockView : ModelRecord -> Html a
 bottomDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
-        [ padding 2, spacing 5, width fill ]
+        commonLayoutStyles
     <|
         trackInfoBox model.trackTree
 
@@ -438,7 +438,7 @@ centralAreaView model =
 viewPaneArea : ModelRecord -> Html Msg
 viewPaneArea model =
     layoutWith { options = [ noStaticStyleSheet ] }
-        []
+        commonLayoutStyles
     <|
         contentArea model
 
@@ -449,23 +449,20 @@ topLoadingBar model =
             button
                 [ padding 5
                 , Background.color FlatColors.ChinesePalette.twinkleBlue
-                , Font.size 14
-                , Font.family
-                    [ Font.typeface "Open Sans"
-                    , Font.sansSerif
-                    ]
                 ]
                 { onPress = Just GpxRequested
                 , label = text "Load GPX file"
                 }
     in
     row
-        [ spacing 20
-        , padding 5
-        , width fill
-        , Border.widthEach { left = 0, right = 0, top = 0, bottom = 1 }
-        , Border.color FlatColors.ChinesePalette.twinkleBlue
-        ]
+        ([ spacing 20
+         , padding 5
+         , width fill
+         , Border.widthEach { left = 0, right = 0, top = 0, bottom = 1 }
+         , Border.color FlatColors.ChinesePalette.twinkleBlue
+         ]
+            ++ commonLayoutStyles
+        )
         [ loadGpxButton
         ]
 

@@ -15172,15 +15172,6 @@ var $author$project$Main$update = F2(
 					$elm$core$Platform$Cmd$none);
 		}
 	});
-var $mdgriffith$elm_ui$Internal$Model$Rgba = F4(
-	function (a, b, c, d) {
-		return {$: 'Rgba', a: a, b: b, c: c, d: d};
-	});
-var $mdgriffith$elm_ui$Element$rgb255 = F3(
-	function (red, green, blue) {
-		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, red / 255, green / 255, blue / 255, 1);
-	});
-var $smucode$elm_flat_colors$FlatColors$ChinesePalette$bayWharf = A3($mdgriffith$elm_ui$Element$rgb255, 116, 125, 140);
 var $mdgriffith$elm_ui$Internal$Model$Colored = F3(
 	function (a, b, c) {
 		return {$: 'Colored', a: a, b: b, c: c};
@@ -20633,6 +20624,10 @@ var $mdgriffith$elm_ui$Internal$Model$StaticRootAndDynamic = F2(
 	});
 var $mdgriffith$elm_ui$Internal$Model$AllowHover = {$: 'AllowHover'};
 var $mdgriffith$elm_ui$Internal$Model$Layout = {$: 'Layout'};
+var $mdgriffith$elm_ui$Internal$Model$Rgba = F4(
+	function (a, b, c, d) {
+		return {$: 'Rgba', a: a, b: b, c: c, d: d};
+	});
 var $mdgriffith$elm_ui$Internal$Model$focusDefaultStyle = {
 	backgroundColor: $elm$core$Maybe$Nothing,
 	borderColor: $elm$core$Maybe$Nothing,
@@ -20892,11 +20887,15 @@ var $author$project$Main$leftDockConfig = $whale9490$elm_split_pane$SplitPane$cr
 	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitLeftDockRightEdge});
 var $author$project$Main$leftDockInternalConfig = $whale9490$elm_split_pane$SplitPane$createViewConfig(
 	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitLeftDockInternal});
-var $mdgriffith$elm_ui$Internal$Model$NoStaticStyleSheet = {$: 'NoStaticStyleSheet'};
-var $mdgriffith$elm_ui$Internal$Model$RenderModeOption = function (a) {
-	return {$: 'RenderModeOption', a: a};
+var $mdgriffith$elm_ui$Element$Font$family = function (families) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$fontFamily,
+		A2(
+			$mdgriffith$elm_ui$Internal$Model$FontFamily,
+			A3($elm$core$List$foldl, $mdgriffith$elm_ui$Internal$Model$renderFontClassName, 'ff-', families),
+			families));
 };
-var $mdgriffith$elm_ui$Element$noStaticStyleSheet = $mdgriffith$elm_ui$Internal$Model$RenderModeOption($mdgriffith$elm_ui$Internal$Model$NoStaticStyleSheet);
 var $mdgriffith$elm_ui$Internal$Model$PaddingStyle = F5(
 	function (a, b, c, d, e) {
 		return {$: 'PaddingStyle', a: a, b: b, c: c, d: d, e: e};
@@ -20914,6 +20913,13 @@ var $mdgriffith$elm_ui$Element$padding = function (x) {
 			f,
 			f,
 			f));
+};
+var $mdgriffith$elm_ui$Element$Font$sansSerif = $mdgriffith$elm_ui$Internal$Model$SansSerif;
+var $mdgriffith$elm_ui$Element$Font$size = function (i) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$fontSize,
+		$mdgriffith$elm_ui$Internal$Model$FontSize(i));
 };
 var $mdgriffith$elm_ui$Internal$Model$SpacingStyle = F3(
 	function (a, b, c) {
@@ -20934,6 +20940,30 @@ var $mdgriffith$elm_ui$Element$spacing = function (x) {
 			x,
 			x));
 };
+var $mdgriffith$elm_ui$Element$Font$typeface = $mdgriffith$elm_ui$Internal$Model$Typeface;
+var $author$project$ViewPureStyles$commonLayoutStyles = _List_fromArray(
+	[
+		$mdgriffith$elm_ui$Element$padding(2),
+		$mdgriffith$elm_ui$Element$spacing(5),
+		$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+		$mdgriffith$elm_ui$Element$Font$size(14),
+		$mdgriffith$elm_ui$Element$Font$family(
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$Font$typeface('Open Sans'),
+				$mdgriffith$elm_ui$Element$Font$sansSerif
+			]))
+	]);
+var $mdgriffith$elm_ui$Internal$Model$NoStaticStyleSheet = {$: 'NoStaticStyleSheet'};
+var $mdgriffith$elm_ui$Internal$Model$RenderModeOption = function (a) {
+	return {$: 'RenderModeOption', a: a};
+};
+var $mdgriffith$elm_ui$Element$noStaticStyleSheet = $mdgriffith$elm_ui$Internal$Model$RenderModeOption($mdgriffith$elm_ui$Internal$Model$NoStaticStyleSheet);
+var $mdgriffith$elm_ui$Element$rgb255 = F3(
+	function (red, green, blue) {
+		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, red / 255, green / 255, blue / 255, 1);
+	});
+var $smucode$elm_flat_colors$FlatColors$ChinesePalette$bayWharf = A3($mdgriffith$elm_ui$Element$rgb255, 116, 125, 140);
 var $smucode$elm_flat_colors$FlatColors$AussiePalette$beekeeper = A3($mdgriffith$elm_ui$Element$rgb255, 246, 229, 141);
 var $mdgriffith$elm_ui$Internal$Model$AlignX = function (a) {
 	return {$: 'AlignX', a: a};
@@ -20945,6 +20975,16 @@ var $mdgriffith$elm_ui$Internal$Model$AlignY = function (a) {
 };
 var $mdgriffith$elm_ui$Internal$Model$CenterY = {$: 'CenterY'};
 var $mdgriffith$elm_ui$Element$centerY = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$CenterY);
+var $mdgriffith$elm_ui$Element$Font$color = function (fontColor) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$fontColor,
+		A3(
+			$mdgriffith$elm_ui$Internal$Model$Colored,
+			'fc-' + $mdgriffith$elm_ui$Internal$Model$formatColorClass(fontColor),
+			'color',
+			fontColor));
+};
 var $mdgriffith$elm_ui$Element$el = F2(
 	function (attrs, child) {
 		return A4(
@@ -20962,15 +21002,6 @@ var $mdgriffith$elm_ui$Element$el = F2(
 				_List_fromArray(
 					[child])));
 	});
-var $mdgriffith$elm_ui$Element$Font$family = function (families) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$fontFamily,
-		A2(
-			$mdgriffith$elm_ui$Internal$Model$FontFamily,
-			A3($elm$core$List$foldl, $mdgriffith$elm_ui$Internal$Model$renderFontClassName, 'ff-', families),
-			families));
-};
 var $mdgriffith$elm_ui$Internal$Flag$borderRound = $mdgriffith$elm_ui$Internal$Flag$flag(17);
 var $mdgriffith$elm_ui$Element$Border$rounded = function (radius) {
 	return A2(
@@ -21002,13 +21033,55 @@ var $mdgriffith$elm_ui$Element$row = F2(
 						attrs))),
 			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
 	});
-var $mdgriffith$elm_ui$Element$Font$sansSerif = $mdgriffith$elm_ui$Internal$Model$SansSerif;
-var $mdgriffith$elm_ui$Element$Font$size = function (i) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$fontSize,
-		$mdgriffith$elm_ui$Internal$Model$FontSize(i));
+var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
+var $elm$svg$Svg$circle = $elm$svg$Svg$trustedNode('circle');
+var $elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
+var $elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
+var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
+var $feathericons$elm_feather$FeatherIcons$Icon = function (a) {
+	return {$: 'Icon', a: a};
 };
+var $feathericons$elm_feather$FeatherIcons$defaultAttributes = function (name) {
+	return {
+		_class: $elm$core$Maybe$Just('feather feather-' + name),
+		size: 24,
+		sizeUnit: '',
+		strokeWidth: 2,
+		viewBox: '0 0 24 24'
+	};
+};
+var $feathericons$elm_feather$FeatherIcons$makeBuilder = F2(
+	function (name, src) {
+		return $feathericons$elm_feather$FeatherIcons$Icon(
+			{
+				attrs: $feathericons$elm_feather$FeatherIcons$defaultAttributes(name),
+				src: src
+			});
+	});
+var $elm$svg$Svg$path = $elm$svg$Svg$trustedNode('path');
+var $elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
+var $feathericons$elm_feather$FeatherIcons$settings = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'settings',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$circle,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$cx('12'),
+					$elm$svg$Svg$Attributes$cy('12'),
+					$elm$svg$Svg$Attributes$r('3')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$path,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$d('M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z')
+				]),
+			_List_Nil)
+		]));
 var $mdgriffith$elm_ui$Internal$Model$Text = function (a) {
 	return {$: 'Text', a: a};
 };
@@ -21580,62 +21653,152 @@ var $author$project$TrackInfoBox$trackInfoList = _List_fromArray(
 				},
 				A2($elm$core$Basics$composeR, $elm$core$String$fromFloat, $mdgriffith$elm_ui$Element$text))))
 	]);
-var $mdgriffith$elm_ui$Element$Font$typeface = $mdgriffith$elm_ui$Internal$Model$Typeface;
+var $elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
+var $elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
+var $elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
+var $elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
+var $elm$svg$Svg$map = $elm$virtual_dom$VirtualDom$map;
+var $elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
+var $elm$svg$Svg$Attributes$strokeLinecap = _VirtualDom_attribute('stroke-linecap');
+var $elm$svg$Svg$Attributes$strokeLinejoin = _VirtualDom_attribute('stroke-linejoin');
+var $elm$svg$Svg$Attributes$strokeWidth = _VirtualDom_attribute('stroke-width');
+var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
+var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
+var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
+var $feathericons$elm_feather$FeatherIcons$toHtml = F2(
+	function (attributes, _v0) {
+		var src = _v0.a.src;
+		var attrs = _v0.a.attrs;
+		var strSize = $elm$core$String$fromFloat(attrs.size);
+		var baseAttributes = _List_fromArray(
+			[
+				$elm$svg$Svg$Attributes$fill('none'),
+				$elm$svg$Svg$Attributes$height(
+				_Utils_ap(strSize, attrs.sizeUnit)),
+				$elm$svg$Svg$Attributes$width(
+				_Utils_ap(strSize, attrs.sizeUnit)),
+				$elm$svg$Svg$Attributes$stroke('currentColor'),
+				$elm$svg$Svg$Attributes$strokeLinecap('round'),
+				$elm$svg$Svg$Attributes$strokeLinejoin('round'),
+				$elm$svg$Svg$Attributes$strokeWidth(
+				$elm$core$String$fromFloat(attrs.strokeWidth)),
+				$elm$svg$Svg$Attributes$viewBox(attrs.viewBox)
+			]);
+		var combinedAttributes = _Utils_ap(
+			function () {
+				var _v1 = attrs._class;
+				if (_v1.$ === 'Just') {
+					var c = _v1.a;
+					return A2(
+						$elm$core$List$cons,
+						$elm$svg$Svg$Attributes$class(c),
+						baseAttributes);
+				} else {
+					return baseAttributes;
+				}
+			}(),
+			attributes);
+		return A2(
+			$elm$svg$Svg$svg,
+			combinedAttributes,
+			A2(
+				$elm$core$List$map,
+				$elm$svg$Svg$map($elm$core$Basics$never),
+				src));
+	});
+var $feathericons$elm_feather$FeatherIcons$withSize = F2(
+	function (size, _v0) {
+		var attrs = _v0.a.attrs;
+		var src = _v0.a.src;
+		return $feathericons$elm_feather$FeatherIcons$Icon(
+			{
+				attrs: _Utils_update(
+					attrs,
+					{size: size}),
+				src: src
+			});
+	});
+var $author$project$ViewPureStyles$useIcon = A2(
+	$elm$core$Basics$composeL,
+	A2(
+		$elm$core$Basics$composeL,
+		$mdgriffith$elm_ui$Element$html,
+		$feathericons$elm_feather$FeatherIcons$toHtml(_List_Nil)),
+	$feathericons$elm_feather$FeatherIcons$withSize(20));
 var $author$project$TrackInfoBox$trackInfoBox = function (maybeTree) {
-	if (maybeTree.$ === 'Just') {
-		var trackTree = maybeTree.a;
-		return A2(
-			$mdgriffith$elm_ui$Element$row,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$AussiePalette$beekeeper),
-					$mdgriffith$elm_ui$Element$Border$rounded(10),
-					$mdgriffith$elm_ui$Element$padding(10),
-					$mdgriffith$elm_ui$Element$spacing(5),
-					$mdgriffith$elm_ui$Element$Font$size(14),
-					$mdgriffith$elm_ui$Element$Font$family(
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$Font$typeface('Open Sans'),
-							$mdgriffith$elm_ui$Element$Font$sansSerif
-						]))
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$mdgriffith$elm_ui$Element$column,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$spacing(5)
-						]),
-					A2(
-						$elm$core$List$map,
-						function (_v1) {
-							var txt = _v1.a;
-							return txt;
-						},
-						$author$project$TrackInfoBox$trackInfoList)),
-					A2(
-					$mdgriffith$elm_ui$Element$column,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$spacing(5)
-						]),
-					A2(
-						$elm$core$List$map,
-						function (_v2) {
-							var fn = _v2.b;
-							return fn(trackTree);
-						},
-						$author$project$TrackInfoBox$trackInfoList))
-				]));
-	} else {
-		return A2(
-			$mdgriffith$elm_ui$Element$el,
-			_List_fromArray(
-				[$mdgriffith$elm_ui$Element$centerX, $mdgriffith$elm_ui$Element$centerY]),
-			$mdgriffith$elm_ui$Element$text('No track loaded'));
-	}
+	return A2(
+		$mdgriffith$elm_ui$Element$column,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$mdgriffith$elm_ui$Element$row,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$padding(4),
+						$mdgriffith$elm_ui$Element$spacing(4),
+						$mdgriffith$elm_ui$Element$Font$color($smucode$elm_flat_colors$FlatColors$AussiePalette$beekeeper),
+						$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$bayWharf)
+					]),
+				_List_fromArray(
+					[
+						$author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$settings),
+						$mdgriffith$elm_ui$Element$text('The Route')
+					])),
+				function () {
+				if (maybeTree.$ === 'Just') {
+					var trackTree = maybeTree.a;
+					return A2(
+						$mdgriffith$elm_ui$Element$row,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$AussiePalette$beekeeper),
+								$mdgriffith$elm_ui$Element$Border$rounded(10),
+								$mdgriffith$elm_ui$Element$padding(10),
+								$mdgriffith$elm_ui$Element$spacing(5)
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$mdgriffith$elm_ui$Element$column,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$spacing(5)
+									]),
+								A2(
+									$elm$core$List$map,
+									function (_v1) {
+										var txt = _v1.a;
+										return txt;
+									},
+									$author$project$TrackInfoBox$trackInfoList)),
+								A2(
+								$mdgriffith$elm_ui$Element$column,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$spacing(5)
+									]),
+								A2(
+									$elm$core$List$map,
+									function (_v2) {
+										var fn = _v2.b;
+										return fn(trackTree);
+									},
+									$author$project$TrackInfoBox$trackInfoList))
+							]));
+				} else {
+					return A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[$mdgriffith$elm_ui$Element$centerX, $mdgriffith$elm_ui$Element$centerY]),
+						$mdgriffith$elm_ui$Element$text('No track loaded'));
+				}
+			}()
+			]));
 };
 var $author$project$Main$lowerLeftDockView = function (model) {
 	return A3(
@@ -21644,12 +21807,7 @@ var $author$project$Main$lowerLeftDockView = function (model) {
 			options: _List_fromArray(
 				[$mdgriffith$elm_ui$Element$noStaticStyleSheet])
 		},
-		_List_fromArray(
-			[
-				$mdgriffith$elm_ui$Element$padding(2),
-				$mdgriffith$elm_ui$Element$spacing(5),
-				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
-			]),
+		$author$project$ViewPureStyles$commonLayoutStyles,
 		$author$project$TrackInfoBox$trackInfoBox(model.trackTree));
 };
 var $author$project$Main$upperLeftDockView = function (model) {
@@ -21659,12 +21817,7 @@ var $author$project$Main$upperLeftDockView = function (model) {
 			options: _List_fromArray(
 				[$mdgriffith$elm_ui$Element$noStaticStyleSheet])
 		},
-		_List_fromArray(
-			[
-				$mdgriffith$elm_ui$Element$padding(2),
-				$mdgriffith$elm_ui$Element$spacing(5),
-				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
-			]),
+		$author$project$ViewPureStyles$commonLayoutStyles,
 		$author$project$TrackInfoBox$trackInfoBox(model.trackTree));
 };
 var $whale9490$elm_split_pane$Bound$getValue = function (value) {
@@ -22090,12 +22243,7 @@ var $author$project$Main$bottomDockView = function (model) {
 			options: _List_fromArray(
 				[$mdgriffith$elm_ui$Element$noStaticStyleSheet])
 		},
-		_List_fromArray(
-			[
-				$mdgriffith$elm_ui$Element$padding(2),
-				$mdgriffith$elm_ui$Element$spacing(5),
-				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-			]),
+		$author$project$ViewPureStyles$commonLayoutStyles,
 		$author$project$TrackInfoBox$trackInfoBox(model.trackTree));
 };
 var $author$project$Main$SetCurrentPosition = function (a) {
@@ -22367,7 +22515,6 @@ var $mdgriffith$elm_ui$Internal$Model$TransformComponent = F2(
 	function (a, b) {
 		return {$: 'TransformComponent', a: a, b: b};
 	});
-var $elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
 var $mdgriffith$elm_ui$Internal$Model$map = F2(
 	function (fn, el) {
 		switch (el.$) {
@@ -24349,29 +24496,6 @@ var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWheel = $mpizenberg
 var $author$project$ViewThirdPerson$ImageReset = {$: 'ImageReset'};
 var $author$project$ViewThirdPerson$ImageZoomIn = {$: 'ImageZoomIn'};
 var $author$project$ViewThirdPerson$ImageZoomOut = {$: 'ImageZoomOut'};
-var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
-var $feathericons$elm_feather$FeatherIcons$Icon = function (a) {
-	return {$: 'Icon', a: a};
-};
-var $feathericons$elm_feather$FeatherIcons$defaultAttributes = function (name) {
-	return {
-		_class: $elm$core$Maybe$Just('feather feather-' + name),
-		size: 24,
-		sizeUnit: '',
-		strokeWidth: 2,
-		viewBox: '0 0 24 24'
-	};
-};
-var $feathericons$elm_feather$FeatherIcons$makeBuilder = F2(
-	function (name, src) {
-		return $feathericons$elm_feather$FeatherIcons$Icon(
-			{
-				attrs: $feathericons$elm_feather$FeatherIcons$defaultAttributes(name),
-				src: src
-			});
-	});
-var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
-var $elm$svg$Svg$path = $elm$svg$Svg$trustedNode('path');
 var $feathericons$elm_feather$FeatherIcons$maximize = A2(
 	$feathericons$elm_feather$FeatherIcons$makeBuilder,
 	'maximize',
@@ -24433,77 +24557,6 @@ var $feathericons$elm_feather$FeatherIcons$plus = A2(
 			_List_Nil)
 		]));
 var $author$project$ViewThirdPerson$stopProp = {preventDefault: false, stopPropagation: true};
-var $elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
-var $elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
-var $elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
-var $elm$svg$Svg$map = $elm$virtual_dom$VirtualDom$map;
-var $elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
-var $elm$svg$Svg$Attributes$strokeLinecap = _VirtualDom_attribute('stroke-linecap');
-var $elm$svg$Svg$Attributes$strokeLinejoin = _VirtualDom_attribute('stroke-linejoin');
-var $elm$svg$Svg$Attributes$strokeWidth = _VirtualDom_attribute('stroke-width');
-var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
-var $elm$svg$Svg$Attributes$viewBox = _VirtualDom_attribute('viewBox');
-var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
-var $feathericons$elm_feather$FeatherIcons$toHtml = F2(
-	function (attributes, _v0) {
-		var src = _v0.a.src;
-		var attrs = _v0.a.attrs;
-		var strSize = $elm$core$String$fromFloat(attrs.size);
-		var baseAttributes = _List_fromArray(
-			[
-				$elm$svg$Svg$Attributes$fill('none'),
-				$elm$svg$Svg$Attributes$height(
-				_Utils_ap(strSize, attrs.sizeUnit)),
-				$elm$svg$Svg$Attributes$width(
-				_Utils_ap(strSize, attrs.sizeUnit)),
-				$elm$svg$Svg$Attributes$stroke('currentColor'),
-				$elm$svg$Svg$Attributes$strokeLinecap('round'),
-				$elm$svg$Svg$Attributes$strokeLinejoin('round'),
-				$elm$svg$Svg$Attributes$strokeWidth(
-				$elm$core$String$fromFloat(attrs.strokeWidth)),
-				$elm$svg$Svg$Attributes$viewBox(attrs.viewBox)
-			]);
-		var combinedAttributes = _Utils_ap(
-			function () {
-				var _v1 = attrs._class;
-				if (_v1.$ === 'Just') {
-					var c = _v1.a;
-					return A2(
-						$elm$core$List$cons,
-						$elm$svg$Svg$Attributes$class(c),
-						baseAttributes);
-				} else {
-					return baseAttributes;
-				}
-			}(),
-			attributes);
-		return A2(
-			$elm$svg$Svg$svg,
-			combinedAttributes,
-			A2(
-				$elm$core$List$map,
-				$elm$svg$Svg$map($elm$core$Basics$never),
-				src));
-	});
-var $feathericons$elm_feather$FeatherIcons$withSize = F2(
-	function (size, _v0) {
-		var attrs = _v0.a.attrs;
-		var src = _v0.a.src;
-		return $feathericons$elm_feather$FeatherIcons$Icon(
-			{
-				attrs: _Utils_update(
-					attrs,
-					{size: size}),
-				src: src
-			});
-	});
-var $author$project$ViewPureStyles$useIcon = A2(
-	$elm$core$Basics$composeL,
-	A2(
-		$elm$core$Basics$composeL,
-		$mdgriffith$elm_ui$Element$html,
-		$feathericons$elm_feather$FeatherIcons$toHtml(_List_Nil)),
-	$feathericons$elm_feather$FeatherIcons$withSize(20));
 var $smucode$elm_flat_colors$FlatColors$ChinesePalette$white = A3($mdgriffith$elm_ui$Element$rgb255, 255, 255, 255);
 var $author$project$ViewThirdPerson$zoomButtons = function (msgWrapper) {
 	return A2(
@@ -24650,16 +24703,6 @@ var $mdgriffith$elm_ui$Element$Input$optionWith = F2(
 	});
 var $mdgriffith$elm_ui$Element$Input$Selected = {$: 'Selected'};
 var $smucode$elm_flat_colors$FlatColors$ChinesePalette$clearChill = A3($mdgriffith$elm_ui$Element$rgb255, 30, 144, 255);
-var $mdgriffith$elm_ui$Element$Font$color = function (fontColor) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$fontColor,
-		A3(
-			$mdgriffith$elm_ui$Internal$Model$Colored,
-			'fc-' + $mdgriffith$elm_ui$Internal$Model$formatColorClass(fontColor),
-			'color',
-			fontColor));
-};
 var $smucode$elm_flat_colors$FlatColors$ChinesePalette$prestigeBlue = A3($mdgriffith$elm_ui$Element$rgb255, 47, 53, 66);
 var $mdgriffith$elm_ui$Element$Border$widthXY = F2(
 	function (x, y) {
@@ -24704,14 +24747,7 @@ var $author$project$ViewPureStyles$radioButton = F2(
 					$mdgriffith$elm_ui$Element$Background$color(
 					_Utils_eq(state, $mdgriffith$elm_ui$Element$Input$Selected) ? $smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite : $smucode$elm_flat_colors$FlatColors$ChinesePalette$peace),
 					$mdgriffith$elm_ui$Element$Font$color(
-					_Utils_eq(state, $mdgriffith$elm_ui$Element$Input$Selected) ? $smucode$elm_flat_colors$FlatColors$ChinesePalette$prestigeBlue : $smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite),
-					$mdgriffith$elm_ui$Element$Font$size(14),
-					$mdgriffith$elm_ui$Element$Font$family(
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$Font$typeface('Open Sans'),
-							$mdgriffith$elm_ui$Element$Font$sansSerif
-						]))
+					_Utils_eq(state, $mdgriffith$elm_ui$Element$Input$Selected) ? $smucode$elm_flat_colors$FlatColors$ChinesePalette$prestigeBlue : $smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite)
 				]),
 			A2(
 				$mdgriffith$elm_ui$Element$el,
@@ -25145,7 +25181,7 @@ var $author$project$Main$viewPaneArea = function (model) {
 			options: _List_fromArray(
 				[$mdgriffith$elm_ui$Element$noStaticStyleSheet])
 		},
-		_List_Nil,
+		$author$project$ViewPureStyles$commonLayoutStyles,
 		$author$project$Main$contentArea(model));
 };
 var $author$project$Main$centralAreaView = function (model) {
@@ -25165,12 +25201,7 @@ var $author$project$Main$lowerRightDockView = function (model) {
 			options: _List_fromArray(
 				[$mdgriffith$elm_ui$Element$noStaticStyleSheet])
 		},
-		_List_fromArray(
-			[
-				$mdgriffith$elm_ui$Element$padding(2),
-				$mdgriffith$elm_ui$Element$spacing(5),
-				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
-			]),
+		$author$project$ViewPureStyles$commonLayoutStyles,
 		$author$project$TrackInfoBox$trackInfoBox(model.trackTree));
 };
 var $author$project$Main$rightDockInternalConfig = $whale9490$elm_split_pane$SplitPane$createViewConfig(
@@ -25182,12 +25213,7 @@ var $author$project$Main$upperRightDockView = function (model) {
 			options: _List_fromArray(
 				[$mdgriffith$elm_ui$Element$noStaticStyleSheet])
 		},
-		_List_fromArray(
-			[
-				$mdgriffith$elm_ui$Element$padding(2),
-				$mdgriffith$elm_ui$Element$spacing(5),
-				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
-			]),
+		$author$project$ViewPureStyles$commonLayoutStyles,
 		$author$project$TrackInfoBox$trackInfoBox(model.trackTree));
 };
 var $author$project$Main$rightDockView = function (model) {
@@ -25214,14 +25240,7 @@ var $author$project$Main$topLoadingBar = function (model) {
 		_List_fromArray(
 			[
 				$mdgriffith$elm_ui$Element$padding(5),
-				$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$twinkleBlue),
-				$mdgriffith$elm_ui$Element$Font$size(14),
-				$mdgriffith$elm_ui$Element$Font$family(
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$Font$typeface('Open Sans'),
-						$mdgriffith$elm_ui$Element$Font$sansSerif
-					]))
+				$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$twinkleBlue)
 			]),
 		{
 			label: $mdgriffith$elm_ui$Element$text('Load GPX file'),
@@ -25229,15 +25248,17 @@ var $author$project$Main$topLoadingBar = function (model) {
 		});
 	return A2(
 		$mdgriffith$elm_ui$Element$row,
-		_List_fromArray(
-			[
-				$mdgriffith$elm_ui$Element$spacing(20),
-				$mdgriffith$elm_ui$Element$padding(5),
-				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-				$mdgriffith$elm_ui$Element$Border$widthEach(
-				{bottom: 1, left: 0, right: 0, top: 0}),
-				$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$twinkleBlue)
-			]),
+		_Utils_ap(
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$spacing(20),
+					$mdgriffith$elm_ui$Element$padding(5),
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$Border$widthEach(
+					{bottom: 1, left: 0, right: 0, top: 0}),
+					$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$twinkleBlue)
+				]),
+			$author$project$ViewPureStyles$commonLayoutStyles),
 		_List_fromArray(
 			[loadGpxButton]));
 };
@@ -25255,7 +25276,7 @@ var $author$project$Main$view = function (_v0) {
 						$mdgriffith$elm_ui$Element$spacing(10),
 						$mdgriffith$elm_ui$Element$Font$size(16),
 						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-						$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$bayWharf)
+						$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$peace)
 					]),
 				A2(
 					$mdgriffith$elm_ui$Element$column,
