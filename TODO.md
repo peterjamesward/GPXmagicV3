@@ -9,6 +9,7 @@ Concept test of five (!) dock zones, with multiple adjustable splits.
 
 > Try making the single tab available move around.
 > Use localStorage to save splitter and tool tab layout (as v2).
+> Add configurable title bar and colour at top of each dock.
 
 Put all Font, Colour etc into a Palette/Style module for ease of change.
 
@@ -22,13 +23,15 @@ All to do with getting the right focal point?
  - dockable any side, via pop-up tools icon
  - user choice of colour, ditto
  - preset layout options in "menu bar"
- - less space for view selection -- popup? e.g. feather icon with "eye".
+ - less space for view selection -- popup? e.g. feather icon with "eye" in the wee mini toolbar.
 
  - fully pluggable tools (lots of functions to interact with tabs, like OO)
+ - > But the rule says (apparently) "don't store functions in the model"
+   > https://github.com/evancz/elm-sortable-table/tree/1.0.0#usage-rules
+   
  - previews in all views, each tool is fully responsible (but with shared helpers).
- - validate Actions concept,
- - decide best approach to Undo & Redo (likely GPXSource delta to Undo, function to Redo)
- - (journaling in localStorage would allow recovery by replay?)
+ - Thus, validate Actions concept,
+ - decide best approach to Undo & Redo (see Backlog)
 
 Let's start with Bend/Gradient problems, showing on 3D and map, then Delete.
 > Thinking of not listing problems in the tab, because affects tab size greatly.
@@ -92,6 +95,9 @@ Terrain 2 = Tree walk combined with whole (visible) tree query, because <loops>.
 ## Undo/Redo
 Revert to keeping GPXPoints for Undo, not reverse delta (2.7, not 2.8).
 Use Session state, to avoid taking up ram, with unlimited Undo.
+> Possibility, if fast enough, that we replay journaled edits from last checkpoint (last save).
+> (Because user can always load that file anyway.) Ah, but suppose you want to go further back?
+> I guess we could ask the user to re-open the relevant baseline file?
 
 ## (Algebraic) operations
 As and when needed:

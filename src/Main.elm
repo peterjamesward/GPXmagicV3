@@ -298,7 +298,7 @@ view (Model model) =
             , spacing 10
             , Font.size 16
             , height fill
-            , Background.color FlatColors.ChinesePalette.antiFlashWhite
+            , Background.color FlatColors.ChinesePalette.bayWharf
             ]
           <|
             column [ width fill, height fill ]

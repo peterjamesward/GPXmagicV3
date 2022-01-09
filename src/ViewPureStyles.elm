@@ -151,16 +151,16 @@ radioButton label state =
         --, Border.roundEach { topLeft = 6, bottomLeft = 0, topRight = 6, bottomRight = 0 }
         , Background.color <|
             if state == Input.Selected then
-                FlatColors.ChinesePalette.bayWharf
+                FlatColors.ChinesePalette.antiFlashWhite
 
             else
-                FlatColors.ChinesePalette.antiFlashWhite
+                FlatColors.ChinesePalette.peace
         , Font.color <|
             if state == Input.Selected then
-                FlatColors.ChinesePalette.antiFlashWhite
+                FlatColors.ChinesePalette.prestigeBlue
 
             else
-                FlatColors.ChinesePalette.bayWharf
+                FlatColors.ChinesePalette.antiFlashWhite
         , Font.size 14
         , Font.family
             [ Font.typeface "Open Sans"

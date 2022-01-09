@@ -15180,7 +15180,7 @@ var $mdgriffith$elm_ui$Element$rgb255 = F3(
 	function (red, green, blue) {
 		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, red / 255, green / 255, blue / 255, 1);
 	});
-var $smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite = A3($mdgriffith$elm_ui$Element$rgb255, 241, 242, 246);
+var $smucode$elm_flat_colors$FlatColors$ChinesePalette$bayWharf = A3($mdgriffith$elm_ui$Element$rgb255, 116, 125, 140);
 var $mdgriffith$elm_ui$Internal$Model$Colored = F3(
 	function (a, b, c) {
 		return {$: 'Colored', a: a, b: b, c: c};
@@ -22814,6 +22814,7 @@ var $mdgriffith$elm_ui$Internal$Model$Left = {$: 'Left'};
 var $mdgriffith$elm_ui$Element$alignLeft = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Left);
 var $mdgriffith$elm_ui$Internal$Model$Right = {$: 'Right'};
 var $mdgriffith$elm_ui$Element$alignRight = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Right);
+var $smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite = A3($mdgriffith$elm_ui$Element$rgb255, 241, 242, 246);
 var $mdgriffith$elm_ui$Internal$Model$Button = {$: 'Button'};
 var $elm$json$Json$Encode$bool = _Json_wrap;
 var $elm$html$Html$Attributes$boolProperty = F2(
@@ -24648,7 +24649,6 @@ var $mdgriffith$elm_ui$Element$Input$optionWith = F2(
 		return A2($mdgriffith$elm_ui$Element$Input$Option, val, view);
 	});
 var $mdgriffith$elm_ui$Element$Input$Selected = {$: 'Selected'};
-var $smucode$elm_flat_colors$FlatColors$ChinesePalette$bayWharf = A3($mdgriffith$elm_ui$Element$rgb255, 116, 125, 140);
 var $smucode$elm_flat_colors$FlatColors$ChinesePalette$clearChill = A3($mdgriffith$elm_ui$Element$rgb255, 30, 144, 255);
 var $mdgriffith$elm_ui$Element$Font$color = function (fontColor) {
 	return A2(
@@ -24660,6 +24660,7 @@ var $mdgriffith$elm_ui$Element$Font$color = function (fontColor) {
 			'color',
 			fontColor));
 };
+var $smucode$elm_flat_colors$FlatColors$ChinesePalette$prestigeBlue = A3($mdgriffith$elm_ui$Element$rgb255, 47, 53, 66);
 var $mdgriffith$elm_ui$Element$Border$widthXY = F2(
 	function (x, y) {
 		return A2(
@@ -24701,9 +24702,9 @@ var $author$project$ViewPureStyles$radioButton = F2(
 					$mdgriffith$elm_ui$Element$Border$widthEach(
 					_Utils_eq(state, $mdgriffith$elm_ui$Element$Input$Selected) ? {bottom: 0, left: 2, right: 2, top: 2} : {bottom: 0, left: 1, right: 1, top: 1}),
 					$mdgriffith$elm_ui$Element$Background$color(
-					_Utils_eq(state, $mdgriffith$elm_ui$Element$Input$Selected) ? $smucode$elm_flat_colors$FlatColors$ChinesePalette$bayWharf : $smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite),
+					_Utils_eq(state, $mdgriffith$elm_ui$Element$Input$Selected) ? $smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite : $smucode$elm_flat_colors$FlatColors$ChinesePalette$peace),
 					$mdgriffith$elm_ui$Element$Font$color(
-					_Utils_eq(state, $mdgriffith$elm_ui$Element$Input$Selected) ? $smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite : $smucode$elm_flat_colors$FlatColors$ChinesePalette$bayWharf),
+					_Utils_eq(state, $mdgriffith$elm_ui$Element$Input$Selected) ? $smucode$elm_flat_colors$FlatColors$ChinesePalette$prestigeBlue : $smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite),
 					$mdgriffith$elm_ui$Element$Font$size(14),
 					$mdgriffith$elm_ui$Element$Font$family(
 					_List_fromArray(
@@ -25254,7 +25255,7 @@ var $author$project$Main$view = function (_v0) {
 						$mdgriffith$elm_ui$Element$spacing(10),
 						$mdgriffith$elm_ui$Element$Font$size(16),
 						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-						$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite)
+						$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$bayWharf)
 					]),
 				A2(
 					$mdgriffith$elm_ui$Element$column,
