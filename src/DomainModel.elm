@@ -32,18 +32,32 @@ type alias RoadSection =
     { sourceData : ( GPXSource, GPXSource )
     , startPoint : EarthPoint
     , endPoint : EarthPoint
+
+    -- For rapid location of points using non-map views...
     , boundingBox : BoundingBox3d Meters LocalCoords
     , sphere : Sphere3d Meters LocalCoords
     , trueLength : Length.Length
     , skipCount : Int
+
+    -- For efficient detection of map clicks...
     , medianLongitude : Direction2d LocalCoords
-    , eastwardTurn : Angle
-    , westwardTurn : Angle
+    , eastwardExtent : Angle
+    , westwardExtent : Angle
+
+    -- Basic route statistics...
     , altitudeGained : Length.Length
     , altitudeLost : Length.Length
     , distanceClimbing : Length.Length
     , distanceDescending : Length.Length
     , steepestClimb : Float
+
+    -- Bunch of stuff we need in the tree to be able to locate problem points efficiently...
+    , gradientAtStart : Float
+    , gradientAtEnd : Float
+    , gradientChangeMaximumAbs : Float
+    , directionAtStart : Direction2d LocalCoords
+    , directionAtEnd : Direction2d LocalCoords
+    , directionChangeMaximumAbs : Angle
     }
 
 
@@ -183,20 +197,20 @@ eastwardTurn : PeteTree -> Angle
 eastwardTurn treeNode =
     case treeNode of
         Leaf leaf ->
-            leaf.eastwardTurn
+            leaf.eastwardExtent
 
         Node node ->
-            node.nodeContent.eastwardTurn
+            node.nodeContent.eastwardExtent
 
 
 westwardTurn : PeteTree -> Angle
 westwardTurn treeNode =
     case treeNode of
         Leaf leaf ->
-            leaf.westwardTurn
+            leaf.westwardExtent
 
         Node node ->
-            node.nodeContent.westwardTurn
+            node.nodeContent.westwardExtent
 
 
 pointFromGpxWithReference : GPXSource -> GPXSource -> EarthPoint
@@ -268,6 +282,19 @@ makeRoadSection reference earth1 earth2 =
 
         altitudeChange =
             Point3d.zCoordinate local2 |> Quantity.minus (Point3d.zCoordinate local1)
+
+        gradient =
+            if (range |> Quantity.greaterThanZero) && (altitudeChange |> Quantity.greaterThanZero) then
+                100.0 * Quantity.ratio altitudeChange range
+
+            else
+                0.0
+
+        bearing =
+            Angle.radians <|
+                Spherical.findBearingToTarget
+                    ( Angle.inRadians earth1.latitude, Angle.inRadians <| Direction2d.toAngle earth1.longitude )
+                    ( Angle.inRadians earth2.latitude, Angle.inRadians <| Direction2d.toAngle earth2.longitude )
     in
     { sourceData = ( earth1, earth2 )
     , startPoint = local1
@@ -277,12 +304,12 @@ makeRoadSection reference earth1 earth2 =
     , trueLength = range
     , skipCount = 1
     , medianLongitude = medianLon
-    , eastwardTurn =
+    , eastwardExtent =
         Quantity.max Quantity.zero <|
             Quantity.max
                 (Direction2d.angleFrom medianLon earth1.longitude)
                 (Direction2d.angleFrom medianLon earth2.longitude)
-    , westwardTurn =
+    , westwardExtent =
         Quantity.min Quantity.zero <|
             Quantity.min
                 (Direction2d.angleFrom medianLon earth1.longitude)
@@ -301,12 +328,13 @@ makeRoadSection reference earth1 earth2 =
 
         else
             Quantity.zero
-    , steepestClimb =
-        if (range |> Quantity.greaterThanZero) && (altitudeChange |> Quantity.greaterThanZero) then
-            max 0.0 <| 100.0 * Quantity.ratio altitudeChange range
-
-        else
-            0.0
+    , steepestClimb = max 0.0 gradient
+    , gradientAtStart = gradient
+    , gradientAtEnd = gradient
+    , gradientChangeMaximumAbs = abs gradient
+    , directionAtStart = Direction2d.fromAngle bearing
+    , directionAtEnd = Direction2d.fromAngle bearing
+    , directionChangeMaximumAbs = Angle.degrees 0
     }
 
 
@@ -344,7 +372,7 @@ treeFromList track =
             , trueLength = Quantity.plus (trueLength info1) (trueLength info2)
             , skipCount = skipCount info1 + skipCount info2
             , medianLongitude = sharedMedian
-            , eastwardTurn =
+            , eastwardExtent =
                 Quantity.max
                     (medianLongitude info1
                         |> Direction2d.rotateBy (eastwardTurn info1)
@@ -354,7 +382,7 @@ treeFromList track =
                         |> Direction2d.rotateBy (eastwardTurn info2)
                         |> Direction2d.angleFrom sharedMedian
                     )
-            , westwardTurn =
+            , westwardExtent =
                 Quantity.min
                     (medianLongitude info1
                         |> Direction2d.rotateBy (westwardTurn info1)
@@ -383,6 +411,22 @@ treeFromList track =
             , steepestClimb =
                 max (info1 |> asRecord |> .steepestClimb)
                     (info2 |> asRecord |> .steepestClimb)
+            , gradientAtStart = info1 |> asRecord |> .gradientAtStart
+            , gradientAtEnd = info2 |> asRecord |> .gradientAtEnd
+            , gradientChangeMaximumAbs =
+                max (info1 |> asRecord |> .gradientChangeMaximumAbs)
+                    (info2 |> asRecord |> .gradientChangeMaximumAbs)
+            , directionAtStart = info1 |> asRecord |> .directionAtStart
+            , directionAtEnd = info2 |> asRecord |> .directionAtEnd
+            , directionChangeMaximumAbs =
+                Maybe.withDefault Quantity.zero <|
+                    Quantity.maximum
+                        [ info1 |> asRecord |> .directionChangeMaximumAbs
+                        , info1 |> asRecord |> .directionChangeMaximumAbs
+                        , Quantity.abs <|
+                            Direction2d.angleFrom (info1 |> asRecord |> .directionAtEnd)
+                                (info2 |> asRecord |> .directionAtStart)
+                        ]
             }
 
         treeBuilder : Int -> List GPXSource -> ( Maybe PeteTree, List GPXSource )
