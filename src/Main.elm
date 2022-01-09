@@ -334,6 +334,7 @@ rightDockConfig =
         , customSplitter = Nothing
         }
 
+
 bottomDockConfig : ViewConfig Msg
 bottomDockConfig =
     createViewConfig
@@ -342,20 +343,71 @@ bottomDockConfig =
         }
 
 
-leftDockView : ModelRecord -> Html a
+leftDockInternalConfig : ViewConfig Msg
+leftDockInternalConfig =
+    createViewConfig
+        { toMsg = SplitLeftDockInternal
+        , customSplitter = Nothing
+        }
+
+
+rightDockInternalConfig : ViewConfig Msg
+rightDockInternalConfig =
+    createViewConfig
+        { toMsg = SplitRightDockInternal
+        , customSplitter = Nothing
+        }
+
+
+leftDockView : ModelRecord -> Html Msg
 leftDockView model =
+    SplitPane.view
+        leftDockInternalConfig
+        (upperLeftDockView model)
+        (lowerLeftDockView model)
+        model.leftDockInternal
+
+
+upperLeftDockView : ModelRecord -> Html Msg
+upperLeftDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
         [ padding 2, spacing 5, height fill ]
     <|
         trackInfoBox model.trackTree
 
 
-rightDockView : ModelRecord -> Html a
+lowerLeftDockView : ModelRecord -> Html Msg
+lowerLeftDockView model =
+    layoutWith { options = [ noStaticStyleSheet ] }
+        [ padding 2, spacing 5, height fill ]
+    <|
+        trackInfoBox model.trackTree
+
+
+rightDockView : ModelRecord -> Html Msg
 rightDockView model =
+    SplitPane.view
+        rightDockInternalConfig
+        (upperRightDockView model)
+        (lowerRightDockView model)
+        model.rightDockInternal
+
+
+upperRightDockView : ModelRecord -> Html Msg
+upperRightDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
         [ padding 2, spacing 5, height fill ]
     <|
         trackInfoBox model.trackTree
+
+
+lowerRightDockView : ModelRecord -> Html Msg
+lowerRightDockView model =
+    layoutWith { options = [ noStaticStyleSheet ] }
+        [ padding 2, spacing 5, height fill ]
+    <|
+        trackInfoBox model.trackTree
+
 
 bottomDockView : ModelRecord -> Html a
 bottomDockView model =

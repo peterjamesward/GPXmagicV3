@@ -20905,6 +20905,8 @@ var $whale9490$elm_split_pane$SplitPane$createViewConfig = function (_v0) {
 };
 var $author$project$Main$leftDockConfig = $whale9490$elm_split_pane$SplitPane$createViewConfig(
 	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitLeftDockRightEdge});
+var $author$project$Main$leftDockInternalConfig = $whale9490$elm_split_pane$SplitPane$createViewConfig(
+	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitLeftDockInternal});
 var $mdgriffith$elm_ui$Internal$Model$NoStaticStyleSheet = {$: 'NoStaticStyleSheet'};
 var $mdgriffith$elm_ui$Internal$Model$RenderModeOption = function (a) {
 	return {$: 'RenderModeOption', a: a};
@@ -21650,7 +21652,7 @@ var $author$project$TrackInfoBox$trackInfoBox = function (maybeTree) {
 			$mdgriffith$elm_ui$Element$text('No track loaded'));
 	}
 };
-var $author$project$Main$leftDockView = function (model) {
+var $author$project$Main$lowerLeftDockView = function (model) {
 	return A3(
 		$mdgriffith$elm_ui$Element$layoutWith,
 		{
@@ -21665,9 +21667,7 @@ var $author$project$Main$leftDockView = function (model) {
 			]),
 		$author$project$TrackInfoBox$trackInfoBox(model.trackTree));
 };
-var $author$project$Main$bottomDockConfig = $whale9490$elm_split_pane$SplitPane$createViewConfig(
-	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitBottomDockTopEdge});
-var $author$project$Main$bottomDockView = function (model) {
+var $author$project$Main$upperLeftDockView = function (model) {
 	return A3(
 		$mdgriffith$elm_ui$Element$layoutWith,
 		{
@@ -21678,7 +21678,7 @@ var $author$project$Main$bottomDockView = function (model) {
 			[
 				$mdgriffith$elm_ui$Element$padding(2),
 				$mdgriffith$elm_ui$Element$spacing(5),
-				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
 			]),
 		$author$project$TrackInfoBox$trackInfoBox(model.trackTree));
 };
@@ -22088,6 +22088,31 @@ var $whale9490$elm_split_pane$SplitPane$view = F4(
 						[secondView]))
 				]));
 	});
+var $author$project$Main$leftDockView = function (model) {
+	return A4(
+		$whale9490$elm_split_pane$SplitPane$view,
+		$author$project$Main$leftDockInternalConfig,
+		$author$project$Main$upperLeftDockView(model),
+		$author$project$Main$lowerLeftDockView(model),
+		model.leftDockInternal);
+};
+var $author$project$Main$bottomDockConfig = $whale9490$elm_split_pane$SplitPane$createViewConfig(
+	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitBottomDockTopEdge});
+var $author$project$Main$bottomDockView = function (model) {
+	return A3(
+		$mdgriffith$elm_ui$Element$layoutWith,
+		{
+			options: _List_fromArray(
+				[$mdgriffith$elm_ui$Element$noStaticStyleSheet])
+		},
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$padding(2),
+				$mdgriffith$elm_ui$Element$spacing(5),
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+			]),
+		$author$project$TrackInfoBox$trackInfoBox(model.trackTree));
+};
 var $author$project$Main$SetCurrentPosition = function (a) {
 	return {$: 'SetCurrentPosition', a: a};
 };
@@ -25206,7 +25231,7 @@ var $author$project$Main$centralAreaView = function (model) {
 };
 var $author$project$Main$rightDockConfig = $whale9490$elm_split_pane$SplitPane$createViewConfig(
 	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitRightDockLeftEdge});
-var $author$project$Main$rightDockView = function (model) {
+var $author$project$Main$lowerRightDockView = function (model) {
 	return A3(
 		$mdgriffith$elm_ui$Element$layoutWith,
 		{
@@ -25220,6 +25245,31 @@ var $author$project$Main$rightDockView = function (model) {
 				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
 			]),
 		$author$project$TrackInfoBox$trackInfoBox(model.trackTree));
+};
+var $author$project$Main$rightDockInternalConfig = $whale9490$elm_split_pane$SplitPane$createViewConfig(
+	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitRightDockInternal});
+var $author$project$Main$upperRightDockView = function (model) {
+	return A3(
+		$mdgriffith$elm_ui$Element$layoutWith,
+		{
+			options: _List_fromArray(
+				[$mdgriffith$elm_ui$Element$noStaticStyleSheet])
+		},
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$padding(2),
+				$mdgriffith$elm_ui$Element$spacing(5),
+				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
+			]),
+		$author$project$TrackInfoBox$trackInfoBox(model.trackTree));
+};
+var $author$project$Main$rightDockView = function (model) {
+	return A4(
+		$whale9490$elm_split_pane$SplitPane$view,
+		$author$project$Main$rightDockInternalConfig,
+		$author$project$Main$upperRightDockView(model),
+		$author$project$Main$lowerRightDockView(model),
+		model.rightDockInternal);
 };
 var $author$project$Main$notTheLeftDockView = function (model) {
 	return A4(
