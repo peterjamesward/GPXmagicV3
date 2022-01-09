@@ -334,6 +334,13 @@ rightDockConfig =
         , customSplitter = Nothing
         }
 
+bottomDockConfig : ViewConfig Msg
+bottomDockConfig =
+    createViewConfig
+        { toMsg = SplitBottomDockTopEdge
+        , customSplitter = Nothing
+        }
+
 
 leftDockView : ModelRecord -> Html a
 leftDockView model =
@@ -350,6 +357,13 @@ rightDockView model =
     <|
         trackInfoBox model.trackTree
 
+bottomDockView : ModelRecord -> Html a
+bottomDockView model =
+    layoutWith { options = [ noStaticStyleSheet ] }
+        [ padding 2, spacing 5, width fill ]
+    <|
+        trackInfoBox model.trackTree
+
 
 notTheLeftDockView : ModelRecord -> Html Msg
 notTheLeftDockView model =
@@ -362,6 +376,15 @@ notTheLeftDockView model =
 
 centralAreaView : ModelRecord -> Html Msg
 centralAreaView model =
+    SplitPane.view
+        bottomDockConfig
+        (viewPaneArea model)
+        (bottomDockView model)
+        model.bottomDockTopEdge
+
+
+viewPaneArea : ModelRecord -> Html Msg
+viewPaneArea model =
     layoutWith { options = [ noStaticStyleSheet ] }
         []
     <|
