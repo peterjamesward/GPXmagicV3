@@ -6,6 +6,8 @@
 Concept test of five dock zones, with multiple adjustable splits.
 > try again with https://package.elm-lang.org/packages/whale9490/elm-split-pane/latest/
 
+Put all Font, Colour etc into a Palette module for ease of change.
+
 ## Zoom, Pan, Rotate.
 Pan feels slippy. Is the scaling wrong?
 All to do with getting the right focal point?

@@ -24777,7 +24777,7 @@ var $author$project$Main$contentArea = function (model) {
 					]))
 			]));
 };
-var $author$project$Main$notTheLeftDockView = function (model) {
+var $author$project$Main$centralAreaView = function (model) {
 	return A3(
 		$mdgriffith$elm_ui$Element$layoutWith,
 		{
@@ -24787,40 +24787,22 @@ var $author$project$Main$notTheLeftDockView = function (model) {
 		_List_Nil,
 		$author$project$Main$contentArea(model));
 };
-var $author$project$Main$GpxRequested = {$: 'GpxRequested'};
-var $smucode$elm_flat_colors$FlatColors$ChinesePalette$twinkleBlue = A3($mdgriffith$elm_ui$Element$rgb255, 206, 214, 224);
-var $author$project$Main$topLoadingBar = function (model) {
-	var loadGpxButton = A2(
-		$mdgriffith$elm_ui$Element$Input$button,
-		_List_fromArray(
-			[
-				$mdgriffith$elm_ui$Element$padding(5),
-				$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$twinkleBlue),
-				$mdgriffith$elm_ui$Element$Font$size(14),
-				$mdgriffith$elm_ui$Element$Font$family(
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$Font$typeface('Open Sans'),
-						$mdgriffith$elm_ui$Element$Font$sansSerif
-					]))
-			]),
+var $author$project$Main$rightDockConfig = $whale9490$elm_split_pane$SplitPane$createViewConfig(
+	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitRightDockLeftEdge});
+var $author$project$Main$rightDockView = function (model) {
+	return A3(
+		$mdgriffith$elm_ui$Element$layoutWith,
 		{
-			label: $mdgriffith$elm_ui$Element$text('Load GPX file'),
-			onPress: $elm$core$Maybe$Just($author$project$Main$GpxRequested)
-		});
-	return A2(
-		$mdgriffith$elm_ui$Element$row,
+			options: _List_fromArray(
+				[$mdgriffith$elm_ui$Element$noStaticStyleSheet])
+		},
 		_List_fromArray(
 			[
-				$mdgriffith$elm_ui$Element$spacing(20),
-				$mdgriffith$elm_ui$Element$padding(5),
-				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-				$mdgriffith$elm_ui$Element$Border$widthEach(
-				{bottom: 1, left: 0, right: 0, top: 0}),
-				$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$twinkleBlue)
+				$mdgriffith$elm_ui$Element$padding(2),
+				$mdgriffith$elm_ui$Element$spacing(5),
+				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
 			]),
-		_List_fromArray(
-			[loadGpxButton]));
+		$author$project$TrackInfoBox$trackInfoBox(model.trackTree));
 };
 var $whale9490$elm_split_pane$Bound$getValue = function (value) {
 	return value.a;
@@ -25214,6 +25196,49 @@ var $whale9490$elm_split_pane$SplitPane$view = F4(
 						[secondView]))
 				]));
 	});
+var $author$project$Main$notTheLeftDockView = function (model) {
+	return A4(
+		$whale9490$elm_split_pane$SplitPane$view,
+		$author$project$Main$rightDockConfig,
+		$author$project$Main$centralAreaView(model),
+		$author$project$Main$rightDockView(model),
+		model.rightDockLeftEdge);
+};
+var $author$project$Main$GpxRequested = {$: 'GpxRequested'};
+var $smucode$elm_flat_colors$FlatColors$ChinesePalette$twinkleBlue = A3($mdgriffith$elm_ui$Element$rgb255, 206, 214, 224);
+var $author$project$Main$topLoadingBar = function (model) {
+	var loadGpxButton = A2(
+		$mdgriffith$elm_ui$Element$Input$button,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$padding(5),
+				$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$twinkleBlue),
+				$mdgriffith$elm_ui$Element$Font$size(14),
+				$mdgriffith$elm_ui$Element$Font$family(
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$Font$typeface('Open Sans'),
+						$mdgriffith$elm_ui$Element$Font$sansSerif
+					]))
+			]),
+		{
+			label: $mdgriffith$elm_ui$Element$text('Load GPX file'),
+			onPress: $elm$core$Maybe$Just($author$project$Main$GpxRequested)
+		});
+	return A2(
+		$mdgriffith$elm_ui$Element$row,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$spacing(20),
+				$mdgriffith$elm_ui$Element$padding(5),
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+				$mdgriffith$elm_ui$Element$Border$widthEach(
+				{bottom: 1, left: 0, right: 0, top: 0}),
+				$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$twinkleBlue)
+			]),
+		_List_fromArray(
+			[loadGpxButton]));
+};
 var $author$project$Main$view = function (_v0) {
 	var model = _v0.a;
 	return {
@@ -25245,8 +25270,8 @@ var $author$project$Main$view = function (_v0) {
 								$elm$html$Html$div,
 								_List_fromArray(
 									[
-										A2($elm$html$Html$Attributes$style, 'width', '800px'),
-										A2($elm$html$Html$Attributes$style, 'height', '600px')
+										A2($elm$html$Html$Attributes$style, 'width', '1000px'),
+										A2($elm$html$Html$Attributes$style, 'height', '800px')
 									]),
 								_List_fromArray(
 									[

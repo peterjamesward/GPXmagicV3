@@ -305,8 +305,8 @@ view (Model model) =
                 [ topLoadingBar model
                 , html <|
                     div
-                        [ style "width" "800px"
-                        , style "height" "600px"
+                        [ style "width" "1000px"
+                        , style "height" "800px"
                         ]
                         [ SplitPane.view
                             leftDockConfig
@@ -327,6 +327,14 @@ leftDockConfig =
         }
 
 
+rightDockConfig : ViewConfig Msg
+rightDockConfig =
+    createViewConfig
+        { toMsg = SplitRightDockLeftEdge
+        , customSplitter = Nothing
+        }
+
+
 leftDockView : ModelRecord -> Html a
 leftDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
@@ -335,8 +343,25 @@ leftDockView model =
         trackInfoBox model.trackTree
 
 
+rightDockView : ModelRecord -> Html a
+rightDockView model =
+    layoutWith { options = [ noStaticStyleSheet ] }
+        [ padding 2, spacing 5, height fill ]
+    <|
+        trackInfoBox model.trackTree
+
+
 notTheLeftDockView : ModelRecord -> Html Msg
 notTheLeftDockView model =
+    SplitPane.view
+        rightDockConfig
+        (centralAreaView model)
+        (rightDockView model)
+        model.rightDockLeftEdge
+
+
+centralAreaView : ModelRecord -> Html Msg
+centralAreaView model =
     layoutWith { options = [ noStaticStyleSheet ] }
         []
     <|
