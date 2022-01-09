@@ -9411,24 +9411,6 @@ var $ianmackenzie$elm_units$Quantity$Quantity = function (a) {
 var $ianmackenzie$elm_units$Pixels$pixels = function (numPixels) {
 	return $ianmackenzie$elm_units$Quantity$Quantity(numPixels);
 };
-var $whale9490$elm_split_pane$SplitPane$Px = function (a) {
-	return {$: 'Px', a: a};
-};
-var $whale9490$elm_split_pane$SplitPane$px = F2(
-	function (x, bound) {
-		var newBound = function () {
-			if (bound.$ === 'Just') {
-				var _v1 = bound.a;
-				var lower = _v1.a;
-				var upper = _v1.b;
-				return A2($whale9490$elm_split_pane$Bound$createBound, lower, upper);
-			} else {
-				return A2($whale9490$elm_split_pane$Bound$createBound, 0, 9999999999);
-			}
-		}();
-		return $whale9490$elm_split_pane$SplitPane$Px(
-			A2($whale9490$elm_split_pane$Bound$createBounded, x, newBound));
-	});
 var $elm$json$Json$Encode$object = function (pairs) {
 	return _Json_wrap(
 		A3(
@@ -9471,10 +9453,10 @@ var $author$project$Main$init = F3(
 					bottomDockTopEdge: A2(
 						$whale9490$elm_split_pane$SplitPane$configureSplitter,
 						A2(
-							$whale9490$elm_split_pane$SplitPane$px,
-							450,
+							$whale9490$elm_split_pane$SplitPane$percentage,
+							0.9,
 							$elm$core$Maybe$Just(
-								_Utils_Tuple2(0, 800))),
+								_Utils_Tuple2(0.8, 0.99))),
 						$whale9490$elm_split_pane$SplitPane$init($whale9490$elm_split_pane$SplitPane$Vertical)),
 					currentPosition: 0,
 					filename: $elm$core$Maybe$Nothing,
@@ -9483,10 +9465,10 @@ var $author$project$Main$init = F3(
 					leftDockInternal: A2(
 						$whale9490$elm_split_pane$SplitPane$configureSplitter,
 						A2(
-							$whale9490$elm_split_pane$SplitPane$px,
-							450,
+							$whale9490$elm_split_pane$SplitPane$percentage,
+							0.4,
 							$elm$core$Maybe$Just(
-								_Utils_Tuple2(0, 800))),
+								_Utils_Tuple2(0.1, 0.9))),
 						$whale9490$elm_split_pane$SplitPane$init($whale9490$elm_split_pane$SplitPane$Vertical)),
 					leftDockRightEdge: A2(
 						$whale9490$elm_split_pane$SplitPane$configureSplitter,
@@ -9494,7 +9476,7 @@ var $author$project$Main$init = F3(
 							$whale9490$elm_split_pane$SplitPane$percentage,
 							0.2,
 							$elm$core$Maybe$Just(
-								_Utils_Tuple2(0.2, 0.8))),
+								_Utils_Tuple2(0.01, 0.49))),
 						$whale9490$elm_split_pane$SplitPane$init($whale9490$elm_split_pane$SplitPane$Horizontal)),
 					mapClickDebounce: false,
 					referenceLonLat: A3($author$project$DomainModel$GPXSource, $ianmackenzie$elm_geometry$Direction2d$x, $ianmackenzie$elm_units$Quantity$zero, $ianmackenzie$elm_units$Quantity$zero),
@@ -9502,18 +9484,18 @@ var $author$project$Main$init = F3(
 					rightDockInternal: A2(
 						$whale9490$elm_split_pane$SplitPane$configureSplitter,
 						A2(
-							$whale9490$elm_split_pane$SplitPane$px,
-							450,
+							$whale9490$elm_split_pane$SplitPane$percentage,
+							0.6,
 							$elm$core$Maybe$Just(
-								_Utils_Tuple2(0, 800))),
+								_Utils_Tuple2(0.1, 0.9))),
 						$whale9490$elm_split_pane$SplitPane$init($whale9490$elm_split_pane$SplitPane$Vertical)),
 					rightDockLeftEdge: A2(
 						$whale9490$elm_split_pane$SplitPane$configureSplitter,
 						A2(
 							$whale9490$elm_split_pane$SplitPane$percentage,
-							0.8,
+							0.6,
 							$elm$core$Maybe$Just(
-								_Utils_Tuple2(0.2, 0.8))),
+								_Utils_Tuple2(0.1, 0.99))),
 						$whale9490$elm_split_pane$SplitPane$init($whale9490$elm_split_pane$SplitPane$Horizontal)),
 					scene: _List_Nil,
 					stravaAuthentication: authData,
@@ -11628,6 +11610,9 @@ var $whale9490$elm_split_pane$SplitPane$UpdateConfig = function (a) {
 };
 var $whale9490$elm_split_pane$SplitPane$createUpdateConfig = function (config) {
 	return $whale9490$elm_split_pane$SplitPane$UpdateConfig(config);
+};
+var $whale9490$elm_split_pane$SplitPane$Px = function (a) {
+	return {$: 'Px', a: a};
 };
 var $whale9490$elm_split_pane$Bound$updateValue = F2(
 	function (f, _v0) {
@@ -22116,8 +22101,6 @@ var $author$project$Main$bottomDockView = function (model) {
 var $author$project$Main$SetCurrentPosition = function (a) {
 	return {$: 'SetCurrentPosition', a: a};
 };
-var $mdgriffith$elm_ui$Internal$Model$Bottom = {$: 'Bottom'};
-var $mdgriffith$elm_ui$Element$alignBottom = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$Bottom);
 var $mdgriffith$elm_ui$Internal$Model$Top = {$: 'Top'};
 var $mdgriffith$elm_ui$Element$alignTop = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$Top);
 var $mdgriffith$elm_ui$Element$htmlAttribute = $mdgriffith$elm_ui$Internal$Model$Attr;
@@ -22136,13 +22119,8 @@ var $mdgriffith$elm_ui$Element$Input$HiddenLabel = function (a) {
 	return {$: 'HiddenLabel', a: a};
 };
 var $mdgriffith$elm_ui$Element$Input$labelHidden = $mdgriffith$elm_ui$Element$Input$HiddenLabel;
-var $author$project$Main$minimumLeftPane = 600;
 var $mdgriffith$elm_ui$Internal$Model$Empty = {$: 'Empty'};
 var $mdgriffith$elm_ui$Element$none = $mdgriffith$elm_ui$Internal$Model$Empty;
-var $mdgriffith$elm_ui$Internal$Model$Px = function (a) {
-	return {$: 'Px', a: a};
-};
-var $mdgriffith$elm_ui$Element$px = $mdgriffith$elm_ui$Internal$Model$Px;
 var $mdgriffith$elm_ui$Internal$Model$NoAttribute = {$: 'NoAttribute'};
 var $mdgriffith$elm_ui$Internal$Flag$active = $mdgriffith$elm_ui$Internal$Flag$flag(32);
 var $mdgriffith$elm_ui$Internal$Model$Describe = function (a) {
@@ -22360,6 +22338,10 @@ var $elm$html$Html$Events$onInput = function (tagger) {
 			$elm$html$Html$Events$alwaysStop,
 			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
 };
+var $mdgriffith$elm_ui$Internal$Model$Px = function (a) {
+	return {$: 'Px', a: a};
+};
+var $mdgriffith$elm_ui$Element$px = $mdgriffith$elm_ui$Internal$Model$Px;
 var $mdgriffith$elm_ui$Element$spacingXY = F2(
 	function (x, y) {
 		return A2(
@@ -25110,7 +25092,7 @@ var $author$project$Main$contentArea = function (model) {
 				value: model.currentPosition
 			});
 	};
-	var leftPane = A2(
+	return A2(
 		$mdgriffith$elm_ui$Element$column,
 		_List_fromArray(
 			[
@@ -25153,62 +25135,6 @@ var $author$project$Main$contentArea = function (model) {
 					return $mdgriffith$elm_ui$Element$none;
 				}
 			}()
-			]));
-	return A2(
-		$mdgriffith$elm_ui$Element$column,
-		_List_fromArray(
-			[
-				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-				$mdgriffith$elm_ui$Element$padding(5),
-				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$mdgriffith$elm_ui$Element$row,
-				_List_Nil,
-				_List_fromArray(
-					[
-						A2(
-						$mdgriffith$elm_ui$Element$el,
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$width(
-								$mdgriffith$elm_ui$Element$px($author$project$Main$minimumLeftPane))
-							]),
-						$mdgriffith$elm_ui$Element$none)
-					])),
-				A2(
-				$mdgriffith$elm_ui$Element$row,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-						$mdgriffith$elm_ui$Element$spacing(5),
-						$mdgriffith$elm_ui$Element$padding(5)
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$mdgriffith$elm_ui$Element$el,
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-								$mdgriffith$elm_ui$Element$alignTop
-							]),
-						leftPane)
-					])),
-				A2(
-				$mdgriffith$elm_ui$Element$row,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$width(
-						$mdgriffith$elm_ui$Element$px($author$project$Main$minimumLeftPane)),
-						$mdgriffith$elm_ui$Element$alignBottom
-					]),
-				_List_fromArray(
-					[
-						$author$project$TrackInfoBox$trackInfoBox(model.trackTree)
-					]))
 			]));
 };
 var $author$project$Main$viewPaneArea = function (model) {
@@ -25345,8 +25271,8 @@ var $author$project$Main$view = function (_v0) {
 								$elm$html$Html$div,
 								_List_fromArray(
 									[
-										A2($elm$html$Html$Attributes$style, 'width', '1000px'),
-										A2($elm$html$Html$Attributes$style, 'height', '800px')
+										A2($elm$html$Html$Attributes$style, 'width', '100%'),
+										A2($elm$html$Html$Attributes$style, 'height', '100%')
 									]),
 								_List_fromArray(
 									[

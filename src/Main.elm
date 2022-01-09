@@ -109,19 +109,19 @@ init mflags origin navigationKey =
         , referenceLonLat = GPXSource Direction2d.x Quantity.zero Quantity.zero
         , leftDockRightEdge =
             SplitPane.init Horizontal
-                |> configureSplitter (percentage 0.2 <| Just ( 0.2, 0.8 ))
+                |> configureSplitter (percentage 0.2 <| Just ( 0.01, 0.49 ))
         , leftDockInternal =
             SplitPane.init Vertical
-                |> configureSplitter (SplitPane.px 450 <| Just ( 0, 800 ))
+                |> configureSplitter (percentage 0.4 <| Just ( 0.1, 0.9 ))
         , rightDockLeftEdge =
             SplitPane.init Horizontal
-                |> configureSplitter (percentage 0.8 <| Just ( 0.2, 0.8 ))
+                |> configureSplitter (percentage 0.6 <| Just ( 0.1, 0.99 ))
         , rightDockInternal =
             SplitPane.init Vertical
-                |> configureSplitter (SplitPane.px 450 <| Just ( 0, 800 ))
+                |> configureSplitter (percentage 0.6 <| Just ( 0.1, 0.9 ))
         , bottomDockTopEdge =
             SplitPane.init Vertical
-                |> configureSplitter (SplitPane.px 450 <| Just ( 0, 800 ))
+                |> configureSplitter (percentage 0.9 <| Just ( 0.8, 0.99 ))
         }
     , Cmd.batch
         [ authCmd
@@ -305,8 +305,8 @@ view (Model model) =
                 [ topLoadingBar model
                 , html <|
                     div
-                        [ style "width" "1000px"
-                        , style "height" "800px"
+                        [ style "width" "100%"
+                        , style "height" "100%"
                         ]
                         [ SplitPane.view
                             leftDockConfig
@@ -514,41 +514,28 @@ contentArea model =
                 , step = Just 1
                 , thumb = sliderThumb
                 }
-
-        leftPane =
-            -- NOTE that the Map DIV must be constructed once only, or the map gets upset.
-            column
-                [ width fill, alignTop, padding 10, centerX, height fill ]
-                [ column
-                    [ width fill
-                    , alignTop
-                    , padding 10
-                    , centerX
-                    ]
-                    [ viewModeChoices model
-                    , conditionallyVisible (model.viewMode /= ViewMap) <|
-                        ViewThirdPerson.view model ImageMessage
-                    , conditionallyVisible (model.viewMode == ViewMap) <|
-                        ViewMap.view model MapPortsMessage
-                    ]
-                , case model.trackTree of
-                    Just treeNode ->
-                        slider <| 1 + skipCount treeNode
-
-                    Nothing ->
-                        none
-                ]
     in
-    column [ width fill, padding 5, height fill ]
-        [ row []
-            [ el [ width <| Element.px minimumLeftPane ] none
+    -- NOTE that the Map DIV must be constructed once only, or the map gets upset.
+    column
+        [ width fill, alignTop, padding 10, centerX, height fill ]
+        [ column
+            [ width fill
+            , alignTop
+            , padding 10
+            , centerX
             ]
-        , row [ width fill, spacing 5, padding 5 ]
-            [ el [ width fill, alignTop ] leftPane
+            [ viewModeChoices model
+            , conditionallyVisible (model.viewMode /= ViewMap) <|
+                ViewThirdPerson.view model ImageMessage
+            , conditionallyVisible (model.viewMode == ViewMap) <|
+                ViewMap.view model MapPortsMessage
             ]
-        , row [ width <| Element.px minimumLeftPane, alignBottom ]
-            [ trackInfoBox model.trackTree
-            ]
+        , case model.trackTree of
+            Just treeNode ->
+                slider <| 1 + skipCount treeNode
+
+            Nothing ->
+                none
         ]
 
 
