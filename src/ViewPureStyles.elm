@@ -161,7 +161,11 @@ radioButton label state =
 
             else
                 FlatColors.ChinesePalette.bayWharf
-        , Font.size 16
+        , Font.size 14
+        , Font.family
+            [ Font.typeface "Open Sans"
+            , Font.sansSerif
+            ]
         ]
     <|
         el [ centerX, centerY ] <|

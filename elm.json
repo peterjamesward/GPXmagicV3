@@ -31,7 +31,8 @@
             "mpizenberg/elm-pointer-events": "4.0.2",
             "rtfeldman/elm-iso8601-date-strings": "1.1.4",
             "smucode/elm-flat-colors": "1.0.1",
-            "truqu/elm-base64": "2.0.4"
+            "truqu/elm-base64": "2.0.4",
+            "whale9490/elm-split-pane": "1.0.0"
         },
         "indirect": {
             "elm/parser": "1.1.0",

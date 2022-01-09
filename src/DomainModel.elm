@@ -74,6 +74,7 @@ type
 
 asRecord : PeteTree -> RoadSection
 asRecord treeNode =
+    -- Because is daft writing accessors for every field.
     case treeNode of
         Leaf section ->
             section

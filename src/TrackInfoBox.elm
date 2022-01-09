@@ -4,6 +4,7 @@ import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
+import Element.Font as Font
 import FlatColors.AussiePalette
 import FlatColors.SpanishPalette
 import Length
@@ -31,6 +32,11 @@ trackInfoBox maybeTree =
                 , Border.rounded 10
                 , padding 10
                 , spacing 5
+                , Font.size 14
+                , Font.family
+                    [ Font.typeface "Open Sans"
+                    , Font.sansSerif
+                    ]
                 ]
                 [ column [ spacing 5 ] <| List.map (\( txt, _ ) -> txt) trackInfoList
                 , column [ spacing 5 ] <| List.map (\( _, fn ) -> fn trackTree) trackInfoList

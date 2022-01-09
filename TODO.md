@@ -2,20 +2,29 @@
 
 # WIP
 
+## Layout
+Concept test of five dock zones, with multiple adjustable splits.
+> try again with https://package.elm-lang.org/packages/whale9490/elm-split-pane/latest/
+
 ## Zoom, Pan, Rotate.
 Pan feels slippy. Is the scaling wrong?
 All to do with getting the right focal point?
-> Try the basic V2 code.
+Think about what should remain under the mouse as it moves, and make it so.
 
 ### Editing?
 >> Take a couple of tools, do them as better tabs:
- - dockable any side,
- - user choice of colour,
- - clean UI (?),
- - fully pluggable,
- - previews in all views,
+ - dockable any side, via pop-up tools icon (WIP - define docking zones, need to be resizeable eventually)
+ - user choice of colour, ditto
+ - clean UI (more like native, less colour, smaller fonts),
+ - preset layout options in "menu bar"
+ - fully pluggable tools (lots of functions to interact with tabs, like OO)
+ - previews in all views, each tool is fully responsible (but with shared helpers).
  - validate Actions concept,
- - decide best approach to Undo & Redo
+ - decide best approach to Undo & Redo (likely GPXSource delta to Undo, function to Redo)
+ - (journaling in localStorage would allow recovery by replay?)
+
+Let's start with Bend/Gradient problems, showing on 3D and map, then Delete.
+> Thinking of not listing problems in the tab, because affects tab size greatly.
 
 ### Profile & Charts
 Details in Backlog.

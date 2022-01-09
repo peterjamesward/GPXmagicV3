@@ -16,6 +16,8 @@ import FlatColors.BritishPalette
 import FlatColors.ChinesePalette
 import GeoCodeDecoders exposing (IpInfo)
 import GpxParser exposing (parseGPXPoints)
+import Html exposing (Html, div)
+import Html.Attributes exposing (style)
 import Http
 import Json.Encode as E
 import Length exposing (Meters)
@@ -27,6 +29,16 @@ import OAuthPorts as O exposing (randomBytes)
 import OAuthTypes as O exposing (OAuthMsg(..))
 import Pixels exposing (Pixels)
 import Quantity
+import SplitPane
+    exposing
+        ( Orientation(..)
+        , SizeUnit(..)
+        , ViewConfig
+        , configureSplitter
+        , createViewConfig
+        , percentage
+        , px
+        )
 import StravaAuth exposing (getStravaToken)
 import Task
 import Time
@@ -52,6 +64,11 @@ type Msg
     | ImageMessage ViewThirdPerson.Msg
     | MapPortsMessage MapPortsController.MapMsg
     | StorageMessage E.Value
+    | SplitLeftDockRightEdge SplitPane.Msg
+    | SplitLeftDockInternal SplitPane.Msg
+    | SplitRightDockLeftEdge SplitPane.Msg
+    | SplitRightDockInternal SplitPane.Msg
+    | SplitBottomDockTopEdge SplitPane.Msg
 
 
 main : Program (Maybe (List Int)) Model Msg
@@ -90,6 +107,21 @@ init mflags origin navigationKey =
         , lastMapClick = ( 0.0, 0.0 )
         , viewContext = Nothing
         , referenceLonLat = GPXSource Direction2d.x Quantity.zero Quantity.zero
+        , leftDockRightEdge =
+            SplitPane.init Horizontal
+                |> configureSplitter (percentage 0.2 <| Just ( 0.2, 0.8 ))
+        , leftDockInternal =
+            SplitPane.init Vertical
+                |> configureSplitter (SplitPane.px 450 <| Just ( 0, 800 ))
+        , rightDockLeftEdge =
+            SplitPane.init Horizontal
+                |> configureSplitter (percentage 0.8 <| Just ( 0.2, 0.8 ))
+        , rightDockInternal =
+            SplitPane.init Vertical
+                |> configureSplitter (SplitPane.px 450 <| Just ( 0, 800 ))
+        , bottomDockTopEdge =
+            SplitPane.init Vertical
+                |> configureSplitter (SplitPane.px 450 <| Just ( 0, 800 ))
         }
     , Cmd.batch
         [ authCmd
@@ -230,6 +262,31 @@ update msg (Model model) =
         StorageMessage json ->
             ( Model model, Cmd.none )
 
+        SplitLeftDockRightEdge m ->
+            ( Model { model | leftDockRightEdge = SplitPane.update m model.leftDockRightEdge }
+            , Cmd.none
+            )
+
+        SplitLeftDockInternal m ->
+            ( Model { model | leftDockInternal = SplitPane.update m model.leftDockInternal }
+            , Cmd.none
+            )
+
+        SplitRightDockLeftEdge m ->
+            ( Model { model | rightDockLeftEdge = SplitPane.update m model.rightDockLeftEdge }
+            , Cmd.none
+            )
+
+        SplitRightDockInternal m ->
+            ( Model { model | rightDockInternal = SplitPane.update m model.rightDockInternal }
+            , Cmd.none
+            )
+
+        SplitBottomDockTopEdge m ->
+            ( Model { model | bottomDockTopEdge = SplitPane.update m model.bottomDockTopEdge }
+            , Cmd.none
+            )
+
 
 view : Model -> Browser.Document Msg
 view (Model model) =
@@ -244,13 +301,46 @@ view (Model model) =
             , Background.color FlatColors.ChinesePalette.antiFlashWhite
             ]
           <|
-            column
-                [ width fill ]
+            column [ width fill, height fill ]
                 [ topLoadingBar model
-                , contentArea model
+                , html <|
+                    div
+                        [ style "width" "800px"
+                        , style "height" "600px"
+                        ]
+                        [ SplitPane.view
+                            leftDockConfig
+                            (leftDockView model)
+                            (notTheLeftDockView model)
+                            model.leftDockRightEdge
+                        ]
                 ]
         ]
     }
+
+
+leftDockConfig : ViewConfig Msg
+leftDockConfig =
+    createViewConfig
+        { toMsg = SplitLeftDockRightEdge
+        , customSplitter = Nothing
+        }
+
+
+leftDockView : ModelRecord -> Html a
+leftDockView model =
+    layoutWith { options = [ noStaticStyleSheet ] }
+        [ padding 2, spacing 5, height fill ]
+    <|
+        trackInfoBox model.trackTree
+
+
+notTheLeftDockView : ModelRecord -> Html Msg
+notTheLeftDockView model =
+    layoutWith { options = [ noStaticStyleSheet ] }
+        []
+    <|
+        contentArea model
 
 
 topLoadingBar model =
@@ -258,15 +348,24 @@ topLoadingBar model =
         loadGpxButton =
             button
                 [ padding 5
-                , Border.width 2
-                , Border.rounded 4
-                , Border.color FlatColors.BritishPalette.chainGangGrey
+                , Background.color FlatColors.ChinesePalette.twinkleBlue
+                , Font.size 14
+                , Font.family
+                    [ Font.typeface "Open Sans"
+                    , Font.sansSerif
+                    ]
                 ]
                 { onPress = Just GpxRequested
-                , label = text "Load GPX from your computer"
+                , label = text "Load GPX file"
                 }
     in
-    row [ spacing 20, padding 10 ]
+    row
+        [ spacing 20
+        , padding 5
+        , width fill
+        , Border.widthEach { left = 0, right = 0, top = 0, bottom = 1 }
+        , Border.color FlatColors.ChinesePalette.twinkleBlue
+        ]
         [ loadGpxButton
         ]
 
@@ -319,7 +418,7 @@ contentArea model =
         leftPane =
             -- NOTE that the Map DIV must be constructed once only, or the map gets upset.
             column
-                [ width fill, alignTop, padding 10, centerX ]
+                [ width fill, alignTop, padding 10, centerX, height fill ]
                 [ column
                     [ width fill
                     , alignTop
@@ -340,14 +439,14 @@ contentArea model =
                         none
                 ]
     in
-    column [ width fill, padding 5, alignBottom ]
+    column [ width fill, padding 5, height fill ]
         [ row []
-            [ el [ width <| px minimumLeftPane ] none
+            [ el [ width <| Element.px minimumLeftPane ] none
             ]
         , row [ width fill, spacing 5, padding 5 ]
             [ el [ width fill, alignTop ] leftPane
             ]
-        , row [ width <| px minimumLeftPane, alignBottom ]
+        , row [ width <| Element.px minimumLeftPane, alignBottom ]
             [ trackInfoBox model.trackTree
             ]
         ]
@@ -359,4 +458,9 @@ subscriptions (Model model) =
         [ randomBytes (\ints -> OAuthMessage (GotRandomBytes ints))
         , MapPortsController.mapResponses (MapPortsMessage << MapPortsController.MapPortMessage)
         , LocalStorage.storageResponses StorageMessage
+        , Sub.map SplitLeftDockRightEdge <| SplitPane.subscriptions model.leftDockRightEdge
+        , Sub.map SplitLeftDockInternal <| SplitPane.subscriptions model.leftDockInternal
+        , Sub.map SplitRightDockLeftEdge <| SplitPane.subscriptions model.rightDockLeftEdge
+        , Sub.map SplitRightDockInternal <| SplitPane.subscriptions model.rightDockInternal
+        , Sub.map SplitBottomDockTopEdge <| SplitPane.subscriptions model.bottomDockTopEdge
         ]

@@ -7,11 +7,15 @@ import OAuthTypes as O
 import Pixels exposing (Pixels)
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
+import SplitPane
 import Time
 import ViewContextThirdPerson
 import ViewingMode exposing (ViewingMode)
 
+
+
 --TODO: Try distinct records for Loaded and NotLoaded state, avoiding Maybes.
+
 
 type Model
     = Model ModelRecord
@@ -33,4 +37,11 @@ type alias ModelRecord =
     , mapClickDebounce : Bool
     , lastMapClick : ( Float, Float )
     , viewContext : Maybe ViewContextThirdPerson.ContextThirdPerson
+
+    -- Splitters
+    , leftDockRightEdge : SplitPane.State
+    , leftDockInternal : SplitPane.State
+    , rightDockLeftEdge : SplitPane.State
+    , rightDockInternal : SplitPane.State
+    , bottomDockTopEdge : SplitPane.State
     }
