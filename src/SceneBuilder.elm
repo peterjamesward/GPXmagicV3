@@ -148,7 +148,7 @@ render3dView model =
         renderCurrentMarker marker tree =
             [ Scene3d.point { radius = Pixels.pixels 10 }
                 (Material.color lightOrange)
-                (startPoint <| leafFromIndex marker tree)
+                (pointFromIndex marker tree)
             ]
     in
     case model.trackTree of

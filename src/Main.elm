@@ -104,19 +104,19 @@ init mflags origin navigationKey =
         , referenceLonLat = GPXSource Direction2d.x Quantity.zero Quantity.zero
         , leftDockRightEdge =
             SplitPane.init Horizontal
-                |> configureSplitter (percentage 0.2 <| Just ( 0.01, 0.49 ))
+                |> configureSplitter (percentage 0.2 <| Just ( 0.01, 0.4 ))
         , leftDockInternal =
             SplitPane.init Vertical
                 |> configureSplitter (percentage 0.4 <| Just ( 0.1, 0.9 ))
         , rightDockLeftEdge =
             SplitPane.init Horizontal
-                |> configureSplitter (percentage 0.8 <| Just ( 0.6, 0.99 ))
+                |> configureSplitter (percentage 0.8 <| Just ( 0.6, 0.97 ))
         , rightDockInternal =
             SplitPane.init Vertical
                 |> configureSplitter (percentage 0.6 <| Just ( 0.1, 0.9 ))
         , bottomDockTopEdge =
             SplitPane.init Vertical
-                |> configureSplitter (percentage 0.8 <| Just ( 0.6, 0.99 ))
+                |> configureSplitter (percentage 0.8 <| Just ( 0.6, 0.97 ))
         , windowSize = ( 1000, 800 )
         , contentArea = ( Pixels.pixels 800, Pixels.pixels 500 )
         }
@@ -142,7 +142,7 @@ update msg (Model model) =
                 ( newModel, cmd ) =
                     MapPortsController.update mapMsg model MapPortsMessage
             in
-            ( Model model, cmd )
+            ( Model newModel, cmd )
 
         ReceivedIpDetails response ->
             let

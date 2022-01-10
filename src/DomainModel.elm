@@ -506,6 +506,41 @@ leafFromIndex index treeNode =
                 leafFromIndex (index - skipCount info.left) info.right
 
 
+pointFromIndex : Int -> PeteTree -> EarthPoint
+pointFromIndex index treeNode =
+    case treeNode of
+        Leaf info ->
+            if index <= 0 then
+                info.startPoint
+
+            else
+                info.endPoint
+
+        Node info ->
+            if index < skipCount info.left then
+                pointFromIndex index info.left
+
+            else
+                pointFromIndex (index - skipCount info.left) info.right
+
+gpxPointFromIndex : Int -> PeteTree -> GPXSource
+gpxPointFromIndex index treeNode =
+    case treeNode of
+        Leaf info ->
+            if index <= 0 then
+                Tuple.first info.sourceData
+
+            else
+                Tuple.second info.sourceData
+
+        Node info ->
+            if index < skipCount info.left then
+                gpxPointFromIndex index info.left
+
+            else
+                gpxPointFromIndex (index - skipCount info.left) info.right
+
+
 nearestToRay :
     Axis3d Meters LocalCoords
     -> PeteTree

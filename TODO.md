@@ -4,9 +4,10 @@
 
 ## Layout
 
-Splitters looking good now. Will need tweaking later.
+Splitters looking good now. 
+Will need tweaking later. 
+Might switch to pixel sizing.
 Will need to go in localStorage.
-Has resizing messed up Hit Detect? Or is it just shit?
 
 Try "docking" a tool tab. 
 > Needs popup settings for dock location and colour.
@@ -15,7 +16,7 @@ Put all Font, Colour etc into a Palette/Style module for ease of change.
 
 ## Zoom, Pan, Rotate.
 
-
+Has resizing messed up Hit Detect? Or was it broked already?
 Panning feels slippy. Is the scaling wrong?
 All to do with getting the right focal point?
 > Think about what should remain under the mouse as it moves, and make it so.

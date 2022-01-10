@@ -3,7 +3,7 @@ port module MapPortsController exposing (..)
 import Angle
 import Delay exposing (after)
 import Direction2d
-import DomainModel exposing (GPXSource, PeteTree, gpxFromPointWithReference, leafFromIndex, sourceData, startPoint)
+import DomainModel exposing (GPXSource, PeteTree, gpxFromPointWithReference, gpxPointFromIndex, leafFromIndex, pointFromIndex, sourceData, startPoint)
 import Json.Decode as D exposing (Decoder, field, string)
 import Json.Encode as E
 import Length
@@ -67,8 +67,7 @@ centreMap model =
         Just tree ->
             let
                 { longitude, latitude, altitude } =
-                    leafFromIndex model.currentPosition tree
-                        |> startPoint
+                    pointFromIndex model.currentPosition tree
                         |> gpxFromPointWithReference model.referenceLonLat
             in
             mapCommands <|
@@ -91,14 +90,12 @@ centreMapOnCurrent :
         , referenceLonLat : GPXSource
     }
     -> Cmd msg
-centreMapOnCurrent model  =
+centreMapOnCurrent model =
     case model.trackTree of
         Just tree ->
             let
                 { longitude, latitude, altitude } =
-                    leafFromIndex model.currentPosition tree
-                        |> sourceData
-                        |> Tuple.first
+                    gpxPointFromIndex model.currentPosition tree
             in
             mapCommands <|
                 E.object
@@ -142,7 +139,7 @@ update :
 update mapMsg model msgWrapper =
     case mapMsg of
         ClearMapClickDebounce ->
-            (  { model | mapClickDebounce = False }
+            ( { model | mapClickDebounce = False }
             , Cmd.none
             )
 
@@ -150,7 +147,7 @@ update mapMsg model msgWrapper =
             processMapPortMessage model value msgWrapper
 
         RepaintMap ->
-            (  model, refreshMap )
+            ( model, refreshMap )
 
 
 
@@ -178,16 +175,14 @@ addTrackToMap :
         , referenceLonLat : GPXSource
     }
     -> Cmd msg
-addTrackToMap model  =
+addTrackToMap model =
     -- This is to add the route as a polyline.
     -- We will separately add track points as draggable features.
     case model.trackTree of
         Just tree ->
             let
                 { longitude, latitude, altitude } =
-                    leafFromIndex model.currentPosition tree
-                        |> DomainModel.sourceData
-                        |> Tuple.first
+                    gpxPointFromIndex model.currentPosition tree
             in
             mapCommands <|
                 E.object

@@ -16,7 +16,7 @@ import ViewPureStyles exposing (useIcon)
 
 trackInfoList : List ( Element msg, PeteTree -> Element msg )
 trackInfoList =
-    [ ( text "Points", asRecord >> .skipCount >> String.fromInt >> text )
+    [ ( text "Points", asRecord >> .skipCount >> (+) 1 >> String.fromInt >> text )
     , ( text "Length", asRecord >> .trueLength >> showLongMeasure False >> text )
     , ( text "Ascent", asRecord >> .altitudeGained >> showLongMeasure False >> text )
     , ( text "Descent", asRecord >> .altitudeLost >> showLongMeasure False >> text )

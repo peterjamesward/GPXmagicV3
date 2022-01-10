@@ -112,7 +112,7 @@ view model msgWrapper =
         , width fill
         , height fill
         , pointer
-        , Border.width 2
+        , Border.width 0
         , Border.color FlatColors.ChinesePalette.peace
         , inFront <| zoomButtons msgWrapper
         ]
@@ -145,20 +145,11 @@ onContextMenu msg =
         |> htmlAttribute
 
 
-viewpoint : Viewpoint3d Meters LocalCoords
-viewpoint =
-    Viewpoint3d.lookAt
-        { focalPoint = Point3d.origin
-        , eyePoint = Point3d.centimeters 20 10 10
-        , upDirection = Direction3d.positiveZ
-        }
-
-
 deriveCamera : PeteTree -> ContextThirdPerson -> Int -> Camera3d Meters LocalCoords
 deriveCamera treeNode context currentPosition =
     let
         latitude =
-            leafFromIndex currentPosition treeNode |> effectiveLatitude
+            effectiveLatitude <| leafFromIndex currentPosition treeNode
 
         lookingAt =
             if context.followSelectedPoint then
@@ -173,6 +164,7 @@ deriveCamera treeNode context currentPosition =
                 , azimuth = Direction2d.toAngle context.cameraAzimuth
                 , elevation = context.cameraElevation
                 , distance =
+                --TODO: Some fudging going on here that should not be needed.
                     Length.meters <| 100.0 * Spherical.metresPerPixel context.zoomLevel latitude
                 }
 
@@ -200,9 +192,6 @@ detectHit event model =
     case ( model.trackTree, model.viewContext ) of
         ( Just topNode, Just context ) ->
             let
-                leaf =
-                    leafFromIndex model.currentPosition topNode
-
                 ( x, y ) =
                     event.offsetPos
 
@@ -222,7 +211,7 @@ detectHit event model =
 
                 camera =
                     -- Must use same camera derivation as for the 3D model, else pointless!
-                    deriveCamera leaf context model.currentPosition
+                    deriveCamera topNode context model.currentPosition
 
                 ray =
                     Camera3d.ray camera screenRectangle screenPoint
@@ -270,8 +259,6 @@ update msg model msgWrapper =
 
                 ImageClick event ->
                     -- Click moves pointer but does not re-centre view. (Double click will.)
-                    --TODO: How to share action here with Main:update for slider,
-                    --TODO: without passing control back? Separate module?
                     if context.waitingForClickDelay then
                         { model | currentPosition = detectHit event model }
                             |> Actions.updateAllDisplays
@@ -361,7 +348,7 @@ update msg model msgWrapper =
                                                 -- Empirical
                                                 * Spherical.metresPerPixel
                                                     context.zoomLevel
-                                                    (effectiveLatitude treeNode)
+                                                    (Angle.degrees 30)
                                             )
 
                                 newContext =
