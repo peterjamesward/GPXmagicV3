@@ -9991,6 +9991,9 @@ var $author$project$Main$ImageMessage = function (a) {
 var $author$project$Main$ReceivedIpDetails = function (a) {
 	return {$: 'ReceivedIpDetails', a: a};
 };
+var $author$project$Main$ToolsMsg = function (a) {
+	return {$: 'ToolsMsg', a: a};
+};
 var $author$project$SplitPane$Bound$getValue = function (value) {
 	return value.a;
 };
@@ -12553,6 +12556,56 @@ var $author$project$StravaAuth$update = F2(
 			}
 		}
 		return $author$project$StravaAuth$noOp(model);
+	});
+var $author$project$ToolsProforma$setDock = F3(
+	function (toolType, dock, tool) {
+		return _Utils_eq(tool.toolType, toolType) ? _Utils_update(
+			tool,
+			{dock: dock}) : tool;
+	});
+var $elm$core$Basics$not = _Basics_not;
+var $author$project$ToolsProforma$toggleToolPopup = F2(
+	function (toolType, tool) {
+		return _Utils_eq(tool.toolType, toolType) ? _Utils_update(
+			tool,
+			{isPopupOpen: !tool.isPopupOpen}) : tool;
+	});
+var $author$project$ToolsProforma$update = F3(
+	function (toolMsg, msgWrapper, model) {
+		switch (toolMsg.$) {
+			case 'ToolPopupToggle':
+				var toolType = toolMsg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							tools: A2(
+								$elm$core$List$map,
+								$author$project$ToolsProforma$toggleToolPopup(toolType),
+								model.tools)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'ToolDockSelect':
+				var toolType = toolMsg.a;
+				var toolDock = toolMsg.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							tools: A2(
+								$elm$core$List$map,
+								A2($author$project$ToolsProforma$setDock, toolType, toolDock),
+								model.tools)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'ToolColourSelect':
+				var toolType = toolMsg.a;
+				var color = toolMsg.b;
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			default:
+				var toolType = toolMsg.a;
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+		}
 	});
 var $author$project$ViewThirdPerson$ClickDelayExpired = {$: 'ClickDelayExpired'};
 var $author$project$ViewContextThirdPerson$DragPan = {$: 'DragPan'};
@@ -15339,7 +15392,7 @@ var $author$project$Main$update = F2(
 									windowSize: _Utils_Tuple2(width, height)
 								}))),
 					$author$project$MapPortsController$refreshMap);
-			default:
+			case 'GotWindowSize':
 				var result = msg.a;
 				if (result.$ === 'Ok') {
 					var info = result.a;
@@ -15358,6 +15411,14 @@ var $author$project$Main$update = F2(
 						$author$project$ModelRecord$Model(model),
 						$elm$core$Platform$Cmd$none);
 				}
+			default:
+				var toolMsg = msg.a;
+				var _v12 = A3($author$project$ToolsProforma$update, toolMsg, $author$project$Main$ToolsMsg, model);
+				var newModel = _v12.a;
+				var cmds = _v12.b;
+				return _Utils_Tuple2(
+					$author$project$ModelRecord$Model(newModel),
+					cmds);
 		}
 	});
 var $mdgriffith$elm_ui$Internal$Model$Colored = F3(
@@ -18979,7 +19040,6 @@ var $elm$virtual_dom$VirtualDom$keyedNode = function (tag) {
 	return _VirtualDom_keyedNode(
 		_VirtualDom_noScript(tag));
 };
-var $elm$core$Basics$not = _Basics_not;
 var $elm$html$Html$p = _VirtualDom_node('p');
 var $mdgriffith$elm_ui$Internal$Flag$present = F2(
 	function (myFlag, _v0) {

@@ -28,6 +28,13 @@ type ToolType
     = ToolTrackInfo
 
 
+type ToolMsg
+    = ToolPopupToggle ToolType
+    | ToolDockSelect ToolType ToolDock
+    | ToolColourSelect ToolType Element.Color
+    | ToolStateToggle ToolType
+
+
 type alias ToolEntry =
     { toolType : ToolType
     , label : String
@@ -42,7 +49,7 @@ type alias ToolEntry =
 
 tools : List ToolEntry
 tools =
-    -- One list or five, or six? Try one.
+    -- One list or five, or six? Try one. Arguably a Dict but POITROAE.
     [ toolEntryForTrackInfoBox
     ]
 
@@ -58,3 +65,45 @@ toolEntryForTrackInfoBox =
     , tabColour = FlatColors.AussiePalette.beekeeper
     , isPopupOpen = False
     }
+
+
+toggleToolPopup : ToolType -> ToolEntry -> ToolEntry
+toggleToolPopup toolType tool =
+    if tool.toolType == toolType then
+        { tool | isPopupOpen = not tool.isPopupOpen }
+
+    else
+        tool
+
+
+setDock : ToolType -> ToolDock -> ToolEntry -> ToolEntry
+setDock toolType dock tool =
+    if tool.toolType == toolType then
+        { tool | dock = dock }
+
+    else
+        tool
+
+
+update :
+    ToolMsg
+    -> (ToolMsg -> msg)
+    -> { model | tools : List ToolEntry }
+    -> ( { model | tools : List ToolEntry }, Cmd msg )
+update toolMsg msgWrapper model =
+    case toolMsg of
+        ToolPopupToggle toolType ->
+            ( { model | tools = List.map (toggleToolPopup toolType) model.tools }
+            , Cmd.none
+            )
+
+        ToolDockSelect toolType toolDock ->
+            ( { model | tools = List.map (setDock toolType toolDock) model.tools }
+            , Cmd.none
+            )
+
+        ToolColourSelect toolType color ->
+            ( model, Cmd.none )
+
+        ToolStateToggle toolType ->
+            ( model, Cmd.none )

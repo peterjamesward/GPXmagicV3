@@ -2,15 +2,12 @@
 
 # WIP
 
-## Layout
-
-Splitters looking good now. 
-Will need tweaking later. 
-Might switch to pixel sizing.
-Will need to go in localStorage.
+## Docking tools
 
 Try "docking" a tool tab. 
 > Needs popup settings for dock location and colour.
+> Display of tool tab should be common in proforma, but content delegated to each tool.
+> Remember, no functions in the model, or in any sub-state.
 
 Put all Font, Colour etc into a Palette/Style module for ease of change.
 
@@ -38,6 +35,14 @@ Details in Backlog.
 ---
 
 # Backlog
+
+## Layout
+
+Splitters looking good now.
+Will need tweaking later.
+Might switch to pixel sizing.
+Will need to go in localStorage.
+
 
 ## Rendering
 Use a graduated drop off with distance, compute at each tree level.

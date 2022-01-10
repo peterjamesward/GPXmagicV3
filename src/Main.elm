@@ -65,6 +65,7 @@ type Msg
     | SplitBottomDockTopEdge SplitPane.Msg
     | Resize Int Int
     | GotWindowSize (Result Dom.Error Dom.Viewport)
+    | ToolsMsg ToolsProforma.ToolMsg
 
 
 main : Program (Maybe (List Int)) Model Msg
@@ -320,6 +321,13 @@ update msg (Model model) =
 
                 Err error ->
                     ( Model model, Cmd.none )
+
+        ToolsMsg toolMsg ->
+            let
+                ( newModel, cmds ) =
+                    ToolsProforma.update toolMsg ToolsMsg model
+            in
+            ( Model newModel, cmds )
 
 
 adjustSpaceForContent : ModelRecord -> ModelRecord
