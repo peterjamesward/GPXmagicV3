@@ -9,6 +9,7 @@ import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
 import SplitPane.SplitPane as SplitPane
 import Time
+import ToolsProforma exposing (ToolEntry)
 import ViewContextThirdPerson
 import ViewingMode exposing (ViewingMode)
 
@@ -37,7 +38,7 @@ type alias ModelRecord =
     , mapClickDebounce : Bool
     , lastMapClick : ( Float, Float )
     , viewContext : Maybe ViewContextThirdPerson.ContextThirdPerson
-    , windowSize : (Float, Float)
+    , windowSize : ( Float, Float )
     , contentArea : ( Quantity Int Pixels, Quantity Int Pixels )
 
     -- Splitters
@@ -46,4 +47,7 @@ type alias ModelRecord =
     , rightDockLeftEdge : SplitPane.State
     , rightDockInternal : SplitPane.State
     , bottomDockTopEdge : SplitPane.State
+
+    -- Tools
+    , tools : List ToolEntry
     }

@@ -35,6 +35,7 @@ import SplitPane.SplitPane as SplitPane exposing (..)
 import StravaAuth exposing (getStravaToken)
 import Task
 import Time
+import ToolsProforma
 import TrackInfoBox exposing (trackInfoBox)
 import Url exposing (Url)
 import ViewMap
@@ -119,6 +120,7 @@ init mflags origin navigationKey =
                 |> configureSplitter (percentage 0.8 <| Just ( 0.6, 0.97 ))
         , windowSize = ( 1000, 800 )
         , contentArea = ( Pixels.pixels 800, Pixels.pixels 500 )
+        , tools = ToolsProforma.tools
         }
     , Cmd.batch
         [ authCmd

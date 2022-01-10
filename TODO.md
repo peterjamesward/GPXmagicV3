@@ -14,13 +14,6 @@ Try "docking" a tool tab.
 
 Put all Font, Colour etc into a Palette/Style module for ease of change.
 
-## Zoom, Pan, Rotate.
-
-Has resizing messed up Hit Detect? Or was it broked already?
-Panning feels slippy. Is the scaling wrong?
-All to do with getting the right focal point?
-> Think about what should remain under the mouse as it moves, and make it so.
-
 ## Editing?
 >> Take a couple of tools, do them as better tabs:
  - dockable any side, via pop-up tools icon

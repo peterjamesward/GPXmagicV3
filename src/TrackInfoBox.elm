@@ -8,8 +8,6 @@ import Element.Font as Font
 import FeatherIcons
 import FlatColors.AussiePalette
 import FlatColors.ChinesePalette
-import FlatColors.SpanishPalette
-import Length
 import UtilsForViews exposing (showDecimal0, showDecimal2, showLongMeasure, showShortMeasure)
 import ViewPureStyles exposing (useIcon)
 
@@ -52,5 +50,13 @@ trackInfoBox maybeTree =
                     ]
 
             Nothing ->
-                el [ centerX, centerY ] <| text "No track loaded"
+                el
+                    [ centerX
+                    , centerY
+                    , width fill
+                    , height fill
+                    , Background.color FlatColors.ChinesePalette.coral
+                    ]
+                <|
+                    text "No track loaded"
         ]
