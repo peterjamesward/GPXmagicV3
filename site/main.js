@@ -9557,6 +9557,10 @@ var $author$project$MapPortsController$MapPortMessage = function (a) {
 var $author$project$Main$MapPortsMessage = function (a) {
 	return {$: 'MapPortsMessage', a: a};
 };
+var $author$project$Main$Resize = F2(
+	function (a, b) {
+		return {$: 'Resize', a: a, b: b};
+	});
 var $author$project$Main$SplitBottomDockTopEdge = function (a) {
 	return {$: 'SplitBottomDockTopEdge', a: a};
 };
@@ -9579,23 +9583,8 @@ var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$map = _Platform_map;
 var $elm$json$Json$Decode$value = _Json_decodeValue;
 var $author$project$MapPortsController$mapResponses = _Platform_incomingPort('mapResponses', $elm$json$Json$Decode$value);
-var $author$project$OAuthPorts$randomBytes = _Platform_incomingPort(
-	'randomBytes',
-	$elm$json$Json$Decode$list($elm$json$Json$Decode$int));
-var $author$project$LocalStorage$storageResponses = _Platform_incomingPort('storageResponses', $elm$json$Json$Decode$value);
-var $author$project$SplitPane$SplitPane$Position = F2(
-	function (x, y) {
-		return {x: x, y: y};
-	});
-var $author$project$SplitPane$SplitPane$SplitterLeftAlone = function (a) {
-	return {$: 'SplitterLeftAlone', a: a};
-};
-var $author$project$SplitPane$SplitPane$SplitterMove = function (a) {
-	return {$: 'SplitterMove', a: a};
-};
+var $elm$browser$Browser$Events$Window = {$: 'Window'};
 var $elm$json$Json$Decode$field = _Json_decodeField;
-var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
-var $elm$browser$Browser$Events$Document = {$: 'Document'};
 var $elm$browser$Browser$Events$MySub = F3(
 	function (a, b, c) {
 		return {$: 'MySub', a: a, b: b, c: c};
@@ -9872,6 +9861,36 @@ var $elm$browser$Browser$Events$on = F3(
 		return $elm$browser$Browser$Events$subscription(
 			A3($elm$browser$Browser$Events$MySub, node, name, decoder));
 	});
+var $elm$browser$Browser$Events$onResize = function (func) {
+	return A3(
+		$elm$browser$Browser$Events$on,
+		$elm$browser$Browser$Events$Window,
+		'resize',
+		A2(
+			$elm$json$Json$Decode$field,
+			'target',
+			A3(
+				$elm$json$Json$Decode$map2,
+				func,
+				A2($elm$json$Json$Decode$field, 'innerWidth', $elm$json$Json$Decode$int),
+				A2($elm$json$Json$Decode$field, 'innerHeight', $elm$json$Json$Decode$int))));
+};
+var $author$project$OAuthPorts$randomBytes = _Platform_incomingPort(
+	'randomBytes',
+	$elm$json$Json$Decode$list($elm$json$Json$Decode$int));
+var $author$project$LocalStorage$storageResponses = _Platform_incomingPort('storageResponses', $elm$json$Json$Decode$value);
+var $author$project$SplitPane$SplitPane$Position = F2(
+	function (x, y) {
+		return {x: x, y: y};
+	});
+var $author$project$SplitPane$SplitPane$SplitterLeftAlone = function (a) {
+	return {$: 'SplitterLeftAlone', a: a};
+};
+var $author$project$SplitPane$SplitPane$SplitterMove = function (a) {
+	return {$: 'SplitterMove', a: a};
+};
+var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
+var $elm$browser$Browser$Events$Document = {$: 'Document'};
 var $elm$browser$Browser$Events$onMouseMove = A2($elm$browser$Browser$Events$on, $elm$browser$Browser$Events$Document, 'mousemove');
 var $elm$browser$Browser$Events$onMouseUp = A2($elm$browser$Browser$Events$on, $elm$browser$Browser$Events$Document, 'mouseup');
 var $author$project$SplitPane$SplitPane$subscriptions = function (_v0) {
@@ -9936,7 +9955,12 @@ var $author$project$Main$subscriptions = function (_v0) {
 				A2(
 				$elm$core$Platform$Sub$map,
 				$author$project$Main$SplitBottomDockTopEdge,
-				$author$project$SplitPane$SplitPane$subscriptions(model.bottomDockTopEdge))
+				$author$project$SplitPane$SplitPane$subscriptions(model.bottomDockTopEdge)),
+				$elm$browser$Browser$Events$onResize(
+				F2(
+					function (w, h) {
+						return A2($author$project$Main$Resize, w, h);
+					}))
 			]));
 };
 var $author$project$Main$GpxLoaded = function (a) {

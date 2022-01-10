@@ -330,8 +330,8 @@ adjustSpaceForContent model =
         availableHeightFraction =
             SplitPane.getPosition model.bottomDockTopEdge
 
-        (reservedWidth, reservedHeight) =
-            (50, 120)
+        ( reservedWidth, reservedHeight ) =
+            ( 50, 120 )
 
         ( availableWidthPixels, availableHeightPixels ) =
             ( Tuple.first model.windowSize * availableWidthFraction - reservedWidth
@@ -583,7 +583,7 @@ contentArea model =
             ]
         , case model.trackTree of
             Just treeNode ->
-                el [centerX ] <| slider <| 1 + skipCount treeNode
+                el [ centerX ] <| slider <| 1 + skipCount treeNode
 
             Nothing ->
                 none
@@ -601,4 +601,5 @@ subscriptions (Model model) =
         , Sub.map SplitRightDockLeftEdge <| SplitPane.subscriptions model.rightDockLeftEdge
         , Sub.map SplitRightDockInternal <| SplitPane.subscriptions model.rightDockInternal
         , Sub.map SplitBottomDockTopEdge <| SplitPane.subscriptions model.bottomDockTopEdge
+        , Browser.Events.onResize (\w h -> Resize w h)
         ]

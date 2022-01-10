@@ -3,17 +3,21 @@
 # WIP
 
 ## Layout
-Concept test of five (!) dock zones, with multiple adjustable splits.
-> Looking OK. Need to scale internally, and ideally get the actual window size when we start.
-> Should be able to reduce docks to marginal strip, with click to open/close.
 
-> Try making the single tab available move around.
-> Use localStorage to save splitter and tool tab layout (as v2).
-> Add configurable title bar and colour at top of each dock.
+Splitters looking good now. Will need tweaking later.
+Will need to go in localStorage.
+Need to resize the Map.
+Need to handle window resize.
+Has resizing messed up Hit Detect? Or is it just shit?
+
+Try "docking" a tool tab. 
+> Needs popup settings for dock location and colour.
 
 Put all Font, Colour etc into a Palette/Style module for ease of change.
 
 ## Zoom, Pan, Rotate.
+
+
 Panning feels slippy. Is the scaling wrong?
 All to do with getting the right focal point?
 > Think about what should remain under the mouse as it moves, and make it so.
