@@ -20,7 +20,7 @@ import Quantity exposing (Quantity)
 
 view :
     { model
-        | viewDimensions : ( Quantity Int Pixels, Quantity Int Pixels )
+        | contentArea : ( Quantity Int Pixels, Quantity Int Pixels )
         , trackTree : Maybe PeteTree
     }
     -> (MapPortsController.MapMsg -> msg)
@@ -28,7 +28,7 @@ view :
 view model msgWrapper =
     let
         ( viewWidth, viewHeight ) =
-            model.viewDimensions
+            model.contentArea
 
         handyMapControls =
             column

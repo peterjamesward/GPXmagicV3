@@ -264,42 +264,42 @@ update msg (Model model) =
             ( { model | leftDockRightEdge = SplitPane.update m model.leftDockRightEdge }
                 |> adjustSpaceForContent
                 |> Model
-            , Cmd.none
+            , MapPortsController.refreshMap
             )
 
         SplitLeftDockInternal m ->
             ( { model | leftDockInternal = SplitPane.update m model.leftDockInternal }
                 |> adjustSpaceForContent
                 |> Model
-            , Cmd.none
+            , MapPortsController.refreshMap
             )
 
         SplitRightDockLeftEdge m ->
             ( { model | rightDockLeftEdge = SplitPane.update m model.rightDockLeftEdge }
                 |> adjustSpaceForContent
                 |> Model
-            , Cmd.none
+            , MapPortsController.refreshMap
             )
 
         SplitRightDockInternal m ->
             ( { model | rightDockInternal = SplitPane.update m model.rightDockInternal }
                 |> adjustSpaceForContent
                 |> Model
-            , Cmd.none
+            , MapPortsController.refreshMap
             )
 
         SplitBottomDockTopEdge m ->
             ( { model | bottomDockTopEdge = SplitPane.update m model.bottomDockTopEdge }
                 |> adjustSpaceForContent
                 |> Model
-            , Cmd.none
+            , MapPortsController.refreshMap
             )
 
         Resize width height ->
             ( { model | windowSize = ( toFloat width, toFloat height ) }
                 |> adjustSpaceForContent
                 |> Model
-            , Cmd.none
+            , MapPortsController.refreshMap
             )
 
         GotWindowSize result ->
@@ -313,7 +313,7 @@ update msg (Model model) =
                       }
                         |> adjustSpaceForContent
                         |> Model
-                    , Cmd.none
+                    , MapPortsController.refreshMap
                     )
 
                 Err error ->

@@ -6,8 +6,6 @@
 
 Splitters looking good now. Will need tweaking later.
 Will need to go in localStorage.
-Need to resize the Map.
-Need to handle window resize.
 Has resizing messed up Hit Detect? Or is it just shit?
 
 Try "docking" a tool tab. 

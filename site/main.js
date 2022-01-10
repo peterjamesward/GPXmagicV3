@@ -10305,6 +10305,17 @@ var $author$project$MyIP$processIpInfo = function (response) {
 		return $elm$core$Maybe$Nothing;
 	}
 };
+var $author$project$MapPortsController$refreshMap = $author$project$MapPortsController$mapCommands(
+	$elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'Cmd',
+				$elm$json$Json$Encode$string('Repaint')),
+				_Utils_Tuple2(
+				'token',
+				$elm$json$Json$Encode$string($author$project$MapboxKey$mapboxKey))
+			])));
 var $author$project$MyIP$apiRoot = 'http://ip-api.com';
 var $elm$url$Url$Builder$toQueryPair = function (_v0) {
 	var key = _v0.a;
@@ -11664,17 +11675,6 @@ var $author$project$MapPortsController$processMapPortMessage = F3(
 			return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 		}
 	});
-var $author$project$MapPortsController$refreshMap = $author$project$MapPortsController$mapCommands(
-	$elm$json$Json$Encode$object(
-		_List_fromArray(
-			[
-				_Utils_Tuple2(
-				'Cmd',
-				$elm$json$Json$Encode$string('Repaint')),
-				_Utils_Tuple2(
-				'token',
-				$elm$json$Json$Encode$string($author$project$MapboxKey$mapboxKey))
-			])));
 var $author$project$MapPortsController$update = F3(
 	function (mapMsg, model, msgWrapper) {
 		switch (mapMsg.$) {
@@ -15216,7 +15216,7 @@ var $author$project$Main$update = F2(
 								{
 									leftDockRightEdge: A2($author$project$SplitPane$SplitPane$update, m, model.leftDockRightEdge)
 								}))),
-					$elm$core$Platform$Cmd$none);
+					$author$project$MapPortsController$refreshMap);
 			case 'SplitLeftDockInternal':
 				var m = msg.a;
 				return _Utils_Tuple2(
@@ -15227,7 +15227,7 @@ var $author$project$Main$update = F2(
 								{
 									leftDockInternal: A2($author$project$SplitPane$SplitPane$update, m, model.leftDockInternal)
 								}))),
-					$elm$core$Platform$Cmd$none);
+					$author$project$MapPortsController$refreshMap);
 			case 'SplitRightDockLeftEdge':
 				var m = msg.a;
 				return _Utils_Tuple2(
@@ -15238,7 +15238,7 @@ var $author$project$Main$update = F2(
 								{
 									rightDockLeftEdge: A2($author$project$SplitPane$SplitPane$update, m, model.rightDockLeftEdge)
 								}))),
-					$elm$core$Platform$Cmd$none);
+					$author$project$MapPortsController$refreshMap);
 			case 'SplitRightDockInternal':
 				var m = msg.a;
 				return _Utils_Tuple2(
@@ -15249,7 +15249,7 @@ var $author$project$Main$update = F2(
 								{
 									rightDockInternal: A2($author$project$SplitPane$SplitPane$update, m, model.rightDockInternal)
 								}))),
-					$elm$core$Platform$Cmd$none);
+					$author$project$MapPortsController$refreshMap);
 			case 'SplitBottomDockTopEdge':
 				var m = msg.a;
 				return _Utils_Tuple2(
@@ -15260,7 +15260,7 @@ var $author$project$Main$update = F2(
 								{
 									bottomDockTopEdge: A2($author$project$SplitPane$SplitPane$update, m, model.bottomDockTopEdge)
 								}))),
-					$elm$core$Platform$Cmd$none);
+					$author$project$MapPortsController$refreshMap);
 			case 'Resize':
 				var width = msg.a;
 				var height = msg.b;
@@ -15272,7 +15272,7 @@ var $author$project$Main$update = F2(
 								{
 									windowSize: _Utils_Tuple2(width, height)
 								}))),
-					$elm$core$Platform$Cmd$none);
+					$author$project$MapPortsController$refreshMap);
 			default:
 				var result = msg.a;
 				if (result.$ === 'Ok') {
@@ -15285,7 +15285,7 @@ var $author$project$Main$update = F2(
 									{
 										windowSize: _Utils_Tuple2(info.viewport.width, info.viewport.height)
 									}))),
-						$elm$core$Platform$Cmd$none);
+						$author$project$MapPortsController$refreshMap);
 				} else {
 					var error = result.a;
 					return _Utils_Tuple2(
@@ -23271,7 +23271,7 @@ var $author$project$ViewMap$view = F2(
 						onPress: $elm$core$Maybe$Nothing
 					})
 				]));
-		var _v0 = model.viewDimensions;
+		var _v0 = model.contentArea;
 		var viewWidth = _v0.a;
 		var viewHeight = _v0.b;
 		return A2(
