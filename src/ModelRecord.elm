@@ -37,6 +37,8 @@ type alias ModelRecord =
     , mapClickDebounce : Bool
     , lastMapClick : ( Float, Float )
     , viewContext : Maybe ViewContextThirdPerson.ContextThirdPerson
+    , windowSize : (Int, Int)
+    , contentAreaSize : ( Quantity Int Pixels, Quantity Int Pixels )
 
     -- Splitters
     , leftDockRightEdge : SplitPane.State

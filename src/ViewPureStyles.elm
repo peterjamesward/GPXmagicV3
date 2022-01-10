@@ -35,6 +35,7 @@ defaultColumnLayout =
 commonLayoutStyles =
     [ padding 2
     , spacing 5
+    , width fill
     , height fill
     , Font.size 14
     , Font.family

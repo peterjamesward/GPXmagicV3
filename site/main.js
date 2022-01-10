@@ -8416,6 +8416,9 @@ var $author$project$StravaAuth$convertBytes = A2(
 var $author$project$Main$AdjustTimeZone = function (a) {
 	return {$: 'AdjustTimeZone', a: a};
 };
+var $author$project$Main$ContentAreaSize = function (a) {
+	return {$: 'ContentAreaSize', a: a};
+};
 var $author$project$DomainModel$GPXSource = F3(
 	function (longitude, latitude, altitude) {
 		return {altitude: altitude, latitude: latitude, longitude: longitude};
@@ -8426,6 +8429,30 @@ var $author$project$ModelRecord$Model = function (a) {
 };
 var $whale9490$elm_split_pane$SplitPane$Vertical = {$: 'Vertical'};
 var $author$project$ViewingMode$ViewThird = {$: 'ViewThird'};
+var $elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
+	});
+var $elm$core$Task$onError = _Scheduler_onError;
+var $elm$core$Task$attempt = F2(
+	function (resultToMessage, task) {
+		return $elm$core$Task$command(
+			$elm$core$Task$Perform(
+				A2(
+					$elm$core$Task$onError,
+					A2(
+						$elm$core$Basics$composeL,
+						A2($elm$core$Basics$composeL, $elm$core$Task$succeed, resultToMessage),
+						$elm$core$Result$Err),
+					A2(
+						$elm$core$Task$andThen,
+						A2(
+							$elm$core$Basics$composeL,
+							A2($elm$core$Basics$composeL, $elm$core$Task$succeed, resultToMessage),
+							$elm$core$Result$Ok),
+						task))));
+	});
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $whale9490$elm_split_pane$SplitPane$State = function (a) {
 	return {$: 'State', a: a};
@@ -8438,6 +8465,7 @@ var $whale9490$elm_split_pane$SplitPane$configureSplitter = F2(
 				state,
 				{splitterPosition: newPosition}));
 	});
+var $elm$browser$Browser$Dom$getViewportOf = _Browser_getViewportOf;
 var $elm$time$Time$Name = function (a) {
 	return {$: 'Name', a: a};
 };
@@ -8465,11 +8493,6 @@ var $whale9490$elm_split_pane$Bound$createBound = F2(
 		return _Utils_Tuple2(
 			A2($elm$core$Basics$min, a, b),
 			A2($elm$core$Basics$max, a, b));
-	});
-var $elm$core$Basics$composeL = F3(
-	function (g, f, x) {
-		return g(
-			f(x));
 	});
 var $whale9490$elm_split_pane$Bound$boundTo = function (_v0) {
 	var a = _v0.a;
@@ -9458,6 +9481,9 @@ var $author$project$Main$init = F3(
 							$elm$core$Maybe$Just(
 								_Utils_Tuple2(0.8, 0.99))),
 						$whale9490$elm_split_pane$SplitPane$init($whale9490$elm_split_pane$SplitPane$Vertical)),
+					contentAreaSize: _Utils_Tuple2(
+						$ianmackenzie$elm_units$Pixels$pixels(800),
+						$ianmackenzie$elm_units$Pixels$pixels(600)),
 					currentPosition: 0,
 					filename: $elm$core$Maybe$Nothing,
 					ipInfo: $elm$core$Maybe$Nothing,
@@ -9506,6 +9532,7 @@ var $author$project$Main$init = F3(
 						$ianmackenzie$elm_units$Pixels$pixels(800),
 						$ianmackenzie$elm_units$Pixels$pixels(500)),
 					viewMode: $author$project$ViewingMode$ViewThird,
+					windowSize: _Utils_Tuple2(1000, 800),
 					zone: $elm$time$Time$utc
 				}),
 			$elm$core$Platform$Cmd$batch(
@@ -9513,7 +9540,11 @@ var $author$project$Main$init = F3(
 					[
 						authCmd,
 						A2($elm$core$Task$perform, $author$project$Main$AdjustTimeZone, $elm$time$Time$here),
-						$author$project$LocalStorage$storageListKeys
+						$author$project$LocalStorage$storageListKeys,
+						A2(
+						$elm$core$Task$attempt,
+						$author$project$Main$ContentAreaSize,
+						$elm$browser$Browser$Dom$getViewportOf('contentArea'))
 					])));
 	});
 var $elm$json$Json$Decode$int = _Json_decodeInt;
@@ -10544,6 +10575,7 @@ var $author$project$MyIP$requestIpInformation = function (msg) {
 				_List_Nil)
 		});
 };
+var $elm$core$Basics$round = _Basics_round;
 var $elm$file$File$toString = _File_toString;
 var $author$project$DomainModel$Leaf = function (a) {
 	return {$: 'Leaf', a: a};
@@ -15129,7 +15161,10 @@ var $author$project$Main$update = F2(
 							{
 								leftDockRightEdge: A2($whale9490$elm_split_pane$SplitPane$update, m, model.leftDockRightEdge)
 							})),
-					$elm$core$Platform$Cmd$none);
+					A2(
+						$elm$core$Task$attempt,
+						$author$project$Main$ContentAreaSize,
+						$elm$browser$Browser$Dom$getViewportOf('contentArea')));
 			case 'SplitLeftDockInternal':
 				var m = msg.a;
 				return _Utils_Tuple2(
@@ -15139,7 +15174,10 @@ var $author$project$Main$update = F2(
 							{
 								leftDockInternal: A2($whale9490$elm_split_pane$SplitPane$update, m, model.leftDockInternal)
 							})),
-					$elm$core$Platform$Cmd$none);
+					A2(
+						$elm$core$Task$attempt,
+						$author$project$Main$ContentAreaSize,
+						$elm$browser$Browser$Dom$getViewportOf('contentArea')));
 			case 'SplitRightDockLeftEdge':
 				var m = msg.a;
 				return _Utils_Tuple2(
@@ -15149,7 +15187,10 @@ var $author$project$Main$update = F2(
 							{
 								rightDockLeftEdge: A2($whale9490$elm_split_pane$SplitPane$update, m, model.rightDockLeftEdge)
 							})),
-					$elm$core$Platform$Cmd$none);
+					A2(
+						$elm$core$Task$attempt,
+						$author$project$Main$ContentAreaSize,
+						$elm$browser$Browser$Dom$getViewportOf('contentArea')));
 			case 'SplitRightDockInternal':
 				var m = msg.a;
 				return _Utils_Tuple2(
@@ -15159,8 +15200,11 @@ var $author$project$Main$update = F2(
 							{
 								rightDockInternal: A2($whale9490$elm_split_pane$SplitPane$update, m, model.rightDockInternal)
 							})),
-					$elm$core$Platform$Cmd$none);
-			default:
+					A2(
+						$elm$core$Task$attempt,
+						$author$project$Main$ContentAreaSize,
+						$elm$browser$Browser$Dom$getViewportOf('contentArea')));
+			case 'SplitBottomDockTopEdge':
 				var m = msg.a;
 				return _Utils_Tuple2(
 					$author$project$ModelRecord$Model(
@@ -15169,7 +15213,46 @@ var $author$project$Main$update = F2(
 							{
 								bottomDockTopEdge: A2($whale9490$elm_split_pane$SplitPane$update, m, model.bottomDockTopEdge)
 							})),
-					$elm$core$Platform$Cmd$none);
+					A2(
+						$elm$core$Task$attempt,
+						$author$project$Main$ContentAreaSize,
+						$elm$browser$Browser$Dom$getViewportOf('contentArea')));
+			case 'Resize':
+				var width = msg.a;
+				var height = msg.b;
+				return _Utils_Tuple2(
+					$author$project$ModelRecord$Model(
+						_Utils_update(
+							model,
+							{
+								windowSize: _Utils_Tuple2(width, height)
+							})),
+					A2(
+						$elm$core$Task$attempt,
+						$author$project$Main$ContentAreaSize,
+						$elm$browser$Browser$Dom$getViewportOf('contentArea')));
+			default:
+				var response = msg.a;
+				if (response.$ === 'Ok') {
+					var viewport = response.a;
+					return _Utils_Tuple2(
+						$author$project$ModelRecord$Model(
+							_Utils_update(
+								model,
+								{
+									contentAreaSize: _Utils_Tuple2(
+										$ianmackenzie$elm_units$Pixels$pixels(
+											$elm$core$Basics$round(viewport.viewport.width)),
+										$ianmackenzie$elm_units$Pixels$pixels(
+											$elm$core$Basics$round(viewport.viewport.height)))
+								})),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					var error = response.a;
+					return _Utils_Tuple2(
+						$author$project$ModelRecord$Model(model),
+						$elm$core$Platform$Cmd$none);
+				}
 		}
 	});
 var $mdgriffith$elm_ui$Internal$Model$Colored = F3(
@@ -15190,7 +15273,6 @@ var $mdgriffith$elm_ui$Internal$Flag$flag = function (i) {
 	return (i > 31) ? $mdgriffith$elm_ui$Internal$Flag$Second(1 << (i - 32)) : $mdgriffith$elm_ui$Internal$Flag$Flag(1 << i);
 };
 var $mdgriffith$elm_ui$Internal$Flag$bgColor = $mdgriffith$elm_ui$Internal$Flag$flag(8);
-var $elm$core$Basics$round = _Basics_round;
 var $mdgriffith$elm_ui$Internal$Model$floatClass = function (x) {
 	return $elm$core$String$fromInt(
 		$elm$core$Basics$round(x * 255));
@@ -20608,10 +20690,129 @@ var $mdgriffith$elm_ui$Element$column = F2(
 						attrs))),
 			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
 	});
+var $mdgriffith$elm_ui$Internal$Model$FontFamily = F2(
+	function (a, b) {
+		return {$: 'FontFamily', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Flag$fontFamily = $mdgriffith$elm_ui$Internal$Flag$flag(5);
+var $elm$core$String$words = _String_words;
+var $mdgriffith$elm_ui$Internal$Model$renderFontClassName = F2(
+	function (font, current) {
+		return _Utils_ap(
+			current,
+			function () {
+				switch (font.$) {
+					case 'Serif':
+						return 'serif';
+					case 'SansSerif':
+						return 'sans-serif';
+					case 'Monospace':
+						return 'monospace';
+					case 'Typeface':
+						var name = font.a;
+						return A2(
+							$elm$core$String$join,
+							'-',
+							$elm$core$String$words(
+								$elm$core$String$toLower(name)));
+					case 'ImportFont':
+						var name = font.a;
+						var url = font.b;
+						return A2(
+							$elm$core$String$join,
+							'-',
+							$elm$core$String$words(
+								$elm$core$String$toLower(name)));
+					default:
+						var name = font.a.name;
+						return A2(
+							$elm$core$String$join,
+							'-',
+							$elm$core$String$words(
+								$elm$core$String$toLower(name)));
+				}
+			}());
+	});
+var $mdgriffith$elm_ui$Element$Font$family = function (families) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$fontFamily,
+		A2(
+			$mdgriffith$elm_ui$Internal$Model$FontFamily,
+			A3($elm$core$List$foldl, $mdgriffith$elm_ui$Internal$Model$renderFontClassName, 'ff-', families),
+			families));
+};
 var $mdgriffith$elm_ui$Internal$Model$Fill = function (a) {
 	return {$: 'Fill', a: a};
 };
 var $mdgriffith$elm_ui$Element$fill = $mdgriffith$elm_ui$Internal$Model$Fill(1);
+var $mdgriffith$elm_ui$Internal$Model$PaddingStyle = F5(
+	function (a, b, c, d, e) {
+		return {$: 'PaddingStyle', a: a, b: b, c: c, d: d, e: e};
+	});
+var $mdgriffith$elm_ui$Internal$Flag$padding = $mdgriffith$elm_ui$Internal$Flag$flag(2);
+var $mdgriffith$elm_ui$Element$padding = function (x) {
+	var f = x;
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$padding,
+		A5(
+			$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
+			'p-' + $elm$core$String$fromInt(x),
+			f,
+			f,
+			f,
+			f));
+};
+var $mdgriffith$elm_ui$Internal$Model$SansSerif = {$: 'SansSerif'};
+var $mdgriffith$elm_ui$Element$Font$sansSerif = $mdgriffith$elm_ui$Internal$Model$SansSerif;
+var $mdgriffith$elm_ui$Internal$Model$FontSize = function (a) {
+	return {$: 'FontSize', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Flag$fontSize = $mdgriffith$elm_ui$Internal$Flag$flag(4);
+var $mdgriffith$elm_ui$Element$Font$size = function (i) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$fontSize,
+		$mdgriffith$elm_ui$Internal$Model$FontSize(i));
+};
+var $mdgriffith$elm_ui$Internal$Model$SpacingStyle = F3(
+	function (a, b, c) {
+		return {$: 'SpacingStyle', a: a, b: b, c: c};
+	});
+var $mdgriffith$elm_ui$Internal$Flag$spacing = $mdgriffith$elm_ui$Internal$Flag$flag(3);
+var $mdgriffith$elm_ui$Internal$Model$spacingName = F2(
+	function (x, y) {
+		return 'spacing-' + ($elm$core$String$fromInt(x) + ('-' + $elm$core$String$fromInt(y)));
+	});
+var $mdgriffith$elm_ui$Element$spacing = function (x) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$spacing,
+		A3(
+			$mdgriffith$elm_ui$Internal$Model$SpacingStyle,
+			A2($mdgriffith$elm_ui$Internal$Model$spacingName, x, x),
+			x,
+			x));
+};
+var $mdgriffith$elm_ui$Internal$Model$Typeface = function (a) {
+	return {$: 'Typeface', a: a};
+};
+var $mdgriffith$elm_ui$Element$Font$typeface = $mdgriffith$elm_ui$Internal$Model$Typeface;
+var $author$project$ViewPureStyles$commonLayoutStyles = _List_fromArray(
+	[
+		$mdgriffith$elm_ui$Element$padding(2),
+		$mdgriffith$elm_ui$Element$spacing(5),
+		$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+		$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+		$mdgriffith$elm_ui$Element$Font$size(14),
+		$mdgriffith$elm_ui$Element$Font$family(
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$Font$typeface('Open Sans'),
+				$mdgriffith$elm_ui$Element$Font$sansSerif
+			]))
+	]);
 var $mdgriffith$elm_ui$Internal$Model$unstyled = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Unstyled, $elm$core$Basics$always);
 var $mdgriffith$elm_ui$Element$html = $mdgriffith$elm_ui$Internal$Model$unstyled;
 var $mdgriffith$elm_ui$Internal$Model$OnlyDynamic = F2(
@@ -20762,58 +20963,7 @@ var $mdgriffith$elm_ui$Internal$Model$renderRoot = F3(
 					_List_fromArray(
 						[child]))));
 	});
-var $mdgriffith$elm_ui$Internal$Model$FontFamily = F2(
-	function (a, b) {
-		return {$: 'FontFamily', a: a, b: b};
-	});
-var $mdgriffith$elm_ui$Internal$Model$FontSize = function (a) {
-	return {$: 'FontSize', a: a};
-};
-var $mdgriffith$elm_ui$Internal$Model$SansSerif = {$: 'SansSerif'};
-var $mdgriffith$elm_ui$Internal$Model$Typeface = function (a) {
-	return {$: 'Typeface', a: a};
-};
 var $mdgriffith$elm_ui$Internal$Flag$fontColor = $mdgriffith$elm_ui$Internal$Flag$flag(14);
-var $mdgriffith$elm_ui$Internal$Flag$fontFamily = $mdgriffith$elm_ui$Internal$Flag$flag(5);
-var $mdgriffith$elm_ui$Internal$Flag$fontSize = $mdgriffith$elm_ui$Internal$Flag$flag(4);
-var $elm$core$String$words = _String_words;
-var $mdgriffith$elm_ui$Internal$Model$renderFontClassName = F2(
-	function (font, current) {
-		return _Utils_ap(
-			current,
-			function () {
-				switch (font.$) {
-					case 'Serif':
-						return 'serif';
-					case 'SansSerif':
-						return 'sans-serif';
-					case 'Monospace':
-						return 'monospace';
-					case 'Typeface':
-						var name = font.a;
-						return A2(
-							$elm$core$String$join,
-							'-',
-							$elm$core$String$words(
-								$elm$core$String$toLower(name)));
-					case 'ImportFont':
-						var name = font.a;
-						var url = font.b;
-						return A2(
-							$elm$core$String$join,
-							'-',
-							$elm$core$String$words(
-								$elm$core$String$toLower(name)));
-					default:
-						var name = font.a.name;
-						return A2(
-							$elm$core$String$join,
-							'-',
-							$elm$core$String$words(
-								$elm$core$String$toLower(name)));
-				}
-			}());
-	});
 var $mdgriffith$elm_ui$Internal$Model$rootStyle = function () {
 	var families = _List_fromArray(
 		[
@@ -20887,73 +21037,6 @@ var $author$project$Main$leftDockConfig = $whale9490$elm_split_pane$SplitPane$cr
 	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitLeftDockRightEdge});
 var $author$project$Main$leftDockInternalConfig = $whale9490$elm_split_pane$SplitPane$createViewConfig(
 	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitLeftDockInternal});
-var $mdgriffith$elm_ui$Element$Font$family = function (families) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$fontFamily,
-		A2(
-			$mdgriffith$elm_ui$Internal$Model$FontFamily,
-			A3($elm$core$List$foldl, $mdgriffith$elm_ui$Internal$Model$renderFontClassName, 'ff-', families),
-			families));
-};
-var $mdgriffith$elm_ui$Internal$Model$PaddingStyle = F5(
-	function (a, b, c, d, e) {
-		return {$: 'PaddingStyle', a: a, b: b, c: c, d: d, e: e};
-	});
-var $mdgriffith$elm_ui$Internal$Flag$padding = $mdgriffith$elm_ui$Internal$Flag$flag(2);
-var $mdgriffith$elm_ui$Element$padding = function (x) {
-	var f = x;
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$padding,
-		A5(
-			$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
-			'p-' + $elm$core$String$fromInt(x),
-			f,
-			f,
-			f,
-			f));
-};
-var $mdgriffith$elm_ui$Element$Font$sansSerif = $mdgriffith$elm_ui$Internal$Model$SansSerif;
-var $mdgriffith$elm_ui$Element$Font$size = function (i) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$fontSize,
-		$mdgriffith$elm_ui$Internal$Model$FontSize(i));
-};
-var $mdgriffith$elm_ui$Internal$Model$SpacingStyle = F3(
-	function (a, b, c) {
-		return {$: 'SpacingStyle', a: a, b: b, c: c};
-	});
-var $mdgriffith$elm_ui$Internal$Flag$spacing = $mdgriffith$elm_ui$Internal$Flag$flag(3);
-var $mdgriffith$elm_ui$Internal$Model$spacingName = F2(
-	function (x, y) {
-		return 'spacing-' + ($elm$core$String$fromInt(x) + ('-' + $elm$core$String$fromInt(y)));
-	});
-var $mdgriffith$elm_ui$Element$spacing = function (x) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$spacing,
-		A3(
-			$mdgriffith$elm_ui$Internal$Model$SpacingStyle,
-			A2($mdgriffith$elm_ui$Internal$Model$spacingName, x, x),
-			x,
-			x));
-};
-var $mdgriffith$elm_ui$Element$Font$typeface = $mdgriffith$elm_ui$Internal$Model$Typeface;
-var $author$project$ViewPureStyles$commonLayoutStyles = _List_fromArray(
-	[
-		$mdgriffith$elm_ui$Element$padding(2),
-		$mdgriffith$elm_ui$Element$spacing(5),
-		$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-		$mdgriffith$elm_ui$Element$Font$size(14),
-		$mdgriffith$elm_ui$Element$Font$family(
-		_List_fromArray(
-			[
-				$mdgriffith$elm_ui$Element$Font$typeface('Open Sans'),
-				$mdgriffith$elm_ui$Element$Font$sansSerif
-			]))
-	]);
 var $mdgriffith$elm_ui$Internal$Model$NoStaticStyleSheet = {$: 'NoStaticStyleSheet'};
 var $mdgriffith$elm_ui$Internal$Model$RenderModeOption = function (a) {
 	return {$: 'RenderModeOption', a: a};
@@ -22263,6 +22346,7 @@ var $author$project$ViewPureStyles$conditionallyVisible = F2(
 				]),
 			element);
 	});
+var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
 var $mdgriffith$elm_ui$Element$Input$HiddenLabel = function (a) {
 	return {$: 'HiddenLabel', a: a};
 };
@@ -23101,7 +23185,6 @@ var $mdgriffith$elm_ui$Element$Input$button = F2(
 				_List_fromArray(
 					[label])));
 	});
-var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
 var $ianmackenzie$elm_units$Pixels$inPixels = function (_v0) {
 	var numPixels = _v0.a;
 	return numPixels;
@@ -24642,6 +24725,20 @@ var $author$project$ViewThirdPerson$view = F2(
 		if ((_v0.a.$ === 'Just') && (_v0.b.$ === 'Just')) {
 			var treeNode = _v0.a.a;
 			var context = _v0.b.a;
+			var _v1 = model.contentAreaSize;
+			var viewWidth = _v1.a;
+			var viewHeight = _v1.b;
+			var _v2 = _Utils_Tuple2(
+				A2(
+					$ianmackenzie$elm_units$Quantity$minus,
+					$ianmackenzie$elm_units$Pixels$pixels(20),
+					viewWidth),
+				A2(
+					$ianmackenzie$elm_units$Quantity$minus,
+					$ianmackenzie$elm_units$Pixels$pixels(40),
+					viewHeight));
+			var availableWidth = _v2.a;
+			var availableHeight = _v2.b;
 			return A2(
 				$mdgriffith$elm_ui$Element$el,
 				_List_fromArray(
@@ -24682,7 +24779,7 @@ var $author$project$ViewThirdPerson$view = F2(
 							background: $ianmackenzie$elm_3d_scene$Scene3d$backgroundColor($avh4$elm_color$Color$lightBlue),
 							camera: A3($author$project$ViewThirdPerson$deriveCamera, treeNode, context, model.currentPosition),
 							clipDepth: $ianmackenzie$elm_units$Length$meters(1),
-							dimensions: model.viewDimensions,
+							dimensions: _Utils_Tuple2(availableWidth, availableHeight),
 							entities: model.scene,
 							upDirection: $ianmackenzie$elm_geometry$Direction3d$positiveZ
 						})));
@@ -25147,8 +25244,10 @@ var $author$project$Main$contentArea = function (model) {
 					[
 						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 						$mdgriffith$elm_ui$Element$alignTop,
-						$mdgriffith$elm_ui$Element$padding(10),
-						$mdgriffith$elm_ui$Element$centerX
+						$mdgriffith$elm_ui$Element$padding(0),
+						$mdgriffith$elm_ui$Element$centerX,
+						$mdgriffith$elm_ui$Element$htmlAttribute(
+						$elm$html$Html$Attributes$id('contentArea'))
 					]),
 				_List_fromArray(
 					[
@@ -25269,15 +25368,10 @@ var $author$project$Main$view = function (_v0) {
 			[
 				A2(
 				$mdgriffith$elm_ui$Element$layout,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-						$mdgriffith$elm_ui$Element$padding(10),
-						$mdgriffith$elm_ui$Element$spacing(10),
-						$mdgriffith$elm_ui$Element$Font$size(16),
-						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-						$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$peace)
-					]),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$peace),
+					$author$project$ViewPureStyles$commonLayoutStyles),
 				A2(
 					$mdgriffith$elm_ui$Element$column,
 					_List_fromArray(
@@ -25307,7 +25401,7 @@ var $author$project$Main$view = function (_v0) {
 									])))
 						])))
 			]),
-		title: 'GPXmagic Labs'
+		title: 'GPXmagic Labs V3 concepts'
 	};
 };
 var $author$project$Main$main = $elm$browser$Browser$application(

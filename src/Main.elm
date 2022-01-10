@@ -2,6 +2,8 @@ module Main exposing (main)
 
 import Actions
 import Browser exposing (application)
+import Browser.Dom as Dom exposing (getViewport, getViewportOf)
+import Browser.Events
 import Browser.Navigation exposing (Key)
 import Direction2d
 import DomainModel exposing (..)
@@ -17,7 +19,7 @@ import FlatColors.ChinesePalette
 import GeoCodeDecoders exposing (IpInfo)
 import GpxParser exposing (parseGPXPoints)
 import Html exposing (Html, div)
-import Html.Attributes exposing (style)
+import Html.Attributes exposing (id, style)
 import Http
 import Json.Encode as E
 import Length exposing (Meters)
@@ -69,6 +71,8 @@ type Msg
     | SplitRightDockLeftEdge SplitPane.Msg
     | SplitRightDockInternal SplitPane.Msg
     | SplitBottomDockTopEdge SplitPane.Msg
+    | Resize Int Int
+    | ContentAreaSize (Result Dom.Error Dom.Viewport)
 
 
 main : Program (Maybe (List Int)) Model Msg
@@ -122,11 +126,14 @@ init mflags origin navigationKey =
         , bottomDockTopEdge =
             SplitPane.init Vertical
                 |> configureSplitter (percentage 0.9 <| Just ( 0.8, 0.99 ))
+        , windowSize = ( 1000, 800 )
+        , contentAreaSize = ( Pixels.pixels 800, Pixels.pixels 600 )
         }
     , Cmd.batch
         [ authCmd
         , Task.perform AdjustTimeZone Time.here
         , LocalStorage.storageListKeys
+        , Task.attempt ContentAreaSize (Dom.getViewportOf "contentArea")
         ]
     )
 
@@ -264,42 +271,59 @@ update msg (Model model) =
 
         SplitLeftDockRightEdge m ->
             ( Model { model | leftDockRightEdge = SplitPane.update m model.leftDockRightEdge }
-            , Cmd.none
+            , Task.attempt ContentAreaSize (Dom.getViewportOf "contentArea")
             )
 
         SplitLeftDockInternal m ->
             ( Model { model | leftDockInternal = SplitPane.update m model.leftDockInternal }
-            , Cmd.none
+            , Task.attempt ContentAreaSize (Dom.getViewportOf "contentArea")
             )
 
         SplitRightDockLeftEdge m ->
             ( Model { model | rightDockLeftEdge = SplitPane.update m model.rightDockLeftEdge }
-            , Cmd.none
+            , Task.attempt ContentAreaSize (Dom.getViewportOf "contentArea")
             )
 
         SplitRightDockInternal m ->
             ( Model { model | rightDockInternal = SplitPane.update m model.rightDockInternal }
-            , Cmd.none
+            , Task.attempt ContentAreaSize (Dom.getViewportOf "contentArea")
             )
 
         SplitBottomDockTopEdge m ->
             ( Model { model | bottomDockTopEdge = SplitPane.update m model.bottomDockTopEdge }
-            , Cmd.none
+            , Task.attempt ContentAreaSize (Dom.getViewportOf "contentArea")
             )
+
+        Resize width height ->
+            ( Model { model | windowSize = ( width, height ) }
+            , Task.attempt ContentAreaSize (Dom.getViewportOf "contentArea")
+            )
+
+        ContentAreaSize response ->
+            case response of
+                Ok viewport ->
+                    ( Model
+                        { model
+                            | contentAreaSize =
+                                ( Pixels.pixels <| round viewport.viewport.width
+                                , Pixels.pixels <| round viewport.viewport.height
+                                )
+                        }
+                    , Cmd.none
+                    )
+
+                Err error ->
+                    ( Model model, Cmd.none )
 
 
 view : Model -> Browser.Document Msg
 view (Model model) =
-    { title = "GPXmagic Labs"
+    { title = "GPXmagic Labs V3 concepts"
     , body =
         [ layout
-            [ width fill
-            , padding 10
-            , spacing 10
-            , Font.size 16
-            , height fill
-            , Background.color FlatColors.ChinesePalette.peace
-            ]
+            (Background.color FlatColors.ChinesePalette.peace
+                :: commonLayoutStyles
+            )
           <|
             column [ width fill, height fill ]
                 [ topLoadingBar model
@@ -518,8 +542,9 @@ contentArea model =
         [ column
             [ width fill
             , alignTop
-            , padding 10
+            , padding 0
             , centerX
+            , htmlAttribute (id "contentArea")
             ]
             [ viewModeChoices model
             , conditionallyVisible (model.viewMode /= ViewMap) <|

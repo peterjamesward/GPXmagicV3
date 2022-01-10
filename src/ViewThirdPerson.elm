@@ -3,6 +3,7 @@ module ViewThirdPerson exposing (..)
 import Actions
 import Angle exposing (Angle)
 import Axis3d
+import Browser.Dom
 import Camera3d exposing (Camera3d)
 import Color
 import Delay
@@ -91,6 +92,7 @@ view :
     { model
         | scene : List (Entity LocalCoords)
         , viewDimensions : ( Quantity Int Pixels, Quantity Int Pixels )
+        , contentAreaSize : ( Quantity Int Pixels, Quantity Int Pixels )
         , trackTree : Maybe PeteTree
         , currentPosition : Int
         , viewContext : Maybe ContextThirdPerson
@@ -100,6 +102,15 @@ view :
 view model msgWrapper =
     case ( model.trackTree, model.viewContext ) of
         ( Just treeNode, Just context ) ->
+            let
+                ( viewWidth, viewHeight ) =
+                    model.contentAreaSize
+
+                ( availableWidth, availableHeight ) =
+                    ( viewWidth |> Quantity.minus (Pixels.pixels 20)
+                    , viewHeight |> Quantity.minus (Pixels.pixels 40)
+                    )
+            in
             el
                 [ htmlAttribute <| Mouse.onDown (ImageGrab >> msgWrapper)
                 , htmlAttribute <| Mouse.onMove (ImageDrag >> msgWrapper)
@@ -118,7 +129,7 @@ view model msgWrapper =
                 html <|
                     Scene3d.cloudy
                         { camera = deriveCamera treeNode context model.currentPosition
-                        , dimensions = model.viewDimensions
+                        , dimensions = (availableWidth, availableHeight)
                         , background = backgroundColor Color.lightBlue
                         , clipDepth = Length.meters 1
                         , entities = model.scene
