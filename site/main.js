@@ -9973,9 +9973,12 @@ var $elm$core$Tuple$second = function (_v0) {
 var $author$project$Main$adjustSpaceForContent = function (model) {
 	var availableWidthFraction = (1.0 - $author$project$SplitPane$SplitPane$getPosition(model.leftDockRightEdge)) * $author$project$SplitPane$SplitPane$getPosition(model.rightDockLeftEdge);
 	var availableHeightFraction = $author$project$SplitPane$SplitPane$getPosition(model.bottomDockTopEdge);
-	var _v0 = _Utils_Tuple2(model.windowSize.a * availableWidthFraction, model.windowSize.b * availableHeightFraction);
-	var availableWidthPixels = _v0.a;
-	var availableHeightPixels = _v0.b;
+	var _v0 = _Utils_Tuple2(50, 120);
+	var reservedWidth = _v0.a;
+	var reservedHeight = _v0.b;
+	var _v1 = _Utils_Tuple2((model.windowSize.a * availableWidthFraction) - reservedWidth, (model.windowSize.b * availableHeightFraction) - reservedHeight);
+	var availableWidthPixels = _v1.a;
+	var availableHeightPixels = _v1.b;
 	return _Utils_update(
 		model,
 		{
@@ -25231,8 +25234,7 @@ var $author$project$Main$contentArea = function (model) {
 				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 				$mdgriffith$elm_ui$Element$alignTop,
 				$mdgriffith$elm_ui$Element$padding(10),
-				$mdgriffith$elm_ui$Element$centerX,
-				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
+				$mdgriffith$elm_ui$Element$centerX
 			]),
 		_List_fromArray(
 			[
@@ -25261,8 +25263,12 @@ var $author$project$Main$contentArea = function (model) {
 				var _v0 = model.trackTree;
 				if (_v0.$ === 'Just') {
 					var treeNode = _v0.a;
-					return slider(
-						1 + $author$project$DomainModel$skipCount(treeNode));
+					return A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[$mdgriffith$elm_ui$Element$centerX]),
+						slider(
+							1 + $author$project$DomainModel$skipCount(treeNode)));
 				} else {
 					return $mdgriffith$elm_ui$Element$none;
 				}

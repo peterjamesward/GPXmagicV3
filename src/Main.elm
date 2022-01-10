@@ -330,9 +330,12 @@ adjustSpaceForContent model =
         availableHeightFraction =
             SplitPane.getPosition model.bottomDockTopEdge
 
+        (reservedWidth, reservedHeight) =
+            (50, 120)
+
         ( availableWidthPixels, availableHeightPixels ) =
-            ( Tuple.first model.windowSize * availableWidthFraction
-            , Tuple.second model.windowSize * availableHeightFraction
+            ( Tuple.first model.windowSize * availableWidthFraction - reservedWidth
+            , Tuple.second model.windowSize * availableHeightFraction - reservedHeight
             )
     in
     { model
@@ -565,7 +568,7 @@ contentArea model =
     in
     -- NOTE that the Map DIV must be constructed once only, or the map gets upset.
     column
-        [ width fill, alignTop, padding 10, centerX, height fill ]
+        [ width fill, alignTop, padding 10, centerX ]
         [ column
             [ width fill
             , alignTop
@@ -580,7 +583,7 @@ contentArea model =
             ]
         , case model.trackTree of
             Just treeNode ->
-                slider <| 1 + skipCount treeNode
+                el [centerX ] <| slider <| 1 + skipCount treeNode
 
             Nothing ->
                 none
