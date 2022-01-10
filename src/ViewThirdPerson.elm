@@ -17,6 +17,7 @@ import Element.Font as Font
 import Element.Input as Input
 import FeatherIcons
 import FlatColors.ChinesePalette exposing (white)
+import Html.Attributes exposing (id)
 import Html.Events as HE
 import Html.Events.Extra.Mouse as Mouse exposing (Button(..))
 import Html.Events.Extra.Wheel as Wheel
@@ -92,7 +93,7 @@ view :
     { model
         | scene : List (Entity LocalCoords)
         , viewDimensions : ( Quantity Int Pixels, Quantity Int Pixels )
-        , contentAreaSize : ( Quantity Int Pixels, Quantity Int Pixels )
+        , contentArea : ( Quantity Int Pixels, Quantity Int Pixels )
         , trackTree : Maybe PeteTree
         , currentPosition : Int
         , viewContext : Maybe ContextThirdPerson
@@ -100,44 +101,36 @@ view :
     -> (Msg -> msg)
     -> Element msg
 view model msgWrapper =
-    case ( model.trackTree, model.viewContext ) of
-        ( Just treeNode, Just context ) ->
-            let
-                ( viewWidth, viewHeight ) =
-                    model.contentAreaSize
-
-                ( availableWidth, availableHeight ) =
-                    ( viewWidth |> Quantity.minus (Pixels.pixels 20)
-                    , viewHeight |> Quantity.minus (Pixels.pixels 40)
-                    )
-            in
-            el
-                [ htmlAttribute <| Mouse.onDown (ImageGrab >> msgWrapper)
-                , htmlAttribute <| Mouse.onMove (ImageDrag >> msgWrapper)
-                , htmlAttribute <| Mouse.onUp (ImageRelease >> msgWrapper)
-                , htmlAttribute <| Mouse.onClick (ImageClick >> msgWrapper)
-                , htmlAttribute <| Mouse.onDoubleClick (ImageDoubleClick >> msgWrapper)
-                , htmlAttribute <| Wheel.onWheel (\event -> msgWrapper (ImageMouseWheel event.deltaY))
-                , onContextMenu (msgWrapper ImageNoOp)
-                , width fill
-                , pointer
-                , Border.width 2
-                , Border.color FlatColors.ChinesePalette.peace
-                , inFront <| zoomButtons msgWrapper
-                ]
-            <|
+    el
+        [ htmlAttribute <| Mouse.onDown (ImageGrab >> msgWrapper)
+        , htmlAttribute <| Mouse.onMove (ImageDrag >> msgWrapper)
+        , htmlAttribute <| Mouse.onUp (ImageRelease >> msgWrapper)
+        , htmlAttribute <| Mouse.onClick (ImageClick >> msgWrapper)
+        , htmlAttribute <| Mouse.onDoubleClick (ImageDoubleClick >> msgWrapper)
+        , htmlAttribute <| Wheel.onWheel (\event -> msgWrapper (ImageMouseWheel event.deltaY))
+        , onContextMenu (msgWrapper ImageNoOp)
+        , width fill
+        , height fill
+        , pointer
+        , Border.width 2
+        , Border.color FlatColors.ChinesePalette.peace
+        , inFront <| zoomButtons msgWrapper
+        ]
+    <|
+        case ( model.trackTree, model.viewContext ) of
+            ( Just treeNode, Just context ) ->
                 html <|
                     Scene3d.cloudy
                         { camera = deriveCamera treeNode context model.currentPosition
-                        , dimensions = (availableWidth, availableHeight)
+                        , dimensions = model.contentArea
                         , background = backgroundColor Color.lightBlue
                         , clipDepth = Length.meters 1
                         , entities = model.scene
                         , upDirection = positiveZ
                         }
 
-        _ ->
-            text "No track to show"
+            _ ->
+                text "No track to show"
 
 
 onContextMenu : a -> Element.Attribute a

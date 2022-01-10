@@ -31,16 +31,7 @@ import OAuthPorts as O exposing (randomBytes)
 import OAuthTypes as O exposing (OAuthMsg(..))
 import Pixels exposing (Pixels)
 import Quantity
-import SplitPane
-    exposing
-        ( Orientation(..)
-        , SizeUnit(..)
-        , ViewConfig
-        , configureSplitter
-        , createViewConfig
-        , percentage
-        , px
-        )
+import SplitPane.SplitPane as SplitPane exposing (..)
 import StravaAuth exposing (getStravaToken)
 import Task
 import Time
@@ -72,7 +63,7 @@ type Msg
     | SplitRightDockInternal SplitPane.Msg
     | SplitBottomDockTopEdge SplitPane.Msg
     | Resize Int Int
-    | ContentAreaSize (Result Dom.Error Dom.Viewport)
+    | GotWindowSize (Result Dom.Error Dom.Viewport)
 
 
 main : Program (Maybe (List Int)) Model Msg
@@ -119,21 +110,21 @@ init mflags origin navigationKey =
                 |> configureSplitter (percentage 0.4 <| Just ( 0.1, 0.9 ))
         , rightDockLeftEdge =
             SplitPane.init Horizontal
-                |> configureSplitter (percentage 0.6 <| Just ( 0.1, 0.99 ))
+                |> configureSplitter (percentage 0.8 <| Just ( 0.6, 0.99 ))
         , rightDockInternal =
             SplitPane.init Vertical
                 |> configureSplitter (percentage 0.6 <| Just ( 0.1, 0.9 ))
         , bottomDockTopEdge =
             SplitPane.init Vertical
-                |> configureSplitter (percentage 0.9 <| Just ( 0.8, 0.99 ))
+                |> configureSplitter (percentage 0.8 <| Just ( 0.6, 0.99 ))
         , windowSize = ( 1000, 800 )
-        , contentAreaSize = ( Pixels.pixels 800, Pixels.pixels 600 )
+        , contentArea = ( Pixels.pixels 800, Pixels.pixels 500 )
         }
     , Cmd.batch
         [ authCmd
         , Task.perform AdjustTimeZone Time.here
         , LocalStorage.storageListKeys
-        , Task.attempt ContentAreaSize (Dom.getViewportOf "contentArea")
+        , Task.attempt GotWindowSize Dom.getViewport
         ]
     )
 
@@ -270,50 +261,86 @@ update msg (Model model) =
             ( Model model, Cmd.none )
 
         SplitLeftDockRightEdge m ->
-            ( Model { model | leftDockRightEdge = SplitPane.update m model.leftDockRightEdge }
-            , Task.attempt ContentAreaSize (Dom.getViewportOf "contentArea")
+            ( { model | leftDockRightEdge = SplitPane.update m model.leftDockRightEdge }
+                |> adjustSpaceForContent
+                |> Model
+            , Cmd.none
             )
 
         SplitLeftDockInternal m ->
-            ( Model { model | leftDockInternal = SplitPane.update m model.leftDockInternal }
-            , Task.attempt ContentAreaSize (Dom.getViewportOf "contentArea")
+            ( { model | leftDockInternal = SplitPane.update m model.leftDockInternal }
+                |> adjustSpaceForContent
+                |> Model
+            , Cmd.none
             )
 
         SplitRightDockLeftEdge m ->
-            ( Model { model | rightDockLeftEdge = SplitPane.update m model.rightDockLeftEdge }
-            , Task.attempt ContentAreaSize (Dom.getViewportOf "contentArea")
+            ( { model | rightDockLeftEdge = SplitPane.update m model.rightDockLeftEdge }
+                |> adjustSpaceForContent
+                |> Model
+            , Cmd.none
             )
 
         SplitRightDockInternal m ->
-            ( Model { model | rightDockInternal = SplitPane.update m model.rightDockInternal }
-            , Task.attempt ContentAreaSize (Dom.getViewportOf "contentArea")
+            ( { model | rightDockInternal = SplitPane.update m model.rightDockInternal }
+                |> adjustSpaceForContent
+                |> Model
+            , Cmd.none
             )
 
         SplitBottomDockTopEdge m ->
-            ( Model { model | bottomDockTopEdge = SplitPane.update m model.bottomDockTopEdge }
-            , Task.attempt ContentAreaSize (Dom.getViewportOf "contentArea")
+            ( { model | bottomDockTopEdge = SplitPane.update m model.bottomDockTopEdge }
+                |> adjustSpaceForContent
+                |> Model
+            , Cmd.none
             )
 
         Resize width height ->
-            ( Model { model | windowSize = ( width, height ) }
-            , Task.attempt ContentAreaSize (Dom.getViewportOf "contentArea")
+            ( { model | windowSize = ( toFloat width, toFloat height ) }
+                |> adjustSpaceForContent
+                |> Model
+            , Cmd.none
             )
 
-        ContentAreaSize response ->
-            case response of
-                Ok viewport ->
-                    ( Model
-                        { model
-                            | contentAreaSize =
-                                ( Pixels.pixels <| round viewport.viewport.width
-                                , Pixels.pixels <| round viewport.viewport.height
-                                )
-                        }
+        GotWindowSize result ->
+            case result of
+                Ok info ->
+                    ( { model
+                        | windowSize =
+                            ( info.viewport.width
+                            , info.viewport.height
+                            )
+                      }
+                        |> adjustSpaceForContent
+                        |> Model
                     , Cmd.none
                     )
 
                 Err error ->
                     ( Model model, Cmd.none )
+
+
+adjustSpaceForContent : ModelRecord -> ModelRecord
+adjustSpaceForContent model =
+    let
+        availableWidthFraction =
+            (1.0 - SplitPane.getPosition model.leftDockRightEdge)
+                * SplitPane.getPosition model.rightDockLeftEdge
+
+        availableHeightFraction =
+            SplitPane.getPosition model.bottomDockTopEdge
+
+        ( availableWidthPixels, availableHeightPixels ) =
+            ( Tuple.first model.windowSize * availableWidthFraction
+            , Tuple.second model.windowSize * availableHeightFraction
+            )
+    in
+    { model
+        | contentArea =
+            ( Pixels.pixels <| round availableWidthPixels
+            , Pixels.pixels <| round availableHeightPixels
+            )
+    }
 
 
 view : Model -> Browser.Document Msg
@@ -542,9 +569,8 @@ contentArea model =
         [ column
             [ width fill
             , alignTop
-            , padding 0
+            , padding 10
             , centerX
-            , htmlAttribute (id "contentArea")
             ]
             [ viewModeChoices model
             , conditionallyVisible (model.viewMode /= ViewMap) <|

@@ -8416,18 +8416,18 @@ var $author$project$StravaAuth$convertBytes = A2(
 var $author$project$Main$AdjustTimeZone = function (a) {
 	return {$: 'AdjustTimeZone', a: a};
 };
-var $author$project$Main$ContentAreaSize = function (a) {
-	return {$: 'ContentAreaSize', a: a};
-};
 var $author$project$DomainModel$GPXSource = F3(
 	function (longitude, latitude, altitude) {
 		return {altitude: altitude, latitude: latitude, longitude: longitude};
 	});
-var $whale9490$elm_split_pane$SplitPane$Horizontal = {$: 'Horizontal'};
+var $author$project$Main$GotWindowSize = function (a) {
+	return {$: 'GotWindowSize', a: a};
+};
+var $author$project$SplitPane$SplitPane$Horizontal = {$: 'Horizontal'};
 var $author$project$ModelRecord$Model = function (a) {
 	return {$: 'Model', a: a};
 };
-var $whale9490$elm_split_pane$SplitPane$Vertical = {$: 'Vertical'};
+var $author$project$SplitPane$SplitPane$Vertical = {$: 'Vertical'};
 var $author$project$ViewingMode$ViewThird = {$: 'ViewThird'};
 var $elm$core$Basics$composeL = F3(
 	function (g, f, x) {
@@ -8454,18 +8454,18 @@ var $elm$core$Task$attempt = F2(
 						task))));
 	});
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
-var $whale9490$elm_split_pane$SplitPane$State = function (a) {
+var $author$project$SplitPane$SplitPane$State = function (a) {
 	return {$: 'State', a: a};
 };
-var $whale9490$elm_split_pane$SplitPane$configureSplitter = F2(
+var $author$project$SplitPane$SplitPane$configureSplitter = F2(
 	function (newPosition, _v0) {
 		var state = _v0.a;
-		return $whale9490$elm_split_pane$SplitPane$State(
+		return $author$project$SplitPane$SplitPane$State(
 			_Utils_update(
 				state,
 				{splitterPosition: newPosition}));
 	});
-var $elm$browser$Browser$Dom$getViewportOf = _Browser_getViewportOf;
+var $elm$browser$Browser$Dom$getViewport = _Browser_withWindow(_Browser_getViewport);
 var $elm$time$Time$Name = function (a) {
 	return {$: 'Name', a: a};
 };
@@ -8478,23 +8478,23 @@ var $elm$time$Time$Zone = F2(
 	});
 var $elm$time$Time$customZone = $elm$time$Time$Zone;
 var $elm$time$Time$here = _Time_here(_Utils_Tuple0);
-var $whale9490$elm_split_pane$SplitPane$Draggable = function (a) {
+var $author$project$SplitPane$SplitPane$Draggable = function (a) {
 	return {$: 'Draggable', a: a};
 };
-var $whale9490$elm_split_pane$SplitPane$Percentage = function (a) {
+var $author$project$SplitPane$SplitPane$Percentage = function (a) {
 	return {$: 'Percentage', a: a};
 };
 var $elm$core$Basics$min = F2(
 	function (x, y) {
 		return (_Utils_cmp(x, y) < 0) ? x : y;
 	});
-var $whale9490$elm_split_pane$Bound$createBound = F2(
+var $author$project$SplitPane$Bound$createBound = F2(
 	function (a, b) {
 		return _Utils_Tuple2(
 			A2($elm$core$Basics$min, a, b),
 			A2($elm$core$Basics$max, a, b));
 	});
-var $whale9490$elm_split_pane$Bound$boundTo = function (_v0) {
+var $author$project$SplitPane$Bound$boundTo = function (_v0) {
 	var a = _v0.a;
 	var b = _v0.b;
 	return A2(
@@ -8502,41 +8502,41 @@ var $whale9490$elm_split_pane$Bound$boundTo = function (_v0) {
 		$elm$core$Basics$min(b),
 		$elm$core$Basics$max(a));
 };
-var $whale9490$elm_split_pane$Bound$putValue = F2(
+var $author$project$SplitPane$Bound$putValue = F2(
 	function (_v0, value) {
 		var bound = _v0.b;
 		return _Utils_Tuple2(
-			A2($whale9490$elm_split_pane$Bound$boundTo, bound, value),
+			A2($author$project$SplitPane$Bound$boundTo, bound, value),
 			bound);
 	});
-var $whale9490$elm_split_pane$Bound$createBounded = F2(
+var $author$project$SplitPane$Bound$createBounded = F2(
 	function (value, bound) {
 		return A2(
-			$whale9490$elm_split_pane$Bound$putValue,
+			$author$project$SplitPane$Bound$putValue,
 			_Utils_Tuple2(value, bound),
 			value);
 	});
-var $whale9490$elm_split_pane$SplitPane$percentage = F2(
+var $author$project$SplitPane$SplitPane$percentage = F2(
 	function (x, bound) {
 		var newBound = function () {
 			if (bound.$ === 'Just') {
 				var _v1 = bound.a;
 				var lower = _v1.a;
 				var upper = _v1.b;
-				return A2($whale9490$elm_split_pane$Bound$createBound, lower, upper);
+				return A2($author$project$SplitPane$Bound$createBound, lower, upper);
 			} else {
-				return A2($whale9490$elm_split_pane$Bound$createBound, 0.0, 1.0);
+				return A2($author$project$SplitPane$Bound$createBound, 0.0, 1.0);
 			}
 		}();
-		return $whale9490$elm_split_pane$SplitPane$Percentage(
-			A2($whale9490$elm_split_pane$Bound$createBounded, x, newBound));
+		return $author$project$SplitPane$SplitPane$Percentage(
+			A2($author$project$SplitPane$Bound$createBounded, x, newBound));
 	});
-var $whale9490$elm_split_pane$SplitPane$init = function (o) {
-	return $whale9490$elm_split_pane$SplitPane$State(
+var $author$project$SplitPane$SplitPane$init = function (o) {
+	return $author$project$SplitPane$SplitPane$State(
 		{
-			dragState: $whale9490$elm_split_pane$SplitPane$Draggable($elm$core$Maybe$Nothing),
+			dragState: $author$project$SplitPane$SplitPane$Draggable($elm$core$Maybe$Nothing),
 			orientation: o,
-			splitterPosition: A2($whale9490$elm_split_pane$SplitPane$percentage, 0.5, $elm$core$Maybe$Nothing)
+			splitterPosition: A2($author$project$SplitPane$SplitPane$percentage, 0.5, $elm$core$Maybe$Nothing)
 		});
 };
 var $author$project$OAuthTypes$AccessTokenRequested = {$: 'AccessTokenRequested'};
@@ -9474,55 +9474,55 @@ var $author$project$Main$init = F3(
 			$author$project$ModelRecord$Model(
 				{
 					bottomDockTopEdge: A2(
-						$whale9490$elm_split_pane$SplitPane$configureSplitter,
+						$author$project$SplitPane$SplitPane$configureSplitter,
 						A2(
-							$whale9490$elm_split_pane$SplitPane$percentage,
-							0.9,
+							$author$project$SplitPane$SplitPane$percentage,
+							0.8,
 							$elm$core$Maybe$Just(
-								_Utils_Tuple2(0.8, 0.99))),
-						$whale9490$elm_split_pane$SplitPane$init($whale9490$elm_split_pane$SplitPane$Vertical)),
-					contentAreaSize: _Utils_Tuple2(
+								_Utils_Tuple2(0.6, 0.99))),
+						$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Vertical)),
+					contentArea: _Utils_Tuple2(
 						$ianmackenzie$elm_units$Pixels$pixels(800),
-						$ianmackenzie$elm_units$Pixels$pixels(600)),
+						$ianmackenzie$elm_units$Pixels$pixels(500)),
 					currentPosition: 0,
 					filename: $elm$core$Maybe$Nothing,
 					ipInfo: $elm$core$Maybe$Nothing,
 					lastMapClick: _Utils_Tuple2(0.0, 0.0),
 					leftDockInternal: A2(
-						$whale9490$elm_split_pane$SplitPane$configureSplitter,
+						$author$project$SplitPane$SplitPane$configureSplitter,
 						A2(
-							$whale9490$elm_split_pane$SplitPane$percentage,
+							$author$project$SplitPane$SplitPane$percentage,
 							0.4,
 							$elm$core$Maybe$Just(
 								_Utils_Tuple2(0.1, 0.9))),
-						$whale9490$elm_split_pane$SplitPane$init($whale9490$elm_split_pane$SplitPane$Vertical)),
+						$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Vertical)),
 					leftDockRightEdge: A2(
-						$whale9490$elm_split_pane$SplitPane$configureSplitter,
+						$author$project$SplitPane$SplitPane$configureSplitter,
 						A2(
-							$whale9490$elm_split_pane$SplitPane$percentage,
+							$author$project$SplitPane$SplitPane$percentage,
 							0.2,
 							$elm$core$Maybe$Just(
 								_Utils_Tuple2(0.01, 0.49))),
-						$whale9490$elm_split_pane$SplitPane$init($whale9490$elm_split_pane$SplitPane$Horizontal)),
+						$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Horizontal)),
 					mapClickDebounce: false,
 					referenceLonLat: A3($author$project$DomainModel$GPXSource, $ianmackenzie$elm_geometry$Direction2d$x, $ianmackenzie$elm_units$Quantity$zero, $ianmackenzie$elm_units$Quantity$zero),
 					renderDepth: 0,
 					rightDockInternal: A2(
-						$whale9490$elm_split_pane$SplitPane$configureSplitter,
+						$author$project$SplitPane$SplitPane$configureSplitter,
 						A2(
-							$whale9490$elm_split_pane$SplitPane$percentage,
+							$author$project$SplitPane$SplitPane$percentage,
 							0.6,
 							$elm$core$Maybe$Just(
 								_Utils_Tuple2(0.1, 0.9))),
-						$whale9490$elm_split_pane$SplitPane$init($whale9490$elm_split_pane$SplitPane$Vertical)),
+						$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Vertical)),
 					rightDockLeftEdge: A2(
-						$whale9490$elm_split_pane$SplitPane$configureSplitter,
+						$author$project$SplitPane$SplitPane$configureSplitter,
 						A2(
-							$whale9490$elm_split_pane$SplitPane$percentage,
-							0.6,
+							$author$project$SplitPane$SplitPane$percentage,
+							0.8,
 							$elm$core$Maybe$Just(
-								_Utils_Tuple2(0.1, 0.99))),
-						$whale9490$elm_split_pane$SplitPane$init($whale9490$elm_split_pane$SplitPane$Horizontal)),
+								_Utils_Tuple2(0.6, 0.99))),
+						$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Horizontal)),
 					scene: _List_Nil,
 					stravaAuthentication: authData,
 					time: $elm$time$Time$millisToPosix(0),
@@ -9541,10 +9541,7 @@ var $author$project$Main$init = F3(
 						authCmd,
 						A2($elm$core$Task$perform, $author$project$Main$AdjustTimeZone, $elm$time$Time$here),
 						$author$project$LocalStorage$storageListKeys,
-						A2(
-						$elm$core$Task$attempt,
-						$author$project$Main$ContentAreaSize,
-						$elm$browser$Browser$Dom$getViewportOf('contentArea'))
+						A2($elm$core$Task$attempt, $author$project$Main$GotWindowSize, $elm$browser$Browser$Dom$getViewport)
 					])));
 	});
 var $elm$json$Json$Decode$int = _Json_decodeInt;
@@ -9586,14 +9583,14 @@ var $author$project$OAuthPorts$randomBytes = _Platform_incomingPort(
 	'randomBytes',
 	$elm$json$Json$Decode$list($elm$json$Json$Decode$int));
 var $author$project$LocalStorage$storageResponses = _Platform_incomingPort('storageResponses', $elm$json$Json$Decode$value);
-var $whale9490$elm_split_pane$SplitPane$Position = F2(
+var $author$project$SplitPane$SplitPane$Position = F2(
 	function (x, y) {
 		return {x: x, y: y};
 	});
-var $whale9490$elm_split_pane$SplitPane$SplitterLeftAlone = function (a) {
+var $author$project$SplitPane$SplitPane$SplitterLeftAlone = function (a) {
 	return {$: 'SplitterLeftAlone', a: a};
 };
-var $whale9490$elm_split_pane$SplitPane$SplitterMove = function (a) {
+var $author$project$SplitPane$SplitPane$SplitterMove = function (a) {
 	return {$: 'SplitterMove', a: a};
 };
 var $elm$json$Json$Decode$field = _Json_decodeField;
@@ -9877,7 +9874,7 @@ var $elm$browser$Browser$Events$on = F3(
 	});
 var $elm$browser$Browser$Events$onMouseMove = A2($elm$browser$Browser$Events$on, $elm$browser$Browser$Events$Document, 'mousemove');
 var $elm$browser$Browser$Events$onMouseUp = A2($elm$browser$Browser$Events$on, $elm$browser$Browser$Events$Document, 'mouseup');
-var $whale9490$elm_split_pane$SplitPane$subscriptions = function (_v0) {
+var $author$project$SplitPane$SplitPane$subscriptions = function (_v0) {
 	var state = _v0.a;
 	var _v1 = state.dragState;
 	if ((_v1.$ === 'Draggable') && (_v1.a.$ === 'Just')) {
@@ -9887,19 +9884,19 @@ var $whale9490$elm_split_pane$SplitPane$subscriptions = function (_v0) {
 					$elm$browser$Browser$Events$onMouseMove(
 					A2(
 						$elm$json$Json$Decode$map,
-						$whale9490$elm_split_pane$SplitPane$SplitterMove,
+						$author$project$SplitPane$SplitPane$SplitterMove,
 						A3(
 							$elm$json$Json$Decode$map2,
-							$whale9490$elm_split_pane$SplitPane$Position,
+							$author$project$SplitPane$SplitPane$Position,
 							A2($elm$json$Json$Decode$field, 'pageX', $elm$json$Json$Decode$int),
 							A2($elm$json$Json$Decode$field, 'pageY', $elm$json$Json$Decode$int)))),
 					$elm$browser$Browser$Events$onMouseUp(
 					A2(
 						$elm$json$Json$Decode$map,
-						$whale9490$elm_split_pane$SplitPane$SplitterLeftAlone,
+						$author$project$SplitPane$SplitPane$SplitterLeftAlone,
 						A3(
 							$elm$json$Json$Decode$map2,
-							$whale9490$elm_split_pane$SplitPane$Position,
+							$author$project$SplitPane$SplitPane$Position,
 							A2($elm$json$Json$Decode$field, 'pageX', $elm$json$Json$Decode$int),
 							A2($elm$json$Json$Decode$field, 'pageY', $elm$json$Json$Decode$int))))
 				]));
@@ -9923,23 +9920,23 @@ var $author$project$Main$subscriptions = function (_v0) {
 				A2(
 				$elm$core$Platform$Sub$map,
 				$author$project$Main$SplitLeftDockRightEdge,
-				$whale9490$elm_split_pane$SplitPane$subscriptions(model.leftDockRightEdge)),
+				$author$project$SplitPane$SplitPane$subscriptions(model.leftDockRightEdge)),
 				A2(
 				$elm$core$Platform$Sub$map,
 				$author$project$Main$SplitLeftDockInternal,
-				$whale9490$elm_split_pane$SplitPane$subscriptions(model.leftDockInternal)),
+				$author$project$SplitPane$SplitPane$subscriptions(model.leftDockInternal)),
 				A2(
 				$elm$core$Platform$Sub$map,
 				$author$project$Main$SplitRightDockLeftEdge,
-				$whale9490$elm_split_pane$SplitPane$subscriptions(model.rightDockLeftEdge)),
+				$author$project$SplitPane$SplitPane$subscriptions(model.rightDockLeftEdge)),
 				A2(
 				$elm$core$Platform$Sub$map,
 				$author$project$Main$SplitRightDockInternal,
-				$whale9490$elm_split_pane$SplitPane$subscriptions(model.rightDockInternal)),
+				$author$project$SplitPane$SplitPane$subscriptions(model.rightDockInternal)),
 				A2(
 				$elm$core$Platform$Sub$map,
 				$author$project$Main$SplitBottomDockTopEdge,
-				$whale9490$elm_split_pane$SplitPane$subscriptions(model.bottomDockTopEdge))
+				$author$project$SplitPane$SplitPane$subscriptions(model.bottomDockTopEdge))
 			]));
 };
 var $author$project$Main$GpxLoaded = function (a) {
@@ -9953,6 +9950,41 @@ var $author$project$Main$ImageMessage = function (a) {
 };
 var $author$project$Main$ReceivedIpDetails = function (a) {
 	return {$: 'ReceivedIpDetails', a: a};
+};
+var $author$project$SplitPane$Bound$getValue = function (value) {
+	return value.a;
+};
+var $author$project$SplitPane$SplitPane$getPosition = function (_v0) {
+	var s = _v0.a;
+	var _v1 = s.splitterPosition;
+	if (_v1.$ === 'Percentage') {
+		var percent = _v1.a;
+		return $author$project$SplitPane$Bound$getValue(percent);
+	} else {
+		var pixels = _v1.a;
+		return $author$project$SplitPane$Bound$getValue(pixels);
+	}
+};
+var $elm$core$Basics$round = _Basics_round;
+var $elm$core$Tuple$second = function (_v0) {
+	var y = _v0.b;
+	return y;
+};
+var $author$project$Main$adjustSpaceForContent = function (model) {
+	var availableWidthFraction = (1.0 - $author$project$SplitPane$SplitPane$getPosition(model.leftDockRightEdge)) * $author$project$SplitPane$SplitPane$getPosition(model.rightDockLeftEdge);
+	var availableHeightFraction = $author$project$SplitPane$SplitPane$getPosition(model.bottomDockTopEdge);
+	var _v0 = _Utils_Tuple2(model.windowSize.a * availableWidthFraction, model.windowSize.b * availableHeightFraction);
+	var availableWidthPixels = _v0.a;
+	var availableHeightPixels = _v0.b;
+	return _Utils_update(
+		model,
+		{
+			contentArea: _Utils_Tuple2(
+				$ianmackenzie$elm_units$Pixels$pixels(
+					$elm$core$Basics$round(availableWidthPixels)),
+				$ianmackenzie$elm_units$Pixels$pixels(
+					$elm$core$Basics$round(availableHeightPixels)))
+		});
 };
 var $elm$json$Json$Encode$float = _Json_wrap;
 var $author$project$MapPortsController$mapCommands = _Platform_outgoingPort('mapCommands', $elm$core$Basics$identity);
@@ -10575,7 +10607,6 @@ var $author$project$MyIP$requestIpInformation = function (msg) {
 				_List_Nil)
 		});
 };
-var $elm$core$Basics$round = _Basics_round;
 var $elm$file$File$toString = _File_toString;
 var $author$project$DomainModel$Leaf = function (a) {
 	return {$: 'Leaf', a: a};
@@ -10865,10 +10896,6 @@ var $author$project$DomainModel$pointFromGpxWithReference = F2(
 					A2($ianmackenzie$elm_units$Quantity$minus, reference.latitude, gpx.latitude))),
 			A2($ianmackenzie$elm_units$Quantity$minus, reference.altitude, gpx.altitude));
 	});
-var $elm$core$Tuple$second = function (_v0) {
-	var y = _v0.b;
-	return y;
-};
 var $author$project$Spherical$range = F2(
 	function (lonLat1, lonLat2) {
 		var _v0 = _Utils_Tuple2(
@@ -11637,43 +11664,43 @@ var $author$project$MapPortsController$update = F3(
 				return _Utils_Tuple2(model, $author$project$MapPortsController$refreshMap);
 		}
 	});
-var $whale9490$elm_split_pane$SplitPane$UpdateConfig = function (a) {
+var $author$project$SplitPane$SplitPane$UpdateConfig = function (a) {
 	return {$: 'UpdateConfig', a: a};
 };
-var $whale9490$elm_split_pane$SplitPane$createUpdateConfig = function (config) {
-	return $whale9490$elm_split_pane$SplitPane$UpdateConfig(config);
+var $author$project$SplitPane$SplitPane$createUpdateConfig = function (config) {
+	return $author$project$SplitPane$SplitPane$UpdateConfig(config);
 };
-var $whale9490$elm_split_pane$SplitPane$Px = function (a) {
+var $author$project$SplitPane$SplitPane$Px = function (a) {
 	return {$: 'Px', a: a};
 };
-var $whale9490$elm_split_pane$Bound$updateValue = F2(
+var $author$project$SplitPane$Bound$updateValue = F2(
 	function (f, _v0) {
 		var value = _v0.a;
 		var bound = _v0.b;
 		return _Utils_Tuple2(
 			A2(
-				$whale9490$elm_split_pane$Bound$boundTo,
+				$author$project$SplitPane$Bound$boundTo,
 				bound,
 				f(value)),
 			bound);
 	});
-var $whale9490$elm_split_pane$SplitPane$resize = F5(
+var $author$project$SplitPane$SplitPane$resize = F5(
 	function (ori, splitterPosition, step, paneWidth, paneHeight) {
 		if (ori.$ === 'Horizontal') {
 			if (splitterPosition.$ === 'Px') {
 				var p = splitterPosition.a;
-				return $whale9490$elm_split_pane$SplitPane$Px(
+				return $author$project$SplitPane$SplitPane$Px(
 					A2(
-						$whale9490$elm_split_pane$Bound$updateValue,
+						$author$project$SplitPane$Bound$updateValue,
 						function (v) {
 							return v + step.x;
 						},
 						p));
 			} else {
 				var p = splitterPosition.a;
-				return $whale9490$elm_split_pane$SplitPane$Percentage(
+				return $author$project$SplitPane$SplitPane$Percentage(
 					A2(
-						$whale9490$elm_split_pane$Bound$updateValue,
+						$author$project$SplitPane$Bound$updateValue,
 						function (v) {
 							return v + (step.x / paneWidth);
 						},
@@ -11682,18 +11709,18 @@ var $whale9490$elm_split_pane$SplitPane$resize = F5(
 		} else {
 			if (splitterPosition.$ === 'Px') {
 				var p = splitterPosition.a;
-				return $whale9490$elm_split_pane$SplitPane$Px(
+				return $author$project$SplitPane$SplitPane$Px(
 					A2(
-						$whale9490$elm_split_pane$Bound$updateValue,
+						$author$project$SplitPane$Bound$updateValue,
 						function (v) {
 							return v + step.y;
 						},
 						p));
 			} else {
 				var p = splitterPosition.a;
-				return $whale9490$elm_split_pane$SplitPane$Percentage(
+				return $author$project$SplitPane$SplitPane$Percentage(
 					A2(
-						$whale9490$elm_split_pane$Bound$updateValue,
+						$author$project$SplitPane$Bound$updateValue,
 						function (v) {
 							return v + (step.y / paneHeight);
 						},
@@ -11701,7 +11728,7 @@ var $whale9490$elm_split_pane$SplitPane$resize = F5(
 			}
 		}
 	});
-var $whale9490$elm_split_pane$SplitPane$customUpdate = F3(
+var $author$project$SplitPane$SplitPane$customUpdate = F3(
 	function (_v0, msg, _v1) {
 		var updateConfig = _v0.a;
 		var state = _v1.a;
@@ -11714,11 +11741,11 @@ var $whale9490$elm_split_pane$SplitPane$customUpdate = F3(
 						var _v3 = _v2.a.a;
 						var pos = _v2.b.a;
 						return _Utils_Tuple2(
-							$whale9490$elm_split_pane$SplitPane$State(
+							$author$project$SplitPane$SplitPane$State(
 								_Utils_update(
 									state,
 									{
-										dragState: $whale9490$elm_split_pane$SplitPane$Draggable(
+										dragState: $author$project$SplitPane$SplitPane$Draggable(
 											$elm$core$Maybe$Just(
 												{
 													anchor: {
@@ -11736,11 +11763,11 @@ var $whale9490$elm_split_pane$SplitPane$customUpdate = F3(
 					switch (_v2.b.$) {
 						case 'SplitterLeftAlone':
 							return _Utils_Tuple2(
-								$whale9490$elm_split_pane$SplitPane$State(
+								$author$project$SplitPane$SplitPane$State(
 									_Utils_update(
 										state,
 										{
-											dragState: $whale9490$elm_split_pane$SplitPane$Draggable($elm$core$Maybe$Nothing)
+											dragState: $author$project$SplitPane$SplitPane$Draggable($elm$core$Maybe$Nothing)
 										})),
 								updateConfig.onResizeEnded);
 						case 'SplitterMove':
@@ -11748,13 +11775,13 @@ var $whale9490$elm_split_pane$SplitPane$customUpdate = F3(
 							var anchor = _v2.a.a.a.anchor;
 							var newRequestedPosition = _v2.b.a;
 							var step = {x: newRequestedPosition.x - anchor.x, y: newRequestedPosition.y - anchor.y};
-							var newSplitterPosition = A5($whale9490$elm_split_pane$SplitPane$resize, state.orientation, state.splitterPosition, step, paneInfo.width, paneInfo.height);
+							var newSplitterPosition = A5($author$project$SplitPane$SplitPane$resize, state.orientation, state.splitterPosition, step, paneInfo.width, paneInfo.height);
 							return _Utils_Tuple2(
-								$whale9490$elm_split_pane$SplitPane$State(
+								$author$project$SplitPane$SplitPane$State(
 									_Utils_update(
 										state,
 										{
-											dragState: $whale9490$elm_split_pane$SplitPane$Draggable(
+											dragState: $author$project$SplitPane$SplitPane$Draggable(
 												$elm$core$Maybe$Just(
 													{
 														anchor: {x: newRequestedPosition.x, y: newRequestedPosition.y},
@@ -11772,14 +11799,14 @@ var $whale9490$elm_split_pane$SplitPane$customUpdate = F3(
 			}
 		}
 		return _Utils_Tuple2(
-			$whale9490$elm_split_pane$SplitPane$State(state),
+			$author$project$SplitPane$SplitPane$State(state),
 			$elm$core$Maybe$Nothing);
 	});
-var $whale9490$elm_split_pane$SplitPane$update = F2(
+var $author$project$SplitPane$SplitPane$update = F2(
 	function (msg, model) {
 		var _v0 = A3(
-			$whale9490$elm_split_pane$SplitPane$customUpdate,
-			$whale9490$elm_split_pane$SplitPane$createUpdateConfig(
+			$author$project$SplitPane$SplitPane$customUpdate,
+			$author$project$SplitPane$SplitPane$createUpdateConfig(
 				{
 					onResize: function (_v1) {
 						return $elm$core$Maybe$Nothing;
@@ -15156,99 +15183,84 @@ var $author$project$Main$update = F2(
 				var m = msg.a;
 				return _Utils_Tuple2(
 					$author$project$ModelRecord$Model(
-						_Utils_update(
-							model,
-							{
-								leftDockRightEdge: A2($whale9490$elm_split_pane$SplitPane$update, m, model.leftDockRightEdge)
-							})),
-					A2(
-						$elm$core$Task$attempt,
-						$author$project$Main$ContentAreaSize,
-						$elm$browser$Browser$Dom$getViewportOf('contentArea')));
+						$author$project$Main$adjustSpaceForContent(
+							_Utils_update(
+								model,
+								{
+									leftDockRightEdge: A2($author$project$SplitPane$SplitPane$update, m, model.leftDockRightEdge)
+								}))),
+					$elm$core$Platform$Cmd$none);
 			case 'SplitLeftDockInternal':
 				var m = msg.a;
 				return _Utils_Tuple2(
 					$author$project$ModelRecord$Model(
-						_Utils_update(
-							model,
-							{
-								leftDockInternal: A2($whale9490$elm_split_pane$SplitPane$update, m, model.leftDockInternal)
-							})),
-					A2(
-						$elm$core$Task$attempt,
-						$author$project$Main$ContentAreaSize,
-						$elm$browser$Browser$Dom$getViewportOf('contentArea')));
+						$author$project$Main$adjustSpaceForContent(
+							_Utils_update(
+								model,
+								{
+									leftDockInternal: A2($author$project$SplitPane$SplitPane$update, m, model.leftDockInternal)
+								}))),
+					$elm$core$Platform$Cmd$none);
 			case 'SplitRightDockLeftEdge':
 				var m = msg.a;
 				return _Utils_Tuple2(
 					$author$project$ModelRecord$Model(
-						_Utils_update(
-							model,
-							{
-								rightDockLeftEdge: A2($whale9490$elm_split_pane$SplitPane$update, m, model.rightDockLeftEdge)
-							})),
-					A2(
-						$elm$core$Task$attempt,
-						$author$project$Main$ContentAreaSize,
-						$elm$browser$Browser$Dom$getViewportOf('contentArea')));
+						$author$project$Main$adjustSpaceForContent(
+							_Utils_update(
+								model,
+								{
+									rightDockLeftEdge: A2($author$project$SplitPane$SplitPane$update, m, model.rightDockLeftEdge)
+								}))),
+					$elm$core$Platform$Cmd$none);
 			case 'SplitRightDockInternal':
 				var m = msg.a;
 				return _Utils_Tuple2(
 					$author$project$ModelRecord$Model(
-						_Utils_update(
-							model,
-							{
-								rightDockInternal: A2($whale9490$elm_split_pane$SplitPane$update, m, model.rightDockInternal)
-							})),
-					A2(
-						$elm$core$Task$attempt,
-						$author$project$Main$ContentAreaSize,
-						$elm$browser$Browser$Dom$getViewportOf('contentArea')));
+						$author$project$Main$adjustSpaceForContent(
+							_Utils_update(
+								model,
+								{
+									rightDockInternal: A2($author$project$SplitPane$SplitPane$update, m, model.rightDockInternal)
+								}))),
+					$elm$core$Platform$Cmd$none);
 			case 'SplitBottomDockTopEdge':
 				var m = msg.a;
 				return _Utils_Tuple2(
 					$author$project$ModelRecord$Model(
-						_Utils_update(
-							model,
-							{
-								bottomDockTopEdge: A2($whale9490$elm_split_pane$SplitPane$update, m, model.bottomDockTopEdge)
-							})),
-					A2(
-						$elm$core$Task$attempt,
-						$author$project$Main$ContentAreaSize,
-						$elm$browser$Browser$Dom$getViewportOf('contentArea')));
+						$author$project$Main$adjustSpaceForContent(
+							_Utils_update(
+								model,
+								{
+									bottomDockTopEdge: A2($author$project$SplitPane$SplitPane$update, m, model.bottomDockTopEdge)
+								}))),
+					$elm$core$Platform$Cmd$none);
 			case 'Resize':
 				var width = msg.a;
 				var height = msg.b;
 				return _Utils_Tuple2(
 					$author$project$ModelRecord$Model(
-						_Utils_update(
-							model,
-							{
-								windowSize: _Utils_Tuple2(width, height)
-							})),
-					A2(
-						$elm$core$Task$attempt,
-						$author$project$Main$ContentAreaSize,
-						$elm$browser$Browser$Dom$getViewportOf('contentArea')));
-			default:
-				var response = msg.a;
-				if (response.$ === 'Ok') {
-					var viewport = response.a;
-					return _Utils_Tuple2(
-						$author$project$ModelRecord$Model(
+						$author$project$Main$adjustSpaceForContent(
 							_Utils_update(
 								model,
 								{
-									contentAreaSize: _Utils_Tuple2(
-										$ianmackenzie$elm_units$Pixels$pixels(
-											$elm$core$Basics$round(viewport.viewport.width)),
-										$ianmackenzie$elm_units$Pixels$pixels(
-											$elm$core$Basics$round(viewport.viewport.height)))
-								})),
+									windowSize: _Utils_Tuple2(width, height)
+								}))),
+					$elm$core$Platform$Cmd$none);
+			default:
+				var result = msg.a;
+				if (result.$ === 'Ok') {
+					var info = result.a;
+					return _Utils_Tuple2(
+						$author$project$ModelRecord$Model(
+							$author$project$Main$adjustSpaceForContent(
+								_Utils_update(
+									model,
+									{
+										windowSize: _Utils_Tuple2(info.viewport.width, info.viewport.height)
+									}))),
 						$elm$core$Platform$Cmd$none);
 				} else {
-					var error = response.a;
+					var error = result.a;
 					return _Utils_Tuple2(
 						$author$project$ModelRecord$Model(model),
 						$elm$core$Platform$Cmd$none);
@@ -21024,18 +21036,18 @@ var $mdgriffith$elm_ui$Element$layoutWith = F3(
 	});
 var $mdgriffith$elm_ui$Element$layout = $mdgriffith$elm_ui$Element$layoutWith(
 	{options: _List_Nil});
-var $whale9490$elm_split_pane$SplitPane$ViewConfig = function (a) {
+var $author$project$SplitPane$SplitPane$ViewConfig = function (a) {
 	return {$: 'ViewConfig', a: a};
 };
-var $whale9490$elm_split_pane$SplitPane$createViewConfig = function (_v0) {
+var $author$project$SplitPane$SplitPane$createViewConfig = function (_v0) {
 	var toMsg = _v0.toMsg;
 	var customSplitter = _v0.customSplitter;
-	return $whale9490$elm_split_pane$SplitPane$ViewConfig(
+	return $author$project$SplitPane$SplitPane$ViewConfig(
 		{splitter: customSplitter, toMsg: toMsg});
 };
-var $author$project$Main$leftDockConfig = $whale9490$elm_split_pane$SplitPane$createViewConfig(
+var $author$project$Main$leftDockConfig = $author$project$SplitPane$SplitPane$createViewConfig(
 	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitLeftDockRightEdge});
-var $author$project$Main$leftDockInternalConfig = $whale9490$elm_split_pane$SplitPane$createViewConfig(
+var $author$project$Main$leftDockInternalConfig = $author$project$SplitPane$SplitPane$createViewConfig(
 	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitLeftDockInternal});
 var $mdgriffith$elm_ui$Internal$Model$NoStaticStyleSheet = {$: 'NoStaticStyleSheet'};
 var $mdgriffith$elm_ui$Internal$Model$RenderModeOption = function (a) {
@@ -21903,19 +21915,16 @@ var $author$project$Main$upperLeftDockView = function (model) {
 		$author$project$ViewPureStyles$commonLayoutStyles,
 		$author$project$TrackInfoBox$trackInfoBox(model.trackTree));
 };
-var $whale9490$elm_split_pane$Bound$getValue = function (value) {
-	return value.a;
-};
 var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
 var $elm$core$Debug$toString = _Debug_toString;
-var $whale9490$elm_split_pane$SplitPane$firstChildViewStyle = function (_v0) {
+var $author$project$SplitPane$SplitPane$firstChildViewStyle = function (_v0) {
 	var state = _v0.a;
 	var _v1 = state.splitterPosition;
 	if (_v1.$ === 'Px') {
 		var p = _v1.a;
 		var v = $elm$core$Debug$toString(
-			$whale9490$elm_split_pane$Bound$getValue(p)) + 'px';
+			$author$project$SplitPane$Bound$getValue(p)) + 'px';
 		var _v2 = state.orientation;
 		if (_v2.$ === 'Horizontal') {
 			return _List_fromArray(
@@ -21941,7 +21950,7 @@ var $whale9490$elm_split_pane$SplitPane$firstChildViewStyle = function (_v0) {
 	} else {
 		var p = _v1.a;
 		var v = $elm$core$Debug$toString(
-			$whale9490$elm_split_pane$Bound$getValue(p));
+			$author$project$SplitPane$Bound$getValue(p));
 		return _List_fromArray(
 			[
 				A2($elm$html$Html$Attributes$style, 'display', 'flex'),
@@ -21954,10 +21963,10 @@ var $whale9490$elm_split_pane$SplitPane$firstChildViewStyle = function (_v0) {
 			]);
 	}
 };
-var $whale9490$elm_split_pane$SplitPane$CustomSplitter = function (a) {
+var $author$project$SplitPane$SplitPane$CustomSplitter = function (a) {
 	return {$: 'CustomSplitter', a: a};
 };
-var $whale9490$elm_split_pane$SplitPane$SplitterClick = function (a) {
+var $author$project$SplitPane$SplitPane$SplitterClick = function (a) {
 	return {$: 'SplitterClick', a: a};
 };
 var $elm$virtual_dom$VirtualDom$Custom = function (a) {
@@ -21971,14 +21980,14 @@ var $elm$html$Html$Events$custom = F2(
 			event,
 			$elm$virtual_dom$VirtualDom$Custom(decoder));
 	});
-var $whale9490$elm_split_pane$SplitPane$DOMInfo = F6(
+var $author$project$SplitPane$SplitPane$DOMInfo = F6(
 	function (x, y, touchX, touchY, parentWidth, parentHeight) {
 		return {parentHeight: parentHeight, parentWidth: parentWidth, touchX: touchX, touchY: touchY, x: x, y: y};
 	});
 var $elm$json$Json$Decode$map6 = _Json_map6;
-var $whale9490$elm_split_pane$SplitPane$domInfo = A7(
+var $author$project$SplitPane$SplitPane$domInfo = A7(
 	$elm$json$Json$Decode$map6,
-	$whale9490$elm_split_pane$SplitPane$DOMInfo,
+	$author$project$SplitPane$SplitPane$DOMInfo,
 	$elm$json$Json$Decode$maybe(
 		A2($elm$json$Json$Decode$field, 'clientX', $elm$json$Json$Decode$int)),
 	$elm$json$Json$Decode$maybe(
@@ -22005,7 +22014,7 @@ var $whale9490$elm_split_pane$SplitPane$domInfo = A7(
 		_List_fromArray(
 			['currentTarget', 'parentElement', 'clientHeight']),
 		$elm$json$Json$Decode$int));
-var $whale9490$elm_split_pane$SplitPane$onMouseDown = function (toMsg) {
+var $author$project$SplitPane$SplitPane$onMouseDown = function (toMsg) {
 	return A2(
 		$elm$html$Html$Events$custom,
 		'mousedown',
@@ -22014,14 +22023,14 @@ var $whale9490$elm_split_pane$SplitPane$onMouseDown = function (toMsg) {
 			function (d) {
 				return {
 					message: toMsg(
-						$whale9490$elm_split_pane$SplitPane$SplitterClick(d)),
+						$author$project$SplitPane$SplitPane$SplitterClick(d)),
 					preventDefault: true,
 					stopPropagation: false
 				};
 			},
-			$whale9490$elm_split_pane$SplitPane$domInfo));
+			$author$project$SplitPane$SplitPane$domInfo));
 };
-var $whale9490$elm_split_pane$SplitPane$domInfoToPosition = function (_v0) {
+var $author$project$SplitPane$SplitPane$domInfoToPosition = function (_v0) {
 	var x = _v0.x;
 	var y = _v0.y;
 	var touchX = _v0.touchX;
@@ -22045,7 +22054,7 @@ var $whale9490$elm_split_pane$SplitPane$domInfoToPosition = function (_v0) {
 		}
 	}
 };
-var $whale9490$elm_split_pane$SplitPane$onTouchCancel = function (toMsg) {
+var $author$project$SplitPane$SplitPane$onTouchCancel = function (toMsg) {
 	return A2(
 		$elm$html$Html$Events$custom,
 		'touchcancel',
@@ -22054,15 +22063,15 @@ var $whale9490$elm_split_pane$SplitPane$onTouchCancel = function (toMsg) {
 			function (d) {
 				return {
 					message: toMsg(
-						$whale9490$elm_split_pane$SplitPane$SplitterLeftAlone(
-							$whale9490$elm_split_pane$SplitPane$domInfoToPosition(d))),
+						$author$project$SplitPane$SplitPane$SplitterLeftAlone(
+							$author$project$SplitPane$SplitPane$domInfoToPosition(d))),
 					preventDefault: true,
 					stopPropagation: true
 				};
 			},
-			$whale9490$elm_split_pane$SplitPane$domInfo));
+			$author$project$SplitPane$SplitPane$domInfo));
 };
-var $whale9490$elm_split_pane$SplitPane$onTouchEnd = function (toMsg) {
+var $author$project$SplitPane$SplitPane$onTouchEnd = function (toMsg) {
 	return A2(
 		$elm$html$Html$Events$custom,
 		'touchend',
@@ -22071,15 +22080,15 @@ var $whale9490$elm_split_pane$SplitPane$onTouchEnd = function (toMsg) {
 			function (d) {
 				return {
 					message: toMsg(
-						$whale9490$elm_split_pane$SplitPane$SplitterLeftAlone(
-							$whale9490$elm_split_pane$SplitPane$domInfoToPosition(d))),
+						$author$project$SplitPane$SplitPane$SplitterLeftAlone(
+							$author$project$SplitPane$SplitPane$domInfoToPosition(d))),
 					preventDefault: true,
 					stopPropagation: true
 				};
 			},
-			$whale9490$elm_split_pane$SplitPane$domInfo));
+			$author$project$SplitPane$SplitPane$domInfo));
 };
-var $whale9490$elm_split_pane$SplitPane$onTouchMove = function (toMsg) {
+var $author$project$SplitPane$SplitPane$onTouchMove = function (toMsg) {
 	return A2(
 		$elm$html$Html$Events$custom,
 		'touchmove',
@@ -22088,15 +22097,15 @@ var $whale9490$elm_split_pane$SplitPane$onTouchMove = function (toMsg) {
 			function (d) {
 				return {
 					message: toMsg(
-						$whale9490$elm_split_pane$SplitPane$SplitterMove(
-							$whale9490$elm_split_pane$SplitPane$domInfoToPosition(d))),
+						$author$project$SplitPane$SplitPane$SplitterMove(
+							$author$project$SplitPane$SplitPane$domInfoToPosition(d))),
 					preventDefault: true,
 					stopPropagation: true
 				};
 			},
-			$whale9490$elm_split_pane$SplitPane$domInfo));
+			$author$project$SplitPane$SplitPane$domInfo));
 };
-var $whale9490$elm_split_pane$SplitPane$onTouchStart = function (toMsg) {
+var $author$project$SplitPane$SplitPane$onTouchStart = function (toMsg) {
 	return A2(
 		$elm$html$Html$Events$custom,
 		'touchstart',
@@ -22105,38 +22114,38 @@ var $whale9490$elm_split_pane$SplitPane$onTouchStart = function (toMsg) {
 			function (d) {
 				return {
 					message: toMsg(
-						$whale9490$elm_split_pane$SplitPane$SplitterClick(d)),
+						$author$project$SplitPane$SplitPane$SplitterClick(d)),
 					preventDefault: true,
 					stopPropagation: true
 				};
 			},
-			$whale9490$elm_split_pane$SplitPane$domInfo));
+			$author$project$SplitPane$SplitPane$domInfo));
 };
 var $elm$html$Html$span = _VirtualDom_node('span');
-var $whale9490$elm_split_pane$SplitPane$createCustomSplitter = F2(
+var $author$project$SplitPane$SplitPane$createCustomSplitter = F2(
 	function (toMsg, details) {
-		return $whale9490$elm_split_pane$SplitPane$CustomSplitter(
+		return $author$project$SplitPane$SplitPane$CustomSplitter(
 			A2(
 				$elm$html$Html$span,
 				A2(
 					$elm$core$List$cons,
-					$whale9490$elm_split_pane$SplitPane$onMouseDown(toMsg),
+					$author$project$SplitPane$SplitPane$onMouseDown(toMsg),
 					A2(
 						$elm$core$List$cons,
-						$whale9490$elm_split_pane$SplitPane$onTouchStart(toMsg),
+						$author$project$SplitPane$SplitPane$onTouchStart(toMsg),
 						A2(
 							$elm$core$List$cons,
-							$whale9490$elm_split_pane$SplitPane$onTouchEnd(toMsg),
+							$author$project$SplitPane$SplitPane$onTouchEnd(toMsg),
 							A2(
 								$elm$core$List$cons,
-								$whale9490$elm_split_pane$SplitPane$onTouchMove(toMsg),
+								$author$project$SplitPane$SplitPane$onTouchMove(toMsg),
 								A2(
 									$elm$core$List$cons,
-									$whale9490$elm_split_pane$SplitPane$onTouchCancel(toMsg),
+									$author$project$SplitPane$SplitPane$onTouchCancel(toMsg),
 									details.attributes))))),
 				details.children));
 	});
-var $whale9490$elm_split_pane$SplitPane$baseDefaultSplitterStyles = _List_fromArray(
+var $author$project$SplitPane$SplitPane$baseDefaultSplitterStyles = _List_fromArray(
 	[
 		A2($elm$html$Html$Attributes$style, 'width', '100%'),
 		A2($elm$html$Html$Attributes$style, 'background', '#000'),
@@ -22148,9 +22157,9 @@ var $whale9490$elm_split_pane$SplitPane$baseDefaultSplitterStyles = _List_fromAr
 		A2($elm$html$Html$Attributes$style, 'userSelect', 'none'),
 		A2($elm$html$Html$Attributes$style, 'backgroundClip', 'padding-box')
 	]);
-var $whale9490$elm_split_pane$SplitPane$defaultHorizontalSplitterStyle = function (dragState) {
+var $author$project$SplitPane$SplitPane$defaultHorizontalSplitterStyle = function (dragState) {
 	return _Utils_ap(
-		$whale9490$elm_split_pane$SplitPane$baseDefaultSplitterStyles,
+		$author$project$SplitPane$SplitPane$baseDefaultSplitterStyles,
 		_Utils_ap(
 			_List_fromArray(
 				[
@@ -22171,9 +22180,9 @@ var $whale9490$elm_split_pane$SplitPane$defaultHorizontalSplitterStyle = functio
 				}
 			}()));
 };
-var $whale9490$elm_split_pane$SplitPane$defaultVerticalSplitterStyle = function (dragState) {
+var $author$project$SplitPane$SplitPane$defaultVerticalSplitterStyle = function (dragState) {
 	return _Utils_ap(
-		$whale9490$elm_split_pane$SplitPane$baseDefaultSplitterStyles,
+		$author$project$SplitPane$SplitPane$baseDefaultSplitterStyles,
 		_Utils_ap(
 			_List_fromArray(
 				[
@@ -22194,21 +22203,21 @@ var $whale9490$elm_split_pane$SplitPane$defaultVerticalSplitterStyle = function 
 				}
 			}()));
 };
-var $whale9490$elm_split_pane$SplitPane$createDefaultSplitterDetails = F2(
+var $author$project$SplitPane$SplitPane$createDefaultSplitterDetails = F2(
 	function (ori, dragState) {
 		if (ori.$ === 'Horizontal') {
 			return {
-				attributes: $whale9490$elm_split_pane$SplitPane$defaultHorizontalSplitterStyle(dragState),
+				attributes: $author$project$SplitPane$SplitPane$defaultHorizontalSplitterStyle(dragState),
 				children: _List_Nil
 			};
 		} else {
 			return {
-				attributes: $whale9490$elm_split_pane$SplitPane$defaultVerticalSplitterStyle(dragState),
+				attributes: $author$project$SplitPane$SplitPane$defaultVerticalSplitterStyle(dragState),
 				children: _List_Nil
 			};
 		}
 	});
-var $whale9490$elm_split_pane$SplitPane$getConcreteSplitter = F3(
+var $author$project$SplitPane$SplitPane$getConcreteSplitter = F3(
 	function (viewConfig, ori, dragState) {
 		var _v0 = viewConfig.splitter;
 		if (_v0.$ === 'Just') {
@@ -22216,14 +22225,14 @@ var $whale9490$elm_split_pane$SplitPane$getConcreteSplitter = F3(
 			return splitter;
 		} else {
 			var _v1 = A2(
-				$whale9490$elm_split_pane$SplitPane$createCustomSplitter,
+				$author$project$SplitPane$SplitPane$createCustomSplitter,
 				viewConfig.toMsg,
-				A2($whale9490$elm_split_pane$SplitPane$createDefaultSplitterDetails, ori, dragState));
+				A2($author$project$SplitPane$SplitPane$createDefaultSplitterDetails, ori, dragState));
 			var defaultSplitter = _v1.a;
 			return defaultSplitter;
 		}
 	});
-var $whale9490$elm_split_pane$SplitPane$paneContainerStyle = function (ori) {
+var $author$project$SplitPane$SplitPane$paneContainerStyle = function (ori) {
 	return _List_fromArray(
 		[
 			A2($elm$html$Html$Attributes$style, 'overflow', 'hidden'),
@@ -22245,7 +22254,7 @@ var $whale9490$elm_split_pane$SplitPane$paneContainerStyle = function (ori) {
 			A2($elm$html$Html$Attributes$style, 'boxSizing', 'border-box')
 		]);
 };
-var $whale9490$elm_split_pane$SplitPane$secondChildViewStyle = function (_v0) {
+var $author$project$SplitPane$SplitPane$secondChildViewStyle = function (_v0) {
 	var state = _v0.a;
 	var _v1 = state.splitterPosition;
 	if (_v1.$ === 'Px') {
@@ -22262,7 +22271,7 @@ var $whale9490$elm_split_pane$SplitPane$secondChildViewStyle = function (_v0) {
 	} else {
 		var p = _v1.a;
 		var v = $elm$core$Debug$toString(
-			1 - $whale9490$elm_split_pane$Bound$getValue(p));
+			1 - $author$project$SplitPane$Bound$getValue(p));
 		return _List_fromArray(
 			[
 				A2($elm$html$Html$Attributes$style, 'display', 'flex'),
@@ -22275,17 +22284,17 @@ var $whale9490$elm_split_pane$SplitPane$secondChildViewStyle = function (_v0) {
 			]);
 	}
 };
-var $whale9490$elm_split_pane$SplitPane$view = F4(
+var $author$project$SplitPane$SplitPane$view = F4(
 	function (_v0, firstView, secondView, _v1) {
 		var viewConfig = _v0.a;
 		var state = _v1.a;
-		var splitter = A3($whale9490$elm_split_pane$SplitPane$getConcreteSplitter, viewConfig, state.orientation, state.dragState);
+		var splitter = A3($author$project$SplitPane$SplitPane$getConcreteSplitter, viewConfig, state.orientation, state.dragState);
 		return A2(
 			$elm$html$Html$div,
 			A2(
 				$elm$core$List$cons,
 				$elm$html$Html$Attributes$class('pane-container'),
-				$whale9490$elm_split_pane$SplitPane$paneContainerStyle(state.orientation)),
+				$author$project$SplitPane$SplitPane$paneContainerStyle(state.orientation)),
 			_List_fromArray(
 				[
 					A2(
@@ -22293,8 +22302,8 @@ var $whale9490$elm_split_pane$SplitPane$view = F4(
 					A2(
 						$elm$core$List$cons,
 						$elm$html$Html$Attributes$class('pane-first-view'),
-						$whale9490$elm_split_pane$SplitPane$firstChildViewStyle(
-							$whale9490$elm_split_pane$SplitPane$State(state))),
+						$author$project$SplitPane$SplitPane$firstChildViewStyle(
+							$author$project$SplitPane$SplitPane$State(state))),
 					_List_fromArray(
 						[firstView])),
 					splitter,
@@ -22303,21 +22312,21 @@ var $whale9490$elm_split_pane$SplitPane$view = F4(
 					A2(
 						$elm$core$List$cons,
 						$elm$html$Html$Attributes$class('pane-second-view'),
-						$whale9490$elm_split_pane$SplitPane$secondChildViewStyle(
-							$whale9490$elm_split_pane$SplitPane$State(state))),
+						$author$project$SplitPane$SplitPane$secondChildViewStyle(
+							$author$project$SplitPane$SplitPane$State(state))),
 					_List_fromArray(
 						[secondView]))
 				]));
 	});
 var $author$project$Main$leftDockView = function (model) {
 	return A4(
-		$whale9490$elm_split_pane$SplitPane$view,
+		$author$project$SplitPane$SplitPane$view,
 		$author$project$Main$leftDockInternalConfig,
 		$author$project$Main$upperLeftDockView(model),
 		$author$project$Main$lowerLeftDockView(model),
 		model.leftDockInternal);
 };
-var $author$project$Main$bottomDockConfig = $whale9490$elm_split_pane$SplitPane$createViewConfig(
+var $author$project$Main$bottomDockConfig = $author$project$SplitPane$SplitPane$createViewConfig(
 	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitBottomDockTopEdge});
 var $author$project$Main$bottomDockView = function (model) {
 	return A3(
@@ -22346,7 +22355,6 @@ var $author$project$ViewPureStyles$conditionallyVisible = F2(
 				]),
 			element);
 	});
-var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
 var $mdgriffith$elm_ui$Element$Input$HiddenLabel = function (a) {
 	return {$: 'HiddenLabel', a: a};
 };
@@ -23185,6 +23193,7 @@ var $mdgriffith$elm_ui$Element$Input$button = F2(
 				_List_fromArray(
 					[label])));
 	});
+var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
 var $ianmackenzie$elm_units$Pixels$inPixels = function (_v0) {
 	var numPixels = _v0.a;
 	return numPixels;
@@ -24721,71 +24730,60 @@ var $author$project$ViewThirdPerson$zoomButtons = function (msgWrapper) {
 };
 var $author$project$ViewThirdPerson$view = F2(
 	function (model, msgWrapper) {
-		var _v0 = _Utils_Tuple2(model.trackTree, model.viewContext);
-		if ((_v0.a.$ === 'Just') && (_v0.b.$ === 'Just')) {
-			var treeNode = _v0.a.a;
-			var context = _v0.b.a;
-			var _v1 = model.contentAreaSize;
-			var viewWidth = _v1.a;
-			var viewHeight = _v1.b;
-			var _v2 = _Utils_Tuple2(
-				A2(
-					$ianmackenzie$elm_units$Quantity$minus,
-					$ianmackenzie$elm_units$Pixels$pixels(20),
-					viewWidth),
-				A2(
-					$ianmackenzie$elm_units$Quantity$minus,
-					$ianmackenzie$elm_units$Pixels$pixels(40),
-					viewHeight));
-			var availableWidth = _v2.a;
-			var availableHeight = _v2.b;
-			return A2(
-				$mdgriffith$elm_ui$Element$el,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$htmlAttribute(
-						$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onDown(
-							A2($elm$core$Basics$composeR, $author$project$ViewThirdPerson$ImageGrab, msgWrapper))),
-						$mdgriffith$elm_ui$Element$htmlAttribute(
-						$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onMove(
-							A2($elm$core$Basics$composeR, $author$project$ViewThirdPerson$ImageDrag, msgWrapper))),
-						$mdgriffith$elm_ui$Element$htmlAttribute(
-						$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onUp(
-							A2($elm$core$Basics$composeR, $author$project$ViewThirdPerson$ImageRelease, msgWrapper))),
-						$mdgriffith$elm_ui$Element$htmlAttribute(
-						$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onClick(
-							A2($elm$core$Basics$composeR, $author$project$ViewThirdPerson$ImageClick, msgWrapper))),
-						$mdgriffith$elm_ui$Element$htmlAttribute(
-						$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onDoubleClick(
-							A2($elm$core$Basics$composeR, $author$project$ViewThirdPerson$ImageDoubleClick, msgWrapper))),
-						$mdgriffith$elm_ui$Element$htmlAttribute(
-						$mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWheel(
-							function (event) {
-								return msgWrapper(
-									$author$project$ViewThirdPerson$ImageMouseWheel(event.deltaY));
-							})),
-						$author$project$ViewThirdPerson$onContextMenu(
-						msgWrapper($author$project$ViewThirdPerson$ImageNoOp)),
-						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-						$mdgriffith$elm_ui$Element$pointer,
-						$mdgriffith$elm_ui$Element$Border$width(2),
-						$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$peace),
-						$mdgriffith$elm_ui$Element$inFront(
-						$author$project$ViewThirdPerson$zoomButtons(msgWrapper))
-					]),
-				$mdgriffith$elm_ui$Element$html(
-					$ianmackenzie$elm_3d_scene$Scene3d$cloudy(
-						{
-							background: $ianmackenzie$elm_3d_scene$Scene3d$backgroundColor($avh4$elm_color$Color$lightBlue),
-							camera: A3($author$project$ViewThirdPerson$deriveCamera, treeNode, context, model.currentPosition),
-							clipDepth: $ianmackenzie$elm_units$Length$meters(1),
-							dimensions: _Utils_Tuple2(availableWidth, availableHeight),
-							entities: model.scene,
-							upDirection: $ianmackenzie$elm_geometry$Direction3d$positiveZ
-						})));
-		} else {
-			return $mdgriffith$elm_ui$Element$text('No track to show');
-		}
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$htmlAttribute(
+					$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onDown(
+						A2($elm$core$Basics$composeR, $author$project$ViewThirdPerson$ImageGrab, msgWrapper))),
+					$mdgriffith$elm_ui$Element$htmlAttribute(
+					$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onMove(
+						A2($elm$core$Basics$composeR, $author$project$ViewThirdPerson$ImageDrag, msgWrapper))),
+					$mdgriffith$elm_ui$Element$htmlAttribute(
+					$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onUp(
+						A2($elm$core$Basics$composeR, $author$project$ViewThirdPerson$ImageRelease, msgWrapper))),
+					$mdgriffith$elm_ui$Element$htmlAttribute(
+					$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onClick(
+						A2($elm$core$Basics$composeR, $author$project$ViewThirdPerson$ImageClick, msgWrapper))),
+					$mdgriffith$elm_ui$Element$htmlAttribute(
+					$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onDoubleClick(
+						A2($elm$core$Basics$composeR, $author$project$ViewThirdPerson$ImageDoubleClick, msgWrapper))),
+					$mdgriffith$elm_ui$Element$htmlAttribute(
+					$mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWheel(
+						function (event) {
+							return msgWrapper(
+								$author$project$ViewThirdPerson$ImageMouseWheel(event.deltaY));
+						})),
+					$author$project$ViewThirdPerson$onContextMenu(
+					msgWrapper($author$project$ViewThirdPerson$ImageNoOp)),
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$pointer,
+					$mdgriffith$elm_ui$Element$Border$width(2),
+					$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$peace),
+					$mdgriffith$elm_ui$Element$inFront(
+					$author$project$ViewThirdPerson$zoomButtons(msgWrapper))
+				]),
+			function () {
+				var _v0 = _Utils_Tuple2(model.trackTree, model.viewContext);
+				if ((_v0.a.$ === 'Just') && (_v0.b.$ === 'Just')) {
+					var treeNode = _v0.a.a;
+					var context = _v0.b.a;
+					return $mdgriffith$elm_ui$Element$html(
+						$ianmackenzie$elm_3d_scene$Scene3d$cloudy(
+							{
+								background: $ianmackenzie$elm_3d_scene$Scene3d$backgroundColor($avh4$elm_color$Color$lightBlue),
+								camera: A3($author$project$ViewThirdPerson$deriveCamera, treeNode, context, model.currentPosition),
+								clipDepth: $ianmackenzie$elm_units$Length$meters(1),
+								dimensions: model.contentArea,
+								entities: model.scene,
+								upDirection: $ianmackenzie$elm_geometry$Direction3d$positiveZ
+							}));
+				} else {
+					return $mdgriffith$elm_ui$Element$text('No track to show');
+				}
+			}());
 	});
 var $author$project$Main$SetViewMode = function (a) {
 	return {$: 'SetViewMode', a: a};
@@ -25244,10 +25242,8 @@ var $author$project$Main$contentArea = function (model) {
 					[
 						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 						$mdgriffith$elm_ui$Element$alignTop,
-						$mdgriffith$elm_ui$Element$padding(0),
-						$mdgriffith$elm_ui$Element$centerX,
-						$mdgriffith$elm_ui$Element$htmlAttribute(
-						$elm$html$Html$Attributes$id('contentArea'))
+						$mdgriffith$elm_ui$Element$padding(10),
+						$mdgriffith$elm_ui$Element$centerX
 					]),
 				_List_fromArray(
 					[
@@ -25285,13 +25281,13 @@ var $author$project$Main$viewPaneArea = function (model) {
 };
 var $author$project$Main$centralAreaView = function (model) {
 	return A4(
-		$whale9490$elm_split_pane$SplitPane$view,
+		$author$project$SplitPane$SplitPane$view,
 		$author$project$Main$bottomDockConfig,
 		$author$project$Main$viewPaneArea(model),
 		$author$project$Main$bottomDockView(model),
 		model.bottomDockTopEdge);
 };
-var $author$project$Main$rightDockConfig = $whale9490$elm_split_pane$SplitPane$createViewConfig(
+var $author$project$Main$rightDockConfig = $author$project$SplitPane$SplitPane$createViewConfig(
 	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitRightDockLeftEdge});
 var $author$project$Main$lowerRightDockView = function (model) {
 	return A3(
@@ -25303,7 +25299,7 @@ var $author$project$Main$lowerRightDockView = function (model) {
 		$author$project$ViewPureStyles$commonLayoutStyles,
 		$author$project$TrackInfoBox$trackInfoBox(model.trackTree));
 };
-var $author$project$Main$rightDockInternalConfig = $whale9490$elm_split_pane$SplitPane$createViewConfig(
+var $author$project$Main$rightDockInternalConfig = $author$project$SplitPane$SplitPane$createViewConfig(
 	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitRightDockInternal});
 var $author$project$Main$upperRightDockView = function (model) {
 	return A3(
@@ -25317,7 +25313,7 @@ var $author$project$Main$upperRightDockView = function (model) {
 };
 var $author$project$Main$rightDockView = function (model) {
 	return A4(
-		$whale9490$elm_split_pane$SplitPane$view,
+		$author$project$SplitPane$SplitPane$view,
 		$author$project$Main$rightDockInternalConfig,
 		$author$project$Main$upperRightDockView(model),
 		$author$project$Main$lowerRightDockView(model),
@@ -25325,7 +25321,7 @@ var $author$project$Main$rightDockView = function (model) {
 };
 var $author$project$Main$notTheLeftDockView = function (model) {
 	return A4(
-		$whale9490$elm_split_pane$SplitPane$view,
+		$author$project$SplitPane$SplitPane$view,
 		$author$project$Main$rightDockConfig,
 		$author$project$Main$centralAreaView(model),
 		$author$project$Main$rightDockView(model),
@@ -25393,7 +25389,7 @@ var $author$project$Main$view = function (_v0) {
 								_List_fromArray(
 									[
 										A4(
-										$whale9490$elm_split_pane$SplitPane$view,
+										$author$project$SplitPane$SplitPane$view,
 										$author$project$Main$leftDockConfig,
 										$author$project$Main$leftDockView(model),
 										$author$project$Main$notTheLeftDockView(model),
