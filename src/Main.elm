@@ -437,7 +437,7 @@ upperLeftDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
         commonLayoutStyles
     <|
-        trackInfoBox model.trackTree
+        ToolsProforma.toolsForDock ToolsProforma.DockUpperLeft ToolsMsg model
 
 
 lowerLeftDockView : ModelRecord -> Html Msg
@@ -445,7 +445,7 @@ lowerLeftDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
         commonLayoutStyles
     <|
-        trackInfoBox model.trackTree
+        ToolsProforma.toolsForDock ToolsProforma.DockLowerLeft ToolsMsg model
 
 
 rightDockView : ModelRecord -> Html Msg
@@ -462,7 +462,7 @@ upperRightDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
         commonLayoutStyles
     <|
-        trackInfoBox model.trackTree
+        ToolsProforma.toolsForDock ToolsProforma.DockUpperRight ToolsMsg model
 
 
 lowerRightDockView : ModelRecord -> Html Msg
@@ -470,15 +470,15 @@ lowerRightDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
         commonLayoutStyles
     <|
-        trackInfoBox model.trackTree
+        ToolsProforma.toolsForDock ToolsProforma.DockUpperRight ToolsMsg model
 
 
-bottomDockView : ModelRecord -> Html a
+bottomDockView : ModelRecord -> Html Msg
 bottomDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
         commonLayoutStyles
     <|
-        trackInfoBox model.trackTree
+        ToolsProforma.toolsForDock ToolsProforma.DockBottom ToolsMsg model
 
 
 notTheLeftDockView : ModelRecord -> Html Msg

@@ -2,11 +2,17 @@ module ToolsProforma exposing (..)
 
 import Color exposing (Color)
 import DomainModel exposing (PeteTree)
-import Element exposing (Element)
+import Element exposing (..)
+import Element.Background as Background
+import Element.Font as Font
+import FeatherIcons
 import FlatColors.AussiePalette
+import FlatColors.ChinesePalette
 import Json.Encode as E
 import LocalCoords exposing (LocalCoords)
 import Scene3d exposing (Entity)
+import TrackInfoBox
+import ViewPureStyles exposing (useIcon)
 
 
 type ToolState
@@ -107,3 +113,44 @@ update toolMsg msgWrapper model =
 
         ToolStateToggle toolType ->
             ( model, Cmd.none )
+
+
+
+--View stuff
+
+
+toolsForDock :
+    ToolDock
+    -> (ToolMsg -> msg)
+    ->
+        { model
+            | tools : List ToolEntry
+            , trackTree : Maybe PeteTree
+        }
+    -> Element msg
+toolsForDock dock msgWrapper model =
+    column [] <|
+        (model.tools
+            |> List.filter (\tool -> tool.dock == dock)
+            |> List.map (viewTool msgWrapper model))
+
+
+viewTool :
+    (ToolMsg -> msg)
+    -> { model | trackTree : Maybe PeteTree }
+    -> ToolEntry
+    -> Element msg
+viewTool msgWrapper model toolEntry =
+    column [ width fill ]
+        [ row
+            [ width fill
+            , padding 4
+            , spacing 8
+            , Font.color FlatColors.AussiePalette.beekeeper
+            , Background.color toolEntry.tabColour
+            ]
+            [ useIcon FeatherIcons.settings
+            , text toolEntry.label
+            ]
+        , TrackInfoBox.trackInfoBox model.trackTree
+        ]

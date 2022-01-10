@@ -21198,22 +21198,12 @@ var $author$project$Main$leftDockConfig = $author$project$SplitPane$SplitPane$cr
 	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitLeftDockRightEdge});
 var $author$project$Main$leftDockInternalConfig = $author$project$SplitPane$SplitPane$createViewConfig(
 	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitLeftDockInternal});
+var $author$project$ToolsProforma$DockLowerLeft = {$: 'DockLowerLeft'};
 var $mdgriffith$elm_ui$Internal$Model$NoStaticStyleSheet = {$: 'NoStaticStyleSheet'};
 var $mdgriffith$elm_ui$Internal$Model$RenderModeOption = function (a) {
 	return {$: 'RenderModeOption', a: a};
 };
 var $mdgriffith$elm_ui$Element$noStaticStyleSheet = $mdgriffith$elm_ui$Internal$Model$RenderModeOption($mdgriffith$elm_ui$Internal$Model$NoStaticStyleSheet);
-var $smucode$elm_flat_colors$FlatColors$ChinesePalette$bayWharf = A3($mdgriffith$elm_ui$Element$rgb255, 116, 125, 140);
-var $mdgriffith$elm_ui$Internal$Model$AlignX = function (a) {
-	return {$: 'AlignX', a: a};
-};
-var $mdgriffith$elm_ui$Internal$Model$CenterX = {$: 'CenterX'};
-var $mdgriffith$elm_ui$Element$centerX = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$CenterX);
-var $mdgriffith$elm_ui$Internal$Model$AlignY = function (a) {
-	return {$: 'AlignY', a: a};
-};
-var $mdgriffith$elm_ui$Internal$Model$CenterY = {$: 'CenterY'};
-var $mdgriffith$elm_ui$Element$centerY = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$CenterY);
 var $mdgriffith$elm_ui$Element$Font$color = function (fontColor) {
 	return A2(
 		$mdgriffith$elm_ui$Internal$Model$StyleClass,
@@ -21223,35 +21213,6 @@ var $mdgriffith$elm_ui$Element$Font$color = function (fontColor) {
 			'fc-' + $mdgriffith$elm_ui$Internal$Model$formatColorClass(fontColor),
 			'color',
 			fontColor));
-};
-var $smucode$elm_flat_colors$FlatColors$ChinesePalette$coral = A3($mdgriffith$elm_ui$Element$rgb255, 255, 127, 80);
-var $mdgriffith$elm_ui$Element$el = F2(
-	function (attrs, child) {
-		return A4(
-			$mdgriffith$elm_ui$Internal$Model$element,
-			$mdgriffith$elm_ui$Internal$Model$asEl,
-			$mdgriffith$elm_ui$Internal$Model$div,
-			A2(
-				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-				A2(
-					$elm$core$List$cons,
-					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-					attrs)),
-			$mdgriffith$elm_ui$Internal$Model$Unkeyed(
-				_List_fromArray(
-					[child])));
-	});
-var $mdgriffith$elm_ui$Internal$Flag$borderRound = $mdgriffith$elm_ui$Internal$Flag$flag(17);
-var $mdgriffith$elm_ui$Element$Border$rounded = function (radius) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$borderRound,
-		A3(
-			$mdgriffith$elm_ui$Internal$Model$Single,
-			'br-' + $elm$core$String$fromInt(radius),
-			'border-radius',
-			$elm$core$String$fromInt(radius) + 'px'));
 };
 var $mdgriffith$elm_ui$Internal$Model$AsRow = {$: 'AsRow'};
 var $mdgriffith$elm_ui$Internal$Model$asRow = $mdgriffith$elm_ui$Internal$Model$AsRow;
@@ -21327,6 +21288,46 @@ var $mdgriffith$elm_ui$Internal$Model$Text = function (a) {
 };
 var $mdgriffith$elm_ui$Element$text = function (content) {
 	return $mdgriffith$elm_ui$Internal$Model$Text(content);
+};
+var $smucode$elm_flat_colors$FlatColors$ChinesePalette$bayWharf = A3($mdgriffith$elm_ui$Element$rgb255, 116, 125, 140);
+var $mdgriffith$elm_ui$Internal$Model$AlignX = function (a) {
+	return {$: 'AlignX', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$CenterX = {$: 'CenterX'};
+var $mdgriffith$elm_ui$Element$centerX = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$CenterX);
+var $mdgriffith$elm_ui$Internal$Model$AlignY = function (a) {
+	return {$: 'AlignY', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$CenterY = {$: 'CenterY'};
+var $mdgriffith$elm_ui$Element$centerY = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$CenterY);
+var $smucode$elm_flat_colors$FlatColors$ChinesePalette$coral = A3($mdgriffith$elm_ui$Element$rgb255, 255, 127, 80);
+var $mdgriffith$elm_ui$Element$el = F2(
+	function (attrs, child) {
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asEl,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+					attrs)),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+				_List_fromArray(
+					[child])));
+	});
+var $mdgriffith$elm_ui$Internal$Flag$borderRound = $mdgriffith$elm_ui$Internal$Flag$flag(17);
+var $mdgriffith$elm_ui$Element$Border$rounded = function (radius) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$borderRound,
+		A3(
+			$mdgriffith$elm_ui$Internal$Model$Single,
+			'br-' + $elm$core$String$fromInt(radius),
+			'border-radius',
+			$elm$core$String$fromInt(radius) + 'px'));
 };
 var $ianmackenzie$elm_units$Length$inMeters = function (_v0) {
 	var numMeters = _v0.a;
@@ -22049,6 +22050,49 @@ var $author$project$TrackInfoBox$trackInfoBox = function (maybeTree) {
 			}()
 			]));
 };
+var $author$project$ToolsProforma$viewTool = F3(
+	function (msgWrapper, model, toolEntry) {
+		return A2(
+			$mdgriffith$elm_ui$Element$column,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$row,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$padding(4),
+							$mdgriffith$elm_ui$Element$spacing(8),
+							$mdgriffith$elm_ui$Element$Font$color($smucode$elm_flat_colors$FlatColors$AussiePalette$beekeeper),
+							$mdgriffith$elm_ui$Element$Background$color(toolEntry.tabColour)
+						]),
+					_List_fromArray(
+						[
+							$author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$settings),
+							$mdgriffith$elm_ui$Element$text(toolEntry.label)
+						])),
+					$author$project$TrackInfoBox$trackInfoBox(model.trackTree)
+				]));
+	});
+var $author$project$ToolsProforma$toolsForDock = F3(
+	function (dock, msgWrapper, model) {
+		return A2(
+			$mdgriffith$elm_ui$Element$column,
+			_List_Nil,
+			A2(
+				$elm$core$List$map,
+				A2($author$project$ToolsProforma$viewTool, msgWrapper, model),
+				A2(
+					$elm$core$List$filter,
+					function (tool) {
+						return _Utils_eq(tool.dock, dock);
+					},
+					model.tools)));
+	});
 var $author$project$Main$lowerLeftDockView = function (model) {
 	return A3(
 		$mdgriffith$elm_ui$Element$layoutWith,
@@ -22057,7 +22101,7 @@ var $author$project$Main$lowerLeftDockView = function (model) {
 				[$mdgriffith$elm_ui$Element$noStaticStyleSheet])
 		},
 		$author$project$ViewPureStyles$commonLayoutStyles,
-		$author$project$TrackInfoBox$trackInfoBox(model.trackTree));
+		A3($author$project$ToolsProforma$toolsForDock, $author$project$ToolsProforma$DockLowerLeft, $author$project$Main$ToolsMsg, model));
 };
 var $author$project$Main$upperLeftDockView = function (model) {
 	return A3(
@@ -22067,7 +22111,7 @@ var $author$project$Main$upperLeftDockView = function (model) {
 				[$mdgriffith$elm_ui$Element$noStaticStyleSheet])
 		},
 		$author$project$ViewPureStyles$commonLayoutStyles,
-		$author$project$TrackInfoBox$trackInfoBox(model.trackTree));
+		A3($author$project$ToolsProforma$toolsForDock, $author$project$ToolsProforma$DockUpperLeft, $author$project$Main$ToolsMsg, model));
 };
 var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
@@ -22482,6 +22526,7 @@ var $author$project$Main$leftDockView = function (model) {
 };
 var $author$project$Main$bottomDockConfig = $author$project$SplitPane$SplitPane$createViewConfig(
 	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitBottomDockTopEdge});
+var $author$project$ToolsProforma$DockBottom = {$: 'DockBottom'};
 var $author$project$Main$bottomDockView = function (model) {
 	return A3(
 		$mdgriffith$elm_ui$Element$layoutWith,
@@ -22490,7 +22535,7 @@ var $author$project$Main$bottomDockView = function (model) {
 				[$mdgriffith$elm_ui$Element$noStaticStyleSheet])
 		},
 		$author$project$ViewPureStyles$commonLayoutStyles,
-		$author$project$TrackInfoBox$trackInfoBox(model.trackTree));
+		A3($author$project$ToolsProforma$toolsForDock, $author$project$ToolsProforma$DockBottom, $author$project$Main$ToolsMsg, model));
 };
 var $author$project$Main$SetCurrentPosition = function (a) {
 	return {$: 'SetCurrentPosition', a: a};
@@ -25446,6 +25491,7 @@ var $author$project$Main$centralAreaView = function (model) {
 };
 var $author$project$Main$rightDockConfig = $author$project$SplitPane$SplitPane$createViewConfig(
 	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitRightDockLeftEdge});
+var $author$project$ToolsProforma$DockUpperRight = {$: 'DockUpperRight'};
 var $author$project$Main$lowerRightDockView = function (model) {
 	return A3(
 		$mdgriffith$elm_ui$Element$layoutWith,
@@ -25454,7 +25500,7 @@ var $author$project$Main$lowerRightDockView = function (model) {
 				[$mdgriffith$elm_ui$Element$noStaticStyleSheet])
 		},
 		$author$project$ViewPureStyles$commonLayoutStyles,
-		$author$project$TrackInfoBox$trackInfoBox(model.trackTree));
+		A3($author$project$ToolsProforma$toolsForDock, $author$project$ToolsProforma$DockUpperRight, $author$project$Main$ToolsMsg, model));
 };
 var $author$project$Main$rightDockInternalConfig = $author$project$SplitPane$SplitPane$createViewConfig(
 	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitRightDockInternal});
@@ -25466,7 +25512,7 @@ var $author$project$Main$upperRightDockView = function (model) {
 				[$mdgriffith$elm_ui$Element$noStaticStyleSheet])
 		},
 		$author$project$ViewPureStyles$commonLayoutStyles,
-		$author$project$TrackInfoBox$trackInfoBox(model.trackTree));
+		A3($author$project$ToolsProforma$toolsForDock, $author$project$ToolsProforma$DockUpperRight, $author$project$Main$ToolsMsg, model));
 };
 var $author$project$Main$rightDockView = function (model) {
 	return A4(
