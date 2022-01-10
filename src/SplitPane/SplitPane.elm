@@ -549,7 +549,7 @@ firstChildViewStyle (State state) =
         Px p ->
             let
                 v =
-                    (Debug.toString <| toFloat (getValue p)) ++ "px"
+                    (String.fromFloat <| toFloat (getValue p)) ++ "px"
             in
             case state.orientation of
                 Horizontal ->
@@ -573,7 +573,7 @@ firstChildViewStyle (State state) =
         Percentage p ->
             let
                 v =
-                    Debug.toString <| getValue p
+                    String.fromFloat <| getValue p
             in
             [ style "display" "flex"
             , style "flex" v
@@ -601,7 +601,7 @@ secondChildViewStyle (State state) =
         Percentage p ->
             let
                 v =
-                    Debug.toString <| 1 - getValue p
+                    String.fromFloat <| 1 - getValue p
             in
             [ style "display" "flex"
             , style "flex" v
