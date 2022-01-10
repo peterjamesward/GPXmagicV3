@@ -576,6 +576,7 @@ nearestToRay ray treeNode =
                             )
 
                         leftDistance =
+                            -- How close are we to the neighbourhood?
                             sphere node.left
                                 |> Sphere3d.centerPoint
                                 |> Point3d.distanceFromAxis ray

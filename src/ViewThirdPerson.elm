@@ -183,7 +183,7 @@ detectHit :
         { m
             | trackTree : Maybe PeteTree
             , currentPosition : Int
-            , viewDimensions : ( Quantity Int Pixels, Quantity Int Pixels )
+            , contentArea : ( Quantity Int Pixels, Quantity Int Pixels )
             , viewContext : Maybe ContextThirdPerson
         }
     -> Int
@@ -199,7 +199,7 @@ detectHit event model =
                     Point2d.pixels x y
 
                 ( w, h ) =
-                    model.viewDimensions
+                    model.contentArea
 
                 ( wFloat, hFloat ) =
                     ( toFloatQuantity w, toFloatQuantity h )
