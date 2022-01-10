@@ -12557,6 +12557,12 @@ var $author$project$StravaAuth$update = F2(
 		}
 		return $author$project$StravaAuth$noOp(model);
 	});
+var $author$project$ToolsProforma$setColour = F3(
+	function (toolType, colour, tool) {
+		return _Utils_eq(tool.toolType, toolType) ? _Utils_update(
+			tool,
+			{tabColour: colour}) : tool;
+	});
 var $author$project$ToolsProforma$setDock = F3(
 	function (toolType, dock, tool) {
 		return _Utils_eq(tool.toolType, toolType) ? _Utils_update(
@@ -12601,7 +12607,16 @@ var $author$project$ToolsProforma$update = F3(
 			case 'ToolColourSelect':
 				var toolType = toolMsg.a;
 				var color = toolMsg.b;
-				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							tools: A2(
+								$elm$core$List$map,
+								A2($author$project$ToolsProforma$setColour, toolType, color),
+								model.tools)
+						}),
+					$elm$core$Platform$Cmd$none);
 			default:
 				var toolType = toolMsg.a;
 				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);

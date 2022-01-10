@@ -93,6 +93,14 @@ setDock toolType dock tool =
     else
         tool
 
+setColour : ToolType -> Element.Color -> ToolEntry -> ToolEntry
+setColour toolType colour tool =
+    if tool.toolType == toolType then
+        { tool | tabColour = colour }
+
+    else
+        tool
+
 
 update :
     ToolMsg
@@ -112,7 +120,8 @@ update toolMsg msgWrapper model =
             )
 
         ToolColourSelect toolType color ->
-            ( model, Cmd.none )
+            ( {model | tools = List.map (setColour toolType color) model.tools}
+            , Cmd.none )
 
         ToolStateToggle toolType ->
             ( model, Cmd.none )
