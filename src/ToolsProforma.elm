@@ -3,9 +3,10 @@ module ToolsProforma exposing (..)
 import Color exposing (Color)
 import DomainModel exposing (PeteTree)
 import Element exposing (..)
-import Element.Background as Background
+import Element.Background as Background exposing (color)
 import Element.Border as Border exposing (roundEach)
 import Element.Font as Font
+import Element.Input as Input
 import FeatherIcons
 import FlatColors.AussiePalette
 import FlatColors.ChinesePalette
@@ -149,6 +150,7 @@ viewTool msgWrapper model toolEntry =
         , Border.width 2
         , Border.color toolEntry.tabColour
         , Border.rounded 8
+        , inFront <| showDockOptions msgWrapper toolEntry
         ]
         [ row
             [ width fill
@@ -157,7 +159,51 @@ viewTool msgWrapper model toolEntry =
             , Background.color toolEntry.tabColour
             ]
             [ text toolEntry.label
-            , el [ alignRight ] <| useIcon FeatherIcons.settings
+            , Input.button [ alignRight ]
+                { onPress = Just <| msgWrapper <| ToolPopupToggle toolEntry.toolType
+                , label = useIcon FeatherIcons.settings
+                }
             ]
         , TrackInfoBox.trackInfoBox model.trackTree
         ]
+
+
+showDockOptions : (ToolMsg -> msg) -> ToolEntry -> Element msg
+showDockOptions msgWrapper toolEntry =
+    if toolEntry.isPopupOpen then
+        row
+            [ Background.color FlatColors.ChinesePalette.antiFlashWhite
+            , alignRight
+            , moveDown 26
+            , Border.color FlatColors.ChinesePalette.bruschettaTomato
+            , Border.rounded 4
+            , Border.width 2
+            ]
+            [ Input.button []
+                { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockUpperLeft
+                , label = useIcon FeatherIcons.arrowUpLeft
+                }
+            , Input.button
+                []
+                { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockLowerLeft
+                , label = useIcon FeatherIcons.arrowDownLeft
+                }
+            , Input.button
+                []
+                { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockBottom
+                , label = useIcon FeatherIcons.arrowDown
+                }
+            , Input.button
+                []
+                { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockLowerRight
+                , label = useIcon FeatherIcons.arrowDownRight
+                }
+            , Input.button
+                []
+                { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockUpperRight
+                , label = useIcon FeatherIcons.arrowUpRight
+                }
+            ]
+
+    else
+        none

@@ -470,7 +470,7 @@ lowerRightDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
         commonLayoutStyles
     <|
-        ToolsProforma.toolsForDock ToolsProforma.DockUpperRight ToolsMsg model
+        ToolsProforma.toolsForDock ToolsProforma.DockLowerRight ToolsMsg model
 
 
 bottomDockView : ModelRecord -> Html Msg

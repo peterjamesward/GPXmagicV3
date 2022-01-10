@@ -26,7 +26,7 @@ trackInfoList =
 
 trackInfoBox : Maybe PeteTree -> Element msg
 trackInfoBox maybeTree =
-    el [ width fill ] <|
+    el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
         case maybeTree of
             Just trackTree ->
                 row
