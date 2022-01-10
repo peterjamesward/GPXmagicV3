@@ -4,7 +4,8 @@
 
 ## Docking tools
 
-Tool tab colour selection, using just sample from FlatUI.
+Need to choose contrasting font colour depending on colour used.
+Could do this in view, I guess, which is a bit lazy and mildly inefficient.
 
 Put all Font, Colour etc into a Palette/Style module for ease of change.
 
