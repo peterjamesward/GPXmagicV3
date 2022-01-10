@@ -10,6 +10,7 @@ import Element.Input as Input
 import FeatherIcons
 import FlatColors.AussiePalette
 import FlatColors.ChinesePalette
+import FlatColors.SwedishPalette
 import Json.Encode as E
 import LocalCoords exposing (LocalCoords)
 import Scene3d exposing (Entity)
@@ -150,7 +151,14 @@ viewTool msgWrapper model toolEntry =
         , Border.width 2
         , Border.color toolEntry.tabColour
         , Border.rounded 8
-        , inFront <| showDockOptions msgWrapper toolEntry
+        , inFront <|
+            column
+                [ alignRight
+                , moveDown 26
+                ]
+                [ showDockOptions msgWrapper toolEntry
+                , showColourOptions msgWrapper toolEntry
+                ]
         ]
         [ row
             [ width fill
@@ -173,8 +181,6 @@ showDockOptions msgWrapper toolEntry =
     if toolEntry.isPopupOpen then
         row
             [ Background.color FlatColors.ChinesePalette.antiFlashWhite
-            , alignRight
-            , moveDown 26
             , Border.color FlatColors.ChinesePalette.bruschettaTomato
             , Border.rounded 4
             , Border.width 2
@@ -203,6 +209,57 @@ showDockOptions msgWrapper toolEntry =
                 { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockUpperRight
                 , label = useIcon FeatherIcons.arrowUpRight
                 }
+            ]
+
+    else
+        none
+
+
+showColourOptions : (ToolMsg -> msg) -> ToolEntry -> Element msg
+showColourOptions msgWrapper toolEntry =
+    let
+        colourBlock colour =
+            Input.button
+                [ Background.color colour, width <| px 20, height <| px 20 ]
+                { label = none
+                , onPress = Just <| msgWrapper <| ToolColourSelect toolEntry.toolType colour
+                }
+    in
+    if toolEntry.isPopupOpen then
+        column
+            [ alignRight
+            , Border.color FlatColors.ChinesePalette.bruschettaTomato
+            , Border.rounded 4
+            , Border.width 2
+            ]
+            [ row []
+                [ colourBlock FlatColors.SwedishPalette.highlighterPink
+                , colourBlock FlatColors.SwedishPalette.darkPeriwinkle
+                , colourBlock FlatColors.SwedishPalette.megaman
+                , colourBlock FlatColors.SwedishPalette.freshTurquoise
+                , colourBlock FlatColors.SwedishPalette.mintyGreen
+                ]
+            , row []
+                [ colourBlock FlatColors.SwedishPalette.sizzlingRed
+                , colourBlock FlatColors.SwedishPalette.freeSpeechBlue
+                , colourBlock FlatColors.SwedishPalette.spiroDiscoBall
+                , colourBlock FlatColors.SwedishPalette.jadeDust
+                , colourBlock FlatColors.SwedishPalette.greenTeal
+                ]
+            , row []
+                [ colourBlock FlatColors.SwedishPalette.narenjiOrange
+                , colourBlock FlatColors.SwedishPalette.yrielYellow
+                , colourBlock FlatColors.SwedishPalette.sunsetOrange
+                , colourBlock FlatColors.SwedishPalette.hintOfElusiveBlue
+                , colourBlock FlatColors.SwedishPalette.goodNight
+                ]
+            , row []
+                [ colourBlock FlatColors.SwedishPalette.chromeYellow
+                , colourBlock FlatColors.SwedishPalette.vibrantYellow
+                , colourBlock FlatColors.SwedishPalette.redOrange
+                , colourBlock FlatColors.SwedishPalette.londonSquare
+                , colourBlock FlatColors.SwedishPalette.blackPearl
+                ]
             ]
 
     else

@@ -21387,6 +21387,20 @@ var $mdgriffith$elm_ui$Element$createNearby = F2(
 var $mdgriffith$elm_ui$Element$inFront = function (element) {
 	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$InFront, element);
 };
+var $mdgriffith$elm_ui$Internal$Model$MoveY = function (a) {
+	return {$: 'MoveY', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$TransformComponent = F2(
+	function (a, b) {
+		return {$: 'TransformComponent', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Flag$moveY = $mdgriffith$elm_ui$Internal$Flag$flag(26);
+var $mdgriffith$elm_ui$Element$moveDown = function (y) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$TransformComponent,
+		$mdgriffith$elm_ui$Internal$Flag$moveY,
+		$mdgriffith$elm_ui$Internal$Model$MoveY(y));
+};
 var $mdgriffith$elm_ui$Internal$Flag$borderRound = $mdgriffith$elm_ui$Internal$Flag$flag(17);
 var $mdgriffith$elm_ui$Element$Border$rounded = function (radius) {
 	return A2(
@@ -21467,6 +21481,130 @@ var $feathericons$elm_feather$FeatherIcons$settings = A2(
 				]),
 			_List_Nil)
 		]));
+var $author$project$ToolsProforma$ToolColourSelect = F2(
+	function (a, b) {
+		return {$: 'ToolColourSelect', a: a, b: b};
+	});
+var $smucode$elm_flat_colors$FlatColors$SwedishPalette$blackPearl = A3($mdgriffith$elm_ui$Element$rgb255, 30, 39, 46);
+var $smucode$elm_flat_colors$FlatColors$ChinesePalette$bruschettaTomato = A3($mdgriffith$elm_ui$Element$rgb255, 255, 99, 72);
+var $smucode$elm_flat_colors$FlatColors$SwedishPalette$chromeYellow = A3($mdgriffith$elm_ui$Element$rgb255, 255, 168, 1);
+var $smucode$elm_flat_colors$FlatColors$SwedishPalette$darkPeriwinkle = A3($mdgriffith$elm_ui$Element$rgb255, 87, 95, 207);
+var $smucode$elm_flat_colors$FlatColors$SwedishPalette$freeSpeechBlue = A3($mdgriffith$elm_ui$Element$rgb255, 60, 64, 198);
+var $smucode$elm_flat_colors$FlatColors$SwedishPalette$freshTurquoise = A3($mdgriffith$elm_ui$Element$rgb255, 52, 231, 228);
+var $smucode$elm_flat_colors$FlatColors$SwedishPalette$goodNight = A3($mdgriffith$elm_ui$Element$rgb255, 72, 84, 96);
+var $smucode$elm_flat_colors$FlatColors$SwedishPalette$greenTeal = A3($mdgriffith$elm_ui$Element$rgb255, 5, 196, 107);
+var $smucode$elm_flat_colors$FlatColors$SwedishPalette$highlighterPink = A3($mdgriffith$elm_ui$Element$rgb255, 239, 87, 119);
+var $smucode$elm_flat_colors$FlatColors$SwedishPalette$hintOfElusiveBlue = A3($mdgriffith$elm_ui$Element$rgb255, 210, 218, 226);
+var $smucode$elm_flat_colors$FlatColors$SwedishPalette$jadeDust = A3($mdgriffith$elm_ui$Element$rgb255, 0, 216, 214);
+var $smucode$elm_flat_colors$FlatColors$SwedishPalette$londonSquare = A3($mdgriffith$elm_ui$Element$rgb255, 128, 142, 155);
+var $smucode$elm_flat_colors$FlatColors$SwedishPalette$megaman = A3($mdgriffith$elm_ui$Element$rgb255, 75, 207, 250);
+var $smucode$elm_flat_colors$FlatColors$SwedishPalette$mintyGreen = A3($mdgriffith$elm_ui$Element$rgb255, 11, 232, 129);
+var $smucode$elm_flat_colors$FlatColors$SwedishPalette$narenjiOrange = A3($mdgriffith$elm_ui$Element$rgb255, 255, 192, 72);
+var $mdgriffith$elm_ui$Internal$Model$Empty = {$: 'Empty'};
+var $mdgriffith$elm_ui$Element$none = $mdgriffith$elm_ui$Internal$Model$Empty;
+var $mdgriffith$elm_ui$Internal$Model$Px = function (a) {
+	return {$: 'Px', a: a};
+};
+var $mdgriffith$elm_ui$Element$px = $mdgriffith$elm_ui$Internal$Model$Px;
+var $smucode$elm_flat_colors$FlatColors$SwedishPalette$redOrange = A3($mdgriffith$elm_ui$Element$rgb255, 255, 63, 52);
+var $smucode$elm_flat_colors$FlatColors$SwedishPalette$sizzlingRed = A3($mdgriffith$elm_ui$Element$rgb255, 245, 59, 87);
+var $smucode$elm_flat_colors$FlatColors$SwedishPalette$spiroDiscoBall = A3($mdgriffith$elm_ui$Element$rgb255, 15, 188, 249);
+var $smucode$elm_flat_colors$FlatColors$SwedishPalette$sunsetOrange = A3($mdgriffith$elm_ui$Element$rgb255, 255, 94, 87);
+var $smucode$elm_flat_colors$FlatColors$SwedishPalette$vibrantYellow = A3($mdgriffith$elm_ui$Element$rgb255, 255, 211, 42);
+var $mdgriffith$elm_ui$Internal$Model$BorderWidth = F5(
+	function (a, b, c, d, e) {
+		return {$: 'BorderWidth', a: a, b: b, c: c, d: d, e: e};
+	});
+var $mdgriffith$elm_ui$Element$Border$width = function (v) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$borderWidth,
+		A5(
+			$mdgriffith$elm_ui$Internal$Model$BorderWidth,
+			'b-' + $elm$core$String$fromInt(v),
+			v,
+			v,
+			v,
+			v));
+};
+var $smucode$elm_flat_colors$FlatColors$SwedishPalette$yrielYellow = A3($mdgriffith$elm_ui$Element$rgb255, 255, 221, 89);
+var $author$project$ToolsProforma$showColourOptions = F2(
+	function (msgWrapper, toolEntry) {
+		var colourBlock = function (colour) {
+			return A2(
+				$mdgriffith$elm_ui$Element$Input$button,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$Background$color(colour),
+						$mdgriffith$elm_ui$Element$width(
+						$mdgriffith$elm_ui$Element$px(20)),
+						$mdgriffith$elm_ui$Element$height(
+						$mdgriffith$elm_ui$Element$px(20))
+					]),
+				{
+					label: $mdgriffith$elm_ui$Element$none,
+					onPress: $elm$core$Maybe$Just(
+						msgWrapper(
+							A2($author$project$ToolsProforma$ToolColourSelect, toolEntry.toolType, colour)))
+				});
+		};
+		return toolEntry.isPopupOpen ? A2(
+			$mdgriffith$elm_ui$Element$column,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$alignRight,
+					$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$bruschettaTomato),
+					$mdgriffith$elm_ui$Element$Border$rounded(4),
+					$mdgriffith$elm_ui$Element$Border$width(2)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$row,
+					_List_Nil,
+					_List_fromArray(
+						[
+							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$highlighterPink),
+							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$darkPeriwinkle),
+							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$megaman),
+							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$freshTurquoise),
+							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$mintyGreen)
+						])),
+					A2(
+					$mdgriffith$elm_ui$Element$row,
+					_List_Nil,
+					_List_fromArray(
+						[
+							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$sizzlingRed),
+							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$freeSpeechBlue),
+							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$spiroDiscoBall),
+							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$jadeDust),
+							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$greenTeal)
+						])),
+					A2(
+					$mdgriffith$elm_ui$Element$row,
+					_List_Nil,
+					_List_fromArray(
+						[
+							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$narenjiOrange),
+							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$yrielYellow),
+							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$sunsetOrange),
+							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$hintOfElusiveBlue),
+							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$goodNight)
+						])),
+					A2(
+					$mdgriffith$elm_ui$Element$row,
+					_List_Nil,
+					_List_fromArray(
+						[
+							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$chromeYellow),
+							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$vibrantYellow),
+							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$redOrange),
+							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$londonSquare),
+							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$blackPearl)
+						]))
+				])) : $mdgriffith$elm_ui$Element$none;
+	});
 var $author$project$ToolsProforma$DockBottom = {$: 'DockBottom'};
 var $author$project$ToolsProforma$DockLowerRight = {$: 'DockLowerRight'};
 var $author$project$ToolsProforma$DockUpperRight = {$: 'DockUpperRight'};
@@ -21597,23 +21735,6 @@ var $feathericons$elm_feather$FeatherIcons$arrowUpRight = A2(
 				]),
 			_List_Nil)
 		]));
-var $smucode$elm_flat_colors$FlatColors$ChinesePalette$bruschettaTomato = A3($mdgriffith$elm_ui$Element$rgb255, 255, 99, 72);
-var $mdgriffith$elm_ui$Internal$Model$MoveY = function (a) {
-	return {$: 'MoveY', a: a};
-};
-var $mdgriffith$elm_ui$Internal$Model$TransformComponent = F2(
-	function (a, b) {
-		return {$: 'TransformComponent', a: a, b: b};
-	});
-var $mdgriffith$elm_ui$Internal$Flag$moveY = $mdgriffith$elm_ui$Internal$Flag$flag(26);
-var $mdgriffith$elm_ui$Element$moveDown = function (y) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$TransformComponent,
-		$mdgriffith$elm_ui$Internal$Flag$moveY,
-		$mdgriffith$elm_ui$Internal$Model$MoveY(y));
-};
-var $mdgriffith$elm_ui$Internal$Model$Empty = {$: 'Empty'};
-var $mdgriffith$elm_ui$Element$none = $mdgriffith$elm_ui$Internal$Model$Empty;
 var $elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
 var $elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
 var $elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
@@ -21686,22 +21807,6 @@ var $author$project$ViewPureStyles$useIcon = A2(
 		$mdgriffith$elm_ui$Element$html,
 		$feathericons$elm_feather$FeatherIcons$toHtml(_List_Nil)),
 	$feathericons$elm_feather$FeatherIcons$withSize(20));
-var $mdgriffith$elm_ui$Internal$Model$BorderWidth = F5(
-	function (a, b, c, d, e) {
-		return {$: 'BorderWidth', a: a, b: b, c: c, d: d, e: e};
-	});
-var $mdgriffith$elm_ui$Element$Border$width = function (v) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$borderWidth,
-		A5(
-			$mdgriffith$elm_ui$Internal$Model$BorderWidth,
-			'b-' + $elm$core$String$fromInt(v),
-			v,
-			v,
-			v,
-			v));
-};
 var $author$project$ToolsProforma$showDockOptions = F2(
 	function (msgWrapper, toolEntry) {
 		return toolEntry.isPopupOpen ? A2(
@@ -21709,8 +21814,6 @@ var $author$project$ToolsProforma$showDockOptions = F2(
 			_List_fromArray(
 				[
 					$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite),
-					$mdgriffith$elm_ui$Element$alignRight,
-					$mdgriffith$elm_ui$Element$moveDown(26),
 					$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$bruschettaTomato),
 					$mdgriffith$elm_ui$Element$Border$rounded(4),
 					$mdgriffith$elm_ui$Element$Border$width(2)
@@ -22437,7 +22540,18 @@ var $author$project$ToolsProforma$viewTool = F3(
 					$mdgriffith$elm_ui$Element$Border$color(toolEntry.tabColour),
 					$mdgriffith$elm_ui$Element$Border$rounded(8),
 					$mdgriffith$elm_ui$Element$inFront(
-					A2($author$project$ToolsProforma$showDockOptions, msgWrapper, toolEntry))
+					A2(
+						$mdgriffith$elm_ui$Element$column,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$alignRight,
+								$mdgriffith$elm_ui$Element$moveDown(26)
+							]),
+						_List_fromArray(
+							[
+								A2($author$project$ToolsProforma$showDockOptions, msgWrapper, toolEntry),
+								A2($author$project$ToolsProforma$showColourOptions, msgWrapper, toolEntry)
+							])))
 				]),
 			_List_fromArray(
 				[
@@ -23146,10 +23260,6 @@ var $elm$html$Html$Events$onInput = function (tagger) {
 			$elm$html$Html$Events$alwaysStop,
 			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
 };
-var $mdgriffith$elm_ui$Internal$Model$Px = function (a) {
-	return {$: 'Px', a: a};
-};
-var $mdgriffith$elm_ui$Element$px = $mdgriffith$elm_ui$Internal$Model$Px;
 var $mdgriffith$elm_ui$Element$spacingXY = F2(
 	function (x, y) {
 		return A2(

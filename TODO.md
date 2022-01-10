@@ -4,24 +4,15 @@
 
 ## Docking tools
 
-Try "docking" a tool tab. 
-> Needs popup settings for dock location and colour.
-> Display of tool tab should be common in proforma, but content delegated to each tool.
-> Remember, no functions in the model, or in any sub-state.
+Tool tab colour selection, using just sample from FlatUI.
 
 Put all Font, Colour etc into a Palette/Style module for ease of change.
 
 ## Editing?
 >> Take a couple of tools, do them as better tabs:
- - dockable any side, via pop-up tools icon
- - user choice of colour, ditto
  - preset layout options in "menu bar"
  - less space for view selection -- popup? e.g. feather icon with "eye" in the wee mini toolbar.
 
- - fully pluggable tools (lots of functions to interact with tabs, like OO)
- - > But the rule says (apparently) "don't store functions in the model"
-   > https://github.com/evancz/elm-sortable-table/tree/1.0.0#usage-rules
-   
  - previews in all views, each tool is fully responsible (but with shared helpers).
  - Thus, validate Actions concept,
  - decide best approach to Undo & Redo (see Backlog)
