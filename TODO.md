@@ -9,6 +9,9 @@ Could do this in view, I guess, which is a bit lazy and mildly inefficient.
 
 Put all Font, Colour etc into a Palette/Style module for ease of change.
 
+Need "no dock" option and a place to access them from.
+Need "restore to defaults".
+
 ## Editing?
 >> Take a couple of tools, do them as better tabs:
  - preset layout options in "menu bar"

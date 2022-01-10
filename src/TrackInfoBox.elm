@@ -38,12 +38,10 @@ trackInfoBox maybeTree =
                     ]
 
             Nothing ->
-                el
-                    [ centerX
-                    , centerY
-                    , width fill
-                    , height fill
-                    , Background.color FlatColors.ChinesePalette.coral
+                row
+                    [ padding 10
+                    , spacing 5
                     ]
-                <|
-                    text "No track loaded"
+                    [ column [ spacing 5 ] <| List.map (\( txt, _ ) -> txt) trackInfoList
+                    , column [ spacing 5 ] <| List.map (always <| text "- no data -") trackInfoList
+                    ]
