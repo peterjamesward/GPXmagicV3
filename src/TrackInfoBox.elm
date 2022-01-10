@@ -26,23 +26,11 @@ trackInfoList =
 
 trackInfoBox : Maybe PeteTree -> Element msg
 trackInfoBox maybeTree =
-    column [ width fill ]
-        [ row
-            [ width fill
-            , padding 4
-            , spacing 4
-            , Font.color FlatColors.AussiePalette.beekeeper
-            , Background.color FlatColors.ChinesePalette.bayWharf
-            ]
-            [ useIcon FeatherIcons.settings
-            , text "The Route"
-            ]
-        , case maybeTree of
+    el [ width fill ] <|
+        case maybeTree of
             Just trackTree ->
                 row
-                    [ Background.color FlatColors.AussiePalette.beekeeper
-                    , Border.rounded 10
-                    , padding 10
+                    [ padding 10
                     , spacing 5
                     ]
                     [ column [ spacing 5 ] <| List.map (\( txt, _ ) -> txt) trackInfoList
@@ -59,4 +47,3 @@ trackInfoBox maybeTree =
                     ]
                 <|
                     text "No track loaded"
-        ]

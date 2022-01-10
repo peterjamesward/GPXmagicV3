@@ -4,6 +4,7 @@ import Color exposing (Color)
 import DomainModel exposing (PeteTree)
 import Element exposing (..)
 import Element.Background as Background
+import Element.Border as Border exposing (roundEach)
 import Element.Font as Font
 import FeatherIcons
 import FlatColors.AussiePalette
@@ -132,7 +133,8 @@ toolsForDock dock msgWrapper model =
     column [] <|
         (model.tools
             |> List.filter (\tool -> tool.dock == dock)
-            |> List.map (viewTool msgWrapper model))
+            |> List.map (viewTool msgWrapper model)
+        )
 
 
 viewTool :
@@ -141,16 +143,21 @@ viewTool :
     -> ToolEntry
     -> Element msg
 viewTool msgWrapper model toolEntry =
-    column [ width fill ]
+    column
+        [ width fill
+        , spacing 0
+        , Border.width 2
+        , Border.color toolEntry.tabColour
+        , Border.rounded 8
+        ]
         [ row
             [ width fill
-            , padding 4
             , spacing 8
-            , Font.color FlatColors.AussiePalette.beekeeper
+            , padding 4
             , Background.color toolEntry.tabColour
             ]
-            [ useIcon FeatherIcons.settings
-            , text toolEntry.label
+            [ text toolEntry.label
+            , el [ alignRight ] <| useIcon FeatherIcons.settings
             ]
         , TrackInfoBox.trackInfoBox model.trackTree
         ]
