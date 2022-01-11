@@ -211,7 +211,7 @@ viewTool msgWrapper model toolEntry =
                 }
             ]
         , if toolEntry.state == Expanded then
-            TrackInfoBox.trackInfoBox model.trackTree
+            viewToolByType msgWrapper toolEntry model
 
           else
             none
@@ -306,3 +306,12 @@ showColourOptions msgWrapper toolEntry =
 
     else
         none
+
+
+viewToolByType :
+    (ToolMsg -> msg)
+    -> ToolEntry
+    -> { model | trackTree : Maybe PeteTree }
+    -> Element msg
+viewToolByType msgWrapper entry model =
+    TrackInfoBox.trackInfoBox model.trackTree
