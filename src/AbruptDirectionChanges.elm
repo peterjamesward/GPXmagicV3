@@ -5,8 +5,10 @@ import Direction2d
 import DomainModel exposing (PeteTree(..), asRecord)
 import Element exposing (..)
 import Element.Background as Background
+import Element.Input as Input
 import FlatColors.ChinesePalette
 import Quantity
+import ViewPureStyles exposing (sliderThumb)
 
 
 type alias Options =
@@ -27,6 +29,7 @@ type Msg
     = ViewNext
     | ViewPrevious
     | SetCurrentTo
+    | SetThreshold Angle
 
 
 findAbruptDirectionChanges : Options -> PeteTree -> Options
@@ -74,22 +77,65 @@ findAbruptDirectionChanges options tree =
     }
 
 
+update :
+    Msg
+    -> (Msg -> msg)
+    ->
+        { model
+            | trackTree : Maybe PeteTree
+            , directionChangeOptions : Options
+        }
+    ->
+        ( { model
+            | trackTree : Maybe PeteTree
+            , directionChangeOptions : Options
+          }
+        , Cmd msg
+        )
+update msg msgWrapper model =
+    case msg of
+        ViewNext ->
+            ( model, Cmd.none )
+
+        ViewPrevious ->
+            ( model, Cmd.none )
+
+        SetCurrentTo ->
+            ( model, Cmd.none )
+
+        SetThreshold angle ->
+            let
+                oldOptions =
+                    model.directionChangeOptions
+
+                newOptions =
+                    { oldOptions | threshold = angle, breaches = [] }
+
+                populatedOptions =
+                    case model.trackTree of
+                        Just aTree ->
+                            findAbruptDirectionChanges newOptions aTree
+
+                        Nothing ->
+                            newOptions
+            in
+            ( { model | directionChangeOptions = populatedOptions }
+            , Cmd.none
+            )
+
+
 view : (Msg -> msg) -> Options -> Element msg
 view msgWrapper options =
     el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
-        case options.breaches of
-            pair :: morePairs ->
-                row
-                    [ padding 10
-                    , spacing 5
-                    ]
-                    [ text <| "Found" ++ (String.fromInt <| List.length options.breaches)
-                    ]
-
-            [] ->
-                row
-                    [ padding 10
-                    , spacing 5
-                    ]
-                    [ text "None found"
-                    ]
+        column []
+            [ Input.slider
+                ViewPureStyles.shortSliderStyles
+                { onChange = Angle.degrees >> SetThreshold >> msgWrapper
+                , value = Angle.inDegrees options.threshold
+                , label = Input.labelHidden "Direction change threshold"
+                , min = 30
+                , max = 120
+                , step = Just 1
+                , thumb = sliderThumb
+                }
+            ]

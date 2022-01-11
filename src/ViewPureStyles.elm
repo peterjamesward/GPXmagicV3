@@ -221,6 +221,25 @@ wideSliderStyles =
     ]
 
 
+shortSliderStyles =
+    [ height <| px 24
+    , width <| px 150
+    , centerY
+    , centerX
+    , behindContent <|
+        -- Slider track
+        el
+            [ width <| px 150
+            , height <| px 2
+            , centerY
+            , centerX
+            , Background.color scrollbarBackground
+            , Border.rounded 6
+            ]
+            Element.none
+    ]
+
+
 sliderThumb : Thumb
 sliderThumb =
     thumb

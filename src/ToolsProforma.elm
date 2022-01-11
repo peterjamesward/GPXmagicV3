@@ -189,7 +189,7 @@ update toolMsg msgWrapper model =
 
         DirectionChanges msg ->
             -- Delegate to tool here...
-            ( model, Cmd.none )
+            AbruptDirectionChanges.update msg (DirectionChanges >> msgWrapper) model
 
 
 refreshAllTools :
