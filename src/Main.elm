@@ -208,7 +208,9 @@ update msg (Model model) =
                     }
 
                 ( finalModel, cmd ) =
-                    modelWithTrack |> Actions.updateAllDisplays
+                    modelWithTrack
+                    |> ToolsProforma.refreshAllTools
+                    |> Actions.updateAllDisplays
             in
             ( Model finalModel, cmd )
 

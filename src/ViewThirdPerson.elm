@@ -101,9 +101,17 @@ view :
     -> (Msg -> msg)
     -> Element msg
 view model msgWrapper =
+    let
+        dragging =
+            Maybe.map .dragAction model.viewContext |> Maybe.withDefault DragNone
+    in
     el
         [ htmlAttribute <| Mouse.onDown (ImageGrab >> msgWrapper)
-        , htmlAttribute <| Mouse.onMove (ImageDrag >> msgWrapper)
+        , if dragging /= DragNone then
+            htmlAttribute <| Mouse.onMove (ImageDrag >> msgWrapper)
+
+          else
+            pointer
         , htmlAttribute <| Mouse.onUp (ImageRelease >> msgWrapper)
         , htmlAttribute <| Mouse.onClick (ImageClick >> msgWrapper)
         , htmlAttribute <| Mouse.onDoubleClick (ImageDoubleClick >> msgWrapper)
@@ -164,7 +172,7 @@ deriveCamera treeNode context currentPosition =
                 , azimuth = Direction2d.toAngle context.cameraAzimuth
                 , elevation = context.cameraElevation
                 , distance =
-                --TODO: Some fudging going on here that should not be needed.
+                    --TODO: Some fudging going on here that should not be needed.
                     Length.meters <| 100.0 * Spherical.metresPerPixel context.zoomLevel latitude
                 }
 

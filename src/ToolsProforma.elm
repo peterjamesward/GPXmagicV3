@@ -189,8 +189,37 @@ update toolMsg msgWrapper model =
 
         DirectionChanges msg ->
             -- Delegate to tool here...
-            (model, Cmd.none)
+            ( model, Cmd.none )
 
+
+refreshAllTools :
+    { model
+        | tools : List ToolEntry
+        , trackTree : Maybe PeteTree
+        , directionChangeOptions : AbruptDirectionChanges.Options
+    }
+    ->
+        { model
+            | tools : List ToolEntry
+            , trackTree : Maybe PeteTree
+            , directionChangeOptions : AbruptDirectionChanges.Options
+        }
+refreshAllTools model =
+    -- Track, or something has changed; tool data is stale.
+    -- Same impact as tools being opened, so we'll re-use that.
+    -- The discarding of cmds here is questionable.
+    let
+        refreshOneTool entry ( updatedModel, _ ) =
+            if entry.state == Expanded then
+                toolStateHasChanged entry.toolType Expanded updatedModel
+
+            else
+                ( updatedModel, Cmd.none )
+
+        ( finalModel, _ ) =
+            model.tools |> List.foldl refreshOneTool ( model, Cmd.none )
+    in
+    finalModel
 
 
 toolStateHasChanged :
@@ -198,12 +227,14 @@ toolStateHasChanged :
     -> ToolState
     ->
         { model
-            | trackTree : Maybe PeteTree
+            | tools : List ToolEntry
+            , trackTree : Maybe PeteTree
             , directionChangeOptions : AbruptDirectionChanges.Options
         }
     ->
         ( { model
-            | trackTree : Maybe PeteTree
+            | tools : List ToolEntry
+            , trackTree : Maybe PeteTree
             , directionChangeOptions : AbruptDirectionChanges.Options
           }
         , Cmd msg

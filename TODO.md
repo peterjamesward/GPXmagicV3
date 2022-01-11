@@ -23,6 +23,10 @@ Let's start with Bend/Gradient problems, showing on 3D and map, then Delete.
 ## Profile & Charts
 Details in Backlog.
 
+
+## Other
+Can we not listen to mouse move until the button is down, on images?
+
 ---
 
 # Backlog
