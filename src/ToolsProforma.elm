@@ -87,6 +87,22 @@ toggleToolPopup toolType tool =
         tool
 
 
+toggleToolState : ToolType -> ToolEntry -> ToolEntry
+toggleToolState toolType tool =
+    if tool.toolType == toolType then
+        { tool
+            | state =
+                if tool.state == Expanded then
+                    Contracted
+
+                else
+                    Expanded
+        }
+
+    else
+        tool
+
+
 setDock : ToolType -> ToolDock -> ToolEntry -> ToolEntry
 setDock toolType dock tool =
     if tool.toolType == toolType then
@@ -131,7 +147,9 @@ update toolMsg msgWrapper model =
             )
 
         ToolStateToggle toolType ->
-            ( model, Cmd.none )
+            ( { model | tools = List.map (toggleToolState toolType) model.tools }
+            , Cmd.none
+            )
 
 
 
@@ -183,13 +201,20 @@ viewTool msgWrapper model toolEntry =
             , Background.color toolEntry.tabColour
             , Font.color toolEntry.textColour
             ]
-            [ text toolEntry.label
+            [ Input.button [ centerX ]
+                { onPress = Just <| msgWrapper <| ToolStateToggle toolEntry.toolType
+                , label = text toolEntry.label
+                }
             , Input.button [ alignRight ]
                 { onPress = Just <| msgWrapper <| ToolPopupToggle toolEntry.toolType
                 , label = useIcon FeatherIcons.settings
                 }
             ]
-        , TrackInfoBox.trackInfoBox model.trackTree
+        , if toolEntry.state == Expanded then
+            TrackInfoBox.trackInfoBox model.trackTree
+
+          else
+            none
         ]
 
 
