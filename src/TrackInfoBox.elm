@@ -3,13 +3,8 @@ module TrackInfoBox exposing (..)
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
-import Element.Border as Border
-import Element.Font as Font
-import FeatherIcons
-import FlatColors.AussiePalette
 import FlatColors.ChinesePalette
 import UtilsForViews exposing (showDecimal0, showDecimal2, showLongMeasure, showShortMeasure)
-import ViewPureStyles exposing (useIcon)
 
 
 trackInfoList : List ( Element msg, PeteTree -> Element msg )
@@ -20,7 +15,7 @@ trackInfoList =
     , ( text "Descent", asRecord >> .altitudeLost >> showLongMeasure False >> text )
     , ( text "Climb distance", asRecord >> .distanceClimbing >> showLongMeasure False >> text )
     , ( text "Descent distance", asRecord >> .distanceDescending >> showLongMeasure False >> text )
-    , ( text "Steepest", asRecord >> .steepestClimb >> String.fromFloat >> text )
+    , ( text "Steepest", asRecord >> .steepestClimb >> showDecimal2 >> text )
     ]
 
 

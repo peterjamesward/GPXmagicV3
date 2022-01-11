@@ -415,8 +415,14 @@ treeFromList track =
             , gradientAtStart = info1 |> asRecord |> .gradientAtStart
             , gradientAtEnd = info2 |> asRecord |> .gradientAtEnd
             , gradientChangeMaximumAbs =
-                max (info1 |> asRecord |> .gradientChangeMaximumAbs)
-                    (info2 |> asRecord |> .gradientChangeMaximumAbs)
+                Maybe.withDefault 0.0 <|
+                    List.maximum
+                        [ info1 |> asRecord |> .gradientChangeMaximumAbs
+                        , info2 |> asRecord |> .gradientChangeMaximumAbs
+                        , abs <|
+                            (info1 |> asRecord |> .gradientAtEnd)
+                                - (info2 |> asRecord |> .gradientAtStart)
+                        ]
             , directionAtStart = info1 |> asRecord |> .directionAtStart
             , directionAtEnd = info2 |> asRecord |> .directionAtEnd
             , directionChangeMaximumAbs =
@@ -522,6 +528,7 @@ pointFromIndex index treeNode =
 
             else
                 pointFromIndex (index - skipCount info.left) info.right
+
 
 gpxPointFromIndex : Int -> PeteTree -> GPXSource
 gpxPointFromIndex index treeNode =

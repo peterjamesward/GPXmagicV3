@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import AbruptDirectionChanges
 import Actions
 import Browser exposing (application)
 import Browser.Dom as Dom exposing (getViewport, getViewportOf)
@@ -122,6 +123,7 @@ init mflags origin navigationKey =
         , windowSize = ( 1000, 800 )
         , contentArea = ( Pixels.pixels 800, Pixels.pixels 500 )
         , tools = ToolsProforma.tools
+            , directionChangeOptions = AbruptDirectionChanges.defaultOptions
         }
     , Cmd.batch
         [ authCmd
@@ -341,7 +343,8 @@ adjustSpaceForContent model =
             SplitPane.getPosition model.bottomDockTopEdge
 
         ( reservedWidth, reservedHeight ) =
-            ( 50, 120 )
+            -- This by experiment, not ideal.
+            ( 50, 130 )
 
         ( availableWidthPixels, availableHeightPixels ) =
             ( Tuple.first model.windowSize * availableWidthFraction - reservedWidth
@@ -512,20 +515,20 @@ topLoadingBar model =
         loadGpxButton =
             button
                 [ padding 5
-                , Background.color FlatColors.ChinesePalette.twinkleBlue
+                , Background.color FlatColors.ChinesePalette.antiFlashWhite
                 ]
                 { onPress = Just GpxRequested
                 , label = text "Load GPX file"
                 }
     in
     row
-        ([ spacing 20
-         , padding 5
-         , width fill
-         , Border.widthEach { left = 0, right = 0, top = 0, bottom = 1 }
-         , Border.color FlatColors.ChinesePalette.twinkleBlue
-         ]
-            ++ commonLayoutStyles
+        (commonLayoutStyles
+            ++ [ spacing 20
+               , padding 10
+               , width fill
+               , Border.widthEach { left = 0, right = 0, top = 0, bottom = 1 }
+               , Border.color FlatColors.ChinesePalette.twinkleBlue
+               ]
         )
         [ loadGpxButton
         ]
@@ -582,7 +585,7 @@ contentArea model =
         [ column
             [ width fill
             , alignTop
-            , padding 10
+            --, padding 10
             , centerX
             ]
             [ viewModeChoices model

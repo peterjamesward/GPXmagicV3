@@ -1,5 +1,6 @@
 module ToolsProforma exposing (..)
 
+import AbruptDirectionChanges
 import Color exposing (Color)
 import DomainModel exposing (PeteTree)
 import Element exposing (..)
@@ -35,13 +36,15 @@ type ToolDock
 
 type ToolType
     = ToolTrackInfo
+    | AbruptDirectionChanges
 
 
 type ToolMsg
     = ToolPopupToggle ToolType
     | ToolDockSelect ToolType ToolDock
     | ToolColourSelect ToolType Element.Color
-    | ToolStateToggle ToolType
+    | ToolStateToggle ToolType ToolState
+    | DirectionChanges AbruptDirectionChanges.Msg
 
 
 type alias ToolEntry =
@@ -60,12 +63,13 @@ type alias ToolEntry =
 tools : List ToolEntry
 tools =
     -- One list or five, or six? Try one. Arguably a Dict but POITROAE.
-    [ toolEntryForTrackInfoBox
+    [ trackInfoBox
+    , abruptDirectionChanges
     ]
 
 
-toolEntryForTrackInfoBox : ToolEntry
-toolEntryForTrackInfoBox =
+trackInfoBox : ToolEntry
+trackInfoBox =
     { toolType = ToolTrackInfo
     , label = "Summary info"
     , info = "Here is some useful information"
@@ -74,6 +78,20 @@ toolEntryForTrackInfoBox =
     , dock = DockUpperLeft
     , tabColour = FlatColors.AussiePalette.beekeeper
     , textColour = contrastingColour FlatColors.AussiePalette.beekeeper
+    , isPopupOpen = False
+    }
+
+
+abruptDirectionChanges : ToolEntry
+abruptDirectionChanges =
+    { toolType = AbruptDirectionChanges
+    , label = "Direction changes"
+    , info = "These may need smoothing"
+    , video = Nothing
+    , state = Contracted
+    , dock = DockUpperRight
+    , tabColour = FlatColors.AussiePalette.spicedNectarine
+    , textColour = contrastingColour FlatColors.AussiePalette.spicedNectarine
     , isPopupOpen = False
     }
 
@@ -87,20 +105,26 @@ toggleToolPopup toolType tool =
         tool
 
 
-toggleToolState : ToolType -> ToolEntry -> ToolEntry
-toggleToolState toolType tool =
+setToolState : ToolType -> ToolState -> ToolEntry -> ToolEntry
+setToolState toolType state tool =
     if tool.toolType == toolType then
-        { tool
-            | state =
-                if tool.state == Expanded then
-                    Contracted
-
-                else
-                    Expanded
-        }
+        { tool | state = state }
 
     else
         tool
+
+
+nextToolState : ToolState -> ToolState
+nextToolState state =
+    case state of
+        Expanded ->
+            Contracted
+
+        Contracted ->
+            Expanded
+
+        Disabled ->
+            Disabled
 
 
 setDock : ToolType -> ToolDock -> ToolEntry -> ToolEntry
@@ -127,8 +151,20 @@ setColour toolType colour tool =
 update :
     ToolMsg
     -> (ToolMsg -> msg)
-    -> { model | tools : List ToolEntry }
-    -> ( { model | tools : List ToolEntry }, Cmd msg )
+    ->
+        { model
+            | tools : List ToolEntry
+            , trackTree : Maybe PeteTree
+            , directionChangeOptions : AbruptDirectionChanges.Options
+        }
+    ->
+        ( { model
+            | tools : List ToolEntry
+            , trackTree : Maybe PeteTree
+            , directionChangeOptions : AbruptDirectionChanges.Options
+          }
+        , Cmd msg
+        )
 update toolMsg msgWrapper model =
     case toolMsg of
         ToolPopupToggle toolType ->
@@ -146,10 +182,51 @@ update toolMsg msgWrapper model =
             , Cmd.none
             )
 
-        ToolStateToggle toolType ->
-            ( { model | tools = List.map (toggleToolState toolType) model.tools }
-            , Cmd.none
-            )
+        ToolStateToggle toolType newState ->
+            -- Record the new state, but also let the tool know!
+            { model | tools = List.map (setToolState toolType newState) model.tools }
+                |> toolStateHasChanged toolType newState
+
+        DirectionChanges msg ->
+            -- Delegate to tool here...
+            (model, Cmd.none)
+
+
+
+toolStateHasChanged :
+    ToolType
+    -> ToolState
+    ->
+        { model
+            | trackTree : Maybe PeteTree
+            , directionChangeOptions : AbruptDirectionChanges.Options
+        }
+    ->
+        ( { model
+            | trackTree : Maybe PeteTree
+            , directionChangeOptions : AbruptDirectionChanges.Options
+          }
+        , Cmd msg
+        )
+toolStateHasChanged toolType newState model =
+    case toolType of
+        ToolTrackInfo ->
+            ( model, Cmd.none )
+
+        AbruptDirectionChanges ->
+            case ( newState, model.trackTree ) of
+                ( Expanded, Just treeNode ) ->
+                    ( { model
+                        | directionChangeOptions =
+                            AbruptDirectionChanges.findAbruptDirectionChanges
+                                model.directionChangeOptions
+                                treeNode
+                      }
+                    , Cmd.none
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
 
 
 
@@ -163,6 +240,7 @@ toolsForDock :
         { model
             | tools : List ToolEntry
             , trackTree : Maybe PeteTree
+            , directionChangeOptions : AbruptDirectionChanges.Options
         }
     -> Element msg
 toolsForDock dock msgWrapper model =
@@ -175,7 +253,11 @@ toolsForDock dock msgWrapper model =
 
 viewTool :
     (ToolMsg -> msg)
-    -> { model | trackTree : Maybe PeteTree }
+    ->
+        { model
+            | trackTree : Maybe PeteTree
+            , directionChangeOptions : AbruptDirectionChanges.Options
+        }
     -> ToolEntry
     -> Element msg
 viewTool msgWrapper model toolEntry =
@@ -202,7 +284,11 @@ viewTool msgWrapper model toolEntry =
             , Font.color toolEntry.textColour
             ]
             [ Input.button [ centerX ]
-                { onPress = Just <| msgWrapper <| ToolStateToggle toolEntry.toolType
+                { onPress =
+                    Just <|
+                        msgWrapper <|
+                            ToolStateToggle toolEntry.toolType <|
+                                nextToolState toolEntry.state
                 , label = text toolEntry.label
                 }
             , Input.button [ alignRight ]
@@ -311,7 +397,16 @@ showColourOptions msgWrapper toolEntry =
 viewToolByType :
     (ToolMsg -> msg)
     -> ToolEntry
-    -> { model | trackTree : Maybe PeteTree }
+    ->
+        { model
+            | trackTree : Maybe PeteTree
+            , directionChangeOptions : AbruptDirectionChanges.Options
+        }
     -> Element msg
 viewToolByType msgWrapper entry model =
-    TrackInfoBox.trackInfoBox model.trackTree
+    case entry.toolType of
+        ToolTrackInfo ->
+            TrackInfoBox.trackInfoBox model.trackTree
+
+        AbruptDirectionChanges ->
+            AbruptDirectionChanges.view (msgWrapper << DirectionChanges) model.directionChangeOptions

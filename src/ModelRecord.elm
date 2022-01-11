@@ -1,5 +1,6 @@
 module ModelRecord exposing (..)
 
+import AbruptDirectionChanges
 import DomainModel exposing (GPXSource, PeteTree)
 import GeoCodeDecoders exposing (IpInfo)
 import LocalCoords exposing (LocalCoords)
@@ -50,4 +51,7 @@ type alias ModelRecord =
 
     -- Tools
     , tools : List ToolEntry
+
+    -- Tool specific options
+            , directionChangeOptions : AbruptDirectionChanges.Options
     }
