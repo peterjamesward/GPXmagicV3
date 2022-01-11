@@ -127,7 +127,7 @@ update msg msgWrapper model =
 view : (Msg -> msg) -> Options -> Element msg
 view msgWrapper options =
     el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
-        column []
+        column [ centerX, padding 4 ]
             [ Input.slider
                 ViewPureStyles.shortSliderStyles
                 { onChange = Angle.degrees >> SetThreshold >> msgWrapper
@@ -138,4 +138,8 @@ view msgWrapper options =
                 , step = Just 1
                 , thumb = sliderThumb
                 }
+            , el [ centerX ] <|
+                text <|
+                    (String.fromInt <| round <| Angle.inDegrees options.threshold)
+                        ++ "º"
             ]
