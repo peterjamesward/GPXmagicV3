@@ -2,13 +2,15 @@
 
 # WIP
 
+!!! Need to have a non-recursive subset of ModelRecord for Actions to work.
+
+Forward and back on Direction changes should just go to the error. Leave Eye for re-location.
+
 ## Docking tools
 
 Put all Font, Colour etc into a Palette/Style module for ease of change.
 
 Need "restore to defaults" for tools.
-
-The navigation from Direction Changes is just going to the start!
 
 ## Editing?
 >> Take a couple of tools, do them as better tabs:
@@ -24,10 +26,6 @@ Let's start with Bend/Gradient problems, showing on 3D and map, then Delete.
 
 ## Profile & Charts
 Details in Backlog.
-
-
-## Other
-Can we not listen to mouse move until the button is down, on images?
 
 ---
 

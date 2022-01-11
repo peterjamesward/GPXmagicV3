@@ -117,26 +117,33 @@ update msg msgWrapper model =
     case msg of
         ViewNext ->
             let
+                breachIndex =
+                    min (List.length oldOptions.breaches - 1) (oldOptions.currentBreach + 1)
+
                 newOptions =
-                    { oldOptions
-                        | currentBreach =
-                            min
-                                (List.length oldOptions.breaches - 1)
-                                (1 + oldOptions.currentBreach)
-                    }
+                    { oldOptions | currentBreach = breachIndex }
+
+                ( position, _ ) =
+                    Maybe.withDefault ( 0, Angle.degrees 0 ) <|
+                        List.Extra.getAt breachIndex newOptions.breaches
             in
-            ( { model | directionChangeOptions = newOptions }
-            , Cmd.none
-            )
+            { model | directionChangeOptions = newOptions }
+                |> Actions.setCurrentPosition position
 
         ViewPrevious ->
             let
+                breachIndex =
+                    max 0 (oldOptions.currentBreach - 1)
+
                 newOptions =
-                    { oldOptions | currentBreach = max 0 (oldOptions.currentBreach - 1) }
+                    { oldOptions | currentBreach = breachIndex }
+
+                ( position, _ ) =
+                    Maybe.withDefault ( 0, Angle.degrees 0 ) <|
+                        List.Extra.getAt breachIndex newOptions.breaches
             in
-            ( { model | directionChangeOptions = newOptions }
-            , Cmd.none
-            )
+            { model | directionChangeOptions = newOptions }
+                |> Actions.setCurrentPosition position
 
         SetCurrentPosition position ->
             Actions.setCurrentPosition position model
