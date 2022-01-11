@@ -16,7 +16,7 @@ import Json.Encode as E
 import LocalCoords exposing (LocalCoords)
 import Scene3d exposing (Entity)
 import TrackInfoBox
-import ViewPureStyles exposing (contrastingColour, useIcon)
+import ViewPureStyles exposing (contrastingColour, neatToolsBorder, useIcon)
 
 
 type ToolState
@@ -339,11 +339,7 @@ showDockOptions : (ToolMsg -> msg) -> ToolEntry -> Element msg
 showDockOptions msgWrapper toolEntry =
     if toolEntry.isPopupOpen then
         row
-            [ Background.color FlatColors.ChinesePalette.antiFlashWhite
-            , Border.color FlatColors.ChinesePalette.bruschettaTomato
-            , Border.rounded 4
-            , Border.width 2
-            ]
+            neatToolsBorder
             [ Input.button []
                 { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockUpperLeft
                 , label = useIcon FeatherIcons.arrowUpLeft
@@ -386,11 +382,7 @@ showColourOptions msgWrapper toolEntry =
     in
     if toolEntry.isPopupOpen then
         column
-            [ alignRight
-            , Border.color FlatColors.ChinesePalette.bruschettaTomato
-            , Border.rounded 4
-            , Border.width 2
-            ]
+            (alignRight :: neatToolsBorder)
             [ row []
                 [ colourBlock FlatColors.SwedishPalette.highlighterPink
                 , colourBlock FlatColors.SwedishPalette.darkPeriwinkle

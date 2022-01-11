@@ -6,9 +6,12 @@ import DomainModel exposing (PeteTree(..), asRecord)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input
+import FeatherIcons
 import FlatColors.ChinesePalette
+import List.Extra
 import Quantity
-import ViewPureStyles exposing (sliderThumb)
+import UtilsForViews exposing (showAngle)
+import ViewPureStyles exposing (neatToolsBorder, sliderThumb, useIcon)
 
 
 type alias Options =
@@ -28,7 +31,7 @@ defaultOptions =
 type Msg
     = ViewNext
     | ViewPrevious
-    | SetCurrentTo
+    | SetCurrentPosition
     | SetThreshold Angle
 
 
@@ -93,21 +96,39 @@ update :
         , Cmd msg
         )
 update msg msgWrapper model =
+    let
+        oldOptions =
+            model.directionChangeOptions
+    in
     case msg of
         ViewNext ->
-            ( model, Cmd.none )
+            let
+                newOptions =
+                    { oldOptions
+                        | currentBreach =
+                            min
+                                (List.length oldOptions.breaches - 1)
+                                (1 + oldOptions.currentBreach)
+                    }
+            in
+            ( { model | directionChangeOptions = newOptions }
+            , Cmd.none
+            )
 
         ViewPrevious ->
-            ( model, Cmd.none )
+            let
+                newOptions =
+                    { oldOptions | currentBreach = max 0 (oldOptions.currentBreach - 1) }
+            in
+            ( { model | directionChangeOptions = newOptions }
+            , Cmd.none
+            )
 
-        SetCurrentTo ->
+        SetCurrentPosition ->
             ( model, Cmd.none )
 
         SetThreshold angle ->
             let
-                oldOptions =
-                    model.directionChangeOptions
-
                 newOptions =
                     { oldOptions | threshold = angle, breaches = [] }
 
@@ -127,7 +148,7 @@ update msg msgWrapper model =
 view : (Msg -> msg) -> Options -> Element msg
 view msgWrapper options =
     el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
-        column [ centerX, padding 4 ]
+        column [ centerX, padding 4, spacing 4, height <| px 100 ]
             [ Input.slider
                 ViewPureStyles.shortSliderStyles
                 { onChange = Angle.degrees >> SetThreshold >> msgWrapper
@@ -140,6 +161,40 @@ view msgWrapper options =
                 }
             , el [ centerX ] <|
                 text <|
-                    (String.fromInt <| round <| Angle.inDegrees options.threshold)
+                    "Threshold "
+                        ++ (String.fromInt <| round <| Angle.inDegrees options.threshold)
                         ++ "º"
+            , case options.breaches of
+                [] ->
+                    el [ centerX, centerY ] <| text "None found"
+
+                a :: b ->
+                    column [ spacing 4, centerX ]
+                        [ el [ centerX ] <|
+                            text <|
+                                String.fromInt (options.currentBreach + 1)
+                                    ++ " of "
+                                    ++ (String.fromInt <| List.length options.breaches)
+                                    ++ " is "
+                                    ++ (showAngle <|
+                                            Tuple.second <|
+                                                Maybe.withDefault ( 0, Angle.degrees 0 ) <|
+                                                    List.Extra.getAt options.currentBreach options.breaches
+                                       )
+                                    ++ "º"
+                        , row [ centerX, spacing 10 ]
+                            [ Input.button neatToolsBorder
+                                { label = useIcon FeatherIcons.chevronLeft
+                                , onPress = Just <| msgWrapper <| ViewPrevious
+                                }
+                            , Input.button neatToolsBorder
+                                { label = useIcon FeatherIcons.eye
+                                , onPress = Just <| msgWrapper <| SetCurrentPosition
+                                }
+                            , Input.button neatToolsBorder
+                                { label = useIcon FeatherIcons.chevronRight
+                                , onPress = Just <| msgWrapper <| ViewNext
+                                }
+                            ]
+                        ]
             ]

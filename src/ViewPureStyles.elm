@@ -148,6 +148,7 @@ checkboxIcon isChecked =
         <|
             none
 
+
 contrastingColour col =
     let
         { red, green, blue, alpha } =
@@ -218,6 +219,14 @@ wideSliderStyles =
             , Border.rounded 6
             ]
             Element.none
+    ]
+
+
+neatToolsBorder =
+    [ Background.color FlatColors.ChinesePalette.antiFlashWhite
+    , Border.color FlatColors.ChinesePalette.bruschettaTomato
+    , Border.rounded 4
+    , Border.width 2
     ]
 
 

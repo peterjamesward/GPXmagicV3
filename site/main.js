@@ -12728,16 +12728,37 @@ var $author$project$ToolsProforma$toggleToolPopup = F2(
 	});
 var $author$project$AbruptDirectionChanges$update = F3(
 	function (msg, msgWrapper, model) {
+		var oldOptions = model.directionChangeOptions;
 		switch (msg.$) {
 			case 'ViewNext':
-				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				var newOptions = _Utils_update(
+					oldOptions,
+					{
+						currentBreach: A2(
+							$elm$core$Basics$min,
+							$elm$core$List$length(oldOptions.breaches) - 1,
+							1 + oldOptions.currentBreach)
+					});
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{directionChangeOptions: newOptions}),
+					$elm$core$Platform$Cmd$none);
 			case 'ViewPrevious':
-				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-			case 'SetCurrentTo':
+				var newOptions = _Utils_update(
+					oldOptions,
+					{
+						currentBreach: A2($elm$core$Basics$max, 0, oldOptions.currentBreach - 1)
+					});
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{directionChangeOptions: newOptions}),
+					$elm$core$Platform$Cmd$none);
+			case 'SetCurrentPosition':
 				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 			default:
 				var angle = msg.a;
-				var oldOptions = model.directionChangeOptions;
 				var newOptions = _Utils_update(
 					oldOptions,
 					{breaches: _List_Nil, threshold: angle});
@@ -21721,7 +21742,6 @@ var $author$project$ToolsProforma$ToolColourSelect = F2(
 		return {$: 'ToolColourSelect', a: a, b: b};
 	});
 var $smucode$elm_flat_colors$FlatColors$SwedishPalette$blackPearl = A3($mdgriffith$elm_ui$Element$rgb255, 30, 39, 46);
-var $smucode$elm_flat_colors$FlatColors$ChinesePalette$bruschettaTomato = A3($mdgriffith$elm_ui$Element$rgb255, 255, 99, 72);
 var $smucode$elm_flat_colors$FlatColors$SwedishPalette$chromeYellow = A3($mdgriffith$elm_ui$Element$rgb255, 255, 168, 1);
 var $smucode$elm_flat_colors$FlatColors$SwedishPalette$darkPeriwinkle = A3($mdgriffith$elm_ui$Element$rgb255, 87, 95, 207);
 var $smucode$elm_flat_colors$FlatColors$SwedishPalette$freeSpeechBlue = A3($mdgriffith$elm_ui$Element$rgb255, 60, 64, 198);
@@ -21735,15 +21755,8 @@ var $smucode$elm_flat_colors$FlatColors$SwedishPalette$londonSquare = A3($mdgrif
 var $smucode$elm_flat_colors$FlatColors$SwedishPalette$megaman = A3($mdgriffith$elm_ui$Element$rgb255, 75, 207, 250);
 var $smucode$elm_flat_colors$FlatColors$SwedishPalette$mintyGreen = A3($mdgriffith$elm_ui$Element$rgb255, 11, 232, 129);
 var $smucode$elm_flat_colors$FlatColors$SwedishPalette$narenjiOrange = A3($mdgriffith$elm_ui$Element$rgb255, 255, 192, 72);
-var $mdgriffith$elm_ui$Internal$Model$Px = function (a) {
-	return {$: 'Px', a: a};
-};
-var $mdgriffith$elm_ui$Element$px = $mdgriffith$elm_ui$Internal$Model$Px;
-var $smucode$elm_flat_colors$FlatColors$SwedishPalette$redOrange = A3($mdgriffith$elm_ui$Element$rgb255, 255, 63, 52);
-var $smucode$elm_flat_colors$FlatColors$SwedishPalette$sizzlingRed = A3($mdgriffith$elm_ui$Element$rgb255, 245, 59, 87);
-var $smucode$elm_flat_colors$FlatColors$SwedishPalette$spiroDiscoBall = A3($mdgriffith$elm_ui$Element$rgb255, 15, 188, 249);
-var $smucode$elm_flat_colors$FlatColors$SwedishPalette$sunsetOrange = A3($mdgriffith$elm_ui$Element$rgb255, 255, 94, 87);
-var $smucode$elm_flat_colors$FlatColors$SwedishPalette$vibrantYellow = A3($mdgriffith$elm_ui$Element$rgb255, 255, 211, 42);
+var $smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite = A3($mdgriffith$elm_ui$Element$rgb255, 241, 242, 246);
+var $smucode$elm_flat_colors$FlatColors$ChinesePalette$bruschettaTomato = A3($mdgriffith$elm_ui$Element$rgb255, 255, 99, 72);
 var $mdgriffith$elm_ui$Internal$Model$BorderWidth = F5(
 	function (a, b, c, d, e) {
 		return {$: 'BorderWidth', a: a, b: b, c: c, d: d, e: e};
@@ -21760,6 +21773,22 @@ var $mdgriffith$elm_ui$Element$Border$width = function (v) {
 			v,
 			v));
 };
+var $author$project$ViewPureStyles$neatToolsBorder = _List_fromArray(
+	[
+		$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite),
+		$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$bruschettaTomato),
+		$mdgriffith$elm_ui$Element$Border$rounded(4),
+		$mdgriffith$elm_ui$Element$Border$width(2)
+	]);
+var $mdgriffith$elm_ui$Internal$Model$Px = function (a) {
+	return {$: 'Px', a: a};
+};
+var $mdgriffith$elm_ui$Element$px = $mdgriffith$elm_ui$Internal$Model$Px;
+var $smucode$elm_flat_colors$FlatColors$SwedishPalette$redOrange = A3($mdgriffith$elm_ui$Element$rgb255, 255, 63, 52);
+var $smucode$elm_flat_colors$FlatColors$SwedishPalette$sizzlingRed = A3($mdgriffith$elm_ui$Element$rgb255, 245, 59, 87);
+var $smucode$elm_flat_colors$FlatColors$SwedishPalette$spiroDiscoBall = A3($mdgriffith$elm_ui$Element$rgb255, 15, 188, 249);
+var $smucode$elm_flat_colors$FlatColors$SwedishPalette$sunsetOrange = A3($mdgriffith$elm_ui$Element$rgb255, 255, 94, 87);
+var $smucode$elm_flat_colors$FlatColors$SwedishPalette$vibrantYellow = A3($mdgriffith$elm_ui$Element$rgb255, 255, 211, 42);
 var $smucode$elm_flat_colors$FlatColors$SwedishPalette$yrielYellow = A3($mdgriffith$elm_ui$Element$rgb255, 255, 221, 89);
 var $author$project$ToolsProforma$showColourOptions = F2(
 	function (msgWrapper, toolEntry) {
@@ -21783,13 +21812,7 @@ var $author$project$ToolsProforma$showColourOptions = F2(
 		};
 		return toolEntry.isPopupOpen ? A2(
 			$mdgriffith$elm_ui$Element$column,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$alignRight,
-					$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$bruschettaTomato),
-					$mdgriffith$elm_ui$Element$Border$rounded(4),
-					$mdgriffith$elm_ui$Element$Border$width(2)
-				]),
+			A2($elm$core$List$cons, $mdgriffith$elm_ui$Element$alignRight, $author$project$ViewPureStyles$neatToolsBorder),
 			_List_fromArray(
 				[
 					A2(
@@ -21844,7 +21867,6 @@ var $author$project$ToolsProforma$ToolDockSelect = F2(
 	function (a, b) {
 		return {$: 'ToolDockSelect', a: a, b: b};
 	});
-var $smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite = A3($mdgriffith$elm_ui$Element$rgb255, 241, 242, 246);
 var $elm$svg$Svg$line = $elm$svg$Svg$trustedNode('line');
 var $elm$svg$Svg$Attributes$points = _VirtualDom_attribute('points');
 var $elm$svg$Svg$polyline = $elm$svg$Svg$trustedNode('polyline');
@@ -22043,13 +22065,7 @@ var $author$project$ToolsProforma$showDockOptions = F2(
 	function (msgWrapper, toolEntry) {
 		return toolEntry.isPopupOpen ? A2(
 			$mdgriffith$elm_ui$Element$row,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite),
-					$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$bruschettaTomato),
-					$mdgriffith$elm_ui$Element$Border$rounded(4),
-					$mdgriffith$elm_ui$Element$Border$width(2)
-				]),
+			$author$project$ViewPureStyles$neatToolsBorder,
 			_List_fromArray(
 				[
 					A2(
@@ -22775,9 +22791,91 @@ var $author$project$TrackInfoBox$trackInfoBox = function (maybeTree) {
 			}
 		}());
 };
+var $author$project$AbruptDirectionChanges$SetCurrentPosition = {$: 'SetCurrentPosition'};
 var $author$project$AbruptDirectionChanges$SetThreshold = function (a) {
 	return {$: 'SetThreshold', a: a};
 };
+var $author$project$AbruptDirectionChanges$ViewNext = {$: 'ViewNext'};
+var $author$project$AbruptDirectionChanges$ViewPrevious = {$: 'ViewPrevious'};
+var $mdgriffith$elm_ui$Internal$Model$AlignY = function (a) {
+	return {$: 'AlignY', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$CenterY = {$: 'CenterY'};
+var $mdgriffith$elm_ui$Element$centerY = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$CenterY);
+var $feathericons$elm_feather$FeatherIcons$chevronLeft = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'chevron-left',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$polyline,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$points('15 18 9 12 15 6')
+				]),
+			_List_Nil)
+		]));
+var $feathericons$elm_feather$FeatherIcons$chevronRight = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'chevron-right',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$polyline,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$points('9 18 15 12 9 6')
+				]),
+			_List_Nil)
+		]));
+var $feathericons$elm_feather$FeatherIcons$eye = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'eye',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$path,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$d('M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$circle,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$cx('12'),
+					$elm$svg$Svg$Attributes$cy('12'),
+					$elm$svg$Svg$Attributes$r('3')
+				]),
+			_List_Nil)
+		]));
+var $elm$core$List$drop = F2(
+	function (n, list) {
+		drop:
+		while (true) {
+			if (n <= 0) {
+				return list;
+			} else {
+				if (!list.b) {
+					return list;
+				} else {
+					var x = list.a;
+					var xs = list.b;
+					var $temp$n = n - 1,
+						$temp$list = xs;
+					n = $temp$n;
+					list = $temp$list;
+					continue drop;
+				}
+			}
+		}
+	});
+var $elm_community$list_extra$List$Extra$getAt = F2(
+	function (idx, xs) {
+		return (idx < 0) ? $elm$core$Maybe$Nothing : $elm$core$List$head(
+			A2($elm$core$List$drop, idx, xs));
+	});
 var $mdgriffith$elm_ui$Element$Input$HiddenLabel = function (a) {
 	return {$: 'HiddenLabel', a: a};
 };
@@ -22786,11 +22884,6 @@ var $mdgriffith$elm_ui$Internal$Model$Behind = {$: 'Behind'};
 var $mdgriffith$elm_ui$Element$behindContent = function (element) {
 	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$Behind, element);
 };
-var $mdgriffith$elm_ui$Internal$Model$AlignY = function (a) {
-	return {$: 'AlignY', a: a};
-};
-var $mdgriffith$elm_ui$Internal$Model$CenterY = {$: 'CenterY'};
-var $mdgriffith$elm_ui$Element$centerY = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$CenterY);
 var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$asbestos = A3($mdgriffith$elm_ui$Element$rgb255, 127, 140, 141);
 var $author$project$ColourPalette$scrollbarBackground = $smucode$elm_flat_colors$FlatColors$FlatUIPalette$asbestos;
 var $author$project$ViewPureStyles$shortSliderStyles = _List_fromArray(
@@ -22817,6 +22910,20 @@ var $author$project$ViewPureStyles$shortSliderStyles = _List_fromArray(
 				]),
 			$mdgriffith$elm_ui$Element$none))
 	]);
+var $author$project$UtilsForViews$showDecimal0 = function (x) {
+	var locale = _Utils_update(
+		$cuducos$elm_format_number$FormatNumber$Locales$usLocale,
+		{
+			decimals: $cuducos$elm_format_number$FormatNumber$Locales$Exact(0),
+			negativePrefix: '-',
+			thousandSeparator: ''
+		});
+	return A2($cuducos$elm_format_number$FormatNumber$format, locale, x);
+};
+var $author$project$UtilsForViews$showAngle = function (angle) {
+	return $author$project$UtilsForViews$showDecimal0(
+		$ianmackenzie$elm_units$Angle$inDegrees(angle));
+};
 var $mdgriffith$elm_ui$Internal$Flag$active = $mdgriffith$elm_ui$Internal$Flag$flag(32);
 var $mdgriffith$elm_ui$Internal$Model$LivePolite = {$: 'LivePolite'};
 var $mdgriffith$elm_ui$Element$Region$announce = $mdgriffith$elm_ui$Internal$Model$Describe($mdgriffith$elm_ui$Internal$Model$LivePolite);
@@ -23460,7 +23567,10 @@ var $author$project$AbruptDirectionChanges$view = F2(
 				_List_fromArray(
 					[
 						$mdgriffith$elm_ui$Element$centerX,
-						$mdgriffith$elm_ui$Element$padding(4)
+						$mdgriffith$elm_ui$Element$padding(4),
+						$mdgriffith$elm_ui$Element$spacing(4),
+						$mdgriffith$elm_ui$Element$height(
+						$mdgriffith$elm_ui$Element$px(100))
 					]),
 				_List_fromArray(
 					[
@@ -23484,9 +23594,79 @@ var $author$project$AbruptDirectionChanges$view = F2(
 						_List_fromArray(
 							[$mdgriffith$elm_ui$Element$centerX]),
 						$mdgriffith$elm_ui$Element$text(
-							$elm$core$String$fromInt(
+							'Threshold ' + ($elm$core$String$fromInt(
 								$elm$core$Basics$round(
-									$ianmackenzie$elm_units$Angle$inDegrees(options.threshold))) + 'º'))
+									$ianmackenzie$elm_units$Angle$inDegrees(options.threshold))) + 'º'))),
+						function () {
+						var _v0 = options.breaches;
+						if (!_v0.b) {
+							return A2(
+								$mdgriffith$elm_ui$Element$el,
+								_List_fromArray(
+									[$mdgriffith$elm_ui$Element$centerX, $mdgriffith$elm_ui$Element$centerY]),
+								$mdgriffith$elm_ui$Element$text('None found'));
+						} else {
+							var a = _v0.a;
+							var b = _v0.b;
+							return A2(
+								$mdgriffith$elm_ui$Element$column,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$spacing(4),
+										$mdgriffith$elm_ui$Element$centerX
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$mdgriffith$elm_ui$Element$el,
+										_List_fromArray(
+											[$mdgriffith$elm_ui$Element$centerX]),
+										$mdgriffith$elm_ui$Element$text(
+											$elm$core$String$fromInt(options.currentBreach + 1) + (' of ' + ($elm$core$String$fromInt(
+												$elm$core$List$length(options.breaches)) + (' is ' + ($author$project$UtilsForViews$showAngle(
+												A2(
+													$elm$core$Maybe$withDefault,
+													_Utils_Tuple2(
+														0,
+														$ianmackenzie$elm_units$Angle$degrees(0)),
+													A2($elm_community$list_extra$List$Extra$getAt, options.currentBreach, options.breaches)).b) + 'º')))))),
+										A2(
+										$mdgriffith$elm_ui$Element$row,
+										_List_fromArray(
+											[
+												$mdgriffith$elm_ui$Element$centerX,
+												$mdgriffith$elm_ui$Element$spacing(10)
+											]),
+										_List_fromArray(
+											[
+												A2(
+												$mdgriffith$elm_ui$Element$Input$button,
+												$author$project$ViewPureStyles$neatToolsBorder,
+												{
+													label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronLeft),
+													onPress: $elm$core$Maybe$Just(
+														msgWrapper($author$project$AbruptDirectionChanges$ViewPrevious))
+												}),
+												A2(
+												$mdgriffith$elm_ui$Element$Input$button,
+												$author$project$ViewPureStyles$neatToolsBorder,
+												{
+													label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$eye),
+													onPress: $elm$core$Maybe$Just(
+														msgWrapper($author$project$AbruptDirectionChanges$SetCurrentPosition))
+												}),
+												A2(
+												$mdgriffith$elm_ui$Element$Input$button,
+												$author$project$ViewPureStyles$neatToolsBorder,
+												{
+													label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronRight),
+													onPress: $elm$core$Maybe$Just(
+														msgWrapper($author$project$AbruptDirectionChanges$ViewNext))
+												})
+											]))
+									]));
+						}
+					}()
 					])));
 	});
 var $author$project$ToolsProforma$viewToolByType = F3(
