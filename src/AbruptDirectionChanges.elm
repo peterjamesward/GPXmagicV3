@@ -1,5 +1,6 @@
 module AbruptDirectionChanges exposing (..)
 
+import Actions
 import Angle exposing (Angle)
 import Direction2d
 import DomainModel exposing (PeteTree(..), asRecord)
@@ -9,9 +10,12 @@ import Element.Input as Input
 import FeatherIcons
 import FlatColors.ChinesePalette
 import List.Extra
+import LocalCoords exposing (LocalCoords)
 import Quantity
+import Scene3d exposing (Entity)
 import UtilsForViews exposing (showAngle)
 import ViewPureStyles exposing (neatToolsBorder, sliderThumb, useIcon)
+import ViewingMode exposing (ViewingMode)
 
 
 type alias Options =
@@ -31,7 +35,7 @@ defaultOptions =
 type Msg
     = ViewNext
     | ViewPrevious
-    | SetCurrentPosition
+    | SetCurrentPosition Int
     | SetThreshold Angle
 
 
@@ -87,11 +91,21 @@ update :
         { model
             | trackTree : Maybe PeteTree
             , directionChangeOptions : Options
+            , viewMode : ViewingMode
+            , scene : List (Entity LocalCoords)
+            , currentPosition : Int
+            , referenceLonLat : DomainModel.GPXSource
+            , renderDepth : Int
         }
     ->
         ( { model
             | trackTree : Maybe PeteTree
             , directionChangeOptions : Options
+            , viewMode : ViewingMode
+            , scene : List (Entity LocalCoords)
+            , currentPosition : Int
+            , referenceLonLat : DomainModel.GPXSource
+            , renderDepth : Int
           }
         , Cmd msg
         )
@@ -124,8 +138,8 @@ update msg msgWrapper model =
             , Cmd.none
             )
 
-        SetCurrentPosition ->
-            ( model, Cmd.none )
+        SetCurrentPosition position ->
+            Actions.setCurrentPosition position model
 
         SetThreshold angle ->
             let
@@ -169,6 +183,11 @@ view msgWrapper options =
                     el [ centerX, centerY ] <| text "None found"
 
                 a :: b ->
+                    let
+                        ( position, turn ) =
+                            Maybe.withDefault ( 0, Angle.degrees 0 ) <|
+                                List.Extra.getAt options.currentBreach options.breaches
+                    in
                     column [ spacing 4, centerX ]
                         [ el [ centerX ] <|
                             text <|
@@ -176,11 +195,7 @@ view msgWrapper options =
                                     ++ " of "
                                     ++ (String.fromInt <| List.length options.breaches)
                                     ++ " is "
-                                    ++ (showAngle <|
-                                            Tuple.second <|
-                                                Maybe.withDefault ( 0, Angle.degrees 0 ) <|
-                                                    List.Extra.getAt options.currentBreach options.breaches
-                                       )
+                                    ++ (showAngle <| turn)
                                     ++ "º"
                         , row [ centerX, spacing 10 ]
                             [ Input.button neatToolsBorder
@@ -189,7 +204,7 @@ view msgWrapper options =
                                 }
                             , Input.button neatToolsBorder
                                 { label = useIcon FeatherIcons.eye
-                                , onPress = Just <| msgWrapper <| SetCurrentPosition
+                                , onPress = Just <| msgWrapper <| SetCurrentPosition position
                                 }
                             , Input.button neatToolsBorder
                                 { label = useIcon FeatherIcons.chevronRight

@@ -17,6 +17,7 @@ import LocalCoords exposing (LocalCoords)
 import Scene3d exposing (Entity)
 import TrackInfoBox
 import ViewPureStyles exposing (contrastingColour, neatToolsBorder, useIcon)
+import ViewingMode exposing (ViewingMode)
 
 
 type ToolState
@@ -155,12 +156,22 @@ update :
         { model
             | tools : List ToolEntry
             , trackTree : Maybe PeteTree
+            , viewMode : ViewingMode
+            , scene : List (Entity LocalCoords)
+            , currentPosition : Int
+            , referenceLonLat : DomainModel.GPXSource
+            , renderDepth : Int
             , directionChangeOptions : AbruptDirectionChanges.Options
         }
     ->
         ( { model
             | tools : List ToolEntry
             , trackTree : Maybe PeteTree
+            , viewMode : ViewingMode
+            , scene : List (Entity LocalCoords)
+            , currentPosition : Int
+            , referenceLonLat : DomainModel.GPXSource
+            , renderDepth : Int
             , directionChangeOptions : AbruptDirectionChanges.Options
           }
         , Cmd msg

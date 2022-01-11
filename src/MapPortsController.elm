@@ -8,7 +8,6 @@ import Json.Decode as D exposing (Decoder, field, string)
 import Json.Encode as E
 import Length
 import MapboxKey exposing (mapboxKey)
-import ModelRecord exposing (Model(..))
 import SceneBuilder
 
 

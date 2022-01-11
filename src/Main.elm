@@ -241,8 +241,7 @@ update msg (Model model) =
                 Just treeTop ->
                     let
                         ( finalModel, cmd ) =
-                            { model | currentPosition = pos }
-                                |> Actions.updateAllDisplays
+                            Actions.setCurrentPosition pos model
                     in
                     ( Model finalModel, cmd )
 
