@@ -15948,7 +15948,7 @@ var $author$project$DomainModel$treeFromList = function (track) {
 						_List_fromArray(
 							[
 								$author$project$DomainModel$asRecord(info1).directionChangeMaximumAbs,
-								$author$project$DomainModel$asRecord(info1).directionChangeMaximumAbs,
+								$author$project$DomainModel$asRecord(info2).directionChangeMaximumAbs,
 								$ianmackenzie$elm_units$Quantity$abs(
 								A2(
 									$ianmackenzie$elm_geometry$Direction2d$angleFrom,

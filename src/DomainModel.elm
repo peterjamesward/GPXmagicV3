@@ -429,9 +429,10 @@ treeFromList track =
                 Maybe.withDefault Quantity.zero <|
                     Quantity.maximum
                         [ info1 |> asRecord |> .directionChangeMaximumAbs
-                        , info1 |> asRecord |> .directionChangeMaximumAbs
+                        , info2 |> asRecord |> .directionChangeMaximumAbs
                         , Quantity.abs <|
-                            Direction2d.angleFrom (info1 |> asRecord |> .directionAtEnd)
+                            Direction2d.angleFrom
+                                (info1 |> asRecord |> .directionAtEnd)
                                 (info2 |> asRecord |> .directionAtStart)
                         ]
             }
