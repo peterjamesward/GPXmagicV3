@@ -148,6 +148,18 @@ checkboxIcon isChecked =
         <|
             none
 
+contrastingColour col =
+    let
+        { red, green, blue, alpha } =
+            toRgb col
+    in
+    fromRgb
+        { red = toFloat <| round <| 1.0 - red
+        , green = toFloat <| round <| 1.0 - green
+        , blue = toFloat <| round <| 1.0 - blue
+        , alpha = 1.0
+        }
+
 
 radioButton label state =
     el

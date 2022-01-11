@@ -15,7 +15,7 @@ import Json.Encode as E
 import LocalCoords exposing (LocalCoords)
 import Scene3d exposing (Entity)
 import TrackInfoBox
-import ViewPureStyles exposing (useIcon)
+import ViewPureStyles exposing (contrastingColour, useIcon)
 
 
 type ToolState
@@ -52,6 +52,7 @@ type alias ToolEntry =
     , state : ToolState
     , dock : ToolDock
     , tabColour : Element.Color
+    , textColour : Element.Color
     , isPopupOpen : Bool
     }
 
@@ -72,6 +73,7 @@ toolEntryForTrackInfoBox =
     , state = Expanded
     , dock = DockUpperLeft
     , tabColour = FlatColors.AussiePalette.beekeeper
+    , textColour = contrastingColour FlatColors.AussiePalette.beekeeper
     , isPopupOpen = False
     }
 
@@ -93,10 +95,14 @@ setDock toolType dock tool =
     else
         tool
 
+
 setColour : ToolType -> Element.Color -> ToolEntry -> ToolEntry
 setColour toolType colour tool =
     if tool.toolType == toolType then
-        { tool | tabColour = colour }
+        { tool
+            | tabColour = colour
+            , textColour = contrastingColour colour
+        }
 
     else
         tool
@@ -120,8 +126,9 @@ update toolMsg msgWrapper model =
             )
 
         ToolColourSelect toolType color ->
-            ( {model | tools = List.map (setColour toolType color) model.tools}
-            , Cmd.none )
+            ( { model | tools = List.map (setColour toolType color) model.tools }
+            , Cmd.none
+            )
 
         ToolStateToggle toolType ->
             ( model, Cmd.none )
@@ -174,6 +181,7 @@ viewTool msgWrapper model toolEntry =
             , spacing 8
             , padding 4
             , Background.color toolEntry.tabColour
+            , Font.color toolEntry.textColour
             ]
             [ text toolEntry.label
             , Input.button [ alignRight ]
