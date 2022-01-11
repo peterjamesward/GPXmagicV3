@@ -3,7 +3,7 @@ module AbruptDirectionChanges exposing (..)
 import Actions
 import Angle exposing (Angle)
 import Direction2d
-import DomainModel exposing (PeteTree(..), asRecord)
+import DomainModel exposing (PeteTree(..), asRecord, skipCount)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input
@@ -62,7 +62,7 @@ findAbruptDirectionChanges options tree =
                         withThisNodeIfNeeded =
                             -- Is it at this node, or one of its children?
                             if thisNodeAngle |> Quantity.greaterThanOrEqualTo options.threshold then
-                                ( skip, thisNodeAngle ) :: accum
+                                ( skip + 1, thisNodeAngle ) :: accum
 
                             else
                                 accum
@@ -73,7 +73,7 @@ findAbruptDirectionChanges options tree =
                     then
                         withThisNodeIfNeeded
                             |> helper skip node.left
-                            |> helper (skip + node.nodeContent.skipCount) node.right
+                            |> helper (skip + skipCount node.left) node.right
 
                     else
                         accum

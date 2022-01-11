@@ -31,12 +31,16 @@ updateAllDisplays :
         , Cmd msg
         )
 updateAllDisplays model =
-    ( model |> renderModel
+    let
+        renderedModel =
+            model |> renderModel
+    in
+    ( renderedModel
     , if model.viewMode == ViewMap then
         Cmd.batch
             -- Must repaint track on so that selective rendering works.
-            [ MapPortsController.addTrackToMap model
-            , MapPortsController.centreMapOnCurrent model
+            [ MapPortsController.addTrackToMap renderedModel
+            , MapPortsController.centreMapOnCurrent renderedModel
             ]
 
       else

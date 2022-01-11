@@ -8,6 +8,8 @@ Put all Font, Colour etc into a Palette/Style module for ease of change.
 
 Need "restore to defaults" for tools.
 
+The navigation from Direction Changes is just going to the start!
+
 ## Editing?
 >> Take a couple of tools, do them as better tabs:
  - preset layout options in "menu bar"
