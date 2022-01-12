@@ -9,8 +9,9 @@ Do I need the click delay debounce thing (map and image)?
 Not doing selective render on Map?
 
 Map click should not re-centre map.
-
 Third person click should not re-centre the view.
+> More generally, don't centre the view you click on.
+> Other views will centre if they are in "follow" mode.
 
 Are sharp bends being reported when not so sharp? 
 > **YES** this is a problem. See sharp bend example.

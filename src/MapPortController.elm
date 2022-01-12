@@ -1,4 +1,4 @@
-port module MapPortsController exposing (..)
+port module MapPortController exposing (..)
 
 import Actions exposing (ToolAction(..))
 import Angle

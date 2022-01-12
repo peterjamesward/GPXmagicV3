@@ -6,6 +6,7 @@ import Browser exposing (application)
 import Browser.Dom as Dom exposing (getViewport, getViewportOf)
 import Browser.Events
 import Browser.Navigation exposing (Key)
+import Delay
 import Direction2d
 import DomainModel exposing (..)
 import Element exposing (..)
@@ -23,7 +24,7 @@ import Http
 import Json.Encode as E
 import LocalCoords exposing (LocalCoords)
 import LocalStorage
-import MapPortsController
+import MapPortController
 import MyIP
 import OAuthPorts as O exposing (randomBytes)
 import OAuthTypes as O exposing (OAuthMsg(..))
@@ -57,7 +58,7 @@ type Msg
     | ReceivedIpDetails (Result Http.Error IpInfo)
     | IpInfoAcknowledged (Result Http.Error ())
     | ImageMessage ViewThirdPerson.Msg
-    | MapPortsMessage MapPortsController.MapMsg
+    | MapPortsMessage MapPortController.MapMsg
     | StorageMessage E.Value
     | SplitLeftDockRightEdge SplitPane.Msg
     | SplitLeftDockInternal SplitPane.Msg
@@ -178,7 +179,7 @@ update msg model =
                 Just track ->
                     let
                         actions =
-                            MapPortsController.update mapMsg track
+                            MapPortController.update mapMsg track
 
                         newModel =
                             performActionsOnModel actions model
@@ -209,7 +210,7 @@ update msg model =
             in
             ( { model | ipInfo = ipInfo }
             , Cmd.batch
-                [ MapPortsController.createMap mapInfoWithLocation
+                [ MapPortController.createMap mapInfoWithLocation
 
                 --, MyIP.sendIpInfo model.time IpInfoAcknowledged ipInfo
                 ]
@@ -369,37 +370,37 @@ update msg model =
         SplitLeftDockRightEdge m ->
             ( { model | leftDockRightEdge = SplitPane.update m model.leftDockRightEdge }
                 |> adjustSpaceForContent
-            , MapPortsController.refreshMap
+            , MapPortController.refreshMap
             )
 
         SplitLeftDockInternal m ->
             ( { model | leftDockInternal = SplitPane.update m model.leftDockInternal }
                 |> adjustSpaceForContent
-            , MapPortsController.refreshMap
+            , MapPortController.refreshMap
             )
 
         SplitRightDockLeftEdge m ->
             ( { model | rightDockLeftEdge = SplitPane.update m model.rightDockLeftEdge }
                 |> adjustSpaceForContent
-            , MapPortsController.refreshMap
+            , MapPortController.refreshMap
             )
 
         SplitRightDockInternal m ->
             ( { model | rightDockInternal = SplitPane.update m model.rightDockInternal }
                 |> adjustSpaceForContent
-            , MapPortsController.refreshMap
+            , MapPortController.refreshMap
             )
 
         SplitBottomDockTopEdge m ->
             ( { model | bottomDockTopEdge = SplitPane.update m model.bottomDockTopEdge }
                 |> adjustSpaceForContent
-            , MapPortsController.refreshMap
+            , MapPortController.refreshMap
             )
 
         Resize width height ->
             ( { model | windowSize = ( toFloat width, toFloat height ) }
                 |> adjustSpaceForContent
-            , MapPortsController.refreshMap
+            , MapPortController.refreshMap
             )
 
         GotWindowSize result ->
@@ -412,7 +413,7 @@ update msg model =
                             )
                       }
                         |> adjustSpaceForContent
-                    , MapPortsController.refreshMap
+                    , MapPortController.refreshMap
                     )
 
                 Err error ->
@@ -713,7 +714,7 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ randomBytes (\ints -> OAuthMessage (GotRandomBytes ints))
-        , MapPortsController.mapResponses (MapPortsMessage << MapPortsController.MapPortMessage)
+        , MapPortController.mapResponses (MapPortsMessage << MapPortController.MapPortMessage)
         , LocalStorage.storageResponses StorageMessage
         , Sub.map SplitLeftDockRightEdge <| SplitPane.subscriptions model.leftDockRightEdge
         , Sub.map SplitLeftDockInternal <| SplitPane.subscriptions model.leftDockInternal
@@ -762,7 +763,7 @@ performActionCommands actions model =
         performAction action =
             case ( action, model.track ) of
                 ( SetCurrent position, Just track ) ->
-                    MapPortsController.centreMapOnCurrent track
+                    MapPortController.centreMapOnCurrent track
 
                 ( ShowPreview string color list, Just track ) ->
                     Cmd.none
@@ -772,7 +773,7 @@ performActionCommands actions model =
 
                 ( DelayMessage int msg, Just track ) ->
                     --TODO: May not be required.
-                    Cmd.none
+                    Delay.after int msg
 
                 _ ->
                     Cmd.none
@@ -784,6 +785,6 @@ updateAllDisplays : TrackLoaded -> Cmd msg
 updateAllDisplays track =
     Cmd.batch
         -- Must repaint track on so that selective rendering works.
-        [ MapPortsController.addTrackToMap track
-        , MapPortsController.centreMapOnCurrent track
+        [ MapPortController.addTrackToMap track
+        , MapPortController.centreMapOnCurrent track
         ]

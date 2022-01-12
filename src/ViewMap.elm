@@ -7,7 +7,7 @@ import Element.Font as Font
 import Element.Input exposing (button)
 import FlatColors.ChinesePalette
 import Html.Attributes exposing (id)
-import MapPortsController
+import MapPortController
 import Pixels exposing (Pixels, inPixels)
 import Quantity exposing (Quantity)
 import TrackLoaded exposing (TrackLoaded)
@@ -28,7 +28,7 @@ view :
         | contentArea : ( Quantity Int Pixels, Quantity Int Pixels )
         , track : Maybe TrackLoaded
     }
-    -> (MapPortsController.MapMsg -> msg)
+    -> (MapPortController.MapMsg -> msg)
     -> Element msg
 view model msgWrapper =
     let
