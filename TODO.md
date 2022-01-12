@@ -2,13 +2,20 @@
 
 # WIP
 
-!!! Need to have a non-recursive subset of ModelRecord for Actions to work.
+## Refactoring before adding more code ...
 
-Forward and back on Direction changes should just go to the error. Leave Eye for re-location.
+All over the floor.
+Need to separate ViewContext from TrackLoaded. Will need this for multiple views anyway.
+Need to add ToolAction fulfilment.
 
-## Docking tools
+How to allow Actions to update Map, but Map to set current?
+> Because the first of these not required!
 
 Put all Font, Colour etc into a Palette/Style module for ease of change.
+
+**BUG** Why 3D stops centering after a while?
+
+**Next**: Delete tool.
 
 Need "restore to defaults" for tools.
 
@@ -20,9 +27,6 @@ Need "restore to defaults" for tools.
  - previews in all views, each tool is fully responsible (but with shared helpers).
  - Thus, validate Actions concept,
  - decide best approach to Undo & Redo (see Backlog)
-
-Let's start with Bend/Gradient problems, showing on 3D and map, then Delete.
-> Thinking of not listing problems in the tab, because affects tab size greatly.
 
 ## Profile & Charts
 Details in Backlog.

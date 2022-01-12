@@ -1,8 +1,7 @@
 module ToolsProforma exposing (..)
 
 import AbruptDirectionChanges
-import Color exposing (Color)
-import DomainModel exposing (PeteTree)
+import Actions exposing (ToolAction)
 import Element exposing (..)
 import Element.Background as Background exposing (color)
 import Element.Border as Border exposing (roundEach)
@@ -10,14 +9,10 @@ import Element.Font as Font
 import Element.Input as Input
 import FeatherIcons
 import FlatColors.AussiePalette
-import FlatColors.ChinesePalette
 import FlatColors.SwedishPalette
-import Json.Encode as E
-import LocalCoords exposing (LocalCoords)
-import Scene3d exposing (Entity)
 import TrackInfoBox
+import TrackLoaded exposing (TrackLoaded)
 import ViewPureStyles exposing (contrastingColour, neatToolsBorder, useIcon)
-import ViewingMode exposing (ViewingMode)
 
 
 type ToolState
@@ -155,42 +150,32 @@ update :
     ->
         { model
             | tools : List ToolEntry
-            , trackTree : Maybe PeteTree
-            , viewMode : ViewingMode
-            , scene : List (Entity LocalCoords)
-            , currentPosition : Int
-            , referenceLonLat : DomainModel.GPXSource
-            , renderDepth : Int
+            , track : Maybe TrackLoaded
             , directionChangeOptions : AbruptDirectionChanges.Options
         }
     ->
         ( { model
             | tools : List ToolEntry
-            , trackTree : Maybe PeteTree
-            , viewMode : ViewingMode
-            , scene : List (Entity LocalCoords)
-            , currentPosition : Int
-            , referenceLonLat : DomainModel.GPXSource
-            , renderDepth : Int
+            , track : Maybe TrackLoaded
             , directionChangeOptions : AbruptDirectionChanges.Options
           }
-        , Cmd msg
+        , List (ToolAction msg)
         )
 update toolMsg msgWrapper model =
     case toolMsg of
         ToolPopupToggle toolType ->
             ( { model | tools = List.map (toggleToolPopup toolType) model.tools }
-            , Cmd.none
+            , []
             )
 
         ToolDockSelect toolType toolDock ->
             ( { model | tools = List.map (setDock toolType toolDock) model.tools }
-            , Cmd.none
+            , []
             )
 
         ToolColourSelect toolType color ->
             ( { model | tools = List.map (setColour toolType color) model.tools }
-            , Cmd.none
+            , []
             )
 
         ToolStateToggle toolType newState ->
@@ -200,37 +185,54 @@ update toolMsg msgWrapper model =
 
         DirectionChanges msg ->
             -- Delegate to tool here...
-            AbruptDirectionChanges.update msg (DirectionChanges >> msgWrapper) model
+            case model.track of
+                Just track ->
+                    let
+                        ( newOptions, actions ) =
+                            AbruptDirectionChanges.update msg model.directionChangeOptions track
+                    in
+                    ( { model | directionChangeOptions = newOptions }
+                    , []
+                    )
+
+                Nothing ->
+                    ( model, [] )
 
 
 refreshAllTools :
     { model
         | tools : List ToolEntry
-        , trackTree : Maybe PeteTree
+        , track : Maybe TrackLoaded
         , directionChangeOptions : AbruptDirectionChanges.Options
     }
     ->
-        { model
+        ( { model
             | tools : List ToolEntry
-            , trackTree : Maybe PeteTree
+            , track : Maybe TrackLoaded
             , directionChangeOptions : AbruptDirectionChanges.Options
-        }
+          }
+        , List (ToolAction msg)
+        )
 refreshAllTools model =
     -- Track, or something has changed; tool data is stale.
     -- Same impact as tools being opened, so we'll re-use that.
     -- The discarding of cmds here is questionable.
     let
-        refreshOneTool entry ( updatedModel, _ ) =
+        refreshOneTool entry ( updatedModel, actions ) =
             if entry.state == Expanded then
-                toolStateHasChanged entry.toolType Expanded updatedModel
+                let
+                    ( incrementalModel, incrementalActions ) =
+                        toolStateHasChanged entry.toolType Expanded updatedModel
+                in
+                ( incrementalModel, incrementalActions ++ actions )
 
             else
-                ( updatedModel, Cmd.none )
+                ( updatedModel, actions )
 
-        ( finalModel, _ ) =
-            model.tools |> List.foldl refreshOneTool ( model, Cmd.none )
+        ( finalModel, accumulatedActions ) =
+            model.tools |> List.foldl refreshOneTool ( model, [] )
     in
-    finalModel
+    ( finalModel, accumulatedActions )
 
 
 toolStateHasChanged :
@@ -239,36 +241,38 @@ toolStateHasChanged :
     ->
         { model
             | tools : List ToolEntry
-            , trackTree : Maybe PeteTree
+            , track : Maybe TrackLoaded
             , directionChangeOptions : AbruptDirectionChanges.Options
         }
     ->
         ( { model
             | tools : List ToolEntry
-            , trackTree : Maybe PeteTree
+            , track : Maybe TrackLoaded
             , directionChangeOptions : AbruptDirectionChanges.Options
           }
-        , Cmd msg
+        , List (ToolAction msg)
         )
 toolStateHasChanged toolType newState model =
-    case toolType of
-        ToolTrackInfo ->
-            ( model, Cmd.none )
+    case ( toolType, model.track ) of
+        ( ToolTrackInfo, _ ) ->
+            ( model, [] )
 
-        AbruptDirectionChanges ->
-            case ( newState, model.trackTree ) of
-                ( Expanded, Just treeNode ) ->
-                    ( { model
-                        | directionChangeOptions =
-                            AbruptDirectionChanges.findAbruptDirectionChanges
-                                model.directionChangeOptions
-                                treeNode
-                      }
-                    , Cmd.none
-                    )
+        ( AbruptDirectionChanges, Just track ) ->
+            if newState == Expanded then
+                ( { model
+                    | directionChangeOptions =
+                        AbruptDirectionChanges.findAbruptDirectionChanges
+                            model.directionChangeOptions
+                            track.trackTree
+                  }
+                , []
+                )
 
-                _ ->
-                    ( model, Cmd.none )
+            else
+                ( model, [] )
+
+        _ ->
+            ( model, [] )
 
 
 
@@ -281,7 +285,7 @@ toolsForDock :
     ->
         { model
             | tools : List ToolEntry
-            , trackTree : Maybe PeteTree
+            , track : Maybe TrackLoaded
             , directionChangeOptions : AbruptDirectionChanges.Options
         }
     -> Element msg
@@ -297,7 +301,7 @@ viewTool :
     (ToolMsg -> msg)
     ->
         { model
-            | trackTree : Maybe PeteTree
+            | track : Maybe TrackLoaded
             , directionChangeOptions : AbruptDirectionChanges.Options
         }
     -> ToolEntry
@@ -433,14 +437,14 @@ viewToolByType :
     -> ToolEntry
     ->
         { model
-            | trackTree : Maybe PeteTree
+            | track : Maybe TrackLoaded
             , directionChangeOptions : AbruptDirectionChanges.Options
         }
     -> Element msg
 viewToolByType msgWrapper entry model =
     case entry.toolType of
         ToolTrackInfo ->
-            TrackInfoBox.trackInfoBox model.trackTree
+            TrackInfoBox.trackInfoBox model.track
 
         AbruptDirectionChanges ->
             AbruptDirectionChanges.view (msgWrapper << DirectionChanges) model.directionChangeOptions

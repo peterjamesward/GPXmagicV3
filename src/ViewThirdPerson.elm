@@ -1,12 +1,10 @@
 module ViewThirdPerson exposing (..)
 
-import Actions
+import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
 import Axis3d
-import Browser.Dom
 import Camera3d exposing (Camera3d)
 import Color
-import Delay
 import Direction2d exposing (Direction2d)
 import Direction3d exposing (positiveZ)
 import DomainModel exposing (..)
@@ -17,24 +15,22 @@ import Element.Font as Font
 import Element.Input as Input
 import FeatherIcons
 import FlatColors.ChinesePalette exposing (white)
-import Html.Attributes exposing (id)
 import Html.Events as HE
 import Html.Events.Extra.Mouse as Mouse exposing (Button(..))
 import Html.Events.Extra.Wheel as Wheel
 import Json.Decode as D
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
-import MapPortsController exposing (MapMsg)
-import ModelRecord exposing (ModelRecord)
 import Pixels exposing (Pixels)
-import Plane3d
 import Point2d
 import Point3d
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
 import Spherical
+import TrackLoaded exposing (TrackLoaded)
 import Vector3d
+import ViewContext exposing (ViewContext(..))
 import ViewContextThirdPerson exposing (ContextThirdPerson, DragAction(..))
 import ViewPureStyles exposing (useIcon)
 import Viewpoint3d exposing (Viewpoint3d)
@@ -92,26 +88,28 @@ zoomButtons msgWrapper =
 view :
     { model
         | scene : List (Entity LocalCoords)
-        , viewDimensions : ( Quantity Int Pixels, Quantity Int Pixels )
         , contentArea : ( Quantity Int Pixels, Quantity Int Pixels )
-        , trackTree : Maybe PeteTree
-        , currentPosition : Int
+        , track : Maybe TrackLoaded
         , viewContext : Maybe ContextThirdPerson
     }
     -> (Msg -> msg)
     -> Element msg
 view model msgWrapper =
     let
+        --TODO: Function call on view context...
         dragging =
-            Maybe.map .dragAction model.viewContext |> Maybe.withDefault DragNone
+            True
+
+        --Maybe.map .dragAction model.viewContext |> Maybe.withDefault DragNone
     in
     el
         [ htmlAttribute <| Mouse.onDown (ImageGrab >> msgWrapper)
-        , if dragging /= DragNone then
-            htmlAttribute <| Mouse.onMove (ImageDrag >> msgWrapper)
 
-          else
-            pointer
+        --, if dragging /= DragNone then
+        , htmlAttribute <| Mouse.onMove (ImageDrag >> msgWrapper)
+
+        --else
+        --  pointer
         , htmlAttribute <| Mouse.onUp (ImageRelease >> msgWrapper)
         , htmlAttribute <| Mouse.onClick (ImageClick >> msgWrapper)
         , htmlAttribute <| Mouse.onDoubleClick (ImageDoubleClick >> msgWrapper)
@@ -125,11 +123,11 @@ view model msgWrapper =
         , inFront <| zoomButtons msgWrapper
         ]
     <|
-        case ( model.trackTree, model.viewContext ) of
-            ( Just treeNode, Just context ) ->
+        case ( model.track, model.viewContext ) of
+            ( Just aTrack, Just context ) ->
                 html <|
                     Scene3d.cloudy
-                        { camera = deriveCamera treeNode context model.currentPosition
+                        { camera = deriveCamera aTrack.trackTree context aTrack.currentPosition
                         , dimensions = model.contentArea
                         , background = backgroundColor Color.lightBlue
                         , clipDepth = Length.meters 1
@@ -187,224 +185,193 @@ deriveCamera treeNode context currentPosition =
 
 detectHit :
     Mouse.Event
-    ->
-        { m
-            | trackTree : Maybe PeteTree
-            , currentPosition : Int
-            , contentArea : ( Quantity Int Pixels, Quantity Int Pixels )
-            , viewContext : Maybe ContextThirdPerson
-        }
+    -> TrackLoaded
+    -> ContextThirdPerson
     -> Int
-detectHit event model =
+detectHit event track context =
     --TODO: Move into view/pane/whatever it will be.
-    case ( model.trackTree, model.viewContext ) of
-        ( Just topNode, Just context ) ->
-            let
-                ( x, y ) =
-                    event.offsetPos
+    let
+        ( x, y ) =
+            event.offsetPos
 
-                screenPoint =
-                    Point2d.pixels x y
+        ( w, h ) =
+            context.contentArea
 
-                ( w, h ) =
-                    model.contentArea
+        screenPoint =
+            Point2d.pixels x y
 
-                ( wFloat, hFloat ) =
-                    ( toFloatQuantity w, toFloatQuantity h )
+        ( wFloat, hFloat ) =
+            ( toFloatQuantity w, toFloatQuantity h )
 
-                screenRectangle =
-                    Rectangle2d.from
-                        (Point2d.xy Quantity.zero hFloat)
-                        (Point2d.xy wFloat Quantity.zero)
+        screenRectangle =
+            Rectangle2d.from
+                (Point2d.xy Quantity.zero hFloat)
+                (Point2d.xy wFloat Quantity.zero)
 
-                camera =
-                    -- Must use same camera derivation as for the 3D model, else pointless!
-                    deriveCamera topNode context model.currentPosition
+        camera =
+            -- Must use same camera derivation as for the 3D model, else pointless!
+            deriveCamera track.trackTree context track.currentPosition
 
-                ray =
-                    Camera3d.ray camera screenRectangle screenPoint
-            in
-            nearestToRay ray topNode
-
-        _ ->
-            0
+        ray =
+            Camera3d.ray camera screenRectangle screenPoint
+    in
+    nearestToRay ray track.trackTree
 
 
 update :
     Msg
-    -> ModelRecord
-    -> (Msg -> msg)
-    -> ( ModelRecord, Cmd msg )
-update msg model msgWrapper =
-    case ( model.trackTree, model.viewContext ) of
-        ( Just treeNode, Just context ) ->
-            case msg of
-                ImageZoomIn ->
+    -> TrackLoaded
+    -> ContextThirdPerson
+    -> ( ContextThirdPerson, List (ToolAction Msg) )
+update msg track context =
+    case msg of
+        ImageZoomIn ->
+            let
+                newContext =
+                    { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + 0.5 }
+            in
+            ( newContext, [] )
+
+        ImageZoomOut ->
+            let
+                newContext =
+                    { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel - 0.5 }
+            in
+            ( newContext, [] )
+
+        ImageReset ->
+            ( initialiseView track.currentPosition track.trackTree context.contentArea
+            , []
+            )
+
+        ImageNoOp ->
+            ( context, [] )
+
+        ImageClick event ->
+            -- Click moves pointer but does not re-centre view. (Double click will.)
+            if context.waitingForClickDelay then
+                ( context, [ SetCurrent <| detectHit event track context ] )
+
+            else
+                ( context, [] )
+
+        ImageMouseWheel deltaY ->
+            let
+                increment =
+                    -0.001 * deltaY
+
+                newContext =
+                    { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + increment }
+            in
+            ( newContext, [] )
+
+        ImageGrab event ->
+            -- Mouse behaviour depends which view is in use...
+            -- Right-click or ctrl-click to mean rotate; otherwise pan.
+            let
+                alternate =
+                    event.keys.ctrl || event.button == SecondButton
+
+                newContext =
+                    { context
+                        | orbiting = Just event.offsetPos
+                        , dragAction =
+                            if alternate then
+                                DragRotate
+
+                            else
+                                DragPan
+                        , waitingForClickDelay = True
+                        , followSelectedPoint = False
+                    }
+            in
+            ( newContext
+            , [ DelayMessage 250 ClickDelayExpired ]
+            )
+
+        ImageDrag event ->
+            let
+                ( dx, dy ) =
+                    event.offsetPos
+            in
+            case ( context.dragAction, context.orbiting ) of
+                ( DragRotate, Just ( startX, startY ) ) ->
+                    -- Change the camera azimuth and elevation
                     let
+                        newAzimuth =
+                            Angle.degrees <|
+                                (Angle.inDegrees <| Direction2d.toAngle context.cameraAzimuth)
+                                    - (dx - startX)
+
+                        newElevation =
+                            Angle.degrees <|
+                                Angle.inDegrees context.cameraElevation
+                                    + (dy - startY)
+
                         newContext =
-                            { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + 0.5 }
+                            { context
+                                | cameraAzimuth = Direction2d.fromAngle newAzimuth
+                                , cameraElevation = newElevation
+                                , orbiting = Just ( dx, dy )
+                            }
                     in
-                    ( { model | viewContext = Just newContext }
-                    , Cmd.none
+                    ( newContext
+                    , []
                     )
 
-                ImageZoomOut ->
+                ( DragPan, Just ( startX, startY ) ) ->
                     let
-                        newContext =
-                            { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel - 0.5 }
-                    in
-                    ( { model | viewContext = Just newContext }
-                    , Cmd.none
-                    )
-
-                ImageReset ->
-                    ( { model | viewContext = Just <| initialiseView model.currentPosition treeNode }
-                    , Cmd.none
-                    )
-
-                ImageNoOp ->
-                    ( model, Cmd.none )
-
-                ImageClick event ->
-                    -- Click moves pointer but does not re-centre view. (Double click will.)
-                    if context.waitingForClickDelay then
-                        { model | currentPosition = detectHit event model }
-                            |> Actions.updateAllDisplays
-
-                    else
-                        ( model, Cmd.none )
-
-                ImageMouseWheel deltaY ->
-                    let
-                        increment =
-                            -0.001 * deltaY
+                        shiftVector =
+                            Vector3d.meters
+                                ((startY - dy) * Angle.sin context.cameraElevation)
+                                (startX - dx)
+                                ((dy - startY) * Angle.cos context.cameraElevation)
+                                |> Vector3d.rotateAround
+                                    Axis3d.z
+                                    (Direction2d.toAngle context.cameraAzimuth)
+                                |> Vector3d.scaleBy
+                                    (0.1
+                                        -- Empirical
+                                        * Spherical.metresPerPixel
+                                            context.zoomLevel
+                                            (Angle.degrees 30)
+                                    )
 
                         newContext =
-                            { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + increment }
+                            { context
+                                | focalPoint =
+                                    context.focalPoint |> Point3d.translateBy shiftVector
+                                , orbiting = Just ( dx, dy )
+                            }
                     in
-                    ( { model | viewContext = Just newContext }
-                    , Cmd.none
-                    )
+                    ( newContext, [] )
 
-                ImageGrab event ->
-                    -- Mouse behaviour depends which view is in use...
-                    -- Right-click or ctrl-click to mean rotate; otherwise pan.
-                    let
-                        alternate =
-                            event.keys.ctrl || event.button == SecondButton
+                _ ->
+                    ( context, [] )
 
-                        newContext =
-                            Just
-                                { context
-                                    | orbiting = Just event.offsetPos
-                                    , dragAction =
-                                        if alternate then
-                                            DragRotate
+        ImageRelease event ->
+            let
+                newContext =
+                    { context
+                        | orbiting = Nothing
+                        , dragAction = DragNone
+                    }
+            in
+            ( newContext, [] )
 
-                                        else
-                                            DragPan
-                                    , waitingForClickDelay = True
-                                    , followSelectedPoint = False
-                                }
-                    in
-                    ( { model | viewContext = newContext }
-                    , Delay.after 250 (msgWrapper ClickDelayExpired)
-                    )
+        ImageDoubleClick event ->
+            ( context, [] )
 
-                ImageDrag event ->
-                    let
-                        ( dx, dy ) =
-                            event.offsetPos
-                    in
-                    case ( context.dragAction, context.orbiting ) of
-                        ( DragRotate, Just ( startX, startY ) ) ->
-                            -- Change the camera azimuth and elevation
-                            let
-                                newAzimuth =
-                                    Angle.degrees <|
-                                        (Angle.inDegrees <| Direction2d.toAngle context.cameraAzimuth)
-                                            - (dx - startX)
-
-                                newElevation =
-                                    Angle.degrees <|
-                                        Angle.inDegrees context.cameraElevation
-                                            + (dy - startY)
-
-                                newContext =
-                                    { context
-                                        | cameraAzimuth = Direction2d.fromAngle newAzimuth
-                                        , cameraElevation = newElevation
-                                        , orbiting = Just ( dx, dy )
-                                    }
-                            in
-                            ( { model | viewContext = Just newContext }
-                            , Cmd.none
-                            )
-
-                        ( DragPan, Just ( startX, startY ) ) ->
-                            let
-                                shiftVector =
-                                    Vector3d.meters
-                                        ((startY - dy) * Angle.sin context.cameraElevation)
-                                        (startX - dx)
-                                        ((dy - startY) * Angle.cos context.cameraElevation)
-                                        |> Vector3d.rotateAround
-                                            Axis3d.z
-                                            (Direction2d.toAngle context.cameraAzimuth)
-                                        |> Vector3d.scaleBy
-                                            (0.1
-                                                -- Empirical
-                                                * Spherical.metresPerPixel
-                                                    context.zoomLevel
-                                                    (Angle.degrees 30)
-                                            )
-
-                                newContext =
-                                    { context
-                                        | focalPoint =
-                                            context.focalPoint |> Point3d.translateBy shiftVector
-                                        , orbiting = Just ( dx, dy )
-                                    }
-                            in
-                            ( { model | viewContext = Just newContext }
-                            , Cmd.none
-                            )
-
-                        _ ->
-                            ( model, Cmd.none )
-
-                ImageRelease event ->
-                    let
-                        newContext =
-                            Just
-                                { context
-                                    | orbiting = Nothing
-                                    , dragAction = DragNone
-                                }
-                    in
-                    ( { model | viewContext = newContext }
-                    , Cmd.none
-                    )
-
-                ImageDoubleClick event ->
-                    ( model, Cmd.none )
-
-                ClickDelayExpired ->
-                    ( { model | viewContext = Just { context | waitingForClickDelay = False } }
-                    , Cmd.none
-                    )
-
-        _ ->
-            ( model, Cmd.none )
+        ClickDelayExpired ->
+            ( { context | waitingForClickDelay = False }, [] )
 
 
-multiplyDistanceBy : Float -> ContextThirdPerson -> Maybe ContextThirdPerson
-multiplyDistanceBy factor context =
-    Just { context | cameraDistance = context.cameraDistance |> Quantity.multiplyBy factor }
-
-
-initialiseView : Int -> PeteTree -> ContextThirdPerson
-initialiseView current treeNode =
+initialiseView :
+    Int
+    -> PeteTree
+    -> ( Quantity Int Pixels, Quantity Int Pixels )
+    -> ContextThirdPerson
+initialiseView current treeNode viewSize =
     { cameraAzimuth = Direction2d.x
     , cameraElevation = Angle.degrees 30
     , cameraDistance = Length.kilometers 10
@@ -417,4 +384,5 @@ initialiseView current treeNode =
         treeNode |> leafFromIndex current |> startPoint
     , waitingForClickDelay = False
     , followSelectedPoint = True
+    , contentArea = viewSize
     }

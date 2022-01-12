@@ -1,20 +1,17 @@
 port module MapPortsController exposing (..)
 
 import Angle
-import Delay exposing (after)
 import Direction2d
 import DomainModel exposing (GPXSource, PeteTree, gpxFromPointWithReference, gpxPointFromIndex, leafFromIndex, pointFromIndex, sourceData, startPoint)
 import Json.Decode as D exposing (Decoder, field, string)
 import Json.Encode as E
 import Length
 import MapboxKey exposing (mapboxKey)
-import SceneBuilder
+import TrackLoaded exposing (TrackLoaded)
 
 
 type MapMsg
     = MapPortMessage E.Value
-    | RepaintMap
-    | ClearMapClickDebounce
 
 
 type alias MapInfo =
@@ -81,72 +78,37 @@ centreMap model =
             Cmd.none
 
 
-centreMapOnCurrent :
-    { m
-        | trackTree : Maybe PeteTree
-        , renderDepth : Int
-        , currentPosition : Int
-        , referenceLonLat : GPXSource
-    }
-    -> Cmd msg
-centreMapOnCurrent model =
-    case model.trackTree of
-        Just tree ->
-            let
-                { longitude, latitude, altitude } =
-                    gpxPointFromIndex model.currentPosition tree
-            in
-            mapCommands <|
-                E.object
-                    [ ( "Cmd", E.string "Centre" )
-                    , ( "token", E.string mapboxKey )
-                    , ( "lon", E.float <| Angle.inDegrees <| Direction2d.toAngle longitude )
-                    , ( "lat", E.float <| Angle.inDegrees latitude )
-                    ]
-
-        Nothing ->
-            Cmd.none
+centreMapOnCurrent : TrackLoaded -> Cmd msg
+centreMapOnCurrent track =
+    let
+        { longitude, latitude, altitude } =
+            gpxPointFromIndex track.currentPosition track.trackTree
+    in
+    mapCommands <|
+        E.object
+            [ ( "Cmd", E.string "Centre" )
+            , ( "token", E.string mapboxKey )
+            , ( "lon", E.float <| Angle.inDegrees <| Direction2d.toAngle longitude )
+            , ( "lat", E.float <| Angle.inDegrees latitude )
+            ]
 
 
-deferredMapRepaint msgWrapper =
-    after 50 (RepaintMap |> msgWrapper)
+
+{-
+   deferredMapRepaint msgWrapper =
+       -- This is now in JS, where it quietly just works.
+       after 50 (RepaintMap |> msgWrapper)
+-}
 
 
 update :
     MapMsg
-    ->
-        { model
-            | trackTree : Maybe PeteTree
-            , lastMapClick : ( Float, Float )
-            , mapClickDebounce : Bool
-            , currentPosition : Int
-            , renderDepth : Int
-            , referenceLonLat : GPXSource
-        }
-    -> (MapMsg -> msg)
-    ->
-        ( { model
-            | trackTree : Maybe PeteTree
-            , lastMapClick : ( Float, Float )
-            , mapClickDebounce : Bool
-            , currentPosition : Int
-            , renderDepth : Int
-            , referenceLonLat : GPXSource
-          }
-        , Cmd msg
-        )
-update mapMsg model msgWrapper =
+    -> TrackLoaded
+    -> Cmd msg
+update mapMsg track =
     case mapMsg of
-        ClearMapClickDebounce ->
-            ( { model | mapClickDebounce = False }
-            , Cmd.none
-            )
-
         MapPortMessage value ->
-            processMapPortMessage model value msgWrapper
-
-        RepaintMap ->
-            ( model, refreshMap )
+            processMapPortMessage track value
 
 
 
@@ -166,36 +128,24 @@ update mapMsg model msgWrapper =
 --            ]
 
 
-addTrackToMap :
-    { m
-        | trackTree : Maybe PeteTree
-        , renderDepth : Int
-        , currentPosition : Int
-        , referenceLonLat : GPXSource
-    }
-    -> Cmd msg
-addTrackToMap model =
+addTrackToMap : TrackLoaded -> Cmd msg
+addTrackToMap track =
     -- This is to add the route as a polyline.
     -- We will separately add track points as draggable features.
-    case model.trackTree of
-        Just tree ->
-            let
-                { longitude, latitude, altitude } =
-                    gpxPointFromIndex model.currentPosition tree
-            in
-            mapCommands <|
-                E.object
-                    [ ( "Cmd", E.string "Track" )
-                    , ( "token", E.string mapboxKey )
-                    , ( "lon", E.float <| Angle.inDegrees <| Direction2d.toAngle longitude )
-                    , ( "lat", E.float <| Angle.inDegrees latitude )
-                    , ( "zoom", E.float 10.0 )
-                    , ( "data", SceneBuilder.renderMapJson model ) -- Route as polyline
-                    , ( "points", E.null ) --trackPointsToJSON track ) -- Make track points draggable
-                    ]
-
-        Nothing ->
-            Cmd.none
+    let
+        { longitude, latitude, altitude } =
+            gpxPointFromIndex track.currentPosition track.trackTree
+    in
+    mapCommands <|
+        E.object
+            [ ( "Cmd", E.string "Track" )
+            , ( "token", E.string mapboxKey )
+            , ( "lon", E.float <| Angle.inDegrees <| Direction2d.toAngle longitude )
+            , ( "lat", E.float <| Angle.inDegrees latitude )
+            , ( "zoom", E.float 10.0 )
+            , ( "data", E.null ) --SceneBuilder.renderMapJson track ) -- Route as polyline
+            , ( "points", E.null ) --trackPointsToJSON track ) -- Make track points draggable
+            ]
 
 
 
@@ -234,28 +184,10 @@ msgDecoder =
 
 
 processMapPortMessage :
-    { m
-        | trackTree : Maybe PeteTree
-        , lastMapClick : ( Float, Float )
-        , mapClickDebounce : Bool
-        , currentPosition : Int
-        , renderDepth : Int
-        , referenceLonLat : GPXSource
-    }
+    TrackLoaded
     -> E.Value
-    -> (MapMsg -> msg)
-    ->
-        ( { m
-            | trackTree : Maybe PeteTree
-            , lastMapClick : ( Float, Float )
-            , mapClickDebounce : Bool
-            , currentPosition : Int
-            , renderDepth : Int
-            , referenceLonLat : GPXSource
-          }
-        , Cmd msg
-        )
-processMapPortMessage model json msgWrapper =
+    -> Cmd msg
+processMapPortMessage track json =
     let
         jsonMsg =
             D.decodeValue msgDecoder json
@@ -265,14 +197,14 @@ processMapPortMessage model json msgWrapper =
             , D.decodeValue (D.field "lon" D.float) json
             )
     in
-    case ( jsonMsg, model.trackTree ) of
-        ( Ok "click", Just tree ) ->
+    case jsonMsg of
+        Ok "click" ->
             --{ 'msg' : 'click'
             --, 'lat' : e.lat()
             --, 'lon' : e.lon()
             --} );
-            case ( model.mapClickDebounce, lat, lon ) of
-                ( False, Ok lat1, Ok lon1 ) ->
+            case ( lat, lon ) of
+                ( Ok lat1, Ok lon1 ) ->
                     let
                         gpxPoint =
                             { longitude = Direction2d.fromAngle <| Angle.degrees lon1
@@ -281,26 +213,12 @@ processMapPortMessage model json msgWrapper =
                             }
 
                         index =
-                            DomainModel.nearestToLonLat gpxPoint tree
-
-                        updatedModel =
-                            { model
-                                | lastMapClick = ( lon1, lat1 )
-                                , mapClickDebounce = True
-                                , currentPosition = index
-                            }
+                            DomainModel.nearestToLonLat gpxPoint track.trackTree
                     in
-                    ( updatedModel
-                    , Cmd.batch
-                        [ -- Selective rendering requires we remove and add again.
-                          addTrackToMap updatedModel
-                        , after 100 (ClearMapClickDebounce |> msgWrapper)
-                        , after 100 (RepaintMap |> msgWrapper)
-                        ]
-                    )
+                    addTrackToMap track
 
                 _ ->
-                    ( model, Cmd.none )
+                    Cmd.none
 
         --( Ok "drag", Just track ) ->
         --    case draggedOnMap json track of
@@ -323,35 +241,5 @@ processMapPortMessage model json msgWrapper =
         --
         --        _ ->
         --            ( Model model, Cmd.none )
-        --
-        --( Ok "sketch", _ ) ->
-        --    case ( longitudes, latitudes, elevations ) of
-        --        ( Ok mapLongitudes, Ok mapLatitudes, Ok mapElevations ) ->
-        --            let
-        --                newTrack =
-        --                    List.map3
-        --                        (\x y z -> ( x, y, z ))
-        --                        mapLongitudes
-        --                        mapLatitudes
-        --                        mapElevations
-        --                        |> Track.trackFromMap
-        --            in
-        --            case newTrack of
-        --                Just track ->
-        --                    applyTrack (Model model) track
-        --
-        --                Nothing ->
-        --                    ( Model model
-        --                    , Cmd.none
-        --                    )
-        --
-        --        _ ->
-        --            ( Model model, Cmd.none )
-        --
-        --( Ok "no node", _ ) ->
-        --    ( Model model
-        --    , Cmd.none
-        --    )
-        --
         _ ->
-            ( model, Cmd.none )
+            Cmd.none

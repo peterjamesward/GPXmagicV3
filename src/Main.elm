@@ -11,11 +11,9 @@ import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
-import Element.Font as Font
 import Element.Input as Input exposing (button)
 import File exposing (File)
 import File.Select as Select
-import FlatColors.BritishPalette
 import FlatColors.ChinesePalette
 import GeoCodeDecoders exposing (IpInfo)
 import GpxParser exposing (parseGPXPoints)
@@ -23,26 +21,27 @@ import Html exposing (Html, div)
 import Html.Attributes exposing (id, style)
 import Http
 import Json.Encode as E
-import Length exposing (Meters)
+import LocalCoords exposing (LocalCoords)
 import LocalStorage
 import MapPortsController
-import ModelRecord exposing (Model(..), ModelRecord)
 import MyIP
 import OAuthPorts as O exposing (randomBytes)
 import OAuthTypes as O exposing (OAuthMsg(..))
 import Pixels exposing (Pixels)
-import Quantity
+import Quantity exposing (Quantity)
+import Scene3d exposing (Entity)
 import SplitPane.SplitPane as SplitPane exposing (..)
 import StravaAuth exposing (getStravaToken)
 import Task
 import Time
-import ToolsProforma
-import TrackInfoBox exposing (trackInfoBox)
+import ToolsProforma exposing (ToolEntry)
+import TrackLoaded exposing (TrackLoaded)
 import Url exposing (Url)
+import ViewContext exposing (ViewContext(..), ViewMode(..))
+import ViewContextThirdPerson exposing (ContextThirdPerson)
 import ViewMap
 import ViewPureStyles exposing (commonLayoutStyles, conditionallyVisible, radioButton, sliderThumb)
 import ViewThirdPerson
-import ViewingMode exposing (ViewingMode(..))
 
 
 type Msg
@@ -53,7 +52,7 @@ type Msg
     | AdjustTimeZone Time.Zone
     | SetRenderDepth Int
     | SetCurrentPosition Int
-    | SetViewMode ViewingMode
+    | SetViewMode ViewMode
     | ReceivedIpDetails (Result Http.Error IpInfo)
     | IpInfoAcknowledged (Result Http.Error ())
     | ImageMessage ViewThirdPerson.Msg
@@ -67,6 +66,40 @@ type Msg
     | Resize Int Int
     | GotWindowSize (Result Dom.Error Dom.Viewport)
     | ToolsMsg ToolsProforma.ToolMsg
+
+
+type alias Model =
+    { filename : Maybe String
+    , time : Time.Posix
+    , zone : Time.Zone
+    , ipInfo : Maybe IpInfo
+    , stravaAuthentication : O.Model
+
+    -- Track stuff
+    , track : Maybe TrackLoaded
+
+    -- Visuals
+    , scene : List (Entity LocalCoords)
+    , viewContext : Maybe ContextThirdPerson
+
+    -- Layout stuff
+    , viewDimensions : ( Quantity Int Pixels, Quantity Int Pixels )
+    , windowSize : ( Float, Float )
+    , contentArea : ( Quantity Int Pixels, Quantity Int Pixels )
+
+    -- Splitters
+    , leftDockRightEdge : SplitPane.State
+    , leftDockInternal : SplitPane.State
+    , rightDockLeftEdge : SplitPane.State
+    , rightDockInternal : SplitPane.State
+    , bottomDockTopEdge : SplitPane.State
+
+    -- Tools
+    , tools : List ToolEntry
+
+    -- Tool specific options
+    , directionChangeOptions : AbruptDirectionChanges.Options
+    }
 
 
 main : Program (Maybe (List Int)) Model Msg
@@ -89,42 +122,35 @@ init mflags origin navigationKey =
         ( authData, authCmd ) =
             StravaAuth.init mflags origin navigationKey OAuthMessage
     in
-    ( Model
-        { filename = Nothing
-        , time = Time.millisToPosix 0
-        , zone = Time.utc
-        , stravaAuthentication = authData
-        , trackTree = Nothing
-        , renderDepth = 0
-        , scene = []
-        , currentPosition = 0
-        , viewMode = ViewThird
-        , viewDimensions = ( Pixels.pixels 800, Pixels.pixels 500 )
-        , ipInfo = Nothing
-        , mapClickDebounce = False
-        , lastMapClick = ( 0.0, 0.0 )
-        , viewContext = Nothing
-        , referenceLonLat = GPXSource Direction2d.x Quantity.zero Quantity.zero
-        , leftDockRightEdge =
+    ( { filename = Nothing
+      , time = Time.millisToPosix 0
+      , zone = Time.utc
+      , ipInfo = Nothing
+      , stravaAuthentication = authData
+      , track = Nothing
+      , viewDimensions = ( Pixels.pixels 800, Pixels.pixels 500 )
+      , scene = []
+      , viewContext = Nothing
+      , windowSize = ( 1000, 800 )
+      , contentArea = ( Pixels.pixels 800, Pixels.pixels 500 )
+      , leftDockRightEdge =
             SplitPane.init Horizontal
                 |> configureSplitter (percentage 0.2 <| Just ( 0.01, 0.4 ))
-        , leftDockInternal =
+      , leftDockInternal =
             SplitPane.init Vertical
                 |> configureSplitter (percentage 0.4 <| Just ( 0.1, 0.9 ))
-        , rightDockLeftEdge =
+      , rightDockLeftEdge =
             SplitPane.init Horizontal
                 |> configureSplitter (percentage 0.8 <| Just ( 0.6, 0.97 ))
-        , rightDockInternal =
+      , rightDockInternal =
             SplitPane.init Vertical
                 |> configureSplitter (percentage 0.6 <| Just ( 0.1, 0.9 ))
-        , bottomDockTopEdge =
+      , bottomDockTopEdge =
             SplitPane.init Vertical
                 |> configureSplitter (percentage 0.8 <| Just ( 0.6, 0.97 ))
-        , windowSize = ( 1000, 800 )
-        , contentArea = ( Pixels.pixels 800, Pixels.pixels 500 )
-        , tools = ToolsProforma.tools
-            , directionChangeOptions = AbruptDirectionChanges.defaultOptions
-        }
+      , tools = ToolsProforma.tools
+      , directionChangeOptions = AbruptDirectionChanges.defaultOptions
+      }
     , Cmd.batch
         [ authCmd
         , Task.perform AdjustTimeZone Time.here
@@ -135,19 +161,20 @@ init mflags origin navigationKey =
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg (Model model) =
+update msg model =
     case msg of
         AdjustTimeZone newZone ->
-            ( Model { model | zone = newZone }
+            ( { model | zone = newZone }
             , MyIP.requestIpInformation ReceivedIpDetails
             )
 
         MapPortsMessage mapMsg ->
-            let
-                ( newModel, cmd ) =
-                    MapPortsController.update mapMsg model MapPortsMessage
-            in
-            ( Model newModel, cmd )
+            case model.track of
+                Just track ->
+                    ( model, MapPortsController.update mapMsg track )
+
+                Nothing ->
+                    ( model, Cmd.none )
 
         ReceivedIpDetails response ->
             let
@@ -168,7 +195,7 @@ update msg (Model model) =
                             , centreLat = 0.0
                             }
             in
-            ( Model { model | ipInfo = ipInfo }
+            ( { model | ipInfo = ipInfo }
             , Cmd.batch
                 [ MapPortsController.createMap mapInfoWithLocation
 
@@ -177,15 +204,15 @@ update msg (Model model) =
             )
 
         IpInfoAcknowledged _ ->
-            ( Model model, Cmd.none )
+            ( model, Cmd.none )
 
         GpxRequested ->
-            ( Model model
+            ( model
             , Select.file [ "text/gpx" ] GpxSelected
             )
 
         GpxSelected file ->
-            ( Model { model | filename = Just (File.name file) }
+            ( { model | filename = Just (File.name file) }
             , Task.perform GpxLoaded (File.toString file)
             )
 
@@ -196,30 +223,45 @@ update msg (Model model) =
 
                 trackTree =
                     treeFromList gpxTrack
-
-                modelWithTrack =
-                    { model
-                        | trackTree = trackTree
-                        , renderDepth = 10
-                        , viewContext = Maybe.map (ViewThirdPerson.initialiseView 0) trackTree
-                        , referenceLonLat =
-                            List.head gpxTrack
-                                |> Maybe.withDefault (GPXSource Direction2d.x Quantity.zero Quantity.zero)
-                    }
-
-                ( finalModel, cmd ) =
-                    modelWithTrack
-                    |> ToolsProforma.refreshAllTools
-                    |> Actions.updateAllDisplays
             in
-            ( Model finalModel, cmd )
+            case trackTree of
+                Just aTree ->
+                    let
+                        newTrack =
+                            { trackTree = aTree
+                            , currentPosition = 0
+                            , renderDepth = 10
+                            , referenceLonLat =
+                                List.head gpxTrack
+                                    |> Maybe.withDefault (GPXSource Direction2d.x Quantity.zero Quantity.zero)
+                            }
+
+                        modelWithTrack =
+                            { model | track = Just newTrack }
+
+                        ( finalModel, cmd ) =
+                            modelWithTrack
+                                |> ToolsProforma.refreshAllTools
+                    in
+                    ( finalModel, Actions.updateAllDisplays newTrack )
+
+                Nothing ->
+                    ( model, Cmd.none )
 
         SetRenderDepth depth ->
-            let
-                ( finalModel, cmd ) =
-                    { model | renderDepth = depth } |> Actions.updateAllDisplays
-            in
-            ( Model finalModel, cmd )
+            case model.track of
+                Just track ->
+                    let
+                        newTrack =
+                            { track | renderDepth = depth }
+
+                        newModel =
+                            { model | track = Just track }
+                    in
+                    ( newModel, Actions.updateAllDisplays newTrack )
+
+                Nothing ->
+                    ( model, Cmd.none )
 
         --Delegate wrapped OAuthmessages. Be bowled over if this works first time. Or fiftieth.
         --Maybe look after to see if there is yet a token. Easy way to know.
@@ -231,80 +273,95 @@ update msg (Model model) =
                 isToken =
                     getStravaToken newAuthData
             in
-            ( Model { model | stravaAuthentication = newAuthData }
+            ( { model | stravaAuthentication = newAuthData }
             , Cmd.map OAuthMessage authCmd
             )
 
         SetCurrentPosition pos ->
             -- Slider moves pointer and recentres view.
-            case model.trackTree of
-                Just treeTop ->
-                    let
-                        ( finalModel, cmd ) =
-                            Actions.setCurrentPosition pos model
-                    in
-                    ( Model finalModel, cmd )
+            case model.track of
+                Just track ->
+                    ( model, Actions.setCurrentPosition pos track )
 
                 Nothing ->
-                    ( Model model, Cmd.none )
+                    ( model, Cmd.none )
 
-        SetViewMode newMode ->
-            let
-                ( finalModel, cmd ) =
-                    { model | viewMode = newMode }
-                        |> Actions.updateAllDisplays
-            in
-            ( Model finalModel, cmd )
+        SetViewMode viewMode ->
+            case model.track of
+                Just track ->
+                    --TODO MODE SWITCHING
+                    let
+                        newModel =
+                            model
+                    in
+                    ( newModel, Actions.updateAllDisplays track )
+
+                Nothing ->
+                    ( model, Cmd.none )
 
         ImageMessage imageMsg ->
-            let
-                ( newModel, cmds ) =
-                    ViewThirdPerson.update imageMsg model ImageMessage
-            in
-            ( Model newModel, cmds )
+            case model.track of
+                Just track ->
+                    let
+                        oldContext =
+                            model.viewContext
+
+                        ( newContext, actions ) =
+                            case model.viewContext of
+                                Just third ->
+                                    let
+                                        ( new, act ) =
+                                            ViewThirdPerson.update imageMsg track third
+                                    in
+                                    ( Just new, act )
+
+                                Nothing ->
+                                    ( Nothing, [] )
+
+                        newModel =
+                            { model | viewContext = newContext }
+                    in
+                    ( newModel, Cmd.none )
+
+                Nothing ->
+                    ( model, Cmd.none )
 
         StorageMessage json ->
-            ( Model model, Cmd.none )
+            ( model, Cmd.none )
 
         SplitLeftDockRightEdge m ->
             ( { model | leftDockRightEdge = SplitPane.update m model.leftDockRightEdge }
                 |> adjustSpaceForContent
-                |> Model
             , MapPortsController.refreshMap
             )
 
         SplitLeftDockInternal m ->
             ( { model | leftDockInternal = SplitPane.update m model.leftDockInternal }
                 |> adjustSpaceForContent
-                |> Model
             , MapPortsController.refreshMap
             )
 
         SplitRightDockLeftEdge m ->
             ( { model | rightDockLeftEdge = SplitPane.update m model.rightDockLeftEdge }
                 |> adjustSpaceForContent
-                |> Model
             , MapPortsController.refreshMap
             )
 
         SplitRightDockInternal m ->
             ( { model | rightDockInternal = SplitPane.update m model.rightDockInternal }
                 |> adjustSpaceForContent
-                |> Model
             , MapPortsController.refreshMap
             )
 
         SplitBottomDockTopEdge m ->
             ( { model | bottomDockTopEdge = SplitPane.update m model.bottomDockTopEdge }
                 |> adjustSpaceForContent
-                |> Model
             , MapPortsController.refreshMap
             )
 
         Resize width height ->
             ( { model | windowSize = ( toFloat width, toFloat height ) }
                 |> adjustSpaceForContent
-                |> Model
             , MapPortsController.refreshMap
             )
 
@@ -318,22 +375,21 @@ update msg (Model model) =
                             )
                       }
                         |> adjustSpaceForContent
-                        |> Model
                     , MapPortsController.refreshMap
                     )
 
                 Err error ->
-                    ( Model model, Cmd.none )
+                    ( model, Cmd.none )
 
         ToolsMsg toolMsg ->
             let
                 ( newModel, cmds ) =
                     ToolsProforma.update toolMsg ToolsMsg model
             in
-            ( Model newModel, cmds )
+            ( newModel, Cmd.none )
 
 
-adjustSpaceForContent : ModelRecord -> ModelRecord
+adjustSpaceForContent : Model -> Model
 adjustSpaceForContent model =
     let
         availableWidthFraction =
@@ -361,7 +417,7 @@ adjustSpaceForContent model =
 
 
 view : Model -> Browser.Document Msg
-view (Model model) =
+view model =
     { title = "GPXmagic Labs V3 concepts"
     , body =
         [ layout
@@ -427,7 +483,7 @@ rightDockInternalConfig =
         }
 
 
-leftDockView : ModelRecord -> Html Msg
+leftDockView : Model -> Html Msg
 leftDockView model =
     SplitPane.view
         leftDockInternalConfig
@@ -436,7 +492,7 @@ leftDockView model =
         model.leftDockInternal
 
 
-upperLeftDockView : ModelRecord -> Html Msg
+upperLeftDockView : Model -> Html Msg
 upperLeftDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
         commonLayoutStyles
@@ -444,7 +500,7 @@ upperLeftDockView model =
         ToolsProforma.toolsForDock ToolsProforma.DockUpperLeft ToolsMsg model
 
 
-lowerLeftDockView : ModelRecord -> Html Msg
+lowerLeftDockView : Model -> Html Msg
 lowerLeftDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
         commonLayoutStyles
@@ -452,7 +508,7 @@ lowerLeftDockView model =
         ToolsProforma.toolsForDock ToolsProforma.DockLowerLeft ToolsMsg model
 
 
-rightDockView : ModelRecord -> Html Msg
+rightDockView : Model -> Html Msg
 rightDockView model =
     SplitPane.view
         rightDockInternalConfig
@@ -461,7 +517,7 @@ rightDockView model =
         model.rightDockInternal
 
 
-upperRightDockView : ModelRecord -> Html Msg
+upperRightDockView : Model -> Html Msg
 upperRightDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
         commonLayoutStyles
@@ -469,7 +525,7 @@ upperRightDockView model =
         ToolsProforma.toolsForDock ToolsProforma.DockUpperRight ToolsMsg model
 
 
-lowerRightDockView : ModelRecord -> Html Msg
+lowerRightDockView : Model -> Html Msg
 lowerRightDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
         commonLayoutStyles
@@ -477,7 +533,7 @@ lowerRightDockView model =
         ToolsProforma.toolsForDock ToolsProforma.DockLowerRight ToolsMsg model
 
 
-bottomDockView : ModelRecord -> Html Msg
+bottomDockView : Model -> Html Msg
 bottomDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
         commonLayoutStyles
@@ -485,7 +541,7 @@ bottomDockView model =
         ToolsProforma.toolsForDock ToolsProforma.DockBottom ToolsMsg model
 
 
-notTheLeftDockView : ModelRecord -> Html Msg
+notTheLeftDockView : Model -> Html Msg
 notTheLeftDockView model =
     SplitPane.view
         rightDockConfig
@@ -494,7 +550,7 @@ notTheLeftDockView model =
         model.rightDockLeftEdge
 
 
-centralAreaView : ModelRecord -> Html Msg
+centralAreaView : Model -> Html Msg
 centralAreaView model =
     SplitPane.view
         bottomDockConfig
@@ -503,7 +559,7 @@ centralAreaView model =
         model.bottomDockTopEdge
 
 
-viewPaneArea : ModelRecord -> Html Msg
+viewPaneArea : Model -> Html Msg
 viewPaneArea model =
     layoutWith { options = [ noStaticStyleSheet ] }
         commonLayoutStyles
@@ -543,7 +599,7 @@ maximumLeftPane =
     1400
 
 
-viewModeChoices : ModelRecord -> Element Msg
+viewModeChoices : Model -> Element Msg
 viewModeChoices model =
     let
         fullOptionList =
@@ -559,26 +615,40 @@ viewModeChoices model =
         , padding 5
         ]
         { onChange = SetViewMode
-        , selected = Just model.viewMode
+        , selected = Just ViewThird
         , label = Input.labelHidden "Choose view"
         , options = fullOptionList
         }
 
 
-contentArea : ModelRecord -> Element Msg
+contentArea : Model -> Element Msg
 contentArea model =
     let
         slider trackLength =
             Input.slider
                 ViewPureStyles.wideSliderStyles
                 { onChange = round >> SetCurrentPosition
-                , value = toFloat model.currentPosition
+                , value =
+                    case model.track of
+                        Just track ->
+                            toFloat track.currentPosition
+
+                        Nothing ->
+                            0.0
                 , label = Input.labelHidden "Current position slider"
                 , min = 0
                 , max = toFloat <| trackLength - 1
                 , step = Just 1
                 , thumb = sliderThumb
                 }
+
+        viewMode =
+            case model.track of
+                Just track ->
+                    ViewThird
+
+                Nothing ->
+                    ViewInfo
     in
     -- NOTE that the Map DIV must be constructed once only, or the map gets upset.
     column
@@ -586,18 +656,17 @@ contentArea model =
         [ column
             [ width fill
             , alignTop
-            --, padding 10
             , centerX
             ]
             [ viewModeChoices model
-            , conditionallyVisible (model.viewMode /= ViewMap) <|
+            , conditionallyVisible (viewMode /= ViewMap) <|
                 ViewThirdPerson.view model ImageMessage
-            , conditionallyVisible (model.viewMode == ViewMap) <|
+            , conditionallyVisible (viewMode == ViewMap) <|
                 ViewMap.view model MapPortsMessage
             ]
-        , case model.trackTree of
-            Just treeNode ->
-                el [ centerX ] <| slider <| 1 + skipCount treeNode
+        , case model.track of
+            Just track ->
+                el [ centerX ] <| slider <| 1 + skipCount track.trackTree
 
             Nothing ->
                 none
@@ -605,7 +674,7 @@ contentArea model =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions (Model model) =
+subscriptions model =
     Sub.batch
         [ randomBytes (\ints -> OAuthMessage (GotRandomBytes ints))
         , MapPortsController.mapResponses (MapPortsMessage << MapPortsController.MapPortMessage)

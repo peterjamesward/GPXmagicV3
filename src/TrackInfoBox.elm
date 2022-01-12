@@ -4,6 +4,7 @@ import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
 import FlatColors.ChinesePalette
+import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal0, showDecimal2, showLongMeasure, showShortMeasure)
 
 
@@ -19,17 +20,17 @@ trackInfoList =
     ]
 
 
-trackInfoBox : Maybe PeteTree -> Element msg
-trackInfoBox maybeTree =
+trackInfoBox : Maybe TrackLoaded -> Element msg
+trackInfoBox maybeTrack =
     el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
-        case maybeTree of
-            Just trackTree ->
+        case maybeTrack of
+            Just track ->
                 row
                     [ padding 10
                     , spacing 5
                     ]
                     [ column [ spacing 5 ] <| List.map (\( txt, _ ) -> txt) trackInfoList
-                    , column [ spacing 5 ] <| List.map (\( _, fn ) -> fn trackTree) trackInfoList
+                    , column [ spacing 5 ] <| List.map (\( _, fn ) -> fn track.trackTree) trackInfoList
                     ]
 
             Nothing ->

@@ -23,6 +23,7 @@ import Scene3d.Material as Material
 import SketchPlane3d
 import Sphere3d
 import Spherical
+import TrackLoaded exposing (TrackLoaded)
 import Vector3d
 
 
@@ -164,15 +165,8 @@ render3dView model =
 --TODO: Factor the recursion away from the rendering and these two large routines combine.
 
 
-renderMapJson :
-    { m
-        | trackTree : Maybe PeteTree
-        , renderDepth : Int
-        , currentPosition : Int
-        , referenceLonLat : GPXSource
-    }
-    -> E.Value
-renderMapJson model =
+renderMapJson : TrackLoaded -> E.Value
+renderMapJson track =
     let
         boxSide =
             --TODO: put box side in model
@@ -190,12 +184,6 @@ renderMapJson model =
         makeVisibleSegment node =
             lngLatPair <| mapLocation <| Tuple.second <| sourceData node
 
-        --renderCurrentMarker : Int -> PeteTree -> List (Entity LocalCoords)
-        --renderCurrentMarker marker tree =
-        --    [ Scene3d.point { radius = Pixels.pixels 10 }
-        --        (Material.color lightOrange)
-        --        (mapLocation <| leafFromIndex marker tree)
-        --    ]
         renderTree : Int -> PeteTree -> List E.Value -> List E.Value
         renderTree depth someNode accum =
             case someNode of
@@ -237,31 +225,25 @@ renderMapJson model =
 
         renderFirstPoint treeNode =
             lngLatPair <| mapLocation <| Tuple.first <| sourceData treeNode
-    in
-    case model.trackTree of
-        Just tree ->
-            let
-                start =
-                    startPoint <| leafFromIndex model.currentPosition tree
 
-                box =
-                    BoundingBox3d.withDimensions ( boxSide, boxSide, boxSide ) start
+        current =
+            startPoint <| leafFromIndex track.currentPosition track.trackTree
 
-                geometry =
-                    E.object
-                        [ ( "type", E.string "LineString" )
-                        , ( "coordinates", E.list identity coordinates )
-                        ]
+        detailBox =
+            BoundingBox3d.withDimensions ( boxSide, boxSide, boxSide ) current
 
-                coordinates =
-                    renderFirstPoint tree
-                        :: renderTreeSelectively box model.renderDepth tree []
-            in
+        geometry =
             E.object
-                [ ( "type", E.string "Feature" )
-                , ( "properties", E.object [] )
-                , ( "geometry", geometry )
+                [ ( "type", E.string "LineString" )
+                , ( "coordinates", E.list identity coordinates )
                 ]
 
-        Nothing ->
-            E.null
+        coordinates =
+            renderFirstPoint track.trackTree
+                :: renderTreeSelectively detailBox track.renderDepth track.trackTree []
+    in
+    E.object
+        [ ( "type", E.string "Feature" )
+        , ( "properties", E.object [] )
+        , ( "geometry", geometry )
+        ]

@@ -1,10 +1,5 @@
 module ViewMap exposing (..)
 
-import Angle
-import BoundingBox3d exposing (BoundingBox3d)
-import Camera3d exposing (Camera3d)
-import Color exposing (white)
-import Direction3d exposing (positiveZ)
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
@@ -16,12 +11,19 @@ import Html.Attributes exposing (id)
 import MapPortsController
 import Pixels exposing (Pixels, inPixels)
 import Quantity exposing (Quantity)
+import TrackLoaded exposing (TrackLoaded)
+
+
+type alias MapContext =
+    { mapClickDebounce : Bool
+    , lastMapClick : ( Float, Float )
+    }
 
 
 view :
     { model
         | contentArea : ( Quantity Int Pixels, Quantity Int Pixels )
-        , trackTree : Maybe PeteTree
+        , track : Maybe TrackLoaded
     }
     -> (MapPortsController.MapMsg -> msg)
     -> Element msg

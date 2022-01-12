@@ -1,6 +1,6 @@
 module AbruptDirectionChanges exposing (..)
 
-import Actions
+import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
 import Direction2d
 import DomainModel exposing (PeteTree(..), asRecord, skipCount)
@@ -10,12 +10,10 @@ import Element.Input as Input
 import FeatherIcons
 import FlatColors.ChinesePalette
 import List.Extra
-import LocalCoords exposing (LocalCoords)
 import Quantity
-import Scene3d exposing (Entity)
+import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showAngle)
 import ViewPureStyles exposing (neatToolsBorder, sliderThumb, useIcon)
-import ViewingMode exposing (ViewingMode)
 
 
 type alias Options =
@@ -86,84 +84,51 @@ findAbruptDirectionChanges options tree =
 
 update :
     Msg
-    -> (Msg -> msg)
-    ->
-        { model
-            | trackTree : Maybe PeteTree
-            , directionChangeOptions : Options
-            , viewMode : ViewingMode
-            , scene : List (Entity LocalCoords)
-            , currentPosition : Int
-            , referenceLonLat : DomainModel.GPXSource
-            , renderDepth : Int
-        }
-    ->
-        ( { model
-            | trackTree : Maybe PeteTree
-            , directionChangeOptions : Options
-            , viewMode : ViewingMode
-            , scene : List (Entity LocalCoords)
-            , currentPosition : Int
-            , referenceLonLat : DomainModel.GPXSource
-            , renderDepth : Int
-          }
-        , Cmd msg
-        )
-update msg msgWrapper model =
-    let
-        oldOptions =
-            model.directionChangeOptions
-    in
+    -> Options
+    -> TrackLoaded
+    -> ( Options, List (ToolAction msg) )
+update msg options track =
     case msg of
         ViewNext ->
             let
                 breachIndex =
-                    min (List.length oldOptions.breaches - 1) (oldOptions.currentBreach + 1)
+                    min (List.length options.breaches - 1) (options.currentBreach + 1)
 
                 newOptions =
-                    { oldOptions | currentBreach = breachIndex }
+                    { options | currentBreach = breachIndex }
 
                 ( position, _ ) =
                     Maybe.withDefault ( 0, Angle.degrees 0 ) <|
                         List.Extra.getAt breachIndex newOptions.breaches
             in
-            { model | directionChangeOptions = newOptions }
-                |> Actions.setCurrentPosition position
+            ( newOptions, [ SetCurrent position ] )
 
         ViewPrevious ->
             let
                 breachIndex =
-                    max 0 (oldOptions.currentBreach - 1)
+                    max 0 (options.currentBreach - 1)
 
                 newOptions =
-                    { oldOptions | currentBreach = breachIndex }
+                    { options | currentBreach = breachIndex }
 
                 ( position, _ ) =
                     Maybe.withDefault ( 0, Angle.degrees 0 ) <|
                         List.Extra.getAt breachIndex newOptions.breaches
             in
-            { model | directionChangeOptions = newOptions }
-                |> Actions.setCurrentPosition position
+            ( newOptions, [ SetCurrent position ] )
 
         SetCurrentPosition position ->
-            Actions.setCurrentPosition position model
+            ( options, [ SetCurrent position ] )
 
         SetThreshold angle ->
             let
                 newOptions =
-                    { oldOptions | threshold = angle, breaches = [] }
+                    { options | threshold = angle, breaches = [] }
 
                 populatedOptions =
-                    case model.trackTree of
-                        Just aTree ->
-                            findAbruptDirectionChanges newOptions aTree
-
-                        Nothing ->
-                            newOptions
+                    findAbruptDirectionChanges newOptions track.trackTree
             in
-            ( { model | directionChangeOptions = populatedOptions }
-            , Cmd.none
-            )
+            ( populatedOptions, [] )
 
 
 view : (Msg -> msg) -> Options -> Element msg
@@ -210,7 +175,7 @@ view msgWrapper options =
                                 , onPress = Just <| msgWrapper <| ViewPrevious
                                 }
                             , Input.button neatToolsBorder
-                                { label = useIcon FeatherIcons.eye
+                                { label = useIcon FeatherIcons.mousePointer
                                 , onPress = Just <| msgWrapper <| SetCurrentPosition position
                                 }
                             , Input.button neatToolsBorder
