@@ -30,8 +30,7 @@ import Scene3d exposing (Entity, backgroundColor)
 import Spherical
 import TrackLoaded exposing (TrackLoaded)
 import Vector3d
-import ViewContext exposing (ViewContext(..))
-import ViewContextThirdPerson exposing (ThirdPersonContext, DragAction(..))
+import ViewContextThirdPerson exposing (DragAction(..), ThirdPersonContext)
 import ViewPureStyles exposing (useIcon)
 import Viewpoint3d exposing (Viewpoint3d)
 
@@ -93,20 +92,16 @@ view :
     -> Element msg
 view context track scene msgWrapper =
     let
-        --TODO: Function call on view context...
         dragging =
-            True
-
-        --Maybe.map .dragAction model.viewContext |> Maybe.withDefault DragNone
+            context.dragAction
     in
     el
         [ htmlAttribute <| Mouse.onDown (ImageGrab >> msgWrapper)
+        , if dragging /= DragNone then
+            htmlAttribute <| Mouse.onMove (ImageDrag >> msgWrapper)
 
-        --, if dragging /= DragNone then
-        , htmlAttribute <| Mouse.onMove (ImageDrag >> msgWrapper)
-
-        --else
-        --  pointer
+          else
+            pointer
         , htmlAttribute <| Mouse.onUp (ImageRelease >> msgWrapper)
         , htmlAttribute <| Mouse.onClick (ImageClick >> msgWrapper)
         , htmlAttribute <| Mouse.onDoubleClick (ImageDoubleClick >> msgWrapper)
@@ -119,16 +114,16 @@ view context track scene msgWrapper =
         , Border.color FlatColors.ChinesePalette.peace
         , inFront <| zoomButtons msgWrapper
         ]
-            <|
-                html <|
-                    Scene3d.cloudy
-                        { camera = deriveCamera track.trackTree context track.currentPosition
-                        , dimensions = context.contentArea
-                        , background = backgroundColor Color.lightBlue
-                        , clipDepth = Length.meters 1
-                        , entities = scene
-                        , upDirection = positiveZ
-                        }
+    <|
+        html <|
+            Scene3d.cloudy
+                { camera = deriveCamera track.trackTree context track.currentPosition
+                , dimensions = context.contentArea
+                , background = backgroundColor Color.lightBlue
+                , clipDepth = Length.meters 1
+                , entities = scene
+                , upDirection = positiveZ
+                }
 
 
 onContextMenu : a -> Element.Attribute a
@@ -274,7 +269,7 @@ update msg track context =
                             else
                                 DragPan
                         , waitingForClickDelay = True
-                        , followSelectedPoint = False
+                        --, followSelectedPoint = False
                     }
             in
             ( newContext

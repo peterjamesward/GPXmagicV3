@@ -130,10 +130,6 @@ render3dView track =
         renderCurrentMarker track.currentPosition track.trackTree
 
 
-
---TODO: Factor the recursion away from the rendering and these two large routines combine.
-
-
 renderMapJson : TrackLoaded -> E.Value
 renderMapJson track =
     let

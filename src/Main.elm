@@ -1,7 +1,7 @@
 module Main exposing (main)
 
 import AbruptDirectionChanges
-import Actions
+import Actions exposing (ToolAction(..))
 import Browser exposing (application)
 import Browser.Dom as Dom exposing (getViewport, getViewportOf)
 import Browser.Events
@@ -35,7 +35,7 @@ import SplitPane.SplitPane as SplitPane exposing (..)
 import StravaAuth exposing (getStravaToken)
 import Task
 import Time
-import ToolsProforma exposing (ToolEntry)
+import ToolsController exposing (ToolEntry)
 import TrackLoaded exposing (TrackLoaded)
 import Url exposing (Url)
 import ViewContext exposing (ViewContext(..), ViewMode(..))
@@ -66,7 +66,7 @@ type Msg
     | SplitBottomDockTopEdge SplitPane.Msg
     | Resize Int Int
     | GotWindowSize (Result Dom.Error Dom.Viewport)
-    | ToolsMsg ToolsProforma.ToolMsg
+    | ToolsMsg ToolsController.ToolMsg
 
 
 type alias Model =
@@ -153,7 +153,7 @@ init mflags origin navigationKey =
       , bottomDockTopEdge =
             SplitPane.init Vertical
                 |> configureSplitter (percentage 0.8 <| Just ( 0.6, 0.97 ))
-      , tools = ToolsProforma.tools
+      , tools = ToolsController.tools
       , directionChangeOptions = AbruptDirectionChanges.defaultOptions
       }
     , Cmd.batch
@@ -252,11 +252,17 @@ update msg model =
                                             model.contentArea
                                 , viewMapContext = Just ViewMap.initialiseContext
                                 , scene = SceneBuilder.render3dView newTrack
+                                , viewMode =
+                                    if model.viewMode == ViewInfo then
+                                        ViewThird
+
+                                    else
+                                        model.viewMode
                             }
 
                         ( finalModel, cmd ) =
                             modelWithTrack
-                                |> ToolsProforma.refreshAllTools
+                                |> ToolsController.refreshAllTools
                     in
                     ( finalModel, Actions.updateAllDisplays newTrack )
 
@@ -407,10 +413,14 @@ update msg model =
 
         ToolsMsg toolMsg ->
             let
-                ( newModel, cmds ) =
-                    ToolsProforma.update toolMsg ToolsMsg model
+                ( newModel, actions ) =
+                    -- Some of the actions update the model, some issue commands.
+                    ToolsController.update toolMsg ToolsMsg model
+
+                modelAfterActions =
+                    performActionsOnModel actions newModel
             in
-            ( newModel, Cmd.none )
+            ( modelAfterActions, performActionCommands actions )
 
 
 adjustSpaceForContent : Model -> Model
@@ -521,7 +531,7 @@ upperLeftDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
         commonLayoutStyles
     <|
-        ToolsProforma.toolsForDock ToolsProforma.DockUpperLeft ToolsMsg model
+        ToolsController.toolsForDock ToolsController.DockUpperLeft ToolsMsg model
 
 
 lowerLeftDockView : Model -> Html Msg
@@ -529,7 +539,7 @@ lowerLeftDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
         commonLayoutStyles
     <|
-        ToolsProforma.toolsForDock ToolsProforma.DockLowerLeft ToolsMsg model
+        ToolsController.toolsForDock ToolsController.DockLowerLeft ToolsMsg model
 
 
 rightDockView : Model -> Html Msg
@@ -546,7 +556,7 @@ upperRightDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
         commonLayoutStyles
     <|
-        ToolsProforma.toolsForDock ToolsProforma.DockUpperRight ToolsMsg model
+        ToolsController.toolsForDock ToolsController.DockUpperRight ToolsMsg model
 
 
 lowerRightDockView : Model -> Html Msg
@@ -554,7 +564,7 @@ lowerRightDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
         commonLayoutStyles
     <|
-        ToolsProforma.toolsForDock ToolsProforma.DockLowerRight ToolsMsg model
+        ToolsController.toolsForDock ToolsController.DockLowerRight ToolsMsg model
 
 
 bottomDockView : Model -> Html Msg
@@ -562,7 +572,7 @@ bottomDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
         commonLayoutStyles
     <|
-        ToolsProforma.toolsForDock ToolsProforma.DockBottom ToolsMsg model
+        ToolsController.toolsForDock ToolsController.DockBottom ToolsMsg model
 
 
 notTheLeftDockView : Model -> Html Msg
@@ -631,7 +641,7 @@ viewModeChoices model =
         , padding 5
         ]
         { onChange = SetViewMode
-        , selected = Just ViewThird
+        , selected = Just model.viewMode
         , label = Input.labelHidden "Choose view"
         , options = fullOptionList
         }
@@ -703,3 +713,39 @@ subscriptions model =
         , Sub.map SplitBottomDockTopEdge <| SplitPane.subscriptions model.bottomDockTopEdge
         , Browser.Events.onResize (\w h -> Resize w h)
         ]
+
+
+performActionsOnModel : List (ToolAction Msg) -> Model -> Model
+performActionsOnModel actions model =
+    let
+        performAction : ToolAction Msg -> Model -> Model
+        performAction action mdl =
+            case ( action, mdl.track ) of
+                ( SetCurrent position, Just track ) ->
+                    let
+                        newTrack =
+                            { track | currentPosition = position }
+                    in
+                    { mdl
+                        | track = Just newTrack
+                        , scene = SceneBuilder.render3dView newTrack
+                    }
+
+                ( ShowPreview string color list, Just track ) ->
+                    mdl
+
+                ( HidePreview string, Just track ) ->
+                    mdl
+
+                ( DelayMessage int msg, Just track ) ->
+                    mdl
+
+                _ ->
+                    mdl
+    in
+    List.foldl performAction model actions
+
+
+performActionCommands : List (ToolAction Msg) -> Cmd Msg
+performActionCommands actions =
+    Cmd.none

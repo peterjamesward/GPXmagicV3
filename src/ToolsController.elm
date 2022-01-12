@@ -1,4 +1,4 @@
-module ToolsProforma exposing (..)
+module ToolsController exposing (..)
 
 import AbruptDirectionChanges
 import Actions exposing (ToolAction)
@@ -192,7 +192,7 @@ update toolMsg msgWrapper model =
                             AbruptDirectionChanges.update msg model.directionChangeOptions track
                     in
                     ( { model | directionChangeOptions = newOptions }
-                    , []
+                    , actions
                     )
 
                 Nothing ->

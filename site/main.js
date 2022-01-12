@@ -9462,9 +9462,9 @@ var $author$project$LocalStorage$storageListKeys = $author$project$LocalStorage$
 				'Cmd',
 				$elm$json$Json$Encode$string('storage.list'))
 			])));
-var $author$project$ToolsProforma$AbruptDirectionChanges = {$: 'AbruptDirectionChanges'};
-var $author$project$ToolsProforma$Contracted = {$: 'Contracted'};
-var $author$project$ToolsProforma$DockUpperRight = {$: 'DockUpperRight'};
+var $author$project$ToolsController$AbruptDirectionChanges = {$: 'AbruptDirectionChanges'};
+var $author$project$ToolsController$Contracted = {$: 'Contracted'};
+var $author$project$ToolsController$DockUpperRight = {$: 'DockUpperRight'};
 var $mdgriffith$elm_ui$Internal$Model$Rgba = F4(
 	function (a, b, c, d) {
 		return {$: 'Rgba', a: a, b: b, c: c, d: d};
@@ -9499,34 +9499,34 @@ var $mdgriffith$elm_ui$Element$rgb255 = F3(
 		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, red / 255, green / 255, blue / 255, 1);
 	});
 var $smucode$elm_flat_colors$FlatColors$AussiePalette$spicedNectarine = A3($mdgriffith$elm_ui$Element$rgb255, 255, 190, 118);
-var $author$project$ToolsProforma$abruptDirectionChanges = {
-	dock: $author$project$ToolsProforma$DockUpperRight,
+var $author$project$ToolsController$abruptDirectionChanges = {
+	dock: $author$project$ToolsController$DockUpperRight,
 	info: 'These may need smoothing',
 	isPopupOpen: false,
 	label: 'Direction changes',
-	state: $author$project$ToolsProforma$Contracted,
+	state: $author$project$ToolsController$Contracted,
 	tabColour: $smucode$elm_flat_colors$FlatColors$AussiePalette$spicedNectarine,
 	textColour: $author$project$ViewPureStyles$contrastingColour($smucode$elm_flat_colors$FlatColors$AussiePalette$spicedNectarine),
-	toolType: $author$project$ToolsProforma$AbruptDirectionChanges,
+	toolType: $author$project$ToolsController$AbruptDirectionChanges,
 	video: $elm$core$Maybe$Nothing
 };
-var $author$project$ToolsProforma$DockUpperLeft = {$: 'DockUpperLeft'};
-var $author$project$ToolsProforma$Expanded = {$: 'Expanded'};
-var $author$project$ToolsProforma$ToolTrackInfo = {$: 'ToolTrackInfo'};
+var $author$project$ToolsController$DockUpperLeft = {$: 'DockUpperLeft'};
+var $author$project$ToolsController$Expanded = {$: 'Expanded'};
+var $author$project$ToolsController$ToolTrackInfo = {$: 'ToolTrackInfo'};
 var $smucode$elm_flat_colors$FlatColors$AussiePalette$beekeeper = A3($mdgriffith$elm_ui$Element$rgb255, 246, 229, 141);
-var $author$project$ToolsProforma$trackInfoBox = {
-	dock: $author$project$ToolsProforma$DockUpperLeft,
+var $author$project$ToolsController$trackInfoBox = {
+	dock: $author$project$ToolsController$DockUpperLeft,
 	info: 'Here is some useful information',
 	isPopupOpen: false,
 	label: 'Summary info',
-	state: $author$project$ToolsProforma$Expanded,
+	state: $author$project$ToolsController$Expanded,
 	tabColour: $smucode$elm_flat_colors$FlatColors$AussiePalette$beekeeper,
 	textColour: $author$project$ViewPureStyles$contrastingColour($smucode$elm_flat_colors$FlatColors$AussiePalette$beekeeper),
-	toolType: $author$project$ToolsProforma$ToolTrackInfo,
+	toolType: $author$project$ToolsController$ToolTrackInfo,
 	video: $elm$core$Maybe$Nothing
 };
-var $author$project$ToolsProforma$tools = _List_fromArray(
-	[$author$project$ToolsProforma$trackInfoBox, $author$project$ToolsProforma$abruptDirectionChanges]);
+var $author$project$ToolsController$tools = _List_fromArray(
+	[$author$project$ToolsController$trackInfoBox, $author$project$ToolsController$abruptDirectionChanges]);
 var $elm$time$Time$utc = A2($elm$time$Time$Zone, 0, _List_Nil);
 var $author$project$Main$init = F3(
 	function (mflags, origin, navigationKey) {
@@ -9584,7 +9584,7 @@ var $author$project$Main$init = F3(
 				scene: _List_Nil,
 				stravaAuthentication: authData,
 				time: $elm$time$Time$millisToPosix(0),
-				tools: $author$project$ToolsProforma$tools,
+				tools: $author$project$ToolsController$tools,
 				track: $elm$core$Maybe$Nothing,
 				viewDimensions: _Utils_Tuple2(
 					$ianmackenzie$elm_units$Pixels$pixels(800),
@@ -10038,6 +10038,7 @@ var $author$project$Main$ReceivedIpDetails = function (a) {
 var $author$project$Main$ToolsMsg = function (a) {
 	return {$: 'ToolsMsg', a: a};
 };
+var $author$project$ViewContext$ViewThird = {$: 'ViewThird'};
 var $author$project$SplitPane$Bound$getValue = function (value) {
 	return value.a;
 };
@@ -10364,140 +10365,9 @@ var $author$project$GpxParser$parseGPXPoints = function (xml) {
 		$elm$core$Basics$identity,
 		A2($elm$core$List$map, earthVector, trkpts));
 };
-var $author$project$MyIP$processIpInfo = function (response) {
-	if (response.$ === 'Ok') {
-		var ipInfo = response.a;
-		return $elm$core$Maybe$Just(ipInfo);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
+var $author$project$Main$performActionCommands = function (actions) {
+	return $elm$core$Platform$Cmd$none;
 };
-var $elm$core$Basics$negate = function (n) {
-	return -n;
-};
-var $elm$core$Basics$abs = function (n) {
-	return (n < 0) ? (-n) : n;
-};
-var $ianmackenzie$elm_units$Quantity$abs = function (_v0) {
-	var value = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(
-		$elm$core$Basics$abs(value));
-};
-var $elm$core$Basics$atan2 = _Basics_atan2;
-var $ianmackenzie$elm_geometry$Direction2d$angleFrom = F2(
-	function (_v0, _v1) {
-		var d1 = _v0.a;
-		var d2 = _v1.a;
-		var relativeY = (d1.x * d2.y) - (d1.y * d2.x);
-		var relativeX = (d1.x * d2.x) + (d1.y * d2.y);
-		return $ianmackenzie$elm_units$Quantity$Quantity(
-			A2($elm$core$Basics$atan2, relativeY, relativeX));
-	});
-var $author$project$DomainModel$asRecord = function (treeNode) {
-	if (treeNode.$ === 'Leaf') {
-		var section = treeNode.a;
-		return section;
-	} else {
-		var node = treeNode.a;
-		return node.nodeContent;
-	}
-};
-var $elm$core$Basics$ge = _Utils_ge;
-var $ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo = F2(
-	function (_v0, _v1) {
-		var y = _v0.a;
-		var x = _v1.a;
-		return _Utils_cmp(x, y) > -1;
-	});
-var $author$project$AbruptDirectionChanges$findAbruptDirectionChanges = F2(
-	function (options, tree) {
-		var helper = F3(
-			function (skip, treeNode, accum) {
-				if (treeNode.$ === 'Leaf') {
-					return accum;
-				} else {
-					var node = treeNode.a;
-					var thisNodeAngle = $ianmackenzie$elm_units$Quantity$abs(
-						A2(
-							$ianmackenzie$elm_geometry$Direction2d$angleFrom,
-							$author$project$DomainModel$asRecord(node.left).directionAtEnd,
-							$author$project$DomainModel$asRecord(node.right).directionAtStart));
-					var withThisNodeIfNeeded = A2($ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo, options.threshold, thisNodeAngle) ? A2(
-						$elm$core$List$cons,
-						_Utils_Tuple2(skip + 1, thisNodeAngle),
-						accum) : accum;
-					return A2($ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo, options.threshold, node.nodeContent.directionChangeMaximumAbs) ? A3(
-						helper,
-						skip + $author$project$DomainModel$skipCount(node.left),
-						node.right,
-						A3(helper, skip, node.left, withThisNodeIfNeeded)) : accum;
-				}
-			});
-		return _Utils_update(
-			options,
-			{
-				breaches: A3(helper, 0, tree, _List_Nil),
-				currentBreach: 0
-			});
-	});
-var $author$project$ToolsProforma$toolStateHasChanged = F3(
-	function (toolType, newState, model) {
-		var _v0 = _Utils_Tuple2(toolType, model.track);
-		if (_v0.a.$ === 'ToolTrackInfo') {
-			var _v1 = _v0.a;
-			return _Utils_Tuple2(model, _List_Nil);
-		} else {
-			if (_v0.b.$ === 'Just') {
-				var _v2 = _v0.a;
-				var track = _v0.b.a;
-				return _Utils_eq(newState, $author$project$ToolsProforma$Expanded) ? _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							directionChangeOptions: A2($author$project$AbruptDirectionChanges$findAbruptDirectionChanges, model.directionChangeOptions, track.trackTree)
-						}),
-					_List_Nil) : _Utils_Tuple2(model, _List_Nil);
-			} else {
-				return _Utils_Tuple2(model, _List_Nil);
-			}
-		}
-	});
-var $author$project$ToolsProforma$refreshAllTools = function (model) {
-	var refreshOneTool = F2(
-		function (entry, _v2) {
-			var updatedModel = _v2.a;
-			var actions = _v2.b;
-			if (_Utils_eq(entry.state, $author$project$ToolsProforma$Expanded)) {
-				var _v1 = A3($author$project$ToolsProforma$toolStateHasChanged, entry.toolType, $author$project$ToolsProforma$Expanded, updatedModel);
-				var incrementalModel = _v1.a;
-				var incrementalActions = _v1.b;
-				return _Utils_Tuple2(
-					incrementalModel,
-					_Utils_ap(incrementalActions, actions));
-			} else {
-				return _Utils_Tuple2(updatedModel, actions);
-			}
-		});
-	var _v0 = A3(
-		$elm$core$List$foldl,
-		refreshOneTool,
-		_Utils_Tuple2(model, _List_Nil),
-		model.tools);
-	var finalModel = _v0.a;
-	var accumulatedActions = _v0.b;
-	return _Utils_Tuple2(finalModel, accumulatedActions);
-};
-var $author$project$MapPortsController$refreshMap = $author$project$MapPortsController$mapCommands(
-	$elm$json$Json$Encode$object(
-		_List_fromArray(
-			[
-				_Utils_Tuple2(
-				'Cmd',
-				$elm$json$Json$Encode$string('Repaint')),
-				_Utils_Tuple2(
-				'token',
-				$elm$json$Json$Encode$string($author$project$MapboxKey$mapboxKey))
-			])));
 var $avh4$elm_color$Color$RgbaSpace = F4(
 	function (a, b, c, d) {
 		return {$: 'RgbaSpace', a: a, b: b, c: c, d: d};
@@ -10571,6 +10441,9 @@ var $elm$core$Basics$clamp = F3(
 	function (low, high, number) {
 		return (_Utils_cmp(number, low) < 0) ? low : ((_Utils_cmp(number, high) > 0) ? high : number);
 	});
+var $elm$core$Basics$negate = function (n) {
+	return -n;
+};
 var $avh4$elm_color$Color$purple = A4($avh4$elm_color$Color$RgbaSpace, 117 / 255, 80 / 255, 123 / 255, 1.0);
 var $avh4$elm_color$Color$red = A4($avh4$elm_color$Color$RgbaSpace, 204 / 255, 0 / 255, 0 / 255, 1.0);
 var $elm$core$Basics$isNaN = _Basics_isNaN;
@@ -10620,6 +10493,13 @@ var $avh4$elm_color$Color$hsla = F4(
 var $avh4$elm_color$Color$hsl = F3(
 	function (h, s, l) {
 		return A4($avh4$elm_color$Color$hsla, h, s, l, 1.0);
+	});
+var $elm$core$Basics$ge = _Utils_ge;
+var $ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo = F2(
+	function (_v0, _v1) {
+		var y = _v0.a;
+		var x = _v1.a;
+		return _Utils_cmp(x, y) > -1;
 	});
 var $ianmackenzie$elm_units$Quantity$lessThanOrEqualTo = F2(
 	function (_v0, _v1) {
@@ -12004,6 +11884,14 @@ var $author$project$DomainModel$trueLength = function (treeNode) {
 		return node.nodeContent.trueLength;
 	}
 };
+var $elm$core$Basics$abs = function (n) {
+	return (n < 0) ? (-n) : n;
+};
+var $ianmackenzie$elm_units$Quantity$abs = function (_v0) {
+	var value = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(
+		$elm$core$Basics$abs(value));
+};
 var $ianmackenzie$elm_geometry$Point3d$coordinates = function (_v0) {
 	var p = _v0.a;
 	return _Utils_Tuple3(
@@ -12190,6 +12078,171 @@ var $author$project$SceneBuilder$render3dView = function (track) {
 		track.trackTree,
 		A2(renderCurrentMarker, track.currentPosition, track.trackTree));
 };
+var $author$project$Main$performActionsOnModel = F2(
+	function (actions, model) {
+		var performAction = F2(
+			function (action, mdl) {
+				var _v0 = _Utils_Tuple2(action, mdl.track);
+				_v0$4:
+				while (true) {
+					if (_v0.b.$ === 'Just') {
+						switch (_v0.a.$) {
+							case 'SetCurrent':
+								var position = _v0.a.a;
+								var track = _v0.b.a;
+								var newTrack = _Utils_update(
+									track,
+									{currentPosition: position});
+								return _Utils_update(
+									mdl,
+									{
+										scene: $author$project$SceneBuilder$render3dView(newTrack),
+										track: $elm$core$Maybe$Just(newTrack)
+									});
+							case 'ShowPreview':
+								var _v1 = _v0.a;
+								var string = _v1.a;
+								var color = _v1.b;
+								var list = _v1.c;
+								var track = _v0.b.a;
+								return mdl;
+							case 'HidePreview':
+								var string = _v0.a.a;
+								var track = _v0.b.a;
+								return mdl;
+							case 'DelayMessage':
+								var _v2 = _v0.a;
+								var _int = _v2.a;
+								var msg = _v2.b;
+								var track = _v0.b.a;
+								return mdl;
+							default:
+								break _v0$4;
+						}
+					} else {
+						break _v0$4;
+					}
+				}
+				return mdl;
+			});
+		return A3($elm$core$List$foldl, performAction, model, actions);
+	});
+var $author$project$MyIP$processIpInfo = function (response) {
+	if (response.$ === 'Ok') {
+		var ipInfo = response.a;
+		return $elm$core$Maybe$Just(ipInfo);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $elm$core$Basics$atan2 = _Basics_atan2;
+var $ianmackenzie$elm_geometry$Direction2d$angleFrom = F2(
+	function (_v0, _v1) {
+		var d1 = _v0.a;
+		var d2 = _v1.a;
+		var relativeY = (d1.x * d2.y) - (d1.y * d2.x);
+		var relativeX = (d1.x * d2.x) + (d1.y * d2.y);
+		return $ianmackenzie$elm_units$Quantity$Quantity(
+			A2($elm$core$Basics$atan2, relativeY, relativeX));
+	});
+var $author$project$DomainModel$asRecord = function (treeNode) {
+	if (treeNode.$ === 'Leaf') {
+		var section = treeNode.a;
+		return section;
+	} else {
+		var node = treeNode.a;
+		return node.nodeContent;
+	}
+};
+var $author$project$AbruptDirectionChanges$findAbruptDirectionChanges = F2(
+	function (options, tree) {
+		var helper = F3(
+			function (skip, treeNode, accum) {
+				if (treeNode.$ === 'Leaf') {
+					return accum;
+				} else {
+					var node = treeNode.a;
+					var thisNodeAngle = $ianmackenzie$elm_units$Quantity$abs(
+						A2(
+							$ianmackenzie$elm_geometry$Direction2d$angleFrom,
+							$author$project$DomainModel$asRecord(node.left).directionAtEnd,
+							$author$project$DomainModel$asRecord(node.right).directionAtStart));
+					var withThisNodeIfNeeded = A2($ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo, options.threshold, thisNodeAngle) ? A2(
+						$elm$core$List$cons,
+						_Utils_Tuple2(skip + 1, thisNodeAngle),
+						accum) : accum;
+					return A2($ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo, options.threshold, node.nodeContent.directionChangeMaximumAbs) ? A3(
+						helper,
+						skip + $author$project$DomainModel$skipCount(node.left),
+						node.right,
+						A3(helper, skip, node.left, withThisNodeIfNeeded)) : accum;
+				}
+			});
+		return _Utils_update(
+			options,
+			{
+				breaches: A3(helper, 0, tree, _List_Nil),
+				currentBreach: 0
+			});
+	});
+var $author$project$ToolsController$toolStateHasChanged = F3(
+	function (toolType, newState, model) {
+		var _v0 = _Utils_Tuple2(toolType, model.track);
+		if (_v0.a.$ === 'ToolTrackInfo') {
+			var _v1 = _v0.a;
+			return _Utils_Tuple2(model, _List_Nil);
+		} else {
+			if (_v0.b.$ === 'Just') {
+				var _v2 = _v0.a;
+				var track = _v0.b.a;
+				return _Utils_eq(newState, $author$project$ToolsController$Expanded) ? _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							directionChangeOptions: A2($author$project$AbruptDirectionChanges$findAbruptDirectionChanges, model.directionChangeOptions, track.trackTree)
+						}),
+					_List_Nil) : _Utils_Tuple2(model, _List_Nil);
+			} else {
+				return _Utils_Tuple2(model, _List_Nil);
+			}
+		}
+	});
+var $author$project$ToolsController$refreshAllTools = function (model) {
+	var refreshOneTool = F2(
+		function (entry, _v2) {
+			var updatedModel = _v2.a;
+			var actions = _v2.b;
+			if (_Utils_eq(entry.state, $author$project$ToolsController$Expanded)) {
+				var _v1 = A3($author$project$ToolsController$toolStateHasChanged, entry.toolType, $author$project$ToolsController$Expanded, updatedModel);
+				var incrementalModel = _v1.a;
+				var incrementalActions = _v1.b;
+				return _Utils_Tuple2(
+					incrementalModel,
+					_Utils_ap(incrementalActions, actions));
+			} else {
+				return _Utils_Tuple2(updatedModel, actions);
+			}
+		});
+	var _v0 = A3(
+		$elm$core$List$foldl,
+		refreshOneTool,
+		_Utils_Tuple2(model, _List_Nil),
+		model.tools);
+	var finalModel = _v0.a;
+	var accumulatedActions = _v0.b;
+	return _Utils_Tuple2(finalModel, accumulatedActions);
+};
+var $author$project$MapPortsController$refreshMap = $author$project$MapPortsController$mapCommands(
+	$elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'Cmd',
+				$elm$json$Json$Encode$string('Repaint')),
+				_Utils_Tuple2(
+				'token',
+				$elm$json$Json$Encode$string($author$project$MapboxKey$mapboxKey))
+			])));
 var $author$project$MyIP$apiRoot = 'http://ip-api.com';
 var $elm$url$Url$Builder$toQueryPair = function (_v0) {
 	var key = _v0.a;
@@ -12554,10 +12607,135 @@ var $ianmackenzie$elm_units$Angle$inDegrees = function (angle) {
 	return 180 * ($ianmackenzie$elm_units$Angle$inRadians(angle) / $elm$core$Basics$pi);
 };
 var $elm$json$Json$Encode$null = _Json_encodeNull;
+var $elm$json$Json$Encode$list = F2(
+	function (func, entries) {
+		return _Json_wrap(
+			A3(
+				$elm$core$List$foldl,
+				_Json_addEntry(func),
+				_Json_emptyArray(_Utils_Tuple0),
+				entries));
+	});
+var $author$project$DomainModel$lngLatPair = function (_v0) {
+	var longitude = _v0.a;
+	var latitude = _v0.b;
+	return A2(
+		$elm$json$Json$Encode$list,
+		$elm$json$Json$Encode$float,
+		_List_fromArray(
+			[
+				$ianmackenzie$elm_units$Angle$inDegrees(longitude),
+				$ianmackenzie$elm_units$Angle$inDegrees(latitude)
+			]));
+};
+var $author$project$DomainModel$sourceData = function (treeNode) {
+	if (treeNode.$ === 'Leaf') {
+		var leaf = treeNode.a;
+		return leaf.sourceData;
+	} else {
+		var node = treeNode.a;
+		return node.nodeContent.sourceData;
+	}
+};
 var $ianmackenzie$elm_geometry$Direction2d$toAngle = function (_v0) {
 	var d = _v0.a;
 	return $ianmackenzie$elm_units$Quantity$Quantity(
 		A2($elm$core$Basics$atan2, d.y, d.x));
+};
+var $author$project$SceneBuilder$renderMapJson = function (track) {
+	var mapLocation = function (point) {
+		var _v2 = point;
+		var longitude = _v2.longitude;
+		var latitude = _v2.latitude;
+		var altitude = _v2.altitude;
+		return _Utils_Tuple2(
+			$ianmackenzie$elm_geometry$Direction2d$toAngle(longitude),
+			latitude);
+	};
+	var renderFirstPoint = function (treeNode) {
+		return $author$project$DomainModel$lngLatPair(
+			mapLocation(
+				$author$project$DomainModel$sourceData(treeNode).a));
+	};
+	var makeVisibleSegment = function (node) {
+		return $author$project$DomainModel$lngLatPair(
+			mapLocation(
+				$author$project$DomainModel$sourceData(node).b));
+	};
+	var renderTree = F3(
+		function (depth, someNode, accum) {
+			if (someNode.$ === 'Leaf') {
+				var leafNode = someNode.a;
+				return A2(
+					$elm$core$List$cons,
+					makeVisibleSegment(someNode),
+					accum);
+			} else {
+				var notLeaf = someNode.a;
+				return (depth <= 0) ? A2(
+					$elm$core$List$cons,
+					makeVisibleSegment(someNode),
+					accum) : A3(
+					renderTree,
+					depth - 1,
+					notLeaf.left,
+					A3(renderTree, depth - 1, notLeaf.right, accum));
+			}
+		});
+	var renderTreeSelectively = F4(
+		function (box, depth, someNode, accum) {
+			if (someNode.$ === 'Leaf') {
+				var leafNode = someNode.a;
+				return A2(
+					$elm$core$List$cons,
+					makeVisibleSegment(someNode),
+					accum);
+			} else {
+				var notLeaf = someNode.a;
+				return A2($ianmackenzie$elm_geometry$BoundingBox3d$intersects, box, notLeaf.nodeContent.boundingBox) ? A4(
+					renderTreeSelectively,
+					box,
+					depth - 1,
+					notLeaf.left,
+					A4(renderTreeSelectively, box, depth - 1, notLeaf.right, accum)) : A3(
+					renderTree,
+					depth - 1,
+					notLeaf.left,
+					A3(renderTree, depth - 1, notLeaf.right, accum));
+			}
+		});
+	var current = $author$project$DomainModel$startPoint(
+		A2($author$project$DomainModel$leafFromIndex, track.currentPosition, track.trackTree));
+	var boxSide = $ianmackenzie$elm_units$Length$kilometers(4);
+	var detailBox = A2(
+		$ianmackenzie$elm_geometry$BoundingBox3d$withDimensions,
+		_Utils_Tuple3(boxSide, boxSide, boxSide),
+		current);
+	var coordinates = A2(
+		$elm$core$List$cons,
+		renderFirstPoint(track.trackTree),
+		A4(renderTreeSelectively, detailBox, track.renderDepth, track.trackTree, _List_Nil));
+	var geometry = $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'type',
+				$elm$json$Json$Encode$string('LineString')),
+				_Utils_Tuple2(
+				'coordinates',
+				A2($elm$json$Json$Encode$list, $elm$core$Basics$identity, coordinates))
+			]));
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'type',
+				$elm$json$Json$Encode$string('Feature')),
+				_Utils_Tuple2(
+				'properties',
+				$elm$json$Json$Encode$object(_List_Nil)),
+				_Utils_Tuple2('geometry', geometry)
+			]));
 };
 var $author$project$MapPortsController$addTrackToMap = function (track) {
 	var _v0 = A2($author$project$DomainModel$gpxPointFromIndex, track.currentPosition, track.trackTree);
@@ -12586,7 +12764,9 @@ var $author$project$MapPortsController$addTrackToMap = function (track) {
 					_Utils_Tuple2(
 					'zoom',
 					$elm$json$Json$Encode$float(10.0)),
-					_Utils_Tuple2('data', $elm$json$Json$Encode$null),
+					_Utils_Tuple2(
+					'data',
+					$author$project$SceneBuilder$renderMapJson(track)),
 					_Utils_Tuple2('points', $elm$json$Json$Encode$null)
 				])));
 };
@@ -12853,15 +13033,6 @@ var $author$project$DomainModel$medianLongitude = function (treeNode) {
 	} else {
 		var node = treeNode.a;
 		return node.nodeContent.medianLongitude;
-	}
-};
-var $author$project$DomainModel$sourceData = function (treeNode) {
-	if (treeNode.$ === 'Leaf') {
-		var leaf = treeNode.a;
-		return leaf.sourceData;
-	} else {
-		var node = treeNode.a;
-		return node.nodeContent.sourceData;
 	}
 };
 var $ianmackenzie$elm_geometry$BoundingBox3d$extrema = function (_v0) {
@@ -14036,7 +14207,7 @@ var $author$project$StravaAuth$update = F2(
 		}
 		return $author$project$StravaAuth$noOp(model);
 	});
-var $author$project$ToolsProforma$setColour = F3(
+var $author$project$ToolsController$setColour = F3(
 	function (toolType, colour, tool) {
 		return _Utils_eq(tool.toolType, toolType) ? _Utils_update(
 			tool,
@@ -14045,20 +14216,20 @@ var $author$project$ToolsProforma$setColour = F3(
 				textColour: $author$project$ViewPureStyles$contrastingColour(colour)
 			}) : tool;
 	});
-var $author$project$ToolsProforma$setDock = F3(
+var $author$project$ToolsController$setDock = F3(
 	function (toolType, dock, tool) {
 		return _Utils_eq(tool.toolType, toolType) ? _Utils_update(
 			tool,
 			{dock: dock}) : tool;
 	});
-var $author$project$ToolsProforma$setToolState = F3(
+var $author$project$ToolsController$setToolState = F3(
 	function (toolType, state, tool) {
 		return _Utils_eq(tool.toolType, toolType) ? _Utils_update(
 			tool,
 			{state: state}) : tool;
 	});
 var $elm$core$Basics$not = _Basics_not;
-var $author$project$ToolsProforma$toggleToolPopup = F2(
+var $author$project$ToolsController$toggleToolPopup = F2(
 	function (toolType, tool) {
 		return _Utils_eq(tool.toolType, toolType) ? _Utils_update(
 			tool,
@@ -14152,7 +14323,7 @@ var $author$project$AbruptDirectionChanges$update = F3(
 				return _Utils_Tuple2(populatedOptions, _List_Nil);
 		}
 	});
-var $author$project$ToolsProforma$update = F3(
+var $author$project$ToolsController$update = F3(
 	function (toolMsg, msgWrapper, model) {
 		switch (toolMsg.$) {
 			case 'ToolPopupToggle':
@@ -14163,7 +14334,7 @@ var $author$project$ToolsProforma$update = F3(
 						{
 							tools: A2(
 								$elm$core$List$map,
-								$author$project$ToolsProforma$toggleToolPopup(toolType),
+								$author$project$ToolsController$toggleToolPopup(toolType),
 								model.tools)
 						}),
 					_List_Nil);
@@ -14176,7 +14347,7 @@ var $author$project$ToolsProforma$update = F3(
 						{
 							tools: A2(
 								$elm$core$List$map,
-								A2($author$project$ToolsProforma$setDock, toolType, toolDock),
+								A2($author$project$ToolsController$setDock, toolType, toolDock),
 								model.tools)
 						}),
 					_List_Nil);
@@ -14189,7 +14360,7 @@ var $author$project$ToolsProforma$update = F3(
 						{
 							tools: A2(
 								$elm$core$List$map,
-								A2($author$project$ToolsProforma$setColour, toolType, color),
+								A2($author$project$ToolsController$setColour, toolType, color),
 								model.tools)
 						}),
 					_List_Nil);
@@ -14197,7 +14368,7 @@ var $author$project$ToolsProforma$update = F3(
 				var toolType = toolMsg.a;
 				var newState = toolMsg.b;
 				return A3(
-					$author$project$ToolsProforma$toolStateHasChanged,
+					$author$project$ToolsController$toolStateHasChanged,
 					toolType,
 					newState,
 					_Utils_update(
@@ -14205,7 +14376,7 @@ var $author$project$ToolsProforma$update = F3(
 						{
 							tools: A2(
 								$elm$core$List$map,
-								A2($author$project$ToolsProforma$setToolState, toolType, newState),
+								A2($author$project$ToolsController$setToolState, toolType, newState),
 								model.tools)
 						}));
 			default:
@@ -14220,7 +14391,7 @@ var $author$project$ToolsProforma$update = F3(
 						_Utils_update(
 							model,
 							{directionChangeOptions: newOptions}),
-						_List_Nil);
+						actions);
 				} else {
 					return _Utils_Tuple2(model, _List_Nil);
 				}
@@ -15105,7 +15276,6 @@ var $author$project$ViewThirdPerson$update = F3(
 					context,
 					{
 						dragAction: alternate ? $author$project$ViewContextThirdPerson$DragRotate : $author$project$ViewContextThirdPerson$DragPan,
-						followSelectedPoint: false,
 						orbiting: $elm$core$Maybe$Just(event.offsetPos),
 						waitingForClickDelay: true
 					});
@@ -15282,10 +15452,11 @@ var $author$project$Main$update = F2(
 							scene: $author$project$SceneBuilder$render3dView(newTrack),
 							track: $elm$core$Maybe$Just(newTrack),
 							viewMapContext: $elm$core$Maybe$Just($author$project$ViewMap$initialiseContext),
+							viewMode: _Utils_eq(model.viewMode, $author$project$ViewContext$ViewInfo) ? $author$project$ViewContext$ViewThird : model.viewMode,
 							viewThirdPersonContext: $elm$core$Maybe$Just(
 								A3($author$project$ViewThirdPerson$initialiseView, 0, newTrack.trackTree, model.contentArea))
 						});
-					var _v4 = $author$project$ToolsProforma$refreshAllTools(modelWithTrack);
+					var _v4 = $author$project$ToolsController$refreshAllTools(modelWithTrack);
 					var finalModel = _v4.a;
 					var cmd = _v4.b;
 					return _Utils_Tuple2(
@@ -15469,10 +15640,13 @@ var $author$project$Main$update = F2(
 				}
 			default:
 				var toolMsg = msg.a;
-				var _v14 = A3($author$project$ToolsProforma$update, toolMsg, $author$project$Main$ToolsMsg, model);
+				var _v14 = A3($author$project$ToolsController$update, toolMsg, $author$project$Main$ToolsMsg, model);
 				var newModel = _v14.a;
-				var cmds = _v14.b;
-				return _Utils_Tuple2(newModel, $elm$core$Platform$Cmd$none);
+				var actions = _v14.b;
+				var modelAfterActions = A2($author$project$Main$performActionsOnModel, actions, newModel);
+				return _Utils_Tuple2(
+					modelAfterActions,
+					$author$project$Main$performActionCommands(actions));
 		}
 	});
 var $mdgriffith$elm_ui$Internal$Model$Colored = F3(
@@ -18032,15 +18206,6 @@ var $mdgriffith$elm_ui$Internal$Model$staticRoot = function (opts) {
 				_List_Nil);
 	}
 };
-var $elm$json$Json$Encode$list = F2(
-	function (func, entries) {
-		return _Json_wrap(
-			A3(
-				$elm$core$List$foldl,
-				_Json_addEntry(func),
-				_Json_emptyArray(_Utils_Tuple0),
-				entries));
-	});
 var $elm$core$List$any = F2(
 	function (isOkay, list) {
 		any:
@@ -21251,16 +21416,16 @@ var $author$project$Main$leftDockConfig = $author$project$SplitPane$SplitPane$cr
 	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitLeftDockRightEdge});
 var $author$project$Main$leftDockInternalConfig = $author$project$SplitPane$SplitPane$createViewConfig(
 	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitLeftDockInternal});
-var $author$project$ToolsProforma$DockLowerLeft = {$: 'DockLowerLeft'};
+var $author$project$ToolsController$DockLowerLeft = {$: 'DockLowerLeft'};
 var $mdgriffith$elm_ui$Internal$Model$NoStaticStyleSheet = {$: 'NoStaticStyleSheet'};
 var $mdgriffith$elm_ui$Internal$Model$RenderModeOption = function (a) {
 	return {$: 'RenderModeOption', a: a};
 };
 var $mdgriffith$elm_ui$Element$noStaticStyleSheet = $mdgriffith$elm_ui$Internal$Model$RenderModeOption($mdgriffith$elm_ui$Internal$Model$NoStaticStyleSheet);
-var $author$project$ToolsProforma$ToolPopupToggle = function (a) {
+var $author$project$ToolsController$ToolPopupToggle = function (a) {
 	return {$: 'ToolPopupToggle', a: a};
 };
-var $author$project$ToolsProforma$ToolStateToggle = F2(
+var $author$project$ToolsController$ToolStateToggle = F2(
 	function (a, b) {
 		return {$: 'ToolStateToggle', a: a, b: b};
 	});
@@ -21470,15 +21635,15 @@ var $mdgriffith$elm_ui$Element$moveDown = function (y) {
 		$mdgriffith$elm_ui$Internal$Flag$moveY,
 		$mdgriffith$elm_ui$Internal$Model$MoveY(y));
 };
-var $author$project$ToolsProforma$Disabled = {$: 'Disabled'};
-var $author$project$ToolsProforma$nextToolState = function (state) {
+var $author$project$ToolsController$Disabled = {$: 'Disabled'};
+var $author$project$ToolsController$nextToolState = function (state) {
 	switch (state.$) {
 		case 'Expanded':
-			return $author$project$ToolsProforma$Contracted;
+			return $author$project$ToolsController$Contracted;
 		case 'Contracted':
-			return $author$project$ToolsProforma$Expanded;
+			return $author$project$ToolsController$Expanded;
 		default:
-			return $author$project$ToolsProforma$Disabled;
+			return $author$project$ToolsController$Disabled;
 	}
 };
 var $mdgriffith$elm_ui$Internal$Model$Empty = {$: 'Empty'};
@@ -21563,7 +21728,7 @@ var $feathericons$elm_feather$FeatherIcons$settings = A2(
 				]),
 			_List_Nil)
 		]));
-var $author$project$ToolsProforma$ToolColourSelect = F2(
+var $author$project$ToolsController$ToolColourSelect = F2(
 	function (a, b) {
 		return {$: 'ToolColourSelect', a: a, b: b};
 	});
@@ -21616,7 +21781,7 @@ var $smucode$elm_flat_colors$FlatColors$SwedishPalette$spiroDiscoBall = A3($mdgr
 var $smucode$elm_flat_colors$FlatColors$SwedishPalette$sunsetOrange = A3($mdgriffith$elm_ui$Element$rgb255, 255, 94, 87);
 var $smucode$elm_flat_colors$FlatColors$SwedishPalette$vibrantYellow = A3($mdgriffith$elm_ui$Element$rgb255, 255, 211, 42);
 var $smucode$elm_flat_colors$FlatColors$SwedishPalette$yrielYellow = A3($mdgriffith$elm_ui$Element$rgb255, 255, 221, 89);
-var $author$project$ToolsProforma$showColourOptions = F2(
+var $author$project$ToolsController$showColourOptions = F2(
 	function (msgWrapper, toolEntry) {
 		var colourBlock = function (colour) {
 			return A2(
@@ -21633,7 +21798,7 @@ var $author$project$ToolsProforma$showColourOptions = F2(
 					label: $mdgriffith$elm_ui$Element$none,
 					onPress: $elm$core$Maybe$Just(
 						msgWrapper(
-							A2($author$project$ToolsProforma$ToolColourSelect, toolEntry.toolType, colour)))
+							A2($author$project$ToolsController$ToolColourSelect, toolEntry.toolType, colour)))
 				});
 		};
 		return toolEntry.isPopupOpen ? A2(
@@ -21687,9 +21852,9 @@ var $author$project$ToolsProforma$showColourOptions = F2(
 						]))
 				])) : $mdgriffith$elm_ui$Element$none;
 	});
-var $author$project$ToolsProforma$DockBottom = {$: 'DockBottom'};
-var $author$project$ToolsProforma$DockLowerRight = {$: 'DockLowerRight'};
-var $author$project$ToolsProforma$ToolDockSelect = F2(
+var $author$project$ToolsController$DockBottom = {$: 'DockBottom'};
+var $author$project$ToolsController$DockLowerRight = {$: 'DockLowerRight'};
+var $author$project$ToolsController$ToolDockSelect = F2(
 	function (a, b) {
 		return {$: 'ToolDockSelect', a: a, b: b};
 	});
@@ -21887,7 +22052,7 @@ var $author$project$ViewPureStyles$useIcon = A2(
 		$mdgriffith$elm_ui$Element$html,
 		$feathericons$elm_feather$FeatherIcons$toHtml(_List_Nil)),
 	$feathericons$elm_feather$FeatherIcons$withSize(20));
-var $author$project$ToolsProforma$showDockOptions = F2(
+var $author$project$ToolsController$showDockOptions = F2(
 	function (msgWrapper, toolEntry) {
 		return toolEntry.isPopupOpen ? A2(
 			$mdgriffith$elm_ui$Element$row,
@@ -21901,7 +22066,7 @@ var $author$project$ToolsProforma$showDockOptions = F2(
 						label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$arrowUpLeft),
 						onPress: $elm$core$Maybe$Just(
 							msgWrapper(
-								A2($author$project$ToolsProforma$ToolDockSelect, toolEntry.toolType, $author$project$ToolsProforma$DockUpperLeft)))
+								A2($author$project$ToolsController$ToolDockSelect, toolEntry.toolType, $author$project$ToolsController$DockUpperLeft)))
 					}),
 					A2(
 					$mdgriffith$elm_ui$Element$Input$button,
@@ -21910,7 +22075,7 @@ var $author$project$ToolsProforma$showDockOptions = F2(
 						label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$arrowDownLeft),
 						onPress: $elm$core$Maybe$Just(
 							msgWrapper(
-								A2($author$project$ToolsProforma$ToolDockSelect, toolEntry.toolType, $author$project$ToolsProforma$DockLowerLeft)))
+								A2($author$project$ToolsController$ToolDockSelect, toolEntry.toolType, $author$project$ToolsController$DockLowerLeft)))
 					}),
 					A2(
 					$mdgriffith$elm_ui$Element$Input$button,
@@ -21919,7 +22084,7 @@ var $author$project$ToolsProforma$showDockOptions = F2(
 						label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$arrowDown),
 						onPress: $elm$core$Maybe$Just(
 							msgWrapper(
-								A2($author$project$ToolsProforma$ToolDockSelect, toolEntry.toolType, $author$project$ToolsProforma$DockBottom)))
+								A2($author$project$ToolsController$ToolDockSelect, toolEntry.toolType, $author$project$ToolsController$DockBottom)))
 					}),
 					A2(
 					$mdgriffith$elm_ui$Element$Input$button,
@@ -21928,7 +22093,7 @@ var $author$project$ToolsProforma$showDockOptions = F2(
 						label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$arrowDownRight),
 						onPress: $elm$core$Maybe$Just(
 							msgWrapper(
-								A2($author$project$ToolsProforma$ToolDockSelect, toolEntry.toolType, $author$project$ToolsProforma$DockLowerRight)))
+								A2($author$project$ToolsController$ToolDockSelect, toolEntry.toolType, $author$project$ToolsController$DockLowerRight)))
 					}),
 					A2(
 					$mdgriffith$elm_ui$Element$Input$button,
@@ -21937,7 +22102,7 @@ var $author$project$ToolsProforma$showDockOptions = F2(
 						label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$arrowUpRight),
 						onPress: $elm$core$Maybe$Just(
 							msgWrapper(
-								A2($author$project$ToolsProforma$ToolDockSelect, toolEntry.toolType, $author$project$ToolsProforma$DockUpperRight)))
+								A2($author$project$ToolsController$ToolDockSelect, toolEntry.toolType, $author$project$ToolsController$DockUpperRight)))
 					})
 				])) : $mdgriffith$elm_ui$Element$none;
 	});
@@ -21947,7 +22112,7 @@ var $mdgriffith$elm_ui$Internal$Model$Text = function (a) {
 var $mdgriffith$elm_ui$Element$text = function (content) {
 	return $mdgriffith$elm_ui$Internal$Model$Text(content);
 };
-var $author$project$ToolsProforma$DirectionChanges = function (a) {
+var $author$project$ToolsController$DirectionChanges = function (a) {
 	return {$: 'DirectionChanges', a: a};
 };
 var $mdgriffith$elm_ui$Element$el = F2(
@@ -23475,7 +23640,7 @@ var $author$project$AbruptDirectionChanges$view = F2(
 					}()
 					])));
 	});
-var $author$project$ToolsProforma$viewToolByType = F3(
+var $author$project$ToolsController$viewToolByType = F3(
 	function (msgWrapper, entry, model) {
 		var _v0 = entry.toolType;
 		if (_v0.$ === 'ToolTrackInfo') {
@@ -23483,11 +23648,11 @@ var $author$project$ToolsProforma$viewToolByType = F3(
 		} else {
 			return A2(
 				$author$project$AbruptDirectionChanges$view,
-				A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsProforma$DirectionChanges),
+				A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$DirectionChanges),
 				model.directionChangeOptions);
 		}
 	});
-var $author$project$ToolsProforma$viewTool = F3(
+var $author$project$ToolsController$viewTool = F3(
 	function (msgWrapper, model, toolEntry) {
 		return A2(
 			$mdgriffith$elm_ui$Element$column,
@@ -23508,8 +23673,8 @@ var $author$project$ToolsProforma$viewTool = F3(
 							]),
 						_List_fromArray(
 							[
-								A2($author$project$ToolsProforma$showDockOptions, msgWrapper, toolEntry),
-								A2($author$project$ToolsProforma$showColourOptions, msgWrapper, toolEntry)
+								A2($author$project$ToolsController$showDockOptions, msgWrapper, toolEntry),
+								A2($author$project$ToolsController$showColourOptions, msgWrapper, toolEntry)
 							])))
 				]),
 			_List_fromArray(
@@ -23535,9 +23700,9 @@ var $author$project$ToolsProforma$viewTool = F3(
 								onPress: $elm$core$Maybe$Just(
 									msgWrapper(
 										A2(
-											$author$project$ToolsProforma$ToolStateToggle,
+											$author$project$ToolsController$ToolStateToggle,
 											toolEntry.toolType,
-											$author$project$ToolsProforma$nextToolState(toolEntry.state))))
+											$author$project$ToolsController$nextToolState(toolEntry.state))))
 							}),
 							A2(
 							$mdgriffith$elm_ui$Element$Input$button,
@@ -23547,20 +23712,20 @@ var $author$project$ToolsProforma$viewTool = F3(
 								label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$settings),
 								onPress: $elm$core$Maybe$Just(
 									msgWrapper(
-										$author$project$ToolsProforma$ToolPopupToggle(toolEntry.toolType)))
+										$author$project$ToolsController$ToolPopupToggle(toolEntry.toolType)))
 							})
 						])),
-					_Utils_eq(toolEntry.state, $author$project$ToolsProforma$Expanded) ? A3($author$project$ToolsProforma$viewToolByType, msgWrapper, toolEntry, model) : $mdgriffith$elm_ui$Element$none
+					_Utils_eq(toolEntry.state, $author$project$ToolsController$Expanded) ? A3($author$project$ToolsController$viewToolByType, msgWrapper, toolEntry, model) : $mdgriffith$elm_ui$Element$none
 				]));
 	});
-var $author$project$ToolsProforma$toolsForDock = F3(
+var $author$project$ToolsController$toolsForDock = F3(
 	function (dock, msgWrapper, model) {
 		return A2(
 			$mdgriffith$elm_ui$Element$column,
 			_List_Nil,
 			A2(
 				$elm$core$List$map,
-				A2($author$project$ToolsProforma$viewTool, msgWrapper, model),
+				A2($author$project$ToolsController$viewTool, msgWrapper, model),
 				A2(
 					$elm$core$List$filter,
 					function (tool) {
@@ -23576,7 +23741,7 @@ var $author$project$Main$lowerLeftDockView = function (model) {
 				[$mdgriffith$elm_ui$Element$noStaticStyleSheet])
 		},
 		$author$project$ViewPureStyles$commonLayoutStyles,
-		A3($author$project$ToolsProforma$toolsForDock, $author$project$ToolsProforma$DockLowerLeft, $author$project$Main$ToolsMsg, model));
+		A3($author$project$ToolsController$toolsForDock, $author$project$ToolsController$DockLowerLeft, $author$project$Main$ToolsMsg, model));
 };
 var $author$project$Main$upperLeftDockView = function (model) {
 	return A3(
@@ -23586,7 +23751,7 @@ var $author$project$Main$upperLeftDockView = function (model) {
 				[$mdgriffith$elm_ui$Element$noStaticStyleSheet])
 		},
 		$author$project$ViewPureStyles$commonLayoutStyles,
-		A3($author$project$ToolsProforma$toolsForDock, $author$project$ToolsProforma$DockUpperLeft, $author$project$Main$ToolsMsg, model));
+		A3($author$project$ToolsController$toolsForDock, $author$project$ToolsController$DockUpperLeft, $author$project$Main$ToolsMsg, model));
 };
 var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
 var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
@@ -24007,7 +24172,7 @@ var $author$project$Main$bottomDockView = function (model) {
 				[$mdgriffith$elm_ui$Element$noStaticStyleSheet])
 		},
 		$author$project$ViewPureStyles$commonLayoutStyles,
-		A3($author$project$ToolsProforma$toolsForDock, $author$project$ToolsProforma$DockBottom, $author$project$Main$ToolsMsg, model));
+		A3($author$project$ToolsController$toolsForDock, $author$project$ToolsController$DockBottom, $author$project$Main$ToolsMsg, model));
 };
 var $author$project$Main$ImageMessage = function (a) {
 	return {$: 'ImageMessage', a: a};
@@ -25550,7 +25715,7 @@ var $author$project$ViewThirdPerson$zoomButtons = function (msgWrapper) {
 };
 var $author$project$ViewThirdPerson$view = F4(
 	function (context, track, scene, msgWrapper) {
-		var dragging = true;
+		var dragging = context.dragAction;
 		return A2(
 			$mdgriffith$elm_ui$Element$el,
 			_List_fromArray(
@@ -25558,9 +25723,9 @@ var $author$project$ViewThirdPerson$view = F4(
 					$mdgriffith$elm_ui$Element$htmlAttribute(
 					$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onDown(
 						A2($elm$core$Basics$composeR, $author$project$ViewThirdPerson$ImageGrab, msgWrapper))),
-					$mdgriffith$elm_ui$Element$htmlAttribute(
+					(!_Utils_eq(dragging, $author$project$ViewContextThirdPerson$DragNone)) ? $mdgriffith$elm_ui$Element$htmlAttribute(
 					$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onMove(
-						A2($elm$core$Basics$composeR, $author$project$ViewThirdPerson$ImageDrag, msgWrapper))),
+						A2($elm$core$Basics$composeR, $author$project$ViewThirdPerson$ImageDrag, msgWrapper))) : $mdgriffith$elm_ui$Element$pointer,
 					$mdgriffith$elm_ui$Element$htmlAttribute(
 					$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onUp(
 						A2($elm$core$Basics$composeR, $author$project$ViewThirdPerson$ImageRelease, msgWrapper))),
@@ -25600,7 +25765,6 @@ var $author$project$ViewThirdPerson$view = F4(
 var $author$project$Main$SetViewMode = function (a) {
 	return {$: 'SetViewMode', a: a};
 };
-var $author$project$ViewContext$ViewThird = {$: 'ViewThird'};
 var $mdgriffith$elm_ui$Element$Input$Option = F2(
 	function (a, b) {
 		return {$: 'Option', a: a, b: b};
@@ -25993,7 +26157,7 @@ var $author$project$Main$viewModeChoices = function (model) {
 			label: $mdgriffith$elm_ui$Element$Input$labelHidden('Choose view'),
 			onChange: $author$project$Main$SetViewMode,
 			options: fullOptionList,
-			selected: $elm$core$Maybe$Just($author$project$ViewContext$ViewThird)
+			selected: $elm$core$Maybe$Just(model.viewMode)
 		});
 };
 var $author$project$ViewPureStyles$wideSliderStyles = _List_fromArray(
@@ -26127,7 +26291,7 @@ var $author$project$Main$lowerRightDockView = function (model) {
 				[$mdgriffith$elm_ui$Element$noStaticStyleSheet])
 		},
 		$author$project$ViewPureStyles$commonLayoutStyles,
-		A3($author$project$ToolsProforma$toolsForDock, $author$project$ToolsProforma$DockLowerRight, $author$project$Main$ToolsMsg, model));
+		A3($author$project$ToolsController$toolsForDock, $author$project$ToolsController$DockLowerRight, $author$project$Main$ToolsMsg, model));
 };
 var $author$project$Main$rightDockInternalConfig = $author$project$SplitPane$SplitPane$createViewConfig(
 	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitRightDockInternal});
@@ -26139,7 +26303,7 @@ var $author$project$Main$upperRightDockView = function (model) {
 				[$mdgriffith$elm_ui$Element$noStaticStyleSheet])
 		},
 		$author$project$ViewPureStyles$commonLayoutStyles,
-		A3($author$project$ToolsProforma$toolsForDock, $author$project$ToolsProforma$DockUpperRight, $author$project$Main$ToolsMsg, model));
+		A3($author$project$ToolsController$toolsForDock, $author$project$ToolsController$DockUpperRight, $author$project$Main$ToolsMsg, model));
 };
 var $author$project$Main$rightDockView = function (model) {
 	return A4(

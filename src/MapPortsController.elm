@@ -7,6 +7,7 @@ import Json.Decode as D exposing (Decoder, field, string)
 import Json.Encode as E
 import Length
 import MapboxKey exposing (mapboxKey)
+import SceneBuilder
 import TrackLoaded exposing (TrackLoaded)
 
 
@@ -143,7 +144,7 @@ addTrackToMap track =
             , ( "lon", E.float <| Angle.inDegrees <| Direction2d.toAngle longitude )
             , ( "lat", E.float <| Angle.inDegrees latitude )
             , ( "zoom", E.float 10.0 )
-            , ( "data", E.null ) --SceneBuilder.renderMapJson track ) -- Route as polyline
+            , ( "data", SceneBuilder.renderMapJson track ) -- Route as polyline
             , ( "points", E.null ) --trackPointsToJSON track ) -- Make track points draggable
             ]
 
