@@ -2,23 +2,23 @@
 
 # WIP
 
-Do I need the click delay debounce thing (map and image)?
-> Yes, stupid number of messages from Map. 
-> Might try debounce in JS again.
-
-Not doing selective render on Map?
+Not doing selective render on Map! (Always detail at 0.)
+> Ideally, only re-render when user stops moving the slider; could be time-based?
+> Click should certainly re-render at nearest point.
 
 Map click should not re-centre map.
 Third person click should not re-centre the view.
-> More generally, don't centre the view you click on.
-> Other views will centre if they are in "follow" mode.
+Double-click, in contrast, always centres.
+> More generally, don't centre _the view you click on_.
+> Other views should centre when in "follow" mode.
 
 Are sharp bends being reported when not so sharp? 
 > **YES** this is a problem. See sharp bend example.
+> Can't see it, need to use debugger.
 
 Put all Font, Colour etc into a Palette/Style module for ease of change.
 
-**POSSIBLE BUG** Why 3D stops centering after a while?
+Small thing, but sort bend problems in index order -- better, generate them in the right order!
 
 **Next up**: Delete tool.
 
