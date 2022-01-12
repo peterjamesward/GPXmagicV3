@@ -15321,8 +15321,17 @@ var $author$project$Main$update = F2(
 				var _v7 = model.track;
 				if (_v7.$ === 'Just') {
 					var track = _v7.a;
-					return _Utils_Tuple2(
+					var newTrack = _Utils_update(
+						track,
+						{currentPosition: pos});
+					var newModel = _Utils_update(
 						model,
+						{
+							scene: $author$project$SceneBuilder$render3dView(newTrack),
+							track: $elm$core$Maybe$Just(newTrack)
+						});
+					return _Utils_Tuple2(
+						newModel,
 						A2($author$project$Actions$setCurrentPosition, pos, track));
 				} else {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);

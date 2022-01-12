@@ -291,7 +291,17 @@ update msg model =
             -- Slider moves pointer and recentres view.
             case model.track of
                 Just track ->
-                    ( model, Actions.setCurrentPosition pos track )
+                    let
+                        newTrack =
+                            { track | currentPosition = pos }
+
+                        newModel =
+                            { model
+                                | track = Just newTrack
+                                , scene = SceneBuilder.render3dView newTrack
+                            }
+                    in
+                    ( newModel, Actions.setCurrentPosition pos track )
 
                 Nothing ->
                     ( model, Cmd.none )
