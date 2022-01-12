@@ -3,21 +3,23 @@
 # WIP
 
 Do I need the click delay debounce thing (map and image)?
-> Yes, stupid number of messages from Map. Might try debounce in JS again.
+> Yes, stupid number of messages from Map. 
+> Might try debounce in JS again.
 
-Need click detect back on Map.
+Not doing selective render on Map?
+
+Map click should not re-centre map.
+
+Third person click should not re-centre the view.
 
 Are sharp bends being reported when not so sharp? 
 > **YES** this is a problem. See sharp bend example.
 
-How to allow Actions to update Map, but Map to set current?
-> Because the first of these not required!
-
 Put all Font, Colour etc into a Palette/Style module for ease of change.
 
-**BUG** Why 3D stops centering after a while?
+**POSSIBLE BUG** Why 3D stops centering after a while?
 
-**Next**: Delete tool.
+**Next up**: Delete tool.
 
 Need "restore to defaults" for tools.
 
