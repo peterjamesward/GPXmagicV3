@@ -420,7 +420,9 @@ update msg model =
                 modelAfterActions =
                     performActionsOnModel actions newModel
             in
-            ( modelAfterActions, performActionCommands actions )
+            ( modelAfterActions
+            , performActionCommands actions modelAfterActions
+            )
 
 
 adjustSpaceForContent : Model -> Model
@@ -746,6 +748,25 @@ performActionsOnModel actions model =
     List.foldl performAction model actions
 
 
-performActionCommands : List (ToolAction Msg) -> Cmd Msg
-performActionCommands actions =
-    Cmd.none
+performActionCommands : List (ToolAction Msg) -> Model -> Cmd Msg
+performActionCommands actions model =
+    let
+        performAction : ToolAction Msg -> Cmd Msg
+        performAction action =
+            case ( action, model.track ) of
+                ( SetCurrent position, Just track ) ->
+                    MapPortsController.centreMapOnCurrent track
+
+                ( ShowPreview string color list, Just track ) ->
+                    Cmd.none
+
+                ( HidePreview string, Just track ) ->
+                    Cmd.none
+
+                ( DelayMessage int msg, Just track ) ->
+                    Cmd.none
+
+                _ ->
+                    Cmd.none
+    in
+    Cmd.batch <| List.map performAction actions

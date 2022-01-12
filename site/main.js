@@ -10365,9 +10365,113 @@ var $author$project$GpxParser$parseGPXPoints = function (xml) {
 		$elm$core$Basics$identity,
 		A2($elm$core$List$map, earthVector, trkpts));
 };
-var $author$project$Main$performActionCommands = function (actions) {
-	return $elm$core$Platform$Cmd$none;
+var $author$project$DomainModel$gpxPointFromIndex = F2(
+	function (index, treeNode) {
+		gpxPointFromIndex:
+		while (true) {
+			if (treeNode.$ === 'Leaf') {
+				var info = treeNode.a;
+				return (index <= 0) ? info.sourceData.a : info.sourceData.b;
+			} else {
+				var info = treeNode.a;
+				if (_Utils_cmp(
+					index,
+					$author$project$DomainModel$skipCount(info.left)) < 0) {
+					var $temp$index = index,
+						$temp$treeNode = info.left;
+					index = $temp$index;
+					treeNode = $temp$treeNode;
+					continue gpxPointFromIndex;
+				} else {
+					var $temp$index = index - $author$project$DomainModel$skipCount(info.left),
+						$temp$treeNode = info.right;
+					index = $temp$index;
+					treeNode = $temp$treeNode;
+					continue gpxPointFromIndex;
+				}
+			}
+		}
+	});
+var $ianmackenzie$elm_units$Angle$inRadians = function (_v0) {
+	var numRadians = _v0.a;
+	return numRadians;
 };
+var $ianmackenzie$elm_units$Angle$inDegrees = function (angle) {
+	return 180 * ($ianmackenzie$elm_units$Angle$inRadians(angle) / $elm$core$Basics$pi);
+};
+var $elm$core$Basics$atan2 = _Basics_atan2;
+var $ianmackenzie$elm_geometry$Direction2d$toAngle = function (_v0) {
+	var d = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(
+		A2($elm$core$Basics$atan2, d.y, d.x));
+};
+var $author$project$MapPortsController$centreMapOnCurrent = function (track) {
+	var _v0 = A2($author$project$DomainModel$gpxPointFromIndex, track.currentPosition, track.trackTree);
+	var longitude = _v0.longitude;
+	var latitude = _v0.latitude;
+	var altitude = _v0.altitude;
+	return $author$project$MapPortsController$mapCommands(
+		$elm$json$Json$Encode$object(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'Cmd',
+					$elm$json$Json$Encode$string('Centre')),
+					_Utils_Tuple2(
+					'token',
+					$elm$json$Json$Encode$string($author$project$MapboxKey$mapboxKey)),
+					_Utils_Tuple2(
+					'lon',
+					$elm$json$Json$Encode$float(
+						$ianmackenzie$elm_units$Angle$inDegrees(
+							$ianmackenzie$elm_geometry$Direction2d$toAngle(longitude)))),
+					_Utils_Tuple2(
+					'lat',
+					$elm$json$Json$Encode$float(
+						$ianmackenzie$elm_units$Angle$inDegrees(latitude)))
+				])));
+};
+var $author$project$Main$performActionCommands = F2(
+	function (actions, model) {
+		var performAction = function (action) {
+			var _v0 = _Utils_Tuple2(action, model.track);
+			_v0$4:
+			while (true) {
+				if (_v0.b.$ === 'Just') {
+					switch (_v0.a.$) {
+						case 'SetCurrent':
+							var position = _v0.a.a;
+							var track = _v0.b.a;
+							return $author$project$MapPortsController$centreMapOnCurrent(track);
+						case 'ShowPreview':
+							var _v1 = _v0.a;
+							var string = _v1.a;
+							var color = _v1.b;
+							var list = _v1.c;
+							var track = _v0.b.a;
+							return $elm$core$Platform$Cmd$none;
+						case 'HidePreview':
+							var string = _v0.a.a;
+							var track = _v0.b.a;
+							return $elm$core$Platform$Cmd$none;
+						case 'DelayMessage':
+							var _v2 = _v0.a;
+							var _int = _v2.a;
+							var msg = _v2.b;
+							var track = _v0.b.a;
+							return $elm$core$Platform$Cmd$none;
+						default:
+							break _v0$4;
+					}
+				} else {
+					break _v0$4;
+				}
+			}
+			return $elm$core$Platform$Cmd$none;
+		};
+		return $elm$core$Platform$Cmd$batch(
+			A2($elm$core$List$map, performAction, actions));
+	});
 var $avh4$elm_color$Color$RgbaSpace = F4(
 	function (a, b, c, d) {
 		return {$: 'RgbaSpace', a: a, b: b, c: c, d: d};
@@ -12135,7 +12239,6 @@ var $author$project$MyIP$processIpInfo = function (response) {
 		return $elm$core$Maybe$Nothing;
 	}
 };
-var $elm$core$Basics$atan2 = _Basics_atan2;
 var $ianmackenzie$elm_geometry$Direction2d$angleFrom = F2(
 	function (_v0, _v1) {
 		var d1 = _v0.a;
@@ -12572,40 +12675,6 @@ var $author$project$MyIP$requestIpInformation = function (msg) {
 				_List_Nil)
 		});
 };
-var $author$project$DomainModel$gpxPointFromIndex = F2(
-	function (index, treeNode) {
-		gpxPointFromIndex:
-		while (true) {
-			if (treeNode.$ === 'Leaf') {
-				var info = treeNode.a;
-				return (index <= 0) ? info.sourceData.a : info.sourceData.b;
-			} else {
-				var info = treeNode.a;
-				if (_Utils_cmp(
-					index,
-					$author$project$DomainModel$skipCount(info.left)) < 0) {
-					var $temp$index = index,
-						$temp$treeNode = info.left;
-					index = $temp$index;
-					treeNode = $temp$treeNode;
-					continue gpxPointFromIndex;
-				} else {
-					var $temp$index = index - $author$project$DomainModel$skipCount(info.left),
-						$temp$treeNode = info.right;
-					index = $temp$index;
-					treeNode = $temp$treeNode;
-					continue gpxPointFromIndex;
-				}
-			}
-		}
-	});
-var $ianmackenzie$elm_units$Angle$inRadians = function (_v0) {
-	var numRadians = _v0.a;
-	return numRadians;
-};
-var $ianmackenzie$elm_units$Angle$inDegrees = function (angle) {
-	return 180 * ($ianmackenzie$elm_units$Angle$inRadians(angle) / $elm$core$Basics$pi);
-};
 var $elm$json$Json$Encode$null = _Json_encodeNull;
 var $elm$json$Json$Encode$list = F2(
 	function (func, entries) {
@@ -12636,11 +12705,6 @@ var $author$project$DomainModel$sourceData = function (treeNode) {
 		var node = treeNode.a;
 		return node.nodeContent.sourceData;
 	}
-};
-var $ianmackenzie$elm_geometry$Direction2d$toAngle = function (_v0) {
-	var d = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(
-		A2($elm$core$Basics$atan2, d.y, d.x));
 };
 var $author$project$SceneBuilder$renderMapJson = function (track) {
 	var mapLocation = function (point) {
@@ -12768,32 +12832,6 @@ var $author$project$MapPortsController$addTrackToMap = function (track) {
 					'data',
 					$author$project$SceneBuilder$renderMapJson(track)),
 					_Utils_Tuple2('points', $elm$json$Json$Encode$null)
-				])));
-};
-var $author$project$MapPortsController$centreMapOnCurrent = function (track) {
-	var _v0 = A2($author$project$DomainModel$gpxPointFromIndex, track.currentPosition, track.trackTree);
-	var longitude = _v0.longitude;
-	var latitude = _v0.latitude;
-	var altitude = _v0.altitude;
-	return $author$project$MapPortsController$mapCommands(
-		$elm$json$Json$Encode$object(
-			_List_fromArray(
-				[
-					_Utils_Tuple2(
-					'Cmd',
-					$elm$json$Json$Encode$string('Centre')),
-					_Utils_Tuple2(
-					'token',
-					$elm$json$Json$Encode$string($author$project$MapboxKey$mapboxKey)),
-					_Utils_Tuple2(
-					'lon',
-					$elm$json$Json$Encode$float(
-						$ianmackenzie$elm_units$Angle$inDegrees(
-							$ianmackenzie$elm_geometry$Direction2d$toAngle(longitude)))),
-					_Utils_Tuple2(
-					'lat',
-					$elm$json$Json$Encode$float(
-						$ianmackenzie$elm_units$Angle$inDegrees(latitude)))
 				])));
 };
 var $author$project$Actions$updateAllDisplays = function (track) {
@@ -15646,7 +15684,7 @@ var $author$project$Main$update = F2(
 				var modelAfterActions = A2($author$project$Main$performActionsOnModel, actions, newModel);
 				return _Utils_Tuple2(
 					modelAfterActions,
-					$author$project$Main$performActionCommands(actions));
+					A2($author$project$Main$performActionCommands, actions, modelAfterActions));
 		}
 	});
 var $mdgriffith$elm_ui$Internal$Model$Colored = F3(

@@ -2,10 +2,9 @@
 
 # WIP
 
-## Refactoring before adding more code ...
+Do I need the click delay debounce thing (map and image)?
 
-Do multiple views PROPS.
-Need to add ToolAction fulfilment.
+Are sharp bends being reported when not so sharp?
 
 How to allow Actions to update Map, but Map to set current?
 > Because the first of these not required!
