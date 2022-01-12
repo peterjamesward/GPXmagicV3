@@ -57,21 +57,22 @@ findAbruptDirectionChanges options tree =
                                 (node.right |> asRecord |> .directionAtStart)
                                 |> Quantity.abs
 
-                        withThisNodeIfNeeded =
+                        withThisNodeIfNeeded acc =
                             -- Is it at this node, or one of its children?
                             if thisNodeAngle |> Quantity.greaterThanOrEqualTo options.threshold then
-                                ( skip + 1, thisNodeAngle ) :: accum
+                                ( skip + 1, thisNodeAngle ) :: acc
 
                             else
-                                accum
+                                acc
                     in
                     if
                         node.nodeContent.directionChangeMaximumAbs
                             |> Quantity.greaterThanOrEqualTo options.threshold
                     then
-                        withThisNodeIfNeeded
-                            |> helper skip node.left
+                        accum
                             |> helper (skip + skipCount node.left) node.right
+                            |> helper skip node.left
+                            |> withThisNodeIfNeeded
 
                     else
                         accum

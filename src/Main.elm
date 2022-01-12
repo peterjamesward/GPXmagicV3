@@ -763,8 +763,10 @@ performActionCommands actions model =
         performAction action =
             case ( action, model.track ) of
                 ( SetCurrent position, Just track ) ->
-                    MapPortController.addTrackToMap track
-                    --MapPortController.centreMapOnCurrent track
+                    Cmd.batch
+                        [ MapPortController.addTrackToMap track
+                        , MapPortController.centreMapOnCurrent track
+                        ]
 
                 ( ShowPreview string color list, Just track ) ->
                     Cmd.none
