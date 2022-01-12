@@ -1,5 +1,6 @@
 port module MapPortsController exposing (..)
 
+import Actions exposing (ToolAction(..))
 import Angle
 import Direction2d
 import DomainModel exposing (GPXSource, PeteTree, gpxFromPointWithReference, gpxPointFromIndex, leafFromIndex, pointFromIndex, sourceData, startPoint)
@@ -105,7 +106,7 @@ centreMapOnCurrent track =
 update :
     MapMsg
     -> TrackLoaded
-    -> Cmd msg
+    -> List (ToolAction msg)
 update mapMsg track =
     case mapMsg of
         MapPortMessage value ->
@@ -187,7 +188,7 @@ msgDecoder =
 processMapPortMessage :
     TrackLoaded
     -> E.Value
-    -> Cmd msg
+    -> List (ToolAction msg)
 processMapPortMessage track json =
     let
         jsonMsg =
@@ -216,10 +217,10 @@ processMapPortMessage track json =
                         index =
                             DomainModel.nearestToLonLat gpxPoint track.trackTree
                     in
-                    addTrackToMap track
+                    [SetCurrent index]
 
                 _ ->
-                    Cmd.none
+                    []
 
         --( Ok "drag", Just track ) ->
         --    case draggedOnMap json track of
@@ -243,4 +244,4 @@ processMapPortMessage track json =
         --        _ ->
         --            ( Model model, Cmd.none )
         _ ->
-            Cmd.none
+            []

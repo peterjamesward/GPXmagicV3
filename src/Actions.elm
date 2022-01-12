@@ -4,8 +4,6 @@ module Actions exposing (..)
 
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree)
 import Element
-import MapPortsController
-import TrackLoaded exposing (TrackLoaded)
 
 
 type ToolAction msg
@@ -15,21 +13,3 @@ type ToolAction msg
     | DelayMessage Int msg
     | NoAction
 
-
-updateAllDisplays : TrackLoaded -> Cmd msg
-updateAllDisplays track =
-    --if track.viewMode == ViewMap then
-        Cmd.batch
-            -- Must repaint track on so that selective rendering works.
-            [ MapPortsController.addTrackToMap track
-            , MapPortsController.centreMapOnCurrent track
-            ]
-
-    --else
-    --    Cmd.none
-
-
-setCurrentPosition : Int -> TrackLoaded -> Cmd msg
-setCurrentPosition position model =
-    { model | currentPosition = position }
-        |> updateAllDisplays

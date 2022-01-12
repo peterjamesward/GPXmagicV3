@@ -3,10 +3,12 @@
 # WIP
 
 Do I need the click delay debounce thing (map and image)?
+> Yes, stupid number of messages from Map. Might try debounce in JS again.
 
-Need click detect back.
+Need click detect back on Map.
 
-Are sharp bends being reported when not so sharp? **YES** this is a problem.
+Are sharp bends being reported when not so sharp? 
+> **YES** this is a problem. See sharp bend example.
 
 How to allow Actions to update Map, but Map to set current?
 > Because the first of these not required!

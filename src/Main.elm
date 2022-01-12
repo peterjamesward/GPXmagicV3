@@ -176,7 +176,14 @@ update msg model =
         MapPortsMessage mapMsg ->
             case model.track of
                 Just track ->
-                    ( model, MapPortsController.update mapMsg track )
+                    let
+                        actions =
+                            MapPortsController.update mapMsg track
+
+                        newModel =
+                            performActionsOnModel actions model
+                    in
+                    ( newModel, performActionCommands actions model )
 
                 Nothing ->
                     ( model, Cmd.none )
@@ -264,7 +271,7 @@ update msg model =
                             modelWithTrack
                                 |> ToolsController.refreshAllTools
                     in
-                    ( finalModel, Actions.updateAllDisplays newTrack )
+                    ( finalModel, updateAllDisplays newTrack )
 
                 Nothing ->
                     ( model, Cmd.none )
@@ -279,7 +286,7 @@ update msg model =
                         newModel =
                             { model | track = Just track }
                     in
-                    ( newModel, Actions.updateAllDisplays newTrack )
+                    ( newModel, updateAllDisplays newTrack )
 
                 Nothing ->
                     ( model, Cmd.none )
@@ -312,7 +319,9 @@ update msg model =
                                 , scene = SceneBuilder.render3dView newTrack
                             }
                     in
-                    ( newModel, Actions.setCurrentPosition pos track )
+                    ( newModel
+                    , performActionCommands [ SetCurrent pos ] newModel
+                    )
 
                 Nothing ->
                     ( model, Cmd.none )
@@ -324,7 +333,7 @@ update msg model =
                         newModel =
                             { model | viewMode = viewMode }
                     in
-                    ( newModel, Actions.updateAllDisplays track )
+                    ( newModel, updateAllDisplays track )
 
                 Nothing ->
                     ( model, Cmd.none )
@@ -347,7 +356,7 @@ update msg model =
 
                         newModel =
                             { model | viewThirdPersonContext = newContext }
-                             |> performActionsOnModel actions
+                                |> performActionsOnModel actions
                     in
                     ( newModel, performActionCommands actions model )
 
@@ -762,9 +771,19 @@ performActionCommands actions model =
                     Cmd.none
 
                 ( DelayMessage int msg, Just track ) ->
+                    --TODO: May not be required.
                     Cmd.none
 
                 _ ->
                     Cmd.none
     in
     Cmd.batch <| List.map performAction actions
+
+
+updateAllDisplays : TrackLoaded -> Cmd msg
+updateAllDisplays track =
+    Cmd.batch
+        -- Must repaint track on so that selective rendering works.
+        [ MapPortsController.addTrackToMap track
+        , MapPortsController.centreMapOnCurrent track
+        ]

@@ -237,11 +237,11 @@ update msg msgWrapper track context =
 
         ImageClick event ->
             -- Click moves pointer but does not re-centre view. (Double click will.)
-            --if context.waitingForClickDelay then
+            if context.waitingForClickDelay then
                 ( context, [ SetCurrent <| detectHit event track context ] )
 
-            --else
-            --    ( context, [] )
+            else
+                ( context, [] )
 
         ImageMouseWheel deltaY ->
             let
@@ -269,7 +269,8 @@ update msg msgWrapper track context =
 
                             else
                                 DragPan
-                        --, waitingForClickDelay = True
+                        , waitingForClickDelay = True
+
                         --, followSelectedPoint = False
                     }
             in
