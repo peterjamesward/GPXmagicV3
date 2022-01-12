@@ -30,6 +30,7 @@ import OAuthTypes as O exposing (OAuthMsg(..))
 import Pixels exposing (Pixels)
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
+import SceneBuilder
 import SplitPane.SplitPane as SplitPane exposing (..)
 import StravaAuth exposing (getStravaToken)
 import Task
@@ -237,7 +238,16 @@ update msg model =
                             }
 
                         modelWithTrack =
-                            { model | track = Just newTrack }
+                            { model
+                                | track = Just newTrack
+                                , viewContext =
+                                    Just <|
+                                        ViewThirdPerson.initialiseView
+                                            0
+                                            newTrack.trackTree
+                                            model.contentArea
+                                , scene = SceneBuilder.render3dView newTrack
+                            }
 
                         ( finalModel, cmd ) =
                             modelWithTrack

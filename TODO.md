@@ -4,8 +4,7 @@
 
 ## Refactoring before adding more code ...
 
-All over the floor.
-Need to separate ViewContext from TrackLoaded. Will need this for multiple views anyway.
+Do multiple views PROPS.
 Need to add ToolAction fulfilment.
 
 How to allow Actions to update Map, but Map to set current?

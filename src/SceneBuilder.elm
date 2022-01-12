@@ -8,7 +8,6 @@ import BoundingBox3d exposing (BoundingBox3d)
 import Color exposing (Color, black, darkGreen, green, lightOrange)
 import ColourPalette exposing (gradientHue, gradientHue2)
 import Direction2d
-import Direction3d
 import DomainModel exposing (..)
 import Json.Encode as E
 import Length exposing (Meters)
@@ -20,43 +19,18 @@ import Point3d
 import Quantity
 import Scene3d exposing (Entity)
 import Scene3d.Material as Material
-import SketchPlane3d
-import Sphere3d
-import Spherical
 import TrackLoaded exposing (TrackLoaded)
-import Vector3d
 
 
-globe =
-    Scene3d.sphere (Material.color darkGreen)
-        (Sphere3d.withRadius (Length.meters Spherical.meanRadius) Point3d.origin)
-
-
-render3dView :
-    { m
-        | trackTree : Maybe PeteTree
-        , renderDepth : Int
-        , currentPosition : Int
-    }
-    -> List (Entity LocalCoords)
-render3dView model =
+render3dView : TrackLoaded -> List (Entity LocalCoords)
+render3dView track =
     let
         floorPlane =
-            case model.trackTree of
-                Just aTree ->
-                    Plane3d.xy |> Plane3d.offsetBy (BoundingBox3d.minZ <| boundingBox aTree)
-
-                Nothing ->
-                    Plane3d.xy
+            Plane3d.xy |> Plane3d.offsetBy (BoundingBox3d.minZ <| boundingBox track.trackTree)
 
         fullRenderingZone =
-            case model.trackTree of
-                Just aTree ->
-                    BoundingBox3d.withDimensions ( boxSide, boxSide, boxSide )
-                        (startPoint <| leafFromIndex model.currentPosition aTree)
-
-                Nothing ->
-                    BoundingBox3d.singleton Point3d.origin
+            BoundingBox3d.withDimensions ( boxSide, boxSide, boxSide )
+                (startPoint <| leafFromIndex track.currentPosition track.trackTree)
 
         gradientColourPastel : Float -> Color.Color
         gradientColourPastel slope =
@@ -152,13 +126,8 @@ render3dView model =
                 (pointFromIndex marker tree)
             ]
     in
-    case model.trackTree of
-        Just tree ->
-            renderTreeSelectively model.renderDepth tree <|
-                renderCurrentMarker model.currentPosition tree
-
-        Nothing ->
-            []
+    renderTreeSelectively track.renderDepth track.trackTree <|
+        renderCurrentMarker track.currentPosition track.trackTree
 
 
 
