@@ -4,7 +4,9 @@
 
 Do I need the click delay debounce thing (map and image)?
 
-Are sharp bends being reported when not so sharp?
+Need click detect back.
+
+Are sharp bends being reported when not so sharp? **YES** this is a problem.
 
 How to allow Actions to update Map, but Map to set current?
 > Because the first of these not required!

@@ -333,15 +333,12 @@ update msg model =
             case model.track of
                 Just track ->
                     let
-                        oldContext =
-                            model.viewThirdPersonContext
-
                         ( newContext, actions ) =
                             case model.viewThirdPersonContext of
                                 Just third ->
                                     let
                                         ( new, act ) =
-                                            ViewThirdPerson.update imageMsg track third
+                                            ViewThirdPerson.update imageMsg ImageMessage track third
                                     in
                                     ( Just new, act )
 
@@ -350,8 +347,9 @@ update msg model =
 
                         newModel =
                             { model | viewThirdPersonContext = newContext }
+                             |> performActionsOnModel actions
                     in
-                    ( newModel, Cmd.none )
+                    ( newModel, performActionCommands actions model )
 
                 Nothing ->
                     ( model, Cmd.none )

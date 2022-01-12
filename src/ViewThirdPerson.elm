@@ -207,10 +207,11 @@ detectHit event track context =
 
 update :
     Msg
+    -> (Msg -> msg)
     -> TrackLoaded
     -> ThirdPersonContext
-    -> ( ThirdPersonContext, List (ToolAction Msg) )
-update msg track context =
+    -> ( ThirdPersonContext, List (ToolAction msg) )
+update msg msgWrapper track context =
     case msg of
         ImageZoomIn ->
             let
@@ -236,11 +237,11 @@ update msg track context =
 
         ImageClick event ->
             -- Click moves pointer but does not re-centre view. (Double click will.)
-            if context.waitingForClickDelay then
+            --if context.waitingForClickDelay then
                 ( context, [ SetCurrent <| detectHit event track context ] )
 
-            else
-                ( context, [] )
+            --else
+            --    ( context, [] )
 
         ImageMouseWheel deltaY ->
             let
@@ -268,12 +269,12 @@ update msg track context =
 
                             else
                                 DragPan
-                        , waitingForClickDelay = True
+                        --, waitingForClickDelay = True
                         --, followSelectedPoint = False
                     }
             in
             ( newContext
-            , [ DelayMessage 250 ClickDelayExpired ]
+            , [ DelayMessage 250 (msgWrapper ClickDelayExpired) ]
             )
 
         ImageDrag event ->
