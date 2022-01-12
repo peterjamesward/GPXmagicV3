@@ -1,6 +1,6 @@
 module ViewContext exposing (..)
 
-import ViewContextThirdPerson exposing (ContextThirdPerson)
+import ViewContextThirdPerson exposing (ThirdPersonContext)
 import ViewMap
 
 
@@ -14,6 +14,6 @@ type ViewMode
 
 
 type ViewContext
-    = ThirdPersonContext ContextThirdPerson
+    = ThirdPersonContext ThirdPersonContext
     | MapContext ViewMap.MapContext
     | InfoContext

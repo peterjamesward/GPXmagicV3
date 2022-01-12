@@ -31,7 +31,7 @@ import Spherical
 import TrackLoaded exposing (TrackLoaded)
 import Vector3d
 import ViewContext exposing (ViewContext(..))
-import ViewContextThirdPerson exposing (ContextThirdPerson, DragAction(..))
+import ViewContextThirdPerson exposing (ThirdPersonContext, DragAction(..))
 import ViewPureStyles exposing (useIcon)
 import Viewpoint3d exposing (Viewpoint3d)
 
@@ -86,15 +86,12 @@ zoomButtons msgWrapper =
 
 
 view :
-    { model
-        | scene : List (Entity LocalCoords)
-        , contentArea : ( Quantity Int Pixels, Quantity Int Pixels )
-        , track : Maybe TrackLoaded
-        , viewContext : Maybe ContextThirdPerson
-    }
+    ThirdPersonContext
+    -> TrackLoaded
+    -> List (Entity LocalCoords)
     -> (Msg -> msg)
     -> Element msg
-view model msgWrapper =
+view context track scene msgWrapper =
     let
         --TODO: Function call on view context...
         dragging =
@@ -122,21 +119,16 @@ view model msgWrapper =
         , Border.color FlatColors.ChinesePalette.peace
         , inFront <| zoomButtons msgWrapper
         ]
-    <|
-        case ( model.track, model.viewContext ) of
-            ( Just aTrack, Just context ) ->
+            <|
                 html <|
                     Scene3d.cloudy
-                        { camera = deriveCamera aTrack.trackTree context aTrack.currentPosition
-                        , dimensions = model.contentArea
+                        { camera = deriveCamera track.trackTree context track.currentPosition
+                        , dimensions = context.contentArea
                         , background = backgroundColor Color.lightBlue
                         , clipDepth = Length.meters 1
-                        , entities = model.scene
+                        , entities = scene
                         , upDirection = positiveZ
                         }
-
-            _ ->
-                text "No track to show"
 
 
 onContextMenu : a -> Element.Attribute a
@@ -151,7 +143,7 @@ onContextMenu msg =
         |> htmlAttribute
 
 
-deriveCamera : PeteTree -> ContextThirdPerson -> Int -> Camera3d Meters LocalCoords
+deriveCamera : PeteTree -> ThirdPersonContext -> Int -> Camera3d Meters LocalCoords
 deriveCamera treeNode context currentPosition =
     let
         latitude =
@@ -186,7 +178,7 @@ deriveCamera treeNode context currentPosition =
 detectHit :
     Mouse.Event
     -> TrackLoaded
-    -> ContextThirdPerson
+    -> ThirdPersonContext
     -> Int
 detectHit event track context =
     --TODO: Move into view/pane/whatever it will be.
@@ -221,8 +213,8 @@ detectHit event track context =
 update :
     Msg
     -> TrackLoaded
-    -> ContextThirdPerson
-    -> ( ContextThirdPerson, List (ToolAction Msg) )
+    -> ThirdPersonContext
+    -> ( ThirdPersonContext, List (ToolAction Msg) )
 update msg track context =
     case msg of
         ImageZoomIn ->
@@ -370,7 +362,7 @@ initialiseView :
     Int
     -> PeteTree
     -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> ContextThirdPerson
+    -> ThirdPersonContext
 initialiseView current treeNode viewSize =
     { cameraAzimuth = Direction2d.x
     , cameraElevation = Angle.degrees 30

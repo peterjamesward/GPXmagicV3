@@ -8421,6 +8421,7 @@ var $author$project$Main$GotWindowSize = function (a) {
 };
 var $author$project$SplitPane$SplitPane$Horizontal = {$: 'Horizontal'};
 var $author$project$SplitPane$SplitPane$Vertical = {$: 'Vertical'};
+var $author$project$ViewContext$ViewInfo = {$: 'ViewInfo'};
 var $elm$core$Basics$composeL = F3(
 	function (g, f, x) {
 		return g(
@@ -9585,10 +9586,12 @@ var $author$project$Main$init = F3(
 				time: $elm$time$Time$millisToPosix(0),
 				tools: $author$project$ToolsProforma$tools,
 				track: $elm$core$Maybe$Nothing,
-				viewContext: $elm$core$Maybe$Nothing,
 				viewDimensions: _Utils_Tuple2(
 					$ianmackenzie$elm_units$Pixels$pixels(800),
 					$ianmackenzie$elm_units$Pixels$pixels(500)),
+				viewMapContext: $elm$core$Maybe$Nothing,
+				viewMode: $author$project$ViewContext$ViewInfo,
+				viewThirdPersonContext: $elm$core$Maybe$Nothing,
 				windowSize: _Utils_Tuple2(1000, 800),
 				zone: $elm$time$Time$utc
 			},
@@ -10126,6 +10129,10 @@ var $elm$core$List$head = function (list) {
 	} else {
 		return $elm$core$Maybe$Nothing;
 	}
+};
+var $author$project$ViewMap$initialiseContext = {
+	lastMapClick: _Utils_Tuple2(0, 0),
+	mapClickDebounce: false
 };
 var $author$project$ViewContextThirdPerson$DragNone = {$: 'DragNone'};
 var $ianmackenzie$elm_units$Length$meters = function (numMeters) {
@@ -15274,7 +15281,8 @@ var $author$project$Main$update = F2(
 						{
 							scene: $author$project$SceneBuilder$render3dView(newTrack),
 							track: $elm$core$Maybe$Just(newTrack),
-							viewContext: $elm$core$Maybe$Just(
+							viewMapContext: $elm$core$Maybe$Just($author$project$ViewMap$initialiseContext),
+							viewThirdPersonContext: $elm$core$Maybe$Just(
 								A3($author$project$ViewThirdPerson$initialiseView, 0, newTrack.trackTree, model.contentArea))
 						});
 					var _v4 = $author$project$ToolsProforma$refreshAllTools(modelWithTrack);
@@ -15341,7 +15349,9 @@ var $author$project$Main$update = F2(
 				var _v8 = model.track;
 				if (_v8.$ === 'Just') {
 					var track = _v8.a;
-					var newModel = model;
+					var newModel = _Utils_update(
+						model,
+						{viewMode: viewMode});
 					return _Utils_Tuple2(
 						newModel,
 						$author$project$Actions$updateAllDisplays(track));
@@ -15353,9 +15363,9 @@ var $author$project$Main$update = F2(
 				var _v9 = model.track;
 				if (_v9.$ === 'Just') {
 					var track = _v9.a;
-					var oldContext = model.viewContext;
+					var oldContext = model.viewThirdPersonContext;
 					var _v10 = function () {
-						var _v11 = model.viewContext;
+						var _v11 = model.viewThirdPersonContext;
 						if (_v11.$ === 'Just') {
 							var third = _v11.a;
 							var _v12 = A3($author$project$ViewThirdPerson$update, imageMsg, track, third);
@@ -15372,7 +15382,7 @@ var $author$project$Main$update = F2(
 					var actions = _v10.b;
 					var newModel = _Utils_update(
 						model,
-						{viewContext: newContext});
+						{viewThirdPersonContext: newContext});
 					return _Utils_Tuple2(newModel, $elm$core$Platform$Cmd$none);
 				} else {
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
@@ -24005,9 +24015,7 @@ var $author$project$Main$ImageMessage = function (a) {
 var $author$project$Main$SetCurrentPosition = function (a) {
 	return {$: 'SetCurrentPosition', a: a};
 };
-var $author$project$ViewContext$ViewInfo = {$: 'ViewInfo'};
 var $author$project$ViewContext$ViewMap = {$: 'ViewMap'};
-var $author$project$ViewContext$ViewThird = {$: 'ViewThird'};
 var $mdgriffith$elm_ui$Internal$Model$Top = {$: 'Top'};
 var $mdgriffith$elm_ui$Element$alignTop = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$Top);
 var $mdgriffith$elm_ui$Element$htmlAttribute = $mdgriffith$elm_ui$Internal$Model$Attr;
@@ -25540,8 +25548,8 @@ var $author$project$ViewThirdPerson$zoomButtons = function (msgWrapper) {
 				})
 			]));
 };
-var $author$project$ViewThirdPerson$view = F2(
-	function (model, msgWrapper) {
+var $author$project$ViewThirdPerson$view = F4(
+	function (context, track, scene, msgWrapper) {
 		var dragging = true;
 		return A2(
 			$mdgriffith$elm_ui$Element$el,
@@ -25578,29 +25586,21 @@ var $author$project$ViewThirdPerson$view = F2(
 					$mdgriffith$elm_ui$Element$inFront(
 					$author$project$ViewThirdPerson$zoomButtons(msgWrapper))
 				]),
-			function () {
-				var _v0 = _Utils_Tuple2(model.track, model.viewContext);
-				if ((_v0.a.$ === 'Just') && (_v0.b.$ === 'Just')) {
-					var aTrack = _v0.a.a;
-					var context = _v0.b.a;
-					return $mdgriffith$elm_ui$Element$html(
-						$ianmackenzie$elm_3d_scene$Scene3d$cloudy(
-							{
-								background: $ianmackenzie$elm_3d_scene$Scene3d$backgroundColor($avh4$elm_color$Color$lightBlue),
-								camera: A3($author$project$ViewThirdPerson$deriveCamera, aTrack.trackTree, context, aTrack.currentPosition),
-								clipDepth: $ianmackenzie$elm_units$Length$meters(1),
-								dimensions: model.contentArea,
-								entities: model.scene,
-								upDirection: $ianmackenzie$elm_geometry$Direction3d$positiveZ
-							}));
-				} else {
-					return $mdgriffith$elm_ui$Element$text('No track to show');
-				}
-			}());
+			$mdgriffith$elm_ui$Element$html(
+				$ianmackenzie$elm_3d_scene$Scene3d$cloudy(
+					{
+						background: $ianmackenzie$elm_3d_scene$Scene3d$backgroundColor($avh4$elm_color$Color$lightBlue),
+						camera: A3($author$project$ViewThirdPerson$deriveCamera, track.trackTree, context, track.currentPosition),
+						clipDepth: $ianmackenzie$elm_units$Length$meters(1),
+						dimensions: context.contentArea,
+						entities: scene,
+						upDirection: $ianmackenzie$elm_geometry$Direction3d$positiveZ
+					})));
 	});
 var $author$project$Main$SetViewMode = function (a) {
 	return {$: 'SetViewMode', a: a};
 };
+var $author$project$ViewContext$ViewThird = {$: 'ViewThird'};
 var $mdgriffith$elm_ui$Element$Input$Option = F2(
 	function (a, b) {
 		return {$: 'Option', a: a, b: b};
@@ -26021,15 +26021,6 @@ var $author$project$ViewPureStyles$wideSliderStyles = _List_fromArray(
 			$mdgriffith$elm_ui$Element$none))
 	]);
 var $author$project$Main$contentArea = function (model) {
-	var viewMode = function () {
-		var _v2 = model.track;
-		if (_v2.$ === 'Just') {
-			var track = _v2.a;
-			return $author$project$ViewContext$ViewThird;
-		} else {
-			return $author$project$ViewContext$ViewInfo;
-		}
-	}();
 	var slider = function (trackLength) {
 		return A2(
 			$mdgriffith$elm_ui$Element$Input$slider,
@@ -26042,9 +26033,9 @@ var $author$project$Main$contentArea = function (model) {
 				step: $elm$core$Maybe$Just(1),
 				thumb: $author$project$ViewPureStyles$sliderThumb,
 				value: function () {
-					var _v1 = model.track;
-					if (_v1.$ === 'Just') {
-						var track = _v1.a;
+					var _v2 = model.track;
+					if (_v2.$ === 'Just') {
+						var track = _v2.a;
 						return track.currentPosition;
 					} else {
 						return 0.0;
@@ -26076,17 +26067,26 @@ var $author$project$Main$contentArea = function (model) {
 						$author$project$Main$viewModeChoices(model),
 						A2(
 						$author$project$ViewPureStyles$conditionallyVisible,
-						!_Utils_eq(viewMode, $author$project$ViewContext$ViewMap),
-						A2($author$project$ViewThirdPerson$view, model, $author$project$Main$ImageMessage)),
+						!_Utils_eq(model.viewMode, $author$project$ViewContext$ViewMap),
+						function () {
+							var _v0 = _Utils_Tuple2(model.viewThirdPersonContext, model.track);
+							if ((_v0.a.$ === 'Just') && (_v0.b.$ === 'Just')) {
+								var context = _v0.a.a;
+								var track = _v0.b.a;
+								return A4($author$project$ViewThirdPerson$view, context, track, model.scene, $author$project$Main$ImageMessage);
+							} else {
+								return $mdgriffith$elm_ui$Element$none;
+							}
+						}()),
 						A2(
 						$author$project$ViewPureStyles$conditionallyVisible,
-						_Utils_eq(viewMode, $author$project$ViewContext$ViewMap),
+						_Utils_eq(model.viewMode, $author$project$ViewContext$ViewMap),
 						A2($author$project$ViewMap$view, model, $author$project$Main$MapPortsMessage))
 					])),
 				function () {
-				var _v0 = model.track;
-				if (_v0.$ === 'Just') {
-					var track = _v0.a;
+				var _v1 = model.track;
+				if (_v1.$ === 'Just') {
+					var track = _v1.a;
 					return A2(
 						$mdgriffith$elm_ui$Element$el,
 						_List_fromArray(

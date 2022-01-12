@@ -1,6 +1,5 @@
 module ViewMap exposing (..)
 
-import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -18,6 +17,10 @@ type alias MapContext =
     { mapClickDebounce : Bool
     , lastMapClick : ( Float, Float )
     }
+
+
+initialiseContext =
+    { mapClickDebounce = False, lastMapClick = ( 0, 0 ) }
 
 
 view :

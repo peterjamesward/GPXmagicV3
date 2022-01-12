@@ -17,7 +17,7 @@ type DragAction
     | DragPlan
 
 
-type alias ContextThirdPerson =
+type alias ThirdPersonContext =
     { cameraAzimuth : Direction2d LocalCoords --Camera relative to plane normal at focus point
     , cameraElevation : Angle -- Above local horizon plane
     , cameraDistance : Quantity Float Length.Meters

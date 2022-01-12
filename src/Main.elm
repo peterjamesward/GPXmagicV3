@@ -39,8 +39,8 @@ import ToolsProforma exposing (ToolEntry)
 import TrackLoaded exposing (TrackLoaded)
 import Url exposing (Url)
 import ViewContext exposing (ViewContext(..), ViewMode(..))
-import ViewContextThirdPerson exposing (ContextThirdPerson)
-import ViewMap
+import ViewContextThirdPerson exposing (ThirdPersonContext)
+import ViewMap exposing (MapContext)
 import ViewPureStyles exposing (commonLayoutStyles, conditionallyVisible, radioButton, sliderThumb)
 import ViewThirdPerson
 
@@ -81,7 +81,9 @@ type alias Model =
 
     -- Visuals
     , scene : List (Entity LocalCoords)
-    , viewContext : Maybe ContextThirdPerson
+    , viewMode : ViewMode
+    , viewThirdPersonContext : Maybe ThirdPersonContext
+    , viewMapContext : Maybe MapContext
 
     -- Layout stuff
     , viewDimensions : ( Quantity Int Pixels, Quantity Int Pixels )
@@ -131,7 +133,9 @@ init mflags origin navigationKey =
       , track = Nothing
       , viewDimensions = ( Pixels.pixels 800, Pixels.pixels 500 )
       , scene = []
-      , viewContext = Nothing
+      , viewMode = ViewInfo
+      , viewThirdPersonContext = Nothing
+      , viewMapContext = Nothing
       , windowSize = ( 1000, 800 )
       , contentArea = ( Pixels.pixels 800, Pixels.pixels 500 )
       , leftDockRightEdge =
@@ -240,12 +244,13 @@ update msg model =
                         modelWithTrack =
                             { model
                                 | track = Just newTrack
-                                , viewContext =
+                                , viewThirdPersonContext =
                                     Just <|
                                         ViewThirdPerson.initialiseView
                                             0
                                             newTrack.trackTree
                                             model.contentArea
+                                , viewMapContext = Just ViewMap.initialiseContext
                                 , scene = SceneBuilder.render3dView newTrack
                             }
 
@@ -309,10 +314,9 @@ update msg model =
         SetViewMode viewMode ->
             case model.track of
                 Just track ->
-                    --TODO MODE SWITCHING
                     let
                         newModel =
-                            model
+                            { model | viewMode = viewMode }
                     in
                     ( newModel, Actions.updateAllDisplays track )
 
@@ -324,10 +328,10 @@ update msg model =
                 Just track ->
                     let
                         oldContext =
-                            model.viewContext
+                            model.viewThirdPersonContext
 
                         ( newContext, actions ) =
-                            case model.viewContext of
+                            case model.viewThirdPersonContext of
                                 Just third ->
                                     let
                                         ( new, act ) =
@@ -339,7 +343,7 @@ update msg model =
                                     ( Nothing, [] )
 
                         newModel =
-                            { model | viewContext = newContext }
+                            { model | viewThirdPersonContext = newContext }
                     in
                     ( newModel, Cmd.none )
 
@@ -611,14 +615,6 @@ topLoadingBar model =
         ]
 
 
-minimumLeftPane =
-    600
-
-
-maximumLeftPane =
-    1400
-
-
 viewModeChoices : Model -> Element Msg
 viewModeChoices model =
     let
@@ -661,14 +657,6 @@ contentArea model =
                 , step = Just 1
                 , thumb = sliderThumb
                 }
-
-        viewMode =
-            case model.track of
-                Just track ->
-                    ViewThird
-
-                Nothing ->
-                    ViewInfo
     in
     -- NOTE that the Map DIV must be constructed once only, or the map gets upset.
     column
@@ -679,9 +667,18 @@ contentArea model =
             , centerX
             ]
             [ viewModeChoices model
-            , conditionallyVisible (viewMode /= ViewMap) <|
-                ViewThirdPerson.view model ImageMessage
-            , conditionallyVisible (viewMode == ViewMap) <|
+            , conditionallyVisible (model.viewMode /= ViewMap) <|
+                case ( model.viewThirdPersonContext, model.track ) of
+                    ( Just context, Just track ) ->
+                        ViewThirdPerson.view
+                            context
+                            track
+                            model.scene
+                            ImageMessage
+
+                    _ ->
+                        none
+            , conditionallyVisible (model.viewMode == ViewMap) <|
                 ViewMap.view model MapPortsMessage
             ]
         , case model.track of
