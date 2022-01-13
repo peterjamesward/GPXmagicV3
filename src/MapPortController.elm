@@ -3,12 +3,12 @@ port module MapPortController exposing (..)
 import Actions exposing (ToolAction(..))
 import Angle
 import Direction2d
-import DomainModel exposing (GPXSource, PeteTree, gpxFromPointWithReference, gpxPointFromIndex, leafFromIndex, earthPointFromIndex, sourceData, startPoint)
+import DomainModel exposing (..)
 import Json.Decode as D exposing (Decoder, field, string)
 import Json.Encode as E
 import Length
 import MapboxKey exposing (mapboxKey)
-import SceneBuilder
+import SceneBuilderMap
 import TrackLoaded exposing (TrackLoaded)
 
 
@@ -145,7 +145,7 @@ addTrackToMap track =
             , ( "lon", E.float <| Angle.inDegrees <| Direction2d.toAngle longitude )
             , ( "lat", E.float <| Angle.inDegrees latitude )
             , ( "zoom", E.float 10.0 )
-            , ( "data", SceneBuilder.renderMapJson track ) -- Route as polyline
+            , ( "data", SceneBuilderMap.renderMapJson track ) -- Route as polyline
             , ( "points", E.null ) --trackPointsToJSON track ) -- Make track points draggable
             ]
 
@@ -217,7 +217,7 @@ processMapPortMessage track json =
                         index =
                             DomainModel.nearestToLonLat gpxPoint track.trackTree
                     in
-                    [SetCurrent index]
+                    [ SetCurrent index ]
 
                 _ ->
                     []
