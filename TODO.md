@@ -4,6 +4,9 @@
 
 Previews for Direction Change, in 3D and on Map.
 
+Current position slider should refresh all tool previews.
+Same will be true for Purple.
+
 Map click should not re-centre map.
 Third person click should not re-centre the view.
 Double-click, in contrast, always centres.

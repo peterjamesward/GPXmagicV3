@@ -1,12 +1,13 @@
 module Main exposing (main)
 
 import AbruptDirectionChanges
-import Actions exposing (ToolAction(..))
+import Actions exposing (PreviewData, ToolAction(..))
 import Browser exposing (application)
 import Browser.Dom as Dom exposing (getViewport, getViewportOf)
 import Browser.Events
 import Browser.Navigation exposing (Key)
 import Delay
+import Dict exposing (Dict)
 import Direction2d
 import DomainModel exposing (..)
 import Element exposing (..)
@@ -85,6 +86,7 @@ type alias Model =
     , viewMode : ViewMode
     , viewThirdPersonContext : Maybe ThirdPersonContext
     , viewMapContext : Maybe MapContext
+    , previews : Dict String PreviewData
 
     -- Layout stuff
     , viewDimensions : ( Quantity Int Pixels, Quantity Int Pixels )
@@ -134,6 +136,7 @@ init mflags origin navigationKey =
       , track = Nothing
       , viewDimensions = ( Pixels.pixels 800, Pixels.pixels 500 )
       , scene = []
+      , previews = Dict.empty
       , viewMode = ViewInfo
       , viewThirdPersonContext = Nothing
       , viewMapContext = Nothing
@@ -164,6 +167,25 @@ init mflags origin navigationKey =
         , Task.attempt GotWindowSize Dom.getViewport
         ]
     )
+
+
+render : Model -> Model
+render model =
+    -- This is or should be the one place where rendering for 3D (and similar) happens.
+    -- Map is different: it's imperative by nature, and we don't need to retain the json.
+    case model.track of
+        Just track ->
+            let
+                renderedTrack =
+                    SceneBuilder.render3dView track
+
+                renderedPreviews =
+                    SceneBuilder.renderPreviews model.previews
+            in
+            { model | scene = renderedPreviews ++ renderedTrack }
+
+        Nothing ->
+            model
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -250,23 +272,23 @@ update msg model =
                             }
 
                         modelWithTrack =
-                            { model
-                                | track = Just newTrack
-                                , viewThirdPersonContext =
-                                    Just <|
-                                        ViewThirdPerson.initialiseView
-                                            0
-                                            newTrack.trackTree
-                                            model.contentArea
-                                , viewMapContext = Just ViewMap.initialiseContext
-                                , scene = SceneBuilder.render3dView newTrack
-                                , viewMode =
-                                    if model.viewMode == ViewInfo then
-                                        ViewThird
+                            render
+                                { model
+                                    | track = Just newTrack
+                                    , viewThirdPersonContext =
+                                        Just <|
+                                            ViewThirdPerson.initialiseView
+                                                0
+                                                newTrack.trackTree
+                                                model.contentArea
+                                    , viewMapContext = Just ViewMap.initialiseContext
+                                    , viewMode =
+                                        if model.viewMode == ViewInfo then
+                                            ViewThird
 
-                                    else
-                                        model.viewMode
-                            }
+                                        else
+                                            model.viewMode
+                                }
 
                         ( finalModel, cmd ) =
                             modelWithTrack
@@ -307,7 +329,9 @@ update msg model =
             )
 
         SetCurrentPosition pos ->
-            -- Slider moves pointer and recentres view.
+            -- Slider moves pointer and re-centres view.
+            -- The actions will re-render and repaint the map.
+            -- TODO: Refresh all the open tools.
             case model.track of
                 Just track ->
                     let
@@ -315,10 +339,7 @@ update msg model =
                             { track | currentPosition = pos }
 
                         newModel =
-                            { model
-                                | track = Just newTrack
-                                , scene = SceneBuilder.render3dView newTrack
-                            }
+                            render { model | track = Just newTrack }
                     in
                     ( newModel
                     , performActionCommands [ SetCurrent pos ] newModel
@@ -736,16 +757,17 @@ performActionsOnModel actions model =
                         newTrack =
                             { track | currentPosition = position }
                     in
-                    { mdl
-                        | track = Just newTrack
-                        , scene = SceneBuilder.render3dView newTrack
-                    }
+                    { mdl | track = Just newTrack }
 
-                ( ShowPreview string shape color list, Just track ) ->
-                    mdl
+                ( ShowPreview previewData, Just track ) ->
+                    -- Put preview into the scene.
+                    -- After some thought, it is sensible to collect the preview data
+                    -- since it's handy, as the alternative is another complex case
+                    -- statement in ToolController.
+                    { mdl | previews = Dict.insert previewData.tag previewData model.previews }
 
-                ( HidePreview string, Just track ) ->
-                    mdl
+                ( HidePreview tag, Just track ) ->
+                    { mdl | previews = Dict.remove tag model.previews }
 
                 ( DelayMessage int msg, Just track ) ->
                     mdl
@@ -754,6 +776,7 @@ performActionsOnModel actions model =
                     mdl
     in
     List.foldl performAction model actions
+        |> render
 
 
 performActionCommands : List (ToolAction Msg) -> Model -> Cmd Msg
@@ -768,14 +791,15 @@ performActionCommands actions model =
                         , MapPortController.centreMapOnCurrent track
                         ]
 
-                ( ShowPreview string shape color list, Just track ) ->
+                ( ShowPreview previewData, Just track ) ->
+                    -- Add source and layer to map, via Port commands.
                     Cmd.none
 
                 ( HidePreview string, Just track ) ->
                     Cmd.none
 
                 ( DelayMessage int msg, Just track ) ->
-                    --TODO: May not be required.
+                    -- This used to "debounce" some clicks.
                     Delay.after int msg
 
                 _ ->

@@ -9,11 +9,20 @@ import Element
 
 type ToolAction msg
     = SetCurrent Int
-    | ShowPreview String PreviewShape Element.Color (List ( EarthPoint, GPXSource ))
+    | ShowPreview PreviewData
     | HidePreview String
     | DelayMessage Int msg
     | NoAction
 
+
 type PreviewShape
     = PreviewCircle
     | PreviewLine
+
+
+type alias PreviewData =
+    { tag : String
+    , shape : PreviewShape
+    , colour : Element.Color
+    , points : List ( EarthPoint, GPXSource )
+    }

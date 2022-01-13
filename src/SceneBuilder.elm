@@ -3,10 +3,12 @@ module SceneBuilder exposing (..)
 -- In V3 there is only one 3d model, used for first and third views.
 -- Plan and Profile are 2d drawings.
 
+import Actions exposing (PreviewData)
 import Angle exposing (Angle)
 import BoundingBox3d exposing (BoundingBox3d)
 import Color exposing (Color, black, darkGreen, green, lightOrange)
 import ColourPalette exposing (gradientHue, gradientHue2)
+import Dict exposing (Dict)
 import Direction2d
 import DomainModel exposing (..)
 import Json.Encode as E
@@ -212,3 +214,8 @@ renderMapJson track =
         , ( "properties", E.object [] )
         , ( "geometry", geometry )
         ]
+
+
+renderPreviews : Dict String PreviewData -> List (Entity LocalCoords)
+renderPreviews previews =
+    []

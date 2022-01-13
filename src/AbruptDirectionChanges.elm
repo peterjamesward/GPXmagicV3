@@ -1,6 +1,6 @@
 module AbruptDirectionChanges exposing (..)
 
-import Actions exposing (PreviewShape(..), ToolAction(..))
+import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
 import Angle exposing (Angle)
 import Direction2d
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), asRecord, skipCount)
@@ -97,9 +97,19 @@ toolStateChange opened colour options track =
                 populatedOptions =
                     findAbruptDirectionChanges options theTrack.trackTree
             in
-            --TODO: Previews returned here.
+            --TODO: May stop sending the list here and let action processor request it.
+            -- (Not much in it.)
             ( populatedOptions
-            , [ ShowPreview "kinks" PreviewCircle colour (buildPreview options theTrack.trackTree) ]
+            , [ ShowPreview
+                    { tag = "kinks"
+                    , shape = PreviewCircle
+                    , colour = colour
+                    , points =
+                        DomainModel.buildPreview
+                            (List.map Tuple.first options.breaches)
+                            theTrack.trackTree
+                    }
+              ]
             )
 
         _ ->
@@ -160,7 +170,16 @@ update msg options previewColour hasTrack =
                             findAbruptDirectionChanges newOptions track.trackTree
                     in
                     ( populatedOptions
-                    , [ ShowPreview "kinks" PreviewCircle previewColour (buildPreview options track.trackTree) ]
+                    , [ ShowPreview
+                            { tag = "kinks"
+                            , shape = PreviewCircle
+                            , colour = previewColour
+                            , points =
+                                DomainModel.buildPreview
+                                    (List.map Tuple.first options.breaches)
+                                    track.trackTree
+                            }
+                      ]
                     )
 
 
@@ -218,10 +237,3 @@ view msgWrapper options =
                             ]
                         ]
             ]
-
-
-buildPreview : Options -> PeteTree -> List ( EarthPoint, GPXSource )
-buildPreview options tree =
-    -- We assume that the list is populated already, this call is cheap.
-    -- Let's put this in DomainModel so it's usable by all tools.
-    DomainModel.buildPreview (List.map Tuple.first options.breaches) tree
