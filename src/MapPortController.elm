@@ -150,6 +150,29 @@ addTrackToMap track =
             ]
 
 
+showPreview : String -> String -> String -> E.Value -> Cmd msg
+showPreview tag shape colour geoJson =
+    mapCommands <|
+        E.object
+            [ ( "Cmd", E.string "ShowPreview" )
+            , ( "token", E.string mapboxKey )
+            , ( "label", E.string tag )
+            , ( "shape", E.string shape )
+            , ( "colour", E.string colour )
+            , ( "data", geoJson )
+            ]
+
+
+hidePreview : String -> Cmd msg
+hidePreview tag =
+    mapCommands <|
+        E.object
+            [ ( "Cmd", E.string "HidePreview" )
+            , ( "token", E.string mapboxKey )
+            , ( "label", E.string tag )
+            ]
+
+
 
 --addMarkersToMap :
 --    Track

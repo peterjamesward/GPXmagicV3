@@ -171,6 +171,18 @@ function mapMessageHandler(msg) {
             }
             break;
 
+        case 'ShowPreview':
+            if (isMapCreated) {
+                showPreview(msg);
+            }
+            break;
+
+        case 'HidePreview':
+            if (isMapCreated) {
+                hidePreview(msg.tsg);
+            }
+            break;
+
         case 'Drag':
             if (isMapCreated) {
                 setClickMode(msg.Enable, msg.points);
@@ -436,11 +448,6 @@ function addOptionals(msg) {
             .addTo(map);
     };
 
-//    console.log(msg.previews);
-    if (msg.previews != 'undefined' && typeof(msg.previews) != 'undefined') {
-      msg.previews.forEach(addPreview);
-    };
-
     setTimeout(function()
       {
         map.resize();
@@ -448,33 +455,61 @@ function addOptionals(msg) {
 
 };
 
-function addPreview(preview) {
+    //    E.object
+    //        [ ( "Cmd", E.string "ShowPreview" )
+    //        , ( "token", E.string mapboxKey )
+    //        , ( "label", E.string tag )
+    //        , ( "shape", E.string shape )
+    //        , ( "colour", E.string colour )
+    //        , ( "data", geoJson )
+    //        ]
 
-    //console.log(preview);
+function showPreview(msg) {
 
-    if (map.getLayer(preview.name)) map.removeLayer(preview.name);
-    if (map.getSource(preview.name)) map.removeSource(preview.name);
+    console.log ( msg );
+    if (map.getLayer(msg.label)) map.removeLayer(msg.label);
+    if (map.getSource(msg.label)) map.removeSource(msg.label);
 
-    map.addSource(preview.name, {
+    map.addSource(msg.label, {
         'type': 'geojson',
-        'data': preview.points
+        'data': msg.data
         });
 
-    map.addLayer({
-        'id': preview.name,
-        'type': 'line',
-        'source': preview.name,
-        'layout': {
-        'line-join': 'round',
-        'line-cap': 'round'
-        },
-        'paint': {
-            'line-color': preview.colour,
-            'line-width': 4
-        }
-    });
-
+    if (msg.shape === 'line') {
+        map.addLayer({
+            'id': msg.label,
+            'type': 'line',
+            'source': msg.label,
+            'layout': {
+                'line-join': 'round',
+                'line-cap': 'round'
+            },
+            'paint': {
+                'line-color': msg.colour,
+                'line-width': 6
+            }
+        });
+    }
+    else
+    {
+        map.addLayer({
+            'id': msg.label,
+            'type': 'circle',
+            'source': msg.label,
+            'paint': {
+                'circle-radius': 8,
+                'circle-color': msg.colour
+            }
+        });
+    };
 };
+
+function hidePreview(label) {
+
+    if (map.getLayer(label)) map.removeLayer(label);
+    if (map.getSource(label)) map.removeSource(label);
+
+}
 
 
 

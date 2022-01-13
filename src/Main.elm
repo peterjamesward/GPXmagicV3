@@ -1,7 +1,7 @@
 module Main exposing (main)
 
 import AbruptDirectionChanges
-import Actions exposing (PreviewData, ToolAction(..))
+import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
 import Browser exposing (application)
 import Browser.Dom as Dom exposing (getViewport, getViewportOf)
 import Browser.Events
@@ -22,7 +22,7 @@ import GpxParser exposing (parseGPXPoints)
 import Html exposing (Html, div)
 import Html.Attributes exposing (id, style)
 import Http
-import Json.Encode as E
+import Json.Encode as E exposing (string)
 import LocalCoords exposing (LocalCoords)
 import LocalStorage
 import MapPortController
@@ -33,6 +33,7 @@ import Pixels exposing (Pixels)
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
 import SceneBuilder
+import SceneBuilderMap
 import SplitPane.SplitPane as SplitPane exposing (..)
 import StravaAuth exposing (getStravaToken)
 import Task
@@ -40,6 +41,7 @@ import Time
 import ToolsController exposing (ToolEntry)
 import TrackLoaded exposing (TrackLoaded)
 import Url exposing (Url)
+import UtilsForViews exposing (colourHexString)
 import ViewContext exposing (ViewContext(..), ViewMode(..))
 import ViewContextThirdPerson exposing (ThirdPersonContext)
 import ViewMap exposing (MapContext)
@@ -793,10 +795,23 @@ performActionCommands actions model =
 
                 ( ShowPreview previewData, Just track ) ->
                     -- Add source and layer to map, via Port commands.
-                    Cmd.none
+                    let _ = Debug.log "PREVIEW" previewData
+                    in
+                    MapPortController.showPreview
+                        previewData.tag
+                        (case previewData.shape of
+                            PreviewCircle ->
+                                "circle"
 
-                ( HidePreview string, Just track ) ->
-                    Cmd.none
+                            PreviewLine ->
+                                "line"
+                        )
+                        (colourHexString previewData.colour)
+                        (SceneBuilderMap.renderPreview previewData)
+
+                ( HidePreview tag, Just track ) ->
+                    MapPortController.hidePreview
+                        tag
 
                 ( DelayMessage int msg, Just track ) ->
                     -- This used to "debounce" some clicks.

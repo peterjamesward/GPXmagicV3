@@ -1,10 +1,15 @@
 module UtilsForViews exposing (..)
 
 import Angle
+import Color exposing (rgb)
+import Color.Convert exposing (colorToHex)
+import Element
 import FormatNumber exposing (format)
 import FormatNumber.Locales exposing (Decimals(..), usLocale)
+import Hex
 import Length
 import Speed exposing (Speed)
+
 
 showLongMeasure : Bool -> Length.Length -> String
 showLongMeasure imperial distance =
@@ -91,3 +96,23 @@ showDecimal6 x =
     in
     format locale x
 
+
+colourHexString : Element.Color -> String
+colourHexString colour =
+    let
+        { red, green, blue, alpha } =
+            Element.toRgb colour
+
+        ( redInt, greenInt, blueInt ) =
+            ( floor <| red * 255
+            , floor <| green * 255
+            , floor <| blue * 255
+            )
+
+        leadingZeroes str =
+            String.repeat (2 - String.length str) "0" ++ str
+    in
+    "#"
+        ++ (leadingZeroes <| Hex.toString redInt)
+        ++ (leadingZeroes <| Hex.toString greenInt)
+        ++ (leadingZeroes <| Hex.toString blueInt)

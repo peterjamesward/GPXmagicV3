@@ -1,13 +1,90 @@
 module SceneBuilderMap exposing (..)
 
+import Actions exposing (PreviewData, PreviewShape(..))
 import Angle exposing (Angle)
 import BoundingBox3d exposing (BoundingBox3d)
+import Dict exposing (Dict)
 import Direction2d
 import DomainModel exposing (..)
+import Element
 import Json.Encode as E
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
 import TrackLoaded exposing (TrackLoaded)
+
+
+renderPreview : PreviewData -> E.Value
+renderPreview { tag, shape, colour, points } =
+    case shape of
+        PreviewCircle ->
+            pointsToJSON <| List.map Tuple.second points
+
+        PreviewLine ->
+            lineToJSON <| List.map Tuple.second points
+
+
+lineToJSON : List GPXSource -> E.Value
+lineToJSON points =
+    -- JSON suitable for Mapbox API to add polyline for route.
+    let
+        geometry =
+            E.object
+                [ ( "type", E.string "LineString" )
+                , ( "coordinates", E.list identity coordinates )
+                ]
+
+        coordinates =
+            List.map
+                (\{ longitude, latitude, altitude } ->
+                    DomainModel.lngLatPair ( Direction2d.toAngle longitude, latitude )
+                )
+                points
+    in
+    E.object
+        [ ( "type", E.string "Feature" )
+        , ( "properties", E.object [] )
+        , ( "geometry", geometry )
+        ]
+
+
+pointsToJSON : List GPXSource -> E.Value
+pointsToJSON points =
+    -- Similar but each point is a feature so it is draggable.
+    --var geojson = {
+    --    'type': 'FeatureCollection',
+    --    'features': [
+    --        {
+    --            'type': 'Feature',
+    --            'geometry': {
+    --                'type': 'Point',
+    --                'coordinates': [0, 0]
+    --            }
+    --        }
+    --    ]
+    --};
+    let
+        features =
+            List.map makeFeature points
+
+        makeFeature tp =
+            E.object
+                [ ( "type", E.string "Feature" )
+                , ( "geometry", point tp )
+                ]
+
+        coordinates pt =
+            DomainModel.lngLatPair ( Direction2d.toAngle pt.longitude, pt.latitude )
+
+        point tp =
+            E.object
+                [ ( "type", E.string "Point" )
+                , ( "coordinates", coordinates tp )
+                ]
+    in
+    E.object
+        [ ( "type", E.string "FeatureCollection" )
+        , ( "features", E.list identity features )
+        ]
 
 
 renderMapJson : TrackLoaded -> E.Value
