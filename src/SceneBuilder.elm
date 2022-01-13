@@ -3,14 +3,16 @@ module SceneBuilder exposing (..)
 -- In V3 there is only one 3d model, used for first and third views.
 -- Plan and Profile are 2d drawings.
 
-import Actions exposing (PreviewData)
+import Actions exposing (PreviewData, PreviewShape(..))
 import Angle exposing (Angle)
+import Axis3d
 import BoundingBox3d exposing (BoundingBox3d)
 import Color exposing (Color, black, darkGreen, green, lightOrange)
 import ColourPalette exposing (gradientHue, gradientHue2)
 import Dict exposing (Dict)
 import Direction2d
 import DomainModel exposing (..)
+import Element
 import Json.Encode as E
 import Length exposing (Meters)
 import LineSegment3d
@@ -22,6 +24,7 @@ import Quantity
 import Scene3d exposing (Entity)
 import Scene3d.Material as Material
 import TrackLoaded exposing (TrackLoaded)
+import Vector3d
 
 
 render3dView : TrackLoaded -> List (Entity LocalCoords)
@@ -218,4 +221,76 @@ renderMapJson track =
 
 renderPreviews : Dict String PreviewData -> List (Entity LocalCoords)
 renderPreviews previews =
-    []
+    let
+        onePreview :
+            { tag : String
+            , shape : PreviewShape
+            , colour : Element.Color
+            , points : List ( EarthPoint, GPXSource )
+            }
+            -> List (Entity LocalCoords)
+        onePreview { tag, shape, colour, points } =
+            case shape of
+                PreviewCircle ->
+                    previewAsPoints colour <| List.map Tuple.first points
+
+                PreviewLine ->
+                    previewAsLine colour <| List.map Tuple.first points
+    in
+    previews |> Dict.values |> List.concatMap onePreview
+
+
+previewAsLine : Element.Color -> List EarthPoint -> List (Entity LocalCoords)
+previewAsLine color points =
+    let
+        material =
+            Material.matte <| Color.fromRgba <| Element.toRgb color
+
+        preview p1 p2 =
+            paintSomethingBetween
+                (Length.meters 0.5)
+                material
+                p1
+                p2
+    in
+    List.map2 preview points (List.drop 1 points) |> List.concat
+
+
+previewAsPoints : Element.Color -> List EarthPoint -> List (Entity LocalCoords)
+previewAsPoints color points =
+    let
+        material =
+            Material.color <| Color.fromRgba <| Element.toRgb color
+
+        highlightPoint p =
+            Scene3d.point { radius = Pixels.pixels 7 } material p
+    in
+    List.map highlightPoint points
+
+
+paintSomethingBetween width material pt1 pt2 =
+    let
+        roadAsSegment =
+            LineSegment3d.from pt1 pt2
+
+        halfWidth =
+            Vector3d.from pt1 pt2
+                |> Vector3d.projectOnto Plane3d.xy
+                |> Vector3d.scaleTo width
+
+        ( leftKerbVector, rightKerbVector ) =
+            ( Vector3d.rotateAround Axis3d.z (Angle.degrees 90) halfWidth
+            , Vector3d.rotateAround Axis3d.z (Angle.degrees -90) halfWidth
+            )
+
+        ( leftKerb, rightKerb ) =
+            ( LineSegment3d.translateBy leftKerbVector roadAsSegment
+            , LineSegment3d.translateBy rightKerbVector roadAsSegment
+            )
+    in
+    [ Scene3d.quad material
+        (LineSegment3d.startPoint leftKerb)
+        (LineSegment3d.endPoint leftKerb)
+        (LineSegment3d.endPoint rightKerb)
+        (LineSegment3d.startPoint rightKerb)
+    ]
