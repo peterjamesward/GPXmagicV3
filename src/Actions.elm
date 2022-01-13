@@ -1,6 +1,6 @@
 module Actions exposing (..)
 
--- This quasi-DSL allows any tool to ask Main to update the model and display stuff
+-- This wee DSL allows any tool to ask Main to update the model and display stuff
 -- (including on the Map) without the tools needing knowledge of the model or ports.
 
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree)

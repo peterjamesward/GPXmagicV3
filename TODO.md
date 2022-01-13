@@ -2,13 +2,13 @@
 
 # WIP
 
+Previews for bend problems, in 3D and on Map.
+
 Map click should not re-centre map.
 Third person click should not re-centre the view.
 Double-click, in contrast, always centres.
 > More generally, don't centre _the view you click on_.
 > Other views should centre when in "follow" mode.
-
-Previews for bend problems, in 3D and on Map.
 
 Are sharp bends being reported when not so sharp? 
 > **YES** this is a problem. See sharp bend example.
@@ -17,8 +17,6 @@ Are sharp bends being reported when not so sharp?
 Make DragPan work on 3D view.
 
 Put all Font, Colour etc into a Palette/Style module for ease of change.
-
-Small thing, but sort bend problems in index order -- better, generate them in the right order!
 
 **Next up**: Delete tool.
 
@@ -47,6 +45,13 @@ Will need tweaking later.
 Might switch to pixel sizing.
 Will need to go in localStorage.
 
+## Tools
+
+"Where am I" - reverse geocode.
+"Markers" - adjust orange and purple including 10% FF.
+"Drag on map" - preview replaces static dots with draggables.
+2-way drag corrects for azimuth.
+Is Undo/Redo a control?
 
 ## Rendering
 Use a graduated drop off with distance, compute at each tree level.
@@ -99,7 +104,7 @@ Terrain 2 = Tree walk combined with whole (visible) tree query, because <loops>.
 
 ## Undo/Redo
 Revert to keeping GPXPoints for Undo, not reverse delta (2.7, not 2.8).
-Use Session state, to avoid taking up ram, with unlimited Undo.
+Use Session state, to avoid taking up ram, with unlimited Undo?
 > Possibility, if fast enough, that we replay journaled edits from last checkpoint (last save).
 > (Because user can always load that file anyway.) Ah, but suppose you want to go further back?
 > I guess we could ask the user to re-open the relevant baseline file?
