@@ -1,0 +1,27 @@
+    <trkpt lat="40.3564755683389" lon="116.001482178569"><ele>25.8097173317665</ele></trkpt>
+    <trkpt lat="40.3564693995284" lon="116.001516133683"><ele>25.7657533474838</ele></trkpt>
+    <trkpt lat="40.3564639557293" lon="116.001544827205"><ele>25.7056417496757</ele></trkpt>
+    <trkpt lat="40.3564590747979" lon="116.001568924666"><ele>25.6318182225463</ele></trkpt>
+    <trkpt lat="40.3564546118334" lon="116.001589211021"><ele>25.5468595940985</ele></trkpt>
+    <trkpt lat="40.3564504407709" lon="116.001606563581"><ele>25.4534514112074</ele></trkpt>
+    <trkpt lat="40.3564464529924" lon="116.001621925654"><ele>25.3543631440878</ele></trkpt>
+    <trkpt lat="40.3564425532407" lon="116.001636282407"><ele>25.2524252981107</ele></trkpt>
+  </trkseg>
+ </trk>
+</gpx>
+<?xml version="1.0" encoding="UTF-8"?>
+<gpx creator="StravaGPX" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd" version="1.1" xmlns="http://www.topografix.com/GPX/1/1">
+ <trk>
+  <name>Around The The World In 800 Days</name>
+  <type>1</type>
+  <trkseg>
+    <trkpt lat="-31.941706193287" lon="115.975153207176"><ele>24.000462962963</ele></trkpt>
+    <trkpt lat="-31.9417290398403" lon="115.975245794997"><ele>24.0104614606267</ele></trkpt>
+    <trkpt lat="-31.9417527425456" lon="115.975337776938"><ele>23.7944656543101</ele></trkpt>
+    <trkpt lat="-31.9417781600344" lon="115.975428592532"><ele>23.5833335870071</ele></trkpt>
+    <trkpt lat="-31.9418061541881" lon="115.975517766148"><ele>23.3793369109395</ele></trkpt>
+    <trkpt lat="-31.9418375872249" lon="115.975604935052"><ele>23.1846042271814</ele></trkpt>
+    <trkpt lat="-31.9418733128051" lon="115.975689861994"><ele>23.0011496958892</ele></trkpt>
+    <trkpt lat="-31.941914158842" lon="115.97577242996"><ele>22.8309397935032</ele></trkpt>
+    <trkpt lat="-31.9419609003447" lon="115.97585261893"><ele>22.6759696066934</ele></trkpt>
+    <trkpt lat="-31.9420142221128" lon="115.975930466818"><ele>22.5383410336531</ele></trkpt>

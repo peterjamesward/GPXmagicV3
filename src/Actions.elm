@@ -9,8 +9,11 @@ import Element
 
 type ToolAction msg
     = SetCurrent Int
-    | ShowPreview String Element.Color (List ( EarthPoint, GPXSource ))
+    | ShowPreview String PreviewShape Element.Color (List ( EarthPoint, GPXSource ))
     | HidePreview String
     | DelayMessage Int msg
     | NoAction
 
+type PreviewShape
+    = PreviewCircle
+    | PreviewLine

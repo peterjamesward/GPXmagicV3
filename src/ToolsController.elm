@@ -10,6 +10,7 @@ import Element.Input as Input
 import FeatherIcons
 import FlatColors.AussiePalette
 import FlatColors.SwedishPalette
+import List.Extra
 import TrackInfoBox
 import TrackLoaded exposing (TrackLoaded)
 import ViewPureStyles exposing (contrastingColour, neatToolsBorder, useIcon)
@@ -144,6 +145,14 @@ setColour toolType colour tool =
         tool
 
 
+getColour : ToolType -> List ToolEntry -> Element.Color
+getColour toolType entries =
+    entries
+        |> List.Extra.find (\tab -> tab.toolType == toolType)
+        |> Maybe.map .tabColour
+        |> Maybe.withDefault FlatColors.SwedishPalette.freeSpeechBlue
+
+
 update :
     ToolMsg
     -> (ToolMsg -> msg)
@@ -185,18 +194,17 @@ update toolMsg msgWrapper model =
 
         DirectionChanges msg ->
             -- Delegate to tool here...
-            case model.track of
-                Just track ->
-                    let
-                        ( newOptions, actions ) =
-                            AbruptDirectionChanges.update msg model.directionChangeOptions track
-                    in
-                    ( { model | directionChangeOptions = newOptions }
-                    , actions
-                    )
-
-                Nothing ->
-                    ( model, [] )
+            let
+                ( newOptions, actions ) =
+                    AbruptDirectionChanges.update
+                        msg
+                        model.directionChangeOptions
+                        (getColour AbruptDirectionChanges model.tools)
+                        model.track
+            in
+            ( { model | directionChangeOptions = newOptions }
+            , actions
+            )
 
 
 refreshAllTools :
@@ -253,26 +261,25 @@ toolStateHasChanged :
         , List (ToolAction msg)
         )
 toolStateHasChanged toolType newState model =
-    case ( toolType, model.track ) of
-        ( ToolTrackInfo, _ ) ->
+    case toolType of
+        ToolTrackInfo ->
             ( model, [] )
 
-        ( AbruptDirectionChanges, Just track ) ->
-            if newState == Expanded then
-                ( { model
-                    | directionChangeOptions =
-                        AbruptDirectionChanges.findAbruptDirectionChanges
-                            model.directionChangeOptions
-                            track.trackTree
-                  }
-                , []
-                )
+        AbruptDirectionChanges ->
+            -- Would like an OO style dispatch table here but what with each tool
+            -- having its own options, that's more tricky than it's worth.
+            let
+                ( newOptions, actions ) =
+                    AbruptDirectionChanges.toolStateChange
+                        (newState == Expanded)
+                        (getColour toolType model.tools)
+                        model.directionChangeOptions
+                        model.track
 
-            else
-                ( model, [] )
-
-        _ ->
-            ( model, [] )
+                newModel =
+                    { model | directionChangeOptions = newOptions }
+            in
+            ( newModel, actions )
 
 
 

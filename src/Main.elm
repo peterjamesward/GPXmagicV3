@@ -741,7 +741,7 @@ performActionsOnModel actions model =
                         , scene = SceneBuilder.render3dView newTrack
                     }
 
-                ( ShowPreview string color list, Just track ) ->
+                ( ShowPreview string shape color list, Just track ) ->
                     mdl
 
                 ( HidePreview string, Just track ) ->
@@ -768,7 +768,7 @@ performActionCommands actions model =
                         , MapPortController.centreMapOnCurrent track
                         ]
 
-                ( ShowPreview string color list, Just track ) ->
+                ( ShowPreview string shape color list, Just track ) ->
                     Cmd.none
 
                 ( HidePreview string, Just track ) ->

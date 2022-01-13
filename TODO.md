@@ -2,7 +2,7 @@
 
 # WIP
 
-Previews for bend problems, in 3D and on Map.
+Previews for Direction Change, in 3D and on Map.
 
 Map click should not re-centre map.
 Third person click should not re-centre the view.
@@ -12,7 +12,7 @@ Double-click, in contrast, always centres.
 
 Are sharp bends being reported when not so sharp? 
 > **YES** this is a problem. See sharp bend example.
-> Can't see it, need to use debugger.
+> Can't see it in the code; need to use debugger.
 
 Make DragPan work on 3D view.
 
@@ -34,6 +34,10 @@ Need "restore to defaults" for tools.
 ## Profile & Charts
 Details in Backlog.
 
+## Map
+Add non-draggable track point circles, in seperate layer we can turn on and off
+to replace by draggables when that control is open.
+
 ---
 
 # Backlog
@@ -44,6 +48,7 @@ Splitters looking good now.
 Will need tweaking later.
 Might switch to pixel sizing.
 Will need to go in localStorage.
+Settings button for background colour.
 
 ## Tools
 
@@ -52,6 +57,8 @@ Will need to go in localStorage.
 "Drag on map" - preview replaces static dots with draggables.
 2-way drag corrects for azimuth.
 Is Undo/Redo a control?
+Pane payout choices.
+I think the top bar is still special: Load, Save, Donate. Is it?
 
 ## Rendering
 Use a graduated drop off with distance, compute at each tree level.
@@ -59,7 +66,6 @@ On Map, work out the depth to fit (say) 1000 points within visible region.
 
 ## Decide how to organise windows, panes, views.
 What state lives where? (This relates to the multi-window decision.)
-Also, need to see if we can live without PostUpdateAction, just let the tools do their thing.
 First pane is special, because of map, and because you must have it.
 Hence, one pane + list, or just four panes with visibility?
 
@@ -67,7 +73,7 @@ Hence, one pane + list, or just four panes with visibility?
 Clean.
 Menu bar?
 Chinese FlatUI palette?
-Keep current track in indexDB to support a "restart/recover" option?
+Keep current track in indexDB to support a "restart/recover" option? No.
 JB suggests heavily customisable tools layout to support differing "workflows".
 
 ## Plan view

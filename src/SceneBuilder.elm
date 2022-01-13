@@ -123,7 +123,7 @@ render3dView track =
         renderCurrentMarker marker tree =
             [ Scene3d.point { radius = Pixels.pixels 10 }
                 (Material.color lightOrange)
-                (pointFromIndex marker tree)
+                (earthPointFromIndex marker tree)
             ]
     in
     renderTreeSelectively track.renderDepth track.trackTree <|

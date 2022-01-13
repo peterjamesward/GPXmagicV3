@@ -1,9 +1,9 @@
 module AbruptDirectionChanges exposing (..)
 
-import Actions exposing (ToolAction(..))
+import Actions exposing (PreviewShape(..), ToolAction(..))
 import Angle exposing (Angle)
 import Direction2d
-import DomainModel exposing (PeteTree(..), asRecord, skipCount)
+import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), asRecord, skipCount)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input
@@ -83,53 +83,85 @@ findAbruptDirectionChanges options tree =
     }
 
 
+toolStateChange :
+    Bool
+    -> Element.Color
+    -> Options
+    -> Maybe TrackLoaded
+    -> ( Options, List (ToolAction msg) )
+toolStateChange opened colour options track =
+    case ( opened, track ) of
+        ( True, Just theTrack ) ->
+            -- Make sure we have up to date breaches and preview is shown.
+            let
+                populatedOptions =
+                    findAbruptDirectionChanges options theTrack.trackTree
+            in
+            --TODO: Previews returned here.
+            ( populatedOptions
+            , [ ShowPreview "kinks" PreviewCircle colour (buildPreview options theTrack.trackTree) ]
+            )
+
+        _ ->
+            -- Hide preview
+            ( options, [ HidePreview "kinks" ] )
+
+
 update :
     Msg
     -> Options
-    -> TrackLoaded
+    -> Element.Color
+    -> Maybe TrackLoaded
     -> ( Options, List (ToolAction msg) )
-update msg options track =
-    case msg of
-        ViewNext ->
-            let
-                breachIndex =
-                    min (List.length options.breaches - 1) (options.currentBreach + 1)
+update msg options previewColour hasTrack =
+    case hasTrack of
+        Nothing ->
+            ( options, [] )
 
-                newOptions =
-                    { options | currentBreach = breachIndex }
+        Just track ->
+            case msg of
+                ViewNext ->
+                    let
+                        breachIndex =
+                            min (List.length options.breaches - 1) (options.currentBreach + 1)
 
-                ( position, _ ) =
-                    Maybe.withDefault ( 0, Angle.degrees 0 ) <|
-                        List.Extra.getAt breachIndex newOptions.breaches
-            in
-            ( newOptions, [ SetCurrent position ] )
+                        newOptions =
+                            { options | currentBreach = breachIndex }
 
-        ViewPrevious ->
-            let
-                breachIndex =
-                    max 0 (options.currentBreach - 1)
+                        ( position, _ ) =
+                            Maybe.withDefault ( 0, Angle.degrees 0 ) <|
+                                List.Extra.getAt breachIndex newOptions.breaches
+                    in
+                    ( newOptions, [ SetCurrent position ] )
 
-                newOptions =
-                    { options | currentBreach = breachIndex }
+                ViewPrevious ->
+                    let
+                        breachIndex =
+                            max 0 (options.currentBreach - 1)
 
-                ( position, _ ) =
-                    Maybe.withDefault ( 0, Angle.degrees 0 ) <|
-                        List.Extra.getAt breachIndex newOptions.breaches
-            in
-            ( newOptions, [ SetCurrent position ] )
+                        newOptions =
+                            { options | currentBreach = breachIndex }
 
-        SetCurrentPosition position ->
-            ( options, [ SetCurrent position ] )
+                        ( position, _ ) =
+                            Maybe.withDefault ( 0, Angle.degrees 0 ) <|
+                                List.Extra.getAt breachIndex newOptions.breaches
+                    in
+                    ( newOptions, [ SetCurrent position ] )
 
-        SetThreshold angle ->
-            let
-                newOptions =
-                    { options | threshold = angle, breaches = [] }
+                SetCurrentPosition position ->
+                    ( options, [ SetCurrent position ] )
 
-                populatedOptions =
-                    findAbruptDirectionChanges newOptions track.trackTree
-            in
-            ( populatedOptions, [] )
+                SetThreshold angle ->
+                    let
+                        newOptions =
+                            { options | threshold = angle, breaches = [] }
+
+                        populatedOptions =
+                            findAbruptDirectionChanges newOptions track.trackTree
+                    in
+                    ( populatedOptions
+                    , [ ShowPreview "kinks" PreviewCircle previewColour (buildPreview options track.trackTree) ]
+                    )
 
 
 view : (Msg -> msg) -> Options -> Element msg
@@ -186,3 +218,10 @@ view msgWrapper options =
                             ]
                         ]
             ]
+
+
+buildPreview : Options -> PeteTree -> List ( EarthPoint, GPXSource )
+buildPreview options tree =
+    -- We assume that the list is populated already, this call is cheap.
+    -- Let's put this in DomainModel so it's usable by all tools.
+    DomainModel.buildPreview (List.map Tuple.first options.breaches) tree

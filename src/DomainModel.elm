@@ -481,6 +481,20 @@ treeFromList track =
     treeBuilder numberOfSegments track |> Tuple.first
 
 
+leafFromIndex : Int -> PeteTree -> PeteTree
+leafFromIndex index treeNode =
+    case treeNode of
+        Leaf info ->
+            treeNode
+
+        Node info ->
+            if index < skipCount info.left then
+                leafFromIndex index info.left
+
+            else
+                leafFromIndex (index - skipCount info.left) info.right
+
+
 earthPointFromIndex : Int -> PeteTree -> EarthPoint
 earthPointFromIndex index treeNode =
     case treeNode of
@@ -497,38 +511,6 @@ earthPointFromIndex index treeNode =
 
             else
                 earthPointFromIndex (index - skipCount info.left) info.right
-
-
-leafFromIndex : Int -> PeteTree -> PeteTree
-leafFromIndex index treeNode =
-    case treeNode of
-        Leaf info ->
-            treeNode
-
-        Node info ->
-            if index < skipCount info.left then
-                leafFromIndex index info.left
-
-            else
-                leafFromIndex (index - skipCount info.left) info.right
-
-
-pointFromIndex : Int -> PeteTree -> EarthPoint
-pointFromIndex index treeNode =
-    case treeNode of
-        Leaf info ->
-            if index <= 0 then
-                info.startPoint
-
-            else
-                info.endPoint
-
-        Node info ->
-            if index < skipCount info.left then
-                pointFromIndex index info.left
-
-            else
-                pointFromIndex (index - skipCount info.left) info.right
 
 
 gpxPointFromIndex : Int -> PeteTree -> GPXSource
@@ -738,3 +720,15 @@ containingSphere box =
 lngLatPair : ( Angle, Angle ) -> E.Value
 lngLatPair ( longitude, latitude ) =
     E.list E.float [ Angle.inDegrees longitude, Angle.inDegrees latitude ]
+
+
+buildPreview : List Int -> PeteTree -> List ( EarthPoint, GPXSource )
+buildPreview indices tree =
+    let
+        getDualCoords index =
+            -- Rather glaring inefficiency here.
+            ( earthPointFromIndex index tree
+            , gpxPointFromIndex index tree
+            )
+    in
+    List.map getDualCoords indices

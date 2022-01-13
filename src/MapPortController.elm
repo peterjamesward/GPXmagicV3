@@ -3,7 +3,7 @@ port module MapPortController exposing (..)
 import Actions exposing (ToolAction(..))
 import Angle
 import Direction2d
-import DomainModel exposing (GPXSource, PeteTree, gpxFromPointWithReference, gpxPointFromIndex, leafFromIndex, pointFromIndex, sourceData, startPoint)
+import DomainModel exposing (GPXSource, PeteTree, gpxFromPointWithReference, gpxPointFromIndex, leafFromIndex, earthPointFromIndex, sourceData, startPoint)
 import Json.Decode as D exposing (Decoder, field, string)
 import Json.Encode as E
 import Length
@@ -65,7 +65,7 @@ centreMap model =
         Just tree ->
             let
                 { longitude, latitude, altitude } =
-                    pointFromIndex model.currentPosition tree
+                    earthPointFromIndex model.currentPosition tree
                         |> gpxFromPointWithReference model.referenceLonLat
             in
             mapCommands <|
