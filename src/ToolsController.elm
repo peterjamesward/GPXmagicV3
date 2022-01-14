@@ -208,7 +208,7 @@ update toolMsg msgWrapper model =
             )
 
 
-refreshAllTools :
+refreshOpenTools :
     { model
         | tools : List ToolEntry
         , track : Maybe TrackLoaded
@@ -222,12 +222,11 @@ refreshAllTools :
           }
         , List (ToolAction msg)
         )
-refreshAllTools model =
+refreshOpenTools model =
     -- Track, or something has changed; tool data is stale.
     -- Same impact as tools being opened, so we'll re-use that.
-    -- The discarding of cmds here is questionable.
     let
-        refreshOneTool entry ( updatedModel, actions ) =
+        refreshOpenTool entry ( updatedModel, actions ) =
             if entry.state == Expanded then
                 let
                     ( incrementalModel, incrementalActions ) =
@@ -237,11 +236,8 @@ refreshAllTools model =
 
             else
                 ( updatedModel, actions )
-
-        ( finalModel, accumulatedActions ) =
-            model.tools |> List.foldl refreshOneTool ( model, [] )
     in
-    ( finalModel, accumulatedActions )
+    model.tools |> List.foldl refreshOpenTool ( model, [] )
 
 
 toolStateHasChanged :

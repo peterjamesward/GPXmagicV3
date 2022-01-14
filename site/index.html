@@ -179,7 +179,7 @@ function mapMessageHandler(msg) {
 
         case 'HidePreview':
             if (isMapCreated) {
-                hidePreview(msg.tsg);
+                hidePreview(msg.label);
             }
             break;
 
@@ -466,7 +466,7 @@ function addOptionals(msg) {
 
 function showPreview(msg) {
 
-    console.log ( msg );
+    //console.log ( msg );
     if (map.getLayer(msg.label)) map.removeLayer(msg.label);
     if (map.getSource(msg.label)) map.removeSource(msg.label);
 
@@ -506,6 +506,7 @@ function showPreview(msg) {
 
 function hidePreview(label) {
 
+    //console.log("Hide", label);
     if (map.getLayer(label)) map.removeLayer(label);
     if (map.getSource(label)) map.removeSource(label);
 

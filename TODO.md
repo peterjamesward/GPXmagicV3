@@ -2,9 +2,11 @@
 
 # WIP
 
-Previews for Direction Change, in 3D and on Map.
+(Colour change needs to be treated same as tool open.)
 
-Current position slider should refresh all tool previews.
+Pane resizing broken somehow. Map is OK but 3D not resizing.
+
+Current position slider should refresh open tool previews.
 Same will be true for Purple.
 
 Map click should not re-centre map.
@@ -46,6 +48,8 @@ to replace by draggables when that control is open.
 # Backlog
 
 ## Layout
+
+Modal pop-up during loading, also a place to show parsing errors.
 
 Splitters looking good now.
 Will need tweaking later.

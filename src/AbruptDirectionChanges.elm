@@ -106,7 +106,7 @@ toolStateChange opened colour options track =
                     , colour = colour
                     , points =
                         DomainModel.buildPreview
-                            (List.map Tuple.first options.breaches)
+                            (List.map Tuple.first populatedOptions.breaches)
                             theTrack.trackTree
                     }
               ]
@@ -124,48 +124,46 @@ update :
     -> Maybe TrackLoaded
     -> ( Options, List (ToolAction msg) )
 update msg options previewColour hasTrack =
-    case hasTrack of
-        Nothing ->
-            ( options, [] )
+    case msg of
+        ViewNext ->
+            let
+                breachIndex =
+                    min (List.length options.breaches - 1) (options.currentBreach + 1)
 
-        Just track ->
-            case msg of
-                ViewNext ->
+                newOptions =
+                    { options | currentBreach = breachIndex }
+
+                ( position, _ ) =
+                    Maybe.withDefault ( 0, Angle.degrees 0 ) <|
+                        List.Extra.getAt breachIndex newOptions.breaches
+            in
+            ( newOptions, [ SetCurrent position ] )
+
+        ViewPrevious ->
+            let
+                breachIndex =
+                    max 0 (options.currentBreach - 1)
+
+                newOptions =
+                    { options | currentBreach = breachIndex }
+
+                ( position, _ ) =
+                    Maybe.withDefault ( 0, Angle.degrees 0 ) <|
+                        List.Extra.getAt breachIndex newOptions.breaches
+            in
+            ( newOptions, [ SetCurrent position ] )
+
+        SetCurrentPosition position ->
+            ( options, [ SetCurrent position ] )
+
+        SetThreshold angle ->
+            let
+                newOptions =
+                    { options | threshold = angle, breaches = [] }
+            in
+            case hasTrack of
+                Just track ->
                     let
-                        breachIndex =
-                            min (List.length options.breaches - 1) (options.currentBreach + 1)
-
-                        newOptions =
-                            { options | currentBreach = breachIndex }
-
-                        ( position, _ ) =
-                            Maybe.withDefault ( 0, Angle.degrees 0 ) <|
-                                List.Extra.getAt breachIndex newOptions.breaches
-                    in
-                    ( newOptions, [ SetCurrent position ] )
-
-                ViewPrevious ->
-                    let
-                        breachIndex =
-                            max 0 (options.currentBreach - 1)
-
-                        newOptions =
-                            { options | currentBreach = breachIndex }
-
-                        ( position, _ ) =
-                            Maybe.withDefault ( 0, Angle.degrees 0 ) <|
-                                List.Extra.getAt breachIndex newOptions.breaches
-                    in
-                    ( newOptions, [ SetCurrent position ] )
-
-                SetCurrentPosition position ->
-                    ( options, [ SetCurrent position ] )
-
-                SetThreshold angle ->
-                    let
-                        newOptions =
-                            { options | threshold = angle, breaches = [] }
-
                         populatedOptions =
                             findAbruptDirectionChanges newOptions track.trackTree
                     in
@@ -181,6 +179,9 @@ update msg options previewColour hasTrack =
                             }
                       ]
                     )
+
+                Nothing ->
+                    ( newOptions, [] )
 
 
 view : (Msg -> msg) -> Options -> Element msg

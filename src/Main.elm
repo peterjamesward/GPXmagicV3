@@ -274,29 +274,37 @@ update msg model =
                             }
 
                         modelWithTrack =
-                            render
-                                { model
-                                    | track = Just newTrack
-                                    , viewThirdPersonContext =
-                                        Just <|
-                                            ViewThirdPerson.initialiseView
-                                                0
-                                                newTrack.trackTree
-                                                model.contentArea
-                                    , viewMapContext = Just ViewMap.initialiseContext
-                                    , viewMode =
-                                        if model.viewMode == ViewInfo then
-                                            ViewThird
+                            { model
+                                | track = Just newTrack
+                                , viewThirdPersonContext =
+                                    Just <|
+                                        ViewThirdPerson.initialiseView
+                                            0
+                                            newTrack.trackTree
+                                            model.contentArea
+                                , viewMapContext = Just ViewMap.initialiseContext
+                                , viewMode =
+                                    if model.viewMode == ViewInfo then
+                                        ViewThird
 
-                                        else
-                                            model.viewMode
-                                }
+                                    else
+                                        model.viewMode
+                            }
 
-                        ( finalModel, cmd ) =
+                        ( newModel, actions ) =
                             modelWithTrack
-                                |> ToolsController.refreshAllTools
+                                |> ToolsController.refreshOpenTools
+
+                        modelAfterActions =
+                            -- e.g. collect previews and render ...
+                            performActionsOnModel actions newModel
                     in
-                    ( finalModel, updateAllDisplays newTrack )
+                    ( modelAfterActions
+                    , Cmd.batch
+                        [ performActionCommands actions modelAfterActions
+                        , showTrackOnMapCentered newTrack
+                        ]
+                    )
 
                 Nothing ->
                     ( model, Cmd.none )
@@ -311,7 +319,7 @@ update msg model =
                         newModel =
                             { model | track = Just track }
                     in
-                    ( newModel, updateAllDisplays newTrack )
+                    ( newModel, showTrackOnMapCentered newTrack )
 
                 Nothing ->
                     ( model, Cmd.none )
@@ -357,7 +365,7 @@ update msg model =
                         newModel =
                             { model | viewMode = viewMode }
                     in
-                    ( newModel, updateAllDisplays track )
+                    ( newModel, showTrackOnMapCentered track )
 
                 Nothing ->
                     ( model, Cmd.none )
@@ -766,10 +774,10 @@ performActionsOnModel actions model =
                     -- After some thought, it is sensible to collect the preview data
                     -- since it's handy, as the alternative is another complex case
                     -- statement in ToolController.
-                    { mdl | previews = Dict.insert previewData.tag previewData model.previews }
+                    { mdl | previews = Dict.insert previewData.tag previewData mdl.previews }
 
                 ( HidePreview tag, Just track ) ->
-                    { mdl | previews = Dict.remove tag model.previews }
+                    { mdl | previews = Dict.remove tag mdl.previews }
 
                 ( DelayMessage int msg, Just track ) ->
                     mdl
@@ -795,8 +803,6 @@ performActionCommands actions model =
 
                 ( ShowPreview previewData, Just track ) ->
                     -- Add source and layer to map, via Port commands.
-                    let _ = Debug.log "PREVIEW" previewData
-                    in
                     MapPortController.showPreview
                         previewData.tag
                         (case previewData.shape of
@@ -810,8 +816,7 @@ performActionCommands actions model =
                         (SceneBuilderMap.renderPreview previewData)
 
                 ( HidePreview tag, Just track ) ->
-                    MapPortController.hidePreview
-                        tag
+                    MapPortController.hidePreview tag
 
                 ( DelayMessage int msg, Just track ) ->
                     -- This used to "debounce" some clicks.
@@ -823,8 +828,8 @@ performActionCommands actions model =
     Cmd.batch <| List.map performAction actions
 
 
-updateAllDisplays : TrackLoaded -> Cmd msg
-updateAllDisplays track =
+showTrackOnMapCentered : TrackLoaded -> Cmd msg
+showTrackOnMapCentered track =
     Cmd.batch
         -- Must repaint track on so that selective rendering works.
         [ MapPortController.addTrackToMap track
