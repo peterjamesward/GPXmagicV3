@@ -1,19 +1,14 @@
 module Tools.DeletePoints exposing (..)
 
 import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
-import Angle exposing (Angle)
-import Direction2d
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), asRecord, skipCount)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input
 import FeatherIcons
 import FlatColors.ChinesePalette
-import List.Extra
-import Quantity
 import TrackLoaded exposing (TrackLoaded)
-import UtilsForViews exposing (showAngle)
-import ViewPureStyles exposing (neatToolsBorder, sliderThumb, useIcon)
+import ViewPureStyles exposing (neatToolsBorder)
 
 
 type alias Options =
@@ -26,8 +21,11 @@ defaultOptions =
     }
 
 
-type Msg
-    = Delete Int Int
+type
+    Msg
+    --TODO: Decide on (start, finish), (start, count), or (fromStart, fromEnd).
+    --Shall we start by considering the single point deletion?
+    = Delete --Int Int
 
 
 toolStateChange :
@@ -48,7 +46,7 @@ toolStateChange opened colour options track =
                     , points =
                         --TODO: list of points between markers
                         DomainModel.buildPreview
-                            (List.map Tuple.first [])
+                            [ theTrack.currentPosition ]
                             theTrack.trackTree
                     }
               ]
@@ -66,13 +64,19 @@ update :
     -> Maybe TrackLoaded
     -> ( Options, List (ToolAction msg) )
 update msg options previewColour hasTrack =
-    case msg of
-        Delete from to ->
+    case ( hasTrack, msg ) of
+        ( Just track, Delete ) ->
+            ( options, [ DeleteSinglePoint track.currentPosition ] )
+
+        _ ->
             ( options, [] )
 
 
 view : (Msg -> msg) -> Options -> Element msg
 view msgWrapper options =
     el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
-        column [ centerX, padding 4, spacing 4, height <| px 100 ]
-            []
+        el [ centerX, padding 4, spacing 4, height <| px 50 ] <|
+            Input.button (centerY :: neatToolsBorder)
+                { onPress = Just (msgWrapper Delete)
+                , label = text "Delete point"
+                }

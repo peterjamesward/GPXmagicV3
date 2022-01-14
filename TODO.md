@@ -4,7 +4,9 @@
 
 **Next up**: Delete tool. (See Tree Algebra below)
 
-Make DragPan work on 3D view.
+Split up **DomainModel** into core and various helpers.
+
+Make **DragPan** work on 3D view.
 
 Put all Font, Colour etc into a Palette/Style module for ease of change.
 

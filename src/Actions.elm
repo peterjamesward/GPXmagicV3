@@ -13,6 +13,7 @@ type ToolAction msg
     | HidePreview String
     | DelayMessage Int msg
     | MapCenterOnCurrent
+    | DeleteSinglePoint Int
     | NoAction
 
 

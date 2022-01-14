@@ -10195,14 +10195,17 @@ var $author$project$DomainModel$leafFromIndex = F2(
 			}
 		}
 	});
-var $author$project$DomainModel$startPoint = function (treeNode) {
+var $author$project$DomainModel$asRecord = function (treeNode) {
 	if (treeNode.$ === 'Leaf') {
-		var leaf = treeNode.a;
-		return leaf.startPoint;
+		var section = treeNode.a;
+		return section;
 	} else {
 		var node = treeNode.a;
-		return node.nodeContent.startPoint;
+		return node.nodeContent;
 	}
+};
+var $author$project$DomainModel$startPoint = function (treeNode) {
+	return $author$project$DomainModel$asRecord(treeNode).startPoint;
 };
 var $ianmackenzie$elm_geometry$Geometry$Types$Direction2d = function (a) {
 	return {$: 'Direction2d', a: a};
@@ -10498,13 +10501,7 @@ var $author$project$DomainModel$lngLatPair = function (_v0) {
 			]));
 };
 var $author$project$DomainModel$sourceData = function (treeNode) {
-	if (treeNode.$ === 'Leaf') {
-		var leaf = treeNode.a;
-		return leaf.sourceData;
-	} else {
-		var node = treeNode.a;
-		return node.nodeContent.sourceData;
-	}
+	return $author$project$DomainModel$asRecord(treeNode).sourceData;
 };
 var $elm$core$Basics$atan2 = _Basics_atan2;
 var $ianmackenzie$elm_geometry$Direction2d$toAngle = function (_v0) {
@@ -11034,19 +11031,17 @@ var $author$project$Main$performActionCommands = F2(
 		return $elm$core$Platform$Cmd$batch(
 			A2($elm$core$List$map, performAction, actions));
 	});
+var $author$project$DomainModel$deleteSinglePoint = F2(
+	function (index, treeNode) {
+		return treeNode;
+	});
 var $avh4$elm_color$Color$RgbaSpace = F4(
 	function (a, b, c, d) {
 		return {$: 'RgbaSpace', a: a, b: b, c: c, d: d};
 	});
 var $avh4$elm_color$Color$black = A4($avh4$elm_color$Color$RgbaSpace, 0 / 255, 0 / 255, 0 / 255, 1.0);
 var $author$project$DomainModel$boundingBox = function (treeNode) {
-	if (treeNode.$ === 'Leaf') {
-		var leaf = treeNode.a;
-		return leaf.boundingBox;
-	} else {
-		var node = treeNode.a;
-		return node.nodeContent.boundingBox;
-	}
+	return $author$project$DomainModel$asRecord(treeNode).boundingBox;
 };
 var $ianmackenzie$elm_3d_scene$Scene3d$Types$Constant = function (a) {
 	return {$: 'Constant', a: a};
@@ -11106,13 +11101,7 @@ var $author$project$DomainModel$earthPointFromIndex = F2(
 		}
 	});
 var $author$project$DomainModel$endPoint = function (treeNode) {
-	if (treeNode.$ === 'Leaf') {
-		var leaf = treeNode.a;
-		return leaf.endPoint;
-	} else {
-		var node = treeNode.a;
-		return node.nodeContent.endPoint;
-	}
+	return $author$project$DomainModel$asRecord(treeNode).endPoint;
 };
 var $ianmackenzie$elm_geometry$LineSegment3d$endPoint = function (_v0) {
 	var _v1 = _v0.a;
@@ -12471,13 +12460,7 @@ var $ianmackenzie$elm_geometry$LineSegment3d$startPoint = function (_v0) {
 	return start;
 };
 var $author$project$DomainModel$trueLength = function (treeNode) {
-	if (treeNode.$ === 'Leaf') {
-		var leaf = treeNode.a;
-		return leaf.trueLength;
-	} else {
-		var node = treeNode.a;
-		return node.nodeContent.trueLength;
-	}
+	return $author$project$DomainModel$asRecord(treeNode).trueLength;
 };
 var $ianmackenzie$elm_geometry$Point3d$origin = $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
 	{x: 0, y: 0, z: 0});
@@ -12904,7 +12887,7 @@ var $author$project$Main$performActionsOnModel = F2(
 		var performAction = F2(
 			function (action, mdl) {
 				var _v0 = _Utils_Tuple2(action, mdl.track);
-				_v0$4:
+				_v0$5:
 				while (true) {
 					if (_v0.b.$ === 'Just') {
 						switch (_v0.a.$) {
@@ -12941,11 +12924,25 @@ var $author$project$Main$performActionsOnModel = F2(
 								var msg = _v1.b;
 								var track = _v0.b.a;
 								return mdl;
+							case 'DeleteSinglePoint':
+								var index = _v0.a.a;
+								var track = _v0.b.a;
+								var newTrack = _Utils_update(
+									track,
+									{
+										trackTree: A2($author$project$DomainModel$deleteSinglePoint, index, track.trackTree)
+									});
+								var newModel = _Utils_update(
+									model,
+									{
+										track: $elm$core$Maybe$Just(newTrack)
+									});
+								return newModel;
 							default:
-								break _v0$4;
+								break _v0$5;
 						}
 					} else {
-						break _v0$4;
+						break _v0$5;
 					}
 				}
 				return mdl;
@@ -13036,15 +13033,6 @@ var $ianmackenzie$elm_geometry$Direction2d$angleFrom = F2(
 		return $ianmackenzie$elm_units$Quantity$Quantity(
 			A2($elm$core$Basics$atan2, relativeY, relativeX));
 	});
-var $author$project$DomainModel$asRecord = function (treeNode) {
-	if (treeNode.$ === 'Leaf') {
-		var section = treeNode.a;
-		return section;
-	} else {
-		var node = treeNode.a;
-		return node.nodeContent;
-	}
-};
 var $author$project$Tools$AbruptDirectionChanges$findAbruptDirectionChanges = F2(
 	function (options, tree) {
 		var helper = F3(
@@ -13129,7 +13117,8 @@ var $author$project$Tools$DeletePoints$toolStateChange = F4(
 							colour: colour,
 							points: A2(
 								$author$project$DomainModel$buildPreview,
-								A2($elm$core$List$map, $elm$core$Tuple$first, _List_Nil),
+								_List_fromArray(
+									[theTrack.currentPosition]),
 								theTrack.trackTree),
 							shape: $author$project$Actions$PreviewCircle,
 							tag: 'delete'
@@ -13585,13 +13574,7 @@ var $author$project$DomainModel$containingSphere = function (box) {
 	return A2($ianmackenzie$elm_geometry$Sphere3d$withRadius, radius, here);
 };
 var $author$project$DomainModel$eastwardTurn = function (treeNode) {
-	if (treeNode.$ === 'Leaf') {
-		var leaf = treeNode.a;
-		return leaf.eastwardExtent;
-	} else {
-		var node = treeNode.a;
-		return node.nodeContent.eastwardExtent;
-	}
+	return $author$project$DomainModel$asRecord(treeNode).eastwardExtent;
 };
 var $author$project$Spherical$findBearingToTarget = F2(
 	function (_v0, _v1) {
@@ -13752,13 +13735,7 @@ var $ianmackenzie$elm_units$Quantity$maximum = function (quantities) {
 	}
 };
 var $author$project$DomainModel$medianLongitude = function (treeNode) {
-	if (treeNode.$ === 'Leaf') {
-		var leaf = treeNode.a;
-		return leaf.medianLongitude;
-	} else {
-		var node = treeNode.a;
-		return node.nodeContent.medianLongitude;
-	}
+	return $author$project$DomainModel$asRecord(treeNode).medianLongitude;
 };
 var $ianmackenzie$elm_geometry$BoundingBox3d$extrema = function (_v0) {
 	var boundingBoxExtrema = _v0.a;
@@ -13779,13 +13756,7 @@ var $ianmackenzie$elm_geometry$BoundingBox3d$union = F2(
 			});
 	});
 var $author$project$DomainModel$westwardTurn = function (treeNode) {
-	if (treeNode.$ === 'Leaf') {
-		var leaf = treeNode.a;
-		return leaf.westwardExtent;
-	} else {
-		var node = treeNode.a;
-		return node.nodeContent.westwardExtent;
-	}
+	return $author$project$DomainModel$asRecord(treeNode).westwardExtent;
 };
 var $author$project$DomainModel$treeFromList = function (track) {
 	var referencePoint = A2(
@@ -15049,11 +15020,24 @@ var $author$project$Tools$AbruptDirectionChanges$update = F4(
 				}
 		}
 	});
+var $author$project$Actions$DeleteSinglePoint = function (a) {
+	return {$: 'DeleteSinglePoint', a: a};
+};
 var $author$project$Tools$DeletePoints$update = F4(
 	function (msg, options, previewColour, hasTrack) {
-		var from = msg.a;
-		var to = msg.b;
-		return _Utils_Tuple2(options, _List_Nil);
+		var _v0 = _Utils_Tuple2(hasTrack, msg);
+		if (_v0.a.$ === 'Just') {
+			var track = _v0.a.a;
+			var _v1 = _v0.b;
+			return _Utils_Tuple2(
+				options,
+				_List_fromArray(
+					[
+						$author$project$Actions$DeleteSinglePoint(track.currentPosition)
+					]));
+		} else {
+			return _Utils_Tuple2(options, _List_Nil);
+		}
 	});
 var $author$project$ToolsController$update = F4(
 	function (toolMsg, isTrack, msgWrapper, options) {
@@ -15601,13 +15585,7 @@ var $ianmackenzie$elm_geometry$Sphere3d$radius = function (_v0) {
 	return properties.radius;
 };
 var $author$project$DomainModel$sphere = function (treeNode) {
-	if (treeNode.$ === 'Leaf') {
-		var leaf = treeNode.a;
-		return leaf.sphere;
-	} else {
-		var node = treeNode.a;
-		return node.nodeContent.sphere;
-	}
+	return $author$project$DomainModel$asRecord(treeNode).sphere;
 };
 var $author$project$DomainModel$nearestToRay = F2(
 	function (ray, treeNode) {
@@ -24466,6 +24444,7 @@ var $author$project$Tools$AbruptDirectionChanges$view = F2(
 					}()
 					])));
 	});
+var $author$project$Tools$DeletePoints$Delete = {$: 'Delete'};
 var $author$project$Tools$DeletePoints$view = F2(
 	function (msgWrapper, options) {
 		return A2(
@@ -24476,16 +24455,23 @@ var $author$project$Tools$DeletePoints$view = F2(
 					$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite)
 				]),
 			A2(
-				$mdgriffith$elm_ui$Element$column,
+				$mdgriffith$elm_ui$Element$el,
 				_List_fromArray(
 					[
 						$mdgriffith$elm_ui$Element$centerX,
 						$mdgriffith$elm_ui$Element$padding(4),
 						$mdgriffith$elm_ui$Element$spacing(4),
 						$mdgriffith$elm_ui$Element$height(
-						$mdgriffith$elm_ui$Element$px(100))
+						$mdgriffith$elm_ui$Element$px(50))
 					]),
-				_List_Nil));
+				A2(
+					$mdgriffith$elm_ui$Element$Input$button,
+					A2($elm$core$List$cons, $mdgriffith$elm_ui$Element$centerY, $author$project$ViewPureStyles$neatToolsBorder),
+					{
+						label: $mdgriffith$elm_ui$Element$text('Delete point'),
+						onPress: $elm$core$Maybe$Just(
+							msgWrapper($author$project$Tools$DeletePoints$Delete))
+					})));
 	});
 var $author$project$ToolsController$viewToolByType = F4(
 	function (msgWrapper, entry, isTrack, options) {

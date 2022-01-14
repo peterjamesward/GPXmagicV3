@@ -85,12 +85,7 @@ asRecord treeNode =
 
 sourceData : PeteTree -> ( GPXSource, GPXSource )
 sourceData treeNode =
-    case treeNode of
-        Leaf leaf ->
-            leaf.sourceData
-
-        Node node ->
-            node.nodeContent.sourceData
+    treeNode |> asRecord |> .sourceData
 
 
 effectiveLatitude : PeteTree -> Angle
@@ -100,22 +95,12 @@ effectiveLatitude treeNode =
 
 startPoint : PeteTree -> EarthPoint
 startPoint treeNode =
-    case treeNode of
-        Leaf leaf ->
-            leaf.startPoint
-
-        Node node ->
-            node.nodeContent.startPoint
+    treeNode |> asRecord |> .startPoint
 
 
 endPoint : PeteTree -> EarthPoint
 endPoint treeNode =
-    case treeNode of
-        Leaf leaf ->
-            leaf.endPoint
-
-        Node node ->
-            node.nodeContent.endPoint
+    treeNode |> asRecord |> .endPoint
 
 
 isLongitudeContained : Direction2d LocalCoords -> PeteTree -> Bool
@@ -146,12 +131,7 @@ rotationAwayFrom longitude treeNode =
 
 trueLength : PeteTree -> Length
 trueLength treeNode =
-    case treeNode of
-        Leaf leaf ->
-            leaf.trueLength
-
-        Node node ->
-            node.nodeContent.trueLength
+    treeNode |> asRecord |> .trueLength
 
 
 skipCount : PeteTree -> Int
@@ -166,52 +146,27 @@ skipCount treeNode =
 
 boundingBox : PeteTree -> BoundingBox3d Length.Meters LocalCoords
 boundingBox treeNode =
-    case treeNode of
-        Leaf leaf ->
-            leaf.boundingBox
-
-        Node node ->
-            node.nodeContent.boundingBox
+    treeNode |> asRecord |> .boundingBox
 
 
 sphere : PeteTree -> Sphere3d Length.Meters LocalCoords
 sphere treeNode =
-    case treeNode of
-        Leaf leaf ->
-            leaf.sphere
-
-        Node node ->
-            node.nodeContent.sphere
+    treeNode |> asRecord |> .sphere
 
 
 medianLongitude : PeteTree -> Direction2d LocalCoords
 medianLongitude treeNode =
-    case treeNode of
-        Leaf leaf ->
-            leaf.medianLongitude
-
-        Node node ->
-            node.nodeContent.medianLongitude
+    treeNode |> asRecord |> .medianLongitude
 
 
 eastwardTurn : PeteTree -> Angle
 eastwardTurn treeNode =
-    case treeNode of
-        Leaf leaf ->
-            leaf.eastwardExtent
-
-        Node node ->
-            node.nodeContent.eastwardExtent
+    treeNode |> asRecord |> .eastwardExtent
 
 
 westwardTurn : PeteTree -> Angle
 westwardTurn treeNode =
-    case treeNode of
-        Leaf leaf ->
-            leaf.westwardExtent
-
-        Node node ->
-            node.nodeContent.westwardExtent
+    treeNode |> asRecord |> .westwardExtent
 
 
 pointFromGpxWithReference : GPXSource -> GPXSource -> EarthPoint
@@ -732,3 +687,8 @@ buildPreview indices tree =
             )
     in
     List.map getDualCoords indices
+
+
+deleteSinglePoint : Int -> PeteTree -> PeteTree
+deleteSinglePoint index treeNode =
+    treeNode

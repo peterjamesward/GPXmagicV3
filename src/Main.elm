@@ -827,6 +827,20 @@ performActionsOnModel actions model =
                 ( DelayMessage int msg, Just track ) ->
                     mdl
 
+                ( DeleteSinglePoint index, Just track ) ->
+                    let
+                        newTrack =
+                            --TODO: Change current point if now outside tree bounds.
+                            { track
+                                | trackTree =
+                                    DomainModel.deleteSinglePoint index track.trackTree
+                            }
+
+                        newModel =
+                            { model | track = Just newTrack }
+                    in
+                    newModel
+
                 _ ->
                     mdl
     in
