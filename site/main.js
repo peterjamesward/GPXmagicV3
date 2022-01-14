@@ -8473,6 +8473,7 @@ var $author$project$Tools$AbruptDirectionChanges$defaultOptions = {
 	currentBreach: 0,
 	threshold: $ianmackenzie$elm_units$Angle$degrees(60)
 };
+var $author$project$Tools$DeletePoints$defaultOptions = {dummy: 0};
 var $elm$browser$Browser$Dom$getViewport = _Browser_withWindow(_Browser_getViewport);
 var $elm$time$Time$Name = function (a) {
 	return {$: 'Name', a: a};
@@ -9462,9 +9463,9 @@ var $author$project$LocalStorage$storageListKeys = $author$project$LocalStorage$
 				'Cmd',
 				$elm$json$Json$Encode$string('storage.list'))
 			])));
-var $author$project$ToolsController$AbruptDirectionChanges = {$: 'AbruptDirectionChanges'};
 var $author$project$ToolsController$Contracted = {$: 'Contracted'};
 var $author$project$ToolsController$DockUpperRight = {$: 'DockUpperRight'};
+var $author$project$ToolsController$ToolDeletePoints = {$: 'ToolDeletePoints'};
 var $mdgriffith$elm_ui$Internal$Model$Rgba = F4(
 	function (a, b, c, d) {
 		return {$: 'Rgba', a: a, b: b, c: c, d: d};
@@ -9498,8 +9499,21 @@ var $mdgriffith$elm_ui$Element$rgb255 = F3(
 	function (red, green, blue) {
 		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, red / 255, green / 255, blue / 255, 1);
 	});
+var $smucode$elm_flat_colors$FlatColors$AussiePalette$pinkGlamour = A3($mdgriffith$elm_ui$Element$rgb255, 255, 121, 121);
+var $author$project$ToolsController$deleteTool = {
+	dock: $author$project$ToolsController$DockUpperRight,
+	info: 'Away with ye',
+	isPopupOpen: false,
+	label: 'Delete points',
+	state: $author$project$ToolsController$Contracted,
+	tabColour: $smucode$elm_flat_colors$FlatColors$AussiePalette$pinkGlamour,
+	textColour: $author$project$ViewPureStyles$contrastingColour($smucode$elm_flat_colors$FlatColors$AussiePalette$pinkGlamour),
+	toolType: $author$project$ToolsController$ToolDeletePoints,
+	video: $elm$core$Maybe$Nothing
+};
+var $author$project$ToolsController$ToolAbruptDirectionChanges = {$: 'ToolAbruptDirectionChanges'};
 var $smucode$elm_flat_colors$FlatColors$AussiePalette$spicedNectarine = A3($mdgriffith$elm_ui$Element$rgb255, 255, 190, 118);
-var $author$project$ToolsController$abruptDirectionChanges = {
+var $author$project$ToolsController$directionChangeTool = {
 	dock: $author$project$ToolsController$DockUpperRight,
 	info: 'These may need smoothing',
 	isPopupOpen: false,
@@ -9507,7 +9521,7 @@ var $author$project$ToolsController$abruptDirectionChanges = {
 	state: $author$project$ToolsController$Contracted,
 	tabColour: $smucode$elm_flat_colors$FlatColors$AussiePalette$spicedNectarine,
 	textColour: $author$project$ViewPureStyles$contrastingColour($smucode$elm_flat_colors$FlatColors$AussiePalette$spicedNectarine),
-	toolType: $author$project$ToolsController$AbruptDirectionChanges,
+	toolType: $author$project$ToolsController$ToolAbruptDirectionChanges,
 	video: $elm$core$Maybe$Nothing
 };
 var $author$project$ToolsController$DockUpperLeft = {$: 'DockUpperLeft'};
@@ -9526,7 +9540,7 @@ var $author$project$ToolsController$trackInfoBox = {
 	video: $elm$core$Maybe$Nothing
 };
 var $author$project$ToolsController$tools = _List_fromArray(
-	[$author$project$ToolsController$trackInfoBox, $author$project$ToolsController$abruptDirectionChanges]);
+	[$author$project$ToolsController$trackInfoBox, $author$project$ToolsController$directionChangeTool, $author$project$ToolsController$deleteTool]);
 var $elm$time$Time$utc = A2($elm$time$Time$Zone, 0, _List_Nil);
 var $author$project$Main$init = F3(
 	function (mflags, origin, navigationKey) {
@@ -9546,6 +9560,7 @@ var $author$project$Main$init = F3(
 				contentArea: _Utils_Tuple2(
 					$ianmackenzie$elm_units$Pixels$pixels(800),
 					$ianmackenzie$elm_units$Pixels$pixels(500)),
+				deleteOptions: $author$project$Tools$DeletePoints$defaultOptions,
 				directionChangeOptions: $author$project$Tools$AbruptDirectionChanges$defaultOptions,
 				filename: $elm$core$Maybe$Nothing,
 				ipInfo: $elm$core$Maybe$Nothing,
@@ -13101,23 +13116,66 @@ var $author$project$Tools$AbruptDirectionChanges$toolStateChange = F4(
 					]));
 		}
 	});
+var $author$project$Tools$DeletePoints$toolStateChange = F4(
+	function (opened, colour, options, track) {
+		var _v0 = _Utils_Tuple2(opened, track);
+		if (_v0.a && (_v0.b.$ === 'Just')) {
+			var theTrack = _v0.b.a;
+			return _Utils_Tuple2(
+				options,
+				_List_fromArray(
+					[
+						$author$project$Actions$ShowPreview(
+						{
+							colour: colour,
+							points: A2(
+								$author$project$DomainModel$buildPreview,
+								A2($elm$core$List$map, $elm$core$Tuple$first, _List_Nil),
+								theTrack.trackTree),
+							shape: $author$project$Actions$PreviewCircle,
+							tag: 'delete'
+						})
+					]));
+		} else {
+			return _Utils_Tuple2(
+				options,
+				_List_fromArray(
+					[
+						$author$project$Actions$HidePreview('delete')
+					]));
+		}
+	});
 var $author$project$ToolsController$toolStateHasChanged = F3(
 	function (toolType, newState, model) {
-		if (toolType.$ === 'ToolTrackInfo') {
-			return _Utils_Tuple2(model, _List_Nil);
-		} else {
-			var _v1 = A4(
-				$author$project$Tools$AbruptDirectionChanges$toolStateChange,
-				_Utils_eq(newState, $author$project$ToolsController$Expanded),
-				A2($author$project$ToolsController$getColour, toolType, model.tools),
-				model.directionChangeOptions,
-				model.track);
-			var newOptions = _v1.a;
-			var actions = _v1.b;
-			var newModel = _Utils_update(
-				model,
-				{directionChangeOptions: newOptions});
-			return _Utils_Tuple2(newModel, actions);
+		switch (toolType.$) {
+			case 'ToolTrackInfo':
+				return _Utils_Tuple2(model, _List_Nil);
+			case 'ToolAbruptDirectionChanges':
+				var _v1 = A4(
+					$author$project$Tools$AbruptDirectionChanges$toolStateChange,
+					_Utils_eq(newState, $author$project$ToolsController$Expanded),
+					A2($author$project$ToolsController$getColour, toolType, model.tools),
+					model.directionChangeOptions,
+					model.track);
+				var newOptions = _v1.a;
+				var actions = _v1.b;
+				var newModel = _Utils_update(
+					model,
+					{directionChangeOptions: newOptions});
+				return _Utils_Tuple2(newModel, actions);
+			default:
+				var _v2 = A4(
+					$author$project$Tools$DeletePoints$toolStateChange,
+					_Utils_eq(newState, $author$project$ToolsController$Expanded),
+					A2($author$project$ToolsController$getColour, toolType, model.tools),
+					model.deleteOptions,
+					model.track);
+				var newOptions = _v2.a;
+				var actions = _v2.b;
+				var newModel = _Utils_update(
+					model,
+					{deleteOptions: newOptions});
+				return _Utils_Tuple2(newModel, actions);
 		}
 	});
 var $author$project$ToolsController$refreshOpenTools = function (model) {
@@ -14991,6 +15049,12 @@ var $author$project$Tools$AbruptDirectionChanges$update = F4(
 				}
 		}
 	});
+var $author$project$Tools$DeletePoints$update = F4(
+	function (msg, options, previewColour, hasTrack) {
+		var from = msg.a;
+		var to = msg.b;
+		return _Utils_Tuple2(options, _List_Nil);
+	});
 var $author$project$ToolsController$update = F3(
 	function (toolMsg, msgWrapper, model) {
 		switch (toolMsg.$) {
@@ -15051,13 +15115,13 @@ var $author$project$ToolsController$update = F3(
 								A2($author$project$ToolsController$setToolState, toolType, newState),
 								model.tools)
 						}));
-			default:
+			case 'DirectionChanges':
 				var msg = toolMsg.a;
 				var _v1 = A4(
 					$author$project$Tools$AbruptDirectionChanges$update,
 					msg,
 					model.directionChangeOptions,
-					A2($author$project$ToolsController$getColour, $author$project$ToolsController$AbruptDirectionChanges, model.tools),
+					A2($author$project$ToolsController$getColour, $author$project$ToolsController$ToolAbruptDirectionChanges, model.tools),
 					model.track);
 				var newOptions = _v1.a;
 				var actions = _v1.b;
@@ -15065,6 +15129,21 @@ var $author$project$ToolsController$update = F3(
 					_Utils_update(
 						model,
 						{directionChangeOptions: newOptions}),
+					actions);
+			default:
+				var msg = toolMsg.a;
+				var _v2 = A4(
+					$author$project$Tools$DeletePoints$update,
+					msg,
+					model.deleteOptions,
+					A2($author$project$ToolsController$getColour, $author$project$ToolsController$ToolDeletePoints, model.tools),
+					model.track);
+				var newOptions = _v2.a;
+				var actions = _v2.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{deleteOptions: newOptions}),
 					actions);
 		}
 	});
@@ -22861,6 +22940,9 @@ var $mdgriffith$elm_ui$Internal$Model$Text = function (a) {
 var $mdgriffith$elm_ui$Element$text = function (content) {
 	return $mdgriffith$elm_ui$Internal$Model$Text(content);
 };
+var $author$project$ToolsController$DeletePoints = function (a) {
+	return {$: 'DeletePoints', a: a};
+};
 var $author$project$ToolsController$DirectionChanges = function (a) {
 	return {$: 'DirectionChanges', a: a};
 };
@@ -24376,16 +24458,43 @@ var $author$project$Tools$AbruptDirectionChanges$view = F2(
 					}()
 					])));
 	});
+var $author$project$Tools$DeletePoints$view = F2(
+	function (msgWrapper, options) {
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite)
+				]),
+			A2(
+				$mdgriffith$elm_ui$Element$column,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$centerX,
+						$mdgriffith$elm_ui$Element$padding(4),
+						$mdgriffith$elm_ui$Element$spacing(4),
+						$mdgriffith$elm_ui$Element$height(
+						$mdgriffith$elm_ui$Element$px(100))
+					]),
+				_List_Nil));
+	});
 var $author$project$ToolsController$viewToolByType = F3(
 	function (msgWrapper, entry, model) {
 		var _v0 = entry.toolType;
-		if (_v0.$ === 'ToolTrackInfo') {
-			return $author$project$TrackInfoBox$trackInfoBox(model.track);
-		} else {
-			return A2(
-				$author$project$Tools$AbruptDirectionChanges$view,
-				A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$DirectionChanges),
-				model.directionChangeOptions);
+		switch (_v0.$) {
+			case 'ToolTrackInfo':
+				return $author$project$TrackInfoBox$trackInfoBox(model.track);
+			case 'ToolAbruptDirectionChanges':
+				return A2(
+					$author$project$Tools$AbruptDirectionChanges$view,
+					A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$DirectionChanges),
+					model.directionChangeOptions);
+			default:
+				return A2(
+					$author$project$Tools$DeletePoints$view,
+					A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$DeletePoints),
+					model.deleteOptions);
 		}
 	});
 var $author$project$ToolsController$viewTool = F3(

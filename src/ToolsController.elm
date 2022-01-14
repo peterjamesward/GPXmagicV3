@@ -1,6 +1,5 @@
 module ToolsController exposing (..)
 
-import Tools.AbruptDirectionChanges as AbruptDirectionChanges
 import Actions exposing (ToolAction)
 import Element exposing (..)
 import Element.Background as Background exposing (color)
@@ -13,6 +12,8 @@ import FlatColors.SwedishPalette
 import Html.Attributes exposing (style)
 import Html.Events.Extra.Mouse as Mouse
 import List.Extra
+import Tools.AbruptDirectionChanges as AbruptDirectionChanges
+import Tools.DeletePoints
 import TrackInfoBox
 import TrackLoaded exposing (TrackLoaded)
 import ViewPureStyles exposing (contrastingColour, neatToolsBorder, useIcon)
@@ -36,7 +37,8 @@ type ToolDock
 
 type ToolType
     = ToolTrackInfo
-    | AbruptDirectionChanges
+    | ToolAbruptDirectionChanges
+    | ToolDeletePoints
 
 
 type ToolMsg
@@ -45,6 +47,7 @@ type ToolMsg
     | ToolColourSelect ToolType Element.Color
     | ToolStateToggle ToolType ToolState
     | DirectionChanges AbruptDirectionChanges.Msg
+    | DeletePoints Tools.DeletePoints.Msg
     | ToolNoOp
 
 
@@ -65,7 +68,8 @@ tools : List ToolEntry
 tools =
     -- One list or five, or six? Try one. Arguably a Dict but POITROAE.
     [ trackInfoBox
-    , abruptDirectionChanges
+    , directionChangeTool
+    , deleteTool
     ]
 
 
@@ -83,9 +87,9 @@ trackInfoBox =
     }
 
 
-abruptDirectionChanges : ToolEntry
-abruptDirectionChanges =
-    { toolType = AbruptDirectionChanges
+directionChangeTool : ToolEntry
+directionChangeTool =
+    { toolType = ToolAbruptDirectionChanges
     , label = "Direction changes"
     , info = "These may need smoothing"
     , video = Nothing
@@ -93,6 +97,20 @@ abruptDirectionChanges =
     , dock = DockUpperRight
     , tabColour = FlatColors.AussiePalette.spicedNectarine
     , textColour = contrastingColour FlatColors.AussiePalette.spicedNectarine
+    , isPopupOpen = False
+    }
+
+
+deleteTool : ToolEntry
+deleteTool =
+    { toolType = ToolDeletePoints
+    , label = "Delete points"
+    , info = "Away with ye"
+    , video = Nothing
+    , state = Contracted
+    , dock = DockUpperRight
+    , tabColour = FlatColors.AussiePalette.pinkGlamour
+    , textColour = contrastingColour FlatColors.AussiePalette.pinkGlamour
     , isPopupOpen = False
     }
 
@@ -165,12 +183,14 @@ update :
             | tools : List ToolEntry
             , track : Maybe TrackLoaded
             , directionChangeOptions : AbruptDirectionChanges.Options
+            , deleteOptions : Tools.DeletePoints.Options
         }
     ->
         ( { model
             | tools : List ToolEntry
             , track : Maybe TrackLoaded
             , directionChangeOptions : AbruptDirectionChanges.Options
+            , deleteOptions : Tools.DeletePoints.Options
           }
         , List (ToolAction msg)
         )
@@ -206,10 +226,24 @@ update toolMsg msgWrapper model =
                     AbruptDirectionChanges.update
                         msg
                         model.directionChangeOptions
-                        (getColour AbruptDirectionChanges model.tools)
+                        (getColour ToolAbruptDirectionChanges model.tools)
                         model.track
             in
             ( { model | directionChangeOptions = newOptions }
+            , actions
+            )
+
+        DeletePoints msg ->
+            -- Delegate to tool here...
+            let
+                ( newOptions, actions ) =
+                    Tools.DeletePoints.update
+                        msg
+                        model.deleteOptions
+                        (getColour ToolDeletePoints model.tools)
+                        model.track
+            in
+            ( { model | deleteOptions = newOptions }
             , actions
             )
 
@@ -219,12 +253,14 @@ refreshOpenTools :
         | tools : List ToolEntry
         , track : Maybe TrackLoaded
         , directionChangeOptions : AbruptDirectionChanges.Options
+        , deleteOptions : Tools.DeletePoints.Options
     }
     ->
         ( { model
             | tools : List ToolEntry
             , track : Maybe TrackLoaded
             , directionChangeOptions : AbruptDirectionChanges.Options
+            , deleteOptions : Tools.DeletePoints.Options
           }
         , List (ToolAction msg)
         )
@@ -254,12 +290,14 @@ toolStateHasChanged :
             | tools : List ToolEntry
             , track : Maybe TrackLoaded
             , directionChangeOptions : AbruptDirectionChanges.Options
+            , deleteOptions : Tools.DeletePoints.Options
         }
     ->
         ( { model
             | tools : List ToolEntry
             , track : Maybe TrackLoaded
             , directionChangeOptions : AbruptDirectionChanges.Options
+            , deleteOptions : Tools.DeletePoints.Options
           }
         , List (ToolAction msg)
         )
@@ -268,7 +306,7 @@ toolStateHasChanged toolType newState model =
         ToolTrackInfo ->
             ( model, [] )
 
-        AbruptDirectionChanges ->
+        ToolAbruptDirectionChanges ->
             -- Would like an OO style dispatch table here but what with each tool
             -- having its own options, that's more tricky than it's worth.
             let
@@ -281,6 +319,20 @@ toolStateHasChanged toolType newState model =
 
                 newModel =
                     { model | directionChangeOptions = newOptions }
+            in
+            ( newModel, actions )
+
+        ToolDeletePoints ->
+            let
+                ( newOptions, actions ) =
+                    Tools.DeletePoints.toolStateChange
+                        (newState == Expanded)
+                        (getColour toolType model.tools)
+                        model.deleteOptions
+                        model.track
+
+                newModel =
+                    { model | deleteOptions = newOptions }
             in
             ( newModel, actions )
 
@@ -297,6 +349,7 @@ toolsForDock :
             | tools : List ToolEntry
             , track : Maybe TrackLoaded
             , directionChangeOptions : AbruptDirectionChanges.Options
+            , deleteOptions : Tools.DeletePoints.Options
         }
     -> Element msg
 toolsForDock dock msgWrapper model =
@@ -313,6 +366,7 @@ viewTool :
         { model
             | track : Maybe TrackLoaded
             , directionChangeOptions : AbruptDirectionChanges.Options
+            , deleteOptions : Tools.DeletePoints.Options
         }
     -> ToolEntry
     -> Element msg
@@ -455,6 +509,7 @@ viewToolByType :
         { model
             | track : Maybe TrackLoaded
             , directionChangeOptions : AbruptDirectionChanges.Options
+            , deleteOptions : Tools.DeletePoints.Options
         }
     -> Element msg
 viewToolByType msgWrapper entry model =
@@ -462,5 +517,9 @@ viewToolByType msgWrapper entry model =
         ToolTrackInfo ->
             TrackInfoBox.trackInfoBox model.track
 
-        AbruptDirectionChanges ->
+        ToolAbruptDirectionChanges ->
             AbruptDirectionChanges.view (msgWrapper << DirectionChanges) model.directionChangeOptions
+
+        ToolDeletePoints ->
+            Tools.DeletePoints.view (msgWrapper << DeletePoints) model.deleteOptions
+

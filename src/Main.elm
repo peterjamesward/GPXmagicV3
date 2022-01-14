@@ -38,6 +38,7 @@ import SplitPane.SplitPane as SplitPane exposing (..)
 import StravaAuth exposing (getStravaToken)
 import Task
 import Time
+import Tools.DeletePoints
 import ToolsController exposing (ToolEntry)
 import TrackLoaded exposing (TrackLoaded)
 import Url exposing (Url)
@@ -107,6 +108,7 @@ type alias Model =
 
     -- Tool specific options
     , directionChangeOptions : AbruptDirectionChanges.Options
+    , deleteOptions : Tools.DeletePoints.Options
     }
 
 
@@ -161,6 +163,7 @@ init mflags origin navigationKey =
                 |> configureSplitter (percentage 0.8 <| Just ( 0.6, 0.97 ))
       , tools = ToolsController.tools
       , directionChangeOptions = AbruptDirectionChanges.defaultOptions
+      , deleteOptions = Tools.DeletePoints.defaultOptions
       }
     , Cmd.batch
         [ authCmd
