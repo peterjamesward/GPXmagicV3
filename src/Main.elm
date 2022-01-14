@@ -805,6 +805,7 @@ performActionCommands actions model =
                 ( SetCurrent position, Just track ) ->
                     Cmd.batch
                         [ MapPortController.addTrackToMap track
+                        , MapPortController.centreMapOnCurrent track
                         ]
 
                 ( ShowPreview previewData, Just track ) ->
