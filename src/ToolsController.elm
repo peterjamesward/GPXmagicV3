@@ -184,8 +184,9 @@ update toolMsg msgWrapper model =
             )
 
         ToolColourSelect toolType color ->
+            -- Instantly reflect colour changes in preview.
             ( { model | tools = List.map (setColour toolType color) model.tools }
-            , []
+                |> toolStateHasChanged toolType Expanded
             )
 
         ToolStateToggle toolType newState ->

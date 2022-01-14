@@ -2,7 +2,8 @@
 
 # WIP
 
-(Colour change needs to be treated same as tool open.)
+1. Dock options passing through to tool.
+2. Pane messages wrong or resizing wrong.
 
 Pane resizing broken somehow. Map is OK but 3D not resizing.
 
