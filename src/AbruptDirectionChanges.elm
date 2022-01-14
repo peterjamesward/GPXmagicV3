@@ -60,7 +60,7 @@ findAbruptDirectionChanges options tree =
                         withThisNodeIfNeeded acc =
                             -- Is it at this node, or one of its children?
                             if thisNodeAngle |> Quantity.greaterThanOrEqualTo options.threshold then
-                                ( skip + 1, thisNodeAngle ) :: acc
+                                ( skip + (skipCount node.left), thisNodeAngle ) :: acc
 
                             else
                                 acc

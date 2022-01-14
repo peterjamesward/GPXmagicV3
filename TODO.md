@@ -2,18 +2,11 @@
 
 # WIP
 
-Current position slider should refresh open tool previews.
-Same will be true for Purple.
-
 Map click should not re-centre map.
 Third person click should not re-centre the view.
 Double-click, in contrast, always centres.
 > More generally, don't centre _the view you click on_.
 > Other views should centre when in "follow" mode.
-
-Are sharp bends being reported when not so sharp? 
-> **YES** this is a problem. See sharp bend example.
-> Can't see it in the code; need to use debugger.
 
 Make DragPan work on 3D view.
 
@@ -36,7 +29,7 @@ Need "restore to defaults" for tools.
 Details in Backlog.
 
 ## Map
-Add non-draggable track point circles, in seperate layer we can turn on and off
+Add non-draggable track point circles, in separate layer we can turn on and off
 to replace by draggables when that control is open.
 
 ---
@@ -133,6 +126,11 @@ So far, looking awesome at 937K (!).
 Do an embedded version of Map with Round the World route as iframe for Steve?
 Binary file format for fastest load?
 > https://package.elm-lang.org/packages/elm-toulouse/cbor/latest/
+
+## Deferred stuff
+Current position slider should refresh open tool previews.
+Same will be true for Purple.
+
 
 ---
 
