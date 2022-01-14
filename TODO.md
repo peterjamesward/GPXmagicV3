@@ -12,12 +12,9 @@ Need "restore to defaults" for tools.
 
 ## Editing?
 >> Take a couple of tools, do them as better tabs:
- - preset layout options in "menu bar"
- - less space for view selection -- popup? e.g. feather icon with "eye" in the wee mini toolbar.
+ - Less space for view selection -- popup? e.g. feather icon with "eye" in the wee mini toolbar.
 
- - previews in all views, each tool is fully responsible (but with shared helpers).
- - Thus, validate Actions concept,
- - decide best approach to Undo & Redo (see Backlog)
+ - Decide best approach to Undo & Redo (see Backlog)
 
 ## Profile & Charts
 Details in Backlog.
@@ -38,8 +35,6 @@ Double-click, in contrast, always centres.
 > Other views should centre when in "follow" mode.
 
 ## Layout
-
-Modal pop-up during loading, also a place to show parsing errors.
 
 Splitters looking good now.
 Will need tweaking later.

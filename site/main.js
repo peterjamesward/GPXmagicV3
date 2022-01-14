@@ -9565,6 +9565,7 @@ var $author$project$Main$init = F3(
 						$elm$core$Maybe$Just(
 							_Utils_Tuple2(0.01, 0.4))),
 					$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Horizontal)),
+				modalMessage: $elm$core$Maybe$Nothing,
 				previews: $elm$core$Dict$empty,
 				rightDockInternal: A2(
 					$author$project$SplitPane$SplitPane$configureSplitter,
@@ -16036,7 +16037,11 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 			case 'GpxRequested':
 				return _Utils_Tuple2(
-					model,
+					_Utils_update(
+						model,
+						{
+							modalMessage: $elm$core$Maybe$Just('Select GPX file')
+						}),
 					A2(
 						$elm$file$File$Select$file,
 						_List_fromArray(
@@ -16049,7 +16054,9 @@ var $author$project$Main$update = F2(
 						model,
 						{
 							filename: $elm$core$Maybe$Just(
-								$elm$file$File$name(file))
+								$elm$file$File$name(file)),
+							modalMessage: $elm$core$Maybe$Just(
+								'Loading ' + $elm$file$File$name(file))
 						}),
 					A2(
 						$elm$core$Task$perform,
@@ -16073,6 +16080,7 @@ var $author$project$Main$update = F2(
 					var modelWithTrack = _Utils_update(
 						model,
 						{
+							modalMessage: $elm$core$Maybe$Nothing,
 							track: $elm$core$Maybe$Just(newTrack),
 							viewMapContext: $elm$core$Maybe$Just($author$project$ViewMap$initialiseContext),
 							viewMode: _Utils_eq(model.viewMode, $author$project$ViewContext$ViewInfo) ? $author$project$ViewContext$ViewThird : model.viewMode,
@@ -21835,6 +21843,23 @@ var $author$project$ViewPureStyles$commonLayoutStyles = _List_fromArray(
 	]);
 var $mdgriffith$elm_ui$Internal$Model$unstyled = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Unstyled, $elm$core$Basics$always);
 var $mdgriffith$elm_ui$Element$html = $mdgriffith$elm_ui$Internal$Model$unstyled;
+var $mdgriffith$elm_ui$Internal$Model$InFront = {$: 'InFront'};
+var $mdgriffith$elm_ui$Internal$Model$Nearby = F2(
+	function (a, b) {
+		return {$: 'Nearby', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Model$NoAttribute = {$: 'NoAttribute'};
+var $mdgriffith$elm_ui$Element$createNearby = F2(
+	function (loc, element) {
+		if (element.$ === 'Empty') {
+			return $mdgriffith$elm_ui$Internal$Model$NoAttribute;
+		} else {
+			return A2($mdgriffith$elm_ui$Internal$Model$Nearby, loc, element);
+		}
+	});
+var $mdgriffith$elm_ui$Element$inFront = function (element) {
+	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$InFront, element);
+};
 var $mdgriffith$elm_ui$Internal$Model$OnlyDynamic = F2(
 	function (a, b) {
 		return {$: 'OnlyDynamic', a: a, b: b};
@@ -22086,7 +22111,6 @@ var $elm$html$Html$Attributes$boolProperty = F2(
 	});
 var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
 var $mdgriffith$elm_ui$Element$Input$enter = 'Enter';
-var $mdgriffith$elm_ui$Internal$Model$NoAttribute = {$: 'NoAttribute'};
 var $mdgriffith$elm_ui$Element$Input$hasFocusStyle = function (attr) {
 	if (((attr.$ === 'StyleClass') && (attr.b.$ === 'PseudoSelector')) && (attr.b.a.$ === 'Focus')) {
 		var _v1 = attr.b;
@@ -22244,22 +22268,6 @@ var $mdgriffith$elm_ui$Element$Font$color = function (fontColor) {
 			fontColor));
 };
 var $mdgriffith$elm_ui$Element$htmlAttribute = $mdgriffith$elm_ui$Internal$Model$Attr;
-var $mdgriffith$elm_ui$Internal$Model$InFront = {$: 'InFront'};
-var $mdgriffith$elm_ui$Internal$Model$Nearby = F2(
-	function (a, b) {
-		return {$: 'Nearby', a: a, b: b};
-	});
-var $mdgriffith$elm_ui$Element$createNearby = F2(
-	function (loc, element) {
-		if (element.$ === 'Empty') {
-			return $mdgriffith$elm_ui$Internal$Model$NoAttribute;
-		} else {
-			return A2($mdgriffith$elm_ui$Internal$Model$Nearby, loc, element);
-		}
-	});
-var $mdgriffith$elm_ui$Element$inFront = function (element) {
-	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$InFront, element);
-};
 var $mdgriffith$elm_ui$Internal$Model$MoveY = function (a) {
 	return {$: 'MoveY', a: a};
 };
@@ -26984,6 +26992,15 @@ var $author$project$Main$notTheLeftDockView = function (model) {
 		$author$project$Main$rightDockView(model),
 		model.rightDockLeftEdge);
 };
+var $author$project$Main$showModalMessage = function (msg) {
+	return A2(
+		$mdgriffith$elm_ui$Element$el,
+		A2(
+			$elm$core$List$cons,
+			$mdgriffith$elm_ui$Element$centerX,
+			A2($elm$core$List$cons, $mdgriffith$elm_ui$Element$centerY, $author$project$ViewPureStyles$neatToolsBorder)),
+		$mdgriffith$elm_ui$Element$text(msg));
+};
 var $author$project$Main$GpxRequested = {$: 'GpxRequested'};
 var $smucode$elm_flat_colors$FlatColors$ChinesePalette$twinkleBlue = A3($mdgriffith$elm_ui$Element$rgb255, 206, 214, 224);
 var $author$project$Main$topLoadingBar = function (model) {
@@ -27023,7 +27040,19 @@ var $author$project$Main$view = function (model) {
 				A2(
 					$elm$core$List$cons,
 					$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$peace),
-					$author$project$ViewPureStyles$commonLayoutStyles),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$inFront(
+							function () {
+								var _v0 = model.modalMessage;
+								if (_v0.$ === 'Just') {
+									var msg = _v0.a;
+									return $author$project$Main$showModalMessage(msg);
+								} else {
+									return $mdgriffith$elm_ui$Element$none;
+								}
+							}()),
+						$author$project$ViewPureStyles$commonLayoutStyles)),
 				A2(
 					$mdgriffith$elm_ui$Element$column,
 					_List_fromArray(

@@ -45,7 +45,7 @@ import UtilsForViews exposing (colourHexString)
 import ViewContext exposing (ViewContext(..), ViewMode(..))
 import ViewContextThirdPerson exposing (ThirdPersonContext)
 import ViewMap exposing (MapContext)
-import ViewPureStyles exposing (commonLayoutStyles, conditionallyVisible, radioButton, sliderThumb)
+import ViewPureStyles exposing (commonLayoutStyles, conditionallyVisible, neatToolsBorder, radioButton, sliderThumb)
 import ViewThirdPerson
 
 
@@ -93,6 +93,7 @@ type alias Model =
     -- Layout stuff
     , windowSize : ( Float, Float )
     , contentArea : ( Quantity Int Pixels, Quantity Int Pixels )
+    , modalMessage : Maybe String
 
     -- Splitters
     , leftDockRightEdge : SplitPane.State
@@ -142,6 +143,7 @@ init mflags origin navigationKey =
       , viewMapContext = Nothing
       , windowSize = ( 1000, 800 )
       , contentArea = ( Pixels.pixels 800, Pixels.pixels 500 )
+      , modalMessage = Nothing
       , leftDockRightEdge =
             SplitPane.init Horizontal
                 |> configureSplitter (percentage 0.2 <| Just ( 0.01, 0.4 ))
@@ -242,12 +244,15 @@ update msg model =
             ( model, Cmd.none )
 
         GpxRequested ->
-            ( model
+            ( { model | modalMessage = Just "Select GPX file" }
             , Select.file [ "text/gpx" ] GpxSelected
             )
 
         GpxSelected file ->
-            ( { model | filename = Just (File.name file) }
+            ( { model
+                | filename = Just (File.name file)
+                , modalMessage = Just <| ("Loading " ++ File.name file)
+              }
             , Task.perform GpxLoaded (File.toString file)
             )
 
@@ -287,6 +292,7 @@ update msg model =
 
                                     else
                                         model.viewMode
+                                , modalMessage = Nothing
                             }
 
                         ( newModel, actions ) =
@@ -489,12 +495,25 @@ adjustSpaceForContent model =
     }
 
 
+showModalMessage msg =
+    el (centerX :: centerY :: neatToolsBorder) <|
+        text msg
+
+
 view : Model -> Browser.Document Msg
 view model =
     { title = "GPXmagic Labs V3 concepts"
     , body =
         [ layout
             (Background.color FlatColors.ChinesePalette.peace
+                :: (inFront <|
+                        case model.modalMessage of
+                            Just msg ->
+                                showModalMessage msg
+
+                            Nothing ->
+                                none
+                   )
                 :: commonLayoutStyles
             )
           <|
@@ -715,6 +734,7 @@ contentArea model =
         [ width <| Element.px <| Pixels.inPixels w
         , height <| Element.px <| Pixels.inPixels h
         , alignTop
+
         --, padding 10
         , centerX
         ]
