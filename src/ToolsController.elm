@@ -13,7 +13,7 @@ import Html.Attributes exposing (style)
 import Html.Events.Extra.Mouse as Mouse
 import List.Extra
 import Tools.AbruptDirectionChanges as AbruptDirectionChanges
-import Tools.DeletePoints
+import Tools.DeletePoints as DeletePoints
 import TrackInfoBox
 import TrackLoaded exposing (TrackLoaded)
 import ViewPureStyles exposing (contrastingColour, neatToolsBorder, useIcon)
@@ -41,13 +41,29 @@ type ToolType
     | ToolDeletePoints
 
 
+type alias Options =
+    -- Tool specific options
+    { tools :  List ToolEntry
+    , directionChangeOptions : AbruptDirectionChanges.Options
+    , deleteOptions : DeletePoints.Options
+    }
+
+
+defaultOptions : Options
+defaultOptions =
+    { tools = defaultTools
+    , directionChangeOptions = AbruptDirectionChanges.defaultOptions
+    , deleteOptions = DeletePoints.defaultOptions
+    }
+
+
 type ToolMsg
     = ToolPopupToggle ToolType
     | ToolDockSelect ToolType ToolDock
     | ToolColourSelect ToolType Element.Color
     | ToolStateToggle ToolType ToolState
     | DirectionChanges AbruptDirectionChanges.Msg
-    | DeletePoints Tools.DeletePoints.Msg
+    | DeletePoints DeletePoints.Msg
     | ToolNoOp
 
 
@@ -64,8 +80,8 @@ type alias ToolEntry =
     }
 
 
-tools : List ToolEntry
-tools =
+defaultTools : List ToolEntry
+defaultTools =
     -- One list or five, or six? Try one. Arguably a Dict but POITROAE.
     [ trackInfoBox
     , directionChangeTool
@@ -177,47 +193,34 @@ getColour toolType entries =
 
 update :
     ToolMsg
+    -> Maybe TrackLoaded
     -> (ToolMsg -> msg)
-    ->
-        { model
-            | tools : List ToolEntry
-            , track : Maybe TrackLoaded
-            , directionChangeOptions : AbruptDirectionChanges.Options
-            , deleteOptions : Tools.DeletePoints.Options
-        }
-    ->
-        ( { model
-            | tools : List ToolEntry
-            , track : Maybe TrackLoaded
-            , directionChangeOptions : AbruptDirectionChanges.Options
-            , deleteOptions : Tools.DeletePoints.Options
-          }
-        , List (ToolAction msg)
-        )
-update toolMsg msgWrapper model =
+    -> Options
+    -> ( Options, List (ToolAction msg) )
+update toolMsg isTrack msgWrapper options =
     case toolMsg of
         ToolNoOp ->
-            ( model, [] )
+            ( options, [] )
 
         ToolPopupToggle toolType ->
-            ( { model | tools = List.map (toggleToolPopup toolType) model.tools }
+            ( { options | tools = List.map (toggleToolPopup toolType) options.tools }
             , []
             )
 
         ToolDockSelect toolType toolDock ->
-            ( { model | tools = List.map (setDock toolType toolDock) model.tools }
+            ( { options | tools = List.map (setDock toolType toolDock) options.tools }
             , []
             )
 
         ToolColourSelect toolType color ->
             -- Instantly reflect colour changes in preview.
-            { model | tools = List.map (setColour toolType color) model.tools }
-                |> toolStateHasChanged toolType Expanded
+            { options | tools = List.map (setColour toolType color) options.tools }
+                |> toolStateHasChanged toolType Expanded isTrack
 
         ToolStateToggle toolType newState ->
             -- Record the new state, but also let the tool know!
-            { model | tools = List.map (setToolState toolType newState) model.tools }
-                |> toolStateHasChanged toolType newState
+            { options | tools = List.map (setToolState toolType newState) options.tools }
+                |> toolStateHasChanged toolType newState isTrack
 
         DirectionChanges msg ->
             -- Delegate to tool here...
@@ -225,11 +228,11 @@ update toolMsg msgWrapper model =
                 ( newOptions, actions ) =
                     AbruptDirectionChanges.update
                         msg
-                        model.directionChangeOptions
-                        (getColour ToolAbruptDirectionChanges model.tools)
-                        model.track
+                        options.directionChangeOptions
+                        (getColour ToolAbruptDirectionChanges options.tools)
+                        isTrack
             in
-            ( { model | directionChangeOptions = newOptions }
+            ( { options | directionChangeOptions = newOptions }
             , actions
             )
 
@@ -237,34 +240,22 @@ update toolMsg msgWrapper model =
             -- Delegate to tool here...
             let
                 ( newOptions, actions ) =
-                    Tools.DeletePoints.update
+                    DeletePoints.update
                         msg
-                        model.deleteOptions
-                        (getColour ToolDeletePoints model.tools)
-                        model.track
+                        options.deleteOptions
+                        (getColour ToolDeletePoints options.tools)
+                        isTrack
             in
-            ( { model | deleteOptions = newOptions }
+            ( { options | deleteOptions = newOptions }
             , actions
             )
 
 
 refreshOpenTools :
-    { model
-        | tools : List ToolEntry
-        , track : Maybe TrackLoaded
-        , directionChangeOptions : AbruptDirectionChanges.Options
-        , deleteOptions : Tools.DeletePoints.Options
-    }
-    ->
-        ( { model
-            | tools : List ToolEntry
-            , track : Maybe TrackLoaded
-            , directionChangeOptions : AbruptDirectionChanges.Options
-            , deleteOptions : Tools.DeletePoints.Options
-          }
-        , List (ToolAction msg)
-        )
-refreshOpenTools model =
+    Maybe TrackLoaded
+    -> Options
+    -> ( Options, List (ToolAction msg) )
+refreshOpenTools  isTrack options =
     -- Track, or something has changed; tool data is stale.
     -- Same impact as tools being opened, so we'll re-use that.
     let
@@ -272,69 +263,56 @@ refreshOpenTools model =
             if entry.state == Expanded then
                 let
                     ( incrementalModel, incrementalActions ) =
-                        toolStateHasChanged entry.toolType Expanded updatedModel
+                        toolStateHasChanged entry.toolType Expanded isTrack updatedModel
                 in
                 ( incrementalModel, incrementalActions ++ actions )
 
             else
                 ( updatedModel, actions )
     in
-    model.tools |> List.foldl refreshOpenTool ( model, [] )
+    options.tools |> List.foldl refreshOpenTool ( options, [] )
 
 
 toolStateHasChanged :
     ToolType
     -> ToolState
-    ->
-        { model
-            | tools : List ToolEntry
-            , track : Maybe TrackLoaded
-            , directionChangeOptions : AbruptDirectionChanges.Options
-            , deleteOptions : Tools.DeletePoints.Options
-        }
-    ->
-        ( { model
-            | tools : List ToolEntry
-            , track : Maybe TrackLoaded
-            , directionChangeOptions : AbruptDirectionChanges.Options
-            , deleteOptions : Tools.DeletePoints.Options
-          }
-        , List (ToolAction msg)
-        )
-toolStateHasChanged toolType newState model =
+    -> Maybe TrackLoaded
+    -> Options
+    -> ( Options, List (ToolAction msg) )
+toolStateHasChanged toolType newState isTrack options =
     case toolType of
         ToolTrackInfo ->
-            ( model, [] )
+            ( options, [] )
 
         ToolAbruptDirectionChanges ->
             -- Would like an OO style dispatch table here but what with each tool
             -- having its own options, that's more tricky than it's worth.
             let
-                ( newOptions, actions ) =
+                ( newToolOptions, actions ) =
                     AbruptDirectionChanges.toolStateChange
                         (newState == Expanded)
-                        (getColour toolType model.tools)
-                        model.directionChangeOptions
-                        model.track
+                        (getColour toolType options.tools)
+                        options.directionChangeOptions
+                        isTrack
 
-                newModel =
-                    { model | directionChangeOptions = newOptions }
+                newOptions =
+                    { options | directionChangeOptions = newToolOptions }
             in
-            ( newModel, actions )
+            ( newOptions, actions )
 
         ToolDeletePoints ->
             let
-                ( newOptions, actions ) =
-                    Tools.DeletePoints.toolStateChange
+                ( newToolOptions, actions ) =
+                    DeletePoints.toolStateChange
                         (newState == Expanded)
-                        (getColour toolType model.tools)
-                        model.deleteOptions
-                        model.track
+                        (getColour toolType options.tools)
+                        options.deleteOptions
+                        isTrack
 
-                newModel =
-                    { model | deleteOptions = newOptions }
+                newOptions =
+                    { options | deleteOptions = newToolOptions }
             in
-            ( newModel, actions )
+            ( newOptions, actions )
 
 
 
@@ -344,33 +322,24 @@ toolStateHasChanged toolType newState model =
 toolsForDock :
     ToolDock
     -> (ToolMsg -> msg)
-    ->
-        { model
-            | tools : List ToolEntry
-            , track : Maybe TrackLoaded
-            , directionChangeOptions : AbruptDirectionChanges.Options
-            , deleteOptions : Tools.DeletePoints.Options
-        }
+    -> Maybe TrackLoaded
+    -> Options
     -> Element msg
-toolsForDock dock msgWrapper model =
+toolsForDock dock msgWrapper isTrack options =
     column [] <|
-        (model.tools
-            |> List.filter (\tool -> tool.dock == dock)
-            |> List.map (viewTool msgWrapper model)
+        (options.tools
+            |> List.filter (\t -> t.dock == dock)
+            |> List.map (viewTool msgWrapper isTrack options)
         )
 
 
 viewTool :
     (ToolMsg -> msg)
-    ->
-        { model
-            | track : Maybe TrackLoaded
-            , directionChangeOptions : AbruptDirectionChanges.Options
-            , deleteOptions : Tools.DeletePoints.Options
-        }
+    -> Maybe TrackLoaded
+    -> Options
     -> ToolEntry
     -> Element msg
-viewTool msgWrapper model toolEntry =
+viewTool msgWrapper isTrack options toolEntry =
     column
         [ width fill
         , spacing 0
@@ -412,7 +381,7 @@ viewTool msgWrapper model toolEntry =
                 }
             ]
         , if toolEntry.state == Expanded then
-            viewToolByType msgWrapper toolEntry model
+            viewToolByType msgWrapper toolEntry isTrack options
 
           else
             none
@@ -505,21 +474,16 @@ showColourOptions msgWrapper toolEntry =
 viewToolByType :
     (ToolMsg -> msg)
     -> ToolEntry
-    ->
-        { model
-            | track : Maybe TrackLoaded
-            , directionChangeOptions : AbruptDirectionChanges.Options
-            , deleteOptions : Tools.DeletePoints.Options
-        }
+    -> Maybe TrackLoaded
+    -> Options
     -> Element msg
-viewToolByType msgWrapper entry model =
+viewToolByType msgWrapper entry isTrack options =
     case entry.toolType of
         ToolTrackInfo ->
-            TrackInfoBox.trackInfoBox model.track
+            TrackInfoBox.trackInfoBox isTrack
 
         ToolAbruptDirectionChanges ->
-            AbruptDirectionChanges.view (msgWrapper << DirectionChanges) model.directionChangeOptions
+            AbruptDirectionChanges.view (msgWrapper << DirectionChanges) options.directionChangeOptions
 
         ToolDeletePoints ->
-            Tools.DeletePoints.view (msgWrapper << DeletePoints) model.deleteOptions
-
+            DeletePoints.view (msgWrapper << DeletePoints) options.deleteOptions

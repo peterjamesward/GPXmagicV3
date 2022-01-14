@@ -1,6 +1,5 @@
 module Main exposing (main)
 
-import Tools.AbruptDirectionChanges as AbruptDirectionChanges
 import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
 import Browser exposing (application)
 import Browser.Dom as Dom exposing (getViewport, getViewportOf)
@@ -38,7 +37,6 @@ import SplitPane.SplitPane as SplitPane exposing (..)
 import StravaAuth exposing (getStravaToken)
 import Task
 import Time
-import Tools.DeletePoints
 import ToolsController exposing (ToolEntry)
 import TrackLoaded exposing (TrackLoaded)
 import Url exposing (Url)
@@ -104,11 +102,7 @@ type alias Model =
     , bottomDockTopEdge : SplitPane.State
 
     -- Tools
-    , tools : List ToolEntry
-
-    -- Tool specific options
-    , directionChangeOptions : AbruptDirectionChanges.Options
-    , deleteOptions : Tools.DeletePoints.Options
+    , toolOptions : ToolsController.Options
     }
 
 
@@ -161,9 +155,7 @@ init mflags origin navigationKey =
       , bottomDockTopEdge =
             SplitPane.init Vertical
                 |> configureSplitter (percentage 0.8 <| Just ( 0.6, 0.97 ))
-      , tools = ToolsController.tools
-      , directionChangeOptions = AbruptDirectionChanges.defaultOptions
-      , deleteOptions = Tools.DeletePoints.defaultOptions
+      , toolOptions = ToolsController.defaultOptions
       }
     , Cmd.batch
         [ authCmd
@@ -298,13 +290,17 @@ update msg model =
                                 , modalMessage = Nothing
                             }
 
-                        ( newModel, actions ) =
-                            modelWithTrack
-                                |> ToolsController.refreshOpenTools
+                        ( newOptions, actions ) =
+                            ToolsController.refreshOpenTools
+                                modelWithTrack.track
+                                modelWithTrack.toolOptions
+
+                        modelWithUpdatedTools =
+                            { modelWithTrack | toolOptions = newOptions }
 
                         modelAfterActions =
                             -- e.g. collect previews and render ...
-                            performActionsOnModel actions newModel
+                            performActionsOnModel actions modelWithUpdatedTools
                     in
                     ( modelAfterActions
                     , Cmd.batch
@@ -459,9 +455,12 @@ update msg model =
 
         ToolsMsg toolMsg ->
             let
-                ( newModel, actions ) =
+                ( newToolOptions, actions ) =
                     -- Some of the actions update the model, some issue commands.
-                    ToolsController.update toolMsg ToolsMsg model
+                    ToolsController.update toolMsg model.track ToolsMsg model.toolOptions
+
+                newModel =
+                    { model | toolOptions = newToolOptions }
 
                 modelAfterActions =
                     performActionsOnModel actions newModel
@@ -592,7 +591,7 @@ upperLeftDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
         commonLayoutStyles
     <|
-        ToolsController.toolsForDock ToolsController.DockUpperLeft ToolsMsg model
+        ToolsController.toolsForDock ToolsController.DockUpperLeft ToolsMsg model.track model.toolOptions
 
 
 lowerLeftDockView : Model -> Html Msg
@@ -600,7 +599,11 @@ lowerLeftDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
         commonLayoutStyles
     <|
-        ToolsController.toolsForDock ToolsController.DockLowerLeft ToolsMsg model
+        ToolsController.toolsForDock
+            ToolsController.DockLowerLeft
+            ToolsMsg
+            model.track
+            model.toolOptions
 
 
 rightDockView : Model -> Html Msg
@@ -617,7 +620,11 @@ upperRightDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
         commonLayoutStyles
     <|
-        ToolsController.toolsForDock ToolsController.DockUpperRight ToolsMsg model
+        ToolsController.toolsForDock
+            ToolsController.DockUpperRight
+            ToolsMsg
+            model.track
+            model.toolOptions
 
 
 lowerRightDockView : Model -> Html Msg
@@ -625,7 +632,11 @@ lowerRightDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
         commonLayoutStyles
     <|
-        ToolsController.toolsForDock ToolsController.DockLowerRight ToolsMsg model
+        ToolsController.toolsForDock
+            ToolsController.DockLowerRight
+            ToolsMsg
+            model.track
+            model.toolOptions
 
 
 bottomDockView : Model -> Html Msg
@@ -633,7 +644,11 @@ bottomDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
         commonLayoutStyles
     <|
-        ToolsController.toolsForDock ToolsController.DockBottom ToolsMsg model
+        ToolsController.toolsForDock
+            ToolsController.DockBottom
+            ToolsMsg
+            model.track
+            model.toolOptions
 
 
 notTheLeftDockView : Model -> Html Msg
