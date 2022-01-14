@@ -2,16 +2,11 @@
 
 # WIP
 
-Third person click should not re-centre the view.
-Double-click, in contrast, always centres.
-> More generally, don't centre _the view you click on_.
-> Other views should centre when in "follow" mode.
+**Next up**: Delete tool.
 
 Make DragPan work on 3D view.
 
 Put all Font, Colour etc into a Palette/Style module for ease of change.
-
-**Next up**: Delete tool.
 
 Need "restore to defaults" for tools.
 
@@ -35,6 +30,13 @@ to replace by draggables when that control is open.
 
 # Backlog
 
+Third person click should not re-centre the view.
+> Does so now because we are in "follow" mode.
+
+Double-click, in contrast, always centres.
+> More generally, don't centre _the view you click on_.
+> Other views should centre when in "follow" mode.
+
 ## Layout
 
 Modal pop-up during loading, also a place to show parsing errors.
@@ -47,13 +49,13 @@ Settings button for background colour.
 
 ## Tools
 
-"Where am I" - reverse geocode.
-"Markers" - adjust orange and purple including 10% FF.
+"Markers" - adjust orange and purple including 10% FF & REW.
 "Drag on map" - preview replaces static dots with draggables.
 2-way drag corrects for azimuth.
 Is Undo/Redo a control?
-Pane payout choices.
+Pane payout choices as control?
 I think the top bar is still special: Load, Save, Donate. Is it?
+"Where am I" - reverse geocode.
 
 ## Rendering
 Use a graduated drop off with distance, compute at each tree level.

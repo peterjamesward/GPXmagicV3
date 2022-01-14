@@ -26877,7 +26877,6 @@ var $author$project$Main$contentArea = function (model) {
 				$mdgriffith$elm_ui$Element$px(
 					$ianmackenzie$elm_units$Pixels$inPixels(h))),
 				$mdgriffith$elm_ui$Element$alignTop,
-				$mdgriffith$elm_ui$Element$padding(10),
 				$mdgriffith$elm_ui$Element$centerX
 			]),
 		_List_fromArray(
