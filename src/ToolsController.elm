@@ -11,10 +11,12 @@ import Element.Input as Input
 import FeatherIcons
 import FlatColors.AussiePalette
 import FlatColors.SwedishPalette
+import Html.Events.Extra.Mouse as Mouse
 import List.Extra
 import TrackInfoBox
 import TrackLoaded exposing (TrackLoaded)
 import ViewPureStyles exposing (contrastingColour, neatToolsBorder, useIcon)
+import ViewThirdPerson exposing (stopProp)
 
 
 type ToolState
@@ -43,6 +45,7 @@ type ToolMsg
     | ToolColourSelect ToolType Element.Color
     | ToolStateToggle ToolType ToolState
     | DirectionChanges AbruptDirectionChanges.Msg
+    | ToolNoOp
 
 
 type alias ToolEntry =
@@ -173,6 +176,9 @@ update :
         )
 update toolMsg msgWrapper model =
     case toolMsg of
+        ToolNoOp ->
+            ( model, [] )
+
         ToolPopupToggle toolType ->
             ( { model | tools = List.map (toggleToolPopup toolType) model.tools }
             , []
@@ -185,9 +191,8 @@ update toolMsg msgWrapper model =
 
         ToolColourSelect toolType color ->
             -- Instantly reflect colour changes in preview.
-            ( { model | tools = List.map (setColour toolType color) model.tools }
+            { model | tools = List.map (setColour toolType color) model.tools }
                 |> toolStateHasChanged toolType Expanded
-            )
 
         ToolStateToggle toolType newState ->
             -- Record the new state, but also let the tool know!
@@ -360,7 +365,8 @@ showDockOptions msgWrapper toolEntry =
     if toolEntry.isPopupOpen then
         row
             neatToolsBorder
-            [ Input.button []
+            [ Input.button
+                []
                 { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockUpperLeft
                 , label = useIcon FeatherIcons.arrowUpLeft
                 }

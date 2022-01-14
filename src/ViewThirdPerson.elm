@@ -86,11 +86,12 @@ zoomButtons msgWrapper =
 
 view :
     ThirdPersonContext
+    -> (Quantity Int Pixels, Quantity Int Pixels)
     -> TrackLoaded
     -> List (Entity LocalCoords)
     -> (Msg -> msg)
     -> Element msg
-view context track scene msgWrapper =
+view context contentArea track scene msgWrapper =
     let
         dragging =
             context.dragAction
@@ -118,7 +119,7 @@ view context track scene msgWrapper =
         html <|
             Scene3d.cloudy
                 { camera = deriveCamera track.trackTree context track.currentPosition
-                , dimensions = context.contentArea
+                , dimensions = contentArea
                 , background = backgroundColor Color.lightBlue
                 , clipDepth = Length.meters 1
                 , entities = scene

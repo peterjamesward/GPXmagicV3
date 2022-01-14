@@ -2,10 +2,8 @@
 
 # WIP
 
-1. Dock options passing through to tool.
-2. Pane messages wrong or resizing wrong.
-
-Pane resizing broken somehow. Map is OK but 3D not resizing.
+1. Dock options passing through to tool. (Because of slider!)
+> No idea how to fix this.
 
 Current position slider should refresh open tool previews.
 Same will be true for Purple.

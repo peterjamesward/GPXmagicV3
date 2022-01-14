@@ -91,7 +91,6 @@ type alias Model =
     , previews : Dict String PreviewData
 
     -- Layout stuff
-    , viewDimensions : ( Quantity Int Pixels, Quantity Int Pixels )
     , windowSize : ( Float, Float )
     , contentArea : ( Quantity Int Pixels, Quantity Int Pixels )
 
@@ -136,7 +135,6 @@ init mflags origin navigationKey =
       , ipInfo = Nothing
       , stravaAuthentication = authData
       , track = Nothing
-      , viewDimensions = ( Pixels.pixels 800, Pixels.pixels 500 )
       , scene = []
       , previews = Dict.empty
       , viewMode = ViewInfo
@@ -691,6 +689,9 @@ viewModeChoices model =
 contentArea : Model -> Element Msg
 contentArea model =
     let
+        ( w, h ) =
+            model.contentArea
+
         slider trackLength =
             Input.slider
                 ViewPureStyles.wideSliderStyles
@@ -711,7 +712,12 @@ contentArea model =
     in
     -- NOTE that the Map DIV must be constructed once only, or the map gets upset.
     column
-        [ width fill, alignTop, padding 10, centerX ]
+        [ width <| Element.px <| Pixels.inPixels w
+        , height <| Element.px <| Pixels.inPixels h
+        , alignTop
+        , padding 10
+        , centerX
+        ]
         [ column
             [ width fill
             , alignTop
@@ -723,6 +729,7 @@ contentArea model =
                     ( Just context, Just track ) ->
                         ViewThirdPerson.view
                             context
+                            model.contentArea
                             track
                             model.scene
                             ImageMessage
