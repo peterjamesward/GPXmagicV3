@@ -2,7 +2,7 @@
 
 # WIP
 
-**Next up**: Delete tool.
+**Next up**: Delete tool. (See Tree Algebra below)
 
 Make DragPan work on 3D view.
 
@@ -13,7 +13,6 @@ Need "restore to defaults" for tools.
 ## Editing?
 >> Take a couple of tools, do them as better tabs:
  - Less space for view selection -- popup? e.g. feather icon with "eye" in the wee mini toolbar.
-
  - Decide best approach to Undo & Redo (see Backlog)
 
 ## Profile & Charts
@@ -107,16 +106,14 @@ Use Session state, to avoid taking up ram, with unlimited Undo?
 > (Because user can always load that file anyway.) Ah, but suppose you want to go further back?
 > I guess we could ask the user to re-open the relevant baseline file?
 
-## (Algebraic) operations
-As and when needed:
-- Delete a leaf/leaves
-- Insert a leaf/leaves
-- Update leaves (and all their aggregate nodes)  
-  (note this is actually a top-down operation)
-
-## Scale test
-Test with 1M TP (ask Steve).
-So far, looking awesome at 937K (!).
+## Tree algebra
+As and when needed (first two are basic, not sure about 3 and 4)
+1. Split tree into two
+2. Join two trees 
+3. Delete a leaf/leaves 
+4. Insert a leaf/leaves
+5. Update leaves (and all their aggregate nodes)   
+  (note this is actually a top-down operation where the action is in the return)
 
 ## iframe
 Do an embedded version of Map with Round the World route as iframe for Steve?
