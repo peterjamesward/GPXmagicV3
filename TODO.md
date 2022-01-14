@@ -2,7 +2,6 @@
 
 # WIP
 
-Map click should not re-centre map.
 Third person click should not re-centre the view.
 Double-click, in contrast, always centres.
 > More generally, don't centre _the view you click on_.

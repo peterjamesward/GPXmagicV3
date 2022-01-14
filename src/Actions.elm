@@ -12,6 +12,7 @@ type ToolAction msg
     | ShowPreview PreviewData
     | HidePreview String
     | DelayMessage Int msg
+    | MapCenterOnCurrent
     | NoAction
 
 

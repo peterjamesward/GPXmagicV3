@@ -350,7 +350,7 @@ update msg model =
                             render { model | track = Just newTrack }
                     in
                     ( newModel
-                    , performActionCommands [ SetCurrent pos ] newModel
+                    , performActionCommands [ MapCenterOnCurrent ] newModel
                     )
 
                 Nothing ->
@@ -805,7 +805,14 @@ performActionCommands actions model =
                 ( SetCurrent position, Just track ) ->
                     Cmd.batch
                         [ MapPortController.addTrackToMap track
-                        , MapPortController.centreMapOnCurrent track
+
+                        --, MapPortController.centreMapOnCurrent track
+                        ]
+
+                ( MapCenterOnCurrent, Just track ) ->
+                    Cmd.batch
+                        [ --MapPortController.addTrackToMap track
+                          MapPortController.centreMapOnCurrent track
                         ]
 
                 ( ShowPreview previewData, Just track ) ->
