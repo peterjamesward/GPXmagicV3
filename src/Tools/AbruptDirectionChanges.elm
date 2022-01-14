@@ -1,4 +1,4 @@
-module AbruptDirectionChanges exposing (..)
+module Tools.AbruptDirectionChanges exposing (..)
 
 import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
 import Angle exposing (Angle)

@@ -1,8 +1,7 @@
 module ToolsController exposing (..)
 
-import AbruptDirectionChanges
+import Tools.AbruptDirectionChanges as AbruptDirectionChanges
 import Actions exposing (ToolAction)
-import DomainModel exposing (EarthPoint, GPXSource)
 import Element exposing (..)
 import Element.Background as Background exposing (color)
 import Element.Border as Border exposing (roundEach)

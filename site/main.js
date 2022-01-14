@@ -8468,7 +8468,7 @@ var $ianmackenzie$elm_units$Angle$radians = function (numRadians) {
 var $ianmackenzie$elm_units$Angle$degrees = function (numDegrees) {
 	return $ianmackenzie$elm_units$Angle$radians($elm$core$Basics$pi * (numDegrees / 180));
 };
-var $author$project$AbruptDirectionChanges$defaultOptions = {
+var $author$project$Tools$AbruptDirectionChanges$defaultOptions = {
 	breaches: _List_Nil,
 	currentBreach: 0,
 	threshold: $ianmackenzie$elm_units$Angle$degrees(60)
@@ -9546,7 +9546,7 @@ var $author$project$Main$init = F3(
 				contentArea: _Utils_Tuple2(
 					$ianmackenzie$elm_units$Pixels$pixels(800),
 					$ianmackenzie$elm_units$Pixels$pixels(500)),
-				directionChangeOptions: $author$project$AbruptDirectionChanges$defaultOptions,
+				directionChangeOptions: $author$project$Tools$AbruptDirectionChanges$defaultOptions,
 				filename: $elm$core$Maybe$Nothing,
 				ipInfo: $elm$core$Maybe$Nothing,
 				leftDockInternal: A2(
@@ -13031,7 +13031,7 @@ var $author$project$DomainModel$asRecord = function (treeNode) {
 		return node.nodeContent;
 	}
 };
-var $author$project$AbruptDirectionChanges$findAbruptDirectionChanges = F2(
+var $author$project$Tools$AbruptDirectionChanges$findAbruptDirectionChanges = F2(
 	function (options, tree) {
 		var helper = F3(
 			function (skip, treeNode, accum) {
@@ -13071,12 +13071,12 @@ var $author$project$AbruptDirectionChanges$findAbruptDirectionChanges = F2(
 				currentBreach: 0
 			});
 	});
-var $author$project$AbruptDirectionChanges$toolStateChange = F4(
+var $author$project$Tools$AbruptDirectionChanges$toolStateChange = F4(
 	function (opened, colour, options, track) {
 		var _v0 = _Utils_Tuple2(opened, track);
 		if (_v0.a && (_v0.b.$ === 'Just')) {
 			var theTrack = _v0.b.a;
-			var populatedOptions = A2($author$project$AbruptDirectionChanges$findAbruptDirectionChanges, options, theTrack.trackTree);
+			var populatedOptions = A2($author$project$Tools$AbruptDirectionChanges$findAbruptDirectionChanges, options, theTrack.trackTree);
 			return _Utils_Tuple2(
 				populatedOptions,
 				_List_fromArray(
@@ -13107,7 +13107,7 @@ var $author$project$ToolsController$toolStateHasChanged = F3(
 			return _Utils_Tuple2(model, _List_Nil);
 		} else {
 			var _v1 = A4(
-				$author$project$AbruptDirectionChanges$toolStateChange,
+				$author$project$Tools$AbruptDirectionChanges$toolStateChange,
 				_Utils_eq(newState, $author$project$ToolsController$Expanded),
 				A2($author$project$ToolsController$getColour, toolType, model.tools),
 				model.directionChangeOptions,
@@ -14913,7 +14913,7 @@ var $elm_community$list_extra$List$Extra$getAt = F2(
 		return (idx < 0) ? $elm$core$Maybe$Nothing : $elm$core$List$head(
 			A2($elm$core$List$drop, idx, xs));
 	});
-var $author$project$AbruptDirectionChanges$update = F4(
+var $author$project$Tools$AbruptDirectionChanges$update = F4(
 	function (msg, options, previewColour, hasTrack) {
 		switch (msg.$) {
 			case 'ViewNext':
@@ -14970,7 +14970,7 @@ var $author$project$AbruptDirectionChanges$update = F4(
 					{breaches: _List_Nil, threshold: angle});
 				if (hasTrack.$ === 'Just') {
 					var track = hasTrack.a;
-					var populatedOptions = A2($author$project$AbruptDirectionChanges$findAbruptDirectionChanges, newOptions, track.trackTree);
+					var populatedOptions = A2($author$project$Tools$AbruptDirectionChanges$findAbruptDirectionChanges, newOptions, track.trackTree);
 					return _Utils_Tuple2(
 						populatedOptions,
 						_List_fromArray(
@@ -15054,7 +15054,7 @@ var $author$project$ToolsController$update = F3(
 			default:
 				var msg = toolMsg.a;
 				var _v1 = A4(
-					$author$project$AbruptDirectionChanges$update,
+					$author$project$Tools$AbruptDirectionChanges$update,
 					msg,
 					model.directionChangeOptions,
 					A2($author$project$ToolsController$getColour, $author$project$ToolsController$AbruptDirectionChanges, model.tools),
@@ -23521,14 +23521,14 @@ var $author$project$TrackInfoBox$trackInfoBox = function (maybeTrack) {
 			}
 		}());
 };
-var $author$project$AbruptDirectionChanges$SetCurrentPosition = function (a) {
+var $author$project$Tools$AbruptDirectionChanges$SetCurrentPosition = function (a) {
 	return {$: 'SetCurrentPosition', a: a};
 };
-var $author$project$AbruptDirectionChanges$SetThreshold = function (a) {
+var $author$project$Tools$AbruptDirectionChanges$SetThreshold = function (a) {
 	return {$: 'SetThreshold', a: a};
 };
-var $author$project$AbruptDirectionChanges$ViewNext = {$: 'ViewNext'};
-var $author$project$AbruptDirectionChanges$ViewPrevious = {$: 'ViewPrevious'};
+var $author$project$Tools$AbruptDirectionChanges$ViewNext = {$: 'ViewNext'};
+var $author$project$Tools$AbruptDirectionChanges$ViewPrevious = {$: 'ViewPrevious'};
 var $mdgriffith$elm_ui$Internal$Model$AlignY = function (a) {
 	return {$: 'AlignY', a: a};
 };
@@ -24257,7 +24257,7 @@ var $author$project$ViewPureStyles$sliderThumb = $mdgriffith$elm_ui$Element$Inpu
 			$mdgriffith$elm_ui$Element$Background$color(
 			A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1))
 		]));
-var $author$project$AbruptDirectionChanges$view = F2(
+var $author$project$Tools$AbruptDirectionChanges$view = F2(
 	function (msgWrapper, options) {
 		return A2(
 			$mdgriffith$elm_ui$Element$el,
@@ -24288,7 +24288,7 @@ var $author$project$AbruptDirectionChanges$view = F2(
 							onChange: A2(
 								$elm$core$Basics$composeR,
 								$ianmackenzie$elm_units$Angle$degrees,
-								A2($elm$core$Basics$composeR, $author$project$AbruptDirectionChanges$SetThreshold, msgWrapper)),
+								A2($elm$core$Basics$composeR, $author$project$Tools$AbruptDirectionChanges$SetThreshold, msgWrapper)),
 							step: $elm$core$Maybe$Just(1),
 							thumb: $author$project$ViewPureStyles$sliderThumb,
 							value: $ianmackenzie$elm_units$Angle$inDegrees(options.threshold)
@@ -24351,7 +24351,7 @@ var $author$project$AbruptDirectionChanges$view = F2(
 												{
 													label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronLeft),
 													onPress: $elm$core$Maybe$Just(
-														msgWrapper($author$project$AbruptDirectionChanges$ViewPrevious))
+														msgWrapper($author$project$Tools$AbruptDirectionChanges$ViewPrevious))
 												}),
 												A2(
 												$mdgriffith$elm_ui$Element$Input$button,
@@ -24360,7 +24360,7 @@ var $author$project$AbruptDirectionChanges$view = F2(
 													label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$mousePointer),
 													onPress: $elm$core$Maybe$Just(
 														msgWrapper(
-															$author$project$AbruptDirectionChanges$SetCurrentPosition(position)))
+															$author$project$Tools$AbruptDirectionChanges$SetCurrentPosition(position)))
 												}),
 												A2(
 												$mdgriffith$elm_ui$Element$Input$button,
@@ -24368,7 +24368,7 @@ var $author$project$AbruptDirectionChanges$view = F2(
 												{
 													label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronRight),
 													onPress: $elm$core$Maybe$Just(
-														msgWrapper($author$project$AbruptDirectionChanges$ViewNext))
+														msgWrapper($author$project$Tools$AbruptDirectionChanges$ViewNext))
 												})
 											]))
 									]));
@@ -24383,7 +24383,7 @@ var $author$project$ToolsController$viewToolByType = F3(
 			return $author$project$TrackInfoBox$trackInfoBox(model.track);
 		} else {
 			return A2(
-				$author$project$AbruptDirectionChanges$view,
+				$author$project$Tools$AbruptDirectionChanges$view,
 				A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$DirectionChanges),
 				model.directionChangeOptions);
 		}

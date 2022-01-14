@@ -1,6 +1,6 @@
 module Main exposing (main)
 
-import AbruptDirectionChanges
+import Tools.AbruptDirectionChanges as AbruptDirectionChanges
 import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
 import Browser exposing (application)
 import Browser.Dom as Dom exposing (getViewport, getViewportOf)
