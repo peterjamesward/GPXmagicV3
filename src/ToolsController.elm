@@ -11,6 +11,7 @@ import Element.Input as Input
 import FeatherIcons
 import FlatColors.AussiePalette
 import FlatColors.SwedishPalette
+import Html.Attributes exposing (style)
 import Html.Events.Extra.Mouse as Mouse
 import List.Extra
 import TrackInfoBox
@@ -327,6 +328,11 @@ viewTool msgWrapper model toolEntry =
             column
                 [ alignRight
                 , moveDown 26
+                , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always ToolNoOp >> msgWrapper)
+                , htmlAttribute <| Mouse.onWithOptions "dblclick" stopProp (always ToolNoOp >> msgWrapper)
+                , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ToolNoOp >> msgWrapper)
+                , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always ToolNoOp >> msgWrapper)
+                , htmlAttribute (style "z-index" "20")
                 ]
                 [ showDockOptions msgWrapper toolEntry
                 , showColourOptions msgWrapper toolEntry

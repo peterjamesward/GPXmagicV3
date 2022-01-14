@@ -2,9 +2,6 @@
 
 # WIP
 
-1. Dock options passing through to tool. (Because of slider!)
-> No idea how to fix this.
-
 Current position slider should refresh open tool previews.
 Same will be true for Purple.
 
