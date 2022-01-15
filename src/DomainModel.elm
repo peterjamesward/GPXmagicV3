@@ -681,7 +681,7 @@ buildPreview : List Int -> PeteTree -> List ( EarthPoint, GPXSource )
 buildPreview indices tree =
     let
         getDualCoords index =
-            -- Rather glaring inefficiency here.
+            --TODO: Rather glaring inefficiency here.
             ( earthPointFromIndex index tree
             , gpxPointFromIndex index tree
             )
@@ -691,4 +691,23 @@ buildPreview indices tree =
 
 deleteSinglePoint : Int -> PeteTree -> PeteTree
 deleteSinglePoint index treeNode =
-    treeNode
+    -- Logically, where index of 0 means the first leaf is discarded.
+    -- We don't actually ever split a leaf.
+    let
+        ( leftSide, remainder ) =
+            treeNode |> splitTreeAt index
+
+        ( discard, rightSide ) =
+            remainder |> splitTreeAt 1
+    in
+    joinTrees leftSide rightSide
+
+
+splitTree : Int -> PeteTree -> ( Maybe PeteTree, Maybe PeteTree )
+splitTree leavesToTheLeft initialTree =
+    ()
+
+
+joinTrees : PeteTree -> PeteTree -> PeteTree
+joinTrees leftTree rightTree =
+    ()
