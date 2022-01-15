@@ -23406,7 +23406,7 @@ var $author$project$UtilsForViews$showLongMeasure = F2(
 			$ianmackenzie$elm_units$Length$inMiles(distance)) + ' miles') : ($author$project$UtilsForViews$showDecimal2(
 			$ianmackenzie$elm_units$Length$inMeters(distance)) + 'm');
 	});
-var $author$project$TrackInfoBox$trackInfoList = _List_fromArray(
+var $author$project$Tools$TrackInfoBox$trackInfoList = _List_fromArray(
 	[
 		_Utils_Tuple2(
 		$mdgriffith$elm_ui$Element$text('Points'),
@@ -23504,7 +23504,7 @@ var $author$project$TrackInfoBox$trackInfoList = _List_fromArray(
 				},
 				A2($elm$core$Basics$composeR, $author$project$UtilsForViews$showDecimal2, $mdgriffith$elm_ui$Element$text))))
 	]);
-var $author$project$TrackInfoBox$trackInfoBox = function (maybeTrack) {
+var $author$project$Tools$TrackInfoBox$trackInfoBox = function (maybeTrack) {
 	return A2(
 		$mdgriffith$elm_ui$Element$el,
 		_List_fromArray(
@@ -23536,7 +23536,7 @@ var $author$project$TrackInfoBox$trackInfoBox = function (maybeTrack) {
 									var txt = _v1.a;
 									return txt;
 								},
-								$author$project$TrackInfoBox$trackInfoList)),
+								$author$project$Tools$TrackInfoBox$trackInfoList)),
 							A2(
 							$mdgriffith$elm_ui$Element$column,
 							_List_fromArray(
@@ -23549,7 +23549,7 @@ var $author$project$TrackInfoBox$trackInfoBox = function (maybeTrack) {
 									var fn = _v2.b;
 									return fn(track.trackTree);
 								},
-								$author$project$TrackInfoBox$trackInfoList))
+								$author$project$Tools$TrackInfoBox$trackInfoList))
 						]));
 			} else {
 				return A2(
@@ -23573,7 +23573,7 @@ var $author$project$TrackInfoBox$trackInfoBox = function (maybeTrack) {
 									var txt = _v3.a;
 									return txt;
 								},
-								$author$project$TrackInfoBox$trackInfoList)),
+								$author$project$Tools$TrackInfoBox$trackInfoList)),
 							A2(
 							$mdgriffith$elm_ui$Element$column,
 							_List_fromArray(
@@ -23584,7 +23584,7 @@ var $author$project$TrackInfoBox$trackInfoBox = function (maybeTrack) {
 								$elm$core$List$map,
 								$elm$core$Basics$always(
 									$mdgriffith$elm_ui$Element$text('- no data -')),
-								$author$project$TrackInfoBox$trackInfoList))
+								$author$project$Tools$TrackInfoBox$trackInfoList))
 						]));
 			}
 		}());
@@ -24478,7 +24478,7 @@ var $author$project$ToolsController$viewToolByType = F4(
 		var _v0 = entry.toolType;
 		switch (_v0.$) {
 			case 'ToolTrackInfo':
-				return $author$project$TrackInfoBox$trackInfoBox(isTrack);
+				return $author$project$Tools$TrackInfoBox$trackInfoBox(isTrack);
 			case 'ToolAbruptDirectionChanges':
 				return A2(
 					$author$project$Tools$AbruptDirectionChanges$view,

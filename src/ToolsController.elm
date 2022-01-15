@@ -14,7 +14,7 @@ import Html.Events.Extra.Mouse as Mouse
 import List.Extra
 import Tools.AbruptDirectionChanges as AbruptDirectionChanges
 import Tools.DeletePoints as DeletePoints
-import TrackInfoBox
+import Tools.TrackInfoBox as TrackInfoBox
 import TrackLoaded exposing (TrackLoaded)
 import ViewPureStyles exposing (contrastingColour, neatToolsBorder, useIcon)
 import ViewThirdPerson exposing (stopProp)

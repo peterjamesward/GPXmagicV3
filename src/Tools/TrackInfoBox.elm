@@ -1,4 +1,4 @@
-module TrackInfoBox exposing (..)
+module Tools.TrackInfoBox exposing (..)
 
 import DomainModel exposing (..)
 import Element exposing (..)
