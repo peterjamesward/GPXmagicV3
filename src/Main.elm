@@ -833,7 +833,7 @@ performActionsOnModel actions model =
                             --TODO: Change current point if now outside tree bounds.
                             { track
                                 | trackTree =
-                                    DomainModel.deleteSinglePoint index track.trackTree
+                                    DomainModel.deleteSinglePoint index track.referenceLonLat track.trackTree
                             }
 
                         newModel =

@@ -3,18 +3,20 @@
 # WIP
 
 Not refreshing previews under all conditions necessary.
+> Possibly just unwritten code.
 
-**Next up**: Delete tool. (See Tree Algebra below)
+**Next up**: Delete tool.
 
 ## Tree algebra
-As and when needed (first two are basic, not sure about 3 and 4)
 1. Split tree into two
 2. Join two trees
+
 3. Delete a leaf/leaves (can be done using 1 & 2)
-4. Insert a leaf/leaves (can this be done with 1 & 2?)
+4. Insert a leaf/leaves (can be done with 1 & 2)
 5. Update leaves (and all their aggregate nodes)   
    (note this is actually a top-down operation where the action is in the return,  
    and is really the same as building the tree initially.
+   (If this is the whole tree, use the chance to re-balance.)
 
 Split up **DomainModel** into core and various helpers.
 

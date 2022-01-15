@@ -294,6 +294,99 @@ makeRoadSection reference earth1 earth2 =
     }
 
 
+combineInfo : PeteTree -> PeteTree -> RoadSection
+combineInfo info1 info2 =
+    let
+        box =
+            BoundingBox3d.union (boundingBox info1) (boundingBox info2)
+
+        sharedMedian =
+            medianLongitude info1
+                |> Direction2d.rotateBy
+                    (Direction2d.angleFrom (medianLongitude info1) (medianLongitude info2) |> Quantity.half)
+    in
+    { sourceData = ( Tuple.first (sourceData info1), Tuple.second (sourceData info2) )
+    , startPoint = startPoint info1
+    , endPoint = endPoint info2
+    , boundingBox = box
+    , sphere = containingSphere box
+    , trueLength = Quantity.plus (trueLength info1) (trueLength info2)
+    , skipCount = skipCount info1 + skipCount info2
+    , medianLongitude = sharedMedian
+    , eastwardExtent =
+        Quantity.max
+            (medianLongitude info1
+                |> Direction2d.rotateBy (eastwardTurn info1)
+                |> Direction2d.angleFrom sharedMedian
+            )
+            (medianLongitude info2
+                |> Direction2d.rotateBy (eastwardTurn info2)
+                |> Direction2d.angleFrom sharedMedian
+            )
+    , westwardExtent =
+        Quantity.min
+            (medianLongitude info1
+                |> Direction2d.rotateBy (westwardTurn info1)
+                |> Direction2d.angleFrom sharedMedian
+            )
+            (medianLongitude info2
+                |> Direction2d.rotateBy (westwardTurn info2)
+                |> Direction2d.angleFrom sharedMedian
+            )
+    , altitudeGained =
+        Quantity.plus
+            (info1 |> asRecord |> .altitudeGained)
+            (info2 |> asRecord |> .altitudeGained)
+    , altitudeLost =
+        Quantity.plus
+            (info1 |> asRecord |> .altitudeLost)
+            (info2 |> asRecord |> .altitudeLost)
+    , distanceClimbing =
+        Quantity.plus
+            (info1 |> asRecord |> .distanceClimbing)
+            (info2 |> asRecord |> .distanceClimbing)
+    , distanceDescending =
+        Quantity.plus
+            (info1 |> asRecord |> .distanceDescending)
+            (info2 |> asRecord |> .distanceDescending)
+    , steepestClimb =
+        max (info1 |> asRecord |> .steepestClimb)
+            (info2 |> asRecord |> .steepestClimb)
+    , gradientAtStart = info1 |> asRecord |> .gradientAtStart
+    , gradientAtEnd = info2 |> asRecord |> .gradientAtEnd
+    , gradientChangeMaximumAbs =
+        Maybe.withDefault 0.0 <|
+            List.maximum
+                [ info1 |> asRecord |> .gradientChangeMaximumAbs
+                , info2 |> asRecord |> .gradientChangeMaximumAbs
+                , abs <|
+                    (info1 |> asRecord |> .gradientAtEnd)
+                        - (info2 |> asRecord |> .gradientAtStart)
+                ]
+    , directionAtStart = info1 |> asRecord |> .directionAtStart
+    , directionAtEnd = info2 |> asRecord |> .directionAtEnd
+    , directionChangeMaximumAbs =
+        Maybe.withDefault Quantity.zero <|
+            Quantity.maximum
+                [ info1 |> asRecord |> .directionChangeMaximumAbs
+                , info2 |> asRecord |> .directionChangeMaximumAbs
+                , Quantity.abs <|
+                    Direction2d.angleFrom
+                        (info1 |> asRecord |> .directionAtEnd)
+                        (info2 |> asRecord |> .directionAtStart)
+                ]
+    }
+
+
+joiningNode : PeteTree -> PeteTree -> PeteTree
+joiningNode left right =
+    Node
+        { nodeContent = combineInfo left right
+        , left = left
+        , right = right
+        }
+
+
 treeFromList : List GPXSource -> Maybe PeteTree
 treeFromList track =
     -- Build the skeletal tree of nodes, then attach the leaves from the input list.
@@ -308,89 +401,6 @@ treeFromList track =
 
         numberOfSegments =
             List.length track - 1
-
-        combineInfo : PeteTree -> PeteTree -> RoadSection
-        combineInfo info1 info2 =
-            let
-                box =
-                    BoundingBox3d.union (boundingBox info1) (boundingBox info2)
-
-                sharedMedian =
-                    medianLongitude info1
-                        |> Direction2d.rotateBy
-                            (Direction2d.angleFrom (medianLongitude info1) (medianLongitude info2) |> Quantity.half)
-            in
-            { sourceData = ( Tuple.first (sourceData info1), Tuple.second (sourceData info2) )
-            , startPoint = startPoint info1
-            , endPoint = endPoint info2
-            , boundingBox = box
-            , sphere = containingSphere box
-            , trueLength = Quantity.plus (trueLength info1) (trueLength info2)
-            , skipCount = skipCount info1 + skipCount info2
-            , medianLongitude = sharedMedian
-            , eastwardExtent =
-                Quantity.max
-                    (medianLongitude info1
-                        |> Direction2d.rotateBy (eastwardTurn info1)
-                        |> Direction2d.angleFrom sharedMedian
-                    )
-                    (medianLongitude info2
-                        |> Direction2d.rotateBy (eastwardTurn info2)
-                        |> Direction2d.angleFrom sharedMedian
-                    )
-            , westwardExtent =
-                Quantity.min
-                    (medianLongitude info1
-                        |> Direction2d.rotateBy (westwardTurn info1)
-                        |> Direction2d.angleFrom sharedMedian
-                    )
-                    (medianLongitude info2
-                        |> Direction2d.rotateBy (westwardTurn info2)
-                        |> Direction2d.angleFrom sharedMedian
-                    )
-            , altitudeGained =
-                Quantity.plus
-                    (info1 |> asRecord |> .altitudeGained)
-                    (info2 |> asRecord |> .altitudeGained)
-            , altitudeLost =
-                Quantity.plus
-                    (info1 |> asRecord |> .altitudeLost)
-                    (info2 |> asRecord |> .altitudeLost)
-            , distanceClimbing =
-                Quantity.plus
-                    (info1 |> asRecord |> .distanceClimbing)
-                    (info2 |> asRecord |> .distanceClimbing)
-            , distanceDescending =
-                Quantity.plus
-                    (info1 |> asRecord |> .distanceDescending)
-                    (info2 |> asRecord |> .distanceDescending)
-            , steepestClimb =
-                max (info1 |> asRecord |> .steepestClimb)
-                    (info2 |> asRecord |> .steepestClimb)
-            , gradientAtStart = info1 |> asRecord |> .gradientAtStart
-            , gradientAtEnd = info2 |> asRecord |> .gradientAtEnd
-            , gradientChangeMaximumAbs =
-                Maybe.withDefault 0.0 <|
-                    List.maximum
-                        [ info1 |> asRecord |> .gradientChangeMaximumAbs
-                        , info2 |> asRecord |> .gradientChangeMaximumAbs
-                        , abs <|
-                            (info1 |> asRecord |> .gradientAtEnd)
-                                - (info2 |> asRecord |> .gradientAtStart)
-                        ]
-            , directionAtStart = info1 |> asRecord |> .directionAtStart
-            , directionAtEnd = info2 |> asRecord |> .directionAtEnd
-            , directionChangeMaximumAbs =
-                Maybe.withDefault Quantity.zero <|
-                    Quantity.maximum
-                        [ info1 |> asRecord |> .directionChangeMaximumAbs
-                        , info2 |> asRecord |> .directionChangeMaximumAbs
-                        , Quantity.abs <|
-                            Direction2d.angleFrom
-                                (info1 |> asRecord |> .directionAtEnd)
-                                (info2 |> asRecord |> .directionAtStart)
-                        ]
-            }
 
         treeBuilder : Int -> List GPXSource -> ( Maybe PeteTree, List GPXSource )
         treeBuilder n pointStream =
@@ -421,12 +431,7 @@ treeFromList track =
                     case ( left, right ) of
                         -- Should have returned _something_ but we're forced to check
                         ( Just leftSubtree, Just rightSubtree ) ->
-                            ( Just <|
-                                Node
-                                    { nodeContent = combineInfo leftSubtree rightSubtree
-                                    , left = leftSubtree
-                                    , right = rightSubtree
-                                    }
+                            ( Just <| joiningNode leftSubtree rightSubtree
                             , remainingAfterRight
                             )
 
@@ -689,25 +694,104 @@ buildPreview indices tree =
     List.map getDualCoords indices
 
 
-deleteSinglePoint : Int -> PeteTree -> PeteTree
-deleteSinglePoint index treeNode =
+deleteSinglePoint : Int -> GPXSource -> PeteTree -> PeteTree
+deleteSinglePoint index refLonLat treeNode =
     -- Logically, where index of 0 means the first leaf is discarded.
     -- We don't actually ever split a leaf.
+    case treeNode |> splitTreeAt index of
+        ( Just leftSide, Just remainder ) ->
+            case remainder |> splitTreeAt 1 of
+                ( _, Just rightSide ) ->
+                    joinTrees refLonLat leftSide rightSide
+
+                _ -> treeNode
+
+        _ -> treeNode
+
+splitTreeAt : Int -> PeteTree -> ( Maybe PeteTree, Maybe PeteTree )
+splitTreeAt leavesToTheLeft thisNode =
+    case thisNode of
+        Leaf leaf ->
+            ( Nothing, Nothing )
+
+        Node aNode ->
+            if leavesToTheLeft <= 0 then
+                -- Easy, all to the right
+                ( Nothing, Just thisNode )
+
+            else if skipCount thisNode <= leavesToTheLeft then
+                -- Easy, just goes left
+                ( Just thisNode, Nothing )
+
+            else
+                -- Somewhere on this node's expanse.
+                -- Look at the children and work out what to do.
+                let
+                    ( leftOfLeft, rightOfLeft ) =
+                        splitTreeAt leavesToTheLeft aNode.left
+
+                    ( leftOfRight, rightOfRight ) =
+                        splitTreeAt (leavesToTheLeft - skipCount aNode.left) aNode.right
+                in
+                case ( ( leftOfLeft, rightOfLeft ), ( leftOfRight, rightOfRight ) ) of
+                    ( ( Just allOnTheLeft, Nothing ), ( Nothing, Just allOnTheRight ) ) ->
+                        -- Right down the middle
+                        ( Just allOnTheLeft
+                        , Just allOnTheRight
+                        )
+
+                    ( ( Just leftSplitLeft, Just leftSplitRight ), ( Nothing, Just untouchedRight ) ) ->
+                        ( Just leftSplitLeft
+                        , Just <| joiningNode leftSplitRight untouchedRight
+                        )
+
+                    ( ( Just untouchedLeft, Nothing ), ( Just rightSplitLeft, Just rightSplitRight ) ) ->
+                        ( Just <| joiningNode untouchedLeft rightSplitLeft
+                        , Just rightSplitRight
+                        )
+
+                    _ ->
+                        -- Other cases not sensible
+                        ( Nothing, Nothing )
+
+
+getFirstLeaf : PeteTree -> RoadSection
+getFirstLeaf someNode =
+    case someNode of
+        Leaf leaf ->
+            leaf
+
+        Node node ->
+            getFirstLeaf node.left
+
+
+getLastLeaf : PeteTree -> RoadSection
+getLastLeaf someNode =
+    case someNode of
+        Leaf leaf ->
+            leaf
+
+        Node node ->
+            getLastLeaf node.right
+
+
+joinTrees : GPXSource -> PeteTree -> PeteTree -> PeteTree
+joinTrees refLonLat leftTree rightTree =
+    -- Make a leaf joining the extreme right point of the left to extreme left of the right.
+    -- Use a joining node to add this leaf to the smallest side (by skipcount)
+    -- Use another joining node to combine.
     let
-        ( leftSide, remainder ) =
-            treeNode |> splitTreeAt index
+        rightmostOfLeft =
+            getLastLeaf leftTree |> .sourceData |> Tuple.second
 
-        ( discard, rightSide ) =
-            remainder |> splitTreeAt 1
+        leftmostOfRight =
+            getFirstLeaf rightTree |> .sourceData |> Tuple.first
+
+        newLeaf =
+            Leaf <| makeRoadSection refLonLat rightmostOfLeft leftmostOfRight
     in
-    joinTrees leftSide rightSide
+    if skipCount leftTree <= skipCount rightTree then
+        joiningNode (joiningNode leftTree newLeaf) rightTree
 
-
-splitTree : Int -> PeteTree -> ( Maybe PeteTree, Maybe PeteTree )
-splitTree leavesToTheLeft initialTree =
-    ()
-
-
-joinTrees : PeteTree -> PeteTree -> PeteTree
-joinTrees leftTree rightTree =
-    ()
+    else
+        joiningNode leftTree (joiningNode newLeaf rightTree)
