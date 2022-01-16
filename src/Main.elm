@@ -837,7 +837,7 @@ performActionsOnModel actions model =
                             }
 
                         newModel =
-                            { model | track = Just newTrack }
+                            { mdl | track = Just newTrack }
                     in
                     newModel
 

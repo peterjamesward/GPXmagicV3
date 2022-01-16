@@ -698,21 +698,41 @@ deleteSinglePoint : Int -> GPXSource -> PeteTree -> PeteTree
 deleteSinglePoint index refLonLat treeNode =
     -- Logically, where index of 0 means the first leaf is discarded.
     -- We don't actually ever split a leaf.
+    -- This is flawed. Consider the trivial case of two leaves
+    -- we should be able to delete the shared point and end up with one new leaf.
     case treeNode |> splitTreeAt index of
         ( Just leftSide, Just remainder ) ->
             case remainder |> splitTreeAt 1 of
                 ( _, Just rightSide ) ->
                     joinTrees refLonLat leftSide rightSide
 
-                _ -> treeNode
+                ( _, Nothing ) ->
+                    leftSide
 
-        _ -> treeNode
+        ( Just leftSide, Nothing ) ->
+            leftSide
+
+        ( Nothing, Just rightSide ) ->
+            rightSide
+
+        ( Nothing, Nothing ) ->
+            -- Oh, dear. Can't return a Nothing.
+            treeNode
+
 
 splitTreeAt : Int -> PeteTree -> ( Maybe PeteTree, Maybe PeteTree )
 splitTreeAt leavesToTheLeft thisNode =
+    let
+        _ =
+            Debug.log "SPLIT" leavesToTheLeft
+    in
     case thisNode of
         Leaf leaf ->
-            ( Nothing, Nothing )
+            if leavesToTheLeft > 0 then
+                ( Just thisNode, Nothing )
+
+            else
+                ( Nothing, Just thisNode )
 
         Node aNode ->
             if leavesToTheLeft <= 0 then
