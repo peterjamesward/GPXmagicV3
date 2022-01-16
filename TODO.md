@@ -12,7 +12,13 @@ In 3 point test:
 2nd point - OK
 3rd point - OK
 
-Should be able to delete first or last point, unless there are only two!
+In 4 point test
+1st point OK
+2nd point delete but still four points
+3rd point delete but five points (!)
+4th point delete but still four points
+
+Seriously?
 
 ## NEXT UP: Markers.
 ## AND THEN: Undo, Redo.

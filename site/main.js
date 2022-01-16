@@ -16266,70 +16266,53 @@ var $author$project$DomainModel$deleteSinglePoint = F3(
 	function (index, refLonLat, treeNode) {
 		if (treeNode.$ === 'Node') {
 			var node = treeNode.a;
-			var _v1 = A3($author$project$DomainModel$splitTreeAt, index, refLonLat, treeNode);
-			if (_v1.a.$ === 'Just') {
-				if (_v1.b.$ === 'Just') {
-					var left = _v1.a.a;
-					var right = _v1.b.a;
-					var trimmedRight = A3($author$project$DomainModel$splitTreeAt, 1, refLonLat, right).b;
-					var trimmedLeft = A3(
-						$author$project$DomainModel$splitTreeAt,
-						$author$project$DomainModel$skipCount(left) - 1,
-						refLonLat,
-						left).a;
-					var rightJoinPoint = $author$project$DomainModel$secondPoint(node.right).a;
-					var leftJoinPoint = $author$project$DomainModel$penultimatePoint(node.left).a;
-					var newLeaf = $author$project$DomainModel$Leaf(
-						A3($author$project$DomainModel$makeRoadSection, refLonLat, leftJoinPoint, rightJoinPoint));
-					return (_Utils_cmp(
-						$author$project$DomainModel$skipCount(left),
-						$author$project$DomainModel$skipCount(right)) < 1) ? A2(
-						$elm$core$Maybe$withDefault,
-						treeNode,
-						A3(
-							$author$project$DomainModel$safeJoin,
-							refLonLat,
-							A3(
-								$author$project$DomainModel$safeJoin,
-								refLonLat,
-								trimmedLeft,
-								$elm$core$Maybe$Just(newLeaf)),
-							trimmedRight)) : A2(
-						$elm$core$Maybe$withDefault,
-						treeNode,
-						A3(
-							$author$project$DomainModel$safeJoin,
-							refLonLat,
-							trimmedLeft,
-							A3(
-								$author$project$DomainModel$safeJoin,
-								refLonLat,
-								$elm$core$Maybe$Just(newLeaf),
-								trimmedRight)));
-				} else {
-					var left = _v1.a.a;
-					var _v2 = _v1.b;
+			if (index <= 0) {
+				return A2(
+					$elm$core$Maybe$withDefault,
+					treeNode,
+					A3($author$project$DomainModel$splitTreeAt, 1, refLonLat, treeNode).b);
+			} else {
+				if (_Utils_eq(
+					index,
+					$author$project$DomainModel$skipCount(treeNode))) {
 					return A2(
 						$elm$core$Maybe$withDefault,
 						treeNode,
 						A3(
 							$author$project$DomainModel$splitTreeAt,
+							$author$project$DomainModel$skipCount(treeNode) - 1,
+							refLonLat,
+							treeNode).a);
+				} else {
+					var _v1 = A3($author$project$DomainModel$splitTreeAt, index, refLonLat, treeNode);
+					if ((_v1.a.$ === 'Just') && (_v1.b.$ === 'Just')) {
+						var left = _v1.a.a;
+						var right = _v1.b.a;
+						var trimmedRight = A3($author$project$DomainModel$splitTreeAt, 1, refLonLat, right).b;
+						var trimmedLeft = A3(
+							$author$project$DomainModel$splitTreeAt,
 							$author$project$DomainModel$skipCount(left) - 1,
 							refLonLat,
-							left).a);
-				}
-			} else {
-				if (_v1.b.$ === 'Just') {
-					var _v3 = _v1.a;
-					var right = _v1.b.a;
-					return A2(
-						$elm$core$Maybe$withDefault,
-						treeNode,
-						A3($author$project$DomainModel$splitTreeAt, 1, refLonLat, right).b);
-				} else {
-					var _v4 = _v1.a;
-					var _v5 = _v1.b;
-					return treeNode;
+							left).a;
+						var rightJoinPoint = $author$project$DomainModel$secondPoint(right).a;
+						var leftJoinPoint = $author$project$DomainModel$penultimatePoint(left).a;
+						var newLeaf = $author$project$DomainModel$Leaf(
+							A3($author$project$DomainModel$makeRoadSection, refLonLat, leftJoinPoint, rightJoinPoint));
+						return A2(
+							$elm$core$Maybe$withDefault,
+							treeNode,
+							A3(
+								$author$project$DomainModel$safeJoin,
+								refLonLat,
+								trimmedLeft,
+								A3(
+									$author$project$DomainModel$safeJoin,
+									refLonLat,
+									$elm$core$Maybe$Just(newLeaf),
+									trimmedRight)));
+					} else {
+						return treeNode;
+					}
 				}
 			}
 		} else {

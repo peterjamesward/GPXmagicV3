@@ -708,53 +708,50 @@ deleteSinglePoint index refLonLat treeNode =
     -- Then we can trim the left and right, and stitch together the new section.
     case treeNode of
         Node node ->
-            case splitTreeAt index refLonLat treeNode of
-                ( Just left, Just right ) ->
-                    let
-                        leftJoinPoint =
-                            Tuple.first <| penultimatePoint node.left
+            if index <= 0 then
+                -- First point deletion special case
+                treeNode
+                    |> splitTreeAt 1 refLonLat
+                    |> Tuple.second
+                    |> Maybe.withDefault treeNode
 
-                        rightJoinPoint =
-                            Tuple.first <| secondPoint node.right
+            else if index == skipCount treeNode then
+                -- Last point also special case
+                treeNode
+                    |> splitTreeAt (skipCount treeNode - 1) refLonLat
+                    |> Tuple.first
+                    |> Maybe.withDefault treeNode
 
-                        trimmedLeft =
-                            splitTreeAt (skipCount left - 1) refLonLat left
-                                |> Tuple.first
+            else
+                -- Having dispensed with special cases above, there should be something each side.
+                case treeNode |> splitTreeAt index refLonLat of
+                    ( Just left, Just right ) ->
+                        let
+                            leftJoinPoint =
+                                penultimatePoint left |> Tuple.first
 
-                        trimmedRight =
-                            splitTreeAt 1 refLonLat right
-                                |> Tuple.second
+                            rightJoinPoint =
+                                secondPoint right |> Tuple.first
 
-                        newLeaf =
-                            Leaf <| makeRoadSection refLonLat leftJoinPoint rightJoinPoint
-                    in
-                    if skipCount left <= skipCount right then
-                        safeJoin
-                            refLonLat
-                            (safeJoin refLonLat trimmedLeft (Just newLeaf))
-                            trimmedRight
-                            |> Maybe.withDefault treeNode
+                            newLeaf =
+                                Leaf <| makeRoadSection refLonLat leftJoinPoint rightJoinPoint
 
-                    else
-                        safeJoin
-                            refLonLat
-                            trimmedLeft
-                            (safeJoin refLonLat (Just newLeaf) trimmedRight)
-                            |> Maybe.withDefault treeNode
+                            trimmedLeft =
+                                left
+                                    |> splitTreeAt (skipCount left - 1) refLonLat
+                                    |> Tuple.first
 
-                ( Just left, Nothing ) ->
-                    splitTreeAt (skipCount left - 1) refLonLat left
-                        |> Tuple.first
-                        |> Maybe.withDefault treeNode
+                            trimmedRight =
+                                right
+                                    |> splitTreeAt 1 refLonLat
+                                    |> Tuple.second
+                        in
+                        Maybe.withDefault treeNode <|
+                            safeJoin refLonLat trimmedLeft <|
+                                safeJoin refLonLat (Just newLeaf) trimmedRight
 
-                ( Nothing, Just right ) ->
-                    splitTreeAt 1 refLonLat right
-                        |> Tuple.second
-                        |> Maybe.withDefault treeNode
-
-                ( Nothing, Nothing ) ->
-                    -- but it's a node!
-                    treeNode
+                    _ ->
+                        treeNode
 
         Leaf leaf ->
             -- Can't split a leaf
