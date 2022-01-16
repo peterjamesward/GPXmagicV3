@@ -5,23 +5,9 @@
 Not refreshing previews under all conditions necessary.
 > Possibly just unwritten code.
 
-## Delete tool.
-
-In 3 point test:
-1st point - OK
-2nd point - OK
-3rd point - OK
-
-In 4 point test
-1st point OK
-2nd point delete but still four points
-3rd point delete but five points (!)
-4th point delete but still four points
-
-Seriously?
-
 ## NEXT UP: Markers.
 ## AND THEN: Undo, Redo.
+## AND THEN: Delete with a range.
 
 ## Tree algebra
 DONE. Split tree into two
