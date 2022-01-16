@@ -7,8 +7,10 @@ Not refreshing previews under all conditions necessary.
 
 ## Delete tool.
 
-Seems to work in trivial case (3 or 4 points) but not in general!
-In fact only works on one of four points. Reckon fix that & all will be well.
+In 3 point test:
+1st point - OK
+2nd point - OK
+3rd point - OK
 
 Should be able to delete first or last point, unless there are only two!
 

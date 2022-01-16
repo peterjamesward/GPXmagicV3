@@ -7,6 +7,7 @@ import Direction2d exposing (Direction2d)
 import Json.Encode as E
 import Length exposing (Length, Meters, inMeters)
 import LocalCoords exposing (LocalCoords)
+import Maybe.Extra as Maybe
 import Point3d exposing (Point3d)
 import Quantity exposing (Quantity)
 import Sphere3d exposing (Sphere3d)
@@ -698,77 +699,98 @@ deleteSinglePoint : Int -> GPXSource -> PeteTree -> PeteTree
 deleteSinglePoint index refLonLat treeNode =
     -- Logically, where index of 0 means the first leaf is discarded.
     -- We don't actually ever split a leaf.
-    case treeNode |> splitTreeAt index of
-        ( Just leftSide, Just remainder ) ->
-            case remainder |> splitTreeAt 1 of
-                ( _, Just rightSide ) ->
-                    --TODO: Seems silly that we need refLonLat as we have EarthPoint in the Leaf!!
-                    joinTrees refLonLat leftSide rightSide
+    -- Default here is to return the original.
+    -- I see my error. We should:
+    -- THIS NEEDS to consider case of only having two leaves, so we can't trim them.
+    -- Generally, there will need to be a new road section between the penultimate _point_
+    -- of the left and the _second_ point of the right.
+    -- We can find these prior to any trimming.
+    -- Then we can trim the left and right, and stitch together the new section.
+    case treeNode of
+        Node node ->
+            case splitTreeAt index refLonLat treeNode of
+                ( Just left, Just right ) ->
+                    let
+                        leftJoinPoint =
+                            Tuple.first <| penultimatePoint node.left
 
-                ( _, Nothing ) ->
-                    -- Disallowed
+                        rightJoinPoint =
+                            Tuple.first <| secondPoint node.right
+
+                        trimmedLeft =
+                            splitTreeAt (skipCount left - 1) refLonLat left
+                                |> Tuple.first
+
+                        trimmedRight =
+                            splitTreeAt 1 refLonLat right
+                                |> Tuple.second
+
+                        newLeaf =
+                            Leaf <| makeRoadSection refLonLat leftJoinPoint rightJoinPoint
+                    in
+                    if skipCount left <= skipCount right then
+                        safeJoin
+                            refLonLat
+                            (safeJoin refLonLat trimmedLeft (Just newLeaf))
+                            trimmedRight
+                            |> Maybe.withDefault treeNode
+
+                    else
+                        safeJoin
+                            refLonLat
+                            trimmedLeft
+                            (safeJoin refLonLat (Just newLeaf) trimmedRight)
+                            |> Maybe.withDefault treeNode
+
+                ( Just left, Nothing ) ->
+                    splitTreeAt (skipCount left - 1) refLonLat left
+                        |> Tuple.first
+                        |> Maybe.withDefault treeNode
+
+                ( Nothing, Just right ) ->
+                    splitTreeAt 1 refLonLat right
+                        |> Tuple.second
+                        |> Maybe.withDefault treeNode
+
+                ( Nothing, Nothing ) ->
+                    -- but it's a node!
                     treeNode
 
-        ( Just leftSide, Nothing ) ->
-            -- Disallowed
-            treeNode
-
-        ( Nothing, Just remainder ) ->
-            case remainder |> splitTreeAt 1 of
-                ( _, Just rightSide ) ->
-                    rightSide
-
-                ( _, Nothing ) ->
-                    -- Disallowed
-                    treeNode
-
-        ( Nothing, Nothing ) ->
-            -- Oh, dear. Can't return a Nothing.
+        Leaf leaf ->
+            -- Can't split a leaf
             treeNode
 
 
-splitTreeAt : Int -> PeteTree -> ( Maybe PeteTree, Maybe PeteTree )
-splitTreeAt leavesToTheLeft thisNode =
+splitTreeAt : Int -> GPXSource -> PeteTree -> ( Maybe PeteTree, Maybe PeteTree )
+splitTreeAt leavesToTheLeft refLonLat thisNode =
     case thisNode of
         Leaf leaf ->
-            if leavesToTheLeft > 0 then
-                ( Just thisNode, Nothing )
+            if leavesToTheLeft <= 0 then
+                ( Nothing, Just thisNode )
 
             else
-                ( Nothing, Just thisNode )
+                ( Just thisNode, Nothing )
 
         Node aNode ->
+            -- From my scribbles, this turns out quite neatly.
             if leavesToTheLeft <= 0 then
-                -- Easy, all to the right
                 ( Nothing, Just thisNode )
 
-            else if skipCount thisNode < leavesToTheLeft then
-                -- Easy, just goes left
+            else if leavesToTheLeft >= skipCount thisNode then
                 ( Just thisNode, Nothing )
 
             else
-            -- Somewhere on this node's expanse.
-            -- Look at the children and work out what to do.
-            if
-                leavesToTheLeft < skipCount aNode.left
-            then
-                case splitTreeAt leavesToTheLeft aNode.left of
-                    ( leftGrandchild, Just rightGrandchild ) ->
-                        ( leftGrandchild, Just <| joiningNode rightGrandchild aNode.right )
+                let
+                    ( leftOfLeft, rightOfLeft ) =
+                        aNode.left |> splitTreeAt leavesToTheLeft refLonLat
 
-                    ( leftGrandchild, Nothing ) ->
-                        ( leftGrandchild, Just aNode.right )
-
-            else if leavesToTheLeft > skipCount aNode.left then
-                case splitTreeAt leavesToTheLeft aNode.left of
-                    ( Just leftGrandchild, rightGrandchild ) ->
-                        ( Just <| joiningNode aNode.left leftGrandchild, rightGrandchild )
-
-                    ( Nothing, rightGrandChild ) ->
-                        ( Just aNode.left, rightGrandChild )
-
-            else
-                ( Just aNode.left, Just aNode.right )
+                    ( leftOfRight, rightOfRight ) =
+                        aNode.right |> splitTreeAt (leavesToTheLeft - skipCount aNode.left) refLonLat
+                in
+                -- In theory, only one side can actually be split...
+                ( safeJoin refLonLat leftOfLeft leftOfRight
+                , safeJoin refLonLat rightOfLeft rightOfRight
+                )
 
 
 getFirstLeaf : PeteTree -> RoadSection
@@ -791,8 +813,43 @@ getLastLeaf someNode =
             getLastLeaf node.right
 
 
+secondPoint : PeteTree -> ( GPXSource, EarthPoint )
+secondPoint tree =
+    let
+        leaf =
+            getFirstLeaf tree
+    in
+    ( Tuple.second leaf.sourceData, leaf.endPoint )
+
+
+penultimatePoint : PeteTree -> ( GPXSource, EarthPoint )
+penultimatePoint tree =
+    let
+        leaf =
+            getLastLeaf tree
+    in
+    ( Tuple.first leaf.sourceData, leaf.startPoint )
+
+
+safeJoin : GPXSource -> Maybe PeteTree -> Maybe PeteTree -> Maybe PeteTree
+safeJoin refLonLat left right =
+    case ( left, right ) of
+        ( Just leftTree, Just rightTree ) ->
+            Just <| joinTrees refLonLat leftTree rightTree
+
+        ( Just leftTree, Nothing ) ->
+            left
+
+        ( Nothing, Just rightTree ) ->
+            right
+
+        ( Nothing, Nothing ) ->
+            Nothing
+
+
 joinTrees : GPXSource -> PeteTree -> PeteTree -> PeteTree
 joinTrees refLonLat leftTree rightTree =
+    -- TODO: Does not need refLonLat!
     -- Make a leaf joining the extreme right point of the left to extreme left of the right.
     -- Use a joining node to add this leaf to the smallest side (by skipcount)
     -- Use another joining node to combine.
