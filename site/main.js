@@ -15983,20 +15983,6 @@ var $author$project$DomainModel$penultimatePoint = function (tree) {
 	var leaf = $author$project$DomainModel$getLastLeaf(tree);
 	return _Utils_Tuple2(leaf.sourceData.a, leaf.startPoint);
 };
-var $author$project$DomainModel$getFirstLeaf = function (someNode) {
-	getFirstLeaf:
-	while (true) {
-		if (someNode.$ === 'Leaf') {
-			var leaf = someNode.a;
-			return leaf;
-		} else {
-			var node = someNode.a;
-			var $temp$someNode = node.left;
-			someNode = $temp$someNode;
-			continue getFirstLeaf;
-		}
-	}
-};
 var $author$project$DomainModel$Node = function (a) {
 	return {$: 'Node', a: a};
 };
@@ -16176,31 +16162,15 @@ var $author$project$DomainModel$joiningNode = F2(
 				right: right
 			});
 	});
-var $author$project$DomainModel$joinTrees = F3(
-	function (refLonLat, leftTree, rightTree) {
-		var rightmostOfLeft = $author$project$DomainModel$getLastLeaf(leftTree).sourceData.b;
-		var leftmostOfRight = $author$project$DomainModel$getFirstLeaf(rightTree).sourceData.a;
-		var newLeaf = $author$project$DomainModel$Leaf(
-			A3($author$project$DomainModel$makeRoadSection, refLonLat, rightmostOfLeft, leftmostOfRight));
-		return (_Utils_cmp(
-			$author$project$DomainModel$skipCount(leftTree),
-			$author$project$DomainModel$skipCount(rightTree)) < 1) ? A2(
-			$author$project$DomainModel$joiningNode,
-			A2($author$project$DomainModel$joiningNode, leftTree, newLeaf),
-			rightTree) : A2(
-			$author$project$DomainModel$joiningNode,
-			leftTree,
-			A2($author$project$DomainModel$joiningNode, newLeaf, rightTree));
-	});
-var $author$project$DomainModel$safeJoin = F3(
-	function (refLonLat, left, right) {
+var $author$project$DomainModel$safeJoin = F2(
+	function (left, right) {
 		var _v0 = _Utils_Tuple2(left, right);
 		if (_v0.a.$ === 'Just') {
 			if (_v0.b.$ === 'Just') {
 				var leftTree = _v0.a.a;
 				var rightTree = _v0.b.a;
 				return $elm$core$Maybe$Just(
-					A3($author$project$DomainModel$joinTrees, refLonLat, leftTree, rightTree));
+					A2($author$project$DomainModel$joiningNode, leftTree, rightTree));
 			} else {
 				var leftTree = _v0.a.a;
 				var _v1 = _v0.b;
@@ -16218,12 +16188,26 @@ var $author$project$DomainModel$safeJoin = F3(
 			}
 		}
 	});
+var $author$project$DomainModel$getFirstLeaf = function (someNode) {
+	getFirstLeaf:
+	while (true) {
+		if (someNode.$ === 'Leaf') {
+			var leaf = someNode.a;
+			return leaf;
+		} else {
+			var node = someNode.a;
+			var $temp$someNode = node.left;
+			someNode = $temp$someNode;
+			continue getFirstLeaf;
+		}
+	}
+};
 var $author$project$DomainModel$secondPoint = function (tree) {
 	var leaf = $author$project$DomainModel$getFirstLeaf(tree);
 	return _Utils_Tuple2(leaf.sourceData.b, leaf.endPoint);
 };
-var $author$project$DomainModel$splitTreeAt = F3(
-	function (leavesToTheLeft, refLonLat, thisNode) {
+var $author$project$DomainModel$splitTreeAt = F2(
+	function (leavesToTheLeft, thisNode) {
 		if (thisNode.$ === 'Leaf') {
 			var leaf = thisNode.a;
 			return (leavesToTheLeft <= 0) ? _Utils_Tuple2(
@@ -16245,19 +16229,18 @@ var $author$project$DomainModel$splitTreeAt = F3(
 						$elm$core$Maybe$Just(thisNode),
 						$elm$core$Maybe$Nothing);
 				} else {
-					var _v1 = A3(
+					var _v1 = A2(
 						$author$project$DomainModel$splitTreeAt,
 						leavesToTheLeft - $author$project$DomainModel$skipCount(aNode.left),
-						refLonLat,
 						aNode.right);
 					var leftOfRight = _v1.a;
 					var rightOfRight = _v1.b;
-					var _v2 = A3($author$project$DomainModel$splitTreeAt, leavesToTheLeft, refLonLat, aNode.left);
+					var _v2 = A2($author$project$DomainModel$splitTreeAt, leavesToTheLeft, aNode.left);
 					var leftOfLeft = _v2.a;
 					var rightOfLeft = _v2.b;
 					return _Utils_Tuple2(
-						A3($author$project$DomainModel$safeJoin, refLonLat, leftOfLeft, leftOfRight),
-						A3($author$project$DomainModel$safeJoin, refLonLat, rightOfLeft, rightOfRight));
+						A2($author$project$DomainModel$safeJoin, leftOfLeft, leftOfRight),
+						A2($author$project$DomainModel$safeJoin, rightOfLeft, rightOfRight));
 				}
 			}
 		}
@@ -16270,7 +16253,7 @@ var $author$project$DomainModel$deleteSinglePoint = F3(
 				return A2(
 					$elm$core$Maybe$withDefault,
 					treeNode,
-					A3($author$project$DomainModel$splitTreeAt, 1, refLonLat, treeNode).b);
+					A2($author$project$DomainModel$splitTreeAt, 1, treeNode).b);
 			} else {
 				if (_Utils_eq(
 					index,
@@ -16278,36 +16261,31 @@ var $author$project$DomainModel$deleteSinglePoint = F3(
 					return A2(
 						$elm$core$Maybe$withDefault,
 						treeNode,
-						A3(
+						A2(
 							$author$project$DomainModel$splitTreeAt,
 							$author$project$DomainModel$skipCount(treeNode) - 1,
-							refLonLat,
 							treeNode).a);
 				} else {
-					var _v1 = A3($author$project$DomainModel$splitTreeAt, index, refLonLat, treeNode);
+					var _v1 = A2($author$project$DomainModel$splitTreeAt, index, treeNode);
 					if ((_v1.a.$ === 'Just') && (_v1.b.$ === 'Just')) {
 						var left = _v1.a.a;
 						var right = _v1.b.a;
-						var trimmedRight = A3($author$project$DomainModel$splitTreeAt, 1, refLonLat, right).b;
-						var trimmedLeft = A3(
-							$author$project$DomainModel$splitTreeAt,
-							$author$project$DomainModel$skipCount(left) - 1,
-							refLonLat,
-							left).a;
 						var rightJoinPoint = $author$project$DomainModel$secondPoint(right).a;
 						var leftJoinPoint = $author$project$DomainModel$penultimatePoint(left).a;
 						var newLeaf = $author$project$DomainModel$Leaf(
 							A3($author$project$DomainModel$makeRoadSection, refLonLat, leftJoinPoint, rightJoinPoint));
+						var _v2 = A2($author$project$DomainModel$splitTreeAt, 1, right);
+						var trimmedRight = _v2.b;
+						var _v3 = A2($author$project$DomainModel$splitTreeAt, index - 1, left);
+						var trimmedLeft = _v3.a;
 						return A2(
 							$elm$core$Maybe$withDefault,
 							treeNode,
-							A3(
+							A2(
 								$author$project$DomainModel$safeJoin,
-								refLonLat,
 								trimmedLeft,
-								A3(
+								A2(
 									$author$project$DomainModel$safeJoin,
-									refLonLat,
 									$elm$core$Maybe$Just(newLeaf),
 									trimmedRight)));
 					} else {

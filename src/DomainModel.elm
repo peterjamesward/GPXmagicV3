@@ -711,20 +711,20 @@ deleteSinglePoint index refLonLat treeNode =
             if index <= 0 then
                 -- First point deletion special case
                 treeNode
-                    |> splitTreeAt 1 refLonLat
+                    |> splitTreeAt 1
                     |> Tuple.second
                     |> Maybe.withDefault treeNode
 
             else if index == skipCount treeNode then
                 -- Last point also special case
                 treeNode
-                    |> splitTreeAt (skipCount treeNode - 1) refLonLat
+                    |> splitTreeAt (skipCount treeNode - 1)
                     |> Tuple.first
                     |> Maybe.withDefault treeNode
 
             else
                 -- Having dispensed with special cases above, there should be something each side.
-                case treeNode |> splitTreeAt index refLonLat of
+                case treeNode |> splitTreeAt index of
                     ( Just left, Just right ) ->
                         let
                             leftJoinPoint =
@@ -736,19 +736,15 @@ deleteSinglePoint index refLonLat treeNode =
                             newLeaf =
                                 Leaf <| makeRoadSection refLonLat leftJoinPoint rightJoinPoint
 
-                            trimmedLeft =
-                                left
-                                    |> splitTreeAt (skipCount left - 1) refLonLat
-                                    |> Tuple.first
+                            ( trimmedLeft, _ ) =
+                                left |> splitTreeAt (index - 1)
 
-                            trimmedRight =
-                                right
-                                    |> splitTreeAt 1 refLonLat
-                                    |> Tuple.second
+                            ( _, trimmedRight ) =
+                                right |> splitTreeAt 1
                         in
                         Maybe.withDefault treeNode <|
-                            safeJoin refLonLat trimmedLeft <|
-                                safeJoin refLonLat (Just newLeaf) trimmedRight
+                            safeJoin trimmedLeft <|
+                                safeJoin (Just newLeaf) trimmedRight
 
                     _ ->
                         treeNode
@@ -758,8 +754,8 @@ deleteSinglePoint index refLonLat treeNode =
             treeNode
 
 
-splitTreeAt : Int -> GPXSource -> PeteTree -> ( Maybe PeteTree, Maybe PeteTree )
-splitTreeAt leavesToTheLeft refLonLat thisNode =
+splitTreeAt : Int -> PeteTree -> ( Maybe PeteTree, Maybe PeteTree )
+splitTreeAt leavesToTheLeft thisNode =
     case thisNode of
         Leaf leaf ->
             if leavesToTheLeft <= 0 then
@@ -779,14 +775,14 @@ splitTreeAt leavesToTheLeft refLonLat thisNode =
             else
                 let
                     ( leftOfLeft, rightOfLeft ) =
-                        aNode.left |> splitTreeAt leavesToTheLeft refLonLat
+                        aNode.left |> splitTreeAt leavesToTheLeft
 
                     ( leftOfRight, rightOfRight ) =
-                        aNode.right |> splitTreeAt (leavesToTheLeft - skipCount aNode.left) refLonLat
+                        aNode.right |> splitTreeAt (leavesToTheLeft - skipCount aNode.left)
                 in
                 -- In theory, only one side can actually be split...
-                ( safeJoin refLonLat leftOfLeft leftOfRight
-                , safeJoin refLonLat rightOfLeft rightOfRight
+                ( safeJoin leftOfLeft leftOfRight
+                , safeJoin rightOfLeft rightOfRight
                 )
 
 
@@ -828,11 +824,11 @@ penultimatePoint tree =
     ( Tuple.first leaf.sourceData, leaf.startPoint )
 
 
-safeJoin : GPXSource -> Maybe PeteTree -> Maybe PeteTree -> Maybe PeteTree
-safeJoin refLonLat left right =
+safeJoin : Maybe PeteTree -> Maybe PeteTree -> Maybe PeteTree
+safeJoin left right =
     case ( left, right ) of
         ( Just leftTree, Just rightTree ) ->
-            Just <| joinTrees refLonLat leftTree rightTree
+            Just <| joiningNode leftTree rightTree
 
         ( Just leftTree, Nothing ) ->
             left
@@ -842,26 +838,3 @@ safeJoin refLonLat left right =
 
         ( Nothing, Nothing ) ->
             Nothing
-
-
-joinTrees : GPXSource -> PeteTree -> PeteTree -> PeteTree
-joinTrees refLonLat leftTree rightTree =
-    -- TODO: Does not need refLonLat!
-    -- Make a leaf joining the extreme right point of the left to extreme left of the right.
-    -- Use a joining node to add this leaf to the smallest side (by skipcount)
-    -- Use another joining node to combine.
-    let
-        rightmostOfLeft =
-            getLastLeaf leftTree |> .sourceData |> Tuple.second
-
-        leftmostOfRight =
-            getFirstLeaf rightTree |> .sourceData |> Tuple.first
-
-        newLeaf =
-            Leaf <| makeRoadSection refLonLat rightmostOfLeft leftmostOfRight
-    in
-    if skipCount leftTree <= skipCount rightTree then
-        joiningNode (joiningNode leftTree newLeaf) rightTree
-
-    else
-        joiningNode leftTree (joiningNode newLeaf rightTree)
