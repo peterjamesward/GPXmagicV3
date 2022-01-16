@@ -16188,10 +16188,8 @@ var $author$project$DomainModel$joinTrees = F3(
 			leftTree,
 			A2($author$project$DomainModel$joiningNode, newLeaf, rightTree));
 	});
-var $elm$core$Debug$log = _Debug_log;
 var $author$project$DomainModel$splitTreeAt = F2(
 	function (leavesToTheLeft, thisNode) {
-		var _v0 = A2($elm$core$Debug$log, 'SPLIT', leavesToTheLeft);
 		if (thisNode.$ === 'Leaf') {
 			var leaf = thisNode.a;
 			return (leavesToTheLeft > 0) ? _Utils_Tuple2(
@@ -16208,78 +16206,54 @@ var $author$project$DomainModel$splitTreeAt = F2(
 			} else {
 				if (_Utils_cmp(
 					$author$project$DomainModel$skipCount(thisNode),
-					leavesToTheLeft) < 1) {
+					leavesToTheLeft) < 0) {
 					return _Utils_Tuple2(
 						$elm$core$Maybe$Just(thisNode),
 						$elm$core$Maybe$Nothing);
 				} else {
-					var _v2 = A2(
-						$author$project$DomainModel$splitTreeAt,
-						leavesToTheLeft - $author$project$DomainModel$skipCount(aNode.left),
-						aNode.right);
-					var leftOfRight = _v2.a;
-					var rightOfRight = _v2.b;
-					var _v3 = A2($author$project$DomainModel$splitTreeAt, leavesToTheLeft, aNode.left);
-					var leftOfLeft = _v3.a;
-					var rightOfLeft = _v3.b;
-					var _v4 = _Utils_Tuple2(
-						_Utils_Tuple2(leftOfLeft, rightOfLeft),
-						_Utils_Tuple2(leftOfRight, rightOfRight));
-					_v4$3:
-					while (true) {
-						if (_v4.a.a.$ === 'Just') {
-							if (_v4.a.b.$ === 'Just') {
-								if ((_v4.b.a.$ === 'Nothing') && (_v4.b.b.$ === 'Just')) {
-									var _v9 = _v4.a;
-									var leftSplitLeft = _v9.a.a;
-									var leftSplitRight = _v9.b.a;
-									var _v10 = _v4.b;
-									var _v11 = _v10.a;
-									var untouchedRight = _v10.b.a;
-									return _Utils_Tuple2(
-										$elm$core$Maybe$Just(leftSplitLeft),
-										$elm$core$Maybe$Just(
-											A2($author$project$DomainModel$joiningNode, leftSplitRight, untouchedRight)));
-								} else {
-									break _v4$3;
-								}
+					if (_Utils_cmp(
+						leavesToTheLeft,
+						$author$project$DomainModel$skipCount(aNode.left)) < 0) {
+						var _v1 = A2($author$project$DomainModel$splitTreeAt, leavesToTheLeft, aNode.left);
+						if (_v1.b.$ === 'Just') {
+							var leftGrandchild = _v1.a;
+							var rightGrandchild = _v1.b.a;
+							return _Utils_Tuple2(
+								leftGrandchild,
+								$elm$core$Maybe$Just(
+									A2($author$project$DomainModel$joiningNode, rightGrandchild, aNode.right)));
+						} else {
+							var leftGrandchild = _v1.a;
+							var _v2 = _v1.b;
+							return _Utils_Tuple2(
+								leftGrandchild,
+								$elm$core$Maybe$Just(aNode.right));
+						}
+					} else {
+						if (_Utils_cmp(
+							leavesToTheLeft,
+							$author$project$DomainModel$skipCount(aNode.left)) > 0) {
+							var _v3 = A2($author$project$DomainModel$splitTreeAt, leavesToTheLeft, aNode.left);
+							if (_v3.a.$ === 'Just') {
+								var leftGrandchild = _v3.a.a;
+								var rightGrandchild = _v3.b;
+								return _Utils_Tuple2(
+									$elm$core$Maybe$Just(
+										A2($author$project$DomainModel$joiningNode, aNode.left, leftGrandchild)),
+									rightGrandchild);
 							} else {
-								if (_v4.b.a.$ === 'Nothing') {
-									if (_v4.b.b.$ === 'Just') {
-										var _v5 = _v4.a;
-										var allOnTheLeft = _v5.a.a;
-										var _v6 = _v5.b;
-										var _v7 = _v4.b;
-										var _v8 = _v7.a;
-										var allOnTheRight = _v7.b.a;
-										return _Utils_Tuple2(
-											$elm$core$Maybe$Just(allOnTheLeft),
-											$elm$core$Maybe$Just(allOnTheRight));
-									} else {
-										break _v4$3;
-									}
-								} else {
-									if (_v4.b.b.$ === 'Just') {
-										var _v12 = _v4.a;
-										var untouchedLeft = _v12.a.a;
-										var _v13 = _v12.b;
-										var _v14 = _v4.b;
-										var rightSplitLeft = _v14.a.a;
-										var rightSplitRight = _v14.b.a;
-										return _Utils_Tuple2(
-											$elm$core$Maybe$Just(
-												A2($author$project$DomainModel$joiningNode, untouchedLeft, rightSplitLeft)),
-											$elm$core$Maybe$Just(rightSplitRight));
-									} else {
-										break _v4$3;
-									}
-								}
+								var _v4 = _v3.a;
+								var rightGrandChild = _v3.b;
+								return _Utils_Tuple2(
+									$elm$core$Maybe$Just(aNode.left),
+									rightGrandChild);
 							}
 						} else {
-							break _v4$3;
+							return _Utils_Tuple2(
+								$elm$core$Maybe$Just(aNode.left),
+								$elm$core$Maybe$Just(aNode.right));
 						}
 					}
-					return _Utils_Tuple2($elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing);
 				}
 			}
 		}
@@ -16297,21 +16271,28 @@ var $author$project$DomainModel$deleteSinglePoint = F3(
 					return A3($author$project$DomainModel$joinTrees, refLonLat, leftSide, rightSide);
 				} else {
 					var _v2 = _v1.b;
-					return leftSide;
+					return treeNode;
 				}
 			} else {
 				var leftSide = _v0.a.a;
 				var _v3 = _v0.b;
-				return leftSide;
+				return treeNode;
 			}
 		} else {
 			if (_v0.b.$ === 'Just') {
 				var _v4 = _v0.a;
-				var rightSide = _v0.b.a;
-				return rightSide;
+				var remainder = _v0.b.a;
+				var _v5 = A2($author$project$DomainModel$splitTreeAt, 1, remainder);
+				if (_v5.b.$ === 'Just') {
+					var rightSide = _v5.b.a;
+					return rightSide;
+				} else {
+					var _v6 = _v5.b;
+					return treeNode;
+				}
 			} else {
-				var _v5 = _v0.a;
-				var _v6 = _v0.b;
+				var _v7 = _v0.a;
+				var _v8 = _v0.b;
 				return treeNode;
 			}
 		}

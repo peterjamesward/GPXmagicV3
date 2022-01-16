@@ -698,22 +698,29 @@ deleteSinglePoint : Int -> GPXSource -> PeteTree -> PeteTree
 deleteSinglePoint index refLonLat treeNode =
     -- Logically, where index of 0 means the first leaf is discarded.
     -- We don't actually ever split a leaf.
-    -- This is flawed. Consider the trivial case of two leaves
-    -- we should be able to delete the shared point and end up with one new leaf.
     case treeNode |> splitTreeAt index of
         ( Just leftSide, Just remainder ) ->
             case remainder |> splitTreeAt 1 of
                 ( _, Just rightSide ) ->
+                    --TODO: Seems silly that we need refLonLat as we have EarthPoint in the Leaf!!
                     joinTrees refLonLat leftSide rightSide
 
                 ( _, Nothing ) ->
-                    leftSide
+                    -- Disallowed
+                    treeNode
 
         ( Just leftSide, Nothing ) ->
-            leftSide
+            -- Disallowed
+            treeNode
 
-        ( Nothing, Just rightSide ) ->
-            rightSide
+        ( Nothing, Just remainder ) ->
+            case remainder |> splitTreeAt 1 of
+                ( _, Just rightSide ) ->
+                    rightSide
+
+                ( _, Nothing ) ->
+                    -- Disallowed
+                    treeNode
 
         ( Nothing, Nothing ) ->
             -- Oh, dear. Can't return a Nothing.
@@ -722,10 +729,6 @@ deleteSinglePoint index refLonLat treeNode =
 
 splitTreeAt : Int -> PeteTree -> ( Maybe PeteTree, Maybe PeteTree )
 splitTreeAt leavesToTheLeft thisNode =
-    let
-        _ =
-            Debug.log "SPLIT" leavesToTheLeft
-    in
     case thisNode of
         Leaf leaf ->
             if leavesToTheLeft > 0 then
@@ -739,40 +742,33 @@ splitTreeAt leavesToTheLeft thisNode =
                 -- Easy, all to the right
                 ( Nothing, Just thisNode )
 
-            else if skipCount thisNode <= leavesToTheLeft then
+            else if skipCount thisNode < leavesToTheLeft then
                 -- Easy, just goes left
                 ( Just thisNode, Nothing )
 
             else
-                -- Somewhere on this node's expanse.
-                -- Look at the children and work out what to do.
-                let
-                    ( leftOfLeft, rightOfLeft ) =
-                        splitTreeAt leavesToTheLeft aNode.left
+            -- Somewhere on this node's expanse.
+            -- Look at the children and work out what to do.
+            if
+                leavesToTheLeft < skipCount aNode.left
+            then
+                case splitTreeAt leavesToTheLeft aNode.left of
+                    ( leftGrandchild, Just rightGrandchild ) ->
+                        ( leftGrandchild, Just <| joiningNode rightGrandchild aNode.right )
 
-                    ( leftOfRight, rightOfRight ) =
-                        splitTreeAt (leavesToTheLeft - skipCount aNode.left) aNode.right
-                in
-                case ( ( leftOfLeft, rightOfLeft ), ( leftOfRight, rightOfRight ) ) of
-                    ( ( Just allOnTheLeft, Nothing ), ( Nothing, Just allOnTheRight ) ) ->
-                        -- Right down the middle
-                        ( Just allOnTheLeft
-                        , Just allOnTheRight
-                        )
+                    ( leftGrandchild, Nothing ) ->
+                        ( leftGrandchild, Just aNode.right )
 
-                    ( ( Just leftSplitLeft, Just leftSplitRight ), ( Nothing, Just untouchedRight ) ) ->
-                        ( Just leftSplitLeft
-                        , Just <| joiningNode leftSplitRight untouchedRight
-                        )
+            else if leavesToTheLeft > skipCount aNode.left then
+                case splitTreeAt leavesToTheLeft aNode.left of
+                    ( Just leftGrandchild, rightGrandchild ) ->
+                        ( Just <| joiningNode aNode.left leftGrandchild, rightGrandchild )
 
-                    ( ( Just untouchedLeft, Nothing ), ( Just rightSplitLeft, Just rightSplitRight ) ) ->
-                        ( Just <| joiningNode untouchedLeft rightSplitLeft
-                        , Just rightSplitRight
-                        )
+                    ( Nothing, rightGrandChild ) ->
+                        ( Just aNode.left, rightGrandChild )
 
-                    _ ->
-                        -- Other cases not sensible
-                        ( Nothing, Nothing )
+            else
+                ( Just aNode.left, Just aNode.right )
 
 
 getFirstLeaf : PeteTree -> RoadSection

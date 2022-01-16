@@ -5,20 +5,28 @@
 Not refreshing previews under all conditions necessary.
 > Possibly just unwritten code.
 
-**Next up**: Delete tool.
+## Delete tool.
+
+Seems to work in trivial case (3 or 4 points) but not in general!
+In fact only works on one of four points. Reckon fix that & all will be well.
+
+Should be able to delete first or last point, unless there are only two!
+
+## NEXT UP: Markers.
+## AND THEN: Undo, Redo.
 
 ## Tree algebra
-1. Split tree into two
-2. Join two trees
-
-3. Delete a leaf/leaves (can be done using 1 & 2)
-4. Insert a leaf/leaves (can be done with 1 & 2)
-5. Update leaves (and all their aggregate nodes)   
+DONE. Split tree into two
+DONE. Join two trees
+DONE. Delete a leaf/leaves (is just split and join)
+DONE. Insert a leaf/leaves (is just join)
+5. Interpolate is a special case with a neat implementation,
+6. Update leaves (and all their aggregate nodes)   
    (note this is actually a top-down operation where the action is in the return,  
    and is really the same as building the tree initially.
-   (If this is the whole tree, use the chance to re-balance.)
+   (If this is the whole tree, use the chance to re-balance?)
 
-Split up **DomainModel** into core and various helpers.
+Split **DomainModel** into core and various helpers.
 
 Make **DragPan** work on 3D view.
 
