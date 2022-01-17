@@ -52,15 +52,15 @@ findAbruptDirectionChanges options tree =
                 Node node ->
                     let
                         thisNodeAngle =
-                            Direction2d.angleFrom
-                                (node.left |> asRecord |> .directionAtEnd)
-                                (node.right |> asRecord |> .directionAtStart)
-                                |> Quantity.abs
+                            Quantity.abs <|
+                                Direction2d.angleFrom
+                                    (node.left |> asRecord |> .directionAtEnd)
+                                    (node.right |> asRecord |> .directionAtStart)
 
                         withThisNodeIfNeeded acc =
                             -- Is it at this node, or one of its children?
                             if thisNodeAngle |> Quantity.greaterThanOrEqualTo options.threshold then
-                                ( skip + (skipCount node.left), thisNodeAngle ) :: acc
+                                ( skip + skipCount node.left, thisNodeAngle ) :: acc
 
                             else
                                 acc

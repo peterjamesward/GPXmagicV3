@@ -388,8 +388,8 @@ joiningNode left right =
         }
 
 
-treeFromList : List GPXSource -> Maybe PeteTree
-treeFromList track =
+treeFromSourcePoints : List GPXSource -> Maybe PeteTree
+treeFromSourcePoints track =
     -- Build the skeletal tree of nodes, then attach the leaves from the input list.
     -- Should be much quicker than recursively splitting the list, for large lists.
     -- First point is arbitrary reference for conformal projection (TBC).

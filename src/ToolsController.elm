@@ -14,6 +14,7 @@ import Html.Events.Extra.Mouse as Mouse
 import List.Extra
 import Tools.AbruptDirectionChanges as AbruptDirectionChanges
 import Tools.DeletePoints as DeletePoints
+import Tools.Pointers as Pointers
 import Tools.TrackInfoBox as TrackInfoBox
 import TrackLoaded exposing (TrackLoaded)
 import ViewPureStyles exposing (contrastingColour, neatToolsBorder, useIcon)
@@ -39,13 +40,15 @@ type ToolType
     = ToolTrackInfo
     | ToolAbruptDirectionChanges
     | ToolDeletePoints
+    | ToolPointers
 
 
 type alias Options =
     -- Tool specific options
-    { tools :  List ToolEntry
+    { tools : List ToolEntry
     , directionChangeOptions : AbruptDirectionChanges.Options
     , deleteOptions : DeletePoints.Options
+    , pointerOptions : Pointers.Options
     }
 
 
@@ -54,6 +57,7 @@ defaultOptions =
     { tools = defaultTools
     , directionChangeOptions = AbruptDirectionChanges.defaultOptions
     , deleteOptions = DeletePoints.defaultOptions
+    , pointerOptions = Pointers.defaultOptions
     }
 
 
@@ -64,6 +68,7 @@ type ToolMsg
     | ToolStateToggle ToolType ToolState
     | DirectionChanges AbruptDirectionChanges.Msg
     | DeletePoints DeletePoints.Msg
+    | PointerMsg Pointers.Msg
     | ToolNoOp
 
 
@@ -83,7 +88,8 @@ type alias ToolEntry =
 defaultTools : List ToolEntry
 defaultTools =
     -- One list or five, or six? Try one. Arguably a Dict but POITROAE.
-    [ trackInfoBox
+    [ pointersTool
+    , trackInfoBox
     , directionChangeTool
     , deleteTool
     ]
@@ -111,8 +117,22 @@ directionChangeTool =
     , video = Nothing
     , state = Contracted
     , dock = DockUpperRight
-    , tabColour = FlatColors.AussiePalette.spicedNectarine
-    , textColour = contrastingColour FlatColors.AussiePalette.spicedNectarine
+    , tabColour = FlatColors.AussiePalette.deepKoamaru
+    , textColour = contrastingColour FlatColors.AussiePalette.deepKoamaru
+    , isPopupOpen = False
+    }
+
+
+pointersTool : ToolEntry
+pointersTool =
+    { toolType = ToolPointers
+    , label = "Pointers"
+    , info = "Use to bracket edits"
+    , video = Nothing
+    , state = Expanded
+    , dock = DockUpperRight
+    , tabColour = FlatColors.AussiePalette.quinceJelly
+    , textColour = contrastingColour FlatColors.AussiePalette.quinceJelly
     , isPopupOpen = False
     }
 
@@ -124,7 +144,7 @@ deleteTool =
     , info = "Away with ye"
     , video = Nothing
     , state = Contracted
-    , dock = DockUpperRight
+    , dock = DockLowerLeft
     , tabColour = FlatColors.AussiePalette.pinkGlamour
     , textColour = contrastingColour FlatColors.AussiePalette.pinkGlamour
     , isPopupOpen = False
@@ -250,12 +270,15 @@ update toolMsg isTrack msgWrapper options =
             , actions
             )
 
+        PointerMsg msg ->
+            ( options, [] )
+
 
 refreshOpenTools :
     Maybe TrackLoaded
     -> Options
     -> ( Options, List (ToolAction msg) )
-refreshOpenTools  isTrack options =
+refreshOpenTools isTrack options =
     -- Track, or something has changed; tool data is stale.
     -- Same impact as tools being opened, so we'll re-use that.
     let
@@ -314,6 +337,9 @@ toolStateHasChanged toolType newState isTrack options =
             in
             ( newOptions, actions )
 
+        ToolPointers ->
+            ( options, [] )
+
 
 
 --View stuff
@@ -326,7 +352,7 @@ toolsForDock :
     -> Options
     -> Element msg
 toolsForDock dock msgWrapper isTrack options =
-    column [] <|
+    wrappedRow [ spacing 4, scrollbarY, height fill ] <|
         (options.tools
             |> List.filter (\t -> t.dock == dock)
             |> List.map (viewTool msgWrapper isTrack options)
@@ -342,6 +368,8 @@ viewTool :
 viewTool msgWrapper isTrack options toolEntry =
     column
         [ width fill
+        , alignTop
+        , htmlAttribute (style "vertical-align" "top")
         , spacing 0
         , Border.width 2
         , Border.color toolEntry.tabColour
@@ -487,3 +515,6 @@ viewToolByType msgWrapper entry isTrack options =
 
         ToolDeletePoints ->
             DeletePoints.view (msgWrapper << DeletePoints) options.deleteOptions
+
+        ToolPointers ->
+            Pointers.view (msgWrapper << PointerMsg) options.pointerOptions

@@ -4,9 +4,11 @@
 
 ## NEXT UP: Markers.
 
-## AND THEN: Undo, Redo. (Do journaling here?)
+Also, adjust scrollbar width to use content area.
 
-## AND THEN: Delete with a range.
+## AND THEN: Delete with a range (nearly trivial).
+
+## AND THEN: Undo, Redo. (Do journaling here?)
 
 ## Tree algebra
 DONE. Split tree into two

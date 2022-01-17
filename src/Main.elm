@@ -257,7 +257,7 @@ update msg model =
                     parseGPXPoints content
 
                 trackTree =
-                    treeFromList gpxTrack
+                    treeFromSourcePoints gpxTrack
             in
             case trackTree of
                 Just aTree ->
