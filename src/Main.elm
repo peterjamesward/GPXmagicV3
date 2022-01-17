@@ -731,7 +731,7 @@ contentArea model =
 
         slider trackLength =
             Input.slider
-                ViewPureStyles.wideSliderStyles
+                (ViewPureStyles.wideSliderStylesWithWidth w)
                 { onChange = round >> SetCurrentPosition
                 , value =
                     case model.track of

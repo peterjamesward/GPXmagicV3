@@ -11,6 +11,8 @@ import FeatherIcons
 import FlatColors.BritishPalette
 import FlatColors.ChinesePalette
 import Html.Attributes exposing (style)
+import Pixels exposing (Pixels)
+import Quantity exposing (Quantity)
 
 
 defaultRowLayout =
@@ -203,15 +205,20 @@ displayName n =
             none
 
 
-wideSliderStyles =
+wideSliderStylesWithWidth : Quantity Int Pixels -> List (Attribute msg)
+wideSliderStylesWithWidth w =
+    let
+        usedWidth =
+            w |> Pixels.toInt |> toFloat |> (*) 0.8 |> round
+    in
     [ height <| px 24
-    , width <| px 400
+    , width <| px usedWidth
     , centerY
     , centerX
     , behindContent <|
         -- Slider track
         el
-            [ width <| px 400
+            [ width <| px usedWidth
             , height <| px 2
             , centerY
             , centerX
@@ -220,6 +227,10 @@ wideSliderStyles =
             ]
             Element.none
     ]
+
+
+wideSliderStyles =
+    wideSliderStylesWithWidth (Pixels.int 400)
 
 
 neatToolsBorder =

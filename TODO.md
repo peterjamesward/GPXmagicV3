@@ -4,8 +4,6 @@
 
 ## NEXT UP: Markers.
 
-Also, adjust scrollbar width to use content area.
-
 ## AND THEN: Delete with a range (nearly trivial).
 
 ## AND THEN: Undo, Redo. (Do journaling here?)
@@ -42,6 +40,11 @@ Details in Backlog.
 Add non-draggable track point circles, in separate layer we can turn on and off
 to replace by draggables when that control is open.
 
+Map options tool? 
+- Map style
+- Map follow orange pointer
+- Draggable points
+
 ---
 
 # Backlog
@@ -55,25 +58,20 @@ Double-click, in contrast, always centres.
 
 ## Layout
 
-Splitters looking good now.
-Will need tweaking later.
-Might switch to pixel sizing.
+Splitters need tweaking later. Might switch to pixel sizing.
 Will need to go in localStorage.
-Settings button for background colour.
 
 ## Tools
 
-"Markers" - adjust orange and purple including 10% FF & REW.
-"Drag on map" - preview replaces static dots with draggables.
 2-way drag corrects for azimuth.
-Is Undo/Redo a control?
 Pane payout choices as control?
 I think the top bar is still special: Load, Save, Donate. Is it?
-"Where am I" - reverse geocode.
+"Where am I" - reverse geocode (rate limited)).
 
 ## Rendering
-Use a graduated drop off with distance, compute at each tree level.
+Use a graduated drop off with distance, compute at each tree level?
 On Map, work out the depth to fit (say) 1000 points within visible region.
+> Done that it RTWI80D.
 
 ## Decide how to organise windows, panes, views.
 What state lives where? (This relates to the multi-window decision.)
@@ -81,11 +79,9 @@ First pane is special, because of map, and because you must have it.
 Hence, one pane + list, or just four panes with visibility?
 
 ## Look and Feel
-Clean.
-Menu bar?
-Chinese FlatUI palette?
-Keep current track in indexDB to support a "restart/recover" option? No.
-JB suggests heavily customisable tools layout to support differing "workflows".
+Configurable background colour.
+Keep current track in indexDB to support a "restart/recover" option? 
+> No - journal the edits.
 
 ## Plan view
 Same as before. Use 3d-scene. Orthographic camera.
@@ -126,19 +122,10 @@ Use Session state, to avoid taking up ram, with unlimited Undo?
 > (Because user can always load that file anyway.) Ah, but suppose you want to go further back?
 > I guess we could ask the user to re-open the relevant baseline file?
 
-## iframe
-Do an embedded version of Map with Round the World route as iframe for Steve?
-Binary file format for fastest load?
-> https://package.elm-lang.org/packages/elm-toulouse/cbor/latest/
-
-## Deferred stuff
-Current position slider should refresh open tool previews.
-Same will be true for Purple.
-
 
 ---
 
-# Parked
+# Parked (and probably abandoned)
 
 ### Multiple windows (demoted again; more value in better tool layout and customisation)
 Tauri looks interesting as we would not need node.js

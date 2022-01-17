@@ -19,12 +19,14 @@ import ViewPureStyles exposing (neatToolsBorder, sliderThumb, useIcon)
 
 
 type alias Options =
-    { dummy : Int
+    { orange : Int
+    , purple : Maybe Int
     }
 
 
 defaultOptions =
-    { dummy = 0
+    { orange = 0
+    , purple = Nothing
     }
 
 

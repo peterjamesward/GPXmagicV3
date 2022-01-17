@@ -8474,7 +8474,7 @@ var $author$project$Tools$AbruptDirectionChanges$defaultOptions = {
 	threshold: $ianmackenzie$elm_units$Angle$degrees(60)
 };
 var $author$project$Tools$DeletePoints$defaultOptions = {dummy: 0};
-var $author$project$Tools$Pointers$defaultOptions = {dummy: 0};
+var $author$project$Tools$Pointers$defaultOptions = {orange: 0, purple: $elm$core$Maybe$Nothing};
 var $author$project$ToolsController$Contracted = {$: 'Contracted'};
 var $author$project$ToolsController$DockLowerLeft = {$: 'DockLowerLeft'};
 var $author$project$ToolsController$ToolDeletePoints = {$: 'ToolDeletePoints'};
@@ -27526,35 +27526,42 @@ var $author$project$Main$viewModeChoices = function (model) {
 			selected: $elm$core$Maybe$Just(model.viewMode)
 		});
 };
-var $author$project$ViewPureStyles$wideSliderStyles = _List_fromArray(
-	[
-		$mdgriffith$elm_ui$Element$height(
-		$mdgriffith$elm_ui$Element$px(24)),
-		$mdgriffith$elm_ui$Element$width(
-		$mdgriffith$elm_ui$Element$px(400)),
-		$mdgriffith$elm_ui$Element$centerY,
-		$mdgriffith$elm_ui$Element$centerX,
-		$mdgriffith$elm_ui$Element$behindContent(
-		A2(
-			$mdgriffith$elm_ui$Element$el,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$width(
-					$mdgriffith$elm_ui$Element$px(400)),
-					$mdgriffith$elm_ui$Element$height(
-					$mdgriffith$elm_ui$Element$px(2)),
-					$mdgriffith$elm_ui$Element$centerY,
-					$mdgriffith$elm_ui$Element$centerX,
-					$mdgriffith$elm_ui$Element$Background$color($author$project$ColourPalette$scrollbarBackground),
-					$mdgriffith$elm_ui$Element$Border$rounded(6)
-				]),
-			$mdgriffith$elm_ui$Element$none))
-	]);
+var $author$project$ViewPureStyles$wideSliderStylesWithWidth = function (w) {
+	var usedWidth = $elm$core$Basics$round(
+		0.8 * $ianmackenzie$elm_units$Pixels$toInt(w));
+	return _List_fromArray(
+		[
+			$mdgriffith$elm_ui$Element$height(
+			$mdgriffith$elm_ui$Element$px(24)),
+			$mdgriffith$elm_ui$Element$width(
+			$mdgriffith$elm_ui$Element$px(usedWidth)),
+			$mdgriffith$elm_ui$Element$centerY,
+			$mdgriffith$elm_ui$Element$centerX,
+			$mdgriffith$elm_ui$Element$behindContent(
+			A2(
+				$mdgriffith$elm_ui$Element$el,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width(
+						$mdgriffith$elm_ui$Element$px(usedWidth)),
+						$mdgriffith$elm_ui$Element$height(
+						$mdgriffith$elm_ui$Element$px(2)),
+						$mdgriffith$elm_ui$Element$centerY,
+						$mdgriffith$elm_ui$Element$centerX,
+						$mdgriffith$elm_ui$Element$Background$color($author$project$ColourPalette$scrollbarBackground),
+						$mdgriffith$elm_ui$Element$Border$rounded(6)
+					]),
+				$mdgriffith$elm_ui$Element$none))
+		]);
+};
 var $author$project$Main$contentArea = function (model) {
+	var _v0 = model.contentArea;
+	var w = _v0.a;
+	var h = _v0.b;
 	var slider = function (trackLength) {
 		return A2(
 			$mdgriffith$elm_ui$Element$Input$slider,
-			$author$project$ViewPureStyles$wideSliderStyles,
+			$author$project$ViewPureStyles$wideSliderStylesWithWidth(w),
 			{
 				label: $mdgriffith$elm_ui$Element$Input$labelHidden('Current position slider'),
 				max: trackLength - 1,
@@ -27573,9 +27580,6 @@ var $author$project$Main$contentArea = function (model) {
 				}()
 			});
 	};
-	var _v0 = model.contentArea;
-	var w = _v0.a;
-	var h = _v0.b;
 	return A2(
 		$mdgriffith$elm_ui$Element$column,
 		_List_fromArray(
