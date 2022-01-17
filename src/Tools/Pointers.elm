@@ -67,30 +67,47 @@ update :
     -> Maybe TrackLoaded
     -> ( Options, List (ToolAction msg) )
 update msg options previewColour hasTrack =
-    case msg of
-        PointerForwardOne ->
+    case hasTrack of
+        Nothing ->
             ( options, [] )
 
-        PointerBackwardOne ->
-            ( options, [] )
+        Just track ->
+            case msg of
+                PointerForwardOne ->
+                    let
+                        position =
+                            min (options.orange + 1) (skipCount track.trackTree)
+                    in
+                    ( { options | orange = position }
+                    , [ SetCurrent position ]
+                    )
 
-        PointerFastForward ->
-            ( options, [] )
+                PointerBackwardOne ->
+                    let
+                        position =
+                            max (options.orange - 1) 0
+                    in
+                    ( { options | orange = position }
+                    , [ SetCurrent position ]
+                    )
 
-        PointerRewind ->
-            ( options, [] )
+                PointerFastForward ->
+                    ( options, [] )
 
-        DropMarker ->
-            ( options, [] )
+                PointerRewind ->
+                    ( options, [] )
 
-        LiftMarker ->
-            ( options, [] )
+                DropMarker ->
+                    ( options, [] )
 
-        MarkerForwardOne ->
-            ( options, [] )
+                LiftMarker ->
+                    ( options, [] )
 
-        MarferBackwardOne ->
-            ( options, [] )
+                MarkerForwardOne ->
+                    ( options, [] )
+
+                MarferBackwardOne ->
+                    ( options, [] )
 
 
 view : (Msg -> msg) -> Options -> Element msg
@@ -100,6 +117,7 @@ view msgWrapper options =
             [ centerX
             , padding 4
             , spacing 6
+
             --, height <| px 150
             ]
             [ el [ centerX ] <|

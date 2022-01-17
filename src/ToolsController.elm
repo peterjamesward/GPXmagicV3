@@ -271,7 +271,17 @@ update toolMsg isTrack msgWrapper options =
             )
 
         PointerMsg msg ->
-            ( options, [] )
+            let
+                ( newOptions, actions ) =
+                    Pointers.update
+                        msg
+                        options.pointerOptions
+                        (getColour ToolPointers options.tools)
+                        isTrack
+            in
+            ( { options | pointerOptions = newOptions }
+            , actions
+            )
 
 
 refreshOpenTools :

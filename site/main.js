@@ -15266,6 +15266,51 @@ var $author$project$Tools$DeletePoints$update = F4(
 			return _Utils_Tuple2(options, _List_Nil);
 		}
 	});
+var $author$project$Tools$Pointers$update = F4(
+	function (msg, options, previewColour, hasTrack) {
+		if (hasTrack.$ === 'Nothing') {
+			return _Utils_Tuple2(options, _List_Nil);
+		} else {
+			var track = hasTrack.a;
+			switch (msg.$) {
+				case 'PointerForwardOne':
+					var position = A2(
+						$elm$core$Basics$min,
+						options.orange + 1,
+						$author$project$DomainModel$skipCount(track.trackTree));
+					return _Utils_Tuple2(
+						_Utils_update(
+							options,
+							{orange: position}),
+						_List_fromArray(
+							[
+								$author$project$Actions$SetCurrent(position)
+							]));
+				case 'PointerBackwardOne':
+					var position = A2($elm$core$Basics$max, options.orange - 1, 0);
+					return _Utils_Tuple2(
+						_Utils_update(
+							options,
+							{orange: position}),
+						_List_fromArray(
+							[
+								$author$project$Actions$SetCurrent(position)
+							]));
+				case 'PointerFastForward':
+					return _Utils_Tuple2(options, _List_Nil);
+				case 'PointerRewind':
+					return _Utils_Tuple2(options, _List_Nil);
+				case 'DropMarker':
+					return _Utils_Tuple2(options, _List_Nil);
+				case 'LiftMarker':
+					return _Utils_Tuple2(options, _List_Nil);
+				case 'MarkerForwardOne':
+					return _Utils_Tuple2(options, _List_Nil);
+				default:
+					return _Utils_Tuple2(options, _List_Nil);
+			}
+		}
+	});
 var $author$project$ToolsController$update = F4(
 	function (toolMsg, isTrack, msgWrapper, options) {
 		switch (toolMsg.$) {
@@ -15360,7 +15405,19 @@ var $author$project$ToolsController$update = F4(
 					actions);
 			default:
 				var msg = toolMsg.a;
-				return _Utils_Tuple2(options, _List_Nil);
+				var _v3 = A4(
+					$author$project$Tools$Pointers$update,
+					msg,
+					options.pointerOptions,
+					A2($author$project$ToolsController$getColour, $author$project$ToolsController$ToolPointers, options.tools),
+					isTrack);
+				var newOptions = _v3.a;
+				var actions = _v3.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						options,
+						{pointerOptions: newOptions}),
+					actions);
 		}
 	});
 var $author$project$ViewThirdPerson$ClickDelayExpired = {$: 'ClickDelayExpired'};
