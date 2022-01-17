@@ -14,7 +14,7 @@ type ToolAction msg
     | DelayMessage Int msg
     | MapCenterOnCurrent
     | DeleteSinglePoint Int
-    | RefreshOpenTools -- Must follow an action that changes the track.
+    | TrackHasChanged -- Must follow an action that changes the track.
     | NoAction
 
 

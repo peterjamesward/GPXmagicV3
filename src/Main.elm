@@ -840,10 +840,9 @@ performActionsOnModel actions model =
                     in
                     { foldedModel | track = Just newTrack }
 
-                ( RefreshOpenTools, Just track ) ->
+                ( TrackHasChanged, Just track ) ->
                     -- Must be wary of looping here.
                     let
-                        _ = Debug.log "REFRESHING" refreshedToolOptions
                         ( refreshedToolOptions, secondaryActions ) =
                             ToolsController.refreshOpenTools foldedModel.track foldedModel.toolOptions
 
@@ -865,32 +864,9 @@ performActionsOnModel actions model =
 performActionCommands : List (ToolAction Msg) -> Model -> Cmd Msg
 performActionCommands actions model =
     let
-        performAction : ToolAction Msg -> Cmd Msg
-        performAction action =
-            case ( action, model.track ) of
-                ( SetCurrent position, Just track ) ->
-                    Cmd.batch
-                        [ MapPortController.addTrackToMap track
-
-                        --, MapPortController.centreMapOnCurrent track
-                        ]
-
-                ( MapCenterOnCurrent, Just track ) ->
-                    Cmd.batch
-                        [ --MapPortController.addTrackToMap track
-                          MapPortController.centreMapOnCurrent track
-                        ]
-
-                ( ShowPreview previewData, Just track ) ->
-                    -- Add source and layer to map, via Port commands.
-                    -- Use preview data from model dictionary, as that could be
-                    -- more up to date than this version.
-                    let
-                        useThisData =
-                            model.previews
-                                |> Dict.get previewData.tag
-                                |> Maybe.withDefault previewData
-                    in
+        showPreviewOnMap tag =
+            case Dict.get tag model.previews of
+                Just useThisData ->
                     MapPortController.showPreview
                         useThisData.tag
                         (case useThisData.shape of
@@ -903,12 +879,39 @@ performActionCommands actions model =
                         (colourHexString useThisData.colour)
                         (SceneBuilderMap.renderPreview useThisData)
 
+                Nothing ->
+                    Cmd.none
+
+        performAction : ToolAction Msg -> Cmd Msg
+        performAction action =
+            case ( action, model.track ) of
+                ( SetCurrent position, Just track ) ->
+                    Cmd.batch
+                        [ MapPortController.addTrackToMap track
+                        ]
+
+                ( MapCenterOnCurrent, Just track ) ->
+                    Cmd.batch
+                        [ MapPortController.centreMapOnCurrent track
+                        ]
+
+                ( ShowPreview previewData, Just track ) ->
+                    -- Add source and layer to map, via Port commands.
+                    -- Use preview data from model dictionary, as that could be
+                    -- more up to date than this version.
+                    showPreviewOnMap previewData.tag
+
                 ( HidePreview tag, Just track ) ->
                     MapPortController.hidePreview tag
 
                 ( DelayMessage int msg, Just track ) ->
                     -- This used to "debounce" some clicks.
                     Delay.after int msg
+
+                ( TrackHasChanged, Just track ) ->
+                    Cmd.batch <|
+                        MapPortController.addTrackToMap track
+                            :: List.map showPreviewOnMap (Dict.keys model.previews)
 
                 _ ->
                     Cmd.none

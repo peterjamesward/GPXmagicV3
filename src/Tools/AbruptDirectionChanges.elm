@@ -96,8 +96,6 @@ toolStateChange opened colour options track =
             let
                 populatedOptions =
                     findAbruptDirectionChanges options theTrack.trackTree
-
-                _ = Debug.log "BENDS" populatedOptions.breaches
             in
             --TODO: May stop sending the list here and let action processor request it.
             -- (Not much in it.)

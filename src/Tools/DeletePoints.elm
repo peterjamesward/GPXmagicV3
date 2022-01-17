@@ -68,7 +68,7 @@ update msg options previewColour hasTrack =
         ( Just track, Delete ) ->
             ( options
             , [ DeleteSinglePoint track.currentPosition
-              , RefreshOpenTools
+              , TrackHasChanged
               ]
             )
 
