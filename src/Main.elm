@@ -814,6 +814,13 @@ performActionsOnModel actions model =
                     in
                     { foldedModel | track = Just newTrack }
 
+                ( SetCurrentFromMapClick position, Just track ) ->
+                    let
+                        newTrack =
+                            { track | currentPosition = position }
+                    in
+                    { foldedModel | track = Just newTrack }
+
                 ( ShowPreview previewData, Just track ) ->
                     -- Put preview into the scene.
                     -- After some thought, it is sensible to collect the preview data
@@ -888,7 +895,11 @@ performActionCommands actions model =
                 ( SetCurrent position, Just track ) ->
                     Cmd.batch
                         [ MapPortController.addTrackToMap track
+                        , MapPortController.centreMapOnCurrent track
                         ]
+
+                ( SetCurrentFromMapClick position, Just track ) ->
+                    Cmd.none
 
                 ( MapCenterOnCurrent, Just track ) ->
                     Cmd.batch

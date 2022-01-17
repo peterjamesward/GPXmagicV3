@@ -9,6 +9,7 @@ import Element
 
 type ToolAction msg
     = SetCurrent Int
+    | SetCurrentFromMapClick Int -- to avoid re-centering the map!
     | ShowPreview PreviewData
     | HidePreview String
     | DelayMessage Int msg
