@@ -3,7 +3,11 @@
 # WIP
 
 Not refreshing previews under all conditions necessary.
+> Track load
+> Delete point
 > Possibly just unwritten code.
+
+Ask JB & JMcR for comments.
 
 ## NEXT UP: Markers.
 ## AND THEN: Undo, Redo.
