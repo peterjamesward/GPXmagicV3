@@ -805,44 +805,58 @@ performActionsOnModel : List (ToolAction Msg) -> Model -> Model
 performActionsOnModel actions model =
     let
         performAction : ToolAction Msg -> Model -> Model
-        performAction action mdl =
-            case ( action, mdl.track ) of
+        performAction action foldedModel =
+            case ( action, foldedModel.track ) of
                 ( SetCurrent position, Just track ) ->
                     let
                         newTrack =
                             { track | currentPosition = position }
                     in
-                    { mdl | track = Just newTrack }
+                    { foldedModel | track = Just newTrack }
 
                 ( ShowPreview previewData, Just track ) ->
                     -- Put preview into the scene.
                     -- After some thought, it is sensible to collect the preview data
                     -- since it's handy, as the alternative is another complex case
                     -- statement in ToolController.
-                    { mdl | previews = Dict.insert previewData.tag previewData mdl.previews }
+                    { foldedModel | previews = Dict.insert previewData.tag previewData foldedModel.previews }
 
                 ( HidePreview tag, Just track ) ->
-                    { mdl | previews = Dict.remove tag mdl.previews }
+                    { foldedModel | previews = Dict.remove tag foldedModel.previews }
 
                 ( DelayMessage int msg, Just track ) ->
-                    mdl
+                    foldedModel
 
                 ( DeleteSinglePoint index, Just track ) ->
                     let
-                        newTrack =
-                            --TODO: Change current point if now outside tree bounds.
-                            { track
-                                | trackTree =
-                                    DomainModel.deleteSinglePoint index track.referenceLonLat track.trackTree
-                            }
+                        newTree =
+                            DomainModel.deleteSinglePoint index track.referenceLonLat track.trackTree
 
-                        newModel =
-                            { mdl | track = Just newTrack }
+                        newTrack =
+                            { track
+                                | trackTree = newTree
+                                , currentPosition = min index (skipCount newTree)
+                            }
                     in
-                    newModel
+                    { foldedModel | track = Just newTrack }
+
+                ( RefreshOpenTools, Just track ) ->
+                    -- Must be wary of looping here.
+                    let
+                        _ = Debug.log "REFRESHING" refreshedToolOptions
+                        ( refreshedToolOptions, secondaryActions ) =
+                            ToolsController.refreshOpenTools foldedModel.track foldedModel.toolOptions
+
+                        innerModelWithNewToolSettings =
+                            { foldedModel | toolOptions = refreshedToolOptions }
+
+                        modelAfterSecondaryActions =
+                            innerModelWithNewToolSettings |> performActionsOnModel secondaryActions
+                    in
+                    modelAfterSecondaryActions
 
                 _ ->
-                    mdl
+                    foldedModel
     in
     List.foldl performAction model actions
         |> render
@@ -869,17 +883,25 @@ performActionCommands actions model =
 
                 ( ShowPreview previewData, Just track ) ->
                     -- Add source and layer to map, via Port commands.
+                    -- Use preview data from model dictionary, as that could be
+                    -- more up to date than this version.
+                    let
+                        useThisData =
+                            model.previews
+                                |> Dict.get previewData.tag
+                                |> Maybe.withDefault previewData
+                    in
                     MapPortController.showPreview
-                        previewData.tag
-                        (case previewData.shape of
+                        useThisData.tag
+                        (case useThisData.shape of
                             PreviewCircle ->
                                 "circle"
 
                             PreviewLine ->
                                 "line"
                         )
-                        (colourHexString previewData.colour)
-                        (SceneBuilderMap.renderPreview previewData)
+                        (colourHexString useThisData.colour)
+                        (SceneBuilderMap.renderPreview useThisData)
 
                 ( HidePreview tag, Just track ) ->
                     MapPortController.hidePreview tag

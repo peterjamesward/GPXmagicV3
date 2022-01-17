@@ -66,7 +66,11 @@ update :
 update msg options previewColour hasTrack =
     case ( hasTrack, msg ) of
         ( Just track, Delete ) ->
-            ( options, [ DeleteSinglePoint track.currentPosition ] )
+            ( options
+            , [ DeleteSinglePoint track.currentPosition
+              , RefreshOpenTools
+              ]
+            )
 
         _ ->
             ( options, [] )

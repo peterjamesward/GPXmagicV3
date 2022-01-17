@@ -2,15 +2,10 @@
 
 # WIP
 
-Not refreshing previews under all conditions necessary.
-> Track load
-> Delete point
-> Possibly just unwritten code.
-
-Ask JB & JMcR for comments.
-
 ## NEXT UP: Markers.
-## AND THEN: Undo, Redo.
+
+## AND THEN: Undo, Redo. (Do journaling here?)
+
 ## AND THEN: Delete with a range.
 
 ## Tree algebra
@@ -18,7 +13,7 @@ DONE. Split tree into two
 DONE. Join two trees
 DONE. Delete a leaf/leaves (is just split and join)
 DONE. Insert a leaf/leaves (is just join)
-5. Interpolate is a special case with a neat implementation,
+
 6. Update leaves (and all their aggregate nodes)   
    (note this is actually a top-down operation where the action is in the return,  
    and is really the same as building the tree initially.
@@ -29,6 +24,7 @@ Split **DomainModel** into core and various helpers.
 Make **DragPan** work on 3D view.
 
 Put all Font, Colour etc into a Palette/Style module for ease of change.
+Make Tool titles 'black' or 'white'.
 
 Need "restore to defaults" for tools.
 

@@ -259,16 +259,16 @@ refreshOpenTools  isTrack options =
     -- Track, or something has changed; tool data is stale.
     -- Same impact as tools being opened, so we'll re-use that.
     let
-        refreshOpenTool entry ( updatedModel, actions ) =
+        refreshOpenTool entry ( inputOptions, collectingActions ) =
             if entry.state == Expanded then
                 let
                     ( incrementalModel, incrementalActions ) =
-                        toolStateHasChanged entry.toolType Expanded isTrack updatedModel
+                        toolStateHasChanged entry.toolType Expanded isTrack inputOptions
                 in
-                ( incrementalModel, incrementalActions ++ actions )
+                ( incrementalModel, incrementalActions ++ collectingActions )
 
             else
-                ( updatedModel, actions )
+                ( inputOptions, collectingActions )
     in
     options.tools |> List.foldl refreshOpenTool ( options, [] )
 
