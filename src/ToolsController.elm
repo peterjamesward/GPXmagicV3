@@ -11,6 +11,7 @@ import FlatColors.AussiePalette
 import FlatColors.SwedishPalette
 import Html.Attributes exposing (style)
 import Html.Events.Extra.Mouse as Mouse
+import Json.Decode as D exposing (field)
 import Json.Encode as E
 import List.Extra
 import Tools.AbruptDirectionChanges as AbruptDirectionChanges
@@ -550,77 +551,193 @@ viewToolByType msgWrapper entry isTrack options =
 -- Local storage management
 
 
+type alias StoredTool =
+    { toolType : String
+    , state : String
+    , dock : String
+    , tab : ColourTriplet
+    , text : ColourTriplet
+    }
+
+
+type alias ColourTriplet =
+    { red : Float
+    , green : Float
+    , blue : Float
+    }
+
+
+encodeType : ToolType -> String
+encodeType toolType =
+    case toolType of
+        ToolTrackInfo ->
+            "ToolTrackInfo"
+
+        ToolAbruptDirectionChanges ->
+            "ToolAbruptDirectionChanges"
+
+        ToolDeletePoints ->
+            "ToolDeletePoints"
+
+        ToolPointers ->
+            "ToolPointers"
+
+
+encodeColour : Element.Color -> E.Value
+encodeColour colour =
+    let
+        { red, green, blue, alpha } =
+            toRgb colour
+    in
+    E.object
+        [ ( "red", E.float red )
+        , ( "green", E.float green )
+        , ( "blue", E.float blue )
+        ]
+
+
+decodeColour : ColourTriplet -> Element.Color
+decodeColour { red, green, blue } =
+    Element.fromRgb
+        { red = red
+        , green = green
+        , blue = blue
+        , alpha = 1.0
+        }
+
+
+encodeState : ToolState -> String
+encodeState state =
+    case state of
+        Expanded ->
+            "expanded"
+
+        Contracted ->
+            "contracted"
+
+        Disabled ->
+            "disabled"
+
+
+decodeState : String -> ToolState
+decodeState state =
+    case state of
+        "expanded" ->
+            Expanded
+
+        "contracted" ->
+            Contracted
+
+        "disabled" ->
+            Disabled
+
+        _ ->
+            Contracted
+
+
+encodeDock : ToolDock -> String
+encodeDock dock =
+    case dock of
+        DockUpperLeft ->
+            "upperleft"
+
+        DockLowerLeft ->
+            "lowerleft"
+
+        DockUpperRight ->
+            "upperright"
+
+        DockLowerRight ->
+            "lowerright"
+
+        DockBottom ->
+            "bottom"
+
+        DockNone ->
+            "none"
+
+
+decodeDock : String -> ToolDock
+decodeDock dock =
+    case dock of
+        "upperleft" ->
+            DockUpperLeft
+
+        "lowerleft" ->
+            DockLowerLeft
+
+        "upperright" ->
+            DockUpperRight
+
+        "lowerright" ->
+            DockLowerRight
+
+        "bottom" ->
+            DockBottom
+
+        "none" ->
+            DockNone
+
+        _ ->
+            DockUpperRight
+
+
+encodeOneTool : ToolEntry -> E.Value
+encodeOneTool tool =
+    E.object
+        [ ( "type", E.string <| encodeType tool.toolType )
+        , ( "state", E.string <| encodeState tool.state )
+        , ( "dock", E.string <| encodeDock tool.dock )
+        , ( "tab", encodeColour tool.tabColour )
+        , ( "text", encodeColour tool.textColour )
+        ]
+
+
 encodeToolState : Options -> E.Value
 encodeToolState options =
-    let
-        encodeType : ToolType -> String
-        encodeType toolType =
-            case toolType of
-                ToolTrackInfo ->
-                    "ToolTrackInfo"
-
-                ToolAbruptDirectionChanges ->
-                    "ToolAbruptDirectionChanges"
-
-                ToolDeletePoints ->
-                    "ToolDeletePoints"
-
-                ToolPointers ->
-                    "ToolPointers"
-
-        encodeColour : Element.Color -> E.Value
-        encodeColour colour =
-            let
-                { red, green, blue, alpha } =
-                    toRgb colour
-            in
-            E.object
-                [ ( "red", E.float red )
-                , ( "green", E.float green )
-                , ( "blue", E.float blue )
-                ]
-
-        encodeState : ToolState -> String
-        encodeState state =
-            case state of
-                Expanded ->
-                    "expanded"
-
-                Contracted ->
-                    "contracted"
-
-                Disabled ->
-                    "diabled"
-
-        encodeDock : ToolDock -> String
-        encodeDock dock =
-            case dock of
-                DockUpperLeft ->
-                    "upperleft"
-
-                DockLowerLeft ->
-                    "lowerleft"
-
-                DockUpperRight ->
-                    "upperright"
-
-                DockLowerRight ->
-                    "lowerright"
-
-                DockBottom ->
-                    "bottom"
-
-                DockNone ->
-                    "none"
-
-        encodeOneTool : ToolEntry -> E.Value
-        encodeOneTool tool =
-            E.object
-                [ ( "type", E.string <| encodeType tool.toolType )
-                , ( "state", E.string <| encodeState tool.state )
-                , ( "dock", E.string <| encodeDock tool.dock )
-                , ( "tab", encodeColour tool.tabColour )
-                , ( "text", encodeColour tool.textColour )
-                ]
-    in
     E.list identity <| List.map encodeOneTool options.tools
+
+
+colourDecoder =
+    D.map3 ColourTriplet
+        (field "red" D.float)
+        (field "green" D.float)
+        (field "blue" D.float)
+
+
+toolDecoder =
+    D.map5 StoredTool
+        (field "type" D.string)
+        (field "state" D.string)
+        (field "dock" D.string)
+        (field "tab" colourDecoder)
+        (field "text" colourDecoder)
+
+
+restoreStoredValues : Options -> D.Value -> Options
+restoreStoredValues options values =
+    -- Care! Need to overlay restored values on to the current tools.
+    let
+        toolsAsStored =
+            D.decodeValue (D.list toolDecoder) values
+
+        useStoredSettings : List StoredTool -> ToolEntry -> ToolEntry
+        useStoredSettings stored tool =
+            case List.Extra.find (\fromStore -> fromStore.toolType == encodeType tool.toolType) stored of
+                Just found ->
+                    { tool
+                        | state = decodeState found.state
+                        , dock = decodeDock found.dock
+                        , tabColour = decodeColour found.tab
+                        , textColour = decodeColour found.text
+                    }
+
+                Nothing ->
+                    tool
+    in
+    case toolsAsStored of
+        Ok stored ->
+            { options | tools = List.map (useStoredSettings stored) options.tools }
+
+        Err error ->
+            options

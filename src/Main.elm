@@ -228,6 +228,7 @@ init mflags origin navigationKey =
         , LocalStorage.storageListKeys
         , Task.attempt GotWindowSize Dom.getViewport
         , LocalStorage.storageGetItem "splits"
+        , LocalStorage.storageGetItem "tools"
         ]
     )
 
@@ -990,6 +991,12 @@ performActionsOnModel actions model =
                     case key of
                         "splits" ->
                             foldedModel |> decodeSplitValues value
+
+                        "tools" ->
+                            { foldedModel
+                                | toolOptions =
+                                    ToolsController.restoreStoredValues foldedModel.toolOptions value
+                            }
 
                         _ ->
                             foldedModel

@@ -9635,7 +9635,8 @@ var $author$project$Main$init = F3(
 						A2($elm$core$Task$perform, $author$project$Main$AdjustTimeZone, $elm$time$Time$here),
 						$author$project$LocalStorage$storageListKeys,
 						A2($elm$core$Task$attempt, $author$project$Main$GotWindowSize, $elm$browser$Browser$Dom$getViewport),
-						$author$project$LocalStorage$storageGetItem('splits')
+						$author$project$LocalStorage$storageGetItem('splits'),
+						$author$project$LocalStorage$storageGetItem('tools')
 					])));
 	});
 var $elm$json$Json$Decode$int = _Json_decodeInt;
@@ -11003,93 +11004,93 @@ var $author$project$Main$encodeSplitValues = function (model) {
 					$author$project$SplitPane$SplitPane$getPosition(model.rightDockInternal)))
 			]));
 };
+var $author$project$ToolsController$encodeColour = function (colour) {
+	var _v0 = $mdgriffith$elm_ui$Element$toRgb(colour);
+	var red = _v0.red;
+	var green = _v0.green;
+	var blue = _v0.blue;
+	var alpha = _v0.alpha;
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'red',
+				$elm$json$Json$Encode$float(red)),
+				_Utils_Tuple2(
+				'green',
+				$elm$json$Json$Encode$float(green)),
+				_Utils_Tuple2(
+				'blue',
+				$elm$json$Json$Encode$float(blue))
+			]));
+};
+var $author$project$ToolsController$encodeDock = function (dock) {
+	switch (dock.$) {
+		case 'DockUpperLeft':
+			return 'upperleft';
+		case 'DockLowerLeft':
+			return 'lowerleft';
+		case 'DockUpperRight':
+			return 'upperright';
+		case 'DockLowerRight':
+			return 'lowerright';
+		case 'DockBottom':
+			return 'bottom';
+		default:
+			return 'none';
+	}
+};
+var $author$project$ToolsController$encodeState = function (state) {
+	switch (state.$) {
+		case 'Expanded':
+			return 'expanded';
+		case 'Contracted':
+			return 'contracted';
+		default:
+			return 'disabled';
+	}
+};
+var $author$project$ToolsController$encodeType = function (toolType) {
+	switch (toolType.$) {
+		case 'ToolTrackInfo':
+			return 'ToolTrackInfo';
+		case 'ToolAbruptDirectionChanges':
+			return 'ToolAbruptDirectionChanges';
+		case 'ToolDeletePoints':
+			return 'ToolDeletePoints';
+		default:
+			return 'ToolPointers';
+	}
+};
+var $author$project$ToolsController$encodeOneTool = function (tool) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'type',
+				$elm$json$Json$Encode$string(
+					$author$project$ToolsController$encodeType(tool.toolType))),
+				_Utils_Tuple2(
+				'state',
+				$elm$json$Json$Encode$string(
+					$author$project$ToolsController$encodeState(tool.state))),
+				_Utils_Tuple2(
+				'dock',
+				$elm$json$Json$Encode$string(
+					$author$project$ToolsController$encodeDock(tool.dock))),
+				_Utils_Tuple2(
+				'tab',
+				$author$project$ToolsController$encodeColour(tool.tabColour)),
+				_Utils_Tuple2(
+				'text',
+				$author$project$ToolsController$encodeColour(tool.textColour))
+			]));
+};
 var $author$project$ToolsController$encodeToolState = function (options) {
-	var encodeType = function (toolType) {
-		switch (toolType.$) {
-			case 'ToolTrackInfo':
-				return 'ToolTrackInfo';
-			case 'ToolAbruptDirectionChanges':
-				return 'ToolAbruptDirectionChanges';
-			case 'ToolDeletePoints':
-				return 'ToolDeletePoints';
-			default:
-				return 'ToolPointers';
-		}
-	};
-	var encodeState = function (state) {
-		switch (state.$) {
-			case 'Expanded':
-				return 'expanded';
-			case 'Contracted':
-				return 'contracted';
-			default:
-				return 'diabled';
-		}
-	};
-	var encodeDock = function (dock) {
-		switch (dock.$) {
-			case 'DockUpperLeft':
-				return 'upperleft';
-			case 'DockLowerLeft':
-				return 'lowerleft';
-			case 'DockUpperRight':
-				return 'upperright';
-			case 'DockLowerRight':
-				return 'lowerright';
-			case 'DockBottom':
-				return 'bottom';
-			default:
-				return 'none';
-		}
-	};
-	var encodeColour = function (colour) {
-		var _v0 = $mdgriffith$elm_ui$Element$toRgb(colour);
-		var red = _v0.red;
-		var green = _v0.green;
-		var blue = _v0.blue;
-		var alpha = _v0.alpha;
-		return $elm$json$Json$Encode$object(
-			_List_fromArray(
-				[
-					_Utils_Tuple2(
-					'red',
-					$elm$json$Json$Encode$float(red)),
-					_Utils_Tuple2(
-					'green',
-					$elm$json$Json$Encode$float(green)),
-					_Utils_Tuple2(
-					'blue',
-					$elm$json$Json$Encode$float(blue))
-				]));
-	};
-	var encodeOneTool = function (tool) {
-		return $elm$json$Json$Encode$object(
-			_List_fromArray(
-				[
-					_Utils_Tuple2(
-					'type',
-					$elm$json$Json$Encode$string(
-						encodeType(tool.toolType))),
-					_Utils_Tuple2(
-					'state',
-					$elm$json$Json$Encode$string(
-						encodeState(tool.state))),
-					_Utils_Tuple2(
-					'dock',
-					$elm$json$Json$Encode$string(
-						encodeDock(tool.dock))),
-					_Utils_Tuple2(
-					'tab',
-					encodeColour(tool.tabColour)),
-					_Utils_Tuple2(
-					'text',
-					encodeColour(tool.textColour))
-				]));
-	};
 	return A2(
 		$elm$json$Json$Encode$list,
 		$elm$core$Basics$identity,
-		A2($elm$core$List$map, encodeOneTool, options.tools));
+		A2($elm$core$List$map, $author$project$ToolsController$encodeOneTool, options.tools));
 };
 var $author$project$MapPortController$hidePreview = function (tag) {
 	return $author$project$MapPortController$mapCommands(
@@ -14059,6 +14060,120 @@ var $author$project$Main$render = function (model) {
 		return model;
 	}
 };
+var $mdgriffith$elm_ui$Element$fromRgb = function (clr) {
+	return A4($mdgriffith$elm_ui$Internal$Model$Rgba, clr.red, clr.green, clr.blue, clr.alpha);
+};
+var $author$project$ToolsController$decodeColour = function (_v0) {
+	var red = _v0.red;
+	var green = _v0.green;
+	var blue = _v0.blue;
+	return $mdgriffith$elm_ui$Element$fromRgb(
+		{alpha: 1.0, blue: blue, green: green, red: red});
+};
+var $author$project$ToolsController$DockBottom = {$: 'DockBottom'};
+var $author$project$ToolsController$DockLowerRight = {$: 'DockLowerRight'};
+var $author$project$ToolsController$DockNone = {$: 'DockNone'};
+var $author$project$ToolsController$decodeDock = function (dock) {
+	switch (dock) {
+		case 'upperleft':
+			return $author$project$ToolsController$DockUpperLeft;
+		case 'lowerleft':
+			return $author$project$ToolsController$DockLowerLeft;
+		case 'upperright':
+			return $author$project$ToolsController$DockUpperRight;
+		case 'lowerright':
+			return $author$project$ToolsController$DockLowerRight;
+		case 'bottom':
+			return $author$project$ToolsController$DockBottom;
+		case 'none':
+			return $author$project$ToolsController$DockNone;
+		default:
+			return $author$project$ToolsController$DockUpperRight;
+	}
+};
+var $author$project$ToolsController$Disabled = {$: 'Disabled'};
+var $author$project$ToolsController$decodeState = function (state) {
+	switch (state) {
+		case 'expanded':
+			return $author$project$ToolsController$Expanded;
+		case 'contracted':
+			return $author$project$ToolsController$Contracted;
+		case 'disabled':
+			return $author$project$ToolsController$Disabled;
+		default:
+			return $author$project$ToolsController$Contracted;
+	}
+};
+var $author$project$ToolsController$StoredTool = F5(
+	function (toolType, state, dock, tab, text) {
+		return {dock: dock, state: state, tab: tab, text: text, toolType: toolType};
+	});
+var $author$project$ToolsController$ColourTriplet = F3(
+	function (red, green, blue) {
+		return {blue: blue, green: green, red: red};
+	});
+var $elm$json$Json$Decode$float = _Json_decodeFloat;
+var $elm$json$Json$Decode$map3 = _Json_map3;
+var $author$project$ToolsController$colourDecoder = A4(
+	$elm$json$Json$Decode$map3,
+	$author$project$ToolsController$ColourTriplet,
+	A2($elm$json$Json$Decode$field, 'red', $elm$json$Json$Decode$float),
+	A2($elm$json$Json$Decode$field, 'green', $elm$json$Json$Decode$float),
+	A2($elm$json$Json$Decode$field, 'blue', $elm$json$Json$Decode$float));
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $author$project$ToolsController$toolDecoder = A6(
+	$elm$json$Json$Decode$map5,
+	$author$project$ToolsController$StoredTool,
+	A2($elm$json$Json$Decode$field, 'type', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'state', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'dock', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'tab', $author$project$ToolsController$colourDecoder),
+	A2($elm$json$Json$Decode$field, 'text', $author$project$ToolsController$colourDecoder));
+var $author$project$ToolsController$restoreStoredValues = F2(
+	function (options, values) {
+		var useStoredSettings = F2(
+			function (stored, tool) {
+				var _v1 = A2(
+					$elm_community$list_extra$List$Extra$find,
+					function (fromStore) {
+						return _Utils_eq(
+							fromStore.toolType,
+							$author$project$ToolsController$encodeType(tool.toolType));
+					},
+					stored);
+				if (_v1.$ === 'Just') {
+					var found = _v1.a;
+					return _Utils_update(
+						tool,
+						{
+							dock: $author$project$ToolsController$decodeDock(found.dock),
+							state: $author$project$ToolsController$decodeState(found.state),
+							tabColour: $author$project$ToolsController$decodeColour(found.tab),
+							textColour: $author$project$ToolsController$decodeColour(found.text)
+						});
+				} else {
+					return tool;
+				}
+			});
+		var toolsAsStored = A2(
+			$elm$json$Json$Decode$decodeValue,
+			$elm$json$Json$Decode$list($author$project$ToolsController$toolDecoder),
+			values);
+		if (toolsAsStored.$ === 'Ok') {
+			var stored = toolsAsStored.a;
+			return _Utils_update(
+				options,
+				{
+					tools: A2(
+						$elm$core$List$map,
+						useStoredSettings(stored),
+						options.tools)
+				});
+		} else {
+			var error = toolsAsStored.a;
+			return options;
+		}
+	});
 var $author$project$Main$performActionsOnModel = F2(
 	function (actions, model) {
 		var performAction = F2(
@@ -14187,10 +14302,17 @@ var $author$project$Main$performActionsOnModel = F2(
 							var _v4 = _v0.a;
 							var key = _v4.a;
 							var value = _v4.b;
-							if (key === 'splits') {
-								return A2($author$project$Main$decodeSplitValues, value, foldedModel);
-							} else {
-								return foldedModel;
+							switch (key) {
+								case 'splits':
+									return A2($author$project$Main$decodeSplitValues, value, foldedModel);
+								case 'tools':
+									return _Utils_update(
+										foldedModel,
+										{
+											toolOptions: A2($author$project$ToolsController$restoreStoredValues, foldedModel.toolOptions, value)
+										});
+								default:
+									return foldedModel;
 							}
 						default:
 							break _v0$9;
@@ -14213,7 +14335,6 @@ var $author$project$Actions$StoredValueRetrieved = F2(
 	function (a, b) {
 		return {$: 'StoredValueRetrieved', a: a, b: b};
 	});
-var $elm$json$Json$Decode$string = _Json_decodeString;
 var $author$project$LocalStorage$msgDecoder = A2($elm$json$Json$Decode$field, 'msg', $elm$json$Json$Decode$string);
 var $author$project$LocalStorage$processStoragePortMessage = F2(
 	function (json, model) {
@@ -14364,7 +14485,6 @@ var $elm$json$Json$Decode$at = F2(
 	function (fields, decoder) {
 		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
 	});
-var $elm$json$Json$Decode$float = _Json_decodeFloat;
 var $elm$json$Json$Decode$map7 = _Json_map7;
 var $author$project$GeoCodeDecoders$ipInfoDecoder = A8(
 	$elm$json$Json$Decode$map7,
@@ -14951,7 +15071,6 @@ var $author$project$OAuthTypes$UserInfo = F3(
 	});
 var $author$project$StravaClientSecret$clientSecret = '01713301d9282956d3d182c1e01ce02c5e8620c3';
 var $author$project$StravaAuth$defaultHttpsUrl = {fragment: $elm$core$Maybe$Nothing, host: '', path: '', port_: $elm$core$Maybe$Nothing, protocol: $elm$url$Url$Https, query: $elm$core$Maybe$Nothing};
-var $elm$json$Json$Decode$map3 = _Json_map3;
 var $author$project$StravaAuth$configuration = {
 	authorizationEndpoint: _Utils_update(
 		$author$project$StravaAuth$defaultHttpsUrl,
@@ -23023,7 +23142,6 @@ var $author$project$SplitPane$SplitPane$createViewConfig = function (_v0) {
 };
 var $author$project$Main$bottomDockConfig = $author$project$SplitPane$SplitPane$createViewConfig(
 	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitBottomDockTopEdge});
-var $author$project$ToolsController$DockBottom = {$: 'DockBottom'};
 var $mdgriffith$elm_ui$Internal$Model$NoStaticStyleSheet = {$: 'NoStaticStyleSheet'};
 var $mdgriffith$elm_ui$Internal$Model$RenderModeOption = function (a) {
 	return {$: 'RenderModeOption', a: a};
@@ -23234,7 +23352,6 @@ var $mdgriffith$elm_ui$Element$moveDown = function (y) {
 		$mdgriffith$elm_ui$Internal$Flag$moveY,
 		$mdgriffith$elm_ui$Internal$Model$MoveY(y));
 };
-var $author$project$ToolsController$Disabled = {$: 'Disabled'};
 var $author$project$ToolsController$nextToolState = function (state) {
 	switch (state.$) {
 		case 'Expanded':
@@ -23548,7 +23665,6 @@ var $author$project$ToolsController$showColourOptions = F2(
 						]))
 				])) : $mdgriffith$elm_ui$Element$none;
 	});
-var $author$project$ToolsController$DockLowerRight = {$: 'DockLowerRight'};
 var $author$project$ToolsController$ToolDockSelect = F2(
 	function (a, b) {
 		return {$: 'ToolDockSelect', a: a, b: b};

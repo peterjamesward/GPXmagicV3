@@ -6,8 +6,6 @@ BUG: Dubious (obviously wrong) direction changes reported.
 
 # WIP
 
-Save Tool positions, colour, state.
-
 # BACKLOG, roughly in order
 
 ## Delete with a range (nearly trivial).
