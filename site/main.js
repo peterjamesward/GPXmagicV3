@@ -8482,10 +8482,12 @@ var $mdgriffith$elm_ui$Internal$Model$Rgba = F4(
 	function (a, b, c, d) {
 		return {$: 'Rgba', a: a, b: b, c: c, d: d};
 	});
-var $mdgriffith$elm_ui$Element$fromRgb = function (clr) {
-	return A4($mdgriffith$elm_ui$Internal$Model$Rgba, clr.red, clr.green, clr.blue, clr.alpha);
-};
-var $elm$core$Basics$round = _Basics_round;
+var $mdgriffith$elm_ui$Element$rgb255 = F3(
+	function (red, green, blue) {
+		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, red / 255, green / 255, blue / 255, 1);
+	});
+var $smucode$elm_flat_colors$FlatColors$AussiePalette$coastalBreeze = A3($mdgriffith$elm_ui$Element$rgb255, 223, 249, 251);
+var $smucode$elm_flat_colors$FlatColors$AussiePalette$deepKoamaru = A3($mdgriffith$elm_ui$Element$rgb255, 48, 51, 107);
 var $mdgriffith$elm_ui$Element$toRgb = function (_v0) {
 	var r = _v0.a;
 	var g = _v0.b;
@@ -8499,18 +8501,9 @@ var $author$project$ViewPureStyles$contrastingColour = function (col) {
 	var green = _v0.green;
 	var blue = _v0.blue;
 	var alpha = _v0.alpha;
-	return $mdgriffith$elm_ui$Element$fromRgb(
-		{
-			alpha: 1.0,
-			blue: $elm$core$Basics$round(1.0 - blue),
-			green: $elm$core$Basics$round(1.0 - green),
-			red: $elm$core$Basics$round(1.0 - red)
-		});
+	var grey = ((0.299 * red) + (0.587 * green)) + (0.114 * blue);
+	return (grey > 0.5) ? $smucode$elm_flat_colors$FlatColors$AussiePalette$deepKoamaru : $smucode$elm_flat_colors$FlatColors$AussiePalette$coastalBreeze;
 };
-var $mdgriffith$elm_ui$Element$rgb255 = F3(
-	function (red, green, blue) {
-		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, red / 255, green / 255, blue / 255, 1);
-	});
 var $smucode$elm_flat_colors$FlatColors$AussiePalette$pinkGlamour = A3($mdgriffith$elm_ui$Element$rgb255, 255, 121, 121);
 var $author$project$ToolsController$deleteTool = {
 	dock: $author$project$ToolsController$DockLowerLeft,
@@ -8525,7 +8518,6 @@ var $author$project$ToolsController$deleteTool = {
 };
 var $author$project$ToolsController$DockUpperRight = {$: 'DockUpperRight'};
 var $author$project$ToolsController$ToolAbruptDirectionChanges = {$: 'ToolAbruptDirectionChanges'};
-var $smucode$elm_flat_colors$FlatColors$AussiePalette$deepKoamaru = A3($mdgriffith$elm_ui$Element$rgb255, 48, 51, 107);
 var $author$project$ToolsController$directionChangeTool = {
 	dock: $author$project$ToolsController$DockUpperRight,
 	info: 'These may need smoothing',
@@ -10085,6 +10077,7 @@ var $author$project$SplitPane$SplitPane$getPosition = function (_v0) {
 		return $author$project$SplitPane$Bound$getValue(pixels);
 	}
 };
+var $elm$core$Basics$round = _Basics_round;
 var $elm$core$Tuple$second = function (_v0) {
 	var y = _v0.b;
 	return y;

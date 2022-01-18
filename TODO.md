@@ -4,7 +4,17 @@
 
 ## NEXT UP: Markers.
 
+Change position slider to be distance not point based.
+? Add variable rate movement control to Pointer box (fairly simple new control with self-centering) ?
+
+Whether to leave currentPosition (and purple) in Track or move to Pointers.options.
+> This is surely not really a thing.
+
+Save & Restore of splitter and tool settings (basis in v2).
+
 ## AND THEN: Delete with a range (nearly trivial).
+
+**NB**: Use `count from start` and `count from end` to denote the portion for deletion.
 
 ## AND THEN: Undo, Redo. (Do journaling here?)
 
@@ -16,7 +26,7 @@ DONE. Insert a leaf/leaves (is just join)
 
 6. Update leaves (and all their aggregate nodes)   
    (note this is actually a top-down operation where the action is in the return,  
-   and is really the same as building the tree initially.
+   and is really the **same as building** the tree initially.
    (If this is the whole tree, use the chance to re-balance?)
 
 Split **DomainModel** into core and various helpers.
@@ -24,7 +34,7 @@ Split **DomainModel** into core and various helpers.
 Make **DragPan** work on 3D view.
 
 Put all Font, Colour etc into a Palette/Style module for ease of change.
-Make Tool titles 'black' or 'white'.
+Make Tool titles 'black' or 'white' using greyscale formula.
 
 Need "restore to defaults" for tools.
 

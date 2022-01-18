@@ -8,6 +8,7 @@ import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input exposing (Thumb, thumb)
 import FeatherIcons
+import FlatColors.AussiePalette
 import FlatColors.BritishPalette
 import FlatColors.ChinesePalette
 import Html.Attributes exposing (style)
@@ -155,13 +156,15 @@ contrastingColour col =
     let
         { red, green, blue, alpha } =
             toRgb col
+
+        grey =
+            0.299 * red + 0.587 * green + 0.114 * blue
     in
-    fromRgb
-        { red = toFloat <| round <| 1.0 - red
-        , green = toFloat <| round <| 1.0 - green
-        , blue = toFloat <| round <| 1.0 - blue
-        , alpha = 1.0
-        }
+    if grey > 0.5 then
+        FlatColors.AussiePalette.deepKoamaru
+
+    else
+        FlatColors.AussiePalette.coastalBreeze
 
 
 radioButton label state =
