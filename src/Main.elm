@@ -526,7 +526,7 @@ update msg model =
             let
                 newModel =
                     { model | windowSize = ( toFloat width, toFloat height ) }
-                        |> adjustSpaceForContent
+                        |> allocateSpaceForDocksAndContent width height
             in
             ( newModel
             , performActionCommands [ MapRefresh, StoreSplitConfig ] newModel
@@ -568,23 +568,39 @@ update msg model =
 
 allocateSpaceForDocksAndContent : Int -> Int -> Model -> Model
 allocateSpaceForDocksAndContent width height model =
+    let
+        currentLeftSplit =
+            truncate <| getPosition model.leftDockRightEdge
+
+        currentRightSplit =
+            truncate <| getPosition model.rightDockLeftEdge
+
+        currentBottomSplit =
+            truncate <| getPosition model.bottomDockTopEdge
+
+        currentLeftInternal =
+            truncate <| getPosition model.leftDockInternal
+
+        currentRightInternal =
+            truncate <| getPosition model.rightDockInternal
+    in
     { model
         | windowSize = ( toFloat width, toFloat height )
         , leftDockRightEdge =
             SplitPane.init Horizontal
-                |> configureSplitter (SplitPane.px 200 <| Just ( 20, width // 3 ))
+                |> configureSplitter (SplitPane.px currentLeftSplit <| Just ( 20, width // 3 ))
         , leftDockInternal =
             SplitPane.init Vertical
-                |> configureSplitter (SplitPane.px (height // 2) <| Just ( 50, height - 75 ))
+                |> configureSplitter (SplitPane.px currentLeftInternal <| Just ( 50, height - 75 ))
         , rightDockLeftEdge =
             SplitPane.init Horizontal
-                |> configureSplitter (SplitPane.px (width - 200) <| Just ( 2 * width // 3, width - 20 ))
+                |> configureSplitter (SplitPane.px currentRightSplit <| Just ( 2 * width // 3, width - 20 ))
         , rightDockInternal =
             SplitPane.init Vertical
-                |> configureSplitter (SplitPane.px (height // 2) <| Just ( 50, height - 75 ))
+                |> configureSplitter (SplitPane.px currentRightInternal <| Just ( 50, height - 75 ))
         , bottomDockTopEdge =
             SplitPane.init Vertical
-                |> configureSplitter (SplitPane.px (height - 200) <| Just ( height * 2 // 3, height - 75 ))
+                |> configureSplitter (SplitPane.px currentBottomSplit <| Just ( height * 2 // 3, height - 75 ))
     }
         |> adjustSpaceForContent
 

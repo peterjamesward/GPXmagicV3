@@ -10153,8 +10153,14 @@ var $author$project$SplitPane$SplitPane$px = F2(
 		return $author$project$SplitPane$SplitPane$Px(
 			A2($author$project$SplitPane$Bound$createBounded, x, newBound));
 	});
+var $elm$core$Basics$truncate = _Basics_truncate;
 var $author$project$Main$allocateSpaceForDocksAndContent = F3(
 	function (width, height, model) {
+		var currentRightSplit = $author$project$SplitPane$SplitPane$getPosition(model.rightDockLeftEdge) | 0;
+		var currentRightInternal = $author$project$SplitPane$SplitPane$getPosition(model.rightDockInternal) | 0;
+		var currentLeftSplit = $author$project$SplitPane$SplitPane$getPosition(model.leftDockRightEdge) | 0;
+		var currentLeftInternal = $author$project$SplitPane$SplitPane$getPosition(model.leftDockInternal) | 0;
+		var currentBottomSplit = $author$project$SplitPane$SplitPane$getPosition(model.bottomDockTopEdge) | 0;
 		return $author$project$Main$adjustSpaceForContent(
 			_Utils_update(
 				model,
@@ -10163,7 +10169,7 @@ var $author$project$Main$allocateSpaceForDocksAndContent = F3(
 						$author$project$SplitPane$SplitPane$configureSplitter,
 						A2(
 							$author$project$SplitPane$SplitPane$px,
-							height - 200,
+							currentBottomSplit,
 							$elm$core$Maybe$Just(
 								_Utils_Tuple2(((height * 2) / 3) | 0, height - 75))),
 						$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Vertical)),
@@ -10171,7 +10177,7 @@ var $author$project$Main$allocateSpaceForDocksAndContent = F3(
 						$author$project$SplitPane$SplitPane$configureSplitter,
 						A2(
 							$author$project$SplitPane$SplitPane$px,
-							(height / 2) | 0,
+							currentLeftInternal,
 							$elm$core$Maybe$Just(
 								_Utils_Tuple2(50, height - 75))),
 						$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Vertical)),
@@ -10179,7 +10185,7 @@ var $author$project$Main$allocateSpaceForDocksAndContent = F3(
 						$author$project$SplitPane$SplitPane$configureSplitter,
 						A2(
 							$author$project$SplitPane$SplitPane$px,
-							200,
+							currentLeftSplit,
 							$elm$core$Maybe$Just(
 								_Utils_Tuple2(20, (width / 3) | 0))),
 						$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Horizontal)),
@@ -10187,7 +10193,7 @@ var $author$project$Main$allocateSpaceForDocksAndContent = F3(
 						$author$project$SplitPane$SplitPane$configureSplitter,
 						A2(
 							$author$project$SplitPane$SplitPane$px,
-							(height / 2) | 0,
+							currentRightInternal,
 							$elm$core$Maybe$Just(
 								_Utils_Tuple2(50, height - 75))),
 						$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Vertical)),
@@ -10195,7 +10201,7 @@ var $author$project$Main$allocateSpaceForDocksAndContent = F3(
 						$author$project$SplitPane$SplitPane$configureSplitter,
 						A2(
 							$author$project$SplitPane$SplitPane$px,
-							width - 200,
+							currentRightSplit,
 							$elm$core$Maybe$Just(
 								_Utils_Tuple2(((2 * width) / 3) | 0, width - 20))),
 						$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Horizontal)),
@@ -11410,7 +11416,6 @@ var $author$project$Main$SplitDecode = F5(
 	});
 var $elm$json$Json$Decode$decodeValue = _Json_run;
 var $elm$json$Json$Decode$map5 = _Json_map5;
-var $elm$core$Basics$truncate = _Basics_truncate;
 var $author$project$Main$decodeSplitValues = F2(
 	function (values, model) {
 		var decoder = A6(
@@ -17365,7 +17370,10 @@ var $author$project$Main$update = F2(
 			case 'Resize':
 				var width = msg.a;
 				var height = msg.b;
-				var newModel = $author$project$Main$adjustSpaceForContent(
+				var newModel = A3(
+					$author$project$Main$allocateSpaceForDocksAndContent,
+					width,
+					height,
 					_Utils_update(
 						model,
 						{

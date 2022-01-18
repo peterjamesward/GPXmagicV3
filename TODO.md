@@ -2,14 +2,16 @@
 
 BUG: Dubious steepest gradient on some routes.
 
-BUG: Maxima of right and bottom docks not restoring properly.
-
 # WIP
 
 ## Undo, Redo.
-> Decision on approach:
+Decision on approach.
+I will trust that the Redo stack rarely grows large, as it empties as soon
+as another (different) edit occurs. Hence, just keep track point data.
 > for Undo: `fromStart : Int, fromEnd : Int, List (GPXSource, EarthPoint)`
-> for Redo: `fromStart : Int, fromEnd : Int, Command + Options`
+> for Redo: the same
+Means the logic is essentially the same both ways.
+(Consider putting into sessionStorage but only if there's a clear need.)
 
 # BACKLOG, roughly in order
 
@@ -46,24 +48,12 @@ Map options tool?
 - Map follow orange pointer
 - Draggable points
 
-
-
-## Layout
-
-Splitters need tweaking later. Might switch to pixel sizing.
-Will need to go in localStorage.
-
 ## Tools
 
 2-way drag corrects for azimuth.
 Pane payout choices as control?
 I think the top bar is still special: Load, Save, Donate. Is it?
 "Where am I" - reverse geocode (rate limited)).
-
-## Rendering
-Use a graduated drop off with distance, compute at each tree level?
-On Map, work out the depth to fit (say) 1000 points within visible region.
-> Done that it RTWI80D.
 
 ## Decide how to organise windows, panes, views.
 What state lives where? (This relates to the multi-window decision.)
@@ -72,8 +62,6 @@ Hence, one pane + list, or just four panes with visibility?
 
 ## Look and Feel
 Configurable background colour.
-Keep current track in indexDB to support a "restart/recover" option? 
-> No - journal the edits.
 
 ## Plan view
 Same as before. Use 3d-scene. Orthographic camera.
@@ -107,9 +95,21 @@ Terrain 1 = Simple tree walk, in many cases will just work but not always.
 Terrain 2 = Tree walk combined with whole (visible) tree query, because <loops>.
 (Expand bounding boxes to allow for road width.)
 
+## Rendering
+Use a graduated drop off with distance, compute at each tree level?
+On Map, work out the depth to fit (say) 1000 points within visible region.
+> Done that in RTWI80D.
+> Not sure it's required.
+
 ## Journal edits to indexedDB?
 Potential for recovery by replay.
 Possible aid to isolating and reproducing bugs.
+
+## Memory usage monitoring
+Possibility: display warning when memory available is low.
+performance.memory.jsHeapSizeLimit
+performance.memory.usedJSHeapSize
+performance.memory.totalJSHeapSize
 
 ---
 
