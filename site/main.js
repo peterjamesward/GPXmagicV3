@@ -8475,6 +8475,7 @@ var $author$project$Tools$AbruptDirectionChanges$defaultOptions = {
 };
 var $author$project$Tools$DeletePoints$defaultOptions = {dummy: 0};
 var $author$project$Tools$Pointers$defaultOptions = {orange: 0, purple: $elm$core$Maybe$Nothing};
+var $author$project$Tools$UndoRedo$defaultOptions = {redos: _List_Nil, undos: _List_Nil};
 var $author$project$ToolsController$Contracted = {$: 'Contracted'};
 var $author$project$ToolsController$DockLowerLeft = {$: 'DockLowerLeft'};
 var $author$project$ToolsController$ToolDeletePoints = {$: 'ToolDeletePoints'};
@@ -8557,9 +8558,22 @@ var $author$project$ToolsController$trackInfoBox = {
 	toolType: $author$project$ToolsController$ToolTrackInfo,
 	video: $elm$core$Maybe$Nothing
 };
+var $author$project$ToolsController$ToolUndoRedo = {$: 'ToolUndoRedo'};
+var $smucode$elm_flat_colors$FlatColors$AussiePalette$juneBud = A3($mdgriffith$elm_ui$Element$rgb255, 186, 220, 88);
+var $author$project$ToolsController$undoRedoTool = {
+	dock: $author$project$ToolsController$DockUpperRight,
+	info: 'Like time travel',
+	isPopupOpen: false,
+	label: 'Undo & Redo',
+	state: $author$project$ToolsController$Expanded,
+	tabColour: $smucode$elm_flat_colors$FlatColors$AussiePalette$juneBud,
+	textColour: $author$project$ViewPureStyles$contrastingColour($smucode$elm_flat_colors$FlatColors$AussiePalette$juneBud),
+	toolType: $author$project$ToolsController$ToolUndoRedo,
+	video: $elm$core$Maybe$Nothing
+};
 var $author$project$ToolsController$defaultTools = _List_fromArray(
-	[$author$project$ToolsController$pointersTool, $author$project$ToolsController$trackInfoBox, $author$project$ToolsController$directionChangeTool, $author$project$ToolsController$deleteTool]);
-var $author$project$ToolsController$defaultOptions = {deleteOptions: $author$project$Tools$DeletePoints$defaultOptions, directionChangeOptions: $author$project$Tools$AbruptDirectionChanges$defaultOptions, pointerOptions: $author$project$Tools$Pointers$defaultOptions, tools: $author$project$ToolsController$defaultTools};
+	[$author$project$ToolsController$pointersTool, $author$project$ToolsController$undoRedoTool, $author$project$ToolsController$trackInfoBox, $author$project$ToolsController$directionChangeTool, $author$project$ToolsController$deleteTool]);
+var $author$project$ToolsController$defaultOptions = {deleteOptions: $author$project$Tools$DeletePoints$defaultOptions, directionChangeOptions: $author$project$Tools$AbruptDirectionChanges$defaultOptions, pointerOptions: $author$project$Tools$Pointers$defaultOptions, tools: $author$project$ToolsController$defaultTools, undoRedoOptions: $author$project$Tools$UndoRedo$defaultOptions};
 var $elm$browser$Browser$Dom$getViewport = _Browser_withWindow(_Browser_getViewport);
 var $elm$time$Time$Name = function (a) {
 	return {$: 'Name', a: a};
@@ -11058,8 +11072,10 @@ var $author$project$ToolsController$encodeType = function (toolType) {
 			return 'ToolAbruptDirectionChanges';
 		case 'ToolDeletePoints':
 			return 'ToolDeletePoints';
-		default:
+		case 'ToolPointers':
 			return 'ToolPointers';
+		default:
+			return 'ToolUndoRedo';
 	}
 };
 var $author$project$ToolsController$encodeOneTool = function (tool) {
@@ -12306,11 +12322,13 @@ var $author$project$ToolsController$toolStateHasChanged = F4(
 				return _Utils_Tuple2(
 					newOptions,
 					A2($elm$core$List$cons, $author$project$Actions$StoreToolsConfig, actions));
-			default:
+			case 'ToolPointers':
 				return _Utils_Tuple2(
 					options,
 					_List_fromArray(
 						[$author$project$Actions$StoreToolsConfig]));
+			default:
+				return _Utils_Tuple2(options, _List_Nil);
 		}
 	});
 var $author$project$ToolsController$refreshOpenTools = F2(
@@ -16000,6 +16018,23 @@ var $author$project$Tools$Pointers$update = F4(
 			}
 		}
 	});
+var $author$project$Tools$UndoRedo$update = F4(
+	function (msg, options, previewColour, hasTrack) {
+		var _v0 = _Utils_Tuple2(hasTrack, msg);
+		if (_v0.a.$ === 'Just') {
+			if (_v0.b.$ === 'Undo') {
+				var track = _v0.a.a;
+				var _v1 = _v0.b;
+				return _Utils_Tuple2(options, _List_Nil);
+			} else {
+				var track = _v0.a.a;
+				var _v2 = _v0.b;
+				return _Utils_Tuple2(options, _List_Nil);
+			}
+		} else {
+			return _Utils_Tuple2(options, _List_Nil);
+		}
+	});
 var $author$project$ToolsController$update = F4(
 	function (toolMsg, isTrack, msgWrapper, options) {
 		switch (toolMsg.$) {
@@ -16093,7 +16128,7 @@ var $author$project$ToolsController$update = F4(
 						options,
 						{deleteOptions: newOptions}),
 					actions);
-			default:
+			case 'PointerMsg':
 				var msg = toolMsg.a;
 				var _v3 = A4(
 					$author$project$Tools$Pointers$update,
@@ -16107,6 +16142,21 @@ var $author$project$ToolsController$update = F4(
 					_Utils_update(
 						options,
 						{pointerOptions: newOptions}),
+					actions);
+			default:
+				var msg = toolMsg.a;
+				var _v4 = A4(
+					$author$project$Tools$UndoRedo$update,
+					msg,
+					options.undoRedoOptions,
+					A2($author$project$ToolsController$getColour, $author$project$ToolsController$ToolUndoRedo, options.tools),
+					isTrack);
+				var newOptions = _v4.a;
+				var actions = _v4.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						options,
+						{undoRedoOptions: newOptions}),
 					actions);
 		}
 	});
@@ -23935,6 +23985,9 @@ var $author$project$ToolsController$DirectionChanges = function (a) {
 var $author$project$ToolsController$PointerMsg = function (a) {
 	return {$: 'PointerMsg', a: a};
 };
+var $author$project$ToolsController$UndoRedoMsg = function (a) {
+	return {$: 'UndoRedoMsg', a: a};
+};
 var $mdgriffith$elm_ui$Element$el = F2(
 	function (attrs, child) {
 		return A4(
@@ -25749,6 +25802,84 @@ var $author$project$Tools$Pointers$view = F3(
 						])));
 		}
 	});
+var $author$project$Tools$UndoRedo$Undo = {$: 'Undo'};
+var $author$project$Tools$UndoRedo$view = F2(
+	function (msgWrapper, options) {
+		return A2(
+			$mdgriffith$elm_ui$Element$column,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$centerX,
+							$mdgriffith$elm_ui$Element$padding(4),
+							$mdgriffith$elm_ui$Element$spacing(4),
+							$mdgriffith$elm_ui$Element$height(
+							$mdgriffith$elm_ui$Element$px(50))
+						]),
+					function () {
+						var _v0 = options.undos;
+						if (!_v0.b) {
+							return A2(
+								$mdgriffith$elm_ui$Element$Input$button,
+								A2($elm$core$List$cons, $mdgriffith$elm_ui$Element$centerY, $author$project$ViewPureStyles$neatToolsBorder),
+								{
+									label: $mdgriffith$elm_ui$Element$text('Nothing to Undo'),
+									onPress: $elm$core$Maybe$Nothing
+								});
+						} else {
+							var something = _v0;
+							return A2(
+								$mdgriffith$elm_ui$Element$Input$button,
+								A2($elm$core$List$cons, $mdgriffith$elm_ui$Element$centerY, $author$project$ViewPureStyles$neatToolsBorder),
+								{
+									label: $mdgriffith$elm_ui$Element$text('Undo something'),
+									onPress: $elm$core$Maybe$Just(
+										msgWrapper($author$project$Tools$UndoRedo$Undo))
+								});
+						}
+					}()),
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$centerX,
+							$mdgriffith$elm_ui$Element$padding(4),
+							$mdgriffith$elm_ui$Element$spacing(4),
+							$mdgriffith$elm_ui$Element$height(
+							$mdgriffith$elm_ui$Element$px(50))
+						]),
+					function () {
+						var _v1 = options.undos;
+						if (!_v1.b) {
+							return A2(
+								$mdgriffith$elm_ui$Element$Input$button,
+								A2($elm$core$List$cons, $mdgriffith$elm_ui$Element$centerY, $author$project$ViewPureStyles$neatToolsBorder),
+								{
+									label: $mdgriffith$elm_ui$Element$text('Nothing to Redo'),
+									onPress: $elm$core$Maybe$Nothing
+								});
+						} else {
+							var something = _v1;
+							return A2(
+								$mdgriffith$elm_ui$Element$Input$button,
+								A2($elm$core$List$cons, $mdgriffith$elm_ui$Element$centerY, $author$project$ViewPureStyles$neatToolsBorder),
+								{
+									label: $mdgriffith$elm_ui$Element$text('Redo something'),
+									onPress: $elm$core$Maybe$Just(
+										msgWrapper($author$project$Tools$UndoRedo$Undo))
+								});
+						}
+					}())
+				]));
+	});
 var $author$project$ToolsController$viewToolByType = F4(
 	function (msgWrapper, entry, isTrack, options) {
 		var _v0 = entry.toolType;
@@ -25765,12 +25896,17 @@ var $author$project$ToolsController$viewToolByType = F4(
 					$author$project$Tools$DeletePoints$view,
 					A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$DeletePoints),
 					options.deleteOptions);
-			default:
+			case 'ToolPointers':
 				return A3(
 					$author$project$Tools$Pointers$view,
 					A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$PointerMsg),
 					options.pointerOptions,
 					isTrack);
+			default:
+				return A2(
+					$author$project$Tools$UndoRedo$view,
+					A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$UndoRedoMsg),
+					options.undoRedoOptions);
 		}
 	});
 var $author$project$ToolsController$viewTool = F4(

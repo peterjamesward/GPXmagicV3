@@ -18,6 +18,7 @@ import Tools.AbruptDirectionChanges as AbruptDirectionChanges
 import Tools.DeletePoints as DeletePoints
 import Tools.Pointers as Pointers
 import Tools.TrackInfoBox as TrackInfoBox
+import Tools.UndoRedo as UndoRedo
 import TrackLoaded exposing (TrackLoaded)
 import ViewPureStyles exposing (contrastingColour, neatToolsBorder, useIcon)
 import ViewThirdPerson exposing (stopProp)
@@ -43,6 +44,7 @@ type ToolType
     | ToolAbruptDirectionChanges
     | ToolDeletePoints
     | ToolPointers
+    | ToolUndoRedo
 
 
 type alias Options =
@@ -51,6 +53,7 @@ type alias Options =
     , directionChangeOptions : AbruptDirectionChanges.Options
     , deleteOptions : DeletePoints.Options
     , pointerOptions : Pointers.Options
+    , undoRedoOptions : UndoRedo.Options
     }
 
 
@@ -60,6 +63,7 @@ defaultOptions =
     , directionChangeOptions = AbruptDirectionChanges.defaultOptions
     , deleteOptions = DeletePoints.defaultOptions
     , pointerOptions = Pointers.defaultOptions
+    , undoRedoOptions = UndoRedo.defaultOptions
     }
 
 
@@ -71,6 +75,7 @@ type ToolMsg
     | DirectionChanges AbruptDirectionChanges.Msg
     | DeletePoints DeletePoints.Msg
     | PointerMsg Pointers.Msg
+    | UndoRedoMsg UndoRedo.Msg
     | ToolNoOp
 
 
@@ -91,6 +96,7 @@ defaultTools : List ToolEntry
 defaultTools =
     -- One list or five, or six? Try one. Arguably a Dict but POITROAE.
     [ pointersTool
+    , undoRedoTool
     , trackInfoBox
     , directionChangeTool
     , deleteTool
@@ -107,6 +113,19 @@ trackInfoBox =
     , dock = DockUpperLeft
     , tabColour = FlatColors.AussiePalette.beekeeper
     , textColour = contrastingColour FlatColors.AussiePalette.beekeeper
+    , isPopupOpen = False
+    }
+
+undoRedoTool : ToolEntry
+undoRedoTool =
+    { toolType = ToolUndoRedo
+    , label = "Undo & Redo"
+    , info = "Like time travel"
+    , video = Nothing
+    , state = Expanded
+    , dock = DockUpperRight
+    , tabColour = FlatColors.AussiePalette.juneBud
+    , textColour = contrastingColour FlatColors.AussiePalette.juneBud
     , isPopupOpen = False
     }
 
@@ -300,6 +319,19 @@ update toolMsg isTrack msgWrapper options =
             , actions
             )
 
+        UndoRedoMsg msg ->
+            let
+                ( newOptions, actions ) =
+                    UndoRedo.update
+                        msg
+                        options.undoRedoOptions
+                        (getColour ToolUndoRedo options.tools)
+                        isTrack
+            in
+            ( { options | undoRedoOptions = newOptions }
+            , actions
+            )
+
 
 refreshOpenTools :
     Maybe TrackLoaded
@@ -366,6 +398,10 @@ toolStateHasChanged toolType newState isTrack options =
 
         ToolPointers ->
             ( options, [ StoreToolsConfig ] )
+
+        ToolUndoRedo ->
+            ( options, [  ] )
+
 
 
 
@@ -546,6 +582,10 @@ viewToolByType msgWrapper entry isTrack options =
         ToolPointers ->
             Pointers.view (msgWrapper << PointerMsg) options.pointerOptions isTrack
 
+        ToolUndoRedo ->
+            UndoRedo.view (msgWrapper << UndoRedoMsg) options.undoRedoOptions
+
+
 
 
 -- Local storage management
@@ -581,6 +621,9 @@ encodeType toolType =
 
         ToolPointers ->
             "ToolPointers"
+
+        ToolUndoRedo ->
+            "ToolUndoRedo"
 
 
 encodeColour : Element.Color -> E.Value
