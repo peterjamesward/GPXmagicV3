@@ -17,6 +17,7 @@ type ToolAction msg
     | MapCenterOnCurrent
     | MapRefresh -- generally because layout has changed.
     | StoreSplitConfig
+    | StoreToolsConfig
     | StoredValueRetrieved String E.Value
     | DeleteSinglePoint Int
     | TrackHasChanged -- Must follow an action that changes the track.

@@ -1,6 +1,6 @@
 module ToolsController exposing (..)
 
-import Actions exposing (ToolAction)
+import Actions exposing (ToolAction(..))
 import Element exposing (..)
 import Element.Background as Background exposing (color)
 import Element.Border as Border exposing (roundEach)
@@ -11,6 +11,7 @@ import FlatColors.AussiePalette
 import FlatColors.SwedishPalette
 import Html.Attributes exposing (style)
 import Html.Events.Extra.Mouse as Mouse
+import Json.Encode as E
 import List.Extra
 import Tools.AbruptDirectionChanges as AbruptDirectionChanges
 import Tools.DeletePoints as DeletePoints
@@ -232,12 +233,12 @@ update toolMsg isTrack msgWrapper options =
 
         ToolPopupToggle toolType ->
             ( { options | tools = List.map (toggleToolPopup toolType) options.tools }
-            , []
+            , [ StoreToolsConfig ]
             )
 
         ToolDockSelect toolType toolDock ->
             ( { options | tools = List.map (setDock toolType toolDock) options.tools }
-            , []
+            , [ StoreToolsConfig ]
             )
 
         ToolColourSelect toolType color ->
@@ -250,7 +251,7 @@ update toolMsg isTrack msgWrapper options =
                 toolStateHasChanged toolType Expanded isTrack newOptions
 
             else
-                ( newOptions, [] )
+                ( newOptions, [ StoreToolsConfig ] )
 
         ToolStateToggle toolType newState ->
             -- Record the new state, but also let the tool know!
@@ -330,7 +331,7 @@ toolStateHasChanged :
 toolStateHasChanged toolType newState isTrack options =
     case toolType of
         ToolTrackInfo ->
-            ( options, [] )
+            ( options, [ StoreToolsConfig ] )
 
         ToolAbruptDirectionChanges ->
             -- Would like an OO style dispatch table here but what with each tool
@@ -346,7 +347,7 @@ toolStateHasChanged toolType newState isTrack options =
                 newOptions =
                     { options | directionChangeOptions = newToolOptions }
             in
-            ( newOptions, actions )
+            ( newOptions, StoreToolsConfig :: actions )
 
         ToolDeletePoints ->
             let
@@ -360,10 +361,10 @@ toolStateHasChanged toolType newState isTrack options =
                 newOptions =
                     { options | deleteOptions = newToolOptions }
             in
-            ( newOptions, actions )
+            ( newOptions, StoreToolsConfig :: actions )
 
         ToolPointers ->
-            ( options, [] )
+            ( options, [ StoreToolsConfig ] )
 
 
 
@@ -543,3 +544,83 @@ viewToolByType msgWrapper entry isTrack options =
 
         ToolPointers ->
             Pointers.view (msgWrapper << PointerMsg) options.pointerOptions isTrack
+
+
+
+-- Local storage management
+
+
+encodeToolState : Options -> E.Value
+encodeToolState options =
+    let
+        encodeType : ToolType -> String
+        encodeType toolType =
+            case toolType of
+                ToolTrackInfo ->
+                    "ToolTrackInfo"
+
+                ToolAbruptDirectionChanges ->
+                    "ToolAbruptDirectionChanges"
+
+                ToolDeletePoints ->
+                    "ToolDeletePoints"
+
+                ToolPointers ->
+                    "ToolPointers"
+
+        encodeColour : Element.Color -> E.Value
+        encodeColour colour =
+            let
+                { red, green, blue, alpha } =
+                    toRgb colour
+            in
+            E.object
+                [ ( "red", E.float red )
+                , ( "green", E.float green )
+                , ( "blue", E.float blue )
+                ]
+
+        encodeState : ToolState -> String
+        encodeState state =
+            case state of
+                Expanded ->
+                    "expanded"
+
+                Contracted ->
+                    "contracted"
+
+                Disabled ->
+                    "diabled"
+
+        encodeDock : ToolDock -> String
+        encodeDock dock =
+            case dock of
+                DockUpperLeft ->
+                    "upperleft"
+
+                DockLowerLeft ->
+                    "lowerleft"
+
+                DockUpperRight ->
+                    "upperright"
+
+                DockLowerRight ->
+                    "lowerright"
+
+                DockBottom ->
+                    "bottom"
+
+                DockNone ->
+                    "none"
+
+        encodeOneTool : ToolEntry -> E.Value
+        encodeOneTool tool =
+            E.object
+                [ ( "type", E.string <| encodeType tool.toolType )
+                , ( "state", E.string <| encodeState tool.state )
+                , ( "dock", E.string <| encodeDock tool.dock )
+                , ( "tab", encodeColour tool.tabColour )
+                , ( "text", encodeColour tool.textColour )
+                ]
+    in
+    E.list identity <| List.map encodeOneTool options.tools

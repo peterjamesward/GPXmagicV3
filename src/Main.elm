@@ -1066,6 +1066,10 @@ performActionCommands actions model =
                 ( StoreSplitConfig, _ ) ->
                     LocalStorage.storageSetItem "splits" (encodeSplitValues model)
 
+                ( StoreToolsConfig, _ ) ->
+                    LocalStorage.storageSetItem "tools" <|
+                        ToolsController.encodeToolState model.toolOptions
+
                 _ ->
                     Cmd.none
     in
