@@ -2,23 +2,24 @@
 
 BUG: Dubious steepest gradient on some routes.
 
-BUG: Dubious (obviously wrong) direction changes reported.
+BUG: Maxima of right and bottom docks not restoring properly.
 
 # WIP
 
-## Undo, Redo. (Do journaling here?)
-Decide on approach (more 2.7 than 2.8)
+## Undo, Redo.
+> Decision on approach:
+> for Undo: `fromStart : Int, fromEnd : Int, List (GPXSource, EarthPoint)`
+> for Redo: `fromStart : Int, fromEnd : Int, Command + Options`
 
 # BACKLOG, roughly in order
 
 ## Delete with a range (nearly trivial).
-Use `count from start` and `count from end` to denote the portion for deletion.
 
 ## Multiple views
 
 ## DEBT
 
-Split **DomainModel** into core and various helpers.
+Take helpers out of **DomainModel** if not type-specific.
 
 Make **DragPan** work on 3D view.
 
@@ -30,7 +31,6 @@ Double-click, in contrast, always centres.
 > Other views should centre when in "follow" mode.
 
 Put all Font, Colour etc into a Palette/Style module for ease of change.
-Make Tool titles 'black' or 'white' using greyscale formula.
 
 Need "restore to defaults" for tools.
 
@@ -107,13 +107,9 @@ Terrain 1 = Simple tree walk, in many cases will just work but not always.
 Terrain 2 = Tree walk combined with whole (visible) tree query, because <loops>.
 (Expand bounding boxes to allow for road width.)
 
-## Undo/Redo
-Revert to keeping GPXPoints for Undo, not reverse delta (2.7, not 2.8).
-Use Session state, to avoid taking up ram, with unlimited Undo?
-> Possibility, if fast enough, that we replay journaled edits from last checkpoint (last save).
-> (Because user can always load that file anyway.) Ah, but suppose you want to go further back?
-> I guess we could ask the user to re-open the relevant baseline file?
-
+## Journal edits to indexedDB?
+Potential for recovery by replay.
+Possible aid to isolating and reproducing bugs.
 
 ---
 
