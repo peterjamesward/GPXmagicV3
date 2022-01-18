@@ -10059,6 +10059,9 @@ var $author$project$Actions$MapCenterOnCurrent = {$: 'MapCenterOnCurrent'};
 var $author$project$Main$ReceivedIpDetails = function (a) {
 	return {$: 'ReceivedIpDetails', a: a};
 };
+var $author$project$Actions$SetCurrent = function (a) {
+	return {$: 'SetCurrent', a: a};
+};
 var $author$project$Main$ToolsMsg = function (a) {
 	return {$: 'ToolsMsg', a: a};
 };
@@ -10428,6 +10431,57 @@ var $ianmackenzie$elm_units$Angle$inDegrees = function (angle) {
 	return 180 * ($ianmackenzie$elm_units$Angle$inRadians(angle) / $elm$core$Basics$pi);
 };
 var $elm$json$Json$Encode$null = _Json_encodeNull;
+var $elm$core$Basics$atan2 = _Basics_atan2;
+var $ianmackenzie$elm_geometry$Direction2d$toAngle = function (_v0) {
+	var d = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(
+		A2($elm$core$Basics$atan2, d.y, d.x));
+};
+var $author$project$MapPortController$addMarkersToMap = function (track) {
+	var encodePos = function (_v1) {
+		var longitude = _v1.longitude;
+		var latitude = _v1.latitude;
+		var altitude = _v1.altitude;
+		return $elm$json$Json$Encode$object(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'lon',
+					$elm$json$Json$Encode$float(
+						$ianmackenzie$elm_units$Angle$inDegrees(
+							$ianmackenzie$elm_geometry$Direction2d$toAngle(longitude)))),
+					_Utils_Tuple2(
+					'lat',
+					$elm$json$Json$Encode$float(
+						$ianmackenzie$elm_units$Angle$inDegrees(latitude)))
+				]));
+	};
+	return $author$project$MapPortController$mapCommands(
+		$elm$json$Json$Encode$object(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'Cmd',
+					$elm$json$Json$Encode$string('Mark')),
+					_Utils_Tuple2(
+					'orange',
+					encodePos(
+						A2($author$project$DomainModel$gpxPointFromIndex, track.currentPosition, track.trackTree))),
+					function () {
+					var _v0 = track.markerPosition;
+					if (_v0.$ === 'Just') {
+						var mark = _v0.a;
+						return _Utils_Tuple2(
+							'purple',
+							encodePos(
+								A2($author$project$DomainModel$gpxPointFromIndex, mark, track.trackTree)));
+					} else {
+						return _Utils_Tuple2('ignore', $elm$json$Json$Encode$null);
+					}
+				}(),
+					_Utils_Tuple2('previews', $elm$json$Json$Encode$null)
+				])));
+};
 var $elm$core$Basics$ge = _Utils_ge;
 var $ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo = F2(
 	function (_v0, _v1) {
@@ -10510,12 +10564,6 @@ var $author$project$DomainModel$lngLatPair = function (_v0) {
 };
 var $author$project$DomainModel$sourceData = function (treeNode) {
 	return $author$project$DomainModel$asRecord(treeNode).sourceData;
-};
-var $elm$core$Basics$atan2 = _Basics_atan2;
-var $ianmackenzie$elm_geometry$Direction2d$toAngle = function (_v0) {
-	var d = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(
-		A2($elm$core$Basics$atan2, d.y, d.x));
 };
 var $ianmackenzie$elm_geometry$Geometry$Types$BoundingBox3d = function (a) {
 	return {$: 'BoundingBox3d', a: a};
@@ -11002,7 +11050,7 @@ var $author$project$Main$performActionCommands = F2(
 		};
 		var performAction = function (action) {
 			var _v0 = _Utils_Tuple2(action, model.track);
-			_v0$7:
+			_v0$8:
 			while (true) {
 				if (_v0.b.$ === 'Just') {
 					switch (_v0.a.$) {
@@ -11013,12 +11061,13 @@ var $author$project$Main$performActionCommands = F2(
 								_List_fromArray(
 									[
 										$author$project$MapPortController$addTrackToMap(track),
-										$author$project$MapPortController$centreMapOnCurrent(track)
+										$author$project$MapPortController$centreMapOnCurrent(track),
+										$author$project$MapPortController$addMarkersToMap(track)
 									]));
 						case 'SetCurrentFromMapClick':
 							var position = _v0.a.a;
 							var track = _v0.b.a;
-							return $elm$core$Platform$Cmd$none;
+							return $author$project$MapPortController$addMarkersToMap(track);
 						case 'MapCenterOnCurrent':
 							var _v1 = _v0.a;
 							var track = _v0.b.a;
@@ -11049,14 +11098,21 @@ var $author$project$Main$performActionCommands = F2(
 									$elm$core$List$cons,
 									$author$project$MapPortController$addTrackToMap(track),
 									A2(
-										$elm$core$List$map,
-										showPreviewOnMap,
-										$elm$core$Dict$keys(model.previews))));
+										$elm$core$List$cons,
+										$author$project$MapPortController$addMarkersToMap(track),
+										A2(
+											$elm$core$List$map,
+											showPreviewOnMap,
+											$elm$core$Dict$keys(model.previews)))));
+						case 'SetMarker':
+							var maybeMarker = _v0.a.a;
+							var track = _v0.b.a;
+							return $author$project$MapPortController$addMarkersToMap(track);
 						default:
-							break _v0$7;
+							break _v0$8;
 					}
 				} else {
-					break _v0$7;
+					break _v0$8;
 				}
 			}
 			return $elm$core$Platform$Cmd$none;
@@ -11934,6 +11990,7 @@ var $avh4$elm_color$Color$RgbaSpace = F4(
 		return {$: 'RgbaSpace', a: a, b: b, c: c, d: d};
 	});
 var $avh4$elm_color$Color$black = A4($avh4$elm_color$Color$RgbaSpace, 0 / 255, 0 / 255, 0 / 255, 1.0);
+var $smucode$elm_flat_colors$FlatColors$AussiePalette$blurple = A3($mdgriffith$elm_ui$Element$rgb255, 72, 52, 212);
 var $ianmackenzie$elm_3d_scene$Scene3d$Types$Constant = function (a) {
 	return {$: 'Constant', a: a};
 };
@@ -11980,6 +12037,9 @@ var $ianmackenzie$elm_geometry$LineSegment3d$from = F2(
 		return $ianmackenzie$elm_geometry$LineSegment3d$fromEndpoints(
 			_Utils_Tuple2(givenStartPoint, givenEndPoint));
 	});
+var $avh4$elm_color$Color$fromRgba = function (components) {
+	return A4($avh4$elm_color$Color$RgbaSpace, components.red, components.green, components.blue, components.alpha);
+};
 var $elm$core$Basics$clamp = F3(
 	function (low, high, number) {
 		return (_Utils_cmp(number, low) < 0) ? low : ((_Utils_cmp(number, high) > 0) ? high : number);
@@ -13237,19 +13297,37 @@ var $ianmackenzie$elm_geometry$Direction3d$positiveZ = $ianmackenzie$elm_geometr
 var $ianmackenzie$elm_geometry$Direction3d$z = $ianmackenzie$elm_geometry$Direction3d$positiveZ;
 var $ianmackenzie$elm_geometry$Plane3d$xy = A2($ianmackenzie$elm_geometry$Plane3d$through, $ianmackenzie$elm_geometry$Point3d$origin, $ianmackenzie$elm_geometry$Direction3d$z);
 var $author$project$SceneBuilder$render3dView = function (track) {
-	var renderCurrentMarker = F2(
-		function (marker, tree) {
-			return _List_fromArray(
-				[
-					A3(
-					$ianmackenzie$elm_3d_scene$Scene3d$point,
-					{
-						radius: $ianmackenzie$elm_units$Pixels$pixels(10)
-					},
-					$ianmackenzie$elm_3d_scene$Scene3d$Material$color($avh4$elm_color$Color$lightOrange),
-					A2($author$project$DomainModel$earthPointFromIndex, marker, tree))
-				]);
-		});
+	var renderCurrentMarkers = _Utils_ap(
+		_List_fromArray(
+			[
+				A3(
+				$ianmackenzie$elm_3d_scene$Scene3d$point,
+				{
+					radius: $ianmackenzie$elm_units$Pixels$pixels(10)
+				},
+				$ianmackenzie$elm_3d_scene$Scene3d$Material$color($avh4$elm_color$Color$lightOrange),
+				A2($author$project$DomainModel$earthPointFromIndex, track.currentPosition, track.trackTree))
+			]),
+		function () {
+			var _v2 = track.markerPosition;
+			if (_v2.$ === 'Just') {
+				var marker = _v2.a;
+				return _List_fromArray(
+					[
+						A3(
+						$ianmackenzie$elm_3d_scene$Scene3d$point,
+						{
+							radius: $ianmackenzie$elm_units$Pixels$pixels(9)
+						},
+						$ianmackenzie$elm_3d_scene$Scene3d$Material$color(
+							$avh4$elm_color$Color$fromRgba(
+								$mdgriffith$elm_ui$Element$toRgb($smucode$elm_flat_colors$FlatColors$AussiePalette$blurple))),
+						A2($author$project$DomainModel$earthPointFromIndex, marker, track.trackTree))
+					]);
+			} else {
+				return _List_Nil;
+			}
+		}());
 	var gradientFromNode = function (treeNode) {
 		return 100.0 * A2(
 			$ianmackenzie$elm_units$Quantity$ratio,
@@ -13357,11 +13435,7 @@ var $author$project$SceneBuilder$render3dView = function (track) {
 					A3(renderTree, depth - 1, unLeaf.left, accum));
 			}
 		});
-	return A3(
-		renderTreeSelectively,
-		track.renderDepth,
-		track.trackTree,
-		A2(renderCurrentMarker, track.currentPosition, track.trackTree));
+	return A3(renderTreeSelectively, track.renderDepth, track.trackTree, renderCurrentMarkers);
 };
 var $elm$core$List$drop = F2(
 	function (n, list) {
@@ -13384,9 +13458,6 @@ var $elm$core$List$drop = F2(
 			}
 		}
 	});
-var $avh4$elm_color$Color$fromRgba = function (components) {
-	return A4($avh4$elm_color$Color$RgbaSpace, components.red, components.green, components.blue, components.alpha);
-};
 var $ianmackenzie$elm_3d_scene$Scene3d$Types$LambertianMaterial = F3(
 	function (a, b, c) {
 		return {$: 'LambertianMaterial', a: a, b: b, c: c};
@@ -13643,7 +13714,7 @@ var $author$project$Main$performActionsOnModel = F2(
 		var performAction = F2(
 			function (action, foldedModel) {
 				var _v0 = _Utils_Tuple2(action, foldedModel.track);
-				_v0$7:
+				_v0$8:
 				while (true) {
 					if (_v0.b.$ === 'Just') {
 						switch (_v0.a.$) {
@@ -13720,11 +13791,22 @@ var $author$project$Main$performActionsOnModel = F2(
 									{toolOptions: refreshedToolOptions});
 								var modelAfterSecondaryActions = A2($author$project$Main$performActionsOnModel, secondaryActions, innerModelWithNewToolSettings);
 								return modelAfterSecondaryActions;
+							case 'SetMarker':
+								var maybeMarker = _v0.a.a;
+								var track = _v0.b.a;
+								var updatedTrack = _Utils_update(
+									track,
+									{markerPosition: maybeMarker});
+								return _Utils_update(
+									foldedModel,
+									{
+										track: $elm$core$Maybe$Just(updatedTrack)
+									});
 							default:
-								break _v0$7;
+								break _v0$8;
 						}
 					} else {
-						break _v0$7;
+						break _v0$8;
 					}
 				}
 				return foldedModel;
@@ -14085,7 +14167,8 @@ var $author$project$Main$showTrackOnMapCentered = function (track) {
 		_List_fromArray(
 			[
 				$author$project$MapPortController$addTrackToMap(track),
-				$author$project$MapPortController$centreMapOnCurrent(track)
+				$author$project$MapPortController$centreMapOnCurrent(track),
+				$author$project$MapPortController$addMarkersToMap(track)
 			]));
 };
 var $elm$file$File$toString = _File_toString;
@@ -15152,9 +15235,6 @@ var $author$project$ToolsController$toggleToolPopup = F2(
 			tool,
 			{isPopupOpen: !tool.isPopupOpen}) : tool;
 	});
-var $author$project$Actions$SetCurrent = function (a) {
-	return {$: 'SetCurrent', a: a};
-};
 var $elm_community$list_extra$List$Extra$getAt = F2(
 	function (idx, xs) {
 		return (idx < 0) ? $elm$core$Maybe$Nothing : $elm$core$List$head(
@@ -15276,9 +15356,10 @@ var $author$project$Tools$Pointers$update = F4(
 						$author$project$DomainModel$skipCount(track.trackTree),
 						value + increment);
 				});
+			var orange = track.currentPosition;
 			switch (msg.$) {
 				case 'PointerForwardOne':
-					var position = A2(restrictToTrack, options.orange, 1);
+					var position = A2(restrictToTrack, orange, 1);
 					return _Utils_Tuple2(
 						_Utils_update(
 							options,
@@ -15288,7 +15369,7 @@ var $author$project$Tools$Pointers$update = F4(
 								$author$project$Actions$SetCurrent(position)
 							]));
 				case 'PointerBackwardOne':
-					var position = A2(restrictToTrack, options.orange, -1);
+					var position = A2(restrictToTrack, orange, -1);
 					return _Utils_Tuple2(
 						_Utils_update(
 							options,
@@ -15300,7 +15381,7 @@ var $author$project$Tools$Pointers$update = F4(
 				case 'PointerFastForward':
 					var position = A2(
 						restrictToTrack,
-						options.orange,
+						orange,
 						($author$project$DomainModel$skipCount(track.trackTree) / 20) | 0);
 					return _Utils_Tuple2(
 						_Utils_update(
@@ -15313,7 +15394,7 @@ var $author$project$Tools$Pointers$update = F4(
 				case 'PointerRewind':
 					var position = A2(
 						restrictToTrack,
-						options.orange,
+						orange,
 						0 - (($author$project$DomainModel$skipCount(track.trackTree) / 20) | 0));
 					return _Utils_Tuple2(
 						_Utils_update(
@@ -15328,12 +15409,12 @@ var $author$project$Tools$Pointers$update = F4(
 						_Utils_update(
 							options,
 							{
-								purple: $elm$core$Maybe$Just(options.orange)
+								purple: $elm$core$Maybe$Just(orange)
 							}),
 						_List_fromArray(
 							[
 								$author$project$Actions$SetMarker(
-								$elm$core$Maybe$Just(options.orange))
+								$elm$core$Maybe$Just(orange))
 							]));
 				case 'LiftMarker':
 					return _Utils_Tuple2(
@@ -16490,6 +16571,7 @@ var $author$project$Main$update = F2(
 					var aTree = trackTree.a;
 					var newTrack = {
 						currentPosition: 0,
+						markerPosition: $elm$core$Maybe$Nothing,
 						referenceLonLat: A2(
 							$elm$core$Maybe$withDefault,
 							A3($author$project$DomainModel$GPXSource, $ianmackenzie$elm_geometry$Direction2d$x, $ianmackenzie$elm_units$Quantity$zero, $ianmackenzie$elm_units$Quantity$zero),
@@ -16557,33 +16639,20 @@ var $author$project$Main$update = F2(
 					A2($elm$core$Platform$Cmd$map, $author$project$Main$OAuthMessage, authCmd));
 			case 'SetCurrentPosition':
 				var pos = msg.a;
+				var actions = _List_fromArray(
+					[
+						$author$project$Actions$SetCurrent(pos),
+						$author$project$Actions$MapCenterOnCurrent
+					]);
+				var modelAfterActions = A2($author$project$Main$performActionsOnModel, actions, model);
+				return _Utils_Tuple2(
+					modelAfterActions,
+					A2($author$project$Main$performActionCommands, actions, modelAfterActions));
+			case 'SetViewMode':
+				var viewMode = msg.a;
 				var _v7 = model.track;
 				if (_v7.$ === 'Just') {
 					var track = _v7.a;
-					var newTrack = _Utils_update(
-						track,
-						{currentPosition: pos});
-					var newModel = $author$project$Main$render(
-						_Utils_update(
-							model,
-							{
-								track: $elm$core$Maybe$Just(newTrack)
-							}));
-					return _Utils_Tuple2(
-						newModel,
-						A2(
-							$author$project$Main$performActionCommands,
-							_List_fromArray(
-								[$author$project$Actions$MapCenterOnCurrent]),
-							newModel));
-				} else {
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-				}
-			case 'SetViewMode':
-				var viewMode = msg.a;
-				var _v8 = model.track;
-				if (_v8.$ === 'Just') {
-					var track = _v8.a;
 					var newModel = _Utils_update(
 						model,
 						{viewMode: viewMode});
@@ -16595,16 +16664,16 @@ var $author$project$Main$update = F2(
 				}
 			case 'ImageMessage':
 				var imageMsg = msg.a;
-				var _v9 = model.track;
-				if (_v9.$ === 'Just') {
-					var track = _v9.a;
-					var _v10 = function () {
-						var _v11 = model.viewThirdPersonContext;
-						if (_v11.$ === 'Just') {
-							var third = _v11.a;
-							var _v12 = A4($author$project$ViewThirdPerson$update, imageMsg, $author$project$Main$ImageMessage, track, third);
-							var _new = _v12.a;
-							var act = _v12.b;
+				var _v8 = model.track;
+				if (_v8.$ === 'Just') {
+					var track = _v8.a;
+					var _v9 = function () {
+						var _v10 = model.viewThirdPersonContext;
+						if (_v10.$ === 'Just') {
+							var third = _v10.a;
+							var _v11 = A4($author$project$ViewThirdPerson$update, imageMsg, $author$project$Main$ImageMessage, track, third);
+							var _new = _v11.a;
+							var act = _v11.b;
 							return _Utils_Tuple2(
 								$elm$core$Maybe$Just(_new),
 								act);
@@ -16612,8 +16681,8 @@ var $author$project$Main$update = F2(
 							return _Utils_Tuple2($elm$core$Maybe$Nothing, _List_Nil);
 						}
 					}();
-					var newContext = _v10.a;
-					var actions = _v10.b;
+					var newContext = _v9.a;
+					var actions = _v9.b;
 					var newModel = A2(
 						$author$project$Main$performActionsOnModel,
 						actions,
@@ -16708,9 +16777,9 @@ var $author$project$Main$update = F2(
 				}
 			default:
 				var toolMsg = msg.a;
-				var _v14 = A4($author$project$ToolsController$update, toolMsg, model.track, $author$project$Main$ToolsMsg, model.toolOptions);
-				var newToolOptions = _v14.a;
-				var actions = _v14.b;
+				var _v13 = A4($author$project$ToolsController$update, toolMsg, model.track, $author$project$Main$ToolsMsg, model.toolOptions);
+				var newToolOptions = _v13.a;
+				var actions = _v13.b;
 				var newModel = _Utils_update(
 					model,
 					{toolOptions: newToolOptions});
@@ -24848,7 +24917,6 @@ var $author$project$Tools$Pointers$PointerBackwardOne = {$: 'PointerBackwardOne'
 var $author$project$Tools$Pointers$PointerFastForward = {$: 'PointerFastForward'};
 var $author$project$Tools$Pointers$PointerForwardOne = {$: 'PointerForwardOne'};
 var $author$project$Tools$Pointers$PointerRewind = {$: 'PointerRewind'};
-var $smucode$elm_flat_colors$FlatColors$AussiePalette$blurple = A3($mdgriffith$elm_ui$Element$rgb255, 72, 52, 212);
 var $feathericons$elm_feather$FeatherIcons$chevronsLeft = A2(
 	$feathericons$elm_feather$FeatherIcons$makeBuilder,
 	'chevrons-left',

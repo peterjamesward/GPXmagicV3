@@ -75,12 +75,16 @@ update msg options previewColour hasTrack =
             let
                 restrictToTrack value increment =
                     clamp 0 (skipCount track.trackTree) <| value + increment
+
+                orange =
+                    -- Track has definitive pointer position.
+                    track.currentPosition
             in
             case msg of
                 PointerForwardOne ->
                     let
                         position =
-                            restrictToTrack options.orange 1
+                            restrictToTrack orange 1
                     in
                     ( { options | orange = position }
                     , [ SetCurrent position ]
@@ -89,7 +93,7 @@ update msg options previewColour hasTrack =
                 PointerBackwardOne ->
                     let
                         position =
-                            restrictToTrack options.orange -1
+                            restrictToTrack orange -1
                     in
                     ( { options | orange = position }
                     , [ SetCurrent position ]
@@ -98,7 +102,7 @@ update msg options previewColour hasTrack =
                 PointerFastForward ->
                     let
                         position =
-                            restrictToTrack options.orange (skipCount track.trackTree // 20)
+                            restrictToTrack orange (skipCount track.trackTree // 20)
                     in
                     ( { options | orange = position }
                     , [ SetCurrent position ]
@@ -107,15 +111,15 @@ update msg options previewColour hasTrack =
                 PointerRewind ->
                     let
                         position =
-                            restrictToTrack options.orange (0 - skipCount track.trackTree // 20)
+                            restrictToTrack orange (0 - skipCount track.trackTree // 20)
                     in
                     ( { options | orange = position }
                     , [ SetCurrent position ]
                     )
 
                 DropMarker ->
-                    ( { options | purple = Just options.orange }
-                    , [ SetMarker <| Just options.orange ]
+                    ( { options | purple = Just orange }
+                    , [ SetMarker <| Just orange ]
                     )
 
                 LiftMarker ->

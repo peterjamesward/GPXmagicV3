@@ -13,6 +13,7 @@ import Dict exposing (Dict)
 import Direction2d
 import DomainModel exposing (..)
 import Element
+import FlatColors.AussiePalette
 import Json.Encode as E
 import Length exposing (Meters)
 import LineSegment3d
@@ -124,16 +125,25 @@ render3dView track =
                             |> renderTree (depth - 1) unLeaf.left
                             |> renderTree (depth - 1) unLeaf.right
 
-        renderCurrentMarker : Int -> PeteTree -> List (Entity LocalCoords)
-        renderCurrentMarker marker tree =
+        renderCurrentMarkers : List (Entity LocalCoords)
+        renderCurrentMarkers =
             [ Scene3d.point { radius = Pixels.pixels 10 }
                 (Material.color lightOrange)
-                (earthPointFromIndex marker tree)
+                (earthPointFromIndex track.currentPosition track.trackTree)
             ]
+                ++ (case track.markerPosition of
+                        Just marker ->
+                            [ Scene3d.point { radius = Pixels.pixels 9 }
+                                (Material.color <| Color.fromRgba <| Element.toRgb <| FlatColors.AussiePalette.blurple)
+                                (earthPointFromIndex marker track.trackTree)
+                            ]
+
+                        Nothing ->
+                            []
+                   )
     in
     renderTreeSelectively track.renderDepth track.trackTree <|
-        renderCurrentMarker track.currentPosition track.trackTree
-
+        renderCurrentMarkers
 
 
 renderPreviews : Dict String PreviewData -> List (Entity LocalCoords)

@@ -262,9 +262,11 @@ update msg model =
             case trackTree of
                 Just aTree ->
                     let
+                        newTrack : TrackLoaded
                         newTrack =
                             { trackTree = aTree
                             , currentPosition = 0
+                            , markerPosition = Nothing
                             , renderDepth = 10
                             , referenceLonLat =
                                 List.head gpxTrack
@@ -344,22 +346,17 @@ update msg model =
         SetCurrentPosition pos ->
             -- Slider moves pointer and re-centres view.
             -- The actions will re-render and repaint the map.
-            -- TODO: Refresh all the open tools.
-            case model.track of
-                Just track ->
-                    let
-                        newTrack =
-                            { track | currentPosition = pos }
+            -- TODO: Make this into a Tool
+            let
+                actions =
+                    [ SetCurrent pos, MapCenterOnCurrent ]
 
-                        newModel =
-                            render { model | track = Just newTrack }
-                    in
-                    ( newModel
-                    , performActionCommands [ MapCenterOnCurrent ] newModel
-                    )
-
-                Nothing ->
-                    ( model, Cmd.none )
+                modelAfterActions =
+                    performActionsOnModel actions model
+            in
+            ( modelAfterActions
+            , performActionCommands actions modelAfterActions
+            )
 
         SetViewMode viewMode ->
             case model.track of
@@ -859,6 +856,13 @@ performActionsOnModel actions model =
                     in
                     modelAfterSecondaryActions
 
+                ( SetMarker maybeMarker, Just track ) ->
+                    let
+                        updatedTrack =
+                            { track | markerPosition = maybeMarker }
+                    in
+                    { foldedModel | track = Just updatedTrack }
+
                 _ ->
                     foldedModel
     in
@@ -894,10 +898,11 @@ performActionCommands actions model =
                     Cmd.batch
                         [ MapPortController.addTrackToMap track
                         , MapPortController.centreMapOnCurrent track
+                        , MapPortController.addMarkersToMap track
                         ]
 
                 ( SetCurrentFromMapClick position, Just track ) ->
-                    Cmd.none
+                    MapPortController.addMarkersToMap track
 
                 ( MapCenterOnCurrent, Just track ) ->
                     Cmd.batch
@@ -920,7 +925,11 @@ performActionCommands actions model =
                 ( TrackHasChanged, Just track ) ->
                     Cmd.batch <|
                         MapPortController.addTrackToMap track
+                            :: MapPortController.addMarkersToMap track
                             :: List.map showPreviewOnMap (Dict.keys model.previews)
+
+                ( SetMarker maybeMarker, Just track ) ->
+                    MapPortController.addMarkersToMap track
 
                 _ ->
                     Cmd.none
@@ -934,4 +943,5 @@ showTrackOnMapCentered track =
         -- Must repaint track on so that selective rendering works.
         [ MapPortController.addTrackToMap track
         , MapPortController.centreMapOnCurrent track
+        , MapPortController.addMarkersToMap track
         ]

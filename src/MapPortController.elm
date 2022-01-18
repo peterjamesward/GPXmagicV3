@@ -173,34 +173,29 @@ hidePreview tag =
             ]
 
 
+addMarkersToMap :
+    TrackLoaded
+    -> Cmd msg
+addMarkersToMap track =
+    let
+        encodePos { longitude, latitude, altitude } =
+            E.object
+                [ ( "lon", E.float <| Angle.inDegrees <| Direction2d.toAngle longitude )
+                , ( "lat", E.float <| Angle.inDegrees latitude )
+                ]
+    in
+    mapCommands <|
+        E.object
+            [ ( "Cmd", E.string "Mark" )
+            , ( "orange", encodePos <| gpxPointFromIndex track.currentPosition track.trackTree )
+            , case track.markerPosition of
+                Just mark ->
+                    ( "purple", encodePos <| gpxPointFromIndex mark track.trackTree )
 
---addMarkersToMap :
---    Track
---    -> List E.Value
---    -> Cmd msg
---addMarkersToMap track previews =
---    let
---        realWorldPosition tp =
---            Track.withoutGhanianTransform track tp.xyz
---
---        encodePos ( lon, lat, ele ) =
---            E.object
---                [ ( "lon", E.float lon )
---                , ( "lat", E.float lat )
---                ]
---    in
---    commandPort <|
---        E.object
---            [ ( "Cmd", E.string "Mark" )
---            , ( "orange", encodePos <| realWorldPosition track.currentNode )
---            , case track.markedNode of
---                Just mark ->
---                    ( "purple", encodePos <| realWorldPosition mark )
---
---                Nothing ->
---                    ( "ignore", E.null )
---            , ( "previews", E.list identity previews )
---            ]
+                Nothing ->
+                    ( "ignore", E.null )
+            , ( "previews", E.null )
+            ]
 
 
 msgDecoder : Decoder String

@@ -2,20 +2,14 @@
 
 # WIP
 
-## NEXT UP: Markers.
-
-Need to show Purple.
-
-Whether to leave currentPosition (and purple) in Track or move to Pointers.options.
-> This is surely not really a thing; must be in Track.
+## NEXT UP:
 
 Save & Restore of splitter and tool settings (basis in v2).
 
 ## AND THEN: Delete with a range (nearly trivial).
+Use `count from start` and `count from end` to denote the portion for deletion.
 
-**NB**: Use `count from start` and `count from end` to denote the portion for deletion.
-
-Change colour on closed tab shows preview.
+BUG: Change colour on closed tab shows preview.
 
 ## AND THEN: Undo, Redo. (Do journaling here?)
 
