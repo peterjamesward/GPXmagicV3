@@ -10086,14 +10086,14 @@ var $elm$core$Tuple$second = function (_v0) {
 	return y;
 };
 var $author$project$Main$adjustSpaceForContent = function (model) {
-	var availableWidthFraction = (1.0 - $author$project$SplitPane$SplitPane$getPosition(model.leftDockRightEdge)) * $author$project$SplitPane$SplitPane$getPosition(model.rightDockLeftEdge);
-	var availableHeightFraction = $author$project$SplitPane$SplitPane$getPosition(model.bottomDockTopEdge);
-	var _v0 = _Utils_Tuple2(50, 130);
+	var _v0 = _Utils_Tuple2(20, 80);
 	var reservedWidth = _v0.a;
 	var reservedHeight = _v0.b;
-	var _v1 = _Utils_Tuple2((model.windowSize.a * availableWidthFraction) - reservedWidth, (model.windowSize.b * availableHeightFraction) - reservedHeight);
-	var availableWidthPixels = _v1.a;
-	var availableHeightPixels = _v1.b;
+	var availableHeightPixels = $author$project$SplitPane$SplitPane$getPosition(model.bottomDockTopEdge) - reservedHeight;
+	var availableWidthPixels = ($author$project$SplitPane$SplitPane$getPosition(model.rightDockLeftEdge) - $author$project$SplitPane$SplitPane$getPosition(model.leftDockRightEdge)) - reservedWidth;
+	var _v1 = _Utils_Tuple2(model.windowSize.a, model.windowSize.b);
+	var width = _v1.a;
+	var height = _v1.b;
 	return _Utils_update(
 		model,
 		{
@@ -10104,6 +10104,73 @@ var $author$project$Main$adjustSpaceForContent = function (model) {
 					$elm$core$Basics$round(availableHeightPixels)))
 		});
 };
+var $author$project$SplitPane$SplitPane$Px = function (a) {
+	return {$: 'Px', a: a};
+};
+var $author$project$SplitPane$SplitPane$px = F2(
+	function (x, bound) {
+		var newBound = function () {
+			if (bound.$ === 'Just') {
+				var _v1 = bound.a;
+				var lower = _v1.a;
+				var upper = _v1.b;
+				return A2($author$project$SplitPane$Bound$createBound, lower, upper);
+			} else {
+				return A2($author$project$SplitPane$Bound$createBound, 0, 9999999999);
+			}
+		}();
+		return $author$project$SplitPane$SplitPane$Px(
+			A2($author$project$SplitPane$Bound$createBounded, x, newBound));
+	});
+var $author$project$Main$allocateSpaceForDocksAndContent = F3(
+	function (width, height, model) {
+		return $author$project$Main$adjustSpaceForContent(
+			_Utils_update(
+				model,
+				{
+					bottomDockTopEdge: A2(
+						$author$project$SplitPane$SplitPane$configureSplitter,
+						A2(
+							$author$project$SplitPane$SplitPane$px,
+							height - 200,
+							$elm$core$Maybe$Just(
+								_Utils_Tuple2(((height * 2) / 3) | 0, height - 75))),
+						$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Vertical)),
+					leftDockInternal: A2(
+						$author$project$SplitPane$SplitPane$configureSplitter,
+						A2(
+							$author$project$SplitPane$SplitPane$px,
+							(height / 2) | 0,
+							$elm$core$Maybe$Just(
+								_Utils_Tuple2(50, height - 75))),
+						$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Vertical)),
+					leftDockRightEdge: A2(
+						$author$project$SplitPane$SplitPane$configureSplitter,
+						A2(
+							$author$project$SplitPane$SplitPane$px,
+							200,
+							$elm$core$Maybe$Just(
+								_Utils_Tuple2(20, (width / 3) | 0))),
+						$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Horizontal)),
+					rightDockInternal: A2(
+						$author$project$SplitPane$SplitPane$configureSplitter,
+						A2(
+							$author$project$SplitPane$SplitPane$px,
+							(height / 2) | 0,
+							$elm$core$Maybe$Just(
+								_Utils_Tuple2(50, height - 75))),
+						$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Vertical)),
+					rightDockLeftEdge: A2(
+						$author$project$SplitPane$SplitPane$configureSplitter,
+						A2(
+							$author$project$SplitPane$SplitPane$px,
+							width - 200,
+							$elm$core$Maybe$Just(
+								_Utils_Tuple2(((2 * width) / 3) | 0, width - 20))),
+						$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Horizontal)),
+					windowSize: _Utils_Tuple2(width, height)
+				}));
+	});
 var $elm$json$Json$Encode$float = _Json_wrap;
 var $author$project$MapPortController$mapCommands = _Platform_outgoingPort('mapCommands', $elm$core$Basics$identity);
 var $author$project$MapboxKey$mapboxKey = 'pk.eyJ1IjoicGV0ZXJqYW1lc3dhcmQiLCJhIjoiY2tpdWswb3dsMm02bDMzcDMyNGw1bmh5aSJ9.Fk3ibin0PpeEGXlGsctP1g';
@@ -14222,6 +14289,7 @@ var $author$project$DomainModel$treeFromSourcePoints = function (track) {
 	var numberOfSegments = $elm$core$List$length(track) - 1;
 	return A2(treeBuilder, numberOfSegments, track).a;
 };
+var $elm$core$Basics$truncate = _Basics_truncate;
 var $author$project$Actions$SetCurrentFromMapClick = function (a) {
 	return {$: 'SetCurrentFromMapClick', a: a};
 };
@@ -14391,9 +14459,6 @@ var $author$project$SplitPane$SplitPane$UpdateConfig = function (a) {
 };
 var $author$project$SplitPane$SplitPane$createUpdateConfig = function (config) {
 	return $author$project$SplitPane$SplitPane$UpdateConfig(config);
-};
-var $author$project$SplitPane$SplitPane$Px = function (a) {
-	return {$: 'Px', a: a};
 };
 var $author$project$SplitPane$Bound$updateValue = F2(
 	function (f, _v0) {
@@ -16752,7 +16817,10 @@ var $author$project$Main$update = F2(
 				var width = msg.a;
 				var height = msg.b;
 				return _Utils_Tuple2(
-					$author$project$Main$adjustSpaceForContent(
+					A3(
+						$author$project$Main$allocateSpaceForDocksAndContent,
+						width,
+						height,
 						_Utils_update(
 							model,
 							{
@@ -16764,12 +16832,7 @@ var $author$project$Main$update = F2(
 				if (result.$ === 'Ok') {
 					var info = result.a;
 					return _Utils_Tuple2(
-						$author$project$Main$adjustSpaceForContent(
-							_Utils_update(
-								model,
-								{
-									windowSize: _Utils_Tuple2(info.viewport.width, info.viewport.height)
-								})),
+						A3($author$project$Main$allocateSpaceForDocksAndContent, info.viewport.width | 0, info.viewport.height | 0, model),
 						$author$project$MapPortController$refreshMap);
 				} else {
 					var error = result.a;
@@ -22560,6 +22623,8 @@ var $mdgriffith$elm_ui$Element$layoutWith = F3(
 	});
 var $mdgriffith$elm_ui$Element$layout = $mdgriffith$elm_ui$Element$layoutWith(
 	{options: _List_Nil});
+var $mdgriffith$elm_ui$Internal$Model$Empty = {$: 'Empty'};
+var $mdgriffith$elm_ui$Element$none = $mdgriffith$elm_ui$Internal$Model$Empty;
 var $author$project$SplitPane$SplitPane$ViewConfig = function (a) {
 	return {$: 'ViewConfig', a: a};
 };
@@ -22569,10 +22634,9 @@ var $author$project$SplitPane$SplitPane$createViewConfig = function (_v0) {
 	return $author$project$SplitPane$SplitPane$ViewConfig(
 		{splitter: customSplitter, toMsg: toMsg});
 };
-var $author$project$Main$leftDockConfig = $author$project$SplitPane$SplitPane$createViewConfig(
-	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitLeftDockRightEdge});
-var $author$project$Main$leftDockInternalConfig = $author$project$SplitPane$SplitPane$createViewConfig(
-	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitLeftDockInternal});
+var $author$project$Main$bottomDockConfig = $author$project$SplitPane$SplitPane$createViewConfig(
+	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitBottomDockTopEdge});
+var $author$project$ToolsController$DockBottom = {$: 'DockBottom'};
 var $mdgriffith$elm_ui$Internal$Model$NoStaticStyleSheet = {$: 'NoStaticStyleSheet'};
 var $mdgriffith$elm_ui$Internal$Model$RenderModeOption = function (a) {
 	return {$: 'RenderModeOption', a: a};
@@ -22794,8 +22858,6 @@ var $author$project$ToolsController$nextToolState = function (state) {
 			return $author$project$ToolsController$Disabled;
 	}
 };
-var $mdgriffith$elm_ui$Internal$Model$Empty = {$: 'Empty'};
-var $mdgriffith$elm_ui$Element$none = $mdgriffith$elm_ui$Internal$Model$Empty;
 var $elm$virtual_dom$VirtualDom$Custom = function (a) {
 	return {$: 'Custom', a: a};
 };
@@ -23099,7 +23161,6 @@ var $author$project$ToolsController$showColourOptions = F2(
 						]))
 				])) : $mdgriffith$elm_ui$Element$none;
 	});
-var $author$project$ToolsController$DockBottom = {$: 'DockBottom'};
 var $author$project$ToolsController$DockLowerRight = {$: 'DockLowerRight'};
 var $author$project$ToolsController$ToolDockSelect = F2(
 	function (a, b) {
@@ -25524,7 +25585,7 @@ var $author$project$ToolsController$toolsForDock = F4(
 					},
 					options.tools)));
 	});
-var $author$project$Main$lowerLeftDockView = function (model) {
+var $author$project$Main$bottomDockView = function (model) {
 	return A3(
 		$mdgriffith$elm_ui$Element$layoutWith,
 		{
@@ -25532,17 +25593,7 @@ var $author$project$Main$lowerLeftDockView = function (model) {
 				[$mdgriffith$elm_ui$Element$noStaticStyleSheet])
 		},
 		$author$project$ViewPureStyles$commonLayoutStyles,
-		A4($author$project$ToolsController$toolsForDock, $author$project$ToolsController$DockLowerLeft, $author$project$Main$ToolsMsg, model.track, model.toolOptions));
-};
-var $author$project$Main$upperLeftDockView = function (model) {
-	return A3(
-		$mdgriffith$elm_ui$Element$layoutWith,
-		{
-			options: _List_fromArray(
-				[$mdgriffith$elm_ui$Element$noStaticStyleSheet])
-		},
-		$author$project$ViewPureStyles$commonLayoutStyles,
-		A4($author$project$ToolsController$toolsForDock, $author$project$ToolsController$DockUpperLeft, $author$project$Main$ToolsMsg, model.track, model.toolOptions));
+		A4($author$project$ToolsController$toolsForDock, $author$project$ToolsController$DockBottom, $author$project$Main$ToolsMsg, model.track, model.toolOptions));
 };
 var $author$project$SplitPane$SplitPane$firstChildViewStyle = function (_v0) {
 	var state = _v0.a;
@@ -25932,26 +25983,6 @@ var $author$project$SplitPane$SplitPane$view = F4(
 						[secondView]))
 				]));
 	});
-var $author$project$Main$leftDockView = function (model) {
-	return A4(
-		$author$project$SplitPane$SplitPane$view,
-		$author$project$Main$leftDockInternalConfig,
-		$author$project$Main$upperLeftDockView(model),
-		$author$project$Main$lowerLeftDockView(model),
-		model.leftDockInternal);
-};
-var $author$project$Main$bottomDockConfig = $author$project$SplitPane$SplitPane$createViewConfig(
-	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitBottomDockTopEdge});
-var $author$project$Main$bottomDockView = function (model) {
-	return A3(
-		$mdgriffith$elm_ui$Element$layoutWith,
-		{
-			options: _List_fromArray(
-				[$mdgriffith$elm_ui$Element$noStaticStyleSheet])
-		},
-		$author$project$ViewPureStyles$commonLayoutStyles,
-		A4($author$project$ToolsController$toolsForDock, $author$project$ToolsController$DockBottom, $author$project$Main$ToolsMsg, model.track, model.toolOptions));
-};
 var $author$project$Main$SetCurrentPosition = function (a) {
 	return {$: 'SetCurrentPosition', a: a};
 };
@@ -27971,6 +28002,46 @@ var $author$project$Main$centralAreaView = function (model) {
 		$author$project$Main$bottomDockView(model),
 		model.bottomDockTopEdge);
 };
+var $author$project$Main$leftDockConfig = $author$project$SplitPane$SplitPane$createViewConfig(
+	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitLeftDockRightEdge});
+var $author$project$Main$leftDockInternalConfig = $author$project$SplitPane$SplitPane$createViewConfig(
+	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitLeftDockInternal});
+var $author$project$Main$lowerLeftDockView = function (model) {
+	return A3(
+		$mdgriffith$elm_ui$Element$layoutWith,
+		{
+			options: _List_fromArray(
+				[$mdgriffith$elm_ui$Element$noStaticStyleSheet])
+		},
+		$author$project$ViewPureStyles$commonLayoutStyles,
+		A4($author$project$ToolsController$toolsForDock, $author$project$ToolsController$DockLowerLeft, $author$project$Main$ToolsMsg, model.track, model.toolOptions));
+};
+var $author$project$Main$upperLeftDockView = function (model) {
+	return A3(
+		$mdgriffith$elm_ui$Element$layoutWith,
+		{
+			options: _List_fromArray(
+				[$mdgriffith$elm_ui$Element$noStaticStyleSheet])
+		},
+		$author$project$ViewPureStyles$commonLayoutStyles,
+		A4($author$project$ToolsController$toolsForDock, $author$project$ToolsController$DockUpperLeft, $author$project$Main$ToolsMsg, model.track, model.toolOptions));
+};
+var $author$project$Main$leftDockView = function (model) {
+	return A4(
+		$author$project$SplitPane$SplitPane$view,
+		$author$project$Main$leftDockInternalConfig,
+		$author$project$Main$upperLeftDockView(model),
+		$author$project$Main$lowerLeftDockView(model),
+		model.leftDockInternal);
+};
+var $author$project$Main$notTheRightDockView = function (model) {
+	return A4(
+		$author$project$SplitPane$SplitPane$view,
+		$author$project$Main$leftDockConfig,
+		$author$project$Main$leftDockView(model),
+		$author$project$Main$centralAreaView(model),
+		model.leftDockRightEdge);
+};
 var $author$project$Main$rightDockConfig = $author$project$SplitPane$SplitPane$createViewConfig(
 	{customSplitter: $elm$core$Maybe$Nothing, toMsg: $author$project$Main$SplitRightDockLeftEdge});
 var $author$project$Main$lowerRightDockView = function (model) {
@@ -28002,14 +28073,6 @@ var $author$project$Main$rightDockView = function (model) {
 		$author$project$Main$upperRightDockView(model),
 		$author$project$Main$lowerRightDockView(model),
 		model.rightDockInternal);
-};
-var $author$project$Main$notTheLeftDockView = function (model) {
-	return A4(
-		$author$project$SplitPane$SplitPane$view,
-		$author$project$Main$rightDockConfig,
-		$author$project$Main$centralAreaView(model),
-		$author$project$Main$rightDockView(model),
-		model.rightDockLeftEdge);
 };
 var $author$project$Main$showModalMessage = function (msg) {
 	return A2(
@@ -28094,10 +28157,10 @@ var $author$project$Main$view = function (model) {
 									[
 										A4(
 										$author$project$SplitPane$SplitPane$view,
-										$author$project$Main$leftDockConfig,
-										$author$project$Main$leftDockView(model),
-										$author$project$Main$notTheLeftDockView(model),
-										model.leftDockRightEdge)
+										$author$project$Main$rightDockConfig,
+										$author$project$Main$notTheRightDockView(model),
+										$author$project$Main$rightDockView(model),
+										model.rightDockLeftEdge)
 									])))
 						])))
 			]),

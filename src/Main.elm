@@ -430,20 +430,17 @@ update msg model =
 
         Resize width height ->
             ( { model | windowSize = ( toFloat width, toFloat height ) }
-                |> adjustSpaceForContent
+                |> allocateSpaceForDocksAndContent width height
             , MapPortController.refreshMap
             )
 
         GotWindowSize result ->
             case result of
                 Ok info ->
-                    ( { model
-                        | windowSize =
-                            ( info.viewport.width
-                            , info.viewport.height
-                            )
-                      }
-                        |> adjustSpaceForContent
+                    ( model
+                        |> allocateSpaceForDocksAndContent
+                            (truncate info.viewport.width)
+                            (truncate info.viewport.height)
                     , MapPortController.refreshMap
                     )
 
@@ -467,24 +464,49 @@ update msg model =
             )
 
 
+allocateSpaceForDocksAndContent : Int -> Int -> Model -> Model
+allocateSpaceForDocksAndContent width height model =
+    { model
+        | windowSize = ( toFloat width, toFloat height )
+        , leftDockRightEdge =
+            SplitPane.init Horizontal
+                |> configureSplitter (SplitPane.px 200 <| Just ( 20, width // 3 ))
+        , leftDockInternal =
+            SplitPane.init Vertical
+                |> configureSplitter (SplitPane.px (height // 2) <| Just ( 50, height - 75 ))
+        , rightDockLeftEdge =
+            SplitPane.init Horizontal
+                |> configureSplitter (SplitPane.px (width - 200) <| Just ( 2 * width // 3, width - 20 ))
+        , rightDockInternal =
+            SplitPane.init Vertical
+                |> configureSplitter (SplitPane.px (height // 2) <| Just ( 50, height - 75 ))
+        , bottomDockTopEdge =
+            SplitPane.init Vertical
+                |> configureSplitter (SplitPane.px (height - 200) <| Just ( height * 2 // 3, height - 75 ))
+    }
+        |> adjustSpaceForContent
+
+
 adjustSpaceForContent : Model -> Model
 adjustSpaceForContent model =
     let
-        availableWidthFraction =
-            (1.0 - SplitPane.getPosition model.leftDockRightEdge)
-                * SplitPane.getPosition model.rightDockLeftEdge
+        ( width, height ) =
+            ( Tuple.first model.windowSize
+            , Tuple.second model.windowSize
+            )
 
-        availableHeightFraction =
+        availableWidthPixels =
+            SplitPane.getPosition model.rightDockLeftEdge
+                - SplitPane.getPosition model.leftDockRightEdge
+                - reservedWidth
+
+        availableHeightPixels =
             SplitPane.getPosition model.bottomDockTopEdge
+                - reservedHeight
 
         ( reservedWidth, reservedHeight ) =
             -- This by experiment, not ideal.
-            ( 50, 130 )
-
-        ( availableWidthPixels, availableHeightPixels ) =
-            ( Tuple.first model.windowSize * availableWidthFraction - reservedWidth
-            , Tuple.second model.windowSize * availableHeightFraction - reservedHeight
-            )
+            ( 20, 80 )
     in
     { model
         | contentArea =
@@ -524,10 +546,10 @@ view model =
                         , style "height" "100%"
                         ]
                         [ SplitPane.view
-                            leftDockConfig
-                            (leftDockView model)
-                            (notTheLeftDockView model)
-                            model.leftDockRightEdge
+                            rightDockConfig
+                            (notTheRightDockView model)
+                            (rightDockView model)
+                            model.rightDockLeftEdge
                         ]
                 ]
         ]
@@ -574,6 +596,24 @@ rightDockInternalConfig =
         }
 
 
+rightDockView : Model -> Html Msg
+rightDockView model =
+    SplitPane.view
+        rightDockInternalConfig
+        (upperRightDockView model)
+        (lowerRightDockView model)
+        model.rightDockInternal
+
+
+notTheRightDockView : Model -> Html Msg
+notTheRightDockView model =
+    SplitPane.view
+        leftDockConfig
+        (leftDockView model)
+        (centralAreaView model)
+        model.leftDockRightEdge
+
+
 leftDockView : Model -> Html Msg
 leftDockView model =
     SplitPane.view
@@ -601,15 +641,6 @@ lowerLeftDockView model =
             ToolsMsg
             model.track
             model.toolOptions
-
-
-rightDockView : Model -> Html Msg
-rightDockView model =
-    SplitPane.view
-        rightDockInternalConfig
-        (upperRightDockView model)
-        (lowerRightDockView model)
-        model.rightDockInternal
 
 
 upperRightDockView : Model -> Html Msg
@@ -646,15 +677,6 @@ bottomDockView model =
             ToolsMsg
             model.track
             model.toolOptions
-
-
-notTheLeftDockView : Model -> Html Msg
-notTheLeftDockView model =
-    SplitPane.view
-        rightDockConfig
-        (centralAreaView model)
-        (rightDockView model)
-        model.rightDockLeftEdge
 
 
 centralAreaView : Model -> Html Msg

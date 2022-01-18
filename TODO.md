@@ -1,42 +1,40 @@
-
-
-# WIP
-
-## NEXT UP:
-
-Save & Restore of splitter and tool settings (basis in v2).
-
-## AND THEN: Delete with a range (nearly trivial).
-Use `count from start` and `count from end` to denote the portion for deletion.
+# BUGS
 
 BUG: Change colour on closed tab shows preview.
 
-## AND THEN: Undo, Redo. (Do journaling here?)
+# WIP
 
-## Tree algebra
-DONE. Split tree into two
-DONE. Join two trees
-DONE. Delete a leaf/leaves (is just split and join)
-DONE. Insert a leaf/leaves (is just join)
+Save & Restore of splitter and tool settings (basis in v2).
 
-6. Update leaves (and all their aggregate nodes)   
-   (note this is actually a top-down operation where the action is in the return,  
-   and is really the **same as building** the tree initially.
-   (If this is the whole tree, use the chance to re-balance?)
+## NEXT UP:
+
+# BACKLOG, roughly in order
+
+## Delete with a range (nearly trivial).
+Use `count from start` and `count from end` to denote the portion for deletion.
+
+## Undo, Redo. (Do journaling here?)
+Decide on approach (more 2.7 than 2.8)
+
+## Multiple views
+
+## DEBT
 
 Split **DomainModel** into core and various helpers.
 
 Make **DragPan** work on 3D view.
 
+Third person click should not re-centre the view.
+> Does so now because we are in "follow" mode.
+
+Double-click, in contrast, always centres.
+> More generally, don't centre _the view you click on_.
+> Other views should centre when in "follow" mode.
+
 Put all Font, Colour etc into a Palette/Style module for ease of change.
 Make Tool titles 'black' or 'white' using greyscale formula.
 
 Need "restore to defaults" for tools.
-
-## Editing?
->> Take a couple of tools, do them as better tabs:
- - Less space for view selection -- popup? e.g. feather icon with "eye" in the wee mini toolbar.
- - Decide best approach to Undo & Redo (see Backlog)
 
 ## Profile & Charts
 Details in Backlog.
@@ -50,18 +48,7 @@ Map options tool?
 - Map follow orange pointer
 - Draggable points
 
----
 
-# Backlog
-
-Third person click should not re-centre the view.
-> Does so now because we are in "follow" mode.
-
-Double-click, in contrast, always centres.
-> More generally, don't centre _the view you click on_.
-> Other views should centre when in "follow" mode.
-
-? Add variable rate movement control to Pointer box (fairly simple new control with self-centering) ?
 
 ## Layout
 
