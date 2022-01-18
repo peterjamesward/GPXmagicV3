@@ -6,13 +6,13 @@ BUG: Dubious (obviously wrong) direction changes reported.
 
 # WIP
 
+## Undo, Redo. (Do journaling here?)
+Decide on approach (more 2.7 than 2.8)
+
 # BACKLOG, roughly in order
 
 ## Delete with a range (nearly trivial).
 Use `count from start` and `count from end` to denote the portion for deletion.
-
-## Undo, Redo. (Do journaling here?)
-Decide on approach (more 2.7 than 2.8)
 
 ## Multiple views
 
