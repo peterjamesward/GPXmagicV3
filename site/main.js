@@ -25613,10 +25613,10 @@ var $author$project$DomainModel$distanceFromIndex = F2(
 	});
 var $author$project$Tools$Pointers$positionDescription = F2(
 	function (pos, track) {
-		return 'Point ' + ($elm$core$String$fromInt(pos) + (', at ' + (A2(
+		return 'Point ' + ($elm$core$String$fromInt(pos) + (', at ' + A2(
 			$author$project$UtilsForViews$showLongMeasure,
 			false,
-			A2($author$project$DomainModel$distanceFromIndex, pos, track)) + 'm')));
+			A2($author$project$DomainModel$distanceFromIndex, pos, track))));
 	});
 var $author$project$Tools$Pointers$view = F3(
 	function (msgWrapper, options, isTrack) {
