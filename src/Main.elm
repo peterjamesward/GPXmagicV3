@@ -207,19 +207,19 @@ init mflags origin navigationKey =
       , modalMessage = Nothing
       , leftDockRightEdge =
             SplitPane.init Horizontal
-                |> configureSplitter (percentage 0.2 <| Just ( 0.01, 0.4 ))
+                |> configureSplitter (SplitPane.px 200 <| Just ( 20, 200 ))
       , leftDockInternal =
             SplitPane.init Vertical
-                |> configureSplitter (percentage 0.4 <| Just ( 0.1, 0.9 ))
+                |> configureSplitter (SplitPane.px (500 // 2) <| Just ( 50, 400 ))
       , rightDockLeftEdge =
             SplitPane.init Horizontal
-                |> configureSplitter (percentage 0.8 <| Just ( 0.6, 0.97 ))
+                |> configureSplitter (SplitPane.px (800 - 200) <| Just ( 600, 990 ))
       , rightDockInternal =
             SplitPane.init Vertical
-                |> configureSplitter (percentage 0.6 <| Just ( 0.1, 0.9 ))
+                |> configureSplitter (SplitPane.px (500 // 2) <| Just ( 50, 400 ))
       , bottomDockTopEdge =
             SplitPane.init Vertical
-                |> configureSplitter (percentage 0.8 <| Just ( 0.6, 0.97 ))
+                |> configureSplitter (SplitPane.px (500 - 200) <| Just ( 300, 470 ))
       , toolOptions = ToolsController.defaultOptions
       }
     , Cmd.batch

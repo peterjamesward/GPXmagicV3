@@ -166,7 +166,6 @@ positionDescription pos track =
         ++ String.fromInt pos
         ++ ", at "
         ++ (showLongMeasure False <| DomainModel.distanceFromIndex pos track)
-        ++ "m"
 
 
 view : (Msg -> msg) -> Options -> Maybe TrackLoaded -> Element msg

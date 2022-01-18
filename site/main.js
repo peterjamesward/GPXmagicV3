@@ -9540,6 +9540,24 @@ var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
 var $ianmackenzie$elm_units$Pixels$pixels = function (numPixels) {
 	return $ianmackenzie$elm_units$Quantity$Quantity(numPixels);
 };
+var $author$project$SplitPane$SplitPane$Px = function (a) {
+	return {$: 'Px', a: a};
+};
+var $author$project$SplitPane$SplitPane$px = F2(
+	function (x, bound) {
+		var newBound = function () {
+			if (bound.$ === 'Just') {
+				var _v1 = bound.a;
+				var lower = _v1.a;
+				var upper = _v1.b;
+				return A2($author$project$SplitPane$Bound$createBound, lower, upper);
+			} else {
+				return A2($author$project$SplitPane$Bound$createBound, 0, 9999999999);
+			}
+		}();
+		return $author$project$SplitPane$SplitPane$Px(
+			A2($author$project$SplitPane$Bound$createBounded, x, newBound));
+	});
 var $elm$json$Json$Encode$object = function (pairs) {
 	return _Json_wrap(
 		A3(
@@ -9587,10 +9605,10 @@ var $author$project$Main$init = F3(
 				bottomDockTopEdge: A2(
 					$author$project$SplitPane$SplitPane$configureSplitter,
 					A2(
-						$author$project$SplitPane$SplitPane$percentage,
-						0.8,
+						$author$project$SplitPane$SplitPane$px,
+						500 - 200,
 						$elm$core$Maybe$Just(
-							_Utils_Tuple2(0.6, 0.97))),
+							_Utils_Tuple2(300, 470))),
 					$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Vertical)),
 				contentArea: _Utils_Tuple2(
 					$ianmackenzie$elm_units$Pixels$pixels(800),
@@ -9600,36 +9618,36 @@ var $author$project$Main$init = F3(
 				leftDockInternal: A2(
 					$author$project$SplitPane$SplitPane$configureSplitter,
 					A2(
-						$author$project$SplitPane$SplitPane$percentage,
-						0.4,
+						$author$project$SplitPane$SplitPane$px,
+						(500 / 2) | 0,
 						$elm$core$Maybe$Just(
-							_Utils_Tuple2(0.1, 0.9))),
+							_Utils_Tuple2(50, 400))),
 					$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Vertical)),
 				leftDockRightEdge: A2(
 					$author$project$SplitPane$SplitPane$configureSplitter,
 					A2(
-						$author$project$SplitPane$SplitPane$percentage,
-						0.2,
+						$author$project$SplitPane$SplitPane$px,
+						200,
 						$elm$core$Maybe$Just(
-							_Utils_Tuple2(0.01, 0.4))),
+							_Utils_Tuple2(20, 200))),
 					$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Horizontal)),
 				modalMessage: $elm$core$Maybe$Nothing,
 				previews: $elm$core$Dict$empty,
 				rightDockInternal: A2(
 					$author$project$SplitPane$SplitPane$configureSplitter,
 					A2(
-						$author$project$SplitPane$SplitPane$percentage,
-						0.6,
+						$author$project$SplitPane$SplitPane$px,
+						(500 / 2) | 0,
 						$elm$core$Maybe$Just(
-							_Utils_Tuple2(0.1, 0.9))),
+							_Utils_Tuple2(50, 400))),
 					$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Vertical)),
 				rightDockLeftEdge: A2(
 					$author$project$SplitPane$SplitPane$configureSplitter,
 					A2(
-						$author$project$SplitPane$SplitPane$percentage,
-						0.8,
+						$author$project$SplitPane$SplitPane$px,
+						800 - 200,
 						$elm$core$Maybe$Just(
-							_Utils_Tuple2(0.6, 0.97))),
+							_Utils_Tuple2(600, 990))),
 					$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Horizontal)),
 				scene: _List_Nil,
 				stravaAuthentication: authData,
@@ -10135,24 +10153,6 @@ var $author$project$Main$adjustSpaceForContent = function (model) {
 					$elm$core$Basics$round(availableHeightPixels)))
 		});
 };
-var $author$project$SplitPane$SplitPane$Px = function (a) {
-	return {$: 'Px', a: a};
-};
-var $author$project$SplitPane$SplitPane$px = F2(
-	function (x, bound) {
-		var newBound = function () {
-			if (bound.$ === 'Just') {
-				var _v1 = bound.a;
-				var lower = _v1.a;
-				var upper = _v1.b;
-				return A2($author$project$SplitPane$Bound$createBound, lower, upper);
-			} else {
-				return A2($author$project$SplitPane$Bound$createBound, 0, 9999999999);
-			}
-		}();
-		return $author$project$SplitPane$SplitPane$Px(
-			A2($author$project$SplitPane$Bound$createBounded, x, newBound));
-	});
 var $elm$core$Basics$truncate = _Basics_truncate;
 var $author$project$Main$allocateSpaceForDocksAndContent = F3(
 	function (width, height, model) {

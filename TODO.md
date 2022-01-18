@@ -13,15 +13,16 @@ as another (different) edit occurs. Hence, just keep track point data.
 Means the logic is essentially the same both ways.
 (Consider putting into sessionStorage but only if there's a clear need.)
 
-# BACKLOG, roughly in order
+---
+
+# BACKLOG, roughly in order ...
 
 ## Delete with a range (nearly trivial).
+Keep single point until it's clear that it falls out as a (not) special case.
 
 ## Multiple views
-
-## DEBT
-
-Take helpers out of **DomainModel** if not type-specific.
+Possibly a tool for this. But probably a "menu" option.
+Possibly use tool to also switch views, or is that too obscure?
 
 Make **DragPan** work on 3D view.
 
