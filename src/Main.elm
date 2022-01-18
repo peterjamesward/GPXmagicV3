@@ -752,8 +752,6 @@ contentArea model =
         [ width <| Element.px <| Pixels.inPixels w
         , height <| Element.px <| Pixels.inPixels h
         , alignTop
-
-        --, padding 10
         , centerX
         ]
         [ column

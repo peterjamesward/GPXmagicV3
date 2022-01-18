@@ -4,17 +4,18 @@
 
 ## NEXT UP: Markers.
 
-Change position slider to be distance not point based.
-? Add variable rate movement control to Pointer box (fairly simple new control with self-centering) ?
+Need to show Purple.
 
 Whether to leave currentPosition (and purple) in Track or move to Pointers.options.
-> This is surely not really a thing.
+> This is surely not really a thing; must be in Track.
 
 Save & Restore of splitter and tool settings (basis in v2).
 
 ## AND THEN: Delete with a range (nearly trivial).
 
 **NB**: Use `count from start` and `count from end` to denote the portion for deletion.
+
+Change colour on closed tab shows preview.
 
 ## AND THEN: Undo, Redo. (Do journaling here?)
 
@@ -65,6 +66,8 @@ Third person click should not re-centre the view.
 Double-click, in contrast, always centres.
 > More generally, don't centre _the view you click on_.
 > Other views should centre when in "follow" mode.
+
+? Add variable rate movement control to Pointer box (fairly simple new control with self-centering) ?
 
 ## Layout
 

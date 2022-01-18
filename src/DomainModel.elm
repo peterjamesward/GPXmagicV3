@@ -492,6 +492,26 @@ gpxPointFromIndex index treeNode =
                 gpxPointFromIndex (index - skipCount info.left) info.right
 
 
+distanceFromIndex : Int -> PeteTree -> Length.Length
+distanceFromIndex index treeNode =
+    case treeNode of
+        Leaf info ->
+            if index <= 0 then
+                Length.meters 0
+
+            else
+                info.trueLength
+
+        Node info ->
+            if index < skipCount info.left then
+                distanceFromIndex index info.left
+
+            else
+                Quantity.plus
+                    info.nodeContent.trueLength
+                    (distanceFromIndex (index - skipCount info.left) info.right)
+
+
 nearestToRay :
     Axis3d Meters LocalCoords
     -> PeteTree

@@ -14,7 +14,7 @@ import FlatColors.ChinesePalette
 import List.Extra
 import Quantity
 import TrackLoaded exposing (TrackLoaded)
-import UtilsForViews exposing (showAngle)
+import UtilsForViews exposing (showAngle, showLongMeasure)
 import ViewPureStyles exposing (neatToolsBorder, sliderThumb, useIcon)
 
 
@@ -72,11 +72,15 @@ update msg options previewColour hasTrack =
             ( options, [] )
 
         Just track ->
+            let
+                restrictToTrack value increment =
+                    clamp 0 (skipCount track.trackTree) <| value + increment
+            in
             case msg of
                 PointerForwardOne ->
                     let
                         position =
-                            min (options.orange + 1) (skipCount track.trackTree)
+                            restrictToTrack options.orange 1
                     in
                     ( { options | orange = position }
                     , [ SetCurrent position ]
@@ -85,86 +89,177 @@ update msg options previewColour hasTrack =
                 PointerBackwardOne ->
                     let
                         position =
-                            max (options.orange - 1) 0
+                            restrictToTrack options.orange -1
                     in
                     ( { options | orange = position }
                     , [ SetCurrent position ]
                     )
 
                 PointerFastForward ->
-                    ( options, [] )
+                    let
+                        position =
+                            restrictToTrack options.orange (skipCount track.trackTree // 20)
+                    in
+                    ( { options | orange = position }
+                    , [ SetCurrent position ]
+                    )
 
                 PointerRewind ->
-                    ( options, [] )
+                    let
+                        position =
+                            restrictToTrack options.orange (0 - skipCount track.trackTree // 20)
+                    in
+                    ( { options | orange = position }
+                    , [ SetCurrent position ]
+                    )
 
                 DropMarker ->
-                    ( options, [] )
+                    ( { options | purple = Just options.orange }
+                    , [ SetMarker <| Just options.orange ]
+                    )
 
                 LiftMarker ->
-                    ( options, [] )
+                    ( { options | purple = Nothing }
+                    , [ SetMarker Nothing ]
+                    )
 
                 MarkerForwardOne ->
-                    ( options, [] )
+                    let
+                        position =
+                            case options.purple of
+                                Just something ->
+                                    Just <| restrictToTrack something 1
+
+                                Nothing ->
+                                    Nothing
+                    in
+                    ( { options
+                        | purple = position
+                      }
+                    , [ SetMarker position ]
+                    )
 
                 MarferBackwardOne ->
-                    ( options, [] )
+                    let
+                        position =
+                            case options.purple of
+                                Just something ->
+                                    Just <| restrictToTrack something -1
+
+                                Nothing ->
+                                    Nothing
+                    in
+                    ( { options
+                        | purple = position
+                      }
+                    , [ SetMarker position ]
+                    )
 
 
-view : (Msg -> msg) -> Options -> Element msg
-view msgWrapper options =
-    el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
-        column
-            [ centerX
-            , padding 4
-            , spacing 6
+positionDescription : Int -> PeteTree -> String
+positionDescription pos track =
+    "Point "
+        ++ String.fromInt pos
+        ++ ", at "
+        ++ (showLongMeasure False <| DomainModel.distanceFromIndex pos track)
+        ++ "m"
 
-            --, height <| px 150
-            ]
-            [ el [ centerX ] <|
-                text <|
-                    "About the Orange pointer ..."
-            , row
-                [ centerX
-                , spacing 10
-                , Font.color FlatColors.AussiePalette.quinceJelly
+
+view : (Msg -> msg) -> Options -> Maybe TrackLoaded -> Element msg
+view msgWrapper options isTrack =
+    case isTrack of
+        Nothing ->
+            el
+                [ width fill
+                , Background.color FlatColors.ChinesePalette.antiFlashWhite
+                , height <| px 140
                 ]
-                [ Input.button neatToolsBorder
-                    { label = useIcon FeatherIcons.chevronsLeft
-                    , onPress = Just <| msgWrapper <| PointerRewind
-                    }
-                , Input.button neatToolsBorder
-                    { label = useIcon FeatherIcons.chevronLeft
-                    , onPress = Just <| msgWrapper <| PointerBackwardOne
-                    }
-                , Input.button neatToolsBorder
-                    { label = useIcon FeatherIcons.chevronRight
-                    , onPress = Just <| msgWrapper <| PointerForwardOne
-                    }
-                , Input.button neatToolsBorder
-                    { label = useIcon FeatherIcons.chevronsRight
-                    , onPress = Just <| msgWrapper <| PointerFastForward
-                    }
-                ]
-            , el [ centerX ] <|
-                Input.button (padding 8 :: neatToolsBorder)
-                    { label = text "Drop purple marker"
-                    , onPress = Just <| msgWrapper <| DropMarker
-                    }
-            , row
-                [ centerX
-                , spacing 10
-                , Font.color FlatColors.AussiePalette.blurple
-                ]
-                [ Input.button neatToolsBorder
-                    { label = useIcon FeatherIcons.chevronLeft
-                    , onPress = Just <| msgWrapper <| MarferBackwardOne
-                    }
-                , Input.button neatToolsBorder
-                    { label = useIcon FeatherIcons.chevronsRight
-                    , onPress = Just <| msgWrapper <| MarkerForwardOne
-                    }
-                ]
-            , el [ centerX ] <|
-                text <|
-                    "About the Purple marker ..."
-            ]
+                none
+
+        Just track ->
+            el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
+                column
+                    [ centerX
+                    , padding 4
+                    , spacing 6
+
+                    --, height <| px 150
+                    ]
+                    [ el [ centerX ] <|
+                        text <|
+                            positionDescription options.orange track.trackTree
+                    , row
+                        [ centerX
+                        , spacing 10
+                        , Font.color FlatColors.AussiePalette.quinceJelly
+                        ]
+                        [ Input.button neatToolsBorder
+                            { label = useIcon FeatherIcons.chevronsLeft
+                            , onPress = Just <| msgWrapper <| PointerRewind
+                            }
+                        , Input.button neatToolsBorder
+                            { label = useIcon FeatherIcons.chevronLeft
+                            , onPress = Just <| msgWrapper <| PointerBackwardOne
+                            }
+                        , Input.button neatToolsBorder
+                            { label = useIcon FeatherIcons.chevronRight
+                            , onPress = Just <| msgWrapper <| PointerForwardOne
+                            }
+                        , Input.button neatToolsBorder
+                            { label = useIcon FeatherIcons.chevronsRight
+                            , onPress = Just <| msgWrapper <| PointerFastForward
+                            }
+                        ]
+                    , el [ centerX ] <|
+                        case options.purple of
+                            Just something ->
+                                Input.button (padding 8 :: neatToolsBorder)
+                                    { label = text "Lift purple marker"
+                                    , onPress = Just <| msgWrapper <| LiftMarker
+                                    }
+
+                            Nothing ->
+                                Input.button (padding 8 :: neatToolsBorder)
+                                    { label = text "Drop purple marker"
+                                    , onPress = Just <| msgWrapper <| DropMarker
+                                    }
+                    , case options.purple of
+                        Just something ->
+                            row
+                                [ centerX
+                                , spacing 10
+                                , Font.color FlatColors.AussiePalette.blurple
+                                ]
+                                [ Input.button neatToolsBorder
+                                    { label = useIcon FeatherIcons.chevronLeft
+                                    , onPress = Just <| msgWrapper <| MarferBackwardOne
+                                    }
+                                , Input.button neatToolsBorder
+                                    { label = useIcon FeatherIcons.chevronRight
+                                    , onPress = Just <| msgWrapper <| MarkerForwardOne
+                                    }
+                                ]
+
+                        Nothing ->
+                            row
+                                [ centerX
+                                , spacing 10
+                                , Font.color FlatColors.AussiePalette.coastalBreeze
+                                ]
+                                [ Input.button neatToolsBorder
+                                    { label = useIcon FeatherIcons.chevronLeft
+                                    , onPress = Just <| msgWrapper <| MarferBackwardOne
+                                    }
+                                , Input.button neatToolsBorder
+                                    { label = useIcon FeatherIcons.chevronRight
+                                    , onPress = Just <| msgWrapper <| MarkerForwardOne
+                                    }
+                                ]
+                    , el [ centerX ] <|
+                        case options.purple of
+                            Just something ->
+                                text <| positionDescription something track.trackTree
+
+                            Nothing ->
+                                text "---"
+                    ]

@@ -16,6 +16,7 @@ type ToolAction msg
     | MapCenterOnCurrent
     | DeleteSinglePoint Int
     | TrackHasChanged -- Must follow an action that changes the track.
+    | SetMarker (Maybe Int)
     | NoAction
 
 

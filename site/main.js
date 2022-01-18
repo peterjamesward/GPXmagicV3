@@ -15259,18 +15259,26 @@ var $author$project$Tools$DeletePoints$update = F4(
 			return _Utils_Tuple2(options, _List_Nil);
 		}
 	});
+var $author$project$Actions$SetMarker = function (a) {
+	return {$: 'SetMarker', a: a};
+};
 var $author$project$Tools$Pointers$update = F4(
 	function (msg, options, previewColour, hasTrack) {
 		if (hasTrack.$ === 'Nothing') {
 			return _Utils_Tuple2(options, _List_Nil);
 		} else {
 			var track = hasTrack.a;
+			var restrictToTrack = F2(
+				function (value, increment) {
+					return A3(
+						$elm$core$Basics$clamp,
+						0,
+						$author$project$DomainModel$skipCount(track.trackTree),
+						value + increment);
+				});
 			switch (msg.$) {
 				case 'PointerForwardOne':
-					var position = A2(
-						$elm$core$Basics$min,
-						options.orange + 1,
-						$author$project$DomainModel$skipCount(track.trackTree));
+					var position = A2(restrictToTrack, options.orange, 1);
 					return _Utils_Tuple2(
 						_Utils_update(
 							options,
@@ -15280,7 +15288,7 @@ var $author$project$Tools$Pointers$update = F4(
 								$author$project$Actions$SetCurrent(position)
 							]));
 				case 'PointerBackwardOne':
-					var position = A2($elm$core$Basics$max, options.orange - 1, 0);
+					var position = A2(restrictToTrack, options.orange, -1);
 					return _Utils_Tuple2(
 						_Utils_update(
 							options,
@@ -15290,17 +15298,90 @@ var $author$project$Tools$Pointers$update = F4(
 								$author$project$Actions$SetCurrent(position)
 							]));
 				case 'PointerFastForward':
-					return _Utils_Tuple2(options, _List_Nil);
+					var position = A2(
+						restrictToTrack,
+						options.orange,
+						($author$project$DomainModel$skipCount(track.trackTree) / 20) | 0);
+					return _Utils_Tuple2(
+						_Utils_update(
+							options,
+							{orange: position}),
+						_List_fromArray(
+							[
+								$author$project$Actions$SetCurrent(position)
+							]));
 				case 'PointerRewind':
-					return _Utils_Tuple2(options, _List_Nil);
+					var position = A2(
+						restrictToTrack,
+						options.orange,
+						0 - (($author$project$DomainModel$skipCount(track.trackTree) / 20) | 0));
+					return _Utils_Tuple2(
+						_Utils_update(
+							options,
+							{orange: position}),
+						_List_fromArray(
+							[
+								$author$project$Actions$SetCurrent(position)
+							]));
 				case 'DropMarker':
-					return _Utils_Tuple2(options, _List_Nil);
+					return _Utils_Tuple2(
+						_Utils_update(
+							options,
+							{
+								purple: $elm$core$Maybe$Just(options.orange)
+							}),
+						_List_fromArray(
+							[
+								$author$project$Actions$SetMarker(
+								$elm$core$Maybe$Just(options.orange))
+							]));
 				case 'LiftMarker':
-					return _Utils_Tuple2(options, _List_Nil);
+					return _Utils_Tuple2(
+						_Utils_update(
+							options,
+							{purple: $elm$core$Maybe$Nothing}),
+						_List_fromArray(
+							[
+								$author$project$Actions$SetMarker($elm$core$Maybe$Nothing)
+							]));
 				case 'MarkerForwardOne':
-					return _Utils_Tuple2(options, _List_Nil);
+					var position = function () {
+						var _v2 = options.purple;
+						if (_v2.$ === 'Just') {
+							var something = _v2.a;
+							return $elm$core$Maybe$Just(
+								A2(restrictToTrack, something, 1));
+						} else {
+							return $elm$core$Maybe$Nothing;
+						}
+					}();
+					return _Utils_Tuple2(
+						_Utils_update(
+							options,
+							{purple: position}),
+						_List_fromArray(
+							[
+								$author$project$Actions$SetMarker(position)
+							]));
 				default:
-					return _Utils_Tuple2(options, _List_Nil);
+					var position = function () {
+						var _v3 = options.purple;
+						if (_v3.$ === 'Just') {
+							var something = _v3.a;
+							return $elm$core$Maybe$Just(
+								A2(restrictToTrack, something, -1));
+						} else {
+							return $elm$core$Maybe$Nothing;
+						}
+					}();
+					return _Utils_Tuple2(
+						_Utils_update(
+							options,
+							{purple: position}),
+						_List_fromArray(
+							[
+								$author$project$Actions$SetMarker(position)
+							]));
 			}
 		}
 	});
@@ -24760,6 +24841,7 @@ var $author$project$Tools$DeletePoints$view = F2(
 					})));
 	});
 var $author$project$Tools$Pointers$DropMarker = {$: 'DropMarker'};
+var $author$project$Tools$Pointers$LiftMarker = {$: 'LiftMarker'};
 var $author$project$Tools$Pointers$MarferBackwardOne = {$: 'MarferBackwardOne'};
 var $author$project$Tools$Pointers$MarkerForwardOne = {$: 'MarkerForwardOne'};
 var $author$project$Tools$Pointers$PointerBackwardOne = {$: 'PointerBackwardOne'};
@@ -24807,121 +24889,233 @@ var $feathericons$elm_feather$FeatherIcons$chevronsRight = A2(
 				]),
 			_List_Nil)
 		]));
-var $author$project$Tools$Pointers$view = F2(
-	function (msgWrapper, options) {
-		return A2(
-			$mdgriffith$elm_ui$Element$el,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-					$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite)
-				]),
-			A2(
-				$mdgriffith$elm_ui$Element$column,
+var $author$project$DomainModel$distanceFromIndex = F2(
+	function (index, treeNode) {
+		distanceFromIndex:
+		while (true) {
+			if (treeNode.$ === 'Leaf') {
+				var info = treeNode.a;
+				return (index <= 0) ? $ianmackenzie$elm_units$Length$meters(0) : info.trueLength;
+			} else {
+				var info = treeNode.a;
+				if (_Utils_cmp(
+					index,
+					$author$project$DomainModel$skipCount(info.left)) < 0) {
+					var $temp$index = index,
+						$temp$treeNode = info.left;
+					index = $temp$index;
+					treeNode = $temp$treeNode;
+					continue distanceFromIndex;
+				} else {
+					return A2(
+						$ianmackenzie$elm_units$Quantity$plus,
+						info.nodeContent.trueLength,
+						A2(
+							$author$project$DomainModel$distanceFromIndex,
+							index - $author$project$DomainModel$skipCount(info.left),
+							info.right));
+				}
+			}
+		}
+	});
+var $author$project$Tools$Pointers$positionDescription = F2(
+	function (pos, track) {
+		return 'Point ' + ($elm$core$String$fromInt(pos) + (', at ' + (A2(
+			$author$project$UtilsForViews$showLongMeasure,
+			false,
+			A2($author$project$DomainModel$distanceFromIndex, pos, track)) + 'm')));
+	});
+var $author$project$Tools$Pointers$view = F3(
+	function (msgWrapper, options, isTrack) {
+		if (isTrack.$ === 'Nothing') {
+			return A2(
+				$mdgriffith$elm_ui$Element$el,
 				_List_fromArray(
 					[
-						$mdgriffith$elm_ui$Element$centerX,
-						$mdgriffith$elm_ui$Element$padding(4),
-						$mdgriffith$elm_ui$Element$spacing(6)
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite),
+						$mdgriffith$elm_ui$Element$height(
+						$mdgriffith$elm_ui$Element$px(140))
 					]),
+				$mdgriffith$elm_ui$Element$none);
+		} else {
+			var track = isTrack.a;
+			return A2(
+				$mdgriffith$elm_ui$Element$el,
 				_List_fromArray(
 					[
-						A2(
-						$mdgriffith$elm_ui$Element$el,
-						_List_fromArray(
-							[$mdgriffith$elm_ui$Element$centerX]),
-						$mdgriffith$elm_ui$Element$text('About the Orange pointer ...')),
-						A2(
-						$mdgriffith$elm_ui$Element$row,
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$centerX,
-								$mdgriffith$elm_ui$Element$spacing(10),
-								$mdgriffith$elm_ui$Element$Font$color($smucode$elm_flat_colors$FlatColors$AussiePalette$quinceJelly)
-							]),
-						_List_fromArray(
-							[
-								A2(
-								$mdgriffith$elm_ui$Element$Input$button,
-								$author$project$ViewPureStyles$neatToolsBorder,
-								{
-									label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronsLeft),
-									onPress: $elm$core$Maybe$Just(
-										msgWrapper($author$project$Tools$Pointers$PointerRewind))
-								}),
-								A2(
-								$mdgriffith$elm_ui$Element$Input$button,
-								$author$project$ViewPureStyles$neatToolsBorder,
-								{
-									label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronLeft),
-									onPress: $elm$core$Maybe$Just(
-										msgWrapper($author$project$Tools$Pointers$PointerBackwardOne))
-								}),
-								A2(
-								$mdgriffith$elm_ui$Element$Input$button,
-								$author$project$ViewPureStyles$neatToolsBorder,
-								{
-									label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronRight),
-									onPress: $elm$core$Maybe$Just(
-										msgWrapper($author$project$Tools$Pointers$PointerForwardOne))
-								}),
-								A2(
-								$mdgriffith$elm_ui$Element$Input$button,
-								$author$project$ViewPureStyles$neatToolsBorder,
-								{
-									label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronsRight),
-									onPress: $elm$core$Maybe$Just(
-										msgWrapper($author$project$Tools$Pointers$PointerFastForward))
-								})
-							])),
-						A2(
-						$mdgriffith$elm_ui$Element$el,
-						_List_fromArray(
-							[$mdgriffith$elm_ui$Element$centerX]),
-						A2(
-							$mdgriffith$elm_ui$Element$Input$button,
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite)
+					]),
+				A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$centerX,
+							$mdgriffith$elm_ui$Element$padding(4),
+							$mdgriffith$elm_ui$Element$spacing(6)
+						]),
+					_List_fromArray(
+						[
 							A2(
-								$elm$core$List$cons,
-								$mdgriffith$elm_ui$Element$padding(8),
-								$author$project$ViewPureStyles$neatToolsBorder),
-							{
-								label: $mdgriffith$elm_ui$Element$text('Drop purple marker'),
-								onPress: $elm$core$Maybe$Just(
-									msgWrapper($author$project$Tools$Pointers$DropMarker))
-							})),
-						A2(
-						$mdgriffith$elm_ui$Element$row,
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$centerX,
-								$mdgriffith$elm_ui$Element$spacing(10),
-								$mdgriffith$elm_ui$Element$Font$color($smucode$elm_flat_colors$FlatColors$AussiePalette$blurple)
-							]),
-						_List_fromArray(
-							[
-								A2(
-								$mdgriffith$elm_ui$Element$Input$button,
-								$author$project$ViewPureStyles$neatToolsBorder,
-								{
-									label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronLeft),
-									onPress: $elm$core$Maybe$Just(
-										msgWrapper($author$project$Tools$Pointers$MarferBackwardOne))
-								}),
-								A2(
-								$mdgriffith$elm_ui$Element$Input$button,
-								$author$project$ViewPureStyles$neatToolsBorder,
-								{
-									label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronsRight),
-									onPress: $elm$core$Maybe$Just(
-										msgWrapper($author$project$Tools$Pointers$MarkerForwardOne))
-								})
-							])),
-						A2(
-						$mdgriffith$elm_ui$Element$el,
-						_List_fromArray(
-							[$mdgriffith$elm_ui$Element$centerX]),
-						$mdgriffith$elm_ui$Element$text('About the Purple marker ...'))
-					])));
+							$mdgriffith$elm_ui$Element$el,
+							_List_fromArray(
+								[$mdgriffith$elm_ui$Element$centerX]),
+							$mdgriffith$elm_ui$Element$text(
+								A2($author$project$Tools$Pointers$positionDescription, options.orange, track.trackTree))),
+							A2(
+							$mdgriffith$elm_ui$Element$row,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$centerX,
+									$mdgriffith$elm_ui$Element$spacing(10),
+									$mdgriffith$elm_ui$Element$Font$color($smucode$elm_flat_colors$FlatColors$AussiePalette$quinceJelly)
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$mdgriffith$elm_ui$Element$Input$button,
+									$author$project$ViewPureStyles$neatToolsBorder,
+									{
+										label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronsLeft),
+										onPress: $elm$core$Maybe$Just(
+											msgWrapper($author$project$Tools$Pointers$PointerRewind))
+									}),
+									A2(
+									$mdgriffith$elm_ui$Element$Input$button,
+									$author$project$ViewPureStyles$neatToolsBorder,
+									{
+										label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronLeft),
+										onPress: $elm$core$Maybe$Just(
+											msgWrapper($author$project$Tools$Pointers$PointerBackwardOne))
+									}),
+									A2(
+									$mdgriffith$elm_ui$Element$Input$button,
+									$author$project$ViewPureStyles$neatToolsBorder,
+									{
+										label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronRight),
+										onPress: $elm$core$Maybe$Just(
+											msgWrapper($author$project$Tools$Pointers$PointerForwardOne))
+									}),
+									A2(
+									$mdgriffith$elm_ui$Element$Input$button,
+									$author$project$ViewPureStyles$neatToolsBorder,
+									{
+										label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronsRight),
+										onPress: $elm$core$Maybe$Just(
+											msgWrapper($author$project$Tools$Pointers$PointerFastForward))
+									})
+								])),
+							A2(
+							$mdgriffith$elm_ui$Element$el,
+							_List_fromArray(
+								[$mdgriffith$elm_ui$Element$centerX]),
+							function () {
+								var _v1 = options.purple;
+								if (_v1.$ === 'Just') {
+									var something = _v1.a;
+									return A2(
+										$mdgriffith$elm_ui$Element$Input$button,
+										A2(
+											$elm$core$List$cons,
+											$mdgriffith$elm_ui$Element$padding(8),
+											$author$project$ViewPureStyles$neatToolsBorder),
+										{
+											label: $mdgriffith$elm_ui$Element$text('Lift purple marker'),
+											onPress: $elm$core$Maybe$Just(
+												msgWrapper($author$project$Tools$Pointers$LiftMarker))
+										});
+								} else {
+									return A2(
+										$mdgriffith$elm_ui$Element$Input$button,
+										A2(
+											$elm$core$List$cons,
+											$mdgriffith$elm_ui$Element$padding(8),
+											$author$project$ViewPureStyles$neatToolsBorder),
+										{
+											label: $mdgriffith$elm_ui$Element$text('Drop purple marker'),
+											onPress: $elm$core$Maybe$Just(
+												msgWrapper($author$project$Tools$Pointers$DropMarker))
+										});
+								}
+							}()),
+							function () {
+							var _v2 = options.purple;
+							if (_v2.$ === 'Just') {
+								var something = _v2.a;
+								return A2(
+									$mdgriffith$elm_ui$Element$row,
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$centerX,
+											$mdgriffith$elm_ui$Element$spacing(10),
+											$mdgriffith$elm_ui$Element$Font$color($smucode$elm_flat_colors$FlatColors$AussiePalette$blurple)
+										]),
+									_List_fromArray(
+										[
+											A2(
+											$mdgriffith$elm_ui$Element$Input$button,
+											$author$project$ViewPureStyles$neatToolsBorder,
+											{
+												label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronLeft),
+												onPress: $elm$core$Maybe$Just(
+													msgWrapper($author$project$Tools$Pointers$MarferBackwardOne))
+											}),
+											A2(
+											$mdgriffith$elm_ui$Element$Input$button,
+											$author$project$ViewPureStyles$neatToolsBorder,
+											{
+												label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronRight),
+												onPress: $elm$core$Maybe$Just(
+													msgWrapper($author$project$Tools$Pointers$MarkerForwardOne))
+											})
+										]));
+							} else {
+								return A2(
+									$mdgriffith$elm_ui$Element$row,
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$centerX,
+											$mdgriffith$elm_ui$Element$spacing(10),
+											$mdgriffith$elm_ui$Element$Font$color($smucode$elm_flat_colors$FlatColors$AussiePalette$coastalBreeze)
+										]),
+									_List_fromArray(
+										[
+											A2(
+											$mdgriffith$elm_ui$Element$Input$button,
+											$author$project$ViewPureStyles$neatToolsBorder,
+											{
+												label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronLeft),
+												onPress: $elm$core$Maybe$Just(
+													msgWrapper($author$project$Tools$Pointers$MarferBackwardOne))
+											}),
+											A2(
+											$mdgriffith$elm_ui$Element$Input$button,
+											$author$project$ViewPureStyles$neatToolsBorder,
+											{
+												label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronRight),
+												onPress: $elm$core$Maybe$Just(
+													msgWrapper($author$project$Tools$Pointers$MarkerForwardOne))
+											})
+										]));
+							}
+						}(),
+							A2(
+							$mdgriffith$elm_ui$Element$el,
+							_List_fromArray(
+								[$mdgriffith$elm_ui$Element$centerX]),
+							function () {
+								var _v3 = options.purple;
+								if (_v3.$ === 'Just') {
+									var something = _v3.a;
+									return $mdgriffith$elm_ui$Element$text(
+										A2($author$project$Tools$Pointers$positionDescription, something, track.trackTree));
+								} else {
+									return $mdgriffith$elm_ui$Element$text('---');
+								}
+							}())
+						])));
+		}
 	});
 var $author$project$ToolsController$viewToolByType = F4(
 	function (msgWrapper, entry, isTrack, options) {
@@ -24940,10 +25134,11 @@ var $author$project$ToolsController$viewToolByType = F4(
 					A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$DeletePoints),
 					options.deleteOptions);
 			default:
-				return A2(
+				return A3(
 					$author$project$Tools$Pointers$view,
 					A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$PointerMsg),
-					options.pointerOptions);
+					options.pointerOptions,
+					isTrack);
 		}
 	});
 var $author$project$ToolsController$viewTool = F4(

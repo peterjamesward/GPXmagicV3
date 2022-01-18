@@ -527,4 +527,4 @@ viewToolByType msgWrapper entry isTrack options =
             DeletePoints.view (msgWrapper << DeletePoints) options.deleteOptions
 
         ToolPointers ->
-            Pointers.view (msgWrapper << PointerMsg) options.pointerOptions
+            Pointers.view (msgWrapper << PointerMsg) options.pointerOptions isTrack
