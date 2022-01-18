@@ -211,6 +211,14 @@ getColour toolType entries =
         |> Maybe.withDefault FlatColors.SwedishPalette.freeSpeechBlue
 
 
+isToolOpen : ToolType -> List ToolEntry -> Bool
+isToolOpen toolType entries =
+    List.Extra.find
+        (\tab -> tab.toolType == toolType && tab.state == Expanded)
+        entries
+        /= Nothing
+
+
 update :
     ToolMsg
     -> Maybe TrackLoaded
@@ -234,8 +242,15 @@ update toolMsg isTrack msgWrapper options =
 
         ToolColourSelect toolType color ->
             -- Instantly reflect colour changes in preview.
-            { options | tools = List.map (setColour toolType color) options.tools }
-                |> toolStateHasChanged toolType Expanded isTrack
+            let
+                newOptions =
+                    { options | tools = List.map (setColour toolType color) options.tools }
+            in
+            if isToolOpen toolType options.tools then
+                toolStateHasChanged toolType Expanded isTrack newOptions
+
+            else
+                ( newOptions, [] )
 
         ToolStateToggle toolType newState ->
             -- Record the new state, but also let the tool know!
