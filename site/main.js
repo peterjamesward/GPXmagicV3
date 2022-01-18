@@ -9541,6 +9541,19 @@ var $elm$json$Json$Encode$object = function (pairs) {
 };
 var $author$project$LocalStorage$storageCommands = _Platform_outgoingPort('storageCommands', $elm$core$Basics$identity);
 var $elm$json$Json$Encode$string = _Json_wrap;
+var $author$project$LocalStorage$storageGetItem = function (key) {
+	return $author$project$LocalStorage$storageCommands(
+		$elm$json$Json$Encode$object(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'Cmd',
+					$elm$json$Json$Encode$string('storage.get')),
+					_Utils_Tuple2(
+					'key',
+					$elm$json$Json$Encode$string(key))
+				])));
+};
 var $author$project$LocalStorage$storageListKeys = $author$project$LocalStorage$storageCommands(
 	$elm$json$Json$Encode$object(
 		_List_fromArray(
@@ -9621,7 +9634,8 @@ var $author$project$Main$init = F3(
 						authCmd,
 						A2($elm$core$Task$perform, $author$project$Main$AdjustTimeZone, $elm$time$Time$here),
 						$author$project$LocalStorage$storageListKeys,
-						A2($elm$core$Task$attempt, $author$project$Main$GotWindowSize, $elm$browser$Browser$Dom$getViewport)
+						A2($elm$core$Task$attempt, $author$project$Main$GotWindowSize, $elm$browser$Browser$Dom$getViewport),
+						$author$project$LocalStorage$storageGetItem('splits')
 					])));
 	});
 var $elm$json$Json$Decode$int = _Json_decodeInt;
@@ -10056,12 +10070,14 @@ var $author$project$Main$ImageMessage = function (a) {
 	return {$: 'ImageMessage', a: a};
 };
 var $author$project$Actions$MapCenterOnCurrent = {$: 'MapCenterOnCurrent'};
+var $author$project$Actions$MapRefresh = {$: 'MapRefresh'};
 var $author$project$Main$ReceivedIpDetails = function (a) {
 	return {$: 'ReceivedIpDetails', a: a};
 };
 var $author$project$Actions$SetCurrent = function (a) {
 	return {$: 'SetCurrent', a: a};
 };
+var $author$project$Actions$StoreSplitConfig = {$: 'StoreSplitConfig'};
 var $author$project$Main$ToolsMsg = function (a) {
 	return {$: 'ToolsMsg', a: a};
 };
@@ -10961,6 +10977,32 @@ var $author$project$UtilsForViews$colourHexString = function (colour) {
 		$rtfeldman$elm_hex$Hex$toString(greenInt)) + leadingZeroes(
 		$rtfeldman$elm_hex$Hex$toString(blueInt))));
 };
+var $author$project$Main$encodeSplitValues = function (model) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'left',
+				$elm$json$Json$Encode$float(
+					$author$project$SplitPane$SplitPane$getPosition(model.leftDockRightEdge))),
+				_Utils_Tuple2(
+				'right',
+				$elm$json$Json$Encode$float(
+					$author$project$SplitPane$SplitPane$getPosition(model.rightDockLeftEdge))),
+				_Utils_Tuple2(
+				'bottom',
+				$elm$json$Json$Encode$float(
+					$author$project$SplitPane$SplitPane$getPosition(model.bottomDockTopEdge))),
+				_Utils_Tuple2(
+				'internalleft',
+				$elm$json$Json$Encode$float(
+					$author$project$SplitPane$SplitPane$getPosition(model.leftDockInternal))),
+				_Utils_Tuple2(
+				'internalright',
+				$elm$json$Json$Encode$float(
+					$author$project$SplitPane$SplitPane$getPosition(model.rightDockInternal)))
+			]));
+};
 var $author$project$MapPortController$hidePreview = function (tag) {
 	return $author$project$MapPortController$mapCommands(
 		$elm$json$Json$Encode$object(
@@ -10977,6 +11019,17 @@ var $author$project$MapPortController$hidePreview = function (tag) {
 					$elm$json$Json$Encode$string(tag))
 				])));
 };
+var $author$project$MapPortController$refreshMap = $author$project$MapPortController$mapCommands(
+	$elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'Cmd',
+				$elm$json$Json$Encode$string('Repaint')),
+				_Utils_Tuple2(
+				'token',
+				$elm$json$Json$Encode$string($author$project$MapboxKey$mapboxKey))
+			])));
 var $author$project$SceneBuilderMap$lineToJSON = function (points) {
 	var coordinates = A2(
 		$elm$core$List$map,
@@ -11092,18 +11145,33 @@ var $author$project$MapPortController$showPreview = F4(
 						_Utils_Tuple2('data', geoJson)
 					])));
 	});
+var $author$project$LocalStorage$storageSetItem = F2(
+	function (key, value) {
+		return $author$project$LocalStorage$storageCommands(
+			$elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'Cmd',
+						$elm$json$Json$Encode$string('storage.set')),
+						_Utils_Tuple2(
+						'key',
+						$elm$json$Json$Encode$string(key)),
+						_Utils_Tuple2('value', value)
+					])));
+	});
 var $author$project$Main$performActionCommands = F2(
 	function (actions, model) {
 		var showPreviewOnMap = function (tag) {
-			var _v4 = A2($elm$core$Dict$get, tag, model.previews);
-			if (_v4.$ === 'Just') {
-				var useThisData = _v4.a;
+			var _v6 = A2($elm$core$Dict$get, tag, model.previews);
+			if (_v6.$ === 'Just') {
+				var useThisData = _v6.a;
 				return A4(
 					$author$project$MapPortController$showPreview,
 					useThisData.tag,
 					function () {
-						var _v5 = useThisData.shape;
-						if (_v5.$ === 'PreviewCircle') {
+						var _v7 = useThisData.shape;
+						if (_v7.$ === 'PreviewCircle') {
 							return 'circle';
 						} else {
 							return 'line';
@@ -11117,11 +11185,11 @@ var $author$project$Main$performActionCommands = F2(
 		};
 		var performAction = function (action) {
 			var _v0 = _Utils_Tuple2(action, model.track);
-			_v0$8:
+			_v0$10:
 			while (true) {
-				if (_v0.b.$ === 'Just') {
-					switch (_v0.a.$) {
-						case 'SetCurrent':
+				switch (_v0.a.$) {
+					case 'SetCurrent':
+						if (_v0.b.$ === 'Just') {
 							var position = _v0.a.a;
 							var track = _v0.b.a;
 							return $elm$core$Platform$Cmd$batch(
@@ -11131,34 +11199,62 @@ var $author$project$Main$performActionCommands = F2(
 										$author$project$MapPortController$centreMapOnCurrent(track),
 										$author$project$MapPortController$addMarkersToMap(track)
 									]));
-						case 'SetCurrentFromMapClick':
+						} else {
+							break _v0$10;
+						}
+					case 'SetCurrentFromMapClick':
+						if (_v0.b.$ === 'Just') {
 							var position = _v0.a.a;
 							var track = _v0.b.a;
 							return $author$project$MapPortController$addMarkersToMap(track);
-						case 'MapCenterOnCurrent':
+						} else {
+							break _v0$10;
+						}
+					case 'MapCenterOnCurrent':
+						if (_v0.b.$ === 'Just') {
 							var _v1 = _v0.a;
 							var track = _v0.b.a;
-							return $elm$core$Platform$Cmd$batch(
-								_List_fromArray(
-									[
-										$author$project$MapPortController$centreMapOnCurrent(track)
-									]));
-						case 'ShowPreview':
+							return $author$project$MapPortController$centreMapOnCurrent(track);
+						} else {
+							break _v0$10;
+						}
+					case 'MapRefresh':
+						if (_v0.b.$ === 'Just') {
+							var _v2 = _v0.a;
+							var track = _v0.b.a;
+							return $author$project$MapPortController$refreshMap;
+						} else {
+							break _v0$10;
+						}
+					case 'ShowPreview':
+						if (_v0.b.$ === 'Just') {
 							var previewData = _v0.a.a;
 							var track = _v0.b.a;
 							return showPreviewOnMap(previewData.tag);
-						case 'HidePreview':
+						} else {
+							break _v0$10;
+						}
+					case 'HidePreview':
+						if (_v0.b.$ === 'Just') {
 							var tag = _v0.a.a;
 							var track = _v0.b.a;
 							return $author$project$MapPortController$hidePreview(tag);
-						case 'DelayMessage':
-							var _v2 = _v0.a;
-							var _int = _v2.a;
-							var msg = _v2.b;
+						} else {
+							break _v0$10;
+						}
+					case 'DelayMessage':
+						if (_v0.b.$ === 'Just') {
+							var _v3 = _v0.a;
+							var _int = _v3.a;
+							var msg = _v3.b;
 							var track = _v0.b.a;
 							return A2($andrewMacmurray$elm_delay$Delay$after, _int, msg);
-						case 'TrackHasChanged':
-							var _v3 = _v0.a;
+						} else {
+							break _v0$10;
+						}
+					case 'TrackHasChanged':
+						if (_v0.b.$ === 'Just') {
+							var _v4 = _v0.a;
 							var track = _v0.b.a;
 							return $elm$core$Platform$Cmd$batch(
 								A2(
@@ -11171,21 +11267,103 @@ var $author$project$Main$performActionCommands = F2(
 											$elm$core$List$map,
 											showPreviewOnMap,
 											$elm$core$Dict$keys(model.previews)))));
-						case 'SetMarker':
+						} else {
+							break _v0$10;
+						}
+					case 'SetMarker':
+						if (_v0.b.$ === 'Just') {
 							var maybeMarker = _v0.a.a;
 							var track = _v0.b.a;
 							return $author$project$MapPortController$addMarkersToMap(track);
-						default:
-							break _v0$8;
-					}
-				} else {
-					break _v0$8;
+						} else {
+							break _v0$10;
+						}
+					case 'StoreSplitConfig':
+						var _v5 = _v0.a;
+						return A2(
+							$author$project$LocalStorage$storageSetItem,
+							'splits',
+							$author$project$Main$encodeSplitValues(model));
+					default:
+						break _v0$10;
 				}
 			}
 			return $elm$core$Platform$Cmd$none;
 		};
 		return $elm$core$Platform$Cmd$batch(
 			A2($elm$core$List$map, performAction, actions));
+	});
+var $author$project$Main$SplitDecode = F5(
+	function (left, right, bottom, leftInternal, rightInternal) {
+		return {bottom: bottom, left: left, leftInternal: leftInternal, right: right, rightInternal: rightInternal};
+	});
+var $elm$json$Json$Decode$decodeValue = _Json_run;
+var $elm$json$Json$Decode$map5 = _Json_map5;
+var $elm$core$Basics$truncate = _Basics_truncate;
+var $author$project$Main$decodeSplitValues = F2(
+	function (values, model) {
+		var decoder = A6(
+			$elm$json$Json$Decode$map5,
+			$author$project$Main$SplitDecode,
+			A2($elm$json$Json$Decode$field, 'left', $elm$json$Json$Decode$int),
+			A2($elm$json$Json$Decode$field, 'right', $elm$json$Json$Decode$int),
+			A2($elm$json$Json$Decode$field, 'bottom', $elm$json$Json$Decode$int),
+			A2($elm$json$Json$Decode$field, 'internalleft', $elm$json$Json$Decode$int),
+			A2($elm$json$Json$Decode$field, 'internalright', $elm$json$Json$Decode$int));
+		var decoded = A2($elm$json$Json$Decode$decodeValue, decoder, values);
+		var _v0 = _Utils_Tuple2(model.windowSize.a | 0, model.windowSize.b | 0);
+		var width = _v0.a;
+		var height = _v0.b;
+		if (decoded.$ === 'Ok') {
+			var data = decoded.a;
+			return $author$project$Main$adjustSpaceForContent(
+				_Utils_update(
+					model,
+					{
+						bottomDockTopEdge: A2(
+							$author$project$SplitPane$SplitPane$configureSplitter,
+							A2(
+								$author$project$SplitPane$SplitPane$px,
+								data.bottom,
+								$elm$core$Maybe$Just(
+									_Utils_Tuple2(((height * 2) / 3) | 0, height - 75))),
+							$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Vertical)),
+						leftDockInternal: A2(
+							$author$project$SplitPane$SplitPane$configureSplitter,
+							A2(
+								$author$project$SplitPane$SplitPane$px,
+								data.leftInternal,
+								$elm$core$Maybe$Just(
+									_Utils_Tuple2(50, height - 75))),
+							$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Vertical)),
+						leftDockRightEdge: A2(
+							$author$project$SplitPane$SplitPane$configureSplitter,
+							A2(
+								$author$project$SplitPane$SplitPane$px,
+								data.left,
+								$elm$core$Maybe$Just(
+									_Utils_Tuple2(20, (width / 3) | 0))),
+							$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Horizontal)),
+						rightDockInternal: A2(
+							$author$project$SplitPane$SplitPane$configureSplitter,
+							A2(
+								$author$project$SplitPane$SplitPane$px,
+								data.rightInternal,
+								$elm$core$Maybe$Just(
+									_Utils_Tuple2(50, height - 75))),
+							$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Vertical)),
+						rightDockLeftEdge: A2(
+							$author$project$SplitPane$SplitPane$configureSplitter,
+							A2(
+								$author$project$SplitPane$SplitPane$px,
+								data.right,
+								$elm$core$Maybe$Just(
+									_Utils_Tuple2(((2 * width) / 3) | 0, width - 20))),
+							$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Horizontal))
+					}));
+		} else {
+			return model;
+		}
 	});
 var $author$project$DomainModel$Leaf = function (a) {
 	return {$: 'Leaf', a: a};
@@ -13781,11 +13959,11 @@ var $author$project$Main$performActionsOnModel = F2(
 		var performAction = F2(
 			function (action, foldedModel) {
 				var _v0 = _Utils_Tuple2(action, foldedModel.track);
-				_v0$8:
+				_v0$9:
 				while (true) {
-					if (_v0.b.$ === 'Just') {
-						switch (_v0.a.$) {
-							case 'SetCurrent':
+					switch (_v0.a.$) {
+						case 'SetCurrent':
+							if (_v0.b.$ === 'Just') {
 								var position = _v0.a.a;
 								var track = _v0.b.a;
 								var newTrack = _Utils_update(
@@ -13796,7 +13974,11 @@ var $author$project$Main$performActionsOnModel = F2(
 									{
 										track: $elm$core$Maybe$Just(newTrack)
 									});
-							case 'SetCurrentFromMapClick':
+							} else {
+								break _v0$9;
+							}
+						case 'SetCurrentFromMapClick':
+							if (_v0.b.$ === 'Just') {
 								var position = _v0.a.a;
 								var track = _v0.b.a;
 								var newTrack = _Utils_update(
@@ -13807,7 +13989,11 @@ var $author$project$Main$performActionsOnModel = F2(
 									{
 										track: $elm$core$Maybe$Just(newTrack)
 									});
-							case 'ShowPreview':
+							} else {
+								break _v0$9;
+							}
+						case 'ShowPreview':
+							if (_v0.b.$ === 'Just') {
 								var previewData = _v0.a.a;
 								var track = _v0.b.a;
 								return _Utils_update(
@@ -13815,7 +14001,11 @@ var $author$project$Main$performActionsOnModel = F2(
 									{
 										previews: A3($elm$core$Dict$insert, previewData.tag, previewData, foldedModel.previews)
 									});
-							case 'HidePreview':
+							} else {
+								break _v0$9;
+							}
+						case 'HidePreview':
+							if (_v0.b.$ === 'Just') {
 								var tag = _v0.a.a;
 								var track = _v0.b.a;
 								return _Utils_update(
@@ -13823,13 +14013,21 @@ var $author$project$Main$performActionsOnModel = F2(
 									{
 										previews: A2($elm$core$Dict$remove, tag, foldedModel.previews)
 									});
-							case 'DelayMessage':
+							} else {
+								break _v0$9;
+							}
+						case 'DelayMessage':
+							if (_v0.b.$ === 'Just') {
 								var _v1 = _v0.a;
 								var _int = _v1.a;
 								var msg = _v1.b;
 								var track = _v0.b.a;
 								return foldedModel;
-							case 'DeleteSinglePoint':
+							} else {
+								break _v0$9;
+							}
+						case 'DeleteSinglePoint':
+							if (_v0.b.$ === 'Just') {
 								var index = _v0.a.a;
 								var track = _v0.b.a;
 								var newTree = A3($author$project$DomainModel$deleteSinglePoint, index, track.referenceLonLat, track.trackTree);
@@ -13847,7 +14045,11 @@ var $author$project$Main$performActionsOnModel = F2(
 									{
 										track: $elm$core$Maybe$Just(newTrack)
 									});
-							case 'TrackHasChanged':
+							} else {
+								break _v0$9;
+							}
+						case 'TrackHasChanged':
+							if (_v0.b.$ === 'Just') {
 								var _v2 = _v0.a;
 								var track = _v0.b.a;
 								var _v3 = A2($author$project$ToolsController$refreshOpenTools, foldedModel.track, foldedModel.toolOptions);
@@ -13858,7 +14060,11 @@ var $author$project$Main$performActionsOnModel = F2(
 									{toolOptions: refreshedToolOptions});
 								var modelAfterSecondaryActions = A2($author$project$Main$performActionsOnModel, secondaryActions, innerModelWithNewToolSettings);
 								return modelAfterSecondaryActions;
-							case 'SetMarker':
+							} else {
+								break _v0$9;
+							}
+						case 'SetMarker':
+							if (_v0.b.$ === 'Just') {
 								var maybeMarker = _v0.a.a;
 								var track = _v0.b.a;
 								var updatedTrack = _Utils_update(
@@ -13869,11 +14075,20 @@ var $author$project$Main$performActionsOnModel = F2(
 									{
 										track: $elm$core$Maybe$Just(updatedTrack)
 									});
-							default:
-								break _v0$8;
-						}
-					} else {
-						break _v0$8;
+							} else {
+								break _v0$9;
+							}
+						case 'StoredValueRetrieved':
+							var _v4 = _v0.a;
+							var key = _v4.a;
+							var value = _v4.b;
+							if (key === 'splits') {
+								return A2($author$project$Main$decodeSplitValues, value, foldedModel);
+							} else {
+								return foldedModel;
+							}
+						default:
+							break _v0$9;
 					}
 				}
 				return foldedModel;
@@ -13889,17 +14104,39 @@ var $author$project$MyIP$processIpInfo = function (response) {
 		return $elm$core$Maybe$Nothing;
 	}
 };
-var $author$project$MapPortController$refreshMap = $author$project$MapPortController$mapCommands(
-	$elm$json$Json$Encode$object(
-		_List_fromArray(
-			[
-				_Utils_Tuple2(
-				'Cmd',
-				$elm$json$Json$Encode$string('Repaint')),
-				_Utils_Tuple2(
-				'token',
-				$elm$json$Json$Encode$string($author$project$MapboxKey$mapboxKey))
-			])));
+var $author$project$Actions$StoredValueRetrieved = F2(
+	function (a, b) {
+		return {$: 'StoredValueRetrieved', a: a, b: b};
+	});
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $author$project$LocalStorage$msgDecoder = A2($elm$json$Json$Decode$field, 'msg', $elm$json$Json$Decode$string);
+var $author$project$LocalStorage$processStoragePortMessage = F2(
+	function (json, model) {
+		var jsonMsg = A2($elm$json$Json$Decode$decodeValue, $author$project$LocalStorage$msgDecoder, json);
+		if ((jsonMsg.$ === 'Ok') && (jsonMsg.a === 'storage.got')) {
+			var value = A2(
+				$elm$json$Json$Decode$decodeValue,
+				A2($elm$json$Json$Decode$field, 'value', $elm$json$Json$Decode$value),
+				json);
+			var key = A2(
+				$elm$json$Json$Decode$decodeValue,
+				A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string),
+				json);
+			var _v1 = _Utils_Tuple2(key, value);
+			if ((_v1.a.$ === 'Ok') && (_v1.b.$ === 'Ok')) {
+				var someKey = _v1.a.a;
+				var somevalue = _v1.b.a;
+				return _List_fromArray(
+					[
+						A2($author$project$Actions$StoredValueRetrieved, someKey, somevalue)
+					]);
+			} else {
+				return _List_Nil;
+			}
+		} else {
+			return _List_Nil;
+		}
+	});
 var $author$project$MyIP$apiRoot = 'http://ip-api.com';
 var $elm$url$Url$Builder$toQueryPair = function (_v0) {
 	var key = _v0.a;
@@ -14024,7 +14261,6 @@ var $elm$json$Json$Decode$at = F2(
 	});
 var $elm$json$Json$Decode$float = _Json_decodeFloat;
 var $elm$json$Json$Decode$map7 = _Json_map7;
-var $elm$json$Json$Decode$string = _Json_decodeString;
 var $author$project$GeoCodeDecoders$ipInfoDecoder = A8(
 	$elm$json$Json$Decode$map7,
 	$author$project$GeoCodeDecoders$IpInfo,
@@ -14289,11 +14525,9 @@ var $author$project$DomainModel$treeFromSourcePoints = function (track) {
 	var numberOfSegments = $elm$core$List$length(track) - 1;
 	return A2(treeBuilder, numberOfSegments, track).a;
 };
-var $elm$core$Basics$truncate = _Basics_truncate;
 var $author$project$Actions$SetCurrentFromMapClick = function (a) {
 	return {$: 'SetCurrentFromMapClick', a: a};
 };
-var $elm$json$Json$Decode$decodeValue = _Json_run;
 var $author$project$MapPortController$msgDecoder = A2($elm$json$Json$Decode$field, 'msg', $elm$json$Json$Decode$string);
 var $author$project$DomainModel$gpxDistance = F2(
 	function (p1, p2) {
@@ -16762,78 +16996,114 @@ var $author$project$Main$update = F2(
 				}
 			case 'StorageMessage':
 				var json = msg.a;
-				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				var actions = A2($author$project$LocalStorage$processStoragePortMessage, json, model);
+				var newModel = A2($author$project$Main$performActionsOnModel, actions, model);
+				return _Utils_Tuple2(
+					newModel,
+					A2($author$project$Main$performActionCommands, actions, model));
 			case 'SplitLeftDockRightEdge':
 				var m = msg.a;
+				var newModel = $author$project$Main$adjustSpaceForContent(
+					_Utils_update(
+						model,
+						{
+							leftDockRightEdge: A2($author$project$SplitPane$SplitPane$update, m, model.leftDockRightEdge)
+						}));
 				return _Utils_Tuple2(
-					$author$project$Main$adjustSpaceForContent(
-						_Utils_update(
-							model,
-							{
-								leftDockRightEdge: A2($author$project$SplitPane$SplitPane$update, m, model.leftDockRightEdge)
-							})),
-					$author$project$MapPortController$refreshMap);
+					newModel,
+					A2(
+						$author$project$Main$performActionCommands,
+						_List_fromArray(
+							[$author$project$Actions$MapRefresh, $author$project$Actions$StoreSplitConfig]),
+						newModel));
 			case 'SplitLeftDockInternal':
 				var m = msg.a;
+				var newModel = $author$project$Main$adjustSpaceForContent(
+					_Utils_update(
+						model,
+						{
+							leftDockInternal: A2($author$project$SplitPane$SplitPane$update, m, model.leftDockInternal)
+						}));
 				return _Utils_Tuple2(
-					$author$project$Main$adjustSpaceForContent(
-						_Utils_update(
-							model,
-							{
-								leftDockInternal: A2($author$project$SplitPane$SplitPane$update, m, model.leftDockInternal)
-							})),
-					$author$project$MapPortController$refreshMap);
+					newModel,
+					A2(
+						$author$project$Main$performActionCommands,
+						_List_fromArray(
+							[$author$project$Actions$MapRefresh, $author$project$Actions$StoreSplitConfig]),
+						newModel));
 			case 'SplitRightDockLeftEdge':
 				var m = msg.a;
+				var newModel = $author$project$Main$adjustSpaceForContent(
+					_Utils_update(
+						model,
+						{
+							rightDockLeftEdge: A2($author$project$SplitPane$SplitPane$update, m, model.rightDockLeftEdge)
+						}));
 				return _Utils_Tuple2(
-					$author$project$Main$adjustSpaceForContent(
-						_Utils_update(
-							model,
-							{
-								rightDockLeftEdge: A2($author$project$SplitPane$SplitPane$update, m, model.rightDockLeftEdge)
-							})),
-					$author$project$MapPortController$refreshMap);
+					newModel,
+					A2(
+						$author$project$Main$performActionCommands,
+						_List_fromArray(
+							[$author$project$Actions$MapRefresh, $author$project$Actions$StoreSplitConfig]),
+						newModel));
 			case 'SplitRightDockInternal':
 				var m = msg.a;
+				var newModel = $author$project$Main$adjustSpaceForContent(
+					_Utils_update(
+						model,
+						{
+							rightDockInternal: A2($author$project$SplitPane$SplitPane$update, m, model.rightDockInternal)
+						}));
 				return _Utils_Tuple2(
-					$author$project$Main$adjustSpaceForContent(
-						_Utils_update(
-							model,
-							{
-								rightDockInternal: A2($author$project$SplitPane$SplitPane$update, m, model.rightDockInternal)
-							})),
-					$author$project$MapPortController$refreshMap);
+					newModel,
+					A2(
+						$author$project$Main$performActionCommands,
+						_List_fromArray(
+							[$author$project$Actions$MapRefresh, $author$project$Actions$StoreSplitConfig]),
+						newModel));
 			case 'SplitBottomDockTopEdge':
 				var m = msg.a;
+				var newModel = $author$project$Main$adjustSpaceForContent(
+					_Utils_update(
+						model,
+						{
+							bottomDockTopEdge: A2($author$project$SplitPane$SplitPane$update, m, model.bottomDockTopEdge)
+						}));
 				return _Utils_Tuple2(
-					$author$project$Main$adjustSpaceForContent(
-						_Utils_update(
-							model,
-							{
-								bottomDockTopEdge: A2($author$project$SplitPane$SplitPane$update, m, model.bottomDockTopEdge)
-							})),
-					$author$project$MapPortController$refreshMap);
+					newModel,
+					A2(
+						$author$project$Main$performActionCommands,
+						_List_fromArray(
+							[$author$project$Actions$MapRefresh, $author$project$Actions$StoreSplitConfig]),
+						newModel));
 			case 'Resize':
 				var width = msg.a;
 				var height = msg.b;
+				var newModel = $author$project$Main$adjustSpaceForContent(
+					_Utils_update(
+						model,
+						{
+							windowSize: _Utils_Tuple2(width, height)
+						}));
 				return _Utils_Tuple2(
-					A3(
-						$author$project$Main$allocateSpaceForDocksAndContent,
-						width,
-						height,
-						_Utils_update(
-							model,
-							{
-								windowSize: _Utils_Tuple2(width, height)
-							})),
-					$author$project$MapPortController$refreshMap);
+					newModel,
+					A2(
+						$author$project$Main$performActionCommands,
+						_List_fromArray(
+							[$author$project$Actions$MapRefresh, $author$project$Actions$StoreSplitConfig]),
+						newModel));
 			case 'GotWindowSize':
 				var result = msg.a;
 				if (result.$ === 'Ok') {
 					var info = result.a;
+					var newModel = A3($author$project$Main$allocateSpaceForDocksAndContent, info.viewport.width | 0, info.viewport.height | 0, model);
 					return _Utils_Tuple2(
-						A3($author$project$Main$allocateSpaceForDocksAndContent, info.viewport.width | 0, info.viewport.height | 0, model),
-						$author$project$MapPortController$refreshMap);
+						newModel,
+						A2(
+							$author$project$Main$performActionCommands,
+							_List_fromArray(
+								[$author$project$Actions$MapRefresh]),
+							newModel));
 				} else {
 					var error = result.a;
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);

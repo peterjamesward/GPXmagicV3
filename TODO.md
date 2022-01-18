@@ -2,6 +2,10 @@
 
 BUG: Change colour on closed tab shows preview.
 
+BUG: Dubious steepest gradient on some routes.
+
+BUG: Dubious (obviously wrong) direction changes reported.
+
 # WIP
 
 Save & Restore of splitter and tool settings (basis in v2).

@@ -222,7 +222,7 @@ function mapMessageHandler(msg) {
 
 function storageMessageHandler(msg) {
 //    console.log('behold, a message from the land of Elm');
-//    console.log(msg);
+    console.log(msg);
 
     switch (msg.Cmd) {
 
@@ -237,7 +237,7 @@ function storageMessageHandler(msg) {
               val = JSON.parse(localStorage.getItem(msg.key))
             } catch (e) {
             };
-            app.ports.mapResponses.send({ 'msg' : 'storage.got', 'key' : msg.key, 'value' : val });
+            app.ports.storageResponses.send({ 'msg' : 'storage.got', 'key' : msg.key, 'value' : val });
             break;
 
         case 'storage.list':
@@ -248,7 +248,7 @@ function storageMessageHandler(msg) {
                 keys.push(key);
             };
             //console.log(keys);
-            app.ports.mapResponses.send({ 'msg' : 'storage.keys', 'keys' : keys });
+            app.ports.storageResponses.send({ 'msg' : 'storage.keys', 'keys' : keys });
             break;
 
         case 'storage.clear':

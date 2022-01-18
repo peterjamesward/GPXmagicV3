@@ -21,6 +21,7 @@ import GpxParser exposing (parseGPXPoints)
 import Html exposing (Html, div)
 import Html.Attributes exposing (id, style)
 import Http
+import Json.Decode as D
 import Json.Encode as E exposing (string)
 import LocalCoords exposing (LocalCoords)
 import LocalStorage
@@ -106,6 +107,70 @@ type alias Model =
     }
 
 
+encodeSplitValues : Model -> E.Value
+encodeSplitValues model =
+    E.object
+        [ ( "left", E.float <| getPosition model.leftDockRightEdge )
+        , ( "right", E.float <| getPosition model.rightDockLeftEdge )
+        , ( "bottom", E.float <| getPosition model.bottomDockTopEdge )
+        , ( "internalleft", E.float <| getPosition model.leftDockInternal )
+        , ( "internalright", E.float <| getPosition model.rightDockInternal )
+        ]
+
+
+type alias SplitDecode =
+    { left : Int
+    , right : Int
+    , bottom : Int
+    , leftInternal : Int
+    , rightInternal : Int
+    }
+
+
+decodeSplitValues : E.Value -> Model -> Model
+decodeSplitValues values model =
+    let
+        decoder =
+            D.map5 SplitDecode
+                (D.field "left" D.int)
+                (D.field "right" D.int)
+                (D.field "bottom" D.int)
+                (D.field "internalleft" D.int)
+                (D.field "internalright" D.int)
+
+        decoded =
+            D.decodeValue decoder values
+
+        ( width, height ) =
+            ( truncate <| Tuple.first model.windowSize
+            , truncate <| Tuple.second model.windowSize
+            )
+    in
+    case decoded of
+        Ok data ->
+            { model
+                | leftDockRightEdge =
+                    SplitPane.init Horizontal
+                        |> configureSplitter (SplitPane.px data.left <| Just ( 20, width // 3 ))
+                , leftDockInternal =
+                    SplitPane.init Vertical
+                        |> configureSplitter (SplitPane.px data.leftInternal <| Just ( 50, height - 75 ))
+                , rightDockLeftEdge =
+                    SplitPane.init Horizontal
+                        |> configureSplitter (SplitPane.px data.right <| Just ( 2 * width // 3, width - 20 ))
+                , rightDockInternal =
+                    SplitPane.init Vertical
+                        |> configureSplitter (SplitPane.px data.rightInternal <| Just ( 50, height - 75 ))
+                , bottomDockTopEdge =
+                    SplitPane.init Vertical
+                        |> configureSplitter (SplitPane.px data.bottom <| Just ( height * 2 // 3, height - 75 ))
+            }
+                |> adjustSpaceForContent
+
+        Err _ ->
+            model
+
+
 main : Program (Maybe (List Int)) Model Msg
 main =
     -- This is the 'main' from OAuth example.
@@ -162,6 +227,7 @@ init mflags origin navigationKey =
         , Task.perform AdjustTimeZone Time.here
         , LocalStorage.storageListKeys
         , Task.attempt GotWindowSize Dom.getViewport
+        , LocalStorage.storageGetItem "splits"
         ]
     )
 
@@ -396,52 +462,87 @@ update msg model =
                     ( model, Cmd.none )
 
         StorageMessage json ->
-            ( model, Cmd.none )
+            let
+                actions =
+                    LocalStorage.processStoragePortMessage json model
+
+                newModel =
+                    performActionsOnModel actions model
+            in
+            ( newModel, performActionCommands actions model )
 
         SplitLeftDockRightEdge m ->
-            ( { model | leftDockRightEdge = SplitPane.update m model.leftDockRightEdge }
-                |> adjustSpaceForContent
-            , MapPortController.refreshMap
+            let
+                newModel =
+                    { model | leftDockRightEdge = SplitPane.update m model.leftDockRightEdge }
+                        |> adjustSpaceForContent
+            in
+            ( newModel
+            , performActionCommands [ MapRefresh, StoreSplitConfig ] newModel
             )
 
         SplitLeftDockInternal m ->
-            ( { model | leftDockInternal = SplitPane.update m model.leftDockInternal }
-                |> adjustSpaceForContent
-            , MapPortController.refreshMap
+            let
+                newModel =
+                    { model | leftDockInternal = SplitPane.update m model.leftDockInternal }
+                        |> adjustSpaceForContent
+            in
+            ( newModel
+            , performActionCommands [ MapRefresh, StoreSplitConfig ] newModel
             )
 
         SplitRightDockLeftEdge m ->
-            ( { model | rightDockLeftEdge = SplitPane.update m model.rightDockLeftEdge }
-                |> adjustSpaceForContent
-            , MapPortController.refreshMap
+            let
+                newModel =
+                    { model | rightDockLeftEdge = SplitPane.update m model.rightDockLeftEdge }
+                        |> adjustSpaceForContent
+            in
+            ( newModel
+            , performActionCommands [ MapRefresh, StoreSplitConfig ] newModel
             )
 
         SplitRightDockInternal m ->
-            ( { model | rightDockInternal = SplitPane.update m model.rightDockInternal }
-                |> adjustSpaceForContent
-            , MapPortController.refreshMap
+            let
+                newModel =
+                    { model | rightDockInternal = SplitPane.update m model.rightDockInternal }
+                        |> adjustSpaceForContent
+            in
+            ( newModel
+            , performActionCommands [ MapRefresh, StoreSplitConfig ] newModel
             )
 
         SplitBottomDockTopEdge m ->
-            ( { model | bottomDockTopEdge = SplitPane.update m model.bottomDockTopEdge }
-                |> adjustSpaceForContent
-            , MapPortController.refreshMap
+            let
+                newModel =
+                    { model | bottomDockTopEdge = SplitPane.update m model.bottomDockTopEdge }
+                        |> adjustSpaceForContent
+            in
+            ( newModel
+            , performActionCommands [ MapRefresh, StoreSplitConfig ] newModel
             )
 
         Resize width height ->
-            ( { model | windowSize = ( toFloat width, toFloat height ) }
-                |> allocateSpaceForDocksAndContent width height
-            , MapPortController.refreshMap
+            let
+                newModel =
+                    { model | windowSize = ( toFloat width, toFloat height ) }
+                        |> adjustSpaceForContent
+            in
+            ( newModel
+            , performActionCommands [ MapRefresh, StoreSplitConfig ] newModel
             )
 
         GotWindowSize result ->
             case result of
                 Ok info ->
-                    ( model
-                        |> allocateSpaceForDocksAndContent
-                            (truncate info.viewport.width)
-                            (truncate info.viewport.height)
-                    , MapPortController.refreshMap
+                    let
+                        newModel =
+                            model
+                                |> allocateSpaceForDocksAndContent
+                                    (truncate info.viewport.width)
+                                    (truncate info.viewport.height)
+                    in
+                    ( newModel
+                    , performActionCommands [ MapRefresh ] newModel
                     )
 
                 Err error ->
@@ -885,6 +986,14 @@ performActionsOnModel actions model =
                     in
                     { foldedModel | track = Just updatedTrack }
 
+                ( StoredValueRetrieved key value, _ ) ->
+                    case key of
+                        "splits" ->
+                            foldedModel |> decodeSplitValues value
+
+                        _ ->
+                            foldedModel
+
                 _ ->
                     foldedModel
     in
@@ -927,9 +1036,10 @@ performActionCommands actions model =
                     MapPortController.addMarkersToMap track
 
                 ( MapCenterOnCurrent, Just track ) ->
-                    Cmd.batch
-                        [ MapPortController.centreMapOnCurrent track
-                        ]
+                    MapPortController.centreMapOnCurrent track
+
+                ( MapRefresh, Just track ) ->
+                    MapPortController.refreshMap
 
                 ( ShowPreview previewData, Just track ) ->
                     -- Add source and layer to map, via Port commands.
@@ -952,6 +1062,9 @@ performActionCommands actions model =
 
                 ( SetMarker maybeMarker, Just track ) ->
                     MapPortController.addMarkersToMap track
+
+                ( StoreSplitConfig, _ ) ->
+                    LocalStorage.storageSetItem "splits" (encodeSplitValues model)
 
                 _ ->
                     Cmd.none

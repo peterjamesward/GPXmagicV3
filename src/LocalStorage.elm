@@ -1,5 +1,6 @@
 port module LocalStorage exposing (..)
 
+import Actions exposing (ToolAction(..))
 import Json.Decode as D exposing (Decoder, field, string)
 import Json.Encode as E
 
@@ -51,24 +52,30 @@ msgDecoder =
 
 
 processStoragePortMessage :
-    model
-    -> E.Value
-    -> ( model, Cmd msg )
-processStoragePortMessage model json =
+    E.Value
+    -> model
+    -> List (ToolAction msg)
+processStoragePortMessage json model =
     let
         jsonMsg =
             D.decodeValue msgDecoder json
     in
     case jsonMsg of
-        --( Ok "storage.got" ) ->
-        --    let
-        --        key =
-        --            D.decodeValue (D.field "key" D.string) json
-        --
-        --        value =
-        --            D.decodeValue (D.field "value" D.value) json
-        --    in
-        --    case ( key, value ) of
+        Ok "storage.got" ->
+            let
+                key =
+                    D.decodeValue (D.field "key" D.string) json
+
+                value =
+                    D.decodeValue (D.field "value" D.value) json
+            in
+            case ( key, value ) of
+                ( Ok someKey, Ok somevalue ) ->
+                    [ StoredValueRetrieved someKey somevalue ]
+
+                _ ->
+                    []
+
         --        ( Ok "accordion", Ok saved ) ->
         --            let
         --                ( restoreAccordionState, restoreAccordion ) =
@@ -126,8 +133,8 @@ processStoragePortMessage model json =
         --            ( Model model, Cmd.none )
         --
         --( Ok "storage.keys", _ ) ->
-        --    ( Model model
+        --    (  model
         --    , Cmd.none
         --    )
         _ ->
-            ( model, Cmd.none )
+            []

@@ -5,6 +5,7 @@ module Actions exposing (..)
 
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree)
 import Element
+import Json.Decode as E
 
 
 type ToolAction msg
@@ -14,6 +15,9 @@ type ToolAction msg
     | HidePreview String
     | DelayMessage Int msg
     | MapCenterOnCurrent
+    | MapRefresh -- generally because layout has changed.
+    | StoreSplitConfig
+    | StoredValueRetrieved String E.Value
     | DeleteSinglePoint Int
     | TrackHasChanged -- Must follow an action that changes the track.
     | SetMarker (Maybe Int)
