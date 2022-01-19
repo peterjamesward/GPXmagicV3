@@ -769,16 +769,17 @@ lngLatPair ( longitude, latitude ) =
     E.list E.float [ Angle.inDegrees longitude, Angle.inDegrees latitude ]
 
 
+getDualCoords : PeteTree -> Int -> ( EarthPoint, GPXSource )
+getDualCoords tree index =
+    --TODO: Rather glaring inefficiency here.
+    ( earthPointFromIndex index tree
+    , gpxPointFromIndex index tree
+    )
+
+
 buildPreview : List Int -> PeteTree -> List ( EarthPoint, GPXSource )
 buildPreview indices tree =
-    let
-        getDualCoords index =
-            --TODO: Rather glaring inefficiency here.
-            ( earthPointFromIndex index tree
-            , gpxPointFromIndex index tree
-            )
-    in
-    List.map getDualCoords indices
+    List.map (getDualCoords tree) indices
 
 
 takeFromLeft : Int -> PeteTree -> Maybe PeteTree
@@ -824,6 +825,7 @@ takeFromRight leavesFromRight treeNode =
 splitTreeAt : Int -> PeteTree -> ( Maybe PeteTree, Maybe PeteTree )
 splitTreeAt leavesToTheLeft thisNode =
     -- This may be less efficient than the single pass version, but look at it.
+    -- Note that the given point is included in both sides. I.e. this splits by road segment.
     ( takeFromLeft leavesToTheLeft thisNode
     , takeFromRight (skipCount thisNode - leavesToTheLeft) thisNode
     )
@@ -875,3 +877,37 @@ penultimatePoint tree =
             getLastLeaf tree
     in
     ( Tuple.first leaf.sourceData, leaf.startPoint )
+
+
+extractPointsInRange : Int -> Int -> PeteTree -> List ( EarthPoint, GPXSource )
+extractPointsInRange fromStart fromEnd trackTree =
+    -- May be a more efficient way with tree traversal but we ain't a gotten one yet.
+    trackTree
+        |> takeFromLeft (skipCount trackTree - fromEnd)
+        |> Maybe.andThen (takeFromRight (skipCount trackTree - fromStart))
+        |> safeEnumerateFromLeft
+
+
+safeEnumerateFromLeft : Maybe PeteTree -> List ( EarthPoint, GPXSource )
+safeEnumerateFromLeft mTree =
+    case mTree of
+        Just tree ->
+            getDualCoords tree 0
+                :: enumerateFromLeftToRight tree []
+
+        Nothing ->
+            []
+
+
+enumerateFromLeftToRight : PeteTree -> List ( EarthPoint, GPXSource ) -> List ( EarthPoint, GPXSource )
+enumerateFromLeftToRight treeNode accum =
+    -- The name describes the output, not the method!
+    -- Note it gives end points, you need to add the start point somewhere!
+    case treeNode of
+        Leaf leaf ->
+            ( leaf.endPoint, Tuple.second leaf.sourceData ) :: accum
+
+        Node node ->
+            accum
+                |> enumerateFromLeftToRight node.right
+                |> enumerateFromLeftToRight node.left

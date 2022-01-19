@@ -11413,79 +11413,77 @@ var $author$project$Main$performActionCommands = F2(
 		return $elm$core$Platform$Cmd$batch(
 			A2($elm$core$List$map, performAction, actions));
 	});
-var $author$project$Main$SplitDecode = F5(
-	function (left, right, bottom, leftInternal, rightInternal) {
-		return {bottom: bottom, left: left, leftInternal: leftInternal, right: right, rightInternal: rightInternal};
-	});
-var $elm$json$Json$Decode$decodeValue = _Json_run;
-var $elm$json$Json$Decode$map5 = _Json_map5;
-var $author$project$Main$decodeSplitValues = F2(
-	function (values, model) {
-		var decoder = A6(
-			$elm$json$Json$Decode$map5,
-			$author$project$Main$SplitDecode,
-			A2($elm$json$Json$Decode$field, 'left', $elm$json$Json$Decode$int),
-			A2($elm$json$Json$Decode$field, 'right', $elm$json$Json$Decode$int),
-			A2($elm$json$Json$Decode$field, 'bottom', $elm$json$Json$Decode$int),
-			A2($elm$json$Json$Decode$field, 'internalleft', $elm$json$Json$Decode$int),
-			A2($elm$json$Json$Decode$field, 'internalright', $elm$json$Json$Decode$int));
-		var decoded = A2($elm$json$Json$Decode$decodeValue, decoder, values);
-		var _v0 = _Utils_Tuple2(model.windowSize.a | 0, model.windowSize.b | 0);
-		var width = _v0.a;
-		var height = _v0.b;
-		if (decoded.$ === 'Ok') {
-			var data = decoded.a;
-			return $author$project$Main$adjustSpaceForContent(
-				_Utils_update(
-					model,
-					{
-						bottomDockTopEdge: A2(
-							$author$project$SplitPane$SplitPane$configureSplitter,
-							A2(
-								$author$project$SplitPane$SplitPane$px,
-								data.bottom,
-								$elm$core$Maybe$Just(
-									_Utils_Tuple2(((height * 2) / 3) | 0, height - 75))),
-							$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Vertical)),
-						leftDockInternal: A2(
-							$author$project$SplitPane$SplitPane$configureSplitter,
-							A2(
-								$author$project$SplitPane$SplitPane$px,
-								data.leftInternal,
-								$elm$core$Maybe$Just(
-									_Utils_Tuple2(50, height - 75))),
-							$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Vertical)),
-						leftDockRightEdge: A2(
-							$author$project$SplitPane$SplitPane$configureSplitter,
-							A2(
-								$author$project$SplitPane$SplitPane$px,
-								data.left,
-								$elm$core$Maybe$Just(
-									_Utils_Tuple2(20, (width / 3) | 0))),
-							$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Horizontal)),
-						rightDockInternal: A2(
-							$author$project$SplitPane$SplitPane$configureSplitter,
-							A2(
-								$author$project$SplitPane$SplitPane$px,
-								data.rightInternal,
-								$elm$core$Maybe$Just(
-									_Utils_Tuple2(50, height - 75))),
-							$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Vertical)),
-						rightDockLeftEdge: A2(
-							$author$project$SplitPane$SplitPane$configureSplitter,
-							A2(
-								$author$project$SplitPane$SplitPane$px,
-								data.right,
-								$elm$core$Maybe$Just(
-									_Utils_Tuple2(((2 * width) / 3) | 0, width - 20))),
-							$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Horizontal))
-					}));
+var $elm$core$Maybe$andThen = F2(
+	function (callback, maybeValue) {
+		if (maybeValue.$ === 'Just') {
+			var value = maybeValue.a;
+			return callback(value);
 		} else {
-			return model;
+			return $elm$core$Maybe$Nothing;
 		}
 	});
-var $author$project$DomainModel$Leaf = function (a) {
-	return {$: 'Leaf', a: a};
+var $author$project$DomainModel$enumerateFromLeftToRight = F2(
+	function (treeNode, accum) {
+		if (treeNode.$ === 'Leaf') {
+			var leaf = treeNode.a;
+			return A2(
+				$elm$core$List$cons,
+				_Utils_Tuple2(leaf.endPoint, leaf.sourceData.b),
+				accum);
+		} else {
+			var node = treeNode.a;
+			return A2(
+				$author$project$DomainModel$enumerateFromLeftToRight,
+				node.left,
+				A2($author$project$DomainModel$enumerateFromLeftToRight, node.right, accum));
+		}
+	});
+var $author$project$DomainModel$earthPointFromIndex = F2(
+	function (index, treeNode) {
+		earthPointFromIndex:
+		while (true) {
+			if (treeNode.$ === 'Leaf') {
+				var info = treeNode.a;
+				return (index <= 0) ? info.startPoint : info.endPoint;
+			} else {
+				var info = treeNode.a;
+				if (_Utils_cmp(
+					index,
+					$author$project$DomainModel$skipCount(info.left)) < 0) {
+					var $temp$index = index,
+						$temp$treeNode = info.left;
+					index = $temp$index;
+					treeNode = $temp$treeNode;
+					continue earthPointFromIndex;
+				} else {
+					var $temp$index = index - $author$project$DomainModel$skipCount(info.left),
+						$temp$treeNode = info.right;
+					index = $temp$index;
+					treeNode = $temp$treeNode;
+					continue earthPointFromIndex;
+				}
+			}
+		}
+	});
+var $author$project$DomainModel$getDualCoords = F2(
+	function (tree, index) {
+		return _Utils_Tuple2(
+			A2($author$project$DomainModel$earthPointFromIndex, index, tree),
+			A2($author$project$DomainModel$gpxPointFromIndex, index, tree));
+	});
+var $author$project$DomainModel$safeEnumerateFromLeft = function (mTree) {
+	if (mTree.$ === 'Just') {
+		var tree = mTree.a;
+		return A2(
+			$elm$core$List$cons,
+			A2($author$project$DomainModel$getDualCoords, tree, 0),
+			A2($author$project$DomainModel$enumerateFromLeftToRight, tree, _List_Nil));
+	} else {
+		return _List_Nil;
+	}
+};
+var $author$project$DomainModel$Node = function (a) {
+	return {$: 'Node', a: a};
 };
 var $ianmackenzie$elm_geometry$Direction2d$angleFrom = F2(
 	function (_v0, _v1) {
@@ -11496,6 +11494,9 @@ var $ianmackenzie$elm_geometry$Direction2d$angleFrom = F2(
 		return $ianmackenzie$elm_units$Quantity$Quantity(
 			A2($elm$core$Basics$atan2, relativeY, relativeX));
 	});
+var $author$project$DomainModel$boundingBox = function (treeNode) {
+	return $author$project$DomainModel$asRecord(treeNode).boundingBox;
+};
 var $ianmackenzie$elm_units$Quantity$interpolateFrom = F3(
 	function (_v0, _v1, parameter) {
 		var start = _v0.a;
@@ -11588,16 +11589,12 @@ var $author$project$DomainModel$containingSphere = function (box) {
 					]))));
 	return A2($ianmackenzie$elm_geometry$Sphere3d$withRadius, radius, here);
 };
-var $author$project$Spherical$findBearingToTarget = F2(
-	function (_v0, _v1) {
-		var lat1 = _v0.a;
-		var lon1 = _v0.b;
-		var lat2 = _v1.a;
-		var lon2 = _v1.b;
-		var y = $elm$core$Basics$sin(lon2 - lon1) * $elm$core$Basics$cos(lat2);
-		var x = ($elm$core$Basics$cos(lat1) * $elm$core$Basics$sin(lat2)) - (($elm$core$Basics$sin(lat1) * $elm$core$Basics$cos(lat2)) * $elm$core$Basics$cos(lon2 - lon1));
-		return A2($elm$core$Basics$atan2, y, x);
-	});
+var $author$project$DomainModel$eastwardTurn = function (treeNode) {
+	return $author$project$DomainModel$asRecord(treeNode).eastwardExtent;
+};
+var $author$project$DomainModel$endPoint = function (treeNode) {
+	return $author$project$DomainModel$asRecord(treeNode).endPoint;
+};
 var $ianmackenzie$elm_units$Quantity$max = F2(
 	function (_v0, _v1) {
 		var x = _v0.a;
@@ -11605,192 +11602,6 @@ var $ianmackenzie$elm_units$Quantity$max = F2(
 		return $ianmackenzie$elm_units$Quantity$Quantity(
 			A2($elm$core$Basics$max, x, y));
 	});
-var $ianmackenzie$elm_units$Quantity$min = F2(
-	function (_v0, _v1) {
-		var x = _v0.a;
-		var y = _v1.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(
-			A2($elm$core$Basics$min, x, y));
-	});
-var $ianmackenzie$elm_geometry$Point3d$xCoordinate = function (_v0) {
-	var p = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(p.x);
-};
-var $ianmackenzie$elm_geometry$Point3d$yCoordinate = function (_v0) {
-	var p = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(p.y);
-};
-var $ianmackenzie$elm_geometry$Point3d$zCoordinate = function (_v0) {
-	var p = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(p.z);
-};
-var $ianmackenzie$elm_geometry$BoundingBox3d$from = F2(
-	function (firstPoint, secondPoint) {
-		var z2 = $ianmackenzie$elm_geometry$Point3d$zCoordinate(secondPoint);
-		var z1 = $ianmackenzie$elm_geometry$Point3d$zCoordinate(firstPoint);
-		var y2 = $ianmackenzie$elm_geometry$Point3d$yCoordinate(secondPoint);
-		var y1 = $ianmackenzie$elm_geometry$Point3d$yCoordinate(firstPoint);
-		var x2 = $ianmackenzie$elm_geometry$Point3d$xCoordinate(secondPoint);
-		var x1 = $ianmackenzie$elm_geometry$Point3d$xCoordinate(firstPoint);
-		return $ianmackenzie$elm_geometry$Geometry$Types$BoundingBox3d(
-			{
-				maxX: A2($ianmackenzie$elm_units$Quantity$max, x1, x2),
-				maxY: A2($ianmackenzie$elm_units$Quantity$max, y1, y2),
-				maxZ: A2($ianmackenzie$elm_units$Quantity$max, z1, z2),
-				minX: A2($ianmackenzie$elm_units$Quantity$min, x1, x2),
-				minY: A2($ianmackenzie$elm_units$Quantity$min, y1, y2),
-				minZ: A2($ianmackenzie$elm_units$Quantity$min, z1, z2)
-			});
-	});
-var $ianmackenzie$elm_units$Quantity$greaterThanZero = function (_v0) {
-	var x = _v0.a;
-	return x > 0;
-};
-var $ianmackenzie$elm_units$Quantity$lessThanZero = function (_v0) {
-	var x = _v0.a;
-	return x < 0;
-};
-var $ianmackenzie$elm_units$Quantity$negate = function (_v0) {
-	var value = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(-value);
-};
-var $author$project$Spherical$range = F2(
-	function (lonLat1, lonLat2) {
-		var _v0 = _Utils_Tuple2(
-			$ianmackenzie$elm_units$Angle$inRadians(lonLat2.b),
-			$ianmackenzie$elm_units$Angle$inRadians(lonLat2.a));
-		var lat2 = _v0.a;
-		var lon2 = _v0.b;
-		var _v1 = _Utils_Tuple2(
-			$ianmackenzie$elm_units$Angle$inRadians(lonLat1.b),
-			$ianmackenzie$elm_units$Angle$inRadians(lonLat1.a));
-		var lat1 = _v1.a;
-		var lon1 = _v1.b;
-		var y = lat2 - lat1;
-		var x = (lon2 - lon1) * $elm$core$Basics$cos((lat1 + lat2) / 2);
-		return $author$project$Spherical$meanRadius * $elm$core$Basics$sqrt((x * x) + (y * y));
-	});
-var $ianmackenzie$elm_units$Quantity$ratio = F2(
-	function (_v0, _v1) {
-		var x = _v0.a;
-		var y = _v1.a;
-		return x / y;
-	});
-var $ianmackenzie$elm_geometry$Direction2d$rotateBy = F2(
-	function (_v0, _v1) {
-		var angle = _v0.a;
-		var d = _v1.a;
-		var s = $elm$core$Basics$sin(angle);
-		var c = $elm$core$Basics$cos(angle);
-		return $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
-			{x: (c * d.x) - (s * d.y), y: (s * d.x) + (c * d.y)});
-	});
-var $author$project$DomainModel$makeRoadSectionKnowingLocalCoords = F2(
-	function (_v0, _v1) {
-		var earth1 = _v0.a;
-		var local1 = _v0.b;
-		var earth2 = _v1.a;
-		var local2 = _v1.b;
-		var range = $ianmackenzie$elm_units$Length$meters(
-			A2(
-				$author$project$Spherical$range,
-				_Utils_Tuple2(
-					$ianmackenzie$elm_geometry$Direction2d$toAngle(earth1.longitude),
-					earth1.latitude),
-				_Utils_Tuple2(
-					$ianmackenzie$elm_geometry$Direction2d$toAngle(earth2.longitude),
-					earth2.latitude)));
-		var medianLon = A2(
-			$ianmackenzie$elm_geometry$Direction2d$rotateBy,
-			$ianmackenzie$elm_units$Quantity$half(
-				A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, earth1.longitude, earth2.longitude)),
-			earth1.longitude);
-		var box = A2($ianmackenzie$elm_geometry$BoundingBox3d$from, local1, local2);
-		var bearing = $ianmackenzie$elm_units$Angle$radians(
-			A2(
-				$author$project$Spherical$findBearingToTarget,
-				_Utils_Tuple2(
-					$ianmackenzie$elm_units$Angle$inRadians(earth1.latitude),
-					$ianmackenzie$elm_units$Angle$inRadians(
-						$ianmackenzie$elm_geometry$Direction2d$toAngle(earth1.longitude))),
-				_Utils_Tuple2(
-					$ianmackenzie$elm_units$Angle$inRadians(earth2.latitude),
-					$ianmackenzie$elm_units$Angle$inRadians(
-						$ianmackenzie$elm_geometry$Direction2d$toAngle(earth2.longitude)))));
-		var altitudeChange = A2(
-			$ianmackenzie$elm_units$Quantity$minus,
-			$ianmackenzie$elm_geometry$Point3d$zCoordinate(local1),
-			$ianmackenzie$elm_geometry$Point3d$zCoordinate(local2));
-		var gradient = ($ianmackenzie$elm_units$Quantity$greaterThanZero(range) && $ianmackenzie$elm_units$Quantity$greaterThanZero(altitudeChange)) ? (100.0 * A2($ianmackenzie$elm_units$Quantity$ratio, altitudeChange, range)) : 0.0;
-		return {
-			altitudeGained: A2($ianmackenzie$elm_units$Quantity$max, $ianmackenzie$elm_units$Quantity$zero, altitudeChange),
-			altitudeLost: A2(
-				$ianmackenzie$elm_units$Quantity$max,
-				$ianmackenzie$elm_units$Quantity$zero,
-				$ianmackenzie$elm_units$Quantity$negate(altitudeChange)),
-			boundingBox: box,
-			directionAtEnd: $ianmackenzie$elm_geometry$Direction2d$fromAngle(bearing),
-			directionAtStart: $ianmackenzie$elm_geometry$Direction2d$fromAngle(bearing),
-			directionChangeMaximumAbs: $ianmackenzie$elm_units$Angle$degrees(0),
-			distanceClimbing: $ianmackenzie$elm_units$Quantity$greaterThanZero(altitudeChange) ? range : $ianmackenzie$elm_units$Quantity$zero,
-			distanceDescending: $ianmackenzie$elm_units$Quantity$lessThanZero(altitudeChange) ? range : $ianmackenzie$elm_units$Quantity$zero,
-			eastwardExtent: A2(
-				$ianmackenzie$elm_units$Quantity$max,
-				$ianmackenzie$elm_units$Quantity$zero,
-				A2(
-					$ianmackenzie$elm_units$Quantity$max,
-					A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, medianLon, earth1.longitude),
-					A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, medianLon, earth2.longitude))),
-			endPoint: local2,
-			gradientAtEnd: gradient,
-			gradientAtStart: gradient,
-			gradientChangeMaximumAbs: $elm$core$Basics$abs(gradient),
-			medianLongitude: medianLon,
-			skipCount: 1,
-			sourceData: _Utils_Tuple2(earth1, earth2),
-			sphere: $author$project$DomainModel$containingSphere(box),
-			startPoint: local1,
-			steepestClimb: A2($elm$core$Basics$max, 0.0, gradient),
-			trueLength: range,
-			westwardExtent: A2(
-				$ianmackenzie$elm_units$Quantity$min,
-				$ianmackenzie$elm_units$Quantity$zero,
-				A2(
-					$ianmackenzie$elm_units$Quantity$min,
-					A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, medianLon, earth1.longitude),
-					A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, medianLon, earth2.longitude)))
-		};
-	});
-var $author$project$DomainModel$getLastLeaf = function (someNode) {
-	getLastLeaf:
-	while (true) {
-		if (someNode.$ === 'Leaf') {
-			var leaf = someNode.a;
-			return leaf;
-		} else {
-			var node = someNode.a;
-			var $temp$someNode = node.right;
-			someNode = $temp$someNode;
-			continue getLastLeaf;
-		}
-	}
-};
-var $author$project$DomainModel$penultimatePoint = function (tree) {
-	var leaf = $author$project$DomainModel$getLastLeaf(tree);
-	return _Utils_Tuple2(leaf.sourceData.a, leaf.startPoint);
-};
-var $author$project$DomainModel$Node = function (a) {
-	return {$: 'Node', a: a};
-};
-var $author$project$DomainModel$boundingBox = function (treeNode) {
-	return $author$project$DomainModel$asRecord(treeNode).boundingBox;
-};
-var $author$project$DomainModel$eastwardTurn = function (treeNode) {
-	return $author$project$DomainModel$asRecord(treeNode).eastwardExtent;
-};
-var $author$project$DomainModel$endPoint = function (treeNode) {
-	return $author$project$DomainModel$asRecord(treeNode).endPoint;
-};
 var $elm$core$List$maximum = function (list) {
 	if (list.b) {
 		var x = list.a;
@@ -11814,6 +11625,22 @@ var $ianmackenzie$elm_units$Quantity$maximum = function (quantities) {
 var $author$project$DomainModel$medianLongitude = function (treeNode) {
 	return $author$project$DomainModel$asRecord(treeNode).medianLongitude;
 };
+var $ianmackenzie$elm_units$Quantity$min = F2(
+	function (_v0, _v1) {
+		var x = _v0.a;
+		var y = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(
+			A2($elm$core$Basics$min, x, y));
+	});
+var $ianmackenzie$elm_geometry$Direction2d$rotateBy = F2(
+	function (_v0, _v1) {
+		var angle = _v0.a;
+		var d = _v1.a;
+		var s = $elm$core$Basics$sin(angle);
+		var c = $elm$core$Basics$cos(angle);
+		return $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
+			{x: (c * d.x) - (s * d.y), y: (s * d.x) + (c * d.y)});
+	});
 var $author$project$DomainModel$trueLength = function (treeNode) {
 	return $author$project$DomainModel$asRecord(treeNode).trueLength;
 };
@@ -11984,24 +11811,6 @@ var $author$project$DomainModel$safeJoin = F2(
 			}
 		}
 	});
-var $author$project$DomainModel$getFirstLeaf = function (someNode) {
-	getFirstLeaf:
-	while (true) {
-		if (someNode.$ === 'Leaf') {
-			var leaf = someNode.a;
-			return leaf;
-		} else {
-			var node = someNode.a;
-			var $temp$someNode = node.left;
-			someNode = $temp$someNode;
-			continue getFirstLeaf;
-		}
-	}
-};
-var $author$project$DomainModel$secondPoint = function (tree) {
-	var leaf = $author$project$DomainModel$getFirstLeaf(tree);
-	return _Utils_Tuple2(leaf.sourceData.b, leaf.endPoint);
-};
 var $author$project$DomainModel$takeFromLeft = F2(
 	function (leavesFromLeft, treeNode) {
 		if (leavesFromLeft <= 0) {
@@ -12054,6 +11863,292 @@ var $author$project$DomainModel$takeFromRight = F2(
 			}
 		}
 	});
+var $author$project$DomainModel$extractPointsInRange = F3(
+	function (fromStart, fromEnd, trackTree) {
+		return $author$project$DomainModel$safeEnumerateFromLeft(
+			A2(
+				$elm$core$Maybe$andThen,
+				$author$project$DomainModel$takeFromRight(
+					$author$project$DomainModel$skipCount(trackTree) - fromStart),
+				A2(
+					$author$project$DomainModel$takeFromLeft,
+					$author$project$DomainModel$skipCount(trackTree) - fromEnd,
+					trackTree)));
+	});
+var $author$project$TrackLoaded$addToUndoStack = F4(
+	function (action, fromStart, fromEnd, oldTrack) {
+		var undoEntry = {
+			action: action,
+			fromEnd: fromEnd,
+			fromStart: fromStart,
+			originalPoints: A3($author$project$DomainModel$extractPointsInRange, fromStart, fromEnd, oldTrack.trackTree)
+		};
+		return _Utils_update(
+			oldTrack,
+			{
+				undos: A2($elm$core$List$cons, undoEntry, oldTrack.undos)
+			});
+	});
+var $author$project$Main$SplitDecode = F5(
+	function (left, right, bottom, leftInternal, rightInternal) {
+		return {bottom: bottom, left: left, leftInternal: leftInternal, right: right, rightInternal: rightInternal};
+	});
+var $elm$json$Json$Decode$decodeValue = _Json_run;
+var $elm$json$Json$Decode$map5 = _Json_map5;
+var $author$project$Main$decodeSplitValues = F2(
+	function (values, model) {
+		var decoder = A6(
+			$elm$json$Json$Decode$map5,
+			$author$project$Main$SplitDecode,
+			A2($elm$json$Json$Decode$field, 'left', $elm$json$Json$Decode$int),
+			A2($elm$json$Json$Decode$field, 'right', $elm$json$Json$Decode$int),
+			A2($elm$json$Json$Decode$field, 'bottom', $elm$json$Json$Decode$int),
+			A2($elm$json$Json$Decode$field, 'internalleft', $elm$json$Json$Decode$int),
+			A2($elm$json$Json$Decode$field, 'internalright', $elm$json$Json$Decode$int));
+		var decoded = A2($elm$json$Json$Decode$decodeValue, decoder, values);
+		var _v0 = _Utils_Tuple2(model.windowSize.a | 0, model.windowSize.b | 0);
+		var width = _v0.a;
+		var height = _v0.b;
+		if (decoded.$ === 'Ok') {
+			var data = decoded.a;
+			return $author$project$Main$adjustSpaceForContent(
+				_Utils_update(
+					model,
+					{
+						bottomDockTopEdge: A2(
+							$author$project$SplitPane$SplitPane$configureSplitter,
+							A2(
+								$author$project$SplitPane$SplitPane$px,
+								data.bottom,
+								$elm$core$Maybe$Just(
+									_Utils_Tuple2(((height * 2) / 3) | 0, height - 75))),
+							$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Vertical)),
+						leftDockInternal: A2(
+							$author$project$SplitPane$SplitPane$configureSplitter,
+							A2(
+								$author$project$SplitPane$SplitPane$px,
+								data.leftInternal,
+								$elm$core$Maybe$Just(
+									_Utils_Tuple2(50, height - 75))),
+							$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Vertical)),
+						leftDockRightEdge: A2(
+							$author$project$SplitPane$SplitPane$configureSplitter,
+							A2(
+								$author$project$SplitPane$SplitPane$px,
+								data.left,
+								$elm$core$Maybe$Just(
+									_Utils_Tuple2(20, (width / 3) | 0))),
+							$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Horizontal)),
+						rightDockInternal: A2(
+							$author$project$SplitPane$SplitPane$configureSplitter,
+							A2(
+								$author$project$SplitPane$SplitPane$px,
+								data.rightInternal,
+								$elm$core$Maybe$Just(
+									_Utils_Tuple2(50, height - 75))),
+							$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Vertical)),
+						rightDockLeftEdge: A2(
+							$author$project$SplitPane$SplitPane$configureSplitter,
+							A2(
+								$author$project$SplitPane$SplitPane$px,
+								data.right,
+								$elm$core$Maybe$Just(
+									_Utils_Tuple2(((2 * width) / 3) | 0, width - 20))),
+							$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Horizontal))
+					}));
+		} else {
+			return model;
+		}
+	});
+var $author$project$DomainModel$Leaf = function (a) {
+	return {$: 'Leaf', a: a};
+};
+var $author$project$Spherical$findBearingToTarget = F2(
+	function (_v0, _v1) {
+		var lat1 = _v0.a;
+		var lon1 = _v0.b;
+		var lat2 = _v1.a;
+		var lon2 = _v1.b;
+		var y = $elm$core$Basics$sin(lon2 - lon1) * $elm$core$Basics$cos(lat2);
+		var x = ($elm$core$Basics$cos(lat1) * $elm$core$Basics$sin(lat2)) - (($elm$core$Basics$sin(lat1) * $elm$core$Basics$cos(lat2)) * $elm$core$Basics$cos(lon2 - lon1));
+		return A2($elm$core$Basics$atan2, y, x);
+	});
+var $ianmackenzie$elm_geometry$Point3d$xCoordinate = function (_v0) {
+	var p = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(p.x);
+};
+var $ianmackenzie$elm_geometry$Point3d$yCoordinate = function (_v0) {
+	var p = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(p.y);
+};
+var $ianmackenzie$elm_geometry$Point3d$zCoordinate = function (_v0) {
+	var p = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(p.z);
+};
+var $ianmackenzie$elm_geometry$BoundingBox3d$from = F2(
+	function (firstPoint, secondPoint) {
+		var z2 = $ianmackenzie$elm_geometry$Point3d$zCoordinate(secondPoint);
+		var z1 = $ianmackenzie$elm_geometry$Point3d$zCoordinate(firstPoint);
+		var y2 = $ianmackenzie$elm_geometry$Point3d$yCoordinate(secondPoint);
+		var y1 = $ianmackenzie$elm_geometry$Point3d$yCoordinate(firstPoint);
+		var x2 = $ianmackenzie$elm_geometry$Point3d$xCoordinate(secondPoint);
+		var x1 = $ianmackenzie$elm_geometry$Point3d$xCoordinate(firstPoint);
+		return $ianmackenzie$elm_geometry$Geometry$Types$BoundingBox3d(
+			{
+				maxX: A2($ianmackenzie$elm_units$Quantity$max, x1, x2),
+				maxY: A2($ianmackenzie$elm_units$Quantity$max, y1, y2),
+				maxZ: A2($ianmackenzie$elm_units$Quantity$max, z1, z2),
+				minX: A2($ianmackenzie$elm_units$Quantity$min, x1, x2),
+				minY: A2($ianmackenzie$elm_units$Quantity$min, y1, y2),
+				minZ: A2($ianmackenzie$elm_units$Quantity$min, z1, z2)
+			});
+	});
+var $ianmackenzie$elm_units$Quantity$greaterThanZero = function (_v0) {
+	var x = _v0.a;
+	return x > 0;
+};
+var $ianmackenzie$elm_units$Quantity$lessThanZero = function (_v0) {
+	var x = _v0.a;
+	return x < 0;
+};
+var $ianmackenzie$elm_units$Quantity$negate = function (_v0) {
+	var value = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(-value);
+};
+var $author$project$Spherical$range = F2(
+	function (lonLat1, lonLat2) {
+		var _v0 = _Utils_Tuple2(
+			$ianmackenzie$elm_units$Angle$inRadians(lonLat2.b),
+			$ianmackenzie$elm_units$Angle$inRadians(lonLat2.a));
+		var lat2 = _v0.a;
+		var lon2 = _v0.b;
+		var _v1 = _Utils_Tuple2(
+			$ianmackenzie$elm_units$Angle$inRadians(lonLat1.b),
+			$ianmackenzie$elm_units$Angle$inRadians(lonLat1.a));
+		var lat1 = _v1.a;
+		var lon1 = _v1.b;
+		var y = lat2 - lat1;
+		var x = (lon2 - lon1) * $elm$core$Basics$cos((lat1 + lat2) / 2);
+		return $author$project$Spherical$meanRadius * $elm$core$Basics$sqrt((x * x) + (y * y));
+	});
+var $ianmackenzie$elm_units$Quantity$ratio = F2(
+	function (_v0, _v1) {
+		var x = _v0.a;
+		var y = _v1.a;
+		return x / y;
+	});
+var $author$project$DomainModel$makeRoadSectionKnowingLocalCoords = F2(
+	function (_v0, _v1) {
+		var earth1 = _v0.a;
+		var local1 = _v0.b;
+		var earth2 = _v1.a;
+		var local2 = _v1.b;
+		var range = $ianmackenzie$elm_units$Length$meters(
+			A2(
+				$author$project$Spherical$range,
+				_Utils_Tuple2(
+					$ianmackenzie$elm_geometry$Direction2d$toAngle(earth1.longitude),
+					earth1.latitude),
+				_Utils_Tuple2(
+					$ianmackenzie$elm_geometry$Direction2d$toAngle(earth2.longitude),
+					earth2.latitude)));
+		var medianLon = A2(
+			$ianmackenzie$elm_geometry$Direction2d$rotateBy,
+			$ianmackenzie$elm_units$Quantity$half(
+				A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, earth1.longitude, earth2.longitude)),
+			earth1.longitude);
+		var box = A2($ianmackenzie$elm_geometry$BoundingBox3d$from, local1, local2);
+		var bearing = $ianmackenzie$elm_units$Angle$radians(
+			A2(
+				$author$project$Spherical$findBearingToTarget,
+				_Utils_Tuple2(
+					$ianmackenzie$elm_units$Angle$inRadians(earth1.latitude),
+					$ianmackenzie$elm_units$Angle$inRadians(
+						$ianmackenzie$elm_geometry$Direction2d$toAngle(earth1.longitude))),
+				_Utils_Tuple2(
+					$ianmackenzie$elm_units$Angle$inRadians(earth2.latitude),
+					$ianmackenzie$elm_units$Angle$inRadians(
+						$ianmackenzie$elm_geometry$Direction2d$toAngle(earth2.longitude)))));
+		var altitudeChange = A2(
+			$ianmackenzie$elm_units$Quantity$minus,
+			$ianmackenzie$elm_geometry$Point3d$zCoordinate(local1),
+			$ianmackenzie$elm_geometry$Point3d$zCoordinate(local2));
+		var gradient = ($ianmackenzie$elm_units$Quantity$greaterThanZero(range) && $ianmackenzie$elm_units$Quantity$greaterThanZero(altitudeChange)) ? (100.0 * A2($ianmackenzie$elm_units$Quantity$ratio, altitudeChange, range)) : 0.0;
+		return {
+			altitudeGained: A2($ianmackenzie$elm_units$Quantity$max, $ianmackenzie$elm_units$Quantity$zero, altitudeChange),
+			altitudeLost: A2(
+				$ianmackenzie$elm_units$Quantity$max,
+				$ianmackenzie$elm_units$Quantity$zero,
+				$ianmackenzie$elm_units$Quantity$negate(altitudeChange)),
+			boundingBox: box,
+			directionAtEnd: $ianmackenzie$elm_geometry$Direction2d$fromAngle(bearing),
+			directionAtStart: $ianmackenzie$elm_geometry$Direction2d$fromAngle(bearing),
+			directionChangeMaximumAbs: $ianmackenzie$elm_units$Angle$degrees(0),
+			distanceClimbing: $ianmackenzie$elm_units$Quantity$greaterThanZero(altitudeChange) ? range : $ianmackenzie$elm_units$Quantity$zero,
+			distanceDescending: $ianmackenzie$elm_units$Quantity$lessThanZero(altitudeChange) ? range : $ianmackenzie$elm_units$Quantity$zero,
+			eastwardExtent: A2(
+				$ianmackenzie$elm_units$Quantity$max,
+				$ianmackenzie$elm_units$Quantity$zero,
+				A2(
+					$ianmackenzie$elm_units$Quantity$max,
+					A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, medianLon, earth1.longitude),
+					A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, medianLon, earth2.longitude))),
+			endPoint: local2,
+			gradientAtEnd: gradient,
+			gradientAtStart: gradient,
+			gradientChangeMaximumAbs: $elm$core$Basics$abs(gradient),
+			medianLongitude: medianLon,
+			skipCount: 1,
+			sourceData: _Utils_Tuple2(earth1, earth2),
+			sphere: $author$project$DomainModel$containingSphere(box),
+			startPoint: local1,
+			steepestClimb: A2($elm$core$Basics$max, 0.0, gradient),
+			trueLength: range,
+			westwardExtent: A2(
+				$ianmackenzie$elm_units$Quantity$min,
+				$ianmackenzie$elm_units$Quantity$zero,
+				A2(
+					$ianmackenzie$elm_units$Quantity$min,
+					A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, medianLon, earth1.longitude),
+					A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, medianLon, earth2.longitude)))
+		};
+	});
+var $author$project$DomainModel$getLastLeaf = function (someNode) {
+	getLastLeaf:
+	while (true) {
+		if (someNode.$ === 'Leaf') {
+			var leaf = someNode.a;
+			return leaf;
+		} else {
+			var node = someNode.a;
+			var $temp$someNode = node.right;
+			someNode = $temp$someNode;
+			continue getLastLeaf;
+		}
+	}
+};
+var $author$project$DomainModel$penultimatePoint = function (tree) {
+	var leaf = $author$project$DomainModel$getLastLeaf(tree);
+	return _Utils_Tuple2(leaf.sourceData.a, leaf.startPoint);
+};
+var $author$project$DomainModel$getFirstLeaf = function (someNode) {
+	getFirstLeaf:
+	while (true) {
+		if (someNode.$ === 'Leaf') {
+			var leaf = someNode.a;
+			return leaf;
+		} else {
+			var node = someNode.a;
+			var $temp$someNode = node.left;
+			someNode = $temp$someNode;
+			continue getFirstLeaf;
+		}
+	}
+};
+var $author$project$DomainModel$secondPoint = function (tree) {
+	var leaf = $author$project$DomainModel$getFirstLeaf(tree);
+	return _Utils_Tuple2(leaf.sourceData.b, leaf.endPoint);
+};
 var $author$project$DomainModel$joinReplacingEndPointsWithNewLeaf = F2(
 	function (left, right) {
 		var truncatedRight = A2(
@@ -12167,41 +12262,12 @@ var $author$project$Actions$PreviewCircle = {$: 'PreviewCircle'};
 var $author$project$Actions$ShowPreview = function (a) {
 	return {$: 'ShowPreview', a: a};
 };
-var $author$project$DomainModel$earthPointFromIndex = F2(
-	function (index, treeNode) {
-		earthPointFromIndex:
-		while (true) {
-			if (treeNode.$ === 'Leaf') {
-				var info = treeNode.a;
-				return (index <= 0) ? info.startPoint : info.endPoint;
-			} else {
-				var info = treeNode.a;
-				if (_Utils_cmp(
-					index,
-					$author$project$DomainModel$skipCount(info.left)) < 0) {
-					var $temp$index = index,
-						$temp$treeNode = info.left;
-					index = $temp$index;
-					treeNode = $temp$treeNode;
-					continue earthPointFromIndex;
-				} else {
-					var $temp$index = index - $author$project$DomainModel$skipCount(info.left),
-						$temp$treeNode = info.right;
-					index = $temp$index;
-					treeNode = $temp$treeNode;
-					continue earthPointFromIndex;
-				}
-			}
-		}
-	});
 var $author$project$DomainModel$buildPreview = F2(
 	function (indices, tree) {
-		var getDualCoords = function (index) {
-			return _Utils_Tuple2(
-				A2($author$project$DomainModel$earthPointFromIndex, index, tree),
-				A2($author$project$DomainModel$gpxPointFromIndex, index, tree));
-		};
-		return A2($elm$core$List$map, getDualCoords, indices);
+		return A2(
+			$elm$core$List$map,
+			$author$project$DomainModel$getDualCoords(tree),
+			indices);
 	});
 var $author$project$Tools$AbruptDirectionChanges$findAbruptDirectionChanges = F2(
 	function (options, tree) {
@@ -14339,14 +14405,17 @@ var $author$project$Main$performActionsOnModel = F2(
 							} else {
 								break _v0$9;
 							}
-						case 'DeletePointsIncluding':
+						case 'DeletePointsBetween':
 							if (_v0.b.$ === 'Just') {
 								var _v2 = _v0.a;
-								var startRange = _v2.a;
-								var endRange = _v2.b;
+								var fromStart = _v2.a;
+								var fromEnd = _v2.b;
 								var track = _v0.b.a;
-								var newTree = A3($author$project$Tools$DeletePoints$deletePointRange, startRange, endRange, track.trackTree);
-								var newTrack = A2($author$project$TrackLoaded$useTreeWithRepositionedMarkers, newTree, track);
+								var newTree = A3($author$project$Tools$DeletePoints$deletePointRange, fromStart, fromEnd, track.trackTree);
+								var newTrack = A2(
+									$author$project$TrackLoaded$useTreeWithRepositionedMarkers,
+									newTree,
+									A4($author$project$TrackLoaded$addToUndoStack, action, fromStart, fromEnd, track));
 								return _Utils_update(
 									foldedModel,
 									{
@@ -15968,9 +16037,9 @@ var $author$project$Tools$AbruptDirectionChanges$update = F4(
 				}
 		}
 	});
-var $author$project$Actions$DeletePointsIncluding = F2(
+var $author$project$Actions$DeletePointsBetween = F2(
 	function (a, b) {
-		return {$: 'DeletePointsIncluding', a: a, b: b};
+		return {$: 'DeletePointsBetween', a: a, b: b};
 	});
 var $author$project$Actions$TrackHasChanged = {$: 'TrackHasChanged'};
 var $author$project$TrackLoaded$getRangeFromMarkers = function (track) {
@@ -16008,7 +16077,7 @@ var $author$project$Tools$DeletePoints$update = F4(
 				options,
 				_List_fromArray(
 					[
-						A2($author$project$Actions$DeletePointsIncluding, effectiveStart, effectiveEnd),
+						A2($author$project$Actions$DeletePointsBetween, effectiveStart, effectiveEnd),
 						$author$project$Actions$TrackHasChanged
 					]));
 		} else {

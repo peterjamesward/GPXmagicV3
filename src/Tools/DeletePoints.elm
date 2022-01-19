@@ -78,7 +78,7 @@ update msg options previewColour hasTrack =
                             ( fromStart, fromEnd )
             in
             ( options
-            , [ DeletePointsIncluding effectiveStart effectiveEnd
+            , [ DeletePointsBetween effectiveStart effectiveEnd
               , TrackHasChanged
               ]
             )

@@ -972,18 +972,21 @@ performActionsOnModel actions model =
                 ( DelayMessage int msg, Just track ) ->
                     foldedModel
 
-                ( DeletePointsIncluding startRange endRange, Just track ) ->
+                ( DeletePointsBetween fromStart fromEnd, Just track ) ->
                     let
                         newTree =
-                            DeletePoints.deletePointRange startRange endRange track.trackTree
+                            DeletePoints.deletePointRange fromStart fromEnd track.trackTree
 
                         newTrack =
-                            track |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                            track
+                            |> TrackLoaded.addToUndoStack action fromStart fromEnd
+                            |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
                     { foldedModel | track = Just newTrack }
 
                 ( TrackHasChanged, Just track ) ->
                     -- Must be wary of looping here.
+                    -- Purpose is to refresh all tools' options and all presentations.
                     let
                         ( refreshedToolOptions, secondaryActions ) =
                             ToolsController.refreshOpenTools foldedModel.track foldedModel.toolOptions

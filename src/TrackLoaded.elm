@@ -10,17 +10,18 @@ type alias TrackLoaded msg =
     , referenceLonLat : GPXSource
     , renderDepth : Int
     , trackTree : PeteTree
+
     -- Experimental placement of undo/redo stacks.
-  , undos : List (UndoEntry msg)
-      , redos : List (UndoEntry msg)
-       }
+    , undos : List (UndoEntry msg)
+    , redos : List (UndoEntry msg)
+    }
 
 
 type alias UndoEntry msg =
     { fromStart : Int
     , fromEnd : Int
     , action : ToolAction msg
-    , originalPoints : List ( GPXSource, EarthPoint ) -- for reconstructing the original tree
+    , originalPoints : List ( EarthPoint, GPXSource ) -- for reconstructing the original tree
     }
 
 
@@ -29,7 +30,6 @@ type alias Options msg =
     { undos : List (UndoEntry msg)
     , redos : List (UndoEntry msg)
     }
-
 
 
 getRangeFromMarkers : TrackLoaded msg -> ( Int, Int )
@@ -52,6 +52,25 @@ getRangeFromMarkers track =
 type MarkerColour
     = Orange
     | Purple
+
+
+addToUndoStack : ToolAction msg -> Int -> Int -> TrackLoaded msg -> TrackLoaded msg
+addToUndoStack action fromStart fromEnd oldTrack =
+    let
+        undoEntry =
+            { fromStart = fromStart
+            , fromEnd = fromEnd
+            , action = action
+            , originalPoints =
+                DomainModel.extractPointsInRange
+                    fromStart
+                    fromEnd
+                    oldTrack.trackTree
+            }
+    in
+    { oldTrack
+        | undos = undoEntry :: oldTrack.undos
+    }
 
 
 whichMarkerIsNearestStart : TrackLoaded msg -> MarkerColour
