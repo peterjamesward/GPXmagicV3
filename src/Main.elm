@@ -972,13 +972,18 @@ performActionsOnModel actions model =
                 ( DeleteSinglePoint index, Just track ) ->
                     let
                         newTree =
-                            DomainModel.deleteSinglePoint index track.referenceLonLat track.trackTree
+                            DomainModel.deleteSinglePoint index track.trackTree
 
                         newTrack =
-                            { track
-                                | trackTree = newTree
-                                , currentPosition = min index (skipCount newTree)
-                            }
+                            case newTree of
+                                Just reallyIsATree ->
+                                    { track
+                                        | trackTree = reallyIsATree
+                                        , currentPosition = min index (skipCount reallyIsATree)
+                                    }
+
+                                Nothing ->
+                                    track
                     in
                     { foldedModel | track = Just newTrack }
 

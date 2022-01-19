@@ -11651,23 +11651,6 @@ var $ianmackenzie$elm_units$Quantity$negate = function (_v0) {
 	var value = _v0.a;
 	return $ianmackenzie$elm_units$Quantity$Quantity(-value);
 };
-var $ianmackenzie$elm_units$Angle$cos = function (_v0) {
-	var angle = _v0.a;
-	return $elm$core$Basics$cos(angle);
-};
-var $author$project$Spherical$metresPerDegree = 78846.81;
-var $author$project$DomainModel$pointFromGpxWithReference = F2(
-	function (reference, gpx) {
-		return A3(
-			$ianmackenzie$elm_geometry$Point3d$xyz,
-			$ianmackenzie$elm_units$Length$meters(
-				$ianmackenzie$elm_units$Angle$cos(gpx.latitude) * ($author$project$Spherical$metresPerDegree * $ianmackenzie$elm_units$Angle$inDegrees(
-					A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, reference.longitude, gpx.longitude)))),
-			$ianmackenzie$elm_units$Length$meters(
-				$author$project$Spherical$metresPerDegree * $ianmackenzie$elm_units$Angle$inDegrees(
-					A2($ianmackenzie$elm_units$Quantity$minus, reference.latitude, gpx.latitude))),
-			A2($ianmackenzie$elm_units$Quantity$minus, reference.altitude, gpx.altitude));
-	});
 var $author$project$Spherical$range = F2(
 	function (lonLat1, lonLat2) {
 		var _v0 = _Utils_Tuple2(
@@ -11699,8 +11682,12 @@ var $ianmackenzie$elm_geometry$Direction2d$rotateBy = F2(
 		return $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
 			{x: (c * d.x) - (s * d.y), y: (s * d.x) + (c * d.y)});
 	});
-var $author$project$DomainModel$makeRoadSection = F3(
-	function (reference, earth1, earth2) {
+var $author$project$DomainModel$makeRoadSectionKnowingLocalCoords = F2(
+	function (_v0, _v1) {
+		var earth1 = _v0.a;
+		var local1 = _v0.b;
+		var earth2 = _v1.a;
+		var local2 = _v1.b;
 		var range = $ianmackenzie$elm_units$Length$meters(
 			A2(
 				$author$project$Spherical$range,
@@ -11715,8 +11702,6 @@ var $author$project$DomainModel$makeRoadSection = F3(
 			$ianmackenzie$elm_units$Quantity$half(
 				A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, earth1.longitude, earth2.longitude)),
 			earth1.longitude);
-		var local2 = A2($author$project$DomainModel$pointFromGpxWithReference, reference, earth2);
-		var local1 = A2($author$project$DomainModel$pointFromGpxWithReference, reference, earth1);
 		var box = A2($ianmackenzie$elm_geometry$BoundingBox3d$from, local1, local2);
 		var bearing = $ianmackenzie$elm_units$Angle$radians(
 			A2(
@@ -12066,67 +12051,74 @@ var $author$project$DomainModel$takeFromRight = F2(
 			}
 		}
 	});
-var $author$project$DomainModel$splitTreeAt = F2(
-	function (leavesToTheLeft, thisNode) {
-		return _Utils_Tuple2(
-			A2($author$project$DomainModel$takeFromLeft, leavesToTheLeft, thisNode),
-			A2(
-				$author$project$DomainModel$takeFromRight,
-				$author$project$DomainModel$skipCount(thisNode) - leavesToTheLeft,
-				thisNode));
+var $author$project$DomainModel$joinReplacingEndPointsWithNewLeaf = F2(
+	function (left, right) {
+		var truncatedRight = A2(
+			$author$project$DomainModel$takeFromRight,
+			$author$project$DomainModel$skipCount(right) - 1,
+			right);
+		var truncatedLeft = A2(
+			$author$project$DomainModel$takeFromLeft,
+			$author$project$DomainModel$skipCount(left) - 1,
+			left);
+		var newLeaf = $elm$core$Maybe$Just(
+			$author$project$DomainModel$Leaf(
+				A2(
+					$author$project$DomainModel$makeRoadSectionKnowingLocalCoords,
+					$author$project$DomainModel$penultimatePoint(left),
+					$author$project$DomainModel$secondPoint(right))));
+		return (_Utils_cmp(
+			$author$project$DomainModel$skipCount(left),
+			$author$project$DomainModel$skipCount(right)) > 0) ? A2(
+			$author$project$DomainModel$safeJoin,
+			truncatedLeft,
+			A2($author$project$DomainModel$safeJoin, newLeaf, truncatedRight)) : A2(
+			$author$project$DomainModel$safeJoin,
+			A2($author$project$DomainModel$safeJoin, truncatedLeft, newLeaf),
+			truncatedRight);
 	});
-var $author$project$DomainModel$deleteSinglePoint = F3(
-	function (index, refLonLat, treeNode) {
-		if (treeNode.$ === 'Node') {
-			var node = treeNode.a;
-			if (index <= 0) {
-				return A2(
-					$elm$core$Maybe$withDefault,
-					treeNode,
-					A2($author$project$DomainModel$splitTreeAt, 1, treeNode).b);
+var $author$project$DomainModel$safeJoinReplacingEndPointsWithNewLeaf = F2(
+	function (mLeft, mRight) {
+		var _v0 = _Utils_Tuple2(mLeft, mRight);
+		if (_v0.a.$ === 'Just') {
+			if (_v0.b.$ === 'Just') {
+				var left = _v0.a.a;
+				var right = _v0.b.a;
+				return A2($author$project$DomainModel$joinReplacingEndPointsWithNewLeaf, left, right);
 			} else {
-				if (_Utils_eq(
-					index,
-					$author$project$DomainModel$skipCount(treeNode))) {
-					return A2(
-						$elm$core$Maybe$withDefault,
-						treeNode,
-						A2(
-							$author$project$DomainModel$splitTreeAt,
-							$author$project$DomainModel$skipCount(treeNode) - 1,
-							treeNode).a);
-				} else {
-					var _v1 = A2($author$project$DomainModel$splitTreeAt, index, treeNode);
-					if ((_v1.a.$ === 'Just') && (_v1.b.$ === 'Just')) {
-						var left = _v1.a.a;
-						var right = _v1.b.a;
-						var rightJoinPoint = $author$project$DomainModel$secondPoint(right).a;
-						var leftJoinPoint = $author$project$DomainModel$penultimatePoint(left).a;
-						var newLeaf = $author$project$DomainModel$Leaf(
-							A3($author$project$DomainModel$makeRoadSection, refLonLat, leftJoinPoint, rightJoinPoint));
-						var _v2 = A2($author$project$DomainModel$splitTreeAt, 1, right);
-						var trimmedRight = _v2.b;
-						var _v3 = A2($author$project$DomainModel$splitTreeAt, index - 1, left);
-						var trimmedLeft = _v3.a;
-						return A2(
-							$elm$core$Maybe$withDefault,
-							treeNode,
-							A2(
-								$author$project$DomainModel$safeJoin,
-								trimmedLeft,
-								A2(
-									$author$project$DomainModel$safeJoin,
-									$elm$core$Maybe$Just(newLeaf),
-									trimmedRight)));
-					} else {
-						return treeNode;
-					}
-				}
+				var left = _v0.a.a;
+				var _v1 = _v0.b;
+				return A2(
+					$author$project$DomainModel$takeFromLeft,
+					$author$project$DomainModel$skipCount(left) - 1,
+					left);
 			}
 		} else {
-			var leaf = treeNode.a;
-			return treeNode;
+			if (_v0.b.$ === 'Just') {
+				var _v2 = _v0.a;
+				var right = _v0.b.a;
+				return A2(
+					$author$project$DomainModel$takeFromRight,
+					$author$project$DomainModel$skipCount(right) - 1,
+					right);
+			} else {
+				var _v3 = _v0.a;
+				var _v4 = _v0.b;
+				return $elm$core$Maybe$Nothing;
+			}
 		}
+	});
+var $author$project$DomainModel$deleteSinglePoint = F2(
+	function (index, treeNode) {
+		var _v0 = _Utils_Tuple2(
+			A2($author$project$DomainModel$takeFromLeft, index, treeNode),
+			A2(
+				$author$project$DomainModel$takeFromRight,
+				$author$project$DomainModel$skipCount(treeNode) - index,
+				treeNode));
+		var leftWithOverlap = _v0.a;
+		var rightWithOverlap = _v0.b;
+		return A2($author$project$DomainModel$safeJoinReplacingEndPointsWithNewLeaf, leftWithOverlap, rightWithOverlap);
 	});
 var $author$project$Actions$StoreToolsConfig = {$: 'StoreToolsConfig'};
 var $elm_community$list_extra$List$Extra$find = F2(
@@ -14295,16 +14287,23 @@ var $author$project$Main$performActionsOnModel = F2(
 							if (_v0.b.$ === 'Just') {
 								var index = _v0.a.a;
 								var track = _v0.b.a;
-								var newTree = A3($author$project$DomainModel$deleteSinglePoint, index, track.referenceLonLat, track.trackTree);
-								var newTrack = _Utils_update(
-									track,
-									{
-										currentPosition: A2(
-											$elm$core$Basics$min,
-											index,
-											$author$project$DomainModel$skipCount(newTree)),
-										trackTree: newTree
-									});
+								var newTree = A2($author$project$DomainModel$deleteSinglePoint, index, track.trackTree);
+								var newTrack = function () {
+									if (newTree.$ === 'Just') {
+										var reallyIsATree = newTree.a;
+										return _Utils_update(
+											track,
+											{
+												currentPosition: A2(
+													$elm$core$Basics$min,
+													index,
+													$author$project$DomainModel$skipCount(reallyIsATree)),
+												trackTree: reallyIsATree
+											});
+									} else {
+										return track;
+									}
+								}();
 								return _Utils_update(
 									foldedModel,
 									{
@@ -14315,11 +14314,11 @@ var $author$project$Main$performActionsOnModel = F2(
 							}
 						case 'TrackHasChanged':
 							if (_v0.b.$ === 'Just') {
-								var _v2 = _v0.a;
+								var _v3 = _v0.a;
 								var track = _v0.b.a;
-								var _v3 = A2($author$project$ToolsController$refreshOpenTools, foldedModel.track, foldedModel.toolOptions);
-								var refreshedToolOptions = _v3.a;
-								var secondaryActions = _v3.b;
+								var _v4 = A2($author$project$ToolsController$refreshOpenTools, foldedModel.track, foldedModel.toolOptions);
+								var refreshedToolOptions = _v4.a;
+								var secondaryActions = _v4.b;
 								var innerModelWithNewToolSettings = _Utils_update(
 									foldedModel,
 									{toolOptions: refreshedToolOptions});
@@ -14344,9 +14343,9 @@ var $author$project$Main$performActionsOnModel = F2(
 								break _v0$9;
 							}
 						case 'StoredValueRetrieved':
-							var _v4 = _v0.a;
-							var key = _v4.a;
-							var value = _v4.b;
+							var _v5 = _v0.a;
+							var key = _v5.a;
+							var value = _v5.b;
 							switch (key) {
 								case 'splits':
 									return A2($author$project$Main$decodeSplitValues, value, foldedModel);
@@ -14745,6 +14744,35 @@ var $author$project$Main$showTrackOnMapCentered = function (track) {
 			]));
 };
 var $elm$file$File$toString = _File_toString;
+var $ianmackenzie$elm_units$Angle$cos = function (_v0) {
+	var angle = _v0.a;
+	return $elm$core$Basics$cos(angle);
+};
+var $author$project$Spherical$metresPerDegree = 78846.81;
+var $author$project$DomainModel$pointFromGpxWithReference = F2(
+	function (reference, gpx) {
+		return A3(
+			$ianmackenzie$elm_geometry$Point3d$xyz,
+			$ianmackenzie$elm_units$Length$meters(
+				$ianmackenzie$elm_units$Angle$cos(gpx.latitude) * ($author$project$Spherical$metresPerDegree * $ianmackenzie$elm_units$Angle$inDegrees(
+					A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, reference.longitude, gpx.longitude)))),
+			$ianmackenzie$elm_units$Length$meters(
+				$author$project$Spherical$metresPerDegree * $ianmackenzie$elm_units$Angle$inDegrees(
+					A2($ianmackenzie$elm_units$Quantity$minus, reference.latitude, gpx.latitude))),
+			A2($ianmackenzie$elm_units$Quantity$minus, reference.altitude, gpx.altitude));
+	});
+var $author$project$DomainModel$makeRoadSection = F3(
+	function (reference, earth1, earth2) {
+		var _v0 = _Utils_Tuple2(
+			A2($author$project$DomainModel$pointFromGpxWithReference, reference, earth1),
+			A2($author$project$DomainModel$pointFromGpxWithReference, reference, earth2));
+		var local1 = _v0.a;
+		var local2 = _v0.b;
+		return A2(
+			$author$project$DomainModel$makeRoadSectionKnowingLocalCoords,
+			_Utils_Tuple2(earth1, local1),
+			_Utils_Tuple2(earth2, local2));
+	});
 var $author$project$DomainModel$treeFromSourcePoints = function (track) {
 	var referencePoint = A2(
 		$elm$core$Maybe$withDefault,

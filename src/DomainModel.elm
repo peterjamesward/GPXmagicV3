@@ -215,12 +215,20 @@ gpxFromPointWithReference reference point =
 makeRoadSection : GPXSource -> GPXSource -> GPXSource -> RoadSection
 makeRoadSection reference earth1 earth2 =
     let
-        local1 =
-            pointFromGpxWithReference reference earth1
+        ( local1, local2 ) =
+            ( pointFromGpxWithReference reference earth1
+            , pointFromGpxWithReference reference earth2
+            )
+    in
+    makeRoadSectionKnowingLocalCoords ( earth1, local1 ) ( earth2, local2 )
 
-        local2 =
-            pointFromGpxWithReference reference earth2
 
+makeRoadSectionKnowingLocalCoords :
+    ( GPXSource, EarthPoint )
+    -> ( GPXSource, EarthPoint )
+    -> RoadSection
+makeRoadSectionKnowingLocalCoords ( earth1, local1 ) ( earth2, local2 ) =
+    let
         box =
             BoundingBox3d.from local1 local2
 
@@ -381,11 +389,69 @@ combineInfo info1 info2 =
 
 joiningNode : PeteTree -> PeteTree -> PeteTree
 joiningNode left right =
+    -- Joins two nodes, with no special care needed.
     Node
         { nodeContent = combineInfo left right
         , left = left
         , right = right
         }
+
+
+safeJoin : Maybe PeteTree -> Maybe PeteTree -> Maybe PeteTree
+safeJoin left right =
+    -- Wrapper around joining node so we can use Maybes.
+    case ( left, right ) of
+        ( Just leftTree, Just rightTree ) ->
+            Just <| joiningNode leftTree rightTree
+
+        ( Just leftTree, Nothing ) ->
+            left
+
+        ( Nothing, Just rightTree ) ->
+            right
+
+        ( Nothing, Nothing ) ->
+            Nothing
+
+
+joinReplacingEndPointsWithNewLeaf : PeteTree -> PeteTree -> Maybe PeteTree
+joinReplacingEndPointsWithNewLeaf left right =
+    -- Joins two nodes but in the case where we do not want to keep the
+    -- innermost points of each side but replace them with a new leaf.
+    let
+        newLeaf =
+            Just <|
+                Leaf <|
+                    makeRoadSectionKnowingLocalCoords (penultimatePoint left) (secondPoint right)
+
+        truncatedLeft =
+            takeFromLeft (skipCount left - 1) left
+
+        truncatedRight =
+            takeFromRight (skipCount right - 1) right
+    in
+    if skipCount left > skipCount right then
+        -- Attach to smaller side
+        safeJoin truncatedLeft (safeJoin newLeaf truncatedRight)
+
+    else
+        safeJoin (safeJoin truncatedLeft newLeaf) truncatedRight
+
+
+safeJoinReplacingEndPointsWithNewLeaf : Maybe PeteTree -> Maybe PeteTree -> Maybe PeteTree
+safeJoinReplacingEndPointsWithNewLeaf mLeft mRight =
+    case ( mLeft, mRight ) of
+        ( Just left, Just right ) ->
+            joinReplacingEndPointsWithNewLeaf left right
+
+        ( Just left, Nothing ) ->
+            takeFromLeft (skipCount left - 1) left
+
+        ( Nothing, Just right ) ->
+            takeFromRight (skipCount right - 1) right
+
+        ( Nothing, Nothing ) ->
+            Nothing
 
 
 treeFromSourcePoints : List GPXSource -> Maybe PeteTree
@@ -715,64 +781,18 @@ buildPreview indices tree =
     List.map getDualCoords indices
 
 
-deleteSinglePoint : Int -> GPXSource -> PeteTree -> PeteTree
-deleteSinglePoint index refLonLat treeNode =
-    -- TODO: This logically sites between the DeletePoints tool and the Domain Model, It's too specific to be here.
-    -- Logically, where index of 0 means the first leaf is discarded.
-    -- We don't actually ever split a leaf.
-    -- Default here is to return the original.
-    -- I see my error. We should:
-    -- THIS NEEDS to consider case of only having two leaves, so we can't trim them.
-    -- Generally, there will need to be a new road section between the penultimate _point_
-    -- of the left and the _second_ point of the right.
-    -- We can find these prior to any trimming.
-    -- Then we can trim the left and right, and stitch together the new section.
-    case treeNode of
-        Node node ->
-            if index <= 0 then
-                -- First point deletion special case
-                treeNode
-                    |> splitTreeAt 1
-                    |> Tuple.second
-                    |> Maybe.withDefault treeNode
-
-            else if index == skipCount treeNode then
-                -- Last point also special case
-                treeNode
-                    |> splitTreeAt (skipCount treeNode - 1)
-                    |> Tuple.first
-                    |> Maybe.withDefault treeNode
-
-            else
-                -- Having dispensed with special cases above, there should be something each side.
-                case treeNode |> splitTreeAt index of
-                    ( Just left, Just right ) ->
-                        let
-                            leftJoinPoint =
-                                penultimatePoint left |> Tuple.first
-
-                            rightJoinPoint =
-                                secondPoint right |> Tuple.first
-
-                            newLeaf =
-                                Leaf <| makeRoadSection refLonLat leftJoinPoint rightJoinPoint
-
-                            ( trimmedLeft, _ ) =
-                                left |> splitTreeAt (index - 1)
-
-                            ( _, trimmedRight ) =
-                                right |> splitTreeAt 1
-                        in
-                        Maybe.withDefault treeNode <|
-                            safeJoin trimmedLeft <|
-                                safeJoin (Just newLeaf) trimmedRight
-
-                    _ ->
-                        treeNode
-
-        Leaf leaf ->
-            -- Can't split a leaf
-            treeNode
+deleteSinglePoint : Int -> PeteTree -> Maybe PeteTree
+deleteSinglePoint index treeNode =
+    -- Implement with takeFromLeft|Right, should generalise trivially.
+    let
+        ( leftWithOverlap, rightWithOverlap ) =
+            -- These include the trackpoints to be deleted, when we
+            -- join the two sides, we create a new leaf that omits these.
+            ( takeFromLeft index treeNode
+            , takeFromRight (skipCount treeNode - index) treeNode
+            )
+    in
+    safeJoinReplacingEndPointsWithNewLeaf leftWithOverlap rightWithOverlap
 
 
 takeFromLeft : Int -> PeteTree -> Maybe PeteTree
@@ -823,6 +843,16 @@ splitTreeAt leavesToTheLeft thisNode =
     )
 
 
+safeSplitTreeAt : Int -> Maybe PeteTree -> ( Maybe PeteTree, Maybe PeteTree )
+safeSplitTreeAt index mTree =
+    case mTree of
+        Just isTree ->
+            splitTreeAt index isTree
+
+        Nothing ->
+            ( Nothing, Nothing )
+
+
 getFirstLeaf : PeteTree -> RoadSection
 getFirstLeaf someNode =
     case someNode of
@@ -859,19 +889,3 @@ penultimatePoint tree =
             getLastLeaf tree
     in
     ( Tuple.first leaf.sourceData, leaf.startPoint )
-
-
-safeJoin : Maybe PeteTree -> Maybe PeteTree -> Maybe PeteTree
-safeJoin left right =
-    case ( left, right ) of
-        ( Just leftTree, Just rightTree ) ->
-            Just <| joiningNode leftTree rightTree
-
-        ( Just leftTree, Nothing ) ->
-            left
-
-        ( Nothing, Just rightTree ) ->
-            right
-
-        ( Nothing, Nothing ) ->
-            Nothing
