@@ -6,13 +6,9 @@ BUG: Marker status not changing in marker tool view when track loaded.
 # WIP
 
 ## Undo, Redo.
-I will trust that the Redo stack rarely grows large, as it empties when
-another (different) edit occurs. Hence, just keep track point data.
-> for Undo: `fromStart : Int, fromEnd : Int, List (GPXSource, EarthPoint)`
-> for Redo: the action!
-... `BezierApproximation 0.5 1.6`
-... `CurveFormer (x,y) inner outer joining`
-Yes, this what the actions are, Redo merely replays them.
+
+Issue with inclusive v exclusive ranges.
+Can I get the tool to provide the old points?
 
 ---
 

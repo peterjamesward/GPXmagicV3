@@ -63,22 +63,22 @@ update :
 update msg options previewColour hasTrack =
     case ( hasTrack, msg ) of
         ( Just track, DeletePointRange ) ->
-            -- Curious semantics here. If no marker, delete single point (hence inclusive, explicitly).
-            -- but with marker, more sensible if the markers themselves are not deletes (hence, exclusive).
             let
                 ( fromStart, fromEnd ) =
                     TrackLoaded.getRangeFromMarkers track
 
-                ( effectiveStart, effectiveEnd ) =
-                    case track.markerPosition of
-                        Just _ ->
-                            ( fromStart + 1, fromEnd + 1 )
+                action =
+                    -- Curious semantics here. If no marker, delete single point (hence inclusive, explicitly).
+                    -- but with marker, more sensible if the markers themselves are not deletes (hence, exclusive).
+                    -- This attempts to be explicit.
+                    if track.markerPosition == Nothing then
+                        DeletePointsIncluding fromStart fromEnd
 
-                        Nothing ->
-                            ( fromStart, fromEnd )
+                    else
+                        DeletePointsBetween fromStart fromEnd
             in
             ( options
-            , [ DeletePointsBetween effectiveStart effectiveEnd
+            , [ action
               , TrackHasChanged
               ]
             )
@@ -102,9 +102,9 @@ view msgWrapper options =
                 }
 
 
-deletePointRange : Int -> Int -> PeteTree -> Maybe PeteTree
+deletePointRange : Int -> Int -> PeteTree -> ( Maybe PeteTree, List ( EarthPoint, GPXSource ) )
 deletePointRange fromStart fromEnd treeNode =
-    -- Deletes, if possible, inclusive of the markers. We're counting raod segments.
+    -- Deletes, if possible, inclusive of the markers. We're counting road segments.
     let
         ( leftWithOverlap, rightWithOverlap ) =
             -- These include the track points to be deleted, when we
@@ -112,5 +112,13 @@ deletePointRange fromStart fromEnd treeNode =
             ( takeFromLeft fromStart treeNode
             , takeFromRight fromEnd treeNode
             )
+
+        oldPoints =
+            DomainModel.extractPointsInRange
+                fromStart
+                fromEnd
+                treeNode
     in
-    safeJoinReplacingEndPointsWithNewLeaf leftWithOverlap rightWithOverlap
+    ( safeJoinReplacingEndPointsWithNewLeaf leftWithOverlap rightWithOverlap
+    , oldPoints
+    )

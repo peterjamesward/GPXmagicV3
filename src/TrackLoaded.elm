@@ -18,9 +18,7 @@ type alias TrackLoaded msg =
 
 
 type alias UndoEntry msg =
-    { fromStart : Int
-    , fromEnd : Int
-    , action : ToolAction msg
+    { action : ToolAction msg
     , originalPoints : List ( EarthPoint, GPXSource ) -- for reconstructing the original tree
     }
 
@@ -54,18 +52,12 @@ type MarkerColour
     | Purple
 
 
-addToUndoStack : ToolAction msg -> Int -> Int -> TrackLoaded msg -> TrackLoaded msg
-addToUndoStack action fromStart fromEnd oldTrack =
+addToUndoStack : ToolAction msg -> List (EarthPoint, GPXSource) -> TrackLoaded msg -> TrackLoaded msg
+addToUndoStack action oldPoints oldTrack =
     let
         undoEntry =
-            { fromStart = fromStart
-            , fromEnd = fromEnd
-            , action = action
-            , originalPoints =
-                DomainModel.extractPointsInRange
-                    fromStart
-                    fromEnd
-                    oldTrack.trackTree
+            { action = action
+            , originalPoints = oldPoints
             }
     in
     { oldTrack
