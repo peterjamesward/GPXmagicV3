@@ -781,20 +781,6 @@ buildPreview indices tree =
     List.map getDualCoords indices
 
 
-deleteSinglePoint : Int -> PeteTree -> Maybe PeteTree
-deleteSinglePoint index treeNode =
-    -- Implement with takeFromLeft|Right, should generalise trivially.
-    let
-        ( leftWithOverlap, rightWithOverlap ) =
-            -- These include the trackpoints to be deleted, when we
-            -- join the two sides, we create a new leaf that omits these.
-            ( takeFromLeft index treeNode
-            , takeFromRight (skipCount treeNode - index) treeNode
-            )
-    in
-    safeJoinReplacingEndPointsWithNewLeaf leftWithOverlap rightWithOverlap
-
-
 takeFromLeft : Int -> PeteTree -> Maybe PeteTree
 takeFromLeft leavesFromLeft treeNode =
     if leavesFromLeft <= 0 then

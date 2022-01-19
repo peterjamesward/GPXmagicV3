@@ -1,7 +1,7 @@
 module Tools.DeletePoints exposing (..)
 
 import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
-import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), asRecord, skipCount)
+import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), asRecord, safeJoinReplacingEndPointsWithNewLeaf, skipCount, takeFromLeft, takeFromRight)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input
@@ -84,3 +84,18 @@ view msgWrapper options =
                 { onPress = Just (msgWrapper Delete)
                 , label = text "Delete point"
                 }
+
+
+deleteSinglePoint : Int -> PeteTree -> Maybe PeteTree
+deleteSinglePoint index treeNode =
+    -- Implement with takeFromLeft|Right, should generalise trivially.
+    let
+        ( leftWithOverlap, rightWithOverlap ) =
+            -- These include the track points to be deleted, when we
+            -- join the two sides, we create a new leaf that omits these.
+            ( takeFromLeft index treeNode
+            , takeFromRight (skipCount treeNode - index) treeNode
+            )
+    in
+    safeJoinReplacingEndPointsWithNewLeaf leftWithOverlap rightWithOverlap
+

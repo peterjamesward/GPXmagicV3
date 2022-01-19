@@ -38,6 +38,7 @@ import SplitPane.SplitPane as SplitPane exposing (..)
 import StravaAuth exposing (getStravaToken)
 import Task
 import Time
+import Tools.DeletePoints as DeletePoints
 import ToolsController exposing (ToolEntry)
 import TrackLoaded exposing (TrackLoaded)
 import Url exposing (Url)
@@ -972,7 +973,7 @@ performActionsOnModel actions model =
                 ( DeleteSinglePoint index, Just track ) ->
                     let
                         newTree =
-                            DomainModel.deleteSinglePoint index track.trackTree
+                            DeletePoints.deleteSinglePoint index track.trackTree
 
                         newTrack =
                             case newTree of
