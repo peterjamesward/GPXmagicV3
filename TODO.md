@@ -4,6 +4,10 @@ BUG: Dubious steepest gradient on some routes.
 
 # WIP
 
+# Split tree
+
+Cleaner implementation with `takeFromLeft`, `takeFromRight`.
+
 ## Undo, Redo.
 Decision on approach.
 I will trust that the Redo stack rarely grows large, as it empties when

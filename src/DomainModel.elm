@@ -717,6 +717,7 @@ buildPreview indices tree =
 
 deleteSinglePoint : Int -> GPXSource -> PeteTree -> PeteTree
 deleteSinglePoint index refLonLat treeNode =
+    -- TODO: This logically sites between the DeletePoints tool and the Domain Model, It's too specific to be here.
     -- Logically, where index of 0 means the first leaf is discarded.
     -- We don't actually ever split a leaf.
     -- Default here is to return the original.
@@ -774,8 +775,49 @@ deleteSinglePoint index refLonLat treeNode =
             treeNode
 
 
+takeFromLeft : Int -> PeteTree -> Maybe PeteTree
+takeFromLeft leavesFromLeft treeNode =
+    if leavesFromLeft <= 0 then
+        Nothing
+
+    else if leavesFromLeft >= skipCount treeNode then
+        Just treeNode
+
+    else
+        case treeNode of
+            Leaf roadSection ->
+                -- Awkward, can't split a leaf
+                Nothing
+
+            Node record ->
+                safeJoin
+                    (takeFromLeft leavesFromLeft record.left)
+                    (takeFromLeft (leavesFromLeft - skipCount record.left) record.right)
+
+
+takeFromRight : Int -> PeteTree -> Maybe PeteTree
+takeFromRight leavesFromRight treeNode =
+    if leavesFromRight <= 0 then
+        Nothing
+
+    else if leavesFromRight >= skipCount treeNode then
+        Just treeNode
+
+    else
+        case treeNode of
+            Leaf roadSection ->
+                -- Awkward, can't split a leaf
+                Nothing
+
+            Node record ->
+                safeJoin
+                    (takeFromRight (leavesFromRight - skipCount record.right) record.left)
+                    (takeFromRight leavesFromRight record.right)
+
+
 splitTreeAt : Int -> PeteTree -> ( Maybe PeteTree, Maybe PeteTree )
 splitTreeAt leavesToTheLeft thisNode =
+    -- This does a simultaneous take from both sides, probably, but less clearly.
     case thisNode of
         Leaf leaf ->
             if leavesToTheLeft <= 0 then
