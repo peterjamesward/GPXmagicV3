@@ -972,16 +972,42 @@ performActionsOnModel actions model =
 
                 ( DeletePointsIncluding startRange endRange, Just track ) ->
                     let
+                        firstMarker =
+                            TrackLoaded.whichMarkerIsNearestStart track
+
                         newTree =
                             DeletePoints.deletePointRange startRange endRange track.trackTree
 
                         newTrack =
                             case newTree of
                                 Just reallyIsATree ->
+                                    let
+                                        changeInTrackLength =
+                                            skipCount reallyIsATree - skipCount track.trackTree
+
+                                        newOrange =
+                                            case firstMarker of
+                                                TrackLoaded.Orange ->
+                                                    track.currentPosition
+
+                                                TrackLoaded.Purple ->
+                                                    max 0 <| track.currentPosition + changeInTrackLength
+
+                                        newPurple =
+                                            case ( track.markerPosition, firstMarker ) of
+                                                ( Just purple, TrackLoaded.Orange ) ->
+                                                    Just <| max 0 <| purple + changeInTrackLength
+
+                                                ( Just purple, TrackLoaded.Purple ) ->
+                                                    Just purple
+
+                                                _ ->
+                                                    Nothing
+                                    in
                                     { track
                                         | trackTree = reallyIsATree
-                                        , currentPosition = min track.currentPosition (skipCount reallyIsATree)
-                                        , markerPosition = Nothing
+                                        , currentPosition = newOrange
+                                        , markerPosition = newPurple
                                     }
 
                                 Nothing ->

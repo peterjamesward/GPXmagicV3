@@ -18818,6 +18818,17 @@ var $author$project$ToolsController$restoreStoredValues = F2(
 			return options;
 		}
 	});
+var $author$project$TrackLoaded$Orange = {$: 'Orange'};
+var $author$project$TrackLoaded$Purple = {$: 'Purple'};
+var $author$project$TrackLoaded$whichMarkerIsNearestStart = function (track) {
+	var _v0 = track.markerPosition;
+	if (_v0.$ === 'Just') {
+		var purple = _v0.a;
+		return (_Utils_cmp(track.currentPosition, purple) < 1) ? $author$project$TrackLoaded$Orange : $author$project$TrackLoaded$Purple;
+	} else {
+		return $author$project$TrackLoaded$Orange;
+	}
+};
 var $author$project$Main$performActionsOnModel = F2(
 	function (actions, model) {
 		var performAction = F2(
@@ -18897,19 +18908,38 @@ var $author$project$Main$performActionsOnModel = F2(
 								var endRange = _v2.b;
 								var track = _v0.b.a;
 								var newTree = A3($author$project$Tools$DeletePoints$deletePointRange, startRange, endRange, track.trackTree);
+								var firstMarker = $author$project$TrackLoaded$whichMarkerIsNearestStart(track);
 								var newTrack = function () {
 									if (newTree.$ === 'Just') {
 										var reallyIsATree = newTree.a;
+										var changeInTrackLength = $author$project$DomainModel$skipCount(reallyIsATree) - $author$project$DomainModel$skipCount(track.trackTree);
+										var newOrange = function () {
+											if (firstMarker.$ === 'Orange') {
+												return track.currentPosition;
+											} else {
+												return A2($elm$core$Basics$max, 0, track.currentPosition + changeInTrackLength);
+											}
+										}();
+										var newPurple = function () {
+											var _v4 = _Utils_Tuple2(track.markerPosition, firstMarker);
+											if (_v4.a.$ === 'Just') {
+												if (_v4.b.$ === 'Orange') {
+													var purple = _v4.a.a;
+													var _v5 = _v4.b;
+													return $elm$core$Maybe$Just(
+														A2($elm$core$Basics$max, 0, purple + changeInTrackLength));
+												} else {
+													var purple = _v4.a.a;
+													var _v6 = _v4.b;
+													return $elm$core$Maybe$Just(purple);
+												}
+											} else {
+												return $elm$core$Maybe$Nothing;
+											}
+										}();
 										return _Utils_update(
 											track,
-											{
-												currentPosition: A2(
-													$elm$core$Basics$min,
-													track.currentPosition,
-													$author$project$DomainModel$skipCount(reallyIsATree)),
-												markerPosition: $elm$core$Maybe$Nothing,
-												trackTree: reallyIsATree
-											});
+											{currentPosition: newOrange, markerPosition: newPurple, trackTree: reallyIsATree});
 									} else {
 										return track;
 									}
@@ -18924,11 +18954,11 @@ var $author$project$Main$performActionsOnModel = F2(
 							}
 						case 'TrackHasChanged':
 							if (_v0.b.$ === 'Just') {
-								var _v4 = _v0.a;
+								var _v8 = _v0.a;
 								var track = _v0.b.a;
-								var _v5 = A2($author$project$ToolsController$refreshOpenTools, foldedModel.track, foldedModel.toolOptions);
-								var refreshedToolOptions = _v5.a;
-								var secondaryActions = _v5.b;
+								var _v9 = A2($author$project$ToolsController$refreshOpenTools, foldedModel.track, foldedModel.toolOptions);
+								var refreshedToolOptions = _v9.a;
+								var secondaryActions = _v9.b;
 								var innerModelWithNewToolSettings = _Utils_update(
 									foldedModel,
 									{toolOptions: refreshedToolOptions});
@@ -18953,9 +18983,9 @@ var $author$project$Main$performActionsOnModel = F2(
 								break _v0$9;
 							}
 						case 'StoredValueRetrieved':
-							var _v6 = _v0.a;
-							var key = _v6.a;
-							var value = _v6.b;
+							var _v10 = _v0.a;
+							var key = _v10.a;
+							var value = _v10.b;
 							switch (key) {
 								case 'splits':
 									return A2($author$project$Main$decodeSplitValues, value, foldedModel);

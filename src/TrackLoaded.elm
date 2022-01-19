@@ -27,3 +27,22 @@ getRangeFromMarkers track =
 
         Nothing ->
             ( track.currentPosition, theLength - track.currentPosition )
+
+
+type MarkerColour
+    = Orange
+    | Purple
+
+
+whichMarkerIsNearestStart : TrackLoaded -> MarkerColour
+whichMarkerIsNearestStart track =
+    case track.markerPosition of
+        Just purple ->
+            if track.currentPosition <= purple then
+                Orange
+
+            else
+                Purple
+
+        Nothing ->
+            Orange
