@@ -8475,7 +8475,10 @@ var $author$project$Tools$AbruptDirectionChanges$defaultOptions = {
 };
 var $author$project$Tools$DeletePoints$defaultOptions = {singlePoint: true};
 var $author$project$Tools$Pointers$defaultOptions = {orange: 0, purple: $elm$core$Maybe$Nothing};
-var $author$project$Tools$UndoRedo$defaultOptions = {redos: _List_Nil, undos: _List_Nil};
+var $author$project$Tools$UndoRedo$Options = function (dummy) {
+	return {dummy: dummy};
+};
+var $author$project$Tools$UndoRedo$defaultOptions = $author$project$Tools$UndoRedo$Options(0);
 var $author$project$ToolsController$Contracted = {$: 'Contracted'};
 var $author$project$ToolsController$DockLowerLeft = {$: 'DockLowerLeft'};
 var $author$project$ToolsController$ToolDeletePoints = {$: 'ToolDeletePoints'};
@@ -17286,12 +17289,14 @@ var $author$project$Main$update = F2(
 					var newTrack = {
 						currentPosition: 0,
 						markerPosition: $elm$core$Maybe$Nothing,
+						redos: _List_Nil,
 						referenceLonLat: A2(
 							$elm$core$Maybe$withDefault,
 							A3($author$project$DomainModel$GPXSource, $ianmackenzie$elm_geometry$Direction2d$x, $ianmackenzie$elm_units$Quantity$zero, $ianmackenzie$elm_units$Quantity$zero),
 							$elm$core$List$head(gpxTrack)),
 						renderDepth: 10,
-						trackTree: aTree
+						trackTree: aTree,
+						undos: _List_Nil
 					};
 					var modelWithTrack = _Utils_update(
 						model,
@@ -23764,7 +23769,8 @@ var $author$project$ViewPureStyles$neatToolsBorder = _List_fromArray(
 		$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite),
 		$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$bruschettaTomato),
 		$mdgriffith$elm_ui$Element$Border$rounded(4),
-		$mdgriffith$elm_ui$Element$Border$width(2)
+		$mdgriffith$elm_ui$Element$Border$width(2),
+		$mdgriffith$elm_ui$Element$padding(3)
 	]);
 var $mdgriffith$elm_ui$Internal$Model$Px = function (a) {
 	return {$: 'Px', a: a};
@@ -25935,8 +25941,8 @@ var $author$project$Tools$Pointers$view = F3(
 		}
 	});
 var $author$project$Tools$UndoRedo$Undo = {$: 'Undo'};
-var $author$project$Tools$UndoRedo$view = F2(
-	function (msgWrapper, options) {
+var $author$project$Tools$UndoRedo$viewWithTrack = F3(
+	function (msgWrapper, options, track) {
 		return A2(
 			$mdgriffith$elm_ui$Element$column,
 			_List_fromArray(
@@ -25957,7 +25963,7 @@ var $author$project$Tools$UndoRedo$view = F2(
 							$mdgriffith$elm_ui$Element$px(50))
 						]),
 					function () {
-						var _v0 = options.undos;
+						var _v0 = track.undos;
 						if (!_v0.b) {
 							return A2(
 								$mdgriffith$elm_ui$Element$Input$button,
@@ -25989,7 +25995,7 @@ var $author$project$Tools$UndoRedo$view = F2(
 							$mdgriffith$elm_ui$Element$px(50))
 						]),
 					function () {
-						var _v1 = options.undos;
+						var _v1 = track.redos;
 						if (!_v1.b) {
 							return A2(
 								$mdgriffith$elm_ui$Element$Input$button,
@@ -26011,6 +26017,46 @@ var $author$project$Tools$UndoRedo$view = F2(
 						}
 					}())
 				]));
+	});
+var $author$project$Tools$UndoRedo$view = F3(
+	function (msgWrapper, options, mTrack) {
+		if (mTrack.$ === 'Just') {
+			var track = mTrack.a;
+			return A3($author$project$Tools$UndoRedo$viewWithTrack, msgWrapper, options, track);
+		} else {
+			return A2(
+				$mdgriffith$elm_ui$Element$column,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite)
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$centerX,
+								$mdgriffith$elm_ui$Element$padding(4),
+								$mdgriffith$elm_ui$Element$spacing(4),
+								$mdgriffith$elm_ui$Element$height(
+								$mdgriffith$elm_ui$Element$px(50))
+							]),
+						$mdgriffith$elm_ui$Element$none),
+						A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$centerX,
+								$mdgriffith$elm_ui$Element$padding(4),
+								$mdgriffith$elm_ui$Element$spacing(4),
+								$mdgriffith$elm_ui$Element$height(
+								$mdgriffith$elm_ui$Element$px(50))
+							]),
+						$mdgriffith$elm_ui$Element$none)
+					]));
+		}
 	});
 var $author$project$ToolsController$viewToolByType = F4(
 	function (msgWrapper, entry, isTrack, options) {
@@ -26035,10 +26081,11 @@ var $author$project$ToolsController$viewToolByType = F4(
 					options.pointerOptions,
 					isTrack);
 			default:
-				return A2(
+				return A3(
 					$author$project$Tools$UndoRedo$view,
 					A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$UndoRedoMsg),
-					options.undoRedoOptions);
+					options.undoRedoOptions,
+					isTrack);
 		}
 	});
 var $author$project$ToolsController$viewTool = F4(

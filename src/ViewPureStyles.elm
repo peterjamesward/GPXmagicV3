@@ -241,6 +241,7 @@ neatToolsBorder =
     , Border.color FlatColors.ChinesePalette.bruschettaTomato
     , Border.rounded 4
     , Border.width 2
+    , padding 3
     ]
 
 

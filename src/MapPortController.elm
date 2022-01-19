@@ -80,7 +80,7 @@ centreMap model =
             Cmd.none
 
 
-centreMapOnCurrent : TrackLoaded -> Cmd msg
+centreMapOnCurrent : TrackLoaded msg -> Cmd msg
 centreMapOnCurrent track =
     let
         { longitude, latitude, altitude } =
@@ -105,7 +105,7 @@ centreMapOnCurrent track =
 
 update :
     MapMsg
-    -> TrackLoaded
+    -> TrackLoaded msg
     -> List (ToolAction msg)
 update mapMsg track =
     case mapMsg of
@@ -130,7 +130,7 @@ update mapMsg track =
 --            ]
 
 
-addTrackToMap : TrackLoaded -> Cmd msg
+addTrackToMap : TrackLoaded msg -> Cmd msg
 addTrackToMap track =
     -- This is to add the route as a polyline.
     -- We will separately add track points as draggable features.
@@ -174,7 +174,7 @@ hidePreview tag =
 
 
 addMarkersToMap :
-    TrackLoaded
+    TrackLoaded msg
     -> Cmd msg
 addMarkersToMap track =
     let
@@ -204,7 +204,7 @@ msgDecoder =
 
 
 processMapPortMessage :
-    TrackLoaded
+    TrackLoaded msg
     -> E.Value
     -> List (ToolAction msg)
 processMapPortMessage track json =

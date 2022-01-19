@@ -28,7 +28,7 @@ import TrackLoaded exposing (TrackLoaded)
 import Vector3d
 
 
-render3dView : TrackLoaded -> List (Entity LocalCoords)
+render3dView : TrackLoaded msg -> List (Entity LocalCoords)
 render3dView track =
     let
         floorPlane =

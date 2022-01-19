@@ -6,7 +6,6 @@ BUG: Marker status not changing in marker tool view when track loaded.
 # WIP
 
 ## Undo, Redo.
-Decision on approach.
 I will trust that the Redo stack rarely grows large, as it empties when
 another (different) edit occurs. Hence, just keep track point data.
 > for Undo: `fromStart : Int, fromEnd : Int, List (GPXSource, EarthPoint)`

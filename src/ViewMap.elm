@@ -26,7 +26,7 @@ initialiseContext =
 view :
     { model
         | contentArea : ( Quantity Int Pixels, Quantity Int Pixels )
-        , track : Maybe TrackLoaded
+        , track : Maybe (TrackLoaded msg)
     }
     -> (MapPortController.MapMsg -> msg)
     -> Element msg

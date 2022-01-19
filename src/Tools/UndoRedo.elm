@@ -5,25 +5,9 @@ import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), asRecord, skip
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input
-import FeatherIcons
 import FlatColors.ChinesePalette
 import TrackLoaded exposing (TrackLoaded)
 import ViewPureStyles exposing (neatToolsBorder)
-
-
-type alias UndoEntry =
-    { fromStart : Int
-    , fromEnd : Int
-    --, command : TBD -- could this be the Msg from the button click?
-    --, options : TBD -- relevant tool settings?
-    , originalPoints : List ( GPXSource, EarthPoint ) -- for reconstructing the original tree
-    }
-
-
-type alias Options =
-    { undos : List UndoEntry
-    , redos : List UndoEntry
-    }
 
 
 undoLimit =
@@ -31,16 +15,15 @@ undoLimit =
     20
 
 
+type alias Options =
+    { dummy : Int }
+
+
 defaultOptions =
-    { undos = []
-    , redos = []
-    }
+    Options 0
 
 
-type
-    Msg
-    --TODO: Decide on (start, finish), (start, count), or (fromStart, fromEnd).
-    --Shall we start by considering the single point deletion?
+type Msg
     = Undo
     | Redo
 
@@ -49,7 +32,7 @@ toolStateChange :
     Bool
     -> Element.Color
     -> Options
-    -> Maybe TrackLoaded
+    -> Maybe (TrackLoaded msg)
     -> ( Options, List (ToolAction msg) )
 toolStateChange opened colour options track =
     ( options, [] )
@@ -59,7 +42,7 @@ update :
     Msg
     -> Options
     -> Element.Color
-    -> Maybe TrackLoaded
+    -> Maybe (TrackLoaded msg)
     -> ( Options, List (ToolAction msg) )
 update msg options previewColour hasTrack =
     case ( hasTrack, msg ) of
@@ -77,11 +60,24 @@ update msg options previewColour hasTrack =
             ( options, [] )
 
 
-view : (Msg -> msg) -> Options -> Element msg
-view msgWrapper options =
+view : (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view msgWrapper options mTrack =
+    case mTrack of
+        Just track ->
+            viewWithTrack msgWrapper options track
+
+        Nothing ->
+            column [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ]
+                [ el [ centerX, padding 4, spacing 4, height <| px 50 ] none
+                , el [ centerX, padding 4, spacing 4, height <| px 50 ] none
+                ]
+
+
+viewWithTrack : (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
+viewWithTrack msgWrapper options track =
     column [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ]
         [ el [ centerX, padding 4, spacing 4, height <| px 50 ] <|
-            case options.undos of
+            case track.undos of
                 [] ->
                     Input.button (centerY :: neatToolsBorder)
                         { onPress = Nothing
@@ -94,7 +90,7 @@ view msgWrapper options =
                         , label = text "Undo something"
                         }
         , el [ centerX, padding 4, spacing 4, height <| px 50 ] <|
-            case options.undos of
+            case track.redos of
                 [] ->
                     Input.button (centerY :: neatToolsBorder)
                         { onPress = Nothing

@@ -82,7 +82,7 @@ type alias Model =
     , stravaAuthentication : O.Model
 
     -- Track stuff
-    , track : Maybe TrackLoaded
+    , track : Maybe (TrackLoaded Msg)
 
     -- Visuals
     , scene : List (Entity LocalCoords)
@@ -330,7 +330,7 @@ update msg model =
             case trackTree of
                 Just aTree ->
                     let
-                        newTrack : TrackLoaded
+                        newTrack : TrackLoaded Msg
                         newTrack =
                             { trackTree = aTree
                             , currentPosition = 0
@@ -339,6 +339,8 @@ update msg model =
                             , referenceLonLat =
                                 List.head gpxTrack
                                     |> Maybe.withDefault (GPXSource Direction2d.x Quantity.zero Quantity.zero)
+                            , undos = []
+                            , redos = []
                             }
 
                         modelWithTrack =
@@ -1097,7 +1099,7 @@ performActionCommands actions model =
     Cmd.batch <| List.map performAction actions
 
 
-showTrackOnMapCentered : TrackLoaded -> Cmd msg
+showTrackOnMapCentered : TrackLoaded msg -> Cmd msg
 showTrackOnMapCentered track =
     Cmd.batch
         -- Must repaint track on so that selective rendering works.

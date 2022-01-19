@@ -242,7 +242,7 @@ isToolOpen toolType entries =
 
 update :
     ToolMsg
-    -> Maybe TrackLoaded
+    -> Maybe (TrackLoaded msg)
     -> (ToolMsg -> msg)
     -> Options
     -> ( Options, List (ToolAction msg) )
@@ -334,7 +334,7 @@ update toolMsg isTrack msgWrapper options =
 
 
 refreshOpenTools :
-    Maybe TrackLoaded
+    Maybe (TrackLoaded msg)
     -> Options
     -> ( Options, List (ToolAction msg) )
 refreshOpenTools isTrack options =
@@ -358,7 +358,7 @@ refreshOpenTools isTrack options =
 toolStateHasChanged :
     ToolType
     -> ToolState
-    -> Maybe TrackLoaded
+    -> Maybe (TrackLoaded msg)
     -> Options
     -> ( Options, List (ToolAction msg) )
 toolStateHasChanged toolType newState isTrack options =
@@ -411,7 +411,7 @@ toolStateHasChanged toolType newState isTrack options =
 toolsForDock :
     ToolDock
     -> (ToolMsg -> msg)
-    -> Maybe TrackLoaded
+    -> Maybe (TrackLoaded msg)
     -> Options
     -> Element msg
 toolsForDock dock msgWrapper isTrack options =
@@ -424,7 +424,7 @@ toolsForDock dock msgWrapper isTrack options =
 
 viewTool :
     (ToolMsg -> msg)
-    -> Maybe TrackLoaded
+    -> Maybe (TrackLoaded msg)
     -> Options
     -> ToolEntry
     -> Element msg
@@ -565,7 +565,7 @@ showColourOptions msgWrapper toolEntry =
 viewToolByType :
     (ToolMsg -> msg)
     -> ToolEntry
-    -> Maybe TrackLoaded
+    -> Maybe (TrackLoaded msg)
     -> Options
     -> Element msg
 viewToolByType msgWrapper entry isTrack options =
@@ -583,7 +583,7 @@ viewToolByType msgWrapper entry isTrack options =
             Pointers.view (msgWrapper << PointerMsg) options.pointerOptions isTrack
 
         ToolUndoRedo ->
-            UndoRedo.view (msgWrapper << UndoRedoMsg) options.undoRedoOptions
+            UndoRedo.view (msgWrapper << UndoRedoMsg) options.undoRedoOptions isTrack
 
 
 

@@ -29,7 +29,7 @@ toolStateChange :
     Bool
     -> Element.Color
     -> Options
-    -> Maybe TrackLoaded
+    -> Maybe (TrackLoaded msg)
     -> ( Options, List (ToolAction msg) )
 toolStateChange opened colour options track =
     case ( opened, track ) of
@@ -58,7 +58,7 @@ update :
     Msg
     -> Options
     -> Element.Color
-    -> Maybe TrackLoaded
+    -> Maybe (TrackLoaded msg)
     -> ( Options, List (ToolAction msg) )
 update msg options previewColour hasTrack =
     case ( hasTrack, msg ) of

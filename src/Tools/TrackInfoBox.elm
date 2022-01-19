@@ -20,7 +20,7 @@ trackInfoList =
     ]
 
 
-trackInfoBox : Maybe TrackLoaded -> Element msg
+trackInfoBox : Maybe (TrackLoaded msg) -> Element msg
 trackInfoBox maybeTrack =
     el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
         case maybeTrack of

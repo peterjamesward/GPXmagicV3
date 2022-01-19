@@ -87,7 +87,7 @@ pointsToJSON points =
         ]
 
 
-renderMapJson : TrackLoaded -> E.Value
+renderMapJson : TrackLoaded msg -> E.Value
 renderMapJson track =
     let
         boxSide =

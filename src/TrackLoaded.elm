@@ -1,18 +1,38 @@
 module TrackLoaded exposing (..)
 
-import DomainModel exposing (GPXSource, PeteTree, skipCount)
+import Actions exposing (ToolAction)
+import DomainModel exposing (EarthPoint, GPXSource, PeteTree, skipCount)
 
 
-type alias TrackLoaded =
+type alias TrackLoaded msg =
     { currentPosition : Int
     , markerPosition : Maybe Int
     , referenceLonLat : GPXSource
     , renderDepth : Int
     , trackTree : PeteTree
+    -- Experimental placement of undo/redo stacks.
+  , undos : List (UndoEntry msg)
+      , redos : List (UndoEntry msg)
+       }
+
+
+type alias UndoEntry msg =
+    { fromStart : Int
+    , fromEnd : Int
+    , action : ToolAction msg
+    , originalPoints : List ( GPXSource, EarthPoint ) -- for reconstructing the original tree
     }
 
 
-getRangeFromMarkers : TrackLoaded -> ( Int, Int )
+type alias Options msg =
+    -- Do the stacks live here or in Model? That's a good one.
+    { undos : List (UndoEntry msg)
+    , redos : List (UndoEntry msg)
+    }
+
+
+
+getRangeFromMarkers : TrackLoaded msg -> ( Int, Int )
 getRangeFromMarkers track =
     -- This helps all tools consistently to get `fromStart, fromEnd`
     let
@@ -34,7 +54,7 @@ type MarkerColour
     | Purple
 
 
-whichMarkerIsNearestStart : TrackLoaded -> MarkerColour
+whichMarkerIsNearestStart : TrackLoaded msg -> MarkerColour
 whichMarkerIsNearestStart track =
     case track.markerPosition of
         Just purple ->
@@ -48,7 +68,7 @@ whichMarkerIsNearestStart track =
             Orange
 
 
-useTreeWithRepositionedMarkers : Maybe PeteTree -> TrackLoaded -> TrackLoaded
+useTreeWithRepositionedMarkers : Maybe PeteTree -> TrackLoaded msg -> TrackLoaded msg
 useTreeWithRepositionedMarkers mTree oldTrack =
     case mTree of
         Just newTree ->
@@ -58,7 +78,7 @@ useTreeWithRepositionedMarkers mTree oldTrack =
             oldTrack
 
 
-internalUseTree : PeteTree -> TrackLoaded -> TrackLoaded
+internalUseTree : PeteTree -> TrackLoaded msg -> TrackLoaded msg
 internalUseTree newTree oldTrack =
     let
         firstMarker =

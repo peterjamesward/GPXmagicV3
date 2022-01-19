@@ -87,7 +87,7 @@ zoomButtons msgWrapper =
 view :
     ThirdPersonContext
     -> (Quantity Int Pixels, Quantity Int Pixels)
-    -> TrackLoaded
+    -> (TrackLoaded msg)
     -> List (Entity LocalCoords)
     -> (Msg -> msg)
     -> Element msg
@@ -173,7 +173,7 @@ deriveCamera treeNode context currentPosition =
 
 detectHit :
     Mouse.Event
-    -> TrackLoaded
+    -> TrackLoaded msg
     -> ThirdPersonContext
     -> Int
 detectHit event track context =
@@ -209,7 +209,7 @@ detectHit event track context =
 update :
     Msg
     -> (Msg -> msg)
-    -> TrackLoaded
+    -> TrackLoaded msg
     -> ThirdPersonContext
     -> ( ThirdPersonContext, List (ToolAction msg) )
 update msg msgWrapper track context =
