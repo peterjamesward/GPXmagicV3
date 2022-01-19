@@ -465,7 +465,13 @@ treeFromSourcePoints track =
             -- We won't be here without a track, so default is harmless.
             List.head track
                 |> Maybe.withDefault (GPXSource Direction2d.x Quantity.zero Quantity.zero)
+    in
+    treeFromSourcesWithExistingReference referencePoint track
 
+
+treeFromSourcesWithExistingReference : GPXSource -> List GPXSource -> Maybe PeteTree
+treeFromSourcesWithExistingReference referencePoint track =
+    let
         numberOfSegments =
             List.length track - 1
 

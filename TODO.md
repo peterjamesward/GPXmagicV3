@@ -7,8 +7,11 @@ BUG: Marker status not changing in marker tool view when track loaded.
 
 ## Undo, Redo.
 
-Issue with inclusive v exclusive ranges.
-Can I get the tool to provide the old points?
+Undo is not a complete failure! 
+OK from central point delete, not from end point.
+Maybe the current strategy of building a small tree to splice is not sound.
+
+Probably should use this as a chance to re-balance the tree.
 
 ---
 
@@ -52,7 +55,7 @@ Map options tool?
 
 ## Tools
 
-2-way drag corrects for azimuth.
+2-way drag should correct for azimuth.
 Pane payout choices as control?
 I think the top bar is still special: Load, Save, Donate. Is it?
 "Where am I" - reverse geocode (rate limited)).
@@ -85,7 +88,7 @@ https://observablehq.com/@d3/zoomable-area-chart
 
 https://medium.com/@ColinEberhardt/extending-d3-with-higher-order-components-d58cd40b7efd
 
-Remember that most routes will be <10K, not 1M points!
+Remember that most routes will be <100K, not 1M points!
 Therefore, Canvas may be best option.
 Or, given Elm, and the current charting library, and the nature of the tree, we could probably
 show a decent zoomable plot that perhaps shows error bars or a candle plot for non-leaf tree entries.
@@ -94,7 +97,7 @@ PARK THIS FOR NOW; we have options!
 
 ## Terrain
 Terrain 1 = Simple tree walk, in many cases will just work but not always.
-Terrain 2 = Tree walk combined with whole (visible) tree query, because <loops>.
+Terrain 2 = Tree walk combined with whole (visible) tree query, because <track loops>.
 (Expand bounding boxes to allow for road width.)
 
 ## Rendering

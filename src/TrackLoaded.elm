@@ -82,10 +82,46 @@ undoLastAction track =
     --TODO: Stitch in the old points!!
     case track.undos of
         undo :: moreUndos ->
-            { track
-                | undos = moreUndos
-                , redos = undo :: track.redos
-            }
+            let
+                _ =
+                    Debug.log "UNDO" undo.action
+
+                gpxs =
+                    --TODO: What if there's only one point !!
+                    DomainModel.gpxPointFromIndex undo.fromStart track.trackTree
+                        :: List.map Tuple.second undo.originalPoints
+                        ++ [ DomainModel.gpxPointFromIndex
+                                (skipCount track.trackTree - undo.fromEnd)
+                                track.trackTree
+                           ]
+
+                splice =
+                    -- Not really, because
+                    DomainModel.treeFromSourcesWithExistingReference
+                        track.referenceLonLat
+                        gpxs
+
+                ( startSection, endSection ) =
+                    ( DomainModel.takeFromLeft (undo.fromStart - 1) track.trackTree
+                    , DomainModel.takeFromRight (undo.fromEnd - 1) track.trackTree
+                    )
+
+                newTree =
+                    -- If we're not worried about balancing the tree ...
+                    DomainModel.safeJoin
+                        startSection
+                        (DomainModel.safeJoin splice endSection)
+            in
+            case newTree of
+                Just isTree ->
+                    { track
+                        | undos = moreUndos
+                        , redos = undo :: track.redos
+                        , trackTree = isTree
+                    }
+
+                Nothing ->
+                    track
 
         _ ->
             track
