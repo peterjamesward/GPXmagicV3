@@ -9,9 +9,10 @@ BUG: Marker status not changing in marker tool view when track loaded.
 
 Undo is not a complete failure! 
 OK from central point delete, not from end point.
-Maybe the current strategy of building a small tree to splice is not sound.
+Maybe the current strategy of building a small tree to splice is not sound (or clear).
 
-Probably should use this as a chance to re-balance the tree.
+Could use Undo as a chance to re-balance the tree.
+Rebalance recursively or just go for a re-build with TreeTravesor (below)?
 
 ---
 

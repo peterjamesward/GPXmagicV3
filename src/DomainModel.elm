@@ -751,6 +751,7 @@ nearestToLonLat click treeNode =
 
 containingSphere : BoundingBox3d Meters LocalCoords -> Sphere3d Meters LocalCoords
 containingSphere box =
+    --TODO: Move to geometry support.
     let
         here =
             BoundingBox3d.centerPoint box
@@ -772,6 +773,7 @@ containingSphere box =
 
 lngLatPair : ( Angle, Angle ) -> E.Value
 lngLatPair ( longitude, latitude ) =
+    --TODO: Move to encoding support.
     E.list E.float [ Angle.inDegrees longitude, Angle.inDegrees latitude ]
 
 
@@ -916,3 +918,16 @@ enumerateEndPoints treeNode accum =
             accum
                 |> enumerateEndPoints node.right
                 |> enumerateEndPoints node.left
+
+
+recreateGpxSources : Maybe PeteTree -> List GPXSource
+recreateGpxSources mTree =
+    --TODO: Make this a general traversal by taking a function argument.
+    --TODO: Have a road section version, and a points version.
+    case mTree of
+        Just fromTree ->
+            (getFirstLeaf fromTree |> .sourceData |> Tuple.second)
+                :: (enumerateEndPoints fromTree [] |> List.map Tuple.second)
+
+        Nothing ->
+            []

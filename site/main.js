@@ -18883,6 +18883,20 @@ var $author$project$ToolsController$restoreStoredValues = F2(
 		}
 	});
 var $elm$core$Debug$log = _Debug_log;
+var $author$project$DomainModel$recreateGpxSources = function (mTree) {
+	if (mTree.$ === 'Just') {
+		var fromTree = mTree.a;
+		return A2(
+			$elm$core$List$cons,
+			$author$project$DomainModel$getFirstLeaf(fromTree).sourceData.b,
+			A2(
+				$elm$core$List$map,
+				$elm$core$Tuple$second,
+				A2($author$project$DomainModel$enumerateEndPoints, fromTree, _List_Nil)));
+	} else {
+		return _List_Nil;
+	}
+};
 var $ianmackenzie$elm_units$Angle$cos = function (_v0) {
 	var angle = _v0.a;
 	return $elm$core$Basics$cos(angle);
@@ -18959,34 +18973,35 @@ var $author$project$DomainModel$treeFromSourcesWithExistingReference = F2(
 		var numberOfSegments = $elm$core$List$length(track) - 1;
 		return A2(treeBuilder, numberOfSegments, track).a;
 	});
+var $author$project$DomainModel$treeFromSourcePoints = function (track) {
+	var referencePoint = A2(
+		$elm$core$Maybe$withDefault,
+		A3($author$project$DomainModel$GPXSource, $ianmackenzie$elm_geometry$Direction2d$x, $ianmackenzie$elm_units$Quantity$zero, $ianmackenzie$elm_units$Quantity$zero),
+		$elm$core$List$head(track));
+	return A2($author$project$DomainModel$treeFromSourcesWithExistingReference, referencePoint, track);
+};
 var $author$project$TrackLoaded$undoLastAction = function (track) {
 	var _v0 = track.undos;
 	if (_v0.b) {
 		var undo = _v0.a;
 		var moreUndos = _v0.b;
-		var gpxs = A2(
-			$elm$core$List$cons,
-			A2($author$project$DomainModel$gpxPointFromIndex, undo.fromStart, track.trackTree),
-			_Utils_ap(
-				A2($elm$core$List$map, $elm$core$Tuple$second, undo.originalPoints),
-				_List_fromArray(
-					[
-						A2(
-						$author$project$DomainModel$gpxPointFromIndex,
-						$author$project$DomainModel$skipCount(track.trackTree) - undo.fromEnd,
-						track.trackTree)
-					])));
-		var splice = A2($author$project$DomainModel$treeFromSourcesWithExistingReference, track.referenceLonLat, gpxs);
 		var _v1 = _Utils_Tuple2(
-			A2($author$project$DomainModel$takeFromLeft, undo.fromStart - 1, track.trackTree),
-			A2($author$project$DomainModel$takeFromRight, undo.fromEnd - 1, track.trackTree));
+			A2($author$project$DomainModel$takeFromLeft, 1 + undo.fromStart, track.trackTree),
+			A2($author$project$DomainModel$takeFromRight, 1 + undo.fromEnd, track.trackTree));
 		var startSection = _v1.a;
 		var endSection = _v1.b;
-		var newTree = A2(
-			$author$project$DomainModel$safeJoin,
-			startSection,
-			A2($author$project$DomainModel$safeJoin, splice, endSection));
-		var _v2 = A2($elm$core$Debug$log, 'UNDO', undo.action);
+		var _v2 = _Utils_Tuple2(
+			$author$project$DomainModel$recreateGpxSources(startSection),
+			$author$project$DomainModel$recreateGpxSources(endSection));
+		var gpxsFromIntro = _v2.a;
+		var gpxsFromOutro = _v2.b;
+		var allGPX = _Utils_ap(
+			gpxsFromIntro,
+			_Utils_ap(
+				A2($elm$core$List$map, $elm$core$Tuple$second, undo.originalPoints),
+				gpxsFromOutro));
+		var newTree = $author$project$DomainModel$treeFromSourcePoints(allGPX);
+		var _v3 = A2($elm$core$Debug$log, 'UNDO', undo.action);
 		if (newTree.$ === 'Just') {
 			var isTree = newTree.a;
 			return _Utils_update(
@@ -19636,13 +19651,6 @@ var $author$project$Main$showTrackOnMapCentered = function (track) {
 			]));
 };
 var $elm$file$File$toString = _File_toString;
-var $author$project$DomainModel$treeFromSourcePoints = function (track) {
-	var referencePoint = A2(
-		$elm$core$Maybe$withDefault,
-		A3($author$project$DomainModel$GPXSource, $ianmackenzie$elm_geometry$Direction2d$x, $ianmackenzie$elm_units$Quantity$zero, $ianmackenzie$elm_units$Quantity$zero),
-		$elm$core$List$head(track));
-	return A2($author$project$DomainModel$treeFromSourcesWithExistingReference, referencePoint, track);
-};
 var $author$project$Actions$SetCurrentFromMapClick = function (a) {
 	return {$: 'SetCurrentFromMapClick', a: a};
 };
