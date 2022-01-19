@@ -6,19 +6,30 @@ BUG: Dubious steepest gradient on some routes.
 
 ## Undo, Redo.
 Decision on approach.
-I will trust that the Redo stack rarely grows large, as it empties as soon
-as another (different) edit occurs. Hence, just keep track point data.
+I will trust that the Redo stack rarely grows large, as it empties when
+another (different) edit occurs. Hence, just keep track point data.
 > for Undo: `fromStart : Int, fromEnd : Int, List (GPXSource, EarthPoint)`
-> for Redo: the same
-Means the logic is essentially the same both ways.
-(Consider putting into sessionStorage but only if there's a clear need.)
+> for Redo: the action!
+... `BezierApproximation 0.5 1.6`
+... `CurveFormer (x,y) inner outer joining`
+Yes, this what the actions are, Redo merely replays them.
+
+## Delete with a range (nearly trivial, good test for Undo/Redo).
+There is a nice implementation for finding the left and right 
+ranges of a tree, but they're not convenient if you also want the
+middle, which we need for Undo.
+Stick with `splitAt`.
 
 ---
 
 # BACKLOG, roughly in order ...
 
-## Delete with a range (nearly trivial).
-Keep single point until it's clear that it falls out as a (not) special case.
+## PeteTreeTraversor
+Data structure that keeps track of where you are in a tree.
+When 'applied' to a tree, returns a tree element and the traversor (generator) for the next one.
+Symmetry allows left->right and right->left traversal.
+I sense that having this will make some filtering easier.
+Also applies to rendering, where we have hand-coded R->L trversals.
 
 ## Multiple views
 Possibly a tool for this. But probably a "menu" option.
