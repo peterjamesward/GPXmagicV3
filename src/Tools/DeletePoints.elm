@@ -12,20 +12,17 @@ import ViewPureStyles exposing (neatToolsBorder)
 
 
 type alias Options =
-    { dummy : Int
+    { singlePoint : Bool
     }
 
 
 defaultOptions =
-    { dummy = 0
+    { singlePoint = True
     }
 
 
-type
-    Msg
-    --TODO: Decide on (start, finish), (start, count), or (fromStart, fromEnd).
-    --Shall we start by considering the single point deletion?
-    = Delete --Int Int
+type Msg
+    = DeletePointRange -- deletes track between and including markers.
 
 
 toolStateChange :
@@ -38,7 +35,7 @@ toolStateChange opened colour options track =
     case ( opened, track ) of
         ( True, Just theTrack ) ->
             -- Make sure we have up to date breaches and preview is shown.
-            ( options
+            ( { options | singlePoint = theTrack.markerPosition == Nothing }
             , [ ShowPreview
                     { tag = "delete"
                     , shape = PreviewCircle
@@ -65,9 +62,23 @@ update :
     -> ( Options, List (ToolAction msg) )
 update msg options previewColour hasTrack =
     case ( hasTrack, msg ) of
-        ( Just track, Delete ) ->
+        ( Just track, DeletePointRange ) ->
+            -- Curious semantics here. If no marker, delete single point (hence inclusive, explicitly).
+            -- but with marker, more sensible if the markers themselves are not deletes (hence, exclusive).
+            let
+                ( fromStart, fromEnd ) =
+                    TrackLoaded.getRangeFromMarkers track
+
+                ( effectiveStart, effectiveEnd ) =
+                    case track.markerPosition of
+                        Just _ ->
+                            ( fromStart + 1, fromEnd + 1 )
+
+                        Nothing ->
+                            ( fromStart, fromEnd )
+            in
             ( options
-            , [ DeleteSinglePoint track.currentPosition
+            , [ DeletePointsIncluding effectiveStart effectiveEnd
               , TrackHasChanged
               ]
             )
@@ -81,21 +92,25 @@ view msgWrapper options =
     el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
         el [ centerX, padding 4, spacing 4, height <| px 50 ] <|
             Input.button (centerY :: neatToolsBorder)
-                { onPress = Just (msgWrapper Delete)
-                , label = text "Delete point"
+                { onPress = Just (msgWrapper DeletePointRange)
+                , label =
+                    if options.singlePoint then
+                        text "Delete single point"
+
+                    else
+                        text "Delete between markers"
                 }
 
 
-deleteSinglePoint : Int -> PeteTree -> Maybe PeteTree
-deleteSinglePoint index treeNode =
-    -- Implement with takeFromLeft|Right, should generalise trivially.
+deletePointRange : Int -> Int -> PeteTree -> Maybe PeteTree
+deletePointRange fromStart fromEnd treeNode =
+    -- Deletes, if possible, inclusive of the markers. We're counting raod segments.
     let
         ( leftWithOverlap, rightWithOverlap ) =
             -- These include the track points to be deleted, when we
             -- join the two sides, we create a new leaf that omits these.
-            ( takeFromLeft index treeNode
-            , takeFromRight (skipCount treeNode - index) treeNode
+            ( takeFromLeft fromStart treeNode
+            , takeFromRight fromEnd treeNode
             )
     in
     safeJoinReplacingEndPointsWithNewLeaf leftWithOverlap rightWithOverlap
-

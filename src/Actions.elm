@@ -19,7 +19,7 @@ type ToolAction msg
     | StoreSplitConfig
     | StoreToolsConfig
     | StoredValueRetrieved String E.Value
-    | DeleteSinglePoint Int
+    | DeletePointsIncluding Int Int -- fromStart, fromEnd
     | TrackHasChanged -- Must follow an action that changes the track.
     | SetMarker (Maybe Int)
     | NoAction

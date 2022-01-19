@@ -38,7 +38,7 @@ type Msg
     | DropMarker
     | LiftMarker
     | MarkerForwardOne
-    | MarferBackwardOne
+    | MarkerBackwardOne
 
 
 toolStateChange :
@@ -87,7 +87,7 @@ update msg options previewColour hasTrack =
                             restrictToTrack orange 1
                     in
                     ( { options | orange = position }
-                    , [ SetCurrent position ]
+                    , [ SetCurrent position, TrackHasChanged ]
                     )
 
                 PointerBackwardOne ->
@@ -96,7 +96,7 @@ update msg options previewColour hasTrack =
                             restrictToTrack orange -1
                     in
                     ( { options | orange = position }
-                    , [ SetCurrent position ]
+                    , [ SetCurrent position, TrackHasChanged ]
                     )
 
                 PointerFastForward ->
@@ -105,7 +105,7 @@ update msg options previewColour hasTrack =
                             restrictToTrack orange (skipCount track.trackTree // 20)
                     in
                     ( { options | orange = position }
-                    , [ SetCurrent position ]
+                    , [ SetCurrent position, TrackHasChanged ]
                     )
 
                 PointerRewind ->
@@ -114,17 +114,17 @@ update msg options previewColour hasTrack =
                             restrictToTrack orange (0 - skipCount track.trackTree // 20)
                     in
                     ( { options | orange = position }
-                    , [ SetCurrent position ]
+                    , [ SetCurrent position, TrackHasChanged ]
                     )
 
                 DropMarker ->
                     ( { options | purple = Just orange }
-                    , [ SetMarker <| Just orange ]
+                    , [ SetMarker <| Just orange, TrackHasChanged ]
                     )
 
                 LiftMarker ->
                     ( { options | purple = Nothing }
-                    , [ SetMarker Nothing ]
+                    , [ SetMarker Nothing, TrackHasChanged ]
                     )
 
                 MarkerForwardOne ->
@@ -140,10 +140,10 @@ update msg options previewColour hasTrack =
                     ( { options
                         | purple = position
                       }
-                    , [ SetMarker position ]
+                    , [ SetMarker position, TrackHasChanged ]
                     )
 
-                MarferBackwardOne ->
+                MarkerBackwardOne ->
                     let
                         position =
                             case options.purple of
@@ -156,7 +156,7 @@ update msg options previewColour hasTrack =
                     ( { options
                         | purple = position
                       }
-                    , [ SetMarker position ]
+                    , [ SetMarker position, TrackHasChanged ]
                     )
 
 
@@ -235,7 +235,7 @@ view msgWrapper options isTrack =
                                 ]
                                 [ Input.button neatToolsBorder
                                     { label = useIcon FeatherIcons.chevronLeft
-                                    , onPress = Just <| msgWrapper <| MarferBackwardOne
+                                    , onPress = Just <| msgWrapper <| MarkerBackwardOne
                                     }
                                 , Input.button neatToolsBorder
                                     { label = useIcon FeatherIcons.chevronRight
@@ -251,7 +251,7 @@ view msgWrapper options isTrack =
                                 ]
                                 [ Input.button neatToolsBorder
                                     { label = useIcon FeatherIcons.chevronLeft
-                                    , onPress = Just <| msgWrapper <| MarferBackwardOne
+                                    , onPress = Just <| msgWrapper <| MarkerBackwardOne
                                     }
                                 , Input.button neatToolsBorder
                                     { label = useIcon FeatherIcons.chevronRight

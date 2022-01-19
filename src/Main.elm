@@ -970,17 +970,18 @@ performActionsOnModel actions model =
                 ( DelayMessage int msg, Just track ) ->
                     foldedModel
 
-                ( DeleteSinglePoint index, Just track ) ->
+                ( DeletePointsIncluding startRange endRange, Just track ) ->
                     let
                         newTree =
-                            DeletePoints.deleteSinglePoint index track.trackTree
+                            DeletePoints.deletePointRange startRange endRange track.trackTree
 
                         newTrack =
                             case newTree of
                                 Just reallyIsATree ->
                                     { track
                                         | trackTree = reallyIsATree
-                                        , currentPosition = min index (skipCount reallyIsATree)
+                                        , currentPosition = min track.currentPosition (skipCount reallyIsATree)
+                                        , markerPosition = Nothing
                                     }
 
                                 Nothing ->

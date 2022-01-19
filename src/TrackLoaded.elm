@@ -14,6 +14,7 @@ type alias TrackLoaded =
 
 getRangeFromMarkers : TrackLoaded -> ( Int, Int )
 getRangeFromMarkers track =
+    -- This helps all tools consistently to get `fromStart, fromEnd`
     let
         theLength =
             skipCount track.trackTree

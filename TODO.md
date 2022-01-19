@@ -4,9 +4,8 @@ BUG: Dubious steepest gradient on some routes.
 
 # WIP
 
-# Split tree
-
-Cleaner implementation with `takeFromLeft`, `takeFromRight`.
+## Marker positioning
+Seems tricky to get this right after edits. Let's fix it.
 
 ## Undo, Redo.
 Decision on approach.
@@ -17,12 +16,6 @@ another (different) edit occurs. Hence, just keep track point data.
 ... `BezierApproximation 0.5 1.6`
 ... `CurveFormer (x,y) inner outer joining`
 Yes, this what the actions are, Redo merely replays them.
-
-## Delete with a range (nearly trivial, good test for Undo/Redo).
-There is a nice implementation for finding the left and right 
-ranges of a tree, but they're not convenient if you also want the
-middle, which we need for Undo.
-Stick with `splitAt`.
 
 ---
 
