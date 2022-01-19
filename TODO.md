@@ -1,11 +1,9 @@
 # BUGS
 
 BUG: Dubious steepest gradient on some routes.
+BUG: Marker status not changing in marker tool view when track loaded.
 
 # WIP
-
-## Marker positioning
-Seems tricky to get this right after edits. Let's fix it.
 
 ## Undo, Redo.
 Decision on approach.
