@@ -20,6 +20,8 @@ type alias TrackLoaded msg =
 type alias UndoEntry msg =
     { action : ToolAction msg
     , originalPoints : List ( EarthPoint, GPXSource ) -- for reconstructing the original tree
+    , fromStart : Int -- so we do not need to decode the action.
+    , fromEnd : Int
     }
 
 
@@ -52,17 +54,41 @@ type MarkerColour
     | Purple
 
 
-addToUndoStack : ToolAction msg -> List (EarthPoint, GPXSource) -> TrackLoaded msg -> TrackLoaded msg
-addToUndoStack action oldPoints oldTrack =
+addToUndoStack :
+    ToolAction msg
+    -> Int
+    -> Int
+    -> List ( EarthPoint, GPXSource )
+    -> TrackLoaded msg
+    -> TrackLoaded msg
+addToUndoStack action fromStart fromEnd oldPoints oldTrack =
     let
+        undoEntry : UndoEntry msg
         undoEntry =
             { action = action
             , originalPoints = oldPoints
+            , fromStart = fromStart
+            , fromEnd = fromEnd
             }
     in
     { oldTrack
         | undos = undoEntry :: oldTrack.undos
     }
+
+
+undoLastAction : TrackLoaded msg -> TrackLoaded msg
+undoLastAction track =
+    -- For now, just pop the stack
+    --TODO: Stitch in the old points!!
+    case track.undos of
+        undo :: moreUndos ->
+            { track
+                | undos = moreUndos
+                , redos = undo :: track.redos
+            }
+
+        _ ->
+            track
 
 
 whichMarkerIsNearestStart : TrackLoaded msg -> MarkerColour

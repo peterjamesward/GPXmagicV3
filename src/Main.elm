@@ -979,7 +979,7 @@ performActionsOnModel actions model =
 
                         newTrack =
                             track
-                                |> TrackLoaded.addToUndoStack action oldPoints
+                                |> TrackLoaded.addToUndoStack action fromStart fromEnd oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
                     { foldedModel | track = Just newTrack }
@@ -991,7 +991,7 @@ performActionsOnModel actions model =
 
                         newTrack =
                             track
-                                |> TrackLoaded.addToUndoStack action oldPoints
+                                |> TrackLoaded.addToUndoStack action fromStart fromEnd oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
                     { foldedModel | track = Just newTrack }
@@ -1028,6 +1028,24 @@ performActionsOnModel actions model =
                                 | toolOptions =
                                     ToolsController.restoreStoredValues foldedModel.toolOptions value
                             }
+
+                        _ ->
+                            foldedModel
+
+                ( UndoLastAction, Just track ) ->
+                    { foldedModel | track = Just <| TrackLoaded.undoLastAction track }
+
+                ( RedoUndoneAction, Just track ) ->
+                    case track.redos of
+                        redo :: moreRedos ->
+                            let
+                                newTrack =
+                                    { track | redos = moreRedos }
+
+                                newModel =
+                                    { foldedModel | track = Just newTrack }
+                            in
+                            newModel |> performActionsOnModel [ redo.action ]
 
                         _ ->
                             foldedModel

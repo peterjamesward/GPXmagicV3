@@ -23,6 +23,8 @@ type ToolAction msg
     | DeletePointsIncluding Int Int -- fromStart, fromEnd
     | TrackHasChanged -- Must follow an action that changes the track.
     | SetMarker (Maybe Int)
+    | UndoLastAction
+    | RedoUndoneAction
     | NoAction
 
 
@@ -37,3 +39,16 @@ type alias PreviewData =
     , colour : Element.Color
     , points : List ( EarthPoint, GPXSource )
     }
+
+
+interpretAction : ToolAction msg -> String
+interpretAction action =
+    -- Only needed for track modifying actions that go in the undo stack.
+    case action of
+        DeletePointsBetween fromStart fromEnd ->
+            "deletion of points"
+
+        DeletePointsIncluding fromStart fromEnd ->
+            "delete single point"
+
+        _ -> "the last thing"

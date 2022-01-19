@@ -48,12 +48,12 @@ update msg options previewColour hasTrack =
     case ( hasTrack, msg ) of
         ( Just track, Undo ) ->
             ( options
-            , []
+            , [ UndoLastAction ]
             )
 
         ( Just track, Redo ) ->
             ( options
-            , []
+            , [ RedoUndoneAction ]
             )
 
         _ ->
@@ -84,10 +84,10 @@ viewWithTrack msgWrapper options track =
                         , label = text "Nothing to Undo"
                         }
 
-                something ->
+                undo :: _ ->
                     Input.button (centerY :: neatToolsBorder)
                         { onPress = Just (msgWrapper Undo)
-                        , label = text "Undo something"
+                        , label = text <| "Undo " ++ Actions.interpretAction undo.action
                         }
         , el [ centerX, padding 4, spacing 4, height <| px 50 ] <|
             case track.redos of

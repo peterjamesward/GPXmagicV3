@@ -16055,9 +16055,9 @@ var $author$project$Main$performActionCommands = F2(
 		return $elm$core$Platform$Cmd$batch(
 			A2($elm$core$List$map, performAction, actions));
 	});
-var $author$project$TrackLoaded$addToUndoStack = F3(
-	function (action, oldPoints, oldTrack) {
-		var undoEntry = {action: action, originalPoints: oldPoints};
+var $author$project$TrackLoaded$addToUndoStack = F5(
+	function (action, fromStart, fromEnd, oldPoints, oldTrack) {
+		var undoEntry = {action: action, fromEnd: fromEnd, fromStart: fromStart, originalPoints: oldPoints};
 		return _Utils_update(
 			oldTrack,
 			{
@@ -18882,6 +18882,21 @@ var $author$project$ToolsController$restoreStoredValues = F2(
 			return options;
 		}
 	});
+var $author$project$TrackLoaded$undoLastAction = function (track) {
+	var _v0 = track.undos;
+	if (_v0.b) {
+		var undo = _v0.a;
+		var moreUndos = _v0.b;
+		return _Utils_update(
+			track,
+			{
+				redos: A2($elm$core$List$cons, undo, track.redos),
+				undos: moreUndos
+			});
+	} else {
+		return track;
+	}
+};
 var $author$project$TrackLoaded$Orange = {$: 'Orange'};
 var $author$project$TrackLoaded$Purple = {$: 'Purple'};
 var $author$project$TrackLoaded$whichMarkerIsNearestStart = function (track) {
@@ -18939,7 +18954,7 @@ var $author$project$Main$performActionsOnModel = F2(
 		var performAction = F2(
 			function (action, foldedModel) {
 				var _v0 = _Utils_Tuple2(action, foldedModel.track);
-				_v0$10:
+				_v0$12:
 				while (true) {
 					switch (_v0.a.$) {
 						case 'SetCurrent':
@@ -18955,7 +18970,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$10;
+								break _v0$12;
 							}
 						case 'SetCurrentFromMapClick':
 							if (_v0.b.$ === 'Just') {
@@ -18970,7 +18985,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$10;
+								break _v0$12;
 							}
 						case 'ShowPreview':
 							if (_v0.b.$ === 'Just') {
@@ -18982,7 +18997,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										previews: A3($elm$core$Dict$insert, previewData.tag, previewData, foldedModel.previews)
 									});
 							} else {
-								break _v0$10;
+								break _v0$12;
 							}
 						case 'HidePreview':
 							if (_v0.b.$ === 'Just') {
@@ -18994,7 +19009,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										previews: A2($elm$core$Dict$remove, tag, foldedModel.previews)
 									});
 							} else {
-								break _v0$10;
+								break _v0$12;
 							}
 						case 'DelayMessage':
 							if (_v0.b.$ === 'Just') {
@@ -19004,7 +19019,7 @@ var $author$project$Main$performActionsOnModel = F2(
 								var track = _v0.b.a;
 								return foldedModel;
 							} else {
-								break _v0$10;
+								break _v0$12;
 							}
 						case 'DeletePointsBetween':
 							if (_v0.b.$ === 'Just') {
@@ -19018,14 +19033,14 @@ var $author$project$Main$performActionsOnModel = F2(
 								var newTrack = A2(
 									$author$project$TrackLoaded$useTreeWithRepositionedMarkers,
 									newTree,
-									A3($author$project$TrackLoaded$addToUndoStack, action, oldPoints, track));
+									A5($author$project$TrackLoaded$addToUndoStack, action, fromStart, fromEnd, oldPoints, track));
 								return _Utils_update(
 									foldedModel,
 									{
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$10;
+								break _v0$12;
 							}
 						case 'DeletePointsIncluding':
 							if (_v0.b.$ === 'Just') {
@@ -19039,14 +19054,14 @@ var $author$project$Main$performActionsOnModel = F2(
 								var newTrack = A2(
 									$author$project$TrackLoaded$useTreeWithRepositionedMarkers,
 									newTree,
-									A3($author$project$TrackLoaded$addToUndoStack, action, oldPoints, track));
+									A5($author$project$TrackLoaded$addToUndoStack, action, fromStart, fromEnd, oldPoints, track));
 								return _Utils_update(
 									foldedModel,
 									{
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$10;
+								break _v0$12;
 							}
 						case 'TrackHasChanged':
 							if (_v0.b.$ === 'Just') {
@@ -19061,7 +19076,7 @@ var $author$project$Main$performActionsOnModel = F2(
 								var modelAfterSecondaryActions = A2($author$project$Main$performActionsOnModel, secondaryActions, innerModelWithNewToolSettings);
 								return modelAfterSecondaryActions;
 							} else {
-								break _v0$10;
+								break _v0$12;
 							}
 						case 'SetMarker':
 							if (_v0.b.$ === 'Just') {
@@ -19076,7 +19091,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(updatedTrack)
 									});
 							} else {
-								break _v0$10;
+								break _v0$12;
 							}
 						case 'StoredValueRetrieved':
 							var _v8 = _v0.a;
@@ -19094,8 +19109,51 @@ var $author$project$Main$performActionsOnModel = F2(
 								default:
 									return foldedModel;
 							}
+						case 'UndoLastAction':
+							if (_v0.b.$ === 'Just') {
+								var _v10 = _v0.a;
+								var track = _v0.b.a;
+								return _Utils_update(
+									foldedModel,
+									{
+										track: $elm$core$Maybe$Just(
+											$author$project$TrackLoaded$undoLastAction(track))
+									});
+							} else {
+								break _v0$12;
+							}
+						case 'RedoUndoneAction':
+							if (_v0.b.$ === 'Just') {
+								var _v11 = _v0.a;
+								var track = _v0.b.a;
+								var _v12 = track.redos;
+								if (_v12.b) {
+									var redo = _v12.a;
+									var moreRedos = _v12.b;
+									var newTrack = _Utils_update(
+										track,
+										{
+											redos: moreRedos,
+											undos: A2($elm$core$List$cons, redo, track.undos)
+										});
+									var newModel = _Utils_update(
+										foldedModel,
+										{
+											track: $elm$core$Maybe$Just(newTrack)
+										});
+									return A2(
+										$author$project$Main$performActionsOnModel,
+										_List_fromArray(
+											[redo.action]),
+										newModel);
+								} else {
+									return foldedModel;
+								}
+							} else {
+								break _v0$12;
+							}
 						default:
-							break _v0$10;
+							break _v0$12;
 					}
 				}
 				return foldedModel;
@@ -20829,6 +20887,8 @@ var $author$project$Tools$Pointers$update = F4(
 			}
 		}
 	});
+var $author$project$Actions$RedoUndoneAction = {$: 'RedoUndoneAction'};
+var $author$project$Actions$UndoLastAction = {$: 'UndoLastAction'};
 var $author$project$Tools$UndoRedo$update = F4(
 	function (msg, options, previewColour, hasTrack) {
 		var _v0 = _Utils_Tuple2(hasTrack, msg);
@@ -20836,11 +20896,17 @@ var $author$project$Tools$UndoRedo$update = F4(
 			if (_v0.b.$ === 'Undo') {
 				var track = _v0.a.a;
 				var _v1 = _v0.b;
-				return _Utils_Tuple2(options, _List_Nil);
+				return _Utils_Tuple2(
+					options,
+					_List_fromArray(
+						[$author$project$Actions$UndoLastAction]));
 			} else {
 				var track = _v0.a.a;
 				var _v2 = _v0.b;
-				return _Utils_Tuple2(options, _List_Nil);
+				return _Utils_Tuple2(
+					options,
+					_List_fromArray(
+						[$author$project$Actions$RedoUndoneAction]));
 			}
 		} else {
 			return _Utils_Tuple2(options, _List_Nil);
@@ -30526,6 +30592,20 @@ var $author$project$Tools$Pointers$view = F3(
 		}
 	});
 var $author$project$Tools$UndoRedo$Undo = {$: 'Undo'};
+var $author$project$Actions$interpretAction = function (action) {
+	switch (action.$) {
+		case 'DeletePointsBetween':
+			var fromStart = action.a;
+			var fromEnd = action.b;
+			return 'deletion of points';
+		case 'DeletePointsIncluding':
+			var fromStart = action.a;
+			var fromEnd = action.b;
+			return 'delete single point';
+		default:
+			return 'the last thing';
+	}
+};
 var $author$project$Tools$UndoRedo$viewWithTrack = F3(
 	function (msgWrapper, options, track) {
 		return A2(
@@ -30558,12 +30638,13 @@ var $author$project$Tools$UndoRedo$viewWithTrack = F3(
 									onPress: $elm$core$Maybe$Nothing
 								});
 						} else {
-							var something = _v0;
+							var undo = _v0.a;
 							return A2(
 								$mdgriffith$elm_ui$Element$Input$button,
 								A2($elm$core$List$cons, $mdgriffith$elm_ui$Element$centerY, $author$project$ViewPureStyles$neatToolsBorder),
 								{
-									label: $mdgriffith$elm_ui$Element$text('Undo something'),
+									label: $mdgriffith$elm_ui$Element$text(
+										'Undo ' + $author$project$Actions$interpretAction(undo.action)),
 									onPress: $elm$core$Maybe$Just(
 										msgWrapper($author$project$Tools$UndoRedo$Undo))
 								});
