@@ -16142,7 +16142,7 @@ var $elm$core$Maybe$andThen = F2(
 			return $elm$core$Maybe$Nothing;
 		}
 	});
-var $author$project$DomainModel$enumerateFromLeftToRight = F2(
+var $author$project$DomainModel$enumerateEndPoints = F2(
 	function (treeNode, accum) {
 		if (treeNode.$ === 'Leaf') {
 			var leaf = treeNode.a;
@@ -16153,51 +16153,15 @@ var $author$project$DomainModel$enumerateFromLeftToRight = F2(
 		} else {
 			var node = treeNode.a;
 			return A2(
-				$author$project$DomainModel$enumerateFromLeftToRight,
+				$author$project$DomainModel$enumerateEndPoints,
 				node.left,
-				A2($author$project$DomainModel$enumerateFromLeftToRight, node.right, accum));
+				A2($author$project$DomainModel$enumerateEndPoints, node.right, accum));
 		}
 	});
-var $author$project$DomainModel$earthPointFromIndex = F2(
-	function (index, treeNode) {
-		earthPointFromIndex:
-		while (true) {
-			if (treeNode.$ === 'Leaf') {
-				var info = treeNode.a;
-				return (index <= 0) ? info.startPoint : info.endPoint;
-			} else {
-				var info = treeNode.a;
-				if (_Utils_cmp(
-					index,
-					$author$project$DomainModel$skipCount(info.left)) < 0) {
-					var $temp$index = index,
-						$temp$treeNode = info.left;
-					index = $temp$index;
-					treeNode = $temp$treeNode;
-					continue earthPointFromIndex;
-				} else {
-					var $temp$index = index - $author$project$DomainModel$skipCount(info.left),
-						$temp$treeNode = info.right;
-					index = $temp$index;
-					treeNode = $temp$treeNode;
-					continue earthPointFromIndex;
-				}
-			}
-		}
-	});
-var $author$project$DomainModel$getDualCoords = F2(
-	function (tree, index) {
-		return _Utils_Tuple2(
-			A2($author$project$DomainModel$earthPointFromIndex, index, tree),
-			A2($author$project$DomainModel$gpxPointFromIndex, index, tree));
-	});
-var $author$project$DomainModel$safeEnumerateFromLeft = function (mTree) {
+var $author$project$DomainModel$safeEnumerateEndPoints = function (mTree) {
 	if (mTree.$ === 'Just') {
 		var tree = mTree.a;
-		return A2(
-			$elm$core$List$cons,
-			A2($author$project$DomainModel$getDualCoords, tree, 0),
-			A2($author$project$DomainModel$enumerateFromLeftToRight, tree, _List_Nil));
+		return A2($author$project$DomainModel$enumerateEndPoints, tree, _List_Nil);
 	} else {
 		return _List_Nil;
 	}
@@ -16585,7 +16549,7 @@ var $author$project$DomainModel$takeFromRight = F2(
 	});
 var $author$project$DomainModel$extractPointsInRange = F3(
 	function (fromStart, fromEnd, trackTree) {
-		return $author$project$DomainModel$safeEnumerateFromLeft(
+		return $author$project$DomainModel$safeEnumerateEndPoints(
 			A2(
 				$elm$core$Maybe$andThen,
 				$author$project$DomainModel$takeFromRight(
@@ -16900,6 +16864,39 @@ var $author$project$Actions$PreviewCircle = {$: 'PreviewCircle'};
 var $author$project$Actions$ShowPreview = function (a) {
 	return {$: 'ShowPreview', a: a};
 };
+var $author$project$DomainModel$earthPointFromIndex = F2(
+	function (index, treeNode) {
+		earthPointFromIndex:
+		while (true) {
+			if (treeNode.$ === 'Leaf') {
+				var info = treeNode.a;
+				return (index <= 0) ? info.startPoint : info.endPoint;
+			} else {
+				var info = treeNode.a;
+				if (_Utils_cmp(
+					index,
+					$author$project$DomainModel$skipCount(info.left)) < 0) {
+					var $temp$index = index,
+						$temp$treeNode = info.left;
+					index = $temp$index;
+					treeNode = $temp$treeNode;
+					continue earthPointFromIndex;
+				} else {
+					var $temp$index = index - $author$project$DomainModel$skipCount(info.left),
+						$temp$treeNode = info.right;
+					index = $temp$index;
+					treeNode = $temp$treeNode;
+					continue earthPointFromIndex;
+				}
+			}
+		}
+	});
+var $author$project$DomainModel$getDualCoords = F2(
+	function (tree, index) {
+		return _Utils_Tuple2(
+			A2($author$project$DomainModel$earthPointFromIndex, index, tree),
+			A2($author$project$DomainModel$gpxPointFromIndex, index, tree));
+	});
 var $author$project$DomainModel$buildPreview = F2(
 	function (indices, tree) {
 		return A2(

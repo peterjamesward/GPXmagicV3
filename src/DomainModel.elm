@@ -885,22 +885,21 @@ extractPointsInRange fromStart fromEnd trackTree =
     trackTree
         |> takeFromLeft (skipCount trackTree - fromEnd)
         |> Maybe.andThen (takeFromRight (skipCount trackTree - fromStart))
-        |> safeEnumerateFromLeft
+        |> safeEnumerateEndPoints
 
 
-safeEnumerateFromLeft : Maybe PeteTree -> List ( EarthPoint, GPXSource )
-safeEnumerateFromLeft mTree =
+safeEnumerateEndPoints : Maybe PeteTree -> List ( EarthPoint, GPXSource )
+safeEnumerateEndPoints mTree =
     case mTree of
         Just tree ->
-            getDualCoords tree 0
-                :: enumerateFromLeftToRight tree []
+            enumerateEndPoints tree []
 
         Nothing ->
             []
 
 
-enumerateFromLeftToRight : PeteTree -> List ( EarthPoint, GPXSource ) -> List ( EarthPoint, GPXSource )
-enumerateFromLeftToRight treeNode accum =
+enumerateEndPoints : PeteTree -> List ( EarthPoint, GPXSource ) -> List ( EarthPoint, GPXSource )
+enumerateEndPoints treeNode accum =
     -- The name describes the output, not the method!
     -- Note it gives end points, you need to add the start point somewhere!
     case treeNode of
@@ -909,5 +908,5 @@ enumerateFromLeftToRight treeNode accum =
 
         Node node ->
             accum
-                |> enumerateFromLeftToRight node.right
-                |> enumerateFromLeftToRight node.left
+                |> enumerateEndPoints node.right
+                |> enumerateEndPoints node.left
