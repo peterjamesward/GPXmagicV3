@@ -12014,44 +12014,66 @@ var $author$project$DomainModel$secondPoint = function (tree) {
 	var leaf = $author$project$DomainModel$getFirstLeaf(tree);
 	return _Utils_Tuple2(leaf.sourceData.b, leaf.endPoint);
 };
-var $author$project$DomainModel$splitTreeAt = F2(
-	function (leavesToTheLeft, thisNode) {
-		if (thisNode.$ === 'Leaf') {
-			var leaf = thisNode.a;
-			return (leavesToTheLeft <= 0) ? _Utils_Tuple2(
-				$elm$core$Maybe$Nothing,
-				$elm$core$Maybe$Just(thisNode)) : _Utils_Tuple2(
-				$elm$core$Maybe$Just(thisNode),
-				$elm$core$Maybe$Nothing);
+var $author$project$DomainModel$takeFromLeft = F2(
+	function (leavesFromLeft, treeNode) {
+		if (leavesFromLeft <= 0) {
+			return $elm$core$Maybe$Nothing;
 		} else {
-			var aNode = thisNode.a;
-			if (leavesToTheLeft <= 0) {
-				return _Utils_Tuple2(
-					$elm$core$Maybe$Nothing,
-					$elm$core$Maybe$Just(thisNode));
+			if (_Utils_cmp(
+				leavesFromLeft,
+				$author$project$DomainModel$skipCount(treeNode)) > -1) {
+				return $elm$core$Maybe$Just(treeNode);
 			} else {
-				if (_Utils_cmp(
-					leavesToTheLeft,
-					$author$project$DomainModel$skipCount(thisNode)) > -1) {
-					return _Utils_Tuple2(
-						$elm$core$Maybe$Just(thisNode),
-						$elm$core$Maybe$Nothing);
+				if (treeNode.$ === 'Leaf') {
+					var roadSection = treeNode.a;
+					return $elm$core$Maybe$Nothing;
 				} else {
-					var _v1 = A2(
-						$author$project$DomainModel$splitTreeAt,
-						leavesToTheLeft - $author$project$DomainModel$skipCount(aNode.left),
-						aNode.right);
-					var leftOfRight = _v1.a;
-					var rightOfRight = _v1.b;
-					var _v2 = A2($author$project$DomainModel$splitTreeAt, leavesToTheLeft, aNode.left);
-					var leftOfLeft = _v2.a;
-					var rightOfLeft = _v2.b;
-					return _Utils_Tuple2(
-						A2($author$project$DomainModel$safeJoin, leftOfLeft, leftOfRight),
-						A2($author$project$DomainModel$safeJoin, rightOfLeft, rightOfRight));
+					var record = treeNode.a;
+					return A2(
+						$author$project$DomainModel$safeJoin,
+						A2($author$project$DomainModel$takeFromLeft, leavesFromLeft, record.left),
+						A2(
+							$author$project$DomainModel$takeFromLeft,
+							leavesFromLeft - $author$project$DomainModel$skipCount(record.left),
+							record.right));
 				}
 			}
 		}
+	});
+var $author$project$DomainModel$takeFromRight = F2(
+	function (leavesFromRight, treeNode) {
+		if (leavesFromRight <= 0) {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			if (_Utils_cmp(
+				leavesFromRight,
+				$author$project$DomainModel$skipCount(treeNode)) > -1) {
+				return $elm$core$Maybe$Just(treeNode);
+			} else {
+				if (treeNode.$ === 'Leaf') {
+					var roadSection = treeNode.a;
+					return $elm$core$Maybe$Nothing;
+				} else {
+					var record = treeNode.a;
+					return A2(
+						$author$project$DomainModel$safeJoin,
+						A2(
+							$author$project$DomainModel$takeFromRight,
+							leavesFromRight - $author$project$DomainModel$skipCount(record.right),
+							record.left),
+						A2($author$project$DomainModel$takeFromRight, leavesFromRight, record.right));
+				}
+			}
+		}
+	});
+var $author$project$DomainModel$splitTreeAt = F2(
+	function (leavesToTheLeft, thisNode) {
+		return _Utils_Tuple2(
+			A2($author$project$DomainModel$takeFromLeft, leavesToTheLeft, thisNode),
+			A2(
+				$author$project$DomainModel$takeFromRight,
+				$author$project$DomainModel$skipCount(thisNode) - leavesToTheLeft,
+				thisNode));
 	});
 var $author$project$DomainModel$deleteSinglePoint = F3(
 	function (index, refLonLat, treeNode) {

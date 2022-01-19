@@ -817,35 +817,10 @@ takeFromRight leavesFromRight treeNode =
 
 splitTreeAt : Int -> PeteTree -> ( Maybe PeteTree, Maybe PeteTree )
 splitTreeAt leavesToTheLeft thisNode =
-    -- This does a simultaneous take from both sides, probably, but less clearly.
-    case thisNode of
-        Leaf leaf ->
-            if leavesToTheLeft <= 0 then
-                ( Nothing, Just thisNode )
-
-            else
-                ( Just thisNode, Nothing )
-
-        Node aNode ->
-            -- From my scribbles, this turns out quite neatly.
-            if leavesToTheLeft <= 0 then
-                ( Nothing, Just thisNode )
-
-            else if leavesToTheLeft >= skipCount thisNode then
-                ( Just thisNode, Nothing )
-
-            else
-                let
-                    ( leftOfLeft, rightOfLeft ) =
-                        aNode.left |> splitTreeAt leavesToTheLeft
-
-                    ( leftOfRight, rightOfRight ) =
-                        aNode.right |> splitTreeAt (leavesToTheLeft - skipCount aNode.left)
-                in
-                -- In theory, only one side can actually be split...
-                ( safeJoin leftOfLeft leftOfRight
-                , safeJoin rightOfLeft rightOfRight
-                )
+    -- This may be less efficient than the single pass version, but look at it.
+    ( takeFromLeft leavesToTheLeft thisNode
+    , takeFromRight (skipCount thisNode - leavesToTheLeft) thisNode
+    )
 
 
 getFirstLeaf : PeteTree -> RoadSection
