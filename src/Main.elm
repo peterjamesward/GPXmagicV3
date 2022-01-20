@@ -29,6 +29,7 @@ import MapPortController
 import MyIP
 import OAuthPorts as O exposing (randomBytes)
 import OAuthTypes as O exposing (OAuthMsg(..))
+import PaneLayoutManager
 import Pixels exposing (Pixels)
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
@@ -73,6 +74,7 @@ type Msg
     | GotWindowSize (Result Dom.Error Dom.Viewport)
     | ToolsMsg ToolsController.ToolMsg
     | DismissModalMessage
+    | PaneMsg PaneLayoutManager.Msg
 
 
 type alias Model =
@@ -96,6 +98,7 @@ type alias Model =
     , windowSize : ( Float, Float )
     , contentArea : ( Quantity Int Pixels, Quantity Int Pixels )
     , modalMessage : Maybe String
+    , paneLayoutOptions : PaneLayoutManager.Options
 
     -- Splitters
     , leftDockRightEdge : SplitPane.State
@@ -207,6 +210,7 @@ init mflags origin navigationKey =
       , windowSize = ( 1000, 800 )
       , contentArea = ( Pixels.pixels 800, Pixels.pixels 500 )
       , modalMessage = Nothing
+      , paneLayoutOptions = PaneLayoutManager.defaultOptions
       , leftDockRightEdge =
             SplitPane.init Horizontal
                 |> configureSplitter (SplitPane.px 200 <| Just ( 20, 200 ))
@@ -834,8 +838,7 @@ topLoadingBar model =
                ]
         )
         [ loadGpxButton
-
-        --, PaneLayoutManager.paneLayoutMenu
+        , PaneLayoutManager.paneLayoutMenu PaneMsg model.paneLayoutOptions
         ]
 
 
