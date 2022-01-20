@@ -6,17 +6,13 @@ BUG: Previews (Delete) not updating when pointer moves.
 
 # WIP
 
-## Undo, Redo.
-
-Rewrite after above is done for domain model.
+## Multiple views
+Possibly a tool for this, probably a "menu" option.
+Possibly use tool to also switch views, or is that too obscure?
 
 ---
 
 # BACKLOG, roughly in order ...
-
-## Multiple views
-Possibly a tool for this, probably a "menu" option.
-Possibly use tool to also switch views, or is that too obscure?
 
 Make **DragPan** work on 3D view.
 
