@@ -10110,6 +10110,9 @@ var $author$project$Main$ImageMessage = function (a) {
 };
 var $author$project$Actions$MapCenterOnCurrent = {$: 'MapCenterOnCurrent'};
 var $author$project$Actions$MapRefresh = {$: 'MapRefresh'};
+var $author$project$Main$PaneMsg = function (a) {
+	return {$: 'PaneMsg', a: a};
+};
 var $author$project$Main$ReceivedIpDetails = function (a) {
 	return {$: 'ReceivedIpDetails', a: a};
 };
@@ -15303,6 +15306,20 @@ var $author$project$MapPortController$update = F2(
 		var value = mapMsg.a;
 		return A2($author$project$MapPortController$processMapPortMessage, track, value);
 	});
+var $elm$core$Basics$not = _Basics_not;
+var $author$project$PaneLayoutManager$update = F3(
+	function (paneMsg, msgWrapper, options) {
+		if (paneMsg.$ === 'SetPaneLayout') {
+			var paneLayout = paneMsg.a;
+			return _Utils_update(
+				options,
+				{paneLayout: paneLayout});
+		} else {
+			return _Utils_update(
+				options,
+				{popupVisible: !options.popupVisible});
+		}
+	});
 var $author$project$SplitPane$SplitPane$UpdateConfig = function (a) {
 	return {$: 'UpdateConfig', a: a};
 };
@@ -16152,7 +16169,6 @@ var $author$project$ToolsController$setToolState = F3(
 			tool,
 			{state: state}) : tool;
 	});
-var $elm$core$Basics$not = _Basics_not;
 var $author$project$ToolsController$toggleToolPopup = F2(
 	function (toolType, tool) {
 		return _Utils_eq(tool.toolType, toolType) ? _Utils_update(
@@ -17816,7 +17832,11 @@ var $author$project$Main$update = F2(
 					A2($author$project$Main$performActionCommands, actions, modelAfterActions));
 			default:
 				var paneMsg = msg.a;
-				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				var newOptions = A3($author$project$PaneLayoutManager$update, paneMsg, $author$project$Main$PaneMsg, model.paneLayoutOptions);
+				var newModel = _Utils_update(
+					model,
+					{paneLayoutOptions: newOptions});
+				return _Utils_Tuple2(newModel, $elm$core$Platform$Cmd$none);
 		}
 	});
 var $author$project$Main$DismissModalMessage = {$: 'DismissModalMessage'};
@@ -29236,12 +29256,147 @@ var $author$project$ViewPureStyles$showModalMessage = F2(
 				]));
 	});
 var $author$project$Main$GpxRequested = {$: 'GpxRequested'};
-var $author$project$Main$PaneMsg = function (a) {
-	return {$: 'PaneMsg', a: a};
+var $author$project$PaneLayoutManager$TogglePopup = {$: 'TogglePopup'};
+var $author$project$PaneLayoutManager$SetPaneLayout = function (a) {
+	return {$: 'SetPaneLayout', a: a};
 };
+var $author$project$PaneLayoutManager$PanesGrid = {$: 'PanesGrid'};
+var $author$project$PaneLayoutManager$PanesLeftRight = {$: 'PanesLeftRight'};
+var $author$project$PaneLayoutManager$PanesUpperLower = {$: 'PanesUpperLower'};
+var $mdgriffith$elm_ui$Element$Input$white = A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1);
+var $mdgriffith$elm_ui$Element$Input$defaultRadioOption = F2(
+	function (optionLabel, status) {
+		return A2(
+			$mdgriffith$elm_ui$Element$row,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$spacing(10),
+					$mdgriffith$elm_ui$Element$alignLeft,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width(
+							$mdgriffith$elm_ui$Element$px(14)),
+							$mdgriffith$elm_ui$Element$height(
+							$mdgriffith$elm_ui$Element$px(14)),
+							$mdgriffith$elm_ui$Element$Background$color($mdgriffith$elm_ui$Element$Input$white),
+							$mdgriffith$elm_ui$Element$Border$rounded(7),
+							function () {
+							if (status.$ === 'Selected') {
+								return $mdgriffith$elm_ui$Internal$Model$htmlClass('focusable');
+							} else {
+								return $mdgriffith$elm_ui$Internal$Model$NoAttribute;
+							}
+						}(),
+							$mdgriffith$elm_ui$Element$Border$width(
+							function () {
+								switch (status.$) {
+									case 'Idle':
+										return 1;
+									case 'Focused':
+										return 1;
+									default:
+										return 5;
+								}
+							}()),
+							$mdgriffith$elm_ui$Element$Border$color(
+							function () {
+								switch (status.$) {
+									case 'Idle':
+										return A3($mdgriffith$elm_ui$Element$rgb, 208 / 255, 208 / 255, 208 / 255);
+									case 'Focused':
+										return A3($mdgriffith$elm_ui$Element$rgb, 208 / 255, 208 / 255, 208 / 255);
+									default:
+										return A3($mdgriffith$elm_ui$Element$rgb, 59 / 255, 153 / 255, 252 / 255);
+								}
+							}())
+						]),
+					$mdgriffith$elm_ui$Element$none),
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Internal$Model$htmlClass('unfocusable')
+						]),
+					optionLabel)
+				]));
+	});
+var $mdgriffith$elm_ui$Element$Input$option = F2(
+	function (val, txt) {
+		return A2(
+			$mdgriffith$elm_ui$Element$Input$Option,
+			val,
+			$mdgriffith$elm_ui$Element$Input$defaultRadioOption(txt));
+	});
+var $author$project$PaneLayoutManager$optionList = _List_fromArray(
+	[
+		A2(
+		$mdgriffith$elm_ui$Element$Input$option,
+		$author$project$PaneLayoutManager$PanesOne,
+		$mdgriffith$elm_ui$Element$text('One big one')),
+		A2(
+		$mdgriffith$elm_ui$Element$Input$option,
+		$author$project$PaneLayoutManager$PanesLeftRight,
+		$mdgriffith$elm_ui$Element$text('Side by side')),
+		A2(
+		$mdgriffith$elm_ui$Element$Input$option,
+		$author$project$PaneLayoutManager$PanesUpperLower,
+		$mdgriffith$elm_ui$Element$text('Superior & inferior')),
+		A2(
+		$mdgriffith$elm_ui$Element$Input$option,
+		$author$project$PaneLayoutManager$PanesGrid,
+		$mdgriffith$elm_ui$Element$text('Grid of four'))
+	]);
+var $mdgriffith$elm_ui$Element$Input$Column = {$: 'Column'};
+var $mdgriffith$elm_ui$Element$Input$radio = $mdgriffith$elm_ui$Element$Input$radioHelper($mdgriffith$elm_ui$Element$Input$Column);
+var $author$project$PaneLayoutManager$showOptionsMenu = F2(
+	function (msgWrapper, options) {
+		return options.popupVisible ? A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$moveDown(30),
+					$mdgriffith$elm_ui$Element$htmlAttribute(
+					A2($elm$html$Html$Attributes$style, 'z-index', '20'))
+				]),
+			A2(
+				$mdgriffith$elm_ui$Element$Input$radio,
+				_Utils_ap(
+					$author$project$ViewPureStyles$neatToolsBorder,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$padding(10),
+							$mdgriffith$elm_ui$Element$spacing(10)
+						])),
+				{
+					label: $mdgriffith$elm_ui$Element$Input$labelHidden('Choose layout'),
+					onChange: A2($elm$core$Basics$composeL, msgWrapper, $author$project$PaneLayoutManager$SetPaneLayout),
+					options: $author$project$PaneLayoutManager$optionList,
+					selected: $elm$core$Maybe$Just(options.paneLayout)
+				})) : $mdgriffith$elm_ui$Element$none;
+	});
 var $author$project$PaneLayoutManager$paneLayoutMenu = F2(
 	function (msgWrapper, options) {
-		return $mdgriffith$elm_ui$Element$none;
+		return A2(
+			$mdgriffith$elm_ui$Element$Input$button,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$padding(5),
+					$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite),
+					$mdgriffith$elm_ui$Element$inFront(
+					A2($author$project$PaneLayoutManager$showOptionsMenu, msgWrapper, options))
+				]),
+			{
+				label: $mdgriffith$elm_ui$Element$text('Choose layout'),
+				onPress: $elm$core$Maybe$Just(
+					msgWrapper($author$project$PaneLayoutManager$TogglePopup))
+			});
 	});
 var $smucode$elm_flat_colors$FlatColors$ChinesePalette$twinkleBlue = A3($mdgriffith$elm_ui$Element$rgb255, 206, 214, 224);
 var $author$project$Main$topLoadingBar = function (model) {

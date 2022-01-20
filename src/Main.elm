@@ -423,7 +423,7 @@ Please check the file contains GPX data."""}
         SetCurrentPosition pos ->
             -- Slider moves pointer and re-centres view.
             -- The actions will re-render and repaint the map.
-            -- TODO: Make this into a Tool
+            -- TODO: Make this into Pointers tool.
             let
                 actions =
                     [ SetCurrent pos, TrackHasChanged, MapCenterOnCurrent ]
@@ -576,7 +576,16 @@ Please check the file contains GPX data."""}
             )
 
         PaneMsg paneMsg ->
-            (model, Cmd.none)
+            let
+                newOptions =
+                    PaneLayoutManager.update paneMsg PaneMsg model.paneLayoutOptions
+
+                newModel =
+                    { model | paneLayoutOptions = newOptions }
+            in
+            ( newModel
+            , Cmd.none
+            )
 
 
 
