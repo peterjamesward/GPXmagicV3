@@ -105,13 +105,31 @@ view msgWrapper options =
 -- This function finally does the deed, driven by the Action interpreter in Main.
 deleteSinglePoint : Int -> Int -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
 deleteSinglePoint fromStart fromEnd track =
-    -- Be careful with single point delete, that will require expanding the range
-    -- before calling here.
+    -- Clearer to deal with this case separately.
+    -- If they are combined later, I'd be happy with that also.
     let
         newTree =
             DomainModel.replaceRange
                 fromStart
                 fromEnd
+                track.referenceLonLat
+                []
+                track.trackTree
+
+        oldPoints =
+            DomainModel.extractPointsInRange fromStart fromEnd track.trackTree
+    in
+    ( newTree
+    , oldPoints |> List.map Tuple.second
+    )
+
+deletePointsBetween : Int -> Int -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+deletePointsBetween fromStart fromEnd track =
+    let
+        newTree =
+            DomainModel.replaceRange
+                (fromStart + 1)
+                (fromEnd + 1)
                 track.referenceLonLat
                 []
                 track.trackTree

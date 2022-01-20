@@ -5,13 +5,9 @@ BUG: Marker status not changing in marker tool view when track loaded.
 
 # WIP
 
-## IMPORTANT
-
-Domain model should expose no internal structure.
-Only edit operation is to substitute a range of points.
-Internally, it should seek to do this at the lowest possible tree level.
-This will minimise un-levelling.
-Fix this, editing and Undo will be simpler and consistent.
+## Delete
+Delete point preview needs sorting.
+BUG: Repeated delete single point at track end not working.
 
 ## Undo, Redo.
 

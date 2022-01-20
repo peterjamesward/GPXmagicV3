@@ -17016,6 +17016,14 @@ var $author$project$DomainModel$replaceRange = F5(
 			}
 		}
 	});
+var $author$project$Tools$DeletePoints$deletePointsBetween = F3(
+	function (fromStart, fromEnd, track) {
+		var oldPoints = A3($author$project$DomainModel$extractPointsInRange, fromStart, fromEnd, track.trackTree);
+		var newTree = A5($author$project$DomainModel$replaceRange, fromStart + 1, fromEnd + 1, track.referenceLonLat, _List_Nil, track.trackTree);
+		return _Utils_Tuple2(
+			newTree,
+			A2($elm$core$List$map, $elm$core$Tuple$second, oldPoints));
+	});
 var $author$project$Tools$DeletePoints$deleteSinglePoint = F3(
 	function (fromStart, fromEnd, track) {
 		var oldPoints = A3($author$project$DomainModel$extractPointsInRange, fromStart, fromEnd, track.trackTree);
@@ -19242,7 +19250,7 @@ var $author$project$Main$performActionsOnModel = F2(
 								var fromStart = _v2.a;
 								var fromEnd = _v2.b;
 								var track = _v0.b.a;
-								var _v3 = A3($author$project$Tools$DeletePoints$deleteSinglePoint, fromStart, fromEnd, track);
+								var _v3 = A3($author$project$Tools$DeletePoints$deletePointsBetween, fromStart, fromEnd, track);
 								var newTree = _v3.a;
 								var oldPoints = _v3.b;
 								var newTrack = A2(
