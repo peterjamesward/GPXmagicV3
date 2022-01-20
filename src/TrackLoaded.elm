@@ -22,6 +22,8 @@ type alias UndoEntry msg =
     , originalPoints : List ( EarthPoint, GPXSource ) -- for reconstructing the original tree
     , fromStart : Int -- so we do not need to decode the action.
     , fromEnd : Int
+    , currentPosition : Int
+    , markerPosition : Maybe Int
     }
 
 
@@ -69,6 +71,8 @@ addToUndoStack action fromStart fromEnd oldPoints oldTrack =
             , originalPoints = oldPoints
             , fromStart = fromStart
             , fromEnd = fromEnd
+            , currentPosition = oldTrack.currentPosition
+            , markerPosition = oldTrack.markerPosition
             }
     in
     { oldTrack
@@ -86,7 +90,7 @@ undoLastAction track =
                 _ =
                     Debug.log "UNDO" undo.action
 
-                newTree =
+                newTree = Nothing
                     --TODO: Rewrite me. Properly. Clearly. Not hideously. Thanks.
             in
             case newTree of

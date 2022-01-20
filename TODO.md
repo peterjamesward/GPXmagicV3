@@ -5,14 +5,19 @@ BUG: Marker status not changing in marker tool view when track loaded.
 
 # WIP
 
+## IMPORTANT
+
+Domain model should expose no internal structure.
+Only edit operation is to substitute a range of points.
+Internally, it should seek to do this at the lowest possible tree level.
+This will minimise un-levelling.
+Fix this, editing and Undo will be simpler and consistent.
+
 ## Undo, Redo.
 
-Undo is not a complete failure! 
-OK from central point delete, not from end point.
-Maybe the current strategy of building a small tree to splice is not sound (or clear).
+Rewrite once above is done for domain model.
 
-Could use Undo as a chance to re-balance the tree.
-Rebalance recursively or just go for a re-build with TreeTravesor (below)?
+Restore pointers from UndoEntry.
 
 ---
 

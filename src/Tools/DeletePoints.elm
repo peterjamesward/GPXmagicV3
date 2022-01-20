@@ -1,7 +1,7 @@
 module Tools.DeletePoints exposing (..)
 
 import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
-import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), asRecord, safeJoinReplacingEndPointsWithNewLeaf, skipCount, takeFromLeft, takeFromRight)
+import DomainModel exposing (EarthPoint, GPXSource, PeteTree)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input
@@ -106,19 +106,12 @@ deletePointRange : Int -> Int -> PeteTree -> ( Maybe PeteTree, List ( EarthPoint
 deletePointRange fromStart fromEnd treeNode =
     -- Deletes, if possible, inclusive of the markers. We're counting road segments.
     let
-        ( leftWithOverlap, rightWithOverlap ) =
-            -- These include the track points to be deleted, when we
-            -- join the two sides, we create a new leaf that omits these.
-            ( takeFromLeft fromStart treeNode
-            , takeFromRight fromEnd treeNode
-            )
+        newTree =
+            DomainModel.replaceRange fromStart fromEnd []
 
         oldPoints =
-            DomainModel.extractPointsInRange
-                fromStart
-                fromEnd
-                treeNode
+            DomainModel.extractPointsInRange fromStart fromEnd treeNode
     in
-    ( safeJoinReplacingEndPointsWithNewLeaf leftWithOverlap rightWithOverlap
+    ( newTree
     , oldPoints
     )

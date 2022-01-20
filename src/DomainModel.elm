@@ -1,4 +1,29 @@
-module DomainModel exposing (..)
+module DomainModel exposing
+    ( EarthPoint
+    , GPXSource
+    , PeteTree(..)
+    , asRecord
+    , boundingBox
+    , buildPreview
+    , distanceFromIndex
+    , earthPointFromIndex
+    , effectiveLatitude
+    , endPoint
+    , enumerateEndPoints
+    , extractPointsInRange
+    , gpxFromPointWithReference
+    , gpxPointFromIndex
+    , leafFromIndex
+    , lngLatPair
+    , nearestToLonLat
+    , nearestToRay
+    , replaceRange
+    , skipCount
+    , sourceData
+    , startPoint
+    , treeFromSourcePoints
+    , trueLength
+    )
 
 import Angle exposing (Angle)
 import Axis3d exposing (Axis3d)
@@ -64,7 +89,7 @@ type alias RoadSection =
 
 type
     PeteTree
-    -- Absurdly simple tree may work (does, rather spiffingly).
+    -- Absurdly simple tree works quite well.
     = Leaf RoadSection
     | Node
         { nodeContent : RoadSection
@@ -387,6 +412,14 @@ combineInfo info1 info2 =
     }
 
 
+replaceRange : Int -> Int -> List EarthPoint -> Maybe PeteTree
+replaceRange fromStart fromEnd newPoints =
+    --This is our key edit function for external use.
+    --Internally, we make minimal tree changes to make it so, at lowest level possible.
+    --Of course, we reconstruct affected nodes.
+    Nothing
+
+
 joiningNode : PeteTree -> PeteTree -> PeteTree
 joiningNode left right =
     -- Joins two nodes, with no special care needed.
@@ -471,6 +504,7 @@ treeFromSourcePoints track =
 
 treeFromSourcesWithExistingReference : GPXSource -> List GPXSource -> Maybe PeteTree
 treeFromSourcesWithExistingReference referencePoint track =
+    -- This version for use when editing track and reference is known.
     let
         numberOfSegments =
             List.length track - 1
@@ -787,6 +821,7 @@ getDualCoords tree index =
 
 buildPreview : List Int -> PeteTree -> List ( EarthPoint, GPXSource )
 buildPreview indices tree =
+    -- Helper for tool that need to highlight a non-contiguous set of points.
     List.map (getDualCoords tree) indices
 
 

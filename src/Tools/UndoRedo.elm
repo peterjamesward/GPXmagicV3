@@ -97,7 +97,7 @@ viewWithTrack msgWrapper options track =
                         , label = text "Nothing to Redo"
                         }
 
-                something ->
+                redo :: _ ->
                     Input.button (centerY :: neatToolsBorder)
                         { onPress = Just (msgWrapper Undo)
                         , label = text <| "Redo " ++ Actions.interpretAction redo.action
