@@ -15309,15 +15309,18 @@ var $author$project$MapPortController$update = F2(
 var $elm$core$Basics$not = _Basics_not;
 var $author$project$PaneLayoutManager$update = F3(
 	function (paneMsg, msgWrapper, options) {
-		if (paneMsg.$ === 'SetPaneLayout') {
-			var paneLayout = paneMsg.a;
-			return _Utils_update(
-				options,
-				{paneLayout: paneLayout});
-		} else {
-			return _Utils_update(
-				options,
-				{popupVisible: !options.popupVisible});
+		switch (paneMsg.$) {
+			case 'PaneNoOp':
+				return options;
+			case 'SetPaneLayout':
+				var paneLayout = paneMsg.a;
+				return _Utils_update(
+					options,
+					{paneLayout: paneLayout});
+			default:
+				return _Utils_update(
+					options,
+					{popupVisible: !options.popupVisible});
 		}
 	});
 var $author$project$SplitPane$SplitPane$UpdateConfig = function (a) {
@@ -29257,6 +29260,7 @@ var $author$project$ViewPureStyles$showModalMessage = F2(
 	});
 var $author$project$Main$GpxRequested = {$: 'GpxRequested'};
 var $author$project$PaneLayoutManager$TogglePopup = {$: 'TogglePopup'};
+var $author$project$PaneLayoutManager$PaneNoOp = {$: 'PaneNoOp'};
 var $author$project$PaneLayoutManager$SetPaneLayout = function (a) {
 	return {$: 'SetPaneLayout', a: a};
 };
@@ -29343,11 +29347,11 @@ var $author$project$PaneLayoutManager$optionList = _List_fromArray(
 		A2(
 		$mdgriffith$elm_ui$Element$Input$option,
 		$author$project$PaneLayoutManager$PanesLeftRight,
-		$mdgriffith$elm_ui$Element$text('Side by side')),
+		$mdgriffith$elm_ui$Element$text('Wardrobe doors')),
 		A2(
 		$mdgriffith$elm_ui$Element$Input$option,
 		$author$project$PaneLayoutManager$PanesUpperLower,
-		$mdgriffith$elm_ui$Element$text('Superior & inferior')),
+		$mdgriffith$elm_ui$Element$text('Bunk beds')),
 		A2(
 		$mdgriffith$elm_ui$Element$Input$option,
 		$author$project$PaneLayoutManager$PanesGrid,
@@ -29362,6 +29366,42 @@ var $author$project$PaneLayoutManager$showOptionsMenu = F2(
 			_List_fromArray(
 				[
 					$mdgriffith$elm_ui$Element$moveDown(30),
+					$mdgriffith$elm_ui$Element$htmlAttribute(
+					A3(
+						$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
+						'click',
+						$author$project$ViewThirdPerson$stopProp,
+						A2(
+							$elm$core$Basics$composeR,
+							$elm$core$Basics$always($author$project$PaneLayoutManager$PaneNoOp),
+							msgWrapper))),
+					$mdgriffith$elm_ui$Element$htmlAttribute(
+					A3(
+						$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
+						'dblclick',
+						$author$project$ViewThirdPerson$stopProp,
+						A2(
+							$elm$core$Basics$composeR,
+							$elm$core$Basics$always($author$project$PaneLayoutManager$PaneNoOp),
+							msgWrapper))),
+					$mdgriffith$elm_ui$Element$htmlAttribute(
+					A3(
+						$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
+						'mousedown',
+						$author$project$ViewThirdPerson$stopProp,
+						A2(
+							$elm$core$Basics$composeR,
+							$elm$core$Basics$always($author$project$PaneLayoutManager$PaneNoOp),
+							msgWrapper))),
+					$mdgriffith$elm_ui$Element$htmlAttribute(
+					A3(
+						$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
+						'mouseup',
+						$author$project$ViewThirdPerson$stopProp,
+						A2(
+							$elm$core$Basics$composeR,
+							$elm$core$Basics$always($author$project$PaneLayoutManager$PaneNoOp),
+							msgWrapper))),
 					$mdgriffith$elm_ui$Element$htmlAttribute(
 					A2($elm$html$Html$Attributes$style, 'z-index', '20'))
 				]),

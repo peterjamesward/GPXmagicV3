@@ -5,8 +5,10 @@ import Element.Background as Background
 import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
 import Html.Attributes exposing (style)
+import Html.Events.Extra.Mouse as Mouse
 import ViewContext exposing (ViewContext, ViewMode)
 import ViewPureStyles exposing (neatToolsBorder)
+import ViewThirdPerson exposing (stopProp)
 
 
 type PaneType
@@ -51,6 +53,7 @@ defaultOptions =
 type Msg
     = SetPaneLayout PaneLayout
     | TogglePopup
+    | PaneNoOp
 
 
 paneLayoutMenu : (Msg -> msg) -> Options -> Element msg
@@ -70,6 +73,10 @@ showOptionsMenu msgWrapper options =
     if options.popupVisible then
         el
             [ moveDown 30
+            , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always PaneNoOp >> msgWrapper)
+            , htmlAttribute <| Mouse.onWithOptions "dblclick" stopProp (always PaneNoOp >> msgWrapper)
+            , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always PaneNoOp >> msgWrapper)
+            , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always PaneNoOp >> msgWrapper)
             , htmlAttribute (style "z-index" "20")
             ]
         <|
@@ -89,8 +96,8 @@ showOptionsMenu msgWrapper options =
 
 optionList =
     [ Input.option PanesOne <| text "One big one"
-    , Input.option PanesLeftRight <| text "Side by side"
-    , Input.option PanesUpperLower <| text "Superior & inferior"
+    , Input.option PanesLeftRight <| text "Wardrobe doors"
+    , Input.option PanesUpperLower <| text "Bunk beds"
     , Input.option PanesGrid <| text "Grid of four"
     ]
 
@@ -98,6 +105,9 @@ optionList =
 update : Msg -> (Msg -> msg) -> Options -> Options
 update paneMsg msgWrapper options =
     case paneMsg of
+        PaneNoOp ->
+            options
+
         SetPaneLayout paneLayout ->
             { options | paneLayout = paneLayout }
 
