@@ -8458,6 +8458,8 @@ var $author$project$SplitPane$SplitPane$configureSplitter = F2(
 				state,
 				{splitterPosition: newPosition}));
 	});
+var $author$project$PaneLayoutManager$PanesOne = {$: 'PanesOne'};
+var $author$project$PaneLayoutManager$defaultOptions = {paneLayout: $author$project$PaneLayoutManager$PanesOne, popupVisible: false};
 var $elm$core$Basics$pi = _Basics_pi;
 var $ianmackenzie$elm_units$Quantity$Quantity = function (a) {
 	return {$: 'Quantity', a: a};
@@ -9635,6 +9637,7 @@ var $author$project$Main$init = F3(
 							_Utils_Tuple2(20, 200))),
 					$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Horizontal)),
 				modalMessage: $elm$core$Maybe$Nothing,
+				paneLayoutOptions: $author$project$PaneLayoutManager$defaultOptions,
 				previews: $elm$core$Dict$empty,
 				rightDockInternal: A2(
 					$author$project$SplitPane$SplitPane$configureSplitter,
@@ -17585,7 +17588,13 @@ var $author$project$Main$update = F2(
 									$author$project$Main$showTrackOnMapCentered(newTrack)
 								])));
 				} else {
-					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								modalMessage: $elm$core$Maybe$Just('Sorry, unable to make a track.\nPlease check the file contains GPX data.')
+							}),
+						$elm$core$Platform$Cmd$none);
 				}
 			case 'SetRenderDepth':
 				var depth = msg.a;
@@ -17793,7 +17802,7 @@ var $author$project$Main$update = F2(
 					var error = result.a;
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 				}
-			default:
+			case 'ToolsMsg':
 				var toolMsg = msg.a;
 				var _v12 = A4($author$project$ToolsController$update, toolMsg, model.track, $author$project$Main$ToolsMsg, model.toolOptions);
 				var newToolOptions = _v12.a;
@@ -17805,6 +17814,9 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					modelAfterActions,
 					A2($author$project$Main$performActionCommands, actions, modelAfterActions));
+			default:
+				var paneMsg = msg.a;
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 		}
 	});
 var $author$project$Main$DismissModalMessage = {$: 'DismissModalMessage'};
@@ -29224,6 +29236,13 @@ var $author$project$ViewPureStyles$showModalMessage = F2(
 				]));
 	});
 var $author$project$Main$GpxRequested = {$: 'GpxRequested'};
+var $author$project$Main$PaneMsg = function (a) {
+	return {$: 'PaneMsg', a: a};
+};
+var $author$project$PaneLayoutManager$paneLayoutMenu = F2(
+	function (msgWrapper, options) {
+		return $mdgriffith$elm_ui$Element$none;
+	});
 var $smucode$elm_flat_colors$FlatColors$ChinesePalette$twinkleBlue = A3($mdgriffith$elm_ui$Element$rgb255, 206, 214, 224);
 var $author$project$Main$topLoadingBar = function (model) {
 	var loadGpxButton = A2(
@@ -29251,7 +29270,10 @@ var $author$project$Main$topLoadingBar = function (model) {
 					$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$twinkleBlue)
 				])),
 		_List_fromArray(
-			[loadGpxButton]));
+			[
+				loadGpxButton,
+				A2($author$project$PaneLayoutManager$paneLayoutMenu, $author$project$Main$PaneMsg, model.paneLayoutOptions)
+			]));
 };
 var $author$project$Main$view = function (model) {
 	return {

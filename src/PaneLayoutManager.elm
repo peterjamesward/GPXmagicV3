@@ -1,6 +1,7 @@
 module PaneLayoutManager exposing (..)
 
 import Element exposing (Element, none)
+import ViewContext exposing (ViewContext, ViewMode)
 
 
 type PaneType
@@ -25,8 +26,8 @@ type PaneId
 
 type alias PaneContext =
     { paneId : PaneId
-    , activeView : ViewingMode
-    , thirdPersonContext : ViewContextThirdPerson
+    , activeView : ViewMode
+    , thirdPersonContext : ViewContext
     }
 
 

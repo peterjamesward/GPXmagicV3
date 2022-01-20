@@ -387,7 +387,9 @@ update msg model =
                     )
 
                 Nothing ->
-                    ( model, Cmd.none )
+                    ( {model| modalMessage = Just """Sorry, unable to make a track.
+Please check the file contains GPX data."""}
+                    , Cmd.none )
 
         SetRenderDepth depth ->
             case model.track of
@@ -572,6 +574,10 @@ update msg model =
             ( modelAfterActions
             , performActionCommands actions modelAfterActions
             )
+
+        PaneMsg paneMsg ->
+            (model, Cmd.none)
+
 
 
 allocateSpaceForDocksAndContent : Int -> Int -> Model -> Model
