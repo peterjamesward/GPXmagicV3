@@ -412,12 +412,122 @@ combineInfo info1 info2 =
     }
 
 
-replaceRange : Int -> Int -> List EarthPoint -> Maybe PeteTree
-replaceRange fromStart fromEnd newPoints =
-    --This is our key edit function for external use.
-    --Internally, we make minimal tree changes to make it so, at lowest level possible.
-    --Of course, we reconstruct affected nodes.
-    Nothing
+replaceRange :
+    Int
+    -> Int
+    -> GPXSource
+    -> List GPXSource
+    -> PeteTree
+    -> Maybe PeteTree
+replaceRange fromStart fromEnd withReferencePoint newPoints currentTree =
+    {--
+        This is our key edit function for external use.
+
+        Internally, we make minimal tree changes to make it so, at lowest level possible.
+        Of course, we reconstruct affected nodes.
+        The fromStart, fromEnd is because it makes life easier for Undo, and it has symmetry.
+        So, the rules:
+        If you can delegate to one child, do so, and safeJoin result to sibling.
+        Otherwise, you have to handle it.
+        (I briefly thought about passing one half to each child, but that would be bad.)
+
+        Simplest and sort of neatest way here is to make a single list (yes, list) from the
+        parts we keep and the new parts, then use existing logic to form a new node.
+        Locally balanced, not too shabby, if many edits are sort of "like for like".
+        Key semantic point - this works in POINT index space and the values are inclusive
+        (otherwise, how could we do a whole track edit?).
+
+        To be clear, if our points are <ABC> and we use `replaceRange 0 0 []`,
+        the track would disappear, and we would return a Nothing. (It's not our job to stop that.)
+        Likewise `replaceRange 1 1 []' returns <AC> (a single Leaf).
+
+        Also, note the caller MUST have previously derived GPX co-ords, not local metric points,
+        using functions that belong in TrackLoaded.
+    --}
+    case currentTree of
+        Leaf _ ->
+            buildNewNodeWithRange fromStart fromEnd withReferencePoint newPoints currentTree
+
+        Node node ->
+            let
+                containedInLeft =
+                    --TODO: Clarify this comment after testing.
+                    -- I'm fairly sure these are '<' not '<=' to make sure
+                    -- that the adjoining points are included.
+                    -- Simple Leaf tests will validate.
+                    fromStart
+                        < skipCount node.left
+                        && (fromEnd - skipCount node.right < skipCount node.left)
+
+                containedInRight =
+                    (fromStart - skipCount node.left < skipCount node.right)
+                        && (fromEnd < skipCount node.right)
+            in
+            case ( containedInLeft, containedInRight ) of
+                ( True, True ) ->
+                    -- Really, how can that be? Better take control.
+                    buildNewNodeWithRange
+                        fromStart
+                        fromEnd
+                        withReferencePoint
+                        newPoints
+                        currentTree
+
+                ( False, False ) ->
+                    -- The buck stops here.
+                    buildNewNodeWithRange
+                        fromStart
+                        fromEnd
+                        withReferencePoint
+                        newPoints
+                        currentTree
+
+                ( True, False ) ->
+                    -- Delegate to left
+                    safeJoin
+                        (replaceRange
+                            fromStart
+                            (fromEnd - skipCount node.right)
+                            withReferencePoint
+                            newPoints
+                            node.left
+                        )
+                        (Just node.right)
+
+                ( False, True ) ->
+                    -- Delegate to right
+                    safeJoin
+                        (Just node.left)
+                        (replaceRange
+                            (fromStart - skipCount node.left)
+                            fromEnd
+                            withReferencePoint
+                            newPoints
+                            node.right
+                        )
+
+
+buildNewNodeWithRange : Int -> Int -> GPXSource -> List GPXSource -> PeteTree -> Maybe PeteTree
+buildNewNodeWithRange fromStart fromEnd withReferencePoint newPoints currentTree =
+    {-
+       The decision is made, we simply make a new node.
+       No need for finesse, at least initially.
+       We should be a few levels down the tree in most cases.
+    -}
+    let
+        currentGpx =
+            recreateGpxSources <| Just currentTree
+
+        intro =
+            List.take fromStart currentGpx
+
+        outro =
+            List.drop (skipCount currentTree - fromEnd) currentGpx
+
+        updatedGpx =
+            intro ++ newPoints ++ outro
+    in
+    treeFromSourcesWithExistingReference withReferencePoint updatedGpx
 
 
 joiningNode : PeteTree -> PeteTree -> PeteTree
@@ -958,7 +1068,7 @@ enumerateEndPoints treeNode accum =
 recreateGpxSources : Maybe PeteTree -> List GPXSource
 recreateGpxSources mTree =
     --TODO: Make this a general traversal by taking a function argument.
-    --TODO: Have a road section version, and a points version.
+    --TODO: Have a road section version, and a points version?
     case mTree of
         Just fromTree ->
             (getFirstLeaf fromTree |> .sourceData |> Tuple.second)

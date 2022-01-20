@@ -102,16 +102,21 @@ view msgWrapper options =
                 }
 
 
-deletePointRange : Int -> Int -> PeteTree -> ( Maybe PeteTree, List ( EarthPoint, GPXSource ) )
-deletePointRange fromStart fromEnd treeNode =
+deletePointRange : Int -> Int -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+deletePointRange fromStart fromEnd track =
     -- Deletes, if possible, inclusive of the markers. We're counting road segments.
     let
         newTree =
-            DomainModel.replaceRange fromStart fromEnd []
+            DomainModel.replaceRange
+                fromStart
+                fromEnd
+                track.referenceLonLat
+                []
+                track.trackTree
 
         oldPoints =
-            DomainModel.extractPointsInRange fromStart fromEnd treeNode
+            DomainModel.extractPointsInRange fromStart fromEnd track.trackTree
     in
     ( newTree
-    , oldPoints
+    , oldPoints |> List.map Tuple.second
     )

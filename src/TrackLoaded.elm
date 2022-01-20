@@ -19,7 +19,7 @@ type alias TrackLoaded msg =
 
 type alias UndoEntry msg =
     { action : ToolAction msg
-    , originalPoints : List ( EarthPoint, GPXSource ) -- for reconstructing the original tree
+    , originalPoints : List GPXSource -- for reconstructing the original tree
     , fromStart : Int -- so we do not need to decode the action.
     , fromEnd : Int
     , currentPosition : Int
@@ -60,7 +60,7 @@ addToUndoStack :
     ToolAction msg
     -> Int
     -> Int
-    -> List ( EarthPoint, GPXSource )
+    -> List GPXSource
     -> TrackLoaded msg
     -> TrackLoaded msg
 addToUndoStack action fromStart fromEnd oldPoints oldTrack =
@@ -90,8 +90,10 @@ undoLastAction track =
                 _ =
                     Debug.log "UNDO" undo.action
 
-                newTree = Nothing
-                    --TODO: Rewrite me. Properly. Clearly. Not hideously. Thanks.
+                newTree =
+                    Nothing
+
+                --TODO: Rewrite me. Properly. Clearly. Not hideously. Thanks.
             in
             case newTree of
                 Just isTree ->

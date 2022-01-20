@@ -23,15 +23,8 @@ Restore pointers from UndoEntry.
 
 # BACKLOG, roughly in order ...
 
-## PeteTreeTraversor
-Data structure that keeps track of where you are in a tree.
-When 'applied' to a tree, returns a tree element and the traversor (generator) for the next one.
-Symmetry allows left->right and right->left traversal.
-I sense that having this will make some filtering easier.
-Also applies to rendering, where we have hand-coded R->L trversals.
-
 ## Multiple views
-Possibly a tool for this. But probably a "menu" option.
+Possibly a tool for this, probably a "menu" option.
 Possibly use tool to also switch views, or is that too obscure?
 
 Make **DragPan** work on 3D view.
@@ -117,7 +110,7 @@ Potential for recovery by replay.
 Possible aid to isolating and reproducing bugs.
 
 ## Memory usage monitoring
-Possibility: display warning when memory available is low.
+Possibility: display warning when memory available is low 
 performance.memory.jsHeapSizeLimit
 performance.memory.usedJSHeapSize
 performance.memory.totalJSHeapSize
@@ -125,6 +118,14 @@ performance.memory.totalJSHeapSize
 ---
 
 # Parked (and probably abandoned)
+
+## PeteTreeTraversor
+Data structure that keeps track of where you are in a tree.
+When 'applied' to a tree, returns a tree element and the traversor (generator) for the next one.
+Symmetry allows left->right and right->left traversal.
+I sense that having this will make some filtering easier.
+Also applies to rendering, where we have hand-coded R->L trversals.
+> But just having a traversal function with callbacks is probly adequate.
 
 ### Multiple windows (demoted again; more value in better tool layout and customisation)
 Tauri looks interesting as we would not need node.js

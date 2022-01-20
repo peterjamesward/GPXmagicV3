@@ -975,7 +975,7 @@ performActionsOnModel actions model =
                 ( DeletePointsBetween fromStart fromEnd, Just track ) ->
                     let
                         ( newTree, oldPoints ) =
-                            DeletePoints.deletePointRange (fromStart + 1) (fromEnd + 1) track.trackTree
+                            DeletePoints.deletePointRange (fromStart + 1) (fromEnd + 1) track
 
                         newTrack =
                             track
@@ -987,7 +987,7 @@ performActionsOnModel actions model =
                 ( DeletePointsIncluding fromStart fromEnd, Just track ) ->
                     let
                         ( newTree, oldPoints ) =
-                            DeletePoints.deletePointRange fromStart fromEnd track.trackTree
+                            DeletePoints.deletePointRange fromStart fromEnd track
 
                         newTrack =
                             track
