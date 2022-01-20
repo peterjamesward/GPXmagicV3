@@ -16133,15 +16133,55 @@ var $author$project$Main$decodeSplitValues = F2(
 			return model;
 		}
 	});
-var $elm$core$Maybe$andThen = F2(
-	function (callback, maybeValue) {
-		if (maybeValue.$ === 'Just') {
-			var value = maybeValue.a;
-			return callback(value);
-		} else {
-			return $elm$core$Maybe$Nothing;
+var $author$project$DomainModel$earthPointFromIndex = F2(
+	function (index, treeNode) {
+		earthPointFromIndex:
+		while (true) {
+			if (treeNode.$ === 'Leaf') {
+				var info = treeNode.a;
+				return (index <= 0) ? info.startPoint : info.endPoint;
+			} else {
+				var info = treeNode.a;
+				if (_Utils_cmp(
+					index,
+					$author$project$DomainModel$skipCount(info.left)) < 0) {
+					var $temp$index = index,
+						$temp$treeNode = info.left;
+					index = $temp$index;
+					treeNode = $temp$treeNode;
+					continue earthPointFromIndex;
+				} else {
+					var $temp$index = index - $author$project$DomainModel$skipCount(info.left),
+						$temp$treeNode = info.right;
+					index = $temp$index;
+					treeNode = $temp$treeNode;
+					continue earthPointFromIndex;
+				}
+			}
 		}
 	});
+var $author$project$DomainModel$getDualCoords = F2(
+	function (tree, index) {
+		return _Utils_Tuple2(
+			A2($author$project$DomainModel$earthPointFromIndex, index, tree),
+			A2($author$project$DomainModel$gpxPointFromIndex, index, tree));
+	});
+var $author$project$DomainModel$buildPreview = F2(
+	function (indices, tree) {
+		return A2(
+			$elm$core$List$map,
+			$author$project$DomainModel$getDualCoords(tree),
+			indices);
+	});
+var $author$project$DomainModel$extractPointsInRange = F3(
+	function (fromStart, fromEnd, trackTree) {
+		var indices = A2(
+			$elm$core$List$range,
+			fromStart,
+			$author$project$DomainModel$skipCount(trackTree) - fromEnd);
+		return A2($author$project$DomainModel$buildPreview, indices, trackTree);
+	});
+var $elm$core$Debug$log = _Debug_log;
 var $author$project$DomainModel$enumerateEndPoints = F2(
 	function (treeNode, accum) {
 		if (treeNode.$ === 'Leaf') {
@@ -16158,13 +16198,162 @@ var $author$project$DomainModel$enumerateEndPoints = F2(
 				A2($author$project$DomainModel$enumerateEndPoints, node.right, accum));
 		}
 	});
-var $author$project$DomainModel$safeEnumerateEndPoints = function (mTree) {
+var $author$project$DomainModel$getFirstLeaf = function (someNode) {
+	getFirstLeaf:
+	while (true) {
+		if (someNode.$ === 'Leaf') {
+			var leaf = someNode.a;
+			return leaf;
+		} else {
+			var node = someNode.a;
+			var $temp$someNode = node.left;
+			someNode = $temp$someNode;
+			continue getFirstLeaf;
+		}
+	}
+};
+var $author$project$DomainModel$recreateGpxSources = function (mTree) {
 	if (mTree.$ === 'Just') {
-		var tree = mTree.a;
-		return A2($author$project$DomainModel$enumerateEndPoints, tree, _List_Nil);
+		var fromTree = mTree.a;
+		return A2(
+			$elm$core$List$cons,
+			$author$project$DomainModel$getFirstLeaf(fromTree).sourceData.a,
+			A2(
+				$elm$core$List$map,
+				$elm$core$Tuple$second,
+				A2($author$project$DomainModel$enumerateEndPoints, fromTree, _List_Nil)));
 	} else {
 		return _List_Nil;
 	}
+};
+var $elm$core$List$takeReverse = F3(
+	function (n, list, kept) {
+		takeReverse:
+		while (true) {
+			if (n <= 0) {
+				return kept;
+			} else {
+				if (!list.b) {
+					return kept;
+				} else {
+					var x = list.a;
+					var xs = list.b;
+					var $temp$n = n - 1,
+						$temp$list = xs,
+						$temp$kept = A2($elm$core$List$cons, x, kept);
+					n = $temp$n;
+					list = $temp$list;
+					kept = $temp$kept;
+					continue takeReverse;
+				}
+			}
+		}
+	});
+var $elm$core$List$takeTailRec = F2(
+	function (n, list) {
+		return $elm$core$List$reverse(
+			A3($elm$core$List$takeReverse, n, list, _List_Nil));
+	});
+var $elm$core$List$takeFast = F3(
+	function (ctr, n, list) {
+		if (n <= 0) {
+			return _List_Nil;
+		} else {
+			var _v0 = _Utils_Tuple2(n, list);
+			_v0$1:
+			while (true) {
+				_v0$5:
+				while (true) {
+					if (!_v0.b.b) {
+						return list;
+					} else {
+						if (_v0.b.b.b) {
+							switch (_v0.a) {
+								case 1:
+									break _v0$1;
+								case 2:
+									var _v2 = _v0.b;
+									var x = _v2.a;
+									var _v3 = _v2.b;
+									var y = _v3.a;
+									return _List_fromArray(
+										[x, y]);
+								case 3:
+									if (_v0.b.b.b.b) {
+										var _v4 = _v0.b;
+										var x = _v4.a;
+										var _v5 = _v4.b;
+										var y = _v5.a;
+										var _v6 = _v5.b;
+										var z = _v6.a;
+										return _List_fromArray(
+											[x, y, z]);
+									} else {
+										break _v0$5;
+									}
+								default:
+									if (_v0.b.b.b.b && _v0.b.b.b.b.b) {
+										var _v7 = _v0.b;
+										var x = _v7.a;
+										var _v8 = _v7.b;
+										var y = _v8.a;
+										var _v9 = _v8.b;
+										var z = _v9.a;
+										var _v10 = _v9.b;
+										var w = _v10.a;
+										var tl = _v10.b;
+										return (ctr > 1000) ? A2(
+											$elm$core$List$cons,
+											x,
+											A2(
+												$elm$core$List$cons,
+												y,
+												A2(
+													$elm$core$List$cons,
+													z,
+													A2(
+														$elm$core$List$cons,
+														w,
+														A2($elm$core$List$takeTailRec, n - 4, tl))))) : A2(
+											$elm$core$List$cons,
+											x,
+											A2(
+												$elm$core$List$cons,
+												y,
+												A2(
+													$elm$core$List$cons,
+													z,
+													A2(
+														$elm$core$List$cons,
+														w,
+														A3($elm$core$List$takeFast, ctr + 1, n - 4, tl)))));
+									} else {
+										break _v0$5;
+									}
+							}
+						} else {
+							if (_v0.a === 1) {
+								break _v0$1;
+							} else {
+								break _v0$5;
+							}
+						}
+					}
+				}
+				return list;
+			}
+			var _v1 = _v0.b;
+			var x = _v1.a;
+			return _List_fromArray(
+				[x]);
+		}
+	});
+var $elm$core$List$take = F2(
+	function (n, list) {
+		return A3($elm$core$List$takeFast, 0, n, list);
+	});
+var $author$project$DomainModel$Leaf = function (a) {
+	return {$: 'Leaf', a: a};
 };
 var $author$project$DomainModel$Node = function (a) {
 	return {$: 'Node', a: a};
@@ -16469,254 +16658,6 @@ var $author$project$DomainModel$joiningNode = F2(
 				right: right
 			});
 	});
-var $author$project$DomainModel$safeJoin = F2(
-	function (left, right) {
-		var _v0 = _Utils_Tuple2(left, right);
-		if (_v0.a.$ === 'Just') {
-			if (_v0.b.$ === 'Just') {
-				var leftTree = _v0.a.a;
-				var rightTree = _v0.b.a;
-				return $elm$core$Maybe$Just(
-					A2($author$project$DomainModel$joiningNode, leftTree, rightTree));
-			} else {
-				var leftTree = _v0.a.a;
-				var _v1 = _v0.b;
-				return left;
-			}
-		} else {
-			if (_v0.b.$ === 'Just') {
-				var _v2 = _v0.a;
-				var rightTree = _v0.b.a;
-				return right;
-			} else {
-				var _v3 = _v0.a;
-				var _v4 = _v0.b;
-				return $elm$core$Maybe$Nothing;
-			}
-		}
-	});
-var $author$project$DomainModel$takeFromLeft = F2(
-	function (leavesFromLeft, treeNode) {
-		if (leavesFromLeft <= 0) {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			if (_Utils_cmp(
-				leavesFromLeft,
-				$author$project$DomainModel$skipCount(treeNode)) > -1) {
-				return $elm$core$Maybe$Just(treeNode);
-			} else {
-				if (treeNode.$ === 'Leaf') {
-					var roadSection = treeNode.a;
-					return $elm$core$Maybe$Nothing;
-				} else {
-					var record = treeNode.a;
-					return A2(
-						$author$project$DomainModel$safeJoin,
-						A2($author$project$DomainModel$takeFromLeft, leavesFromLeft, record.left),
-						A2(
-							$author$project$DomainModel$takeFromLeft,
-							leavesFromLeft - $author$project$DomainModel$skipCount(record.left),
-							record.right));
-				}
-			}
-		}
-	});
-var $author$project$DomainModel$takeFromRight = F2(
-	function (leavesFromRight, treeNode) {
-		if (leavesFromRight <= 0) {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			if (_Utils_cmp(
-				leavesFromRight,
-				$author$project$DomainModel$skipCount(treeNode)) > -1) {
-				return $elm$core$Maybe$Just(treeNode);
-			} else {
-				if (treeNode.$ === 'Leaf') {
-					var roadSection = treeNode.a;
-					return $elm$core$Maybe$Nothing;
-				} else {
-					var record = treeNode.a;
-					return A2(
-						$author$project$DomainModel$safeJoin,
-						A2(
-							$author$project$DomainModel$takeFromRight,
-							leavesFromRight - $author$project$DomainModel$skipCount(record.right),
-							record.left),
-						A2($author$project$DomainModel$takeFromRight, leavesFromRight, record.right));
-				}
-			}
-		}
-	});
-var $author$project$DomainModel$extractPointsInRange = F3(
-	function (fromStart, fromEnd, trackTree) {
-		return $author$project$DomainModel$safeEnumerateEndPoints(
-			A2(
-				$elm$core$Maybe$andThen,
-				$author$project$DomainModel$takeFromRight(
-					$author$project$DomainModel$skipCount(trackTree) - fromStart),
-				A2(
-					$author$project$DomainModel$takeFromLeft,
-					$author$project$DomainModel$skipCount(trackTree) - fromEnd,
-					trackTree)));
-	});
-var $elm$core$Debug$log = _Debug_log;
-var $author$project$DomainModel$getFirstLeaf = function (someNode) {
-	getFirstLeaf:
-	while (true) {
-		if (someNode.$ === 'Leaf') {
-			var leaf = someNode.a;
-			return leaf;
-		} else {
-			var node = someNode.a;
-			var $temp$someNode = node.left;
-			someNode = $temp$someNode;
-			continue getFirstLeaf;
-		}
-	}
-};
-var $author$project$DomainModel$recreateGpxSources = function (mTree) {
-	if (mTree.$ === 'Just') {
-		var fromTree = mTree.a;
-		return A2(
-			$elm$core$List$cons,
-			$author$project$DomainModel$getFirstLeaf(fromTree).sourceData.a,
-			A2(
-				$elm$core$List$map,
-				$elm$core$Tuple$second,
-				A2($author$project$DomainModel$enumerateEndPoints, fromTree, _List_Nil)));
-	} else {
-		return _List_Nil;
-	}
-};
-var $elm$core$List$takeReverse = F3(
-	function (n, list, kept) {
-		takeReverse:
-		while (true) {
-			if (n <= 0) {
-				return kept;
-			} else {
-				if (!list.b) {
-					return kept;
-				} else {
-					var x = list.a;
-					var xs = list.b;
-					var $temp$n = n - 1,
-						$temp$list = xs,
-						$temp$kept = A2($elm$core$List$cons, x, kept);
-					n = $temp$n;
-					list = $temp$list;
-					kept = $temp$kept;
-					continue takeReverse;
-				}
-			}
-		}
-	});
-var $elm$core$List$takeTailRec = F2(
-	function (n, list) {
-		return $elm$core$List$reverse(
-			A3($elm$core$List$takeReverse, n, list, _List_Nil));
-	});
-var $elm$core$List$takeFast = F3(
-	function (ctr, n, list) {
-		if (n <= 0) {
-			return _List_Nil;
-		} else {
-			var _v0 = _Utils_Tuple2(n, list);
-			_v0$1:
-			while (true) {
-				_v0$5:
-				while (true) {
-					if (!_v0.b.b) {
-						return list;
-					} else {
-						if (_v0.b.b.b) {
-							switch (_v0.a) {
-								case 1:
-									break _v0$1;
-								case 2:
-									var _v2 = _v0.b;
-									var x = _v2.a;
-									var _v3 = _v2.b;
-									var y = _v3.a;
-									return _List_fromArray(
-										[x, y]);
-								case 3:
-									if (_v0.b.b.b.b) {
-										var _v4 = _v0.b;
-										var x = _v4.a;
-										var _v5 = _v4.b;
-										var y = _v5.a;
-										var _v6 = _v5.b;
-										var z = _v6.a;
-										return _List_fromArray(
-											[x, y, z]);
-									} else {
-										break _v0$5;
-									}
-								default:
-									if (_v0.b.b.b.b && _v0.b.b.b.b.b) {
-										var _v7 = _v0.b;
-										var x = _v7.a;
-										var _v8 = _v7.b;
-										var y = _v8.a;
-										var _v9 = _v8.b;
-										var z = _v9.a;
-										var _v10 = _v9.b;
-										var w = _v10.a;
-										var tl = _v10.b;
-										return (ctr > 1000) ? A2(
-											$elm$core$List$cons,
-											x,
-											A2(
-												$elm$core$List$cons,
-												y,
-												A2(
-													$elm$core$List$cons,
-													z,
-													A2(
-														$elm$core$List$cons,
-														w,
-														A2($elm$core$List$takeTailRec, n - 4, tl))))) : A2(
-											$elm$core$List$cons,
-											x,
-											A2(
-												$elm$core$List$cons,
-												y,
-												A2(
-													$elm$core$List$cons,
-													z,
-													A2(
-														$elm$core$List$cons,
-														w,
-														A3($elm$core$List$takeFast, ctr + 1, n - 4, tl)))));
-									} else {
-										break _v0$5;
-									}
-							}
-						} else {
-							if (_v0.a === 1) {
-								break _v0$1;
-							} else {
-								break _v0$5;
-							}
-						}
-					}
-				}
-				return list;
-			}
-			var _v1 = _v0.b;
-			var x = _v1.a;
-			return _List_fromArray(
-				[x]);
-		}
-	});
-var $elm$core$List$take = F2(
-	function (n, list) {
-		return A3($elm$core$List$takeFast, 0, n, list);
-	});
-var $author$project$DomainModel$Leaf = function (a) {
-	return {$: 'Leaf', a: a};
-};
 var $author$project$Spherical$findBearingToTarget = F2(
 	function (_v0, _v1) {
 		var lat1 = _v0.a;
@@ -16967,6 +16908,32 @@ var $author$project$DomainModel$buildNewNodeWithRange = F5(
 		var _v3 = A2($elm$core$Debug$log, 'NEW', newPoints);
 		return A2($author$project$DomainModel$treeFromSourcesWithExistingReference, withReferencePoint, updatedGpx);
 	});
+var $author$project$DomainModel$safeJoin = F2(
+	function (left, right) {
+		var _v0 = _Utils_Tuple2(left, right);
+		if (_v0.a.$ === 'Just') {
+			if (_v0.b.$ === 'Just') {
+				var leftTree = _v0.a.a;
+				var rightTree = _v0.b.a;
+				return $elm$core$Maybe$Just(
+					A2($author$project$DomainModel$joiningNode, leftTree, rightTree));
+			} else {
+				var leftTree = _v0.a.a;
+				var _v1 = _v0.b;
+				return left;
+			}
+		} else {
+			if (_v0.b.$ === 'Just') {
+				var _v2 = _v0.a;
+				var rightTree = _v0.b.a;
+				return right;
+			} else {
+				var _v3 = _v0.a;
+				var _v4 = _v0.b;
+				return $elm$core$Maybe$Nothing;
+			}
+		}
+	});
 var $author$project$DomainModel$replaceRange = F5(
 	function (fromStart, fromEnd, withReferencePoint, newPoints, currentTree) {
 		if (currentTree.$ === 'Leaf') {
@@ -17081,46 +17048,6 @@ var $author$project$Actions$PreviewCircle = {$: 'PreviewCircle'};
 var $author$project$Actions$ShowPreview = function (a) {
 	return {$: 'ShowPreview', a: a};
 };
-var $author$project$DomainModel$earthPointFromIndex = F2(
-	function (index, treeNode) {
-		earthPointFromIndex:
-		while (true) {
-			if (treeNode.$ === 'Leaf') {
-				var info = treeNode.a;
-				return (index <= 0) ? info.startPoint : info.endPoint;
-			} else {
-				var info = treeNode.a;
-				if (_Utils_cmp(
-					index,
-					$author$project$DomainModel$skipCount(info.left)) < 0) {
-					var $temp$index = index,
-						$temp$treeNode = info.left;
-					index = $temp$index;
-					treeNode = $temp$treeNode;
-					continue earthPointFromIndex;
-				} else {
-					var $temp$index = index - $author$project$DomainModel$skipCount(info.left),
-						$temp$treeNode = info.right;
-					index = $temp$index;
-					treeNode = $temp$treeNode;
-					continue earthPointFromIndex;
-				}
-			}
-		}
-	});
-var $author$project$DomainModel$getDualCoords = F2(
-	function (tree, index) {
-		return _Utils_Tuple2(
-			A2($author$project$DomainModel$earthPointFromIndex, index, tree),
-			A2($author$project$DomainModel$gpxPointFromIndex, index, tree));
-	});
-var $author$project$DomainModel$buildPreview = F2(
-	function (indices, tree) {
-		return A2(
-			$elm$core$List$map,
-			$author$project$DomainModel$getDualCoords(tree),
-			indices);
-	});
 var $author$project$Tools$AbruptDirectionChanges$findAbruptDirectionChanges = F2(
 	function (options, tree) {
 		var helper = F3(

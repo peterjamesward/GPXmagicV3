@@ -1050,11 +1050,13 @@ penultimatePoint tree =
 
 extractPointsInRange : Int -> Int -> PeteTree -> List ( EarthPoint, GPXSource )
 extractPointsInRange fromStart fromEnd trackTree =
-    -- May be a more efficient way with tree traversal but we ain't a gotten one yet.
-    trackTree
-        |> takeFromLeft (skipCount trackTree - fromEnd)
-        |> Maybe.andThen (takeFromRight (skipCount trackTree - fromStart))
-        |> safeEnumerateEndPoints
+    -- Going for an efficient but more likely correct approach.
+    -- "Make it right, then make it fast."
+    let
+        indices =
+            List.range fromStart (skipCount trackTree - fromEnd)
+    in
+    buildPreview indices trackTree
 
 
 safeEnumerateEndPoints : Maybe PeteTree -> List ( EarthPoint, GPXSource )

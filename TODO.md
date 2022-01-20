@@ -2,13 +2,13 @@
 
 BUG: Dubious steepest gradient on some routes.
 BUG: Marker status not changing in marker tool view when track loaded.
+BUG: Previews (Delete) not updating when pointer moves.
 
 # WIP
 
 ## Undo, Redo.
 
 Rewrite after above is done for domain model.
-Restore pointers from UndoEntry.
 
 ---
 
