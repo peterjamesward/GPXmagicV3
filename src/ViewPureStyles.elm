@@ -278,3 +278,37 @@ sliderThumb =
 
 useIcon =
     html << FeatherIcons.toHtml [] << FeatherIcons.withSize 20
+
+
+showModalMessage : String -> msg -> Element msg
+showModalMessage content msg =
+    column
+        [ centerY
+        , centerX
+        , Border.width 6
+        , Border.color FlatColors.AussiePalette.quinceJelly
+        , Border.rounded 8
+        ]
+        [ row
+            [ width fill
+            , spacing 8
+            , padding 4
+            , Background.color FlatColors.AussiePalette.quinceJelly
+            , Font.color FlatColors.AussiePalette.coastalBreeze
+            ]
+            [ text "Message"
+            ]
+        , column
+            [ Background.color FlatColors.AussiePalette.coastalBreeze
+            , height fill
+            , width fill
+            , spacing 20
+            , padding 20
+            ]
+            [ text content
+            , Input.button neatToolsBorder
+                { onPress = Just msg
+                , label = text "Dismiss"
+                }
+            ]
+        ]

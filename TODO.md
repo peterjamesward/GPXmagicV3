@@ -1,15 +1,19 @@
 
 # BUGS (for an 'easy' day)
 
-BUG: Dubious steepest gradient on some routes.
-BUG: Orange pointer interpretation wrong in the tool box (always 15240).
+BUG: Dubious steepest gradient on some routes. (May have to wait until we have that tool!)
 BUG: Hit detect is poor on 304K course (!).
 
 # WIP
 
 ## Multiple views
-Possibly a tool for this, probably a "menu" option.
-Possibly use tool to also switch views, or is that too obscure?
+Selection on "Menu bar", needs graphics.
+PaneLayoutManager with PaneType and PaneLayout types.
+Responsible for layout and sizing (size pass in view functions).
+Not sure if panes toggle visibility or truly vanish, depends if it affects Map.
+Manager also displays the menu entry with popup.
+
+NB featherIcons: grid, columns, server (!), square. (for now).
 
 ---
 
@@ -47,17 +51,11 @@ Pane payout choices as control?
 I think the top bar is still special: Load, Save, Donate. Is it?
 "Where am I" - reverse geocode (rate limited)).
 
-## Decide how to organise windows, panes, views.
-What state lives where? (This relates to the multi-window decision.)
-First pane is special, because of map, and because you must have it.
-Hence, one pane + list, or just four panes with visibility?
-
 ## Look and Feel
 Configurable background colour.
 
 ## Error messages
 Using an action DisplayMessage to show modal dialog. 
-Add Dismiss button to modal dialog.
 
 ## Plan view
 Same as before. Use 3d-scene. Orthographic camera.

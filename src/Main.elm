@@ -46,7 +46,7 @@ import UtilsForViews exposing (colourHexString)
 import ViewContext exposing (ViewContext(..), ViewMode(..))
 import ViewContextThirdPerson exposing (ThirdPersonContext)
 import ViewMap exposing (MapContext)
-import ViewPureStyles exposing (commonLayoutStyles, conditionallyVisible, neatToolsBorder, radioButton, sliderThumb)
+import ViewPureStyles exposing (commonLayoutStyles, conditionallyVisible, neatToolsBorder, radioButton, showModalMessage, sliderThumb)
 import ViewThirdPerson
 
 
@@ -72,6 +72,7 @@ type Msg
     | Resize Int Int
     | GotWindowSize (Result Dom.Error Dom.Viewport)
     | ToolsMsg ToolsController.ToolMsg
+    | DismissModalMessage
 
 
 type alias Model =
@@ -259,6 +260,11 @@ update msg model =
         AdjustTimeZone newZone ->
             ( { model | zone = newZone }
             , MyIP.requestIpInformation ReceivedIpDetails
+            )
+
+        DismissModalMessage ->
+            ( { model | modalMessage = Nothing }
+            , Cmd.none
             )
 
         MapPortsMessage mapMsg ->
@@ -632,11 +638,6 @@ adjustSpaceForContent model =
     }
 
 
-showModalMessage msg =
-    el (centerX :: centerY :: neatToolsBorder) <|
-        text msg
-
-
 view : Model -> Browser.Document Msg
 view model =
     { title = "GPXmagic Labs V3 concepts"
@@ -645,8 +646,8 @@ view model =
             (Background.color FlatColors.ChinesePalette.peace
                 :: (inFront <|
                         case model.modalMessage of
-                            Just msg ->
-                                showModalMessage msg
+                            Just message ->
+                                showModalMessage message DismissModalMessage
 
                             Nothing ->
                                 none
@@ -833,6 +834,8 @@ topLoadingBar model =
                ]
         )
         [ loadGpxButton
+
+        --, PaneLayoutManager.paneLayoutMenu
         ]
 
 
@@ -1041,13 +1044,12 @@ performActionsOnModel actions model =
                             let
                                 modelAfterRedo =
                                     performActionsOnModel [ redo.action ] model
-
                             in
                             case modelAfterRedo.track of
                                 Just trackAfterRedo ->
                                     let
-                                         trackWithCorrectRedoStack =
-                                           { trackAfterRedo | redos = moreRedos }
+                                        trackWithCorrectRedoStack =
+                                            { trackAfterRedo | redos = moreRedos }
                                     in
                                     { modelAfterRedo | track = Just trackWithCorrectRedoStack }
 
