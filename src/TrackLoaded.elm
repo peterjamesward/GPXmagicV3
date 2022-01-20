@@ -77,6 +77,7 @@ addToUndoStack action fromStart fromEnd oldPoints oldTrack =
     in
     { oldTrack
         | undos = undoEntry :: oldTrack.undos
+        , redos = []
     }
 
 

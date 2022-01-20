@@ -16061,6 +16061,7 @@ var $author$project$TrackLoaded$addToUndoStack = F5(
 		return _Utils_update(
 			oldTrack,
 			{
+				redos: _List_Nil,
 				undos: A2($elm$core$List$cons, undoEntry, oldTrack.undos)
 			});
 	});
@@ -19321,6 +19322,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										{
 											track: $elm$core$Maybe$Just(newTrack)
 										});
+									var _v13 = A2($elm$core$Debug$log, 'REDO', redo.action);
 									return A2(
 										$author$project$Main$performActionsOnModel,
 										_List_fromArray(
@@ -30687,6 +30689,7 @@ var $author$project$Tools$Pointers$view = F3(
 						])));
 		}
 	});
+var $author$project$Tools$UndoRedo$Redo = {$: 'Redo'};
 var $author$project$Tools$UndoRedo$Undo = {$: 'Undo'};
 var $author$project$Actions$interpretAction = function (action) {
 	switch (action.$) {
@@ -30775,7 +30778,7 @@ var $author$project$Tools$UndoRedo$viewWithTrack = F3(
 									label: $mdgriffith$elm_ui$Element$text(
 										'Redo ' + $author$project$Actions$interpretAction(redo.action)),
 									onPress: $elm$core$Maybe$Just(
-										msgWrapper($author$project$Tools$UndoRedo$Undo))
+										msgWrapper($author$project$Tools$UndoRedo$Redo))
 								});
 						}
 					}())

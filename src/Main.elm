@@ -1042,6 +1042,7 @@ performActionsOnModel actions model =
                     case track.redos of
                         redo :: moreRedos ->
                             let
+                                _ = Debug.log "REDO" redo.action
                                 newTrack =
                                     { track | redos = moreRedos }
 
