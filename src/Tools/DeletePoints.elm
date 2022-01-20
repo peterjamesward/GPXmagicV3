@@ -48,7 +48,6 @@ toolStateChange opened colour options track =
                         Nothing ->
                             [ fromStart ]
             in
-            -- Make sure we have up to date breaches and preview is shown.
             ( { options | singlePoint = theTrack.markerPosition == Nothing }
             , [ ShowPreview
                     { tag = "delete"

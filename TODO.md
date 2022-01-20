@@ -1,8 +1,9 @@
-# BUGS
+
+# BUGS (for an 'easy' day)
 
 BUG: Dubious steepest gradient on some routes.
-BUG: Marker status not changing in marker tool view when track loaded.
-BUG: Previews (Delete) not updating when pointer moves.
+BUG: Orange pointer interpretation wrong in the tool box (always 15240).
+BUG: Hit detect is poor on 304K course (!).
 
 # WIP
 

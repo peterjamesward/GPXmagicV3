@@ -362,17 +362,12 @@ update msg model =
                                 , modalMessage = Nothing
                             }
 
-                        ( newOptions, actions ) =
-                            ToolsController.refreshOpenTools
-                                modelWithTrack.track
-                                modelWithTrack.toolOptions
-
-                        modelWithUpdatedTools =
-                            { modelWithTrack | toolOptions = newOptions }
+                        actions =
+                            [ TrackHasChanged ]
 
                         modelAfterActions =
                             -- e.g. collect previews and render ...
-                            performActionsOnModel actions modelWithUpdatedTools
+                            performActionsOnModel actions modelWithTrack
                     in
                     ( modelAfterActions
                     , Cmd.batch
@@ -419,7 +414,7 @@ update msg model =
             -- TODO: Make this into a Tool
             let
                 actions =
-                    [ SetCurrent pos, MapCenterOnCurrent ]
+                    [ SetCurrent pos, TrackHasChanged, MapCenterOnCurrent ]
 
                 modelAfterActions =
                     performActionsOnModel actions model
@@ -1012,6 +1007,7 @@ performActionsOnModel actions model =
                         modelAfterSecondaryActions =
                             innerModelWithNewToolSettings |> performActionsOnModel secondaryActions
                     in
+                    -- This model should contain all updated previews from open tools.
                     modelAfterSecondaryActions
 
                 ( SetMarker maybeMarker, Just track ) ->
@@ -1042,7 +1038,6 @@ performActionsOnModel actions model =
                     case track.redos of
                         redo :: moreRedos ->
                             let
-                                _ = Debug.log "REDO" redo.action
                                 newTrack =
                                     { track | redos = moreRedos }
 
@@ -1115,10 +1110,11 @@ performActionCommands actions model =
                     Delay.after int msg
 
                 ( TrackHasChanged, Just track ) ->
-                    Cmd.batch <|
-                        MapPortController.addTrackToMap track
-                            :: MapPortController.addMarkersToMap track
-                            :: List.map showPreviewOnMap (Dict.keys model.previews)
+                    Cmd.batch
+                        [ MapPortController.addTrackToMap track
+                        , MapPortController.addMarkersToMap track
+                        , Cmd.batch <| List.map showPreviewOnMap (Dict.keys model.previews)
+                        ]
 
                 ( SetMarker maybeMarker, Just track ) ->
                     MapPortController.addMarkersToMap track

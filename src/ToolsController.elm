@@ -397,7 +397,18 @@ toolStateHasChanged toolType newState isTrack options =
             ( newOptions, StoreToolsConfig :: actions )
 
         ToolPointers ->
-            ( options, [ StoreToolsConfig ] )
+            let
+                ( newToolOptions, actions ) =
+                    Pointers.toolStateChange
+                        (newState == Expanded)
+                        (getColour toolType options.tools)
+                        options.pointerOptions
+                        isTrack
+
+                newOptions =
+                    { options | pointerOptions = newToolOptions }
+            in
+            ( newOptions, [ StoreToolsConfig ] )
 
         ToolUndoRedo ->
             ( options, [  ] )

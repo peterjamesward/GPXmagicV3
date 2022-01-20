@@ -86,8 +86,8 @@ zoomButtons msgWrapper =
 
 view :
     ThirdPersonContext
-    -> (Quantity Int Pixels, Quantity Int Pixels)
-    -> (TrackLoaded msg)
+    -> ( Quantity Int Pixels, Quantity Int Pixels )
+    -> TrackLoaded msg
     -> List (Entity LocalCoords)
     -> (Msg -> msg)
     -> Element msg
@@ -239,7 +239,11 @@ update msg msgWrapper track context =
         ImageClick event ->
             -- Click moves pointer but does not re-centre view. (Double click will.)
             if context.waitingForClickDelay then
-                ( context, [ SetCurrent <| detectHit event track context ] )
+                ( context
+                , [ SetCurrent <| detectHit event track context
+                  , TrackHasChanged
+                  ]
+                )
 
             else
                 ( context, [] )

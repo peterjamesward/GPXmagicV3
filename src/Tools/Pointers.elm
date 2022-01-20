@@ -50,8 +50,10 @@ toolStateChange :
 toolStateChange opened colour options track =
     case ( opened, track ) of
         ( True, Just theTrack ) ->
-            --TODO: Interesting. Could use preview.
-            ( options
+            ( { options
+                | orange = theTrack.currentPosition
+                , purple = theTrack.markerPosition
+              }
             , []
             )
 

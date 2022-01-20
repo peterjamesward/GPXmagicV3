@@ -463,9 +463,6 @@ replaceRange fromStart fromEnd withReferencePoint newPoints currentTree =
                     fromEnd
                         < skipCount node.right
                         && (fromStart - skipCount node.left > 0)
-
-                _ =
-                    Debug.log "REPLACERANGE" ( containedInLeft, containedInRight )
             in
             case ( containedInLeft, containedInRight ) of
                 ( True, True ) ->
@@ -519,18 +516,6 @@ buildNewNodeWithRange fromStart fromEnd withReferencePoint newPoints currentTree
        We should be a few levels down the tree in most cases.
     -}
     let
-        _ =
-            Debug.log "ARGS" ( fromStart, fromEnd )
-
-        _ =
-            Debug.log "GPX" currentGpx
-
-        _ =
-            Debug.log "IN,OUT" ( intro, outro )
-
-        _ =
-            Debug.log "NEW" newPoints
-
         currentGpx =
             recreateGpxSources <| Just currentTree
 
@@ -867,9 +852,6 @@ nearestToLonLat click treeNode =
                             ( isLongitudeContained click.longitude node.left
                             , isLongitudeContained click.longitude node.right
                             )
-
-                        --_ =
-                        --    Debug.log "SPANS" ( inLeftSpan, inRightSpan )
                     in
                     case ( inLeftSpan, inRightSpan ) of
                         ( True, True ) ->

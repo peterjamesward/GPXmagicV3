@@ -88,9 +88,6 @@ undoLastAction track =
     case track.undos of
         undo :: moreUndos ->
             let
-                _ =
-                    Debug.log "UNDO" undo.action
-
                 newTree =
                     DomainModel.replaceRange
                         undo.fromStart

@@ -14777,6 +14777,7 @@ var $author$project$Actions$StoreSplitConfig = {$: 'StoreSplitConfig'};
 var $author$project$Main$ToolsMsg = function (a) {
 	return {$: 'ToolsMsg', a: a};
 };
+var $author$project$Actions$TrackHasChanged = {$: 'TrackHasChanged'};
 var $author$project$ViewContext$ViewThird = {$: 'ViewThird'};
 var $author$project$SplitPane$Bound$getValue = function (value) {
 	return value.a;
@@ -16013,16 +16014,16 @@ var $author$project$Main$performActionCommands = F2(
 							var _v4 = _v0.a;
 							var track = _v0.b.a;
 							return $elm$core$Platform$Cmd$batch(
-								A2(
-									$elm$core$List$cons,
-									$author$project$MapPortController$addTrackToMap(track),
-									A2(
-										$elm$core$List$cons,
+								_List_fromArray(
+									[
+										$author$project$MapPortController$addTrackToMap(track),
 										$author$project$MapPortController$addMarkersToMap(track),
+										$elm$core$Platform$Cmd$batch(
 										A2(
 											$elm$core$List$map,
 											showPreviewOnMap,
-											$elm$core$Dict$keys(model.previews)))));
+											$elm$core$Dict$keys(model.previews)))
+									]));
 						} else {
 							break _v0$11;
 						}
@@ -16182,7 +16183,6 @@ var $author$project$DomainModel$extractPointsInRange = F3(
 			$author$project$DomainModel$skipCount(trackTree) - fromEnd);
 		return A2($author$project$DomainModel$buildPreview, indices, trackTree);
 	});
-var $elm$core$Debug$log = _Debug_log;
 var $author$project$DomainModel$enumerateEndPoints = F2(
 	function (treeNode, accum) {
 		if (treeNode.$ === 'Leaf') {
@@ -16897,16 +16897,6 @@ var $author$project$DomainModel$buildNewNodeWithRange = F5(
 		var updatedGpx = _Utils_ap(
 			intro,
 			_Utils_ap(newPoints, outro));
-		var _v0 = A2(
-			$elm$core$Debug$log,
-			'ARGS',
-			_Utils_Tuple2(fromStart, fromEnd));
-		var _v1 = A2($elm$core$Debug$log, 'GPX', currentGpx);
-		var _v2 = A2(
-			$elm$core$Debug$log,
-			'IN,OUT',
-			_Utils_Tuple2(intro, outro));
-		var _v3 = A2($elm$core$Debug$log, 'NEW', newPoints);
 		return A2($author$project$DomainModel$treeFromSourcesWithExistingReference, withReferencePoint, updatedGpx);
 	});
 var $author$project$DomainModel$safeJoin = F2(
@@ -16947,13 +16937,9 @@ var $author$project$DomainModel$replaceRange = F5(
 			var containedInLeft = (_Utils_cmp(
 				fromStart,
 				$author$project$DomainModel$skipCount(node.left)) < 0) && ((fromEnd - $author$project$DomainModel$skipCount(node.right)) > 0);
-			var _v1 = A2(
-				$elm$core$Debug$log,
-				'REPLACERANGE',
-				_Utils_Tuple2(containedInLeft, containedInRight));
-			var _v2 = _Utils_Tuple2(containedInLeft, containedInRight);
-			if (_v2.a) {
-				if (_v2.b) {
+			var _v1 = _Utils_Tuple2(containedInLeft, containedInRight);
+			if (_v1.a) {
+				if (_v1.b) {
 					return A5($author$project$DomainModel$buildNewNodeWithRange, fromStart, fromEnd, withReferencePoint, newPoints, currentTree);
 				} else {
 					return A2(
@@ -16968,7 +16954,7 @@ var $author$project$DomainModel$replaceRange = F5(
 						$elm$core$Maybe$Just(node.right));
 				}
 			} else {
-				if (!_v2.b) {
+				if (!_v1.b) {
 					return A5($author$project$DomainModel$buildNewNodeWithRange, fromStart, fromEnd, withReferencePoint, newPoints, currentTree);
 				} else {
 					return A2(
@@ -17176,6 +17162,20 @@ var $author$project$Tools$DeletePoints$toolStateChange = F4(
 					]));
 		}
 	});
+var $author$project$Tools$Pointers$toolStateChange = F4(
+	function (opened, colour, options, track) {
+		var _v0 = _Utils_Tuple2(opened, track);
+		if (_v0.a && (_v0.b.$ === 'Just')) {
+			var theTrack = _v0.b.a;
+			return _Utils_Tuple2(
+				_Utils_update(
+					options,
+					{orange: theTrack.currentPosition, purple: theTrack.markerPosition}),
+				_List_Nil);
+		} else {
+			return _Utils_Tuple2(options, _List_Nil);
+		}
+	});
 var $author$project$ToolsController$toolStateHasChanged = F4(
 	function (toolType, newState, isTrack, options) {
 		switch (toolType.$) {
@@ -17215,8 +17215,19 @@ var $author$project$ToolsController$toolStateHasChanged = F4(
 					newOptions,
 					A2($elm$core$List$cons, $author$project$Actions$StoreToolsConfig, actions));
 			case 'ToolPointers':
-				return _Utils_Tuple2(
+				var _v3 = A4(
+					$author$project$Tools$Pointers$toolStateChange,
+					_Utils_eq(newState, $author$project$ToolsController$Expanded),
+					A2($author$project$ToolsController$getColour, toolType, options.tools),
+					options.pointerOptions,
+					isTrack);
+				var newToolOptions = _v3.a;
+				var actions = _v3.b;
+				var newOptions = _Utils_update(
 					options,
+					{pointerOptions: newToolOptions});
+				return _Utils_Tuple2(
+					newOptions,
 					_List_fromArray(
 						[$author$project$Actions$StoreToolsConfig]));
 			default:
@@ -19056,7 +19067,6 @@ var $author$project$TrackLoaded$undoLastAction = function (track) {
 		var undo = _v0.a;
 		var moreUndos = _v0.b;
 		var newTree = A5($author$project$DomainModel$replaceRange, undo.fromStart, undo.fromEnd, track.referenceLonLat, undo.originalPoints, track.trackTree);
-		var _v1 = A2($elm$core$Debug$log, 'UNDO', undo.action);
 		if (newTree.$ === 'Just') {
 			var isTree = newTree.a;
 			return _Utils_update(
@@ -19322,7 +19332,6 @@ var $author$project$Main$performActionsOnModel = F2(
 										{
 											track: $elm$core$Maybe$Just(newTrack)
 										});
-									var _v13 = A2($elm$core$Debug$log, 'REDO', redo.action);
 									return A2(
 										$author$project$Main$performActionsOnModel,
 										_List_fromArray(
@@ -19871,7 +19880,8 @@ var $author$project$MapPortController$processMapPortMessage = F2(
 				var index = A2($author$project$DomainModel$nearestToLonLat, gpxPoint, track.trackTree);
 				return _List_fromArray(
 					[
-						$author$project$Actions$SetCurrentFromMapClick(index)
+						$author$project$Actions$SetCurrentFromMapClick(index),
+						$author$project$Actions$TrackHasChanged
 					]);
 			} else {
 				return _List_Nil;
@@ -20831,7 +20841,6 @@ var $author$project$Actions$DeleteSinglePoint = F2(
 	function (a, b) {
 		return {$: 'DeleteSinglePoint', a: a, b: b};
 	});
-var $author$project$Actions$TrackHasChanged = {$: 'TrackHasChanged'};
 var $author$project$Tools$DeletePoints$update = F4(
 	function (msg, options, previewColour, hasTrack) {
 		var _v0 = _Utils_Tuple2(hasTrack, msg);
@@ -21939,7 +21948,8 @@ var $author$project$ViewThirdPerson$update = F4(
 					_List_fromArray(
 						[
 							$author$project$Actions$SetCurrent(
-							A3($author$project$ViewThirdPerson$detectHit, event, track, context))
+							A3($author$project$ViewThirdPerson$detectHit, event, track, context)),
+							$author$project$Actions$TrackHasChanged
 						])) : _Utils_Tuple2(context, _List_Nil);
 			case 'ImageMouseWheel':
 				var deltaY = msg.a;
@@ -22151,13 +22161,9 @@ var $author$project$Main$update = F2(
 							viewThirdPersonContext: $elm$core$Maybe$Just(
 								A3($author$project$ViewThirdPerson$initialiseView, 0, newTrack.trackTree, model.contentArea))
 						});
-					var _v4 = A2($author$project$ToolsController$refreshOpenTools, modelWithTrack.track, modelWithTrack.toolOptions);
-					var newOptions = _v4.a;
-					var actions = _v4.b;
-					var modelWithUpdatedTools = _Utils_update(
-						modelWithTrack,
-						{toolOptions: newOptions});
-					var modelAfterActions = A2($author$project$Main$performActionsOnModel, actions, modelWithUpdatedTools);
+					var actions = _List_fromArray(
+						[$author$project$Actions$TrackHasChanged]);
+					var modelAfterActions = A2($author$project$Main$performActionsOnModel, actions, modelWithTrack);
 					return _Utils_Tuple2(
 						modelAfterActions,
 						$elm$core$Platform$Cmd$batch(
@@ -22171,9 +22177,9 @@ var $author$project$Main$update = F2(
 				}
 			case 'SetRenderDepth':
 				var depth = msg.a;
-				var _v5 = model.track;
-				if (_v5.$ === 'Just') {
-					var track = _v5.a;
+				var _v4 = model.track;
+				if (_v4.$ === 'Just') {
+					var track = _v4.a;
 					var newTrack = _Utils_update(
 						track,
 						{renderDepth: depth});
@@ -22190,9 +22196,9 @@ var $author$project$Main$update = F2(
 				}
 			case 'OAuthMessage':
 				var authMsg = msg.a;
-				var _v6 = A2($author$project$StravaAuth$update, authMsg, model.stravaAuthentication);
-				var newAuthData = _v6.a;
-				var authCmd = _v6.b;
+				var _v5 = A2($author$project$StravaAuth$update, authMsg, model.stravaAuthentication);
+				var newAuthData = _v5.a;
+				var authCmd = _v5.b;
 				var isToken = $author$project$StravaAuth$getStravaToken(newAuthData);
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -22204,6 +22210,7 @@ var $author$project$Main$update = F2(
 				var actions = _List_fromArray(
 					[
 						$author$project$Actions$SetCurrent(pos),
+						$author$project$Actions$TrackHasChanged,
 						$author$project$Actions$MapCenterOnCurrent
 					]);
 				var modelAfterActions = A2($author$project$Main$performActionsOnModel, actions, model);
@@ -22212,9 +22219,9 @@ var $author$project$Main$update = F2(
 					A2($author$project$Main$performActionCommands, actions, modelAfterActions));
 			case 'SetViewMode':
 				var viewMode = msg.a;
-				var _v7 = model.track;
-				if (_v7.$ === 'Just') {
-					var track = _v7.a;
+				var _v6 = model.track;
+				if (_v6.$ === 'Just') {
+					var track = _v6.a;
 					var newModel = _Utils_update(
 						model,
 						{viewMode: viewMode});
@@ -22226,16 +22233,16 @@ var $author$project$Main$update = F2(
 				}
 			case 'ImageMessage':
 				var imageMsg = msg.a;
-				var _v8 = model.track;
-				if (_v8.$ === 'Just') {
-					var track = _v8.a;
-					var _v9 = function () {
-						var _v10 = model.viewThirdPersonContext;
-						if (_v10.$ === 'Just') {
-							var third = _v10.a;
-							var _v11 = A4($author$project$ViewThirdPerson$update, imageMsg, $author$project$Main$ImageMessage, track, third);
-							var _new = _v11.a;
-							var act = _v11.b;
+				var _v7 = model.track;
+				if (_v7.$ === 'Just') {
+					var track = _v7.a;
+					var _v8 = function () {
+						var _v9 = model.viewThirdPersonContext;
+						if (_v9.$ === 'Just') {
+							var third = _v9.a;
+							var _v10 = A4($author$project$ViewThirdPerson$update, imageMsg, $author$project$Main$ImageMessage, track, third);
+							var _new = _v10.a;
+							var act = _v10.b;
 							return _Utils_Tuple2(
 								$elm$core$Maybe$Just(_new),
 								act);
@@ -22243,8 +22250,8 @@ var $author$project$Main$update = F2(
 							return _Utils_Tuple2($elm$core$Maybe$Nothing, _List_Nil);
 						}
 					}();
-					var newContext = _v9.a;
-					var actions = _v9.b;
+					var newContext = _v8.a;
+					var actions = _v8.b;
 					var newModel = A2(
 						$author$project$Main$performActionsOnModel,
 						actions,
@@ -22376,9 +22383,9 @@ var $author$project$Main$update = F2(
 				}
 			default:
 				var toolMsg = msg.a;
-				var _v13 = A4($author$project$ToolsController$update, toolMsg, model.track, $author$project$Main$ToolsMsg, model.toolOptions);
-				var newToolOptions = _v13.a;
-				var actions = _v13.b;
+				var _v12 = A4($author$project$ToolsController$update, toolMsg, model.track, $author$project$Main$ToolsMsg, model.toolOptions);
+				var newToolOptions = _v12.a;
+				var actions = _v12.b;
 				var newModel = _Utils_update(
 					model,
 					{toolOptions: newToolOptions});

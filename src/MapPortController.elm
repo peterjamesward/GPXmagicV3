@@ -235,7 +235,7 @@ processMapPortMessage track json =
                         index =
                             DomainModel.nearestToLonLat gpxPoint track.trackTree
                     in
-                    [ SetCurrentFromMapClick index ]
+                    [ SetCurrentFromMapClick index, TrackHasChanged ]
 
                 _ ->
                     []
