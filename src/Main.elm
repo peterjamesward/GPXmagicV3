@@ -1037,14 +1037,23 @@ performActionsOnModel actions model =
                 ( RedoUndoneAction, Just track ) ->
                     case track.redos of
                         redo :: moreRedos ->
+                            -- More care needed or the repeated edit will flush the Redo stack.
                             let
-                                newTrack =
-                                    { track | redos = moreRedos }
+                                modelAfterRedo =
+                                    performActionsOnModel [ redo.action ] model
 
-                                newModel =
-                                    { foldedModel | track = Just newTrack }
                             in
-                            newModel |> performActionsOnModel [ redo.action ]
+                            case modelAfterRedo.track of
+                                Just trackAfterRedo ->
+                                    let
+                                         trackWithCorrectRedoStack =
+                                           { trackAfterRedo | redos = moreRedos }
+                                    in
+                                    { modelAfterRedo | track = Just trackWithCorrectRedoStack }
+
+                                Nothing ->
+                                    -- Not good, live with it.
+                                    modelAfterRedo
 
                         _ ->
                             foldedModel

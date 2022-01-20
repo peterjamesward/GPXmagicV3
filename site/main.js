@@ -19324,19 +19324,25 @@ var $author$project$Main$performActionsOnModel = F2(
 								if (_v12.b) {
 									var redo = _v12.a;
 									var moreRedos = _v12.b;
-									var newTrack = _Utils_update(
-										track,
-										{redos: moreRedos});
-									var newModel = _Utils_update(
-										foldedModel,
-										{
-											track: $elm$core$Maybe$Just(newTrack)
-										});
-									return A2(
+									var modelAfterRedo = A2(
 										$author$project$Main$performActionsOnModel,
 										_List_fromArray(
 											[redo.action]),
-										newModel);
+										model);
+									var _v13 = modelAfterRedo.track;
+									if (_v13.$ === 'Just') {
+										var trackAfterRedo = _v13.a;
+										var trackWithCorrectRedoStack = _Utils_update(
+											trackAfterRedo,
+											{redos: moreRedos});
+										return _Utils_update(
+											modelAfterRedo,
+											{
+												track: $elm$core$Maybe$Just(trackWithCorrectRedoStack)
+											});
+									} else {
+										return modelAfterRedo;
+									}
 								} else {
 									return foldedModel;
 								}
