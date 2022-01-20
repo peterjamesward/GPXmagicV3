@@ -1,11 +1,10 @@
 module Tools.DeletePoints exposing (..)
 
 import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
-import DomainModel exposing (EarthPoint, GPXSource, PeteTree)
+import DomainModel exposing (EarthPoint, GPXSource, PeteTree, skipCount)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input
-import FeatherIcons
 import FlatColors.ChinesePalette
 import TrackLoaded exposing (TrackLoaded)
 import ViewPureStyles exposing (neatToolsBorder)
@@ -13,16 +12,19 @@ import ViewPureStyles exposing (neatToolsBorder)
 
 type alias Options =
     { singlePoint : Bool
+    , pointsToBeDeleted : List Int
     }
 
 
+defaultOptions : Options
 defaultOptions =
     { singlePoint = True
+    , pointsToBeDeleted = []
     }
 
 
 type Msg
-    = DeletePointRange -- deletes track between and including markers.
+    = DeletePointOrPoints -- One button serves both cases.
 
 
 toolStateChange :
@@ -34,17 +36,25 @@ toolStateChange :
 toolStateChange opened colour options track =
     case ( opened, track ) of
         ( True, Just theTrack ) ->
+            let
+                ( fromStart, fromEnd ) =
+                    TrackLoaded.getRangeFromMarkers theTrack
+
+                previews =
+                    case theTrack.markerPosition of
+                        Just _ ->
+                            List.range (fromStart + 1) (skipCount theTrack.trackTree - fromEnd - 1)
+
+                        Nothing ->
+                            [ fromStart ]
+            in
             -- Make sure we have up to date breaches and preview is shown.
             ( { options | singlePoint = theTrack.markerPosition == Nothing }
             , [ ShowPreview
                     { tag = "delete"
                     , shape = PreviewCircle
                     , colour = colour
-                    , points =
-                        --TODO: list of points between markers
-                        DomainModel.buildPreview
-                            [ theTrack.currentPosition ]
-                            theTrack.trackTree
+                    , points = DomainModel.buildPreview previews theTrack.trackTree
                     }
               ]
             )
@@ -62,7 +72,7 @@ update :
     -> ( Options, List (ToolAction msg) )
 update msg options previewColour hasTrack =
     case ( hasTrack, msg ) of
-        ( Just track, DeletePointRange ) ->
+        ( Just track, DeletePointOrPoints ) ->
             let
                 ( fromStart, fromEnd ) =
                     TrackLoaded.getRangeFromMarkers track
@@ -92,7 +102,7 @@ view msgWrapper options =
     el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
         el [ centerX, padding 4, spacing 4, height <| px 50 ] <|
             Input.button (centerY :: neatToolsBorder)
-                { onPress = Just (msgWrapper DeletePointRange)
+                { onPress = Just (msgWrapper DeletePointOrPoints)
                 , label =
                     if options.singlePoint then
                         text "Delete single point"
@@ -102,7 +112,10 @@ view msgWrapper options =
                 }
 
 
+
 -- This function finally does the deed, driven by the Action interpreter in Main.
+
+
 deleteSinglePoint : Int -> Int -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
 deleteSinglePoint fromStart fromEnd track =
     -- Clearer to deal with this case separately.
@@ -122,6 +135,7 @@ deleteSinglePoint fromStart fromEnd track =
     ( newTree
     , oldPoints |> List.map Tuple.second
     )
+
 
 deletePointsBetween : Int -> Int -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
 deletePointsBetween fromStart fromEnd track =

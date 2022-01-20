@@ -5,14 +5,9 @@ BUG: Marker status not changing in marker tool view when track loaded.
 
 # WIP
 
-## Delete
-Delete point preview needs sorting.
-BUG: Repeated delete single point at track end not working.
-
 ## Undo, Redo.
 
-Rewrite once above is done for domain model.
-
+Rewrite after above is done for domain model.
 Restore pointers from UndoEntry.
 
 ---

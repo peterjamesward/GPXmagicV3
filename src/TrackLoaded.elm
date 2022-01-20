@@ -137,27 +137,31 @@ useTreeWithRepositionedMarkers mTree oldTrack =
 internalUseTree : PeteTree -> TrackLoaded msg -> TrackLoaded msg
 internalUseTree newTree oldTrack =
     let
+        newLength =
+            skipCount newTree
+
         firstMarker =
             whichMarkerIsNearestStart oldTrack
 
         changeInTrackLength =
-            skipCount newTree - skipCount oldTrack.trackTree
+            newLength - skipCount oldTrack.trackTree
 
         newOrange =
-            case firstMarker of
-                Orange ->
-                    oldTrack.currentPosition
+            clamp 0 newLength <|
+                case firstMarker of
+                    Orange ->
+                        oldTrack.currentPosition
 
-                Purple ->
-                    max 0 <| oldTrack.currentPosition + changeInTrackLength
+                    Purple ->
+                        max 0 <| oldTrack.currentPosition + changeInTrackLength
 
         newPurple =
             case ( oldTrack.markerPosition, firstMarker ) of
                 ( Just purple, Orange ) ->
-                    Just <| max 0 <| purple + changeInTrackLength
+                    Just <| clamp 0 newLength <| purple + changeInTrackLength
 
                 ( Just purple, Purple ) ->
-                    Just purple
+                    Just <| clamp 0 newLength purple
 
                 _ ->
                     Nothing
