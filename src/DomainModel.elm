@@ -528,6 +528,9 @@ buildNewNodeWithRange fromStart fromEnd withReferencePoint newPoints currentTree
         _ =
             Debug.log "IN,OUT" ( intro, outro )
 
+        _ =
+            Debug.log "NEW" newPoints
+
         currentGpx =
             recreateGpxSources <| Just currentTree
 

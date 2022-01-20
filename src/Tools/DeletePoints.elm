@@ -130,10 +130,10 @@ deleteSinglePoint fromStart fromEnd track =
                 track.trackTree
 
         oldPoints =
-            DomainModel.extractPointsInRange fromStart fromEnd track.trackTree
+            [ DomainModel.gpxPointFromIndex track.currentPosition track.trackTree ]
     in
     ( newTree
-    , oldPoints |> List.map Tuple.second
+    , oldPoints
     )
 
 

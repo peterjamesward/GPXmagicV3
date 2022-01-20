@@ -91,9 +91,12 @@ undoLastAction track =
                     Debug.log "UNDO" undo.action
 
                 newTree =
-                    Nothing
-
-                --TODO: Rewrite me. Properly. Clearly. Not hideously. Thanks.
+                    DomainModel.replaceRange
+                        undo.fromStart
+                        undo.fromEnd
+                        track.referenceLonLat
+                        undo.originalPoints
+                        track.trackTree
             in
             case newTree of
                 Just isTree ->
@@ -101,6 +104,8 @@ undoLastAction track =
                         | undos = moreUndos
                         , redos = undo :: track.redos
                         , trackTree = isTree
+                        , currentPosition = undo.currentPosition
+                        , markerPosition = undo.markerPosition
                     }
 
                 Nothing ->
