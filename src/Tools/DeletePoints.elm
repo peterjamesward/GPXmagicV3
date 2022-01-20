@@ -72,7 +72,7 @@ update msg options previewColour hasTrack =
                     -- but with marker, more sensible if the markers themselves are not deletes (hence, exclusive).
                     -- This attempts to be explicit.
                     if track.markerPosition == Nothing then
-                        DeletePointsIncluding fromStart fromEnd
+                        DeleteSinglePoint fromStart fromEnd
 
                     else
                         DeletePointsBetween fromStart fromEnd
@@ -102,9 +102,11 @@ view msgWrapper options =
                 }
 
 
-deletePointRange : Int -> Int -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
-deletePointRange fromStart fromEnd track =
-    -- Deletes, if possible, inclusive of the markers. We're counting road segments.
+-- This function finally does the deed, driven by the Action interpreter in Main.
+deleteSinglePoint : Int -> Int -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+deleteSinglePoint fromStart fromEnd track =
+    -- Be careful with single point delete, that will require expanding the range
+    -- before calling here.
     let
         newTree =
             DomainModel.replaceRange

@@ -975,7 +975,7 @@ performActionsOnModel actions model =
                 ( DeletePointsBetween fromStart fromEnd, Just track ) ->
                     let
                         ( newTree, oldPoints ) =
-                            DeletePoints.deletePointRange (fromStart + 1) (fromEnd + 1) track
+                            DeletePoints.deleteSinglePoint fromStart fromEnd track
 
                         newTrack =
                             track
@@ -984,10 +984,13 @@ performActionsOnModel actions model =
                     in
                     { foldedModel | track = Just newTrack }
 
-                ( DeletePointsIncluding fromStart fromEnd, Just track ) ->
+                ( DeleteSinglePoint fromStart fromEnd, Just track ) ->
                     let
                         ( newTree, oldPoints ) =
-                            DeletePoints.deletePointRange fromStart fromEnd track
+                            DeletePoints.deleteSinglePoint
+                                fromStart
+                                fromEnd
+                                track
 
                         newTrack =
                             track

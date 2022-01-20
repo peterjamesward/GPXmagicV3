@@ -67,6 +67,10 @@ Hence, one pane + list, or just four panes with visibility?
 ## Look and Feel
 Configurable background colour.
 
+## Error messages
+Using an action DisplayMessage to show modal dialog. 
+Add Dismiss button to modal dialog.
+
 ## Plan view
 Same as before. Use 3d-scene. Orthographic camera.
 

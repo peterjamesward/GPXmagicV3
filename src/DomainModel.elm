@@ -457,11 +457,15 @@ replaceRange fromStart fromEnd withReferencePoint newPoints currentTree =
                     -- Simple Leaf tests will validate.
                     fromStart
                         < skipCount node.left
-                        && (fromEnd - skipCount node.right < skipCount node.left)
+                        && (fromEnd - skipCount node.right > 0)
 
                 containedInRight =
-                    (fromStart - skipCount node.left < skipCount node.right)
-                        && (fromEnd < skipCount node.right)
+                    fromEnd
+                        < skipCount node.right
+                        && (fromStart - skipCount node.left > 0)
+
+                _ =
+                    Debug.log "REPLACERANGE" ( containedInLeft, containedInRight )
             in
             case ( containedInLeft, containedInRight ) of
                 ( True, True ) ->
@@ -515,6 +519,15 @@ buildNewNodeWithRange fromStart fromEnd withReferencePoint newPoints currentTree
        We should be a few levels down the tree in most cases.
     -}
     let
+        _ =
+            Debug.log "ARGS" ( fromStart, fromEnd )
+
+        _ =
+            Debug.log "GPX" currentGpx
+
+        _ =
+            Debug.log "IN,OUT" ( intro, outro )
+
         currentGpx =
             recreateGpxSources <| Just currentTree
 
@@ -522,7 +535,7 @@ buildNewNodeWithRange fromStart fromEnd withReferencePoint newPoints currentTree
             List.take fromStart currentGpx
 
         outro =
-            List.drop (skipCount currentTree - fromEnd) currentGpx
+            List.drop (1 + skipCount currentTree - fromEnd) currentGpx
 
         updatedGpx =
             intro ++ newPoints ++ outro
@@ -1071,7 +1084,7 @@ recreateGpxSources mTree =
     --TODO: Have a road section version, and a points version?
     case mTree of
         Just fromTree ->
-            (getFirstLeaf fromTree |> .sourceData |> Tuple.second)
+            (getFirstLeaf fromTree |> .sourceData |> Tuple.first)
                 :: (enumerateEndPoints fromTree [] |> List.map Tuple.second)
 
         Nothing ->

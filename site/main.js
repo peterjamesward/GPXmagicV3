@@ -16559,6 +16559,7 @@ var $author$project$DomainModel$extractPointsInRange = F3(
 					$author$project$DomainModel$skipCount(trackTree) - fromEnd,
 					trackTree)));
 	});
+var $elm$core$Debug$log = _Debug_log;
 var $author$project$DomainModel$getFirstLeaf = function (someNode) {
 	getFirstLeaf:
 	while (true) {
@@ -16578,7 +16579,7 @@ var $author$project$DomainModel$recreateGpxSources = function (mTree) {
 		var fromTree = mTree.a;
 		return A2(
 			$elm$core$List$cons,
-			$author$project$DomainModel$getFirstLeaf(fromTree).sourceData.b,
+			$author$project$DomainModel$getFirstLeaf(fromTree).sourceData.a,
 			A2(
 				$elm$core$List$map,
 				$elm$core$Tuple$second,
@@ -16949,11 +16950,20 @@ var $author$project$DomainModel$buildNewNodeWithRange = F5(
 		var intro = A2($elm$core$List$take, fromStart, currentGpx);
 		var outro = A2(
 			$elm$core$List$drop,
-			$author$project$DomainModel$skipCount(currentTree) - fromEnd,
+			(1 + $author$project$DomainModel$skipCount(currentTree)) - fromEnd,
 			currentGpx);
 		var updatedGpx = _Utils_ap(
 			intro,
 			_Utils_ap(newPoints, outro));
+		var _v0 = A2(
+			$elm$core$Debug$log,
+			'ARGS',
+			_Utils_Tuple2(fromStart, fromEnd));
+		var _v1 = A2($elm$core$Debug$log, 'GPX', currentGpx);
+		var _v2 = A2(
+			$elm$core$Debug$log,
+			'IN,OUT',
+			_Utils_Tuple2(intro, outro));
 		return A2($author$project$DomainModel$treeFromSourcesWithExistingReference, withReferencePoint, updatedGpx);
 	});
 var $author$project$DomainModel$replaceRange = F5(
@@ -16963,18 +16973,18 @@ var $author$project$DomainModel$replaceRange = F5(
 		} else {
 			var node = currentTree.a;
 			var containedInRight = (_Utils_cmp(
-				fromStart - $author$project$DomainModel$skipCount(node.left),
-				$author$project$DomainModel$skipCount(node.right)) < 0) && (_Utils_cmp(
 				fromEnd,
-				$author$project$DomainModel$skipCount(node.right)) < 0);
+				$author$project$DomainModel$skipCount(node.right)) < 0) && ((fromStart - $author$project$DomainModel$skipCount(node.left)) > 0);
 			var containedInLeft = (_Utils_cmp(
 				fromStart,
-				$author$project$DomainModel$skipCount(node.left)) < 0) && (_Utils_cmp(
-				fromEnd - $author$project$DomainModel$skipCount(node.right),
-				$author$project$DomainModel$skipCount(node.left)) < 0);
-			var _v1 = _Utils_Tuple2(containedInLeft, containedInRight);
-			if (_v1.a) {
-				if (_v1.b) {
+				$author$project$DomainModel$skipCount(node.left)) < 0) && ((fromEnd - $author$project$DomainModel$skipCount(node.right)) > 0);
+			var _v1 = A2(
+				$elm$core$Debug$log,
+				'REPLACERANGE',
+				_Utils_Tuple2(containedInLeft, containedInRight));
+			var _v2 = _Utils_Tuple2(containedInLeft, containedInRight);
+			if (_v2.a) {
+				if (_v2.b) {
 					return A5($author$project$DomainModel$buildNewNodeWithRange, fromStart, fromEnd, withReferencePoint, newPoints, currentTree);
 				} else {
 					return A2(
@@ -16989,7 +16999,7 @@ var $author$project$DomainModel$replaceRange = F5(
 						$elm$core$Maybe$Just(node.right));
 				}
 			} else {
-				if (!_v1.b) {
+				if (!_v2.b) {
 					return A5($author$project$DomainModel$buildNewNodeWithRange, fromStart, fromEnd, withReferencePoint, newPoints, currentTree);
 				} else {
 					return A2(
@@ -17006,7 +17016,7 @@ var $author$project$DomainModel$replaceRange = F5(
 			}
 		}
 	});
-var $author$project$Tools$DeletePoints$deletePointRange = F3(
+var $author$project$Tools$DeletePoints$deleteSinglePoint = F3(
 	function (fromStart, fromEnd, track) {
 		var oldPoints = A3($author$project$DomainModel$extractPointsInRange, fromStart, fromEnd, track.trackTree);
 		var newTree = A5($author$project$DomainModel$replaceRange, fromStart, fromEnd, track.referenceLonLat, _List_Nil, track.trackTree);
@@ -19079,7 +19089,6 @@ var $author$project$ToolsController$restoreStoredValues = F2(
 			return options;
 		}
 	});
-var $elm$core$Debug$log = _Debug_log;
 var $author$project$TrackLoaded$undoLastAction = function (track) {
 	var _v0 = track.undos;
 	if (_v0.b) {
@@ -19233,7 +19242,7 @@ var $author$project$Main$performActionsOnModel = F2(
 								var fromStart = _v2.a;
 								var fromEnd = _v2.b;
 								var track = _v0.b.a;
-								var _v3 = A3($author$project$Tools$DeletePoints$deletePointRange, fromStart + 1, fromEnd + 1, track);
+								var _v3 = A3($author$project$Tools$DeletePoints$deleteSinglePoint, fromStart, fromEnd, track);
 								var newTree = _v3.a;
 								var oldPoints = _v3.b;
 								var newTrack = A2(
@@ -19248,13 +19257,13 @@ var $author$project$Main$performActionsOnModel = F2(
 							} else {
 								break _v0$12;
 							}
-						case 'DeletePointsIncluding':
+						case 'DeleteSinglePoint':
 							if (_v0.b.$ === 'Just') {
 								var _v4 = _v0.a;
 								var fromStart = _v4.a;
 								var fromEnd = _v4.b;
 								var track = _v0.b.a;
-								var _v5 = A3($author$project$Tools$DeletePoints$deletePointRange, fromStart, fromEnd, track);
+								var _v5 = A3($author$project$Tools$DeletePoints$deleteSinglePoint, fromStart, fromEnd, track);
 								var newTree = _v5.a;
 								var oldPoints = _v5.b;
 								var newTrack = A2(
@@ -20848,9 +20857,9 @@ var $author$project$Actions$DeletePointsBetween = F2(
 	function (a, b) {
 		return {$: 'DeletePointsBetween', a: a, b: b};
 	});
-var $author$project$Actions$DeletePointsIncluding = F2(
+var $author$project$Actions$DeleteSinglePoint = F2(
 	function (a, b) {
-		return {$: 'DeletePointsIncluding', a: a, b: b};
+		return {$: 'DeleteSinglePoint', a: a, b: b};
 	});
 var $author$project$Actions$TrackHasChanged = {$: 'TrackHasChanged'};
 var $author$project$TrackLoaded$getRangeFromMarkers = function (track) {
@@ -20874,7 +20883,7 @@ var $author$project$Tools$DeletePoints$update = F4(
 			var _v2 = $author$project$TrackLoaded$getRangeFromMarkers(track);
 			var fromStart = _v2.a;
 			var fromEnd = _v2.b;
-			var action = _Utils_eq(track.markerPosition, $elm$core$Maybe$Nothing) ? A2($author$project$Actions$DeletePointsIncluding, fromStart, fromEnd) : A2($author$project$Actions$DeletePointsBetween, fromStart, fromEnd);
+			var action = _Utils_eq(track.markerPosition, $elm$core$Maybe$Nothing) ? A2($author$project$Actions$DeleteSinglePoint, fromStart, fromEnd) : A2($author$project$Actions$DeletePointsBetween, fromStart, fromEnd);
 			return _Utils_Tuple2(
 				options,
 				_List_fromArray(
@@ -30729,7 +30738,7 @@ var $author$project$Actions$interpretAction = function (action) {
 			var fromStart = action.a;
 			var fromEnd = action.b;
 			return 'deletion of points';
-		case 'DeletePointsIncluding':
+		case 'DeleteSinglePoint':
 			var fromStart = action.a;
 			var fromEnd = action.b;
 			return 'delete single point';

@@ -20,7 +20,7 @@ type ToolAction msg
     | StoreToolsConfig
     | StoredValueRetrieved String E.Value
     | DeletePointsBetween Int Int -- fromStart, fromEnd
-    | DeletePointsIncluding Int Int -- fromStart, fromEnd
+    | DeleteSinglePoint Int Int -- fromStart, fromEnd
     | TrackHasChanged -- Must follow an action that changes the track.
     | SetMarker (Maybe Int)
     | UndoLastAction
@@ -48,7 +48,7 @@ interpretAction action =
         DeletePointsBetween fromStart fromEnd ->
             "deletion of points"
 
-        DeletePointsIncluding fromStart fromEnd ->
+        DeleteSinglePoint fromStart fromEnd ->
             "delete single point"
 
         _ -> "the last thing"
