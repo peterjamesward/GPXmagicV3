@@ -254,6 +254,10 @@ function storageMessageHandler(msg) {
         case 'storage.clear':
             localStorage.clear();
             break;
+
+        case 'memory':
+            app.ports.storageResponses.send({ 'msg' : 'memory', 'memory' : performance.memory });
+            break;
     }
 };
 

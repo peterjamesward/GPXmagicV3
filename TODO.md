@@ -53,6 +53,7 @@ I think the top bar is still special: Load, Save, Donate. Is it?
 
 ## Look and Feel
 Configurable background colour.
+Imperial measures.
 
 ## Error messages
 Using an action DisplayMessage to show modal dialog from any tool.

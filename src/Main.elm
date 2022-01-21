@@ -74,6 +74,7 @@ type Msg
     | ToolsMsg ToolsController.ToolMsg
     | DismissModalMessage
     | PaneMsg PaneLayoutManager.Msg
+    | TenSecondTicker Time.Posix
 
 
 type alias Model =
@@ -386,9 +387,10 @@ update msg model =
                     )
 
                 Nothing ->
-                    ( {model| modalMessage = Just """Sorry, unable to make a track.
-Please check the file contains GPX data."""}
-                    , Cmd.none )
+                    ( { model | modalMessage = Just """Sorry, unable to make a track.
+Please check the file contains GPX data.""" }
+                    , Cmd.none
+                    )
 
         SetRenderDepth depth ->
             case model.track of
@@ -585,6 +587,9 @@ Please check the file contains GPX data."""}
             ( newModel
             , Cmd.none
             )
+
+        TenSecondTicker posixTime ->
+            ( model, LocalStorage.storageGetMemoryUsage )
 
 
 
@@ -951,6 +956,7 @@ subscriptions model =
         , Sub.map SplitRightDockInternal <| SplitPane.subscriptions model.rightDockInternal
         , Sub.map SplitBottomDockTopEdge <| SplitPane.subscriptions model.bottomDockTopEdge
         , Browser.Events.onResize (\w h -> Resize w h)
+        , Time.every 10000 TenSecondTicker
         ]
 
 
@@ -1050,6 +1056,14 @@ performActionsOnModel actions model =
 
                         _ ->
                             foldedModel
+
+                ( HeapStatusUpdate heapStatus, _ ) ->
+                    --TODO: Make a tool for these values, but meanwhile...
+                    if (toFloat heapStatus.usedJSHeapSize / toFloat heapStatus.jsHeapSizeLimit) > 0.8 then
+                        { foldedModel | modalMessage = Just "Memory low, please save." }
+
+                    else
+                        foldedModel
 
                 ( UndoLastAction, Just track ) ->
                     { foldedModel | track = Just <| TrackLoaded.undoLastAction track }

@@ -6,6 +6,7 @@ module Actions exposing (..)
 import DomainModel exposing (EarthPoint, GPXSource)
 import Element
 import Json.Decode as E
+import Tools.MemoryUsage
 
 
 type ToolAction msg
@@ -25,6 +26,7 @@ type ToolAction msg
     | SetMarker (Maybe Int)
     | UndoLastAction
     | RedoUndoneAction
+    | HeapStatusUpdate Tools.MemoryUsage.HeapStatus
     | NoAction
 
 
