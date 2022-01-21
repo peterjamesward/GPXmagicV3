@@ -30,7 +30,7 @@ import Scene3d exposing (Entity, backgroundColor)
 import Spherical
 import TrackLoaded exposing (TrackLoaded)
 import Vector3d
-import ViewContextThirdPerson exposing (DragAction(..), ThirdPersonContext)
+import ViewContextThirdPerson exposing (DragAction(..), Context)
 import ViewPureStyles exposing (useIcon)
 import Viewpoint3d exposing (Viewpoint3d)
 
@@ -85,7 +85,7 @@ zoomButtons msgWrapper =
 
 
 view :
-    ThirdPersonContext
+    Context
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> TrackLoaded msg
     -> List (Entity LocalCoords)
@@ -139,7 +139,7 @@ onContextMenu msg =
         |> htmlAttribute
 
 
-deriveCamera : PeteTree -> ThirdPersonContext -> Int -> Camera3d Meters LocalCoords
+deriveCamera : PeteTree -> Context -> Int -> Camera3d Meters LocalCoords
 deriveCamera treeNode context currentPosition =
     let
         latitude =
@@ -174,7 +174,7 @@ deriveCamera treeNode context currentPosition =
 detectHit :
     Mouse.Event
     -> TrackLoaded msg
-    -> ThirdPersonContext
+    -> Context
     -> Int
 detectHit event track context =
     --TODO: Move into view/pane/whatever it will be.
@@ -210,8 +210,8 @@ update :
     Msg
     -> (Msg -> msg)
     -> TrackLoaded msg
-    -> ThirdPersonContext
-    -> ( ThirdPersonContext, List (ToolAction msg) )
+    -> Context
+    -> ( Context, List (ToolAction msg) )
 update msg msgWrapper track context =
     case msg of
         ImageZoomIn ->
@@ -364,7 +364,7 @@ initialiseView :
     Int
     -> PeteTree
     -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> ThirdPersonContext
+    -> Context
 initialiseView current treeNode viewSize =
     { cameraAzimuth = Direction2d.x
     , cameraElevation = Angle.degrees 30

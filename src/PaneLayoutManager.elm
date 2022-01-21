@@ -1,14 +1,31 @@
 module PaneLayoutManager exposing (..)
 
-import Element exposing (Element, column, el, htmlAttribute, inFront, moveDown, none, padding, spacing, text)
+import Element exposing (Element, column, el, htmlAttribute, inFront, moveDown, none, padding, row, spacing, text)
 import Element.Background as Background
 import Element.Input as Input exposing (button)
+import FeatherIcons
 import FlatColors.ChinesePalette
 import Html.Attributes exposing (style)
 import Html.Events.Extra.Mouse as Mouse
-import ViewContext exposing (ViewContext, ViewMode)
-import ViewPureStyles exposing (neatToolsBorder)
+import ViewContextThirdPerson exposing (Context)
+import ViewMap
+import ViewPureStyles exposing (neatToolsBorder, useIcon)
 import ViewThirdPerson exposing (stopProp)
+
+
+type ViewMode
+    = ViewInfo
+    | ViewThird
+    | ViewFirst
+    | ViewPlan
+    | ViewProfile
+    | ViewMap
+
+
+type ViewContext
+    = ThirdPersonContext ViewContextThirdPerson.Context
+    | MapContext ViewMap.Context
+    | InfoContext
 
 
 type PaneType
@@ -34,19 +51,38 @@ type PaneId
 type alias PaneContext =
     { paneId : PaneId
     , activeView : ViewMode
-    , thirdPersonContext : ViewContext
+    , thirdPersonContext : Maybe ViewContextThirdPerson.Context
+    , mapContext : Maybe ViewMap.Context
     }
 
 
 type alias Options =
     { paneLayout : PaneLayout
     , popupVisible : Bool
+    , pane1 : PaneContext
+    , pane2 : PaneContext
+    , pane3 : PaneContext
+    , pane4 : PaneContext
     }
 
 
+defaultPaneContext : PaneContext
+defaultPaneContext =
+    { paneId = Pane1
+    , activeView = ViewInfo
+    , thirdPersonContext = Nothing
+    , mapContext = Nothing
+    }
+
+
+defaultOptions : Options
 defaultOptions =
     { paneLayout = PanesOne
     , popupVisible = False
+    , pane1 = defaultPaneContext
+    , pane2 = defaultPaneContext
+    , pane3 = defaultPaneContext
+    , pane4 = defaultPaneContext
     }
 
 
@@ -95,10 +131,10 @@ showOptionsMenu msgWrapper options =
 
 
 optionList =
-    [ Input.option PanesOne <| text "One big one"
-    , Input.option PanesLeftRight <| text "Wardrobe doors"
-    , Input.option PanesUpperLower <| text "Bunk beds"
-    , Input.option PanesGrid <| text "Grid of four"
+    [ Input.option PanesOne <| row [ spacing 20 ] [ useIcon FeatherIcons.square, text "One big one" ]
+    , Input.option PanesLeftRight <| row [ spacing 20 ] [ useIcon FeatherIcons.columns, text "Wardrobe doors" ]
+    , Input.option PanesUpperLower <| row [ spacing 20 ] [ useIcon FeatherIcons.server, text "Bunk beds" ]
+    , Input.option PanesGrid <| row [ spacing 20 ] [ useIcon FeatherIcons.grid, text "Grid of four" ]
     ]
 
 

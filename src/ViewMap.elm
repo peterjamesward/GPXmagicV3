@@ -13,7 +13,7 @@ import Quantity exposing (Quantity)
 import TrackLoaded exposing (TrackLoaded)
 
 
-type alias MapContext =
+type alias Context =
     { mapClickDebounce : Bool
     , lastMapClick : ( Float, Float )
     }

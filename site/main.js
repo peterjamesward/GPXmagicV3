@@ -8421,7 +8421,7 @@ var $author$project$Main$GotWindowSize = function (a) {
 };
 var $author$project$SplitPane$SplitPane$Horizontal = {$: 'Horizontal'};
 var $author$project$SplitPane$SplitPane$Vertical = {$: 'Vertical'};
-var $author$project$ViewContext$ViewInfo = {$: 'ViewInfo'};
+var $author$project$PaneLayoutManager$ViewInfo = {$: 'ViewInfo'};
 var $elm$core$Basics$composeL = F3(
 	function (g, f, x) {
 		return g(
@@ -8459,7 +8459,9 @@ var $author$project$SplitPane$SplitPane$configureSplitter = F2(
 				{splitterPosition: newPosition}));
 	});
 var $author$project$PaneLayoutManager$PanesOne = {$: 'PanesOne'};
-var $author$project$PaneLayoutManager$defaultOptions = {paneLayout: $author$project$PaneLayoutManager$PanesOne, popupVisible: false};
+var $author$project$PaneLayoutManager$Pane1 = {$: 'Pane1'};
+var $author$project$PaneLayoutManager$defaultPaneContext = {activeView: $author$project$PaneLayoutManager$ViewInfo, mapContext: $elm$core$Maybe$Nothing, paneId: $author$project$PaneLayoutManager$Pane1, thirdPersonContext: $elm$core$Maybe$Nothing};
+var $author$project$PaneLayoutManager$defaultOptions = {pane1: $author$project$PaneLayoutManager$defaultPaneContext, pane2: $author$project$PaneLayoutManager$defaultPaneContext, pane3: $author$project$PaneLayoutManager$defaultPaneContext, pane4: $author$project$PaneLayoutManager$defaultPaneContext, paneLayout: $author$project$PaneLayoutManager$PanesOne, popupVisible: false};
 var $elm$core$Basics$pi = _Basics_pi;
 var $ianmackenzie$elm_units$Quantity$Quantity = function (a) {
 	return {$: 'Quantity', a: a};
@@ -9661,7 +9663,7 @@ var $author$project$Main$init = F3(
 				toolOptions: $author$project$ToolsController$defaultOptions,
 				track: $elm$core$Maybe$Nothing,
 				viewMapContext: $elm$core$Maybe$Nothing,
-				viewMode: $author$project$ViewContext$ViewInfo,
+				viewMode: $author$project$PaneLayoutManager$ViewInfo,
 				viewThirdPersonContext: $elm$core$Maybe$Nothing,
 				windowSize: _Utils_Tuple2(1000, 800),
 				zone: $elm$time$Time$utc
@@ -10124,7 +10126,7 @@ var $author$project$Main$ToolsMsg = function (a) {
 	return {$: 'ToolsMsg', a: a};
 };
 var $author$project$Actions$TrackHasChanged = {$: 'TrackHasChanged'};
-var $author$project$ViewContext$ViewThird = {$: 'ViewThird'};
+var $author$project$PaneLayoutManager$ViewThird = {$: 'ViewThird'};
 var $author$project$SplitPane$Bound$getValue = function (value) {
 	return value.a;
 };
@@ -17591,7 +17593,7 @@ var $author$project$Main$update = F2(
 							modalMessage: $elm$core$Maybe$Nothing,
 							track: $elm$core$Maybe$Just(newTrack),
 							viewMapContext: $elm$core$Maybe$Just($author$project$ViewMap$initialiseContext),
-							viewMode: _Utils_eq(model.viewMode, $author$project$ViewContext$ViewInfo) ? $author$project$ViewContext$ViewThird : model.viewMode,
+							viewMode: _Utils_eq(model.viewMode, $author$project$PaneLayoutManager$ViewInfo) ? $author$project$PaneLayoutManager$ViewThird : model.viewMode,
 							viewThirdPersonContext: $elm$core$Maybe$Just(
 								A3($author$project$ViewThirdPerson$initialiseView, 0, newTrack.trackTree, model.contentArea))
 						});
@@ -27119,7 +27121,7 @@ var $author$project$SplitPane$SplitPane$view = F4(
 var $author$project$Main$SetCurrentPosition = function (a) {
 	return {$: 'SetCurrentPosition', a: a};
 };
-var $author$project$ViewContext$ViewMap = {$: 'ViewMap'};
+var $author$project$PaneLayoutManager$ViewMap = {$: 'ViewMap'};
 var $author$project$ViewPureStyles$conditionallyVisible = F2(
 	function (test, element) {
 		return test ? A2($mdgriffith$elm_ui$Element$el, _List_Nil, element) : A2(
@@ -28982,11 +28984,11 @@ var $author$project$Main$viewModeChoices = function (model) {
 		[
 			A2(
 			$mdgriffith$elm_ui$Element$Input$optionWith,
-			$author$project$ViewContext$ViewThird,
+			$author$project$PaneLayoutManager$ViewThird,
 			$author$project$ViewPureStyles$radioButton('Third person')),
 			A2(
 			$mdgriffith$elm_ui$Element$Input$optionWith,
-			$author$project$ViewContext$ViewMap,
+			$author$project$PaneLayoutManager$ViewMap,
 			$author$project$ViewPureStyles$radioButton('Map'))
 		]);
 	return A2(
@@ -29085,7 +29087,7 @@ var $author$project$Main$contentArea = function (model) {
 						$author$project$Main$viewModeChoices(model),
 						A2(
 						$author$project$ViewPureStyles$conditionallyVisible,
-						!_Utils_eq(model.viewMode, $author$project$ViewContext$ViewMap),
+						!_Utils_eq(model.viewMode, $author$project$PaneLayoutManager$ViewMap),
 						function () {
 							var _v1 = _Utils_Tuple2(model.viewThirdPersonContext, model.track);
 							if ((_v1.a.$ === 'Just') && (_v1.b.$ === 'Just')) {
@@ -29098,7 +29100,7 @@ var $author$project$Main$contentArea = function (model) {
 						}()),
 						A2(
 						$author$project$ViewPureStyles$conditionallyVisible,
-						_Utils_eq(model.viewMode, $author$project$ViewContext$ViewMap),
+						_Utils_eq(model.viewMode, $author$project$PaneLayoutManager$ViewMap),
 						A2($author$project$ViewMap$view, model, $author$project$Main$MapPortsMessage))
 					])),
 				function () {
@@ -29267,6 +29269,68 @@ var $author$project$PaneLayoutManager$SetPaneLayout = function (a) {
 var $author$project$PaneLayoutManager$PanesGrid = {$: 'PanesGrid'};
 var $author$project$PaneLayoutManager$PanesLeftRight = {$: 'PanesLeftRight'};
 var $author$project$PaneLayoutManager$PanesUpperLower = {$: 'PanesUpperLower'};
+var $feathericons$elm_feather$FeatherIcons$columns = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'columns',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$path,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$d('M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7m0-18H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7m0-18v18')
+				]),
+			_List_Nil)
+		]));
+var $elm$svg$Svg$rect = $elm$svg$Svg$trustedNode('rect');
+var $elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
+var $elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
+var $feathericons$elm_feather$FeatherIcons$grid = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'grid',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$rect,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x('3'),
+					$elm$svg$Svg$Attributes$y('3'),
+					$elm$svg$Svg$Attributes$width('7'),
+					$elm$svg$Svg$Attributes$height('7')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$rect,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x('14'),
+					$elm$svg$Svg$Attributes$y('3'),
+					$elm$svg$Svg$Attributes$width('7'),
+					$elm$svg$Svg$Attributes$height('7')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$rect,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x('14'),
+					$elm$svg$Svg$Attributes$y('14'),
+					$elm$svg$Svg$Attributes$width('7'),
+					$elm$svg$Svg$Attributes$height('7')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$rect,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x('3'),
+					$elm$svg$Svg$Attributes$y('14'),
+					$elm$svg$Svg$Attributes$width('7'),
+					$elm$svg$Svg$Attributes$height('7')
+				]),
+			_List_Nil)
+		]));
 var $mdgriffith$elm_ui$Element$Input$white = A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1);
 var $mdgriffith$elm_ui$Element$Input$defaultRadioOption = F2(
 	function (optionLabel, status) {
@@ -29338,24 +29402,134 @@ var $mdgriffith$elm_ui$Element$Input$option = F2(
 			val,
 			$mdgriffith$elm_ui$Element$Input$defaultRadioOption(txt));
 	});
+var $elm$svg$Svg$Attributes$rx = _VirtualDom_attribute('rx');
+var $elm$svg$Svg$Attributes$ry = _VirtualDom_attribute('ry');
+var $feathericons$elm_feather$FeatherIcons$server = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'server',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$rect,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x('2'),
+					$elm$svg$Svg$Attributes$y('2'),
+					$elm$svg$Svg$Attributes$width('20'),
+					$elm$svg$Svg$Attributes$height('8'),
+					$elm$svg$Svg$Attributes$rx('2'),
+					$elm$svg$Svg$Attributes$ry('2')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$rect,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x('2'),
+					$elm$svg$Svg$Attributes$y('14'),
+					$elm$svg$Svg$Attributes$width('20'),
+					$elm$svg$Svg$Attributes$height('8'),
+					$elm$svg$Svg$Attributes$rx('2'),
+					$elm$svg$Svg$Attributes$ry('2')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x1('6'),
+					$elm$svg$Svg$Attributes$y1('6'),
+					$elm$svg$Svg$Attributes$x2('6.01'),
+					$elm$svg$Svg$Attributes$y2('6')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x1('6'),
+					$elm$svg$Svg$Attributes$y1('18'),
+					$elm$svg$Svg$Attributes$x2('6.01'),
+					$elm$svg$Svg$Attributes$y2('18')
+				]),
+			_List_Nil)
+		]));
+var $feathericons$elm_feather$FeatherIcons$square = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'square',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$rect,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x('3'),
+					$elm$svg$Svg$Attributes$y('3'),
+					$elm$svg$Svg$Attributes$width('18'),
+					$elm$svg$Svg$Attributes$height('18'),
+					$elm$svg$Svg$Attributes$rx('2'),
+					$elm$svg$Svg$Attributes$ry('2')
+				]),
+			_List_Nil)
+		]));
 var $author$project$PaneLayoutManager$optionList = _List_fromArray(
 	[
 		A2(
 		$mdgriffith$elm_ui$Element$Input$option,
 		$author$project$PaneLayoutManager$PanesOne,
-		$mdgriffith$elm_ui$Element$text('One big one')),
+		A2(
+			$mdgriffith$elm_ui$Element$row,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$spacing(20)
+				]),
+			_List_fromArray(
+				[
+					$author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$square),
+					$mdgriffith$elm_ui$Element$text('One big one')
+				]))),
 		A2(
 		$mdgriffith$elm_ui$Element$Input$option,
 		$author$project$PaneLayoutManager$PanesLeftRight,
-		$mdgriffith$elm_ui$Element$text('Wardrobe doors')),
+		A2(
+			$mdgriffith$elm_ui$Element$row,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$spacing(20)
+				]),
+			_List_fromArray(
+				[
+					$author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$columns),
+					$mdgriffith$elm_ui$Element$text('Wardrobe doors')
+				]))),
 		A2(
 		$mdgriffith$elm_ui$Element$Input$option,
 		$author$project$PaneLayoutManager$PanesUpperLower,
-		$mdgriffith$elm_ui$Element$text('Bunk beds')),
+		A2(
+			$mdgriffith$elm_ui$Element$row,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$spacing(20)
+				]),
+			_List_fromArray(
+				[
+					$author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$server),
+					$mdgriffith$elm_ui$Element$text('Bunk beds')
+				]))),
 		A2(
 		$mdgriffith$elm_ui$Element$Input$option,
 		$author$project$PaneLayoutManager$PanesGrid,
-		$mdgriffith$elm_ui$Element$text('Grid of four'))
+		A2(
+			$mdgriffith$elm_ui$Element$row,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$spacing(20)
+				]),
+			_List_fromArray(
+				[
+					$author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$grid),
+					$mdgriffith$elm_ui$Element$text('Grid of four')
+				])))
 	]);
 var $mdgriffith$elm_ui$Element$Input$Column = {$: 'Column'};
 var $mdgriffith$elm_ui$Element$Input$radio = $mdgriffith$elm_ui$Element$Input$radioHelper($mdgriffith$elm_ui$Element$Input$Column);

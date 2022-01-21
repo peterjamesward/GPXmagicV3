@@ -29,7 +29,7 @@ import MapPortController
 import MyIP
 import OAuthPorts as O exposing (randomBytes)
 import OAuthTypes as O exposing (OAuthMsg(..))
-import PaneLayoutManager
+import PaneLayoutManager exposing (ViewMode(..))
 import Pixels exposing (Pixels)
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
@@ -44,9 +44,8 @@ import ToolsController exposing (ToolEntry)
 import TrackLoaded exposing (TrackLoaded)
 import Url exposing (Url)
 import UtilsForViews exposing (colourHexString)
-import ViewContext exposing (ViewContext(..), ViewMode(..))
-import ViewContextThirdPerson exposing (ThirdPersonContext)
-import ViewMap exposing (MapContext)
+import ViewContextThirdPerson exposing (Context)
+import ViewMap exposing (Context)
 import ViewPureStyles exposing (commonLayoutStyles, conditionallyVisible, neatToolsBorder, radioButton, showModalMessage, sliderThumb)
 import ViewThirdPerson
 
@@ -90,8 +89,8 @@ type alias Model =
     -- Visuals
     , scene : List (Entity LocalCoords)
     , viewMode : ViewMode
-    , viewThirdPersonContext : Maybe ThirdPersonContext
-    , viewMapContext : Maybe MapContext
+    , viewThirdPersonContext : Maybe ViewContextThirdPerson.Context
+    , viewMapContext : Maybe ViewMap.Context
     , previews : Dict String PreviewData
 
     -- Layout stuff

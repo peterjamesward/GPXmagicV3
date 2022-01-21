@@ -7,8 +7,8 @@ BUG: Hit detect is poor on 304K course (!).
 # WIP
 
 ## Multiple views
-Selection on "Menu bar", needs graphics.
-PaneLayoutManager with PaneType and PaneLayout types.
+
+Move view stuff from Model into PaneLayoutManager.
 Responsible for layout and sizing (size pass in view functions).
 Not sure if panes toggle visibility or truly vanish, depends if it affects Map.
 Manager also displays the menu entry with popup.
@@ -55,7 +55,7 @@ I think the top bar is still special: Load, Save, Donate. Is it?
 Configurable background colour.
 
 ## Error messages
-Using an action DisplayMessage to show modal dialog. 
+Using an action DisplayMessage to show modal dialog from any tool.
 
 ## Plan view
 Same as before. Use 3d-scene. Orthographic camera.
@@ -89,18 +89,15 @@ Terrain 1 = Simple tree walk, in many cases will just work but not always.
 Terrain 2 = Tree walk combined with whole (visible) tree query, because <track loops>.
 (Expand bounding boxes to allow for road width.)
 
-## Rendering
+## Graduated Rendering
 Use a graduated drop off with distance, compute at each tree level?
 On Map, work out the depth to fit (say) 1000 points within visible region.
 > Done that in RTWI80D.
 > Not sure it's required.
 
-## Journal edits to indexedDB?
-Potential for recovery by replay.
-Possible aid to isolating and reproducing bugs.
-
 ## Memory usage monitoring
-Possibility: display warning when memory available is low 
+Possibility: display warning when memory available is low.
+Driven by periodic task (which disables itself if browser does not support).
 performance.memory.jsHeapSizeLimit
 performance.memory.usedJSHeapSize
 performance.memory.totalJSHeapSize
@@ -108,6 +105,10 @@ performance.memory.totalJSHeapSize
 ---
 
 # Parked (and probably abandoned)
+
+## Journal edits to indexedDB?
+Potential for recovery by replay.
+Possible aid to isolating and reproducing bugs.
 
 ## PeteTreeTraversor
 Data structure that keeps track of where you are in a tree.
