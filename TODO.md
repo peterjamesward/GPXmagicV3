@@ -2,20 +2,16 @@
 # BUGS (for an 'easy' day)
 
 BUG: Dubious steepest gradient on some routes. (May have to wait until we have that tool!)
-BUG: Hit detect is poor on 304K course (!).
+BUG: Hit detect is poor on 304K course (maybe not surprising but it should work).
+BUG: The initial map repaint not working in the new pane layout manager.
 
 # WIP
 
 ## Multiple views
 
--- In the middle of delegating from Model to PaneLayoutManager ...
+Next: Add other panes, and sort out the space distribution.
 
-Move view stuff from Model into PaneLayoutManager.
-Responsible for layout and sizing (size pass in view functions).
 Not sure if panes toggle visibility or truly vanish, depends if it affects Map.
-Manager also displays the menu entry with popup.
-
-NB featherIcons: grid, columns, server (!), square. (for now).
 
 ---
 
@@ -48,6 +44,7 @@ Map options tool?
 
 ## Tools
 
+All existing tools to move across, with some rationalisation.
 2-way drag should correct for azimuth.
 Pane payout choices as control?
 I think the top bar is still special: Load, Save, Donate. Is it?
@@ -55,7 +52,7 @@ I think the top bar is still special: Load, Save, Donate. Is it?
 
 ## Look and Feel
 Configurable background colour.
-Imperial measures.
+Imperial measures option.
 
 ## Error messages
 Using an action DisplayMessage to show modal dialog from any tool.
@@ -95,7 +92,6 @@ Terrain 2 = Tree walk combined with whole (visible) tree query, because <track l
 ## Graduated Rendering
 Use a graduated drop off with distance, compute at each tree level?
 On Map, work out the depth to fit (say) 1000 points within visible region.
-> Done that in RTWI80D.
 > Not sure it's required.
 
 ---

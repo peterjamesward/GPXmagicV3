@@ -177,7 +177,7 @@ update paneMsg msgWrapper mTrack contentArea options =
                     { pane1 | activeView = viewMode }
 
                 newOptions =
-                    { options | pane1 = pane1 }
+                    { options | pane1 = newPane1 }
             in
             ( newOptions, [ Actions.MapCenterOnCurrent ] )
 
@@ -262,9 +262,6 @@ viewModeChoices : (Msg -> msg) -> Options -> Element msg
 viewModeChoices msgWrapper options =
     let
         fullOptionList =
-            --[ Input.option ViewThird <| text "Third person"
-            --, Input.option ViewMap <| text "Map"
-            --]
             [ Input.optionWith ViewThird <| radioButton "Perspective"
             , Input.optionWith ViewMap <| radioButton "Map"
             ]
@@ -289,56 +286,52 @@ viewPanes :
     -> Element msg
 viewPanes msgWrapper mTrack scene ( w, h ) options =
     let
-        slider trackLength =
-            Input.slider
-                (ViewPureStyles.wideSliderStylesWithWidth w)
-                { onChange = round >> SetCurrentPosition >> msgWrapper
-                , value =
-                    case mTrack of
-                        Just track ->
-                            toFloat track.currentPosition
+        viewPaneZeroWithMap =
+            column
+                [ width fill
+                , alignTop
+                , centerX
+                ]
+                [ viewModeChoices msgWrapper options
+                , conditionallyVisible (options.pane1.activeView /= ViewMap) <|
+                    case ( options.pane1.thirdPersonContext, mTrack ) of
+                        ( Just context, Just track ) ->
+                            ViewThirdPerson.view
+                                context
+                                ( w, h )
+                                track
+                                scene
+                                (msgWrapper << ImageMessage Pane1)
 
-                        Nothing ->
-                            0.0
-                , label = Input.labelHidden "Current position slider"
-                , min = 0
-                , max = toFloat <| trackLength - 1
-                , step = Just 1
-                , thumb = sliderThumb
-                }
+                        _ ->
+                            none
+                , conditionallyVisible (options.pane1.activeView == ViewMap) <|
+                    ViewMap.view ( w, h ) (msgWrapper << MapPortsMessage)
+                ]
+
+        slider =
+            case mTrack of
+                Just track ->
+                    el [ centerX ] <|
+                        Input.slider
+                            (ViewPureStyles.wideSliderStylesWithWidth w)
+                            { onChange = round >> SetCurrentPosition >> msgWrapper
+                            , value = toFloat track.currentPosition
+                            , label = Input.labelHidden "Current position slider"
+                            , min = 0
+                            , max = toFloat <| skipCount track.trackTree
+                            , step = Just 1
+                            , thumb = sliderThumb
+                            }
+
+                Nothing ->
+                    none
     in
-    -- NOTE that the Map DIV must be constructed once only, or the map gets upset.
+    -- The Map DIV must be constructed once only, even before we have a Track, or the map gets upset.
     column
-        [ width <| E.px <| Pixels.inPixels w
-        , height <| E.px <| Pixels.inPixels h
-        , alignTop
-        , centerX
+        [ alignTop
+        , width fill
         ]
-        [ column
-            [ width fill
-            , alignTop
-            , centerX
-            ]
-            [ viewModeChoices msgWrapper options
-            , conditionallyVisible (options.pane1.activeView /= ViewMap) <|
-                case ( options.pane1.thirdPersonContext, mTrack ) of
-                    ( Just context, Just track ) ->
-                        ViewThirdPerson.view
-                            context
-                            ( w, h )
-                            track
-                            scene
-                            (msgWrapper << ImageMessage Pane1)
-
-                    _ ->
-                        none
-            , conditionallyVisible (options.pane1.activeView == ViewMap) <|
-                ViewMap.view ( w, h ) (msgWrapper << MapPortsMessage)
-            ]
-        , case mTrack of
-            Just track ->
-                el [ centerX ] <| slider <| 1 + skipCount track.trackTree
-
-            Nothing ->
-                none
+        [ wrappedRow [ centerX, width fill ] [ viewPaneZeroWithMap ]
+        , slider
         ]

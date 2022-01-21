@@ -16489,7 +16489,7 @@ var $author$project$PaneLayoutManager$update = F5(
 					{activeView: viewMode});
 				var newOptions = _Utils_update(
 					options,
-					{pane1: pane1});
+					{pane1: newPane1});
 				return _Utils_Tuple2(
 					newOptions,
 					_List_fromArray(
@@ -27378,13 +27378,13 @@ var $author$project$ViewPureStyles$conditionallyVisible = F2(
 				]),
 			element);
 	});
+var $mdgriffith$elm_ui$Internal$Model$Left = {$: 'Left'};
+var $mdgriffith$elm_ui$Element$alignLeft = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Left);
+var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
 var $ianmackenzie$elm_units$Pixels$inPixels = function (_v0) {
 	var numPixels = _v0.a;
 	return numPixels;
 };
-var $mdgriffith$elm_ui$Internal$Model$Left = {$: 'Left'};
-var $mdgriffith$elm_ui$Element$alignLeft = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Left);
-var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
 var $mdgriffith$elm_ui$Internal$Model$MoveX = function (a) {
 	return {$: 'MoveX', a: a};
 };
@@ -29286,99 +29286,92 @@ var $author$project$PaneLayoutManager$viewPanes = F5(
 	function (msgWrapper, mTrack, scene, _v0, options) {
 		var w = _v0.a;
 		var h = _v0.b;
-		var slider = function (trackLength) {
-			return A2(
-				$mdgriffith$elm_ui$Element$Input$slider,
-				$author$project$ViewPureStyles$wideSliderStylesWithWidth(w),
-				{
-					label: $mdgriffith$elm_ui$Element$Input$labelHidden('Current position slider'),
-					max: trackLength - 1,
-					min: 0,
-					onChange: A2(
-						$elm$core$Basics$composeR,
-						$elm$core$Basics$round,
-						A2($elm$core$Basics$composeR, $author$project$PaneLayoutManager$SetCurrentPosition, msgWrapper)),
-					step: $elm$core$Maybe$Just(1),
-					thumb: $author$project$ViewPureStyles$sliderThumb,
-					value: function () {
-						if (mTrack.$ === 'Just') {
-							var track = mTrack.a;
-							return track.currentPosition;
-						} else {
-							return 0.0;
-						}
-					}()
-				});
-		};
-		return A2(
+		var viewPaneZeroWithMap = A2(
 			$mdgriffith$elm_ui$Element$column,
 			_List_fromArray(
 				[
-					$mdgriffith$elm_ui$Element$width(
-					$mdgriffith$elm_ui$Element$px(
-						$ianmackenzie$elm_units$Pixels$inPixels(w))),
-					$mdgriffith$elm_ui$Element$height(
-					$mdgriffith$elm_ui$Element$px(
-						$ianmackenzie$elm_units$Pixels$inPixels(h))),
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 					$mdgriffith$elm_ui$Element$alignTop,
 					$mdgriffith$elm_ui$Element$centerX
 				]),
 			_List_fromArray(
 				[
+					A2($author$project$PaneLayoutManager$viewModeChoices, msgWrapper, options),
 					A2(
-					$mdgriffith$elm_ui$Element$column,
+					$author$project$ViewPureStyles$conditionallyVisible,
+					!_Utils_eq(options.pane1.activeView, $author$project$PaneLayoutManager$ViewMap),
+					function () {
+						var _v2 = _Utils_Tuple2(options.pane1.thirdPersonContext, mTrack);
+						if ((_v2.a.$ === 'Just') && (_v2.b.$ === 'Just')) {
+							var context = _v2.a.a;
+							var track = _v2.b.a;
+							return A5(
+								$author$project$ViewThirdPerson$view,
+								context,
+								_Utils_Tuple2(w, h),
+								track,
+								scene,
+								A2(
+									$elm$core$Basics$composeL,
+									msgWrapper,
+									$author$project$PaneLayoutManager$ImageMessage($author$project$PaneLayoutManager$Pane1)));
+						} else {
+							return $mdgriffith$elm_ui$Element$none;
+						}
+					}()),
+					A2(
+					$author$project$ViewPureStyles$conditionallyVisible,
+					_Utils_eq(options.pane1.activeView, $author$project$PaneLayoutManager$ViewMap),
+					A2(
+						$author$project$ViewMap$view,
+						_Utils_Tuple2(w, h),
+						A2($elm$core$Basics$composeL, msgWrapper, $author$project$PaneLayoutManager$MapPortsMessage)))
+				]));
+		var slider = function () {
+			if (mTrack.$ === 'Just') {
+				var track = mTrack.a;
+				return A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[$mdgriffith$elm_ui$Element$centerX]),
+					A2(
+						$mdgriffith$elm_ui$Element$Input$slider,
+						$author$project$ViewPureStyles$wideSliderStylesWithWidth(w),
+						{
+							label: $mdgriffith$elm_ui$Element$Input$labelHidden('Current position slider'),
+							max: $author$project$DomainModel$skipCount(track.trackTree),
+							min: 0,
+							onChange: A2(
+								$elm$core$Basics$composeR,
+								$elm$core$Basics$round,
+								A2($elm$core$Basics$composeR, $author$project$PaneLayoutManager$SetCurrentPosition, msgWrapper)),
+							step: $elm$core$Maybe$Just(1),
+							thumb: $author$project$ViewPureStyles$sliderThumb,
+							value: track.currentPosition
+						}));
+			} else {
+				return $mdgriffith$elm_ui$Element$none;
+			}
+		}();
+		return A2(
+			$mdgriffith$elm_ui$Element$column,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$alignTop,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$wrappedRow,
 					_List_fromArray(
 						[
-							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-							$mdgriffith$elm_ui$Element$alignTop,
-							$mdgriffith$elm_ui$Element$centerX
+							$mdgriffith$elm_ui$Element$centerX,
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
 						]),
 					_List_fromArray(
-						[
-							A2($author$project$PaneLayoutManager$viewModeChoices, msgWrapper, options),
-							A2(
-							$author$project$ViewPureStyles$conditionallyVisible,
-							!_Utils_eq(options.pane1.activeView, $author$project$PaneLayoutManager$ViewMap),
-							function () {
-								var _v1 = _Utils_Tuple2(options.pane1.thirdPersonContext, mTrack);
-								if ((_v1.a.$ === 'Just') && (_v1.b.$ === 'Just')) {
-									var context = _v1.a.a;
-									var track = _v1.b.a;
-									return A5(
-										$author$project$ViewThirdPerson$view,
-										context,
-										_Utils_Tuple2(w, h),
-										track,
-										scene,
-										A2(
-											$elm$core$Basics$composeL,
-											msgWrapper,
-											$author$project$PaneLayoutManager$ImageMessage($author$project$PaneLayoutManager$Pane1)));
-								} else {
-									return $mdgriffith$elm_ui$Element$none;
-								}
-							}()),
-							A2(
-							$author$project$ViewPureStyles$conditionallyVisible,
-							_Utils_eq(options.pane1.activeView, $author$project$PaneLayoutManager$ViewMap),
-							A2(
-								$author$project$ViewMap$view,
-								_Utils_Tuple2(w, h),
-								A2($elm$core$Basics$composeL, msgWrapper, $author$project$PaneLayoutManager$MapPortsMessage)))
-						])),
-					function () {
-					if (mTrack.$ === 'Just') {
-						var track = mTrack.a;
-						return A2(
-							$mdgriffith$elm_ui$Element$el,
-							_List_fromArray(
-								[$mdgriffith$elm_ui$Element$centerX]),
-							slider(
-								1 + $author$project$DomainModel$skipCount(track.trackTree)));
-					} else {
-						return $mdgriffith$elm_ui$Element$none;
-					}
-				}()
+						[viewPaneZeroWithMap])),
+					slider
 				]));
 	});
 var $author$project$Main$viewPaneArea = function (model) {
