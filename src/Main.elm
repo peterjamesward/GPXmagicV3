@@ -29,7 +29,7 @@ import MapPortController
 import MyIP
 import OAuthPorts as O exposing (randomBytes)
 import OAuthTypes as O exposing (OAuthMsg(..))
-import PaneLayoutManager exposing (ViewMode(..))
+import PaneLayoutManager exposing (Msg(..), ViewMode(..))
 import Pixels exposing (Pixels)
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
@@ -44,10 +44,7 @@ import ToolsController exposing (ToolEntry)
 import TrackLoaded exposing (TrackLoaded)
 import Url exposing (Url)
 import UtilsForViews exposing (colourHexString)
-import ViewContextThirdPerson exposing (Context)
-import ViewMap exposing (Context)
-import ViewPureStyles exposing (commonLayoutStyles, conditionallyVisible, neatToolsBorder, radioButton, showModalMessage, sliderThumb)
-import ViewThirdPerson
+import ViewPureStyles exposing (..)
 
 
 type Msg
@@ -57,12 +54,8 @@ type Msg
     | OAuthMessage OAuthMsg
     | AdjustTimeZone Time.Zone
     | SetRenderDepth Int
-    | SetCurrentPosition Int
-    | SetViewMode ViewMode
     | ReceivedIpDetails (Result Http.Error IpInfo)
     | IpInfoAcknowledged (Result Http.Error ())
-    | ImageMessage ViewThirdPerson.Msg
-    | MapPortsMessage MapPortController.MapMsg
     | StorageMessage E.Value
     | SplitLeftDockRightEdge SplitPane.Msg
     | SplitLeftDockInternal SplitPane.Msg
@@ -89,9 +82,6 @@ type alias Model =
 
     -- Visuals
     , scene : List (Entity LocalCoords)
-    , viewMode : ViewMode
-    , viewThirdPersonContext : Maybe ViewContextThirdPerson.Context
-    , viewMapContext : Maybe ViewMap.Context
     , previews : Dict String PreviewData
 
     -- Layout stuff
@@ -204,9 +194,6 @@ init mflags origin navigationKey =
       , track = Nothing
       , scene = []
       , previews = Dict.empty
-      , viewMode = ViewInfo
-      , viewThirdPersonContext = Nothing
-      , viewMapContext = Nothing
       , windowSize = ( 1000, 800 )
       , contentArea = ( Pixels.pixels 800, Pixels.pixels 500 )
       , modalMessage = Nothing
@@ -270,21 +257,6 @@ update msg model =
             ( { model | modalMessage = Nothing }
             , Cmd.none
             )
-
-        MapPortsMessage mapMsg ->
-            case model.track of
-                Just track ->
-                    let
-                        actions =
-                            MapPortController.update mapMsg track
-
-                        newModel =
-                            performActionsOnModel actions model
-                    in
-                    ( newModel, performActionCommands actions model )
-
-                Nothing ->
-                    ( model, Cmd.none )
 
         ReceivedIpDetails response ->
             let
@@ -356,19 +328,10 @@ update msg model =
                         modelWithTrack =
                             { model
                                 | track = Just newTrack
-                                , viewThirdPersonContext =
-                                    Just <|
-                                        ViewThirdPerson.initialiseView
-                                            0
-                                            newTrack.trackTree
-                                            model.contentArea
-                                , viewMapContext = Just ViewMap.initialiseContext
-                                , viewMode =
-                                    if model.viewMode == ViewInfo then
-                                        ViewThird
-
-                                    else
-                                        model.viewMode
+                                , paneLayoutOptions =
+                                    PaneLayoutManager.initialise
+                                        newTrack
+                                        model.paneLayoutOptions
                                 , modalMessage = Nothing
                             }
 
@@ -420,58 +383,6 @@ Please check the file contains GPX data.""" }
             ( { model | stravaAuthentication = newAuthData }
             , Cmd.map OAuthMessage authCmd
             )
-
-        SetCurrentPosition pos ->
-            -- Slider moves pointer and re-centres view.
-            -- The actions will re-render and repaint the map.
-            -- TODO: Make this into Pointers tool.
-            let
-                actions =
-                    [ SetCurrent pos, TrackHasChanged, MapCenterOnCurrent ]
-
-                modelAfterActions =
-                    performActionsOnModel actions model
-            in
-            ( modelAfterActions
-            , performActionCommands actions modelAfterActions
-            )
-
-        SetViewMode viewMode ->
-            case model.track of
-                Just track ->
-                    let
-                        newModel =
-                            { model | viewMode = viewMode }
-                    in
-                    ( newModel, showTrackOnMapCentered track )
-
-                Nothing ->
-                    ( model, Cmd.none )
-
-        ImageMessage imageMsg ->
-            case model.track of
-                Just track ->
-                    let
-                        ( newContext, actions ) =
-                            case model.viewThirdPersonContext of
-                                Just third ->
-                                    let
-                                        ( new, act ) =
-                                            ViewThirdPerson.update imageMsg ImageMessage track third
-                                    in
-                                    ( Just new, act )
-
-                                Nothing ->
-                                    ( Nothing, [] )
-
-                        newModel =
-                            { model | viewThirdPersonContext = newContext }
-                                |> performActionsOnModel actions
-                    in
-                    ( newModel, performActionCommands actions model )
-
-                Nothing ->
-                    ( model, Cmd.none )
 
         StorageMessage json ->
             let
@@ -578,19 +489,24 @@ Please check the file contains GPX data.""" }
 
         PaneMsg paneMsg ->
             let
-                newOptions =
-                    PaneLayoutManager.update paneMsg PaneMsg model.paneLayoutOptions
+                ( newOptions, actions ) =
+                    PaneLayoutManager.update
+                        paneMsg
+                        PaneMsg
+                        model.track
+                        model.contentArea
+                        model.paneLayoutOptions
 
                 newModel =
                     { model | paneLayoutOptions = newOptions }
+                        |> performActionsOnModel actions
             in
             ( newModel
-            , Cmd.none
+            , performActionCommands actions newModel
             )
 
         TenSecondTicker posixTime ->
             ( model, LocalStorage.storageGetMemoryUsage )
-
 
 
 allocateSpaceForDocksAndContent : Int -> Int -> Model -> Model
@@ -833,7 +749,12 @@ viewPaneArea model =
     layoutWith { options = [ noStaticStyleSheet ] }
         commonLayoutStyles
     <|
-        contentArea model
+        PaneLayoutManager.viewPanes
+            PaneMsg
+            model.track
+            model.scene
+            model.contentArea
+            model.paneLayoutOptions
 
 
 topLoadingBar model =
@@ -861,94 +782,11 @@ topLoadingBar model =
         ]
 
 
-viewModeChoices : Model -> Element Msg
-viewModeChoices model =
-    let
-        fullOptionList =
-            --[ Input.option ViewThird <| text "Third person"
-            --, Input.option ViewMap <| text "Map"
-            --]
-            [ Input.optionWith ViewThird <| radioButton "Third person"
-            , Input.optionWith ViewMap <| radioButton "Map"
-            ]
-    in
-    Input.radioRow
-        [ spacing 5
-        , padding 5
-        ]
-        { onChange = SetViewMode
-        , selected = Just model.viewMode
-        , label = Input.labelHidden "Choose view"
-        , options = fullOptionList
-        }
-
-
-contentArea : Model -> Element Msg
-contentArea model =
-    let
-        ( w, h ) =
-            model.contentArea
-
-        slider trackLength =
-            Input.slider
-                (ViewPureStyles.wideSliderStylesWithWidth w)
-                { onChange = round >> SetCurrentPosition
-                , value =
-                    case model.track of
-                        Just track ->
-                            toFloat track.currentPosition
-
-                        Nothing ->
-                            0.0
-                , label = Input.labelHidden "Current position slider"
-                , min = 0
-                , max = toFloat <| trackLength - 1
-                , step = Just 1
-                , thumb = sliderThumb
-                }
-    in
-    -- NOTE that the Map DIV must be constructed once only, or the map gets upset.
-    column
-        [ width <| Element.px <| Pixels.inPixels w
-        , height <| Element.px <| Pixels.inPixels h
-        , alignTop
-        , centerX
-        ]
-        [ column
-            [ width fill
-            , alignTop
-            , centerX
-            ]
-            [ viewModeChoices model
-            , conditionallyVisible (model.viewMode /= ViewMap) <|
-                case ( model.viewThirdPersonContext, model.track ) of
-                    ( Just context, Just track ) ->
-                        ViewThirdPerson.view
-                            context
-                            model.contentArea
-                            track
-                            model.scene
-                            ImageMessage
-
-                    _ ->
-                        none
-            , conditionallyVisible (model.viewMode == ViewMap) <|
-                ViewMap.view model MapPortsMessage
-            ]
-        , case model.track of
-            Just track ->
-                el [ centerX ] <| slider <| 1 + skipCount track.trackTree
-
-            Nothing ->
-                none
-        ]
-
-
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ randomBytes (\ints -> OAuthMessage (GotRandomBytes ints))
-        , MapPortController.mapResponses (MapPortsMessage << MapPortController.MapPortMessage)
+        , MapPortController.mapResponses (PaneMsg << MapPortsMessage << MapPortController.MapPortMessage)
         , LocalStorage.storageResponses StorageMessage
         , Sub.map SplitLeftDockRightEdge <| SplitPane.subscriptions model.leftDockRightEdge
         , Sub.map SplitLeftDockInternal <| SplitPane.subscriptions model.leftDockInternal
@@ -1059,11 +897,7 @@ performActionsOnModel actions model =
 
                 ( HeapStatusUpdate heapStatus, _ ) ->
                     --TODO: Make a tool for these values, but meanwhile...
-                    if (toFloat heapStatus.usedJSHeapSize / toFloat heapStatus.jsHeapSizeLimit) > 0.8 then
-                        { foldedModel | modalMessage = Just "Memory low, please save." }
-
-                    else
-                        foldedModel
+                    foldedModel
 
                 ( UndoLastAction, Just track ) ->
                     { foldedModel | track = Just <| TrackLoaded.undoLastAction track }

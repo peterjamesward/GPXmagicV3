@@ -24,17 +24,11 @@ initialiseContext =
 
 
 view :
-    { model
-        | contentArea : ( Quantity Int Pixels, Quantity Int Pixels )
-        , track : Maybe (TrackLoaded msg)
-    }
+    ( Quantity Int Pixels, Quantity Int Pixels )
     -> (MapPortController.MapMsg -> msg)
     -> Element msg
-view model msgWrapper =
+view ( viewWidth, viewHeight ) msgWrapper  =
     let
-        ( viewWidth, viewHeight ) =
-            model.contentArea
-
         handyMapControls =
             column
                 [ alignTop

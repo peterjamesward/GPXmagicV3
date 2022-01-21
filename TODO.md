@@ -8,6 +8,8 @@ BUG: Hit detect is poor on 304K course (!).
 
 ## Multiple views
 
+-- In the middle of delegating from Model to PaneLayoutManager ...
+
 Move view stuff from Model into PaneLayoutManager.
 Responsible for layout and sizing (size pass in view functions).
 Not sure if panes toggle visibility or truly vanish, depends if it affects Map.
@@ -95,13 +97,6 @@ Use a graduated drop off with distance, compute at each tree level?
 On Map, work out the depth to fit (say) 1000 points within visible region.
 > Done that in RTWI80D.
 > Not sure it's required.
-
-## Memory usage monitoring
-Possibility: display warning when memory available is low.
-Driven by periodic task (which disables itself if browser does not support).
-performance.memory.jsHeapSizeLimit
-performance.memory.usedJSHeapSize
-performance.memory.totalJSHeapSize
 
 ---
 

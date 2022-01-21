@@ -29,7 +29,4 @@ type alias Context =
     , focalPoint : EarthPoint
     , waitingForClickDelay : Bool
     , followSelectedPoint : Bool
-
-    -- Not happy with this one...
-    , contentArea : ( Quantity Int Pixels, Quantity Int Pixels )
     }

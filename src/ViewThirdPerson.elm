@@ -30,7 +30,7 @@ import Scene3d exposing (Entity, backgroundColor)
 import Spherical
 import TrackLoaded exposing (TrackLoaded)
 import Vector3d
-import ViewContextThirdPerson exposing (DragAction(..), Context)
+import ViewContextThirdPerson exposing (Context, DragAction(..))
 import ViewPureStyles exposing (useIcon)
 import Viewpoint3d exposing (Viewpoint3d)
 
@@ -174,16 +174,14 @@ deriveCamera treeNode context currentPosition =
 detectHit :
     Mouse.Event
     -> TrackLoaded msg
+    -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Context
     -> Int
-detectHit event track context =
+detectHit event track ( w, h ) context =
     --TODO: Move into view/pane/whatever it will be.
     let
         ( x, y ) =
             event.offsetPos
-
-        ( w, h ) =
-            context.contentArea
 
         screenPoint =
             Point2d.pixels x y
@@ -210,9 +208,10 @@ update :
     Msg
     -> (Msg -> msg)
     -> TrackLoaded msg
+    -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Context
     -> ( Context, List (ToolAction msg) )
-update msg msgWrapper track context =
+update msg msgWrapper track area context =
     case msg of
         ImageZoomIn ->
             let
@@ -229,7 +228,7 @@ update msg msgWrapper track context =
             ( newContext, [] )
 
         ImageReset ->
-            ( initialiseView track.currentPosition track.trackTree context.contentArea
+            ( initialiseView track.currentPosition track.trackTree
             , []
             )
 
@@ -240,7 +239,7 @@ update msg msgWrapper track context =
             -- Click moves pointer but does not re-centre view. (Double click will.)
             if context.waitingForClickDelay then
                 ( context
-                , [ SetCurrent <| detectHit event track context
+                , [ SetCurrent <| detectHit event track area context
                   , TrackHasChanged
                   ]
                 )
@@ -363,9 +362,8 @@ update msg msgWrapper track context =
 initialiseView :
     Int
     -> PeteTree
-    -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Context
-initialiseView current treeNode viewSize =
+initialiseView current treeNode =
     { cameraAzimuth = Direction2d.x
     , cameraElevation = Angle.degrees 30
     , cameraDistance = Length.kilometers 10
@@ -378,5 +376,4 @@ initialiseView current treeNode viewSize =
         treeNode |> leafFromIndex current |> startPoint
     , waitingForClickDelay = False
     , followSelectedPoint = True
-    , contentArea = viewSize
     }
