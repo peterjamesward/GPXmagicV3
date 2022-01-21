@@ -308,11 +308,7 @@ function makeTheMap(msg) {
 
         });
 
-        setTimeout(function()
-          {
-            map.resize();
-          }, 50);
-
+        setTimeout(function() { map.resize(); }, 50);
 
     } else {
         //No 'map' node, we have to keep checking.
@@ -372,10 +368,7 @@ function addLineToMap(data, points) {
       { 'msg' : 'track ready' }
     );
 
-    setTimeout(function()
-      {
-        map.resize();
-      }, 50);
+    setTimeout(function() { map.resize(); }, 50);
 };
 
 function setClickMode(newMode, points) {
@@ -452,11 +445,7 @@ function addOptionals(msg) {
             .addTo(map);
     };
 
-    setTimeout(function()
-      {
-        map.resize();
-      }, 50);
-
+    setTimeout(function() { map.resize(); }, 50);
 };
 
     //    E.object

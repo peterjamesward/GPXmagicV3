@@ -27363,6 +27363,7 @@ var $author$project$SplitPane$SplitPane$view = F4(
 						[secondView]))
 				]));
 	});
+var $author$project$PaneLayoutManager$Pane2 = {$: 'Pane2'};
 var $author$project$PaneLayoutManager$SetCurrentPosition = function (a) {
 	return {$: 'SetCurrentPosition', a: a};
 };
@@ -27378,6 +27379,7 @@ var $author$project$ViewPureStyles$conditionallyVisible = F2(
 				]),
 			element);
 	});
+var $mdgriffith$elm_ui$Element$scrollbars = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$overflow, $mdgriffith$elm_ui$Internal$Style$classes.scrollbars);
 var $mdgriffith$elm_ui$Internal$Model$Left = {$: 'Left'};
 var $mdgriffith$elm_ui$Element$alignLeft = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Left);
 var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
@@ -29254,6 +29256,32 @@ var $author$project$PaneLayoutManager$viewModeChoices = F2(
 				selected: $elm$core$Maybe$Just(options.pane1.activeView)
 			});
 	});
+var $author$project$PaneLayoutManager$viewModeChoicesNoMap = F3(
+	function (msgWrapper, paneId, settings) {
+		var reducedOptionList = _List_fromArray(
+			[
+				A2(
+				$mdgriffith$elm_ui$Element$Input$optionWith,
+				$author$project$PaneLayoutManager$ViewThird,
+				$author$project$ViewPureStyles$radioButton('Perspective'))
+			]);
+		return A2(
+			$mdgriffith$elm_ui$Element$Input$radioRow,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$spacing(5),
+					$mdgriffith$elm_ui$Element$padding(5)
+				]),
+			{
+				label: $mdgriffith$elm_ui$Element$Input$labelHidden('Choose view'),
+				onChange: A2(
+					$elm$core$Basics$composeL,
+					msgWrapper,
+					$author$project$PaneLayoutManager$SetViewMode(paneId)),
+				options: reducedOptionList,
+				selected: $elm$core$Maybe$Just(settings.activeView)
+			});
+	});
 var $author$project$ViewPureStyles$wideSliderStylesWithWidth = function (w) {
 	var usedWidth = $elm$core$Basics$round(
 		0.8 * $ianmackenzie$elm_units$Pixels$toInt(w));
@@ -29301,10 +29329,10 @@ var $author$project$PaneLayoutManager$viewPanes = F5(
 					$author$project$ViewPureStyles$conditionallyVisible,
 					!_Utils_eq(options.pane1.activeView, $author$project$PaneLayoutManager$ViewMap),
 					function () {
-						var _v2 = _Utils_Tuple2(options.pane1.thirdPersonContext, mTrack);
-						if ((_v2.a.$ === 'Just') && (_v2.b.$ === 'Just')) {
-							var context = _v2.a.a;
-							var track = _v2.b.a;
+						var _v3 = _Utils_Tuple2(options.pane1.thirdPersonContext, mTrack);
+						if ((_v3.a.$ === 'Just') && (_v3.b.$ === 'Just')) {
+							var context = _v3.a.a;
+							var track = _v3.b.a;
 							return A5(
 								$author$project$ViewThirdPerson$view,
 								context,
@@ -29327,6 +29355,40 @@ var $author$project$PaneLayoutManager$viewPanes = F5(
 						_Utils_Tuple2(w, h),
 						A2($elm$core$Basics$composeL, msgWrapper, $author$project$PaneLayoutManager$MapPortsMessage)))
 				]));
+		var viewPaneNoMap = F2(
+			function (paneId, paneSettings) {
+				return A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$alignTop,
+							$mdgriffith$elm_ui$Element$centerX
+						]),
+					_List_fromArray(
+						[
+							A3($author$project$PaneLayoutManager$viewModeChoicesNoMap, msgWrapper, paneId, paneSettings),
+							function () {
+							var _v2 = _Utils_Tuple2(options.pane2.thirdPersonContext, mTrack);
+							if ((_v2.a.$ === 'Just') && (_v2.b.$ === 'Just')) {
+								var context = _v2.a.a;
+								var track = _v2.b.a;
+								return A5(
+									$author$project$ViewThirdPerson$view,
+									context,
+									_Utils_Tuple2(w, h),
+									track,
+									scene,
+									A2(
+										$elm$core$Basics$composeL,
+										msgWrapper,
+										$author$project$PaneLayoutManager$ImageMessage(paneId)));
+							} else {
+								return $mdgriffith$elm_ui$Element$none;
+							}
+						}()
+						]));
+			});
 		var slider = function () {
 			if (mTrack.$ === 'Just') {
 				var track = mTrack.a;
@@ -29358,7 +29420,8 @@ var $author$project$PaneLayoutManager$viewPanes = F5(
 			_List_fromArray(
 				[
 					$mdgriffith$elm_ui$Element$alignTop,
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$scrollbars
 				]),
 			_List_fromArray(
 				[
@@ -29370,7 +29433,10 @@ var $author$project$PaneLayoutManager$viewPanes = F5(
 							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
 						]),
 					_List_fromArray(
-						[viewPaneZeroWithMap])),
+						[
+							viewPaneZeroWithMap,
+							A2(viewPaneNoMap, $author$project$PaneLayoutManager$Pane2, options.pane2)
+						])),
 					slider
 				]));
 	});

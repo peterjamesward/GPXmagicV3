@@ -276,6 +276,23 @@ viewModeChoices msgWrapper options =
         , options = fullOptionList
         }
 
+viewModeChoicesNoMap : (Msg -> msg) -> PaneId -> PaneContext -> Element msg
+viewModeChoicesNoMap msgWrapper paneId settings =
+    let
+        reducedOptionList =
+            [ Input.optionWith ViewThird <| radioButton "Perspective"
+            ]
+    in
+    Input.radioRow
+        [ spacing 5
+        , padding 5
+        ]
+        { onChange = msgWrapper << SetViewMode paneId
+        , selected = Just settings.activeView
+        , label = Input.labelHidden "Choose view"
+        , options = reducedOptionList
+        }
+
 
 viewPanes :
     (Msg -> msg)
@@ -309,6 +326,27 @@ viewPanes msgWrapper mTrack scene ( w, h ) options =
                     ViewMap.view ( w, h ) (msgWrapper << MapPortsMessage)
                 ]
 
+        viewPaneNoMap paneId paneSettings =
+            column
+                [ width fill
+                , alignTop
+                , centerX
+                ]
+                [ viewModeChoicesNoMap msgWrapper paneId paneSettings
+                --TODO: Factor out this next call.
+                ,   case ( options.pane2.thirdPersonContext, mTrack ) of
+                        ( Just context, Just track ) ->
+                            ViewThirdPerson.view
+                                context
+                                ( w, h )
+                                track
+                                scene
+                                (msgWrapper << ImageMessage paneId)
+
+                        _ ->
+                            none
+                ]
+
         slider =
             case mTrack of
                 Just track ->
@@ -328,10 +366,10 @@ viewPanes msgWrapper mTrack scene ( w, h ) options =
                     none
     in
     -- The Map DIV must be constructed once only, even before we have a Track, or the map gets upset.
-    column
-        [ alignTop
-        , width fill
-        ]
-        [ wrappedRow [ centerX, width fill ] [ viewPaneZeroWithMap ]
+    column [ alignTop, width fill, scrollbars ]
+        [ wrappedRow [ centerX, width fill ]
+            [ viewPaneZeroWithMap
+            , viewPaneNoMap Pane2 options.pane2
+            ]
         , slider
         ]
