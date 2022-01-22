@@ -12,13 +12,6 @@ BUG: Hit detect is poor on 304K course (maybe not surprising but it should work)
 
 Make **DragPan** work on 3D view.
 
-Third person click should not re-centre the view.
-> Does so now because we are in "follow" mode.
-
-Double-click, in contrast, always centres.
-> More generally, don't centre _the view you click on_.
-> Other views should centre when in "follow" mode.
-
 Put all Font, Colour etc into a Palette/Style module for ease of change.
 
 Need "restore to defaults" for tools.
@@ -29,10 +22,11 @@ Details in Backlog.
 ## Map
 Add non-draggable track point circles, in separate layer we can turn on and off
 to replace by draggables when that control is open.
+Try to reduce repaints on moving pointer. Could we be lazy? Only repaint on slider thumb release? 
 
 Map options tool? 
-- Map style
-- Map follow orange pointer
+- Map style (outdoor, satellite)
+- Map follow orange pointer or not
 - Draggable points
 
 ## Tools

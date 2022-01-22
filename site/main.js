@@ -10275,7 +10275,7 @@ var $author$project$ViewMap$initialiseContext = {
 	lastMapClick: _Utils_Tuple2(0, 0),
 	mapClickDebounce: false
 };
-var $author$project$ViewContextThirdPerson$DragNone = {$: 'DragNone'};
+var $author$project$ViewThirdPerson$DragNone = {$: 'DragNone'};
 var $ianmackenzie$elm_units$Length$meters = function (numMeters) {
 	return $ianmackenzie$elm_units$Quantity$Quantity(numMeters);
 };
@@ -10343,11 +10343,11 @@ var $author$project$ViewThirdPerson$initialiseView = F2(
 			cameraDistance: $ianmackenzie$elm_units$Length$kilometers(10),
 			cameraElevation: $ianmackenzie$elm_units$Angle$degrees(30),
 			defaultZoomLevel: 10.0,
-			dragAction: $author$project$ViewContextThirdPerson$DragNone,
+			dragAction: $author$project$ViewThirdPerson$DragNone,
 			fieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
 			focalPoint: $author$project$DomainModel$startPoint(
 				A2($author$project$DomainModel$leafFromIndex, current, treeNode)),
-			followSelectedPoint: true,
+			followSelectedPoint: false,
 			orbiting: $elm$core$Maybe$Nothing,
 			waitingForClickDelay: false,
 			zoomLevel: 10.0
@@ -15378,8 +15378,8 @@ var $author$project$Actions$DelayMessage = F2(
 	function (a, b) {
 		return {$: 'DelayMessage', a: a, b: b};
 	});
-var $author$project$ViewContextThirdPerson$DragPan = {$: 'DragPan'};
-var $author$project$ViewContextThirdPerson$DragRotate = {$: 'DragRotate'};
+var $author$project$ViewThirdPerson$DragPan = {$: 'DragPan'};
+var $author$project$ViewThirdPerson$DragRotate = {$: 'DragRotate'};
 var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$SecondButton = {$: 'SecondButton'};
 var $author$project$DomainModel$effectiveLatitude = function (treeNode) {
 	return $author$project$DomainModel$sourceData(treeNode).a.latitude;
@@ -16179,6 +16179,26 @@ var $author$project$ViewThirdPerson$update = F5(
 							A4($author$project$ViewThirdPerson$detectHit, event, track, area, context)),
 							$author$project$Actions$TrackHasChanged
 						])) : _Utils_Tuple2(context, _List_Nil);
+			case 'ImageDoubleClick':
+				var event = msg.a;
+				var nearestPoint = A4($author$project$ViewThirdPerson$detectHit, event, track, area, context);
+				return _Utils_Tuple2(
+					_Utils_update(
+						context,
+						{
+							focalPoint: A2($author$project$DomainModel$earthPointFromIndex, nearestPoint, track.trackTree)
+						}),
+					_List_fromArray(
+						[
+							$author$project$Actions$SetCurrent(nearestPoint),
+							$author$project$Actions$TrackHasChanged
+						]));
+			case 'ClickDelayExpired':
+				return _Utils_Tuple2(
+					_Utils_update(
+						context,
+						{waitingForClickDelay: false}),
+					_List_Nil);
 			case 'ImageMouseWheel':
 				var deltaY = msg.a;
 				var increment = (-0.001) * deltaY;
@@ -16194,7 +16214,7 @@ var $author$project$ViewThirdPerson$update = F5(
 				var newContext = _Utils_update(
 					context,
 					{
-						dragAction: alternate ? $author$project$ViewContextThirdPerson$DragRotate : $author$project$ViewContextThirdPerson$DragPan,
+						dragAction: alternate ? $author$project$ViewThirdPerson$DragRotate : $author$project$ViewThirdPerson$DragPan,
 						orbiting: $elm$core$Maybe$Just(event.offsetPos),
 						waitingForClickDelay: true
 					});
@@ -16272,21 +16292,12 @@ var $author$project$ViewThirdPerson$update = F5(
 					}
 				}
 				return _Utils_Tuple2(context, _List_Nil);
-			case 'ImageRelease':
+			default:
 				var event = msg.a;
 				var newContext = _Utils_update(
 					context,
-					{dragAction: $author$project$ViewContextThirdPerson$DragNone, orbiting: $elm$core$Maybe$Nothing});
+					{dragAction: $author$project$ViewThirdPerson$DragNone, orbiting: $elm$core$Maybe$Nothing});
 				return _Utils_Tuple2(newContext, _List_Nil);
-			case 'ImageDoubleClick':
-				var event = msg.a;
-				return _Utils_Tuple2(context, _List_Nil);
-			default:
-				return _Utils_Tuple2(
-					_Utils_update(
-						context,
-						{waitingForClickDelay: false}),
-					_List_Nil);
 		}
 	});
 var $author$project$PaneLayoutManager$update = F5(
@@ -28638,7 +28649,7 @@ var $author$project$ViewThirdPerson$view = F5(
 					$mdgriffith$elm_ui$Element$htmlAttribute(
 					$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onDown(
 						A2($elm$core$Basics$composeR, $author$project$ViewThirdPerson$ImageGrab, msgWrapper))),
-					(!_Utils_eq(dragging, $author$project$ViewContextThirdPerson$DragNone)) ? $mdgriffith$elm_ui$Element$htmlAttribute(
+					(!_Utils_eq(dragging, $author$project$ViewThirdPerson$DragNone)) ? $mdgriffith$elm_ui$Element$htmlAttribute(
 					$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onMove(
 						A2($elm$core$Basics$composeR, $author$project$ViewThirdPerson$ImageDrag, msgWrapper))) : $mdgriffith$elm_ui$Element$pointer,
 					$mdgriffith$elm_ui$Element$htmlAttribute(

@@ -30,7 +30,6 @@ import Scene3d exposing (Entity, backgroundColor)
 import Spherical
 import TrackLoaded exposing (TrackLoaded)
 import Vector3d
-import ViewContextThirdPerson exposing (Context, DragAction(..))
 import ViewPureStyles exposing (useIcon)
 import Viewpoint3d exposing (Viewpoint3d)
 
@@ -47,6 +46,27 @@ type Msg
     | ImageZoomOut
     | ImageReset
     | ClickDelayExpired
+
+
+type DragAction
+    = DragNone
+    | DragRotate
+    | DragPan
+
+
+type alias Context =
+    { cameraAzimuth : Direction2d LocalCoords --Camera relative to plane normal at focus point
+    , cameraElevation : Angle -- Above local horizon plane
+    , cameraDistance : Quantity Float Length.Meters
+    , fieldOfView : Angle
+    , orbiting : Maybe ( Float, Float )
+    , dragAction : DragAction
+    , zoomLevel : Float
+    , defaultZoomLevel : Float
+    , focalPoint : EarthPoint
+    , waitingForClickDelay : Bool
+    , followSelectedPoint : Bool
+    }
 
 
 stopProp =
@@ -247,6 +267,20 @@ update msg msgWrapper track area context =
             else
                 ( context, [] )
 
+        ImageDoubleClick event ->
+            let
+                nearestPoint =
+                    detectHit event track area context
+            in
+            ( { context | focalPoint = earthPointFromIndex nearestPoint track.trackTree }
+            , [ SetCurrent nearestPoint
+              , TrackHasChanged
+              ]
+            )
+
+        ClickDelayExpired ->
+            ( { context | waitingForClickDelay = False }, [] )
+
         ImageMouseWheel deltaY ->
             let
                 increment =
@@ -352,12 +386,6 @@ update msg msgWrapper track area context =
             in
             ( newContext, [] )
 
-        ImageDoubleClick event ->
-            ( context, [] )
-
-        ClickDelayExpired ->
-            ( { context | waitingForClickDelay = False }, [] )
-
 
 initialiseView :
     Int
@@ -375,5 +403,5 @@ initialiseView current treeNode =
     , focalPoint =
         treeNode |> leafFromIndex current |> startPoint
     , waitingForClickDelay = False
-    , followSelectedPoint = True
+    , followSelectedPoint = False
     }

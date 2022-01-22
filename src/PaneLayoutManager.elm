@@ -15,7 +15,6 @@ import Pixels exposing (Pixels)
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
 import TrackLoaded exposing (TrackLoaded)
-import ViewContextThirdPerson exposing (Context)
 import ViewMap
 import ViewPureStyles exposing (..)
 import ViewThirdPerson exposing (stopProp)
@@ -31,7 +30,7 @@ type ViewMode
 
 
 type ViewContext
-    = ThirdPersonContext ViewContextThirdPerson.Context
+    = ThirdPersonContext ViewThirdPerson.Context
     | MapContext ViewMap.Context
     | InfoContext
 
@@ -59,7 +58,7 @@ type PaneId
 type alias PaneContext =
     { paneId : PaneId
     , activeView : ViewMode
-    , thirdPersonContext : Maybe ViewContextThirdPerson.Context
+    , thirdPersonContext : Maybe ViewThirdPerson.Context
     , mapContext : Maybe ViewMap.Context
     }
 
