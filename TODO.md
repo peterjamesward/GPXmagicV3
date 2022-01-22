@@ -2,23 +2,21 @@
 # BUGS (for an 'easy' day)
 
 BUG: Dubious steepest gradient on some routes. (May have to wait until we have that tool!)
-BUG: Hit detect is poor on 304K course (maybe not surprising but it should work).
 
 # WIP
 
-Store & Restore pane layout.
+~~Store &~~ **Restore** pane layout.
 
 ---
 
 # BACKLOG, roughly in order ...
 
 ## Small things (you'd hope)
+Limit previews using renderDepth; e.g. Delete for > 1000 points.
 Option for 3D view to follow pointer.
-Make **DragPan** work on 3D view.
-Put all Font, Colour etc into a Palette/Style module for ease of change.
-Need "restore to defaults" for tools.
-Configurable background colour.
-Imperial measures option.
+"Restore to defaults" for tools in top bar settings.
+Configurable background colour (light, medium, dark) in top bar settings.
+Imperial measures option in top bar settings button.
 
 ## Profile & Charts
 Details in Backlog.
@@ -80,6 +78,10 @@ Terrain 2 = Tree walk combined with whole (visible) tree query, because <track l
 Use a graduated drop off with distance, compute at each tree level?
 On Map, work out the depth to fit (say) 1000 points within visible region.
 > Not sure it's required.
+
+
+## Small stuff
+Put all Font, Colour etc into a Palette/Style module for ease of change.
 
 ---
 
