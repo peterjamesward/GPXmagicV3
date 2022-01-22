@@ -1,7 +1,7 @@
 module SceneBuilder exposing (..)
 
--- In V3 there is only one 3d model, used for first and third views.
--- Plan and Profile are 2d drawings.
+-- In V3 there is only one 3d model, used for first, third, and Plan views.
+-- Profile is 2d drawing (or chart).
 
 import Actions exposing (PreviewData, PreviewShape(..))
 import Angle exposing (Angle)
@@ -25,6 +25,7 @@ import Quantity
 import Scene3d exposing (Entity)
 import Scene3d.Material as Material
 import TrackLoaded exposing (TrackLoaded)
+import UtilsForViews exposing (fullDepthRenderingBoxSize)
 import Vector3d
 
 
@@ -35,16 +36,16 @@ render3dView track =
             Plane3d.xy |> Plane3d.offsetBy (BoundingBox3d.minZ <| boundingBox track.trackTree)
 
         fullRenderingZone =
-            BoundingBox3d.withDimensions ( boxSide, boxSide, boxSide )
+            BoundingBox3d.withDimensions
+                ( fullDepthRenderingBoxSize
+                , fullDepthRenderingBoxSize
+                , fullDepthRenderingBoxSize
+                )
                 (startPoint <| leafFromIndex track.currentPosition track.trackTree)
 
         gradientColourPastel : Float -> Color.Color
         gradientColourPastel slope =
             Color.hsl (gradientHue slope) 0.6 0.7
-
-        boxSide =
-            --TODO: put box side in model
-            Length.kilometers 4
 
         gradientFromNode treeNode =
             Quantity.ratio
@@ -108,6 +109,7 @@ render3dView track =
             -> List (Entity LocalCoords)
             -> List (Entity LocalCoords)
         renderTreeSelectively depth someNode accum =
+            --TODO: Rewrite using domain model traversal.
             case someNode of
                 Leaf leafNode ->
                     makeVisibleSegment someNode ++ accum

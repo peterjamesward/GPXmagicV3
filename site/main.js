@@ -30057,7 +30057,7 @@ var $author$project$PaneLayoutManager$optionList = _List_fromArray(
 			_List_fromArray(
 				[
 					$author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$square),
-					$mdgriffith$elm_ui$Element$text('One big one')
+					$mdgriffith$elm_ui$Element$text('Just the one')
 				]))),
 		A2(
 		$mdgriffith$elm_ui$Element$Input$option,
@@ -30071,7 +30071,7 @@ var $author$project$PaneLayoutManager$optionList = _List_fromArray(
 			_List_fromArray(
 				[
 					$author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$columns),
-					$mdgriffith$elm_ui$Element$text('Wardrobe doors')
+					$mdgriffith$elm_ui$Element$text('Cupboards')
 				]))),
 		A2(
 		$mdgriffith$elm_ui$Element$Input$option,
@@ -30085,7 +30085,7 @@ var $author$project$PaneLayoutManager$optionList = _List_fromArray(
 			_List_fromArray(
 				[
 					$author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$server),
-					$mdgriffith$elm_ui$Element$text('Bunk beds')
+					$mdgriffith$elm_ui$Element$text('Drawers')
 				]))),
 		A2(
 		$mdgriffith$elm_ui$Element$Input$option,

@@ -116,6 +116,7 @@ trackInfoBox =
     , isPopupOpen = False
     }
 
+
 undoRedoTool : ToolEntry
 undoRedoTool =
     { toolType = ToolUndoRedo
@@ -411,8 +412,7 @@ toolStateHasChanged toolType newState isTrack options =
             ( newOptions, [ StoreLocally "tools" <| encodeToolState options ] )
 
         ToolUndoRedo ->
-            ( options, [  ] )
-
+            ( options, [] )
 
 
 
@@ -426,7 +426,12 @@ toolsForDock :
     -> Options
     -> Element msg
 toolsForDock dock msgWrapper isTrack options =
-    wrappedRow [ spacing 4, scrollbarY, height fill ] <|
+    wrappedRow
+        [ spacing 4
+        , scrollbarY
+        --, height fill
+        ]
+    <|
         (options.tools
             |> List.filter (\t -> t.dock == dock)
             |> List.map (viewTool msgWrapper isTrack options)
@@ -595,7 +600,6 @@ viewToolByType msgWrapper entry isTrack options =
 
         ToolUndoRedo ->
             UndoRedo.view (msgWrapper << UndoRedoMsg) options.undoRedoOptions isTrack
-
 
 
 

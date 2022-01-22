@@ -116,3 +116,8 @@ colourHexString colour =
         ++ (leadingZeroes <| Hex.toString redInt)
         ++ (leadingZeroes <| Hex.toString greenInt)
         ++ (leadingZeroes <| Hex.toString blueInt)
+
+
+fullDepthRenderingBoxSize =
+    --TODO: put box side in model
+    Length.kilometers 4

@@ -451,10 +451,7 @@ replaceRange fromStart fromEnd withReferencePoint newPoints currentTree =
         Node node ->
             let
                 containedInLeft =
-                    --TODO: Clarify this comment after testing.
-                    -- I'm fairly sure these are '<' not '<=' to make sure
-                    -- that the adjoining points are included.
-                    -- Simple Leaf tests will validate.
+                    -- These are '<' not '<=', validated by tests.
                     fromStart
                         < skipCount node.left
                         && (fromEnd - skipCount node.right > 0)
@@ -1076,3 +1073,85 @@ recreateGpxSources mTree =
 
         Nothing ->
             []
+
+
+traverseTree :
+    Int
+    -> Int
+    -> Int
+    -> PeteTree
+    -> (( EarthPoint, GPXSource ) -> ( EarthPoint, GPXSource ) -> a)
+    -> List a
+    -> List a
+traverseTree startingAt endingAt depth someNode visitor accum =
+    let
+        nodeData =
+            asRecord someNode
+
+        start =
+            ( nodeData.startPoint, Tuple.first nodeData.sourceData )
+
+        end =
+            ( nodeData.endPoint, Tuple.second nodeData.sourceData )
+    in
+    case someNode of
+        Leaf leafNode ->
+            visitor start end :: accum
+
+        Node unLeaf ->
+            if depth <= 0 then
+                visitor start end :: accum
+
+            else
+                accum
+                    |> traverseTree (depth - 1) unLeaf.left visitor
+                    |> traverseTree (depth - 1) unLeaf.right visitor
+
+
+traverseTreeToDepth :
+    Int
+    -> Int
+    -> Int
+    -> PeteTree
+    -> (( EarthPoint, GPXSource ) -> ( EarthPoint, GPXSource ) -> a)
+    -> List a
+    -> List a
+traverseTreeToDepth startingAt endingAt depth someNode visitor accum =
+    --TODO: Need to restrict to [start,end] point indices.
+    -- (Do this by "fast forwarding using skipCount.)
+    let
+        nodeData =
+            asRecord someNode
+
+        start =
+            ( nodeData.startPoint, Tuple.first nodeData.sourceData )
+
+        end =
+            ( nodeData.endPoint, Tuple.second nodeData.sourceData )
+    in
+
+{-
+    Do the FF thing.
+    If startingAt >= my skipcount, return accum
+    If startingAt > 0 but < skipCount then pass to children
+        left child with same start offset
+        right child with usually deduction of left skip count.
+        Don't call right child is beyond the `endingAt`.
+-}
+
+    case someNode of
+        Leaf leafNode ->
+            visitor start end :: accum
+
+        Node unLeaf ->
+            if unLeaf.nodeContent.boundingBox |> BoundingBox3d.intersects fullRenderingZone then
+                -- Ignore depth cutoff near or in the box
+                accum
+                    |> traverseTreeToDepth (depth - 1) unLeaf.left visitor
+                    |> traverseTreeToDepth (depth - 1) unLeaf.right visitor
+
+            else
+                -- Outside box, apply cutoff.
+                accum
+                    |> traverseTree (depth - 1) unLeaf.left visitor
+                    |> traverseTree (depth - 1) unLeaf.right visitor

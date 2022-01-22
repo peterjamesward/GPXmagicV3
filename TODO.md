@@ -2,19 +2,37 @@
 # BUGS (for an 'easy' day)
 
 BUG: Dubious steepest gradient on some routes. (May have to wait until we have that tool!)
+BUG: Would like to have tools float to the top of their docks.
+BUG: In Grid view, Pane1 is noticably smaller than the others.
 
 # WIP
+
+Limit previews using renderDepth; e.g. Delete for > 1000 points.
+> Writing a tree traversal for this. (should also be used in SceneBuilder)
 
 ---
 
 # BACKLOG, roughly in order ...
 
 ## Small things (you'd hope)
-Limit previews using renderDepth; e.g. Delete for > 1000 points.
-Option for 3D view to follow pointer.
+
+BUG: Map is centering on Orange (again).
+
+BUG: I suspect hit detect is not using the correct paen size.
+
+Option for 3D view to follow pointer; where should this live?
+> In the overlay menu, using padlock for continuity with v2.
+
 "Restore to defaults" for tools in top bar settings.
+
 Configurable background colour (light, medium, dark) in top bar settings.
+
 Imperial measures option in top bar settings button.
+
+More distinct spacing and colours between Orange and Purple markers.
+
+JB: I wonder if the Summary and Segment information could be better placed on the top 
+Load GPX top line toggleable between the 2... only thinking of maximising space use.
 
 ## Profile & Charts
 Details in Backlog.
@@ -22,7 +40,8 @@ Details in Backlog.
 ## Map
 Add non-draggable track point circles, in separate layer we can turn on and off
 to replace by draggables when that control is open.
-Try to reduce repaints on moving pointer. Could we be lazy? Only repaint on slider thumb release? 
+Try to reduce repaints on moving pointer. 
+> Could we be lazy? Only repaint on slider thumb release with custom thumb events?
 
 Map options tool? 
 - Map style (outdoor, satellite)
@@ -83,6 +102,9 @@ On Map, work out the depth to fit (say) 1000 points within visible region.
 
 ## Small stuff
 Put all Font, Colour etc into a Palette/Style module for ease of change.
+
+## Loop detection
+JB: I have been getting a few Partner event gpx's lately that do a loop... but then continue around for say 25% of it before finishing which when a map is first loaded i do not notice until i start working on it... it would be nice if when a map is first loaded the points show a different colour when there is another course on top.. ie orange for the first lap but if it continues say red until it finishes..
 
 ---
 

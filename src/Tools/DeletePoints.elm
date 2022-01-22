@@ -43,6 +43,8 @@ toolStateChange opened colour options track =
                 previews =
                     case theTrack.markerPosition of
                         Just _ ->
+                            --TODO: Apply renderDepth here, so we can edit large tracks.
+                            -- May need a new domain model feature to support.
                             List.range (fromStart + 1) (skipCount theTrack.trackTree - fromEnd - 1)
 
                         Nothing ->
