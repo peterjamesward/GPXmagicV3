@@ -1074,7 +1074,7 @@ recreateGpxSources mTree =
         Nothing ->
             []
 
-
+{--
 traverseTree :
     Int
     -> Int
@@ -1155,3 +1155,4 @@ traverseTreeToDepth startingAt endingAt depth someNode visitor accum =
                 accum
                     |> traverseTree (depth - 1) unLeaf.left visitor
                     |> traverseTree (depth - 1) unLeaf.right visitor
+--}

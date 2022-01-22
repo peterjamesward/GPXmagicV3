@@ -12741,6 +12741,7 @@ var $ianmackenzie$elm_geometry$LineSegment3d$from = F2(
 var $avh4$elm_color$Color$fromRgba = function (components) {
 	return A4($avh4$elm_color$Color$RgbaSpace, components.red, components.green, components.blue, components.alpha);
 };
+var $author$project$UtilsForViews$fullDepthRenderingBoxSize = $ianmackenzie$elm_units$Length$kilometers(4);
 var $elm$core$Basics$clamp = F3(
 	function (low, high, number) {
 		return (_Utils_cmp(number, low) < 0) ? low : ((_Utils_cmp(number, high) > 0) ? high : number);
@@ -14047,6 +14048,11 @@ var $author$project$SceneBuilder$render3dView = function (track) {
 			0.6,
 			0.7);
 	};
+	var fullRenderingZone = A2(
+		$ianmackenzie$elm_geometry$BoundingBox3d$withDimensions,
+		_Utils_Tuple3($author$project$UtilsForViews$fullDepthRenderingBoxSize, $author$project$UtilsForViews$fullDepthRenderingBoxSize, $author$project$UtilsForViews$fullDepthRenderingBoxSize),
+		$author$project$DomainModel$startPoint(
+			A2($author$project$DomainModel$leafFromIndex, track.currentPosition, track.trackTree)));
 	var floorPlane = A2(
 		$ianmackenzie$elm_geometry$Plane3d$offsetBy,
 		$ianmackenzie$elm_geometry$BoundingBox3d$minZ(
@@ -14110,12 +14116,6 @@ var $author$project$SceneBuilder$render3dView = function (track) {
 					A3(renderTree, depth - 1, unLeaf.left, accum));
 			}
 		});
-	var boxSide = $ianmackenzie$elm_units$Length$kilometers(4);
-	var fullRenderingZone = A2(
-		$ianmackenzie$elm_geometry$BoundingBox3d$withDimensions,
-		_Utils_Tuple3(boxSide, boxSide, boxSide),
-		$author$project$DomainModel$startPoint(
-			A2($author$project$DomainModel$leafFromIndex, track.currentPosition, track.trackTree)));
 	var renderTreeSelectively = F3(
 		function (depth, someNode, accum) {
 			if (someNode.$ === 'Leaf') {
@@ -27118,8 +27118,7 @@ var $author$project$ToolsController$toolsForDock = F4(
 			_List_fromArray(
 				[
 					$mdgriffith$elm_ui$Element$spacing(4),
-					$mdgriffith$elm_ui$Element$scrollbarY,
-					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill)
+					$mdgriffith$elm_ui$Element$scrollbarY
 				]),
 			A2(
 				$elm$core$List$map,
