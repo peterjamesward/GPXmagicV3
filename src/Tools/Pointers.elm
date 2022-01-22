@@ -6,6 +6,7 @@ import Direction2d
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), asRecord, skipCount)
 import Element exposing (..)
 import Element.Background as Background
+import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
 import FeatherIcons
@@ -172,6 +173,24 @@ positionDescription pos track =
 
 view : (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
 view msgWrapper options isTrack =
+    let
+        purpleStyle =
+            [ Border.color FlatColors.AussiePalette.blurple
+            , Border.rounded 4
+            , Border.width 4
+            , padding 6
+            , centerY
+            , centerX
+            ]
+        orangeStyle =
+            [ Border.color FlatColors.AussiePalette.quinceJelly
+            , Border.rounded 4
+            , Border.width 4
+            , padding 6
+            , centerY
+            , centerX
+            ]
+    in
     case isTrack of
         Nothing ->
             el
@@ -187,6 +206,7 @@ view msgWrapper options isTrack =
                     [ centerX
                     , padding 4
                     , spacing 6
+                    , width fill
 
                     --, height <| px 150
                     ]
@@ -198,36 +218,61 @@ view msgWrapper options isTrack =
                         , spacing 10
                         , Font.color FlatColors.AussiePalette.quinceJelly
                         ]
-                        [ Input.button neatToolsBorder
+                        [ Input.button orangeStyle
                             { label = useIcon FeatherIcons.chevronsLeft
                             , onPress = Just <| msgWrapper <| PointerRewind
                             }
-                        , Input.button neatToolsBorder
+                        , Input.button orangeStyle
                             { label = useIcon FeatherIcons.chevronLeft
                             , onPress = Just <| msgWrapper <| PointerBackwardOne
                             }
-                        , Input.button neatToolsBorder
+                        , Input.button orangeStyle
                             { label = useIcon FeatherIcons.chevronRight
                             , onPress = Just <| msgWrapper <| PointerForwardOne
                             }
-                        , Input.button neatToolsBorder
+                        , Input.button orangeStyle
                             { label = useIcon FeatherIcons.chevronsRight
                             , onPress = Just <| msgWrapper <| PointerFastForward
                             }
                         ]
-                    , el [ centerX ] <|
+                    , el [ centerX, width fill ] <|
                         case options.purple of
                             Just something ->
-                                Input.button (padding 8 :: neatToolsBorder)
-                                    { label = text "Lift purple marker"
-                                    , onPress = Just <| msgWrapper <| LiftMarker
-                                    }
+                                el
+                                    [ Background.color FlatColors.AussiePalette.blurple
+                                    , Font.color FlatColors.AussiePalette.coastalBreeze
+                                    , width fill
+                                    , height <| px 34
+                                    , centerX
+                                    , centerY
+                                    ]
+                                <|
+                                    Input.button
+                                        [ Background.color FlatColors.AussiePalette.blurple
+                                        , Border.color FlatColors.AussiePalette.coastalBreeze
+                                        , Border.rounded 4
+                                        , Border.width 2
+                                        , padding 8
+                                        , centerY
+                                        , centerX
+                                        ]
+                                        { label = text "Lift purple marker"
+                                        , onPress = Just <| msgWrapper <| LiftMarker
+                                        }
 
                             Nothing ->
-                                Input.button (padding 8 :: neatToolsBorder)
-                                    { label = text "Drop purple marker"
-                                    , onPress = Just <| msgWrapper <| DropMarker
-                                    }
+                                el
+                                    [ width fill
+                                    , height <| px 34
+                                    , centerX
+                                    , centerY
+                                    ]
+                                <|
+                                    Input.button
+                                        purpleStyle
+                                        { label = text "Drop purple marker"
+                                        , onPress = Just <| msgWrapper <| DropMarker
+                                        }
                     , case options.purple of
                         Just something ->
                             row
@@ -235,11 +280,11 @@ view msgWrapper options isTrack =
                                 , spacing 10
                                 , Font.color FlatColors.AussiePalette.blurple
                                 ]
-                                [ Input.button neatToolsBorder
+                                [ Input.button purpleStyle
                                     { label = useIcon FeatherIcons.chevronLeft
                                     , onPress = Just <| msgWrapper <| MarkerBackwardOne
                                     }
-                                , Input.button neatToolsBorder
+                                , Input.button purpleStyle
                                     { label = useIcon FeatherIcons.chevronRight
                                     , onPress = Just <| msgWrapper <| MarkerForwardOne
                                     }
@@ -251,13 +296,13 @@ view msgWrapper options isTrack =
                                 , spacing 10
                                 , Font.color FlatColors.AussiePalette.coastalBreeze
                                 ]
-                                [ Input.button neatToolsBorder
+                                [ Input.button purpleStyle
                                     { label = useIcon FeatherIcons.chevronLeft
-                                    , onPress = Just <| msgWrapper <| MarkerBackwardOne
+                                    , onPress = Nothing
                                     }
-                                , Input.button neatToolsBorder
+                                , Input.button purpleStyle
                                     { label = useIcon FeatherIcons.chevronRight
-                                    , onPress = Just <| msgWrapper <| MarkerForwardOne
+                                    , onPress = Nothing
                                     }
                                 ]
                     , el [ centerX ] <|

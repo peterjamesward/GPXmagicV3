@@ -26461,6 +26461,24 @@ var $author$project$Tools$Pointers$positionDescription = F2(
 	});
 var $author$project$Tools$Pointers$view = F3(
 	function (msgWrapper, options, isTrack) {
+		var purpleStyle = _List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$AussiePalette$blurple),
+				$mdgriffith$elm_ui$Element$Border$rounded(4),
+				$mdgriffith$elm_ui$Element$Border$width(4),
+				$mdgriffith$elm_ui$Element$padding(6),
+				$mdgriffith$elm_ui$Element$centerY,
+				$mdgriffith$elm_ui$Element$centerX
+			]);
+		var orangeStyle = _List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$AussiePalette$quinceJelly),
+				$mdgriffith$elm_ui$Element$Border$rounded(4),
+				$mdgriffith$elm_ui$Element$Border$width(4),
+				$mdgriffith$elm_ui$Element$padding(6),
+				$mdgriffith$elm_ui$Element$centerY,
+				$mdgriffith$elm_ui$Element$centerX
+			]);
 		if (isTrack.$ === 'Nothing') {
 			return A2(
 				$mdgriffith$elm_ui$Element$el,
@@ -26487,7 +26505,8 @@ var $author$project$Tools$Pointers$view = F3(
 						[
 							$mdgriffith$elm_ui$Element$centerX,
 							$mdgriffith$elm_ui$Element$padding(4),
-							$mdgriffith$elm_ui$Element$spacing(6)
+							$mdgriffith$elm_ui$Element$spacing(6),
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
 						]),
 					_List_fromArray(
 						[
@@ -26509,7 +26528,7 @@ var $author$project$Tools$Pointers$view = F3(
 								[
 									A2(
 									$mdgriffith$elm_ui$Element$Input$button,
-									$author$project$ViewPureStyles$neatToolsBorder,
+									orangeStyle,
 									{
 										label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronsLeft),
 										onPress: $elm$core$Maybe$Just(
@@ -26517,7 +26536,7 @@ var $author$project$Tools$Pointers$view = F3(
 									}),
 									A2(
 									$mdgriffith$elm_ui$Element$Input$button,
-									$author$project$ViewPureStyles$neatToolsBorder,
+									orangeStyle,
 									{
 										label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronLeft),
 										onPress: $elm$core$Maybe$Just(
@@ -26525,7 +26544,7 @@ var $author$project$Tools$Pointers$view = F3(
 									}),
 									A2(
 									$mdgriffith$elm_ui$Element$Input$button,
-									$author$project$ViewPureStyles$neatToolsBorder,
+									orangeStyle,
 									{
 										label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronRight),
 										onPress: $elm$core$Maybe$Just(
@@ -26533,7 +26552,7 @@ var $author$project$Tools$Pointers$view = F3(
 									}),
 									A2(
 									$mdgriffith$elm_ui$Element$Input$button,
-									$author$project$ViewPureStyles$neatToolsBorder,
+									orangeStyle,
 									{
 										label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronsRight),
 										onPress: $elm$core$Maybe$Just(
@@ -26543,34 +26562,62 @@ var $author$project$Tools$Pointers$view = F3(
 							A2(
 							$mdgriffith$elm_ui$Element$el,
 							_List_fromArray(
-								[$mdgriffith$elm_ui$Element$centerX]),
+								[
+									$mdgriffith$elm_ui$Element$centerX,
+									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+								]),
 							function () {
 								var _v1 = options.purple;
 								if (_v1.$ === 'Just') {
 									var something = _v1.a;
 									return A2(
-										$mdgriffith$elm_ui$Element$Input$button,
+										$mdgriffith$elm_ui$Element$el,
+										_List_fromArray(
+											[
+												$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$AussiePalette$blurple),
+												$mdgriffith$elm_ui$Element$Font$color($smucode$elm_flat_colors$FlatColors$AussiePalette$coastalBreeze),
+												$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+												$mdgriffith$elm_ui$Element$height(
+												$mdgriffith$elm_ui$Element$px(34)),
+												$mdgriffith$elm_ui$Element$centerX,
+												$mdgriffith$elm_ui$Element$centerY
+											]),
 										A2(
-											$elm$core$List$cons,
-											$mdgriffith$elm_ui$Element$padding(8),
-											$author$project$ViewPureStyles$neatToolsBorder),
-										{
-											label: $mdgriffith$elm_ui$Element$text('Lift purple marker'),
-											onPress: $elm$core$Maybe$Just(
-												msgWrapper($author$project$Tools$Pointers$LiftMarker))
-										});
+											$mdgriffith$elm_ui$Element$Input$button,
+											_List_fromArray(
+												[
+													$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$AussiePalette$blurple),
+													$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$AussiePalette$coastalBreeze),
+													$mdgriffith$elm_ui$Element$Border$rounded(4),
+													$mdgriffith$elm_ui$Element$Border$width(2),
+													$mdgriffith$elm_ui$Element$padding(8),
+													$mdgriffith$elm_ui$Element$centerY,
+													$mdgriffith$elm_ui$Element$centerX
+												]),
+											{
+												label: $mdgriffith$elm_ui$Element$text('Lift purple marker'),
+												onPress: $elm$core$Maybe$Just(
+													msgWrapper($author$project$Tools$Pointers$LiftMarker))
+											}));
 								} else {
 									return A2(
-										$mdgriffith$elm_ui$Element$Input$button,
+										$mdgriffith$elm_ui$Element$el,
+										_List_fromArray(
+											[
+												$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+												$mdgriffith$elm_ui$Element$height(
+												$mdgriffith$elm_ui$Element$px(34)),
+												$mdgriffith$elm_ui$Element$centerX,
+												$mdgriffith$elm_ui$Element$centerY
+											]),
 										A2(
-											$elm$core$List$cons,
-											$mdgriffith$elm_ui$Element$padding(8),
-											$author$project$ViewPureStyles$neatToolsBorder),
-										{
-											label: $mdgriffith$elm_ui$Element$text('Drop purple marker'),
-											onPress: $elm$core$Maybe$Just(
-												msgWrapper($author$project$Tools$Pointers$DropMarker))
-										});
+											$mdgriffith$elm_ui$Element$Input$button,
+											purpleStyle,
+											{
+												label: $mdgriffith$elm_ui$Element$text('Drop purple marker'),
+												onPress: $elm$core$Maybe$Just(
+													msgWrapper($author$project$Tools$Pointers$DropMarker))
+											}));
 								}
 							}()),
 							function () {
@@ -26589,7 +26636,7 @@ var $author$project$Tools$Pointers$view = F3(
 										[
 											A2(
 											$mdgriffith$elm_ui$Element$Input$button,
-											$author$project$ViewPureStyles$neatToolsBorder,
+											purpleStyle,
 											{
 												label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronLeft),
 												onPress: $elm$core$Maybe$Just(
@@ -26597,7 +26644,7 @@ var $author$project$Tools$Pointers$view = F3(
 											}),
 											A2(
 											$mdgriffith$elm_ui$Element$Input$button,
-											$author$project$ViewPureStyles$neatToolsBorder,
+											purpleStyle,
 											{
 												label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronRight),
 												onPress: $elm$core$Maybe$Just(
@@ -26617,19 +26664,17 @@ var $author$project$Tools$Pointers$view = F3(
 										[
 											A2(
 											$mdgriffith$elm_ui$Element$Input$button,
-											$author$project$ViewPureStyles$neatToolsBorder,
+											purpleStyle,
 											{
 												label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronLeft),
-												onPress: $elm$core$Maybe$Just(
-													msgWrapper($author$project$Tools$Pointers$MarkerBackwardOne))
+												onPress: $elm$core$Maybe$Nothing
 											}),
 											A2(
 											$mdgriffith$elm_ui$Element$Input$button,
-											$author$project$ViewPureStyles$neatToolsBorder,
+											purpleStyle,
 											{
 												label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronRight),
-												onPress: $elm$core$Maybe$Just(
-													msgWrapper($author$project$Tools$Pointers$MarkerForwardOne))
+												onPress: $elm$core$Maybe$Nothing
 											})
 										]));
 							}
