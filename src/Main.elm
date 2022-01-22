@@ -68,6 +68,7 @@ type Msg
     | DismissModalMessage
     | PaneMsg PaneLayoutManager.Msg
     | TenSecondTicker Time.Posix
+    | RepaintMap
 
 
 type alias Model =
@@ -336,7 +337,7 @@ update msg model =
                             }
 
                         actions =
-                            [ TrackHasChanged ]
+                            [ TrackHasChanged, MapRefresh ]
 
                         modelAfterActions =
                             -- e.g. collect previews and render ...
@@ -507,6 +508,9 @@ Please check the file contains GPX data.""" }
 
         TenSecondTicker posixTime ->
             ( model, LocalStorage.storageGetMemoryUsage )
+
+        RepaintMap ->
+            ( model, MapPortController.refreshMap )
 
 
 allocateSpaceForDocksAndContent : Int -> Int -> Model -> Model

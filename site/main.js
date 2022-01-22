@@ -10283,6 +10283,7 @@ var $author$project$Actions$MapRefresh = {$: 'MapRefresh'};
 var $author$project$Main$ReceivedIpDetails = function (a) {
 	return {$: 'ReceivedIpDetails', a: a};
 };
+var $author$project$Main$RepaintMap = {$: 'RepaintMap'};
 var $author$project$Actions$StoreSplitConfig = {$: 'StoreSplitConfig'};
 var $author$project$Main$ToolsMsg = function (a) {
 	return {$: 'ToolsMsg', a: a};
@@ -16473,7 +16474,8 @@ var $author$project$PaneLayoutManager$update = F5(
 					_Utils_update(
 						options,
 						{paneLayout: paneLayout}),
-					_List_Nil);
+					_List_fromArray(
+						[$author$project$Actions$MapRefresh]));
 			case 'TogglePopup':
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -16493,7 +16495,7 @@ var $author$project$PaneLayoutManager$update = F5(
 				return _Utils_Tuple2(
 					newOptions,
 					_List_fromArray(
-						[$author$project$Actions$MapCenterOnCurrent]));
+						[$author$project$Actions$MapRefresh]));
 			case 'ImageMessage':
 				var pane = paneMsg.a;
 				var imageMsg = paneMsg.b;
@@ -17835,7 +17837,8 @@ var $author$project$Main$update = F2(
 					$elm$core$Platform$Cmd$batch(
 						_List_fromArray(
 							[
-								$author$project$MapPortController$createMap(mapInfoWithLocation)
+								$author$project$MapPortController$createMap(mapInfoWithLocation),
+								$author$project$MapPortController$refreshMap
 							])));
 			case 'IpInfoAcknowledged':
 				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
@@ -17892,7 +17895,7 @@ var $author$project$Main$update = F2(
 							track: $elm$core$Maybe$Just(newTrack)
 						});
 					var actions = _List_fromArray(
-						[$author$project$Actions$TrackHasChanged]);
+						[$author$project$Actions$TrackHasChanged, $author$project$Actions$MapRefresh]);
 					var modelAfterActions = A2($author$project$Main$performActionsOnModel, actions, modelWithTrack);
 					return _Utils_Tuple2(
 						modelAfterActions,
@@ -17900,7 +17903,8 @@ var $author$project$Main$update = F2(
 							_List_fromArray(
 								[
 									A2($author$project$Main$performActionCommands, actions, modelAfterActions),
-									$author$project$Main$showTrackOnMapCentered(newTrack)
+									$author$project$Main$showTrackOnMapCentered(newTrack),
+									A2($andrewMacmurray$elm_delay$Delay$after, 50, $author$project$Main$RepaintMap)
 								])));
 				} else {
 					return _Utils_Tuple2(
@@ -18084,9 +18088,11 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					newModel,
 					A2($author$project$Main$performActionCommands, actions, newModel));
-			default:
+			case 'TenSecondTicker':
 				var posixTime = msg.a;
 				return _Utils_Tuple2(model, $author$project$LocalStorage$storageGetMemoryUsage);
+			default:
+				return _Utils_Tuple2(model, $author$project$MapPortController$refreshMap);
 		}
 	});
 var $author$project$Main$DismissModalMessage = {$: 'DismissModalMessage'};

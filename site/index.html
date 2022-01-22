@@ -154,6 +154,8 @@ function mapMessageHandler(msg) {
         case 'Repaint':
             if (isMapCreated) {
                 map.resize();
+                setTimeout(function() { map.resize(); }, 50);
+
             }
             break;
 
@@ -305,10 +307,10 @@ function makeTheMap(msg) {
             });
 
             app.ports.mapResponses.send({ 'msg' : 'map ready' });
+            map.resize();
 
         });
 
-        setTimeout(function() { map.resize(); }, 50);
 
     } else {
         //No 'map' node, we have to keep checking.

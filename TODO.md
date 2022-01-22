@@ -6,7 +6,6 @@ BUG: Hit detect is poor on 304K course (maybe not surprising but it should work)
 
 # WIP
 
-**BUG**: The initial map repaint not working in the new pane layout manager (despite being in the JS).
 **BUG**: Dragging right browser edge should not change right dock width.
 
 ---

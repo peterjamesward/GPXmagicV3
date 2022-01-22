@@ -163,7 +163,7 @@ update paneMsg msgWrapper mTrack contentArea options =
             ( options, [] )
 
         SetPaneLayout paneLayout ->
-            ( { options | paneLayout = paneLayout }, [] )
+            ( { options | paneLayout = paneLayout }, [ MapRefresh ] )
 
         TogglePopup ->
             ( { options | popupVisible = not options.popupVisible }, [] )
@@ -179,7 +179,7 @@ update paneMsg msgWrapper mTrack contentArea options =
                 newOptions =
                     { options | pane1 = newPane1 }
             in
-            ( newOptions, [ Actions.MapCenterOnCurrent ] )
+            ( newOptions, [ MapRefresh ] )
 
         ImageMessage pane imageMsg ->
             let
