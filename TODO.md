@@ -6,8 +6,6 @@ BUG: Hit detect is poor on 304K course (maybe not surprising but it should work)
 
 # WIP
 
-**BUG**: Dragging right browser edge should not change right dock width.
-
 ---
 
 # BACKLOG, roughly in order ...

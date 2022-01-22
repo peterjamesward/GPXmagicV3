@@ -9714,41 +9714,38 @@ var $author$project$Main$SplitRightDockLeftEdge = function (a) {
 var $author$project$Main$StorageMessage = function (a) {
 	return {$: 'StorageMessage', a: a};
 };
-var $author$project$Main$TenSecondTicker = function (a) {
-	return {$: 'TenSecondTicker', a: a};
-};
 var $elm$core$Platform$Sub$batch = _Platform_batch;
-var $elm$time$Time$Every = F2(
-	function (a, b) {
-		return {$: 'Every', a: a, b: b};
+var $elm$core$Platform$Sub$map = _Platform_map;
+var $elm$json$Json$Decode$value = _Json_decodeValue;
+var $author$project$MapPortController$mapResponses = _Platform_incomingPort('mapResponses', $elm$json$Json$Decode$value);
+var $elm$browser$Browser$Events$Window = {$: 'Window'};
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $elm$browser$Browser$Events$MySub = F3(
+	function (a, b, c) {
+		return {$: 'MySub', a: a, b: b, c: c};
 	});
-var $elm$time$Time$State = F2(
-	function (taggers, processes) {
-		return {processes: processes, taggers: taggers};
+var $elm$browser$Browser$Events$State = F2(
+	function (subs, pids) {
+		return {pids: pids, subs: subs};
 	});
-var $elm$time$Time$init = $elm$core$Task$succeed(
-	A2($elm$time$Time$State, $elm$core$Dict$empty, $elm$core$Dict$empty));
-var $elm$time$Time$addMySub = F2(
-	function (_v0, state) {
-		var interval = _v0.a;
-		var tagger = _v0.b;
-		var _v1 = A2($elm$core$Dict$get, interval, state);
-		if (_v1.$ === 'Nothing') {
-			return A3(
-				$elm$core$Dict$insert,
-				interval,
-				_List_fromArray(
-					[tagger]),
-				state);
-		} else {
-			var taggers = _v1.a;
-			return A3(
-				$elm$core$Dict$insert,
-				interval,
-				A2($elm$core$List$cons, tagger, taggers),
-				state);
-		}
-	});
+var $elm$browser$Browser$Events$init = $elm$core$Task$succeed(
+	A2($elm$browser$Browser$Events$State, _List_Nil, $elm$core$Dict$empty));
+var $elm$browser$Browser$Events$nodeToKey = function (node) {
+	if (node.$ === 'Document') {
+		return 'd_';
+	} else {
+		return 'w_';
+	}
+};
+var $elm$browser$Browser$Events$addKey = function (sub) {
+	var node = sub.a;
+	var name = sub.b;
+	return _Utils_Tuple2(
+		_Utils_ap(
+			$elm$browser$Browser$Events$nodeToKey(node),
+			name),
+		sub);
+};
 var $elm$core$Process$kill = _Scheduler_kill;
 var $elm$core$Dict$foldl = F3(
 	function (func, acc, dict) {
@@ -9836,176 +9833,11 @@ var $elm$core$Dict$merge = F6(
 			intermediateResult,
 			leftovers);
 	});
-var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
-var $elm$time$Time$setInterval = _Time_setInterval;
-var $elm$core$Process$spawn = _Scheduler_spawn;
-var $elm$time$Time$spawnHelp = F3(
-	function (router, intervals, processes) {
-		if (!intervals.b) {
-			return $elm$core$Task$succeed(processes);
-		} else {
-			var interval = intervals.a;
-			var rest = intervals.b;
-			var spawnTimer = $elm$core$Process$spawn(
-				A2(
-					$elm$time$Time$setInterval,
-					interval,
-					A2($elm$core$Platform$sendToSelf, router, interval)));
-			var spawnRest = function (id) {
-				return A3(
-					$elm$time$Time$spawnHelp,
-					router,
-					rest,
-					A3($elm$core$Dict$insert, interval, id, processes));
-			};
-			return A2($elm$core$Task$andThen, spawnRest, spawnTimer);
-		}
-	});
-var $elm$time$Time$onEffects = F3(
-	function (router, subs, _v0) {
-		var processes = _v0.processes;
-		var rightStep = F3(
-			function (_v6, id, _v7) {
-				var spawns = _v7.a;
-				var existing = _v7.b;
-				var kills = _v7.c;
-				return _Utils_Tuple3(
-					spawns,
-					existing,
-					A2(
-						$elm$core$Task$andThen,
-						function (_v5) {
-							return kills;
-						},
-						$elm$core$Process$kill(id)));
-			});
-		var newTaggers = A3($elm$core$List$foldl, $elm$time$Time$addMySub, $elm$core$Dict$empty, subs);
-		var leftStep = F3(
-			function (interval, taggers, _v4) {
-				var spawns = _v4.a;
-				var existing = _v4.b;
-				var kills = _v4.c;
-				return _Utils_Tuple3(
-					A2($elm$core$List$cons, interval, spawns),
-					existing,
-					kills);
-			});
-		var bothStep = F4(
-			function (interval, taggers, id, _v3) {
-				var spawns = _v3.a;
-				var existing = _v3.b;
-				var kills = _v3.c;
-				return _Utils_Tuple3(
-					spawns,
-					A3($elm$core$Dict$insert, interval, id, existing),
-					kills);
-			});
-		var _v1 = A6(
-			$elm$core$Dict$merge,
-			leftStep,
-			bothStep,
-			rightStep,
-			newTaggers,
-			processes,
-			_Utils_Tuple3(
-				_List_Nil,
-				$elm$core$Dict$empty,
-				$elm$core$Task$succeed(_Utils_Tuple0)));
-		var spawnList = _v1.a;
-		var existingDict = _v1.b;
-		var killTask = _v1.c;
-		return A2(
-			$elm$core$Task$andThen,
-			function (newProcesses) {
-				return $elm$core$Task$succeed(
-					A2($elm$time$Time$State, newTaggers, newProcesses));
-			},
-			A2(
-				$elm$core$Task$andThen,
-				function (_v2) {
-					return A3($elm$time$Time$spawnHelp, router, spawnList, existingDict);
-				},
-				killTask));
-	});
-var $elm$time$Time$now = _Time_now($elm$time$Time$millisToPosix);
-var $elm$time$Time$onSelfMsg = F3(
-	function (router, interval, state) {
-		var _v0 = A2($elm$core$Dict$get, interval, state.taggers);
-		if (_v0.$ === 'Nothing') {
-			return $elm$core$Task$succeed(state);
-		} else {
-			var taggers = _v0.a;
-			var tellTaggers = function (time) {
-				return $elm$core$Task$sequence(
-					A2(
-						$elm$core$List$map,
-						function (tagger) {
-							return A2(
-								$elm$core$Platform$sendToApp,
-								router,
-								tagger(time));
-						},
-						taggers));
-			};
-			return A2(
-				$elm$core$Task$andThen,
-				function (_v1) {
-					return $elm$core$Task$succeed(state);
-				},
-				A2($elm$core$Task$andThen, tellTaggers, $elm$time$Time$now));
-		}
-	});
-var $elm$time$Time$subMap = F2(
-	function (f, _v0) {
-		var interval = _v0.a;
-		var tagger = _v0.b;
-		return A2(
-			$elm$time$Time$Every,
-			interval,
-			A2($elm$core$Basics$composeL, f, tagger));
-	});
-_Platform_effectManagers['Time'] = _Platform_createManager($elm$time$Time$init, $elm$time$Time$onEffects, $elm$time$Time$onSelfMsg, 0, $elm$time$Time$subMap);
-var $elm$time$Time$subscription = _Platform_leaf('Time');
-var $elm$time$Time$every = F2(
-	function (interval, tagger) {
-		return $elm$time$Time$subscription(
-			A2($elm$time$Time$Every, interval, tagger));
-	});
-var $elm$core$Platform$Sub$map = _Platform_map;
-var $elm$json$Json$Decode$value = _Json_decodeValue;
-var $author$project$MapPortController$mapResponses = _Platform_incomingPort('mapResponses', $elm$json$Json$Decode$value);
-var $elm$browser$Browser$Events$Window = {$: 'Window'};
-var $elm$json$Json$Decode$field = _Json_decodeField;
-var $elm$browser$Browser$Events$MySub = F3(
-	function (a, b, c) {
-		return {$: 'MySub', a: a, b: b, c: c};
-	});
-var $elm$browser$Browser$Events$State = F2(
-	function (subs, pids) {
-		return {pids: pids, subs: subs};
-	});
-var $elm$browser$Browser$Events$init = $elm$core$Task$succeed(
-	A2($elm$browser$Browser$Events$State, _List_Nil, $elm$core$Dict$empty));
-var $elm$browser$Browser$Events$nodeToKey = function (node) {
-	if (node.$ === 'Document') {
-		return 'd_';
-	} else {
-		return 'w_';
-	}
-};
-var $elm$browser$Browser$Events$addKey = function (sub) {
-	var node = sub.a;
-	var name = sub.b;
-	return _Utils_Tuple2(
-		_Utils_ap(
-			$elm$browser$Browser$Events$nodeToKey(node),
-			name),
-		sub);
-};
 var $elm$browser$Browser$Events$Event = F2(
 	function (key, event) {
 		return {event: event, key: key};
 	});
+var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
 var $elm$browser$Browser$Events$spawn = F3(
 	function (router, key, _v0) {
 		var node = _v0.a;
@@ -10265,8 +10097,7 @@ var $author$project$Main$subscriptions = function (model) {
 				F2(
 					function (w, h) {
 						return A2($author$project$Main$Resize, w, h);
-					})),
-				A2($elm$time$Time$every, 10000, $author$project$Main$TenSecondTicker)
+					}))
 			]));
 };
 var $author$project$DomainModel$GPXSource = F3(
@@ -10283,7 +10114,6 @@ var $author$project$Actions$MapRefresh = {$: 'MapRefresh'};
 var $author$project$Main$ReceivedIpDetails = function (a) {
 	return {$: 'ReceivedIpDetails', a: a};
 };
-var $author$project$Main$RepaintMap = {$: 'RepaintMap'};
 var $author$project$Actions$StoreSplitConfig = {$: 'StoreSplitConfig'};
 var $author$project$Main$ToolsMsg = function (a) {
 	return {$: 'ToolsMsg', a: a};
@@ -10329,12 +10159,15 @@ var $author$project$Main$adjustSpaceForContent = function (model) {
 };
 var $elm$core$Basics$truncate = _Basics_truncate;
 var $author$project$Main$allocateSpaceForDocksAndContent = F3(
-	function (width, height, model) {
-		var currentRightSplit = $author$project$SplitPane$SplitPane$getPosition(model.rightDockLeftEdge) | 0;
+	function (newWidth, newHeight, model) {
 		var currentRightInternal = $author$project$SplitPane$SplitPane$getPosition(model.rightDockInternal) | 0;
 		var currentLeftSplit = $author$project$SplitPane$SplitPane$getPosition(model.leftDockRightEdge) | 0;
 		var currentLeftInternal = $author$project$SplitPane$SplitPane$getPosition(model.leftDockInternal) | 0;
 		var currentBottomSplit = $author$project$SplitPane$SplitPane$getPosition(model.bottomDockTopEdge) | 0;
+		var _v0 = model.windowSize;
+		var startWidth = _v0.a;
+		var startHeight = _v0.b;
+		var currentRightSplit = (startWidth | 0) - ($author$project$SplitPane$SplitPane$getPosition(model.rightDockLeftEdge) | 0);
 		return $author$project$Main$adjustSpaceForContent(
 			_Utils_update(
 				model,
@@ -10345,7 +10178,7 @@ var $author$project$Main$allocateSpaceForDocksAndContent = F3(
 							$author$project$SplitPane$SplitPane$px,
 							currentBottomSplit,
 							$elm$core$Maybe$Just(
-								_Utils_Tuple2(((height * 2) / 3) | 0, height - 75))),
+								_Utils_Tuple2(((newHeight * 2) / 3) | 0, newHeight - 75))),
 						$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Vertical)),
 					leftDockInternal: A2(
 						$author$project$SplitPane$SplitPane$configureSplitter,
@@ -10353,7 +10186,7 @@ var $author$project$Main$allocateSpaceForDocksAndContent = F3(
 							$author$project$SplitPane$SplitPane$px,
 							currentLeftInternal,
 							$elm$core$Maybe$Just(
-								_Utils_Tuple2(50, height - 75))),
+								_Utils_Tuple2(50, newHeight - 75))),
 						$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Vertical)),
 					leftDockRightEdge: A2(
 						$author$project$SplitPane$SplitPane$configureSplitter,
@@ -10361,7 +10194,7 @@ var $author$project$Main$allocateSpaceForDocksAndContent = F3(
 							$author$project$SplitPane$SplitPane$px,
 							currentLeftSplit,
 							$elm$core$Maybe$Just(
-								_Utils_Tuple2(20, (width / 3) | 0))),
+								_Utils_Tuple2(20, (newWidth / 3) | 0))),
 						$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Horizontal)),
 					rightDockInternal: A2(
 						$author$project$SplitPane$SplitPane$configureSplitter,
@@ -10369,17 +10202,17 @@ var $author$project$Main$allocateSpaceForDocksAndContent = F3(
 							$author$project$SplitPane$SplitPane$px,
 							currentRightInternal,
 							$elm$core$Maybe$Just(
-								_Utils_Tuple2(50, height - 75))),
+								_Utils_Tuple2(50, newHeight - 75))),
 						$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Vertical)),
 					rightDockLeftEdge: A2(
 						$author$project$SplitPane$SplitPane$configureSplitter,
 						A2(
 							$author$project$SplitPane$SplitPane$px,
-							currentRightSplit,
+							newWidth - currentRightSplit,
 							$elm$core$Maybe$Just(
-								_Utils_Tuple2(((2 * width) / 3) | 0, width - 20))),
+								_Utils_Tuple2(((2 * newWidth) / 3) | 0, newWidth - 20))),
 						$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Horizontal)),
-					windowSize: _Utils_Tuple2(width, height)
+					windowSize: _Utils_Tuple2(newWidth, newHeight)
 				}));
 	});
 var $elm$json$Json$Encode$float = _Json_wrap;
@@ -15193,6 +15026,7 @@ var $elm$http$Http$State = F2(
 	});
 var $elm$http$Http$init = $elm$core$Task$succeed(
 	A2($elm$http$Http$State, $elm$core$Dict$empty, _List_Nil));
+var $elm$core$Process$spawn = _Scheduler_spawn;
 var $elm$http$Http$updateReqs = F3(
 	function (router, cmds, reqs) {
 		updateReqs:
@@ -15358,14 +15192,6 @@ var $author$project$Main$showTrackOnMapCentered = function (track) {
 				$author$project$MapPortController$addMarkersToMap(track)
 			]));
 };
-var $author$project$LocalStorage$storageGetMemoryUsage = $author$project$LocalStorage$storageCommands(
-	$elm$json$Json$Encode$object(
-		_List_fromArray(
-			[
-				_Utils_Tuple2(
-				'Cmd',
-				$elm$json$Json$Encode$string('memory'))
-			])));
 var $elm$file$File$toString = _File_toString;
 var $author$project$DomainModel$treeFromSourcePoints = function (track) {
 	var referencePoint = A2(
@@ -17837,8 +17663,7 @@ var $author$project$Main$update = F2(
 					$elm$core$Platform$Cmd$batch(
 						_List_fromArray(
 							[
-								$author$project$MapPortController$createMap(mapInfoWithLocation),
-								$author$project$MapPortController$refreshMap
+								$author$project$MapPortController$createMap(mapInfoWithLocation)
 							])));
 			case 'IpInfoAcknowledged':
 				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
@@ -17903,8 +17728,7 @@ var $author$project$Main$update = F2(
 							_List_fromArray(
 								[
 									A2($author$project$Main$performActionCommands, actions, modelAfterActions),
-									$author$project$Main$showTrackOnMapCentered(newTrack),
-									A2($andrewMacmurray$elm_delay$Delay$after, 50, $author$project$Main$RepaintMap)
+									$author$project$Main$showTrackOnMapCentered(newTrack)
 								])));
 				} else {
 					return _Utils_Tuple2(
@@ -18030,15 +17854,7 @@ var $author$project$Main$update = F2(
 			case 'Resize':
 				var width = msg.a;
 				var height = msg.b;
-				var newModel = A3(
-					$author$project$Main$allocateSpaceForDocksAndContent,
-					width,
-					height,
-					_Utils_update(
-						model,
-						{
-							windowSize: _Utils_Tuple2(width, height)
-						}));
+				var newModel = A3($author$project$Main$allocateSpaceForDocksAndContent, width, height, model);
 				return _Utils_Tuple2(
 					newModel,
 					A2(
@@ -18088,9 +17904,6 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					newModel,
 					A2($author$project$Main$performActionCommands, actions, newModel));
-			case 'TenSecondTicker':
-				var posixTime = msg.a;
-				return _Utils_Tuple2(model, $author$project$LocalStorage$storageGetMemoryUsage);
 			default:
 				return _Utils_Tuple2(model, $author$project$MapPortController$refreshMap);
 		}

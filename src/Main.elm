@@ -67,7 +67,6 @@ type Msg
     | ToolsMsg ToolsController.ToolMsg
     | DismissModalMessage
     | PaneMsg PaneLayoutManager.Msg
-    | TenSecondTicker Time.Posix
     | RepaintMap
 
 
@@ -448,8 +447,7 @@ Please check the file contains GPX data.""" }
         Resize width height ->
             let
                 newModel =
-                    { model | windowSize = ( toFloat width, toFloat height ) }
-                        |> allocateSpaceForDocksAndContent width height
+                   allocateSpaceForDocksAndContent width height model
             in
             ( newModel
             , performActionCommands [ MapRefresh, StoreSplitConfig ] newModel
@@ -506,21 +504,23 @@ Please check the file contains GPX data.""" }
             , performActionCommands actions newModel
             )
 
-        TenSecondTicker posixTime ->
-            ( model, LocalStorage.storageGetMemoryUsage )
-
         RepaintMap ->
             ( model, MapPortController.refreshMap )
 
 
 allocateSpaceForDocksAndContent : Int -> Int -> Model -> Model
-allocateSpaceForDocksAndContent width height model =
+allocateSpaceForDocksAndContent newWidth newHeight model =
     let
+        ( startWidth, startHeight ) =
+            model.windowSize
+
         currentLeftSplit =
             truncate <| getPosition model.leftDockRightEdge
 
         currentRightSplit =
-            truncate <| getPosition model.rightDockLeftEdge
+            -- Note that this measurement is from the left window edge,
+            -- but we seek to preserve the width of the dock her.
+            truncate startWidth - (truncate <| getPosition model.rightDockLeftEdge)
 
         currentBottomSplit =
             truncate <| getPosition model.bottomDockTopEdge
@@ -532,22 +532,37 @@ allocateSpaceForDocksAndContent width height model =
             truncate <| getPosition model.rightDockInternal
     in
     { model
-        | windowSize = ( toFloat width, toFloat height )
+        | windowSize = ( toFloat newWidth, toFloat newHeight )
         , leftDockRightEdge =
             SplitPane.init Horizontal
-                |> configureSplitter (SplitPane.px currentLeftSplit <| Just ( 20, width // 3 ))
+                |> configureSplitter
+                    (SplitPane.px currentLeftSplit <|
+                        Just ( 20, newWidth // 3 )
+                    )
         , leftDockInternal =
             SplitPane.init Vertical
-                |> configureSplitter (SplitPane.px currentLeftInternal <| Just ( 50, height - 75 ))
+                |> configureSplitter
+                    (SplitPane.px currentLeftInternal <|
+                        Just ( 50, newHeight - 75 )
+                    )
         , rightDockLeftEdge =
             SplitPane.init Horizontal
-                |> configureSplitter (SplitPane.px currentRightSplit <| Just ( 2 * width // 3, width - 20 ))
+                |> configureSplitter
+                    (SplitPane.px (newWidth - currentRightSplit) <|
+                        Just ( 2 * newWidth // 3, newWidth - 20 )
+                    )
         , rightDockInternal =
             SplitPane.init Vertical
-                |> configureSplitter (SplitPane.px currentRightInternal <| Just ( 50, height - 75 ))
+                |> configureSplitter
+                    (SplitPane.px currentRightInternal <|
+                        Just ( 50, newHeight - 75 )
+                    )
         , bottomDockTopEdge =
             SplitPane.init Vertical
-                |> configureSplitter (SplitPane.px currentBottomSplit <| Just ( height * 2 // 3, height - 75 ))
+                |> configureSplitter
+                    (SplitPane.px currentBottomSplit <|
+                        Just ( newHeight * 2 // 3, newHeight - 75 )
+                    )
     }
         |> adjustSpaceForContent
 
@@ -798,7 +813,6 @@ subscriptions model =
         , Sub.map SplitRightDockInternal <| SplitPane.subscriptions model.rightDockInternal
         , Sub.map SplitBottomDockTopEdge <| SplitPane.subscriptions model.bottomDockTopEdge
         , Browser.Events.onResize (\w h -> Resize w h)
-        , Time.every 10000 TenSecondTicker
         ]
 
 
