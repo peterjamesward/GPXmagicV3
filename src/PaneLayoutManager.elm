@@ -316,14 +316,14 @@ viewPanes msgWrapper mTrack scene ( w, h ) options =
                     ( takeHalf w, h )
 
                 PanesUpperLower ->
-                    ( w, takeHalf h |> Quantity.minus (Pixels.pixels 20))
+                    ( w, takeHalf h |> Quantity.minus (Pixels.pixels 20) )
 
                 PanesOnePlusTwo ->
                     -- Later, not that simple
                     ( w, h )
 
                 PanesGrid ->
-                    ( takeHalf w, takeHalf h )
+                    ( takeHalf w, takeHalf h |> Quantity.minus (Pixels.pixels 20) )
 
         showNonMapViews paneId paneContext =
             case ( paneContext, mTrack ) of
@@ -373,10 +373,37 @@ viewPanes msgWrapper mTrack scene ( w, h ) options =
                 Nothing ->
                     none
     in
-    column [ alignTop, width fill, scrollbars ]
-        [ wrappedRow [ centerX, width fill ]
-            [ viewPaneZeroWithMap
-            , viewPaneNoMap Pane2 options.pane2
-            ]
-        , slider
+    column [ alignTop, width fill ]
+        [ wrappedRow [ centerX, width fill ] <|
+            case options.paneLayout of
+                PanesOne ->
+                    [ viewPaneZeroWithMap
+                    , slider
+                    ]
+
+                PanesLeftRight ->
+                    [ viewPaneZeroWithMap
+                    , viewPaneNoMap Pane2 options.pane2
+                    , slider
+                    ]
+
+                PanesUpperLower ->
+                    [ viewPaneZeroWithMap
+                    , viewPaneNoMap Pane2 options.pane2
+                    , slider
+                    ]
+
+                PanesGrid ->
+                    [ viewPaneZeroWithMap
+                    , viewPaneNoMap Pane2 options.pane2
+                    , viewPaneNoMap Pane3 options.pane3
+                    , viewPaneNoMap Pane4 options.pane4
+                    , slider
+                    ]
+
+                PanesOnePlusTwo ->
+                    -- Later.
+                    [ viewPaneZeroWithMap
+                    , slider
+                    ]
         ]

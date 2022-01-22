@@ -3,16 +3,11 @@
 
 BUG: Dubious steepest gradient on some routes. (May have to wait until we have that tool!)
 BUG: Hit detect is poor on 304K course (maybe not surprising but it should work).
-BUG: The initial map repaint not working in the new pane layout manager (despite being in the JS).
-BUG: Dragging right browser edge should not change right dock width.
 
 # WIP
 
-## Multiple views
-
-Next: Add other panes, and sort out the space distribution.
-
-Not sure if panes toggle visibility or truly vanish, depends if it affects Map.
+**BUG**: The initial map repaint not working in the new pane layout manager (despite being in the JS).
+**BUG**: Dragging right browser edge should not change right dock width.
 
 ---
 

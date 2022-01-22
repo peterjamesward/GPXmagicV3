@@ -27364,6 +27364,8 @@ var $author$project$SplitPane$SplitPane$view = F4(
 				]));
 	});
 var $author$project$PaneLayoutManager$Pane2 = {$: 'Pane2'};
+var $author$project$PaneLayoutManager$Pane3 = {$: 'Pane3'};
+var $author$project$PaneLayoutManager$Pane4 = {$: 'Pane4'};
 var $author$project$PaneLayoutManager$SetCurrentPosition = function (a) {
 	return {$: 'SetCurrentPosition', a: a};
 };
@@ -27379,7 +27381,6 @@ var $author$project$ViewPureStyles$conditionallyVisible = F2(
 				]),
 			element);
 	});
-var $mdgriffith$elm_ui$Element$scrollbars = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$overflow, $mdgriffith$elm_ui$Internal$Style$classes.scrollbars);
 var $ianmackenzie$elm_units$Quantity$truncate = function (_v0) {
 	var value = _v0.a;
 	return $ianmackenzie$elm_units$Quantity$Quantity(value | 0);
@@ -29370,17 +29371,20 @@ var $author$project$PaneLayoutManager$viewPanes = F5(
 				default:
 					return _Utils_Tuple2(
 						takeHalf(w),
-						takeHalf(h));
+						A2(
+							$ianmackenzie$elm_units$Quantity$minus,
+							$ianmackenzie$elm_units$Pixels$pixels(20),
+							takeHalf(h)));
 			}
 		}();
 		var paneWidth = _v1.a;
 		var paneHeight = _v1.b;
 		var showNonMapViews = F2(
 			function (paneId, paneContext) {
-				var _v3 = _Utils_Tuple2(paneContext, mTrack);
-				if ((_v3.a.$ === 'Just') && (_v3.b.$ === 'Just')) {
-					var context = _v3.a.a;
-					var track = _v3.b.a;
+				var _v4 = _Utils_Tuple2(paneContext, mTrack);
+				if ((_v4.a.$ === 'Just') && (_v4.b.$ === 'Just')) {
+					var context = _v4.a.a;
+					var track = _v4.b.a;
 					return A5(
 						$author$project$ViewThirdPerson$view,
 						context,
@@ -29439,8 +29443,7 @@ var $author$project$PaneLayoutManager$viewPanes = F5(
 			_List_fromArray(
 				[
 					$mdgriffith$elm_ui$Element$alignTop,
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-					$mdgriffith$elm_ui$Element$scrollbars
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
 				]),
 			_List_fromArray(
 				[
@@ -29451,12 +29454,40 @@ var $author$project$PaneLayoutManager$viewPanes = F5(
 							$mdgriffith$elm_ui$Element$centerX,
 							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
 						]),
-					_List_fromArray(
-						[
-							viewPaneZeroWithMap,
-							A2(viewPaneNoMap, $author$project$PaneLayoutManager$Pane2, options.pane2)
-						])),
-					slider
+					function () {
+						var _v3 = options.paneLayout;
+						switch (_v3.$) {
+							case 'PanesOne':
+								return _List_fromArray(
+									[viewPaneZeroWithMap, slider]);
+							case 'PanesLeftRight':
+								return _List_fromArray(
+									[
+										viewPaneZeroWithMap,
+										A2(viewPaneNoMap, $author$project$PaneLayoutManager$Pane2, options.pane2),
+										slider
+									]);
+							case 'PanesUpperLower':
+								return _List_fromArray(
+									[
+										viewPaneZeroWithMap,
+										A2(viewPaneNoMap, $author$project$PaneLayoutManager$Pane2, options.pane2),
+										slider
+									]);
+							case 'PanesGrid':
+								return _List_fromArray(
+									[
+										viewPaneZeroWithMap,
+										A2(viewPaneNoMap, $author$project$PaneLayoutManager$Pane2, options.pane2),
+										A2(viewPaneNoMap, $author$project$PaneLayoutManager$Pane3, options.pane3),
+										A2(viewPaneNoMap, $author$project$PaneLayoutManager$Pane4, options.pane4),
+										slider
+									]);
+							default:
+								return _List_fromArray(
+									[viewPaneZeroWithMap, slider]);
+						}
+					}())
 				]));
 	});
 var $author$project$Main$viewPaneArea = function (model) {
