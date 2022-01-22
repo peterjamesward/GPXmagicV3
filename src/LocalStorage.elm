@@ -98,55 +98,12 @@ processStoragePortMessage json model =
                 memory =
                     D.decodeValue (D.field "memory" memoryDecoder) json
             in
-            case ( memory ) of
-                ( Ok gotMemory ) ->
+            case memory of
+                Ok gotMemory ->
                     [ HeapStatusUpdate gotMemory ]
 
                 _ ->
                     []
 
-        --        ( Ok "accordion", Ok saved ) ->
-        --            let
-        --                ( restoreAccordionState, restoreAccordion ) =
-        --                    Accordion.recoverStoredState
-        --                        saved
-        --                        model.toolsAccordion
-        --            in
-        --            ( Model
-        --                { model
-        --                    | accordionState = restoreAccordionState
-        --                    , toolsAccordion = restoreAccordion
-        --                }
-        --            , Cmd.none
-        --            )
-        --
-        --
-        --        ( Ok "panes", Ok saved ) ->
-        --            let
-        --                newPanes =
-        --                    ViewPane.restorePaneState saved model.viewPanes
-        --
-        --                newModel =
-        --                    { model
-        --                        | viewPanes =
-        --                            ViewPane.mapOverPanes
-        --                                (setViewPaneSize model.splitInPixels)
-        --                                newPanes
-        --                    }
-        --            in
-        --            processPostUpdateAction newModel ActionRerender
-        --
-        --        ( Ok "display", Ok saved ) ->
-        --            ( Model { model | displayOptions = DisplayOptions.decodeOptions saved }
-        --            , Cmd.none
-        --            )
-        --
-        --        _ ->
-        --            ( Model model, Cmd.none )
-        --
-        --( Ok "storage.keys", _ ) ->
-        --    (  model
-        --    , Cmd.none
-        --    )
         _ ->
             []

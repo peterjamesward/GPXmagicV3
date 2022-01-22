@@ -218,10 +218,12 @@ init mflags origin navigationKey =
     , Cmd.batch
         [ authCmd
         , Task.perform AdjustTimeZone Time.here
-        , LocalStorage.storageListKeys
+
+        --, LocalStorage.storageListKeys
         , Task.attempt GotWindowSize Dom.getViewport
         , LocalStorage.storageGetItem "splits"
         , LocalStorage.storageGetItem "tools"
+        , LocalStorage.storageGetItem "panes"
         ]
     )
 
@@ -932,6 +934,12 @@ performActionsOnModel actions model =
                             { foldedModel
                                 | toolOptions =
                                     ToolsController.restoreStoredValues foldedModel.toolOptions value
+                            }
+
+                        "panes" ->
+                            { foldedModel
+                                | paneLayoutOptions =
+                                    PaneLayoutManager.restoreStoredValues foldedModel.paneLayoutOptions value
                             }
 
                         _ ->

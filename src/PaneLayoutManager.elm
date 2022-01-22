@@ -9,7 +9,9 @@ import FeatherIcons
 import FlatColors.ChinesePalette
 import Html.Attributes exposing (style)
 import Html.Events.Extra.Mouse as Mouse
+import Json.Decode as D
 import Json.Encode as E
+import List.Extra
 import LocalCoords exposing (LocalCoords)
 import MapPortController
 import Pixels exposing (Pixels)
@@ -169,23 +171,45 @@ update paneMsg msgWrapper mTrack contentArea options =
             in
             ( newOptions
             , [ MapRefresh
-              , StoreLocally "panes" <| encodePaneState options
+              , StoreLocally "panes" <| encodePaneState newOptions
               ]
             )
 
         TogglePopup ->
             ( { options | popupVisible = not options.popupVisible }, [] )
 
-        SetViewMode pane viewMode ->
+        SetViewMode paneId viewMode ->
             let
-                pane1 =
-                    options.pane1
+                currentPane =
+                    case paneId of
+                        Pane1 ->
+                            options.pane1
 
-                newPane1 =
-                    { pane1 | activeView = viewMode }
+                        Pane2 ->
+                            options.pane2
+
+                        Pane3 ->
+                            options.pane3
+
+                        Pane4 ->
+                            options.pane4
+
+                newPane =
+                    { currentPane | activeView = viewMode }
 
                 newOptions =
-                    { options | pane1 = newPane1 }
+                    case paneId of
+                        Pane1 ->
+                            { options | pane1 = newPane }
+
+                        Pane2 ->
+                            { options | pane2 = newPane }
+
+                        Pane3 ->
+                            { options | pane3 = newPane }
+
+                        Pane4 ->
+                            { options | pane4 = newPane }
             in
             ( newOptions
             , [ MapRefresh
@@ -197,6 +221,7 @@ update paneMsg msgWrapper mTrack contentArea options =
             let
                 paneInfo =
                     -- Tedious is good, tedious works.
+                    --TODO: Local refactor here.
                     case paneId of
                         Pane1 ->
                             options.pane1
@@ -284,12 +309,6 @@ initialisePane track options pane =
             Just <|
                 ViewThirdPerson.initialiseView 0 track.trackTree
         , mapContext = Just ViewMap.initialiseContext
-        , activeView =
-            if pane.activeView == ViewInfo then
-                ViewThird
-
-            else
-                pane.activeView
     }
 
 
@@ -455,66 +474,150 @@ encodePaneState options =
         ]
 
 
+paneLayoutHelper : List ( PaneLayout, String )
+paneLayoutHelper =
+    [ ( PanesOne, "One" )
+    , ( PanesLeftRight, "LR" )
+    , ( PanesUpperLower, "UL" )
+    , ( PanesOnePlusTwo, "OneUpTwoDown" )
+    , ( PanesGrid, "Grid" )
+    ]
+
+
 encodePanesLayout : PaneLayout -> String
 encodePanesLayout layout =
-    case layout of
-        PanesOne ->
-            "One"
+    paneLayoutHelper
+        |> List.Extra.find (\entry -> Tuple.first entry == layout)
+        |> Maybe.withDefault ( PanesOne, "One" )
+        |> Tuple.second
 
-        PanesLeftRight ->
-            "LR"
 
-        PanesUpperLower ->
-            "UL"
-
-        PanesOnePlusTwo ->
-            "OneUpTwoDown"
-
-        PanesGrid ->
-            "Grid"
+decodePanesLayout : String -> PaneLayout
+decodePanesLayout layout =
+    paneLayoutHelper
+        |> List.Extra.find (\entry -> Tuple.second entry == layout)
+        |> Maybe.withDefault ( PanesOne, "One" )
+        |> Tuple.first
 
 
 encodeOnePane : PaneContext -> E.Value
 encodeOnePane pane =
     E.object
         [ ( "paneid", E.string <| encodePaneId pane.paneId )
-        , ( "activeview", E.string <| encodeView pane.activeView )
+        , ( "activeView", E.string <| encodeView pane.activeView )
         ]
+
+
+paneIdHelper : List ( PaneId, String )
+paneIdHelper =
+    [ ( Pane1, "pane1" )
+    , ( Pane2, "pane2" )
+    , ( Pane3, "pane3" )
+    , ( Pane4, "pane4" )
+    ]
 
 
 encodePaneId : PaneId -> String
 encodePaneId paneId =
-    case paneId of
-        Pane1 ->
-            "pane1"
+    paneIdHelper
+        |> List.Extra.find (\entry -> Tuple.first entry == paneId)
+        |> Maybe.withDefault ( Pane1, "pane1" )
+        |> Tuple.second
 
-        Pane2 ->
-            "pane2"
 
-        Pane3 ->
-            "pane3"
+decodePaneId : String -> PaneId
+decodePaneId paneId =
+    paneIdHelper
+        |> List.Extra.find (\entry -> Tuple.second entry == paneId)
+        |> Maybe.withDefault ( Pane1, "pane1" )
+        |> Tuple.first
 
-        Pane4 ->
-            "pane4"
+
+viewHelper : List ( ViewMode, String )
+viewHelper =
+    [ ( ViewInfo, "info" )
+    , ( ViewThird, "third" )
+    , ( ViewFirst, "first" )
+    , ( ViewPlan, "plan" )
+    , ( ViewProfile, "profile" )
+    , ( ViewMap, "map" )
+    ]
 
 
 encodeView : ViewMode -> String
 encodeView view =
-    case view of
-        ViewInfo ->
-            "Info"
+    viewHelper
+        |> List.Extra.find (\entry -> Tuple.first entry == view)
+        |> Maybe.withDefault ( ViewInfo, "info" )
+        |> Tuple.second
 
-        ViewThird ->
-            "Third"
 
-        ViewFirst ->
-            "First"
+decodeView : String -> ViewMode
+decodeView view =
+    viewHelper
+        |> List.Extra.find (\entry -> Tuple.second entry == view)
+        |> Maybe.withDefault ( ViewInfo, "info" )
+        |> Tuple.first
 
-        ViewPlan ->
-            "Plan"
 
-        ViewProfile ->
-            "Profile"
+restoreStoredValues : Options -> D.Value -> Options
+restoreStoredValues options values =
+    case D.decodeValue paneStateDecoder values of
+        Ok fromStorage ->
+            let
+                _ =
+                    Debug.log "GOT HERE" ""
+            in
+            { defaultOptions
+                | paneLayout = decodePanesLayout fromStorage.layoutName
+                , popupVisible = False
+                , pane1 = applyStoredPaneDetails fromStorage.pane1
+                , pane2 = applyStoredPaneDetails fromStorage.pane2
+                , pane3 = applyStoredPaneDetails fromStorage.pane3
+                , pane4 = applyStoredPaneDetails fromStorage.pane4
+            }
 
-        ViewMap ->
-            "Map"
+        Err error ->
+            let
+                _ =
+                    Debug.log "ERROR" error
+            in
+            options
+
+
+paneStateDecoder =
+    D.map5 RestoredOptions
+        (D.field "layout" D.string)
+        (D.field "pane1" paneDecoder)
+        (D.field "pane2" paneDecoder)
+        (D.field "pane3" paneDecoder)
+        (D.field "pane4" paneDecoder)
+
+
+paneDecoder =
+    D.map2 StoredPane
+        (D.field "activeView" D.string)
+        (D.field "paneid" D.string)
+
+
+applyStoredPaneDetails : StoredPane -> PaneContext
+applyStoredPaneDetails stored =
+    { defaultPaneContext
+        | activeView = decodeView stored.activeView
+        , paneId = decodePaneId stored.paneId
+    }
+
+
+type alias RestoredOptions =
+    { layoutName : String
+    , pane1 : StoredPane
+    , pane2 : StoredPane
+    , pane3 : StoredPane
+    , pane4 : StoredPane
+    }
+
+
+type alias StoredPane =
+    { activeView : String
+    , paneId : String
+    }

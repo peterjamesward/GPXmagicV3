@@ -5,8 +5,6 @@ BUG: Dubious steepest gradient on some routes. (May have to wait until we have t
 
 # WIP
 
-~~Store &~~ **Restore** pane layout.
-
 ---
 
 # BACKLOG, roughly in order ...
@@ -41,6 +39,10 @@ I think the top bar is still special: Load, Save, Donate. Is it?
 
 ## Error messages
 Using an action DisplayMessage to show modal dialog from any tool.
+
+## Memory monitor
+Make a tool for this.
+Low memory can trigger defensive actions: remove Undo entries, reduce rendering depth, reduce graphics.
 
 ## Plan view
 Same as before. Use 3d-scene. Orthographic camera.
@@ -78,7 +80,6 @@ Terrain 2 = Tree walk combined with whole (visible) tree query, because <track l
 Use a graduated drop off with distance, compute at each tree level?
 On Map, work out the depth to fit (say) 1000 points within visible region.
 > Not sure it's required.
-
 
 ## Small stuff
 Put all Font, Colour etc into a Palette/Style module for ease of change.
