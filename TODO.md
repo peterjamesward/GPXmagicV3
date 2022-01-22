@@ -6,17 +6,19 @@ BUG: Hit detect is poor on 304K course (maybe not surprising but it should work)
 
 # WIP
 
+Store & Restore pane layout.
+
 ---
 
 # BACKLOG, roughly in order ...
 
+## Small things (you'd hope)
 Option for 3D view to follow pointer.
-
 Make **DragPan** work on 3D view.
-
 Put all Font, Colour etc into a Palette/Style module for ease of change.
-
 Need "restore to defaults" for tools.
+Configurable background colour.
+Imperial measures option.
 
 ## Profile & Charts
 Details in Backlog.
@@ -38,10 +40,6 @@ All existing tools to move across, with some rationalisation.
 Pane payout choices as control?
 I think the top bar is still special: Load, Save, Donate. Is it?
 "Where am I" - reverse geocode (rate limited)).
-
-## Look and Feel
-Configurable background colour.
-Imperial measures option.
 
 ## Error messages
 Using an action DisplayMessage to show modal dialog from any tool.

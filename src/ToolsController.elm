@@ -253,12 +253,12 @@ update toolMsg isTrack msgWrapper options =
 
         ToolPopupToggle toolType ->
             ( { options | tools = List.map (toggleToolPopup toolType) options.tools }
-            , [ StoreToolsConfig ]
+            , [ StoreLocally "tools" <| encodeToolState options ]
             )
 
         ToolDockSelect toolType toolDock ->
             ( { options | tools = List.map (setDock toolType toolDock) options.tools }
-            , [ StoreToolsConfig ]
+            , [ StoreLocally "tools" <| encodeToolState options ]
             )
 
         ToolColourSelect toolType color ->
@@ -271,7 +271,7 @@ update toolMsg isTrack msgWrapper options =
                 toolStateHasChanged toolType Expanded isTrack newOptions
 
             else
-                ( newOptions, [ StoreToolsConfig ] )
+                ( newOptions, [ StoreLocally "tools" <| encodeToolState options ] )
 
         ToolStateToggle toolType newState ->
             -- Record the new state, but also let the tool know!
@@ -364,7 +364,7 @@ toolStateHasChanged :
 toolStateHasChanged toolType newState isTrack options =
     case toolType of
         ToolTrackInfo ->
-            ( options, [ StoreToolsConfig ] )
+            ( options, [ StoreLocally "tools" <| encodeToolState options ] )
 
         ToolAbruptDirectionChanges ->
             -- Would like an OO style dispatch table here but what with each tool
@@ -380,7 +380,7 @@ toolStateHasChanged toolType newState isTrack options =
                 newOptions =
                     { options | directionChangeOptions = newToolOptions }
             in
-            ( newOptions, StoreToolsConfig :: actions )
+            ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
         ToolDeletePoints ->
             let
@@ -394,7 +394,7 @@ toolStateHasChanged toolType newState isTrack options =
                 newOptions =
                     { options | deleteOptions = newToolOptions }
             in
-            ( newOptions, StoreToolsConfig :: actions )
+            ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
         ToolPointers ->
             let
@@ -408,7 +408,7 @@ toolStateHasChanged toolType newState isTrack options =
                 newOptions =
                     { options | pointerOptions = newToolOptions }
             in
-            ( newOptions, [ StoreToolsConfig ] )
+            ( newOptions, [ StoreLocally "tools" <| encodeToolState options ] )
 
         ToolUndoRedo ->
             ( options, [  ] )

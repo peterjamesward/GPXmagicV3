@@ -401,7 +401,11 @@ Please check the file contains GPX data.""" }
                         |> adjustSpaceForContent
             in
             ( newModel
-            , performActionCommands [ MapRefresh, StoreSplitConfig ] newModel
+            , performActionCommands
+                [ MapRefresh
+                , StoreLocally "splits" (encodeSplitValues model)
+                ]
+                newModel
             )
 
         SplitLeftDockInternal m ->
@@ -411,7 +415,11 @@ Please check the file contains GPX data.""" }
                         |> adjustSpaceForContent
             in
             ( newModel
-            , performActionCommands [ MapRefresh, StoreSplitConfig ] newModel
+            , performActionCommands
+                [ MapRefresh
+                , StoreLocally "splits" (encodeSplitValues model)
+                ]
+                newModel
             )
 
         SplitRightDockLeftEdge m ->
@@ -421,7 +429,11 @@ Please check the file contains GPX data.""" }
                         |> adjustSpaceForContent
             in
             ( newModel
-            , performActionCommands [ MapRefresh, StoreSplitConfig ] newModel
+            , performActionCommands
+                [ MapRefresh
+                , StoreLocally "splits" (encodeSplitValues model)
+                ]
+                newModel
             )
 
         SplitRightDockInternal m ->
@@ -431,7 +443,11 @@ Please check the file contains GPX data.""" }
                         |> adjustSpaceForContent
             in
             ( newModel
-            , performActionCommands [ MapRefresh, StoreSplitConfig ] newModel
+            , performActionCommands
+                [ MapRefresh
+                , StoreLocally "splits" (encodeSplitValues model)
+                ]
+                newModel
             )
 
         SplitBottomDockTopEdge m ->
@@ -441,16 +457,24 @@ Please check the file contains GPX data.""" }
                         |> adjustSpaceForContent
             in
             ( newModel
-            , performActionCommands [ MapRefresh, StoreSplitConfig ] newModel
+            , performActionCommands
+                [ MapRefresh
+                , StoreLocally "splits" (encodeSplitValues model)
+                ]
+                newModel
             )
 
         Resize width height ->
             let
                 newModel =
-                   allocateSpaceForDocksAndContent width height model
+                    allocateSpaceForDocksAndContent width height model
             in
             ( newModel
-            , performActionCommands [ MapRefresh, StoreSplitConfig ] newModel
+            , performActionCommands
+                [ MapRefresh
+                , StoreLocally "splits" (encodeSplitValues model)
+                ]
+                newModel
             )
 
         GotWindowSize result ->
@@ -1013,12 +1037,8 @@ performActionCommands actions model =
                 ( SetMarker maybeMarker, Just track ) ->
                     MapPortController.addMarkersToMap track
 
-                ( StoreSplitConfig, _ ) ->
-                    LocalStorage.storageSetItem "splits" (encodeSplitValues model)
-
-                ( StoreToolsConfig, _ ) ->
-                    LocalStorage.storageSetItem "tools" <|
-                        ToolsController.encodeToolState model.toolOptions
+                ( StoreLocally key value, _ ) ->
+                    LocalStorage.storageSetItem key value
 
                 _ ->
                     Cmd.none

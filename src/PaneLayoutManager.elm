@@ -9,6 +9,7 @@ import FeatherIcons
 import FlatColors.ChinesePalette
 import Html.Attributes exposing (style)
 import Html.Events.Extra.Mouse as Mouse
+import Json.Encode as E
 import LocalCoords exposing (LocalCoords)
 import MapPortController
 import Pixels exposing (Pixels)
@@ -162,7 +163,15 @@ update paneMsg msgWrapper mTrack contentArea options =
             ( options, [] )
 
         SetPaneLayout paneLayout ->
-            ( { options | paneLayout = paneLayout }, [ MapRefresh ] )
+            let
+                newOptions =
+                    { options | paneLayout = paneLayout }
+            in
+            ( newOptions
+            , [ MapRefresh
+              , StoreLocally "panes" <| encodePaneState options
+              ]
+            )
 
         TogglePopup ->
             ( { options | popupVisible = not options.popupVisible }, [] )
@@ -178,7 +187,11 @@ update paneMsg msgWrapper mTrack contentArea options =
                 newOptions =
                     { options | pane1 = newPane1 }
             in
-            ( newOptions, [ MapRefresh ] )
+            ( newOptions
+            , [ MapRefresh
+              , StoreLocally "panes" <| encodePaneState newOptions
+              ]
+            )
 
         ImageMessage paneId imageMsg ->
             let
@@ -429,3 +442,79 @@ viewPanes msgWrapper mTrack scene ( w, h ) options =
                     , slider
                     ]
         ]
+
+
+encodePaneState : Options -> E.Value
+encodePaneState options =
+    E.object
+        [ ( "layout", E.string <| encodePanesLayout options.paneLayout )
+        , ( "pane1", encodeOnePane options.pane1 )
+        , ( "pane2", encodeOnePane options.pane2 )
+        , ( "pane3", encodeOnePane options.pane3 )
+        , ( "pane4", encodeOnePane options.pane4 )
+        ]
+
+
+encodePanesLayout : PaneLayout -> String
+encodePanesLayout layout =
+    case layout of
+        PanesOne ->
+            "One"
+
+        PanesLeftRight ->
+            "LR"
+
+        PanesUpperLower ->
+            "UL"
+
+        PanesOnePlusTwo ->
+            "OneUpTwoDown"
+
+        PanesGrid ->
+            "Grid"
+
+
+encodeOnePane : PaneContext -> E.Value
+encodeOnePane pane =
+    E.object
+        [ ( "paneid", E.string <| encodePaneId pane.paneId )
+        , ( "activeview", E.string <| encodeView pane.activeView )
+        ]
+
+
+encodePaneId : PaneId -> String
+encodePaneId paneId =
+    case paneId of
+        Pane1 ->
+            "pane1"
+
+        Pane2 ->
+            "pane2"
+
+        Pane3 ->
+            "pane3"
+
+        Pane4 ->
+            "pane4"
+
+
+encodeView : ViewMode -> String
+encodeView view =
+    case view of
+        ViewInfo ->
+            "Info"
+
+        ViewThird ->
+            "Third"
+
+        ViewFirst ->
+            "First"
+
+        ViewPlan ->
+            "Plan"
+
+        ViewProfile ->
+            "Profile"
+
+        ViewMap ->
+            "Map"

@@ -17,8 +17,7 @@ type ToolAction msg
     | DelayMessage Int msg
     | MapCenterOnCurrent
     | MapRefresh -- generally because layout has changed.
-    | StoreSplitConfig
-    | StoreToolsConfig
+    | StoreLocally String E.Value
     | StoredValueRetrieved String E.Value
     | DeletePointsBetween Int Int -- fromStart, fromEnd
     | DeleteSinglePoint Int Int -- fromStart, fromEnd
