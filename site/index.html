@@ -366,9 +366,9 @@ function addLineToMap(data, points) {
         e;
     });
 
-    app.ports.mapResponses.send(
-      { 'msg' : 'track ready' }
-    );
+  //  app.ports.mapResponses.send(
+  //    { 'msg' : 'track ready' }
+  //  );
 
     setTimeout(function() { map.resize(); }, 50);
 };

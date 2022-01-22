@@ -216,6 +216,8 @@ processMapPortMessage track json =
             ( D.decodeValue (D.field "lat" D.float) json
             , D.decodeValue (D.field "lon" D.float) json
             )
+
+        _ = Debug.log "MAP PORT" jsonMsg
     in
     case jsonMsg of
         Ok "click" ->

@@ -16,9 +16,7 @@ Limit previews using renderDepth; e.g. Delete for > 1000 points.
 
 ## Small things (you'd hope)
 
-BUG: Map is centering on Orange (again).
-
-BUG: I suspect hit detect is not using the correct paen size.
+BUG: Hit detect is not using the correct pane size.
 
 Option for 3D view to follow pointer; where should this live?
 > In the overlay menu, using padlock for continuity with v2.
@@ -29,9 +27,7 @@ Configurable background colour (light, medium, dark) in top bar settings.
 
 Imperial measures option in top bar settings button.
 
-More distinct spacing and colours between Orange and Purple markers.
-
-JB: I wonder if the Summary and Segment information could be better placed on the top 
+**JB**: I wonder if the Summary and Segment information could be better placed on the top 
 Load GPX top line toggleable between the 2... only thinking of maximising space use.
 
 ## Profile & Charts
@@ -104,7 +100,7 @@ On Map, work out the depth to fit (say) 1000 points within visible region.
 Put all Font, Colour etc into a Palette/Style module for ease of change.
 
 ## Loop detection
-JB: I have been getting a few Partner event gpx's lately that do a loop... but then continue around for say 25% of it before finishing which when a map is first loaded i do not notice until i start working on it... it would be nice if when a map is first loaded the points show a different colour when there is another course on top.. ie orange for the first lap but if it continues say red until it finishes..
+**JB**: I have been getting a few Partner event gpx's lately that do a loop... but then continue around for say 25% of it before finishing which when a map is first loaded i do not notice until i start working on it... it would be nice if when a map is first loaded the points show a different colour when there is another course on top.. ie orange for the first lap but if it continues say red until it finishes..
 
 ---
 
