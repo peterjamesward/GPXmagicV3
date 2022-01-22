@@ -2,8 +2,7 @@
 # BUGS (for an 'easy' day)
 
 BUG: Dubious steepest gradient on some routes. (May have to wait until we have that tool!)
-BUG: Would like to have tools float to the top of their docks.
-BUG: In Grid view, Pane1 is noticably smaller than the others.
+BUG: In Grid view, Pane1 is notably smaller than the others.
 
 # WIP
 
@@ -25,7 +24,7 @@ Option for 3D view to follow pointer; where should this live?
 
 Configurable background colour (light, medium, dark) in top bar settings.
 
-Imperial measures option in top bar settings button.
+Imperial measures option in top bar settings button (maybe combine with track info bar, JB below).
 
 **JB**: I wonder if the Summary and Segment information could be better placed on the top 
 Load GPX top line toggleable between the 2... only thinking of maximising space use.

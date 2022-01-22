@@ -429,6 +429,7 @@ toolsForDock dock msgWrapper isTrack options =
     wrappedRow
         [ spacing 4
         , scrollbarY
+
         --, height fill
         ]
     <|
@@ -450,9 +451,11 @@ viewTool msgWrapper isTrack options toolEntry =
         , alignTop
         , htmlAttribute (style "vertical-align" "top")
         , spacing 0
-        , Border.width 2
+        , Border.width 4
         , Border.color toolEntry.tabColour
-        , Border.rounded 8
+        , Border.rounded 10
+        , Background.color FlatColors.AussiePalette.coastalBreeze
+        , paddingEach { left = 0, right = 0, top = 0, bottom = 4 }
         , inFront <|
             column
                 [ alignRight
@@ -487,11 +490,12 @@ viewTool msgWrapper isTrack options toolEntry =
                 , label = useIcon FeatherIcons.settings
                 }
             ]
-        , if toolEntry.state == Expanded then
-            viewToolByType msgWrapper toolEntry isTrack options
+        , el [ Border.rounded 8, width fill, height fill ] <|
+            if toolEntry.state == Expanded then
+                viewToolByType msgWrapper toolEntry isTrack options
 
-          else
-            none
+            else
+                none
         ]
 
 
