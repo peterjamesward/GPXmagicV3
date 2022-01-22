@@ -276,6 +276,7 @@ viewModeChoices msgWrapper options =
         , options = fullOptionList
         }
 
+
 viewModeChoicesNoMap : (Msg -> msg) -> PaneId -> PaneContext -> Element msg
 viewModeChoicesNoMap msgWrapper paneId settings =
     let
@@ -303,48 +304,55 @@ viewPanes :
     -> Element msg
 viewPanes msgWrapper mTrack scene ( w, h ) options =
     let
+        takeHalf qty =
+            qty |> Quantity.toFloatQuantity |> Quantity.half |> Quantity.truncate
+
+        ( paneWidth, paneHeight ) =
+            case options.paneLayout of
+                PanesOne ->
+                    ( w, h )
+
+                PanesLeftRight ->
+                    ( takeHalf w, h )
+
+                PanesUpperLower ->
+                    ( w, takeHalf h |> Quantity.minus (Pixels.pixels 20))
+
+                PanesOnePlusTwo ->
+                    -- Later, not that simple
+                    ( w, h )
+
+                PanesGrid ->
+                    ( takeHalf w, takeHalf h )
+
+        showNonMapViews paneId paneContext =
+            case ( paneContext, mTrack ) of
+                ( Just context, Just track ) ->
+                    ViewThirdPerson.view
+                        context
+                        ( paneWidth, paneHeight )
+                        track
+                        scene
+                        (msgWrapper << ImageMessage Pane1)
+
+                _ ->
+                    none
+
         viewPaneZeroWithMap =
-            column
-                [ width fill
-                , alignTop
-                , centerX
-                ]
+            -- The Map DIV must be constructed once only, even before we have a Track,
+            -- or the map gets upset. So we use CSS to show and hide these elements.
+            column [ width fill, alignTop, centerX ]
                 [ viewModeChoices msgWrapper options
                 , conditionallyVisible (options.pane1.activeView /= ViewMap) <|
-                    case ( options.pane1.thirdPersonContext, mTrack ) of
-                        ( Just context, Just track ) ->
-                            ViewThirdPerson.view
-                                context
-                                ( w, h )
-                                track
-                                scene
-                                (msgWrapper << ImageMessage Pane1)
-
-                        _ ->
-                            none
+                    showNonMapViews Pane1 options.pane1.thirdPersonContext
                 , conditionallyVisible (options.pane1.activeView == ViewMap) <|
-                    ViewMap.view ( w, h ) (msgWrapper << MapPortsMessage)
+                    ViewMap.view ( paneWidth, paneHeight ) (msgWrapper << MapPortsMessage)
                 ]
 
         viewPaneNoMap paneId paneSettings =
-            column
-                [ width fill
-                , alignTop
-                , centerX
-                ]
+            column [ width fill, alignTop, centerX ]
                 [ viewModeChoicesNoMap msgWrapper paneId paneSettings
-                --TODO: Factor out this next call.
-                ,   case ( options.pane2.thirdPersonContext, mTrack ) of
-                        ( Just context, Just track ) ->
-                            ViewThirdPerson.view
-                                context
-                                ( w, h )
-                                track
-                                scene
-                                (msgWrapper << ImageMessage paneId)
-
-                        _ ->
-                            none
+                , showNonMapViews Pane1 options.pane1.thirdPersonContext
                 ]
 
         slider =
@@ -365,7 +373,6 @@ viewPanes msgWrapper mTrack scene ( w, h ) options =
                 Nothing ->
                     none
     in
-    -- The Map DIV must be constructed once only, even before we have a Track, or the map gets upset.
     column [ alignTop, width fill, scrollbars ]
         [ wrappedRow [ centerX, width fill ]
             [ viewPaneZeroWithMap

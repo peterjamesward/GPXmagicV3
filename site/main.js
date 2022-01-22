@@ -27380,6 +27380,10 @@ var $author$project$ViewPureStyles$conditionallyVisible = F2(
 			element);
 	});
 var $mdgriffith$elm_ui$Element$scrollbars = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$overflow, $mdgriffith$elm_ui$Internal$Style$classes.scrollbars);
+var $ianmackenzie$elm_units$Quantity$truncate = function (_v0) {
+	var value = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(value | 0);
+};
 var $mdgriffith$elm_ui$Internal$Model$Left = {$: 'Left'};
 var $mdgriffith$elm_ui$Element$alignLeft = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Left);
 var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
@@ -29314,81 +29318,11 @@ var $author$project$PaneLayoutManager$viewPanes = F5(
 	function (msgWrapper, mTrack, scene, _v0, options) {
 		var w = _v0.a;
 		var h = _v0.b;
-		var viewPaneZeroWithMap = A2(
-			$mdgriffith$elm_ui$Element$column,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-					$mdgriffith$elm_ui$Element$alignTop,
-					$mdgriffith$elm_ui$Element$centerX
-				]),
-			_List_fromArray(
-				[
-					A2($author$project$PaneLayoutManager$viewModeChoices, msgWrapper, options),
-					A2(
-					$author$project$ViewPureStyles$conditionallyVisible,
-					!_Utils_eq(options.pane1.activeView, $author$project$PaneLayoutManager$ViewMap),
-					function () {
-						var _v3 = _Utils_Tuple2(options.pane1.thirdPersonContext, mTrack);
-						if ((_v3.a.$ === 'Just') && (_v3.b.$ === 'Just')) {
-							var context = _v3.a.a;
-							var track = _v3.b.a;
-							return A5(
-								$author$project$ViewThirdPerson$view,
-								context,
-								_Utils_Tuple2(w, h),
-								track,
-								scene,
-								A2(
-									$elm$core$Basics$composeL,
-									msgWrapper,
-									$author$project$PaneLayoutManager$ImageMessage($author$project$PaneLayoutManager$Pane1)));
-						} else {
-							return $mdgriffith$elm_ui$Element$none;
-						}
-					}()),
-					A2(
-					$author$project$ViewPureStyles$conditionallyVisible,
-					_Utils_eq(options.pane1.activeView, $author$project$PaneLayoutManager$ViewMap),
-					A2(
-						$author$project$ViewMap$view,
-						_Utils_Tuple2(w, h),
-						A2($elm$core$Basics$composeL, msgWrapper, $author$project$PaneLayoutManager$MapPortsMessage)))
-				]));
-		var viewPaneNoMap = F2(
-			function (paneId, paneSettings) {
-				return A2(
-					$mdgriffith$elm_ui$Element$column,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-							$mdgriffith$elm_ui$Element$alignTop,
-							$mdgriffith$elm_ui$Element$centerX
-						]),
-					_List_fromArray(
-						[
-							A3($author$project$PaneLayoutManager$viewModeChoicesNoMap, msgWrapper, paneId, paneSettings),
-							function () {
-							var _v2 = _Utils_Tuple2(options.pane2.thirdPersonContext, mTrack);
-							if ((_v2.a.$ === 'Just') && (_v2.b.$ === 'Just')) {
-								var context = _v2.a.a;
-								var track = _v2.b.a;
-								return A5(
-									$author$project$ViewThirdPerson$view,
-									context,
-									_Utils_Tuple2(w, h),
-									track,
-									scene,
-									A2(
-										$elm$core$Basics$composeL,
-										msgWrapper,
-										$author$project$PaneLayoutManager$ImageMessage(paneId)));
-							} else {
-								return $mdgriffith$elm_ui$Element$none;
-							}
-						}()
-						]));
-			});
+		var takeHalf = function (qty) {
+			return $ianmackenzie$elm_units$Quantity$truncate(
+				$ianmackenzie$elm_units$Quantity$half(
+					$ianmackenzie$elm_units$Quantity$toFloatQuantity(qty)));
+		};
 		var slider = function () {
 			if (mTrack.$ === 'Just') {
 				var track = mTrack.a;
@@ -29415,6 +29349,91 @@ var $author$project$PaneLayoutManager$viewPanes = F5(
 				return $mdgriffith$elm_ui$Element$none;
 			}
 		}();
+		var _v1 = function () {
+			var _v2 = options.paneLayout;
+			switch (_v2.$) {
+				case 'PanesOne':
+					return _Utils_Tuple2(w, h);
+				case 'PanesLeftRight':
+					return _Utils_Tuple2(
+						takeHalf(w),
+						h);
+				case 'PanesUpperLower':
+					return _Utils_Tuple2(
+						w,
+						A2(
+							$ianmackenzie$elm_units$Quantity$minus,
+							$ianmackenzie$elm_units$Pixels$pixels(20),
+							takeHalf(h)));
+				case 'PanesOnePlusTwo':
+					return _Utils_Tuple2(w, h);
+				default:
+					return _Utils_Tuple2(
+						takeHalf(w),
+						takeHalf(h));
+			}
+		}();
+		var paneWidth = _v1.a;
+		var paneHeight = _v1.b;
+		var showNonMapViews = F2(
+			function (paneId, paneContext) {
+				var _v3 = _Utils_Tuple2(paneContext, mTrack);
+				if ((_v3.a.$ === 'Just') && (_v3.b.$ === 'Just')) {
+					var context = _v3.a.a;
+					var track = _v3.b.a;
+					return A5(
+						$author$project$ViewThirdPerson$view,
+						context,
+						_Utils_Tuple2(paneWidth, paneHeight),
+						track,
+						scene,
+						A2(
+							$elm$core$Basics$composeL,
+							msgWrapper,
+							$author$project$PaneLayoutManager$ImageMessage($author$project$PaneLayoutManager$Pane1)));
+				} else {
+					return $mdgriffith$elm_ui$Element$none;
+				}
+			});
+		var viewPaneNoMap = F2(
+			function (paneId, paneSettings) {
+				return A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$alignTop,
+							$mdgriffith$elm_ui$Element$centerX
+						]),
+					_List_fromArray(
+						[
+							A3($author$project$PaneLayoutManager$viewModeChoicesNoMap, msgWrapper, paneId, paneSettings),
+							A2(showNonMapViews, $author$project$PaneLayoutManager$Pane1, options.pane1.thirdPersonContext)
+						]));
+			});
+		var viewPaneZeroWithMap = A2(
+			$mdgriffith$elm_ui$Element$column,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$alignTop,
+					$mdgriffith$elm_ui$Element$centerX
+				]),
+			_List_fromArray(
+				[
+					A2($author$project$PaneLayoutManager$viewModeChoices, msgWrapper, options),
+					A2(
+					$author$project$ViewPureStyles$conditionallyVisible,
+					!_Utils_eq(options.pane1.activeView, $author$project$PaneLayoutManager$ViewMap),
+					A2(showNonMapViews, $author$project$PaneLayoutManager$Pane1, options.pane1.thirdPersonContext)),
+					A2(
+					$author$project$ViewPureStyles$conditionallyVisible,
+					_Utils_eq(options.pane1.activeView, $author$project$PaneLayoutManager$ViewMap),
+					A2(
+						$author$project$ViewMap$view,
+						_Utils_Tuple2(paneWidth, paneHeight),
+						A2($elm$core$Basics$composeL, msgWrapper, $author$project$PaneLayoutManager$MapPortsMessage)))
+				]));
 		return A2(
 			$mdgriffith$elm_ui$Element$column,
 			_List_fromArray(
