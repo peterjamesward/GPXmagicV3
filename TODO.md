@@ -10,6 +10,8 @@ BUG: Hit detect is poor on 304K course (maybe not surprising but it should work)
 
 # BACKLOG, roughly in order ...
 
+Option for 3D view to follow pointer.
+
 Make **DragPan** work on 3D view.
 
 Put all Font, Colour etc into a Palette/Style module for ease of change.

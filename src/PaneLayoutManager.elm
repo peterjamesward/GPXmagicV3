@@ -87,9 +87,9 @@ defaultOptions =
     { paneLayout = PanesOne
     , popupVisible = False
     , pane1 = defaultPaneContext
-    , pane2 = defaultPaneContext
-    , pane3 = defaultPaneContext
-    , pane4 = defaultPaneContext
+    , pane2 = { defaultPaneContext | paneId = Pane2 }
+    , pane3 = { defaultPaneContext | paneId = Pane3 }
+    , pane4 = { defaultPaneContext | paneId = Pane4 }
     }
 
 
@@ -180,13 +180,25 @@ update paneMsg msgWrapper mTrack contentArea options =
             in
             ( newOptions, [ MapRefresh ] )
 
-        ImageMessage pane imageMsg ->
+        ImageMessage paneId imageMsg ->
             let
-                pane1 =
-                    options.pane1
+                paneInfo =
+                    -- Tedious is good, tedious works.
+                    case paneId of
+                        Pane1 ->
+                            options.pane1
+
+                        Pane2 ->
+                            options.pane2
+
+                        Pane3 ->
+                            options.pane3
+
+                        Pane4 ->
+                            options.pane4
 
                 ( newContext, actions ) =
-                    case ( mTrack, pane1.thirdPersonContext ) of
+                    case ( mTrack, paneInfo.thirdPersonContext ) of
                         ( Just track, Just third ) ->
                             let
                                 ( new, act ) =
@@ -203,11 +215,22 @@ update paneMsg msgWrapper mTrack contentArea options =
                         _ ->
                             ( Nothing, [] )
 
-                newPane1 =
-                    { pane1 | thirdPersonContext = newContext }
+                newPane =
+                    { paneInfo | thirdPersonContext = newContext }
 
                 newOptions =
-                    { options | pane1 = newPane1 }
+                    case paneId of
+                        Pane1 ->
+                            { options | pane1 = newPane }
+
+                        Pane2 ->
+                            { options | pane2 = newPane }
+
+                        Pane3 ->
+                            { options | pane3 = newPane }
+
+                        Pane4 ->
+                            { options | pane4 = newPane }
             in
             ( newOptions, actions )
 
@@ -257,8 +280,8 @@ initialisePane track options pane =
     }
 
 
-viewModeChoices : (Msg -> msg) -> Options -> Element msg
-viewModeChoices msgWrapper options =
+viewModeChoices : (Msg -> msg) -> PaneContext -> Element msg
+viewModeChoices msgWrapper context =
     let
         fullOptionList =
             [ Input.optionWith ViewThird <| radioButton "Perspective"
@@ -267,17 +290,17 @@ viewModeChoices msgWrapper options =
     in
     Input.radioRow
         [ spacing 5
-        , padding 5
+        , paddingEach { top = 4, left = 4, bottom = 0, right = 0 }
         ]
-        { onChange = msgWrapper << SetViewMode Pane1
-        , selected = Just options.pane1.activeView
+        { onChange = msgWrapper << SetViewMode context.paneId
+        , selected = Just context.activeView
         , label = Input.labelHidden "Choose view"
         , options = fullOptionList
         }
 
 
-viewModeChoicesNoMap : (Msg -> msg) -> PaneId -> PaneContext -> Element msg
-viewModeChoicesNoMap msgWrapper paneId settings =
+viewModeChoicesNoMap : (Msg -> msg) -> PaneContext -> Element msg
+viewModeChoicesNoMap msgWrapper pane =
     let
         reducedOptionList =
             [ Input.optionWith ViewThird <| radioButton "Perspective"
@@ -287,8 +310,8 @@ viewModeChoicesNoMap msgWrapper paneId settings =
         [ spacing 5
         , padding 5
         ]
-        { onChange = msgWrapper << SetViewMode paneId
-        , selected = Just settings.activeView
+        { onChange = msgWrapper << SetViewMode pane.paneId
+        , selected = Just pane.activeView
         , label = Input.labelHidden "Choose view"
         , options = reducedOptionList
         }
@@ -324,34 +347,34 @@ viewPanes msgWrapper mTrack scene ( w, h ) options =
                 PanesGrid ->
                     ( takeHalf w, takeHalf h |> Quantity.minus (Pixels.pixels 20) )
 
-        showNonMapViews paneId paneContext =
-            case ( paneContext, mTrack ) of
+        showNonMapViews pane =
+            case ( pane.thirdPersonContext, mTrack ) of
                 ( Just context, Just track ) ->
                     ViewThirdPerson.view
                         context
                         ( paneWidth, paneHeight )
                         track
                         scene
-                        (msgWrapper << ImageMessage Pane1)
+                        (msgWrapper << ImageMessage pane.paneId)
 
                 _ ->
                     none
 
-        viewPaneZeroWithMap =
+        viewPaneZeroWithMap pane =
             -- The Map DIV must be constructed once only, even before we have a Track,
             -- or the map gets upset. So we use CSS to show and hide these elements.
             column [ width fill, alignTop, centerX ]
-                [ viewModeChoices msgWrapper options
-                , conditionallyVisible (options.pane1.activeView /= ViewMap) <|
-                    showNonMapViews Pane1 options.pane1.thirdPersonContext
-                , conditionallyVisible (options.pane1.activeView == ViewMap) <|
+                [ viewModeChoices msgWrapper pane
+                , conditionallyVisible (pane.activeView /= ViewMap) <|
+                    showNonMapViews pane
+                , conditionallyVisible (pane.activeView == ViewMap) <|
                     ViewMap.view ( paneWidth, paneHeight ) (msgWrapper << MapPortsMessage)
                 ]
 
-        viewPaneNoMap paneId paneSettings =
+        viewPaneNoMap pane =
             column [ width fill, alignTop, centerX ]
-                [ viewModeChoicesNoMap msgWrapper paneId paneSettings
-                , showNonMapViews Pane1 options.pane1.thirdPersonContext
+                [ viewModeChoicesNoMap msgWrapper pane
+                , showNonMapViews pane
                 ]
 
         slider =
@@ -376,33 +399,33 @@ viewPanes msgWrapper mTrack scene ( w, h ) options =
         [ wrappedRow [ centerX, width fill ] <|
             case options.paneLayout of
                 PanesOne ->
-                    [ viewPaneZeroWithMap
+                    [ viewPaneZeroWithMap options.pane1
                     , slider
                     ]
 
                 PanesLeftRight ->
-                    [ viewPaneZeroWithMap
-                    , viewPaneNoMap Pane2 options.pane2
+                    [ viewPaneZeroWithMap options.pane1
+                    , viewPaneNoMap options.pane2
                     , slider
                     ]
 
                 PanesUpperLower ->
-                    [ viewPaneZeroWithMap
-                    , viewPaneNoMap Pane2 options.pane2
+                    [ viewPaneZeroWithMap options.pane1
+                    , viewPaneNoMap options.pane2
                     , slider
                     ]
 
                 PanesGrid ->
-                    [ viewPaneZeroWithMap
-                    , viewPaneNoMap Pane2 options.pane2
-                    , viewPaneNoMap Pane3 options.pane3
-                    , viewPaneNoMap Pane4 options.pane4
+                    [ viewPaneZeroWithMap options.pane1
+                    , viewPaneNoMap options.pane2
+                    , viewPaneNoMap options.pane3
+                    , viewPaneNoMap options.pane4
                     , slider
                     ]
 
                 PanesOnePlusTwo ->
                     -- Later.
-                    [ viewPaneZeroWithMap
+                    [ viewPaneZeroWithMap options.pane1
                     , slider
                     ]
         ]
