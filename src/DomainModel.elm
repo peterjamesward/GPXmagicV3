@@ -9,7 +9,6 @@ module DomainModel exposing
     , earthPointFromIndex
     , effectiveLatitude
     , endPoint
-    , enumerateEndPoints
     , extractPointsInRange
     , gpxFromPointWithReference
     , gpxPointFromIndex
@@ -444,6 +443,7 @@ replaceRange fromStart fromEnd withReferencePoint newPoints currentTree =
         Also, note the caller MUST have previously derived GPX co-ords, not local metric points,
         using functions that belong in TrackLoaded.
     --}
+    --TODO: Rewrite without inspection of children. Let the children decide for themselves.
     case currentTree of
         Leaf _ ->
             buildNewNodeWithRange fromStart fromEnd withReferencePoint newPoints currentTree
@@ -1027,66 +1027,106 @@ penultimatePoint tree =
     ( Tuple.first leaf.sourceData, leaf.startPoint )
 
 
-extractPointsInRange : Int -> Int -> PeteTree -> List ( EarthPoint, GPXSource )
-extractPointsInRange fromStart fromEnd trackTree =
-    -- Going for an efficient but more likely correct approach.
-    -- "Make it right, then make it fast."
+extractPointsInRange :
+    Int
+    -> Int
+    -> (RoadSection -> Maybe Int)
+    -> PeteTree
+    -> List ( EarthPoint, GPXSource )
+extractPointsInRange fromStart fromEnd depthFunction trackTree =
+    -- Should be able to write this using universal traversal now.
+    -- "Make it right, then make it faster."
     let
-        indices =
-            List.range fromStart (skipCount trackTree - fromEnd)
+        myFoldFn : RoadSection -> List ( EarthPoint, GPXSource ) -> List ( EarthPoint, GPXSource )
+        myFoldFn section accum =
+            -- Note that we put start and end on, but each time we drop the previous start.
+            ( section.startPoint, Tuple.first section.sourceData )
+                :: ( section.endPoint, Tuple.second section.sourceData )
+                :: List.drop 1 accum
     in
-    buildPreview indices trackTree
-
-
-safeEnumerateEndPoints : Maybe PeteTree -> List ( EarthPoint, GPXSource )
-safeEnumerateEndPoints mTree =
-    case mTree of
-        Just tree ->
-            enumerateEndPoints tree []
-
-        Nothing ->
-            []
-
-
-enumerateEndPoints : PeteTree -> List ( EarthPoint, GPXSource ) -> List ( EarthPoint, GPXSource )
-enumerateEndPoints treeNode accum =
-    -- The name describes the output, not the method!
-    -- Note it gives end points, you need to add the start point somewhere!
-    case treeNode of
-        Leaf leaf ->
-            ( leaf.endPoint, Tuple.second leaf.sourceData ) :: accum
-
-        Node node ->
-            accum
-                |> enumerateEndPoints node.right
-                |> enumerateEndPoints node.left
+    traverseTreeBetweenLimitsToDepth
+        fromStart
+        (skipCount trackTree - fromEnd)
+        depthFunction
+        0
+        trackTree
+        myFoldFn
+        []
 
 
 recreateGpxSources : Maybe PeteTree -> List GPXSource
 recreateGpxSources mTree =
-    --TODO: Make this a general traversal by taking a function argument.
-    --TODO: Have a road section version, and a points version?
+    -- Using the all-purpose traversal function, but resulting in a
+    -- list where we get the start point of all sections, plus the end point of the last section.
+    -- NOTE is in reverse order.
+    let
+        myFoldFn : RoadSection -> List GPXSource -> List GPXSource
+        myFoldFn section accum =
+            Tuple.first section.sourceData
+                :: Tuple.second section.sourceData
+                :: List.drop 1 accum
+    in
     case mTree of
-        Just fromTree ->
-            (getFirstLeaf fromTree |> .sourceData |> Tuple.first)
-                :: (enumerateEndPoints fromTree [] |> List.map Tuple.second)
+        Just treeNode ->
+            foldOverRoute myFoldFn treeNode
 
         Nothing ->
             []
 
-{--
-traverseTree :
+
+
+--case mTree of
+--    Just fromTree ->
+--        (getFirstLeaf fromTree |> .sourceData |> Tuple.first)
+--            :: (enumerateEndPoints fromTree [] |> List.map Tuple.second)
+--
+--    Nothing ->
+--        []
+
+
+foldOverRoute : (RoadSection -> List a -> List a) -> PeteTree -> List a
+foldOverRoute foldFn treeNode =
+    traverseTreeBetween
+        0
+        (skipCount treeNode)
+        treeNode
+        foldFn
+        []
+
+
+treeToRoadSectionList : PeteTree -> List RoadSection
+treeToRoadSectionList someNode =
+    -- By way of example use of all-purpose traversal function,
+    -- this will do the whole tree with no depth limit.
+    foldOverRoute (::) someNode
+
+
+traverseTreeBetween :
     Int
     -> Int
+    -> PeteTree
+    -> (RoadSection -> List a -> List a)
+    -> List a
+    -> List a
+traverseTreeBetween startingAt endingAt someNode foldFn accum =
+    traverseTreeBetweenLimitsToDepth startingAt endingAt (always Nothing) 0 someNode foldFn accum
+
+
+traverseTreeBetweenLimitsToDepth :
+    Int
+    -> Int
+    -> (RoadSection -> Maybe Int)
     -> Int
     -> PeteTree
-    -> (( EarthPoint, GPXSource ) -> ( EarthPoint, GPXSource ) -> a)
+    -> (RoadSection -> List a -> List a)
     -> List a
     -> List a
-traverseTree startingAt endingAt depth someNode visitor accum =
+traverseTreeBetweenLimitsToDepth startingAt endingAt depthFunction currentDepth thisNode foldFn accum =
+    -- NOTE this does a left-right traversal and conses the road sections,
+    -- so the road comes out "backwards" in terms of road segments.
     let
         nodeData =
-            asRecord someNode
+            asRecord thisNode
 
         start =
             ( nodeData.startPoint, Tuple.first nodeData.sourceData )
@@ -1094,65 +1134,52 @@ traverseTree startingAt endingAt depth someNode visitor accum =
         end =
             ( nodeData.endPoint, Tuple.second nodeData.sourceData )
     in
-    case someNode of
-        Leaf leafNode ->
-            visitor start end :: accum
+    {-
+       Do the FF thing.
+       If startingAt >= my skipcount, return accum
+       If startingAt > 0 but < skipCount then pass to children
+           left child with same start offset
+           right child with usually deduction of left skip count.
+           Don't call right child is beyond the `endingAt`.
+    -}
+    if startingAt >= skipCount thisNode then
+        -- We have nothing to contribute
+        accum
 
-        Node unLeaf ->
-            if depth <= 0 then
-                visitor start end :: accum
+    else if endingAt <= 0 then
+        -- Already passed the end, nothing should be added.
+        accum
 
-            else
-                accum
-                    |> traverseTree (depth - 1) unLeaf.left visitor
-                    |> traverseTree (depth - 1) unLeaf.right visitor
+    else
+        case thisNode of
+            Leaf leafNode ->
+                -- Leaves on the line.
+                foldFn leafNode accum
 
+            Node node ->
+                let
+                    maximumDepth =
+                        depthFunction node.nodeContent
+                            |> Maybe.withDefault 999
+                in
+                if currentDepth >= maximumDepth then
+                    -- Can go no deeper, provide our info
+                    foldFn node.nodeContent accum
 
-traverseTreeToDepth :
-    Int
-    -> Int
-    -> Int
-    -> PeteTree
-    -> (( EarthPoint, GPXSource ) -> ( EarthPoint, GPXSource ) -> a)
-    -> List a
-    -> List a
-traverseTreeToDepth startingAt endingAt depth someNode visitor accum =
-    --TODO: Need to restrict to [start,end] point indices.
-    -- (Do this by "fast forwarding using skipCount.)
-    let
-        nodeData =
-            asRecord someNode
-
-        start =
-            ( nodeData.startPoint, Tuple.first nodeData.sourceData )
-
-        end =
-            ( nodeData.endPoint, Tuple.second nodeData.sourceData )
-    in
-
-{-
-    Do the FF thing.
-    If startingAt >= my skipcount, return accum
-    If startingAt > 0 but < skipCount then pass to children
-        left child with same start offset
-        right child with usually deduction of left skip count.
-        Don't call right child is beyond the `endingAt`.
--}
-
-    case someNode of
-        Leaf leafNode ->
-            visitor start end :: accum
-
-        Node unLeaf ->
-            if unLeaf.nodeContent.boundingBox |> BoundingBox3d.intersects fullRenderingZone then
-                -- Ignore depth cutoff near or in the box
-                accum
-                    |> traverseTreeToDepth (depth - 1) unLeaf.left visitor
-                    |> traverseTreeToDepth (depth - 1) unLeaf.right visitor
-
-            else
-                -- Outside box, apply cutoff.
-                accum
-                    |> traverseTree (depth - 1) unLeaf.left visitor
-                    |> traverseTree (depth - 1) unLeaf.right visitor
---}
+                else
+                    -- Give the children a try
+                    accum
+                        |> traverseTreeBetweenLimitsToDepth
+                            startingAt
+                            endingAt
+                            depthFunction
+                            (currentDepth + 1)
+                            node.left
+                            foldFn
+                        |> traverseTreeBetweenLimitsToDepth
+                            (startingAt - skipCount node.left)
+                            (endingAt - skipCount node.left)
+                            depthFunction
+                            (currentDepth + 1)
+                            node.right
+                            foldFn

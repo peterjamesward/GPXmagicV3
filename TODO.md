@@ -8,6 +8,10 @@ BUG: In Grid view, Pane1 is notably smaller than the others.
 
 Limit previews using renderDepth; e.g. Delete for > 1000 points.
 > Writing a tree traversal for this. (should also be used in SceneBuilder)
+> https://package.elm-lang.org/packages/icidasset/elm-binary/latest/Binary has application.
+> `ensureSize 10 <| fromDecimal x`, lacks comparison operator. 
+> Still, useful for "toggling" through a tree.
+> Because I want that Travesor after all.
 
 ---
 
@@ -115,7 +119,7 @@ When 'applied' to a tree, returns a tree element and the traversor (generator) f
 Symmetry allows left->right and right->left traversal.
 I sense that having this will make some filtering easier.
 Also applies to rendering, where we have hand-coded R->L trversals.
-> But just having a traversal function with callbacks is probly adequate.
+> But just having a traversal function with callbacks is probly adequate; so this is internal.
 
 ### Multiple windows (demoted again; more value in better tool layout and customisation)
 Tauri looks interesting as we would not need node.js

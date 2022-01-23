@@ -150,8 +150,14 @@ deletePointsBetween fromStart fromEnd track =
                 track.trackTree
 
         oldPoints =
-            DomainModel.extractPointsInRange fromStart fromEnd track.trackTree
+            -- The Nothing here means no depth limit, so we get all the points.
+            -- Note we have to reverse them.
+                DomainModel.extractPointsInRange
+                    (fromStart + 1)
+                    (fromEnd + 1)
+                    (always Nothing)
+                    track.trackTree
     in
     ( newTree
-    , oldPoints |> List.map Tuple.second
+    , oldPoints |> List.map Tuple.second |> List.reverse
     )
