@@ -16623,12 +16623,18 @@ var $author$project$ViewThirdPerson$update = F5(
 					}
 				}
 				return _Utils_Tuple2(context, _List_Nil);
-			default:
+			case 'ImageRelease':
 				var event = msg.a;
 				var newContext = _Utils_update(
 					context,
 					{dragAction: $author$project$ViewThirdPerson$DragNone, orbiting: $elm$core$Maybe$Nothing});
 				return _Utils_Tuple2(newContext, _List_Nil);
+			default:
+				return _Utils_Tuple2(
+					_Utils_update(
+						context,
+						{followSelectedPoint: !context.followSelectedPoint}),
+					_List_Nil);
 		}
 	});
 var $author$project$PaneLayoutManager$update = F5(
@@ -29044,6 +29050,37 @@ var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWheel = $mpizenberg
 var $author$project$ViewThirdPerson$ImageReset = {$: 'ImageReset'};
 var $author$project$ViewThirdPerson$ImageZoomIn = {$: 'ImageZoomIn'};
 var $author$project$ViewThirdPerson$ImageZoomOut = {$: 'ImageZoomOut'};
+var $author$project$ViewThirdPerson$ToggleFollowOrange = {$: 'ToggleFollowOrange'};
+var $elm$svg$Svg$rect = $elm$svg$Svg$trustedNode('rect');
+var $elm$svg$Svg$Attributes$rx = _VirtualDom_attribute('rx');
+var $elm$svg$Svg$Attributes$ry = _VirtualDom_attribute('ry');
+var $elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
+var $elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
+var $feathericons$elm_feather$FeatherIcons$lock = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'lock',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$rect,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x('3'),
+					$elm$svg$Svg$Attributes$y('11'),
+					$elm$svg$Svg$Attributes$width('18'),
+					$elm$svg$Svg$Attributes$height('11'),
+					$elm$svg$Svg$Attributes$rx('2'),
+					$elm$svg$Svg$Attributes$ry('2')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$path,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$d('M7 11V7a5 5 0 0 1 10 0v4')
+				]),
+			_List_Nil)
+		]));
 var $feathericons$elm_feather$FeatherIcons$maximize = A2(
 	$feathericons$elm_feather$FeatherIcons$makeBuilder,
 	'maximize',
@@ -29099,85 +29136,119 @@ var $feathericons$elm_feather$FeatherIcons$plus = A2(
 				]),
 			_List_Nil)
 		]));
+var $feathericons$elm_feather$FeatherIcons$unlock = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'unlock',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$rect,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x('3'),
+					$elm$svg$Svg$Attributes$y('11'),
+					$elm$svg$Svg$Attributes$width('18'),
+					$elm$svg$Svg$Attributes$height('11'),
+					$elm$svg$Svg$Attributes$rx('2'),
+					$elm$svg$Svg$Attributes$ry('2')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$path,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$d('M7 11V7a5 5 0 0 1 9.9-1')
+				]),
+			_List_Nil)
+		]));
 var $smucode$elm_flat_colors$FlatColors$ChinesePalette$white = A3($mdgriffith$elm_ui$Element$rgb255, 255, 255, 255);
-var $author$project$ViewThirdPerson$zoomButtons = function (msgWrapper) {
-	return A2(
-		$mdgriffith$elm_ui$Element$column,
-		_List_fromArray(
-			[
-				$mdgriffith$elm_ui$Element$alignTop,
-				$mdgriffith$elm_ui$Element$alignRight,
-				$mdgriffith$elm_ui$Element$moveDown(5),
-				$mdgriffith$elm_ui$Element$moveLeft(5),
-				$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$white),
-				$mdgriffith$elm_ui$Element$Font$size(40),
-				$mdgriffith$elm_ui$Element$padding(6),
-				$mdgriffith$elm_ui$Element$spacing(8),
-				$mdgriffith$elm_ui$Element$htmlAttribute(
-				A3(
-					$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
-					'click',
-					$author$project$ViewThirdPerson$stopProp,
+var $author$project$ViewThirdPerson$zoomButtons = F2(
+	function (msgWrapper, context) {
+		return A2(
+			$mdgriffith$elm_ui$Element$column,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$alignTop,
+					$mdgriffith$elm_ui$Element$alignRight,
+					$mdgriffith$elm_ui$Element$moveDown(5),
+					$mdgriffith$elm_ui$Element$moveLeft(5),
+					$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$white),
+					$mdgriffith$elm_ui$Element$Font$size(40),
+					$mdgriffith$elm_ui$Element$padding(6),
+					$mdgriffith$elm_ui$Element$spacing(8),
+					$mdgriffith$elm_ui$Element$htmlAttribute(
+					A3(
+						$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
+						'click',
+						$author$project$ViewThirdPerson$stopProp,
+						A2(
+							$elm$core$Basics$composeR,
+							$elm$core$Basics$always($author$project$ViewThirdPerson$ImageNoOp),
+							msgWrapper))),
+					$mdgriffith$elm_ui$Element$htmlAttribute(
+					A3(
+						$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
+						'dblclick',
+						$author$project$ViewThirdPerson$stopProp,
+						A2(
+							$elm$core$Basics$composeR,
+							$elm$core$Basics$always($author$project$ViewThirdPerson$ImageNoOp),
+							msgWrapper))),
+					$mdgriffith$elm_ui$Element$htmlAttribute(
+					A3(
+						$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
+						'mousedown',
+						$author$project$ViewThirdPerson$stopProp,
+						A2(
+							$elm$core$Basics$composeR,
+							$elm$core$Basics$always($author$project$ViewThirdPerson$ImageNoOp),
+							msgWrapper))),
+					$mdgriffith$elm_ui$Element$htmlAttribute(
+					A3(
+						$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
+						'mouseup',
+						$author$project$ViewThirdPerson$stopProp,
+						A2(
+							$elm$core$Basics$composeR,
+							$elm$core$Basics$always($author$project$ViewThirdPerson$ImageNoOp),
+							msgWrapper)))
+				]),
+			_List_fromArray(
+				[
 					A2(
-						$elm$core$Basics$composeR,
-						$elm$core$Basics$always($author$project$ViewThirdPerson$ImageNoOp),
-						msgWrapper))),
-				$mdgriffith$elm_ui$Element$htmlAttribute(
-				A3(
-					$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
-					'dblclick',
-					$author$project$ViewThirdPerson$stopProp,
+					$mdgriffith$elm_ui$Element$Input$button,
+					_List_Nil,
+					{
+						label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$plus),
+						onPress: $elm$core$Maybe$Just(
+							msgWrapper($author$project$ViewThirdPerson$ImageZoomIn))
+					}),
 					A2(
-						$elm$core$Basics$composeR,
-						$elm$core$Basics$always($author$project$ViewThirdPerson$ImageNoOp),
-						msgWrapper))),
-				$mdgriffith$elm_ui$Element$htmlAttribute(
-				A3(
-					$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
-					'mousedown',
-					$author$project$ViewThirdPerson$stopProp,
+					$mdgriffith$elm_ui$Element$Input$button,
+					_List_Nil,
+					{
+						label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$minus),
+						onPress: $elm$core$Maybe$Just(
+							msgWrapper($author$project$ViewThirdPerson$ImageZoomOut))
+					}),
 					A2(
-						$elm$core$Basics$composeR,
-						$elm$core$Basics$always($author$project$ViewThirdPerson$ImageNoOp),
-						msgWrapper))),
-				$mdgriffith$elm_ui$Element$htmlAttribute(
-				A3(
-					$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
-					'mouseup',
-					$author$project$ViewThirdPerson$stopProp,
+					$mdgriffith$elm_ui$Element$Input$button,
+					_List_Nil,
+					{
+						label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$maximize),
+						onPress: $elm$core$Maybe$Just(
+							msgWrapper($author$project$ViewThirdPerson$ImageReset))
+					}),
 					A2(
-						$elm$core$Basics$composeR,
-						$elm$core$Basics$always($author$project$ViewThirdPerson$ImageNoOp),
-						msgWrapper)))
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$mdgriffith$elm_ui$Element$Input$button,
-				_List_Nil,
-				{
-					label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$plus),
-					onPress: $elm$core$Maybe$Just(
-						msgWrapper($author$project$ViewThirdPerson$ImageZoomIn))
-				}),
-				A2(
-				$mdgriffith$elm_ui$Element$Input$button,
-				_List_Nil,
-				{
-					label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$minus),
-					onPress: $elm$core$Maybe$Just(
-						msgWrapper($author$project$ViewThirdPerson$ImageZoomOut))
-				}),
-				A2(
-				$mdgriffith$elm_ui$Element$Input$button,
-				_List_Nil,
-				{
-					label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$maximize),
-					onPress: $elm$core$Maybe$Just(
-						msgWrapper($author$project$ViewThirdPerson$ImageReset))
-				})
-			]));
-};
+					$mdgriffith$elm_ui$Element$Input$button,
+					_List_Nil,
+					{
+						label: context.followSelectedPoint ? $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$lock) : $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$unlock),
+						onPress: $elm$core$Maybe$Just(
+							msgWrapper($author$project$ViewThirdPerson$ToggleFollowOrange))
+					})
+				]));
+	});
 var $author$project$ViewThirdPerson$view = F5(
 	function (context, contentArea, track, scene, msgWrapper) {
 		var dragging = context.dragAction;
@@ -29214,7 +29285,7 @@ var $author$project$ViewThirdPerson$view = F5(
 					$mdgriffith$elm_ui$Element$Border$width(0),
 					$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$peace),
 					$mdgriffith$elm_ui$Element$inFront(
-					$author$project$ViewThirdPerson$zoomButtons(msgWrapper))
+					A2($author$project$ViewThirdPerson$zoomButtons, msgWrapper, context))
 				]),
 			$mdgriffith$elm_ui$Element$html(
 				$ianmackenzie$elm_3d_scene$Scene3d$cloudy(
@@ -29998,9 +30069,6 @@ var $feathericons$elm_feather$FeatherIcons$columns = A2(
 				]),
 			_List_Nil)
 		]));
-var $elm$svg$Svg$rect = $elm$svg$Svg$trustedNode('rect');
-var $elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
-var $elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
 var $feathericons$elm_feather$FeatherIcons$grid = A2(
 	$feathericons$elm_feather$FeatherIcons$makeBuilder,
 	'grid',
@@ -30118,8 +30186,6 @@ var $mdgriffith$elm_ui$Element$Input$option = F2(
 			val,
 			$mdgriffith$elm_ui$Element$Input$defaultRadioOption(txt));
 	});
-var $elm$svg$Svg$Attributes$rx = _VirtualDom_attribute('rx');
-var $elm$svg$Svg$Attributes$ry = _VirtualDom_attribute('ry');
 var $feathericons$elm_feather$FeatherIcons$server = A2(
 	$feathericons$elm_feather$FeatherIcons$makeBuilder,
 	'server',

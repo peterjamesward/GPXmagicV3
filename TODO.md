@@ -9,11 +9,15 @@ BUG: In Grid view, Pane1 is notably smaller than the others.
 Option for 3D view to follow pointer; where should this live?
 > In the overlay menu, using padlock for continuity with v2.
 
+Option for Map to follow pointer.
+
 ---
 
 # BACKLOG, roughly in order ...
 
 ## Small things (you'd hope)
+
+Remove scroll bars from docks.
 
 SceneBuilder to use new traversal fn with more progressive rendering.
 

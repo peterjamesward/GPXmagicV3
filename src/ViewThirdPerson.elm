@@ -46,6 +46,7 @@ type Msg
     | ImageZoomOut
     | ImageReset
     | ClickDelayExpired
+    | ToggleFollowOrange
 
 
 type DragAction
@@ -73,8 +74,8 @@ stopProp =
     { stopPropagation = True, preventDefault = False }
 
 
-zoomButtons : (Msg -> msg) -> Element msg
-zoomButtons msgWrapper =
+zoomButtons : (Msg -> msg) -> Context -> Element msg
+zoomButtons msgWrapper context =
     column
         [ alignTop
         , alignRight
@@ -100,6 +101,15 @@ zoomButtons msgWrapper =
         , Input.button []
             { onPress = Just <| msgWrapper ImageReset
             , label = useIcon FeatherIcons.maximize
+            }
+        , Input.button []
+            { onPress = Just <| msgWrapper ToggleFollowOrange
+            , label =
+                if context.followSelectedPoint then
+                    useIcon FeatherIcons.lock
+
+                else
+                    useIcon FeatherIcons.unlock
             }
         ]
 
@@ -133,7 +143,7 @@ view context contentArea track scene msgWrapper =
         , pointer
         , Border.width 0
         , Border.color FlatColors.ChinesePalette.peace
-        , inFront <| zoomButtons msgWrapper
+        , inFront <| zoomButtons msgWrapper context
         ]
     <|
         html <|
@@ -385,6 +395,11 @@ update msg msgWrapper track area context =
                     }
             in
             ( newContext, [] )
+
+        ToggleFollowOrange ->
+            ( { context | followSelectedPoint = not context.followSelectedPoint }
+            , []
+            )
 
 
 initialiseView :
