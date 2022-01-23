@@ -1,12 +1,14 @@
 module Tools.DeletePoints exposing (..)
 
 import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
-import DomainModel exposing (EarthPoint, GPXSource, PeteTree, skipCount)
+import BoundingBox3d
+import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, getDualCoords, leafFromIndex, skipCount, startPoint, traverseTreeBetweenLimitsToDepth)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input
 import FlatColors.ChinesePalette
 import TrackLoaded exposing (TrackLoaded)
+import UtilsForViews exposing (fullDepthRenderingBoxSize)
 import ViewPureStyles exposing (neatToolsBorder)
 
 
@@ -37,25 +39,53 @@ toolStateChange opened colour options track =
     case ( opened, track ) of
         ( True, Just theTrack ) ->
             let
+                fullRenderingZone =
+                    BoundingBox3d.withDimensions
+                        ( fullDepthRenderingBoxSize
+                        , fullDepthRenderingBoxSize
+                        , fullDepthRenderingBoxSize
+                        )
+                        (startPoint <| leafFromIndex theTrack.currentPosition theTrack.trackTree)
+
                 ( fromStart, fromEnd ) =
                     TrackLoaded.getRangeFromMarkers theTrack
+
+                depthFunction : RoadSection -> Maybe Int
+                depthFunction road =
+                    if road.boundingBox |> BoundingBox3d.intersects fullRenderingZone then
+                        Nothing
+
+                    else
+                        Just 10
+
+                foldFn : RoadSection -> List ( EarthPoint, GPXSource ) -> List ( EarthPoint, GPXSource )
+                foldFn road accum =
+                    ( road.startPoint, Tuple.first road.sourceData )
+                        :: accum
 
                 previews =
                     case theTrack.markerPosition of
                         Just _ ->
-                            --TODO: Apply renderDepth here, so we can edit large tracks.
-                            -- May need a new domain model feature to support.
-                            List.range (fromStart + 1) (skipCount theTrack.trackTree - fromEnd - 1)
+                            List.drop 1 <|
+                                List.reverse <|
+                                    traverseTreeBetweenLimitsToDepth
+                                        fromStart
+                                        (skipCount theTrack.trackTree - fromEnd)
+                                        depthFunction
+                                        0
+                                        theTrack.trackTree
+                                        foldFn
+                                        []
 
                         Nothing ->
-                            [ fromStart ]
+                            [ getDualCoords theTrack.trackTree fromStart ]
             in
             ( { options | singlePoint = theTrack.markerPosition == Nothing }
             , [ ShowPreview
                     { tag = "delete"
                     , shape = PreviewCircle
                     , colour = colour
-                    , points = DomainModel.buildPreview previews theTrack.trackTree
+                    , points = previews --DomainModel.buildPreview previews theTrack.trackTree
                     }
               ]
             )

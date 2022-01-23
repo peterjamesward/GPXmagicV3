@@ -31,6 +31,7 @@ import Vector3d
 
 render3dView : TrackLoaded msg -> List (Entity LocalCoords)
 render3dView track =
+    --TODO: Use new traversal to provide better depth function.
     let
         floorPlane =
             Plane3d.xy |> Plane3d.offsetBy (BoundingBox3d.minZ <| boundingBox track.trackTree)

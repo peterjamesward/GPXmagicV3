@@ -17131,6 +17131,7 @@ var $author$project$Tools$AbruptDirectionChanges$toolStateChange = F4(
 					]));
 		}
 	});
+var $author$project$UtilsForViews$fullDepthRenderingBoxSize = $ianmackenzie$elm_units$Length$kilometers(4);
 var $author$project$TrackLoaded$getRangeFromMarkers = function (track) {
 	var theLength = $author$project$DomainModel$skipCount(track.trackTree);
 	var _v0 = track.markerPosition;
@@ -17143,11 +17144,61 @@ var $author$project$TrackLoaded$getRangeFromMarkers = function (track) {
 		return _Utils_Tuple2(track.currentPosition, theLength - track.currentPosition);
 	}
 };
+var $author$project$DomainModel$traverseTreeBetweenLimitsToDepth = F7(
+	function (startingAt, endingAt, depthFunction, currentDepth, thisNode, foldFn, accum) {
+		var nodeData = $author$project$DomainModel$asRecord(thisNode);
+		var start = _Utils_Tuple2(nodeData.startPoint, nodeData.sourceData.a);
+		var end = _Utils_Tuple2(nodeData.endPoint, nodeData.sourceData.b);
+		if (_Utils_cmp(
+			startingAt,
+			$author$project$DomainModel$skipCount(thisNode)) > -1) {
+			return accum;
+		} else {
+			if (endingAt <= 0) {
+				return accum;
+			} else {
+				if (thisNode.$ === 'Leaf') {
+					var leafNode = thisNode.a;
+					return A2(foldFn, leafNode, accum);
+				} else {
+					var node = thisNode.a;
+					var maximumDepth = A2(
+						$elm$core$Maybe$withDefault,
+						999,
+						depthFunction(node.nodeContent));
+					return (_Utils_cmp(currentDepth, maximumDepth) > -1) ? A2(foldFn, node.nodeContent, accum) : A7(
+						$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
+						startingAt - $author$project$DomainModel$skipCount(node.left),
+						endingAt - $author$project$DomainModel$skipCount(node.left),
+						depthFunction,
+						currentDepth + 1,
+						node.right,
+						foldFn,
+						A7($author$project$DomainModel$traverseTreeBetweenLimitsToDepth, startingAt, endingAt, depthFunction, currentDepth + 1, node.left, foldFn, accum));
+				}
+			}
+		}
+	});
 var $author$project$Tools$DeletePoints$toolStateChange = F4(
 	function (opened, colour, options, track) {
 		var _v0 = _Utils_Tuple2(opened, track);
 		if (_v0.a && (_v0.b.$ === 'Just')) {
 			var theTrack = _v0.b.a;
+			var fullRenderingZone = A2(
+				$ianmackenzie$elm_geometry$BoundingBox3d$withDimensions,
+				_Utils_Tuple3($author$project$UtilsForViews$fullDepthRenderingBoxSize, $author$project$UtilsForViews$fullDepthRenderingBoxSize, $author$project$UtilsForViews$fullDepthRenderingBoxSize),
+				$author$project$DomainModel$startPoint(
+					A2($author$project$DomainModel$leafFromIndex, theTrack.currentPosition, theTrack.trackTree)));
+			var foldFn = F2(
+				function (road, accum) {
+					return A2(
+						$elm$core$List$cons,
+						_Utils_Tuple2(road.startPoint, road.sourceData.a),
+						accum);
+				});
+			var depthFunction = function (road) {
+				return A2($ianmackenzie$elm_geometry$BoundingBox3d$intersects, fullRenderingZone, road.boundingBox) ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(10);
+			};
 			var _v1 = $author$project$TrackLoaded$getRangeFromMarkers(theTrack);
 			var fromStart = _v1.a;
 			var fromEnd = _v1.b;
@@ -17155,12 +17206,23 @@ var $author$project$Tools$DeletePoints$toolStateChange = F4(
 				var _v2 = theTrack.markerPosition;
 				if (_v2.$ === 'Just') {
 					return A2(
-						$elm$core$List$range,
-						fromStart + 1,
-						($author$project$DomainModel$skipCount(theTrack.trackTree) - fromEnd) - 1);
+						$elm$core$List$drop,
+						1,
+						$elm$core$List$reverse(
+							A7(
+								$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
+								fromStart,
+								$author$project$DomainModel$skipCount(theTrack.trackTree) - fromEnd,
+								depthFunction,
+								0,
+								theTrack.trackTree,
+								foldFn,
+								_List_Nil)));
 				} else {
 					return _List_fromArray(
-						[fromStart]);
+						[
+							A2($author$project$DomainModel$getDualCoords, theTrack.trackTree, fromStart)
+						]);
 				}
 			}();
 			return _Utils_Tuple2(
@@ -17172,12 +17234,7 @@ var $author$project$Tools$DeletePoints$toolStateChange = F4(
 				_List_fromArray(
 					[
 						$author$project$Actions$ShowPreview(
-						{
-							colour: colour,
-							points: A2($author$project$DomainModel$buildPreview, previews, theTrack.trackTree),
-							shape: $author$project$Actions$PreviewCircle,
-							tag: 'delete'
-						})
+						{colour: colour, points: previews, shape: $author$project$Actions$PreviewCircle, tag: 'delete'})
 					]));
 		} else {
 			return _Utils_Tuple2(
@@ -17360,7 +17417,6 @@ var $ianmackenzie$elm_geometry$LineSegment3d$from = F2(
 var $avh4$elm_color$Color$fromRgba = function (components) {
 	return A4($avh4$elm_color$Color$RgbaSpace, components.red, components.green, components.blue, components.alpha);
 };
-var $author$project$UtilsForViews$fullDepthRenderingBoxSize = $ianmackenzie$elm_units$Length$kilometers(4);
 var $elm$core$Basics$clamp = F3(
 	function (low, high, number) {
 		return (_Utils_cmp(number, low) < 0) ? low : ((_Utils_cmp(number, high) > 0) ? high : number);

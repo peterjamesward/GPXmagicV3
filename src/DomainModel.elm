@@ -2,6 +2,7 @@ module DomainModel exposing
     ( EarthPoint
     , GPXSource
     , PeteTree(..)
+    , RoadSection
     , asRecord
     , boundingBox
     , buildPreview
@@ -10,6 +11,7 @@ module DomainModel exposing
     , effectiveLatitude
     , endPoint
     , extractPointsInRange
+    , getDualCoords
     , gpxFromPointWithReference
     , gpxPointFromIndex
     , leafFromIndex
@@ -20,6 +22,7 @@ module DomainModel exposing
     , skipCount
     , sourceData
     , startPoint
+    , traverseTreeBetweenLimitsToDepth
     , treeFromSourcePoints
     , trueLength
     )
