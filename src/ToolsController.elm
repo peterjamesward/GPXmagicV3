@@ -112,7 +112,7 @@ trackInfoBox =
     , state = Expanded
     , dock = DockUpperLeft
     , tabColour = FlatColors.AussiePalette.beekeeper
-    , textColour = contrastingColour FlatColors.AussiePalette.beekeeper
+    , textColour = contrastingColour FlatColors.AussiePalette.juneBud
     , isPopupOpen = False
     }
 
@@ -168,7 +168,7 @@ deleteTool =
     , state = Contracted
     , dock = DockLowerLeft
     , tabColour = FlatColors.AussiePalette.pinkGlamour
-    , textColour = contrastingColour FlatColors.AussiePalette.pinkGlamour
+    , textColour = contrastingColour FlatColors.AussiePalette.exodusFruit
     , isPopupOpen = False
     }
 

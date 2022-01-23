@@ -6,13 +6,11 @@ BUG: In Grid view, Pane1 is notably smaller than the others.
 
 # WIP
 
-Configurable background colour (light, medium, dark) in top bar settings.
-
-"Restore to defaults" for tools in top bar settings.
-
 Imperial measures option in top bar settings button (maybe combine with track info bar, JB below).
 > **JB**: I wonder if the Summary and Segment information could be better placed on the top
 > Load GPX top line toggleable between the 2... only thinking of maximising space use.
+
+Save background colour and measure selection.
 
 ---
 
@@ -22,8 +20,29 @@ Imperial measures option in top bar settings button (maybe combine with track in
 
 SceneBuilder to use new traversal fn with more progressive rendering.
 
-## Profile & Charts
-Details in Backlog.
+## Profile, Charts (BIG)
+
+Has to be at least as good as GPX Smoother.
+
+Not 3d, just drawing onto Canvas?
+(But what about zoom and pan?)
+Altitude change from RoadSection.
+
+D3 with https://github.com/seliopou/elm-d3/blob/master/README.md ?
+(Only need to write the JS once, then just pass data.)
+https://observablehq.com/@d3/gradient-encoding
+https://observablehq.com/@d3/line-with-tooltip
+https://observablehq.com/@d3/pannable-chart
+https://observablehq.com/@d3/zoomable-area-chart
+... and there's this ... https://blog.scottlogic.com/2020/05/01/rendering-one-million-points-with-d3.html
+
+https://medium.com/@ColinEberhardt/extending-d3-with-higher-order-components-d58cd40b7efd
+
+Remember that most routes will be <100K, not 1M points!
+Therefore, Canvas may be best option.
+Or, given Elm, and the current charting library, and the nature of the tree, we could probably
+show a decent zoomable plot that perhaps shows error bars or a candle plot for non-leaf tree entries.
+Though, by the same argument, we could ship 10K points to JS no problem.
 
 ## Map
 Add non-draggable track point circles, in separate layer we can turn on and off
@@ -49,30 +68,6 @@ Low memory can trigger defensive actions: remove Undo entries, reduce rendering 
 
 ## Plan view
 Same as v2. Use 3d-scene. Orthographic camera.
-
-## Profile
-Not 3d, just drawing onto Canvas?
-(But what about zoom and pan?)
-Altitude change from start, end; trueLength.
-> Combine with Charts, by adding the colours, ideally. See below.
-
-## Charts
-D3 with https://github.com/seliopou/elm-d3/blob/master/README.md ?
-(Only need to write the JS once, then just pass data.)
-https://observablehq.com/@d3/gradient-encoding
-https://observablehq.com/@d3/line-with-tooltip
-https://observablehq.com/@d3/pannable-chart
-https://observablehq.com/@d3/zoomable-area-chart
-... and there's this ... https://blog.scottlogic.com/2020/05/01/rendering-one-million-points-with-d3.html
-
-https://medium.com/@ColinEberhardt/extending-d3-with-higher-order-components-d58cd40b7efd
-
-Remember that most routes will be <100K, not 1M points!
-Therefore, Canvas may be best option.
-Or, given Elm, and the current charting library, and the nature of the tree, we could probably
-show a decent zoomable plot that perhaps shows error bars or a candle plot for non-leaf tree entries.
-Though, by the same argument, we could ship 10K points to JS no problem.
-PARK THIS FOR NOW; we have options!
 
 ## Terrain
 Terrain 1 = Simple tree walk, in many cases will just work but not always.

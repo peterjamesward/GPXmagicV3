@@ -12,6 +12,7 @@ import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
+import Element.Font as Font
 import Element.Input as Input exposing (button)
 import FeatherIcons
 import File exposing (File)
@@ -74,6 +75,7 @@ type Msg
     | RepaintMap
     | ToggleToolPopup
     | BackgroundColour Element.Color
+    | RestoreDefaultToolLayout
     | NoOp
 
 
@@ -553,6 +555,11 @@ Please check the file contains GPX data.""" }
         NoOp ->
             ( model, Cmd.none )
 
+        RestoreDefaultToolLayout ->
+            ( { model | toolOptions = ToolsController.defaultOptions }
+            , Cmd.none
+            )
+
 
 allocateSpaceForDocksAndContent : Int -> Int -> Model -> Model
 allocateSpaceForDocksAndContent newWidth newHeight model =
@@ -861,31 +868,40 @@ globalOptions model =
                 , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always NoOp)
                 , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always NoOp)
                 , htmlAttribute (style "z-index" "20")
+                , Background.color FlatColors.AussiePalette.coastalBreeze
                 ]
-                [ showColourOptions model
+                [ showOptionsMenu model
                 ]
         ]
     <|
-        Input.button [ alignRight ]
+        Input.button
+            [ alignRight ]
             { onPress = Just <| ToggleToolPopup
             , label = useIcon FeatherIcons.settings
             }
 
 
-showColourOptions model =
+showOptionsMenu model =
     let
         colourBlock colour =
             Input.button
-                [ Background.color colour, width <| Element.px 30, height <| Element.px 20 ]
+                [ Background.color colour, width fill, height <| Element.px 20 ]
                 { label = none
                 , onPress = Just <| BackgroundColour colour
                 }
     in
     if model.isPopupOpen then
-        row (alignRight :: neatToolsBorder)
-            [ colourBlock FlatColors.AussiePalette.coastalBreeze
-            , colourBlock FlatColors.AussiePalette.soaringEagle
-            , colourBlock FlatColors.AussiePalette.wizardGrey
+        column []
+            [ row (alignRight :: width fill :: neatToolsBorder)
+                [ colourBlock FlatColors.AussiePalette.coastalBreeze
+                , colourBlock FlatColors.AussiePalette.soaringEagle
+                , colourBlock FlatColors.AussiePalette.wizardGrey
+                ]
+            , el (alignRight :: width fill :: neatToolsBorder) <|
+                Input.button [ alignRight ]
+                    { onPress = Just <| RestoreDefaultToolLayout
+                    , label = text "Restore default layout"
+                    }
             ]
 
     else
