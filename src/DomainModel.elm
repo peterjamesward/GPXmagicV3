@@ -1027,61 +1027,67 @@ penultimatePoint tree =
     ( Tuple.first leaf.sourceData, leaf.startPoint )
 
 
-extractPointsInRange :
-    Int
-    -> Int
-    -> (RoadSection -> Maybe Int)
-    -> PeteTree
-    -> List ( EarthPoint, GPXSource )
-extractPointsInRange fromStart fromEnd depthFunction trackTree =
-    -- Should be able to write this using universal traversal now.
-    -- "Make it right, then make it faster."
+extractPointsInRange : Int -> Int -> PeteTree -> List ( EarthPoint, GPXSource )
+extractPointsInRange fromStart fromEnd trackTree =
+    -- Going for an efficient but more likely correct approach.
+    -- "Make it right, then make it fast."
     let
-        myFoldFn : RoadSection -> List ( EarthPoint, GPXSource ) -> List ( EarthPoint, GPXSource )
-        myFoldFn section accum =
-            -- Note that we put start and end on, but each time we drop the previous start.
-            ( section.startPoint, Tuple.first section.sourceData )
-                :: ( section.endPoint, Tuple.second section.sourceData )
-                :: List.drop 1 accum
+        indices =
+            List.range fromStart (skipCount trackTree - fromEnd)
     in
-    traverseTreeBetweenLimitsToDepth
-        fromStart
-        (skipCount trackTree - fromEnd)
-        depthFunction
-        0
-        trackTree
-        myFoldFn
-        []
+    buildPreview indices trackTree
+
+
+safeEnumerateEndPoints : Maybe PeteTree -> List ( EarthPoint, GPXSource )
+safeEnumerateEndPoints mTree =
+    case mTree of
+        Just tree ->
+            enumerateEndPoints tree []
+
+        Nothing ->
+            []
 
 
 recreateGpxSources : Maybe PeteTree -> List GPXSource
 recreateGpxSources mTree =
     -- Using the all-purpose traversal function, but resulting in a
     -- list where we get the start point of all sections, plus the end point of the last section.
-    -- NOTE is in reverse order.
-    let
-        myFoldFn : RoadSection -> List GPXSource -> List GPXSource
-        myFoldFn section accum =
-            Tuple.first section.sourceData
-                :: Tuple.second section.sourceData
-                :: List.drop 1 accum
-    in
+    -- NOTE we reverse to put the list in "natural" order.
+    --TODO: This new code WRONG, leaving the old.
+    --let
+    --    myFoldFn : RoadSection -> List GPXSource -> List GPXSource
+    --    myFoldFn section accum =
+    --        Tuple.first section.sourceData
+    --            :: Tuple.second section.sourceData
+    --            :: List.drop 1 accum
+    --in
+    --case mTree of
+    --    Just treeNode ->
+    --        foldOverRoute myFoldFn treeNode |> List.reverse
+    --
+    --    Nothing ->
+    --        []
     case mTree of
-        Just treeNode ->
-            foldOverRoute myFoldFn treeNode
+        Just fromTree ->
+            (getFirstLeaf fromTree |> .sourceData |> Tuple.first)
+                :: (enumerateEndPoints fromTree [] |> List.map Tuple.second)
 
         Nothing ->
             []
 
 
+enumerateEndPoints : PeteTree -> List ( EarthPoint, GPXSource ) -> List ( EarthPoint, GPXSource )
+enumerateEndPoints treeNode accum =
+    -- The name describes the output, not the method!
+    -- Note it gives end points, you need to add the start point somewhere!
+    case treeNode of
+        Leaf leaf ->
+            ( leaf.endPoint, Tuple.second leaf.sourceData ) :: accum
 
---case mTree of
---    Just fromTree ->
---        (getFirstLeaf fromTree |> .sourceData |> Tuple.first)
---            :: (enumerateEndPoints fromTree [] |> List.map Tuple.second)
---
---    Nothing ->
---        []
+        Node node ->
+            accum
+                |> enumerateEndPoints node.right
+                |> enumerateEndPoints node.left
 
 
 foldOverRoute : (RoadSection -> List a -> List a) -> PeteTree -> List a

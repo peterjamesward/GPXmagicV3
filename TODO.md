@@ -6,6 +6,8 @@ BUG: In Grid view, Pane1 is notably smaller than the others.
 
 # WIP
 
+New traverse broken Undo for delete two internal points.
+
 Limit previews using renderDepth; e.g. Delete for > 1000 points.
 > Writing a tree traversal for this. (should also be used in SceneBuilder)
 > https://package.elm-lang.org/packages/icidasset/elm-binary/latest/Binary has application.

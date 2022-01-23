@@ -83,8 +83,6 @@ addToUndoStack action fromStart fromEnd oldPoints oldTrack =
 
 undoLastAction : TrackLoaded msg -> TrackLoaded msg
 undoLastAction track =
-    -- For now, just pop the stack
-    --TODO: Stitch in the old points!!
     case track.undos of
         undo :: moreUndos ->
             let
