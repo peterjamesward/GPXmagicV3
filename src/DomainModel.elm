@@ -1035,10 +1035,19 @@ extractPointsInRange fromStart fromEnd trackTree =
     -- Going for an efficient but more likely correct approach.
     -- "Make it right, then make it fast."
     let
-        indices =
-            List.range fromStart (skipCount trackTree - fromEnd)
+        myFoldFn : RoadSection -> List ( EarthPoint, GPXSource ) -> List ( EarthPoint, GPXSource )
+        myFoldFn road accum =
+            ( road.endPoint, Tuple.second road.sourceData )
+                :: ( road.startPoint, Tuple.first road.sourceData )
+                :: List.drop 1 accum
     in
-    buildPreview indices trackTree
+    List.reverse <|
+        traverseTreeBetween
+            fromStart
+            (skipCount trackTree - fromEnd)
+            trackTree
+            myFoldFn
+            []
 
 
 safeEnumerateEndPoints : Maybe PeteTree -> List ( EarthPoint, GPXSource )
