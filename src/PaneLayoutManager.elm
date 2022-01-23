@@ -160,6 +160,40 @@ update :
     -> Options
     -> ( Options, List (ToolAction msg) )
 update paneMsg msgWrapper mTrack contentArea options =
+    let
+        updatePaneWith : PaneId -> (PaneContext -> PaneContext) -> Options
+        updatePaneWith id updateFn =
+            let
+                currentPane =
+                    case id of
+                        Pane1 ->
+                            options.pane1
+
+                        Pane2 ->
+                            options.pane2
+
+                        Pane3 ->
+                            options.pane3
+
+                        Pane4 ->
+                            options.pane4
+
+                updatedPane =
+                    updateFn currentPane
+            in
+            case id of
+                Pane1 ->
+                    { options | pane1 = updatedPane }
+
+                Pane2 ->
+                    { options | pane2 = updatedPane }
+
+                Pane3 ->
+                    { options | pane3 = updatedPane }
+
+                Pane4 ->
+                    { options | pane4 = updatedPane }
+    in
     case paneMsg of
         PaneNoOp ->
             ( options, [] )
@@ -180,36 +214,9 @@ update paneMsg msgWrapper mTrack contentArea options =
 
         SetViewMode paneId viewMode ->
             let
-                currentPane =
-                    case paneId of
-                        Pane1 ->
-                            options.pane1
-
-                        Pane2 ->
-                            options.pane2
-
-                        Pane3 ->
-                            options.pane3
-
-                        Pane4 ->
-                            options.pane4
-
-                newPane =
-                    { currentPane | activeView = viewMode }
-
                 newOptions =
-                    case paneId of
-                        Pane1 ->
-                            { options | pane1 = newPane }
-
-                        Pane2 ->
-                            { options | pane2 = newPane }
-
-                        Pane3 ->
-                            { options | pane3 = newPane }
-
-                        Pane4 ->
-                            { options | pane4 = newPane }
+                    updatePaneWith paneId
+                        (\pane -> { pane | activeView = viewMode })
             in
             ( newOptions
             , [ MapRefresh
@@ -244,8 +251,7 @@ update paneMsg msgWrapper mTrack contentArea options =
                                         imageMsg
                                         (msgWrapper << ImageMessage Pane1)
                                         track
-                                        contentArea
-                                        -- need this for hit detection.
+                                        (dimensionsWithLayout options.paneLayout contentArea)
                                         third
                             in
                             ( Just new, act )
@@ -349,6 +355,29 @@ viewModeChoicesNoMap msgWrapper pane =
         }
 
 
+takeHalf qty =
+    qty |> Quantity.toFloatQuantity |> Quantity.half |> Quantity.truncate
+
+
+dimensionsWithLayout layout ( w, h ) =
+    case layout of
+        PanesOne ->
+            ( w, h )
+
+        PanesLeftRight ->
+            ( takeHalf w, h )
+
+        PanesUpperLower ->
+            ( w, takeHalf h |> Quantity.minus (Pixels.pixels 20) )
+
+        PanesOnePlusTwo ->
+            -- Later, not that simple
+            ( w, h )
+
+        PanesGrid ->
+            ( takeHalf w, takeHalf h |> Quantity.minus (Pixels.pixels 20) )
+
+
 viewPanes :
     (Msg -> msg)
     -> Maybe (TrackLoaded msg)
@@ -358,26 +387,8 @@ viewPanes :
     -> Element msg
 viewPanes msgWrapper mTrack scene ( w, h ) options =
     let
-        takeHalf qty =
-            qty |> Quantity.toFloatQuantity |> Quantity.half |> Quantity.truncate
-
         ( paneWidth, paneHeight ) =
-            case options.paneLayout of
-                PanesOne ->
-                    ( w, h )
-
-                PanesLeftRight ->
-                    ( takeHalf w, h )
-
-                PanesUpperLower ->
-                    ( w, takeHalf h |> Quantity.minus (Pixels.pixels 20) )
-
-                PanesOnePlusTwo ->
-                    -- Later, not that simple
-                    ( w, h )
-
-                PanesGrid ->
-                    ( takeHalf w, takeHalf h |> Quantity.minus (Pixels.pixels 20) )
+            dimensionsWithLayout options.paneLayout ( w, h )
 
         showNonMapViews pane =
             case ( pane.thirdPersonContext, mTrack ) of

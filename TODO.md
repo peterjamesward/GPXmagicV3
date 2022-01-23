@@ -6,14 +6,8 @@ BUG: In Grid view, Pane1 is notably smaller than the others.
 
 # WIP
 
-New traverse broken Undo for delete two internal points.
-
-Limit previews using renderDepth; e.g. Delete for > 1000 points.
-> Writing a tree traversal for this. (should also be used in SceneBuilder)
-> https://package.elm-lang.org/packages/icidasset/elm-binary/latest/Binary has application.
-> `ensureSize 10 <| fromDecimal x`, lacks comparison operator. 
-> Still, useful for "toggling" through a tree.
-> Because I want that Travesor after all.
+Option for 3D view to follow pointer; where should this live?
+> In the overlay menu, using padlock for continuity with v2.
 
 ---
 
@@ -21,10 +15,7 @@ Limit previews using renderDepth; e.g. Delete for > 1000 points.
 
 ## Small things (you'd hope)
 
-BUG: Hit detect is not using the correct pane size.
-
-Option for 3D view to follow pointer; where should this live?
-> In the overlay menu, using padlock for continuity with v2.
+SceneBuilder to use new traversal fn with more progressive rendering.
 
 "Restore to defaults" for tools in top bar settings.
 

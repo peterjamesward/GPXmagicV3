@@ -15432,6 +15432,48 @@ var $author$project$Actions$MapCenterOnCurrent = {$: 'MapCenterOnCurrent'};
 var $author$project$Actions$SetCurrent = function (a) {
 	return {$: 'SetCurrent', a: a};
 };
+var $ianmackenzie$elm_units$Quantity$toFloatQuantity = function (_v0) {
+	var value = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(value);
+};
+var $ianmackenzie$elm_units$Quantity$truncate = function (_v0) {
+	var value = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(value | 0);
+};
+var $author$project$PaneLayoutManager$takeHalf = function (qty) {
+	return $ianmackenzie$elm_units$Quantity$truncate(
+		$ianmackenzie$elm_units$Quantity$half(
+			$ianmackenzie$elm_units$Quantity$toFloatQuantity(qty)));
+};
+var $author$project$PaneLayoutManager$dimensionsWithLayout = F2(
+	function (layout, _v0) {
+		var w = _v0.a;
+		var h = _v0.b;
+		switch (layout.$) {
+			case 'PanesOne':
+				return _Utils_Tuple2(w, h);
+			case 'PanesLeftRight':
+				return _Utils_Tuple2(
+					$author$project$PaneLayoutManager$takeHalf(w),
+					h);
+			case 'PanesUpperLower':
+				return _Utils_Tuple2(
+					w,
+					A2(
+						$ianmackenzie$elm_units$Quantity$minus,
+						$ianmackenzie$elm_units$Pixels$pixels(20),
+						$author$project$PaneLayoutManager$takeHalf(h)));
+			case 'PanesOnePlusTwo':
+				return _Utils_Tuple2(w, h);
+			default:
+				return _Utils_Tuple2(
+					$author$project$PaneLayoutManager$takeHalf(w),
+					A2(
+						$ianmackenzie$elm_units$Quantity$minus,
+						$ianmackenzie$elm_units$Pixels$pixels(20),
+						$author$project$PaneLayoutManager$takeHalf(h)));
+		}
+	});
 var $author$project$PaneLayoutManager$encodePaneId = function (paneId) {
 	return A2(
 		$elm$core$Maybe$withDefault,
@@ -16399,10 +16441,6 @@ var $ianmackenzie$elm_3d_camera$Camera3d$ray = F3(
 				$ianmackenzie$elm_3d_camera$Viewpoint3d$viewDirection(camera.viewpoint));
 		}
 	});
-var $ianmackenzie$elm_units$Quantity$toFloatQuantity = function (_v0) {
-	var value = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(value);
-};
 var $author$project$ViewThirdPerson$detectHit = F4(
 	function (event, track, _v0, context) {
 		var w = _v0.a;
@@ -16595,6 +16633,40 @@ var $author$project$ViewThirdPerson$update = F5(
 	});
 var $author$project$PaneLayoutManager$update = F5(
 	function (paneMsg, msgWrapper, mTrack, contentArea, options) {
+		var updatePaneWith = F2(
+			function (id, updateFn) {
+				var currentPane = function () {
+					switch (id.$) {
+						case 'Pane1':
+							return options.pane1;
+						case 'Pane2':
+							return options.pane2;
+						case 'Pane3':
+							return options.pane3;
+						default:
+							return options.pane4;
+					}
+				}();
+				var updatedPane = updateFn(currentPane);
+				switch (id.$) {
+					case 'Pane1':
+						return _Utils_update(
+							options,
+							{pane1: updatedPane});
+					case 'Pane2':
+						return _Utils_update(
+							options,
+							{pane2: updatedPane});
+					case 'Pane3':
+						return _Utils_update(
+							options,
+							{pane3: updatedPane});
+					default:
+						return _Utils_update(
+							options,
+							{pane4: updatedPane});
+				}
+			});
 		switch (paneMsg.$) {
 			case 'PaneNoOp':
 				return _Utils_Tuple2(options, _List_Nil);
@@ -16622,41 +16694,14 @@ var $author$project$PaneLayoutManager$update = F5(
 			case 'SetViewMode':
 				var paneId = paneMsg.a;
 				var viewMode = paneMsg.b;
-				var currentPane = function () {
-					switch (paneId.$) {
-						case 'Pane1':
-							return options.pane1;
-						case 'Pane2':
-							return options.pane2;
-						case 'Pane3':
-							return options.pane3;
-						default:
-							return options.pane4;
-					}
-				}();
-				var newPane = _Utils_update(
-					currentPane,
-					{activeView: viewMode});
-				var newOptions = function () {
-					switch (paneId.$) {
-						case 'Pane1':
-							return _Utils_update(
-								options,
-								{pane1: newPane});
-						case 'Pane2':
-							return _Utils_update(
-								options,
-								{pane2: newPane});
-						case 'Pane3':
-							return _Utils_update(
-								options,
-								{pane3: newPane});
-						default:
-							return _Utils_update(
-								options,
-								{pane4: newPane});
-					}
-				}();
+				var newOptions = A2(
+					updatePaneWith,
+					paneId,
+					function (pane) {
+						return _Utils_update(
+							pane,
+							{activeView: viewMode});
+					});
 				return _Utils_Tuple2(
 					newOptions,
 					_List_fromArray(
@@ -16682,12 +16727,12 @@ var $author$project$PaneLayoutManager$update = F5(
 							return options.pane4;
 					}
 				}();
-				var _v3 = function () {
-					var _v4 = _Utils_Tuple2(mTrack, paneInfo.thirdPersonContext);
-					if ((_v4.a.$ === 'Just') && (_v4.b.$ === 'Just')) {
-						var track = _v4.a.a;
-						var third = _v4.b.a;
-						var _v5 = A5(
+				var _v1 = function () {
+					var _v2 = _Utils_Tuple2(mTrack, paneInfo.thirdPersonContext);
+					if ((_v2.a.$ === 'Just') && (_v2.b.$ === 'Just')) {
+						var track = _v2.a.a;
+						var third = _v2.b.a;
+						var _v3 = A5(
 							$author$project$ViewThirdPerson$update,
 							imageMsg,
 							A2(
@@ -16695,10 +16740,10 @@ var $author$project$PaneLayoutManager$update = F5(
 								msgWrapper,
 								$author$project$PaneLayoutManager$ImageMessage($author$project$PaneLayoutManager$Pane1)),
 							track,
-							contentArea,
+							A2($author$project$PaneLayoutManager$dimensionsWithLayout, options.paneLayout, contentArea),
 							third);
-						var _new = _v5.a;
-						var act = _v5.b;
+						var _new = _v3.a;
+						var act = _v3.b;
 						return _Utils_Tuple2(
 							$elm$core$Maybe$Just(_new),
 							act);
@@ -16706,8 +16751,8 @@ var $author$project$PaneLayoutManager$update = F5(
 						return _Utils_Tuple2($elm$core$Maybe$Nothing, _List_Nil);
 					}
 				}();
-				var newContext = _v3.a;
-				var actions = _v3.b;
+				var newContext = _v1.a;
+				var actions = _v1.b;
 				var newPane = _Utils_update(
 					paneInfo,
 					{thirdPersonContext: newContext});
@@ -27709,10 +27754,6 @@ var $author$project$ViewPureStyles$conditionallyVisible = F2(
 				]),
 			element);
 	});
-var $ianmackenzie$elm_units$Quantity$truncate = function (_v0) {
-	var value = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(value | 0);
-};
 var $mdgriffith$elm_ui$Internal$Model$Left = {$: 'Left'};
 var $mdgriffith$elm_ui$Element$alignLeft = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Left);
 var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
@@ -29648,11 +29689,6 @@ var $author$project$PaneLayoutManager$viewPanes = F5(
 	function (msgWrapper, mTrack, scene, _v0, options) {
 		var w = _v0.a;
 		var h = _v0.b;
-		var takeHalf = function (qty) {
-			return $ianmackenzie$elm_units$Quantity$truncate(
-				$ianmackenzie$elm_units$Quantity$half(
-					$ianmackenzie$elm_units$Quantity$toFloatQuantity(qty)));
-		};
 		var slider = function () {
 			if (mTrack.$ === 'Just') {
 				var track = mTrack.a;
@@ -29679,40 +29715,17 @@ var $author$project$PaneLayoutManager$viewPanes = F5(
 				return $mdgriffith$elm_ui$Element$none;
 			}
 		}();
-		var _v1 = function () {
-			var _v2 = options.paneLayout;
-			switch (_v2.$) {
-				case 'PanesOne':
-					return _Utils_Tuple2(w, h);
-				case 'PanesLeftRight':
-					return _Utils_Tuple2(
-						takeHalf(w),
-						h);
-				case 'PanesUpperLower':
-					return _Utils_Tuple2(
-						w,
-						A2(
-							$ianmackenzie$elm_units$Quantity$minus,
-							$ianmackenzie$elm_units$Pixels$pixels(20),
-							takeHalf(h)));
-				case 'PanesOnePlusTwo':
-					return _Utils_Tuple2(w, h);
-				default:
-					return _Utils_Tuple2(
-						takeHalf(w),
-						A2(
-							$ianmackenzie$elm_units$Quantity$minus,
-							$ianmackenzie$elm_units$Pixels$pixels(20),
-							takeHalf(h)));
-			}
-		}();
+		var _v1 = A2(
+			$author$project$PaneLayoutManager$dimensionsWithLayout,
+			options.paneLayout,
+			_Utils_Tuple2(w, h));
 		var paneWidth = _v1.a;
 		var paneHeight = _v1.b;
 		var showNonMapViews = function (pane) {
-			var _v4 = _Utils_Tuple2(pane.thirdPersonContext, mTrack);
-			if ((_v4.a.$ === 'Just') && (_v4.b.$ === 'Just')) {
-				var context = _v4.a.a;
-				var track = _v4.b.a;
+			var _v3 = _Utils_Tuple2(pane.thirdPersonContext, mTrack);
+			if ((_v3.a.$ === 'Just') && (_v3.b.$ === 'Just')) {
+				var context = _v3.a.a;
+				var track = _v3.b.a;
 				return A5(
 					$author$project$ViewThirdPerson$view,
 					context,
@@ -29784,8 +29797,8 @@ var $author$project$PaneLayoutManager$viewPanes = F5(
 							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
 						]),
 					function () {
-						var _v3 = options.paneLayout;
-						switch (_v3.$) {
+						var _v2 = options.paneLayout;
+						switch (_v2.$) {
 							case 'PanesOne':
 								return _List_fromArray(
 									[
