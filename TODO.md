@@ -6,22 +6,21 @@ BUG: In Grid view, Pane1 is notably smaller than the others.
 
 # WIP
 
+"Restore to defaults" for tools in top bar settings.
+
+Configurable background colour (light, medium, dark) in top bar settings.
+
+Imperial measures option in top bar settings button (maybe combine with track info bar, JB below).
+> **JB**: I wonder if the Summary and Segment information could be better placed on the top
+> Load GPX top line toggleable between the 2... only thinking of maximising space use.
+
 ---
 
 # BACKLOG, roughly in order ...
 
 ## Small things (you'd hope)
 
-"Restore to defaults" for tools in top bar settings.
-
-Configurable background colour (light, medium, dark) in top bar settings.
-
-Imperial measures option in top bar settings button (maybe combine with track info bar, JB below).
-
 SceneBuilder to use new traversal fn with more progressive rendering.
-
-**JB**: I wonder if the Summary and Segment information could be better placed on the top 
-Load GPX top line toggleable between the 2... only thinking of maximising space use.
 
 ## Profile & Charts
 Details in Backlog.
@@ -34,16 +33,12 @@ Try to reduce repaints on moving pointer.
 
 Map options tool? 
 - Map style (outdoor, satellite)
-- Map follow orange pointer or not
 - Draggable points
 
 ## Tools
 
 All existing tools to move across, with some rationalisation.
 2-way drag should correct for azimuth.
-Pane payout choices as control?
-I think the top bar is still special: Load, Save, Donate. Is it?
-"Where am I" - reverse geocode (rate limited)).
 
 ## Error messages
 Using an action DisplayMessage to show modal dialog from any tool.
@@ -53,7 +48,7 @@ Make a tool for this.
 Low memory can trigger defensive actions: remove Undo entries, reduce rendering depth, reduce graphics.
 
 ## Plan view
-Same as before. Use 3d-scene. Orthographic camera.
+Same as v2. Use 3d-scene. Orthographic camera.
 
 ## Profile
 Not 3d, just drawing onto Canvas?
