@@ -10308,6 +10308,7 @@ var $elm$core$List$head = function (list) {
 	}
 };
 var $author$project$ViewMap$initialiseContext = {
+	followOrange: false,
 	lastMapClick: _Utils_Tuple2(0, 0),
 	mapClickDebounce: false
 };
@@ -15429,6 +15430,9 @@ var $author$project$PaneLayoutManager$ImageMessage = F2(
 		return {$: 'ImageMessage', a: a, b: b};
 	});
 var $author$project$Actions$MapCenterOnCurrent = {$: 'MapCenterOnCurrent'};
+var $author$project$PaneLayoutManager$MapViewMessage = function (a) {
+	return {$: 'MapViewMessage', a: a};
+};
 var $author$project$Actions$SetCurrent = function (a) {
 	return {$: 'SetCurrent', a: a};
 };
@@ -15707,6 +15711,14 @@ var $author$project$MapPortController$update = F2(
 	function (mapMsg, track) {
 		var value = mapMsg.a;
 		return A2($author$project$MapPortController$processMapPortMessage, track, value);
+	});
+var $author$project$ViewMap$update = F5(
+	function (msg, msgWrapper, track, area, context) {
+		return _Utils_Tuple2(
+			_Utils_update(
+				context,
+				{followOrange: !context.followOrange}),
+			_List_Nil);
 	});
 var $author$project$ViewThirdPerson$ClickDelayExpired = {$: 'ClickDelayExpired'};
 var $author$project$Actions$DelayMessage = F2(
@@ -16783,6 +16795,40 @@ var $author$project$PaneLayoutManager$update = F5(
 					}
 				}();
 				return _Utils_Tuple2(newOptions, actions);
+			case 'MapViewMessage':
+				var mapViewMsg = paneMsg.a;
+				var paneInfo = options.pane1;
+				var _v6 = function () {
+					var _v7 = _Utils_Tuple2(mTrack, paneInfo.mapContext);
+					if ((_v7.a.$ === 'Just') && (_v7.b.$ === 'Just')) {
+						var track = _v7.a.a;
+						var mapContext = _v7.b.a;
+						var _v8 = A5(
+							$author$project$ViewMap$update,
+							mapViewMsg,
+							A2($elm$core$Basics$composeL, msgWrapper, $author$project$PaneLayoutManager$MapViewMessage),
+							track,
+							A2($author$project$PaneLayoutManager$dimensionsWithLayout, options.paneLayout, contentArea),
+							mapContext);
+						var _new = _v8.a;
+						var act = _v8.b;
+						return _Utils_Tuple2(
+							$elm$core$Maybe$Just(_new),
+							act);
+					} else {
+						return _Utils_Tuple2($elm$core$Maybe$Nothing, _List_Nil);
+					}
+				}();
+				var newContext = _v6.a;
+				var actions = _v6.b;
+				var newPane = _Utils_update(
+					paneInfo,
+					{mapContext: newContext});
+				return _Utils_Tuple2(
+					_Utils_update(
+						options,
+						{pane1: newPane}),
+					actions);
 			case 'MapPortsMessage':
 				var mapMsg = paneMsg.a;
 				if (mTrack.$ === 'Just') {
@@ -16794,13 +16840,26 @@ var $author$project$PaneLayoutManager$update = F5(
 				}
 			default:
 				var pos = paneMsg.a;
+				var mapFollowsOrange = function () {
+					var _v10 = options.pane1.mapContext;
+					if (_v10.$ === 'Just') {
+						var mapContext = _v10.a;
+						return mapContext.followOrange;
+					} else {
+						return false;
+					}
+				}();
 				return _Utils_Tuple2(
 					options,
-					_List_fromArray(
+					mapFollowsOrange ? _List_fromArray(
 						[
 							$author$project$Actions$SetCurrent(pos),
 							$author$project$Actions$TrackHasChanged,
 							$author$project$Actions$MapCenterOnCurrent
+						]) : _List_fromArray(
+						[
+							$author$project$Actions$SetCurrent(pos),
+							$author$project$Actions$TrackHasChanged
 						]));
 		}
 	});
@@ -27760,6 +27819,7 @@ var $author$project$ViewPureStyles$conditionallyVisible = F2(
 				]),
 			element);
 	});
+var $author$project$ViewMap$ToggleFollowOrange = {$: 'ToggleFollowOrange'};
 var $mdgriffith$elm_ui$Internal$Model$Left = {$: 'Left'};
 var $mdgriffith$elm_ui$Element$alignLeft = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Left);
 var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
@@ -27767,6 +27827,36 @@ var $ianmackenzie$elm_units$Pixels$inPixels = function (_v0) {
 	var numPixels = _v0.a;
 	return numPixels;
 };
+var $elm$svg$Svg$rect = $elm$svg$Svg$trustedNode('rect');
+var $elm$svg$Svg$Attributes$rx = _VirtualDom_attribute('rx');
+var $elm$svg$Svg$Attributes$ry = _VirtualDom_attribute('ry');
+var $elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
+var $elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
+var $feathericons$elm_feather$FeatherIcons$lock = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'lock',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$rect,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x('3'),
+					$elm$svg$Svg$Attributes$y('11'),
+					$elm$svg$Svg$Attributes$width('18'),
+					$elm$svg$Svg$Attributes$height('11'),
+					$elm$svg$Svg$Attributes$rx('2'),
+					$elm$svg$Svg$Attributes$ry('2')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$path,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$d('M7 11V7a5 5 0 0 1 10 0v4')
+				]),
+			_List_Nil)
+		]));
 var $mdgriffith$elm_ui$Internal$Model$MoveX = function (a) {
 	return {$: 'MoveX', a: a};
 };
@@ -27778,61 +27868,109 @@ var $mdgriffith$elm_ui$Element$moveLeft = function (x) {
 		$mdgriffith$elm_ui$Internal$Model$MoveX(-x));
 };
 var $smucode$elm_flat_colors$FlatColors$ChinesePalette$peace = A3($mdgriffith$elm_ui$Element$rgb255, 164, 176, 190);
-var $author$project$ViewMap$view = F2(
-	function (_v0, msgWrapper) {
+var $feathericons$elm_feather$FeatherIcons$unlock = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'unlock',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$rect,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x('3'),
+					$elm$svg$Svg$Attributes$y('11'),
+					$elm$svg$Svg$Attributes$width('18'),
+					$elm$svg$Svg$Attributes$height('11'),
+					$elm$svg$Svg$Attributes$rx('2'),
+					$elm$svg$Svg$Attributes$ry('2')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$path,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$d('M7 11V7a5 5 0 0 1 9.9-1')
+				]),
+			_List_Nil)
+		]));
+var $author$project$ViewMap$view = F3(
+	function (_v0, mContext, msgWrapper) {
 		var viewWidth = _v0.a;
 		var viewHeight = _v0.b;
-		var handyMapControls = A2(
-			$mdgriffith$elm_ui$Element$column,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$alignTop,
-					$mdgriffith$elm_ui$Element$alignRight,
-					$mdgriffith$elm_ui$Element$moveDown(100),
-					$mdgriffith$elm_ui$Element$moveLeft(10),
-					$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite),
-					$mdgriffith$elm_ui$Element$Font$size(40),
-					$mdgriffith$elm_ui$Element$padding(6),
-					$mdgriffith$elm_ui$Element$spacing(8)
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$mdgriffith$elm_ui$Element$Input$button,
-					_List_Nil,
-					{
-						label: $mdgriffith$elm_ui$Element$text('x'),
-						onPress: $elm$core$Maybe$Nothing
-					})
-				]));
-		return A2(
-			$mdgriffith$elm_ui$Element$row,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$spacing(0),
-					$mdgriffith$elm_ui$Element$padding(0)
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$mdgriffith$elm_ui$Element$el,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$width(
-							$mdgriffith$elm_ui$Element$px(
-								$ianmackenzie$elm_units$Pixels$inPixels(viewWidth))),
-							$mdgriffith$elm_ui$Element$height(
-							$mdgriffith$elm_ui$Element$px(
-								$ianmackenzie$elm_units$Pixels$inPixels(viewHeight))),
-							$mdgriffith$elm_ui$Element$alignLeft,
-							$mdgriffith$elm_ui$Element$alignTop,
-							$mdgriffith$elm_ui$Element$Border$width(2),
-							$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$peace),
-							$mdgriffith$elm_ui$Element$htmlAttribute(
-							$elm$html$Html$Attributes$id('map'))
-						]),
-					$mdgriffith$elm_ui$Element$none)
-				]));
+		var handyMapControls = function (context) {
+			return A2(
+				$mdgriffith$elm_ui$Element$column,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$alignTop,
+						$mdgriffith$elm_ui$Element$alignRight,
+						$mdgriffith$elm_ui$Element$moveDown(100),
+						$mdgriffith$elm_ui$Element$moveLeft(10),
+						$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite),
+						$mdgriffith$elm_ui$Element$Font$size(40),
+						$mdgriffith$elm_ui$Element$padding(6),
+						$mdgriffith$elm_ui$Element$spacing(8)
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Element$Input$button,
+						_List_Nil,
+						{
+							label: context.followOrange ? $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$lock) : $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$unlock),
+							onPress: $elm$core$Maybe$Just(
+								msgWrapper($author$project$ViewMap$ToggleFollowOrange))
+						})
+					]));
+		};
+		if (mContext.$ === 'Just') {
+			var context = mContext.a;
+			return A2(
+				$mdgriffith$elm_ui$Element$row,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$spacing(0),
+						$mdgriffith$elm_ui$Element$padding(0),
+						$mdgriffith$elm_ui$Element$inFront(
+						handyMapControls(context))
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$width(
+								$mdgriffith$elm_ui$Element$px(
+									$ianmackenzie$elm_units$Pixels$inPixels(viewWidth))),
+								$mdgriffith$elm_ui$Element$height(
+								$mdgriffith$elm_ui$Element$px(
+									$ianmackenzie$elm_units$Pixels$inPixels(viewHeight))),
+								$mdgriffith$elm_ui$Element$alignLeft,
+								$mdgriffith$elm_ui$Element$alignTop,
+								$mdgriffith$elm_ui$Element$Border$width(2),
+								$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$peace),
+								$mdgriffith$elm_ui$Element$htmlAttribute(
+								$elm$html$Html$Attributes$id('map'))
+							]),
+						$mdgriffith$elm_ui$Element$none)
+					]));
+		} else {
+			return A2(
+				$mdgriffith$elm_ui$Element$row,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$htmlAttribute(
+								$elm$html$Html$Attributes$id('map'))
+							]),
+						$mdgriffith$elm_ui$Element$none)
+					]));
+		}
 	});
 var $author$project$ViewThirdPerson$ImageClick = function (a) {
 	return {$: 'ImageClick', a: a};
@@ -29051,36 +29189,6 @@ var $author$project$ViewThirdPerson$ImageReset = {$: 'ImageReset'};
 var $author$project$ViewThirdPerson$ImageZoomIn = {$: 'ImageZoomIn'};
 var $author$project$ViewThirdPerson$ImageZoomOut = {$: 'ImageZoomOut'};
 var $author$project$ViewThirdPerson$ToggleFollowOrange = {$: 'ToggleFollowOrange'};
-var $elm$svg$Svg$rect = $elm$svg$Svg$trustedNode('rect');
-var $elm$svg$Svg$Attributes$rx = _VirtualDom_attribute('rx');
-var $elm$svg$Svg$Attributes$ry = _VirtualDom_attribute('ry');
-var $elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
-var $elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
-var $feathericons$elm_feather$FeatherIcons$lock = A2(
-	$feathericons$elm_feather$FeatherIcons$makeBuilder,
-	'lock',
-	_List_fromArray(
-		[
-			A2(
-			$elm$svg$Svg$rect,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$x('3'),
-					$elm$svg$Svg$Attributes$y('11'),
-					$elm$svg$Svg$Attributes$width('18'),
-					$elm$svg$Svg$Attributes$height('11'),
-					$elm$svg$Svg$Attributes$rx('2'),
-					$elm$svg$Svg$Attributes$ry('2')
-				]),
-			_List_Nil),
-			A2(
-			$elm$svg$Svg$path,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$d('M7 11V7a5 5 0 0 1 10 0v4')
-				]),
-			_List_Nil)
-		]));
 var $feathericons$elm_feather$FeatherIcons$maximize = A2(
 	$feathericons$elm_feather$FeatherIcons$makeBuilder,
 	'maximize',
@@ -29133,31 +29241,6 @@ var $feathericons$elm_feather$FeatherIcons$plus = A2(
 					$elm$svg$Svg$Attributes$y1('12'),
 					$elm$svg$Svg$Attributes$x2('19'),
 					$elm$svg$Svg$Attributes$y2('12')
-				]),
-			_List_Nil)
-		]));
-var $feathericons$elm_feather$FeatherIcons$unlock = A2(
-	$feathericons$elm_feather$FeatherIcons$makeBuilder,
-	'unlock',
-	_List_fromArray(
-		[
-			A2(
-			$elm$svg$Svg$rect,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$x('3'),
-					$elm$svg$Svg$Attributes$y('11'),
-					$elm$svg$Svg$Attributes$width('18'),
-					$elm$svg$Svg$Attributes$height('11'),
-					$elm$svg$Svg$Attributes$rx('2'),
-					$elm$svg$Svg$Attributes$ry('2')
-				]),
-			_List_Nil),
-			A2(
-			$elm$svg$Svg$path,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$d('M7 11V7a5 5 0 0 1 9.9-1')
 				]),
 			_List_Nil)
 		]));
@@ -29845,10 +29928,11 @@ var $author$project$PaneLayoutManager$viewPanes = F5(
 						A2(
 						$author$project$ViewPureStyles$conditionallyVisible,
 						_Utils_eq(pane.activeView, $author$project$PaneLayoutManager$ViewMap),
-						A2(
+						A3(
 							$author$project$ViewMap$view,
 							_Utils_Tuple2(paneWidth, paneHeight),
-							A2($elm$core$Basics$composeL, msgWrapper, $author$project$PaneLayoutManager$MapPortsMessage)))
+							pane.mapContext,
+							A2($elm$core$Basics$composeL, msgWrapper, $author$project$PaneLayoutManager$MapViewMessage)))
 					]));
 		};
 		return A2(

@@ -103,6 +103,7 @@ type Msg
     | SetViewMode PaneId ViewMode
     | ImageMessage PaneId ViewThirdPerson.Msg
     | MapPortsMessage MapPortController.MapMsg
+    | MapViewMessage ViewMap.Msg
     | PaneNoOp
 
 
@@ -278,6 +279,33 @@ update paneMsg msgWrapper mTrack contentArea options =
             in
             ( newOptions, actions )
 
+        MapViewMessage mapViewMsg ->
+            let
+                paneInfo =
+                    options.pane1
+
+                ( newContext, actions ) =
+                    case ( mTrack, paneInfo.mapContext ) of
+                        ( Just track, Just mapContext ) ->
+                            let
+                                ( new, act ) =
+                                    ViewMap.update
+                                        mapViewMsg
+                                        (msgWrapper << MapViewMessage)
+                                        track
+                                        (dimensionsWithLayout options.paneLayout contentArea)
+                                        mapContext
+                            in
+                            ( Just new, act )
+
+                        _ ->
+                            ( Nothing, [] )
+
+                newPane =
+                    { paneInfo | mapContext = newContext }
+            in
+            ( { options | pane1 = newPane }, actions )
+
         MapPortsMessage mapMsg ->
             case mTrack of
                 Just track ->
@@ -293,8 +321,21 @@ update paneMsg msgWrapper mTrack contentArea options =
         SetCurrentPosition pos ->
             -- Slider moves pointer and re-centres view.
             -- The actions will re-render and repaint the map.
+            let
+                mapFollowsOrange =
+                    case options.pane1.mapContext of
+                        Just mapContext ->
+                            mapContext.followOrange
+
+                        Nothing ->
+                            False
+            in
             ( options
-            , [ SetCurrent pos, TrackHasChanged, MapCenterOnCurrent ]
+            , if mapFollowsOrange then
+                [ SetCurrent pos, TrackHasChanged, MapCenterOnCurrent ]
+
+              else
+                [ SetCurrent pos, TrackHasChanged ]
             )
 
 
@@ -411,7 +452,10 @@ viewPanes msgWrapper mTrack scene ( w, h ) options =
                 , conditionallyVisible (pane.activeView /= ViewMap) <|
                     showNonMapViews pane
                 , conditionallyVisible (pane.activeView == ViewMap) <|
-                    ViewMap.view ( paneWidth, paneHeight ) (msgWrapper << MapPortsMessage)
+                    ViewMap.view
+                        ( paneWidth, paneHeight )
+                        pane.mapContext
+                        (msgWrapper << MapViewMessage)
                 ]
 
         viewPaneNoMap pane =
