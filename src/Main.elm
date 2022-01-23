@@ -107,6 +107,7 @@ type alias Model =
     -- Tools
     , toolOptions : ToolsController.Options
     , isPopupOpen : Bool
+    , backgroundColour : Element.Color
     }
 
 
@@ -223,6 +224,7 @@ init mflags origin navigationKey =
                 |> configureSplitter (SplitPane.px (500 - 200) <| Just ( 300, 470 ))
       , toolOptions = ToolsController.defaultOptions
       , isPopupOpen = False
+      , backgroundColour = FlatColors.AussiePalette.wizardGrey
       }
     , Cmd.batch
         [ authCmd
@@ -545,8 +547,8 @@ Please check the file contains GPX data.""" }
         ToggleToolPopup ->
             ( { model | isPopupOpen = not model.isPopupOpen }, Cmd.none )
 
-        BackgroundColour color ->
-            ( model, Cmd.none )
+        BackgroundColour colour ->
+            ( { model | backgroundColour = colour }, Cmd.none )
 
         NoOp ->
             ( model, Cmd.none )
@@ -645,7 +647,7 @@ view model =
     { title = "GPXmagic Labs V3 concepts"
     , body =
         [ layout
-            (Background.color FlatColors.ChinesePalette.peace
+            (Background.color model.backgroundColour
                 :: (inFront <|
                         case model.modalMessage of
                             Just message ->
@@ -864,7 +866,10 @@ globalOptions model =
                 ]
         ]
     <|
-        useIcon FeatherIcons.settings
+        Input.button [ alignRight ]
+            { onPress = Just <| ToggleToolPopup
+            , label = useIcon FeatherIcons.settings
+            }
 
 
 showColourOptions model =
@@ -880,7 +885,7 @@ showColourOptions model =
         row (alignRight :: neatToolsBorder)
             [ colourBlock FlatColors.AussiePalette.coastalBreeze
             , colourBlock FlatColors.AussiePalette.soaringEagle
-            , colourBlock FlatColors.AussiePalette.deepKoamaru
+            , colourBlock FlatColors.AussiePalette.wizardGrey
             ]
 
     else

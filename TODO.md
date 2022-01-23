@@ -6,9 +6,9 @@ BUG: In Grid view, Pane1 is notably smaller than the others.
 
 # WIP
 
-"Restore to defaults" for tools in top bar settings.
-
 Configurable background colour (light, medium, dark) in top bar settings.
+
+"Restore to defaults" for tools in top bar settings.
 
 Imperial measures option in top bar settings button (maybe combine with track info bar, JB below).
 > **JB**: I wonder if the Summary and Segment information could be better placed on the top
