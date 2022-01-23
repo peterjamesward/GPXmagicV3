@@ -12,15 +12,13 @@ BUG: In Grid view, Pane1 is notably smaller than the others.
 
 ## Small things (you'd hope)
 
-Remove scroll bars from docks.
-
-SceneBuilder to use new traversal fn with more progressive rendering.
-
 "Restore to defaults" for tools in top bar settings.
 
 Configurable background colour (light, medium, dark) in top bar settings.
 
 Imperial measures option in top bar settings button (maybe combine with track info bar, JB below).
+
+SceneBuilder to use new traversal fn with more progressive rendering.
 
 **JB**: I wonder if the Summary and Segment information could be better placed on the top 
 Load GPX top line toggleable between the 2... only thinking of maximising space use.

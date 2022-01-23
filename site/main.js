@@ -24232,12 +24232,6 @@ var $mdgriffith$elm_ui$Internal$Model$RenderModeOption = function (a) {
 	return {$: 'RenderModeOption', a: a};
 };
 var $mdgriffith$elm_ui$Element$noStaticStyleSheet = $mdgriffith$elm_ui$Internal$Model$RenderModeOption($mdgriffith$elm_ui$Internal$Model$NoStaticStyleSheet);
-var $mdgriffith$elm_ui$Internal$Model$Class = F2(
-	function (a, b) {
-		return {$: 'Class', a: a, b: b};
-	});
-var $mdgriffith$elm_ui$Internal$Flag$overflow = $mdgriffith$elm_ui$Internal$Flag$flag(20);
-var $mdgriffith$elm_ui$Element$scrollbarY = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$overflow, $mdgriffith$elm_ui$Internal$Style$classes.scrollbarsY);
 var $author$project$ToolsController$ToolNoOp = {$: 'ToolNoOp'};
 var $author$project$ToolsController$ToolPopupToggle = function (a) {
 	return {$: 'ToolPopupToggle', a: a};
@@ -24335,6 +24329,10 @@ var $mdgriffith$elm_ui$Element$Input$onKeyLookup = function (lookup) {
 				},
 				isKey)));
 };
+var $mdgriffith$elm_ui$Internal$Model$Class = F2(
+	function (a, b) {
+		return {$: 'Class', a: a, b: b};
+	});
 var $mdgriffith$elm_ui$Internal$Flag$cursor = $mdgriffith$elm_ui$Internal$Flag$flag(21);
 var $mdgriffith$elm_ui$Element$pointer = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$cursor, $mdgriffith$elm_ui$Internal$Style$classes.cursorPointer);
 var $mdgriffith$elm_ui$Element$Input$space = ' ';
@@ -27394,8 +27392,7 @@ var $author$project$ToolsController$toolsForDock = F4(
 			$mdgriffith$elm_ui$Element$wrappedRow,
 			_List_fromArray(
 				[
-					$mdgriffith$elm_ui$Element$spacing(4),
-					$mdgriffith$elm_ui$Element$scrollbarY
+					$mdgriffith$elm_ui$Element$spacing(4)
 				]),
 			A2(
 				$elm$core$List$map,

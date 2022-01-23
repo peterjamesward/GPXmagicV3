@@ -427,11 +427,7 @@ toolsForDock :
     -> Element msg
 toolsForDock dock msgWrapper isTrack options =
     wrappedRow
-        [ spacing 4
-        , scrollbarY
-
-        --, height fill
-        ]
+        [ spacing 4 ]
     <|
         (options.tools
             |> List.filter (\t -> t.dock == dock)
