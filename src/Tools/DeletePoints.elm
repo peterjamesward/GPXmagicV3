@@ -188,5 +188,5 @@ deletePointsBetween fromStart fromEnd track =
                 track.trackTree
     in
     ( newTree
-    , oldPoints |> List.map Tuple.second |> List.reverse
+    , oldPoints |> List.map Tuple.second
     )

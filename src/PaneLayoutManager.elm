@@ -564,10 +564,6 @@ restoreStoredValues : Options -> D.Value -> Options
 restoreStoredValues options values =
     case D.decodeValue paneStateDecoder values of
         Ok fromStorage ->
-            let
-                _ =
-                    Debug.log "GOT HERE" ""
-            in
             { defaultOptions
                 | paneLayout = decodePanesLayout fromStorage.layoutName
                 , popupVisible = False
@@ -578,10 +574,6 @@ restoreStoredValues options values =
             }
 
         Err error ->
-            let
-                _ =
-                    Debug.log "ERROR" error
-            in
             options
 
 
