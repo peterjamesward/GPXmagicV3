@@ -13,13 +13,16 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Input as Input exposing (button)
+import FeatherIcons
 import File exposing (File)
 import File.Select as Select
+import FlatColors.AussiePalette
 import FlatColors.ChinesePalette
 import GeoCodeDecoders exposing (IpInfo)
 import GpxParser exposing (parseGPXPoints)
 import Html exposing (Html, div)
 import Html.Attributes exposing (id, style)
+import Html.Events.Extra.Mouse as Mouse
 import Http
 import Json.Decode as D
 import Json.Encode as E exposing (string)
@@ -45,6 +48,7 @@ import TrackLoaded exposing (TrackLoaded)
 import Url exposing (Url)
 import UtilsForViews exposing (colourHexString)
 import ViewPureStyles exposing (..)
+import ViewThirdPerson exposing (stopProp)
 
 
 type Msg
@@ -68,6 +72,9 @@ type Msg
     | DismissModalMessage
     | PaneMsg PaneLayoutManager.Msg
     | RepaintMap
+    | ToggleToolPopup
+    | BackgroundColour Element.Color
+    | NoOp
 
 
 type alias Model =
@@ -99,6 +106,7 @@ type alias Model =
 
     -- Tools
     , toolOptions : ToolsController.Options
+    , isPopupOpen : Bool
     }
 
 
@@ -214,6 +222,7 @@ init mflags origin navigationKey =
             SplitPane.init Vertical
                 |> configureSplitter (SplitPane.px (500 - 200) <| Just ( 300, 470 ))
       , toolOptions = ToolsController.defaultOptions
+      , isPopupOpen = False
       }
     , Cmd.batch
         [ authCmd
@@ -533,6 +542,15 @@ Please check the file contains GPX data.""" }
         RepaintMap ->
             ( model, MapPortController.refreshMap )
 
+        ToggleToolPopup ->
+            ( { model | isPopupOpen = not model.isPopupOpen }, Cmd.none )
+
+        BackgroundColour color ->
+            ( model, Cmd.none )
+
+        NoOp ->
+            ( model, Cmd.none )
+
 
 allocateSpaceForDocksAndContent : Int -> Int -> Model -> Model
 allocateSpaceForDocksAndContent newWidth newHeight model =
@@ -824,7 +842,49 @@ topLoadingBar model =
         )
         [ loadGpxButton
         , PaneLayoutManager.paneLayoutMenu PaneMsg model.paneLayoutOptions
+        , globalOptions model
         ]
+
+
+globalOptions : Model -> Element Msg
+globalOptions model =
+    el
+        [ alignRight
+        , inFront <|
+            column
+                [ alignRight
+                , moveDown 26
+                , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always NoOp)
+                , htmlAttribute <| Mouse.onWithOptions "dblclick" stopProp (always NoOp)
+                , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always NoOp)
+                , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always NoOp)
+                , htmlAttribute (style "z-index" "20")
+                ]
+                [ showColourOptions model
+                ]
+        ]
+    <|
+        useIcon FeatherIcons.settings
+
+
+showColourOptions model =
+    let
+        colourBlock colour =
+            Input.button
+                [ Background.color colour, width <| Element.px 30, height <| Element.px 20 ]
+                { label = none
+                , onPress = Just <| BackgroundColour colour
+                }
+    in
+    if model.isPopupOpen then
+        row (alignRight :: neatToolsBorder)
+            [ colourBlock FlatColors.AussiePalette.coastalBreeze
+            , colourBlock FlatColors.AussiePalette.soaringEagle
+            , colourBlock FlatColors.AussiePalette.deepKoamaru
+            ]
+
+    else
+        none
 
 
 subscriptions : Model -> Sub Msg

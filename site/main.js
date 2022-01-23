@@ -9630,6 +9630,7 @@ var $author$project$Main$init = F3(
 					$ianmackenzie$elm_units$Pixels$pixels(500)),
 				filename: $elm$core$Maybe$Nothing,
 				ipInfo: $elm$core$Maybe$Nothing,
+				isPopupOpen: false,
 				leftDockInternal: A2(
 					$author$project$SplitPane$SplitPane$configureSplitter,
 					A2(
@@ -10413,6 +10414,7 @@ var $author$project$PaneLayoutManager$initialise = F2(
 	});
 var $elm$core$Platform$Cmd$map = _Platform_map;
 var $elm$file$File$name = _File_name;
+var $elm$core$Basics$not = _Basics_not;
 var $elm$regex$Regex$Match = F4(
 	function (match, index, number, submatches) {
 		return {index: index, match: match, number: number, submatches: submatches};
@@ -15547,7 +15549,6 @@ var $author$project$PaneLayoutManager$encodePaneState = function (options) {
 				$author$project$PaneLayoutManager$encodeOnePane(options.pane4))
 			]));
 };
-var $elm$core$Basics$not = _Basics_not;
 var $author$project$Actions$SetCurrentFromMapClick = function (a) {
 	return {$: 'SetCurrentFromMapClick', a: a};
 };
@@ -18438,8 +18439,19 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					newModel,
 					A2($author$project$Main$performActionCommands, actions, newModel));
-			default:
+			case 'RepaintMap':
 				return _Utils_Tuple2(model, $author$project$MapPortController$refreshMap);
+			case 'ToggleToolPopup':
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{isPopupOpen: !model.isPopupOpen}),
+					$elm$core$Platform$Cmd$none);
+			case 'BackgroundColour':
+				var color = msg.a;
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			default:
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 		}
 	});
 var $author$project$Main$DismissModalMessage = {$: 'DismissModalMessage'};
@@ -30132,6 +30144,86 @@ var $author$project$ViewPureStyles$showModalMessage = F2(
 				]));
 	});
 var $author$project$Main$GpxRequested = {$: 'GpxRequested'};
+var $author$project$Main$NoOp = {$: 'NoOp'};
+var $author$project$Main$BackgroundColour = function (a) {
+	return {$: 'BackgroundColour', a: a};
+};
+var $smucode$elm_flat_colors$FlatColors$AussiePalette$soaringEagle = A3($mdgriffith$elm_ui$Element$rgb255, 149, 175, 192);
+var $author$project$Main$showColourOptions = function (model) {
+	var colourBlock = function (colour) {
+		return A2(
+			$mdgriffith$elm_ui$Element$Input$button,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$Background$color(colour),
+					$mdgriffith$elm_ui$Element$width(
+					$mdgriffith$elm_ui$Element$px(30)),
+					$mdgriffith$elm_ui$Element$height(
+					$mdgriffith$elm_ui$Element$px(20))
+				]),
+			{
+				label: $mdgriffith$elm_ui$Element$none,
+				onPress: $elm$core$Maybe$Just(
+					$author$project$Main$BackgroundColour(colour))
+			});
+	};
+	return model.isPopupOpen ? A2(
+		$mdgriffith$elm_ui$Element$row,
+		A2($elm$core$List$cons, $mdgriffith$elm_ui$Element$alignRight, $author$project$ViewPureStyles$neatToolsBorder),
+		_List_fromArray(
+			[
+				colourBlock($smucode$elm_flat_colors$FlatColors$AussiePalette$coastalBreeze),
+				colourBlock($smucode$elm_flat_colors$FlatColors$AussiePalette$soaringEagle),
+				colourBlock($smucode$elm_flat_colors$FlatColors$AussiePalette$deepKoamaru)
+			])) : $mdgriffith$elm_ui$Element$none;
+};
+var $author$project$Main$globalOptions = function (model) {
+	return A2(
+		$mdgriffith$elm_ui$Element$el,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$alignRight,
+				$mdgriffith$elm_ui$Element$inFront(
+				A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$alignRight,
+							$mdgriffith$elm_ui$Element$moveDown(26),
+							$mdgriffith$elm_ui$Element$htmlAttribute(
+							A3(
+								$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
+								'click',
+								$author$project$ViewThirdPerson$stopProp,
+								$elm$core$Basics$always($author$project$Main$NoOp))),
+							$mdgriffith$elm_ui$Element$htmlAttribute(
+							A3(
+								$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
+								'dblclick',
+								$author$project$ViewThirdPerson$stopProp,
+								$elm$core$Basics$always($author$project$Main$NoOp))),
+							$mdgriffith$elm_ui$Element$htmlAttribute(
+							A3(
+								$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
+								'mousedown',
+								$author$project$ViewThirdPerson$stopProp,
+								$elm$core$Basics$always($author$project$Main$NoOp))),
+							$mdgriffith$elm_ui$Element$htmlAttribute(
+							A3(
+								$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
+								'mouseup',
+								$author$project$ViewThirdPerson$stopProp,
+								$elm$core$Basics$always($author$project$Main$NoOp))),
+							$mdgriffith$elm_ui$Element$htmlAttribute(
+							A2($elm$html$Html$Attributes$style, 'z-index', '20'))
+						]),
+					_List_fromArray(
+						[
+							$author$project$Main$showColourOptions(model)
+						])))
+			]),
+		$author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$settings));
+};
 var $author$project$PaneLayoutManager$TogglePopup = {$: 'TogglePopup'};
 var $author$project$PaneLayoutManager$PaneNoOp = {$: 'PaneNoOp'};
 var $author$project$PaneLayoutManager$SetPaneLayout = function (a) {
@@ -30504,7 +30596,8 @@ var $author$project$Main$topLoadingBar = function (model) {
 		_List_fromArray(
 			[
 				loadGpxButton,
-				A2($author$project$PaneLayoutManager$paneLayoutMenu, $author$project$Main$PaneMsg, model.paneLayoutOptions)
+				A2($author$project$PaneLayoutManager$paneLayoutMenu, $author$project$Main$PaneMsg, model.paneLayoutOptions),
+				$author$project$Main$globalOptions(model)
 			]));
 };
 var $author$project$Main$view = function (model) {
