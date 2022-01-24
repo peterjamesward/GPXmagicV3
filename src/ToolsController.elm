@@ -54,6 +54,7 @@ type alias Options =
     , deleteOptions : DeletePoints.Options
     , pointerOptions : Pointers.Options
     , undoRedoOptions : UndoRedo.Options
+    , imperial : Bool
     }
 
 
@@ -64,6 +65,7 @@ defaultOptions =
     , deleteOptions = DeletePoints.defaultOptions
     , pointerOptions = Pointers.defaultOptions
     , undoRedoOptions = UndoRedo.defaultOptions
+    , imperial = False
     }
 
 
@@ -76,6 +78,7 @@ type ToolMsg
     | DeletePoints DeletePoints.Msg
     | PointerMsg Pointers.Msg
     | UndoRedoMsg UndoRedo.Msg
+    | ToggleImperial
     | ToolNoOp
 
 
@@ -333,6 +336,9 @@ update toolMsg isTrack msgWrapper options =
             , actions
             )
 
+        ToggleImperial ->
+            ( { options | imperial = not options.imperial }, [] )
+
 
 refreshOpenTools :
     Maybe (TrackLoaded msg)
@@ -587,7 +593,7 @@ viewToolByType :
 viewToolByType msgWrapper entry isTrack options =
     case entry.toolType of
         ToolTrackInfo ->
-            TrackInfoBox.trackInfoBox isTrack
+            TrackInfoBox.trackInfoBox isTrack options.imperial
 
         ToolAbruptDirectionChanges ->
             AbruptDirectionChanges.view (msgWrapper << DirectionChanges) options.directionChangeOptions
@@ -799,3 +805,15 @@ restoreStoredValues options values =
 
         Err error ->
             options
+
+
+imperialToggleMenuEntry msgWrapper options =
+    Input.button [ alignRight ]
+        { onPress = Just <| msgWrapper ToggleImperial
+        , label =
+            if options.imperial then
+                text "Use metric measures"
+
+            else
+                text "Use imperial measures"
+        }

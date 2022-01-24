@@ -6,11 +6,9 @@ BUG: In Grid view, Pane1 is notably smaller than the others.
 
 # WIP
 
-Imperial measures option in top bar settings button (maybe combine with track info bar, JB below).
-> **JB**: I wonder if the Summary and Segment information could be better placed on the top
-> Load GPX top line toggleable between the 2... only thinking of maximising space use.
+Save & restore background colour and measure selection.
 
-Save background colour and measure selection.
+Default controls to greyscale apart from Pointers.
 
 ---
 

@@ -8597,7 +8597,7 @@ var $author$project$ToolsController$undoRedoTool = {
 };
 var $author$project$ToolsController$defaultTools = _List_fromArray(
 	[$author$project$ToolsController$pointersTool, $author$project$ToolsController$undoRedoTool, $author$project$ToolsController$trackInfoBox, $author$project$ToolsController$directionChangeTool, $author$project$ToolsController$deleteTool]);
-var $author$project$ToolsController$defaultOptions = {deleteOptions: $author$project$Tools$DeletePoints$defaultOptions, directionChangeOptions: $author$project$Tools$AbruptDirectionChanges$defaultOptions, pointerOptions: $author$project$Tools$Pointers$defaultOptions, tools: $author$project$ToolsController$defaultTools, undoRedoOptions: $author$project$Tools$UndoRedo$defaultOptions};
+var $author$project$ToolsController$defaultOptions = {deleteOptions: $author$project$Tools$DeletePoints$defaultOptions, directionChangeOptions: $author$project$Tools$AbruptDirectionChanges$defaultOptions, imperial: false, pointerOptions: $author$project$Tools$Pointers$defaultOptions, tools: $author$project$ToolsController$defaultTools, undoRedoOptions: $author$project$Tools$UndoRedo$defaultOptions};
 var $elm$browser$Browser$Dom$getViewport = _Browser_withWindow(_Browser_getViewport);
 var $elm$time$Time$Name = function (a) {
 	return {$: 'Name', a: a};
@@ -18114,7 +18114,7 @@ var $author$project$ToolsController$update = F4(
 						options,
 						{pointerOptions: newOptions}),
 					actions);
-			default:
+			case 'UndoRedoMsg':
 				var msg = toolMsg.a;
 				var _v4 = A4(
 					$author$project$Tools$UndoRedo$update,
@@ -18129,6 +18129,12 @@ var $author$project$ToolsController$update = F4(
 						options,
 						{undoRedoOptions: newOptions}),
 					actions);
+			default:
+				return _Utils_Tuple2(
+					_Utils_update(
+						options,
+						{imperial: !options.imperial}),
+					_List_Nil);
 		}
 	});
 var $author$project$Main$update = F2(
@@ -25559,185 +25565,141 @@ var $author$project$Tools$TrackInfoBox$trackInfoList = _List_fromArray(
 	[
 		_Utils_Tuple2(
 		$mdgriffith$elm_ui$Element$text('Points'),
-		A2(
-			$elm$core$Basics$composeR,
-			$author$project$DomainModel$asRecord,
-			A2(
-				$elm$core$Basics$composeR,
-				function ($) {
-					return $.skipCount;
-				},
-				A2(
-					$elm$core$Basics$composeR,
-					$elm$core$Basics$add(1),
-					A2($elm$core$Basics$composeR, $elm$core$String$fromInt, $mdgriffith$elm_ui$Element$text))))),
+		F2(
+			function (imperial, info) {
+				return $mdgriffith$elm_ui$Element$text(
+					$elm$core$String$fromInt(1 + info.skipCount));
+			})),
 		_Utils_Tuple2(
 		$mdgriffith$elm_ui$Element$text('Length'),
-		A2(
-			$elm$core$Basics$composeR,
-			$author$project$DomainModel$asRecord,
-			A2(
-				$elm$core$Basics$composeR,
-				function ($) {
-					return $.trueLength;
-				},
-				A2(
-					$elm$core$Basics$composeR,
-					$author$project$UtilsForViews$showLongMeasure(false),
-					$mdgriffith$elm_ui$Element$text)))),
+		F2(
+			function (imperial, info) {
+				return $mdgriffith$elm_ui$Element$text(
+					A2($author$project$UtilsForViews$showLongMeasure, imperial, info.trueLength));
+			})),
 		_Utils_Tuple2(
 		$mdgriffith$elm_ui$Element$text('Ascent'),
-		A2(
-			$elm$core$Basics$composeR,
-			$author$project$DomainModel$asRecord,
-			A2(
-				$elm$core$Basics$composeR,
-				function ($) {
-					return $.altitudeGained;
-				},
-				A2(
-					$elm$core$Basics$composeR,
-					$author$project$UtilsForViews$showLongMeasure(false),
-					$mdgriffith$elm_ui$Element$text)))),
+		F2(
+			function (imperial, info) {
+				return $mdgriffith$elm_ui$Element$text(
+					A2($author$project$UtilsForViews$showLongMeasure, imperial, info.altitudeGained));
+			})),
 		_Utils_Tuple2(
 		$mdgriffith$elm_ui$Element$text('Descent'),
-		A2(
-			$elm$core$Basics$composeR,
-			$author$project$DomainModel$asRecord,
-			A2(
-				$elm$core$Basics$composeR,
-				function ($) {
-					return $.altitudeLost;
-				},
-				A2(
-					$elm$core$Basics$composeR,
-					$author$project$UtilsForViews$showLongMeasure(false),
-					$mdgriffith$elm_ui$Element$text)))),
+		F2(
+			function (imperial, info) {
+				return $mdgriffith$elm_ui$Element$text(
+					A2($author$project$UtilsForViews$showLongMeasure, imperial, info.altitudeLost));
+			})),
 		_Utils_Tuple2(
 		$mdgriffith$elm_ui$Element$text('Climbing'),
-		A2(
-			$elm$core$Basics$composeR,
-			$author$project$DomainModel$asRecord,
-			A2(
-				$elm$core$Basics$composeR,
-				function ($) {
-					return $.distanceClimbing;
-				},
-				A2(
-					$elm$core$Basics$composeR,
-					$author$project$UtilsForViews$showLongMeasure(false),
-					$mdgriffith$elm_ui$Element$text)))),
+		F2(
+			function (imperial, info) {
+				return $mdgriffith$elm_ui$Element$text(
+					A2($author$project$UtilsForViews$showLongMeasure, imperial, info.distanceClimbing));
+			})),
 		_Utils_Tuple2(
 		$mdgriffith$elm_ui$Element$text('Descending'),
-		A2(
-			$elm$core$Basics$composeR,
-			$author$project$DomainModel$asRecord,
-			A2(
-				$elm$core$Basics$composeR,
-				function ($) {
-					return $.distanceDescending;
-				},
-				A2(
-					$elm$core$Basics$composeR,
-					$author$project$UtilsForViews$showLongMeasure(false),
-					$mdgriffith$elm_ui$Element$text)))),
+		F2(
+			function (imperial, info) {
+				return $mdgriffith$elm_ui$Element$text(
+					A2($author$project$UtilsForViews$showLongMeasure, imperial, info.distanceDescending));
+			})),
 		_Utils_Tuple2(
 		$mdgriffith$elm_ui$Element$text('Steepest'),
-		A2(
-			$elm$core$Basics$composeR,
-			$author$project$DomainModel$asRecord,
-			A2(
-				$elm$core$Basics$composeR,
-				function ($) {
-					return $.steepestClimb;
-				},
-				A2($elm$core$Basics$composeR, $author$project$UtilsForViews$showDecimal2, $mdgriffith$elm_ui$Element$text))))
+		F2(
+			function (imperial, info) {
+				return $mdgriffith$elm_ui$Element$text(
+					$author$project$UtilsForViews$showDecimal2(info.steepestClimb));
+			}))
 	]);
-var $author$project$Tools$TrackInfoBox$trackInfoBox = function (maybeTrack) {
-	return A2(
-		$mdgriffith$elm_ui$Element$el,
-		_List_fromArray(
-			[
-				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-				$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite)
-			]),
-		function () {
-			if (maybeTrack.$ === 'Just') {
-				var track = maybeTrack.a;
-				return A2(
-					$mdgriffith$elm_ui$Element$row,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$padding(10),
-							$mdgriffith$elm_ui$Element$spacing(5)
-						]),
-					_List_fromArray(
-						[
-							A2(
-							$mdgriffith$elm_ui$Element$column,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$spacing(5)
-								]),
-							A2(
-								$elm$core$List$map,
-								function (_v1) {
-									var txt = _v1.a;
-									return txt;
-								},
-								$author$project$Tools$TrackInfoBox$trackInfoList)),
-							A2(
-							$mdgriffith$elm_ui$Element$column,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$spacing(5)
-								]),
-							A2(
-								$elm$core$List$map,
-								function (_v2) {
-									var fn = _v2.b;
-									return fn(track.trackTree);
-								},
-								$author$project$Tools$TrackInfoBox$trackInfoList))
-						]));
-			} else {
-				return A2(
-					$mdgriffith$elm_ui$Element$row,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$padding(10),
-							$mdgriffith$elm_ui$Element$spacing(5)
-						]),
-					_List_fromArray(
-						[
-							A2(
-							$mdgriffith$elm_ui$Element$column,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$spacing(5)
-								]),
-							A2(
-								$elm$core$List$map,
-								function (_v3) {
-									var txt = _v3.a;
-									return txt;
-								},
-								$author$project$Tools$TrackInfoBox$trackInfoList)),
-							A2(
-							$mdgriffith$elm_ui$Element$column,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$spacing(5)
-								]),
-							A2(
-								$elm$core$List$map,
-								$elm$core$Basics$always(
-									$mdgriffith$elm_ui$Element$text('- no data -')),
-								$author$project$Tools$TrackInfoBox$trackInfoList))
-						]));
-			}
-		}());
-};
+var $author$project$Tools$TrackInfoBox$trackInfoBox = F2(
+	function (maybeTrack, imperial) {
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite)
+				]),
+			function () {
+				if (maybeTrack.$ === 'Just') {
+					var track = maybeTrack.a;
+					var info = $author$project$DomainModel$asRecord(track.trackTree);
+					return A2(
+						$mdgriffith$elm_ui$Element$row,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$padding(10),
+								$mdgriffith$elm_ui$Element$spacing(5)
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$mdgriffith$elm_ui$Element$column,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$spacing(5)
+									]),
+								A2(
+									$elm$core$List$map,
+									function (_v1) {
+										var txt = _v1.a;
+										return txt;
+									},
+									$author$project$Tools$TrackInfoBox$trackInfoList)),
+								A2(
+								$mdgriffith$elm_ui$Element$column,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$spacing(5)
+									]),
+								A2(
+									$elm$core$List$map,
+									function (_v2) {
+										var fn = _v2.b;
+										return A2(fn, imperial, info);
+									},
+									$author$project$Tools$TrackInfoBox$trackInfoList))
+							]));
+				} else {
+					return A2(
+						$mdgriffith$elm_ui$Element$row,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$padding(10),
+								$mdgriffith$elm_ui$Element$spacing(5)
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$mdgriffith$elm_ui$Element$column,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$spacing(5)
+									]),
+								A2(
+									$elm$core$List$map,
+									function (_v3) {
+										var txt = _v3.a;
+										return txt;
+									},
+									$author$project$Tools$TrackInfoBox$trackInfoList)),
+								A2(
+								$mdgriffith$elm_ui$Element$column,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$spacing(5)
+									]),
+								A2(
+									$elm$core$List$map,
+									$elm$core$Basics$always(
+										$mdgriffith$elm_ui$Element$text('- no data -')),
+									$author$project$Tools$TrackInfoBox$trackInfoList))
+							]));
+				}
+			}());
+	});
 var $author$project$Tools$AbruptDirectionChanges$SetCurrentPosition = function (a) {
 	return {$: 'SetCurrentPosition', a: a};
 };
@@ -27080,7 +27042,7 @@ var $author$project$ToolsController$viewToolByType = F4(
 		var _v0 = entry.toolType;
 		switch (_v0.$) {
 			case 'ToolTrackInfo':
-				return $author$project$Tools$TrackInfoBox$trackInfoBox(isTrack);
+				return A2($author$project$Tools$TrackInfoBox$trackInfoBox, isTrack, options.imperial);
 			case 'ToolAbruptDirectionChanges':
 				return A2(
 					$author$project$Tools$AbruptDirectionChanges$view,
@@ -30163,6 +30125,19 @@ var $author$project$Main$BackgroundColour = function (a) {
 	return {$: 'BackgroundColour', a: a};
 };
 var $author$project$Main$RestoreDefaultToolLayout = {$: 'RestoreDefaultToolLayout'};
+var $author$project$ToolsController$ToggleImperial = {$: 'ToggleImperial'};
+var $author$project$ToolsController$imperialToggleMenuEntry = F2(
+	function (msgWrapper, options) {
+		return A2(
+			$mdgriffith$elm_ui$Element$Input$button,
+			_List_fromArray(
+				[$mdgriffith$elm_ui$Element$alignRight]),
+			{
+				label: options.imperial ? $mdgriffith$elm_ui$Element$text('Use metric measures') : $mdgriffith$elm_ui$Element$text('Use imperial measures'),
+				onPress: $elm$core$Maybe$Just(
+					msgWrapper($author$project$ToolsController$ToggleImperial))
+			});
+	});
 var $smucode$elm_flat_colors$FlatColors$AussiePalette$soaringEagle = A3($mdgriffith$elm_ui$Element$rgb255, 149, 175, 192);
 var $author$project$Main$showOptionsMenu = function (model) {
 	var colourBlock = function (colour) {
@@ -30183,7 +30158,10 @@ var $author$project$Main$showOptionsMenu = function (model) {
 	};
 	return model.isPopupOpen ? A2(
 		$mdgriffith$elm_ui$Element$column,
-		_List_Nil,
+		A2(
+			$elm$core$List$cons,
+			$mdgriffith$elm_ui$Element$spacing(4),
+			$author$project$ViewPureStyles$neatToolsBorder),
 		_List_fromArray(
 			[
 				A2(
@@ -30217,7 +30195,17 @@ var $author$project$Main$showOptionsMenu = function (model) {
 					{
 						label: $mdgriffith$elm_ui$Element$text('Restore default layout'),
 						onPress: $elm$core$Maybe$Just($author$project$Main$RestoreDefaultToolLayout)
-					}))
+					})),
+				A2(
+				$mdgriffith$elm_ui$Element$el,
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$alignRight,
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$author$project$ViewPureStyles$neatToolsBorder)),
+				A2($author$project$ToolsController$imperialToggleMenuEntry, $author$project$Main$ToolsMsg, model.toolOptions))
 			])) : $mdgriffith$elm_ui$Element$none;
 };
 var $author$project$Main$globalOptions = function (model) {

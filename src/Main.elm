@@ -891,7 +891,7 @@ showOptionsMenu model =
                 }
     in
     if model.isPopupOpen then
-        column []
+        column (spacing 4 :: neatToolsBorder)
             [ row (alignRight :: width fill :: neatToolsBorder)
                 [ colourBlock FlatColors.AussiePalette.coastalBreeze
                 , colourBlock FlatColors.AussiePalette.soaringEagle
@@ -902,6 +902,8 @@ showOptionsMenu model =
                     { onPress = Just <| RestoreDefaultToolLayout
                     , label = text "Restore default layout"
                     }
+            , el (alignRight :: width fill :: neatToolsBorder) <|
+            ToolsController.imperialToggleMenuEntry ToolsMsg model.toolOptions
             ]
 
     else
