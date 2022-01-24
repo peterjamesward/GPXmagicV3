@@ -337,7 +337,11 @@ update toolMsg isTrack msgWrapper options =
             )
 
         ToggleImperial ->
-            ( { options | imperial = not options.imperial }, [] )
+            let
+                newOptions =
+                    { options | imperial = not options.imperial }
+            in
+            ( newOptions, [ StoreLocally "measure" <| E.bool newOptions.imperial ] )
 
 
 refreshOpenTools :
@@ -802,6 +806,21 @@ restoreStoredValues options values =
     case toolsAsStored of
         Ok stored ->
             { options | tools = List.map (useStoredSettings stored) options.tools }
+
+        Err error ->
+            options
+
+
+restoreMeasure : Options -> D.Value -> Options
+restoreMeasure options value =
+    -- Care! Need to overlay restored values on to the current tools.
+    let
+        decoded =
+            D.decodeValue D.bool value
+    in
+    case decoded of
+        Ok setting ->
+            { options | imperial = setting }
 
         Err error ->
             options

@@ -237,6 +237,7 @@ init mflags origin navigationKey =
         , LocalStorage.storageGetItem "splits"
         , LocalStorage.storageGetItem "tools"
         , LocalStorage.storageGetItem "panes"
+        , LocalStorage.storageGetItem "measure"
         ]
     )
 
@@ -1023,6 +1024,12 @@ performActionsOnModel actions model =
                             { foldedModel
                                 | paneLayoutOptions =
                                     PaneLayoutManager.restoreStoredValues foldedModel.paneLayoutOptions value
+                            }
+
+                        "measure" ->
+                            { foldedModel
+                                | toolOptions =
+                                    ToolsController.restoreMeasure foldedModel.toolOptions value
                             }
 
                         _ ->

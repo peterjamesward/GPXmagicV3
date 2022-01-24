@@ -9685,7 +9685,8 @@ var $author$project$Main$init = F3(
 						A2($elm$core$Task$attempt, $author$project$Main$GotWindowSize, $elm$browser$Browser$Dom$getViewport),
 						$author$project$LocalStorage$storageGetItem('splits'),
 						$author$project$LocalStorage$storageGetItem('tools'),
-						$author$project$LocalStorage$storageGetItem('panes')
+						$author$project$LocalStorage$storageGetItem('panes'),
+						$author$project$LocalStorage$storageGetItem('measure')
 					])));
 	});
 var $elm$json$Json$Decode$int = _Json_decodeInt;
@@ -14475,6 +14476,20 @@ var $author$project$Main$render = function (model) {
 		return model;
 	}
 };
+var $elm$json$Json$Decode$bool = _Json_decodeBool;
+var $author$project$ToolsController$restoreMeasure = F2(
+	function (options, value) {
+		var decoded = A2($elm$json$Json$Decode$decodeValue, $elm$json$Json$Decode$bool, value);
+		if (decoded.$ === 'Ok') {
+			var setting = decoded.a;
+			return _Utils_update(
+				options,
+				{imperial: setting});
+		} else {
+			var error = decoded.a;
+			return options;
+		}
+	});
 var $author$project$PaneLayoutManager$paneIdHelper = _List_fromArray(
 	[
 		_Utils_Tuple2($author$project$PaneLayoutManager$Pane1, 'pane1'),
@@ -14948,6 +14963,12 @@ var $author$project$Main$performActionsOnModel = F2(
 										foldedModel,
 										{
 											paneLayoutOptions: A2($author$project$PaneLayoutManager$restoreStoredValues, foldedModel.paneLayoutOptions, value)
+										});
+								case 'measure':
+									return _Utils_update(
+										foldedModel,
+										{
+											toolOptions: A2($author$project$ToolsController$restoreMeasure, foldedModel.toolOptions, value)
 										});
 								default:
 									return foldedModel;
@@ -17684,6 +17705,7 @@ var $author$project$StravaAuth$update = F2(
 		}
 		return $author$project$StravaAuth$noOp(model);
 	});
+var $elm$json$Json$Encode$bool = _Json_wrap;
 var $author$project$ToolsController$isToolOpen = F2(
 	function (toolType, entries) {
 		return !_Utils_eq(
@@ -18130,11 +18152,18 @@ var $author$project$ToolsController$update = F4(
 						{undoRedoOptions: newOptions}),
 					actions);
 			default:
+				var newOptions = _Utils_update(
+					options,
+					{imperial: !options.imperial});
 				return _Utils_Tuple2(
-					_Utils_update(
-						options,
-						{imperial: !options.imperial}),
-					_List_Nil);
+					newOptions,
+					_List_fromArray(
+						[
+							A2(
+							$author$project$Actions$StoreLocally,
+							'measure',
+							$elm$json$Json$Encode$bool(newOptions.imperial))
+						]));
 		}
 	});
 var $author$project$Main$update = F2(
@@ -24285,7 +24314,6 @@ var $mdgriffith$elm_ui$Internal$Model$Button = {$: 'Button'};
 var $mdgriffith$elm_ui$Internal$Model$Describe = function (a) {
 	return {$: 'Describe', a: a};
 };
-var $elm$json$Json$Encode$bool = _Json_wrap;
 var $elm$html$Html$Attributes$boolProperty = F2(
 	function (key, bool) {
 		return A2(
@@ -24544,7 +24572,6 @@ var $mpizenberg$elm_pointer_events$Internal$Decode$Keys = F3(
 	function (alt, ctrl, shift) {
 		return {alt: alt, ctrl: ctrl, shift: shift};
 	});
-var $elm$json$Json$Decode$bool = _Json_decodeBool;
 var $mpizenberg$elm_pointer_events$Internal$Decode$keys = A4(
 	$elm$json$Json$Decode$map3,
 	$mpizenberg$elm_pointer_events$Internal$Decode$Keys,

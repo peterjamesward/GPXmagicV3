@@ -6,8 +6,6 @@ BUG: In Grid view, Pane1 is notably smaller than the others.
 
 # WIP
 
-Save & restore background colour and measure selection.
-
 Default controls to greyscale apart from Pointers.
 
 ---
