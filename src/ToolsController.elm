@@ -114,8 +114,8 @@ trackInfoBox =
     , video = Nothing
     , state = Expanded
     , dock = DockUpperLeft
-    , tabColour = FlatColors.AussiePalette.beekeeper
-    , textColour = contrastingColour FlatColors.AussiePalette.juneBud
+    , tabColour = FlatColors.SwedishPalette.blackPearl
+    , textColour = contrastingColour FlatColors.SwedishPalette.blackPearl
     , isPopupOpen = False
     }
 
@@ -128,8 +128,8 @@ undoRedoTool =
     , video = Nothing
     , state = Expanded
     , dock = DockUpperRight
-    , tabColour = FlatColors.AussiePalette.juneBud
-    , textColour = contrastingColour FlatColors.AussiePalette.juneBud
+    , tabColour = FlatColors.SwedishPalette.blackPearl
+    , textColour = contrastingColour FlatColors.SwedishPalette.blackPearl
     , isPopupOpen = False
     }
 
@@ -142,8 +142,8 @@ directionChangeTool =
     , video = Nothing
     , state = Contracted
     , dock = DockUpperRight
-    , tabColour = FlatColors.AussiePalette.deepKoamaru
-    , textColour = contrastingColour FlatColors.AussiePalette.deepKoamaru
+    , tabColour = FlatColors.SwedishPalette.blackPearl
+    , textColour = contrastingColour FlatColors.SwedishPalette.blackPearl
     , isPopupOpen = False
     }
 
@@ -170,8 +170,8 @@ deleteTool =
     , video = Nothing
     , state = Contracted
     , dock = DockLowerLeft
-    , tabColour = FlatColors.AussiePalette.pinkGlamour
-    , textColour = contrastingColour FlatColors.AussiePalette.exodusFruit
+    , tabColour = FlatColors.SwedishPalette.blackPearl
+    , textColour = contrastingColour FlatColors.SwedishPalette.blackPearl
     , isPopupOpen = False
     }
 

@@ -8510,6 +8510,7 @@ var $mdgriffith$elm_ui$Element$rgb255 = F3(
 	function (red, green, blue) {
 		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, red / 255, green / 255, blue / 255, 1);
 	});
+var $smucode$elm_flat_colors$FlatColors$SwedishPalette$blackPearl = A3($mdgriffith$elm_ui$Element$rgb255, 30, 39, 46);
 var $smucode$elm_flat_colors$FlatColors$AussiePalette$coastalBreeze = A3($mdgriffith$elm_ui$Element$rgb255, 223, 249, 251);
 var $smucode$elm_flat_colors$FlatColors$AussiePalette$deepKoamaru = A3($mdgriffith$elm_ui$Element$rgb255, 48, 51, 107);
 var $mdgriffith$elm_ui$Element$toRgb = function (_v0) {
@@ -8528,16 +8529,14 @@ var $author$project$ViewPureStyles$contrastingColour = function (col) {
 	var grey = ((0.299 * red) + (0.587 * green)) + (0.114 * blue);
 	return (grey > 0.5) ? $smucode$elm_flat_colors$FlatColors$AussiePalette$deepKoamaru : $smucode$elm_flat_colors$FlatColors$AussiePalette$coastalBreeze;
 };
-var $smucode$elm_flat_colors$FlatColors$AussiePalette$exodusFruit = A3($mdgriffith$elm_ui$Element$rgb255, 104, 109, 224);
-var $smucode$elm_flat_colors$FlatColors$AussiePalette$pinkGlamour = A3($mdgriffith$elm_ui$Element$rgb255, 255, 121, 121);
 var $author$project$ToolsController$deleteTool = {
 	dock: $author$project$ToolsController$DockLowerLeft,
 	info: 'Away with ye',
 	isPopupOpen: false,
 	label: 'Delete points',
 	state: $author$project$ToolsController$Contracted,
-	tabColour: $smucode$elm_flat_colors$FlatColors$AussiePalette$pinkGlamour,
-	textColour: $author$project$ViewPureStyles$contrastingColour($smucode$elm_flat_colors$FlatColors$AussiePalette$exodusFruit),
+	tabColour: $smucode$elm_flat_colors$FlatColors$SwedishPalette$blackPearl,
+	textColour: $author$project$ViewPureStyles$contrastingColour($smucode$elm_flat_colors$FlatColors$SwedishPalette$blackPearl),
 	toolType: $author$project$ToolsController$ToolDeletePoints,
 	video: $elm$core$Maybe$Nothing
 };
@@ -8549,8 +8548,8 @@ var $author$project$ToolsController$directionChangeTool = {
 	isPopupOpen: false,
 	label: 'Direction changes',
 	state: $author$project$ToolsController$Contracted,
-	tabColour: $smucode$elm_flat_colors$FlatColors$AussiePalette$deepKoamaru,
-	textColour: $author$project$ViewPureStyles$contrastingColour($smucode$elm_flat_colors$FlatColors$AussiePalette$deepKoamaru),
+	tabColour: $smucode$elm_flat_colors$FlatColors$SwedishPalette$blackPearl,
+	textColour: $author$project$ViewPureStyles$contrastingColour($smucode$elm_flat_colors$FlatColors$SwedishPalette$blackPearl),
 	toolType: $author$project$ToolsController$ToolAbruptDirectionChanges,
 	video: $elm$core$Maybe$Nothing
 };
@@ -8570,16 +8569,14 @@ var $author$project$ToolsController$pointersTool = {
 };
 var $author$project$ToolsController$DockUpperLeft = {$: 'DockUpperLeft'};
 var $author$project$ToolsController$ToolTrackInfo = {$: 'ToolTrackInfo'};
-var $smucode$elm_flat_colors$FlatColors$AussiePalette$beekeeper = A3($mdgriffith$elm_ui$Element$rgb255, 246, 229, 141);
-var $smucode$elm_flat_colors$FlatColors$AussiePalette$juneBud = A3($mdgriffith$elm_ui$Element$rgb255, 186, 220, 88);
 var $author$project$ToolsController$trackInfoBox = {
 	dock: $author$project$ToolsController$DockUpperLeft,
 	info: 'Here is some useful information',
 	isPopupOpen: false,
 	label: 'Summary info',
 	state: $author$project$ToolsController$Expanded,
-	tabColour: $smucode$elm_flat_colors$FlatColors$AussiePalette$beekeeper,
-	textColour: $author$project$ViewPureStyles$contrastingColour($smucode$elm_flat_colors$FlatColors$AussiePalette$juneBud),
+	tabColour: $smucode$elm_flat_colors$FlatColors$SwedishPalette$blackPearl,
+	textColour: $author$project$ViewPureStyles$contrastingColour($smucode$elm_flat_colors$FlatColors$SwedishPalette$blackPearl),
 	toolType: $author$project$ToolsController$ToolTrackInfo,
 	video: $elm$core$Maybe$Nothing
 };
@@ -8590,8 +8587,8 @@ var $author$project$ToolsController$undoRedoTool = {
 	isPopupOpen: false,
 	label: 'Undo & Redo',
 	state: $author$project$ToolsController$Expanded,
-	tabColour: $smucode$elm_flat_colors$FlatColors$AussiePalette$juneBud,
-	textColour: $author$project$ViewPureStyles$contrastingColour($smucode$elm_flat_colors$FlatColors$AussiePalette$juneBud),
+	tabColour: $smucode$elm_flat_colors$FlatColors$SwedishPalette$blackPearl,
+	textColour: $author$project$ViewPureStyles$contrastingColour($smucode$elm_flat_colors$FlatColors$SwedishPalette$blackPearl),
 	toolType: $author$project$ToolsController$ToolUndoRedo,
 	video: $elm$core$Maybe$Nothing
 };
@@ -24738,7 +24735,6 @@ var $author$project$ToolsController$ToolColourSelect = F2(
 	function (a, b) {
 		return {$: 'ToolColourSelect', a: a, b: b};
 	});
-var $smucode$elm_flat_colors$FlatColors$SwedishPalette$blackPearl = A3($mdgriffith$elm_ui$Element$rgb255, 30, 39, 46);
 var $smucode$elm_flat_colors$FlatColors$SwedishPalette$chromeYellow = A3($mdgriffith$elm_ui$Element$rgb255, 255, 168, 1);
 var $smucode$elm_flat_colors$FlatColors$SwedishPalette$darkPeriwinkle = A3($mdgriffith$elm_ui$Element$rgb255, 87, 95, 207);
 var $smucode$elm_flat_colors$FlatColors$SwedishPalette$freshTurquoise = A3($mdgriffith$elm_ui$Element$rgb255, 52, 231, 228);

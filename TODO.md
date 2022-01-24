@@ -6,16 +6,6 @@ BUG: In Grid view, Pane1 is notably smaller than the others.
 
 # WIP
 
-Default controls to greyscale apart from Pointers.
-
----
-
-# BACKLOG, roughly in order ...
-
-## Small things (you'd hope)
-
-SceneBuilder to use new traversal fn with more progressive rendering.
-
 ## Profile, Charts (BIG)
 
 Has to be at least as good as GPX Smoother.
@@ -39,6 +29,16 @@ Therefore, Canvas may be best option.
 Or, given Elm, and the current charting library, and the nature of the tree, we could probably
 show a decent zoomable plot that perhaps shows error bars or a candle plot for non-leaf tree entries.
 Though, by the same argument, we could ship 10K points to JS no problem.
+
+---
+
+# BACKLOG, roughly in order ...
+
+## Small things (you'd hope)
+
+SceneBuilder to use new traversal fn with more progressive rendering.
+
+Hide the white stripe paddng at foot of each tool.
 
 ## Map
 Add non-draggable track point circles, in separate layer we can turn on and off
