@@ -1,114 +1,22 @@
-<!DOCTYPE HTML>
+<!doctype html>
 <html>
-
 <head>
-  <meta charset="UTF-8">
-  <title>GPXmagic Labs</title>
-  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
-  <script type="text/javascript" src="main.js"></script>
+  <script src="../node_modules/seedrandom/seedrandom.js"></script>
+  <script>Math.seedrandom('a22ebc7c488a3a47');</script>
+  <script src="../node_modules/mockdate/lib/mockdate.js"></script>
+  <script>MockDate.set('2000-01-01', 0);</script>
   <script src="https://unpkg.com/d3"></script>
   <script src="https://unpkg.com/d3fc"></script>
+  <link rel="stylesheet" href="index.css">
+  <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgo=">
 </head>
 
 <body>
-<div id="myapp"></div>
 
-<div id="chart" style="height:500px"></div>
+<div id="chart"></div>
+
+<script src="chart.js"></script>
+
 </body>
-
-<script type="text/javascript">
-
-// a random number generator
-const generator = fc.randomGeometricBrownianMotion().steps(11);
-
-// some formatters
-const distanceFormatter = d3.format('0.0f');
-const valueFormatter = d3.format('0.0f');
-
-const yExtent = fc
-    .extentLinear()
-    .include([0])
-    .pad([0, 0.5])
-    .accessors([d => d.sales]);
-
-const data = {
-    // target values for the annotations
-    targets: [
-        {
-            name: 'lowest',
-            value: 400.0
-        },
-        {
-            name: 'highest',
-            value: 1500.0
-        }
-    ],
-    // randomly generated sales data
-    sales: generator(1).map((d, i) => ({
-        month: distanceFormatter(1000 * i),
-        sales: 5000 * d - 4000,
-        gradient: d
-    }))
-};
-
-const chart = fc
-    .chartCartesian(d3.scaleBand(), d3.scaleLinear())
-    .xDomain(data.sales.map(d => d.month))
-    .yDomain(yExtent(data.sales))
-    .xPadding(0.2)
-    .yTicks(5)
-    .yTickFormat(valueFormatter)
-    .yLabel('Altitude (m)')
-    .yNice();
-
-const bar = fc
-    .autoBandwidth(fc.seriesSvgBar())
-    .crossValue(d => d.month)
-    .mainValue(d => d.sales)
-    .align('left')
-    .decorate(selection => {
-        // The selection passed to decorate is the one which the component creates
-        // within its internal data join, here we use the update selection to
-        // apply a style to 'path' elements created by the bar series
-        selection
-            .select('.bar > path')
-            .style('fill', d =>
-                d.sales < data.targets[0].value ? 'inherit' : '#0c0'
-            );
-    });
-
-const annotation = fc
-    .annotationSvgLine()
-    .value(d => d.value)
-    .decorate(selection => {
-        selection
-            .enter()
-            .select('g.left-handle')
-            .append('text')
-            .attr('x', 5)
-            .attr('y', -5);
-        selection
-            .select('g.left-handle text')
-            .text(d => d.name + ' - ' + valueFormatter(d.value) + 'M');
-    });
-
-const multi = fc
-    .seriesSvgMulti()
-    .series([bar, annotation])
-    .mapping((data, index, series) => {
-        switch (series[index]) {
-            case bar:
-                return data.sales;
-            case annotation:
-                return data.targets;
-        }
-    });
-
-chart.svgPlotArea(multi);
-
-d3.select('#chart')
-    .datum(data)
-    .call(chart);
-</script>
 
 </html>

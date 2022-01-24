@@ -10,9 +10,7 @@ BUG: In Grid view, Pane1 is notably smaller than the others.
 
 Has to be at least as good as GPX Smoother.
 
-Not 3d, just drawing onto Canvas?
-(But what about zoom and pan?)
-Altitude change from RoadSection.
+**GOAL**: Try to get a workable altitude & gradient plot using D3|D3FC and Canvas.
 
 D3 with https://github.com/seliopou/elm-d3/blob/master/README.md ?
 (Only need to write the JS once, then just pass data.)
