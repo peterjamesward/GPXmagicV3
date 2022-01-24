@@ -24617,40 +24617,6 @@ var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions = F3(
 				},
 				$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$eventDecoder));
 	});
-var $mdgriffith$elm_ui$Internal$Model$paddingName = F4(
-	function (top, right, bottom, left) {
-		return 'pad-' + ($elm$core$String$fromInt(top) + ('-' + ($elm$core$String$fromInt(right) + ('-' + ($elm$core$String$fromInt(bottom) + ('-' + $elm$core$String$fromInt(left)))))));
-	});
-var $mdgriffith$elm_ui$Element$paddingEach = function (_v0) {
-	var top = _v0.top;
-	var right = _v0.right;
-	var bottom = _v0.bottom;
-	var left = _v0.left;
-	if (_Utils_eq(top, right) && (_Utils_eq(top, bottom) && _Utils_eq(top, left))) {
-		var topFloat = top;
-		return A2(
-			$mdgriffith$elm_ui$Internal$Model$StyleClass,
-			$mdgriffith$elm_ui$Internal$Flag$padding,
-			A5(
-				$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
-				'p-' + $elm$core$String$fromInt(top),
-				topFloat,
-				topFloat,
-				topFloat,
-				topFloat));
-	} else {
-		return A2(
-			$mdgriffith$elm_ui$Internal$Model$StyleClass,
-			$mdgriffith$elm_ui$Internal$Flag$padding,
-			A5(
-				$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
-				A4($mdgriffith$elm_ui$Internal$Model$paddingName, top, right, bottom, left),
-				top,
-				right,
-				bottom,
-				left));
-	}
-};
 var $mdgriffith$elm_ui$Internal$Flag$borderRound = $mdgriffith$elm_ui$Internal$Flag$flag(17);
 var $mdgriffith$elm_ui$Element$Border$rounded = function (radius) {
 	return A2(
@@ -25126,6 +25092,40 @@ var $author$project$ToolsController$PointerMsg = function (a) {
 };
 var $author$project$ToolsController$UndoRedoMsg = function (a) {
 	return {$: 'UndoRedoMsg', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$paddingName = F4(
+	function (top, right, bottom, left) {
+		return 'pad-' + ($elm$core$String$fromInt(top) + ('-' + ($elm$core$String$fromInt(right) + ('-' + ($elm$core$String$fromInt(bottom) + ('-' + $elm$core$String$fromInt(left)))))));
+	});
+var $mdgriffith$elm_ui$Element$paddingEach = function (_v0) {
+	var top = _v0.top;
+	var right = _v0.right;
+	var bottom = _v0.bottom;
+	var left = _v0.left;
+	if (_Utils_eq(top, right) && (_Utils_eq(top, bottom) && _Utils_eq(top, left))) {
+		var topFloat = top;
+		return A2(
+			$mdgriffith$elm_ui$Internal$Model$StyleClass,
+			$mdgriffith$elm_ui$Internal$Flag$padding,
+			A5(
+				$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
+				'p-' + $elm$core$String$fromInt(top),
+				topFloat,
+				topFloat,
+				topFloat,
+				topFloat));
+	} else {
+		return A2(
+			$mdgriffith$elm_ui$Internal$Model$StyleClass,
+			$mdgriffith$elm_ui$Internal$Flag$padding,
+			A5(
+				$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
+				A4($mdgriffith$elm_ui$Internal$Model$paddingName, top, right, bottom, left),
+				top,
+				right,
+				bottom,
+				left));
+	}
 };
 var $cuducos$elm_format_number$FormatNumber$Locales$Exact = function (a) {
 	return {$: 'Exact', a: a};
@@ -27062,33 +27062,43 @@ var $author$project$Tools$UndoRedo$view = F3(
 	});
 var $author$project$ToolsController$viewToolByType = F4(
 	function (msgWrapper, entry, isTrack, options) {
-		var _v0 = entry.toolType;
-		switch (_v0.$) {
-			case 'ToolTrackInfo':
-				return A2($author$project$Tools$TrackInfoBox$trackInfoBox, isTrack, options.imperial);
-			case 'ToolAbruptDirectionChanges':
-				return A2(
-					$author$project$Tools$AbruptDirectionChanges$view,
-					A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$DirectionChanges),
-					options.directionChangeOptions);
-			case 'ToolDeletePoints':
-				return A2(
-					$author$project$Tools$DeletePoints$view,
-					A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$DeletePoints),
-					options.deleteOptions);
-			case 'ToolPointers':
-				return A3(
-					$author$project$Tools$Pointers$view,
-					A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$PointerMsg),
-					options.pointerOptions,
-					isTrack);
-			default:
-				return A3(
-					$author$project$Tools$UndoRedo$view,
-					A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$UndoRedoMsg),
-					options.undoRedoOptions,
-					isTrack);
-		}
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$centerX,
+					$mdgriffith$elm_ui$Element$paddingEach(
+					{bottom: 4, left: 0, right: 0, top: 0})
+				]),
+			function () {
+				var _v0 = entry.toolType;
+				switch (_v0.$) {
+					case 'ToolTrackInfo':
+						return A2($author$project$Tools$TrackInfoBox$trackInfoBox, isTrack, options.imperial);
+					case 'ToolAbruptDirectionChanges':
+						return A2(
+							$author$project$Tools$AbruptDirectionChanges$view,
+							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$DirectionChanges),
+							options.directionChangeOptions);
+					case 'ToolDeletePoints':
+						return A2(
+							$author$project$Tools$DeletePoints$view,
+							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$DeletePoints),
+							options.deleteOptions);
+					case 'ToolPointers':
+						return A3(
+							$author$project$Tools$Pointers$view,
+							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$PointerMsg),
+							options.pointerOptions,
+							isTrack);
+					default:
+						return A3(
+							$author$project$Tools$UndoRedo$view,
+							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$UndoRedoMsg),
+							options.undoRedoOptions,
+							isTrack);
+				}
+			}());
 	});
 var $author$project$ToolsController$viewTool = F4(
 	function (msgWrapper, isTrack, options, toolEntry) {
@@ -27105,8 +27115,6 @@ var $author$project$ToolsController$viewTool = F4(
 					$mdgriffith$elm_ui$Element$Border$color(toolEntry.tabColour),
 					$mdgriffith$elm_ui$Element$Border$rounded(10),
 					$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$AussiePalette$coastalBreeze),
-					$mdgriffith$elm_ui$Element$paddingEach(
-					{bottom: 4, left: 0, right: 0, top: 0}),
 					$mdgriffith$elm_ui$Element$inFront(
 					A2(
 						$mdgriffith$elm_ui$Element$column,

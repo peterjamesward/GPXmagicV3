@@ -38,8 +38,6 @@ Though, by the same argument, we could ship 10K points to JS no problem.
 
 SceneBuilder to use new traversal fn with more progressive rendering.
 
-Hide the white stripe paddng at foot of each tool.
-
 ## Map
 Add non-draggable track point circles, in separate layer we can turn on and off
 to replace by draggables when that control is open.

@@ -461,7 +461,6 @@ viewTool msgWrapper isTrack options toolEntry =
         , Border.color toolEntry.tabColour
         , Border.rounded 10
         , Background.color FlatColors.AussiePalette.coastalBreeze
-        , paddingEach { left = 0, right = 0, top = 0, bottom = 4 }
         , inFront <|
             column
                 [ alignRight
@@ -595,21 +594,24 @@ viewToolByType :
     -> Options
     -> Element msg
 viewToolByType msgWrapper entry isTrack options =
-    case entry.toolType of
-        ToolTrackInfo ->
-            TrackInfoBox.trackInfoBox isTrack options.imperial
+    el
+        [ centerX, paddingEach { left = 0, right = 0, top = 0, bottom = 4 } ]
+    <|
+        case entry.toolType of
+            ToolTrackInfo ->
+                TrackInfoBox.trackInfoBox isTrack options.imperial
 
-        ToolAbruptDirectionChanges ->
-            AbruptDirectionChanges.view (msgWrapper << DirectionChanges) options.directionChangeOptions
+            ToolAbruptDirectionChanges ->
+                AbruptDirectionChanges.view (msgWrapper << DirectionChanges) options.directionChangeOptions
 
-        ToolDeletePoints ->
-            DeletePoints.view (msgWrapper << DeletePoints) options.deleteOptions
+            ToolDeletePoints ->
+                DeletePoints.view (msgWrapper << DeletePoints) options.deleteOptions
 
-        ToolPointers ->
-            Pointers.view (msgWrapper << PointerMsg) options.pointerOptions isTrack
+            ToolPointers ->
+                Pointers.view (msgWrapper << PointerMsg) options.pointerOptions isTrack
 
-        ToolUndoRedo ->
-            UndoRedo.view (msgWrapper << UndoRedoMsg) options.undoRedoOptions isTrack
+            ToolUndoRedo ->
+                UndoRedo.view (msgWrapper << UndoRedoMsg) options.undoRedoOptions isTrack
 
 
 
