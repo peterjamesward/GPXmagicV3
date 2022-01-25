@@ -12,62 +12,11 @@ const data = [{"distance":0,"altitude":12.467755997081404,"gradient":0.189787625
 {"distance":37.77188134184183,"altitude":12.53944245338498,"gradient":0.18979005728712342},
 {"distance":39.197387401205226,"altitude":12.542147922151678,"gradient":0.18979060049617877}]
 
-const xExtent = fc.extentLinear()
-  .accessors([d => d.distance])
-  .include([0, 40]);
 
-const yExtent = fc.extentLinear()
-  .accessors([d => d.altitude])
-  .include([12.2, 12.7]);
+const chart = Plot.plot({
+  marks: [
+    Plot.line(data, {x: "distance", y: "altitude"})
+  ]
+})
 
-const xAxis = fc.axisBottom(xExtent)
-  .tickArguments([5])
-  .tickCenterLabel(true);
-
-const yAxis = fc.axisBottom(yExtent)
-  .tickArguments([5])
-  .tickCenterLabel(true);
-
-// gridlines (from d3fc-annotation)
-// n.b. the gridlines are rendered using SVG
-var gridlines = fc.annotationSvgGridline();
-
-var line = fc.seriesCanvasLine()
-    .crossValue(d => d.distance)
-    .mainValue(d => d.altitude)
-    .decorate((context, datum, index) => {
-        context.fillStyle = '#4444ff';
-      });
-
-const color = d3.scaleOrdinal(d3.schemeCategory10);
-
-var area = fc.seriesCanvasArea()
-    .crossValue(d => d.distance)
-    .mainValue(d => d.altitude)
-    .decorate((context, datum, index) => {
-        context.fillStyle = '#eeeeee';
-    });
-
-// combine into a single series
-var multi = fc.seriesCanvasMulti()
-  .series([area, line]);
-
-// the Cartesian component, which uses d3fc-element for layout
-// of the standard features of a chart (axes, labels, plot area)
-var chart = fc.chartCartesian(
-    d3.scaleLinear(),
-    d3.scaleLinear()
-  )
-  .xLabel('Distance')
-  .yLabel('Altitude')
-  .yDomain(yExtent(data))
-  .xDomain(xExtent(data))
-  .yOrient('left')
-  .svgPlotArea(gridlines)
-  .canvasPlotArea(multi);
-
-// render
-d3.select('#chart')
-  .datum(data)
-  .call(chart);
-
+document.body.appendChild(chart);
