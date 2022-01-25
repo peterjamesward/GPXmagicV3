@@ -4,7 +4,7 @@ const data = [{"distance":0,"altitude":12.467755997081404,"gradient":0.189787625
 {"distance":26.36773919966308,"altitude":12.517798703251394,"gradient":0.18978784659748643},
 {"distance":27.793261863628437,"altitude":12.520504172018093,"gradient":0.18978791154357338},
 {"distance":29.218784039774018,"altitude":12.52320964078479,"gradient":0.18978803749248432},
-{"distance":30.644305269902187,"altitude":12.52591510955149,"gradient":0.18978822408369428},
+{"distance":30.644305269902187,"altitude":12.52591510955149,"gradient":2.18978822408369428},
 {"distance":32.06982509852133,"altitude":12.528620578318186,"gradient":0.1897884712266169},
 {"distance":33.495343070826664,"altitude":12.531326047084885,"gradient":0.18978877860236976},
 {"distance":34.92085873440838,"altitude":12.534031515851582,"gradient":0.18978914581778442},
@@ -34,11 +34,19 @@ var gridlines = fc.annotationSvgGridline();
 
 var line = fc.seriesCanvasLine()
     .crossValue(d => d.distance)
-    .mainValue(d => d.altitude);
+    .mainValue(d => d.altitude)
+    .decorate((context, datum, index) => {
+        context.fillStyle = '#4444ff';
+      });
+
+const color = d3.scaleOrdinal(d3.schemeCategory10);
 
 var area = fc.seriesCanvasArea()
     .crossValue(d => d.distance)
-    .mainValue(d => d.altitude);
+    .mainValue(d => d.altitude)
+    .decorate((context, datum, index) => {
+        context.fillStyle = '#eeeeee';
+    });
 
 // combine into a single series
 var multi = fc.seriesCanvasMulti()
@@ -52,21 +60,14 @@ var chart = fc.chartCartesian(
   )
   .xLabel('Distance')
   .yLabel('Altitude')
-//  .chartLabel('Sine and Cosine')
   .yDomain(yExtent(data))
   .xDomain(xExtent(data))
   .yOrient('left')
   .svgPlotArea(gridlines)
   .canvasPlotArea(multi);
 
-//chart.decorate(selection => {
-//  selection.enter()
-//    .select('.x-label')
-//    .style('line-height', '5em')
-//    .style('color', 'red')
-//});
-
 // render
 d3.select('#chart')
   .datum(data)
   .call(chart);
+
