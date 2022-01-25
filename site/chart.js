@@ -46,7 +46,8 @@ var area = fc.seriesCanvasArea()
     .mainValue(d => d.altitude)
     .decorate((context, datum, index) => {
         context.fillStyle = '#eeeeee';
-    });
+    })
+    ;
 
 // combine into a single series
 var multi = fc.seriesCanvasMulti()
