@@ -20,12 +20,18 @@ const chart = Plot.plot({
   y: {
     grid: true
   },
+  color: {
+    scheme: "turbo",
+    type: "linear",
+    domain: [-1, 5],
+    range: [0, 1]
+  },
   marks: [
     Plot.areaY(data,
         {x: "distance",
         y1: 12.4,
         y2: d => d.altitude,
-        fill: "#eeeeee"
+        fill: "gradient" //"#EEEEEE"
         }),
     Plot.lineY(data,
         {x: "distance",
