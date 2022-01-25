@@ -16,6 +16,7 @@ import Element.Font as Font
 import Element.Input as Input exposing (button)
 import FeatherIcons
 import File exposing (File)
+import File.Download as Download
 import File.Select as Select
 import FlatColors.AussiePalette
 import FlatColors.ChinesePalette
@@ -76,6 +77,7 @@ type Msg
     | ToggleToolPopup
     | BackgroundColour Element.Color
     | RestoreDefaultToolLayout
+    | SaveJsonData -- for chart testing...
     | NoOp
 
 
@@ -561,6 +563,24 @@ Please check the file contains GPX data.""" }
             , Cmd.none
             )
 
+        SaveJsonData ->
+            let
+                content =
+                    Maybe.map TrackLoaded.jsonProfileData model.track
+            in
+            ( model
+            , case content of
+                Just json ->
+                    Download.string "DATA.JSON" "text/json" json
+
+                Nothing ->
+                    Cmd.none
+            )
+
+
+
+--task to write the data
+
 
 allocateSpaceForDocksAndContent : Int -> Int -> Model -> Model
 allocateSpaceForDocksAndContent newWidth newHeight model =
@@ -840,6 +860,15 @@ topLoadingBar model =
                 { onPress = Just GpxRequested
                 , label = text "Load GPX file"
                 }
+
+        saveButton =
+            button
+                [ padding 5
+                , Background.color FlatColors.AussiePalette.quinceJelly
+                ]
+                { onPress = Just SaveJsonData
+                , label = text "SAVE JSON TEST"
+                }
     in
     row
         (commonLayoutStyles
@@ -852,6 +881,7 @@ topLoadingBar model =
         )
         [ loadGpxButton
         , PaneLayoutManager.paneLayoutMenu PaneMsg model.paneLayoutOptions
+        , saveButton
         , globalOptions model
         ]
 
@@ -904,7 +934,7 @@ showOptionsMenu model =
                     , label = text "Restore default layout"
                     }
             , el (alignRight :: width fill :: neatToolsBorder) <|
-            ToolsController.imperialToggleMenuEntry ToolsMsg model.toolOptions
+                ToolsController.imperialToggleMenuEntry ToolsMsg model.toolOptions
             ]
 
     else

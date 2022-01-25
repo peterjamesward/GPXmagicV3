@@ -3,6 +3,7 @@ module DomainModel exposing
     , GPXSource
     , PeteTree(..)
     , RoadSection
+    , TrackPoint
     , asRecord
     , boundingBox
     , buildPreview
@@ -22,6 +23,7 @@ module DomainModel exposing
     , skipCount
     , sourceData
     , startPoint
+    , trackPointsForOutput
     , traverseTreeBetweenLimitsToDepth
     , treeFromSourcePoints
     , trueLength
@@ -51,6 +53,17 @@ type alias GPXSource =
 
 type alias EarthPoint =
     Point3d Length.Meters LocalCoords
+
+
+type alias TrackPoint =
+    -- A type designed for output, not for computation!
+    { distanceFromStart : Length.Length
+    , longitude : Angle
+    , latitude : Angle
+    , altitude : Length.Length
+    , gradient : Float
+    , trueLength : Length.Length
+    }
 
 
 type alias RoadSection =
@@ -1201,3 +1214,29 @@ traverseTreeBetweenLimitsToDepth startingAt endingAt depthFunction currentDepth 
                             (currentDepth + 1)
                             node.right
                             foldFn
+
+
+trackPointsForOutput : PeteTree -> List TrackPoint
+trackPointsForOutput tree =
+    let
+        foldFn : RoadSection -> List TrackPoint -> List TrackPoint
+        foldFn node accum =
+            let
+                distance =
+                    case accum of
+                        prevPoint :: _ ->
+                            prevPoint.distanceFromStart |> Quantity.plus prevPoint.trueLength
+
+                        [] ->
+                            Quantity.zero
+            in
+            { distanceFromStart = distance
+            , longitude = Direction2d.toAngle <| .longitude <| Tuple.first <| node.sourceData
+            , latitude = .latitude <| Tuple.first <| node.sourceData
+            , altitude = .altitude <| Tuple.first <| node.sourceData
+            , gradient = .gradientAtStart node
+            , trueLength = .trueLength node
+            }
+                :: accum
+    in
+    foldOverRoute foldFn tree

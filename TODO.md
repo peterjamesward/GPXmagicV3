@@ -8,31 +8,24 @@ BUG: In Grid view, Pane1 is notably smaller than the others.
 
 ## Profile, Charts (BIG)
 
-Has to be at least as good as GPX Smoother.
-
 **GOAL**: Try to get a workable altitude & gradient plot using D3|D3FC and Canvas.
 
-D3 with https://github.com/seliopou/elm-d3/blob/master/README.md ?
-(Only need to write the JS once, then just pass data.)
-https://observablehq.com/@d3/gradient-encoding
-https://observablehq.com/@d3/line-with-tooltip
-https://observablehq.com/@d3/pannable-chart
-https://observablehq.com/@d3/zoomable-area-chart
-... and there's this ... https://blog.scottlogic.com/2020/05/01/rendering-one-million-points-with-d3.html
-
-https://medium.com/@ColinEberhardt/extending-d3-with-higher-order-components-d58cd40b7efd
-
-Remember that most routes will be <100K, not 1M points!
-Therefore, Canvas may be best option.
-Or, given Elm, and the current charting library, and the nature of the tree, we could probably
-show a decent zoomable plot that perhaps shows error bars or a candle plot for non-leaf tree entries.
-Though, by the same argument, we could ship 10K points to JS no problem.
+Direction:
+1. Get some JSON data from v3 labs (WIP - ?? altitude ??)
+2. Start with working chart example (ready)
+3. Mutate to show both altitude and gradient, perhaps on separate charts.
+4. Convert to Canvas or WebGL.
+5. Add overlays.
+6. Add zoom and pan.
+7. Make sure we can add another line set to show filter impact.
+8. Pass data through a new port.
+9. If performance a problem, try selective rendering.
 
 ---
 
 # BACKLOG, roughly in order ...
 
-## Small things (you'd hope)
+## Track rendering
 
 SceneBuilder to use new traversal fn with more progressive rendering.
 
@@ -47,8 +40,7 @@ Map options tool?
 - Draggable points
 
 ## Tools
-
-All existing tools to move across, with some rationalisation.
+Not all existing tools to move across; some rationalisation.
 2-way drag should correct for azimuth.
 
 ## Error messages
@@ -57,6 +49,8 @@ Using an action DisplayMessage to show modal dialog from any tool.
 ## Memory monitor
 Make a tool for this.
 Low memory can trigger defensive actions: remove Undo entries, reduce rendering depth, reduce graphics.
+If we are so short of memory that we can't create the output string, one option is to turn off graphics,
+another to output in sections.
 
 ## Plan view
 Same as v2. Use 3d-scene. Orthographic camera.

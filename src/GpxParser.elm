@@ -70,14 +70,14 @@ parseGPXPoints xml =
                         GPXSource
                             (Direction2d.fromAngle <| Angle.degrees lon)
                             (Angle.degrees lat)
-                            (Length.meters <| alt + Spherical.meanRadius)
+                            (Length.meters alt )
 
                 ( (Just lat) :: _, (Just lon) :: _, _ ) ->
                     Just <|
                         GPXSource
                             (Direction2d.fromAngle <| Angle.degrees lon)
                             (Angle.degrees lat)
-                            (Length.meters Spherical.meanRadius)
+                            (Length.meters 0)
 
                 _ ->
                     Nothing

@@ -1,7 +1,10 @@
 module TrackLoaded exposing (..)
 
 import Actions exposing (ToolAction)
-import DomainModel exposing (EarthPoint, GPXSource, PeteTree, skipCount)
+import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, TrackPoint, skipCount)
+import Json.Encode as E
+import Length exposing (inMeters)
+import Point3d
 
 
 type alias TrackLoaded msg =
@@ -172,3 +175,41 @@ internalUseTree newTree oldTrack =
         , currentPosition = newOrange
         , markerPosition = newPurple
     }
+
+
+
+-- Rendering a track for output, whether GPX or JSON.
+-- Hmm. We need a context-aware tree traversal to actually give us a list of distances from start.
+-- Let's put the traversal in the domain model, and simple JSON output here.
+-- We need for GPX: lon, lat, alt; for profile JSON: distance, alt, gradient.
+-- In both cases, it's point-based, not RoadSection.
+-- Welcome back, TrackPoint as a hybrid of EarthPoint and GPXSource.
+
+
+profilePointEncode : TrackPoint -> E.Value
+profilePointEncode tp =
+    E.object
+        [ ( "distance", E.float <| inMeters tp.distanceFromStart )
+        , ( "altitude", E.float <| inMeters tp.altitude )
+        , ( "gradient", E.float tp.gradient )
+        ]
+
+
+jsonProfileData : TrackLoaded msg -> String
+jsonProfileData track =
+    -- Get profile data from domain model
+    -- Make JSON
+    -- Convert to string
+    let
+        points =
+            List.reverse <|
+                DomainModel.trackPointsForOutput track.trackTree
+
+        json =
+            E.list identity <| List.map profilePointEncode points
+
+        output =
+            E.encode 0 json
+    in
+    -- Nicely indented, why not.
+    output
