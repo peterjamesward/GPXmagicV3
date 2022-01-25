@@ -7,15 +7,31 @@ const data = [{"distance":0,"altitude":12.467755997081404,"gradient":0.189787625
 {"distance":30.644305269902187,"altitude":12.52591510955149,"gradient":2.18978822408369428},
 {"distance":32.06982509852133,"altitude":12.528620578318186,"gradient":0.1897884712266169},
 {"distance":33.495343070826664,"altitude":12.531326047084885,"gradient":0.18978877860236976},
-{"distance":34.92085873440838,"altitude":12.534031515851582,"gradient":0.18978914581778442},
+{"distance":34.92085873440838,"altitude":12.534031515851582,"gradient":1.18978914581778442},
 {"distance":36.346371639817875,"altitude":12.536736984618281,"gradient":0.18978957230930815},
 {"distance":37.77188134184183,"altitude":12.53944245338498,"gradient":0.18979005728712342},
 {"distance":39.197387401205226,"altitude":12.542147922151678,"gradient":0.18979060049617877}]
 
 
 const chart = Plot.plot({
+  x: {
+    grid: true
+  },
+  y: {
+    grid: true
+  },
   marks: [
-    Plot.line(data, {x: "distance", y: "altitude"})
+    Plot.areaY(data,
+        {x: "distance",
+        y1: 12.4,
+        y2: d => d.altitude,
+        fill: "#eeeeee"
+        }),
+    Plot.lineY(data,
+        {x: "distance",
+        y: "altitude"
+        })
+
   ]
 })
 
