@@ -10530,14 +10530,10 @@ var $author$project$DomainModel$trackPointsForOutput = function (tree) {
 				{
 					altitude: node.sourceData.a.altitude,
 					distanceFromStart: distance,
-					gradient: function ($) {
-						return $.gradientAtStart;
-					}(node),
+					gradient: node.gradientAtStart,
 					latitude: node.sourceData.a.latitude,
 					longitude: $ianmackenzie$elm_geometry$Direction2d$toAngle(node.sourceData.a.longitude),
-					trueLength: function ($) {
-						return $.trueLength;
-					}(node)
+					trueLength: node.trueLength
 				},
 				accum);
 		});
@@ -12138,12 +12134,6 @@ var $author$project$Spherical$range = F2(
 		var x = (lon2 - lon1) * $elm$core$Basics$cos((lat1 + lat2) / 2);
 		return $author$project$Spherical$meanRadius * $elm$core$Basics$sqrt((x * x) + (y * y));
 	});
-var $ianmackenzie$elm_units$Quantity$ratio = F2(
-	function (_v0, _v1) {
-		var x = _v0.a;
-		var y = _v1.a;
-		return x / y;
-	});
 var $author$project$DomainModel$makeRoadSectionKnowingLocalCoords = F2(
 	function (_v0, _v1) {
 		var earth1 = _v0.a;
@@ -12180,7 +12170,9 @@ var $author$project$DomainModel$makeRoadSectionKnowingLocalCoords = F2(
 			$ianmackenzie$elm_units$Quantity$minus,
 			$ianmackenzie$elm_geometry$Point3d$zCoordinate(local1),
 			$ianmackenzie$elm_geometry$Point3d$zCoordinate(local2));
-		var gradient = ($ianmackenzie$elm_units$Quantity$greaterThanZero(range) && $ianmackenzie$elm_units$Quantity$greaterThanZero(altitudeChange)) ? (100.0 * A2($ianmackenzie$elm_units$Quantity$ratio, altitudeChange, range)) : 0.0;
+		var gradient = ($ianmackenzie$elm_units$Quantity$greaterThanZero(
+			$ianmackenzie$elm_units$Quantity$abs(range)) && $ianmackenzie$elm_units$Quantity$greaterThanZero(
+			$ianmackenzie$elm_units$Quantity$abs(altitudeChange))) ? ((100.0 * $ianmackenzie$elm_units$Length$inMeters(altitudeChange)) / $ianmackenzie$elm_units$Length$inMeters(range)) : 0.0;
 		return {
 			altitudeGained: A2($ianmackenzie$elm_units$Quantity$max, $ianmackenzie$elm_units$Quantity$zero, altitudeChange),
 			altitudeLost: A2(
@@ -12950,6 +12942,30 @@ var $avh4$elm_color$Color$hsl = F3(
 	function (h, s, l) {
 		return A4($avh4$elm_color$Color$hsla, h, s, l, 1.0);
 	});
+var $author$project$SceneBuilder$gradientColourPastel = function (slope) {
+	return A3(
+		$avh4$elm_color$Color$hsl,
+		$author$project$ColourPalette$gradientHue(slope),
+		0.6,
+		0.7);
+};
+var $ianmackenzie$elm_units$Quantity$ratio = F2(
+	function (_v0, _v1) {
+		var x = _v0.a;
+		var y = _v1.a;
+		return x / y;
+	});
+var $author$project$DomainModel$gradientFromNode = function (treeNode) {
+	return 100.0 * A2(
+		$ianmackenzie$elm_units$Quantity$ratio,
+		A2(
+			$ianmackenzie$elm_units$Quantity$minus,
+			$ianmackenzie$elm_geometry$Point3d$zCoordinate(
+				$author$project$DomainModel$startPoint(treeNode)),
+			$ianmackenzie$elm_geometry$Point3d$zCoordinate(
+				$author$project$DomainModel$endPoint(treeNode))),
+		$author$project$DomainModel$trueLength(treeNode));
+};
 var $avh4$elm_color$Color$lightOrange = A4($avh4$elm_color$Color$RgbaSpace, 252 / 255, 175 / 255, 62 / 255, 1.0);
 var $ianmackenzie$elm_3d_scene$Scene3d$Types$Entity = function (a) {
 	return {$: 'Entity', a: a};
@@ -14184,24 +14200,6 @@ var $author$project$SceneBuilder$render3dView = function (track) {
 				return _List_Nil;
 			}
 		}());
-	var gradientFromNode = function (treeNode) {
-		return 100.0 * A2(
-			$ianmackenzie$elm_units$Quantity$ratio,
-			A2(
-				$ianmackenzie$elm_units$Quantity$minus,
-				$ianmackenzie$elm_geometry$Point3d$zCoordinate(
-					$author$project$DomainModel$startPoint(treeNode)),
-				$ianmackenzie$elm_geometry$Point3d$zCoordinate(
-					$author$project$DomainModel$endPoint(treeNode))),
-			$author$project$DomainModel$trueLength(treeNode));
-	};
-	var gradientColourPastel = function (slope) {
-		return A3(
-			$avh4$elm_color$Color$hsl,
-			$author$project$ColourPalette$gradientHue(slope),
-			0.6,
-			0.7);
-	};
 	var fullRenderingZone = A2(
 		$ianmackenzie$elm_geometry$BoundingBox3d$withDimensions,
 		_Utils_Tuple3($author$project$UtilsForViews$fullDepthRenderingBoxSize, $author$project$UtilsForViews$fullDepthRenderingBoxSize, $author$project$UtilsForViews$fullDepthRenderingBoxSize),
@@ -14217,14 +14215,14 @@ var $author$project$SceneBuilder$render3dView = function (track) {
 			$ianmackenzie$elm_geometry$LineSegment3d$from,
 			$author$project$DomainModel$startPoint(node),
 			$author$project$DomainModel$endPoint(node));
-		var gradient = gradientFromNode(node);
+		var gradient = $author$project$DomainModel$gradientFromNode(node);
 		var curtainHem = A2($ianmackenzie$elm_geometry$LineSegment3d$projectOnto, floorPlane, roadAsSegment);
 		return _List_fromArray(
 			[
 				A5(
 				$ianmackenzie$elm_3d_scene$Scene3d$quad,
 				$ianmackenzie$elm_3d_scene$Scene3d$Material$color(
-					gradientColourPastel(gradient)),
+					$author$project$SceneBuilder$gradientColourPastel(gradient)),
 				$ianmackenzie$elm_geometry$LineSegment3d$startPoint(roadAsSegment),
 				$ianmackenzie$elm_geometry$LineSegment3d$endPoint(roadAsSegment),
 				$ianmackenzie$elm_geometry$LineSegment3d$endPoint(curtainHem),

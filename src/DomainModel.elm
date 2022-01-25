@@ -15,6 +15,7 @@ module DomainModel exposing
     , getDualCoords
     , gpxFromPointWithReference
     , gpxPointFromIndex
+    , gradientFromNode
     , leafFromIndex
     , lngLatPair
     , nearestToLonLat
@@ -289,8 +290,11 @@ makeRoadSectionKnowingLocalCoords ( earth1, local1 ) ( earth2, local2 ) =
             Point3d.zCoordinate local2 |> Quantity.minus (Point3d.zCoordinate local1)
 
         gradient =
-            if (range |> Quantity.greaterThanZero) && (altitudeChange |> Quantity.greaterThanZero) then
-                100.0 * Quantity.ratio altitudeChange range
+            if
+                (Quantity.abs range |> Quantity.greaterThanZero)
+                    && (Quantity.abs altitudeChange |> Quantity.greaterThanZero)
+            then
+                100.0 * Length.inMeters altitudeChange / Length.inMeters range
 
             else
                 0.0
@@ -1234,9 +1238,19 @@ trackPointsForOutput tree =
             , longitude = Direction2d.toAngle <| .longitude <| Tuple.first <| node.sourceData
             , latitude = .latitude <| Tuple.first <| node.sourceData
             , altitude = .altitude <| Tuple.first <| node.sourceData
-            , gradient = .gradientAtStart node
-            , trueLength = .trueLength node
+            , gradient = node.gradientAtStart
+            , trueLength = node.trueLength
             }
                 :: accum
     in
     foldOverRoute foldFn tree
+
+
+gradientFromNode treeNode =
+    Quantity.ratio
+        (Point3d.zCoordinate (endPoint treeNode)
+            |> Quantity.minus
+                (Point3d.zCoordinate (startPoint treeNode))
+        )
+        (trueLength treeNode)
+        |> (*) 100.0

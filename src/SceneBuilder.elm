@@ -29,6 +29,11 @@ import UtilsForViews exposing (fullDepthRenderingBoxSize)
 import Vector3d
 
 
+gradientColourPastel : Float -> Color.Color
+gradientColourPastel slope =
+    Color.hsl (gradientHue slope) 0.6 0.7
+
+
 render3dView : TrackLoaded msg -> List (Entity LocalCoords)
 render3dView track =
     --TODO: Use new traversal to provide better depth function.
@@ -44,24 +49,11 @@ render3dView track =
                 )
                 (startPoint <| leafFromIndex track.currentPosition track.trackTree)
 
-        gradientColourPastel : Float -> Color.Color
-        gradientColourPastel slope =
-            Color.hsl (gradientHue slope) 0.6 0.7
-
-        gradientFromNode treeNode =
-            Quantity.ratio
-                (Point3d.zCoordinate (endPoint treeNode)
-                    |> Quantity.minus
-                        (Point3d.zCoordinate (startPoint treeNode))
-                )
-                (trueLength treeNode)
-                |> (*) 100.0
-
         gradientCurtain : PeteTree -> List (Entity LocalCoords)
         gradientCurtain node =
             let
                 gradient =
-                    gradientFromNode node
+                    DomainModel.gradientFromNode node
 
                 roadAsSegment =
                     LineSegment3d.from (startPoint node) (endPoint node)
