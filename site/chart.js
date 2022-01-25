@@ -40,7 +40,8 @@ const chart = Plot.plot({
         }),
     Plot.dot(data, {
       x: "distance",      // feature for the x channel
-      y: "altitude"     // feature for the y channel
+      y: "altitude",     // feature for the y channel
+        fill: "gradient" //"#EEEEEE"
     })
   ]
 })
