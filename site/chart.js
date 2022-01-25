@@ -29,9 +29,13 @@ const chart = Plot.plot({
         }),
     Plot.lineY(data,
         {x: "distance",
-        y: "altitude"
-        })
-
+        y: "altitude",
+        stroke: "blue"
+        }),
+    Plot.dot(data, {
+      x: "distance",      // feature for the x channel
+      y: "altitude"     // feature for the y channel
+    })
   ]
 })
 
