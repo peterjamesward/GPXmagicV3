@@ -36,9 +36,10 @@ var line = fc.seriesCanvasLine()
     .mainValue(d => d.altitude)
     ;
 
-var gradient = fc.seriesCanvasBar()
+var gradient = fc.seriesCanvasLine()
     .crossValue(d => d.distance)
     .mainValue(d => d.gradient)
+    .curve(d3.curveStepAfter)
     ;
 
 var area = fc.seriesCanvasArea()
