@@ -24,7 +24,7 @@ type alias Options =
 
 
 defaultOptions =
-    { threshold = Angle.degrees 60
+    { threshold = Angle.degrees 120
     , breaches = []
     , currentBreach = 0
     }

@@ -8491,7 +8491,7 @@ var $ianmackenzie$elm_units$Angle$degrees = function (numDegrees) {
 var $author$project$Tools$AbruptDirectionChanges$defaultOptions = {
 	breaches: _List_Nil,
 	currentBreach: 0,
-	threshold: $ianmackenzie$elm_units$Angle$degrees(60)
+	threshold: $ianmackenzie$elm_units$Angle$degrees(120)
 };
 var $author$project$Tools$DeletePoints$defaultOptions = {pointsToBeDeleted: _List_Nil, singlePoint: true};
 var $author$project$Tools$Pointers$defaultOptions = {orange: 0, purple: $elm$core$Maybe$Nothing};
