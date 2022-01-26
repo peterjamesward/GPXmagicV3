@@ -963,28 +963,32 @@ performActionsOnModel actions model =
         performAction action foldedModel =
             case ( action, foldedModel.track ) of
                 ( SetCurrent position, Just track ) ->
-                    let
-                        newTrack =
-                            { track | currentPosition = position }
-                    in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel
+                        | track =
+                            Just { track | currentPosition = position }
+                    }
 
                 ( SetCurrentFromMapClick position, Just track ) ->
-                    let
-                        newTrack =
-                            { track | currentPosition = position }
-                    in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel
+                        | track =
+                            Just { track | currentPosition = position }
+                    }
 
                 ( ShowPreview previewData, Just track ) ->
                     -- Put preview into the scene.
                     -- After some thought, it is sensible to collect the preview data
                     -- since it's handy, as the alternative is another complex case
                     -- statement in ToolController.
-                    { foldedModel | previews = Dict.insert previewData.tag previewData foldedModel.previews }
+                    { foldedModel
+                        | previews =
+                            Dict.insert previewData.tag previewData foldedModel.previews
+                    }
 
                 ( HidePreview tag, Just track ) ->
-                    { foldedModel | previews = Dict.remove tag foldedModel.previews }
+                    { foldedModel
+                        | previews =
+                            Dict.remove tag foldedModel.previews
+                    }
 
                 ( DelayMessage int msg, Just track ) ->
                     foldedModel
@@ -1127,10 +1131,7 @@ performActionCommands actions model =
         performAction action =
             case ( action, model.track ) of
                 ( SetCurrent position, Just track ) ->
-                    Cmd.batch
-                        [ MapPortController.addTrackToMap track
-                        , MapPortController.addMarkersToMap track
-                        ]
+                    MapPortController.addMarkersToMap track
 
                 ( SetCurrentFromMapClick position, Just track ) ->
                     MapPortController.addMarkersToMap track
