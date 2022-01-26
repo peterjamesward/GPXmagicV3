@@ -3,7 +3,6 @@
 
 BUG: Dubious steepest gradient on some routes. (May have to wait until we have that tool!)
 BUG: In Grid view, Pane1 is notably smaller than the others.
-BUG: There's a one-pixel white line inside each tool border.
 
 # WIP
 

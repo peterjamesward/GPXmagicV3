@@ -459,8 +459,8 @@ viewTool msgWrapper isTrack options toolEntry =
         , spacing 0
         , Border.width 4
         , Border.color toolEntry.tabColour
-        , Border.rounded 10
-        , Background.color FlatColors.AussiePalette.coastalBreeze
+        , Border.rounded 8
+        , Background.color toolEntry.tabColour
         , inFront <|
             column
                 [ alignRight
@@ -478,7 +478,8 @@ viewTool msgWrapper isTrack options toolEntry =
         [ row
             [ width fill
             , spacing 8
-            , padding 4
+            , height <| px 24
+            --, padding 4
             , Background.color toolEntry.tabColour
             , Font.color toolEntry.textColour
             ]
@@ -595,7 +596,7 @@ viewToolByType :
     -> Element msg
 viewToolByType msgWrapper entry isTrack options =
     el
-        [ centerX, paddingEach { left = 0, right = 0, top = 0, bottom = 4 } ]
+        [ centerX, padding 2, width fill, Border.rounded 4 ]
     <|
         case entry.toolType of
             ToolTrackInfo ->
