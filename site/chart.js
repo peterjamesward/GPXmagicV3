@@ -42,11 +42,13 @@ var gradient = fc.seriesCanvasLine()
     .curve(d3.curveStepAfter)
     ;
 
+// Area gives us the fill under the height line.
 var area = fc.seriesCanvasArea()
     .crossValue(d => d.distance)
     .mainValue(d => d.altitude)
     .decorate((context, datum, index) => {
         context.fillStyle = '#eeeeee';
+        context.alpha = 0.5 ; //?
     })
     ;
 

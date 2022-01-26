@@ -6,28 +6,31 @@ BUG: In Grid view, Pane1 is notably smaller than the others.
 
 # WIP
 
-## Profile, Charts (BIG)
+## Profile, Charts
 
-**GOAL**: Try to get a workable altitude & gradient plot using D3|D3FC and Canvas.
+I have decided to abandon the D3|D3FC route, and revert 
+to the current 3d-scene approach with some changes:
 
-Direction:
-1. Get some JSON data from v3 labs (WIP - ?? altitude ??)
-2. Start with working chart example (ready)
-3. Mutate to show both altitude and gradient, perhaps on separate charts.
-4. Convert to Canvas or WebGL.
-5. Add overlays.
-6. Add zoom and pan.
-7. Make sure we can add another line set to show filter impact.
-8. Pass data through a new port.
-9. If performance a problem, try selective rendering.
+Colour to look more like a conventional plot - lines and subtle shading.
+Two views, one for altitude, one for gradient;
+(Could put them in one scene, e.g. alt on YZ plane, gradient on XY;)
+Both use orthographic views;
+Use progressive rendering;
+Show current as vertical orange line, through both views;
+When zooming, decline the camera so that the vertical scale remains the same;
+Track box diagonal to work out visible area;
+Use visible area to create an SVG scales overlay;
+Further SVG overlay for current point details.
 
 ---
 
 # BACKLOG, roughly in order ...
 
-## Track rendering
+## Graduated Rendering
 
-SceneBuilder to use new traversal fn with more progressive rendering.
+Use a graduated drop off with distance, compute at each tree level?
+For each node, take minimum distance from bounding box to current.
+Set depth = (roughly) 20 - distance in km, down to 10.
 
 ## Map
 Add non-draggable track point circles, in separate layer we can turn on and off
@@ -59,11 +62,6 @@ Same as v2. Use 3d-scene. Orthographic camera.
 Terrain 1 = Simple tree walk, in many cases will just work but not always.
 Terrain 2 = Tree walk combined with whole (visible) tree query, because <track loops>.
 (Expand bounding boxes to allow for road width.)
-
-## Graduated Rendering
-Use a graduated drop off with distance, compute at each tree level?
-On Map, work out the depth to fit (say) 1000 points within visible region.
-> Not sure it's required.
 
 ## Small stuff
 Put all Font, Colour etc into a Palette/Style module for ease of change.
