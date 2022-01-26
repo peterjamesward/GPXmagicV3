@@ -1,4 +1,4 @@
-module SceneBuilder exposing (..)
+module SceneBuilder3D exposing (..)
 
 -- In V3 there is only one 3d model, used for first, third, and Plan views.
 -- Profile is 2d drawing (or chart).

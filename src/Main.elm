@@ -38,7 +38,7 @@ import PaneLayoutManager exposing (Msg(..), ViewMode(..))
 import Pixels exposing (Pixels)
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
-import SceneBuilder
+import SceneBuilder3D
 import SceneBuilderMap
 import SplitPane.SplitPane as SplitPane exposing (..)
 import StravaAuth exposing (getStravaToken)
@@ -92,7 +92,8 @@ type alias Model =
     , track : Maybe (TrackLoaded Msg)
 
     -- Visuals
-    , scene : List (Entity LocalCoords)
+    , scene3d : List (Entity LocalCoords)
+    , sceneProfile : List (Entity LocalCoords)
     , previews : Dict String PreviewData
 
     -- Layout stuff
@@ -205,7 +206,8 @@ init mflags origin navigationKey =
       , ipInfo = Nothing
       , stravaAuthentication = authData
       , track = Nothing
-      , scene = []
+      , scene3d = []
+      , sceneProfile = []
       , previews = Dict.empty
       , windowSize = ( 1000, 800 )
       , contentArea = ( Pixels.pixels 800, Pixels.pixels 500 )
@@ -252,12 +254,15 @@ render model =
         Just track ->
             let
                 renderedTrack =
-                    SceneBuilder.render3dView track
+                    SceneBuilder3D.render3dView track
 
                 renderedPreviews =
-                    SceneBuilder.renderPreviews model.previews
+                    SceneBuilder3D.renderPreviews model.previews
             in
-            { model | scene = renderedPreviews ++ renderedTrack }
+            { model
+                | scene3d = renderedPreviews ++ renderedTrack
+                , sceneProfile = SceneBuilderProfile.render track
+            }
 
         Nothing ->
             model
@@ -845,7 +850,8 @@ viewPaneArea model =
         PaneLayoutManager.viewPanes
             PaneMsg
             model.track
-            model.scene
+            model.scene3d
+            model.sceneProfile
             model.contentArea
             model.paneLayoutOptions
 
