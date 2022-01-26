@@ -20,6 +20,7 @@ import Scene3d exposing (Entity)
 import Time
 import TrackLoaded exposing (TrackLoaded)
 import ViewMap
+import ViewProfileCharts
 import ViewPureStyles exposing (..)
 import ViewThirdPerson exposing (stopProp)
 
@@ -37,6 +38,7 @@ type ViewContext
     = ThirdPersonContext ViewThirdPerson.Context
     | MapContext ViewMap.Context
     | InfoContext
+    | ProfileContext
 
 
 type PaneType
@@ -64,6 +66,7 @@ type alias PaneContext =
     , activeView : ViewMode
     , thirdPersonContext : Maybe ViewThirdPerson.Context
     , mapContext : Maybe ViewMap.Context
+    , profileContext : Maybe ViewProfileCharts.Context
     }
 
 
@@ -90,6 +93,7 @@ defaultPaneContext =
     , activeView = ViewInfo
     , thirdPersonContext = Nothing
     , mapContext = Nothing
+    , profileContext = Nothing
     }
 
 
@@ -413,6 +417,7 @@ viewModeChoices msgWrapper context =
         fullOptionList =
             [ Input.optionWith ViewThird <| radioButton "Perspective"
             , Input.optionWith ViewMap <| radioButton "Map"
+            , Input.optionWith ViewProfile <| radioButton "Profile"
             ]
     in
     Input.radioRow
@@ -431,6 +436,7 @@ viewModeChoicesNoMap msgWrapper pane =
     let
         reducedOptionList =
             [ Input.optionWith ViewThird <| radioButton "Perspective"
+            , Input.optionWith ViewProfile <| radioButton "Profile"
             ]
     in
     Input.radioRow

@@ -3,12 +3,9 @@
 
 BUG: Dubious steepest gradient on some routes. (May have to wait until we have that tool!)
 BUG: In Grid view, Pane1 is notably smaller than the others.
+BUG: Hit detect on Map is slow, sometimes very slow. (Paris to Bree).
 
 # WIP
-
-## Movement on map
-
-Timer idea seems OK, need to adjust map rendering to suit.
 
 ## Profile, Charts
 
