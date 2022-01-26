@@ -3,6 +3,7 @@
 
 BUG: Dubious steepest gradient on some routes. (May have to wait until we have that tool!)
 BUG: In Grid view, Pane1 is notably smaller than the others.
+BUG: There's a one-pixel white line inside each tool border.
 
 # WIP
 
@@ -35,12 +36,18 @@ Set depth = (roughly) 20 - distance in km, down to 10.
 ## Map
 Add non-draggable track point circles, in separate layer we can turn on and off
 to replace by draggables when that control is open.
+(Only leaf points can be draggable!)
 Try to reduce repaints on moving pointer. 
+> Could just require a map click to repaint? (Not a good idea.)
 > Could we be lazy? Only repaint on slider thumb release with custom thumb events?
+> Actually, try just not using selective rendering; it's currently OK for most tracks,
+> and it was all driven by RTWI80D, which is largely irrelevant.
+> That we, eliminate all map repainting, and just move the markers, as v2.
 
 Map options tool? 
 - Map style (outdoor, satellite)
 - Draggable points
+> These could just be popups on the map view.
 
 ## Tools
 Not all existing tools to move across; some rationalisation.
