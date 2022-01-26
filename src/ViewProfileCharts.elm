@@ -15,6 +15,7 @@ import Element.Font as Font
 import Element.Input as Input
 import FeatherIcons
 import FlatColors.ChinesePalette exposing (white)
+import Html.Attributes exposing (id)
 import Html.Events as HE
 import Html.Events.Extra.Mouse as Mouse exposing (Button(..))
 import Html.Events.Extra.Wheel as Wheel
@@ -146,6 +147,7 @@ view context ( givenWidth, givenHeight ) track scene msgWrapper =
 
           else
             pointer
+        , htmlAttribute (id "CHART")
         , htmlAttribute <| Mouse.onUp (ImageRelease >> msgWrapper)
         , htmlAttribute <| Mouse.onClick (ImageClick >> msgWrapper)
         , htmlAttribute <| Mouse.onDoubleClick (ImageDoubleClick >> msgWrapper)

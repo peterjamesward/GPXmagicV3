@@ -17,7 +17,6 @@ import MapPortController
 import Pixels exposing (Pixels)
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
-import Time
 import TrackLoaded exposing (TrackLoaded)
 import ViewMap
 import ViewProfileCharts
@@ -114,7 +113,8 @@ type Msg
     | SetCurrentPosition Int
     | TogglePopup
     | SetViewMode PaneId ViewMode
-    | ImageMessage PaneId ViewThirdPerson.Msg
+    | ThirdPersonViewMessage PaneId ViewThirdPerson.Msg
+    | ProfileViewMessage PaneId ViewProfileCharts.Msg
     | MapPortsMessage MapPortController.MapMsg
     | MapViewMessage ViewMap.Msg
     | SliderTimeout
@@ -239,7 +239,7 @@ update paneMsg msgWrapper mTrack contentArea options =
               ]
             )
 
-        ImageMessage paneId imageMsg ->
+        ThirdPersonViewMessage paneId imageMsg ->
             let
                 paneInfo =
                     -- Tedious is good, tedious works.
@@ -264,7 +264,7 @@ update paneMsg msgWrapper mTrack contentArea options =
                                 ( new, act ) =
                                     ViewThirdPerson.update
                                         imageMsg
-                                        (msgWrapper << ImageMessage Pane1)
+                                        (msgWrapper << ThirdPersonViewMessage Pane1)
                                         track
                                         (dimensionsWithLayout options.paneLayout contentArea)
                                         third
@@ -276,6 +276,60 @@ update paneMsg msgWrapper mTrack contentArea options =
 
                 newPane =
                     { paneInfo | thirdPersonContext = newContext }
+
+                newOptions =
+                    case paneId of
+                        Pane1 ->
+                            { options | pane1 = newPane }
+
+                        Pane2 ->
+                            { options | pane2 = newPane }
+
+                        Pane3 ->
+                            { options | pane3 = newPane }
+
+                        Pane4 ->
+                            { options | pane4 = newPane }
+            in
+            ( newOptions, actions )
+
+        ProfileViewMessage paneId imageMsg ->
+            let
+                paneInfo =
+                    -- Tedious is good, tedious works.
+                    --TODO: Local refactor here.
+                    case paneId of
+                        Pane1 ->
+                            options.pane1
+
+                        Pane2 ->
+                            options.pane2
+
+                        Pane3 ->
+                            options.pane3
+
+                        Pane4 ->
+                            options.pane4
+
+                ( newContext, actions ) =
+                    case ( mTrack, paneInfo.profileContext ) of
+                        ( Just track, Just profile ) ->
+                            let
+                                ( new, act ) =
+                                    ViewProfileCharts.update
+                                        imageMsg
+                                        (msgWrapper << ProfileViewMessage Pane1)
+                                        track
+                                        (dimensionsWithLayout options.paneLayout contentArea)
+                                        profile
+                            in
+                            ( Just new, act )
+
+                        _ ->
+                            ( Nothing, [] )
+
+                newPane =
+                    { paneInfo | profileContext = newContext }
 
                 newOptions =
                     case paneId of
@@ -407,6 +461,9 @@ initialisePane track options pane =
         | thirdPersonContext =
             Just <|
                 ViewThirdPerson.initialiseView 0 track.trackTree
+        , profileContext =
+            Just <|
+                ViewProfileCharts.initialiseView 0 track.trackTree
         , mapContext = Just ViewMap.initialiseContext
     }
 
@@ -486,14 +543,32 @@ viewPanes msgWrapper mTrack scene ( w, h ) options =
             dimensionsWithLayout options.paneLayout ( w, h )
 
         showNonMapViews pane =
-            case ( pane.thirdPersonContext, mTrack ) of
-                ( Just context, Just track ) ->
-                    ViewThirdPerson.view
-                        context
-                        ( paneWidth, paneHeight )
-                        track
-                        scene
-                        (msgWrapper << ImageMessage pane.paneId)
+            case pane.activeView of
+                ViewThird ->
+                    case ( pane.thirdPersonContext, mTrack ) of
+                        ( Just context, Just track ) ->
+                            ViewThirdPerson.view
+                                context
+                                ( paneWidth, paneHeight )
+                                track
+                                scene
+                                (msgWrapper << ThirdPersonViewMessage pane.paneId)
+
+                        _ ->
+                            none
+
+                ViewProfile ->
+                    case ( pane.profileContext, mTrack ) of
+                        ( Just context, Just track ) ->
+                            ViewProfileCharts.view
+                                context
+                                ( paneWidth, paneHeight )
+                                track
+                                scene
+                                (msgWrapper << ProfileViewMessage pane.paneId)
+
+                        _ ->
+                            none
 
                 _ ->
                     none
