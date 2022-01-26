@@ -8461,6 +8461,7 @@ var $author$project$PaneLayoutManager$Pane2 = {$: 'Pane2'};
 var $author$project$PaneLayoutManager$Pane3 = {$: 'Pane3'};
 var $author$project$PaneLayoutManager$Pane4 = {$: 'Pane4'};
 var $author$project$PaneLayoutManager$PanesOne = {$: 'PanesOne'};
+var $author$project$PaneLayoutManager$SliderIdle = {$: 'SliderIdle'};
 var $author$project$PaneLayoutManager$Pane1 = {$: 'Pane1'};
 var $author$project$PaneLayoutManager$ViewInfo = {$: 'ViewInfo'};
 var $author$project$PaneLayoutManager$defaultPaneContext = {activeView: $author$project$PaneLayoutManager$ViewInfo, mapContext: $elm$core$Maybe$Nothing, paneId: $author$project$PaneLayoutManager$Pane1, thirdPersonContext: $elm$core$Maybe$Nothing};
@@ -8476,7 +8477,8 @@ var $author$project$PaneLayoutManager$defaultOptions = {
 		$author$project$PaneLayoutManager$defaultPaneContext,
 		{paneId: $author$project$PaneLayoutManager$Pane4}),
 	paneLayout: $author$project$PaneLayoutManager$PanesOne,
-	popupVisible: false
+	popupVisible: false,
+	sliderState: $author$project$PaneLayoutManager$SliderIdle
 };
 var $elm$core$Basics$pi = _Basics_pi;
 var $ianmackenzie$elm_units$Quantity$Quantity = function (a) {
@@ -15523,6 +15525,10 @@ var $author$project$DomainModel$treeFromSourcePoints = function (track) {
 		$elm$core$List$head(track));
 	return A2($author$project$DomainModel$treeFromSourcesWithExistingReference, referencePoint, track);
 };
+var $author$project$Actions$DelayMessage = F2(
+	function (a, b) {
+		return {$: 'DelayMessage', a: a, b: b};
+	});
 var $author$project$PaneLayoutManager$ImageMessage = F2(
 	function (a, b) {
 		return {$: 'ImageMessage', a: a, b: b};
@@ -15531,9 +15537,13 @@ var $author$project$Actions$MapCenterOnCurrent = {$: 'MapCenterOnCurrent'};
 var $author$project$PaneLayoutManager$MapViewMessage = function (a) {
 	return {$: 'MapViewMessage', a: a};
 };
+var $author$project$Actions$NoAction = {$: 'NoAction'};
 var $author$project$Actions$SetCurrent = function (a) {
 	return {$: 'SetCurrent', a: a};
 };
+var $author$project$PaneLayoutManager$SliderMoved = {$: 'SliderMoved'};
+var $author$project$PaneLayoutManager$SliderTimeout = {$: 'SliderTimeout'};
+var $author$project$PaneLayoutManager$SliderWaitingForTimeout = {$: 'SliderWaitingForTimeout'};
 var $ianmackenzie$elm_units$Quantity$toFloatQuantity = function (_v0) {
 	var value = _v0.a;
 	return $ianmackenzie$elm_units$Quantity$Quantity(value);
@@ -15818,10 +15828,6 @@ var $author$project$ViewMap$update = F5(
 			_List_Nil);
 	});
 var $author$project$ViewThirdPerson$ClickDelayExpired = {$: 'ClickDelayExpired'};
-var $author$project$Actions$DelayMessage = F2(
-	function (a, b) {
-		return {$: 'DelayMessage', a: a, b: b};
-	});
 var $author$project$ViewThirdPerson$DragPan = {$: 'DragPan'};
 var $author$project$ViewThirdPerson$DragRotate = {$: 'DragRotate'};
 var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$SecondButton = {$: 'SecondButton'};
@@ -16935,8 +16941,11 @@ var $author$project$PaneLayoutManager$update = F5(
 				} else {
 					return _Utils_Tuple2(options, _List_Nil);
 				}
-			default:
+			case 'SetCurrentPosition':
 				var pos = paneMsg.a;
+				var newOptions = _Utils_update(
+					options,
+					{sliderState: $author$project$PaneLayoutManager$SliderMoved});
 				var mapFollowsOrange = function () {
 					var _v10 = options.pane1.mapContext;
 					if (_v10.$ === 'Just') {
@@ -16947,16 +16956,41 @@ var $author$project$PaneLayoutManager$update = F5(
 					}
 				}();
 				return _Utils_Tuple2(
+					newOptions,
+					_List_fromArray(
+						[
+							$author$project$Actions$SetCurrent(pos),
+							mapFollowsOrange ? $author$project$Actions$MapCenterOnCurrent : $author$project$Actions$NoAction,
+							A2(
+							$author$project$Actions$DelayMessage,
+							100,
+							msgWrapper($author$project$PaneLayoutManager$SliderTimeout))
+						]));
+			default:
+				var newOptions = _Utils_update(
 					options,
-					mapFollowsOrange ? _List_fromArray(
+					{
+						sliderState: function () {
+							var _v11 = options.sliderState;
+							switch (_v11.$) {
+								case 'SliderIdle':
+									return $author$project$PaneLayoutManager$SliderIdle;
+								case 'SliderMoved':
+									return $author$project$PaneLayoutManager$SliderWaitingForTimeout;
+								default:
+									return $author$project$PaneLayoutManager$SliderIdle;
+							}
+						}()
+					});
+				return _Utils_Tuple2(
+					newOptions,
+					_List_fromArray(
 						[
-							$author$project$Actions$SetCurrent(pos),
-							$author$project$Actions$TrackHasChanged,
-							$author$project$Actions$MapCenterOnCurrent
-						]) : _List_fromArray(
-						[
-							$author$project$Actions$SetCurrent(pos),
-							$author$project$Actions$TrackHasChanged
+							((!_Utils_eq(options.sliderState, $author$project$PaneLayoutManager$SliderIdle)) && _Utils_eq(newOptions.sliderState, $author$project$PaneLayoutManager$SliderIdle)) ? $author$project$Actions$TrackHasChanged : $author$project$Actions$NoAction,
+							(!_Utils_eq(newOptions.sliderState, $author$project$PaneLayoutManager$SliderIdle)) ? A2(
+							$author$project$Actions$DelayMessage,
+							100,
+							msgWrapper($author$project$PaneLayoutManager$SliderTimeout)) : $author$project$Actions$NoAction
 						]));
 		}
 	});

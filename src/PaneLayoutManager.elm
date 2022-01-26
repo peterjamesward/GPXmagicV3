@@ -17,6 +17,7 @@ import MapPortController
 import Pixels exposing (Pixels)
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
+import Time
 import TrackLoaded exposing (TrackLoaded)
 import ViewMap
 import ViewPureStyles exposing (..)
@@ -73,7 +74,14 @@ type alias Options =
     , pane2 : PaneContext
     , pane3 : PaneContext
     , pane4 : PaneContext
+    , sliderState : SliderState
     }
+
+
+type SliderState
+    = SliderIdle
+    | SliderMoved
+    | SliderWaitingForTimeout
 
 
 defaultPaneContext : PaneContext
@@ -93,6 +101,7 @@ defaultOptions =
     , pane2 = { defaultPaneContext | paneId = Pane2 }
     , pane3 = { defaultPaneContext | paneId = Pane3 }
     , pane4 = { defaultPaneContext | paneId = Pane4 }
+    , sliderState = SliderIdle
     }
 
 
@@ -104,6 +113,7 @@ type Msg
     | ImageMessage PaneId ViewThirdPerson.Msg
     | MapPortsMessage MapPortController.MapMsg
     | MapViewMessage ViewMap.Msg
+    | SliderTimeout
     | PaneNoOp
 
 
@@ -329,13 +339,51 @@ update paneMsg msgWrapper mTrack contentArea options =
 
                         Nothing ->
                             False
-            in
-            ( options
-            , if mapFollowsOrange then
-                [ SetCurrent pos, TrackHasChanged, MapCenterOnCurrent ]
 
-              else
-                [ SetCurrent pos, TrackHasChanged ]
+                newOptions =
+                    { options | sliderState = SliderMoved }
+            in
+            ( newOptions
+            , [ SetCurrent pos
+              , if mapFollowsOrange then
+                    MapCenterOnCurrent
+
+                else
+                    Actions.NoAction
+              , Actions.DelayMessage 100 (msgWrapper SliderTimeout)
+              ]
+            )
+
+        SliderTimeout ->
+            let
+                newOptions =
+                    { options
+                        | sliderState =
+                            case options.sliderState of
+                                SliderIdle ->
+                                    SliderIdle
+
+                                SliderMoved ->
+                                    SliderWaitingForTimeout
+
+                                SliderWaitingForTimeout ->
+                                    SliderIdle
+                    }
+            in
+            ( newOptions
+            , [ if options.sliderState /= SliderIdle && newOptions.sliderState == SliderIdle then
+                    -- Force re-render once only.
+                    TrackHasChanged
+
+                else
+                    Actions.NoAction
+              , if newOptions.sliderState /= SliderIdle then
+                    -- Ask for a timer, to see if control has stopped moving.
+                    Actions.DelayMessage 100 (msgWrapper SliderTimeout)
+
+                else
+                    Actions.NoAction
+              ]
             )
 
 
