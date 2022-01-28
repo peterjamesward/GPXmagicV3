@@ -33,6 +33,8 @@ renderBoth track =
         { minX, maxX, minY, maxY, minZ, maxZ } =
             BoundingBox3d.extrema <| boundingBox track.trackTree
 
+        centreZ = minZ |> Quantity.plus maxZ |> Quantity.half
+
         ( _, _, rangeZ ) =
             BoundingBox3d.dimensions <| boundingBox track.trackTree
 
@@ -53,20 +55,20 @@ renderBoth track =
             highDetailBox
                 |> BoundingBox3d.expandBy (Length.kilometers 4)
 
-        pointToProfileCoords distance p =
-            Point3d.xyz
-                distance
-                Quantity.zero
-                (Point3d.zCoordinate p |> Quantity.minus minZ)
-
         makeAltitudeSegment : Length.Length -> RoadSection -> List (Entity LocalCoords)
         makeAltitudeSegment distance road =
             let
                 profileStart =
-                    pointToProfileCoords distance road.startPoint
+                    Point3d.xyz
+                        distance
+                        Quantity.zero
+                        (Point3d.zCoordinate road.startPoint)
 
                 profileEnd =
-                    pointToProfileCoords (distance |> Quantity.plus road.trueLength) road.endPoint
+                    Point3d.xyz
+                        (distance |> Quantity.plus road.trueLength)
+                        Quantity.zero
+                        (Point3d.zCoordinate road.endPoint)
 
                 gradient =
                     DomainModel.gradientFromNode <| Leaf road
@@ -93,19 +95,25 @@ renderBoth track =
         makeGradientSegment distance road =
             let
                 gradient =
-                    DomainModel.gradientFromNode <| Leaf road
+                    clamp -30.0 30.0 <|
+                        DomainModel.gradientFromNode <|
+                            Leaf road
+
+                yValue =
+                    -- Exaggerate here, reduce if needed in view.
+                    gradient * 20.0
 
                 segmentStart =
                     Point3d.xyz
                         distance
                         Quantity.zero
-                        (Length.meters gradient)
+                        (Length.meters yValue)
 
                 segmentEnd =
                     Point3d.xyz
                         (distance |> Quantity.plus road.trueLength)
                         Quantity.zero
-                        (Length.meters gradient)
+                        (Length.meters yValue)
             in
             [ Scene3d.point { radius = Pixels.pixels 1 }
                 (Material.color black)

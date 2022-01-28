@@ -14385,18 +14385,23 @@ var $author$project$SceneBuilderProfile$gradientColourPastel = function (slope) 
 var $author$project$SceneBuilderProfile$renderBoth = function (track) {
 	var makeGradientSegment = F2(
 		function (distance, road) {
-			var gradient = $author$project$DomainModel$gradientFromNode(
-				$author$project$DomainModel$Leaf(road));
+			var gradient = A3(
+				$elm$core$Basics$clamp,
+				-30.0,
+				30.0,
+				$author$project$DomainModel$gradientFromNode(
+					$author$project$DomainModel$Leaf(road)));
+			var yValue = gradient * 20.0;
 			var segmentEnd = A3(
 				$ianmackenzie$elm_geometry$Point3d$xyz,
 				A2($ianmackenzie$elm_units$Quantity$plus, road.trueLength, distance),
 				$ianmackenzie$elm_units$Quantity$zero,
-				$ianmackenzie$elm_units$Length$meters(gradient));
+				$ianmackenzie$elm_units$Length$meters(yValue));
 			var segmentStart = A3(
 				$ianmackenzie$elm_geometry$Point3d$xyz,
 				distance,
 				$ianmackenzie$elm_units$Quantity$zero,
-				$ianmackenzie$elm_units$Length$meters(gradient));
+				$ianmackenzie$elm_units$Length$meters(yValue));
 			return _List_fromArray(
 				[
 					A3(
@@ -14452,25 +14457,21 @@ var $author$project$SceneBuilderProfile$renderBoth = function (track) {
 	var maxY = _v1.maxY;
 	var minZ = _v1.minZ;
 	var maxZ = _v1.maxZ;
+	var centreZ = $ianmackenzie$elm_units$Quantity$half(
+		A2($ianmackenzie$elm_units$Quantity$plus, maxZ, minZ));
 	var floorPlane = A2($ianmackenzie$elm_geometry$Plane3d$offsetBy, minZ, $ianmackenzie$elm_geometry$Plane3d$xy);
-	var pointToProfileCoords = F2(
-		function (distance, p) {
-			return A3(
+	var makeAltitudeSegment = F2(
+		function (distance, road) {
+			var profileStart = A3(
 				$ianmackenzie$elm_geometry$Point3d$xyz,
 				distance,
 				$ianmackenzie$elm_units$Quantity$zero,
-				A2(
-					$ianmackenzie$elm_units$Quantity$minus,
-					minZ,
-					$ianmackenzie$elm_geometry$Point3d$zCoordinate(p)));
-		});
-	var makeAltitudeSegment = F2(
-		function (distance, road) {
-			var profileStart = A2(pointToProfileCoords, distance, road.startPoint);
-			var profileEnd = A2(
-				pointToProfileCoords,
+				$ianmackenzie$elm_geometry$Point3d$zCoordinate(road.startPoint));
+			var profileEnd = A3(
+				$ianmackenzie$elm_geometry$Point3d$xyz,
 				A2($ianmackenzie$elm_units$Quantity$plus, road.trueLength, distance),
-				road.endPoint);
+				$ianmackenzie$elm_units$Quantity$zero,
+				$ianmackenzie$elm_geometry$Point3d$zCoordinate(road.endPoint));
 			var roadAsSegment = A2($ianmackenzie$elm_geometry$LineSegment3d$from, profileStart, profileEnd);
 			var gradient = $author$project$DomainModel$gradientFromNode(
 				$author$project$DomainModel$Leaf(road));
