@@ -565,7 +565,7 @@ viewPanes msgWrapper mTrack scene3d sceneProfile ( w, h ) options =
                                 context
                                 ( paneWidth, paneHeight )
                                 track
-                                scene3d
+                                sceneProfile
                                 (msgWrapper << ProfileViewMessage pane.paneId)
 
                         _ ->

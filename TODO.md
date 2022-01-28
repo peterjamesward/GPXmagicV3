@@ -7,6 +7,10 @@ BUG: Hit detect on Map is slow, sometimes very slow. (Paris to Bree).
 
 # WIP
 
+## Profile rendering
+Is just a tree walk, with accumulating distance.
+NB: the tree walker does not need to to (List a) as accumulator, `a` is better.
+
 ## Profile, Charts
 
 I have decided to retain the current 3d-scene approach with some changes:
@@ -30,7 +34,7 @@ I have decided to retain the current 3d-scene approach with some changes:
 
 Use a graduated drop off with distance, compute at each tree level?
 For each node, take minimum distance from bounding box to current.
-Set depth = (roughly) 20 - distance in km, down to 10.
+Set depth = (say) 20 - distance in km, down to 10. (Will never have 1M points.)
 
 ## Map
 
@@ -72,9 +76,15 @@ Terrain 2 = Tree walk combined with whole (visible) tree query, because <track l
 
 Put all Font, Colour etc into a Palette/Style module for ease of change.
 
+?? Move `scene(s)` into Pane Layout; they can be rendered only if visible.
+
 ## Loop detection
 
 **JB**: I have been getting a few Partner event gpx's lately that do a loop... but then continue around for say 25% of it before finishing which when a map is first loaded i do not notice until i start working on it... it would be nice if when a map is first loaded the points show a different colour when there is another course on top.. ie orange for the first lap but if it continues say red until it finishes..
+
+## Graph
+
+Oh yes. Basically sound, unless there's something I've not yet thought about.
 
 ---
 
@@ -103,10 +113,4 @@ Tauri looks interesting as we would not need node.js
 ### Non-WebGL markers?
 Use a Canvas overlay for markers?
 > Shall we test this idea with a popup, then adopt or abandon?
-(Parked as needless optimisation given apparent speed of rendering.)
-
-### New Plan view
-Not 3d, just drawing on Canvas.
-https://package.elm-lang.org/packages/joakin/elm-canvas/latest/
-Not sure, since we have the scene, so it's just orthographic view and we get free zoom & pan!
-
+(Parked as needless optimisation given apparent speed of progressive rendering.)

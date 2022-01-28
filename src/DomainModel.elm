@@ -1119,30 +1119,30 @@ enumerateEndPoints treeNode accum =
                 |> enumerateEndPoints node.left
 
 
-foldOverRoute : (RoadSection -> List a -> List a) -> PeteTree -> List a
-foldOverRoute foldFn treeNode =
+foldOverRoute : (RoadSection ->  a ->  a) -> PeteTree ->  a -> a
+foldOverRoute foldFn treeNode startValues =
     traverseTreeBetween
         0
         (skipCount treeNode)
         treeNode
         foldFn
-        []
+        startValues
 
 
 treeToRoadSectionList : PeteTree -> List RoadSection
 treeToRoadSectionList someNode =
     -- By way of example use of all-purpose traversal function,
     -- this will do the whole tree with no depth limit.
-    foldOverRoute (::) someNode
+    foldOverRoute (::) someNode []
 
 
 traverseTreeBetween :
     Int
     -> Int
     -> PeteTree
-    -> (RoadSection -> List a -> List a)
-    -> List a
-    -> List a
+    -> (RoadSection ->  a ->  a)
+    ->  a
+    ->  a
 traverseTreeBetween startingAt endingAt someNode foldFn accum =
     traverseTreeBetweenLimitsToDepth startingAt endingAt (always Nothing) 0 someNode foldFn accum
 
@@ -1153,9 +1153,9 @@ traverseTreeBetweenLimitsToDepth :
     -> (RoadSection -> Maybe Int)
     -> Int
     -> PeteTree
-    -> (RoadSection -> List a -> List a)
-    -> List a
-    -> List a
+    -> (RoadSection ->  a ->  a)
+    ->  a
+    ->  a
 traverseTreeBetweenLimitsToDepth startingAt endingAt depthFunction currentDepth thisNode foldFn accum =
     -- NOTE this does a left-right traversal and conses the road sections,
     -- so the road comes out "backwards" in terms of road segments.
@@ -1243,7 +1243,7 @@ trackPointsForOutput tree =
             }
                 :: accum
     in
-    foldOverRoute foldFn tree
+    foldOverRoute foldFn tree []
 
 
 gradientFromNode treeNode =
