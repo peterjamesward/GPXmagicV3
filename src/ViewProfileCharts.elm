@@ -138,9 +138,22 @@ view context ( givenWidth, givenHeight ) track sceneAltitude sceneGradient msgWr
         dragging =
             context.dragAction
 
-        eachViewSize =
+        splitProportion = 0.5
+
+        altitudePortion =
             ( givenWidth
-            , givenHeight |> Quantity.toFloatQuantity |> Quantity.half |> Quantity.truncate
+            , givenHeight
+                |> Quantity.toFloatQuantity
+                |> Quantity.multiplyBy splitProportion
+                |> Quantity.truncate
+            )
+
+        gradientPortion =
+            ( givenWidth
+            , givenHeight
+                |> Quantity.toFloatQuantity
+                |> Quantity.multiplyBy (1.0 - splitProportion)
+                |> Quantity.truncate
             )
     in
     column
@@ -165,7 +178,7 @@ view context ( givenWidth, givenHeight ) track sceneAltitude sceneGradient msgWr
         [ html <|
             Scene3d.unlit
                 { camera = deriveCamera track.trackTree context track.currentPosition
-                , dimensions = eachViewSize
+                , dimensions = altitudePortion
                 , background = backgroundColor Color.white
                 , clipDepth = Length.meters 1
                 , entities = sceneAltitude
@@ -173,7 +186,7 @@ view context ( givenWidth, givenHeight ) track sceneAltitude sceneGradient msgWr
         , html <|
             Scene3d.unlit
                 { camera = deriveCamera track.trackTree context track.currentPosition
-                , dimensions = eachViewSize
+                , dimensions = gradientPortion
                 , background = backgroundColor Color.white
                 , clipDepth = Length.meters 1
                 , entities = sceneGradient

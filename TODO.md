@@ -9,9 +9,10 @@ BUG: Hit detect on Map is slow, sometimes very slow. (Paris to Bree).
 
 ## Profile rendering
 
-Suggest: Use z dimension to scale vertically so we always use the space available.
-Separate WebGL for gradient? Probably cleanest.
-Follow Orange.
+Use z dimension to scale vertically so we always use the space available.
+
+BUG: Turn off follow, jumps to start.
+
 Pan.
 Zoom.
 SVG overlay scale.
