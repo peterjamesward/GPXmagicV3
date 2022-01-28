@@ -33,18 +33,6 @@ renderBoth track =
         { minX, maxX, minY, maxY, minZ, maxZ } =
             BoundingBox3d.extrema <| boundingBox track.trackTree
 
-
-        ( _, _, rangeZ ) =
-            BoundingBox3d.dimensions <| boundingBox track.trackTree
-
-        normaliseZ =
-            -- Avoid zero divide.
-            if rangeZ |> Quantity.greaterThanZero then
-                rangeZ
-
-            else
-                Length.meters 1
-
         highDetailBox =
             DomainModel.earthPointFromIndex track.currentPosition track.trackTree
                 |> BoundingBox3d.singleton

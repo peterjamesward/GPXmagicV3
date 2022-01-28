@@ -391,7 +391,7 @@ update msg msgWrapper track area context =
                         shiftVector =
                             --TODO: Find out how to do the pixel calculation. See examples?
                             Vector3d.meters
-                                ((startX - dx) * 2.0)
+                                ((startX - dx) * 1.15 ^ (22 - context.zoomLevel))
                                 0
                                 0
 

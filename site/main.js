@@ -14445,18 +14445,14 @@ var $author$project$SceneBuilderProfile$renderBoth = function (track) {
 				currentDistance,
 				$ianmackenzie$elm_units$Quantity$zero,
 				$ianmackenzie$elm_units$Length$kilometers(3))));
-	var _v0 = $ianmackenzie$elm_geometry$BoundingBox3d$dimensions(
+	var _v0 = $ianmackenzie$elm_geometry$BoundingBox3d$extrema(
 		$author$project$DomainModel$boundingBox(track.trackTree));
-	var rangeZ = _v0.c;
-	var normaliseZ = $ianmackenzie$elm_units$Quantity$greaterThanZero(rangeZ) ? rangeZ : $ianmackenzie$elm_units$Length$meters(1);
-	var _v1 = $ianmackenzie$elm_geometry$BoundingBox3d$extrema(
-		$author$project$DomainModel$boundingBox(track.trackTree));
-	var minX = _v1.minX;
-	var maxX = _v1.maxX;
-	var minY = _v1.minY;
-	var maxY = _v1.maxY;
-	var minZ = _v1.minZ;
-	var maxZ = _v1.maxZ;
+	var minX = _v0.minX;
+	var maxX = _v0.maxX;
+	var minY = _v0.minY;
+	var maxY = _v0.maxY;
+	var minZ = _v0.minZ;
+	var maxZ = _v0.maxZ;
 	var floorPlane = A2($ianmackenzie$elm_geometry$Plane3d$offsetBy, minZ, $ianmackenzie$elm_geometry$Plane3d$xy);
 	var makeAltitudeSegment = F2(
 		function (distance, road) {
@@ -14504,10 +14500,10 @@ var $author$project$SceneBuilderProfile$renderBoth = function (track) {
 				]);
 		});
 	var foldFn = F2(
-		function (road, _v3) {
-			var distance = _v3.a;
-			var altitude = _v3.b;
-			var gradient = _v3.c;
+		function (road, _v2) {
+			var distance = _v2.a;
+			var altitude = _v2.b;
+			var gradient = _v2.c;
 			return _Utils_Tuple3(
 				A2($ianmackenzie$elm_units$Quantity$plus, road.trueLength, distance),
 				_Utils_ap(
@@ -14517,7 +14513,7 @@ var $author$project$SceneBuilderProfile$renderBoth = function (track) {
 					A2(makeGradientSegment, distance, road),
 					gradient));
 		});
-	var _v2 = A7(
+	var _v1 = A7(
 		$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
 		0,
 		$author$project$DomainModel$skipCount(track.trackTree),
@@ -14526,8 +14522,8 @@ var $author$project$SceneBuilderProfile$renderBoth = function (track) {
 		track.trackTree,
 		foldFn,
 		_Utils_Tuple3($ianmackenzie$elm_units$Quantity$zero, _List_Nil, _List_Nil));
-	var altitudeScene = _v2.b;
-	var gradientScene = _v2.c;
+	var altitudeScene = _v1.b;
+	var gradientScene = _v1.c;
 	return _Utils_Tuple2(
 		A2($elm$core$List$cons, currentPosLine, altitudeScene),
 		A2($elm$core$List$cons, currentPosLine, gradientScene));
@@ -16919,7 +16915,11 @@ var $author$project$ViewProfileCharts$update = F5(
 					var _v4 = _v2.b.a;
 					var startX = _v4.a;
 					var startY = _v4.b;
-					var shiftVector = A3($ianmackenzie$elm_geometry$Vector3d$meters, (startX - dx) * 2.0, 0, 0);
+					var shiftVector = A3(
+						$ianmackenzie$elm_geometry$Vector3d$meters,
+						(startX - dx) * A2($elm$core$Basics$pow, 1.15, 22 - context.zoomLevel),
+						0,
+						0);
 					var newContext = _Utils_update(
 						context,
 						{
