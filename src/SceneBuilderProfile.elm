@@ -33,7 +33,6 @@ renderBoth track =
         { minX, maxX, minY, maxY, minZ, maxZ } =
             BoundingBox3d.extrema <| boundingBox track.trackTree
 
-        centreZ = minZ |> Quantity.plus maxZ |> Quantity.half
 
         ( _, _, rangeZ ) =
             BoundingBox3d.dimensions <| boundingBox track.trackTree
@@ -62,13 +61,13 @@ renderBoth track =
                     Point3d.xyz
                         distance
                         Quantity.zero
-                        (Point3d.zCoordinate road.startPoint)
+                        (Point3d.zCoordinate road.startPoint |> Quantity.minus minZ)
 
                 profileEnd =
                     Point3d.xyz
                         (distance |> Quantity.plus road.trueLength)
                         Quantity.zero
-                        (Point3d.zCoordinate road.endPoint)
+                        (Point3d.zCoordinate road.endPoint |> Quantity.minus minZ)
 
                 gradient =
                     DomainModel.gradientFromNode <| Leaf road

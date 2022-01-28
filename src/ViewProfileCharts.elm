@@ -15,6 +15,7 @@ import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
 import FeatherIcons
+import FlatColors.AussiePalette
 import FlatColors.ChinesePalette exposing (white)
 import Html.Attributes exposing (id)
 import Html.Events as HE
@@ -96,6 +97,9 @@ zoomButtons msgWrapper context =
         , Font.size 40
         , padding 6
         , spacing 8
+        , Border.width 1
+        , Border.rounded 4
+        , Border.color FlatColors.AussiePalette.blurple
         , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always ImageNoOp >> msgWrapper)
         , htmlAttribute <| Mouse.onWithOptions "dblclick" stopProp (always ImageNoOp >> msgWrapper)
         , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ImageNoOp >> msgWrapper)
@@ -177,7 +181,7 @@ view context ( givenWidth, givenHeight ) track sceneAltitude sceneGradient msgWr
         ]
         [ html <|
             Scene3d.unlit
-                { camera = deriveCamera track.trackTree context track.currentPosition
+                { camera = deriveAltitudeCamera track.trackTree context track.currentPosition
                 , dimensions = altitudePortion
                 , background = backgroundColor Color.white
                 , clipDepth = Length.meters 1
@@ -185,7 +189,7 @@ view context ( givenWidth, givenHeight ) track sceneAltitude sceneGradient msgWr
                 }
         , html <|
             Scene3d.unlit
-                { camera = deriveCamera track.trackTree context track.currentPosition
+                { camera = deriveGradientCamera track.trackTree context track.currentPosition
                 , dimensions = gradientPortion
                 , background = backgroundColor Color.white
                 , clipDepth = Length.meters 1
@@ -206,13 +210,53 @@ onContextMenu msg =
         |> htmlAttribute
 
 
-deriveCamera : PeteTree -> Context -> Int -> Camera3d Meters LocalCoords
-deriveCamera treeNode context currentPosition =
+deriveAltitudeCamera : PeteTree -> Context -> Int -> Camera3d Meters LocalCoords
+deriveAltitudeCamera treeNode context currentPosition =
     let
+        centre =
+            BoundingBox3d.centerPoint <| boundingBox treeNode
+
         latitude =
             effectiveLatitude <| leafFromIndex currentPosition treeNode
 
-        lookingAt =
+        altitudeLookingAt =
+            if context.followSelectedPoint then
+                Point3d.xyz
+                    (distanceFromIndex currentPosition treeNode)
+                    Quantity.zero
+                    (Point3d.zCoordinate centre)
+
+            else
+                context.focalPoint
+
+        altitudeViewpoint =
+            Viewpoint3d.orbitZ
+                { focalPoint = altitudeLookingAt
+                , azimuth = Direction2d.toAngle Direction2d.negativeY
+                , elevation = context.altitudeCameraElevation
+                , distance =
+                    --TODO: Some fudging going on here that should not be needed.
+                    Length.meters <| 20.0 * Spherical.metresPerPixel context.zoomLevel latitude
+                }
+    in
+    Camera3d.orthographic
+        { viewpoint = altitudeViewpoint
+        , viewportHeight =
+            --TODO: Work this out properly
+            Length.meters 1000.0
+        }
+
+
+deriveGradientCamera : PeteTree -> Context -> Int -> Camera3d Meters LocalCoords
+deriveGradientCamera treeNode context currentPosition =
+    let
+        centre =
+            BoundingBox3d.centerPoint <| boundingBox treeNode
+
+        latitude =
+            effectiveLatitude <| leafFromIndex currentPosition treeNode
+
+        gradientLookingAt =
             if context.followSelectedPoint then
                 Point3d.xyz
                     (distanceFromIndex currentPosition treeNode)
@@ -222,18 +266,18 @@ deriveCamera treeNode context currentPosition =
             else
                 context.focalPoint
 
-        cameraViewpoint =
+        gradientViewpoint =
             Viewpoint3d.orbitZ
-                { focalPoint = lookingAt
+                { focalPoint = gradientLookingAt
                 , azimuth = Direction2d.toAngle Direction2d.negativeY
-                , elevation = context.altitudeCameraElevation
+                , elevation = context.gradientCameraElevation
                 , distance =
                     --TODO: Some fudging going on here that should not be needed.
-                    Length.meters <| 100.0 * Spherical.metresPerPixel context.zoomLevel latitude
+                    Length.meters <| 20.0 * Spherical.metresPerPixel context.zoomLevel latitude
                 }
     in
     Camera3d.orthographic
-        { viewpoint = cameraViewpoint
+        { viewpoint = gradientViewpoint
         , viewportHeight =
             --TODO: Work this out properly
             Length.meters 1000.0
@@ -248,6 +292,7 @@ detectHit :
     -> Int
 detectHit event track ( w, h ) context =
     --TODO: Simplify, using x position to find distance.
+    --TODO: Depends which pane we are in? No.
     let
         ( x, y ) =
             event.offsetPos
@@ -265,7 +310,7 @@ detectHit event track ( w, h ) context =
 
         camera =
             -- Must use same camera derivation as for the 3D model, else pointless!
-            deriveCamera track.trackTree context track.currentPosition
+            deriveAltitudeCamera track.trackTree context track.currentPosition
 
         ray =
             Camera3d.ray camera screenRectangle screenPoint
