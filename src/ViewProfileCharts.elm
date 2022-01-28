@@ -142,7 +142,8 @@ view context ( givenWidth, givenHeight ) track sceneAltitude sceneGradient msgWr
         dragging =
             context.dragAction
 
-        splitProportion = 0.5
+        splitProportion =
+            0.5
 
         altitudePortion =
             ( givenWidth
@@ -234,16 +235,12 @@ deriveAltitudeCamera treeNode context currentPosition =
                 { focalPoint = altitudeLookingAt
                 , azimuth = Direction2d.toAngle Direction2d.negativeY
                 , elevation = context.altitudeCameraElevation
-                , distance =
-                    --TODO: Some fudging going on here that should not be needed.
-                    Length.meters <| 20.0 * Spherical.metresPerPixel context.zoomLevel latitude
+                , distance = Length.kilometer
                 }
     in
     Camera3d.orthographic
         { viewpoint = altitudeViewpoint
-        , viewportHeight =
-            --TODO: Work this out properly
-            Length.meters 1000.0
+        , viewportHeight = Length.meters <| 2 ^ (22 - context.zoomLevel)
         }
 
 
@@ -278,9 +275,7 @@ deriveGradientCamera treeNode context currentPosition =
     in
     Camera3d.orthographic
         { viewpoint = gradientViewpoint
-        , viewportHeight =
-            --TODO: Work this out properly
-            Length.meters 1000.0
+        , viewportHeight = Length.meters <| 2 ^ (22 - context.zoomLevel)
         }
 
 
@@ -334,9 +329,7 @@ update msg msgWrapper track area context =
             ( { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel - 0.5 }, [] )
 
         ImageReset ->
-            ( initialiseView track.currentPosition track.trackTree
-            , []
-            )
+            ( initialiseView track.currentPosition track.trackTree, [] )
 
         ImageNoOp ->
             ( context, [] )
@@ -398,8 +391,9 @@ update msg msgWrapper track area context =
                 ( DragPan, Just ( startX, startY ) ) ->
                     let
                         shiftVector =
+                            --TODO: Find out how to do the pixel calculation. See examples?
                             Vector3d.meters
-                                ((startY - dy) * Angle.sin context.altitudeCameraElevation)
+                                ((startX - dx) * 2.0)
                                 0
                                 0
 

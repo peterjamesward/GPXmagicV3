@@ -16081,11 +16081,7 @@ var $author$project$ViewProfileCharts$DragPan = {$: 'DragPan'};
 var $author$project$DomainModel$effectiveLatitude = function (treeNode) {
 	return $author$project$DomainModel$sourceData(treeNode).a.latitude;
 };
-var $author$project$Spherical$metresPerPixelAtEquatorZoomZero = 78271.484;
-var $author$project$Spherical$metresPerPixel = F2(
-	function (zoomLevel, latitude) {
-		return ($ianmackenzie$elm_units$Angle$cos(latitude) * $author$project$Spherical$metresPerPixelAtEquatorZoomZero) / A2($elm$core$Basics$pow, 2.0, zoomLevel);
-	});
+var $ianmackenzie$elm_units$Length$kilometer = $ianmackenzie$elm_units$Length$kilometers(1);
 var $ianmackenzie$elm_geometry$Direction2d$negativeY = $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
 	{x: 0, y: -1});
 var $ianmackenzie$elm_3d_camera$Camera3d$Types$Viewpoint3d = function (a) {
@@ -16353,15 +16349,15 @@ var $author$project$ViewProfileCharts$deriveAltitudeCamera = F3(
 		var altitudeViewpoint = $ianmackenzie$elm_3d_camera$Viewpoint3d$orbitZ(
 			{
 				azimuth: $ianmackenzie$elm_geometry$Direction2d$toAngle($ianmackenzie$elm_geometry$Direction2d$negativeY),
-				distance: $ianmackenzie$elm_units$Length$meters(
-					20.0 * A2($author$project$Spherical$metresPerPixel, context.zoomLevel, latitude)),
+				distance: $ianmackenzie$elm_units$Length$kilometer,
 				elevation: context.altitudeCameraElevation,
 				focalPoint: altitudeLookingAt
 			});
 		return $ianmackenzie$elm_3d_camera$Camera3d$orthographic(
 			{
 				viewpoint: altitudeViewpoint,
-				viewportHeight: $ianmackenzie$elm_units$Length$meters(1000.0)
+				viewportHeight: $ianmackenzie$elm_units$Length$meters(
+					A2($elm$core$Basics$pow, 2, 22 - context.zoomLevel))
 			});
 	});
 var $ianmackenzie$elm_geometry$Geometry$Types$Rectangle2d = function (a) {
@@ -16829,10 +16825,6 @@ var $ianmackenzie$elm_geometry$Vector3d$meters = F3(
 		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
 			{x: x, y: y, z: z});
 	});
-var $ianmackenzie$elm_units$Angle$sin = function (_v0) {
-	var angle = _v0.a;
-	return $elm$core$Basics$sin(angle);
-};
 var $author$project$ViewProfileCharts$update = F5(
 	function (msg, msgWrapper, track, area, context) {
 		switch (msg.$) {
@@ -16927,11 +16919,7 @@ var $author$project$ViewProfileCharts$update = F5(
 					var _v4 = _v2.b.a;
 					var startX = _v4.a;
 					var startY = _v4.b;
-					var shiftVector = A3(
-						$ianmackenzie$elm_geometry$Vector3d$meters,
-						(startY - dy) * $ianmackenzie$elm_units$Angle$sin(context.altitudeCameraElevation),
-						0,
-						0);
+					var shiftVector = A3($ianmackenzie$elm_geometry$Vector3d$meters, (startX - dx) * 2.0, 0, 0);
 					var newContext = _Utils_update(
 						context,
 						{
@@ -16962,6 +16950,11 @@ var $author$project$ViewThirdPerson$ClickDelayExpired = {$: 'ClickDelayExpired'}
 var $author$project$ViewThirdPerson$DragPan = {$: 'DragPan'};
 var $author$project$ViewThirdPerson$DragRotate = {$: 'DragRotate'};
 var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$SecondButton = {$: 'SecondButton'};
+var $author$project$Spherical$metresPerPixelAtEquatorZoomZero = 78271.484;
+var $author$project$Spherical$metresPerPixel = F2(
+	function (zoomLevel, latitude) {
+		return ($ianmackenzie$elm_units$Angle$cos(latitude) * $author$project$Spherical$metresPerPixelAtEquatorZoomZero) / A2($elm$core$Basics$pow, 2.0, zoomLevel);
+	});
 var $ianmackenzie$elm_3d_camera$Camera3d$Types$Perspective = function (a) {
 	return {$: 'Perspective', a: a};
 };
@@ -17025,6 +17018,10 @@ var $ianmackenzie$elm_geometry$Vector3d$scaleBy = F2(
 		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
 			{x: k * v.x, y: k * v.y, z: k * v.z});
 	});
+var $ianmackenzie$elm_units$Angle$sin = function (_v0) {
+	var angle = _v0.a;
+	return $elm$core$Basics$sin(angle);
+};
 var $author$project$ViewThirdPerson$update = F5(
 	function (msg, msgWrapper, track, area, context) {
 		switch (msg.$) {
@@ -28588,7 +28585,8 @@ var $author$project$ViewProfileCharts$deriveGradientCamera = F3(
 		return $ianmackenzie$elm_3d_camera$Camera3d$orthographic(
 			{
 				viewpoint: gradientViewpoint,
-				viewportHeight: $ianmackenzie$elm_units$Length$meters(1000.0)
+				viewportHeight: $ianmackenzie$elm_units$Length$meters(
+					A2($elm$core$Basics$pow, 2, 22 - context.zoomLevel))
 			});
 	});
 var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$defaultOptions = {preventDefault: true, stopPropagation: false};
