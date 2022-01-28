@@ -12,9 +12,10 @@ BUG: Hit detect on Map is slow, sometimes very slow. (Paris to Bree).
 Altitude: Use z dimension to scale vertically so we always use the space available.
 
 Both: Work out camera elevation so that the range remains in display when zooming.
+> Should be easy enough if we project rays from two opposite corners.
 I.e. effect is to zoom X only.
 
-Fix click detect using X coordinate of ray.
+Fix click detect using X coordinate of ray. 
 
 SVG overlay scale.
 

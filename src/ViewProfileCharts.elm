@@ -31,6 +31,7 @@ import Point3d
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
+import SketchPlane3d
 import Spherical
 import TrackLoaded exposing (TrackLoaded)
 import Vector3d
@@ -47,14 +48,19 @@ import Viewpoint3d exposing (Viewpoint3d)
 --TODO: SVG scales overlay.
 
 
+type ClickZone
+    = ZoneAltitude
+    | ZoneGradient
+
+
 type Msg
     = ImageMouseWheel Float
     | ImageGrab Mouse.Event
     | ImageDrag Mouse.Event
     | ImageRelease Mouse.Event
     | ImageNoOp
-    | ImageClick Mouse.Event
-    | ImageDoubleClick Mouse.Event
+    | ImageClick ClickZone Mouse.Event
+    | ImageDoubleClick ClickZone Mouse.Event
     | ImageZoomIn
     | ImageZoomOut
     | ImageReset
@@ -169,8 +175,6 @@ view context ( givenWidth, givenHeight ) track sceneAltitude sceneGradient msgWr
           else
             pointer
         , htmlAttribute <| Mouse.onUp (ImageRelease >> msgWrapper)
-        , htmlAttribute <| Mouse.onClick (ImageClick >> msgWrapper)
-        , htmlAttribute <| Mouse.onDoubleClick (ImageDoubleClick >> msgWrapper)
         , htmlAttribute <| Wheel.onWheel (\event -> msgWrapper (ImageMouseWheel event.deltaY))
         , onContextMenu (msgWrapper ImageNoOp)
         , width fill
@@ -180,22 +184,32 @@ view context ( givenWidth, givenHeight ) track sceneAltitude sceneGradient msgWr
         , Border.color FlatColors.ChinesePalette.peace
         , inFront <| zoomButtons msgWrapper context
         ]
-        [ html <|
-            Scene3d.unlit
-                { camera = deriveAltitudeCamera track.trackTree context track.currentPosition
-                , dimensions = altitudePortion
-                , background = backgroundColor Color.white
-                , clipDepth = Length.meters 1
-                , entities = sceneAltitude
-                }
-        , html <|
-            Scene3d.unlit
-                { camera = deriveGradientCamera track.trackTree context track.currentPosition
-                , dimensions = gradientPortion
-                , background = backgroundColor Color.white
-                , clipDepth = Length.meters 1
-                , entities = sceneGradient
-                }
+        [ el
+            [ htmlAttribute <| Mouse.onClick (ImageClick ZoneAltitude >> msgWrapper)
+            , htmlAttribute <| Mouse.onDoubleClick (ImageDoubleClick ZoneAltitude >> msgWrapper)
+            ]
+          <|
+            html <|
+                Scene3d.unlit
+                    { camera = deriveAltitudeCamera track.trackTree context track.currentPosition
+                    , dimensions = altitudePortion
+                    , background = backgroundColor Color.white
+                    , clipDepth = Length.meters 1
+                    , entities = sceneAltitude
+                    }
+        , el
+            [ htmlAttribute <| Mouse.onClick (ImageClick ZoneGradient >> msgWrapper)
+            , htmlAttribute <| Mouse.onDoubleClick (ImageDoubleClick ZoneGradient >> msgWrapper)
+            ]
+          <|
+            html <|
+                Scene3d.unlit
+                    { camera = deriveGradientCamera track.trackTree context track.currentPosition
+                    , dimensions = gradientPortion
+                    , background = backgroundColor Color.white
+                    , clipDepth = Length.meters 1
+                    , entities = sceneGradient
+                    }
         ]
 
 
@@ -284,8 +298,6 @@ detectHit :
     -> Context
     -> Int
 detectHit event track ( w, h ) context =
-    --TODO: Simplify, using x position to find distance.
-    --TODO: Depends which pane we are in? No.
     let
         ( x, y ) =
             event.offsetPos
@@ -308,7 +320,13 @@ detectHit event track ( w, h ) context =
         ray =
             Camera3d.ray camera screenRectangle screenPoint
     in
-    nearestToRay ray track.trackTree
+    case ray |> Axis3d.intersectionWithPlane Plane3d.zx of
+        Just pointOnZX ->
+            DomainModel.indexFromDistance (Point3d.xCoordinate pointOnZX) track.trackTree
+
+        Nothing ->
+            -- Leave position unchanged; should not occur.
+            track.currentPosition
 
 
 update :
@@ -318,7 +336,28 @@ update :
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Context
     -> ( Context, List (ToolAction msg) )
-update msg msgWrapper track area context =
+update msg msgWrapper track ( givenWidth, givenHeight ) context =
+    let
+        splitProportion =
+            --TODO: Remove duplicate with `view`
+            0.5
+
+        altitudePortion =
+            ( givenWidth
+            , givenHeight
+                |> Quantity.toFloatQuantity
+                |> Quantity.multiplyBy splitProportion
+                |> Quantity.truncate
+            )
+
+        gradientPortion =
+            ( givenWidth
+            , givenHeight
+                |> Quantity.toFloatQuantity
+                |> Quantity.multiplyBy (1.0 - splitProportion)
+                |> Quantity.truncate
+            )
+    in
     case msg of
         ImageZoomIn ->
             ( { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + 0.5 }, [] )
@@ -332,8 +371,17 @@ update msg msgWrapper track area context =
         ImageNoOp ->
             ( context, [] )
 
-        ImageClick event ->
+        ImageClick zone event ->
             -- Click moves pointer but does not re-centre view. (Double click will.)
+            let
+                area =
+                    case zone of
+                        ZoneAltitude ->
+                            altitudePortion
+
+                        ZoneGradient ->
+                            gradientPortion
+            in
             if context.waitingForClickDelay then
                 ( context
                 , [ SetCurrent <| detectHit event track area context
@@ -344,8 +392,16 @@ update msg msgWrapper track area context =
             else
                 ( context, [] )
 
-        ImageDoubleClick event ->
+        ImageDoubleClick zone event ->
             let
+                area =
+                    case zone of
+                        ZoneAltitude ->
+                            altitudePortion
+
+                        ZoneGradient ->
+                            gradientPortion
+
                 nearestPoint =
                     detectHit event track area context
             in

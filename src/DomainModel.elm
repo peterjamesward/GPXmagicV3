@@ -16,6 +16,7 @@ module DomainModel exposing
     , gpxFromPointWithReference
     , gpxPointFromIndex
     , gradientFromNode
+    , indexFromDistance
     , leafFromIndex
     , lngLatPair
     , nearestToLonLat
@@ -746,6 +747,25 @@ distanceFromIndex index treeNode =
                     (distanceFromIndex (index - skipCount info.left) info.right)
 
 
+indexFromDistance : Length.Length -> PeteTree -> Int
+indexFromDistance distance treeNode =
+    case treeNode of
+        Leaf info ->
+            if distance |> Quantity.lessThanOrEqualTo (Quantity.half info.trueLength) then
+                0
+
+            else
+                1
+
+        Node info ->
+            if distance |> Quantity.lessThanOrEqualTo info.nodeContent.trueLength then
+                indexFromDistance distance info.left
+
+            else
+                skipCount info.left
+                    + indexFromDistance (distance |> Quantity.minus info.nodeContent.trueLength) info.right
+
+
 nearestToRay :
     Axis3d Meters LocalCoords
     -> PeteTree
@@ -1119,7 +1139,7 @@ enumerateEndPoints treeNode accum =
                 |> enumerateEndPoints node.left
 
 
-foldOverRoute : (RoadSection ->  a ->  a) -> PeteTree ->  a -> a
+foldOverRoute : (RoadSection -> a -> a) -> PeteTree -> a -> a
 foldOverRoute foldFn treeNode startValues =
     traverseTreeBetween
         0
@@ -1140,9 +1160,9 @@ traverseTreeBetween :
     Int
     -> Int
     -> PeteTree
-    -> (RoadSection ->  a ->  a)
-    ->  a
-    ->  a
+    -> (RoadSection -> a -> a)
+    -> a
+    -> a
 traverseTreeBetween startingAt endingAt someNode foldFn accum =
     traverseTreeBetweenLimitsToDepth startingAt endingAt (always Nothing) 0 someNode foldFn accum
 
@@ -1153,9 +1173,9 @@ traverseTreeBetweenLimitsToDepth :
     -> (RoadSection -> Maybe Int)
     -> Int
     -> PeteTree
-    -> (RoadSection ->  a ->  a)
-    ->  a
-    ->  a
+    -> (RoadSection -> a -> a)
+    -> a
+    -> a
 traverseTreeBetweenLimitsToDepth startingAt endingAt depthFunction currentDepth thisNode foldFn accum =
     -- NOTE this does a left-right traversal and conses the road sections,
     -- so the road comes out "backwards" in terms of road segments.

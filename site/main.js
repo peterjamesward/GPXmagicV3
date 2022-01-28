@@ -16420,6 +16420,504 @@ var $ianmackenzie$elm_geometry$Rectangle2d$from = F2(
 			$ianmackenzie$elm_geometry$Point2d$xCoordinate(p2),
 			$ianmackenzie$elm_geometry$Point2d$yCoordinate(p2));
 	});
+var $author$project$DomainModel$indexFromDistance = F2(
+	function (distance, treeNode) {
+		indexFromDistance:
+		while (true) {
+			if (treeNode.$ === 'Leaf') {
+				var info = treeNode.a;
+				return A2(
+					$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
+					$ianmackenzie$elm_units$Quantity$half(info.trueLength),
+					distance) ? 0 : 1;
+			} else {
+				var info = treeNode.a;
+				if (A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, info.nodeContent.trueLength, distance)) {
+					var $temp$distance = distance,
+						$temp$treeNode = info.left;
+					distance = $temp$distance;
+					treeNode = $temp$treeNode;
+					continue indexFromDistance;
+				} else {
+					return $author$project$DomainModel$skipCount(info.left) + A2(
+						$author$project$DomainModel$indexFromDistance,
+						A2($ianmackenzie$elm_units$Quantity$minus, info.nodeContent.trueLength, distance),
+						info.right);
+				}
+			}
+		}
+	});
+var $ianmackenzie$elm_geometry$Direction3d$componentIn = F2(
+	function (_v0, _v1) {
+		var d2 = _v0.a;
+		var d1 = _v1.a;
+		return ((d1.x * d2.x) + (d1.y * d2.y)) + (d1.z * d2.z);
+	});
+var $ianmackenzie$elm_units$Quantity$multiplyBy = F2(
+	function (scale, _v0) {
+		var value = _v0.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(scale * value);
+	});
+var $ianmackenzie$elm_geometry$Axis3d$originPoint = function (_v0) {
+	var axis = _v0.a;
+	return axis.originPoint;
+};
+var $ianmackenzie$elm_geometry$Point3d$signedDistanceFrom = F2(
+	function (_v0, _v1) {
+		var plane = _v0.a;
+		var p = _v1.a;
+		var _v2 = plane.originPoint;
+		var p0 = _v2.a;
+		var _v3 = plane.normalDirection;
+		var n = _v3.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity((((p.x - p0.x) * n.x) + ((p.y - p0.y) * n.y)) + ((p.z - p0.z) * n.z));
+	});
+var $ianmackenzie$elm_geometry$Point3d$translateIn = F3(
+	function (_v0, _v1, _v2) {
+		var d = _v0.a;
+		var distance = _v1.a;
+		var p = _v2.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+			{x: p.x + (distance * d.x), y: p.y + (distance * d.y), z: p.z + (distance * d.z)});
+	});
+var $ianmackenzie$elm_geometry$Axis3d$intersectionWithPlane = F2(
+	function (plane, axis) {
+		var axisDirection = $ianmackenzie$elm_geometry$Axis3d$direction(axis);
+		var _v0 = plane;
+		var normalDirection = _v0.a.normalDirection;
+		var normalComponent = A2($ianmackenzie$elm_geometry$Direction3d$componentIn, normalDirection, axisDirection);
+		if (!normalComponent) {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var axisOrigin = $ianmackenzie$elm_geometry$Axis3d$originPoint(axis);
+			var normalDistance = A2($ianmackenzie$elm_geometry$Point3d$signedDistanceFrom, plane, axisOrigin);
+			var axialDistance = A2($ianmackenzie$elm_units$Quantity$multiplyBy, (-1) / normalComponent, normalDistance);
+			return $elm$core$Maybe$Just(
+				A3($ianmackenzie$elm_geometry$Point3d$translateIn, axisDirection, axialDistance, axisOrigin));
+		}
+	});
+var $ianmackenzie$elm_geometry$Point2d$pixels = F2(
+	function (x, y) {
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point2d(
+			{x: x, y: y});
+	});
+var $ianmackenzie$elm_units$Quantity$at = F2(
+	function (_v0, _v1) {
+		var rateOfChange = _v0.a;
+		var independentValue = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(rateOfChange * independentValue);
+	});
+var $ianmackenzie$elm_geometry$Frame2d$copy = function (_v0) {
+	var properties = _v0.a;
+	return $ianmackenzie$elm_geometry$Geometry$Types$Frame2d(properties);
+};
+var $ianmackenzie$elm_geometry$Rectangle2d$axes = function (_v0) {
+	var rectangle = _v0.a;
+	return $ianmackenzie$elm_geometry$Frame2d$copy(rectangle.axes);
+};
+var $ianmackenzie$elm_geometry$Rectangle2d$dimensions = function (_v0) {
+	var rectangle = _v0.a;
+	return rectangle.dimensions;
+};
+var $ianmackenzie$elm_geometry$Vector3d$direction = function (_v0) {
+	var v = _v0.a;
+	var largestComponent = A2(
+		$elm$core$Basics$max,
+		$elm$core$Basics$abs(v.x),
+		A2(
+			$elm$core$Basics$max,
+			$elm$core$Basics$abs(v.y),
+			$elm$core$Basics$abs(v.z)));
+	if (!largestComponent) {
+		return $elm$core$Maybe$Nothing;
+	} else {
+		var scaledZ = v.z / largestComponent;
+		var scaledY = v.y / largestComponent;
+		var scaledX = v.x / largestComponent;
+		var scaledLength = $elm$core$Basics$sqrt(((scaledX * scaledX) + (scaledY * scaledY)) + (scaledZ * scaledZ));
+		return $elm$core$Maybe$Just(
+			$ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
+				{x: scaledX / scaledLength, y: scaledY / scaledLength, z: scaledZ / scaledLength}));
+	}
+};
+var $ianmackenzie$elm_units$Quantity$divideBy = F2(
+	function (divisor, _v0) {
+		var value = _v0.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(value / divisor);
+	});
+var $ianmackenzie$elm_3d_camera$Viewpoint3d$eyePoint = function (_v0) {
+	var frame = _v0.a;
+	return $ianmackenzie$elm_geometry$Frame3d$originPoint(frame);
+};
+var $ianmackenzie$elm_geometry$Direction3d$negativeZ = $ianmackenzie$elm_geometry$Direction3d$unsafe(
+	{x: 0, y: 0, z: -1});
+var $ianmackenzie$elm_units$Quantity$per = F2(
+	function (_v0, _v1) {
+		var independentValue = _v0.a;
+		var dependentValue = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(dependentValue / independentValue);
+	});
+var $ianmackenzie$elm_geometry$Direction3d$placeIn = F2(
+	function (_v0, _v1) {
+		var frame = _v0.a;
+		var d = _v1.a;
+		var _v2 = frame.zDirection;
+		var k = _v2.a;
+		var _v3 = frame.yDirection;
+		var j = _v3.a;
+		var _v4 = frame.xDirection;
+		var i = _v4.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
+			{x: ((i.x * d.x) + (j.x * d.y)) + (k.x * d.z), y: ((i.y * d.x) + (j.y * d.y)) + (k.y * d.z), z: ((i.z * d.x) + (j.z * d.y)) + (k.z * d.z)});
+	});
+var $ianmackenzie$elm_geometry$Direction3d$reverse = function (_v0) {
+	var d = _v0.a;
+	return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
+		{x: -d.x, y: -d.y, z: -d.z});
+};
+var $ianmackenzie$elm_3d_camera$Viewpoint3d$viewDirection = function (_v0) {
+	var frame = _v0.a;
+	return $ianmackenzie$elm_geometry$Direction3d$reverse(
+		$ianmackenzie$elm_geometry$Frame3d$zDirection(frame));
+};
+var $ianmackenzie$elm_geometry$Point2d$xCoordinateIn = F2(
+	function (_v0, _v1) {
+		var frame = _v0.a;
+		var p = _v1.a;
+		var _v2 = frame.originPoint;
+		var p0 = _v2.a;
+		var _v3 = frame.xDirection;
+		var d = _v3.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(((p.x - p0.x) * d.x) + ((p.y - p0.y) * d.y));
+	});
+var $ianmackenzie$elm_geometry$Vector3d$xyz = F3(
+	function (_v0, _v1, _v2) {
+		var x = _v0.a;
+		var y = _v1.a;
+		var z = _v2.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
+			{x: x, y: y, z: z});
+	});
+var $ianmackenzie$elm_geometry$Point3d$xyzIn = F4(
+	function (_v0, _v1, _v2, _v3) {
+		var frame = _v0.a;
+		var x = _v1.a;
+		var y = _v2.a;
+		var z = _v3.a;
+		var _v4 = frame.originPoint;
+		var p0 = _v4.a;
+		var _v5 = frame.zDirection;
+		var k = _v5.a;
+		var _v6 = frame.yDirection;
+		var j = _v6.a;
+		var _v7 = frame.xDirection;
+		var i = _v7.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+			{x: ((p0.x + (x * i.x)) + (y * j.x)) + (z * k.x), y: ((p0.y + (x * i.y)) + (y * j.y)) + (z * k.y), z: ((p0.z + (x * i.z)) + (y * j.z)) + (z * k.z)});
+	});
+var $ianmackenzie$elm_geometry$Point2d$yCoordinateIn = F2(
+	function (_v0, _v1) {
+		var frame = _v0.a;
+		var p = _v1.a;
+		var _v2 = frame.originPoint;
+		var p0 = _v2.a;
+		var _v3 = frame.yDirection;
+		var d = _v3.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(((p.x - p0.x) * d.x) + ((p.y - p0.y) * d.y));
+	});
+var $ianmackenzie$elm_3d_camera$Camera3d$ray = F3(
+	function (_v0, screen, point) {
+		var camera = _v0.a;
+		var screenY = A2(
+			$ianmackenzie$elm_geometry$Point2d$yCoordinateIn,
+			$ianmackenzie$elm_geometry$Rectangle2d$axes(screen),
+			point);
+		var screenX = A2(
+			$ianmackenzie$elm_geometry$Point2d$xCoordinateIn,
+			$ianmackenzie$elm_geometry$Rectangle2d$axes(screen),
+			point);
+		var _v1 = camera.viewpoint;
+		var viewpointFrame = _v1.a;
+		var _v2 = $ianmackenzie$elm_geometry$Rectangle2d$dimensions(screen);
+		var screenWidth = _v2.a;
+		var screenHeight = _v2.b;
+		var _v3 = camera.projection;
+		if (_v3.$ === 'Perspective') {
+			var frustumSlope = _v3.a;
+			var screenZ = $ianmackenzie$elm_units$Quantity$negate(
+				A2(
+					$ianmackenzie$elm_units$Quantity$divideBy,
+					frustumSlope,
+					A2($ianmackenzie$elm_units$Quantity$multiplyBy, 0.5, screenHeight)));
+			var direction = A2(
+				$ianmackenzie$elm_geometry$Direction3d$placeIn,
+				viewpointFrame,
+				A2(
+					$elm$core$Maybe$withDefault,
+					$ianmackenzie$elm_geometry$Direction3d$negativeZ,
+					$ianmackenzie$elm_geometry$Vector3d$direction(
+						A3($ianmackenzie$elm_geometry$Vector3d$xyz, screenX, screenY, screenZ))));
+			return A2(
+				$ianmackenzie$elm_geometry$Axis3d$through,
+				$ianmackenzie$elm_3d_camera$Viewpoint3d$eyePoint(camera.viewpoint),
+				direction);
+		} else {
+			var viewpointHeight = _v3.a;
+			var resolution = A2($ianmackenzie$elm_units$Quantity$per, screenHeight, viewpointHeight);
+			var origin = A4(
+				$ianmackenzie$elm_geometry$Point3d$xyzIn,
+				viewpointFrame,
+				A2($ianmackenzie$elm_units$Quantity$at, resolution, screenX),
+				A2($ianmackenzie$elm_units$Quantity$at, resolution, screenY),
+				$ianmackenzie$elm_units$Quantity$zero);
+			return A2(
+				$ianmackenzie$elm_geometry$Axis3d$through,
+				origin,
+				$ianmackenzie$elm_3d_camera$Viewpoint3d$viewDirection(camera.viewpoint));
+		}
+	});
+var $ianmackenzie$elm_geometry$Plane3d$zx = A2($ianmackenzie$elm_geometry$Plane3d$through, $ianmackenzie$elm_geometry$Point3d$origin, $ianmackenzie$elm_geometry$Direction3d$y);
+var $author$project$ViewProfileCharts$detectHit = F4(
+	function (event, track, _v0, context) {
+		var w = _v0.a;
+		var h = _v0.b;
+		var camera = A3($author$project$ViewProfileCharts$deriveAltitudeCamera, track.trackTree, context, track.currentPosition);
+		var _v1 = event.offsetPos;
+		var x = _v1.a;
+		var y = _v1.b;
+		var screenPoint = A2($ianmackenzie$elm_geometry$Point2d$pixels, x, y);
+		var _v2 = _Utils_Tuple2(
+			$ianmackenzie$elm_units$Quantity$toFloatQuantity(w),
+			$ianmackenzie$elm_units$Quantity$toFloatQuantity(h));
+		var wFloat = _v2.a;
+		var hFloat = _v2.b;
+		var screenRectangle = A2(
+			$ianmackenzie$elm_geometry$Rectangle2d$from,
+			A2($ianmackenzie$elm_geometry$Point2d$xy, $ianmackenzie$elm_units$Quantity$zero, hFloat),
+			A2($ianmackenzie$elm_geometry$Point2d$xy, wFloat, $ianmackenzie$elm_units$Quantity$zero));
+		var ray = A3($ianmackenzie$elm_3d_camera$Camera3d$ray, camera, screenRectangle, screenPoint);
+		var _v3 = A2($ianmackenzie$elm_geometry$Axis3d$intersectionWithPlane, $ianmackenzie$elm_geometry$Plane3d$zx, ray);
+		if (_v3.$ === 'Just') {
+			var pointOnZX = _v3.a;
+			return A2(
+				$author$project$DomainModel$indexFromDistance,
+				$ianmackenzie$elm_geometry$Point3d$xCoordinate(pointOnZX),
+				track.trackTree);
+		} else {
+			return track.currentPosition;
+		}
+	});
+var $ianmackenzie$elm_geometry$Vector3d$meters = F3(
+	function (x, y, z) {
+		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
+			{x: x, y: y, z: z});
+	});
+var $author$project$ViewProfileCharts$update = F5(
+	function (msg, msgWrapper, track, _v0, context) {
+		var givenWidth = _v0.a;
+		var givenHeight = _v0.b;
+		var splitProportion = 0.5;
+		var gradientPortion = _Utils_Tuple2(
+			givenWidth,
+			$ianmackenzie$elm_units$Quantity$truncate(
+				A2(
+					$ianmackenzie$elm_units$Quantity$multiplyBy,
+					1.0 - splitProportion,
+					$ianmackenzie$elm_units$Quantity$toFloatQuantity(givenHeight))));
+		var altitudePortion = _Utils_Tuple2(
+			givenWidth,
+			$ianmackenzie$elm_units$Quantity$truncate(
+				A2(
+					$ianmackenzie$elm_units$Quantity$multiplyBy,
+					splitProportion,
+					$ianmackenzie$elm_units$Quantity$toFloatQuantity(givenHeight))));
+		switch (msg.$) {
+			case 'ImageZoomIn':
+				return _Utils_Tuple2(
+					_Utils_update(
+						context,
+						{
+							zoomLevel: A3($elm$core$Basics$clamp, 0.0, 22.0, context.zoomLevel + 0.5)
+						}),
+					_List_Nil);
+			case 'ImageZoomOut':
+				return _Utils_Tuple2(
+					_Utils_update(
+						context,
+						{
+							zoomLevel: A3($elm$core$Basics$clamp, 0.0, 22.0, context.zoomLevel - 0.5)
+						}),
+					_List_Nil);
+			case 'ImageReset':
+				return _Utils_Tuple2(
+					A2($author$project$ViewProfileCharts$initialiseView, track.currentPosition, track.trackTree),
+					_List_Nil);
+			case 'ImageNoOp':
+				return _Utils_Tuple2(context, _List_Nil);
+			case 'ImageClick':
+				var zone = msg.a;
+				var event = msg.b;
+				var area = function () {
+					if (zone.$ === 'ZoneAltitude') {
+						return altitudePortion;
+					} else {
+						return gradientPortion;
+					}
+				}();
+				return context.waitingForClickDelay ? _Utils_Tuple2(
+					context,
+					_List_fromArray(
+						[
+							$author$project$Actions$SetCurrent(
+							A4($author$project$ViewProfileCharts$detectHit, event, track, area, context)),
+							$author$project$Actions$TrackHasChanged
+						])) : _Utils_Tuple2(context, _List_Nil);
+			case 'ImageDoubleClick':
+				var zone = msg.a;
+				var event = msg.b;
+				var area = function () {
+					if (zone.$ === 'ZoneAltitude') {
+						return altitudePortion;
+					} else {
+						return gradientPortion;
+					}
+				}();
+				var nearestPoint = A4($author$project$ViewProfileCharts$detectHit, event, track, area, context);
+				return _Utils_Tuple2(
+					_Utils_update(
+						context,
+						{
+							focalPoint: A2($author$project$DomainModel$earthPointFromIndex, nearestPoint, track.trackTree)
+						}),
+					_List_fromArray(
+						[
+							$author$project$Actions$SetCurrent(nearestPoint),
+							$author$project$Actions$TrackHasChanged
+						]));
+			case 'ClickDelayExpired':
+				return _Utils_Tuple2(
+					_Utils_update(
+						context,
+						{waitingForClickDelay: false}),
+					_List_Nil);
+			case 'ImageMouseWheel':
+				var deltaY = msg.a;
+				var increment = (-0.001) * deltaY;
+				return _Utils_Tuple2(
+					_Utils_update(
+						context,
+						{
+							zoomLevel: A3($elm$core$Basics$clamp, 0.0, 22.0, context.zoomLevel + increment)
+						}),
+					_List_Nil);
+			case 'ImageGrab':
+				var event = msg.a;
+				var newContext = _Utils_update(
+					context,
+					{
+						dragAction: $author$project$ViewProfileCharts$DragPan,
+						orbiting: $elm$core$Maybe$Just(event.offsetPos),
+						waitingForClickDelay: true
+					});
+				return _Utils_Tuple2(
+					newContext,
+					_List_fromArray(
+						[
+							A2(
+							$author$project$Actions$DelayMessage,
+							250,
+							msgWrapper($author$project$ViewProfileCharts$ClickDelayExpired))
+						]));
+			case 'ImageDrag':
+				var event = msg.a;
+				var _v4 = event.offsetPos;
+				var dx = _v4.a;
+				var dy = _v4.b;
+				var _v5 = _Utils_Tuple2(context.dragAction, context.orbiting);
+				if ((_v5.a.$ === 'DragPan') && (_v5.b.$ === 'Just')) {
+					var _v6 = _v5.a;
+					var _v7 = _v5.b.a;
+					var startX = _v7.a;
+					var startY = _v7.b;
+					var shiftVector = A3(
+						$ianmackenzie$elm_geometry$Vector3d$meters,
+						(startX - dx) * A2($elm$core$Basics$pow, 1.15, 22 - context.zoomLevel),
+						0,
+						0);
+					var newContext = _Utils_update(
+						context,
+						{
+							focalPoint: A2($ianmackenzie$elm_geometry$Point3d$translateBy, shiftVector, context.focalPoint),
+							orbiting: $elm$core$Maybe$Just(
+								_Utils_Tuple2(dx, dy))
+						});
+					return _Utils_Tuple2(newContext, _List_Nil);
+				} else {
+					return _Utils_Tuple2(context, _List_Nil);
+				}
+			case 'ImageRelease':
+				var event = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						context,
+						{dragAction: $author$project$ViewProfileCharts$DragNone, orbiting: $elm$core$Maybe$Nothing}),
+					_List_Nil);
+			default:
+				return _Utils_Tuple2(
+					_Utils_update(
+						context,
+						{
+							focalPoint: A2($author$project$DomainModel$earthPointFromIndex, track.currentPosition, track.trackTree),
+							followSelectedPoint: !context.followSelectedPoint
+						}),
+					_List_Nil);
+		}
+	});
+var $author$project$ViewThirdPerson$ClickDelayExpired = {$: 'ClickDelayExpired'};
+var $author$project$ViewThirdPerson$DragPan = {$: 'DragPan'};
+var $author$project$ViewThirdPerson$DragRotate = {$: 'DragRotate'};
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$SecondButton = {$: 'SecondButton'};
+var $author$project$Spherical$metresPerPixelAtEquatorZoomZero = 78271.484;
+var $author$project$Spherical$metresPerPixel = F2(
+	function (zoomLevel, latitude) {
+		return ($ianmackenzie$elm_units$Angle$cos(latitude) * $author$project$Spherical$metresPerPixelAtEquatorZoomZero) / A2($elm$core$Basics$pow, 2.0, zoomLevel);
+	});
+var $ianmackenzie$elm_3d_camera$Camera3d$Types$Perspective = function (a) {
+	return {$: 'Perspective', a: a};
+};
+var $elm$core$Basics$tan = _Basics_tan;
+var $ianmackenzie$elm_units$Angle$tan = function (_v0) {
+	var angle = _v0.a;
+	return $elm$core$Basics$tan(angle);
+};
+var $ianmackenzie$elm_3d_camera$Camera3d$perspective = function (_arguments) {
+	var halfFieldOfView = $ianmackenzie$elm_units$Quantity$half(
+		$ianmackenzie$elm_units$Quantity$abs(_arguments.verticalFieldOfView));
+	var frustumSlope = $ianmackenzie$elm_units$Angle$tan(halfFieldOfView);
+	return $ianmackenzie$elm_3d_camera$Camera3d$Types$Camera3d(
+		{
+			projection: $ianmackenzie$elm_3d_camera$Camera3d$Types$Perspective(frustumSlope),
+			viewpoint: _arguments.viewpoint
+		});
+};
+var $author$project$ViewThirdPerson$deriveCamera = F3(
+	function (treeNode, context, currentPosition) {
+		var lookingAt = context.followSelectedPoint ? $author$project$DomainModel$startPoint(
+			A2($author$project$DomainModel$leafFromIndex, currentPosition, treeNode)) : context.focalPoint;
+		var latitude = $author$project$DomainModel$effectiveLatitude(
+			A2($author$project$DomainModel$leafFromIndex, currentPosition, treeNode));
+		var cameraViewpoint = $ianmackenzie$elm_3d_camera$Viewpoint3d$orbitZ(
+			{
+				azimuth: $ianmackenzie$elm_geometry$Direction2d$toAngle(context.cameraAzimuth),
+				distance: $ianmackenzie$elm_units$Length$meters(
+					100.0 * A2($author$project$Spherical$metresPerPixel, context.zoomLevel, latitude)),
+				elevation: context.cameraElevation,
+				focalPoint: lookingAt
+			});
+		var perspectiveCamera = $ianmackenzie$elm_3d_camera$Camera3d$perspective(
+			{verticalFieldOfView: context.fieldOfView, viewpoint: cameraViewpoint});
+		return perspectiveCamera;
+	});
 var $ianmackenzie$elm_geometry$Sphere3d$centerPoint = function (_v0) {
 	var properties = _v0.a;
 	return properties.centerPoint;
@@ -16473,10 +16971,6 @@ var $ianmackenzie$elm_geometry$Vector3d$componentIn = F2(
 		var v = _v1.a;
 		return $ianmackenzie$elm_units$Quantity$Quantity(((v.x * d.x) + (v.y * d.y)) + (v.z * d.z));
 	});
-var $ianmackenzie$elm_geometry$Axis3d$originPoint = function (_v0) {
-	var axis = _v0.a;
-	return axis.originPoint;
-};
 var $ianmackenzie$elm_geometry$Axis3d$intersectionWithSphere = F2(
 	function (_v0, axis) {
 		var centerPoint = _v0.a.centerPoint;
@@ -16609,390 +17103,6 @@ var $author$project$DomainModel$nearestToRay = F2(
 				}
 			});
 		return A2(helper, treeNode, 0).a;
-	});
-var $ianmackenzie$elm_geometry$Point2d$pixels = F2(
-	function (x, y) {
-		return $ianmackenzie$elm_geometry$Geometry$Types$Point2d(
-			{x: x, y: y});
-	});
-var $ianmackenzie$elm_units$Quantity$at = F2(
-	function (_v0, _v1) {
-		var rateOfChange = _v0.a;
-		var independentValue = _v1.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(rateOfChange * independentValue);
-	});
-var $ianmackenzie$elm_geometry$Frame2d$copy = function (_v0) {
-	var properties = _v0.a;
-	return $ianmackenzie$elm_geometry$Geometry$Types$Frame2d(properties);
-};
-var $ianmackenzie$elm_geometry$Rectangle2d$axes = function (_v0) {
-	var rectangle = _v0.a;
-	return $ianmackenzie$elm_geometry$Frame2d$copy(rectangle.axes);
-};
-var $ianmackenzie$elm_geometry$Rectangle2d$dimensions = function (_v0) {
-	var rectangle = _v0.a;
-	return rectangle.dimensions;
-};
-var $ianmackenzie$elm_geometry$Vector3d$direction = function (_v0) {
-	var v = _v0.a;
-	var largestComponent = A2(
-		$elm$core$Basics$max,
-		$elm$core$Basics$abs(v.x),
-		A2(
-			$elm$core$Basics$max,
-			$elm$core$Basics$abs(v.y),
-			$elm$core$Basics$abs(v.z)));
-	if (!largestComponent) {
-		return $elm$core$Maybe$Nothing;
-	} else {
-		var scaledZ = v.z / largestComponent;
-		var scaledY = v.y / largestComponent;
-		var scaledX = v.x / largestComponent;
-		var scaledLength = $elm$core$Basics$sqrt(((scaledX * scaledX) + (scaledY * scaledY)) + (scaledZ * scaledZ));
-		return $elm$core$Maybe$Just(
-			$ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
-				{x: scaledX / scaledLength, y: scaledY / scaledLength, z: scaledZ / scaledLength}));
-	}
-};
-var $ianmackenzie$elm_units$Quantity$divideBy = F2(
-	function (divisor, _v0) {
-		var value = _v0.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(value / divisor);
-	});
-var $ianmackenzie$elm_3d_camera$Viewpoint3d$eyePoint = function (_v0) {
-	var frame = _v0.a;
-	return $ianmackenzie$elm_geometry$Frame3d$originPoint(frame);
-};
-var $ianmackenzie$elm_units$Quantity$multiplyBy = F2(
-	function (scale, _v0) {
-		var value = _v0.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(scale * value);
-	});
-var $ianmackenzie$elm_geometry$Direction3d$negativeZ = $ianmackenzie$elm_geometry$Direction3d$unsafe(
-	{x: 0, y: 0, z: -1});
-var $ianmackenzie$elm_units$Quantity$per = F2(
-	function (_v0, _v1) {
-		var independentValue = _v0.a;
-		var dependentValue = _v1.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(dependentValue / independentValue);
-	});
-var $ianmackenzie$elm_geometry$Direction3d$placeIn = F2(
-	function (_v0, _v1) {
-		var frame = _v0.a;
-		var d = _v1.a;
-		var _v2 = frame.zDirection;
-		var k = _v2.a;
-		var _v3 = frame.yDirection;
-		var j = _v3.a;
-		var _v4 = frame.xDirection;
-		var i = _v4.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
-			{x: ((i.x * d.x) + (j.x * d.y)) + (k.x * d.z), y: ((i.y * d.x) + (j.y * d.y)) + (k.y * d.z), z: ((i.z * d.x) + (j.z * d.y)) + (k.z * d.z)});
-	});
-var $ianmackenzie$elm_geometry$Direction3d$reverse = function (_v0) {
-	var d = _v0.a;
-	return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
-		{x: -d.x, y: -d.y, z: -d.z});
-};
-var $ianmackenzie$elm_3d_camera$Viewpoint3d$viewDirection = function (_v0) {
-	var frame = _v0.a;
-	return $ianmackenzie$elm_geometry$Direction3d$reverse(
-		$ianmackenzie$elm_geometry$Frame3d$zDirection(frame));
-};
-var $ianmackenzie$elm_geometry$Point2d$xCoordinateIn = F2(
-	function (_v0, _v1) {
-		var frame = _v0.a;
-		var p = _v1.a;
-		var _v2 = frame.originPoint;
-		var p0 = _v2.a;
-		var _v3 = frame.xDirection;
-		var d = _v3.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(((p.x - p0.x) * d.x) + ((p.y - p0.y) * d.y));
-	});
-var $ianmackenzie$elm_geometry$Vector3d$xyz = F3(
-	function (_v0, _v1, _v2) {
-		var x = _v0.a;
-		var y = _v1.a;
-		var z = _v2.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
-			{x: x, y: y, z: z});
-	});
-var $ianmackenzie$elm_geometry$Point3d$xyzIn = F4(
-	function (_v0, _v1, _v2, _v3) {
-		var frame = _v0.a;
-		var x = _v1.a;
-		var y = _v2.a;
-		var z = _v3.a;
-		var _v4 = frame.originPoint;
-		var p0 = _v4.a;
-		var _v5 = frame.zDirection;
-		var k = _v5.a;
-		var _v6 = frame.yDirection;
-		var j = _v6.a;
-		var _v7 = frame.xDirection;
-		var i = _v7.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
-			{x: ((p0.x + (x * i.x)) + (y * j.x)) + (z * k.x), y: ((p0.y + (x * i.y)) + (y * j.y)) + (z * k.y), z: ((p0.z + (x * i.z)) + (y * j.z)) + (z * k.z)});
-	});
-var $ianmackenzie$elm_geometry$Point2d$yCoordinateIn = F2(
-	function (_v0, _v1) {
-		var frame = _v0.a;
-		var p = _v1.a;
-		var _v2 = frame.originPoint;
-		var p0 = _v2.a;
-		var _v3 = frame.yDirection;
-		var d = _v3.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(((p.x - p0.x) * d.x) + ((p.y - p0.y) * d.y));
-	});
-var $ianmackenzie$elm_3d_camera$Camera3d$ray = F3(
-	function (_v0, screen, point) {
-		var camera = _v0.a;
-		var screenY = A2(
-			$ianmackenzie$elm_geometry$Point2d$yCoordinateIn,
-			$ianmackenzie$elm_geometry$Rectangle2d$axes(screen),
-			point);
-		var screenX = A2(
-			$ianmackenzie$elm_geometry$Point2d$xCoordinateIn,
-			$ianmackenzie$elm_geometry$Rectangle2d$axes(screen),
-			point);
-		var _v1 = camera.viewpoint;
-		var viewpointFrame = _v1.a;
-		var _v2 = $ianmackenzie$elm_geometry$Rectangle2d$dimensions(screen);
-		var screenWidth = _v2.a;
-		var screenHeight = _v2.b;
-		var _v3 = camera.projection;
-		if (_v3.$ === 'Perspective') {
-			var frustumSlope = _v3.a;
-			var screenZ = $ianmackenzie$elm_units$Quantity$negate(
-				A2(
-					$ianmackenzie$elm_units$Quantity$divideBy,
-					frustumSlope,
-					A2($ianmackenzie$elm_units$Quantity$multiplyBy, 0.5, screenHeight)));
-			var direction = A2(
-				$ianmackenzie$elm_geometry$Direction3d$placeIn,
-				viewpointFrame,
-				A2(
-					$elm$core$Maybe$withDefault,
-					$ianmackenzie$elm_geometry$Direction3d$negativeZ,
-					$ianmackenzie$elm_geometry$Vector3d$direction(
-						A3($ianmackenzie$elm_geometry$Vector3d$xyz, screenX, screenY, screenZ))));
-			return A2(
-				$ianmackenzie$elm_geometry$Axis3d$through,
-				$ianmackenzie$elm_3d_camera$Viewpoint3d$eyePoint(camera.viewpoint),
-				direction);
-		} else {
-			var viewpointHeight = _v3.a;
-			var resolution = A2($ianmackenzie$elm_units$Quantity$per, screenHeight, viewpointHeight);
-			var origin = A4(
-				$ianmackenzie$elm_geometry$Point3d$xyzIn,
-				viewpointFrame,
-				A2($ianmackenzie$elm_units$Quantity$at, resolution, screenX),
-				A2($ianmackenzie$elm_units$Quantity$at, resolution, screenY),
-				$ianmackenzie$elm_units$Quantity$zero);
-			return A2(
-				$ianmackenzie$elm_geometry$Axis3d$through,
-				origin,
-				$ianmackenzie$elm_3d_camera$Viewpoint3d$viewDirection(camera.viewpoint));
-		}
-	});
-var $author$project$ViewProfileCharts$detectHit = F4(
-	function (event, track, _v0, context) {
-		var w = _v0.a;
-		var h = _v0.b;
-		var camera = A3($author$project$ViewProfileCharts$deriveAltitudeCamera, track.trackTree, context, track.currentPosition);
-		var _v1 = event.offsetPos;
-		var x = _v1.a;
-		var y = _v1.b;
-		var screenPoint = A2($ianmackenzie$elm_geometry$Point2d$pixels, x, y);
-		var _v2 = _Utils_Tuple2(
-			$ianmackenzie$elm_units$Quantity$toFloatQuantity(w),
-			$ianmackenzie$elm_units$Quantity$toFloatQuantity(h));
-		var wFloat = _v2.a;
-		var hFloat = _v2.b;
-		var screenRectangle = A2(
-			$ianmackenzie$elm_geometry$Rectangle2d$from,
-			A2($ianmackenzie$elm_geometry$Point2d$xy, $ianmackenzie$elm_units$Quantity$zero, hFloat),
-			A2($ianmackenzie$elm_geometry$Point2d$xy, wFloat, $ianmackenzie$elm_units$Quantity$zero));
-		var ray = A3($ianmackenzie$elm_3d_camera$Camera3d$ray, camera, screenRectangle, screenPoint);
-		return A2($author$project$DomainModel$nearestToRay, ray, track.trackTree);
-	});
-var $ianmackenzie$elm_geometry$Vector3d$meters = F3(
-	function (x, y, z) {
-		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
-			{x: x, y: y, z: z});
-	});
-var $author$project$ViewProfileCharts$update = F5(
-	function (msg, msgWrapper, track, area, context) {
-		switch (msg.$) {
-			case 'ImageZoomIn':
-				return _Utils_Tuple2(
-					_Utils_update(
-						context,
-						{
-							zoomLevel: A3($elm$core$Basics$clamp, 0.0, 22.0, context.zoomLevel + 0.5)
-						}),
-					_List_Nil);
-			case 'ImageZoomOut':
-				return _Utils_Tuple2(
-					_Utils_update(
-						context,
-						{
-							zoomLevel: A3($elm$core$Basics$clamp, 0.0, 22.0, context.zoomLevel - 0.5)
-						}),
-					_List_Nil);
-			case 'ImageReset':
-				return _Utils_Tuple2(
-					A2($author$project$ViewProfileCharts$initialiseView, track.currentPosition, track.trackTree),
-					_List_Nil);
-			case 'ImageNoOp':
-				return _Utils_Tuple2(context, _List_Nil);
-			case 'ImageClick':
-				var event = msg.a;
-				return context.waitingForClickDelay ? _Utils_Tuple2(
-					context,
-					_List_fromArray(
-						[
-							$author$project$Actions$SetCurrent(
-							A4($author$project$ViewProfileCharts$detectHit, event, track, area, context)),
-							$author$project$Actions$TrackHasChanged
-						])) : _Utils_Tuple2(context, _List_Nil);
-			case 'ImageDoubleClick':
-				var event = msg.a;
-				var nearestPoint = A4($author$project$ViewProfileCharts$detectHit, event, track, area, context);
-				return _Utils_Tuple2(
-					_Utils_update(
-						context,
-						{
-							focalPoint: A2($author$project$DomainModel$earthPointFromIndex, nearestPoint, track.trackTree)
-						}),
-					_List_fromArray(
-						[
-							$author$project$Actions$SetCurrent(nearestPoint),
-							$author$project$Actions$TrackHasChanged
-						]));
-			case 'ClickDelayExpired':
-				return _Utils_Tuple2(
-					_Utils_update(
-						context,
-						{waitingForClickDelay: false}),
-					_List_Nil);
-			case 'ImageMouseWheel':
-				var deltaY = msg.a;
-				var increment = (-0.001) * deltaY;
-				return _Utils_Tuple2(
-					_Utils_update(
-						context,
-						{
-							zoomLevel: A3($elm$core$Basics$clamp, 0.0, 22.0, context.zoomLevel + increment)
-						}),
-					_List_Nil);
-			case 'ImageGrab':
-				var event = msg.a;
-				var newContext = _Utils_update(
-					context,
-					{
-						dragAction: $author$project$ViewProfileCharts$DragPan,
-						orbiting: $elm$core$Maybe$Just(event.offsetPos),
-						waitingForClickDelay: true
-					});
-				return _Utils_Tuple2(
-					newContext,
-					_List_fromArray(
-						[
-							A2(
-							$author$project$Actions$DelayMessage,
-							250,
-							msgWrapper($author$project$ViewProfileCharts$ClickDelayExpired))
-						]));
-			case 'ImageDrag':
-				var event = msg.a;
-				var _v1 = event.offsetPos;
-				var dx = _v1.a;
-				var dy = _v1.b;
-				var _v2 = _Utils_Tuple2(context.dragAction, context.orbiting);
-				if ((_v2.a.$ === 'DragPan') && (_v2.b.$ === 'Just')) {
-					var _v3 = _v2.a;
-					var _v4 = _v2.b.a;
-					var startX = _v4.a;
-					var startY = _v4.b;
-					var shiftVector = A3(
-						$ianmackenzie$elm_geometry$Vector3d$meters,
-						(startX - dx) * A2($elm$core$Basics$pow, 1.15, 22 - context.zoomLevel),
-						0,
-						0);
-					var newContext = _Utils_update(
-						context,
-						{
-							focalPoint: A2($ianmackenzie$elm_geometry$Point3d$translateBy, shiftVector, context.focalPoint),
-							orbiting: $elm$core$Maybe$Just(
-								_Utils_Tuple2(dx, dy))
-						});
-					return _Utils_Tuple2(newContext, _List_Nil);
-				} else {
-					return _Utils_Tuple2(context, _List_Nil);
-				}
-			case 'ImageRelease':
-				var event = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						context,
-						{dragAction: $author$project$ViewProfileCharts$DragNone, orbiting: $elm$core$Maybe$Nothing}),
-					_List_Nil);
-			default:
-				return _Utils_Tuple2(
-					_Utils_update(
-						context,
-						{
-							focalPoint: A2($author$project$DomainModel$earthPointFromIndex, track.currentPosition, track.trackTree),
-							followSelectedPoint: !context.followSelectedPoint
-						}),
-					_List_Nil);
-		}
-	});
-var $author$project$ViewThirdPerson$ClickDelayExpired = {$: 'ClickDelayExpired'};
-var $author$project$ViewThirdPerson$DragPan = {$: 'DragPan'};
-var $author$project$ViewThirdPerson$DragRotate = {$: 'DragRotate'};
-var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$SecondButton = {$: 'SecondButton'};
-var $author$project$Spherical$metresPerPixelAtEquatorZoomZero = 78271.484;
-var $author$project$Spherical$metresPerPixel = F2(
-	function (zoomLevel, latitude) {
-		return ($ianmackenzie$elm_units$Angle$cos(latitude) * $author$project$Spherical$metresPerPixelAtEquatorZoomZero) / A2($elm$core$Basics$pow, 2.0, zoomLevel);
-	});
-var $ianmackenzie$elm_3d_camera$Camera3d$Types$Perspective = function (a) {
-	return {$: 'Perspective', a: a};
-};
-var $elm$core$Basics$tan = _Basics_tan;
-var $ianmackenzie$elm_units$Angle$tan = function (_v0) {
-	var angle = _v0.a;
-	return $elm$core$Basics$tan(angle);
-};
-var $ianmackenzie$elm_3d_camera$Camera3d$perspective = function (_arguments) {
-	var halfFieldOfView = $ianmackenzie$elm_units$Quantity$half(
-		$ianmackenzie$elm_units$Quantity$abs(_arguments.verticalFieldOfView));
-	var frustumSlope = $ianmackenzie$elm_units$Angle$tan(halfFieldOfView);
-	return $ianmackenzie$elm_3d_camera$Camera3d$Types$Camera3d(
-		{
-			projection: $ianmackenzie$elm_3d_camera$Camera3d$Types$Perspective(frustumSlope),
-			viewpoint: _arguments.viewpoint
-		});
-};
-var $author$project$ViewThirdPerson$deriveCamera = F3(
-	function (treeNode, context, currentPosition) {
-		var lookingAt = context.followSelectedPoint ? $author$project$DomainModel$startPoint(
-			A2($author$project$DomainModel$leafFromIndex, currentPosition, treeNode)) : context.focalPoint;
-		var latitude = $author$project$DomainModel$effectiveLatitude(
-			A2($author$project$DomainModel$leafFromIndex, currentPosition, treeNode));
-		var cameraViewpoint = $ianmackenzie$elm_3d_camera$Viewpoint3d$orbitZ(
-			{
-				azimuth: $ianmackenzie$elm_geometry$Direction2d$toAngle(context.cameraAzimuth),
-				distance: $ianmackenzie$elm_units$Length$meters(
-					100.0 * A2($author$project$Spherical$metresPerPixel, context.zoomLevel, latitude)),
-				elevation: context.cameraElevation,
-				focalPoint: lookingAt
-			});
-		var perspectiveCamera = $ianmackenzie$elm_3d_camera$Camera3d$perspective(
-			{verticalFieldOfView: context.fieldOfView, viewpoint: cameraViewpoint});
-		return perspectiveCamera;
 	});
 var $author$project$ViewThirdPerson$detectHit = F4(
 	function (event, track, _v0, context) {
@@ -28541,12 +28651,14 @@ var $author$project$ViewMap$view = F3(
 					]));
 		}
 	});
-var $author$project$ViewProfileCharts$ImageClick = function (a) {
-	return {$: 'ImageClick', a: a};
-};
-var $author$project$ViewProfileCharts$ImageDoubleClick = function (a) {
-	return {$: 'ImageDoubleClick', a: a};
-};
+var $author$project$ViewProfileCharts$ImageClick = F2(
+	function (a, b) {
+		return {$: 'ImageClick', a: a, b: b};
+	});
+var $author$project$ViewProfileCharts$ImageDoubleClick = F2(
+	function (a, b) {
+		return {$: 'ImageDoubleClick', a: a, b: b};
+	});
 var $author$project$ViewProfileCharts$ImageDrag = function (a) {
 	return {$: 'ImageDrag', a: a};
 };
@@ -28560,6 +28672,8 @@ var $author$project$ViewProfileCharts$ImageNoOp = {$: 'ImageNoOp'};
 var $author$project$ViewProfileCharts$ImageRelease = function (a) {
 	return {$: 'ImageRelease', a: a};
 };
+var $author$project$ViewProfileCharts$ZoneAltitude = {$: 'ZoneAltitude'};
+var $author$project$ViewProfileCharts$ZoneGradient = {$: 'ZoneGradient'};
 var $ianmackenzie$elm_3d_scene$Scene3d$BackgroundColor = function (a) {
 	return {$: 'BackgroundColor', a: a};
 };
@@ -29878,12 +29992,6 @@ var $author$project$ViewProfileCharts$view = F6(
 					$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onUp(
 						A2($elm$core$Basics$composeR, $author$project$ViewProfileCharts$ImageRelease, msgWrapper))),
 					$mdgriffith$elm_ui$Element$htmlAttribute(
-					$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onClick(
-						A2($elm$core$Basics$composeR, $author$project$ViewProfileCharts$ImageClick, msgWrapper))),
-					$mdgriffith$elm_ui$Element$htmlAttribute(
-					$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onDoubleClick(
-						A2($elm$core$Basics$composeR, $author$project$ViewProfileCharts$ImageDoubleClick, msgWrapper))),
-					$mdgriffith$elm_ui$Element$htmlAttribute(
 					$mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWheel(
 						function (event) {
 							return msgWrapper(
@@ -29901,24 +30009,58 @@ var $author$project$ViewProfileCharts$view = F6(
 				]),
 			_List_fromArray(
 				[
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$htmlAttribute(
+							$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onClick(
+								A2(
+									$elm$core$Basics$composeR,
+									$author$project$ViewProfileCharts$ImageClick($author$project$ViewProfileCharts$ZoneAltitude),
+									msgWrapper))),
+							$mdgriffith$elm_ui$Element$htmlAttribute(
+							$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onDoubleClick(
+								A2(
+									$elm$core$Basics$composeR,
+									$author$project$ViewProfileCharts$ImageDoubleClick($author$project$ViewProfileCharts$ZoneAltitude),
+									msgWrapper)))
+						]),
 					$mdgriffith$elm_ui$Element$html(
-					$ianmackenzie$elm_3d_scene$Scene3d$unlit(
-						{
-							background: $ianmackenzie$elm_3d_scene$Scene3d$backgroundColor($avh4$elm_color$Color$white),
-							camera: A3($author$project$ViewProfileCharts$deriveAltitudeCamera, track.trackTree, context, track.currentPosition),
-							clipDepth: $ianmackenzie$elm_units$Length$meters(1),
-							dimensions: altitudePortion,
-							entities: sceneAltitude
-						})),
+						$ianmackenzie$elm_3d_scene$Scene3d$unlit(
+							{
+								background: $ianmackenzie$elm_3d_scene$Scene3d$backgroundColor($avh4$elm_color$Color$white),
+								camera: A3($author$project$ViewProfileCharts$deriveAltitudeCamera, track.trackTree, context, track.currentPosition),
+								clipDepth: $ianmackenzie$elm_units$Length$meters(1),
+								dimensions: altitudePortion,
+								entities: sceneAltitude
+							}))),
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$htmlAttribute(
+							$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onClick(
+								A2(
+									$elm$core$Basics$composeR,
+									$author$project$ViewProfileCharts$ImageClick($author$project$ViewProfileCharts$ZoneGradient),
+									msgWrapper))),
+							$mdgriffith$elm_ui$Element$htmlAttribute(
+							$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onDoubleClick(
+								A2(
+									$elm$core$Basics$composeR,
+									$author$project$ViewProfileCharts$ImageDoubleClick($author$project$ViewProfileCharts$ZoneGradient),
+									msgWrapper)))
+						]),
 					$mdgriffith$elm_ui$Element$html(
-					$ianmackenzie$elm_3d_scene$Scene3d$unlit(
-						{
-							background: $ianmackenzie$elm_3d_scene$Scene3d$backgroundColor($avh4$elm_color$Color$white),
-							camera: A3($author$project$ViewProfileCharts$deriveGradientCamera, track.trackTree, context, track.currentPosition),
-							clipDepth: $ianmackenzie$elm_units$Length$meters(1),
-							dimensions: gradientPortion,
-							entities: sceneGradient
-						}))
+						$ianmackenzie$elm_3d_scene$Scene3d$unlit(
+							{
+								background: $ianmackenzie$elm_3d_scene$Scene3d$backgroundColor($avh4$elm_color$Color$white),
+								camera: A3($author$project$ViewProfileCharts$deriveGradientCamera, track.trackTree, context, track.currentPosition),
+								clipDepth: $ianmackenzie$elm_units$Length$meters(1),
+								dimensions: gradientPortion,
+								entities: sceneGradient
+							})))
 				]));
 	});
 var $author$project$ViewThirdPerson$ImageClick = function (a) {
