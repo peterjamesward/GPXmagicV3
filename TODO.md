@@ -9,27 +9,16 @@ BUG: Hit detect on Map is slow, sometimes very slow. (Paris to Bree).
 
 ## Profile rendering
 
-Use z dimension to scale vertically so we always use the space available.
-Separate cameras for gradient.
+Altitude: Use z dimension to scale vertically so we always use the space available.
+
+Both: Work out camera elevation so that the range remains in display when zooming.
+I.e. effect is to zoom X only.
 
 BUG: Turn off follow, jumps to start.
 
-Pan.
-Zoom.
+Fix click detect using X coordinate of ray.
+
 SVG overlay scale.
-(NB, should really have a distinct type for profile coordinates.)
-
-## Profile, Charts
-
-I have decided to retain the current 3d-scene approach with some changes:
-
-- Colour to look more like a conventional plot - lines and subtle shading.
-- Two views: one for altitude, one for gradient;
-- Show current as vertical orange line, through both views;
-- When zooming, decline the camera so that the vertical scale remains the same (!);
-- Track box diagonal to work out visible area;
-- Use visible area to create an SVG scales overlay;
-- Further SVG overlay for current point details.
 
 ---
 

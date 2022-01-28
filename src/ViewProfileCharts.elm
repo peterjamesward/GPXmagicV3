@@ -268,9 +268,7 @@ deriveGradientCamera treeNode context currentPosition =
                 { focalPoint = gradientLookingAt
                 , azimuth = Direction2d.toAngle Direction2d.negativeY
                 , elevation = context.gradientCameraElevation
-                , distance =
-                    --TODO: Some fudging going on here that should not be needed.
-                    Length.meters <| 20.0 * Spherical.metresPerPixel context.zoomLevel latitude
+                , distance = Length.kilometer
                 }
     in
     Camera3d.orthographic

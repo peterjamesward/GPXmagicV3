@@ -28575,8 +28575,7 @@ var $author$project$ViewProfileCharts$deriveGradientCamera = F3(
 		var gradientViewpoint = $ianmackenzie$elm_3d_camera$Viewpoint3d$orbitZ(
 			{
 				azimuth: $ianmackenzie$elm_geometry$Direction2d$toAngle($ianmackenzie$elm_geometry$Direction2d$negativeY),
-				distance: $ianmackenzie$elm_units$Length$meters(
-					20.0 * A2($author$project$Spherical$metresPerPixel, context.zoomLevel, latitude)),
+				distance: $ianmackenzie$elm_units$Length$kilometer,
 				elevation: context.gradientCameraElevation,
 				focalPoint: gradientLookingAt
 			});
