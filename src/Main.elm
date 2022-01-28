@@ -262,7 +262,7 @@ render model =
             in
             { model
                 | scene3d = renderedPreviews ++ renderedTrack
-                , sceneProfile = SceneBuilderProfile.render track
+                , sceneProfile = SceneBuilderProfile.renderAltitude track
             }
 
         Nothing ->

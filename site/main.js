@@ -10375,7 +10375,7 @@ var $author$project$DomainModel$startPoint = function (treeNode) {
 var $author$project$ViewProfileCharts$initialiseView = F2(
 	function (current, treeNode) {
 		return {
-			altitudeCameraElevation: $ianmackenzie$elm_units$Angle$degrees(30),
+			altitudeCameraElevation: $ianmackenzie$elm_units$Angle$degrees(0),
 			cameraDistance: $ianmackenzie$elm_units$Length$kilometers(10),
 			defaultZoomLevel: 10.0,
 			dragAction: $author$project$ViewProfileCharts$DragNone,
@@ -10383,7 +10383,7 @@ var $author$project$ViewProfileCharts$initialiseView = F2(
 			focalPoint: $author$project$DomainModel$startPoint(
 				A2($author$project$DomainModel$leafFromIndex, current, treeNode)),
 			followSelectedPoint: false,
-			gradientCameraElevation: $ianmackenzie$elm_units$Angle$degrees(30),
+			gradientCameraElevation: $ianmackenzie$elm_units$Angle$degrees(0),
 			orbiting: $elm$core$Maybe$Nothing,
 			waitingForClickDelay: false,
 			zoomLevel: 10.0
@@ -12856,6 +12856,7 @@ var $avh4$elm_color$Color$RgbaSpace = F4(
 		return {$: 'RgbaSpace', a: a, b: b, c: c, d: d};
 	});
 var $avh4$elm_color$Color$black = A4($avh4$elm_color$Color$RgbaSpace, 0 / 255, 0 / 255, 0 / 255, 1.0);
+var $smucode$elm_flat_colors$FlatColors$AussiePalette$blurple = A3($mdgriffith$elm_ui$Element$rgb255, 72, 52, 212);
 var $ianmackenzie$elm_3d_scene$Scene3d$Types$Constant = function (a) {
 	return {$: 'Constant', a: a};
 };
@@ -12891,43 +12892,6 @@ var $ianmackenzie$elm_geometry$LineSegment3d$endPoint = function (_v0) {
 	var end = _v1.b;
 	return end;
 };
-var $ianmackenzie$elm_geometry$BoundingBox3d$unsafeOffsetBy = F2(
-	function (amount, boundingBox) {
-		return $ianmackenzie$elm_geometry$Geometry$Types$BoundingBox3d(
-			{
-				maxX: A2(
-					$ianmackenzie$elm_units$Quantity$plus,
-					amount,
-					$ianmackenzie$elm_geometry$BoundingBox3d$maxX(boundingBox)),
-				maxY: A2(
-					$ianmackenzie$elm_units$Quantity$plus,
-					amount,
-					$ianmackenzie$elm_geometry$BoundingBox3d$maxY(boundingBox)),
-				maxZ: A2(
-					$ianmackenzie$elm_units$Quantity$plus,
-					amount,
-					$ianmackenzie$elm_geometry$BoundingBox3d$maxZ(boundingBox)),
-				minX: A2(
-					$ianmackenzie$elm_units$Quantity$minus,
-					amount,
-					$ianmackenzie$elm_geometry$BoundingBox3d$minX(boundingBox)),
-				minY: A2(
-					$ianmackenzie$elm_units$Quantity$minus,
-					amount,
-					$ianmackenzie$elm_geometry$BoundingBox3d$minY(boundingBox)),
-				minZ: A2(
-					$ianmackenzie$elm_units$Quantity$minus,
-					amount,
-					$ianmackenzie$elm_geometry$BoundingBox3d$minZ(boundingBox))
-			});
-	});
-var $ianmackenzie$elm_geometry$BoundingBox3d$expandBy = F2(
-	function (amount, boundingBox) {
-		return A2(
-			$ianmackenzie$elm_geometry$BoundingBox3d$unsafeOffsetBy,
-			$ianmackenzie$elm_units$Quantity$abs(amount),
-			boundingBox);
-	});
 var $ianmackenzie$elm_geometry$Geometry$Types$LineSegment3d = function (a) {
 	return {$: 'LineSegment3d', a: a};
 };
@@ -12939,6 +12903,9 @@ var $ianmackenzie$elm_geometry$LineSegment3d$from = F2(
 		return $ianmackenzie$elm_geometry$LineSegment3d$fromEndpoints(
 			_Utils_Tuple2(givenStartPoint, givenEndPoint));
 	});
+var $avh4$elm_color$Color$fromRgba = function (components) {
+	return A4($avh4$elm_color$Color$RgbaSpace, components.red, components.green, components.blue, components.alpha);
+};
 var $elm$core$Basics$clamp = F3(
 	function (low, high, number) {
 		return (_Utils_cmp(number, low) < 0) ? low : ((_Utils_cmp(number, high) > 0) ? high : number);
@@ -12993,7 +12960,7 @@ var $avh4$elm_color$Color$hsl = F3(
 	function (h, s, l) {
 		return A4($avh4$elm_color$Color$hsla, h, s, l, 1.0);
 	});
-var $author$project$SceneBuilderProfile$gradientColourPastel = function (slope) {
+var $author$project$SceneBuilder3D$gradientColourPastel = function (slope) {
 	return A3(
 		$avh4$elm_color$Color$hsl,
 		$author$project$ColourPalette$gradientHue(slope),
@@ -13017,6 +12984,7 @@ var $author$project$DomainModel$gradientFromNode = function (treeNode) {
 				$author$project$DomainModel$endPoint(treeNode))),
 		$author$project$DomainModel$trueLength(treeNode));
 };
+var $avh4$elm_color$Color$lightOrange = A4($avh4$elm_color$Color$RgbaSpace, 252 / 255, 175 / 255, 62 / 255, 1.0);
 var $ianmackenzie$elm_3d_scene$Scene3d$Types$Entity = function (a) {
 	return {$: 'Entity', a: a};
 };
@@ -14218,97 +14186,6 @@ var $ianmackenzie$elm_geometry$Direction3d$positiveZ = $ianmackenzie$elm_geometr
 	{x: 0, y: 0, z: 1});
 var $ianmackenzie$elm_geometry$Direction3d$z = $ianmackenzie$elm_geometry$Direction3d$positiveZ;
 var $ianmackenzie$elm_geometry$Plane3d$xy = A2($ianmackenzie$elm_geometry$Plane3d$through, $ianmackenzie$elm_geometry$Point3d$origin, $ianmackenzie$elm_geometry$Direction3d$z);
-var $author$project$SceneBuilderProfile$render = function (track) {
-	var highDetailBox = A2(
-		$ianmackenzie$elm_geometry$BoundingBox3d$expandBy,
-		$ianmackenzie$elm_units$Length$kilometers(4),
-		$ianmackenzie$elm_geometry$BoundingBox3d$singleton(
-			A2($author$project$DomainModel$earthPointFromIndex, track.currentPosition, track.trackTree)));
-	var mediumDetailBox = A2(
-		$ianmackenzie$elm_geometry$BoundingBox3d$expandBy,
-		$ianmackenzie$elm_units$Length$kilometers(4),
-		highDetailBox);
-	var floorPlane = A2(
-		$ianmackenzie$elm_geometry$Plane3d$offsetBy,
-		$ianmackenzie$elm_geometry$BoundingBox3d$minZ(
-			$author$project$DomainModel$boundingBox(track.trackTree)),
-		$ianmackenzie$elm_geometry$Plane3d$xy);
-	var makeVisibleSegment = F2(
-		function (distance, road) {
-			var profileStart = A3(
-				$ianmackenzie$elm_geometry$Point3d$xyz,
-				distance,
-				$ianmackenzie$elm_units$Quantity$zero,
-				$ianmackenzie$elm_geometry$Point3d$zCoordinate(road.startPoint));
-			var profileEnd = A3(
-				$ianmackenzie$elm_geometry$Point3d$xyz,
-				A2($ianmackenzie$elm_units$Quantity$plus, road.trueLength, distance),
-				$ianmackenzie$elm_units$Quantity$zero,
-				$ianmackenzie$elm_geometry$Point3d$zCoordinate(road.endPoint));
-			var roadAsSegment = A2($ianmackenzie$elm_geometry$LineSegment3d$from, profileStart, profileEnd);
-			var gradient = $author$project$DomainModel$gradientFromNode(
-				$author$project$DomainModel$Leaf(road));
-			var curtainHem = A2($ianmackenzie$elm_geometry$LineSegment3d$projectOnto, floorPlane, roadAsSegment);
-			return _List_fromArray(
-				[
-					A3(
-					$ianmackenzie$elm_3d_scene$Scene3d$point,
-					{
-						radius: $ianmackenzie$elm_units$Pixels$pixels(1)
-					},
-					$ianmackenzie$elm_3d_scene$Scene3d$Material$color($avh4$elm_color$Color$black),
-					profileStart),
-					A2(
-					$ianmackenzie$elm_3d_scene$Scene3d$lineSegment,
-					$ianmackenzie$elm_3d_scene$Scene3d$Material$color($avh4$elm_color$Color$black),
-					A2($ianmackenzie$elm_geometry$LineSegment3d$from, profileStart, profileEnd)),
-					A5(
-					$ianmackenzie$elm_3d_scene$Scene3d$quad,
-					$ianmackenzie$elm_3d_scene$Scene3d$Material$color(
-						$author$project$SceneBuilderProfile$gradientColourPastel(gradient)),
-					$ianmackenzie$elm_geometry$LineSegment3d$startPoint(roadAsSegment),
-					$ianmackenzie$elm_geometry$LineSegment3d$endPoint(roadAsSegment),
-					$ianmackenzie$elm_geometry$LineSegment3d$endPoint(curtainHem),
-					$ianmackenzie$elm_geometry$LineSegment3d$startPoint(curtainHem))
-				]);
-		});
-	var foldFn = F2(
-		function (road, _v1) {
-			var distance = _v1.a;
-			var collectedEntities = _v1.b;
-			return _Utils_Tuple2(
-				A2($ianmackenzie$elm_units$Quantity$plus, road.trueLength, distance),
-				_Utils_ap(
-					A2(makeVisibleSegment, distance, road),
-					collectedEntities));
-		});
-	var depthFn = function (road) {
-		return A2($ianmackenzie$elm_geometry$BoundingBox3d$intersects, highDetailBox, road.boundingBox) ? $elm$core$Maybe$Nothing : (A2($ianmackenzie$elm_geometry$BoundingBox3d$intersects, mediumDetailBox, road.boundingBox) ? $elm$core$Maybe$Just(15) : $elm$core$Maybe$Just(10));
-	};
-	var _v0 = A7(
-		$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
-		0,
-		$author$project$DomainModel$skipCount(track.trackTree),
-		depthFn,
-		0,
-		track.trackTree,
-		foldFn,
-		_Utils_Tuple2($ianmackenzie$elm_units$Quantity$zero, _List_Nil));
-	var entities = _v0.b;
-	return entities;
-};
-var $smucode$elm_flat_colors$FlatColors$AussiePalette$blurple = A3($mdgriffith$elm_ui$Element$rgb255, 72, 52, 212);
-var $avh4$elm_color$Color$fromRgba = function (components) {
-	return A4($avh4$elm_color$Color$RgbaSpace, components.red, components.green, components.blue, components.alpha);
-};
-var $author$project$SceneBuilder3D$gradientColourPastel = function (slope) {
-	return A3(
-		$avh4$elm_color$Color$hsl,
-		$author$project$ColourPalette$gradientHue(slope),
-		0.6,
-		0.7);
-};
-var $avh4$elm_color$Color$lightOrange = A4($avh4$elm_color$Color$RgbaSpace, 252 / 255, 175 / 255, 62 / 255, 1.0);
 var $author$project$SceneBuilder3D$render3dView = function (track) {
 	var renderCurrentMarkers = _Utils_ap(
 		_List_fromArray(
@@ -14430,6 +14307,188 @@ var $author$project$SceneBuilder3D$render3dView = function (track) {
 			}
 		});
 	return A3(renderTreeSelectively, track.renderDepth, track.trackTree, renderCurrentMarkers);
+};
+var $author$project$DomainModel$distanceFromIndex = F2(
+	function (index, treeNode) {
+		distanceFromIndex:
+		while (true) {
+			if (treeNode.$ === 'Leaf') {
+				var info = treeNode.a;
+				return (index <= 0) ? $ianmackenzie$elm_units$Length$meters(0) : info.trueLength;
+			} else {
+				var info = treeNode.a;
+				if (_Utils_cmp(
+					index,
+					$author$project$DomainModel$skipCount(info.left)) < 0) {
+					var $temp$index = index,
+						$temp$treeNode = info.left;
+					index = $temp$index;
+					treeNode = $temp$treeNode;
+					continue distanceFromIndex;
+				} else {
+					return A2(
+						$ianmackenzie$elm_units$Quantity$plus,
+						info.nodeContent.trueLength,
+						A2(
+							$author$project$DomainModel$distanceFromIndex,
+							index - $author$project$DomainModel$skipCount(info.left),
+							info.right));
+				}
+			}
+		}
+	});
+var $ianmackenzie$elm_geometry$BoundingBox3d$unsafeOffsetBy = F2(
+	function (amount, boundingBox) {
+		return $ianmackenzie$elm_geometry$Geometry$Types$BoundingBox3d(
+			{
+				maxX: A2(
+					$ianmackenzie$elm_units$Quantity$plus,
+					amount,
+					$ianmackenzie$elm_geometry$BoundingBox3d$maxX(boundingBox)),
+				maxY: A2(
+					$ianmackenzie$elm_units$Quantity$plus,
+					amount,
+					$ianmackenzie$elm_geometry$BoundingBox3d$maxY(boundingBox)),
+				maxZ: A2(
+					$ianmackenzie$elm_units$Quantity$plus,
+					amount,
+					$ianmackenzie$elm_geometry$BoundingBox3d$maxZ(boundingBox)),
+				minX: A2(
+					$ianmackenzie$elm_units$Quantity$minus,
+					amount,
+					$ianmackenzie$elm_geometry$BoundingBox3d$minX(boundingBox)),
+				minY: A2(
+					$ianmackenzie$elm_units$Quantity$minus,
+					amount,
+					$ianmackenzie$elm_geometry$BoundingBox3d$minY(boundingBox)),
+				minZ: A2(
+					$ianmackenzie$elm_units$Quantity$minus,
+					amount,
+					$ianmackenzie$elm_geometry$BoundingBox3d$minZ(boundingBox))
+			});
+	});
+var $ianmackenzie$elm_geometry$BoundingBox3d$expandBy = F2(
+	function (amount, boundingBox) {
+		return A2(
+			$ianmackenzie$elm_geometry$BoundingBox3d$unsafeOffsetBy,
+			$ianmackenzie$elm_units$Quantity$abs(amount),
+			boundingBox);
+	});
+var $author$project$SceneBuilderProfile$gradientColourPastel = function (slope) {
+	return A3(
+		$avh4$elm_color$Color$hsl,
+		$author$project$ColourPalette$gradientHue(slope),
+		0.6,
+		0.7);
+};
+var $author$project$SceneBuilderProfile$renderAltitude = function (track) {
+	var highDetailBox = A2(
+		$ianmackenzie$elm_geometry$BoundingBox3d$expandBy,
+		$ianmackenzie$elm_units$Length$kilometers(4),
+		$ianmackenzie$elm_geometry$BoundingBox3d$singleton(
+			A2($author$project$DomainModel$earthPointFromIndex, track.currentPosition, track.trackTree)));
+	var mediumDetailBox = A2(
+		$ianmackenzie$elm_geometry$BoundingBox3d$expandBy,
+		$ianmackenzie$elm_units$Length$kilometers(4),
+		highDetailBox);
+	var depthFn = function (road) {
+		return A2($ianmackenzie$elm_geometry$BoundingBox3d$intersects, highDetailBox, road.boundingBox) ? $elm$core$Maybe$Nothing : (A2($ianmackenzie$elm_geometry$BoundingBox3d$intersects, mediumDetailBox, road.boundingBox) ? $elm$core$Maybe$Just(15) : $elm$core$Maybe$Just(10));
+	};
+	var currentDistance = A2($author$project$DomainModel$distanceFromIndex, track.currentPosition, track.trackTree);
+	var currentPosLine = A2(
+		$ianmackenzie$elm_3d_scene$Scene3d$lineSegment,
+		$ianmackenzie$elm_3d_scene$Scene3d$Material$color($avh4$elm_color$Color$lightOrange),
+		A2(
+			$ianmackenzie$elm_geometry$LineSegment3d$from,
+			A3(
+				$ianmackenzie$elm_geometry$Point3d$xyz,
+				currentDistance,
+				$ianmackenzie$elm_units$Quantity$zero,
+				$ianmackenzie$elm_units$Length$kilometers(-3)),
+			A3(
+				$ianmackenzie$elm_geometry$Point3d$xyz,
+				currentDistance,
+				$ianmackenzie$elm_units$Quantity$zero,
+				$ianmackenzie$elm_units$Length$kilometers(3))));
+	var _v0 = $ianmackenzie$elm_geometry$BoundingBox3d$dimensions(
+		$author$project$DomainModel$boundingBox(track.trackTree));
+	var rangeZ = _v0.c;
+	var normaliseZ = $ianmackenzie$elm_units$Quantity$greaterThanZero(rangeZ) ? rangeZ : $ianmackenzie$elm_units$Length$meters(1);
+	var _v1 = $ianmackenzie$elm_geometry$BoundingBox3d$extrema(
+		$author$project$DomainModel$boundingBox(track.trackTree));
+	var minX = _v1.minX;
+	var maxX = _v1.maxX;
+	var minY = _v1.minY;
+	var maxY = _v1.maxY;
+	var minZ = _v1.minZ;
+	var maxZ = _v1.maxZ;
+	var floorPlane = A2($ianmackenzie$elm_geometry$Plane3d$offsetBy, minZ, $ianmackenzie$elm_geometry$Plane3d$xy);
+	var makeVisibleSegment = F2(
+		function (distance, road) {
+			var profileStart = A3(
+				$ianmackenzie$elm_geometry$Point3d$xyz,
+				distance,
+				$ianmackenzie$elm_units$Quantity$zero,
+				A2(
+					$ianmackenzie$elm_units$Quantity$minus,
+					minZ,
+					$ianmackenzie$elm_geometry$Point3d$zCoordinate(road.startPoint)));
+			var profileEnd = A3(
+				$ianmackenzie$elm_geometry$Point3d$xyz,
+				A2($ianmackenzie$elm_units$Quantity$plus, road.trueLength, distance),
+				$ianmackenzie$elm_units$Quantity$zero,
+				A2(
+					$ianmackenzie$elm_units$Quantity$minus,
+					minZ,
+					$ianmackenzie$elm_geometry$Point3d$zCoordinate(road.endPoint)));
+			var roadAsSegment = A2($ianmackenzie$elm_geometry$LineSegment3d$from, profileStart, profileEnd);
+			var gradient = $author$project$DomainModel$gradientFromNode(
+				$author$project$DomainModel$Leaf(road));
+			var curtainHem = A2($ianmackenzie$elm_geometry$LineSegment3d$projectOnto, floorPlane, roadAsSegment);
+			return _List_fromArray(
+				[
+					A3(
+					$ianmackenzie$elm_3d_scene$Scene3d$point,
+					{
+						radius: $ianmackenzie$elm_units$Pixels$pixels(1)
+					},
+					$ianmackenzie$elm_3d_scene$Scene3d$Material$color($avh4$elm_color$Color$black),
+					profileStart),
+					A2(
+					$ianmackenzie$elm_3d_scene$Scene3d$lineSegment,
+					$ianmackenzie$elm_3d_scene$Scene3d$Material$color($avh4$elm_color$Color$black),
+					A2($ianmackenzie$elm_geometry$LineSegment3d$from, profileStart, profileEnd)),
+					A5(
+					$ianmackenzie$elm_3d_scene$Scene3d$quad,
+					$ianmackenzie$elm_3d_scene$Scene3d$Material$color(
+						$author$project$SceneBuilderProfile$gradientColourPastel(gradient)),
+					$ianmackenzie$elm_geometry$LineSegment3d$startPoint(roadAsSegment),
+					$ianmackenzie$elm_geometry$LineSegment3d$endPoint(roadAsSegment),
+					$ianmackenzie$elm_geometry$LineSegment3d$endPoint(curtainHem),
+					$ianmackenzie$elm_geometry$LineSegment3d$startPoint(curtainHem))
+				]);
+		});
+	var foldFn = F2(
+		function (road, _v3) {
+			var distance = _v3.a;
+			var collectedEntities = _v3.b;
+			return _Utils_Tuple2(
+				A2($ianmackenzie$elm_units$Quantity$plus, road.trueLength, distance),
+				_Utils_ap(
+					A2(makeVisibleSegment, distance, road),
+					collectedEntities));
+		});
+	var _v2 = A7(
+		$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
+		0,
+		$author$project$DomainModel$skipCount(track.trackTree),
+		depthFn,
+		0,
+		track.trackTree,
+		foldFn,
+		_Utils_Tuple2($ianmackenzie$elm_units$Quantity$zero, _List_Nil));
+	var entities = _v2.b;
+	return A2($elm$core$List$cons, currentPosLine, entities);
 };
 var $ianmackenzie$elm_3d_scene$Scene3d$Types$LambertianMaterial = F3(
 	function (a, b, c) {
@@ -14677,7 +14736,7 @@ var $author$project$Main$render = function (model) {
 			model,
 			{
 				scene3d: _Utils_ap(renderedPreviews, renderedTrack),
-				sceneProfile: $author$project$SceneBuilderProfile$render(track)
+				sceneProfile: $author$project$SceneBuilderProfile$renderAltitude(track)
 			});
 	} else {
 		return model;
@@ -16236,8 +16295,11 @@ var $ianmackenzie$elm_3d_camera$Camera3d$orthographic = function (_arguments) {
 };
 var $author$project$ViewProfileCharts$deriveCamera = F3(
 	function (treeNode, context, currentPosition) {
-		var lookingAt = context.followSelectedPoint ? $author$project$DomainModel$startPoint(
-			A2($author$project$DomainModel$leafFromIndex, currentPosition, treeNode)) : context.focalPoint;
+		var lookingAt = context.followSelectedPoint ? A3(
+			$ianmackenzie$elm_geometry$Point3d$xyz,
+			A2($author$project$DomainModel$distanceFromIndex, currentPosition, treeNode),
+			$ianmackenzie$elm_units$Quantity$zero,
+			$ianmackenzie$elm_units$Quantity$zero) : context.focalPoint;
 		var latitude = $author$project$DomainModel$effectiveLatitude(
 			A2($author$project$DomainModel$leafFromIndex, currentPosition, treeNode));
 		var cameraViewpoint = $ianmackenzie$elm_3d_camera$Viewpoint3d$orbitZ(
@@ -16719,12 +16781,6 @@ var $ianmackenzie$elm_geometry$Vector3d$meters = F3(
 		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
 			{x: x, y: y, z: z});
 	});
-var $ianmackenzie$elm_geometry$Vector3d$scaleBy = F2(
-	function (k, _v0) {
-		var v = _v0.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
-			{x: k * v.x, y: k * v.y, z: k * v.z});
-	});
 var $ianmackenzie$elm_units$Angle$sin = function (_v0) {
 	var angle = _v0.a;
 	return $elm$core$Basics$sin(angle);
@@ -16823,17 +16879,11 @@ var $author$project$ViewProfileCharts$update = F5(
 					var _v4 = _v2.b.a;
 					var startX = _v4.a;
 					var startY = _v4.b;
-					var shiftVector = A2(
-						$ianmackenzie$elm_geometry$Vector3d$scaleBy,
-						0.1 * A2(
-							$author$project$Spherical$metresPerPixel,
-							context.zoomLevel,
-							$ianmackenzie$elm_units$Angle$degrees(30)),
-						A3(
-							$ianmackenzie$elm_geometry$Vector3d$meters,
-							(startY - dy) * $ianmackenzie$elm_units$Angle$sin(context.altitudeCameraElevation),
-							startX - dx,
-							(dy - startY) * $ianmackenzie$elm_units$Angle$cos(context.altitudeCameraElevation)));
+					var shiftVector = A3(
+						$ianmackenzie$elm_geometry$Vector3d$meters,
+						(startY - dy) * $ianmackenzie$elm_units$Angle$sin(context.altitudeCameraElevation),
+						0,
+						0);
 					var newContext = _Utils_update(
 						context,
 						{
@@ -16920,6 +16970,12 @@ var $author$project$ViewThirdPerson$detectHit = F4(
 			A2($ianmackenzie$elm_geometry$Point2d$xy, wFloat, $ianmackenzie$elm_units$Quantity$zero));
 		var ray = A3($ianmackenzie$elm_3d_camera$Camera3d$ray, camera, screenRectangle, screenPoint);
 		return A2($author$project$DomainModel$nearestToRay, ray, track.trackTree);
+	});
+var $ianmackenzie$elm_geometry$Vector3d$scaleBy = F2(
+	function (k, _v0) {
+		var v = _v0.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
+			{x: k * v.x, y: k * v.y, z: k * v.z});
 	});
 var $author$project$ViewThirdPerson$update = F5(
 	function (msg, msgWrapper, track, area, context) {
@@ -27129,35 +27185,6 @@ var $feathericons$elm_feather$FeatherIcons$chevronsRight = A2(
 				]),
 			_List_Nil)
 		]));
-var $author$project$DomainModel$distanceFromIndex = F2(
-	function (index, treeNode) {
-		distanceFromIndex:
-		while (true) {
-			if (treeNode.$ === 'Leaf') {
-				var info = treeNode.a;
-				return (index <= 0) ? $ianmackenzie$elm_units$Length$meters(0) : info.trueLength;
-			} else {
-				var info = treeNode.a;
-				if (_Utils_cmp(
-					index,
-					$author$project$DomainModel$skipCount(info.left)) < 0) {
-					var $temp$index = index,
-						$temp$treeNode = info.left;
-					index = $temp$index;
-					treeNode = $temp$treeNode;
-					continue distanceFromIndex;
-				} else {
-					return A2(
-						$ianmackenzie$elm_units$Quantity$plus,
-						info.nodeContent.trueLength,
-						A2(
-							$author$project$DomainModel$distanceFromIndex,
-							index - $author$project$DomainModel$skipCount(info.left),
-							info.right));
-				}
-			}
-		}
-	});
 var $author$project$Tools$Pointers$positionDescription = F2(
 	function (pos, track) {
 		return 'Point ' + ($elm$core$String$fromInt(pos) + (', at ' + A2(
@@ -29761,8 +29788,6 @@ var $author$project$ViewProfileCharts$view = F5(
 					(!_Utils_eq(dragging, $author$project$ViewProfileCharts$DragNone)) ? $mdgriffith$elm_ui$Element$htmlAttribute(
 					$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onMove(
 						A2($elm$core$Basics$composeR, $author$project$ViewProfileCharts$ImageDrag, msgWrapper))) : $mdgriffith$elm_ui$Element$pointer,
-					$mdgriffith$elm_ui$Element$htmlAttribute(
-					$elm$html$Html$Attributes$id('CHART')),
 					$mdgriffith$elm_ui$Element$htmlAttribute(
 					$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onUp(
 						A2($elm$core$Basics$composeR, $author$project$ViewProfileCharts$ImageRelease, msgWrapper))),

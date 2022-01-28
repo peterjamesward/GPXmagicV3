@@ -3,6 +3,7 @@ module ViewProfileCharts exposing (..)
 import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
 import Axis3d
+import BoundingBox3d
 import Camera3d exposing (Camera3d)
 import Color
 import Direction2d exposing (Direction2d)
@@ -23,6 +24,7 @@ import Json.Decode as D
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
 import Pixels exposing (Pixels)
+import Plane3d
 import Point2d
 import Point3d
 import Quantity exposing (Quantity, toFloatQuantity)
@@ -147,7 +149,6 @@ view context ( givenWidth, givenHeight ) track scene msgWrapper =
 
           else
             pointer
-        , htmlAttribute (id "CHART")
         , htmlAttribute <| Mouse.onUp (ImageRelease >> msgWrapper)
         , htmlAttribute <| Mouse.onClick (ImageClick >> msgWrapper)
         , htmlAttribute <| Mouse.onDoubleClick (ImageDoubleClick >> msgWrapper)
@@ -199,7 +200,10 @@ deriveCamera treeNode context currentPosition =
 
         lookingAt =
             if context.followSelectedPoint then
-                startPoint <| leafFromIndex currentPosition treeNode
+                Point3d.xyz
+                    (distanceFromIndex currentPosition treeNode)
+                    Quantity.zero
+                    Quantity.zero
 
             else
                 context.focalPoint
@@ -337,15 +341,8 @@ update msg msgWrapper track area context =
                         shiftVector =
                             Vector3d.meters
                                 ((startY - dy) * Angle.sin context.altitudeCameraElevation)
-                                (startX - dx)
-                                ((dy - startY) * Angle.cos context.altitudeCameraElevation)
-                                |> Vector3d.scaleBy
-                                    (0.1
-                                        -- Empirical
-                                        * Spherical.metresPerPixel
-                                            context.zoomLevel
-                                            (Angle.degrees 30)
-                                    )
+                                0
+                                0
 
                         newContext =
                             { context
@@ -378,8 +375,8 @@ initialiseView :
     -> PeteTree
     -> Context
 initialiseView current treeNode =
-    { altitudeCameraElevation = Angle.degrees 30
-    , gradientCameraElevation = Angle.degrees 30
+    { altitudeCameraElevation = Angle.degrees 0
+    , gradientCameraElevation = Angle.degrees 0
     , cameraDistance = Length.kilometers 10
     , fieldOfView = Angle.degrees 45
     , orbiting = Nothing

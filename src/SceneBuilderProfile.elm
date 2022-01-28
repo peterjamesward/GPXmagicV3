@@ -3,18 +3,10 @@ module SceneBuilderProfile exposing (..)
 -- Combines altitude and gradient. Clever.
 -- TODO: Add additional planes to show result of filters.
 
-import Actions exposing (PreviewData, PreviewShape(..))
-import Angle exposing (Angle)
-import Axis3d
 import BoundingBox3d exposing (BoundingBox3d)
 import Color exposing (Color, black, darkGreen, green, lightOrange)
 import ColourPalette exposing (gradientHue, gradientHue2)
-import Dict exposing (Dict)
-import Direction2d
 import DomainModel exposing (..)
-import Element
-import FlatColors.AussiePalette
-import Json.Encode as E
 import Length exposing (Meters)
 import LineSegment3d
 import LocalCoords exposing (LocalCoords)
@@ -25,8 +17,6 @@ import Quantity
 import Scene3d exposing (Entity)
 import Scene3d.Material as Material
 import TrackLoaded exposing (TrackLoaded)
-import UtilsForViews exposing (fullDepthRenderingBoxSize)
-import Vector3d
 
 
 gradientColourPastel : Float -> Color.Color
@@ -34,13 +24,25 @@ gradientColourPastel slope =
     Color.hsl (gradientHue slope) 0.6 0.7
 
 
-render : TrackLoaded msg -> List (Entity LocalCoords)
-render track =
+renderAltitude : TrackLoaded msg -> List (Entity LocalCoords)
+renderAltitude track =
     let
         floorPlane =
-            Plane3d.xy
-                |> Plane3d.offsetBy
-                    (BoundingBox3d.minZ <| boundingBox track.trackTree)
+            Plane3d.xy |> Plane3d.offsetBy minZ
+
+        { minX, maxX, minY, maxY, minZ, maxZ } =
+            BoundingBox3d.extrema <| boundingBox track.trackTree
+
+        ( _, _, rangeZ ) =
+            BoundingBox3d.dimensions <| boundingBox track.trackTree
+
+        normaliseZ =
+            -- Avoid zero divide.
+            if rangeZ |> Quantity.greaterThanZero then
+                rangeZ
+
+            else
+                Length.meters 1
 
         highDetailBox =
             DomainModel.earthPointFromIndex track.currentPosition track.trackTree
@@ -58,13 +60,17 @@ render track =
                     Point3d.xyz
                         distance
                         Quantity.zero
-                        (Point3d.zCoordinate road.startPoint)
+                        (Point3d.zCoordinate road.startPoint
+                            |> Quantity.minus minZ
+                        )
 
                 profileEnd =
                     Point3d.xyz
                         (distance |> Quantity.plus road.trueLength)
                         Quantity.zero
-                        (Point3d.zCoordinate road.endPoint)
+                        (Point3d.zCoordinate road.endPoint
+                            |> Quantity.minus minZ
+                        )
 
                 gradient =
                     DomainModel.gradientFromNode <| Leaf road
@@ -116,5 +122,14 @@ render track =
                 track.trackTree
                 foldFn
                 ( Quantity.zero, [] )
+
+        currentDistance =
+            distanceFromIndex track.currentPosition track.trackTree
+
+        currentPosLine =
+            Scene3d.lineSegment (Material.color lightOrange) <|
+                LineSegment3d.from
+                    (Point3d.xyz currentDistance Quantity.zero (Length.kilometers -3))
+                    (Point3d.xyz currentDistance Quantity.zero (Length.kilometers 3))
     in
-    entities
+    currentPosLine :: entities
