@@ -24,8 +24,8 @@ gradientColourPastel slope =
     Color.hsl (gradientHue slope) 0.6 0.7
 
 
-renderAltitude : TrackLoaded msg -> List (Entity LocalCoords)
-renderAltitude track =
+renderBoth : TrackLoaded msg -> ( List (Entity LocalCoords), List (Entity LocalCoords) )
+renderBoth track =
     let
         floorPlane =
             Plane3d.xy |> Plane3d.offsetBy minZ
@@ -53,24 +53,20 @@ renderAltitude track =
             highDetailBox
                 |> BoundingBox3d.expandBy (Length.kilometers 4)
 
-        makeVisibleSegment : Length.Length -> RoadSection -> List (Entity LocalCoords)
-        makeVisibleSegment distance road =
+        pointToProfileCoords distance p =
+            Point3d.xyz
+                distance
+                Quantity.zero
+                (Point3d.zCoordinate p |> Quantity.minus minZ)
+
+        makeAltitudeSegment : Length.Length -> RoadSection -> List (Entity LocalCoords)
+        makeAltitudeSegment distance road =
             let
                 profileStart =
-                    Point3d.xyz
-                        distance
-                        Quantity.zero
-                        (Point3d.zCoordinate road.startPoint
-                            |> Quantity.minus minZ
-                        )
+                    pointToProfileCoords distance road.startPoint
 
                 profileEnd =
-                    Point3d.xyz
-                        (distance |> Quantity.plus road.trueLength)
-                        Quantity.zero
-                        (Point3d.zCoordinate road.endPoint
-                            |> Quantity.minus minZ
-                        )
+                    pointToProfileCoords (distance |> Quantity.plus road.trueLength) road.endPoint
 
                 gradient =
                     DomainModel.gradientFromNode <| Leaf road
@@ -93,13 +89,40 @@ renderAltitude track =
                 (LineSegment3d.startPoint curtainHem)
             ]
 
+        makeGradientSegment : Length.Length -> RoadSection -> List (Entity LocalCoords)
+        makeGradientSegment distance road =
+            let
+                gradient =
+                    DomainModel.gradientFromNode <| Leaf road
+
+                segmentStart =
+                    Point3d.xyz
+                        distance
+                        Quantity.zero
+                        (Length.meters gradient)
+
+                segmentEnd =
+                    Point3d.xyz
+                        (distance |> Quantity.plus road.trueLength)
+                        Quantity.zero
+                        (Length.meters gradient)
+            in
+            [ Scene3d.point { radius = Pixels.pixels 1 }
+                (Material.color black)
+                segmentStart
+            , Scene3d.lineSegment (Material.color black) <|
+                LineSegment3d.from segmentStart segmentEnd
+            ]
+
         foldFn :
             RoadSection
-            -> ( Length.Length, List (Entity LocalCoords) )
-            -> ( Length.Length, List (Entity LocalCoords) )
-        foldFn road ( distance, collectedEntities ) =
+            -> ( Length.Length, List (Entity LocalCoords), List (Entity LocalCoords) )
+            -> ( Length.Length, List (Entity LocalCoords), List (Entity LocalCoords) )
+        foldFn road ( distance, altitude, gradient ) =
+            -- Ambitiously, do gradient in the same traversal.
             ( distance |> Quantity.plus road.trueLength
-            , makeVisibleSegment distance road ++ collectedEntities
+            , makeAltitudeSegment distance road ++ altitude
+            , makeGradientSegment distance road ++ gradient
             )
 
         depthFn road =
@@ -113,7 +136,7 @@ renderAltitude track =
             else
                 Just 10
 
-        ( _, entities ) =
+        ( _, altitudeScene, gradientScene ) =
             DomainModel.traverseTreeBetweenLimitsToDepth
                 0
                 (skipCount track.trackTree)
@@ -121,7 +144,7 @@ renderAltitude track =
                 0
                 track.trackTree
                 foldFn
-                ( Quantity.zero, [] )
+                ( Quantity.zero, [], [] )
 
         currentDistance =
             distanceFromIndex track.currentPosition track.trackTree
@@ -132,4 +155,6 @@ renderAltitude track =
                     (Point3d.xyz currentDistance Quantity.zero (Length.kilometers -1))
                     (Point3d.xyz currentDistance Quantity.zero (Length.kilometers 3))
     in
-    currentPosLine :: entities
+    ( currentPosLine :: altitudeScene
+    , currentPosLine :: gradientScene
+    )

@@ -130,9 +130,10 @@ view :
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> TrackLoaded msg
     -> List (Entity LocalCoords)
+    -> List (Entity LocalCoords)
     -> (Msg -> msg)
     -> Element msg
-view context ( givenWidth, givenHeight ) track scene msgWrapper =
+view context ( givenWidth, givenHeight ) track sceneAltitude sceneGradient msgWrapper =
     let
         dragging =
             context.dragAction
@@ -167,7 +168,7 @@ view context ( givenWidth, givenHeight ) track scene msgWrapper =
                 , dimensions = eachViewSize
                 , background = backgroundColor Color.white
                 , clipDepth = Length.meters 1
-                , entities = scene
+                , entities = sceneAltitude
                 }
         , html <|
             Scene3d.unlit
@@ -175,7 +176,7 @@ view context ( givenWidth, givenHeight ) track scene msgWrapper =
                 , dimensions = eachViewSize
                 , background = backgroundColor Color.white
                 , clipDepth = Length.meters 1
-                , entities = scene
+                , entities = sceneGradient
                 }
         ]
 

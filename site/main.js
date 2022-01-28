@@ -14438,7 +14438,8 @@ var $author$project$Main$init = F3(
 							_Utils_Tuple2(600, 990))),
 					$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Horizontal)),
 				scene3d: _List_Nil,
-				sceneProfile: _List_Nil,
+				sceneAltitude: _List_Nil,
+				sceneGradient: _List_Nil,
 				stravaAuthentication: authData,
 				time: $elm$time$Time$millisToPosix(0),
 				toolOptions: $author$project$ToolsController$defaultOptions,
@@ -18999,7 +19000,36 @@ var $author$project$SceneBuilderProfile$gradientColourPastel = function (slope) 
 		0.6,
 		0.7);
 };
-var $author$project$SceneBuilderProfile$renderAltitude = function (track) {
+var $author$project$SceneBuilderProfile$renderBoth = function (track) {
+	var makeGradientSegment = F2(
+		function (distance, road) {
+			var gradient = $author$project$DomainModel$gradientFromNode(
+				$author$project$DomainModel$Leaf(road));
+			var segmentEnd = A3(
+				$ianmackenzie$elm_geometry$Point3d$xyz,
+				A2($ianmackenzie$elm_units$Quantity$plus, road.trueLength, distance),
+				$ianmackenzie$elm_units$Quantity$zero,
+				$ianmackenzie$elm_units$Length$meters(gradient));
+			var segmentStart = A3(
+				$ianmackenzie$elm_geometry$Point3d$xyz,
+				distance,
+				$ianmackenzie$elm_units$Quantity$zero,
+				$ianmackenzie$elm_units$Length$meters(gradient));
+			return _List_fromArray(
+				[
+					A3(
+					$ianmackenzie$elm_3d_scene$Scene3d$point,
+					{
+						radius: $ianmackenzie$elm_units$Pixels$pixels(1)
+					},
+					$ianmackenzie$elm_3d_scene$Scene3d$Material$color($avh4$elm_color$Color$black),
+					segmentStart),
+					A2(
+					$ianmackenzie$elm_3d_scene$Scene3d$lineSegment,
+					$ianmackenzie$elm_3d_scene$Scene3d$Material$color($avh4$elm_color$Color$black),
+					A2($ianmackenzie$elm_geometry$LineSegment3d$from, segmentStart, segmentEnd))
+				]);
+		});
 	var highDetailBox = A2(
 		$ianmackenzie$elm_geometry$BoundingBox3d$expandBy,
 		$ianmackenzie$elm_units$Length$kilometers(4),
@@ -19041,24 +19071,24 @@ var $author$project$SceneBuilderProfile$renderAltitude = function (track) {
 	var minZ = _v1.minZ;
 	var maxZ = _v1.maxZ;
 	var floorPlane = A2($ianmackenzie$elm_geometry$Plane3d$offsetBy, minZ, $ianmackenzie$elm_geometry$Plane3d$xy);
-	var makeVisibleSegment = F2(
-		function (distance, road) {
-			var profileStart = A3(
+	var pointToProfileCoords = F2(
+		function (distance, p) {
+			return A3(
 				$ianmackenzie$elm_geometry$Point3d$xyz,
 				distance,
 				$ianmackenzie$elm_units$Quantity$zero,
 				A2(
 					$ianmackenzie$elm_units$Quantity$minus,
 					minZ,
-					$ianmackenzie$elm_geometry$Point3d$zCoordinate(road.startPoint)));
-			var profileEnd = A3(
-				$ianmackenzie$elm_geometry$Point3d$xyz,
+					$ianmackenzie$elm_geometry$Point3d$zCoordinate(p)));
+		});
+	var makeAltitudeSegment = F2(
+		function (distance, road) {
+			var profileStart = A2(pointToProfileCoords, distance, road.startPoint);
+			var profileEnd = A2(
+				pointToProfileCoords,
 				A2($ianmackenzie$elm_units$Quantity$plus, road.trueLength, distance),
-				$ianmackenzie$elm_units$Quantity$zero,
-				A2(
-					$ianmackenzie$elm_units$Quantity$minus,
-					minZ,
-					$ianmackenzie$elm_geometry$Point3d$zCoordinate(road.endPoint)));
+				road.endPoint);
 			var roadAsSegment = A2($ianmackenzie$elm_geometry$LineSegment3d$from, profileStart, profileEnd);
 			var gradient = $author$project$DomainModel$gradientFromNode(
 				$author$project$DomainModel$Leaf(road));
@@ -19089,12 +19119,16 @@ var $author$project$SceneBuilderProfile$renderAltitude = function (track) {
 	var foldFn = F2(
 		function (road, _v3) {
 			var distance = _v3.a;
-			var collectedEntities = _v3.b;
-			return _Utils_Tuple2(
+			var altitude = _v3.b;
+			var gradient = _v3.c;
+			return _Utils_Tuple3(
 				A2($ianmackenzie$elm_units$Quantity$plus, road.trueLength, distance),
 				_Utils_ap(
-					A2(makeVisibleSegment, distance, road),
-					collectedEntities));
+					A2(makeAltitudeSegment, distance, road),
+					altitude),
+				_Utils_ap(
+					A2(makeGradientSegment, distance, road),
+					gradient));
 		});
 	var _v2 = A7(
 		$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
@@ -19104,9 +19138,12 @@ var $author$project$SceneBuilderProfile$renderAltitude = function (track) {
 		0,
 		track.trackTree,
 		foldFn,
-		_Utils_Tuple2($ianmackenzie$elm_units$Quantity$zero, _List_Nil));
-	var entities = _v2.b;
-	return A2($elm$core$List$cons, currentPosLine, entities);
+		_Utils_Tuple3($ianmackenzie$elm_units$Quantity$zero, _List_Nil, _List_Nil));
+	var altitudeScene = _v2.b;
+	var gradientScene = _v2.c;
+	return _Utils_Tuple2(
+		A2($elm$core$List$cons, currentPosLine, altitudeScene),
+		A2($elm$core$List$cons, currentPosLine, gradientScene));
 };
 var $ianmackenzie$elm_3d_scene$Scene3d$Types$LambertianMaterial = F3(
 	function (a, b, c) {
@@ -19340,11 +19377,15 @@ var $author$project$Main$render = function (model) {
 		var track = _v0.a;
 		var renderedTrack = $author$project$SceneBuilder3D$render3dView(track);
 		var renderedPreviews = $author$project$SceneBuilder3D$renderPreviews(model.previews);
+		var _v1 = $author$project$SceneBuilderProfile$renderBoth(track);
+		var altitude = _v1.a;
+		var gradient = _v1.b;
 		return _Utils_update(
 			model,
 			{
 				scene3d: _Utils_ap(renderedPreviews, renderedTrack),
-				sceneProfile: $author$project$SceneBuilderProfile$renderAltitude(track)
+				sceneAltitude: altitude,
+				sceneGradient: gradient
 			});
 	} else {
 		return model;
@@ -34271,8 +34312,8 @@ var $author$project$ViewProfileCharts$zoomButtons = F2(
 					})
 				]));
 	});
-var $author$project$ViewProfileCharts$view = F5(
-	function (context, _v0, track, scene, msgWrapper) {
+var $author$project$ViewProfileCharts$view = F6(
+	function (context, _v0, track, sceneAltitude, sceneGradient, msgWrapper) {
 		var givenWidth = _v0.a;
 		var givenHeight = _v0.b;
 		var eachViewSize = _Utils_Tuple2(
@@ -34325,7 +34366,7 @@ var $author$project$ViewProfileCharts$view = F5(
 							camera: A3($author$project$ViewProfileCharts$deriveCamera, track.trackTree, context, track.currentPosition),
 							clipDepth: $ianmackenzie$elm_units$Length$meters(1),
 							dimensions: eachViewSize,
-							entities: scene
+							entities: sceneAltitude
 						})),
 					$mdgriffith$elm_ui$Element$html(
 					$ianmackenzie$elm_3d_scene$Scene3d$unlit(
@@ -34334,7 +34375,7 @@ var $author$project$ViewProfileCharts$view = F5(
 							camera: A3($author$project$ViewProfileCharts$deriveCamera, track.trackTree, context, track.currentPosition),
 							clipDepth: $ianmackenzie$elm_units$Length$meters(1),
 							dimensions: eachViewSize,
-							entities: scene
+							entities: sceneGradient
 						}))
 				]));
 	});
@@ -35113,8 +35154,8 @@ var $author$project$ViewPureStyles$wideSliderStylesWithWidth = function (w) {
 				$mdgriffith$elm_ui$Element$none))
 		]);
 };
-var $author$project$PaneLayoutManager$viewPanes = F6(
-	function (msgWrapper, mTrack, scene3d, sceneProfile, _v0, options) {
+var $author$project$PaneLayoutManager$viewPanes = F7(
+	function (msgWrapper, mTrack, scene3d, sceneProfile, sceneGradient, _v0, options) {
 		var w = _v0.a;
 		var h = _v0.b;
 		var slider = function () {
@@ -35175,12 +35216,13 @@ var $author$project$PaneLayoutManager$viewPanes = F6(
 					if ((_v5.a.$ === 'Just') && (_v5.b.$ === 'Just')) {
 						var context = _v5.a.a;
 						var track = _v5.b.a;
-						return A5(
+						return A6(
 							$author$project$ViewProfileCharts$view,
 							context,
 							_Utils_Tuple2(paneWidth, paneHeight),
 							track,
 							sceneProfile,
+							sceneGradient,
 							A2(
 								$elm$core$Basics$composeL,
 								msgWrapper,
@@ -35299,7 +35341,7 @@ var $author$project$Main$viewPaneArea = function (model) {
 				[$mdgriffith$elm_ui$Element$noStaticStyleSheet])
 		},
 		$author$project$ViewPureStyles$commonLayoutStyles,
-		A6($author$project$PaneLayoutManager$viewPanes, $author$project$Main$PaneMsg, model.track, model.scene3d, model.sceneProfile, model.contentArea, model.paneLayoutOptions));
+		A7($author$project$PaneLayoutManager$viewPanes, $author$project$Main$PaneMsg, model.track, model.scene3d, model.sceneAltitude, model.sceneGradient, model.contentArea, model.paneLayoutOptions));
 };
 var $author$project$Main$centralAreaView = function (model) {
 	return A4(

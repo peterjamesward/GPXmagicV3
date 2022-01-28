@@ -94,7 +94,8 @@ type alias Model =
 
     -- Visuals
     , scene3d : List (Entity LocalCoords)
-    , sceneProfile : List (Entity LocalCoords)
+    , sceneAltitude : List (Entity LocalCoords)
+    , sceneGradient : List (Entity LocalCoords)
     , previews : Dict String PreviewData
 
     -- Layout stuff
@@ -208,7 +209,8 @@ init mflags origin navigationKey =
       , stravaAuthentication = authData
       , track = Nothing
       , scene3d = []
-      , sceneProfile = []
+      , sceneAltitude = []
+      , sceneGradient = []
       , previews = Dict.empty
       , windowSize = ( 1000, 800 )
       , contentArea = ( Pixels.pixels 800, Pixels.pixels 500 )
@@ -259,10 +261,14 @@ render model =
 
                 renderedPreviews =
                     SceneBuilder3D.renderPreviews model.previews
+
+                (altitude, gradient) =
+                    SceneBuilderProfile.renderBoth track
             in
             { model
                 | scene3d = renderedPreviews ++ renderedTrack
-                , sceneProfile = SceneBuilderProfile.renderAltitude track
+                , sceneAltitude = altitude
+                , sceneGradient = gradient
             }
 
         Nothing ->
@@ -852,7 +858,8 @@ viewPaneArea model =
             PaneMsg
             model.track
             model.scene3d
-            model.sceneProfile
+            model.sceneAltitude
+            model.sceneGradient
             model.contentArea
             model.paneLayoutOptions
 

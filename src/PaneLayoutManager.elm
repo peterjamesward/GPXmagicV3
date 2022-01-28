@@ -535,10 +535,11 @@ viewPanes :
     -> Maybe (TrackLoaded msg)
     -> List (Entity LocalCoords)
     -> List (Entity LocalCoords)
+    -> List (Entity LocalCoords)
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Options
     -> Element msg
-viewPanes msgWrapper mTrack scene3d sceneProfile ( w, h ) options =
+viewPanes msgWrapper mTrack scene3d sceneProfile sceneGradient ( w, h ) options =
     let
         ( paneWidth, paneHeight ) =
             dimensionsWithLayout options.paneLayout ( w, h )
@@ -566,6 +567,7 @@ viewPanes msgWrapper mTrack scene3d sceneProfile ( w, h ) options =
                                 ( paneWidth, paneHeight )
                                 track
                                 sceneProfile
+                                sceneGradient
                                 (msgWrapper << ProfileViewMessage pane.paneId)
 
                         _ ->
