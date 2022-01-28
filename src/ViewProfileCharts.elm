@@ -55,9 +55,9 @@ type ClickZone
 
 type Msg
     = ImageMouseWheel Float
-    | ImageGrab Mouse.Event
-    | ImageDrag Mouse.Event
-    | ImageRelease Mouse.Event
+    | ImageGrab ClickZone Mouse.Event
+    | ImageDrag ClickZone Mouse.Event
+    | ImageRelease ClickZone Mouse.Event
     | ImageNoOp
     | ImageClick ClickZone Mouse.Event
     | ImageDoubleClick ClickZone Mouse.Event
@@ -168,14 +168,7 @@ view context ( givenWidth, givenHeight ) track sceneAltitude sceneGradient msgWr
             )
     in
     column
-        [ htmlAttribute <| Mouse.onDown (ImageGrab >> msgWrapper)
-        , if dragging /= DragNone then
-            htmlAttribute <| Mouse.onMove (ImageDrag >> msgWrapper)
-
-          else
-            pointer
-        , htmlAttribute <| Mouse.onUp (ImageRelease >> msgWrapper)
-        , htmlAttribute <| Wheel.onWheel (\event -> msgWrapper (ImageMouseWheel event.deltaY))
+        [ htmlAttribute <| Wheel.onWheel (\event -> msgWrapper (ImageMouseWheel event.deltaY))
         , onContextMenu (msgWrapper ImageNoOp)
         , width fill
         , height fill
@@ -185,7 +178,14 @@ view context ( givenWidth, givenHeight ) track sceneAltitude sceneGradient msgWr
         , inFront <| zoomButtons msgWrapper context
         ]
         [ el
-            [ htmlAttribute <| Mouse.onClick (ImageClick ZoneAltitude >> msgWrapper)
+            [ htmlAttribute <| Mouse.onDown (ImageGrab ZoneAltitude >> msgWrapper)
+            , if dragging /= DragNone then
+                htmlAttribute <| Mouse.onMove (ImageDrag ZoneAltitude >> msgWrapper)
+
+              else
+                pointer
+            , htmlAttribute <| Mouse.onUp (ImageRelease ZoneAltitude >> msgWrapper)
+            , htmlAttribute <| Mouse.onClick (ImageClick ZoneAltitude >> msgWrapper)
             , htmlAttribute <| Mouse.onDoubleClick (ImageDoubleClick ZoneAltitude >> msgWrapper)
             ]
           <|
@@ -198,7 +198,14 @@ view context ( givenWidth, givenHeight ) track sceneAltitude sceneGradient msgWr
                     , entities = sceneAltitude
                     }
         , el
-            [ htmlAttribute <| Mouse.onClick (ImageClick ZoneGradient >> msgWrapper)
+            [ htmlAttribute <| Mouse.onDown (ImageGrab ZoneGradient >> msgWrapper)
+            , if dragging /= DragNone then
+                htmlAttribute <| Mouse.onMove (ImageDrag ZoneGradient >> msgWrapper)
+
+              else
+                pointer
+            , htmlAttribute <| Mouse.onUp (ImageRelease ZoneGradient >> msgWrapper)
+            , htmlAttribute <| Mouse.onClick (ImageClick ZoneGradient >> msgWrapper)
             , htmlAttribute <| Mouse.onDoubleClick (ImageDoubleClick ZoneGradient >> msgWrapper)
             ]
           <|
@@ -291,19 +298,62 @@ deriveGradientCamera treeNode context currentPosition =
         }
 
 
-detectHit :
-    Mouse.Event
+metresPerPixel :
+    ( Quantity Int Pixels, Quantity Int Pixels )
+    -> Context
     -> TrackLoaded msg
+    -> Float
+metresPerPixel ( w, h ) context track =
+    -- This should fix the panning.
+    let
+        ( wFloat, hFloat ) =
+            ( toFloatQuantity w, toFloatQuantity h )
+
+        screenRectangle =
+            Rectangle2d.from
+                (Point2d.xy Quantity.zero hFloat)
+                (Point2d.xy wFloat Quantity.zero)
+
+        camera =
+            -- Must use same camera derivation as for the 3D model, else pointless!
+            deriveAltitudeCamera track.trackTree context track.currentPosition
+
+        ( blueCorner, redCorner ) =
+            ( Point2d.pixels 0 0, Point2d.xy wFloat hFloat )
+
+        ( blueRay, redRay ) =
+            ( Camera3d.ray camera screenRectangle blueCorner
+            , Camera3d.ray camera screenRectangle redCorner
+            )
+
+        ( bluePoint, redPoint ) =
+            ( blueRay |> Axis3d.intersectionWithPlane Plane3d.zx
+            , redRay |> Axis3d.intersectionWithPlane Plane3d.zx
+            )
+    in
+    case ( bluePoint, redPoint ) of
+        ( Just blue, Just red ) ->
+            Point3d.xCoordinate blue
+                |> Quantity.minus (Point3d.xCoordinate red)
+                |> Quantity.abs
+                |> Length.inMeters
+                |> (\len -> len / Pixels.inPixels wFloat)
+
+        _ ->
+            -- Oh!
+            1.0
+
+
+modelPointFromClick :
+    Mouse.Event
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Context
-    -> Int
-detectHit event track ( w, h ) context =
+    -> TrackLoaded msg
+    -> Maybe EarthPoint
+modelPointFromClick event ( w, h ) context track =
     let
         ( x, y ) =
             event.offsetPos
-
-        _ = Debug.log "X" x
-        _ = Debug.log "RECT" screenRectangle
 
         screenPoint =
             Point2d.pixels x y
@@ -323,11 +373,18 @@ detectHit event track ( w, h ) context =
         ray =
             Camera3d.ray camera screenRectangle screenPoint
     in
-    case ray |> Axis3d.intersectionWithPlane Plane3d.zx of
+    ray |> Axis3d.intersectionWithPlane Plane3d.zx
+
+
+detectHit :
+    Mouse.Event
+    -> TrackLoaded msg
+    -> ( Quantity Int Pixels, Quantity Int Pixels )
+    -> Context
+    -> Int
+detectHit event track ( w, h ) context =
+    case modelPointFromClick event ( w, h ) context track of
         Just pointOnZX ->
-            let
-                _ = Debug.log "DISTANCE" (Point3d.xCoordinate pointOnZX)
-            in
             DomainModel.indexFromDistance (Point3d.xCoordinate pointOnZX) track.trackTree
 
         Nothing ->
@@ -363,6 +420,14 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
                 |> Quantity.multiplyBy (1.0 - splitProportion)
                 |> Quantity.truncate
             )
+
+        areaForZone zone =
+            case zone of
+                ZoneAltitude ->
+                    altitudePortion
+
+                ZoneGradient ->
+                    gradientPortion
     in
     case msg of
         ImageZoomIn ->
@@ -379,18 +444,9 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
 
         ImageClick zone event ->
             -- Click moves pointer but does not re-centre view. (Double click will.)
-            let
-                area =
-                    case zone of
-                        ZoneAltitude ->
-                            altitudePortion
-
-                        ZoneGradient ->
-                            gradientPortion
-            in
             if context.waitingForClickDelay then
                 ( context
-                , [ SetCurrent <| detectHit event track area context
+                , [ SetCurrent <| detectHit event track (areaForZone zone) context
                   , TrackHasChanged
                   ]
                 )
@@ -400,16 +456,8 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
 
         ImageDoubleClick zone event ->
             let
-                area =
-                    case zone of
-                        ZoneAltitude ->
-                            altitudePortion
-
-                        ZoneGradient ->
-                            gradientPortion
-
                 nearestPoint =
-                    detectHit event track area context
+                    detectHit event track (areaForZone zone) context
             in
             ( { context | focalPoint = earthPointFromIndex nearestPoint track.trackTree }
             , [ SetCurrent nearestPoint
@@ -427,7 +475,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
             in
             ( { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + increment }, [] )
 
-        ImageGrab event ->
+        ImageGrab zone event ->
             -- Mouse behaviour depends which view is in use...
             -- Right-click or ctrl-click to mean rotate; otherwise pan.
             let
@@ -442,7 +490,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
             , [ DelayMessage 250 (msgWrapper ClickDelayExpired) ]
             )
 
-        ImageDrag event ->
+        ImageDrag zone event ->
             let
                 ( dx, dy ) =
                     event.offsetPos
@@ -450,10 +498,14 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
             case ( context.dragAction, context.orbiting ) of
                 ( DragPan, Just ( startX, startY ) ) ->
                     let
+                        panFactor =
+                            metresPerPixel (areaForZone zone) context track
+
                         shiftVector =
                             --TODO: Find out how to do the pixel calculation. See examples?
                             Vector3d.meters
-                                ((startX - dx) * 1.15 ^ (22 - context.zoomLevel))
+                                --((startX - dx) * 1.15 ^ (22 - context.zoomLevel))
+                                ((startX - dx) * panFactor)
                                 0
                                 0
 
@@ -469,7 +521,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
                 _ ->
                     ( context, [] )
 
-        ImageRelease event ->
+        ImageRelease zone event ->
             ( { context
                 | orbiting = Nothing
                 , dragAction = DragNone

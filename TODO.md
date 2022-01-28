@@ -9,8 +9,12 @@ BUG: Hit detect on Map is slow, sometimes very slow. (Paris to Bree).
 
 ## Profile rendering
 
-Both: Work out camera elevation so that the range remains in display when zooming.
-> Should be easy enough if we project rays from two opposite corners.
+BUG: Unlocking profile follow orange leaves one lost.
+
+Should be able to have a larger altitude zone without messing up the x-scrolling.
+
+Work out camera elevations so that the range remains in display when zooming.
+> Should be easy enough if we project rays from two opposite corners (like `hitDetect`).
 I.e. effect is to zoom X only.
 
 SVG overlay scale.

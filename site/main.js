@@ -16074,6 +16074,39 @@ var $author$project$ViewMap$update = F5(
 	});
 var $author$project$ViewProfileCharts$ClickDelayExpired = {$: 'ClickDelayExpired'};
 var $author$project$ViewProfileCharts$DragPan = {$: 'DragPan'};
+var $author$project$DomainModel$indexFromDistance = F2(
+	function (distance, treeNode) {
+		indexFromDistance:
+		while (true) {
+			if (treeNode.$ === 'Leaf') {
+				var info = treeNode.a;
+				return A2(
+					$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
+					$ianmackenzie$elm_units$Quantity$half(info.trueLength),
+					distance) ? 0 : 1;
+			} else {
+				var info = treeNode.a;
+				if (A2(
+					$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
+					$author$project$DomainModel$trueLength(info.left),
+					distance)) {
+					var $temp$distance = distance,
+						$temp$treeNode = info.left;
+					distance = $temp$distance;
+					treeNode = $temp$treeNode;
+					continue indexFromDistance;
+				} else {
+					return $author$project$DomainModel$skipCount(info.left) + A2(
+						$author$project$DomainModel$indexFromDistance,
+						A2(
+							$ianmackenzie$elm_units$Quantity$minus,
+							$author$project$DomainModel$trueLength(info.left),
+							distance),
+						info.right);
+				}
+			}
+		}
+	});
 var $author$project$DomainModel$effectiveLatitude = function (treeNode) {
 	return $author$project$DomainModel$sourceData(treeNode).a.latitude;
 };
@@ -16420,39 +16453,6 @@ var $ianmackenzie$elm_geometry$Rectangle2d$from = F2(
 			$ianmackenzie$elm_geometry$Point2d$xCoordinate(p2),
 			$ianmackenzie$elm_geometry$Point2d$yCoordinate(p2));
 	});
-var $author$project$DomainModel$indexFromDistance = F2(
-	function (distance, treeNode) {
-		indexFromDistance:
-		while (true) {
-			if (treeNode.$ === 'Leaf') {
-				var info = treeNode.a;
-				return A2(
-					$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
-					$ianmackenzie$elm_units$Quantity$half(info.trueLength),
-					distance) ? 0 : 1;
-			} else {
-				var info = treeNode.a;
-				if (A2(
-					$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
-					$author$project$DomainModel$trueLength(info.left),
-					distance)) {
-					var $temp$distance = distance,
-						$temp$treeNode = info.left;
-					distance = $temp$distance;
-					treeNode = $temp$treeNode;
-					continue indexFromDistance;
-				} else {
-					return $author$project$DomainModel$skipCount(info.left) + A2(
-						$author$project$DomainModel$indexFromDistance,
-						A2(
-							$ianmackenzie$elm_units$Quantity$minus,
-							$author$project$DomainModel$trueLength(info.left),
-							distance),
-						info.right);
-				}
-			}
-		}
-	});
 var $ianmackenzie$elm_geometry$Direction3d$componentIn = F2(
 	function (_v0, _v1) {
 		var d2 = _v0.a;
@@ -16502,7 +16502,6 @@ var $ianmackenzie$elm_geometry$Axis3d$intersectionWithPlane = F2(
 				A3($ianmackenzie$elm_geometry$Point3d$translateIn, axisDirection, axialDistance, axisOrigin));
 		}
 	});
-var $elm$core$Debug$log = _Debug_log;
 var $ianmackenzie$elm_geometry$Point2d$pixels = F2(
 	function (x, y) {
 		return $ianmackenzie$elm_geometry$Geometry$Types$Point2d(
@@ -16684,8 +16683,8 @@ var $ianmackenzie$elm_3d_camera$Camera3d$ray = F3(
 		}
 	});
 var $ianmackenzie$elm_geometry$Plane3d$zx = A2($ianmackenzie$elm_geometry$Plane3d$through, $ianmackenzie$elm_geometry$Point3d$origin, $ianmackenzie$elm_geometry$Direction3d$y);
-var $author$project$ViewProfileCharts$detectHit = F4(
-	function (event, track, _v0, context) {
+var $author$project$ViewProfileCharts$modelPointFromClick = F4(
+	function (event, _v0, context, track) {
 		var w = _v0.a;
 		var h = _v0.b;
 		var camera = A3($author$project$ViewProfileCharts$deriveAltitudeCamera, track.trackTree, context, track.currentPosition);
@@ -16703,15 +16702,20 @@ var $author$project$ViewProfileCharts$detectHit = F4(
 			A2($ianmackenzie$elm_geometry$Point2d$xy, $ianmackenzie$elm_units$Quantity$zero, hFloat),
 			A2($ianmackenzie$elm_geometry$Point2d$xy, wFloat, $ianmackenzie$elm_units$Quantity$zero));
 		var ray = A3($ianmackenzie$elm_3d_camera$Camera3d$ray, camera, screenRectangle, screenPoint);
-		var _v3 = A2($elm$core$Debug$log, 'X', x);
-		var _v4 = A2($elm$core$Debug$log, 'RECT', screenRectangle);
-		var _v5 = A2($ianmackenzie$elm_geometry$Axis3d$intersectionWithPlane, $ianmackenzie$elm_geometry$Plane3d$zx, ray);
-		if (_v5.$ === 'Just') {
-			var pointOnZX = _v5.a;
-			var _v6 = A2(
-				$elm$core$Debug$log,
-				'DISTANCE',
-				$ianmackenzie$elm_geometry$Point3d$xCoordinate(pointOnZX));
+		return A2($ianmackenzie$elm_geometry$Axis3d$intersectionWithPlane, $ianmackenzie$elm_geometry$Plane3d$zx, ray);
+	});
+var $author$project$ViewProfileCharts$detectHit = F4(
+	function (event, track, _v0, context) {
+		var w = _v0.a;
+		var h = _v0.b;
+		var _v1 = A4(
+			$author$project$ViewProfileCharts$modelPointFromClick,
+			event,
+			_Utils_Tuple2(w, h),
+			context,
+			track);
+		if (_v1.$ === 'Just') {
+			var pointOnZX = _v1.a;
 			return A2(
 				$author$project$DomainModel$indexFromDistance,
 				$ianmackenzie$elm_geometry$Point3d$xCoordinate(pointOnZX),
@@ -16720,10 +16724,61 @@ var $author$project$ViewProfileCharts$detectHit = F4(
 			return track.currentPosition;
 		}
 	});
+var $elm$core$Debug$log = _Debug_log;
 var $ianmackenzie$elm_geometry$Vector3d$meters = F3(
 	function (x, y, z) {
 		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
 			{x: x, y: y, z: z});
+	});
+var $ianmackenzie$elm_units$Pixels$inPixels = function (_v0) {
+	var numPixels = _v0.a;
+	return numPixels;
+};
+var $author$project$ViewProfileCharts$metresPerPixel = F3(
+	function (_v0, context, track) {
+		var w = _v0.a;
+		var h = _v0.b;
+		var camera = A3($author$project$ViewProfileCharts$deriveAltitudeCamera, track.trackTree, context, track.currentPosition);
+		var _v1 = _Utils_Tuple2(
+			$ianmackenzie$elm_units$Quantity$toFloatQuantity(w),
+			$ianmackenzie$elm_units$Quantity$toFloatQuantity(h));
+		var wFloat = _v1.a;
+		var hFloat = _v1.b;
+		var _v2 = _Utils_Tuple2(
+			A2($ianmackenzie$elm_geometry$Point2d$pixels, 0, 0),
+			A2($ianmackenzie$elm_geometry$Point2d$xy, wFloat, hFloat));
+		var blueCorner = _v2.a;
+		var redCorner = _v2.b;
+		var screenRectangle = A2(
+			$ianmackenzie$elm_geometry$Rectangle2d$from,
+			A2($ianmackenzie$elm_geometry$Point2d$xy, $ianmackenzie$elm_units$Quantity$zero, hFloat),
+			A2($ianmackenzie$elm_geometry$Point2d$xy, wFloat, $ianmackenzie$elm_units$Quantity$zero));
+		var _v3 = _Utils_Tuple2(
+			A3($ianmackenzie$elm_3d_camera$Camera3d$ray, camera, screenRectangle, blueCorner),
+			A3($ianmackenzie$elm_3d_camera$Camera3d$ray, camera, screenRectangle, redCorner));
+		var blueRay = _v3.a;
+		var redRay = _v3.b;
+		var _v4 = _Utils_Tuple2(
+			A2($ianmackenzie$elm_geometry$Axis3d$intersectionWithPlane, $ianmackenzie$elm_geometry$Plane3d$zx, blueRay),
+			A2($ianmackenzie$elm_geometry$Axis3d$intersectionWithPlane, $ianmackenzie$elm_geometry$Plane3d$zx, redRay));
+		var bluePoint = _v4.a;
+		var redPoint = _v4.b;
+		var _v5 = _Utils_Tuple2(bluePoint, redPoint);
+		if ((_v5.a.$ === 'Just') && (_v5.b.$ === 'Just')) {
+			var blue = _v5.a.a;
+			var red = _v5.b.a;
+			return function (len) {
+				return len / $ianmackenzie$elm_units$Pixels$inPixels(wFloat);
+			}(
+				$ianmackenzie$elm_units$Length$inMeters(
+					$ianmackenzie$elm_units$Quantity$abs(
+						A2(
+							$ianmackenzie$elm_units$Quantity$minus,
+							$ianmackenzie$elm_geometry$Point3d$xCoordinate(red),
+							$ianmackenzie$elm_geometry$Point3d$xCoordinate(blue)))));
+		} else {
+			return 1.0;
+		}
 	});
 var $author$project$ViewProfileCharts$update = F5(
 	function (msg, msgWrapper, track, _v0, context) {
@@ -16744,6 +16799,13 @@ var $author$project$ViewProfileCharts$update = F5(
 					$ianmackenzie$elm_units$Quantity$multiplyBy,
 					splitProportion,
 					$ianmackenzie$elm_units$Quantity$toFloatQuantity(givenHeight))));
+		var areaForZone = function (zone) {
+			if (zone.$ === 'ZoneAltitude') {
+				return altitudePortion;
+			} else {
+				return gradientPortion;
+			}
+		};
 		switch (msg.$) {
 			case 'ImageZoomIn':
 				return _Utils_Tuple2(
@@ -16770,32 +16832,28 @@ var $author$project$ViewProfileCharts$update = F5(
 			case 'ImageClick':
 				var zone = msg.a;
 				var event = msg.b;
-				var area = function () {
-					if (zone.$ === 'ZoneAltitude') {
-						return altitudePortion;
-					} else {
-						return gradientPortion;
-					}
-				}();
 				return context.waitingForClickDelay ? _Utils_Tuple2(
 					context,
 					_List_fromArray(
 						[
 							$author$project$Actions$SetCurrent(
-							A4($author$project$ViewProfileCharts$detectHit, event, track, area, context)),
+							A4(
+								$author$project$ViewProfileCharts$detectHit,
+								event,
+								track,
+								areaForZone(zone),
+								context)),
 							$author$project$Actions$TrackHasChanged
 						])) : _Utils_Tuple2(context, _List_Nil);
 			case 'ImageDoubleClick':
 				var zone = msg.a;
 				var event = msg.b;
-				var area = function () {
-					if (zone.$ === 'ZoneAltitude') {
-						return altitudePortion;
-					} else {
-						return gradientPortion;
-					}
-				}();
-				var nearestPoint = A4($author$project$ViewProfileCharts$detectHit, event, track, area, context);
+				var nearestPoint = A4(
+					$author$project$ViewProfileCharts$detectHit,
+					event,
+					track,
+					areaForZone(zone),
+					context);
 				return _Utils_Tuple2(
 					_Utils_update(
 						context,
@@ -16824,7 +16882,8 @@ var $author$project$ViewProfileCharts$update = F5(
 						}),
 					_List_Nil);
 			case 'ImageGrab':
-				var event = msg.a;
+				var zone = msg.a;
+				var event = msg.b;
 				var newContext = _Utils_update(
 					context,
 					{
@@ -16842,21 +16901,23 @@ var $author$project$ViewProfileCharts$update = F5(
 							msgWrapper($author$project$ViewProfileCharts$ClickDelayExpired))
 						]));
 			case 'ImageDrag':
-				var event = msg.a;
-				var _v4 = event.offsetPos;
-				var dx = _v4.a;
-				var dy = _v4.b;
-				var _v5 = _Utils_Tuple2(context.dragAction, context.orbiting);
-				if ((_v5.a.$ === 'DragPan') && (_v5.b.$ === 'Just')) {
-					var _v6 = _v5.a;
-					var _v7 = _v5.b.a;
-					var startX = _v7.a;
-					var startY = _v7.b;
-					var shiftVector = A3(
-						$ianmackenzie$elm_geometry$Vector3d$meters,
-						(startX - dx) * A2($elm$core$Basics$pow, 1.15, 22 - context.zoomLevel),
-						0,
-						0);
+				var zone = msg.a;
+				var event = msg.b;
+				var _v2 = event.offsetPos;
+				var dx = _v2.a;
+				var dy = _v2.b;
+				var _v3 = _Utils_Tuple2(context.dragAction, context.orbiting);
+				if ((_v3.a.$ === 'DragPan') && (_v3.b.$ === 'Just')) {
+					var _v4 = _v3.a;
+					var _v5 = _v3.b.a;
+					var startX = _v5.a;
+					var startY = _v5.b;
+					var panFactor = A3(
+						$author$project$ViewProfileCharts$metresPerPixel,
+						areaForZone(zone),
+						context,
+						track);
+					var shiftVector = A3($ianmackenzie$elm_geometry$Vector3d$meters, (startX - dx) * panFactor, 0, 0);
 					var newContext = _Utils_update(
 						context,
 						{
@@ -16864,12 +16925,15 @@ var $author$project$ViewProfileCharts$update = F5(
 							orbiting: $elm$core$Maybe$Just(
 								_Utils_Tuple2(dx, dy))
 						});
+					var _v6 = A2($elm$core$Debug$log, 'DX', startX - dx);
+					var _v7 = A2($elm$core$Debug$log, 'MPP', panFactor);
 					return _Utils_Tuple2(newContext, _List_Nil);
 				} else {
 					return _Utils_Tuple2(context, _List_Nil);
 				}
 			case 'ImageRelease':
-				var event = msg.a;
+				var zone = msg.a;
+				var event = msg.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						context,
@@ -28515,10 +28579,6 @@ var $author$project$ViewMap$ToggleFollowOrange = {$: 'ToggleFollowOrange'};
 var $mdgriffith$elm_ui$Internal$Model$Left = {$: 'Left'};
 var $mdgriffith$elm_ui$Element$alignLeft = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Left);
 var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
-var $ianmackenzie$elm_units$Pixels$inPixels = function (_v0) {
-	var numPixels = _v0.a;
-	return numPixels;
-};
 var $elm$svg$Svg$rect = $elm$svg$Svg$trustedNode('rect');
 var $elm$svg$Svg$Attributes$rx = _VirtualDom_attribute('rx');
 var $elm$svg$Svg$Attributes$ry = _VirtualDom_attribute('ry');
@@ -28672,19 +28732,22 @@ var $author$project$ViewProfileCharts$ImageDoubleClick = F2(
 	function (a, b) {
 		return {$: 'ImageDoubleClick', a: a, b: b};
 	});
-var $author$project$ViewProfileCharts$ImageDrag = function (a) {
-	return {$: 'ImageDrag', a: a};
-};
-var $author$project$ViewProfileCharts$ImageGrab = function (a) {
-	return {$: 'ImageGrab', a: a};
-};
+var $author$project$ViewProfileCharts$ImageDrag = F2(
+	function (a, b) {
+		return {$: 'ImageDrag', a: a, b: b};
+	});
+var $author$project$ViewProfileCharts$ImageGrab = F2(
+	function (a, b) {
+		return {$: 'ImageGrab', a: a, b: b};
+	});
 var $author$project$ViewProfileCharts$ImageMouseWheel = function (a) {
 	return {$: 'ImageMouseWheel', a: a};
 };
 var $author$project$ViewProfileCharts$ImageNoOp = {$: 'ImageNoOp'};
-var $author$project$ViewProfileCharts$ImageRelease = function (a) {
-	return {$: 'ImageRelease', a: a};
-};
+var $author$project$ViewProfileCharts$ImageRelease = F2(
+	function (a, b) {
+		return {$: 'ImageRelease', a: a, b: b};
+	});
 var $author$project$ViewProfileCharts$ZoneAltitude = {$: 'ZoneAltitude'};
 var $author$project$ViewProfileCharts$ZoneGradient = {$: 'ZoneGradient'};
 var $ianmackenzie$elm_3d_scene$Scene3d$BackgroundColor = function (a) {
@@ -29996,15 +30059,6 @@ var $author$project$ViewProfileCharts$view = F6(
 			_List_fromArray(
 				[
 					$mdgriffith$elm_ui$Element$htmlAttribute(
-					$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onDown(
-						A2($elm$core$Basics$composeR, $author$project$ViewProfileCharts$ImageGrab, msgWrapper))),
-					(!_Utils_eq(dragging, $author$project$ViewProfileCharts$DragNone)) ? $mdgriffith$elm_ui$Element$htmlAttribute(
-					$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onMove(
-						A2($elm$core$Basics$composeR, $author$project$ViewProfileCharts$ImageDrag, msgWrapper))) : $mdgriffith$elm_ui$Element$pointer,
-					$mdgriffith$elm_ui$Element$htmlAttribute(
-					$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onUp(
-						A2($elm$core$Basics$composeR, $author$project$ViewProfileCharts$ImageRelease, msgWrapper))),
-					$mdgriffith$elm_ui$Element$htmlAttribute(
 					$mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWheel(
 						function (event) {
 							return msgWrapper(
@@ -30026,6 +30080,24 @@ var $author$project$ViewProfileCharts$view = F6(
 					$mdgriffith$elm_ui$Element$el,
 					_List_fromArray(
 						[
+							$mdgriffith$elm_ui$Element$htmlAttribute(
+							$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onDown(
+								A2(
+									$elm$core$Basics$composeR,
+									$author$project$ViewProfileCharts$ImageGrab($author$project$ViewProfileCharts$ZoneAltitude),
+									msgWrapper))),
+							(!_Utils_eq(dragging, $author$project$ViewProfileCharts$DragNone)) ? $mdgriffith$elm_ui$Element$htmlAttribute(
+							$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onMove(
+								A2(
+									$elm$core$Basics$composeR,
+									$author$project$ViewProfileCharts$ImageDrag($author$project$ViewProfileCharts$ZoneAltitude),
+									msgWrapper))) : $mdgriffith$elm_ui$Element$pointer,
+							$mdgriffith$elm_ui$Element$htmlAttribute(
+							$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onUp(
+								A2(
+									$elm$core$Basics$composeR,
+									$author$project$ViewProfileCharts$ImageRelease($author$project$ViewProfileCharts$ZoneAltitude),
+									msgWrapper))),
 							$mdgriffith$elm_ui$Element$htmlAttribute(
 							$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onClick(
 								A2(
@@ -30052,6 +30124,24 @@ var $author$project$ViewProfileCharts$view = F6(
 					$mdgriffith$elm_ui$Element$el,
 					_List_fromArray(
 						[
+							$mdgriffith$elm_ui$Element$htmlAttribute(
+							$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onDown(
+								A2(
+									$elm$core$Basics$composeR,
+									$author$project$ViewProfileCharts$ImageGrab($author$project$ViewProfileCharts$ZoneGradient),
+									msgWrapper))),
+							(!_Utils_eq(dragging, $author$project$ViewProfileCharts$DragNone)) ? $mdgriffith$elm_ui$Element$htmlAttribute(
+							$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onMove(
+								A2(
+									$elm$core$Basics$composeR,
+									$author$project$ViewProfileCharts$ImageDrag($author$project$ViewProfileCharts$ZoneGradient),
+									msgWrapper))) : $mdgriffith$elm_ui$Element$pointer,
+							$mdgriffith$elm_ui$Element$htmlAttribute(
+							$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onUp(
+								A2(
+									$elm$core$Basics$composeR,
+									$author$project$ViewProfileCharts$ImageRelease($author$project$ViewProfileCharts$ZoneGradient),
+									msgWrapper))),
 							$mdgriffith$elm_ui$Element$htmlAttribute(
 							$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onClick(
 								A2(
