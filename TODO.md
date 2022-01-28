@@ -14,8 +14,6 @@ Altitude: Use z dimension to scale vertically so we always use the space availab
 Both: Work out camera elevation so that the range remains in display when zooming.
 I.e. effect is to zoom X only.
 
-BUG: Turn off follow, jumps to start.
-
 Fix click detect using X coordinate of ray.
 
 SVG overlay scale.

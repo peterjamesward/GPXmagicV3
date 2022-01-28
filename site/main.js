@@ -16942,7 +16942,10 @@ var $author$project$ViewProfileCharts$update = F5(
 				return _Utils_Tuple2(
 					_Utils_update(
 						context,
-						{followSelectedPoint: !context.followSelectedPoint}),
+						{
+							focalPoint: A2($author$project$DomainModel$earthPointFromIndex, track.currentPosition, track.trackTree),
+							followSelectedPoint: !context.followSelectedPoint
+						}),
 					_List_Nil);
 		}
 	});
