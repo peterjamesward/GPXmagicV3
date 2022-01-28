@@ -16432,7 +16432,10 @@ var $author$project$DomainModel$indexFromDistance = F2(
 					distance) ? 0 : 1;
 			} else {
 				var info = treeNode.a;
-				if (A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, info.nodeContent.trueLength, distance)) {
+				if (A2(
+					$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
+					$author$project$DomainModel$trueLength(info.left),
+					distance)) {
 					var $temp$distance = distance,
 						$temp$treeNode = info.left;
 					distance = $temp$distance;
@@ -16441,7 +16444,10 @@ var $author$project$DomainModel$indexFromDistance = F2(
 				} else {
 					return $author$project$DomainModel$skipCount(info.left) + A2(
 						$author$project$DomainModel$indexFromDistance,
-						A2($ianmackenzie$elm_units$Quantity$minus, info.nodeContent.trueLength, distance),
+						A2(
+							$ianmackenzie$elm_units$Quantity$minus,
+							$author$project$DomainModel$trueLength(info.left),
+							distance),
 						info.right);
 				}
 			}
@@ -16496,6 +16502,7 @@ var $ianmackenzie$elm_geometry$Axis3d$intersectionWithPlane = F2(
 				A3($ianmackenzie$elm_geometry$Point3d$translateIn, axisDirection, axialDistance, axisOrigin));
 		}
 	});
+var $elm$core$Debug$log = _Debug_log;
 var $ianmackenzie$elm_geometry$Point2d$pixels = F2(
 	function (x, y) {
 		return $ianmackenzie$elm_geometry$Geometry$Types$Point2d(
@@ -16696,9 +16703,15 @@ var $author$project$ViewProfileCharts$detectHit = F4(
 			A2($ianmackenzie$elm_geometry$Point2d$xy, $ianmackenzie$elm_units$Quantity$zero, hFloat),
 			A2($ianmackenzie$elm_geometry$Point2d$xy, wFloat, $ianmackenzie$elm_units$Quantity$zero));
 		var ray = A3($ianmackenzie$elm_3d_camera$Camera3d$ray, camera, screenRectangle, screenPoint);
-		var _v3 = A2($ianmackenzie$elm_geometry$Axis3d$intersectionWithPlane, $ianmackenzie$elm_geometry$Plane3d$zx, ray);
-		if (_v3.$ === 'Just') {
-			var pointOnZX = _v3.a;
+		var _v3 = A2($elm$core$Debug$log, 'X', x);
+		var _v4 = A2($elm$core$Debug$log, 'RECT', screenRectangle);
+		var _v5 = A2($ianmackenzie$elm_geometry$Axis3d$intersectionWithPlane, $ianmackenzie$elm_geometry$Plane3d$zx, ray);
+		if (_v5.$ === 'Just') {
+			var pointOnZX = _v5.a;
+			var _v6 = A2(
+				$elm$core$Debug$log,
+				'DISTANCE',
+				$ianmackenzie$elm_geometry$Point3d$xCoordinate(pointOnZX));
 			return A2(
 				$author$project$DomainModel$indexFromDistance,
 				$ianmackenzie$elm_geometry$Point3d$xCoordinate(pointOnZX),

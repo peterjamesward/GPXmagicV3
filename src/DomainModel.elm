@@ -758,12 +758,12 @@ indexFromDistance distance treeNode =
                 1
 
         Node info ->
-            if distance |> Quantity.lessThanOrEqualTo info.nodeContent.trueLength then
+            if distance |> Quantity.lessThanOrEqualTo (trueLength info.left) then
                 indexFromDistance distance info.left
 
             else
                 skipCount info.left
-                    + indexFromDistance (distance |> Quantity.minus info.nodeContent.trueLength) info.right
+                    + indexFromDistance (distance |> Quantity.minus (trueLength info.left)) info.right
 
 
 nearestToRay :

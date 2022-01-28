@@ -302,6 +302,9 @@ detectHit event track ( w, h ) context =
         ( x, y ) =
             event.offsetPos
 
+        _ = Debug.log "X" x
+        _ = Debug.log "RECT" screenRectangle
+
         screenPoint =
             Point2d.pixels x y
 
@@ -322,6 +325,9 @@ detectHit event track ( w, h ) context =
     in
     case ray |> Axis3d.intersectionWithPlane Plane3d.zx of
         Just pointOnZX ->
+            let
+                _ = Debug.log "DISTANCE" (Point3d.xCoordinate pointOnZX)
+            in
             DomainModel.indexFromDistance (Point3d.xCoordinate pointOnZX) track.trackTree
 
         Nothing ->
