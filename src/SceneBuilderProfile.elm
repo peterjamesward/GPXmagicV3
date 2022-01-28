@@ -129,7 +129,7 @@ renderAltitude track =
         currentPosLine =
             Scene3d.lineSegment (Material.color lightOrange) <|
                 LineSegment3d.from
-                    (Point3d.xyz currentDistance Quantity.zero (Length.kilometers -3))
+                    (Point3d.xyz currentDistance Quantity.zero (Length.kilometers -1))
                     (Point3d.xyz currentDistance Quantity.zero (Length.kilometers 3))
     in
     currentPosLine :: entities

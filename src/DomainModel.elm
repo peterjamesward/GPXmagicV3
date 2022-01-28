@@ -737,12 +737,12 @@ distanceFromIndex index treeNode =
                 info.trueLength
 
         Node info ->
-            if index < skipCount info.left then
+            if index <= skipCount info.left then
                 distanceFromIndex index info.left
 
             else
                 Quantity.plus
-                    info.nodeContent.trueLength
+                    (trueLength info.left)
                     (distanceFromIndex (index - skipCount info.left) info.right)
 
 
