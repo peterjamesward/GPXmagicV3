@@ -9,12 +9,45 @@ BUG: Hit detect on Map is slow, sometimes very slow. (Paris to Bree).
 
 ## Profile rendering
 
-Can we fix the altitude so that minZ stays at the bottom when zooming far out?
-> Would make y scale a tad simpler.
-> Can't figure out how not create a logical loop with metresPerPixel and deriveCamera.
-> It will help to move rendering into PaneLayoutManager (thought so before).
+Not going to try coding now; too late, but can write _about_ what we need...
+> It's literate programming.
 
-SVG overlay scale -- WIP, using charts library, looking promising.
+OK. Both altitude and gradient are rendered with some exaggeration. 
+This is because we can
+scale this _down_ at view time, but cannot increase it. 
+The aim is for the altitude vertical scale always to run from minZ to maxZ, regardless of zoom. 
+Camera zoom affects X and Y equally.
+When the zoom level is low (far away, so the track looks small), the track view
+collapses toward the view "lookingAt" point, centre of the viewport.
+
+When the track is small enough to not fill the height, we want two things:
+- The base of the track stays at the base of the view;
+- The start of the track stays at the left of the view.
+- 
+We achieve this by, at low zoom levels:
+- Raising the "lookAt" point;
+- Moving the "lookAt" point along the track 
+
+In other words:
+- The lookAt vertically must be centerZ when the height is filled;
+- When the heigh is not filled: minZ + half viewport height * metres/pixel.
+- Hence, simple `max` of these might suffice.
+
+Horizontally:
+- When current distance / metres per pixel < half viewport width, move lookAt along track.
+- More simple, lookAtX is min of half viewport width * metres/pixel and current distance.
+- Similar at the right hand side and end of track (max value for lookAtX).
+
+Stop zooming out when track fills the window exactly.
+> Use inverse of metres/pixel formula during scroll wheel message update.
+
+Gradient Y scale should be constant; always occupying the height (there's no proportion to maintain).
+This requires changing the rendering so that all furthest (low) zoom, it comes out right,
+then we always correct using camera elevation.
+
+Render current point lines using SVG.
+
+Display distance, altitude, gradient for current point.
 
 SVG overlay tracks mouse movement, shows point data.
 
