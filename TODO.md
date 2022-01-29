@@ -9,8 +9,6 @@ BUG: Hit detect on Map is slow, sometimes very slow. (Paris to Bree).
 
 ## Profile rendering
 
-BUG: Unlocking profile follow orange leaves one lost.
-
 Should be able to have a larger altitude zone without messing up the x-scrolling.
 > Easy now the metres/pixel logic is solved?
 

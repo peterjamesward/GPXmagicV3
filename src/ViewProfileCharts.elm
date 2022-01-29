@@ -239,9 +239,6 @@ deriveAltitudeCamera treeNode context currentPosition =
         centre =
             BoundingBox3d.centerPoint <| boundingBox treeNode
 
-        latitude =
-            effectiveLatitude <| leafFromIndex currentPosition treeNode
-
         altitudeLookingAt =
             if context.followSelectedPoint then
                 Point3d.xyz
@@ -269,12 +266,6 @@ deriveAltitudeCamera treeNode context currentPosition =
 deriveGradientCamera : PeteTree -> Context -> Int -> Camera3d Meters LocalCoords
 deriveGradientCamera treeNode context currentPosition =
     let
-        centre =
-            BoundingBox3d.centerPoint <| boundingBox treeNode
-
-        latitude =
-            effectiveLatitude <| leafFromIndex currentPosition treeNode
-
         gradientLookingAt =
             if context.followSelectedPoint then
                 Point3d.xyz
@@ -283,7 +274,10 @@ deriveGradientCamera treeNode context currentPosition =
                     Quantity.zero
 
             else
-                context.focalPoint
+                Point3d.xyz
+                    (Point3d.xCoordinate context.focalPoint)
+                    Quantity.zero
+                    Quantity.zero
 
         gradientViewpoint =
             Viewpoint3d.orbitZ
@@ -429,6 +423,9 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
 
                 ZoneGradient ->
                     gradientPortion
+
+        centre =
+            BoundingBox3d.centerPoint <| boundingBox track.trackTree
     in
     case msg of
         ImageZoomIn ->
@@ -531,7 +528,11 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
         ToggleFollowOrange ->
             ( { context
                 | followSelectedPoint = not context.followSelectedPoint
-                , focalPoint = earthPointFromIndex track.currentPosition track.trackTree
+                , focalPoint =
+                    Point3d.xyz
+                        (distanceFromIndex track.currentPosition track.trackTree)
+                        Quantity.zero
+                        (Point3d.zCoordinate centre)
               }
             , []
             )

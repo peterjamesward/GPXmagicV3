@@ -16108,9 +16108,6 @@ var $author$project$DomainModel$indexFromDistance = F2(
 			}
 		}
 	});
-var $author$project$DomainModel$effectiveLatitude = function (treeNode) {
-	return $author$project$DomainModel$sourceData(treeNode).a.latitude;
-};
 var $ianmackenzie$elm_units$Length$kilometer = $ianmackenzie$elm_units$Length$kilometers(1);
 var $ianmackenzie$elm_geometry$Direction2d$negativeY = $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
 	{x: 0, y: -1});
@@ -16367,8 +16364,6 @@ var $ianmackenzie$elm_3d_camera$Camera3d$orthographic = function (_arguments) {
 };
 var $author$project$ViewProfileCharts$deriveAltitudeCamera = F3(
 	function (treeNode, context, currentPosition) {
-		var latitude = $author$project$DomainModel$effectiveLatitude(
-			A2($author$project$DomainModel$leafFromIndex, currentPosition, treeNode));
 		var centre = $ianmackenzie$elm_geometry$BoundingBox3d$centerPoint(
 			$author$project$DomainModel$boundingBox(treeNode));
 		var altitudeLookingAt = context.followSelectedPoint ? A3(
@@ -16792,6 +16787,8 @@ var $author$project$ViewProfileCharts$update = F5(
 					$ianmackenzie$elm_units$Quantity$multiplyBy,
 					1.0 - splitProportion,
 					$ianmackenzie$elm_units$Quantity$toFloatQuantity(givenHeight))));
+		var centre = $ianmackenzie$elm_geometry$BoundingBox3d$centerPoint(
+			$author$project$DomainModel$boundingBox(track.trackTree));
 		var altitudePortion = _Utils_Tuple2(
 			givenWidth,
 			$ianmackenzie$elm_units$Quantity$truncate(
@@ -16942,7 +16939,11 @@ var $author$project$ViewProfileCharts$update = F5(
 					_Utils_update(
 						context,
 						{
-							focalPoint: A2($author$project$DomainModel$earthPointFromIndex, track.currentPosition, track.trackTree),
+							focalPoint: A3(
+								$ianmackenzie$elm_geometry$Point3d$xyz,
+								A2($author$project$DomainModel$distanceFromIndex, track.currentPosition, track.trackTree),
+								$ianmackenzie$elm_units$Quantity$zero,
+								$ianmackenzie$elm_geometry$Point3d$zCoordinate(centre)),
 							followSelectedPoint: !context.followSelectedPoint
 						}),
 					_List_Nil);
@@ -16952,6 +16953,9 @@ var $author$project$ViewThirdPerson$ClickDelayExpired = {$: 'ClickDelayExpired'}
 var $author$project$ViewThirdPerson$DragPan = {$: 'DragPan'};
 var $author$project$ViewThirdPerson$DragRotate = {$: 'DragRotate'};
 var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$SecondButton = {$: 'SecondButton'};
+var $author$project$DomainModel$effectiveLatitude = function (treeNode) {
+	return $author$project$DomainModel$sourceData(treeNode).a.latitude;
+};
 var $author$project$Spherical$metresPerPixelAtEquatorZoomZero = 78271.484;
 var $author$project$Spherical$metresPerPixel = F2(
 	function (zoomLevel, latitude) {
@@ -17366,7 +17370,10 @@ var $author$project$ViewThirdPerson$update = F5(
 				return _Utils_Tuple2(
 					_Utils_update(
 						context,
-						{followSelectedPoint: !context.followSelectedPoint}),
+						{
+							focalPoint: A2($author$project$DomainModel$earthPointFromIndex, track.currentPosition, track.trackTree),
+							followSelectedPoint: !context.followSelectedPoint
+						}),
 					_List_Nil);
 		}
 	});
@@ -28756,13 +28763,15 @@ var $ianmackenzie$elm_3d_scene$Scene3d$backgroundColor = function (color) {
 };
 var $author$project$ViewProfileCharts$deriveGradientCamera = F3(
 	function (treeNode, context, currentPosition) {
-		var latitude = $author$project$DomainModel$effectiveLatitude(
-			A2($author$project$DomainModel$leafFromIndex, currentPosition, treeNode));
 		var gradientLookingAt = context.followSelectedPoint ? A3(
 			$ianmackenzie$elm_geometry$Point3d$xyz,
 			A2($author$project$DomainModel$distanceFromIndex, currentPosition, treeNode),
 			$ianmackenzie$elm_units$Quantity$zero,
-			$ianmackenzie$elm_units$Quantity$zero) : context.focalPoint;
+			$ianmackenzie$elm_units$Quantity$zero) : A3(
+			$ianmackenzie$elm_geometry$Point3d$xyz,
+			$ianmackenzie$elm_geometry$Point3d$xCoordinate(context.focalPoint),
+			$ianmackenzie$elm_units$Quantity$zero,
+			$ianmackenzie$elm_units$Quantity$zero);
 		var gradientViewpoint = $ianmackenzie$elm_3d_camera$Viewpoint3d$orbitZ(
 			{
 				azimuth: $ianmackenzie$elm_geometry$Direction2d$toAngle($ianmackenzie$elm_geometry$Direction2d$negativeY),
@@ -28770,8 +28779,6 @@ var $author$project$ViewProfileCharts$deriveGradientCamera = F3(
 				elevation: context.gradientCameraElevation,
 				focalPoint: gradientLookingAt
 			});
-		var centre = $ianmackenzie$elm_geometry$BoundingBox3d$centerPoint(
-			$author$project$DomainModel$boundingBox(treeNode));
 		return $ianmackenzie$elm_3d_camera$Camera3d$orthographic(
 			{
 				viewpoint: gradientViewpoint,

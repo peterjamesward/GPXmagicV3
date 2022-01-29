@@ -397,7 +397,10 @@ update msg msgWrapper track area context =
             ( newContext, [] )
 
         ToggleFollowOrange ->
-            ( { context | followSelectedPoint = not context.followSelectedPoint }
+            ( { context
+                | followSelectedPoint = not context.followSelectedPoint
+                , focalPoint = earthPointFromIndex track.currentPosition track.trackTree
+              }
             , []
             )
 
