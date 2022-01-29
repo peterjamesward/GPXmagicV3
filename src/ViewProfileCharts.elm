@@ -29,7 +29,7 @@ import LocalCoords exposing (LocalCoords)
 import Pixels exposing (Pixels)
 import Plane3d
 import Point2d
-import Point3d
+import Point3d exposing (Point3d)
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
@@ -358,13 +358,43 @@ svgAltitudeScale :
     -> TrackLoaded msg
     -> Html msg
 svgAltitudeScale ( w, h ) context track =
+    let
+        ( zeroCorner, otherCorner ) =
+            -- Zero is upper left, hence min distance, max altitude.
+            extentOfVisibleModel ( w, h ) context track
+
+        { minX, maxX, minY, maxY, minZ, maxZ } =
+            -- Domain extent across entire model, not current view.
+            BoundingBox3d.extrema <| boundingBox track.trackTree
+
+        maxDistance =
+            trueLength track.trackTree
+
+        leftEdge =
+            case zeroCorner of
+                Just zeroPoint ->
+                    min 0 (Length.inMeters <| Point3d.xCoordinate zeroPoint)
+
+                Nothing ->
+                    0
+
+        rightEdge =
+            case otherCorner of
+                Just farPoint ->
+                    max
+                        (Length.inMeters <| Point3d.xCoordinate farPoint)
+                        (Length.inMeters maxDistance)
+
+                Nothing ->
+                    (Length.inMeters maxDistance)
+    in
     C.chart
         [ CA.height <| Pixels.inPixels <| Quantity.toFloatQuantity <| h
         , CA.width <| Pixels.inPixels <| Quantity.toFloatQuantity <| w
         , CA.margin { top = 20, bottom = 30, left = 30, right = 20 }
         , CA.range
-            [ CA.lowest 0 CA.orLower
-            , CA.highest 1300 CA.orHigher
+            [ CA.lowest leftEdge CA.exactly
+            , CA.highest rightEdge CA.orHigher
             ]
         , CA.domain
             [ CA.lowest 0 CA.orLower
@@ -379,6 +409,7 @@ svgAltitudeScale ( w, h ) context track =
         , C.xLabels [ CA.amount 10, CA.withGrid ]
         , C.yLabels [ CA.amount 10, CA.withGrid ]
         ]
+
 
 svgGradientScale :
     ( Quantity Int Pixels, Quantity Int Pixels )
@@ -409,13 +440,12 @@ svgGradientScale ( w, h ) context track =
         ]
 
 
-metresPerPixel :
+extentOfVisibleModel :
     ( Quantity Int Pixels, Quantity Int Pixels )
     -> Context
     -> TrackLoaded msg
-    -> Float
-metresPerPixel ( w, h ) context track =
-    -- This should fix the panning.
+    -> ( Maybe (Point3d Meters LocalCoords), Maybe (Point3d Meters LocalCoords) )
+extentOfVisibleModel ( w, h ) context track =
     let
         ( wFloat, hFloat ) =
             ( toFloatQuantity w, toFloatQuantity h )
@@ -442,7 +472,20 @@ metresPerPixel ( w, h ) context track =
             , redRay |> Axis3d.intersectionWithPlane Plane3d.zx
             )
     in
-    case ( bluePoint, redPoint ) of
+    ( bluePoint, redPoint )
+
+
+metresPerPixel :
+    ( Quantity Int Pixels, Quantity Int Pixels )
+    -> Context
+    -> TrackLoaded msg
+    -> Float
+metresPerPixel ( w, h ) context track =
+    let
+        ( wFloat, hFloat ) =
+            ( toFloatQuantity w, toFloatQuantity h )
+    in
+    case extentOfVisibleModel ( w, h ) context track of
         ( Just blue, Just red ) ->
             Point3d.xCoordinate blue
                 |> Quantity.minus (Point3d.xCoordinate red)

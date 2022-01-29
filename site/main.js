@@ -16809,11 +16809,7 @@ var $ianmackenzie$elm_geometry$Vector3d$meters = F3(
 		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
 			{x: x, y: y, z: z});
 	});
-var $ianmackenzie$elm_units$Pixels$inPixels = function (_v0) {
-	var numPixels = _v0.a;
-	return numPixels;
-};
-var $author$project$ViewProfileCharts$metresPerPixel = F3(
+var $author$project$ViewProfileCharts$extentOfVisibleModel = F3(
 	function (_v0, context, track) {
 		var w = _v0.a;
 		var h = _v0.b;
@@ -16842,10 +16838,29 @@ var $author$project$ViewProfileCharts$metresPerPixel = F3(
 			A2($ianmackenzie$elm_geometry$Axis3d$intersectionWithPlane, $ianmackenzie$elm_geometry$Plane3d$zx, redRay));
 		var bluePoint = _v4.a;
 		var redPoint = _v4.b;
-		var _v5 = _Utils_Tuple2(bluePoint, redPoint);
-		if ((_v5.a.$ === 'Just') && (_v5.b.$ === 'Just')) {
-			var blue = _v5.a.a;
-			var red = _v5.b.a;
+		return _Utils_Tuple2(bluePoint, redPoint);
+	});
+var $ianmackenzie$elm_units$Pixels$inPixels = function (_v0) {
+	var numPixels = _v0.a;
+	return numPixels;
+};
+var $author$project$ViewProfileCharts$metresPerPixel = F3(
+	function (_v0, context, track) {
+		var w = _v0.a;
+		var h = _v0.b;
+		var _v1 = _Utils_Tuple2(
+			$ianmackenzie$elm_units$Quantity$toFloatQuantity(w),
+			$ianmackenzie$elm_units$Quantity$toFloatQuantity(h));
+		var wFloat = _v1.a;
+		var hFloat = _v1.b;
+		var _v2 = A3(
+			$author$project$ViewProfileCharts$extentOfVisibleModel,
+			_Utils_Tuple2(w, h),
+			context,
+			track);
+		if ((_v2.a.$ === 'Just') && (_v2.b.$ === 'Just')) {
+			var blue = _v2.a.a;
+			var red = _v2.b.a;
 			return function (len) {
 				return len / $ianmackenzie$elm_units$Pixels$inPixels(wFloat);
 			}(
@@ -31025,6 +31040,10 @@ var $terezka$elm_charts$Chart$Attributes$domain = F2(
 			config,
 			{domain: v});
 	});
+var $terezka$elm_charts$Chart$Attributes$exactly = F3(
+	function (exact, _v0, _v1) {
+		return exact;
+	});
 var $terezka$elm_charts$Chart$Attributes$height = F2(
 	function (v, config) {
 		return _Utils_update(
@@ -34818,6 +34837,46 @@ var $author$project$ViewProfileCharts$svgAltitudeScale = F3(
 	function (_v0, context, track) {
 		var w = _v0.a;
 		var h = _v0.b;
+		var maxDistance = $author$project$DomainModel$trueLength(track.trackTree);
+		var _v1 = A3(
+			$author$project$ViewProfileCharts$extentOfVisibleModel,
+			_Utils_Tuple2(w, h),
+			context,
+			track);
+		var zeroCorner = _v1.a;
+		var otherCorner = _v1.b;
+		var rightEdge = function () {
+			if (otherCorner.$ === 'Just') {
+				var farPoint = otherCorner.a;
+				return A2(
+					$elm$core$Basics$max,
+					$ianmackenzie$elm_units$Length$inMeters(
+						$ianmackenzie$elm_geometry$Point3d$xCoordinate(farPoint)),
+					$ianmackenzie$elm_units$Length$inMeters(maxDistance));
+			} else {
+				return $ianmackenzie$elm_units$Length$inMeters(maxDistance);
+			}
+		}();
+		var leftEdge = function () {
+			if (zeroCorner.$ === 'Just') {
+				var zeroPoint = zeroCorner.a;
+				return A2(
+					$elm$core$Basics$min,
+					0,
+					$ianmackenzie$elm_units$Length$inMeters(
+						$ianmackenzie$elm_geometry$Point3d$xCoordinate(zeroPoint)));
+			} else {
+				return 0;
+			}
+		}();
+		var _v2 = $ianmackenzie$elm_geometry$BoundingBox3d$extrema(
+			$author$project$DomainModel$boundingBox(track.trackTree));
+		var minX = _v2.minX;
+		var maxX = _v2.maxX;
+		var minY = _v2.minY;
+		var maxY = _v2.maxY;
+		var minZ = _v2.minZ;
+		var maxZ = _v2.maxZ;
 		return A2(
 			$terezka$elm_charts$Chart$chart,
 			_List_fromArray(
@@ -34833,8 +34892,8 @@ var $author$project$ViewProfileCharts$svgAltitudeScale = F3(
 					$terezka$elm_charts$Chart$Attributes$range(
 					_List_fromArray(
 						[
-							A2($terezka$elm_charts$Chart$Attributes$lowest, 0, $terezka$elm_charts$Chart$Attributes$orLower),
-							A2($terezka$elm_charts$Chart$Attributes$highest, 1300, $terezka$elm_charts$Chart$Attributes$orHigher)
+							A2($terezka$elm_charts$Chart$Attributes$lowest, leftEdge, $terezka$elm_charts$Chart$Attributes$exactly),
+							A2($terezka$elm_charts$Chart$Attributes$highest, rightEdge, $terezka$elm_charts$Chart$Attributes$orHigher)
 						])),
 					$terezka$elm_charts$Chart$Attributes$domain(
 					_List_fromArray(
