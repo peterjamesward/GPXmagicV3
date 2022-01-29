@@ -9,6 +9,9 @@ BUG: Hit detect on Map is slow, sometimes very slow. (Paris to Bree).
 
 ## Profile rendering
 
+Can we fix the altitude so that minZ stays at the bottom when zooming far out?
+> Would make y scale a tad simpler.
+
 SVG overlay scale.
 
 SVG overlay tracks mouse movement, shows point data.

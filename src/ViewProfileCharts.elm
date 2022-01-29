@@ -218,6 +218,7 @@ view context ( givenWidth, givenHeight ) track sceneAltitude sceneGradient msgWr
             , htmlAttribute <| Mouse.onDoubleClick (ImageDoubleClick ZoneGradient >> msgWrapper)
             , padding 10
             , Background.color white
+            , inFront <| html <| svgGradientScale gradientPortion context track
             ]
           <|
             html <|
@@ -360,17 +361,46 @@ svgAltitudeScale ( w, h ) context track =
     C.chart
         [ CA.height <| Pixels.inPixels <| Quantity.toFloatQuantity <| h
         , CA.width <| Pixels.inPixels <| Quantity.toFloatQuantity <| w
+        , CA.margin { top = 20, bottom = 30, left = 30, right = 20 }
         , CA.range
-            [ CA.lowest -100 CA.orLower
-            , CA.highest 100 CA.orHigher
+            [ CA.lowest 0 CA.orLower
+            , CA.highest 1300 CA.orHigher
             ]
         , CA.domain
-            [ CA.lowest 5 CA.orLower
-            , CA.highest 100 CA.orHigher
+            [ CA.lowest 0 CA.orLower
+            , CA.highest 200 CA.orHigher
             ]
         ]
         [ C.series .x
-            [  ]
+            []
+            [ { x = 0, y = 0 }
+            , { x = 800, y = 0 }
+            ]
+        , C.xLabels [ CA.amount 10, CA.withGrid ]
+        , C.yLabels [ CA.amount 10, CA.withGrid ]
+        ]
+
+svgGradientScale :
+    ( Quantity Int Pixels, Quantity Int Pixels )
+    -> Context
+    -> TrackLoaded msg
+    -> Html msg
+svgGradientScale ( w, h ) context track =
+    C.chart
+        [ CA.height <| Pixels.inPixels <| Quantity.toFloatQuantity <| h
+        , CA.width <| Pixels.inPixels <| Quantity.toFloatQuantity <| w
+        , CA.margin { top = 20, bottom = 30, left = 30, right = 20 }
+        , CA.range
+            [ CA.lowest 0 CA.orLower
+            , CA.highest 1300 CA.orHigher
+            ]
+        , CA.domain
+            [ CA.lowest -30 CA.orLower
+            , CA.highest 30 CA.orHigher
+            ]
+        ]
+        [ C.series .x
+            []
             [ { x = 0, y = 0 }
             , { x = 800, y = 0 }
             ]

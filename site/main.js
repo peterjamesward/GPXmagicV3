@@ -31039,6 +31039,12 @@ var $terezka$elm_charts$Chart$Attributes$highest = F3(
 				max: A3(edit, v, b.max, b.dataMax)
 			});
 	});
+var $terezka$elm_charts$Chart$Attributes$margin = F2(
+	function (v, config) {
+		return _Utils_update(
+			config,
+			{margin: v});
+	});
 var $terezka$elm_charts$Chart$Attributes$orHigher = F3(
 	function (most, real, _v0) {
 		return (_Utils_cmp(real, most) < 0) ? most : real;
@@ -34822,17 +34828,75 @@ var $author$project$ViewProfileCharts$svgAltitudeScale = F3(
 					$terezka$elm_charts$Chart$Attributes$width(
 					$ianmackenzie$elm_units$Pixels$inPixels(
 						$ianmackenzie$elm_units$Quantity$toFloatQuantity(w))),
+					$terezka$elm_charts$Chart$Attributes$margin(
+					{bottom: 30, left: 30, right: 20, top: 20}),
 					$terezka$elm_charts$Chart$Attributes$range(
 					_List_fromArray(
 						[
-							A2($terezka$elm_charts$Chart$Attributes$lowest, -100, $terezka$elm_charts$Chart$Attributes$orLower),
-							A2($terezka$elm_charts$Chart$Attributes$highest, 100, $terezka$elm_charts$Chart$Attributes$orHigher)
+							A2($terezka$elm_charts$Chart$Attributes$lowest, 0, $terezka$elm_charts$Chart$Attributes$orLower),
+							A2($terezka$elm_charts$Chart$Attributes$highest, 1300, $terezka$elm_charts$Chart$Attributes$orHigher)
 						])),
 					$terezka$elm_charts$Chart$Attributes$domain(
 					_List_fromArray(
 						[
-							A2($terezka$elm_charts$Chart$Attributes$lowest, 5, $terezka$elm_charts$Chart$Attributes$orLower),
-							A2($terezka$elm_charts$Chart$Attributes$highest, 100, $terezka$elm_charts$Chart$Attributes$orHigher)
+							A2($terezka$elm_charts$Chart$Attributes$lowest, 0, $terezka$elm_charts$Chart$Attributes$orLower),
+							A2($terezka$elm_charts$Chart$Attributes$highest, 200, $terezka$elm_charts$Chart$Attributes$orHigher)
+						]))
+				]),
+			_List_fromArray(
+				[
+					A3(
+					$terezka$elm_charts$Chart$series,
+					function ($) {
+						return $.x;
+					},
+					_List_Nil,
+					_List_fromArray(
+						[
+							{x: 0, y: 0},
+							{x: 800, y: 0}
+						])),
+					$terezka$elm_charts$Chart$xLabels(
+					_List_fromArray(
+						[
+							$terezka$elm_charts$Chart$Attributes$amount(10),
+							$terezka$elm_charts$Chart$Attributes$withGrid
+						])),
+					$terezka$elm_charts$Chart$yLabels(
+					_List_fromArray(
+						[
+							$terezka$elm_charts$Chart$Attributes$amount(10),
+							$terezka$elm_charts$Chart$Attributes$withGrid
+						]))
+				]));
+	});
+var $author$project$ViewProfileCharts$svgGradientScale = F3(
+	function (_v0, context, track) {
+		var w = _v0.a;
+		var h = _v0.b;
+		return A2(
+			$terezka$elm_charts$Chart$chart,
+			_List_fromArray(
+				[
+					$terezka$elm_charts$Chart$Attributes$height(
+					$ianmackenzie$elm_units$Pixels$inPixels(
+						$ianmackenzie$elm_units$Quantity$toFloatQuantity(h))),
+					$terezka$elm_charts$Chart$Attributes$width(
+					$ianmackenzie$elm_units$Pixels$inPixels(
+						$ianmackenzie$elm_units$Quantity$toFloatQuantity(w))),
+					$terezka$elm_charts$Chart$Attributes$margin(
+					{bottom: 30, left: 30, right: 20, top: 20}),
+					$terezka$elm_charts$Chart$Attributes$range(
+					_List_fromArray(
+						[
+							A2($terezka$elm_charts$Chart$Attributes$lowest, 0, $terezka$elm_charts$Chart$Attributes$orLower),
+							A2($terezka$elm_charts$Chart$Attributes$highest, 1300, $terezka$elm_charts$Chart$Attributes$orHigher)
+						])),
+					$terezka$elm_charts$Chart$Attributes$domain(
+					_List_fromArray(
+						[
+							A2($terezka$elm_charts$Chart$Attributes$lowest, -30, $terezka$elm_charts$Chart$Attributes$orLower),
+							A2($terezka$elm_charts$Chart$Attributes$highest, 30, $terezka$elm_charts$Chart$Attributes$orHigher)
 						]))
 				]),
 			_List_fromArray(
@@ -36197,7 +36261,10 @@ var $author$project$ViewProfileCharts$view = F6(
 									$author$project$ViewProfileCharts$ImageDoubleClick($author$project$ViewProfileCharts$ZoneGradient),
 									msgWrapper))),
 							$mdgriffith$elm_ui$Element$padding(10),
-							$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$white)
+							$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$white),
+							$mdgriffith$elm_ui$Element$inFront(
+							$mdgriffith$elm_ui$Element$html(
+								A3($author$project$ViewProfileCharts$svgGradientScale, gradientPortion, context, track)))
 						]),
 					$mdgriffith$elm_ui$Element$html(
 						$ianmackenzie$elm_3d_scene$Scene3d$unlit(
