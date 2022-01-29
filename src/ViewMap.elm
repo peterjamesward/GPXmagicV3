@@ -26,11 +26,20 @@ type Msg
     = ToggleFollowOrange
 
 
-initialiseContext =
-    { mapClickDebounce = False
-    , lastMapClick = ( 0, 0 )
-    , followOrange = False
-    }
+initialiseContext : Maybe Context -> Context
+initialiseContext currentContext =
+    case currentContext of
+        Just context ->
+            { context
+                | mapClickDebounce = False
+                , lastMapClick = ( 0, 0 )
+            }
+
+        Nothing ->
+            { mapClickDebounce = False
+            , lastMapClick = ( 0, 0 )
+            , followOrange = False
+            }
 
 
 update :

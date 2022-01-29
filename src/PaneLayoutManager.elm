@@ -460,11 +460,13 @@ initialisePane track options pane =
     { pane
         | thirdPersonContext =
             Just <|
-                ViewThirdPerson.initialiseView 0 track.trackTree
+                ViewThirdPerson.initialiseView 0 track.trackTree pane.thirdPersonContext
         , profileContext =
             Just <|
-                ViewProfileCharts.initialiseView 0 track.trackTree
-        , mapContext = Just ViewMap.initialiseContext
+                ViewProfileCharts.initialiseView 0 track.trackTree pane.profileContext
+        , mapContext =
+            Just <|
+                ViewMap.initialiseContext pane.mapContext
     }
 
 

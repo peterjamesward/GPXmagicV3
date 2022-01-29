@@ -10313,10 +10313,22 @@ var $elm$core$List$head = function (list) {
 		return $elm$core$Maybe$Nothing;
 	}
 };
-var $author$project$ViewMap$initialiseContext = {
-	followOrange: false,
-	lastMapClick: _Utils_Tuple2(0, 0),
-	mapClickDebounce: false
+var $author$project$ViewMap$initialiseContext = function (currentContext) {
+	if (currentContext.$ === 'Just') {
+		var context = currentContext.a;
+		return _Utils_update(
+			context,
+			{
+				lastMapClick: _Utils_Tuple2(0, 0),
+				mapClickDebounce: false
+			});
+	} else {
+		return {
+			followOrange: false,
+			lastMapClick: _Utils_Tuple2(0, 0),
+			mapClickDebounce: false
+		};
+	}
 };
 var $author$project$ViewProfileCharts$DragNone = {$: 'DragNone'};
 var $ianmackenzie$elm_units$Length$meters = function (numMeters) {
@@ -10373,23 +10385,43 @@ var $author$project$DomainModel$asRecord = function (treeNode) {
 var $author$project$DomainModel$startPoint = function (treeNode) {
 	return $author$project$DomainModel$asRecord(treeNode).startPoint;
 };
-var $author$project$ViewProfileCharts$initialiseView = F2(
-	function (current, treeNode) {
-		return {
-			altitudeCameraElevation: $ianmackenzie$elm_units$Angle$degrees(0),
-			cameraDistance: $ianmackenzie$elm_units$Length$kilometers(10),
-			defaultZoomLevel: 10.0,
-			dragAction: $author$project$ViewProfileCharts$DragNone,
-			fieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
-			focalPoint: $author$project$DomainModel$startPoint(
-				A2($author$project$DomainModel$leafFromIndex, current, treeNode)),
-			followSelectedPoint: false,
-			gradientCameraElevation: $ianmackenzie$elm_units$Angle$degrees(0),
-			metresPerPixel: 10.0,
-			orbiting: $elm$core$Maybe$Nothing,
-			waitingForClickDelay: false,
-			zoomLevel: 10.0
-		};
+var $author$project$ViewProfileCharts$initialiseView = F3(
+	function (current, treeNode, currentContext) {
+		if (currentContext.$ === 'Just') {
+			var context = currentContext.a;
+			return _Utils_update(
+				context,
+				{
+					altitudeCameraElevation: $ianmackenzie$elm_units$Angle$degrees(0),
+					cameraDistance: $ianmackenzie$elm_units$Length$kilometers(10),
+					defaultZoomLevel: 10.0,
+					dragAction: $author$project$ViewProfileCharts$DragNone,
+					fieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
+					focalPoint: $author$project$DomainModel$startPoint(
+						A2($author$project$DomainModel$leafFromIndex, current, treeNode)),
+					gradientCameraElevation: $ianmackenzie$elm_units$Angle$degrees(0),
+					metresPerPixel: 10.0,
+					orbiting: $elm$core$Maybe$Nothing,
+					waitingForClickDelay: false,
+					zoomLevel: 10.0
+				});
+		} else {
+			return {
+				altitudeCameraElevation: $ianmackenzie$elm_units$Angle$degrees(0),
+				cameraDistance: $ianmackenzie$elm_units$Length$kilometers(10),
+				defaultZoomLevel: 10.0,
+				dragAction: $author$project$ViewProfileCharts$DragNone,
+				fieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
+				focalPoint: $author$project$DomainModel$startPoint(
+					A2($author$project$DomainModel$leafFromIndex, current, treeNode)),
+				followSelectedPoint: false,
+				gradientCameraElevation: $ianmackenzie$elm_units$Angle$degrees(0),
+				metresPerPixel: 10.0,
+				orbiting: $elm$core$Maybe$Nothing,
+				waitingForClickDelay: false,
+				zoomLevel: 10.0
+			};
+		}
 	});
 var $author$project$ViewThirdPerson$DragNone = {$: 'DragNone'};
 var $ianmackenzie$elm_geometry$Geometry$Types$Direction2d = function (a) {
@@ -10398,33 +10430,53 @@ var $ianmackenzie$elm_geometry$Geometry$Types$Direction2d = function (a) {
 var $ianmackenzie$elm_geometry$Direction2d$positiveX = $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
 	{x: 1, y: 0});
 var $ianmackenzie$elm_geometry$Direction2d$x = $ianmackenzie$elm_geometry$Direction2d$positiveX;
-var $author$project$ViewThirdPerson$initialiseView = F2(
-	function (current, treeNode) {
-		return {
-			cameraAzimuth: $ianmackenzie$elm_geometry$Direction2d$x,
-			cameraDistance: $ianmackenzie$elm_units$Length$kilometers(10),
-			cameraElevation: $ianmackenzie$elm_units$Angle$degrees(30),
-			defaultZoomLevel: 10.0,
-			dragAction: $author$project$ViewThirdPerson$DragNone,
-			fieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
-			focalPoint: $author$project$DomainModel$startPoint(
-				A2($author$project$DomainModel$leafFromIndex, current, treeNode)),
-			followSelectedPoint: false,
-			orbiting: $elm$core$Maybe$Nothing,
-			waitingForClickDelay: false,
-			zoomLevel: 10.0
-		};
+var $author$project$ViewThirdPerson$initialiseView = F3(
+	function (current, treeNode, currentContext) {
+		if (currentContext.$ === 'Just') {
+			var context = currentContext.a;
+			return _Utils_update(
+				context,
+				{
+					cameraAzimuth: $ianmackenzie$elm_geometry$Direction2d$x,
+					cameraDistance: $ianmackenzie$elm_units$Length$kilometers(10),
+					cameraElevation: $ianmackenzie$elm_units$Angle$degrees(30),
+					defaultZoomLevel: 10.0,
+					dragAction: $author$project$ViewThirdPerson$DragNone,
+					fieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
+					focalPoint: $author$project$DomainModel$startPoint(
+						A2($author$project$DomainModel$leafFromIndex, current, treeNode)),
+					orbiting: $elm$core$Maybe$Nothing,
+					waitingForClickDelay: false,
+					zoomLevel: 10.0
+				});
+		} else {
+			return {
+				cameraAzimuth: $ianmackenzie$elm_geometry$Direction2d$x,
+				cameraDistance: $ianmackenzie$elm_units$Length$kilometers(10),
+				cameraElevation: $ianmackenzie$elm_units$Angle$degrees(30),
+				defaultZoomLevel: 10.0,
+				dragAction: $author$project$ViewThirdPerson$DragNone,
+				fieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
+				focalPoint: $author$project$DomainModel$startPoint(
+					A2($author$project$DomainModel$leafFromIndex, current, treeNode)),
+				followSelectedPoint: true,
+				orbiting: $elm$core$Maybe$Nothing,
+				waitingForClickDelay: false,
+				zoomLevel: 10.0
+			};
+		}
 	});
 var $author$project$PaneLayoutManager$initialisePane = F3(
 	function (track, options, pane) {
 		return _Utils_update(
 			pane,
 			{
-				mapContext: $elm$core$Maybe$Just($author$project$ViewMap$initialiseContext),
+				mapContext: $elm$core$Maybe$Just(
+					$author$project$ViewMap$initialiseContext(pane.mapContext)),
 				profileContext: $elm$core$Maybe$Just(
-					A2($author$project$ViewProfileCharts$initialiseView, 0, track.trackTree)),
+					A3($author$project$ViewProfileCharts$initialiseView, 0, track.trackTree, pane.profileContext)),
 				thirdPersonContext: $elm$core$Maybe$Just(
-					A2($author$project$ViewThirdPerson$initialiseView, 0, track.trackTree))
+					A3($author$project$ViewThirdPerson$initialiseView, 0, track.trackTree, pane.thirdPersonContext))
 			});
 	});
 var $author$project$PaneLayoutManager$initialise = F2(
@@ -16135,7 +16187,6 @@ var $ianmackenzie$elm_units$Quantity$greaterThan = F2(
 		var x = _v1.a;
 		return _Utils_cmp(x, y) > 0;
 	});
-var $elm$core$Debug$log = _Debug_log;
 var $ianmackenzie$elm_geometry$Direction2d$negativeY = $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
 	{x: 0, y: -1});
 var $ianmackenzie$elm_3d_camera$Camera3d$Types$Viewpoint3d = function (a) {
@@ -16393,9 +16444,6 @@ var $author$project$ViewProfileCharts$deriveAltitudeCamera = F3(
 	function (treeNode, context, currentPosition) {
 		var viewportHeight = $ianmackenzie$elm_units$Length$meters(
 			A2($elm$core$Basics$pow, 2, 22 - context.zoomLevel));
-		var centreZ = $ianmackenzie$elm_geometry$Point3d$zCoordinate(
-			$ianmackenzie$elm_geometry$BoundingBox3d$centerPoint(
-				$author$project$DomainModel$boundingBox(treeNode)));
 		var altitudeLookingAt = context.followSelectedPoint ? A3(
 			$ianmackenzie$elm_geometry$Point3d$xyz,
 			A2($author$project$DomainModel$distanceFromIndex, currentPosition, treeNode),
@@ -16423,10 +16471,6 @@ var $author$project$ViewProfileCharts$deriveAltitudeCamera = F3(
 				elevation: elevationToReduce,
 				focalPoint: altitudeLookingAt
 			});
-		var _v1 = A2(
-			$elm$core$Debug$log,
-			'Range, Height, Reduction',
-			_Utils_Tuple3(rangeOfY, viewportHeight, requiredReduction));
 		return $ianmackenzie$elm_3d_camera$Camera3d$orthographic(
 			{viewpoint: altitudeViewpoint, viewportHeight: viewportHeight});
 	});
@@ -16862,7 +16906,11 @@ var $author$project$ViewProfileCharts$update = F5(
 					_List_Nil);
 			case 'ImageReset':
 				return _Utils_Tuple2(
-					A2($author$project$ViewProfileCharts$initialiseView, track.currentPosition, track.trackTree),
+					A3(
+						$author$project$ViewProfileCharts$initialiseView,
+						track.currentPosition,
+						track.trackTree,
+						$elm$core$Maybe$Just(context)),
 					_List_Nil);
 			case 'ImageNoOp':
 				return _Utils_Tuple2(context, _List_Nil);
@@ -17273,7 +17321,11 @@ var $author$project$ViewThirdPerson$update = F5(
 				return _Utils_Tuple2(newContext, _List_Nil);
 			case 'ImageReset':
 				return _Utils_Tuple2(
-					A2($author$project$ViewThirdPerson$initialiseView, track.currentPosition, track.trackTree),
+					A3(
+						$author$project$ViewThirdPerson$initialiseView,
+						track.currentPosition,
+						track.trackTree,
+						$elm$core$Maybe$Just(context)),
 					_List_Nil);
 			case 'ImageNoOp':
 				return _Utils_Tuple2(context, _List_Nil);
@@ -29929,6 +29981,7 @@ var $ianmackenzie$elm_3d_scene$Scene3d$unlit = function (_arguments) {
 		});
 };
 var $avh4$elm_color$Color$white = A4($avh4$elm_color$Color$RgbaSpace, 255 / 255, 255 / 255, 255 / 255, 1.0);
+var $smucode$elm_flat_colors$FlatColors$ChinesePalette$white = A3($mdgriffith$elm_ui$Element$rgb255, 255, 255, 255);
 var $author$project$ViewProfileCharts$ImageReset = {$: 'ImageReset'};
 var $author$project$ViewProfileCharts$ImageZoomIn = {$: 'ImageZoomIn'};
 var $author$project$ViewProfileCharts$ImageZoomOut = {$: 'ImageZoomOut'};
@@ -29989,7 +30042,6 @@ var $feathericons$elm_feather$FeatherIcons$plus = A2(
 			_List_Nil)
 		]));
 var $author$project$ViewProfileCharts$stopProp = {preventDefault: false, stopPropagation: true};
-var $smucode$elm_flat_colors$FlatColors$ChinesePalette$white = A3($mdgriffith$elm_ui$Element$rgb255, 255, 255, 255);
 var $author$project$ViewProfileCharts$zoomButtons = F2(
 	function (msgWrapper, context) {
 		return A2(
@@ -30086,20 +30138,34 @@ var $author$project$ViewProfileCharts$view = F6(
 		var givenHeight = _v0.b;
 		var splitProportion = 0.5;
 		var gradientPortion = _Utils_Tuple2(
-			givenWidth,
+			A2(
+				$ianmackenzie$elm_units$Quantity$minus,
+				$ianmackenzie$elm_units$Pixels$pixels(20),
+				givenWidth),
 			$ianmackenzie$elm_units$Quantity$truncate(
 				A2(
 					$ianmackenzie$elm_units$Quantity$multiplyBy,
 					1.0 - splitProportion,
-					$ianmackenzie$elm_units$Quantity$toFloatQuantity(givenHeight))));
+					$ianmackenzie$elm_units$Quantity$toFloatQuantity(
+						A2(
+							$ianmackenzie$elm_units$Quantity$minus,
+							$ianmackenzie$elm_units$Pixels$pixels(20),
+							givenHeight)))));
 		var dragging = context.dragAction;
 		var altitudePortion = _Utils_Tuple2(
-			givenWidth,
+			A2(
+				$ianmackenzie$elm_units$Quantity$minus,
+				$ianmackenzie$elm_units$Pixels$pixels(20),
+				givenWidth),
 			$ianmackenzie$elm_units$Quantity$truncate(
 				A2(
 					$ianmackenzie$elm_units$Quantity$multiplyBy,
 					splitProportion,
-					$ianmackenzie$elm_units$Quantity$toFloatQuantity(givenHeight))));
+					$ianmackenzie$elm_units$Quantity$toFloatQuantity(
+						A2(
+							$ianmackenzie$elm_units$Quantity$minus,
+							$ianmackenzie$elm_units$Pixels$pixels(20),
+							givenHeight)))));
 		return A2(
 			$mdgriffith$elm_ui$Element$column,
 			_List_fromArray(
@@ -30155,7 +30221,9 @@ var $author$project$ViewProfileCharts$view = F6(
 								A2(
 									$elm$core$Basics$composeR,
 									$author$project$ViewProfileCharts$ImageDoubleClick($author$project$ViewProfileCharts$ZoneAltitude),
-									msgWrapper)))
+									msgWrapper))),
+							$mdgriffith$elm_ui$Element$padding(10),
+							$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$white)
 						]),
 					$mdgriffith$elm_ui$Element$html(
 						$ianmackenzie$elm_3d_scene$Scene3d$unlit(
@@ -30199,7 +30267,9 @@ var $author$project$ViewProfileCharts$view = F6(
 								A2(
 									$elm$core$Basics$composeR,
 									$author$project$ViewProfileCharts$ImageDoubleClick($author$project$ViewProfileCharts$ZoneGradient),
-									msgWrapper)))
+									msgWrapper))),
+							$mdgriffith$elm_ui$Element$padding(10),
+							$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$white)
 						]),
 					$mdgriffith$elm_ui$Element$html(
 						$ianmackenzie$elm_3d_scene$Scene3d$unlit(

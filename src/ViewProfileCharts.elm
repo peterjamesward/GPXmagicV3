@@ -153,16 +153,19 @@ view context ( givenWidth, givenHeight ) track sceneAltitude sceneGradient msgWr
             0.5
 
         altitudePortion =
-            ( givenWidth
+            -- Subtract pixels we use for padding around the scene view.
+            ( givenWidth |> Quantity.minus (Pixels.pixels 20)
             , givenHeight
+                |> Quantity.minus (Pixels.pixels 20)
                 |> Quantity.toFloatQuantity
                 |> Quantity.multiplyBy splitProportion
                 |> Quantity.truncate
             )
 
         gradientPortion =
-            ( givenWidth
+            ( givenWidth |> Quantity.minus (Pixels.pixels 20)
             , givenHeight
+                |> Quantity.minus (Pixels.pixels 20)
                 |> Quantity.toFloatQuantity
                 |> Quantity.multiplyBy (1.0 - splitProportion)
                 |> Quantity.truncate
@@ -188,6 +191,8 @@ view context ( givenWidth, givenHeight ) track sceneAltitude sceneGradient msgWr
             , htmlAttribute <| Mouse.onUp (ImageRelease ZoneAltitude >> msgWrapper)
             , htmlAttribute <| Mouse.onClick (ImageClick ZoneAltitude >> msgWrapper)
             , htmlAttribute <| Mouse.onDoubleClick (ImageDoubleClick ZoneAltitude >> msgWrapper)
+            , padding 10
+            , Background.color white
             ]
           <|
             html <|
@@ -208,6 +213,8 @@ view context ( givenWidth, givenHeight ) track sceneAltitude sceneGradient msgWr
             , htmlAttribute <| Mouse.onUp (ImageRelease ZoneGradient >> msgWrapper)
             , htmlAttribute <| Mouse.onClick (ImageClick ZoneGradient >> msgWrapper)
             , htmlAttribute <| Mouse.onDoubleClick (ImageDoubleClick ZoneGradient >> msgWrapper)
+            , padding 10
+            , Background.color white
             ]
           <|
             html <|
@@ -240,11 +247,6 @@ deriveAltitudeCamera treeNode context currentPosition =
     -- fits within the view regardless of zoom level. This approach because it
     -- avoids having to rebuild the scene.
     let
-        centreZ =
-            Point3d.zCoordinate <|
-                BoundingBox3d.centerPoint <|
-                    boundingBox treeNode
-
         { minX, maxX, minY, maxY, minZ, maxZ } =
             BoundingBox3d.extrema <| boundingBox treeNode
 
@@ -262,8 +264,6 @@ deriveAltitudeCamera treeNode context currentPosition =
 
             else
                 1.0
-
-        _ = Debug.log "Range, Height, Reduction" (rangeOfY, viewportHeight, requiredReduction)
 
         elevationToReduce =
             Angle.radians <| acos requiredReduction
@@ -464,7 +464,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
             ( { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel - 0.5 }, [] )
 
         ImageReset ->
-            ( initialiseView track.currentPosition track.trackTree, [] )
+            ( initialiseView track.currentPosition track.trackTree (Just context), [] )
 
         ImageNoOp ->
             ( context, [] )
@@ -570,18 +570,36 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
 initialiseView :
     Int
     -> PeteTree
+    -> Maybe Context
     -> Context
-initialiseView current treeNode =
-    { altitudeCameraElevation = Angle.degrees 0
-    , gradientCameraElevation = Angle.degrees 0
-    , cameraDistance = Length.kilometers 10
-    , fieldOfView = Angle.degrees 45
-    , orbiting = Nothing
-    , dragAction = DragNone
-    , zoomLevel = 10.0
-    , defaultZoomLevel = 10.0
-    , focalPoint = treeNode |> leafFromIndex current |> startPoint
-    , waitingForClickDelay = False
-    , followSelectedPoint = False
-    , metresPerPixel = 10.0
-    }
+initialiseView current treeNode currentContext =
+    case currentContext of
+        Just context ->
+            { context
+                | altitudeCameraElevation = Angle.degrees 0
+                , gradientCameraElevation = Angle.degrees 0
+                , cameraDistance = Length.kilometers 10
+                , fieldOfView = Angle.degrees 45
+                , orbiting = Nothing
+                , dragAction = DragNone
+                , zoomLevel = 10.0
+                , defaultZoomLevel = 10.0
+                , focalPoint = treeNode |> leafFromIndex current |> startPoint
+                , waitingForClickDelay = False
+                , metresPerPixel = 10.0
+            }
+
+        Nothing ->
+            { altitudeCameraElevation = Angle.degrees 0
+            , gradientCameraElevation = Angle.degrees 0
+            , cameraDistance = Length.kilometers 10
+            , fieldOfView = Angle.degrees 45
+            , orbiting = Nothing
+            , dragAction = DragNone
+            , zoomLevel = 10.0
+            , defaultZoomLevel = 10.0
+            , focalPoint = treeNode |> leafFromIndex current |> startPoint
+            , waitingForClickDelay = False
+            , followSelectedPoint = False
+            , metresPerPixel = 10.0
+            }

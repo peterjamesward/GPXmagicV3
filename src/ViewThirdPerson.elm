@@ -258,7 +258,7 @@ update msg msgWrapper track area context =
             ( newContext, [] )
 
         ImageReset ->
-            ( initialiseView track.currentPosition track.trackTree
+            ( initialiseView track.currentPosition track.trackTree (Just context)
             , []
             )
 
@@ -408,18 +408,36 @@ update msg msgWrapper track area context =
 initialiseView :
     Int
     -> PeteTree
+    -> Maybe Context
     -> Context
-initialiseView current treeNode =
-    { cameraAzimuth = Direction2d.x
-    , cameraElevation = Angle.degrees 30
-    , cameraDistance = Length.kilometers 10
-    , fieldOfView = Angle.degrees 45
-    , orbiting = Nothing
-    , dragAction = DragNone
-    , zoomLevel = 10.0
-    , defaultZoomLevel = 10.0
-    , focalPoint =
-        treeNode |> leafFromIndex current |> startPoint
-    , waitingForClickDelay = False
-    , followSelectedPoint = False
-    }
+initialiseView current treeNode currentContext =
+    case currentContext of
+        Just context ->
+            { context
+                | cameraAzimuth = Direction2d.x
+                , cameraElevation = Angle.degrees 30
+                , cameraDistance = Length.kilometers 10
+                , fieldOfView = Angle.degrees 45
+                , orbiting = Nothing
+                , dragAction = DragNone
+                , zoomLevel = 10.0
+                , defaultZoomLevel = 10.0
+                , focalPoint =
+                    treeNode |> leafFromIndex current |> startPoint
+                , waitingForClickDelay = False
+            }
+
+        Nothing ->
+            { cameraAzimuth = Direction2d.x
+            , cameraElevation = Angle.degrees 30
+            , cameraDistance = Length.kilometers 10
+            , fieldOfView = Angle.degrees 45
+            , orbiting = Nothing
+            , dragAction = DragNone
+            , zoomLevel = 10.0
+            , defaultZoomLevel = 10.0
+            , focalPoint =
+                treeNode |> leafFromIndex current |> startPoint
+            , waitingForClickDelay = False
+            , followSelectedPoint = True
+            }
