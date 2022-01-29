@@ -28,10 +28,15 @@ renderBoth : TrackLoaded msg -> ( List (Entity LocalCoords), List (Entity LocalC
 renderBoth track =
     let
         floorPlane =
-            Plane3d.xy |> Plane3d.offsetBy minZ
+            Plane3d.xy
+                |> Plane3d.offsetBy
+                    (minZ |> Quantity.minus centreZ |> Quantity.multiplyBy 5.0)
 
         { minX, maxX, minY, maxY, minZ, maxZ } =
             BoundingBox3d.extrema <| boundingBox track.trackTree
+
+        centreZ =
+            Point3d.zCoordinate <| BoundingBox3d.centerPoint <| boundingBox track.trackTree
 
         highDetailBox =
             DomainModel.earthPointFromIndex track.currentPosition track.trackTree
@@ -46,16 +51,23 @@ renderBoth track =
         makeAltitudeSegment distance road =
             let
                 profileStart =
+                    -- Try exaggerating scale here and compensating in the view.
                     Point3d.xyz
                         distance
                         Quantity.zero
-                        (Point3d.zCoordinate road.startPoint |> Quantity.minus minZ)
+                        (Point3d.zCoordinate road.startPoint
+                            |> Quantity.minus centreZ
+                            |> Quantity.multiplyBy 5.0
+                        )
 
                 profileEnd =
                     Point3d.xyz
                         (distance |> Quantity.plus road.trueLength)
                         Quantity.zero
-                        (Point3d.zCoordinate road.endPoint |> Quantity.minus minZ)
+                        (Point3d.zCoordinate road.endPoint
+                            |> Quantity.minus centreZ
+                            |> Quantity.multiplyBy 5.0
+                        )
 
                 gradient =
                     DomainModel.gradientFromNode <| Leaf road

@@ -14383,6 +14383,11 @@ var $author$project$SceneBuilderProfile$gradientColourPastel = function (slope) 
 		0.6,
 		0.7);
 };
+var $ianmackenzie$elm_units$Quantity$multiplyBy = F2(
+	function (scale, _v0) {
+		var value = _v0.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(scale * value);
+	});
 var $author$project$SceneBuilderProfile$renderBoth = function (track) {
 	var makeGradientSegment = F2(
 		function (distance, road) {
@@ -14446,6 +14451,9 @@ var $author$project$SceneBuilderProfile$renderBoth = function (track) {
 				currentDistance,
 				$ianmackenzie$elm_units$Quantity$zero,
 				$ianmackenzie$elm_units$Length$kilometers(3))));
+	var centreZ = $ianmackenzie$elm_geometry$Point3d$zCoordinate(
+		$ianmackenzie$elm_geometry$BoundingBox3d$centerPoint(
+			$author$project$DomainModel$boundingBox(track.trackTree)));
 	var _v0 = $ianmackenzie$elm_geometry$BoundingBox3d$extrema(
 		$author$project$DomainModel$boundingBox(track.trackTree));
 	var minX = _v0.minX;
@@ -14454,7 +14462,13 @@ var $author$project$SceneBuilderProfile$renderBoth = function (track) {
 	var maxY = _v0.maxY;
 	var minZ = _v0.minZ;
 	var maxZ = _v0.maxZ;
-	var floorPlane = A2($ianmackenzie$elm_geometry$Plane3d$offsetBy, minZ, $ianmackenzie$elm_geometry$Plane3d$xy);
+	var floorPlane = A2(
+		$ianmackenzie$elm_geometry$Plane3d$offsetBy,
+		A2(
+			$ianmackenzie$elm_units$Quantity$multiplyBy,
+			5.0,
+			A2($ianmackenzie$elm_units$Quantity$minus, centreZ, minZ)),
+		$ianmackenzie$elm_geometry$Plane3d$xy);
 	var makeAltitudeSegment = F2(
 		function (distance, road) {
 			var profileStart = A3(
@@ -14462,17 +14476,23 @@ var $author$project$SceneBuilderProfile$renderBoth = function (track) {
 				distance,
 				$ianmackenzie$elm_units$Quantity$zero,
 				A2(
-					$ianmackenzie$elm_units$Quantity$minus,
-					minZ,
-					$ianmackenzie$elm_geometry$Point3d$zCoordinate(road.startPoint)));
+					$ianmackenzie$elm_units$Quantity$multiplyBy,
+					5.0,
+					A2(
+						$ianmackenzie$elm_units$Quantity$minus,
+						centreZ,
+						$ianmackenzie$elm_geometry$Point3d$zCoordinate(road.startPoint))));
 			var profileEnd = A3(
 				$ianmackenzie$elm_geometry$Point3d$xyz,
 				A2($ianmackenzie$elm_units$Quantity$plus, road.trueLength, distance),
 				$ianmackenzie$elm_units$Quantity$zero,
 				A2(
-					$ianmackenzie$elm_units$Quantity$minus,
-					minZ,
-					$ianmackenzie$elm_geometry$Point3d$zCoordinate(road.endPoint)));
+					$ianmackenzie$elm_units$Quantity$multiplyBy,
+					5.0,
+					A2(
+						$ianmackenzie$elm_units$Quantity$minus,
+						centreZ,
+						$ianmackenzie$elm_geometry$Point3d$zCoordinate(road.endPoint))));
 			var roadAsSegment = A2($ianmackenzie$elm_geometry$LineSegment3d$from, profileStart, profileEnd);
 			var gradient = $author$project$DomainModel$gradientFromNode(
 				$author$project$DomainModel$Leaf(road));
@@ -16108,7 +16128,14 @@ var $author$project$DomainModel$indexFromDistance = F2(
 			}
 		}
 	});
-var $ianmackenzie$elm_units$Length$kilometer = $ianmackenzie$elm_units$Length$kilometers(1);
+var $elm$core$Basics$acos = _Basics_acos;
+var $ianmackenzie$elm_units$Quantity$greaterThan = F2(
+	function (_v0, _v1) {
+		var y = _v0.a;
+		var x = _v1.a;
+		return _Utils_cmp(x, y) > 0;
+	});
+var $elm$core$Debug$log = _Debug_log;
 var $ianmackenzie$elm_geometry$Direction2d$negativeY = $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
 	{x: 0, y: -1});
 var $ianmackenzie$elm_3d_camera$Camera3d$Types$Viewpoint3d = function (a) {
@@ -16364,26 +16391,44 @@ var $ianmackenzie$elm_3d_camera$Camera3d$orthographic = function (_arguments) {
 };
 var $author$project$ViewProfileCharts$deriveAltitudeCamera = F3(
 	function (treeNode, context, currentPosition) {
-		var centre = $ianmackenzie$elm_geometry$BoundingBox3d$centerPoint(
-			$author$project$DomainModel$boundingBox(treeNode));
+		var viewportHeight = $ianmackenzie$elm_units$Length$meters(
+			A2($elm$core$Basics$pow, 2, 22 - context.zoomLevel));
+		var centreZ = $ianmackenzie$elm_geometry$Point3d$zCoordinate(
+			$ianmackenzie$elm_geometry$BoundingBox3d$centerPoint(
+				$author$project$DomainModel$boundingBox(treeNode)));
 		var altitudeLookingAt = context.followSelectedPoint ? A3(
 			$ianmackenzie$elm_geometry$Point3d$xyz,
 			A2($author$project$DomainModel$distanceFromIndex, currentPosition, treeNode),
 			$ianmackenzie$elm_units$Quantity$zero,
-			$ianmackenzie$elm_geometry$Point3d$zCoordinate(centre)) : context.focalPoint;
+			$ianmackenzie$elm_units$Quantity$zero) : context.focalPoint;
+		var _v0 = $ianmackenzie$elm_geometry$BoundingBox3d$extrema(
+			$author$project$DomainModel$boundingBox(treeNode));
+		var minX = _v0.minX;
+		var maxX = _v0.maxX;
+		var minY = _v0.minY;
+		var maxY = _v0.maxY;
+		var minZ = _v0.minZ;
+		var maxZ = _v0.maxZ;
+		var rangeOfY = A2(
+			$ianmackenzie$elm_units$Quantity$multiplyBy,
+			5.0,
+			A2($ianmackenzie$elm_units$Quantity$minus, minZ, maxZ));
+		var requiredReduction = A2($ianmackenzie$elm_units$Quantity$greaterThan, viewportHeight, rangeOfY) ? A2($ianmackenzie$elm_units$Quantity$ratio, viewportHeight, rangeOfY) : 1.0;
+		var elevationToReduce = $ianmackenzie$elm_units$Angle$radians(
+			$elm$core$Basics$acos(requiredReduction));
 		var altitudeViewpoint = $ianmackenzie$elm_3d_camera$Viewpoint3d$orbitZ(
 			{
 				azimuth: $ianmackenzie$elm_geometry$Direction2d$toAngle($ianmackenzie$elm_geometry$Direction2d$negativeY),
-				distance: $ianmackenzie$elm_units$Length$kilometer,
-				elevation: context.altitudeCameraElevation,
+				distance: $ianmackenzie$elm_units$Length$kilometers(10),
+				elevation: elevationToReduce,
 				focalPoint: altitudeLookingAt
 			});
+		var _v1 = A2(
+			$elm$core$Debug$log,
+			'Range, Height, Reduction',
+			_Utils_Tuple3(rangeOfY, viewportHeight, requiredReduction));
 		return $ianmackenzie$elm_3d_camera$Camera3d$orthographic(
-			{
-				viewpoint: altitudeViewpoint,
-				viewportHeight: $ianmackenzie$elm_units$Length$meters(
-					A2($elm$core$Basics$pow, 2, 22 - context.zoomLevel))
-			});
+			{viewpoint: altitudeViewpoint, viewportHeight: viewportHeight});
 	});
 var $ianmackenzie$elm_geometry$Geometry$Types$Rectangle2d = function (a) {
 	return {$: 'Rectangle2d', a: a};
@@ -16454,11 +16499,6 @@ var $ianmackenzie$elm_geometry$Direction3d$componentIn = F2(
 		var d2 = _v0.a;
 		var d1 = _v1.a;
 		return ((d1.x * d2.x) + (d1.y * d2.y)) + (d1.z * d2.z);
-	});
-var $ianmackenzie$elm_units$Quantity$multiplyBy = F2(
-	function (scale, _v0) {
-		var value = _v0.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(scale * value);
 	});
 var $ianmackenzie$elm_geometry$Axis3d$originPoint = function (_v0) {
 	var axis = _v0.a;
@@ -28761,6 +28801,7 @@ var $ianmackenzie$elm_3d_scene$Scene3d$BackgroundColor = function (a) {
 var $ianmackenzie$elm_3d_scene$Scene3d$backgroundColor = function (color) {
 	return $ianmackenzie$elm_3d_scene$Scene3d$BackgroundColor(color);
 };
+var $ianmackenzie$elm_units$Length$kilometer = $ianmackenzie$elm_units$Length$kilometers(1);
 var $author$project$ViewProfileCharts$deriveGradientCamera = F3(
 	function (treeNode, context, currentPosition) {
 		var gradientLookingAt = context.followSelectedPoint ? A3(
@@ -30217,12 +30258,6 @@ var $ianmackenzie$elm_3d_scene$Scene3d$oneLight = function (light) {
 var $ianmackenzie$elm_units$Quantity$float = function (value) {
 	return $ianmackenzie$elm_units$Quantity$Quantity(value);
 };
-var $ianmackenzie$elm_units$Quantity$greaterThan = F2(
-	function (_v0, _v1) {
-		var y = _v0.a;
-		var x = _v1.a;
-		return _Utils_cmp(x, y) > 0;
-	});
 var $ianmackenzie$elm_units$Illuminance$inLux = function (_v0) {
 	var numLux = _v0.a;
 	return numLux;

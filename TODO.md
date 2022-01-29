@@ -9,6 +9,8 @@ BUG: Hit detect on Map is slow, sometimes very slow. (Paris to Bree).
 
 ## Profile rendering
 
+Scale altitude to use space available?
+
 Should be able to have a larger altitude zone without messing up the x-scrolling.
 > Easy now the metres/pixel logic is solved?
 

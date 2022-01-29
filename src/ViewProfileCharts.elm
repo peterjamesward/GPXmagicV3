@@ -235,16 +235,45 @@ onContextMenu msg =
 
 deriveAltitudeCamera : PeteTree -> Context -> Int -> Camera3d Meters LocalCoords
 deriveAltitudeCamera treeNode context currentPosition =
+    -- NOTE: SceneBuilder has exaggerated the scale by 5 times.
+    -- Here, we will adjust camera elevation so that the full altitude range
+    -- fits within the view regardless of zoom level. This approach because it
+    -- avoids having to rebuild the scene.
     let
-        centre =
-            BoundingBox3d.centerPoint <| boundingBox treeNode
+        centreZ =
+            Point3d.zCoordinate <|
+                BoundingBox3d.centerPoint <|
+                    boundingBox treeNode
+
+        { minX, maxX, minY, maxY, minZ, maxZ } =
+            BoundingBox3d.extrema <| boundingBox treeNode
+
+        rangeOfY =
+            -- The range we must fit within the viewport
+            maxZ |> Quantity.minus minZ |> Quantity.multiplyBy 5.0
+
+        viewportHeight =
+            -- The vertical space available within the viewport, from the zoom level
+            Length.meters <| 2 ^ (22 - context.zoomLevel)
+
+        requiredReduction =
+            if rangeOfY |> Quantity.greaterThan viewportHeight then
+                Quantity.ratio viewportHeight rangeOfY
+
+            else
+                1.0
+
+        _ = Debug.log "Range, Height, Reduction" (rangeOfY, viewportHeight, requiredReduction)
+
+        elevationToReduce =
+            Angle.radians <| acos requiredReduction
 
         altitudeLookingAt =
             if context.followSelectedPoint then
                 Point3d.xyz
                     (distanceFromIndex currentPosition treeNode)
                     Quantity.zero
-                    (Point3d.zCoordinate centre)
+                    Quantity.zero
 
             else
                 context.focalPoint
@@ -253,13 +282,13 @@ deriveAltitudeCamera treeNode context currentPosition =
             Viewpoint3d.orbitZ
                 { focalPoint = altitudeLookingAt
                 , azimuth = Direction2d.toAngle Direction2d.negativeY
-                , elevation = context.altitudeCameraElevation
-                , distance = Length.kilometer
+                , elevation = elevationToReduce --context.altitudeCameraElevation
+                , distance = Length.kilometers 10
                 }
     in
     Camera3d.orthographic
         { viewpoint = altitudeViewpoint
-        , viewportHeight = Length.meters <| 2 ^ (22 - context.zoomLevel)
+        , viewportHeight = viewportHeight
         }
 
 
