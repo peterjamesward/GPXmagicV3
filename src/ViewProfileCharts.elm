@@ -5,9 +5,11 @@ import Angle exposing (Angle)
 import Axis3d
 import BoundingBox3d
 import Camera3d exposing (Camera3d)
+import Chart as C
+import Chart.Attributes as CA
+import Circle2d
 import Color
 import Direction2d exposing (Direction2d)
-import Direction3d exposing (positiveZ)
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
@@ -17,7 +19,7 @@ import Element.Input as Input
 import FeatherIcons
 import FlatColors.AussiePalette
 import FlatColors.ChinesePalette exposing (white)
-import Html.Attributes exposing (id)
+import Html exposing (Html)
 import Html.Events as HE
 import Html.Events.Extra.Mouse as Mouse exposing (Button(..))
 import Html.Events.Extra.Wheel as Wheel
@@ -31,8 +33,8 @@ import Point3d
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
-import SketchPlane3d
-import Spherical
+import Svg as Svg exposing (Svg, circle)
+import Svg.Attributes as Attributes exposing (cx, cy, r)
 import TrackLoaded exposing (TrackLoaded)
 import Vector3d
 import ViewPureStyles exposing (useIcon)
@@ -193,6 +195,7 @@ view context ( givenWidth, givenHeight ) track sceneAltitude sceneGradient msgWr
             , htmlAttribute <| Mouse.onDoubleClick (ImageDoubleClick ZoneAltitude >> msgWrapper)
             , padding 10
             , Background.color white
+            , inFront <| html <| svgAltitudeScale altitudePortion context track
             ]
           <|
             html <|
@@ -318,7 +321,8 @@ deriveGradientCamera treeNode context currentPosition =
         elevationToReduce =
             Angle.radians <| acos requiredReduction
 
-        _ = Debug.log "range, height, reduce" (rangeOfY, viewportHeight, requiredReduction)
+        _ =
+            Debug.log "range, height, reduce" ( rangeOfY, viewportHeight, requiredReduction )
 
         gradientLookingAt =
             if context.followSelectedPoint then
@@ -345,6 +349,34 @@ deriveGradientCamera treeNode context currentPosition =
         { viewpoint = gradientViewpoint
         , viewportHeight = Length.meters <| 2 ^ (22 - context.zoomLevel)
         }
+
+
+svgAltitudeScale :
+    ( Quantity Int Pixels, Quantity Int Pixels )
+    -> Context
+    -> TrackLoaded msg
+    -> Html msg
+svgAltitudeScale ( w, h ) context track =
+    C.chart
+        [ CA.height <| Pixels.inPixels <| Quantity.toFloatQuantity <| h
+        , CA.width <| Pixels.inPixels <| Quantity.toFloatQuantity <| w
+        , CA.range
+            [ CA.lowest -100 CA.orLower
+            , CA.highest 100 CA.orHigher
+            ]
+        , CA.domain
+            [ CA.lowest 5 CA.orLower
+            , CA.highest 100 CA.orHigher
+            ]
+        ]
+        [ C.series .x
+            [  ]
+            [ { x = 0, y = 0 }
+            , { x = 800, y = 0 }
+            ]
+        , C.xLabels [ CA.amount 10, CA.withGrid ]
+        , C.yLabels [ CA.amount 10, CA.withGrid ]
+        ]
 
 
 metresPerPixel :

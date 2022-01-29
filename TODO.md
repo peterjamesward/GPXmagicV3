@@ -11,17 +11,11 @@ BUG: Hit detect on Map is slow, sometimes very slow. (Paris to Bree).
 
 SVG overlay scale.
 
+SVG overlay tracks mouse movement, shows point data.
+
 ---
 
 # BACKLOG, roughly in order ...
-
-Retro-fit the metresPerPixel logic to ThirdPerson panning (using XY plane).
-
-## Graduated Rendering
-
-Use a graduated drop off with distance, compute at each tree level?
-For each node, take minimum distance from bounding box to current.
-Set depth = (say) 20 - distance in km, down to 10. (Will never have 1M points.)
 
 ## Map
 
@@ -47,7 +41,8 @@ Using an action DisplayMessage to show modal dialog from any tool.
 Make a tool for this.
 Low memory can trigger defensive actions: remove Undo entries, reduce rendering depth, reduce graphics.
 If we are so short of memory that we can't create the output string, one option is to turn off graphics,
-another to output in sections.
+another to output in sections. Another, to drop the scenes, reclaim some heap, defer writing to an 
+action, then re-render. This would also work for edits, but hairy.
 
 ## Plan view
 
@@ -64,6 +59,12 @@ Terrain 2 = Tree walk combined with whole (visible) tree query, because <track l
 Put all Font, Colour etc into a Palette/Style module for ease of change.
 
 ?? Move `scene(s)` into Pane Layout; they can be rendered only if visible.
+
+## Graduated Rendering
+
+Use a graduated drop off with distance, compute at each tree level?
+For each node, take minimum distance from bounding box to current.
+Set depth = (say) 20 - distance in km, down to 10. (Will never have 1M points.)
 
 ## Loop detection
 
