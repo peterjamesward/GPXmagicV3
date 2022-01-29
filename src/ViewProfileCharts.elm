@@ -295,6 +295,31 @@ deriveAltitudeCamera treeNode context currentPosition =
 deriveGradientCamera : PeteTree -> Context -> Int -> Camera3d Meters LocalCoords
 deriveGradientCamera treeNode context currentPosition =
     let
+        ( minZ, maxZ ) =
+            -- Scene builder clamps to +/- 30%
+            ( Length.meters -30, Length.meters 30 )
+
+        rangeOfY =
+            -- The range we must fit within the viewport.
+            -- The times 25 is because I have no idea how this works.
+            maxZ |> Quantity.minus minZ |> Quantity.multiplyBy 25.0
+
+        viewportHeight =
+            -- The vertical space available within the viewport, from the zoom level
+            Length.meters <| 2 ^ (22 - context.zoomLevel)
+
+        requiredReduction =
+            if rangeOfY |> Quantity.greaterThan viewportHeight then
+                Quantity.ratio viewportHeight rangeOfY
+
+            else
+                1.0
+
+        elevationToReduce =
+            Angle.radians <| acos requiredReduction
+
+        _ = Debug.log "range, height, reduce" (rangeOfY, viewportHeight, requiredReduction)
+
         gradientLookingAt =
             if context.followSelectedPoint then
                 Point3d.xyz
@@ -312,7 +337,7 @@ deriveGradientCamera treeNode context currentPosition =
             Viewpoint3d.orbitZ
                 { focalPoint = gradientLookingAt
                 , azimuth = Direction2d.toAngle Direction2d.negativeY
-                , elevation = context.gradientCameraElevation
+                , elevation = elevationToReduce
                 , distance = Length.kilometer
                 }
     in

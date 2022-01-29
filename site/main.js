@@ -28854,8 +28854,11 @@ var $ianmackenzie$elm_3d_scene$Scene3d$backgroundColor = function (color) {
 	return $ianmackenzie$elm_3d_scene$Scene3d$BackgroundColor(color);
 };
 var $ianmackenzie$elm_units$Length$kilometer = $ianmackenzie$elm_units$Length$kilometers(1);
+var $elm$core$Debug$log = _Debug_log;
 var $author$project$ViewProfileCharts$deriveGradientCamera = F3(
 	function (treeNode, context, currentPosition) {
+		var viewportHeight = $ianmackenzie$elm_units$Length$meters(
+			A2($elm$core$Basics$pow, 2, 22 - context.zoomLevel));
 		var gradientLookingAt = context.followSelectedPoint ? A3(
 			$ianmackenzie$elm_geometry$Point3d$xyz,
 			A2($author$project$DomainModel$distanceFromIndex, currentPosition, treeNode),
@@ -28865,13 +28868,29 @@ var $author$project$ViewProfileCharts$deriveGradientCamera = F3(
 			$ianmackenzie$elm_geometry$Point3d$xCoordinate(context.focalPoint),
 			$ianmackenzie$elm_units$Quantity$zero,
 			$ianmackenzie$elm_units$Quantity$zero);
+		var _v0 = _Utils_Tuple2(
+			$ianmackenzie$elm_units$Length$meters(-30),
+			$ianmackenzie$elm_units$Length$meters(30));
+		var minZ = _v0.a;
+		var maxZ = _v0.b;
+		var rangeOfY = A2(
+			$ianmackenzie$elm_units$Quantity$multiplyBy,
+			25.0,
+			A2($ianmackenzie$elm_units$Quantity$minus, minZ, maxZ));
+		var requiredReduction = A2($ianmackenzie$elm_units$Quantity$greaterThan, viewportHeight, rangeOfY) ? A2($ianmackenzie$elm_units$Quantity$ratio, viewportHeight, rangeOfY) : 1.0;
+		var elevationToReduce = $ianmackenzie$elm_units$Angle$radians(
+			$elm$core$Basics$acos(requiredReduction));
 		var gradientViewpoint = $ianmackenzie$elm_3d_camera$Viewpoint3d$orbitZ(
 			{
 				azimuth: $ianmackenzie$elm_geometry$Direction2d$toAngle($ianmackenzie$elm_geometry$Direction2d$negativeY),
 				distance: $ianmackenzie$elm_units$Length$kilometer,
-				elevation: context.gradientCameraElevation,
+				elevation: elevationToReduce,
 				focalPoint: gradientLookingAt
 			});
+		var _v1 = A2(
+			$elm$core$Debug$log,
+			'range, height, reduce',
+			_Utils_Tuple3(rangeOfY, viewportHeight, requiredReduction));
 		return $ianmackenzie$elm_3d_camera$Camera3d$orthographic(
 			{
 				viewpoint: gradientViewpoint,
