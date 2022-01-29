@@ -92,10 +92,7 @@ type alias Model =
     -- Track stuff
     , track : Maybe (TrackLoaded Msg)
 
-    -- Visuals
-    , scene3d : List (Entity LocalCoords)
-    , sceneAltitude : List (Entity LocalCoords)
-    , sceneGradient : List (Entity LocalCoords)
+    -- Visuals (scenes now in PaneLayoutManager)
     , previews : Dict String PreviewData
 
     -- Layout stuff
@@ -208,9 +205,6 @@ init mflags origin navigationKey =
       , ipInfo = Nothing
       , stravaAuthentication = authData
       , track = Nothing
-      , scene3d = []
-      , sceneAltitude = []
-      , sceneGradient = []
       , previews = Dict.empty
       , windowSize = ( 1000, 800 )
       , contentArea = ( Pixels.pixels 800, Pixels.pixels 500 )
@@ -256,20 +250,10 @@ render model =
     case model.track of
         Just track ->
             let
-                renderedTrack =
-                    SceneBuilder3D.render3dView track
-
-                renderedPreviews =
-                    SceneBuilder3D.renderPreviews model.previews
-
-                (altitude, gradient) =
-                    SceneBuilderProfile.renderBoth track
+                paneLayout =
+                    PaneLayoutManager.render model.paneLayoutOptions track
             in
-            { model
-                | scene3d = renderedPreviews ++ renderedTrack
-                , sceneAltitude = altitude
-                , sceneGradient = gradient
-            }
+            { model | paneLayoutOptions = paneLayout }
 
         Nothing ->
             model
@@ -857,9 +841,6 @@ viewPaneArea model =
         PaneLayoutManager.viewPanes
             PaneMsg
             model.track
-            model.scene3d
-            model.sceneAltitude
-            model.sceneGradient
             model.contentArea
             model.paneLayoutOptions
 

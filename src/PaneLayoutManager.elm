@@ -17,6 +17,8 @@ import MapPortController
 import Pixels exposing (Pixels)
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
+import SceneBuilder3D
+import SceneBuilderProfile
 import TrackLoaded exposing (TrackLoaded)
 import ViewMap
 import ViewProfileCharts
@@ -77,6 +79,9 @@ type alias Options =
     , pane3 : PaneContext
     , pane4 : PaneContext
     , sliderState : SliderState
+    , scene3d : List (Entity LocalCoords)
+    , sceneAltitude : List (Entity LocalCoords)
+    , sceneGradient : List (Entity LocalCoords)
     }
 
 
@@ -105,6 +110,9 @@ defaultOptions =
     , pane3 = { defaultPaneContext | paneId = Pane3 }
     , pane4 = { defaultPaneContext | paneId = Pane4 }
     , sliderState = SliderIdle
+    , scene3d = []
+    , sceneAltitude = []
+    , sceneGradient = []
     }
 
 
@@ -165,6 +173,19 @@ optionList =
     , Input.option PanesUpperLower <| row [ spacing 20 ] [ useIcon FeatherIcons.server, E.text "Drawers" ]
     , Input.option PanesGrid <| row [ spacing 20 ] [ useIcon FeatherIcons.grid, E.text "Grid of four" ]
     ]
+
+
+render : Options -> TrackLoaded msg -> Options
+render options track =
+    let
+        ( altitude, gradient ) =
+            SceneBuilderProfile.renderBoth track
+    in
+    { options
+        | scene3d = SceneBuilder3D.render3dView track
+        , sceneAltitude = altitude
+        , sceneGradient = gradient
+    }
 
 
 update :
@@ -535,13 +556,10 @@ dimensionsWithLayout layout ( w, h ) =
 viewPanes :
     (Msg -> msg)
     -> Maybe (TrackLoaded msg)
-    -> List (Entity LocalCoords)
-    -> List (Entity LocalCoords)
-    -> List (Entity LocalCoords)
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Options
     -> Element msg
-viewPanes msgWrapper mTrack scene3d sceneProfile sceneGradient ( w, h ) options =
+viewPanes msgWrapper mTrack ( w, h ) options =
     let
         ( paneWidth, paneHeight ) =
             dimensionsWithLayout options.paneLayout ( w, h )
@@ -555,7 +573,7 @@ viewPanes msgWrapper mTrack scene3d sceneProfile sceneGradient ( w, h ) options 
                                 context
                                 ( paneWidth, paneHeight )
                                 track
-                                scene3d
+                                options.scene3d
                                 (msgWrapper << ThirdPersonViewMessage pane.paneId)
 
                         _ ->
@@ -568,8 +586,8 @@ viewPanes msgWrapper mTrack scene3d sceneProfile sceneGradient ( w, h ) options 
                                 context
                                 ( paneWidth, paneHeight )
                                 track
-                                sceneProfile
-                                sceneGradient
+                                options.sceneAltitude
+                                options.sceneGradient
                                 (msgWrapper << ProfileViewMessage pane.paneId)
 
                         _ ->

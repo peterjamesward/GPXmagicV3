@@ -8478,6 +8478,9 @@ var $author$project$PaneLayoutManager$defaultOptions = {
 		{paneId: $author$project$PaneLayoutManager$Pane4}),
 	paneLayout: $author$project$PaneLayoutManager$PanesOne,
 	popupVisible: false,
+	scene3d: _List_Nil,
+	sceneAltitude: _List_Nil,
+	sceneGradient: _List_Nil,
 	sliderState: $author$project$PaneLayoutManager$SliderIdle
 };
 var $elm$core$Basics$pi = _Basics_pi;
@@ -9668,9 +9671,6 @@ var $author$project$Main$init = F3(
 						$elm$core$Maybe$Just(
 							_Utils_Tuple2(600, 990))),
 					$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Horizontal)),
-				scene3d: _List_Nil,
-				sceneAltitude: _List_Nil,
-				sceneGradient: _List_Nil,
 				stravaAuthentication: authData,
 				time: $elm$time$Time$millisToPosix(0),
 				toolOptions: $author$project$ToolsController$defaultOptions,
@@ -14601,258 +14601,27 @@ var $author$project$SceneBuilderProfile$renderBoth = function (track) {
 		A2($elm$core$List$cons, currentPosLine, altitudeScene),
 		A2($elm$core$List$cons, currentPosLine, gradientScene));
 };
-var $ianmackenzie$elm_3d_scene$Scene3d$Types$LambertianMaterial = F3(
-	function (a, b, c) {
-		return {$: 'LambertianMaterial', a: a, b: b, c: c};
-	});
-var $ianmackenzie$elm_3d_scene$Scene3d$Types$VerticalNormal = {$: 'VerticalNormal'};
-var $ianmackenzie$elm_3d_scene$Scene3d$Types$LinearRgb = function (a) {
-	return {$: 'LinearRgb', a: a};
-};
-var $elm$core$Basics$pow = _Basics_pow;
-var $ianmackenzie$elm_3d_scene$Scene3d$ColorConversions$inverseGamma = function (u) {
-	return A3(
-		$elm$core$Basics$clamp,
-		0,
-		1,
-		(u <= 0.04045) ? (u / 12.92) : A2($elm$core$Basics$pow, (u + 0.055) / 1.055, 2.4));
-};
-var $ianmackenzie$elm_3d_scene$Scene3d$ColorConversions$colorToLinearRgb = function (color) {
-	var _v0 = $avh4$elm_color$Color$toRgba(color);
-	var red = _v0.red;
-	var green = _v0.green;
-	var blue = _v0.blue;
-	return $ianmackenzie$elm_3d_scene$Scene3d$Types$LinearRgb(
-		A3(
-			$elm_explorations$linear_algebra$Math$Vector3$vec3,
-			$ianmackenzie$elm_3d_scene$Scene3d$ColorConversions$inverseGamma(red),
-			$ianmackenzie$elm_3d_scene$Scene3d$ColorConversions$inverseGamma(green),
-			$ianmackenzie$elm_3d_scene$Scene3d$ColorConversions$inverseGamma(blue)));
-};
-var $ianmackenzie$elm_3d_scene$Scene3d$Material$matte = function (materialColor) {
-	return A3(
-		$ianmackenzie$elm_3d_scene$Scene3d$Types$LambertianMaterial,
-		$ianmackenzie$elm_3d_scene$Scene3d$Types$UseMeshUvs,
-		$ianmackenzie$elm_3d_scene$Scene3d$Types$Constant(
-			$ianmackenzie$elm_3d_scene$Scene3d$ColorConversions$colorToLinearRgb(materialColor)),
-		$ianmackenzie$elm_3d_scene$Scene3d$Types$Constant($ianmackenzie$elm_3d_scene$Scene3d$Types$VerticalNormal));
-};
-var $ianmackenzie$elm_geometry$Vector3d$from = F2(
-	function (_v0, _v1) {
-		var p1 = _v0.a;
-		var p2 = _v1.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
-			{x: p2.x - p1.x, y: p2.y - p1.y, z: p2.z - p1.z});
-	});
-var $ianmackenzie$elm_geometry$Vector3d$projectOnto = F2(
-	function (_v0, _v1) {
-		var plane = _v0.a;
-		var v = _v1.a;
-		var _v2 = plane.normalDirection;
-		var n = _v2.a;
-		var normalProjection = ((v.x * n.x) + (v.y * n.y)) + (v.z * n.z);
-		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
-			{x: v.x - (normalProjection * n.x), y: v.y - (normalProjection * n.y), z: v.z - (normalProjection * n.z)});
-	});
-var $ianmackenzie$elm_geometry$Vector3d$rotateAround = F3(
-	function (_v0, _v1, _v2) {
-		var axis = _v0.a;
-		var angle = _v1.a;
-		var v = _v2.a;
-		var halfAngle = 0.5 * angle;
-		var qw = $elm$core$Basics$cos(halfAngle);
-		var sinHalfAngle = $elm$core$Basics$sin(halfAngle);
-		var _v3 = axis.direction;
-		var d = _v3.a;
-		var qx = d.x * sinHalfAngle;
-		var wx = qw * qx;
-		var xx = qx * qx;
-		var qy = d.y * sinHalfAngle;
-		var wy = qw * qy;
-		var xy = qx * qy;
-		var yy = qy * qy;
-		var a22 = 1 - (2 * (xx + yy));
-		var qz = d.z * sinHalfAngle;
-		var wz = qw * qz;
-		var a01 = 2 * (xy - wz);
-		var a10 = 2 * (xy + wz);
-		var xz = qx * qz;
-		var a02 = 2 * (xz + wy);
-		var a20 = 2 * (xz - wy);
-		var yz = qy * qz;
-		var a12 = 2 * (yz - wx);
-		var a21 = 2 * (yz + wx);
-		var zz = qz * qz;
-		var a00 = 1 - (2 * (yy + zz));
-		var a11 = 1 - (2 * (xx + zz));
-		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
-			{x: ((a00 * v.x) + (a01 * v.y)) + (a02 * v.z), y: ((a10 * v.x) + (a11 * v.y)) + (a12 * v.z), z: ((a20 * v.x) + (a21 * v.y)) + (a22 * v.z)});
-	});
-var $ianmackenzie$elm_geometry$Vector3d$zero = $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
-	{x: 0, y: 0, z: 0});
-var $ianmackenzie$elm_geometry$Vector3d$scaleTo = F2(
-	function (_v0, _v1) {
-		var q = _v0.a;
-		var v = _v1.a;
-		var largestComponent = A2(
-			$elm$core$Basics$max,
-			$elm$core$Basics$abs(v.x),
-			A2(
-				$elm$core$Basics$max,
-				$elm$core$Basics$abs(v.y),
-				$elm$core$Basics$abs(v.z)));
-		if (!largestComponent) {
-			return $ianmackenzie$elm_geometry$Vector3d$zero;
-		} else {
-			var scaledZ = v.z / largestComponent;
-			var scaledY = v.y / largestComponent;
-			var scaledX = v.x / largestComponent;
-			var scaledLength = $elm$core$Basics$sqrt(((scaledX * scaledX) + (scaledY * scaledY)) + (scaledZ * scaledZ));
-			return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
-				{x: (q * scaledX) / scaledLength, y: (q * scaledY) / scaledLength, z: (q * scaledZ) / scaledLength});
-		}
-	});
-var $ianmackenzie$elm_geometry$LineSegment3d$translateBy = F2(
-	function (displacementVector, lineSegment) {
-		return A2(
-			$ianmackenzie$elm_geometry$LineSegment3d$mapEndpoints,
-			$ianmackenzie$elm_geometry$Point3d$translateBy(displacementVector),
-			lineSegment);
-	});
-var $ianmackenzie$elm_geometry$Geometry$Types$Axis3d = function (a) {
-	return {$: 'Axis3d', a: a};
-};
-var $ianmackenzie$elm_geometry$Axis3d$through = F2(
-	function (givenPoint, givenDirection) {
-		return $ianmackenzie$elm_geometry$Geometry$Types$Axis3d(
-			{direction: givenDirection, originPoint: givenPoint});
-	});
-var $ianmackenzie$elm_geometry$Axis3d$z = A2($ianmackenzie$elm_geometry$Axis3d$through, $ianmackenzie$elm_geometry$Point3d$origin, $ianmackenzie$elm_geometry$Direction3d$z);
-var $author$project$SceneBuilder3D$paintSomethingBetween = F4(
-	function (width, material, pt1, pt2) {
-		var roadAsSegment = A2($ianmackenzie$elm_geometry$LineSegment3d$from, pt1, pt2);
-		var halfWidth = A2(
-			$ianmackenzie$elm_geometry$Vector3d$scaleTo,
-			width,
-			A2(
-				$ianmackenzie$elm_geometry$Vector3d$projectOnto,
-				$ianmackenzie$elm_geometry$Plane3d$xy,
-				A2($ianmackenzie$elm_geometry$Vector3d$from, pt1, pt2)));
-		var _v0 = _Utils_Tuple2(
-			A3(
-				$ianmackenzie$elm_geometry$Vector3d$rotateAround,
-				$ianmackenzie$elm_geometry$Axis3d$z,
-				$ianmackenzie$elm_units$Angle$degrees(90),
-				halfWidth),
-			A3(
-				$ianmackenzie$elm_geometry$Vector3d$rotateAround,
-				$ianmackenzie$elm_geometry$Axis3d$z,
-				$ianmackenzie$elm_units$Angle$degrees(-90),
-				halfWidth));
-		var leftKerbVector = _v0.a;
-		var rightKerbVector = _v0.b;
-		var _v1 = _Utils_Tuple2(
-			A2($ianmackenzie$elm_geometry$LineSegment3d$translateBy, leftKerbVector, roadAsSegment),
-			A2($ianmackenzie$elm_geometry$LineSegment3d$translateBy, rightKerbVector, roadAsSegment));
-		var leftKerb = _v1.a;
-		var rightKerb = _v1.b;
-		return _List_fromArray(
-			[
-				A5(
-				$ianmackenzie$elm_3d_scene$Scene3d$quad,
-				material,
-				$ianmackenzie$elm_geometry$LineSegment3d$startPoint(leftKerb),
-				$ianmackenzie$elm_geometry$LineSegment3d$endPoint(leftKerb),
-				$ianmackenzie$elm_geometry$LineSegment3d$endPoint(rightKerb),
-				$ianmackenzie$elm_geometry$LineSegment3d$startPoint(rightKerb))
-			]);
-	});
-var $author$project$SceneBuilder3D$previewAsLine = F2(
-	function (color, points) {
-		var material = $ianmackenzie$elm_3d_scene$Scene3d$Material$matte(
-			$avh4$elm_color$Color$fromRgba(
-				$mdgriffith$elm_ui$Element$toRgb(color)));
-		var preview = F2(
-			function (p1, p2) {
-				return A4(
-					$author$project$SceneBuilder3D$paintSomethingBetween,
-					$ianmackenzie$elm_units$Length$meters(0.5),
-					material,
-					p1,
-					p2);
+var $author$project$PaneLayoutManager$render = F2(
+	function (options, track) {
+		var _v0 = $author$project$SceneBuilderProfile$renderBoth(track);
+		var altitude = _v0.a;
+		var gradient = _v0.b;
+		return _Utils_update(
+			options,
+			{
+				scene3d: $author$project$SceneBuilder3D$render3dView(track),
+				sceneAltitude: altitude,
+				sceneGradient: gradient
 			});
-		return $elm$core$List$concat(
-			A3(
-				$elm$core$List$map2,
-				preview,
-				points,
-				A2($elm$core$List$drop, 1, points)));
 	});
-var $author$project$SceneBuilder3D$previewAsPoints = F2(
-	function (color, points) {
-		var material = $ianmackenzie$elm_3d_scene$Scene3d$Material$color(
-			$avh4$elm_color$Color$fromRgba(
-				$mdgriffith$elm_ui$Element$toRgb(color)));
-		var highlightPoint = function (p) {
-			return A3(
-				$ianmackenzie$elm_3d_scene$Scene3d$point,
-				{
-					radius: $ianmackenzie$elm_units$Pixels$pixels(7)
-				},
-				material,
-				p);
-		};
-		return A2($elm$core$List$map, highlightPoint, points);
-	});
-var $elm$core$Dict$values = function (dict) {
-	return A3(
-		$elm$core$Dict$foldr,
-		F3(
-			function (key, value, valueList) {
-				return A2($elm$core$List$cons, value, valueList);
-			}),
-		_List_Nil,
-		dict);
-};
-var $author$project$SceneBuilder3D$renderPreviews = function (previews) {
-	var onePreview = function (_v1) {
-		var tag = _v1.tag;
-		var shape = _v1.shape;
-		var colour = _v1.colour;
-		var points = _v1.points;
-		if (shape.$ === 'PreviewCircle') {
-			return A2(
-				$author$project$SceneBuilder3D$previewAsPoints,
-				colour,
-				A2($elm$core$List$map, $elm$core$Tuple$first, points));
-		} else {
-			return A2(
-				$author$project$SceneBuilder3D$previewAsLine,
-				colour,
-				A2($elm$core$List$map, $elm$core$Tuple$first, points));
-		}
-	};
-	return A2(
-		$elm$core$List$concatMap,
-		onePreview,
-		$elm$core$Dict$values(previews));
-};
 var $author$project$Main$render = function (model) {
 	var _v0 = model.track;
 	if (_v0.$ === 'Just') {
 		var track = _v0.a;
-		var renderedTrack = $author$project$SceneBuilder3D$render3dView(track);
-		var renderedPreviews = $author$project$SceneBuilder3D$renderPreviews(model.previews);
-		var _v1 = $author$project$SceneBuilderProfile$renderBoth(track);
-		var altitude = _v1.a;
-		var gradient = _v1.b;
+		var paneLayout = A2($author$project$PaneLayoutManager$render, model.paneLayoutOptions, track);
 		return _Utils_update(
 			model,
-			{
-				scene3d: _Utils_ap(renderedPreviews, renderedTrack),
-				sceneAltitude: altitude,
-				sceneGradient: gradient
-			});
+			{paneLayoutOptions: paneLayout});
 	} else {
 		return model;
 	}
@@ -16375,6 +16144,14 @@ var $ianmackenzie$elm_geometry$Frame3d$translateAlongOwn = F3(
 			distance,
 			frame);
 	});
+var $ianmackenzie$elm_geometry$Geometry$Types$Axis3d = function (a) {
+	return {$: 'Axis3d', a: a};
+};
+var $ianmackenzie$elm_geometry$Axis3d$through = F2(
+	function (givenPoint, givenDirection) {
+		return $ianmackenzie$elm_geometry$Geometry$Types$Axis3d(
+			{direction: givenDirection, originPoint: givenPoint});
+	});
 var $ianmackenzie$elm_geometry$Frame3d$xAxis = function (_v0) {
 	var frame = _v0.a;
 	return A2($ianmackenzie$elm_geometry$Axis3d$through, frame.originPoint, frame.xDirection);
@@ -16440,6 +16217,7 @@ var $ianmackenzie$elm_3d_camera$Camera3d$orthographic = function (_arguments) {
 			viewpoint: _arguments.viewpoint
 		});
 };
+var $elm$core$Basics$pow = _Basics_pow;
 var $author$project$ViewProfileCharts$deriveAltitudeCamera = F3(
 	function (treeNode, context, currentPosition) {
 		var viewportHeight = $ianmackenzie$elm_units$Length$meters(
@@ -17153,6 +16931,13 @@ var $ianmackenzie$elm_geometry$Vector3d$componentIn = F2(
 		var v = _v1.a;
 		return $ianmackenzie$elm_units$Quantity$Quantity(((v.x * d.x) + (v.y * d.y)) + (v.z * d.z));
 	});
+var $ianmackenzie$elm_geometry$Vector3d$from = F2(
+	function (_v0, _v1) {
+		var p1 = _v0.a;
+		var p2 = _v1.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
+			{x: p2.x - p1.x, y: p2.y - p1.y, z: p2.z - p1.z});
+	});
 var $ianmackenzie$elm_geometry$Axis3d$intersectionWithSphere = F2(
 	function (_v0, axis) {
 		var centerPoint = _v0.a.centerPoint;
@@ -17307,6 +17092,40 @@ var $author$project$ViewThirdPerson$detectHit = F4(
 		var ray = A3($ianmackenzie$elm_3d_camera$Camera3d$ray, camera, screenRectangle, screenPoint);
 		return A2($author$project$DomainModel$nearestToRay, ray, track.trackTree);
 	});
+var $ianmackenzie$elm_geometry$Vector3d$rotateAround = F3(
+	function (_v0, _v1, _v2) {
+		var axis = _v0.a;
+		var angle = _v1.a;
+		var v = _v2.a;
+		var halfAngle = 0.5 * angle;
+		var qw = $elm$core$Basics$cos(halfAngle);
+		var sinHalfAngle = $elm$core$Basics$sin(halfAngle);
+		var _v3 = axis.direction;
+		var d = _v3.a;
+		var qx = d.x * sinHalfAngle;
+		var wx = qw * qx;
+		var xx = qx * qx;
+		var qy = d.y * sinHalfAngle;
+		var wy = qw * qy;
+		var xy = qx * qy;
+		var yy = qy * qy;
+		var a22 = 1 - (2 * (xx + yy));
+		var qz = d.z * sinHalfAngle;
+		var wz = qw * qz;
+		var a01 = 2 * (xy - wz);
+		var a10 = 2 * (xy + wz);
+		var xz = qx * qz;
+		var a02 = 2 * (xz + wy);
+		var a20 = 2 * (xz - wy);
+		var yz = qy * qz;
+		var a12 = 2 * (yz - wx);
+		var a21 = 2 * (yz + wx);
+		var zz = qz * qz;
+		var a00 = 1 - (2 * (yy + zz));
+		var a11 = 1 - (2 * (xx + zz));
+		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
+			{x: ((a00 * v.x) + (a01 * v.y)) + (a02 * v.z), y: ((a10 * v.x) + (a11 * v.y)) + (a12 * v.z), z: ((a20 * v.x) + (a21 * v.y)) + (a22 * v.z)});
+	});
 var $ianmackenzie$elm_geometry$Vector3d$scaleBy = F2(
 	function (k, _v0) {
 		var v = _v0.a;
@@ -17317,6 +17136,7 @@ var $ianmackenzie$elm_units$Angle$sin = function (_v0) {
 	var angle = _v0.a;
 	return $elm$core$Basics$sin(angle);
 };
+var $ianmackenzie$elm_geometry$Axis3d$z = A2($ianmackenzie$elm_geometry$Axis3d$through, $ianmackenzie$elm_geometry$Point3d$origin, $ianmackenzie$elm_geometry$Direction3d$z);
 var $author$project$ViewThirdPerson$update = F5(
 	function (msg, msgWrapper, track, area, context) {
 		switch (msg.$) {
@@ -35058,6 +34878,9 @@ var $ianmackenzie$elm_3d_scene$Scene3d$ColorConversions$chromaticityToCieXyz = F
 		var y = _v1.a.y;
 		return A3($ianmackenzie$elm_3d_scene$Scene3d$Types$CieXyz, (intensity * x) / y, intensity, (intensity * ((1 - x) - y)) / y);
 	});
+var $ianmackenzie$elm_3d_scene$Scene3d$Types$LinearRgb = function (a) {
+	return {$: 'LinearRgb', a: a};
+};
 var $ianmackenzie$elm_3d_scene$Scene3d$ColorConversions$cieXyzToLinearRgb = function (_v0) {
 	var bigX = _v0.a;
 	var bigY = _v0.b;
@@ -37094,8 +36917,8 @@ var $author$project$ViewPureStyles$wideSliderStylesWithWidth = function (w) {
 				$mdgriffith$elm_ui$Element$none))
 		]);
 };
-var $author$project$PaneLayoutManager$viewPanes = F7(
-	function (msgWrapper, mTrack, scene3d, sceneProfile, sceneGradient, _v0, options) {
+var $author$project$PaneLayoutManager$viewPanes = F4(
+	function (msgWrapper, mTrack, _v0, options) {
 		var w = _v0.a;
 		var h = _v0.b;
 		var slider = function () {
@@ -37143,7 +36966,7 @@ var $author$project$PaneLayoutManager$viewPanes = F7(
 							context,
 							_Utils_Tuple2(paneWidth, paneHeight),
 							track,
-							scene3d,
+							options.scene3d,
 							A2(
 								$elm$core$Basics$composeL,
 								msgWrapper,
@@ -37161,8 +36984,8 @@ var $author$project$PaneLayoutManager$viewPanes = F7(
 							context,
 							_Utils_Tuple2(paneWidth, paneHeight),
 							track,
-							sceneProfile,
-							sceneGradient,
+							options.sceneAltitude,
+							options.sceneGradient,
 							A2(
 								$elm$core$Basics$composeL,
 								msgWrapper,
@@ -37281,7 +37104,7 @@ var $author$project$Main$viewPaneArea = function (model) {
 				[$mdgriffith$elm_ui$Element$noStaticStyleSheet])
 		},
 		$author$project$ViewPureStyles$commonLayoutStyles,
-		A7($author$project$PaneLayoutManager$viewPanes, $author$project$Main$PaneMsg, model.track, model.scene3d, model.sceneAltitude, model.sceneGradient, model.contentArea, model.paneLayoutOptions));
+		A4($author$project$PaneLayoutManager$viewPanes, $author$project$Main$PaneMsg, model.track, model.contentArea, model.paneLayoutOptions));
 };
 var $author$project$Main$centralAreaView = function (model) {
 	return A4(
