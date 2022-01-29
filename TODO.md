@@ -12,6 +12,7 @@ BUG: Hit detect on Map is slow, sometimes very slow. (Paris to Bree).
 BUG: Unlocking profile follow orange leaves one lost.
 
 Should be able to have a larger altitude zone without messing up the x-scrolling.
+> Easy now the metres/pixel logic is solved?
 
 Work out camera elevations so that the range remains in display when zooming.
 > Should be easy enough if we project rays from two opposite corners (like `hitDetect`).
@@ -22,6 +23,8 @@ SVG overlay scale.
 ---
 
 # BACKLOG, roughly in order ...
+
+Retro-fit the metresPerPixel logic to ThirdPerson panning (using XY plane).
 
 ## Graduated Rendering
 

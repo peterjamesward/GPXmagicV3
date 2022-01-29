@@ -10385,6 +10385,7 @@ var $author$project$ViewProfileCharts$initialiseView = F2(
 				A2($author$project$DomainModel$leafFromIndex, current, treeNode)),
 			followSelectedPoint: false,
 			gradientCameraElevation: $ianmackenzie$elm_units$Angle$degrees(0),
+			metresPerPixel: 10.0,
 			orbiting: $elm$core$Maybe$Nothing,
 			waitingForClickDelay: false,
 			zoomLevel: 10.0
@@ -16724,7 +16725,6 @@ var $author$project$ViewProfileCharts$detectHit = F4(
 			return track.currentPosition;
 		}
 	});
-var $elm$core$Debug$log = _Debug_log;
 var $ianmackenzie$elm_geometry$Vector3d$meters = F3(
 	function (x, y, z) {
 		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
@@ -16888,6 +16888,11 @@ var $author$project$ViewProfileCharts$update = F5(
 					context,
 					{
 						dragAction: $author$project$ViewProfileCharts$DragPan,
+						metresPerPixel: A3(
+							$author$project$ViewProfileCharts$metresPerPixel,
+							areaForZone(zone),
+							context,
+							track),
 						orbiting: $elm$core$Maybe$Just(event.offsetPos),
 						waitingForClickDelay: true
 					});
@@ -16912,12 +16917,7 @@ var $author$project$ViewProfileCharts$update = F5(
 					var _v5 = _v3.b.a;
 					var startX = _v5.a;
 					var startY = _v5.b;
-					var panFactor = A3(
-						$author$project$ViewProfileCharts$metresPerPixel,
-						areaForZone(zone),
-						context,
-						track);
-					var shiftVector = A3($ianmackenzie$elm_geometry$Vector3d$meters, (startX - dx) * panFactor, 0, 0);
+					var shiftVector = A3($ianmackenzie$elm_geometry$Vector3d$meters, (startX - dx) * context.metresPerPixel, 0, 0);
 					var newContext = _Utils_update(
 						context,
 						{
@@ -16925,8 +16925,6 @@ var $author$project$ViewProfileCharts$update = F5(
 							orbiting: $elm$core$Maybe$Just(
 								_Utils_Tuple2(dx, dy))
 						});
-					var _v6 = A2($elm$core$Debug$log, 'DX', startX - dx);
-					var _v7 = A2($elm$core$Debug$log, 'MPP', panFactor);
 					return _Utils_Tuple2(newContext, _List_Nil);
 				} else {
 					return _Utils_Tuple2(context, _List_Nil);

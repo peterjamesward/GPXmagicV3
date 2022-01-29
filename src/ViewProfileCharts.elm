@@ -85,6 +85,7 @@ type alias Context =
     , focalPoint : EarthPoint
     , waitingForClickDelay : Bool
     , followSelectedPoint : Bool
+    , metresPerPixel : Float -- Helps with dragging accurately.
     }
 
 
@@ -484,6 +485,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
                         | orbiting = Just event.offsetPos
                         , dragAction = DragPan
                         , waitingForClickDelay = True
+                        , metresPerPixel = metresPerPixel (areaForZone zone) context track
                     }
             in
             ( newContext
@@ -498,14 +500,11 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
             case ( context.dragAction, context.orbiting ) of
                 ( DragPan, Just ( startX, startY ) ) ->
                     let
-                        panFactor =
-                            metresPerPixel (areaForZone zone) context track
-
                         shiftVector =
                             --TODO: Find out how to do the pixel calculation. See examples?
                             Vector3d.meters
                                 --((startX - dx) * 1.15 ^ (22 - context.zoomLevel))
-                                ((startX - dx) * panFactor)
+                                ((startX - dx) * context.metresPerPixel)
                                 0
                                 0
 
@@ -554,4 +553,5 @@ initialiseView current treeNode =
     , focalPoint = treeNode |> leafFromIndex current |> startPoint
     , waitingForClickDelay = False
     , followSelectedPoint = False
+    , metresPerPixel = 10.0
     }
