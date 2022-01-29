@@ -11,8 +11,9 @@ BUG: Hit detect on Map is slow, sometimes very slow. (Paris to Bree).
 
 Can we fix the altitude so that minZ stays at the bottom when zooming far out?
 > Would make y scale a tad simpler.
+> Can't figure out how not create a logical loop with metresPerPixel and deriveCamera.
 
-SVG overlay scale.
+SVG overlay scale -- WIP, using charts library, looking promising.
 
 SVG overlay tracks mouse movement, shows point data.
 

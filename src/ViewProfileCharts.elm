@@ -401,12 +401,7 @@ svgAltitudeScale ( w, h ) context track =
             , CA.highest 200 CA.orHigher
             ]
         ]
-        [ C.series .x
-            []
-            [ { x = 0, y = 0 }
-            , { x = 800, y = 0 }
-            ]
-        , C.xLabels [ CA.amount 10, CA.withGrid ]
+        [ C.xLabels [ CA.amount 10, CA.withGrid ]
         , C.yLabels [ CA.amount 10, CA.withGrid ]
         ]
 
