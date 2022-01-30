@@ -28804,6 +28804,14 @@ var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWithOptions = F2(
 				$mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$eventDecoder));
 	});
 var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWheel = $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWithOptions($mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$defaultOptions);
+var $terezka$elm_charts$Internal$Svg$Start = {$: 'Start'};
+var $terezka$elm_charts$Chart$Attributes$alignLeft = function (config) {
+	return _Utils_update(
+		config,
+		{
+			anchor: $elm$core$Maybe$Just($terezka$elm_charts$Internal$Svg$Start)
+		});
+};
 var $terezka$elm_charts$Chart$Attributes$amount = F2(
 	function (value, config) {
 		return _Utils_update(
@@ -30891,11 +30899,26 @@ var $terezka$elm_charts$Chart$Attributes$highest = F3(
 				max: A3(edit, v, b.max, b.dataMax)
 			});
 	});
+var $ianmackenzie$elm_units$Length$inKilometers = function (length) {
+	return 0.001 * $ianmackenzie$elm_units$Length$inMeters(length);
+};
 var $terezka$elm_charts$Chart$Attributes$margin = F2(
 	function (v, config) {
 		return _Utils_update(
 			config,
 			{margin: v});
+	});
+var $terezka$elm_charts$Chart$Attributes$moveDown = F2(
+	function (v, config) {
+		return _Utils_update(
+			config,
+			{yOff: config.yOff + v});
+	});
+var $terezka$elm_charts$Chart$Attributes$moveRight = F2(
+	function (v, config) {
+		return _Utils_update(
+			config,
+			{xOff: config.xOff + v});
 	});
 var $terezka$elm_charts$Chart$Attributes$orHigher = F3(
 	function (most, real, _v0) {
@@ -33271,7 +33294,6 @@ var $terezka$elm_charts$Chart$xLabels = function (edits) {
 			}));
 };
 var $terezka$elm_charts$Internal$Svg$End = {$: 'End'};
-var $terezka$elm_charts$Internal$Svg$Start = {$: 'Start'};
 var $terezka$elm_charts$Chart$yLabels = function (edits) {
 	var toTicks = F2(
 		function (p, config) {
@@ -33369,46 +33391,16 @@ var $author$project$ViewProfileCharts$svgAltitudeScale = F3(
 	function (_v0, context, track) {
 		var w = _v0.a;
 		var h = _v0.b;
-		var maxDistance = $author$project$DomainModel$trueLength(track.trackTree);
-		var _v1 = A3(
-			$author$project$ViewProfileCharts$extentOfVisibleModel,
-			_Utils_Tuple2(w, h),
-			context,
-			track);
-		var zeroCorner = _v1.a;
-		var otherCorner = _v1.b;
-		var rightEdge = function () {
-			if (otherCorner.$ === 'Just') {
-				var farPoint = otherCorner.a;
-				return A2(
-					$elm$core$Basics$max,
-					$ianmackenzie$elm_units$Length$inMeters(
-						$ianmackenzie$elm_geometry$Point3d$xCoordinate(farPoint)),
-					$ianmackenzie$elm_units$Length$inMeters(maxDistance));
-			} else {
-				return $ianmackenzie$elm_units$Length$inMeters(maxDistance);
-			}
-		}();
-		var leftEdge = function () {
-			if (zeroCorner.$ === 'Just') {
-				var zeroPoint = zeroCorner.a;
-				return A2(
-					$elm$core$Basics$min,
-					0,
-					$ianmackenzie$elm_units$Length$inMeters(
-						$ianmackenzie$elm_geometry$Point3d$xCoordinate(zeroPoint)));
-			} else {
-				return 0;
-			}
-		}();
-		var _v2 = $ianmackenzie$elm_geometry$BoundingBox3d$extrema(
+		var maxDistance = $ianmackenzie$elm_units$Length$inKilometers(
+			$author$project$DomainModel$trueLength(track.trackTree));
+		var _v1 = $ianmackenzie$elm_geometry$BoundingBox3d$extrema(
 			$author$project$DomainModel$boundingBox(track.trackTree));
-		var minX = _v2.minX;
-		var maxX = _v2.maxX;
-		var minY = _v2.minY;
-		var maxY = _v2.maxY;
-		var minZ = _v2.minZ;
-		var maxZ = _v2.maxZ;
+		var minX = _v1.minX;
+		var maxX = _v1.maxX;
+		var minY = _v1.minY;
+		var maxY = _v1.maxY;
+		var minZ = _v1.minZ;
+		var maxZ = _v1.maxZ;
 		return A2(
 			$terezka$elm_charts$Chart$chart,
 			_List_fromArray(
@@ -33424,8 +33416,8 @@ var $author$project$ViewProfileCharts$svgAltitudeScale = F3(
 					$terezka$elm_charts$Chart$Attributes$range(
 					_List_fromArray(
 						[
-							A2($terezka$elm_charts$Chart$Attributes$lowest, leftEdge, $terezka$elm_charts$Chart$Attributes$exactly),
-							A2($terezka$elm_charts$Chart$Attributes$highest, rightEdge, $terezka$elm_charts$Chart$Attributes$orHigher)
+							A2($terezka$elm_charts$Chart$Attributes$lowest, 0, $terezka$elm_charts$Chart$Attributes$exactly),
+							A2($terezka$elm_charts$Chart$Attributes$highest, maxDistance, $terezka$elm_charts$Chart$Attributes$orHigher)
 						])),
 					$terezka$elm_charts$Chart$Attributes$domain(
 					_List_fromArray(
@@ -33440,12 +33432,14 @@ var $author$project$ViewProfileCharts$svgAltitudeScale = F3(
 					_List_fromArray(
 						[
 							$terezka$elm_charts$Chart$Attributes$amount(10),
-							$terezka$elm_charts$Chart$Attributes$withGrid
+							$terezka$elm_charts$Chart$Attributes$alignLeft,
+							$terezka$elm_charts$Chart$Attributes$moveDown(20)
 						])),
 					$terezka$elm_charts$Chart$yLabels(
 					_List_fromArray(
 						[
 							$terezka$elm_charts$Chart$Attributes$amount(10),
+							$terezka$elm_charts$Chart$Attributes$moveRight(20),
 							$terezka$elm_charts$Chart$Attributes$withGrid
 						]))
 				]));
@@ -34792,12 +34786,6 @@ var $author$project$ViewProfileCharts$svgGradientScale = F3(
 						[
 							{x: 0, y: 0},
 							{x: 800, y: 0}
-						])),
-					$terezka$elm_charts$Chart$xLabels(
-					_List_fromArray(
-						[
-							$terezka$elm_charts$Chart$Attributes$amount(10),
-							$terezka$elm_charts$Chart$Attributes$withGrid
 						])),
 					$terezka$elm_charts$Chart$yLabels(
 					_List_fromArray(

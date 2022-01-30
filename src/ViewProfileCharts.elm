@@ -356,50 +356,28 @@ svgAltitudeScale :
     -> Html msg
 svgAltitudeScale ( w, h ) context track =
     let
-        ( zeroCorner, otherCorner ) =
-            -- Zero is upper left, hence min distance, max altitude.
-            extentOfVisibleModel ( w, h ) context track
-
         { minX, maxX, minY, maxY, minZ, maxZ } =
             -- Domain extent across entire model, not current view.
             BoundingBox3d.extrema <| boundingBox track.trackTree
 
         maxDistance =
-            trueLength track.trackTree
-
-        leftEdge =
-            case zeroCorner of
-                Just zeroPoint ->
-                    min 0 (Length.inMeters <| Point3d.xCoordinate zeroPoint)
-
-                Nothing ->
-                    0
-
-        rightEdge =
-            case otherCorner of
-                Just farPoint ->
-                    max
-                        (Length.inMeters <| Point3d.xCoordinate farPoint)
-                        (Length.inMeters maxDistance)
-
-                Nothing ->
-                    Length.inMeters maxDistance
+            Length.inKilometers <| trueLength track.trackTree
     in
     C.chart
         [ CA.height <| Pixels.inPixels <| Quantity.toFloatQuantity <| h
         , CA.width <| Pixels.inPixels <| Quantity.toFloatQuantity <| w
         , CA.margin { top = 20, bottom = 30, left = 30, right = 20 }
         , CA.range
-            [ CA.lowest leftEdge CA.exactly
-            , CA.highest rightEdge CA.orHigher
+            [ CA.lowest 0 CA.exactly
+            , CA.highest maxDistance CA.orHigher
             ]
         , CA.domain
             [ CA.lowest 0 CA.orLower
             , CA.highest 200 CA.orHigher
             ]
         ]
-        [ C.xLabels [ CA.amount 10, CA.withGrid ]
-        , C.yLabels [ CA.amount 10, CA.withGrid ]
+        [ C.xLabels [ CA.amount 10, CA.alignLeft, CA.moveDown 20 ]
+        , C.yLabels [ CA.amount 10, CA.moveRight 20, CA.withGrid ]
         ]
 
 
@@ -427,7 +405,6 @@ svgGradientScale ( w, h ) context track =
             [ { x = 0, y = 0 }
             , { x = 800, y = 0 }
             ]
-        , C.xLabels [ CA.amount 10, CA.withGrid ]
         , C.yLabels [ CA.amount 10, CA.withGrid ]
         ]
 
