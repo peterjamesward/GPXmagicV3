@@ -10373,6 +10373,10 @@ var $author$project$DomainModel$leafFromIndex = F2(
 			}
 		}
 	});
+var $ianmackenzie$elm_units$Length$inMeters = function (_v0) {
+	var numMeters = _v0.a;
+	return numMeters;
+};
 var $author$project$DomainModel$asRecord = function (treeNode) {
 	if (treeNode.$ === 'Leaf') {
 		var section = treeNode.a;
@@ -10381,6 +10385,16 @@ var $author$project$DomainModel$asRecord = function (treeNode) {
 		var node = treeNode.a;
 		return node.nodeContent;
 	}
+};
+var $author$project$DomainModel$trueLength = function (treeNode) {
+	return $author$project$DomainModel$asRecord(treeNode).trueLength;
+};
+var $author$project$ViewProfileCharts$minZoomLevel = function (treeNode) {
+	return 23.75 - A2(
+		$elm$core$Basics$logBase,
+		2.0,
+		$ianmackenzie$elm_units$Length$inMeters(
+			$author$project$DomainModel$trueLength(treeNode)));
 };
 var $author$project$DomainModel$startPoint = function (treeNode) {
 	return $author$project$DomainModel$asRecord(treeNode).startPoint;
@@ -10403,13 +10417,13 @@ var $author$project$ViewProfileCharts$initialiseView = F3(
 					metresPerPixel: 10.0,
 					orbiting: $elm$core$Maybe$Nothing,
 					waitingForClickDelay: false,
-					zoomLevel: 10.0
+					zoomLevel: $author$project$ViewProfileCharts$minZoomLevel(treeNode)
 				});
 		} else {
 			return {
 				altitudeCameraElevation: $ianmackenzie$elm_units$Angle$degrees(0),
 				cameraDistance: $ianmackenzie$elm_units$Length$kilometers(10),
-				defaultZoomLevel: 10.0,
+				defaultZoomLevel: $author$project$ViewProfileCharts$minZoomLevel(treeNode),
 				dragAction: $author$project$ViewProfileCharts$DragNone,
 				fieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
 				focalPoint: $author$project$DomainModel$startPoint(
@@ -10419,7 +10433,7 @@ var $author$project$ViewProfileCharts$initialiseView = F3(
 				metresPerPixel: 10.0,
 				orbiting: $elm$core$Maybe$Nothing,
 				waitingForClickDelay: false,
-				zoomLevel: 10.0
+				zoomLevel: $author$project$ViewProfileCharts$minZoomLevel(treeNode)
 			};
 		}
 	});
@@ -10499,10 +10513,6 @@ var $elm$json$Json$Encode$list = F2(
 				_Json_emptyArray(_Utils_Tuple0),
 				entries));
 	});
-var $ianmackenzie$elm_units$Length$inMeters = function (_v0) {
-	var numMeters = _v0.a;
-	return numMeters;
-};
 var $author$project$TrackLoaded$profilePointEncode = function (tp) {
 	return $elm$json$Json$Encode$object(
 		_List_fromArray(
@@ -11993,9 +12003,6 @@ var $ianmackenzie$elm_geometry$Direction2d$rotateBy = F2(
 		return $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
 			{x: (c * d.x) - (s * d.y), y: (s * d.x) + (c * d.y)});
 	});
-var $author$project$DomainModel$trueLength = function (treeNode) {
-	return $author$project$DomainModel$asRecord(treeNode).trueLength;
-};
 var $ianmackenzie$elm_geometry$BoundingBox3d$extrema = function (_v0) {
 	var boundingBoxExtrema = _v0.a;
 	return boundingBoxExtrema;
@@ -14449,7 +14456,7 @@ var $author$project$SceneBuilderProfile$renderBoth = function (track) {
 				30.0,
 				$author$project$DomainModel$gradientFromNode(
 					$author$project$DomainModel$Leaf(road)));
-			var yValue = gradient * 20.0;
+			var yValue = gradient * 1000.0;
 			var segmentEnd = A3(
 				$ianmackenzie$elm_geometry$Point3d$xyz,
 				A2($ianmackenzie$elm_units$Quantity$plus, road.trueLength, distance),
@@ -16686,7 +16693,11 @@ var $author$project$ViewProfileCharts$update = F5(
 					_Utils_update(
 						context,
 						{
-							zoomLevel: A3($elm$core$Basics$clamp, 0.0, 22.0, context.zoomLevel + 0.5)
+							zoomLevel: A3(
+								$elm$core$Basics$clamp,
+								$author$project$ViewProfileCharts$minZoomLevel(track.trackTree),
+								22.0,
+								context.zoomLevel + 0.5)
 						}),
 					_List_Nil);
 			case 'ImageZoomOut':
@@ -16694,7 +16705,11 @@ var $author$project$ViewProfileCharts$update = F5(
 					_Utils_update(
 						context,
 						{
-							zoomLevel: A3($elm$core$Basics$clamp, 0.0, 22.0, context.zoomLevel - 0.5)
+							zoomLevel: A3(
+								$elm$core$Basics$clamp,
+								$author$project$ViewProfileCharts$minZoomLevel(track.trackTree),
+								22.0,
+								context.zoomLevel - 0.5)
 						}),
 					_List_Nil);
 			case 'ImageReset':
@@ -16752,12 +16767,15 @@ var $author$project$ViewProfileCharts$update = F5(
 			case 'ImageMouseWheel':
 				var deltaY = msg.a;
 				var increment = (-0.001) * deltaY;
+				var zoomLevel = A3(
+					$elm$core$Basics$clamp,
+					$author$project$ViewProfileCharts$minZoomLevel(track.trackTree),
+					22.0,
+					context.zoomLevel + increment);
 				return _Utils_Tuple2(
 					_Utils_update(
 						context,
-						{
-							zoomLevel: A3($elm$core$Basics$clamp, 0.0, 22.0, context.zoomLevel + increment)
-						}),
+						{zoomLevel: zoomLevel}),
 					_List_Nil);
 			case 'ImageGrab':
 				var zone = msg.a;
@@ -28689,7 +28707,6 @@ var $ianmackenzie$elm_3d_scene$Scene3d$backgroundColor = function (color) {
 	return $ianmackenzie$elm_3d_scene$Scene3d$BackgroundColor(color);
 };
 var $ianmackenzie$elm_units$Length$kilometer = $ianmackenzie$elm_units$Length$kilometers(1);
-var $elm$core$Debug$log = _Debug_log;
 var $author$project$ViewProfileCharts$deriveGradientCamera = F3(
 	function (treeNode, context, currentPosition) {
 		var viewportHeight = $ianmackenzie$elm_units$Length$meters(
@@ -28722,10 +28739,6 @@ var $author$project$ViewProfileCharts$deriveGradientCamera = F3(
 				elevation: elevationToReduce,
 				focalPoint: gradientLookingAt
 			});
-		var _v1 = A2(
-			$elm$core$Debug$log,
-			'range, height, reduce',
-			_Utils_Tuple3(rangeOfY, viewportHeight, requiredReduction));
 		return $ianmackenzie$elm_3d_camera$Camera3d$orthographic(
 			{
 				viewpoint: gradientViewpoint,

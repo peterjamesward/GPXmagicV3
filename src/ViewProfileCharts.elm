@@ -286,7 +286,7 @@ deriveAltitudeCamera treeNode context currentPosition =
             Viewpoint3d.orbitZ
                 { focalPoint = altitudeLookingAt
                 , azimuth = Direction2d.toAngle Direction2d.negativeY
-                , elevation = elevationToReduce --context.altitudeCameraElevation
+                , elevation = elevationToReduce
                 , distance = Length.kilometers 10
                 }
     in
@@ -321,9 +321,6 @@ deriveGradientCamera treeNode context currentPosition =
 
         elevationToReduce =
             Angle.radians <| acos requiredReduction
-
-        _ =
-            Debug.log "range, height, reduce" ( rangeOfY, viewportHeight, requiredReduction )
 
         gradientLookingAt =
             if context.followSelectedPoint then
@@ -386,7 +383,7 @@ svgAltitudeScale ( w, h ) context track =
                         (Length.inMeters maxDistance)
 
                 Nothing ->
-                    (Length.inMeters maxDistance)
+                    Length.inMeters maxDistance
     in
     C.chart
         [ CA.height <| Pixels.inPixels <| Quantity.toFloatQuantity <| h
@@ -541,6 +538,11 @@ detectHit event track ( w, h ) context =
             track.currentPosition
 
 
+minZoomLevel treeNode =
+    -- More empiricism, which is really embarrassing.
+    23.75 - logBase 2.0 (Length.inMeters <| trueLength treeNode)
+
+
 update :
     Msg
     -> (Msg -> msg)
@@ -583,10 +585,14 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
     in
     case msg of
         ImageZoomIn ->
-            ( { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + 0.5 }, [] )
+            ( { context | zoomLevel = clamp (minZoomLevel track.trackTree) 22.0 <| context.zoomLevel + 0.5 }
+            , []
+            )
 
         ImageZoomOut ->
-            ( { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel - 0.5 }, [] )
+            ( { context | zoomLevel = clamp (minZoomLevel track.trackTree) 22.0 <| context.zoomLevel - 0.5 }
+            , []
+            )
 
         ImageReset ->
             ( initialiseView track.currentPosition track.trackTree (Just context), [] )
@@ -624,8 +630,11 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
             let
                 increment =
                     -0.001 * deltaY
+
+                zoomLevel =
+                    clamp (minZoomLevel track.trackTree) 22.0 <| context.zoomLevel + increment
             in
-            ( { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + increment }, [] )
+            ( { context | zoomLevel = zoomLevel }, [] )
 
         ImageGrab zone event ->
             -- Mouse behaviour depends which view is in use...
@@ -707,7 +716,7 @@ initialiseView current treeNode currentContext =
                 , fieldOfView = Angle.degrees 45
                 , orbiting = Nothing
                 , dragAction = DragNone
-                , zoomLevel = 10.0
+                , zoomLevel = minZoomLevel treeNode
                 , defaultZoomLevel = 10.0
                 , focalPoint = treeNode |> leafFromIndex current |> startPoint
                 , waitingForClickDelay = False
@@ -721,8 +730,8 @@ initialiseView current treeNode currentContext =
             , fieldOfView = Angle.degrees 45
             , orbiting = Nothing
             , dragAction = DragNone
-            , zoomLevel = 10.0
-            , defaultZoomLevel = 10.0
+            , zoomLevel = minZoomLevel treeNode
+            , defaultZoomLevel = minZoomLevel treeNode
             , focalPoint = treeNode |> leafFromIndex current |> startPoint
             , waitingForClickDelay = False
             , followSelectedPoint = False

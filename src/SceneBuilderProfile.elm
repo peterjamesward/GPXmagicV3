@@ -99,8 +99,8 @@ renderBoth track =
                             Leaf road
 
                 yValue =
-                    -- Exaggerate here, reduce if needed in view.
-                    gradient * 20.0
+                    -- Exaggerate here, reduce to fit in view depending on zoom level.
+                    gradient * 1000.0
 
                 segmentStart =
                     Point3d.xyz

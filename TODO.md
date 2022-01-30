@@ -3,19 +3,34 @@
 
 BUG: Dubious steepest gradient on some routes. (May have to wait until we have that tool!)
 BUG: In Grid view, Pane1 is notably smaller than the others.
+
 BUG: Hit detect on Map is slow, sometimes very slow. (Paris to Bree).
+>>> Something is blowing the stack (try zooming on Artemis to Bree profile)
+> Possibly goes away with --optimise compile.
+``` main.js:11929 Uncaught RangeError: Maximum call stack size exceeded
+    at Function.f (main.js:11929:11)
+    at A2 (main.js:56:28)
+    at main.js:11925:11
+    at main.js:15:54
+    at A2 (main.js:56:44)
+    at Function.f (main.js:11000:5)
+    at A2 (main.js:56:28)
+    at Function.f (main.js:11974:8)
+    at A2 (main.js:56:28)
+    at main.js:11925:11
+```
 
 # WIP
 
 ## Profile rendering
 
 Not going to try coding now; too late, but can write _about_ what we need...
-> It's literate programming.
+> It's literate programming, and it really helps.
 
 OK. Both altitude and gradient are rendered with some exaggeration. 
-This is because we can
-scale this _down_ at view time, but cannot increase it. 
+This is because we can scale this _down_ at view time, but cannot increase it. 
 The aim is for the altitude vertical scale always to run from minZ to maxZ, regardless of zoom. 
+
 Camera zoom affects X and Y equally.
 When the zoom level is low (far away, so the track looks small), the track view
 collapses toward the view "lookingAt" point, centre of the viewport.
@@ -23,14 +38,16 @@ collapses toward the view "lookingAt" point, centre of the viewport.
 When the track is small enough to not fill the height, we want two things:
 - The base of the track stays at the base of the view;
 - The start of the track stays at the left of the view.
-- 
+
 We achieve this by, at low zoom levels:
 - Raising the "lookAt" point;
 - Moving the "lookAt" point along the track 
 
 In other words:
 - The lookAt vertically must be centerZ when the height is filled;
-- When the heigh is not filled: minZ + half viewport height * metres/pixel.
+- When the height is not filled, minZ will be (minZ - centreZ) / mpp pixels below centre,
+- To move this down by the required halfheight - (minZ - centreZ)/mpp, we need to 
+- move the lookingAt up by halfheight * mpp - (minZ - centreZ).
 - Hence, simple `max` of these might suffice.
 
 Horizontally:
@@ -43,13 +60,24 @@ Stop zooming out when track fills the window exactly.
 
 Gradient Y scale should be constant; always occupying the height (there's no proportion to maintain).
 This requires changing the rendering so that all furthest (low) zoom, it comes out right,
-then we always correct using camera elevation.
+then we always correct using camera elevation. Hmm. For a 100km course, and a 2:1 aspect ration,
+that implies a +/- 25km scale. Might as well put % as km.
+Would the cosine logic hold up, zooming in on that? We can but try.
 
-Render current point lines using SVG.
+## STATUS
+
+Min zoom is good. 
+Need to put numbers and ticks inside the axes, and fix margin.
+Also fix initial and default zoom.
+Will need to refresh zoom after resize, in case it breaks.
+Then sort out the min/max for focal point, now ends are fixed.
+Panning should then not be able to move the start/end from their respective edges.
+
+Render current point lines using SVG, maybe dotted to both axes.
 
 Display distance, altitude, gradient for current point.
 
-SVG overlay tracks mouse movement, shows point data.
+Set initial zoom for profile at the min zoom level determined above.
 
 ---
 
