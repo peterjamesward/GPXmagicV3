@@ -362,6 +362,15 @@ svgAltitudeScale ( w, h ) context track =
 
         maxDistance =
             Length.inKilometers <| trueLength track.trackTree
+
+        currentPointAltitude =
+            Length.inMeters <|
+                Point3d.zCoordinate <|
+                    earthPointFromIndex track.currentPosition track.trackTree
+
+        currentPointDistance =
+            Length.inMeters <|
+                distanceFromIndex track.currentPosition track.trackTree
     in
     C.chart
         [ CA.height <| Pixels.inPixels <| Quantity.toFloatQuantity <| h
@@ -378,6 +387,23 @@ svgAltitudeScale ( w, h ) context track =
         ]
         [ C.xLabels [ CA.amount 10, CA.alignLeft, CA.moveDown 20 ]
         , C.yLabels [ CA.amount 10, CA.moveRight 20, CA.withGrid ]
+        , C.withPlane <|
+            \p ->
+                [ C.line
+                    [ CA.x1 0
+                    , CA.y1 currentPointAltitude
+                    , CA.x2 p.x.max
+                    , CA.dashed [ 5, 5 ]
+                    , CA.color CA.red
+                    ]
+                , C.line
+                    [ CA.x1 currentPointDistance
+                    , CA.y1 0
+                    , CA.y2 2000
+                    , CA.dashed [ 5, 5 ]
+                    , CA.color CA.blue
+                    ]
+                ]
         ]
 
 

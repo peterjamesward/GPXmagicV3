@@ -28818,6 +28818,8 @@ var $terezka$elm_charts$Chart$Attributes$amount = F2(
 			config,
 			{amount: value});
 	});
+var $terezka$elm_charts$Internal$Helpers$blue = '#12A5ED';
+var $terezka$elm_charts$Chart$Attributes$blue = $terezka$elm_charts$Internal$Helpers$blue;
 var $terezka$elm_charts$Internal$Svg$Event = F2(
 	function (name, handler) {
 		return {handler: handler, name: name};
@@ -30902,6 +30904,15 @@ var $terezka$elm_charts$Chart$Attributes$highest = F3(
 var $ianmackenzie$elm_units$Length$inKilometers = function (length) {
 	return 0.001 * $ianmackenzie$elm_units$Length$inMeters(length);
 };
+var $terezka$elm_charts$Chart$SvgElement = function (a) {
+	return {$: 'SvgElement', a: a};
+};
+var $terezka$elm_charts$Chart$line = function (attrs) {
+	return $terezka$elm_charts$Chart$SvgElement(
+		function (p) {
+			return A2($terezka$elm_charts$Chart$Svg$line, p, attrs);
+		});
+};
 var $terezka$elm_charts$Chart$Attributes$margin = F2(
 	function (v, config) {
 		return _Utils_update(
@@ -30930,11 +30941,31 @@ var $terezka$elm_charts$Chart$Attributes$range = F2(
 			config,
 			{range: v});
 	});
+var $terezka$elm_charts$Internal$Helpers$red = '#F5325B';
+var $terezka$elm_charts$Chart$Attributes$red = $terezka$elm_charts$Internal$Helpers$red;
 var $terezka$elm_charts$Chart$Attributes$withGrid = function (config) {
 	return _Utils_update(
 		config,
 		{grid: true});
 };
+var $terezka$elm_charts$Chart$SubElements = function (a) {
+	return {$: 'SubElements', a: a};
+};
+var $terezka$elm_charts$Chart$withPlane = function (func) {
+	return $terezka$elm_charts$Chart$SubElements(
+		F2(
+			function (p, is) {
+				return func(p);
+			}));
+};
+var $terezka$elm_charts$Chart$Attributes$x2 = F2(
+	function (v, config) {
+		return _Utils_update(
+			config,
+			{
+				x2: $elm$core$Maybe$Just(v)
+			});
+	});
 var $terezka$elm_charts$Internal$Svg$Floats = {$: 'Floats'};
 var $terezka$elm_charts$Chart$LabelsElement = F3(
 	function (a, b, c) {
@@ -33293,6 +33324,14 @@ var $terezka$elm_charts$Chart$xLabels = function (edits) {
 						A2(toTicks, p, config)));
 			}));
 };
+var $terezka$elm_charts$Chart$Attributes$y2 = F2(
+	function (v, config) {
+		return _Utils_update(
+			config,
+			{
+				y2: $elm$core$Maybe$Just(v)
+			});
+	});
 var $terezka$elm_charts$Internal$Svg$End = {$: 'End'};
 var $terezka$elm_charts$Chart$yLabels = function (edits) {
 	var toTicks = F2(
@@ -33393,6 +33432,11 @@ var $author$project$ViewProfileCharts$svgAltitudeScale = F3(
 		var h = _v0.b;
 		var maxDistance = $ianmackenzie$elm_units$Length$inKilometers(
 			$author$project$DomainModel$trueLength(track.trackTree));
+		var currentPointDistance = $ianmackenzie$elm_units$Length$inMeters(
+			A2($author$project$DomainModel$distanceFromIndex, track.currentPosition, track.trackTree));
+		var currentPointAltitude = $ianmackenzie$elm_units$Length$inMeters(
+			$ianmackenzie$elm_geometry$Point3d$zCoordinate(
+				A2($author$project$DomainModel$earthPointFromIndex, track.currentPosition, track.trackTree)));
 		var _v1 = $ianmackenzie$elm_geometry$BoundingBox3d$extrema(
 			$author$project$DomainModel$boundingBox(track.trackTree));
 		var minX = _v1.minX;
@@ -33441,7 +33485,35 @@ var $author$project$ViewProfileCharts$svgAltitudeScale = F3(
 							$terezka$elm_charts$Chart$Attributes$amount(10),
 							$terezka$elm_charts$Chart$Attributes$moveRight(20),
 							$terezka$elm_charts$Chart$Attributes$withGrid
-						]))
+						])),
+					$terezka$elm_charts$Chart$withPlane(
+					function (p) {
+						return _List_fromArray(
+							[
+								$terezka$elm_charts$Chart$line(
+								_List_fromArray(
+									[
+										$terezka$elm_charts$Chart$Attributes$x1(0),
+										$terezka$elm_charts$Chart$Attributes$y1(currentPointAltitude),
+										$terezka$elm_charts$Chart$Attributes$x2(p.x.max),
+										$terezka$elm_charts$Chart$Attributes$dashed(
+										_List_fromArray(
+											[5, 5])),
+										$terezka$elm_charts$Chart$Attributes$color($terezka$elm_charts$Chart$Attributes$red)
+									])),
+								$terezka$elm_charts$Chart$line(
+								_List_fromArray(
+									[
+										$terezka$elm_charts$Chart$Attributes$x1(currentPointDistance),
+										$terezka$elm_charts$Chart$Attributes$y1(0),
+										$terezka$elm_charts$Chart$Attributes$y2(2000),
+										$terezka$elm_charts$Chart$Attributes$dashed(
+										_List_fromArray(
+											[5, 5])),
+										$terezka$elm_charts$Chart$Attributes$color($terezka$elm_charts$Chart$Attributes$blue)
+									]))
+							]);
+					})
 				]));
 	});
 var $terezka$elm_charts$Chart$Indexed = function (a) {
@@ -33587,13 +33659,11 @@ var $terezka$elm_charts$Chart$Attributes$opacity = F2(
 			config,
 			{opacity: v});
 	});
-var $terezka$elm_charts$Internal$Helpers$blue = '#12A5ED';
 var $terezka$elm_charts$Internal$Helpers$brown = '#871c1c';
 var $terezka$elm_charts$Internal$Helpers$green = '#71c614';
 var $terezka$elm_charts$Internal$Helpers$moss = '#92b42c';
 var $terezka$elm_charts$Internal$Helpers$orange = '#FF8400';
 var $terezka$elm_charts$Internal$Helpers$purple = '#7b4dff';
-var $terezka$elm_charts$Internal$Helpers$red = '#F5325B';
 var $elm$core$Dict$sizeHelp = F2(
 	function (n, dict) {
 		sizeHelp:
