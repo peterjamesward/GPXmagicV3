@@ -18,7 +18,6 @@ import Pixels exposing (Pixels)
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
 import SceneBuilder3D
-import SceneBuilderProfile exposing (ProfileDatum)
 import TrackLoaded exposing (TrackLoaded)
 import ViewMap
 import ViewProfileCharts
@@ -80,7 +79,6 @@ type alias Options =
     , pane4 : PaneContext
     , sliderState : SliderState
     , scene3d : List (Entity LocalCoords)
-    , sceneAltitude : List ProfileDatum
     }
 
 
@@ -110,7 +108,6 @@ defaultOptions =
     , pane4 = { defaultPaneContext | paneId = Pane4 }
     , sliderState = SliderIdle
     , scene3d = []
-    , sceneAltitude = []
     }
 
 
@@ -175,14 +172,28 @@ optionList =
 
 render : Options -> TrackLoaded msg -> Options
 render options track =
-    let
-        ( altitude ) =
-            SceneBuilderProfile.renderBoth track
-    in
+    --Profile stuff now lives in the pane context, as each pane could
+    --have different version!
+    --TODO: Any open Profile views also get to (re-)render here.
     { options
         | scene3d = SceneBuilder3D.render3dView track
-        , sceneAltitude = altitude
+        , pane1 = renderPaneIfProfileVisible options.pane1 track
+        , pane2 = renderPaneIfProfileVisible options.pane2 track
+        , pane3 = renderPaneIfProfileVisible options.pane3 track
+        , pane4 = renderPaneIfProfileVisible options.pane4 track
     }
+
+
+renderPaneIfProfileVisible : PaneContext -> TrackLoaded msg -> PaneContext
+renderPaneIfProfileVisible pane track =
+    case ( pane.activeView, pane.profileContext ) of
+        ( ViewProfile, Just context ) ->
+            { pane
+                | profileContext = Just <| ViewProfileCharts.renderProfileDataForCharts context track
+            }
+
+        _ ->
+            pane
 
 
 update :
@@ -583,7 +594,6 @@ viewPanes msgWrapper mTrack ( w, h ) options =
                                 context
                                 ( paneWidth, paneHeight )
                                 track
-                                options.sceneAltitude
                                 (msgWrapper << ProfileViewMessage pane.paneId)
 
                         _ ->

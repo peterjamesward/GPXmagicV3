@@ -1,10 +1,7 @@
 module ViewProfileCharts exposing (..)
 
 import Actions exposing (ToolAction(..))
-import Angle exposing (Angle)
-import Axis3d
 import BoundingBox3d
-import Camera3d exposing (Camera3d)
 import Chart as C
 import Chart.Attributes as CA
 import DomainModel exposing (..)
@@ -20,16 +17,10 @@ import Html.Events as HE
 import Html.Events.Extra.Mouse as Mouse exposing (Button(..))
 import Html.Events.Extra.Wheel as Wheel
 import Json.Decode as D
-import Length exposing (Meters)
-import LocalCoords exposing (LocalCoords)
+import Length
 import Pixels exposing (Pixels)
-import Plane3d
-import Point2d
 import Point3d exposing (Point3d)
 import Quantity exposing (Quantity, toFloatQuantity)
-import Rectangle2d
-import Scene3d exposing (Entity, backgroundColor)
-import SceneBuilderProfile exposing (ProfileDatum)
 import TrackLoaded exposing (TrackLoaded)
 import Vector3d
 import ViewPureStyles exposing (useIcon)
@@ -69,6 +60,7 @@ type alias Context =
     , followSelectedPoint : Bool
     , metresPerPixel : Float -- Helps with dragging accurately.
     , waitingForClickDelay : Bool
+    , profileData : List ProfileDatum
     }
 
 
@@ -123,10 +115,10 @@ view :
     Context
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> TrackLoaded msg
-    -> List ProfileDatum
     -> (Msg -> msg)
     -> Element msg
-view context ( givenWidth, givenHeight ) track profileData msgWrapper =
+view context ( givenWidth, givenHeight ) track msgWrapper =
+    --TODO: Note profileData now in context.
     let
         dragging =
             context.dragAction
@@ -367,6 +359,49 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
             )
 
 
+type alias ProfileDatum =
+    -- Intended for use with the terezka charts, but agnostic.
+    -- One required for each point
+    { distance : Float -- metres or miles depending on units setting
+    , minAltitude : Float -- metres or feet
+    , maxAltitude : Float -- will be same as above for Leaf
+    , startGradient : Float -- percent
+    , endGradient : Float -- again, same for Leaf.
+    , colour : Color -- use average gradient if not Leaf
+    }
+
+
+renderProfileDataForCharts : Context -> TrackLoaded msg -> Context
+renderProfileDataForCharts context track =
+    let
+        foldFn :
+            RoadSection
+            -> ( Length.Length, List ProfileDatum )
+            -> ( Length.Length, List ProfileDatum )
+        foldFn road ( distance, outputs ) =
+            -- Ambitiously, do gradient in the same traversal.
+            ( distance |> Quantity.plus road.trueLength
+            , outputs
+            )
+
+        depthFn road =
+            --TODO: Depth is function designed to ensure about 1000 values returned,
+            --determined by track length (and skip count) and zoom level.
+            Just 10
+
+        ( _, result ) =
+            DomainModel.traverseTreeBetweenLimitsToDepth
+                0
+                (skipCount track.trackTree)
+                depthFn
+                0
+                track.trackTree
+                foldFn
+                ( Quantity.zero, [] )
+    in
+    { context | profileData = result }
+
+
 initialiseView :
     Int
     -> PeteTree
@@ -394,4 +429,5 @@ initialiseView current treeNode currentContext =
             , followSelectedPoint = False
             , metresPerPixel = 10.0
             , waitingForClickDelay = False
+            , profileData = []
             }

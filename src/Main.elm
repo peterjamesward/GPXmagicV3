@@ -37,10 +37,7 @@ import OAuthTypes as O exposing (OAuthMsg(..))
 import PaneLayoutManager exposing (Msg(..), ViewMode(..))
 import Pixels exposing (Pixels)
 import Quantity exposing (Quantity)
-import Scene3d exposing (Entity)
-import SceneBuilder3D
 import SceneBuilderMap
-import SceneBuilderProfile
 import SplitPane.SplitPane as SplitPane exposing (..)
 import StravaAuth exposing (getStravaToken)
 import Task
