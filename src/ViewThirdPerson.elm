@@ -289,6 +289,7 @@ update msg msgWrapper track area context =
             )
 
         ClickDelayExpired ->
+            --TODO: Replace with logic that looks for mouse movement.
             ( { context | waitingForClickDelay = False }, [] )
 
         ImageMouseWheel deltaY ->
@@ -318,8 +319,6 @@ update msg msgWrapper track area context =
                             else
                                 DragPan
                         , waitingForClickDelay = True
-
-                        --, followSelectedPoint = False
                     }
             in
             ( newContext

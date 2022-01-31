@@ -5,6 +5,11 @@ import Element exposing (rgb255)
 import FlatColors.FlatUIPalette exposing (..)
 
 
+gradientColourPastel : Float -> Color.Color
+gradientColourPastel slope =
+    Color.hsl (gradientHue slope) 0.6 0.7
+
+
 gradientHue : Float -> Float
 gradientHue slope =
     let

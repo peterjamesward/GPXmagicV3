@@ -18,7 +18,7 @@ import Pixels exposing (Pixels)
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
 import SceneBuilder3D
-import SceneBuilderProfile
+import SceneBuilderProfile exposing (ProfileDatum)
 import TrackLoaded exposing (TrackLoaded)
 import ViewMap
 import ViewProfileCharts
@@ -80,8 +80,7 @@ type alias Options =
     , pane4 : PaneContext
     , sliderState : SliderState
     , scene3d : List (Entity LocalCoords)
-    , sceneAltitude : List (Entity LocalCoords)
-    , sceneGradient : List (Entity LocalCoords)
+    , sceneAltitude : List ProfileDatum
     }
 
 
@@ -112,7 +111,6 @@ defaultOptions =
     , sliderState = SliderIdle
     , scene3d = []
     , sceneAltitude = []
-    , sceneGradient = []
     }
 
 
@@ -178,13 +176,12 @@ optionList =
 render : Options -> TrackLoaded msg -> Options
 render options track =
     let
-        ( altitude, gradient ) =
+        ( altitude ) =
             SceneBuilderProfile.renderBoth track
     in
     { options
         | scene3d = SceneBuilder3D.render3dView track
         , sceneAltitude = altitude
-        , sceneGradient = gradient
     }
 
 
@@ -587,7 +584,6 @@ viewPanes msgWrapper mTrack ( w, h ) options =
                                 ( paneWidth, paneHeight )
                                 track
                                 options.sceneAltitude
-                                options.sceneGradient
                                 (msgWrapper << ProfileViewMessage pane.paneId)
 
                         _ ->

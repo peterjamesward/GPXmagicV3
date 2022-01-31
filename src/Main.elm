@@ -1018,6 +1018,7 @@ performActionsOnModel actions model =
                 ( TrackHasChanged, Just track ) ->
                     -- Must be wary of looping here.
                     -- Purpose is to refresh all tools' options and all presentations.
+                    --TODO: Isolate what this is supposed to achieve, and just do it.
                     let
                         ( refreshedToolOptions, secondaryActions ) =
                             ToolsController.refreshOpenTools foldedModel.track foldedModel.toolOptions

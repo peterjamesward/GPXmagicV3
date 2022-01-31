@@ -4,7 +4,10 @@
 BUG: Dubious steepest gradient on some routes. (May have to wait until we have that tool!)
 BUG: In Grid view, Pane1 is notably smaller than the others.
 
-BUG: Hit detect on Map is slow, sometimes very slow. (Paris to Bree).
+**BUG**: Hit detect on Map is slow, sometimes very slow. (Paris to Bree).
+Can take tens of seconds but seems to recover.
+Does each successive search take longer ?????
+
 >>> Something is blowing the stack (try zooming on Artemis to Bree profile)
 > Possibly goes away with --optimise compile.
 ``` main.js:11929 Uncaught RangeError: Maximum call stack size exceeded
@@ -26,6 +29,9 @@ BUG: Hit detect on Map is slow, sometimes very slow. (Paris to Bree).
 
 Simplest -- just re-render on zoom, pan, setCurrent and use the terezka chart package.
 Use a stack to show altitude range for non Leaf sections.
+
+Drag might be nuisance but the library exposes events so we should be good.
+https://elm-charts.org/documentation/interactivity/zoom
 
 ---
 
