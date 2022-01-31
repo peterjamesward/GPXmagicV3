@@ -15957,6 +15957,20 @@ var $author$project$DomainModel$indexFromDistance = F2(
 		}
 	});
 var $elm$core$Basics$acos = _Basics_acos;
+var $ianmackenzie$elm_units$Quantity$clamp = F3(
+	function (_v0, _v1, _v2) {
+		var lower = _v0.a;
+		var upper = _v1.a;
+		var value = _v2.a;
+		return (_Utils_cmp(lower, upper) < 1) ? $ianmackenzie$elm_units$Quantity$Quantity(
+			A3($elm$core$Basics$clamp, lower, upper, value)) : $ianmackenzie$elm_units$Quantity$Quantity(
+			A3($elm$core$Basics$clamp, upper, lower, value));
+	});
+var $ianmackenzie$elm_units$Quantity$divideBy = F2(
+	function (divisor, _v0) {
+		var value = _v0.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(value / divisor);
+	});
 var $ianmackenzie$elm_units$Quantity$greaterThan = F2(
 	function (_v0, _v1) {
 		var y = _v0.a;
@@ -16229,11 +16243,22 @@ var $author$project$ViewProfileCharts$deriveAltitudeCamera = F3(
 	function (treeNode, context, currentPosition) {
 		var viewportHeight = $ianmackenzie$elm_units$Length$meters(
 			A2($elm$core$Basics$pow, 2, 22 - context.zoomLevel));
-		var altitudeLookingAt = context.followSelectedPoint ? A3(
-			$ianmackenzie$elm_geometry$Point3d$xyz,
-			A2($author$project$DomainModel$distanceFromIndex, currentPosition, treeNode),
-			$ianmackenzie$elm_units$Quantity$zero,
-			$ianmackenzie$elm_units$Quantity$zero) : context.focalPoint;
+		var proportionOnView = A2(
+			$ianmackenzie$elm_units$Quantity$divideBy,
+			A2(
+				$elm$core$Basics$pow,
+				2,
+				context.zoomLevel - $author$project$ViewProfileCharts$minZoomLevel(treeNode)),
+			$author$project$DomainModel$trueLength(treeNode));
+		var xLookingAt = A3(
+			$ianmackenzie$elm_units$Quantity$clamp,
+			$ianmackenzie$elm_units$Quantity$half(proportionOnView),
+			A2(
+				$ianmackenzie$elm_units$Quantity$minus,
+				$ianmackenzie$elm_units$Quantity$half(proportionOnView),
+				$author$project$DomainModel$trueLength(treeNode)),
+			context.followSelectedPoint ? A2($author$project$DomainModel$distanceFromIndex, currentPosition, treeNode) : $ianmackenzie$elm_geometry$Point3d$xCoordinate(context.focalPoint));
+		var altitudeLookingAt = A3($ianmackenzie$elm_geometry$Point3d$xyz, xLookingAt, $ianmackenzie$elm_units$Quantity$zero, $ianmackenzie$elm_units$Quantity$zero);
 		var _v0 = $ianmackenzie$elm_geometry$BoundingBox3d$extrema(
 			$author$project$DomainModel$boundingBox(treeNode));
 		var minX = _v0.minX;
@@ -16411,11 +16436,6 @@ var $ianmackenzie$elm_geometry$Vector3d$direction = function (_v0) {
 				{x: scaledX / scaledLength, y: scaledY / scaledLength, z: scaledZ / scaledLength}));
 	}
 };
-var $ianmackenzie$elm_units$Quantity$divideBy = F2(
-	function (divisor, _v0) {
-		var value = _v0.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(value / divisor);
-	});
 var $ianmackenzie$elm_3d_camera$Viewpoint3d$eyePoint = function (_v0) {
 	var frame = _v0.a;
 	return $ianmackenzie$elm_geometry$Frame3d$originPoint(frame);

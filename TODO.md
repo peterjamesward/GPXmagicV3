@@ -66,18 +66,22 @@ Would the cosine logic hold up, zooming in on that? We can but try.
 
 ## STATUS
 
-Min zoom is good. 
-Need to put numbers and ticks inside the axes, and fix margin.
-Also fix initial and default zoom.
-Will need to refresh zoom after resize, in case it breaks.
-Then sort out the min/max for focal point, now ends are fixed.
+I think comparison of current and min zoom levels gives me the proportion of track on view
+and from that is easy to determined the allowable range for lookingAt,
+
 Panning should then not be able to move the start/end from their respective edges.
 
-Render current point lines using SVG, maybe dotted to both axes.
+Refresh zoom after resize.
+
+Need to put numbers and ticks inside the axes, and fix margin.
+
+Revisit the cosine thingy once above is fixed.
+
+Repeat for gradient.
+
+Finish current point lines using SVG (very rough right now).
 
 Display distance, altitude, gradient for current point.
-
-Set initial zoom for profile at the min zoom level determined above.
 
 ---
 

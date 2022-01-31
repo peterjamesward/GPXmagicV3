@@ -272,15 +272,26 @@ deriveAltitudeCamera treeNode context currentPosition =
         elevationToReduce =
             Angle.radians <| acos requiredReduction
 
-        altitudeLookingAt =
-            if context.followSelectedPoint then
-                Point3d.xyz
-                    (distanceFromIndex currentPosition treeNode)
-                    Quantity.zero
-                    Quantity.zero
+        proportionOnView =
+            trueLength treeNode
+                |> Quantity.divideBy (2 ^ (context.zoomLevel - minZoomLevel treeNode))
 
-            else
-                context.focalPoint
+        xLookingAt =
+            Quantity.clamp
+                (proportionOnView |> Quantity.half)
+                (trueLength treeNode |> Quantity.minus (Quantity.half proportionOnView))
+            <|
+                if context.followSelectedPoint then
+                    distanceFromIndex currentPosition treeNode
+
+                else
+                    Point3d.xCoordinate context.focalPoint
+
+        altitudeLookingAt =
+            Point3d.xyz
+                xLookingAt
+                Quantity.zero
+                Quantity.zero
 
         altitudeViewpoint =
             Viewpoint3d.orbitZ
