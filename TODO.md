@@ -24,65 +24,8 @@ BUG: Hit detect on Map is slow, sometimes very slow. (Paris to Bree).
 
 ## Profile rendering
 
-Not going to try coding now; too late, but can write _about_ what we need...
-> It's literate programming, and it really helps.
-
-OK. Both altitude and gradient are rendered with some exaggeration. 
-This is because we can scale this _down_ at view time, but cannot increase it. 
-The aim is for the altitude vertical scale always to run from minZ to maxZ, regardless of zoom. 
-
-Camera zoom affects X and Y equally.
-When the zoom level is low (far away, so the track looks small), the track view
-collapses toward the view "lookingAt" point, centre of the viewport.
-
-When the track is small enough to not fill the height, we want two things:
-- The base of the track stays at the base of the view;
-- The start of the track stays at the left of the view.
-
-We achieve this by, at low zoom levels:
-- Raising the "lookAt" point;
-- Moving the "lookAt" point along the track 
-
-In other words:
-- The lookAt vertically must be centerZ when the height is filled;
-- When the height is not filled, minZ will be (minZ - centreZ) / mpp pixels below centre,
-- To move this down by the required halfheight - (minZ - centreZ)/mpp, we need to 
-- move the lookingAt up by halfheight * mpp - (minZ - centreZ).
-- Hence, simple `max` of these might suffice.
-
-Horizontally:
-- When current distance / metres per pixel < half viewport width, move lookAt along track.
-- More simple, lookAtX is min of half viewport width * metres/pixel and current distance.
-- Similar at the right hand side and end of track (max value for lookAtX).
-
-Stop zooming out when track fills the window exactly.
-> Use inverse of metres/pixel formula during scroll wheel message update.
-
-Gradient Y scale should be constant; always occupying the height (there's no proportion to maintain).
-This requires changing the rendering so that all furthest (low) zoom, it comes out right,
-then we always correct using camera elevation. Hmm. For a 100km course, and a 2:1 aspect ration,
-that implies a +/- 25km scale. Might as well put % as km.
-Would the cosine logic hold up, zooming in on that? We can but try.
-
-## STATUS
-
-Without doubt, I need to make this code solid and less experimental.
-`viewportHeight`, for example, is in model units, not screen.
-I know that I have to "cheat" that so that the 3d view corresponds to the zoom level.
-Correct and clear determination of scale and zoom levels is ESSENTIAL, or I keep breaking this.
-Done well, it will be clear, stable, maintainable.
-
-Refresh zoom after resize.
-
-Need to put numbers and ticks inside the axes, and fix margin.
-
-Revisit the cosine thingy once above is fixed.
-
-Repeat for gradient.
-
-Finish current point lines using SVG (very rough right now).
-
-Display distance, altitude, gradient for current point.
+Simplest -- just re-render on zoom, pan, setCurrent and use the terezka chart package.
+Use a stack to show altitude range for non Leaf sections.
 
 ---
 
@@ -91,13 +34,13 @@ Display distance, altitude, gradient for current point.
 ## Map
 
 Add non-draggable track point circles, in separate layer we can turn on and off
-to replace by draggables when that control is open.
-(Only leaf points can be draggable!)
+to replace by draggables when requested.
+(Only leaf points can be draggable; perhaps distinguish by colour.)
 
 Map options tool? 
 - Map style (outdoor, satellite)
 - Draggable points
-> These could just be popups on the map view.
+> These could just be popups on the map view. (Layers, Cross-arrow, resp.)
 
 ## Tools
 
@@ -105,11 +48,12 @@ Not all existing tools to move across; some rationalisation.
 2-way drag should correct for azimuth.
 
 ## Error messages
-Using an action DisplayMessage to show modal dialog from any tool.
+Using an action DisplayMessage to show modal dialog from any tool. 
+Add a non-modal message error for info.
 
 ## Memory monitor
 
-Make a tool for this.
+Make a tool for this. Quite important and useful.
 Low memory can trigger defensive actions: remove Undo entries, reduce rendering depth, reduce graphics.
 If we are so short of memory that we can't create the output string, one option is to turn off graphics,
 another to output in sections. Another, to drop the scenes, reclaim some heap, defer writing to an 
@@ -131,12 +75,6 @@ Put all Font, Colour etc into a Palette/Style module for ease of change.
 
 ?? Move `scene(s)` into Pane Layout; they can be rendered only if visible.
 
-## Graduated Rendering
-
-Use a graduated drop off with distance, compute at each tree level?
-For each node, take minimum distance from bounding box to current.
-Set depth = (say) 20 - distance in km, down to 10. (Will never have 1M points.)
-
 ## Loop detection
 
 **JB**: I have been getting a few Partner event gpx's lately that do a loop... but then continue around for say 25% of it before finishing which when a map is first loaded i do not notice until i start working on it... it would be nice if when a map is first loaded the points show a different colour when there is another course on top.. ie orange for the first lap but if it continues say red until it finishes..
@@ -145,31 +83,28 @@ Set depth = (say) 20 - distance in km, down to 10. (Will never have 1M points.)
 
 Oh yes. Basically sound, unless there's something I've not yet thought about.
 
+## Improvement for drag detect
+
+Note this little pattern that looks for movement rather than use a timer:
+```elm
+    OnMouseMove offset ->
+      case model.dragging of
+        CouldStillBeClick prevOffset ->
+          if prevOffset == offset then
+            model
+          else
+            { model | center = updateCenter model.center prevOffset offset
+            , dragging = ForSureDragging offset
+            }
+
+        ForSureDragging prevOffset ->
+          { model | center = updateCenter model.center prevOffset offset
+          , dragging = ForSureDragging offset
+          }
+
+        None ->
+          model
+```
+
 ---
 
-# Parked (and probably abandoned)
-
-## Journal edits to indexedDB?
-Potential for recovery by replay.
-Possible aid to isolating and reproducing bugs.
-
-## PeteTreeTraversor
-Data structure that keeps track of where you are in a tree.
-When 'applied' to a tree, returns a tree element and the traversor (generator) for the next one.
-Symmetry allows left->right and right->left traversal.
-I sense that having this will make some filtering easier.
-Also applies to rendering, where we have hand-coded R->L trversals.
-> But just having a traversal function with callbacks is probly adequate; so this is internal.
-
-### Multiple windows (demoted again; more value in better tool layout and customisation)
-Tauri looks interesting as we would not need node.js
-> https://tauri.studio/en/docs/getting-started/intro/
-
-### View culling other than in WebGL.
-- See if visible area can best be done by pre-selecting view elements, or left to GPU.
-- (optimal culling view frustrum tricky combination of plane/bbox intersects and axis distance?)
-
-### Non-WebGL markers?
-Use a Canvas overlay for markers?
-> Shall we test this idea with a popup, then adopt or abandon?
-(Parked as needless optimisation given apparent speed of progressive rendering.)
