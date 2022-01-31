@@ -374,6 +374,27 @@ svgAltitudeScale ( w, h ) context track =
         maxDistance =
             Length.inKilometers <| trueLength track.trackTree
 
+        proportionOnView =
+            trueLength track.trackTree
+                |> Quantity.divideBy (2 ^ (context.zoomLevel - minZoomLevel track.trackTree))
+
+        xCentre =
+            -- Aargh. Duplicated from camera.
+            Quantity.clamp
+                (proportionOnView |> Quantity.half)
+                (trueLength track.trackTree |> Quantity.minus (Quantity.half proportionOnView))
+            <|
+                if context.followSelectedPoint then
+                    distanceFromIndex track.currentPosition track.trackTree
+
+                else
+                    Point3d.xCoordinate context.focalPoint
+
+        ( xMin, xMax ) =
+            ( xCentre |> Quantity.minus (Quantity.half proportionOnView)
+            , xCentre |> Quantity.plus (Quantity.half proportionOnView)
+            )
+
         currentPointAltitude =
             Length.inMeters <|
                 Point3d.zCoordinate <|
@@ -388,8 +409,8 @@ svgAltitudeScale ( w, h ) context track =
         , CA.width <| Pixels.inPixels <| Quantity.toFloatQuantity <| w
         , CA.margin { top = 20, bottom = 30, left = 30, right = 20 }
         , CA.range
-            [ CA.lowest 0 CA.exactly
-            , CA.highest maxDistance CA.orHigher
+            [ CA.lowest (Length.inMeters xMin) CA.exactly
+            , CA.highest (Length.inMeters xMax) CA.exactly
             ]
         , CA.domain
             [ CA.lowest 0 CA.orLower

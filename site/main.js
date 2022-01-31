@@ -33450,6 +33450,21 @@ var $author$project$ViewProfileCharts$svgAltitudeScale = F3(
 	function (_v0, context, track) {
 		var w = _v0.a;
 		var h = _v0.b;
+		var proportionOnView = A2(
+			$ianmackenzie$elm_units$Quantity$divideBy,
+			A2(
+				$elm$core$Basics$pow,
+				2,
+				context.zoomLevel - $author$project$ViewProfileCharts$minZoomLevel(track.trackTree)),
+			$author$project$DomainModel$trueLength(track.trackTree));
+		var xCentre = A3(
+			$ianmackenzie$elm_units$Quantity$clamp,
+			$ianmackenzie$elm_units$Quantity$half(proportionOnView),
+			A2(
+				$ianmackenzie$elm_units$Quantity$minus,
+				$ianmackenzie$elm_units$Quantity$half(proportionOnView),
+				$author$project$DomainModel$trueLength(track.trackTree)),
+			context.followSelectedPoint ? A2($author$project$DomainModel$distanceFromIndex, track.currentPosition, track.trackTree) : $ianmackenzie$elm_geometry$Point3d$xCoordinate(context.focalPoint));
 		var maxDistance = $ianmackenzie$elm_units$Length$inKilometers(
 			$author$project$DomainModel$trueLength(track.trackTree));
 		var currentPointDistance = $ianmackenzie$elm_units$Length$inMeters(
@@ -33457,14 +33472,25 @@ var $author$project$ViewProfileCharts$svgAltitudeScale = F3(
 		var currentPointAltitude = $ianmackenzie$elm_units$Length$inMeters(
 			$ianmackenzie$elm_geometry$Point3d$zCoordinate(
 				A2($author$project$DomainModel$earthPointFromIndex, track.currentPosition, track.trackTree)));
-		var _v1 = $ianmackenzie$elm_geometry$BoundingBox3d$extrema(
+		var _v1 = _Utils_Tuple2(
+			A2(
+				$ianmackenzie$elm_units$Quantity$minus,
+				$ianmackenzie$elm_units$Quantity$half(proportionOnView),
+				xCentre),
+			A2(
+				$ianmackenzie$elm_units$Quantity$plus,
+				$ianmackenzie$elm_units$Quantity$half(proportionOnView),
+				xCentre));
+		var xMin = _v1.a;
+		var xMax = _v1.b;
+		var _v2 = $ianmackenzie$elm_geometry$BoundingBox3d$extrema(
 			$author$project$DomainModel$boundingBox(track.trackTree));
-		var minX = _v1.minX;
-		var maxX = _v1.maxX;
-		var minY = _v1.minY;
-		var maxY = _v1.maxY;
-		var minZ = _v1.minZ;
-		var maxZ = _v1.maxZ;
+		var minX = _v2.minX;
+		var maxX = _v2.maxX;
+		var minY = _v2.minY;
+		var maxY = _v2.maxY;
+		var minZ = _v2.minZ;
+		var maxZ = _v2.maxZ;
 		return A2(
 			$terezka$elm_charts$Chart$chart,
 			_List_fromArray(
@@ -33480,8 +33506,14 @@ var $author$project$ViewProfileCharts$svgAltitudeScale = F3(
 					$terezka$elm_charts$Chart$Attributes$range(
 					_List_fromArray(
 						[
-							A2($terezka$elm_charts$Chart$Attributes$lowest, 0, $terezka$elm_charts$Chart$Attributes$exactly),
-							A2($terezka$elm_charts$Chart$Attributes$highest, maxDistance, $terezka$elm_charts$Chart$Attributes$orHigher)
+							A2(
+							$terezka$elm_charts$Chart$Attributes$lowest,
+							$ianmackenzie$elm_units$Length$inMeters(xMin),
+							$terezka$elm_charts$Chart$Attributes$exactly),
+							A2(
+							$terezka$elm_charts$Chart$Attributes$highest,
+							$ianmackenzie$elm_units$Length$inMeters(xMax),
+							$terezka$elm_charts$Chart$Attributes$exactly)
 						])),
 					$terezka$elm_charts$Chart$Attributes$domain(
 					_List_fromArray(
