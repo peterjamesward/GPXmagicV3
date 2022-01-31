@@ -66,10 +66,11 @@ Would the cosine logic hold up, zooming in on that? We can but try.
 
 ## STATUS
 
-I think comparison of current and min zoom levels gives me the proportion of track on view
-and from that is easy to determined the allowable range for lookingAt,
-
-Panning should then not be able to move the start/end from their respective edges.
+Without doubt, I need to make this code solid and less experimental.
+`viewportHeight`, for example, is in model units, not screen.
+I know that I have to "cheat" that so that the 3d view corresponds to the zoom level.
+Correct and clear determination of scale and zoom levels is ESSENTIAL, or I keep breaking this.
+Done well, it will be clear, stable, maintainable.
 
 Refresh zoom after resize.
 
