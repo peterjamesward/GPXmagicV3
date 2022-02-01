@@ -4,6 +4,8 @@ import Actions exposing (ToolAction(..))
 import BoundingBox3d
 import Chart as C
 import Chart.Attributes as CA
+import Color
+import ColourPalette exposing (gradientColourPastel, gradientHue)
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
@@ -54,7 +56,7 @@ type DragAction
 type alias Context =
     { dragAction : DragAction
     , orbiting : Maybe ( Float, Float )
-    , zoomLevel : Float
+    , zoomLevel : Float -- 0 = whole track, 1 = half, etc.
     , defaultZoomLevel : Float
     , focalPoint : EarthPoint
     , followSelectedPoint : Bool
@@ -111,6 +113,11 @@ zoomButtons msgWrapper context =
         ]
 
 
+splitProportion =
+    -- Fraction of height for the altitude, remainder for gradient.
+    0.5
+
+
 view :
     Context
     -> ( Quantity Int Pixels, Quantity Int Pixels )
@@ -122,9 +129,6 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
     let
         dragging =
             context.dragAction
-
-        splitProportion =
-            0.5
 
         altitudePortion =
             -- Subtract pixels we use for padding around the scene view.
@@ -209,10 +213,6 @@ update :
     -> ( Context, List (ToolAction msg) )
 update msg msgWrapper track ( givenWidth, givenHeight ) context =
     let
-        splitProportion =
-            --TODO: Remove duplicate with `view`
-            0.5
-
         altitudePortion =
             ( givenWidth
             , givenHeight
@@ -318,9 +318,8 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
                 ( DragPan, Just ( startX, startY ) ) ->
                     let
                         shiftVector =
-                            --TODO: Find out how to do the pixel calculation. See examples?
+                            --TODO: Follow the chart example.
                             Vector3d.meters
-                                --((startX - dx) * 1.15 ^ (22 - context.zoomLevel))
                                 ((startX - dx) * context.metresPerPixel)
                                 0
                                 0
@@ -367,38 +366,73 @@ type alias ProfileDatum =
     , maxAltitude : Float -- will be same as above for Leaf
     , startGradient : Float -- percent
     , endGradient : Float -- again, same for Leaf.
-    , colour : Color -- use average gradient if not Leaf
+    , colour : Color.Color -- use average gradient if not Leaf
     }
 
 
 renderProfileDataForCharts : Context -> TrackLoaded msg -> Context
 renderProfileDataForCharts context track =
+    --TODO: Need Imperial/Metric flag.
     let
-        foldFn :
-            RoadSection
-            -> ( Length.Length, List ProfileDatum )
-            -> ( Length.Length, List ProfileDatum )
-        foldFn road ( distance, outputs ) =
-            -- Ambitiously, do gradient in the same traversal.
-            ( distance |> Quantity.plus road.trueLength
-            , outputs
+        trackLengthInView =
+            trueLength track.trackTree |> Quantity.multiplyBy (0.5 ^ context.zoomLevel)
+
+        pointOfInterest =
+            if context.followSelectedPoint then
+                distanceFromIndex track.currentPosition track.trackTree
+
+            else
+                Point3d.xCoordinate context.focalPoint
+
+        leftEdge =
+            Quantity.max
+                Quantity.zero
+                (pointOfInterest |> Quantity.minus (Quantity.half trackLengthInView))
+
+        rightEdge =
+            leftEdge |> Quantity.plus trackLengthInView
+
+        (leftIndex, rightIndex) =
+            (indexFromDistance leftEdge track.trackTree
+            , indexFromDistance rightEdge track.trackTree
             )
 
         depthFn road =
-            --TODO: Depth is function designed to ensure about 1000 values returned,
-            --determined by track length (and skip count) and zoom level.
-            Just 10
+            --Depth to ensure about 1000 values returned,
+            Just <| round <| 10 + context.zoomLevel
 
-        ( _, result ) =
+        foldFn :
+            RoadSection
+            -> ( Length.Length, Maybe RoadSection, List ProfileDatum )
+            -> ( Length.Length, Maybe RoadSection, List ProfileDatum )
+        foldFn road ( nextDistance,prevSectionForUseAtEnd, outputs ) =
+            let
+                newEntry : ProfileDatum
+                newEntry =
+                    { distance = Length.inMeters nextDistance
+                    , minAltitude = Length.inMeters  <| BoundingBox3d.minZ <| road.boundingBox
+                    , maxAltitude = Length.inMeters  <| BoundingBox3d.maxZ <| road.boundingBox
+                    , startGradient = road.gradientAtStart
+                    , endGradient = road.gradientAtEnd
+                    , colour =  gradientColourPastel (gradientFromNode <| Leaf road)
+                    }
+            in
+            ( nextDistance |> Quantity.plus road.trueLength
+            , Just road
+            , newEntry :: outputs
+            )
+
+        ( lastDistance, lastSection, result ) =
             DomainModel.traverseTreeBetweenLimitsToDepth
-                0
-                (skipCount track.trackTree)
+                leftIndex
+                rightIndex
                 depthFn
                 0
                 track.trackTree
                 foldFn
-                ( Quantity.zero, [] )
+                ( Quantity.zero, Nothing, [] )
     in
+    --TODO: Use last section to add the final section's end point.
     { context | profileData = result }
 
 

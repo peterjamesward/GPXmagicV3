@@ -259,8 +259,13 @@ update paneMsg msgWrapper mTrack contentArea options =
         SetViewMode paneId viewMode ->
             let
                 newOptions =
+                    --TODO: Render profile view.
                     updatePaneWith paneId
-                        (\pane -> { pane | activeView = viewMode })
+                        (\pane ->
+                            { pane
+                                | activeView = viewMode
+                            }
+                        )
             in
             ( newOptions
             , [ MapRefresh
