@@ -25,6 +25,7 @@ import Pixels exposing (Pixels)
 import Point3d exposing (Point3d)
 import Quantity exposing (Quantity, toFloatQuantity)
 import TrackLoaded exposing (TrackLoaded)
+import UtilsForViews exposing (colourHexString)
 import Vector3d
 import ViewPureStyles exposing (useIcon)
 
@@ -148,14 +149,20 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                 |> Quantity.multiplyBy (1.0 - splitProportion)
                 |> Quantity.truncate
             )
+
+        backgroundColour =
+            colourHexString FlatColors.ChinesePalette.antiFlashWhite
     in
     el [ width <| px 1000, height <| px 500, padding 30 ] <|
         html <|
             C.chart
                 [ CA.height 300
                 , CA.width 1000
-                , CA.htmlAttrs
-                    [ HA.style "background" "#fcf9e9" ]
+                , CA.htmlAttrs [ HA.style "background" backgroundColour ]
+                , CA.range [ CA.likeData ]
+                , CA.domain [ CA.likeData ]
+                , CA.margin { top = 20, bottom = 30, left = 30, right = 20 }
+                , CA.padding { top = 20, bottom = 20, left = 20, right = 20 }
                 ]
                 [ C.xAxis []
                 , C.xTicks []
@@ -164,7 +171,13 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                 , C.yTicks []
                 , C.yLabels []
                 , series .distance
-                    [ interpolated .minAltitude [ CA.width 2 ] [] ]
+                    [ interpolated .minAltitude
+                        [ CA.width 2
+                        , CA.opacity 0.2
+                        , CA.gradient []
+                        ]
+                        []
+                    ]
                     context.profileData
                 ]
 

@@ -30411,6 +30411,25 @@ var $terezka$elm_charts$Chart$chart = F2(
 			chartEls,
 			afterEls);
 	});
+var $terezka$elm_charts$Chart$Attributes$domain = F2(
+	function (v, config) {
+		return _Utils_update(
+			config,
+			{domain: v});
+	});
+var $terezka$elm_charts$Internal$Svg$Gradient = function (a) {
+	return {$: 'Gradient', a: a};
+};
+var $terezka$elm_charts$Chart$Attributes$gradient = F2(
+	function (colors, config) {
+		return _Utils_update(
+			config,
+			{
+				design: $elm$core$Maybe$Just(
+					$terezka$elm_charts$Internal$Svg$Gradient(colors)),
+				opacity: (!config.opacity) ? 1 : config.opacity
+			});
+	});
 var $terezka$elm_charts$Chart$Attributes$height = F2(
 	function (v, config) {
 		return _Utils_update(
@@ -30465,6 +30484,35 @@ var $terezka$elm_charts$Chart$interpolated = F2(
 				_List_fromArray(
 					[$terezka$elm_charts$Chart$Attributes$linear]),
 				inter));
+	});
+var $terezka$elm_charts$Chart$Attributes$likeData = function (b) {
+	return _Utils_update(
+		b,
+		{max: b.dataMax, min: b.dataMin});
+};
+var $terezka$elm_charts$Chart$Attributes$margin = F2(
+	function (v, config) {
+		return _Utils_update(
+			config,
+			{margin: v});
+	});
+var $terezka$elm_charts$Chart$Attributes$opacity = F2(
+	function (v, config) {
+		return _Utils_update(
+			config,
+			{opacity: v});
+	});
+var $terezka$elm_charts$Chart$Attributes$padding = F2(
+	function (value, config) {
+		return _Utils_update(
+			config,
+			{padding: value});
+	});
+var $terezka$elm_charts$Chart$Attributes$range = F2(
+	function (v, config) {
+		return _Utils_update(
+			config,
+			{range: v});
 	});
 var $terezka$elm_charts$Chart$Indexed = function (a) {
 	return {$: 'Indexed', a: a};
@@ -30603,12 +30651,6 @@ var $terezka$elm_charts$Chart$Attributes$border = F2(
 			{border: v});
 	});
 var $terezka$elm_charts$Internal$Svg$defaultInterpolation = {attrs: _List_Nil, color: $terezka$elm_charts$Internal$Helpers$pink, dashed: _List_Nil, design: $elm$core$Maybe$Nothing, method: $elm$core$Maybe$Nothing, opacity: 0, width: 1};
-var $terezka$elm_charts$Chart$Attributes$opacity = F2(
-	function (v, config) {
-		return _Utils_update(
-			config,
-			{opacity: v});
-	});
 var $terezka$elm_charts$Internal$Helpers$blue = '#12A5ED';
 var $terezka$elm_charts$Internal$Helpers$brown = '#871c1c';
 var $terezka$elm_charts$Internal$Helpers$green = '#71c614';
@@ -34623,6 +34665,7 @@ var $author$project$ViewProfileCharts$view = F4(
 							$ianmackenzie$elm_units$Pixels$pixels(20),
 							givenHeight)))));
 		var dragging = context.dragAction;
+		var backgroundColour = $author$project$UtilsForViews$colourHexString($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite);
 		var altitudePortion = _Utils_Tuple2(
 			A2(
 				$ianmackenzie$elm_units$Quantity$minus,
@@ -34657,8 +34700,18 @@ var $author$project$ViewProfileCharts$view = F4(
 							$terezka$elm_charts$Chart$Attributes$htmlAttrs(
 							_List_fromArray(
 								[
-									A2($elm$html$Html$Attributes$style, 'background', '#fcf9e9')
-								]))
+									A2($elm$html$Html$Attributes$style, 'background', backgroundColour)
+								])),
+							$terezka$elm_charts$Chart$Attributes$range(
+							_List_fromArray(
+								[$terezka$elm_charts$Chart$Attributes$likeData])),
+							$terezka$elm_charts$Chart$Attributes$domain(
+							_List_fromArray(
+								[$terezka$elm_charts$Chart$Attributes$likeData])),
+							$terezka$elm_charts$Chart$Attributes$margin(
+							{bottom: 30, left: 30, right: 20, top: 20}),
+							$terezka$elm_charts$Chart$Attributes$padding(
+							{bottom: 20, left: 20, right: 20, top: 20})
 						]),
 					_List_fromArray(
 						[
@@ -34682,7 +34735,9 @@ var $author$project$ViewProfileCharts$view = F4(
 									},
 									_List_fromArray(
 										[
-											$terezka$elm_charts$Chart$Attributes$width(2)
+											$terezka$elm_charts$Chart$Attributes$width(2),
+											$terezka$elm_charts$Chart$Attributes$opacity(0.2),
+											$terezka$elm_charts$Chart$Attributes$gradient(_List_Nil)
 										]),
 									_List_Nil)
 								]),
