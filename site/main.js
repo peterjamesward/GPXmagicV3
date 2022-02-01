@@ -28354,6 +28354,9 @@ var $author$project$ViewMap$view = F3(
 					]));
 		}
 	});
+var $author$project$ViewProfileCharts$ImageMouseWheel = function (a) {
+	return {$: 'ImageMouseWheel', a: a};
+};
 var $terezka$elm_charts$Internal$Property$Property = function (a) {
 	return {$: 'Property', a: a};
 };
@@ -31797,6 +31800,50 @@ var $terezka$elm_charts$Chart$Attributes$margin = F2(
 			config,
 			{margin: v});
 	});
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$defaultOptions = {preventDefault: true, stopPropagation: false};
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$Event = F3(
+	function (mouseEvent, deltaY, deltaMode) {
+		return {deltaMode: deltaMode, deltaY: deltaY, mouseEvent: mouseEvent};
+	});
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$DeltaLine = {$: 'DeltaLine'};
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$DeltaPage = {$: 'DeltaPage'};
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$DeltaPixel = {$: 'DeltaPixel'};
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$deltaModeDecoder = function () {
+	var intToMode = function (_int) {
+		switch (_int) {
+			case 1:
+				return $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$DeltaLine;
+			case 2:
+				return $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$DeltaPage;
+			default:
+				return $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$DeltaPixel;
+		}
+	};
+	return A2($elm$json$Json$Decode$map, intToMode, $elm$json$Json$Decode$int);
+}();
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$eventDecoder = A4(
+	$elm$json$Json$Decode$map3,
+	$mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$Event,
+	$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$eventDecoder,
+	A2($elm$json$Json$Decode$field, 'deltaY', $elm$json$Json$Decode$float),
+	A2($elm$json$Json$Decode$field, 'deltaMode', $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$deltaModeDecoder));
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWithOptions = F2(
+	function (options, tag) {
+		return A2(
+			$elm$html$Html$Events$custom,
+			'wheel',
+			A2(
+				$elm$json$Json$Decode$map,
+				function (ev) {
+					return {
+						message: tag(ev),
+						preventDefault: options.preventDefault,
+						stopPropagation: options.stopPropagation
+					};
+				},
+				$mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$eventDecoder));
+	});
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWheel = $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWithOptions($mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$defaultOptions);
 var $terezka$elm_charts$Chart$Attributes$opacity = F2(
 	function (v, config) {
 		return _Utils_update(
@@ -35585,7 +35632,13 @@ var $author$project$ViewProfileCharts$view = F4(
 							$mdgriffith$elm_ui$Element$height(
 							$mdgriffith$elm_ui$Element$px(300)),
 							$mdgriffith$elm_ui$Element$padding(30),
-							$mdgriffith$elm_ui$Element$spacing(0)
+							$mdgriffith$elm_ui$Element$spacing(0),
+							$mdgriffith$elm_ui$Element$htmlAttribute(
+							$mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWheel(
+								function (event) {
+									return msgWrapper(
+										$author$project$ViewProfileCharts$ImageMouseWheel(event.deltaY));
+								}))
 						]),
 					$mdgriffith$elm_ui$Element$html(
 						A2(
@@ -35677,7 +35730,13 @@ var $author$project$ViewProfileCharts$view = F4(
 							$mdgriffith$elm_ui$Element$px(1000)),
 							$mdgriffith$elm_ui$Element$height(
 							$mdgriffith$elm_ui$Element$px(300)),
-							$mdgriffith$elm_ui$Element$padding(30)
+							$mdgriffith$elm_ui$Element$padding(30),
+							$mdgriffith$elm_ui$Element$htmlAttribute(
+							$mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWheel(
+								function (event) {
+									return msgWrapper(
+										$author$project$ViewProfileCharts$ImageMouseWheel(event.deltaY));
+								}))
 						]),
 					$mdgriffith$elm_ui$Element$html(
 						A2(
@@ -36933,50 +36992,6 @@ var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onDoubleClick = A2($m
 var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onDown = A2($mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions, 'mousedown', $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$defaultOptions);
 var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onMove = A2($mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions, 'mousemove', $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$defaultOptions);
 var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onUp = A2($mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions, 'mouseup', $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$defaultOptions);
-var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$defaultOptions = {preventDefault: true, stopPropagation: false};
-var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$Event = F3(
-	function (mouseEvent, deltaY, deltaMode) {
-		return {deltaMode: deltaMode, deltaY: deltaY, mouseEvent: mouseEvent};
-	});
-var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$DeltaLine = {$: 'DeltaLine'};
-var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$DeltaPage = {$: 'DeltaPage'};
-var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$DeltaPixel = {$: 'DeltaPixel'};
-var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$deltaModeDecoder = function () {
-	var intToMode = function (_int) {
-		switch (_int) {
-			case 1:
-				return $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$DeltaLine;
-			case 2:
-				return $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$DeltaPage;
-			default:
-				return $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$DeltaPixel;
-		}
-	};
-	return A2($elm$json$Json$Decode$map, intToMode, $elm$json$Json$Decode$int);
-}();
-var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$eventDecoder = A4(
-	$elm$json$Json$Decode$map3,
-	$mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$Event,
-	$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$eventDecoder,
-	A2($elm$json$Json$Decode$field, 'deltaY', $elm$json$Json$Decode$float),
-	A2($elm$json$Json$Decode$field, 'deltaMode', $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$deltaModeDecoder));
-var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWithOptions = F2(
-	function (options, tag) {
-		return A2(
-			$elm$html$Html$Events$custom,
-			'wheel',
-			A2(
-				$elm$json$Json$Decode$map,
-				function (ev) {
-					return {
-						message: tag(ev),
-						preventDefault: options.preventDefault,
-						stopPropagation: options.stopPropagation
-					};
-				},
-				$mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$eventDecoder));
-	});
-var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWheel = $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWithOptions($mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$defaultOptions);
 var $author$project$ViewThirdPerson$ImageReset = {$: 'ImageReset'};
 var $author$project$ViewThirdPerson$ImageZoomIn = {$: 'ImageZoomIn'};
 var $author$project$ViewThirdPerson$ImageZoomOut = {$: 'ImageZoomOut'};

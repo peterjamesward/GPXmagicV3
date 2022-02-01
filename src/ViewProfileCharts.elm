@@ -4,6 +4,7 @@ import Actions exposing (ToolAction(..))
 import BoundingBox3d
 import Chart as C exposing (chart, interpolated, series, xAxis, xLabels, yAxis, yLabels)
 import Chart.Attributes as CA exposing (margin, withGrid)
+import Chart.Events as CE
 import Color
 import ColourPalette exposing (gradientColourPastel, gradientHue)
 import DomainModel exposing (..)
@@ -173,7 +174,14 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
             colourHexString FlatColors.ChinesePalette.antiFlashWhite
     in
     column []
-        [ el [ width <| px 1000, height <| px 300, padding 30, spacing 0 ] <|
+        [ el
+            [ width <| px 1000
+            , height <| px 300
+            , padding 30
+            , spacing 0
+            , htmlAttribute <| Wheel.onWheel (\event -> msgWrapper (ImageMouseWheel event.deltaY))
+            ]
+          <|
             html <|
                 C.chart
                     [ CA.height altitudeHeight
@@ -218,7 +226,13 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                         ]
                         context.profileData
                     ]
-        , el [ width <| px 1000, height <| px 300, padding 30 ] <|
+        , el
+            [ width <| px 1000
+            , height <| px 300
+            , padding 30
+            , htmlAttribute <| Wheel.onWheel (\event -> msgWrapper (ImageMouseWheel event.deltaY))
+            ]
+          <|
             html <|
                 C.chart
                     [ CA.height gradientHeight
