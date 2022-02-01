@@ -10399,7 +10399,7 @@ var $author$project$ViewProfileCharts$initialiseView = F3(
 				dragAction: $author$project$ViewProfileCharts$DragNone,
 				focalPoint: $author$project$DomainModel$startPoint(
 					A2($author$project$DomainModel$leafFromIndex, current, treeNode)),
-				followSelectedPoint: false,
+				followSelectedPoint: true,
 				metresPerPixel: 10.0,
 				orbiting: $elm$core$Maybe$Nothing,
 				profileData: _List_Nil,
@@ -14353,6 +14353,15 @@ var $author$project$SceneBuilder3D$render3dView = function (track) {
 		});
 	return A3(renderTreeSelectively, track.renderDepth, track.trackTree, renderCurrentMarkers);
 };
+var $ianmackenzie$elm_units$Quantity$clamp = F3(
+	function (_v0, _v1, _v2) {
+		var lower = _v0.a;
+		var upper = _v1.a;
+		var value = _v2.a;
+		return (_Utils_cmp(lower, upper) < 1) ? $ianmackenzie$elm_units$Quantity$Quantity(
+			A3($elm$core$Basics$clamp, lower, upper, value)) : $ianmackenzie$elm_units$Quantity$Quantity(
+			A3($elm$core$Basics$clamp, upper, lower, value));
+	});
 var $author$project$DomainModel$distanceFromIndex = F2(
 	function (index, treeNode) {
 		distanceFromIndex:
@@ -14435,9 +14444,13 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F2(
 			A2($elm$core$Basics$pow, 0.5, context.zoomLevel),
 			$author$project$DomainModel$trueLength(track.trackTree));
 		var pointOfInterest = context.followSelectedPoint ? A2($author$project$DomainModel$distanceFromIndex, track.currentPosition, track.trackTree) : $ianmackenzie$elm_geometry$Point3d$xCoordinate(context.focalPoint);
-		var leftEdge = A2(
-			$ianmackenzie$elm_units$Quantity$max,
+		var leftEdge = A3(
+			$ianmackenzie$elm_units$Quantity$clamp,
 			$ianmackenzie$elm_units$Quantity$zero,
+			A2(
+				$ianmackenzie$elm_units$Quantity$minus,
+				trackLengthInView,
+				$author$project$DomainModel$trueLength(track.trackTree)),
 			A2(
 				$ianmackenzie$elm_units$Quantity$minus,
 				$ianmackenzie$elm_units$Quantity$half(trackLengthInView),
@@ -14449,16 +14462,13 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F2(
 				var prevSectionForUseAtEnd = _v2.b;
 				var outputs = _v2.c;
 				var newEntry = {
+					altitude: $ianmackenzie$elm_units$Length$inMeters(
+						$ianmackenzie$elm_geometry$Point3d$zCoordinate(road.startPoint)),
 					colour: $author$project$ColourPalette$gradientColourPastel(
 						$author$project$DomainModel$gradientFromNode(
 							$author$project$DomainModel$Leaf(road))),
 					distance: $ianmackenzie$elm_units$Length$inMeters(nextDistance),
-					endGradient: road.gradientAtEnd,
-					maxAltitude: $ianmackenzie$elm_units$Length$inMeters(
-						$ianmackenzie$elm_geometry$BoundingBox3d$maxZ(road.boundingBox)),
-					minAltitude: $ianmackenzie$elm_units$Length$inMeters(
-						$ianmackenzie$elm_geometry$BoundingBox3d$minZ(road.boundingBox)),
-					startGradient: road.gradientAtStart
+					gradient: (road.gradientAtStart * 0.5) + (road.gradientAtEnd * 0.5)
 				};
 				return _Utils_Tuple3(
 					A2($ianmackenzie$elm_units$Quantity$plus, road.trueLength, nextDistance),
@@ -14530,6 +14540,17 @@ var $author$project$Main$render = function (model) {
 		return model;
 	}
 };
+var $author$project$PaneLayoutManager$renderProfile = F2(
+	function (options, track) {
+		return _Utils_update(
+			options,
+			{
+				pane1: A2($author$project$PaneLayoutManager$renderPaneIfProfileVisible, options.pane1, track),
+				pane2: A2($author$project$PaneLayoutManager$renderPaneIfProfileVisible, options.pane2, track),
+				pane3: A2($author$project$PaneLayoutManager$renderPaneIfProfileVisible, options.pane3, track),
+				pane4: A2($author$project$PaneLayoutManager$renderPaneIfProfileVisible, options.pane4, track)
+			});
+	});
 var $elm$json$Json$Decode$bool = _Json_decodeBool;
 var $author$project$ToolsController$restoreMeasure = F2(
 	function (options, value) {
@@ -14860,7 +14881,7 @@ var $author$project$Main$performActionsOnModel = F2(
 		var performAction = F2(
 			function (action, foldedModel) {
 				var _v0 = _Utils_Tuple2(action, foldedModel.track);
-				_v0$13:
+				_v0$14:
 				while (true) {
 					switch (_v0.a.$) {
 						case 'SetCurrent':
@@ -14876,7 +14897,7 @@ var $author$project$Main$performActionsOnModel = F2(
 												{currentPosition: position}))
 									});
 							} else {
-								break _v0$13;
+								break _v0$14;
 							}
 						case 'SetCurrentFromMapClick':
 							if (_v0.b.$ === 'Just') {
@@ -14891,7 +14912,7 @@ var $author$project$Main$performActionsOnModel = F2(
 												{currentPosition: position}))
 									});
 							} else {
-								break _v0$13;
+								break _v0$14;
 							}
 						case 'ShowPreview':
 							if (_v0.b.$ === 'Just') {
@@ -14903,7 +14924,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										previews: A3($elm$core$Dict$insert, previewData.tag, previewData, foldedModel.previews)
 									});
 							} else {
-								break _v0$13;
+								break _v0$14;
 							}
 						case 'HidePreview':
 							if (_v0.b.$ === 'Just') {
@@ -14915,27 +14936,39 @@ var $author$project$Main$performActionsOnModel = F2(
 										previews: A2($elm$core$Dict$remove, tag, foldedModel.previews)
 									});
 							} else {
-								break _v0$13;
+								break _v0$14;
+							}
+						case 'RenderProfile':
+							if (_v0.b.$ === 'Just') {
+								var _v1 = _v0.a;
+								var track = _v0.b.a;
+								return _Utils_update(
+									foldedModel,
+									{
+										paneLayoutOptions: A2($author$project$PaneLayoutManager$renderProfile, foldedModel.paneLayoutOptions, track)
+									});
+							} else {
+								break _v0$14;
 							}
 						case 'DelayMessage':
 							if (_v0.b.$ === 'Just') {
-								var _v1 = _v0.a;
-								var _int = _v1.a;
-								var msg = _v1.b;
+								var _v2 = _v0.a;
+								var _int = _v2.a;
+								var msg = _v2.b;
 								var track = _v0.b.a;
 								return foldedModel;
 							} else {
-								break _v0$13;
+								break _v0$14;
 							}
 						case 'DeletePointsBetween':
 							if (_v0.b.$ === 'Just') {
-								var _v2 = _v0.a;
-								var fromStart = _v2.a;
-								var fromEnd = _v2.b;
+								var _v3 = _v0.a;
+								var fromStart = _v3.a;
+								var fromEnd = _v3.b;
 								var track = _v0.b.a;
-								var _v3 = A3($author$project$Tools$DeletePoints$deletePointsBetween, fromStart, fromEnd, track);
-								var newTree = _v3.a;
-								var oldPoints = _v3.b;
+								var _v4 = A3($author$project$Tools$DeletePoints$deletePointsBetween, fromStart, fromEnd, track);
+								var newTree = _v4.a;
+								var oldPoints = _v4.b;
 								var newTrack = A2(
 									$author$project$TrackLoaded$useTreeWithRepositionedMarkers,
 									newTree,
@@ -14946,17 +14979,17 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$13;
+								break _v0$14;
 							}
 						case 'DeleteSinglePoint':
 							if (_v0.b.$ === 'Just') {
-								var _v4 = _v0.a;
-								var fromStart = _v4.a;
-								var fromEnd = _v4.b;
+								var _v5 = _v0.a;
+								var fromStart = _v5.a;
+								var fromEnd = _v5.b;
 								var track = _v0.b.a;
-								var _v5 = A3($author$project$Tools$DeletePoints$deleteSinglePoint, fromStart, fromEnd, track);
-								var newTree = _v5.a;
-								var oldPoints = _v5.b;
+								var _v6 = A3($author$project$Tools$DeletePoints$deleteSinglePoint, fromStart, fromEnd, track);
+								var newTree = _v6.a;
+								var oldPoints = _v6.b;
 								var newTrack = A2(
 									$author$project$TrackLoaded$useTreeWithRepositionedMarkers,
 									newTree,
@@ -14967,22 +15000,22 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$13;
+								break _v0$14;
 							}
 						case 'TrackHasChanged':
 							if (_v0.b.$ === 'Just') {
-								var _v6 = _v0.a;
+								var _v7 = _v0.a;
 								var track = _v0.b.a;
-								var _v7 = A2($author$project$ToolsController$refreshOpenTools, foldedModel.track, foldedModel.toolOptions);
-								var refreshedToolOptions = _v7.a;
-								var secondaryActions = _v7.b;
+								var _v8 = A2($author$project$ToolsController$refreshOpenTools, foldedModel.track, foldedModel.toolOptions);
+								var refreshedToolOptions = _v8.a;
+								var secondaryActions = _v8.b;
 								var innerModelWithNewToolSettings = _Utils_update(
 									foldedModel,
 									{toolOptions: refreshedToolOptions});
 								var modelAfterSecondaryActions = A2($author$project$Main$performActionsOnModel, secondaryActions, innerModelWithNewToolSettings);
 								return modelAfterSecondaryActions;
 							} else {
-								break _v0$13;
+								break _v0$14;
 							}
 						case 'SetMarker':
 							if (_v0.b.$ === 'Just') {
@@ -14997,12 +15030,12 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(updatedTrack)
 									});
 							} else {
-								break _v0$13;
+								break _v0$14;
 							}
 						case 'StoredValueRetrieved':
-							var _v8 = _v0.a;
-							var key = _v8.a;
-							var value = _v8.b;
+							var _v9 = _v0.a;
+							var key = _v9.a;
+							var value = _v9.b;
 							switch (key) {
 								case 'splits':
 									return A2($author$project$Main$decodeSplitValues, value, foldedModel);
@@ -15032,7 +15065,7 @@ var $author$project$Main$performActionsOnModel = F2(
 							return foldedModel;
 						case 'UndoLastAction':
 							if (_v0.b.$ === 'Just') {
-								var _v10 = _v0.a;
+								var _v11 = _v0.a;
 								var track = _v0.b.a;
 								return _Utils_update(
 									foldedModel,
@@ -15041,24 +15074,24 @@ var $author$project$Main$performActionsOnModel = F2(
 											$author$project$TrackLoaded$undoLastAction(track))
 									});
 							} else {
-								break _v0$13;
+								break _v0$14;
 							}
 						case 'RedoUndoneAction':
 							if (_v0.b.$ === 'Just') {
-								var _v11 = _v0.a;
+								var _v12 = _v0.a;
 								var track = _v0.b.a;
-								var _v12 = track.redos;
-								if (_v12.b) {
-									var redo = _v12.a;
-									var moreRedos = _v12.b;
+								var _v13 = track.redos;
+								if (_v13.b) {
+									var redo = _v13.a;
+									var moreRedos = _v13.b;
 									var modelAfterRedo = A2(
 										$author$project$Main$performActionsOnModel,
 										_List_fromArray(
 											[redo.action]),
 										model);
-									var _v13 = modelAfterRedo.track;
-									if (_v13.$ === 'Just') {
-										var trackAfterRedo = _v13.a;
+									var _v14 = modelAfterRedo.track;
+									if (_v14.$ === 'Just') {
+										var trackAfterRedo = _v14.a;
 										var trackWithCorrectRedoStack = _Utils_update(
 											trackAfterRedo,
 											{redos: moreRedos});
@@ -15074,10 +15107,10 @@ var $author$project$Main$performActionsOnModel = F2(
 									return foldedModel;
 								}
 							} else {
-								break _v0$13;
+								break _v0$14;
 							}
 						default:
-							break _v0$13;
+							break _v0$14;
 					}
 				}
 				return foldedModel;
@@ -15525,6 +15558,7 @@ var $author$project$PaneLayoutManager$ProfileViewMessage = F2(
 	function (a, b) {
 		return {$: 'ProfileViewMessage', a: a, b: b};
 	});
+var $author$project$Actions$RenderProfile = {$: 'RenderProfile'};
 var $author$project$Actions$SetCurrent = function (a) {
 	return {$: 'SetCurrent', a: a};
 };
@@ -17271,6 +17305,7 @@ var $author$project$PaneLayoutManager$update = F5(
 					_List_fromArray(
 						[
 							$author$project$Actions$SetCurrent(pos),
+							$author$project$Actions$RenderProfile,
 							mapFollowsOrange ? $author$project$Actions$MapCenterOnCurrent : $author$project$Actions$NoAction,
 							A2(
 							$author$project$Actions$DelayMessage,
@@ -35710,7 +35745,7 @@ var $author$project$ViewProfileCharts$view = F4(
 											A3(
 											$terezka$elm_charts$Chart$interpolated,
 											function ($) {
-												return $.minAltitude;
+												return $.altitude;
 											},
 											_List_fromArray(
 												[
@@ -35812,7 +35847,7 @@ var $author$project$ViewProfileCharts$view = F4(
 											A2(
 											$terezka$elm_charts$Chart$bar,
 											function ($) {
-												return $.startGradient;
+												return $.gradient;
 											},
 											_List_Nil)
 										]),

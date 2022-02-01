@@ -26,6 +26,7 @@ type ToolAction msg
     | UndoLastAction
     | RedoUndoneAction
     | HeapStatusUpdate Tools.MemoryUsage.HeapStatus
+    | RenderProfile
     | NoAction
 
 

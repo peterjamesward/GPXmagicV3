@@ -184,6 +184,17 @@ render options track =
     }
 
 
+renderProfile : Options -> TrackLoaded msg -> Options
+renderProfile options track =
+    -- Same but only renders profile, because of zoom, pan, or something.
+    { options
+        | pane1 = renderPaneIfProfileVisible options.pane1 track
+        , pane2 = renderPaneIfProfileVisible options.pane2 track
+        , pane3 = renderPaneIfProfileVisible options.pane3 track
+        , pane4 = renderPaneIfProfileVisible options.pane4 track
+    }
+
+
 renderPaneIfProfileVisible : PaneContext -> TrackLoaded msg -> PaneContext
 renderPaneIfProfileVisible pane track =
     case ( pane.activeView, pane.profileContext ) of
@@ -437,6 +448,7 @@ update paneMsg msgWrapper mTrack contentArea options =
             in
             ( newOptions
             , [ SetCurrent pos
+              , RenderProfile
               , if mapFollowsOrange then
                     MapCenterOnCurrent
 

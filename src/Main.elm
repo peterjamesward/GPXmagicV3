@@ -982,6 +982,14 @@ performActionsOnModel actions model =
                             Dict.remove tag foldedModel.previews
                     }
 
+                ( RenderProfile, Just track ) ->
+                    { foldedModel
+                        | paneLayoutOptions =
+                            PaneLayoutManager.renderProfile
+                                foldedModel.paneLayoutOptions
+                                track
+                    }
+
                 ( DelayMessage int msg, Just track ) ->
                     foldedModel
 

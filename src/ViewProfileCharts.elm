@@ -217,7 +217,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                                 ]
                             ]
                     , series .distance
-                        [ interpolated .minAltitude
+                        [ interpolated .altitude
                             [ CA.width 2
                             , CA.opacity 0.2
                             , CA.gradient []
@@ -269,7 +269,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                             ]
                     , C.bars
                         [ CA.x1 .distance ]
-                        [ C.bar .startGradient [] ]
+                        [ C.bar .gradient [] ]
                         context.profileData
                     ]
         ]
@@ -475,10 +475,8 @@ type alias ProfileDatum =
     -- Intended for use with the terezka charts, but agnostic.
     -- One required for each point
     { distance : Float -- metres or miles depending on units setting
-    , minAltitude : Float -- metres or feet
-    , maxAltitude : Float -- will be same as above for Leaf
-    , startGradient : Float -- percent
-    , endGradient : Float -- again, same for Leaf.
+    , altitude : Float -- metres or feet
+    , gradient : Float -- percent
     , colour : Color.Color -- use average gradient if not Leaf
     }
 
@@ -498,8 +496,9 @@ renderProfileDataForCharts context track =
                 Point3d.xCoordinate context.focalPoint
 
         leftEdge =
-            Quantity.max
+            Quantity.clamp
                 Quantity.zero
+                (trueLength track.trackTree |> Quantity.minus trackLengthInView)
                 (pointOfInterest |> Quantity.minus (Quantity.half trackLengthInView))
 
         rightEdge =
@@ -523,10 +522,8 @@ renderProfileDataForCharts context track =
                 newEntry : ProfileDatum
                 newEntry =
                     { distance = Length.inMeters nextDistance
-                    , minAltitude = Length.inMeters <| BoundingBox3d.minZ <| road.boundingBox
-                    , maxAltitude = Length.inMeters <| BoundingBox3d.maxZ <| road.boundingBox
-                    , startGradient = road.gradientAtStart
-                    , endGradient = road.gradientAtEnd
+                    , altitude = Length.inMeters <| Point3d.zCoordinate road.startPoint
+                    , gradient = road.gradientAtStart * 0.5 + road.gradientAtEnd * 0.5
                     , colour = gradientColourPastel (gradientFromNode <| Leaf road)
                     }
             in
@@ -573,7 +570,7 @@ initialiseView current treeNode currentContext =
             , zoomLevel = 0.0
             , defaultZoomLevel = 0.0
             , focalPoint = treeNode |> leafFromIndex current |> startPoint
-            , followSelectedPoint = False
+            , followSelectedPoint = True
             , metresPerPixel = 10.0
             , waitingForClickDelay = False
             , profileData = []
