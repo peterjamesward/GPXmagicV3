@@ -14492,7 +14492,7 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F2(
 			0,
 			track.trackTree,
 			foldFn,
-			_Utils_Tuple3($ianmackenzie$elm_units$Quantity$zero, $elm$core$Maybe$Nothing, _List_Nil));
+			_Utils_Tuple3(leftEdge, $elm$core$Maybe$Nothing, _List_Nil));
 		var lastDistance = _v1.a;
 		var lastSection = _v1.b;
 		var result = _v1.c;

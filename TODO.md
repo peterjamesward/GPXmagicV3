@@ -28,7 +28,6 @@ Does each successive search take longer ?????
 ## Profile rendering
 
 Need:
-* slider
 * pan
 * click 
 * double click

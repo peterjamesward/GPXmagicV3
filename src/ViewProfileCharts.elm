@@ -540,7 +540,7 @@ renderProfileDataForCharts context track =
                 0
                 track.trackTree
                 foldFn
-                ( Quantity.zero, Nothing, [] )
+                ( leftEdge, Nothing, [] )
     in
     --TODO: Use last section to add the final section's end point.
     { context | profileData = result }
