@@ -33,6 +33,10 @@ Perpendiculars from current point to axes.
 
 Can we colour the area under the line? (I suspect not.)
 
+Add in the last point to the rendering after the fold.
+
+Layout needs work.
+
 Drag might be nuisance but the library exposes events so we should be good.
 https://elm-charts.org/documentation/interactivity/zoom
 

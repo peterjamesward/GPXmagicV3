@@ -153,33 +153,67 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
         backgroundColour =
             colourHexString FlatColors.ChinesePalette.antiFlashWhite
     in
-    el [ width <| px 1000, height <| px 500, padding 30 ] <|
-        html <|
-            C.chart
-                [ CA.height 300
-                , CA.width 1000
-                , CA.htmlAttrs [ HA.style "background" backgroundColour ]
-                , CA.range [ CA.likeData ]
-                , CA.domain [ CA.likeData ]
-                , CA.margin { top = 20, bottom = 30, left = 30, right = 20 }
-                , CA.padding { top = 20, bottom = 20, left = 20, right = 20 }
-                ]
-                [ C.xAxis []
-                , C.xTicks []
-                , C.xLabels []
-                , C.yAxis []
-                , C.yTicks []
-                , C.yLabels []
-                , series .distance
-                    [ interpolated .minAltitude
-                        [ CA.width 2
-                        , CA.opacity 0.2
-                        , CA.gradient []
-                        ]
-                        []
+    column []
+        [ el [ width <| px 1000, height <| px 300, padding 30, spacing 0 ] <|
+            html <|
+                C.chart
+                    [ CA.height 300
+                    , CA.width 1000
+                    , CA.htmlAttrs [ HA.style "background" backgroundColour ]
+                    , CA.range [ CA.likeData ]
+                    , CA.domain [ CA.likeData ]
+                    , CA.margin { top = 10, bottom = 30, left = 30, right = 20 }
+                    , CA.padding { top = 10, bottom = 30, left = 20, right = 20 }
                     ]
-                    context.profileData
-                ]
+                    [ C.xAxis []
+                    , C.xTicks []
+                    , C.xLabels []
+                    , C.yAxis []
+                    , C.yTicks []
+                    , C.yLabels []
+                    , series .distance
+                        [ interpolated .minAltitude
+                            [ CA.width 2
+                            , CA.opacity 0.2
+                            , CA.gradient []
+                            ]
+                            []
+                        ]
+                        context.profileData
+                    ]
+        , el [ width <| px 1000, height <| px 300, padding 30 ] <|
+            html <|
+                C.chart
+                    [ CA.height 300
+                    , CA.width 1000
+                    , CA.htmlAttrs [ HA.style "background" backgroundColour ]
+                    , CA.range [ CA.likeData ]
+                    , CA.domain [ CA.likeData ]
+                    , CA.margin { top = 20, bottom = 30, left = 30, right = 20 }
+                    , CA.padding { top = 20, bottom = 20, left = 20, right = 20 }
+                    ]
+                    [ C.xAxis []
+                    , C.xTicks []
+                    , C.xLabels []
+                    , C.yAxis []
+                    , C.yTicks []
+                    , C.yLabels []
+                    , C.bars
+                        []
+                        [ C.bar .startGradient []
+
+                        --|> C.variation
+                        --    (\_ d ->
+                        --        if d.x == 3 then
+                        --            [ CA.striped [] ]
+                        --
+                        --        else
+                        --            []
+                        --    )
+                        ]
+                        context.profileData
+                    ]
+        ]
 
 
 onContextMenu : a -> Element.Attribute a
