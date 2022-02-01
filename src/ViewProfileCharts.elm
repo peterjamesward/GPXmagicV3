@@ -131,23 +131,42 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
         dragging =
             context.dragAction
 
-        altitudePortion =
+        currentPointAltitude =
+            earthPointFromIndex track.currentPosition track.trackTree
+                |> Point3d.zCoordinate
+                |> Length.inMeters
+
+        currentPointGradient =
+            leafFromIndex track.currentPosition track.trackTree
+                |> gradientFromNode
+
+        currentPointDistance =
+            Length.inMeters <|
+                distanceFromIndex track.currentPosition track.trackTree
+
+        ( altitudeWidth, altitudeHeight ) =
             -- Subtract pixels we use for padding around the scene view.
-            ( givenWidth |> Quantity.minus (Pixels.pixels 20)
+            ( givenWidth
+                --|> Quantity.minus (Pixels.pixels 20)
+                |> Quantity.toFloatQuantity
+                |> Pixels.inPixels
             , givenHeight
-                |> Quantity.minus (Pixels.pixels 20)
+                --|> Quantity.minus (Pixels.pixels 20)
                 |> Quantity.toFloatQuantity
                 |> Quantity.multiplyBy splitProportion
-                |> Quantity.truncate
+                |> Pixels.inPixels
             )
 
-        gradientPortion =
-            ( givenWidth |> Quantity.minus (Pixels.pixels 20)
+        ( gradientWidth, gradientHeight ) =
+            ( givenWidth
+                --|> Quantity.minus (Pixels.pixels 20)
+                |> Quantity.toFloatQuantity
+                |> Pixels.inPixels
             , givenHeight
-                |> Quantity.minus (Pixels.pixels 20)
+                --|> Quantity.minus (Pixels.pixels 20)
                 |> Quantity.toFloatQuantity
                 |> Quantity.multiplyBy (1.0 - splitProportion)
-                |> Quantity.truncate
+                |> Pixels.inPixels
             )
 
         backgroundColour =
@@ -157,8 +176,8 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
         [ el [ width <| px 1000, height <| px 300, padding 30, spacing 0 ] <|
             html <|
                 C.chart
-                    [ CA.height 300
-                    , CA.width 1000
+                    [ CA.height altitudeHeight
+                    , CA.width altitudeWidth
                     , CA.htmlAttrs [ HA.style "background" backgroundColour ]
                     , CA.range [ CA.likeData ]
                     , CA.domain [ CA.likeData ]
@@ -171,6 +190,24 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                     , C.yAxis []
                     , C.yTicks []
                     , C.yLabels []
+                    , C.withPlane <|
+                        \p ->
+                            [ C.line
+                                [ CA.x1 p.x.min
+                                , CA.y1 currentPointAltitude
+                                , CA.x2 p.x.max
+                                , CA.dashed [ 5, 5 ]
+                                , CA.color CA.red
+                                ]
+                            , C.line
+                                [ CA.x1 currentPointDistance
+                                , CA.y1 p.y.min
+                                , CA.y2 p.y.max
+                                , CA.dashed [ 5, 5 ]
+                                , CA.width 2
+                                , CA.color CA.red
+                                ]
+                            ]
                     , series .distance
                         [ interpolated .minAltitude
                             [ CA.width 2
@@ -184,8 +221,8 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
         , el [ width <| px 1000, height <| px 300, padding 30 ] <|
             html <|
                 C.chart
-                    [ CA.height 300
-                    , CA.width 1000
+                    [ CA.height gradientHeight
+                    , CA.width gradientWidth
                     , CA.htmlAttrs [ HA.style "background" backgroundColour ]
                     , CA.range [ CA.likeData ]
                     , CA.domain [ CA.likeData ]
@@ -198,19 +235,27 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                     , C.yAxis []
                     , C.yTicks []
                     , C.yLabels []
+                    , C.withPlane <|
+                        \p ->
+                            [ C.line
+                                [ CA.x1 p.x.min
+                                , CA.y1 currentPointGradient
+                                , CA.x2 p.x.max
+                                , CA.dashed [ 5, 5 ]
+                                , CA.color CA.red
+                                ]
+                            , C.line
+                                [ CA.x1 currentPointDistance
+                                , CA.y1 p.y.min
+                                , CA.y2 p.y.max
+                                , CA.dashed [ 5, 5 ]
+                                , CA.width 2
+                                , CA.color CA.red
+                                ]
+                            ]
                     , C.bars
-                        []
-                        [ C.bar .startGradient []
-
-                        --|> C.variation
-                        --    (\_ d ->
-                        --        if d.x == 3 then
-                        --            [ CA.striped [] ]
-                        --
-                        --        else
-                        --            []
-                        --    )
-                        ]
+                        [ CA.x1 .distance ]
+                        [ C.bar .startGradient [] ]
                         context.profileData
                     ]
         ]

@@ -31782,6 +31782,15 @@ var $terezka$elm_charts$Chart$Attributes$likeData = function (b) {
 		b,
 		{max: b.dataMax, min: b.dataMin});
 };
+var $terezka$elm_charts$Chart$SvgElement = function (a) {
+	return {$: 'SvgElement', a: a};
+};
+var $terezka$elm_charts$Chart$line = function (attrs) {
+	return $terezka$elm_charts$Chart$SvgElement(
+		function (p) {
+			return A2($terezka$elm_charts$Chart$Svg$line, p, attrs);
+		});
+};
 var $terezka$elm_charts$Chart$Attributes$margin = F2(
 	function (v, config) {
 		return _Utils_update(
@@ -31806,6 +31815,7 @@ var $terezka$elm_charts$Chart$Attributes$range = F2(
 			config,
 			{range: v});
 	});
+var $terezka$elm_charts$Chart$Attributes$red = $terezka$elm_charts$Internal$Helpers$red;
 var $terezka$elm_charts$Chart$SeriesElement = F4(
 	function (a, b, c, d) {
 		return {$: 'SeriesElement', a: a, b: b, c: c, d: d};
@@ -32681,6 +32691,24 @@ var $terezka$elm_charts$Chart$series = F3(
 	function (toX, properties, data) {
 		return A4($terezka$elm_charts$Chart$seriesMap, $elm$core$Basics$identity, toX, properties, data);
 	});
+var $terezka$elm_charts$Chart$SubElements = function (a) {
+	return {$: 'SubElements', a: a};
+};
+var $terezka$elm_charts$Chart$withPlane = function (func) {
+	return $terezka$elm_charts$Chart$SubElements(
+		F2(
+			function (p, is) {
+				return func(p);
+			}));
+};
+var $terezka$elm_charts$Chart$Attributes$x2 = F2(
+	function (v, config) {
+		return _Utils_update(
+			config,
+			{
+				x2: $elm$core$Maybe$Just(v)
+			});
+	});
 var $terezka$elm_charts$Chart$AxisElement = F2(
 	function (a, b) {
 		return {$: 'AxisElement', a: a, b: b};
@@ -32726,14 +32754,6 @@ var $terezka$elm_charts$Chart$Svg$arrow = F2(
 			$terezka$elm_charts$Internal$Svg$arrow,
 			plane,
 			A2($terezka$elm_charts$Internal$Helpers$apply, edits, $terezka$elm_charts$Internal$Svg$defaultArrow));
-	});
-var $terezka$elm_charts$Chart$Attributes$x2 = F2(
-	function (v, config) {
-		return _Utils_update(
-			config,
-			{
-				x2: $elm$core$Maybe$Just(v)
-			});
 	});
 var $terezka$elm_charts$Chart$Attributes$zero = function (b) {
 	return A3($elm$core$Basics$clamp, b.min, b.max, 0);
@@ -35266,12 +35286,6 @@ var $terezka$elm_charts$Chart$xTicks = function (edits) {
 					toTicks(p)));
 		});
 };
-var $terezka$elm_charts$Chart$Attributes$rotate = F2(
-	function (v, config) {
-		return _Utils_update(
-			config,
-			{rotate: config.rotate + v});
-	});
 var $terezka$elm_charts$Chart$Attributes$y2 = F2(
 	function (v, config) {
 		return _Utils_update(
@@ -35279,6 +35293,12 @@ var $terezka$elm_charts$Chart$Attributes$y2 = F2(
 			{
 				y2: $elm$core$Maybe$Just(v)
 			});
+	});
+var $terezka$elm_charts$Chart$Attributes$rotate = F2(
+	function (v, config) {
+		return _Utils_update(
+			config,
+			{rotate: config.rotate + v});
 	});
 var $terezka$elm_charts$Chart$yAxis = function (edits) {
 	var config = A2(
@@ -35522,36 +35542,35 @@ var $author$project$ViewProfileCharts$view = F4(
 	function (context, _v0, track, msgWrapper) {
 		var givenWidth = _v0.a;
 		var givenHeight = _v0.b;
-		var gradientPortion = _Utils_Tuple2(
-			A2(
-				$ianmackenzie$elm_units$Quantity$minus,
-				$ianmackenzie$elm_units$Pixels$pixels(20),
-				givenWidth),
-			$ianmackenzie$elm_units$Quantity$truncate(
+		var dragging = context.dragAction;
+		var currentPointGradient = $author$project$DomainModel$gradientFromNode(
+			A2($author$project$DomainModel$leafFromIndex, track.currentPosition, track.trackTree));
+		var currentPointDistance = $ianmackenzie$elm_units$Length$inMeters(
+			A2($author$project$DomainModel$distanceFromIndex, track.currentPosition, track.trackTree));
+		var currentPointAltitude = $ianmackenzie$elm_units$Length$inMeters(
+			$ianmackenzie$elm_geometry$Point3d$zCoordinate(
+				A2($author$project$DomainModel$earthPointFromIndex, track.currentPosition, track.trackTree)));
+		var backgroundColour = $author$project$UtilsForViews$colourHexString($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite);
+		var _v1 = _Utils_Tuple2(
+			$ianmackenzie$elm_units$Pixels$inPixels(
+				$ianmackenzie$elm_units$Quantity$toFloatQuantity(givenWidth)),
+			$ianmackenzie$elm_units$Pixels$inPixels(
 				A2(
 					$ianmackenzie$elm_units$Quantity$multiplyBy,
 					1.0 - $author$project$ViewProfileCharts$splitProportion,
-					$ianmackenzie$elm_units$Quantity$toFloatQuantity(
-						A2(
-							$ianmackenzie$elm_units$Quantity$minus,
-							$ianmackenzie$elm_units$Pixels$pixels(20),
-							givenHeight)))));
-		var dragging = context.dragAction;
-		var backgroundColour = $author$project$UtilsForViews$colourHexString($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite);
-		var altitudePortion = _Utils_Tuple2(
-			A2(
-				$ianmackenzie$elm_units$Quantity$minus,
-				$ianmackenzie$elm_units$Pixels$pixels(20),
-				givenWidth),
-			$ianmackenzie$elm_units$Quantity$truncate(
+					$ianmackenzie$elm_units$Quantity$toFloatQuantity(givenHeight))));
+		var gradientWidth = _v1.a;
+		var gradientHeight = _v1.b;
+		var _v2 = _Utils_Tuple2(
+			$ianmackenzie$elm_units$Pixels$inPixels(
+				$ianmackenzie$elm_units$Quantity$toFloatQuantity(givenWidth)),
+			$ianmackenzie$elm_units$Pixels$inPixels(
 				A2(
 					$ianmackenzie$elm_units$Quantity$multiplyBy,
 					$author$project$ViewProfileCharts$splitProportion,
-					$ianmackenzie$elm_units$Quantity$toFloatQuantity(
-						A2(
-							$ianmackenzie$elm_units$Quantity$minus,
-							$ianmackenzie$elm_units$Pixels$pixels(20),
-							givenHeight)))));
+					$ianmackenzie$elm_units$Quantity$toFloatQuantity(givenHeight))));
+		var altitudeWidth = _v2.a;
+		var altitudeHeight = _v2.b;
 		return A2(
 			$mdgriffith$elm_ui$Element$column,
 			_List_Nil,
@@ -35573,8 +35592,8 @@ var $author$project$ViewProfileCharts$view = F4(
 							$terezka$elm_charts$Chart$chart,
 							_List_fromArray(
 								[
-									$terezka$elm_charts$Chart$Attributes$height(300),
-									$terezka$elm_charts$Chart$Attributes$width(1000),
+									$terezka$elm_charts$Chart$Attributes$height(altitudeHeight),
+									$terezka$elm_charts$Chart$Attributes$width(altitudeWidth),
 									$terezka$elm_charts$Chart$Attributes$htmlAttrs(
 									_List_fromArray(
 										[
@@ -35599,6 +35618,35 @@ var $author$project$ViewProfileCharts$view = F4(
 									$terezka$elm_charts$Chart$yAxis(_List_Nil),
 									$terezka$elm_charts$Chart$yTicks(_List_Nil),
 									$terezka$elm_charts$Chart$yLabels(_List_Nil),
+									$terezka$elm_charts$Chart$withPlane(
+									function (p) {
+										return _List_fromArray(
+											[
+												$terezka$elm_charts$Chart$line(
+												_List_fromArray(
+													[
+														$terezka$elm_charts$Chart$Attributes$x1(p.x.min),
+														$terezka$elm_charts$Chart$Attributes$y1(currentPointAltitude),
+														$terezka$elm_charts$Chart$Attributes$x2(p.x.max),
+														$terezka$elm_charts$Chart$Attributes$dashed(
+														_List_fromArray(
+															[5, 5])),
+														$terezka$elm_charts$Chart$Attributes$color($terezka$elm_charts$Chart$Attributes$red)
+													])),
+												$terezka$elm_charts$Chart$line(
+												_List_fromArray(
+													[
+														$terezka$elm_charts$Chart$Attributes$x1(currentPointDistance),
+														$terezka$elm_charts$Chart$Attributes$y1(p.y.min),
+														$terezka$elm_charts$Chart$Attributes$y2(p.y.max),
+														$terezka$elm_charts$Chart$Attributes$dashed(
+														_List_fromArray(
+															[5, 5])),
+														$terezka$elm_charts$Chart$Attributes$width(2),
+														$terezka$elm_charts$Chart$Attributes$color($terezka$elm_charts$Chart$Attributes$red)
+													]))
+											]);
+									}),
 									A3(
 									$terezka$elm_charts$Chart$series,
 									function ($) {
@@ -35636,8 +35684,8 @@ var $author$project$ViewProfileCharts$view = F4(
 							$terezka$elm_charts$Chart$chart,
 							_List_fromArray(
 								[
-									$terezka$elm_charts$Chart$Attributes$height(300),
-									$terezka$elm_charts$Chart$Attributes$width(1000),
+									$terezka$elm_charts$Chart$Attributes$height(gradientHeight),
+									$terezka$elm_charts$Chart$Attributes$width(gradientWidth),
 									$terezka$elm_charts$Chart$Attributes$htmlAttrs(
 									_List_fromArray(
 										[
@@ -35662,9 +35710,44 @@ var $author$project$ViewProfileCharts$view = F4(
 									$terezka$elm_charts$Chart$yAxis(_List_Nil),
 									$terezka$elm_charts$Chart$yTicks(_List_Nil),
 									$terezka$elm_charts$Chart$yLabels(_List_Nil),
+									$terezka$elm_charts$Chart$withPlane(
+									function (p) {
+										return _List_fromArray(
+											[
+												$terezka$elm_charts$Chart$line(
+												_List_fromArray(
+													[
+														$terezka$elm_charts$Chart$Attributes$x1(p.x.min),
+														$terezka$elm_charts$Chart$Attributes$y1(currentPointGradient),
+														$terezka$elm_charts$Chart$Attributes$x2(p.x.max),
+														$terezka$elm_charts$Chart$Attributes$dashed(
+														_List_fromArray(
+															[5, 5])),
+														$terezka$elm_charts$Chart$Attributes$color($terezka$elm_charts$Chart$Attributes$red)
+													])),
+												$terezka$elm_charts$Chart$line(
+												_List_fromArray(
+													[
+														$terezka$elm_charts$Chart$Attributes$x1(currentPointDistance),
+														$terezka$elm_charts$Chart$Attributes$y1(p.y.min),
+														$terezka$elm_charts$Chart$Attributes$y2(p.y.max),
+														$terezka$elm_charts$Chart$Attributes$dashed(
+														_List_fromArray(
+															[5, 5])),
+														$terezka$elm_charts$Chart$Attributes$width(2),
+														$terezka$elm_charts$Chart$Attributes$color($terezka$elm_charts$Chart$Attributes$red)
+													]))
+											]);
+									}),
 									A3(
 									$terezka$elm_charts$Chart$bars,
-									_List_Nil,
+									_List_fromArray(
+										[
+											$terezka$elm_charts$Chart$Attributes$x1(
+											function ($) {
+												return $.distance;
+											})
+										]),
 									_List_fromArray(
 										[
 											A2(
