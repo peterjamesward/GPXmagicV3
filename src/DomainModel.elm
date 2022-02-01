@@ -227,7 +227,7 @@ pointFromGpxWithReference reference gpx =
             |> (*) Spherical.metresPerDegree
             |> Length.meters
         )
-        (gpx.altitude |> Quantity.minus reference.altitude)
+        gpx.altitude
 
 
 gpxFromPointWithReference : GPXSource -> EarthPoint -> GPXSource

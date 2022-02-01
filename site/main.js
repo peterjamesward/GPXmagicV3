@@ -12290,7 +12290,7 @@ var $author$project$DomainModel$pointFromGpxWithReference = F2(
 			$ianmackenzie$elm_units$Length$meters(
 				$author$project$Spherical$metresPerDegree * $ianmackenzie$elm_units$Angle$inDegrees(
 					A2($ianmackenzie$elm_units$Quantity$minus, reference.latitude, gpx.latitude))),
-			A2($ianmackenzie$elm_units$Quantity$minus, reference.altitude, gpx.altitude));
+			gpx.altitude);
 	});
 var $author$project$DomainModel$makeRoadSection = F3(
 	function (reference, earth1, earth2) {
