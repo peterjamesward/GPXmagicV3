@@ -28,7 +28,12 @@ Does each successive search take longer ?????
 ## Profile rendering
 
 Simplest -- just re-render on zoom, pan, setCurrent and use the terezka chart package.
-Use a stack to show altitude range for non Leaf sections.
+Use a stack to show altitude range for non Leaf sections?
+
+Altitude values look off? Are they absolute or offsets?
+They are wrong; bounding boxes do not agree with start and end z values!!
+
+Weird layout. Why chart not show?
 
 Drag might be nuisance but the library exposes events so we should be good.
 https://elm-charts.org/documentation/interactivity/zoom

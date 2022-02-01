@@ -2,8 +2,8 @@ module ViewProfileCharts exposing (..)
 
 import Actions exposing (ToolAction(..))
 import BoundingBox3d
-import Chart as C
-import Chart.Attributes as CA
+import Chart as C exposing (chart, interpolated, series, xAxis, xLabels, yAxis, yLabels)
+import Chart.Attributes as CA exposing (margin, withGrid)
 import Color
 import ColourPalette exposing (gradientColourPastel, gradientHue)
 import DomainModel exposing (..)
@@ -15,6 +15,7 @@ import Element.Input as Input
 import FeatherIcons
 import FlatColors.AussiePalette
 import FlatColors.ChinesePalette exposing (white)
+import Html.Attributes as HA
 import Html.Events as HE
 import Html.Events.Extra.Mouse as Mouse exposing (Button(..))
 import Html.Events.Extra.Wheel as Wheel
@@ -125,7 +126,6 @@ view :
     -> (Msg -> msg)
     -> Element msg
 view context ( givenWidth, givenHeight ) track msgWrapper =
-    --TODO: Note profileData now in context.
     let
         dragging =
             context.dragAction
@@ -149,17 +149,24 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                 |> Quantity.truncate
             )
     in
-    column
-        [ htmlAttribute <| Wheel.onWheel (\event -> msgWrapper (ImageMouseWheel event.deltaY))
-        , onContextMenu (msgWrapper ImageNoOp)
-        , width fill
-        , height fill
-        , pointer
-        , Border.width 0
-        , Border.color FlatColors.ChinesePalette.peace
-        , inFront <| zoomButtons msgWrapper context
-        ]
-        []
+    el [ width <| px 1000, height <| px 500, padding 30 ] <|
+        html <|
+            C.chart
+                [ CA.height 300
+                , CA.width 1000
+                , CA.htmlAttrs
+                    [ HA.style "background" "#fcf9e9" ]
+                ]
+                [ C.xAxis []
+                , C.xTicks []
+                , C.xLabels []
+                , C.yAxis []
+                , C.yTicks []
+                , C.yLabels []
+                , series .distance
+                    [ interpolated .minAltitude [ CA.width 2 ] [] ]
+                    context.profileData
+                ]
 
 
 onContextMenu : a -> Element.Attribute a
@@ -392,8 +399,8 @@ renderProfileDataForCharts context track =
         rightEdge =
             leftEdge |> Quantity.plus trackLengthInView
 
-        (leftIndex, rightIndex) =
-            (indexFromDistance leftEdge track.trackTree
+        ( leftIndex, rightIndex ) =
+            ( indexFromDistance leftEdge track.trackTree
             , indexFromDistance rightEdge track.trackTree
             )
 
@@ -405,16 +412,16 @@ renderProfileDataForCharts context track =
             RoadSection
             -> ( Length.Length, Maybe RoadSection, List ProfileDatum )
             -> ( Length.Length, Maybe RoadSection, List ProfileDatum )
-        foldFn road ( nextDistance,prevSectionForUseAtEnd, outputs ) =
+        foldFn road ( nextDistance, prevSectionForUseAtEnd, outputs ) =
             let
                 newEntry : ProfileDatum
                 newEntry =
                     { distance = Length.inMeters nextDistance
-                    , minAltitude = Length.inMeters  <| BoundingBox3d.minZ <| road.boundingBox
-                    , maxAltitude = Length.inMeters  <| BoundingBox3d.maxZ <| road.boundingBox
+                    , minAltitude = Length.inMeters <| BoundingBox3d.minZ <| road.boundingBox
+                    , maxAltitude = Length.inMeters <| BoundingBox3d.maxZ <| road.boundingBox
                     , startGradient = road.gradientAtStart
                     , endGradient = road.gradientAtEnd
-                    , colour =  gradientColourPastel (gradientFromNode <| Leaf road)
+                    , colour = gradientColourPastel (gradientFromNode <| Leaf road)
                     }
             in
             ( nextDistance |> Quantity.plus road.trueLength
@@ -447,8 +454,8 @@ initialiseView current treeNode currentContext =
             { context
                 | orbiting = Nothing
                 , dragAction = DragNone
-                , zoomLevel = 10.0
-                , defaultZoomLevel = 10.0
+                , zoomLevel = 0.0
+                , defaultZoomLevel = 0.0
                 , focalPoint = treeNode |> leafFromIndex current |> startPoint
                 , metresPerPixel = 10.0
                 , waitingForClickDelay = False
@@ -457,8 +464,8 @@ initialiseView current treeNode currentContext =
         Nothing ->
             { orbiting = Nothing
             , dragAction = DragNone
-            , zoomLevel = 10.0
-            , defaultZoomLevel = 10.0
+            , zoomLevel = 0.0
+            , defaultZoomLevel = 0.0
             , focalPoint = treeNode |> leafFromIndex current |> startPoint
             , followSelectedPoint = False
             , metresPerPixel = 10.0
