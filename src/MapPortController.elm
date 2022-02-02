@@ -24,6 +24,20 @@ type alias MapInfo =
     }
 
 
+type alias MapState =
+    -- Introduced to debounce map messages.
+    { lastClickLon : Float
+    , lastClickLat : Float
+    }
+
+
+defaultMapState : MapState
+defaultMapState =
+    { lastClickLon = 0.0
+    , lastClickLat = 0.0
+    }
+
+
 port mapCommands : E.Value -> Cmd msg
 
 
@@ -106,11 +120,12 @@ centreMapOnCurrent track =
 update :
     MapMsg
     -> TrackLoaded msg
-    -> List (ToolAction msg)
-update mapMsg track =
+    -> MapState
+    -> ( MapState, List (ToolAction msg) )
+update mapMsg track lastState =
     case mapMsg of
         MapPortMessage value ->
-            processMapPortMessage track value
+            processMapPortMessage lastState track value
 
 
 
@@ -204,10 +219,11 @@ msgDecoder =
 
 
 processMapPortMessage :
-    TrackLoaded msg
+    MapState
+    -> TrackLoaded msg
     -> E.Value
-    -> List (ToolAction msg)
-processMapPortMessage track json =
+    -> ( MapState, List (ToolAction msg) )
+processMapPortMessage lastState track json =
     let
         jsonMsg =
             D.decodeValue msgDecoder json
@@ -225,20 +241,29 @@ processMapPortMessage track json =
             --} );
             case ( lat, lon ) of
                 ( Ok lat1, Ok lon1 ) ->
-                    let
-                        gpxPoint =
-                            { longitude = Direction2d.fromAngle <| Angle.degrees lon1
-                            , latitude = Angle.degrees lat1
-                            , altitude = Length.meters 0.0
-                            }
+                    if lat1 == lastState.lastClickLat && lon1 == lastState.lastClickLon then
+                        ( lastState, [] )
 
-                        index =
-                            DomainModel.nearestToLonLat gpxPoint track.trackTree
-                    in
-                    [ SetCurrentFromMapClick index, TrackHasChanged ]
+                    else
+                        let
+                            gpxPoint =
+                                { longitude = Direction2d.fromAngle <| Angle.degrees lon1
+                                , latitude = Angle.degrees lat1
+                                , altitude = Length.meters 0.0
+                                }
+
+                            index =
+                                DomainModel.nearestToLonLat gpxPoint track.trackTree
+                        in
+                        ( { lastState
+                            | lastClickLon = lon1
+                            , lastClickLat = lat1
+                          }
+                        , [ SetCurrentFromMapClick index, TrackHasChanged ]
+                        )
 
                 _ ->
-                    []
+                    ( lastState, [] )
 
         --( Ok "drag", Just track ) ->
         --    case draggedOnMap json track of
@@ -262,4 +287,4 @@ processMapPortMessage track json =
         --        _ ->
         --            ( Model model, Cmd.none )
         _ ->
-            []
+            ( lastState, [] )

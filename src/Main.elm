@@ -355,9 +355,7 @@ update msg model =
                     in
                     ( modelAfterActions
                     , Cmd.batch
-                        [ performActionCommands actions modelAfterActions
-                        , showTrackOnMapCentered newTrack
-                        ]
+                        [ showTrackOnMapCentered newTrack ]
                     )
 
                 Nothing ->
@@ -1135,7 +1133,8 @@ performActionCommands actions model =
                     MapPortController.addMarkersToMap track
 
                 ( SetCurrentFromMapClick position, Just track ) ->
-                    MapPortController.addMarkersToMap track
+                    Cmd.none
+                    --MapPortController.addMarkersToMap track
 
                 ( MapCenterOnCurrent, Just track ) ->
                     MapPortController.centreMapOnCurrent track

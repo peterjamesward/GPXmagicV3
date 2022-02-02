@@ -3,10 +3,7 @@
 
 BUG: Dubious steepest gradient on some routes. (May have to wait until we have that tool!)
 BUG: In Grid view, Pane1 is notably smaller than the others.
-
-**BUG**: Hit detect on Map is slow, sometimes very slow. (Paris to Bree).
-Can take tens of seconds but seems to recover.
-Does each successive search take longer ?????
+BUG: Last line at right hand edge in Profile is weird. (JS trace suggests a divide by zero somewhere!)
 
 >>> Something is blowing the stack (try zooming on Artemis to Bree profile)
 > Possibly goes away with --optimise compile.
@@ -25,6 +22,16 @@ Does each successive search take longer ?????
 
 # WIP
 
+**BUG**: Hit detect on Map is slow, sometimes very slow. (Paris to Bree).
+Can take tens of seconds but seems to recover.
+Each successive search takes longer!!!
+
+Well, definitely far too many outgoing map messages post-click.
+And, yes, number of incoming click messages is growing.
+Something not being tidied up in the map.
+1. Code issues "Mark, Track, Mark" for every update.
+2. Map sends 2x click first time, then 6x, then 18x.
+
 ---
 
 Time for a quick update video?
@@ -41,6 +48,10 @@ Map options tool?
 - Map style (outdoor, satellite)
 - Draggable points
 > These could just be popups on the map view. (Layers, Cross-arrow, resp.)
+
+## Laziness
+
+Don't render profile if not visible.
 
 ## Tools
 
@@ -83,28 +94,6 @@ Put all Font, Colour etc into a Palette/Style module for ease of change.
 
 Oh yes. Basically sound, unless there's something I've not yet thought about.
 
-## Improvement for drag detect?
-
-Note this little pattern that looks for movement rather than use a timer:
-```elm
-    OnMouseMove offset ->
-      case model.dragging of
-        CouldStillBeClick prevOffset ->
-          if prevOffset == offset then
-            model
-          else
-            { model | center = updateCenter model.center prevOffset offset
-            , dragging = ForSureDragging offset
-            }
-
-        ForSureDragging prevOffset ->
-          { model | center = updateCenter model.center prevOffset offset
-          , dragging = ForSureDragging offset
-          }
-
-        None ->
-          model
-```
 
 ---
 

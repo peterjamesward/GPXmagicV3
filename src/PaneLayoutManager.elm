@@ -79,6 +79,7 @@ type alias Options =
     , pane4 : PaneContext
     , sliderState : SliderState
     , scene3d : List (Entity LocalCoords)
+    , mapState : MapPortController.MapState
     }
 
 
@@ -108,6 +109,7 @@ defaultOptions =
     , pane4 = { defaultPaneContext | paneId = Pane4 }
     , sliderState = SliderIdle
     , scene3d = []
+    , mapState = MapPortController.defaultMapState
     }
 
 
@@ -423,10 +425,12 @@ update paneMsg msgWrapper mTrack contentArea options =
             case mTrack of
                 Just track ->
                     let
-                        actions =
-                            MapPortController.update mapMsg track
+                        ( newState, actions ) =
+                            MapPortController.update mapMsg track options.mapState
                     in
-                    ( options, actions )
+                    ( { options | mapState = newState }
+                    , actions
+                    )
 
                 Nothing ->
                     ( options, [] )

@@ -8462,10 +8462,12 @@ var $author$project$PaneLayoutManager$Pane3 = {$: 'Pane3'};
 var $author$project$PaneLayoutManager$Pane4 = {$: 'Pane4'};
 var $author$project$PaneLayoutManager$PanesOne = {$: 'PanesOne'};
 var $author$project$PaneLayoutManager$SliderIdle = {$: 'SliderIdle'};
+var $author$project$MapPortController$defaultMapState = {lastClickLat: 0.0, lastClickLon: 0.0};
 var $author$project$PaneLayoutManager$Pane1 = {$: 'Pane1'};
 var $author$project$PaneLayoutManager$ViewInfo = {$: 'ViewInfo'};
 var $author$project$PaneLayoutManager$defaultPaneContext = {activeView: $author$project$PaneLayoutManager$ViewInfo, mapContext: $elm$core$Maybe$Nothing, paneId: $author$project$PaneLayoutManager$Pane1, profileContext: $elm$core$Maybe$Nothing, thirdPersonContext: $elm$core$Maybe$Nothing};
 var $author$project$PaneLayoutManager$defaultOptions = {
+	mapState: $author$project$MapPortController$defaultMapState,
 	pane1: $author$project$PaneLayoutManager$defaultPaneContext,
 	pane2: _Utils_update(
 		$author$project$PaneLayoutManager$defaultPaneContext,
@@ -11443,7 +11445,7 @@ var $author$project$Main$performActionCommands = F2(
 						if (_v0.b.$ === 'Just') {
 							var position = _v0.a.a;
 							var track = _v0.b.a;
-							return $author$project$MapPortController$addMarkersToMap(track);
+							return $elm$core$Platform$Cmd$none;
 						} else {
 							break _v0$10;
 						}
@@ -15824,8 +15826,8 @@ var $author$project$DomainModel$nearestToLonLat = F2(
 			});
 		return A2(helper, treeNode, 0).a;
 	});
-var $author$project$MapPortController$processMapPortMessage = F2(
-	function (track, json) {
+var $author$project$MapPortController$processMapPortMessage = F3(
+	function (lastState, track, json) {
 		var jsonMsg = A2($elm$json$Json$Decode$decodeValue, $author$project$MapPortController$msgDecoder, json);
 		var _v0 = _Utils_Tuple2(
 			A2(
@@ -15843,29 +15845,37 @@ var $author$project$MapPortController$processMapPortMessage = F2(
 			if ((_v2.a.$ === 'Ok') && (_v2.b.$ === 'Ok')) {
 				var lat1 = _v2.a.a;
 				var lon1 = _v2.b.a;
-				var gpxPoint = {
-					altitude: $ianmackenzie$elm_units$Length$meters(0.0),
-					latitude: $ianmackenzie$elm_units$Angle$degrees(lat1),
-					longitude: $ianmackenzie$elm_geometry$Direction2d$fromAngle(
-						$ianmackenzie$elm_units$Angle$degrees(lon1))
-				};
-				var index = A2($author$project$DomainModel$nearestToLonLat, gpxPoint, track.trackTree);
-				return _List_fromArray(
-					[
-						$author$project$Actions$SetCurrentFromMapClick(index),
-						$author$project$Actions$TrackHasChanged
-					]);
+				if (_Utils_eq(lat1, lastState.lastClickLat) && _Utils_eq(lon1, lastState.lastClickLon)) {
+					return _Utils_Tuple2(lastState, _List_Nil);
+				} else {
+					var gpxPoint = {
+						altitude: $ianmackenzie$elm_units$Length$meters(0.0),
+						latitude: $ianmackenzie$elm_units$Angle$degrees(lat1),
+						longitude: $ianmackenzie$elm_geometry$Direction2d$fromAngle(
+							$ianmackenzie$elm_units$Angle$degrees(lon1))
+					};
+					var index = A2($author$project$DomainModel$nearestToLonLat, gpxPoint, track.trackTree);
+					return _Utils_Tuple2(
+						_Utils_update(
+							lastState,
+							{lastClickLat: lat1, lastClickLon: lon1}),
+						_List_fromArray(
+							[
+								$author$project$Actions$SetCurrentFromMapClick(index),
+								$author$project$Actions$TrackHasChanged
+							]));
+				}
 			} else {
-				return _List_Nil;
+				return _Utils_Tuple2(lastState, _List_Nil);
 			}
 		} else {
-			return _List_Nil;
+			return _Utils_Tuple2(lastState, _List_Nil);
 		}
 	});
-var $author$project$MapPortController$update = F2(
-	function (mapMsg, track) {
+var $author$project$MapPortController$update = F3(
+	function (mapMsg, track, lastState) {
 		var value = mapMsg.a;
-		return A2($author$project$MapPortController$processMapPortMessage, track, value);
+		return A3($author$project$MapPortController$processMapPortMessage, lastState, track, value);
 	});
 var $author$project$ViewMap$update = F5(
 	function (msg, msgWrapper, track, area, context) {
@@ -17305,8 +17315,14 @@ var $author$project$PaneLayoutManager$update = F5(
 				var mapMsg = paneMsg.a;
 				if (mTrack.$ === 'Just') {
 					var track = mTrack.a;
-					var actions = A2($author$project$MapPortController$update, mapMsg, track);
-					return _Utils_Tuple2(options, actions);
+					var _v15 = A3($author$project$MapPortController$update, mapMsg, track, options.mapState);
+					var newState = _v15.a;
+					var actions = _v15.b;
+					return _Utils_Tuple2(
+						_Utils_update(
+							options,
+							{mapState: newState}),
+						actions);
 				} else {
 					return _Utils_Tuple2(options, _List_Nil);
 				}
@@ -17316,9 +17332,9 @@ var $author$project$PaneLayoutManager$update = F5(
 					options,
 					{sliderState: $author$project$PaneLayoutManager$SliderMoved});
 				var mapFollowsOrange = function () {
-					var _v15 = options.pane1.mapContext;
-					if (_v15.$ === 'Just') {
-						var mapContext = _v15.a;
+					var _v16 = options.pane1.mapContext;
+					if (_v16.$ === 'Just') {
+						var mapContext = _v16.a;
 						return mapContext.followOrange;
 					} else {
 						return false;
@@ -17341,8 +17357,8 @@ var $author$project$PaneLayoutManager$update = F5(
 					options,
 					{
 						sliderState: function () {
-							var _v16 = options.sliderState;
-							switch (_v16.$) {
+							var _v17 = options.sliderState;
+							switch (_v17.$) {
 								case 'SliderIdle':
 									return $author$project$PaneLayoutManager$SliderIdle;
 								case 'SliderMoved':
@@ -18740,7 +18756,6 @@ var $author$project$Main$update = F2(
 						$elm$core$Platform$Cmd$batch(
 							_List_fromArray(
 								[
-									A2($author$project$Main$performActionCommands, actions, modelAfterActions),
 									$author$project$Main$showTrackOnMapCentered(newTrack)
 								])));
 				} else {
