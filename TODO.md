@@ -14,18 +14,13 @@ Time for a quick update video?
 
 # BACKLOG, roughly in order ...
 
-## Map
+## Memory monitor
 
-Map options tool? 
-- Map style (outdoor, satellite)
-- Draggable points
-> These could just be popups on the map view. (Layers, Cross-arrow, resp.)
-
-- Map render to JSON should use the new universal traversal.
-
-## Laziness, optimisation
-
-Don't render profile if not visible.
+Make a tool for this. Quite important and useful.
+Low memory can trigger defensive actions: remove Undo entries, reduce rendering depth, reduce graphics.
+If we are so short of memory that we can't create the output string, one option is to turn off graphics,
+another to output in sections. Another, to drop the scenes, reclaim some heap, defer writing to an
+action, then re-render. This would also work for edits, but hairy.
 
 ## Tools
 
@@ -37,17 +32,14 @@ Not all existing tools to move across; some rationalisation.
 Using an action DisplayMessage to show modal dialog from any tool. 
 Add a non-modal message error for info.
 
-## Memory monitor
-
-Make a tool for this. Quite important and useful.
-Low memory can trigger defensive actions: remove Undo entries, reduce rendering depth, reduce graphics.
-If we are so short of memory that we can't create the output string, one option is to turn off graphics,
-another to output in sections. Another, to drop the scenes, reclaim some heap, defer writing to an 
-action, then re-render. This would also work for edits, but hairy.
-
 ## Plan view
 
 Same as v2. Use 3d-scene. Orthographic camera.
+
+## Map
+
+Draggable points
+> These could just be popups on the map view. (Layers, Cross-arrow, resp.)
 
 ## Terrain
 
@@ -69,6 +61,9 @@ Put all Font, Colour etc into a Palette/Style module for ease of change.
 
 Oh yes. Basically sound, unless there's something I've not yet thought about.
 
+## Laziness, optimisation
+
+Don't render anything if not visible.
 
 ---
 
