@@ -330,8 +330,8 @@ function addLineToMap(data, points) {
 
     if (trackAdded) {
         //console.log('removing existing track');
-        map.removeLayer('route');
-        map.removeSource('route');
+        map.removeLayer('route')
+           .removeSource('route');
         trackAdded = false;
     }
 
@@ -372,7 +372,7 @@ function addLineToMap(data, points) {
   //    { 'msg' : 'track ready' }
   //  );
 
-    setTimeout(function() { map.resize(); }, 50);
+//    setTimeout(function() { map.resize(); }, 50);
 };
 
 function setClickMode(newMode, points) {
@@ -438,6 +438,7 @@ var whiteMarker = new mapboxgl.Marker({ color: "#FFFFFF", scale: 0.8 });
 function addOptionals(msg) {
     if (typeof(msg.orange) != 'undefined') {
         orangeMarker
+            .remove()
             .setLngLat([msg.orange.lon, msg.orange.lat])
             .addTo(map);
     }
