@@ -10377,6 +10377,10 @@ var $author$project$DomainModel$asRecord = function (treeNode) {
 var $author$project$DomainModel$startPoint = function (treeNode) {
 	return $author$project$DomainModel$asRecord(treeNode).startPoint;
 };
+var $author$project$DomainModel$trueLength = function (treeNode) {
+	return $author$project$DomainModel$asRecord(treeNode).trueLength;
+};
+var $ianmackenzie$elm_units$Quantity$zero = $ianmackenzie$elm_units$Quantity$Quantity(0);
 var $author$project$ViewProfileCharts$initialiseView = F3(
 	function (current, treeNode, currentContext) {
 		if (currentContext.$ === 'Just') {
@@ -10395,14 +10399,17 @@ var $author$project$ViewProfileCharts$initialiseView = F3(
 				});
 		} else {
 			return {
+				altitudeData: _List_Nil,
 				defaultZoomLevel: 0.0,
 				dragAction: $author$project$ViewProfileCharts$DragNone,
 				focalPoint: $author$project$DomainModel$startPoint(
 					A2($author$project$DomainModel$leafFromIndex, current, treeNode)),
 				followSelectedPoint: true,
+				gradientData: _List_Nil,
+				leftEdge: $ianmackenzie$elm_units$Quantity$zero,
 				metresPerPixel: 10.0,
 				orbiting: $elm$core$Maybe$Nothing,
-				profileData: _List_Nil,
+				rightEdge: $author$project$DomainModel$trueLength(treeNode),
 				waitingForClickDelay: false,
 				zoomLevel: 0.0
 			};
@@ -10581,7 +10588,6 @@ var $ianmackenzie$elm_geometry$Direction2d$toAngle = function (_v0) {
 	return $ianmackenzie$elm_units$Quantity$Quantity(
 		A2($elm$core$Basics$atan2, d.y, d.x));
 };
-var $ianmackenzie$elm_units$Quantity$zero = $ianmackenzie$elm_units$Quantity$Quantity(0);
 var $author$project$DomainModel$trackPointsForOutput = function (tree) {
 	var foldFn = F2(
 		function (node, accum) {
@@ -11984,9 +11990,6 @@ var $ianmackenzie$elm_geometry$Direction2d$rotateBy = F2(
 		return $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
 			{x: (c * d.x) - (s * d.y), y: (s * d.x) + (c * d.y)});
 	});
-var $author$project$DomainModel$trueLength = function (treeNode) {
-	return $author$project$DomainModel$asRecord(treeNode).trueLength;
-};
 var $ianmackenzie$elm_geometry$BoundingBox3d$extrema = function (_v0) {
 	var boundingBoxExtrema = _v0.a;
 	return boundingBoxExtrema;
@@ -14459,21 +14462,27 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F2(
 		var foldFn = F2(
 			function (road, _v2) {
 				var nextDistance = _v2.a;
-				var prevSectionForUseAtEnd = _v2.b;
-				var outputs = _v2.c;
-				var newEntry = {
-					altitude: $ianmackenzie$elm_units$Length$inMeters(
-						$ianmackenzie$elm_geometry$Point3d$zCoordinate(road.startPoint)),
+				var altitudesOut = _v2.b;
+				var gradientsOut = _v2.c;
+				var gradientDatum = {
 					colour: $author$project$ColourPalette$gradientColourPastel(
 						$author$project$DomainModel$gradientFromNode(
 							$author$project$DomainModel$Leaf(road))),
-					distance: $ianmackenzie$elm_units$Length$inMeters(nextDistance),
-					gradient: (road.gradientAtStart * 0.5) + (road.gradientAtEnd * 0.5)
+					endDistance: $ianmackenzie$elm_units$Length$inMeters(
+						A2($ianmackenzie$elm_units$Quantity$plus, road.trueLength, nextDistance)),
+					gradient: $author$project$DomainModel$gradientFromNode(
+						$author$project$DomainModel$Leaf(road)),
+					startDistance: $ianmackenzie$elm_units$Length$inMeters(nextDistance)
+				};
+				var altitudeDatum = {
+					altitude: $ianmackenzie$elm_units$Length$inMeters(
+						$ianmackenzie$elm_geometry$Point3d$zCoordinate(road.startPoint)),
+					distance: $ianmackenzie$elm_units$Length$inMeters(nextDistance)
 				};
 				return _Utils_Tuple3(
 					A2($ianmackenzie$elm_units$Quantity$plus, road.trueLength, nextDistance),
-					$elm$core$Maybe$Just(road),
-					A2($elm$core$List$cons, newEntry, outputs));
+					A2($elm$core$List$cons, altitudeDatum, altitudesOut),
+					A2($elm$core$List$cons, gradientDatum, gradientsOut));
 			});
 		var depthFn = function (road) {
 			return $elm$core$Maybe$Just(
@@ -14484,6 +14493,12 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F2(
 			A2($author$project$DomainModel$indexFromDistance, rightEdge, track.trackTree));
 		var leftIndex = _v0.a;
 		var rightIndex = _v0.b;
+		var finalPoint = A2($author$project$DomainModel$earthPointFromIndex, rightIndex, track.trackTree);
+		var finalAltitudeDatum = {
+			altitude: $ianmackenzie$elm_units$Length$inMeters(
+				$ianmackenzie$elm_geometry$Point3d$zCoordinate(finalPoint)),
+			distance: $ianmackenzie$elm_units$Length$inMeters(rightEdge)
+		};
 		var _v1 = A7(
 			$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
 			leftIndex,
@@ -14492,13 +14507,18 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F2(
 			0,
 			track.trackTree,
 			foldFn,
-			_Utils_Tuple3(leftEdge, $elm$core$Maybe$Nothing, _List_Nil));
+			_Utils_Tuple3(leftEdge, _List_Nil, _List_Nil));
 		var lastDistance = _v1.a;
-		var lastSection = _v1.b;
-		var result = _v1.c;
+		var altitudes = _v1.b;
+		var gradients = _v1.c;
 		return _Utils_update(
 			context,
-			{profileData: result});
+			{
+				altitudeData: A2($elm$core$List$cons, finalAltitudeDatum, altitudes),
+				gradientData: gradients,
+				leftEdge: leftEdge,
+				rightEdge: rightEdge
+			});
 	});
 var $author$project$PaneLayoutManager$renderPaneIfProfileVisible = F2(
 	function (pane, track) {
@@ -35755,7 +35775,7 @@ var $author$project$ViewProfileCharts$view = F4(
 												]),
 											_List_Nil)
 										]),
-									context.profileData)
+									context.altitudeData)
 								])))),
 					A2(
 					$mdgriffith$elm_ui$Element$el,
@@ -35839,7 +35859,11 @@ var $author$project$ViewProfileCharts$view = F4(
 										[
 											$terezka$elm_charts$Chart$Attributes$x1(
 											function ($) {
-												return $.distance;
+												return $.startDistance;
+											}),
+											$terezka$elm_charts$Chart$Attributes$x2(
+											function ($) {
+												return $.endDistance;
 											})
 										]),
 									_List_fromArray(
@@ -35851,7 +35875,7 @@ var $author$project$ViewProfileCharts$view = F4(
 											},
 											_List_Nil)
 										]),
-									context.profileData)
+									context.gradientData)
 								]))))
 				]));
 	});

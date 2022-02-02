@@ -65,7 +65,10 @@ type alias Context =
     , followSelectedPoint : Bool
     , metresPerPixel : Float -- Helps with dragging accurately.
     , waitingForClickDelay : Bool
-    , profileData : List ProfileDatum
+    , altitudeData : List AltitudeDatum
+    , gradientData : List GradientDatum
+    , leftEdge : Length.Length
+    , rightEdge : Length.Length
     }
 
 
@@ -224,7 +227,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                             ]
                             []
                         ]
-                        context.profileData
+                        context.altitudeData
                     ]
         , el
             [ width <| px 1000
@@ -268,9 +271,9 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                                 ]
                             ]
                     , C.bars
-                        [ CA.x1 .distance ]
+                        [ CA.x1 .startDistance, CA.x2 .endDistance ]
                         [ C.bar .gradient [] ]
-                        context.profileData
+                        context.gradientData
                     ]
         ]
 
@@ -471,11 +474,17 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
             )
 
 
-type alias ProfileDatum =
+type alias AltitudeDatum =
     -- Intended for use with the terezka charts, but agnostic.
     -- One required for each point
     { distance : Float -- metres or miles depending on units setting
     , altitude : Float -- metres or feet
+    }
+
+
+type alias GradientDatum =
+    { startDistance : Float
+    , endDistance : Float
     , gradient : Float -- percent
     , colour : Color.Color -- use average gradient if not Leaf
     }
@@ -515,24 +524,30 @@ renderProfileDataForCharts context track =
 
         foldFn :
             RoadSection
-            -> ( Length.Length, Maybe RoadSection, List ProfileDatum )
-            -> ( Length.Length, Maybe RoadSection, List ProfileDatum )
-        foldFn road ( nextDistance, prevSectionForUseAtEnd, outputs ) =
+            -> ( Length.Length, List AltitudeDatum, List GradientDatum )
+            -> ( Length.Length, List AltitudeDatum, List GradientDatum )
+        foldFn road ( nextDistance, altitudesOut, gradientsOut ) =
             let
-                newEntry : ProfileDatum
-                newEntry =
+                altitudeDatum : AltitudeDatum
+                altitudeDatum =
                     { distance = Length.inMeters nextDistance
                     , altitude = Length.inMeters <| Point3d.zCoordinate road.startPoint
-                    , gradient = road.gradientAtStart * 0.5 + road.gradientAtEnd * 0.5
+                    }
+
+                gradientDatum : GradientDatum
+                gradientDatum =
+                    { startDistance = Length.inMeters nextDistance
+                    , endDistance = Length.inMeters (nextDistance |> Quantity.plus road.trueLength)
+                    , gradient = gradientFromNode <| Leaf road
                     , colour = gradientColourPastel (gradientFromNode <| Leaf road)
                     }
             in
             ( nextDistance |> Quantity.plus road.trueLength
-            , Just road
-            , newEntry :: outputs
+            , altitudeDatum :: altitudesOut
+            , gradientDatum :: gradientsOut
             )
 
-        ( lastDistance, lastSection, result ) =
+        ( lastDistance, altitudes, gradients ) =
             DomainModel.traverseTreeBetweenLimitsToDepth
                 leftIndex
                 rightIndex
@@ -540,10 +555,24 @@ renderProfileDataForCharts context track =
                 0
                 track.trackTree
                 foldFn
-                ( leftEdge, Nothing, [] )
+                ( leftEdge, [], [] )
+
+        finalPoint =
+            earthPointFromIndex rightIndex track.trackTree
+
+        finalAltitudeDatum : AltitudeDatum
+        finalAltitudeDatum =
+            { distance = Length.inMeters rightEdge
+            , altitude = Length.inMeters <| Point3d.zCoordinate finalPoint
+            }
     in
     --TODO: Use last section to add the final section's end point.
-    { context | profileData = result }
+    { context
+        | altitudeData = finalAltitudeDatum :: altitudes
+        , gradientData = gradients
+        , leftEdge = leftEdge
+        , rightEdge = rightEdge
+    }
 
 
 initialiseView :
@@ -573,5 +602,8 @@ initialiseView current treeNode currentContext =
             , followSelectedPoint = True
             , metresPerPixel = 10.0
             , waitingForClickDelay = False
-            , profileData = []
+            , altitudeData = []
+            , gradientData = []
+            , leftEdge = Quantity.zero
+            , rightEdge = trueLength treeNode
             }

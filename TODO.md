@@ -27,19 +27,21 @@ Does each successive search take longer ?????
 
 ## Profile rendering
 
+Might be sensible to put more stuff in context to help painting.
+e.g. leftEdge, rightEdge so we can scale axes by distance not by index.
+
 Need:
-* pan
-* click 
-* double click
-* Can we differentially colour the area under the line? (I suspect not.)
+* Scales don't quite line up (? do we need x2 on distance for gradient ?)
+* Pan (moves under current point line, so changes current)
+* Click & double click both re-centre.
+* Differential colouring for gradient. (?? subtle bars under the altitude ??)
 * Add in the last point to the rendering after the fold
 * Layout needs work
 * Resizing
 
-Drag might be nuisance but the library exposes events so we should be good.
-https://elm-charts.org/documentation/interactivity/zoom
-
 ---
+
+Time for a quick update video?
 
 # BACKLOG, roughly in order ...
 
@@ -95,7 +97,7 @@ Put all Font, Colour etc into a Palette/Style module for ease of change.
 
 Oh yes. Basically sound, unless there's something I've not yet thought about.
 
-## Improvement for drag detect
+## Improvement for drag detect?
 
 Note this little pattern that looks for movement rather than use a timer:
 ```elm
