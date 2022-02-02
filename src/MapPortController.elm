@@ -161,7 +161,7 @@ addTrackToMap track =
             , ( "lat", E.float <| Angle.inDegrees latitude )
             , ( "zoom", E.float 10.0 )
             , ( "data", SceneBuilderMap.renderMapJson track ) -- Route as polyline
-            , ( "points", E.null ) --trackPointsToJSON track ) -- Make track points draggable
+            , ( "points", SceneBuilderMap.trackPointsToJSON track ) -- Make track points draggable
             ]
 
 

@@ -952,8 +952,8 @@ containingSphere box =
     Sphere3d.withRadius radius here
 
 
-lngLatPair : ( Angle, Angle ) -> E.Value
-lngLatPair ( longitude, latitude ) =
+lngLatPair : ( Angle, Angle, Length.Length ) -> E.Value
+lngLatPair ( longitude, latitude, _ ) =
     --TODO: Move to encoding support.
     E.list E.float [ Angle.inDegrees longitude, Angle.inDegrees latitude ]
 

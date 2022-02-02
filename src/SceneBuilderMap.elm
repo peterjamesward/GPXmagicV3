@@ -10,6 +10,7 @@ import Element
 import Json.Encode as E
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
+import Quantity
 import TrackLoaded exposing (TrackLoaded)
 
 
@@ -36,7 +37,7 @@ lineToJSON points =
         coordinates =
             List.map
                 (\{ longitude, latitude, altitude } ->
-                    DomainModel.lngLatPair ( Direction2d.toAngle longitude, latitude )
+                    DomainModel.lngLatPair ( Direction2d.toAngle longitude, latitude, altitude )
                 )
                 points
     in
@@ -73,7 +74,7 @@ pointsToJSON points =
                 ]
 
         coordinates pt =
-            DomainModel.lngLatPair ( Direction2d.toAngle pt.longitude, pt.latitude )
+            DomainModel.lngLatPair ( Direction2d.toAngle pt.longitude, pt.latitude, Quantity.zero )
 
         point tp =
             E.object
@@ -87,20 +88,28 @@ pointsToJSON points =
         ]
 
 
+mapLocation : GPXSource -> ( Angle, Angle, Length.Length )
+mapLocation point =
+    let
+        { longitude, latitude, altitude } =
+            point
+    in
+    ( Direction2d.toAngle longitude, latitude, altitude )
+
+
+latLonPair : ( Angle, Angle, Length.Length ) -> E.Value
+latLonPair ( lon, lat, ele ) =
+    E.list E.float [ Angle.inDegrees lon, Angle.inDegrees lat ]
+
+
 renderMapJson : TrackLoaded msg -> E.Value
 renderMapJson track =
+    -- This version gives track suitable for map.addTrack.
+    -- Sadly, mapbox requires a different format for the track points.
     let
         boxSide =
             --TODO: put box side in model
             Length.kilometers 4
-
-        mapLocation : GPXSource -> ( Angle, Angle )
-        mapLocation point =
-            let
-                { longitude, latitude, altitude } =
-                    point
-            in
-            ( Direction2d.toAngle longitude, latitude )
 
         makeVisibleSegment : PeteTree -> E.Value
         makeVisibleSegment node =
@@ -168,4 +177,72 @@ renderMapJson track =
         [ ( "type", E.string "Feature" )
         , ( "properties", E.object [] )
         , ( "geometry", geometry )
+        ]
+
+
+trackPointsToJSON : TrackLoaded msg -> E.Value
+trackPointsToJSON track =
+    -- Similar but each point is a feature so it is draggable.
+    --var geojson = {
+    --    'type': 'FeatureCollection',
+    --    'features': [
+    --        {
+    --            'type': 'Feature',
+    --            'geometry': {
+    --                'type': 'Point',
+    --                'coordinates': [0, 0]
+    --            }
+    --        }
+    --    ]
+    --};
+    let
+        fullRenderBoxSize =
+            Length.kilometers 4
+
+        fullRenderBox =
+            earthPointFromIndex track.currentPosition track.trackTree
+                |> BoundingBox3d.singleton
+                |> BoundingBox3d.expandBy fullRenderBoxSize
+
+        depthFn : RoadSection -> Maybe Int
+        depthFn road =
+            if road.boundingBox |> BoundingBox3d.intersects fullRenderBox then
+                Nothing
+
+            else
+                Just 10
+
+        foldFn : RoadSection -> List E.Value -> List E.Value
+        foldFn road output =
+            let
+                ( lon, lat, alt ) =
+                    mapLocation <| Tuple.first road.sourceData
+            in
+            makeFeature ( lon, lat, alt ) :: output
+
+        makeFeature tp =
+            E.object
+                [ ( "type", E.string "Feature" )
+                , ( "geometry", point tp )
+                ]
+
+        point lonLat =
+            E.object
+                [ ( "type", E.string "Point" )
+                , ( "coordinates", latLonPair lonLat )
+                ]
+
+        features =
+            DomainModel.traverseTreeBetweenLimitsToDepth
+                0
+                (skipCount track.trackTree)
+                depthFn
+                0
+                track.trackTree
+                foldFn
+                []
+    in
+    E.object
+        [ ( "type", E.string "FeatureCollection" )
+        , ( "features", E.list identity features )
         ]

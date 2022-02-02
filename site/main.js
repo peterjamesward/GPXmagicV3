@@ -10922,6 +10922,16 @@ var $author$project$DomainModel$lngLatPair = function (_v0) {
 				$ianmackenzie$elm_units$Angle$inDegrees(latitude)
 			]));
 };
+var $author$project$SceneBuilderMap$mapLocation = function (point) {
+	var _v0 = point;
+	var longitude = _v0.longitude;
+	var latitude = _v0.latitude;
+	var altitude = _v0.altitude;
+	return _Utils_Tuple3(
+		$ianmackenzie$elm_geometry$Direction2d$toAngle(longitude),
+		latitude,
+		altitude);
+};
 var $author$project$DomainModel$sourceData = function (treeNode) {
 	return $author$project$DomainModel$asRecord(treeNode).sourceData;
 };
@@ -10982,23 +10992,14 @@ var $ianmackenzie$elm_geometry$BoundingBox3d$withDimensions = F2(
 			});
 	});
 var $author$project$SceneBuilderMap$renderMapJson = function (track) {
-	var mapLocation = function (point) {
-		var _v2 = point;
-		var longitude = _v2.longitude;
-		var latitude = _v2.latitude;
-		var altitude = _v2.altitude;
-		return _Utils_Tuple2(
-			$ianmackenzie$elm_geometry$Direction2d$toAngle(longitude),
-			latitude);
-	};
 	var renderFirstPoint = function (treeNode) {
 		return $author$project$DomainModel$lngLatPair(
-			mapLocation(
+			$author$project$SceneBuilderMap$mapLocation(
 				$author$project$DomainModel$sourceData(treeNode).a));
 	};
 	var makeVisibleSegment = function (node) {
 		return $author$project$DomainModel$lngLatPair(
-			mapLocation(
+			$author$project$SceneBuilderMap$mapLocation(
 				$author$project$DomainModel$sourceData(node).b));
 	};
 	var renderTree = F3(
@@ -11076,6 +11077,172 @@ var $author$project$SceneBuilderMap$renderMapJson = function (track) {
 				_Utils_Tuple2('geometry', geometry)
 			]));
 };
+var $author$project$DomainModel$earthPointFromIndex = F2(
+	function (index, treeNode) {
+		earthPointFromIndex:
+		while (true) {
+			if (treeNode.$ === 'Leaf') {
+				var info = treeNode.a;
+				return (index <= 0) ? info.startPoint : info.endPoint;
+			} else {
+				var info = treeNode.a;
+				if (_Utils_cmp(
+					index,
+					$author$project$DomainModel$skipCount(info.left)) < 0) {
+					var $temp$index = index,
+						$temp$treeNode = info.left;
+					index = $temp$index;
+					treeNode = $temp$treeNode;
+					continue earthPointFromIndex;
+				} else {
+					var $temp$index = index - $author$project$DomainModel$skipCount(info.left),
+						$temp$treeNode = info.right;
+					index = $temp$index;
+					treeNode = $temp$treeNode;
+					continue earthPointFromIndex;
+				}
+			}
+		}
+	});
+var $ianmackenzie$elm_geometry$BoundingBox3d$unsafeOffsetBy = F2(
+	function (amount, boundingBox) {
+		return $ianmackenzie$elm_geometry$Geometry$Types$BoundingBox3d(
+			{
+				maxX: A2(
+					$ianmackenzie$elm_units$Quantity$plus,
+					amount,
+					$ianmackenzie$elm_geometry$BoundingBox3d$maxX(boundingBox)),
+				maxY: A2(
+					$ianmackenzie$elm_units$Quantity$plus,
+					amount,
+					$ianmackenzie$elm_geometry$BoundingBox3d$maxY(boundingBox)),
+				maxZ: A2(
+					$ianmackenzie$elm_units$Quantity$plus,
+					amount,
+					$ianmackenzie$elm_geometry$BoundingBox3d$maxZ(boundingBox)),
+				minX: A2(
+					$ianmackenzie$elm_units$Quantity$minus,
+					amount,
+					$ianmackenzie$elm_geometry$BoundingBox3d$minX(boundingBox)),
+				minY: A2(
+					$ianmackenzie$elm_units$Quantity$minus,
+					amount,
+					$ianmackenzie$elm_geometry$BoundingBox3d$minY(boundingBox)),
+				minZ: A2(
+					$ianmackenzie$elm_units$Quantity$minus,
+					amount,
+					$ianmackenzie$elm_geometry$BoundingBox3d$minZ(boundingBox))
+			});
+	});
+var $ianmackenzie$elm_geometry$BoundingBox3d$expandBy = F2(
+	function (amount, boundingBox) {
+		return A2(
+			$ianmackenzie$elm_geometry$BoundingBox3d$unsafeOffsetBy,
+			$ianmackenzie$elm_units$Quantity$abs(amount),
+			boundingBox);
+	});
+var $author$project$SceneBuilderMap$latLonPair = function (_v0) {
+	var lon = _v0.a;
+	var lat = _v0.b;
+	var ele = _v0.c;
+	return A2(
+		$elm$json$Json$Encode$list,
+		$elm$json$Json$Encode$float,
+		_List_fromArray(
+			[
+				$ianmackenzie$elm_units$Angle$inDegrees(lon),
+				$ianmackenzie$elm_units$Angle$inDegrees(lat)
+			]));
+};
+var $ianmackenzie$elm_geometry$Point3d$xCoordinate = function (_v0) {
+	var p = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(p.x);
+};
+var $ianmackenzie$elm_geometry$Point3d$yCoordinate = function (_v0) {
+	var p = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(p.y);
+};
+var $ianmackenzie$elm_geometry$Point3d$zCoordinate = function (_v0) {
+	var p = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(p.z);
+};
+var $ianmackenzie$elm_geometry$BoundingBox3d$singleton = function (point) {
+	return $ianmackenzie$elm_geometry$Geometry$Types$BoundingBox3d(
+		{
+			maxX: $ianmackenzie$elm_geometry$Point3d$xCoordinate(point),
+			maxY: $ianmackenzie$elm_geometry$Point3d$yCoordinate(point),
+			maxZ: $ianmackenzie$elm_geometry$Point3d$zCoordinate(point),
+			minX: $ianmackenzie$elm_geometry$Point3d$xCoordinate(point),
+			minY: $ianmackenzie$elm_geometry$Point3d$yCoordinate(point),
+			minZ: $ianmackenzie$elm_geometry$Point3d$zCoordinate(point)
+		});
+};
+var $author$project$SceneBuilderMap$trackPointsToJSON = function (track) {
+	var point = function (lonLat) {
+		return $elm$json$Json$Encode$object(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'type',
+					$elm$json$Json$Encode$string('Point')),
+					_Utils_Tuple2(
+					'coordinates',
+					$author$project$SceneBuilderMap$latLonPair(lonLat))
+				]));
+	};
+	var makeFeature = function (tp) {
+		return $elm$json$Json$Encode$object(
+			_List_fromArray(
+				[
+					_Utils_Tuple2(
+					'type',
+					$elm$json$Json$Encode$string('Feature')),
+					_Utils_Tuple2(
+					'geometry',
+					point(tp))
+				]));
+	};
+	var fullRenderBoxSize = $ianmackenzie$elm_units$Length$kilometers(4);
+	var fullRenderBox = A2(
+		$ianmackenzie$elm_geometry$BoundingBox3d$expandBy,
+		fullRenderBoxSize,
+		$ianmackenzie$elm_geometry$BoundingBox3d$singleton(
+			A2($author$project$DomainModel$earthPointFromIndex, track.currentPosition, track.trackTree)));
+	var foldFn = F2(
+		function (road, output) {
+			var _v0 = $author$project$SceneBuilderMap$mapLocation(road.sourceData.a);
+			var lon = _v0.a;
+			var lat = _v0.b;
+			var alt = _v0.c;
+			return A2(
+				$elm$core$List$cons,
+				makeFeature(
+					_Utils_Tuple3(lon, lat, alt)),
+				output);
+		});
+	var depthFn = function (road) {
+		return A2($ianmackenzie$elm_geometry$BoundingBox3d$intersects, fullRenderBox, road.boundingBox) ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(10);
+	};
+	var features = A7(
+		$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
+		0,
+		$author$project$DomainModel$skipCount(track.trackTree),
+		depthFn,
+		0,
+		track.trackTree,
+		foldFn,
+		_List_Nil);
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'type',
+				$elm$json$Json$Encode$string('FeatureCollection')),
+				_Utils_Tuple2(
+				'features',
+				A2($elm$json$Json$Encode$list, $elm$core$Basics$identity, features))
+			]));
+};
 var $author$project$MapPortController$addTrackToMap = function (track) {
 	var _v0 = A2($author$project$DomainModel$gpxPointFromIndex, track.currentPosition, track.trackTree);
 	var longitude = _v0.longitude;
@@ -11106,7 +11273,9 @@ var $author$project$MapPortController$addTrackToMap = function (track) {
 					_Utils_Tuple2(
 					'data',
 					$author$project$SceneBuilderMap$renderMapJson(track)),
-					_Utils_Tuple2('points', $elm$json$Json$Encode$null)
+					_Utils_Tuple2(
+					'points',
+					$author$project$SceneBuilderMap$trackPointsToJSON(track))
 				])));
 };
 var $author$project$MapPortController$centreMapOnCurrent = function (track) {
@@ -11283,9 +11452,10 @@ var $author$project$SceneBuilderMap$lineToJSON = function (points) {
 			var latitude = _v0.latitude;
 			var altitude = _v0.altitude;
 			return $author$project$DomainModel$lngLatPair(
-				_Utils_Tuple2(
+				_Utils_Tuple3(
 					$ianmackenzie$elm_geometry$Direction2d$toAngle(longitude),
-					latitude));
+					latitude,
+					altitude));
 		},
 		points);
 	var geometry = $elm$json$Json$Encode$object(
@@ -11313,9 +11483,10 @@ var $author$project$SceneBuilderMap$lineToJSON = function (points) {
 var $author$project$SceneBuilderMap$pointsToJSON = function (points) {
 	var coordinates = function (pt) {
 		return $author$project$DomainModel$lngLatPair(
-			_Utils_Tuple2(
+			_Utils_Tuple3(
 				$ianmackenzie$elm_geometry$Direction2d$toAngle(pt.longitude),
-				pt.latitude));
+				pt.latitude,
+				$ianmackenzie$elm_units$Quantity$zero));
 	};
 	var point = function (tp) {
 		return $elm$json$Json$Encode$object(
@@ -12140,18 +12311,6 @@ var $author$project$Spherical$findBearingToTarget = F2(
 		var x = ($elm$core$Basics$cos(lat1) * $elm$core$Basics$sin(lat2)) - (($elm$core$Basics$sin(lat1) * $elm$core$Basics$cos(lat2)) * $elm$core$Basics$cos(lon2 - lon1));
 		return A2($elm$core$Basics$atan2, y, x);
 	});
-var $ianmackenzie$elm_geometry$Point3d$xCoordinate = function (_v0) {
-	var p = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(p.x);
-};
-var $ianmackenzie$elm_geometry$Point3d$yCoordinate = function (_v0) {
-	var p = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(p.y);
-};
-var $ianmackenzie$elm_geometry$Point3d$zCoordinate = function (_v0) {
-	var p = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(p.z);
-};
 var $ianmackenzie$elm_geometry$BoundingBox3d$from = F2(
 	function (firstPoint, secondPoint) {
 		var z2 = $ianmackenzie$elm_geometry$Point3d$zCoordinate(secondPoint);
@@ -12592,33 +12751,6 @@ var $author$project$Actions$PreviewCircle = {$: 'PreviewCircle'};
 var $author$project$Actions$ShowPreview = function (a) {
 	return {$: 'ShowPreview', a: a};
 };
-var $author$project$DomainModel$earthPointFromIndex = F2(
-	function (index, treeNode) {
-		earthPointFromIndex:
-		while (true) {
-			if (treeNode.$ === 'Leaf') {
-				var info = treeNode.a;
-				return (index <= 0) ? info.startPoint : info.endPoint;
-			} else {
-				var info = treeNode.a;
-				if (_Utils_cmp(
-					index,
-					$author$project$DomainModel$skipCount(info.left)) < 0) {
-					var $temp$index = index,
-						$temp$treeNode = info.left;
-					index = $temp$index;
-					treeNode = $temp$treeNode;
-					continue earthPointFromIndex;
-				} else {
-					var $temp$index = index - $author$project$DomainModel$skipCount(info.left),
-						$temp$treeNode = info.right;
-					index = $temp$index;
-					treeNode = $temp$treeNode;
-					continue earthPointFromIndex;
-				}
-			}
-		}
-	});
 var $author$project$DomainModel$getDualCoords = F2(
 	function (tree, index) {
 		return _Utils_Tuple2(
@@ -13310,17 +13442,6 @@ var $ianmackenzie$elm_3d_scene$Scene3d$UnoptimizedShaders$singlePointVertex = {
 	src: '\n        precision highp float;\n        \n        attribute lowp float dummyAttribute;\n        \n        uniform highp vec4 modelScale;\n        uniform highp mat4 modelMatrix;\n        uniform lowp float pointRadius;\n        uniform highp mat4 viewMatrix;\n        uniform highp mat4 projectionMatrix;\n        uniform highp mat4 sceneProperties;\n        uniform highp vec3 pointPosition;\n        \n        vec4 getWorldPosition(vec3 modelPosition, vec4 modelScale, mat4 modelMatrix) {\n            vec4 scaledPosition = vec4(modelScale.xyz * modelPosition, 1.0);\n            return modelMatrix * scaledPosition;\n        }\n        \n        void main () {\n            vec4 worldPosition = getWorldPosition(pointPosition, modelScale, modelMatrix);\n            gl_Position = projectionMatrix * (viewMatrix * worldPosition);\n            float supersampling = sceneProperties[3][0];\n            gl_PointSize = 2.0 * pointRadius * supersampling * dummyAttribute + 2.0;\n        }\n    ',
 	attributes: {dummyAttribute: 'dummyAttribute'},
 	uniforms: {modelMatrix: 'modelMatrix', modelScale: 'modelScale', pointPosition: 'pointPosition', pointRadius: 'pointRadius', projectionMatrix: 'projectionMatrix', sceneProperties: 'sceneProperties', viewMatrix: 'viewMatrix'}
-};
-var $ianmackenzie$elm_geometry$BoundingBox3d$singleton = function (point) {
-	return $ianmackenzie$elm_geometry$Geometry$Types$BoundingBox3d(
-		{
-			maxX: $ianmackenzie$elm_geometry$Point3d$xCoordinate(point),
-			maxY: $ianmackenzie$elm_geometry$Point3d$yCoordinate(point),
-			maxZ: $ianmackenzie$elm_geometry$Point3d$zCoordinate(point),
-			minX: $ianmackenzie$elm_geometry$Point3d$xCoordinate(point),
-			minY: $ianmackenzie$elm_geometry$Point3d$yCoordinate(point),
-			minZ: $ianmackenzie$elm_geometry$Point3d$zCoordinate(point)
-		});
 };
 var $ianmackenzie$elm_units$Pixels$toFloat = function (_v0) {
 	var numPixels = _v0.a;

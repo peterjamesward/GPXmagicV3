@@ -16,16 +16,14 @@ Time for a quick update video?
 
 ## Map
 
-Add non-draggable track point circles, in separate layer we can turn on and off
-to replace by draggables when requested.
-(Only leaf points can be draggable; perhaps distinguish by colour.)
-
 Map options tool? 
 - Map style (outdoor, satellite)
 - Draggable points
 > These could just be popups on the map view. (Layers, Cross-arrow, resp.)
 
-## Laziness
+- Map render to JSON should use the new universal traversal.
+
+## Laziness, optimisation
 
 Don't render profile if not visible.
 
@@ -35,6 +33,7 @@ Not all existing tools to move across; some rationalisation.
 2-way drag should correct for azimuth.
 
 ## Error messages
+
 Using an action DisplayMessage to show modal dialog from any tool. 
 Add a non-modal message error for info.
 
