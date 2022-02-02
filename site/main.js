@@ -14391,6 +14391,20 @@ var $author$project$DomainModel$distanceFromIndex = F2(
 			}
 		}
 	});
+var $author$project$DomainModel$getLastLeaf = function (someNode) {
+	getLastLeaf:
+	while (true) {
+		if (someNode.$ === 'Leaf') {
+			var leaf = someNode.a;
+			return leaf;
+		} else {
+			var node = someNode.a;
+			var $temp$someNode = node.right;
+			someNode = $temp$someNode;
+			continue getLastLeaf;
+		}
+	}
+};
 var $author$project$ColourPalette$gradientColourPastel = function (slope) {
 	return A3(
 		$avh4$elm_color$Color$hsl,
@@ -14475,6 +14489,17 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F2(
 					$elm$core$Maybe$Just(road),
 					A2($elm$core$List$cons, newEntry, outputs));
 			});
+		var finalLeaf = $author$project$DomainModel$getLastLeaf(track.trackTree);
+		var finalDatum = {
+			altitude: $ianmackenzie$elm_units$Length$inMeters(
+				$ianmackenzie$elm_geometry$Point3d$zCoordinate(finalLeaf.endPoint)),
+			colour: $author$project$ColourPalette$gradientColourPastel(
+				$author$project$DomainModel$gradientFromNode(
+					$author$project$DomainModel$Leaf(finalLeaf))),
+			distance: $ianmackenzie$elm_units$Length$inMeters(rightEdge),
+			gradient: $author$project$DomainModel$gradientFromNode(
+				$author$project$DomainModel$Leaf(finalLeaf))
+		};
 		var depthFn = function (road) {
 			return $elm$core$Maybe$Just(
 				$elm$core$Basics$round(10 + context.zoomLevel));
@@ -14498,7 +14523,9 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F2(
 		var result = _v1.c;
 		return _Utils_update(
 			context,
-			{profileData: result});
+			{
+				profileData: A2($elm$core$List$cons, finalDatum, result)
+			});
 	});
 var $author$project$PaneLayoutManager$renderPaneIfProfileVisible = F2(
 	function (pane, track) {

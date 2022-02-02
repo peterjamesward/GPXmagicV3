@@ -13,6 +13,8 @@ module DomainModel exposing
     , endPoint
     , extractPointsInRange
     , getDualCoords
+    , getFirstLeaf
+    , getLastLeaf
     , gpxFromPointWithReference
     , gpxPointFromIndex
     , gradientFromNode

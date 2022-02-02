@@ -27,11 +27,7 @@ Does each successive search take longer ?????
 
 ## Profile rendering
 
-Might be sensible to put more stuff in context to help painting.
-e.g. leftEdge, rightEdge so we can scale axes by distance not by index.
-
 Need:
-* Scales don't quite line up (? do we need x2 on distance for gradient ?)
 * Pan (moves under current point line, so changes current)
 * Click & double click both re-centre.
 * Differential colouring for gradient. (?? subtle bars under the altitude ??)

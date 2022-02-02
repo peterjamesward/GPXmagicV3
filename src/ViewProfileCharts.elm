@@ -543,9 +543,19 @@ renderProfileDataForCharts context track =
                 track.trackTree
                 foldFn
                 ( leftEdge, Nothing, [] )
+
+        finalLeaf =
+            getLastLeaf track.trackTree
+
+        finalDatum =
+            { distance = Length.inMeters rightEdge
+            , altitude = Length.inMeters <| Point3d.zCoordinate finalLeaf.endPoint
+            , gradient = gradientFromNode <| Leaf finalLeaf
+            , colour = gradientColourPastel (gradientFromNode <| Leaf finalLeaf)
+            }
     in
     --TODO: Use last section to add the final section's end point.
-    { context | profileData = result }
+    { context | profileData = finalDatum :: result }
 
 
 initialiseView :
