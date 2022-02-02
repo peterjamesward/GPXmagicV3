@@ -25,12 +25,6 @@ Does each successive search take longer ?????
 
 # WIP
 
-## Profile rendering
-
-Need:
-* Pan (moves under current point line, so changes current)
-* Click & double click both re-centre.
-
 ---
 
 Time for a quick update video?

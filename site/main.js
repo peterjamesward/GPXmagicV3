@@ -15967,21 +15967,22 @@ var $author$project$ViewProfileCharts$update = F5(
 			case 'ImageNoOp':
 				return _Utils_Tuple2(context, _List_Nil);
 			case 'ImageClick':
-				var zone = msg.a;
-				var event = msg.b;
-				return context.waitingForClickDelay ? _Utils_Tuple2(
-					context,
-					_List_fromArray(
-						[
-							$author$project$Actions$SetCurrent(
-							A4(
-								$author$project$ViewProfileCharts$detectHit,
-								event,
-								track,
-								areaForZone(zone),
-								context)),
-							$author$project$Actions$TrackHasChanged
-						])) : _Utils_Tuple2(context, _List_Nil);
+				var point = msg.a;
+				if (point.$ === 'Just') {
+					var isPoint = point.a;
+					return _Utils_Tuple2(
+						context,
+						_List_fromArray(
+							[
+								$author$project$Actions$SetCurrent(
+								A2(
+									$author$project$DomainModel$indexFromDistance,
+									$ianmackenzie$elm_units$Length$meters(isPoint.x),
+									track.trackTree))
+							]));
+				} else {
+					return _Utils_Tuple2(context, _List_Nil);
+				}
 			case 'ImageDoubleClick':
 				var zone = msg.a;
 				var event = msg.b;
@@ -16039,15 +16040,15 @@ var $author$project$ViewProfileCharts$update = F5(
 			case 'ImageDrag':
 				var zone = msg.a;
 				var event = msg.b;
-				var _v2 = event.offsetPos;
-				var dx = _v2.a;
-				var dy = _v2.b;
-				var _v3 = _Utils_Tuple2(context.dragAction, context.orbiting);
-				if ((_v3.a.$ === 'DragPan') && (_v3.b.$ === 'Just')) {
-					var _v4 = _v3.a;
-					var _v5 = _v3.b.a;
-					var startX = _v5.a;
-					var startY = _v5.b;
+				var _v3 = event.offsetPos;
+				var dx = _v3.a;
+				var dy = _v3.b;
+				var _v4 = _Utils_Tuple2(context.dragAction, context.orbiting);
+				if ((_v4.a.$ === 'DragPan') && (_v4.b.$ === 'Just')) {
+					var _v5 = _v4.a;
+					var _v6 = _v4.b.a;
+					var startX = _v6.a;
+					var startY = _v6.b;
 					var shiftVector = A3($ianmackenzie$elm_geometry$Vector3d$meters, (startX - dx) * context.metresPerPixel, 0, 0);
 					var newContext = _Utils_update(
 						context,
@@ -28410,6 +28411,9 @@ var $author$project$ViewMap$view = F3(
 					]));
 		}
 	});
+var $author$project$ViewProfileCharts$ImageClick = function (a) {
+	return {$: 'ImageClick', a: a};
+};
 var $author$project$ViewProfileCharts$ImageMouseWheel = function (a) {
 	return {$: 'ImageMouseWheel', a: a};
 };
@@ -30476,6 +30480,15 @@ var $terezka$elm_charts$Chart$Attributes$domain = F2(
 			config,
 			{domain: v});
 	});
+var $terezka$elm_charts$Internal$Events$Decoder = function (a) {
+	return {$: 'Decoder', a: a};
+};
+var $terezka$elm_charts$Internal$Events$getCoords = $terezka$elm_charts$Internal$Events$Decoder(
+	F3(
+		function (_v0, plane, searched) {
+			return searched;
+		}));
+var $terezka$elm_charts$Chart$Events$getCoords = $terezka$elm_charts$Internal$Events$getCoords;
 var $terezka$elm_charts$Internal$Svg$Gradient = function (a) {
 	return {$: 'Gradient', a: a};
 };
@@ -30563,6 +30576,40 @@ var $terezka$elm_charts$Chart$Attributes$margin = F2(
 		return _Utils_update(
 			config,
 			{margin: v});
+	});
+var $terezka$elm_charts$Internal$Events$map = F2(
+	function (f, _v0) {
+		var a = _v0.a;
+		return $terezka$elm_charts$Internal$Events$Decoder(
+			F3(
+				function (ps, s, p) {
+					return f(
+						A3(a, ps, s, p));
+				}));
+	});
+var $terezka$elm_charts$Chart$Events$map = $terezka$elm_charts$Internal$Events$map;
+var $terezka$elm_charts$Internal$Events$Event = function (a) {
+	return {$: 'Event', a: a};
+};
+var $terezka$elm_charts$Internal$Events$on = F3(
+	function (name, decoder, config) {
+		return _Utils_update(
+			config,
+			{
+				events: A2(
+					$elm$core$List$cons,
+					$terezka$elm_charts$Internal$Events$Event(
+						{decoder: decoder, name: name}),
+					config.events)
+			});
+	});
+var $terezka$elm_charts$Chart$Events$on = $terezka$elm_charts$Internal$Events$on;
+var $terezka$elm_charts$Chart$Events$onClick = F2(
+	function (onMsg, decoder) {
+		return A2(
+			$terezka$elm_charts$Chart$Events$on,
+			'click',
+			A2($terezka$elm_charts$Chart$Events$map, onMsg, decoder));
 	});
 var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$defaultOptions = {preventDefault: true, stopPropagation: false};
 var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$Event = F3(
@@ -34852,7 +34899,14 @@ var $author$project$ViewProfileCharts$view = F4(
 									$terezka$elm_charts$Chart$Attributes$margin(
 									{bottom: 30, left: 30, right: 20, top: 10}),
 									$terezka$elm_charts$Chart$Attributes$padding(
-									{bottom: 30, left: 20, right: 20, top: 10})
+									{bottom: 30, left: 20, right: 20, top: 10}),
+									A2(
+									$terezka$elm_charts$Chart$Events$onClick,
+									A2(
+										$elm$core$Basics$composeL,
+										A2($elm$core$Basics$composeL, msgWrapper, $author$project$ViewProfileCharts$ImageClick),
+										$elm$core$Maybe$Just),
+									$terezka$elm_charts$Chart$Events$getCoords)
 								]),
 							_List_fromArray(
 								[
@@ -34951,7 +35005,14 @@ var $author$project$ViewProfileCharts$view = F4(
 									$terezka$elm_charts$Chart$Attributes$margin(
 									{bottom: 30, left: 30, right: 20, top: 20}),
 									$terezka$elm_charts$Chart$Attributes$padding(
-									{bottom: 20, left: 20, right: 20, top: 20})
+									{bottom: 20, left: 20, right: 20, top: 20}),
+									A2(
+									$terezka$elm_charts$Chart$Events$onClick,
+									A2(
+										$elm$core$Basics$composeL,
+										A2($elm$core$Basics$composeL, msgWrapper, $author$project$ViewProfileCharts$ImageClick),
+										$elm$core$Maybe$Just),
+									$terezka$elm_charts$Chart$Events$getCoords)
 								]),
 							_List_fromArray(
 								[

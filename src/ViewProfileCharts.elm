@@ -5,6 +5,7 @@ import BoundingBox3d
 import Chart as C exposing (chart, interpolated, series, xAxis, xLabels, yAxis, yLabels)
 import Chart.Attributes as CA exposing (margin, withGrid)
 import Chart.Events as CE
+import Chart.Item as CI
 import Color
 import ColourPalette exposing (gradientColourPastel, gradientHue)
 import DomainModel exposing (..)
@@ -42,7 +43,7 @@ type Msg
     | ImageDrag ClickZone Mouse.Event
     | ImageRelease ClickZone Mouse.Event
     | ImageNoOp
-    | ImageClick ClickZone Mouse.Event
+    | ImageClick (Maybe CE.Point)
     | ImageDoubleClick ClickZone Mouse.Event
     | ImageZoomIn
     | ImageZoomOut
@@ -186,6 +187,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                     , CA.domain [ CA.likeData ]
                     , CA.margin { top = 10, bottom = 30, left = 30, right = 20 }
                     , CA.padding { top = 10, bottom = 30, left = 20, right = 20 }
+                    , CE.onClick (msgWrapper << ImageClick << Just) CE.getCoords
                     ]
                     [ C.xAxis []
                     , C.xTicks []
@@ -236,6 +238,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                     , CA.domain [ CA.likeData ]
                     , CA.margin { top = 20, bottom = 30, left = 30, right = 20 }
                     , CA.padding { top = 20, bottom = 20, left = 20, right = 20 }
+                    , CE.onClick (msgWrapper << ImageClick << Just) CE.getCoords
                     ]
                     [ C.xAxis []
                     , C.xTicks []
@@ -366,17 +369,17 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
         ImageNoOp ->
             ( context, [] )
 
-        ImageClick zone event ->
-            -- Click moves pointer but does not re-centre view. (Double click will.)
-            if context.waitingForClickDelay then
-                ( context
-                , [ SetCurrent <| detectHit event track (areaForZone zone) context
-                  , TrackHasChanged
-                  ]
-                )
+        ImageClick point ->
+            case point of
+                Just isPoint ->
+                    ( context
+                    , [ Actions.SetCurrent <|
+                            indexFromDistance (Length.meters isPoint.x) track.trackTree
+                      ]
+                    )
 
-            else
-                ( context, [] )
+                Nothing ->
+                    ( context, [] )
 
         ImageDoubleClick zone event ->
             let
