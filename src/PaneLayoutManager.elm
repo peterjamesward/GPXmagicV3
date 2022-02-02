@@ -622,7 +622,7 @@ viewPanes msgWrapper mTrack ( w, h ) options =
         viewPaneZeroWithMap pane =
             -- The Map DIV must be constructed once only, even before we have a Track,
             -- or the map gets upset. So we use CSS to show and hide these elements.
-            column [ width fill, alignTop, centerX ]
+            column [ width fill, centerX ]
                 [ viewModeChoices msgWrapper pane
                 , conditionallyVisible (pane.activeView /= ViewMap) <|
                     showNonMapViews pane

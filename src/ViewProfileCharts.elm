@@ -129,9 +129,6 @@ view :
     -> Element msg
 view context ( givenWidth, givenHeight ) track msgWrapper =
     let
-        dragging =
-            context.dragAction
-
         currentPointAltitude =
             earthPointFromIndex track.currentPosition track.trackTree
                 |> Point3d.zCoordinate
@@ -175,10 +172,8 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
     in
     column []
         [ el
-            [ width <| px 1000
-            , height <| px 300
-            , padding 30
-            , spacing 0
+            [ width <| px <| round altitudeWidth
+            , height <| px <| round altitudeHeight
             , htmlAttribute <| Wheel.onWheel (\event -> msgWrapper (ImageMouseWheel event.deltaY))
             ]
           <|
@@ -227,9 +222,8 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                         context.profileData
                     ]
         , el
-            [ width <| px 1000
-            , height <| px 300
-            , padding 30
+            [ width <| px <| round gradientWidth
+            , height <| px <| round gradientHeight
             , htmlAttribute <| Wheel.onWheel (\event -> msgWrapper (ImageMouseWheel event.deltaY))
             ]
           <|
@@ -517,9 +511,9 @@ renderProfileDataForCharts context track =
 
         foldFn :
             RoadSection
-            -> ( Length.Length, Maybe RoadSection, List ProfileDatum )
-            -> ( Length.Length, Maybe RoadSection, List ProfileDatum )
-        foldFn road ( nextDistance, prevSectionForUseAtEnd, outputs ) =
+            -> ( Length.Length, List ProfileDatum )
+            -> ( Length.Length, List ProfileDatum )
+        foldFn road ( nextDistance, outputs ) =
             let
                 newEntry : ProfileDatum
                 newEntry =
@@ -530,11 +524,10 @@ renderProfileDataForCharts context track =
                     }
             in
             ( nextDistance |> Quantity.plus road.trueLength
-            , Just road
             , newEntry :: outputs
             )
 
-        ( lastDistance, lastSection, result ) =
+        ( _, result ) =
             DomainModel.traverseTreeBetweenLimitsToDepth
                 leftIndex
                 rightIndex
@@ -542,7 +535,7 @@ renderProfileDataForCharts context track =
                 0
                 track.trackTree
                 foldFn
-                ( leftEdge, Nothing, [] )
+                ( leftEdge, [] )
 
         finalLeaf =
             getLastLeaf track.trackTree

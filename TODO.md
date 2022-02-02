@@ -30,10 +30,6 @@ Does each successive search take longer ?????
 Need:
 * Pan (moves under current point line, so changes current)
 * Click & double click both re-centre.
-* Differential colouring for gradient. (?? subtle bars under the altitude ??)
-* Add in the last point to the rendering after the fold
-* Layout needs work
-* Resizing
 
 ---
 

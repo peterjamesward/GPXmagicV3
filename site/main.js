@@ -14473,8 +14473,7 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F2(
 		var foldFn = F2(
 			function (road, _v2) {
 				var nextDistance = _v2.a;
-				var prevSectionForUseAtEnd = _v2.b;
-				var outputs = _v2.c;
+				var outputs = _v2.b;
 				var newEntry = {
 					altitude: $ianmackenzie$elm_units$Length$inMeters(
 						$ianmackenzie$elm_geometry$Point3d$zCoordinate(road.startPoint)),
@@ -14484,9 +14483,8 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F2(
 					distance: $ianmackenzie$elm_units$Length$inMeters(nextDistance),
 					gradient: (road.gradientAtStart * 0.5) + (road.gradientAtEnd * 0.5)
 				};
-				return _Utils_Tuple3(
+				return _Utils_Tuple2(
 					A2($ianmackenzie$elm_units$Quantity$plus, road.trueLength, nextDistance),
-					$elm$core$Maybe$Just(road),
 					A2($elm$core$List$cons, newEntry, outputs));
 			});
 		var finalLeaf = $author$project$DomainModel$getLastLeaf(track.trackTree);
@@ -14517,10 +14515,8 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F2(
 			0,
 			track.trackTree,
 			foldFn,
-			_Utils_Tuple3(leftEdge, $elm$core$Maybe$Nothing, _List_Nil));
-		var lastDistance = _v1.a;
-		var lastSection = _v1.b;
-		var result = _v1.c;
+			_Utils_Tuple2(leftEdge, _List_Nil));
+		var result = _v1.b;
 		return _Utils_update(
 			context,
 			{
@@ -28373,8 +28369,6 @@ var $author$project$ViewMap$view = F3(
 				$mdgriffith$elm_ui$Element$row,
 				_List_fromArray(
 					[
-						$mdgriffith$elm_ui$Element$spacing(0),
-						$mdgriffith$elm_ui$Element$padding(0),
 						$mdgriffith$elm_ui$Element$inFront(
 						handyMapControls(context))
 					]),
@@ -34787,7 +34781,6 @@ var $author$project$ViewProfileCharts$view = F4(
 	function (context, _v0, track, msgWrapper) {
 		var givenWidth = _v0.a;
 		var givenHeight = _v0.b;
-		var dragging = context.dragAction;
 		var currentPointGradient = $author$project$DomainModel$gradientFromNode(
 			A2($author$project$DomainModel$leafFromIndex, track.currentPosition, track.trackTree));
 		var currentPointDistance = $ianmackenzie$elm_units$Length$inMeters(
@@ -34826,11 +34819,11 @@ var $author$project$ViewProfileCharts$view = F4(
 					_List_fromArray(
 						[
 							$mdgriffith$elm_ui$Element$width(
-							$mdgriffith$elm_ui$Element$px(1000)),
+							$mdgriffith$elm_ui$Element$px(
+								$elm$core$Basics$round(altitudeWidth))),
 							$mdgriffith$elm_ui$Element$height(
-							$mdgriffith$elm_ui$Element$px(300)),
-							$mdgriffith$elm_ui$Element$padding(30),
-							$mdgriffith$elm_ui$Element$spacing(0),
+							$mdgriffith$elm_ui$Element$px(
+								$elm$core$Basics$round(altitudeHeight))),
 							$mdgriffith$elm_ui$Element$htmlAttribute(
 							$mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWheel(
 								function (event) {
@@ -34925,10 +34918,11 @@ var $author$project$ViewProfileCharts$view = F4(
 					_List_fromArray(
 						[
 							$mdgriffith$elm_ui$Element$width(
-							$mdgriffith$elm_ui$Element$px(1000)),
+							$mdgriffith$elm_ui$Element$px(
+								$elm$core$Basics$round(gradientWidth))),
 							$mdgriffith$elm_ui$Element$height(
-							$mdgriffith$elm_ui$Element$px(300)),
-							$mdgriffith$elm_ui$Element$padding(30),
+							$mdgriffith$elm_ui$Element$px(
+								$elm$core$Basics$round(gradientHeight))),
 							$mdgriffith$elm_ui$Element$htmlAttribute(
 							$mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWheel(
 								function (event) {
@@ -36986,7 +36980,6 @@ var $author$project$PaneLayoutManager$viewPanes = F4(
 				_List_fromArray(
 					[
 						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-						$mdgriffith$elm_ui$Element$alignTop,
 						$mdgriffith$elm_ui$Element$centerX
 					]),
 				_List_fromArray(

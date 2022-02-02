@@ -89,10 +89,7 @@ view ( viewWidth, viewHeight ) mContext msgWrapper =
     case mContext of
         Just context ->
             row
-                [ spacing 0
-                , padding 0
-                , inFront <| handyMapControls context
-                ]
+                [ inFront <| handyMapControls context ]
                 [ el
                     [ width <| px <| inPixels viewWidth
                     , height <| px <| inPixels viewHeight
