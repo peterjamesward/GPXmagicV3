@@ -267,9 +267,11 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                                 , CA.color CA.red
                                 ]
                             ]
-                    , C.bars
-                        [ CA.x1 .distance ]
-                        [ C.bar .gradient [] ]
+                    , series .distance
+                        [ interpolated .gradient
+                            [ CA.width 2, CA.stepped ]
+                            []
+                        ]
                         context.profileData
                     ]
         ]
