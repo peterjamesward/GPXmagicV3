@@ -12,9 +12,6 @@ DEBT: Map sends more click messages each time we click. They are debounced but, 
 
 # BACKLOG, roughly in order ...
 
-**DEBT**: more efficient replaceRange/rebuild.
-> N.B. "Take N points" from either end === "take N-1 leaves", except when N = 1, when just the extreme point.
-
 ## Tools
 
 2. Centroid average

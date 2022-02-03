@@ -53,22 +53,22 @@ type alias GPXSource =
     -- Being a raw line of data from GPX file.
     { longitude : Direction2d LocalCoords
     , latitude : Angle
-    , altitude : Length.Length
+    , altitude : Quantity Float Meters
     }
 
 
 type alias EarthPoint =
-    Point3d Length.Meters LocalCoords
+    Point3d Meters LocalCoords
 
 
 type alias TrackPoint =
     -- A type designed for output, not for computation!
-    { distanceFromStart : Length.Length
+    { distanceFromStart : Quantity Float Meters
     , longitude : Angle
     , latitude : Angle
-    , altitude : Length.Length
+    , altitude : Quantity Float Meters
     , gradient : Float
-    , trueLength : Length.Length
+    , trueLength : Quantity Float Meters
     }
 
 
@@ -83,7 +83,7 @@ type alias RoadSection =
     -- For rapid location of points using non-map views...
     , boundingBox : BoundingBox3d Meters LocalCoords
     , sphere : Sphere3d Meters LocalCoords
-    , trueLength : Length.Length
+    , trueLength : Quantity Float Meters
     , skipCount : Int
 
     -- For efficient detection of map clicks...
@@ -92,10 +92,10 @@ type alias RoadSection =
     , westwardExtent : Angle
 
     -- Basic route statistics...
-    , altitudeGained : Length.Length
-    , altitudeLost : Length.Length
-    , distanceClimbing : Length.Length
-    , distanceDescending : Length.Length
+    , altitudeGained : Quantity Float Meters
+    , altitudeLost : Quantity Float Meters
+    , distanceClimbing : Quantity Float Meters
+    , distanceDescending : Quantity Float Meters
     , steepestClimb : Float
 
     -- Bunch of stuff we need in the tree to be able to locate problem points efficiently...
@@ -176,7 +176,7 @@ rotationAwayFrom longitude treeNode =
         (Quantity.abs <| Direction2d.angleFrom longitude nodeWest)
 
 
-trueLength : PeteTree -> Length
+trueLength : PeteTree -> Quantity Float Meters
 trueLength treeNode =
     treeNode |> asRecord |> .trueLength
 
@@ -191,12 +191,12 @@ skipCount treeNode =
             node.nodeContent.skipCount
 
 
-boundingBox : PeteTree -> BoundingBox3d Length.Meters LocalCoords
+boundingBox : PeteTree -> BoundingBox3d Meters LocalCoords
 boundingBox treeNode =
     treeNode |> asRecord |> .boundingBox
 
 
-sphere : PeteTree -> Sphere3d Length.Meters LocalCoords
+sphere : PeteTree -> Sphere3d Meters LocalCoords
 sphere treeNode =
     treeNode |> asRecord |> .sphere
 
@@ -238,7 +238,7 @@ gpxFromPointWithReference : GPXSource -> EarthPoint -> GPXSource
 gpxFromPointWithReference reference point =
     let
         ( x, y, z ) =
-            Point3d.toTuple inMeters point
+            Point3d.toTuple Length.inMeters point
 
         longitude =
             x
