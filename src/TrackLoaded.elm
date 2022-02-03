@@ -96,7 +96,6 @@ undoLastAction track =
                         track.referenceLonLat
                         undo.originalPoints
                         track.trackTree
-                        |> DomainModel.rebuildTree track.referenceLonLat
             in
             case newTree of
                 Just isTree ->

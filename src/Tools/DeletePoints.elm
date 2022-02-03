@@ -159,7 +159,6 @@ deleteSinglePoint fromStart fromEnd track =
                 track.referenceLonLat
                 []
                 track.trackTree
-                |> DomainModel.rebuildTree track.referenceLonLat
 
         oldPoints =
             [ DomainModel.gpxPointFromIndex track.currentPosition track.trackTree ]

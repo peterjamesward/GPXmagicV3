@@ -456,6 +456,25 @@ replaceRange :
     -> PeteTree
     -> Maybe PeteTree
 replaceRange fromStart fromEnd withReferencePoint newPoints currentTree =
+    let
+        leadIn =
+            List.reverse <|
+                getFirstNPointsInReverseOrder fromStart currentTree
+
+        leadOut =
+            getLastNPointsInNaturalOrder fromEnd currentTree
+    in
+    (leadIn ++ newPoints ++ leadOut) |> treeFromSourcesWithExistingReference withReferencePoint
+
+
+replaceRange0 :
+    Int
+    -> Int
+    -> GPXSource
+    -> List GPXSource
+    -> PeteTree
+    -> Maybe PeteTree
+replaceRange0 fromStart fromEnd withReferencePoint newPoints currentTree =
     {--
         This is our key edit function for external use.
 
@@ -1191,6 +1210,72 @@ getAllGPXPointsInNaturalOrder treeNode =
             foldOverRouteRL internalFoldFn treeNode []
     in
     gpxPointFromIndex 0 treeNode :: endPoints
+
+
+getFirstNPointsInReverseOrder : Int -> PeteTree -> List GPXSource
+getFirstNPointsInReverseOrder howMany treeNode =
+    let
+        helper : PeteTree -> ( Int, List GPXSource ) -> ( Int, List GPXSource )
+        helper thisNode ( stillNeeded, got ) =
+            if stillNeeded <= 0 then
+                ( 0, got )
+
+            else
+                case thisNode of
+                    Leaf leaf ->
+                        if stillNeeded == 2 then
+                            -- We end it here
+                            ( 0
+                            , Tuple.second leaf.sourceData
+                                :: Tuple.first leaf.sourceData
+                                :: got
+                            )
+
+                        else
+                            ( 0, Tuple.first leaf.sourceData :: got )
+
+                    Node node ->
+                        let
+                            ( stillNeededAfterLeft, gotWithLeft ) =
+                                helper node.left ( stillNeeded, got )
+                        in
+                        helper node.right ( stillNeededAfterLeft, gotWithLeft )
+    in
+    helper treeNode ( howMany, [] )
+        |> Tuple.second
+
+
+getLastNPointsInNaturalOrder : Int -> PeteTree -> List GPXSource
+getLastNPointsInNaturalOrder howMany treeNode =
+    let
+        helper : PeteTree -> ( Int, List GPXSource ) -> ( Int, List GPXSource )
+        helper thisNode ( stillNeeded, got ) =
+            if stillNeeded <= 0 then
+                ( 0, got )
+
+            else
+                case thisNode of
+                    Leaf leaf ->
+                        if stillNeeded == 2 then
+                            -- We end it here
+                            ( 0
+                            , Tuple.first leaf.sourceData
+                                :: Tuple.second leaf.sourceData
+                                :: got
+                            )
+
+                        else
+                            ( 0, Tuple.second leaf.sourceData :: got )
+
+                    Node node ->
+                        let
+                            ( stillNeededAfterRight, gotWithRight ) =
+                                helper node.right ( stillNeeded, got )
+                        in
+                        helper node.left ( stillNeededAfterRight, gotWithRight )
+    in
+    helper treeNode ( howMany, [] )
+        |> Tuple.second
 
 
 treeToRoadSectionList : PeteTree -> List RoadSection

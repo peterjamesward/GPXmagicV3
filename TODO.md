@@ -3,7 +3,6 @@
 
 BUG: Dubious steepest gradient on some routes. (May have to wait until we have that tool!)
 BUG: Map sends more click messages each time we click. They are debounced but, still.
-BUG: Undo delete of 100,000 points and it doesn't render well. Suspect tree unbalanced.
 
 # WIP
 
