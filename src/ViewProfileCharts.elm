@@ -514,9 +514,9 @@ renderProfileDataForCharts context track =
 
         foldFn :
             RoadSection
-            -> ( Length.Length, List ProfileDatum )
-            -> ( Length.Length, List ProfileDatum )
-        foldFn road ( nextDistance, outputs ) =
+            -> ( Length.Length, List ProfileDatum, Maybe RoadSection )
+            -> ( Length.Length, List ProfileDatum, Maybe RoadSection )
+        foldFn road ( nextDistance, outputs, _ ) =
             let
                 newEntry : ProfileDatum
                 newEntry =
@@ -528,9 +528,10 @@ renderProfileDataForCharts context track =
             in
             ( nextDistance |> Quantity.plus road.trueLength
             , newEntry :: outputs
+            , Just road
             )
 
-        ( _, result ) =
+        ( _, result, final ) =
             DomainModel.traverseTreeBetweenLimitsToDepth
                 leftIndex
                 rightIndex
@@ -538,17 +539,24 @@ renderProfileDataForCharts context track =
                 0
                 track.trackTree
                 foldFn
-                ( leftEdge, [] )
-
-        finalLeaf =
-            getLastLeaf track.trackTree
+                ( leftEdge, [], Nothing )
 
         finalDatum =
-            { distance = Length.inMeters rightEdge
-            , altitude = Length.inMeters <| Point3d.zCoordinate finalLeaf.endPoint
-            , gradient = gradientFromNode <| Leaf finalLeaf
-            , colour = gradientColourPastel (gradientFromNode <| Leaf finalLeaf)
-            }
+            case final of
+                Just finalLeaf ->
+                    { distance = Length.inMeters rightEdge
+                    , altitude = Length.inMeters <| Point3d.zCoordinate finalLeaf.endPoint
+                    , gradient = gradientFromNode <| Leaf finalLeaf
+                    , colour = gradientColourPastel (gradientFromNode <| Leaf finalLeaf)
+                    }
+
+                Nothing ->
+                    -- Can't happen
+                    { distance = Length.inMeters rightEdge
+                    , altitude = 0.0
+                    , gradient = 0.0
+                    , colour = Color.black
+                    }
     in
     --TODO: Use last section to add the final section's end point.
     { context | profileData = finalDatum :: result }

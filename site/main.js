@@ -14514,20 +14514,6 @@ var $author$project$DomainModel$distanceFromIndex = F2(
 			}
 		}
 	});
-var $author$project$DomainModel$getLastLeaf = function (someNode) {
-	getLastLeaf:
-	while (true) {
-		if (someNode.$ === 'Leaf') {
-			var leaf = someNode.a;
-			return leaf;
-		} else {
-			var node = someNode.a;
-			var $temp$someNode = node.right;
-			someNode = $temp$someNode;
-			continue getLastLeaf;
-		}
-	}
-};
 var $author$project$ColourPalette$gradientColourPastel = function (slope) {
 	return A3(
 		$avh4$elm_color$Color$hsl,
@@ -14594,9 +14580,9 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F2(
 				pointOfInterest));
 		var rightEdge = A2($ianmackenzie$elm_units$Quantity$plus, trackLengthInView, leftEdge);
 		var foldFn = F2(
-			function (road, _v2) {
-				var nextDistance = _v2.a;
-				var outputs = _v2.b;
+			function (road, _v3) {
+				var nextDistance = _v3.a;
+				var outputs = _v3.b;
 				var newEntry = {
 					altitude: $ianmackenzie$elm_units$Length$inMeters(
 						$ianmackenzie$elm_geometry$Point3d$zCoordinate(road.startPoint)),
@@ -14606,21 +14592,11 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F2(
 					distance: $ianmackenzie$elm_units$Length$inMeters(nextDistance),
 					gradient: (road.gradientAtStart * 0.5) + (road.gradientAtEnd * 0.5)
 				};
-				return _Utils_Tuple2(
+				return _Utils_Tuple3(
 					A2($ianmackenzie$elm_units$Quantity$plus, road.trueLength, nextDistance),
-					A2($elm$core$List$cons, newEntry, outputs));
+					A2($elm$core$List$cons, newEntry, outputs),
+					$elm$core$Maybe$Just(road));
 			});
-		var finalLeaf = $author$project$DomainModel$getLastLeaf(track.trackTree);
-		var finalDatum = {
-			altitude: $ianmackenzie$elm_units$Length$inMeters(
-				$ianmackenzie$elm_geometry$Point3d$zCoordinate(finalLeaf.endPoint)),
-			colour: $author$project$ColourPalette$gradientColourPastel(
-				$author$project$DomainModel$gradientFromNode(
-					$author$project$DomainModel$Leaf(finalLeaf))),
-			distance: $ianmackenzie$elm_units$Length$inMeters(rightEdge),
-			gradient: $author$project$DomainModel$gradientFromNode(
-				$author$project$DomainModel$Leaf(finalLeaf))
-		};
 		var depthFn = function (road) {
 			return $elm$core$Maybe$Just(
 				$elm$core$Basics$round(10 + context.zoomLevel));
@@ -14638,8 +14614,31 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F2(
 			0,
 			track.trackTree,
 			foldFn,
-			_Utils_Tuple2(leftEdge, _List_Nil));
+			_Utils_Tuple3(leftEdge, _List_Nil, $elm$core$Maybe$Nothing));
 		var result = _v1.b;
+		var _final = _v1.c;
+		var finalDatum = function () {
+			if (_final.$ === 'Just') {
+				var finalLeaf = _final.a;
+				return {
+					altitude: $ianmackenzie$elm_units$Length$inMeters(
+						$ianmackenzie$elm_geometry$Point3d$zCoordinate(finalLeaf.endPoint)),
+					colour: $author$project$ColourPalette$gradientColourPastel(
+						$author$project$DomainModel$gradientFromNode(
+							$author$project$DomainModel$Leaf(finalLeaf))),
+					distance: $ianmackenzie$elm_units$Length$inMeters(rightEdge),
+					gradient: $author$project$DomainModel$gradientFromNode(
+						$author$project$DomainModel$Leaf(finalLeaf))
+				};
+			} else {
+				return {
+					altitude: 0.0,
+					colour: $avh4$elm_color$Color$black,
+					distance: $ianmackenzie$elm_units$Length$inMeters(rightEdge),
+					gradient: 0.0
+				};
+			}
+		}();
 		return _Utils_update(
 			context,
 			{
