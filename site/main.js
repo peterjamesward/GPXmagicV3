@@ -12606,13 +12606,53 @@ var $author$project$Tools$DeletePoints$deletePointsBetween = F3(
 			newTree,
 			A2($elm$core$List$map, $elm$core$Tuple$second, oldPoints));
 	});
+var $author$project$DomainModel$foldOverRouteRL = F3(
+	function (foldFn, treeNode, accum) {
+		if (treeNode.$ === 'Leaf') {
+			var leaf = treeNode.a;
+			return A2(foldFn, leaf, accum);
+		} else {
+			var node = treeNode.a;
+			return A3(
+				$author$project$DomainModel$foldOverRouteRL,
+				foldFn,
+				node.left,
+				A3($author$project$DomainModel$foldOverRouteRL, foldFn, node.right, accum));
+		}
+	});
+var $author$project$DomainModel$getAllGPXPointsInNaturalOrder = function (treeNode) {
+	var internalFoldFn = F2(
+		function (road, accum) {
+			return A2($elm$core$List$cons, road.sourceData.b, accum);
+		});
+	var endPoints = A3($author$project$DomainModel$foldOverRouteRL, internalFoldFn, treeNode, _List_Nil);
+	return A2(
+		$elm$core$List$cons,
+		A2($author$project$DomainModel$gpxPointFromIndex, 0, treeNode),
+		endPoints);
+};
+var $author$project$DomainModel$rebuildTree = F2(
+	function (referencePoint, treeNode) {
+		if (treeNode.$ === 'Just') {
+			var something = treeNode.a;
+			return A2(
+				$author$project$DomainModel$treeFromSourcesWithExistingReference,
+				referencePoint,
+				$author$project$DomainModel$getAllGPXPointsInNaturalOrder(something));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
 var $author$project$Tools$DeletePoints$deleteSinglePoint = F3(
 	function (fromStart, fromEnd, track) {
 		var oldPoints = _List_fromArray(
 			[
 				A2($author$project$DomainModel$gpxPointFromIndex, track.currentPosition, track.trackTree)
 			]);
-		var newTree = A5($author$project$DomainModel$replaceRange, fromStart, fromEnd, track.referenceLonLat, _List_Nil, track.trackTree);
+		var newTree = A2(
+			$author$project$DomainModel$rebuildTree,
+			track.referenceLonLat,
+			A5($author$project$DomainModel$replaceRange, fromStart, fromEnd, track.referenceLonLat, _List_Nil, track.trackTree));
 		return _Utils_Tuple2(newTree, oldPoints);
 	});
 var $author$project$ToolsController$encodeColour = function (colour) {
@@ -15181,7 +15221,10 @@ var $author$project$TrackLoaded$undoLastAction = function (track) {
 	if (_v0.b) {
 		var undo = _v0.a;
 		var moreUndos = _v0.b;
-		var newTree = A5($author$project$DomainModel$replaceRange, undo.fromStart, undo.fromEnd, track.referenceLonLat, undo.originalPoints, track.trackTree);
+		var newTree = A2(
+			$author$project$DomainModel$rebuildTree,
+			track.referenceLonLat,
+			A5($author$project$DomainModel$replaceRange, undo.fromStart, undo.fromEnd, track.referenceLonLat, undo.originalPoints, track.trackTree));
 		if (newTree.$ === 'Just') {
 			var isTree = newTree.a;
 			return _Utils_update(

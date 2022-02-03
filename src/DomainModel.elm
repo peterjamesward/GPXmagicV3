@@ -12,6 +12,7 @@ module DomainModel exposing
     , effectiveLatitude
     , endPoint
     , extractPointsInRange
+    , getAllGPXPointsInNaturalOrder
     , getDualCoords
     , getFirstLeaf
     , getLastLeaf
@@ -23,6 +24,7 @@ module DomainModel exposing
     , lngLatPair
     , nearestToLonLat
     , nearestToRay
+    , rebuildTree
     , replaceRange
     , skipCount
     , sourceData
@@ -432,6 +434,18 @@ combineInfo info1 info2 =
                         (info2 |> asRecord |> .directionAtStart)
                 ]
     }
+
+
+rebuildTree : GPXSource -> Maybe PeteTree -> Maybe PeteTree
+rebuildTree referencePoint treeNode =
+    case treeNode of
+        Just something ->
+            something
+                |> getAllGPXPointsInNaturalOrder
+                |> treeFromSourcesWithExistingReference referencePoint
+
+        Nothing ->
+            Nothing
 
 
 replaceRange :
@@ -1151,6 +1165,34 @@ foldOverRoute foldFn treeNode startValues =
         startValues
 
 
+foldOverRouteRL : (RoadSection -> a -> a) -> PeteTree -> a -> a
+foldOverRouteRL foldFn treeNode accum =
+    -- A right to left walk allow the fold fn to cons and not need reversing.
+    case treeNode of
+        Leaf leaf ->
+            foldFn leaf accum
+
+        Node node ->
+            accum
+                |> foldOverRouteRL foldFn node.right
+                |> foldOverRouteRL foldFn node.left
+
+
+getAllGPXPointsInNaturalOrder : PeteTree -> List GPXSource
+getAllGPXPointsInNaturalOrder treeNode =
+    -- A right-to-left traversal that is POINT focused.
+    -- Really handy for output or for tree rebuilding.
+    let
+        internalFoldFn : RoadSection -> List GPXSource -> List GPXSource
+        internalFoldFn road accum =
+            Tuple.second road.sourceData :: accum
+
+        endPoints =
+            foldOverRouteRL internalFoldFn treeNode []
+    in
+    gpxPointFromIndex 0 treeNode :: endPoints
+
+
 treeToRoadSectionList : PeteTree -> List RoadSection
 treeToRoadSectionList someNode =
     -- By way of example use of all-purpose traversal function,
@@ -1244,6 +1286,7 @@ traverseTreeBetweenLimitsToDepth startingAt endingAt depthFunction currentDepth 
 
 trackPointsForOutput : PeteTree -> List TrackPoint
 trackPointsForOutput tree =
+    --TODO: This seems to ignore the final point
     let
         foldFn : RoadSection -> List TrackPoint -> List TrackPoint
         foldFn node accum =
