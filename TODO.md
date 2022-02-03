@@ -2,17 +2,21 @@
 # BUGS (for an 'easy' day)
 
 BUG: Dubious steepest gradient on some routes. (May have to wait until we have that tool!)
-BUG: Map sends more click messages each time we click. They are debounced but, still.
+DEBT: Map sends more click messages each time we click. They are debounced but, still, why??
 
 # WIP
+
+1. Bezier x 2  ++ needs "Track is a loop" variant.
 
 ---
 
 # BACKLOG, roughly in order ...
 
+**DEBT**: more efficient replaceRange/rebuild.
+> N.B. "Take N points" from either end === "take N-1 leaves", except when N = 1, when just the extreme point.
+
 ## Tools
 
-1. Bezier x 2
 2. Centroid average
 3. Curve Former (2-way drag should correct for azimuth)
 4. Classic bend smoother

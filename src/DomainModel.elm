@@ -459,8 +459,56 @@ replaceRange fromStart fromEnd withReferencePoint newPoints currentTree =
     --TODO: Rather than fanny around internally only to rebuild, just rebuild!
     --Sadly, I seem unable to correctly write this, although I think I had
     --simply forgotten that this was recursing internally. That would explain a lot.
-    replaceRangeInternal fromStart fromEnd withReferencePoint newPoints currentTree
-        |> rebuildTree withReferencePoint
+    let
+        leftBit =
+            takePointsFromLeft fromStart currentTree
+
+        rightBit =
+            takePointsFromRight fromEnd currentTree
+    in
+    (leftBit ++ newPoints ++ rightBit)
+        |> treeFromSourcesWithExistingReference withReferencePoint
+
+
+
+--replaceRangeInternal fromStart fromEnd withReferencePoint newPoints currentTree
+--    |> rebuildTree withReferencePoint
+
+
+takePointsFromLeft : Int -> PeteTree -> List GPXSource
+takePointsFromLeft numPoints tree =
+    if numPoints == 0 then
+        []
+
+    else if numPoints == 1 then
+        [ gpxPointFromIndex 0 tree ]
+
+    else
+        -- We need leaves
+        let
+            leftLeaves =
+                takeFromLeft (numPoints - 1) tree
+        in
+        Maybe.map getAllGPXPointsInNaturalOrder leftLeaves
+            |> Maybe.withDefault []
+
+
+takePointsFromRight : Int -> PeteTree -> List GPXSource
+takePointsFromRight numPoints tree =
+    if numPoints == 0 then
+        []
+
+    else if numPoints == 1 then
+        [ getLastLeaf tree |> .sourceData |> Tuple.second ]
+
+    else
+        -- We need leaves
+        let
+            rightLeaves =
+                takeFromRight (numPoints - 1) tree
+        in
+        Maybe.map getAllGPXPointsInNaturalOrder rightLeaves
+            |> Maybe.withDefault []
 
 
 replaceRangeInternal :
