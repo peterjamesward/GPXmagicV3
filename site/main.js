@@ -12526,6 +12526,43 @@ var $author$project$DomainModel$buildNewNodeWithRange = F5(
 			_Utils_ap(newPoints, outro));
 		return A2($author$project$DomainModel$treeFromSourcesWithExistingReference, withReferencePoint, updatedGpx);
 	});
+var $author$project$DomainModel$foldOverRouteRL = F3(
+	function (foldFn, treeNode, accum) {
+		if (treeNode.$ === 'Leaf') {
+			var leaf = treeNode.a;
+			return A2(foldFn, leaf, accum);
+		} else {
+			var node = treeNode.a;
+			return A3(
+				$author$project$DomainModel$foldOverRouteRL,
+				foldFn,
+				node.left,
+				A3($author$project$DomainModel$foldOverRouteRL, foldFn, node.right, accum));
+		}
+	});
+var $author$project$DomainModel$getAllGPXPointsInNaturalOrder = function (treeNode) {
+	var internalFoldFn = F2(
+		function (road, accum) {
+			return A2($elm$core$List$cons, road.sourceData.b, accum);
+		});
+	var endPoints = A3($author$project$DomainModel$foldOverRouteRL, internalFoldFn, treeNode, _List_Nil);
+	return A2(
+		$elm$core$List$cons,
+		A2($author$project$DomainModel$gpxPointFromIndex, 0, treeNode),
+		endPoints);
+};
+var $author$project$DomainModel$rebuildTree = F2(
+	function (referencePoint, treeNode) {
+		if (treeNode.$ === 'Just') {
+			var something = treeNode.a;
+			return A2(
+				$author$project$DomainModel$treeFromSourcesWithExistingReference,
+				referencePoint,
+				$author$project$DomainModel$getAllGPXPointsInNaturalOrder(something));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
 var $author$project$DomainModel$safeJoin = F2(
 	function (left, right) {
 		var _v0 = _Utils_Tuple2(left, right);
@@ -12553,6 +12590,13 @@ var $author$project$DomainModel$safeJoin = F2(
 		}
 	});
 var $author$project$DomainModel$replaceRange = F5(
+	function (fromStart, fromEnd, withReferencePoint, newPoints, currentTree) {
+		return A2(
+			$author$project$DomainModel$rebuildTree,
+			withReferencePoint,
+			A5($author$project$DomainModel$replaceRangeInternal, fromStart, fromEnd, withReferencePoint, newPoints, currentTree));
+	});
+var $author$project$DomainModel$replaceRangeInternal = F5(
 	function (fromStart, fromEnd, withReferencePoint, newPoints, currentTree) {
 		if (currentTree.$ === 'Leaf') {
 			return A5($author$project$DomainModel$buildNewNodeWithRange, fromStart, fromEnd, withReferencePoint, newPoints, currentTree);
@@ -12606,53 +12650,13 @@ var $author$project$Tools$DeletePoints$deletePointsBetween = F3(
 			newTree,
 			A2($elm$core$List$map, $elm$core$Tuple$second, oldPoints));
 	});
-var $author$project$DomainModel$foldOverRouteRL = F3(
-	function (foldFn, treeNode, accum) {
-		if (treeNode.$ === 'Leaf') {
-			var leaf = treeNode.a;
-			return A2(foldFn, leaf, accum);
-		} else {
-			var node = treeNode.a;
-			return A3(
-				$author$project$DomainModel$foldOverRouteRL,
-				foldFn,
-				node.left,
-				A3($author$project$DomainModel$foldOverRouteRL, foldFn, node.right, accum));
-		}
-	});
-var $author$project$DomainModel$getAllGPXPointsInNaturalOrder = function (treeNode) {
-	var internalFoldFn = F2(
-		function (road, accum) {
-			return A2($elm$core$List$cons, road.sourceData.b, accum);
-		});
-	var endPoints = A3($author$project$DomainModel$foldOverRouteRL, internalFoldFn, treeNode, _List_Nil);
-	return A2(
-		$elm$core$List$cons,
-		A2($author$project$DomainModel$gpxPointFromIndex, 0, treeNode),
-		endPoints);
-};
-var $author$project$DomainModel$rebuildTree = F2(
-	function (referencePoint, treeNode) {
-		if (treeNode.$ === 'Just') {
-			var something = treeNode.a;
-			return A2(
-				$author$project$DomainModel$treeFromSourcesWithExistingReference,
-				referencePoint,
-				$author$project$DomainModel$getAllGPXPointsInNaturalOrder(something));
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
 var $author$project$Tools$DeletePoints$deleteSinglePoint = F3(
 	function (fromStart, fromEnd, track) {
 		var oldPoints = _List_fromArray(
 			[
 				A2($author$project$DomainModel$gpxPointFromIndex, track.currentPosition, track.trackTree)
 			]);
-		var newTree = A2(
-			$author$project$DomainModel$rebuildTree,
-			track.referenceLonLat,
-			A5($author$project$DomainModel$replaceRange, fromStart, fromEnd, track.referenceLonLat, _List_Nil, track.trackTree));
+		var newTree = A5($author$project$DomainModel$replaceRange, fromStart, fromEnd, track.referenceLonLat, _List_Nil, track.trackTree);
 		return _Utils_Tuple2(newTree, oldPoints);
 	});
 var $author$project$ToolsController$encodeColour = function (colour) {

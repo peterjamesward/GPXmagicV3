@@ -456,6 +456,21 @@ replaceRange :
     -> PeteTree
     -> Maybe PeteTree
 replaceRange fromStart fromEnd withReferencePoint newPoints currentTree =
+    --TODO: Rather than fanny around internally only to rebuild, just rebuild!
+    --Sadly, I seem unable to correctly write this, although I think I had
+    --simply forgotten that this was recursing internally. That would explain a lot.
+    replaceRangeInternal fromStart fromEnd withReferencePoint newPoints currentTree
+        |> rebuildTree withReferencePoint
+
+
+replaceRangeInternal :
+    Int
+    -> Int
+    -> GPXSource
+    -> List GPXSource
+    -> PeteTree
+    -> Maybe PeteTree
+replaceRangeInternal fromStart fromEnd withReferencePoint newPoints currentTree =
     {--
         This is our key edit function for external use.
 
