@@ -15,6 +15,7 @@ import Json.Decode as D exposing (field)
 import Json.Encode as E
 import List.Extra
 import Tools.AbruptDirectionChanges as AbruptDirectionChanges
+import Tools.BezierSplines
 import Tools.DeletePoints as DeletePoints
 import Tools.Pointers as Pointers
 import Tools.TrackInfoBox as TrackInfoBox
@@ -45,6 +46,7 @@ type ToolType
     | ToolDeletePoints
     | ToolPointers
     | ToolUndoRedo
+    | ToolBezierSplines
 
 
 type alias Options =
@@ -55,6 +57,7 @@ type alias Options =
     , pointerOptions : Pointers.Options
     , undoRedoOptions : UndoRedo.Options
     , imperial : Bool
+    , bezierSplineOptions : Tools.BezierSplines.Options
     }
 
 
@@ -66,6 +69,7 @@ defaultOptions =
     , pointerOptions = Pointers.defaultOptions
     , undoRedoOptions = UndoRedo.defaultOptions
     , imperial = False
+    , bezierSplineOptions = Tools.BezierSplines.defaultOptions
     }
 
 
@@ -80,6 +84,7 @@ type ToolMsg
     | UndoRedoMsg UndoRedo.Msg
     | ToggleImperial
     | ToolNoOp
+    | ToolBezierMsg Tools.BezierSplines.Msg
 
 
 type alias ToolEntry =
@@ -103,6 +108,7 @@ defaultTools =
     , trackInfoBox
     , directionChangeTool
     , deleteTool
+    , bezierSplinesTool
     ]
 
 
@@ -170,6 +176,20 @@ deleteTool =
     , video = Nothing
     , state = Contracted
     , dock = DockLowerLeft
+    , tabColour = FlatColors.SwedishPalette.blackPearl
+    , textColour = contrastingColour FlatColors.SwedishPalette.blackPearl
+    , isPopupOpen = False
+    }
+
+
+bezierSplinesTool : ToolEntry
+bezierSplinesTool =
+    { toolType = ToolBezierSplines
+    , label = "Bezier splines"
+    , info = "Make it smoother"
+    , video = Nothing
+    , state = Contracted
+    , dock = DockLowerRight
     , tabColour = FlatColors.SwedishPalette.blackPearl
     , textColour = contrastingColour FlatColors.SwedishPalette.blackPearl
     , isPopupOpen = False
@@ -336,6 +356,19 @@ update toolMsg isTrack msgWrapper options =
             , actions
             )
 
+        ToolBezierMsg msg ->
+            let
+                ( newOptions, actions ) =
+                    Tools.BezierSplines.update
+                        msg
+                        options.bezierSplineOptions
+                        (getColour ToolBezierSplines options.tools)
+                        isTrack
+            in
+            ( { options | bezierSplineOptions = newOptions }
+            , actions
+            )
+
         ToggleImperial ->
             let
                 newOptions =
@@ -424,6 +457,20 @@ toolStateHasChanged toolType newState isTrack options =
         ToolUndoRedo ->
             ( options, [] )
 
+        ToolBezierSplines ->
+            let
+                ( newToolOptions, actions ) =
+                    Tools.BezierSplines.toolStateChange
+                        (newState == Expanded)
+                        (getColour toolType options.tools)
+                        options.bezierSplineOptions
+                        isTrack
+
+                newOptions =
+                    { options | bezierSplineOptions = newToolOptions }
+            in
+            ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
+
 
 
 --View stuff
@@ -479,6 +526,7 @@ viewTool msgWrapper isTrack options toolEntry =
             [ width fill
             , spacing 8
             , height <| px 24
+
             --, padding 4
             , Background.color toolEntry.tabColour
             , Font.color toolEntry.textColour
@@ -614,7 +662,8 @@ viewToolByType msgWrapper entry isTrack options =
             ToolUndoRedo ->
                 UndoRedo.view (msgWrapper << UndoRedoMsg) options.undoRedoOptions isTrack
 
-
+            ToolBezierSplines ->
+                Tools.BezierSplines.view (msgWrapper << ToolBezierMsg) options.bezierSplineOptions
 
 -- Local storage management
 
@@ -652,6 +701,9 @@ encodeType toolType =
 
         ToolUndoRedo ->
             "ToolUndoRedo"
+
+        ToolBezierSplines ->
+            "ToolBezierSplines"
 
 
 encodeColour : Element.Color -> E.Value

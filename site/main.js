@@ -8498,6 +8498,7 @@ var $author$project$Tools$AbruptDirectionChanges$defaultOptions = {
 	currentBreach: 0,
 	threshold: $ianmackenzie$elm_units$Angle$degrees(120)
 };
+var $author$project$Tools$BezierSplines$defaultOptions = {bezierTension: 0.5, bezierTolerance: 5.0};
 var $author$project$Tools$DeletePoints$defaultOptions = {pointsToBeDeleted: _List_Nil, singlePoint: true};
 var $author$project$Tools$Pointers$defaultOptions = {orange: 0, purple: $elm$core$Maybe$Nothing};
 var $author$project$Tools$UndoRedo$Options = function (dummy) {
@@ -8505,8 +8506,8 @@ var $author$project$Tools$UndoRedo$Options = function (dummy) {
 };
 var $author$project$Tools$UndoRedo$defaultOptions = $author$project$Tools$UndoRedo$Options(0);
 var $author$project$ToolsController$Contracted = {$: 'Contracted'};
-var $author$project$ToolsController$DockLowerLeft = {$: 'DockLowerLeft'};
-var $author$project$ToolsController$ToolDeletePoints = {$: 'ToolDeletePoints'};
+var $author$project$ToolsController$DockLowerRight = {$: 'DockLowerRight'};
+var $author$project$ToolsController$ToolBezierSplines = {$: 'ToolBezierSplines'};
 var $mdgriffith$elm_ui$Internal$Model$Rgba = F4(
 	function (a, b, c, d) {
 		return {$: 'Rgba', a: a, b: b, c: c, d: d};
@@ -8534,6 +8535,19 @@ var $author$project$ViewPureStyles$contrastingColour = function (col) {
 	var grey = ((0.299 * red) + (0.587 * green)) + (0.114 * blue);
 	return (grey > 0.5) ? $smucode$elm_flat_colors$FlatColors$AussiePalette$deepKoamaru : $smucode$elm_flat_colors$FlatColors$AussiePalette$coastalBreeze;
 };
+var $author$project$ToolsController$bezierSplinesTool = {
+	dock: $author$project$ToolsController$DockLowerRight,
+	info: 'Make it smoother',
+	isPopupOpen: false,
+	label: 'Bezier splines',
+	state: $author$project$ToolsController$Contracted,
+	tabColour: $smucode$elm_flat_colors$FlatColors$SwedishPalette$blackPearl,
+	textColour: $author$project$ViewPureStyles$contrastingColour($smucode$elm_flat_colors$FlatColors$SwedishPalette$blackPearl),
+	toolType: $author$project$ToolsController$ToolBezierSplines,
+	video: $elm$core$Maybe$Nothing
+};
+var $author$project$ToolsController$DockLowerLeft = {$: 'DockLowerLeft'};
+var $author$project$ToolsController$ToolDeletePoints = {$: 'ToolDeletePoints'};
 var $author$project$ToolsController$deleteTool = {
 	dock: $author$project$ToolsController$DockLowerLeft,
 	info: 'Away with ye',
@@ -8598,8 +8612,8 @@ var $author$project$ToolsController$undoRedoTool = {
 	video: $elm$core$Maybe$Nothing
 };
 var $author$project$ToolsController$defaultTools = _List_fromArray(
-	[$author$project$ToolsController$pointersTool, $author$project$ToolsController$undoRedoTool, $author$project$ToolsController$trackInfoBox, $author$project$ToolsController$directionChangeTool, $author$project$ToolsController$deleteTool]);
-var $author$project$ToolsController$defaultOptions = {deleteOptions: $author$project$Tools$DeletePoints$defaultOptions, directionChangeOptions: $author$project$Tools$AbruptDirectionChanges$defaultOptions, imperial: false, pointerOptions: $author$project$Tools$Pointers$defaultOptions, tools: $author$project$ToolsController$defaultTools, undoRedoOptions: $author$project$Tools$UndoRedo$defaultOptions};
+	[$author$project$ToolsController$pointersTool, $author$project$ToolsController$undoRedoTool, $author$project$ToolsController$trackInfoBox, $author$project$ToolsController$directionChangeTool, $author$project$ToolsController$deleteTool, $author$project$ToolsController$bezierSplinesTool]);
+var $author$project$ToolsController$defaultOptions = {bezierSplineOptions: $author$project$Tools$BezierSplines$defaultOptions, deleteOptions: $author$project$Tools$DeletePoints$defaultOptions, directionChangeOptions: $author$project$Tools$AbruptDirectionChanges$defaultOptions, imperial: false, pointerOptions: $author$project$Tools$Pointers$defaultOptions, tools: $author$project$ToolsController$defaultTools, undoRedoOptions: $author$project$Tools$UndoRedo$defaultOptions};
 var $elm$browser$Browser$Dom$getViewport = _Browser_withWindow(_Browser_getViewport);
 var $elm$time$Time$Name = function (a) {
 	return {$: 'Name', a: a};
@@ -12715,8 +12729,10 @@ var $author$project$ToolsController$encodeType = function (toolType) {
 			return 'ToolDeletePoints';
 		case 'ToolPointers':
 			return 'ToolPointers';
-		default:
+		case 'ToolUndoRedo':
 			return 'ToolUndoRedo';
+		default:
+			return 'ToolBezierSplines';
 	}
 };
 var $author$project$ToolsController$encodeOneTool = function (tool) {
@@ -12878,6 +12894,7 @@ var $author$project$Tools$AbruptDirectionChanges$toolStateChange = F4(
 					]));
 		}
 	});
+var $author$project$Actions$PreviewLine = {$: 'PreviewLine'};
 var $author$project$UtilsForViews$fullDepthRenderingBoxSize = $ianmackenzie$elm_units$Length$kilometers(4);
 var $author$project$TrackLoaded$getRangeFromMarkers = function (track) {
 	var theLength = $author$project$DomainModel$skipCount(track.trackTree);
@@ -12891,6 +12908,54 @@ var $author$project$TrackLoaded$getRangeFromMarkers = function (track) {
 		return _Utils_Tuple2(track.currentPosition, theLength - track.currentPosition);
 	}
 };
+var $author$project$Tools$BezierSplines$toolStateChange = F4(
+	function (opened, colour, options, track) {
+		var _v0 = _Utils_Tuple2(opened, track);
+		if (_v0.a && (_v0.b.$ === 'Just')) {
+			var theTrack = _v0.b.a;
+			var previews = function () {
+				var _v2 = theTrack.markerPosition;
+				if (_v2.$ === 'Just') {
+					var marker = _v2.a;
+					return _List_Nil;
+				} else {
+					return _List_Nil;
+				}
+			}();
+			var fullRenderingZone = A2(
+				$ianmackenzie$elm_geometry$BoundingBox3d$withDimensions,
+				_Utils_Tuple3($author$project$UtilsForViews$fullDepthRenderingBoxSize, $author$project$UtilsForViews$fullDepthRenderingBoxSize, $author$project$UtilsForViews$fullDepthRenderingBoxSize),
+				$author$project$DomainModel$startPoint(
+					A2($author$project$DomainModel$leafFromIndex, theTrack.currentPosition, theTrack.trackTree)));
+			var foldFn = F2(
+				function (road, accum) {
+					return A2(
+						$elm$core$List$cons,
+						_Utils_Tuple2(road.startPoint, road.sourceData.a),
+						accum);
+				});
+			var depthFunction = function (road) {
+				return A2($ianmackenzie$elm_geometry$BoundingBox3d$intersects, fullRenderingZone, road.boundingBox) ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(10);
+			};
+			var _v1 = $author$project$TrackLoaded$getRangeFromMarkers(theTrack);
+			var fromStart = _v1.a;
+			var fromEnd = _v1.b;
+			return _Utils_Tuple2(
+				options,
+				_List_fromArray(
+					[
+						$author$project$Actions$ShowPreview(
+						{colour: colour, points: previews, shape: $author$project$Actions$PreviewLine, tag: 'bezier'})
+					]));
+		} else {
+			return _Utils_Tuple2(
+				options,
+				_List_fromArray(
+					[
+						$author$project$Actions$HidePreview('delete')
+					]));
+		}
+	});
 var $author$project$Tools$DeletePoints$toolStateChange = F4(
 	function (opened, colour, options, track) {
 		var _v0 = _Utils_Tuple2(opened, track);
@@ -13047,8 +13112,29 @@ var $author$project$ToolsController$toolStateHasChanged = F4(
 							'tools',
 							$author$project$ToolsController$encodeToolState(options))
 						]));
-			default:
+			case 'ToolUndoRedo':
 				return _Utils_Tuple2(options, _List_Nil);
+			default:
+				var _v4 = A4(
+					$author$project$Tools$BezierSplines$toolStateChange,
+					_Utils_eq(newState, $author$project$ToolsController$Expanded),
+					A2($author$project$ToolsController$getColour, toolType, options.tools),
+					options.bezierSplineOptions,
+					isTrack);
+				var newToolOptions = _v4.a;
+				var actions = _v4.b;
+				var newOptions = _Utils_update(
+					options,
+					{bezierSplineOptions: newToolOptions});
+				return _Utils_Tuple2(
+					newOptions,
+					A2(
+						$elm$core$List$cons,
+						A2(
+							$author$project$Actions$StoreLocally,
+							'tools',
+							$author$project$ToolsController$encodeToolState(options)),
+						actions));
 		}
 	});
 var $author$project$ToolsController$refreshOpenTools = F2(
@@ -15118,7 +15204,6 @@ var $author$project$ToolsController$decodeColour = function (_v0) {
 		{alpha: 1.0, blue: blue, green: green, red: red});
 };
 var $author$project$ToolsController$DockBottom = {$: 'DockBottom'};
-var $author$project$ToolsController$DockLowerRight = {$: 'DockLowerRight'};
 var $author$project$ToolsController$DockNone = {$: 'DockNone'};
 var $author$project$ToolsController$decodeDock = function (dock) {
 	switch (dock) {
@@ -18670,6 +18755,38 @@ var $author$project$Tools$AbruptDirectionChanges$update = F4(
 				}
 		}
 	});
+var $author$project$Tools$BezierSplines$update = F4(
+	function (msg, options, previewColour, hasTrack) {
+		var _v0 = _Utils_Tuple2(hasTrack, msg);
+		_v0$2:
+		while (true) {
+			if (_v0.a.$ === 'Just') {
+				switch (_v0.b.$) {
+					case 'SetBezierTension':
+						var track = _v0.a.a;
+						var tension = _v0.b.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								options,
+								{bezierTension: tension}),
+							_List_Nil);
+					case 'SetBezierTolerance':
+						var track = _v0.a.a;
+						var tolerance = _v0.b.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								options,
+								{bezierTolerance: tolerance}),
+							_List_Nil);
+					default:
+						break _v0$2;
+				}
+			} else {
+				break _v0$2;
+			}
+		}
+		return _Utils_Tuple2(options, _List_Nil);
+	});
 var $author$project$Actions$DeletePointsBetween = F2(
 	function (a, b) {
 		return {$: 'DeletePointsBetween', a: a, b: b};
@@ -18993,6 +19110,21 @@ var $author$project$ToolsController$update = F4(
 					_Utils_update(
 						options,
 						{undoRedoOptions: newOptions}),
+					actions);
+			case 'ToolBezierMsg':
+				var msg = toolMsg.a;
+				var _v5 = A4(
+					$author$project$Tools$BezierSplines$update,
+					msg,
+					options.bezierSplineOptions,
+					A2($author$project$ToolsController$getColour, $author$project$ToolsController$ToolBezierSplines, options.tools),
+					isTrack);
+				var newOptions = _v5.a;
+				var actions = _v5.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						options,
+						{bezierSplineOptions: newOptions}),
 					actions);
 			default:
 				var newOptions = _Utils_update(
@@ -25947,6 +26079,9 @@ var $author$project$ToolsController$DirectionChanges = function (a) {
 var $author$project$ToolsController$PointerMsg = function (a) {
 	return {$: 'PointerMsg', a: a};
 };
+var $author$project$ToolsController$ToolBezierMsg = function (a) {
+	return {$: 'ToolBezierMsg', a: a};
+};
 var $author$project$ToolsController$UndoRedoMsg = function (a) {
 	return {$: 'UndoRedoMsg', a: a};
 };
@@ -27394,6 +27529,180 @@ var $author$project$Tools$AbruptDirectionChanges$view = F2(
 					}()
 					])));
 	});
+var $author$project$Tools$BezierSplines$BezierApproximation = {$: 'BezierApproximation'};
+var $author$project$Tools$BezierSplines$BezierSplines = {$: 'BezierSplines'};
+var $author$project$Tools$BezierSplines$SetBezierTension = function (a) {
+	return {$: 'SetBezierTension', a: a};
+};
+var $author$project$Tools$BezierSplines$SetBezierTolerance = function (a) {
+	return {$: 'SetBezierTolerance', a: a};
+};
+var $author$project$ViewPureStyles$commonShortHorizontalSliderStyles = _List_fromArray(
+	[
+		$mdgriffith$elm_ui$Element$height(
+		$mdgriffith$elm_ui$Element$px(20)),
+		$mdgriffith$elm_ui$Element$width(
+		$mdgriffith$elm_ui$Element$px(150)),
+		$mdgriffith$elm_ui$Element$centerY,
+		$mdgriffith$elm_ui$Element$centerX,
+		$mdgriffith$elm_ui$Element$behindContent(
+		A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width(
+					$mdgriffith$elm_ui$Element$px(150)),
+					$mdgriffith$elm_ui$Element$height(
+					$mdgriffith$elm_ui$Element$px(2)),
+					$mdgriffith$elm_ui$Element$centerY,
+					$mdgriffith$elm_ui$Element$centerX,
+					$mdgriffith$elm_ui$Element$Background$color($author$project$ColourPalette$scrollbarBackground),
+					$mdgriffith$elm_ui$Element$Border$rounded(6)
+				]),
+			$mdgriffith$elm_ui$Element$none))
+	]);
+var $mdgriffith$elm_ui$Element$Input$defaultThumb = $mdgriffith$elm_ui$Element$Input$Thumb(
+	_List_fromArray(
+		[
+			$mdgriffith$elm_ui$Element$width(
+			$mdgriffith$elm_ui$Element$px(16)),
+			$mdgriffith$elm_ui$Element$height(
+			$mdgriffith$elm_ui$Element$px(16)),
+			$mdgriffith$elm_ui$Element$Border$rounded(8),
+			$mdgriffith$elm_ui$Element$Border$width(1),
+			$mdgriffith$elm_ui$Element$Border$color(
+			A3($mdgriffith$elm_ui$Element$rgb, 0.5, 0.5, 0.5)),
+			$mdgriffith$elm_ui$Element$Background$color(
+			A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1))
+		]));
+var $mdgriffith$elm_ui$Element$Input$Below = {$: 'Below'};
+var $mdgriffith$elm_ui$Element$Input$Label = F3(
+	function (a, b, c) {
+		return {$: 'Label', a: a, b: b, c: c};
+	});
+var $mdgriffith$elm_ui$Element$Input$labelBelow = $mdgriffith$elm_ui$Element$Input$Label($mdgriffith$elm_ui$Element$Input$Below);
+var $mdgriffith$elm_ui$Internal$Model$Paragraph = {$: 'Paragraph'};
+var $mdgriffith$elm_ui$Element$paragraph = F2(
+	function (attrs, children) {
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asParagraph,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Internal$Model$Describe($mdgriffith$elm_ui$Internal$Model$Paragraph),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$spacing(5),
+						attrs))),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+	});
+var $author$project$Tools$BezierSplines$view = F2(
+	function (wrap, options) {
+		var sliders = A2(
+			$mdgriffith$elm_ui$Element$column,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$centerX,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$spacing(5)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$Input$slider,
+					$author$project$ViewPureStyles$commonShortHorizontalSliderStyles,
+					{
+						label: A2(
+							$mdgriffith$elm_ui$Element$Input$labelBelow,
+							_List_Nil,
+							$mdgriffith$elm_ui$Element$text(
+								'Tension ' + $author$project$UtilsForViews$showDecimal2(options.bezierTension))),
+						max: 1.0,
+						min: 0.0,
+						onChange: A2($elm$core$Basics$composeL, wrap, $author$project$Tools$BezierSplines$SetBezierTension),
+						step: $elm$core$Maybe$Just(0.1),
+						thumb: $mdgriffith$elm_ui$Element$Input$defaultThumb,
+						value: options.bezierTension
+					}),
+					A2(
+					$mdgriffith$elm_ui$Element$Input$slider,
+					$author$project$ViewPureStyles$commonShortHorizontalSliderStyles,
+					{
+						label: A2(
+							$mdgriffith$elm_ui$Element$Input$labelBelow,
+							_List_Nil,
+							$mdgriffith$elm_ui$Element$text(
+								'Tolerance ' + $author$project$UtilsForViews$showDecimal2(options.bezierTolerance))),
+						max: 10.0,
+						min: 1.0,
+						onChange: A2($elm$core$Basics$composeL, wrap, $author$project$Tools$BezierSplines$SetBezierTolerance),
+						step: $elm$core$Maybe$Just(0.5),
+						thumb: $mdgriffith$elm_ui$Element$Input$defaultThumb,
+						value: options.bezierTolerance
+					})
+				]));
+		var buttons = A2(
+			$mdgriffith$elm_ui$Element$row,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$centerX,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$spacing(5)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$Input$button,
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$author$project$ViewPureStyles$neatToolsBorder),
+					{
+						label: A2(
+							$mdgriffith$elm_ui$Element$paragraph,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$text('Pass through existing points')
+								])),
+						onPress: $elm$core$Maybe$Just(
+							wrap($author$project$Tools$BezierSplines$BezierSplines))
+					}),
+					A2(
+					$mdgriffith$elm_ui$Element$Input$button,
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$author$project$ViewPureStyles$neatToolsBorder),
+					{
+						label: A2(
+							$mdgriffith$elm_ui$Element$paragraph,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$text('Use existing points as a guide')
+								])),
+						onPress: $elm$core$Maybe$Just(
+							wrap($author$project$Tools$BezierSplines$BezierApproximation))
+					})
+				]));
+		return A2(
+			$mdgriffith$elm_ui$Element$column,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$spacing(10),
+					$mdgriffith$elm_ui$Element$padding(10),
+					$mdgriffith$elm_ui$Element$centerX,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite)
+				]),
+			_List_fromArray(
+				[sliders, buttons]));
+	});
 var $author$project$Tools$DeletePoints$DeletePointOrPoints = {$: 'DeletePointOrPoints'};
 var $author$project$Tools$DeletePoints$view = F2(
 	function (msgWrapper, options) {
@@ -27882,12 +28191,17 @@ var $author$project$ToolsController$viewToolByType = F4(
 							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$PointerMsg),
 							options.pointerOptions,
 							isTrack);
-					default:
+					case 'ToolUndoRedo':
 						return A3(
 							$author$project$Tools$UndoRedo$view,
 							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$UndoRedoMsg),
 							options.undoRedoOptions,
 							isTrack);
+					default:
+						return A2(
+							$author$project$Tools$BezierSplines$view,
+							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolBezierMsg),
+							options.bezierSplineOptions);
 				}
 			}());
 	});
