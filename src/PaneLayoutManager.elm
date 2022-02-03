@@ -1,6 +1,7 @@
 module PaneLayoutManager exposing (..)
 
 import Actions exposing (..)
+import Dict exposing (Dict)
 import DomainModel exposing (skipCount)
 import Element as E exposing (..)
 import Element.Background as Background
@@ -172,13 +173,15 @@ optionList =
     ]
 
 
-render : Options -> TrackLoaded msg -> Options
-render options track =
+render : Options -> TrackLoaded msg -> Dict String PreviewData -> Options
+render options track previews =
     --Profile stuff now lives in the pane context, as each pane could
     --have different version!
     --TODO: Any open Profile views also get to (re-)render here.
     { options
-        | scene3d = SceneBuilder3D.render3dView track
+        | scene3d =
+            SceneBuilder3D.renderPreviews previews
+                ++ SceneBuilder3D.render3dView track
         , pane1 = renderPaneIfProfileVisible options.pane1 track
         , pane2 = renderPaneIfProfileVisible options.pane2 track
         , pane3 = renderPaneIfProfileVisible options.pane3 track

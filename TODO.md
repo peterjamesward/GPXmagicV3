@@ -7,8 +7,6 @@ BUG: Undo delete of 100,000 points and it doesn't render well. Suspect tree unba
 
 # WIP
 
-**Restore Previews!!**
-
 Make it so that **Undo rebuilds the tree**. It would be a shame not to.
 
 ---

@@ -248,7 +248,7 @@ render model =
         Just track ->
             let
                 paneLayout =
-                    PaneLayoutManager.render model.paneLayoutOptions track
+                    PaneLayoutManager.render model.paneLayoutOptions track model.previews
             in
             { model | paneLayoutOptions = paneLayout }
 
