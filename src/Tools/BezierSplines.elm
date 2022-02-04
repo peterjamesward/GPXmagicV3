@@ -240,7 +240,7 @@ view wrap options =
         , width fill
         , Background.color FlatColors.ChinesePalette.antiFlashWhite
         ]
-        [ sliders
-        , modeChoice
-        , actionButton
+        [ el [ centerX ] sliders
+        , el [ centerX ] modeChoice
+        , el [ centerX ] actionButton
         ]

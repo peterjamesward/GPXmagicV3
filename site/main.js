@@ -13146,6 +13146,99 @@ var $author$project$Tools$BezierSplines$applyUsingOptions = F2(
 			newTree,
 			A2($elm$core$List$map, $elm$core$Tuple$second, oldPoints));
 	});
+var $author$project$Tools$CentroidAverage$FoldState = F2(
+	function (roadMinusOne, newPoints) {
+		return {newPoints: newPoints, roadMinusOne: roadMinusOne};
+	});
+var $ianmackenzie$elm_geometry$Point3d$centroid3 = F3(
+	function (_v0, _v1, _v2) {
+		var p1 = _v0.a;
+		var p2 = _v1.a;
+		var p3 = _v2.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+			{x: (p1.x + ((p2.x - p1.x) / 3)) + ((p3.x - p1.x) / 3), y: (p1.y + ((p2.y - p1.y) / 3)) + ((p3.y - p1.y) / 3), z: (p1.z + ((p2.z - p1.z) / 3)) + ((p3.z - p1.z) / 3)});
+	});
+var $ianmackenzie$elm_geometry$Triangle3d$centroid = function (triangle) {
+	var _v0 = $ianmackenzie$elm_geometry$Triangle3d$vertices(triangle);
+	var p1 = _v0.a;
+	var p2 = _v0.b;
+	var p3 = _v0.c;
+	return A3($ianmackenzie$elm_geometry$Point3d$centroid3, p1, p2, p3);
+};
+var $author$project$Tools$CentroidAverage$centroidAverage = F5(
+	function (isLoop, weight, startIndx, endIndex, treeNode) {
+		var midPoint = function (road) {
+			return A2($ianmackenzie$elm_geometry$Point3d$midpoint, road.startPoint, road.endPoint);
+		};
+		var foldFn = F2(
+			function (road, state) {
+				var _v0 = state.roadMinusOne;
+				if (_v0.$ === 'Nothing') {
+					return _Utils_update(
+						state,
+						{
+							roadMinusOne: $elm$core$Maybe$Just(road)
+						});
+				} else {
+					var roadMinusOne = _v0.a;
+					var triangle = A3($ianmackenzie$elm_geometry$Triangle3d$from, roadMinusOne.startPoint, road.startPoint, road.endPoint);
+					var centroid = $ianmackenzie$elm_geometry$Triangle3d$centroid(triangle);
+					var newPoint = A3($ianmackenzie$elm_geometry$Point3d$interpolateFrom, road.startPoint, centroid, weight);
+					return _Utils_update(
+						state,
+						{
+							newPoints: A2($elm$core$List$cons, newPoint, state.newPoints),
+							roadMinusOne: $elm$core$Maybe$Just(road)
+						});
+				}
+			});
+		var foldOutput = A7(
+			$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
+			startIndx,
+			endIndex,
+			$elm$core$Basics$always($elm$core$Maybe$Nothing),
+			0,
+			treeNode,
+			foldFn,
+			A2($author$project$Tools$CentroidAverage$FoldState, $elm$core$Maybe$Nothing, _List_Nil));
+		return $elm$core$List$reverse(foldOutput.newPoints);
+	});
+var $author$project$Tools$CentroidAverage$computeNewPoints = F2(
+	function (options, track) {
+		var _v0 = $author$project$TrackLoaded$getRangeFromMarkers(track);
+		var fromStart = _v0.a;
+		var fromEnd = _v0.b;
+		var earthPoints = A5($author$project$Tools$CentroidAverage$centroidAverage, false, options.weighting, fromStart, fromEnd, track.trackTree);
+		var previewPoints = A2(
+			$elm$core$List$map,
+			function (earth) {
+				return _Utils_Tuple2(
+					earth,
+					A2($author$project$DomainModel$gpxFromPointWithReference, track.referenceLonLat, earth));
+			},
+			earthPoints);
+		return previewPoints;
+	});
+var $author$project$Tools$CentroidAverage$applyUsingOptions = F2(
+	function (options, track) {
+		var _v0 = $author$project$TrackLoaded$getRangeFromMarkers(track);
+		var fromStart = _v0.a;
+		var fromEnd = _v0.b;
+		var newTree = A5(
+			$author$project$DomainModel$replaceRange,
+			fromStart + 1,
+			fromEnd + 1,
+			track.referenceLonLat,
+			A2(
+				$elm$core$List$map,
+				$elm$core$Tuple$second,
+				A2($author$project$Tools$CentroidAverage$computeNewPoints, options, track)),
+			track.trackTree);
+		var oldPoints = A3($author$project$DomainModel$extractPointsInRange, fromStart, fromEnd, track.trackTree);
+		return _Utils_Tuple2(
+			newTree,
+			A2($elm$core$List$map, $elm$core$Tuple$second, oldPoints));
+	});
 var $author$project$Main$SplitDecode = F5(
 	function (left, right, bottom, leftInternal, rightInternal) {
 		return {bottom: bottom, left: left, leftInternal: leftInternal, right: right, rightInternal: rightInternal};
@@ -13482,22 +13575,6 @@ var $author$project$Tools$BezierSplines$toolStateChange = F4(
 						$author$project$Actions$HidePreview('bezier')
 					]));
 		}
-	});
-var $author$project$Tools$CentroidAverage$computeNewPoints = F2(
-	function (options, track) {
-		var earthPoints = _List_Nil;
-		var previewPoints = A2(
-			$elm$core$List$map,
-			function (earth) {
-				return _Utils_Tuple2(
-					earth,
-					A2($author$project$DomainModel$gpxFromPointWithReference, track.referenceLonLat, earth));
-			},
-			earthPoints);
-		var _v0 = $author$project$TrackLoaded$getRangeFromMarkers(track);
-		var fromStart = _v0.a;
-		var fromEnd = _v0.b;
-		return previewPoints;
 	});
 var $author$project$Tools$CentroidAverage$toolStateChange = F4(
 	function (opened, colour, options, track) {
@@ -15930,7 +16007,7 @@ var $author$project$Main$performActionsOnModel = F2(
 		var performAction = F2(
 			function (action, foldedModel) {
 				var _v0 = _Utils_Tuple2(action, foldedModel.track);
-				_v0$15:
+				_v0$16:
 				while (true) {
 					switch (_v0.a.$) {
 						case 'SetCurrent':
@@ -15946,7 +16023,7 @@ var $author$project$Main$performActionsOnModel = F2(
 												{currentPosition: position}))
 									});
 							} else {
-								break _v0$15;
+								break _v0$16;
 							}
 						case 'SetCurrentFromMapClick':
 							if (_v0.b.$ === 'Just') {
@@ -15961,7 +16038,7 @@ var $author$project$Main$performActionsOnModel = F2(
 												{currentPosition: position}))
 									});
 							} else {
-								break _v0$15;
+								break _v0$16;
 							}
 						case 'ShowPreview':
 							if (_v0.b.$ === 'Just') {
@@ -15973,7 +16050,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										previews: A3($elm$core$Dict$insert, previewData.tag, previewData, foldedModel.previews)
 									});
 							} else {
-								break _v0$15;
+								break _v0$16;
 							}
 						case 'HidePreview':
 							if (_v0.b.$ === 'Just') {
@@ -15985,7 +16062,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										previews: A2($elm$core$Dict$remove, tag, foldedModel.previews)
 									});
 							} else {
-								break _v0$15;
+								break _v0$16;
 							}
 						case 'RenderProfile':
 							if (_v0.b.$ === 'Just') {
@@ -15997,7 +16074,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										paneLayoutOptions: A2($author$project$PaneLayoutManager$renderProfile, foldedModel.paneLayoutOptions, track)
 									});
 							} else {
-								break _v0$15;
+								break _v0$16;
 							}
 						case 'DelayMessage':
 							if (_v0.b.$ === 'Just') {
@@ -16007,7 +16084,7 @@ var $author$project$Main$performActionsOnModel = F2(
 								var track = _v0.b.a;
 								return foldedModel;
 							} else {
-								break _v0$15;
+								break _v0$16;
 							}
 						case 'DeletePointsBetween':
 							if (_v0.b.$ === 'Just') {
@@ -16028,7 +16105,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$15;
+								break _v0$16;
 							}
 						case 'DeleteSinglePoint':
 							if (_v0.b.$ === 'Just') {
@@ -16049,7 +16126,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$15;
+								break _v0$16;
 							}
 						case 'BezierApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -16071,22 +16148,44 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$15;
+								break _v0$16;
+							}
+						case 'CentroidAverageApplyWithOptions':
+							if (_v0.b.$ === 'Just') {
+								var options = _v0.a.a;
+								var track = _v0.b.a;
+								var _v9 = A2($author$project$Tools$CentroidAverage$applyUsingOptions, options, track);
+								var newTree = _v9.a;
+								var oldPoints = _v9.b;
+								var _v10 = $author$project$TrackLoaded$getRangeFromMarkers(track);
+								var fromStart = _v10.a;
+								var fromEnd = _v10.b;
+								var newTrack = A2(
+									$author$project$TrackLoaded$useTreeWithRepositionedMarkers,
+									newTree,
+									A5($author$project$TrackLoaded$addToUndoStack, action, fromStart, fromEnd, oldPoints, track));
+								return _Utils_update(
+									foldedModel,
+									{
+										track: $elm$core$Maybe$Just(newTrack)
+									});
+							} else {
+								break _v0$16;
 							}
 						case 'TrackHasChanged':
 							if (_v0.b.$ === 'Just') {
-								var _v9 = _v0.a;
+								var _v11 = _v0.a;
 								var track = _v0.b.a;
-								var _v10 = A2($author$project$ToolsController$refreshOpenTools, foldedModel.track, foldedModel.toolOptions);
-								var refreshedToolOptions = _v10.a;
-								var secondaryActions = _v10.b;
+								var _v12 = A2($author$project$ToolsController$refreshOpenTools, foldedModel.track, foldedModel.toolOptions);
+								var refreshedToolOptions = _v12.a;
+								var secondaryActions = _v12.b;
 								var innerModelWithNewToolSettings = _Utils_update(
 									foldedModel,
 									{toolOptions: refreshedToolOptions});
 								var modelAfterSecondaryActions = A2($author$project$Main$performActionsOnModel, secondaryActions, innerModelWithNewToolSettings);
 								return modelAfterSecondaryActions;
 							} else {
-								break _v0$15;
+								break _v0$16;
 							}
 						case 'SetMarker':
 							if (_v0.b.$ === 'Just') {
@@ -16101,12 +16200,12 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(updatedTrack)
 									});
 							} else {
-								break _v0$15;
+								break _v0$16;
 							}
 						case 'StoredValueRetrieved':
-							var _v11 = _v0.a;
-							var key = _v11.a;
-							var value = _v11.b;
+							var _v13 = _v0.a;
+							var key = _v13.a;
+							var value = _v13.b;
 							switch (key) {
 								case 'splits':
 									return A2($author$project$Main$decodeSplitValues, value, foldedModel);
@@ -16136,7 +16235,7 @@ var $author$project$Main$performActionsOnModel = F2(
 							return foldedModel;
 						case 'UndoLastAction':
 							if (_v0.b.$ === 'Just') {
-								var _v13 = _v0.a;
+								var _v15 = _v0.a;
 								var track = _v0.b.a;
 								return _Utils_update(
 									foldedModel,
@@ -16145,24 +16244,24 @@ var $author$project$Main$performActionsOnModel = F2(
 											$author$project$TrackLoaded$undoLastAction(track))
 									});
 							} else {
-								break _v0$15;
+								break _v0$16;
 							}
 						case 'RedoUndoneAction':
 							if (_v0.b.$ === 'Just') {
-								var _v14 = _v0.a;
+								var _v16 = _v0.a;
 								var track = _v0.b.a;
-								var _v15 = track.redos;
-								if (_v15.b) {
-									var redo = _v15.a;
-									var moreRedos = _v15.b;
+								var _v17 = track.redos;
+								if (_v17.b) {
+									var redo = _v17.a;
+									var moreRedos = _v17.b;
 									var modelAfterRedo = A2(
 										$author$project$Main$performActionsOnModel,
 										_List_fromArray(
 											[redo.action]),
 										model);
-									var _v16 = modelAfterRedo.track;
-									if (_v16.$ === 'Just') {
-										var trackAfterRedo = _v16.a;
+									var _v18 = modelAfterRedo.track;
+									if (_v18.$ === 'Just') {
+										var trackAfterRedo = _v18.a;
 										var trackWithCorrectRedoStack = _Utils_update(
 											trackAfterRedo,
 											{redos: moreRedos});
@@ -16178,10 +16277,10 @@ var $author$project$Main$performActionsOnModel = F2(
 									return foldedModel;
 								}
 							} else {
-								break _v0$15;
+								break _v0$16;
 							}
 						default:
-							break _v0$15;
+							break _v0$16;
 					}
 				}
 				return foldedModel;
@@ -28790,7 +28889,23 @@ var $author$project$Tools$BezierSplines$view = F2(
 					$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite)
 				]),
 			_List_fromArray(
-				[sliders, modeChoice, actionButton]));
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[$mdgriffith$elm_ui$Element$centerX]),
+					sliders),
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[$mdgriffith$elm_ui$Element$centerX]),
+					modeChoice),
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[$mdgriffith$elm_ui$Element$centerX]),
+					actionButton)
+				]));
 	});
 var $author$project$Tools$CentroidAverage$ApplyWithOptions = {$: 'ApplyWithOptions'};
 var $author$project$Tools$CentroidAverage$SetWeighting = function (a) {
@@ -29113,7 +29228,23 @@ var $author$project$Tools$CentroidAverage$view = F2(
 					$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite)
 				]),
 			_List_fromArray(
-				[sliders, modeChoices, actionButton]));
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[$mdgriffith$elm_ui$Element$centerX]),
+					sliders),
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[$mdgriffith$elm_ui$Element$centerX]),
+					modeChoices),
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[$mdgriffith$elm_ui$Element$centerX]),
+					actionButton)
+				]));
 	});
 var $author$project$Tools$DeletePoints$DeletePointOrPoints = {$: 'DeletePointOrPoints'};
 var $author$project$Tools$DeletePoints$view = F2(

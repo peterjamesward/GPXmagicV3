@@ -6,8 +6,10 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
+import Point3d
 import Tools.CentroidAverageOptions exposing (Options)
 import TrackLoaded exposing (TrackLoaded)
+import Triangle3d
 import UtilsForViews exposing (fullDepthRenderingBoxSize, showDecimal2)
 import ViewPureStyles exposing (commonShortHorizontalSliderStyles, neatToolsBorder, prettyButtonStyles)
 
@@ -34,7 +36,7 @@ computeNewPoints options track =
             TrackLoaded.getRangeFromMarkers track
 
         earthPoints =
-            []
+            centroidAverage False options.weighting fromStart fromEnd track.trackTree
 
         previewPoints =
             earthPoints
@@ -218,7 +220,63 @@ view wrap options =
         , width fill
         , Background.color FlatColors.ChinesePalette.antiFlashWhite
         ]
-        [ sliders
-        , modeChoices
-        , actionButton
+        [ el [ centerX ] sliders
+        , el [ centerX ] modeChoices
+        , el [ centerX ] actionButton
         ]
+
+
+type alias FoldState =
+    { roadMinusOne : Maybe RoadSection
+    , newPoints : List EarthPoint
+    }
+
+
+centroidAverage : Bool -> Float -> Int -> Int -> PeteTree -> List EarthPoint
+centroidAverage isLoop weight startIndx endIndex treeNode =
+    -- Structurally pretty much same as Bezier approximation.
+    let
+        midPoint : RoadSection -> EarthPoint
+        midPoint road =
+            Point3d.midpoint road.startPoint road.endPoint
+
+        foldFn : RoadSection -> FoldState -> FoldState
+        foldFn road state =
+            case state.roadMinusOne of
+                Nothing ->
+                    -- Defer action until we have three road pieces.
+                    { state | roadMinusOne = Just road }
+
+                Just roadMinusOne ->
+                    let
+                        triangle =
+                            Triangle3d.from
+                                roadMinusOne.startPoint
+                                road.startPoint
+                                road.endPoint
+
+                        centroid =
+                            Triangle3d.centroid triangle
+
+                        newPoint =
+                            Point3d.interpolateFrom
+                                road.startPoint
+                                centroid
+                                weight
+                    in
+                    { state
+                        | roadMinusOne = Just road
+                        , newPoints = newPoint :: state.newPoints
+                    }
+
+        foldOutput =
+            DomainModel.traverseTreeBetweenLimitsToDepth
+                startIndx
+                endIndex
+                (always Nothing)
+                0
+                treeNode
+                foldFn
+                (FoldState Nothing [])
+    in
+    foldOutput.newPoints |> List.reverse
