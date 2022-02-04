@@ -999,7 +999,12 @@ performActionsOnModel actions model =
 
                         newTrack =
                             track
-                                |> TrackLoaded.addToUndoStack action fromStart fromEnd oldPoints
+                                |> TrackLoaded.addToUndoStack
+                                    action
+                                    fromStart
+                                    fromEnd
+                                    "delete points"
+                                    oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
                     { foldedModel | track = Just newTrack }
@@ -1014,7 +1019,11 @@ performActionsOnModel actions model =
 
                         newTrack =
                             track
-                                |> TrackLoaded.addToUndoStack action fromStart fromEnd oldPoints
+                                |> TrackLoaded.addToUndoStack action
+                                    fromStart
+                                    fromEnd
+                                    "delete one point"
+                                    oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
                     { foldedModel | track = Just newTrack }
@@ -1026,7 +1035,11 @@ performActionsOnModel actions model =
 
                         newTrack =
                             track
-                                |> TrackLoaded.addToUndoStack action 0 0 oldPoints
+                                |> TrackLoaded.addToUndoStack action
+                                    0
+                                    0
+                                    "bezier spline"
+                                    oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
                     { foldedModel | track = Just newTrack }

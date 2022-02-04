@@ -43,7 +43,7 @@ computeNewPoints options track =
 
         ( fromStart, fromEnd ) =
             case track.markerPosition of
-                Just marker ->
+                Just _ ->
                     TrackLoaded.getRangeFromMarkers track
 
                 Nothing ->
@@ -89,8 +89,6 @@ applyUsingCurrentPoints options track =
                 track.trackTree
 
         oldPoints =
-            -- The Nothing here means no depth limit, so we get all the points.
-            -- Note we have to reverse them.
             DomainModel.extractPointsInRange
                 fromStart
                 fromEnd

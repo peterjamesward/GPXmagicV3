@@ -11717,9 +11717,9 @@ var $author$project$Main$performActionCommands = F2(
 		return $elm$core$Platform$Cmd$batch(
 			A2($elm$core$List$map, performAction, actions));
 	});
-var $author$project$TrackLoaded$addToUndoStack = F5(
-	function (action, fromStart, fromEnd, oldPoints, oldTrack) {
-		var undoEntry = {action: action, currentPosition: oldTrack.currentPosition, fromEnd: fromEnd, fromStart: fromStart, markerPosition: oldTrack.markerPosition, originalPoints: oldPoints};
+var $author$project$TrackLoaded$addToUndoStack = F6(
+	function (action, fromStart, fromEnd, message, oldPoints, oldTrack) {
+		var undoEntry = {action: action, currentPosition: oldTrack.currentPosition, fromEnd: fromEnd, fromStart: fromStart, markerPosition: oldTrack.markerPosition, message: message, originalPoints: oldPoints};
 		return _Utils_update(
 			oldTrack,
 			{
@@ -12307,7 +12307,6 @@ var $author$project$Tools$BezierSplines$computeNewPoints = F2(
 		var _v0 = function () {
 			var _v1 = track.markerPosition;
 			if (_v1.$ === 'Just') {
-				var marker = _v1.a;
 				return $author$project$TrackLoaded$getRangeFromMarkers(track);
 			} else {
 				return _Utils_Tuple2(0, 0);
@@ -15884,7 +15883,7 @@ var $author$project$Main$performActionsOnModel = F2(
 								var newTrack = A2(
 									$author$project$TrackLoaded$useTreeWithRepositionedMarkers,
 									newTree,
-									A5($author$project$TrackLoaded$addToUndoStack, action, fromStart, fromEnd, oldPoints, track));
+									A6($author$project$TrackLoaded$addToUndoStack, action, fromStart, fromEnd, 'delete points', oldPoints, track));
 								return _Utils_update(
 									foldedModel,
 									{
@@ -15905,7 +15904,7 @@ var $author$project$Main$performActionsOnModel = F2(
 								var newTrack = A2(
 									$author$project$TrackLoaded$useTreeWithRepositionedMarkers,
 									newTree,
-									A5($author$project$TrackLoaded$addToUndoStack, action, fromStart, fromEnd, oldPoints, track));
+									A6($author$project$TrackLoaded$addToUndoStack, action, fromStart, fromEnd, 'delete one point', oldPoints, track));
 								return _Utils_update(
 									foldedModel,
 									{
@@ -15924,7 +15923,7 @@ var $author$project$Main$performActionsOnModel = F2(
 								var newTrack = A2(
 									$author$project$TrackLoaded$useTreeWithRepositionedMarkers,
 									newTree,
-									A5($author$project$TrackLoaded$addToUndoStack, action, 0, 0, oldPoints, track));
+									A6($author$project$TrackLoaded$addToUndoStack, action, 0, 0, 'bezier spline', oldPoints, track));
 								return _Utils_update(
 									foldedModel,
 									{
