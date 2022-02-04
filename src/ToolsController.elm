@@ -17,6 +17,8 @@ import List.Extra
 import Tools.AbruptDirectionChanges as AbruptDirectionChanges
 import Tools.BezierOptions
 import Tools.BezierSplines
+import Tools.CentroidAverage
+import Tools.CentroidAverageOptions
 import Tools.DeletePoints as DeletePoints
 import Tools.Pointers as Pointers
 import Tools.TrackInfoBox as TrackInfoBox
@@ -48,6 +50,7 @@ type ToolType
     | ToolPointers
     | ToolUndoRedo
     | ToolBezierSplines
+    | ToolCentroidAverage
 
 
 type alias Options =
@@ -59,6 +62,7 @@ type alias Options =
     , undoRedoOptions : UndoRedo.Options
     , imperial : Bool
     , bezierSplineOptions : Tools.BezierOptions.Options
+    , centroidAverageOptions : Tools.CentroidAverageOptions.Options
     }
 
 
@@ -71,6 +75,7 @@ defaultOptions =
     , undoRedoOptions = UndoRedo.defaultOptions
     , imperial = False
     , bezierSplineOptions = Tools.BezierSplines.defaultOptions
+    , centroidAverageOptions = Tools.CentroidAverage.defaultOptions
     }
 
 
@@ -86,6 +91,7 @@ type ToolMsg
     | ToggleImperial
     | ToolNoOp
     | ToolBezierMsg Tools.BezierSplines.Msg
+    | ToolCentroidMsg Tools.CentroidAverage.Msg
 
 
 type alias ToolEntry =
@@ -110,6 +116,7 @@ defaultTools =
     , directionChangeTool
     , deleteTool
     , bezierSplinesTool
+    , centroidAverageTool
     ]
 
 
@@ -187,6 +194,19 @@ bezierSplinesTool : ToolEntry
 bezierSplinesTool =
     { toolType = ToolBezierSplines
     , label = "Bezier splines"
+    , info = "Make it smoother"
+    , video = Nothing
+    , state = Contracted
+    , dock = DockLowerRight
+    , tabColour = FlatColors.SwedishPalette.blackPearl
+    , textColour = contrastingColour FlatColors.SwedishPalette.blackPearl
+    , isPopupOpen = False
+    }
+
+centroidAverageTool : ToolEntry
+centroidAverageTool =
+    { toolType = ToolCentroidAverage
+    , label = "Centroid Average"
     , info = "Make it smoother"
     , video = Nothing
     , state = Contracted
@@ -370,6 +390,19 @@ update toolMsg isTrack msgWrapper options =
             , actions
             )
 
+        ToolCentroidMsg msg ->
+            let
+                ( newOptions, actions ) =
+                    Tools.CentroidAverage.update
+                        msg
+                        options.centroidAverageOptions
+                        (getColour ToolCentroidAverage options.tools)
+                        isTrack
+            in
+            ( { options | centroidAverageOptions = newOptions }
+            , actions
+            )
+
         ToggleImperial ->
             let
                 newOptions =
@@ -469,6 +502,20 @@ toolStateHasChanged toolType newState isTrack options =
 
                 newOptions =
                     { options | bezierSplineOptions = newToolOptions }
+            in
+            ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
+
+        ToolCentroidAverage ->
+            let
+                ( newToolOptions, actions ) =
+                    Tools.CentroidAverage.toolStateChange
+                        (newState == Expanded)
+                        (getColour toolType options.tools)
+                        options.centroidAverageOptions
+                        isTrack
+
+                newOptions =
+                    { options | centroidAverageOptions = newToolOptions }
             in
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
@@ -666,6 +713,10 @@ viewToolByType msgWrapper entry isTrack options =
             ToolBezierSplines ->
                 Tools.BezierSplines.view (msgWrapper << ToolBezierMsg) options.bezierSplineOptions
 
+            ToolCentroidAverage ->
+                Tools.CentroidAverage.view (msgWrapper << ToolCentroidMsg) options.centroidAverageOptions
+
+
 -- Local storage management
 
 
@@ -705,6 +756,9 @@ encodeType toolType =
 
         ToolBezierSplines ->
             "ToolBezierSplines"
+
+        ToolCentroidAverage ->
+            "ToolCentroidAverage"
 
 
 encodeColour : Element.Color -> E.Value

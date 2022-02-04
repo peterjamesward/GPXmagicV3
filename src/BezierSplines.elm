@@ -16,7 +16,8 @@ import Vector3d
 
 
 type alias ControlPoint =
-    Point3d Meters LocalCoords
+    -- For clarity.
+    EarthPoint
 
 
 type alias SplineFoldState =
@@ -28,9 +29,8 @@ type alias SplineFoldState =
 
 bezierSplinesThroughExistingPoints : Bool -> Float -> Float -> Int -> Int -> PeteTree -> List EarthPoint
 bezierSplinesThroughExistingPoints isLoop tension tolerance startIndx endIndex treeNode =
-    -- I think we can do this with a fold, but we need two adjacent segments to make a triangle.
-    -- For each triangle, we figure out the control points, make a spline, approximate it.
-    -- The caller can convert to GPX coordinates and splice into the tree.
+    --TODO: Note that once we have control points, the routines are identical; factor this out.
+    --TODO: Wrap around on loop.
     let
         foldFn : RoadSection -> SplineFoldState -> SplineFoldState
         foldFn road state =
@@ -154,6 +154,8 @@ bezierSplinesThroughExistingPoints isLoop tension tolerance startIndx endIndex t
 
 bezierSplineApproximation : Bool -> Float -> Float -> Int -> Int -> PeteTree -> List EarthPoint
 bezierSplineApproximation isLoop tension tolerance startIndx endIndex treeNode =
+    --TODO: Note that once we have control points, the routines are identical; factor this out.
+    --TODO: Wrap around on loop.
     let
         midPoint : RoadSection -> Point3d Meters LocalCoords
         midPoint road =

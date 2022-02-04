@@ -8500,6 +8500,7 @@ var $author$project$Tools$AbruptDirectionChanges$defaultOptions = {
 };
 var $author$project$Tools$BezierOptions$Approximated = {$: 'Approximated'};
 var $author$project$Tools$BezierSplines$defaultOptions = {bezierStyle: $author$project$Tools$BezierOptions$Approximated, bezierTension: 0.5, bezierTolerance: 5.0};
+var $author$project$Tools$CentroidAverage$defaultOptions = {applyToAltitude: true, applyToPosition: true, weighting: 1.0};
 var $author$project$Tools$DeletePoints$defaultOptions = {pointsToBeDeleted: _List_Nil, singlePoint: true};
 var $author$project$Tools$Pointers$defaultOptions = {orange: 0, purple: $elm$core$Maybe$Nothing};
 var $author$project$Tools$UndoRedo$Options = function (dummy) {
@@ -8545,6 +8546,18 @@ var $author$project$ToolsController$bezierSplinesTool = {
 	tabColour: $smucode$elm_flat_colors$FlatColors$SwedishPalette$blackPearl,
 	textColour: $author$project$ViewPureStyles$contrastingColour($smucode$elm_flat_colors$FlatColors$SwedishPalette$blackPearl),
 	toolType: $author$project$ToolsController$ToolBezierSplines,
+	video: $elm$core$Maybe$Nothing
+};
+var $author$project$ToolsController$ToolCentroidAverage = {$: 'ToolCentroidAverage'};
+var $author$project$ToolsController$centroidAverageTool = {
+	dock: $author$project$ToolsController$DockLowerRight,
+	info: 'Make it smoother',
+	isPopupOpen: false,
+	label: 'Centroid Average',
+	state: $author$project$ToolsController$Contracted,
+	tabColour: $smucode$elm_flat_colors$FlatColors$SwedishPalette$blackPearl,
+	textColour: $author$project$ViewPureStyles$contrastingColour($smucode$elm_flat_colors$FlatColors$SwedishPalette$blackPearl),
+	toolType: $author$project$ToolsController$ToolCentroidAverage,
 	video: $elm$core$Maybe$Nothing
 };
 var $author$project$ToolsController$DockLowerLeft = {$: 'DockLowerLeft'};
@@ -8613,8 +8626,8 @@ var $author$project$ToolsController$undoRedoTool = {
 	video: $elm$core$Maybe$Nothing
 };
 var $author$project$ToolsController$defaultTools = _List_fromArray(
-	[$author$project$ToolsController$pointersTool, $author$project$ToolsController$undoRedoTool, $author$project$ToolsController$trackInfoBox, $author$project$ToolsController$directionChangeTool, $author$project$ToolsController$deleteTool, $author$project$ToolsController$bezierSplinesTool]);
-var $author$project$ToolsController$defaultOptions = {bezierSplineOptions: $author$project$Tools$BezierSplines$defaultOptions, deleteOptions: $author$project$Tools$DeletePoints$defaultOptions, directionChangeOptions: $author$project$Tools$AbruptDirectionChanges$defaultOptions, imperial: false, pointerOptions: $author$project$Tools$Pointers$defaultOptions, tools: $author$project$ToolsController$defaultTools, undoRedoOptions: $author$project$Tools$UndoRedo$defaultOptions};
+	[$author$project$ToolsController$pointersTool, $author$project$ToolsController$undoRedoTool, $author$project$ToolsController$trackInfoBox, $author$project$ToolsController$directionChangeTool, $author$project$ToolsController$deleteTool, $author$project$ToolsController$bezierSplinesTool, $author$project$ToolsController$centroidAverageTool]);
+var $author$project$ToolsController$defaultOptions = {bezierSplineOptions: $author$project$Tools$BezierSplines$defaultOptions, centroidAverageOptions: $author$project$Tools$CentroidAverage$defaultOptions, deleteOptions: $author$project$Tools$DeletePoints$defaultOptions, directionChangeOptions: $author$project$Tools$AbruptDirectionChanges$defaultOptions, imperial: false, pointerOptions: $author$project$Tools$Pointers$defaultOptions, tools: $author$project$ToolsController$defaultTools, undoRedoOptions: $author$project$Tools$UndoRedo$defaultOptions};
 var $elm$browser$Browser$Dom$getViewport = _Browser_withWindow(_Browser_getViewport);
 var $elm$time$Time$Name = function (a) {
 	return {$: 'Name', a: a};
@@ -13279,8 +13292,10 @@ var $author$project$ToolsController$encodeType = function (toolType) {
 			return 'ToolPointers';
 		case 'ToolUndoRedo':
 			return 'ToolUndoRedo';
-		default:
+		case 'ToolBezierSplines':
 			return 'ToolBezierSplines';
+		default:
+			return 'ToolCentroidAverage';
 	}
 };
 var $author$project$ToolsController$encodeOneTool = function (tool) {
@@ -13468,6 +13483,48 @@ var $author$project$Tools$BezierSplines$toolStateChange = F4(
 					]));
 		}
 	});
+var $author$project$Tools$CentroidAverage$computeNewPoints = F2(
+	function (options, track) {
+		var earthPoints = _List_Nil;
+		var previewPoints = A2(
+			$elm$core$List$map,
+			function (earth) {
+				return _Utils_Tuple2(
+					earth,
+					A2($author$project$DomainModel$gpxFromPointWithReference, track.referenceLonLat, earth));
+			},
+			earthPoints);
+		var _v0 = $author$project$TrackLoaded$getRangeFromMarkers(track);
+		var fromStart = _v0.a;
+		var fromEnd = _v0.b;
+		return previewPoints;
+	});
+var $author$project$Tools$CentroidAverage$toolStateChange = F4(
+	function (opened, colour, options, track) {
+		var _v0 = _Utils_Tuple2(opened, track);
+		if (_v0.a && (_v0.b.$ === 'Just')) {
+			var theTrack = _v0.b.a;
+			return _Utils_Tuple2(
+				options,
+				_List_fromArray(
+					[
+						$author$project$Actions$ShowPreview(
+						{
+							colour: colour,
+							points: A2($author$project$Tools$CentroidAverage$computeNewPoints, options, theTrack),
+							shape: $author$project$Actions$PreviewCircle,
+							tag: 'centroid'
+						})
+					]));
+		} else {
+			return _Utils_Tuple2(
+				options,
+				_List_fromArray(
+					[
+						$author$project$Actions$HidePreview('centroid')
+					]));
+		}
+	});
 var $author$project$UtilsForViews$fullDepthRenderingBoxSize = $ianmackenzie$elm_units$Length$kilometers(4);
 var $author$project$Tools$DeletePoints$toolStateChange = F4(
 	function (opened, colour, options, track) {
@@ -13627,7 +13684,7 @@ var $author$project$ToolsController$toolStateHasChanged = F4(
 						]));
 			case 'ToolUndoRedo':
 				return _Utils_Tuple2(options, _List_Nil);
-			default:
+			case 'ToolBezierSplines':
 				var _v4 = A4(
 					$author$project$Tools$BezierSplines$toolStateChange,
 					_Utils_eq(newState, $author$project$ToolsController$Expanded),
@@ -13639,6 +13696,27 @@ var $author$project$ToolsController$toolStateHasChanged = F4(
 				var newOptions = _Utils_update(
 					options,
 					{bezierSplineOptions: newToolOptions});
+				return _Utils_Tuple2(
+					newOptions,
+					A2(
+						$elm$core$List$cons,
+						A2(
+							$author$project$Actions$StoreLocally,
+							'tools',
+							$author$project$ToolsController$encodeToolState(options)),
+						actions));
+			default:
+				var _v5 = A4(
+					$author$project$Tools$CentroidAverage$toolStateChange,
+					_Utils_eq(newState, $author$project$ToolsController$Expanded),
+					A2($author$project$ToolsController$getColour, toolType, options.tools),
+					options.centroidAverageOptions,
+					isTrack);
+				var newToolOptions = _v5.a;
+				var actions = _v5.b;
+				var newOptions = _Utils_update(
+					options,
+					{centroidAverageOptions: newToolOptions});
 				return _Utils_Tuple2(
 					newOptions,
 					A2(
@@ -19314,6 +19392,81 @@ var $author$project$Tools$BezierSplines$update = F4(
 		}
 		return _Utils_Tuple2(options, _List_Nil);
 	});
+var $author$project$Actions$CentroidAverageApplyWithOptions = function (a) {
+	return {$: 'CentroidAverageApplyWithOptions', a: a};
+};
+var $author$project$Tools$CentroidAverage$update = F4(
+	function (msg, options, previewColour, hasTrack) {
+		var _v0 = _Utils_Tuple2(hasTrack, msg);
+		if (_v0.a.$ === 'Just') {
+			switch (_v0.b.$) {
+				case 'SetWeighting':
+					var track = _v0.a.a;
+					var weight = _v0.b.a;
+					var newOptions = _Utils_update(
+						options,
+						{weighting: weight});
+					return _Utils_Tuple2(
+						newOptions,
+						_List_fromArray(
+							[
+								$author$project$Actions$ShowPreview(
+								{
+									colour: previewColour,
+									points: A2($author$project$Tools$CentroidAverage$computeNewPoints, newOptions, track),
+									shape: $author$project$Actions$PreviewCircle,
+									tag: 'centroid'
+								})
+							]));
+				case 'ToggleAltitude':
+					var track = _v0.a.a;
+					var newOptions = _Utils_update(
+						options,
+						{applyToAltitude: !options.applyToAltitude});
+					return _Utils_Tuple2(
+						newOptions,
+						_List_fromArray(
+							[
+								$author$project$Actions$ShowPreview(
+								{
+									colour: previewColour,
+									points: A2($author$project$Tools$CentroidAverage$computeNewPoints, newOptions, track),
+									shape: $author$project$Actions$PreviewCircle,
+									tag: 'centroid'
+								})
+							]));
+				case 'TogglePosition':
+					var track = _v0.a.a;
+					var newOptions = _Utils_update(
+						options,
+						{applyToPosition: !options.applyToPosition});
+					return _Utils_Tuple2(
+						newOptions,
+						_List_fromArray(
+							[
+								$author$project$Actions$ShowPreview(
+								{
+									colour: previewColour,
+									points: A2($author$project$Tools$CentroidAverage$computeNewPoints, newOptions, track),
+									shape: $author$project$Actions$PreviewCircle,
+									tag: 'centroid'
+								})
+							]));
+				default:
+					var track = _v0.a.a;
+					var _v1 = _v0.b;
+					return _Utils_Tuple2(
+						options,
+						_List_fromArray(
+							[
+								$author$project$Actions$CentroidAverageApplyWithOptions(options),
+								$author$project$Actions$TrackHasChanged
+							]));
+			}
+		} else {
+			return _Utils_Tuple2(options, _List_Nil);
+		}
+	});
 var $author$project$Actions$DeletePointsBetween = F2(
 	function (a, b) {
 		return {$: 'DeletePointsBetween', a: a, b: b};
@@ -19652,6 +19805,21 @@ var $author$project$ToolsController$update = F4(
 					_Utils_update(
 						options,
 						{bezierSplineOptions: newOptions}),
+					actions);
+			case 'ToolCentroidMsg':
+				var msg = toolMsg.a;
+				var _v6 = A4(
+					$author$project$Tools$CentroidAverage$update,
+					msg,
+					options.centroidAverageOptions,
+					A2($author$project$ToolsController$getColour, $author$project$ToolsController$ToolCentroidAverage, options.tools),
+					isTrack);
+				var newOptions = _v6.a;
+				var actions = _v6.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						options,
+						{centroidAverageOptions: newOptions}),
 					actions);
 			default:
 				var newOptions = _Utils_update(
@@ -26609,6 +26777,9 @@ var $author$project$ToolsController$PointerMsg = function (a) {
 var $author$project$ToolsController$ToolBezierMsg = function (a) {
 	return {$: 'ToolBezierMsg', a: a};
 };
+var $author$project$ToolsController$ToolCentroidMsg = function (a) {
+	return {$: 'ToolCentroidMsg', a: a};
+};
 var $author$project$ToolsController$UndoRedoMsg = function (a) {
 	return {$: 'UndoRedoMsg', a: a};
 };
@@ -28621,6 +28792,329 @@ var $author$project$Tools$BezierSplines$view = F2(
 			_List_fromArray(
 				[sliders, modeChoice, actionButton]));
 	});
+var $author$project$Tools$CentroidAverage$ApplyWithOptions = {$: 'ApplyWithOptions'};
+var $author$project$Tools$CentroidAverage$SetWeighting = function (a) {
+	return {$: 'SetWeighting', a: a};
+};
+var $author$project$Tools$CentroidAverage$ToggleAltitude = function (a) {
+	return {$: 'ToggleAltitude', a: a};
+};
+var $author$project$Tools$CentroidAverage$TogglePosition = function (a) {
+	return {$: 'TogglePosition', a: a};
+};
+var $mdgriffith$elm_ui$Element$Input$checkbox = F2(
+	function (attrs, _v0) {
+		var label = _v0.label;
+		var icon = _v0.icon;
+		var checked = _v0.checked;
+		var onChange = _v0.onChange;
+		var attributes = _Utils_ap(
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$Input$isHiddenLabel(label) ? $mdgriffith$elm_ui$Internal$Model$NoAttribute : $mdgriffith$elm_ui$Element$spacing(6),
+					$mdgriffith$elm_ui$Internal$Model$Attr(
+					$elm$html$Html$Events$onClick(
+						onChange(!checked))),
+					$mdgriffith$elm_ui$Element$Region$announce,
+					$mdgriffith$elm_ui$Element$Input$onKeyLookup(
+					function (code) {
+						return _Utils_eq(code, $mdgriffith$elm_ui$Element$Input$enter) ? $elm$core$Maybe$Just(
+							onChange(!checked)) : (_Utils_eq(code, $mdgriffith$elm_ui$Element$Input$space) ? $elm$core$Maybe$Just(
+							onChange(!checked)) : $elm$core$Maybe$Nothing);
+					}),
+					$mdgriffith$elm_ui$Element$Input$tabindex(0),
+					$mdgriffith$elm_ui$Element$pointer,
+					$mdgriffith$elm_ui$Element$alignLeft,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+				]),
+			attrs);
+		return A3(
+			$mdgriffith$elm_ui$Element$Input$applyLabel,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Internal$Model$Attr(
+					A2($elm$html$Html$Attributes$attribute, 'role', 'checkbox')),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Internal$Model$Attr(
+						A2(
+							$elm$html$Html$Attributes$attribute,
+							'aria-checked',
+							checked ? 'true' : 'false')),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$Input$hiddenLabelAttribute(label),
+						attributes))),
+			label,
+			A4(
+				$mdgriffith$elm_ui$Internal$Model$element,
+				$mdgriffith$elm_ui$Internal$Model$asEl,
+				$mdgriffith$elm_ui$Internal$Model$div,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$centerY,
+						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink)
+					]),
+				$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+					_List_fromArray(
+						[
+							icon(checked)
+						]))));
+	});
+var $mdgriffith$elm_ui$Internal$Flag$fontAlignment = $mdgriffith$elm_ui$Internal$Flag$flag(12);
+var $mdgriffith$elm_ui$Element$Font$center = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontAlignment, $mdgriffith$elm_ui$Internal$Style$classes.textCenter);
+var $elm$core$Basics$degrees = function (angleInDegrees) {
+	return (angleInDegrees * $elm$core$Basics$pi) / 180;
+};
+var $mdgriffith$elm_ui$Element$moveUp = function (y) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$TransformComponent,
+		$mdgriffith$elm_ui$Internal$Flag$moveY,
+		$mdgriffith$elm_ui$Internal$Model$MoveY(-y));
+};
+var $mdgriffith$elm_ui$Element$rgba = $mdgriffith$elm_ui$Internal$Model$Rgba;
+var $mdgriffith$elm_ui$Internal$Model$Rotate = F2(
+	function (a, b) {
+		return {$: 'Rotate', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Flag$rotate = $mdgriffith$elm_ui$Internal$Flag$flag(24);
+var $mdgriffith$elm_ui$Element$rotate = function (angle) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$TransformComponent,
+		$mdgriffith$elm_ui$Internal$Flag$rotate,
+		A2(
+			$mdgriffith$elm_ui$Internal$Model$Rotate,
+			_Utils_Tuple3(0, 0, 1),
+			angle));
+};
+var $mdgriffith$elm_ui$Internal$Model$boxShadowClass = function (shadow) {
+	return $elm$core$String$concat(
+		_List_fromArray(
+			[
+				shadow.inset ? 'box-inset' : 'box-',
+				$mdgriffith$elm_ui$Internal$Model$floatClass(shadow.offset.a) + 'px',
+				$mdgriffith$elm_ui$Internal$Model$floatClass(shadow.offset.b) + 'px',
+				$mdgriffith$elm_ui$Internal$Model$floatClass(shadow.blur) + 'px',
+				$mdgriffith$elm_ui$Internal$Model$floatClass(shadow.size) + 'px',
+				$mdgriffith$elm_ui$Internal$Model$formatColorClass(shadow.color)
+			]));
+};
+var $mdgriffith$elm_ui$Internal$Flag$shadows = $mdgriffith$elm_ui$Internal$Flag$flag(19);
+var $mdgriffith$elm_ui$Element$Border$shadow = function (almostShade) {
+	var shade = {blur: almostShade.blur, color: almostShade.color, inset: false, offset: almostShade.offset, size: almostShade.size};
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$shadows,
+		A3(
+			$mdgriffith$elm_ui$Internal$Model$Single,
+			$mdgriffith$elm_ui$Internal$Model$boxShadowClass(shade),
+			'box-shadow',
+			$mdgriffith$elm_ui$Internal$Model$formatBoxShadow(shade)));
+};
+var $mdgriffith$elm_ui$Internal$Model$Transparency = F2(
+	function (a, b) {
+		return {$: 'Transparency', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Flag$transparency = $mdgriffith$elm_ui$Internal$Flag$flag(0);
+var $mdgriffith$elm_ui$Element$transparent = function (on) {
+	return on ? A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$transparency,
+		A2($mdgriffith$elm_ui$Internal$Model$Transparency, 'transparent', 1.0)) : A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$transparency,
+		A2($mdgriffith$elm_ui$Internal$Model$Transparency, 'visible', 0.0));
+};
+var $mdgriffith$elm_ui$Element$Border$widthXY = F2(
+	function (x, y) {
+		return A2(
+			$mdgriffith$elm_ui$Internal$Model$StyleClass,
+			$mdgriffith$elm_ui$Internal$Flag$borderWidth,
+			A5(
+				$mdgriffith$elm_ui$Internal$Model$BorderWidth,
+				'b-' + ($elm$core$String$fromInt(x) + ('-' + $elm$core$String$fromInt(y))),
+				y,
+				x,
+				y,
+				x));
+	});
+var $mdgriffith$elm_ui$Element$Border$widthEach = function (_v0) {
+	var bottom = _v0.bottom;
+	var top = _v0.top;
+	var left = _v0.left;
+	var right = _v0.right;
+	return (_Utils_eq(top, bottom) && _Utils_eq(left, right)) ? (_Utils_eq(top, right) ? $mdgriffith$elm_ui$Element$Border$width(top) : A2($mdgriffith$elm_ui$Element$Border$widthXY, left, top)) : A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$borderWidth,
+		A5(
+			$mdgriffith$elm_ui$Internal$Model$BorderWidth,
+			'b-' + ($elm$core$String$fromInt(top) + ('-' + ($elm$core$String$fromInt(right) + ('-' + ($elm$core$String$fromInt(bottom) + ('-' + $elm$core$String$fromInt(left))))))),
+			top,
+			right,
+			bottom,
+			left));
+};
+var $mdgriffith$elm_ui$Element$Input$defaultCheckbox = function (checked) {
+	return A2(
+		$mdgriffith$elm_ui$Element$el,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Internal$Model$htmlClass('focusable'),
+				$mdgriffith$elm_ui$Element$width(
+				$mdgriffith$elm_ui$Element$px(14)),
+				$mdgriffith$elm_ui$Element$height(
+				$mdgriffith$elm_ui$Element$px(14)),
+				$mdgriffith$elm_ui$Element$Font$color($mdgriffith$elm_ui$Element$Input$white),
+				$mdgriffith$elm_ui$Element$centerY,
+				$mdgriffith$elm_ui$Element$Font$size(9),
+				$mdgriffith$elm_ui$Element$Font$center,
+				$mdgriffith$elm_ui$Element$Border$rounded(3),
+				$mdgriffith$elm_ui$Element$Border$color(
+				checked ? A3($mdgriffith$elm_ui$Element$rgb, 59 / 255, 153 / 255, 252 / 255) : A3($mdgriffith$elm_ui$Element$rgb, 211 / 255, 211 / 255, 211 / 255)),
+				$mdgriffith$elm_ui$Element$Border$shadow(
+				{
+					blur: 1,
+					color: checked ? A4($mdgriffith$elm_ui$Element$rgba, 238 / 255, 238 / 255, 238 / 255, 0) : A3($mdgriffith$elm_ui$Element$rgb, 238 / 255, 238 / 255, 238 / 255),
+					offset: _Utils_Tuple2(0, 0),
+					size: 1
+				}),
+				$mdgriffith$elm_ui$Element$Background$color(
+				checked ? A3($mdgriffith$elm_ui$Element$rgb, 59 / 255, 153 / 255, 252 / 255) : $mdgriffith$elm_ui$Element$Input$white),
+				$mdgriffith$elm_ui$Element$Border$width(
+				checked ? 0 : 1),
+				$mdgriffith$elm_ui$Element$inFront(
+				A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$Border$color($mdgriffith$elm_ui$Element$Input$white),
+							$mdgriffith$elm_ui$Element$height(
+							$mdgriffith$elm_ui$Element$px(6)),
+							$mdgriffith$elm_ui$Element$width(
+							$mdgriffith$elm_ui$Element$px(9)),
+							$mdgriffith$elm_ui$Element$rotate(
+							$elm$core$Basics$degrees(-45)),
+							$mdgriffith$elm_ui$Element$centerX,
+							$mdgriffith$elm_ui$Element$centerY,
+							$mdgriffith$elm_ui$Element$moveUp(1),
+							$mdgriffith$elm_ui$Element$transparent(!checked),
+							$mdgriffith$elm_ui$Element$Border$widthEach(
+							{bottom: 2, left: 2, right: 0, top: 0})
+						]),
+					$mdgriffith$elm_ui$Element$none))
+			]),
+		$mdgriffith$elm_ui$Element$none);
+};
+var $mdgriffith$elm_ui$Element$Input$OnLeft = {$: 'OnLeft'};
+var $mdgriffith$elm_ui$Element$Input$labelLeft = $mdgriffith$elm_ui$Element$Input$Label($mdgriffith$elm_ui$Element$Input$OnLeft);
+var $mdgriffith$elm_ui$Element$Input$OnRight = {$: 'OnRight'};
+var $mdgriffith$elm_ui$Element$Input$labelRight = $mdgriffith$elm_ui$Element$Input$Label($mdgriffith$elm_ui$Element$Input$OnRight);
+var $author$project$Tools$CentroidAverage$view = F2(
+	function (wrap, options) {
+		var sliders = A2(
+			$mdgriffith$elm_ui$Element$column,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$centerX,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$spacing(5)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$Input$slider,
+					$author$project$ViewPureStyles$commonShortHorizontalSliderStyles,
+					{
+						label: A2(
+							$mdgriffith$elm_ui$Element$Input$labelBelow,
+							_List_Nil,
+							$mdgriffith$elm_ui$Element$text(
+								'Weighting ' + $author$project$UtilsForViews$showDecimal2(options.weighting))),
+						max: 1.0,
+						min: 0.0,
+						onChange: A2($elm$core$Basics$composeL, wrap, $author$project$Tools$CentroidAverage$SetWeighting),
+						step: $elm$core$Maybe$Nothing,
+						thumb: $mdgriffith$elm_ui$Element$Input$defaultThumb,
+						value: options.weighting
+					})
+				]));
+		var modeChoices = A2(
+			$mdgriffith$elm_ui$Element$row,
+			_List_Nil,
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$Input$checkbox,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$padding(10),
+							$mdgriffith$elm_ui$Element$spacing(5)
+						]),
+					{
+						checked: options.applyToPosition,
+						icon: $mdgriffith$elm_ui$Element$Input$defaultCheckbox,
+						label: A2(
+							$mdgriffith$elm_ui$Element$Input$labelLeft,
+							_List_Nil,
+							$mdgriffith$elm_ui$Element$text('Position')),
+						onChange: A2($elm$core$Basics$composeL, wrap, $author$project$Tools$CentroidAverage$TogglePosition)
+					}),
+					A2(
+					$mdgriffith$elm_ui$Element$Input$checkbox,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$padding(10),
+							$mdgriffith$elm_ui$Element$spacing(5)
+						]),
+					{
+						checked: options.applyToAltitude,
+						icon: $mdgriffith$elm_ui$Element$Input$defaultCheckbox,
+						label: A2(
+							$mdgriffith$elm_ui$Element$Input$labelRight,
+							_List_Nil,
+							$mdgriffith$elm_ui$Element$text('Altitude')),
+						onChange: A2($elm$core$Basics$composeL, wrap, $author$project$Tools$CentroidAverage$ToggleAltitude)
+					})
+				]));
+		var actionButton = A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$centerX,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$spacing(5)
+				]),
+			A2(
+				$mdgriffith$elm_ui$Element$Input$button,
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$author$project$ViewPureStyles$neatToolsBorder),
+				{
+					label: A2(
+						$mdgriffith$elm_ui$Element$paragraph,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$text('Apply')
+							])),
+					onPress: $elm$core$Maybe$Just(
+						wrap($author$project$Tools$CentroidAverage$ApplyWithOptions))
+				}));
+		return A2(
+			$mdgriffith$elm_ui$Element$column,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$spacing(10),
+					$mdgriffith$elm_ui$Element$padding(10),
+					$mdgriffith$elm_ui$Element$centerX,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite)
+				]),
+			_List_fromArray(
+				[sliders, modeChoices, actionButton]));
+	});
 var $author$project$Tools$DeletePoints$DeletePointOrPoints = {$: 'DeletePointOrPoints'};
 var $author$project$Tools$DeletePoints$view = F2(
 	function (msgWrapper, options) {
@@ -28957,6 +29451,9 @@ var $author$project$Actions$interpretAction = function (action) {
 		case 'BezierApplyWithOptions':
 			var options = action.a;
 			return 'Bezier spline';
+		case 'CentroidAverageApplyWithOptions':
+			var options = action.a;
+			return 'centroid average';
 		default:
 			return 'ask Pete to fix this message';
 	}
@@ -29118,11 +29615,16 @@ var $author$project$ToolsController$viewToolByType = F4(
 							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$UndoRedoMsg),
 							options.undoRedoOptions,
 							isTrack);
-					default:
+					case 'ToolBezierSplines':
 						return A2(
 							$author$project$Tools$BezierSplines$view,
 							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolBezierMsg),
 							options.bezierSplineOptions);
+					default:
+						return A2(
+							$author$project$Tools$CentroidAverage$view,
+							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolCentroidMsg),
+							options.centroidAverageOptions);
 				}
 			}());
 	});
@@ -30734,9 +31236,6 @@ var $terezka$elm_charts$Internal$Coordinates$toSVGY = F2(
 		return A2($terezka$elm_charts$Internal$Coordinates$scaleSVGY, plane, plane.y.max - value) + plane.y.marginMin;
 	});
 var $elm$svg$Svg$Attributes$transform = _VirtualDom_attribute('transform');
-var $elm$core$Basics$degrees = function (angleInDegrees) {
-	return (angleInDegrees * $elm$core$Basics$pi) / 180;
-};
 var $terezka$elm_charts$Internal$Svg$trianglePath = F4(
 	function (area_, off, x_, y_) {
 		var side = $elm$core$Basics$sqrt(
@@ -38057,35 +38556,6 @@ var $mdgriffith$elm_ui$Element$paddingEach = function (_v0) {
 };
 var $smucode$elm_flat_colors$FlatColors$ChinesePalette$clearChill = A3($mdgriffith$elm_ui$Element$rgb255, 30, 144, 255);
 var $smucode$elm_flat_colors$FlatColors$ChinesePalette$prestigeBlue = A3($mdgriffith$elm_ui$Element$rgb255, 47, 53, 66);
-var $mdgriffith$elm_ui$Element$Border$widthXY = F2(
-	function (x, y) {
-		return A2(
-			$mdgriffith$elm_ui$Internal$Model$StyleClass,
-			$mdgriffith$elm_ui$Internal$Flag$borderWidth,
-			A5(
-				$mdgriffith$elm_ui$Internal$Model$BorderWidth,
-				'b-' + ($elm$core$String$fromInt(x) + ('-' + $elm$core$String$fromInt(y))),
-				y,
-				x,
-				y,
-				x));
-	});
-var $mdgriffith$elm_ui$Element$Border$widthEach = function (_v0) {
-	var bottom = _v0.bottom;
-	var top = _v0.top;
-	var left = _v0.left;
-	var right = _v0.right;
-	return (_Utils_eq(top, bottom) && _Utils_eq(left, right)) ? (_Utils_eq(top, right) ? $mdgriffith$elm_ui$Element$Border$width(top) : A2($mdgriffith$elm_ui$Element$Border$widthXY, left, top)) : A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$borderWidth,
-		A5(
-			$mdgriffith$elm_ui$Internal$Model$BorderWidth,
-			'b-' + ($elm$core$String$fromInt(top) + ('-' + ($elm$core$String$fromInt(right) + ('-' + ($elm$core$String$fromInt(bottom) + ('-' + $elm$core$String$fromInt(left))))))),
-			top,
-			right,
-			bottom,
-			left));
-};
 var $author$project$ViewPureStyles$radioButton = F2(
 	function (label, state) {
 		return A2(

@@ -7,6 +7,7 @@ import DomainModel exposing (EarthPoint, GPXSource)
 import Element
 import Json.Decode as E
 import Tools.BezierOptions
+import Tools.CentroidAverageOptions
 import Tools.MemoryUsage
 
 
@@ -30,6 +31,7 @@ type ToolAction msg
     | HeapStatusUpdate Tools.MemoryUsage.HeapStatus
     | RenderProfile
     | BezierApplyWithOptions Tools.BezierOptions.Options
+    | CentroidAverageApplyWithOptions Tools.CentroidAverageOptions.Options
 
 
 type PreviewShape
@@ -57,5 +59,8 @@ interpretAction action =
 
         BezierApplyWithOptions options ->
             "Bezier spline"
+
+        CentroidAverageApplyWithOptions options ->
+            "centroid average"
 
         _ -> "ask Pete to fix this message"

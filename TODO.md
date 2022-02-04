@@ -1,7 +1,8 @@
 
-# BUGS (for an 'easy' day)
+# BUGS & DEBT (for an 'easy' day)
 
 BUG: Dubious steepest gradient on some routes. (May have to wait until we have that tool!)
+
 DEBT: Map sends more click messages each time we click. They are debounced but, still, why??
 
 # WIP
@@ -17,14 +18,14 @@ DEBT: Map sends more click messages each time we click. They are debounced but, 
 3. Curve Former (2-way drag should correct for azimuth)
 4. Classic bend smoother
 5. Drag on map
-6. Nudge
-7. Move & Stretch (2-way drag should correct for azimuth)
-8. Gradient problems
-9. Steep climbs
-10. Intersections
-11. Fly-through
-12. Limit gradients
-13. Segment info
+6. Nudge 
+7. Segment info
+8. Move & Stretch (2-way drag should correct for azimuth)
+9. Gradient problems
+10. Steep climbs
+11. Intersections
+12. Fly-through
+13. Limit gradients
 14. Graph Theory
 15. Use Strava segment data
 16. Loops (includes Out and Back) (+ impact on others, such as Bezier).
@@ -36,7 +37,7 @@ DEBT: Map sends more click messages each time we click. They are debounced but, 
 22. Track synthesise (think Moog for GPX)
 23. Memory usage
 24. Samir's bend detector
-25. Clothoids
+25. Clothoids (!!)
 
 ## Error messages
 
@@ -69,7 +70,7 @@ Put all Font, Colour etc into a Palette/Style module for ease of change.
 
 Don't render anything that's not visible.
 
-_Correctly_ fix the replaceRange so that it just rebuilds the tree.
+Disable Live Preview for large tracks or large selections.
 
 ---
 
