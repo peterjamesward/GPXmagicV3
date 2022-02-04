@@ -5,8 +5,8 @@ module BezierSplines exposing (..)
 -}
 
 import CubicSpline3d exposing (CubicSpline3d)
-import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection)
-import Length
+import DomainModel exposing (EarthPoint, PeteTree, RoadSection)
+import Length exposing (Meters)
 import LineSegment3d exposing (LineSegment3d)
 import LocalCoords exposing (LocalCoords)
 import Point3d exposing (Point3d)
@@ -16,134 +16,92 @@ import Vector3d
 
 
 type alias ControlPoint =
-    Point3d Length.Length LocalCoords
+    Point3d Meters LocalCoords
 
 
 type alias SplineFoldState =
-    { previousRoad : Maybe RoadSection
-    , carriedControlPoint : Maybe ControlPoint
+    { roadMinusOne : Maybe RoadSection
+    , roadMinusTwo : Maybe RoadSection
     , newPoints : List EarthPoint
     }
 
 
-bezierSplinesUsingTree : Bool -> Float -> Float -> Int -> Int -> PeteTree -> List EarthPoint
-bezierSplinesUsingTree isLoop tension tolerance startIndx endIndex treeNode =
+bezierSplinesThroughExistingPoints : Bool -> Float -> Float -> Int -> Int -> PeteTree -> List EarthPoint
+bezierSplinesThroughExistingPoints isLoop tension tolerance startIndx endIndex treeNode =
     -- I think we can do this with a fold, but we need two adjacent segments to make a triangle.
     -- For each triangle, we figure out the control points, make a spline, approximate it.
     -- The caller can convert to GPX coordinates and splice into the tree.
     let
         foldFn : RoadSection -> SplineFoldState -> SplineFoldState
         foldFn road state =
-            case state.previousRoad of
-                Nothing ->
-                    -- Defer action until we have two road pieces.
-                    { previousRoad = Just road
-                    , carriedControlPoint = Nothing
-                    , newPoints = state.newPoints
+            case ( state.roadMinusOne, state.roadMinusTwo ) of
+                ( Nothing, Nothing ) ->
+                    -- Defer action until we have three road pieces.
+                    { state | roadMinusOne = Just road }
+
+                ( Just previousRoad, Nothing ) ->
+                    { state
+                        | roadMinusTwo = state.roadMinusOne
+                        , roadMinusOne = Just road
                     }
 
-                Just previousRoad ->
-                    -- We have two roads, we can make a spline.
-                    -- We will need to carry forward for the next one.
-                    let
-                        triangle =
-                            Triangle3d.from
-                                previousRoad.startPoint
-                                road.startPoint
-                                road.endPoint
-                    in
+                ( Nothing, Just cantHappen ) ->
                     state
 
-        controlPointsFromTriangle :
-            Triangle3d Length.Length LocalCoords
-            -> ( ControlPoint, ControlPoint, ControlPoint )
-        controlPointsFromTriangle triangle =
-            let
-                ( _, b, _ ) =
-                    Triangle3d.vertices triangle
+                ( Just roadMinusOne, Just roadMinusTwo ) ->
+                    let
+                        triangle1 =
+                            -- Minor inefficiency re-creating triangles is not worth worrying about.
+                            Triangle3d.from
+                                roadMinusTwo.startPoint
+                                roadMinusTwo.endPoint
+                                roadMinusOne.endPoint
 
-                ( entryEdge, oppositeEdge, exitEdge ) =
-                    Triangle3d.edges triangle
+                        triangle2 =
+                            Triangle3d.from
+                                roadMinusOne.startPoint
+                                roadMinusOne.endPoint
+                                road.endPoint
 
-                ( ab, ac, bc ) =
-                    ( Length.inMeters <| LineSegment3d.length entryEdge
-                    , Length.inMeters <| LineSegment3d.length oppositeEdge
-                    , Length.inMeters <| LineSegment3d.length exitEdge
-                    )
+                        ( ( _, start, control1 ), ( control2, end, _ ) ) =
+                            -- It's what the v1 code said; no reason to challenge it.
+                            ( controlPointsFromTriangle triangle1
+                            , controlPointsFromTriangle triangle2
+                            )
 
-                ( entryFactor, exitFactor ) =
-                    ( -1.0 * tension * ab / (ab + bc)
-                    , tension * bc / (ab + bc)
-                    )
+                        spline : CubicSpline3d Meters LocalCoords
+                        spline =
+                            CubicSpline3d.fromControlPoints
+                                start
+                                control1
+                                control2
+                                end
 
-                controlPointVector =
-                    Vector3d.from
-                        (LineSegment3d.startPoint oppositeEdge)
-                        (LineSegment3d.endPoint oppositeEdge)
+                        polylineFromSpline : Polyline3d Meters LocalCoords
+                        polylineFromSpline =
+                            CubicSpline3d.approximate (Length.meters tolerance) spline
 
-                ( entryScaleVector, exitScalevector ) =
-                    ( Vector3d.scaleBy entryFactor controlPointVector
-                    , Vector3d.scaleBy exitFactor controlPointVector
-                    )
+                        asSegments : List (LineSegment3d Length.Meters LocalCoords)
+                        asSegments =
+                            Polyline3d.segments polylineFromSpline
 
-                ( entryPoint, exitPoint ) =
-                    ( Point3d.translateBy entryScaleVector b
-                    , Point3d.translateBy exitScalevector b
-                    )
-            in
-            ( entryPoint, b, exitPoint )
-    in
-    []
-
-
-bezierSplines : Bool -> Float -> Float -> List TrackPoint -> List TrackPoint
-bezierSplines isLoop tension tolerance trackPoints =
-    let
-        points =
-            -- Shim for v1 code.
-            List.map .xyz trackPoints
-
-        firstPoint =
-            -- This is used for wrap-around on loop, in which case use second point
-            if isLoop then
-                List.take 1 <| List.drop 1 points
-
-            else
-                List.take 1 points
-
-        lastPoint =
-            -- This is used for wrap-around on loop, in which case use penultimate point
-            if isLoop then
-                List.take 1 <| List.drop 1 <| List.reverse points
-
-            else
-                List.take 1 <| List.reverse points
-
-        makeTriangles : List (Triangle3d Length.Meters LocalCoords)
-        makeTriangles =
-            let
-                shiftedBack =
-                    if isLoop then
-                        lastPoint ++ points
-
-                    else
-                        firstPoint ++ points
-
-                shiftedForwards =
-                    if isLoop then
-                        List.drop 1 points ++ firstPoint
-
-                    else
-                        List.drop 1 points ++ lastPoint
-            in
-            List.map3
-                Triangle3d.from
-                shiftedBack
-                points
-                shiftedForwards
+                        asPointsAgain : List EarthPoint
+                        asPointsAgain =
+                            List.map
+                                LineSegment3d.startPoint
+                                (List.take 1 asSegments)
+                                ++ List.map
+                                    LineSegment3d.endPoint
+                                    asSegments
+                    in
+                    { state
+                        | roadMinusTwo = state.roadMinusOne
+                        , roadMinusOne = Just road
+                        , newPoints = (asPointsAgain |> List.reverse) ++ state.newPoints
+                    }
 
         controlPointsFromTriangle :
-            Triangle3d Length.Meters LocalCoords
+            Triangle3d Meters LocalCoords
             -> ( ControlPoint, ControlPoint, ControlPoint )
         controlPointsFromTriangle triangle =
             let
@@ -181,53 +139,19 @@ bezierSplines isLoop tension tolerance trackPoints =
             in
             ( entryPoint, b, exitPoint )
 
-        makeControlPoints : List ( ControlPoint, ControlPoint, ControlPoint )
-        makeControlPoints =
-            List.map
-                controlPointsFromTriangle
-                makeTriangles
-
-        makeSpline :
-            ( ControlPoint, ControlPoint, ControlPoint )
-            -> ( ControlPoint, ControlPoint, ControlPoint )
-            -> CubicSpline3d Length.Meters LocalCoords
-        makeSpline ( _, start, control1 ) ( control2, end, _ ) =
-            CubicSpline3d.fromControlPoints
-                start
-                control1
-                control2
-                end
-
-        makeSplines : List (CubicSpline3d Length.Meters LocalCoords)
-        makeSplines =
-            List.map2
-                makeSpline
-                makeControlPoints
-                (List.drop 1 makeControlPoints)
-
-        asPolylines : List (Polyline3d Length.Meters LocalCoords)
-        asPolylines =
-            List.map
-                (CubicSpline3d.approximate (Length.meters tolerance))
-                makeSplines
-
-        asSegments : List (LineSegment3d Length.Meters LocalCoords)
-        asSegments =
-            List.concatMap
-                Polyline3d.segments
-                asPolylines
-
-        asPointsAgain : List ControlPoint
-        asPointsAgain =
-            List.map
-                LineSegment3d.startPoint
-                (List.take 1 asSegments)
-                ++ List.map
-                    LineSegment3d.endPoint
-                    asSegments
+        foldOutput =
+            DomainModel.traverseTreeBetweenLimitsToDepth
+                startIndx
+                endIndex
+                (always Nothing)
+                0
+                treeNode
+                foldFn
+                (SplineFoldState Nothing Nothing [])
     in
-    List.map trackPointFromPoint asPointsAgain
+    foldOutput.newPoints
 
+{-
 
 bezierApproximation : Bool -> Float -> Float -> List TrackPoint -> List TrackPoint
 bezierApproximation _ _ tolerance points =
@@ -278,6 +202,7 @@ bezierApproximation _ _ tolerance points =
     List.take 1 points
         ++ List.map trackPointFromPoint asPointsAgain
         ++ List.drop (List.length points - 1) points
+-}
 
 
 

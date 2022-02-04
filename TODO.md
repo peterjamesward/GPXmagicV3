@@ -36,6 +36,8 @@ DEBT: Map sends more click messages each time we click. They are debounced but, 
 21. Something akin to Graphs, stemming from Muriel's route.
 22. Track synthesise (think Moog for GPX)
 23. Memory usage
+24. Samir's bend detector
+25. Clothoids
 
 ## Error messages
 

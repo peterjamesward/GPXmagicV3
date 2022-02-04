@@ -10,7 +10,8 @@ import Tools.MemoryUsage
 
 
 type ToolAction msg
-    = SetCurrent Int
+    = NoAction
+    | SetCurrent Int
     | SetCurrentFromMapClick Int -- to avoid re-centering the map!
     | ShowPreview PreviewData
     | HidePreview String
@@ -27,7 +28,7 @@ type ToolAction msg
     | RedoUndoneAction
     | HeapStatusUpdate Tools.MemoryUsage.HeapStatus
     | RenderProfile
-    | NoAction
+    | BezierSplineThroughCurrentPoints
 
 
 type PreviewShape

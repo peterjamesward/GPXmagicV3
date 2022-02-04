@@ -1,6 +1,7 @@
 module Tools.BezierSplines exposing (..)
 
 import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
+import BezierSplines
 import BoundingBox3d
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, getDualCoords, leafFromIndex, skipCount, startPoint, traverseTreeBetweenLimitsToDepth)
 import Element exposing (..)
@@ -32,6 +33,46 @@ type Msg
     | BezierApproximation
 
 
+computeNewPoints : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
+computeNewPoints options track =
+    let
+        fullRenderingZone =
+            BoundingBox3d.withDimensions
+                ( fullDepthRenderingBoxSize
+                , fullDepthRenderingBoxSize
+                , fullDepthRenderingBoxSize
+                )
+                (startPoint <| leafFromIndex track.currentPosition track.trackTree)
+
+        ( fromStart, fromEnd ) =
+            case track.markerPosition of
+                Just marker ->
+                    TrackLoaded.getRangeFromMarkers track
+
+                Nothing ->
+                    ( 0, 0 )
+
+        splineEarthPoints =
+            BezierSplines.bezierSplinesThroughExistingPoints
+                False
+                options.bezierTension
+                options.bezierTolerance
+                fromStart
+                (skipCount track.trackTree - fromEnd)
+                track.trackTree
+
+        previewPoints =
+            splineEarthPoints
+                |> List.map
+                    (\earth ->
+                        ( earth
+                        , DomainModel.gpxFromPointWithReference track.referenceLonLat earth
+                        )
+                    )
+    in
+    previewPoints
+
+
 toolStateChange :
     Bool
     -> Element.Color
@@ -41,52 +82,19 @@ toolStateChange :
 toolStateChange opened colour options track =
     case ( opened, track ) of
         ( True, Just theTrack ) ->
-            let
-                fullRenderingZone =
-                    BoundingBox3d.withDimensions
-                        ( fullDepthRenderingBoxSize
-                        , fullDepthRenderingBoxSize
-                        , fullDepthRenderingBoxSize
-                        )
-                        (startPoint <| leafFromIndex theTrack.currentPosition theTrack.trackTree)
-
-                ( fromStart, fromEnd ) =
-                    TrackLoaded.getRangeFromMarkers theTrack
-
-                depthFunction : RoadSection -> Maybe Int
-                depthFunction road =
-                    if road.boundingBox |> BoundingBox3d.intersects fullRenderingZone then
-                        Nothing
-
-                    else
-                        Just 10
-
-                foldFn : RoadSection -> List ( EarthPoint, GPXSource ) -> List ( EarthPoint, GPXSource )
-                foldFn road accum =
-                    ( road.startPoint, Tuple.first road.sourceData )
-                        :: accum
-
-                previews =
-                    case theTrack.markerPosition of
-                        Just marker ->
-                            []
-
-                        Nothing ->
-                            []
-            in
             ( options
             , [ ShowPreview
                     { tag = "bezier"
                     , shape = PreviewLine
                     , colour = colour
-                    , points = previews
+                    , points = computeNewPoints options theTrack
                     }
               ]
             )
 
         _ ->
             -- Hide preview
-            ( options, [ HidePreview "delete" ] )
+            ( options, [ HidePreview "bezier" ] )
 
 
 update :
@@ -98,10 +106,33 @@ update :
 update msg options previewColour hasTrack =
     case ( hasTrack, msg ) of
         ( Just track, SetBezierTension tension ) ->
-            ( { options | bezierTension = tension }, [] )
+            ( { options | bezierTension = tension }
+            , [ ShowPreview
+                    { tag = "bezier"
+                    , shape = PreviewLine
+                    , colour = previewColour
+                    , points = computeNewPoints options track
+                    }
+              ]
+            )
 
         ( Just track, SetBezierTolerance tolerance ) ->
-            ( { options | bezierTolerance = tolerance }, [] )
+            ( { options | bezierTolerance = tolerance }
+            , [ ShowPreview
+                    { tag = "bezier"
+                    , shape = PreviewLine
+                    , colour = previewColour
+                    , points = computeNewPoints options track
+                    }
+              ]
+            )
+
+        ( Just track, BezierSplines ) ->
+            ( options
+            , [ Actions.BezierSplineThroughCurrentPoints
+              , TrackHasChanged
+              ]
+            )
 
         _ ->
             ( options, [] )
@@ -120,7 +151,7 @@ view wrap options =
                                 "Tension "
                                     ++ showDecimal2 options.bezierTension
                     , min = 0.0
-                    , max = 1.0
+                    , max = 2.0
                     , step = Just 0.1
                     , value = options.bezierTension
                     , thumb = Input.defaultThumb
