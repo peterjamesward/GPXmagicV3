@@ -77,7 +77,9 @@ bezierSplinesThroughExistingPoints isLoop tension tolerance startIndx endIndex t
 
                         polylineFromSpline : Polyline3d Meters LocalCoords
                         polylineFromSpline =
-                            CubicSpline3d.approximate (Length.meters tolerance) spline
+                            CubicSpline3d.approximate
+                                (Length.meters <| 0.2 * tolerance)
+                                spline
 
                         asSegments : List (LineSegment3d Length.Meters LocalCoords)
                         asSegments =

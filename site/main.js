@@ -12226,7 +12226,7 @@ var $author$project$BezierSplines$bezierSplinesThroughExistingPoints = F6(
 						var spline = A4($ianmackenzie$elm_geometry$CubicSpline3d$fromControlPoints, b1, c1, a2, b2);
 						var polylineFromSpline = A2(
 							$ianmackenzie$elm_geometry$CubicSpline3d$approximate,
-							$ianmackenzie$elm_units$Length$meters(tolerance),
+							$ianmackenzie$elm_units$Length$meters(0.2 * tolerance),
 							spline);
 						var asSegments = $ianmackenzie$elm_geometry$Polyline3d$segments(polylineFromSpline);
 						var asPointsAgain = _Utils_ap(
