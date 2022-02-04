@@ -34,12 +34,7 @@ computeNewPoints : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
 computeNewPoints options track =
     let
         ( fromStart, fromEnd ) =
-            case track.markerPosition of
-                Just _ ->
-                    TrackLoaded.getRangeFromMarkers track
-
-                Nothing ->
-                    ( 0, 0 )
+            TrackLoaded.getRangeFromMarkers track
 
         splineEarthPoints =
             BezierSplines.bezierSplinesThroughExistingPoints
@@ -61,16 +56,12 @@ computeNewPoints options track =
     in
     previewPoints
 
+
 applyUsingCurrentPoints : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
 applyUsingCurrentPoints options track =
     let
         ( fromStart, fromEnd ) =
-            case track.markerPosition of
-                Just marker ->
-                    TrackLoaded.getRangeFromMarkers track
-
-                Nothing ->
-                    ( 0, 0 )
+            TrackLoaded.getRangeFromMarkers track
 
         newTree =
             DomainModel.replaceRange
@@ -81,9 +72,10 @@ applyUsingCurrentPoints options track =
                 track.trackTree
 
         oldPoints =
+            -- +1s here?
             DomainModel.extractPointsInRange
-                fromStart
-                fromEnd
+                (fromStart + 1)
+                (fromEnd + 1)
                 track.trackTree
     in
     ( newTree

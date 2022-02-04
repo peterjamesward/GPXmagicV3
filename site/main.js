@@ -12256,7 +12256,7 @@ var $author$project$BezierSplines$bezierSplinesThroughExistingPoints = F6(
 			treeNode,
 			foldFn,
 			A3($author$project$BezierSplines$SplineFoldState, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing, _List_Nil));
-		return foldOutput.newPoints;
+		return $elm$core$List$reverse(foldOutput.newPoints);
 	});
 var $author$project$TrackLoaded$getRangeFromMarkers = function (track) {
 	var theLength = $author$project$DomainModel$skipCount(track.trackTree);
@@ -12269,6 +12269,10 @@ var $author$project$TrackLoaded$getRangeFromMarkers = function (track) {
 	} else {
 		return _Utils_Tuple2(track.currentPosition, theLength - track.currentPosition);
 	}
+};
+var $ianmackenzie$elm_units$Angle$cos = function (_v0) {
+	var angle = _v0.a;
+	return $elm$core$Basics$cos(angle);
 };
 var $author$project$Spherical$metresPerDegree = 78846.81;
 var $ianmackenzie$elm_geometry$Point3d$toTuple = F2(
@@ -12287,27 +12291,21 @@ var $author$project$DomainModel$gpxFromPointWithReference = F2(
 		var x = _v0.a;
 		var y = _v0.b;
 		var z = _v0.c;
-		var latitude = (y / $author$project$Spherical$metresPerDegree) + $ianmackenzie$elm_units$Angle$inDegrees(reference.latitude);
-		var longitude = ((x / $elm$core$Basics$cos(latitude)) / $author$project$Spherical$metresPerDegree) + $ianmackenzie$elm_units$Angle$inDegrees(
-			$ianmackenzie$elm_geometry$Direction2d$toAngle(reference.longitude));
+		var latitude = $ianmackenzie$elm_units$Angle$degrees(
+			(y / $author$project$Spherical$metresPerDegree) + $ianmackenzie$elm_units$Angle$inDegrees(reference.latitude));
+		var longitude = $ianmackenzie$elm_units$Angle$degrees(
+			((x / $ianmackenzie$elm_units$Angle$cos(latitude)) / $author$project$Spherical$metresPerDegree) + $ianmackenzie$elm_units$Angle$inDegrees(
+				$ianmackenzie$elm_geometry$Direction2d$toAngle(reference.longitude)));
 		var altitude = z;
 		return A3(
 			$author$project$DomainModel$GPXSource,
-			$ianmackenzie$elm_geometry$Direction2d$fromAngle(
-				$ianmackenzie$elm_units$Angle$degrees(longitude)),
-			$ianmackenzie$elm_units$Angle$degrees(latitude),
+			$ianmackenzie$elm_geometry$Direction2d$fromAngle(longitude),
+			latitude,
 			$ianmackenzie$elm_units$Length$meters(altitude));
 	});
 var $author$project$Tools$BezierSplines$computeNewPoints = F2(
 	function (options, track) {
-		var _v0 = function () {
-			var _v1 = track.markerPosition;
-			if (_v1.$ === 'Just') {
-				return $author$project$TrackLoaded$getRangeFromMarkers(track);
-			} else {
-				return _Utils_Tuple2(0, 0);
-			}
-		}();
+		var _v0 = $author$project$TrackLoaded$getRangeFromMarkers(track);
 		var fromStart = _v0.a;
 		var fromEnd = _v0.b;
 		var splineEarthPoints = A6(
@@ -12955,10 +12953,6 @@ var $author$project$DomainModel$makeRoadSectionKnowingLocalCoords = F2(
 					A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, medianLon, earth2.longitude)))
 		};
 	});
-var $ianmackenzie$elm_units$Angle$cos = function (_v0) {
-	var angle = _v0.a;
-	return $elm$core$Basics$cos(angle);
-};
 var $author$project$DomainModel$pointFromGpxWithReference = F2(
 	function (reference, gpx) {
 		return A3(
@@ -13043,15 +13037,7 @@ var $author$project$DomainModel$replaceRange = F5(
 	});
 var $author$project$Tools$BezierSplines$applyUsingCurrentPoints = F2(
 	function (options, track) {
-		var _v0 = function () {
-			var _v1 = track.markerPosition;
-			if (_v1.$ === 'Just') {
-				var marker = _v1.a;
-				return $author$project$TrackLoaded$getRangeFromMarkers(track);
-			} else {
-				return _Utils_Tuple2(0, 0);
-			}
-		}();
+		var _v0 = $author$project$TrackLoaded$getRangeFromMarkers(track);
 		var fromStart = _v0.a;
 		var fromEnd = _v0.b;
 		var newTree = A5(
@@ -13064,7 +13050,7 @@ var $author$project$Tools$BezierSplines$applyUsingCurrentPoints = F2(
 				$elm$core$Tuple$second,
 				A2($author$project$Tools$BezierSplines$computeNewPoints, options, track)),
 			track.trackTree);
-		var oldPoints = A3($author$project$DomainModel$extractPointsInRange, fromStart, fromEnd, track.trackTree);
+		var oldPoints = A3($author$project$DomainModel$extractPointsInRange, fromStart + 1, fromEnd + 1, track.trackTree);
 		return _Utils_Tuple2(
 			newTree,
 			A2($elm$core$List$map, $elm$core$Tuple$second, oldPoints));

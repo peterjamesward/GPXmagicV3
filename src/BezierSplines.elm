@@ -149,7 +149,7 @@ bezierSplinesThroughExistingPoints isLoop tension tolerance startIndx endIndex t
                 foldFn
                 (SplineFoldState Nothing Nothing [])
     in
-    foldOutput.newPoints
+    foldOutput.newPoints |> List.reverse
 
 
 

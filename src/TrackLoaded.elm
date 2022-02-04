@@ -51,7 +51,7 @@ getRangeFromMarkers track =
             )
 
         Nothing ->
-            -- Hmm. Some want current point, some want whole track.
+            -- Hmm. Some want current point, some want whole track. This gives (0,0) == whole track.
             ( track.currentPosition, theLength - track.currentPosition )
 
 

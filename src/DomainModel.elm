@@ -241,20 +241,21 @@ gpxFromPointWithReference reference point =
             Point3d.toTuple Length.inMeters point
 
         longitude =
-            x
-                / cos latitude
-                / Spherical.metresPerDegree
-                + (Angle.inDegrees <| Direction2d.toAngle reference.longitude)
+            Angle.degrees <|
+                x
+                    / Angle.cos latitude
+                    / Spherical.metresPerDegree
+                    + (Angle.inDegrees <| Direction2d.toAngle reference.longitude)
 
         latitude =
-            y / Spherical.metresPerDegree + Angle.inDegrees reference.latitude
+            Angle.degrees <| y / Spherical.metresPerDegree + Angle.inDegrees reference.latitude
 
         altitude =
             z
     in
     GPXSource
-        (Direction2d.fromAngle <| Angle.degrees longitude)
-        (Angle.degrees latitude)
+        (Direction2d.fromAngle longitude)
+        latitude
         (Length.meters altitude)
 
 
