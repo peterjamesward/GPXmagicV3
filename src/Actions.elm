@@ -29,7 +29,7 @@ type ToolAction msg
     | RedoUndoneAction
     | HeapStatusUpdate Tools.MemoryUsage.HeapStatus
     | RenderProfile
-    | BezierSplineThroughCurrentPoints Tools.BezierOptions.Options
+    | BezierApplyWithOptions Tools.BezierOptions.Options
 
 
 type PreviewShape
@@ -55,7 +55,7 @@ interpretAction action =
         DeleteSinglePoint fromStart fromEnd ->
             "delete single point"
 
-        BezierSplineThroughCurrentPoints options ->
-            "Bezier spline through current points"
+        BezierApplyWithOptions options ->
+            "Bezier spline"
 
         _ -> "ask Pete to fix this message"

@@ -26,7 +26,7 @@ type Msg
     = SetBezierTension Float
     | SetBezierTolerance Float
     | BezierSplines
-    | BezierApproximation
+    | BezierApplyWithOptions
     | SetBezierStyle BezierStyle
 
 
@@ -36,8 +36,16 @@ computeNewPoints options track =
         ( fromStart, fromEnd ) =
             TrackLoaded.getRangeFromMarkers track
 
+        splineFunction =
+            case options.bezierStyle of
+                ThroughExisting ->
+                    BezierSplines.bezierSplinesThroughExistingPoints
+
+                Approximated ->
+                    BezierSplines.bezierSplineApproximation
+
         splineEarthPoints =
-            BezierSplines.bezierSplinesThroughExistingPoints
+            splineFunction
                 False
                 options.bezierTension
                 options.bezierTolerance
@@ -57,8 +65,8 @@ computeNewPoints options track =
     previewPoints
 
 
-applyUsingCurrentPoints : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
-applyUsingCurrentPoints options track =
+applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyUsingOptions options track =
     let
         ( fromStart, fromEnd ) =
             TrackLoaded.getRangeFromMarkers track
@@ -139,7 +147,7 @@ update msg options previewColour hasTrack =
 
         ( Just track, BezierSplines ) ->
             ( options
-            , [ Actions.BezierSplineThroughCurrentPoints options
+            , [ Actions.BezierApplyWithOptions options
               , TrackHasChanged
               ]
             )
@@ -208,17 +216,10 @@ view wrap options =
 
         actionButton =
             el [ centerX, width fill, spacing 5 ] <|
-                button (width fill :: neatToolsBorder) <|
-                    case options.bezierStyle of
-                        ThroughExisting ->
-                            { onPress = Just <| wrap BezierSplines
-                            , label = paragraph [] [ text "Apply" ]
-                            }
-
-                        Approximated ->
-                            { onPress = Just <| wrap BezierApproximation
-                            , label = paragraph [] [ text "Apply" ]
-                            }
+                button (width fill :: neatToolsBorder)
+                    { onPress = Just <| wrap BezierApplyWithOptions
+                    , label = paragraph [] [ text "Apply" ]
+                    }
     in
     column
         [ spacing 10

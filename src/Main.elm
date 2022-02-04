@@ -1026,12 +1026,12 @@ performActionsOnModel actions model =
                     in
                     { foldedModel | track = Just newTrack }
 
-                ( BezierSplineThroughCurrentPoints options, Just track ) ->
+                ( BezierApplyWithOptions options, Just track ) ->
                     let
                         ( newTree, oldPoints ) =
-                            Tools.BezierSplines.applyUsingCurrentPoints options track
+                            Tools.BezierSplines.applyUsingOptions options track
 
-                        (fromStart, fromEnd) =
+                        ( fromStart, fromEnd ) =
                             TrackLoaded.getRangeFromMarkers track
 
                         newTrack =

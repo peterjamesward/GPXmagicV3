@@ -11923,6 +11923,26 @@ var $ianmackenzie$elm_geometry$CubicSpline3d$approximate = F2(
 			A2($ianmackenzie$elm_geometry$CubicSpline3d$numApproximationSegments, maxError, spline),
 			spline);
 	});
+var $ianmackenzie$elm_geometry$LineSegment3d$endPoint = function (_v0) {
+	var _v1 = _v0.a;
+	var end = _v1.b;
+	return end;
+};
+var $ianmackenzie$elm_geometry$Geometry$Types$CubicSpline3d = function (a) {
+	return {$: 'CubicSpline3d', a: a};
+};
+var $ianmackenzie$elm_geometry$CubicSpline3d$fromControlPoints = F4(
+	function (p1, p2, p3, p4) {
+		return $ianmackenzie$elm_geometry$Geometry$Types$CubicSpline3d(
+			{firstControlPoint: p1, fourthControlPoint: p4, secondControlPoint: p2, thirdControlPoint: p3});
+	});
+var $ianmackenzie$elm_geometry$Point3d$midpoint = F2(
+	function (_v0, _v1) {
+		var p1 = _v0.a;
+		var p2 = _v1.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+			{x: p1.x + (0.5 * (p2.x - p1.x)), y: p1.y + (0.5 * (p2.y - p1.y)), z: p1.z + (0.5 * (p2.z - p1.z))});
+	});
 var $ianmackenzie$elm_geometry$Geometry$Types$LineSegment3d = function (a) {
 	return {$: 'LineSegment3d', a: a};
 };
@@ -11933,61 +11953,6 @@ var $ianmackenzie$elm_geometry$LineSegment3d$from = F2(
 	function (givenStartPoint, givenEndPoint) {
 		return $ianmackenzie$elm_geometry$LineSegment3d$fromEndpoints(
 			_Utils_Tuple2(givenStartPoint, givenEndPoint));
-	});
-var $ianmackenzie$elm_geometry$Triangle3d$vertices = function (_v0) {
-	var triangleVertices = _v0.a;
-	return triangleVertices;
-};
-var $ianmackenzie$elm_geometry$Triangle3d$edges = function (triangle) {
-	var _v0 = $ianmackenzie$elm_geometry$Triangle3d$vertices(triangle);
-	var p1 = _v0.a;
-	var p2 = _v0.b;
-	var p3 = _v0.c;
-	return _Utils_Tuple3(
-		A2($ianmackenzie$elm_geometry$LineSegment3d$from, p1, p2),
-		A2($ianmackenzie$elm_geometry$LineSegment3d$from, p2, p3),
-		A2($ianmackenzie$elm_geometry$LineSegment3d$from, p3, p1));
-};
-var $ianmackenzie$elm_geometry$LineSegment3d$endPoint = function (_v0) {
-	var _v1 = _v0.a;
-	var end = _v1.b;
-	return end;
-};
-var $ianmackenzie$elm_geometry$Geometry$Types$Triangle3d = function (a) {
-	return {$: 'Triangle3d', a: a};
-};
-var $ianmackenzie$elm_geometry$Triangle3d$from = F3(
-	function (p1, p2, p3) {
-		return $ianmackenzie$elm_geometry$Geometry$Types$Triangle3d(
-			_Utils_Tuple3(p1, p2, p3));
-	});
-var $ianmackenzie$elm_geometry$Geometry$Types$CubicSpline3d = function (a) {
-	return {$: 'CubicSpline3d', a: a};
-};
-var $ianmackenzie$elm_geometry$CubicSpline3d$fromControlPoints = F4(
-	function (p1, p2, p3, p4) {
-		return $ianmackenzie$elm_geometry$Geometry$Types$CubicSpline3d(
-			{firstControlPoint: p1, fourthControlPoint: p4, secondControlPoint: p2, thirdControlPoint: p3});
-	});
-var $ianmackenzie$elm_geometry$LineSegment3d$endpoints = function (_v0) {
-	var lineSegmentEndpoints = _v0.a;
-	return lineSegmentEndpoints;
-};
-var $ianmackenzie$elm_geometry$LineSegment3d$vector = function (lineSegment) {
-	var _v0 = $ianmackenzie$elm_geometry$LineSegment3d$endpoints(lineSegment);
-	var p1 = _v0.a;
-	var p2 = _v0.b;
-	return A2($ianmackenzie$elm_geometry$Vector3d$from, p1, p2);
-};
-var $ianmackenzie$elm_geometry$LineSegment3d$length = function (lineSegment) {
-	return $ianmackenzie$elm_geometry$Vector3d$length(
-		$ianmackenzie$elm_geometry$LineSegment3d$vector(lineSegment));
-};
-var $ianmackenzie$elm_geometry$Vector3d$scaleBy = F2(
-	function (k, _v0) {
-		var v = _v0.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
-			{x: k * v.x, y: k * v.y, z: k * v.z});
 	});
 var $ianmackenzie$elm_geometry$Polyline3d$vertices = function (_v0) {
 	var polylineVertices = _v0.a;
@@ -12134,6 +12099,111 @@ var $elm$core$List$takeFast = F3(
 var $elm$core$List$take = F2(
 	function (n, list) {
 		return A3($elm$core$List$takeFast, 0, n, list);
+	});
+var $author$project$BezierSplines$bezierSplineApproximation = F6(
+	function (isLoop, tension, tolerance, startIndx, endIndex, treeNode) {
+		var midPoint = function (road) {
+			return A2($ianmackenzie$elm_geometry$Point3d$midpoint, road.startPoint, road.endPoint);
+		};
+		var foldFn = F2(
+			function (road, state) {
+				var _v0 = state.roadMinusOne;
+				if (_v0.$ === 'Nothing') {
+					return _Utils_update(
+						state,
+						{
+							roadMinusOne: $elm$core$Maybe$Just(road)
+						});
+				} else {
+					var roadMinusOne = _v0.a;
+					var _v1 = _Utils_Tuple2(
+						_Utils_Tuple2(
+							midPoint(roadMinusOne),
+							roadMinusOne.endPoint),
+						_Utils_Tuple2(
+							road.startPoint,
+							midPoint(road)));
+					var _v2 = _v1.a;
+					var c1 = _v2.a;
+					var b1 = _v2.b;
+					var _v3 = _v1.b;
+					var b2 = _v3.a;
+					var a2 = _v3.b;
+					var spline = A4($ianmackenzie$elm_geometry$CubicSpline3d$fromControlPoints, b1, c1, a2, b2);
+					var polylineFromSpline = A2(
+						$ianmackenzie$elm_geometry$CubicSpline3d$approximate,
+						$ianmackenzie$elm_units$Length$meters(0.2 * tolerance),
+						spline);
+					var asSegments = $ianmackenzie$elm_geometry$Polyline3d$segments(polylineFromSpline);
+					var asPointsAgain = _Utils_ap(
+						A2(
+							$elm$core$List$map,
+							$ianmackenzie$elm_geometry$LineSegment3d$startPoint,
+							A2($elm$core$List$take, 1, asSegments)),
+						A2($elm$core$List$map, $ianmackenzie$elm_geometry$LineSegment3d$endPoint, asSegments));
+					return _Utils_update(
+						state,
+						{
+							newPoints: _Utils_ap(
+								$elm$core$List$reverse(asPointsAgain),
+								state.newPoints),
+							roadMinusOne: $elm$core$Maybe$Just(road),
+							roadMinusTwo: state.roadMinusOne
+						});
+				}
+			});
+		var foldOutput = A7(
+			$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
+			startIndx,
+			endIndex,
+			$elm$core$Basics$always($elm$core$Maybe$Nothing),
+			0,
+			treeNode,
+			foldFn,
+			A3($author$project$BezierSplines$SplineFoldState, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing, _List_Nil));
+		return $elm$core$List$reverse(foldOutput.newPoints);
+	});
+var $ianmackenzie$elm_geometry$Triangle3d$vertices = function (_v0) {
+	var triangleVertices = _v0.a;
+	return triangleVertices;
+};
+var $ianmackenzie$elm_geometry$Triangle3d$edges = function (triangle) {
+	var _v0 = $ianmackenzie$elm_geometry$Triangle3d$vertices(triangle);
+	var p1 = _v0.a;
+	var p2 = _v0.b;
+	var p3 = _v0.c;
+	return _Utils_Tuple3(
+		A2($ianmackenzie$elm_geometry$LineSegment3d$from, p1, p2),
+		A2($ianmackenzie$elm_geometry$LineSegment3d$from, p2, p3),
+		A2($ianmackenzie$elm_geometry$LineSegment3d$from, p3, p1));
+};
+var $ianmackenzie$elm_geometry$Geometry$Types$Triangle3d = function (a) {
+	return {$: 'Triangle3d', a: a};
+};
+var $ianmackenzie$elm_geometry$Triangle3d$from = F3(
+	function (p1, p2, p3) {
+		return $ianmackenzie$elm_geometry$Geometry$Types$Triangle3d(
+			_Utils_Tuple3(p1, p2, p3));
+	});
+var $ianmackenzie$elm_geometry$LineSegment3d$endpoints = function (_v0) {
+	var lineSegmentEndpoints = _v0.a;
+	return lineSegmentEndpoints;
+};
+var $ianmackenzie$elm_geometry$LineSegment3d$vector = function (lineSegment) {
+	var _v0 = $ianmackenzie$elm_geometry$LineSegment3d$endpoints(lineSegment);
+	var p1 = _v0.a;
+	var p2 = _v0.b;
+	return A2($ianmackenzie$elm_geometry$Vector3d$from, p1, p2);
+};
+var $ianmackenzie$elm_geometry$LineSegment3d$length = function (lineSegment) {
+	return $ianmackenzie$elm_geometry$Vector3d$length(
+		$ianmackenzie$elm_geometry$LineSegment3d$vector(lineSegment));
+};
+var $ianmackenzie$elm_geometry$Vector3d$scaleBy = F2(
+	function (k, _v0) {
+		var v = _v0.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
+			{x: k * v.x, y: k * v.y, z: k * v.z});
 	});
 var $ianmackenzie$elm_geometry$Point3d$translateBy = F2(
 	function (_v0, _v1) {
@@ -12305,11 +12375,19 @@ var $author$project$DomainModel$gpxFromPointWithReference = F2(
 	});
 var $author$project$Tools$BezierSplines$computeNewPoints = F2(
 	function (options, track) {
+		var splineFunction = function () {
+			var _v1 = options.bezierStyle;
+			if (_v1.$ === 'ThroughExisting') {
+				return $author$project$BezierSplines$bezierSplinesThroughExistingPoints;
+			} else {
+				return $author$project$BezierSplines$bezierSplineApproximation;
+			}
+		}();
 		var _v0 = $author$project$TrackLoaded$getRangeFromMarkers(track);
 		var fromStart = _v0.a;
 		var fromEnd = _v0.b;
 		var splineEarthPoints = A6(
-			$author$project$BezierSplines$bezierSplinesThroughExistingPoints,
+			splineFunction,
 			false,
 			options.bezierTension,
 			options.bezierTolerance,
@@ -13035,7 +13113,7 @@ var $author$project$DomainModel$replaceRange = F5(
 				leftBit,
 				_Utils_ap(newPoints, rightBit)));
 	});
-var $author$project$Tools$BezierSplines$applyUsingCurrentPoints = F2(
+var $author$project$Tools$BezierSplines$applyUsingOptions = F2(
 	function (options, track) {
 		var _v0 = $author$project$TrackLoaded$getRangeFromMarkers(track);
 		var fromStart = _v0.a;
@@ -15895,11 +15973,11 @@ var $author$project$Main$performActionsOnModel = F2(
 							} else {
 								break _v0$15;
 							}
-						case 'BezierSplineThroughCurrentPoints':
+						case 'BezierApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
 								var options = _v0.a.a;
 								var track = _v0.b.a;
-								var _v7 = A2($author$project$Tools$BezierSplines$applyUsingCurrentPoints, options, track);
+								var _v7 = A2($author$project$Tools$BezierSplines$applyUsingOptions, options, track);
 								var newTree = _v7.a;
 								var oldPoints = _v7.b;
 								var _v8 = $author$project$TrackLoaded$getRangeFromMarkers(track);
@@ -19153,8 +19231,8 @@ var $author$project$Tools$AbruptDirectionChanges$update = F4(
 				}
 		}
 	});
-var $author$project$Actions$BezierSplineThroughCurrentPoints = function (a) {
-	return {$: 'BezierSplineThroughCurrentPoints', a: a};
+var $author$project$Actions$BezierApplyWithOptions = function (a) {
+	return {$: 'BezierApplyWithOptions', a: a};
 };
 var $author$project$Tools$BezierSplines$update = F4(
 	function (msg, options, previewColour, hasTrack) {
@@ -19204,7 +19282,7 @@ var $author$project$Tools$BezierSplines$update = F4(
 							options,
 							_List_fromArray(
 								[
-									$author$project$Actions$BezierSplineThroughCurrentPoints(options),
+									$author$project$Actions$BezierApplyWithOptions(options),
 									$author$project$Actions$TrackHasChanged
 								]));
 					case 'SetBezierStyle':
@@ -27975,8 +28053,7 @@ var $author$project$Tools$AbruptDirectionChanges$view = F2(
 					}()
 					])));
 	});
-var $author$project$Tools$BezierSplines$BezierApproximation = {$: 'BezierApproximation'};
-var $author$project$Tools$BezierSplines$BezierSplines = {$: 'BezierSplines'};
+var $author$project$Tools$BezierSplines$BezierApplyWithOptions = {$: 'BezierApplyWithOptions'};
 var $author$project$Tools$BezierSplines$SetBezierStyle = function (a) {
 	return {$: 'SetBezierStyle', a: a};
 };
@@ -28517,34 +28594,17 @@ var $author$project$Tools$BezierSplines$view = F2(
 					$elm$core$List$cons,
 					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 					$author$project$ViewPureStyles$neatToolsBorder),
-				function () {
-					var _v0 = options.bezierStyle;
-					if (_v0.$ === 'ThroughExisting') {
-						return {
-							label: A2(
-								$mdgriffith$elm_ui$Element$paragraph,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$mdgriffith$elm_ui$Element$text('Apply')
-									])),
-							onPress: $elm$core$Maybe$Just(
-								wrap($author$project$Tools$BezierSplines$BezierSplines))
-						};
-					} else {
-						return {
-							label: A2(
-								$mdgriffith$elm_ui$Element$paragraph,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$mdgriffith$elm_ui$Element$text('Apply')
-									])),
-							onPress: $elm$core$Maybe$Just(
-								wrap($author$project$Tools$BezierSplines$BezierApproximation))
-						};
-					}
-				}()));
+				{
+					label: A2(
+						$mdgriffith$elm_ui$Element$paragraph,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$text('Apply')
+							])),
+					onPress: $elm$core$Maybe$Just(
+						wrap($author$project$Tools$BezierSplines$BezierApplyWithOptions))
+				}));
 		return A2(
 			$mdgriffith$elm_ui$Element$column,
 			_List_fromArray(
@@ -28891,9 +28951,9 @@ var $author$project$Actions$interpretAction = function (action) {
 			var fromStart = action.a;
 			var fromEnd = action.b;
 			return 'delete single point';
-		case 'BezierSplineThroughCurrentPoints':
+		case 'BezierApplyWithOptions':
 			var options = action.a;
-			return 'Bezier spline through current points';
+			return 'Bezier spline';
 		default:
 			return 'ask Pete to fix this message';
 	}

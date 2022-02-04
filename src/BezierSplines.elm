@@ -97,8 +97,6 @@ bezierSplinesThroughExistingPoints isLoop tension tolerance startIndx endIndex t
                     { state
                         | roadMinusTwo = state.roadMinusOne
                         , roadMinusOne = Just road
-
-                        --, newPoints = [ c1, c2 ] ++ state.newPoints
                         , newPoints = (asPointsAgain |> List.reverse) ++ state.newPoints
                     }
 
@@ -140,6 +138,71 @@ bezierSplinesThroughExistingPoints isLoop tension tolerance startIndx endIndex t
                     )
             in
             ( entryPoint, b, exitPoint )
+
+        foldOutput =
+            DomainModel.traverseTreeBetweenLimitsToDepth
+                startIndx
+                endIndex
+                (always Nothing)
+                0
+                treeNode
+                foldFn
+                (SplineFoldState Nothing Nothing [])
+    in
+    foldOutput.newPoints |> List.reverse
+
+
+bezierSplineApproximation : Bool -> Float -> Float -> Int -> Int -> PeteTree -> List EarthPoint
+bezierSplineApproximation isLoop tension tolerance startIndx endIndex treeNode =
+    let
+        midPoint : RoadSection -> Point3d Meters LocalCoords
+        midPoint road =
+            Point3d.midpoint road.startPoint road.endPoint
+
+        foldFn : RoadSection -> SplineFoldState -> SplineFoldState
+        foldFn road state =
+            case state.roadMinusOne of
+                Nothing ->
+                    -- Defer action until we have three road pieces.
+                    { state | roadMinusOne = Just road }
+
+                Just roadMinusOne ->
+                    let
+                        ( ( c1, b1 ), ( b2, a2 ) ) =
+                            ( ( midPoint roadMinusOne, roadMinusOne.endPoint )
+                            , ( road.startPoint, midPoint road )
+                            )
+
+                        spline : CubicSpline3d Meters LocalCoords
+                        spline =
+                            -- From previous road start to end, using control points
+                            -- from adjacent edges.
+                            CubicSpline3d.fromControlPoints b1 c1 a2 b2
+
+                        polylineFromSpline : Polyline3d Meters LocalCoords
+                        polylineFromSpline =
+                            CubicSpline3d.approximate
+                                (Length.meters <| 0.2 * tolerance)
+                                spline
+
+                        asSegments : List (LineSegment3d Length.Meters LocalCoords)
+                        asSegments =
+                            Polyline3d.segments polylineFromSpline
+
+                        asPointsAgain : List EarthPoint
+                        asPointsAgain =
+                            List.map
+                                LineSegment3d.startPoint
+                                (List.take 1 asSegments)
+                                ++ List.map
+                                    LineSegment3d.endPoint
+                                    asSegments
+                    in
+                    { state
+                        | roadMinusTwo = state.roadMinusOne
+                        , roadMinusOne = Just road
+                        , newPoints = (asPointsAgain |> List.reverse) ++ state.newPoints
+                    }
 
         foldOutput =
             DomainModel.traverseTreeBetweenLimitsToDepth
