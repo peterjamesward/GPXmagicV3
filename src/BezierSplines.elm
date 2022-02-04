@@ -63,19 +63,17 @@ bezierSplinesThroughExistingPoints isLoop tension tolerance startIndx endIndex t
                                 roadMinusOne.endPoint
                                 road.endPoint
 
-                        ( ( _, start, control1 ), ( control2, end, _ ) ) =
-                            -- It's what the v1 code said; no reason to challenge it.
+                        ( ( c1, b1, a1 ), ( c2, b2, a2 ) ) =
+                            -- Might not be the order you expected.
                             ( controlPointsFromTriangle triangle1
                             , controlPointsFromTriangle triangle2
                             )
 
                         spline : CubicSpline3d Meters LocalCoords
                         spline =
-                            CubicSpline3d.fromControlPoints
-                                start
-                                control1
-                                control2
-                                end
+                            -- From previous road start to end, using control points
+                            -- from adjacent edges.
+                            CubicSpline3d.fromControlPoints b1 c1 a2 b2
 
                         polylineFromSpline : Polyline3d Meters LocalCoords
                         polylineFromSpline =
@@ -97,6 +95,8 @@ bezierSplinesThroughExistingPoints isLoop tension tolerance startIndx endIndex t
                     { state
                         | roadMinusTwo = state.roadMinusOne
                         , roadMinusOne = Just road
+
+                        --, newPoints = [ c1, c2 ] ++ state.newPoints
                         , newPoints = (asPointsAgain |> List.reverse) ++ state.newPoints
                     }
 
@@ -108,7 +108,7 @@ bezierSplinesThroughExistingPoints isLoop tension tolerance startIndx endIndex t
                 ( _, b, _ ) =
                     Triangle3d.vertices triangle
 
-                ( entryEdge, oppositeEdge, exitEdge ) =
+                ( entryEdge, exitEdge, oppositeEdge ) =
                     Triangle3d.edges triangle
 
                 ( ab, ac, bc ) =
@@ -151,59 +151,58 @@ bezierSplinesThroughExistingPoints isLoop tension tolerance startIndx endIndex t
     in
     foldOutput.newPoints
 
+
+
 {-
 
-bezierApproximation : Bool -> Float -> Float -> List TrackPoint -> List TrackPoint
-bezierApproximation _ _ tolerance points =
-    -- This variant uses existing points as controls, and lets the result approximate the route.
-    -- Arguments compatible; loopiness and tension not used.
-    let
-        rawPoints =
-            List.map .xyz points
+   bezierApproximation : Bool -> Float -> Float -> List TrackPoint -> List TrackPoint
+   bezierApproximation _ _ tolerance points =
+       -- This variant uses existing points as controls, and lets the result approximate the route.
+       -- Arguments compatible; loopiness and tension not used.
+       let
+           rawPoints =
+               List.map .xyz points
 
-        makeSpline first second third =
-            let
-                ( start, end ) =
-                    ( Point3d.midpoint first second
-                    , Point3d.midpoint second third
-                    )
-            in
-            CubicSpline3d.fromControlPoints
-                start
-                second
-                second
-                end
+           makeSpline first second third =
+               let
+                   ( start, end ) =
+                       ( Point3d.midpoint first second
+                       , Point3d.midpoint second third
+                       )
+               in
+               CubicSpline3d.fromControlPoints
+                   start
+                   second
+                   second
+                   end
 
-        makeSplines =
-            List.map3
-                makeSpline
-                rawPoints
-                (List.drop 1 rawPoints)
-                (List.drop 2 rawPoints)
+           makeSplines =
+               List.map3
+                   makeSpline
+                   rawPoints
+                   (List.drop 1 rawPoints)
+                   (List.drop 2 rawPoints)
 
-        asPolylines =
-            List.map
-                (CubicSpline3d.approximate (Length.meters tolerance))
-                makeSplines
+           asPolylines =
+               List.map
+                   (CubicSpline3d.approximate (Length.meters tolerance))
+                   makeSplines
 
-        asSegments =
-            List.concatMap
-                Polyline3d.segments
-                asPolylines
+           asSegments =
+               List.concatMap
+                   Polyline3d.segments
+                   asPolylines
 
-        asPointsAgain =
-            List.map
-                LineSegment3d.startPoint
-                (List.take 1 asSegments)
-                ++ List.map
-                    LineSegment3d.endPoint
-                    asSegments
-    in
-    List.take 1 points
-        ++ List.map trackPointFromPoint asPointsAgain
-        ++ List.drop (List.length points - 1) points
+           asPointsAgain =
+               List.map
+                   LineSegment3d.startPoint
+                   (List.take 1 asSegments)
+                   ++ List.map
+                       LineSegment3d.endPoint
+                       asSegments
+       in
+       List.take 1 points
+           ++ List.map trackPointFromPoint asPointsAgain
+           ++ List.drop (List.length points - 1) points
 -}
-
-
-
 -- END

@@ -9,6 +9,7 @@ DEBT: Map sends more click messages each time we click. They are debounced but, 
 1. Bezier x 2  ++ needs "Track is a loop" variant.
 
 > Map preview is wrong. Looks like GPX conversion is wrong.
+> (Try visualising control points ...)
 > Undo badly broke.
 > Need Undo stack message.
 > Spline calc looks wrong to boot.

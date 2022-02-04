@@ -33,14 +33,6 @@ type Msg
 computeNewPoints : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
 computeNewPoints options track =
     let
-        fullRenderingZone =
-            BoundingBox3d.withDimensions
-                ( fullDepthRenderingBoxSize
-                , fullDepthRenderingBoxSize
-                , fullDepthRenderingBoxSize
-                )
-                (startPoint <| leafFromIndex track.currentPosition track.trackTree)
-
         ( fromStart, fromEnd ) =
             case track.markerPosition of
                 Just _ ->
@@ -111,7 +103,7 @@ toolStateChange opened colour options track =
             ( options
             , [ ShowPreview
                     { tag = "bezier"
-                    , shape = PreviewLine
+                    , shape = PreviewCircle
                     , colour = colour
                     , points = computeNewPoints options theTrack
                     }
@@ -135,7 +127,7 @@ update msg options previewColour hasTrack =
             ( { options | bezierTension = tension }
             , [ ShowPreview
                     { tag = "bezier"
-                    , shape = PreviewLine
+                    , shape = PreviewCircle
                     , colour = previewColour
                     , points = computeNewPoints options track
                     }
@@ -146,7 +138,7 @@ update msg options previewColour hasTrack =
             ( { options | bezierTolerance = tolerance }
             , [ ShowPreview
                     { tag = "bezier"
-                    , shape = PreviewLine
+                    , shape = PreviewCircle
                     , colour = previewColour
                     , points = computeNewPoints options track
                     }
@@ -164,7 +156,7 @@ update msg options previewColour hasTrack =
             ( { options | bezierStyle = style }
             , [ ShowPreview
                     { tag = "bezier"
-                    , shape = PreviewLine
+                    , shape = PreviewCircle
                     , colour = previewColour
                     , points = computeNewPoints options track
                     }
@@ -188,8 +180,8 @@ view wrap options =
                                 "Tension "
                                     ++ showDecimal2 options.bezierTension
                     , min = 0.0
-                    , max = 2.0
-                    , step = Just 0.1
+                    , max = 1.0
+                    , step = Nothing
                     , value = options.bezierTension
                     , thumb = Input.defaultThumb
                     }

@@ -12147,8 +12147,8 @@ var $author$project$BezierSplines$bezierSplinesThroughExistingPoints = F6(
 		var controlPointsFromTriangle = function (triangle) {
 			var _v8 = $ianmackenzie$elm_geometry$Triangle3d$edges(triangle);
 			var entryEdge = _v8.a;
-			var oppositeEdge = _v8.b;
-			var exitEdge = _v8.c;
+			var exitEdge = _v8.b;
+			var oppositeEdge = _v8.c;
 			var controlPointVector = A2(
 				$ianmackenzie$elm_geometry$Vector3d$from,
 				$ianmackenzie$elm_geometry$LineSegment3d$startPoint(oppositeEdge),
@@ -12216,12 +12216,14 @@ var $author$project$BezierSplines$bezierSplinesThroughExistingPoints = F6(
 							controlPointsFromTriangle(triangle1),
 							controlPointsFromTriangle(triangle2));
 						var _v6 = _v5.a;
-						var start = _v6.b;
-						var control1 = _v6.c;
+						var c1 = _v6.a;
+						var b1 = _v6.b;
+						var a1 = _v6.c;
 						var _v7 = _v5.b;
-						var control2 = _v7.a;
-						var end = _v7.b;
-						var spline = A4($ianmackenzie$elm_geometry$CubicSpline3d$fromControlPoints, start, control1, control2, end);
+						var c2 = _v7.a;
+						var b2 = _v7.b;
+						var a2 = _v7.c;
+						var spline = A4($ianmackenzie$elm_geometry$CubicSpline3d$fromControlPoints, b1, c1, a2, b2);
 						var polylineFromSpline = A2(
 							$ianmackenzie$elm_geometry$CubicSpline3d$approximate,
 							$ianmackenzie$elm_units$Length$meters(tolerance),
@@ -12256,7 +12258,6 @@ var $author$project$BezierSplines$bezierSplinesThroughExistingPoints = F6(
 			A3($author$project$BezierSplines$SplineFoldState, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing, _List_Nil));
 		return foldOutput.newPoints;
 	});
-var $author$project$UtilsForViews$fullDepthRenderingBoxSize = $ianmackenzie$elm_units$Length$kilometers(4);
 var $author$project$TrackLoaded$getRangeFromMarkers = function (track) {
 	var theLength = $author$project$DomainModel$skipCount(track.trackTree);
 	var _v0 = track.markerPosition;
@@ -12299,11 +12300,6 @@ var $author$project$DomainModel$gpxFromPointWithReference = F2(
 	});
 var $author$project$Tools$BezierSplines$computeNewPoints = F2(
 	function (options, track) {
-		var fullRenderingZone = A2(
-			$ianmackenzie$elm_geometry$BoundingBox3d$withDimensions,
-			_Utils_Tuple3($author$project$UtilsForViews$fullDepthRenderingBoxSize, $author$project$UtilsForViews$fullDepthRenderingBoxSize, $author$project$UtilsForViews$fullDepthRenderingBoxSize),
-			$author$project$DomainModel$startPoint(
-				A2($author$project$DomainModel$leafFromIndex, track.currentPosition, track.trackTree)));
 		var _v0 = function () {
 			var _v1 = track.markerPosition;
 			if (_v1.$ === 'Just') {
@@ -13382,7 +13378,6 @@ var $author$project$Tools$AbruptDirectionChanges$toolStateChange = F4(
 					]));
 		}
 	});
-var $author$project$Actions$PreviewLine = {$: 'PreviewLine'};
 var $author$project$Tools$BezierSplines$toolStateChange = F4(
 	function (opened, colour, options, track) {
 		var _v0 = _Utils_Tuple2(opened, track);
@@ -13396,7 +13391,7 @@ var $author$project$Tools$BezierSplines$toolStateChange = F4(
 						{
 							colour: colour,
 							points: A2($author$project$Tools$BezierSplines$computeNewPoints, options, theTrack),
-							shape: $author$project$Actions$PreviewLine,
+							shape: $author$project$Actions$PreviewCircle,
 							tag: 'bezier'
 						})
 					]));
@@ -13409,6 +13404,7 @@ var $author$project$Tools$BezierSplines$toolStateChange = F4(
 					]));
 		}
 	});
+var $author$project$UtilsForViews$fullDepthRenderingBoxSize = $ianmackenzie$elm_units$Length$kilometers(4);
 var $author$project$Tools$DeletePoints$toolStateChange = F4(
 	function (opened, colour, options, track) {
 		var _v0 = _Utils_Tuple2(opened, track);
@@ -19191,7 +19187,7 @@ var $author$project$Tools$BezierSplines$update = F4(
 									{
 										colour: previewColour,
 										points: A2($author$project$Tools$BezierSplines$computeNewPoints, options, track),
-										shape: $author$project$Actions$PreviewLine,
+										shape: $author$project$Actions$PreviewCircle,
 										tag: 'bezier'
 									})
 								]));
@@ -19208,7 +19204,7 @@ var $author$project$Tools$BezierSplines$update = F4(
 									{
 										colour: previewColour,
 										points: A2($author$project$Tools$BezierSplines$computeNewPoints, options, track),
-										shape: $author$project$Actions$PreviewLine,
+										shape: $author$project$Actions$PreviewCircle,
 										tag: 'bezier'
 									})
 								]));
@@ -19235,7 +19231,7 @@ var $author$project$Tools$BezierSplines$update = F4(
 									{
 										colour: previewColour,
 										points: A2($author$project$Tools$BezierSplines$computeNewPoints, options, track),
-										shape: $author$project$Actions$PreviewLine,
+										shape: $author$project$Actions$PreviewCircle,
 										tag: 'bezier'
 									})
 								]));
@@ -28471,10 +28467,10 @@ var $author$project$Tools$BezierSplines$view = F2(
 							_List_Nil,
 							$mdgriffith$elm_ui$Element$text(
 								'Tension ' + $author$project$UtilsForViews$showDecimal2(options.bezierTension))),
-						max: 2.0,
+						max: 1.0,
 						min: 0.0,
 						onChange: A2($elm$core$Basics$composeL, wrap, $author$project$Tools$BezierSplines$SetBezierTension),
-						step: $elm$core$Maybe$Just(0.1),
+						step: $elm$core$Maybe$Nothing,
 						thumb: $mdgriffith$elm_ui$Element$Input$defaultThumb,
 						value: options.bezierTension
 					}),
