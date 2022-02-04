@@ -12124,11 +12124,11 @@ var $author$project$BezierSplines$bezierSplineApproximation = F6(
 							road.startPoint,
 							midPoint(road)));
 					var _v2 = _v1.a;
-					var c1 = _v2.a;
-					var b1 = _v2.b;
+					var b1 = _v2.a;
+					var c1 = _v2.b;
 					var _v3 = _v1.b;
-					var b2 = _v3.a;
-					var a2 = _v3.b;
+					var a2 = _v3.a;
+					var b2 = _v3.b;
 					var spline = A4($ianmackenzie$elm_geometry$CubicSpline3d$fromControlPoints, b1, c1, a2, b2);
 					var polylineFromSpline = A2(
 						$ianmackenzie$elm_geometry$CubicSpline3d$approximate,
@@ -19277,7 +19277,7 @@ var $author$project$Tools$BezierSplines$update = F4(
 										tag: 'bezier'
 									})
 								]));
-					case 'BezierSplines':
+					case 'BezierApplyWithOptions':
 						var track = _v0.a.a;
 						var _v1 = _v0.b;
 						return _Utils_Tuple2(

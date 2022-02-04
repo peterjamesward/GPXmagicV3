@@ -168,7 +168,7 @@ bezierSplineApproximation isLoop tension tolerance startIndx endIndex treeNode =
 
                 Just roadMinusOne ->
                     let
-                        ( ( c1, b1 ), ( b2, a2 ) ) =
+                        ( ( b1, c1 ), ( a2, b2 ) ) =
                             ( ( midPoint roadMinusOne, roadMinusOne.endPoint )
                             , ( road.startPoint, midPoint road )
                             )

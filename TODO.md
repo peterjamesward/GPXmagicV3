@@ -6,10 +6,6 @@ DEBT: Map sends more click messages each time we click. They are debounced but, 
 
 # WIP
 
-1. Bezier x 2  ++ needs "Track is a loop" variant.
-
-"Through looks good", "Approximate" should be quicker now.
-
 ---
 
 # BACKLOG, roughly in order ...

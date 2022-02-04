@@ -153,7 +153,7 @@ update msg options previewColour hasTrack =
               ]
             )
 
-        ( Just track, BezierSplines ) ->
+        ( Just track, BezierApplyWithOptions ) ->
             ( options
             , [ Actions.BezierApplyWithOptions options
               , TrackHasChanged
