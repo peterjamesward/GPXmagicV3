@@ -24,7 +24,6 @@ type alias UndoEntry msg =
     , originalPoints : List GPXSource -- for reconstructing the original tree
     , fromStart : Int -- so we do not need to decode the action.
     , fromEnd : Int
-    , message : String
     , currentPosition : Int
     , markerPosition : Maybe Int
     }
@@ -64,11 +63,10 @@ addToUndoStack :
     ToolAction msg
     -> Int
     -> Int
-    -> String
     -> List GPXSource
     -> TrackLoaded msg
     -> TrackLoaded msg
-addToUndoStack action fromStart fromEnd message oldPoints oldTrack =
+addToUndoStack action fromStart fromEnd  oldPoints oldTrack =
     let
         undoEntry : UndoEntry msg
         undoEntry =
@@ -76,7 +74,6 @@ addToUndoStack action fromStart fromEnd message oldPoints oldTrack =
             , originalPoints = oldPoints
             , fromStart = fromStart
             , fromEnd = fromEnd
-            , message = message
             , currentPosition = oldTrack.currentPosition
             , markerPosition = oldTrack.markerPosition
             }

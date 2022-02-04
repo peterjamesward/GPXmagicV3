@@ -55,4 +55,7 @@ interpretAction action =
         DeleteSinglePoint fromStart fromEnd ->
             "delete single point"
 
-        _ -> "the last thing"
+        BezierSplineThroughCurrentPoints options ->
+            "Bezier spline through current points"
+
+        _ -> "ask Pete to fix this message"

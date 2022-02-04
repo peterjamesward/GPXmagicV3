@@ -74,8 +74,8 @@ applyUsingCurrentPoints options track =
         oldPoints =
             -- +1s here?
             DomainModel.extractPointsInRange
-                (fromStart + 1)
-                (fromEnd + 1)
+                fromStart
+                fromEnd
                 track.trackTree
     in
     ( newTree

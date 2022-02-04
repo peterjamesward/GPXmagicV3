@@ -1003,7 +1003,6 @@ performActionsOnModel actions model =
                                     action
                                     fromStart
                                     fromEnd
-                                    "delete points"
                                     oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
@@ -1022,7 +1021,6 @@ performActionsOnModel actions model =
                                 |> TrackLoaded.addToUndoStack action
                                     fromStart
                                     fromEnd
-                                    "delete one point"
                                     oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
@@ -1033,12 +1031,14 @@ performActionsOnModel actions model =
                         ( newTree, oldPoints ) =
                             Tools.BezierSplines.applyUsingCurrentPoints options track
 
+                        (fromStart, fromEnd) =
+                            TrackLoaded.getRangeFromMarkers track
+
                         newTrack =
                             track
                                 |> TrackLoaded.addToUndoStack action
-                                    0
-                                    0
-                                    "bezier spline"
+                                    fromStart
+                                    fromEnd
                                     oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in

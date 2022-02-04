@@ -1,7 +1,6 @@
 module Tools.UndoRedo exposing (..)
 
 import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
-import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), asRecord, skipCount)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input
