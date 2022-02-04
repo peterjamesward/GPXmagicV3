@@ -6,13 +6,14 @@ DEBT: Map sends more click messages each time we click. They are debounced but, 
 
 # WIP
 
+2. Centroid average
+
 ---
 
 # BACKLOG, roughly in order ...
 
 ## Tools
 
-2. Centroid average
 3. Curve Former (2-way drag should correct for azimuth)
 4. Classic bend smoother
 5. Drag on map
@@ -26,7 +27,7 @@ DEBT: Map sends more click messages each time we click. They are debounced but, 
 13. Segment info
 14. Graph Theory
 15. Use Strava segment data
-16. Loops (includes Out and Back)
+16. Loops (includes Out and Back) (+ impact on others, such as Bezier).
 17. Visual options
 18. SVG import
 19. Map Satellite style choice
