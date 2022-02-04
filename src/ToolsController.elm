@@ -15,6 +15,7 @@ import Json.Decode as D exposing (field)
 import Json.Encode as E
 import List.Extra
 import Tools.AbruptDirectionChanges as AbruptDirectionChanges
+import Tools.BezierOptions
 import Tools.BezierSplines
 import Tools.DeletePoints as DeletePoints
 import Tools.Pointers as Pointers
@@ -57,7 +58,7 @@ type alias Options =
     , pointerOptions : Pointers.Options
     , undoRedoOptions : UndoRedo.Options
     , imperial : Bool
-    , bezierSplineOptions : Tools.BezierSplines.Options
+    , bezierSplineOptions : Tools.BezierOptions.Options
     }
 
 

@@ -42,6 +42,7 @@ import SplitPane.SplitPane as SplitPane exposing (..)
 import StravaAuth exposing (getStravaToken)
 import Task
 import Time
+import Tools.BezierSplines
 import Tools.DeletePoints as DeletePoints
 import ToolsController exposing (ToolEntry)
 import TrackLoaded exposing (TrackLoaded)
@@ -1018,6 +1019,18 @@ performActionsOnModel actions model =
                     in
                     { foldedModel | track = Just newTrack }
 
+                ( BezierSplineThroughCurrentPoints options, Just track ) ->
+                    let
+                        ( newTree, oldPoints ) =
+                            Tools.BezierSplines.applyUsingCurrentPoints options track
+
+                        newTrack =
+                            track
+                                |> TrackLoaded.addToUndoStack action 0 0 oldPoints
+                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                    in
+                    { foldedModel | track = Just newTrack }
+
                 ( TrackHasChanged, Just track ) ->
                     -- Must be wary of looping here.
                     -- Purpose is to refresh all tools' options and all presentations.
@@ -1134,8 +1147,8 @@ performActionCommands actions model =
 
                 ( SetCurrentFromMapClick position, Just track ) ->
                     Cmd.none
-                    --MapPortController.addMarkersToMap track
 
+                --MapPortController.addMarkersToMap track
                 ( MapCenterOnCurrent, Just track ) ->
                     MapPortController.centreMapOnCurrent track
 

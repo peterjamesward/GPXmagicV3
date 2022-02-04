@@ -8,21 +8,17 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
+import Tools.BezierOptions as BezierOptions exposing (BezierStyle(..), Options)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (fullDepthRenderingBoxSize, showDecimal2)
 import ViewPureStyles exposing (commonShortHorizontalSliderStyles, neatToolsBorder, prettyButtonStyles)
-
-
-type alias Options =
-    { bezierTension : Float
-    , bezierTolerance : Float
-    }
 
 
 defaultOptions : Options
 defaultOptions =
     { bezierTension = 0.5
     , bezierTolerance = 5.0
+    , bezierStyle = BezierOptions.Approximated
     }
 
 
@@ -31,6 +27,7 @@ type Msg
     | SetBezierTolerance Float
     | BezierSplines
     | BezierApproximation
+    | SetBezierStyle BezierStyle
 
 
 computeNewPoints : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
@@ -71,6 +68,37 @@ computeNewPoints options track =
                     )
     in
     previewPoints
+
+applyUsingCurrentPoints : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyUsingCurrentPoints options track =
+    let
+        ( fromStart, fromEnd ) =
+            case track.markerPosition of
+                Just marker ->
+                    TrackLoaded.getRangeFromMarkers track
+
+                Nothing ->
+                    ( 0, 0 )
+
+        newTree =
+            DomainModel.replaceRange
+                (fromStart + 1)
+                (fromEnd + 1)
+                track.referenceLonLat
+                (List.map Tuple.second <| computeNewPoints options track)
+                track.trackTree
+
+        oldPoints =
+            -- The Nothing here means no depth limit, so we get all the points.
+            -- Note we have to reverse them.
+            DomainModel.extractPointsInRange
+                fromStart
+                fromEnd
+                track.trackTree
+    in
+    ( newTree
+    , oldPoints |> List.map Tuple.second
+    )
 
 
 toolStateChange :
@@ -129,8 +157,19 @@ update msg options previewColour hasTrack =
 
         ( Just track, BezierSplines ) ->
             ( options
-            , [ Actions.BezierSplineThroughCurrentPoints
+            , [ Actions.BezierSplineThroughCurrentPoints options
               , TrackHasChanged
+              ]
+            )
+
+        ( Just track, SetBezierStyle style ) ->
+            ( { options | bezierStyle = style }
+            , [ ShowPreview
+                    { tag = "bezier"
+                    , shape = PreviewLine
+                    , colour = previewColour
+                    , points = computeNewPoints options track
+                    }
               ]
             )
 
@@ -171,19 +210,33 @@ view wrap options =
                     }
                 ]
 
-        buttons =
-            row [ centerX, width fill, spacing 5 ]
-                [ button
-                    (width fill :: neatToolsBorder)
-                    { onPress = Just <| wrap BezierSplines
-                    , label = paragraph [] [ text "Pass through existing points" ]
-                    }
-                , button
-                    (width fill :: neatToolsBorder)
-                    { onPress = Just <| wrap BezierApproximation
-                    , label = paragraph [] [ text "Use existing points as a guide" ]
-                    }
+        modeChoice =
+            Input.radio
+                [ padding 10
+                , spacing 5
                 ]
+                { onChange = wrap << SetBezierStyle
+                , selected = Just options.bezierStyle
+                , label = Input.labelHidden "Style"
+                , options =
+                    [ Input.option ThroughExisting (text "Through existing points")
+                    , Input.option Approximated (text "Approximating existing points")
+                    ]
+                }
+
+        actionButton =
+            el [ centerX, width fill, spacing 5 ] <|
+                button (width fill :: neatToolsBorder) <|
+                    case options.bezierStyle of
+                        ThroughExisting ->
+                            { onPress = Just <| wrap BezierSplines
+                            , label = paragraph [] [ text "Apply" ]
+                            }
+
+                        Approximated ->
+                            { onPress = Just <| wrap BezierApproximation
+                            , label = paragraph [] [ text "Apply" ]
+                            }
     in
     column
         [ spacing 10
@@ -193,5 +246,6 @@ view wrap options =
         , Background.color FlatColors.ChinesePalette.antiFlashWhite
         ]
         [ sliders
-        , buttons
+        , modeChoice
+        , actionButton
         ]

@@ -6,6 +6,7 @@ module Actions exposing (..)
 import DomainModel exposing (EarthPoint, GPXSource)
 import Element
 import Json.Decode as E
+import Tools.BezierOptions
 import Tools.MemoryUsage
 
 
@@ -28,7 +29,7 @@ type ToolAction msg
     | RedoUndoneAction
     | HeapStatusUpdate Tools.MemoryUsage.HeapStatus
     | RenderProfile
-    | BezierSplineThroughCurrentPoints
+    | BezierSplineThroughCurrentPoints Tools.BezierOptions.Options
 
 
 type PreviewShape
