@@ -7,7 +7,11 @@ DEBT: Map sends more click messages each time we click. They are debounced but, 
 
 # WIP
 
-2. Centroid average
+## Centroid average 
+
+> Not heeding the markers.
+> Need to check splicing.
+> Need to apply altitude & position options.
 
 ---
 

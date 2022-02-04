@@ -65,7 +65,6 @@ applyUsingOptions options track =
                 track.trackTree
 
         oldPoints =
-            -- +1s here?
             DomainModel.extractPointsInRange
                 fromStart
                 fromEnd
@@ -236,10 +235,6 @@ centroidAverage : Bool -> Float -> Int -> Int -> PeteTree -> List EarthPoint
 centroidAverage isLoop weight startIndx endIndex treeNode =
     -- Structurally pretty much same as Bezier approximation.
     let
-        midPoint : RoadSection -> EarthPoint
-        midPoint road =
-            Point3d.midpoint road.startPoint road.endPoint
-
         foldFn : RoadSection -> FoldState -> FoldState
         foldFn road state =
             case state.roadMinusOne of
