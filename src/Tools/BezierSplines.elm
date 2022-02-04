@@ -124,23 +124,31 @@ update :
 update msg options previewColour hasTrack =
     case ( hasTrack, msg ) of
         ( Just track, SetBezierTension tension ) ->
-            ( { options | bezierTension = tension }
+            let
+                newOptions =
+                    { options | bezierTension = tension }
+            in
+            ( newOptions
             , [ ShowPreview
                     { tag = "bezier"
                     , shape = PreviewCircle
                     , colour = previewColour
-                    , points = computeNewPoints options track
+                    , points = computeNewPoints newOptions track
                     }
               ]
             )
 
         ( Just track, SetBezierTolerance tolerance ) ->
-            ( { options | bezierTolerance = tolerance }
+            let
+                newOptions =
+                    { options | bezierTolerance = tolerance }
+            in
+            ( newOptions
             , [ ShowPreview
                     { tag = "bezier"
                     , shape = PreviewCircle
                     , colour = previewColour
-                    , points = computeNewPoints options track
+                    , points = computeNewPoints newOptions track
                     }
               ]
             )
@@ -153,12 +161,16 @@ update msg options previewColour hasTrack =
             )
 
         ( Just track, SetBezierStyle style ) ->
-            ( { options | bezierStyle = style }
+            let
+                newOptions =
+                    { options | bezierStyle = style }
+            in
+            ( newOptions
             , [ ShowPreview
                     { tag = "bezier"
                     , shape = PreviewCircle
                     , colour = previewColour
-                    , points = computeNewPoints options track
+                    , points = computeNewPoints newOptions track
                     }
               ]
             )

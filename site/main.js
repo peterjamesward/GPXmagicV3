@@ -19244,16 +19244,17 @@ var $author$project$Tools$BezierSplines$update = F4(
 					case 'SetBezierTension':
 						var track = _v0.a.a;
 						var tension = _v0.b.a;
+						var newOptions = _Utils_update(
+							options,
+							{bezierTension: tension});
 						return _Utils_Tuple2(
-							_Utils_update(
-								options,
-								{bezierTension: tension}),
+							newOptions,
 							_List_fromArray(
 								[
 									$author$project$Actions$ShowPreview(
 									{
 										colour: previewColour,
-										points: A2($author$project$Tools$BezierSplines$computeNewPoints, options, track),
+										points: A2($author$project$Tools$BezierSplines$computeNewPoints, newOptions, track),
 										shape: $author$project$Actions$PreviewCircle,
 										tag: 'bezier'
 									})
@@ -19261,16 +19262,17 @@ var $author$project$Tools$BezierSplines$update = F4(
 					case 'SetBezierTolerance':
 						var track = _v0.a.a;
 						var tolerance = _v0.b.a;
+						var newOptions = _Utils_update(
+							options,
+							{bezierTolerance: tolerance});
 						return _Utils_Tuple2(
-							_Utils_update(
-								options,
-								{bezierTolerance: tolerance}),
+							newOptions,
 							_List_fromArray(
 								[
 									$author$project$Actions$ShowPreview(
 									{
 										colour: previewColour,
-										points: A2($author$project$Tools$BezierSplines$computeNewPoints, options, track),
+										points: A2($author$project$Tools$BezierSplines$computeNewPoints, newOptions, track),
 										shape: $author$project$Actions$PreviewCircle,
 										tag: 'bezier'
 									})
@@ -19288,16 +19290,17 @@ var $author$project$Tools$BezierSplines$update = F4(
 					case 'SetBezierStyle':
 						var track = _v0.a.a;
 						var style = _v0.b.a;
+						var newOptions = _Utils_update(
+							options,
+							{bezierStyle: style});
 						return _Utils_Tuple2(
-							_Utils_update(
-								options,
-								{bezierStyle: style}),
+							newOptions,
 							_List_fromArray(
 								[
 									$author$project$Actions$ShowPreview(
 									{
 										colour: previewColour,
-										points: A2($author$project$Tools$BezierSplines$computeNewPoints, options, track),
+										points: A2($author$project$Tools$BezierSplines$computeNewPoints, newOptions, track),
 										shape: $author$project$Actions$PreviewCircle,
 										tag: 'bezier'
 									})
