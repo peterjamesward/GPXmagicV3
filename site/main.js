@@ -11936,11 +11936,27 @@ var $ianmackenzie$elm_geometry$CubicSpline3d$approximate = F2(
 			A2($ianmackenzie$elm_geometry$CubicSpline3d$numApproximationSegments, maxError, spline),
 			spline);
 	});
-var $ianmackenzie$elm_geometry$LineSegment3d$endPoint = function (_v0) {
-	var _v1 = _v0.a;
-	var end = _v1.b;
-	return end;
-};
+var $elm$core$List$drop = F2(
+	function (n, list) {
+		drop:
+		while (true) {
+			if (n <= 0) {
+				return list;
+			} else {
+				if (!list.b) {
+					return list;
+				} else {
+					var x = list.a;
+					var xs = list.b;
+					var $temp$n = n - 1,
+						$temp$list = xs;
+					n = $temp$n;
+					list = $temp$list;
+					continue drop;
+				}
+			}
+		}
+	});
 var $ianmackenzie$elm_geometry$Geometry$Types$CubicSpline3d = function (a) {
 	return {$: 'CubicSpline3d', a: a};
 };
@@ -11956,163 +11972,10 @@ var $ianmackenzie$elm_geometry$Point3d$midpoint = F2(
 		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
 			{x: p1.x + (0.5 * (p2.x - p1.x)), y: p1.y + (0.5 * (p2.y - p1.y)), z: p1.z + (0.5 * (p2.z - p1.z))});
 	});
-var $ianmackenzie$elm_geometry$Geometry$Types$LineSegment3d = function (a) {
-	return {$: 'LineSegment3d', a: a};
-};
-var $ianmackenzie$elm_geometry$LineSegment3d$fromEndpoints = function (givenEndpoints) {
-	return $ianmackenzie$elm_geometry$Geometry$Types$LineSegment3d(givenEndpoints);
-};
-var $ianmackenzie$elm_geometry$LineSegment3d$from = F2(
-	function (givenStartPoint, givenEndPoint) {
-		return $ianmackenzie$elm_geometry$LineSegment3d$fromEndpoints(
-			_Utils_Tuple2(givenStartPoint, givenEndPoint));
-	});
 var $ianmackenzie$elm_geometry$Polyline3d$vertices = function (_v0) {
 	var polylineVertices = _v0.a;
 	return polylineVertices;
 };
-var $ianmackenzie$elm_geometry$Polyline3d$segments = function (polyline) {
-	var _v0 = $ianmackenzie$elm_geometry$Polyline3d$vertices(polyline);
-	if (!_v0.b) {
-		return _List_Nil;
-	} else {
-		var all = _v0;
-		var first = all.a;
-		var rest = all.b;
-		return A3($elm$core$List$map2, $ianmackenzie$elm_geometry$LineSegment3d$from, all, rest);
-	}
-};
-var $ianmackenzie$elm_geometry$LineSegment3d$startPoint = function (_v0) {
-	var _v1 = _v0.a;
-	var start = _v1.a;
-	return start;
-};
-var $elm$core$List$takeReverse = F3(
-	function (n, list, kept) {
-		takeReverse:
-		while (true) {
-			if (n <= 0) {
-				return kept;
-			} else {
-				if (!list.b) {
-					return kept;
-				} else {
-					var x = list.a;
-					var xs = list.b;
-					var $temp$n = n - 1,
-						$temp$list = xs,
-						$temp$kept = A2($elm$core$List$cons, x, kept);
-					n = $temp$n;
-					list = $temp$list;
-					kept = $temp$kept;
-					continue takeReverse;
-				}
-			}
-		}
-	});
-var $elm$core$List$takeTailRec = F2(
-	function (n, list) {
-		return $elm$core$List$reverse(
-			A3($elm$core$List$takeReverse, n, list, _List_Nil));
-	});
-var $elm$core$List$takeFast = F3(
-	function (ctr, n, list) {
-		if (n <= 0) {
-			return _List_Nil;
-		} else {
-			var _v0 = _Utils_Tuple2(n, list);
-			_v0$1:
-			while (true) {
-				_v0$5:
-				while (true) {
-					if (!_v0.b.b) {
-						return list;
-					} else {
-						if (_v0.b.b.b) {
-							switch (_v0.a) {
-								case 1:
-									break _v0$1;
-								case 2:
-									var _v2 = _v0.b;
-									var x = _v2.a;
-									var _v3 = _v2.b;
-									var y = _v3.a;
-									return _List_fromArray(
-										[x, y]);
-								case 3:
-									if (_v0.b.b.b.b) {
-										var _v4 = _v0.b;
-										var x = _v4.a;
-										var _v5 = _v4.b;
-										var y = _v5.a;
-										var _v6 = _v5.b;
-										var z = _v6.a;
-										return _List_fromArray(
-											[x, y, z]);
-									} else {
-										break _v0$5;
-									}
-								default:
-									if (_v0.b.b.b.b && _v0.b.b.b.b.b) {
-										var _v7 = _v0.b;
-										var x = _v7.a;
-										var _v8 = _v7.b;
-										var y = _v8.a;
-										var _v9 = _v8.b;
-										var z = _v9.a;
-										var _v10 = _v9.b;
-										var w = _v10.a;
-										var tl = _v10.b;
-										return (ctr > 1000) ? A2(
-											$elm$core$List$cons,
-											x,
-											A2(
-												$elm$core$List$cons,
-												y,
-												A2(
-													$elm$core$List$cons,
-													z,
-													A2(
-														$elm$core$List$cons,
-														w,
-														A2($elm$core$List$takeTailRec, n - 4, tl))))) : A2(
-											$elm$core$List$cons,
-											x,
-											A2(
-												$elm$core$List$cons,
-												y,
-												A2(
-													$elm$core$List$cons,
-													z,
-													A2(
-														$elm$core$List$cons,
-														w,
-														A3($elm$core$List$takeFast, ctr + 1, n - 4, tl)))));
-									} else {
-										break _v0$5;
-									}
-							}
-						} else {
-							if (_v0.a === 1) {
-								break _v0$1;
-							} else {
-								break _v0$5;
-							}
-						}
-					}
-				}
-				return list;
-			}
-			var _v1 = _v0.b;
-			var x = _v1.a;
-			return _List_fromArray(
-				[x]);
-		}
-	});
-var $elm$core$List$take = F2(
-	function (n, list) {
-		return A3($elm$core$List$takeFast, 0, n, list);
-	});
 var $author$project$BezierSplines$bezierSplineApproximation = F6(
 	function (isLoop, tension, tolerance, startIndx, endIndex, treeNode) {
 		var midPoint = function (road) {
@@ -12147,19 +12010,15 @@ var $author$project$BezierSplines$bezierSplineApproximation = F6(
 						$ianmackenzie$elm_geometry$CubicSpline3d$approximate,
 						$ianmackenzie$elm_units$Length$meters(0.2 * tolerance),
 						spline);
-					var asSegments = $ianmackenzie$elm_geometry$Polyline3d$segments(polylineFromSpline);
-					var asPointsAgain = _Utils_ap(
+					var vertices = $elm$core$List$reverse(
 						A2(
-							$elm$core$List$map,
-							$ianmackenzie$elm_geometry$LineSegment3d$startPoint,
-							A2($elm$core$List$take, 1, asSegments)),
-						A2($elm$core$List$map, $ianmackenzie$elm_geometry$LineSegment3d$endPoint, asSegments));
+							$elm$core$List$drop,
+							1,
+							$ianmackenzie$elm_geometry$Polyline3d$vertices(polylineFromSpline)));
 					return _Utils_update(
 						state,
 						{
-							newPoints: _Utils_ap(
-								$elm$core$List$reverse(asPointsAgain),
-								state.newPoints),
+							newPoints: _Utils_ap(vertices, state.newPoints),
 							roadMinusOne: $elm$core$Maybe$Just(road),
 							roadMinusTwo: state.roadMinusOne
 						});
@@ -12176,6 +12035,17 @@ var $author$project$BezierSplines$bezierSplineApproximation = F6(
 			A3($author$project$BezierSplines$SplineFoldState, $elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing, _List_Nil));
 		return $elm$core$List$reverse(foldOutput.newPoints);
 	});
+var $ianmackenzie$elm_geometry$Geometry$Types$LineSegment3d = function (a) {
+	return {$: 'LineSegment3d', a: a};
+};
+var $ianmackenzie$elm_geometry$LineSegment3d$fromEndpoints = function (givenEndpoints) {
+	return $ianmackenzie$elm_geometry$Geometry$Types$LineSegment3d(givenEndpoints);
+};
+var $ianmackenzie$elm_geometry$LineSegment3d$from = F2(
+	function (givenStartPoint, givenEndPoint) {
+		return $ianmackenzie$elm_geometry$LineSegment3d$fromEndpoints(
+			_Utils_Tuple2(givenStartPoint, givenEndPoint));
+	});
 var $ianmackenzie$elm_geometry$Triangle3d$vertices = function (_v0) {
 	var triangleVertices = _v0.a;
 	return triangleVertices;
@@ -12189,6 +12059,11 @@ var $ianmackenzie$elm_geometry$Triangle3d$edges = function (triangle) {
 		A2($ianmackenzie$elm_geometry$LineSegment3d$from, p1, p2),
 		A2($ianmackenzie$elm_geometry$LineSegment3d$from, p2, p3),
 		A2($ianmackenzie$elm_geometry$LineSegment3d$from, p3, p1));
+};
+var $ianmackenzie$elm_geometry$LineSegment3d$endPoint = function (_v0) {
+	var _v1 = _v0.a;
+	var end = _v1.b;
+	return end;
 };
 var $ianmackenzie$elm_geometry$Geometry$Types$Triangle3d = function (a) {
 	return {$: 'Triangle3d', a: a};
@@ -12218,6 +12093,11 @@ var $ianmackenzie$elm_geometry$Vector3d$scaleBy = F2(
 		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
 			{x: k * v.x, y: k * v.y, z: k * v.z});
 	});
+var $ianmackenzie$elm_geometry$LineSegment3d$startPoint = function (_v0) {
+	var _v1 = _v0.a;
+	var start = _v1.a;
+	return start;
+};
 var $ianmackenzie$elm_geometry$Point3d$translateBy = F2(
 	function (_v0, _v1) {
 		var v = _v0.a;
@@ -12311,19 +12191,15 @@ var $author$project$BezierSplines$bezierSplinesThroughExistingPoints = F6(
 							$ianmackenzie$elm_geometry$CubicSpline3d$approximate,
 							$ianmackenzie$elm_units$Length$meters(0.2 * tolerance),
 							spline);
-						var asSegments = $ianmackenzie$elm_geometry$Polyline3d$segments(polylineFromSpline);
-						var asPointsAgain = _Utils_ap(
+						var vertices = $elm$core$List$reverse(
 							A2(
-								$elm$core$List$map,
-								$ianmackenzie$elm_geometry$LineSegment3d$startPoint,
-								A2($elm$core$List$take, 1, asSegments)),
-							A2($elm$core$List$map, $ianmackenzie$elm_geometry$LineSegment3d$endPoint, asSegments));
+								$elm$core$List$drop,
+								1,
+								$ianmackenzie$elm_geometry$Polyline3d$vertices(polylineFromSpline)));
 						return _Utils_update(
 							state,
 							{
-								newPoints: _Utils_ap(
-									$elm$core$List$reverse(asPointsAgain),
-									state.newPoints),
+								newPoints: _Utils_ap(vertices, state.newPoints),
 								roadMinusOne: $elm$core$Maybe$Just(road),
 								roadMinusTwo: state.roadMinusOne
 							});
@@ -12416,27 +12292,6 @@ var $author$project$Tools$BezierSplines$computeNewPoints = F2(
 			},
 			splineEarthPoints);
 		return previewPoints;
-	});
-var $elm$core$List$drop = F2(
-	function (n, list) {
-		drop:
-		while (true) {
-			if (n <= 0) {
-				return list;
-			} else {
-				if (!list.b) {
-					return list;
-				} else {
-					var x = list.a;
-					var xs = list.b;
-					var $temp$n = n - 1,
-						$temp$list = xs;
-					n = $temp$n;
-					list = $temp$list;
-					continue drop;
-				}
-			}
-		}
 	});
 var $author$project$DomainModel$extractPointsInRange = F3(
 	function (fromStart, fromEnd, trackTree) {
@@ -34888,6 +34743,132 @@ var $ryannhg$date_format$DateFormat$monthNumber_ = F2(
 var $elm$core$List$sum = function (numbers) {
 	return A3($elm$core$List$foldl, $elm$core$Basics$add, 0, numbers);
 };
+var $elm$core$List$takeReverse = F3(
+	function (n, list, kept) {
+		takeReverse:
+		while (true) {
+			if (n <= 0) {
+				return kept;
+			} else {
+				if (!list.b) {
+					return kept;
+				} else {
+					var x = list.a;
+					var xs = list.b;
+					var $temp$n = n - 1,
+						$temp$list = xs,
+						$temp$kept = A2($elm$core$List$cons, x, kept);
+					n = $temp$n;
+					list = $temp$list;
+					kept = $temp$kept;
+					continue takeReverse;
+				}
+			}
+		}
+	});
+var $elm$core$List$takeTailRec = F2(
+	function (n, list) {
+		return $elm$core$List$reverse(
+			A3($elm$core$List$takeReverse, n, list, _List_Nil));
+	});
+var $elm$core$List$takeFast = F3(
+	function (ctr, n, list) {
+		if (n <= 0) {
+			return _List_Nil;
+		} else {
+			var _v0 = _Utils_Tuple2(n, list);
+			_v0$1:
+			while (true) {
+				_v0$5:
+				while (true) {
+					if (!_v0.b.b) {
+						return list;
+					} else {
+						if (_v0.b.b.b) {
+							switch (_v0.a) {
+								case 1:
+									break _v0$1;
+								case 2:
+									var _v2 = _v0.b;
+									var x = _v2.a;
+									var _v3 = _v2.b;
+									var y = _v3.a;
+									return _List_fromArray(
+										[x, y]);
+								case 3:
+									if (_v0.b.b.b.b) {
+										var _v4 = _v0.b;
+										var x = _v4.a;
+										var _v5 = _v4.b;
+										var y = _v5.a;
+										var _v6 = _v5.b;
+										var z = _v6.a;
+										return _List_fromArray(
+											[x, y, z]);
+									} else {
+										break _v0$5;
+									}
+								default:
+									if (_v0.b.b.b.b && _v0.b.b.b.b.b) {
+										var _v7 = _v0.b;
+										var x = _v7.a;
+										var _v8 = _v7.b;
+										var y = _v8.a;
+										var _v9 = _v8.b;
+										var z = _v9.a;
+										var _v10 = _v9.b;
+										var w = _v10.a;
+										var tl = _v10.b;
+										return (ctr > 1000) ? A2(
+											$elm$core$List$cons,
+											x,
+											A2(
+												$elm$core$List$cons,
+												y,
+												A2(
+													$elm$core$List$cons,
+													z,
+													A2(
+														$elm$core$List$cons,
+														w,
+														A2($elm$core$List$takeTailRec, n - 4, tl))))) : A2(
+											$elm$core$List$cons,
+											x,
+											A2(
+												$elm$core$List$cons,
+												y,
+												A2(
+													$elm$core$List$cons,
+													z,
+													A2(
+														$elm$core$List$cons,
+														w,
+														A3($elm$core$List$takeFast, ctr + 1, n - 4, tl)))));
+									} else {
+										break _v0$5;
+									}
+							}
+						} else {
+							if (_v0.a === 1) {
+								break _v0$1;
+							} else {
+								break _v0$5;
+							}
+						}
+					}
+				}
+				return list;
+			}
+			var _v1 = _v0.b;
+			var x = _v1.a;
+			return _List_fromArray(
+				[x]);
+		}
+	});
+var $elm$core$List$take = F2(
+	function (n, list) {
+		return A3($elm$core$List$takeFast, 0, n, list);
+	});
 var $elm$time$Time$toYear = F2(
 	function (zone, time) {
 		return $elm$time$Time$toCivil(

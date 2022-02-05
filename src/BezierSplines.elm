@@ -81,23 +81,16 @@ bezierSplinesThroughExistingPoints isLoop tension tolerance startIndx endIndex t
                                 (Length.meters <| 0.2 * tolerance)
                                 spline
 
-                        asSegments : List (LineSegment3d Length.Meters LocalCoords)
-                        asSegments =
-                            Polyline3d.segments polylineFromSpline
-
-                        asPointsAgain : List EarthPoint
-                        asPointsAgain =
-                            List.map
-                                LineSegment3d.startPoint
-                                (List.take 1 asSegments)
-                                ++ List.map
-                                    LineSegment3d.endPoint
-                                    asSegments
+                        vertices : List EarthPoint
+                        vertices =
+                            Polyline3d.vertices polylineFromSpline
+                                |> List.drop 1
+                                |> List.reverse
                     in
                     { state
                         | roadMinusTwo = state.roadMinusOne
                         , roadMinusOne = Just road
-                        , newPoints = (asPointsAgain |> List.reverse) ++ state.newPoints
+                        , newPoints = vertices ++ state.newPoints
                     }
 
         controlPointsFromTriangle :
@@ -187,23 +180,16 @@ bezierSplineApproximation isLoop tension tolerance startIndx endIndex treeNode =
                                 (Length.meters <| 0.2 * tolerance)
                                 spline
 
-                        asSegments : List (LineSegment3d Length.Meters LocalCoords)
-                        asSegments =
-                            Polyline3d.segments polylineFromSpline
-
-                        asPointsAgain : List EarthPoint
-                        asPointsAgain =
-                            List.map
-                                LineSegment3d.startPoint
-                                (List.take 1 asSegments)
-                                ++ List.map
-                                    LineSegment3d.endPoint
-                                    asSegments
+                        vertices : List EarthPoint
+                        vertices =
+                            Polyline3d.vertices polylineFromSpline
+                                |> List.drop 1
+                                |> List.reverse
                     in
                     { state
                         | roadMinusTwo = state.roadMinusOne
                         , roadMinusOne = Just road
-                        , newPoints = (asPointsAgain |> List.reverse) ++ state.newPoints
+                        , newPoints = vertices ++ state.newPoints
                     }
 
         foldOutput =
@@ -217,4 +203,3 @@ bezierSplineApproximation isLoop tension tolerance startIndx endIndex treeNode =
                 (SplineFoldState Nothing Nothing [])
     in
     foldOutput.newPoints |> List.reverse
-

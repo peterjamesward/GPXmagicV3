@@ -11,11 +11,6 @@ DEBT: Map sends more click messages each time we click. They are debounced but, 
 
 # BACKLOG, roughly in order ...
 
-## Profile preview
-
-This needs previewData to have a PeteTree so we can derive distances.
-This will also allow elision, so ability to handle much larger previews.
-
 ## Tools
 
 3. Curve Former (2-way drag should correct for azimuth)
@@ -40,6 +35,12 @@ This will also allow elision, so ability to handle much larger previews.
 22. Something akin to Graphs, stemming from Muriel's route.
 23. Memory usage
 24. Samir's bend detector
+
+## Profile preview
+
+This needs previewData to have a PeteTree so we can derive distances.
+This will also allow elision, so ability to handle much larger previews.
+> Non-trivial as some tools have non-contiguous preview points. Think more.
 
 ## Error messages
 
