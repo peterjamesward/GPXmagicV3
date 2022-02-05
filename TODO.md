@@ -7,20 +7,19 @@ DEBT: Map sends more click messages each time we click. They are debounced but, 
 
 # WIP
 
-## Centroid average 
-
-> Not heeding the markers.
-> Need to check splicing.
-> Need to apply altitude & position options.
-
 ---
 
 # BACKLOG, roughly in order ...
 
+## Profile preview
+
+This needs previewData to have a PeteTree so we can derive distances.
+This will also allow elision, so ability to handle much larger previews.
+
 ## Tools
 
 3. Curve Former (2-way drag should correct for azimuth)
-4. Classic bend smoother
+4. Classic bend smoother (fix Samir's bug on looped routes)
 5. Drag on map
 6. Nudge 
 7. Segment info
@@ -29,19 +28,18 @@ DEBT: Map sends more click messages each time we click. They are debounced but, 
 10. Steep climbs
 11. Intersections
 12. Fly-through
-13. Limit gradients
-14. Graph Theory
-15. Use Strava segment data
-16. Loops (includes Out and Back) (+ impact on others, such as Bezier).
-17. Visual options
-18. SVG import
-19. Map Satellite style choice
-20. Super smoothing  (think GPXsmoother, but different)
-21. Something akin to Graphs, stemming from Muriel's route.
-22. Track synthesise (think Moog for GPX)
+13. Limit gradients 
+14. Clothoids (!!)
+15. Graph Theory
+16. Use Strava segment data
+17. Loops (includes Out and Back) (+ impact on others, such as Bezier).
+18. Visual options
+19. SVG import
+20. Map Satellite style choice
+21. Super smoothing  (think GPXsmoother, but different)
+22. Something akin to Graphs, stemming from Muriel's route.
 23. Memory usage
 24. Samir's bend detector
-25. Clothoids (!!)
 
 ## Error messages
 
@@ -75,6 +73,8 @@ Put all Font, Colour etc into a Palette/Style module for ease of change.
 Don't render anything that's not visible.
 
 Disable Live Preview for large tracks or large selections.
+Better, a user-chosen threshold of number of points for live preview.
+> Add this to "global state" which needs to pass aroud, like Imperial.
 
 ---
 

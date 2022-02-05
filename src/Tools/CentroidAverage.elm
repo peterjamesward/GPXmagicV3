@@ -6,11 +6,14 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
+import Plane3d
 import Point3d
+import Quantity
 import Tools.CentroidAverageOptions exposing (Options)
 import TrackLoaded exposing (TrackLoaded)
 import Triangle3d
 import UtilsForViews exposing (fullDepthRenderingBoxSize, showDecimal2)
+import Vector3d
 import ViewPureStyles exposing (commonShortHorizontalSliderStyles, neatToolsBorder, prettyButtonStyles)
 
 
@@ -36,7 +39,7 @@ computeNewPoints options track =
             TrackLoaded.getRangeFromMarkers track
 
         earthPoints =
-            centroidAverage False options.weighting fromStart fromEnd track.trackTree
+            centroidAverage False options fromStart fromEnd track.trackTree
 
         previewPoints =
             earthPoints
@@ -231,8 +234,8 @@ type alias FoldState =
     }
 
 
-centroidAverage : Bool -> Float -> Int -> Int -> PeteTree -> List EarthPoint
-centroidAverage isLoop weight startIndx endIndex treeNode =
+centroidAverage : Bool -> Options -> Int -> Int -> PeteTree -> List EarthPoint
+centroidAverage isLoop options fromStart fromEnd treeNode =
     -- Structurally pretty much same as Bezier approximation.
     let
         foldFn : RoadSection -> FoldState -> FoldState
@@ -244,10 +247,13 @@ centroidAverage isLoop weight startIndx endIndex treeNode =
 
                 Just roadMinusOne ->
                     let
+                        originalPoint =
+                            road.startPoint
+
                         triangle =
                             Triangle3d.from
                                 roadMinusOne.startPoint
-                                road.startPoint
+                                originalPoint
                                 road.endPoint
 
                         centroid =
@@ -255,19 +261,38 @@ centroidAverage isLoop weight startIndx endIndex treeNode =
 
                         newPoint =
                             Point3d.interpolateFrom
-                                road.startPoint
+                                originalPoint
                                 centroid
-                                weight
+                                options.weighting
+
+                        shiftVector =
+                            Vector3d.from originalPoint newPoint
+
+                        shiftWithOptions =
+                            if options.applyToAltitude && options.applyToPosition then
+                                shiftVector
+
+                            else if options.applyToPosition then
+                                shiftVector |> Vector3d.projectOnto Plane3d.xy
+
+                            else if options.applyToAltitude then
+                                Vector3d.xyz Quantity.zero Quantity.zero (Vector3d.zComponent shiftVector)
+
+                            else
+                                Vector3d.zero
+
+                        adjustedPoint =
+                            originalPoint |> Point3d.translateBy shiftWithOptions
                     in
                     { state
                         | roadMinusOne = Just road
-                        , newPoints = newPoint :: state.newPoints
+                        , newPoints = adjustedPoint :: state.newPoints
                     }
 
         foldOutput =
             DomainModel.traverseTreeBetweenLimitsToDepth
-                startIndx
-                endIndex
+                fromStart
+                (skipCount treeNode - fromEnd)
                 (always Nothing)
                 0
                 treeNode

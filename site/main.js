@@ -13165,11 +13165,52 @@ var $ianmackenzie$elm_geometry$Triangle3d$centroid = function (triangle) {
 	var p3 = _v0.c;
 	return A3($ianmackenzie$elm_geometry$Point3d$centroid3, p1, p2, p3);
 };
+var $ianmackenzie$elm_geometry$Vector3d$projectOnto = F2(
+	function (_v0, _v1) {
+		var plane = _v0.a;
+		var v = _v1.a;
+		var _v2 = plane.normalDirection;
+		var n = _v2.a;
+		var normalProjection = ((v.x * n.x) + (v.y * n.y)) + (v.z * n.z);
+		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
+			{x: v.x - (normalProjection * n.x), y: v.y - (normalProjection * n.y), z: v.z - (normalProjection * n.z)});
+	});
+var $ianmackenzie$elm_geometry$Point3d$origin = $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+	{x: 0, y: 0, z: 0});
+var $ianmackenzie$elm_geometry$Geometry$Types$Plane3d = function (a) {
+	return {$: 'Plane3d', a: a};
+};
+var $ianmackenzie$elm_geometry$Plane3d$through = F2(
+	function (givenPoint, givenNormalDirection) {
+		return $ianmackenzie$elm_geometry$Geometry$Types$Plane3d(
+			{normalDirection: givenNormalDirection, originPoint: givenPoint});
+	});
+var $ianmackenzie$elm_geometry$Geometry$Types$Direction3d = function (a) {
+	return {$: 'Direction3d', a: a};
+};
+var $ianmackenzie$elm_geometry$Direction3d$unsafe = function (givenComponents) {
+	return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(givenComponents);
+};
+var $ianmackenzie$elm_geometry$Direction3d$positiveZ = $ianmackenzie$elm_geometry$Direction3d$unsafe(
+	{x: 0, y: 0, z: 1});
+var $ianmackenzie$elm_geometry$Direction3d$z = $ianmackenzie$elm_geometry$Direction3d$positiveZ;
+var $ianmackenzie$elm_geometry$Plane3d$xy = A2($ianmackenzie$elm_geometry$Plane3d$through, $ianmackenzie$elm_geometry$Point3d$origin, $ianmackenzie$elm_geometry$Direction3d$z);
+var $ianmackenzie$elm_geometry$Vector3d$xyz = F3(
+	function (_v0, _v1, _v2) {
+		var x = _v0.a;
+		var y = _v1.a;
+		var z = _v2.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
+			{x: x, y: y, z: z});
+	});
+var $ianmackenzie$elm_geometry$Vector3d$zComponent = function (_v0) {
+	var v = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(v.z);
+};
+var $ianmackenzie$elm_geometry$Vector3d$zero = $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
+	{x: 0, y: 0, z: 0});
 var $author$project$Tools$CentroidAverage$centroidAverage = F5(
-	function (isLoop, weight, startIndx, endIndex, treeNode) {
-		var midPoint = function (road) {
-			return A2($ianmackenzie$elm_geometry$Point3d$midpoint, road.startPoint, road.endPoint);
-		};
+	function (isLoop, options, fromStart, fromEnd, treeNode) {
 		var foldFn = F2(
 			function (road, state) {
 				var _v0 = state.roadMinusOne;
@@ -13181,21 +13222,29 @@ var $author$project$Tools$CentroidAverage$centroidAverage = F5(
 						});
 				} else {
 					var roadMinusOne = _v0.a;
-					var triangle = A3($ianmackenzie$elm_geometry$Triangle3d$from, roadMinusOne.startPoint, road.startPoint, road.endPoint);
+					var originalPoint = road.startPoint;
+					var triangle = A3($ianmackenzie$elm_geometry$Triangle3d$from, roadMinusOne.startPoint, originalPoint, road.endPoint);
 					var centroid = $ianmackenzie$elm_geometry$Triangle3d$centroid(triangle);
-					var newPoint = A3($ianmackenzie$elm_geometry$Point3d$interpolateFrom, road.startPoint, centroid, weight);
+					var newPoint = A3($ianmackenzie$elm_geometry$Point3d$interpolateFrom, originalPoint, centroid, options.weighting);
+					var shiftVector = A2($ianmackenzie$elm_geometry$Vector3d$from, originalPoint, newPoint);
+					var shiftWithOptions = (options.applyToAltitude && options.applyToPosition) ? shiftVector : (options.applyToPosition ? A2($ianmackenzie$elm_geometry$Vector3d$projectOnto, $ianmackenzie$elm_geometry$Plane3d$xy, shiftVector) : (options.applyToAltitude ? A3(
+						$ianmackenzie$elm_geometry$Vector3d$xyz,
+						$ianmackenzie$elm_units$Quantity$zero,
+						$ianmackenzie$elm_units$Quantity$zero,
+						$ianmackenzie$elm_geometry$Vector3d$zComponent(shiftVector)) : $ianmackenzie$elm_geometry$Vector3d$zero));
+					var adjustedPoint = A2($ianmackenzie$elm_geometry$Point3d$translateBy, shiftWithOptions, originalPoint);
 					return _Utils_update(
 						state,
 						{
-							newPoints: A2($elm$core$List$cons, newPoint, state.newPoints),
+							newPoints: A2($elm$core$List$cons, adjustedPoint, state.newPoints),
 							roadMinusOne: $elm$core$Maybe$Just(road)
 						});
 				}
 			});
 		var foldOutput = A7(
 			$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
-			startIndx,
-			endIndex,
+			fromStart,
+			$author$project$DomainModel$skipCount(treeNode) - fromEnd,
 			$elm$core$Basics$always($elm$core$Maybe$Nothing),
 			0,
 			treeNode,
@@ -13208,7 +13257,7 @@ var $author$project$Tools$CentroidAverage$computeNewPoints = F2(
 		var _v0 = $author$project$TrackLoaded$getRangeFromMarkers(track);
 		var fromStart = _v0.a;
 		var fromEnd = _v0.b;
-		var earthPoints = A5($author$project$Tools$CentroidAverage$centroidAverage, false, options.weighting, fromStart, fromEnd, track.trackTree);
+		var earthPoints = A5($author$project$Tools$CentroidAverage$centroidAverage, false, options, fromStart, fromEnd, track.trackTree);
 		var previewPoints = A2(
 			$elm$core$List$map,
 			function (earth) {
@@ -14136,9 +14185,6 @@ var $ianmackenzie$elm_3d_scene$Scene3d$lineSegment = F2(
 var $ianmackenzie$elm_geometry$Plane3d$normalDirection = function (_v0) {
 	var plane = _v0.a;
 	return plane.normalDirection;
-};
-var $ianmackenzie$elm_geometry$Geometry$Types$Plane3d = function (a) {
-	return {$: 'Plane3d', a: a};
 };
 var $ianmackenzie$elm_geometry$Plane3d$withNormalDirection = F2(
 	function (givenNormalDirection, givenPoint) {
@@ -15094,23 +15140,6 @@ var $ianmackenzie$elm_3d_scene$Scene3d$quad = F5(
 	function (givenMaterial, p1, p2, p3, p4) {
 		return A7($ianmackenzie$elm_3d_scene$Scene3d$Entity$quad, true, false, givenMaterial, p1, p2, p3, p4);
 	});
-var $ianmackenzie$elm_geometry$Point3d$origin = $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
-	{x: 0, y: 0, z: 0});
-var $ianmackenzie$elm_geometry$Plane3d$through = F2(
-	function (givenPoint, givenNormalDirection) {
-		return $ianmackenzie$elm_geometry$Geometry$Types$Plane3d(
-			{normalDirection: givenNormalDirection, originPoint: givenPoint});
-	});
-var $ianmackenzie$elm_geometry$Geometry$Types$Direction3d = function (a) {
-	return {$: 'Direction3d', a: a};
-};
-var $ianmackenzie$elm_geometry$Direction3d$unsafe = function (givenComponents) {
-	return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(givenComponents);
-};
-var $ianmackenzie$elm_geometry$Direction3d$positiveZ = $ianmackenzie$elm_geometry$Direction3d$unsafe(
-	{x: 0, y: 0, z: 1});
-var $ianmackenzie$elm_geometry$Direction3d$z = $ianmackenzie$elm_geometry$Direction3d$positiveZ;
-var $ianmackenzie$elm_geometry$Plane3d$xy = A2($ianmackenzie$elm_geometry$Plane3d$through, $ianmackenzie$elm_geometry$Point3d$origin, $ianmackenzie$elm_geometry$Direction3d$z);
 var $author$project$SceneBuilder3D$render3dView = function (track) {
 	var renderCurrentMarkers = _Utils_ap(
 		_List_fromArray(
@@ -15448,16 +15477,6 @@ var $ianmackenzie$elm_3d_scene$Scene3d$Material$matte = function (materialColor)
 			$ianmackenzie$elm_3d_scene$Scene3d$ColorConversions$colorToLinearRgb(materialColor)),
 		$ianmackenzie$elm_3d_scene$Scene3d$Types$Constant($ianmackenzie$elm_3d_scene$Scene3d$Types$VerticalNormal));
 };
-var $ianmackenzie$elm_geometry$Vector3d$projectOnto = F2(
-	function (_v0, _v1) {
-		var plane = _v0.a;
-		var v = _v1.a;
-		var _v2 = plane.normalDirection;
-		var n = _v2.a;
-		var normalProjection = ((v.x * n.x) + (v.y * n.y)) + (v.z * n.z);
-		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
-			{x: v.x - (normalProjection * n.x), y: v.y - (normalProjection * n.y), z: v.z - (normalProjection * n.z)});
-	});
 var $ianmackenzie$elm_geometry$Vector3d$rotateAround = F3(
 	function (_v0, _v1, _v2) {
 		var axis = _v0.a;
@@ -15492,8 +15511,6 @@ var $ianmackenzie$elm_geometry$Vector3d$rotateAround = F3(
 		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
 			{x: ((a00 * v.x) + (a01 * v.y)) + (a02 * v.z), y: ((a10 * v.x) + (a11 * v.y)) + (a12 * v.z), z: ((a20 * v.x) + (a21 * v.y)) + (a22 * v.z)});
 	});
-var $ianmackenzie$elm_geometry$Vector3d$zero = $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
-	{x: 0, y: 0, z: 0});
 var $ianmackenzie$elm_geometry$Vector3d$scaleTo = F2(
 	function (_v0, _v1) {
 		var q = _v0.a;
@@ -17876,14 +17893,6 @@ var $ianmackenzie$elm_geometry$Point2d$xCoordinateIn = F2(
 		var _v3 = frame.xDirection;
 		var d = _v3.a;
 		return $ianmackenzie$elm_units$Quantity$Quantity(((p.x - p0.x) * d.x) + ((p.y - p0.y) * d.y));
-	});
-var $ianmackenzie$elm_geometry$Vector3d$xyz = F3(
-	function (_v0, _v1, _v2) {
-		var x = _v0.a;
-		var y = _v1.a;
-		var z = _v2.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
-			{x: x, y: y, z: z});
 	});
 var $ianmackenzie$elm_geometry$Point3d$xyzIn = F4(
 	function (_v0, _v1, _v2, _v3) {
