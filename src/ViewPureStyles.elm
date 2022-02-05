@@ -245,6 +245,15 @@ neatToolsBorder =
     ]
 
 
+disabledToolsBorder =
+    [ Background.color FlatColors.ChinesePalette.antiFlashWhite
+    , Border.color FlatColors.ChinesePalette.peace
+    , Border.rounded 4
+    , Border.width 2
+    , padding 3
+    ]
+
+
 shortSliderStyles =
     [ height <| px 24
     , width <| px 150

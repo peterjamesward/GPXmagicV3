@@ -7,13 +7,14 @@ DEBT: Map sends more click messages each time we click. They are debounced but, 
 
 # WIP
 
+3. Curve Former (2-way drag should correct for azimuth)
+
 ---
 
 # BACKLOG, roughly in order ...
 
 ## Tools
 
-3. Curve Former (2-way drag should correct for azimuth)
 4. Classic bend smoother (fix Samir's bug on looped routes)
 5. Drag on map
 6. Nudge 

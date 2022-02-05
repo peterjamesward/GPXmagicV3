@@ -8501,6 +8501,33 @@ var $author$project$Tools$AbruptDirectionChanges$defaultOptions = {
 var $author$project$Tools$BezierOptions$Approximated = {$: 'Approximated'};
 var $author$project$Tools$BezierSplines$defaultOptions = {bezierStyle: $author$project$Tools$BezierOptions$Approximated, bezierTension: 0.5, bezierTolerance: 5.0};
 var $author$project$Tools$CentroidAverage$defaultOptions = {applyToAltitude: true, applyToPosition: true, weighting: 1.0};
+var $author$project$Tools$CurveFormerOptions$Holistic = {$: 'Holistic'};
+var $ianmackenzie$elm_units$Length$meters = function (numMeters) {
+	return $ianmackenzie$elm_units$Quantity$Quantity(numMeters);
+};
+var $ianmackenzie$elm_geometry$Geometry$Types$Vector2d = function (a) {
+	return {$: 'Vector2d', a: a};
+};
+var $ianmackenzie$elm_geometry$Vector2d$zero = $ianmackenzie$elm_geometry$Geometry$Types$Vector2d(
+	{x: 0, y: 0});
+var $author$project$Tools$CurveFormer$defaultOptions = {
+	circle: $elm$core$Maybe$Nothing,
+	dragging: $elm$core$Maybe$Nothing,
+	fixedAttachmentPoints: $elm$core$Maybe$Nothing,
+	lastVector: $ianmackenzie$elm_geometry$Vector2d$zero,
+	newTrackPoints: _List_Nil,
+	pointsAreContiguous: false,
+	pointsWithinCircle: _List_Nil,
+	pointsWithinDisc: _List_Nil,
+	pullRadius: $ianmackenzie$elm_units$Length$meters(15.0),
+	pushRadius: $ianmackenzie$elm_units$Length$meters(10.0),
+	referencePoint: $elm$core$Maybe$Nothing,
+	smoothGradient: $author$project$Tools$CurveFormerOptions$Holistic,
+	spacing: $ianmackenzie$elm_units$Length$meters(5.0),
+	transitionRadius: $ianmackenzie$elm_units$Length$meters(20.0),
+	usePullRadius: false,
+	vector: $ianmackenzie$elm_geometry$Vector2d$zero
+};
 var $author$project$Tools$DeletePoints$defaultOptions = {pointsToBeDeleted: _List_Nil, singlePoint: true};
 var $author$project$Tools$Pointers$defaultOptions = {orange: 0, purple: $elm$core$Maybe$Nothing};
 var $author$project$Tools$UndoRedo$Options = function (dummy) {
@@ -8558,6 +8585,18 @@ var $author$project$ToolsController$centroidAverageTool = {
 	tabColour: $smucode$elm_flat_colors$FlatColors$SwedishPalette$blackPearl,
 	textColour: $author$project$ViewPureStyles$contrastingColour($smucode$elm_flat_colors$FlatColors$SwedishPalette$blackPearl),
 	toolType: $author$project$ToolsController$ToolCentroidAverage,
+	video: $elm$core$Maybe$Nothing
+};
+var $author$project$ToolsController$ToolCurveFormer = {$: 'ToolCurveFormer'};
+var $author$project$ToolsController$curveFormerTool = {
+	dock: $author$project$ToolsController$DockLowerRight,
+	info: 'Make it smoother',
+	isPopupOpen: false,
+	label: 'Radiused bends',
+	state: $author$project$ToolsController$Contracted,
+	tabColour: $smucode$elm_flat_colors$FlatColors$SwedishPalette$blackPearl,
+	textColour: $author$project$ViewPureStyles$contrastingColour($smucode$elm_flat_colors$FlatColors$SwedishPalette$blackPearl),
+	toolType: $author$project$ToolsController$ToolCurveFormer,
 	video: $elm$core$Maybe$Nothing
 };
 var $author$project$ToolsController$DockLowerLeft = {$: 'DockLowerLeft'};
@@ -8626,8 +8665,8 @@ var $author$project$ToolsController$undoRedoTool = {
 	video: $elm$core$Maybe$Nothing
 };
 var $author$project$ToolsController$defaultTools = _List_fromArray(
-	[$author$project$ToolsController$pointersTool, $author$project$ToolsController$undoRedoTool, $author$project$ToolsController$trackInfoBox, $author$project$ToolsController$directionChangeTool, $author$project$ToolsController$deleteTool, $author$project$ToolsController$bezierSplinesTool, $author$project$ToolsController$centroidAverageTool]);
-var $author$project$ToolsController$defaultOptions = {bezierSplineOptions: $author$project$Tools$BezierSplines$defaultOptions, centroidAverageOptions: $author$project$Tools$CentroidAverage$defaultOptions, deleteOptions: $author$project$Tools$DeletePoints$defaultOptions, directionChangeOptions: $author$project$Tools$AbruptDirectionChanges$defaultOptions, imperial: false, pointerOptions: $author$project$Tools$Pointers$defaultOptions, tools: $author$project$ToolsController$defaultTools, undoRedoOptions: $author$project$Tools$UndoRedo$defaultOptions};
+	[$author$project$ToolsController$pointersTool, $author$project$ToolsController$undoRedoTool, $author$project$ToolsController$trackInfoBox, $author$project$ToolsController$directionChangeTool, $author$project$ToolsController$deleteTool, $author$project$ToolsController$bezierSplinesTool, $author$project$ToolsController$centroidAverageTool, $author$project$ToolsController$curveFormerTool]);
+var $author$project$ToolsController$defaultOptions = {bezierSplineOptions: $author$project$Tools$BezierSplines$defaultOptions, centroidAverageOptions: $author$project$Tools$CentroidAverage$defaultOptions, curveFormerOptions: $author$project$Tools$CurveFormer$defaultOptions, deleteOptions: $author$project$Tools$DeletePoints$defaultOptions, directionChangeOptions: $author$project$Tools$AbruptDirectionChanges$defaultOptions, imperial: false, pointerOptions: $author$project$Tools$Pointers$defaultOptions, tools: $author$project$ToolsController$defaultTools, undoRedoOptions: $author$project$Tools$UndoRedo$defaultOptions};
 var $elm$browser$Browser$Dom$getViewport = _Browser_withWindow(_Browser_getViewport);
 var $elm$time$Time$Name = function (a) {
 	return {$: 'Name', a: a};
@@ -10439,9 +10478,6 @@ var $author$project$ViewProfileCharts$initialiseView = F3(
 		}
 	});
 var $author$project$ViewThirdPerson$DragNone = {$: 'DragNone'};
-var $ianmackenzie$elm_units$Length$meters = function (numMeters) {
-	return $ianmackenzie$elm_units$Quantity$Quantity(numMeters);
-};
 var $ianmackenzie$elm_units$Length$kilometers = function (numKilometers) {
 	return $ianmackenzie$elm_units$Length$meters(1000 * numKilometers);
 };
@@ -13291,8 +13327,10 @@ var $author$project$ToolsController$encodeType = function (toolType) {
 			return 'ToolUndoRedo';
 		case 'ToolBezierSplines':
 			return 'ToolBezierSplines';
-		default:
+		case 'ToolCentroidAverage':
 			return 'ToolCentroidAverage';
+		default:
+			return 'ToolCurveFormer';
 	}
 };
 var $author$project$ToolsController$encodeOneTool = function (tool) {
@@ -13506,6 +13544,48 @@ var $author$project$Tools$CentroidAverage$toolStateChange = F4(
 					]));
 		}
 	});
+var $author$project$Tools$CurveFormer$computeNewPoints = F2(
+	function (options, track) {
+		var earthPoints = _List_Nil;
+		var previewPoints = A2(
+			$elm$core$List$map,
+			function (earth) {
+				return _Utils_Tuple2(
+					earth,
+					A2($author$project$DomainModel$gpxFromPointWithReference, track.referenceLonLat, earth));
+			},
+			earthPoints);
+		var _v0 = $author$project$TrackLoaded$getRangeFromMarkers(track);
+		var fromStart = _v0.a;
+		var fromEnd = _v0.b;
+		return previewPoints;
+	});
+var $author$project$Tools$CurveFormer$toolStateChange = F4(
+	function (opened, colour, options, track) {
+		var _v0 = _Utils_Tuple2(opened, track);
+		if (_v0.a && (_v0.b.$ === 'Just')) {
+			var theTrack = _v0.b.a;
+			return _Utils_Tuple2(
+				options,
+				_List_fromArray(
+					[
+						$author$project$Actions$ShowPreview(
+						{
+							colour: colour,
+							points: A2($author$project$Tools$CurveFormer$computeNewPoints, options, theTrack),
+							shape: $author$project$Actions$PreviewCircle,
+							tag: 'former'
+						})
+					]));
+		} else {
+			return _Utils_Tuple2(
+				options,
+				_List_fromArray(
+					[
+						$author$project$Actions$HidePreview('former')
+					]));
+		}
+	});
 var $author$project$UtilsForViews$fullDepthRenderingBoxSize = $ianmackenzie$elm_units$Length$kilometers(4);
 var $author$project$Tools$DeletePoints$toolStateChange = F4(
 	function (opened, colour, options, track) {
@@ -13686,7 +13766,7 @@ var $author$project$ToolsController$toolStateHasChanged = F4(
 							'tools',
 							$author$project$ToolsController$encodeToolState(options)),
 						actions));
-			default:
+			case 'ToolCentroidAverage':
 				var _v5 = A4(
 					$author$project$Tools$CentroidAverage$toolStateChange,
 					_Utils_eq(newState, $author$project$ToolsController$Expanded),
@@ -13698,6 +13778,27 @@ var $author$project$ToolsController$toolStateHasChanged = F4(
 				var newOptions = _Utils_update(
 					options,
 					{centroidAverageOptions: newToolOptions});
+				return _Utils_Tuple2(
+					newOptions,
+					A2(
+						$elm$core$List$cons,
+						A2(
+							$author$project$Actions$StoreLocally,
+							'tools',
+							$author$project$ToolsController$encodeToolState(options)),
+						actions));
+			default:
+				var _v6 = A4(
+					$author$project$Tools$CurveFormer$toolStateChange,
+					_Utils_eq(newState, $author$project$ToolsController$Expanded),
+					A2($author$project$ToolsController$getColour, toolType, options.tools),
+					options.curveFormerOptions,
+					isTrack);
+				var newToolOptions = _v6.a;
+				var actions = _v6.b;
+				var newOptions = _Utils_update(
+					options,
+					{curveFormerOptions: newToolOptions});
 				return _Utils_Tuple2(
 					newOptions,
 					A2(
@@ -19430,6 +19531,92 @@ var $author$project$Tools$CentroidAverage$update = F4(
 			return _Utils_Tuple2(options, _List_Nil);
 		}
 	});
+var $author$project$Actions$CurveFormerApplyWithOptions = function (a) {
+	return {$: 'CurveFormerApplyWithOptions', a: a};
+};
+var $author$project$Tools$CurveFormer$update = F4(
+	function (msg, options, previewColour, hasTrack) {
+		var _v0 = _Utils_Tuple2(hasTrack, msg);
+		_v0$4:
+		while (true) {
+			if (_v0.a.$ === 'Just') {
+				switch (_v0.b.$) {
+					case 'SetPushRadius':
+						var track = _v0.a.a;
+						var radius = _v0.b.a;
+						var newOptions = _Utils_update(
+							options,
+							{
+								pushRadius: $ianmackenzie$elm_units$Length$meters(radius)
+							});
+						return _Utils_Tuple2(
+							newOptions,
+							_List_fromArray(
+								[
+									$author$project$Actions$ShowPreview(
+									{
+										colour: previewColour,
+										points: A2($author$project$Tools$CurveFormer$computeNewPoints, newOptions, track),
+										shape: $author$project$Actions$PreviewCircle,
+										tag: 'former'
+									})
+								]));
+					case 'SetPullRadius':
+						var track = _v0.a.a;
+						var radius = _v0.b.a;
+						var newOptions = _Utils_update(
+							options,
+							{
+								pullRadius: $ianmackenzie$elm_units$Length$meters(radius)
+							});
+						return _Utils_Tuple2(
+							newOptions,
+							_List_fromArray(
+								[
+									$author$project$Actions$ShowPreview(
+									{
+										colour: previewColour,
+										points: A2($author$project$Tools$CurveFormer$computeNewPoints, newOptions, track),
+										shape: $author$project$Actions$PreviewCircle,
+										tag: 'former'
+									})
+								]));
+					case 'ToggleUsePullRadius':
+						var track = _v0.a.a;
+						var newOptions = _Utils_update(
+							options,
+							{usePullRadius: !options.usePullRadius});
+						return _Utils_Tuple2(
+							newOptions,
+							_List_fromArray(
+								[
+									$author$project$Actions$ShowPreview(
+									{
+										colour: previewColour,
+										points: A2($author$project$Tools$CurveFormer$computeNewPoints, newOptions, track),
+										shape: $author$project$Actions$PreviewCircle,
+										tag: 'former'
+									})
+								]));
+					case 'ApplyWithOptions':
+						var track = _v0.a.a;
+						var _v1 = _v0.b;
+						return _Utils_Tuple2(
+							options,
+							_List_fromArray(
+								[
+									$author$project$Actions$CurveFormerApplyWithOptions(options),
+									$author$project$Actions$TrackHasChanged
+								]));
+					default:
+						break _v0$4;
+				}
+			} else {
+				break _v0$4;
+			}
+		}
+		return _Utils_Tuple2(options, _List_Nil);
+	});
 var $author$project$Actions$DeletePointsBetween = F2(
 	function (a, b) {
 		return {$: 'DeletePointsBetween', a: a, b: b};
@@ -19783,6 +19970,21 @@ var $author$project$ToolsController$update = F4(
 					_Utils_update(
 						options,
 						{centroidAverageOptions: newOptions}),
+					actions);
+			case 'ToolCurveFormerMsg':
+				var msg = toolMsg.a;
+				var _v7 = A4(
+					$author$project$Tools$CurveFormer$update,
+					msg,
+					options.curveFormerOptions,
+					A2($author$project$ToolsController$getColour, $author$project$ToolsController$ToolCurveFormer, options.tools),
+					isTrack);
+				var newOptions = _v7.a;
+				var actions = _v7.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						options,
+						{curveFormerOptions: newOptions}),
 					actions);
 			default:
 				var newOptions = _Utils_update(
@@ -26743,6 +26945,9 @@ var $author$project$ToolsController$ToolBezierMsg = function (a) {
 var $author$project$ToolsController$ToolCentroidMsg = function (a) {
 	return {$: 'ToolCentroidMsg', a: a};
 };
+var $author$project$ToolsController$ToolCurveFormerMsg = function (a) {
+	return {$: 'ToolCurveFormerMsg', a: a};
+};
 var $author$project$ToolsController$UndoRedoMsg = function (a) {
 	return {$: 'UndoRedoMsg', a: a};
 };
@@ -29110,6 +29315,720 @@ var $author$project$Tools$CentroidAverage$view = F2(
 					actionButton)
 				]));
 	});
+var $author$project$Tools$CurveFormer$ApplyWithOptions = {$: 'ApplyWithOptions'};
+var $author$project$Tools$CurveFormer$DraggerModeToggle = function (a) {
+	return {$: 'DraggerModeToggle', a: a};
+};
+var $author$project$Tools$CurveFormer$DraggerReset = {$: 'DraggerReset'};
+var $author$project$Tools$CurveFormer$SetPullRadius = function (a) {
+	return {$: 'SetPullRadius', a: a};
+};
+var $author$project$Tools$CurveFormer$SetPushRadius = function (a) {
+	return {$: 'SetPushRadius', a: a};
+};
+var $author$project$Tools$CurveFormer$SetSpacing = function (a) {
+	return {$: 'SetSpacing', a: a};
+};
+var $author$project$Tools$CurveFormer$SetTransitionRadius = function (a) {
+	return {$: 'SetTransitionRadius', a: a};
+};
+var $author$project$Tools$CurveFormer$ToggleUsePullRadius = function (a) {
+	return {$: 'ToggleUsePullRadius', a: a};
+};
+var $smucode$elm_flat_colors$FlatColors$ChinesePalette$peace = A3($mdgriffith$elm_ui$Element$rgb255, 164, 176, 190);
+var $author$project$ViewPureStyles$disabledToolsBorder = _List_fromArray(
+	[
+		$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite),
+		$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$peace),
+		$mdgriffith$elm_ui$Element$Border$rounded(4),
+		$mdgriffith$elm_ui$Element$Border$width(2),
+		$mdgriffith$elm_ui$Element$padding(3)
+	]);
+var $author$project$ViewPureStyles$edges = {bottom: 0, left: 0, right: 0, top: 0};
+var $feathericons$elm_feather$FeatherIcons$info = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'info',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$circle,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$cx('12'),
+					$elm$svg$Svg$Attributes$cy('12'),
+					$elm$svg$Svg$Attributes$r('10')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x1('12'),
+					$elm$svg$Svg$Attributes$y1('16'),
+					$elm$svg$Svg$Attributes$x2('12'),
+					$elm$svg$Svg$Attributes$y2('12')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x1('12'),
+					$elm$svg$Svg$Attributes$y1('8'),
+					$elm$svg$Svg$Attributes$x2('12.01'),
+					$elm$svg$Svg$Attributes$y2('8')
+				]),
+			_List_Nil)
+		]));
+var $mdgriffith$elm_ui$Internal$Model$paddingName = F4(
+	function (top, right, bottom, left) {
+		return 'pad-' + ($elm$core$String$fromInt(top) + ('-' + ($elm$core$String$fromInt(right) + ('-' + ($elm$core$String$fromInt(bottom) + ('-' + $elm$core$String$fromInt(left)))))));
+	});
+var $mdgriffith$elm_ui$Element$paddingEach = function (_v0) {
+	var top = _v0.top;
+	var right = _v0.right;
+	var bottom = _v0.bottom;
+	var left = _v0.left;
+	if (_Utils_eq(top, right) && (_Utils_eq(top, bottom) && _Utils_eq(top, left))) {
+		var topFloat = top;
+		return A2(
+			$mdgriffith$elm_ui$Internal$Model$StyleClass,
+			$mdgriffith$elm_ui$Internal$Flag$padding,
+			A5(
+				$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
+				'p-' + $elm$core$String$fromInt(top),
+				topFloat,
+				topFloat,
+				topFloat,
+				topFloat));
+	} else {
+		return A2(
+			$mdgriffith$elm_ui$Internal$Model$StyleClass,
+			$mdgriffith$elm_ui$Internal$Flag$padding,
+			A5(
+				$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
+				A4($mdgriffith$elm_ui$Internal$Model$paddingName, top, right, bottom, left),
+				top,
+				right,
+				bottom,
+				left));
+	}
+};
+var $ianmackenzie$elm_units$Length$inFeet = function (length) {
+	return $ianmackenzie$elm_units$Length$inMeters(length) / $ianmackenzie$elm_units$Constants$foot;
+};
+var $author$project$UtilsForViews$showShortMeasure = F2(
+	function (imperial, distance) {
+		return imperial ? ($author$project$UtilsForViews$showDecimal2(
+			$ianmackenzie$elm_units$Length$inFeet(distance)) + ' feet') : ($author$project$UtilsForViews$showDecimal2(
+			$ianmackenzie$elm_units$Length$inMeters(distance)) + 'm');
+	});
+var $author$project$Tools$CurveFormer$DraggerGrab = function (a) {
+	return {$: 'DraggerGrab', a: a};
+};
+var $author$project$Tools$CurveFormer$DraggerMove = function (a) {
+	return {$: 'DraggerMove', a: a};
+};
+var $author$project$Tools$CurveFormer$DraggerRelease = function (a) {
+	return {$: 'DraggerRelease', a: a};
+};
+var $ianmackenzie$elm_geometry$Vector2d$components = function (_v0) {
+	var v = _v0.a;
+	return _Utils_Tuple2(
+		$ianmackenzie$elm_units$Quantity$Quantity(v.x),
+		$ianmackenzie$elm_units$Quantity$Quantity(v.y));
+};
+var $author$project$Tools$CurveFormer$controlSvgRadius = 100;
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$defaultOptions = {preventDefault: true, stopPropagation: false};
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$Event = F5(
+	function (pointerType, pointer, pointerId, isPrimary, contactDetails) {
+		return {contactDetails: contactDetails, isPrimary: isPrimary, pointer: pointer, pointerId: pointerId, pointerType: pointerType};
+	});
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$ContactDetails = F5(
+	function (width, height, pressure, tiltX, tiltY) {
+		return {height: height, pressure: pressure, tiltX: tiltX, tiltY: tiltY, width: width};
+	});
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$contactDetailsDecoder = A6(
+	$elm$json$Json$Decode$map5,
+	$mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$ContactDetails,
+	A2($elm$json$Json$Decode$field, 'width', $elm$json$Json$Decode$float),
+	A2($elm$json$Json$Decode$field, 'height', $elm$json$Json$Decode$float),
+	A2($elm$json$Json$Decode$field, 'pressure', $elm$json$Json$Decode$float),
+	A2($elm$json$Json$Decode$field, 'tiltX', $elm$json$Json$Decode$float),
+	A2($elm$json$Json$Decode$field, 'tiltY', $elm$json$Json$Decode$float));
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$MouseType = {$: 'MouseType'};
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$PenType = {$: 'PenType'};
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$TouchType = {$: 'TouchType'};
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$stringToPointerType = function (str) {
+	switch (str) {
+		case 'pen':
+			return $mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$PenType;
+		case 'touch':
+			return $mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$TouchType;
+		default:
+			return $mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$MouseType;
+	}
+};
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$pointerTypeDecoder = A2($elm$json$Json$Decode$map, $mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$stringToPointerType, $elm$json$Json$Decode$string);
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$eventDecoder = A6(
+	$elm$json$Json$Decode$map5,
+	$mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$Event,
+	A2($elm$json$Json$Decode$field, 'pointerType', $mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$pointerTypeDecoder),
+	$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$eventDecoder,
+	A2($elm$json$Json$Decode$field, 'pointerId', $elm$json$Json$Decode$int),
+	A2($elm$json$Json$Decode$field, 'isPrimary', $elm$json$Json$Decode$bool),
+	$mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$contactDetailsDecoder);
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$onWithOptions = F3(
+	function (event, options, tag) {
+		return A2(
+			$elm$html$Html$Events$custom,
+			event,
+			A2(
+				$elm$json$Json$Decode$map,
+				function (ev) {
+					return {
+						message: tag(ev),
+						preventDefault: options.preventDefault,
+						stopPropagation: options.stopPropagation
+					};
+				},
+				$mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$eventDecoder));
+	});
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$onDown = A2($mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$onWithOptions, 'pointerdown', $mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$defaultOptions);
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$onMove = A2($mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$onWithOptions, 'pointermove', $mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$defaultOptions);
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$onUp = A2($mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$onWithOptions, 'pointerup', $mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$defaultOptions);
+var $ianmackenzie$elm_geometry$Point2d$fromMeters = function (givenCoordinates) {
+	return $ianmackenzie$elm_geometry$Geometry$Types$Point2d(givenCoordinates);
+};
+var $author$project$Tools$CurveFormer$point = function (_v0) {
+	var x = _v0.a;
+	var y = _v0.b;
+	return $ianmackenzie$elm_geometry$Point2d$fromMeters(
+		{x: x, y: y});
+};
+var $author$project$Tools$CurveFormer$twoWayDragControl = F2(
+	function (options, wrapper) {
+		var clickableContainer = A2(
+			$elm$core$Basics$composeL,
+			A2(
+				$elm$core$Basics$composeL,
+				$mdgriffith$elm_ui$Element$el(
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$htmlAttribute(
+							$mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$onDown(
+								A2(
+									$elm$core$Basics$composeR,
+									function ($) {
+										return $.pointer;
+									},
+									A2(
+										$elm$core$Basics$composeR,
+										function ($) {
+											return $.offsetPos;
+										},
+										A2(
+											$elm$core$Basics$composeR,
+											$author$project$Tools$CurveFormer$point,
+											A2($elm$core$Basics$composeR, $author$project$Tools$CurveFormer$DraggerGrab, wrapper)))))),
+							$mdgriffith$elm_ui$Element$htmlAttribute(
+							$mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$onMove(
+								A2(
+									$elm$core$Basics$composeR,
+									function ($) {
+										return $.pointer;
+									},
+									A2(
+										$elm$core$Basics$composeR,
+										function ($) {
+											return $.offsetPos;
+										},
+										A2(
+											$elm$core$Basics$composeR,
+											$author$project$Tools$CurveFormer$point,
+											A2($elm$core$Basics$composeR, $author$project$Tools$CurveFormer$DraggerMove, wrapper)))))),
+							$mdgriffith$elm_ui$Element$htmlAttribute(
+							$mpizenberg$elm_pointer_events$Html$Events$Extra$Pointer$onUp(
+								A2(
+									$elm$core$Basics$composeR,
+									function ($) {
+										return $.pointer;
+									},
+									A2(
+										$elm$core$Basics$composeR,
+										function ($) {
+											return $.offsetPos;
+										},
+										A2(
+											$elm$core$Basics$composeR,
+											$author$project$Tools$CurveFormer$point,
+											A2($elm$core$Basics$composeR, $author$project$Tools$CurveFormer$DraggerRelease, wrapper)))))),
+							$mdgriffith$elm_ui$Element$htmlAttribute(
+							A2($elm$html$Html$Attributes$style, 'touch-action', 'none')),
+							$mdgriffith$elm_ui$Element$pointer,
+							$mdgriffith$elm_ui$Element$alignLeft
+						])),
+				$mdgriffith$elm_ui$Element$html),
+			$elm$svg$Svg$svg(
+				_List_fromArray(
+					[
+						$elm$svg$Svg$Attributes$viewBox('-150 -150 300 300'),
+						$elm$svg$Svg$Attributes$width('140px'),
+						$elm$svg$Svg$Attributes$height('140px')
+					])));
+		var _v0 = $ianmackenzie$elm_geometry$Vector2d$components(options.vector);
+		var x = _v0.a;
+		var y = _v0.b;
+		var _v1 = _Utils_Tuple2(
+			$elm$core$String$fromFloat(
+				$ianmackenzie$elm_units$Length$inMeters(x)),
+			$elm$core$String$fromFloat(
+				$ianmackenzie$elm_units$Length$inMeters(y)));
+		var xPoint = _v1.a;
+		var yPoint = _v1.b;
+		return clickableContainer(
+			_List_fromArray(
+				[
+					A2(
+					$elm$svg$Svg$circle,
+					_List_fromArray(
+						[
+							$elm$svg$Svg$Attributes$cx('0'),
+							$elm$svg$Svg$Attributes$cy('0'),
+							$elm$svg$Svg$Attributes$r(
+							$elm$core$String$fromInt($author$project$Tools$CurveFormer$controlSvgRadius)),
+							$elm$svg$Svg$Attributes$stroke('black'),
+							$elm$svg$Svg$Attributes$strokeWidth('1'),
+							$elm$svg$Svg$Attributes$fill('darkslategrey')
+						]),
+					_List_Nil),
+					A2(
+					$elm$svg$Svg$line,
+					_List_fromArray(
+						[
+							$elm$svg$Svg$Attributes$x1('0'),
+							$elm$svg$Svg$Attributes$y1('0'),
+							$elm$svg$Svg$Attributes$x2(xPoint),
+							$elm$svg$Svg$Attributes$y2(yPoint),
+							$elm$svg$Svg$Attributes$stroke('orange'),
+							$elm$svg$Svg$Attributes$strokeWidth('10'),
+							$elm$svg$Svg$Attributes$strokeLinecap('round')
+						]),
+					_List_Nil)
+				]));
+	});
+var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$sunFlower = A3($mdgriffith$elm_ui$Element$rgb255, 241, 196, 15);
+var $author$project$ColourPalette$warningColor = $smucode$elm_flat_colors$FlatColors$FlatUIPalette$sunFlower;
+var $mdgriffith$elm_ui$Internal$Model$Padding = F5(
+	function (a, b, c, d, e) {
+		return {$: 'Padding', a: a, b: b, c: c, d: d, e: e};
+	});
+var $mdgriffith$elm_ui$Internal$Model$Spaced = F3(
+	function (a, b, c) {
+		return {$: 'Spaced', a: a, b: b, c: c};
+	});
+var $mdgriffith$elm_ui$Internal$Model$extractSpacingAndPadding = function (attrs) {
+	return A3(
+		$elm$core$List$foldr,
+		F2(
+			function (attr, _v0) {
+				var pad = _v0.a;
+				var spacing = _v0.b;
+				return _Utils_Tuple2(
+					function () {
+						if (pad.$ === 'Just') {
+							var x = pad.a;
+							return pad;
+						} else {
+							if ((attr.$ === 'StyleClass') && (attr.b.$ === 'PaddingStyle')) {
+								var _v3 = attr.b;
+								var name = _v3.a;
+								var t = _v3.b;
+								var r = _v3.c;
+								var b = _v3.d;
+								var l = _v3.e;
+								return $elm$core$Maybe$Just(
+									A5($mdgriffith$elm_ui$Internal$Model$Padding, name, t, r, b, l));
+							} else {
+								return $elm$core$Maybe$Nothing;
+							}
+						}
+					}(),
+					function () {
+						if (spacing.$ === 'Just') {
+							var x = spacing.a;
+							return spacing;
+						} else {
+							if ((attr.$ === 'StyleClass') && (attr.b.$ === 'SpacingStyle')) {
+								var _v6 = attr.b;
+								var name = _v6.a;
+								var x = _v6.b;
+								var y = _v6.c;
+								return $elm$core$Maybe$Just(
+									A3($mdgriffith$elm_ui$Internal$Model$Spaced, name, x, y));
+							} else {
+								return $elm$core$Maybe$Nothing;
+							}
+						}
+					}());
+			}),
+		_Utils_Tuple2($elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing),
+		attrs);
+};
+var $mdgriffith$elm_ui$Internal$Model$paddingNameFloat = F4(
+	function (top, right, bottom, left) {
+		return 'pad-' + ($mdgriffith$elm_ui$Internal$Model$floatClass(top) + ('-' + ($mdgriffith$elm_ui$Internal$Model$floatClass(right) + ('-' + ($mdgriffith$elm_ui$Internal$Model$floatClass(bottom) + ('-' + $mdgriffith$elm_ui$Internal$Model$floatClass(left)))))));
+	});
+var $mdgriffith$elm_ui$Element$wrappedRow = F2(
+	function (attrs, children) {
+		var _v0 = $mdgriffith$elm_ui$Internal$Model$extractSpacingAndPadding(attrs);
+		var padded = _v0.a;
+		var spaced = _v0.b;
+		if (spaced.$ === 'Nothing') {
+			return A4(
+				$mdgriffith$elm_ui$Internal$Model$element,
+				$mdgriffith$elm_ui$Internal$Model$asRow,
+				$mdgriffith$elm_ui$Internal$Model$div,
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.wrapped)))),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+						A2(
+							$elm$core$List$cons,
+							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+							attrs))),
+				$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+		} else {
+			var _v2 = spaced.a;
+			var spaceName = _v2.a;
+			var x = _v2.b;
+			var y = _v2.c;
+			var newPadding = function () {
+				if (padded.$ === 'Just') {
+					var _v5 = padded.a;
+					var name = _v5.a;
+					var t = _v5.b;
+					var r = _v5.c;
+					var b = _v5.d;
+					var l = _v5.e;
+					if ((_Utils_cmp(r, x / 2) > -1) && (_Utils_cmp(b, y / 2) > -1)) {
+						var newTop = t - (y / 2);
+						var newRight = r - (x / 2);
+						var newLeft = l - (x / 2);
+						var newBottom = b - (y / 2);
+						return $elm$core$Maybe$Just(
+							A2(
+								$mdgriffith$elm_ui$Internal$Model$StyleClass,
+								$mdgriffith$elm_ui$Internal$Flag$padding,
+								A5(
+									$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
+									A4($mdgriffith$elm_ui$Internal$Model$paddingNameFloat, newTop, newRight, newBottom, newLeft),
+									newTop,
+									newRight,
+									newBottom,
+									newLeft)));
+					} else {
+						return $elm$core$Maybe$Nothing;
+					}
+				} else {
+					return $elm$core$Maybe$Nothing;
+				}
+			}();
+			if (newPadding.$ === 'Just') {
+				var pad = newPadding.a;
+				return A4(
+					$mdgriffith$elm_ui$Internal$Model$element,
+					$mdgriffith$elm_ui$Internal$Model$asRow,
+					$mdgriffith$elm_ui$Internal$Model$div,
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.wrapped)))),
+						A2(
+							$elm$core$List$cons,
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+							A2(
+								$elm$core$List$cons,
+								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+								_Utils_ap(
+									attrs,
+									_List_fromArray(
+										[pad]))))),
+					$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+			} else {
+				var halfY = -(y / 2);
+				var halfX = -(x / 2);
+				return A4(
+					$mdgriffith$elm_ui$Internal$Model$element,
+					$mdgriffith$elm_ui$Internal$Model$asEl,
+					$mdgriffith$elm_ui$Internal$Model$div,
+					attrs,
+					$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+						_List_fromArray(
+							[
+								A4(
+								$mdgriffith$elm_ui$Internal$Model$element,
+								$mdgriffith$elm_ui$Internal$Model$asRow,
+								$mdgriffith$elm_ui$Internal$Model$div,
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.wrapped)))),
+									A2(
+										$elm$core$List$cons,
+										$mdgriffith$elm_ui$Internal$Model$Attr(
+											A2(
+												$elm$html$Html$Attributes$style,
+												'margin',
+												$elm$core$String$fromFloat(halfY) + ('px' + (' ' + ($elm$core$String$fromFloat(halfX) + 'px'))))),
+										A2(
+											$elm$core$List$cons,
+											$mdgriffith$elm_ui$Internal$Model$Attr(
+												A2(
+													$elm$html$Html$Attributes$style,
+													'width',
+													'calc(100% + ' + ($elm$core$String$fromInt(x) + 'px)'))),
+											A2(
+												$elm$core$List$cons,
+												$mdgriffith$elm_ui$Internal$Model$Attr(
+													A2(
+														$elm$html$Html$Attributes$style,
+														'height',
+														'calc(100% + ' + ($elm$core$String$fromInt(y) + 'px)'))),
+												A2(
+													$elm$core$List$cons,
+													A2(
+														$mdgriffith$elm_ui$Internal$Model$StyleClass,
+														$mdgriffith$elm_ui$Internal$Flag$spacing,
+														A3($mdgriffith$elm_ui$Internal$Model$SpacingStyle, spaceName, x, y)),
+													_List_Nil))))),
+								$mdgriffith$elm_ui$Internal$Model$Unkeyed(children))
+							])));
+			}
+		}
+	});
+var $author$project$Tools$CurveFormer$view = F3(
+	function (imperial, wrapper, options) {
+		var squared = function (x) {
+			return x * x;
+		};
+		var showTransitionRadiusSlider = A2(
+			$mdgriffith$elm_ui$Element$Input$slider,
+			$author$project$ViewPureStyles$commonShortHorizontalSliderStyles,
+			{
+				label: A2(
+					$mdgriffith$elm_ui$Element$Input$labelBelow,
+					_List_Nil,
+					$mdgriffith$elm_ui$Element$text(
+						'Joining radius ' + A2($author$project$UtilsForViews$showShortMeasure, imperial, options.transitionRadius))),
+				max: 10.0,
+				min: 2.0,
+				onChange: A2(
+					$elm$core$Basics$composeL,
+					A2($elm$core$Basics$composeL, wrapper, $author$project$Tools$CurveFormer$SetTransitionRadius),
+					squared),
+				step: $elm$core$Maybe$Nothing,
+				thumb: $mdgriffith$elm_ui$Element$Input$defaultThumb,
+				value: $elm$core$Basics$sqrt(
+					$ianmackenzie$elm_units$Length$inMeters(options.transitionRadius))
+			});
+		var showSpacingSlider = A2(
+			$mdgriffith$elm_ui$Element$Input$slider,
+			$author$project$ViewPureStyles$commonShortHorizontalSliderStyles,
+			{
+				label: A2(
+					$mdgriffith$elm_ui$Element$Input$labelBelow,
+					_List_Nil,
+					$mdgriffith$elm_ui$Element$text(
+						'Spacing ' + A2($author$project$UtilsForViews$showShortMeasure, imperial, options.spacing))),
+				max: 10.0,
+				min: 2.0,
+				onChange: A2($elm$core$Basics$composeL, wrapper, $author$project$Tools$CurveFormer$SetSpacing),
+				step: $elm$core$Maybe$Nothing,
+				thumb: $mdgriffith$elm_ui$Element$Input$defaultThumb,
+				value: $ianmackenzie$elm_units$Length$inMeters(options.spacing)
+			});
+		var showPushRadiusSlider = A2(
+			$mdgriffith$elm_ui$Element$Input$slider,
+			$author$project$ViewPureStyles$commonShortHorizontalSliderStyles,
+			{
+				label: A2(
+					$mdgriffith$elm_ui$Element$Input$labelBelow,
+					_List_Nil,
+					$mdgriffith$elm_ui$Element$text(
+						'Bend radius ' + A2($author$project$UtilsForViews$showShortMeasure, imperial, options.pushRadius))),
+				max: 10.0,
+				min: 2.0,
+				onChange: A2(
+					$elm$core$Basics$composeL,
+					A2($elm$core$Basics$composeL, wrapper, $author$project$Tools$CurveFormer$SetPushRadius),
+					squared),
+				step: $elm$core$Maybe$Nothing,
+				thumb: $mdgriffith$elm_ui$Element$Input$defaultThumb,
+				value: $elm$core$Basics$sqrt(
+					$ianmackenzie$elm_units$Length$inMeters(options.pushRadius))
+			});
+		var showPullSelection = A2(
+			$mdgriffith$elm_ui$Element$Input$checkbox,
+			_List_Nil,
+			{
+				checked: options.usePullRadius,
+				icon: $mdgriffith$elm_ui$Element$Input$defaultCheckbox,
+				label: A2(
+					$mdgriffith$elm_ui$Element$Input$labelRight,
+					_List_fromArray(
+						[$mdgriffith$elm_ui$Element$centerY]),
+					$mdgriffith$elm_ui$Element$text('Include outliers')),
+				onChange: A2($elm$core$Basics$composeL, wrapper, $author$project$Tools$CurveFormer$ToggleUsePullRadius)
+			});
+		var showPullRadiusSlider = A2(
+			$mdgriffith$elm_ui$Element$Input$slider,
+			$author$project$ViewPureStyles$commonShortHorizontalSliderStyles,
+			{
+				label: A2(
+					$mdgriffith$elm_ui$Element$Input$labelBelow,
+					_List_Nil,
+					$mdgriffith$elm_ui$Element$text(
+						'Inclusion zone ' + A2($author$project$UtilsForViews$showShortMeasure, imperial, options.pullRadius))),
+				max: 40.0,
+				min: 5.0,
+				onChange: A2($elm$core$Basics$composeL, wrapper, $author$project$Tools$CurveFormer$SetPullRadius),
+				step: $elm$core$Maybe$Nothing,
+				thumb: $mdgriffith$elm_ui$Element$Input$defaultThumb,
+				value: $ianmackenzie$elm_units$Length$inMeters(options.pullRadius)
+			});
+		var showModeSelection = A2(
+			$mdgriffith$elm_ui$Element$Input$checkbox,
+			_List_Nil,
+			{
+				checked: _Utils_eq(options.smoothGradient, $author$project$Tools$CurveFormerOptions$Holistic),
+				icon: $mdgriffith$elm_ui$Element$Input$defaultCheckbox,
+				label: A2(
+					$mdgriffith$elm_ui$Element$Input$labelRight,
+					_List_fromArray(
+						[$mdgriffith$elm_ui$Element$centerY]),
+					$mdgriffith$elm_ui$Element$text('Smooth gradient')),
+				onChange: A2($elm$core$Basics$composeL, wrapper, $author$project$Tools$CurveFormer$DraggerModeToggle)
+			});
+		var showHelpfulMessage = A2(
+			$mdgriffith$elm_ui$Element$row,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$padding(5),
+					$mdgriffith$elm_ui$Element$spacing(10),
+					$mdgriffith$elm_ui$Element$Background$color($author$project$ColourPalette$warningColor),
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+				]),
+			_List_fromArray(
+				[
+					$author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$info),
+					A2(
+					$mdgriffith$elm_ui$Element$paragraph,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$text('I don\'t know what to do without contiguous points.')
+						]))
+				]));
+		var showActionButtons = A2(
+			$mdgriffith$elm_ui$Element$row,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$padding(5),
+					$mdgriffith$elm_ui$Element$spacing(5),
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$Input$button,
+					$author$project$ViewPureStyles$neatToolsBorder,
+					{
+						label: $mdgriffith$elm_ui$Element$text('Reset'),
+						onPress: $elm$core$Maybe$Just(
+							wrapper($author$project$Tools$CurveFormer$DraggerReset))
+					}),
+					function () {
+					var _v0 = _Utils_Tuple2(
+						$elm$core$List$length(options.newTrackPoints) >= 3,
+						options.pointsAreContiguous);
+					if (_v0.b) {
+						return A2(
+							$mdgriffith$elm_ui$Element$Input$button,
+							$author$project$ViewPureStyles$neatToolsBorder,
+							{
+								label: $mdgriffith$elm_ui$Element$text('Apply'),
+								onPress: $elm$core$Maybe$Just(
+									wrapper($author$project$Tools$CurveFormer$ApplyWithOptions))
+							});
+					} else {
+						return A2(
+							$mdgriffith$elm_ui$Element$Input$button,
+							A2(
+								$elm$core$List$cons,
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+								$author$project$ViewPureStyles$disabledToolsBorder),
+							{
+								label: A2(
+									$mdgriffith$elm_ui$Element$paragraph,
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+										]),
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$text('Need at least 3 contiguous points')
+										])),
+								onPress: $elm$core$Maybe$Nothing
+							});
+					}
+				}()
+				]));
+		return A2(
+			$mdgriffith$elm_ui$Element$row,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$paddingEach(
+					_Utils_update(
+						$author$project$ViewPureStyles$edges,
+						{right: 10})),
+					$mdgriffith$elm_ui$Element$spacing(5),
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite)
+				]),
+			_List_fromArray(
+				[
+					A2($author$project$Tools$CurveFormer$twoWayDragControl, options, wrapper),
+					A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$spacing(5)
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$mdgriffith$elm_ui$Element$wrappedRow,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$alignLeft,
+									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+									$mdgriffith$elm_ui$Element$spacing(5)
+								]),
+							_List_fromArray(
+								[
+									showPushRadiusSlider,
+									showTransitionRadiusSlider,
+									showSpacingSlider,
+									showPullSelection,
+									options.usePullRadius ? showPullRadiusSlider : $mdgriffith$elm_ui$Element$none
+								])),
+							showModeSelection,
+							showActionButtons
+						]))
+				]));
+	});
 var $author$project$Tools$DeletePoints$DeletePointOrPoints = {$: 'DeletePointOrPoints'};
 var $author$project$Tools$DeletePoints$view = F2(
 	function (msgWrapper, options) {
@@ -29449,6 +30368,9 @@ var $author$project$Actions$interpretAction = function (action) {
 		case 'CentroidAverageApplyWithOptions':
 			var options = action.a;
 			return 'centroid average';
+		case 'CurveFormerApplyWithOptions':
+			var options = action.a;
+			return 'curve former';
 		default:
 			return 'ask Pete to fix this message';
 	}
@@ -29615,11 +30537,17 @@ var $author$project$ToolsController$viewToolByType = F4(
 							$author$project$Tools$BezierSplines$view,
 							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolBezierMsg),
 							options.bezierSplineOptions);
-					default:
+					case 'ToolCentroidAverage':
 						return A2(
 							$author$project$Tools$CentroidAverage$view,
 							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolCentroidMsg),
 							options.centroidAverageOptions);
+					default:
+						return A3(
+							$author$project$Tools$CurveFormer$view,
+							options.imperial,
+							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolCurveFormerMsg),
+							options.curveFormerOptions);
 				}
 			}());
 	});
@@ -29739,194 +30667,6 @@ var $author$project$ToolsController$viewTool = F4(
 						]),
 					_Utils_eq(toolEntry.state, $author$project$ToolsController$Expanded) ? A4($author$project$ToolsController$viewToolByType, msgWrapper, toolEntry, isTrack, options) : $mdgriffith$elm_ui$Element$none)
 				]));
-	});
-var $mdgriffith$elm_ui$Internal$Model$Padding = F5(
-	function (a, b, c, d, e) {
-		return {$: 'Padding', a: a, b: b, c: c, d: d, e: e};
-	});
-var $mdgriffith$elm_ui$Internal$Model$Spaced = F3(
-	function (a, b, c) {
-		return {$: 'Spaced', a: a, b: b, c: c};
-	});
-var $mdgriffith$elm_ui$Internal$Model$extractSpacingAndPadding = function (attrs) {
-	return A3(
-		$elm$core$List$foldr,
-		F2(
-			function (attr, _v0) {
-				var pad = _v0.a;
-				var spacing = _v0.b;
-				return _Utils_Tuple2(
-					function () {
-						if (pad.$ === 'Just') {
-							var x = pad.a;
-							return pad;
-						} else {
-							if ((attr.$ === 'StyleClass') && (attr.b.$ === 'PaddingStyle')) {
-								var _v3 = attr.b;
-								var name = _v3.a;
-								var t = _v3.b;
-								var r = _v3.c;
-								var b = _v3.d;
-								var l = _v3.e;
-								return $elm$core$Maybe$Just(
-									A5($mdgriffith$elm_ui$Internal$Model$Padding, name, t, r, b, l));
-							} else {
-								return $elm$core$Maybe$Nothing;
-							}
-						}
-					}(),
-					function () {
-						if (spacing.$ === 'Just') {
-							var x = spacing.a;
-							return spacing;
-						} else {
-							if ((attr.$ === 'StyleClass') && (attr.b.$ === 'SpacingStyle')) {
-								var _v6 = attr.b;
-								var name = _v6.a;
-								var x = _v6.b;
-								var y = _v6.c;
-								return $elm$core$Maybe$Just(
-									A3($mdgriffith$elm_ui$Internal$Model$Spaced, name, x, y));
-							} else {
-								return $elm$core$Maybe$Nothing;
-							}
-						}
-					}());
-			}),
-		_Utils_Tuple2($elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing),
-		attrs);
-};
-var $mdgriffith$elm_ui$Internal$Model$paddingNameFloat = F4(
-	function (top, right, bottom, left) {
-		return 'pad-' + ($mdgriffith$elm_ui$Internal$Model$floatClass(top) + ('-' + ($mdgriffith$elm_ui$Internal$Model$floatClass(right) + ('-' + ($mdgriffith$elm_ui$Internal$Model$floatClass(bottom) + ('-' + $mdgriffith$elm_ui$Internal$Model$floatClass(left)))))));
-	});
-var $mdgriffith$elm_ui$Element$wrappedRow = F2(
-	function (attrs, children) {
-		var _v0 = $mdgriffith$elm_ui$Internal$Model$extractSpacingAndPadding(attrs);
-		var padded = _v0.a;
-		var spaced = _v0.b;
-		if (spaced.$ === 'Nothing') {
-			return A4(
-				$mdgriffith$elm_ui$Internal$Model$element,
-				$mdgriffith$elm_ui$Internal$Model$asRow,
-				$mdgriffith$elm_ui$Internal$Model$div,
-				A2(
-					$elm$core$List$cons,
-					$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.wrapped)))),
-					A2(
-						$elm$core$List$cons,
-						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-						A2(
-							$elm$core$List$cons,
-							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-							attrs))),
-				$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
-		} else {
-			var _v2 = spaced.a;
-			var spaceName = _v2.a;
-			var x = _v2.b;
-			var y = _v2.c;
-			var newPadding = function () {
-				if (padded.$ === 'Just') {
-					var _v5 = padded.a;
-					var name = _v5.a;
-					var t = _v5.b;
-					var r = _v5.c;
-					var b = _v5.d;
-					var l = _v5.e;
-					if ((_Utils_cmp(r, x / 2) > -1) && (_Utils_cmp(b, y / 2) > -1)) {
-						var newTop = t - (y / 2);
-						var newRight = r - (x / 2);
-						var newLeft = l - (x / 2);
-						var newBottom = b - (y / 2);
-						return $elm$core$Maybe$Just(
-							A2(
-								$mdgriffith$elm_ui$Internal$Model$StyleClass,
-								$mdgriffith$elm_ui$Internal$Flag$padding,
-								A5(
-									$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
-									A4($mdgriffith$elm_ui$Internal$Model$paddingNameFloat, newTop, newRight, newBottom, newLeft),
-									newTop,
-									newRight,
-									newBottom,
-									newLeft)));
-					} else {
-						return $elm$core$Maybe$Nothing;
-					}
-				} else {
-					return $elm$core$Maybe$Nothing;
-				}
-			}();
-			if (newPadding.$ === 'Just') {
-				var pad = newPadding.a;
-				return A4(
-					$mdgriffith$elm_ui$Internal$Model$element,
-					$mdgriffith$elm_ui$Internal$Model$asRow,
-					$mdgriffith$elm_ui$Internal$Model$div,
-					A2(
-						$elm$core$List$cons,
-						$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.wrapped)))),
-						A2(
-							$elm$core$List$cons,
-							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-							A2(
-								$elm$core$List$cons,
-								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-								_Utils_ap(
-									attrs,
-									_List_fromArray(
-										[pad]))))),
-					$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
-			} else {
-				var halfY = -(y / 2);
-				var halfX = -(x / 2);
-				return A4(
-					$mdgriffith$elm_ui$Internal$Model$element,
-					$mdgriffith$elm_ui$Internal$Model$asEl,
-					$mdgriffith$elm_ui$Internal$Model$div,
-					attrs,
-					$mdgriffith$elm_ui$Internal$Model$Unkeyed(
-						_List_fromArray(
-							[
-								A4(
-								$mdgriffith$elm_ui$Internal$Model$element,
-								$mdgriffith$elm_ui$Internal$Model$asRow,
-								$mdgriffith$elm_ui$Internal$Model$div,
-								A2(
-									$elm$core$List$cons,
-									$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.wrapped)))),
-									A2(
-										$elm$core$List$cons,
-										$mdgriffith$elm_ui$Internal$Model$Attr(
-											A2(
-												$elm$html$Html$Attributes$style,
-												'margin',
-												$elm$core$String$fromFloat(halfY) + ('px' + (' ' + ($elm$core$String$fromFloat(halfX) + 'px'))))),
-										A2(
-											$elm$core$List$cons,
-											$mdgriffith$elm_ui$Internal$Model$Attr(
-												A2(
-													$elm$html$Html$Attributes$style,
-													'width',
-													'calc(100% + ' + ($elm$core$String$fromInt(x) + 'px)'))),
-											A2(
-												$elm$core$List$cons,
-												$mdgriffith$elm_ui$Internal$Model$Attr(
-													A2(
-														$elm$html$Html$Attributes$style,
-														'height',
-														'calc(100% + ' + ($elm$core$String$fromInt(y) + 'px)'))),
-												A2(
-													$elm$core$List$cons,
-													A2(
-														$mdgriffith$elm_ui$Internal$Model$StyleClass,
-														$mdgriffith$elm_ui$Internal$Flag$spacing,
-														A3($mdgriffith$elm_ui$Internal$Model$SpacingStyle, spaceName, x, y)),
-													_List_Nil))))),
-								$mdgriffith$elm_ui$Internal$Model$Unkeyed(children))
-							])));
-			}
-		}
 	});
 var $author$project$ToolsController$toolsForDock = F4(
 	function (dock, msgWrapper, isTrack, options) {
@@ -30404,7 +31144,6 @@ var $mdgriffith$elm_ui$Element$moveLeft = function (x) {
 		$mdgriffith$elm_ui$Internal$Flag$moveX,
 		$mdgriffith$elm_ui$Internal$Model$MoveX(-x));
 };
-var $smucode$elm_flat_colors$FlatColors$ChinesePalette$peace = A3($mdgriffith$elm_ui$Element$rgb255, 164, 176, 190);
 var $feathericons$elm_feather$FeatherIcons$unlock = A2(
 	$feathericons$elm_feather$FeatherIcons$makeBuilder,
 	'unlock',
@@ -38641,40 +39380,6 @@ var $mdgriffith$elm_ui$Element$Input$optionWith = F2(
 	function (val, view) {
 		return A2($mdgriffith$elm_ui$Element$Input$Option, val, view);
 	});
-var $mdgriffith$elm_ui$Internal$Model$paddingName = F4(
-	function (top, right, bottom, left) {
-		return 'pad-' + ($elm$core$String$fromInt(top) + ('-' + ($elm$core$String$fromInt(right) + ('-' + ($elm$core$String$fromInt(bottom) + ('-' + $elm$core$String$fromInt(left)))))));
-	});
-var $mdgriffith$elm_ui$Element$paddingEach = function (_v0) {
-	var top = _v0.top;
-	var right = _v0.right;
-	var bottom = _v0.bottom;
-	var left = _v0.left;
-	if (_Utils_eq(top, right) && (_Utils_eq(top, bottom) && _Utils_eq(top, left))) {
-		var topFloat = top;
-		return A2(
-			$mdgriffith$elm_ui$Internal$Model$StyleClass,
-			$mdgriffith$elm_ui$Internal$Flag$padding,
-			A5(
-				$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
-				'p-' + $elm$core$String$fromInt(top),
-				topFloat,
-				topFloat,
-				topFloat,
-				topFloat));
-	} else {
-		return A2(
-			$mdgriffith$elm_ui$Internal$Model$StyleClass,
-			$mdgriffith$elm_ui$Internal$Flag$padding,
-			A5(
-				$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
-				A4($mdgriffith$elm_ui$Internal$Model$paddingName, top, right, bottom, left),
-				top,
-				right,
-				bottom,
-				left));
-	}
-};
 var $smucode$elm_flat_colors$FlatColors$ChinesePalette$clearChill = A3($mdgriffith$elm_ui$Element$rgb255, 30, 144, 255);
 var $smucode$elm_flat_colors$FlatColors$ChinesePalette$prestigeBlue = A3($mdgriffith$elm_ui$Element$rgb255, 47, 53, 66);
 var $author$project$ViewPureStyles$radioButton = F2(

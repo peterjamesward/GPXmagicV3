@@ -19,6 +19,8 @@ import Tools.BezierOptions
 import Tools.BezierSplines
 import Tools.CentroidAverage
 import Tools.CentroidAverageOptions
+import Tools.CurveFormer
+import Tools.CurveFormerOptions
 import Tools.DeletePoints as DeletePoints
 import Tools.Pointers as Pointers
 import Tools.TrackInfoBox as TrackInfoBox
@@ -51,6 +53,7 @@ type ToolType
     | ToolUndoRedo
     | ToolBezierSplines
     | ToolCentroidAverage
+    | ToolCurveFormer
 
 
 type alias Options =
@@ -63,6 +66,7 @@ type alias Options =
     , imperial : Bool
     , bezierSplineOptions : Tools.BezierOptions.Options
     , centroidAverageOptions : Tools.CentroidAverageOptions.Options
+    , curveFormerOptions : Tools.CurveFormerOptions.Options
     }
 
 
@@ -76,6 +80,7 @@ defaultOptions =
     , imperial = False
     , bezierSplineOptions = Tools.BezierSplines.defaultOptions
     , centroidAverageOptions = Tools.CentroidAverage.defaultOptions
+    , curveFormerOptions = Tools.CurveFormer.defaultOptions
     }
 
 
@@ -92,6 +97,7 @@ type ToolMsg
     | ToolNoOp
     | ToolBezierMsg Tools.BezierSplines.Msg
     | ToolCentroidMsg Tools.CentroidAverage.Msg
+    | ToolCurveFormerMsg Tools.CurveFormer.Msg
 
 
 type alias ToolEntry =
@@ -117,6 +123,7 @@ defaultTools =
     , deleteTool
     , bezierSplinesTool
     , centroidAverageTool
+    , curveFormerTool
     ]
 
 
@@ -203,10 +210,25 @@ bezierSplinesTool =
     , isPopupOpen = False
     }
 
+
 centroidAverageTool : ToolEntry
 centroidAverageTool =
     { toolType = ToolCentroidAverage
     , label = "Centroid Average"
+    , info = "Make it smoother"
+    , video = Nothing
+    , state = Contracted
+    , dock = DockLowerRight
+    , tabColour = FlatColors.SwedishPalette.blackPearl
+    , textColour = contrastingColour FlatColors.SwedishPalette.blackPearl
+    , isPopupOpen = False
+    }
+
+
+curveFormerTool : ToolEntry
+curveFormerTool =
+    { toolType = ToolCurveFormer
+    , label = "Radiused bends"
     , info = "Make it smoother"
     , video = Nothing
     , state = Contracted
@@ -403,6 +425,19 @@ update toolMsg isTrack msgWrapper options =
             , actions
             )
 
+        ToolCurveFormerMsg msg ->
+            let
+                ( newOptions, actions ) =
+                    Tools.CurveFormer.update
+                        msg
+                        options.curveFormerOptions
+                        (getColour ToolCurveFormer options.tools)
+                        isTrack
+            in
+            ( { options | curveFormerOptions = newOptions }
+            , actions
+            )
+
         ToggleImperial ->
             let
                 newOptions =
@@ -516,6 +551,20 @@ toolStateHasChanged toolType newState isTrack options =
 
                 newOptions =
                     { options | centroidAverageOptions = newToolOptions }
+            in
+            ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
+
+        ToolCurveFormer ->
+            let
+                ( newToolOptions, actions ) =
+                    Tools.CurveFormer.toolStateChange
+                        (newState == Expanded)
+                        (getColour toolType options.tools)
+                        options.curveFormerOptions
+                        isTrack
+
+                newOptions =
+                    { options | curveFormerOptions = newToolOptions }
             in
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
@@ -716,6 +765,10 @@ viewToolByType msgWrapper entry isTrack options =
             ToolCentroidAverage ->
                 Tools.CentroidAverage.view (msgWrapper << ToolCentroidMsg) options.centroidAverageOptions
 
+            ToolCurveFormer ->
+                Tools.CurveFormer.view options.imperial (msgWrapper << ToolCurveFormerMsg) options.curveFormerOptions
+
+
 
 -- Local storage management
 
@@ -759,6 +812,9 @@ encodeType toolType =
 
         ToolCentroidAverage ->
             "ToolCentroidAverage"
+
+        ToolCurveFormer ->
+            "ToolCurveFormer"
 
 
 encodeColour : Element.Color -> E.Value

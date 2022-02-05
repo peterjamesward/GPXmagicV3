@@ -8,6 +8,7 @@ import Element
 import Json.Decode as E
 import Tools.BezierOptions
 import Tools.CentroidAverageOptions
+import Tools.CurveFormerOptions
 import Tools.MemoryUsage
 
 
@@ -32,6 +33,7 @@ type ToolAction msg
     | RenderProfile
     | BezierApplyWithOptions Tools.BezierOptions.Options
     | CentroidAverageApplyWithOptions Tools.CentroidAverageOptions.Options
+    | CurveFormerApplyWithOptions Tools.CurveFormerOptions.Options
 
 
 type PreviewShape
@@ -63,4 +65,8 @@ interpretAction action =
         CentroidAverageApplyWithOptions options ->
             "centroid average"
 
-        _ -> "ask Pete to fix this message"
+        CurveFormerApplyWithOptions options ->
+            "curve former"
+
+        _ ->
+            "ask Pete to fix this message"
