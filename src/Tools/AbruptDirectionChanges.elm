@@ -13,7 +13,7 @@ import List.Extra
 import Quantity
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showAngle)
-import ViewPureStyles exposing (neatToolsBorder, sliderThumb, useIcon)
+import ViewPureStyles exposing (neatToolsBorder, noTrackMessage, sliderThumb, useIcon)
 
 
 type alias Options =
@@ -184,57 +184,62 @@ update msg options previewColour hasTrack =
                     ( newOptions, [] )
 
 
-view : (Msg -> msg) -> Options -> Element msg
-view msgWrapper options =
-    el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
-        column [ centerX, padding 4, spacing 4, height <| px 100 ]
-            [ Input.slider
-                ViewPureStyles.shortSliderStyles
-                { onChange = Angle.degrees >> SetThreshold >> msgWrapper
-                , value = Angle.inDegrees options.threshold
-                , label = Input.labelHidden "Direction change threshold"
-                , min = 30
-                , max = 120
-                , step = Just 1
-                , thumb = sliderThumb
-                }
-            , el [ centerX ] <|
-                text <|
-                    "Threshold "
-                        ++ (String.fromInt <| round <| Angle.inDegrees options.threshold)
-                        ++ "º"
-            , case options.breaches of
-                [] ->
-                    el [ centerX, centerY ] <| text "None found"
+view : (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view msgWrapper options isTrack =
+    case isTrack of
+        Just track ->
+            el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
+                column [ centerX, padding 4, spacing 4, height <| px 100 ]
+                    [ Input.slider
+                        ViewPureStyles.shortSliderStyles
+                        { onChange = Angle.degrees >> SetThreshold >> msgWrapper
+                        , value = Angle.inDegrees options.threshold
+                        , label = Input.labelHidden "Direction change threshold"
+                        , min = 30
+                        , max = 120
+                        , step = Just 1
+                        , thumb = sliderThumb
+                        }
+                    , el [ centerX ] <|
+                        text <|
+                            "Threshold "
+                                ++ (String.fromInt <| round <| Angle.inDegrees options.threshold)
+                                ++ "º"
+                    , case options.breaches of
+                        [] ->
+                            el [ centerX, centerY ] <| text "None found"
 
-                a :: b ->
-                    let
-                        ( position, turn ) =
-                            Maybe.withDefault ( 0, Angle.degrees 0 ) <|
-                                List.Extra.getAt options.currentBreach options.breaches
-                    in
-                    column [ spacing 4, centerX ]
-                        [ el [ centerX ] <|
-                            text <|
-                                String.fromInt (options.currentBreach + 1)
-                                    ++ " of "
-                                    ++ (String.fromInt <| List.length options.breaches)
-                                    ++ " is "
-                                    ++ (showAngle <| turn)
-                                    ++ "º"
-                        , row [ centerX, spacing 10 ]
-                            [ Input.button neatToolsBorder
-                                { label = useIcon FeatherIcons.chevronLeft
-                                , onPress = Just <| msgWrapper <| ViewPrevious
-                                }
-                            , Input.button neatToolsBorder
-                                { label = useIcon FeatherIcons.mousePointer
-                                , onPress = Just <| msgWrapper <| SetCurrentPosition position
-                                }
-                            , Input.button neatToolsBorder
-                                { label = useIcon FeatherIcons.chevronRight
-                                , onPress = Just <| msgWrapper <| ViewNext
-                                }
-                            ]
-                        ]
-            ]
+                        a :: b ->
+                            let
+                                ( position, turn ) =
+                                    Maybe.withDefault ( 0, Angle.degrees 0 ) <|
+                                        List.Extra.getAt options.currentBreach options.breaches
+                            in
+                            column [ spacing 4, centerX ]
+                                [ el [ centerX ] <|
+                                    text <|
+                                        String.fromInt (options.currentBreach + 1)
+                                            ++ " of "
+                                            ++ (String.fromInt <| List.length options.breaches)
+                                            ++ " is "
+                                            ++ (showAngle <| turn)
+                                            ++ "º"
+                                , row [ centerX, spacing 10 ]
+                                    [ Input.button neatToolsBorder
+                                        { label = useIcon FeatherIcons.chevronLeft
+                                        , onPress = Just <| msgWrapper <| ViewPrevious
+                                        }
+                                    , Input.button neatToolsBorder
+                                        { label = useIcon FeatherIcons.mousePointer
+                                        , onPress = Just <| msgWrapper <| SetCurrentPosition position
+                                        }
+                                    , Input.button neatToolsBorder
+                                        { label = useIcon FeatherIcons.chevronRight
+                                        , onPress = Just <| msgWrapper <| ViewNext
+                                        }
+                                    ]
+                                ]
+                    ]
+
+        Nothing ->
+            noTrackMessage

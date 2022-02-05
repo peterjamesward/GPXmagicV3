@@ -24,7 +24,7 @@ import Triangle3d
 import UtilsForViews exposing (showDecimal2, showShortMeasure)
 import Vector2d
 import Vector3d
-import ViewPureStyles exposing (checkboxIcon, commonShortHorizontalSliderStyles, disabledToolsBorder, edges, neatToolsBorder, prettyButtonStyles, useIcon)
+import ViewPureStyles exposing (checkboxIcon, commonShortHorizontalSliderStyles, disabledToolsBorder, edges, neatToolsBorder, noTrackMessage, prettyButtonStyles, useIcon)
 
 
 defaultOptions : Options
@@ -196,8 +196,8 @@ update msg options previewColour hasTrack =
             ( options, [] )
 
 
-view : Bool -> (Msg -> msg) -> Options -> Element msg
-view imperial wrapper options =
+view : Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view imperial wrapper options track =
     let
         squared x =
             x * x
@@ -300,35 +300,38 @@ view imperial wrapper options =
                 , paragraph [] <| [ text "I don't know what to do without contiguous points." ]
                 ]
     in
-    -- Try with linear vector, switch to log or something else if needed.
-    row
-        [ paddingEach { edges | right = 10 }
-        , spacing 5
-        , width fill
-        , Background.color FlatColors.ChinesePalette.antiFlashWhite
-        ]
-        [ twoWayDragControl options wrapper
-        , column [ width fill, spacing 5 ]
-            [ wrappedRow
-                [ Element.alignLeft
-                , Element.width Element.fill
+    case track of
+        Just isTrack ->
+            row
+                [ paddingEach { edges | right = 10 }
                 , spacing 5
+                , width fill
+                , Background.color FlatColors.ChinesePalette.antiFlashWhite
                 ]
-                [ showPushRadiusSlider
-                , showTransitionRadiusSlider
-                , showSpacingSlider
-                , showPullSelection
-                , if options.usePullRadius then
-                    showPullRadiusSlider
+                [ twoWayDragControl options wrapper
+                , column [ width fill, spacing 5 ]
+                    [ wrappedRow
+                        [ Element.alignLeft
+                        , Element.width Element.fill
+                        , spacing 5
+                        ]
+                        [ showPushRadiusSlider
+                        , showTransitionRadiusSlider
+                        , showSpacingSlider
+                        , showPullSelection
+                        , if options.usePullRadius then
+                            showPullRadiusSlider
 
-                  else
-                    none
+                          else
+                            none
+                        ]
+                    , showModeSelection
+                    , showActionButtons
+                    ]
                 ]
-            , showModeSelection
-            , showActionButtons
-            ]
-        ]
 
+        Nothing ->
+            noTrackMessage
 
 type alias Point =
     Point2d Meters LocalCoords

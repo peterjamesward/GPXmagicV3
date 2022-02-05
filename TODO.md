@@ -16,6 +16,7 @@ DEBT: Map sends more click messages each time we click. They are debounced but, 
 ## Tools
 
 4. Classic bend smoother (fix Samir's bug on looped routes)
+5. Clothoids (promoted because may be similar structurally to bezier & centroid)
 5. Drag on map
 6. Nudge 
 7. Segment info
@@ -23,25 +24,18 @@ DEBT: Map sends more click messages each time we click. They are debounced but, 
 9. Gradient problems
 10. Steep climbs
 11. Intersections
+17. Visual options
+18. SVG import
 12. Fly-through
 13. Limit gradients 
-14. Clothoids (!!)
-15. Graph Theory
-16. Use Strava segment data
-17. Loops (includes Out and Back) (+ impact on others, such as Bezier).
-18. Visual options
-19. SVG import
-20. Map Satellite style choice
-21. Super smoothing  (think GPXsmoother, but different)
-22. Something akin to Graphs, stemming from Muriel's route.
-23. Memory usage
-24. Samir's bend detector
-
-## Profile preview
-
-This needs previewData to have a PeteTree so we can derive distances.
-This will also allow elision, so ability to handle much larger previews.
-> Non-trivial as some tools have non-contiguous preview points. Think more.
+14. Graph Theory
+15. Use Strava segment data
+16. Loops (includes Out and Back) (+ impact on others, such as Bezier).
+19. Map Satellite style choice
+20. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
+21. Something akin to Graphs, stemming from Muriel's route.
+22. Memory usage (incl limiting actions such as dumping Undo stack).
+23. Samir's bend detector (amount of angular change within X linear metres).
 
 ## Error messages
 
@@ -79,4 +73,22 @@ Better, a user-chosen threshold of number of points for live preview.
 > Add this to "global state" which needs to pass aroud, like Imperial.
 
 ---
+
+# Parked
+
+## Profile preview
+
+This needs previewData to have a PeteTree so we can derive distances.
+> We can always derive startDistance using startFrom.
+
+This will also allow elision, so ability to handle much larger previews.
+
+Should distinguish between new (sequential) track points and (isolated) features
+on existing track. Latter is bends, gradients, points to delete.
+
+Hence, not just one-size-fits-all "preview".
+
+Then again, it's not really worth worrying about. If we have excessive points
+in a preview list, we can easily elide them by skipping through the list in the
+view; a PeteTree is OTT.
 

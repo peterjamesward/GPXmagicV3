@@ -748,7 +748,10 @@ viewToolByType msgWrapper entry isTrack options =
                 TrackInfoBox.trackInfoBox isTrack options.imperial
 
             ToolAbruptDirectionChanges ->
-                AbruptDirectionChanges.view (msgWrapper << DirectionChanges) options.directionChangeOptions
+                AbruptDirectionChanges.view
+                    (msgWrapper << DirectionChanges)
+                    options.directionChangeOptions
+                    isTrack
 
             ToolDeletePoints ->
                 DeletePoints.view (msgWrapper << DeletePoints) options.deleteOptions
@@ -766,7 +769,11 @@ viewToolByType msgWrapper entry isTrack options =
                 Tools.CentroidAverage.view (msgWrapper << ToolCentroidMsg) options.centroidAverageOptions
 
             ToolCurveFormer ->
-                Tools.CurveFormer.view options.imperial (msgWrapper << ToolCurveFormerMsg) options.curveFormerOptions
+                Tools.CurveFormer.view
+                    options.imperial
+                    (msgWrapper << ToolCurveFormerMsg)
+                    options.curveFormerOptions
+                    isTrack
 
 
 

@@ -321,3 +321,16 @@ showModalMessage content msg =
                 }
             ]
         ]
+
+
+noTrackMessage =
+    paragraph
+        [ padding 20
+        , spacing 5
+        , width fill
+        , Background.color FlatColors.ChinesePalette.antiFlashWhite
+        , centerX
+        , centerY
+        , height <| px 100
+        ]
+        [ text "Controls will appear here when a track is loaded." ]

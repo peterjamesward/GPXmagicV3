@@ -27603,6 +27603,42 @@ var $feathericons$elm_feather$FeatherIcons$mousePointer = A2(
 				]),
 			_List_Nil)
 		]));
+var $mdgriffith$elm_ui$Internal$Model$Paragraph = {$: 'Paragraph'};
+var $mdgriffith$elm_ui$Element$paragraph = F2(
+	function (attrs, children) {
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asParagraph,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Internal$Model$Describe($mdgriffith$elm_ui$Internal$Model$Paragraph),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$spacing(5),
+						attrs))),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+	});
+var $author$project$ViewPureStyles$noTrackMessage = A2(
+	$mdgriffith$elm_ui$Element$paragraph,
+	_List_fromArray(
+		[
+			$mdgriffith$elm_ui$Element$padding(20),
+			$mdgriffith$elm_ui$Element$spacing(5),
+			$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+			$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite),
+			$mdgriffith$elm_ui$Element$centerX,
+			$mdgriffith$elm_ui$Element$centerY,
+			$mdgriffith$elm_ui$Element$height(
+			$mdgriffith$elm_ui$Element$px(100))
+		]),
+	_List_fromArray(
+		[
+			$mdgriffith$elm_ui$Element$text('Controls will appear here when a track is loaded.')
+		]));
 var $mdgriffith$elm_ui$Internal$Model$Behind = {$: 'Behind'};
 var $mdgriffith$elm_ui$Element$behindContent = function (element) {
 	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$Behind, element);
@@ -28276,124 +28312,129 @@ var $author$project$ViewPureStyles$sliderThumb = $mdgriffith$elm_ui$Element$Inpu
 			$mdgriffith$elm_ui$Element$Background$color(
 			A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1))
 		]));
-var $author$project$Tools$AbruptDirectionChanges$view = F2(
-	function (msgWrapper, options) {
-		return A2(
-			$mdgriffith$elm_ui$Element$el,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-					$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite)
-				]),
-			A2(
-				$mdgriffith$elm_ui$Element$column,
+var $author$project$Tools$AbruptDirectionChanges$view = F3(
+	function (msgWrapper, options, isTrack) {
+		if (isTrack.$ === 'Just') {
+			var track = isTrack.a;
+			return A2(
+				$mdgriffith$elm_ui$Element$el,
 				_List_fromArray(
 					[
-						$mdgriffith$elm_ui$Element$centerX,
-						$mdgriffith$elm_ui$Element$padding(4),
-						$mdgriffith$elm_ui$Element$spacing(4),
-						$mdgriffith$elm_ui$Element$height(
-						$mdgriffith$elm_ui$Element$px(100))
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite)
 					]),
-				_List_fromArray(
-					[
-						A2(
-						$mdgriffith$elm_ui$Element$Input$slider,
-						$author$project$ViewPureStyles$shortSliderStyles,
-						{
-							label: $mdgriffith$elm_ui$Element$Input$labelHidden('Direction change threshold'),
-							max: 120,
-							min: 30,
-							onChange: A2(
-								$elm$core$Basics$composeR,
-								$ianmackenzie$elm_units$Angle$degrees,
-								A2($elm$core$Basics$composeR, $author$project$Tools$AbruptDirectionChanges$SetThreshold, msgWrapper)),
-							step: $elm$core$Maybe$Just(1),
-							thumb: $author$project$ViewPureStyles$sliderThumb,
-							value: $ianmackenzie$elm_units$Angle$inDegrees(options.threshold)
-						}),
-						A2(
-						$mdgriffith$elm_ui$Element$el,
-						_List_fromArray(
-							[$mdgriffith$elm_ui$Element$centerX]),
-						$mdgriffith$elm_ui$Element$text(
-							'Threshold ' + ($elm$core$String$fromInt(
-								$elm$core$Basics$round(
-									$ianmackenzie$elm_units$Angle$inDegrees(options.threshold))) + 'º'))),
-						function () {
-						var _v0 = options.breaches;
-						if (!_v0.b) {
-							return A2(
-								$mdgriffith$elm_ui$Element$el,
-								_List_fromArray(
-									[$mdgriffith$elm_ui$Element$centerX, $mdgriffith$elm_ui$Element$centerY]),
-								$mdgriffith$elm_ui$Element$text('None found'));
-						} else {
-							var a = _v0.a;
-							var b = _v0.b;
-							var _v1 = A2(
-								$elm$core$Maybe$withDefault,
-								_Utils_Tuple2(
-									0,
-									$ianmackenzie$elm_units$Angle$degrees(0)),
-								A2($elm_community$list_extra$List$Extra$getAt, options.currentBreach, options.breaches));
-							var position = _v1.a;
-							var turn = _v1.b;
-							return A2(
-								$mdgriffith$elm_ui$Element$column,
-								_List_fromArray(
-									[
-										$mdgriffith$elm_ui$Element$spacing(4),
-										$mdgriffith$elm_ui$Element$centerX
-									]),
-								_List_fromArray(
-									[
-										A2(
-										$mdgriffith$elm_ui$Element$el,
-										_List_fromArray(
-											[$mdgriffith$elm_ui$Element$centerX]),
-										$mdgriffith$elm_ui$Element$text(
-											$elm$core$String$fromInt(options.currentBreach + 1) + (' of ' + ($elm$core$String$fromInt(
-												$elm$core$List$length(options.breaches)) + (' is ' + ($author$project$UtilsForViews$showAngle(turn) + 'º')))))),
-										A2(
-										$mdgriffith$elm_ui$Element$row,
-										_List_fromArray(
-											[
-												$mdgriffith$elm_ui$Element$centerX,
-												$mdgriffith$elm_ui$Element$spacing(10)
-											]),
-										_List_fromArray(
-											[
-												A2(
-												$mdgriffith$elm_ui$Element$Input$button,
-												$author$project$ViewPureStyles$neatToolsBorder,
-												{
-													label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronLeft),
-													onPress: $elm$core$Maybe$Just(
-														msgWrapper($author$project$Tools$AbruptDirectionChanges$ViewPrevious))
-												}),
-												A2(
-												$mdgriffith$elm_ui$Element$Input$button,
-												$author$project$ViewPureStyles$neatToolsBorder,
-												{
-													label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$mousePointer),
-													onPress: $elm$core$Maybe$Just(
-														msgWrapper(
-															$author$project$Tools$AbruptDirectionChanges$SetCurrentPosition(position)))
-												}),
-												A2(
-												$mdgriffith$elm_ui$Element$Input$button,
-												$author$project$ViewPureStyles$neatToolsBorder,
-												{
-													label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronRight),
-													onPress: $elm$core$Maybe$Just(
-														msgWrapper($author$project$Tools$AbruptDirectionChanges$ViewNext))
-												})
-											]))
-									]));
-						}
-					}()
-					])));
+				A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$centerX,
+							$mdgriffith$elm_ui$Element$padding(4),
+							$mdgriffith$elm_ui$Element$spacing(4),
+							$mdgriffith$elm_ui$Element$height(
+							$mdgriffith$elm_ui$Element$px(100))
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$mdgriffith$elm_ui$Element$Input$slider,
+							$author$project$ViewPureStyles$shortSliderStyles,
+							{
+								label: $mdgriffith$elm_ui$Element$Input$labelHidden('Direction change threshold'),
+								max: 120,
+								min: 30,
+								onChange: A2(
+									$elm$core$Basics$composeR,
+									$ianmackenzie$elm_units$Angle$degrees,
+									A2($elm$core$Basics$composeR, $author$project$Tools$AbruptDirectionChanges$SetThreshold, msgWrapper)),
+								step: $elm$core$Maybe$Just(1),
+								thumb: $author$project$ViewPureStyles$sliderThumb,
+								value: $ianmackenzie$elm_units$Angle$inDegrees(options.threshold)
+							}),
+							A2(
+							$mdgriffith$elm_ui$Element$el,
+							_List_fromArray(
+								[$mdgriffith$elm_ui$Element$centerX]),
+							$mdgriffith$elm_ui$Element$text(
+								'Threshold ' + ($elm$core$String$fromInt(
+									$elm$core$Basics$round(
+										$ianmackenzie$elm_units$Angle$inDegrees(options.threshold))) + 'º'))),
+							function () {
+							var _v1 = options.breaches;
+							if (!_v1.b) {
+								return A2(
+									$mdgriffith$elm_ui$Element$el,
+									_List_fromArray(
+										[$mdgriffith$elm_ui$Element$centerX, $mdgriffith$elm_ui$Element$centerY]),
+									$mdgriffith$elm_ui$Element$text('None found'));
+							} else {
+								var a = _v1.a;
+								var b = _v1.b;
+								var _v2 = A2(
+									$elm$core$Maybe$withDefault,
+									_Utils_Tuple2(
+										0,
+										$ianmackenzie$elm_units$Angle$degrees(0)),
+									A2($elm_community$list_extra$List$Extra$getAt, options.currentBreach, options.breaches));
+								var position = _v2.a;
+								var turn = _v2.b;
+								return A2(
+									$mdgriffith$elm_ui$Element$column,
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$spacing(4),
+											$mdgriffith$elm_ui$Element$centerX
+										]),
+									_List_fromArray(
+										[
+											A2(
+											$mdgriffith$elm_ui$Element$el,
+											_List_fromArray(
+												[$mdgriffith$elm_ui$Element$centerX]),
+											$mdgriffith$elm_ui$Element$text(
+												$elm$core$String$fromInt(options.currentBreach + 1) + (' of ' + ($elm$core$String$fromInt(
+													$elm$core$List$length(options.breaches)) + (' is ' + ($author$project$UtilsForViews$showAngle(turn) + 'º')))))),
+											A2(
+											$mdgriffith$elm_ui$Element$row,
+											_List_fromArray(
+												[
+													$mdgriffith$elm_ui$Element$centerX,
+													$mdgriffith$elm_ui$Element$spacing(10)
+												]),
+											_List_fromArray(
+												[
+													A2(
+													$mdgriffith$elm_ui$Element$Input$button,
+													$author$project$ViewPureStyles$neatToolsBorder,
+													{
+														label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronLeft),
+														onPress: $elm$core$Maybe$Just(
+															msgWrapper($author$project$Tools$AbruptDirectionChanges$ViewPrevious))
+													}),
+													A2(
+													$mdgriffith$elm_ui$Element$Input$button,
+													$author$project$ViewPureStyles$neatToolsBorder,
+													{
+														label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$mousePointer),
+														onPress: $elm$core$Maybe$Just(
+															msgWrapper(
+																$author$project$Tools$AbruptDirectionChanges$SetCurrentPosition(position)))
+													}),
+													A2(
+													$mdgriffith$elm_ui$Element$Input$button,
+													$author$project$ViewPureStyles$neatToolsBorder,
+													{
+														label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronRight),
+														onPress: $elm$core$Maybe$Just(
+															msgWrapper($author$project$Tools$AbruptDirectionChanges$ViewNext))
+													})
+												]))
+										]));
+							}
+						}()
+						])));
+		} else {
+			return $author$project$ViewPureStyles$noTrackMessage;
+		}
 	});
 var $author$project$Tools$BezierSplines$BezierApplyWithOptions = {$: 'BezierApplyWithOptions'};
 var $author$project$Tools$BezierSplines$SetBezierStyle = function (a) {
@@ -28526,25 +28567,6 @@ var $mdgriffith$elm_ui$Element$Input$option = F2(
 			$mdgriffith$elm_ui$Element$Input$Option,
 			val,
 			$mdgriffith$elm_ui$Element$Input$defaultRadioOption(txt));
-	});
-var $mdgriffith$elm_ui$Internal$Model$Paragraph = {$: 'Paragraph'};
-var $mdgriffith$elm_ui$Element$paragraph = F2(
-	function (attrs, children) {
-		return A4(
-			$mdgriffith$elm_ui$Internal$Model$element,
-			$mdgriffith$elm_ui$Internal$Model$asParagraph,
-			$mdgriffith$elm_ui$Internal$Model$div,
-			A2(
-				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Internal$Model$Describe($mdgriffith$elm_ui$Internal$Model$Paragraph),
-				A2(
-					$elm$core$List$cons,
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-					A2(
-						$elm$core$List$cons,
-						$mdgriffith$elm_ui$Element$spacing(5),
-						attrs))),
-			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
 	});
 var $mdgriffith$elm_ui$Element$Input$Column = {$: 'Column'};
 var $mdgriffith$elm_ui$Element$Input$AfterFound = {$: 'AfterFound'};
@@ -29807,8 +29829,8 @@ var $mdgriffith$elm_ui$Element$wrappedRow = F2(
 			}
 		}
 	});
-var $author$project$Tools$CurveFormer$view = F3(
-	function (imperial, wrapper, options) {
+var $author$project$Tools$CurveFormer$view = F4(
+	function (imperial, wrapper, options, track) {
 		var squared = function (x) {
 			return x * x;
 		};
@@ -29949,10 +29971,10 @@ var $author$project$Tools$CurveFormer$view = F3(
 							wrapper($author$project$Tools$CurveFormer$DraggerReset))
 					}),
 					function () {
-					var _v0 = _Utils_Tuple2(
+					var _v1 = _Utils_Tuple2(
 						$elm$core$List$length(options.newTrackPoints) >= 3,
 						options.pointsAreContiguous);
-					if (_v0.b) {
+					if (_v1.b) {
 						return A2(
 							$mdgriffith$elm_ui$Element$Input$button,
 							$author$project$ViewPureStyles$neatToolsBorder,
@@ -29984,50 +30006,55 @@ var $author$project$Tools$CurveFormer$view = F3(
 					}
 				}()
 				]));
-		return A2(
-			$mdgriffith$elm_ui$Element$row,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$paddingEach(
-					_Utils_update(
-						$author$project$ViewPureStyles$edges,
-						{right: 10})),
-					$mdgriffith$elm_ui$Element$spacing(5),
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-					$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite)
-				]),
-			_List_fromArray(
-				[
-					A2($author$project$Tools$CurveFormer$twoWayDragControl, options, wrapper),
-					A2(
-					$mdgriffith$elm_ui$Element$column,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-							$mdgriffith$elm_ui$Element$spacing(5)
-						]),
-					_List_fromArray(
-						[
-							A2(
-							$mdgriffith$elm_ui$Element$wrappedRow,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$alignLeft,
-									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-									$mdgriffith$elm_ui$Element$spacing(5)
-								]),
-							_List_fromArray(
-								[
-									showPushRadiusSlider,
-									showTransitionRadiusSlider,
-									showSpacingSlider,
-									showPullSelection,
-									options.usePullRadius ? showPullRadiusSlider : $mdgriffith$elm_ui$Element$none
-								])),
-							showModeSelection,
-							showActionButtons
-						]))
-				]));
+		if (track.$ === 'Just') {
+			var isTrack = track.a;
+			return A2(
+				$mdgriffith$elm_ui$Element$row,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$paddingEach(
+						_Utils_update(
+							$author$project$ViewPureStyles$edges,
+							{right: 10})),
+						$mdgriffith$elm_ui$Element$spacing(5),
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite)
+					]),
+				_List_fromArray(
+					[
+						A2($author$project$Tools$CurveFormer$twoWayDragControl, options, wrapper),
+						A2(
+						$mdgriffith$elm_ui$Element$column,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+								$mdgriffith$elm_ui$Element$spacing(5)
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$mdgriffith$elm_ui$Element$wrappedRow,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$alignLeft,
+										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+										$mdgriffith$elm_ui$Element$spacing(5)
+									]),
+								_List_fromArray(
+									[
+										showPushRadiusSlider,
+										showTransitionRadiusSlider,
+										showSpacingSlider,
+										showPullSelection,
+										options.usePullRadius ? showPullRadiusSlider : $mdgriffith$elm_ui$Element$none
+									])),
+								showModeSelection,
+								showActionButtons
+							]))
+					]));
+		} else {
+			return $author$project$ViewPureStyles$noTrackMessage;
+		}
 	});
 var $author$project$Tools$DeletePoints$DeletePointOrPoints = {$: 'DeletePointOrPoints'};
 var $author$project$Tools$DeletePoints$view = F2(
@@ -30511,10 +30538,11 @@ var $author$project$ToolsController$viewToolByType = F4(
 					case 'ToolTrackInfo':
 						return A2($author$project$Tools$TrackInfoBox$trackInfoBox, isTrack, options.imperial);
 					case 'ToolAbruptDirectionChanges':
-						return A2(
+						return A3(
 							$author$project$Tools$AbruptDirectionChanges$view,
 							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$DirectionChanges),
-							options.directionChangeOptions);
+							options.directionChangeOptions,
+							isTrack);
 					case 'ToolDeletePoints':
 						return A2(
 							$author$project$Tools$DeletePoints$view,
@@ -30543,11 +30571,12 @@ var $author$project$ToolsController$viewToolByType = F4(
 							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolCentroidMsg),
 							options.centroidAverageOptions);
 					default:
-						return A3(
+						return A4(
 							$author$project$Tools$CurveFormer$view,
 							options.imperial,
 							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolCurveFormerMsg),
-							options.curveFormerOptions);
+							options.curveFormerOptions,
+							isTrack);
 				}
 			}());
 	});
