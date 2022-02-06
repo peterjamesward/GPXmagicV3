@@ -144,13 +144,7 @@ render3dView track =
 renderPreviews : Dict String PreviewData -> List (Entity LocalCoords)
 renderPreviews previews =
     let
-        onePreview :
-            { tag : String
-            , shape : PreviewShape
-            , colour : Element.Color
-            , points : List ( EarthPoint, GPXSource )
-            }
-            -> List (Entity LocalCoords)
+        onePreview : PreviewData -> List (Entity LocalCoords)
         onePreview { tag, shape, colour, points } =
             case shape of
                 PreviewCircle ->
@@ -158,6 +152,10 @@ renderPreviews previews =
 
                 PreviewLine ->
                     previewAsLine colour <| List.map Tuple.first points
+
+                PreviewToolSupplied callback ->
+                    -- This may be breaking one of those Elmish rules.
+                    callback
     in
     previews |> Dict.values |> List.concatMap onePreview
 

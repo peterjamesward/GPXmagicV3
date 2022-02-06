@@ -1,6 +1,8 @@
 module UtilsForViews exposing (..)
 
 import Angle
+import BoundingBox2d exposing (BoundingBox2d)
+import BoundingBox3d exposing (BoundingBox3d)
 import Color exposing (rgb)
 import Color.Convert exposing (colorToHex)
 import Element
@@ -121,3 +123,12 @@ colourHexString colour =
 fullDepthRenderingBoxSize =
     --TODO: put box side in model
     Length.kilometers 4
+
+
+flatBox : BoundingBox3d m c -> BoundingBox2d m c
+flatBox box =
+    let
+        { minX, maxX, minY, maxY, minZ, maxZ } =
+            BoundingBox3d.extrema box
+    in
+    BoundingBox2d.fromExtrema { minX = minX, maxX = maxX, minY = minY, maxY = maxY }

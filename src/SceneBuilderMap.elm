@@ -23,6 +23,10 @@ renderPreview { tag, shape, colour, points } =
         PreviewLine ->
             lineToJSON <| List.map Tuple.second points
 
+        PreviewToolSupplied _ ->
+            -- Can't do arbitrary stuff on the Map.
+            E.null
+
 
 lineToJSON : List GPXSource -> E.Value
 lineToJSON points =

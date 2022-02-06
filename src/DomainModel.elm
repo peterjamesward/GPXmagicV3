@@ -24,6 +24,7 @@ module DomainModel exposing
     , lngLatPair
     , nearestToLonLat
     , nearestToRay
+    , queryPointsUsingFilter
     , rebuildTree
     , replaceRange
     , skipCount
@@ -1383,3 +1384,30 @@ gradientFromNode treeNode =
         )
         (trueLength treeNode)
         |> (*) 100.0
+
+
+queryPointsUsingFilter :
+    (Int -> Int -> RoadSection -> Bool)
+    -> PeteTree
+    -> (Int -> RoadSection -> a -> a)
+    -> a
+    -> a
+queryPointsUsingFilter filterFn treeNode foldFn accum =
+    let
+        helper : Int -> Int -> PeteTree -> a -> a
+        helper starting ending someNode myAccumulator =
+            if filterFn starting ending (asRecord treeNode) then
+                -- Seems to be of interest to caller
+                case someNode of
+                    Leaf leaf ->
+                        foldFn starting leaf myAccumulator
+
+                    Node node ->
+                        myAccumulator
+                            |> helper starting (ending - skipCount node.right) node.left
+                            |> helper (starting + skipCount node.left) ending node.right
+
+            else
+                myAccumulator
+    in
+    helper 0 (skipCount treeNode) treeNode accum

@@ -1156,17 +1156,24 @@ performActionCommands actions model =
         showPreviewOnMap tag =
             case Dict.get tag model.previews of
                 Just useThisData ->
-                    MapPortController.showPreview
-                        useThisData.tag
-                        (case useThisData.shape of
-                            PreviewCircle ->
+                    case useThisData.shape of
+                        PreviewCircle ->
+                            MapPortController.showPreview
+                                useThisData.tag
                                 "circle"
+                                (colourHexString useThisData.colour)
+                                (SceneBuilderMap.renderPreview useThisData)
 
-                            PreviewLine ->
+                        PreviewLine ->
+                            MapPortController.showPreview
+                                useThisData.tag
                                 "line"
-                        )
-                        (colourHexString useThisData.colour)
-                        (SceneBuilderMap.renderPreview useThisData)
+                                (colourHexString useThisData.colour)
+                                (SceneBuilderMap.renderPreview useThisData)
+
+                        _ ->
+                            -- No other shapes go to map.
+                            Cmd.none
 
                 Nothing ->
                     Cmd.none

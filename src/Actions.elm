@@ -6,6 +6,8 @@ module Actions exposing (..)
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree)
 import Element
 import Json.Decode as E
+import LocalCoords exposing (LocalCoords)
+import Scene3d exposing (Entity)
 import Tools.BezierOptions
 import Tools.CentroidAverageOptions
 import Tools.CurveFormerOptions
@@ -39,6 +41,7 @@ type ToolAction msg
 type PreviewShape
     = PreviewCircle
     | PreviewLine
+    | PreviewToolSupplied (List (Entity LocalCoords))
 
 
 type alias PreviewData =
