@@ -242,9 +242,12 @@ update msg options previewColour hasTrack =
                                     else
                                         options.referencePoint
                             }
+
+                        optionsWithNewCircle =
+                            { newOptions | circle = Just <| getCircle options track }
                                 |> makeCurveIfPossible track
                     in
-                    ( newOptions, previewActions newOptions previewColour track )
+                    ( optionsWithNewCircle, previewActions optionsWithNewCircle previewColour track )
 
         ( Just track, DraggerRelease _ ) ->
             let

@@ -26162,19 +26162,25 @@ var $author$project$Tools$CurveFormer$update = F4(
 							$ianmackenzie$elm_geometry$Vector2d$plus,
 							A2($ianmackenzie$elm_geometry$Vector2d$from, dragStart, offset),
 							options.lastVector);
-						var newOptions = A2(
+						var newOptions = _Utils_update(
+							options,
+							{
+								referencePoint: _Utils_eq(options.referencePoint, $elm$core$Maybe$Nothing) ? $elm$core$Maybe$Just(
+									A2($author$project$DomainModel$earthPointFromIndex, track.currentPosition, track.trackTree)) : options.referencePoint,
+								vector: newVector
+							});
+						var optionsWithNewCircle = A2(
 							$author$project$Tools$CurveFormer$makeCurveIfPossible,
 							track,
 							_Utils_update(
-								options,
+								newOptions,
 								{
-									referencePoint: _Utils_eq(options.referencePoint, $elm$core$Maybe$Nothing) ? $elm$core$Maybe$Just(
-										A2($author$project$DomainModel$earthPointFromIndex, track.currentPosition, track.trackTree)) : options.referencePoint,
-									vector: newVector
+									circle: $elm$core$Maybe$Just(
+										A2($author$project$Tools$CurveFormer$getCircle, options, track))
 								}));
 						return _Utils_Tuple2(
-							newOptions,
-							A3($author$project$Tools$CurveFormer$previewActions, newOptions, previewColour, track));
+							optionsWithNewCircle,
+							A3($author$project$Tools$CurveFormer$previewActions, optionsWithNewCircle, previewColour, track));
 					}
 				case 'DraggerRelease':
 					var track = _v0.a.a;
