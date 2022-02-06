@@ -75,7 +75,7 @@ type Msg
     | SetGradientSmoothingMode GradientSmoothing
     | DraggerReset
     | SetPushRadius Float
-    | SetPullRadius Float
+    | SetDiscWidth Float
     | SetTransitionRadius Float
     | SetSpacing Float
     | ToggleUsePullRadius Bool
@@ -172,13 +172,16 @@ update msg options previewColour hasTrack =
             let
                 newOptions =
                     { options | pushRadius = Length.meters radius }
-            in
-            ( newOptions, previewActions newOptions previewColour track )
 
-        ( Just track, SetPullRadius radius ) ->
+                optionsWithNewCircle =
+                    { newOptions | circle = Just <| getCircle options track }
+            in
+            ( optionsWithNewCircle, previewActions optionsWithNewCircle previewColour track )
+
+        ( Just track, SetDiscWidth width ) ->
             let
                 newOptions =
-                    { options | pullRadius = Length.meters radius }
+                    { options | pullRadius = options.pushRadius |> Quantity.plus (Length.meters width) }
             in
             ( newOptions, previewActions newOptions previewColour track )
 
@@ -309,14 +312,14 @@ view imperial wrapper options track =
 
         showPullRadiusSlider =
             Input.slider commonShortHorizontalSliderStyles
-                { onChange = wrapper << SetPullRadius
+                { onChange = wrapper << SetDiscWidth
                 , label =
                     Input.labelBelow []
                         (text <| "Inclusion zone " ++ showShortMeasure imperial options.pullRadius)
-                , min = 5.0
+                , min = 1.0
                 , max = 40.0
                 , step = Nothing
-                , value = options.pullRadius |> Length.inMeters
+                , value = options.pullRadius |> Quantity.minus options.pushRadius |> Length.inMeters
                 , thumb = Input.defaultThumb
                 }
 
@@ -671,6 +674,8 @@ makeCurveIfPossible track options =
         ( startRange, endRange ) =
             ( fromStart, skipCount track.trackTree - fromEnd )
 
+        _ = Debug.log "start,end" (startRange, endRange)
+
         circle =
             getCircle options track
 
@@ -689,6 +694,7 @@ makeCurveIfPossible track options =
 
         isWithinCircleAndWithinRange : Int -> Int -> RoadSection -> Bool
         isWithinCircleAndWithinRange start end road =
+            let _ = Debug.log "FILTER" (start, end) in
             -- Road section is interesting?
             start
                 >= startRange
@@ -1220,7 +1226,6 @@ makeCurveIfPossible track options =
     { options
         | pointsWithinCircle = pointsWithinCircle
         , pointsWithinDisc = pointsWithinDisc
-        , circle = Just circle
         , pointsAreContiguous = areContiguous capturedRoadSections
         , newTrackPoints = newBendEntirely
         , fixedAttachmentPoints = attachmentPoints

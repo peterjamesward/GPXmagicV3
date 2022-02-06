@@ -24425,6 +24425,34 @@ var $ianmackenzie$elm_geometry$Vector2d$from = F2(
 		return $ianmackenzie$elm_geometry$Geometry$Types$Vector2d(
 			{x: p2.x - p1.x, y: p2.y - p1.y});
 	});
+var $ianmackenzie$elm_geometry$Vector2d$xComponent = function (_v0) {
+	var v = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(v.x);
+};
+var $ianmackenzie$elm_geometry$Vector2d$yComponent = function (_v0) {
+	var v = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(v.y);
+};
+var $author$project$Tools$CurveFormer$getCircle = F2(
+	function (options, track) {
+		var translation = A3(
+			$ianmackenzie$elm_geometry$Vector3d$xyz,
+			$ianmackenzie$elm_geometry$Vector2d$xComponent(options.vector),
+			$ianmackenzie$elm_units$Quantity$negate(
+				$ianmackenzie$elm_geometry$Vector2d$yComponent(options.vector)),
+			$ianmackenzie$elm_units$Quantity$zero);
+		var orange = A2($author$project$DomainModel$earthPointFromIndex, track.currentPosition, track.trackTree);
+		var centre = function () {
+			var _v0 = options.referencePoint;
+			if (_v0.$ === 'Just') {
+				var localReference = _v0.a;
+				return A2($ianmackenzie$elm_geometry$Point3d$translateBy, translation, localReference);
+			} else {
+				return A2($ianmackenzie$elm_geometry$Point3d$translateBy, translation, orange);
+			}
+		}();
+		return A3($ianmackenzie$elm_geometry$Circle3d$withRadius, options.pushRadius, $ianmackenzie$elm_geometry$Direction3d$positiveZ, centre);
+	});
 var $author$project$Tools$CurveFormer$EntryMode = {$: 'EntryMode'};
 var $author$project$Tools$CurveFormer$ExitMode = {$: 'ExitMode'};
 var $ianmackenzie$elm_geometry$Point2d$along = F2(
@@ -24608,34 +24636,6 @@ var $ianmackenzie$elm_geometry$Point2d$fromRecord = F2(
 			toQuantity(x),
 			toQuantity(y));
 	});
-var $ianmackenzie$elm_geometry$Vector2d$xComponent = function (_v0) {
-	var v = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(v.x);
-};
-var $ianmackenzie$elm_geometry$Vector2d$yComponent = function (_v0) {
-	var v = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(v.y);
-};
-var $author$project$Tools$CurveFormer$getCircle = F2(
-	function (options, track) {
-		var translation = A3(
-			$ianmackenzie$elm_geometry$Vector3d$xyz,
-			$ianmackenzie$elm_geometry$Vector2d$xComponent(options.vector),
-			$ianmackenzie$elm_units$Quantity$negate(
-				$ianmackenzie$elm_geometry$Vector2d$yComponent(options.vector)),
-			$ianmackenzie$elm_units$Quantity$zero);
-		var orange = A2($author$project$DomainModel$earthPointFromIndex, track.currentPosition, track.trackTree);
-		var centre = function () {
-			var _v0 = options.referencePoint;
-			if (_v0.$ === 'Just') {
-				var localReference = _v0.a;
-				return A2($ianmackenzie$elm_geometry$Point3d$translateBy, translation, localReference);
-			} else {
-				return A2($ianmackenzie$elm_geometry$Point3d$translateBy, translation, orange);
-			}
-		}();
-		return A3($ianmackenzie$elm_geometry$Circle3d$withRadius, options.pushRadius, $ianmackenzie$elm_geometry$Direction3d$positiveZ, centre);
-	});
 var $ianmackenzie$elm_geometry$Point2d$interpolateFrom = F3(
 	function (_v0, _v1, t) {
 		var p1 = _v0.a;
@@ -24737,6 +24737,7 @@ var $author$project$Geometry101$lineEquationFromTwoPoints = F2(
 		var a = p1.y - p2.y;
 		return {a: a, b: b, c: c};
 	});
+var $elm$core$Debug$log = _Debug_log;
 var $elm$core$Maybe$map2 = F3(
 	function (func, ma, mb) {
 		if (ma.$ === 'Nothing') {
@@ -25450,6 +25451,10 @@ var $author$project$Tools$CurveFormer$makeCurveIfPossible = F2(
 		};
 		var isWithinCircleAndWithinRange = F3(
 			function (start, end, road) {
+				var _v42 = A2(
+					$elm$core$Debug$log,
+					'FILTER',
+					_Utils_Tuple2(start, end));
 				return (_Utils_cmp(start, startRange) > -1) && ((_Utils_cmp(end, endRange) < 1) && isWithinPushRadius(road.startPoint));
 			});
 		var isWithinDisc = function (pt) {
@@ -25476,10 +25481,10 @@ var $author$project$Tools$CurveFormer$makeCurveIfPossible = F2(
 		var capturedRoadSections = A2($elm$core$Dict$union, pointsWithinCircle, pointsWithinDisc);
 		var centreOnPlane = A2($ianmackenzie$elm_geometry$Point3d$projectInto, drawingPlane, centre);
 		var isLeftHandBend = function () {
-			var _v40 = $elm$core$List$head(
+			var _v41 = $elm$core$List$head(
 				$elm$core$Dict$values(capturedRoadSections));
-			if (_v40.$ === 'Just') {
-				var firstSection = _v40.a;
+			if (_v41.$ === 'Just') {
+				var firstSection = _v41.a;
 				var roadAxis = A2(
 					$ianmackenzie$elm_geometry$Axis2d$withDirection,
 					firstSection.directionAtStart,
@@ -25494,11 +25499,11 @@ var $author$project$Tools$CurveFormer$makeCurveIfPossible = F2(
 		}();
 		var findAcceptableTransition = F3(
 			function (mode, idx1, idx2) {
-				var _v32 = _Utils_Tuple2(
+				var _v33 = _Utils_Tuple2(
 					A2($author$project$DomainModel$earthPointFromIndex, idx1, track.trackTree),
 					A2($author$project$DomainModel$earthPointFromIndex, idx2, track.trackTree));
-				var tp1 = _v32.a;
-				var tp2 = _v32.b;
+				var tp1 = _v33.a;
+				var tp2 = _v33.b;
 				var entryLineSegment = A2(
 					$ianmackenzie$elm_geometry$LineSegment2d$from,
 					A2($ianmackenzie$elm_geometry$Point3d$projectInto, drawingPlane, tp1),
@@ -25722,10 +25727,10 @@ var $author$project$Tools$CurveFormer$makeCurveIfPossible = F2(
 			}
 		}();
 		var attachmentPoints = function () {
-			var _v30 = _Utils_Tuple2(entryInformation, exitInformation);
-			if ((_v30.a.$ === 'Just') && (_v30.b.$ === 'Just')) {
-				var entry = _v30.a.a;
-				var exit = _v30.b.a;
+			var _v31 = _Utils_Tuple2(entryInformation, exitInformation);
+			if ((_v31.a.$ === 'Just') && (_v31.b.$ === 'Just')) {
+				var entry = _v31.a.a;
+				var exit = _v31.b.a;
 				return $elm$core$Maybe$Just(
 					_Utils_Tuple2(entry.index, exit.index));
 			} else {
@@ -25734,9 +25739,9 @@ var $author$project$Tools$CurveFormer$makeCurveIfPossible = F2(
 		}();
 		var prepareOriginalAltitudesForInterpolation = function () {
 			if (attachmentPoints.$ === 'Just') {
-				var _v29 = attachmentPoints.a;
-				var start = _v29.a;
-				var end = _v29.b;
+				var _v30 = attachmentPoints.a;
+				var start = _v30.a;
+				var end = _v30.b;
 				var startDistance = A2($author$project$DomainModel$distanceFromIndex, start, track.trackTree);
 				var originalSection = A2(
 					$elm$core$List$map,
@@ -25769,53 +25774,53 @@ var $author$project$Tools$CurveFormer$makeCurveIfPossible = F2(
 		var interpolateOriginalAltitudesByDistance = function (fraction) {
 			var twoSides = A2(
 				$elm_community$list_extra$List$Extra$splitWhen,
-				function (_v27) {
-					var k = _v27.a;
+				function (_v28) {
+					var k = _v28.a;
 					return _Utils_cmp(k, fraction) > -1;
 				},
 				prepareOriginalAltitudesForInterpolation);
 			if (twoSides.$ === 'Just') {
-				var _v15 = twoSides.a;
-				var beforePairs = _v15.a;
-				var afterPairs = _v15.b;
-				var _v16 = _Utils_Tuple2(
+				var _v16 = twoSides.a;
+				var beforePairs = _v16.a;
+				var afterPairs = _v16.b;
+				var _v17 = _Utils_Tuple2(
 					$elm_community$list_extra$List$Extra$last(beforePairs),
 					$elm$core$List$head(afterPairs));
-				var lastBefore = _v16.a;
-				var firstAfter = _v16.b;
-				var _v17 = _Utils_Tuple2(lastBefore, firstAfter);
-				if (_v17.a.$ === 'Just') {
-					if (_v17.b.$ === 'Just') {
-						var _v18 = _v17.a.a;
-						var priorFraction = _v18.a;
-						var priorAltitude = _v18.b;
-						var _v19 = _v17.b.a;
-						var nextFraction = _v19.a;
-						var nextAltitude = _v19.b;
-						var _v20 = _Utils_Tuple2((nextFraction - fraction) / (nextFraction - priorFraction), (fraction - priorFraction) / (nextFraction - priorFraction));
-						var beforeContribution = _v20.a;
-						var afterContribution = _v20.b;
+				var lastBefore = _v17.a;
+				var firstAfter = _v17.b;
+				var _v18 = _Utils_Tuple2(lastBefore, firstAfter);
+				if (_v18.a.$ === 'Just') {
+					if (_v18.b.$ === 'Just') {
+						var _v19 = _v18.a.a;
+						var priorFraction = _v19.a;
+						var priorAltitude = _v19.b;
+						var _v20 = _v18.b.a;
+						var nextFraction = _v20.a;
+						var nextAltitude = _v20.b;
+						var _v21 = _Utils_Tuple2((nextFraction - fraction) / (nextFraction - priorFraction), (fraction - priorFraction) / (nextFraction - priorFraction));
+						var beforeContribution = _v21.a;
+						var afterContribution = _v21.b;
 						return A2(
 							$ianmackenzie$elm_units$Quantity$plus,
 							A2($ianmackenzie$elm_units$Quantity$multiplyBy, beforeContribution, priorAltitude),
 							A2($ianmackenzie$elm_units$Quantity$multiplyBy, afterContribution, nextAltitude));
 					} else {
-						var _v21 = _v17.a.a;
-						var priorFraction = _v21.a;
-						var priorAltitude = _v21.b;
-						var _v22 = _v17.b;
+						var _v22 = _v18.a.a;
+						var priorFraction = _v22.a;
+						var priorAltitude = _v22.b;
+						var _v23 = _v18.b;
 						return priorAltitude;
 					}
 				} else {
-					if (_v17.b.$ === 'Just') {
-						var _v23 = _v17.a;
-						var _v24 = _v17.b.a;
-						var nextFraction = _v24.a;
-						var nextAltitude = _v24.b;
+					if (_v18.b.$ === 'Just') {
+						var _v24 = _v18.a;
+						var _v25 = _v18.b.a;
+						var nextFraction = _v25.a;
+						var nextAltitude = _v25.b;
 						return nextAltitude;
 					} else {
-						var _v25 = _v17.a;
-						var _v26 = _v17.b;
+						var _v26 = _v18.a;
+						var _v27 = _v18.b;
 						return $ianmackenzie$elm_units$Quantity$zero;
 					}
 				}
@@ -25846,15 +25851,15 @@ var $author$project$Tools$CurveFormer$makeCurveIfPossible = F2(
 			}
 		}();
 		var theArcItself = function () {
-			var _v10 = _Utils_Tuple2(entryInformation, exitInformation);
-			if ((_v10.a.$ === 'Just') && (_v10.b.$ === 'Just')) {
-				var entry = _v10.a.a;
-				var exit = _v10.b.a;
-				var _v11 = _Utils_Tuple2(
+			var _v11 = _Utils_Tuple2(entryInformation, exitInformation);
+			if ((_v11.a.$ === 'Just') && (_v11.b.$ === 'Just')) {
+				var entry = _v11.a.a;
+				var exit = _v11.b.a;
+				var _v12 = _Utils_Tuple2(
 					A2($ianmackenzie$elm_geometry$Direction2d$from, centreOnPlane, entry.joinsBendAt),
 					A2($ianmackenzie$elm_geometry$Direction2d$from, centreOnPlane, exit.joinsBendAt));
-				var entryDirection = _v11.a;
-				var exitDirection = _v11.b;
+				var entryDirection = _v12.a;
+				var exitDirection = _v12.b;
 				var turn = A3($elm$core$Maybe$map2, $ianmackenzie$elm_geometry$Direction2d$angleFrom, entryDirection, exitDirection);
 				if (turn.$ === 'Just') {
 					var turnAngle = turn.a;
@@ -25878,10 +25883,10 @@ var $author$project$Tools$CurveFormer$makeCurveIfPossible = F2(
 			}
 		}();
 		var newBendEntirely = function () {
-			var _v8 = _Utils_Tuple2(entryInformation, exitInformation);
-			if ((_v8.a.$ === 'Just') && (_v8.b.$ === 'Just')) {
-				var entry = _v8.a.a;
-				var exit = _v8.b.a;
+			var _v9 = _Utils_Tuple2(entryInformation, exitInformation);
+			if ((_v9.a.$ === 'Just') && (_v9.b.$ === 'Just')) {
+				var entry = _v9.a.a;
+				var exit = _v9.b.a;
 				var completeSegments = _Utils_ap(
 					_List_Nil,
 					_Utils_ap(
@@ -25922,8 +25927,8 @@ var $author$project$Tools$CurveFormer$makeCurveIfPossible = F2(
 							var originalSegmentStart = $ianmackenzie$elm_geometry$LineSegment2d$startPoint(seg);
 							var adjustment = A2($ianmackenzie$elm_units$Quantity$multiplyBy, proportionalDistance, altitudeChange);
 							var newAltitude = function () {
-								var _v9 = options.smoothGradient;
-								if (_v9.$ === 'Holistic') {
+								var _v10 = options.smoothGradient;
+								if (_v10.$ === 'Holistic') {
 									return A2(
 										$ianmackenzie$elm_units$Quantity$plus,
 										adjustment,
@@ -25945,10 +25950,13 @@ var $author$project$Tools$CurveFormer$makeCurveIfPossible = F2(
 				return _List_Nil;
 			}
 		}();
+		var _v8 = A2(
+			$elm$core$Debug$log,
+			'start,end',
+			_Utils_Tuple2(startRange, endRange));
 		return _Utils_update(
 			options,
 			{
-				circle: $elm$core$Maybe$Just(circle),
 				fixedAttachmentPoints: attachmentPoints,
 				newTrackPoints: newBendEntirely,
 				pointsAreContiguous: $author$project$Tools$CurveFormer$areContiguous(capturedRoadSections),
@@ -25976,16 +25984,25 @@ var $author$project$Tools$CurveFormer$update = F4(
 						{
 							pushRadius: $ianmackenzie$elm_units$Length$meters(radius)
 						});
-					return _Utils_Tuple2(
+					var optionsWithNewCircle = _Utils_update(
 						newOptions,
-						A3($author$project$Tools$CurveFormer$previewActions, newOptions, previewColour, track));
-				case 'SetPullRadius':
+						{
+							circle: $elm$core$Maybe$Just(
+								A2($author$project$Tools$CurveFormer$getCircle, options, track))
+						});
+					return _Utils_Tuple2(
+						optionsWithNewCircle,
+						A3($author$project$Tools$CurveFormer$previewActions, optionsWithNewCircle, previewColour, track));
+				case 'SetDiscWidth':
 					var track = _v0.a.a;
-					var radius = _v0.b.a;
+					var width = _v0.b.a;
 					var newOptions = _Utils_update(
 						options,
 						{
-							pullRadius: $ianmackenzie$elm_units$Length$meters(radius)
+							pullRadius: A2(
+								$ianmackenzie$elm_units$Quantity$plus,
+								$ianmackenzie$elm_units$Length$meters(width),
+								options.pushRadius)
 						});
 					return _Utils_Tuple2(
 						newOptions,
@@ -35685,11 +35702,11 @@ var $author$project$Tools$CentroidAverage$view = F2(
 var $author$project$Tools$CurveFormer$ApplyWithOptions = {$: 'ApplyWithOptions'};
 var $author$project$Tools$CurveFormer$DraggerReset = {$: 'DraggerReset'};
 var $author$project$Tools$CurveFormerOptions$Piecewise = {$: 'Piecewise'};
+var $author$project$Tools$CurveFormer$SetDiscWidth = function (a) {
+	return {$: 'SetDiscWidth', a: a};
+};
 var $author$project$Tools$CurveFormer$SetGradientSmoothingMode = function (a) {
 	return {$: 'SetGradientSmoothingMode', a: a};
-};
-var $author$project$Tools$CurveFormer$SetPullRadius = function (a) {
-	return {$: 'SetPullRadius', a: a};
 };
 var $author$project$Tools$CurveFormer$SetPushRadius = function (a) {
 	return {$: 'SetPushRadius', a: a};
@@ -36222,11 +36239,12 @@ var $author$project$Tools$CurveFormer$view = F4(
 					$mdgriffith$elm_ui$Element$text(
 						'Inclusion zone ' + A2($author$project$UtilsForViews$showShortMeasure, imperial, options.pullRadius))),
 				max: 40.0,
-				min: 5.0,
-				onChange: A2($elm$core$Basics$composeL, wrapper, $author$project$Tools$CurveFormer$SetPullRadius),
+				min: 1.0,
+				onChange: A2($elm$core$Basics$composeL, wrapper, $author$project$Tools$CurveFormer$SetDiscWidth),
 				step: $elm$core$Maybe$Nothing,
 				thumb: $mdgriffith$elm_ui$Element$Input$defaultThumb,
-				value: $ianmackenzie$elm_units$Length$inMeters(options.pullRadius)
+				value: $ianmackenzie$elm_units$Length$inMeters(
+					A2($ianmackenzie$elm_units$Quantity$minus, options.pushRadius, options.pullRadius))
 			});
 		var showModeSelection = A2(
 			$mdgriffith$elm_ui$Element$Input$checkbox,
@@ -46504,4 +46522,4 @@ _Platform_export({'Main':{'init':$author$project$Main$main(
 				$elm$json$Json$Decode$map,
 				$elm$core$Maybe$Just,
 				$elm$json$Json$Decode$list($elm$json$Json$Decode$int))
-			])))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Element.Color":{"args":[],"type":"Internal.Model.Color"},"GeoCodeDecoders.IpInfo":{"args":[],"type":"{ ip : String.String, country : String.String, region : String.String, city : String.String, zip : String.String, latitude : Basics.Float, longitude : Basics.Float }"},"Browser.Dom.Viewport":{"args":[],"type":"{ scene : { width : Basics.Float, height : Basics.Float }, viewport : { x : Basics.Float, y : Basics.Float, width : Basics.Float, height : Basics.Float } }"},"OAuth.AuthorizationCode.AuthenticationSuccess":{"args":[],"type":"{ token : OAuth.Token, refreshToken : Maybe.Maybe OAuth.Token, expiresIn : Maybe.Maybe Basics.Int, scope : List.List String.String }"},"SplitPane.SplitPane.DOMInfo":{"args":[],"type":"{ x : Maybe.Maybe Basics.Int, y : Maybe.Maybe Basics.Int, touchX : Maybe.Maybe Basics.Int, touchY : Maybe.Maybe Basics.Int, parentWidth : Basics.Int, parentHeight : Basics.Int }"},"Time.Era":{"args":[],"type":"{ start : Basics.Int, offset : Basics.Int }"},"SplitPane.SplitPane.Position":{"args":[],"type":"{ x : Basics.Int, y : Basics.Int }"},"OAuthTypes.UserInfo":{"args":[],"type":"{ id : Basics.Int, firstname : String.String, lastname : String.String }"},"Angle.Angle":{"args":[],"type":"Quantity.Quantity Basics.Float Angle.Radians"},"Html.Events.Extra.Mouse.Event":{"args":[],"type":"{ keys : Html.Events.Extra.Mouse.Keys, button : Html.Events.Extra.Mouse.Button, clientPos : ( Basics.Float, Basics.Float ), offsetPos : ( Basics.Float, Basics.Float ), pagePos : ( Basics.Float, Basics.Float ), screenPos : ( Basics.Float, Basics.Float ) }"},"Html.Events.Extra.Mouse.Keys":{"args":[],"type":"{ alt : Basics.Bool, ctrl : Basics.Bool, shift : Basics.Bool }"},"Chart.Events.Point":{"args":[],"type":"{ x : Basics.Float, y : Basics.Float }"},"Tools.CurveFormerOptions.Point":{"args":[],"type":"Point2d.Point2d Length.Meters LocalCoords.LocalCoords"},"Point2d.Point2d":{"args":["units","coordinates"],"type":"Geometry.Types.Point2d units coordinates"}},"unions":{"Main.Msg":{"args":[],"tags":{"GpxRequested":[],"GpxSelected":["File.File"],"GpxLoaded":["String.String"],"OAuthMessage":["OAuthTypes.OAuthMsg"],"AdjustTimeZone":["Time.Zone"],"SetRenderDepth":["Basics.Int"],"ReceivedIpDetails":["Result.Result Http.Error GeoCodeDecoders.IpInfo"],"IpInfoAcknowledged":["Result.Result Http.Error ()"],"StorageMessage":["Json.Encode.Value"],"SplitLeftDockRightEdge":["SplitPane.SplitPane.Msg"],"SplitLeftDockInternal":["SplitPane.SplitPane.Msg"],"SplitRightDockLeftEdge":["SplitPane.SplitPane.Msg"],"SplitRightDockInternal":["SplitPane.SplitPane.Msg"],"SplitBottomDockTopEdge":["SplitPane.SplitPane.Msg"],"Resize":["Basics.Int","Basics.Int"],"GotWindowSize":["Result.Result Browser.Dom.Error Browser.Dom.Viewport"],"ToolsMsg":["ToolsController.ToolMsg"],"DismissModalMessage":[],"PaneMsg":["PaneLayoutManager.Msg"],"RepaintMap":[],"ToggleToolPopup":[],"BackgroundColour":["Element.Color"],"RestoreDefaultToolLayout":[],"SaveJsonData":[],"NoOp":[]}},"Internal.Model.Color":{"args":[],"tags":{"Rgba":["Basics.Float","Basics.Float","Basics.Float","Basics.Float"]}},"Browser.Dom.Error":{"args":[],"tags":{"NotFound":["String.String"]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"File.File":{"args":[],"tags":{"File":[]}},"Basics.Float":{"args":[],"tags":{"Float":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"PaneLayoutManager.Msg":{"args":[],"tags":{"SetPaneLayout":["PaneLayoutManager.PaneLayout"],"SetCurrentPosition":["Basics.Int"],"TogglePopup":[],"SetViewMode":["PaneLayoutManager.PaneId","PaneLayoutManager.ViewMode"],"ThirdPersonViewMessage":["PaneLayoutManager.PaneId","ViewThirdPerson.Msg"],"ProfileViewMessage":["PaneLayoutManager.PaneId","ViewProfileCharts.Msg"],"MapPortsMessage":["MapPortController.MapMsg"],"MapViewMessage":["ViewMap.Msg"],"SliderTimeout":[],"PaneNoOp":[]}},"SplitPane.SplitPane.Msg":{"args":[],"tags":{"SplitterClick":["SplitPane.SplitPane.DOMInfo"],"SplitterMove":["SplitPane.SplitPane.Position"],"SplitterLeftAlone":["SplitPane.SplitPane.Position"]}},"OAuthTypes.OAuthMsg":{"args":[],"tags":{"NoOp":[],"SignInRequested":[],"GotRandomBytes":["List.List Basics.Int"],"AccessTokenRequested":[],"GotAccessToken":["Result.Result Http.Error OAuth.AuthorizationCode.AuthenticationSuccess"],"UserInfoRequested":[],"GotUserInfo":["Result.Result Http.Error OAuthTypes.UserInfo"],"SignOutRequested":[]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"ToolsController.ToolMsg":{"args":[],"tags":{"ToolPopupToggle":["ToolsController.ToolType"],"ToolDockSelect":["ToolsController.ToolType","ToolsController.ToolDock"],"ToolColourSelect":["ToolsController.ToolType","Element.Color"],"ToolStateToggle":["ToolsController.ToolType","ToolsController.ToolState"],"DirectionChanges":["Tools.AbruptDirectionChanges.Msg"],"DeletePoints":["Tools.DeletePoints.Msg"],"PointerMsg":["Tools.Pointers.Msg"],"UndoRedoMsg":["Tools.UndoRedo.Msg"],"ToggleImperial":[],"ToolNoOp":[],"ToolBezierMsg":["Tools.BezierSplines.Msg"],"ToolCentroidMsg":["Tools.CentroidAverage.Msg"],"ToolCurveFormerMsg":["Tools.CurveFormer.Msg"]}},"Json.Encode.Value":{"args":[],"tags":{"Value":[]}},"Time.Zone":{"args":[],"tags":{"Zone":["Basics.Int","List.List Time.Era"]}},"List.List":{"args":["a"],"tags":{}},"MapPortController.MapMsg":{"args":[],"tags":{"MapPortMessage":["Json.Encode.Value"]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Tools.AbruptDirectionChanges.Msg":{"args":[],"tags":{"ViewNext":[],"ViewPrevious":[],"SetCurrentPosition":["Basics.Int"],"SetThreshold":["Angle.Angle"]}},"Tools.BezierSplines.Msg":{"args":[],"tags":{"SetBezierTension":["Basics.Float"],"SetBezierTolerance":["Basics.Float"],"BezierSplines":[],"BezierApplyWithOptions":[],"SetBezierStyle":["Tools.BezierOptions.BezierStyle"]}},"Tools.CentroidAverage.Msg":{"args":[],"tags":{"SetWeighting":["Basics.Float"],"ToggleAltitude":["Basics.Bool"],"TogglePosition":["Basics.Bool"],"ApplyWithOptions":[]}},"Tools.CurveFormer.Msg":{"args":[],"tags":{"DraggerGrab":["Tools.CurveFormerOptions.Point"],"DraggerMove":["Tools.CurveFormerOptions.Point"],"DraggerRelease":["Tools.CurveFormerOptions.Point"],"SetGradientSmoothingMode":["Tools.CurveFormerOptions.GradientSmoothing"],"DraggerReset":[],"SetPushRadius":["Basics.Float"],"SetPullRadius":["Basics.Float"],"SetTransitionRadius":["Basics.Float"],"SetSpacing":["Basics.Float"],"ToggleUsePullRadius":["Basics.Bool"],"ApplyWithOptions":[]}},"Tools.DeletePoints.Msg":{"args":[],"tags":{"DeletePointOrPoints":[]}},"Tools.Pointers.Msg":{"args":[],"tags":{"PointerForwardOne":[],"PointerBackwardOne":[],"PointerFastForward":[],"PointerRewind":[],"DropMarker":[],"LiftMarker":[],"MarkerForwardOne":[],"MarkerBackwardOne":[]}},"Tools.UndoRedo.Msg":{"args":[],"tags":{"Undo":[],"Redo":[]}},"ViewMap.Msg":{"args":[],"tags":{"ToggleFollowOrange":[]}},"ViewProfileCharts.Msg":{"args":[],"tags":{"ImageMouseWheel":["Basics.Float"],"ImageGrab":["ViewProfileCharts.ClickZone","Html.Events.Extra.Mouse.Event"],"ImageDrag":["ViewProfileCharts.ClickZone","Html.Events.Extra.Mouse.Event"],"ImageRelease":["ViewProfileCharts.ClickZone","Html.Events.Extra.Mouse.Event"],"ImageNoOp":[],"ImageClick":["Maybe.Maybe Chart.Events.Point"],"ImageDoubleClick":["ViewProfileCharts.ClickZone","Html.Events.Extra.Mouse.Event"],"ImageZoomIn":[],"ImageZoomOut":[],"ImageReset":[],"ClickDelayExpired":[],"ToggleFollowOrange":[]}},"ViewThirdPerson.Msg":{"args":[],"tags":{"ImageMouseWheel":["Basics.Float"],"ImageGrab":["Html.Events.Extra.Mouse.Event"],"ImageDrag":["Html.Events.Extra.Mouse.Event"],"ImageRelease":["Html.Events.Extra.Mouse.Event"],"ImageNoOp":[],"ImageClick":["Html.Events.Extra.Mouse.Event"],"ImageDoubleClick":["Html.Events.Extra.Mouse.Event"],"ImageZoomIn":[],"ImageZoomOut":[],"ImageReset":[],"ClickDelayExpired":[],"ToggleFollowOrange":[]}},"PaneLayoutManager.PaneId":{"args":[],"tags":{"Pane1":[],"Pane2":[],"Pane3":[],"Pane4":[]}},"PaneLayoutManager.PaneLayout":{"args":[],"tags":{"PanesOne":[],"PanesLeftRight":[],"PanesUpperLower":[],"PanesOnePlusTwo":[],"PanesGrid":[]}},"OAuth.Token":{"args":[],"tags":{"Bearer":["String.String"]}},"ToolsController.ToolDock":{"args":[],"tags":{"DockUpperLeft":[],"DockLowerLeft":[],"DockUpperRight":[],"DockLowerRight":[],"DockBottom":[],"DockNone":[]}},"ToolsController.ToolState":{"args":[],"tags":{"Expanded":[],"Contracted":[],"Disabled":[]}},"ToolsController.ToolType":{"args":[],"tags":{"ToolTrackInfo":[],"ToolAbruptDirectionChanges":[],"ToolDeletePoints":[],"ToolPointers":[],"ToolUndoRedo":[],"ToolBezierSplines":[],"ToolCentroidAverage":[],"ToolCurveFormer":[]}},"PaneLayoutManager.ViewMode":{"args":[],"tags":{"ViewInfo":[],"ViewThird":[],"ViewFirst":[],"ViewPlan":[],"ViewProfile":[],"ViewMap":[]}},"Tools.BezierOptions.BezierStyle":{"args":[],"tags":{"ThroughExisting":[],"Approximated":[]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Html.Events.Extra.Mouse.Button":{"args":[],"tags":{"ErrorButton":[],"MainButton":[],"MiddleButton":[],"SecondButton":[],"BackButton":[],"ForwardButton":[]}},"ViewProfileCharts.ClickZone":{"args":[],"tags":{"ZoneAltitude":[],"ZoneGradient":[]}},"Tools.CurveFormerOptions.GradientSmoothing":{"args":[],"tags":{"Piecewise":[],"Holistic":[]}},"LocalCoords.LocalCoords":{"args":[],"tags":{"LocalCoords":[]}},"Length.Meters":{"args":[],"tags":{"Meters":[]}},"Geometry.Types.Point2d":{"args":["units","coordinates"],"tags":{"Point2d":["{ x : Basics.Float, y : Basics.Float }"]}},"Quantity.Quantity":{"args":["number","units"],"tags":{"Quantity":["number"]}},"Angle.Radians":{"args":[],"tags":{"Radians":[]}}}}})}});}(this));
+			])))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{"Element.Color":{"args":[],"type":"Internal.Model.Color"},"GeoCodeDecoders.IpInfo":{"args":[],"type":"{ ip : String.String, country : String.String, region : String.String, city : String.String, zip : String.String, latitude : Basics.Float, longitude : Basics.Float }"},"Browser.Dom.Viewport":{"args":[],"type":"{ scene : { width : Basics.Float, height : Basics.Float }, viewport : { x : Basics.Float, y : Basics.Float, width : Basics.Float, height : Basics.Float } }"},"OAuth.AuthorizationCode.AuthenticationSuccess":{"args":[],"type":"{ token : OAuth.Token, refreshToken : Maybe.Maybe OAuth.Token, expiresIn : Maybe.Maybe Basics.Int, scope : List.List String.String }"},"SplitPane.SplitPane.DOMInfo":{"args":[],"type":"{ x : Maybe.Maybe Basics.Int, y : Maybe.Maybe Basics.Int, touchX : Maybe.Maybe Basics.Int, touchY : Maybe.Maybe Basics.Int, parentWidth : Basics.Int, parentHeight : Basics.Int }"},"Time.Era":{"args":[],"type":"{ start : Basics.Int, offset : Basics.Int }"},"SplitPane.SplitPane.Position":{"args":[],"type":"{ x : Basics.Int, y : Basics.Int }"},"OAuthTypes.UserInfo":{"args":[],"type":"{ id : Basics.Int, firstname : String.String, lastname : String.String }"},"Angle.Angle":{"args":[],"type":"Quantity.Quantity Basics.Float Angle.Radians"},"Html.Events.Extra.Mouse.Event":{"args":[],"type":"{ keys : Html.Events.Extra.Mouse.Keys, button : Html.Events.Extra.Mouse.Button, clientPos : ( Basics.Float, Basics.Float ), offsetPos : ( Basics.Float, Basics.Float ), pagePos : ( Basics.Float, Basics.Float ), screenPos : ( Basics.Float, Basics.Float ) }"},"Html.Events.Extra.Mouse.Keys":{"args":[],"type":"{ alt : Basics.Bool, ctrl : Basics.Bool, shift : Basics.Bool }"},"Chart.Events.Point":{"args":[],"type":"{ x : Basics.Float, y : Basics.Float }"},"Tools.CurveFormerOptions.Point":{"args":[],"type":"Point2d.Point2d Length.Meters LocalCoords.LocalCoords"},"Point2d.Point2d":{"args":["units","coordinates"],"type":"Geometry.Types.Point2d units coordinates"}},"unions":{"Main.Msg":{"args":[],"tags":{"GpxRequested":[],"GpxSelected":["File.File"],"GpxLoaded":["String.String"],"OAuthMessage":["OAuthTypes.OAuthMsg"],"AdjustTimeZone":["Time.Zone"],"SetRenderDepth":["Basics.Int"],"ReceivedIpDetails":["Result.Result Http.Error GeoCodeDecoders.IpInfo"],"IpInfoAcknowledged":["Result.Result Http.Error ()"],"StorageMessage":["Json.Encode.Value"],"SplitLeftDockRightEdge":["SplitPane.SplitPane.Msg"],"SplitLeftDockInternal":["SplitPane.SplitPane.Msg"],"SplitRightDockLeftEdge":["SplitPane.SplitPane.Msg"],"SplitRightDockInternal":["SplitPane.SplitPane.Msg"],"SplitBottomDockTopEdge":["SplitPane.SplitPane.Msg"],"Resize":["Basics.Int","Basics.Int"],"GotWindowSize":["Result.Result Browser.Dom.Error Browser.Dom.Viewport"],"ToolsMsg":["ToolsController.ToolMsg"],"DismissModalMessage":[],"PaneMsg":["PaneLayoutManager.Msg"],"RepaintMap":[],"ToggleToolPopup":[],"BackgroundColour":["Element.Color"],"RestoreDefaultToolLayout":[],"SaveJsonData":[],"NoOp":[]}},"Internal.Model.Color":{"args":[],"tags":{"Rgba":["Basics.Float","Basics.Float","Basics.Float","Basics.Float"]}},"Browser.Dom.Error":{"args":[],"tags":{"NotFound":["String.String"]}},"Http.Error":{"args":[],"tags":{"BadUrl":["String.String"],"Timeout":[],"NetworkError":[],"BadStatus":["Basics.Int"],"BadBody":["String.String"]}},"File.File":{"args":[],"tags":{"File":[]}},"Basics.Float":{"args":[],"tags":{"Float":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}},"PaneLayoutManager.Msg":{"args":[],"tags":{"SetPaneLayout":["PaneLayoutManager.PaneLayout"],"SetCurrentPosition":["Basics.Int"],"TogglePopup":[],"SetViewMode":["PaneLayoutManager.PaneId","PaneLayoutManager.ViewMode"],"ThirdPersonViewMessage":["PaneLayoutManager.PaneId","ViewThirdPerson.Msg"],"ProfileViewMessage":["PaneLayoutManager.PaneId","ViewProfileCharts.Msg"],"MapPortsMessage":["MapPortController.MapMsg"],"MapViewMessage":["ViewMap.Msg"],"SliderTimeout":[],"PaneNoOp":[]}},"SplitPane.SplitPane.Msg":{"args":[],"tags":{"SplitterClick":["SplitPane.SplitPane.DOMInfo"],"SplitterMove":["SplitPane.SplitPane.Position"],"SplitterLeftAlone":["SplitPane.SplitPane.Position"]}},"OAuthTypes.OAuthMsg":{"args":[],"tags":{"NoOp":[],"SignInRequested":[],"GotRandomBytes":["List.List Basics.Int"],"AccessTokenRequested":[],"GotAccessToken":["Result.Result Http.Error OAuth.AuthorizationCode.AuthenticationSuccess"],"UserInfoRequested":[],"GotUserInfo":["Result.Result Http.Error OAuthTypes.UserInfo"],"SignOutRequested":[]}},"Result.Result":{"args":["error","value"],"tags":{"Ok":["value"],"Err":["error"]}},"String.String":{"args":[],"tags":{"String":[]}},"ToolsController.ToolMsg":{"args":[],"tags":{"ToolPopupToggle":["ToolsController.ToolType"],"ToolDockSelect":["ToolsController.ToolType","ToolsController.ToolDock"],"ToolColourSelect":["ToolsController.ToolType","Element.Color"],"ToolStateToggle":["ToolsController.ToolType","ToolsController.ToolState"],"DirectionChanges":["Tools.AbruptDirectionChanges.Msg"],"DeletePoints":["Tools.DeletePoints.Msg"],"PointerMsg":["Tools.Pointers.Msg"],"UndoRedoMsg":["Tools.UndoRedo.Msg"],"ToggleImperial":[],"ToolNoOp":[],"ToolBezierMsg":["Tools.BezierSplines.Msg"],"ToolCentroidMsg":["Tools.CentroidAverage.Msg"],"ToolCurveFormerMsg":["Tools.CurveFormer.Msg"]}},"Json.Encode.Value":{"args":[],"tags":{"Value":[]}},"Time.Zone":{"args":[],"tags":{"Zone":["Basics.Int","List.List Time.Era"]}},"List.List":{"args":["a"],"tags":{}},"MapPortController.MapMsg":{"args":[],"tags":{"MapPortMessage":["Json.Encode.Value"]}},"Maybe.Maybe":{"args":["a"],"tags":{"Just":["a"],"Nothing":[]}},"Tools.AbruptDirectionChanges.Msg":{"args":[],"tags":{"ViewNext":[],"ViewPrevious":[],"SetCurrentPosition":["Basics.Int"],"SetThreshold":["Angle.Angle"]}},"Tools.BezierSplines.Msg":{"args":[],"tags":{"SetBezierTension":["Basics.Float"],"SetBezierTolerance":["Basics.Float"],"BezierSplines":[],"BezierApplyWithOptions":[],"SetBezierStyle":["Tools.BezierOptions.BezierStyle"]}},"Tools.CentroidAverage.Msg":{"args":[],"tags":{"SetWeighting":["Basics.Float"],"ToggleAltitude":["Basics.Bool"],"TogglePosition":["Basics.Bool"],"ApplyWithOptions":[]}},"Tools.CurveFormer.Msg":{"args":[],"tags":{"DraggerGrab":["Tools.CurveFormerOptions.Point"],"DraggerMove":["Tools.CurveFormerOptions.Point"],"DraggerRelease":["Tools.CurveFormerOptions.Point"],"SetGradientSmoothingMode":["Tools.CurveFormerOptions.GradientSmoothing"],"DraggerReset":[],"SetPushRadius":["Basics.Float"],"SetDiscWidth":["Basics.Float"],"SetTransitionRadius":["Basics.Float"],"SetSpacing":["Basics.Float"],"ToggleUsePullRadius":["Basics.Bool"],"ApplyWithOptions":[]}},"Tools.DeletePoints.Msg":{"args":[],"tags":{"DeletePointOrPoints":[]}},"Tools.Pointers.Msg":{"args":[],"tags":{"PointerForwardOne":[],"PointerBackwardOne":[],"PointerFastForward":[],"PointerRewind":[],"DropMarker":[],"LiftMarker":[],"MarkerForwardOne":[],"MarkerBackwardOne":[]}},"Tools.UndoRedo.Msg":{"args":[],"tags":{"Undo":[],"Redo":[]}},"ViewMap.Msg":{"args":[],"tags":{"ToggleFollowOrange":[]}},"ViewProfileCharts.Msg":{"args":[],"tags":{"ImageMouseWheel":["Basics.Float"],"ImageGrab":["ViewProfileCharts.ClickZone","Html.Events.Extra.Mouse.Event"],"ImageDrag":["ViewProfileCharts.ClickZone","Html.Events.Extra.Mouse.Event"],"ImageRelease":["ViewProfileCharts.ClickZone","Html.Events.Extra.Mouse.Event"],"ImageNoOp":[],"ImageClick":["Maybe.Maybe Chart.Events.Point"],"ImageDoubleClick":["ViewProfileCharts.ClickZone","Html.Events.Extra.Mouse.Event"],"ImageZoomIn":[],"ImageZoomOut":[],"ImageReset":[],"ClickDelayExpired":[],"ToggleFollowOrange":[]}},"ViewThirdPerson.Msg":{"args":[],"tags":{"ImageMouseWheel":["Basics.Float"],"ImageGrab":["Html.Events.Extra.Mouse.Event"],"ImageDrag":["Html.Events.Extra.Mouse.Event"],"ImageRelease":["Html.Events.Extra.Mouse.Event"],"ImageNoOp":[],"ImageClick":["Html.Events.Extra.Mouse.Event"],"ImageDoubleClick":["Html.Events.Extra.Mouse.Event"],"ImageZoomIn":[],"ImageZoomOut":[],"ImageReset":[],"ClickDelayExpired":[],"ToggleFollowOrange":[]}},"PaneLayoutManager.PaneId":{"args":[],"tags":{"Pane1":[],"Pane2":[],"Pane3":[],"Pane4":[]}},"PaneLayoutManager.PaneLayout":{"args":[],"tags":{"PanesOne":[],"PanesLeftRight":[],"PanesUpperLower":[],"PanesOnePlusTwo":[],"PanesGrid":[]}},"OAuth.Token":{"args":[],"tags":{"Bearer":["String.String"]}},"ToolsController.ToolDock":{"args":[],"tags":{"DockUpperLeft":[],"DockLowerLeft":[],"DockUpperRight":[],"DockLowerRight":[],"DockBottom":[],"DockNone":[]}},"ToolsController.ToolState":{"args":[],"tags":{"Expanded":[],"Contracted":[],"Disabled":[]}},"ToolsController.ToolType":{"args":[],"tags":{"ToolTrackInfo":[],"ToolAbruptDirectionChanges":[],"ToolDeletePoints":[],"ToolPointers":[],"ToolUndoRedo":[],"ToolBezierSplines":[],"ToolCentroidAverage":[],"ToolCurveFormer":[]}},"PaneLayoutManager.ViewMode":{"args":[],"tags":{"ViewInfo":[],"ViewThird":[],"ViewFirst":[],"ViewPlan":[],"ViewProfile":[],"ViewMap":[]}},"Tools.BezierOptions.BezierStyle":{"args":[],"tags":{"ThroughExisting":[],"Approximated":[]}},"Basics.Bool":{"args":[],"tags":{"True":[],"False":[]}},"Html.Events.Extra.Mouse.Button":{"args":[],"tags":{"ErrorButton":[],"MainButton":[],"MiddleButton":[],"SecondButton":[],"BackButton":[],"ForwardButton":[]}},"ViewProfileCharts.ClickZone":{"args":[],"tags":{"ZoneAltitude":[],"ZoneGradient":[]}},"Tools.CurveFormerOptions.GradientSmoothing":{"args":[],"tags":{"Piecewise":[],"Holistic":[]}},"LocalCoords.LocalCoords":{"args":[],"tags":{"LocalCoords":[]}},"Length.Meters":{"args":[],"tags":{"Meters":[]}},"Geometry.Types.Point2d":{"args":["units","coordinates"],"tags":{"Point2d":["{ x : Basics.Float, y : Basics.Float }"]}},"Quantity.Quantity":{"args":["number","units"],"tags":{"Quantity":["number"]}},"Angle.Radians":{"args":[],"tags":{"Radians":[]}}}}})}});}(this));
