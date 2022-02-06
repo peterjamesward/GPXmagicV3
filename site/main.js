@@ -24425,6 +24425,1537 @@ var $ianmackenzie$elm_geometry$Vector2d$from = F2(
 		return $ianmackenzie$elm_geometry$Geometry$Types$Vector2d(
 			{x: p2.x - p1.x, y: p2.y - p1.y});
 	});
+var $author$project$Tools$CurveFormer$EntryMode = {$: 'EntryMode'};
+var $author$project$Tools$CurveFormer$ExitMode = {$: 'ExitMode'};
+var $ianmackenzie$elm_geometry$Point2d$along = F2(
+	function (_v0, _v1) {
+		var axis = _v0.a;
+		var distance = _v1.a;
+		var _v2 = axis.originPoint;
+		var p0 = _v2.a;
+		var _v3 = axis.direction;
+		var d = _v3.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point2d(
+			{x: p0.x + (distance * d.x), y: p0.y + (distance * d.y)});
+	});
+var $elm$core$Maybe$andThen = F2(
+	function (callback, maybeValue) {
+		if (maybeValue.$ === 'Just') {
+			var value = maybeValue.a;
+			return callback(value);
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $elm$core$List$any = F2(
+	function (isOkay, list) {
+		any:
+		while (true) {
+			if (!list.b) {
+				return false;
+			} else {
+				var x = list.a;
+				var xs = list.b;
+				if (isOkay(x)) {
+					return true;
+				} else {
+					var $temp$isOkay = isOkay,
+						$temp$list = xs;
+					isOkay = $temp$isOkay;
+					list = $temp$list;
+					continue any;
+				}
+			}
+		}
+	});
+var $elm$core$List$member = F2(
+	function (x, xs) {
+		return A2(
+			$elm$core$List$any,
+			function (a) {
+				return _Utils_eq(a, x);
+			},
+			xs);
+	});
+var $elm_community$list_extra$List$Extra$uniqueHelp = F4(
+	function (f, existing, remaining, accumulator) {
+		uniqueHelp:
+		while (true) {
+			if (!remaining.b) {
+				return $elm$core$List$reverse(accumulator);
+			} else {
+				var first = remaining.a;
+				var rest = remaining.b;
+				var computedFirst = f(first);
+				if (A2($elm$core$List$member, computedFirst, existing)) {
+					var $temp$f = f,
+						$temp$existing = existing,
+						$temp$remaining = rest,
+						$temp$accumulator = accumulator;
+					f = $temp$f;
+					existing = $temp$existing;
+					remaining = $temp$remaining;
+					accumulator = $temp$accumulator;
+					continue uniqueHelp;
+				} else {
+					var $temp$f = f,
+						$temp$existing = A2($elm$core$List$cons, computedFirst, existing),
+						$temp$remaining = rest,
+						$temp$accumulator = A2($elm$core$List$cons, first, accumulator);
+					f = $temp$f;
+					existing = $temp$existing;
+					remaining = $temp$remaining;
+					accumulator = $temp$accumulator;
+					continue uniqueHelp;
+				}
+			}
+		}
+	});
+var $elm_community$list_extra$List$Extra$uniqueBy = F2(
+	function (f, list) {
+		return A4($elm_community$list_extra$List$Extra$uniqueHelp, f, _List_Nil, list, _List_Nil);
+	});
+var $elm_community$list_extra$List$Extra$allDifferentBy = F2(
+	function (f, list) {
+		return _Utils_eq(
+			$elm$core$List$length(list),
+			$elm$core$List$length(
+				A2($elm_community$list_extra$List$Extra$uniqueBy, f, list)));
+	});
+var $elm_community$list_extra$List$Extra$allDifferent = function (list) {
+	return A2($elm_community$list_extra$List$Extra$allDifferentBy, $elm$core$Basics$identity, list);
+};
+var $elm$core$List$minimum = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(
+			A3($elm$core$List$foldl, $elm$core$Basics$min, x, xs));
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $author$project$Tools$CurveFormer$areContiguous = function (roads) {
+	var indices = $elm$core$Dict$keys(roads);
+	return (!$elm$core$List$length(indices)) || function () {
+		var _v0 = _Utils_Tuple2(
+			$elm$core$List$maximum(indices),
+			$elm$core$List$minimum(indices));
+		if ((_v0.a.$ === 'Just') && (_v0.b.$ === 'Just')) {
+			var isMax = _v0.a.a;
+			var isMin = _v0.b.a;
+			return _Utils_eq(
+				isMax - isMin,
+				$elm$core$List$length(indices) - 1) && $elm_community$list_extra$List$Extra$allDifferent(indices);
+		} else {
+			return false;
+		}
+	}();
+};
+var $ianmackenzie$elm_geometry$LineSegment2d$endPoint = function (_v0) {
+	var _v1 = _v0.a;
+	var end = _v1.b;
+	return end;
+};
+var $elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
+var $ianmackenzie$elm_geometry$Vector2d$direction = function (_v0) {
+	var v = _v0.a;
+	var largestComponent = A2(
+		$elm$core$Basics$max,
+		$elm$core$Basics$abs(v.x),
+		$elm$core$Basics$abs(v.y));
+	if (!largestComponent) {
+		return $elm$core$Maybe$Nothing;
+	} else {
+		var scaledY = v.y / largestComponent;
+		var scaledX = v.x / largestComponent;
+		var scaledLength = $elm$core$Basics$sqrt((scaledX * scaledX) + (scaledY * scaledY));
+		return $elm$core$Maybe$Just(
+			$ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
+				{x: scaledX / scaledLength, y: scaledY / scaledLength}));
+	}
+};
+var $ianmackenzie$elm_geometry$Direction2d$from = F2(
+	function (firstPoint, secondPoint) {
+		return $ianmackenzie$elm_geometry$Vector2d$direction(
+			A2($ianmackenzie$elm_geometry$Vector2d$from, firstPoint, secondPoint));
+	});
+var $ianmackenzie$elm_geometry$Geometry$Types$LineSegment2d = function (a) {
+	return {$: 'LineSegment2d', a: a};
+};
+var $ianmackenzie$elm_geometry$LineSegment2d$fromEndpoints = $ianmackenzie$elm_geometry$Geometry$Types$LineSegment2d;
+var $ianmackenzie$elm_geometry$LineSegment2d$from = F2(
+	function (startPoint_, endPoint_) {
+		return $ianmackenzie$elm_geometry$LineSegment2d$fromEndpoints(
+			_Utils_Tuple2(startPoint_, endPoint_));
+	});
+var $ianmackenzie$elm_geometry$Point2d$fromRecord = F2(
+	function (toQuantity, _v0) {
+		var x = _v0.x;
+		var y = _v0.y;
+		return A2(
+			$ianmackenzie$elm_geometry$Point2d$xy,
+			toQuantity(x),
+			toQuantity(y));
+	});
+var $ianmackenzie$elm_geometry$Vector2d$xComponent = function (_v0) {
+	var v = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(v.x);
+};
+var $ianmackenzie$elm_geometry$Vector2d$yComponent = function (_v0) {
+	var v = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(v.y);
+};
+var $author$project$Tools$CurveFormer$getCircle = F2(
+	function (options, track) {
+		var translation = A3(
+			$ianmackenzie$elm_geometry$Vector3d$xyz,
+			$ianmackenzie$elm_geometry$Vector2d$xComponent(options.vector),
+			$ianmackenzie$elm_units$Quantity$negate(
+				$ianmackenzie$elm_geometry$Vector2d$yComponent(options.vector)),
+			$ianmackenzie$elm_units$Quantity$zero);
+		var orange = A2($author$project$DomainModel$earthPointFromIndex, track.currentPosition, track.trackTree);
+		var centre = function () {
+			var _v0 = options.referencePoint;
+			if (_v0.$ === 'Just') {
+				var localReference = _v0.a;
+				return A2($ianmackenzie$elm_geometry$Point3d$translateBy, translation, localReference);
+			} else {
+				return A2($ianmackenzie$elm_geometry$Point3d$translateBy, translation, orange);
+			}
+		}();
+		return A3($ianmackenzie$elm_geometry$Circle3d$withRadius, options.pushRadius, $ianmackenzie$elm_geometry$Direction3d$positiveZ, centre);
+	});
+var $ianmackenzie$elm_geometry$Point2d$interpolateFrom = F3(
+	function (_v0, _v1, t) {
+		var p1 = _v0.a;
+		var p2 = _v1.a;
+		return (t <= 0.5) ? $ianmackenzie$elm_geometry$Geometry$Types$Point2d(
+			{x: p1.x + (t * (p2.x - p1.x)), y: p1.y + (t * (p2.y - p1.y))}) : $ianmackenzie$elm_geometry$Geometry$Types$Point2d(
+			{x: p2.x + ((1 - t) * (p1.x - p2.x)), y: p2.y + ((1 - t) * (p1.y - p2.y))});
+	});
+var $ianmackenzie$elm_geometry$Geometry$Types$LargeNegative = {$: 'LargeNegative'};
+var $ianmackenzie$elm_geometry$SweptAngle$largeNegative = $ianmackenzie$elm_geometry$Geometry$Types$LargeNegative;
+var $ianmackenzie$elm_geometry$Geometry$Types$LargePositive = {$: 'LargePositive'};
+var $ianmackenzie$elm_geometry$SweptAngle$largePositive = $ianmackenzie$elm_geometry$Geometry$Types$LargePositive;
+var $elm_community$list_extra$List$Extra$last = function (items) {
+	last:
+	while (true) {
+		if (!items.b) {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			if (!items.b.b) {
+				var x = items.a;
+				return $elm$core$Maybe$Just(x);
+			} else {
+				var rest = items.b;
+				var $temp$items = rest;
+				items = $temp$items;
+				continue last;
+			}
+		}
+	}
+};
+var $ianmackenzie$elm_geometry$Vector2d$length = function (_v0) {
+	var v = _v0.a;
+	var largestComponent = A2(
+		$elm$core$Basics$max,
+		$elm$core$Basics$abs(v.x),
+		$elm$core$Basics$abs(v.y));
+	if (!largestComponent) {
+		return $ianmackenzie$elm_units$Quantity$zero;
+	} else {
+		var scaledY = v.y / largestComponent;
+		var scaledX = v.x / largestComponent;
+		var scaledLength = $elm$core$Basics$sqrt((scaledX * scaledX) + (scaledY * scaledY));
+		return $ianmackenzie$elm_units$Quantity$Quantity(scaledLength * largestComponent);
+	}
+};
+var $ianmackenzie$elm_geometry$LineSegment2d$endpoints = function (_v0) {
+	var endpoints_ = _v0.a;
+	return endpoints_;
+};
+var $ianmackenzie$elm_geometry$LineSegment2d$vector = function (lineSegment) {
+	var _v0 = $ianmackenzie$elm_geometry$LineSegment2d$endpoints(lineSegment);
+	var p1 = _v0.a;
+	var p2 = _v0.b;
+	return A2($ianmackenzie$elm_geometry$Vector2d$from, p1, p2);
+};
+var $ianmackenzie$elm_geometry$LineSegment2d$length = function (givenSegment) {
+	return $ianmackenzie$elm_geometry$Vector2d$length(
+		$ianmackenzie$elm_geometry$LineSegment2d$vector(givenSegment));
+};
+var $author$project$Geometry101$Point = F2(
+	function (x, y) {
+		return {x: x, y: y};
+	});
+var $author$project$Geometry101$solveQuadratic = F3(
+	function (a, b, c) {
+		var disc = (b * b) - ((4 * a) * c);
+		return (!disc) ? _List_fromArray(
+			[0 - (b / (a + a))]) : ((disc > 0) ? _List_fromArray(
+			[
+				((0 - b) - $elm$core$Basics$sqrt(disc)) / (a + a),
+				((0 - b) + $elm$core$Basics$sqrt(disc)) / (a + a)
+			]) : _List_Nil);
+	});
+var $author$project$Geometry101$lineCircleIntersections = F2(
+	function (_v0, _v1) {
+		var a = _v0.a;
+		var b = _v0.b;
+		var c = _v0.c;
+		var centre = _v1.centre;
+		var radius = _v1.radius;
+		var shiftedLine = {a: a, b: b, c: c + ((a * centre.x) + (b * centre.y))};
+		var xSolutionsShifted = A3($author$project$Geometry101$solveQuadratic, (shiftedLine.a * shiftedLine.a) + (shiftedLine.b * shiftedLine.b), (2.0 * shiftedLine.a) * shiftedLine.c, (shiftedLine.c * shiftedLine.c) - (((shiftedLine.b * shiftedLine.b) * radius) * radius));
+		var xSolutions = A2(
+			$elm$core$List$map,
+			$elm$core$Basics$add(centre.x),
+			xSolutionsShifted);
+		var ySolutions = A2(
+			$elm$core$List$map,
+			function (x) {
+				return 0 - (((a * x) + c) / b);
+			},
+			xSolutions);
+		return A3($elm$core$List$map2, $author$project$Geometry101$Point, xSolutions, ySolutions);
+	});
+var $author$project$Geometry101$lineEquationFromTwoPoints = F2(
+	function (p1, p2) {
+		var c = (p1.x * p2.y) - (p2.x * p1.y);
+		var b = p2.x - p1.x;
+		var a = p1.y - p2.y;
+		return {a: a, b: b, c: c};
+	});
+var $elm$core$Maybe$map2 = F3(
+	function (func, ma, mb) {
+		if (ma.$ === 'Nothing') {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var a = ma.a;
+			if (mb.$ === 'Nothing') {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var b = mb.a;
+				return $elm$core$Maybe$Just(
+					A2(func, a, b));
+			}
+		}
+	});
+var $elm_community$list_extra$List$Extra$maximumBy = F2(
+	function (f, ls) {
+		var maxBy = F2(
+			function (x, _v1) {
+				var y = _v1.a;
+				var fy = _v1.b;
+				var fx = f(x);
+				return (_Utils_cmp(fx, fy) > 0) ? _Utils_Tuple2(x, fx) : _Utils_Tuple2(y, fy);
+			});
+		if (ls.b) {
+			if (!ls.b.b) {
+				var l_ = ls.a;
+				return $elm$core$Maybe$Just(l_);
+			} else {
+				var l_ = ls.a;
+				var ls_ = ls.b;
+				return $elm$core$Maybe$Just(
+					A3(
+						$elm$core$List$foldl,
+						maxBy,
+						_Utils_Tuple2(
+							l_,
+							f(l_)),
+						ls_).a);
+			}
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $elm_community$list_extra$List$Extra$minimumBy = F2(
+	function (f, ls) {
+		var minBy = F2(
+			function (x, _v1) {
+				var y = _v1.a;
+				var fy = _v1.b;
+				var fx = f(x);
+				return (_Utils_cmp(fx, fy) < 0) ? _Utils_Tuple2(x, fx) : _Utils_Tuple2(y, fy);
+			});
+		if (ls.b) {
+			if (!ls.b.b) {
+				var l_ = ls.a;
+				return $elm$core$Maybe$Just(l_);
+			} else {
+				var l_ = ls.a;
+				var ls_ = ls.b;
+				return $elm$core$Maybe$Just(
+					A3(
+						$elm$core$List$foldl,
+						minBy,
+						_Utils_Tuple2(
+							l_,
+							f(l_)),
+						ls_).a);
+			}
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $ianmackenzie$elm_geometry$Vector2d$rotateCounterclockwise = function (_v0) {
+	var v = _v0.a;
+	return $ianmackenzie$elm_geometry$Geometry$Types$Vector2d(
+		{x: -v.y, y: v.x});
+};
+var $ianmackenzie$elm_geometry$Vector2d$perpendicularTo = function (givenVector) {
+	return $ianmackenzie$elm_geometry$Vector2d$rotateCounterclockwise(givenVector);
+};
+var $ianmackenzie$elm_geometry$LineSegment2d$perpendicularDirection = function (givenSegment) {
+	return $ianmackenzie$elm_geometry$Vector2d$direction(
+		$ianmackenzie$elm_geometry$Vector2d$perpendicularTo(
+			$ianmackenzie$elm_geometry$LineSegment2d$vector(givenSegment)));
+};
+var $ianmackenzie$elm_geometry$Point3d$projectInto = F2(
+	function (_v0, _v1) {
+		var sketchPlane = _v0.a;
+		var p = _v1.a;
+		var _v2 = sketchPlane.originPoint;
+		var p0 = _v2.a;
+		var deltaX = p.x - p0.x;
+		var deltaY = p.y - p0.y;
+		var deltaZ = p.z - p0.z;
+		var _v3 = sketchPlane.yDirection;
+		var j = _v3.a;
+		var _v4 = sketchPlane.xDirection;
+		var i = _v4.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point2d(
+			{x: ((deltaX * i.x) + (deltaY * i.y)) + (deltaZ * i.z), y: ((deltaX * j.x) + (deltaY * j.y)) + (deltaZ * j.z)});
+	});
+var $author$project$DomainModel$queryPointsUsingFilter = F4(
+	function (filterFn, treeNode, foldFn, accum) {
+		var helper = F4(
+			function (starting, ending, someNode, myAccumulator) {
+				if (A3(
+					filterFn,
+					starting,
+					ending,
+					$author$project$DomainModel$asRecord(treeNode))) {
+					if (someNode.$ === 'Leaf') {
+						var leaf = someNode.a;
+						return A3(foldFn, starting, leaf, myAccumulator);
+					} else {
+						var node = someNode.a;
+						return A4(
+							helper,
+							starting + $author$project$DomainModel$skipCount(node.left),
+							ending,
+							node.right,
+							A4(
+								helper,
+								starting,
+								ending - $author$project$DomainModel$skipCount(node.right),
+								node.left,
+								myAccumulator));
+					}
+				} else {
+					return myAccumulator;
+				}
+			});
+		return A4(
+			helper,
+			0,
+			$author$project$DomainModel$skipCount(treeNode),
+			treeNode,
+			accum);
+	});
+var $ianmackenzie$elm_geometry$Quantity$Extra$lOverTheta = F2(
+	function (_v0, _v1) {
+		var l = _v0.a;
+		var theta = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(l / theta);
+	});
+var $ianmackenzie$elm_geometry$Arc2d$radius = function (_v0) {
+	var arc = _v0.a;
+	return A2($ianmackenzie$elm_geometry$Quantity$Extra$lOverTheta, arc.signedLength, arc.sweptAngle);
+};
+var $elm_community$list_extra$List$Extra$scanl = F3(
+	function (f, b, xs) {
+		var scan1 = F2(
+			function (x, accAcc) {
+				if (accAcc.b) {
+					var acc = accAcc.a;
+					return A2(
+						$elm$core$List$cons,
+						A2(f, x, acc),
+						accAcc);
+				} else {
+					return _List_Nil;
+				}
+			});
+		return $elm$core$List$reverse(
+			A3(
+				$elm$core$List$foldl,
+				scan1,
+				_List_fromArray(
+					[b]),
+				xs));
+	});
+var $ianmackenzie$elm_geometry$Geometry$Types$Polyline2d = function (a) {
+	return {$: 'Polyline2d', a: a};
+};
+var $ianmackenzie$elm_geometry$Polyline2d$fromVertices = function (givenVertices) {
+	return $ianmackenzie$elm_geometry$Geometry$Types$Polyline2d(givenVertices);
+};
+var $ianmackenzie$elm_geometry$Quantity$Extra$aXbY = F4(
+	function (a, _v0, b, _v1) {
+		var x = _v0.a;
+		var y = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity((a * x) + (b * y));
+	});
+var $ianmackenzie$elm_units$Quantity$lessThan = F2(
+	function (_v0, _v1) {
+		var y = _v0.a;
+		var x = _v1.a;
+		return _Utils_cmp(x, y) < 0;
+	});
+var $ianmackenzie$elm_geometry$Quantity$Extra$rSinTheta = F2(
+	function (r, theta) {
+		return A2(
+			$ianmackenzie$elm_units$Quantity$multiplyBy,
+			$ianmackenzie$elm_units$Angle$sin(theta),
+			r);
+	});
+var $ianmackenzie$elm_geometry$Direction2d$xComponent = function (_v0) {
+	var d = _v0.a;
+	return d.x;
+};
+var $ianmackenzie$elm_geometry$Direction2d$yComponent = function (_v0) {
+	var d = _v0.a;
+	return d.y;
+};
+var $ianmackenzie$elm_geometry$Arc2d$pointOn = F2(
+	function (_v0, parameterValue) {
+		var arc = _v0.a;
+		var y0 = $ianmackenzie$elm_geometry$Point2d$yCoordinate(arc.startPoint);
+		var x0 = $ianmackenzie$elm_geometry$Point2d$xCoordinate(arc.startPoint);
+		var dy = $ianmackenzie$elm_geometry$Direction2d$yComponent(arc.xDirection);
+		var dx = $ianmackenzie$elm_geometry$Direction2d$xComponent(arc.xDirection);
+		var arcSweptAngle = arc.sweptAngle;
+		var arcSignedLength = arc.signedLength;
+		if (_Utils_eq(arcSweptAngle, $ianmackenzie$elm_units$Quantity$zero)) {
+			var distance = A2($ianmackenzie$elm_units$Quantity$multiplyBy, parameterValue, arcSignedLength);
+			var px = A2(
+				$ianmackenzie$elm_units$Quantity$plus,
+				A2($ianmackenzie$elm_units$Quantity$multiplyBy, dx, distance),
+				x0);
+			var py = A2(
+				$ianmackenzie$elm_units$Quantity$plus,
+				A2($ianmackenzie$elm_units$Quantity$multiplyBy, dy, distance),
+				y0);
+			return A2($ianmackenzie$elm_geometry$Point2d$xy, px, py);
+		} else {
+			var theta = A2($ianmackenzie$elm_units$Quantity$multiplyBy, parameterValue, arcSweptAngle);
+			var arcRadius = A2($ianmackenzie$elm_geometry$Quantity$Extra$lOverTheta, arcSignedLength, arcSweptAngle);
+			var x = A2($ianmackenzie$elm_geometry$Quantity$Extra$rSinTheta, arcRadius, theta);
+			var y = A2(
+				$ianmackenzie$elm_units$Quantity$lessThan,
+				$ianmackenzie$elm_units$Angle$radians($elm$core$Basics$pi / 2),
+				$ianmackenzie$elm_units$Quantity$abs(theta)) ? A2(
+				$ianmackenzie$elm_units$Quantity$multiplyBy,
+				$ianmackenzie$elm_units$Angle$tan(
+					A2($ianmackenzie$elm_units$Quantity$multiplyBy, 0.5, theta)),
+				x) : A2(
+				$ianmackenzie$elm_units$Quantity$multiplyBy,
+				1 - $ianmackenzie$elm_units$Angle$cos(theta),
+				arcRadius);
+			var px = A2(
+				$ianmackenzie$elm_units$Quantity$plus,
+				A4($ianmackenzie$elm_geometry$Quantity$Extra$aXbY, dx, x, -dy, y),
+				x0);
+			var py = A2(
+				$ianmackenzie$elm_units$Quantity$plus,
+				A4($ianmackenzie$elm_geometry$Quantity$Extra$aXbY, dy, x, dx, y),
+				y0);
+			return A2($ianmackenzie$elm_geometry$Point2d$xy, px, py);
+		}
+	});
+var $ianmackenzie$elm_geometry$Arc2d$segments = F2(
+	function (numSegments, arc) {
+		return $ianmackenzie$elm_geometry$Polyline2d$fromVertices(
+			A2(
+				$ianmackenzie$elm_1d_parameter$Parameter1d$steps,
+				numSegments,
+				$ianmackenzie$elm_geometry$Arc2d$pointOn(arc)));
+	});
+var $ianmackenzie$elm_geometry$Polyline2d$vertices = function (_v0) {
+	var polylineVertices = _v0.a;
+	return polylineVertices;
+};
+var $ianmackenzie$elm_geometry$Polyline2d$segments = function (polyline) {
+	var _v0 = $ianmackenzie$elm_geometry$Polyline2d$vertices(polyline);
+	if (!_v0.b) {
+		return _List_Nil;
+	} else {
+		var all = _v0;
+		var first = all.a;
+		var rest = all.b;
+		return A3($elm$core$List$map2, $ianmackenzie$elm_geometry$LineSegment2d$from, all, rest);
+	}
+};
+var $ianmackenzie$elm_geometry$Point2d$signedDistanceAlong = F2(
+	function (_v0, _v1) {
+		var axis = _v0.a;
+		var p = _v1.a;
+		var _v2 = axis.originPoint;
+		var p0 = _v2.a;
+		var _v3 = axis.direction;
+		var d = _v3.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(((p.x - p0.x) * d.x) + ((p.y - p0.y) * d.y));
+	});
+var $ianmackenzie$elm_geometry$Point2d$signedDistanceFrom = F2(
+	function (_v0, _v1) {
+		var axis = _v0.a;
+		var p = _v1.a;
+		var _v2 = axis.originPoint;
+		var p0 = _v2.a;
+		var _v3 = axis.direction;
+		var d = _v3.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(((p.y - p0.y) * d.x) - ((p.x - p0.x) * d.y));
+	});
+var $ianmackenzie$elm_geometry$Geometry$Types$SmallNegative = {$: 'SmallNegative'};
+var $ianmackenzie$elm_geometry$SweptAngle$smallNegative = $ianmackenzie$elm_geometry$Geometry$Types$SmallNegative;
+var $ianmackenzie$elm_geometry$Geometry$Types$SmallPositive = {$: 'SmallPositive'};
+var $ianmackenzie$elm_geometry$SweptAngle$smallPositive = $ianmackenzie$elm_geometry$Geometry$Types$SmallPositive;
+var $elm_community$list_extra$List$Extra$findIndexHelp = F3(
+	function (index, predicate, list) {
+		findIndexHelp:
+		while (true) {
+			if (!list.b) {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var x = list.a;
+				var xs = list.b;
+				if (predicate(x)) {
+					return $elm$core$Maybe$Just(index);
+				} else {
+					var $temp$index = index + 1,
+						$temp$predicate = predicate,
+						$temp$list = xs;
+					index = $temp$index;
+					predicate = $temp$predicate;
+					list = $temp$list;
+					continue findIndexHelp;
+				}
+			}
+		}
+	});
+var $elm_community$list_extra$List$Extra$findIndex = $elm_community$list_extra$List$Extra$findIndexHelp(0);
+var $elm$core$List$takeReverse = F3(
+	function (n, list, kept) {
+		takeReverse:
+		while (true) {
+			if (n <= 0) {
+				return kept;
+			} else {
+				if (!list.b) {
+					return kept;
+				} else {
+					var x = list.a;
+					var xs = list.b;
+					var $temp$n = n - 1,
+						$temp$list = xs,
+						$temp$kept = A2($elm$core$List$cons, x, kept);
+					n = $temp$n;
+					list = $temp$list;
+					kept = $temp$kept;
+					continue takeReverse;
+				}
+			}
+		}
+	});
+var $elm$core$List$takeTailRec = F2(
+	function (n, list) {
+		return $elm$core$List$reverse(
+			A3($elm$core$List$takeReverse, n, list, _List_Nil));
+	});
+var $elm$core$List$takeFast = F3(
+	function (ctr, n, list) {
+		if (n <= 0) {
+			return _List_Nil;
+		} else {
+			var _v0 = _Utils_Tuple2(n, list);
+			_v0$1:
+			while (true) {
+				_v0$5:
+				while (true) {
+					if (!_v0.b.b) {
+						return list;
+					} else {
+						if (_v0.b.b.b) {
+							switch (_v0.a) {
+								case 1:
+									break _v0$1;
+								case 2:
+									var _v2 = _v0.b;
+									var x = _v2.a;
+									var _v3 = _v2.b;
+									var y = _v3.a;
+									return _List_fromArray(
+										[x, y]);
+								case 3:
+									if (_v0.b.b.b.b) {
+										var _v4 = _v0.b;
+										var x = _v4.a;
+										var _v5 = _v4.b;
+										var y = _v5.a;
+										var _v6 = _v5.b;
+										var z = _v6.a;
+										return _List_fromArray(
+											[x, y, z]);
+									} else {
+										break _v0$5;
+									}
+								default:
+									if (_v0.b.b.b.b && _v0.b.b.b.b.b) {
+										var _v7 = _v0.b;
+										var x = _v7.a;
+										var _v8 = _v7.b;
+										var y = _v8.a;
+										var _v9 = _v8.b;
+										var z = _v9.a;
+										var _v10 = _v9.b;
+										var w = _v10.a;
+										var tl = _v10.b;
+										return (ctr > 1000) ? A2(
+											$elm$core$List$cons,
+											x,
+											A2(
+												$elm$core$List$cons,
+												y,
+												A2(
+													$elm$core$List$cons,
+													z,
+													A2(
+														$elm$core$List$cons,
+														w,
+														A2($elm$core$List$takeTailRec, n - 4, tl))))) : A2(
+											$elm$core$List$cons,
+											x,
+											A2(
+												$elm$core$List$cons,
+												y,
+												A2(
+													$elm$core$List$cons,
+													z,
+													A2(
+														$elm$core$List$cons,
+														w,
+														A3($elm$core$List$takeFast, ctr + 1, n - 4, tl)))));
+									} else {
+										break _v0$5;
+									}
+							}
+						} else {
+							if (_v0.a === 1) {
+								break _v0$1;
+							} else {
+								break _v0$5;
+							}
+						}
+					}
+				}
+				return list;
+			}
+			var _v1 = _v0.b;
+			var x = _v1.a;
+			return _List_fromArray(
+				[x]);
+		}
+	});
+var $elm$core$List$take = F2(
+	function (n, list) {
+		return A3($elm$core$List$takeFast, 0, n, list);
+	});
+var $elm_community$list_extra$List$Extra$splitAt = F2(
+	function (n, xs) {
+		return _Utils_Tuple2(
+			A2($elm$core$List$take, n, xs),
+			A2($elm$core$List$drop, n, xs));
+	});
+var $elm_community$list_extra$List$Extra$splitWhen = F2(
+	function (predicate, list) {
+		return A2(
+			$elm$core$Maybe$map,
+			function (i) {
+				return A2($elm_community$list_extra$List$Extra$splitAt, i, list);
+			},
+			A2($elm_community$list_extra$List$Extra$findIndex, predicate, list));
+	});
+var $ianmackenzie$elm_geometry$LineSegment2d$startPoint = function (_v0) {
+	var _v1 = _v0.a;
+	var start = _v1.a;
+	return start;
+};
+var $ianmackenzie$elm_geometry$Arc2d$sweptAngle = function (_v0) {
+	var properties = _v0.a;
+	return properties.sweptAngle;
+};
+var $ianmackenzie$elm_geometry$Geometry$Types$Axis2d = function (a) {
+	return {$: 'Axis2d', a: a};
+};
+var $ianmackenzie$elm_geometry$Axis2d$through = F2(
+	function (givenPoint, givenDirection) {
+		return $ianmackenzie$elm_geometry$Geometry$Types$Axis2d(
+			{direction: givenDirection, originPoint: givenPoint});
+	});
+var $ianmackenzie$elm_geometry$Axis2d$throughPoints = F2(
+	function (firstPoint, secondPoint) {
+		var _v0 = A2($ianmackenzie$elm_geometry$Direction2d$from, firstPoint, secondPoint);
+		if (_v0.$ === 'Just') {
+			var axisDirection = _v0.a;
+			return $elm$core$Maybe$Just(
+				A2($ianmackenzie$elm_geometry$Axis2d$through, firstPoint, axisDirection));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $elm_community$maybe_extra$Maybe$Extra$toList = function (m) {
+	if (m.$ === 'Nothing') {
+		return _List_Nil;
+	} else {
+		var x = m.a;
+		return _List_fromArray(
+			[x]);
+	}
+};
+var $ianmackenzie$elm_geometry$Point2d$toRecord = F2(
+	function (fromQuantity, point) {
+		return {
+			x: fromQuantity(
+				$ianmackenzie$elm_geometry$Point2d$xCoordinate(point)),
+			y: fromQuantity(
+				$ianmackenzie$elm_geometry$Point2d$yCoordinate(point))
+		};
+	});
+var $ianmackenzie$elm_geometry$LineSegment2d$mapEndpoints = F2(
+	function (_function, lineSegment) {
+		var _v0 = $ianmackenzie$elm_geometry$LineSegment2d$endpoints(lineSegment);
+		var p1 = _v0.a;
+		var p2 = _v0.b;
+		return $ianmackenzie$elm_geometry$LineSegment2d$fromEndpoints(
+			_Utils_Tuple2(
+				_function(p1),
+				_function(p2)));
+	});
+var $ianmackenzie$elm_geometry$Point2d$translateBy = F2(
+	function (_v0, _v1) {
+		var v = _v0.a;
+		var p = _v1.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point2d(
+			{x: p.x + v.x, y: p.y + v.y});
+	});
+var $ianmackenzie$elm_geometry$LineSegment2d$translateBy = function (displacementVector) {
+	return $ianmackenzie$elm_geometry$LineSegment2d$mapEndpoints(
+		$ianmackenzie$elm_geometry$Point2d$translateBy(displacementVector));
+};
+var $ianmackenzie$elm_geometry$SketchPlane3d$originPoint = function (_v0) {
+	var properties = _v0.a;
+	return properties.originPoint;
+};
+var $ianmackenzie$elm_geometry$SketchPlane3d$translateBy = F2(
+	function (vector, sketchPlane) {
+		return $ianmackenzie$elm_geometry$SketchPlane3d$unsafe(
+			{
+				originPoint: A2(
+					$ianmackenzie$elm_geometry$Point3d$translateBy,
+					vector,
+					$ianmackenzie$elm_geometry$SketchPlane3d$originPoint(sketchPlane)),
+				xDirection: $ianmackenzie$elm_geometry$SketchPlane3d$xDirection(sketchPlane),
+				yDirection: $ianmackenzie$elm_geometry$SketchPlane3d$yDirection(sketchPlane)
+			});
+	});
+var $ianmackenzie$elm_geometry$Axis2d$withDirection = F2(
+	function (givenDirection, givenPoint) {
+		return $ianmackenzie$elm_geometry$Geometry$Types$Axis2d(
+			{direction: givenDirection, originPoint: givenPoint});
+	});
+var $ianmackenzie$elm_geometry$Vector2d$withLength = F2(
+	function (_v0, _v1) {
+		var a = _v0.a;
+		var d = _v1.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Vector2d(
+			{x: a * d.x, y: a * d.y});
+	});
+var $elm$core$Basics$asin = _Basics_asin;
+var $ianmackenzie$elm_units$Angle$asin = function (x) {
+	return $ianmackenzie$elm_units$Quantity$Quantity(
+		$elm$core$Basics$asin(x));
+};
+var $ianmackenzie$elm_geometry$LineSegment2d$interpolate = F2(
+	function (lineSegment, t) {
+		var _v0 = $ianmackenzie$elm_geometry$LineSegment2d$endpoints(lineSegment);
+		var start = _v0.a;
+		var end = _v0.b;
+		return A3($ianmackenzie$elm_geometry$Point2d$interpolateFrom, start, end, t);
+	});
+var $ianmackenzie$elm_geometry$LineSegment2d$midpoint = function (lineSegment) {
+	return A2($ianmackenzie$elm_geometry$LineSegment2d$interpolate, lineSegment, 0.5);
+};
+var $ianmackenzie$elm_geometry$Geometry$Types$Arc2d = function (a) {
+	return {$: 'Arc2d', a: a};
+};
+var $ianmackenzie$elm_geometry$Direction2d$rotateClockwise = function (_v0) {
+	var d = _v0.a;
+	return $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
+		{x: d.y, y: -d.x});
+};
+var $ianmackenzie$elm_geometry$Arc2d$sweptAround = F3(
+	function (givenCenterPoint, givenSweptAngle, givenStartPoint) {
+		var displacement = A2($ianmackenzie$elm_geometry$Vector2d$from, givenStartPoint, givenCenterPoint);
+		var _v0 = $ianmackenzie$elm_geometry$Vector2d$direction(displacement);
+		if (_v0.$ === 'Just') {
+			var yDirection = _v0.a;
+			var computedRadius = $ianmackenzie$elm_geometry$Vector2d$length(displacement);
+			return $ianmackenzie$elm_geometry$Geometry$Types$Arc2d(
+				{
+					signedLength: A2($ianmackenzie$elm_geometry$Quantity$Extra$rTheta, computedRadius, givenSweptAngle),
+					startPoint: givenStartPoint,
+					sweptAngle: givenSweptAngle,
+					xDirection: $ianmackenzie$elm_geometry$Direction2d$rotateClockwise(yDirection)
+				});
+		} else {
+			return $ianmackenzie$elm_geometry$Geometry$Types$Arc2d(
+				{signedLength: $ianmackenzie$elm_units$Quantity$zero, startPoint: givenStartPoint, sweptAngle: givenSweptAngle, xDirection: $ianmackenzie$elm_geometry$Direction2d$x});
+		}
+	});
+var $ianmackenzie$elm_geometry$Point2d$translateIn = F3(
+	function (_v0, _v1, _v2) {
+		var d = _v0.a;
+		var distance = _v1.a;
+		var p = _v2.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point2d(
+			{x: p.x + (distance * d.x), y: p.y + (distance * d.y)});
+	});
+var $ianmackenzie$elm_geometry$Arc2d$twoPi = $ianmackenzie$elm_units$Angle$radians(2 * $elm$core$Basics$pi);
+var $ianmackenzie$elm_geometry$Arc2d$withRadius = F4(
+	function (givenRadius, givenSweptAngle, givenStartPoint, givenEndPoint) {
+		var squaredRadius = $ianmackenzie$elm_units$Quantity$squared(givenRadius);
+		var chord = A2($ianmackenzie$elm_geometry$LineSegment2d$from, givenStartPoint, givenEndPoint);
+		var squaredHalfLength = $ianmackenzie$elm_units$Quantity$squared(
+			A2(
+				$ianmackenzie$elm_units$Quantity$multiplyBy,
+				0.5,
+				$ianmackenzie$elm_geometry$LineSegment2d$length(chord)));
+		return A2($ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo, squaredHalfLength, squaredRadius) ? A2(
+			$elm$core$Maybe$map,
+			function (offsetDirection) {
+				var offsetMagnitude = $ianmackenzie$elm_units$Quantity$sqrt(
+					A2($ianmackenzie$elm_units$Quantity$minus, squaredHalfLength, squaredRadius));
+				var offsetDistance = function () {
+					switch (givenSweptAngle.$) {
+						case 'SmallPositive':
+							return offsetMagnitude;
+						case 'SmallNegative':
+							return $ianmackenzie$elm_units$Quantity$negate(offsetMagnitude);
+						case 'LargeNegative':
+							return offsetMagnitude;
+						default:
+							return $ianmackenzie$elm_units$Quantity$negate(offsetMagnitude);
+					}
+				}();
+				var halfLength = $ianmackenzie$elm_units$Quantity$sqrt(squaredHalfLength);
+				var shortAngle = A2(
+					$ianmackenzie$elm_units$Quantity$multiplyBy,
+					2,
+					$ianmackenzie$elm_units$Angle$asin(
+						A2($ianmackenzie$elm_units$Quantity$ratio, halfLength, givenRadius)));
+				var sweptAngleInRadians = function () {
+					switch (givenSweptAngle.$) {
+						case 'SmallPositive':
+							return shortAngle;
+						case 'SmallNegative':
+							return $ianmackenzie$elm_units$Quantity$negate(shortAngle);
+						case 'LargePositive':
+							return A2($ianmackenzie$elm_units$Quantity$minus, shortAngle, $ianmackenzie$elm_geometry$Arc2d$twoPi);
+						default:
+							return A2($ianmackenzie$elm_units$Quantity$minus, $ianmackenzie$elm_geometry$Arc2d$twoPi, shortAngle);
+					}
+				}();
+				var computedCenterPoint = A3(
+					$ianmackenzie$elm_geometry$Point2d$translateIn,
+					offsetDirection,
+					offsetDistance,
+					$ianmackenzie$elm_geometry$LineSegment2d$midpoint(chord));
+				return A3($ianmackenzie$elm_geometry$Arc2d$sweptAround, computedCenterPoint, sweptAngleInRadians, givenStartPoint);
+			},
+			$ianmackenzie$elm_geometry$LineSegment2d$perpendicularDirection(chord)) : $elm$core$Maybe$Nothing;
+	});
+var $author$project$Tools$CurveFormer$makeCurveIfPossible = F2(
+	function (track, options) {
+		var circle = A2($author$project$Tools$CurveFormer$getCircle, options, track);
+		var arcToSegments = function (arc) {
+			var arcLength = $elm$core$Basics$abs(
+				$ianmackenzie$elm_units$Length$inMeters(
+					$ianmackenzie$elm_geometry$Arc2d$radius(arc)) * $ianmackenzie$elm_units$Angle$inRadians(
+					$ianmackenzie$elm_geometry$Arc2d$sweptAngle(arc)));
+			var entryArcNumSegments = A2(
+				$elm$core$Basics$max,
+				1,
+				$elm$core$Basics$ceiling(
+					arcLength / $ianmackenzie$elm_units$Length$inMeters(options.spacing)));
+			return $ianmackenzie$elm_geometry$Polyline2d$segments(
+				A2($ianmackenzie$elm_geometry$Arc2d$segments, entryArcNumSegments, arc));
+		};
+		var _v0 = $author$project$TrackLoaded$getRangeFromMarkers(track);
+		var fromStart = _v0.a;
+		var fromEnd = _v0.b;
+		var _v1 = _Utils_Tuple2(
+			fromStart,
+			$author$project$DomainModel$skipCount(track.trackTree) - fromEnd);
+		var startRange = _v1.a;
+		var endRange = _v1.b;
+		var _v2 = _Utils_Tuple3(
+			$ianmackenzie$elm_geometry$Circle3d$centerPoint(circle),
+			$ianmackenzie$elm_geometry$Circle3d$axis(circle),
+			A2(
+				$ianmackenzie$elm_geometry$SketchPlane3d$translateBy,
+				A2(
+					$ianmackenzie$elm_geometry$Vector3d$withLength,
+					$ianmackenzie$elm_geometry$Point3d$zCoordinate(
+						$ianmackenzie$elm_geometry$Circle3d$centerPoint(circle)),
+					$ianmackenzie$elm_geometry$Direction3d$positiveZ),
+				$ianmackenzie$elm_geometry$SketchPlane3d$xy));
+		var centre = _v2.a;
+		var axis = _v2.b;
+		var drawingPlane = _v2.c;
+		var isWithinPullRadius = function (pt) {
+			return A2(
+				$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
+				options.pullRadius,
+				A2($ianmackenzie$elm_geometry$Point3d$distanceFromAxis, axis, pt));
+		};
+		var isWithinPushRadius = function (pt) {
+			return A2(
+				$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
+				options.pushRadius,
+				A2($ianmackenzie$elm_geometry$Point3d$distanceFromAxis, axis, pt));
+		};
+		var isWithinCircleAndWithinRange = F3(
+			function (start, end, road) {
+				return (_Utils_cmp(start, startRange) > -1) && ((_Utils_cmp(end, endRange) < 1) && isWithinPushRadius(road.startPoint));
+			});
+		var isWithinDisc = function (pt) {
+			return isWithinPullRadius(pt) && (!isWithinPushRadius(pt));
+		};
+		var isWithinRangeAndDisc = F3(
+			function (start, end, road) {
+				return (_Utils_cmp(start, startRange) > -1) && ((_Utils_cmp(end, endRange) < 1) && isWithinDisc(road.startPoint));
+			});
+		var pointsWithinDisc = function () {
+			var collector = F3(
+				function (index, road, dict) {
+					return isWithinDisc(road.startPoint) ? A3($elm$core$Dict$insert, index, road, dict) : dict;
+				});
+			return A4($author$project$DomainModel$queryPointsUsingFilter, isWithinRangeAndDisc, track.trackTree, collector, $elm$core$Dict$empty);
+		}();
+		var pointsWithinCircle = function () {
+			var collector = F3(
+				function (index, road, dict) {
+					return isWithinPushRadius(road.startPoint) ? A3($elm$core$Dict$insert, index, road, dict) : dict;
+				});
+			return A4($author$project$DomainModel$queryPointsUsingFilter, isWithinCircleAndWithinRange, track.trackTree, collector, $elm$core$Dict$empty);
+		}();
+		var capturedRoadSections = A2($elm$core$Dict$union, pointsWithinCircle, pointsWithinDisc);
+		var centreOnPlane = A2($ianmackenzie$elm_geometry$Point3d$projectInto, drawingPlane, centre);
+		var isLeftHandBend = function () {
+			var _v40 = $elm$core$List$head(
+				$elm$core$Dict$values(capturedRoadSections));
+			if (_v40.$ === 'Just') {
+				var firstSection = _v40.a;
+				var roadAxis = A2(
+					$ianmackenzie$elm_geometry$Axis2d$withDirection,
+					firstSection.directionAtStart,
+					A2($ianmackenzie$elm_geometry$Point3d$projectInto, drawingPlane, firstSection.startPoint));
+				return A2(
+					$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo,
+					$ianmackenzie$elm_units$Quantity$zero,
+					A2($ianmackenzie$elm_geometry$Point2d$signedDistanceFrom, roadAxis, centreOnPlane));
+			} else {
+				return true;
+			}
+		}();
+		var findAcceptableTransition = F3(
+			function (mode, idx1, idx2) {
+				var _v32 = _Utils_Tuple2(
+					A2($author$project$DomainModel$earthPointFromIndex, idx1, track.trackTree),
+					A2($author$project$DomainModel$earthPointFromIndex, idx2, track.trackTree));
+				var tp1 = _v32.a;
+				var tp2 = _v32.b;
+				var entryLineSegment = A2(
+					$ianmackenzie$elm_geometry$LineSegment2d$from,
+					A2($ianmackenzie$elm_geometry$Point3d$projectInto, drawingPlane, tp1),
+					A2($ianmackenzie$elm_geometry$Point3d$projectInto, drawingPlane, tp2));
+				var entryLineAxis = A2(
+					$ianmackenzie$elm_geometry$Axis2d$throughPoints,
+					$ianmackenzie$elm_geometry$LineSegment2d$startPoint(entryLineSegment),
+					$ianmackenzie$elm_geometry$LineSegment2d$endPoint(entryLineSegment));
+				var entryLineShiftVector = function () {
+					var shiftAmount = isLeftHandBend ? $ianmackenzie$elm_units$Quantity$negate(options.transitionRadius) : options.transitionRadius;
+					return A2(
+						$elm$core$Maybe$map,
+						$ianmackenzie$elm_geometry$Vector2d$withLength(shiftAmount),
+						$ianmackenzie$elm_geometry$LineSegment2d$perpendicularDirection(entryLineSegment));
+				}();
+				var shiftedEntryLine = function () {
+					if (entryLineShiftVector.$ === 'Just') {
+						var theVector = entryLineShiftVector.a;
+						return $elm$core$Maybe$Just(
+							A2($ianmackenzie$elm_geometry$LineSegment2d$translateBy, theVector, entryLineSegment));
+					} else {
+						return $elm$core$Maybe$Nothing;
+					}
+				}();
+				var outerCircleIntersections = function () {
+					if (shiftedEntryLine.$ === 'Just') {
+						var line = shiftedEntryLine.a;
+						var outerCircle = {
+							centre: A2($ianmackenzie$elm_geometry$Point2d$toRecord, $ianmackenzie$elm_units$Length$inMeters, centreOnPlane),
+							radius: $ianmackenzie$elm_units$Length$inMeters(
+								A2($ianmackenzie$elm_units$Quantity$plus, options.pushRadius, options.transitionRadius))
+						};
+						var lineEqn = A2(
+							$author$project$Geometry101$lineEquationFromTwoPoints,
+							A2(
+								$ianmackenzie$elm_geometry$Point2d$toRecord,
+								$ianmackenzie$elm_units$Length$inMeters,
+								$ianmackenzie$elm_geometry$LineSegment2d$startPoint(line)),
+							A2(
+								$ianmackenzie$elm_geometry$Point2d$toRecord,
+								$ianmackenzie$elm_units$Length$inMeters,
+								$ianmackenzie$elm_geometry$LineSegment2d$endPoint(line)));
+						return A2(
+							$elm$core$List$map,
+							$ianmackenzie$elm_geometry$Point2d$fromRecord($ianmackenzie$elm_units$Length$meters),
+							A2($author$project$Geometry101$lineCircleIntersections, lineEqn, outerCircle));
+					} else {
+						return _List_Nil;
+					}
+				}();
+				var validCounterBendCentresAndTangentPoints = function () {
+					if (entryLineAxis.$ === 'Just') {
+						var sameOldAxis = entryLineAxis.a;
+						var selectionFunction = function () {
+							if (mode.$ === 'EntryMode') {
+								return $elm_community$list_extra$List$Extra$minimumBy(
+									A2(
+										$elm$core$Basics$composeR,
+										function ($) {
+											return $.distanceAlong;
+										},
+										$ianmackenzie$elm_units$Length$inMeters));
+							} else {
+								return $elm_community$list_extra$List$Extra$maximumBy(
+									A2(
+										$elm$core$Basics$composeR,
+										function ($) {
+											return $.distanceAlong;
+										},
+										$ianmackenzie$elm_units$Length$inMeters));
+							}
+						}();
+						var elaborateIntersectionPoint = function (i) {
+							var distanceAlong = A2($ianmackenzie$elm_geometry$Point2d$signedDistanceAlong, sameOldAxis, i);
+							var tangentPoint2d = A2($ianmackenzie$elm_geometry$Point2d$along, sameOldAxis, distanceAlong);
+							var bendJoinPoint = A3(
+								$ianmackenzie$elm_geometry$Point2d$interpolateFrom,
+								centreOnPlane,
+								i,
+								A2(
+									$ianmackenzie$elm_units$Quantity$ratio,
+									options.pushRadius,
+									A2($ianmackenzie$elm_units$Quantity$plus, options.pushRadius, options.transitionRadius)));
+							return {
+								distanceAlong: distanceAlong,
+								index: function () {
+									if (mode.$ === 'EntryMode') {
+										return idx1;
+									} else {
+										return idx2;
+									}
+								}(),
+								intersection: i,
+								joinsBendAt: bendJoinPoint,
+								originalTrackPoint: function () {
+									if (mode.$ === 'EntryMode') {
+										return tp1;
+									} else {
+										return tp2;
+									}
+								}(),
+								tangentPoint: tangentPoint2d
+							};
+						};
+						return A2(
+							$elm$core$List$filter,
+							A2(
+								$elm$core$Basics$composeR,
+								function ($) {
+									return $.distanceAlong;
+								},
+								$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo(
+									$ianmackenzie$elm_geometry$LineSegment2d$length(entryLineSegment))),
+							A2(
+								$elm$core$List$filter,
+								A2(
+									$elm$core$Basics$composeR,
+									function ($) {
+										return $.distanceAlong;
+									},
+									$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo($ianmackenzie$elm_units$Quantity$zero)),
+								$elm_community$maybe_extra$Maybe$Extra$toList(
+									selectionFunction(
+										A2($elm$core$List$map, elaborateIntersectionPoint, outerCircleIntersections)))));
+					} else {
+						return _List_Nil;
+					}
+				}();
+				if (!validCounterBendCentresAndTangentPoints.b) {
+					return $elm$core$Maybe$Nothing;
+				} else {
+					var bestFound = validCounterBendCentresAndTangentPoints.a;
+					return $elm$core$Maybe$Just(bestFound);
+				}
+			});
+		var entryCurveSeeker = function (index) {
+			entryCurveSeeker:
+			while (true) {
+				var _v3 = _Utils_Tuple2(
+					A2($author$project$DomainModel$earthPointFromIndex, index - 1, track.trackTree),
+					A2($author$project$DomainModel$earthPointFromIndex, index, track.trackTree));
+				var tp1 = _v3.a;
+				var tp2 = _v3.b;
+				var _v4 = A3(findAcceptableTransition, $author$project$Tools$CurveFormer$EntryMode, index - 1, index);
+				if (_v4.$ === 'Just') {
+					var transition = _v4.a;
+					return $elm$core$Maybe$Just(transition);
+				} else {
+					if (index > 1) {
+						var $temp$index = index - 1;
+						index = $temp$index;
+						continue entryCurveSeeker;
+					} else {
+						return $elm$core$Maybe$Nothing;
+					}
+				}
+			}
+		};
+		var exitCurveSeeker = F2(
+			function (routeLength, index) {
+				exitCurveSeeker:
+				while (true) {
+					var _v5 = _Utils_Tuple2(
+						A2($author$project$DomainModel$earthPointFromIndex, index, track.trackTree),
+						A2($author$project$DomainModel$earthPointFromIndex, index + 1, track.trackTree));
+					var tp1 = _v5.a;
+					var tp2 = _v5.b;
+					var _v6 = A3(findAcceptableTransition, $author$project$Tools$CurveFormer$ExitMode, index, index + 1);
+					if (_v6.$ === 'Just') {
+						var transition = _v6.a;
+						return $elm$core$Maybe$Just(transition);
+					} else {
+						if (_Utils_cmp(index, routeLength - 2) < 0) {
+							var $temp$routeLength = routeLength,
+								$temp$index = index + 1;
+							routeLength = $temp$routeLength;
+							index = $temp$index;
+							continue exitCurveSeeker;
+						} else {
+							return $elm$core$Maybe$Nothing;
+						}
+					}
+				}
+			});
+		var _v7 = function () {
+			var routeLength = $author$project$DomainModel$skipCount(track.trackTree);
+			return _Utils_Tuple2(
+				A2(
+					$elm$core$Maybe$andThen,
+					entryCurveSeeker,
+					$elm$core$List$head(
+						$elm$core$Dict$keys(capturedRoadSections))),
+				A2(
+					$elm$core$Maybe$andThen,
+					exitCurveSeeker(routeLength),
+					$elm_community$list_extra$List$Extra$last(
+						$elm$core$Dict$keys(capturedRoadSections))));
+		}();
+		var entryInformation = _v7.a;
+		var exitInformation = _v7.b;
+		var entryCurve = function () {
+			if (entryInformation.$ === 'Just') {
+				var intersection = entryInformation.a.intersection;
+				var distanceAlong = entryInformation.a.distanceAlong;
+				var tangentPoint = entryInformation.a.tangentPoint;
+				var joinsBendAt = entryInformation.a.joinsBendAt;
+				return A2(
+					$elm$core$Maybe$withDefault,
+					_List_Nil,
+					A2(
+						$elm$core$Maybe$map,
+						arcToSegments,
+						A4(
+							$ianmackenzie$elm_geometry$Arc2d$withRadius,
+							options.transitionRadius,
+							isLeftHandBend ? $ianmackenzie$elm_geometry$SweptAngle$smallNegative : $ianmackenzie$elm_geometry$SweptAngle$smallPositive,
+							tangentPoint,
+							joinsBendAt)));
+			} else {
+				return _List_Nil;
+			}
+		}();
+		var attachmentPoints = function () {
+			var _v30 = _Utils_Tuple2(entryInformation, exitInformation);
+			if ((_v30.a.$ === 'Just') && (_v30.b.$ === 'Just')) {
+				var entry = _v30.a.a;
+				var exit = _v30.b.a;
+				return $elm$core$Maybe$Just(
+					_Utils_Tuple2(entry.index, exit.index));
+			} else {
+				return $elm$core$Maybe$Nothing;
+			}
+		}();
+		var prepareOriginalAltitudesForInterpolation = function () {
+			if (attachmentPoints.$ === 'Just') {
+				var _v29 = attachmentPoints.a;
+				var start = _v29.a;
+				var end = _v29.b;
+				var startDistance = A2($author$project$DomainModel$distanceFromIndex, start, track.trackTree);
+				var originalSection = A2(
+					$elm$core$List$map,
+					$elm$core$Tuple$first,
+					A3(
+						$author$project$DomainModel$extractPointsInRange,
+						start,
+						$author$project$DomainModel$skipCount(track.trackTree) - end,
+						track.trackTree));
+				var endDistance = A2($author$project$DomainModel$distanceFromIndex, end, track.trackTree);
+				var length = A2($ianmackenzie$elm_units$Quantity$minus, startDistance, endDistance);
+				var altitudesByFraction = A2(
+					$elm$core$List$map,
+					function (idx) {
+						var thisPointDistanceFromStart = A2($author$project$DomainModel$distanceFromIndex, idx, track.trackTree);
+						return _Utils_Tuple2(
+							A2(
+								$ianmackenzie$elm_units$Quantity$ratio,
+								A2($ianmackenzie$elm_units$Quantity$minus, startDistance, thisPointDistanceFromStart),
+								length),
+							$ianmackenzie$elm_geometry$Point3d$zCoordinate(
+								A2($author$project$DomainModel$earthPointFromIndex, idx, track.trackTree)));
+					},
+					A2($elm$core$List$range, start, end));
+				return altitudesByFraction;
+			} else {
+				return _List_Nil;
+			}
+		}();
+		var interpolateOriginalAltitudesByDistance = function (fraction) {
+			var twoSides = A2(
+				$elm_community$list_extra$List$Extra$splitWhen,
+				function (_v27) {
+					var k = _v27.a;
+					return _Utils_cmp(k, fraction) > -1;
+				},
+				prepareOriginalAltitudesForInterpolation);
+			if (twoSides.$ === 'Just') {
+				var _v15 = twoSides.a;
+				var beforePairs = _v15.a;
+				var afterPairs = _v15.b;
+				var _v16 = _Utils_Tuple2(
+					$elm_community$list_extra$List$Extra$last(beforePairs),
+					$elm$core$List$head(afterPairs));
+				var lastBefore = _v16.a;
+				var firstAfter = _v16.b;
+				var _v17 = _Utils_Tuple2(lastBefore, firstAfter);
+				if (_v17.a.$ === 'Just') {
+					if (_v17.b.$ === 'Just') {
+						var _v18 = _v17.a.a;
+						var priorFraction = _v18.a;
+						var priorAltitude = _v18.b;
+						var _v19 = _v17.b.a;
+						var nextFraction = _v19.a;
+						var nextAltitude = _v19.b;
+						var _v20 = _Utils_Tuple2((nextFraction - fraction) / (nextFraction - priorFraction), (fraction - priorFraction) / (nextFraction - priorFraction));
+						var beforeContribution = _v20.a;
+						var afterContribution = _v20.b;
+						return A2(
+							$ianmackenzie$elm_units$Quantity$plus,
+							A2($ianmackenzie$elm_units$Quantity$multiplyBy, beforeContribution, priorAltitude),
+							A2($ianmackenzie$elm_units$Quantity$multiplyBy, afterContribution, nextAltitude));
+					} else {
+						var _v21 = _v17.a.a;
+						var priorFraction = _v21.a;
+						var priorAltitude = _v21.b;
+						var _v22 = _v17.b;
+						return priorAltitude;
+					}
+				} else {
+					if (_v17.b.$ === 'Just') {
+						var _v23 = _v17.a;
+						var _v24 = _v17.b.a;
+						var nextFraction = _v24.a;
+						var nextAltitude = _v24.b;
+						return nextAltitude;
+					} else {
+						var _v25 = _v17.a;
+						var _v26 = _v17.b;
+						return $ianmackenzie$elm_units$Quantity$zero;
+					}
+				}
+			} else {
+				return $ianmackenzie$elm_units$Quantity$zero;
+			}
+		};
+		var exitCurve = function () {
+			if (exitInformation.$ === 'Just') {
+				var intersection = exitInformation.a.intersection;
+				var distanceAlong = exitInformation.a.distanceAlong;
+				var tangentPoint = exitInformation.a.tangentPoint;
+				var joinsBendAt = exitInformation.a.joinsBendAt;
+				return A2(
+					$elm$core$Maybe$withDefault,
+					_List_Nil,
+					A2(
+						$elm$core$Maybe$map,
+						arcToSegments,
+						A4(
+							$ianmackenzie$elm_geometry$Arc2d$withRadius,
+							options.transitionRadius,
+							isLeftHandBend ? $ianmackenzie$elm_geometry$SweptAngle$smallNegative : $ianmackenzie$elm_geometry$SweptAngle$smallPositive,
+							joinsBendAt,
+							tangentPoint)));
+			} else {
+				return _List_Nil;
+			}
+		}();
+		var theArcItself = function () {
+			var _v10 = _Utils_Tuple2(entryInformation, exitInformation);
+			if ((_v10.a.$ === 'Just') && (_v10.b.$ === 'Just')) {
+				var entry = _v10.a.a;
+				var exit = _v10.b.a;
+				var _v11 = _Utils_Tuple2(
+					A2($ianmackenzie$elm_geometry$Direction2d$from, centreOnPlane, entry.joinsBendAt),
+					A2($ianmackenzie$elm_geometry$Direction2d$from, centreOnPlane, exit.joinsBendAt));
+				var entryDirection = _v11.a;
+				var exitDirection = _v11.b;
+				var turn = A3($elm$core$Maybe$map2, $ianmackenzie$elm_geometry$Direction2d$angleFrom, entryDirection, exitDirection);
+				if (turn.$ === 'Just') {
+					var turnAngle = turn.a;
+					return A2(
+						$elm$core$Maybe$withDefault,
+						_List_Nil,
+						A2(
+							$elm$core$Maybe$map,
+							arcToSegments,
+							A4(
+								$ianmackenzie$elm_geometry$Arc2d$withRadius,
+								options.pushRadius,
+								isLeftHandBend ? (A2($ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo, $ianmackenzie$elm_units$Quantity$zero, turnAngle) ? $ianmackenzie$elm_geometry$SweptAngle$smallPositive : $ianmackenzie$elm_geometry$SweptAngle$largePositive) : (A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, $ianmackenzie$elm_units$Quantity$zero, turnAngle) ? $ianmackenzie$elm_geometry$SweptAngle$smallNegative : $ianmackenzie$elm_geometry$SweptAngle$largeNegative),
+								entry.joinsBendAt,
+								exit.joinsBendAt)));
+				} else {
+					return _List_Nil;
+				}
+			} else {
+				return _List_Nil;
+			}
+		}();
+		var newBendEntirely = function () {
+			var _v8 = _Utils_Tuple2(entryInformation, exitInformation);
+			if ((_v8.a.$ === 'Just') && (_v8.b.$ === 'Just')) {
+				var entry = _v8.a.a;
+				var exit = _v8.b.a;
+				var completeSegments = _Utils_ap(
+					_List_Nil,
+					_Utils_ap(
+						entryCurve,
+						_Utils_ap(
+							theArcItself,
+							_Utils_ap(
+								exitCurve,
+								_List_fromArray(
+									[
+										A2(
+										$ianmackenzie$elm_geometry$LineSegment2d$from,
+										exit.tangentPoint,
+										A2($ianmackenzie$elm_geometry$Point3d$projectInto, drawingPlane, exit.originalTrackPoint))
+									])))));
+				var cumulativeDistances = A3(
+					$elm_community$list_extra$List$Extra$scanl,
+					F2(
+						function (seg, run) {
+							return A2(
+								$ianmackenzie$elm_units$Quantity$plus,
+								run,
+								$ianmackenzie$elm_geometry$LineSegment2d$length(seg));
+						}),
+					$ianmackenzie$elm_units$Quantity$zero,
+					completeSegments);
+				var altitudeChange = A2(
+					$ianmackenzie$elm_units$Quantity$minus,
+					$ianmackenzie$elm_geometry$Point3d$zCoordinate(entry.originalTrackPoint),
+					$ianmackenzie$elm_geometry$Point3d$zCoordinate(exit.originalTrackPoint));
+				var actualNewLength = $ianmackenzie$elm_units$Quantity$sum(
+					A2($elm$core$List$map, $ianmackenzie$elm_geometry$LineSegment2d$length, completeSegments));
+				var adjustedAltitudes = A3(
+					$elm$core$List$map2,
+					F2(
+						function (seg, dist) {
+							var proportionalDistance = A2($ianmackenzie$elm_units$Quantity$ratio, dist, actualNewLength);
+							var originalSegmentStart = $ianmackenzie$elm_geometry$LineSegment2d$startPoint(seg);
+							var adjustment = A2($ianmackenzie$elm_units$Quantity$multiplyBy, proportionalDistance, altitudeChange);
+							var newAltitude = function () {
+								var _v9 = options.smoothGradient;
+								if (_v9.$ === 'Holistic') {
+									return A2(
+										$ianmackenzie$elm_units$Quantity$plus,
+										adjustment,
+										$ianmackenzie$elm_geometry$Point3d$zCoordinate(entry.originalTrackPoint));
+								} else {
+									return interpolateOriginalAltitudesByDistance(proportionalDistance);
+								}
+							}();
+							return A3(
+								$ianmackenzie$elm_geometry$Point3d$xyz,
+								$ianmackenzie$elm_geometry$Point2d$xCoordinate(originalSegmentStart),
+								$ianmackenzie$elm_geometry$Point2d$yCoordinate(originalSegmentStart),
+								newAltitude);
+						}),
+					A2($elm$core$List$drop, 0, completeSegments),
+					cumulativeDistances);
+				return adjustedAltitudes;
+			} else {
+				return _List_Nil;
+			}
+		}();
+		return _Utils_update(
+			options,
+			{
+				circle: $elm$core$Maybe$Just(circle),
+				fixedAttachmentPoints: attachmentPoints,
+				newTrackPoints: newBendEntirely,
+				pointsAreContiguous: $author$project$Tools$CurveFormer$areContiguous(capturedRoadSections),
+				pointsWithinCircle: pointsWithinCircle,
+				pointsWithinDisc: pointsWithinDisc
+			});
+	});
 var $ianmackenzie$elm_geometry$Vector2d$plus = F2(
 	function (_v0, _v1) {
 		var v2 = _v0.a;
@@ -24521,13 +26052,16 @@ var $author$project$Tools$CurveFormer$update = F4(
 							$ianmackenzie$elm_geometry$Vector2d$plus,
 							A2($ianmackenzie$elm_geometry$Vector2d$from, dragStart, offset),
 							options.lastVector);
-						var newOptions = _Utils_update(
-							options,
-							{
-								referencePoint: _Utils_eq(options.referencePoint, $elm$core$Maybe$Nothing) ? $elm$core$Maybe$Just(
-									A2($author$project$DomainModel$earthPointFromIndex, track.currentPosition, track.trackTree)) : options.referencePoint,
-								vector: newVector
-							});
+						var newOptions = A2(
+							$author$project$Tools$CurveFormer$makeCurveIfPossible,
+							track,
+							_Utils_update(
+								options,
+								{
+									referencePoint: _Utils_eq(options.referencePoint, $elm$core$Maybe$Nothing) ? $elm$core$Maybe$Just(
+										A2($author$project$DomainModel$earthPointFromIndex, track.currentPosition, track.trackTree)) : options.referencePoint,
+									vector: newVector
+								}));
 						return _Utils_Tuple2(
 							newOptions,
 							A3($author$project$Tools$CurveFormer$previewActions, newOptions, previewColour, track));
@@ -27838,27 +29372,6 @@ var $mdgriffith$elm_ui$Internal$Model$staticRoot = function (opts) {
 				_List_Nil);
 	}
 };
-var $elm$core$List$any = F2(
-	function (isOkay, list) {
-		any:
-		while (true) {
-			if (!list.b) {
-				return false;
-			} else {
-				var x = list.a;
-				var xs = list.b;
-				if (isOkay(x)) {
-					return true;
-				} else {
-					var $temp$isOkay = isOkay,
-						$temp$list = xs;
-					isOkay = $temp$isOkay;
-					list = $temp$list;
-					continue any;
-				}
-			}
-		}
-	});
 var $mdgriffith$elm_ui$Internal$Model$fontName = function (font) {
 	switch (font.$) {
 		case 'Serif':
@@ -28585,27 +30098,6 @@ var $mdgriffith$elm_ui$Internal$Model$adjust = F3(
 	function (size, height, vertical) {
 		return {height: height / size, size: size, vertical: vertical};
 	});
-var $elm$core$List$filter = F2(
-	function (isGood, list) {
-		return A3(
-			$elm$core$List$foldr,
-			F2(
-				function (x, xs) {
-					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
-				}),
-			_List_Nil,
-			list);
-	});
-var $elm$core$List$minimum = function (list) {
-	if (list.b) {
-		var x = list.a;
-		var xs = list.b;
-		return $elm$core$Maybe$Just(
-			A3($elm$core$List$foldl, $elm$core$Basics$min, x, xs));
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
-};
 var $mdgriffith$elm_ui$Internal$Model$convertAdjustment = function (adjustment) {
 	var lines = _List_fromArray(
 		[adjustment.capital, adjustment.baseline, adjustment.descender, adjustment.lowercase]);
@@ -37752,15 +39244,6 @@ var $terezka$elm_charts$Chart$Svg$line = F2(
 			plane,
 			A2($terezka$elm_charts$Internal$Helpers$apply, edits, $terezka$elm_charts$Internal$Svg$defaultLine));
 	});
-var $elm$core$List$member = F2(
-	function (x, xs) {
-		return A2(
-			$elm$core$List$any,
-			function (a) {
-				return _Utils_eq(a, x);
-			},
-			xs);
-	});
 var $terezka$elm_charts$Chart$Attributes$size = F2(
 	function (v, config) {
 		return _Utils_update(
@@ -39248,21 +40731,6 @@ var $terezka$elm_charts$Internal$Svg$interpolation = F5(
 					A4($terezka$elm_charts$Internal$Svg$toCommands, method, toX, toY, data)));
 		}
 	});
-var $elm$core$Maybe$map2 = F3(
-	function (func, ma, mb) {
-		if (ma.$ === 'Nothing') {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			var a = ma.a;
-			if (mb.$ === 'Nothing') {
-				return $elm$core$Maybe$Nothing;
-			} else {
-				var b = mb.a;
-				return $elm$core$Maybe$Just(
-					A2(func, a, b));
-			}
-		}
-	});
 var $elm$html$Html$table = _VirtualDom_node('table');
 var $terezka$elm_charts$Internal$Produce$toDefaultName = F2(
 	function (index, name) {
@@ -40291,132 +41759,6 @@ var $ryannhg$date_format$DateFormat$monthNumber_ = F2(
 var $elm$core$List$sum = function (numbers) {
 	return A3($elm$core$List$foldl, $elm$core$Basics$add, 0, numbers);
 };
-var $elm$core$List$takeReverse = F3(
-	function (n, list, kept) {
-		takeReverse:
-		while (true) {
-			if (n <= 0) {
-				return kept;
-			} else {
-				if (!list.b) {
-					return kept;
-				} else {
-					var x = list.a;
-					var xs = list.b;
-					var $temp$n = n - 1,
-						$temp$list = xs,
-						$temp$kept = A2($elm$core$List$cons, x, kept);
-					n = $temp$n;
-					list = $temp$list;
-					kept = $temp$kept;
-					continue takeReverse;
-				}
-			}
-		}
-	});
-var $elm$core$List$takeTailRec = F2(
-	function (n, list) {
-		return $elm$core$List$reverse(
-			A3($elm$core$List$takeReverse, n, list, _List_Nil));
-	});
-var $elm$core$List$takeFast = F3(
-	function (ctr, n, list) {
-		if (n <= 0) {
-			return _List_Nil;
-		} else {
-			var _v0 = _Utils_Tuple2(n, list);
-			_v0$1:
-			while (true) {
-				_v0$5:
-				while (true) {
-					if (!_v0.b.b) {
-						return list;
-					} else {
-						if (_v0.b.b.b) {
-							switch (_v0.a) {
-								case 1:
-									break _v0$1;
-								case 2:
-									var _v2 = _v0.b;
-									var x = _v2.a;
-									var _v3 = _v2.b;
-									var y = _v3.a;
-									return _List_fromArray(
-										[x, y]);
-								case 3:
-									if (_v0.b.b.b.b) {
-										var _v4 = _v0.b;
-										var x = _v4.a;
-										var _v5 = _v4.b;
-										var y = _v5.a;
-										var _v6 = _v5.b;
-										var z = _v6.a;
-										return _List_fromArray(
-											[x, y, z]);
-									} else {
-										break _v0$5;
-									}
-								default:
-									if (_v0.b.b.b.b && _v0.b.b.b.b.b) {
-										var _v7 = _v0.b;
-										var x = _v7.a;
-										var _v8 = _v7.b;
-										var y = _v8.a;
-										var _v9 = _v8.b;
-										var z = _v9.a;
-										var _v10 = _v9.b;
-										var w = _v10.a;
-										var tl = _v10.b;
-										return (ctr > 1000) ? A2(
-											$elm$core$List$cons,
-											x,
-											A2(
-												$elm$core$List$cons,
-												y,
-												A2(
-													$elm$core$List$cons,
-													z,
-													A2(
-														$elm$core$List$cons,
-														w,
-														A2($elm$core$List$takeTailRec, n - 4, tl))))) : A2(
-											$elm$core$List$cons,
-											x,
-											A2(
-												$elm$core$List$cons,
-												y,
-												A2(
-													$elm$core$List$cons,
-													z,
-													A2(
-														$elm$core$List$cons,
-														w,
-														A3($elm$core$List$takeFast, ctr + 1, n - 4, tl)))));
-									} else {
-										break _v0$5;
-									}
-							}
-						} else {
-							if (_v0.a === 1) {
-								break _v0$1;
-							} else {
-								break _v0$5;
-							}
-						}
-					}
-				}
-				return list;
-			}
-			var _v1 = _v0.b;
-			var x = _v1.a;
-			return _List_fromArray(
-				[x]);
-		}
-	});
-var $elm$core$List$take = F2(
-	function (n, list) {
-		return A3($elm$core$List$takeFast, 0, n, list);
-	});
 var $elm$time$Time$toYear = F2(
 	function (zone, time) {
 		return $elm$time$Time$toCivil(

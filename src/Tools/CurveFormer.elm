@@ -238,6 +238,7 @@ update msg options previewColour hasTrack =
                                     else
                                         options.referencePoint
                             }
+                                |> makeCurveIfPossible track
                     in
                     ( newOptions, previewActions newOptions previewColour track )
 
