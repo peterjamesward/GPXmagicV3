@@ -7,7 +7,10 @@ DEBT: Map sends more click messages each time we click. They are debounced but, 
 
 # WIP
 
-3. Curve Former (2-way drag should correct for azimuth)
+## Curve Former (2-way drag should correct for azimuth)
+-- Circle not moving on drag.
+-- Point detection shows signs of working.
+-- MUST use bounding boxes for culling.
 
 ---
 

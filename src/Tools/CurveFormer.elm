@@ -5,6 +5,7 @@ import Angle
 import Arc2d
 import Arc3d
 import Axis2d
+import BoundingBox2d
 import Circle3d exposing (Circle3d)
 import Color
 import ColourPalette exposing (warningColor)
@@ -674,8 +675,6 @@ makeCurveIfPossible track options =
         ( startRange, endRange ) =
             ( fromStart, skipCount track.trackTree - fromEnd )
 
-        _ = Debug.log "start,end" (startRange, endRange)
-
         circle =
             getCircle options track
 
@@ -692,15 +691,25 @@ makeCurveIfPossible track options =
             -- Most of the work is planar; we layer the elevations on at the end.
             centre |> Point3d.projectInto drawingPlane
 
+        innerBox =
+            BoundingBox2d.withDimensions
+                ( Quantity.twice options.pushRadius, Quantity.twice options.pullRadius )
+                centreOnPlane
+
+        outerBox =
+            BoundingBox2d.withDimensions
+                ( Quantity.twice options.pullRadius, Quantity.twice options.pullRadius )
+                centreOnPlane
+
         isWithinCircleAndWithinRange : Int -> Int -> RoadSection -> Bool
         isWithinCircleAndWithinRange start end road =
-            let _ = Debug.log "FILTER" (start, end) in
+            --TODO: Use bounding boxes !!
             -- Road section is interesting?
             start
                 >= startRange
                 && end
                 <= endRange
-                && isWithinPushRadius road.startPoint
+                && (road.boundingBox |> flatBox |> BoundingBox2d.intersects innerBox)
 
         isWithinPushRadius pt =
             pt
@@ -720,7 +729,7 @@ makeCurveIfPossible track options =
                 >= startRange
                 && end
                 <= endRange
-                && isWithinDisc road.startPoint
+                && (road.boundingBox |> flatBox |> BoundingBox2d.intersects outerBox)
 
         pointsWithinCircle : Dict Int RoadSection
         pointsWithinCircle =
