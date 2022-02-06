@@ -1,16 +1,20 @@
 
 # BUGS & DEBT (for an 'easy' day)
 
-BUG: Dubious steepest gradient on some routes. (May have to wait until we have that tool!)
+BUG: Dubious steepest gradient on some routes. 
+> (May have to wait until we have that tool!)
 
-DEBT: Map sends more click messages each time we click. They are debounced but, still, why??
+DEBT: Map sends more click messages each time we click. 
+> They are debounced but, still, why??
 
 # WIP
 
-## Curve Former (2-way drag should correct for azimuth)
--- Circle not moving on drag.
--- Point detection shows signs of working.
--- MUST use bounding boxes for culling.
+## Curve Former 
+
+2-way drag should correct for azimuth.
+
+Circle moves now, but some updates are one state adrift and 
+the points are now not showing up when they were previously.
 
 ---
 
