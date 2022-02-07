@@ -8498,6 +8498,7 @@ var $author$project$Tools$AbruptDirectionChanges$defaultOptions = {
 	currentBreach: 0,
 	threshold: $ianmackenzie$elm_units$Angle$degrees(120)
 };
+var $author$project$Tools$BendSmoother$defaultOptions = {bendTrackPointSpacing: 5.0, segments: 1, smoothedBend: $elm$core$Maybe$Nothing};
 var $author$project$Tools$BezierOptions$Approximated = {$: 'Approximated'};
 var $author$project$Tools$BezierSplines$defaultOptions = {bezierStyle: $author$project$Tools$BezierOptions$Approximated, bezierTension: 0.5, bezierTolerance: 5.0};
 var $author$project$Tools$CentroidAverage$defaultOptions = {applyToAltitude: true, applyToPosition: true, weighting: 1.0};
@@ -8535,7 +8536,7 @@ var $author$project$Tools$UndoRedo$Options = function (dummy) {
 var $author$project$Tools$UndoRedo$defaultOptions = $author$project$Tools$UndoRedo$Options(0);
 var $author$project$ToolsController$Contracted = {$: 'Contracted'};
 var $author$project$ToolsController$DockLowerRight = {$: 'DockLowerRight'};
-var $author$project$ToolsController$ToolBezierSplines = {$: 'ToolBezierSplines'};
+var $author$project$ToolsController$ToolBendSmoother = {$: 'ToolBendSmoother'};
 var $mdgriffith$elm_ui$Internal$Model$Rgba = F4(
 	function (a, b, c, d) {
 		return {$: 'Rgba', a: a, b: b, c: c, d: d};
@@ -8563,6 +8564,18 @@ var $author$project$ViewPureStyles$contrastingColour = function (col) {
 	var grey = ((0.299 * red) + (0.587 * green)) + (0.114 * blue);
 	return (grey > 0.5) ? $smucode$elm_flat_colors$FlatColors$AussiePalette$deepKoamaru : $smucode$elm_flat_colors$FlatColors$AussiePalette$coastalBreeze;
 };
+var $author$project$ToolsController$bendSmootherTool = {
+	dock: $author$project$ToolsController$DockLowerRight,
+	info: 'Make it smoother',
+	isPopupOpen: false,
+	label: 'Classic bends',
+	state: $author$project$ToolsController$Contracted,
+	tabColour: $smucode$elm_flat_colors$FlatColors$SwedishPalette$blackPearl,
+	textColour: $author$project$ViewPureStyles$contrastingColour($smucode$elm_flat_colors$FlatColors$SwedishPalette$blackPearl),
+	toolType: $author$project$ToolsController$ToolBendSmoother,
+	video: $elm$core$Maybe$Nothing
+};
+var $author$project$ToolsController$ToolBezierSplines = {$: 'ToolBezierSplines'};
 var $author$project$ToolsController$bezierSplinesTool = {
 	dock: $author$project$ToolsController$DockLowerRight,
 	info: 'Make it smoother',
@@ -8664,8 +8677,8 @@ var $author$project$ToolsController$undoRedoTool = {
 	video: $elm$core$Maybe$Nothing
 };
 var $author$project$ToolsController$defaultTools = _List_fromArray(
-	[$author$project$ToolsController$pointersTool, $author$project$ToolsController$undoRedoTool, $author$project$ToolsController$trackInfoBox, $author$project$ToolsController$directionChangeTool, $author$project$ToolsController$deleteTool, $author$project$ToolsController$bezierSplinesTool, $author$project$ToolsController$centroidAverageTool, $author$project$ToolsController$curveFormerTool]);
-var $author$project$ToolsController$defaultOptions = {bezierSplineOptions: $author$project$Tools$BezierSplines$defaultOptions, centroidAverageOptions: $author$project$Tools$CentroidAverage$defaultOptions, curveFormerOptions: $author$project$Tools$CurveFormer$defaultOptions, deleteOptions: $author$project$Tools$DeletePoints$defaultOptions, directionChangeOptions: $author$project$Tools$AbruptDirectionChanges$defaultOptions, imperial: false, pointerOptions: $author$project$Tools$Pointers$defaultOptions, tools: $author$project$ToolsController$defaultTools, undoRedoOptions: $author$project$Tools$UndoRedo$defaultOptions};
+	[$author$project$ToolsController$pointersTool, $author$project$ToolsController$undoRedoTool, $author$project$ToolsController$trackInfoBox, $author$project$ToolsController$directionChangeTool, $author$project$ToolsController$deleteTool, $author$project$ToolsController$bezierSplinesTool, $author$project$ToolsController$centroidAverageTool, $author$project$ToolsController$curveFormerTool, $author$project$ToolsController$bendSmootherTool]);
+var $author$project$ToolsController$defaultOptions = {bendSmootherOptions: $author$project$Tools$BendSmoother$defaultOptions, bezierSplineOptions: $author$project$Tools$BezierSplines$defaultOptions, centroidAverageOptions: $author$project$Tools$CentroidAverage$defaultOptions, curveFormerOptions: $author$project$Tools$CurveFormer$defaultOptions, deleteOptions: $author$project$Tools$DeletePoints$defaultOptions, directionChangeOptions: $author$project$Tools$AbruptDirectionChanges$defaultOptions, imperial: false, pointerOptions: $author$project$Tools$Pointers$defaultOptions, tools: $author$project$ToolsController$defaultTools, undoRedoOptions: $author$project$Tools$UndoRedo$defaultOptions};
 var $elm$browser$Browser$Dom$getViewport = _Browser_withWindow(_Browser_getViewport);
 var $elm$time$Time$Name = function (a) {
 	return {$: 'Name', a: a};
@@ -13386,8 +13399,10 @@ var $author$project$ToolsController$encodeType = function (toolType) {
 			return 'ToolBezierSplines';
 		case 'ToolCentroidAverage':
 			return 'ToolCentroidAverage';
-		default:
+		case 'ToolCurveFormer':
 			return 'ToolCurveFormer';
+		default:
+			return 'ToolBendSmoother';
 	}
 };
 var $author$project$ToolsController$encodeOneTool = function (tool) {
@@ -13546,6 +13561,52 @@ var $author$project$Tools$AbruptDirectionChanges$toolStateChange = F4(
 				_List_fromArray(
 					[
 						$author$project$Actions$HidePreview('kinks')
+					]));
+		}
+	});
+var $author$project$Tools$BendSmoother$computeNewPoints = F2(
+	function (options, track) {
+		var earthPoints = _List_Nil;
+		var previewPoints = A2(
+			$elm$core$List$map,
+			function (earth) {
+				return _Utils_Tuple2(
+					earth,
+					A2($author$project$DomainModel$gpxFromPointWithReference, track.referenceLonLat, earth));
+			},
+			earthPoints);
+		var _v0 = $author$project$TrackLoaded$getRangeFromMarkers(track);
+		var fromStart = _v0.a;
+		var fromEnd = _v0.b;
+		return previewPoints;
+	});
+var $author$project$Tools$BendSmoother$previewActions = F3(
+	function (newOptions, colour, track) {
+		return _List_fromArray(
+			[
+				$author$project$Actions$ShowPreview(
+				{
+					colour: colour,
+					points: A2($author$project$Tools$BendSmoother$computeNewPoints, newOptions, track),
+					shape: $author$project$Actions$PreviewCircle,
+					tag: 'bend'
+				})
+			]);
+	});
+var $author$project$Tools$BendSmoother$toolStateChange = F4(
+	function (opened, colour, options, track) {
+		var _v0 = _Utils_Tuple2(opened, track);
+		if (_v0.a && (_v0.b.$ === 'Just')) {
+			var theTrack = _v0.b.a;
+			return _Utils_Tuple2(
+				options,
+				A3($author$project$Tools$BendSmoother$previewActions, options, colour, theTrack));
+		} else {
+			return _Utils_Tuple2(
+				options,
+				_List_fromArray(
+					[
+						$author$project$Actions$HidePreview('bend')
 					]));
 		}
 	});
@@ -14500,7 +14561,7 @@ var $author$project$ToolsController$toolStateHasChanged = F4(
 							'tools',
 							$author$project$ToolsController$encodeToolState(options)),
 						actions));
-			default:
+			case 'ToolCurveFormer':
 				var _v6 = A4(
 					$author$project$Tools$CurveFormer$toolStateChange,
 					_Utils_eq(newState, $author$project$ToolsController$Expanded),
@@ -14512,6 +14573,27 @@ var $author$project$ToolsController$toolStateHasChanged = F4(
 				var newOptions = _Utils_update(
 					options,
 					{curveFormerOptions: newToolOptions});
+				return _Utils_Tuple2(
+					newOptions,
+					A2(
+						$elm$core$List$cons,
+						A2(
+							$author$project$Actions$StoreLocally,
+							'tools',
+							$author$project$ToolsController$encodeToolState(options)),
+						actions));
+			default:
+				var _v7 = A4(
+					$author$project$Tools$BendSmoother$toolStateChange,
+					_Utils_eq(newState, $author$project$ToolsController$Expanded),
+					A2($author$project$ToolsController$getColour, toolType, options.tools),
+					options.bendSmootherOptions,
+					isTrack);
+				var newToolOptions = _v7.a;
+				var actions = _v7.b;
+				var newOptions = _Utils_update(
+					options,
+					{bendSmootherOptions: newToolOptions});
 				return _Utils_Tuple2(
 					newOptions,
 					A2(
@@ -19737,6 +19819,37 @@ var $author$project$Tools$AbruptDirectionChanges$update = F4(
 				}
 		}
 	});
+var $author$project$Actions$BendSmootherApplyWithOptions = function (a) {
+	return {$: 'BendSmootherApplyWithOptions', a: a};
+};
+var $author$project$Tools$BendSmoother$update = F4(
+	function (msg, options, previewColour, hasTrack) {
+		var _v0 = _Utils_Tuple2(hasTrack, msg);
+		if (_v0.a.$ === 'Just') {
+			if (_v0.b.$ === 'SetBendTrackPointSpacing') {
+				var track = _v0.a.a;
+				var spacing = _v0.b.a;
+				var newOptions = _Utils_update(
+					options,
+					{bendTrackPointSpacing: spacing});
+				return _Utils_Tuple2(
+					newOptions,
+					A3($author$project$Tools$BendSmoother$previewActions, newOptions, previewColour, track));
+			} else {
+				var track = _v0.a.a;
+				var _v1 = _v0.b;
+				return _Utils_Tuple2(
+					options,
+					_List_fromArray(
+						[
+							$author$project$Actions$BendSmootherApplyWithOptions(options),
+							$author$project$Actions$TrackHasChanged
+						]));
+			}
+		} else {
+			return _Utils_Tuple2(options, _List_Nil);
+		}
+	});
 var $author$project$Actions$BezierApplyWithOptions = function (a) {
 	return {$: 'BezierApplyWithOptions', a: a};
 };
@@ -22058,6 +22171,21 @@ var $author$project$ToolsController$update = F4(
 					_Utils_update(
 						options,
 						{curveFormerOptions: newOptions}),
+					actions);
+			case 'ToolBendSmootherMsg':
+				var msg = toolMsg.a;
+				var _v8 = A4(
+					$author$project$Tools$BendSmoother$update,
+					msg,
+					options.bendSmootherOptions,
+					A2($author$project$ToolsController$getColour, $author$project$ToolsController$ToolBendSmoother, options.tools),
+					isTrack);
+				var newOptions = _v8.a;
+				var actions = _v8.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						options,
+						{bendSmootherOptions: newOptions}),
 					actions);
 			default:
 				var newOptions = _Utils_update(
@@ -28970,6 +29098,9 @@ var $author$project$ToolsController$DirectionChanges = function (a) {
 var $author$project$ToolsController$PointerMsg = function (a) {
 	return {$: 'PointerMsg', a: a};
 };
+var $author$project$ToolsController$ToolBendSmootherMsg = function (a) {
+	return {$: 'ToolBendSmootherMsg', a: a};
+};
 var $author$project$ToolsController$ToolBezierMsg = function (a) {
 	return {$: 'ToolBezierMsg', a: a};
 };
@@ -30467,17 +30598,10 @@ var $author$project$Tools$AbruptDirectionChanges$view = F3(
 			return $author$project$ViewPureStyles$noTrackMessage;
 		}
 	});
-var $author$project$Tools$BezierSplines$BezierApplyWithOptions = {$: 'BezierApplyWithOptions'};
-var $author$project$Tools$BezierSplines$SetBezierStyle = function (a) {
-	return {$: 'SetBezierStyle', a: a};
+var $author$project$Tools$BendSmoother$ApplyWithOptions = {$: 'ApplyWithOptions'};
+var $author$project$Tools$BendSmoother$SetBendTrackPointSpacing = function (a) {
+	return {$: 'SetBendTrackPointSpacing', a: a};
 };
-var $author$project$Tools$BezierSplines$SetBezierTension = function (a) {
-	return {$: 'SetBezierTension', a: a};
-};
-var $author$project$Tools$BezierSplines$SetBezierTolerance = function (a) {
-	return {$: 'SetBezierTolerance', a: a};
-};
-var $author$project$Tools$BezierOptions$ThroughExisting = {$: 'ThroughExisting'};
 var $author$project$ViewPureStyles$commonShortHorizontalSliderStyles = _List_fromArray(
 	[
 		$mdgriffith$elm_ui$Element$height(
@@ -30516,12 +30640,117 @@ var $mdgriffith$elm_ui$Element$Input$defaultThumb = $mdgriffith$elm_ui$Element$I
 			$mdgriffith$elm_ui$Element$Background$color(
 			A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1))
 		]));
+var $ianmackenzie$elm_units$Length$feet = function (numFeet) {
+	return $ianmackenzie$elm_units$Length$meters($ianmackenzie$elm_units$Constants$foot * numFeet);
+};
 var $mdgriffith$elm_ui$Element$Input$Below = {$: 'Below'};
 var $mdgriffith$elm_ui$Element$Input$Label = F3(
 	function (a, b, c) {
 		return {$: 'Label', a: a, b: b, c: c};
 	});
 var $mdgriffith$elm_ui$Element$Input$labelBelow = $mdgriffith$elm_ui$Element$Input$Label($mdgriffith$elm_ui$Element$Input$Below);
+var $ianmackenzie$elm_units$Length$inFeet = function (length) {
+	return $ianmackenzie$elm_units$Length$inMeters(length) / $ianmackenzie$elm_units$Constants$foot;
+};
+var $author$project$UtilsForViews$showShortMeasure = F2(
+	function (imperial, distance) {
+		return imperial ? ($author$project$UtilsForViews$showDecimal2(
+			$ianmackenzie$elm_units$Length$inFeet(distance)) + ' feet') : ($author$project$UtilsForViews$showDecimal2(
+			$ianmackenzie$elm_units$Length$inMeters(distance)) + 'm');
+	});
+var $author$project$Tools$BendSmoother$bendSmoothnessSlider = F3(
+	function (imperial, options, wrap) {
+		return A2(
+			$mdgriffith$elm_ui$Element$Input$slider,
+			$author$project$ViewPureStyles$commonShortHorizontalSliderStyles,
+			{
+				label: A2(
+					$mdgriffith$elm_ui$Element$Input$labelBelow,
+					_List_Nil,
+					$mdgriffith$elm_ui$Element$text(
+						'Spacing: ' + A2(
+							$author$project$UtilsForViews$showShortMeasure,
+							imperial,
+							$ianmackenzie$elm_units$Length$meters(options.bendTrackPointSpacing)))),
+				max: $ianmackenzie$elm_units$Length$inMeters(
+					imperial ? $ianmackenzie$elm_units$Length$feet(30.0) : $ianmackenzie$elm_units$Length$meters(10.0)),
+				min: $ianmackenzie$elm_units$Length$inMeters(
+					imperial ? $ianmackenzie$elm_units$Length$feet(3.0) : $ianmackenzie$elm_units$Length$meters(1.0)),
+				onChange: A2($elm$core$Basics$composeL, wrap, $author$project$Tools$BendSmoother$SetBendTrackPointSpacing),
+				step: $elm$core$Maybe$Nothing,
+				thumb: $mdgriffith$elm_ui$Element$Input$defaultThumb,
+				value: options.bendTrackPointSpacing
+			});
+	});
+var $author$project$Tools$BendSmoother$view = F4(
+	function (imperial, wrapper, options, track) {
+		var fixBendButton = function (smooth) {
+			return A2(
+				$mdgriffith$elm_ui$Element$Input$button,
+				$author$project$ViewPureStyles$neatToolsBorder,
+				{
+					label: function () {
+						if (smooth.$ === 'Just') {
+							var isSmooth = smooth.a;
+							return A2(
+								$mdgriffith$elm_ui$Element$paragraph,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$text(
+										'Smooth between markers\nRadius ' + A2(
+											$author$project$UtilsForViews$showShortMeasure,
+											imperial,
+											$ianmackenzie$elm_units$Length$meters(isSmooth.radius)))
+									]));
+						} else {
+							return $mdgriffith$elm_ui$Element$text('No bend found');
+						}
+					}(),
+					onPress: $elm$core$Maybe$Just(
+						wrapper($author$project$Tools$BendSmoother$ApplyWithOptions))
+				});
+		};
+		if (track.$ === 'Just') {
+			var isTrack = track.a;
+			return A2(
+				$mdgriffith$elm_ui$Element$column,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$padding(10),
+						$mdgriffith$elm_ui$Element$spacing(5),
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$centerX,
+						$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite)
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[$mdgriffith$elm_ui$Element$centerX]),
+						A3($author$project$Tools$BendSmoother$bendSmoothnessSlider, imperial, options, wrapper)),
+						A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[$mdgriffith$elm_ui$Element$centerX]),
+						fixBendButton(options.smoothedBend))
+					]));
+		} else {
+			return $author$project$ViewPureStyles$noTrackMessage;
+		}
+	});
+var $author$project$Tools$BezierSplines$BezierApplyWithOptions = {$: 'BezierApplyWithOptions'};
+var $author$project$Tools$BezierSplines$SetBezierStyle = function (a) {
+	return {$: 'SetBezierStyle', a: a};
+};
+var $author$project$Tools$BezierSplines$SetBezierTension = function (a) {
+	return {$: 'SetBezierTension', a: a};
+};
+var $author$project$Tools$BezierSplines$SetBezierTolerance = function (a) {
+	return {$: 'SetBezierTolerance', a: a};
+};
+var $author$project$Tools$BezierOptions$ThroughExisting = {$: 'ThroughExisting'};
 var $mdgriffith$elm_ui$Element$Input$Option = F2(
 	function (a, b) {
 		return {$: 'Option', a: a, b: b};
@@ -31433,15 +31662,6 @@ var $mdgriffith$elm_ui$Element$paddingEach = function (_v0) {
 				left));
 	}
 };
-var $ianmackenzie$elm_units$Length$inFeet = function (length) {
-	return $ianmackenzie$elm_units$Length$inMeters(length) / $ianmackenzie$elm_units$Constants$foot;
-};
-var $author$project$UtilsForViews$showShortMeasure = F2(
-	function (imperial, distance) {
-		return imperial ? ($author$project$UtilsForViews$showDecimal2(
-			$ianmackenzie$elm_units$Length$inFeet(distance)) + ' feet') : ($author$project$UtilsForViews$showDecimal2(
-			$ianmackenzie$elm_units$Length$inMeters(distance)) + 'm');
-	});
 var $author$project$Tools$CurveFormer$DraggerGrab = function (a) {
 	return {$: 'DraggerGrab', a: a};
 };
@@ -32379,6 +32599,9 @@ var $author$project$Actions$interpretAction = function (action) {
 		case 'CurveFormerApplyWithOptions':
 			var options = action.a;
 			return 'curve former';
+		case 'BendSmootherApplyWithOptions':
+			var options = action.a;
+			return 'bend smoother';
 		default:
 			return 'ask Pete to fix this message';
 	}
@@ -32551,12 +32774,19 @@ var $author$project$ToolsController$viewToolByType = F4(
 							$author$project$Tools$CentroidAverage$view,
 							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolCentroidMsg),
 							options.centroidAverageOptions);
-					default:
+					case 'ToolCurveFormer':
 						return A4(
 							$author$project$Tools$CurveFormer$view,
 							options.imperial,
 							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolCurveFormerMsg),
 							options.curveFormerOptions,
+							isTrack);
+					default:
+						return A4(
+							$author$project$Tools$BendSmoother$view,
+							options.imperial,
+							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolBendSmootherMsg),
+							options.bendSmootherOptions,
 							isTrack);
 				}
 			}());

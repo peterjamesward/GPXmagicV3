@@ -15,6 +15,8 @@ import Json.Decode as D exposing (field)
 import Json.Encode as E
 import List.Extra
 import Tools.AbruptDirectionChanges as AbruptDirectionChanges
+import Tools.BendSmoother
+import Tools.BendSmootherOptions
 import Tools.BezierOptions
 import Tools.BezierSplines
 import Tools.CentroidAverage
@@ -54,6 +56,7 @@ type ToolType
     | ToolBezierSplines
     | ToolCentroidAverage
     | ToolCurveFormer
+    | ToolBendSmoother
 
 
 type alias Options =
@@ -67,6 +70,7 @@ type alias Options =
     , bezierSplineOptions : Tools.BezierOptions.Options
     , centroidAverageOptions : Tools.CentroidAverageOptions.Options
     , curveFormerOptions : Tools.CurveFormerOptions.Options
+    , bendSmootherOptions : Tools.BendSmootherOptions.Options
     }
 
 
@@ -81,6 +85,7 @@ defaultOptions =
     , bezierSplineOptions = Tools.BezierSplines.defaultOptions
     , centroidAverageOptions = Tools.CentroidAverage.defaultOptions
     , curveFormerOptions = Tools.CurveFormer.defaultOptions
+    , bendSmootherOptions = Tools.BendSmoother.defaultOptions
     }
 
 
@@ -98,6 +103,7 @@ type ToolMsg
     | ToolBezierMsg Tools.BezierSplines.Msg
     | ToolCentroidMsg Tools.CentroidAverage.Msg
     | ToolCurveFormerMsg Tools.CurveFormer.Msg
+    | ToolBendSmootherMsg Tools.BendSmoother.Msg
 
 
 type alias ToolEntry =
@@ -124,6 +130,7 @@ defaultTools =
     , bezierSplinesTool
     , centroidAverageTool
     , curveFormerTool
+    , bendSmootherTool
     ]
 
 
@@ -229,6 +236,19 @@ curveFormerTool : ToolEntry
 curveFormerTool =
     { toolType = ToolCurveFormer
     , label = "Radiused bends"
+    , info = "Make it smoother"
+    , video = Nothing
+    , state = Contracted
+    , dock = DockLowerRight
+    , tabColour = FlatColors.SwedishPalette.blackPearl
+    , textColour = contrastingColour FlatColors.SwedishPalette.blackPearl
+    , isPopupOpen = False
+    }
+
+bendSmootherTool : ToolEntry
+bendSmootherTool =
+    { toolType = ToolBendSmoother
+    , label = "Classic bends"
     , info = "Make it smoother"
     , video = Nothing
     , state = Contracted
@@ -438,6 +458,19 @@ update toolMsg isTrack msgWrapper options =
             , actions
             )
 
+        ToolBendSmootherMsg msg ->
+            let
+                ( newOptions, actions ) =
+                    Tools.BendSmoother.update
+                        msg
+                        options.bendSmootherOptions
+                        (getColour ToolBendSmoother options.tools)
+                        isTrack
+            in
+            ( { options | bendSmootherOptions = newOptions }
+            , actions
+            )
+
         ToggleImperial ->
             let
                 newOptions =
@@ -565,6 +598,20 @@ toolStateHasChanged toolType newState isTrack options =
 
                 newOptions =
                     { options | curveFormerOptions = newToolOptions }
+            in
+            ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
+
+        ToolBendSmoother ->
+            let
+                ( newToolOptions, actions ) =
+                    Tools.BendSmoother.toolStateChange
+                        (newState == Expanded)
+                        (getColour toolType options.tools)
+                        options.bendSmootherOptions
+                        isTrack
+
+                newOptions =
+                    { options | bendSmootherOptions = newToolOptions }
             in
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
@@ -775,6 +822,13 @@ viewToolByType msgWrapper entry isTrack options =
                     options.curveFormerOptions
                     isTrack
 
+            ToolBendSmoother ->
+                Tools.BendSmoother.view
+                    options.imperial
+                    (msgWrapper << ToolBendSmootherMsg)
+                    options.bendSmootherOptions
+                    isTrack
+
 
 
 -- Local storage management
@@ -822,6 +876,9 @@ encodeType toolType =
 
         ToolCurveFormer ->
             "ToolCurveFormer"
+
+        ToolBendSmoother ->
+            "ToolBendSmoother"
 
 
 encodeColour : Element.Color -> E.Value

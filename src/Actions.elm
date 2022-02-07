@@ -8,6 +8,7 @@ import Element
 import Json.Decode as E
 import LocalCoords exposing (LocalCoords)
 import Scene3d exposing (Entity)
+import Tools.BendSmootherOptions
 import Tools.BezierOptions
 import Tools.CentroidAverageOptions
 import Tools.CurveFormerOptions
@@ -36,6 +37,7 @@ type ToolAction msg
     | BezierApplyWithOptions Tools.BezierOptions.Options
     | CentroidAverageApplyWithOptions Tools.CentroidAverageOptions.Options
     | CurveFormerApplyWithOptions Tools.CurveFormerOptions.Options
+    | BendSmootherApplyWithOptions Tools.BendSmootherOptions.Options
 
 
 type PreviewShape
@@ -70,6 +72,9 @@ interpretAction action =
 
         CurveFormerApplyWithOptions options ->
             "curve former"
+
+        BendSmootherApplyWithOptions options ->
+            "bend smoother"
 
         _ ->
             "ask Pete to fix this message"
