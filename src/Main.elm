@@ -1137,7 +1137,11 @@ performActionsOnModel actions model =
                     then
                         let
                             newTree =
-                                DomainModel.updatePointByIndexInSitu index endGpx track.trackTree
+                                DomainModel.updatePointByIndexInSitu
+                                    index
+                                    endGpx
+                                    track.referenceLonLat
+                                    track.trackTree
 
                             ( fromStart, fromEnd ) =
                                 ( index, skipCount track.trackTree - index )
@@ -1148,7 +1152,6 @@ performActionsOnModel actions model =
                                         fromStart
                                         fromEnd
                                         [ currentPosition ]
-                                    |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                         in
                         { foldedModel | track = Just newTrack }
 

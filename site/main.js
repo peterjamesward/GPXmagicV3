@@ -13387,6 +13387,123 @@ var $author$project$Tools$DeletePoints$deleteSinglePoint = F3(
 		var newTree = A5($author$project$DomainModel$replaceRange, fromStart, fromEnd, track.referenceLonLat, _List_Nil, track.trackTree);
 		return _Utils_Tuple2(newTree, oldPoints);
 	});
+var $author$project$DomainModel$gpxDistance = F2(
+	function (p1, p2) {
+		var lon = function (p) {
+			return $ianmackenzie$elm_geometry$Direction2d$toAngle(p.longitude);
+		};
+		return $ianmackenzie$elm_units$Length$meters(
+			A2(
+				$author$project$Spherical$range,
+				_Utils_Tuple2(
+					$ianmackenzie$elm_geometry$Direction2d$toAngle(p1.longitude),
+					p1.latitude),
+				_Utils_Tuple2(
+					$ianmackenzie$elm_geometry$Direction2d$toAngle(p2.longitude),
+					p2.latitude)));
+	});
+var $author$project$DomainModel$isLongitudeContained = F2(
+	function (longitude, treeNode) {
+		var turnFromMedianToGiven = A2(
+			$ianmackenzie$elm_geometry$Direction2d$angleFrom,
+			$author$project$DomainModel$medianLongitude(treeNode),
+			longitude);
+		return A2(
+			$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo,
+			$author$project$DomainModel$westwardTurn(treeNode),
+			turnFromMedianToGiven) && A2(
+			$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
+			$author$project$DomainModel$eastwardTurn(treeNode),
+			turnFromMedianToGiven);
+	});
+var $author$project$DomainModel$rotationAwayFrom = F2(
+	function (longitude, treeNode) {
+		var nodeWest = A2(
+			$ianmackenzie$elm_geometry$Direction2d$rotateBy,
+			$author$project$DomainModel$westwardTurn(treeNode),
+			$author$project$DomainModel$medianLongitude(treeNode));
+		var nodeEast = A2(
+			$ianmackenzie$elm_geometry$Direction2d$rotateBy,
+			$author$project$DomainModel$eastwardTurn(treeNode),
+			$author$project$DomainModel$medianLongitude(treeNode));
+		return A2(
+			$ianmackenzie$elm_units$Quantity$min,
+			$ianmackenzie$elm_units$Quantity$abs(
+				A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, longitude, nodeEast)),
+			$ianmackenzie$elm_units$Quantity$abs(
+				A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, longitude, nodeWest)));
+	});
+var $author$project$DomainModel$nearestToLonLat = F2(
+	function (click, treeNode) {
+		var helper = F2(
+			function (withNode, skip) {
+				helper:
+				while (true) {
+					if (withNode.$ === 'Leaf') {
+						var leaf = withNode.a;
+						var startDistance = A2($author$project$DomainModel$gpxDistance, click, leaf.sourceData.a);
+						var endDistance = A2($author$project$DomainModel$gpxDistance, click, leaf.sourceData.b);
+						return A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, endDistance, startDistance) ? _Utils_Tuple2(skip, startDistance) : _Utils_Tuple2(skip + 1, endDistance);
+					} else {
+						var node = withNode.a;
+						var _v1 = _Utils_Tuple2(
+							A2($author$project$DomainModel$isLongitudeContained, click.longitude, node.left),
+							A2($author$project$DomainModel$isLongitudeContained, click.longitude, node.right));
+						var inLeftSpan = _v1.a;
+						var inRightSpan = _v1.b;
+						var _v2 = _Utils_Tuple2(inLeftSpan, inRightSpan);
+						if (_v2.a) {
+							if (_v2.b) {
+								var _v3 = A2(
+									helper,
+									node.right,
+									skip + $author$project$DomainModel$skipCount(node.left));
+								var rightBestIndex = _v3.a;
+								var rightBestDistance = _v3.b;
+								var _v4 = A2(helper, node.left, skip);
+								var leftBestIndex = _v4.a;
+								var leftBestDistance = _v4.b;
+								return A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, rightBestDistance, leftBestDistance) ? _Utils_Tuple2(leftBestIndex, leftBestDistance) : _Utils_Tuple2(rightBestIndex, rightBestDistance);
+							} else {
+								var $temp$withNode = node.left,
+									$temp$skip = skip;
+								withNode = $temp$withNode;
+								skip = $temp$skip;
+								continue helper;
+							}
+						} else {
+							if (_v2.b) {
+								var $temp$withNode = node.right,
+									$temp$skip = skip + $author$project$DomainModel$skipCount(node.left);
+								withNode = $temp$withNode;
+								skip = $temp$skip;
+								continue helper;
+							} else {
+								var _v5 = _Utils_Tuple2(
+									A2($author$project$DomainModel$rotationAwayFrom, click.longitude, node.left),
+									A2($author$project$DomainModel$rotationAwayFrom, click.longitude, node.right));
+								var leftDistance = _v5.a;
+								var rightDistance = _v5.b;
+								if (A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, rightDistance, leftDistance)) {
+									var $temp$withNode = node.left,
+										$temp$skip = skip;
+									withNode = $temp$withNode;
+									skip = $temp$skip;
+									continue helper;
+								} else {
+									var $temp$withNode = node.right,
+										$temp$skip = skip + $author$project$DomainModel$skipCount(node.left);
+									withNode = $temp$withNode;
+									skip = $temp$skip;
+									continue helper;
+								}
+							}
+						}
+					}
+				}
+			});
+		return A2(helper, treeNode, 0).a;
+	});
 var $author$project$ToolsController$encodeColour = function (colour) {
 	var _v0 = $mdgriffith$elm_ui$Element$toRgb(colour);
 	var red = _v0.red;
@@ -17446,6 +17563,32 @@ var $author$project$TrackLoaded$undoLastAction = function (track) {
 		return track;
 	}
 };
+var $author$project$DomainModel$updatePointByIndexInSitu = F4(
+	function (index, newGPX, referencePoint, tree) {
+		if ((index < 0) || (_Utils_cmp(
+			index,
+			$author$project$DomainModel$skipCount(tree)) > 0)) {
+			return tree;
+		} else {
+			if (tree.$ === 'Leaf') {
+				var leaf = tree.a;
+				return (!index) ? $author$project$DomainModel$Leaf(
+					A3($author$project$DomainModel$makeRoadSection, referencePoint, newGPX, leaf.sourceData.b)) : $author$project$DomainModel$Leaf(
+					A3($author$project$DomainModel$makeRoadSection, referencePoint, leaf.sourceData.a, newGPX));
+			} else {
+				var node = tree.a;
+				return A2(
+					$author$project$DomainModel$joiningNode,
+					A4($author$project$DomainModel$updatePointByIndexInSitu, index, newGPX, referencePoint, node.left),
+					A4(
+						$author$project$DomainModel$updatePointByIndexInSitu,
+						index - $author$project$DomainModel$skipCount(node.left),
+						newGPX,
+						referencePoint,
+						node.right));
+			}
+		}
+	});
 var $author$project$TrackLoaded$Orange = {$: 'Orange'};
 var $author$project$TrackLoaded$Purple = {$: 'Purple'};
 var $author$project$TrackLoaded$whichMarkerIsNearestStart = function (track) {
@@ -17509,7 +17652,7 @@ var $author$project$Main$performActionsOnModel = F2(
 		var performAction = F2(
 			function (action, foldedModel) {
 				var _v0 = _Utils_Tuple2(action, foldedModel.track);
-				_v0$18:
+				_v0$19:
 				while (true) {
 					switch (_v0.a.$) {
 						case 'SetCurrent':
@@ -17525,7 +17668,7 @@ var $author$project$Main$performActionsOnModel = F2(
 												{currentPosition: position}))
 									});
 							} else {
-								break _v0$18;
+								break _v0$19;
 							}
 						case 'SetCurrentFromMapClick':
 							if (_v0.b.$ === 'Just') {
@@ -17540,7 +17683,7 @@ var $author$project$Main$performActionsOnModel = F2(
 												{currentPosition: position}))
 									});
 							} else {
-								break _v0$18;
+								break _v0$19;
 							}
 						case 'ShowPreview':
 							if (_v0.b.$ === 'Just') {
@@ -17552,7 +17695,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										previews: A3($elm$core$Dict$insert, previewData.tag, previewData, foldedModel.previews)
 									});
 							} else {
-								break _v0$18;
+								break _v0$19;
 							}
 						case 'HidePreview':
 							if (_v0.b.$ === 'Just') {
@@ -17564,7 +17707,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										previews: A2($elm$core$Dict$remove, tag, foldedModel.previews)
 									});
 							} else {
-								break _v0$18;
+								break _v0$19;
 							}
 						case 'RenderProfile':
 							if (_v0.b.$ === 'Just') {
@@ -17576,7 +17719,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										paneLayoutOptions: A2($author$project$PaneLayoutManager$renderProfile, foldedModel.paneLayoutOptions, track)
 									});
 							} else {
-								break _v0$18;
+								break _v0$19;
 							}
 						case 'DelayMessage':
 							if (_v0.b.$ === 'Just') {
@@ -17586,7 +17729,7 @@ var $author$project$Main$performActionsOnModel = F2(
 								var track = _v0.b.a;
 								return foldedModel;
 							} else {
-								break _v0$18;
+								break _v0$19;
 							}
 						case 'DeletePointsBetween':
 							if (_v0.b.$ === 'Just') {
@@ -17607,7 +17750,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$18;
+								break _v0$19;
 							}
 						case 'DeleteSinglePoint':
 							if (_v0.b.$ === 'Just') {
@@ -17628,7 +17771,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$18;
+								break _v0$19;
 							}
 						case 'BezierApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -17650,7 +17793,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$18;
+								break _v0$19;
 							}
 						case 'CentroidAverageApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -17672,7 +17815,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$18;
+								break _v0$19;
 							}
 						case 'CurveFormerApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -17699,7 +17842,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$18;
+								break _v0$19;
 							}
 						case 'BendSmootherApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -17721,22 +17864,80 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$18;
+								break _v0$19;
+							}
+						case 'PointMovedOnMap':
+							if (_v0.b.$ === 'Just') {
+								var _v16 = _v0.a;
+								var startLon = _v16.a;
+								var startLat = _v16.b;
+								var endLon = _v16.c;
+								var endLat = _v16.d;
+								var track = _v0.b.a;
+								var startGpx = {
+									altitude: $ianmackenzie$elm_units$Quantity$zero,
+									latitude: $ianmackenzie$elm_units$Angle$degrees(startLat),
+									longitude: $ianmackenzie$elm_geometry$Direction2d$fromAngle(
+										$ianmackenzie$elm_units$Angle$degrees(startLon))
+								};
+								var index = A2($author$project$DomainModel$nearestToLonLat, startGpx, track.trackTree);
+								var endGpx = {
+									altitude: $ianmackenzie$elm_units$Quantity$zero,
+									latitude: $ianmackenzie$elm_units$Angle$degrees(startLon),
+									longitude: $ianmackenzie$elm_geometry$Direction2d$fromAngle(
+										$ianmackenzie$elm_units$Angle$degrees(endLon))
+								};
+								var currentPosition = A2($author$project$DomainModel$gpxPointFromIndex, index, track.trackTree);
+								var distanceMoved = A2($author$project$DomainModel$gpxDistance, currentPosition, endGpx);
+								var clickProximity = A2($author$project$DomainModel$gpxDistance, startGpx, currentPosition);
+								if (A2(
+									$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
+									$ianmackenzie$elm_units$Length$meters(2.0),
+									clickProximity) && A2(
+									$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo,
+									$ianmackenzie$elm_units$Length$meters(0.0),
+									distanceMoved)) {
+									var newTree = A4($author$project$DomainModel$updatePointByIndexInSitu, index, endGpx, track.referenceLonLat, track.trackTree);
+									var _v17 = _Utils_Tuple2(
+										index,
+										$author$project$DomainModel$skipCount(track.trackTree) - index);
+									var fromStart = _v17.a;
+									var fromEnd = _v17.b;
+									var newTrack = A5(
+										$author$project$TrackLoaded$addToUndoStack,
+										action,
+										fromStart,
+										fromEnd,
+										_List_fromArray(
+											[currentPosition]),
+										_Utils_update(
+											track,
+											{trackTree: newTree}));
+									return _Utils_update(
+										foldedModel,
+										{
+											track: $elm$core$Maybe$Just(newTrack)
+										});
+								} else {
+									return foldedModel;
+								}
+							} else {
+								break _v0$19;
 							}
 						case 'TrackHasChanged':
 							if (_v0.b.$ === 'Just') {
-								var _v16 = _v0.a;
+								var _v18 = _v0.a;
 								var track = _v0.b.a;
-								var _v17 = A2($author$project$ToolsController$refreshOpenTools, foldedModel.track, foldedModel.toolOptions);
-								var refreshedToolOptions = _v17.a;
-								var secondaryActions = _v17.b;
+								var _v19 = A2($author$project$ToolsController$refreshOpenTools, foldedModel.track, foldedModel.toolOptions);
+								var refreshedToolOptions = _v19.a;
+								var secondaryActions = _v19.b;
 								var innerModelWithNewToolSettings = _Utils_update(
 									foldedModel,
 									{toolOptions: refreshedToolOptions});
 								var modelAfterSecondaryActions = A2($author$project$Main$performActionsOnModel, secondaryActions, innerModelWithNewToolSettings);
 								return modelAfterSecondaryActions;
 							} else {
-								break _v0$18;
+								break _v0$19;
 							}
 						case 'SetMarker':
 							if (_v0.b.$ === 'Just') {
@@ -17751,12 +17952,12 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(updatedTrack)
 									});
 							} else {
-								break _v0$18;
+								break _v0$19;
 							}
 						case 'StoredValueRetrieved':
-							var _v18 = _v0.a;
-							var key = _v18.a;
-							var value = _v18.b;
+							var _v20 = _v0.a;
+							var key = _v20.a;
+							var value = _v20.b;
 							switch (key) {
 								case 'splits':
 									return A2($author$project$Main$decodeSplitValues, value, foldedModel);
@@ -17786,7 +17987,7 @@ var $author$project$Main$performActionsOnModel = F2(
 							return foldedModel;
 						case 'UndoLastAction':
 							if (_v0.b.$ === 'Just') {
-								var _v20 = _v0.a;
+								var _v22 = _v0.a;
 								var track = _v0.b.a;
 								return _Utils_update(
 									foldedModel,
@@ -17795,24 +17996,24 @@ var $author$project$Main$performActionsOnModel = F2(
 											$author$project$TrackLoaded$undoLastAction(track))
 									});
 							} else {
-								break _v0$18;
+								break _v0$19;
 							}
 						case 'RedoUndoneAction':
 							if (_v0.b.$ === 'Just') {
-								var _v21 = _v0.a;
+								var _v23 = _v0.a;
 								var track = _v0.b.a;
-								var _v22 = track.redos;
-								if (_v22.b) {
-									var redo = _v22.a;
-									var moreRedos = _v22.b;
+								var _v24 = track.redos;
+								if (_v24.b) {
+									var redo = _v24.a;
+									var moreRedos = _v24.b;
 									var modelAfterRedo = A2(
 										$author$project$Main$performActionsOnModel,
 										_List_fromArray(
 											[redo.action]),
 										model);
-									var _v23 = modelAfterRedo.track;
-									if (_v23.$ === 'Just') {
-										var trackAfterRedo = _v23.a;
+									var _v25 = modelAfterRedo.track;
+									if (_v25.$ === 'Just') {
+										var trackAfterRedo = _v25.a;
 										var trackWithCorrectRedoStack = _Utils_update(
 											trackAfterRedo,
 											{redos: moreRedos});
@@ -17828,10 +18029,10 @@ var $author$project$Main$performActionsOnModel = F2(
 									return foldedModel;
 								}
 							} else {
-								break _v0$18;
+								break _v0$19;
 							}
 						default:
-							break _v0$18;
+							break _v0$19;
 					}
 				}
 				return foldedModel;
@@ -18404,124 +18605,63 @@ var $author$project$PaneLayoutManager$encodePaneState = function (options) {
 var $author$project$Actions$SetCurrentFromMapClick = function (a) {
 	return {$: 'SetCurrentFromMapClick', a: a};
 };
-var $author$project$MapPortController$msgDecoder = A2($elm$json$Json$Decode$field, 'msg', $elm$json$Json$Decode$string);
-var $author$project$DomainModel$gpxDistance = F2(
-	function (p1, p2) {
-		var lon = function (p) {
-			return $ianmackenzie$elm_geometry$Direction2d$toAngle(p.longitude);
-		};
-		return $ianmackenzie$elm_units$Length$meters(
+var $author$project$Actions$PointMovedOnMap = F4(
+	function (a, b, c, d) {
+		return {$: 'PointMovedOnMap', a: a, b: b, c: c, d: d};
+	});
+var $author$project$MapPortController$draggedOnMap = F2(
+	function (json, track) {
+		var lon2 = A2(
+			$elm$json$Json$Decode$decodeValue,
 			A2(
-				$author$project$Spherical$range,
-				_Utils_Tuple2(
-					$ianmackenzie$elm_geometry$Direction2d$toAngle(p1.longitude),
-					p1.latitude),
-				_Utils_Tuple2(
-					$ianmackenzie$elm_geometry$Direction2d$toAngle(p2.longitude),
-					p2.latitude)));
+				$elm$json$Json$Decode$at,
+				_List_fromArray(
+					['end', 'lng']),
+				$elm$json$Json$Decode$float),
+			json);
+		var lon1 = A2(
+			$elm$json$Json$Decode$decodeValue,
+			A2(
+				$elm$json$Json$Decode$at,
+				_List_fromArray(
+					['start', 'lng']),
+				$elm$json$Json$Decode$float),
+			json);
+		var lat2 = A2(
+			$elm$json$Json$Decode$decodeValue,
+			A2(
+				$elm$json$Json$Decode$at,
+				_List_fromArray(
+					['end', 'lat']),
+				$elm$json$Json$Decode$float),
+			json);
+		var lat1 = A2(
+			$elm$json$Json$Decode$decodeValue,
+			A2(
+				$elm$json$Json$Decode$at,
+				_List_fromArray(
+					['start', 'lat']),
+				$elm$json$Json$Decode$float),
+			json);
+		var _v0 = _Utils_Tuple2(
+			_Utils_Tuple2(lon1, lat1),
+			_Utils_Tuple2(lon2, lat2));
+		if ((((_v0.a.a.$ === 'Ok') && (_v0.a.b.$ === 'Ok')) && (_v0.b.a.$ === 'Ok')) && (_v0.b.b.$ === 'Ok')) {
+			var _v1 = _v0.a;
+			var startLon = _v1.a.a;
+			var startLat = _v1.b.a;
+			var _v2 = _v0.b;
+			var endLon = _v2.a.a;
+			var endLat = _v2.b.a;
+			return _List_fromArray(
+				[
+					A4($author$project$Actions$PointMovedOnMap, startLon, startLat, endLon, endLat)
+				]);
+		} else {
+			return _List_Nil;
+		}
 	});
-var $author$project$DomainModel$isLongitudeContained = F2(
-	function (longitude, treeNode) {
-		var turnFromMedianToGiven = A2(
-			$ianmackenzie$elm_geometry$Direction2d$angleFrom,
-			$author$project$DomainModel$medianLongitude(treeNode),
-			longitude);
-		return A2(
-			$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo,
-			$author$project$DomainModel$westwardTurn(treeNode),
-			turnFromMedianToGiven) && A2(
-			$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
-			$author$project$DomainModel$eastwardTurn(treeNode),
-			turnFromMedianToGiven);
-	});
-var $author$project$DomainModel$rotationAwayFrom = F2(
-	function (longitude, treeNode) {
-		var nodeWest = A2(
-			$ianmackenzie$elm_geometry$Direction2d$rotateBy,
-			$author$project$DomainModel$westwardTurn(treeNode),
-			$author$project$DomainModel$medianLongitude(treeNode));
-		var nodeEast = A2(
-			$ianmackenzie$elm_geometry$Direction2d$rotateBy,
-			$author$project$DomainModel$eastwardTurn(treeNode),
-			$author$project$DomainModel$medianLongitude(treeNode));
-		return A2(
-			$ianmackenzie$elm_units$Quantity$min,
-			$ianmackenzie$elm_units$Quantity$abs(
-				A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, longitude, nodeEast)),
-			$ianmackenzie$elm_units$Quantity$abs(
-				A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, longitude, nodeWest)));
-	});
-var $author$project$DomainModel$nearestToLonLat = F2(
-	function (click, treeNode) {
-		var helper = F2(
-			function (withNode, skip) {
-				helper:
-				while (true) {
-					if (withNode.$ === 'Leaf') {
-						var leaf = withNode.a;
-						var startDistance = A2($author$project$DomainModel$gpxDistance, click, leaf.sourceData.a);
-						var endDistance = A2($author$project$DomainModel$gpxDistance, click, leaf.sourceData.b);
-						return A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, endDistance, startDistance) ? _Utils_Tuple2(skip, startDistance) : _Utils_Tuple2(skip + 1, endDistance);
-					} else {
-						var node = withNode.a;
-						var _v1 = _Utils_Tuple2(
-							A2($author$project$DomainModel$isLongitudeContained, click.longitude, node.left),
-							A2($author$project$DomainModel$isLongitudeContained, click.longitude, node.right));
-						var inLeftSpan = _v1.a;
-						var inRightSpan = _v1.b;
-						var _v2 = _Utils_Tuple2(inLeftSpan, inRightSpan);
-						if (_v2.a) {
-							if (_v2.b) {
-								var _v3 = A2(
-									helper,
-									node.right,
-									skip + $author$project$DomainModel$skipCount(node.left));
-								var rightBestIndex = _v3.a;
-								var rightBestDistance = _v3.b;
-								var _v4 = A2(helper, node.left, skip);
-								var leftBestIndex = _v4.a;
-								var leftBestDistance = _v4.b;
-								return A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, rightBestDistance, leftBestDistance) ? _Utils_Tuple2(leftBestIndex, leftBestDistance) : _Utils_Tuple2(rightBestIndex, rightBestDistance);
-							} else {
-								var $temp$withNode = node.left,
-									$temp$skip = skip;
-								withNode = $temp$withNode;
-								skip = $temp$skip;
-								continue helper;
-							}
-						} else {
-							if (_v2.b) {
-								var $temp$withNode = node.right,
-									$temp$skip = skip + $author$project$DomainModel$skipCount(node.left);
-								withNode = $temp$withNode;
-								skip = $temp$skip;
-								continue helper;
-							} else {
-								var _v5 = _Utils_Tuple2(
-									A2($author$project$DomainModel$rotationAwayFrom, click.longitude, node.left),
-									A2($author$project$DomainModel$rotationAwayFrom, click.longitude, node.right));
-								var leftDistance = _v5.a;
-								var rightDistance = _v5.b;
-								if (A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, rightDistance, leftDistance)) {
-									var $temp$withNode = node.left,
-										$temp$skip = skip;
-									withNode = $temp$withNode;
-									skip = $temp$skip;
-									continue helper;
-								} else {
-									var $temp$withNode = node.right,
-										$temp$skip = skip + $author$project$DomainModel$skipCount(node.left);
-									withNode = $temp$withNode;
-									skip = $temp$skip;
-									continue helper;
-								}
-							}
-						}
-					}
-				}
-			});
-		return A2(helper, treeNode, 0).a;
-	});
+var $author$project$MapPortController$msgDecoder = A2($elm$json$Json$Decode$field, 'msg', $elm$json$Json$Decode$string);
 var $author$project$MapPortController$processMapPortMessage = F3(
 	function (lastState, track, json) {
 		var jsonMsg = A2($elm$json$Json$Decode$decodeValue, $author$project$MapPortController$msgDecoder, json);
@@ -18536,37 +18676,50 @@ var $author$project$MapPortController$processMapPortMessage = F3(
 				json));
 		var lat = _v0.a;
 		var lon = _v0.b;
-		if ((jsonMsg.$ === 'Ok') && (jsonMsg.a === 'click')) {
-			var _v2 = _Utils_Tuple2(lat, lon);
-			if ((_v2.a.$ === 'Ok') && (_v2.b.$ === 'Ok')) {
-				var lat1 = _v2.a.a;
-				var lon1 = _v2.b.a;
-				if (_Utils_eq(lat1, lastState.lastClickLat) && _Utils_eq(lon1, lastState.lastClickLon)) {
-					return _Utils_Tuple2(lastState, _List_Nil);
-				} else {
-					var gpxPoint = {
-						altitude: $ianmackenzie$elm_units$Length$meters(0.0),
-						latitude: $ianmackenzie$elm_units$Angle$degrees(lat1),
-						longitude: $ianmackenzie$elm_geometry$Direction2d$fromAngle(
-							$ianmackenzie$elm_units$Angle$degrees(lon1))
-					};
-					var index = A2($author$project$DomainModel$nearestToLonLat, gpxPoint, track.trackTree);
-					return _Utils_Tuple2(
-						_Utils_update(
+		_v1$2:
+		while (true) {
+			if (jsonMsg.$ === 'Ok') {
+				switch (jsonMsg.a) {
+					case 'click':
+						var _v2 = _Utils_Tuple2(lat, lon);
+						if ((_v2.a.$ === 'Ok') && (_v2.b.$ === 'Ok')) {
+							var lat1 = _v2.a.a;
+							var lon1 = _v2.b.a;
+							if (_Utils_eq(lat1, lastState.lastClickLat) && _Utils_eq(lon1, lastState.lastClickLon)) {
+								return _Utils_Tuple2(lastState, _List_Nil);
+							} else {
+								var gpxPoint = {
+									altitude: $ianmackenzie$elm_units$Length$meters(0.0),
+									latitude: $ianmackenzie$elm_units$Angle$degrees(lat1),
+									longitude: $ianmackenzie$elm_geometry$Direction2d$fromAngle(
+										$ianmackenzie$elm_units$Angle$degrees(lon1))
+								};
+								var index = A2($author$project$DomainModel$nearestToLonLat, gpxPoint, track.trackTree);
+								return _Utils_Tuple2(
+									_Utils_update(
+										lastState,
+										{lastClickLat: lat1, lastClickLon: lon1}),
+									_List_fromArray(
+										[
+											$author$project$Actions$SetCurrentFromMapClick(index),
+											$author$project$Actions$TrackHasChanged
+										]));
+							}
+						} else {
+							return _Utils_Tuple2(lastState, _List_Nil);
+						}
+					case 'drag':
+						return _Utils_Tuple2(
 							lastState,
-							{lastClickLat: lat1, lastClickLon: lon1}),
-						_List_fromArray(
-							[
-								$author$project$Actions$SetCurrentFromMapClick(index),
-								$author$project$Actions$TrackHasChanged
-							]));
+							A2($author$project$MapPortController$draggedOnMap, json, track));
+					default:
+						break _v1$2;
 				}
 			} else {
-				return _Utils_Tuple2(lastState, _List_Nil);
+				break _v1$2;
 			}
-		} else {
-			return _Utils_Tuple2(lastState, _List_Nil);
 		}
+		return _Utils_Tuple2(lastState, _List_Nil);
 	});
 var $author$project$MapPortController$update = F3(
 	function (mapMsg, track, lastState) {
@@ -33328,6 +33481,8 @@ var $author$project$Actions$interpretAction = function (action) {
 		case 'BendSmootherApplyWithOptions':
 			var options = action.a;
 			return 'bend smoother';
+		case 'PointMovedOnMap':
+			return 'move on map';
 		default:
 			return 'ask Pete to fix this message';
 	}

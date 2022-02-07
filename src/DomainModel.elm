@@ -1415,9 +1415,25 @@ queryPointsUsingFilter filterFn treeNode foldFn accum =
     helper 0 (skipCount treeNode) treeNode accum
 
 
-updatePointByIndexInSitu : Int -> GPXSource -> PeteTree -> PeteTree
-updatePointByIndexInSitu index endGpx tree =
+updatePointByIndexInSitu : Int -> GPXSource -> GPXSource -> PeteTree -> PeteTree
+updatePointByIndexInSitu index newGPX referencePoint tree =
     --TODO: write this.
     -- Note that all points except end points appear in two places, and they can be distant in the tree.
     -- Still, idea is to change only ancestor nodes, obviously including the topmost.
-    tree
+    if index < 0 || index > skipCount tree then
+        tree
+
+    else
+        case tree of
+            Leaf leaf ->
+                if index == 0 then
+                    Leaf <| makeRoadSection referencePoint newGPX (Tuple.second leaf.sourceData)
+
+                else
+                    -- index == 1
+                    Leaf <| makeRoadSection referencePoint (Tuple.first leaf.sourceData) newGPX
+
+            Node node ->
+                joiningNode
+                    (updatePointByIndexInSitu index newGPX referencePoint node.left)
+                    (updatePointByIndexInSitu (index - skipCount node.left) newGPX referencePoint node.right)

@@ -267,15 +267,8 @@ processMapPortMessage lastState track json =
                 _ ->
                     ( lastState, [] )
 
-        ( Ok "drag", Just track ) ->
-            case draggedOnMap json track of
-                Just undoEntry ->
-                    processPostUpdateAction
-                        model
-                        (PostUpdateActions.ActionTrackChanged TrackEditType.EditPreservesIndex undoEntry)
-
-                Nothing ->
-                    ( Model model, Cmd.none )
+        Ok "drag" ->
+            ( lastState, draggedOnMap json track )
 
         --( Ok "elevations", Just track ) ->
         --    case elevations of

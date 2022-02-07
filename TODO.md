@@ -33,24 +33,25 @@ Take another look at the clicking issue?
 ## Tools
 
 1. Nudge 
-2. Segment info (toggle with whole track?)
-3. Move & Stretch 
-4. Gradient problems
-5. Steep climbs
-6. Intersections
-7. Visual options
-8. Memory usage (incl limiting actions such as dumping Undo stack).
-9. SVG import
-10. Fly-through
-11. Limit gradients 
-12. Graph Theory
-13. Use Strava segment data
-14. Loops (includes Out and Back) (+ impact on others, such as Bezier).
-15. Samir's bend detector (amount of angular change within X linear metres).
-16. Clothoids (promoted because may be similar structurally to bezier & centroid)
-17. Map Satellite style choice
-18. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
-19. Something akin to Graphs, stemming from Muriel's route.
+2. Output (!!)
+3. Segment info (toggle with whole track?)
+4. Move & Stretch 
+5. Gradient problems
+6. Steep climbs
+7. Intersections
+8. Visual options
+9. Memory usage (incl limiting actions such as dumping Undo stack).
+10. SVG import
+11. Fly-through
+12. Limit gradients 
+13. Graph Theory
+14. Use Strava segment data
+15. Loops (includes Out and Back) (+ impact on others, such as Bezier).
+16. Samir's bend detector (amount of angular change within X linear metres).
+17. Clothoids (promoted because may be similar structurally to bezier & centroid)
+18. Map Satellite style choice
+19. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
+20. Something akin to Graphs, stemming from Muriel's route.
 
 ## Error messages
 
