@@ -413,7 +413,7 @@ initialiseView current treeNode currentContext =
     case currentContext of
         Just context ->
             { context
-                | cameraAzimuth = Direction2d.x
+                | cameraAzimuth = Direction2d.negativeY
                 , cameraElevation = Angle.degrees 30
                 , cameraDistance = Length.kilometers 10
                 , fieldOfView = Angle.degrees 45
@@ -427,7 +427,7 @@ initialiseView current treeNode currentContext =
             }
 
         Nothing ->
-            { cameraAzimuth = Direction2d.x
+            { cameraAzimuth = Direction2d.negativeY
             , cameraElevation = Angle.degrees 30
             , cameraDistance = Length.kilometers 10
             , fieldOfView = Angle.degrees 45

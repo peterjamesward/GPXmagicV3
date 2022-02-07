@@ -60,7 +60,8 @@ defaultOptions =
     , usePullRadius = False
     , pointsWithinCircle = Dict.empty
     , pointsWithinDisc = Dict.empty
-    , circle = Nothing
+
+    --, circle = Nothing
     , pointsAreContiguous = False
     , newTrackPoints = []
     , fixedAttachmentPoints = Nothing
@@ -173,11 +174,8 @@ update msg options previewColour hasTrack =
             let
                 newOptions =
                     { options | pushRadius = Length.meters radius }
-
-                optionsWithNewCircle =
-                    { newOptions | circle = Just <| getCircle options track }
             in
-            ( optionsWithNewCircle, previewActions optionsWithNewCircle previewColour track )
+            ( newOptions, previewActions newOptions previewColour track )
 
         ( Just track, SetDiscWidth width ) ->
             let
@@ -242,12 +240,8 @@ update msg options previewColour hasTrack =
                                     else
                                         options.referencePoint
                             }
-
-                        optionsWithNewCircle =
-                            { newOptions | circle = Just <| getCircle options track }
-                                |> makeCurveIfPossible track
                     in
-                    ( optionsWithNewCircle, previewActions optionsWithNewCircle previewColour track )
+                    ( newOptions, previewActions newOptions previewColour track )
 
         ( Just track, DraggerRelease _ ) ->
             let
@@ -511,8 +505,8 @@ formCurveWithOptions isLoop options fromStart fromEnd treeNode =
 
 showToolTrackInteractions : Options -> TrackLoaded msg -> List (Entity LocalCoords)
 showToolTrackInteractions options track =
-    showCircle options
-        ++ showDisc options
+    showCircle options track
+        ++ showDisc options track
         ++ highlightPoints Color.white (Dict.keys options.pointsWithinCircle) track
         ++ highlightPoints Color.blue (Dict.keys options.pointsWithinDisc) track
 
@@ -570,66 +564,63 @@ getOuterCircle options track =
     Circle3d.withRadius outerRadius Direction3d.positiveZ centre
 
 
-showCircle : Options -> List (Entity LocalCoords)
-showCircle options =
-    case options.circle of
-        Just circle ->
-            let
-                arc =
-                    Circle3d.toArc circle
+showCircle : Options -> TrackLoaded msg -> List (Entity LocalCoords)
+showCircle options track =
+    let
+        circle =
+            getCircle options track
+    in
+    let
+        arc =
+            Circle3d.toArc circle
 
-                segments =
-                    Arc3d.segments 20 arc |> Polyline3d.segments
+        segments =
+            Arc3d.segments 20 arc |> Polyline3d.segments
 
-                material =
-                    Material.color Color.white
+        material =
+            Material.color Color.white
 
-                drawSegment segment =
-                    Scene3d.lineSegment material segment
-            in
-            List.map drawSegment segments
-
-        Nothing ->
-            []
+        drawSegment segment =
+            Scene3d.lineSegment material segment
+    in
+    List.map drawSegment segments
 
 
-showDisc : Options -> List (Entity LocalCoords)
-showDisc options =
-    case options.circle of
-        Just innerCircle ->
-            let
-                centre =
-                    Circle3d.centerPoint innerCircle
+showDisc : Options -> TrackLoaded msg -> List (Entity LocalCoords)
+showDisc options track =
+    let
+        circle =
+            getCircle options track
 
-                direction =
-                    Circle3d.axialDirection innerCircle
+        centre =
+            Circle3d.centerPoint circle
 
-                outerCircle =
-                    Circle3d.withRadius
-                        options.pullRadius
-                        direction
-                        centre
+        direction =
+            Circle3d.axialDirection circle
 
-                arc =
-                    Circle3d.toArc outerCircle
+        outerCircle =
+            Circle3d.withRadius
+                options.pullRadius
+                direction
+                centre
 
-                segments =
-                    Arc3d.segments 20 arc |> Polyline3d.segments
+        arc =
+            Circle3d.toArc outerCircle
 
-                material =
-                    Material.color Color.lightYellow
+        segments =
+            Arc3d.segments 20 arc |> Polyline3d.segments
 
-                drawSegment segment =
-                    Scene3d.lineSegment material segment
-            in
-            if options.usePullRadius then
-                List.map drawSegment segments
+        material =
+            Material.color Color.lightYellow
 
-            else
-                []
+        drawSegment segment =
+            Scene3d.lineSegment material segment
+    in
+    if options.usePullRadius then
+        List.map drawSegment segments
 
-        Nothing ->
-            []
+    else
+        []
 
 
 highlightPoints : Color.Color -> List Int -> TrackLoaded msg -> List (Entity LocalCoords)

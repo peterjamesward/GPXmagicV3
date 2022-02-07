@@ -33,7 +33,7 @@ type alias Options =
     , usePullRadius : Bool
     , pointsWithinCircle : Dict Int RoadSection
     , pointsWithinDisc : Dict Int RoadSection
-    , circle : Maybe (Circle3d Meters LocalCoords)
+    --, circle : Maybe (Circle3d Meters LocalCoords)
     , pointsAreContiguous : Bool
     , newTrackPoints : List EarthPoint
     , fixedAttachmentPoints : Maybe ( Int, Int )
