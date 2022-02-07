@@ -13186,6 +13186,56 @@ var $author$project$Tools$CentroidAverage$applyUsingOptions = F2(
 			newTree,
 			A2($elm$core$List$map, $elm$core$Tuple$second, oldPoints));
 	});
+var $author$project$Tools$CurveFormer$computeNewPoints = F2(
+	function (options, track) {
+		var earthPoints = options.newTrackPoints;
+		var previewPoints = A2(
+			$elm$core$List$map,
+			function (earth) {
+				return _Utils_Tuple2(
+					earth,
+					A2($author$project$DomainModel$gpxFromPointWithReference, track.referenceLonLat, earth));
+			},
+			earthPoints);
+		var _v0 = $author$project$TrackLoaded$getRangeFromMarkers(track);
+		var fromStart = _v0.a;
+		var fromEnd = _v0.b;
+		return previewPoints;
+	});
+var $author$project$Tools$CurveFormer$applyUsingOptions = F2(
+	function (options, track) {
+		var _v0 = options.fixedAttachmentPoints;
+		if (_v0.$ === 'Just') {
+			var _v1 = _v0.a;
+			var entryPoint = _v1.a;
+			var exitPoint = _v1.b;
+			var _v2 = _Utils_Tuple2(
+				entryPoint,
+				$author$project$DomainModel$skipCount(track.trackTree) - exitPoint);
+			var fromStart = _v2.a;
+			var fromEnd = _v2.b;
+			var newTree = A5(
+				$author$project$DomainModel$replaceRange,
+				fromStart + 1,
+				fromEnd + 1,
+				track.referenceLonLat,
+				A2(
+					$elm$core$List$map,
+					$elm$core$Tuple$second,
+					A2($author$project$Tools$CurveFormer$computeNewPoints, options, track)),
+				track.trackTree);
+			var oldPoints = A3($author$project$DomainModel$extractPointsInRange, fromStart, fromEnd, track.trackTree);
+			return _Utils_Tuple3(
+				newTree,
+				A2($elm$core$List$map, $elm$core$Tuple$second, oldPoints),
+				_Utils_Tuple2(entryPoint, exitPoint));
+		} else {
+			return _Utils_Tuple3(
+				$elm$core$Maybe$Just(track.trackTree),
+				_List_Nil,
+				_Utils_Tuple2(0, 0));
+		}
+	});
 var $author$project$Main$SplitDecode = F5(
 	function (left, right, bottom, leftInternal, rightInternal) {
 		return {bottom: bottom, left: left, leftInternal: leftInternal, right: right, rightInternal: rightInternal};
@@ -13554,22 +13604,6 @@ var $author$project$Tools$CentroidAverage$toolStateChange = F4(
 var $author$project$Actions$PreviewToolSupplied = function (a) {
 	return {$: 'PreviewToolSupplied', a: a};
 };
-var $author$project$Tools$CurveFormer$computeNewPoints = F2(
-	function (options, track) {
-		var earthPoints = options.newTrackPoints;
-		var previewPoints = A2(
-			$elm$core$List$map,
-			function (earth) {
-				return _Utils_Tuple2(
-					earth,
-					A2($author$project$DomainModel$gpxFromPointWithReference, track.referenceLonLat, earth));
-			},
-			earthPoints);
-		var _v0 = $author$project$TrackLoaded$getRangeFromMarkers(track);
-		var fromStart = _v0.a;
-		var fromEnd = _v0.b;
-		return previewPoints;
-	});
 var $avh4$elm_color$Color$RgbaSpace = F4(
 	function (a, b, c, d) {
 		return {$: 'RgbaSpace', a: a, b: b, c: c, d: d};
@@ -16315,7 +16349,7 @@ var $author$project$Main$performActionsOnModel = F2(
 		var performAction = F2(
 			function (action, foldedModel) {
 				var _v0 = _Utils_Tuple2(action, foldedModel.track);
-				_v0$16:
+				_v0$17:
 				while (true) {
 					switch (_v0.a.$) {
 						case 'SetCurrent':
@@ -16331,7 +16365,7 @@ var $author$project$Main$performActionsOnModel = F2(
 												{currentPosition: position}))
 									});
 							} else {
-								break _v0$16;
+								break _v0$17;
 							}
 						case 'SetCurrentFromMapClick':
 							if (_v0.b.$ === 'Just') {
@@ -16346,7 +16380,7 @@ var $author$project$Main$performActionsOnModel = F2(
 												{currentPosition: position}))
 									});
 							} else {
-								break _v0$16;
+								break _v0$17;
 							}
 						case 'ShowPreview':
 							if (_v0.b.$ === 'Just') {
@@ -16358,7 +16392,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										previews: A3($elm$core$Dict$insert, previewData.tag, previewData, foldedModel.previews)
 									});
 							} else {
-								break _v0$16;
+								break _v0$17;
 							}
 						case 'HidePreview':
 							if (_v0.b.$ === 'Just') {
@@ -16370,7 +16404,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										previews: A2($elm$core$Dict$remove, tag, foldedModel.previews)
 									});
 							} else {
-								break _v0$16;
+								break _v0$17;
 							}
 						case 'RenderProfile':
 							if (_v0.b.$ === 'Just') {
@@ -16382,7 +16416,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										paneLayoutOptions: A2($author$project$PaneLayoutManager$renderProfile, foldedModel.paneLayoutOptions, track)
 									});
 							} else {
-								break _v0$16;
+								break _v0$17;
 							}
 						case 'DelayMessage':
 							if (_v0.b.$ === 'Just') {
@@ -16392,7 +16426,7 @@ var $author$project$Main$performActionsOnModel = F2(
 								var track = _v0.b.a;
 								return foldedModel;
 							} else {
-								break _v0$16;
+								break _v0$17;
 							}
 						case 'DeletePointsBetween':
 							if (_v0.b.$ === 'Just') {
@@ -16413,7 +16447,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$16;
+								break _v0$17;
 							}
 						case 'DeleteSinglePoint':
 							if (_v0.b.$ === 'Just') {
@@ -16434,7 +16468,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$16;
+								break _v0$17;
 							}
 						case 'BezierApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -16456,7 +16490,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$16;
+								break _v0$17;
 							}
 						case 'CentroidAverageApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -16478,22 +16512,49 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$16;
+								break _v0$17;
+							}
+						case 'CurveFormerApplyWithOptions':
+							if (_v0.b.$ === 'Just') {
+								var options = _v0.a.a;
+								var track = _v0.b.a;
+								var _v11 = A2($author$project$Tools$CurveFormer$applyUsingOptions, options, track);
+								var newTree = _v11.a;
+								var oldPoints = _v11.b;
+								var _v12 = _v11.c;
+								var entry = _v12.a;
+								var exit = _v12.b;
+								var _v13 = _Utils_Tuple2(
+									entry,
+									$author$project$DomainModel$skipCount(track.trackTree) - exit);
+								var fromStart = _v13.a;
+								var fromEnd = _v13.b;
+								var newTrack = A2(
+									$author$project$TrackLoaded$useTreeWithRepositionedMarkers,
+									newTree,
+									A5($author$project$TrackLoaded$addToUndoStack, action, fromStart, fromEnd, oldPoints, track));
+								return _Utils_update(
+									foldedModel,
+									{
+										track: $elm$core$Maybe$Just(newTrack)
+									});
+							} else {
+								break _v0$17;
 							}
 						case 'TrackHasChanged':
 							if (_v0.b.$ === 'Just') {
-								var _v11 = _v0.a;
+								var _v14 = _v0.a;
 								var track = _v0.b.a;
-								var _v12 = A2($author$project$ToolsController$refreshOpenTools, foldedModel.track, foldedModel.toolOptions);
-								var refreshedToolOptions = _v12.a;
-								var secondaryActions = _v12.b;
+								var _v15 = A2($author$project$ToolsController$refreshOpenTools, foldedModel.track, foldedModel.toolOptions);
+								var refreshedToolOptions = _v15.a;
+								var secondaryActions = _v15.b;
 								var innerModelWithNewToolSettings = _Utils_update(
 									foldedModel,
 									{toolOptions: refreshedToolOptions});
 								var modelAfterSecondaryActions = A2($author$project$Main$performActionsOnModel, secondaryActions, innerModelWithNewToolSettings);
 								return modelAfterSecondaryActions;
 							} else {
-								break _v0$16;
+								break _v0$17;
 							}
 						case 'SetMarker':
 							if (_v0.b.$ === 'Just') {
@@ -16508,12 +16569,12 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(updatedTrack)
 									});
 							} else {
-								break _v0$16;
+								break _v0$17;
 							}
 						case 'StoredValueRetrieved':
-							var _v13 = _v0.a;
-							var key = _v13.a;
-							var value = _v13.b;
+							var _v16 = _v0.a;
+							var key = _v16.a;
+							var value = _v16.b;
 							switch (key) {
 								case 'splits':
 									return A2($author$project$Main$decodeSplitValues, value, foldedModel);
@@ -16543,7 +16604,7 @@ var $author$project$Main$performActionsOnModel = F2(
 							return foldedModel;
 						case 'UndoLastAction':
 							if (_v0.b.$ === 'Just') {
-								var _v15 = _v0.a;
+								var _v18 = _v0.a;
 								var track = _v0.b.a;
 								return _Utils_update(
 									foldedModel,
@@ -16552,24 +16613,24 @@ var $author$project$Main$performActionsOnModel = F2(
 											$author$project$TrackLoaded$undoLastAction(track))
 									});
 							} else {
-								break _v0$16;
+								break _v0$17;
 							}
 						case 'RedoUndoneAction':
 							if (_v0.b.$ === 'Just') {
-								var _v16 = _v0.a;
+								var _v19 = _v0.a;
 								var track = _v0.b.a;
-								var _v17 = track.redos;
-								if (_v17.b) {
-									var redo = _v17.a;
-									var moreRedos = _v17.b;
+								var _v20 = track.redos;
+								if (_v20.b) {
+									var redo = _v20.a;
+									var moreRedos = _v20.b;
 									var modelAfterRedo = A2(
 										$author$project$Main$performActionsOnModel,
 										_List_fromArray(
 											[redo.action]),
 										model);
-									var _v18 = modelAfterRedo.track;
-									if (_v18.$ === 'Just') {
-										var trackAfterRedo = _v18.a;
+									var _v21 = modelAfterRedo.track;
+									if (_v21.$ === 'Just') {
+										var trackAfterRedo = _v21.a;
 										var trackWithCorrectRedoStack = _Utils_update(
 											trackAfterRedo,
 											{redos: moreRedos});
@@ -16585,10 +16646,10 @@ var $author$project$Main$performActionsOnModel = F2(
 									return foldedModel;
 								}
 							} else {
-								break _v0$16;
+								break _v0$17;
 							}
 						default:
-							break _v0$16;
+							break _v0$17;
 					}
 				}
 				return foldedModel;
@@ -20206,7 +20267,6 @@ var $author$project$Geometry101$lineEquationFromTwoPoints = F2(
 		var a = p1.y - p2.y;
 		return {a: a, b: b, c: c};
 	});
-var $elm$core$Debug$log = _Debug_log;
 var $elm$core$Maybe$map2 = F3(
 	function (func, ma, mb) {
 		if (ma.$ === 'Nothing') {
@@ -20988,7 +21048,7 @@ var $author$project$Tools$CurveFormer$makeCurveIfPossible = F2(
 			var runningAverageDirectionChange = F3(
 				function (idx, road, change) {
 					if (change.a.$ === 'Nothing') {
-						var _v46 = change.a;
+						var _v41 = change.a;
 						return _Utils_Tuple2(
 							$elm$core$Maybe$Just(road.directionAtStart),
 							0.0);
@@ -21001,21 +21061,21 @@ var $author$project$Tools$CurveFormer$makeCurveIfPossible = F2(
 								A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, previousDirection, road.directionAtStart)));
 					}
 				});
-			var _v44 = A3(
+			var _v39 = A3(
 				$elm$core$Dict$foldl,
 				runningAverageDirectionChange,
 				_Utils_Tuple2($elm$core$Maybe$Nothing, 0.0),
 				capturedRoadSections);
-			var changeInDirection = _v44.b;
+			var changeInDirection = _v39.b;
 			return changeInDirection < 0.0;
 		}();
 		var findAcceptableTransition = F3(
 			function (mode, idx1, idx2) {
-				var _v36 = _Utils_Tuple2(
+				var _v32 = _Utils_Tuple2(
 					A2($author$project$DomainModel$earthPointFromIndex, idx1, track.trackTree),
 					A2($author$project$DomainModel$earthPointFromIndex, idx2, track.trackTree));
-				var tp1 = _v36.a;
-				var tp2 = _v36.b;
+				var tp1 = _v32.a;
+				var tp2 = _v32.b;
 				var entryLineSegment = A2(
 					$ianmackenzie$elm_geometry$LineSegment2d$from,
 					A2($ianmackenzie$elm_geometry$Point3d$projectInto, drawingPlane, tp1),
@@ -21144,7 +21204,6 @@ var $author$project$Tools$CurveFormer$makeCurveIfPossible = F2(
 						return _List_Nil;
 					}
 				}();
-				var _v37 = A2($elm$core$Debug$log, 'entryLineAxis', entryLineAxis);
 				return $elm$core$List$head(validCounterBendCentresAndTangentPoints);
 			});
 		var entryCurveSeeker = function (index) {
@@ -21235,10 +21294,10 @@ var $author$project$Tools$CurveFormer$makeCurveIfPossible = F2(
 			}
 		}();
 		var attachmentPoints = function () {
-			var _v34 = _Utils_Tuple2(entryInformation, exitInformation);
-			if ((_v34.a.$ === 'Just') && (_v34.b.$ === 'Just')) {
-				var entry = _v34.a.a;
-				var exit = _v34.b.a;
+			var _v30 = _Utils_Tuple2(entryInformation, exitInformation);
+			if ((_v30.a.$ === 'Just') && (_v30.b.$ === 'Just')) {
+				var entry = _v30.a.a;
+				var exit = _v30.b.a;
 				return $elm$core$Maybe$Just(
 					_Utils_Tuple2(entry.index, exit.index));
 			} else {
@@ -21247,9 +21306,9 @@ var $author$project$Tools$CurveFormer$makeCurveIfPossible = F2(
 		}();
 		var prepareOriginalAltitudesForInterpolation = function () {
 			if (attachmentPoints.$ === 'Just') {
-				var _v33 = attachmentPoints.a;
-				var start = _v33.a;
-				var end = _v33.b;
+				var _v29 = attachmentPoints.a;
+				var start = _v29.a;
+				var end = _v29.b;
 				var startDistance = A2($author$project$DomainModel$distanceFromIndex, start, track.trackTree);
 				var originalSection = A2(
 					$elm$core$List$map,
@@ -21282,53 +21341,53 @@ var $author$project$Tools$CurveFormer$makeCurveIfPossible = F2(
 		var interpolateOriginalAltitudesByDistance = function (fraction) {
 			var twoSides = A2(
 				$elm_community$list_extra$List$Extra$splitWhen,
-				function (_v31) {
-					var k = _v31.a;
+				function (_v27) {
+					var k = _v27.a;
 					return _Utils_cmp(k, fraction) > -1;
 				},
 				prepareOriginalAltitudesForInterpolation);
 			if (twoSides.$ === 'Just') {
-				var _v19 = twoSides.a;
-				var beforePairs = _v19.a;
-				var afterPairs = _v19.b;
-				var _v20 = _Utils_Tuple2(
+				var _v15 = twoSides.a;
+				var beforePairs = _v15.a;
+				var afterPairs = _v15.b;
+				var _v16 = _Utils_Tuple2(
 					$elm_community$list_extra$List$Extra$last(beforePairs),
 					$elm$core$List$head(afterPairs));
-				var lastBefore = _v20.a;
-				var firstAfter = _v20.b;
-				var _v21 = _Utils_Tuple2(lastBefore, firstAfter);
-				if (_v21.a.$ === 'Just') {
-					if (_v21.b.$ === 'Just') {
-						var _v22 = _v21.a.a;
-						var priorFraction = _v22.a;
-						var priorAltitude = _v22.b;
-						var _v23 = _v21.b.a;
-						var nextFraction = _v23.a;
-						var nextAltitude = _v23.b;
-						var _v24 = _Utils_Tuple2((nextFraction - fraction) / (nextFraction - priorFraction), (fraction - priorFraction) / (nextFraction - priorFraction));
-						var beforeContribution = _v24.a;
-						var afterContribution = _v24.b;
+				var lastBefore = _v16.a;
+				var firstAfter = _v16.b;
+				var _v17 = _Utils_Tuple2(lastBefore, firstAfter);
+				if (_v17.a.$ === 'Just') {
+					if (_v17.b.$ === 'Just') {
+						var _v18 = _v17.a.a;
+						var priorFraction = _v18.a;
+						var priorAltitude = _v18.b;
+						var _v19 = _v17.b.a;
+						var nextFraction = _v19.a;
+						var nextAltitude = _v19.b;
+						var _v20 = _Utils_Tuple2((nextFraction - fraction) / (nextFraction - priorFraction), (fraction - priorFraction) / (nextFraction - priorFraction));
+						var beforeContribution = _v20.a;
+						var afterContribution = _v20.b;
 						return A2(
 							$ianmackenzie$elm_units$Quantity$plus,
 							A2($ianmackenzie$elm_units$Quantity$multiplyBy, beforeContribution, priorAltitude),
 							A2($ianmackenzie$elm_units$Quantity$multiplyBy, afterContribution, nextAltitude));
 					} else {
-						var _v25 = _v21.a.a;
-						var priorFraction = _v25.a;
-						var priorAltitude = _v25.b;
-						var _v26 = _v21.b;
+						var _v21 = _v17.a.a;
+						var priorFraction = _v21.a;
+						var priorAltitude = _v21.b;
+						var _v22 = _v17.b;
 						return priorAltitude;
 					}
 				} else {
-					if (_v21.b.$ === 'Just') {
-						var _v27 = _v21.a;
-						var _v28 = _v21.b.a;
-						var nextFraction = _v28.a;
-						var nextAltitude = _v28.b;
+					if (_v17.b.$ === 'Just') {
+						var _v23 = _v17.a;
+						var _v24 = _v17.b.a;
+						var nextFraction = _v24.a;
+						var nextAltitude = _v24.b;
 						return nextAltitude;
 					} else {
-						var _v29 = _v21.a;
-						var _v30 = _v21.b;
+						var _v25 = _v17.a;
+						var _v26 = _v17.b;
 						return $ianmackenzie$elm_units$Quantity$zero;
 					}
 				}
@@ -21359,17 +21418,16 @@ var $author$project$Tools$CurveFormer$makeCurveIfPossible = F2(
 			}
 		}();
 		var theArcItself = function () {
-			var _v13 = _Utils_Tuple2(entryInformation, exitInformation);
-			if ((_v13.a.$ === 'Just') && (_v13.b.$ === 'Just')) {
-				var entry = _v13.a.a;
-				var exit = _v13.b.a;
-				var _v14 = _Utils_Tuple2(
+			var _v10 = _Utils_Tuple2(entryInformation, exitInformation);
+			if ((_v10.a.$ === 'Just') && (_v10.b.$ === 'Just')) {
+				var entry = _v10.a.a;
+				var exit = _v10.b.a;
+				var _v11 = _Utils_Tuple2(
 					A2($ianmackenzie$elm_geometry$Direction2d$from, centreOnPlane, entry.joinsBendAt),
 					A2($ianmackenzie$elm_geometry$Direction2d$from, centreOnPlane, exit.joinsBendAt));
-				var entryDirection = _v14.a;
-				var exitDirection = _v14.b;
+				var entryDirection = _v11.a;
+				var exitDirection = _v11.b;
 				var turn = A3($elm$core$Maybe$map2, $ianmackenzie$elm_geometry$Direction2d$angleFrom, entryDirection, exitDirection);
-				var _v15 = A2($elm$core$Debug$log, 'TURN', turn);
 				if (turn.$ === 'Just') {
 					var turnAngle = turn.a;
 					return A2(
@@ -21392,10 +21450,10 @@ var $author$project$Tools$CurveFormer$makeCurveIfPossible = F2(
 			}
 		}();
 		var newBendEntirely = function () {
-			var _v11 = _Utils_Tuple2(entryInformation, exitInformation);
-			if ((_v11.a.$ === 'Just') && (_v11.b.$ === 'Just')) {
-				var entry = _v11.a.a;
-				var exit = _v11.b.a;
+			var _v8 = _Utils_Tuple2(entryInformation, exitInformation);
+			if ((_v8.a.$ === 'Just') && (_v8.b.$ === 'Just')) {
+				var entry = _v8.a.a;
+				var exit = _v8.b.a;
 				var completeSegments = _Utils_ap(
 					_List_Nil,
 					_Utils_ap(
@@ -21436,8 +21494,8 @@ var $author$project$Tools$CurveFormer$makeCurveIfPossible = F2(
 							var originalSegmentStart = $ianmackenzie$elm_geometry$LineSegment2d$startPoint(seg);
 							var adjustment = A2($ianmackenzie$elm_units$Quantity$multiplyBy, proportionalDistance, altitudeChange);
 							var newAltitude = function () {
-								var _v12 = options.smoothGradient;
-								if (_v12.$ === 'Holistic') {
+								var _v9 = options.smoothGradient;
+								if (_v9.$ === 'Holistic') {
 									return A2(
 										$ianmackenzie$elm_units$Quantity$plus,
 										adjustment,
@@ -21459,12 +21517,6 @@ var $author$project$Tools$CurveFormer$makeCurveIfPossible = F2(
 				return _List_Nil;
 			}
 		}();
-		var _v8 = A2($elm$core$Debug$log, 'ISLEFT', isLeftHandBend);
-		var _v9 = A2(
-			$elm$core$Debug$log,
-			'( entryInformation, exitInformation )',
-			_Utils_Tuple2(entryInformation, exitInformation));
-		var _v10 = A2($elm$core$Debug$log, 'attachmentPoints', attachmentPoints);
 		return _Utils_update(
 			options,
 			{

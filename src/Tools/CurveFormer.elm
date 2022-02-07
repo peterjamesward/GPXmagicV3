@@ -106,29 +106,35 @@ computeNewPoints options track =
     previewPoints
 
 
-applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource, ( Int, Int ) )
 applyUsingOptions options track =
-    let
-        ( fromStart, fromEnd ) =
-            TrackLoaded.getRangeFromMarkers track
+    case options.fixedAttachmentPoints of
+        Just ( entryPoint, exitPoint ) ->
+            let
+                ( fromStart, fromEnd ) =
+                    ( entryPoint, skipCount track.trackTree - exitPoint )
 
-        newTree =
-            DomainModel.replaceRange
-                (fromStart + 1)
-                (fromEnd + 1)
-                track.referenceLonLat
-                (List.map Tuple.second <| computeNewPoints options track)
-                track.trackTree
+                newTree =
+                    DomainModel.replaceRange
+                        (fromStart + 1)
+                        (fromEnd + 1)
+                        track.referenceLonLat
+                        (List.map Tuple.second <| computeNewPoints options track)
+                        track.trackTree
 
-        oldPoints =
-            DomainModel.extractPointsInRange
-                fromStart
-                fromEnd
-                track.trackTree
-    in
-    ( newTree
-    , oldPoints |> List.map Tuple.second
-    )
+                oldPoints =
+                    DomainModel.extractPointsInRange
+                        fromStart
+                        fromEnd
+                        track.trackTree
+            in
+            ( newTree
+            , oldPoints |> List.map Tuple.second
+            , ( entryPoint, exitPoint )
+            )
+
+        Nothing ->
+            ( Just track.trackTree, [], ( 0, 0 ) )
 
 
 toolStateChange :
@@ -803,21 +809,6 @@ makeCurveIfPossible track options =
             in
             changeInDirection < 0.0
 
-        _ = Debug.log "ISLEFT" isLeftHandBend
-
-        --case List.head <| Dict.values capturedRoadSections of
-        --    Just firstSection ->
-        --        let
-        --            roadAxis =
-        --                Axis2d.withDirection
-        --                    firstSection.directionAtStart
-        --                    (Point3d.projectInto drawingPlane firstSection.startPoint)
-        --        in
-        --        Point2d.signedDistanceFrom roadAxis centreOnPlane
-        --            |> Quantity.greaterThanOrEqualTo Quantity.zero
-        --
-        --    Nothing ->
-        --        True
         findAcceptableTransition : TransitionMode -> Int -> Int -> Maybe IntersectionInformation
         findAcceptableTransition mode idx1 idx2 =
             let
@@ -882,9 +873,6 @@ makeCurveIfPossible track options =
 
                         Nothing ->
                             []
-
-                _ =
-                    Debug.log "entryLineAxis" entryLineAxis
 
                 validCounterBendCentresAndTangentPoints : List IntersectionInformation
                 validCounterBendCentresAndTangentPoints =
@@ -1023,9 +1011,6 @@ makeCurveIfPossible track options =
                 |> Maybe.andThen (exitCurveSeeker routeLength)
             )
 
-        _ =
-            Debug.log "( entryInformation, exitInformation )" ( entryInformation, exitInformation )
-
         entryCurve =
             case entryInformation of
                 Just { intersection, distanceAlong, tangentPoint, joinsBendAt } ->
@@ -1075,9 +1060,6 @@ makeCurveIfPossible track options =
 
                         turn =
                             Maybe.map2 Direction2d.angleFrom entryDirection exitDirection
-
-                        _ =
-                            Debug.log "TURN" turn
                     in
                     case turn of
                         Just turnAngle ->
@@ -1106,9 +1088,6 @@ makeCurveIfPossible track options =
 
                 _ ->
                     []
-
-        _ =
-            Debug.log "attachmentPoints" attachmentPoints
 
         prepareOriginalAltitudesForInterpolation =
             case attachmentPoints of

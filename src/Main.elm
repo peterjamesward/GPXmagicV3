@@ -44,6 +44,7 @@ import Task
 import Time
 import Tools.BezierSplines
 import Tools.CentroidAverage
+import Tools.CurveFormer
 import Tools.DeletePoints as DeletePoints
 import ToolsController exposing (ToolEntry)
 import TrackLoaded exposing (TrackLoaded)
@@ -1052,6 +1053,24 @@ performActionsOnModel actions model =
 
                         ( fromStart, fromEnd ) =
                             TrackLoaded.getRangeFromMarkers track
+
+                        newTrack =
+                            track
+                                |> TrackLoaded.addToUndoStack action
+                                    fromStart
+                                    fromEnd
+                                    oldPoints
+                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                    in
+                    { foldedModel | track = Just newTrack }
+
+                ( CurveFormerApplyWithOptions options, Just track ) ->
+                    let
+                        ( newTree, oldPoints, (entry, exit) ) =
+                            Tools.CurveFormer.applyUsingOptions options track
+
+                        ( fromStart, fromEnd ) =
+                            (entry, skipCount track.trackTree - exit)
 
                         newTrack =
                             track
