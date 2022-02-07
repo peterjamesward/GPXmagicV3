@@ -9,13 +9,17 @@ DEBT: Map sends more click messages each time we click.
 
 Curve Former should reset on track load.
 
+Curve Former: make sure search for entry/exit does not extend to track ends!
+
+BUG: Classic bend smoother consumes all memory on certain looped routes where
+orange and purple are (possibly) colinear.
+
 # WIP
 
-Classic bend smoother 
-Bend smoother logic carried over perfectly.
-Need to update control when pointers are moved.
-Need apply.
-(fix Samir's bug on looped routes == same point exactly on different lap?)
+## Drag on map
+
+Why not? 
+Take another look at the clicking issue?
 
 ---
 
@@ -23,26 +27,25 @@ Need apply.
 
 ## Tools
 
-1. Drag on map
-2. Nudge 
-3. Segment info
-4. Clothoids (promoted because may be similar structurally to bezier & centroid)
-5. Move & Stretch (2-way drag should correct for azimuth)
-6. Gradient problems
-7. Steep climbs
-8. Intersections
-9. Visual options
-10. SVG import
-11. Fly-through
-12. Limit gradients 
-13. Graph Theory
-14. Use Strava segment data
-15. Loops (includes Out and Back) (+ impact on others, such as Bezier).
-16. Map Satellite style choice
-17. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
-18. Something akin to Graphs, stemming from Muriel's route.
-19. Memory usage (incl limiting actions such as dumping Undo stack).
-20. Samir's bend detector (amount of angular change within X linear metres).
+1. Nudge 
+2. Segment info (toggle with whole track?)
+3. Move & Stretch 
+4. Gradient problems
+5. Steep climbs
+6. Intersections
+7. Visual options
+8. Memory usage (incl limiting actions such as dumping Undo stack).
+9. SVG import
+10. Fly-through
+11. Limit gradients 
+12. Graph Theory
+13. Use Strava segment data
+14. Loops (includes Out and Back) (+ impact on others, such as Bezier).
+15. Samir's bend detector (amount of angular change within X linear metres).
+16. Clothoids (promoted because may be similar structurally to bezier & centroid)
+17. Map Satellite style choice
+18. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
+19. Something akin to Graphs, stemming from Muriel's route.
 
 ## Error messages
 

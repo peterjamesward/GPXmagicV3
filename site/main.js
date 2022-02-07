@@ -14562,19 +14562,23 @@ var $author$project$Tools$BendSmoother$parallelFindSemicircle = F2(
 		var firstTangentPoint = _v7.a;
 		var secondTangentPoint = _v7.b;
 		var centreLine = {endsAt: midBC, startAt: middle};
-		var _v8 = _Utils_Tuple2(firstTangentPoint, secondTangentPoint);
-		if ((_v8.a.$ === 'Just') && (_v8.b.$ === 'Just')) {
-			var t1 = _v8.a.a;
-			var t2 = _v8.b.a;
-			var radius = A2($author$project$Geometry101$distance, middle, t1);
-			var midArcPoint = A2($author$project$Geometry101$pointAlongRoad, centreLine, radius);
-			return A3(
-				$ianmackenzie$elm_geometry$Arc2d$throughPoints,
-				A2($ianmackenzie$elm_geometry$Point2d$meters, t1.x, t1.y),
-				A2($ianmackenzie$elm_geometry$Point2d$meters, midArcPoint.x, midArcPoint.y),
-				A2($ianmackenzie$elm_geometry$Point2d$meters, t2.x, t2.y));
-		} else {
+		if (_Utils_eq(pa, pb) || (_Utils_eq(pa, pc) || (_Utils_eq(pa, pd) || (_Utils_eq(pb, pc) || (_Utils_eq(pb, pd) || _Utils_eq(pc, pd)))))) {
 			return $elm$core$Maybe$Nothing;
+		} else {
+			var _v8 = _Utils_Tuple2(firstTangentPoint, secondTangentPoint);
+			if ((_v8.a.$ === 'Just') && (_v8.b.$ === 'Just')) {
+				var t1 = _v8.a.a;
+				var t2 = _v8.b.a;
+				var radius = A2($author$project$Geometry101$distance, middle, t1);
+				var midArcPoint = A2($author$project$Geometry101$pointAlongRoad, centreLine, radius);
+				return A3(
+					$ianmackenzie$elm_geometry$Arc2d$throughPoints,
+					A2($ianmackenzie$elm_geometry$Point2d$meters, t1.x, t1.y),
+					A2($ianmackenzie$elm_geometry$Point2d$meters, midArcPoint.x, midArcPoint.y),
+					A2($ianmackenzie$elm_geometry$Point2d$meters, t2.x, t2.y));
+			} else {
+				return $elm$core$Maybe$Nothing;
+			}
 		}
 	});
 var $author$project$Tools$BendSmoother$roadToGeometry = function (road) {
