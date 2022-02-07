@@ -38,6 +38,7 @@ type ToolAction msg
     | CentroidAverageApplyWithOptions Tools.CentroidAverageOptions.Options
     | CurveFormerApplyWithOptions Tools.CurveFormerOptions.Options
     | BendSmootherApplyWithOptions Tools.BendSmootherOptions.Options
+    | MakeMapPointsDraggable Bool
 
 
 type PreviewShape

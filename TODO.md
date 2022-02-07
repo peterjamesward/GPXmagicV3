@@ -20,6 +20,9 @@ orange and purple are (possibly) colinear.
 
 Why not? 
 Take another look at the clicking issue?
+1. Toggle for draggable points
+2. JS interface to make draggable
+3. Handling the drag message
 
 ---
 

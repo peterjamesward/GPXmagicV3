@@ -10403,6 +10403,7 @@ var $author$project$ViewMap$initialiseContext = function (currentContext) {
 			});
 	} else {
 		return {
+			draggable: false,
 			followOrange: false,
 			lastMapClick: _Utils_Tuple2(0, 0),
 			mapClickDebounce: false
@@ -14562,23 +14563,19 @@ var $author$project$Tools$BendSmoother$parallelFindSemicircle = F2(
 		var firstTangentPoint = _v7.a;
 		var secondTangentPoint = _v7.b;
 		var centreLine = {endsAt: midBC, startAt: middle};
-		if (_Utils_eq(pa, pb) || (_Utils_eq(pa, pc) || (_Utils_eq(pa, pd) || (_Utils_eq(pb, pc) || (_Utils_eq(pb, pd) || _Utils_eq(pc, pd)))))) {
-			return $elm$core$Maybe$Nothing;
+		var _v8 = _Utils_Tuple2(firstTangentPoint, secondTangentPoint);
+		if ((_v8.a.$ === 'Just') && (_v8.b.$ === 'Just')) {
+			var t1 = _v8.a.a;
+			var t2 = _v8.b.a;
+			var radius = A2($author$project$Geometry101$distance, middle, t1);
+			var midArcPoint = A2($author$project$Geometry101$pointAlongRoad, centreLine, radius);
+			return A3(
+				$ianmackenzie$elm_geometry$Arc2d$throughPoints,
+				A2($ianmackenzie$elm_geometry$Point2d$meters, t1.x, t1.y),
+				A2($ianmackenzie$elm_geometry$Point2d$meters, midArcPoint.x, midArcPoint.y),
+				A2($ianmackenzie$elm_geometry$Point2d$meters, t2.x, t2.y));
 		} else {
-			var _v8 = _Utils_Tuple2(firstTangentPoint, secondTangentPoint);
-			if ((_v8.a.$ === 'Just') && (_v8.b.$ === 'Just')) {
-				var t1 = _v8.a.a;
-				var t2 = _v8.b.a;
-				var radius = A2($author$project$Geometry101$distance, middle, t1);
-				var midArcPoint = A2($author$project$Geometry101$pointAlongRoad, centreLine, radius);
-				return A3(
-					$ianmackenzie$elm_geometry$Arc2d$throughPoints,
-					A2($ianmackenzie$elm_geometry$Point2d$meters, t1.x, t1.y),
-					A2($ianmackenzie$elm_geometry$Point2d$meters, midArcPoint.x, midArcPoint.y),
-					A2($ianmackenzie$elm_geometry$Point2d$meters, t2.x, t2.y));
-			} else {
-				return $elm$core$Maybe$Nothing;
-			}
+			return $elm$core$Maybe$Nothing;
 		}
 	});
 var $author$project$Tools$BendSmoother$roadToGeometry = function (road) {
@@ -18550,13 +18547,28 @@ var $author$project$MapPortController$update = F3(
 		var value = mapMsg.a;
 		return A3($author$project$MapPortController$processMapPortMessage, lastState, track, value);
 	});
+var $author$project$Actions$MakeMapPointsDraggable = function (a) {
+	return {$: 'MakeMapPointsDraggable', a: a};
+};
 var $author$project$ViewMap$update = F5(
 	function (msg, msgWrapper, track, area, context) {
-		return _Utils_Tuple2(
-			_Utils_update(
+		if (msg.$ === 'ToggleFollowOrange') {
+			return _Utils_Tuple2(
+				_Utils_update(
+					context,
+					{followOrange: !context.followOrange}),
+				_List_Nil);
+		} else {
+			var newOptions = _Utils_update(
 				context,
-				{followOrange: !context.followOrange}),
-			_List_Nil);
+				{draggable: !context.draggable});
+			return _Utils_Tuple2(
+				newOptions,
+				_List_fromArray(
+					[
+						$author$project$Actions$MakeMapPointsDraggable(newOptions.draggable)
+					]));
+		}
 	});
 var $author$project$ViewProfileCharts$ClickDelayExpired = {$: 'ClickDelayExpired'};
 var $author$project$ViewProfileCharts$DragPan = {$: 'DragPan'};
@@ -34027,6 +34039,7 @@ var $author$project$ViewPureStyles$conditionallyVisible = F2(
 				]),
 			element);
 	});
+var $author$project$ViewMap$ToggleDraggable = {$: 'ToggleDraggable'};
 var $author$project$ViewMap$ToggleFollowOrange = {$: 'ToggleFollowOrange'};
 var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
 var $ianmackenzie$elm_units$Pixels$inPixels = function (_v0) {
@@ -34060,6 +34073,60 @@ var $feathericons$elm_feather$FeatherIcons$lock = A2(
 			_List_fromArray(
 				[
 					$elm$svg$Svg$Attributes$d('M7 11V7a5 5 0 0 1 10 0v4')
+				]),
+			_List_Nil)
+		]));
+var $feathericons$elm_feather$FeatherIcons$move = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'move',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$polyline,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$points('5 9 2 12 5 15')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$polyline,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$points('9 5 12 2 15 5')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$polyline,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$points('15 19 12 22 9 19')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$polyline,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$points('19 9 22 12 19 15')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x1('2'),
+					$elm$svg$Svg$Attributes$y1('12'),
+					$elm$svg$Svg$Attributes$x2('22'),
+					$elm$svg$Svg$Attributes$y2('12')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x1('12'),
+					$elm$svg$Svg$Attributes$y1('2'),
+					$elm$svg$Svg$Attributes$x2('12'),
+					$elm$svg$Svg$Attributes$y2('22')
 				]),
 			_List_Nil)
 		]));
@@ -34098,6 +34165,32 @@ var $feathericons$elm_feather$FeatherIcons$unlock = A2(
 				]),
 			_List_Nil)
 		]));
+var $feathericons$elm_feather$FeatherIcons$x = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'x',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x1('18'),
+					$elm$svg$Svg$Attributes$y1('6'),
+					$elm$svg$Svg$Attributes$x2('6'),
+					$elm$svg$Svg$Attributes$y2('18')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x1('6'),
+					$elm$svg$Svg$Attributes$y1('6'),
+					$elm$svg$Svg$Attributes$x2('18'),
+					$elm$svg$Svg$Attributes$y2('18')
+				]),
+			_List_Nil)
+		]));
 var $author$project$ViewMap$view = F3(
 	function (_v0, mContext, msgWrapper) {
 		var viewWidth = _v0.a;
@@ -34125,6 +34218,14 @@ var $author$project$ViewMap$view = F3(
 							label: context.followOrange ? $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$lock) : $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$unlock),
 							onPress: $elm$core$Maybe$Just(
 								msgWrapper($author$project$ViewMap$ToggleFollowOrange))
+						}),
+						A2(
+						$mdgriffith$elm_ui$Element$Input$button,
+						_List_Nil,
+						{
+							label: context.draggable ? $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$move) : $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$x),
+							onPress: $elm$core$Maybe$Just(
+								msgWrapper($author$project$ViewMap$ToggleDraggable))
 						})
 					]));
 		};

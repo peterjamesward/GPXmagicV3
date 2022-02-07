@@ -1,6 +1,6 @@
 module ViewMap exposing (..)
 
-import Actions exposing (ToolAction)
+import Actions exposing (ToolAction(..))
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -19,11 +19,13 @@ type alias Context =
     { mapClickDebounce : Bool
     , lastMapClick : ( Float, Float )
     , followOrange : Bool
+    , draggable : Bool
     }
 
 
 type Msg
     = ToggleFollowOrange
+    | ToggleDraggable
 
 
 initialiseContext : Maybe Context -> Context
@@ -39,6 +41,7 @@ initialiseContext currentContext =
             { mapClickDebounce = False
             , lastMapClick = ( 0, 0 )
             , followOrange = False
+            , draggable = False
             }
 
 
@@ -54,6 +57,15 @@ update msg msgWrapper track area context =
         ToggleFollowOrange ->
             ( { context | followOrange = not context.followOrange }
             , []
+            )
+
+        ToggleDraggable ->
+            let
+                newOptions =
+                    { context | draggable = not context.draggable }
+            in
+            ( newOptions
+            , [ MakeMapPointsDraggable newOptions.draggable ]
             )
 
 
@@ -83,6 +95,15 @@ view ( viewWidth, viewHeight ) mContext msgWrapper =
 
                         else
                             useIcon FeatherIcons.unlock
+                    }
+                , Input.button []
+                    { onPress = Just <| msgWrapper ToggleDraggable
+                    , label =
+                        if context.draggable then
+                            useIcon FeatherIcons.move
+
+                        else
+                            useIcon FeatherIcons.x
                     }
                 ]
     in
