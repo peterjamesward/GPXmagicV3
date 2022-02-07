@@ -10,7 +10,7 @@ import Circle3d exposing (Circle3d)
 import Color
 import ColourPalette exposing (warningColor)
 import Dict exposing (Dict)
-import Direction2d
+import Direction2d exposing (Direction2d)
 import Direction3d
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, endPoint, skipCount, startPoint)
 import Element exposing (..)
@@ -92,7 +92,7 @@ computeNewPoints options track =
             TrackLoaded.getRangeFromMarkers track
 
         earthPoints =
-            []
+            options.newTrackPoints
 
         previewPoints =
             earthPoints
@@ -175,6 +175,7 @@ update msg options previewColour hasTrack =
             let
                 newOptions =
                     { options | pushRadius = Length.meters radius }
+                        |> makeCurveIfPossible track
             in
             ( newOptions, previewActions newOptions previewColour track )
 
@@ -182,6 +183,7 @@ update msg options previewColour hasTrack =
             let
                 newOptions =
                     { options | pullRadius = options.pushRadius |> Quantity.plus (Length.meters width) }
+                        |> makeCurveIfPossible track
             in
             ( newOptions, previewActions newOptions previewColour track )
 
@@ -189,6 +191,7 @@ update msg options previewColour hasTrack =
             let
                 newOptions =
                     { options | transitionRadius = Length.meters radius }
+                        |> makeCurveIfPossible track
             in
             ( newOptions, previewActions newOptions previewColour track )
 
@@ -196,6 +199,7 @@ update msg options previewColour hasTrack =
             let
                 newOptions =
                     { options | spacing = Length.meters spacing }
+                        |> makeCurveIfPossible track
             in
             ( newOptions, previewActions newOptions previewColour track )
 
@@ -203,6 +207,7 @@ update msg options previewColour hasTrack =
             let
                 newOptions =
                     { options | usePullRadius = not options.usePullRadius }
+                        |> makeCurveIfPossible track
             in
             ( newOptions, previewActions newOptions previewColour track )
 
@@ -210,6 +215,7 @@ update msg options previewColour hasTrack =
             let
                 newOptions =
                     { options | smoothGradient = mode }
+                        |> makeCurveIfPossible track
             in
             ( newOptions, previewActions newOptions previewColour track )
 
@@ -769,20 +775,49 @@ makeCurveIfPossible track options =
             -- OK, not the entry road, but the first road segment in the circle.
             -- Positive distance == LEFT OF ROAD, i.e. left hand bend.
             -- Note I ignore the obvious "on the axis" case; this may bite me later.
-            case List.head <| Dict.values capturedRoadSections of
-                Just firstSection ->
-                    let
-                        roadAxis =
-                            Axis2d.withDirection
-                                firstSection.directionAtStart
-                                (Point3d.projectInto drawingPlane firstSection.startPoint)
-                    in
-                    Point2d.signedDistanceFrom roadAxis centreOnPlane
-                        |> Quantity.greaterThanOrEqualTo Quantity.zero
+            -- THIS SEEMS TO HAVE FLIPPED IN V3.
+            --TODO: Simpler, clearer, better logic.
+            -- e.g. what is the NET CHANGE in directiom along the section?
+            let
+                runningAverageDirectionChange :
+                    Int
+                    -> RoadSection
+                    -> ( Maybe (Direction2d LocalCoords), Float )
+                    -> ( Maybe (Direction2d LocalCoords), Float )
+                runningAverageDirectionChange idx road change =
+                    case change of
+                        ( Nothing, _ ) ->
+                            -- "Maybe it's his first time around"
+                            ( Just road.directionAtStart, 0.0 )
 
-                Nothing ->
-                    True
+                        ( Just previousDirection, prevTotal ) ->
+                            ( Just road.directionAtStart
+                            , road.directionAtStart
+                                |> Direction2d.angleFrom previousDirection
+                                |> Angle.inDegrees
+                                |> (+) prevTotal
+                            )
 
+                ( _, changeInDirection ) =
+                    Dict.foldl runningAverageDirectionChange ( Nothing, 0.0 ) capturedRoadSections
+            in
+            changeInDirection < 0.0
+
+        _ = Debug.log "ISLEFT" isLeftHandBend
+
+        --case List.head <| Dict.values capturedRoadSections of
+        --    Just firstSection ->
+        --        let
+        --            roadAxis =
+        --                Axis2d.withDirection
+        --                    firstSection.directionAtStart
+        --                    (Point3d.projectInto drawingPlane firstSection.startPoint)
+        --        in
+        --        Point2d.signedDistanceFrom roadAxis centreOnPlane
+        --            |> Quantity.greaterThanOrEqualTo Quantity.zero
+        --
+        --    Nothing ->
+        --        True
         findAcceptableTransition : TransitionMode -> Int -> Int -> Maybe IntersectionInformation
         findAcceptableTransition mode idx1 idx2 =
             let
@@ -848,6 +883,9 @@ makeCurveIfPossible track options =
                         Nothing ->
                             []
 
+                _ =
+                    Debug.log "entryLineAxis" entryLineAxis
+
                 validCounterBendCentresAndTangentPoints : List IntersectionInformation
                 validCounterBendCentresAndTangentPoints =
                     -- Point is 'valid' if it is not 'before' the segment start (or axis origin).
@@ -912,12 +950,7 @@ makeCurveIfPossible track options =
                         _ ->
                             []
             in
-            case validCounterBendCentresAndTangentPoints of
-                [] ->
-                    Nothing
-
-                bestFound :: _ ->
-                    Just bestFound
+            List.head validCounterBendCentresAndTangentPoints
 
         arcToSegments arc =
             let
@@ -990,6 +1023,9 @@ makeCurveIfPossible track options =
                 |> Maybe.andThen (exitCurveSeeker routeLength)
             )
 
+        _ =
+            Debug.log "( entryInformation, exitInformation )" ( entryInformation, exitInformation )
+
         entryCurve =
             case entryInformation of
                 Just { intersection, distanceAlong, tangentPoint, joinsBendAt } ->
@@ -1039,6 +1075,9 @@ makeCurveIfPossible track options =
 
                         turn =
                             Maybe.map2 Direction2d.angleFrom entryDirection exitDirection
+
+                        _ =
+                            Debug.log "TURN" turn
                     in
                     case turn of
                         Just turnAngle ->
@@ -1067,6 +1106,9 @@ makeCurveIfPossible track options =
 
                 _ ->
                     []
+
+        _ =
+            Debug.log "attachmentPoints" attachmentPoints
 
         prepareOriginalAltitudesForInterpolation =
             case attachmentPoints of
