@@ -128,15 +128,17 @@ update mapMsg track lastState =
             processMapPortMessage lastState track value
 
 
+toggleDragging : Bool -> TrackLoaded msg -> Cmd msg
+toggleDragging isDragging track =
+    mapCommands <|
+        E.object
+            [ ( "Cmd", E.string "Drag" )
+            , ( "Enable", E.bool isDragging )
+            , ( "points", SceneBuilderMap.trackPointsToJSON track ) -- Make track points draggable
+            ]
 
---toggleDragging : Bool -> Track -> Cmd msg
---toggleDragging isDragging track =
---    commandPort <|
---        E.object
---            [ ( "Cmd", E.string "Drag" )
---            , ( "Enable", E.bool isDragging )
---            , ( "points", trackPointsToJSON track ) -- Make track points draggable
---            ]
+
+
 --requestElevations : Cmd msg
 --requestElevations =
 --    commandPort <|
@@ -265,16 +267,16 @@ processMapPortMessage lastState track json =
                 _ ->
                     ( lastState, [] )
 
-        --( Ok "drag", Just track ) ->
-        --    case draggedOnMap json track of
-        --        Just undoEntry ->
-        --            processPostUpdateAction
-        --                model
-        --                (PostUpdateActions.ActionTrackChanged TrackEditType.EditPreservesIndex undoEntry)
-        --
-        --        Nothing ->
-        --            ( Model model, Cmd.none )
-        --
+        ( Ok "drag", Just track ) ->
+            case draggedOnMap json track of
+                Just undoEntry ->
+                    processPostUpdateAction
+                        model
+                        (PostUpdateActions.ActionTrackChanged TrackEditType.EditPreservesIndex undoEntry)
+
+                Nothing ->
+                    ( Model model, Cmd.none )
+
         --( Ok "elevations", Just track ) ->
         --    case elevations of
         --        Ok mapElevations ->
@@ -288,3 +290,29 @@ processMapPortMessage lastState track json =
         --            ( Model model, Cmd.none )
         _ ->
             ( lastState, [] )
+
+
+draggedOnMap : E.Value -> TrackLoaded msg -> List (ToolAction msg)
+draggedOnMap json track =
+    -- Map has told us the old and new coordinates of a point.
+    -- Return Nothing if drag did not change track.
+    --TODO: Return an Action so this can be consistent with other edit operations.
+    let
+        lon1 =
+            D.decodeValue (D.at [ "start", "lng" ] D.float) json
+
+        lat1 =
+            D.decodeValue (D.at [ "start", "lat" ] D.float) json
+
+        lon2 =
+            D.decodeValue (D.at [ "end", "lng" ] D.float) json
+
+        lat2 =
+            D.decodeValue (D.at [ "end", "lat" ] D.float) json
+    in
+    case ( ( lon1, lat1 ), ( lon2, lat2 ) ) of
+        ( ( Ok startLon, Ok startLat ), ( Ok endLon, Ok endLat ) ) ->
+            [ PointMovedOnMap startLon startLat endLon endLat ]
+
+        _ ->
+            []

@@ -1,6 +1,7 @@
 module Main exposing (main)
 
 import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
+import Angle
 import Browser exposing (application)
 import Browser.Dom as Dom exposing (getViewport, getViewportOf)
 import Browser.Events
@@ -28,6 +29,7 @@ import Html.Events.Extra.Mouse as Mouse
 import Http
 import Json.Decode as D
 import Json.Encode as E exposing (string)
+import Length
 import LocalCoords exposing (LocalCoords)
 import LocalStorage
 import MapPortController
@@ -38,6 +40,7 @@ import PaneLayoutManager exposing (Msg(..), ViewMode(..))
 import Pixels exposing (Pixels)
 import Quantity exposing (Quantity)
 import SceneBuilderMap
+import Spherical
 import SplitPane.SplitPane as SplitPane exposing (..)
 import StravaAuth exposing (getStravaToken)
 import Task
@@ -1067,11 +1070,11 @@ performActionsOnModel actions model =
 
                 ( CurveFormerApplyWithOptions options, Just track ) ->
                     let
-                        ( newTree, oldPoints, (entry, exit) ) =
+                        ( newTree, oldPoints, ( entry, exit ) ) =
                             Tools.CurveFormer.applyUsingOptions options track
 
                         ( fromStart, fromEnd ) =
-                            (entry, skipCount track.trackTree - exit)
+                            ( entry, skipCount track.trackTree - exit )
 
                         newTrack =
                             track
@@ -1100,6 +1103,57 @@ performActionsOnModel actions model =
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
                     { foldedModel | track = Just newTrack }
+
+                ( PointMovedOnMap startLon startLat endLon endLat, Just track ) ->
+                    let
+                        startGpx =
+                            { longitude = Direction2d.fromAngle <| Angle.degrees startLon
+                            , latitude = Angle.degrees startLat
+                            , altitude = Quantity.zero
+                            }
+
+                        endGpx =
+                            { longitude = Direction2d.fromAngle <| Angle.degrees endLon
+                            , latitude = Angle.degrees startLon
+                            , altitude = Quantity.zero
+                            }
+
+                        index =
+                            DomainModel.nearestToLonLat startGpx track.trackTree
+
+                        currentPosition =
+                            gpxPointFromIndex index track.trackTree
+
+                        clickProximity =
+                            DomainModel.gpxDistance startGpx currentPosition
+
+                        distanceMoved =
+                            DomainModel.gpxDistance currentPosition endGpx
+                    in
+                    -- Must be sufficiently close to count, and must have moved.
+                    if
+                        (clickProximity |> Quantity.lessThanOrEqualTo (Length.meters 2.0))
+                            && (distanceMoved |> Quantity.greaterThanOrEqualTo (Length.meters 0.0))
+                    then
+                        let
+                            newTree =
+                                DomainModel.updatePointByIndexInSitu index endGpx track.trackTree
+
+                            ( fromStart, fromEnd ) =
+                                ( index, skipCount track.trackTree - index )
+
+                            newTrack =
+                                { track | trackTree = newTree }
+                                    |> TrackLoaded.addToUndoStack action
+                                        fromStart
+                                        fromEnd
+                                        [ currentPosition ]
+                                    |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                        in
+                        { foldedModel | track = Just newTrack }
+
+                    else
+                        foldedModel
 
                 ( TrackHasChanged, Just track ) ->
                     -- Must be wary of looping here.
@@ -1231,6 +1285,9 @@ performActionCommands actions model =
 
                 ( MapRefresh, Just track ) ->
                     MapPortController.refreshMap
+
+                ( MakeMapPointsDraggable flag, Just track ) ->
+                    MapPortController.toggleDragging flag track
 
                 ( ShowPreview previewData, Just track ) ->
                     -- Add source and layer to map, via Port commands.

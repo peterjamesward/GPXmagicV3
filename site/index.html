@@ -164,7 +164,7 @@ function mapMessageHandler(msg) {
         case 'Track':
             if (isMapCreated) {
                 addLineToMap(msg.data, msg.points);
-                setClickMode('true', msg.points);
+                setClickMode('false', msg.points);
             }
             break;
 
@@ -357,7 +357,6 @@ function addLineToMap(data, points) {
     });
 
     trackAdded = true;
-//    setClickMode(clickToDrag, points);
     map.on('click', function(e) {
       app.ports.mapResponses.send
         ( { 'msg' : 'click'
@@ -376,14 +375,14 @@ function addLineToMap(data, points) {
 };
 
 function setClickMode(newMode, points) {
-    if (clickToDrag && pointsLayerAdded) {
-        map.removeLayer('points');
-        map.removeSource('points');
-        pointsLayerAdded = false;
-    }
+   if (pointsLayerAdded) {
+       map.removeLayer('points');
+       map.removeSource('points');
+       pointsLayerAdded = false;
+   }
 
     clickToDrag = newMode;
-    if (clickToDrag && !pointsLayerAdded) {
+    {
         map.addSource('points', {
             'type': 'geojson',
             'data': points
@@ -401,34 +400,37 @@ function setClickMode(newMode, points) {
 
         pointsLayerAdded = true;
 
-        // When the cursor enters a feature in the point layer, prepare for dragging.
-        map.on('mouseenter', 'points', function (e) {
-            canvas.style.cursor = 'move';
-            e;
-        });
+        if (clickToDrag) {
+            // When the cursor enters a feature in the point layer, prepare for dragging.
+            map.on('mouseenter', 'points', function (e) {
+                canvas.style.cursor = 'move';
+                e;
+            });
 
-        map.on('mouseleave', 'points', function (e) {
-            canvas.style.cursor = '';
-            e;
-        });
+            map.on('mouseleave', 'points', function (e) {
+                canvas.style.cursor = '';
+                e;
+            });
 
-        map.on('mousedown', 'points', function (e) {
-            // Prevent the default map drag behavior.
-            e.preventDefault();
-            startDraggingPoint(e);
-            e;
-        });
+            map.on('mousedown', 'points', function (e) {
+                // Prevent the default map drag behavior.
+                e.preventDefault();
+                startDraggingPoint(e);
+                e;
+            });
 
-        map.on('click', function(e) {
-          console.log("click", e);
-          app.ports.mapResponses.send
-              ( { 'msg' : 'click'
-                , 'lon' : e.lngLat.lng
-                , 'lat' : e.lngLat.lat
-            } );
-            e;
-        });
-    }
+            map.on('click', function(e) {
+              console.log("click", e);
+              app.ports.mapResponses.send
+                  ( { 'msg' : 'click'
+                    , 'lon' : e.lngLat.lng
+                    , 'lat' : e.lngLat.lat
+                } );
+                e;
+            });
+
+        };
+    };
 };
 
 var orangeMarker = new mapboxgl.Marker({ color: "#FFA500" });

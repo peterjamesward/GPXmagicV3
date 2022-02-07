@@ -16,6 +16,7 @@ module DomainModel exposing
     , getDualCoords
     , getFirstLeaf
     , getLastLeaf
+    , gpxDistance
     , gpxFromPointWithReference
     , gpxPointFromIndex
     , gradientFromNode
@@ -34,6 +35,7 @@ module DomainModel exposing
     , traverseTreeBetweenLimitsToDepth
     , treeFromSourcePoints
     , trueLength
+    , updatePointByIndexInSitu
     )
 
 import Angle exposing (Angle)
@@ -1411,3 +1413,11 @@ queryPointsUsingFilter filterFn treeNode foldFn accum =
                 myAccumulator
     in
     helper 0 (skipCount treeNode) treeNode accum
+
+
+updatePointByIndexInSitu : Int -> GPXSource -> PeteTree -> PeteTree
+updatePointByIndexInSitu index endGpx tree =
+    --TODO: write this.
+    -- Note that all points except end points appear in two places, and they can be distant in the tree.
+    -- Still, idea is to change only ancestor nodes, obviously including the topmost.
+    tree

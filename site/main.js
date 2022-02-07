@@ -11655,6 +11655,24 @@ var $author$project$LocalStorage$storageSetItem = F2(
 						_Utils_Tuple2('value', value)
 					])));
 	});
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $author$project$MapPortController$toggleDragging = F2(
+	function (isDragging, track) {
+		return $author$project$MapPortController$mapCommands(
+			$elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'Cmd',
+						$elm$json$Json$Encode$string('Drag')),
+						_Utils_Tuple2(
+						'Enable',
+						$elm$json$Json$Encode$bool(isDragging)),
+						_Utils_Tuple2(
+						'points',
+						$author$project$SceneBuilderMap$trackPointsToJSON(track))
+					])));
+	});
 var $author$project$Main$performActionCommands = F2(
 	function (actions, model) {
 		var showPreviewOnMap = function (tag) {
@@ -11686,7 +11704,7 @@ var $author$project$Main$performActionCommands = F2(
 		};
 		var performAction = function (action) {
 			var _v0 = _Utils_Tuple2(action, model.track);
-			_v0$10:
+			_v0$11:
 			while (true) {
 				switch (_v0.a.$) {
 					case 'SetCurrent':
@@ -11695,7 +11713,7 @@ var $author$project$Main$performActionCommands = F2(
 							var track = _v0.b.a;
 							return $author$project$MapPortController$addMarkersToMap(track);
 						} else {
-							break _v0$10;
+							break _v0$11;
 						}
 					case 'SetCurrentFromMapClick':
 						if (_v0.b.$ === 'Just') {
@@ -11703,7 +11721,7 @@ var $author$project$Main$performActionCommands = F2(
 							var track = _v0.b.a;
 							return $elm$core$Platform$Cmd$none;
 						} else {
-							break _v0$10;
+							break _v0$11;
 						}
 					case 'MapCenterOnCurrent':
 						if (_v0.b.$ === 'Just') {
@@ -11711,7 +11729,7 @@ var $author$project$Main$performActionCommands = F2(
 							var track = _v0.b.a;
 							return $author$project$MapPortController$centreMapOnCurrent(track);
 						} else {
-							break _v0$10;
+							break _v0$11;
 						}
 					case 'MapRefresh':
 						if (_v0.b.$ === 'Just') {
@@ -11719,7 +11737,15 @@ var $author$project$Main$performActionCommands = F2(
 							var track = _v0.b.a;
 							return $author$project$MapPortController$refreshMap;
 						} else {
-							break _v0$10;
+							break _v0$11;
+						}
+					case 'MakeMapPointsDraggable':
+						if (_v0.b.$ === 'Just') {
+							var flag = _v0.a.a;
+							var track = _v0.b.a;
+							return A2($author$project$MapPortController$toggleDragging, flag, track);
+						} else {
+							break _v0$11;
 						}
 					case 'ShowPreview':
 						if (_v0.b.$ === 'Just') {
@@ -11727,7 +11753,7 @@ var $author$project$Main$performActionCommands = F2(
 							var track = _v0.b.a;
 							return showPreviewOnMap(previewData.tag);
 						} else {
-							break _v0$10;
+							break _v0$11;
 						}
 					case 'HidePreview':
 						if (_v0.b.$ === 'Just') {
@@ -11735,7 +11761,7 @@ var $author$project$Main$performActionCommands = F2(
 							var track = _v0.b.a;
 							return $author$project$MapPortController$hidePreview(tag);
 						} else {
-							break _v0$10;
+							break _v0$11;
 						}
 					case 'DelayMessage':
 						if (_v0.b.$ === 'Just') {
@@ -11745,7 +11771,7 @@ var $author$project$Main$performActionCommands = F2(
 							var track = _v0.b.a;
 							return A2($andrewMacmurray$elm_delay$Delay$after, _int, msg);
 						} else {
-							break _v0$10;
+							break _v0$11;
 						}
 					case 'TrackHasChanged':
 						if (_v0.b.$ === 'Just') {
@@ -11763,7 +11789,7 @@ var $author$project$Main$performActionCommands = F2(
 											$elm$core$Dict$keys(model.previews)))
 									]));
 						} else {
-							break _v0$10;
+							break _v0$11;
 						}
 					case 'SetMarker':
 						if (_v0.b.$ === 'Just') {
@@ -11771,7 +11797,7 @@ var $author$project$Main$performActionCommands = F2(
 							var track = _v0.b.a;
 							return $author$project$MapPortController$addMarkersToMap(track);
 						} else {
-							break _v0$10;
+							break _v0$11;
 						}
 					case 'StoreLocally':
 						var _v5 = _v0.a;
@@ -11779,7 +11805,7 @@ var $author$project$Main$performActionCommands = F2(
 						var value = _v5.b;
 						return A2($author$project$LocalStorage$storageSetItem, key, value);
 					default:
-						break _v0$10;
+						break _v0$11;
 				}
 			}
 			return $elm$core$Platform$Cmd$none;
@@ -20757,7 +20783,6 @@ var $author$project$StravaAuth$update = F2(
 		}
 		return $author$project$StravaAuth$noOp(model);
 	});
-var $elm$json$Json$Encode$bool = _Json_wrap;
 var $author$project$ToolsController$isToolOpen = F2(
 	function (toolType, entries) {
 		return !_Utils_eq(

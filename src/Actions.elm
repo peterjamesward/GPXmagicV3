@@ -39,6 +39,7 @@ type ToolAction msg
     | CurveFormerApplyWithOptions Tools.CurveFormerOptions.Options
     | BendSmootherApplyWithOptions Tools.BendSmootherOptions.Options
     | MakeMapPointsDraggable Bool
+    | PointMovedOnMap Float Float Float Float
 
 
 type PreviewShape
@@ -76,6 +77,9 @@ interpretAction action =
 
         BendSmootherApplyWithOptions options ->
             "bend smoother"
+
+        PointMovedOnMap _ _ _ _ ->
+            "move on map"
 
         _ ->
             "ask Pete to fix this message"

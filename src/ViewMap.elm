@@ -126,3 +126,4 @@ view ( viewWidth, viewHeight ) mContext msgWrapper =
         Nothing ->
             -- Keep the DOM hierarchy consistent.
             row [] [ el [ htmlAttribute (id "map") ] none ]
+
