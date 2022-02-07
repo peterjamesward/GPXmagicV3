@@ -21,6 +21,7 @@ import FlatColors.ChinesePalette
 import Geometry101
 import Html.Attributes
 import Html.Events.Extra.Pointer as Pointer
+import Interval
 import Length exposing (Meters)
 import LineSegment2d
 import List.Extra
@@ -240,6 +241,7 @@ update msg options previewColour hasTrack =
                                     else
                                         options.referencePoint
                             }
+                                |> makeCurveIfPossible track
                     in
                     ( newOptions, previewActions newOptions previewColour track )
 
@@ -351,7 +353,7 @@ view imperial wrapper options track =
                     ( _, False ) ->
                         Input.button
                             (width fill :: disabledToolsBorder)
-                            { label = paragraph [ width fill ] <| [ text "Need at least 3 contiguous points" ]
+                            { label = paragraph [ width fill ] <| [ text "Not found" ]
                             , onPress = Nothing
                             }
                 ]
@@ -664,10 +666,17 @@ makeCurveIfPossible track options =
     -- we keep it in our model.
     let
         ( fromStart, fromEnd ) =
-            TrackLoaded.getRangeFromMarkers track
+            if track.markerPosition == Nothing then
+                ( 0, 0 )
+
+            else
+                TrackLoaded.getRangeFromMarkers track
 
         ( startRange, endRange ) =
             ( fromStart, skipCount track.trackTree - fromEnd )
+
+        searchInterval =
+            Interval.from startRange endRange
 
         circle =
             getCircle options track
@@ -687,7 +696,7 @@ makeCurveIfPossible track options =
 
         innerBox =
             BoundingBox2d.withDimensions
-                ( Quantity.twice options.pushRadius, Quantity.twice options.pullRadius )
+                ( Quantity.twice options.pushRadius, Quantity.twice options.pushRadius )
                 centreOnPlane
 
         outerBox =
@@ -695,15 +704,11 @@ makeCurveIfPossible track options =
                 ( Quantity.twice options.pullRadius, Quantity.twice options.pullRadius )
                 centreOnPlane
 
-        isWithinCircleAndWithinRange : Int -> Int -> RoadSection -> Bool
-        isWithinCircleAndWithinRange start end road =
-            --TODO: Use bounding boxes !!
+        overlapsCircleAndRange : Int -> Int -> RoadSection -> Bool
+        overlapsCircleAndRange start end road =
             -- Road section is interesting?
-            start
-                >= startRange
-                && end
-                <= endRange
-                && (road.boundingBox |> flatBox |> BoundingBox2d.intersects innerBox)
+            (road.boundingBox |> flatBox |> BoundingBox2d.intersects innerBox)
+                && (Interval.from start end |> Interval.intersects searchInterval)
 
         isWithinPushRadius pt =
             pt
@@ -718,12 +723,9 @@ makeCurveIfPossible track options =
         isWithinDisc pt =
             isWithinPullRadius pt && (not <| isWithinPushRadius pt)
 
-        isWithinRangeAndDisc start end road =
-            start
-                >= startRange
-                && end
-                <= endRange
-                && (road.boundingBox |> flatBox |> BoundingBox2d.intersects outerBox)
+        overlapsDiscAndRange start end road =
+            (road.boundingBox |> flatBox |> BoundingBox2d.intersects outerBox)
+                && (Interval.from start end |> Interval.intersects searchInterval)
 
         pointsWithinCircle : Dict Int RoadSection
         pointsWithinCircle =
@@ -736,7 +738,7 @@ makeCurveIfPossible track options =
                         dict
             in
             DomainModel.queryPointsUsingFilter
-                isWithinCircleAndWithinRange
+                overlapsCircleAndRange
                 track.trackTree
                 collector
                 Dict.empty
@@ -752,7 +754,7 @@ makeCurveIfPossible track options =
                         dict
             in
             DomainModel.queryPointsUsingFilter
-                isWithinRangeAndDisc
+                overlapsDiscAndRange
                 track.trackTree
                 collector
                 Dict.empty

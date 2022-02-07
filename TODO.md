@@ -11,8 +11,6 @@ DEBT: Map sends more click messages each time we click.
 
 ## Curve Former 
 
-2-way drag should correct for azimuth.
-
 Circle moves now, but some updates are one state adrift and 
 the points are now not showing up when they were previously.
 
@@ -98,4 +96,8 @@ Hence, not just one-size-fits-all "preview".
 Then again, it's not really worth worrying about. If we have excessive points
 in a preview list, we can easily elide them by skipping through the list in the
 view; a PeteTree is OTT.
+
+## Other 
+
+2-way drag should correct for azimuth. NOT POSSIBLE - multiple views!
 

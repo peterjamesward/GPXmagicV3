@@ -50,7 +50,8 @@ getRangeFromMarkers track =
             )
 
         Nothing ->
-            -- Hmm. Some want current point, some want whole track. This gives (0,0) == whole track.
+            -- Hmm. Some want current point, some want whole track.
+            -- This choice gives the offset of orange from either end.
             ( track.currentPosition, theLength - track.currentPosition )
 
 
