@@ -42,6 +42,7 @@ import SplitPane.SplitPane as SplitPane exposing (..)
 import StravaAuth exposing (getStravaToken)
 import Task
 import Time
+import Tools.BendSmoother
 import Tools.BezierSplines
 import Tools.CentroidAverage
 import Tools.CurveFormer
@@ -1071,6 +1072,24 @@ performActionsOnModel actions model =
 
                         ( fromStart, fromEnd ) =
                             (entry, skipCount track.trackTree - exit)
+
+                        newTrack =
+                            track
+                                |> TrackLoaded.addToUndoStack action
+                                    fromStart
+                                    fromEnd
+                                    oldPoints
+                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                    in
+                    { foldedModel | track = Just newTrack }
+
+                ( BendSmootherApplyWithOptions options, Just track ) ->
+                    let
+                        ( newTree, oldPoints ) =
+                            Tools.BendSmoother.applyUsingOptions options track
+
+                        ( fromStart, fromEnd ) =
+                            TrackLoaded.getRangeFromMarkers track
 
                         newTrack =
                             track

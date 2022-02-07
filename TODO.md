@@ -11,7 +11,11 @@ Curve Former should reset on track load.
 
 # WIP
 
-Classic bend smoother (fix Samir's bug on looped routes == same point exactly on different lap?)
+Classic bend smoother 
+Bend smoother logic carried over perfectly.
+Need to update control when pointers are moved.
+Need apply.
+(fix Samir's bug on looped routes == same point exactly on different lap?)
 
 ---
 

@@ -94,12 +94,16 @@ applyUsingOptions options track =
         ( fromStart, fromEnd ) =
             TrackLoaded.getRangeFromMarkers track
 
+        gpxPoints =
+            (Maybe.map .nodes options.smoothedBend |> Maybe.withDefault [])
+                |> List.map (DomainModel.gpxFromPointWithReference track.referenceLonLat)
+
         newTree =
             DomainModel.replaceRange
                 (fromStart + 1)
                 (fromEnd + 1)
                 track.referenceLonLat
-                (List.map Tuple.second <| computeNewPoints options track)
+                gpxPoints
                 track.trackTree
 
         oldPoints =
@@ -122,7 +126,11 @@ toolStateChange :
 toolStateChange opened colour options track =
     case ( opened, track ) of
         ( True, Just theTrack ) ->
-            ( options, previewActions options colour theTrack )
+            let
+                newOptions =
+                    options |> tryBendSmoother theTrack
+            in
+            ( newOptions, previewActions newOptions colour theTrack )
 
         _ ->
             ( options, [ HidePreview "bend" ] )
@@ -391,7 +399,7 @@ makeSmoothBend trackPointSpacing roadAB roadCD arc =
                 ++ newArcPoints
                 ++ [ newExitPoint, roadCD.endPoint ]
     in
-    newEarthPoints
+    List.drop 1 <| List.take (List.length newEarthPoints - 1) newEarthPoints
 
 
 toPlanarPoint : EarthPoint -> G.Point
