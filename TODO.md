@@ -11,7 +11,7 @@ Curve Former should reset on track load.
 
 # WIP
 
-Classic bend smoother (fix Samir's bug on looped routes)
+Classic bend smoother (fix Samir's bug on looped routes == same point exactly on different lap?)
 
 ---
 
