@@ -10376,6 +10376,7 @@ var $author$project$Main$encodeSplitValues = function (model) {
 					$author$project$SplitPane$SplitPane$getPosition(model.rightDockInternal)))
 			]));
 };
+var $elm$core$String$endsWith = _String_endsWith;
 var $elm$file$File$Select$file = F2(
 	function (mimes, toMsg) {
 		return A2(
@@ -10576,141 +10577,6 @@ var $author$project$PaneLayoutManager$initialise = F2(
 				pane4: A3($author$project$PaneLayoutManager$initialisePane, track, options, options.pane4)
 			});
 	});
-var $elm$json$Json$Encode$list = F2(
-	function (func, entries) {
-		return _Json_wrap(
-			A3(
-				$elm$core$List$foldl,
-				_Json_addEntry(func),
-				_Json_emptyArray(_Utils_Tuple0),
-				entries));
-	});
-var $ianmackenzie$elm_units$Length$inMeters = function (_v0) {
-	var numMeters = _v0.a;
-	return numMeters;
-};
-var $author$project$TrackLoaded$profilePointEncode = function (tp) {
-	return $elm$json$Json$Encode$object(
-		_List_fromArray(
-			[
-				_Utils_Tuple2(
-				'distance',
-				$elm$json$Json$Encode$float(
-					$ianmackenzie$elm_units$Length$inMeters(tp.distanceFromStart))),
-				_Utils_Tuple2(
-				'altitude',
-				$elm$json$Json$Encode$float(
-					$ianmackenzie$elm_units$Length$inMeters(tp.altitude))),
-				_Utils_Tuple2(
-				'gradient',
-				$elm$json$Json$Encode$float(tp.gradient))
-			]));
-};
-var $elm$core$Basics$ge = _Utils_ge;
-var $author$project$DomainModel$traverseTreeBetweenLimitsToDepth = F7(
-	function (startingAt, endingAt, depthFunction, currentDepth, thisNode, foldFn, accum) {
-		var nodeData = $author$project$DomainModel$asRecord(thisNode);
-		var start = _Utils_Tuple2(nodeData.startPoint, nodeData.sourceData.a);
-		var end = _Utils_Tuple2(nodeData.endPoint, nodeData.sourceData.b);
-		if (_Utils_cmp(
-			startingAt,
-			$author$project$DomainModel$skipCount(thisNode)) > -1) {
-			return accum;
-		} else {
-			if (endingAt <= 0) {
-				return accum;
-			} else {
-				if (thisNode.$ === 'Leaf') {
-					var leafNode = thisNode.a;
-					return A2(foldFn, leafNode, accum);
-				} else {
-					var node = thisNode.a;
-					var maximumDepth = A2(
-						$elm$core$Maybe$withDefault,
-						999,
-						depthFunction(node.nodeContent));
-					return (_Utils_cmp(currentDepth, maximumDepth) > -1) ? A2(foldFn, node.nodeContent, accum) : A7(
-						$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
-						startingAt - $author$project$DomainModel$skipCount(node.left),
-						endingAt - $author$project$DomainModel$skipCount(node.left),
-						depthFunction,
-						currentDepth + 1,
-						node.right,
-						foldFn,
-						A7($author$project$DomainModel$traverseTreeBetweenLimitsToDepth, startingAt, endingAt, depthFunction, currentDepth + 1, node.left, foldFn, accum));
-				}
-			}
-		}
-	});
-var $author$project$DomainModel$traverseTreeBetween = F5(
-	function (startingAt, endingAt, someNode, foldFn, accum) {
-		return A7(
-			$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
-			startingAt,
-			endingAt,
-			$elm$core$Basics$always($elm$core$Maybe$Nothing),
-			0,
-			someNode,
-			foldFn,
-			accum);
-	});
-var $author$project$DomainModel$foldOverRoute = F3(
-	function (foldFn, treeNode, startValues) {
-		return A5(
-			$author$project$DomainModel$traverseTreeBetween,
-			0,
-			$author$project$DomainModel$skipCount(treeNode),
-			treeNode,
-			foldFn,
-			startValues);
-	});
-var $ianmackenzie$elm_units$Quantity$plus = F2(
-	function (_v0, _v1) {
-		var y = _v0.a;
-		var x = _v1.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(x + y);
-	});
-var $elm$core$Basics$atan2 = _Basics_atan2;
-var $ianmackenzie$elm_geometry$Direction2d$toAngle = function (_v0) {
-	var d = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(
-		A2($elm$core$Basics$atan2, d.y, d.x));
-};
-var $author$project$DomainModel$trackPointsForOutput = function (tree) {
-	var foldFn = F2(
-		function (node, accum) {
-			var distance = function () {
-				if (accum.b) {
-					var prevPoint = accum.a;
-					return A2($ianmackenzie$elm_units$Quantity$plus, prevPoint.trueLength, prevPoint.distanceFromStart);
-				} else {
-					return $ianmackenzie$elm_units$Quantity$zero;
-				}
-			}();
-			return A2(
-				$elm$core$List$cons,
-				{
-					altitude: node.sourceData.a.altitude,
-					distanceFromStart: distance,
-					gradient: node.gradientAtStart,
-					latitude: node.sourceData.a.latitude,
-					longitude: $ianmackenzie$elm_geometry$Direction2d$toAngle(node.sourceData.a.longitude),
-					trueLength: node.trueLength
-				},
-				accum);
-		});
-	return A3($author$project$DomainModel$foldOverRoute, foldFn, tree, _List_Nil);
-};
-var $author$project$TrackLoaded$jsonProfileData = function (track) {
-	var points = $elm$core$List$reverse(
-		$author$project$DomainModel$trackPointsForOutput(track.trackTree));
-	var json = A2(
-		$elm$json$Json$Encode$list,
-		$elm$core$Basics$identity,
-		A2($elm$core$List$map, $author$project$TrackLoaded$profilePointEncode, points));
-	var output = A2($elm$json$Json$Encode$encode, 0, json);
-	return output;
-};
 var $elm$core$Platform$Cmd$map = _Platform_map;
 var $elm$file$File$name = _File_name;
 var $elm$core$Basics$not = _Basics_not;
@@ -10899,6 +10765,12 @@ var $ianmackenzie$elm_units$Angle$inDegrees = function (angle) {
 	return 180 * ($ianmackenzie$elm_units$Angle$inRadians(angle) / $elm$core$Basics$pi);
 };
 var $elm$json$Json$Encode$null = _Json_encodeNull;
+var $elm$core$Basics$atan2 = _Basics_atan2;
+var $ianmackenzie$elm_geometry$Direction2d$toAngle = function (_v0) {
+	var d = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(
+		A2($elm$core$Basics$atan2, d.y, d.x));
+};
 var $author$project$MapPortController$addMarkersToMap = function (track) {
 	var encodePos = function (_v1) {
 		var longitude = _v1.longitude;
@@ -10944,6 +10816,7 @@ var $author$project$MapPortController$addMarkersToMap = function (track) {
 					_Utils_Tuple2('previews', $elm$json$Json$Encode$null)
 				])));
 };
+var $elm$core$Basics$ge = _Utils_ge;
 var $ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo = F2(
 	function (_v0, _v1) {
 		var y = _v0.a;
@@ -11002,6 +10875,15 @@ var $ianmackenzie$elm_geometry$BoundingBox3d$intersects = F2(
 			$ianmackenzie$elm_geometry$BoundingBox3d$minZ(other),
 			$ianmackenzie$elm_geometry$BoundingBox3d$maxZ(boundingBox))))));
 	});
+var $elm$json$Json$Encode$list = F2(
+	function (func, entries) {
+		return _Json_wrap(
+			A3(
+				$elm$core$List$foldl,
+				_Json_addEntry(func),
+				_Json_emptyArray(_Utils_Tuple0),
+				entries));
+	});
 var $author$project$DomainModel$lngLatPair = function (_v0) {
 	var longitude = _v0.a;
 	var latitude = _v0.b;
@@ -11054,6 +10936,12 @@ var $ianmackenzie$elm_units$Quantity$minus = F2(
 		var y = _v0.a;
 		var x = _v1.a;
 		return $ianmackenzie$elm_units$Quantity$Quantity(x - y);
+	});
+var $ianmackenzie$elm_units$Quantity$plus = F2(
+	function (_v0, _v1) {
+		var y = _v0.a;
+		var x = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(x + y);
 	});
 var $ianmackenzie$elm_geometry$BoundingBox3d$withDimensions = F2(
 	function (_v0, givenCenterPoint) {
@@ -11280,6 +11168,41 @@ var $ianmackenzie$elm_geometry$BoundingBox3d$singleton = function (point) {
 			minZ: $ianmackenzie$elm_geometry$Point3d$zCoordinate(point)
 		});
 };
+var $author$project$DomainModel$traverseTreeBetweenLimitsToDepth = F7(
+	function (startingAt, endingAt, depthFunction, currentDepth, thisNode, foldFn, accum) {
+		var nodeData = $author$project$DomainModel$asRecord(thisNode);
+		var start = _Utils_Tuple2(nodeData.startPoint, nodeData.sourceData.a);
+		var end = _Utils_Tuple2(nodeData.endPoint, nodeData.sourceData.b);
+		if (_Utils_cmp(
+			startingAt,
+			$author$project$DomainModel$skipCount(thisNode)) > -1) {
+			return accum;
+		} else {
+			if (endingAt <= 0) {
+				return accum;
+			} else {
+				if (thisNode.$ === 'Leaf') {
+					var leafNode = thisNode.a;
+					return A2(foldFn, leafNode, accum);
+				} else {
+					var node = thisNode.a;
+					var maximumDepth = A2(
+						$elm$core$Maybe$withDefault,
+						999,
+						depthFunction(node.nodeContent));
+					return (_Utils_cmp(currentDepth, maximumDepth) > -1) ? A2(foldFn, node.nodeContent, accum) : A7(
+						$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
+						startingAt - $author$project$DomainModel$skipCount(node.left),
+						endingAt - $author$project$DomainModel$skipCount(node.left),
+						depthFunction,
+						currentDepth + 1,
+						node.right,
+						foldFn,
+						A7($author$project$DomainModel$traverseTreeBetweenLimitsToDepth, startingAt, endingAt, depthFunction, currentDepth + 1, node.left, foldFn, accum));
+				}
+			}
+		}
+	});
 var $author$project$SceneBuilderMap$trackPointsToJSON = function (track) {
 	var point = function (lonLat) {
 		return $elm$json$Json$Encode$object(
@@ -11877,6 +11800,18 @@ var $elm$core$List$drop = F2(
 			}
 		}
 	});
+var $author$project$DomainModel$traverseTreeBetween = F5(
+	function (startingAt, endingAt, someNode, foldFn, accum) {
+		return A7(
+			$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
+			startingAt,
+			endingAt,
+			$elm$core$Basics$always($elm$core$Maybe$Nothing),
+			0,
+			someNode,
+			foldFn,
+			accum);
+	});
 var $author$project$DomainModel$extractPointsInRange = F3(
 	function (fromStart, fromEnd, trackTree) {
 		var myFoldFn = F2(
@@ -11913,6 +11848,10 @@ var $author$project$TrackLoaded$getRangeFromMarkers = function (track) {
 var $ianmackenzie$elm_units$Angle$cos = function (_v0) {
 	var angle = _v0.a;
 	return $elm$core$Basics$cos(angle);
+};
+var $ianmackenzie$elm_units$Length$inMeters = function (_v0) {
+	var numMeters = _v0.a;
+	return numMeters;
 };
 var $author$project$Spherical$metresPerDegree = 78846.81;
 var $ianmackenzie$elm_geometry$Point3d$toTuple = F2(
@@ -18698,6 +18637,7 @@ var $elm$file$File$Download$string = F3(
 			A3(_File_download, name, mime, content));
 	});
 var $elm$file$File$toString = _File_toString;
+var $elm$core$String$toUpper = _String_toUpper;
 var $author$project$DomainModel$treeFromSourcePoints = function (track) {
 	var referencePoint = A2(
 		$elm$core$Maybe$withDefault,
@@ -23383,6 +23323,39 @@ var $author$project$ToolsController$update = F4(
 						]));
 		}
 	});
+var $author$project$WriteGPX$writeFooter = '</gpx>';
+var $author$project$WriteGPX$preamble = '<?xml version=\'1.0\' encoding=\'UTF-8\'?>\n<gpx version="1.1"\n  creator="https://www.stepwiserefinement.co.uk"\n  xmlns="http://www.topografix.com/GPX/1/1"\n  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"\n  xsi:schemaLocation="http://www.topografix.com/GPX/1/1\n  http://www.topografix.com/GPX/1/1/gpx.xsd">\n  <metadata>\n    <name>Cycling</name>\n    <author>\n      <link href="https://www.stepwiserefinement.co.uk">\n        <text>GPXmagic 2.0</text>\n        <type>text/html</type>\n      </link>\n    </author>\n  </metadata>\n';
+var $author$project$WriteGPX$writePreamble = $author$project$WriteGPX$preamble;
+var $elm$core$String$fromFloat = _String_fromNumber;
+var $author$project$WriteGPX$writeTrackPoint = function (gpx) {
+	return '<trkpt lat=\"' + ($elm$core$String$fromFloat(
+		$ianmackenzie$elm_units$Angle$inDegrees(gpx.latitude)) + ('\" lon=\"' + ($elm$core$String$fromFloat(
+		$ianmackenzie$elm_units$Angle$inDegrees(
+			$ianmackenzie$elm_geometry$Direction2d$toAngle(gpx.longitude))) + ('\">' + ('<ele>' + ($elm$core$String$fromFloat(
+		$ianmackenzie$elm_units$Length$inMeters(gpx.altitude)) + ('</ele>' + '</trkpt>\n')))))));
+};
+var $author$project$WriteGPX$writeTrack = F2(
+	function (name, trackPoints) {
+		return '\n  <trk>\n    <name>' + (name + ('</name>\n    <trkseg>\n' + ($elm$core$String$concat(
+			A2($elm$core$List$map, $author$project$WriteGPX$writeTrackPoint, trackPoints)) + '    </trkseg>\n  </trk>\n ')));
+	});
+var $author$project$WriteGPX$writeGPX = F2(
+	function (name, track) {
+		var useName = function () {
+			if (name.$ === 'Just') {
+				var n = name.a;
+				return n;
+			} else {
+				return 'A track from GPXmagic';
+			}
+		}();
+		var points = $author$project$DomainModel$getAllGPXPointsInNaturalOrder(track.trackTree);
+		return _Utils_ap(
+			$author$project$WriteGPX$writePreamble,
+			_Utils_ap(
+				A2($author$project$WriteGPX$writeTrack, useName, points),
+				$author$project$WriteGPX$writeFooter));
+	});
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
@@ -23717,17 +23690,39 @@ var $author$project$Main$update = F2(
 						{toolOptions: $author$project$ToolsController$defaultOptions}),
 					$elm$core$Platform$Cmd$none);
 			default:
-				var content = A2($elm$core$Maybe$map, $author$project$TrackLoaded$jsonProfileData, model.track);
-				return _Utils_Tuple2(
-					model,
-					function () {
-						if (content.$ === 'Just') {
-							var json = content.a;
-							return A3($elm$file$File$Download$string, 'DATA.JSON', 'text/json', json);
-						} else {
-							return $elm$core$Platform$Cmd$none;
-						}
-					}());
+				var outputFilename = function () {
+					var _v9 = model.filename;
+					if (_v9.$ === 'Just') {
+						var filename = _v9.a;
+						return _Utils_ap(
+							filename,
+							(!A2(
+								$elm$core$String$endsWith,
+								'.GPX',
+								$elm$core$String$toUpper(filename))) ? '.gpx' : '');
+					} else {
+						return 'NOFILENAME';
+					}
+				}();
+				var _v8 = model.track;
+				if (_v8.$ === 'Just') {
+					var track = _v8.a;
+					return _Utils_Tuple2(
+						model,
+						A3(
+							$elm$file$File$Download$string,
+							outputFilename,
+							'text/gpx',
+							A2($author$project$WriteGPX$writeGPX, model.filename, track)));
+				} else {
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								modalMessage: $elm$core$Maybe$Just('Sorry, unable to write the file')
+							}),
+						$elm$core$Platform$Cmd$none);
+				}
 		}
 	});
 var $author$project$Main$DismissModalMessage = {$: 'DismissModalMessage'};
@@ -24076,7 +24071,6 @@ var $mdgriffith$elm_ui$Internal$Model$Style = F2(
 var $mdgriffith$elm_ui$Internal$Style$dot = function (c) {
 	return '.' + c;
 };
-var $elm$core$String$fromFloat = _String_fromNumber;
 var $mdgriffith$elm_ui$Internal$Model$formatColor = function (_v0) {
 	var red = _v0.a;
 	var green = _v0.b;
@@ -39234,7 +39228,6 @@ var $elm$time$Time$toSecond = F2(
 				$elm$time$Time$posixToMillis(time),
 				1000));
 	});
-var $elm$core$String$toUpper = _String_toUpper;
 var $ryannhg$date_format$DateFormat$millisecondsPerYear = $elm$core$Basics$round((((1000 * 60) * 60) * 24) * 365.25);
 var $ryannhg$date_format$DateFormat$firstDayOfYear = F2(
 	function (zone, time) {
@@ -43378,7 +43371,7 @@ var $author$project$ViewPureStyles$showModalMessage = F2(
 				]));
 	});
 var $author$project$Main$GpxRequested = {$: 'GpxRequested'};
-var $author$project$Main$SaveJsonData = {$: 'SaveJsonData'};
+var $author$project$Main$WriteGpxFile = {$: 'WriteGpxFile'};
 var $author$project$Main$NoOp = {$: 'NoOp'};
 var $author$project$Main$ToggleToolPopup = {$: 'ToggleToolPopup'};
 var $author$project$Main$BackgroundColour = function (a) {
@@ -43523,6 +43516,7 @@ var $author$project$Main$globalOptions = function (model) {
 				onPress: $elm$core$Maybe$Just($author$project$Main$ToggleToolPopup)
 			}));
 };
+var $smucode$elm_flat_colors$FlatColors$AussiePalette$juneBud = A3($mdgriffith$elm_ui$Element$rgb255, 186, 220, 88);
 var $author$project$PaneLayoutManager$TogglePopup = {$: 'TogglePopup'};
 var $author$project$PaneLayoutManager$PaneNoOp = {$: 'PaneNoOp'};
 var $author$project$PaneLayoutManager$SetPaneLayout = function (a) {
@@ -43800,11 +43794,11 @@ var $author$project$Main$topLoadingBar = function (model) {
 		_List_fromArray(
 			[
 				$mdgriffith$elm_ui$Element$padding(5),
-				$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$AussiePalette$quinceJelly)
+				$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$AussiePalette$juneBud)
 			]),
 		{
-			label: $mdgriffith$elm_ui$Element$text('SAVE JSON TEST'),
-			onPress: $elm$core$Maybe$Just($author$project$Main$SaveJsonData)
+			label: $mdgriffith$elm_ui$Element$text('Save GPX file'),
+			onPress: $elm$core$Maybe$Just($author$project$Main$WriteGpxFile)
 		});
 	var loadGpxButton = A2(
 		$mdgriffith$elm_ui$Element$Input$button,

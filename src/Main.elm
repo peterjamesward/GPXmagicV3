@@ -57,6 +57,7 @@ import Url exposing (Url)
 import UtilsForViews exposing (colourHexString)
 import ViewPureStyles exposing (..)
 import ViewThirdPerson exposing (stopProp)
+import WriteGPX
 
 
 type Msg
@@ -83,7 +84,7 @@ type Msg
     | ToggleToolPopup
     | BackgroundColour Element.Color
     | RestoreDefaultToolLayout
-    | SaveJsonData -- for chart testing...
+    | WriteGpxFile
     | NoOp
 
 
@@ -562,19 +563,33 @@ Please check the file contains GPX data.""" }
             , Cmd.none
             )
 
-        SaveJsonData ->
+        WriteGpxFile ->
             let
-                content =
-                    Maybe.map TrackLoaded.jsonProfileData model.track
+                outputFilename =
+                    case model.filename of
+                        Just filename ->
+                            filename
+                                ++ (if not (String.endsWith ".GPX" (String.toUpper filename)) then
+                                        ".gpx"
+
+                                    else
+                                        ""
+                                   )
+
+                        Nothing ->
+                            "NOFILENAME"
             in
-            ( model
-            , case content of
-                Just json ->
-                    Download.string "DATA.JSON" "text/json" json
+            case model.track of
+                Just track ->
+                    ( model
+                    , Download.string outputFilename "text/gpx" <|
+                        WriteGPX.writeGPX model.filename track
+                    )
 
                 Nothing ->
-                    Cmd.none
-            )
+                    ( { model | modalMessage = Just "Sorry, unable to write the file" }
+                    , Cmd.none
+                    )
 
 
 
@@ -862,10 +877,10 @@ topLoadingBar model =
         saveButton =
             button
                 [ padding 5
-                , Background.color FlatColors.AussiePalette.quinceJelly
+                , Background.color FlatColors.AussiePalette.juneBud
                 ]
-                { onPress = Just SaveJsonData
-                , label = text "SAVE JSON TEST"
+                { onPress = Just WriteGpxFile
+                , label = text "Save GPX file"
                 }
     in
     row
