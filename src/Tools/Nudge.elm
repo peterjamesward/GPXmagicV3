@@ -42,46 +42,32 @@ type alias Point =
     Point2d Meters LocalCoords
 
 
-computeNewPoints : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
-computeNewPoints options track =
-    let
-        ( fromStart, fromEnd ) =
-            TrackLoaded.getRangeFromMarkers track
-
-        previewPoints points =
-            points
-                |> List.map
-                    (\earth ->
-                        ( earth
-                        , DomainModel.gpxFromPointWithReference track.referenceLonLat earth
-                        )
-                    )
-    in
-    []
-
-
-applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyUsingOptions :
+    Options
+    -> TrackLoaded msg
+    -> ( Maybe PeteTree, List GPXSource, ( Int, Int ) )
 applyUsingOptions options track =
     let
-        ( fromStart, fromEnd ) =
-            TrackLoaded.getRangeFromMarkers track
+        ( ( actualStart, actualEnd ), newPoints ) =
+            computeNudgedPoints options track
 
         newTree =
             DomainModel.replaceRange
-                (fromStart + 1)
-                (fromEnd + 1)
+                actualStart
+                actualEnd
                 track.referenceLonLat
-                []
+                (List.map Tuple.second newPoints)
                 track.trackTree
 
         oldPoints =
             DomainModel.extractPointsInRange
-                fromStart
-                fromEnd
+                actualStart
+                actualEnd
                 track.trackTree
     in
     ( newTree
     , oldPoints |> List.map Tuple.second
+    , ( actualStart, actualEnd )
     )
 
 
@@ -105,12 +91,15 @@ previewActions newOptions colour track =
         { tag = "nudge"
         , shape = PreviewCircle
         , colour = colour
-        , points = computeNudgedPoints newOptions track
+        , points = Tuple.second <| computeNudgedPoints newOptions track
         }
     ]
 
 
-computeNudgedPoints : Options -> TrackLoaded msg -> List (EarthPoint, GPXSource)
+computeNudgedPoints :
+    Options
+    -> TrackLoaded msg
+    -> ( ( Int, Int ), List ( EarthPoint, GPXSource ) )
 computeNudgedPoints settings track =
     let
         ( fromStart, fromEnd ) =
@@ -192,7 +181,7 @@ computeNudgedPoints settings track =
                         )
                     )
     in
-    previewPoints
+    ( ( startIncludingFade, endIncludingFade ), previewPoints )
 
 
 effectiveDirection : Int -> TrackLoaded msg -> Direction2d LocalCoords

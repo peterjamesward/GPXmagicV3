@@ -50,6 +50,7 @@ import Tools.BezierSplines
 import Tools.CentroidAverage
 import Tools.CurveFormer
 import Tools.DeletePoints as DeletePoints
+import Tools.Nudge
 import ToolsController exposing (ToolEntry)
 import TrackLoaded exposing (TrackLoaded)
 import Url exposing (Url)
@@ -1072,6 +1073,24 @@ performActionsOnModel actions model =
                     let
                         ( newTree, oldPoints, ( entry, exit ) ) =
                             Tools.CurveFormer.applyUsingOptions options track
+
+                        ( fromStart, fromEnd ) =
+                            ( entry, skipCount track.trackTree - exit )
+
+                        newTrack =
+                            track
+                                |> TrackLoaded.addToUndoStack action
+                                    fromStart
+                                    fromEnd
+                                    oldPoints
+                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                    in
+                    { foldedModel | track = Just newTrack }
+
+                ( NudgeApplyWithOptions options, Just track ) ->
+                    let
+                        ( newTree, oldPoints, ( entry, exit ) ) =
+                            Tools.Nudge.applyUsingOptions options track
 
                         ( fromStart, fromEnd ) =
                             ( entry, skipCount track.trackTree - exit )
