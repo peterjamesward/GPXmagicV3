@@ -23,16 +23,16 @@ orange and purple are (possibly) co-linear.
 ## Tools
 
 1. Segment info (toggle with whole track?)
-2. Move & Stretch 
-3. Gradient problems
+2. Gradient problems
+3. Limit gradients
 4. Steep climbs
 5. Intersections
 6. Visual options
 7. Map Satellite style choice
 8. Memory usage (incl limiting actions such as dumping Undo stack).
 9. SVG import
-10. Fly-through
-11. Limit gradients 
+10. Move & Stretch
+11. Fly-through
 12. Graph Theory
 13. Use Strava segment data
 14. Loops (includes Out and Back) (+ impact on others, such as Bezier).
