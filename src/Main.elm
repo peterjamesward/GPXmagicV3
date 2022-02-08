@@ -1112,51 +1112,36 @@ performActionsOnModel actions model =
                             , altitude = Quantity.zero
                             }
 
-                        endGpx =
-                            { longitude = Direction2d.fromAngle <| Angle.degrees endLon
-                            , latitude = Angle.degrees startLon
-                            , altitude = Quantity.zero
-                            }
-
                         index =
                             DomainModel.nearestToLonLat startGpx track.trackTree
 
-                        currentPosition =
+                        positionBeforeDrag =
                             gpxPointFromIndex index track.trackTree
 
-                        clickProximity =
-                            DomainModel.gpxDistance startGpx currentPosition
+                        endGpx =
+                            { longitude = Direction2d.fromAngle <| Angle.degrees endLon
+                            , latitude = Angle.degrees endLat
+                            , altitude = positionBeforeDrag.altitude
+                            }
 
-                        distanceMoved =
-                            DomainModel.gpxDistance currentPosition endGpx
+                        newTree =
+                            DomainModel.updatePointByIndexInSitu
+                                index
+                                endGpx
+                                track.referenceLonLat
+                                track.trackTree
+
+                        ( fromStart, fromEnd ) =
+                            ( index, skipCount track.trackTree - index )
+
+                        newTrack =
+                            { track | trackTree = newTree }
+                                |> TrackLoaded.addToUndoStack action
+                                    fromStart
+                                    fromEnd
+                                    [ positionBeforeDrag ]
                     in
-                    -- Must be sufficiently close to count, and must have moved.
-                    if
-                        (clickProximity |> Quantity.lessThanOrEqualTo (Length.meters 2.0))
-                            && (distanceMoved |> Quantity.greaterThanOrEqualTo (Length.meters 0.0))
-                    then
-                        let
-                            newTree =
-                                DomainModel.updatePointByIndexInSitu
-                                    index
-                                    endGpx
-                                    track.referenceLonLat
-                                    track.trackTree
-
-                            ( fromStart, fromEnd ) =
-                                ( index, skipCount track.trackTree - index )
-
-                            newTrack =
-                                { track | trackTree = newTree }
-                                    |> TrackLoaded.addToUndoStack action
-                                        fromStart
-                                        fromEnd
-                                        [ currentPosition ]
-                        in
-                        { foldedModel | track = Just newTrack }
-
-                    else
-                        foldedModel
+                    { foldedModel | track = Just newTrack }
 
                 ( TrackHasChanged, Just track ) ->
                     -- Must be wary of looping here.

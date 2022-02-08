@@ -94,7 +94,7 @@ function startDraggingPoint(e) {
         'source': 'drag',
         'paint': {
             'circle-radius': 5,
-            'circle-color': '#ffff00'
+            'circle-color': '#4834d4'
         }
     });
 
@@ -375,6 +375,7 @@ function addLineToMap(data, points) {
 };
 
 function setClickMode(newMode, points) {
+
    if (pointsLayerAdded) {
        map.removeLayer('points');
        map.removeSource('points');
@@ -401,6 +402,7 @@ function setClickMode(newMode, points) {
         pointsLayerAdded = true;
 
         if (clickToDrag) {
+
             // When the cursor enters a feature in the point layer, prepare for dragging.
             map.on('mouseenter', 'points', function (e) {
                 canvas.style.cursor = 'move';
@@ -429,7 +431,12 @@ function setClickMode(newMode, points) {
                 e;
             });
 
-        };
+        } else {
+          map.off('mouseenter','points')
+             .off('mouseleave','points')
+             .off('mousedown','points')
+             .off('click','points')
+        }
     };
 };
 

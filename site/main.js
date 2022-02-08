@@ -17881,46 +17881,34 @@ var $author$project$Main$performActionsOnModel = F2(
 										$ianmackenzie$elm_units$Angle$degrees(startLon))
 								};
 								var index = A2($author$project$DomainModel$nearestToLonLat, startGpx, track.trackTree);
+								var positionBeforeDrag = A2($author$project$DomainModel$gpxPointFromIndex, index, track.trackTree);
 								var endGpx = {
-									altitude: $ianmackenzie$elm_units$Quantity$zero,
-									latitude: $ianmackenzie$elm_units$Angle$degrees(startLon),
+									altitude: positionBeforeDrag.altitude,
+									latitude: $ianmackenzie$elm_units$Angle$degrees(endLat),
 									longitude: $ianmackenzie$elm_geometry$Direction2d$fromAngle(
 										$ianmackenzie$elm_units$Angle$degrees(endLon))
 								};
-								var currentPosition = A2($author$project$DomainModel$gpxPointFromIndex, index, track.trackTree);
-								var distanceMoved = A2($author$project$DomainModel$gpxDistance, currentPosition, endGpx);
-								var clickProximity = A2($author$project$DomainModel$gpxDistance, startGpx, currentPosition);
-								if (A2(
-									$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
-									$ianmackenzie$elm_units$Length$meters(2.0),
-									clickProximity) && A2(
-									$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo,
-									$ianmackenzie$elm_units$Length$meters(0.0),
-									distanceMoved)) {
-									var newTree = A4($author$project$DomainModel$updatePointByIndexInSitu, index, endGpx, track.referenceLonLat, track.trackTree);
-									var _v17 = _Utils_Tuple2(
-										index,
-										$author$project$DomainModel$skipCount(track.trackTree) - index);
-									var fromStart = _v17.a;
-									var fromEnd = _v17.b;
-									var newTrack = A5(
-										$author$project$TrackLoaded$addToUndoStack,
-										action,
-										fromStart,
-										fromEnd,
-										_List_fromArray(
-											[currentPosition]),
-										_Utils_update(
-											track,
-											{trackTree: newTree}));
-									return _Utils_update(
-										foldedModel,
-										{
-											track: $elm$core$Maybe$Just(newTrack)
-										});
-								} else {
-									return foldedModel;
-								}
+								var newTree = A4($author$project$DomainModel$updatePointByIndexInSitu, index, endGpx, track.referenceLonLat, track.trackTree);
+								var _v17 = _Utils_Tuple2(
+									index,
+									$author$project$DomainModel$skipCount(track.trackTree) - index);
+								var fromStart = _v17.a;
+								var fromEnd = _v17.b;
+								var newTrack = A5(
+									$author$project$TrackLoaded$addToUndoStack,
+									action,
+									fromStart,
+									fromEnd,
+									_List_fromArray(
+										[positionBeforeDrag]),
+									_Utils_update(
+										track,
+										{trackTree: newTree}));
+								return _Utils_update(
+									foldedModel,
+									{
+										track: $elm$core$Maybe$Just(newTrack)
+									});
 							} else {
 								break _v0$19;
 							}
@@ -18655,7 +18643,8 @@ var $author$project$MapPortController$draggedOnMap = F2(
 			var endLat = _v2.b.a;
 			return _List_fromArray(
 				[
-					A4($author$project$Actions$PointMovedOnMap, startLon, startLat, endLon, endLat)
+					A4($author$project$Actions$PointMovedOnMap, startLon, startLat, endLon, endLat),
+					$author$project$Actions$TrackHasChanged
 				]);
 		} else {
 			return _List_Nil;

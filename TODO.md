@@ -18,13 +18,8 @@ orange and purple are (possibly) colinear.
 
 ## Drag on map
 
-Why not? 
-Take another look at the clicking issue?
-~~1. Toggle for draggable points~~
-2. JS interface to make draggable
--- Toggling off again does not redraw them!
-
-3. Handling the drag message
+* Initially map allows dragging. Can't see why.
+* Altitude is zero!
 
 ---
 

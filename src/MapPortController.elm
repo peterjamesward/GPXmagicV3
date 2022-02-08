@@ -305,7 +305,9 @@ draggedOnMap json track =
     in
     case ( ( lon1, lat1 ), ( lon2, lat2 ) ) of
         ( ( Ok startLon, Ok startLat ), ( Ok endLon, Ok endLat ) ) ->
-            [ PointMovedOnMap startLon startLat endLon endLat ]
+            [ PointMovedOnMap startLon startLat endLon endLat
+            , TrackHasChanged
+            ]
 
         _ ->
             []
