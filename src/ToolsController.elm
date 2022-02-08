@@ -24,6 +24,8 @@ import Tools.CentroidAverageOptions
 import Tools.CurveFormer
 import Tools.CurveFormerOptions
 import Tools.DeletePoints as DeletePoints
+import Tools.Nudge
+import Tools.NudgeOptions
 import Tools.Pointers as Pointers
 import Tools.TrackInfoBox as TrackInfoBox
 import Tools.UndoRedo as UndoRedo
@@ -57,6 +59,7 @@ type ToolType
     | ToolCentroidAverage
     | ToolCurveFormer
     | ToolBendSmoother
+    | ToolNudge
 
 
 type alias Options =
@@ -71,6 +74,7 @@ type alias Options =
     , centroidAverageOptions : Tools.CentroidAverageOptions.Options
     , curveFormerOptions : Tools.CurveFormerOptions.Options
     , bendSmootherOptions : Tools.BendSmootherOptions.Options
+    , nudgeOptions : Tools.NudgeOptions.Options
     }
 
 
@@ -86,6 +90,7 @@ defaultOptions =
     , centroidAverageOptions = Tools.CentroidAverage.defaultOptions
     , curveFormerOptions = Tools.CurveFormer.defaultOptions
     , bendSmootherOptions = Tools.BendSmoother.defaultOptions
+    , nudgeOptions = Tools.Nudge.defaultOptions
     }
 
 
@@ -104,6 +109,7 @@ type ToolMsg
     | ToolCentroidMsg Tools.CentroidAverage.Msg
     | ToolCurveFormerMsg Tools.CurveFormer.Msg
     | ToolBendSmootherMsg Tools.BendSmoother.Msg
+    | ToolNudgeMsg Tools.Nudge.Msg
 
 
 type alias ToolEntry =
@@ -131,6 +137,7 @@ defaultTools =
     , centroidAverageTool
     , curveFormerTool
     , bendSmootherTool
+    , nudgeTool
     ]
 
 
@@ -245,10 +252,25 @@ curveFormerTool =
     , isPopupOpen = False
     }
 
+
 bendSmootherTool : ToolEntry
 bendSmootherTool =
     { toolType = ToolBendSmoother
     , label = "Classic bends"
+    , info = "Make it smoother"
+    , video = Nothing
+    , state = Contracted
+    , dock = DockLowerRight
+    , tabColour = FlatColors.SwedishPalette.blackPearl
+    , textColour = contrastingColour FlatColors.SwedishPalette.blackPearl
+    , isPopupOpen = False
+    }
+
+
+nudgeTool : ToolEntry
+nudgeTool =
+    { toolType = ToolNudge
+    , label = "Nudge"
     , info = "Make it smoother"
     , video = Nothing
     , state = Contracted
@@ -471,6 +493,19 @@ update toolMsg isTrack msgWrapper options =
             , actions
             )
 
+        ToolNudgeMsg msg ->
+            let
+                ( newOptions, actions ) =
+                    Tools.Nudge.update
+                        msg
+                        options.nudgeOptions
+                        (getColour ToolNudge options.tools)
+                        isTrack
+            in
+            ( { options | nudgeOptions = newOptions }
+            , actions
+            )
+
         ToggleImperial ->
             let
                 newOptions =
@@ -612,6 +647,20 @@ toolStateHasChanged toolType newState isTrack options =
 
                 newOptions =
                     { options | bendSmootherOptions = newToolOptions }
+            in
+            ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
+
+        ToolNudge ->
+            let
+                ( newToolOptions, actions ) =
+                    Tools.Nudge.toolStateChange
+                        (newState == Expanded)
+                        (getColour toolType options.tools)
+                        options.nudgeOptions
+                        isTrack
+
+                newOptions =
+                    { options | nudgeOptions = newToolOptions }
             in
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
@@ -829,6 +878,13 @@ viewToolByType msgWrapper entry isTrack options =
                     options.bendSmootherOptions
                     isTrack
 
+            ToolNudge ->
+                Tools.Nudge.view
+                    options.imperial
+                    options.nudgeOptions
+                    (msgWrapper << ToolNudgeMsg)
+                    isTrack
+
 
 
 -- Local storage management
@@ -880,6 +936,8 @@ encodeType toolType =
         ToolBendSmoother ->
             "ToolBendSmoother"
 
+        ToolNudge ->
+            "ToolNudge"
 
 encodeColour : Element.Color -> E.Value
 encodeColour colour =

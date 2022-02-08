@@ -13,6 +13,7 @@ import Tools.BezierOptions
 import Tools.CentroidAverageOptions
 import Tools.CurveFormerOptions
 import Tools.MemoryUsage
+import Tools.NudgeOptions
 
 
 type ToolAction msg
@@ -40,6 +41,7 @@ type ToolAction msg
     | BendSmootherApplyWithOptions Tools.BendSmootherOptions.Options
     | MakeMapPointsDraggable Bool
     | PointMovedOnMap Float Float Float Float
+    | NudgeApplyWithOptions Tools.NudgeOptions.Options
 
 
 type PreviewShape
@@ -80,6 +82,9 @@ interpretAction action =
 
         PointMovedOnMap _ _ _ _ ->
             "move on map"
+
+        NudgeApplyWithOptions options ->
+            "nudge"
 
         _ ->
             "ask Pete to fix this message"

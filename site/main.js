@@ -8529,6 +8529,8 @@ var $author$project$Tools$CurveFormer$defaultOptions = {
 	vector: $ianmackenzie$elm_geometry$Vector2d$zero
 };
 var $author$project$Tools$DeletePoints$defaultOptions = {pointsToBeDeleted: _List_Nil, singlePoint: true};
+var $ianmackenzie$elm_units$Quantity$zero = $ianmackenzie$elm_units$Quantity$Quantity(0);
+var $author$project$Tools$Nudge$defaultOptions = {fadeExtent: $ianmackenzie$elm_units$Quantity$zero, horizontal: $ianmackenzie$elm_units$Quantity$zero, vertical: $ianmackenzie$elm_units$Quantity$zero};
 var $author$project$Tools$Pointers$defaultOptions = {orange: 0, purple: $elm$core$Maybe$Nothing};
 var $author$project$Tools$UndoRedo$Options = function (dummy) {
 	return {dummy: dummy};
@@ -8637,6 +8639,18 @@ var $author$project$ToolsController$directionChangeTool = {
 	toolType: $author$project$ToolsController$ToolAbruptDirectionChanges,
 	video: $elm$core$Maybe$Nothing
 };
+var $author$project$ToolsController$ToolNudge = {$: 'ToolNudge'};
+var $author$project$ToolsController$nudgeTool = {
+	dock: $author$project$ToolsController$DockLowerRight,
+	info: 'Make it smoother',
+	isPopupOpen: false,
+	label: 'Nudge',
+	state: $author$project$ToolsController$Contracted,
+	tabColour: $smucode$elm_flat_colors$FlatColors$SwedishPalette$blackPearl,
+	textColour: $author$project$ViewPureStyles$contrastingColour($smucode$elm_flat_colors$FlatColors$SwedishPalette$blackPearl),
+	toolType: $author$project$ToolsController$ToolNudge,
+	video: $elm$core$Maybe$Nothing
+};
 var $author$project$ToolsController$Expanded = {$: 'Expanded'};
 var $author$project$ToolsController$ToolPointers = {$: 'ToolPointers'};
 var $smucode$elm_flat_colors$FlatColors$AussiePalette$quinceJelly = A3($mdgriffith$elm_ui$Element$rgb255, 240, 147, 43);
@@ -8677,8 +8691,8 @@ var $author$project$ToolsController$undoRedoTool = {
 	video: $elm$core$Maybe$Nothing
 };
 var $author$project$ToolsController$defaultTools = _List_fromArray(
-	[$author$project$ToolsController$pointersTool, $author$project$ToolsController$undoRedoTool, $author$project$ToolsController$trackInfoBox, $author$project$ToolsController$directionChangeTool, $author$project$ToolsController$deleteTool, $author$project$ToolsController$bezierSplinesTool, $author$project$ToolsController$centroidAverageTool, $author$project$ToolsController$curveFormerTool, $author$project$ToolsController$bendSmootherTool]);
-var $author$project$ToolsController$defaultOptions = {bendSmootherOptions: $author$project$Tools$BendSmoother$defaultOptions, bezierSplineOptions: $author$project$Tools$BezierSplines$defaultOptions, centroidAverageOptions: $author$project$Tools$CentroidAverage$defaultOptions, curveFormerOptions: $author$project$Tools$CurveFormer$defaultOptions, deleteOptions: $author$project$Tools$DeletePoints$defaultOptions, directionChangeOptions: $author$project$Tools$AbruptDirectionChanges$defaultOptions, imperial: false, pointerOptions: $author$project$Tools$Pointers$defaultOptions, tools: $author$project$ToolsController$defaultTools, undoRedoOptions: $author$project$Tools$UndoRedo$defaultOptions};
+	[$author$project$ToolsController$pointersTool, $author$project$ToolsController$undoRedoTool, $author$project$ToolsController$trackInfoBox, $author$project$ToolsController$directionChangeTool, $author$project$ToolsController$deleteTool, $author$project$ToolsController$bezierSplinesTool, $author$project$ToolsController$centroidAverageTool, $author$project$ToolsController$curveFormerTool, $author$project$ToolsController$bendSmootherTool, $author$project$ToolsController$nudgeTool]);
+var $author$project$ToolsController$defaultOptions = {bendSmootherOptions: $author$project$Tools$BendSmoother$defaultOptions, bezierSplineOptions: $author$project$Tools$BezierSplines$defaultOptions, centroidAverageOptions: $author$project$Tools$CentroidAverage$defaultOptions, curveFormerOptions: $author$project$Tools$CurveFormer$defaultOptions, deleteOptions: $author$project$Tools$DeletePoints$defaultOptions, directionChangeOptions: $author$project$Tools$AbruptDirectionChanges$defaultOptions, imperial: false, nudgeOptions: $author$project$Tools$Nudge$defaultOptions, pointerOptions: $author$project$Tools$Pointers$defaultOptions, tools: $author$project$ToolsController$defaultTools, undoRedoOptions: $author$project$Tools$UndoRedo$defaultOptions};
 var $elm$browser$Browser$Dom$getViewport = _Browser_withWindow(_Browser_getViewport);
 var $elm$time$Time$Name = function (a) {
 	return {$: 'Name', a: a};
@@ -10662,7 +10676,6 @@ var $ianmackenzie$elm_geometry$Direction2d$toAngle = function (_v0) {
 	return $ianmackenzie$elm_units$Quantity$Quantity(
 		A2($elm$core$Basics$atan2, d.y, d.x));
 };
-var $ianmackenzie$elm_units$Quantity$zero = $ianmackenzie$elm_units$Quantity$Quantity(0);
 var $author$project$DomainModel$trackPointsForOutput = function (tree) {
 	var foldFn = F2(
 		function (node, accum) {
@@ -13574,8 +13587,10 @@ var $author$project$ToolsController$encodeType = function (toolType) {
 			return 'ToolCentroidAverage';
 		case 'ToolCurveFormer':
 			return 'ToolCurveFormer';
-		default:
+		case 'ToolBendSmoother':
 			return 'ToolBendSmoother';
+		default:
+			return 'ToolNudge';
 	}
 };
 var $author$project$ToolsController$encodeOneTool = function (tool) {
@@ -15629,6 +15644,53 @@ var $author$project$Tools$DeletePoints$toolStateChange = F4(
 					]));
 		}
 	});
+var $author$project$Tools$Nudge$computeNewPoints = F2(
+	function (options, track) {
+		var previewPoints = function (points) {
+			return A2(
+				$elm$core$List$map,
+				function (earth) {
+					return _Utils_Tuple2(
+						earth,
+						A2($author$project$DomainModel$gpxFromPointWithReference, track.referenceLonLat, earth));
+				},
+				points);
+		};
+		var _v0 = $author$project$TrackLoaded$getRangeFromMarkers(track);
+		var fromStart = _v0.a;
+		var fromEnd = _v0.b;
+		return _List_Nil;
+	});
+var $author$project$Tools$Nudge$previewActions = F3(
+	function (newOptions, colour, track) {
+		return _List_fromArray(
+			[
+				$author$project$Actions$ShowPreview(
+				{
+					colour: colour,
+					points: A2($author$project$Tools$Nudge$computeNewPoints, newOptions, track),
+					shape: $author$project$Actions$PreviewCircle,
+					tag: 'nudge'
+				})
+			]);
+	});
+var $author$project$Tools$Nudge$toolStateChange = F4(
+	function (opened, colour, options, track) {
+		var _v0 = _Utils_Tuple2(opened, track);
+		if (_v0.a && (_v0.b.$ === 'Just')) {
+			var theTrack = _v0.b.a;
+			return _Utils_Tuple2(
+				options,
+				A3($author$project$Tools$Nudge$previewActions, options, colour, theTrack));
+		} else {
+			return _Utils_Tuple2(
+				options,
+				_List_fromArray(
+					[
+						$author$project$Actions$HidePreview('nudge')
+					]));
+		}
+	});
 var $author$project$Tools$Pointers$toolStateChange = F4(
 	function (opened, colour, options, track) {
 		var _v0 = _Utils_Tuple2(opened, track);
@@ -15784,7 +15846,7 @@ var $author$project$ToolsController$toolStateHasChanged = F4(
 							'tools',
 							$author$project$ToolsController$encodeToolState(options)),
 						actions));
-			default:
+			case 'ToolBendSmoother':
 				var _v7 = A4(
 					$author$project$Tools$BendSmoother$toolStateChange,
 					_Utils_eq(newState, $author$project$ToolsController$Expanded),
@@ -15796,6 +15858,27 @@ var $author$project$ToolsController$toolStateHasChanged = F4(
 				var newOptions = _Utils_update(
 					options,
 					{bendSmootherOptions: newToolOptions});
+				return _Utils_Tuple2(
+					newOptions,
+					A2(
+						$elm$core$List$cons,
+						A2(
+							$author$project$Actions$StoreLocally,
+							'tools',
+							$author$project$ToolsController$encodeToolState(options)),
+						actions));
+			default:
+				var _v8 = A4(
+					$author$project$Tools$Nudge$toolStateChange,
+					_Utils_eq(newState, $author$project$ToolsController$Expanded),
+					A2($author$project$ToolsController$getColour, toolType, options.tools),
+					options.nudgeOptions,
+					isTrack);
+				var newToolOptions = _v8.a;
+				var actions = _v8.b;
+				var newOptions = _Utils_update(
+					options,
+					{nudgeOptions: newToolOptions});
 				return _Utils_Tuple2(
 					newOptions,
 					A2(
@@ -22704,6 +22787,65 @@ var $author$project$Tools$DeletePoints$update = F4(
 			return _Utils_Tuple2(options, _List_Nil);
 		}
 	});
+var $author$project$Actions$NudgeApplyWithOptions = function (a) {
+	return {$: 'NudgeApplyWithOptions', a: a};
+};
+var $author$project$Tools$Nudge$update = F4(
+	function (msg, options, previewColour, hasTrack) {
+		var _v0 = _Utils_Tuple2(hasTrack, msg);
+		if (_v0.a.$ === 'Just') {
+			switch (_v0.b.$) {
+				case 'SetHorizontalNudgeFactor':
+					var track = _v0.a.a;
+					var value = _v0.b.a;
+					var newOptions = _Utils_update(
+						options,
+						{horizontal: value});
+					return _Utils_Tuple2(
+						newOptions,
+						A3($author$project$Tools$Nudge$previewActions, newOptions, previewColour, track));
+				case 'SetVerticalNudgeFactor':
+					var track = _v0.a.a;
+					var value = _v0.b.a;
+					var newOptions = _Utils_update(
+						options,
+						{vertical: value});
+					return _Utils_Tuple2(
+						newOptions,
+						A3($author$project$Tools$Nudge$previewActions, newOptions, previewColour, track));
+				case 'SetFadeExtent':
+					var track = _v0.a.a;
+					var value = _v0.b.a;
+					var newOptions = _Utils_update(
+						options,
+						{fadeExtent: value});
+					return _Utils_Tuple2(
+						newOptions,
+						A3($author$project$Tools$Nudge$previewActions, newOptions, previewColour, track));
+				case 'ZeroNudgeFactors':
+					var track = _v0.a.a;
+					var _v1 = _v0.b;
+					return _Utils_Tuple2(
+						$author$project$Tools$Nudge$defaultOptions,
+						_List_fromArray(
+							[
+								$author$project$Actions$HidePreview('nudge')
+							]));
+				default:
+					var track = _v0.a.a;
+					var _v2 = _v0.b;
+					return _Utils_Tuple2(
+						options,
+						_List_fromArray(
+							[
+								$author$project$Actions$NudgeApplyWithOptions(options),
+								$author$project$Actions$TrackHasChanged
+							]));
+			}
+		} else {
+			return _Utils_Tuple2(options, _List_Nil);
+		}
+	});
 var $author$project$Actions$SetMarker = function (a) {
 	return {$: 'SetMarker', a: a};
 };
@@ -23061,6 +23203,21 @@ var $author$project$ToolsController$update = F4(
 					_Utils_update(
 						options,
 						{bendSmootherOptions: newOptions}),
+					actions);
+			case 'ToolNudgeMsg':
+				var msg = toolMsg.a;
+				var _v9 = A4(
+					$author$project$Tools$Nudge$update,
+					msg,
+					options.nudgeOptions,
+					A2($author$project$ToolsController$getColour, $author$project$ToolsController$ToolNudge, options.tools),
+					isTrack);
+				var newOptions = _v9.a;
+				var actions = _v9.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						options,
+						{nudgeOptions: newOptions}),
 					actions);
 			default:
 				var newOptions = _Utils_update(
@@ -29985,6 +30142,9 @@ var $author$project$ToolsController$ToolCentroidMsg = function (a) {
 var $author$project$ToolsController$ToolCurveFormerMsg = function (a) {
 	return {$: 'ToolCurveFormerMsg', a: a};
 };
+var $author$project$ToolsController$ToolNudgeMsg = function (a) {
+	return {$: 'ToolNudgeMsg', a: a};
+};
 var $author$project$ToolsController$UndoRedoMsg = function (a) {
 	return {$: 'UndoRedoMsg', a: a};
 };
@@ -33161,6 +33321,195 @@ var $author$project$Tools$DeletePoints$view = F2(
 							msgWrapper($author$project$Tools$DeletePoints$DeletePointOrPoints))
 					})));
 	});
+var $author$project$Tools$Nudge$SetFadeExtent = function (a) {
+	return {$: 'SetFadeExtent', a: a};
+};
+var $author$project$Tools$Nudge$fadeSlider = F3(
+	function (imperial, value, wrap) {
+		return A2(
+			$mdgriffith$elm_ui$Element$Input$slider,
+			$author$project$ViewPureStyles$commonShortHorizontalSliderStyles,
+			{
+				label: A2(
+					$mdgriffith$elm_ui$Element$Input$labelBelow,
+					_List_fromArray(
+						[$mdgriffith$elm_ui$Element$centerX]),
+					$mdgriffith$elm_ui$Element$text(
+						A2($author$project$UtilsForViews$showShortMeasure, imperial, value))),
+				max: $ianmackenzie$elm_units$Length$inMeters(
+					imperial ? $ianmackenzie$elm_units$Length$feet(160.0) : $ianmackenzie$elm_units$Length$meters(50.0)),
+				min: 0.0,
+				onChange: A2(
+					$elm$core$Basics$composeR,
+					$ianmackenzie$elm_units$Length$meters,
+					A2($elm$core$Basics$composeR, $author$project$Tools$Nudge$SetFadeExtent, wrap)),
+				step: $elm$core$Maybe$Nothing,
+				thumb: $mdgriffith$elm_ui$Element$Input$defaultThumb,
+				value: $ianmackenzie$elm_units$Length$inMeters(value)
+			});
+	});
+var $author$project$Tools$Nudge$SetHorizontalNudgeFactor = function (a) {
+	return {$: 'SetHorizontalNudgeFactor', a: a};
+};
+var $author$project$Tools$Nudge$horizontalNudgeSlider = F3(
+	function (imperial, value, wrap) {
+		return A2(
+			$mdgriffith$elm_ui$Element$Input$slider,
+			$author$project$ViewPureStyles$commonShortHorizontalSliderStyles,
+			{
+				label: A2(
+					$mdgriffith$elm_ui$Element$Input$labelBelow,
+					_List_fromArray(
+						[$mdgriffith$elm_ui$Element$centerX]),
+					$mdgriffith$elm_ui$Element$text(
+						A2($author$project$UtilsForViews$showShortMeasure, imperial, value))),
+				max: $ianmackenzie$elm_units$Length$inMeters(
+					imperial ? $ianmackenzie$elm_units$Length$feet(16.0) : $ianmackenzie$elm_units$Length$meters(5.0)),
+				min: $ianmackenzie$elm_units$Length$inMeters(
+					imperial ? $ianmackenzie$elm_units$Length$feet(-16.0) : $ianmackenzie$elm_units$Length$meters(-5.0)),
+				onChange: A2(
+					$elm$core$Basics$composeR,
+					$ianmackenzie$elm_units$Length$meters,
+					A2($elm$core$Basics$composeR, $author$project$Tools$Nudge$SetHorizontalNudgeFactor, wrap)),
+				step: $elm$core$Maybe$Nothing,
+				thumb: $mdgriffith$elm_ui$Element$Input$defaultThumb,
+				value: $ianmackenzie$elm_units$Length$inMeters(value)
+			});
+	});
+var $author$project$Tools$Nudge$ApplyWithOptions = {$: 'ApplyWithOptions'};
+var $author$project$Tools$Nudge$nudgeButton = F2(
+	function (settings, wrap) {
+		return A2(
+			$mdgriffith$elm_ui$Element$Input$button,
+			$author$project$ViewPureStyles$neatToolsBorder,
+			{
+				label: $mdgriffith$elm_ui$Element$text('Apply'),
+				onPress: $elm$core$Maybe$Just(
+					wrap($author$project$Tools$Nudge$ApplyWithOptions))
+			});
+	});
+var $author$project$Tools$Nudge$SetVerticalNudgeFactor = function (a) {
+	return {$: 'SetVerticalNudgeFactor', a: a};
+};
+var $author$project$ViewPureStyles$commonShortVerticalSliderStyles = _List_fromArray(
+	[
+		$mdgriffith$elm_ui$Element$height(
+		$mdgriffith$elm_ui$Element$px(150)),
+		$mdgriffith$elm_ui$Element$width(
+		$mdgriffith$elm_ui$Element$px(20)),
+		$mdgriffith$elm_ui$Element$centerY,
+		$mdgriffith$elm_ui$Element$centerX,
+		$mdgriffith$elm_ui$Element$behindContent(
+		A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width(
+					$mdgriffith$elm_ui$Element$px(2)),
+					$mdgriffith$elm_ui$Element$height(
+					$mdgriffith$elm_ui$Element$px(150)),
+					$mdgriffith$elm_ui$Element$centerY,
+					$mdgriffith$elm_ui$Element$centerX,
+					$mdgriffith$elm_ui$Element$Background$color($author$project$ColourPalette$scrollbarBackground),
+					$mdgriffith$elm_ui$Element$Border$rounded(6)
+				]),
+			$mdgriffith$elm_ui$Element$none))
+	]);
+var $author$project$Tools$Nudge$verticalNudgeSlider = F3(
+	function (imperial, value, wrap) {
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$alignRight,
+					$mdgriffith$elm_ui$Element$paddingEach(
+					_Utils_update(
+						$author$project$ViewPureStyles$edges,
+						{left: 10}))
+				]),
+			A2(
+				$mdgriffith$elm_ui$Element$Input$slider,
+				$author$project$ViewPureStyles$commonShortVerticalSliderStyles,
+				{
+					label: A2(
+						$mdgriffith$elm_ui$Element$Input$labelBelow,
+						_List_fromArray(
+							[$mdgriffith$elm_ui$Element$centerY]),
+						$mdgriffith$elm_ui$Element$text(
+							A2($author$project$UtilsForViews$showShortMeasure, imperial, value))),
+					max: $ianmackenzie$elm_units$Length$inMeters(
+						imperial ? $ianmackenzie$elm_units$Length$feet(16.0) : $ianmackenzie$elm_units$Length$meters(5.0)),
+					min: $ianmackenzie$elm_units$Length$inMeters(
+						imperial ? $ianmackenzie$elm_units$Length$feet(-16.0) : $ianmackenzie$elm_units$Length$meters(-5.0)),
+					onChange: A2(
+						$elm$core$Basics$composeR,
+						$ianmackenzie$elm_units$Length$meters,
+						A2($elm$core$Basics$composeR, $author$project$Tools$Nudge$SetVerticalNudgeFactor, wrap)),
+					step: $elm$core$Maybe$Nothing,
+					thumb: $mdgriffith$elm_ui$Element$Input$defaultThumb,
+					value: $ianmackenzie$elm_units$Length$inMeters(value)
+				}));
+	});
+var $author$project$Tools$Nudge$ZeroNudgeFactors = {$: 'ZeroNudgeFactors'};
+var $author$project$Tools$Nudge$zeroButton = function (wrap) {
+	return A2(
+		$mdgriffith$elm_ui$Element$Input$button,
+		$author$project$ViewPureStyles$neatToolsBorder,
+		{
+			label: $mdgriffith$elm_ui$Element$text('Zero sliders'),
+			onPress: $elm$core$Maybe$Just(
+				wrap($author$project$Tools$Nudge$ZeroNudgeFactors))
+		});
+};
+var $author$project$Tools$Nudge$view = F4(
+	function (imperial, options, msgWrapper, track) {
+		if (track.$ === 'Nothing') {
+			return $author$project$ViewPureStyles$noTrackMessage;
+		} else {
+			var isTrack = track.a;
+			return A2(
+				$mdgriffith$elm_ui$Element$row,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$padding(5),
+						$mdgriffith$elm_ui$Element$spacing(5),
+						$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite)
+					]),
+				_List_fromArray(
+					[
+						A3($author$project$Tools$Nudge$verticalNudgeSlider, imperial, options.vertical, msgWrapper),
+						A2(
+						$mdgriffith$elm_ui$Element$column,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+								$mdgriffith$elm_ui$Element$centerX,
+								$mdgriffith$elm_ui$Element$padding(5),
+								$mdgriffith$elm_ui$Element$spacing(5)
+							]),
+						_List_fromArray(
+							[
+								A3($author$project$Tools$Nudge$horizontalNudgeSlider, imperial, options.horizontal, msgWrapper),
+								A2(
+								$mdgriffith$elm_ui$Element$row,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$padding(5),
+										$mdgriffith$elm_ui$Element$spacing(5)
+									]),
+								_List_fromArray(
+									[
+										A2($author$project$Tools$Nudge$nudgeButton, options, msgWrapper),
+										$author$project$Tools$Nudge$zeroButton(msgWrapper)
+									])),
+								$mdgriffith$elm_ui$Element$text('Fade in/out'),
+								A3($author$project$Tools$Nudge$fadeSlider, imperial, options.fadeExtent, msgWrapper)
+							]))
+					]));
+		}
+	});
 var $author$project$Tools$Pointers$DropMarker = {$: 'DropMarker'};
 var $author$project$Tools$Pointers$LiftMarker = {$: 'LiftMarker'};
 var $author$project$Tools$Pointers$MarkerBackwardOne = {$: 'MarkerBackwardOne'};
@@ -33479,6 +33828,9 @@ var $author$project$Actions$interpretAction = function (action) {
 			return 'bend smoother';
 		case 'PointMovedOnMap':
 			return 'move on map';
+		case 'NudgeApplyWithOptions':
+			var options = action.a;
+			return 'nudge';
 		default:
 			return 'ask Pete to fix this message';
 	}
@@ -33658,12 +34010,19 @@ var $author$project$ToolsController$viewToolByType = F4(
 							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolCurveFormerMsg),
 							options.curveFormerOptions,
 							isTrack);
-					default:
+					case 'ToolBendSmoother':
 						return A4(
 							$author$project$Tools$BendSmoother$view,
 							options.imperial,
 							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolBendSmootherMsg),
 							options.bendSmootherOptions,
+							isTrack);
+					default:
+						return A4(
+							$author$project$Tools$Nudge$view,
+							options.imperial,
+							options.nudgeOptions,
+							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolNudgeMsg),
 							isTrack);
 				}
 			}());

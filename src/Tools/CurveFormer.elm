@@ -932,8 +932,14 @@ makeCurveIfPossible track options =
                             List.map elaborateIntersectionPoint outerCircleIntersections
                                 |> selectionFunction
                                 |> Maybe.Extra.toList
-                                |> List.filter (.distanceAlong >> Quantity.greaterThanOrEqualTo Quantity.zero)
-                                |> List.filter (.distanceAlong >> Quantity.lessThanOrEqualTo (LineSegment2d.length entryLineSegment))
+                                |> List.filter
+                                    (.distanceAlong
+                                        >> Quantity.greaterThanOrEqualTo Quantity.zero
+                                    )
+                                |> List.filter
+                                    (.distanceAlong
+                                        >> Quantity.lessThanOrEqualTo (LineSegment2d.length entryLineSegment)
+                                    )
 
                         _ ->
                             []
