@@ -14,31 +14,32 @@ orange and purple are (possibly) co-linear.
 
 # WIP
 
+## Output (!!)
+
 ---
 
 # BACKLOG, roughly in order ...
 
 ## Tools
 
-1. Output (!!)
-2. Segment info (toggle with whole track?)
-3. Move & Stretch 
-4. Gradient problems
-5. Steep climbs
-6. Intersections
-7. Visual options
-8. Map Satellite style choice
-9. Memory usage (incl limiting actions such as dumping Undo stack).
-10. SVG import
-11. Fly-through
-12. Limit gradients 
-13. Graph Theory
-14. Use Strava segment data
-15. Loops (includes Out and Back) (+ impact on others, such as Bezier).
-16. Samir's bend detector (amount of angular change within X linear metres).
-17. Clothoids (promoted because may be similar structurally to bezier & centroid)
-18. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
-19. Something akin to Graphs, stemming from Muriel's route.
+1. Segment info (toggle with whole track?)
+2. Move & Stretch 
+3. Gradient problems
+4. Steep climbs
+5. Intersections
+6. Visual options
+7. Map Satellite style choice
+8. Memory usage (incl limiting actions such as dumping Undo stack).
+9. SVG import
+10. Fly-through
+11. Limit gradients 
+12. Graph Theory
+13. Use Strava segment data
+14. Loops (includes Out and Back) (+ impact on others, such as Bezier).
+15. Samir's bend detector (amount of angular change within X linear metres).
+16. Clothoids (promoted because may be similar structurally to bezier & centroid)
+17. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
+18. Something akin to Graphs, stemming from Muriel's route.
 
 ## Error messages
 
