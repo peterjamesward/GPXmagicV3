@@ -15644,22 +15644,189 @@ var $author$project$Tools$DeletePoints$toolStateChange = F4(
 					]));
 		}
 	});
-var $author$project$Tools$Nudge$computeNewPoints = F2(
-	function (options, track) {
-		var previewPoints = function (points) {
-			return A2(
-				$elm$core$List$map,
-				function (earth) {
-					return _Utils_Tuple2(
-						earth,
-						A2($author$project$DomainModel$gpxFromPointWithReference, track.referenceLonLat, earth));
-				},
-				points);
-		};
+var $author$project$DomainModel$distanceFromIndex = F2(
+	function (index, treeNode) {
+		distanceFromIndex:
+		while (true) {
+			if (treeNode.$ === 'Leaf') {
+				var info = treeNode.a;
+				return (index <= 0) ? $ianmackenzie$elm_units$Length$meters(0) : info.trueLength;
+			} else {
+				var info = treeNode.a;
+				if (_Utils_cmp(
+					index,
+					$author$project$DomainModel$skipCount(info.left)) < 1) {
+					var $temp$index = index,
+						$temp$treeNode = info.left;
+					index = $temp$index;
+					treeNode = $temp$treeNode;
+					continue distanceFromIndex;
+				} else {
+					return A2(
+						$ianmackenzie$elm_units$Quantity$plus,
+						$author$project$DomainModel$trueLength(info.left),
+						A2(
+							$author$project$DomainModel$distanceFromIndex,
+							index - $author$project$DomainModel$skipCount(info.left),
+							info.right));
+				}
+			}
+		}
+	});
+var $author$project$DomainModel$indexFromDistance = F2(
+	function (distance, treeNode) {
+		indexFromDistance:
+		while (true) {
+			if (treeNode.$ === 'Leaf') {
+				var info = treeNode.a;
+				return A2(
+					$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
+					$ianmackenzie$elm_units$Quantity$half(info.trueLength),
+					distance) ? 0 : 1;
+			} else {
+				var info = treeNode.a;
+				if (A2(
+					$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
+					$author$project$DomainModel$trueLength(info.left),
+					distance)) {
+					var $temp$distance = distance,
+						$temp$treeNode = info.left;
+					distance = $temp$distance;
+					treeNode = $temp$treeNode;
+					continue indexFromDistance;
+				} else {
+					return $author$project$DomainModel$skipCount(info.left) + A2(
+						$author$project$DomainModel$indexFromDistance,
+						A2(
+							$ianmackenzie$elm_units$Quantity$minus,
+							$author$project$DomainModel$trueLength(info.left),
+							distance),
+						info.right);
+				}
+			}
+		}
+	});
+var $author$project$Tools$Nudge$effectiveDirection = F2(
+	function (index, track) {
+		var thisLeaf = $author$project$DomainModel$asRecord(
+			A2($author$project$DomainModel$leafFromIndex, index, track.trackTree));
+		var precedingLeaf = $author$project$DomainModel$asRecord(
+			A2($author$project$DomainModel$leafFromIndex, index - 1, track.trackTree));
+		return A2(
+			$ianmackenzie$elm_geometry$Direction2d$rotateBy,
+			$ianmackenzie$elm_units$Quantity$half(
+				A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, precedingLeaf.directionAtStart, thisLeaf.directionAtStart)),
+			thisLeaf.directionAtStart);
+	});
+var $ianmackenzie$elm_geometry$Direction2d$rotateCounterclockwise = function (_v0) {
+	var d = _v0.a;
+	return $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
+		{x: -d.y, y: d.x});
+};
+var $ianmackenzie$elm_geometry$Vector3d$withLength = F2(
+	function (_v0, _v1) {
+		var a = _v0.a;
+		var d = _v1.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
+			{x: a * d.x, y: a * d.y, z: a * d.z});
+	});
+var $ianmackenzie$elm_geometry$Direction3d$xy = function (_v0) {
+	var theta = _v0.a;
+	return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
+		{
+			x: $elm$core$Basics$cos(theta),
+			y: $elm$core$Basics$sin(theta),
+			z: 0
+		});
+};
+var $author$project$Tools$Nudge$nudgeTrackPoint = F4(
+	function (options, fade, index, track) {
+		if (!fade) {
+			return A2($author$project$DomainModel$earthPointFromIndex, index, track.trackTree);
+		} else {
+			var verticalVector = A2(
+				$ianmackenzie$elm_geometry$Vector3d$scaleBy,
+				fade,
+				A3($ianmackenzie$elm_geometry$Vector3d$xyz, $ianmackenzie$elm_units$Quantity$zero, $ianmackenzie$elm_units$Quantity$zero, options.vertical));
+			var horizontalDirection = $ianmackenzie$elm_geometry$Direction3d$xy(
+				$ianmackenzie$elm_geometry$Direction2d$toAngle(
+					$ianmackenzie$elm_geometry$Direction2d$rotateCounterclockwise(
+						A2($author$project$Tools$Nudge$effectiveDirection, index, track))));
+			var horizontalVector = A2(
+				$ianmackenzie$elm_geometry$Vector3d$scaleBy,
+				fade,
+				A2($ianmackenzie$elm_geometry$Vector3d$withLength, options.horizontal, horizontalDirection));
+			var current = A2($author$project$DomainModel$earthPointFromIndex, index, track.trackTree);
+			var newXYZ = A2(
+				$ianmackenzie$elm_geometry$Point3d$translateBy,
+				verticalVector,
+				A2($ianmackenzie$elm_geometry$Point3d$translateBy, horizontalVector, current));
+			return newXYZ;
+		}
+	});
+var $author$project$Tools$Nudge$computeNudgedPoints = F2(
+	function (settings, track) {
+		var liesWithin = F2(
+			function (_v4, given) {
+				var lo = _v4.a;
+				var hi = _v4.b;
+				return A2($ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo, lo, given) && A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, hi, given);
+			});
+		var fader = F2(
+			function (pointDistance, referenceDistance) {
+				var _v3 = _Utils_Tuple2(
+					$ianmackenzie$elm_units$Length$inMeters(pointDistance),
+					$ianmackenzie$elm_units$Length$inMeters(referenceDistance));
+				var place = _v3.a;
+				var base = _v3.b;
+				var x = $elm$core$Basics$abs(
+					(place - base) / $ianmackenzie$elm_units$Length$inMeters(settings.fadeExtent));
+				return 1.0 - x;
+			});
 		var _v0 = $author$project$TrackLoaded$getRangeFromMarkers(track);
 		var fromStart = _v0.a;
 		var fromEnd = _v0.b;
-		return _List_Nil;
+		var _v1 = _Utils_Tuple2(
+			fromStart,
+			$author$project$DomainModel$skipCount(track.trackTree) - fromEnd);
+		var fromNode = _v1.a;
+		var toNode = _v1.b;
+		var _v2 = _Utils_Tuple2(
+			A2($author$project$DomainModel$distanceFromIndex, fromNode, track.trackTree),
+			A2($author$project$DomainModel$distanceFromIndex, toNode, track.trackTree));
+		var startDistance = _v2.a;
+		var endDistance = _v2.b;
+		var fadeOutEndDistance = A2($ianmackenzie$elm_units$Quantity$plus, settings.fadeExtent, endDistance);
+		var endIncludingFade = A2($author$project$DomainModel$indexFromDistance, fadeOutEndDistance, track.trackTree);
+		var fadeInStartDistance = A2($ianmackenzie$elm_units$Quantity$minus, settings.fadeExtent, startDistance);
+		var startIncludingFade = A2($author$project$DomainModel$indexFromDistance, fadeInStartDistance, track.trackTree);
+		var nudge = function (index) {
+			var pointDistance = A2($author$project$DomainModel$distanceFromIndex, index, track.trackTree);
+			var fade = A2(
+				liesWithin,
+				_Utils_Tuple2(startDistance, endDistance),
+				pointDistance) ? 1.0 : (A2(
+				liesWithin,
+				_Utils_Tuple2(fadeInStartDistance, startDistance),
+				pointDistance) ? A2(fader, pointDistance, startDistance) : (A2(
+				liesWithin,
+				_Utils_Tuple2(endDistance, fadeOutEndDistance),
+				pointDistance) ? A2(fader, pointDistance, endDistance) : 0.0));
+			return A4($author$project$Tools$Nudge$nudgeTrackPoint, settings, fade, index, track);
+		};
+		var newEarthPoints = A2(
+			$elm$core$List$map,
+			nudge,
+			A2($elm$core$List$range, startIncludingFade, endIncludingFade));
+		var previewPoints = A2(
+			$elm$core$List$map,
+			function (earth) {
+				return _Utils_Tuple2(
+					earth,
+					A2($author$project$DomainModel$gpxFromPointWithReference, track.referenceLonLat, earth));
+			},
+			newEarthPoints);
+		return previewPoints;
 	});
 var $author$project$Tools$Nudge$previewActions = F3(
 	function (newOptions, colour, track) {
@@ -15668,7 +15835,7 @@ var $author$project$Tools$Nudge$previewActions = F3(
 				$author$project$Actions$ShowPreview(
 				{
 					colour: colour,
-					points: A2($author$project$Tools$Nudge$computeNewPoints, newOptions, track),
+					points: A2($author$project$Tools$Nudge$computeNudgedPoints, newOptions, track),
 					shape: $author$project$Actions$PreviewCircle,
 					tag: 'nudge'
 				})
@@ -16007,13 +16174,6 @@ var $ianmackenzie$elm_geometry$Plane3d$translateBy = F2(
 			$ianmackenzie$elm_geometry$Plane3d$withNormalDirection,
 			plane.normalDirection,
 			A2($ianmackenzie$elm_geometry$Point3d$translateBy, vector, plane.originPoint));
-	});
-var $ianmackenzie$elm_geometry$Vector3d$withLength = F2(
-	function (_v0, _v1) {
-		var a = _v0.a;
-		var d = _v1.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
-			{x: a * d.x, y: a * d.y, z: a * d.z});
 	});
 var $ianmackenzie$elm_geometry$Plane3d$translateIn = F3(
 	function (direction, distance, plane) {
@@ -16967,35 +17127,6 @@ var $ianmackenzie$elm_units$Quantity$clamp = F3(
 			A3($elm$core$Basics$clamp, lower, upper, value)) : $ianmackenzie$elm_units$Quantity$Quantity(
 			A3($elm$core$Basics$clamp, upper, lower, value));
 	});
-var $author$project$DomainModel$distanceFromIndex = F2(
-	function (index, treeNode) {
-		distanceFromIndex:
-		while (true) {
-			if (treeNode.$ === 'Leaf') {
-				var info = treeNode.a;
-				return (index <= 0) ? $ianmackenzie$elm_units$Length$meters(0) : info.trueLength;
-			} else {
-				var info = treeNode.a;
-				if (_Utils_cmp(
-					index,
-					$author$project$DomainModel$skipCount(info.left)) < 1) {
-					var $temp$index = index,
-						$temp$treeNode = info.left;
-					index = $temp$index;
-					treeNode = $temp$treeNode;
-					continue distanceFromIndex;
-				} else {
-					return A2(
-						$ianmackenzie$elm_units$Quantity$plus,
-						$author$project$DomainModel$trueLength(info.left),
-						A2(
-							$author$project$DomainModel$distanceFromIndex,
-							index - $author$project$DomainModel$skipCount(info.left),
-							info.right));
-				}
-			}
-		}
-	});
 var $author$project$ColourPalette$gradientColourPastel = function (slope) {
 	return A3(
 		$avh4$elm_color$Color$hsl,
@@ -17003,39 +17134,6 @@ var $author$project$ColourPalette$gradientColourPastel = function (slope) {
 		0.6,
 		0.7);
 };
-var $author$project$DomainModel$indexFromDistance = F2(
-	function (distance, treeNode) {
-		indexFromDistance:
-		while (true) {
-			if (treeNode.$ === 'Leaf') {
-				var info = treeNode.a;
-				return A2(
-					$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
-					$ianmackenzie$elm_units$Quantity$half(info.trueLength),
-					distance) ? 0 : 1;
-			} else {
-				var info = treeNode.a;
-				if (A2(
-					$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
-					$author$project$DomainModel$trueLength(info.left),
-					distance)) {
-					var $temp$distance = distance,
-						$temp$treeNode = info.left;
-					distance = $temp$distance;
-					treeNode = $temp$treeNode;
-					continue indexFromDistance;
-				} else {
-					return $author$project$DomainModel$skipCount(info.left) + A2(
-						$author$project$DomainModel$indexFromDistance,
-						A2(
-							$ianmackenzie$elm_units$Quantity$minus,
-							$author$project$DomainModel$trueLength(info.left),
-							distance),
-						info.right);
-				}
-			}
-		}
-	});
 var $author$project$ViewProfileCharts$renderProfileDataForCharts = F2(
 	function (context, track) {
 		var trackLengthInView = A2(

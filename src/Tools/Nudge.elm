@@ -1,6 +1,8 @@
 module Tools.Nudge exposing (..)
 
 import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
+import Direction2d exposing (Direction2d)
+import Direction3d
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
@@ -103,9 +105,147 @@ previewActions newOptions colour track =
         { tag = "nudge"
         , shape = PreviewCircle
         , colour = colour
-        , points = computeNewPoints newOptions track
+        , points = computeNudgedPoints newOptions track
         }
     ]
+
+
+computeNudgedPoints : Options -> TrackLoaded msg -> List (EarthPoint, GPXSource)
+computeNudgedPoints settings track =
+    let
+        ( fromStart, fromEnd ) =
+            TrackLoaded.getRangeFromMarkers track
+
+        ( fromNode, toNode ) =
+            -- Shim for legacy code; not worth re-writing what is already quite clear.
+            ( fromStart, skipCount track.trackTree - fromEnd )
+
+        ( startDistance, endDistance ) =
+            ( DomainModel.distanceFromIndex fromNode track.trackTree
+            , DomainModel.distanceFromIndex toNode track.trackTree
+            )
+
+        fadeInStartDistance =
+            startDistance |> Quantity.minus settings.fadeExtent
+
+        fadeOutEndDistance =
+            endDistance |> Quantity.plus settings.fadeExtent
+
+        startIncludingFade =
+            indexFromDistance fadeInStartDistance track.trackTree
+
+        endIncludingFade =
+            indexFromDistance fadeOutEndDistance track.trackTree
+
+        fader pointDistance referenceDistance =
+            let
+                ( place, base ) =
+                    ( inMeters pointDistance, inMeters referenceDistance )
+
+                x =
+                    abs <| (place - base) / inMeters settings.fadeExtent
+            in
+            1.0 - x
+
+        liesWithin ( lo, hi ) given =
+            (given |> Quantity.greaterThanOrEqualTo lo)
+                && (given |> Quantity.lessThanOrEqualTo hi)
+
+        nudge index =
+            let
+                pointDistance =
+                    DomainModel.distanceFromIndex index track.trackTree
+
+                fade =
+                    if
+                        pointDistance
+                            |> liesWithin ( startDistance, endDistance )
+                    then
+                        1.0
+
+                    else if
+                        pointDistance
+                            |> liesWithin ( fadeInStartDistance, startDistance )
+                    then
+                        fader pointDistance startDistance
+
+                    else if
+                        pointDistance
+                            |> liesWithin ( endDistance, fadeOutEndDistance )
+                    then
+                        fader pointDistance endDistance
+
+                    else
+                        0.0
+            in
+            nudgeTrackPoint settings fade index track
+
+        newEarthPoints =
+            List.map nudge <| List.range startIncludingFade endIncludingFade
+
+        previewPoints =
+            newEarthPoints
+                |> List.map
+                    (\earth ->
+                        ( earth
+                        , DomainModel.gpxFromPointWithReference track.referenceLonLat earth
+                        )
+                    )
+    in
+    previewPoints
+
+
+effectiveDirection : Int -> TrackLoaded msg -> Direction2d LocalCoords
+effectiveDirection index track =
+    --In v1 and v2, each point had its before and after directions.
+    --That's not stored in v3, but not too hard to compute.
+    let
+        precedingLeaf =
+            -- Will be first leaf if index is zero.
+            leafFromIndex (index - 1) track.trackTree |> asRecord
+
+        thisLeaf =
+            leafFromIndex index track.trackTree |> asRecord
+    in
+    thisLeaf.directionAtStart
+        |> Direction2d.rotateBy
+            (Quantity.half <|
+                Direction2d.angleFrom
+                    precedingLeaf.directionAtStart
+                    thisLeaf.directionAtStart
+            )
+
+
+nudgeTrackPoint : Options -> Float -> Int -> TrackLoaded msg -> EarthPoint
+nudgeTrackPoint options fade index track =
+    if fade == 0 then
+        earthPointFromIndex index track.trackTree
+
+    else
+        let
+            current =
+                earthPointFromIndex index track.trackTree
+
+            horizontalDirection =
+                effectiveDirection index track
+                    |> Direction2d.rotateCounterclockwise
+                    |> Direction2d.toAngle
+                    |> Direction3d.xy
+
+            horizontalVector =
+                Vector3d.withLength options.horizontal horizontalDirection
+                    |> Vector3d.scaleBy fade
+
+            verticalVector =
+                Vector3d.xyz Quantity.zero Quantity.zero options.vertical
+                    |> Vector3d.scaleBy fade
+
+            newXYZ =
+                current
+                    |> Point3d.translateBy horizontalVector
+                    |> Point3d.translateBy verticalVector
+        in
+        newXYZ
 
 
 update :
