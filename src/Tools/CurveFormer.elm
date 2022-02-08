@@ -955,9 +955,8 @@ makeCurveIfPossible track options =
             in
             Arc2d.segments entryArcNumSegments arc |> Polyline2d.segments
 
-        entryCurveSeeker : Int -> Maybe IntersectionInformation
-        entryCurveSeeker index =
-            --TODO: Limit search to (say) within 1km of entry/exit.
+        entryCurveSeeker : Int -> Int -> Maybe IntersectionInformation
+        entryCurveSeeker limit index =
             let
                 ( tp1, tp2 ) =
                     ( DomainModel.earthPointFromIndex (index - 1) track.trackTree
@@ -969,15 +968,14 @@ makeCurveIfPossible track options =
                     Just transition
 
                 Nothing ->
-                    if index > 1 then
-                        entryCurveSeeker (index - 1)
+                    if index > 1 && limit > 0 then
+                        entryCurveSeeker (limit - 1) (index - 1)
 
                     else
                         Nothing
 
         exitCurveSeeker : Int -> Int -> Maybe IntersectionInformation
-        exitCurveSeeker routeLength index =
-            --TODO: Limit search to (say) within 1km of entry/exit.
+        exitCurveSeeker limit index =
             let
                 ( tp1, tp2 ) =
                     ( DomainModel.earthPointFromIndex index track.trackTree
@@ -989,26 +987,25 @@ makeCurveIfPossible track options =
                     Just transition
 
                 Nothing ->
-                    if index < routeLength - 2 then
-                        exitCurveSeeker routeLength (index + 1)
+                    if index < routeLength - 2 && limit > 0 then
+                        exitCurveSeeker (limit - 1) (index + 1)
 
                     else
                         Nothing
 
+        routeLength =
+            skipCount track.trackTree
+
         ( entryInformation, exitInformation ) =
             -- Scan route for joins that suffice.
-            let
-                routeLength =
-                    skipCount track.trackTree
-            in
             ( capturedRoadSections
                 |> Dict.keys
                 |> List.head
-                |> Maybe.andThen entryCurveSeeker
+                |> Maybe.andThen (entryCurveSeeker 100)
             , capturedRoadSections
                 |> Dict.keys
                 |> List.Extra.last
-                |> Maybe.andThen (exitCurveSeeker routeLength)
+                |> Maybe.andThen (exitCurveSeeker 100)
             )
 
         entryCurve =

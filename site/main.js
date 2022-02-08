@@ -21931,6 +21931,7 @@ var $ianmackenzie$elm_geometry$Arc2d$withRadius = F4(
 	});
 var $author$project$Tools$CurveFormer$makeCurveIfPossible = F2(
 	function (track, options) {
+		var routeLength = $author$project$DomainModel$skipCount(track.trackTree);
 		var circle = A2($author$project$Tools$CurveFormer$getCircle, options, track);
 		var arcToSegments = function (arc) {
 			var arcLength = $elm$core$Basics$abs(
@@ -22193,31 +22194,34 @@ var $author$project$Tools$CurveFormer$makeCurveIfPossible = F2(
 				}();
 				return $elm$core$List$head(validCounterBendCentresAndTangentPoints);
 			});
-		var entryCurveSeeker = function (index) {
-			entryCurveSeeker:
-			while (true) {
-				var _v3 = _Utils_Tuple2(
-					A2($author$project$DomainModel$earthPointFromIndex, index - 1, track.trackTree),
-					A2($author$project$DomainModel$earthPointFromIndex, index, track.trackTree));
-				var tp1 = _v3.a;
-				var tp2 = _v3.b;
-				var _v4 = A3(findAcceptableTransition, $author$project$Tools$CurveFormer$EntryMode, index - 1, index);
-				if (_v4.$ === 'Just') {
-					var transition = _v4.a;
-					return $elm$core$Maybe$Just(transition);
-				} else {
-					if (index > 1) {
-						var $temp$index = index - 1;
-						index = $temp$index;
-						continue entryCurveSeeker;
+		var entryCurveSeeker = F2(
+			function (limit, index) {
+				entryCurveSeeker:
+				while (true) {
+					var _v3 = _Utils_Tuple2(
+						A2($author$project$DomainModel$earthPointFromIndex, index - 1, track.trackTree),
+						A2($author$project$DomainModel$earthPointFromIndex, index, track.trackTree));
+					var tp1 = _v3.a;
+					var tp2 = _v3.b;
+					var _v4 = A3(findAcceptableTransition, $author$project$Tools$CurveFormer$EntryMode, index - 1, index);
+					if (_v4.$ === 'Just') {
+						var transition = _v4.a;
+						return $elm$core$Maybe$Just(transition);
 					} else {
-						return $elm$core$Maybe$Nothing;
+						if ((index > 1) && (limit > 0)) {
+							var $temp$limit = limit - 1,
+								$temp$index = index - 1;
+							limit = $temp$limit;
+							index = $temp$index;
+							continue entryCurveSeeker;
+						} else {
+							return $elm$core$Maybe$Nothing;
+						}
 					}
 				}
-			}
-		};
+			});
 		var exitCurveSeeker = F2(
-			function (routeLength, index) {
+			function (limit, index) {
 				exitCurveSeeker:
 				while (true) {
 					var _v5 = _Utils_Tuple2(
@@ -22230,10 +22234,10 @@ var $author$project$Tools$CurveFormer$makeCurveIfPossible = F2(
 						var transition = _v6.a;
 						return $elm$core$Maybe$Just(transition);
 					} else {
-						if (_Utils_cmp(index, routeLength - 2) < 0) {
-							var $temp$routeLength = routeLength,
+						if ((_Utils_cmp(index, routeLength - 2) < 0) && (limit > 0)) {
+							var $temp$limit = limit - 1,
 								$temp$index = index + 1;
-							routeLength = $temp$routeLength;
+							limit = $temp$limit;
 							index = $temp$index;
 							continue exitCurveSeeker;
 						} else {
@@ -22242,20 +22246,17 @@ var $author$project$Tools$CurveFormer$makeCurveIfPossible = F2(
 					}
 				}
 			});
-		var _v7 = function () {
-			var routeLength = $author$project$DomainModel$skipCount(track.trackTree);
-			return _Utils_Tuple2(
-				A2(
-					$elm$core$Maybe$andThen,
-					entryCurveSeeker,
-					$elm$core$List$head(
-						$elm$core$Dict$keys(capturedRoadSections))),
-				A2(
-					$elm$core$Maybe$andThen,
-					exitCurveSeeker(routeLength),
-					$elm_community$list_extra$List$Extra$last(
-						$elm$core$Dict$keys(capturedRoadSections))));
-		}();
+		var _v7 = _Utils_Tuple2(
+			A2(
+				$elm$core$Maybe$andThen,
+				entryCurveSeeker(100),
+				$elm$core$List$head(
+					$elm$core$Dict$keys(capturedRoadSections))),
+			A2(
+				$elm$core$Maybe$andThen,
+				exitCurveSeeker(100),
+				$elm_community$list_extra$List$Extra$last(
+					$elm$core$Dict$keys(capturedRoadSections))));
 		var entryInformation = _v7.a;
 		var exitInformation = _v7.b;
 		var entryCurve = function () {

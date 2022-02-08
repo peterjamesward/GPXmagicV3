@@ -9,8 +9,6 @@ DEBT: Map sends more click messages each time we click.
 
 Curve Former should reset on track load.
 
-Curve Former: make sure search for entry/exit does not extend to track ends!
-
 BUG: Classic bend smoother consumes all memory on certain looped routes where
 orange and purple are (possibly) colinear.
 
