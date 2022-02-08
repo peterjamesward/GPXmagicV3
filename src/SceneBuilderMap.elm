@@ -224,6 +224,14 @@ trackPointsToJSON track =
             in
             makeFeature ( lon, lat, alt ) :: output
 
+        missingLastPoint =
+            track.trackTree
+                |> getLastLeaf
+                |> .sourceData
+                |> Tuple.second
+                |> mapLocation
+                |> makeFeature
+
         makeFeature tp =
             E.object
                 [ ( "type", E.string "Feature" )
@@ -237,14 +245,15 @@ trackPointsToJSON track =
                 ]
 
         features =
-            DomainModel.traverseTreeBetweenLimitsToDepth
-                0
-                (skipCount track.trackTree)
-                depthFn
-                0
-                track.trackTree
-                foldFn
-                []
+            missingLastPoint
+                :: DomainModel.traverseTreeBetweenLimitsToDepth
+                    0
+                    (skipCount track.trackTree)
+                    depthFn
+                    0
+                    track.trackTree
+                    foldFn
+                    []
     in
     E.object
         [ ( "type", E.string "FeatureCollection" )

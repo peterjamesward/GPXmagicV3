@@ -11217,6 +11217,20 @@ var $ianmackenzie$elm_geometry$BoundingBox3d$expandBy = F2(
 			$ianmackenzie$elm_units$Quantity$abs(amount),
 			boundingBox);
 	});
+var $author$project$DomainModel$getLastLeaf = function (someNode) {
+	getLastLeaf:
+	while (true) {
+		if (someNode.$ === 'Leaf') {
+			var leaf = someNode.a;
+			return leaf;
+		} else {
+			var node = someNode.a;
+			var $temp$someNode = node.right;
+			someNode = $temp$someNode;
+			continue getLastLeaf;
+		}
+	}
+};
 var $author$project$SceneBuilderMap$latLonPair = function (_v0) {
 	var lon = _v0.a;
 	var lat = _v0.b;
@@ -11278,6 +11292,9 @@ var $author$project$SceneBuilderMap$trackPointsToJSON = function (track) {
 					point(tp))
 				]));
 	};
+	var missingLastPoint = makeFeature(
+		$author$project$SceneBuilderMap$mapLocation(
+			$author$project$DomainModel$getLastLeaf(track.trackTree).sourceData.b));
 	var fullRenderBoxSize = $ianmackenzie$elm_units$Length$kilometers(4);
 	var fullRenderBox = A2(
 		$ianmackenzie$elm_geometry$BoundingBox3d$expandBy,
@@ -11299,15 +11316,18 @@ var $author$project$SceneBuilderMap$trackPointsToJSON = function (track) {
 	var depthFn = function (road) {
 		return A2($ianmackenzie$elm_geometry$BoundingBox3d$intersects, fullRenderBox, road.boundingBox) ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(10);
 	};
-	var features = A7(
-		$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
-		0,
-		$author$project$DomainModel$skipCount(track.trackTree),
-		depthFn,
-		0,
-		track.trackTree,
-		foldFn,
-		_List_Nil);
+	var features = A2(
+		$elm$core$List$cons,
+		missingLastPoint,
+		A7(
+			$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
+			0,
+			$author$project$DomainModel$skipCount(track.trackTree),
+			depthFn,
+			0,
+			track.trackTree,
+			foldFn,
+			_List_Nil));
 	return $elm$json$Json$Encode$object(
 		_List_fromArray(
 			[
@@ -12309,20 +12329,6 @@ var $author$project$DomainModel$takePointsFromLeft = F2(
 			}
 		}
 	});
-var $author$project$DomainModel$getLastLeaf = function (someNode) {
-	getLastLeaf:
-	while (true) {
-		if (someNode.$ === 'Leaf') {
-			var leaf = someNode.a;
-			return leaf;
-		} else {
-			var node = someNode.a;
-			var $temp$someNode = node.right;
-			someNode = $temp$someNode;
-			continue getLastLeaf;
-		}
-	}
-};
 var $author$project$DomainModel$takeFromRight = F2(
 	function (leavesFromRight, treeNode) {
 		if (leavesFromRight <= 0) {
