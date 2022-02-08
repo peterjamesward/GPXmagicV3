@@ -13381,7 +13381,6 @@ var $author$project$DomainModel$indexFromDistance = F2(
 			}
 		}
 	});
-var $elm$core$Debug$log = _Debug_log;
 var $author$project$Tools$Nudge$effectiveDirection = F2(
 	function (index, track) {
 		var thisLeaf = $author$project$DomainModel$asRecord(
@@ -13391,20 +13390,6 @@ var $author$project$Tools$Nudge$effectiveDirection = F2(
 		var deviation = A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, precedingLeaf.directionAtStart, thisLeaf.directionAtStart);
 		var halfDeviation = $ianmackenzie$elm_units$Quantity$half(deviation);
 		var bisectedAngle = A2($ianmackenzie$elm_geometry$Direction2d$rotateBy, halfDeviation, precedingLeaf.directionAtStart);
-		var _v0 = A2(
-			$elm$core$Debug$log,
-			'Effective direction stuff',
-			_List_fromArray(
-				[
-					$ianmackenzie$elm_units$Angle$inDegrees(
-					$ianmackenzie$elm_geometry$Direction2d$toAngle(precedingLeaf.directionAtStart)),
-					$ianmackenzie$elm_units$Angle$inDegrees(
-					$ianmackenzie$elm_geometry$Direction2d$toAngle(thisLeaf.directionAtStart)),
-					$ianmackenzie$elm_units$Angle$inDegrees(deviation),
-					$ianmackenzie$elm_units$Angle$inDegrees(halfDeviation),
-					$ianmackenzie$elm_units$Angle$inDegrees(
-					$ianmackenzie$elm_geometry$Direction2d$toAngle(bisectedAngle))
-				]));
 		return bisectedAngle;
 	});
 var $ianmackenzie$elm_geometry$Direction3d$on = F2(
@@ -13541,11 +13526,15 @@ var $author$project$Tools$Nudge$applyUsingOptions = F2(
 		var actualStart = _v1.a;
 		var actualEnd = _v1.b;
 		var newPoints = _v0.b;
-		var oldPoints = A3($author$project$DomainModel$extractPointsInRange, actualStart, actualEnd, track.trackTree);
+		var oldPoints = A3(
+			$author$project$DomainModel$extractPointsInRange,
+			actualStart,
+			$author$project$DomainModel$skipCount(track.trackTree) - actualEnd,
+			track.trackTree);
 		var newTree = A5(
 			$author$project$DomainModel$replaceRange,
 			actualStart,
-			actualEnd,
+			$author$project$DomainModel$skipCount(track.trackTree) - actualEnd,
 			track.referenceLonLat,
 			A2($elm$core$List$map, $elm$core$Tuple$second, newPoints),
 			track.trackTree);

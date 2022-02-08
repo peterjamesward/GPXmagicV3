@@ -56,7 +56,7 @@ applyUsingOptions options track =
         newTree =
             DomainModel.replaceRange
                 actualStart
-                actualEnd
+                (skipCount track.trackTree - actualEnd)
                 track.referenceLonLat
                 (List.map Tuple.second newPoints)
                 track.trackTree
@@ -64,7 +64,7 @@ applyUsingOptions options track =
         oldPoints =
             DomainModel.extractPointsInRange
                 actualStart
-                actualEnd
+                (skipCount track.trackTree - actualEnd)
                 track.trackTree
     in
     ( newTree
@@ -209,15 +209,6 @@ effectiveDirection index track =
         bisectedAngle =
             precedingLeaf.directionAtStart
                 |> Direction2d.rotateBy halfDeviation
-
-        _ =
-            Debug.log "Effective direction stuff"
-                [ precedingLeaf.directionAtStart |> Direction2d.toAngle |> Angle.inDegrees
-                , thisLeaf.directionAtStart |> Direction2d.toAngle |> Angle.inDegrees
-                , deviation |> Angle.inDegrees
-                , halfDeviation |> Angle.inDegrees
-                , bisectedAngle |> Direction2d.toAngle |> Angle.inDegrees
-                ]
     in
     -- This formulation intended to avoid -180/+180 issues.
     bisectedAngle

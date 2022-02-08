@@ -14,8 +14,6 @@ orange and purple are (possibly) co-linear.
 
 # WIP
 
-Nudge
-
 ---
 
 # BACKLOG, roughly in order ...
