@@ -12468,17 +12468,18 @@ var $author$project$DomainModel$makeRoadSectionKnowingLocalCoords = F2(
 				A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, earth1.longitude, earth2.longitude)),
 			earth1.longitude);
 		var box = A2($ianmackenzie$elm_geometry$BoundingBox3d$from, local1, local2);
-		var bearing = $ianmackenzie$elm_units$Angle$radians(
-			A2(
-				$author$project$Spherical$findBearingToTarget,
-				_Utils_Tuple2(
-					$ianmackenzie$elm_units$Angle$inRadians(earth1.latitude),
-					$ianmackenzie$elm_units$Angle$inRadians(
-						$ianmackenzie$elm_geometry$Direction2d$toAngle(earth1.longitude))),
-				_Utils_Tuple2(
-					$ianmackenzie$elm_units$Angle$inRadians(earth2.latitude),
-					$ianmackenzie$elm_units$Angle$inRadians(
-						$ianmackenzie$elm_geometry$Direction2d$toAngle(earth2.longitude)))));
+		var bearing = A2(
+			$author$project$Spherical$findBearingToTarget,
+			_Utils_Tuple2(
+				$ianmackenzie$elm_units$Angle$inRadians(earth1.latitude),
+				$ianmackenzie$elm_units$Angle$inRadians(
+					$ianmackenzie$elm_geometry$Direction2d$toAngle(earth1.longitude))),
+			_Utils_Tuple2(
+				$ianmackenzie$elm_units$Angle$inRadians(earth2.latitude),
+				$ianmackenzie$elm_units$Angle$inRadians(
+					$ianmackenzie$elm_geometry$Direction2d$toAngle(earth2.longitude))));
+		var direction = $ianmackenzie$elm_geometry$Direction2d$fromAngle(
+			$ianmackenzie$elm_units$Angle$radians(($elm$core$Basics$pi / 2) - bearing));
 		var altitudeChange = A2(
 			$ianmackenzie$elm_units$Quantity$minus,
 			$ianmackenzie$elm_geometry$Point3d$zCoordinate(local1),
@@ -12493,8 +12494,8 @@ var $author$project$DomainModel$makeRoadSectionKnowingLocalCoords = F2(
 				$ianmackenzie$elm_units$Quantity$zero,
 				$ianmackenzie$elm_units$Quantity$negate(altitudeChange)),
 			boundingBox: box,
-			directionAtEnd: $ianmackenzie$elm_geometry$Direction2d$fromAngle(bearing),
-			directionAtStart: $ianmackenzie$elm_geometry$Direction2d$fromAngle(bearing),
+			directionAtEnd: direction,
+			directionAtStart: direction,
 			directionChangeMaximumAbs: $ianmackenzie$elm_units$Angle$degrees(0),
 			distanceClimbing: $ianmackenzie$elm_units$Quantity$greaterThanZero(altitudeChange) ? range : $ianmackenzie$elm_units$Quantity$zero,
 			distanceDescending: $ianmackenzie$elm_units$Quantity$lessThanZero(altitudeChange) ? range : $ianmackenzie$elm_units$Quantity$zero,
@@ -13380,22 +13381,47 @@ var $author$project$DomainModel$indexFromDistance = F2(
 			}
 		}
 	});
+var $elm$core$Debug$log = _Debug_log;
 var $author$project$Tools$Nudge$effectiveDirection = F2(
 	function (index, track) {
 		var thisLeaf = $author$project$DomainModel$asRecord(
 			A2($author$project$DomainModel$leafFromIndex, index, track.trackTree));
 		var precedingLeaf = $author$project$DomainModel$asRecord(
 			A2($author$project$DomainModel$leafFromIndex, index - 1, track.trackTree));
-		return A2(
-			$ianmackenzie$elm_geometry$Direction2d$rotateBy,
-			$ianmackenzie$elm_units$Quantity$half(
-				A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, precedingLeaf.directionAtStart, thisLeaf.directionAtStart)),
-			thisLeaf.directionAtStart);
+		var deviation = A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, precedingLeaf.directionAtStart, thisLeaf.directionAtStart);
+		var halfDeviation = $ianmackenzie$elm_units$Quantity$half(deviation);
+		var bisectedAngle = A2($ianmackenzie$elm_geometry$Direction2d$rotateBy, halfDeviation, precedingLeaf.directionAtStart);
+		var _v0 = A2(
+			$elm$core$Debug$log,
+			'Effective direction stuff',
+			_List_fromArray(
+				[
+					$ianmackenzie$elm_units$Angle$inDegrees(
+					$ianmackenzie$elm_geometry$Direction2d$toAngle(precedingLeaf.directionAtStart)),
+					$ianmackenzie$elm_units$Angle$inDegrees(
+					$ianmackenzie$elm_geometry$Direction2d$toAngle(thisLeaf.directionAtStart)),
+					$ianmackenzie$elm_units$Angle$inDegrees(deviation),
+					$ianmackenzie$elm_units$Angle$inDegrees(halfDeviation),
+					$ianmackenzie$elm_units$Angle$inDegrees(
+					$ianmackenzie$elm_geometry$Direction2d$toAngle(bisectedAngle))
+				]));
+		return bisectedAngle;
 	});
-var $ianmackenzie$elm_geometry$Direction2d$rotateCounterclockwise = function (_v0) {
+var $ianmackenzie$elm_geometry$Direction3d$on = F2(
+	function (_v0, _v1) {
+		var sketchPlane = _v0.a;
+		var d = _v1.a;
+		var _v2 = sketchPlane.yDirection;
+		var j = _v2.a;
+		var _v3 = sketchPlane.xDirection;
+		var i = _v3.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
+			{x: (d.x * i.x) + (d.y * j.x), y: (d.x * i.y) + (d.y * j.y), z: (d.x * i.z) + (d.y * j.z)});
+	});
+var $ianmackenzie$elm_geometry$Direction2d$rotateClockwise = function (_v0) {
 	var d = _v0.a;
 	return $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
-		{x: -d.y, y: d.x});
+		{x: d.y, y: -d.x});
 };
 var $ianmackenzie$elm_geometry$Vector3d$withLength = F2(
 	function (_v0, _v1) {
@@ -13404,15 +13430,18 @@ var $ianmackenzie$elm_geometry$Vector3d$withLength = F2(
 		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
 			{x: a * d.x, y: a * d.y, z: a * d.z});
 	});
-var $ianmackenzie$elm_geometry$Direction3d$xy = function (_v0) {
-	var theta = _v0.a;
-	return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
-		{
-			x: $elm$core$Basics$cos(theta),
-			y: $elm$core$Basics$sin(theta),
-			z: 0
-		});
+var $ianmackenzie$elm_geometry$Geometry$Types$SketchPlane3d = function (a) {
+	return {$: 'SketchPlane3d', a: a};
 };
+var $ianmackenzie$elm_geometry$SketchPlane3d$unsafe = $ianmackenzie$elm_geometry$Geometry$Types$SketchPlane3d;
+var $ianmackenzie$elm_geometry$Direction3d$positiveX = $ianmackenzie$elm_geometry$Direction3d$unsafe(
+	{x: 1, y: 0, z: 0});
+var $ianmackenzie$elm_geometry$Direction3d$x = $ianmackenzie$elm_geometry$Direction3d$positiveX;
+var $ianmackenzie$elm_geometry$Direction3d$positiveY = $ianmackenzie$elm_geometry$Direction3d$unsafe(
+	{x: 0, y: 1, z: 0});
+var $ianmackenzie$elm_geometry$Direction3d$y = $ianmackenzie$elm_geometry$Direction3d$positiveY;
+var $ianmackenzie$elm_geometry$SketchPlane3d$xy = $ianmackenzie$elm_geometry$SketchPlane3d$unsafe(
+	{originPoint: $ianmackenzie$elm_geometry$Point3d$origin, xDirection: $ianmackenzie$elm_geometry$Direction3d$x, yDirection: $ianmackenzie$elm_geometry$Direction3d$y});
 var $author$project$Tools$Nudge$nudgeTrackPoint = F4(
 	function (options, fade, index, track) {
 		if (!fade) {
@@ -13422,10 +13451,11 @@ var $author$project$Tools$Nudge$nudgeTrackPoint = F4(
 				$ianmackenzie$elm_geometry$Vector3d$scaleBy,
 				fade,
 				A3($ianmackenzie$elm_geometry$Vector3d$xyz, $ianmackenzie$elm_units$Quantity$zero, $ianmackenzie$elm_units$Quantity$zero, options.vertical));
-			var horizontalDirection = $ianmackenzie$elm_geometry$Direction3d$xy(
-				$ianmackenzie$elm_geometry$Direction2d$toAngle(
-					$ianmackenzie$elm_geometry$Direction2d$rotateCounterclockwise(
-						A2($author$project$Tools$Nudge$effectiveDirection, index, track))));
+			var horizontalDirection = A2(
+				$ianmackenzie$elm_geometry$Direction3d$on,
+				$ianmackenzie$elm_geometry$SketchPlane3d$xy,
+				$ianmackenzie$elm_geometry$Direction2d$rotateClockwise(
+					A2($author$project$Tools$Nudge$effectiveDirection, index, track)));
 			var horizontalVector = A2(
 				$ianmackenzie$elm_geometry$Vector3d$scaleBy,
 				fade,
@@ -14244,11 +14274,6 @@ var $ianmackenzie$elm_geometry$Quantity$Extra$rTheta = F2(
 		var theta = _v1.a;
 		return $ianmackenzie$elm_units$Quantity$Quantity(r * theta);
 	});
-var $ianmackenzie$elm_geometry$Direction2d$rotateClockwise = function (_v0) {
-	var d = _v0.a;
-	return $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
-		{x: d.y, y: -d.x});
-};
 var $ianmackenzie$elm_geometry$Direction2d$positiveX = $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
 	{x: 1, y: 0});
 var $ianmackenzie$elm_geometry$Direction2d$x = $ianmackenzie$elm_geometry$Direction2d$positiveX;
@@ -19401,18 +19426,6 @@ var $ianmackenzie$elm_3d_camera$Viewpoint3d$orbit = function (_arguments) {
 			A3($ianmackenzie$elm_geometry$Frame3d$rotateAroundOwn, $ianmackenzie$elm_geometry$Frame3d$yAxis, _arguments.azimuth, initialFrame)));
 	return $ianmackenzie$elm_3d_camera$Camera3d$Types$Viewpoint3d(finalFrame);
 };
-var $ianmackenzie$elm_geometry$Geometry$Types$SketchPlane3d = function (a) {
-	return {$: 'SketchPlane3d', a: a};
-};
-var $ianmackenzie$elm_geometry$SketchPlane3d$unsafe = $ianmackenzie$elm_geometry$Geometry$Types$SketchPlane3d;
-var $ianmackenzie$elm_geometry$Direction3d$positiveX = $ianmackenzie$elm_geometry$Direction3d$unsafe(
-	{x: 1, y: 0, z: 0});
-var $ianmackenzie$elm_geometry$Direction3d$x = $ianmackenzie$elm_geometry$Direction3d$positiveX;
-var $ianmackenzie$elm_geometry$Direction3d$positiveY = $ianmackenzie$elm_geometry$Direction3d$unsafe(
-	{x: 0, y: 1, z: 0});
-var $ianmackenzie$elm_geometry$Direction3d$y = $ianmackenzie$elm_geometry$Direction3d$positiveY;
-var $ianmackenzie$elm_geometry$SketchPlane3d$xy = $ianmackenzie$elm_geometry$SketchPlane3d$unsafe(
-	{originPoint: $ianmackenzie$elm_geometry$Point3d$origin, xDirection: $ianmackenzie$elm_geometry$Direction3d$x, yDirection: $ianmackenzie$elm_geometry$Direction3d$y});
 var $ianmackenzie$elm_3d_camera$Viewpoint3d$orbitZ = function (_v0) {
 	var focalPoint = _v0.focalPoint;
 	var azimuth = _v0.azimuth;

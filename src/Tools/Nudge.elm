@@ -1,6 +1,7 @@
 module Tools.Nudge exposing (..)
 
 import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
+import Angle
 import Direction2d exposing (Direction2d)
 import Direction3d
 import DomainModel exposing (..)
@@ -15,6 +16,7 @@ import Point2d exposing (Point2d)
 import Point3d exposing (Point3d, xCoordinate, yCoordinate, zCoordinate)
 import Polyline2d
 import Quantity exposing (Quantity)
+import SketchPlane3d
 import Tools.NudgeOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showShortMeasure)
@@ -195,14 +197,30 @@ effectiveDirection index track =
 
         thisLeaf =
             leafFromIndex index track.trackTree |> asRecord
+
+        deviation =
+            Direction2d.angleFrom
+                precedingLeaf.directionAtStart
+                thisLeaf.directionAtStart
+
+        halfDeviation =
+            Quantity.half deviation
+
+        bisectedAngle =
+            precedingLeaf.directionAtStart
+                |> Direction2d.rotateBy halfDeviation
+
+        _ =
+            Debug.log "Effective direction stuff"
+                [ precedingLeaf.directionAtStart |> Direction2d.toAngle |> Angle.inDegrees
+                , thisLeaf.directionAtStart |> Direction2d.toAngle |> Angle.inDegrees
+                , deviation |> Angle.inDegrees
+                , halfDeviation |> Angle.inDegrees
+                , bisectedAngle |> Direction2d.toAngle |> Angle.inDegrees
+                ]
     in
-    thisLeaf.directionAtStart
-        |> Direction2d.rotateBy
-            (Quantity.half <|
-                Direction2d.angleFrom
-                    precedingLeaf.directionAtStart
-                    thisLeaf.directionAtStart
-            )
+    -- This formulation intended to avoid -180/+180 issues.
+    bisectedAngle
 
 
 nudgeTrackPoint : Options -> Float -> Int -> TrackLoaded msg -> EarthPoint
@@ -217,9 +235,8 @@ nudgeTrackPoint options fade index track =
 
             horizontalDirection =
                 effectiveDirection index track
-                    |> Direction2d.rotateCounterclockwise
-                    |> Direction2d.toAngle
-                    |> Direction3d.xy
+                    |> Direction2d.rotateClockwise
+                    |> Direction3d.on SketchPlane3d.xy
 
             horizontalVector =
                 Vector3d.withLength options.horizontal horizontalDirection

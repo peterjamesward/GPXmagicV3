@@ -39,6 +39,7 @@ module DomainModel exposing
     )
 
 import Angle exposing (Angle)
+import Axis2d
 import Axis3d exposing (Axis3d)
 import BoundingBox3d exposing (BoundingBox3d)
 import Direction2d exposing (Direction2d)
@@ -309,10 +310,13 @@ makeRoadSectionKnowingLocalCoords ( earth1, local1 ) ( earth2, local2 ) =
                 0.0
 
         bearing =
-            Angle.radians <|
-                Spherical.findBearingToTarget
-                    ( Angle.inRadians earth1.latitude, Angle.inRadians <| Direction2d.toAngle earth1.longitude )
-                    ( Angle.inRadians earth2.latitude, Angle.inRadians <| Direction2d.toAngle earth2.longitude )
+            -- NB bearing is from North, clockwise.
+            Spherical.findBearingToTarget
+                        ( Angle.inRadians earth1.latitude, Angle.inRadians <| Direction2d.toAngle earth1.longitude )
+                        ( Angle.inRadians earth2.latitude, Angle.inRadians <| Direction2d.toAngle earth2.longitude )
+
+        direction =
+            pi/2 - bearing |> Angle.radians |> Direction2d.fromAngle
     in
     { sourceData = ( earth1, earth2 )
     , startPoint = local1
@@ -350,8 +354,8 @@ makeRoadSectionKnowingLocalCoords ( earth1, local1 ) ( earth2, local2 ) =
     , gradientAtStart = gradient
     , gradientAtEnd = gradient
     , gradientChangeMaximumAbs = abs gradient
-    , directionAtStart = Direction2d.fromAngle bearing
-    , directionAtEnd = Direction2d.fromAngle bearing
+    , directionAtStart = direction
+    , directionAtEnd = direction
     , directionChangeMaximumAbs = Angle.degrees 0
     }
 
