@@ -33862,12 +33862,12 @@ var $author$project$Tools$TrackInfoBox$InfoForPoint = {$: 'InfoForPoint'};
 var $author$project$Tools$TrackInfoBox$displayInfoForPoint = F2(
 	function (imperial, track) {
 		var labels = _List_fromArray(
-			['Number', 'Distance', 'Altitude', 'Longitude', 'Latitude', 'Bearing', 'Gradient']);
+			['Number', 'Distance', 'Longitude', 'Latitude', 'Altitude', 'Bearing', 'Gradient']);
 		var index = track.currentPosition;
 		var leaf = $author$project$DomainModel$asRecord(
 			A2($author$project$DomainModel$leafFromIndex, index, track.trackTree));
 		var distance = A2($author$project$DomainModel$distanceFromIndex, index, track.trackTree);
-		var bearing = $ianmackenzie$elm_units$Angle$inDegrees(
+		var bearing = -$ianmackenzie$elm_units$Angle$inDegrees(
 			A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, $ianmackenzie$elm_geometry$Direction2d$positiveY, leaf.directionAtStart));
 		var _v0 = leaf.sourceData.a;
 		var longitude = _v0.longitude;

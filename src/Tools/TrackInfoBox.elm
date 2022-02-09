@@ -1,6 +1,7 @@
 module Tools.TrackInfoBox exposing (..)
 
 import Angle
+import Axis2d
 import Direction2d
 import DomainModel exposing (..)
 import Element exposing (..)
@@ -84,13 +85,14 @@ displayInfoForPoint imperial track =
             leaf.directionAtStart
                 |> Direction2d.angleFrom Direction2d.positiveY
                 |> Angle.inDegrees
+                |> negate
 
         labels =
             [ "Number"
             , "Distance"
-            , "Altitude"
             , "Longitude"
             , "Latitude"
+            , "Altitude"
             , "Bearing"
             , "Gradient"
             ]

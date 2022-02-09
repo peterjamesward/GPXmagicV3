@@ -17,9 +17,9 @@ BUG: Pointers may be not reset on track load.
 
 # WIP
 
-1. Segment info (toggle with whole track?)
-2. Gradient problems
-3. Steep climbs
+## Gradient problems
+
+## Steep climbs
 
 ---
 
