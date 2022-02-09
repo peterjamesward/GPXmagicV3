@@ -21,7 +21,6 @@ BUG: Pointers may be not reset on track load.
 2. Gradient problems
 3. Steep climbs
 
-
 ---
 
 # BACKLOG, roughly in order ...

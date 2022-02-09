@@ -76,6 +76,7 @@ type alias Options =
     , curveFormerOptions : Tools.CurveFormerOptions.Options
     , bendSmootherOptions : Tools.BendSmootherOptions.Options
     , nudgeOptions : Tools.NudgeOptions.Options
+    , infoOptions : TrackInfoBox.Options
     }
 
 
@@ -92,6 +93,7 @@ defaultOptions =
     , curveFormerOptions = Tools.CurveFormer.defaultOptions
     , bendSmootherOptions = Tools.BendSmoother.defaultOptions
     , nudgeOptions = Tools.Nudge.defaultOptions
+    , infoOptions = TrackInfoBox.defaultOptions
     }
 
 
@@ -111,6 +113,7 @@ type ToolMsg
     | ToolCurveFormerMsg Tools.CurveFormer.Msg
     | ToolBendSmootherMsg Tools.BendSmoother.Msg
     | ToolNudgeMsg Tools.Nudge.Msg
+    | ToolInfoMsg TrackInfoBox.Msg
 
 
 type alias ToolEntry =
@@ -145,13 +148,13 @@ defaultTools =
 trackInfoBox : ToolEntry
 trackInfoBox =
     { toolType = ToolTrackInfo
-    , label = "Summary info"
+    , label = "Information"
     , info = "Here is some useful information"
     , video = Nothing
     , state = Expanded
     , dock = DockUpperLeft
-    , tabColour = FlatColors.SwedishPalette.blackPearl
-    , textColour = contrastingColour FlatColors.SwedishPalette.blackPearl
+    , tabColour = FlatColors.FlatUIPalette.peterRiver
+    , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
     , isPopupOpen = False
     }
 
@@ -164,8 +167,8 @@ undoRedoTool =
     , video = Nothing
     , state = Expanded
     , dock = DockUpperRight
-    , tabColour = FlatColors.SwedishPalette.blackPearl
-    , textColour = contrastingColour FlatColors.SwedishPalette.blackPearl
+    , tabColour = FlatColors.FlatUIPalette.sunFlower
+    , textColour = contrastingColour FlatColors.FlatUIPalette.sunFlower
     , isPopupOpen = False
     }
 
@@ -178,8 +181,8 @@ directionChangeTool =
     , video = Nothing
     , state = Contracted
     , dock = DockUpperRight
-    , tabColour = FlatColors.SwedishPalette.blackPearl
-    , textColour = contrastingColour FlatColors.SwedishPalette.blackPearl
+    , tabColour = FlatColors.FlatUIPalette.peterRiver
+    , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
     , isPopupOpen = False
     }
 
@@ -192,8 +195,8 @@ pointersTool =
     , video = Nothing
     , state = Expanded
     , dock = DockUpperRight
-    , tabColour = FlatColors.AussiePalette.quinceJelly
-    , textColour = contrastingColour FlatColors.AussiePalette.quinceJelly
+    , tabColour = FlatColors.FlatUIPalette.orange
+    , textColour = contrastingColour FlatColors.FlatUIPalette.orange
     , isPopupOpen = False
     }
 
@@ -206,8 +209,8 @@ deleteTool =
     , video = Nothing
     , state = Contracted
     , dock = DockLowerLeft
-    , tabColour = FlatColors.SwedishPalette.blackPearl
-    , textColour = contrastingColour FlatColors.SwedishPalette.blackPearl
+    , tabColour = FlatColors.FlatUIPalette.concrete
+    , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
     , isPopupOpen = False
     }
 
@@ -220,8 +223,8 @@ bezierSplinesTool =
     , video = Nothing
     , state = Contracted
     , dock = DockLowerRight
-    , tabColour = FlatColors.SwedishPalette.blackPearl
-    , textColour = contrastingColour FlatColors.SwedishPalette.blackPearl
+    , tabColour = FlatColors.FlatUIPalette.amethyst
+    , textColour = contrastingColour FlatColors.FlatUIPalette.amethyst
     , isPopupOpen = False
     }
 
@@ -234,8 +237,8 @@ centroidAverageTool =
     , video = Nothing
     , state = Contracted
     , dock = DockLowerRight
-    , tabColour = FlatColors.SwedishPalette.blackPearl
-    , textColour = contrastingColour FlatColors.SwedishPalette.blackPearl
+    , tabColour = FlatColors.FlatUIPalette.amethyst
+    , textColour = contrastingColour FlatColors.FlatUIPalette.amethyst
     , isPopupOpen = False
     }
 
@@ -248,8 +251,8 @@ curveFormerTool =
     , video = Nothing
     , state = Contracted
     , dock = DockLowerRight
-    , tabColour = FlatColors.SwedishPalette.blackPearl
-    , textColour = contrastingColour FlatColors.SwedishPalette.blackPearl
+    , tabColour = FlatColors.FlatUIPalette.turquoise
+    , textColour = contrastingColour FlatColors.FlatUIPalette.turquoise
     , isPopupOpen = False
     }
 
@@ -262,8 +265,8 @@ bendSmootherTool =
     , video = Nothing
     , state = Contracted
     , dock = DockLowerRight
-    , tabColour = FlatColors.SwedishPalette.blackPearl
-    , textColour = contrastingColour FlatColors.SwedishPalette.blackPearl
+    , tabColour = FlatColors.FlatUIPalette.greenSea
+    , textColour = contrastingColour FlatColors.FlatUIPalette.greenSea
     , isPopupOpen = False
     }
 
@@ -276,8 +279,8 @@ nudgeTool =
     , video = Nothing
     , state = Contracted
     , dock = DockLowerRight
-    , tabColour = FlatColors.SwedishPalette.blackPearl
-    , textColour = contrastingColour FlatColors.SwedishPalette.blackPearl
+    , tabColour = FlatColors.FlatUIPalette.concrete
+    , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
     , isPopupOpen = False
     }
 
@@ -514,6 +517,16 @@ update toolMsg isTrack msgWrapper options =
             in
             ( newOptions, [ StoreLocally "measure" <| E.bool newOptions.imperial ] )
 
+        ToolInfoMsg infoMsg ->
+            let
+                ( newOptions ) =
+                    TrackInfoBox.update
+                        infoMsg
+                        options.infoOptions
+            in
+            ( { options | infoOptions = newOptions }
+            , []
+            )
 
 refreshOpenTools :
     Maybe (TrackLoaded msg)
@@ -842,7 +855,7 @@ viewToolByType msgWrapper entry isTrack options =
     <|
         case entry.toolType of
             ToolTrackInfo ->
-                TrackInfoBox.trackInfoBox isTrack options.imperial
+                TrackInfoBox.view (msgWrapper << ToolInfoMsg) options.imperial isTrack options.infoOptions
 
             ToolAbruptDirectionChanges ->
                 AbruptDirectionChanges.view
@@ -939,6 +952,7 @@ encodeType toolType =
 
         ToolNudge ->
             "ToolNudge"
+
 
 encodeColour : Element.Color -> E.Value
 encodeColour colour =
