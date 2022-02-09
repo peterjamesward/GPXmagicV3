@@ -15,14 +15,13 @@ orange and purple are (possibly) co-linear.
 
 BUG: Pointers may be not reset on track load.
 
-BUG: Clivk handling on Profile not quite right. 
-BUG: Excessive zoom in on Profile must be stopped.
 
 # WIP
 
 ## Gradient problems
 
 * Markers on the Profile.
+  BUG: Excessive zoom in on Profile must be stopped.
 
 ## Steep climbs
 
@@ -41,13 +40,13 @@ BUG: Excessive zoom in on Profile must be stopped.
 7. SVG import
 8. Move & Stretch
 9. Fly-through
-10. Graph Theory
+10. Graph Theory (renamed)
 11. Use Strava segment data
 12. Loops (includes Out and Back) (+ impact on others, such as Bezier).
+New stuff:
 13. Samir's bend detector (amount of angular change within X linear metres).
 14. Clothoids (promoted because may be similar structurally to bezier & centroid)
 15. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
-16. Something akin to Graphs, stemming from Muriel's route.
 
 ## Error messages
 

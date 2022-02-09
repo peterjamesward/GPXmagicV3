@@ -492,17 +492,17 @@ renderProfileDataForCharts imperial bumps context track =
             RoadSection
             -> ( Length.Length, List ProfileDatum, Maybe RoadSection )
             -> ( Length.Length, List ProfileDatum, Maybe RoadSection )
-        foldFn road ( nextDistance, outputs, _ ) =
+        foldFn road ( distanceSoFar, outputs, _ ) =
             let
                 newEntry : ProfileDatum
                 newEntry =
-                    { distance = lengthConversion nextDistance
+                    { distance = lengthConversion distanceSoFar
                     , altitude = heightConversion <| Point3d.zCoordinate road.startPoint
-                    , gradient = road.gradientAtStart * 0.5 + road.gradientAtEnd * 0.5
-                    , colour = gradientColourPastel (gradientFromNode <| Leaf road)
+                    , gradient = road.gradientAtStart
+                    , colour = gradientColourPastel road.gradientAtStart
                     }
             in
-            ( nextDistance |> Quantity.plus road.trueLength
+            ( distanceSoFar |> Quantity.plus road.trueLength
             , newEntry :: outputs
             , Just road
             )
@@ -522,8 +522,8 @@ renderProfileDataForCharts imperial bumps context track =
                 Just finalLeaf ->
                     { distance = lengthConversion rightEdge
                     , altitude = heightConversion <| Point3d.zCoordinate finalLeaf.endPoint
-                    , gradient = gradientFromNode <| Leaf finalLeaf
-                    , colour = gradientColourPastel (gradientFromNode <| Leaf finalLeaf)
+                    , gradient = finalLeaf.gradientAtEnd
+                    , colour = gradientColourPastel finalLeaf.gradientAtEnd
                     }
 
                 Nothing ->
@@ -535,7 +535,7 @@ renderProfileDataForCharts imperial bumps context track =
                     }
     in
     { context
-        | profileData = finalDatum :: result
+        | profileData = List.reverse (finalDatum :: result)
         , gradientProblems = bumps
         , imperial = imperial
     }
