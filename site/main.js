@@ -33859,6 +33859,64 @@ var $author$project$Tools$TrackInfoBox$ChooseDisplayMode = function (a) {
 	return {$: 'ChooseDisplayMode', a: a};
 };
 var $author$project$Tools$TrackInfoBox$InfoForPoint = {$: 'InfoForPoint'};
+var $author$project$Tools$TrackInfoBox$displayInfoForPoint = F2(
+	function (imperial, track) {
+		var labels = _List_fromArray(
+			['Number', 'Distance', 'Altitude', 'Longitude', 'Latitude', 'Bearing', 'Gradient']);
+		var index = track.currentPosition;
+		var leaf = $author$project$DomainModel$asRecord(
+			A2($author$project$DomainModel$leafFromIndex, index, track.trackTree));
+		var distance = A2($author$project$DomainModel$distanceFromIndex, index, track.trackTree);
+		var bearing = $ianmackenzie$elm_units$Angle$inDegrees(
+			A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, $ianmackenzie$elm_geometry$Direction2d$positiveY, leaf.directionAtStart));
+		var _v0 = leaf.sourceData.a;
+		var longitude = _v0.longitude;
+		var latitude = _v0.latitude;
+		var altitude = _v0.altitude;
+		return A2(
+			$mdgriffith$elm_ui$Element$row,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$padding(10),
+					$mdgriffith$elm_ui$Element$spacing(5)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$spacing(5)
+						]),
+					A2($elm$core$List$map, $mdgriffith$elm_ui$Element$text, labels)),
+					A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$spacing(5)
+						]),
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$text(
+							$elm$core$String$fromInt(index)),
+							$mdgriffith$elm_ui$Element$text(
+							A2($author$project$UtilsForViews$showLongMeasure, imperial, distance)),
+							$mdgriffith$elm_ui$Element$text(
+							$author$project$UtilsForViews$showDecimal2(
+								$ianmackenzie$elm_units$Angle$inDegrees(
+									$ianmackenzie$elm_geometry$Direction2d$toAngle(longitude)))),
+							$mdgriffith$elm_ui$Element$text(
+							$author$project$UtilsForViews$showDecimal2(
+								$ianmackenzie$elm_units$Angle$inDegrees(latitude))),
+							$mdgriffith$elm_ui$Element$text(
+							A2($author$project$UtilsForViews$showShortMeasure, imperial, altitude)),
+							$mdgriffith$elm_ui$Element$text(
+							$author$project$UtilsForViews$showDecimal2(bearing)),
+							$mdgriffith$elm_ui$Element$text(
+							$author$project$UtilsForViews$showDecimal2(leaf.gradientAtStart))
+						]))
+				]));
+	});
 var $author$project$Tools$TrackInfoBox$displayValuesWithTrack = F3(
 	function (imperial, infoList, track) {
 		var info = $author$project$DomainModel$asRecord(track.trackTree);
@@ -33996,7 +34054,14 @@ var $author$project$Tools$TrackInfoBox$view = F4(
 										]),
 									selected: $elm$core$Maybe$Just(options.displayMode)
 								}),
-								A3($author$project$Tools$TrackInfoBox$displayValuesWithTrack, imperial, $author$project$Tools$TrackInfoBox$trackInfoList, track)
+								function () {
+								var _v1 = options.displayMode;
+								if (_v1.$ === 'InfoForTrack') {
+									return A3($author$project$Tools$TrackInfoBox$displayValuesWithTrack, imperial, $author$project$Tools$TrackInfoBox$trackInfoList, track);
+								} else {
+									return A2($author$project$Tools$TrackInfoBox$displayInfoForPoint, imperial, track);
+								}
+							}()
 							]));
 				} else {
 					return A2(
