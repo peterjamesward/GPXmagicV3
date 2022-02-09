@@ -10629,6 +10629,8 @@ var $author$project$ViewProfileCharts$initialiseView = F3(
 				focalPoint: $author$project$DomainModel$startPoint(
 					A2($author$project$DomainModel$leafFromIndex, current, treeNode)),
 				followSelectedPoint: true,
+				gradientProblems: _List_Nil,
+				imperial: false,
 				metresPerPixel: 10.0,
 				orbiting: $elm$core$Maybe$Nothing,
 				profileData: _List_Nil,
@@ -14025,7 +14027,9 @@ var $author$project$Tools$AbruptGradientChanges$toolStateChange = F4(
 					]));
 		} else {
 			return _Utils_Tuple2(
-				options,
+				_Utils_update(
+					options,
+					{breaches: _List_Nil}),
 				_List_fromArray(
 					[
 						$author$project$Actions$HidePreview('ridge')
@@ -17246,13 +17250,24 @@ var $author$project$ColourPalette$gradientColourPastel = function (slope) {
 		0.6,
 		0.7);
 };
-var $author$project$ViewProfileCharts$renderProfileDataForCharts = F2(
-	function (context, track) {
+var $ianmackenzie$elm_units$Constants$meter = 1.0;
+var $ianmackenzie$elm_units$Constants$inch = 0.0254 * $ianmackenzie$elm_units$Constants$meter;
+var $ianmackenzie$elm_units$Constants$foot = 12 * $ianmackenzie$elm_units$Constants$inch;
+var $ianmackenzie$elm_units$Length$inFeet = function (length) {
+	return $ianmackenzie$elm_units$Length$inMeters(length) / $ianmackenzie$elm_units$Constants$foot;
+};
+var $ianmackenzie$elm_units$Constants$mile = 5280 * $ianmackenzie$elm_units$Constants$foot;
+var $ianmackenzie$elm_units$Length$inMiles = function (length) {
+	return $ianmackenzie$elm_units$Length$inMeters(length) / $ianmackenzie$elm_units$Constants$mile;
+};
+var $author$project$ViewProfileCharts$renderProfileDataForCharts = F4(
+	function (imperial, bumps, context, track) {
 		var trackLengthInView = A2(
 			$ianmackenzie$elm_units$Quantity$multiplyBy,
 			A2($elm$core$Basics$pow, 0.5, context.zoomLevel),
 			$author$project$DomainModel$trueLength(track.trackTree));
 		var pointOfInterest = context.followSelectedPoint ? A2($author$project$DomainModel$distanceFromIndex, track.currentPosition, track.trackTree) : $ianmackenzie$elm_geometry$Point3d$xCoordinate(context.focalPoint);
+		var lengthConversion = imperial ? $ianmackenzie$elm_units$Length$inMiles : $ianmackenzie$elm_units$Length$inMeters;
 		var leftEdge = A3(
 			$ianmackenzie$elm_units$Quantity$clamp,
 			$ianmackenzie$elm_units$Quantity$zero,
@@ -17265,17 +17280,18 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F2(
 				$ianmackenzie$elm_units$Quantity$half(trackLengthInView),
 				pointOfInterest));
 		var rightEdge = A2($ianmackenzie$elm_units$Quantity$plus, trackLengthInView, leftEdge);
+		var heightConversion = imperial ? $ianmackenzie$elm_units$Length$inFeet : $ianmackenzie$elm_units$Length$inMeters;
 		var foldFn = F2(
 			function (road, _v3) {
 				var nextDistance = _v3.a;
 				var outputs = _v3.b;
 				var newEntry = {
-					altitude: $ianmackenzie$elm_units$Length$inMeters(
+					altitude: heightConversion(
 						$ianmackenzie$elm_geometry$Point3d$zCoordinate(road.startPoint)),
 					colour: $author$project$ColourPalette$gradientColourPastel(
 						$author$project$DomainModel$gradientFromNode(
 							$author$project$DomainModel$Leaf(road))),
-					distance: $ianmackenzie$elm_units$Length$inMeters(nextDistance),
+					distance: lengthConversion(nextDistance),
 					gradient: (road.gradientAtStart * 0.5) + (road.gradientAtEnd * 0.5)
 				};
 				return _Utils_Tuple3(
@@ -17307,12 +17323,12 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F2(
 			if (_final.$ === 'Just') {
 				var finalLeaf = _final.a;
 				return {
-					altitude: $ianmackenzie$elm_units$Length$inMeters(
+					altitude: heightConversion(
 						$ianmackenzie$elm_geometry$Point3d$zCoordinate(finalLeaf.endPoint)),
 					colour: $author$project$ColourPalette$gradientColourPastel(
 						$author$project$DomainModel$gradientFromNode(
 							$author$project$DomainModel$Leaf(finalLeaf))),
-					distance: $ianmackenzie$elm_units$Length$inMeters(rightEdge),
+					distance: lengthConversion(rightEdge),
 					gradient: $author$project$DomainModel$gradientFromNode(
 						$author$project$DomainModel$Leaf(finalLeaf))
 				};
@@ -17320,7 +17336,7 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F2(
 				return {
 					altitude: 0.0,
 					colour: $avh4$elm_color$Color$black,
-					distance: $ianmackenzie$elm_units$Length$inMeters(rightEdge),
+					distance: lengthConversion(rightEdge),
 					gradient: 0.0
 				};
 			}
@@ -17328,11 +17344,13 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F2(
 		return _Utils_update(
 			context,
 			{
+				gradientProblems: bumps,
+				imperial: imperial,
 				profileData: A2($elm$core$List$cons, finalDatum, result)
 			});
 	});
-var $author$project$PaneLayoutManager$renderPaneIfProfileVisible = F2(
-	function (pane, track) {
+var $author$project$PaneLayoutManager$renderPaneIfProfileVisible = F4(
+	function (imperial, gradientChanges, pane, track) {
 		var _v0 = _Utils_Tuple2(pane.activeView, pane.profileContext);
 		if ((_v0.a.$ === 'ViewProfile') && (_v0.b.$ === 'Just')) {
 			var _v1 = _v0.a;
@@ -17341,7 +17359,7 @@ var $author$project$PaneLayoutManager$renderPaneIfProfileVisible = F2(
 				pane,
 				{
 					profileContext: $elm$core$Maybe$Just(
-						A2($author$project$ViewProfileCharts$renderProfileDataForCharts, context, track))
+						A4($author$project$ViewProfileCharts$renderProfileDataForCharts, imperial, gradientChanges, context, track))
 				});
 		} else {
 			return pane;
@@ -17559,15 +17577,15 @@ var $author$project$SceneBuilder3D$renderPreviews = function (previews) {
 		onePreview,
 		$elm$core$Dict$values(previews));
 };
-var $author$project$PaneLayoutManager$render = F3(
-	function (options, track, previews) {
+var $author$project$PaneLayoutManager$render = F5(
+	function (imperial, gradientChanges, options, track, previews) {
 		return _Utils_update(
 			options,
 			{
-				pane1: A2($author$project$PaneLayoutManager$renderPaneIfProfileVisible, options.pane1, track),
-				pane2: A2($author$project$PaneLayoutManager$renderPaneIfProfileVisible, options.pane2, track),
-				pane3: A2($author$project$PaneLayoutManager$renderPaneIfProfileVisible, options.pane3, track),
-				pane4: A2($author$project$PaneLayoutManager$renderPaneIfProfileVisible, options.pane4, track),
+				pane1: A4($author$project$PaneLayoutManager$renderPaneIfProfileVisible, imperial, gradientChanges, options.pane1, track),
+				pane2: A4($author$project$PaneLayoutManager$renderPaneIfProfileVisible, imperial, gradientChanges, options.pane2, track),
+				pane3: A4($author$project$PaneLayoutManager$renderPaneIfProfileVisible, imperial, gradientChanges, options.pane3, track),
+				pane4: A4($author$project$PaneLayoutManager$renderPaneIfProfileVisible, imperial, gradientChanges, options.pane4, track),
 				scene3d: _Utils_ap(
 					$author$project$SceneBuilder3D$renderPreviews(previews),
 					$author$project$SceneBuilder3D$render3dView(track))
@@ -17577,7 +17595,8 @@ var $author$project$Main$render = function (model) {
 	var _v0 = model.track;
 	if (_v0.$ === 'Just') {
 		var track = _v0.a;
-		var paneLayout = A3($author$project$PaneLayoutManager$render, model.paneLayoutOptions, track, model.previews);
+		var gradientChanges = A2($elm$core$List$map, $elm$core$Tuple$first, model.toolOptions.gradientChangeOptions.breaches);
+		var paneLayout = A5($author$project$PaneLayoutManager$render, model.toolOptions.imperial, gradientChanges, model.paneLayoutOptions, track, model.previews);
 		return _Utils_update(
 			model,
 			{paneLayoutOptions: paneLayout});
@@ -17585,15 +17604,15 @@ var $author$project$Main$render = function (model) {
 		return model;
 	}
 };
-var $author$project$PaneLayoutManager$renderProfile = F2(
-	function (options, track) {
+var $author$project$PaneLayoutManager$renderProfile = F4(
+	function (imperial, gradientChanges, options, track) {
 		return _Utils_update(
 			options,
 			{
-				pane1: A2($author$project$PaneLayoutManager$renderPaneIfProfileVisible, options.pane1, track),
-				pane2: A2($author$project$PaneLayoutManager$renderPaneIfProfileVisible, options.pane2, track),
-				pane3: A2($author$project$PaneLayoutManager$renderPaneIfProfileVisible, options.pane3, track),
-				pane4: A2($author$project$PaneLayoutManager$renderPaneIfProfileVisible, options.pane4, track)
+				pane1: A4($author$project$PaneLayoutManager$renderPaneIfProfileVisible, imperial, gradientChanges, options.pane1, track),
+				pane2: A4($author$project$PaneLayoutManager$renderPaneIfProfileVisible, imperial, gradientChanges, options.pane2, track),
+				pane3: A4($author$project$PaneLayoutManager$renderPaneIfProfileVisible, imperial, gradientChanges, options.pane3, track),
+				pane4: A4($author$project$PaneLayoutManager$renderPaneIfProfileVisible, imperial, gradientChanges, options.pane4, track)
 			});
 	});
 var $elm$json$Json$Decode$bool = _Json_decodeBool;
@@ -17993,7 +18012,12 @@ var $author$project$Main$performActionsOnModel = F2(
 								return _Utils_update(
 									foldedModel,
 									{
-										paneLayoutOptions: A2($author$project$PaneLayoutManager$renderProfile, foldedModel.paneLayoutOptions, track)
+										paneLayoutOptions: A4(
+											$author$project$PaneLayoutManager$renderProfile,
+											foldedModel.toolOptions.imperial,
+											A2($elm$core$List$map, $elm$core$Tuple$first, foldedModel.toolOptions.gradientChangeOptions.breaches),
+											foldedModel.paneLayoutOptions,
+											track)
 									});
 							} else {
 								break _v0$20;
@@ -19057,35 +19081,6 @@ var $author$project$ViewMap$update = F5(
 	});
 var $author$project$ViewProfileCharts$ClickDelayExpired = {$: 'ClickDelayExpired'};
 var $author$project$ViewProfileCharts$DragPan = {$: 'DragPan'};
-var $author$project$ViewProfileCharts$modelPointFromClick = F4(
-	function (event, _v0, context, track) {
-		var w = _v0.a;
-		var h = _v0.b;
-		var _v1 = event.offsetPos;
-		var x = _v1.a;
-		var y = _v1.b;
-		return $elm$core$Maybe$Nothing;
-	});
-var $author$project$ViewProfileCharts$detectHit = F4(
-	function (event, track, _v0, context) {
-		var w = _v0.a;
-		var h = _v0.b;
-		var _v1 = A4(
-			$author$project$ViewProfileCharts$modelPointFromClick,
-			event,
-			_Utils_Tuple2(w, h),
-			context,
-			track);
-		if (_v1.$ === 'Just') {
-			var pointOnZX = _v1.a;
-			return A2(
-				$author$project$DomainModel$indexFromDistance,
-				$ianmackenzie$elm_geometry$Point3d$xCoordinate(pointOnZX),
-				track.trackTree);
-		} else {
-			return track.currentPosition;
-		}
-	});
 var $ianmackenzie$elm_geometry$Vector3d$meters = F3(
 	function (x, y, z) {
 		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
@@ -19163,26 +19158,6 @@ var $author$project$ViewProfileCharts$update = F5(
 				} else {
 					return _Utils_Tuple2(context, _List_Nil);
 				}
-			case 'ImageDoubleClick':
-				var zone = msg.a;
-				var event = msg.b;
-				var nearestPoint = A4(
-					$author$project$ViewProfileCharts$detectHit,
-					event,
-					track,
-					areaForZone(zone),
-					context);
-				return _Utils_Tuple2(
-					_Utils_update(
-						context,
-						{
-							focalPoint: A2($author$project$DomainModel$earthPointFromIndex, nearestPoint, track.trackTree)
-						}),
-					_List_fromArray(
-						[
-							$author$project$Actions$SetCurrent(nearestPoint),
-							$author$project$Actions$TrackHasChanged
-						]));
 			case 'ClickDelayExpired':
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -19249,7 +19224,7 @@ var $author$project$ViewProfileCharts$update = F5(
 						context,
 						{dragAction: $author$project$ViewProfileCharts$DragNone, orbiting: $elm$core$Maybe$Nothing, waitingForClickDelay: false}),
 					_List_Nil);
-			default:
+			case 'ToggleFollowOrange':
 				return _Utils_Tuple2(
 					_Utils_update(
 						context,
@@ -19262,6 +19237,10 @@ var $author$project$ViewProfileCharts$update = F5(
 							followSelectedPoint: !context.followSelectedPoint
 						}),
 					_List_Nil);
+			default:
+				var clickZone = msg.a;
+				var event = msg.b;
+				return _Utils_Tuple2(context, _List_Nil);
 		}
 	});
 var $author$project$ViewThirdPerson$ClickDelayExpired = {$: 'ClickDelayExpired'};
@@ -32038,9 +32017,6 @@ var $mdgriffith$elm_ui$Element$Input$defaultThumb = $mdgriffith$elm_ui$Element$I
 			$mdgriffith$elm_ui$Element$Background$color(
 			A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1))
 		]));
-var $ianmackenzie$elm_units$Constants$meter = 1.0;
-var $ianmackenzie$elm_units$Constants$inch = 0.0254 * $ianmackenzie$elm_units$Constants$meter;
-var $ianmackenzie$elm_units$Constants$foot = 12 * $ianmackenzie$elm_units$Constants$inch;
 var $ianmackenzie$elm_units$Length$feet = function (numFeet) {
 	return $ianmackenzie$elm_units$Length$meters($ianmackenzie$elm_units$Constants$foot * numFeet);
 };
@@ -32050,9 +32026,6 @@ var $mdgriffith$elm_ui$Element$Input$Label = F3(
 		return {$: 'Label', a: a, b: b, c: c};
 	});
 var $mdgriffith$elm_ui$Element$Input$labelBelow = $mdgriffith$elm_ui$Element$Input$Label($mdgriffith$elm_ui$Element$Input$Below);
-var $ianmackenzie$elm_units$Length$inFeet = function (length) {
-	return $ianmackenzie$elm_units$Length$inMeters(length) / $ianmackenzie$elm_units$Constants$foot;
-};
 var $author$project$UtilsForViews$showShortMeasure = F2(
 	function (imperial, distance) {
 		return imperial ? ($author$project$UtilsForViews$showDecimal2(
@@ -33924,10 +33897,6 @@ var $feathericons$elm_feather$FeatherIcons$chevronsRight = A2(
 				]),
 			_List_Nil)
 		]));
-var $ianmackenzie$elm_units$Constants$mile = 5280 * $ianmackenzie$elm_units$Constants$foot;
-var $ianmackenzie$elm_units$Length$inMiles = function (length) {
-	return $ianmackenzie$elm_units$Length$inMeters(length) / $ianmackenzie$elm_units$Constants$mile;
-};
 var $author$project$UtilsForViews$showLongMeasure = F2(
 	function (imperial, distance) {
 		return imperial ? ($author$project$UtilsForViews$showDecimal2(
@@ -41809,9 +41778,9 @@ var $author$project$ViewProfileCharts$view = F4(
 		var givenHeight = _v0.b;
 		var currentPointGradient = $author$project$DomainModel$gradientFromNode(
 			A2($author$project$DomainModel$leafFromIndex, track.currentPosition, track.trackTree));
-		var currentPointDistance = $ianmackenzie$elm_units$Length$inMeters(
+		var currentPointDistance = (context.imperial ? $ianmackenzie$elm_units$Length$inMiles : $ianmackenzie$elm_units$Length$inMeters)(
 			A2($author$project$DomainModel$distanceFromIndex, track.currentPosition, track.trackTree));
-		var currentPointAltitude = $ianmackenzie$elm_units$Length$inMeters(
+		var currentPointAltitude = (context.imperial ? $ianmackenzie$elm_units$Length$inFeet : $ianmackenzie$elm_units$Length$inMeters)(
 			$ianmackenzie$elm_geometry$Point3d$zCoordinate(
 				A2($author$project$DomainModel$earthPointFromIndex, track.currentPosition, track.trackTree)));
 		var backgroundColour = $author$project$UtilsForViews$colourHexString($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite);

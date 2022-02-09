@@ -258,8 +258,16 @@ render model =
     case model.track of
         Just track ->
             let
+                gradientChanges =
+                    List.map Tuple.first model.toolOptions.gradientChangeOptions.breaches
+
                 paneLayout =
-                    PaneLayoutManager.render model.paneLayoutOptions track model.previews
+                    PaneLayoutManager.render
+                        model.toolOptions.imperial
+                        gradientChanges
+                        model.paneLayoutOptions
+                        track
+                        model.previews
             in
             { model | paneLayoutOptions = paneLayout }
 
@@ -1025,6 +1033,8 @@ performActionsOnModel actions model =
                     { foldedModel
                         | paneLayoutOptions =
                             PaneLayoutManager.renderProfile
+                                foldedModel.toolOptions.imperial
+                                (List.map Tuple.first foldedModel.toolOptions.gradientChangeOptions.breaches)
                                 foldedModel.paneLayoutOptions
                                 track
                     }

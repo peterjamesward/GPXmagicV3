@@ -67,6 +67,8 @@ type alias Context =
     , metresPerPixel : Float -- Helps with dragging accurately.
     , waitingForClickDelay : Bool
     , profileData : List ProfileDatum
+    , gradientProblems : List Int
+    , imperial : Bool
     }
 
 
@@ -133,15 +135,25 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
         currentPointAltitude =
             earthPointFromIndex track.currentPosition track.trackTree
                 |> Point3d.zCoordinate
-                |> Length.inMeters
+                |> (if context.imperial then
+                        Length.inFeet
+
+                    else
+                        Length.inMeters
+                   )
 
         currentPointGradient =
             leafFromIndex track.currentPosition track.trackTree
                 |> gradientFromNode
 
         currentPointDistance =
-            Length.inMeters <|
-                distanceFromIndex track.currentPosition track.trackTree
+            distanceFromIndex track.currentPosition track.trackTree
+                |> (if context.imperial then
+                        Length.inMiles
+
+                    else
+                        Length.inMeters
+                   )
 
         ( altitudeWidth, altitudeHeight ) =
             -- Subtract pixels we use for padding around the scene view.
@@ -274,48 +286,6 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
         ]
 
 
-onContextMenu : a -> Element.Attribute a
-onContextMenu msg =
-    HE.custom "contextmenu"
-        (D.succeed
-            { message = msg
-            , stopPropagation = True
-            , preventDefault = True
-            }
-        )
-        |> htmlAttribute
-
-
-modelPointFromClick :
-    Mouse.Event
-    -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> Context
-    -> TrackLoaded msg
-    -> Maybe EarthPoint
-modelPointFromClick event ( w, h ) context track =
-    let
-        ( x, y ) =
-            event.offsetPos
-    in
-    Nothing
-
-
-detectHit :
-    Mouse.Event
-    -> TrackLoaded msg
-    -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> Context
-    -> Int
-detectHit event track ( w, h ) context =
-    case modelPointFromClick event ( w, h ) context track of
-        Just pointOnZX ->
-            DomainModel.indexFromDistance (Point3d.xCoordinate pointOnZX) track.trackTree
-
-        Nothing ->
-            -- Leave position unchanged; should not occur.
-            track.currentPosition
-
-
 update :
     Msg
     -> (Msg -> msg)
@@ -380,17 +350,6 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
 
                 Nothing ->
                     ( context, [] )
-
-        ImageDoubleClick zone event ->
-            let
-                nearestPoint =
-                    detectHit event track (areaForZone zone) context
-            in
-            ( { context | focalPoint = earthPointFromIndex nearestPoint track.trackTree }
-            , [ SetCurrent nearestPoint
-              , TrackHasChanged
-              ]
-            )
 
         ClickDelayExpired ->
             --TODO: Replace with logic that looks for mouse movement.
@@ -469,6 +428,9 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
             , []
             )
 
+        ImageDoubleClick clickZone event ->
+            ( context, [] )
+
 
 type alias ProfileDatum =
     -- Intended for use with the terezka charts, but agnostic.
@@ -480,10 +442,24 @@ type alias ProfileDatum =
     }
 
 
-renderProfileDataForCharts : Context -> TrackLoaded msg -> Context
-renderProfileDataForCharts context track =
-    --TODO: Need Imperial/Metric flag.
+renderProfileDataForCharts : Bool -> List Int -> Context -> TrackLoaded msg -> Context
+renderProfileDataForCharts imperial bumps context track =
+    -- "bumps" = indices of abrupt gradient changes.
     let
+        lengthConversion =
+            if imperial then
+                Length.inMiles
+
+            else
+                Length.inMeters
+
+        heightConversion =
+            if imperial then
+                Length.inFeet
+
+            else
+                Length.inMeters
+
         trackLengthInView =
             trueLength track.trackTree |> Quantity.multiplyBy (0.5 ^ context.zoomLevel)
 
@@ -520,8 +496,8 @@ renderProfileDataForCharts context track =
             let
                 newEntry : ProfileDatum
                 newEntry =
-                    { distance = Length.inMeters nextDistance
-                    , altitude = Length.inMeters <| Point3d.zCoordinate road.startPoint
+                    { distance = lengthConversion nextDistance
+                    , altitude = heightConversion <| Point3d.zCoordinate road.startPoint
                     , gradient = road.gradientAtStart * 0.5 + road.gradientAtEnd * 0.5
                     , colour = gradientColourPastel (gradientFromNode <| Leaf road)
                     }
@@ -544,22 +520,25 @@ renderProfileDataForCharts context track =
         finalDatum =
             case final of
                 Just finalLeaf ->
-                    { distance = Length.inMeters rightEdge
-                    , altitude = Length.inMeters <| Point3d.zCoordinate finalLeaf.endPoint
+                    { distance = lengthConversion rightEdge
+                    , altitude = heightConversion <| Point3d.zCoordinate finalLeaf.endPoint
                     , gradient = gradientFromNode <| Leaf finalLeaf
                     , colour = gradientColourPastel (gradientFromNode <| Leaf finalLeaf)
                     }
 
                 Nothing ->
                     -- Can't happen
-                    { distance = Length.inMeters rightEdge
+                    { distance = lengthConversion rightEdge
                     , altitude = 0.0
                     , gradient = 0.0
                     , colour = Color.black
                     }
     in
-    --TODO: Use last section to add the final section's end point.
-    { context | profileData = finalDatum :: result }
+    { context
+        | profileData = finalDatum :: result
+        , gradientProblems = bumps
+        , imperial = imperial
+    }
 
 
 initialiseView :
@@ -590,4 +569,6 @@ initialiseView current treeNode currentContext =
             , metresPerPixel = 10.0
             , waitingForClickDelay = False
             , profileData = []
+            , gradientProblems = []
+            , imperial = False
             }

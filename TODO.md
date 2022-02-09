@@ -15,11 +15,14 @@ orange and purple are (possibly) co-linear.
 
 BUG: Pointers may be not reset on track load.
 
+BUG: Clivk handling on Profile not quite right. 
+BUG: Excessive zoom in on Profile must be stopped.
+
 # WIP
 
 ## Gradient problems
 
-Markers on the Profile.
+* Markers on the Profile.
 
 ## Steep climbs
 
@@ -105,3 +108,5 @@ view; a PeteTree is OTT.
 
 2-way drag should correct for azimuth. NOT POSSIBLE - multiple views!
 
+Could optimize Gradient problems by keeping a list of all > X and subsetting.
+But is not too slow now with 973K points, so why bother?.

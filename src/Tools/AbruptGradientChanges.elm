@@ -109,7 +109,9 @@ toolStateChange opened colour options track =
 
         _ ->
             -- Hide preview
-            ( options, [ HidePreview "ridge" ] )
+            ( { options | breaches = [] }
+            , [ HidePreview "ridge" ]
+            )
 
 
 update :
