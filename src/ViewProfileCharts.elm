@@ -295,32 +295,11 @@ update :
     -> ( Context, List (ToolAction msg) )
 update msg msgWrapper track ( givenWidth, givenHeight ) context =
     let
-        altitudePortion =
-            ( givenWidth
-            , givenHeight
-                |> Quantity.toFloatQuantity
-                |> Quantity.multiplyBy splitProportion
-                |> Quantity.truncate
-            )
-
-        gradientPortion =
-            ( givenWidth
-            , givenHeight
-                |> Quantity.toFloatQuantity
-                |> Quantity.multiplyBy (1.0 - splitProportion)
-                |> Quantity.truncate
-            )
-
-        areaForZone zone =
-            case zone of
-                ZoneAltitude ->
-                    altitudePortion
-
-                ZoneGradient ->
-                    gradientPortion
-
         centre =
             BoundingBox3d.centerPoint <| boundingBox track.trackTree
+
+        maxZoom =
+            (logBase 2 <| toFloat <| skipCount track.trackTree) - 2
     in
     case msg of
         ImageZoomIn ->
@@ -361,7 +340,9 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
                     -0.001 * deltaY
 
                 zoomLevel =
-                    clamp 0 10 <| context.zoomLevel + increment
+                    clamp 0 maxZoom <|
+                        context.zoomLevel
+                            + increment
             in
             ( { context | zoomLevel = zoomLevel }, [] )
 
