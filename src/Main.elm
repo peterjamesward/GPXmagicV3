@@ -51,7 +51,7 @@ import Tools.CentroidAverage
 import Tools.CurveFormer
 import Tools.DeletePoints as DeletePoints
 import Tools.Nudge
-import ToolsController exposing (ToolEntry)
+import ToolsController exposing (ToolEntry, encodeToolState)
 import TrackLoaded exposing (TrackLoaded)
 import Url exposing (Url)
 import UtilsForViews exposing (colourHexString)
@@ -559,8 +559,15 @@ Please check the file contains GPX data.""" }
             ( model, Cmd.none )
 
         RestoreDefaultToolLayout ->
-            ( { model | toolOptions = ToolsController.defaultOptions }
-            , Cmd.none
+            let
+                newModel =
+                    { model | toolOptions = ToolsController.defaultOptions }
+
+                actions =
+                    [ StoreLocally "tools" <| encodeToolState newModel.toolOptions ]
+            in
+            ( newModel
+            , performActionCommands actions newModel
             )
 
         WriteGpxFile ->

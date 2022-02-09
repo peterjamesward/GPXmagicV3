@@ -14,11 +14,14 @@ orange and purple are (possibly) co-linear.
 
 BUG: Pointers may be not reset on track load.
 
+BUG: Background colour not saved/restored.
+
 # WIP
 
 1. Segment info (toggle with whole track?)
 2. Gradient problems
 3. Steep climbs
+
 
 ---
 

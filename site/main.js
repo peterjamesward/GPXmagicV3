@@ -10376,6 +10376,115 @@ var $author$project$Main$encodeSplitValues = function (model) {
 					$author$project$SplitPane$SplitPane$getPosition(model.rightDockInternal)))
 			]));
 };
+var $author$project$ToolsController$encodeColour = function (colour) {
+	var _v0 = $mdgriffith$elm_ui$Element$toRgb(colour);
+	var red = _v0.red;
+	var green = _v0.green;
+	var blue = _v0.blue;
+	var alpha = _v0.alpha;
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'red',
+				$elm$json$Json$Encode$float(red)),
+				_Utils_Tuple2(
+				'green',
+				$elm$json$Json$Encode$float(green)),
+				_Utils_Tuple2(
+				'blue',
+				$elm$json$Json$Encode$float(blue))
+			]));
+};
+var $author$project$ToolsController$encodeDock = function (dock) {
+	switch (dock.$) {
+		case 'DockUpperLeft':
+			return 'upperleft';
+		case 'DockLowerLeft':
+			return 'lowerleft';
+		case 'DockUpperRight':
+			return 'upperright';
+		case 'DockLowerRight':
+			return 'lowerright';
+		case 'DockBottom':
+			return 'bottom';
+		default:
+			return 'none';
+	}
+};
+var $author$project$ToolsController$encodeState = function (state) {
+	switch (state.$) {
+		case 'Expanded':
+			return 'expanded';
+		case 'Contracted':
+			return 'contracted';
+		default:
+			return 'disabled';
+	}
+};
+var $author$project$ToolsController$encodeType = function (toolType) {
+	switch (toolType.$) {
+		case 'ToolTrackInfo':
+			return 'ToolTrackInfo';
+		case 'ToolAbruptDirectionChanges':
+			return 'ToolAbruptDirectionChanges';
+		case 'ToolDeletePoints':
+			return 'ToolDeletePoints';
+		case 'ToolPointers':
+			return 'ToolPointers';
+		case 'ToolUndoRedo':
+			return 'ToolUndoRedo';
+		case 'ToolBezierSplines':
+			return 'ToolBezierSplines';
+		case 'ToolCentroidAverage':
+			return 'ToolCentroidAverage';
+		case 'ToolCurveFormer':
+			return 'ToolCurveFormer';
+		case 'ToolBendSmoother':
+			return 'ToolBendSmoother';
+		default:
+			return 'ToolNudge';
+	}
+};
+var $author$project$ToolsController$encodeOneTool = function (tool) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'type',
+				$elm$json$Json$Encode$string(
+					$author$project$ToolsController$encodeType(tool.toolType))),
+				_Utils_Tuple2(
+				'state',
+				$elm$json$Json$Encode$string(
+					$author$project$ToolsController$encodeState(tool.state))),
+				_Utils_Tuple2(
+				'dock',
+				$elm$json$Json$Encode$string(
+					$author$project$ToolsController$encodeDock(tool.dock))),
+				_Utils_Tuple2(
+				'tab',
+				$author$project$ToolsController$encodeColour(tool.tabColour)),
+				_Utils_Tuple2(
+				'text',
+				$author$project$ToolsController$encodeColour(tool.textColour))
+			]));
+};
+var $elm$json$Json$Encode$list = F2(
+	function (func, entries) {
+		return _Json_wrap(
+			A3(
+				$elm$core$List$foldl,
+				_Json_addEntry(func),
+				_Json_emptyArray(_Utils_Tuple0),
+				entries));
+	});
+var $author$project$ToolsController$encodeToolState = function (options) {
+	return A2(
+		$elm$json$Json$Encode$list,
+		$elm$core$Basics$identity,
+		A2($elm$core$List$map, $author$project$ToolsController$encodeOneTool, options.tools));
+};
 var $elm$core$String$endsWith = _String_endsWith;
 var $elm$file$File$Select$file = F2(
 	function (mimes, toMsg) {
@@ -10874,15 +10983,6 @@ var $ianmackenzie$elm_geometry$BoundingBox3d$intersects = F2(
 			$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo,
 			$ianmackenzie$elm_geometry$BoundingBox3d$minZ(other),
 			$ianmackenzie$elm_geometry$BoundingBox3d$maxZ(boundingBox))))));
-	});
-var $elm$json$Json$Encode$list = F2(
-	function (func, entries) {
-		return _Json_wrap(
-			A3(
-				$elm$core$List$foldl,
-				_Json_addEntry(func),
-				_Json_emptyArray(_Utils_Tuple0),
-				entries));
 	});
 var $author$project$DomainModel$lngLatPair = function (_v0) {
 	var longitude = _v0.a;
@@ -13687,106 +13787,6 @@ var $author$project$DomainModel$nearestToLonLat = F2(
 			});
 		return A2(helper, treeNode, 0).a;
 	});
-var $author$project$ToolsController$encodeColour = function (colour) {
-	var _v0 = $mdgriffith$elm_ui$Element$toRgb(colour);
-	var red = _v0.red;
-	var green = _v0.green;
-	var blue = _v0.blue;
-	var alpha = _v0.alpha;
-	return $elm$json$Json$Encode$object(
-		_List_fromArray(
-			[
-				_Utils_Tuple2(
-				'red',
-				$elm$json$Json$Encode$float(red)),
-				_Utils_Tuple2(
-				'green',
-				$elm$json$Json$Encode$float(green)),
-				_Utils_Tuple2(
-				'blue',
-				$elm$json$Json$Encode$float(blue))
-			]));
-};
-var $author$project$ToolsController$encodeDock = function (dock) {
-	switch (dock.$) {
-		case 'DockUpperLeft':
-			return 'upperleft';
-		case 'DockLowerLeft':
-			return 'lowerleft';
-		case 'DockUpperRight':
-			return 'upperright';
-		case 'DockLowerRight':
-			return 'lowerright';
-		case 'DockBottom':
-			return 'bottom';
-		default:
-			return 'none';
-	}
-};
-var $author$project$ToolsController$encodeState = function (state) {
-	switch (state.$) {
-		case 'Expanded':
-			return 'expanded';
-		case 'Contracted':
-			return 'contracted';
-		default:
-			return 'disabled';
-	}
-};
-var $author$project$ToolsController$encodeType = function (toolType) {
-	switch (toolType.$) {
-		case 'ToolTrackInfo':
-			return 'ToolTrackInfo';
-		case 'ToolAbruptDirectionChanges':
-			return 'ToolAbruptDirectionChanges';
-		case 'ToolDeletePoints':
-			return 'ToolDeletePoints';
-		case 'ToolPointers':
-			return 'ToolPointers';
-		case 'ToolUndoRedo':
-			return 'ToolUndoRedo';
-		case 'ToolBezierSplines':
-			return 'ToolBezierSplines';
-		case 'ToolCentroidAverage':
-			return 'ToolCentroidAverage';
-		case 'ToolCurveFormer':
-			return 'ToolCurveFormer';
-		case 'ToolBendSmoother':
-			return 'ToolBendSmoother';
-		default:
-			return 'ToolNudge';
-	}
-};
-var $author$project$ToolsController$encodeOneTool = function (tool) {
-	return $elm$json$Json$Encode$object(
-		_List_fromArray(
-			[
-				_Utils_Tuple2(
-				'type',
-				$elm$json$Json$Encode$string(
-					$author$project$ToolsController$encodeType(tool.toolType))),
-				_Utils_Tuple2(
-				'state',
-				$elm$json$Json$Encode$string(
-					$author$project$ToolsController$encodeState(tool.state))),
-				_Utils_Tuple2(
-				'dock',
-				$elm$json$Json$Encode$string(
-					$author$project$ToolsController$encodeDock(tool.dock))),
-				_Utils_Tuple2(
-				'tab',
-				$author$project$ToolsController$encodeColour(tool.tabColour)),
-				_Utils_Tuple2(
-				'text',
-				$author$project$ToolsController$encodeColour(tool.textColour))
-			]));
-};
-var $author$project$ToolsController$encodeToolState = function (options) {
-	return A2(
-		$elm$json$Json$Encode$list,
-		$elm$core$Basics$identity,
-		A2($elm$core$List$map, $author$project$ToolsController$encodeOneTool, options.tools));
-};
 var $elm_community$list_extra$List$Extra$find = F2(
 	function (predicate, list) {
 		find:
@@ -23684,11 +23684,19 @@ var $author$project$Main$update = F2(
 			case 'NoOp':
 				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 			case 'RestoreDefaultToolLayout':
+				var newModel = _Utils_update(
+					model,
+					{toolOptions: $author$project$ToolsController$defaultOptions});
+				var actions = _List_fromArray(
+					[
+						A2(
+						$author$project$Actions$StoreLocally,
+						'tools',
+						$author$project$ToolsController$encodeToolState(newModel.toolOptions))
+					]);
 				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{toolOptions: $author$project$ToolsController$defaultOptions}),
-					$elm$core$Platform$Cmd$none);
+					newModel,
+					A2($author$project$Main$performActionCommands, actions, newModel));
 			default:
 				var outputFilename = function () {
 					var _v9 = model.filename;
