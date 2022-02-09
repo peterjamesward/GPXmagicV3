@@ -16,6 +16,7 @@ import Json.Decode as D exposing (field)
 import Json.Encode as E
 import List.Extra
 import Tools.AbruptDirectionChanges as AbruptDirectionChanges
+import Tools.AbruptGradientChanges
 import Tools.BendSmoother
 import Tools.BendSmootherOptions
 import Tools.BezierOptions
@@ -61,6 +62,7 @@ type ToolType
     | ToolCurveFormer
     | ToolBendSmoother
     | ToolNudge
+    | ToolAbruptGradientChanges
 
 
 type alias Options =
@@ -77,6 +79,7 @@ type alias Options =
     , bendSmootherOptions : Tools.BendSmootherOptions.Options
     , nudgeOptions : Tools.NudgeOptions.Options
     , infoOptions : TrackInfoBox.Options
+    , gradientChangeOptions : Tools.AbruptGradientChanges.Options
     }
 
 
@@ -94,6 +97,7 @@ defaultOptions =
     , bendSmootherOptions = Tools.BendSmoother.defaultOptions
     , nudgeOptions = Tools.Nudge.defaultOptions
     , infoOptions = TrackInfoBox.defaultOptions
+    , gradientChangeOptions = Tools.AbruptGradientChanges.defaultOptions
     }
 
 
@@ -114,6 +118,7 @@ type ToolMsg
     | ToolBendSmootherMsg Tools.BendSmoother.Msg
     | ToolNudgeMsg Tools.Nudge.Msg
     | ToolInfoMsg TrackInfoBox.Msg
+    | ToolGradientChangeMsg Tools.AbruptGradientChanges.Msg
 
 
 type alias ToolEntry =
@@ -136,6 +141,7 @@ defaultTools =
     , undoRedoTool
     , trackInfoBox
     , directionChangeTool
+    , gradientChangeTool
     , deleteTool
     , bezierSplinesTool
     , centroidAverageTool
@@ -177,6 +183,20 @@ directionChangeTool : ToolEntry
 directionChangeTool =
     { toolType = ToolAbruptDirectionChanges
     , label = "Direction changes"
+    , info = "These may need smoothing"
+    , video = Nothing
+    , state = Contracted
+    , dock = DockUpperRight
+    , tabColour = FlatColors.FlatUIPalette.peterRiver
+    , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
+    , isPopupOpen = False
+    }
+
+
+gradientChangeTool : ToolEntry
+gradientChangeTool =
+    { toolType = ToolAbruptGradientChanges
+    , label = "Gradient changes"
     , info = "These may need smoothing"
     , video = Nothing
     , state = Contracted
@@ -392,7 +412,6 @@ update toolMsg isTrack msgWrapper options =
                 |> toolStateHasChanged toolType newState isTrack
 
         DirectionChanges msg ->
-            -- Delegate to tool here...
             let
                 ( newOptions, actions ) =
                     AbruptDirectionChanges.update
@@ -402,6 +421,19 @@ update toolMsg isTrack msgWrapper options =
                         isTrack
             in
             ( { options | directionChangeOptions = newOptions }
+            , actions
+            )
+
+        ToolGradientChangeMsg msg ->
+            let
+                ( newOptions, actions ) =
+                    Tools.AbruptGradientChanges.update
+                        msg
+                        options.gradientChangeOptions
+                        (getColour ToolAbruptDirectionChanges options.tools)
+                        isTrack
+            in
+            ( { options | gradientChangeOptions = newOptions }
             , actions
             )
 
@@ -519,7 +551,7 @@ update toolMsg isTrack msgWrapper options =
 
         ToolInfoMsg infoMsg ->
             let
-                ( newOptions ) =
+                newOptions =
                     TrackInfoBox.update
                         infoMsg
                         options.infoOptions
@@ -527,6 +559,7 @@ update toolMsg isTrack msgWrapper options =
             ( { options | infoOptions = newOptions }
             , []
             )
+
 
 refreshOpenTools :
     Maybe (TrackLoaded msg)
@@ -677,6 +710,21 @@ toolStateHasChanged toolType newState isTrack options =
                     { options | nudgeOptions = newToolOptions }
             in
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
+
+        ToolAbruptGradientChanges ->
+            let
+                ( newToolOptions, actions ) =
+                    Tools.AbruptGradientChanges.toolStateChange
+                        (newState == Expanded)
+                        (getColour toolType options.tools)
+                        options.gradientChangeOptions
+                        isTrack
+
+                newOptions =
+                    { options | gradientChangeOptions = newToolOptions }
+            in
+            ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
+
 
 
 
@@ -863,6 +911,12 @@ viewToolByType msgWrapper entry isTrack options =
                     options.directionChangeOptions
                     isTrack
 
+            ToolAbruptGradientChanges ->
+                Tools.AbruptGradientChanges.view
+                    (msgWrapper << ToolGradientChangeMsg)
+                    options.gradientChangeOptions
+                    isTrack
+
             ToolDeletePoints ->
                 DeletePoints.view (msgWrapper << DeletePoints) options.deleteOptions
 
@@ -952,6 +1006,9 @@ encodeType toolType =
 
         ToolNudge ->
             "ToolNudge"
+
+        ToolAbruptGradientChanges ->
+            "ToolAbruptGradientChanges"
 
 
 encodeColour : Element.Color -> E.Value

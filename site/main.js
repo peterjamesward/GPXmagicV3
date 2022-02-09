@@ -8498,6 +8498,7 @@ var $author$project$Tools$AbruptDirectionChanges$defaultOptions = {
 	currentBreach: 0,
 	threshold: $ianmackenzie$elm_units$Angle$degrees(120)
 };
+var $author$project$Tools$AbruptGradientChanges$defaultOptions = {breaches: _List_Nil, currentBreach: 0, threshold: 10.0};
 var $author$project$Tools$BendSmoother$defaultOptions = {bendTrackPointSpacing: 5.0, segments: 1, smoothedBend: $elm$core$Maybe$Nothing};
 var $author$project$Tools$BezierOptions$Approximated = {$: 'Approximated'};
 var $author$project$Tools$BezierSplines$defaultOptions = {bezierStyle: $author$project$Tools$BezierOptions$Approximated, bezierTension: 0.5, bezierTolerance: 5.0};
@@ -8645,6 +8646,18 @@ var $author$project$ToolsController$directionChangeTool = {
 	toolType: $author$project$ToolsController$ToolAbruptDirectionChanges,
 	video: $elm$core$Maybe$Nothing
 };
+var $author$project$ToolsController$ToolAbruptGradientChanges = {$: 'ToolAbruptGradientChanges'};
+var $author$project$ToolsController$gradientChangeTool = {
+	dock: $author$project$ToolsController$DockUpperRight,
+	info: 'These may need smoothing',
+	isPopupOpen: false,
+	label: 'Gradient changes',
+	state: $author$project$ToolsController$Contracted,
+	tabColour: $smucode$elm_flat_colors$FlatColors$FlatUIPalette$peterRiver,
+	textColour: $author$project$ViewPureStyles$contrastingColour($smucode$elm_flat_colors$FlatColors$FlatUIPalette$peterRiver),
+	toolType: $author$project$ToolsController$ToolAbruptGradientChanges,
+	video: $elm$core$Maybe$Nothing
+};
 var $author$project$ToolsController$ToolNudge = {$: 'ToolNudge'};
 var $author$project$ToolsController$nudgeTool = {
 	dock: $author$project$ToolsController$DockLowerRight,
@@ -8698,8 +8711,8 @@ var $author$project$ToolsController$undoRedoTool = {
 	video: $elm$core$Maybe$Nothing
 };
 var $author$project$ToolsController$defaultTools = _List_fromArray(
-	[$author$project$ToolsController$pointersTool, $author$project$ToolsController$undoRedoTool, $author$project$ToolsController$trackInfoBox, $author$project$ToolsController$directionChangeTool, $author$project$ToolsController$deleteTool, $author$project$ToolsController$bezierSplinesTool, $author$project$ToolsController$centroidAverageTool, $author$project$ToolsController$curveFormerTool, $author$project$ToolsController$bendSmootherTool, $author$project$ToolsController$nudgeTool]);
-var $author$project$ToolsController$defaultOptions = {bendSmootherOptions: $author$project$Tools$BendSmoother$defaultOptions, bezierSplineOptions: $author$project$Tools$BezierSplines$defaultOptions, centroidAverageOptions: $author$project$Tools$CentroidAverage$defaultOptions, curveFormerOptions: $author$project$Tools$CurveFormer$defaultOptions, deleteOptions: $author$project$Tools$DeletePoints$defaultOptions, directionChangeOptions: $author$project$Tools$AbruptDirectionChanges$defaultOptions, imperial: false, infoOptions: $author$project$Tools$TrackInfoBox$defaultOptions, nudgeOptions: $author$project$Tools$Nudge$defaultOptions, pointerOptions: $author$project$Tools$Pointers$defaultOptions, tools: $author$project$ToolsController$defaultTools, undoRedoOptions: $author$project$Tools$UndoRedo$defaultOptions};
+	[$author$project$ToolsController$pointersTool, $author$project$ToolsController$undoRedoTool, $author$project$ToolsController$trackInfoBox, $author$project$ToolsController$directionChangeTool, $author$project$ToolsController$gradientChangeTool, $author$project$ToolsController$deleteTool, $author$project$ToolsController$bezierSplinesTool, $author$project$ToolsController$centroidAverageTool, $author$project$ToolsController$curveFormerTool, $author$project$ToolsController$bendSmootherTool, $author$project$ToolsController$nudgeTool]);
+var $author$project$ToolsController$defaultOptions = {bendSmootherOptions: $author$project$Tools$BendSmoother$defaultOptions, bezierSplineOptions: $author$project$Tools$BezierSplines$defaultOptions, centroidAverageOptions: $author$project$Tools$CentroidAverage$defaultOptions, curveFormerOptions: $author$project$Tools$CurveFormer$defaultOptions, deleteOptions: $author$project$Tools$DeletePoints$defaultOptions, directionChangeOptions: $author$project$Tools$AbruptDirectionChanges$defaultOptions, gradientChangeOptions: $author$project$Tools$AbruptGradientChanges$defaultOptions, imperial: false, infoOptions: $author$project$Tools$TrackInfoBox$defaultOptions, nudgeOptions: $author$project$Tools$Nudge$defaultOptions, pointerOptions: $author$project$Tools$Pointers$defaultOptions, tools: $author$project$ToolsController$defaultTools, undoRedoOptions: $author$project$Tools$UndoRedo$defaultOptions};
 var $elm$browser$Browser$Dom$getViewport = _Browser_withWindow(_Browser_getViewport);
 var $elm$time$Time$Name = function (a) {
 	return {$: 'Name', a: a};
@@ -10450,8 +10463,10 @@ var $author$project$ToolsController$encodeType = function (toolType) {
 			return 'ToolCurveFormer';
 		case 'ToolBendSmoother':
 			return 'ToolBendSmoother';
-		default:
+		case 'ToolNudge':
 			return 'ToolNudge';
+		default:
+			return 'ToolAbruptGradientChanges';
 	}
 };
 var $author$project$ToolsController$encodeOneTool = function (tool) {
@@ -13946,6 +13961,77 @@ var $author$project$Tools$AbruptDirectionChanges$toolStateChange = F4(
 					]));
 		}
 	});
+var $author$project$Tools$AbruptGradientChanges$findAbruptDirectionChanges = F2(
+	function (options, tree) {
+		var foldFn = F2(
+			function (road, _v2) {
+				var index = _v2.a;
+				var previousIfAny = _v2.b;
+				var outputs = _v2.c;
+				if (previousIfAny.$ === 'Nothing') {
+					return _Utils_Tuple3(
+						index + 1,
+						$elm$core$Maybe$Just(road),
+						outputs);
+				} else {
+					var previousRoad = previousIfAny.a;
+					var change = $elm$core$Basics$abs(road.gradientAtStart - previousRoad.gradientAtStart);
+					return (_Utils_cmp(change, options.threshold) > 0) ? _Utils_Tuple3(
+						index + 1,
+						$elm$core$Maybe$Just(road),
+						A2(
+							$elm$core$List$cons,
+							_Utils_Tuple2(index, change),
+							outputs)) : _Utils_Tuple3(
+						index + 1,
+						$elm$core$Maybe$Just(road),
+						outputs);
+				}
+			});
+		var _v0 = A7(
+			$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
+			0,
+			$author$project$DomainModel$skipCount(tree),
+			$elm$core$Basics$always($elm$core$Maybe$Nothing),
+			0,
+			tree,
+			foldFn,
+			_Utils_Tuple3(0, $elm$core$Maybe$Nothing, _List_Nil));
+		var breaches = _v0.c;
+		return _Utils_update(
+			options,
+			{breaches: breaches, currentBreach: 0});
+	});
+var $author$project$Tools$AbruptGradientChanges$toolStateChange = F4(
+	function (opened, colour, options, track) {
+		var _v0 = _Utils_Tuple2(opened, track);
+		if (_v0.a && (_v0.b.$ === 'Just')) {
+			var theTrack = _v0.b.a;
+			var populatedOptions = A2($author$project$Tools$AbruptGradientChanges$findAbruptDirectionChanges, options, theTrack.trackTree);
+			return _Utils_Tuple2(
+				populatedOptions,
+				_List_fromArray(
+					[
+						$author$project$Actions$ShowPreview(
+						{
+							colour: colour,
+							points: A2(
+								$author$project$DomainModel$buildPreview,
+								A2($elm$core$List$map, $elm$core$Tuple$first, populatedOptions.breaches),
+								theTrack.trackTree),
+							shape: $author$project$Actions$PreviewCircle,
+							tag: 'ridge'
+						})
+					]));
+		} else {
+			return _Utils_Tuple2(
+				options,
+				_List_fromArray(
+					[
+						$author$project$Actions$HidePreview('ridge')
+					]));
+		}
+	});
 var $author$project$Tools$BendSmoother$computeNewPoints = F2(
 	function (options, track) {
 		var previewPoints = function (points) {
@@ -16039,7 +16125,7 @@ var $author$project$ToolsController$toolStateHasChanged = F4(
 							'tools',
 							$author$project$ToolsController$encodeToolState(options)),
 						actions));
-			default:
+			case 'ToolNudge':
 				var _v8 = A4(
 					$author$project$Tools$Nudge$toolStateChange,
 					_Utils_eq(newState, $author$project$ToolsController$Expanded),
@@ -16051,6 +16137,27 @@ var $author$project$ToolsController$toolStateHasChanged = F4(
 				var newOptions = _Utils_update(
 					options,
 					{nudgeOptions: newToolOptions});
+				return _Utils_Tuple2(
+					newOptions,
+					A2(
+						$elm$core$List$cons,
+						A2(
+							$author$project$Actions$StoreLocally,
+							'tools',
+							$author$project$ToolsController$encodeToolState(options)),
+						actions));
+			default:
+				var _v9 = A4(
+					$author$project$Tools$AbruptGradientChanges$toolStateChange,
+					_Utils_eq(newState, $author$project$ToolsController$Expanded),
+					A2($author$project$ToolsController$getColour, toolType, options.tools),
+					options.gradientChangeOptions,
+					isTrack);
+				var newToolOptions = _v9.a;
+				var actions = _v9.b;
+				var newOptions = _Utils_update(
+					options,
+					{gradientChangeOptions: newToolOptions});
 				return _Utils_Tuple2(
 					newOptions,
 					A2(
@@ -21244,6 +21351,80 @@ var $author$project$Tools$AbruptDirectionChanges$update = F4(
 				}
 		}
 	});
+var $author$project$Tools$AbruptGradientChanges$update = F4(
+	function (msg, options, previewColour, hasTrack) {
+		switch (msg.$) {
+			case 'ViewNext':
+				var breachIndex = A2(
+					$elm$core$Basics$min,
+					$elm$core$List$length(options.breaches) - 1,
+					options.currentBreach + 1);
+				var newOptions = _Utils_update(
+					options,
+					{currentBreach: breachIndex});
+				var _v1 = A2(
+					$elm$core$Maybe$withDefault,
+					_Utils_Tuple2(0, 0),
+					A2($elm_community$list_extra$List$Extra$getAt, breachIndex, newOptions.breaches));
+				var position = _v1.a;
+				return _Utils_Tuple2(
+					newOptions,
+					_List_fromArray(
+						[
+							$author$project$Actions$SetCurrent(position)
+						]));
+			case 'ViewPrevious':
+				var breachIndex = A2($elm$core$Basics$max, 0, options.currentBreach - 1);
+				var newOptions = _Utils_update(
+					options,
+					{currentBreach: breachIndex});
+				var _v2 = A2(
+					$elm$core$Maybe$withDefault,
+					_Utils_Tuple2(0, 0),
+					A2($elm_community$list_extra$List$Extra$getAt, breachIndex, newOptions.breaches));
+				var position = _v2.a;
+				return _Utils_Tuple2(
+					newOptions,
+					_List_fromArray(
+						[
+							$author$project$Actions$SetCurrent(position)
+						]));
+			case 'SetCurrentPosition':
+				var position = msg.a;
+				return _Utils_Tuple2(
+					options,
+					_List_fromArray(
+						[
+							$author$project$Actions$SetCurrent(position)
+						]));
+			default:
+				var value = msg.a;
+				var newOptions = _Utils_update(
+					options,
+					{breaches: _List_Nil, threshold: value});
+				if (hasTrack.$ === 'Just') {
+					var track = hasTrack.a;
+					var populatedOptions = A2($author$project$Tools$AbruptGradientChanges$findAbruptDirectionChanges, newOptions, track.trackTree);
+					return _Utils_Tuple2(
+						populatedOptions,
+						_List_fromArray(
+							[
+								$author$project$Actions$ShowPreview(
+								{
+									colour: previewColour,
+									points: A2(
+										$author$project$DomainModel$buildPreview,
+										A2($elm$core$List$map, $elm$core$Tuple$first, options.breaches),
+										track.trackTree),
+									shape: $author$project$Actions$PreviewCircle,
+									tag: 'ridge'
+								})
+							]));
+				} else {
+					return _Utils_Tuple2(newOptions, _List_Nil);
+				}
+		}
+	});
 var $author$project$Actions$BendSmootherApplyWithOptions = function (a) {
 	return {$: 'BendSmootherApplyWithOptions', a: a};
 };
@@ -23215,16 +23396,31 @@ var $author$project$ToolsController$update = F4(
 						options,
 						{directionChangeOptions: newOptions}),
 					actions);
-			case 'DeletePoints':
+			case 'ToolGradientChangeMsg':
 				var msg = toolMsg.a;
 				var _v2 = A4(
+					$author$project$Tools$AbruptGradientChanges$update,
+					msg,
+					options.gradientChangeOptions,
+					A2($author$project$ToolsController$getColour, $author$project$ToolsController$ToolAbruptDirectionChanges, options.tools),
+					isTrack);
+				var newOptions = _v2.a;
+				var actions = _v2.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						options,
+						{gradientChangeOptions: newOptions}),
+					actions);
+			case 'DeletePoints':
+				var msg = toolMsg.a;
+				var _v3 = A4(
 					$author$project$Tools$DeletePoints$update,
 					msg,
 					options.deleteOptions,
 					A2($author$project$ToolsController$getColour, $author$project$ToolsController$ToolDeletePoints, options.tools),
 					isTrack);
-				var newOptions = _v2.a;
-				var actions = _v2.b;
+				var newOptions = _v3.a;
+				var actions = _v3.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						options,
@@ -23232,14 +23428,14 @@ var $author$project$ToolsController$update = F4(
 					actions);
 			case 'PointerMsg':
 				var msg = toolMsg.a;
-				var _v3 = A4(
+				var _v4 = A4(
 					$author$project$Tools$Pointers$update,
 					msg,
 					options.pointerOptions,
 					A2($author$project$ToolsController$getColour, $author$project$ToolsController$ToolPointers, options.tools),
 					isTrack);
-				var newOptions = _v3.a;
-				var actions = _v3.b;
+				var newOptions = _v4.a;
+				var actions = _v4.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						options,
@@ -23247,14 +23443,14 @@ var $author$project$ToolsController$update = F4(
 					actions);
 			case 'UndoRedoMsg':
 				var msg = toolMsg.a;
-				var _v4 = A4(
+				var _v5 = A4(
 					$author$project$Tools$UndoRedo$update,
 					msg,
 					options.undoRedoOptions,
 					A2($author$project$ToolsController$getColour, $author$project$ToolsController$ToolUndoRedo, options.tools),
 					isTrack);
-				var newOptions = _v4.a;
-				var actions = _v4.b;
+				var newOptions = _v5.a;
+				var actions = _v5.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						options,
@@ -23262,14 +23458,14 @@ var $author$project$ToolsController$update = F4(
 					actions);
 			case 'ToolBezierMsg':
 				var msg = toolMsg.a;
-				var _v5 = A4(
+				var _v6 = A4(
 					$author$project$Tools$BezierSplines$update,
 					msg,
 					options.bezierSplineOptions,
 					A2($author$project$ToolsController$getColour, $author$project$ToolsController$ToolBezierSplines, options.tools),
 					isTrack);
-				var newOptions = _v5.a;
-				var actions = _v5.b;
+				var newOptions = _v6.a;
+				var actions = _v6.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						options,
@@ -23277,14 +23473,14 @@ var $author$project$ToolsController$update = F4(
 					actions);
 			case 'ToolCentroidMsg':
 				var msg = toolMsg.a;
-				var _v6 = A4(
+				var _v7 = A4(
 					$author$project$Tools$CentroidAverage$update,
 					msg,
 					options.centroidAverageOptions,
 					A2($author$project$ToolsController$getColour, $author$project$ToolsController$ToolCentroidAverage, options.tools),
 					isTrack);
-				var newOptions = _v6.a;
-				var actions = _v6.b;
+				var newOptions = _v7.a;
+				var actions = _v7.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						options,
@@ -23292,14 +23488,14 @@ var $author$project$ToolsController$update = F4(
 					actions);
 			case 'ToolCurveFormerMsg':
 				var msg = toolMsg.a;
-				var _v7 = A4(
+				var _v8 = A4(
 					$author$project$Tools$CurveFormer$update,
 					msg,
 					options.curveFormerOptions,
 					A2($author$project$ToolsController$getColour, $author$project$ToolsController$ToolCurveFormer, options.tools),
 					isTrack);
-				var newOptions = _v7.a;
-				var actions = _v7.b;
+				var newOptions = _v8.a;
+				var actions = _v8.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						options,
@@ -23307,14 +23503,14 @@ var $author$project$ToolsController$update = F4(
 					actions);
 			case 'ToolBendSmootherMsg':
 				var msg = toolMsg.a;
-				var _v8 = A4(
+				var _v9 = A4(
 					$author$project$Tools$BendSmoother$update,
 					msg,
 					options.bendSmootherOptions,
 					A2($author$project$ToolsController$getColour, $author$project$ToolsController$ToolBendSmoother, options.tools),
 					isTrack);
-				var newOptions = _v8.a;
-				var actions = _v8.b;
+				var newOptions = _v9.a;
+				var actions = _v9.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						options,
@@ -23322,14 +23518,14 @@ var $author$project$ToolsController$update = F4(
 					actions);
 			case 'ToolNudgeMsg':
 				var msg = toolMsg.a;
-				var _v9 = A4(
+				var _v10 = A4(
 					$author$project$Tools$Nudge$update,
 					msg,
 					options.nudgeOptions,
 					A2($author$project$ToolsController$getColour, $author$project$ToolsController$ToolNudge, options.tools),
 					isTrack);
-				var newOptions = _v9.a;
-				var actions = _v9.b;
+				var newOptions = _v10.a;
+				var actions = _v10.b;
 				return _Utils_Tuple2(
 					_Utils_update(
 						options,
@@ -30331,6 +30527,9 @@ var $author$project$ToolsController$ToolCentroidMsg = function (a) {
 var $author$project$ToolsController$ToolCurveFormerMsg = function (a) {
 	return {$: 'ToolCurveFormerMsg', a: a};
 };
+var $author$project$ToolsController$ToolGradientChangeMsg = function (a) {
+	return {$: 'ToolGradientChangeMsg', a: a};
+};
 var $author$project$ToolsController$ToolInfoMsg = function (a) {
 	return {$: 'ToolInfoMsg', a: a};
 };
@@ -31662,6 +31861,141 @@ var $author$project$Tools$AbruptDirectionChanges$view = F3(
 			return $author$project$ViewPureStyles$noTrackMessage;
 		}
 	});
+var $author$project$Tools$AbruptGradientChanges$SetCurrentPosition = function (a) {
+	return {$: 'SetCurrentPosition', a: a};
+};
+var $author$project$Tools$AbruptGradientChanges$SetThreshold = function (a) {
+	return {$: 'SetThreshold', a: a};
+};
+var $author$project$Tools$AbruptGradientChanges$ViewNext = {$: 'ViewNext'};
+var $author$project$Tools$AbruptGradientChanges$ViewPrevious = {$: 'ViewPrevious'};
+var $author$project$UtilsForViews$showDecimal2 = function (x) {
+	var locale = _Utils_update(
+		$cuducos$elm_format_number$FormatNumber$Locales$usLocale,
+		{
+			decimals: $cuducos$elm_format_number$FormatNumber$Locales$Exact(2),
+			negativePrefix: '-',
+			thousandSeparator: ''
+		});
+	return A2($cuducos$elm_format_number$FormatNumber$format, locale, x);
+};
+var $author$project$Tools$AbruptGradientChanges$view = F3(
+	function (msgWrapper, options, isTrack) {
+		if (isTrack.$ === 'Just') {
+			var track = isTrack.a;
+			return A2(
+				$mdgriffith$elm_ui$Element$el,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite)
+					]),
+				A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$centerX,
+							$mdgriffith$elm_ui$Element$padding(4),
+							$mdgriffith$elm_ui$Element$spacing(4),
+							$mdgriffith$elm_ui$Element$height(
+							$mdgriffith$elm_ui$Element$px(100))
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$mdgriffith$elm_ui$Element$Input$slider,
+							$author$project$ViewPureStyles$shortSliderStyles,
+							{
+								label: $mdgriffith$elm_ui$Element$Input$labelHidden('Gradient change threshold'),
+								max: 20,
+								min: 3,
+								onChange: A2($elm$core$Basics$composeR, $author$project$Tools$AbruptGradientChanges$SetThreshold, msgWrapper),
+								step: $elm$core$Maybe$Just(1),
+								thumb: $author$project$ViewPureStyles$sliderThumb,
+								value: options.threshold
+							}),
+							A2(
+							$mdgriffith$elm_ui$Element$el,
+							_List_fromArray(
+								[$mdgriffith$elm_ui$Element$centerX]),
+							$mdgriffith$elm_ui$Element$text(
+								'Threshold ' + ($author$project$UtilsForViews$showDecimal2(options.threshold) + '%'))),
+							function () {
+							var _v1 = options.breaches;
+							if (!_v1.b) {
+								return A2(
+									$mdgriffith$elm_ui$Element$el,
+									_List_fromArray(
+										[$mdgriffith$elm_ui$Element$centerX, $mdgriffith$elm_ui$Element$centerY]),
+									$mdgriffith$elm_ui$Element$text('None found'));
+							} else {
+								var a = _v1.a;
+								var b = _v1.b;
+								var _v2 = A2(
+									$elm$core$Maybe$withDefault,
+									_Utils_Tuple2(0, 0),
+									A2($elm_community$list_extra$List$Extra$getAt, options.currentBreach, options.breaches));
+								var position = _v2.a;
+								var turn = _v2.b;
+								return A2(
+									$mdgriffith$elm_ui$Element$column,
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$spacing(4),
+											$mdgriffith$elm_ui$Element$centerX
+										]),
+									_List_fromArray(
+										[
+											A2(
+											$mdgriffith$elm_ui$Element$el,
+											_List_fromArray(
+												[$mdgriffith$elm_ui$Element$centerX]),
+											$mdgriffith$elm_ui$Element$text(
+												$elm$core$String$fromInt(options.currentBreach + 1) + (' of ' + ($elm$core$String$fromInt(
+													$elm$core$List$length(options.breaches)) + (' is ' + ($author$project$UtilsForViews$showDecimal2(turn) + 'º')))))),
+											A2(
+											$mdgriffith$elm_ui$Element$row,
+											_List_fromArray(
+												[
+													$mdgriffith$elm_ui$Element$centerX,
+													$mdgriffith$elm_ui$Element$spacing(10)
+												]),
+											_List_fromArray(
+												[
+													A2(
+													$mdgriffith$elm_ui$Element$Input$button,
+													$author$project$ViewPureStyles$neatToolsBorder,
+													{
+														label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronLeft),
+														onPress: $elm$core$Maybe$Just(
+															msgWrapper($author$project$Tools$AbruptGradientChanges$ViewPrevious))
+													}),
+													A2(
+													$mdgriffith$elm_ui$Element$Input$button,
+													$author$project$ViewPureStyles$neatToolsBorder,
+													{
+														label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$mousePointer),
+														onPress: $elm$core$Maybe$Just(
+															msgWrapper(
+																$author$project$Tools$AbruptGradientChanges$SetCurrentPosition(position)))
+													}),
+													A2(
+													$mdgriffith$elm_ui$Element$Input$button,
+													$author$project$ViewPureStyles$neatToolsBorder,
+													{
+														label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronRight),
+														onPress: $elm$core$Maybe$Just(
+															msgWrapper($author$project$Tools$AbruptGradientChanges$ViewNext))
+													})
+												]))
+										]));
+							}
+						}()
+						])));
+		} else {
+			return $author$project$ViewPureStyles$noTrackMessage;
+		}
+	});
 var $author$project$Tools$BendSmoother$ApplyWithOptions = {$: 'ApplyWithOptions'};
 var $author$project$Tools$BendSmoother$SetBendTrackPointSpacing = function (a) {
 	return {$: 'SetBendTrackPointSpacing', a: a};
@@ -31718,16 +32052,6 @@ var $mdgriffith$elm_ui$Element$Input$Label = F3(
 var $mdgriffith$elm_ui$Element$Input$labelBelow = $mdgriffith$elm_ui$Element$Input$Label($mdgriffith$elm_ui$Element$Input$Below);
 var $ianmackenzie$elm_units$Length$inFeet = function (length) {
 	return $ianmackenzie$elm_units$Length$inMeters(length) / $ianmackenzie$elm_units$Constants$foot;
-};
-var $author$project$UtilsForViews$showDecimal2 = function (x) {
-	var locale = _Utils_update(
-		$cuducos$elm_format_number$FormatNumber$Locales$usLocale,
-		{
-			decimals: $cuducos$elm_format_number$FormatNumber$Locales$Exact(2),
-			negativePrefix: '-',
-			thousandSeparator: ''
-		});
-	return A2($cuducos$elm_format_number$FormatNumber$format, locale, x);
 };
 var $author$project$UtilsForViews$showShortMeasure = F2(
 	function (imperial, distance) {
@@ -34255,6 +34579,12 @@ var $author$project$ToolsController$viewToolByType = F4(
 							$author$project$Tools$AbruptDirectionChanges$view,
 							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$DirectionChanges),
 							options.directionChangeOptions,
+							isTrack);
+					case 'ToolAbruptGradientChanges':
+						return A3(
+							$author$project$Tools$AbruptGradientChanges$view,
+							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolGradientChangeMsg),
+							options.gradientChangeOptions,
 							isTrack);
 					case 'ToolDeletePoints':
 						return A2(

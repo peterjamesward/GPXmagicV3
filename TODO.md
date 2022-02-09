@@ -19,6 +19,8 @@ BUG: Pointers may be not reset on track load.
 
 ## Gradient problems
 
+Markers on the Profile.
+
 ## Steep climbs
 
 ---
