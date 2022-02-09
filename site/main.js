@@ -9780,7 +9780,8 @@ var $author$project$Main$init = F3(
 						$author$project$LocalStorage$storageGetItem('splits'),
 						$author$project$LocalStorage$storageGetItem('tools'),
 						$author$project$LocalStorage$storageGetItem('panes'),
-						$author$project$LocalStorage$storageGetItem('measure')
+						$author$project$LocalStorage$storageGetItem('measure'),
+						$author$project$LocalStorage$storageGetItem('background')
 					])));
 	});
 var $elm$json$Json$Decode$int = _Json_decodeInt;
@@ -10350,6 +10351,26 @@ var $author$project$MapPortController$createMap = function (info) {
 					$elm$json$Json$Encode$float(info.mapZoom))
 				])));
 };
+var $author$project$ToolsController$encodeColour = function (colour) {
+	var _v0 = $mdgriffith$elm_ui$Element$toRgb(colour);
+	var red = _v0.red;
+	var green = _v0.green;
+	var blue = _v0.blue;
+	var alpha = _v0.alpha;
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'red',
+				$elm$json$Json$Encode$float(red)),
+				_Utils_Tuple2(
+				'green',
+				$elm$json$Json$Encode$float(green)),
+				_Utils_Tuple2(
+				'blue',
+				$elm$json$Json$Encode$float(blue))
+			]));
+};
 var $author$project$Main$encodeSplitValues = function (model) {
 	return $elm$json$Json$Encode$object(
 		_List_fromArray(
@@ -10374,26 +10395,6 @@ var $author$project$Main$encodeSplitValues = function (model) {
 				'internalright',
 				$elm$json$Json$Encode$float(
 					$author$project$SplitPane$SplitPane$getPosition(model.rightDockInternal)))
-			]));
-};
-var $author$project$ToolsController$encodeColour = function (colour) {
-	var _v0 = $mdgriffith$elm_ui$Element$toRgb(colour);
-	var red = _v0.red;
-	var green = _v0.green;
-	var blue = _v0.blue;
-	var alpha = _v0.alpha;
-	return $elm$json$Json$Encode$object(
-		_List_fromArray(
-			[
-				_Utils_Tuple2(
-				'red',
-				$elm$json$Json$Encode$float(red)),
-				_Utils_Tuple2(
-				'green',
-				$elm$json$Json$Encode$float(green)),
-				_Utils_Tuple2(
-				'blue',
-				$elm$json$Json$Encode$float(blue))
 			]));
 };
 var $author$project$ToolsController$encodeDock = function (dock) {
@@ -13582,6 +13583,28 @@ var $author$project$Tools$Nudge$applyUsingOptions = F2(
 			A2($elm$core$List$map, $elm$core$Tuple$second, oldPoints),
 			_Utils_Tuple2(actualStart, actualEnd));
 	});
+var $author$project$ToolsController$ColourTriplet = F3(
+	function (red, green, blue) {
+		return {blue: blue, green: green, red: red};
+	});
+var $elm$json$Json$Decode$float = _Json_decodeFloat;
+var $elm$json$Json$Decode$map3 = _Json_map3;
+var $author$project$ToolsController$colourDecoder = A4(
+	$elm$json$Json$Decode$map3,
+	$author$project$ToolsController$ColourTriplet,
+	A2($elm$json$Json$Decode$field, 'red', $elm$json$Json$Decode$float),
+	A2($elm$json$Json$Decode$field, 'green', $elm$json$Json$Decode$float),
+	A2($elm$json$Json$Decode$field, 'blue', $elm$json$Json$Decode$float));
+var $mdgriffith$elm_ui$Element$fromRgb = function (clr) {
+	return A4($mdgriffith$elm_ui$Internal$Model$Rgba, clr.red, clr.green, clr.blue, clr.alpha);
+};
+var $author$project$ToolsController$decodeColour = function (_v0) {
+	var red = _v0.red;
+	var green = _v0.green;
+	var blue = _v0.blue;
+	return $mdgriffith$elm_ui$Element$fromRgb(
+		{alpha: 1.0, blue: blue, green: green, red: red});
+};
 var $author$project$Main$SplitDecode = F5(
 	function (left, right, bottom, leftInternal, rightInternal) {
 		return {bottom: bottom, left: left, leftInternal: leftInternal, right: right, rightInternal: rightInternal};
@@ -17589,16 +17612,6 @@ var $author$project$PaneLayoutManager$restoreStoredValues = F2(
 			return options;
 		}
 	});
-var $mdgriffith$elm_ui$Element$fromRgb = function (clr) {
-	return A4($mdgriffith$elm_ui$Internal$Model$Rgba, clr.red, clr.green, clr.blue, clr.alpha);
-};
-var $author$project$ToolsController$decodeColour = function (_v0) {
-	var red = _v0.red;
-	var green = _v0.green;
-	var blue = _v0.blue;
-	return $mdgriffith$elm_ui$Element$fromRgb(
-		{alpha: 1.0, blue: blue, green: green, red: red});
-};
 var $author$project$ToolsController$DockBottom = {$: 'DockBottom'};
 var $author$project$ToolsController$DockNone = {$: 'DockNone'};
 var $author$project$ToolsController$decodeDock = function (dock) {
@@ -17636,18 +17649,6 @@ var $author$project$ToolsController$StoredTool = F5(
 	function (toolType, state, dock, tab, text) {
 		return {dock: dock, state: state, tab: tab, text: text, toolType: toolType};
 	});
-var $author$project$ToolsController$ColourTriplet = F3(
-	function (red, green, blue) {
-		return {blue: blue, green: green, red: red};
-	});
-var $elm$json$Json$Decode$float = _Json_decodeFloat;
-var $elm$json$Json$Decode$map3 = _Json_map3;
-var $author$project$ToolsController$colourDecoder = A4(
-	$elm$json$Json$Decode$map3,
-	$author$project$ToolsController$ColourTriplet,
-	A2($elm$json$Json$Decode$field, 'red', $elm$json$Json$Decode$float),
-	A2($elm$json$Json$Decode$field, 'green', $elm$json$Json$Decode$float),
-	A2($elm$json$Json$Decode$field, 'blue', $elm$json$Json$Decode$float));
 var $author$project$ToolsController$toolDecoder = A6(
 	$elm$json$Json$Decode$map5,
 	$author$project$ToolsController$StoredTool,
@@ -18156,6 +18157,18 @@ var $author$project$Main$performActionsOnModel = F2(
 										{
 											toolOptions: A2($author$project$ToolsController$restoreMeasure, foldedModel.toolOptions, value)
 										});
+								case 'background':
+									var getColour = A2($elm$json$Json$Decode$decodeValue, $author$project$ToolsController$colourDecoder, value);
+									if (getColour.$ === 'Ok') {
+										var colour = getColour.a;
+										return _Utils_update(
+											foldedModel,
+											{
+												backgroundColour: $author$project$ToolsController$decodeColour(colour)
+											});
+									} else {
+										return foldedModel;
+									}
 								default:
 									return foldedModel;
 							}
@@ -18164,7 +18177,7 @@ var $author$project$Main$performActionsOnModel = F2(
 							return foldedModel;
 						case 'UndoLastAction':
 							if (_v0.b.$ === 'Just') {
-								var _v25 = _v0.a;
+								var _v26 = _v0.a;
 								var track = _v0.b.a;
 								return _Utils_update(
 									foldedModel,
@@ -18177,20 +18190,20 @@ var $author$project$Main$performActionsOnModel = F2(
 							}
 						case 'RedoUndoneAction':
 							if (_v0.b.$ === 'Just') {
-								var _v26 = _v0.a;
+								var _v27 = _v0.a;
 								var track = _v0.b.a;
-								var _v27 = track.redos;
-								if (_v27.b) {
-									var redo = _v27.a;
-									var moreRedos = _v27.b;
+								var _v28 = track.redos;
+								if (_v28.b) {
+									var redo = _v28.a;
+									var moreRedos = _v28.b;
 									var modelAfterRedo = A2(
 										$author$project$Main$performActionsOnModel,
 										_List_fromArray(
 											[redo.action]),
 										model);
-									var _v28 = modelAfterRedo.track;
-									if (_v28.$ === 'Just') {
-										var trackAfterRedo = _v28.a;
+									var _v29 = modelAfterRedo.track;
+									if (_v29.$ === 'Just') {
+										var trackAfterRedo = _v29.a;
 										var trackWithCorrectRedoStack = _Utils_update(
 											trackAfterRedo,
 											{redos: moreRedos});
@@ -23676,11 +23689,19 @@ var $author$project$Main$update = F2(
 					$elm$core$Platform$Cmd$none);
 			case 'BackgroundColour':
 				var colour = msg.a;
+				var newModel = _Utils_update(
+					model,
+					{backgroundColour: colour});
+				var actions = _List_fromArray(
+					[
+						A2(
+						$author$project$Actions$StoreLocally,
+						'background',
+						$author$project$ToolsController$encodeColour(colour))
+					]);
 				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{backgroundColour: colour}),
-					$elm$core$Platform$Cmd$none);
+					newModel,
+					A2($author$project$Main$performActionCommands, actions, newModel));
 			case 'NoOp':
 				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 			case 'RestoreDefaultToolLayout':
@@ -43399,7 +43420,8 @@ var $author$project$ToolsController$imperialToggleMenuEntry = F2(
 					msgWrapper($author$project$ToolsController$ToggleImperial))
 			});
 	});
-var $smucode$elm_flat_colors$FlatColors$AussiePalette$soaringEagle = A3($mdgriffith$elm_ui$Element$rgb255, 149, 175, 192);
+var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$silver = A3($mdgriffith$elm_ui$Element$rgb255, 189, 195, 199);
+var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$wetAsphalt = A3($mdgriffith$elm_ui$Element$rgb255, 52, 73, 94);
 var $author$project$Main$showOptionsMenu = function (model) {
 	var colourBlock = function (colour) {
 		return A2(
@@ -43436,9 +43458,9 @@ var $author$project$Main$showOptionsMenu = function (model) {
 						$author$project$ViewPureStyles$neatToolsBorder)),
 				_List_fromArray(
 					[
-						colourBlock($smucode$elm_flat_colors$FlatColors$AussiePalette$coastalBreeze),
-						colourBlock($smucode$elm_flat_colors$FlatColors$AussiePalette$soaringEagle),
-						colourBlock($smucode$elm_flat_colors$FlatColors$AussiePalette$wizardGrey)
+						colourBlock($smucode$elm_flat_colors$FlatColors$FlatUIPalette$silver),
+						colourBlock($smucode$elm_flat_colors$FlatColors$FlatUIPalette$asbestos),
+						colourBlock($smucode$elm_flat_colors$FlatColors$FlatUIPalette$wetAsphalt)
 					])),
 				A2(
 				$mdgriffith$elm_ui$Element$el,

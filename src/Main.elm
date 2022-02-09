@@ -21,6 +21,7 @@ import File.Download as Download
 import File.Select as Select
 import FlatColors.AussiePalette
 import FlatColors.ChinesePalette
+import FlatColors.FlatUIPalette
 import GeoCodeDecoders exposing (IpInfo)
 import GpxParser exposing (parseGPXPoints)
 import Html exposing (Html, div)
@@ -51,7 +52,7 @@ import Tools.CentroidAverage
 import Tools.CurveFormer
 import Tools.DeletePoints as DeletePoints
 import Tools.Nudge
-import ToolsController exposing (ToolEntry, encodeToolState)
+import ToolsController exposing (ToolEntry, encodeColour, encodeToolState)
 import TrackLoaded exposing (TrackLoaded)
 import Url exposing (Url)
 import UtilsForViews exposing (colourHexString)
@@ -245,6 +246,7 @@ init mflags origin navigationKey =
         , LocalStorage.storageGetItem "tools"
         , LocalStorage.storageGetItem "panes"
         , LocalStorage.storageGetItem "measure"
+        , LocalStorage.storageGetItem "background"
         ]
     )
 
@@ -553,7 +555,16 @@ Please check the file contains GPX data.""" }
             ( { model | isPopupOpen = not model.isPopupOpen }, Cmd.none )
 
         BackgroundColour colour ->
-            ( { model | backgroundColour = colour }, Cmd.none )
+            let
+                newModel =
+                    { model | backgroundColour = colour }
+
+                actions =
+                    [ StoreLocally "background" <| encodeColour colour ]
+            in
+            ( newModel
+            , performActionCommands actions newModel
+            )
 
         NoOp ->
             ( model, Cmd.none )
@@ -944,9 +955,9 @@ showOptionsMenu model =
     if model.isPopupOpen then
         column (spacing 4 :: neatToolsBorder)
             [ row (alignRight :: width fill :: neatToolsBorder)
-                [ colourBlock FlatColors.AussiePalette.coastalBreeze
-                , colourBlock FlatColors.AussiePalette.soaringEagle
-                , colourBlock FlatColors.AussiePalette.wizardGrey
+                [ colourBlock FlatColors.FlatUIPalette.silver
+                , colourBlock FlatColors.FlatUIPalette.asbestos
+                , colourBlock FlatColors.FlatUIPalette.wetAsphalt
                 ]
             , el (alignRight :: width fill :: neatToolsBorder) <|
                 Input.button [ alignRight ]
@@ -1230,6 +1241,20 @@ performActionsOnModel actions model =
                                 | toolOptions =
                                     ToolsController.restoreMeasure foldedModel.toolOptions value
                             }
+
+                        "background" ->
+                            let
+                                getColour =
+                                    D.decodeValue ToolsController.colourDecoder value
+                            in
+                            case getColour of
+                                Ok colour ->
+                                    { foldedModel
+                                        | backgroundColour = ToolsController.decodeColour colour
+                                    }
+
+                                _ ->
+                                    foldedModel
 
                         _ ->
                             foldedModel
