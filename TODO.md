@@ -7,14 +7,13 @@ BUG: Dubious steepest gradient on some routes.
 DEBT: Map sends more click messages each time we click. 
 > They are debounced but, still, why??
 
-Curve Former should reset on track load.
+BUG: Curve Former should reset on track load.
 
 BUG: Classic bend smoother consumes all memory on certain looped routes where
 orange and purple are (possibly) co-linear.
+? Infinite arc segments?
 
 BUG: Pointers may be not reset on track load.
-
-BUG: Background colour not saved/restored.
 
 # WIP
 

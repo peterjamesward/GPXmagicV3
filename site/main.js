@@ -14915,11 +14915,11 @@ var $author$project$Tools$BendSmoother$parallelFindSemicircle = F2(
 			var t2 = _v8.b.a;
 			var radius = A2($author$project$Geometry101$distance, middle, t1);
 			var midArcPoint = A2($author$project$Geometry101$pointAlongRoad, centreLine, radius);
-			return A3(
+			return ((radius > 0.0) && (radius < 1000.0)) ? A3(
 				$ianmackenzie$elm_geometry$Arc2d$throughPoints,
 				A2($ianmackenzie$elm_geometry$Point2d$meters, t1.x, t1.y),
 				A2($ianmackenzie$elm_geometry$Point2d$meters, midArcPoint.x, midArcPoint.y),
-				A2($ianmackenzie$elm_geometry$Point2d$meters, t2.x, t2.y));
+				A2($ianmackenzie$elm_geometry$Point2d$meters, t2.x, t2.y)) : $elm$core$Maybe$Nothing;
 		} else {
 			return $elm$core$Maybe$Nothing;
 		}
@@ -29917,18 +29917,16 @@ var $author$project$ToolsController$ToolColourSelect = F2(
 	function (a, b) {
 		return {$: 'ToolColourSelect', a: a, b: b};
 	});
-var $smucode$elm_flat_colors$FlatColors$SwedishPalette$chromeYellow = A3($mdgriffith$elm_ui$Element$rgb255, 255, 168, 1);
-var $smucode$elm_flat_colors$FlatColors$SwedishPalette$darkPeriwinkle = A3($mdgriffith$elm_ui$Element$rgb255, 87, 95, 207);
-var $smucode$elm_flat_colors$FlatColors$SwedishPalette$freshTurquoise = A3($mdgriffith$elm_ui$Element$rgb255, 52, 231, 228);
-var $smucode$elm_flat_colors$FlatColors$SwedishPalette$goodNight = A3($mdgriffith$elm_ui$Element$rgb255, 72, 84, 96);
-var $smucode$elm_flat_colors$FlatColors$SwedishPalette$greenTeal = A3($mdgriffith$elm_ui$Element$rgb255, 5, 196, 107);
-var $smucode$elm_flat_colors$FlatColors$SwedishPalette$highlighterPink = A3($mdgriffith$elm_ui$Element$rgb255, 239, 87, 119);
-var $smucode$elm_flat_colors$FlatColors$SwedishPalette$hintOfElusiveBlue = A3($mdgriffith$elm_ui$Element$rgb255, 210, 218, 226);
-var $smucode$elm_flat_colors$FlatColors$SwedishPalette$jadeDust = A3($mdgriffith$elm_ui$Element$rgb255, 0, 216, 214);
-var $smucode$elm_flat_colors$FlatColors$SwedishPalette$londonSquare = A3($mdgriffith$elm_ui$Element$rgb255, 128, 142, 155);
-var $smucode$elm_flat_colors$FlatColors$SwedishPalette$megaman = A3($mdgriffith$elm_ui$Element$rgb255, 75, 207, 250);
-var $smucode$elm_flat_colors$FlatColors$SwedishPalette$mintyGreen = A3($mdgriffith$elm_ui$Element$rgb255, 11, 232, 129);
-var $smucode$elm_flat_colors$FlatColors$SwedishPalette$narenjiOrange = A3($mdgriffith$elm_ui$Element$rgb255, 255, 192, 72);
+var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$alizarin = A3($mdgriffith$elm_ui$Element$rgb255, 231, 76, 60);
+var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$amethyst = A3($mdgriffith$elm_ui$Element$rgb255, 155, 89, 182);
+var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$asbestos = A3($mdgriffith$elm_ui$Element$rgb255, 127, 140, 141);
+var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$belizeHole = A3($mdgriffith$elm_ui$Element$rgb255, 41, 128, 185);
+var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$carrot = A3($mdgriffith$elm_ui$Element$rgb255, 230, 126, 34);
+var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$clouds = A3($mdgriffith$elm_ui$Element$rgb255, 236, 240, 241);
+var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$concrete = A3($mdgriffith$elm_ui$Element$rgb255, 149, 165, 166);
+var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$emerald = A3($mdgriffith$elm_ui$Element$rgb255, 46, 204, 113);
+var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$greenSea = A3($mdgriffith$elm_ui$Element$rgb255, 22, 160, 133);
+var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$midnightBlue = A3($mdgriffith$elm_ui$Element$rgb255, 44, 62, 80);
 var $smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite = A3($mdgriffith$elm_ui$Element$rgb255, 241, 242, 246);
 var $smucode$elm_flat_colors$FlatColors$ChinesePalette$bruschettaTomato = A3($mdgriffith$elm_ui$Element$rgb255, 255, 99, 72);
 var $mdgriffith$elm_ui$Internal$Model$BorderWidth = F5(
@@ -29955,12 +29953,16 @@ var $author$project$ViewPureStyles$neatToolsBorder = _List_fromArray(
 		$mdgriffith$elm_ui$Element$Border$width(2),
 		$mdgriffith$elm_ui$Element$padding(3)
 	]);
-var $smucode$elm_flat_colors$FlatColors$SwedishPalette$redOrange = A3($mdgriffith$elm_ui$Element$rgb255, 255, 63, 52);
-var $smucode$elm_flat_colors$FlatColors$SwedishPalette$sizzlingRed = A3($mdgriffith$elm_ui$Element$rgb255, 245, 59, 87);
-var $smucode$elm_flat_colors$FlatColors$SwedishPalette$spiroDiscoBall = A3($mdgriffith$elm_ui$Element$rgb255, 15, 188, 249);
-var $smucode$elm_flat_colors$FlatColors$SwedishPalette$sunsetOrange = A3($mdgriffith$elm_ui$Element$rgb255, 255, 94, 87);
-var $smucode$elm_flat_colors$FlatColors$SwedishPalette$vibrantYellow = A3($mdgriffith$elm_ui$Element$rgb255, 255, 211, 42);
-var $smucode$elm_flat_colors$FlatColors$SwedishPalette$yrielYellow = A3($mdgriffith$elm_ui$Element$rgb255, 255, 221, 89);
+var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$nephritis = A3($mdgriffith$elm_ui$Element$rgb255, 39, 174, 96);
+var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$orange = A3($mdgriffith$elm_ui$Element$rgb255, 243, 156, 18);
+var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$peterRiver = A3($mdgriffith$elm_ui$Element$rgb255, 52, 152, 219);
+var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$pomegranate = A3($mdgriffith$elm_ui$Element$rgb255, 192, 57, 43);
+var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$pumpkin = A3($mdgriffith$elm_ui$Element$rgb255, 211, 84, 0);
+var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$silver = A3($mdgriffith$elm_ui$Element$rgb255, 189, 195, 199);
+var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$sunFlower = A3($mdgriffith$elm_ui$Element$rgb255, 241, 196, 15);
+var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$turquoise = A3($mdgriffith$elm_ui$Element$rgb255, 26, 188, 156);
+var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$wetAsphalt = A3($mdgriffith$elm_ui$Element$rgb255, 52, 73, 94);
+var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$wisteria = A3($mdgriffith$elm_ui$Element$rgb255, 142, 68, 173);
 var $author$project$ToolsController$showColourOptions = F2(
 	function (msgWrapper, toolEntry) {
 		var colourBlock = function (colour) {
@@ -29991,44 +29993,44 @@ var $author$project$ToolsController$showColourOptions = F2(
 					_List_Nil,
 					_List_fromArray(
 						[
-							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$highlighterPink),
-							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$darkPeriwinkle),
-							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$megaman),
-							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$freshTurquoise),
-							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$mintyGreen)
+							colourBlock($smucode$elm_flat_colors$FlatColors$FlatUIPalette$turquoise),
+							colourBlock($smucode$elm_flat_colors$FlatColors$FlatUIPalette$emerald),
+							colourBlock($smucode$elm_flat_colors$FlatColors$FlatUIPalette$peterRiver),
+							colourBlock($smucode$elm_flat_colors$FlatColors$FlatUIPalette$amethyst),
+							colourBlock($smucode$elm_flat_colors$FlatColors$FlatUIPalette$wetAsphalt)
 						])),
 					A2(
 					$mdgriffith$elm_ui$Element$row,
 					_List_Nil,
 					_List_fromArray(
 						[
-							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$sizzlingRed),
-							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$freeSpeechBlue),
-							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$spiroDiscoBall),
-							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$jadeDust),
-							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$greenTeal)
+							colourBlock($smucode$elm_flat_colors$FlatColors$FlatUIPalette$greenSea),
+							colourBlock($smucode$elm_flat_colors$FlatColors$FlatUIPalette$nephritis),
+							colourBlock($smucode$elm_flat_colors$FlatColors$FlatUIPalette$belizeHole),
+							colourBlock($smucode$elm_flat_colors$FlatColors$FlatUIPalette$wisteria),
+							colourBlock($smucode$elm_flat_colors$FlatColors$FlatUIPalette$midnightBlue)
 						])),
 					A2(
 					$mdgriffith$elm_ui$Element$row,
 					_List_Nil,
 					_List_fromArray(
 						[
-							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$narenjiOrange),
-							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$yrielYellow),
-							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$sunsetOrange),
-							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$hintOfElusiveBlue),
-							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$goodNight)
+							colourBlock($smucode$elm_flat_colors$FlatColors$FlatUIPalette$sunFlower),
+							colourBlock($smucode$elm_flat_colors$FlatColors$FlatUIPalette$carrot),
+							colourBlock($smucode$elm_flat_colors$FlatColors$FlatUIPalette$alizarin),
+							colourBlock($smucode$elm_flat_colors$FlatColors$FlatUIPalette$clouds),
+							colourBlock($smucode$elm_flat_colors$FlatColors$FlatUIPalette$concrete)
 						])),
 					A2(
 					$mdgriffith$elm_ui$Element$row,
 					_List_Nil,
 					_List_fromArray(
 						[
-							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$chromeYellow),
-							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$vibrantYellow),
-							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$redOrange),
-							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$londonSquare),
-							colourBlock($smucode$elm_flat_colors$FlatColors$SwedishPalette$blackPearl)
+							colourBlock($smucode$elm_flat_colors$FlatColors$FlatUIPalette$orange),
+							colourBlock($smucode$elm_flat_colors$FlatColors$FlatUIPalette$pumpkin),
+							colourBlock($smucode$elm_flat_colors$FlatColors$FlatUIPalette$pomegranate),
+							colourBlock($smucode$elm_flat_colors$FlatColors$FlatUIPalette$silver),
+							colourBlock($smucode$elm_flat_colors$FlatColors$FlatUIPalette$asbestos)
 						]))
 				])) : $mdgriffith$elm_ui$Element$none;
 	});
@@ -31012,7 +31014,6 @@ var $mdgriffith$elm_ui$Internal$Model$Behind = {$: 'Behind'};
 var $mdgriffith$elm_ui$Element$behindContent = function (element) {
 	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$Behind, element);
 };
-var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$asbestos = A3($mdgriffith$elm_ui$Element$rgb255, 127, 140, 141);
 var $author$project$ColourPalette$scrollbarBackground = $smucode$elm_flat_colors$FlatColors$FlatUIPalette$asbestos;
 var $author$project$ViewPureStyles$shortSliderStyles = _List_fromArray(
 	[
@@ -43420,8 +43421,6 @@ var $author$project$ToolsController$imperialToggleMenuEntry = F2(
 					msgWrapper($author$project$ToolsController$ToggleImperial))
 			});
 	});
-var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$silver = A3($mdgriffith$elm_ui$Element$rgb255, 189, 195, 199);
-var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$wetAsphalt = A3($mdgriffith$elm_ui$Element$rgb255, 52, 73, 94);
 var $author$project$Main$showOptionsMenu = function (model) {
 	var colourBlock = function (colour) {
 		return A2(

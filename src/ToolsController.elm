@@ -8,6 +8,7 @@ import Element.Font as Font
 import Element.Input as Input
 import FeatherIcons
 import FlatColors.AussiePalette
+import FlatColors.FlatUIPalette
 import FlatColors.SwedishPalette
 import Html.Attributes exposing (style)
 import Html.Events.Extra.Mouse as Mouse
@@ -796,32 +797,32 @@ showColourOptions msgWrapper toolEntry =
         column
             (alignRight :: neatToolsBorder)
             [ row []
-                [ colourBlock FlatColors.SwedishPalette.highlighterPink
-                , colourBlock FlatColors.SwedishPalette.darkPeriwinkle
-                , colourBlock FlatColors.SwedishPalette.megaman
-                , colourBlock FlatColors.SwedishPalette.freshTurquoise
-                , colourBlock FlatColors.SwedishPalette.mintyGreen
+                [ colourBlock FlatColors.FlatUIPalette.turquoise
+                , colourBlock FlatColors.FlatUIPalette.emerald
+                , colourBlock FlatColors.FlatUIPalette.peterRiver
+                , colourBlock FlatColors.FlatUIPalette.amethyst
+                , colourBlock FlatColors.FlatUIPalette.wetAsphalt
                 ]
             , row []
-                [ colourBlock FlatColors.SwedishPalette.sizzlingRed
-                , colourBlock FlatColors.SwedishPalette.freeSpeechBlue
-                , colourBlock FlatColors.SwedishPalette.spiroDiscoBall
-                , colourBlock FlatColors.SwedishPalette.jadeDust
-                , colourBlock FlatColors.SwedishPalette.greenTeal
+                [ colourBlock FlatColors.FlatUIPalette.greenSea
+                , colourBlock FlatColors.FlatUIPalette.nephritis
+                , colourBlock FlatColors.FlatUIPalette.belizeHole
+                , colourBlock FlatColors.FlatUIPalette.wisteria
+                , colourBlock FlatColors.FlatUIPalette.midnightBlue
                 ]
             , row []
-                [ colourBlock FlatColors.SwedishPalette.narenjiOrange
-                , colourBlock FlatColors.SwedishPalette.yrielYellow
-                , colourBlock FlatColors.SwedishPalette.sunsetOrange
-                , colourBlock FlatColors.SwedishPalette.hintOfElusiveBlue
-                , colourBlock FlatColors.SwedishPalette.goodNight
+                [ colourBlock FlatColors.FlatUIPalette.sunFlower
+                , colourBlock FlatColors.FlatUIPalette.carrot
+                , colourBlock FlatColors.FlatUIPalette.alizarin
+                , colourBlock FlatColors.FlatUIPalette.clouds
+                , colourBlock FlatColors.FlatUIPalette.concrete
                 ]
             , row []
-                [ colourBlock FlatColors.SwedishPalette.chromeYellow
-                , colourBlock FlatColors.SwedishPalette.vibrantYellow
-                , colourBlock FlatColors.SwedishPalette.redOrange
-                , colourBlock FlatColors.SwedishPalette.londonSquare
-                , colourBlock FlatColors.SwedishPalette.blackPearl
+                [ colourBlock FlatColors.FlatUIPalette.orange
+                , colourBlock FlatColors.FlatUIPalette.pumpkin
+                , colourBlock FlatColors.FlatUIPalette.pomegranate
+                , colourBlock FlatColors.FlatUIPalette.silver
+                , colourBlock FlatColors.FlatUIPalette.asbestos
                 ]
             ]
 

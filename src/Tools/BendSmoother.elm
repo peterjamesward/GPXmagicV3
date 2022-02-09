@@ -564,10 +564,14 @@ parallelFindSemicircle r1 r2 =
                 midArcPoint =
                     pointAlongRoad centreLine radius
             in
-            Arc2d.throughPoints
-                (Point2d.meters t1.x t1.y)
-                (Point2d.meters midArcPoint.x midArcPoint.y)
-                (Point2d.meters t2.x t2.y)
+            if radius > 0.0 && radius < 1000.0 then
+                Arc2d.throughPoints
+                    (Point2d.meters t1.x t1.y)
+                    (Point2d.meters midArcPoint.x midArcPoint.y)
+                    (Point2d.meters t2.x t2.y)
+
+            else
+                Nothing
 
         _ ->
             Nothing
