@@ -7,5 +7,10 @@ type alias Options =
     { weighting : Float
     , applyToAltitude : Bool
     , applyToPosition : Bool
+    , extent : Extent
     }
 
+
+type Extent
+    = ExtentRange
+    | ExtentTrack

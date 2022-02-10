@@ -11,12 +11,12 @@ BUG: Curve Former should reset on track load.
 BUG: Pointers are not reset on track load.
 
 BUG: Classic bend smoother consumes all memory on certain looped routes where
-orange and purple are (possibly) co-linear.
-? Infinite arc segments? No.
+     orange and purple are (possibly) co-linear.
+
+BUG: Bezier spline whole track does not undo properly, 
+     but only at low tolerances. Seems to retain the spline.
 
 # WIP
-
-BUG: Bezier spline whole track does not undo properly.
 
 ---
 
@@ -24,19 +24,20 @@ BUG: Bezier spline whole track does not undo properly.
 
 ## Tools
 
-1. Limit gradients
-2. Visual options
-3. Display file and track names and allow file name edit
-4. Intersections
-5. Tip Jar / Buy me a coffee.
+1. Visual options
+2. Display file and track names and allow file name edit 
+3. Tip Jar / Buy me a coffee.
+4. SVG import
+5. Out and Back without graphs!
 6. Map Satellite style choice
 7. Memory usage (incl limiting actions such as dumping Undo stack).
-8. SVG import
-9. Move & Stretch
-10. Fly-through
-11. Graph Theory (renamed)
-12. Use Strava segment data
-13. Loops (includes Out and Back) (+ impact on others, such as Bezier).
+8. Limit gradients
+9. Intersections
+10. Move & Stretch
+11. Fly-through
+12. Graph Theory (renamed)
+13. Use Strava segment data
+14. Loops (includes Out and Back) (+ impact on others, such as Bezier).
 
 New stuff:
 1. Samir's bend detector (amount of angular change within X linear metres).

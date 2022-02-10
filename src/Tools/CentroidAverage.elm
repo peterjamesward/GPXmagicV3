@@ -9,7 +9,7 @@ import FlatColors.ChinesePalette
 import Plane3d
 import Point3d
 import Quantity
-import Tools.CentroidAverageOptions exposing (Options)
+import Tools.CentroidAverageOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import Triangle3d
 import UtilsForViews exposing (fullDepthRenderingBoxSize, showDecimal2)
@@ -22,6 +22,7 @@ defaultOptions =
     { weighting = 1.0
     , applyToAltitude = True
     , applyToPosition = True
+    , extent = ExtentRange
     }
 
 
@@ -29,6 +30,7 @@ type Msg
     = SetWeighting Float
     | ToggleAltitude Bool
     | TogglePosition Bool
+    | SetExtent Extent
     | ApplyWithOptions
 
 
@@ -36,7 +38,12 @@ computeNewPoints : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
 computeNewPoints options track =
     let
         ( fromStart, fromEnd ) =
-            TrackLoaded.getRangeFromMarkers track
+            case options.extent of
+                ExtentRange ->
+                    TrackLoaded.getRangeFromMarkers track
+
+                ExtentTrack ->
+                    ( 0, 0 )
 
         earthPoints =
             centroidAverage False options fromStart fromEnd track.trackTree
@@ -57,7 +64,12 @@ applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSour
 applyUsingOptions options track =
     let
         ( fromStart, fromEnd ) =
-            TrackLoaded.getRangeFromMarkers track
+            case options.extent of
+                ExtentRange ->
+                    TrackLoaded.getRangeFromMarkers track
+
+                ExtentTrack ->
+                    ( 0, 0 )
 
         newTree =
             DomainModel.replaceRange
@@ -109,51 +121,44 @@ update :
     -> Maybe (TrackLoaded msg)
     -> ( Options, List (ToolAction msg) )
 update msg options previewColour hasTrack =
+    let
+        actions newOptions track =
+            [ ShowPreview
+                { tag = "centroid"
+                , shape = PreviewCircle
+                , colour = previewColour
+                , points = computeNewPoints newOptions track
+                }
+            ]
+    in
     case ( hasTrack, msg ) of
         ( Just track, SetWeighting weight ) ->
             let
                 newOptions =
                     { options | weighting = weight }
             in
-            ( newOptions
-            , [ ShowPreview
-                    { tag = "centroid"
-                    , shape = PreviewCircle
-                    , colour = previewColour
-                    , points = computeNewPoints newOptions track
-                    }
-              ]
-            )
+            ( newOptions, actions newOptions track )
 
         ( Just track, ToggleAltitude _ ) ->
             let
                 newOptions =
                     { options | applyToAltitude = not options.applyToAltitude }
             in
-            ( newOptions
-            , [ ShowPreview
-                    { tag = "centroid"
-                    , shape = PreviewCircle
-                    , colour = previewColour
-                    , points = computeNewPoints newOptions track
-                    }
-              ]
-            )
+            ( newOptions, actions newOptions track )
 
         ( Just track, TogglePosition _ ) ->
             let
                 newOptions =
                     { options | applyToPosition = not options.applyToPosition }
             in
-            ( newOptions
-            , [ ShowPreview
-                    { tag = "centroid"
-                    , shape = PreviewCircle
-                    , colour = previewColour
-                    , points = computeNewPoints newOptions track
-                    }
-              ]
-            )
+            ( newOptions, actions newOptions track )
+
+        ( Just track, SetExtent extent ) ->
+            let
+                newOptions =
+                    { options | extent = extent }
+            in
+            ( newOptions, actions newOptions track )
 
         ( Just track, ApplyWithOptions ) ->
             ( options
@@ -214,16 +219,31 @@ view wrap options =
                     { onPress = Just <| wrap ApplyWithOptions
                     , label = paragraph [] [ text "Apply" ]
                     }
+
+        extent =
+            Input.radioRow
+                [ padding 10
+                , spacing 5
+                ]
+                { onChange = wrap << SetExtent
+                , selected = Just options.extent
+                , label = Input.labelHidden "Style"
+                , options =
+                    [ Input.option ExtentRange (text "Selected range")
+                    , Input.option ExtentTrack (text "Whole track")
+                    ]
+                }
     in
     column
-        [ spacing 10
-        , padding 10
+        [ spacing 5
+        , padding 5
         , centerX
         , width fill
         , Background.color FlatColors.ChinesePalette.antiFlashWhite
         ]
         [ el [ centerX ] sliders
         , el [ centerX ] modeChoices
+        , el [ centerX ] extent
         , el [ centerX ] actionButton
         ]
 
