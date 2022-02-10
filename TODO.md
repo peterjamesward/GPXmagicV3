@@ -14,32 +14,30 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 # WIP
 
-**Display file and track names** and allow file name edit
-
 ---
 
 # BACKLOG, roughly in order ...
 
 ## Tools
 
-2. SVG import
-3. Use local Bezier approximation to spot-fix bend and gradient issues (?)
-4. Memory usage (incl limiting actions such as dumping Undo stack).
-5. Out and Back without graphs, inc. variable offset.
-6. Limit gradients
-7. Map Satellite style choice
-8. Intersections
-9. Simplify.
-10. Tip Jar / Buy me a coffee
+1. Use local Bezier approximation to spot-fix bend and gradient issues (?)
+2. Memory usage (incl limiting actions such as dumping Undo stack).
+3. Out and Back without graphs, inc. variable offset.
+4. Tip Jar / Buy me a coffee
+5. Limit gradients
+6. Map Satellite style choice
+7. Intersections
+8. Simplify.
+9. Plan view
+10. Fly-through
 11. Move & Stretch
-12. Fly-through
-13. Plan view
-14. Graph Theory (renamed)
-15. Use Strava segment data
-16. Loops (inc. impact on others, such as Bezier).
-17. Lift and Shift
-18. Split and Join
-19. Terrain.
+12. Graph Theory (renamed)
+13. Use Strava segment data
+14. Loops (inc. impact on others, such as Bezier).
+15. Lift and Shift
+16. SVG import
+17. Split and Join
+18. Terrain.
 
 New stuff:
 1. Samir's bend detector (amount of angular change within X linear metres). (Option on Bend Problems)
