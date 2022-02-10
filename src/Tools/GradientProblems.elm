@@ -1,4 +1,4 @@
-module Tools.AbruptGradientChanges exposing (..)
+module Tools.GradientProblems exposing (..)
 
 import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
 import Angle exposing (Angle)
@@ -6,7 +6,7 @@ import Direction2d
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), RoadSection, asRecord, skipCount)
 import Element exposing (..)
 import Element.Background as Background
-import Element.Input as Input
+import Element.Input as Input exposing (labelHidden)
 import FeatherIcons
 import FlatColors.ChinesePalette
 import List.Extra
@@ -16,10 +16,16 @@ import UtilsForViews exposing (showAngle, showDecimal2)
 import ViewPureStyles exposing (neatToolsBorder, noTrackMessage, sliderThumb, useIcon)
 
 
+type GradientProblem
+    = AbruptChange
+    | SteepClimb
+
+
 type alias Options =
     { threshold : Float
     , breaches : List ( Int, Float )
     , currentBreach : Int
+    , mode : GradientProblem
     }
 
 
@@ -27,6 +33,7 @@ defaultOptions =
     { threshold = 10.0
     , breaches = []
     , currentBreach = 0
+    , mode = AbruptChange
     }
 
 
@@ -35,6 +42,7 @@ type Msg
     | ViewPrevious
     | SetCurrentPosition Int
     | SetThreshold Float
+    | SetMode GradientProblem
 
 
 findAbruptDirectionChanges : Options -> PeteTree -> Options
@@ -73,7 +81,39 @@ findAbruptDirectionChanges options tree =
                 ( 0, Nothing, [] )
     in
     { options
-        | breaches = breaches
+        | breaches = List.reverse breaches
+        , currentBreach = 0
+    }
+
+
+findSteepClimbs : Options -> PeteTree -> Options
+findSteepClimbs options tree =
+    -- This function called when track changes, or we call it when threshold is changed.
+    -- We search the tree. At worst, fold over the whole darn tree. Optimize if needed.
+    let
+        foldFn :
+            RoadSection
+            -> ( Int, List ( Int, Float ) )
+            -> ( Int, List ( Int, Float ) )
+        foldFn road ( index, outputs ) =
+            if road.gradientAtStart > options.threshold then
+                ( index + 1, ( index, road.gradientAtStart ) :: outputs )
+
+            else
+                ( index + 1, outputs )
+
+        ( _, breaches ) =
+            DomainModel.traverseTreeBetweenLimitsToDepth
+                0
+                (skipCount tree)
+                (always Nothing)
+                0
+                tree
+                foldFn
+                ( 0, [] )
+    in
+    { options
+        | breaches = List.reverse breaches
         , currentBreach = 0
     }
 
@@ -121,6 +161,27 @@ update :
     -> Maybe (TrackLoaded msg)
     -> ( Options, List (ToolAction msg) )
 update msg options previewColour hasTrack =
+    let
+        actions opts track =
+            [ ShowPreview
+                { tag = "ridge"
+                , shape = PreviewCircle
+                , colour = previewColour
+                , points =
+                    DomainModel.buildPreview
+                        (List.map Tuple.first opts.breaches)
+                        track.trackTree
+                }
+            ]
+
+        populateOptions opts track =
+            case opts.mode of
+                AbruptChange ->
+                    findAbruptDirectionChanges opts track.trackTree
+
+                SteepClimb ->
+                    findSteepClimbs opts track.trackTree
+    in
     case msg of
         ViewNext ->
             let
@@ -162,19 +223,28 @@ update msg options previewColour hasTrack =
                 Just track ->
                     let
                         populatedOptions =
-                            findAbruptDirectionChanges newOptions track.trackTree
+                            populateOptions newOptions track
                     in
                     ( populatedOptions
-                    , [ ShowPreview
-                            { tag = "ridge"
-                            , shape = PreviewCircle
-                            , colour = previewColour
-                            , points =
-                                DomainModel.buildPreview
-                                    (List.map Tuple.first options.breaches)
-                                    track.trackTree
-                            }
-                      ]
+                    , actions populatedOptions track
+                    )
+
+                Nothing ->
+                    ( newOptions, [] )
+
+        SetMode mode ->
+            let
+                newOptions =
+                    { options | mode = mode, breaches = [] }
+            in
+            case hasTrack of
+                Just track ->
+                    let
+                        populatedOptions =
+                            populateOptions newOptions track
+                    in
+                    ( populatedOptions
+                    , actions populatedOptions track
                     )
 
                 Nothing ->
@@ -186,12 +256,21 @@ view msgWrapper options isTrack =
     case isTrack of
         Just track ->
             el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
-                column [ centerX, padding 4, spacing 4, height <| px 100 ]
-                    [ Input.slider
+                column [ centerX, padding 4, spacing 4 ]
+                    [ Input.radio [ centerX, spacing 5 ]
+                        { onChange = msgWrapper << SetMode
+                        , options =
+                            [ Input.option AbruptChange (text "Abrupt changes")
+                            , Input.option SteepClimb (text "Steep climbs")
+                            ]
+                        , selected = Just options.mode
+                        , label = labelHidden "Mode"
+                        }
+                    , Input.slider
                         ViewPureStyles.shortSliderStyles
                         { onChange = SetThreshold >> msgWrapper
                         , value = options.threshold
-                        , label = Input.labelHidden "Gradient change threshold"
+                        , label = Input.labelHidden "Threshold"
                         , min = 3
                         , max = 20
                         , step = Just 1
@@ -220,7 +299,7 @@ view msgWrapper options isTrack =
                                             ++ (String.fromInt <| List.length options.breaches)
                                             ++ " is "
                                             ++ showDecimal2 turn
-                                            ++ "º"
+                                            ++ "%"
                                 , row [ centerX, spacing 10 ]
                                     [ Input.button neatToolsBorder
                                         { label = useIcon FeatherIcons.chevronLeft

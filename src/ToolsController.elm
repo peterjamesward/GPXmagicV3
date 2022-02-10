@@ -16,7 +16,7 @@ import Json.Decode as D exposing (field)
 import Json.Encode as E
 import List.Extra
 import Tools.AbruptDirectionChanges as AbruptDirectionChanges
-import Tools.AbruptGradientChanges
+import Tools.GradientProblems
 import Tools.BendSmoother
 import Tools.BendSmootherOptions
 import Tools.BezierOptions
@@ -62,7 +62,7 @@ type ToolType
     | ToolCurveFormer
     | ToolBendSmoother
     | ToolNudge
-    | ToolAbruptGradientChanges
+    | ToolGradientProblems
 
 
 type alias Options =
@@ -79,7 +79,7 @@ type alias Options =
     , bendSmootherOptions : Tools.BendSmootherOptions.Options
     , nudgeOptions : Tools.NudgeOptions.Options
     , infoOptions : TrackInfoBox.Options
-    , gradientChangeOptions : Tools.AbruptGradientChanges.Options
+    , gradientProblemOptions : Tools.GradientProblems.Options
     }
 
 
@@ -97,7 +97,7 @@ defaultOptions =
     , bendSmootherOptions = Tools.BendSmoother.defaultOptions
     , nudgeOptions = Tools.Nudge.defaultOptions
     , infoOptions = TrackInfoBox.defaultOptions
-    , gradientChangeOptions = Tools.AbruptGradientChanges.defaultOptions
+    , gradientProblemOptions = Tools.GradientProblems.defaultOptions
     }
 
 
@@ -118,7 +118,7 @@ type ToolMsg
     | ToolBendSmootherMsg Tools.BendSmoother.Msg
     | ToolNudgeMsg Tools.Nudge.Msg
     | ToolInfoMsg TrackInfoBox.Msg
-    | ToolGradientChangeMsg Tools.AbruptGradientChanges.Msg
+    | ToolGradientChangeMsg Tools.GradientProblems.Msg
 
 
 type alias ToolEntry =
@@ -195,8 +195,8 @@ directionChangeTool =
 
 gradientChangeTool : ToolEntry
 gradientChangeTool =
-    { toolType = ToolAbruptGradientChanges
-    , label = "Gradient changes"
+    { toolType = ToolGradientProblems
+    , label = "Gradient problems"
     , info = "These may need smoothing"
     , video = Nothing
     , state = Contracted
@@ -427,13 +427,13 @@ update toolMsg isTrack msgWrapper options =
         ToolGradientChangeMsg msg ->
             let
                 ( newOptions, actions ) =
-                    Tools.AbruptGradientChanges.update
+                    Tools.GradientProblems.update
                         msg
-                        options.gradientChangeOptions
+                        options.gradientProblemOptions
                         (getColour ToolAbruptDirectionChanges options.tools)
                         isTrack
             in
-            ( { options | gradientChangeOptions = newOptions }
+            ( { options | gradientProblemOptions = newOptions }
             , actions
             )
 
@@ -711,17 +711,17 @@ toolStateHasChanged toolType newState isTrack options =
             in
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
-        ToolAbruptGradientChanges ->
+        ToolGradientProblems ->
             let
                 ( newToolOptions, actions ) =
-                    Tools.AbruptGradientChanges.toolStateChange
+                    Tools.GradientProblems.toolStateChange
                         (newState == Expanded)
                         (getColour toolType options.tools)
-                        options.gradientChangeOptions
+                        options.gradientProblemOptions
                         isTrack
 
                 newOptions =
-                    { options | gradientChangeOptions = newToolOptions }
+                    { options | gradientProblemOptions = newToolOptions }
             in
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
@@ -911,10 +911,10 @@ viewToolByType msgWrapper entry isTrack options =
                     options.directionChangeOptions
                     isTrack
 
-            ToolAbruptGradientChanges ->
-                Tools.AbruptGradientChanges.view
+            ToolGradientProblems ->
+                Tools.GradientProblems.view
                     (msgWrapper << ToolGradientChangeMsg)
-                    options.gradientChangeOptions
+                    options.gradientProblemOptions
                     isTrack
 
             ToolDeletePoints ->
@@ -1007,7 +1007,7 @@ encodeType toolType =
         ToolNudge ->
             "ToolNudge"
 
-        ToolAbruptGradientChanges ->
+        ToolGradientProblems ->
             "ToolAbruptGradientChanges"
 
 

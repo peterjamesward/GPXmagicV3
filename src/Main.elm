@@ -259,7 +259,7 @@ render model =
         Just track ->
             let
                 gradientChanges =
-                    List.map Tuple.first model.toolOptions.gradientChangeOptions.breaches
+                    List.map Tuple.first model.toolOptions.gradientProblemOptions.breaches
 
                 paneLayout =
                     PaneLayoutManager.render
@@ -1034,7 +1034,7 @@ performActionsOnModel actions model =
                         | paneLayoutOptions =
                             PaneLayoutManager.renderProfile
                                 foldedModel.toolOptions.imperial
-                                (List.map Tuple.first foldedModel.toolOptions.gradientChangeOptions.breaches)
+                                (List.map Tuple.first foldedModel.toolOptions.gradientProblemOptions.breaches)
                                 foldedModel.paneLayoutOptions
                                 track
                     }
