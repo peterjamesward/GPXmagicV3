@@ -18,6 +18,8 @@ BUG: Bezier spline whole track does not undo properly,
 
 # WIP
 
+Display settings -- need to persist.
+
 ---
 
 # BACKLOG, roughly in order ...
@@ -38,6 +40,7 @@ BUG: Bezier spline whole track does not undo properly,
 12. Graph Theory (renamed)
 13. Use Strava segment data
 14. Loops (inc. impact on others, such as Bezier).
+15. Terrain.
 
 New stuff:
 1. Samir's bend detector (amount of angular change within X linear metres).

@@ -16,7 +16,6 @@ import Json.Decode as D exposing (field)
 import Json.Encode as E
 import List.Extra
 import Tools.AbruptDirectionChanges as AbruptDirectionChanges
-import Tools.GradientProblems
 import Tools.BendSmoother
 import Tools.BendSmootherOptions
 import Tools.BezierOptions
@@ -26,6 +25,9 @@ import Tools.CentroidAverageOptions
 import Tools.CurveFormer
 import Tools.CurveFormerOptions
 import Tools.DeletePoints as DeletePoints
+import Tools.DisplaySettings
+import Tools.DisplaySettingsOptions
+import Tools.GradientProblems
 import Tools.Nudge
 import Tools.NudgeOptions
 import Tools.Pointers as Pointers
@@ -63,6 +65,7 @@ type ToolType
     | ToolBendSmoother
     | ToolNudge
     | ToolGradientProblems
+    | ToolDisplaySettings
 
 
 type alias Options =
@@ -80,6 +83,7 @@ type alias Options =
     , nudgeOptions : Tools.NudgeOptions.Options
     , infoOptions : TrackInfoBox.Options
     , gradientProblemOptions : Tools.GradientProblems.Options
+    , displaySettings : Tools.DisplaySettingsOptions.Options
     }
 
 
@@ -98,6 +102,7 @@ defaultOptions =
     , nudgeOptions = Tools.Nudge.defaultOptions
     , infoOptions = TrackInfoBox.defaultOptions
     , gradientProblemOptions = Tools.GradientProblems.defaultOptions
+    , displaySettings = Tools.DisplaySettings.defaultOptions
     }
 
 
@@ -119,6 +124,7 @@ type ToolMsg
     | ToolNudgeMsg Tools.Nudge.Msg
     | ToolInfoMsg TrackInfoBox.Msg
     | ToolGradientChangeMsg Tools.GradientProblems.Msg
+    | ToolDisplaySettingMsg Tools.DisplaySettings.Msg
 
 
 type alias ToolEntry =
@@ -140,6 +146,7 @@ defaultTools =
     [ pointersTool
     , undoRedoTool
     , trackInfoBox
+    , displaySettingsTool
     , directionChangeTool
     , gradientChangeTool
     , deleteTool
@@ -156,6 +163,20 @@ trackInfoBox =
     { toolType = ToolTrackInfo
     , label = "Information"
     , info = "Here is some useful information"
+    , video = Nothing
+    , state = Expanded
+    , dock = DockUpperLeft
+    , tabColour = FlatColors.FlatUIPalette.peterRiver
+    , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
+    , isPopupOpen = False
+    }
+
+
+displaySettingsTool : ToolEntry
+displaySettingsTool =
+    { toolType = ToolDisplaySettings
+    , label = "Display"
+    , info = "How it looks"
     , video = Nothing
     , state = Expanded
     , dock = DockUpperLeft
@@ -560,6 +581,17 @@ update toolMsg isTrack msgWrapper options =
             , []
             )
 
+        ToolDisplaySettingMsg m ->
+            let
+                ( newOptions, actions ) =
+                    Tools.DisplaySettings.update
+                        m
+                        options.displaySettings
+            in
+            ( { options | displaySettings = newOptions }
+            , actions
+            )
+
 
 refreshOpenTools :
     Maybe (TrackLoaded msg)
@@ -725,6 +757,8 @@ toolStateHasChanged toolType newState isTrack options =
             in
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
+        ToolDisplaySettings ->
+            ( options, [] )
 
 
 
@@ -953,6 +987,11 @@ viewToolByType msgWrapper entry isTrack options =
                     (msgWrapper << ToolNudgeMsg)
                     isTrack
 
+            ToolDisplaySettings ->
+                Tools.DisplaySettings.view
+                    (msgWrapper << ToolDisplaySettingMsg)
+                    options.displaySettings
+
 
 
 -- Local storage management
@@ -1009,6 +1048,9 @@ encodeType toolType =
 
         ToolGradientProblems ->
             "ToolAbruptGradientChanges"
+
+        ToolDisplaySettings ->
+            "ToolDisplaySettings"
 
 
 encodeColour : Element.Color -> E.Value
