@@ -956,6 +956,17 @@ topLoadingBar model =
         [ loadGpxButton
         , el [ Font.color <| contrastingColour model.backgroundColour ]
             (text <| bestTrackName model)
+        , case model.filename of
+            Just filename ->
+                Input.text [ padding 5 ]
+                    { text = filename
+                    , onChange = always NoOp
+                    , placeholder = Nothing
+                    , label = Input.labelHidden "filename"
+                    }
+
+            Nothing ->
+                none
         , saveButton
         , el [ alignRight ] <| PaneLayoutManager.paneLayoutMenu PaneMsg model.paneLayoutOptions
         , globalOptions model
