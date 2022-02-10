@@ -719,17 +719,26 @@ composeTitle model =
             "GPXmagic Labs V3 concepts"
 
         Just track ->
+            "GPXmagic - " ++ bestTrackName model
+
+
+bestTrackName model =
+    case model.track of
+        Nothing ->
+            "no track"
+
+        Just track ->
             case track.trackName of
                 Just trackname ->
-                    "GPXmagic - " ++ trackname
+                    trackname
 
                 Nothing ->
                     case model.filename of
                         Just filename ->
-                            "GPXmagic - " ++ filename
+                            filename
 
                         Nothing ->
-                            "GPXmagic - unknown track"
+                            "unnamed track"
 
 
 view : Model -> Browser.Document Msg
@@ -946,7 +955,7 @@ topLoadingBar model =
         )
         [ loadGpxButton
         , el [ Font.color <| contrastingColour model.backgroundColour ]
-            (text <| composeTitle model)
+            (text <| bestTrackName model)
         , saveButton
         , el [ alignRight ] <| PaneLayoutManager.paneLayoutMenu PaneMsg model.paneLayoutOptions
         , globalOptions model

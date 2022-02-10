@@ -29715,25 +29715,34 @@ var $author$project$ViewPureStyles$commonLayoutStyles = _List_fromArray(
 				$mdgriffith$elm_ui$Element$Font$sansSerif
 			]))
 	]);
+var $author$project$Main$bestTrackName = function (model) {
+	var _v0 = model.track;
+	if (_v0.$ === 'Nothing') {
+		return 'no track';
+	} else {
+		var track = _v0.a;
+		var _v1 = track.trackName;
+		if (_v1.$ === 'Just') {
+			var trackname = _v1.a;
+			return trackname;
+		} else {
+			var _v2 = model.filename;
+			if (_v2.$ === 'Just') {
+				var filename = _v2.a;
+				return filename;
+			} else {
+				return 'unnamed track';
+			}
+		}
+	}
+};
 var $author$project$Main$composeTitle = function (model) {
 	var _v0 = model.track;
 	if (_v0.$ === 'Nothing') {
 		return 'GPXmagic Labs V3 concepts';
 	} else {
 		var track = _v0.a;
-		var _v1 = track.trackName;
-		if (_v1.$ === 'Just') {
-			var trackname = _v1.a;
-			return 'GPXmagic - ' + trackname;
-		} else {
-			var _v2 = model.filename;
-			if (_v2.$ === 'Just') {
-				var filename = _v2.a;
-				return 'GPXmagic - ' + filename;
-			} else {
-				return 'GPXmagic - unknown track';
-			}
-		}
+		return 'GPXmagic - ' + $author$project$Main$bestTrackName(model);
 	}
 };
 var $mdgriffith$elm_ui$Internal$Model$unstyled = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Unstyled, $elm$core$Basics$always);
@@ -44950,7 +44959,7 @@ var $author$project$Main$topLoadingBar = function (model) {
 						$author$project$ViewPureStyles$contrastingColour(model.backgroundColour))
 					]),
 				$mdgriffith$elm_ui$Element$text(
-					$author$project$Main$composeTitle(model))),
+					$author$project$Main$bestTrackName(model))),
 				saveButton,
 				A2(
 				$mdgriffith$elm_ui$Element$el,
