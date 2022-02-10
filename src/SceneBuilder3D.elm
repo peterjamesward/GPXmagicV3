@@ -24,6 +24,7 @@ import Point3d
 import Quantity
 import Scene3d exposing (Entity)
 import Scene3d.Material as Material
+import Tools.DisplaySettingsOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (fullDepthRenderingBoxSize)
 import Vector3d
@@ -34,10 +35,15 @@ gradientColourPastel slope =
     Color.hsl (gradientHue slope) 0.6 0.7
 
 
-render3dView : TrackLoaded msg -> List (Entity LocalCoords)
-render3dView track =
+render3dView : Tools.DisplaySettingsOptions.Options -> TrackLoaded msg -> List (Entity LocalCoords)
+render3dView settings track =
     --TODO: Use new traversal to provide better depth function.
     let
+        nominalRenderDepth =
+            clamp 1 10 <|
+                round <|
+                    logBase 2 (toFloat <| skipCount track.trackTree)
+
         floorPlane =
             Plane3d.xy |> Plane3d.offsetBy (BoundingBox3d.minZ <| boundingBox track.trackTree)
 
@@ -49,14 +55,22 @@ render3dView track =
                 )
                 (startPoint <| leafFromIndex track.currentPosition track.trackTree)
 
-        gradientCurtain : PeteTree -> List (Entity LocalCoords)
-        gradientCurtain node =
+        depthFn : RoadSection -> Maybe Int
+        depthFn road =
+            if road.boundingBox |> BoundingBox3d.intersects fullRenderingZone then
+                Nothing
+
+            else
+                Just nominalRenderDepth
+
+        gradientCurtain : RoadSection -> List (Entity LocalCoords)
+        gradientCurtain road =
             let
                 gradient =
-                    DomainModel.gradientFromNode node
+                    road.gradientAtStart
 
                 roadAsSegment =
-                    LineSegment3d.from (startPoint node) (endPoint node)
+                    LineSegment3d.from road.startPoint road.endPoint
 
                 curtainHem =
                     LineSegment3d.projectOnto floorPlane roadAsSegment
@@ -68,57 +82,19 @@ render3dView track =
                 (LineSegment3d.startPoint curtainHem)
             ]
 
-        makeVisibleSegment node =
+        makeVisibleSegment : RoadSection -> List (Entity LocalCoords)
+        makeVisibleSegment road =
             [ Scene3d.point { radius = Pixels.pixels 1 }
                 (Material.color black)
-                (startPoint node)
+                road.startPoint
             , Scene3d.lineSegment (Material.color black) <|
-                LineSegment3d.from (startPoint node) (endPoint node)
+                LineSegment3d.from road.startPoint road.endPoint
             ]
-                ++ gradientCurtain node
+                ++ gradientCurtain road
 
-        renderTree :
-            Int
-            -> PeteTree
-            -> List (Entity LocalCoords)
-            -> List (Entity LocalCoords)
-        renderTree depth someNode accum =
-            case someNode of
-                Leaf leafNode ->
-                    makeVisibleSegment someNode ++ accum
-
-                Node unLeaf ->
-                    if depth <= 0 then
-                        makeVisibleSegment someNode ++ accum
-
-                    else
-                        accum
-                            |> renderTree (depth - 1) unLeaf.left
-                            |> renderTree (depth - 1) unLeaf.right
-
-        renderTreeSelectively :
-            Int
-            -> PeteTree
-            -> List (Entity LocalCoords)
-            -> List (Entity LocalCoords)
-        renderTreeSelectively depth someNode accum =
-            --TODO: Rewrite using domain model traversal.
-            case someNode of
-                Leaf leafNode ->
-                    makeVisibleSegment someNode ++ accum
-
-                Node unLeaf ->
-                    if unLeaf.nodeContent.boundingBox |> BoundingBox3d.intersects fullRenderingZone then
-                        -- Ignore depth cutoff near or in the box
-                        accum
-                            |> renderTreeSelectively (depth - 1) unLeaf.left
-                            |> renderTreeSelectively (depth - 1) unLeaf.right
-
-                    else
-                        -- Outside box, apply cutoff.
-                        accum
-                            |> renderTree (depth - 1) unLeaf.left
-                            |> renderTree (depth - 1) unLeaf.right
+        foldFn : RoadSection -> List (Entity LocalCoords) -> List (Entity LocalCoords)
+        foldFn road scene =
+            makeVisibleSegment road ++ scene
 
         renderCurrentMarkers : List (Entity LocalCoords)
         renderCurrentMarkers =
@@ -137,7 +113,13 @@ render3dView track =
                             []
                    )
     in
-    renderTreeSelectively track.renderDepth track.trackTree <|
+    DomainModel.traverseTreeBetweenLimitsToDepth
+        0
+        (skipCount track.trackTree)
+        depthFn
+        0
+        track.trackTree
+        foldFn
         renderCurrentMarkers
 
 

@@ -16250,13 +16250,13 @@ var $author$project$ToolsController$refreshOpenTools = F2(
 	});
 var $avh4$elm_color$Color$black = A4($avh4$elm_color$Color$RgbaSpace, 0 / 255, 0 / 255, 0 / 255, 1.0);
 var $smucode$elm_flat_colors$FlatColors$AussiePalette$blurple = A3($mdgriffith$elm_ui$Element$rgb255, 72, 52, 212);
-var $avh4$elm_color$Color$fromRgba = function (components) {
-	return A4($avh4$elm_color$Color$RgbaSpace, components.red, components.green, components.blue, components.alpha);
-};
 var $elm$core$Basics$clamp = F3(
 	function (low, high, number) {
 		return (_Utils_cmp(number, low) < 0) ? low : ((_Utils_cmp(number, high) > 0) ? high : number);
 	});
+var $avh4$elm_color$Color$fromRgba = function (components) {
+	return A4($avh4$elm_color$Color$RgbaSpace, components.red, components.green, components.blue, components.alpha);
+};
 var $avh4$elm_color$Color$purple = A4($avh4$elm_color$Color$RgbaSpace, 117 / 255, 80 / 255, 123 / 255, 1.0);
 var $avh4$elm_color$Color$red = A4($avh4$elm_color$Color$RgbaSpace, 204 / 255, 0 / 255, 0 / 255, 1.0);
 var $elm$core$Basics$isNaN = _Basics_isNaN;
@@ -16313,17 +16313,6 @@ var $author$project$SceneBuilder3D$gradientColourPastel = function (slope) {
 		$author$project$ColourPalette$gradientHue(slope),
 		0.6,
 		0.7);
-};
-var $author$project$DomainModel$gradientFromNode = function (treeNode) {
-	return 100.0 * A2(
-		$ianmackenzie$elm_units$Quantity$ratio,
-		A2(
-			$ianmackenzie$elm_units$Quantity$minus,
-			$ianmackenzie$elm_geometry$Point3d$zCoordinate(
-				$author$project$DomainModel$startPoint(treeNode)),
-			$ianmackenzie$elm_geometry$Point3d$zCoordinate(
-				$author$project$DomainModel$endPoint(treeNode))),
-		$author$project$DomainModel$trueLength(treeNode));
 };
 var $avh4$elm_color$Color$lightOrange = A4($avh4$elm_color$Color$RgbaSpace, 252 / 255, 175 / 255, 62 / 255, 1.0);
 var $ianmackenzie$elm_geometry$Plane3d$normalDirection = function (_v0) {
@@ -17164,128 +17153,111 @@ var $ianmackenzie$elm_3d_scene$Scene3d$quad = F5(
 	function (givenMaterial, p1, p2, p3, p4) {
 		return A7($ianmackenzie$elm_3d_scene$Scene3d$Entity$quad, true, false, givenMaterial, p1, p2, p3, p4);
 	});
-var $author$project$SceneBuilder3D$render3dView = function (track) {
-	var renderCurrentMarkers = _Utils_ap(
-		_List_fromArray(
-			[
-				A3(
-				$ianmackenzie$elm_3d_scene$Scene3d$point,
-				{
-					radius: $ianmackenzie$elm_units$Pixels$pixels(10)
-				},
-				$ianmackenzie$elm_3d_scene$Scene3d$Material$color($avh4$elm_color$Color$lightOrange),
-				A2($author$project$DomainModel$earthPointFromIndex, track.currentPosition, track.trackTree))
-			]),
-		function () {
-			var _v2 = track.markerPosition;
-			if (_v2.$ === 'Just') {
-				var marker = _v2.a;
-				return _List_fromArray(
-					[
-						A3(
-						$ianmackenzie$elm_3d_scene$Scene3d$point,
-						{
-							radius: $ianmackenzie$elm_units$Pixels$pixels(9)
-						},
-						$ianmackenzie$elm_3d_scene$Scene3d$Material$color(
-							$avh4$elm_color$Color$fromRgba(
-								$mdgriffith$elm_ui$Element$toRgb($smucode$elm_flat_colors$FlatColors$AussiePalette$blurple))),
-						A2($author$project$DomainModel$earthPointFromIndex, marker, track.trackTree))
-					]);
-			} else {
-				return _List_Nil;
-			}
-		}());
-	var fullRenderingZone = A2(
-		$ianmackenzie$elm_geometry$BoundingBox3d$withDimensions,
-		_Utils_Tuple3($author$project$UtilsForViews$fullDepthRenderingBoxSize, $author$project$UtilsForViews$fullDepthRenderingBoxSize, $author$project$UtilsForViews$fullDepthRenderingBoxSize),
-		$author$project$DomainModel$startPoint(
-			A2($author$project$DomainModel$leafFromIndex, track.currentPosition, track.trackTree)));
-	var floorPlane = A2(
-		$ianmackenzie$elm_geometry$Plane3d$offsetBy,
-		$ianmackenzie$elm_geometry$BoundingBox3d$minZ(
-			$author$project$DomainModel$boundingBox(track.trackTree)),
-		$ianmackenzie$elm_geometry$Plane3d$xy);
-	var gradientCurtain = function (node) {
-		var roadAsSegment = A2(
-			$ianmackenzie$elm_geometry$LineSegment3d$from,
-			$author$project$DomainModel$startPoint(node),
-			$author$project$DomainModel$endPoint(node));
-		var gradient = $author$project$DomainModel$gradientFromNode(node);
-		var curtainHem = A2($ianmackenzie$elm_geometry$LineSegment3d$projectOnto, floorPlane, roadAsSegment);
-		return _List_fromArray(
-			[
-				A5(
-				$ianmackenzie$elm_3d_scene$Scene3d$quad,
-				$ianmackenzie$elm_3d_scene$Scene3d$Material$color(
-					$author$project$SceneBuilder3D$gradientColourPastel(gradient)),
-				$ianmackenzie$elm_geometry$LineSegment3d$startPoint(roadAsSegment),
-				$ianmackenzie$elm_geometry$LineSegment3d$endPoint(roadAsSegment),
-				$ianmackenzie$elm_geometry$LineSegment3d$endPoint(curtainHem),
-				$ianmackenzie$elm_geometry$LineSegment3d$startPoint(curtainHem))
-			]);
-	};
-	var makeVisibleSegment = function (node) {
-		return _Utils_ap(
+var $author$project$SceneBuilder3D$render3dView = F2(
+	function (settings, track) {
+		var renderCurrentMarkers = _Utils_ap(
 			_List_fromArray(
 				[
 					A3(
 					$ianmackenzie$elm_3d_scene$Scene3d$point,
 					{
-						radius: $ianmackenzie$elm_units$Pixels$pixels(1)
+						radius: $ianmackenzie$elm_units$Pixels$pixels(10)
 					},
-					$ianmackenzie$elm_3d_scene$Scene3d$Material$color($avh4$elm_color$Color$black),
-					$author$project$DomainModel$startPoint(node)),
-					A2(
-					$ianmackenzie$elm_3d_scene$Scene3d$lineSegment,
-					$ianmackenzie$elm_3d_scene$Scene3d$Material$color($avh4$elm_color$Color$black),
-					A2(
-						$ianmackenzie$elm_geometry$LineSegment3d$from,
-						$author$project$DomainModel$startPoint(node),
-						$author$project$DomainModel$endPoint(node)))
+					$ianmackenzie$elm_3d_scene$Scene3d$Material$color($avh4$elm_color$Color$lightOrange),
+					A2($author$project$DomainModel$earthPointFromIndex, track.currentPosition, track.trackTree))
 				]),
-			gradientCurtain(node));
-	};
-	var renderTree = F3(
-		function (depth, someNode, accum) {
-			if (someNode.$ === 'Leaf') {
-				var leafNode = someNode.a;
+			function () {
+				var _v0 = track.markerPosition;
+				if (_v0.$ === 'Just') {
+					var marker = _v0.a;
+					return _List_fromArray(
+						[
+							A3(
+							$ianmackenzie$elm_3d_scene$Scene3d$point,
+							{
+								radius: $ianmackenzie$elm_units$Pixels$pixels(9)
+							},
+							$ianmackenzie$elm_3d_scene$Scene3d$Material$color(
+								$avh4$elm_color$Color$fromRgba(
+									$mdgriffith$elm_ui$Element$toRgb($smucode$elm_flat_colors$FlatColors$AussiePalette$blurple))),
+							A2($author$project$DomainModel$earthPointFromIndex, marker, track.trackTree))
+						]);
+				} else {
+					return _List_Nil;
+				}
+			}());
+		var nominalRenderDepth = A3(
+			$elm$core$Basics$clamp,
+			1,
+			10,
+			$elm$core$Basics$round(
+				A2(
+					$elm$core$Basics$logBase,
+					2,
+					$author$project$DomainModel$skipCount(track.trackTree))));
+		var fullRenderingZone = A2(
+			$ianmackenzie$elm_geometry$BoundingBox3d$withDimensions,
+			_Utils_Tuple3($author$project$UtilsForViews$fullDepthRenderingBoxSize, $author$project$UtilsForViews$fullDepthRenderingBoxSize, $author$project$UtilsForViews$fullDepthRenderingBoxSize),
+			$author$project$DomainModel$startPoint(
+				A2($author$project$DomainModel$leafFromIndex, track.currentPosition, track.trackTree)));
+		var floorPlane = A2(
+			$ianmackenzie$elm_geometry$Plane3d$offsetBy,
+			$ianmackenzie$elm_geometry$BoundingBox3d$minZ(
+				$author$project$DomainModel$boundingBox(track.trackTree)),
+			$ianmackenzie$elm_geometry$Plane3d$xy);
+		var gradientCurtain = function (road) {
+			var roadAsSegment = A2($ianmackenzie$elm_geometry$LineSegment3d$from, road.startPoint, road.endPoint);
+			var gradient = road.gradientAtStart;
+			var curtainHem = A2($ianmackenzie$elm_geometry$LineSegment3d$projectOnto, floorPlane, roadAsSegment);
+			return _List_fromArray(
+				[
+					A5(
+					$ianmackenzie$elm_3d_scene$Scene3d$quad,
+					$ianmackenzie$elm_3d_scene$Scene3d$Material$color(
+						$author$project$SceneBuilder3D$gradientColourPastel(gradient)),
+					$ianmackenzie$elm_geometry$LineSegment3d$startPoint(roadAsSegment),
+					$ianmackenzie$elm_geometry$LineSegment3d$endPoint(roadAsSegment),
+					$ianmackenzie$elm_geometry$LineSegment3d$endPoint(curtainHem),
+					$ianmackenzie$elm_geometry$LineSegment3d$startPoint(curtainHem))
+				]);
+		};
+		var makeVisibleSegment = function (road) {
+			return _Utils_ap(
+				_List_fromArray(
+					[
+						A3(
+						$ianmackenzie$elm_3d_scene$Scene3d$point,
+						{
+							radius: $ianmackenzie$elm_units$Pixels$pixels(1)
+						},
+						$ianmackenzie$elm_3d_scene$Scene3d$Material$color($avh4$elm_color$Color$black),
+						road.startPoint),
+						A2(
+						$ianmackenzie$elm_3d_scene$Scene3d$lineSegment,
+						$ianmackenzie$elm_3d_scene$Scene3d$Material$color($avh4$elm_color$Color$black),
+						A2($ianmackenzie$elm_geometry$LineSegment3d$from, road.startPoint, road.endPoint))
+					]),
+				gradientCurtain(road));
+		};
+		var foldFn = F2(
+			function (road, scene) {
 				return _Utils_ap(
-					makeVisibleSegment(someNode),
-					accum);
-			} else {
-				var unLeaf = someNode.a;
-				return (depth <= 0) ? _Utils_ap(
-					makeVisibleSegment(someNode),
-					accum) : A3(
-					renderTree,
-					depth - 1,
-					unLeaf.right,
-					A3(renderTree, depth - 1, unLeaf.left, accum));
-			}
-		});
-	var renderTreeSelectively = F3(
-		function (depth, someNode, accum) {
-			if (someNode.$ === 'Leaf') {
-				var leafNode = someNode.a;
-				return _Utils_ap(
-					makeVisibleSegment(someNode),
-					accum);
-			} else {
-				var unLeaf = someNode.a;
-				return A2($ianmackenzie$elm_geometry$BoundingBox3d$intersects, fullRenderingZone, unLeaf.nodeContent.boundingBox) ? A3(
-					renderTreeSelectively,
-					depth - 1,
-					unLeaf.right,
-					A3(renderTreeSelectively, depth - 1, unLeaf.left, accum)) : A3(
-					renderTree,
-					depth - 1,
-					unLeaf.right,
-					A3(renderTree, depth - 1, unLeaf.left, accum));
-			}
-		});
-	return A3(renderTreeSelectively, track.renderDepth, track.trackTree, renderCurrentMarkers);
-};
+					makeVisibleSegment(road),
+					scene);
+			});
+		var depthFn = function (road) {
+			return A2($ianmackenzie$elm_geometry$BoundingBox3d$intersects, fullRenderingZone, road.boundingBox) ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(nominalRenderDepth);
+		};
+		return A7(
+			$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
+			0,
+			$author$project$DomainModel$skipCount(track.trackTree),
+			depthFn,
+			0,
+			track.trackTree,
+			foldFn,
+			renderCurrentMarkers);
+	});
 var $ianmackenzie$elm_units$Quantity$clamp = F3(
 	function (_v0, _v1, _v2) {
 		var lower = _v0.a;
@@ -17625,8 +17597,8 @@ var $author$project$SceneBuilder3D$renderPreviews = function (previews) {
 		onePreview,
 		$elm$core$Dict$values(previews));
 };
-var $author$project$PaneLayoutManager$render = F5(
-	function (imperial, gradientChanges, options, track, previews) {
+var $author$project$PaneLayoutManager$render = F6(
+	function (imperial, settings, gradientChanges, options, track, previews) {
 		return _Utils_update(
 			options,
 			{
@@ -17636,7 +17608,7 @@ var $author$project$PaneLayoutManager$render = F5(
 				pane4: A4($author$project$PaneLayoutManager$renderPaneIfProfileVisible, imperial, gradientChanges, options.pane4, track),
 				scene3d: _Utils_ap(
 					$author$project$SceneBuilder3D$renderPreviews(previews),
-					$author$project$SceneBuilder3D$render3dView(track))
+					A2($author$project$SceneBuilder3D$render3dView, settings, track))
 			});
 	});
 var $author$project$Main$render = function (model) {
@@ -17644,7 +17616,7 @@ var $author$project$Main$render = function (model) {
 	if (_v0.$ === 'Just') {
 		var track = _v0.a;
 		var gradientChanges = A2($elm$core$List$map, $elm$core$Tuple$first, model.toolOptions.gradientProblemOptions.breaches);
-		var paneLayout = A5($author$project$PaneLayoutManager$render, model.toolOptions.imperial, gradientChanges, model.paneLayoutOptions, track, model.previews);
+		var paneLayout = A6($author$project$PaneLayoutManager$render, model.toolOptions.imperial, model.toolOptions.displaySettings, gradientChanges, model.paneLayoutOptions, track, model.previews);
 		return _Utils_update(
 			model,
 			{paneLayoutOptions: paneLayout});
@@ -23002,9 +22974,11 @@ var $author$project$Tools$DeletePoints$update = F4(
 			return _Utils_Tuple2(options, _List_Nil);
 		}
 	});
+var $author$project$Actions$DisplaySettingsChanged = {$: 'DisplaySettingsChanged'};
 var $author$project$Tools$DisplaySettings$update = F2(
 	function (msg, options) {
-		var actions = _List_Nil;
+		var actions = _List_fromArray(
+			[$author$project$Actions$DisplaySettingsChanged]);
 		switch (msg.$) {
 			case 'SetCentreLine':
 				var state = msg.a;
@@ -33752,7 +33726,7 @@ var $author$project$Tools$DisplaySettings$view = F2(
 						A2(
 						$mdgriffith$elm_ui$Element$Input$option,
 						$author$project$Tools$DisplaySettingsOptions$NoCurtain,
-						$mdgriffith$elm_ui$Element$text('None')),
+						$mdgriffith$elm_ui$Element$text('No curtain')),
 						A2(
 						$mdgriffith$elm_ui$Element$Input$option,
 						$author$project$Tools$DisplaySettingsOptions$PlainCurtain,
@@ -37795,6 +37769,17 @@ var $terezka$elm_charts$Chart$Attributes$gradient = F2(
 				opacity: (!config.opacity) ? 1 : config.opacity
 			});
 	});
+var $author$project$DomainModel$gradientFromNode = function (treeNode) {
+	return 100.0 * A2(
+		$ianmackenzie$elm_units$Quantity$ratio,
+		A2(
+			$ianmackenzie$elm_units$Quantity$minus,
+			$ianmackenzie$elm_geometry$Point3d$zCoordinate(
+				$author$project$DomainModel$startPoint(treeNode)),
+			$ianmackenzie$elm_geometry$Point3d$zCoordinate(
+				$author$project$DomainModel$endPoint(treeNode))),
+		$author$project$DomainModel$trueLength(treeNode));
+};
 var $terezka$elm_charts$Chart$Attributes$height = F2(
 	function (v, config) {
 		return _Utils_update(

@@ -18,7 +18,9 @@ BUG: Bezier spline whole track does not undo properly,
 
 # WIP
 
-Display settings -- need to persist.
+## Display settings 
+1. Effects
+2. Persist
 
 ---
 

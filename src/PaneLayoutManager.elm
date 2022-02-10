@@ -21,6 +21,7 @@ import Pixels exposing (Pixels)
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
 import SceneBuilder3D
+import Tools.DisplaySettingsOptions
 import TrackLoaded exposing (TrackLoaded)
 import ViewMap
 import ViewProfileCharts
@@ -177,15 +178,22 @@ optionList =
     ]
 
 
-render : Bool -> List Int -> Options -> TrackLoaded msg -> Dict String PreviewData -> Options
-render imperial gradientChanges options track previews =
+render :
+    Bool
+    -> Tools.DisplaySettingsOptions.Options
+    -> List Int
+    -> Options
+    -> TrackLoaded msg
+    -> Dict String PreviewData
+    -> Options
+render imperial settings gradientChanges options track previews =
     --Profile stuff now lives in the pane context, as each pane could
     --have different version!
     --TODO: Any open Profile views also get to (re-)render here.
     { options
         | scene3d =
             SceneBuilder3D.renderPreviews previews
-                ++ SceneBuilder3D.render3dView track
+                ++ SceneBuilder3D.render3dView settings track
         , pane1 = renderPaneIfProfileVisible imperial gradientChanges options.pane1 track
         , pane2 = renderPaneIfProfileVisible imperial gradientChanges options.pane2 track
         , pane3 = renderPaneIfProfileVisible imperial gradientChanges options.pane3 track

@@ -6,7 +6,6 @@ import Element.Background as Background
 import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
 import Tools.DisplaySettingsOptions exposing (..)
-import TrackLoaded exposing (TrackLoaded)
 
 
 defaultOptions : Options
@@ -32,7 +31,7 @@ update :
 update msg options =
     let
         actions =
-            []
+            [ DisplaySettingsChanged ]
     in
     case msg of
         SetCentreLine state ->
@@ -76,7 +75,7 @@ view wrap options =
                 , selected = Just options.curtainStyle
                 , label = Input.labelHidden "Curtain"
                 , options =
-                    [ Input.option NoCurtain (text "None")
+                    [ Input.option NoCurtain (text "No curtain")
                     , Input.option PlainCurtain (text "Plain")
                     , Input.option PastelCurtain (text "Coloured")
                     ]

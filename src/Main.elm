@@ -262,8 +262,10 @@ render model =
                     List.map Tuple.first model.toolOptions.gradientProblemOptions.breaches
 
                 paneLayout =
+                    -- Growing list of argument is disturbing.
                     PaneLayoutManager.render
                         model.toolOptions.imperial
+                        model.toolOptions.displaySettings
                         gradientChanges
                         model.paneLayoutOptions
                         track

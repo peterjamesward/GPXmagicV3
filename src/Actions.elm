@@ -18,23 +18,24 @@ import Tools.NudgeOptions
 
 type ToolAction msg
     = NoAction
-    | SetCurrent Int
+    | SetCurrent Int -- move the orange pointer
     | SetCurrentFromMapClick Int -- to avoid re-centering the map!
-    | ShowPreview PreviewData
-    | HidePreview String
-    | DelayMessage Int msg
-    | MapCenterOnCurrent
+    | ShowPreview PreviewData -- add a tool's preview to the collection
+    | HidePreview String -- remove a tools' preview
+    | DelayMessage Int msg -- set a timer, useful for debouncing
+    | MapCenterOnCurrent -- as it says
     | MapRefresh -- generally because layout has changed.
-    | StoreLocally String E.Value
-    | StoredValueRetrieved String E.Value
+    | StoreLocally String E.Value -- save something in local storage
+    | StoredValueRetrieved String E.Value -- retrieve from local storage
     | DeletePointsBetween Int Int -- fromStart, fromEnd
     | DeleteSinglePoint Int Int -- fromStart, fromEnd
-    | TrackHasChanged -- Must follow an action that changes the track.
-    | SetMarker (Maybe Int)
+    | TrackHasChanged -- Tools need to update to reflect any change in track
+    | SetMarker (Maybe Int) -- position the purple marker
+    | DisplaySettingsChanged -- need to refresh the 3d views but no change in track
     | UndoLastAction
     | RedoUndoneAction
     | HeapStatusUpdate Tools.MemoryUsage.HeapStatus
-    | RenderProfile
+    | RenderProfile -- rebuild the altitude and gradient charts
     | BezierApplyWithOptions Tools.BezierOptions.Options
     | CentroidAverageApplyWithOptions Tools.CentroidAverageOptions.Options
     | CurveFormerApplyWithOptions Tools.CurveFormerOptions.Options
