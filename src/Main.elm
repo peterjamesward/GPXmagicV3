@@ -919,8 +919,8 @@ topLoadingBar model =
                ]
         )
         [ loadGpxButton
-        , PaneLayoutManager.paneLayoutMenu PaneMsg model.paneLayoutOptions
         , saveButton
+        , el [ alignRight ] <| PaneLayoutManager.paneLayoutMenu PaneMsg model.paneLayoutOptions
         , globalOptions model
         ]
 
@@ -945,7 +945,7 @@ globalOptions model =
         ]
     <|
         Input.button
-            [ alignRight ]
+            [ alignRight, Font.color FlatColors.FlatUIPalette.sunFlower ]
             { onPress = Just <| ToggleToolPopup
             , label = useIcon FeatherIcons.settings
             }

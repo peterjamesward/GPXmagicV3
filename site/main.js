@@ -48524,7 +48524,10 @@ var $author$project$Main$globalOptions = function (model) {
 		A2(
 			$mdgriffith$elm_ui$Element$Input$button,
 			_List_fromArray(
-				[$mdgriffith$elm_ui$Element$alignRight]),
+				[
+					$mdgriffith$elm_ui$Element$alignRight,
+					$mdgriffith$elm_ui$Element$Font$color($smucode$elm_flat_colors$FlatColors$FlatUIPalette$sunFlower)
+				]),
 			{
 				label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$settings),
 				onPress: $elm$core$Maybe$Just($author$project$Main$ToggleToolPopup)
@@ -48841,8 +48844,12 @@ var $author$project$Main$topLoadingBar = function (model) {
 		_List_fromArray(
 			[
 				loadGpxButton,
-				A2($author$project$PaneLayoutManager$paneLayoutMenu, $author$project$Main$PaneMsg, model.paneLayoutOptions),
 				saveButton,
+				A2(
+				$mdgriffith$elm_ui$Element$el,
+				_List_fromArray(
+					[$mdgriffith$elm_ui$Element$alignRight]),
+				A2($author$project$PaneLayoutManager$paneLayoutMenu, $author$project$Main$PaneMsg, model.paneLayoutOptions)),
 				$author$project$Main$globalOptions(model)
 			]));
 };

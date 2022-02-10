@@ -16,10 +16,6 @@ orange and purple are (possibly) co-linear.
 
 # WIP
 
-## Steep climbs
-
-Combine with abrupt gradient changes.
-
 ---
 
 # BACKLOG, roughly in order ...
