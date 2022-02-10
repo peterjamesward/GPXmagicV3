@@ -26,18 +26,18 @@ BUG: Bezier spline whole track does not undo properly,
 
 1. Visual options
 2. Display file and track names and allow file name edit 
-3. Tip Jar / Buy me a coffee.
-4. SVG import
+3. SVG import
+4. Memory usage (incl limiting actions such as dumping Undo stack).
 5. Out and Back without graphs!
-6. Map Satellite style choice
-7. Memory usage (incl limiting actions such as dumping Undo stack).
-8. Limit gradients
-9. Intersections
+6. Limit gradients
+7. Map Satellite style choice
+8. Intersections
+9. Tip Jar / Buy me a coffee.
 10. Move & Stretch
 11. Fly-through
 12. Graph Theory (renamed)
 13. Use Strava segment data
-14. Loops (includes Out and Back) (+ impact on others, such as Bezier).
+14. Loops (inc. impact on others, such as Bezier).
 
 New stuff:
 1. Samir's bend detector (amount of angular change within X linear metres).
