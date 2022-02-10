@@ -182,6 +182,34 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
 
         backgroundColour =
             colourHexString FlatColors.ChinesePalette.antiFlashWhite
+
+        markerLineAtDistance p dist =
+            C.line
+                [ CA.x1 dist
+                , CA.y1 p.y.min
+                , CA.y2 p.y.max
+                , CA.dashed [ 2, 2 ]
+                , CA.width 1
+                , CA.color CA.darkBlue
+                ]
+
+        lengthConversion =
+            if context.imperial then
+                Length.inMiles
+
+            else
+                Length.inMeters
+
+        problemMarkers =
+            C.withPlane <|
+                \p ->
+                    List.map
+                        (\idx ->
+                            markerLineAtDistance p <|
+                                lengthConversion <|
+                                    distanceFromIndex idx track.trackTree
+                        )
+                        context.gradientProblems
     in
     column []
         [ el
@@ -225,6 +253,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                                 , CA.color CA.red
                                 ]
                             ]
+                    , problemMarkers
                     , series .distance
                         [ interpolated .altitude
                             [ CA.width 2
@@ -276,6 +305,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                                 , CA.color CA.red
                                 ]
                             ]
+                    , problemMarkers
                     , series .distance
                         [ interpolated .gradient
                             [ CA.width 2, CA.stepped ]

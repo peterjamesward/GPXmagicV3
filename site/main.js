@@ -37419,6 +37419,8 @@ var $terezka$elm_charts$Chart$chart = F2(
 			chartEls,
 			afterEls);
 	});
+var $terezka$elm_charts$Internal$Helpers$darkBlue = '#7345f6';
+var $terezka$elm_charts$Chart$Attributes$darkBlue = $terezka$elm_charts$Internal$Helpers$darkBlue;
 var $terezka$elm_charts$Chart$Attributes$domain = F2(
 	function (v, config) {
 		return _Utils_update(
@@ -41755,6 +41757,35 @@ var $author$project$ViewProfileCharts$view = F4(
 	function (context, _v0, track, msgWrapper) {
 		var givenWidth = _v0.a;
 		var givenHeight = _v0.b;
+		var markerLineAtDistance = F2(
+			function (p, dist) {
+				return $terezka$elm_charts$Chart$line(
+					_List_fromArray(
+						[
+							$terezka$elm_charts$Chart$Attributes$x1(dist),
+							$terezka$elm_charts$Chart$Attributes$y1(p.y.min),
+							$terezka$elm_charts$Chart$Attributes$y2(p.y.max),
+							$terezka$elm_charts$Chart$Attributes$dashed(
+							_List_fromArray(
+								[2, 2])),
+							$terezka$elm_charts$Chart$Attributes$width(1),
+							$terezka$elm_charts$Chart$Attributes$color($terezka$elm_charts$Chart$Attributes$darkBlue)
+						]));
+			});
+		var lengthConversion = context.imperial ? $ianmackenzie$elm_units$Length$inMiles : $ianmackenzie$elm_units$Length$inMeters;
+		var problemMarkers = $terezka$elm_charts$Chart$withPlane(
+			function (p) {
+				return A2(
+					$elm$core$List$map,
+					function (idx) {
+						return A2(
+							markerLineAtDistance,
+							p,
+							lengthConversion(
+								A2($author$project$DomainModel$distanceFromIndex, idx, track.trackTree)));
+					},
+					context.gradientProblems);
+			});
 		var currentPointGradient = $author$project$DomainModel$gradientFromNode(
 			A2($author$project$DomainModel$leafFromIndex, track.currentPosition, track.trackTree));
 		var currentPointDistance = (context.imperial ? $ianmackenzie$elm_units$Length$inMiles : $ianmackenzie$elm_units$Length$inMeters)(
@@ -41872,6 +41903,7 @@ var $author$project$ViewProfileCharts$view = F4(
 													]))
 											]);
 									}),
+									problemMarkers,
 									A3(
 									$terezka$elm_charts$Chart$series,
 									function ($) {
@@ -41978,6 +42010,7 @@ var $author$project$ViewProfileCharts$view = F4(
 													]))
 											]);
 									}),
+									problemMarkers,
 									A3(
 									$terezka$elm_charts$Chart$series,
 									function ($) {

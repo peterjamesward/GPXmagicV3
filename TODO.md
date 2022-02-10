@@ -2,7 +2,7 @@
 # BUGS & DEBT (for an 'easy' day)
 
 BUG: Dubious steepest gradient on some routes. 
-> (May have to wait until we have that tool!)
+> Tool confirms.
 
 DEBT: Map sends more click messages each time we click. 
 > They are debounced but, still, why??
@@ -12,17 +12,13 @@ BUG: Pointers are not reset on track load.
 
 BUG: Classic bend smoother consumes all memory on certain looped routes where
 orange and purple are (possibly) co-linear.
-? Infinite arc segments?
-
-
+? Infinite arc segments? No.
 
 # WIP
 
-## Gradient problems
-
-* Markers on the Profile.
-
 ## Steep climbs
+
+Combine with abrupt gradient changes.
 
 ---
 
