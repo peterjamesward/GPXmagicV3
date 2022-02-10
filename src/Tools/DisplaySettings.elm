@@ -5,6 +5,7 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
+import Json.Decode as D
 import Tools.DisplaySettingsOptions exposing (..)
 
 
@@ -24,14 +25,19 @@ type Msg
     | SetGroundPlane Bool
 
 
+restoreSettings : D.Value -> Options -> Options
+restoreSettings json current =
+    decode json current
+
+
 update :
     Msg
     -> Options
     -> ( Options, List (ToolAction msg) )
 update msg options =
     let
-        actions =
-            [ DisplaySettingsChanged ]
+        actions newOptions =
+            [ StoreLocally "visuals" <| encode newOptions ]
     in
     case msg of
         SetCentreLine state ->
@@ -39,28 +45,28 @@ update msg options =
                 newOptions =
                     { options | centreLine = state }
             in
-            ( newOptions, actions )
+            ( newOptions, actions newOptions )
 
         SetGroundPlane state ->
             let
                 newOptions =
                     { options | groundPlane = state }
             in
-            ( newOptions, actions )
+            ( newOptions, actions newOptions )
 
         SetRoadSurface state ->
             let
                 newOptions =
                     { options | roadSurface = state }
             in
-            ( newOptions, actions )
+            ( newOptions, actions newOptions )
 
         SetCurtainStyle curtainStyle ->
             let
                 newOptions =
                     { options | curtainStyle = curtainStyle }
             in
-            ( newOptions, actions )
+            ( newOptions, actions newOptions )
 
 
 view : (Msg -> msg) -> Options -> Element msg

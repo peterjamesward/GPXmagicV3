@@ -51,6 +51,7 @@ import Tools.BezierSplines
 import Tools.CentroidAverage
 import Tools.CurveFormer
 import Tools.DeletePoints as DeletePoints
+import Tools.DisplaySettings
 import Tools.Nudge
 import ToolsController exposing (ToolEntry, encodeColour, encodeToolState)
 import TrackLoaded exposing (TrackLoaded)
@@ -247,6 +248,7 @@ init mflags origin navigationKey =
         , LocalStorage.storageGetItem "panes"
         , LocalStorage.storageGetItem "measure"
         , LocalStorage.storageGetItem "background"
+        , LocalStorage.storageGetItem "visuals"
         ]
     )
 
@@ -1271,6 +1273,21 @@ performActionsOnModel actions model =
 
                                 _ ->
                                     foldedModel
+
+                        "visuals" ->
+                            let
+                                toolOptions =
+                                    model.toolOptions
+
+                                newToolOptions =
+                                    { toolOptions
+                                        | displaySettings =
+                                            Tools.DisplaySettings.restoreSettings
+                                                value
+                                                toolOptions.displaySettings
+                                    }
+                            in
+                            { foldedModel | toolOptions = newToolOptions }
 
                         _ ->
                             foldedModel

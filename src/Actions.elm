@@ -31,7 +31,6 @@ type ToolAction msg
     | DeleteSinglePoint Int Int -- fromStart, fromEnd
     | TrackHasChanged -- Tools need to update to reflect any change in track
     | SetMarker (Maybe Int) -- position the purple marker
-    | DisplaySettingsChanged -- need to refresh the 3d views but no change in track
     | UndoLastAction
     | RedoUndoneAction
     | HeapStatusUpdate Tools.MemoryUsage.HeapStatus

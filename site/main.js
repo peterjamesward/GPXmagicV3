@@ -9818,7 +9818,8 @@ var $author$project$Main$init = F3(
 						$author$project$LocalStorage$storageGetItem('tools'),
 						$author$project$LocalStorage$storageGetItem('panes'),
 						$author$project$LocalStorage$storageGetItem('measure'),
-						$author$project$LocalStorage$storageGetItem('background')
+						$author$project$LocalStorage$storageGetItem('background'),
+						$author$project$LocalStorage$storageGetItem('visuals')
 					])));
 	});
 var $elm$json$Json$Decode$int = _Json_decodeInt;
@@ -17713,6 +17714,50 @@ var $author$project$ToolsController$restoreMeasure = F2(
 			return options;
 		}
 	});
+var $author$project$Tools$DisplaySettingsOptions$PlainCurtain = {$: 'PlainCurtain'};
+var $author$project$Tools$DisplaySettingsOptions$decodeCurtain = function (value) {
+	switch (value) {
+		case 'NoCurtain':
+			return $author$project$Tools$DisplaySettingsOptions$NoCurtain;
+		case 'PlainCurtain':
+			return $author$project$Tools$DisplaySettingsOptions$PlainCurtain;
+		default:
+			return $author$project$Tools$DisplaySettingsOptions$PastelCurtain;
+	}
+};
+var $author$project$Tools$DisplaySettingsOptions$StoredOptions = F4(
+	function (roadSurface, centreLine, groundPlane, curtainStyle) {
+		return {centreLine: centreLine, curtainStyle: curtainStyle, groundPlane: groundPlane, roadSurface: roadSurface};
+	});
+var $elm$json$Json$Decode$map4 = _Json_map4;
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $author$project$Tools$DisplaySettingsOptions$decoder = A5(
+	$elm$json$Json$Decode$map4,
+	$author$project$Tools$DisplaySettingsOptions$StoredOptions,
+	A2($elm$json$Json$Decode$field, 'surface', $elm$json$Json$Decode$bool),
+	A2($elm$json$Json$Decode$field, 'ground', $elm$json$Json$Decode$bool),
+	A2($elm$json$Json$Decode$field, 'centre', $elm$json$Json$Decode$bool),
+	A2($elm$json$Json$Decode$field, 'curtain', $elm$json$Json$Decode$string));
+var $author$project$Tools$DisplaySettingsOptions$decode = F2(
+	function (json, current) {
+		var _v0 = A2($elm$json$Json$Decode$decodeValue, $author$project$Tools$DisplaySettingsOptions$decoder, json);
+		if (_v0.$ === 'Ok') {
+			var decoded = _v0.a;
+			return {
+				centreLine: decoded.centreLine,
+				curtainStyle: $author$project$Tools$DisplaySettingsOptions$decodeCurtain(decoded.curtainStyle),
+				groundPlane: decoded.groundPlane,
+				roadSurface: decoded.roadSurface
+			};
+		} else {
+			var error = _v0.a;
+			return current;
+		}
+	});
+var $author$project$Tools$DisplaySettings$restoreSettings = F2(
+	function (json, current) {
+		return A2($author$project$Tools$DisplaySettingsOptions$decode, json, current);
+	});
 var $author$project$PaneLayoutManager$paneIdHelper = _List_fromArray(
 	[
 		_Utils_Tuple2($author$project$PaneLayoutManager$Pane1, 'pane1'),
@@ -17795,7 +17840,6 @@ var $author$project$PaneLayoutManager$StoredPane = F2(
 	function (activeView, paneId) {
 		return {activeView: activeView, paneId: paneId};
 	});
-var $elm$json$Json$Decode$string = _Json_decodeString;
 var $author$project$PaneLayoutManager$paneDecoder = A3(
 	$elm$json$Json$Decode$map2,
 	$author$project$PaneLayoutManager$StoredPane,
@@ -18391,6 +18435,16 @@ var $author$project$Main$performActionsOnModel = F2(
 									} else {
 										return foldedModel;
 									}
+								case 'visuals':
+									var toolOptions = model.toolOptions;
+									var newToolOptions = _Utils_update(
+										toolOptions,
+										{
+											displaySettings: A2($author$project$Tools$DisplaySettings$restoreSettings, value, toolOptions.displaySettings)
+										});
+									return _Utils_update(
+										foldedModel,
+										{toolOptions: newToolOptions});
 								default:
 									return foldedModel;
 							}
@@ -20720,7 +20774,6 @@ var $elm$json$Json$Decode$maybe = function (decoder) {
 };
 var $author$project$OAuth$Internal$expiresInDecoder = $elm$json$Json$Decode$maybe(
 	A2($elm$json$Json$Decode$field, 'expires_in', $elm$json$Json$Decode$int));
-var $elm$json$Json$Decode$map4 = _Json_map4;
 var $elm$json$Json$Decode$andThen = _Json_andThen;
 var $elm$json$Json$Decode$fail = _Json_fail;
 var $author$project$OAuth$Internal$decoderFromJust = function (msg) {
@@ -23033,36 +23086,81 @@ var $author$project$Tools$DeletePoints$update = F4(
 			return _Utils_Tuple2(options, _List_Nil);
 		}
 	});
-var $author$project$Actions$DisplaySettingsChanged = {$: 'DisplaySettingsChanged'};
+var $author$project$Tools$DisplaySettingsOptions$encodeCurtain = function (style) {
+	return $elm$json$Json$Encode$string(
+		function () {
+			switch (style.$) {
+				case 'NoCurtain':
+					return 'NoCurtain';
+				case 'PlainCurtain':
+					return 'PlainCurtain';
+				default:
+					return 'PastelCurtain';
+			}
+		}());
+};
+var $author$project$Tools$DisplaySettingsOptions$encode = function (options) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'surface',
+				$elm$json$Json$Encode$bool(options.roadSurface)),
+				_Utils_Tuple2(
+				'ground',
+				$elm$json$Json$Encode$bool(options.groundPlane)),
+				_Utils_Tuple2(
+				'centre',
+				$elm$json$Json$Encode$bool(options.centreLine)),
+				_Utils_Tuple2(
+				'curtain',
+				$author$project$Tools$DisplaySettingsOptions$encodeCurtain(options.curtainStyle))
+			]));
+};
 var $author$project$Tools$DisplaySettings$update = F2(
 	function (msg, options) {
-		var actions = _List_fromArray(
-			[$author$project$Actions$DisplaySettingsChanged]);
+		var actions = function (newOptions) {
+			return _List_fromArray(
+				[
+					A2(
+					$author$project$Actions$StoreLocally,
+					'visuals',
+					$author$project$Tools$DisplaySettingsOptions$encode(newOptions))
+				]);
+		};
 		switch (msg.$) {
 			case 'SetCentreLine':
 				var state = msg.a;
 				var newOptions = _Utils_update(
 					options,
 					{centreLine: state});
-				return _Utils_Tuple2(newOptions, actions);
+				return _Utils_Tuple2(
+					newOptions,
+					actions(newOptions));
 			case 'SetGroundPlane':
 				var state = msg.a;
 				var newOptions = _Utils_update(
 					options,
 					{groundPlane: state});
-				return _Utils_Tuple2(newOptions, actions);
+				return _Utils_Tuple2(
+					newOptions,
+					actions(newOptions));
 			case 'SetRoadSurface':
 				var state = msg.a;
 				var newOptions = _Utils_update(
 					options,
 					{roadSurface: state});
-				return _Utils_Tuple2(newOptions, actions);
+				return _Utils_Tuple2(
+					newOptions,
+					actions(newOptions));
 			default:
 				var curtainStyle = msg.a;
 				var newOptions = _Utils_update(
 					options,
 					{curtainStyle: curtainStyle});
-				return _Utils_Tuple2(newOptions, actions);
+				return _Utils_Tuple2(
+					newOptions,
+					actions(newOptions));
 		}
 	});
 var $author$project$Tools$GradientProblems$findSteepClimbs = F2(
@@ -33754,7 +33852,6 @@ var $author$project$Tools$DeletePoints$view = F2(
 							msgWrapper($author$project$Tools$DeletePoints$DeletePointOrPoints))
 					})));
 	});
-var $author$project$Tools$DisplaySettingsOptions$PlainCurtain = {$: 'PlainCurtain'};
 var $author$project$Tools$DisplaySettings$SetCentreLine = function (a) {
 	return {$: 'SetCentreLine', a: a};
 };
