@@ -24174,7 +24174,7 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					newModel,
 					A2($author$project$Main$performActionCommands, actions, newModel));
-			default:
+			case 'WriteGpxFile':
 				var outputFilename = function () {
 					var _v9 = model.filename;
 					if (_v9.$ === 'Just') {
@@ -24208,6 +24208,15 @@ var $author$project$Main$update = F2(
 							}),
 						$elm$core$Platform$Cmd$none);
 				}
+			default:
+				var filename = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							filename: $elm$core$Maybe$Just(filename)
+						}),
+					$elm$core$Platform$Cmd$none);
 		}
 	});
 var $author$project$Main$DismissModalMessage = {$: 'DismissModalMessage'};
@@ -44486,9 +44495,12 @@ var $author$project$ViewPureStyles$showModalMessage = F2(
 						]))
 				]));
 	});
+var $author$project$Main$FilenameChange = function (a) {
+	return {$: 'FilenameChange', a: a};
+};
 var $author$project$Main$GpxRequested = {$: 'GpxRequested'};
-var $author$project$Main$NoOp = {$: 'NoOp'};
 var $author$project$Main$WriteGpxFile = {$: 'WriteGpxFile'};
+var $author$project$Main$NoOp = {$: 'NoOp'};
 var $author$project$Main$ToggleToolPopup = {$: 'ToggleToolPopup'};
 var $author$project$Main$BackgroundColour = function (a) {
 	return {$: 'BackgroundColour', a: a};
@@ -45654,7 +45666,7 @@ var $author$project$Main$topLoadingBar = function (model) {
 							]),
 						{
 							label: $mdgriffith$elm_ui$Element$Input$labelHidden('filename'),
-							onChange: $elm$core$Basics$always($author$project$Main$NoOp),
+							onChange: $author$project$Main$FilenameChange,
 							placeholder: $elm$core$Maybe$Nothing,
 							text: filename
 						});

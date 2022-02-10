@@ -85,6 +85,7 @@ type Msg
     | BackgroundColour Element.Color
     | RestoreDefaultToolLayout
     | WriteGpxFile
+    | FilenameChange String
     | NoOp
 
 
@@ -620,6 +621,11 @@ Please check the file contains GPX data.""" }
                     , Cmd.none
                     )
 
+        FilenameChange filename ->
+            ( { model | filename = Just filename }
+            , Cmd.none
+            )
+
 
 
 --task to write the data
@@ -960,7 +966,7 @@ topLoadingBar model =
             Just filename ->
                 Input.text [ padding 5 ]
                     { text = filename
-                    , onChange = always NoOp
+                    , onChange = FilenameChange
                     , placeholder = Nothing
                     , label = Input.labelHidden "filename"
                     }
