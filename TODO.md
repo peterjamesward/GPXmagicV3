@@ -16,6 +16,8 @@ orange and purple are (possibly) co-linear.
 
 # WIP
 
+BUG: Bezier spline whole track does not undo properly.
+
 ---
 
 # BACKLOG, roughly in order ...
@@ -24,20 +26,22 @@ orange and purple are (possibly) co-linear.
 
 1. Limit gradients
 2. Visual options
-3. Intersections
-4. Tip Jar / Buy me a coffee.
-5. Map Satellite style choice
-6. Memory usage (incl limiting actions such as dumping Undo stack).
-7. SVG import
-8. Move & Stretch
-9. Fly-through
-10. Graph Theory (renamed)
-11. Use Strava segment data
-12. Loops (includes Out and Back) (+ impact on others, such as Bezier).
+3. Display file and track names and allow file name edit
+4. Intersections
+5. Tip Jar / Buy me a coffee.
+6. Map Satellite style choice
+7. Memory usage (incl limiting actions such as dumping Undo stack).
+8. SVG import
+9. Move & Stretch
+10. Fly-through
+11. Graph Theory (renamed)
+12. Use Strava segment data
+13. Loops (includes Out and Back) (+ impact on others, such as Bezier).
+
 New stuff:
-13. Samir's bend detector (amount of angular change within X linear metres).
-14. Clothoids (promoted because may be similar structurally to bezier & centroid)
-15. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
+1. Samir's bend detector (amount of angular change within X linear metres).
+2. Clothoids (promoted because may be similar structurally to bezier & centroid)
+3. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
 
 ## Error messages
 

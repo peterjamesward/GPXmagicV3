@@ -5,9 +5,11 @@ import Dict exposing (Dict)
 import DomainModel exposing (skipCount)
 import Element as E exposing (..)
 import Element.Background as Background
+import Element.Border as Border
 import Element.Input as Input exposing (..)
 import FeatherIcons
 import FlatColors.ChinesePalette
+import FlatColors.FlatUIPalette
 import Html.Attributes exposing (style)
 import Html.Events.Extra.Mouse as Mouse
 import Json.Decode as D
@@ -132,6 +134,8 @@ paneLayoutMenu msgWrapper options =
     Input.button
         [ padding 5
         , Background.color FlatColors.ChinesePalette.antiFlashWhite
+        , Border.color FlatColors.FlatUIPalette.peterRiver
+        , Border.width 2
         , inFront <| showOptionsMenu msgWrapper options
         ]
         { onPress = Just <| msgWrapper TogglePopup

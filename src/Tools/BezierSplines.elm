@@ -2,13 +2,12 @@ module Tools.BezierSplines exposing (..)
 
 import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
 import BezierSplines
-import BoundingBox3d
-import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, getDualCoords, leafFromIndex, skipCount, startPoint, traverseTreeBetweenLimitsToDepth)
+import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
-import Tools.BezierOptions as BezierOptions exposing (BezierStyle(..), Options)
+import Tools.BezierOptions as BezierOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (fullDepthRenderingBoxSize, showDecimal2)
 import ViewPureStyles exposing (commonShortHorizontalSliderStyles, neatToolsBorder, prettyButtonStyles)
@@ -19,6 +18,7 @@ defaultOptions =
     { bezierTension = 0.5
     , bezierTolerance = 5.0
     , bezierStyle = BezierOptions.Approximated
+    , extent = ExtentIsRange
     }
 
 
@@ -28,13 +28,19 @@ type Msg
     | BezierSplines
     | BezierApplyWithOptions
     | SetBezierStyle BezierStyle
+    | SetExtent ExtentOption
 
 
 computeNewPoints : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
 computeNewPoints options track =
     let
         ( fromStart, fromEnd ) =
-            TrackLoaded.getRangeFromMarkers track
+            case options.extent of
+                ExtentIsRange ->
+                    TrackLoaded.getRangeFromMarkers track
+
+                ExtentIsTrack ->
+                    ( 0, 0 )
 
         splineFunction =
             case options.bezierStyle of
@@ -69,7 +75,12 @@ applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSour
 applyUsingOptions options track =
     let
         ( fromStart, fromEnd ) =
-            TrackLoaded.getRangeFromMarkers track
+            case options.extent of
+                ExtentIsRange ->
+                    TrackLoaded.getRangeFromMarkers track
+
+                ExtentIsTrack ->
+                    ( 0, 0 )
 
         newTree =
             DomainModel.replaceRange
@@ -122,36 +133,30 @@ update :
     -> Maybe (TrackLoaded msg)
     -> ( Options, List (ToolAction msg) )
 update msg options previewColour hasTrack =
+    let
+        actions newOptions track =
+            [ ShowPreview
+                { tag = "bezier"
+                , shape = PreviewCircle
+                , colour = previewColour
+                , points = computeNewPoints newOptions track
+                }
+            ]
+    in
     case ( hasTrack, msg ) of
         ( Just track, SetBezierTension tension ) ->
             let
                 newOptions =
                     { options | bezierTension = tension }
             in
-            ( newOptions
-            , [ ShowPreview
-                    { tag = "bezier"
-                    , shape = PreviewCircle
-                    , colour = previewColour
-                    , points = computeNewPoints newOptions track
-                    }
-              ]
-            )
+            ( newOptions, actions newOptions track )
 
         ( Just track, SetBezierTolerance tolerance ) ->
             let
                 newOptions =
                     { options | bezierTolerance = tolerance }
             in
-            ( newOptions
-            , [ ShowPreview
-                    { tag = "bezier"
-                    , shape = PreviewCircle
-                    , colour = previewColour
-                    , points = computeNewPoints newOptions track
-                    }
-              ]
-            )
+            ( newOptions, actions newOptions track )
 
         ( Just track, BezierApplyWithOptions ) ->
             ( options
@@ -165,15 +170,14 @@ update msg options previewColour hasTrack =
                 newOptions =
                     { options | bezierStyle = style }
             in
-            ( newOptions
-            , [ ShowPreview
-                    { tag = "bezier"
-                    , shape = PreviewCircle
-                    , colour = previewColour
-                    , points = computeNewPoints newOptions track
-                    }
-              ]
-            )
+            ( newOptions, actions newOptions track )
+
+        ( Just track, SetExtent extent ) ->
+            let
+                newOptions =
+                    { options | extent = extent }
+            in
+            ( newOptions, actions newOptions track )
 
         _ ->
             ( options, [] )
@@ -226,6 +230,20 @@ view wrap options =
                     ]
                 }
 
+        extent =
+            Input.radioRow
+                [ padding 10
+                , spacing 5
+                ]
+                { onChange = wrap << SetExtent
+                , selected = Just options.extent
+                , label = Input.labelHidden "Style"
+                , options =
+                    [ Input.option ExtentIsRange (text "Selected range")
+                    , Input.option ExtentIsTrack (text "Whole track")
+                    ]
+                }
+
         actionButton =
             el [ centerX, width fill, spacing 5 ] <|
                 button (width fill :: neatToolsBorder)
@@ -234,13 +252,14 @@ view wrap options =
                     }
     in
     column
-        [ spacing 10
-        , padding 10
+        [ spacing 5
+        , padding 5
         , centerX
         , width fill
         , Background.color FlatColors.ChinesePalette.antiFlashWhite
         ]
         [ el [ centerX ] sliders
         , el [ centerX ] modeChoice
+        , el [ centerX ] extent
         , el [ centerX ] actionButton
         ]

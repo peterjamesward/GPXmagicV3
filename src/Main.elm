@@ -895,6 +895,8 @@ topLoadingBar model =
             button
                 [ padding 5
                 , Background.color FlatColors.ChinesePalette.antiFlashWhite
+                , Border.color FlatColors.FlatUIPalette.peterRiver
+                , Border.width 2
                 ]
                 { onPress = Just GpxRequested
                 , label = text "Load GPX file"
@@ -904,6 +906,8 @@ topLoadingBar model =
             button
                 [ padding 5
                 , Background.color FlatColors.AussiePalette.juneBud
+                , Border.color FlatColors.FlatUIPalette.peterRiver
+                , Border.width 2
                 ]
                 { onPress = Just WriteGpxFile
                 , label = text "Save GPX file"
@@ -945,7 +949,7 @@ globalOptions model =
         ]
     <|
         Input.button
-            [ alignRight, Font.color FlatColors.FlatUIPalette.sunFlower ]
+            [ alignRight, Font.color FlatColors.FlatUIPalette.carrot ]
             { onPress = Just <| ToggleToolPopup
             , label = useIcon FeatherIcons.settings
             }
