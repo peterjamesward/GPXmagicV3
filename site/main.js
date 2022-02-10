@@ -13222,9 +13222,10 @@ var $author$project$Tools$BezierSplines$applyUsingOptions = F2(
 				A2($author$project$Tools$BezierSplines$computeNewPoints, options, track)),
 			track.trackTree);
 		var oldPoints = A3($author$project$DomainModel$extractPointsInRange, fromStart, fromEnd, track.trackTree);
-		return _Utils_Tuple2(
+		return _Utils_Tuple3(
 			newTree,
-			A2($elm$core$List$map, $elm$core$Tuple$second, oldPoints));
+			A2($elm$core$List$map, $elm$core$Tuple$second, oldPoints),
+			_Utils_Tuple2(fromStart, fromEnd));
 	});
 var $author$project$Tools$CentroidAverage$FoldState = F2(
 	function (roadMinusOne, newPoints) {
@@ -17418,7 +17419,9 @@ var $author$project$SceneBuilder3D$render3dView = F2(
 				var roadAsSegment = A2($ianmackenzie$elm_geometry$LineSegment3d$from, road.startPoint, road.endPoint);
 				var gradient = road.gradientAtStart;
 				var curtainHem = A2($ianmackenzie$elm_geometry$LineSegment3d$projectOnto, floorPlane, roadAsSegment);
-				var colourFn = _Utils_eq(settings.curtainStyle, $author$project$Tools$DisplaySettingsOptions$PastelCurtain) ? $author$project$SceneBuilder3D$gradientColourPastel : $elm$core$Basics$always($avh4$elm_color$Color$darkGreen);
+				var colourFn = _Utils_eq(settings.curtainStyle, $author$project$Tools$DisplaySettingsOptions$PastelCurtain) ? $author$project$SceneBuilder3D$gradientColourPastel : $elm$core$Basics$always(
+					$avh4$elm_color$Color$fromRgba(
+						$mdgriffith$elm_ui$Element$toRgb($smucode$elm_flat_colors$FlatColors$FlatUIPalette$greenSea)));
 				return _List_fromArray(
 					[
 						A5(
@@ -18224,7 +18227,7 @@ var $author$project$Main$performActionsOnModel = F2(
 								var _v7 = A2($author$project$Tools$BezierSplines$applyUsingOptions, options, track);
 								var newTree = _v7.a;
 								var oldPoints = _v7.b;
-								var _v8 = $author$project$TrackLoaded$getRangeFromMarkers(track);
+								var _v8 = _v7.c;
 								var fromStart = _v8.a;
 								var fromEnd = _v8.b;
 								var newTrack = A2(
@@ -32714,11 +32717,11 @@ var $author$project$Tools$BezierSplines$view = F2(
 						A2(
 						$mdgriffith$elm_ui$Element$Input$option,
 						$author$project$Tools$BezierOptions$ExtentIsRange,
-						$mdgriffith$elm_ui$Element$text('Selected range')),
+						$mdgriffith$elm_ui$Element$text('Selected range\n(preview)')),
 						A2(
 						$mdgriffith$elm_ui$Element$Input$option,
 						$author$project$Tools$BezierOptions$ExtentIsTrack,
-						$mdgriffith$elm_ui$Element$text('Whole track'))
+						$mdgriffith$elm_ui$Element$text('Whole track\n(no preview)'))
 					]),
 				selected: $elm$core$Maybe$Just(options.extent)
 			});
@@ -33085,11 +33088,11 @@ var $author$project$Tools$CentroidAverage$view = F2(
 						A2(
 						$mdgriffith$elm_ui$Element$Input$option,
 						$author$project$Tools$CentroidAverageOptions$ExtentRange,
-						$mdgriffith$elm_ui$Element$text('Selected range')),
+						$mdgriffith$elm_ui$Element$text('Selected range\n(preview)')),
 						A2(
 						$mdgriffith$elm_ui$Element$Input$option,
 						$author$project$Tools$CentroidAverageOptions$ExtentTrack,
-						$mdgriffith$elm_ui$Element$text('Whole track'))
+						$mdgriffith$elm_ui$Element$text('Whole track\n(no preview)'))
 					]),
 				selected: $elm$core$Maybe$Just(options.extent)
 			});

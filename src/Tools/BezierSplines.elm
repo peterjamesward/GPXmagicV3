@@ -71,7 +71,10 @@ computeNewPoints options track =
     previewPoints
 
 
-applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyUsingOptions :
+    Options
+    -> TrackLoaded msg
+    -> ( Maybe PeteTree, List GPXSource, ( Int, Int ) )
 applyUsingOptions options track =
     let
         ( fromStart, fromEnd ) =
@@ -99,6 +102,7 @@ applyUsingOptions options track =
     in
     ( newTree
     , oldPoints |> List.map Tuple.second
+    , ( fromStart, fromEnd )
     )
 
 
@@ -237,8 +241,8 @@ view wrap options =
                 , selected = Just options.extent
                 , label = Input.labelHidden "Style"
                 , options =
-                    [ Input.option ExtentIsRange (text "Selected range")
-                    , Input.option ExtentIsTrack (text "Whole track")
+                    [ Input.option ExtentIsRange (text "Selected range\n(preview)")
+                    , Input.option ExtentIsTrack (text "Whole track\n(no preview)")
                     ]
                 }
 

@@ -10,12 +10,17 @@ BUG: Pointers are not reset on track load.
 BUG: Classic bend smoother consumes all memory on certain looped routes where
      orange and purple are (possibly) co-linear.
 
-BUG: Bezier spline whole track does not undo properly, 
-     but only at low tolerances. Seems to retain the spline.
-
 # WIP
 
-## Display file and track names and allow file name edit
+> Now is too late but these bugs must be fixed first.
+
+**BUG**: Bezier whole track puts Orange at 0.
+
+---
+
+## Interesting idea: use keyboard as tools shortcut.
+e,g type B..E.. and little menu pops up to autocomplete tool name and opens tool.
+or brings tools to attention somehow.
 
 ---
 
@@ -23,25 +28,28 @@ BUG: Bezier spline whole track does not undo properly,
 
 ## Tools
 
-1. SVG import
-2. Use local Bezier approximation to spot-fix bend and gradient issues (?)
-3. Memory usage (incl limiting actions such as dumping Undo stack).
-4. Out and Back without graphs!
-5. Limit gradients
-6. Map Satellite style choice
-7. Intersections
-8. Tip Jar / Buy me a coffee.
-9. Move & Stretch
-10. Fly-through
-11. Graph Theory (renamed)
-12. Use Strava segment data
-13. Loops (inc. impact on others, such as Bezier).
-14. Terrain.
+1. Display file and track names and allow file name edit
+2. SVG import
+3. Use local Bezier approximation to spot-fix bend and gradient issues (?)
+4. Memory usage (incl limiting actions such as dumping Undo stack).
+5. Out and Back without graphs, inc. variable offset.
+6. Limit gradients
+7. Map Satellite style choice
+8. Intersections
+9. Simplify.
+10. Tip Jar / Buy me a coffee.
+11. Move & Stretch
+12. Fly-through
+13. Graph Theory (renamed)
+14. Use Strava segment data
+15. Loops (inc. impact on others, such as Bezier).
+16. Lift and Shift
+17. Split and Join
+18. Terrain.
 
 New stuff:
-1. Samir's bend detector (amount of angular change within X linear metres).
-2. Clothoids (promoted because may be similar structurally to bezier & centroid)
-3. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
+1. Samir's bend detector (amount of angular change within X linear metres). (Option on Bend Problems)
+2. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
 
 ## Error messages
 

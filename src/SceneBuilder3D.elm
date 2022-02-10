@@ -102,7 +102,10 @@ render3dView settings track =
                             gradientColourPastel
 
                         else
-                            always Color.darkGreen
+                            always <|
+                                Color.fromRgba <|
+                                    Element.toRgb
+                                        FlatColors.FlatUIPalette.greenSea
 
                     gradient =
                         road.gradientAtStart

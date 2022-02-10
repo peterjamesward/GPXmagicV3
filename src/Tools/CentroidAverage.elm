@@ -225,8 +225,8 @@ view wrap options =
                 , selected = Just options.extent
                 , label = Input.labelHidden "Style"
                 , options =
-                    [ Input.option ExtentRange (text "Selected range")
-                    , Input.option ExtentTrack (text "Whole track")
+                    [ Input.option ExtentRange (text "Selected range\n(preview)")
+                    , Input.option ExtentTrack (text "Whole track\n(no preview)")
                     ]
                 }
     in

@@ -1087,11 +1087,8 @@ performActionsOnModel actions model =
 
                 ( BezierApplyWithOptions options, Just track ) ->
                     let
-                        ( newTree, oldPoints ) =
+                        ( newTree, oldPoints, (fromStart, fromEnd) ) =
                             Tools.BezierSplines.applyUsingOptions options track
-
-                        ( fromStart, fromEnd ) =
-                            TrackLoaded.getRangeFromMarkers track
 
                         newTrack =
                             track
