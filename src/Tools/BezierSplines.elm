@@ -112,18 +112,26 @@ toolStateChange opened colour options track =
     case ( opened, track ) of
         ( True, Just theTrack ) ->
             ( options
-            , [ ShowPreview
-                    { tag = "bezier"
-                    , shape = PreviewCircle
-                    , colour = colour
-                    , points = computeNewPoints options theTrack
-                    }
-              ]
+            , actions options colour theTrack
             )
 
         _ ->
             -- Hide preview
             ( options, [ HidePreview "bezier" ] )
+
+
+actions newOptions previewColour track =
+    if newOptions.extent == ExtentIsRange then
+        [ ShowPreview
+            { tag = "bezier"
+            , shape = PreviewCircle
+            , colour = previewColour
+            , points = computeNewPoints newOptions track
+            }
+        ]
+
+    else
+        [ HidePreview "bezier" ]
 
 
 update :
@@ -133,30 +141,20 @@ update :
     -> Maybe (TrackLoaded msg)
     -> ( Options, List (ToolAction msg) )
 update msg options previewColour hasTrack =
-    let
-        actions newOptions track =
-            [ ShowPreview
-                { tag = "bezier"
-                , shape = PreviewCircle
-                , colour = previewColour
-                , points = computeNewPoints newOptions track
-                }
-            ]
-    in
     case ( hasTrack, msg ) of
         ( Just track, SetBezierTension tension ) ->
             let
                 newOptions =
                     { options | bezierTension = tension }
             in
-            ( newOptions, actions newOptions track )
+            ( newOptions, actions newOptions previewColour track )
 
         ( Just track, SetBezierTolerance tolerance ) ->
             let
                 newOptions =
                     { options | bezierTolerance = tolerance }
             in
-            ( newOptions, actions newOptions track )
+            ( newOptions, actions newOptions previewColour track )
 
         ( Just track, BezierApplyWithOptions ) ->
             ( options
@@ -170,14 +168,14 @@ update msg options previewColour hasTrack =
                 newOptions =
                     { options | bezierStyle = style }
             in
-            ( newOptions, actions newOptions track )
+            ( newOptions, actions newOptions previewColour track )
 
         ( Just track, SetExtent extent ) ->
             let
                 newOptions =
                     { options | extent = extent }
             in
-            ( newOptions, actions newOptions track )
+            ( newOptions, actions newOptions previewColour track )
 
         _ ->
             ( options, [] )

@@ -1,9 +1,6 @@
 
 # BUGS & DEBT (for an 'easy' day)
 
-BUG: Dubious steepest gradient on some routes. 
-> Tool confirms.
-
 DEBT: Map sends more click messages each time we click. 
 > They are debounced but, still, why??
 
@@ -27,7 +24,7 @@ BUG: Bezier spline whole track does not undo properly,
 ## Tools
 
 1. SVG import
-2. Use local Bezier approximation to spot fix bend and gradient issues (?)
+2. Use local Bezier approximation to spot-fix bend and gradient issues (?)
 3. Memory usage (incl limiting actions such as dumping Undo stack).
 4. Out and Back without graphs!
 5. Limit gradients

@@ -15089,6 +15089,22 @@ var $author$project$Tools$BendSmoother$toolStateChange = F4(
 					]));
 		}
 	});
+var $author$project$Tools$BezierSplines$actions = F3(
+	function (newOptions, previewColour, track) {
+		return _Utils_eq(newOptions.extent, $author$project$Tools$BezierOptions$ExtentIsRange) ? _List_fromArray(
+			[
+				$author$project$Actions$ShowPreview(
+				{
+					colour: previewColour,
+					points: A2($author$project$Tools$BezierSplines$computeNewPoints, newOptions, track),
+					shape: $author$project$Actions$PreviewCircle,
+					tag: 'bezier'
+				})
+			]) : _List_fromArray(
+			[
+				$author$project$Actions$HidePreview('bezier')
+			]);
+	});
 var $author$project$Tools$BezierSplines$toolStateChange = F4(
 	function (opened, colour, options, track) {
 		var _v0 = _Utils_Tuple2(opened, track);
@@ -15096,16 +15112,7 @@ var $author$project$Tools$BezierSplines$toolStateChange = F4(
 			var theTrack = _v0.b.a;
 			return _Utils_Tuple2(
 				options,
-				_List_fromArray(
-					[
-						$author$project$Actions$ShowPreview(
-						{
-							colour: colour,
-							points: A2($author$project$Tools$BezierSplines$computeNewPoints, options, theTrack),
-							shape: $author$project$Actions$PreviewCircle,
-							tag: 'bezier'
-						})
-					]));
+				A3($author$project$Tools$BezierSplines$actions, options, colour, theTrack));
 		} else {
 			return _Utils_Tuple2(
 				options,
@@ -15115,6 +15122,22 @@ var $author$project$Tools$BezierSplines$toolStateChange = F4(
 					]));
 		}
 	});
+var $author$project$Tools$CentroidAverage$actions = F3(
+	function (newOptions, previewColour, track) {
+		return _Utils_eq(newOptions.extent, $author$project$Tools$CentroidAverageOptions$ExtentRange) ? _List_fromArray(
+			[
+				$author$project$Actions$ShowPreview(
+				{
+					colour: previewColour,
+					points: A2($author$project$Tools$CentroidAverage$computeNewPoints, newOptions, track),
+					shape: $author$project$Actions$PreviewCircle,
+					tag: 'centroid'
+				})
+			]) : _List_fromArray(
+			[
+				$author$project$Actions$HidePreview('centroid')
+			]);
+	});
 var $author$project$Tools$CentroidAverage$toolStateChange = F4(
 	function (opened, colour, options, track) {
 		var _v0 = _Utils_Tuple2(opened, track);
@@ -15122,16 +15145,7 @@ var $author$project$Tools$CentroidAverage$toolStateChange = F4(
 			var theTrack = _v0.b.a;
 			return _Utils_Tuple2(
 				options,
-				_List_fromArray(
-					[
-						$author$project$Actions$ShowPreview(
-						{
-							colour: colour,
-							points: A2($author$project$Tools$CentroidAverage$computeNewPoints, options, theTrack),
-							shape: $author$project$Actions$PreviewCircle,
-							tag: 'centroid'
-						})
-					]));
+				A3($author$project$Tools$CentroidAverage$actions, options, colour, theTrack));
 		} else {
 			return _Utils_Tuple2(
 				options,
@@ -21484,19 +21498,6 @@ var $author$project$Actions$BezierApplyWithOptions = function (a) {
 };
 var $author$project$Tools$BezierSplines$update = F4(
 	function (msg, options, previewColour, hasTrack) {
-		var actions = F2(
-			function (newOptions, track) {
-				return _List_fromArray(
-					[
-						$author$project$Actions$ShowPreview(
-						{
-							colour: previewColour,
-							points: A2($author$project$Tools$BezierSplines$computeNewPoints, newOptions, track),
-							shape: $author$project$Actions$PreviewCircle,
-							tag: 'bezier'
-						})
-					]);
-			});
 		var _v0 = _Utils_Tuple2(hasTrack, msg);
 		_v0$5:
 		while (true) {
@@ -21510,7 +21511,7 @@ var $author$project$Tools$BezierSplines$update = F4(
 							{bezierTension: tension});
 						return _Utils_Tuple2(
 							newOptions,
-							A2(actions, newOptions, track));
+							A3($author$project$Tools$BezierSplines$actions, newOptions, previewColour, track));
 					case 'SetBezierTolerance':
 						var track = _v0.a.a;
 						var tolerance = _v0.b.a;
@@ -21519,7 +21520,7 @@ var $author$project$Tools$BezierSplines$update = F4(
 							{bezierTolerance: tolerance});
 						return _Utils_Tuple2(
 							newOptions,
-							A2(actions, newOptions, track));
+							A3($author$project$Tools$BezierSplines$actions, newOptions, previewColour, track));
 					case 'BezierApplyWithOptions':
 						var track = _v0.a.a;
 						var _v1 = _v0.b;
@@ -21538,7 +21539,7 @@ var $author$project$Tools$BezierSplines$update = F4(
 							{bezierStyle: style});
 						return _Utils_Tuple2(
 							newOptions,
-							A2(actions, newOptions, track));
+							A3($author$project$Tools$BezierSplines$actions, newOptions, previewColour, track));
 					case 'SetExtent':
 						var track = _v0.a.a;
 						var extent = _v0.b.a;
@@ -21547,7 +21548,7 @@ var $author$project$Tools$BezierSplines$update = F4(
 							{extent: extent});
 						return _Utils_Tuple2(
 							newOptions,
-							A2(actions, newOptions, track));
+							A3($author$project$Tools$BezierSplines$actions, newOptions, previewColour, track));
 					default:
 						break _v0$5;
 				}
@@ -21562,19 +21563,6 @@ var $author$project$Actions$CentroidAverageApplyWithOptions = function (a) {
 };
 var $author$project$Tools$CentroidAverage$update = F4(
 	function (msg, options, previewColour, hasTrack) {
-		var actions = F2(
-			function (newOptions, track) {
-				return _List_fromArray(
-					[
-						$author$project$Actions$ShowPreview(
-						{
-							colour: previewColour,
-							points: A2($author$project$Tools$CentroidAverage$computeNewPoints, newOptions, track),
-							shape: $author$project$Actions$PreviewCircle,
-							tag: 'centroid'
-						})
-					]);
-			});
 		var _v0 = _Utils_Tuple2(hasTrack, msg);
 		if (_v0.a.$ === 'Just') {
 			switch (_v0.b.$) {
@@ -21586,7 +21574,7 @@ var $author$project$Tools$CentroidAverage$update = F4(
 						{weighting: weight});
 					return _Utils_Tuple2(
 						newOptions,
-						A2(actions, newOptions, track));
+						A3($author$project$Tools$CentroidAverage$actions, newOptions, previewColour, track));
 				case 'ToggleAltitude':
 					var track = _v0.a.a;
 					var newOptions = _Utils_update(
@@ -21594,7 +21582,7 @@ var $author$project$Tools$CentroidAverage$update = F4(
 						{applyToAltitude: !options.applyToAltitude});
 					return _Utils_Tuple2(
 						newOptions,
-						A2(actions, newOptions, track));
+						A3($author$project$Tools$CentroidAverage$actions, newOptions, previewColour, track));
 				case 'TogglePosition':
 					var track = _v0.a.a;
 					var newOptions = _Utils_update(
@@ -21602,7 +21590,7 @@ var $author$project$Tools$CentroidAverage$update = F4(
 						{applyToPosition: !options.applyToPosition});
 					return _Utils_Tuple2(
 						newOptions,
-						A2(actions, newOptions, track));
+						A3($author$project$Tools$CentroidAverage$actions, newOptions, previewColour, track));
 				case 'SetExtent':
 					var track = _v0.a.a;
 					var extent = _v0.b.a;
@@ -21611,7 +21599,7 @@ var $author$project$Tools$CentroidAverage$update = F4(
 						{extent: extent});
 					return _Utils_Tuple2(
 						newOptions,
-						A2(actions, newOptions, track));
+						A3($author$project$Tools$CentroidAverage$actions, newOptions, previewColour, track));
 				default:
 					var track = _v0.a.a;
 					var _v1 = _v0.b;

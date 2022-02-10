@@ -99,19 +99,25 @@ toolStateChange :
 toolStateChange opened colour options track =
     case ( opened, track ) of
         ( True, Just theTrack ) ->
-            ( options
-            , [ ShowPreview
-                    { tag = "centroid"
-                    , shape = PreviewCircle
-                    , colour = colour
-                    , points = computeNewPoints options theTrack
-                    }
-              ]
-            )
+            ( options, actions options colour theTrack )
 
         _ ->
             -- Hide preview
             ( options, [ HidePreview "centroid" ] )
+
+
+actions newOptions previewColour track =
+    if newOptions.extent == ExtentRange then
+        [ ShowPreview
+            { tag = "centroid"
+            , shape = PreviewCircle
+            , colour = previewColour
+            , points = computeNewPoints newOptions track
+            }
+        ]
+
+    else
+        [ HidePreview "centroid" ]
 
 
 update :
@@ -121,44 +127,34 @@ update :
     -> Maybe (TrackLoaded msg)
     -> ( Options, List (ToolAction msg) )
 update msg options previewColour hasTrack =
-    let
-        actions newOptions track =
-            [ ShowPreview
-                { tag = "centroid"
-                , shape = PreviewCircle
-                , colour = previewColour
-                , points = computeNewPoints newOptions track
-                }
-            ]
-    in
     case ( hasTrack, msg ) of
         ( Just track, SetWeighting weight ) ->
             let
                 newOptions =
                     { options | weighting = weight }
             in
-            ( newOptions, actions newOptions track )
+            ( newOptions, actions newOptions previewColour track )
 
         ( Just track, ToggleAltitude _ ) ->
             let
                 newOptions =
                     { options | applyToAltitude = not options.applyToAltitude }
             in
-            ( newOptions, actions newOptions track )
+            ( newOptions, actions newOptions previewColour track )
 
         ( Just track, TogglePosition _ ) ->
             let
                 newOptions =
                     { options | applyToPosition = not options.applyToPosition }
             in
-            ( newOptions, actions newOptions track )
+            ( newOptions, actions newOptions previewColour track )
 
         ( Just track, SetExtent extent ) ->
             let
                 newOptions =
                     { options | extent = extent }
             in
-            ( newOptions, actions newOptions track )
+            ( newOptions, actions newOptions previewColour track )
 
         ( Just track, ApplyWithOptions ) ->
             ( options
