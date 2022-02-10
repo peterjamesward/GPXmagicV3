@@ -6,7 +6,7 @@ import Axis3d
 import Camera3d exposing (Camera3d)
 import Color
 import Direction2d exposing (Direction2d)
-import Direction3d exposing (positiveZ)
+import Direction3d exposing (negativeZ, positiveZ)
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
@@ -147,13 +147,15 @@ view context contentArea track scene msgWrapper =
         ]
     <|
         html <|
-            Scene3d.cloudy
+            Scene3d.sunny
                 { camera = deriveCamera track.trackTree context track.currentPosition
                 , dimensions = contentArea
                 , background = backgroundColor Color.lightBlue
                 , clipDepth = Length.meters 1
                 , entities = scene
                 , upDirection = positiveZ
+                , sunlightDirection = negativeZ
+                , shadows = False
                 }
 
 

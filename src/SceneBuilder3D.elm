@@ -6,6 +6,7 @@ module SceneBuilder3D exposing (..)
 import Actions exposing (PreviewData, PreviewShape(..))
 import Angle exposing (Angle)
 import Axis3d
+import BoundingBox2d
 import BoundingBox3d exposing (BoundingBox3d)
 import Color exposing (Color, black, darkGreen, green, lightOrange)
 import ColourPalette exposing (gradientHue, gradientHue2)
@@ -14,6 +15,7 @@ import Direction2d
 import DomainModel exposing (..)
 import Element
 import FlatColors.AussiePalette
+import FlatColors.FlatUIPalette
 import Json.Encode as E
 import Length exposing (Meters)
 import LineSegment3d
@@ -24,9 +26,9 @@ import Point3d
 import Quantity
 import Scene3d exposing (Entity)
 import Scene3d.Material as Material
-import Tools.DisplaySettingsOptions
+import Tools.DisplaySettingsOptions exposing (CurtainStyle(..))
 import TrackLoaded exposing (TrackLoaded)
-import UtilsForViews exposing (fullDepthRenderingBoxSize)
+import UtilsForViews exposing (flatBox, fullDepthRenderingBoxSize)
 import Vector3d
 
 
@@ -39,6 +41,9 @@ render3dView : Tools.DisplaySettingsOptions.Options -> TrackLoaded msg -> List (
 render3dView settings track =
     --TODO: Use new traversal to provide better depth function.
     let
+        roadWidth =
+            Length.meters 4.0
+
         nominalRenderDepth =
             clamp 1 10 <|
                 round <|
@@ -47,6 +52,9 @@ render3dView settings track =
         floorPlane =
             Plane3d.xy |> Plane3d.offsetBy (BoundingBox3d.minZ <| boundingBox track.trackTree)
 
+        nearbySpace =
+            BoundingBox3d.expandBy Length.kilometer <| boundingBox track.trackTree
+
         fullRenderingZone =
             BoundingBox3d.withDimensions
                 ( fullDepthRenderingBoxSize
@@ -54,6 +62,25 @@ render3dView settings track =
                 , fullDepthRenderingBoxSize
                 )
                 (startPoint <| leafFromIndex track.currentPosition track.trackTree)
+
+        groundPlane =
+            let
+                { minX, maxX, minY, maxY, minZ, maxZ } =
+                    BoundingBox3d.extrema nearbySpace
+
+                modelMinZ =
+                    BoundingBox3d.minZ <| boundingBox track.trackTree
+            in
+            if settings.groundPlane then
+                [ Scene3d.quad (Material.color Color.darkGreen)
+                    (Point3d.xyz minX minY modelMinZ)
+                    (Point3d.xyz minX maxY modelMinZ)
+                    (Point3d.xyz maxX maxY modelMinZ)
+                    (Point3d.xyz maxX minY modelMinZ)
+                ]
+
+            else
+                []
 
         depthFn : RoadSection -> Maybe Int
         depthFn road =
@@ -65,32 +92,58 @@ render3dView settings track =
 
         gradientCurtain : RoadSection -> List (Entity LocalCoords)
         gradientCurtain road =
-            let
-                gradient =
-                    road.gradientAtStart
+            if settings.curtainStyle == NoCurtain then
+                []
 
-                roadAsSegment =
-                    LineSegment3d.from road.startPoint road.endPoint
+            else
+                let
+                    colourFn =
+                        if settings.curtainStyle == PastelCurtain then
+                            gradientColourPastel
 
-                curtainHem =
-                    LineSegment3d.projectOnto floorPlane roadAsSegment
-            in
-            [ Scene3d.quad (Material.color <| gradientColourPastel gradient)
-                (LineSegment3d.startPoint roadAsSegment)
-                (LineSegment3d.endPoint roadAsSegment)
-                (LineSegment3d.endPoint curtainHem)
-                (LineSegment3d.startPoint curtainHem)
-            ]
+                        else
+                            always Color.darkGreen
+
+                    gradient =
+                        road.gradientAtStart
+
+                    roadAsSegment =
+                        LineSegment3d.from road.startPoint road.endPoint
+
+                    curtainHem =
+                        LineSegment3d.projectOnto floorPlane roadAsSegment
+                in
+                [ Scene3d.quad (Material.color <| colourFn gradient)
+                    (LineSegment3d.startPoint roadAsSegment)
+                    (LineSegment3d.endPoint roadAsSegment)
+                    (LineSegment3d.endPoint curtainHem)
+                    (LineSegment3d.startPoint curtainHem)
+                ]
 
         makeVisibleSegment : RoadSection -> List (Entity LocalCoords)
         makeVisibleSegment road =
-            [ Scene3d.point { radius = Pixels.pixels 1 }
-                (Material.color black)
-                road.startPoint
-            , Scene3d.lineSegment (Material.color black) <|
-                LineSegment3d.from road.startPoint road.endPoint
-            ]
+            (if settings.roadSurface then
+                paintSomethingBetween
+                    roadWidth
+                    (Material.matte Color.grey)
+                    road.startPoint
+                    road.endPoint
+
+             else
+                [ Scene3d.point { radius = Pixels.pixels 1 }
+                    (Material.color black)
+                    road.startPoint
+                , Scene3d.lineSegment (Material.color black) <|
+                    LineSegment3d.from road.startPoint road.endPoint
+                ]
+            )
                 ++ gradientCurtain road
+                ++ (if settings.centreLine then
+                        centreLineBetween gradientColourPastel road
+
+                    else
+                        []
+                   )
 
         foldFn : RoadSection -> List (Entity LocalCoords) -> List (Entity LocalCoords)
         foldFn road scene =
@@ -120,7 +173,7 @@ render3dView settings track =
         0
         track.trackTree
         foldFn
-        renderCurrentMarkers
+        (groundPlane ++ renderCurrentMarkers)
 
 
 renderPreviews : Dict String PreviewData -> List (Entity LocalCoords)
@@ -196,3 +249,20 @@ paintSomethingBetween width material pt1 pt2 =
         (LineSegment3d.endPoint rightKerb)
         (LineSegment3d.startPoint rightKerb)
     ]
+
+
+centreLineBetween : (Float -> Color) -> RoadSection -> List (Entity LocalCoords)
+centreLineBetween colouringFn road =
+    let
+        gradient =
+            road.gradientAtStart
+
+        smallUpshiftTo pt =
+            -- To make line stand slightly proud of the road
+            pt |> Point3d.translateBy (Vector3d.meters 0.0 0.0 0.005)
+    in
+    paintSomethingBetween
+        (Length.meters 0.5)
+        (Material.color <| colouringFn gradient)
+        (smallUpshiftTo road.startPoint)
+        (smallUpshiftTo road.endPoint)

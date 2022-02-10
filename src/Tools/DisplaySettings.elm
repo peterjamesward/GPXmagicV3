@@ -51,7 +51,7 @@ update msg options =
         SetRoadSurface state ->
             let
                 newOptions =
-                    { options | groundPlane = state }
+                    { options | roadSurface = state }
             in
             ( newOptions, actions )
 
