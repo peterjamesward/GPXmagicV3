@@ -10885,6 +10885,24 @@ var $author$project$GpxParser$parseGPXPoints = function (xml) {
 		$elm$core$Basics$identity,
 		A2($elm$core$List$map, earthVector, trkpts));
 };
+var $author$project$GpxParser$parseTrackName = function (xml) {
+	var _v0 = A2(
+		$elm$regex$Regex$find,
+		$author$project$GpxParser$asRegex('<name>(.*)<\\/name>'),
+		xml);
+	if (!_v0.b) {
+		return $elm$core$Maybe$Nothing;
+	} else {
+		var x = _v0.a;
+		var _v1 = x.submatches;
+		if (!_v1.b) {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var n = _v1.a;
+			return n;
+		}
+	}
+};
 var $author$project$DomainModel$gpxPointFromIndex = F2(
 	function (index, treeNode) {
 		gpxPointFromIndex:
@@ -23886,6 +23904,7 @@ var $author$project$Main$update = F2(
 							A3($author$project$DomainModel$GPXSource, $ianmackenzie$elm_geometry$Direction2d$x, $ianmackenzie$elm_units$Quantity$zero, $ianmackenzie$elm_units$Quantity$zero),
 							$elm$core$List$head(gpxTrack)),
 						renderDepth: 10,
+						trackName: $author$project$GpxParser$parseTrackName(content),
 						trackTree: aTree,
 						undos: _List_Nil
 					};
@@ -29696,6 +29715,27 @@ var $author$project$ViewPureStyles$commonLayoutStyles = _List_fromArray(
 				$mdgriffith$elm_ui$Element$Font$sansSerif
 			]))
 	]);
+var $author$project$Main$composeTitle = function (model) {
+	var _v0 = model.track;
+	if (_v0.$ === 'Nothing') {
+		return 'GPXmagic Labs V3 concepts';
+	} else {
+		var track = _v0.a;
+		var _v1 = track.trackName;
+		if (_v1.$ === 'Just') {
+			var trackname = _v1.a;
+			return 'GPXmagic - ' + trackname;
+		} else {
+			var _v2 = model.filename;
+			if (_v2.$ === 'Just') {
+				var filename = _v2.a;
+				return 'GPXmagic - ' + filename;
+			} else {
+				return 'GPXmagic - unknown track';
+			}
+		}
+	}
+};
 var $mdgriffith$elm_ui$Internal$Model$unstyled = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Unstyled, $elm$core$Basics$always);
 var $mdgriffith$elm_ui$Element$html = $mdgriffith$elm_ui$Internal$Model$unstyled;
 var $mdgriffith$elm_ui$Internal$Model$InFront = {$: 'InFront'};
@@ -44902,6 +44942,15 @@ var $author$project$Main$topLoadingBar = function (model) {
 		_List_fromArray(
 			[
 				loadGpxButton,
+				A2(
+				$mdgriffith$elm_ui$Element$el,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$Font$color(
+						$author$project$ViewPureStyles$contrastingColour(model.backgroundColour))
+					]),
+				$mdgriffith$elm_ui$Element$text(
+					$author$project$Main$composeTitle(model))),
 				saveButton,
 				A2(
 				$mdgriffith$elm_ui$Element$el,
@@ -44962,7 +45011,7 @@ var $author$project$Main$view = function (model) {
 									])))
 						])))
 			]),
-		title: 'GPXmagic Labs V3 concepts'
+		title: $author$project$Main$composeTitle(model)
 	};
 };
 var $author$project$Main$main = $elm$browser$Browser$application(

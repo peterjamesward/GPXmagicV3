@@ -31,8 +31,6 @@ import Html.Events.Extra.Mouse as Mouse
 import Http
 import Json.Decode as D
 import Json.Encode as E exposing (string)
-import Length
-import LocalCoords exposing (LocalCoords)
 import LocalStorage
 import MapPortController
 import MyIP
@@ -42,7 +40,6 @@ import PaneLayoutManager exposing (Msg(..), ViewMode(..))
 import Pixels exposing (Pixels)
 import Quantity exposing (Quantity)
 import SceneBuilderMap
-import Spherical
 import SplitPane.SplitPane as SplitPane exposing (..)
 import StravaAuth exposing (getStravaToken)
 import Task
@@ -339,7 +336,7 @@ update msg model =
         GpxLoaded content ->
             let
                 gpxTrack =
-                    parseGPXPoints content
+                    GpxParser.parseGPXPoints content
 
                 trackTree =
                     treeFromSourcePoints gpxTrack
@@ -358,6 +355,7 @@ update msg model =
                                     |> Maybe.withDefault (GPXSource Direction2d.x Quantity.zero Quantity.zero)
                             , undos = []
                             , redos = []
+                            , trackName = GpxParser.parseTrackName content
                             }
 
                         modelWithTrack =
@@ -715,9 +713,28 @@ adjustSpaceForContent model =
     }
 
 
+composeTitle model =
+    case model.track of
+        Nothing ->
+            "GPXmagic Labs V3 concepts"
+
+        Just track ->
+            case track.trackName of
+                Just trackname ->
+                    "GPXmagic - " ++ trackname
+
+                Nothing ->
+                    case model.filename of
+                        Just filename ->
+                            "GPXmagic - " ++ filename
+
+                        Nothing ->
+                            "GPXmagic - unknown track"
+
+
 view : Model -> Browser.Document Msg
 view model =
-    { title = "GPXmagic Labs V3 concepts"
+    { title = composeTitle model
     , body =
         [ layout
             (Background.color model.backgroundColour
@@ -928,6 +945,8 @@ topLoadingBar model =
                ]
         )
         [ loadGpxButton
+        , el [ Font.color <| contrastingColour model.backgroundColour ]
+            (text <| composeTitle model)
         , saveButton
         , el [ alignRight ] <| PaneLayoutManager.paneLayoutMenu PaneMsg model.paneLayoutOptions
         , globalOptions model
@@ -1087,7 +1106,7 @@ performActionsOnModel actions model =
 
                 ( BezierApplyWithOptions options, Just track ) ->
                     let
-                        ( newTree, oldPoints, (fromStart, fromEnd) ) =
+                        ( newTree, oldPoints, ( fromStart, fromEnd ) ) =
                             Tools.BezierSplines.applyUsingOptions options track
 
                         newTrack =

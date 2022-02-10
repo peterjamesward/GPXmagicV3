@@ -12,6 +12,7 @@ type alias TrackLoaded msg =
     , referenceLonLat : GPXSource
     , renderDepth : Int
     , trackTree : PeteTree
+    , trackName : Maybe String
 
     -- Experimental placement of undo/redo stacks.
     , undos : List (UndoEntry msg)

@@ -10,17 +10,11 @@ BUG: Pointers are not reset on track load.
 BUG: Classic bend smoother consumes all memory on certain looped routes where
      orange and purple are (possibly) co-linear.
 
+--
+
 # WIP
 
-> Now is too late but these bugs must be fixed first.
-
-**BUG**: Bezier whole track puts Orange at 0.
-
----
-
-## Interesting idea: use keyboard as tools shortcut.
-e,g type B..E.. and little menu pops up to autocomplete tool name and opens tool.
-or brings tools to attention somehow.
+**Display file and track names** and allow file name edit
 
 ---
 
@@ -28,7 +22,6 @@ or brings tools to attention somehow.
 
 ## Tools
 
-1. Display file and track names and allow file name edit
 2. SVG import
 3. Use local Bezier approximation to spot-fix bend and gradient issues (?)
 4. Memory usage (incl limiting actions such as dumping Undo stack).
@@ -37,19 +30,26 @@ or brings tools to attention somehow.
 7. Map Satellite style choice
 8. Intersections
 9. Simplify.
-10. Tip Jar / Buy me a coffee.
+10. Tip Jar / Buy me a coffee
 11. Move & Stretch
 12. Fly-through
-13. Graph Theory (renamed)
-14. Use Strava segment data
-15. Loops (inc. impact on others, such as Bezier).
-16. Lift and Shift
-17. Split and Join
-18. Terrain.
+13. Plan view
+14. Graph Theory (renamed)
+15. Use Strava segment data
+16. Loops (inc. impact on others, such as Bezier).
+17. Lift and Shift
+18. Split and Join
+19. Terrain.
 
 New stuff:
 1. Samir's bend detector (amount of angular change within X linear metres). (Option on Bend Problems)
 2. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
+
+## Keyboard shortcuts
+
+> Let the user select a shortcut key for any tool.
+> Pressing the key opens the tool.
+> I like the idea but I think a "Set shortcuts" configuration would work better.
 
 ## Error messages
 
@@ -82,10 +82,6 @@ Put all Font, Colour etc into a Palette/Style module for ease of change.
 
 Don't render anything that's not visible.
 
-Disable Live Preview for large tracks or large selections.
-Better, a user-chosen threshold of number of points for live preview.
-> Add this to "global state" which needs to pass aroud, like Imperial.
-
 ---
 
 # Parked
@@ -105,10 +101,4 @@ Hence, not just one-size-fits-all "preview".
 Then again, it's not really worth worrying about. If we have excessive points
 in a preview list, we can easily elide them by skipping through the list in the
 view; a PeteTree is OTT.
-
-## Other 
-
-2-way drag should correct for azimuth. NOT POSSIBLE - multiple views!
-
-Could optimize Gradient problems by keeping a list of all > X and subsetting.
-But is not too slow now with 973K points, so why bother?.
+ut is not too slow now with 973K points, so why bother?.

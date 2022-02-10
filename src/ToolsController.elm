@@ -7,7 +7,6 @@ import Element.Border as Border exposing (roundEach)
 import Element.Font as Font
 import Element.Input as Input
 import FeatherIcons
-import FlatColors.AussiePalette
 import FlatColors.FlatUIPalette
 import FlatColors.SwedishPalette
 import Html.Attributes exposing (style)
