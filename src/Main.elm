@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import About
 import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
 import Angle
 import Browser exposing (application)
@@ -216,7 +217,7 @@ init mflags origin navigationKey =
       , previews = Dict.empty
       , windowSize = ( 1000, 800 )
       , contentArea = ( Pixels.pixels 800, Pixels.pixels 500 )
-      , modalMessage = Nothing
+      , modalMessage = Just About.introText
       , paneLayoutOptions = PaneLayoutManager.defaultOptions
       , leftDockRightEdge =
             SplitPane.init Horizontal

@@ -9689,6 +9689,7 @@ var $author$project$StravaAuth$init = F4(
 					clearUrl);
 		}
 	});
+var $author$project$About$introText = '\nThank you for testing GPXmagic v3. It\'s very much the same but with a\nnew core engine, and a new look and feel.\n\nThe main drivers here are speed (especially on longer routes) and customisation.\nIn other words, it should be (mostly) faster, handle more complex routes and\nmake it easier for you to organise the way you like it.\n\nThere are some new tools in the pipeline but the priority is to migrate most\nof the existing tools, maybe fixing some bugs in the process.\n\nPLEASE do not post problems on FaceBook; it\'s impossible to keep track.\n\nPLEASE post issues and ask questions at https://github.com/peterjamesward/GPXmagicV3/issues\nwhere you can see if your issue is already known, and see when (if) they are fixed.\n    ';
 var $elm$time$Time$Posix = function (a) {
 	return {$: 'Posix', a: a};
 };
@@ -9782,7 +9783,7 @@ var $author$project$Main$init = F3(
 						$elm$core$Maybe$Just(
 							_Utils_Tuple2(20, 200))),
 					$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Horizontal)),
-				modalMessage: $elm$core$Maybe$Nothing,
+				modalMessage: $elm$core$Maybe$Just($author$project$About$introText),
 				paneLayoutOptions: $author$project$PaneLayoutManager$defaultOptions,
 				previews: $elm$core$Dict$empty,
 				rightDockInternal: A2(
