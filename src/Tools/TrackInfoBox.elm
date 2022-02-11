@@ -8,25 +8,34 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (labelHidden)
 import FlatColors.ChinesePalette
-import Length exposing (Meters)
-import Quantity exposing (Quantity)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal0, showDecimal2, showLongMeasure, showShortMeasure)
 
 
 type alias Options =
     { displayMode : InformationContext
+    , memoryInfo : Maybe MemoryInfo
+    }
+
+
+type alias MemoryInfo =
+    { jsHeapSizeLimit : Int
+    , totalJSHeapSize : Int
+    , usedJSHeapSize : Int
     }
 
 
 type InformationContext
     = InfoForTrack
     | InfoForPoint
+    | InfoForSystem
 
 
 defaultOptions : Options
 defaultOptions =
-    { displayMode = InfoForTrack }
+    { displayMode = InfoForTrack
+    , memoryInfo = Nothing
+    }
 
 
 type Msg
@@ -144,6 +153,7 @@ view wrapper imperial ifTrack options =
                         , options =
                             [ Input.option InfoForTrack (text "Track")
                             , Input.option InfoForPoint (text "Point")
+                            , Input.option InfoForSystem (text "Memory")
                             ]
                         , selected = Just options.displayMode
                         , label = labelHidden "Oj"
@@ -154,8 +164,51 @@ view wrapper imperial ifTrack options =
 
                         InfoForPoint ->
                             displayInfoForPoint imperial track
+
+                        InfoForSystem ->
+                            displayMemoryDetails options
                     ]
 
             Nothing ->
                 paragraph [ padding 10 ]
                     [ text "Information will show here when a track is loaded." ]
+
+
+updateMemory : MemoryInfo -> Options -> Options
+updateMemory memory options =
+    { options | memoryInfo = Just memory }
+
+
+displayMemoryDetails : Options -> Element msg
+displayMemoryDetails options =
+    let
+        labels =
+            [ "Heap limit"
+            , "Heap size"
+            , "Used heap"
+            ]
+
+        asMB value =
+            (toFloat value
+                / 1024
+                / 1024
+                |> showDecimal2
+            )
+                ++ "MB"
+    in
+    case options.memoryInfo of
+        Nothing ->
+            text "Not available"
+
+        Just memory ->
+            row
+                [ padding 10
+                , spacing 5
+                ]
+                [ column [ spacing 5 ] <| List.map text labels
+                , column [ spacing 5 ]
+                    [ text <| asMB memory.jsHeapSizeLimit
+                    , text <| asMB memory.totalJSHeapSize
+                    , text <| asMB memory.usedJSHeapSize
+                    ]
+                ]

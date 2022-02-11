@@ -51,6 +51,7 @@ import Tools.CurveFormer
 import Tools.DeletePoints as DeletePoints
 import Tools.DisplaySettings
 import Tools.Nudge
+import Tools.TrackInfoBox
 import ToolsController exposing (ToolEntry, encodeColour, encodeToolState)
 import TrackLoaded exposing (TrackLoaded)
 import Url exposing (Url)
@@ -86,6 +87,7 @@ type Msg
     | RestoreDefaultToolLayout
     | WriteGpxFile
     | FilenameChange String
+    | TimeToUpdateMemory
     | NoOp
 
 
@@ -248,6 +250,7 @@ init mflags origin navigationKey =
         , LocalStorage.storageGetItem "measure"
         , LocalStorage.storageGetItem "background"
         , LocalStorage.storageGetItem "visuals"
+        , LocalStorage.storageGetMemoryUsage
         ]
     )
 
@@ -625,6 +628,9 @@ Please check the file contains GPX data.""" }
             ( { model | filename = Just filename }
             , Cmd.none
             )
+
+        TimeToUpdateMemory ->
+            ( model, LocalStorage.storageGetMemoryUsage )
 
 
 
@@ -1337,7 +1343,23 @@ performActionsOnModel actions model =
 
                 ( HeapStatusUpdate heapStatus, _ ) ->
                     --TODO: Make a tool for these values, but meanwhile...
-                    foldedModel
+                    let
+                        currentTools =
+                            model.toolOptions
+
+                        currentInfo =
+                            currentTools.infoOptions
+
+                        newInfo =
+                            Tools.TrackInfoBox.updateMemory heapStatus currentInfo
+
+                        newTools =
+                            { currentTools | infoOptions = newInfo }
+
+                        revisedModel =
+                            { foldedModel | toolOptions = newTools }
+                    in
+                    revisedModel
 
                 ( UndoLastAction, Just track ) ->
                     { foldedModel | track = Just <| TrackLoaded.undoLastAction track }
@@ -1444,6 +1466,9 @@ performActionCommands actions model =
 
                 ( StoreLocally key value, _ ) ->
                     LocalStorage.storageSetItem key value
+
+                ( HeapStatusUpdate _, _ ) ->
+                    Delay.after 1000 TimeToUpdateMemory
 
                 _ ->
                     Cmd.none

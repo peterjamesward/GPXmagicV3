@@ -8540,7 +8540,7 @@ var $ianmackenzie$elm_units$Quantity$zero = $ianmackenzie$elm_units$Quantity$Qua
 var $author$project$Tools$Nudge$defaultOptions = {fadeExtent: $ianmackenzie$elm_units$Quantity$zero, horizontal: $ianmackenzie$elm_units$Quantity$zero, vertical: $ianmackenzie$elm_units$Quantity$zero};
 var $author$project$Tools$Pointers$defaultOptions = {orange: 0, purple: $elm$core$Maybe$Nothing};
 var $author$project$Tools$TrackInfoBox$InfoForTrack = {$: 'InfoForTrack'};
-var $author$project$Tools$TrackInfoBox$defaultOptions = {displayMode: $author$project$Tools$TrackInfoBox$InfoForTrack};
+var $author$project$Tools$TrackInfoBox$defaultOptions = {displayMode: $author$project$Tools$TrackInfoBox$InfoForTrack, memoryInfo: $elm$core$Maybe$Nothing};
 var $author$project$Tools$UndoRedo$Options = function (dummy) {
 	return {dummy: dummy};
 };
@@ -9744,6 +9744,14 @@ var $author$project$LocalStorage$storageGetItem = function (key) {
 					$elm$json$Json$Encode$string(key))
 				])));
 };
+var $author$project$LocalStorage$storageGetMemoryUsage = $author$project$LocalStorage$storageCommands(
+	$elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'Cmd',
+				$elm$json$Json$Encode$string('memory'))
+			])));
 var $elm$time$Time$utc = A2($elm$time$Time$Zone, 0, _List_Nil);
 var $smucode$elm_flat_colors$FlatColors$AussiePalette$wizardGrey = A3($mdgriffith$elm_ui$Element$rgb255, 83, 92, 104);
 var $author$project$Main$init = F3(
@@ -9821,7 +9829,8 @@ var $author$project$Main$init = F3(
 						$author$project$LocalStorage$storageGetItem('panes'),
 						$author$project$LocalStorage$storageGetItem('measure'),
 						$author$project$LocalStorage$storageGetItem('background'),
-						$author$project$LocalStorage$storageGetItem('visuals')
+						$author$project$LocalStorage$storageGetItem('visuals'),
+						$author$project$LocalStorage$storageGetMemoryUsage
 					])));
 	});
 var $elm$json$Json$Decode$int = _Json_decodeInt;
@@ -10904,6 +10913,7 @@ var $author$project$GpxParser$parseTrackName = function (xml) {
 		}
 	}
 };
+var $author$project$Main$TimeToUpdateMemory = {$: 'TimeToUpdateMemory'};
 var $author$project$DomainModel$gpxPointFromIndex = F2(
 	function (index, treeNode) {
 		gpxPointFromIndex:
@@ -11825,7 +11835,7 @@ var $author$project$Main$performActionCommands = F2(
 		};
 		var performAction = function (action) {
 			var _v0 = _Utils_Tuple2(action, model.track);
-			_v0$11:
+			_v0$12:
 			while (true) {
 				switch (_v0.a.$) {
 					case 'SetCurrent':
@@ -11834,7 +11844,7 @@ var $author$project$Main$performActionCommands = F2(
 							var track = _v0.b.a;
 							return $author$project$MapPortController$addMarkersToMap(track);
 						} else {
-							break _v0$11;
+							break _v0$12;
 						}
 					case 'SetCurrentFromMapClick':
 						if (_v0.b.$ === 'Just') {
@@ -11842,7 +11852,7 @@ var $author$project$Main$performActionCommands = F2(
 							var track = _v0.b.a;
 							return $elm$core$Platform$Cmd$none;
 						} else {
-							break _v0$11;
+							break _v0$12;
 						}
 					case 'MapCenterOnCurrent':
 						if (_v0.b.$ === 'Just') {
@@ -11850,7 +11860,7 @@ var $author$project$Main$performActionCommands = F2(
 							var track = _v0.b.a;
 							return $author$project$MapPortController$centreMapOnCurrent(track);
 						} else {
-							break _v0$11;
+							break _v0$12;
 						}
 					case 'MapRefresh':
 						if (_v0.b.$ === 'Just') {
@@ -11858,7 +11868,7 @@ var $author$project$Main$performActionCommands = F2(
 							var track = _v0.b.a;
 							return $author$project$MapPortController$refreshMap;
 						} else {
-							break _v0$11;
+							break _v0$12;
 						}
 					case 'MakeMapPointsDraggable':
 						if (_v0.b.$ === 'Just') {
@@ -11866,7 +11876,7 @@ var $author$project$Main$performActionCommands = F2(
 							var track = _v0.b.a;
 							return A2($author$project$MapPortController$toggleDragging, flag, track);
 						} else {
-							break _v0$11;
+							break _v0$12;
 						}
 					case 'ShowPreview':
 						if (_v0.b.$ === 'Just') {
@@ -11874,7 +11884,7 @@ var $author$project$Main$performActionCommands = F2(
 							var track = _v0.b.a;
 							return showPreviewOnMap(previewData.tag);
 						} else {
-							break _v0$11;
+							break _v0$12;
 						}
 					case 'HidePreview':
 						if (_v0.b.$ === 'Just') {
@@ -11882,7 +11892,7 @@ var $author$project$Main$performActionCommands = F2(
 							var track = _v0.b.a;
 							return $author$project$MapPortController$hidePreview(tag);
 						} else {
-							break _v0$11;
+							break _v0$12;
 						}
 					case 'DelayMessage':
 						if (_v0.b.$ === 'Just') {
@@ -11892,7 +11902,7 @@ var $author$project$Main$performActionCommands = F2(
 							var track = _v0.b.a;
 							return A2($andrewMacmurray$elm_delay$Delay$after, _int, msg);
 						} else {
-							break _v0$11;
+							break _v0$12;
 						}
 					case 'TrackHasChanged':
 						if (_v0.b.$ === 'Just') {
@@ -11910,7 +11920,7 @@ var $author$project$Main$performActionCommands = F2(
 											$elm$core$Dict$keys(model.previews)))
 									]));
 						} else {
-							break _v0$11;
+							break _v0$12;
 						}
 					case 'SetMarker':
 						if (_v0.b.$ === 'Just') {
@@ -11918,15 +11928,17 @@ var $author$project$Main$performActionCommands = F2(
 							var track = _v0.b.a;
 							return $author$project$MapPortController$addMarkersToMap(track);
 						} else {
-							break _v0$11;
+							break _v0$12;
 						}
 					case 'StoreLocally':
 						var _v5 = _v0.a;
 						var key = _v5.a;
 						var value = _v5.b;
 						return A2($author$project$LocalStorage$storageSetItem, key, value);
+					case 'HeapStatusUpdate':
+						return A2($andrewMacmurray$elm_delay$Delay$after, 1000, $author$project$Main$TimeToUpdateMemory);
 					default:
-						break _v0$11;
+						break _v0$12;
 				}
 			}
 			return $elm$core$Platform$Cmd$none;
@@ -18318,6 +18330,14 @@ var $author$project$TrackLoaded$undoLastAction = function (track) {
 		return track;
 	}
 };
+var $author$project$Tools$TrackInfoBox$updateMemory = F2(
+	function (memory, options) {
+		return _Utils_update(
+			options,
+			{
+				memoryInfo: $elm$core$Maybe$Just(memory)
+			});
+	});
 var $author$project$DomainModel$updatePointByIndexInSitu = F4(
 	function (index, newGPX, referencePoint, tree) {
 		if ((index < 0) || (_Utils_cmp(
@@ -18781,7 +18801,16 @@ var $author$project$Main$performActionsOnModel = F2(
 							}
 						case 'HeapStatusUpdate':
 							var heapStatus = _v0.a.a;
-							return foldedModel;
+							var currentTools = model.toolOptions;
+							var currentInfo = currentTools.infoOptions;
+							var newInfo = A2($author$project$Tools$TrackInfoBox$updateMemory, heapStatus, currentInfo);
+							var newTools = _Utils_update(
+								currentTools,
+								{infoOptions: newInfo});
+							var revisedModel = _Utils_update(
+								foldedModel,
+								{toolOptions: newTools});
+							return revisedModel;
 						case 'UndoLastAction':
 							if (_v0.b.$ === 'Just') {
 								var _v26 = _v0.a;
@@ -24496,7 +24525,7 @@ var $author$project$Main$update = F2(
 							}),
 						$elm$core$Platform$Cmd$none);
 				}
-			default:
+			case 'FilenameChange':
 				var filename = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -24505,6 +24534,8 @@ var $author$project$Main$update = F2(
 							filename: $elm$core$Maybe$Just(filename)
 						}),
 					$elm$core$Platform$Cmd$none);
+			default:
+				return _Utils_Tuple2(model, $author$project$LocalStorage$storageGetMemoryUsage);
 		}
 	});
 var $author$project$Main$DismissModalMessage = {$: 'DismissModalMessage'};
@@ -35056,6 +35087,7 @@ var $author$project$Tools$TrackInfoBox$ChooseDisplayMode = function (a) {
 	return {$: 'ChooseDisplayMode', a: a};
 };
 var $author$project$Tools$TrackInfoBox$InfoForPoint = {$: 'InfoForPoint'};
+var $author$project$Tools$TrackInfoBox$InfoForSystem = {$: 'InfoForSystem'};
 var $author$project$Tools$TrackInfoBox$displayInfoForPoint = F2(
 	function (imperial, track) {
 		var labels = _List_fromArray(
@@ -35114,6 +35146,51 @@ var $author$project$Tools$TrackInfoBox$displayInfoForPoint = F2(
 						]))
 				]));
 	});
+var $author$project$Tools$TrackInfoBox$displayMemoryDetails = function (options) {
+	var labels = _List_fromArray(
+		['Heap limit', 'Heap size', 'Used heap']);
+	var asMB = function (value) {
+		return $author$project$UtilsForViews$showDecimal2((value / 1024) / 1024) + 'MB';
+	};
+	var _v0 = options.memoryInfo;
+	if (_v0.$ === 'Nothing') {
+		return $mdgriffith$elm_ui$Element$text('Not available');
+	} else {
+		var memory = _v0.a;
+		return A2(
+			$mdgriffith$elm_ui$Element$row,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$padding(10),
+					$mdgriffith$elm_ui$Element$spacing(5)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$spacing(5)
+						]),
+					A2($elm$core$List$map, $mdgriffith$elm_ui$Element$text, labels)),
+					A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$spacing(5)
+						]),
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$text(
+							asMB(memory.jsHeapSizeLimit)),
+							$mdgriffith$elm_ui$Element$text(
+							asMB(memory.totalJSHeapSize)),
+							$mdgriffith$elm_ui$Element$text(
+							asMB(memory.usedJSHeapSize))
+						]))
+				]));
+	}
+};
 var $author$project$Tools$TrackInfoBox$displayValuesWithTrack = F3(
 	function (imperial, infoList, track) {
 		var info = $author$project$DomainModel$asRecord(track.trackTree);
@@ -35245,16 +35322,23 @@ var $author$project$Tools$TrackInfoBox$view = F4(
 											A2(
 											$mdgriffith$elm_ui$Element$Input$option,
 											$author$project$Tools$TrackInfoBox$InfoForPoint,
-											$mdgriffith$elm_ui$Element$text('Point'))
+											$mdgriffith$elm_ui$Element$text('Point')),
+											A2(
+											$mdgriffith$elm_ui$Element$Input$option,
+											$author$project$Tools$TrackInfoBox$InfoForSystem,
+											$mdgriffith$elm_ui$Element$text('Memory'))
 										]),
 									selected: $elm$core$Maybe$Just(options.displayMode)
 								}),
 								function () {
 								var _v1 = options.displayMode;
-								if (_v1.$ === 'InfoForTrack') {
-									return A3($author$project$Tools$TrackInfoBox$displayValuesWithTrack, imperial, $author$project$Tools$TrackInfoBox$trackInfoList, track);
-								} else {
-									return A2($author$project$Tools$TrackInfoBox$displayInfoForPoint, imperial, track);
+								switch (_v1.$) {
+									case 'InfoForTrack':
+										return A3($author$project$Tools$TrackInfoBox$displayValuesWithTrack, imperial, $author$project$Tools$TrackInfoBox$trackInfoList, track);
+									case 'InfoForPoint':
+										return A2($author$project$Tools$TrackInfoBox$displayInfoForPoint, imperial, track);
+									default:
+										return $author$project$Tools$TrackInfoBox$displayMemoryDetails(options);
 								}
 							}()
 							]));
