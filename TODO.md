@@ -14,28 +14,30 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 # WIP
 
+Out and Back without graphs, inc. variable offset.
+> Can i do this with Nudge and Classic Bends? Seems worth a shot.
+
 ---
 
 # BACKLOG, roughly in order ...
 
 ## Tools
 
-1. Out and Back without graphs, inc. variable offset.
-2. Tip Jar / Buy me a coffee
-3. Limit gradients
+2. Limit gradients
+3. Simplify.
 4. Map Satellite style choice
 5. Intersections
-6. Simplify.
-7. Plan view
-8. Fly-through
-9. Move & Stretch
+6. Plan view
+7. Fly-through
+8. Move & Stretch
+9. 1CQF
 10. Graph Theory (renamed)
 11. Use Strava segment data
 12. Loops (inc. impact on others, such as Bezier).
 13. Lift and Shift
 14. SVG import
-15. Split and Join
-16. Terrain.
+15. Terrain.
+16. Split and Join
 
 New stuff:
 1. Samir's bend detector (amount of angular change within X linear metres). (Option on Bend Problems)

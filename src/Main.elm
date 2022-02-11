@@ -981,8 +981,21 @@ topLoadingBar model =
                 none
         , saveButton
         , el [ alignRight ] <| PaneLayoutManager.paneLayoutMenu PaneMsg model.paneLayoutOptions
+        , buyMeACoffeeButton
         , globalOptions model
         ]
+
+
+buyMeACoffeeButton =
+    newTabLink
+        [ alignRight ]
+        { url = "https://www.buymeacoffee.com/Peterward"
+        , label =
+            image [ height (Element.px 30), width (Element.px 140) ]
+                { src = "https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
+                , description = "Buy Me A Coffee"
+                }
+        }
 
 
 globalOptions : Model -> Element Msg
