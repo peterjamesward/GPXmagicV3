@@ -14,6 +14,7 @@ import Tools.CentroidAverageOptions
 import Tools.CurveFormerOptions
 import Tools.MemoryUsage
 import Tools.NudgeOptions
+import Tools.OutAndBackOptions
 
 
 type ToolAction msg
@@ -42,6 +43,7 @@ type ToolAction msg
     | MakeMapPointsDraggable Bool
     | PointMovedOnMap Float Float Float Float
     | NudgeApplyWithOptions Tools.NudgeOptions.Options
+    | OutAndBackApplyWithOptions Tools.OutAndBackOptions.Options
 
 
 type PreviewShape
@@ -85,6 +87,9 @@ interpretAction action =
 
         NudgeApplyWithOptions options ->
             "nudge"
+
+        OutAndBackApplyWithOptions options ->
+            "out and back"
 
         _ ->
             "ask Pete to fix this message"

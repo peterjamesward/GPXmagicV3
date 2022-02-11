@@ -15,7 +15,12 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 # WIP
 
 Out and Back without graphs, inc. variable offset.
-> Can i do this with Nudge and Classic Bends? Seems worth a shot.
+> No need for graphs:
+1. Extended centre line gives midpoints of turn-around arcs,
+2. Outward route shifted one way, using Nudge logic,
+3. Return route is reverse, shifted oppositely,
+4. Arcs are made from parallel case of Bend Smoother.
+5. Assemble into a new tree.
 
 ---
 
