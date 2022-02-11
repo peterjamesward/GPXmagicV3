@@ -3,24 +3,27 @@ module Tools.BendSmoother exposing (..)
 import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
 import Angle
 import Arc2d exposing (Arc2d)
+import Arc3d exposing (Arc3d)
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, endPoint, skipCount, startPoint)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
 import Geometry101 as G exposing (distance, findIntercept, interpolateLine, isAfter, isBefore, lineEquationFromTwoPoints, lineIntersection, linePerpendicularTo, pointAlongRoad, pointsToGeometry)
-import Length exposing (Meters, inMeters)
+import Length exposing (Meters, inMeters, meters)
 import LineSegment2d
 import LocalCoords exposing (LocalCoords)
 import Plane3d
 import Point2d exposing (Point2d)
 import Point3d exposing (Point3d, xCoordinate, yCoordinate, zCoordinate)
 import Polyline2d
+import Polyline3d
 import Quantity
 import SketchPlane3d
 import Tools.BendSmootherOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showShortMeasure)
+import Vector2d
 import Vector3d
 import ViewPureStyles exposing (..)
 
@@ -30,6 +33,7 @@ defaultOptions =
     { bendTrackPointSpacing = 5.0
     , smoothedBend = Nothing
     , segments = 1
+    , mode = SmoothBend
     }
 
 
@@ -38,8 +42,11 @@ type alias Point =
 
 
 type Msg
-    = ApplyWithOptions
+    = ApplySmoothBend
     | SetBendTrackPointSpacing Float
+    | SetMode SmoothMode
+    | SetSegments Int
+    | ApplySmoothPoint
 
 
 computeNewPoints : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
@@ -90,6 +97,16 @@ tryBendSmoother track options =
 
 applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
 applyUsingOptions options track =
+    case options.mode of
+        SmoothPoint ->
+            softenSinglePoint options.segments track.currentPosition track
+
+        SmoothBend ->
+            applyClassicBendSmoother options track
+
+
+applyClassicBendSmoother : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyClassicBendSmoother options track =
     let
         ( fromStart, fromEnd ) =
             TrackLoaded.getRangeFromMarkers track
@@ -115,6 +132,133 @@ applyUsingOptions options track =
     ( newTree
     , oldPoints |> List.map Tuple.second
     )
+
+
+softenSinglePoint : Int -> Int -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+softenSinglePoint numSegments index track =
+    -- Apply the new bend smoother to a single point, if possible.
+    case singlePoint3dArc track index of
+        Just arc ->
+            let
+                gpxPoints =
+                    Arc3d.segments numSegments arc
+                        |> Polyline3d.vertices
+                        |> List.map (DomainModel.gpxFromPointWithReference track.referenceLonLat)
+
+                newTree =
+                    DomainModel.replaceRange
+                        index
+                        (skipCount track.trackTree - index)
+                        track.referenceLonLat
+                        gpxPoints
+                        track.trackTree
+
+                oldPoints =
+                    [ DomainModel.getDualCoords track.trackTree index ]
+            in
+            ( newTree
+            , oldPoints |> List.map Tuple.second
+            )
+
+        Nothing ->
+            ( Just track.trackTree, [] )
+
+
+singlePoint3dArc : TrackLoaded msg -> Int -> Maybe (Arc3d Meters LocalCoords)
+singlePoint3dArc track index =
+    let
+        ( pa, pb, pc ) =
+            ( DomainModel.earthPointFromIndex (index - 1) track.trackTree
+            , DomainModel.earthPointFromIndex (index + 0) track.trackTree
+            , DomainModel.earthPointFromIndex (index + 1) track.trackTree
+            )
+    in
+    arc3dFromThreePoints pa pb pc
+
+
+arc3dFromThreePoints : EarthPoint -> EarthPoint -> EarthPoint -> Maybe (Arc3d Meters LocalCoords)
+arc3dFromThreePoints pa pb pc =
+    -- Must have three points to play with!
+    let
+        ( beforeLength, afterLength ) =
+            ( Point3d.distanceFrom pa pb, Point3d.distanceFrom pb pc )
+
+        amountToStealFromFirstSegment =
+            Quantity.min (meters 4.0) (Quantity.half beforeLength)
+
+        amountToStealFromSecondSegment =
+            Quantity.min (meters 4.0) (Quantity.half afterLength)
+
+        commonAmountToSteal =
+            Quantity.min amountToStealFromFirstSegment amountToStealFromSecondSegment
+
+        arcStart =
+            Point3d.interpolateFrom
+                pb
+                pa
+                (Quantity.ratio commonAmountToSteal beforeLength)
+
+        arcEnd =
+            Point3d.interpolateFrom
+                pb
+                pc
+                (Quantity.ratio commonAmountToSteal afterLength)
+
+        trianglePlane =
+            SketchPlane3d.throughPoints pa pb pc
+    in
+    case trianglePlane of
+        -- Points necessarily co-planar but type requires us to check!
+        Just plane ->
+            let
+                ( planarA, planarB, planarC ) =
+                    -- I think if we project into 2d, the classic logic will hold.
+                    ( arcStart |> Point3d.projectInto plane
+                    , pb |> Point3d.projectInto plane
+                    , arcEnd |> Point3d.projectInto plane
+                    )
+
+                ( r1Equation, r2Equation ) =
+                    ( lineEquationFromTwoPoints
+                        (Point2d.toRecord inMeters planarA)
+                        (Point2d.toRecord inMeters planarB)
+                    , lineEquationFromTwoPoints
+                        (Point2d.toRecord inMeters planarB)
+                        (Point2d.toRecord inMeters planarC)
+                    )
+
+                ( perpFromFirstTangentPoint, perpFromSecondTangentPoint ) =
+                    ( linePerpendicularTo r1Equation (Point2d.toRecord inMeters planarA)
+                    , linePerpendicularTo r2Equation (Point2d.toRecord inMeters planarC)
+                    )
+
+                circleCenter =
+                    lineIntersection perpFromFirstTangentPoint perpFromSecondTangentPoint
+
+                findArc centre =
+                    let
+                        radius =
+                            distance centre (Point2d.toRecord inMeters planarA)
+
+                        bisector =
+                            Vector2d.from
+                                (Point2d.fromRecord meters centre)
+                                planarB
+
+                        midArcPoint =
+                            Point2d.fromRecord meters centre
+                                |> Point2d.translateBy
+                                    (Vector2d.scaleTo (meters radius) bisector)
+
+                        midPoint3d =
+                            midArcPoint |> Point3d.on plane
+                    in
+                    Arc3d.throughPoints arcStart midPoint3d arcEnd
+            in
+            Maybe.withDefault Nothing <| Maybe.map findArc circleCenter
+
+        Nothing ->
+            Nothing
 
 
 toolStateChange :
@@ -163,7 +307,28 @@ update msg options previewColour hasTrack =
             in
             ( newOptions, previewActions newOptions previewColour track )
 
-        ( Just track, ApplyWithOptions ) ->
+        ( Just track, ApplySmoothBend ) ->
+            ( options
+            , [ Actions.BendSmootherApplyWithOptions options
+              , TrackHasChanged
+              ]
+            )
+
+        ( Just track, SetMode mode ) ->
+            let
+                newOptions =
+                    { options | mode = mode }
+            in
+            ( newOptions, [] )
+
+        ( Just track, SetSegments segments ) ->
+            let
+                newOptions =
+                    { options | segments = segments }
+            in
+            ( newOptions, [] )
+
+        ( Just track, ApplySmoothPoint ) ->
             ( options
             , [ Actions.BendSmootherApplyWithOptions options
               , TrackHasChanged
@@ -174,13 +339,13 @@ update msg options previewColour hasTrack =
             ( options, [] )
 
 
-view : Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
-view imperial wrapper options track =
+viewBendControls : Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+viewBendControls imperial wrapper options track =
     let
         fixBendButton smooth =
             button
                 neatToolsBorder
-                { onPress = Just <| wrapper ApplyWithOptions
+                { onPress = Just <| wrapper ApplySmoothBend
                 , label =
                     case smooth of
                         Just isSmooth ->
@@ -197,11 +362,10 @@ view imperial wrapper options track =
     case track of
         Just isTrack ->
             column
-                [ padding 10
+                [ padding 5
                 , spacing 5
                 , width fill
                 , centerX
-                , Background.color FlatColors.ChinesePalette.antiFlashWhite
                 ]
                 [ el [ centerX ] <| bendSmoothnessSlider imperial options wrapper
                 , el [ centerX ] <| fixBendButton options.smoothedBend
@@ -209,6 +373,61 @@ view imperial wrapper options track =
 
         Nothing ->
             noTrackMessage
+
+
+viewPointControls : Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+viewPointControls imperial wrapper options track =
+    let
+        fixButton =
+            button
+                neatToolsBorder
+                { onPress = Just <| wrapper ApplySmoothBend
+                , label = text "Smooth points"
+                }
+    in
+    case track of
+        Just isTrack ->
+            column
+                [ padding 5
+                , spacing 5
+                , width fill
+                , centerX
+                ]
+                [ el [ centerX ] <| segmentSlider imperial options wrapper
+                , el [ centerX ] <| fixButton
+                ]
+
+        Nothing ->
+            noTrackMessage
+
+
+view : Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view imperial wrapper options track =
+    column
+        [ padding 10
+        , spacing 5
+        , width fill
+        , centerX
+        , Background.color FlatColors.ChinesePalette.antiFlashWhite
+        ]
+        [ el [ centerX ] <|
+            Input.radioRow
+                [ spacing 5 ]
+                { options =
+                    [ Input.option SmoothBend <| text "Bend"
+                    , Input.option SmoothPoint <| text "Point"
+                    ]
+                , onChange = wrapper << SetMode
+                , selected = Just options.mode
+                , label = Input.labelHidden "mode"
+                }
+        , case options.mode of
+            SmoothBend ->
+                viewBendControls imperial wrapper options track
+
+            SmoothPoint ->
+                viewPointControls imperial wrapper options track
+        ]
 
 
 bendSmoothnessSlider : Bool -> Options -> (Msg -> msg) -> Element msg
@@ -237,6 +456,24 @@ bendSmoothnessSlider imperial options wrap =
                     Length.meters 10.0
         , step = Nothing
         , value = options.bendTrackPointSpacing
+        , thumb = Input.defaultThumb
+        }
+
+
+segmentSlider : Bool -> Options -> (Msg -> msg) -> Element msg
+segmentSlider imperial options wrap =
+    Input.slider
+        commonShortHorizontalSliderStyles
+        { onChange = wrap << SetSegments << round
+        , label =
+            Input.labelBelow [] <|
+                text <|
+                    "Segments: "
+                        ++ String.fromInt options.segments
+        , min = 1.0
+        , max = 7.0
+        , step = Just 1.0
+        , value = toFloat options.segments
         , thumb = Input.defaultThumb
         }
 

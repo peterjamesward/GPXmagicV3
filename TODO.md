@@ -20,24 +20,23 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 ## Tools
 
-1. Use local Bezier approximation to spot-fix bend and gradient issues (?)
-2. Memory usage (incl limiting actions such as dumping Undo stack).
-3. Out and Back without graphs, inc. variable offset.
-4. Tip Jar / Buy me a coffee
-5. Limit gradients
-6. Map Satellite style choice
-7. Intersections
-8. Simplify.
-9. Plan view
-10. Fly-through
-11. Move & Stretch
-12. Graph Theory (renamed)
-13. Use Strava segment data
-14. Loops (inc. impact on others, such as Bezier).
-15. Lift and Shift
-16. SVG import
-17. Split and Join
-18. Terrain.
+1. Memory usage (incl limiting actions such as dumping Undo stack).
+2. Out and Back without graphs, inc. variable offset.
+3. Tip Jar / Buy me a coffee
+4. Limit gradients
+5. Map Satellite style choice
+6. Intersections
+7. Simplify.
+8. Plan view
+9. Fly-through
+10. Move & Stretch
+11. Graph Theory (renamed)
+12. Use Strava segment data
+13. Loops (inc. impact on others, such as Bezier).
+14. Lift and Shift
+15. SVG import
+16. Split and Join
+17. Terrain.
 
 New stuff:
 1. Samir's bend detector (amount of angular change within X linear metres). (Option on Bend Problems)
@@ -48,6 +47,10 @@ New stuff:
 > Let the user select a shortcut key for any tool.
 > Pressing the key opens the tool.
 > I like the idea but I think a "Set shortcuts" configuration would work better.
+
+## Eliding previews
+
+Elide the creation of large previews.
 
 ## Error messages
 

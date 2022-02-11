@@ -8498,7 +8498,8 @@ var $author$project$Tools$AbruptDirectionChanges$defaultOptions = {
 	currentBreach: 0,
 	threshold: $ianmackenzie$elm_units$Angle$degrees(120)
 };
-var $author$project$Tools$BendSmoother$defaultOptions = {bendTrackPointSpacing: 5.0, segments: 1, smoothedBend: $elm$core$Maybe$Nothing};
+var $author$project$Tools$BendSmootherOptions$SmoothBend = {$: 'SmoothBend'};
+var $author$project$Tools$BendSmoother$defaultOptions = {bendTrackPointSpacing: 5.0, mode: $author$project$Tools$BendSmootherOptions$SmoothBend, segments: 1, smoothedBend: $elm$core$Maybe$Nothing};
 var $author$project$Tools$BezierOptions$Approximated = {$: 'Approximated'};
 var $author$project$Tools$BezierOptions$ExtentIsRange = {$: 'ExtentIsRange'};
 var $author$project$Tools$BezierSplines$defaultOptions = {bezierStyle: $author$project$Tools$BezierOptions$Approximated, bezierTension: 0.5, bezierTolerance: 5.0, extent: $author$project$Tools$BezierOptions$ExtentIsRange};
@@ -12711,7 +12712,7 @@ var $author$project$DomainModel$replaceRange = F5(
 				leftBit,
 				_Utils_ap(newPoints, rightBit)));
 	});
-var $author$project$Tools$BendSmoother$applyUsingOptions = F2(
+var $author$project$Tools$BendSmoother$applyClassicBendSmoother = F2(
 	function (options, track) {
 		var gpxPoints = A2(
 			$elm$core$List$map,
@@ -12734,18 +12735,497 @@ var $author$project$Tools$BendSmoother$applyUsingOptions = F2(
 			newTree,
 			A2($elm$core$List$map, $elm$core$Tuple$second, oldPoints));
 	});
-var $author$project$BezierSplines$SplineFoldState = F3(
-	function (roadMinusOne, roadMinusTwo, newPoints) {
-		return {newPoints: newPoints, roadMinusOne: roadMinusOne, roadMinusTwo: roadMinusTwo};
+var $author$project$DomainModel$getDualCoords = F2(
+	function (tree, index) {
+		return _Utils_Tuple2(
+			A2($author$project$DomainModel$earthPointFromIndex, index, tree),
+			A2($author$project$DomainModel$gpxPointFromIndex, index, tree));
 	});
-var $ianmackenzie$elm_geometry$CubicSpline3d$firstControlPoint = function (_v0) {
-	var spline = _v0.a;
-	return spline.firstControlPoint;
+var $ianmackenzie$elm_geometry$Geometry$Types$Polyline3d = function (a) {
+	return {$: 'Polyline3d', a: a};
 };
-var $ianmackenzie$elm_geometry$CubicSpline3d$fourthControlPoint = function (_v0) {
-	var spline = _v0.a;
-	return spline.fourthControlPoint;
+var $ianmackenzie$elm_geometry$Polyline3d$fromVertices = function (givenVertices) {
+	return $ianmackenzie$elm_geometry$Geometry$Types$Polyline3d(givenVertices);
 };
+var $elm$core$Basics$tan = _Basics_tan;
+var $ianmackenzie$elm_geometry$Arc3d$pointOn = F2(
+	function (_v0, t) {
+		var arc = _v0.a;
+		var _v1 = arc.yDirection;
+		var v = _v1.a;
+		var _v2 = arc.xDirection;
+		var u = _v2.a;
+		var _v3 = arc.sweptAngle;
+		var thetaMax = _v3.a;
+		var _v4 = arc.signedLength;
+		var sMax = _v4.a;
+		var _v5 = arc.startPoint;
+		var p = _v5.a;
+		if (!thetaMax) {
+			var s = t * sMax;
+			return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+				{x: p.x + (s * u.x), y: p.y + (s * u.y), z: p.z + (s * u.z)});
+		} else {
+			var theta = t * thetaMax;
+			var r = sMax / thetaMax;
+			var x = r * $elm$core$Basics$sin(theta);
+			var y = (_Utils_cmp(
+				$elm$core$Basics$abs(theta),
+				$elm$core$Basics$pi / 2) < 0) ? (x * $elm$core$Basics$tan(0.5 * theta)) : (r * (1 - $elm$core$Basics$cos(theta)));
+			return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+				{x: (p.x + (x * u.x)) + (y * v.x), y: (p.y + (x * u.y)) + (y * v.y), z: (p.z + (x * u.z)) + (y * v.z)});
+		}
+	});
+var $ianmackenzie$elm_1d_parameter$Parameter1d$range = F5(
+	function (startIndex, index, divisor, _function, accumulated) {
+		range:
+		while (true) {
+			var newValue = _function(index / divisor);
+			var newAccumulated = A2($elm$core$List$cons, newValue, accumulated);
+			if (_Utils_eq(index, startIndex)) {
+				return newAccumulated;
+			} else {
+				var $temp$startIndex = startIndex,
+					$temp$index = index - 1,
+					$temp$divisor = divisor,
+					$temp$function = _function,
+					$temp$accumulated = newAccumulated;
+				startIndex = $temp$startIndex;
+				index = $temp$index;
+				divisor = $temp$divisor;
+				_function = $temp$function;
+				accumulated = $temp$accumulated;
+				continue range;
+			}
+		}
+	});
+var $ianmackenzie$elm_1d_parameter$Parameter1d$steps = F2(
+	function (n, _function) {
+		return (n < 1) ? _List_Nil : A5($ianmackenzie$elm_1d_parameter$Parameter1d$range, 0, n, n, _function, _List_Nil);
+	});
+var $ianmackenzie$elm_geometry$Arc3d$segments = F2(
+	function (numSegments, arc) {
+		return $ianmackenzie$elm_geometry$Polyline3d$fromVertices(
+			A2(
+				$ianmackenzie$elm_1d_parameter$Parameter1d$steps,
+				numSegments,
+				$ianmackenzie$elm_geometry$Arc3d$pointOn(arc)));
+	});
+var $elm$core$Basics$pow = _Basics_pow;
+var $author$project$Geometry101$distance = F2(
+	function (p1, p2) {
+		return $elm$core$Basics$sqrt(
+			A2($elm$core$Basics$pow, p1.x - p2.x, 2.0) + A2($elm$core$Basics$pow, p1.y - p2.y, 2.0));
+	});
+var $ianmackenzie$elm_geometry$Point3d$distanceFrom = F2(
+	function (_v0, _v1) {
+		var p1 = _v0.a;
+		var p2 = _v1.a;
+		var deltaZ = p2.z - p1.z;
+		var deltaY = p2.y - p1.y;
+		var deltaX = p2.x - p1.x;
+		var largestComponent = A2(
+			$elm$core$Basics$max,
+			$elm$core$Basics$abs(deltaX),
+			A2(
+				$elm$core$Basics$max,
+				$elm$core$Basics$abs(deltaY),
+				$elm$core$Basics$abs(deltaZ)));
+		if (!largestComponent) {
+			return $ianmackenzie$elm_units$Quantity$zero;
+		} else {
+			var scaledZ = deltaZ / largestComponent;
+			var scaledY = deltaY / largestComponent;
+			var scaledX = deltaX / largestComponent;
+			var scaledLength = $elm$core$Basics$sqrt(((scaledX * scaledX) + (scaledY * scaledY)) + (scaledZ * scaledZ));
+			return $ianmackenzie$elm_units$Quantity$Quantity(scaledLength * largestComponent);
+		}
+	});
+var $ianmackenzie$elm_geometry$Vector2d$from = F2(
+	function (_v0, _v1) {
+		var p1 = _v0.a;
+		var p2 = _v1.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Vector2d(
+			{x: p2.x - p1.x, y: p2.y - p1.y});
+	});
+var $ianmackenzie$elm_geometry$Geometry$Types$Point2d = function (a) {
+	return {$: 'Point2d', a: a};
+};
+var $ianmackenzie$elm_geometry$Point2d$xy = F2(
+	function (_v0, _v1) {
+		var x = _v0.a;
+		var y = _v1.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point2d(
+			{x: x, y: y});
+	});
+var $ianmackenzie$elm_geometry$Point2d$fromRecord = F2(
+	function (toQuantity, _v0) {
+		var x = _v0.x;
+		var y = _v0.y;
+		return A2(
+			$ianmackenzie$elm_geometry$Point2d$xy,
+			toQuantity(x),
+			toQuantity(y));
+	});
+var $ianmackenzie$elm_geometry$Point3d$interpolateFrom = F3(
+	function (_v0, _v1, t) {
+		var p1 = _v0.a;
+		var p2 = _v1.a;
+		return (t <= 0.5) ? $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+			{x: p1.x + (t * (p2.x - p1.x)), y: p1.y + (t * (p2.y - p1.y)), z: p1.z + (t * (p2.z - p1.z))}) : $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+			{x: p2.x + ((1 - t) * (p1.x - p2.x)), y: p2.y + ((1 - t) * (p1.y - p2.y)), z: p2.z + ((1 - t) * (p1.z - p2.z))});
+	});
+var $author$project$Geometry101$lineEquationFromTwoPoints = F2(
+	function (p1, p2) {
+		var c = (p1.x * p2.y) - (p2.x * p1.y);
+		var b = p2.x - p1.x;
+		var a = p1.y - p2.y;
+		return {a: a, b: b, c: c};
+	});
+var $author$project$Geometry101$matrixInverse = function (m) {
+	var determinant = (m.tl * m.br) - (m.tr * m.bl);
+	return (_Utils_cmp(
+		$elm$core$Basics$abs(determinant),
+		A2($elm$core$Basics$pow, 10, -20)) < 0) ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(
+		{bl: ((-1.0) * m.bl) / determinant, br: m.tl / determinant, tl: m.br / determinant, tr: ((-1.0) * m.tr) / determinant});
+};
+var $author$project$Geometry101$matrixMultiplyColumn = F2(
+	function (m, c) {
+		return {b: (m.bl * c.t) + (m.br * c.b), t: (m.tl * c.t) + (m.tr * c.b)};
+	});
+var $author$project$Geometry101$lineIntersection = F2(
+	function (l1, l2) {
+		var matrix = {bl: l2.a, br: l2.b, tl: l1.a, tr: l1.b};
+		var inv = $author$project$Geometry101$matrixInverse(matrix);
+		var column = {b: (-1.0) * l2.c, t: (-1.0) * l1.c};
+		if (inv.$ === 'Just') {
+			var inverse = inv.a;
+			var col = A2($author$project$Geometry101$matrixMultiplyColumn, inverse, column);
+			return $elm$core$Maybe$Just(
+				{x: col.t, y: col.b});
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $author$project$Geometry101$linePerpendicularTo = F2(
+	function (line, p) {
+		var aybx = (line.a * p.y) - (line.b * p.x);
+		return {a: line.b, b: (-1.0) * line.a, c: aybx};
+	});
+var $ianmackenzie$elm_geometry$Point3d$on = F2(
+	function (_v0, _v1) {
+		var sketchPlane = _v0.a;
+		var p = _v1.a;
+		var _v2 = sketchPlane.originPoint;
+		var p0 = _v2.a;
+		var _v3 = sketchPlane.yDirection;
+		var j = _v3.a;
+		var _v4 = sketchPlane.xDirection;
+		var i = _v4.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+			{x: (p0.x + (p.x * i.x)) + (p.y * j.x), y: (p0.y + (p.x * i.y)) + (p.y * j.y), z: (p0.z + (p.x * i.z)) + (p.y * j.z)});
+	});
+var $ianmackenzie$elm_geometry$Point3d$projectInto = F2(
+	function (_v0, _v1) {
+		var sketchPlane = _v0.a;
+		var p = _v1.a;
+		var _v2 = sketchPlane.originPoint;
+		var p0 = _v2.a;
+		var deltaX = p.x - p0.x;
+		var deltaY = p.y - p0.y;
+		var deltaZ = p.z - p0.z;
+		var _v3 = sketchPlane.yDirection;
+		var j = _v3.a;
+		var _v4 = sketchPlane.xDirection;
+		var i = _v4.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point2d(
+			{x: ((deltaX * i.x) + (deltaY * i.y)) + (deltaZ * i.z), y: ((deltaX * j.x) + (deltaY * j.y)) + (deltaZ * j.z)});
+	});
+var $ianmackenzie$elm_units$Quantity$ratio = F2(
+	function (_v0, _v1) {
+		var x = _v0.a;
+		var y = _v1.a;
+		return x / y;
+	});
+var $ianmackenzie$elm_geometry$Vector2d$scaleTo = F2(
+	function (_v0, _v1) {
+		var q = _v0.a;
+		var v = _v1.a;
+		var largestComponent = A2(
+			$elm$core$Basics$max,
+			$elm$core$Basics$abs(v.x),
+			$elm$core$Basics$abs(v.y));
+		if (!largestComponent) {
+			return $ianmackenzie$elm_geometry$Vector2d$zero;
+		} else {
+			var scaledY = v.y / largestComponent;
+			var scaledX = v.x / largestComponent;
+			var scaledLength = $elm$core$Basics$sqrt((scaledX * scaledX) + (scaledY * scaledY));
+			return $ianmackenzie$elm_geometry$Geometry$Types$Vector2d(
+				{x: (q * scaledX) / scaledLength, y: (q * scaledY) / scaledLength});
+		}
+	});
+var $elm$core$Maybe$andThen = F2(
+	function (callback, maybeValue) {
+		if (maybeValue.$ === 'Just') {
+			var value = maybeValue.a;
+			return callback(value);
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $ianmackenzie$elm_geometry$Geometry$Types$Arc3d = function (a) {
+	return {$: 'Arc3d', a: a};
+};
+var $ianmackenzie$elm_geometry$Geometry$Types$Direction3d = function (a) {
+	return {$: 'Direction3d', a: a};
+};
+var $ianmackenzie$elm_geometry$Direction3d$on = F2(
+	function (_v0, _v1) {
+		var sketchPlane = _v0.a;
+		var d = _v1.a;
+		var _v2 = sketchPlane.yDirection;
+		var j = _v2.a;
+		var _v3 = sketchPlane.xDirection;
+		var i = _v3.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
+			{x: (d.x * i.x) + (d.y * j.x), y: (d.x * i.y) + (d.y * j.y), z: (d.x * i.z) + (d.y * j.z)});
+	});
+var $ianmackenzie$elm_geometry$Direction2d$perpendicularTo = function (_v0) {
+	var d = _v0.a;
+	return $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
+		{x: -d.y, y: d.x});
+};
+var $ianmackenzie$elm_geometry$Arc3d$on = F2(
+	function (sketchPlane, _v0) {
+		var arc2d = _v0.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Arc3d(
+			{
+				signedLength: arc2d.signedLength,
+				startPoint: A2($ianmackenzie$elm_geometry$Point3d$on, sketchPlane, arc2d.startPoint),
+				sweptAngle: arc2d.sweptAngle,
+				xDirection: A2($ianmackenzie$elm_geometry$Direction3d$on, sketchPlane, arc2d.xDirection),
+				yDirection: A2(
+					$ianmackenzie$elm_geometry$Direction3d$on,
+					sketchPlane,
+					$ianmackenzie$elm_geometry$Direction2d$perpendicularTo(arc2d.xDirection))
+			});
+	});
+var $ianmackenzie$elm_geometry$Point2d$circumenterHelp = F6(
+	function (_v0, _v1, _v2, a, b, c) {
+		var p1 = _v0.a;
+		var p2 = _v1.a;
+		var p3 = _v2.a;
+		var bc = b * c;
+		if (!bc) {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var cy = p1.y - p3.y;
+			var cx = p1.x - p3.x;
+			var by = p3.y - p2.y;
+			var bx = p3.x - p2.x;
+			var sinA = ((bx * cy) - (by * cx)) / bc;
+			if (!sinA) {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var cosA = ((bx * cx) + (by * cy)) / bc;
+				var scale = cosA / (2 * sinA);
+				var ay = p2.y - p1.y;
+				var ax = p2.x - p1.x;
+				return $elm$core$Maybe$Just(
+					$ianmackenzie$elm_geometry$Geometry$Types$Point2d(
+						{x: (p1.x + (0.5 * ax)) + (scale * ay), y: (p1.y + (0.5 * ay)) - (scale * ax)}));
+			}
+		}
+	});
+var $ianmackenzie$elm_geometry$Point2d$distanceFrom = F2(
+	function (_v0, _v1) {
+		var p1 = _v0.a;
+		var p2 = _v1.a;
+		var deltaY = p2.y - p1.y;
+		var deltaX = p2.x - p1.x;
+		var largestComponent = A2(
+			$elm$core$Basics$max,
+			$elm$core$Basics$abs(deltaX),
+			$elm$core$Basics$abs(deltaY));
+		if (!largestComponent) {
+			return $ianmackenzie$elm_units$Quantity$zero;
+		} else {
+			var scaledY = deltaY / largestComponent;
+			var scaledX = deltaX / largestComponent;
+			var scaledLength = $elm$core$Basics$sqrt((scaledX * scaledX) + (scaledY * scaledY));
+			return $ianmackenzie$elm_units$Quantity$Quantity(scaledLength * largestComponent);
+		}
+	});
+var $ianmackenzie$elm_geometry$Point2d$circumcenter = F3(
+	function (p1, p2, p3) {
+		var _v0 = A2($ianmackenzie$elm_geometry$Point2d$distanceFrom, p3, p1);
+		var c = _v0.a;
+		var _v1 = A2($ianmackenzie$elm_geometry$Point2d$distanceFrom, p2, p3);
+		var b = _v1.a;
+		var _v2 = A2($ianmackenzie$elm_geometry$Point2d$distanceFrom, p1, p2);
+		var a = _v2.a;
+		return (_Utils_cmp(a, b) > -1) ? ((_Utils_cmp(a, c) > -1) ? A6($ianmackenzie$elm_geometry$Point2d$circumenterHelp, p1, p2, p3, a, b, c) : A6($ianmackenzie$elm_geometry$Point2d$circumenterHelp, p3, p1, p2, c, a, b)) : ((_Utils_cmp(b, c) > -1) ? A6($ianmackenzie$elm_geometry$Point2d$circumenterHelp, p2, p3, p1, b, c, a) : A6($ianmackenzie$elm_geometry$Point2d$circumenterHelp, p3, p1, p2, c, a, b));
+	});
+var $ianmackenzie$elm_geometry$Vector2d$direction = function (_v0) {
+	var v = _v0.a;
+	var largestComponent = A2(
+		$elm$core$Basics$max,
+		$elm$core$Basics$abs(v.x),
+		$elm$core$Basics$abs(v.y));
+	if (!largestComponent) {
+		return $elm$core$Maybe$Nothing;
+	} else {
+		var scaledY = v.y / largestComponent;
+		var scaledX = v.x / largestComponent;
+		var scaledLength = $elm$core$Basics$sqrt((scaledX * scaledX) + (scaledY * scaledY));
+		return $elm$core$Maybe$Just(
+			$ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
+				{x: scaledX / scaledLength, y: scaledY / scaledLength}));
+	}
+};
+var $elm$core$Maybe$map3 = F4(
+	function (func, ma, mb, mc) {
+		if (ma.$ === 'Nothing') {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var a = ma.a;
+			if (mb.$ === 'Nothing') {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var b = mb.a;
+				if (mc.$ === 'Nothing') {
+					return $elm$core$Maybe$Nothing;
+				} else {
+					var c = mc.a;
+					return $elm$core$Maybe$Just(
+						A3(func, a, b, c));
+				}
+			}
+		}
+	});
+var $ianmackenzie$elm_geometry$Geometry$Types$Arc2d = function (a) {
+	return {$: 'Arc2d', a: a};
+};
+var $ianmackenzie$elm_geometry$Vector2d$length = function (_v0) {
+	var v = _v0.a;
+	var largestComponent = A2(
+		$elm$core$Basics$max,
+		$elm$core$Basics$abs(v.x),
+		$elm$core$Basics$abs(v.y));
+	if (!largestComponent) {
+		return $ianmackenzie$elm_units$Quantity$zero;
+	} else {
+		var scaledY = v.y / largestComponent;
+		var scaledX = v.x / largestComponent;
+		var scaledLength = $elm$core$Basics$sqrt((scaledX * scaledX) + (scaledY * scaledY));
+		return $ianmackenzie$elm_units$Quantity$Quantity(scaledLength * largestComponent);
+	}
+};
+var $ianmackenzie$elm_geometry$Quantity$Extra$rTheta = F2(
+	function (_v0, _v1) {
+		var r = _v0.a;
+		var theta = _v1.a;
+		return $ianmackenzie$elm_units$Quantity$Quantity(r * theta);
+	});
+var $ianmackenzie$elm_geometry$Direction2d$rotateClockwise = function (_v0) {
+	var d = _v0.a;
+	return $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
+		{x: d.y, y: -d.x});
+};
+var $ianmackenzie$elm_geometry$Direction2d$positiveX = $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
+	{x: 1, y: 0});
+var $ianmackenzie$elm_geometry$Direction2d$x = $ianmackenzie$elm_geometry$Direction2d$positiveX;
+var $ianmackenzie$elm_geometry$Arc2d$sweptAround = F3(
+	function (givenCenterPoint, givenSweptAngle, givenStartPoint) {
+		var displacement = A2($ianmackenzie$elm_geometry$Vector2d$from, givenStartPoint, givenCenterPoint);
+		var _v0 = $ianmackenzie$elm_geometry$Vector2d$direction(displacement);
+		if (_v0.$ === 'Just') {
+			var yDirection = _v0.a;
+			var computedRadius = $ianmackenzie$elm_geometry$Vector2d$length(displacement);
+			return $ianmackenzie$elm_geometry$Geometry$Types$Arc2d(
+				{
+					signedLength: A2($ianmackenzie$elm_geometry$Quantity$Extra$rTheta, computedRadius, givenSweptAngle),
+					startPoint: givenStartPoint,
+					sweptAngle: givenSweptAngle,
+					xDirection: $ianmackenzie$elm_geometry$Direction2d$rotateClockwise(yDirection)
+				});
+		} else {
+			return $ianmackenzie$elm_geometry$Geometry$Types$Arc2d(
+				{signedLength: $ianmackenzie$elm_units$Quantity$zero, startPoint: givenStartPoint, sweptAngle: givenSweptAngle, xDirection: $ianmackenzie$elm_geometry$Direction2d$x});
+		}
+	});
+var $ianmackenzie$elm_geometry$Arc2d$twoPi = $ianmackenzie$elm_units$Angle$radians(2 * $elm$core$Basics$pi);
+var $ianmackenzie$elm_geometry$Arc2d$throughPoints = F3(
+	function (firstPoint, secondPoint, thirdPoint) {
+		return A2(
+			$elm$core$Maybe$andThen,
+			function (computedCenterPoint) {
+				var thirdVector = A2($ianmackenzie$elm_geometry$Vector2d$from, computedCenterPoint, thirdPoint);
+				var secondVector = A2($ianmackenzie$elm_geometry$Vector2d$from, computedCenterPoint, secondPoint);
+				var firstVector = A2($ianmackenzie$elm_geometry$Vector2d$from, computedCenterPoint, firstPoint);
+				return A4(
+					$elm$core$Maybe$map3,
+					F3(
+						function (firstDirection, secondDirection, thirdDirection) {
+							var partial = A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, firstDirection, secondDirection);
+							var full = A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, firstDirection, thirdDirection);
+							var computedSweptAngle = (A2($ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo, $ianmackenzie$elm_units$Quantity$zero, partial) && A2($ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo, partial, full)) ? full : ((A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, $ianmackenzie$elm_units$Quantity$zero, partial) && A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, partial, full)) ? full : (A2($ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo, $ianmackenzie$elm_units$Quantity$zero, full) ? A2($ianmackenzie$elm_units$Quantity$minus, $ianmackenzie$elm_geometry$Arc2d$twoPi, full) : A2($ianmackenzie$elm_units$Quantity$plus, $ianmackenzie$elm_geometry$Arc2d$twoPi, full)));
+							return A3($ianmackenzie$elm_geometry$Arc2d$sweptAround, computedCenterPoint, computedSweptAngle, firstPoint);
+						}),
+					$ianmackenzie$elm_geometry$Vector2d$direction(firstVector),
+					$ianmackenzie$elm_geometry$Vector2d$direction(secondVector),
+					$ianmackenzie$elm_geometry$Vector2d$direction(thirdVector));
+			},
+			A3($ianmackenzie$elm_geometry$Point2d$circumcenter, firstPoint, secondPoint, thirdPoint));
+	});
+var $ianmackenzie$elm_geometry$Vector3d$direction = function (_v0) {
+	var v = _v0.a;
+	var largestComponent = A2(
+		$elm$core$Basics$max,
+		$elm$core$Basics$abs(v.x),
+		A2(
+			$elm$core$Basics$max,
+			$elm$core$Basics$abs(v.y),
+			$elm$core$Basics$abs(v.z)));
+	if (!largestComponent) {
+		return $elm$core$Maybe$Nothing;
+	} else {
+		var scaledZ = v.z / largestComponent;
+		var scaledY = v.y / largestComponent;
+		var scaledX = v.x / largestComponent;
+		var scaledLength = $elm$core$Basics$sqrt(((scaledX * scaledX) + (scaledY * scaledY)) + (scaledZ * scaledZ));
+		return $elm$core$Maybe$Just(
+			$ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
+				{x: scaledX / scaledLength, y: scaledY / scaledLength, z: scaledZ / scaledLength}));
+	}
+};
+var $ianmackenzie$elm_geometry$Direction3d$from = F2(
+	function (_v0, _v1) {
+		var p1 = _v0.a;
+		var p2 = _v1.a;
+		var deltaZ = p2.z - p1.z;
+		var deltaY = p2.y - p1.y;
+		var deltaX = p2.x - p1.x;
+		var largestComponent = A2(
+			$elm$core$Basics$max,
+			$elm$core$Basics$abs(deltaX),
+			A2(
+				$elm$core$Basics$max,
+				$elm$core$Basics$abs(deltaY),
+				$elm$core$Basics$abs(deltaZ)));
+		if (!largestComponent) {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			var scaledZ = deltaZ / largestComponent;
+			var scaledY = deltaY / largestComponent;
+			var scaledX = deltaX / largestComponent;
+			var scaledLength = $elm$core$Basics$sqrt(((scaledX * scaledX) + (scaledY * scaledY)) + (scaledZ * scaledZ));
+			return $elm$core$Maybe$Just(
+				$ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
+					{x: scaledX / scaledLength, y: scaledY / scaledLength, z: scaledZ / scaledLength}));
+		}
+	});
 var $ianmackenzie$elm_geometry$Geometry$Types$Vector3d = function (a) {
 	return {$: 'Vector3d', a: a};
 };
@@ -12782,6 +13262,235 @@ var $ianmackenzie$elm_geometry$Vector3d$minus = F2(
 		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
 			{x: v1.x - v2.x, y: v1.y - v2.y, z: v1.z - v2.z});
 	});
+var $ianmackenzie$elm_geometry$Vector3d$projectionIn = F2(
+	function (_v0, _v1) {
+		var d = _v0.a;
+		var v = _v1.a;
+		var projectedLength = ((v.x * d.x) + (v.y * d.y)) + (v.z * d.z);
+		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
+			{x: d.x * projectedLength, y: d.y * projectedLength, z: d.z * projectedLength});
+	});
+var $ianmackenzie$elm_geometry$Geometry$Types$SketchPlane3d = function (a) {
+	return {$: 'SketchPlane3d', a: a};
+};
+var $ianmackenzie$elm_geometry$SketchPlane3d$unsafe = $ianmackenzie$elm_geometry$Geometry$Types$SketchPlane3d;
+var $ianmackenzie$elm_geometry$SketchPlane3d$throughPoints = F3(
+	function (firstPoint, secondPoint, thirdPoint) {
+		return A2(
+			$elm$core$Maybe$andThen,
+			function (computedXDirection) {
+				var secondCandidate = A2($ianmackenzie$elm_geometry$Vector3d$from, secondPoint, thirdPoint);
+				var firstCandidate = A2($ianmackenzie$elm_geometry$Vector3d$from, firstPoint, thirdPoint);
+				var chosenVector = A2(
+					$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
+					$ianmackenzie$elm_geometry$Vector3d$length(secondCandidate),
+					$ianmackenzie$elm_geometry$Vector3d$length(firstCandidate)) ? firstCandidate : secondCandidate;
+				var yVector = A2(
+					$ianmackenzie$elm_geometry$Vector3d$minus,
+					A2($ianmackenzie$elm_geometry$Vector3d$projectionIn, computedXDirection, chosenVector),
+					chosenVector);
+				return A2(
+					$elm$core$Maybe$map,
+					function (computedYDirection) {
+						return $ianmackenzie$elm_geometry$SketchPlane3d$unsafe(
+							{originPoint: firstPoint, xDirection: computedXDirection, yDirection: computedYDirection});
+					},
+					$ianmackenzie$elm_geometry$Vector3d$direction(yVector));
+			},
+			A2($ianmackenzie$elm_geometry$Direction3d$from, firstPoint, secondPoint));
+	});
+var $ianmackenzie$elm_geometry$Arc3d$throughPoints = F3(
+	function (firstPoint, secondPoint, thirdPoint) {
+		return A2(
+			$elm$core$Maybe$andThen,
+			function (sketchPlane) {
+				return A2(
+					$elm$core$Maybe$map,
+					$ianmackenzie$elm_geometry$Arc3d$on(sketchPlane),
+					A3(
+						$ianmackenzie$elm_geometry$Arc2d$throughPoints,
+						A2($ianmackenzie$elm_geometry$Point3d$projectInto, sketchPlane, firstPoint),
+						A2($ianmackenzie$elm_geometry$Point3d$projectInto, sketchPlane, secondPoint),
+						A2($ianmackenzie$elm_geometry$Point3d$projectInto, sketchPlane, thirdPoint)));
+			},
+			A3($ianmackenzie$elm_geometry$SketchPlane3d$throughPoints, firstPoint, secondPoint, thirdPoint));
+	});
+var $ianmackenzie$elm_geometry$Point2d$xCoordinate = function (_v0) {
+	var p = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(p.x);
+};
+var $ianmackenzie$elm_geometry$Point2d$yCoordinate = function (_v0) {
+	var p = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(p.y);
+};
+var $ianmackenzie$elm_geometry$Point2d$toRecord = F2(
+	function (fromQuantity, point) {
+		return {
+			x: fromQuantity(
+				$ianmackenzie$elm_geometry$Point2d$xCoordinate(point)),
+			y: fromQuantity(
+				$ianmackenzie$elm_geometry$Point2d$yCoordinate(point))
+		};
+	});
+var $ianmackenzie$elm_geometry$Point2d$translateBy = F2(
+	function (_v0, _v1) {
+		var v = _v0.a;
+		var p = _v1.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point2d(
+			{x: p.x + v.x, y: p.y + v.y});
+	});
+var $author$project$Tools$BendSmoother$arc3dFromThreePoints = F3(
+	function (pa, pb, pc) {
+		var trianglePlane = A3($ianmackenzie$elm_geometry$SketchPlane3d$throughPoints, pa, pb, pc);
+		var _v0 = _Utils_Tuple2(
+			A2($ianmackenzie$elm_geometry$Point3d$distanceFrom, pa, pb),
+			A2($ianmackenzie$elm_geometry$Point3d$distanceFrom, pb, pc));
+		var beforeLength = _v0.a;
+		var afterLength = _v0.b;
+		var amountToStealFromSecondSegment = A2(
+			$ianmackenzie$elm_units$Quantity$min,
+			$ianmackenzie$elm_units$Length$meters(4.0),
+			$ianmackenzie$elm_units$Quantity$half(afterLength));
+		var amountToStealFromFirstSegment = A2(
+			$ianmackenzie$elm_units$Quantity$min,
+			$ianmackenzie$elm_units$Length$meters(4.0),
+			$ianmackenzie$elm_units$Quantity$half(beforeLength));
+		var commonAmountToSteal = A2($ianmackenzie$elm_units$Quantity$min, amountToStealFromFirstSegment, amountToStealFromSecondSegment);
+		var arcEnd = A3(
+			$ianmackenzie$elm_geometry$Point3d$interpolateFrom,
+			pb,
+			pc,
+			A2($ianmackenzie$elm_units$Quantity$ratio, commonAmountToSteal, afterLength));
+		var arcStart = A3(
+			$ianmackenzie$elm_geometry$Point3d$interpolateFrom,
+			pb,
+			pa,
+			A2($ianmackenzie$elm_units$Quantity$ratio, commonAmountToSteal, beforeLength));
+		if (trianglePlane.$ === 'Just') {
+			var plane = trianglePlane.a;
+			var _v2 = _Utils_Tuple3(
+				A2($ianmackenzie$elm_geometry$Point3d$projectInto, plane, arcStart),
+				A2($ianmackenzie$elm_geometry$Point3d$projectInto, plane, pb),
+				A2($ianmackenzie$elm_geometry$Point3d$projectInto, plane, arcEnd));
+			var planarA = _v2.a;
+			var planarB = _v2.b;
+			var planarC = _v2.c;
+			var findArc = function (centre) {
+				var radius = A2(
+					$author$project$Geometry101$distance,
+					centre,
+					A2($ianmackenzie$elm_geometry$Point2d$toRecord, $ianmackenzie$elm_units$Length$inMeters, planarA));
+				var bisector = A2(
+					$ianmackenzie$elm_geometry$Vector2d$from,
+					A2($ianmackenzie$elm_geometry$Point2d$fromRecord, $ianmackenzie$elm_units$Length$meters, centre),
+					planarB);
+				var midArcPoint = A2(
+					$ianmackenzie$elm_geometry$Point2d$translateBy,
+					A2(
+						$ianmackenzie$elm_geometry$Vector2d$scaleTo,
+						$ianmackenzie$elm_units$Length$meters(radius),
+						bisector),
+					A2($ianmackenzie$elm_geometry$Point2d$fromRecord, $ianmackenzie$elm_units$Length$meters, centre));
+				var midPoint3d = A2($ianmackenzie$elm_geometry$Point3d$on, plane, midArcPoint);
+				return A3($ianmackenzie$elm_geometry$Arc3d$throughPoints, arcStart, midPoint3d, arcEnd);
+			};
+			var _v3 = _Utils_Tuple2(
+				A2(
+					$author$project$Geometry101$lineEquationFromTwoPoints,
+					A2($ianmackenzie$elm_geometry$Point2d$toRecord, $ianmackenzie$elm_units$Length$inMeters, planarA),
+					A2($ianmackenzie$elm_geometry$Point2d$toRecord, $ianmackenzie$elm_units$Length$inMeters, planarB)),
+				A2(
+					$author$project$Geometry101$lineEquationFromTwoPoints,
+					A2($ianmackenzie$elm_geometry$Point2d$toRecord, $ianmackenzie$elm_units$Length$inMeters, planarB),
+					A2($ianmackenzie$elm_geometry$Point2d$toRecord, $ianmackenzie$elm_units$Length$inMeters, planarC)));
+			var r1Equation = _v3.a;
+			var r2Equation = _v3.b;
+			var _v4 = _Utils_Tuple2(
+				A2(
+					$author$project$Geometry101$linePerpendicularTo,
+					r1Equation,
+					A2($ianmackenzie$elm_geometry$Point2d$toRecord, $ianmackenzie$elm_units$Length$inMeters, planarA)),
+				A2(
+					$author$project$Geometry101$linePerpendicularTo,
+					r2Equation,
+					A2($ianmackenzie$elm_geometry$Point2d$toRecord, $ianmackenzie$elm_units$Length$inMeters, planarC)));
+			var perpFromFirstTangentPoint = _v4.a;
+			var perpFromSecondTangentPoint = _v4.b;
+			var circleCenter = A2($author$project$Geometry101$lineIntersection, perpFromFirstTangentPoint, perpFromSecondTangentPoint);
+			return A2(
+				$elm$core$Maybe$withDefault,
+				$elm$core$Maybe$Nothing,
+				A2($elm$core$Maybe$map, findArc, circleCenter));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $author$project$Tools$BendSmoother$singlePoint3dArc = F2(
+	function (track, index) {
+		var _v0 = _Utils_Tuple3(
+			A2($author$project$DomainModel$earthPointFromIndex, index - 1, track.trackTree),
+			A2($author$project$DomainModel$earthPointFromIndex, index + 0, track.trackTree),
+			A2($author$project$DomainModel$earthPointFromIndex, index + 1, track.trackTree));
+		var pa = _v0.a;
+		var pb = _v0.b;
+		var pc = _v0.c;
+		return A3($author$project$Tools$BendSmoother$arc3dFromThreePoints, pa, pb, pc);
+	});
+var $ianmackenzie$elm_geometry$Polyline3d$vertices = function (_v0) {
+	var polylineVertices = _v0.a;
+	return polylineVertices;
+};
+var $author$project$Tools$BendSmoother$softenSinglePoint = F3(
+	function (numSegments, index, track) {
+		var _v0 = A2($author$project$Tools$BendSmoother$singlePoint3dArc, track, index);
+		if (_v0.$ === 'Just') {
+			var arc = _v0.a;
+			var oldPoints = _List_fromArray(
+				[
+					A2($author$project$DomainModel$getDualCoords, track.trackTree, index)
+				]);
+			var gpxPoints = A2(
+				$elm$core$List$map,
+				$author$project$DomainModel$gpxFromPointWithReference(track.referenceLonLat),
+				$ianmackenzie$elm_geometry$Polyline3d$vertices(
+					A2($ianmackenzie$elm_geometry$Arc3d$segments, numSegments, arc)));
+			var newTree = A5(
+				$author$project$DomainModel$replaceRange,
+				index,
+				$author$project$DomainModel$skipCount(track.trackTree) - index,
+				track.referenceLonLat,
+				gpxPoints,
+				track.trackTree);
+			return _Utils_Tuple2(
+				newTree,
+				A2($elm$core$List$map, $elm$core$Tuple$second, oldPoints));
+		} else {
+			return _Utils_Tuple2(
+				$elm$core$Maybe$Just(track.trackTree),
+				_List_Nil);
+		}
+	});
+var $author$project$Tools$BendSmoother$applyUsingOptions = F2(
+	function (options, track) {
+		var _v0 = options.mode;
+		if (_v0.$ === 'SmoothPoint') {
+			return A3($author$project$Tools$BendSmoother$softenSinglePoint, options.segments, track.currentPosition, track);
+		} else {
+			return A2($author$project$Tools$BendSmoother$applyClassicBendSmoother, options, track);
+		}
+	});
+var $author$project$BezierSplines$SplineFoldState = F3(
+	function (roadMinusOne, roadMinusTwo, newPoints) {
+		return {newPoints: newPoints, roadMinusOne: roadMinusOne, roadMinusTwo: roadMinusTwo};
+	});
+var $ianmackenzie$elm_geometry$CubicSpline3d$firstControlPoint = function (_v0) {
+	var spline = _v0.a;
+	return spline.firstControlPoint;
+};
+var $ianmackenzie$elm_geometry$CubicSpline3d$fourthControlPoint = function (_v0) {
+	var spline = _v0.a;
+	return spline.fourthControlPoint;
+};
 var $ianmackenzie$elm_units$Quantity$multiplyBy = F2(
 	function (scale, _v0) {
 		var value = _v0.a;
@@ -12819,12 +13528,6 @@ var $ianmackenzie$elm_units$Quantity$greaterThan = F2(
 		var x = _v1.a;
 		return _Utils_cmp(x, y) > 0;
 	});
-var $ianmackenzie$elm_units$Quantity$ratio = F2(
-	function (_v0, _v1) {
-		var x = _v0.a;
-		var y = _v1.a;
-		return x / y;
-	});
 var $ianmackenzie$elm_geometry$Curve$numApproximationSegments = function (_v0) {
 	var maxError = _v0.maxError;
 	var maxSecondDerivativeMagnitude = _v0.maxSecondDerivativeMagnitude;
@@ -12850,20 +13553,6 @@ var $ianmackenzie$elm_geometry$CubicSpline3d$numApproximationSegments = F2(
 				maxSecondDerivativeMagnitude: $ianmackenzie$elm_geometry$CubicSpline3d$maxSecondDerivativeMagnitude(spline)
 			});
 	});
-var $ianmackenzie$elm_geometry$Geometry$Types$Polyline3d = function (a) {
-	return {$: 'Polyline3d', a: a};
-};
-var $ianmackenzie$elm_geometry$Polyline3d$fromVertices = function (givenVertices) {
-	return $ianmackenzie$elm_geometry$Geometry$Types$Polyline3d(givenVertices);
-};
-var $ianmackenzie$elm_geometry$Point3d$interpolateFrom = F3(
-	function (_v0, _v1, t) {
-		var p1 = _v0.a;
-		var p2 = _v1.a;
-		return (t <= 0.5) ? $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
-			{x: p1.x + (t * (p2.x - p1.x)), y: p1.y + (t * (p2.y - p1.y)), z: p1.z + (t * (p2.z - p1.z))}) : $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
-			{x: p2.x + ((1 - t) * (p1.x - p2.x)), y: p2.y + ((1 - t) * (p1.y - p2.y)), z: p2.z + ((1 - t) * (p1.z - p2.z))});
-	});
 var $ianmackenzie$elm_geometry$CubicSpline3d$pointOn = F2(
 	function (spline, parameterValue) {
 		var p4 = $ianmackenzie$elm_geometry$CubicSpline3d$fourthControlPoint(spline);
@@ -12876,33 +13565,6 @@ var $ianmackenzie$elm_geometry$CubicSpline3d$pointOn = F2(
 		var q1 = A3($ianmackenzie$elm_geometry$Point3d$interpolateFrom, p1, p2, parameterValue);
 		var r1 = A3($ianmackenzie$elm_geometry$Point3d$interpolateFrom, q1, q2, parameterValue);
 		return A3($ianmackenzie$elm_geometry$Point3d$interpolateFrom, r1, r2, parameterValue);
-	});
-var $ianmackenzie$elm_1d_parameter$Parameter1d$range = F5(
-	function (startIndex, index, divisor, _function, accumulated) {
-		range:
-		while (true) {
-			var newValue = _function(index / divisor);
-			var newAccumulated = A2($elm$core$List$cons, newValue, accumulated);
-			if (_Utils_eq(index, startIndex)) {
-				return newAccumulated;
-			} else {
-				var $temp$startIndex = startIndex,
-					$temp$index = index - 1,
-					$temp$divisor = divisor,
-					$temp$function = _function,
-					$temp$accumulated = newAccumulated;
-				startIndex = $temp$startIndex;
-				index = $temp$index;
-				divisor = $temp$divisor;
-				_function = $temp$function;
-				accumulated = $temp$accumulated;
-				continue range;
-			}
-		}
-	});
-var $ianmackenzie$elm_1d_parameter$Parameter1d$steps = F2(
-	function (n, _function) {
-		return (n < 1) ? _List_Nil : A5($ianmackenzie$elm_1d_parameter$Parameter1d$range, 0, n, n, _function, _List_Nil);
 	});
 var $ianmackenzie$elm_geometry$CubicSpline3d$segments = F2(
 	function (numSegments, spline) {
@@ -12934,10 +13596,6 @@ var $ianmackenzie$elm_geometry$Point3d$midpoint = F2(
 		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
 			{x: p1.x + (0.5 * (p2.x - p1.x)), y: p1.y + (0.5 * (p2.y - p1.y)), z: p1.z + (0.5 * (p2.z - p1.z))});
 	});
-var $ianmackenzie$elm_geometry$Polyline3d$vertices = function (_v0) {
-	var polylineVertices = _v0.a;
-	return polylineVertices;
-};
 var $author$project$BezierSplines$bezierSplineApproximation = F6(
 	function (isLoop, tension, tolerance, startIndx, endIndex, treeNode) {
 		var midPoint = function (road) {
@@ -13284,9 +13942,6 @@ var $ianmackenzie$elm_geometry$Plane3d$through = F2(
 		return $ianmackenzie$elm_geometry$Geometry$Types$Plane3d(
 			{normalDirection: givenNormalDirection, originPoint: givenPoint});
 	});
-var $ianmackenzie$elm_geometry$Geometry$Types$Direction3d = function (a) {
-	return {$: 'Direction3d', a: a};
-};
 var $ianmackenzie$elm_geometry$Direction3d$unsafe = function (givenComponents) {
 	return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(givenComponents);
 };
@@ -13524,22 +14179,6 @@ var $author$project$Tools$Nudge$effectiveDirection = F2(
 		var bisectedAngle = A2($ianmackenzie$elm_geometry$Direction2d$rotateBy, halfDeviation, precedingLeaf.directionAtStart);
 		return bisectedAngle;
 	});
-var $ianmackenzie$elm_geometry$Direction3d$on = F2(
-	function (_v0, _v1) {
-		var sketchPlane = _v0.a;
-		var d = _v1.a;
-		var _v2 = sketchPlane.yDirection;
-		var j = _v2.a;
-		var _v3 = sketchPlane.xDirection;
-		var i = _v3.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
-			{x: (d.x * i.x) + (d.y * j.x), y: (d.x * i.y) + (d.y * j.y), z: (d.x * i.z) + (d.y * j.z)});
-	});
-var $ianmackenzie$elm_geometry$Direction2d$rotateClockwise = function (_v0) {
-	var d = _v0.a;
-	return $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
-		{x: d.y, y: -d.x});
-};
 var $ianmackenzie$elm_geometry$Vector3d$withLength = F2(
 	function (_v0, _v1) {
 		var a = _v0.a;
@@ -13547,10 +14186,6 @@ var $ianmackenzie$elm_geometry$Vector3d$withLength = F2(
 		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
 			{x: a * d.x, y: a * d.y, z: a * d.z});
 	});
-var $ianmackenzie$elm_geometry$Geometry$Types$SketchPlane3d = function (a) {
-	return {$: 'SketchPlane3d', a: a};
-};
-var $ianmackenzie$elm_geometry$SketchPlane3d$unsafe = $ianmackenzie$elm_geometry$Geometry$Types$SketchPlane3d;
 var $ianmackenzie$elm_geometry$Direction3d$positiveX = $ianmackenzie$elm_geometry$Direction3d$unsafe(
 	{x: 1, y: 0, z: 0});
 var $ianmackenzie$elm_geometry$Direction3d$x = $ianmackenzie$elm_geometry$Direction3d$positiveX;
@@ -13948,12 +14583,6 @@ var $author$project$Actions$PreviewCircle = {$: 'PreviewCircle'};
 var $author$project$Actions$ShowPreview = function (a) {
 	return {$: 'ShowPreview', a: a};
 };
-var $author$project$DomainModel$getDualCoords = F2(
-	function (tree, index) {
-		return _Utils_Tuple2(
-			A2($author$project$DomainModel$earthPointFromIndex, index, tree),
-			A2($author$project$DomainModel$gpxPointFromIndex, index, tree));
-	});
 var $author$project$DomainModel$buildPreview = F2(
 	function (indices, tree) {
 		return A2(
@@ -14077,27 +14706,9 @@ var $ianmackenzie$elm_geometry$Direction2d$xComponent = function (_v0) {
 	var d = _v0.a;
 	return d.x;
 };
-var $ianmackenzie$elm_geometry$Point2d$xCoordinate = function (_v0) {
-	var p = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(p.x);
-};
-var $ianmackenzie$elm_geometry$Geometry$Types$Point2d = function (a) {
-	return {$: 'Point2d', a: a};
-};
-var $ianmackenzie$elm_geometry$Point2d$xy = F2(
-	function (_v0, _v1) {
-		var x = _v0.a;
-		var y = _v1.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Point2d(
-			{x: x, y: y});
-	});
 var $ianmackenzie$elm_geometry$Direction2d$yComponent = function (_v0) {
 	var d = _v0.a;
 	return d.y;
-};
-var $ianmackenzie$elm_geometry$Point2d$yCoordinate = function (_v0) {
-	var p = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(p.y);
 };
 var $ianmackenzie$elm_geometry$Arc2d$centerPoint = function (_v0) {
 	var arc = _v0.a;
@@ -14116,12 +14727,6 @@ var $ianmackenzie$elm_geometry$Arc2d$centerPoint = function (_v0) {
 		x0);
 	return A2($ianmackenzie$elm_geometry$Point2d$xy, cx, cy);
 };
-var $elm$core$Basics$pow = _Basics_pow;
-var $author$project$Geometry101$distance = F2(
-	function (p1, p2) {
-		return $elm$core$Basics$sqrt(
-			A2($elm$core$Basics$pow, p1.x - p2.x, 2.0) + A2($elm$core$Basics$pow, p1.y - p2.y, 2.0));
-	});
 var $author$project$Geometry101$interpolateScalar = F3(
 	function (fraction, a, b) {
 		return (b * fraction) + (a * (1.0 - fraction));
@@ -14132,43 +14737,6 @@ var $author$project$Geometry101$interpolateLine = F3(
 			x: A3($author$project$Geometry101$interpolateScalar, fraction, p1.x, p2.x),
 			y: A3($author$project$Geometry101$interpolateScalar, fraction, p1.y, p2.y)
 		};
-	});
-var $author$project$Geometry101$lineEquationFromTwoPoints = F2(
-	function (p1, p2) {
-		var c = (p1.x * p2.y) - (p2.x * p1.y);
-		var b = p2.x - p1.x;
-		var a = p1.y - p2.y;
-		return {a: a, b: b, c: c};
-	});
-var $author$project$Geometry101$matrixInverse = function (m) {
-	var determinant = (m.tl * m.br) - (m.tr * m.bl);
-	return (_Utils_cmp(
-		$elm$core$Basics$abs(determinant),
-		A2($elm$core$Basics$pow, 10, -20)) < 0) ? $elm$core$Maybe$Nothing : $elm$core$Maybe$Just(
-		{bl: ((-1.0) * m.bl) / determinant, br: m.tl / determinant, tl: m.br / determinant, tr: ((-1.0) * m.tr) / determinant});
-};
-var $author$project$Geometry101$matrixMultiplyColumn = F2(
-	function (m, c) {
-		return {b: (m.bl * c.t) + (m.br * c.b), t: (m.tl * c.t) + (m.tr * c.b)};
-	});
-var $author$project$Geometry101$lineIntersection = F2(
-	function (l1, l2) {
-		var matrix = {bl: l2.a, br: l2.b, tl: l1.a, tr: l1.b};
-		var inv = $author$project$Geometry101$matrixInverse(matrix);
-		var column = {b: (-1.0) * l2.c, t: (-1.0) * l1.c};
-		if (inv.$ === 'Just') {
-			var inverse = inv.a;
-			var col = A2($author$project$Geometry101$matrixMultiplyColumn, inverse, column);
-			return $elm$core$Maybe$Just(
-				{x: col.t, y: col.b});
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
-var $author$project$Geometry101$linePerpendicularTo = F2(
-	function (line, p) {
-		var aybx = (line.a * p.y) - (line.b * p.x);
-		return {a: line.b, b: (-1.0) * line.a, c: aybx};
 	});
 var $ianmackenzie$elm_geometry$Point2d$meters = F2(
 	function (x, y) {
@@ -14183,185 +14751,6 @@ var $author$project$Geometry101$pointAlongRoad = F2(
 var $author$project$Geometry101$pointsToGeometry = F2(
 	function (p1, p2) {
 		return {endsAt: p2, startAt: p1};
-	});
-var $elm$core$Maybe$andThen = F2(
-	function (callback, maybeValue) {
-		if (maybeValue.$ === 'Just') {
-			var value = maybeValue.a;
-			return callback(value);
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
-var $ianmackenzie$elm_geometry$Point2d$circumenterHelp = F6(
-	function (_v0, _v1, _v2, a, b, c) {
-		var p1 = _v0.a;
-		var p2 = _v1.a;
-		var p3 = _v2.a;
-		var bc = b * c;
-		if (!bc) {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			var cy = p1.y - p3.y;
-			var cx = p1.x - p3.x;
-			var by = p3.y - p2.y;
-			var bx = p3.x - p2.x;
-			var sinA = ((bx * cy) - (by * cx)) / bc;
-			if (!sinA) {
-				return $elm$core$Maybe$Nothing;
-			} else {
-				var cosA = ((bx * cx) + (by * cy)) / bc;
-				var scale = cosA / (2 * sinA);
-				var ay = p2.y - p1.y;
-				var ax = p2.x - p1.x;
-				return $elm$core$Maybe$Just(
-					$ianmackenzie$elm_geometry$Geometry$Types$Point2d(
-						{x: (p1.x + (0.5 * ax)) + (scale * ay), y: (p1.y + (0.5 * ay)) - (scale * ax)}));
-			}
-		}
-	});
-var $ianmackenzie$elm_geometry$Point2d$distanceFrom = F2(
-	function (_v0, _v1) {
-		var p1 = _v0.a;
-		var p2 = _v1.a;
-		var deltaY = p2.y - p1.y;
-		var deltaX = p2.x - p1.x;
-		var largestComponent = A2(
-			$elm$core$Basics$max,
-			$elm$core$Basics$abs(deltaX),
-			$elm$core$Basics$abs(deltaY));
-		if (!largestComponent) {
-			return $ianmackenzie$elm_units$Quantity$zero;
-		} else {
-			var scaledY = deltaY / largestComponent;
-			var scaledX = deltaX / largestComponent;
-			var scaledLength = $elm$core$Basics$sqrt((scaledX * scaledX) + (scaledY * scaledY));
-			return $ianmackenzie$elm_units$Quantity$Quantity(scaledLength * largestComponent);
-		}
-	});
-var $ianmackenzie$elm_geometry$Point2d$circumcenter = F3(
-	function (p1, p2, p3) {
-		var _v0 = A2($ianmackenzie$elm_geometry$Point2d$distanceFrom, p3, p1);
-		var c = _v0.a;
-		var _v1 = A2($ianmackenzie$elm_geometry$Point2d$distanceFrom, p2, p3);
-		var b = _v1.a;
-		var _v2 = A2($ianmackenzie$elm_geometry$Point2d$distanceFrom, p1, p2);
-		var a = _v2.a;
-		return (_Utils_cmp(a, b) > -1) ? ((_Utils_cmp(a, c) > -1) ? A6($ianmackenzie$elm_geometry$Point2d$circumenterHelp, p1, p2, p3, a, b, c) : A6($ianmackenzie$elm_geometry$Point2d$circumenterHelp, p3, p1, p2, c, a, b)) : ((_Utils_cmp(b, c) > -1) ? A6($ianmackenzie$elm_geometry$Point2d$circumenterHelp, p2, p3, p1, b, c, a) : A6($ianmackenzie$elm_geometry$Point2d$circumenterHelp, p3, p1, p2, c, a, b));
-	});
-var $ianmackenzie$elm_geometry$Vector2d$direction = function (_v0) {
-	var v = _v0.a;
-	var largestComponent = A2(
-		$elm$core$Basics$max,
-		$elm$core$Basics$abs(v.x),
-		$elm$core$Basics$abs(v.y));
-	if (!largestComponent) {
-		return $elm$core$Maybe$Nothing;
-	} else {
-		var scaledY = v.y / largestComponent;
-		var scaledX = v.x / largestComponent;
-		var scaledLength = $elm$core$Basics$sqrt((scaledX * scaledX) + (scaledY * scaledY));
-		return $elm$core$Maybe$Just(
-			$ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
-				{x: scaledX / scaledLength, y: scaledY / scaledLength}));
-	}
-};
-var $ianmackenzie$elm_geometry$Vector2d$from = F2(
-	function (_v0, _v1) {
-		var p1 = _v0.a;
-		var p2 = _v1.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Vector2d(
-			{x: p2.x - p1.x, y: p2.y - p1.y});
-	});
-var $elm$core$Maybe$map3 = F4(
-	function (func, ma, mb, mc) {
-		if (ma.$ === 'Nothing') {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			var a = ma.a;
-			if (mb.$ === 'Nothing') {
-				return $elm$core$Maybe$Nothing;
-			} else {
-				var b = mb.a;
-				if (mc.$ === 'Nothing') {
-					return $elm$core$Maybe$Nothing;
-				} else {
-					var c = mc.a;
-					return $elm$core$Maybe$Just(
-						A3(func, a, b, c));
-				}
-			}
-		}
-	});
-var $ianmackenzie$elm_geometry$Geometry$Types$Arc2d = function (a) {
-	return {$: 'Arc2d', a: a};
-};
-var $ianmackenzie$elm_geometry$Vector2d$length = function (_v0) {
-	var v = _v0.a;
-	var largestComponent = A2(
-		$elm$core$Basics$max,
-		$elm$core$Basics$abs(v.x),
-		$elm$core$Basics$abs(v.y));
-	if (!largestComponent) {
-		return $ianmackenzie$elm_units$Quantity$zero;
-	} else {
-		var scaledY = v.y / largestComponent;
-		var scaledX = v.x / largestComponent;
-		var scaledLength = $elm$core$Basics$sqrt((scaledX * scaledX) + (scaledY * scaledY));
-		return $ianmackenzie$elm_units$Quantity$Quantity(scaledLength * largestComponent);
-	}
-};
-var $ianmackenzie$elm_geometry$Quantity$Extra$rTheta = F2(
-	function (_v0, _v1) {
-		var r = _v0.a;
-		var theta = _v1.a;
-		return $ianmackenzie$elm_units$Quantity$Quantity(r * theta);
-	});
-var $ianmackenzie$elm_geometry$Direction2d$positiveX = $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
-	{x: 1, y: 0});
-var $ianmackenzie$elm_geometry$Direction2d$x = $ianmackenzie$elm_geometry$Direction2d$positiveX;
-var $ianmackenzie$elm_geometry$Arc2d$sweptAround = F3(
-	function (givenCenterPoint, givenSweptAngle, givenStartPoint) {
-		var displacement = A2($ianmackenzie$elm_geometry$Vector2d$from, givenStartPoint, givenCenterPoint);
-		var _v0 = $ianmackenzie$elm_geometry$Vector2d$direction(displacement);
-		if (_v0.$ === 'Just') {
-			var yDirection = _v0.a;
-			var computedRadius = $ianmackenzie$elm_geometry$Vector2d$length(displacement);
-			return $ianmackenzie$elm_geometry$Geometry$Types$Arc2d(
-				{
-					signedLength: A2($ianmackenzie$elm_geometry$Quantity$Extra$rTheta, computedRadius, givenSweptAngle),
-					startPoint: givenStartPoint,
-					sweptAngle: givenSweptAngle,
-					xDirection: $ianmackenzie$elm_geometry$Direction2d$rotateClockwise(yDirection)
-				});
-		} else {
-			return $ianmackenzie$elm_geometry$Geometry$Types$Arc2d(
-				{signedLength: $ianmackenzie$elm_units$Quantity$zero, startPoint: givenStartPoint, sweptAngle: givenSweptAngle, xDirection: $ianmackenzie$elm_geometry$Direction2d$x});
-		}
-	});
-var $ianmackenzie$elm_geometry$Arc2d$twoPi = $ianmackenzie$elm_units$Angle$radians(2 * $elm$core$Basics$pi);
-var $ianmackenzie$elm_geometry$Arc2d$throughPoints = F3(
-	function (firstPoint, secondPoint, thirdPoint) {
-		return A2(
-			$elm$core$Maybe$andThen,
-			function (computedCenterPoint) {
-				var thirdVector = A2($ianmackenzie$elm_geometry$Vector2d$from, computedCenterPoint, thirdPoint);
-				var secondVector = A2($ianmackenzie$elm_geometry$Vector2d$from, computedCenterPoint, secondPoint);
-				var firstVector = A2($ianmackenzie$elm_geometry$Vector2d$from, computedCenterPoint, firstPoint);
-				return A4(
-					$elm$core$Maybe$map3,
-					F3(
-						function (firstDirection, secondDirection, thirdDirection) {
-							var partial = A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, firstDirection, secondDirection);
-							var full = A2($ianmackenzie$elm_geometry$Direction2d$angleFrom, firstDirection, thirdDirection);
-							var computedSweptAngle = (A2($ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo, $ianmackenzie$elm_units$Quantity$zero, partial) && A2($ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo, partial, full)) ? full : ((A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, $ianmackenzie$elm_units$Quantity$zero, partial) && A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, partial, full)) ? full : (A2($ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo, $ianmackenzie$elm_units$Quantity$zero, full) ? A2($ianmackenzie$elm_units$Quantity$minus, $ianmackenzie$elm_geometry$Arc2d$twoPi, full) : A2($ianmackenzie$elm_units$Quantity$plus, $ianmackenzie$elm_geometry$Arc2d$twoPi, full)));
-							return A3($ianmackenzie$elm_geometry$Arc2d$sweptAround, computedCenterPoint, computedSweptAngle, firstPoint);
-						}),
-					$ianmackenzie$elm_geometry$Vector2d$direction(firstVector),
-					$ianmackenzie$elm_geometry$Vector2d$direction(secondVector),
-					$ianmackenzie$elm_geometry$Vector2d$direction(thirdVector));
-			},
-			A3($ianmackenzie$elm_geometry$Point2d$circumcenter, firstPoint, secondPoint, thirdPoint));
 	});
 var $ianmackenzie$elm_geometry$Point3d$toRecord = F2(
 	function (fromQuantity, point) {
@@ -14527,30 +14916,6 @@ var $author$project$Geometry101$isBefore = F2(
 	function (r, p) {
 		return A3($author$project$Geometry101$antiInterpolate, p, r.startAt, r.endsAt) < 0.0;
 	});
-var $ianmackenzie$elm_geometry$Point3d$distanceFrom = F2(
-	function (_v0, _v1) {
-		var p1 = _v0.a;
-		var p2 = _v1.a;
-		var deltaZ = p2.z - p1.z;
-		var deltaY = p2.y - p1.y;
-		var deltaX = p2.x - p1.x;
-		var largestComponent = A2(
-			$elm$core$Basics$max,
-			$elm$core$Basics$abs(deltaX),
-			A2(
-				$elm$core$Basics$max,
-				$elm$core$Basics$abs(deltaY),
-				$elm$core$Basics$abs(deltaZ)));
-		if (!largestComponent) {
-			return $ianmackenzie$elm_units$Quantity$zero;
-		} else {
-			var scaledZ = deltaZ / largestComponent;
-			var scaledY = deltaY / largestComponent;
-			var scaledX = deltaX / largestComponent;
-			var scaledLength = $elm$core$Basics$sqrt(((scaledX * scaledX) + (scaledY * scaledY)) + (scaledZ * scaledZ));
-			return $ianmackenzie$elm_units$Quantity$Quantity(scaledLength * largestComponent);
-		}
-	});
 var $ianmackenzie$elm_geometry$Quantity$Extra$aXbY = F4(
 	function (a, _v0, b, _v1) {
 		var x = _v0.a;
@@ -14574,7 +14939,6 @@ var $ianmackenzie$elm_geometry$Quantity$Extra$rSinTheta = F2(
 			$ianmackenzie$elm_units$Angle$sin(theta),
 			r);
 	});
-var $elm$core$Basics$tan = _Basics_tan;
 var $ianmackenzie$elm_units$Angle$tan = function (_v0) {
 	var angle = _v0.a;
 	return $elm$core$Basics$tan(angle);
@@ -14839,15 +15203,6 @@ var $elm$core$List$takeFast = F3(
 var $elm$core$List$take = F2(
 	function (n, list) {
 		return A3($elm$core$List$takeFast, 0, n, list);
-	});
-var $ianmackenzie$elm_geometry$Point2d$toRecord = F2(
-	function (fromQuantity, point) {
-		return {
-			x: fromQuantity(
-				$ianmackenzie$elm_geometry$Point2d$xCoordinate(point)),
-			y: fromQuantity(
-				$ianmackenzie$elm_geometry$Point2d$yCoordinate(point))
-		};
 	});
 var $ianmackenzie$elm_geometry$Point3d$fromMeters = function (givenCoordinates) {
 	return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(givenCoordinates);
@@ -15573,42 +15928,6 @@ var $ianmackenzie$elm_3d_scene$Scene3d$lineSegment = F2(
 	function (givenMaterial, givenLineSegment) {
 		return A2($ianmackenzie$elm_3d_scene$Scene3d$Entity$lineSegment, givenMaterial, givenLineSegment);
 	});
-var $ianmackenzie$elm_geometry$Arc3d$pointOn = F2(
-	function (_v0, t) {
-		var arc = _v0.a;
-		var _v1 = arc.yDirection;
-		var v = _v1.a;
-		var _v2 = arc.xDirection;
-		var u = _v2.a;
-		var _v3 = arc.sweptAngle;
-		var thetaMax = _v3.a;
-		var _v4 = arc.signedLength;
-		var sMax = _v4.a;
-		var _v5 = arc.startPoint;
-		var p = _v5.a;
-		if (!thetaMax) {
-			var s = t * sMax;
-			return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
-				{x: p.x + (s * u.x), y: p.y + (s * u.y), z: p.z + (s * u.z)});
-		} else {
-			var theta = t * thetaMax;
-			var r = sMax / thetaMax;
-			var x = r * $elm$core$Basics$sin(theta);
-			var y = (_Utils_cmp(
-				$elm$core$Basics$abs(theta),
-				$elm$core$Basics$pi / 2) < 0) ? (x * $elm$core$Basics$tan(0.5 * theta)) : (r * (1 - $elm$core$Basics$cos(theta)));
-			return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
-				{x: (p.x + (x * u.x)) + (y * v.x), y: (p.y + (x * u.y)) + (y * v.y), z: (p.z + (x * u.z)) + (y * v.z)});
-		}
-	});
-var $ianmackenzie$elm_geometry$Arc3d$segments = F2(
-	function (numSegments, arc) {
-		return $ianmackenzie$elm_geometry$Polyline3d$fromVertices(
-			A2(
-				$ianmackenzie$elm_1d_parameter$Parameter1d$steps,
-				numSegments,
-				$ianmackenzie$elm_geometry$Arc3d$pointOn(arc)));
-	});
 var $ianmackenzie$elm_geometry$Polyline3d$segments = function (polyline) {
 	var _v0 = $ianmackenzie$elm_geometry$Polyline3d$vertices(polyline);
 	if (!_v0.b) {
@@ -15671,33 +15990,9 @@ var $ianmackenzie$elm_geometry$Circle3d$radius = function (_v0) {
 	var properties = _v0.a;
 	return properties.radius;
 };
-var $ianmackenzie$elm_geometry$Geometry$Types$Arc3d = function (a) {
-	return {$: 'Arc3d', a: a};
-};
 var $ianmackenzie$elm_geometry$Axis3d$direction = function (_v0) {
 	var axis = _v0.a;
 	return axis.direction;
-};
-var $ianmackenzie$elm_geometry$Vector3d$direction = function (_v0) {
-	var v = _v0.a;
-	var largestComponent = A2(
-		$elm$core$Basics$max,
-		$elm$core$Basics$abs(v.x),
-		A2(
-			$elm$core$Basics$max,
-			$elm$core$Basics$abs(v.y),
-			$elm$core$Basics$abs(v.z)));
-	if (!largestComponent) {
-		return $elm$core$Maybe$Nothing;
-	} else {
-		var scaledZ = v.z / largestComponent;
-		var scaledY = v.y / largestComponent;
-		var scaledX = v.x / largestComponent;
-		var scaledLength = $elm$core$Basics$sqrt(((scaledX * scaledX) + (scaledY * scaledY)) + (scaledZ * scaledZ));
-		return $elm$core$Maybe$Just(
-			$ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
-				{x: scaledX / scaledLength, y: scaledY / scaledLength, z: scaledZ / scaledLength}));
-	}
 };
 var $ianmackenzie$elm_geometry$Direction3d$perpendicularBasis = function (direction) {
 	var xDirection = $ianmackenzie$elm_geometry$Direction3d$perpendicularTo(direction);
@@ -21487,28 +21782,53 @@ var $author$project$Tools$BendSmoother$update = F4(
 	function (msg, options, previewColour, hasTrack) {
 		var _v0 = _Utils_Tuple2(hasTrack, msg);
 		if (_v0.a.$ === 'Just') {
-			if (_v0.b.$ === 'SetBendTrackPointSpacing') {
-				var track = _v0.a.a;
-				var spacing = _v0.b.a;
-				var newOptions = A2(
-					$author$project$Tools$BendSmoother$tryBendSmoother,
-					track,
-					_Utils_update(
+			switch (_v0.b.$) {
+				case 'SetBendTrackPointSpacing':
+					var track = _v0.a.a;
+					var spacing = _v0.b.a;
+					var newOptions = A2(
+						$author$project$Tools$BendSmoother$tryBendSmoother,
+						track,
+						_Utils_update(
+							options,
+							{bendTrackPointSpacing: spacing}));
+					return _Utils_Tuple2(
+						newOptions,
+						A3($author$project$Tools$BendSmoother$previewActions, newOptions, previewColour, track));
+				case 'ApplySmoothBend':
+					var track = _v0.a.a;
+					var _v1 = _v0.b;
+					return _Utils_Tuple2(
 						options,
-						{bendTrackPointSpacing: spacing}));
-				return _Utils_Tuple2(
-					newOptions,
-					A3($author$project$Tools$BendSmoother$previewActions, newOptions, previewColour, track));
-			} else {
-				var track = _v0.a.a;
-				var _v1 = _v0.b;
-				return _Utils_Tuple2(
-					options,
-					_List_fromArray(
-						[
-							$author$project$Actions$BendSmootherApplyWithOptions(options),
-							$author$project$Actions$TrackHasChanged
-						]));
+						_List_fromArray(
+							[
+								$author$project$Actions$BendSmootherApplyWithOptions(options),
+								$author$project$Actions$TrackHasChanged
+							]));
+				case 'SetMode':
+					var track = _v0.a.a;
+					var mode = _v0.b.a;
+					var newOptions = _Utils_update(
+						options,
+						{mode: mode});
+					return _Utils_Tuple2(newOptions, _List_Nil);
+				case 'SetSegments':
+					var track = _v0.a.a;
+					var segments = _v0.b.a;
+					var newOptions = _Utils_update(
+						options,
+						{segments: segments});
+					return _Utils_Tuple2(newOptions, _List_Nil);
+				default:
+					var track = _v0.a.a;
+					var _v2 = _v0.b;
+					return _Utils_Tuple2(
+						options,
+						_List_fromArray(
+							[
+								$author$project$Actions$BendSmootherApplyWithOptions(options),
+								$author$project$Actions$TrackHasChanged
+							]));
 			}
 		} else {
 			return _Utils_Tuple2(options, _List_Nil);
@@ -21810,15 +22130,6 @@ var $ianmackenzie$elm_interval$Interval$from = F2(
 			_Utils_Tuple2(firstValue, secondValue)) : $ianmackenzie$elm_interval$Interval$Interval(
 			_Utils_Tuple2(secondValue, firstValue));
 	});
-var $ianmackenzie$elm_geometry$Point2d$fromRecord = F2(
-	function (toQuantity, _v0) {
-		var x = _v0.x;
-		var y = _v0.y;
-		return A2(
-			$ianmackenzie$elm_geometry$Point2d$xy,
-			toQuantity(x),
-			toQuantity(y));
-	});
 var $ianmackenzie$elm_geometry$Point2d$interpolateFrom = F3(
 	function (_v0, _v1, t) {
 		var p1 = _v0.a;
@@ -22016,22 +22327,6 @@ var $ianmackenzie$elm_geometry$LineSegment2d$perpendicularDirection = function (
 		$ianmackenzie$elm_geometry$Vector2d$perpendicularTo(
 			$ianmackenzie$elm_geometry$LineSegment2d$vector(givenSegment)));
 };
-var $ianmackenzie$elm_geometry$Point3d$projectInto = F2(
-	function (_v0, _v1) {
-		var sketchPlane = _v0.a;
-		var p = _v1.a;
-		var _v2 = sketchPlane.originPoint;
-		var p0 = _v2.a;
-		var deltaX = p.x - p0.x;
-		var deltaY = p.y - p0.y;
-		var deltaZ = p.z - p0.z;
-		var _v3 = sketchPlane.yDirection;
-		var j = _v3.a;
-		var _v4 = sketchPlane.xDirection;
-		var i = _v4.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Point2d(
-			{x: ((deltaX * i.x) + (deltaY * i.y)) + (deltaZ * i.z), y: ((deltaX * j.x) + (deltaY * j.y)) + (deltaZ * j.z)});
-	});
 var $author$project$DomainModel$queryPointsUsingFilter = F4(
 	function (filterFn, treeNode, foldFn, accum) {
 		var helper = F4(
@@ -22181,13 +22476,6 @@ var $ianmackenzie$elm_geometry$LineSegment2d$mapEndpoints = F2(
 			_Utils_Tuple2(
 				_function(p1),
 				_function(p2)));
-	});
-var $ianmackenzie$elm_geometry$Point2d$translateBy = F2(
-	function (_v0, _v1) {
-		var v = _v0.a;
-		var p = _v1.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Point2d(
-			{x: p.x + v.x, y: p.y + v.y});
 	});
 var $ianmackenzie$elm_geometry$LineSegment2d$translateBy = function (displacementVector) {
 	return $ianmackenzie$elm_geometry$LineSegment2d$mapEndpoints(
@@ -32141,170 +32429,10 @@ var $author$project$Tools$AbruptDirectionChanges$view = F3(
 			return $author$project$ViewPureStyles$noTrackMessage;
 		}
 	});
-var $author$project$Tools$BendSmoother$ApplyWithOptions = {$: 'ApplyWithOptions'};
-var $author$project$Tools$BendSmoother$SetBendTrackPointSpacing = function (a) {
-	return {$: 'SetBendTrackPointSpacing', a: a};
+var $author$project$Tools$BendSmoother$SetMode = function (a) {
+	return {$: 'SetMode', a: a};
 };
-var $author$project$ViewPureStyles$commonShortHorizontalSliderStyles = _List_fromArray(
-	[
-		$mdgriffith$elm_ui$Element$height(
-		$mdgriffith$elm_ui$Element$px(20)),
-		$mdgriffith$elm_ui$Element$width(
-		$mdgriffith$elm_ui$Element$px(150)),
-		$mdgriffith$elm_ui$Element$centerY,
-		$mdgriffith$elm_ui$Element$centerX,
-		$mdgriffith$elm_ui$Element$behindContent(
-		A2(
-			$mdgriffith$elm_ui$Element$el,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$width(
-					$mdgriffith$elm_ui$Element$px(150)),
-					$mdgriffith$elm_ui$Element$height(
-					$mdgriffith$elm_ui$Element$px(2)),
-					$mdgriffith$elm_ui$Element$centerY,
-					$mdgriffith$elm_ui$Element$centerX,
-					$mdgriffith$elm_ui$Element$Background$color($author$project$ColourPalette$scrollbarBackground),
-					$mdgriffith$elm_ui$Element$Border$rounded(6)
-				]),
-			$mdgriffith$elm_ui$Element$none))
-	]);
-var $mdgriffith$elm_ui$Element$Input$defaultThumb = $mdgriffith$elm_ui$Element$Input$Thumb(
-	_List_fromArray(
-		[
-			$mdgriffith$elm_ui$Element$width(
-			$mdgriffith$elm_ui$Element$px(16)),
-			$mdgriffith$elm_ui$Element$height(
-			$mdgriffith$elm_ui$Element$px(16)),
-			$mdgriffith$elm_ui$Element$Border$rounded(8),
-			$mdgriffith$elm_ui$Element$Border$width(1),
-			$mdgriffith$elm_ui$Element$Border$color(
-			A3($mdgriffith$elm_ui$Element$rgb, 0.5, 0.5, 0.5)),
-			$mdgriffith$elm_ui$Element$Background$color(
-			A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1))
-		]));
-var $ianmackenzie$elm_units$Length$feet = function (numFeet) {
-	return $ianmackenzie$elm_units$Length$meters($ianmackenzie$elm_units$Constants$foot * numFeet);
-};
-var $mdgriffith$elm_ui$Element$Input$Below = {$: 'Below'};
-var $mdgriffith$elm_ui$Element$Input$Label = F3(
-	function (a, b, c) {
-		return {$: 'Label', a: a, b: b, c: c};
-	});
-var $mdgriffith$elm_ui$Element$Input$labelBelow = $mdgriffith$elm_ui$Element$Input$Label($mdgriffith$elm_ui$Element$Input$Below);
-var $author$project$UtilsForViews$showDecimal2 = function (x) {
-	var locale = _Utils_update(
-		$cuducos$elm_format_number$FormatNumber$Locales$usLocale,
-		{
-			decimals: $cuducos$elm_format_number$FormatNumber$Locales$Exact(2),
-			negativePrefix: '-',
-			thousandSeparator: ''
-		});
-	return A2($cuducos$elm_format_number$FormatNumber$format, locale, x);
-};
-var $author$project$UtilsForViews$showShortMeasure = F2(
-	function (imperial, distance) {
-		return imperial ? ($author$project$UtilsForViews$showDecimal2(
-			$ianmackenzie$elm_units$Length$inFeet(distance)) + ' feet') : ($author$project$UtilsForViews$showDecimal2(
-			$ianmackenzie$elm_units$Length$inMeters(distance)) + 'm');
-	});
-var $author$project$Tools$BendSmoother$bendSmoothnessSlider = F3(
-	function (imperial, options, wrap) {
-		return A2(
-			$mdgriffith$elm_ui$Element$Input$slider,
-			$author$project$ViewPureStyles$commonShortHorizontalSliderStyles,
-			{
-				label: A2(
-					$mdgriffith$elm_ui$Element$Input$labelBelow,
-					_List_Nil,
-					$mdgriffith$elm_ui$Element$text(
-						'Spacing: ' + A2(
-							$author$project$UtilsForViews$showShortMeasure,
-							imperial,
-							$ianmackenzie$elm_units$Length$meters(options.bendTrackPointSpacing)))),
-				max: $ianmackenzie$elm_units$Length$inMeters(
-					imperial ? $ianmackenzie$elm_units$Length$feet(30.0) : $ianmackenzie$elm_units$Length$meters(10.0)),
-				min: $ianmackenzie$elm_units$Length$inMeters(
-					imperial ? $ianmackenzie$elm_units$Length$feet(3.0) : $ianmackenzie$elm_units$Length$meters(1.0)),
-				onChange: A2($elm$core$Basics$composeL, wrap, $author$project$Tools$BendSmoother$SetBendTrackPointSpacing),
-				step: $elm$core$Maybe$Nothing,
-				thumb: $mdgriffith$elm_ui$Element$Input$defaultThumb,
-				value: options.bendTrackPointSpacing
-			});
-	});
-var $author$project$Tools$BendSmoother$view = F4(
-	function (imperial, wrapper, options, track) {
-		var fixBendButton = function (smooth) {
-			return A2(
-				$mdgriffith$elm_ui$Element$Input$button,
-				$author$project$ViewPureStyles$neatToolsBorder,
-				{
-					label: function () {
-						if (smooth.$ === 'Just') {
-							var isSmooth = smooth.a;
-							return A2(
-								$mdgriffith$elm_ui$Element$paragraph,
-								_List_Nil,
-								_List_fromArray(
-									[
-										$mdgriffith$elm_ui$Element$text(
-										'Smooth between markers\nRadius ' + A2(
-											$author$project$UtilsForViews$showShortMeasure,
-											imperial,
-											$ianmackenzie$elm_units$Length$meters(isSmooth.radius)))
-									]));
-						} else {
-							return $mdgriffith$elm_ui$Element$text('No bend found');
-						}
-					}(),
-					onPress: $elm$core$Maybe$Just(
-						wrapper($author$project$Tools$BendSmoother$ApplyWithOptions))
-				});
-		};
-		if (track.$ === 'Just') {
-			var isTrack = track.a;
-			return A2(
-				$mdgriffith$elm_ui$Element$column,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$padding(10),
-						$mdgriffith$elm_ui$Element$spacing(5),
-						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-						$mdgriffith$elm_ui$Element$centerX,
-						$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite)
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$mdgriffith$elm_ui$Element$el,
-						_List_fromArray(
-							[$mdgriffith$elm_ui$Element$centerX]),
-						A3($author$project$Tools$BendSmoother$bendSmoothnessSlider, imperial, options, wrapper)),
-						A2(
-						$mdgriffith$elm_ui$Element$el,
-						_List_fromArray(
-							[$mdgriffith$elm_ui$Element$centerX]),
-						fixBendButton(options.smoothedBend))
-					]));
-		} else {
-			return $author$project$ViewPureStyles$noTrackMessage;
-		}
-	});
-var $author$project$Tools$BezierSplines$BezierApplyWithOptions = {$: 'BezierApplyWithOptions'};
-var $author$project$Tools$BezierOptions$ExtentIsTrack = {$: 'ExtentIsTrack'};
-var $author$project$Tools$BezierSplines$SetBezierStyle = function (a) {
-	return {$: 'SetBezierStyle', a: a};
-};
-var $author$project$Tools$BezierSplines$SetBezierTension = function (a) {
-	return {$: 'SetBezierTension', a: a};
-};
-var $author$project$Tools$BezierSplines$SetBezierTolerance = function (a) {
-	return {$: 'SetBezierTolerance', a: a};
-};
-var $author$project$Tools$BezierSplines$SetExtent = function (a) {
-	return {$: 'SetExtent', a: a};
-};
-var $author$project$Tools$BezierOptions$ThroughExisting = {$: 'ThroughExisting'};
+var $author$project$Tools$BendSmootherOptions$SmoothPoint = {$: 'SmoothPoint'};
 var $mdgriffith$elm_ui$Element$Input$Option = F2(
 	function (a, b) {
 		return {$: 'Option', a: a, b: b};
@@ -32382,7 +32510,7 @@ var $mdgriffith$elm_ui$Element$Input$option = F2(
 			val,
 			$mdgriffith$elm_ui$Element$Input$defaultRadioOption(txt));
 	});
-var $mdgriffith$elm_ui$Element$Input$Column = {$: 'Column'};
+var $mdgriffith$elm_ui$Element$Input$Row = {$: 'Row'};
 var $mdgriffith$elm_ui$Element$Input$AfterFound = {$: 'AfterFound'};
 var $mdgriffith$elm_ui$Element$Input$BeforeFound = {$: 'BeforeFound'};
 var $mdgriffith$elm_ui$Element$Input$Idle = {$: 'Idle'};
@@ -32689,9 +32817,285 @@ var $mdgriffith$elm_ui$Element$Input$radioHelper = F3(
 			input.label,
 			optionArea);
 	});
-var $mdgriffith$elm_ui$Element$Input$radio = $mdgriffith$elm_ui$Element$Input$radioHelper($mdgriffith$elm_ui$Element$Input$Column);
-var $mdgriffith$elm_ui$Element$Input$Row = {$: 'Row'};
 var $mdgriffith$elm_ui$Element$Input$radioRow = $mdgriffith$elm_ui$Element$Input$radioHelper($mdgriffith$elm_ui$Element$Input$Row);
+var $author$project$Tools$BendSmoother$ApplySmoothBend = {$: 'ApplySmoothBend'};
+var $author$project$Tools$BendSmoother$SetBendTrackPointSpacing = function (a) {
+	return {$: 'SetBendTrackPointSpacing', a: a};
+};
+var $author$project$ViewPureStyles$commonShortHorizontalSliderStyles = _List_fromArray(
+	[
+		$mdgriffith$elm_ui$Element$height(
+		$mdgriffith$elm_ui$Element$px(20)),
+		$mdgriffith$elm_ui$Element$width(
+		$mdgriffith$elm_ui$Element$px(150)),
+		$mdgriffith$elm_ui$Element$centerY,
+		$mdgriffith$elm_ui$Element$centerX,
+		$mdgriffith$elm_ui$Element$behindContent(
+		A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width(
+					$mdgriffith$elm_ui$Element$px(150)),
+					$mdgriffith$elm_ui$Element$height(
+					$mdgriffith$elm_ui$Element$px(2)),
+					$mdgriffith$elm_ui$Element$centerY,
+					$mdgriffith$elm_ui$Element$centerX,
+					$mdgriffith$elm_ui$Element$Background$color($author$project$ColourPalette$scrollbarBackground),
+					$mdgriffith$elm_ui$Element$Border$rounded(6)
+				]),
+			$mdgriffith$elm_ui$Element$none))
+	]);
+var $mdgriffith$elm_ui$Element$Input$defaultThumb = $mdgriffith$elm_ui$Element$Input$Thumb(
+	_List_fromArray(
+		[
+			$mdgriffith$elm_ui$Element$width(
+			$mdgriffith$elm_ui$Element$px(16)),
+			$mdgriffith$elm_ui$Element$height(
+			$mdgriffith$elm_ui$Element$px(16)),
+			$mdgriffith$elm_ui$Element$Border$rounded(8),
+			$mdgriffith$elm_ui$Element$Border$width(1),
+			$mdgriffith$elm_ui$Element$Border$color(
+			A3($mdgriffith$elm_ui$Element$rgb, 0.5, 0.5, 0.5)),
+			$mdgriffith$elm_ui$Element$Background$color(
+			A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1))
+		]));
+var $ianmackenzie$elm_units$Length$feet = function (numFeet) {
+	return $ianmackenzie$elm_units$Length$meters($ianmackenzie$elm_units$Constants$foot * numFeet);
+};
+var $mdgriffith$elm_ui$Element$Input$Below = {$: 'Below'};
+var $mdgriffith$elm_ui$Element$Input$Label = F3(
+	function (a, b, c) {
+		return {$: 'Label', a: a, b: b, c: c};
+	});
+var $mdgriffith$elm_ui$Element$Input$labelBelow = $mdgriffith$elm_ui$Element$Input$Label($mdgriffith$elm_ui$Element$Input$Below);
+var $author$project$UtilsForViews$showDecimal2 = function (x) {
+	var locale = _Utils_update(
+		$cuducos$elm_format_number$FormatNumber$Locales$usLocale,
+		{
+			decimals: $cuducos$elm_format_number$FormatNumber$Locales$Exact(2),
+			negativePrefix: '-',
+			thousandSeparator: ''
+		});
+	return A2($cuducos$elm_format_number$FormatNumber$format, locale, x);
+};
+var $author$project$UtilsForViews$showShortMeasure = F2(
+	function (imperial, distance) {
+		return imperial ? ($author$project$UtilsForViews$showDecimal2(
+			$ianmackenzie$elm_units$Length$inFeet(distance)) + ' feet') : ($author$project$UtilsForViews$showDecimal2(
+			$ianmackenzie$elm_units$Length$inMeters(distance)) + 'm');
+	});
+var $author$project$Tools$BendSmoother$bendSmoothnessSlider = F3(
+	function (imperial, options, wrap) {
+		return A2(
+			$mdgriffith$elm_ui$Element$Input$slider,
+			$author$project$ViewPureStyles$commonShortHorizontalSliderStyles,
+			{
+				label: A2(
+					$mdgriffith$elm_ui$Element$Input$labelBelow,
+					_List_Nil,
+					$mdgriffith$elm_ui$Element$text(
+						'Spacing: ' + A2(
+							$author$project$UtilsForViews$showShortMeasure,
+							imperial,
+							$ianmackenzie$elm_units$Length$meters(options.bendTrackPointSpacing)))),
+				max: $ianmackenzie$elm_units$Length$inMeters(
+					imperial ? $ianmackenzie$elm_units$Length$feet(30.0) : $ianmackenzie$elm_units$Length$meters(10.0)),
+				min: $ianmackenzie$elm_units$Length$inMeters(
+					imperial ? $ianmackenzie$elm_units$Length$feet(3.0) : $ianmackenzie$elm_units$Length$meters(1.0)),
+				onChange: A2($elm$core$Basics$composeL, wrap, $author$project$Tools$BendSmoother$SetBendTrackPointSpacing),
+				step: $elm$core$Maybe$Nothing,
+				thumb: $mdgriffith$elm_ui$Element$Input$defaultThumb,
+				value: options.bendTrackPointSpacing
+			});
+	});
+var $author$project$Tools$BendSmoother$viewBendControls = F4(
+	function (imperial, wrapper, options, track) {
+		var fixBendButton = function (smooth) {
+			return A2(
+				$mdgriffith$elm_ui$Element$Input$button,
+				$author$project$ViewPureStyles$neatToolsBorder,
+				{
+					label: function () {
+						if (smooth.$ === 'Just') {
+							var isSmooth = smooth.a;
+							return A2(
+								$mdgriffith$elm_ui$Element$paragraph,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$text(
+										'Smooth between markers\nRadius ' + A2(
+											$author$project$UtilsForViews$showShortMeasure,
+											imperial,
+											$ianmackenzie$elm_units$Length$meters(isSmooth.radius)))
+									]));
+						} else {
+							return $mdgriffith$elm_ui$Element$text('No bend found');
+						}
+					}(),
+					onPress: $elm$core$Maybe$Just(
+						wrapper($author$project$Tools$BendSmoother$ApplySmoothBend))
+				});
+		};
+		if (track.$ === 'Just') {
+			var isTrack = track.a;
+			return A2(
+				$mdgriffith$elm_ui$Element$column,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$padding(5),
+						$mdgriffith$elm_ui$Element$spacing(5),
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$centerX
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[$mdgriffith$elm_ui$Element$centerX]),
+						A3($author$project$Tools$BendSmoother$bendSmoothnessSlider, imperial, options, wrapper)),
+						A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[$mdgriffith$elm_ui$Element$centerX]),
+						fixBendButton(options.smoothedBend))
+					]));
+		} else {
+			return $author$project$ViewPureStyles$noTrackMessage;
+		}
+	});
+var $author$project$Tools$BendSmoother$SetSegments = function (a) {
+	return {$: 'SetSegments', a: a};
+};
+var $author$project$Tools$BendSmoother$segmentSlider = F3(
+	function (imperial, options, wrap) {
+		return A2(
+			$mdgriffith$elm_ui$Element$Input$slider,
+			$author$project$ViewPureStyles$commonShortHorizontalSliderStyles,
+			{
+				label: A2(
+					$mdgriffith$elm_ui$Element$Input$labelBelow,
+					_List_Nil,
+					$mdgriffith$elm_ui$Element$text(
+						'Segments: ' + $elm$core$String$fromInt(options.segments))),
+				max: 7.0,
+				min: 1.0,
+				onChange: A2(
+					$elm$core$Basics$composeL,
+					A2($elm$core$Basics$composeL, wrap, $author$project$Tools$BendSmoother$SetSegments),
+					$elm$core$Basics$round),
+				step: $elm$core$Maybe$Just(1.0),
+				thumb: $mdgriffith$elm_ui$Element$Input$defaultThumb,
+				value: options.segments
+			});
+	});
+var $author$project$Tools$BendSmoother$viewPointControls = F4(
+	function (imperial, wrapper, options, track) {
+		var fixButton = A2(
+			$mdgriffith$elm_ui$Element$Input$button,
+			$author$project$ViewPureStyles$neatToolsBorder,
+			{
+				label: $mdgriffith$elm_ui$Element$text('Smooth points'),
+				onPress: $elm$core$Maybe$Just(
+					wrapper($author$project$Tools$BendSmoother$ApplySmoothBend))
+			});
+		if (track.$ === 'Just') {
+			var isTrack = track.a;
+			return A2(
+				$mdgriffith$elm_ui$Element$column,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$padding(5),
+						$mdgriffith$elm_ui$Element$spacing(5),
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$centerX
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[$mdgriffith$elm_ui$Element$centerX]),
+						A3($author$project$Tools$BendSmoother$segmentSlider, imperial, options, wrapper)),
+						A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[$mdgriffith$elm_ui$Element$centerX]),
+						fixButton)
+					]));
+		} else {
+			return $author$project$ViewPureStyles$noTrackMessage;
+		}
+	});
+var $author$project$Tools$BendSmoother$view = F4(
+	function (imperial, wrapper, options, track) {
+		return A2(
+			$mdgriffith$elm_ui$Element$column,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$padding(10),
+					$mdgriffith$elm_ui$Element$spacing(5),
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$centerX,
+					$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[$mdgriffith$elm_ui$Element$centerX]),
+					A2(
+						$mdgriffith$elm_ui$Element$Input$radioRow,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$spacing(5)
+							]),
+						{
+							label: $mdgriffith$elm_ui$Element$Input$labelHidden('mode'),
+							onChange: A2($elm$core$Basics$composeL, wrapper, $author$project$Tools$BendSmoother$SetMode),
+							options: _List_fromArray(
+								[
+									A2(
+									$mdgriffith$elm_ui$Element$Input$option,
+									$author$project$Tools$BendSmootherOptions$SmoothBend,
+									$mdgriffith$elm_ui$Element$text('Bend')),
+									A2(
+									$mdgriffith$elm_ui$Element$Input$option,
+									$author$project$Tools$BendSmootherOptions$SmoothPoint,
+									$mdgriffith$elm_ui$Element$text('Point'))
+								]),
+							selected: $elm$core$Maybe$Just(options.mode)
+						})),
+					function () {
+					var _v0 = options.mode;
+					if (_v0.$ === 'SmoothBend') {
+						return A4($author$project$Tools$BendSmoother$viewBendControls, imperial, wrapper, options, track);
+					} else {
+						return A4($author$project$Tools$BendSmoother$viewPointControls, imperial, wrapper, options, track);
+					}
+				}()
+				]));
+	});
+var $author$project$Tools$BezierSplines$BezierApplyWithOptions = {$: 'BezierApplyWithOptions'};
+var $author$project$Tools$BezierOptions$ExtentIsTrack = {$: 'ExtentIsTrack'};
+var $author$project$Tools$BezierSplines$SetBezierStyle = function (a) {
+	return {$: 'SetBezierStyle', a: a};
+};
+var $author$project$Tools$BezierSplines$SetBezierTension = function (a) {
+	return {$: 'SetBezierTension', a: a};
+};
+var $author$project$Tools$BezierSplines$SetBezierTolerance = function (a) {
+	return {$: 'SetBezierTolerance', a: a};
+};
+var $author$project$Tools$BezierSplines$SetExtent = function (a) {
+	return {$: 'SetExtent', a: a};
+};
+var $author$project$Tools$BezierOptions$ThroughExisting = {$: 'ThroughExisting'};
+var $mdgriffith$elm_ui$Element$Input$Column = {$: 'Column'};
+var $mdgriffith$elm_ui$Element$Input$radio = $mdgriffith$elm_ui$Element$Input$radioHelper($mdgriffith$elm_ui$Element$Input$Column);
 var $author$project$Tools$BezierSplines$view = F2(
 	function (wrap, options) {
 		var sliders = A2(

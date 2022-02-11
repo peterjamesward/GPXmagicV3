@@ -9,18 +9,17 @@ import Point2d exposing (Point2d)
 import Point3d exposing (Point3d)
 
 
-type Msg
-    = SmoothBend
-    | SetBendTrackPointSpacing Float
-    | SetSegments Int
-    | SoftenBend
-
-
 type alias Options =
     { bendTrackPointSpacing : Float
     , smoothedBend : Maybe SmoothedBend
     , segments : Int
+    , mode : SmoothMode
     }
+
+
+type SmoothMode
+    = SmoothPoint
+    | SmoothBend
 
 
 type alias SmoothedBend =
