@@ -18188,6 +18188,12 @@ var $author$project$SceneBuilder3D$gradientColourPastel = function (slope) {
 		0.7);
 };
 var $avh4$elm_color$Color$grey = A4($avh4$elm_color$Color$RgbaSpace, 211 / 255, 215 / 255, 207 / 255, 1.0);
+var $ianmackenzie$elm_units$Constants$meter = 1.0;
+var $ianmackenzie$elm_units$Constants$inch = 0.0254 * $ianmackenzie$elm_units$Constants$meter;
+var $ianmackenzie$elm_units$Length$inches = function (numInches) {
+	return $ianmackenzie$elm_units$Length$meters($ianmackenzie$elm_units$Constants$inch * numInches);
+};
+var $ianmackenzie$elm_units$Length$inch = $ianmackenzie$elm_units$Length$inches(1);
 var $ianmackenzie$elm_units$Length$kilometer = $ianmackenzie$elm_units$Length$kilometers(1);
 var $avh4$elm_color$Color$lightOrange = A4($avh4$elm_color$Color$RgbaSpace, 252 / 255, 175 / 255, 62 / 255, 1.0);
 var $ianmackenzie$elm_3d_scene$Scene3d$Types$LambertianMaterial = F3(
@@ -18324,8 +18330,11 @@ var $author$project$SceneBuilder3D$render3dView = F2(
 			$ianmackenzie$elm_units$Length$kilometer,
 			$author$project$DomainModel$boundingBox(track.trackTree));
 		var groundPlane = function () {
-			var modelMinZ = $ianmackenzie$elm_geometry$BoundingBox3d$minZ(
-				$author$project$DomainModel$boundingBox(track.trackTree));
+			var modelMinZ = A2(
+				$ianmackenzie$elm_units$Quantity$minus,
+				$ianmackenzie$elm_units$Length$inch,
+				$ianmackenzie$elm_geometry$BoundingBox3d$minZ(
+					$author$project$DomainModel$boundingBox(track.trackTree)));
 			var _v0 = $ianmackenzie$elm_geometry$BoundingBox3d$extrema(nearbySpace);
 			var minX = _v0.minX;
 			var maxX = _v0.maxX;
@@ -18437,8 +18446,6 @@ var $author$project$ColourPalette$gradientColourPastel = function (slope) {
 		0.6,
 		0.7);
 };
-var $ianmackenzie$elm_units$Constants$meter = 1.0;
-var $ianmackenzie$elm_units$Constants$inch = 0.0254 * $ianmackenzie$elm_units$Constants$meter;
 var $ianmackenzie$elm_units$Constants$foot = 12 * $ianmackenzie$elm_units$Constants$inch;
 var $ianmackenzie$elm_units$Length$inFeet = function (length) {
 	return $ianmackenzie$elm_units$Length$inMeters(length) / $ianmackenzie$elm_units$Constants$foot;

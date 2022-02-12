@@ -69,7 +69,9 @@ render3dView settings track =
                     BoundingBox3d.extrema nearbySpace
 
                 modelMinZ =
-                    BoundingBox3d.minZ <| boundingBox track.trackTree
+                    boundingBox track.trackTree
+                    |> BoundingBox3d.minZ
+                    |> Quantity.minus (Length.inch)
             in
             if settings.groundPlane then
                 [ Scene3d.quad (Material.color Color.darkGreen)
