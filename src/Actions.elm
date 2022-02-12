@@ -12,6 +12,7 @@ import Tools.BendSmootherOptions
 import Tools.BezierOptions
 import Tools.CentroidAverageOptions
 import Tools.CurveFormerOptions
+import Tools.InterpolateOptions
 import Tools.MemoryUsage
 import Tools.NudgeOptions
 import Tools.OutAndBackOptions
@@ -45,6 +46,7 @@ type ToolAction msg
     | NudgeApplyWithOptions Tools.NudgeOptions.Options
     | OutAndBackApplyWithOptions Tools.OutAndBackOptions.Options
     | ApplySimplify
+    | ApplyInterpolateWithOptions Tools.InterpolateOptions.Options
 
 
 type PreviewShape
@@ -94,6 +96,9 @@ interpretAction action =
 
         ApplySimplify ->
             "simplify"
+
+        ApplyInterpolateWithOptions options ->
+            "interpolate"
 
         _ ->
             "ask Pete to fix this message"

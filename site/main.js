@@ -8635,6 +8635,9 @@ var $author$project$Tools$DisplaySettingsOptions$PastelCurtain = {$: 'PastelCurt
 var $author$project$Tools$DisplaySettings$defaultOptions = {centreLine: false, curtainStyle: $author$project$Tools$DisplaySettingsOptions$PastelCurtain, groundPlane: true, roadSurface: true};
 var $author$project$Tools$GradientProblems$AbruptChange = {$: 'AbruptChange'};
 var $author$project$Tools$GradientProblems$defaultOptions = {breaches: _List_Nil, currentBreach: 0, mode: $author$project$Tools$GradientProblems$AbruptChange, threshold: 10.0};
+var $author$project$Tools$Interpolate$defaultOptions = {
+	minimumSpacing: $ianmackenzie$elm_units$Length$meters(10.0)
+};
 var $ianmackenzie$elm_units$Quantity$zero = $ianmackenzie$elm_units$Quantity$Quantity(0);
 var $author$project$Tools$Nudge$defaultOptions = {fadeExtent: $ianmackenzie$elm_units$Quantity$zero, horizontal: $ianmackenzie$elm_units$Quantity$zero, vertical: $ianmackenzie$elm_units$Quantity$zero};
 var $author$project$Tools$OutAndBack$defaultOptions = {offset: 0.0};
@@ -8779,6 +8782,18 @@ var $author$project$ToolsController$gradientChangeTool = {
 	toolType: $author$project$ToolsController$ToolGradientProblems,
 	video: $elm$core$Maybe$Nothing
 };
+var $author$project$ToolsController$ToolInterpolate = {$: 'ToolInterpolate'};
+var $author$project$ToolsController$interpolateTool = {
+	dock: $author$project$ToolsController$DockLowerLeft,
+	info: 'Add points',
+	isPopupOpen: false,
+	label: 'Interpolate',
+	state: $author$project$ToolsController$Contracted,
+	tabColour: $smucode$elm_flat_colors$FlatColors$FlatUIPalette$concrete,
+	textColour: $author$project$ViewPureStyles$contrastingColour($smucode$elm_flat_colors$FlatColors$FlatUIPalette$concrete),
+	toolType: $author$project$ToolsController$ToolInterpolate,
+	video: $elm$core$Maybe$Nothing
+};
 var $author$project$ToolsController$ToolNudge = {$: 'ToolNudge'};
 var $author$project$ToolsController$nudgeTool = {
 	dock: $author$project$ToolsController$DockLowerRight,
@@ -8854,8 +8869,8 @@ var $author$project$ToolsController$undoRedoTool = {
 	video: $elm$core$Maybe$Nothing
 };
 var $author$project$ToolsController$defaultTools = _List_fromArray(
-	[$author$project$ToolsController$pointersTool, $author$project$ToolsController$undoRedoTool, $author$project$ToolsController$trackInfoBox, $author$project$ToolsController$displaySettingsTool, $author$project$ToolsController$directionChangeTool, $author$project$ToolsController$gradientChangeTool, $author$project$ToolsController$deleteTool, $author$project$ToolsController$bezierSplinesTool, $author$project$ToolsController$centroidAverageTool, $author$project$ToolsController$curveFormerTool, $author$project$ToolsController$bendSmootherTool, $author$project$ToolsController$nudgeTool, $author$project$ToolsController$outAndBackTool, $author$project$ToolsController$simplifyTool]);
-var $author$project$ToolsController$defaultOptions = {bendSmootherOptions: $author$project$Tools$BendSmoother$defaultOptions, bezierSplineOptions: $author$project$Tools$BezierSplines$defaultOptions, centroidAverageOptions: $author$project$Tools$CentroidAverage$defaultOptions, curveFormerOptions: $author$project$Tools$CurveFormer$defaultOptions, deleteOptions: $author$project$Tools$DeletePoints$defaultOptions, directionChangeOptions: $author$project$Tools$AbruptDirectionChanges$defaultOptions, displaySettings: $author$project$Tools$DisplaySettings$defaultOptions, gradientProblemOptions: $author$project$Tools$GradientProblems$defaultOptions, imperial: false, infoOptions: $author$project$Tools$TrackInfoBox$defaultOptions, nudgeOptions: $author$project$Tools$Nudge$defaultOptions, outAndBackSettings: $author$project$Tools$OutAndBack$defaultOptions, pointerOptions: $author$project$Tools$Pointers$defaultOptions, simplifySettings: $author$project$Tools$Simplify$defaultOptions, tools: $author$project$ToolsController$defaultTools, undoRedoOptions: $author$project$Tools$UndoRedo$defaultOptions};
+	[$author$project$ToolsController$pointersTool, $author$project$ToolsController$undoRedoTool, $author$project$ToolsController$trackInfoBox, $author$project$ToolsController$displaySettingsTool, $author$project$ToolsController$directionChangeTool, $author$project$ToolsController$gradientChangeTool, $author$project$ToolsController$deleteTool, $author$project$ToolsController$bezierSplinesTool, $author$project$ToolsController$centroidAverageTool, $author$project$ToolsController$curveFormerTool, $author$project$ToolsController$bendSmootherTool, $author$project$ToolsController$nudgeTool, $author$project$ToolsController$outAndBackTool, $author$project$ToolsController$simplifyTool, $author$project$ToolsController$interpolateTool]);
+var $author$project$ToolsController$defaultOptions = {bendSmootherOptions: $author$project$Tools$BendSmoother$defaultOptions, bezierSplineOptions: $author$project$Tools$BezierSplines$defaultOptions, centroidAverageOptions: $author$project$Tools$CentroidAverage$defaultOptions, curveFormerOptions: $author$project$Tools$CurveFormer$defaultOptions, deleteOptions: $author$project$Tools$DeletePoints$defaultOptions, directionChangeOptions: $author$project$Tools$AbruptDirectionChanges$defaultOptions, displaySettings: $author$project$Tools$DisplaySettings$defaultOptions, gradientProblemOptions: $author$project$Tools$GradientProblems$defaultOptions, imperial: false, infoOptions: $author$project$Tools$TrackInfoBox$defaultOptions, interpolateSettings: $author$project$Tools$Interpolate$defaultOptions, nudgeOptions: $author$project$Tools$Nudge$defaultOptions, outAndBackSettings: $author$project$Tools$OutAndBack$defaultOptions, pointerOptions: $author$project$Tools$Pointers$defaultOptions, simplifySettings: $author$project$Tools$Simplify$defaultOptions, tools: $author$project$ToolsController$defaultTools, undoRedoOptions: $author$project$Tools$UndoRedo$defaultOptions};
 var $elm$browser$Browser$Dom$getViewport = _Browser_withWindow(_Browser_getViewport);
 var $elm$time$Time$Name = function (a) {
 	return {$: 'Name', a: a};
@@ -10625,8 +10640,10 @@ var $author$project$ToolsController$encodeType = function (toolType) {
 			return 'ToolDisplaySettings';
 		case 'ToolOutAndBack':
 			return 'ToolOutAndBack';
-		default:
+		case 'ToolSimplify':
 			return 'ToolSimplify';
+		default:
+			return 'ToolInterpolate';
 	}
 };
 var $author$project$ToolsController$encodeOneTool = function (tool) {
@@ -16763,6 +16780,21 @@ var $author$project$Tools$GradientProblems$toolStateChange = F4(
 					]));
 		}
 	});
+var $author$project$Tools$Interpolate$toolStateChange = F4(
+	function (opened, colour, options, track) {
+		var _v0 = _Utils_Tuple2(opened, track);
+		if (_v0.a && (_v0.b.$ === 'Just')) {
+			var theTrack = _v0.b.a;
+			return _Utils_Tuple2(options, _List_Nil);
+		} else {
+			return _Utils_Tuple2(
+				options,
+				_List_fromArray(
+					[
+						$author$project$Actions$HidePreview('interpolate')
+					]));
+		}
+	});
 var $author$project$Tools$Nudge$previewActions = F3(
 	function (newOptions, colour, track) {
 		return _List_fromArray(
@@ -17161,7 +17193,7 @@ var $author$project$ToolsController$toolStateHasChanged = F4(
 							'tools',
 							$author$project$ToolsController$encodeToolState(options))
 						]));
-			default:
+			case 'ToolSimplify':
 				var _v10 = A4(
 					$author$project$Tools$Simplify$toolStateChange,
 					_Utils_eq(newState, $author$project$ToolsController$Expanded),
@@ -17173,6 +17205,27 @@ var $author$project$ToolsController$toolStateHasChanged = F4(
 				var newOptions = _Utils_update(
 					options,
 					{simplifySettings: newToolOptions});
+				return _Utils_Tuple2(
+					newOptions,
+					A2(
+						$elm$core$List$cons,
+						A2(
+							$author$project$Actions$StoreLocally,
+							'tools',
+							$author$project$ToolsController$encodeToolState(options)),
+						actions));
+			default:
+				var _v11 = A4(
+					$author$project$Tools$Interpolate$toolStateChange,
+					_Utils_eq(newState, $author$project$ToolsController$Expanded),
+					A2($author$project$ToolsController$getColour, toolType, options.tools),
+					options.interpolateSettings,
+					isTrack);
+				var newToolOptions = _v11.a;
+				var actions = _v11.b;
+				var newOptions = _Utils_update(
+					options,
+					{interpolateSettings: newToolOptions});
 				return _Utils_Tuple2(
 					newOptions,
 					A2(
@@ -24239,6 +24292,69 @@ var $author$project$Tools$GradientProblems$update = F4(
 				}
 		}
 	});
+var $author$project$Actions$ApplyInterpolateWithOptions = function (a) {
+	return {$: 'ApplyInterpolateWithOptions', a: a};
+};
+var $author$project$Tools$Interpolate$computeNewPoints = F2(
+	function (options, track) {
+		var previewPoints = function (points) {
+			return A2(
+				$elm$core$List$map,
+				function (earth) {
+					return _Utils_Tuple2(
+						earth,
+						A2($author$project$DomainModel$gpxFromPointWithReference, track.referenceLonLat, earth));
+				},
+				points);
+		};
+		var _v0 = $author$project$TrackLoaded$getRangeFromMarkers(track);
+		var fromStart = _v0.a;
+		var fromEnd = _v0.b;
+		return _List_Nil;
+	});
+var $author$project$Tools$Interpolate$actions = F3(
+	function (newOptions, previewColour, track) {
+		return _List_fromArray(
+			[
+				$author$project$Actions$ShowPreview(
+				{
+					colour: previewColour,
+					points: A2($author$project$Tools$Interpolate$computeNewPoints, newOptions, track),
+					shape: $author$project$Actions$PreviewCircle,
+					tag: 'interpolate'
+				})
+			]);
+	});
+var $author$project$Tools$Interpolate$update = F4(
+	function (msg, options, previewColour, hasTrack) {
+		var _v0 = _Utils_Tuple2(hasTrack, msg);
+		if (_v0.a.$ === 'Just') {
+			if (_v0.b.$ === 'SetSpacing') {
+				var track = _v0.a.a;
+				var spacing = _v0.b.a;
+				var newOptions = _Utils_update(
+					options,
+					{
+						minimumSpacing: $ianmackenzie$elm_units$Length$meters(spacing)
+					});
+				return _Utils_Tuple2(
+					newOptions,
+					A3($author$project$Tools$Interpolate$actions, newOptions, previewColour, track));
+			} else {
+				var track = _v0.a.a;
+				var _v1 = _v0.b;
+				return _Utils_Tuple2(
+					options,
+					_List_fromArray(
+						[
+							$author$project$Actions$ApplyInterpolateWithOptions(options),
+							$author$project$Actions$TrackHasChanged
+						]));
+			}
+		} else {
+			return _Utils_Tuple2(options, _List_Nil);
+		}
+	});
 var $author$project$Actions$NudgeApplyWithOptions = function (a) {
 	return {$: 'NudgeApplyWithOptions', a: a};
 };
@@ -24795,7 +24911,7 @@ var $author$project$ToolsController$update = F4(
 						options,
 						{outAndBackSettings: newOptions}),
 					actions);
-			default:
+			case 'ToolSimplifyMsg':
 				var msg = toolMsg.a;
 				var _v13 = A4(
 					$author$project$Tools$Simplify$update,
@@ -24809,6 +24925,21 @@ var $author$project$ToolsController$update = F4(
 					_Utils_update(
 						options,
 						{simplifySettings: newOptions}),
+					actions);
+			default:
+				var msg = toolMsg.a;
+				var _v14 = A4(
+					$author$project$Tools$Interpolate$update,
+					msg,
+					options.interpolateSettings,
+					A2($author$project$ToolsController$getColour, $author$project$ToolsController$ToolInterpolate, options.tools),
+					isTrack);
+				var newOptions = _v14.a;
+				var actions = _v14.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						options,
+						{interpolateSettings: newOptions}),
 					actions);
 		}
 	});
@@ -31831,6 +31962,9 @@ var $author$project$ToolsController$ToolGradientChangeMsg = function (a) {
 var $author$project$ToolsController$ToolInfoMsg = function (a) {
 	return {$: 'ToolInfoMsg', a: a};
 };
+var $author$project$ToolsController$ToolInterpolateMsg = function (a) {
+	return {$: 'ToolInterpolateMsg', a: a};
+};
 var $author$project$ToolsController$ToolNudgeMsg = function (a) {
 	return {$: 'ToolNudgeMsg', a: a};
 };
@@ -35300,6 +35434,68 @@ var $author$project$Tools$GradientProblems$view = F3(
 			return $author$project$ViewPureStyles$noTrackMessage;
 		}
 	});
+var $author$project$Tools$Interpolate$Apply = {$: 'Apply'};
+var $author$project$Tools$Interpolate$SetSpacing = function (a) {
+	return {$: 'SetSpacing', a: a};
+};
+var $author$project$Tools$Interpolate$spacingSlider = F3(
+	function (imperial, options, wrap) {
+		return A2(
+			$mdgriffith$elm_ui$Element$Input$slider,
+			$author$project$ViewPureStyles$commonShortHorizontalSliderStyles,
+			{
+				label: A2(
+					$mdgriffith$elm_ui$Element$Input$labelBelow,
+					_List_Nil,
+					$mdgriffith$elm_ui$Element$text(
+						'Spacing: ' + A2($author$project$UtilsForViews$showShortMeasure, imperial, options.minimumSpacing))),
+				max: 50.0,
+				min: 1.0,
+				onChange: A2($elm$core$Basics$composeL, wrap, $author$project$Tools$Interpolate$SetSpacing),
+				step: $elm$core$Maybe$Just(0.5),
+				thumb: $mdgriffith$elm_ui$Element$Input$defaultThumb,
+				value: $ianmackenzie$elm_units$Length$inMeters(options.minimumSpacing)
+			});
+	});
+var $author$project$Tools$Interpolate$view = F4(
+	function (imperial, wrapper, options, track) {
+		var fixButton = A2(
+			$mdgriffith$elm_ui$Element$Input$button,
+			$author$project$ViewPureStyles$neatToolsBorder,
+			{
+				label: $mdgriffith$elm_ui$Element$text('Interpolate'),
+				onPress: $elm$core$Maybe$Just(
+					wrapper($author$project$Tools$Interpolate$Apply))
+			});
+		if (track.$ === 'Just') {
+			var isTrack = track.a;
+			return A2(
+				$mdgriffith$elm_ui$Element$column,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$padding(5),
+						$mdgriffith$elm_ui$Element$spacing(5),
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$centerX,
+						$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite)
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[$mdgriffith$elm_ui$Element$centerX]),
+						A3($author$project$Tools$Interpolate$spacingSlider, imperial, options, wrapper)),
+						A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[$mdgriffith$elm_ui$Element$centerX]),
+						fixButton)
+					]));
+		} else {
+			return $author$project$ViewPureStyles$noTrackMessage;
+		}
+	});
 var $author$project$Tools$Nudge$SetFadeExtent = function (a) {
 	return {$: 'SetFadeExtent', a: a};
 };
@@ -36236,6 +36432,9 @@ var $author$project$Actions$interpretAction = function (action) {
 			return 'out and back';
 		case 'ApplySimplify':
 			return 'simplify';
+		case 'ApplyInterpolateWithOptions':
+			var options = action.a;
+			return 'interpolate';
 		default:
 			return 'ask Pete to fix this message';
 	}
@@ -36452,11 +36651,18 @@ var $author$project$ToolsController$viewToolByType = F4(
 							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolOutAndBackMsg),
 							options.outAndBackSettings,
 							isTrack);
-					default:
+					case 'ToolSimplify':
 						return A3(
 							$author$project$Tools$Simplify$view,
 							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolSimplifyMsg),
 							options.simplifySettings,
+							isTrack);
+					default:
+						return A4(
+							$author$project$Tools$Interpolate$view,
+							options.imperial,
+							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolInterpolateMsg),
+							options.interpolateSettings,
 							isTrack);
 				}
 			}());

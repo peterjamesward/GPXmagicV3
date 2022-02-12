@@ -27,6 +27,8 @@ import Tools.DeletePoints as DeletePoints
 import Tools.DisplaySettings
 import Tools.DisplaySettingsOptions
 import Tools.GradientProblems
+import Tools.Interpolate
+import Tools.InterpolateOptions
 import Tools.Nudge
 import Tools.NudgeOptions
 import Tools.OutAndBack
@@ -70,6 +72,7 @@ type ToolType
     | ToolDisplaySettings
     | ToolOutAndBack
     | ToolSimplify
+    | ToolInterpolate
 
 
 type alias Options =
@@ -90,6 +93,7 @@ type alias Options =
     , displaySettings : Tools.DisplaySettingsOptions.Options
     , outAndBackSettings : Tools.OutAndBackOptions.Options
     , simplifySettings : Tools.Simplify.Options
+    , interpolateSettings : Tools.InterpolateOptions.Options
     }
 
 
@@ -111,6 +115,7 @@ defaultOptions =
     , displaySettings = Tools.DisplaySettings.defaultOptions
     , outAndBackSettings = Tools.OutAndBack.defaultOptions
     , simplifySettings = Tools.Simplify.defaultOptions
+    , interpolateSettings = Tools.Interpolate.defaultOptions
     }
 
 
@@ -135,6 +140,7 @@ type ToolMsg
     | ToolDisplaySettingMsg Tools.DisplaySettings.Msg
     | ToolOutAndBackMsg Tools.OutAndBack.Msg
     | ToolSimplifyMsg Tools.Simplify.Msg
+    | ToolInterpolateMsg Tools.Interpolate.Msg
 
 
 type alias ToolEntry =
@@ -167,6 +173,7 @@ defaultTools =
     , nudgeTool
     , outAndBackTool
     , simplifyTool
+    , interpolateTool
     ]
 
 
@@ -357,6 +364,19 @@ simplifyTool =
     { toolType = ToolSimplify
     , label = "Simplify"
     , info = "Reduce noise"
+    , video = Nothing
+    , state = Contracted
+    , dock = DockLowerLeft
+    , tabColour = FlatColors.FlatUIPalette.concrete
+    , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
+    , isPopupOpen = False
+    }
+
+interpolateTool : ToolEntry
+interpolateTool =
+    { toolType = ToolInterpolate
+    , label = "Interpolate"
+    , info = "Add points"
     , video = Nothing
     , state = Contracted
     , dock = DockLowerLeft
@@ -657,6 +677,21 @@ update toolMsg isTrack msgWrapper options =
             , actions
             )
 
+        ToolInterpolateMsg msg ->
+            let
+                ( newOptions, actions ) =
+                    Tools.Interpolate.update
+                        msg
+                        options.interpolateSettings
+                        (getColour ToolInterpolate options.tools)
+                        isTrack
+            in
+            ( { options | interpolateSettings = newOptions }
+            , actions
+            )
+
+
+
 
 refreshOpenTools :
     Maybe (TrackLoaded msg)
@@ -841,6 +876,21 @@ toolStateHasChanged toolType newState isTrack options =
                     { options | simplifySettings = newToolOptions }
             in
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
+
+        ToolInterpolate ->
+            let
+                ( newToolOptions, actions ) =
+                    Tools.Interpolate.toolStateChange
+                        (newState == Expanded)
+                        (getColour toolType options.tools)
+                        options.interpolateSettings
+                        isTrack
+
+                newOptions =
+                    { options | interpolateSettings = newToolOptions }
+            in
+            ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
+
 
 
 
@@ -1087,6 +1137,14 @@ viewToolByType msgWrapper entry isTrack options =
                     options.simplifySettings
                     isTrack
 
+            ToolInterpolate ->
+                Tools.Interpolate.view
+                    options.imperial
+                    (msgWrapper << ToolInterpolateMsg)
+                    options.interpolateSettings
+                    isTrack
+
+
 
 
 -- Local storage management
@@ -1152,6 +1210,9 @@ encodeType toolType =
 
         ToolSimplify ->
             "ToolSimplify"
+
+        ToolInterpolate ->
+            "ToolInterpolate"
 
 
 encodeColour : Element.Color -> E.Value
