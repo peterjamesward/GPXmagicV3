@@ -29,6 +29,8 @@ import Tools.DisplaySettingsOptions
 import Tools.GradientProblems
 import Tools.Nudge
 import Tools.NudgeOptions
+import Tools.OutAndBack
+import Tools.OutAndBackOptions
 import Tools.Pointers as Pointers
 import Tools.TrackInfoBox as TrackInfoBox
 import Tools.UndoRedo as UndoRedo
@@ -65,6 +67,7 @@ type ToolType
     | ToolNudge
     | ToolGradientProblems
     | ToolDisplaySettings
+    | ToolOutAndBack
 
 
 type alias Options =
@@ -83,6 +86,7 @@ type alias Options =
     , infoOptions : TrackInfoBox.Options
     , gradientProblemOptions : Tools.GradientProblems.Options
     , displaySettings : Tools.DisplaySettingsOptions.Options
+    , outAndBackSettings : Tools.OutAndBackOptions.Options
     }
 
 
@@ -102,6 +106,7 @@ defaultOptions =
     , infoOptions = TrackInfoBox.defaultOptions
     , gradientProblemOptions = Tools.GradientProblems.defaultOptions
     , displaySettings = Tools.DisplaySettings.defaultOptions
+    , outAndBackSettings = Tools.OutAndBack.defaultOptions
     }
 
 
@@ -124,6 +129,7 @@ type ToolMsg
     | ToolInfoMsg TrackInfoBox.Msg
     | ToolGradientChangeMsg Tools.GradientProblems.Msg
     | ToolDisplaySettingMsg Tools.DisplaySettings.Msg
+    | ToolOutAndBackMsg Tools.OutAndBack.Msg
 
 
 type alias ToolEntry =
@@ -154,6 +160,7 @@ defaultTools =
     , curveFormerTool
     , bendSmootherTool
     , nudgeTool
+    , outAndBackTool
     ]
 
 
@@ -319,6 +326,19 @@ nudgeTool =
     , video = Nothing
     , state = Contracted
     , dock = DockLowerRight
+    , tabColour = FlatColors.FlatUIPalette.concrete
+    , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
+    , isPopupOpen = False
+    }
+
+outAndBackTool : ToolEntry
+outAndBackTool =
+    { toolType = ToolOutAndBack
+    , label = "Out and Back"
+    , info = "ET go home"
+    , video = Nothing
+    , state = Contracted
+    , dock = DockLowerLeft
     , tabColour = FlatColors.FlatUIPalette.concrete
     , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
     , isPopupOpen = False
@@ -591,6 +611,20 @@ update toolMsg isTrack msgWrapper options =
             , actions
             )
 
+        ToolOutAndBackMsg msg ->
+            let
+                ( newOptions, actions ) =
+                    Tools.OutAndBack.update
+                        msg
+                        options.outAndBackSettings
+                        isTrack
+            in
+            ( { options | outAndBackSettings = newOptions }
+            , actions
+            )
+
+
+
 
 refreshOpenTools :
     Maybe (TrackLoaded msg)
@@ -758,6 +792,10 @@ toolStateHasChanged toolType newState isTrack options =
 
         ToolDisplaySettings ->
             ( options, [] )
+
+        ToolOutAndBack ->
+            ( options, [] )
+
 
 
 
@@ -991,6 +1029,14 @@ viewToolByType msgWrapper entry isTrack options =
                     (msgWrapper << ToolDisplaySettingMsg)
                     options.displaySettings
 
+            ToolOutAndBack ->
+                Tools.OutAndBack.view
+                    options.imperial
+                    (msgWrapper << ToolOutAndBackMsg)
+                    options.outAndBackSettings
+                    isTrack
+
+
 
 
 -- Local storage management
@@ -1050,6 +1096,10 @@ encodeType toolType =
 
         ToolDisplaySettings ->
             "ToolDisplaySettings"
+
+        ToolOutAndBack ->
+            "ToolOutAndBack"
+
 
 
 encodeColour : Element.Color -> E.Value

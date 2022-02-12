@@ -105,10 +105,9 @@ toolStateChange opened colour options track =
 update :
     Msg
     -> Options
-    -> Element.Color
     -> Maybe (TrackLoaded msg)
     -> ( Options, List (ToolAction msg) )
-update msg options previewColour hasTrack =
+update msg options hasTrack =
     case ( hasTrack, msg ) of
         ( Just track, SetOffset offset ) ->
             let
@@ -145,6 +144,7 @@ view imperial wrapper options track =
                 , spacing 5
                 , width fill
                 , centerX
+                , Background.color FlatColors.ChinesePalette.antiFlashWhite
                 ]
                 [ el [ centerX ] <| offsetSlider imperial options wrapper
                 , el [ centerX ] <| fixButton
@@ -178,7 +178,7 @@ offsetSlider imperial options wrap =
 
                 else
                     Length.meters 5.0
-        , step = Nothing
+        , step = Just 0.5
         , value = options.offset
         , thumb = Input.defaultThumb
         }
