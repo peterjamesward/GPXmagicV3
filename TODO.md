@@ -14,34 +14,27 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 # WIP
 
-Out and Back without graphs, inc. variable offset.
-> No need for graphs:
-1. Extended centre line gives midpoints of turn-around arcs,
-2. Outward route shifted one way, using Nudge logic,
-3. Return route is reverse, shifted oppositely,
-4. Arcs are made from parallel case of Bend Smoother.
-5. Assemble into a new tree.
-
 ---
 
 # BACKLOG, roughly in order ...
 
 ## Tools
 
-2. Limit gradients
-3. Simplify.
-4. Map Satellite style choice
-5. Intersections
-6. Plan view
-7. Fly-through
-8. Move & Stretch
-9. 1CQF
-10. Graph Theory (renamed)
-11. Use Strava segment data
-12. Loops (inc. impact on others, such as Bezier).
-13. Lift and Shift
-14. SVG import
-15. Terrain.
+1. Limit gradients
+2. Simplify
+3. Interpolate
+4. Intersections
+5. Plan view
+6. Fly-through
+7. Move & Stretch
+8. 1CQF
+9. Graph Theory (renamed)
+10. Use Strava segment data
+11. Loops (inc. impact on others, such as Bezier).
+12. Lift and Shift
+13. SVG import
+14. Terrain
+15. Map Satellite style choice
 16. Split and Join
 
 New stuff:
