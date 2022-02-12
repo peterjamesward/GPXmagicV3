@@ -32,6 +32,7 @@ import Tools.NudgeOptions
 import Tools.OutAndBack
 import Tools.OutAndBackOptions
 import Tools.Pointers as Pointers
+import Tools.Simplify
 import Tools.TrackInfoBox as TrackInfoBox
 import Tools.UndoRedo as UndoRedo
 import TrackLoaded exposing (TrackLoaded)
@@ -68,6 +69,7 @@ type ToolType
     | ToolGradientProblems
     | ToolDisplaySettings
     | ToolOutAndBack
+    | ToolSimplify
 
 
 type alias Options =
@@ -87,6 +89,7 @@ type alias Options =
     , gradientProblemOptions : Tools.GradientProblems.Options
     , displaySettings : Tools.DisplaySettingsOptions.Options
     , outAndBackSettings : Tools.OutAndBackOptions.Options
+    , simplifySettings : Tools.Simplify.Options
     }
 
 
@@ -107,6 +110,7 @@ defaultOptions =
     , gradientProblemOptions = Tools.GradientProblems.defaultOptions
     , displaySettings = Tools.DisplaySettings.defaultOptions
     , outAndBackSettings = Tools.OutAndBack.defaultOptions
+    , simplifySettings = Tools.Simplify.defaultOptions
     }
 
 
@@ -130,6 +134,7 @@ type ToolMsg
     | ToolGradientChangeMsg Tools.GradientProblems.Msg
     | ToolDisplaySettingMsg Tools.DisplaySettings.Msg
     | ToolOutAndBackMsg Tools.OutAndBack.Msg
+    | ToolSimplifyMsg Tools.Simplify.Msg
 
 
 type alias ToolEntry =
@@ -161,6 +166,7 @@ defaultTools =
     , bendSmootherTool
     , nudgeTool
     , outAndBackTool
+    , simplifyTool
     ]
 
 
@@ -331,11 +337,26 @@ nudgeTool =
     , isPopupOpen = False
     }
 
+
 outAndBackTool : ToolEntry
 outAndBackTool =
     { toolType = ToolOutAndBack
     , label = "Out and Back"
     , info = "ET go home"
+    , video = Nothing
+    , state = Contracted
+    , dock = DockLowerLeft
+    , tabColour = FlatColors.FlatUIPalette.concrete
+    , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
+    , isPopupOpen = False
+    }
+
+
+simplifyTool : ToolEntry
+simplifyTool =
+    { toolType = ToolSimplify
+    , label = "Simplify"
+    , info = "Reduce noise"
     , video = Nothing
     , state = Contracted
     , dock = DockLowerLeft
@@ -623,7 +644,18 @@ update toolMsg isTrack msgWrapper options =
             , actions
             )
 
-
+        ToolSimplifyMsg msg ->
+            let
+                ( newOptions, actions ) =
+                    Tools.Simplify.update
+                        msg
+                        options.simplifySettings
+                        (getColour ToolSimplify options.tools)
+                        isTrack
+            in
+            ( { options | simplifySettings = newOptions }
+            , actions
+            )
 
 
 refreshOpenTools :
@@ -791,11 +823,24 @@ toolStateHasChanged toolType newState isTrack options =
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
         ToolDisplaySettings ->
-            ( options, [] )
+            ( options, [ StoreLocally "tools" <| encodeToolState options ] )
 
         ToolOutAndBack ->
-            ( options, [] )
+            ( options, [ StoreLocally "tools" <| encodeToolState options ] )
 
+        ToolSimplify ->
+            let
+                ( newToolOptions, actions ) =
+                    Tools.Simplify.toolStateChange
+                        (newState == Expanded)
+                        (getColour toolType options.tools)
+                        options.simplifySettings
+                        isTrack
+
+                newOptions =
+                    { options | simplifySettings = newToolOptions }
+            in
+            ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
 
 
@@ -1036,6 +1081,11 @@ viewToolByType msgWrapper entry isTrack options =
                     options.outAndBackSettings
                     isTrack
 
+            ToolSimplify ->
+                Tools.Simplify.view
+                    (msgWrapper << ToolSimplifyMsg)
+                    options.simplifySettings
+                    isTrack
 
 
 
@@ -1100,6 +1150,8 @@ encodeType toolType =
         ToolOutAndBack ->
             "ToolOutAndBack"
 
+        ToolSimplify ->
+            "ToolSimplify"
 
 
 encodeColour : Element.Color -> E.Value

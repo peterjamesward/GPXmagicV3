@@ -8639,6 +8639,7 @@ var $ianmackenzie$elm_units$Quantity$zero = $ianmackenzie$elm_units$Quantity$Qua
 var $author$project$Tools$Nudge$defaultOptions = {fadeExtent: $ianmackenzie$elm_units$Quantity$zero, horizontal: $ianmackenzie$elm_units$Quantity$zero, vertical: $ianmackenzie$elm_units$Quantity$zero};
 var $author$project$Tools$OutAndBack$defaultOptions = {offset: 0.0};
 var $author$project$Tools$Pointers$defaultOptions = {orange: 0, purple: $elm$core$Maybe$Nothing};
+var $author$project$Tools$Simplify$defaultOptions = {pointsToRemove: _List_Nil};
 var $author$project$Tools$TrackInfoBox$InfoForTrack = {$: 'InfoForTrack'};
 var $author$project$Tools$TrackInfoBox$defaultOptions = {displayMode: $author$project$Tools$TrackInfoBox$InfoForTrack, memoryInfo: $elm$core$Maybe$Nothing};
 var $author$project$Tools$UndoRedo$Options = function (dummy) {
@@ -8815,6 +8816,18 @@ var $author$project$ToolsController$pointersTool = {
 	toolType: $author$project$ToolsController$ToolPointers,
 	video: $elm$core$Maybe$Nothing
 };
+var $author$project$ToolsController$ToolSimplify = {$: 'ToolSimplify'};
+var $author$project$ToolsController$simplifyTool = {
+	dock: $author$project$ToolsController$DockLowerLeft,
+	info: 'Reduce noise',
+	isPopupOpen: false,
+	label: 'Simplify',
+	state: $author$project$ToolsController$Contracted,
+	tabColour: $smucode$elm_flat_colors$FlatColors$FlatUIPalette$concrete,
+	textColour: $author$project$ViewPureStyles$contrastingColour($smucode$elm_flat_colors$FlatColors$FlatUIPalette$concrete),
+	toolType: $author$project$ToolsController$ToolSimplify,
+	video: $elm$core$Maybe$Nothing
+};
 var $author$project$ToolsController$ToolTrackInfo = {$: 'ToolTrackInfo'};
 var $author$project$ToolsController$trackInfoBox = {
 	dock: $author$project$ToolsController$DockUpperLeft,
@@ -8841,8 +8854,8 @@ var $author$project$ToolsController$undoRedoTool = {
 	video: $elm$core$Maybe$Nothing
 };
 var $author$project$ToolsController$defaultTools = _List_fromArray(
-	[$author$project$ToolsController$pointersTool, $author$project$ToolsController$undoRedoTool, $author$project$ToolsController$trackInfoBox, $author$project$ToolsController$displaySettingsTool, $author$project$ToolsController$directionChangeTool, $author$project$ToolsController$gradientChangeTool, $author$project$ToolsController$deleteTool, $author$project$ToolsController$bezierSplinesTool, $author$project$ToolsController$centroidAverageTool, $author$project$ToolsController$curveFormerTool, $author$project$ToolsController$bendSmootherTool, $author$project$ToolsController$nudgeTool, $author$project$ToolsController$outAndBackTool]);
-var $author$project$ToolsController$defaultOptions = {bendSmootherOptions: $author$project$Tools$BendSmoother$defaultOptions, bezierSplineOptions: $author$project$Tools$BezierSplines$defaultOptions, centroidAverageOptions: $author$project$Tools$CentroidAverage$defaultOptions, curveFormerOptions: $author$project$Tools$CurveFormer$defaultOptions, deleteOptions: $author$project$Tools$DeletePoints$defaultOptions, directionChangeOptions: $author$project$Tools$AbruptDirectionChanges$defaultOptions, displaySettings: $author$project$Tools$DisplaySettings$defaultOptions, gradientProblemOptions: $author$project$Tools$GradientProblems$defaultOptions, imperial: false, infoOptions: $author$project$Tools$TrackInfoBox$defaultOptions, nudgeOptions: $author$project$Tools$Nudge$defaultOptions, outAndBackSettings: $author$project$Tools$OutAndBack$defaultOptions, pointerOptions: $author$project$Tools$Pointers$defaultOptions, tools: $author$project$ToolsController$defaultTools, undoRedoOptions: $author$project$Tools$UndoRedo$defaultOptions};
+	[$author$project$ToolsController$pointersTool, $author$project$ToolsController$undoRedoTool, $author$project$ToolsController$trackInfoBox, $author$project$ToolsController$displaySettingsTool, $author$project$ToolsController$directionChangeTool, $author$project$ToolsController$gradientChangeTool, $author$project$ToolsController$deleteTool, $author$project$ToolsController$bezierSplinesTool, $author$project$ToolsController$centroidAverageTool, $author$project$ToolsController$curveFormerTool, $author$project$ToolsController$bendSmootherTool, $author$project$ToolsController$nudgeTool, $author$project$ToolsController$outAndBackTool, $author$project$ToolsController$simplifyTool]);
+var $author$project$ToolsController$defaultOptions = {bendSmootherOptions: $author$project$Tools$BendSmoother$defaultOptions, bezierSplineOptions: $author$project$Tools$BezierSplines$defaultOptions, centroidAverageOptions: $author$project$Tools$CentroidAverage$defaultOptions, curveFormerOptions: $author$project$Tools$CurveFormer$defaultOptions, deleteOptions: $author$project$Tools$DeletePoints$defaultOptions, directionChangeOptions: $author$project$Tools$AbruptDirectionChanges$defaultOptions, displaySettings: $author$project$Tools$DisplaySettings$defaultOptions, gradientProblemOptions: $author$project$Tools$GradientProblems$defaultOptions, imperial: false, infoOptions: $author$project$Tools$TrackInfoBox$defaultOptions, nudgeOptions: $author$project$Tools$Nudge$defaultOptions, outAndBackSettings: $author$project$Tools$OutAndBack$defaultOptions, pointerOptions: $author$project$Tools$Pointers$defaultOptions, simplifySettings: $author$project$Tools$Simplify$defaultOptions, tools: $author$project$ToolsController$defaultTools, undoRedoOptions: $author$project$Tools$UndoRedo$defaultOptions};
 var $elm$browser$Browser$Dom$getViewport = _Browser_withWindow(_Browser_getViewport);
 var $elm$time$Time$Name = function (a) {
 	return {$: 'Name', a: a};
@@ -10610,8 +10623,10 @@ var $author$project$ToolsController$encodeType = function (toolType) {
 			return 'ToolAbruptGradientChanges';
 		case 'ToolDisplaySettings':
 			return 'ToolDisplaySettings';
-		default:
+		case 'ToolOutAndBack':
 			return 'ToolOutAndBack';
+		default:
+			return 'ToolSimplify';
 	}
 };
 var $author$project$ToolsController$encodeOneTool = function (tool) {
@@ -16733,6 +16748,135 @@ var $author$project$Tools$Pointers$toolStateChange = F4(
 			return _Utils_Tuple2(options, _List_Nil);
 		}
 	});
+var $author$project$Tools$Simplify$actions = F3(
+	function (colour, options, track) {
+		return _List_fromArray(
+			[
+				$author$project$Actions$ShowPreview(
+				{
+					colour: colour,
+					points: A2($author$project$DomainModel$buildPreview, options.pointsToRemove, track.trackTree),
+					shape: $author$project$Actions$PreviewCircle,
+					tag: 'simplify'
+				})
+			]);
+	});
+var $ianmackenzie$elm_geometry$Vector3d$cross = F2(
+	function (_v0, _v1) {
+		var v2 = _v0.a;
+		var v1 = _v1.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Vector3d(
+			{x: (v1.y * v2.z) - (v1.z * v2.y), y: (v1.z * v2.x) - (v1.x * v2.z), z: (v1.x * v2.y) - (v1.y * v2.x)});
+	});
+var $ianmackenzie$elm_geometry$Triangle3d$area = function (triangle) {
+	var _v0 = $ianmackenzie$elm_geometry$Triangle3d$vertices(triangle);
+	var p1 = _v0.a;
+	var p2 = _v0.b;
+	var p3 = _v0.c;
+	var firstVector = A2($ianmackenzie$elm_geometry$Vector3d$from, p1, p2);
+	var secondVector = A2($ianmackenzie$elm_geometry$Vector3d$from, p1, p3);
+	return A2(
+		$ianmackenzie$elm_units$Quantity$multiplyBy,
+		0.5,
+		$ianmackenzie$elm_geometry$Vector3d$length(
+			A2($ianmackenzie$elm_geometry$Vector3d$cross, secondVector, firstVector)));
+};
+var $elm$core$Dict$member = F2(
+	function (key, dict) {
+		var _v0 = A2($elm$core$Dict$get, key, dict);
+		if (_v0.$ === 'Just') {
+			return true;
+		} else {
+			return false;
+		}
+	});
+var $elm$core$List$sortWith = _List_sortWith;
+var $author$project$Tools$Simplify$findSimplifications = F2(
+	function (options, tree) {
+		var foldFn = F2(
+			function (road, _v5) {
+				var index = _v5.a;
+				var previousIfAny = _v5.b;
+				var outputs = _v5.c;
+				if (previousIfAny.$ === 'Nothing') {
+					return _Utils_Tuple3(
+						1,
+						$elm$core$Maybe$Just(road),
+						_List_Nil);
+				} else {
+					var previous = previousIfAny.a;
+					return _Utils_Tuple3(
+						index + 1,
+						$elm$core$Maybe$Just(road),
+						A2(
+							$elm$core$List$cons,
+							_Utils_Tuple2(
+								index,
+								$ianmackenzie$elm_geometry$Triangle3d$area(
+									A3($ianmackenzie$elm_geometry$Triangle3d$from, previous.startPoint, road.startPoint, road.endPoint))),
+							outputs));
+				}
+			});
+		var _v0 = A7(
+			$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
+			0,
+			$author$project$DomainModel$skipCount(tree),
+			$elm$core$Basics$always($elm$core$Maybe$Nothing),
+			0,
+			tree,
+			foldFn,
+			_Utils_Tuple3(0, $elm$core$Maybe$Nothing, _List_Nil));
+		var triangleInfo = _v0.c;
+		var selectSmallestAreas = A2(
+			$elm$core$List$take,
+			($elm$core$List$length(triangleInfo) / 5) | 0,
+			A2(
+				$elm$core$List$sortWith,
+				F2(
+					function (_v2, _v3) {
+						var idx1 = _v2.a;
+						var area1 = _v2.b;
+						var idx2 = _v3.a;
+						var area2 = _v3.b;
+						return A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, area2, area1) ? $elm$core$Basics$LT : $elm$core$Basics$GT;
+					}),
+				triangleInfo));
+		var nonAdjacentEntries = A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v1, outputs) {
+					var idx = _v1.a;
+					var area = _v1.b;
+					return (A2($elm$core$Dict$member, idx + 1, outputs) || A2($elm$core$Dict$member, idx - 1, outputs)) ? outputs : A3($elm$core$Dict$insert, idx, idx, outputs);
+				}),
+			$elm$core$Dict$empty,
+			selectSmallestAreas);
+		return _Utils_update(
+			options,
+			{
+				pointsToRemove: $elm$core$Dict$keys(nonAdjacentEntries)
+			});
+	});
+var $author$project$Tools$Simplify$toolStateChange = F4(
+	function (opened, colour, options, track) {
+		var _v0 = _Utils_Tuple2(opened, track);
+		if (_v0.a && (_v0.b.$ === 'Just')) {
+			var theTrack = _v0.b.a;
+			var populatedOptions = A2($author$project$Tools$Simplify$findSimplifications, options, theTrack.trackTree);
+			return _Utils_Tuple2(
+				populatedOptions,
+				A3($author$project$Tools$Simplify$actions, colour, populatedOptions, theTrack));
+		} else {
+			return _Utils_Tuple2(
+				_Utils_update(
+					options,
+					{pointsToRemove: _List_Nil}),
+				_List_fromArray(
+					[
+						$author$project$Actions$HidePreview('simplify')
+					]));
+		}
+	});
 var $author$project$ToolsController$toolStateHasChanged = F4(
 	function (toolType, newState, isTrack, options) {
 		switch (toolType.$) {
@@ -16938,9 +17082,46 @@ var $author$project$ToolsController$toolStateHasChanged = F4(
 							$author$project$ToolsController$encodeToolState(options)),
 						actions));
 			case 'ToolDisplaySettings':
-				return _Utils_Tuple2(options, _List_Nil);
+				return _Utils_Tuple2(
+					options,
+					_List_fromArray(
+						[
+							A2(
+							$author$project$Actions$StoreLocally,
+							'tools',
+							$author$project$ToolsController$encodeToolState(options))
+						]));
+			case 'ToolOutAndBack':
+				return _Utils_Tuple2(
+					options,
+					_List_fromArray(
+						[
+							A2(
+							$author$project$Actions$StoreLocally,
+							'tools',
+							$author$project$ToolsController$encodeToolState(options))
+						]));
 			default:
-				return _Utils_Tuple2(options, _List_Nil);
+				var _v10 = A4(
+					$author$project$Tools$Simplify$toolStateChange,
+					_Utils_eq(newState, $author$project$ToolsController$Expanded),
+					A2($author$project$ToolsController$getColour, toolType, options.tools),
+					options.simplifySettings,
+					isTrack);
+				var newToolOptions = _v10.a;
+				var actions = _v10.b;
+				var newOptions = _Utils_update(
+					options,
+					{simplifySettings: newToolOptions});
+				return _Utils_Tuple2(
+					newOptions,
+					A2(
+						$elm$core$List$cons,
+						A2(
+							$author$project$Actions$StoreLocally,
+							'tools',
+							$author$project$ToolsController$encodeToolState(options)),
+						actions));
 		}
 	});
 var $author$project$ToolsController$refreshOpenTools = F2(
@@ -24202,6 +24383,34 @@ var $author$project$Tools$Pointers$update = F4(
 			}
 		}
 	});
+var $author$project$Tools$Simplify$update = F4(
+	function (msg, options, previewColour, hasTrack) {
+		var _v0 = _Utils_Tuple2(msg, hasTrack);
+		_v0$2:
+		while (true) {
+			if (_v0.a.$ === 'Seek') {
+				if (_v0.b.$ === 'Just') {
+					var _v1 = _v0.a;
+					var track = _v0.b.a;
+					var newOptions = A2($author$project$Tools$Simplify$findSimplifications, options, track.trackTree);
+					return _Utils_Tuple2(
+						newOptions,
+						A3($author$project$Tools$Simplify$actions, previewColour, newOptions, track));
+				} else {
+					break _v0$2;
+				}
+			} else {
+				if (_v0.b.$ === 'Just') {
+					var _v2 = _v0.a;
+					var track = _v0.b.a;
+					return _Utils_Tuple2(options, _List_Nil);
+				} else {
+					break _v0$2;
+				}
+			}
+		}
+		return _Utils_Tuple2(options, _List_Nil);
+	});
 var $author$project$Tools$TrackInfoBox$update = F2(
 	function (msg, options) {
 		var mode = msg.a;
@@ -24493,7 +24702,7 @@ var $author$project$ToolsController$update = F4(
 						options,
 						{displaySettings: newOptions}),
 					actions);
-			default:
+			case 'ToolOutAndBackMsg':
 				var msg = toolMsg.a;
 				var _v12 = A3($author$project$Tools$OutAndBack$update, msg, options.outAndBackSettings, isTrack);
 				var newOptions = _v12.a;
@@ -24502,6 +24711,21 @@ var $author$project$ToolsController$update = F4(
 					_Utils_update(
 						options,
 						{outAndBackSettings: newOptions}),
+					actions);
+			default:
+				var msg = toolMsg.a;
+				var _v13 = A4(
+					$author$project$Tools$Simplify$update,
+					msg,
+					options.simplifySettings,
+					A2($author$project$ToolsController$getColour, $author$project$ToolsController$ToolSimplify, options.tools),
+					isTrack);
+				var newOptions = _v13.a;
+				var actions = _v13.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						options,
+						{simplifySettings: newOptions}),
 					actions);
 		}
 	});
@@ -25246,15 +25470,6 @@ var $elm$core$Set$insert = F2(
 		var dict = _v0.a;
 		return $elm$core$Set$Set_elm_builtin(
 			A3($elm$core$Dict$insert, key, _Utils_Tuple0, dict));
-	});
-var $elm$core$Dict$member = F2(
-	function (key, dict) {
-		var _v0 = A2($elm$core$Dict$get, key, dict);
-		if (_v0.$ === 'Just') {
-			return true;
-		} else {
-			return false;
-		}
 	});
 var $elm$core$Set$member = F2(
 	function (key, _v0) {
@@ -31539,6 +31754,9 @@ var $author$project$ToolsController$ToolNudgeMsg = function (a) {
 var $author$project$ToolsController$ToolOutAndBackMsg = function (a) {
 	return {$: 'ToolOutAndBackMsg', a: a};
 };
+var $author$project$ToolsController$ToolSimplifyMsg = function (a) {
+	return {$: 'ToolSimplifyMsg', a: a};
+};
 var $author$project$ToolsController$UndoRedoMsg = function (a) {
 	return {$: 'UndoRedoMsg', a: a};
 };
@@ -35554,6 +35772,60 @@ var $author$project$Tools$Pointers$view = F3(
 						])));
 		}
 	});
+var $author$project$Tools$Simplify$Apply = {$: 'Apply'};
+var $author$project$Tools$Simplify$Seek = {$: 'Seek'};
+var $author$project$Tools$Simplify$view = F3(
+	function (msgWrapper, options, isTrack) {
+		if (isTrack.$ === 'Just') {
+			var track = isTrack.a;
+			return A2(
+				$mdgriffith$elm_ui$Element$column,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$padding(10),
+						$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite)
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[$mdgriffith$elm_ui$Element$centerX]),
+						A2(
+							$mdgriffith$elm_ui$Element$Input$button,
+							$author$project$ViewPureStyles$neatToolsBorder,
+							function () {
+								var _v1 = $elm$core$List$length(options.pointsToRemove);
+								if (!_v1) {
+									return {
+										label: $mdgriffith$elm_ui$Element$text('Search'),
+										onPress: $elm$core$Maybe$Just(
+											msgWrapper($author$project$Tools$Simplify$Seek))
+									};
+								} else {
+									var quantity = _v1;
+									return {
+										label: A2(
+											$mdgriffith$elm_ui$Element$paragraph,
+											_List_Nil,
+											_List_fromArray(
+												[
+													$mdgriffith$elm_ui$Element$text('Remove '),
+													$mdgriffith$elm_ui$Element$text(
+													$elm$core$String$fromInt(quantity)),
+													$mdgriffith$elm_ui$Element$text(' points')
+												])),
+										onPress: $elm$core$Maybe$Just(
+											msgWrapper($author$project$Tools$Simplify$Apply))
+									};
+								}
+							}()))
+					]));
+		} else {
+			return $author$project$ViewPureStyles$noTrackMessage;
+		}
+	});
 var $author$project$Tools$TrackInfoBox$ChooseDisplayMode = function (a) {
 	return {$: 'ChooseDisplayMode', a: a};
 };
@@ -36068,12 +36340,18 @@ var $author$project$ToolsController$viewToolByType = F4(
 							$author$project$Tools$DisplaySettings$view,
 							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolDisplaySettingMsg),
 							options.displaySettings);
-					default:
+					case 'ToolOutAndBack':
 						return A4(
 							$author$project$Tools$OutAndBack$view,
 							options.imperial,
 							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolOutAndBackMsg),
 							options.outAndBackSettings,
+							isTrack);
+					default:
+						return A3(
+							$author$project$Tools$Simplify$view,
+							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolSimplifyMsg),
+							options.simplifySettings,
 							isTrack);
 				}
 			}());

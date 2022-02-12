@@ -14,6 +14,8 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 # WIP
 
+**Simplify** (De-noise IRL)
+
 ---
 
 # BACKLOG, roughly in order ...
@@ -21,21 +23,20 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 ## Tools
 
 1. Limit gradients
-2. Simplify
-3. Interpolate
-4. Intersections
-5. Plan view
-6. Fly-through
-7. Move & Stretch
-8. 1CQF
-9. Graph Theory (renamed)
-10. Use Strava segment data
-11. Loops (inc. impact on others, such as Bezier).
-12. Lift and Shift
-13. SVG import
-14. Terrain
-15. Map Satellite style choice
-16. Split and Join
+2. Interpolate
+3. Intersections
+4. Plan view (? no rotate, so 4-way drag is always aligned ?)
+5. Fly-through
+6. Move & Stretch
+7. 1CQF
+8. Graph Theory (renamed)
+9. Use Strava segment data
+10. Loops (inc. impact on others, such as Bezier).
+11. Lift and Shift
+12. SVG import
+13. Terrain
+14. Map Satellite style choice
+15. Split and Join
 
 New stuff:
 1. Samir's bend detector (amount of angular change within X linear metres). (Option on Bend Problems)
