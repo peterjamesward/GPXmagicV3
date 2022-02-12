@@ -65,23 +65,34 @@ computeNewPoints options track =
 apply : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
 apply options track =
     let
-        nudgeOptions =
+        noNudge =
             Tools.Nudge.defaultOptions
 
-        ( _, outwardLeg ) =
-            -- nudge entire route one way, in natural order
-            Tools.Nudge.computeNudgedPoints
-                { nudgeOptions | horizontal = Length.meters options.offset }
+        useNudgeTool nudgeOption index =
+            -- Simple wrapper to use internal operation in Nudge
+            Tools.Nudge.nudgeTrackPoint
+                nudgeOption
+                1.0
+                index
                 track
 
-        ( _, returnLegWrongWay ) =
-            -- nudge route other way, reversed
-            Tools.Nudge.computeNudgedPoints
-                { nudgeOptions | horizontal = Quantity.negate <| Length.meters options.offset }
-                track
+        outwardLeg =
+            -- nudge entire route one way, in natural order
+            let
+                nudge =
+                    { noNudge | horizontal = Length.meters options.offset }
+            in
+            List.map (useNudgeTool nudge) (List.range 0 (skipCount track.trackTree))
 
         returnLeg =
-            List.reverse returnLegWrongWay
+            let
+                nudge =
+                    { noNudge
+                        | horizontal = Quantity.negate <| Length.meters options.offset
+                    }
+            in
+            List.map (useNudgeTool nudge) (List.range 0 (skipCount track.trackTree))
+                |> List.reverse
 
         homeLeaf =
             getFirstLeaf track.trackTree
@@ -102,7 +113,7 @@ apply options track =
                     homeLeaf.startPoint
 
         awayLeaf =
-            getFirstLeaf track.trackTree
+            getLastLeaf track.trackTree
 
         awayTurnMidpoint =
             -- extend last leaf to find point on turn
@@ -129,7 +140,7 @@ apply options track =
                     List.head returnLeg
             in
             case ( finalOutwardPoint, firstInwardPoint ) of
-                ( Just ( outEarth, outGPX ), Just ( backEarth, backGpx ) ) ->
+                ( Just outEarth, Just backEarth ) ->
                     Arc3d.throughPoints
                         outEarth
                         awayTurnMidpoint
@@ -148,7 +159,7 @@ apply options track =
                     List.head outwardLeg
             in
             case ( finalInwardPoint, firstOutwardPoint ) of
-                ( Just ( inEarth, inGPX ), Just ( outEarth, outGpx ) ) ->
+                ( Just inEarth, Just outEarth ) ->
                     Arc3d.throughPoints
                         inEarth
                         homeTurnMidpoint
@@ -157,11 +168,17 @@ apply options track =
                 _ ->
                     Nothing
 
+        outwardInGpx =
+            List.map (gpxFromPointWithReference track.referenceLonLat) outwardLeg
+
+        returnInGpx =
+            List.map (gpxFromPointWithReference track.referenceLonLat) returnLeg
+
         homeTurnInGpx =
             case homeTurn of
                 Just arc ->
                     arc
-                        |> Arc3d.approximate (Length.meters 1.0)
+                        |> Arc3d.approximate (Length.meters 0.1)
                         |> Polyline3d.vertices
                         |> List.map (gpxFromPointWithReference track.referenceLonLat)
 
@@ -172,7 +189,7 @@ apply options track =
             case awayTurn of
                 Just arc ->
                     arc
-                        |> Arc3d.approximate (Length.meters 1.0)
+                        |> Arc3d.approximate (Length.meters 0.1)
                         |> Polyline3d.vertices
                         |> List.map (gpxFromPointWithReference track.referenceLonLat)
 
@@ -180,10 +197,7 @@ apply options track =
                     []
 
         newCourse =
-            List.map Tuple.second outwardLeg
-                ++ awayTurnInGpx
-                ++ List.map Tuple.second returnLeg
-                ++ homeTurnInGpx
+            outwardInGpx ++ awayTurnInGpx ++ returnInGpx ++ homeTurnInGpx
 
         newTree =
             DomainModel.treeFromSourcePoints newCourse

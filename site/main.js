@@ -12227,48 +12227,43 @@ var $ianmackenzie$elm_geometry$Arc3d$approximate = F2(
 			A2($ianmackenzie$elm_geometry$Arc3d$numApproximationSegments, maxError, arc),
 			arc);
 	});
-var $author$project$DomainModel$trueLength = function (treeNode) {
-	return $author$project$DomainModel$asRecord(treeNode).trueLength;
-};
-var $author$project$DomainModel$distanceFromIndex = F2(
-	function (index, treeNode) {
-		distanceFromIndex:
-		while (true) {
-			if (treeNode.$ === 'Leaf') {
-				var info = treeNode.a;
-				return (index <= 0) ? $ianmackenzie$elm_units$Length$meters(0) : info.trueLength;
-			} else {
-				var info = treeNode.a;
-				if (_Utils_cmp(
-					index,
-					$author$project$DomainModel$skipCount(info.left)) < 1) {
-					var $temp$index = index,
-						$temp$treeNode = info.left;
-					index = $temp$index;
-					treeNode = $temp$treeNode;
-					continue distanceFromIndex;
-				} else {
-					return A2(
-						$ianmackenzie$elm_units$Quantity$plus,
-						$author$project$DomainModel$trueLength(info.left),
-						A2(
-							$author$project$DomainModel$distanceFromIndex,
-							index - $author$project$DomainModel$skipCount(info.left),
-							info.right));
-				}
-			}
+var $author$project$DomainModel$foldOverRouteRL = F3(
+	function (foldFn, treeNode, accum) {
+		if (treeNode.$ === 'Leaf') {
+			var leaf = treeNode.a;
+			return A2(foldFn, leaf, accum);
+		} else {
+			var node = treeNode.a;
+			return A3(
+				$author$project$DomainModel$foldOverRouteRL,
+				foldFn,
+				node.left,
+				A3($author$project$DomainModel$foldOverRouteRL, foldFn, node.right, accum));
 		}
 	});
-var $author$project$TrackLoaded$getRangeFromMarkers = function (track) {
-	var theLength = $author$project$DomainModel$skipCount(track.trackTree);
-	var _v0 = track.markerPosition;
-	if (_v0.$ === 'Just') {
-		var purple = _v0.a;
-		return _Utils_Tuple2(
-			A2($elm$core$Basics$min, track.currentPosition, purple),
-			A2($elm$core$Basics$min, theLength - track.currentPosition, theLength - purple));
-	} else {
-		return _Utils_Tuple2(track.currentPosition, theLength - track.currentPosition);
+var $author$project$DomainModel$getAllGPXPointsInNaturalOrder = function (treeNode) {
+	var internalFoldFn = F2(
+		function (road, accum) {
+			return A2($elm$core$List$cons, road.sourceData.b, accum);
+		});
+	var endPoints = A3($author$project$DomainModel$foldOverRouteRL, internalFoldFn, treeNode, _List_Nil);
+	return A2(
+		$elm$core$List$cons,
+		A2($author$project$DomainModel$gpxPointFromIndex, 0, treeNode),
+		endPoints);
+};
+var $author$project$DomainModel$getFirstLeaf = function (someNode) {
+	getFirstLeaf:
+	while (true) {
+		if (someNode.$ === 'Leaf') {
+			var leaf = someNode.a;
+			return leaf;
+		} else {
+			var node = someNode.a;
+			var $temp$someNode = node.left;
+			someNode = $temp$someNode;
+			continue getFirstLeaf;
+		}
 	}
 };
 var $ianmackenzie$elm_units$Angle$cos = function (_v0) {
@@ -12308,39 +12303,28 @@ var $author$project$DomainModel$gpxFromPointWithReference = F2(
 			latitude,
 			$ianmackenzie$elm_units$Length$meters(altitude));
 	});
-var $author$project$DomainModel$indexFromDistance = F2(
-	function (distance, treeNode) {
-		indexFromDistance:
-		while (true) {
-			if (treeNode.$ === 'Leaf') {
-				var info = treeNode.a;
-				return A2(
-					$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
-					$ianmackenzie$elm_units$Quantity$half(info.trueLength),
-					distance) ? 0 : 1;
+var $elm_community$list_extra$List$Extra$last = function (items) {
+	last:
+	while (true) {
+		if (!items.b) {
+			return $elm$core$Maybe$Nothing;
+		} else {
+			if (!items.b.b) {
+				var x = items.a;
+				return $elm$core$Maybe$Just(x);
 			} else {
-				var info = treeNode.a;
-				if (A2(
-					$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
-					$author$project$DomainModel$trueLength(info.left),
-					distance)) {
-					var $temp$distance = distance,
-						$temp$treeNode = info.left;
-					distance = $temp$distance;
-					treeNode = $temp$treeNode;
-					continue indexFromDistance;
-				} else {
-					return $author$project$DomainModel$skipCount(info.left) + A2(
-						$author$project$DomainModel$indexFromDistance,
-						A2(
-							$ianmackenzie$elm_units$Quantity$minus,
-							$author$project$DomainModel$trueLength(info.left),
-							distance),
-						info.right);
-				}
+				var rest = items.b;
+				var $temp$items = rest;
+				items = $temp$items;
+				continue last;
 			}
 		}
-	});
+	}
+};
+var $ianmackenzie$elm_units$Quantity$negate = function (_v0) {
+	var value = _v0.a;
+	return $ianmackenzie$elm_units$Quantity$Quantity(-value);
+};
 var $ianmackenzie$elm_geometry$Direction2d$angleFrom = F2(
 	function (_v0, _v1) {
 		var d1 = _v0.a;
@@ -12463,133 +12447,6 @@ var $author$project$Tools$Nudge$nudgeTrackPoint = F4(
 			return newXYZ;
 		}
 	});
-var $author$project$Tools$Nudge$computeNudgedPoints = F2(
-	function (settings, track) {
-		var liesWithin = F2(
-			function (_v4, given) {
-				var lo = _v4.a;
-				var hi = _v4.b;
-				return A2($ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo, lo, given) && A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, hi, given);
-			});
-		var fader = F2(
-			function (pointDistance, referenceDistance) {
-				var _v3 = _Utils_Tuple2(
-					$ianmackenzie$elm_units$Length$inMeters(pointDistance),
-					$ianmackenzie$elm_units$Length$inMeters(referenceDistance));
-				var place = _v3.a;
-				var base = _v3.b;
-				var x = $elm$core$Basics$abs(
-					(place - base) / $ianmackenzie$elm_units$Length$inMeters(settings.fadeExtent));
-				return 1.0 - x;
-			});
-		var _v0 = $author$project$TrackLoaded$getRangeFromMarkers(track);
-		var fromStart = _v0.a;
-		var fromEnd = _v0.b;
-		var _v1 = _Utils_Tuple2(
-			fromStart,
-			$author$project$DomainModel$skipCount(track.trackTree) - fromEnd);
-		var fromNode = _v1.a;
-		var toNode = _v1.b;
-		var _v2 = _Utils_Tuple2(
-			A2($author$project$DomainModel$distanceFromIndex, fromNode, track.trackTree),
-			A2($author$project$DomainModel$distanceFromIndex, toNode, track.trackTree));
-		var startDistance = _v2.a;
-		var endDistance = _v2.b;
-		var fadeOutEndDistance = A2($ianmackenzie$elm_units$Quantity$plus, settings.fadeExtent, endDistance);
-		var endIncludingFade = A2($author$project$DomainModel$indexFromDistance, fadeOutEndDistance, track.trackTree);
-		var fadeInStartDistance = A2($ianmackenzie$elm_units$Quantity$minus, settings.fadeExtent, startDistance);
-		var startIncludingFade = A2($author$project$DomainModel$indexFromDistance, fadeInStartDistance, track.trackTree);
-		var nudge = function (index) {
-			var pointDistance = A2($author$project$DomainModel$distanceFromIndex, index, track.trackTree);
-			var fade = A2(
-				liesWithin,
-				_Utils_Tuple2(startDistance, endDistance),
-				pointDistance) ? 1.0 : (A2(
-				liesWithin,
-				_Utils_Tuple2(fadeInStartDistance, startDistance),
-				pointDistance) ? A2(fader, pointDistance, startDistance) : (A2(
-				liesWithin,
-				_Utils_Tuple2(endDistance, fadeOutEndDistance),
-				pointDistance) ? A2(fader, pointDistance, endDistance) : 0.0));
-			return A4($author$project$Tools$Nudge$nudgeTrackPoint, settings, fade, index, track);
-		};
-		var newEarthPoints = A2(
-			$elm$core$List$map,
-			nudge,
-			A2($elm$core$List$range, startIncludingFade, endIncludingFade));
-		var previewPoints = A2(
-			$elm$core$List$map,
-			function (earth) {
-				return _Utils_Tuple2(
-					earth,
-					A2($author$project$DomainModel$gpxFromPointWithReference, track.referenceLonLat, earth));
-			},
-			newEarthPoints);
-		return _Utils_Tuple2(
-			_Utils_Tuple2(startIncludingFade, endIncludingFade),
-			previewPoints);
-	});
-var $author$project$DomainModel$foldOverRouteRL = F3(
-	function (foldFn, treeNode, accum) {
-		if (treeNode.$ === 'Leaf') {
-			var leaf = treeNode.a;
-			return A2(foldFn, leaf, accum);
-		} else {
-			var node = treeNode.a;
-			return A3(
-				$author$project$DomainModel$foldOverRouteRL,
-				foldFn,
-				node.left,
-				A3($author$project$DomainModel$foldOverRouteRL, foldFn, node.right, accum));
-		}
-	});
-var $author$project$DomainModel$getAllGPXPointsInNaturalOrder = function (treeNode) {
-	var internalFoldFn = F2(
-		function (road, accum) {
-			return A2($elm$core$List$cons, road.sourceData.b, accum);
-		});
-	var endPoints = A3($author$project$DomainModel$foldOverRouteRL, internalFoldFn, treeNode, _List_Nil);
-	return A2(
-		$elm$core$List$cons,
-		A2($author$project$DomainModel$gpxPointFromIndex, 0, treeNode),
-		endPoints);
-};
-var $author$project$DomainModel$getFirstLeaf = function (someNode) {
-	getFirstLeaf:
-	while (true) {
-		if (someNode.$ === 'Leaf') {
-			var leaf = someNode.a;
-			return leaf;
-		} else {
-			var node = someNode.a;
-			var $temp$someNode = node.left;
-			someNode = $temp$someNode;
-			continue getFirstLeaf;
-		}
-	}
-};
-var $elm_community$list_extra$List$Extra$last = function (items) {
-	last:
-	while (true) {
-		if (!items.b) {
-			return $elm$core$Maybe$Nothing;
-		} else {
-			if (!items.b.b) {
-				var x = items.a;
-				return $elm$core$Maybe$Just(x);
-			} else {
-				var rest = items.b;
-				var $temp$items = rest;
-				items = $temp$items;
-				continue last;
-			}
-		}
-	}
-};
-var $ianmackenzie$elm_units$Quantity$negate = function (_v0) {
-	var value = _v0.a;
-	return $ianmackenzie$elm_units$Quantity$Quantity(-value);
-};
 var $elm$core$Maybe$andThen = F2(
 	function (callback, maybeValue) {
 		if (maybeValue.$ === 'Just') {
@@ -13113,6 +12970,9 @@ var $ianmackenzie$elm_units$Quantity$min = F2(
 		return $ianmackenzie$elm_units$Quantity$Quantity(
 			A2($elm$core$Basics$min, x, y));
 	});
+var $author$project$DomainModel$trueLength = function (treeNode) {
+	return $author$project$DomainModel$asRecord(treeNode).trueLength;
+};
 var $ianmackenzie$elm_geometry$BoundingBox3d$extrema = function (_v0) {
 	var boundingBoxExtrema = _v0.a;
 	return boundingBoxExtrema;
@@ -13470,8 +13330,50 @@ var $ianmackenzie$elm_geometry$Polyline3d$vertices = function (_v0) {
 };
 var $author$project$Tools$OutAndBack$apply = F2(
 	function (options, track) {
+		var useNudgeTool = F2(
+			function (nudgeOption, index) {
+				return A4($author$project$Tools$Nudge$nudgeTrackPoint, nudgeOption, 1.0, index, track);
+			});
 		var oldPoints = $author$project$DomainModel$getAllGPXPointsInNaturalOrder(track.trackTree);
-		var nudgeOptions = $author$project$Tools$Nudge$defaultOptions;
+		var noNudge = $author$project$Tools$Nudge$defaultOptions;
+		var outwardLeg = function () {
+			var nudge = _Utils_update(
+				noNudge,
+				{
+					horizontal: $ianmackenzie$elm_units$Length$meters(options.offset)
+				});
+			return A2(
+				$elm$core$List$map,
+				useNudgeTool(nudge),
+				A2(
+					$elm$core$List$range,
+					0,
+					$author$project$DomainModel$skipCount(track.trackTree)));
+		}();
+		var outwardInGpx = A2(
+			$elm$core$List$map,
+			$author$project$DomainModel$gpxFromPointWithReference(track.referenceLonLat),
+			outwardLeg);
+		var returnLeg = function () {
+			var nudge = _Utils_update(
+				noNudge,
+				{
+					horizontal: $ianmackenzie$elm_units$Quantity$negate(
+						$ianmackenzie$elm_units$Length$meters(options.offset))
+				});
+			return $elm$core$List$reverse(
+				A2(
+					$elm$core$List$map,
+					useNudgeTool(nudge),
+					A2(
+						$elm$core$List$range,
+						0,
+						$author$project$DomainModel$skipCount(track.trackTree))));
+		}();
+		var returnInGpx = A2(
+			$elm$core$List$map,
+			$author$project$DomainModel$gpxFromPointWithReference(track.referenceLonLat),
+			returnLeg);
 		var homeLeaf = $author$project$DomainModel$getFirstLeaf(track.trackTree);
 		var homeTurnMidpoint = function () {
 			var leafAxis = A2($ianmackenzie$elm_geometry$Axis3d$throughPoints, homeLeaf.startPoint, homeLeaf.endPoint);
@@ -13487,83 +13389,13 @@ var $author$project$Tools$OutAndBack$apply = F2(
 				return homeLeaf.startPoint;
 			}
 		}();
-		var awayLeaf = $author$project$DomainModel$getFirstLeaf(track.trackTree);
-		var awayTurnMidpoint = function () {
-			var leafAxis = A2($ianmackenzie$elm_geometry$Axis3d$throughPoints, awayLeaf.endPoint, awayLeaf.startPoint);
-			if (leafAxis.$ === 'Just') {
-				var axis = leafAxis.a;
-				return A2(
-					$ianmackenzie$elm_geometry$Point3d$along,
-					axis,
-					$ianmackenzie$elm_units$Quantity$negate(
-						$ianmackenzie$elm_units$Length$meters(
-							$elm$core$Basics$abs(options.offset))));
-			} else {
-				return awayLeaf.endPoint;
-			}
-		}();
-		var _v0 = A2(
-			$author$project$Tools$Nudge$computeNudgedPoints,
-			_Utils_update(
-				nudgeOptions,
-				{
-					horizontal: $ianmackenzie$elm_units$Quantity$negate(
-						$ianmackenzie$elm_units$Length$meters(options.offset))
-				}),
-			track);
-		var returnLegWrongWay = _v0.b;
-		var returnLeg = $elm$core$List$reverse(returnLegWrongWay);
-		var _v1 = A2(
-			$author$project$Tools$Nudge$computeNudgedPoints,
-			_Utils_update(
-				nudgeOptions,
-				{
-					horizontal: $ianmackenzie$elm_units$Length$meters(options.offset)
-				}),
-			track);
-		var outwardLeg = _v1.b;
-		var awayTurn = function () {
-			var firstInwardPoint = $elm$core$List$head(returnLeg);
-			var finalOutwardPoint = $elm_community$list_extra$List$Extra$last(outwardLeg);
-			var _v7 = _Utils_Tuple2(finalOutwardPoint, firstInwardPoint);
-			if ((_v7.a.$ === 'Just') && (_v7.b.$ === 'Just')) {
-				var _v8 = _v7.a.a;
-				var outEarth = _v8.a;
-				var outGPX = _v8.b;
-				var _v9 = _v7.b.a;
-				var backEarth = _v9.a;
-				var backGpx = _v9.b;
-				return A3($ianmackenzie$elm_geometry$Arc3d$throughPoints, outEarth, awayTurnMidpoint, backEarth);
-			} else {
-				return $elm$core$Maybe$Nothing;
-			}
-		}();
-		var awayTurnInGpx = function () {
-			if (awayTurn.$ === 'Just') {
-				var arc = awayTurn.a;
-				return A2(
-					$elm$core$List$map,
-					$author$project$DomainModel$gpxFromPointWithReference(track.referenceLonLat),
-					$ianmackenzie$elm_geometry$Polyline3d$vertices(
-						A2(
-							$ianmackenzie$elm_geometry$Arc3d$approximate,
-							$ianmackenzie$elm_units$Length$meters(1.0),
-							arc)));
-			} else {
-				return _List_Nil;
-			}
-		}();
 		var homeTurn = function () {
 			var firstOutwardPoint = $elm$core$List$head(outwardLeg);
 			var finalInwardPoint = $elm_community$list_extra$List$Extra$last(returnLeg);
-			var _v3 = _Utils_Tuple2(finalInwardPoint, firstOutwardPoint);
-			if ((_v3.a.$ === 'Just') && (_v3.b.$ === 'Just')) {
-				var _v4 = _v3.a.a;
-				var inEarth = _v4.a;
-				var inGPX = _v4.b;
-				var _v5 = _v3.b.a;
-				var outEarth = _v5.a;
-				var outGpx = _v5.b;
+			var _v4 = _Utils_Tuple2(finalInwardPoint, firstOutwardPoint);
+			if ((_v4.a.$ === 'Just') && (_v4.b.$ === 'Just')) {
+				var inEarth = _v4.a.a;
+				var outEarth = _v4.b.a;
 				return A3($ianmackenzie$elm_geometry$Arc3d$throughPoints, inEarth, homeTurnMidpoint, outEarth);
 			} else {
 				return $elm$core$Maybe$Nothing;
@@ -13578,19 +13410,59 @@ var $author$project$Tools$OutAndBack$apply = F2(
 					$ianmackenzie$elm_geometry$Polyline3d$vertices(
 						A2(
 							$ianmackenzie$elm_geometry$Arc3d$approximate,
-							$ianmackenzie$elm_units$Length$meters(1.0),
+							$ianmackenzie$elm_units$Length$meters(0.1),
+							arc)));
+			} else {
+				return _List_Nil;
+			}
+		}();
+		var awayLeaf = $author$project$DomainModel$getLastLeaf(track.trackTree);
+		var awayTurnMidpoint = function () {
+			var leafAxis = A2($ianmackenzie$elm_geometry$Axis3d$throughPoints, awayLeaf.endPoint, awayLeaf.startPoint);
+			if (leafAxis.$ === 'Just') {
+				var axis = leafAxis.a;
+				return A2(
+					$ianmackenzie$elm_geometry$Point3d$along,
+					axis,
+					$ianmackenzie$elm_units$Quantity$negate(
+						$ianmackenzie$elm_units$Length$meters(
+							$elm$core$Basics$abs(options.offset))));
+			} else {
+				return awayLeaf.endPoint;
+			}
+		}();
+		var awayTurn = function () {
+			var firstInwardPoint = $elm$core$List$head(returnLeg);
+			var finalOutwardPoint = $elm_community$list_extra$List$Extra$last(outwardLeg);
+			var _v1 = _Utils_Tuple2(finalOutwardPoint, firstInwardPoint);
+			if ((_v1.a.$ === 'Just') && (_v1.b.$ === 'Just')) {
+				var outEarth = _v1.a.a;
+				var backEarth = _v1.b.a;
+				return A3($ianmackenzie$elm_geometry$Arc3d$throughPoints, outEarth, awayTurnMidpoint, backEarth);
+			} else {
+				return $elm$core$Maybe$Nothing;
+			}
+		}();
+		var awayTurnInGpx = function () {
+			if (awayTurn.$ === 'Just') {
+				var arc = awayTurn.a;
+				return A2(
+					$elm$core$List$map,
+					$author$project$DomainModel$gpxFromPointWithReference(track.referenceLonLat),
+					$ianmackenzie$elm_geometry$Polyline3d$vertices(
+						A2(
+							$ianmackenzie$elm_geometry$Arc3d$approximate,
+							$ianmackenzie$elm_units$Length$meters(0.1),
 							arc)));
 			} else {
 				return _List_Nil;
 			}
 		}();
 		var newCourse = _Utils_ap(
-			A2($elm$core$List$map, $elm$core$Tuple$second, outwardLeg),
+			outwardInGpx,
 			_Utils_ap(
 				awayTurnInGpx,
-				_Utils_ap(
-					A2($elm$core$List$map, $elm$core$Tuple$second, returnLeg),
-					homeTurnInGpx)));
+				_Utils_ap(returnInGpx, homeTurnInGpx)));
 		var newTree = $author$project$DomainModel$treeFromSourcePoints(newCourse);
 		return _Utils_Tuple2(newTree, oldPoints);
 	});
@@ -13648,6 +13520,18 @@ var $author$project$DomainModel$extractPointsInRange = F3(
 				myFoldFn,
 				_List_Nil));
 	});
+var $author$project$TrackLoaded$getRangeFromMarkers = function (track) {
+	var theLength = $author$project$DomainModel$skipCount(track.trackTree);
+	var _v0 = track.markerPosition;
+	if (_v0.$ === 'Just') {
+		var purple = _v0.a;
+		return _Utils_Tuple2(
+			A2($elm$core$Basics$min, track.currentPosition, purple),
+			A2($elm$core$Basics$min, theLength - track.currentPosition, theLength - purple));
+	} else {
+		return _Utils_Tuple2(track.currentPosition, theLength - track.currentPosition);
+	}
+};
 var $author$project$DomainModel$safeJoin = F2(
 	function (left, right) {
 		var _v0 = _Utils_Tuple2(left, right);
@@ -14673,6 +14557,134 @@ var $author$project$Tools$CurveFormer$applyUsingOptions = F2(
 				_List_Nil,
 				_Utils_Tuple2(0, 0));
 		}
+	});
+var $author$project$DomainModel$distanceFromIndex = F2(
+	function (index, treeNode) {
+		distanceFromIndex:
+		while (true) {
+			if (treeNode.$ === 'Leaf') {
+				var info = treeNode.a;
+				return (index <= 0) ? $ianmackenzie$elm_units$Length$meters(0) : info.trueLength;
+			} else {
+				var info = treeNode.a;
+				if (_Utils_cmp(
+					index,
+					$author$project$DomainModel$skipCount(info.left)) < 1) {
+					var $temp$index = index,
+						$temp$treeNode = info.left;
+					index = $temp$index;
+					treeNode = $temp$treeNode;
+					continue distanceFromIndex;
+				} else {
+					return A2(
+						$ianmackenzie$elm_units$Quantity$plus,
+						$author$project$DomainModel$trueLength(info.left),
+						A2(
+							$author$project$DomainModel$distanceFromIndex,
+							index - $author$project$DomainModel$skipCount(info.left),
+							info.right));
+				}
+			}
+		}
+	});
+var $author$project$DomainModel$indexFromDistance = F2(
+	function (distance, treeNode) {
+		indexFromDistance:
+		while (true) {
+			if (treeNode.$ === 'Leaf') {
+				var info = treeNode.a;
+				return A2(
+					$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
+					$ianmackenzie$elm_units$Quantity$half(info.trueLength),
+					distance) ? 0 : 1;
+			} else {
+				var info = treeNode.a;
+				if (A2(
+					$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
+					$author$project$DomainModel$trueLength(info.left),
+					distance)) {
+					var $temp$distance = distance,
+						$temp$treeNode = info.left;
+					distance = $temp$distance;
+					treeNode = $temp$treeNode;
+					continue indexFromDistance;
+				} else {
+					return $author$project$DomainModel$skipCount(info.left) + A2(
+						$author$project$DomainModel$indexFromDistance,
+						A2(
+							$ianmackenzie$elm_units$Quantity$minus,
+							$author$project$DomainModel$trueLength(info.left),
+							distance),
+						info.right);
+				}
+			}
+		}
+	});
+var $author$project$Tools$Nudge$computeNudgedPoints = F2(
+	function (settings, track) {
+		var liesWithin = F2(
+			function (_v4, given) {
+				var lo = _v4.a;
+				var hi = _v4.b;
+				return A2($ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo, lo, given) && A2($ianmackenzie$elm_units$Quantity$lessThanOrEqualTo, hi, given);
+			});
+		var fader = F2(
+			function (pointDistance, referenceDistance) {
+				var _v3 = _Utils_Tuple2(
+					$ianmackenzie$elm_units$Length$inMeters(pointDistance),
+					$ianmackenzie$elm_units$Length$inMeters(referenceDistance));
+				var place = _v3.a;
+				var base = _v3.b;
+				var x = $elm$core$Basics$abs(
+					(place - base) / $ianmackenzie$elm_units$Length$inMeters(settings.fadeExtent));
+				return 1.0 - x;
+			});
+		var _v0 = $author$project$TrackLoaded$getRangeFromMarkers(track);
+		var fromStart = _v0.a;
+		var fromEnd = _v0.b;
+		var _v1 = _Utils_Tuple2(
+			fromStart,
+			$author$project$DomainModel$skipCount(track.trackTree) - fromEnd);
+		var fromNode = _v1.a;
+		var toNode = _v1.b;
+		var _v2 = _Utils_Tuple2(
+			A2($author$project$DomainModel$distanceFromIndex, fromNode, track.trackTree),
+			A2($author$project$DomainModel$distanceFromIndex, toNode, track.trackTree));
+		var startDistance = _v2.a;
+		var endDistance = _v2.b;
+		var fadeOutEndDistance = A2($ianmackenzie$elm_units$Quantity$plus, settings.fadeExtent, endDistance);
+		var endIncludingFade = A2($author$project$DomainModel$indexFromDistance, fadeOutEndDistance, track.trackTree);
+		var fadeInStartDistance = A2($ianmackenzie$elm_units$Quantity$minus, settings.fadeExtent, startDistance);
+		var startIncludingFade = A2($author$project$DomainModel$indexFromDistance, fadeInStartDistance, track.trackTree);
+		var nudge = function (index) {
+			var pointDistance = A2($author$project$DomainModel$distanceFromIndex, index, track.trackTree);
+			var fade = A2(
+				liesWithin,
+				_Utils_Tuple2(startDistance, endDistance),
+				pointDistance) ? 1.0 : (A2(
+				liesWithin,
+				_Utils_Tuple2(fadeInStartDistance, startDistance),
+				pointDistance) ? A2(fader, pointDistance, startDistance) : (A2(
+				liesWithin,
+				_Utils_Tuple2(endDistance, fadeOutEndDistance),
+				pointDistance) ? A2(fader, pointDistance, endDistance) : 0.0));
+			return A4($author$project$Tools$Nudge$nudgeTrackPoint, settings, fade, index, track);
+		};
+		var newEarthPoints = A2(
+			$elm$core$List$map,
+			nudge,
+			A2($elm$core$List$range, startIncludingFade, endIncludingFade));
+		var previewPoints = A2(
+			$elm$core$List$map,
+			function (earth) {
+				return _Utils_Tuple2(
+					earth,
+					A2($author$project$DomainModel$gpxFromPointWithReference, track.referenceLonLat, earth));
+			},
+			newEarthPoints);
+		return _Utils_Tuple2(
+			_Utils_Tuple2(startIncludingFade, endIncludingFade),
+			previewPoints);
 	});
 var $author$project$Tools$Nudge$applyUsingOptions = F2(
 	function (options, track) {
