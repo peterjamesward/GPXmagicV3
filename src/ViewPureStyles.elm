@@ -317,7 +317,7 @@ showModalMessage areaWidth content msg =
             , padding 20
             ]
             [ paragraph
-                []
+                [ width fill ]
               <|
                 [ html <| Markdown.toHtml [] content ]
             , Input.button neatToolsBorder

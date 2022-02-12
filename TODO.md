@@ -16,8 +16,6 @@ BUG: Gradient problems preview is colour from Bend problems.
 
 # WIP
 
-Modal dialog should be confined to (within) the central view pane area.
-
 **Interpolate** -- needs the apply logic.
 
 ---

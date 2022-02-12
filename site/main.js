@@ -46032,7 +46032,10 @@ var $author$project$ViewPureStyles$showModalMessage = F3(
 						[
 							A2(
 							$mdgriffith$elm_ui$Element$paragraph,
-							_List_Nil,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+								]),
 							_List_fromArray(
 								[
 									$mdgriffith$elm_ui$Element$html(
