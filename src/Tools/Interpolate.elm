@@ -7,6 +7,8 @@ import Element.Background as Background
 import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
 import Length exposing (Meters, inMeters, meters)
+import Point3d
+import Quantity
 import Tools.InterpolateOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showShortMeasure)
@@ -29,8 +31,50 @@ computeNewPoints options track =
         ( fromStart, fromEnd ) =
             TrackLoaded.getRangeFromMarkers track
 
-        previewPoints points =
-            points
+        -- This feels like a fold over the leaves, interpolating each as needed.
+        interpolateRoadSection : RoadSection -> List EarthPoint -> List EarthPoint
+        interpolateRoadSection road new =
+            let
+                numNewPointsNeeded =
+                    Quantity.ratio road.trueLength options.minimumSpacing
+                        |> truncate
+
+                spacingOnThisSegment =
+                    road.trueLength |> Quantity.divideBy (toFloat numNewPointsNeeded + 1)
+
+                fractionalIncrement =
+                    Quantity.ratio road.trueLength spacingOnThisSegment
+
+                interpolatedPoints =
+                    -- Includes start point!
+                    List.range 0 numNewPointsNeeded
+                        |> List.map
+                            (\n ->
+                                Point3d.interpolateFrom
+                                    road.startPoint
+                                    road.endPoint
+                                    (fractionalIncrement * toFloat n)
+                            )
+            in
+            List.reverse interpolatedPoints ++ new
+
+        newPoints =
+            -- If fold function conses the start points (reversing them),
+            -- then we need to reverse back. But we drop the initial start point
+            -- so that the splicing works as expected without duplication.
+            DomainModel.traverseTreeBetweenLimitsToDepth
+                fromStart
+                fromEnd
+                (always Nothing)
+                0
+                track.trackTree
+                interpolateRoadSection
+                []
+                |> List.reverse
+                |> List.drop 1
+
+        previewPoints =
+            newPoints
                 |> List.map
                     (\earth ->
                         ( earth
@@ -38,26 +82,35 @@ computeNewPoints options track =
                         )
                     )
     in
-    []
+    previewPoints
 
 
 apply : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
 apply options track =
     let
+        ( fromStart, fromEnd ) =
+            TrackLoaded.getRangeFromMarkers track
+
         newCourse =
-            []
+            computeNewPoints options track
+                |> List.map Tuple.second
 
         newTree =
-            DomainModel.treeFromSourcePoints newCourse
+            DomainModel.replaceRange
+                fromStart
+                fromEnd
+                track.referenceLonLat
+                newCourse
+                track.trackTree
 
-        -- New tree built from four parts:
-        -- Out (nudged one way), away turn, back (nudged other way), home turn.
         oldPoints =
-            -- All the points.
-            getAllGPXPointsInNaturalOrder track.trackTree
+            DomainModel.extractPointsInRange
+                fromStart
+                fromEnd
+                track.trackTree
     in
     ( newTree
-    , oldPoints
+    , oldPoints |> List.map Tuple.second
     )
 
 

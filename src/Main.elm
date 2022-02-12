@@ -50,6 +50,7 @@ import Tools.CentroidAverage
 import Tools.CurveFormer
 import Tools.DeletePoints as DeletePoints
 import Tools.DisplaySettings
+import Tools.Interpolate
 import Tools.Nudge
 import Tools.OutAndBack
 import Tools.Simplify
@@ -1263,6 +1264,24 @@ performActionsOnModel actions model =
                     let
                         ( newTree, oldPoints ) =
                             Tools.Simplify.apply foldedModel.toolOptions.simplifySettings track
+
+                        ( fromStart, fromEnd ) =
+                            (0,0)
+
+                        newTrack =
+                            track
+                                |> TrackLoaded.addToUndoStack action
+                                    fromStart
+                                    fromEnd
+                                    oldPoints
+                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                    in
+                    { foldedModel | track = Just newTrack }
+
+                ( ApplyInterpolateWithOptions options, Just track ) ->
+                    let
+                        ( newTree, oldPoints ) =
+                            Tools.Interpolate.apply options track
 
                         ( fromStart, fromEnd ) =
                             (0,0)
