@@ -8639,7 +8639,7 @@ var $ianmackenzie$elm_units$Quantity$zero = $ianmackenzie$elm_units$Quantity$Qua
 var $author$project$Tools$Nudge$defaultOptions = {fadeExtent: $ianmackenzie$elm_units$Quantity$zero, horizontal: $ianmackenzie$elm_units$Quantity$zero, vertical: $ianmackenzie$elm_units$Quantity$zero};
 var $author$project$Tools$OutAndBack$defaultOptions = {offset: 0.0};
 var $author$project$Tools$Pointers$defaultOptions = {orange: 0, purple: $elm$core$Maybe$Nothing};
-var $author$project$Tools$Simplify$defaultOptions = {pointsToRemove: _List_Nil};
+var $author$project$Tools$Simplify$defaultOptions = {pointsToRemove: $elm$core$Dict$empty};
 var $author$project$Tools$TrackInfoBox$InfoForTrack = {$: 'InfoForTrack'};
 var $author$project$Tools$TrackInfoBox$defaultOptions = {displayMode: $author$project$Tools$TrackInfoBox$InfoForTrack, memoryInfo: $elm$core$Maybe$Nothing};
 var $author$project$Tools$UndoRedo$Options = function (dummy) {
@@ -13481,6 +13481,55 @@ var $author$project$Tools$OutAndBack$apply = F2(
 		var newTree = $author$project$DomainModel$treeFromSourcePoints(newCourse);
 		return _Utils_Tuple2(newTree, oldPoints);
 	});
+var $author$project$DomainModel$getAllGPXPointsInDict = function (treeNode) {
+	var internalFoldFn = F2(
+		function (road, _v1) {
+			var index = _v1.a;
+			var dict = _v1.b;
+			return _Utils_Tuple2(
+				index + 1,
+				A3($elm$core$Dict$insert, index, road.sourceData.b, dict));
+		});
+	var _v0 = A3(
+		$author$project$DomainModel$foldOverRouteRL,
+		internalFoldFn,
+		treeNode,
+		_Utils_Tuple2(
+			1,
+			A3(
+				$elm$core$Dict$insert,
+				0,
+				A2($author$project$DomainModel$gpxPointFromIndex, 0, treeNode),
+				$elm$core$Dict$empty)));
+	var outputs = _v0.b;
+	return outputs;
+};
+var $elm$core$Dict$values = function (dict) {
+	return A3(
+		$elm$core$Dict$foldr,
+		F3(
+			function (key, value, valueList) {
+				return A2($elm$core$List$cons, value, valueList);
+			}),
+		_List_Nil,
+		dict);
+};
+var $author$project$Tools$Simplify$apply = F2(
+	function (options, track) {
+		var originalCourse = $author$project$DomainModel$getAllGPXPointsInDict(track.trackTree);
+		var oldPoints = $elm$core$Dict$values(originalCourse);
+		var newCourse = A3(
+			$elm$core$Dict$foldl,
+			F3(
+				function (k, v, out) {
+					return A2($elm$core$Dict$remove, k, out);
+				}),
+			originalCourse,
+			options.pointsToRemove);
+		var newTree = $author$project$DomainModel$treeFromSourcePoints(
+			$elm$core$Dict$values(newCourse));
+		return _Utils_Tuple2(newTree, oldPoints);
+	});
 var $elm$core$List$drop = F2(
 	function (n, list) {
 		drop:
@@ -16755,7 +16804,10 @@ var $author$project$Tools$Simplify$actions = F3(
 				$author$project$Actions$ShowPreview(
 				{
 					colour: colour,
-					points: A2($author$project$DomainModel$buildPreview, options.pointsToRemove, track.trackTree),
+					points: A2(
+						$author$project$DomainModel$buildPreview,
+						$elm$core$Dict$values(options.pointsToRemove),
+						track.trackTree),
 					shape: $author$project$Actions$PreviewCircle,
 					tag: 'simplify'
 				})
@@ -16853,9 +16905,7 @@ var $author$project$Tools$Simplify$findSimplifications = F2(
 			selectSmallestAreas);
 		return _Utils_update(
 			options,
-			{
-				pointsToRemove: $elm$core$Dict$keys(nonAdjacentEntries)
-			});
+			{pointsToRemove: nonAdjacentEntries});
 	});
 var $author$project$Tools$Simplify$toolStateChange = F4(
 	function (opened, colour, options, track) {
@@ -16870,7 +16920,7 @@ var $author$project$Tools$Simplify$toolStateChange = F4(
 			return _Utils_Tuple2(
 				_Utils_update(
 					options,
-					{pointsToRemove: _List_Nil}),
+					{pointsToRemove: $elm$core$Dict$empty}),
 				_List_fromArray(
 					[
 						$author$project$Actions$HidePreview('simplify')
@@ -18525,16 +18575,6 @@ var $author$project$SceneBuilder3D$previewAsPoints = F2(
 		};
 		return A2($elm$core$List$map, highlightPoint, points);
 	});
-var $elm$core$Dict$values = function (dict) {
-	return A3(
-		$elm$core$Dict$foldr,
-		F3(
-			function (key, value, valueList) {
-				return A2($elm$core$List$cons, value, valueList);
-			}),
-		_List_Nil,
-		dict);
-};
 var $author$project$SceneBuilder3D$renderPreviews = function (previews) {
 	var onePreview = function (_v1) {
 		var tag = _v1.tag;
@@ -18984,7 +19024,7 @@ var $author$project$Main$performActionsOnModel = F2(
 		var performAction = F2(
 			function (action, foldedModel) {
 				var _v0 = _Utils_Tuple2(action, foldedModel.track);
-				_v0$21:
+				_v0$22:
 				while (true) {
 					switch (_v0.a.$) {
 						case 'SetCurrent':
@@ -19000,7 +19040,7 @@ var $author$project$Main$performActionsOnModel = F2(
 												{currentPosition: position}))
 									});
 							} else {
-								break _v0$21;
+								break _v0$22;
 							}
 						case 'SetCurrentFromMapClick':
 							if (_v0.b.$ === 'Just') {
@@ -19015,7 +19055,7 @@ var $author$project$Main$performActionsOnModel = F2(
 												{currentPosition: position}))
 									});
 							} else {
-								break _v0$21;
+								break _v0$22;
 							}
 						case 'ShowPreview':
 							if (_v0.b.$ === 'Just') {
@@ -19027,7 +19067,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										previews: A3($elm$core$Dict$insert, previewData.tag, previewData, foldedModel.previews)
 									});
 							} else {
-								break _v0$21;
+								break _v0$22;
 							}
 						case 'HidePreview':
 							if (_v0.b.$ === 'Just') {
@@ -19039,7 +19079,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										previews: A2($elm$core$Dict$remove, tag, foldedModel.previews)
 									});
 							} else {
-								break _v0$21;
+								break _v0$22;
 							}
 						case 'RenderProfile':
 							if (_v0.b.$ === 'Just') {
@@ -19056,7 +19096,7 @@ var $author$project$Main$performActionsOnModel = F2(
 											track)
 									});
 							} else {
-								break _v0$21;
+								break _v0$22;
 							}
 						case 'DelayMessage':
 							if (_v0.b.$ === 'Just') {
@@ -19066,7 +19106,7 @@ var $author$project$Main$performActionsOnModel = F2(
 								var track = _v0.b.a;
 								return foldedModel;
 							} else {
-								break _v0$21;
+								break _v0$22;
 							}
 						case 'DeletePointsBetween':
 							if (_v0.b.$ === 'Just') {
@@ -19087,7 +19127,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$21;
+								break _v0$22;
 							}
 						case 'DeleteSinglePoint':
 							if (_v0.b.$ === 'Just') {
@@ -19108,7 +19148,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$21;
+								break _v0$22;
 							}
 						case 'BezierApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -19130,7 +19170,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$21;
+								break _v0$22;
 							}
 						case 'CentroidAverageApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -19152,7 +19192,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$21;
+								break _v0$22;
 							}
 						case 'CurveFormerApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -19179,7 +19219,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$21;
+								break _v0$22;
 							}
 						case 'NudgeApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -19206,7 +19246,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$21;
+								break _v0$22;
 							}
 						case 'BendSmootherApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -19228,7 +19268,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$21;
+								break _v0$22;
 							}
 						case 'OutAndBackApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -19250,15 +19290,37 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$21;
+								break _v0$22;
+							}
+						case 'ApplySimplify':
+							if (_v0.b.$ === 'Just') {
+								var _v21 = _v0.a;
+								var track = _v0.b.a;
+								var _v22 = A2($author$project$Tools$Simplify$apply, model.toolOptions.simplifySettings, track);
+								var newTree = _v22.a;
+								var oldPoints = _v22.b;
+								var _v23 = _Utils_Tuple2(0, 0);
+								var fromStart = _v23.a;
+								var fromEnd = _v23.b;
+								var newTrack = A2(
+									$author$project$TrackLoaded$useTreeWithRepositionedMarkers,
+									newTree,
+									A5($author$project$TrackLoaded$addToUndoStack, action, fromStart, fromEnd, oldPoints, track));
+								return _Utils_update(
+									foldedModel,
+									{
+										track: $elm$core$Maybe$Just(newTrack)
+									});
+							} else {
+								break _v0$22;
 							}
 						case 'PointMovedOnMap':
 							if (_v0.b.$ === 'Just') {
-								var _v21 = _v0.a;
-								var startLon = _v21.a;
-								var startLat = _v21.b;
-								var endLon = _v21.c;
-								var endLat = _v21.d;
+								var _v24 = _v0.a;
+								var startLon = _v24.a;
+								var startLat = _v24.b;
+								var endLon = _v24.c;
+								var endLat = _v24.d;
 								var track = _v0.b.a;
 								var startGpx = {
 									altitude: $ianmackenzie$elm_units$Quantity$zero,
@@ -19275,11 +19337,11 @@ var $author$project$Main$performActionsOnModel = F2(
 										$ianmackenzie$elm_units$Angle$degrees(endLon))
 								};
 								var newTree = A4($author$project$DomainModel$updatePointByIndexInSitu, index, endGpx, track.referenceLonLat, track.trackTree);
-								var _v22 = _Utils_Tuple2(
+								var _v25 = _Utils_Tuple2(
 									index,
 									$author$project$DomainModel$skipCount(track.trackTree) - index);
-								var fromStart = _v22.a;
-								var fromEnd = _v22.b;
+								var fromStart = _v25.a;
+								var fromEnd = _v25.b;
 								var newTrack = A5(
 									$author$project$TrackLoaded$addToUndoStack,
 									action,
@@ -19296,22 +19358,22 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$21;
+								break _v0$22;
 							}
 						case 'TrackHasChanged':
 							if (_v0.b.$ === 'Just') {
-								var _v23 = _v0.a;
+								var _v26 = _v0.a;
 								var track = _v0.b.a;
-								var _v24 = A2($author$project$ToolsController$refreshOpenTools, foldedModel.track, foldedModel.toolOptions);
-								var refreshedToolOptions = _v24.a;
-								var secondaryActions = _v24.b;
+								var _v27 = A2($author$project$ToolsController$refreshOpenTools, foldedModel.track, foldedModel.toolOptions);
+								var refreshedToolOptions = _v27.a;
+								var secondaryActions = _v27.b;
 								var innerModelWithNewToolSettings = _Utils_update(
 									foldedModel,
 									{toolOptions: refreshedToolOptions});
 								var modelAfterSecondaryActions = A2($author$project$Main$performActionsOnModel, secondaryActions, innerModelWithNewToolSettings);
 								return modelAfterSecondaryActions;
 							} else {
-								break _v0$21;
+								break _v0$22;
 							}
 						case 'SetMarker':
 							if (_v0.b.$ === 'Just') {
@@ -19326,12 +19388,12 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(updatedTrack)
 									});
 							} else {
-								break _v0$21;
+								break _v0$22;
 							}
 						case 'StoredValueRetrieved':
-							var _v25 = _v0.a;
-							var key = _v25.a;
-							var value = _v25.b;
+							var _v28 = _v0.a;
+							var key = _v28.a;
+							var value = _v28.b;
 							switch (key) {
 								case 'splits':
 									return A2($author$project$Main$decodeSplitValues, value, foldedModel);
@@ -19392,7 +19454,7 @@ var $author$project$Main$performActionsOnModel = F2(
 							return revisedModel;
 						case 'UndoLastAction':
 							if (_v0.b.$ === 'Just') {
-								var _v28 = _v0.a;
+								var _v31 = _v0.a;
 								var track = _v0.b.a;
 								return _Utils_update(
 									foldedModel,
@@ -19401,24 +19463,24 @@ var $author$project$Main$performActionsOnModel = F2(
 											$author$project$TrackLoaded$undoLastAction(track))
 									});
 							} else {
-								break _v0$21;
+								break _v0$22;
 							}
 						case 'RedoUndoneAction':
 							if (_v0.b.$ === 'Just') {
-								var _v29 = _v0.a;
+								var _v32 = _v0.a;
 								var track = _v0.b.a;
-								var _v30 = track.redos;
-								if (_v30.b) {
-									var redo = _v30.a;
-									var moreRedos = _v30.b;
+								var _v33 = track.redos;
+								if (_v33.b) {
+									var redo = _v33.a;
+									var moreRedos = _v33.b;
 									var modelAfterRedo = A2(
 										$author$project$Main$performActionsOnModel,
 										_List_fromArray(
 											[redo.action]),
 										model);
-									var _v31 = modelAfterRedo.track;
-									if (_v31.$ === 'Just') {
-										var trackAfterRedo = _v31.a;
+									var _v34 = modelAfterRedo.track;
+									if (_v34.$ === 'Just') {
+										var trackAfterRedo = _v34.a;
 										var trackWithCorrectRedoStack = _Utils_update(
 											trackAfterRedo,
 											{redos: moreRedos});
@@ -19434,10 +19496,10 @@ var $author$project$Main$performActionsOnModel = F2(
 									return foldedModel;
 								}
 							} else {
-								break _v0$21;
+								break _v0$22;
 							}
 						default:
-							break _v0$21;
+							break _v0$22;
 					}
 				}
 				return foldedModel;
@@ -24383,6 +24445,7 @@ var $author$project$Tools$Pointers$update = F4(
 			}
 		}
 	});
+var $author$project$Actions$ApplySimplify = {$: 'ApplySimplify'};
 var $author$project$Tools$Simplify$update = F4(
 	function (msg, options, previewColour, hasTrack) {
 		var _v0 = _Utils_Tuple2(msg, hasTrack);
@@ -24403,7 +24466,10 @@ var $author$project$Tools$Simplify$update = F4(
 				if (_v0.b.$ === 'Just') {
 					var _v2 = _v0.a;
 					var track = _v0.b.a;
-					return _Utils_Tuple2(options, _List_Nil);
+					return _Utils_Tuple2(
+						options,
+						_List_fromArray(
+							[$author$project$Actions$ApplySimplify]));
 				} else {
 					break _v0$2;
 				}
@@ -35774,6 +35840,26 @@ var $author$project$Tools$Pointers$view = F3(
 	});
 var $author$project$Tools$Simplify$Apply = {$: 'Apply'};
 var $author$project$Tools$Simplify$Seek = {$: 'Seek'};
+var $elm$core$Dict$sizeHelp = F2(
+	function (n, dict) {
+		sizeHelp:
+		while (true) {
+			if (dict.$ === 'RBEmpty_elm_builtin') {
+				return n;
+			} else {
+				var left = dict.d;
+				var right = dict.e;
+				var $temp$n = A2($elm$core$Dict$sizeHelp, n + 1, right),
+					$temp$dict = left;
+				n = $temp$n;
+				dict = $temp$dict;
+				continue sizeHelp;
+			}
+		}
+	});
+var $elm$core$Dict$size = function (dict) {
+	return A2($elm$core$Dict$sizeHelp, 0, dict);
+};
 var $author$project$Tools$Simplify$view = F3(
 	function (msgWrapper, options, isTrack) {
 		if (isTrack.$ === 'Just') {
@@ -35796,7 +35882,7 @@ var $author$project$Tools$Simplify$view = F3(
 							$mdgriffith$elm_ui$Element$Input$button,
 							$author$project$ViewPureStyles$neatToolsBorder,
 							function () {
-								var _v1 = $elm$core$List$length(options.pointsToRemove);
+								var _v1 = $elm$core$Dict$size(options.pointsToRemove);
 								if (!_v1) {
 									return {
 										label: $mdgriffith$elm_ui$Element$text('Search'),
@@ -36131,6 +36217,8 @@ var $author$project$Actions$interpretAction = function (action) {
 		case 'OutAndBackApplyWithOptions':
 			var options = action.a;
 			return 'out and back';
+		case 'ApplySimplify':
+			return 'simplify';
 		default:
 			return 'ask Pete to fix this message';
 	}
@@ -39544,26 +39632,6 @@ var $terezka$elm_charts$Internal$Helpers$green = '#71c614';
 var $terezka$elm_charts$Internal$Helpers$moss = '#92b42c';
 var $terezka$elm_charts$Internal$Helpers$orange = '#FF8400';
 var $terezka$elm_charts$Internal$Helpers$purple = '#7b4dff';
-var $elm$core$Dict$sizeHelp = F2(
-	function (n, dict) {
-		sizeHelp:
-		while (true) {
-			if (dict.$ === 'RBEmpty_elm_builtin') {
-				return n;
-			} else {
-				var left = dict.d;
-				var right = dict.e;
-				var $temp$n = A2($elm$core$Dict$sizeHelp, n + 1, right),
-					$temp$dict = left;
-				n = $temp$n;
-				dict = $temp$dict;
-				continue sizeHelp;
-			}
-		}
-	});
-var $elm$core$Dict$size = function (dict) {
-	return A2($elm$core$Dict$sizeHelp, 0, dict);
-};
 var $terezka$elm_charts$Internal$Helpers$toDefault = F3(
 	function (_default, items, index) {
 		var dict = $elm$core$Dict$fromList(

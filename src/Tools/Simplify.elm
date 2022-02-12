@@ -15,11 +15,11 @@ import ViewPureStyles exposing (neatToolsBorder, noTrackMessage)
 
 
 type alias Options =
-    { pointsToRemove : List Int }
+    { pointsToRemove : Dict Int Int }
 
 
 defaultOptions =
-    { pointsToRemove = [] }
+    { pointsToRemove = Dict.empty }
 
 
 type Msg
@@ -94,7 +94,35 @@ findSimplifications options tree =
                 Dict.empty
                 selectSmallestAreas
     in
-    { options | pointsToRemove = Dict.keys nonAdjacentEntries }
+    { options | pointsToRemove = nonAdjacentEntries }
+
+
+apply : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+apply options track =
+    -- Deleting arbitrary collection of non-adjacent points implies rebuild.
+    --TODO: Hmm, like Out and Back, this may mean we're re-building twice!!
+    let
+        originalCourse =
+            DomainModel.getAllGPXPointsInDict track.trackTree
+
+        newCourse =
+            Dict.foldl
+                (\k v out -> Dict.remove k out)
+                originalCourse
+                options.pointsToRemove
+
+        newTree =
+            DomainModel.treeFromSourcePoints <| Dict.values newCourse
+
+        -- New tree built from four parts:
+        -- Out (nudged one way), away turn, back (nudged other way), home turn.
+        oldPoints =
+            -- All the points.
+            Dict.values originalCourse
+    in
+    ( newTree
+    , oldPoints
+    )
 
 
 toolStateChange :
@@ -119,7 +147,7 @@ toolStateChange opened colour options track =
 
         _ ->
             -- Hide preview
-            ( { options | pointsToRemove = [] }
+            ( { options | pointsToRemove = Dict.empty }
             , [ HidePreview "simplify" ]
             )
 
@@ -132,7 +160,7 @@ actions colour options track =
         , colour = colour
         , points =
             DomainModel.buildPreview
-                options.pointsToRemove
+                (Dict.values options.pointsToRemove)
                 track.trackTree
         }
     ]
@@ -154,7 +182,7 @@ update msg options previewColour hasTrack =
             ( newOptions, actions previewColour newOptions track )
 
         ( Apply, Just track ) ->
-            ( options, [] )
+            ( options, [ Actions.ApplySimplify ] )
 
         _ ->
             ( options, [] )
@@ -171,7 +199,7 @@ view msgWrapper options isTrack =
                 ]
                 [ el [ centerX ] <|
                     Input.button neatToolsBorder <|
-                        case List.length options.pointsToRemove of
+                        case Dict.size options.pointsToRemove of
                             0 ->
                                 { onPress = Just <| msgWrapper Seek
                                 , label = text "Search"

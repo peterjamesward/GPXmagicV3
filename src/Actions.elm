@@ -44,6 +44,7 @@ type ToolAction msg
     | PointMovedOnMap Float Float Float Float
     | NudgeApplyWithOptions Tools.NudgeOptions.Options
     | OutAndBackApplyWithOptions Tools.OutAndBackOptions.Options
+    | ApplySimplify
 
 
 type PreviewShape
@@ -90,6 +91,9 @@ interpretAction action =
 
         OutAndBackApplyWithOptions options ->
             "out and back"
+
+        ApplySimplify ->
+            "simplify"
 
         _ ->
             "ask Pete to fix this message"

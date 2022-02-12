@@ -12,6 +12,7 @@ module DomainModel exposing
     , effectiveLatitude
     , endPoint
     , extractPointsInRange
+    , getAllGPXPointsInDict
     , getAllGPXPointsInNaturalOrder
     , getDualCoords
     , getFirstLeaf
@@ -42,6 +43,7 @@ import Angle exposing (Angle)
 import Axis2d
 import Axis3d exposing (Axis3d)
 import BoundingBox3d exposing (BoundingBox3d)
+import Dict exposing (Dict)
 import Direction2d exposing (Direction2d)
 import Json.Encode as E
 import Length exposing (Length, Meters, inMeters)
@@ -312,11 +314,11 @@ makeRoadSectionKnowingLocalCoords ( earth1, local1 ) ( earth2, local2 ) =
         bearing =
             -- NB bearing is from North, clockwise.
             Spherical.findBearingToTarget
-                        ( Angle.inRadians earth1.latitude, Angle.inRadians <| Direction2d.toAngle earth1.longitude )
-                        ( Angle.inRadians earth2.latitude, Angle.inRadians <| Direction2d.toAngle earth2.longitude )
+                ( Angle.inRadians earth1.latitude, Angle.inRadians <| Direction2d.toAngle earth1.longitude )
+                ( Angle.inRadians earth2.latitude, Angle.inRadians <| Direction2d.toAngle earth2.longitude )
 
         direction =
-            pi/2 - bearing |> Angle.radians |> Direction2d.fromAngle
+            pi / 2 - bearing |> Angle.radians |> Direction2d.fromAngle
     in
     { sourceData = ( earth1, earth2 )
     , startPoint = local1
@@ -1262,6 +1264,28 @@ getAllGPXPointsInNaturalOrder treeNode =
             foldOverRouteRL internalFoldFn treeNode []
     in
     gpxPointFromIndex 0 treeNode :: endPoints
+
+
+getAllGPXPointsInDict : PeteTree -> Dict Int GPXSource
+getAllGPXPointsInDict treeNode =
+    -- Same but allows quick index lookup.
+    let
+        internalFoldFn :
+            RoadSection
+            -> ( Int, Dict Int GPXSource )
+            -> ( Int, Dict Int GPXSource )
+        internalFoldFn road ( index, dict ) =
+            ( index + 1
+            , Dict.insert index (Tuple.second road.sourceData) dict
+            )
+
+        ( _, outputs ) =
+            foldOverRouteRL
+                internalFoldFn
+                treeNode
+                ( 1, Dict.insert 0 (gpxPointFromIndex 0 treeNode) Dict.empty )
+    in
+    outputs
 
 
 treeToRoadSectionList : PeteTree -> List RoadSection
