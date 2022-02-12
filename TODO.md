@@ -10,11 +10,15 @@ BUG: Pointers are not reset on track load.
 BUG: Classic bend smoother consumes all memory on certain looped routes where
      orange and purple are (possibly) co-linear, or something.
 
+BUG: Gradient problems preview is colour from Bend problems.
+
 --
 
 # WIP
 
-**Interpolate**
+Modal dialog should be confined to (within) the central view pane area.
+
+**Interpolate** -- needs the apply logic.
 
 ---
 
@@ -22,7 +26,7 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 ## Tools
 
-1. 1CQF
+1. 1CQF (i.e. Simplify x N / Interpolate / Bezier )
 2. Limit gradients
 3. Intersections
 4. Plan view (? no rotate, so 4-way drag is always aligned ?)

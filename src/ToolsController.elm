@@ -183,8 +183,8 @@ trackInfoBox =
     , label = "Information"
     , info = "Here is some useful information"
     , video = Nothing
-    , state = Expanded
-    , dock = DockUpperLeft
+    , state = Contracted
+    , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.peterRiver
     , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
     , isPopupOpen = False
@@ -197,8 +197,8 @@ displaySettingsTool =
     , label = "Display"
     , info = "How it looks"
     , video = Nothing
-    , state = Expanded
-    , dock = DockUpperLeft
+    , state = Contracted
+    , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.peterRiver
     , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
     , isPopupOpen = False
@@ -268,7 +268,7 @@ deleteTool =
     , info = "Away with ye"
     , video = Nothing
     , state = Contracted
-    , dock = DockLowerLeft
+    , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.concrete
     , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
     , isPopupOpen = False
@@ -282,7 +282,7 @@ bezierSplinesTool =
     , info = "Make it smoother"
     , video = Nothing
     , state = Contracted
-    , dock = DockLowerRight
+    , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.amethyst
     , textColour = contrastingColour FlatColors.FlatUIPalette.amethyst
     , isPopupOpen = False
@@ -296,7 +296,7 @@ centroidAverageTool =
     , info = "Make it smoother"
     , video = Nothing
     , state = Contracted
-    , dock = DockLowerRight
+    , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.amethyst
     , textColour = contrastingColour FlatColors.FlatUIPalette.amethyst
     , isPopupOpen = False
@@ -310,7 +310,7 @@ curveFormerTool =
     , info = "Make it smoother"
     , video = Nothing
     , state = Contracted
-    , dock = DockLowerRight
+    , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.turquoise
     , textColour = contrastingColour FlatColors.FlatUIPalette.turquoise
     , isPopupOpen = False
@@ -324,7 +324,7 @@ bendSmootherTool =
     , info = "Make it smoother"
     , video = Nothing
     , state = Contracted
-    , dock = DockLowerRight
+    , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.greenSea
     , textColour = contrastingColour FlatColors.FlatUIPalette.greenSea
     , isPopupOpen = False
@@ -338,7 +338,7 @@ nudgeTool =
     , info = "Make it smoother"
     , video = Nothing
     , state = Contracted
-    , dock = DockLowerRight
+    , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.concrete
     , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
     , isPopupOpen = False
@@ -352,7 +352,7 @@ outAndBackTool =
     , info = "ET go home"
     , video = Nothing
     , state = Contracted
-    , dock = DockLowerLeft
+    , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.concrete
     , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
     , isPopupOpen = False
@@ -366,11 +366,12 @@ simplifyTool =
     , info = "Reduce noise"
     , video = Nothing
     , state = Contracted
-    , dock = DockLowerLeft
+    , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.concrete
     , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
     , isPopupOpen = False
     }
+
 
 interpolateTool : ToolEntry
 interpolateTool =
@@ -379,7 +380,7 @@ interpolateTool =
     , info = "Add points"
     , video = Nothing
     , state = Contracted
-    , dock = DockLowerLeft
+    , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.concrete
     , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
     , isPopupOpen = False
@@ -691,8 +692,6 @@ update toolMsg isTrack msgWrapper options =
             )
 
 
-
-
 refreshOpenTools :
     Maybe (TrackLoaded msg)
     -> Options
@@ -893,7 +892,6 @@ toolStateHasChanged toolType newState isTrack options =
 
 
 
-
 --View stuff
 
 
@@ -1087,7 +1085,11 @@ viewToolByType msgWrapper entry isTrack options =
                 DeletePoints.view (msgWrapper << DeletePoints) options.deleteOptions
 
             ToolPointers ->
-                Pointers.view (msgWrapper << PointerMsg) options.pointerOptions isTrack
+                Pointers.view
+                    options.imperial
+                    (msgWrapper << PointerMsg)
+                    options.pointerOptions
+                    isTrack
 
             ToolUndoRedo ->
                 UndoRedo.view (msgWrapper << UndoRedoMsg) options.undoRedoOptions isTrack
@@ -1143,7 +1145,6 @@ viewToolByType msgWrapper entry isTrack options =
                     (msgWrapper << ToolInterpolateMsg)
                     options.interpolateSettings
                     isTrack
-
 
 
 

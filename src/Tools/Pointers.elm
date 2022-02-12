@@ -163,16 +163,16 @@ update msg options previewColour hasTrack =
                     )
 
 
-positionDescription : Int -> PeteTree -> String
-positionDescription pos track =
+positionDescription : Bool -> Int -> PeteTree -> String
+positionDescription imperial pos track =
     "Point "
         ++ String.fromInt pos
         ++ ", at "
-        ++ (showLongMeasure False <| DomainModel.distanceFromIndex pos track)
+        ++ (showLongMeasure imperial <| DomainModel.distanceFromIndex pos track)
 
 
-view : (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
-view msgWrapper options isTrack =
+view : Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view imperial msgWrapper options isTrack =
     let
         purpleStyle =
             [ Border.color FlatColors.AussiePalette.blurple
@@ -212,7 +212,7 @@ view msgWrapper options isTrack =
                     ]
                     [ el [ centerX ] <|
                         text <|
-                            positionDescription options.orange track.trackTree
+                            positionDescription imperial options.orange track.trackTree
                     , row
                         [ centerX
                         , spacing 10
@@ -308,7 +308,7 @@ view msgWrapper options isTrack =
                     , el [ centerX ] <|
                         case options.purple of
                             Just something ->
-                                text <| positionDescription something track.trackTree
+                                text <| positionDescription imperial something track.trackTree
 
                             Nothing ->
                                 text "---"

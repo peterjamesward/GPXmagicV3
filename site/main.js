@@ -8650,7 +8650,7 @@ var $author$project$Tools$UndoRedo$Options = function (dummy) {
 };
 var $author$project$Tools$UndoRedo$defaultOptions = $author$project$Tools$UndoRedo$Options(0);
 var $author$project$ToolsController$Contracted = {$: 'Contracted'};
-var $author$project$ToolsController$DockLowerRight = {$: 'DockLowerRight'};
+var $author$project$ToolsController$DockUpperRight = {$: 'DockUpperRight'};
 var $author$project$ToolsController$ToolBendSmoother = {$: 'ToolBendSmoother'};
 var $mdgriffith$elm_ui$Internal$Model$Rgba = F4(
 	function (a, b, c, d) {
@@ -8680,7 +8680,7 @@ var $author$project$ViewPureStyles$contrastingColour = function (col) {
 };
 var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$greenSea = A3($mdgriffith$elm_ui$Element$rgb255, 22, 160, 133);
 var $author$project$ToolsController$bendSmootherTool = {
-	dock: $author$project$ToolsController$DockLowerRight,
+	dock: $author$project$ToolsController$DockUpperRight,
 	info: 'Make it smoother',
 	isPopupOpen: false,
 	label: 'Classic bends',
@@ -8693,7 +8693,7 @@ var $author$project$ToolsController$bendSmootherTool = {
 var $author$project$ToolsController$ToolBezierSplines = {$: 'ToolBezierSplines'};
 var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$amethyst = A3($mdgriffith$elm_ui$Element$rgb255, 155, 89, 182);
 var $author$project$ToolsController$bezierSplinesTool = {
-	dock: $author$project$ToolsController$DockLowerRight,
+	dock: $author$project$ToolsController$DockUpperRight,
 	info: 'Make it smoother',
 	isPopupOpen: false,
 	label: 'Bezier splines',
@@ -8705,7 +8705,7 @@ var $author$project$ToolsController$bezierSplinesTool = {
 };
 var $author$project$ToolsController$ToolCentroidAverage = {$: 'ToolCentroidAverage'};
 var $author$project$ToolsController$centroidAverageTool = {
-	dock: $author$project$ToolsController$DockLowerRight,
+	dock: $author$project$ToolsController$DockUpperRight,
 	info: 'Make it smoother',
 	isPopupOpen: false,
 	label: 'Centroid Average',
@@ -8718,7 +8718,7 @@ var $author$project$ToolsController$centroidAverageTool = {
 var $author$project$ToolsController$ToolCurveFormer = {$: 'ToolCurveFormer'};
 var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$turquoise = A3($mdgriffith$elm_ui$Element$rgb255, 26, 188, 156);
 var $author$project$ToolsController$curveFormerTool = {
-	dock: $author$project$ToolsController$DockLowerRight,
+	dock: $author$project$ToolsController$DockUpperRight,
 	info: 'Make it smoother',
 	isPopupOpen: false,
 	label: 'Radiused bends',
@@ -8728,11 +8728,10 @@ var $author$project$ToolsController$curveFormerTool = {
 	toolType: $author$project$ToolsController$ToolCurveFormer,
 	video: $elm$core$Maybe$Nothing
 };
-var $author$project$ToolsController$DockLowerLeft = {$: 'DockLowerLeft'};
 var $author$project$ToolsController$ToolDeletePoints = {$: 'ToolDeletePoints'};
 var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$concrete = A3($mdgriffith$elm_ui$Element$rgb255, 149, 165, 166);
 var $author$project$ToolsController$deleteTool = {
-	dock: $author$project$ToolsController$DockLowerLeft,
+	dock: $author$project$ToolsController$DockUpperRight,
 	info: 'Away with ye',
 	isPopupOpen: false,
 	label: 'Delete points',
@@ -8742,7 +8741,6 @@ var $author$project$ToolsController$deleteTool = {
 	toolType: $author$project$ToolsController$ToolDeletePoints,
 	video: $elm$core$Maybe$Nothing
 };
-var $author$project$ToolsController$DockUpperRight = {$: 'DockUpperRight'};
 var $author$project$ToolsController$ToolAbruptDirectionChanges = {$: 'ToolAbruptDirectionChanges'};
 var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$peterRiver = A3($mdgriffith$elm_ui$Element$rgb255, 52, 152, 219);
 var $author$project$ToolsController$directionChangeTool = {
@@ -8756,15 +8754,13 @@ var $author$project$ToolsController$directionChangeTool = {
 	toolType: $author$project$ToolsController$ToolAbruptDirectionChanges,
 	video: $elm$core$Maybe$Nothing
 };
-var $author$project$ToolsController$DockUpperLeft = {$: 'DockUpperLeft'};
-var $author$project$ToolsController$Expanded = {$: 'Expanded'};
 var $author$project$ToolsController$ToolDisplaySettings = {$: 'ToolDisplaySettings'};
 var $author$project$ToolsController$displaySettingsTool = {
-	dock: $author$project$ToolsController$DockUpperLeft,
+	dock: $author$project$ToolsController$DockUpperRight,
 	info: 'How it looks',
 	isPopupOpen: false,
 	label: 'Display',
-	state: $author$project$ToolsController$Expanded,
+	state: $author$project$ToolsController$Contracted,
 	tabColour: $smucode$elm_flat_colors$FlatColors$FlatUIPalette$peterRiver,
 	textColour: $author$project$ViewPureStyles$contrastingColour($smucode$elm_flat_colors$FlatColors$FlatUIPalette$peterRiver),
 	toolType: $author$project$ToolsController$ToolDisplaySettings,
@@ -8784,7 +8780,7 @@ var $author$project$ToolsController$gradientChangeTool = {
 };
 var $author$project$ToolsController$ToolInterpolate = {$: 'ToolInterpolate'};
 var $author$project$ToolsController$interpolateTool = {
-	dock: $author$project$ToolsController$DockLowerLeft,
+	dock: $author$project$ToolsController$DockUpperRight,
 	info: 'Add points',
 	isPopupOpen: false,
 	label: 'Interpolate',
@@ -8796,7 +8792,7 @@ var $author$project$ToolsController$interpolateTool = {
 };
 var $author$project$ToolsController$ToolNudge = {$: 'ToolNudge'};
 var $author$project$ToolsController$nudgeTool = {
-	dock: $author$project$ToolsController$DockLowerRight,
+	dock: $author$project$ToolsController$DockUpperRight,
 	info: 'Make it smoother',
 	isPopupOpen: false,
 	label: 'Nudge',
@@ -8808,7 +8804,7 @@ var $author$project$ToolsController$nudgeTool = {
 };
 var $author$project$ToolsController$ToolOutAndBack = {$: 'ToolOutAndBack'};
 var $author$project$ToolsController$outAndBackTool = {
-	dock: $author$project$ToolsController$DockLowerLeft,
+	dock: $author$project$ToolsController$DockUpperRight,
 	info: 'ET go home',
 	isPopupOpen: false,
 	label: 'Out and Back',
@@ -8818,6 +8814,7 @@ var $author$project$ToolsController$outAndBackTool = {
 	toolType: $author$project$ToolsController$ToolOutAndBack,
 	video: $elm$core$Maybe$Nothing
 };
+var $author$project$ToolsController$Expanded = {$: 'Expanded'};
 var $author$project$ToolsController$ToolPointers = {$: 'ToolPointers'};
 var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$orange = A3($mdgriffith$elm_ui$Element$rgb255, 243, 156, 18);
 var $author$project$ToolsController$pointersTool = {
@@ -8833,7 +8830,7 @@ var $author$project$ToolsController$pointersTool = {
 };
 var $author$project$ToolsController$ToolSimplify = {$: 'ToolSimplify'};
 var $author$project$ToolsController$simplifyTool = {
-	dock: $author$project$ToolsController$DockLowerLeft,
+	dock: $author$project$ToolsController$DockUpperRight,
 	info: 'Reduce noise',
 	isPopupOpen: false,
 	label: 'Simplify',
@@ -8845,11 +8842,11 @@ var $author$project$ToolsController$simplifyTool = {
 };
 var $author$project$ToolsController$ToolTrackInfo = {$: 'ToolTrackInfo'};
 var $author$project$ToolsController$trackInfoBox = {
-	dock: $author$project$ToolsController$DockUpperLeft,
+	dock: $author$project$ToolsController$DockUpperRight,
 	info: 'Here is some useful information',
 	isPopupOpen: false,
 	label: 'Information',
-	state: $author$project$ToolsController$Expanded,
+	state: $author$project$ToolsController$Contracted,
 	tabColour: $smucode$elm_flat_colors$FlatColors$FlatUIPalette$peterRiver,
 	textColour: $author$project$ViewPureStyles$contrastingColour($smucode$elm_flat_colors$FlatColors$FlatUIPalette$peterRiver),
 	toolType: $author$project$ToolsController$ToolTrackInfo,
@@ -18884,7 +18881,10 @@ var $author$project$PaneLayoutManager$restoreStoredValues = F2(
 		}
 	});
 var $author$project$ToolsController$DockBottom = {$: 'DockBottom'};
+var $author$project$ToolsController$DockLowerLeft = {$: 'DockLowerLeft'};
+var $author$project$ToolsController$DockLowerRight = {$: 'DockLowerRight'};
 var $author$project$ToolsController$DockNone = {$: 'DockNone'};
+var $author$project$ToolsController$DockUpperLeft = {$: 'DockUpperLeft'};
 var $author$project$ToolsController$decodeDock = function (dock) {
 	switch (dock) {
 		case 'upperleft':
@@ -35806,16 +35806,16 @@ var $author$project$UtilsForViews$showLongMeasure = F2(
 			$ianmackenzie$elm_units$Length$inMiles(distance)) + ' miles') : ($author$project$UtilsForViews$showDecimal2(
 			$ianmackenzie$elm_units$Length$inMeters(distance)) + 'm');
 	});
-var $author$project$Tools$Pointers$positionDescription = F2(
-	function (pos, track) {
+var $author$project$Tools$Pointers$positionDescription = F3(
+	function (imperial, pos, track) {
 		return 'Point ' + ($elm$core$String$fromInt(pos) + (', at ' + A2(
 			$author$project$UtilsForViews$showLongMeasure,
-			false,
+			imperial,
 			A2($author$project$DomainModel$distanceFromIndex, pos, track))));
 	});
 var $smucode$elm_flat_colors$FlatColors$AussiePalette$quinceJelly = A3($mdgriffith$elm_ui$Element$rgb255, 240, 147, 43);
-var $author$project$Tools$Pointers$view = F3(
-	function (msgWrapper, options, isTrack) {
+var $author$project$Tools$Pointers$view = F4(
+	function (imperial, msgWrapper, options, isTrack) {
 		var purpleStyle = _List_fromArray(
 			[
 				$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$AussiePalette$blurple),
@@ -35870,7 +35870,7 @@ var $author$project$Tools$Pointers$view = F3(
 							_List_fromArray(
 								[$mdgriffith$elm_ui$Element$centerX]),
 							$mdgriffith$elm_ui$Element$text(
-								A2($author$project$Tools$Pointers$positionDescription, options.orange, track.trackTree))),
+								A3($author$project$Tools$Pointers$positionDescription, imperial, options.orange, track.trackTree))),
 							A2(
 							$mdgriffith$elm_ui$Element$row,
 							_List_fromArray(
@@ -36043,7 +36043,7 @@ var $author$project$Tools$Pointers$view = F3(
 								if (_v3.$ === 'Just') {
 									var something = _v3.a;
 									return $mdgriffith$elm_ui$Element$text(
-										A2($author$project$Tools$Pointers$positionDescription, something, track.trackTree));
+										A3($author$project$Tools$Pointers$positionDescription, imperial, something, track.trackTree));
 								} else {
 									return $mdgriffith$elm_ui$Element$text('---');
 								}
@@ -36597,8 +36597,9 @@ var $author$project$ToolsController$viewToolByType = F4(
 							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$DeletePoints),
 							options.deleteOptions);
 					case 'ToolPointers':
-						return A3(
+						return A4(
 							$author$project$Tools$Pointers$view,
+							options.imperial,
 							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$PointerMsg),
 							options.pointerOptions,
 							isTrack);
