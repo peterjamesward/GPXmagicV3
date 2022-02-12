@@ -762,7 +762,10 @@ view model =
                 :: (inFront <|
                         case model.modalMessage of
                             Just message ->
-                                showModalMessage message DismissModalMessage
+                                showModalMessage
+                                    (Pixels.inPixels <| Tuple.first model.contentArea)
+                                    message
+                                    DismissModalMessage
 
                             Nothing ->
                                 none

@@ -12,6 +12,7 @@ import FlatColors.AussiePalette
 import FlatColors.BritishPalette
 import FlatColors.ChinesePalette
 import Html.Attributes exposing (style)
+import Markdown
 import Pixels exposing (Pixels)
 import Quantity exposing (Quantity)
 
@@ -289,11 +290,12 @@ useIcon =
     html << FeatherIcons.toHtml [] << FeatherIcons.withSize 20
 
 
-showModalMessage : String -> msg -> Element msg
-showModalMessage content msg =
+showModalMessage : Int -> String -> msg -> Element msg
+showModalMessage areaWidth content msg =
     column
         [ centerY
         , centerX
+        , width <| px areaWidth
         , Border.width 6
         , Border.color FlatColors.AussiePalette.quinceJelly
         , Border.rounded 8
@@ -314,7 +316,10 @@ showModalMessage content msg =
             , spacing 20
             , padding 20
             ]
-            [ text content
+            [ paragraph
+                []
+              <|
+                [ html <| Markdown.toHtml [] content ]
             , Input.button neatToolsBorder
                 { onPress = Just msg
                 , label = text "Dismiss"
