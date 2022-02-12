@@ -1262,7 +1262,7 @@ performActionsOnModel actions model =
                 ( ApplySimplify, Just track ) ->
                     let
                         ( newTree, oldPoints ) =
-                            Tools.Simplify.apply model.toolOptions.simplifySettings track
+                            Tools.Simplify.apply foldedModel.toolOptions.simplifySettings track
 
                         ( fromStart, fromEnd ) =
                             (0,0)

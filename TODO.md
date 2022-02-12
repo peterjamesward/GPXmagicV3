@@ -10,15 +10,9 @@ BUG: Pointers are not reset on track load.
 BUG: Classic bend smoother consumes all memory on certain looped routes where
      orange and purple are (possibly) co-linear.
 
-
-DEBT: Tools that replace whole track should be able to suppress the common rebuild in Main.
-> if whole track returned, no need to rebuild; simple.
-
 --
 
 # WIP
-
-**Simplify** (De-noise IRL)
 
 ---
 

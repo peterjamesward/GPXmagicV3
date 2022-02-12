@@ -100,22 +100,23 @@ findSimplifications options tree =
 apply : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
 apply options track =
     -- Deleting arbitrary collection of non-adjacent points implies rebuild.
-    --TODO: Hmm, like Out and Back, this may mean we're re-building twice!!
     let
+        originalCourse : Dict Int GPXSource
         originalCourse =
             DomainModel.getAllGPXPointsInDict track.trackTree
 
+        newCourse : Dict Int GPXSource
         newCourse =
             Dict.foldl
                 (\k v out -> Dict.remove k out)
                 originalCourse
                 options.pointsToRemove
 
+        newTree : Maybe PeteTree
         newTree =
             DomainModel.treeFromSourcePoints <| Dict.values newCourse
 
-        -- New tree built from four parts:
-        -- Out (nudged one way), away turn, back (nudged other way), home turn.
+        oldPoints : List GPXSource
         oldPoints =
             -- All the points.
             Dict.values originalCourse
@@ -139,8 +140,6 @@ toolStateChange opened colour options track =
                 populatedOptions =
                     findSimplifications options theTrack.trackTree
             in
-            --TODO: May stop sending the list here and let action processor request it.
-            -- (Not much in it.)
             ( populatedOptions
             , actions colour populatedOptions theTrack
             )
@@ -160,7 +159,7 @@ actions colour options track =
         , colour = colour
         , points =
             DomainModel.buildPreview
-                (Dict.values options.pointsToRemove)
+                (Dict.keys options.pointsToRemove)
                 track.trackTree
         }
     ]
@@ -182,7 +181,7 @@ update msg options previewColour hasTrack =
             ( newOptions, actions previewColour newOptions track )
 
         ( Apply, Just track ) ->
-            ( options, [ Actions.ApplySimplify ] )
+            ( options, [ Actions.ApplySimplify, TrackHasChanged ] )
 
         _ ->
             ( options, [] )

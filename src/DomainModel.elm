@@ -1280,7 +1280,7 @@ getAllGPXPointsInDict treeNode =
             )
 
         ( _, outputs ) =
-            foldOverRouteRL
+            foldOverRoute
                 internalFoldFn
                 treeNode
                 ( 1, Dict.insert 0 (gpxPointFromIndex 0 treeNode) Dict.empty )

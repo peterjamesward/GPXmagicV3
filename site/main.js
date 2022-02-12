@@ -13481,6 +13481,28 @@ var $author$project$Tools$OutAndBack$apply = F2(
 		var newTree = $author$project$DomainModel$treeFromSourcePoints(newCourse);
 		return _Utils_Tuple2(newTree, oldPoints);
 	});
+var $author$project$DomainModel$traverseTreeBetween = F5(
+	function (startingAt, endingAt, someNode, foldFn, accum) {
+		return A7(
+			$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
+			startingAt,
+			endingAt,
+			$elm$core$Basics$always($elm$core$Maybe$Nothing),
+			0,
+			someNode,
+			foldFn,
+			accum);
+	});
+var $author$project$DomainModel$foldOverRoute = F3(
+	function (foldFn, treeNode, startValues) {
+		return A5(
+			$author$project$DomainModel$traverseTreeBetween,
+			0,
+			$author$project$DomainModel$skipCount(treeNode),
+			treeNode,
+			foldFn,
+			startValues);
+	});
 var $author$project$DomainModel$getAllGPXPointsInDict = function (treeNode) {
 	var internalFoldFn = F2(
 		function (road, _v1) {
@@ -13491,7 +13513,7 @@ var $author$project$DomainModel$getAllGPXPointsInDict = function (treeNode) {
 				A3($elm$core$Dict$insert, index, road.sourceData.b, dict));
 		});
 	var _v0 = A3(
-		$author$project$DomainModel$foldOverRouteRL,
+		$author$project$DomainModel$foldOverRoute,
 		internalFoldFn,
 		treeNode,
 		_Utils_Tuple2(
@@ -13550,18 +13572,6 @@ var $elm$core$List$drop = F2(
 				}
 			}
 		}
-	});
-var $author$project$DomainModel$traverseTreeBetween = F5(
-	function (startingAt, endingAt, someNode, foldFn, accum) {
-		return A7(
-			$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
-			startingAt,
-			endingAt,
-			$elm$core$Basics$always($elm$core$Maybe$Nothing),
-			0,
-			someNode,
-			foldFn,
-			accum);
 	});
 var $author$project$DomainModel$extractPointsInRange = F3(
 	function (fromStart, fromEnd, trackTree) {
@@ -16806,7 +16816,7 @@ var $author$project$Tools$Simplify$actions = F3(
 					colour: colour,
 					points: A2(
 						$author$project$DomainModel$buildPreview,
-						$elm$core$Dict$values(options.pointsToRemove),
+						$elm$core$Dict$keys(options.pointsToRemove),
 						track.trackTree),
 					shape: $author$project$Actions$PreviewCircle,
 					tag: 'simplify'
@@ -19296,7 +19306,7 @@ var $author$project$Main$performActionsOnModel = F2(
 							if (_v0.b.$ === 'Just') {
 								var _v21 = _v0.a;
 								var track = _v0.b.a;
-								var _v22 = A2($author$project$Tools$Simplify$apply, model.toolOptions.simplifySettings, track);
+								var _v22 = A2($author$project$Tools$Simplify$apply, foldedModel.toolOptions.simplifySettings, track);
 								var newTree = _v22.a;
 								var oldPoints = _v22.b;
 								var _v23 = _Utils_Tuple2(0, 0);
@@ -24469,7 +24479,7 @@ var $author$project$Tools$Simplify$update = F4(
 					return _Utils_Tuple2(
 						options,
 						_List_fromArray(
-							[$author$project$Actions$ApplySimplify]));
+							[$author$project$Actions$ApplySimplify, $author$project$Actions$TrackHasChanged]));
 				} else {
 					break _v0$2;
 				}
