@@ -51,6 +51,7 @@ import Tools.CurveFormer
 import Tools.DeletePoints as DeletePoints
 import Tools.DisplaySettings
 import Tools.Nudge
+import Tools.OutAndBack
 import Tools.TrackInfoBox
 import ToolsController exposing (ToolEntry, encodeColour, encodeToolState)
 import TrackLoaded exposing (TrackLoaded)
@@ -1228,6 +1229,24 @@ performActionsOnModel actions model =
 
                         ( fromStart, fromEnd ) =
                             TrackLoaded.getRangeFromMarkers track
+
+                        newTrack =
+                            track
+                                |> TrackLoaded.addToUndoStack action
+                                    fromStart
+                                    fromEnd
+                                    oldPoints
+                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                    in
+                    { foldedModel | track = Just newTrack }
+
+                ( OutAndBackApplyWithOptions options, Just track ) ->
+                    let
+                        ( newTree, oldPoints ) =
+                            Tools.OutAndBack.apply options track
+
+                        ( fromStart, fromEnd ) =
+                            (0,0)
 
                         newTrack =
                             track
