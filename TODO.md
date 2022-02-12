@@ -8,11 +8,13 @@ BUG: Curve Former should reset on track load.
 BUG: Pointers are not reset on track load.
 
 BUG: Classic bend smoother consumes all memory on certain looped routes where
-     orange and purple are (possibly) co-linear.
+     orange and purple are (possibly) co-linear, or something.
 
 --
 
 # WIP
+
+**Interpolate**
 
 ---
 
@@ -20,21 +22,20 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 ## Tools
 
-1. Limit gradients
-2. Interpolate
+1. 1CQF
+2. Limit gradients
 3. Intersections
 4. Plan view (? no rotate, so 4-way drag is always aligned ?)
 5. Fly-through
 6. Move & Stretch
-7. 1CQF
-8. Graph Theory (renamed)
-9. Use Strava segment data
-10. Loops (inc. impact on others, such as Bezier).
-11. Lift and Shift
-12. SVG import
-13. Terrain
-14. Map Satellite style choice
-15. Split and Join
+7. Graph Theory (renamed)
+8. Use Strava segment data
+9. Loops (inc. impact on others, such as Bezier).
+10. Lift and Shift
+11. SVG import
+12. Terrain
+13. Map Satellite style choice
+14. Split and Join
 
 New stuff:
 1. Samir's bend detector (amount of angular change within X linear metres). (Option on Bend Problems)
