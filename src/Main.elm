@@ -1284,7 +1284,7 @@ performActionsOnModel actions model =
                             Tools.Interpolate.apply options track
 
                         ( fromStart, fromEnd ) =
-                            (0,0)
+                            TrackLoaded.getRangeFromMarkers track
 
                         newTrack =
                             track

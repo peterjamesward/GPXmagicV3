@@ -25,29 +25,37 @@ type Msg
     | SetSpacing Float
 
 
-computeNewPoints : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
-computeNewPoints options track =
+computeNewPoints : Bool -> Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
+computeNewPoints excludeExisting options track =
     let
         ( fromStart, fromEnd ) =
             TrackLoaded.getRangeFromMarkers track
 
-        -- This feels like a fold over the leaves, interpolating each as needed.
+        interpolateStartIndex =
+            -- Sneaky (?) skip existing start points for preview.
+            if excludeExisting then
+                1
+
+            else
+                0
+
+        -- This is a fold over the leaves, interpolating each as needed.
         interpolateRoadSection : RoadSection -> List EarthPoint -> List EarthPoint
         interpolateRoadSection road new =
             let
-                numNewPointsNeeded =
+                intervalsNeeded =
                     Quantity.ratio road.trueLength options.minimumSpacing
-                        |> truncate
+                        |> ceiling
 
                 spacingOnThisSegment =
-                    road.trueLength |> Quantity.divideBy (toFloat numNewPointsNeeded + 1)
+                    road.trueLength |> Quantity.divideBy (toFloat intervalsNeeded)
 
                 fractionalIncrement =
-                    Quantity.ratio road.trueLength spacingOnThisSegment
+                    Quantity.ratio spacingOnThisSegment road.trueLength
 
                 interpolatedPoints =
                     -- Includes start point!
-                    List.range 0 numNewPointsNeeded
+                    List.range interpolateStartIndex (intervalsNeeded - 1)
                         |> List.map
                             (\n ->
                                 Point3d.interpolateFrom
@@ -64,14 +72,13 @@ computeNewPoints options track =
             -- so that the splicing works as expected without duplication.
             DomainModel.traverseTreeBetweenLimitsToDepth
                 fromStart
-                fromEnd
+                (skipCount track.trackTree - fromEnd)
                 (always Nothing)
                 0
                 track.trackTree
                 interpolateRoadSection
                 []
                 |> List.reverse
-                |> List.drop 1
 
         previewPoints =
             newPoints
@@ -92,13 +99,13 @@ apply options track =
             TrackLoaded.getRangeFromMarkers track
 
         newCourse =
-            computeNewPoints options track
+            computeNewPoints False options track
                 |> List.map Tuple.second
 
         newTree =
             DomainModel.replaceRange
                 fromStart
-                fromEnd
+                (fromEnd + 1)
                 track.referenceLonLat
                 newCourse
                 track.trackTree
@@ -123,7 +130,7 @@ toolStateChange :
 toolStateChange opened colour options track =
     case ( opened, track ) of
         ( True, Just theTrack ) ->
-            ( options, [] )
+            ( options, actions options colour theTrack )
 
         _ ->
             ( options, [ HidePreview "interpolate" ] )
@@ -134,7 +141,7 @@ actions newOptions previewColour track =
         { tag = "interpolate"
         , shape = PreviewCircle
         , colour = previewColour
-        , points = computeNewPoints newOptions track
+        , points = computeNewPoints True newOptions track
         }
     ]
 

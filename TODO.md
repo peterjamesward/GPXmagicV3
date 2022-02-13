@@ -16,8 +16,6 @@ BUG: Gradient problems preview is colour from Bend problems.
 
 # WIP
 
-**Interpolate** -- needs the apply logic.
-
 ---
 
 # BACKLOG, roughly in order ...

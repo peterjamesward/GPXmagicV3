@@ -12104,27 +12104,6 @@ var $ianmackenzie$elm_units$Quantity$divideBy = F2(
 		var value = _v0.a;
 		return $ianmackenzie$elm_units$Quantity$Quantity(value / divisor);
 	});
-var $elm$core$List$drop = F2(
-	function (n, list) {
-		drop:
-		while (true) {
-			if (n <= 0) {
-				return list;
-			} else {
-				if (!list.b) {
-					return list;
-				} else {
-					var x = list.a;
-					var xs = list.b;
-					var $temp$n = n - 1,
-						$temp$list = xs;
-					n = $temp$n;
-					list = $temp$list;
-					continue drop;
-				}
-			}
-		}
-	});
 var $author$project$TrackLoaded$getRangeFromMarkers = function (track) {
 	var theLength = $author$project$DomainModel$skipCount(track.trackTree);
 	var _v0 = track.markerPosition;
@@ -12191,19 +12170,21 @@ var $ianmackenzie$elm_units$Quantity$ratio = F2(
 		var y = _v1.a;
 		return x / y;
 	});
-var $author$project$Tools$Interpolate$computeNewPoints = F2(
-	function (options, track) {
+var $author$project$Tools$Interpolate$computeNewPoints = F3(
+	function (excludeExisting, options, track) {
+		var interpolateStartIndex = excludeExisting ? 1 : 0;
 		var interpolateRoadSection = F2(
 			function (road, _new) {
-				var numNewPointsNeeded = A2($ianmackenzie$elm_units$Quantity$ratio, road.trueLength, options.minimumSpacing) | 0;
-				var spacingOnThisSegment = A2($ianmackenzie$elm_units$Quantity$divideBy, numNewPointsNeeded + 1, road.trueLength);
-				var fractionalIncrement = A2($ianmackenzie$elm_units$Quantity$ratio, road.trueLength, spacingOnThisSegment);
+				var intervalsNeeded = $elm$core$Basics$ceiling(
+					A2($ianmackenzie$elm_units$Quantity$ratio, road.trueLength, options.minimumSpacing));
+				var spacingOnThisSegment = A2($ianmackenzie$elm_units$Quantity$divideBy, intervalsNeeded, road.trueLength);
+				var fractionalIncrement = A2($ianmackenzie$elm_units$Quantity$ratio, spacingOnThisSegment, road.trueLength);
 				var interpolatedPoints = A2(
 					$elm$core$List$map,
 					function (n) {
 						return A3($ianmackenzie$elm_geometry$Point3d$interpolateFrom, road.startPoint, road.endPoint, fractionalIncrement * n);
 					},
-					A2($elm$core$List$range, 0, numNewPointsNeeded));
+					A2($elm$core$List$range, interpolateStartIndex, intervalsNeeded - 1));
 				return _Utils_ap(
 					$elm$core$List$reverse(interpolatedPoints),
 					_new);
@@ -12211,19 +12192,16 @@ var $author$project$Tools$Interpolate$computeNewPoints = F2(
 		var _v0 = $author$project$TrackLoaded$getRangeFromMarkers(track);
 		var fromStart = _v0.a;
 		var fromEnd = _v0.b;
-		var newPoints = A2(
-			$elm$core$List$drop,
-			1,
-			$elm$core$List$reverse(
-				A7(
-					$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
-					fromStart,
-					fromEnd,
-					$elm$core$Basics$always($elm$core$Maybe$Nothing),
-					0,
-					track.trackTree,
-					interpolateRoadSection,
-					_List_Nil)));
+		var newPoints = $elm$core$List$reverse(
+			A7(
+				$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
+				fromStart,
+				$author$project$DomainModel$skipCount(track.trackTree) - fromEnd,
+				$elm$core$Basics$always($elm$core$Maybe$Nothing),
+				0,
+				track.trackTree,
+				interpolateRoadSection,
+				_List_Nil));
 		var previewPoints = A2(
 			$elm$core$List$map,
 			function (earth) {
@@ -12233,6 +12211,27 @@ var $author$project$Tools$Interpolate$computeNewPoints = F2(
 			},
 			newPoints);
 		return previewPoints;
+	});
+var $elm$core$List$drop = F2(
+	function (n, list) {
+		drop:
+		while (true) {
+			if (n <= 0) {
+				return list;
+			} else {
+				if (!list.b) {
+					return list;
+				} else {
+					var x = list.a;
+					var xs = list.b;
+					var $temp$n = n - 1,
+						$temp$list = xs;
+					n = $temp$n;
+					list = $temp$list;
+					continue drop;
+				}
+			}
+		}
 	});
 var $author$project$DomainModel$traverseTreeBetween = F5(
 	function (startingAt, endingAt, someNode, foldFn, accum) {
@@ -12934,11 +12933,11 @@ var $author$project$Tools$Interpolate$apply = F2(
 		var newCourse = A2(
 			$elm$core$List$map,
 			$elm$core$Tuple$second,
-			A2($author$project$Tools$Interpolate$computeNewPoints, options, track));
+			A3($author$project$Tools$Interpolate$computeNewPoints, false, options, track));
 		var _v0 = $author$project$TrackLoaded$getRangeFromMarkers(track);
 		var fromStart = _v0.a;
 		var fromEnd = _v0.b;
-		var newTree = A5($author$project$DomainModel$replaceRange, fromStart, fromEnd, track.referenceLonLat, newCourse, track.trackTree);
+		var newTree = A5($author$project$DomainModel$replaceRange, fromStart, fromEnd + 1, track.referenceLonLat, newCourse, track.trackTree);
 		var oldPoints = A3($author$project$DomainModel$extractPointsInRange, fromStart, fromEnd, track.trackTree);
 		return _Utils_Tuple2(
 			newTree,
@@ -16840,12 +16839,27 @@ var $author$project$Tools$GradientProblems$toolStateChange = F4(
 					]));
 		}
 	});
+var $author$project$Tools$Interpolate$actions = F3(
+	function (newOptions, previewColour, track) {
+		return _List_fromArray(
+			[
+				$author$project$Actions$ShowPreview(
+				{
+					colour: previewColour,
+					points: A3($author$project$Tools$Interpolate$computeNewPoints, true, newOptions, track),
+					shape: $author$project$Actions$PreviewCircle,
+					tag: 'interpolate'
+				})
+			]);
+	});
 var $author$project$Tools$Interpolate$toolStateChange = F4(
 	function (opened, colour, options, track) {
 		var _v0 = _Utils_Tuple2(opened, track);
 		if (_v0.a && (_v0.b.$ === 'Just')) {
 			var theTrack = _v0.b.a;
-			return _Utils_Tuple2(options, _List_Nil);
+			return _Utils_Tuple2(
+				options,
+				A3($author$project$Tools$Interpolate$actions, options, colour, theTrack));
 		} else {
 			return _Utils_Tuple2(
 				options,
@@ -19454,7 +19468,7 @@ var $author$project$Main$performActionsOnModel = F2(
 								var _v24 = A2($author$project$Tools$Interpolate$apply, options, track);
 								var newTree = _v24.a;
 								var oldPoints = _v24.b;
-								var _v25 = _Utils_Tuple2(0, 0);
+								var _v25 = $author$project$TrackLoaded$getRangeFromMarkers(track);
 								var fromStart = _v25.a;
 								var fromEnd = _v25.b;
 								var newTrack = A2(
@@ -24375,19 +24389,6 @@ var $author$project$Tools$GradientProblems$update = F4(
 var $author$project$Actions$ApplyInterpolateWithOptions = function (a) {
 	return {$: 'ApplyInterpolateWithOptions', a: a};
 };
-var $author$project$Tools$Interpolate$actions = F3(
-	function (newOptions, previewColour, track) {
-		return _List_fromArray(
-			[
-				$author$project$Actions$ShowPreview(
-				{
-					colour: previewColour,
-					points: A2($author$project$Tools$Interpolate$computeNewPoints, newOptions, track),
-					shape: $author$project$Actions$PreviewCircle,
-					tag: 'interpolate'
-				})
-			]);
-	});
 var $author$project$Tools$Interpolate$update = F4(
 	function (msg, options, previewColour, hasTrack) {
 		var _v0 = _Utils_Tuple2(hasTrack, msg);
