@@ -260,9 +260,17 @@ update msg msgWrapper track area context =
                 ( DragPan, Just ( startX, startY ) ) ->
                     let
                         shiftVector =
-                            Vector3d.meters (startY - dy) (startX - dx) 0.0
+                            Vector3d.meters
+                                (startX - dx)
+                                (dy - startY)
+                                0.0
                                 |> Vector3d.scaleBy
-                                    (metresPerPixel context.zoomLevel (Angle.degrees 30))
+                                    (1.0
+                                        -- Empirical
+                                        * Spherical.metresPerPixel
+                                            context.zoomLevel
+                                            (Angle.degrees 30)
+                                    )
                     in
                     ( { context
                         | focalPoint =

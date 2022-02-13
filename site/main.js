@@ -25585,11 +25585,11 @@ var $author$project$ViewPlan$update = F5(
 					var startY = _v4.b;
 					var shiftVector = A2(
 						$ianmackenzie$elm_geometry$Vector3d$scaleBy,
-						A2(
+						1.0 * A2(
 							$author$project$Spherical$metresPerPixel,
 							context.zoomLevel,
 							$ianmackenzie$elm_units$Angle$degrees(30)),
-						A3($ianmackenzie$elm_geometry$Vector3d$meters, startY - dy, startX - dx, 0.0));
+						A3($ianmackenzie$elm_geometry$Vector3d$meters, startX - dx, dy - startY, 0.0));
 					return _Utils_Tuple2(
 						_Utils_update(
 							context,
