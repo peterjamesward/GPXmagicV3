@@ -605,8 +605,8 @@ viewModeChoices : (Msg -> msg) -> PaneContext -> Element msg
 viewModeChoices msgWrapper context =
     let
         fullOptionList =
-            [ Input.optionWith ViewThird <| radioButton "Perspective"
-            , Input.optionWith ViewMap <| radioButton "Map"
+            [ Input.optionWith ViewMap <| radioButton "Map"
+            , Input.optionWith ViewThird <| radioButton "Perspective"
             , Input.optionWith ViewProfile <| radioButton "Profile"
             , Input.optionWith ViewPlan <| radioButton "Plan"
             ]
@@ -628,6 +628,7 @@ viewModeChoicesNoMap msgWrapper pane =
         reducedOptionList =
             [ Input.optionWith ViewThird <| radioButton "Perspective"
             , Input.optionWith ViewProfile <| radioButton "Profile"
+            , Input.optionWith ViewPlan <| radioButton "Plan"
             ]
     in
     Input.radioRow

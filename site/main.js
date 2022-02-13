@@ -16753,7 +16753,7 @@ var $author$project$Main$performActionCommands = F2(
 						var value = _v5.b;
 						return A2($author$project$LocalStorage$storageSetItem, key, value);
 					case 'HeapStatusUpdate':
-						return A2($andrewMacmurray$elm_delay$Delay$after, 1000, $author$project$Main$TimeToUpdateMemory);
+						return A2($andrewMacmurray$elm_delay$Delay$after, 5000, $author$project$Main$TimeToUpdateMemory);
 					default:
 						break _v0$12;
 				}
@@ -50697,12 +50697,12 @@ var $author$project$PaneLayoutManager$viewModeChoices = F2(
 			[
 				A2(
 				$mdgriffith$elm_ui$Element$Input$optionWith,
-				$author$project$PaneLayoutManager$ViewThird,
-				$author$project$ViewPureStyles$radioButton('Perspective')),
-				A2(
-				$mdgriffith$elm_ui$Element$Input$optionWith,
 				$author$project$PaneLayoutManager$ViewMap,
 				$author$project$ViewPureStyles$radioButton('Map')),
+				A2(
+				$mdgriffith$elm_ui$Element$Input$optionWith,
+				$author$project$PaneLayoutManager$ViewThird,
+				$author$project$ViewPureStyles$radioButton('Perspective')),
 				A2(
 				$mdgriffith$elm_ui$Element$Input$optionWith,
 				$author$project$PaneLayoutManager$ViewProfile,
@@ -50741,7 +50741,11 @@ var $author$project$PaneLayoutManager$viewModeChoicesNoMap = F2(
 				A2(
 				$mdgriffith$elm_ui$Element$Input$optionWith,
 				$author$project$PaneLayoutManager$ViewProfile,
-				$author$project$ViewPureStyles$radioButton('Profile'))
+				$author$project$ViewPureStyles$radioButton('Profile')),
+				A2(
+				$mdgriffith$elm_ui$Element$Input$optionWith,
+				$author$project$PaneLayoutManager$ViewPlan,
+				$author$project$ViewPureStyles$radioButton('Plan'))
 			]);
 		return A2(
 			$mdgriffith$elm_ui$Element$Input$radioRow,

@@ -1541,7 +1541,7 @@ performActionCommands actions model =
                     LocalStorage.storageSetItem key value
 
                 ( HeapStatusUpdate _, _ ) ->
-                    Delay.after 1000 TimeToUpdateMemory
+                    Delay.after 5000 TimeToUpdateMemory
 
                 _ ->
                     Cmd.none
