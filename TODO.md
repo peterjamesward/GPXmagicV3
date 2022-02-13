@@ -14,8 +14,6 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 # WIP
 
-Plan view - not following Orange.
-
 ---
 
 # BACKLOG, roughly in order ...

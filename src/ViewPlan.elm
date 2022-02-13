@@ -204,7 +204,11 @@ deriveCamera treeNode context currentPosition =
             effectiveLatitude <| leafFromIndex currentPosition treeNode
 
         lookingAt =
-            context.focalPoint
+            if context.followSelectedPoint then
+                startPoint <| leafFromIndex currentPosition treeNode
+
+            else
+                context.focalPoint
 
         eyePoint =
             Point3d.translateBy

@@ -25130,7 +25130,8 @@ var $ianmackenzie$elm_3d_camera$Camera3d$orthographic = function (_arguments) {
 };
 var $author$project$ViewPlan$deriveCamera = F3(
 	function (treeNode, context, currentPosition) {
-		var lookingAt = context.focalPoint;
+		var lookingAt = context.followSelectedPoint ? $author$project$DomainModel$startPoint(
+			A2($author$project$DomainModel$leafFromIndex, currentPosition, treeNode)) : context.focalPoint;
 		var latitude = $author$project$DomainModel$effectiveLatitude(
 			A2($author$project$DomainModel$leafFromIndex, currentPosition, treeNode));
 		var eyePoint = A2(
