@@ -10,8 +10,6 @@ BUG: Pointers are not reset on track load.
 BUG: Classic bend smoother consumes all memory on certain looped routes where
      orange and purple are (possibly) co-linear, or something.
 
-BUG: Gradient problems preview is colour from Bend problems.
-
 --
 
 # WIP

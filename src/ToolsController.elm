@@ -512,7 +512,7 @@ update toolMsg isTrack msgWrapper options =
                     Tools.GradientProblems.update
                         msg
                         options.gradientProblemOptions
-                        (getColour ToolAbruptDirectionChanges options.tools)
+                        (getColour ToolGradientProblems options.tools)
                         isTrack
             in
             ( { options | gradientProblemOptions = newOptions }

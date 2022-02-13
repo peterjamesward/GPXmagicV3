@@ -24805,7 +24805,7 @@ var $author$project$ToolsController$update = F4(
 					$author$project$Tools$GradientProblems$update,
 					msg,
 					options.gradientProblemOptions,
-					A2($author$project$ToolsController$getColour, $author$project$ToolsController$ToolAbruptDirectionChanges, options.tools),
+					A2($author$project$ToolsController$getColour, $author$project$ToolsController$ToolGradientProblems, options.tools),
 					isTrack);
 				var newOptions = _v2.a;
 				var actions = _v2.b;
