@@ -24,6 +24,7 @@ import SceneBuilder3D
 import Tools.DisplaySettingsOptions
 import TrackLoaded exposing (TrackLoaded)
 import ViewMap
+import ViewPlan
 import ViewProfileCharts
 import ViewPureStyles exposing (..)
 import ViewThirdPerson exposing (stopProp)
@@ -71,6 +72,7 @@ type alias PaneContext =
     , thirdPersonContext : Maybe ViewThirdPerson.Context
     , mapContext : Maybe ViewMap.Context
     , profileContext : Maybe ViewProfileCharts.Context
+    , planContext : Maybe ViewPlan.Context
     }
 
 
@@ -100,6 +102,7 @@ defaultPaneContext =
     , thirdPersonContext = Nothing
     , mapContext = Nothing
     , profileContext = Nothing
+    , planContext = Nothing
     }
 
 
@@ -124,6 +127,7 @@ type Msg
     | SetViewMode PaneId ViewMode
     | ThirdPersonViewMessage PaneId ViewThirdPerson.Msg
     | ProfileViewMessage PaneId ViewProfileCharts.Msg
+    | PlanViewMessage PaneId ViewPlan.Msg
     | MapPortsMessage MapPortController.MapMsg
     | MapViewMessage ViewMap.Msg
     | SliderTimeout
@@ -293,7 +297,6 @@ update paneMsg msgWrapper mTrack contentArea options =
         SetViewMode paneId viewMode ->
             let
                 newOptions =
-                    --TODO: Render profile view.
                     updatePaneWith paneId
                         (\pane ->
                             { pane
@@ -344,6 +347,60 @@ update paneMsg msgWrapper mTrack contentArea options =
 
                 newPane =
                     { paneInfo | thirdPersonContext = newContext }
+
+                newOptions =
+                    case paneId of
+                        Pane1 ->
+                            { options | pane1 = newPane }
+
+                        Pane2 ->
+                            { options | pane2 = newPane }
+
+                        Pane3 ->
+                            { options | pane3 = newPane }
+
+                        Pane4 ->
+                            { options | pane4 = newPane }
+            in
+            ( newOptions, actions )
+
+        PlanViewMessage paneId imageMsg ->
+            let
+                paneInfo =
+                    -- Tedious is good, tedious works.
+                    --TODO: Local refactor here.
+                    case paneId of
+                        Pane1 ->
+                            options.pane1
+
+                        Pane2 ->
+                            options.pane2
+
+                        Pane3 ->
+                            options.pane3
+
+                        Pane4 ->
+                            options.pane4
+
+                ( newContext, actions ) =
+                    case ( mTrack, paneInfo.planContext ) of
+                        ( Just track, Just planContext ) ->
+                            let
+                                ( new, act ) =
+                                    ViewPlan.update
+                                        imageMsg
+                                        (msgWrapper << PlanViewMessage Pane1)
+                                        track
+                                        (dimensionsWithLayout options.paneLayout contentArea)
+                                        planContext
+                            in
+                            ( Just new, act )
+
+                        _ ->
+                            ( Nothing, [] )
+
+                newPane =
+                    { paneInfo | planContext = newContext }
 
                 newOptions =
                     case paneId of
@@ -535,6 +592,9 @@ initialisePane track options pane =
         , profileContext =
             Just <|
                 ViewProfileCharts.initialiseView 0 track.trackTree pane.profileContext
+        , planContext =
+            Just <|
+                ViewPlan.initialiseView 0 track.trackTree pane.planContext
         , mapContext =
             Just <|
                 ViewMap.initialiseContext pane.mapContext
@@ -548,6 +608,7 @@ viewModeChoices msgWrapper context =
             [ Input.optionWith ViewThird <| radioButton "Perspective"
             , Input.optionWith ViewMap <| radioButton "Map"
             , Input.optionWith ViewProfile <| radioButton "Profile"
+            , Input.optionWith ViewPlan <| radioButton "Plan"
             ]
     in
     Input.radioRow
@@ -625,6 +686,19 @@ viewPanes msgWrapper mTrack ( w, h ) options =
                                 track
                                 options.scene3d
                                 (msgWrapper << ThirdPersonViewMessage pane.paneId)
+
+                        _ ->
+                            none
+
+                ViewPlan ->
+                    case ( pane.planContext, mTrack ) of
+                        ( Just context, Just track ) ->
+                            ViewPlan.view
+                                context
+                                ( paneWidth, paneHeight )
+                                track
+                                options.scene3d
+                                (msgWrapper << PlanViewMessage pane.paneId)
 
                         _ ->
                             none
