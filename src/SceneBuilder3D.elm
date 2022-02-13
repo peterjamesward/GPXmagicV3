@@ -39,7 +39,6 @@ gradientColourPastel slope =
 
 render3dView : Tools.DisplaySettingsOptions.Options -> TrackLoaded msg -> List (Entity LocalCoords)
 render3dView settings track =
-    --TODO: Use new traversal to provide better depth function.
     let
         roadWidth =
             Length.meters 4.0

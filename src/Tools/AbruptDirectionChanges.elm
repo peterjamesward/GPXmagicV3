@@ -97,8 +97,6 @@ toolStateChange opened colour options track =
                 populatedOptions =
                     findAbruptDirectionChanges options theTrack.trackTree
             in
-            --TODO: May stop sending the list here and let action processor request it.
-            -- (Not much in it.)
             ( populatedOptions
             , [ ShowPreview
                     { tag = "kinks"

@@ -1188,23 +1188,6 @@ safeEnumerateEndPoints mTree =
 
 recreateGpxSources : Maybe PeteTree -> List GPXSource
 recreateGpxSources mTree =
-    -- Using the all-purpose traversal function, but resulting in a
-    -- list where we get the start point of all sections, plus the end point of the last section.
-    -- NOTE we reverse to put the list in "natural" order.
-    --TODO: This new code WRONG, leaving the old.
-    --let
-    --    myFoldFn : RoadSection -> List GPXSource -> List GPXSource
-    --    myFoldFn section accum =
-    --        Tuple.first section.sourceData
-    --            :: Tuple.second section.sourceData
-    --            :: List.drop 1 accum
-    --in
-    --case mTree of
-    --    Just treeNode ->
-    --        foldOverRoute myFoldFn treeNode |> List.reverse
-    --
-    --    Nothing ->
-    --        []
     case mTree of
         Just fromTree ->
             (getFirstLeaf fromTree |> .sourceData |> Tuple.first)
@@ -1445,7 +1428,6 @@ queryPointsUsingFilter filterFn treeNode foldFn accum =
 
 updatePointByIndexInSitu : Int -> GPXSource -> GPXSource -> PeteTree -> PeteTree
 updatePointByIndexInSitu index newGPX referencePoint tree =
-    --TODO: write this.
     -- Note that all points except end points appear in two places, and they can be distant in the tree.
     -- Still, idea is to change only ancestor nodes, obviously including the topmost.
     if index < 0 || index > skipCount tree then

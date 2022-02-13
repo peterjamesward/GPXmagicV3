@@ -240,7 +240,6 @@ update msg options previewColour hasTrack =
                 Just dragStart ->
                     let
                         newVector =
-                            --TODO: Compensate for view azimuth
                             options.lastVector |> Vector2d.plus (Vector2d.from dragStart offset)
 
                         newOptions =
@@ -778,12 +777,6 @@ makeCurveIfPossible track options =
         -- Care over turn direction. Bend may exceed 180 degrees and Angle would not be good.
         -- Perhaps simpler and more reliable is "which side of the entry road is the centre?"
         isLeftHandBend =
-            -- OK, not the entry road, but the first road segment in the circle.
-            -- Positive distance == LEFT OF ROAD, i.e. left hand bend.
-            -- Note I ignore the obvious "on the axis" case; this may bite me later.
-            -- THIS SEEMS TO HAVE FLIPPED IN V3.
-            --TODO: Simpler, clearer, better logic.
-            -- e.g. what is the NET CHANGE in directiom along the section?
             let
                 runningAverageDirectionChange :
                     Int

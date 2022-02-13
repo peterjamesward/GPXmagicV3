@@ -193,7 +193,6 @@ render :
 render imperial settings gradientChanges options track previews =
     --Profile stuff now lives in the pane context, as each pane could
     --have different version!
-    --TODO: Any open Profile views also get to (re-)render here.
     { options
         | scene3d =
             SceneBuilder3D.renderPreviews previews

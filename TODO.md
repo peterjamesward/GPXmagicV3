@@ -31,7 +31,7 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 9. Lift and Shift
 10. SVG import
 11. Terrain
-12. Map Satellite style choice
+12. Map style choice (Satellite if possible)
 13. Split and Join
 14. Texture for the ground plane.
 

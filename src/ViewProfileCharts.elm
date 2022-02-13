@@ -361,7 +361,6 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
                     ( context, [] )
 
         ClickDelayExpired ->
-            --TODO: Replace with logic that looks for mouse movement.
             ( { context | waitingForClickDelay = False }, [] )
 
         ImageMouseWheel deltaY ->
@@ -400,7 +399,6 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
                 ( DragPan, Just ( startX, startY ) ) ->
                     let
                         shiftVector =
-                            --TODO: Follow the chart example.
                             Vector3d.meters
                                 ((startX - dx) * context.metresPerPixel)
                                 0

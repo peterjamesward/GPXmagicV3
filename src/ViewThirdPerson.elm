@@ -210,7 +210,6 @@ detectHit :
     -> Context
     -> Int
 detectHit event track ( w, h ) context =
-    --TODO: Move into view/pane/whatever it will be.
     let
         ( x, y ) =
             event.offsetPos
@@ -291,7 +290,6 @@ update msg msgWrapper track area context =
             )
 
         ClickDelayExpired ->
-            --TODO: Replace with logic that looks for mouse movement.
             ( { context | waitingForClickDelay = False }, [] )
 
         ImageMouseWheel deltaY ->

@@ -359,7 +359,6 @@ detectHit :
     -> Context
     -> Int
 detectHit event track ( w, h ) context =
-    --TODO: Move into view/pane/whatever it will be.
     let
         ( x, y ) =
             event.offsetPos

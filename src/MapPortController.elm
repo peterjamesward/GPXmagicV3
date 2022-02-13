@@ -289,7 +289,6 @@ draggedOnMap : E.Value -> TrackLoaded msg -> List (ToolAction msg)
 draggedOnMap json track =
     -- Map has told us the old and new coordinates of a point.
     -- Return Nothing if drag did not change track.
-    --TODO: Return an Action so this can be consistent with other edit operations.
     let
         lon1 =
             D.decodeValue (D.at [ "start", "lng" ] D.float) json

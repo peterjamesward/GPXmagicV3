@@ -1415,7 +1415,6 @@ performActionsOnModel actions model =
                             foldedModel
 
                 ( HeapStatusUpdate heapStatus, _ ) ->
-                    --TODO: Make a tool for these values, but meanwhile...
                     let
                         currentTools =
                             model.toolOptions
