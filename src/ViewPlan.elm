@@ -76,8 +76,8 @@ initialiseView current treeNode currentContext =
                 | fieldOfView = Angle.degrees 45
                 , orbiting = Nothing
                 , dragAction = DragNone
-                , zoomLevel = 10.0
-                , defaultZoomLevel = 10.0
+                , zoomLevel = 12.0
+                , defaultZoomLevel = 12.0
                 , focalPoint =
                     treeNode |> leafFromIndex current |> startPoint
                 , waitingForClickDelay = False
@@ -87,8 +87,8 @@ initialiseView current treeNode currentContext =
             { fieldOfView = Angle.degrees 45
             , orbiting = Nothing
             , dragAction = DragNone
-            , zoomLevel = 10.0
-            , defaultZoomLevel = 10.0
+            , zoomLevel = 12.0
+            , defaultZoomLevel = 12.0
             , focalPoint =
                 treeNode |> leafFromIndex current |> startPoint
             , waitingForClickDelay = False
@@ -335,6 +335,14 @@ update msg msgWrapper track area context =
 
         ImageReset ->
             ( { context | zoomLevel = context.defaultZoomLevel }, [] )
+
+        ToggleFollowOrange ->
+            ( { context
+                | followSelectedPoint = not context.followSelectedPoint
+                , focalPoint = earthPointFromIndex track.currentPosition track.trackTree
+              }
+            , []
+            )
 
         _ ->
             ( context, [] )

@@ -15434,18 +15434,18 @@ var $author$project$ViewPlan$initialiseView = F3(
 			return _Utils_update(
 				context,
 				{
-					defaultZoomLevel: 10.0,
+					defaultZoomLevel: 12.0,
 					dragAction: $author$project$ViewPlan$DragNone,
 					fieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
 					focalPoint: $author$project$DomainModel$startPoint(
 						A2($author$project$DomainModel$leafFromIndex, current, treeNode)),
 					orbiting: $elm$core$Maybe$Nothing,
 					waitingForClickDelay: false,
-					zoomLevel: 10.0
+					zoomLevel: 12.0
 				});
 		} else {
 			return {
-				defaultZoomLevel: 10.0,
+				defaultZoomLevel: 12.0,
 				dragAction: $author$project$ViewPlan$DragNone,
 				fieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
 				focalPoint: $author$project$DomainModel$startPoint(
@@ -15453,7 +15453,7 @@ var $author$project$ViewPlan$initialiseView = F3(
 				followSelectedPoint: true,
 				orbiting: $elm$core$Maybe$Nothing,
 				waitingForClickDelay: false,
-				zoomLevel: 10.0
+				zoomLevel: 12.0
 			};
 		}
 	});
@@ -25663,6 +25663,15 @@ var $author$project$ViewPlan$update = F5(
 					_Utils_update(
 						context,
 						{zoomLevel: context.defaultZoomLevel}),
+					_List_Nil);
+			case 'ToggleFollowOrange':
+				return _Utils_Tuple2(
+					_Utils_update(
+						context,
+						{
+							focalPoint: A2($author$project$DomainModel$earthPointFromIndex, track.currentPosition, track.trackTree),
+							followSelectedPoint: !context.followSelectedPoint
+						}),
 					_List_Nil);
 			default:
 				return _Utils_Tuple2(context, _List_Nil);

@@ -14,7 +14,7 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 # WIP
 
-Plan view - fix dragging, fix lock button, fix default zoom.
+Plan view - not following Orange.
 
 ---
 
