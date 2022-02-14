@@ -14,7 +14,6 @@ import Html.Events.Extra.Mouse as Mouse
 import Json.Decode as D exposing (field)
 import Json.Encode as E
 import List.Extra
-import Tools.AbruptDirectionChanges as AbruptDirectionChanges
 import Tools.BendSmoother
 import Tools.BendSmootherOptions
 import Tools.BezierOptions
@@ -24,6 +23,7 @@ import Tools.CentroidAverageOptions
 import Tools.CurveFormer
 import Tools.CurveFormerOptions
 import Tools.DeletePoints as DeletePoints
+import Tools.DirectionChanges as AbruptDirectionChanges
 import Tools.DisplaySettings
 import Tools.DisplaySettingsOptions
 import Tools.GradientProblems
@@ -1071,6 +1071,7 @@ viewToolByType msgWrapper entry isTrack options =
 
             ToolAbruptDirectionChanges ->
                 AbruptDirectionChanges.view
+                    options.imperial
                     (msgWrapper << DirectionChanges)
                     options.directionChangeOptions
                     isTrack

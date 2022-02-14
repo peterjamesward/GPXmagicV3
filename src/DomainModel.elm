@@ -12,6 +12,8 @@ module DomainModel exposing
     , effectiveLatitude
     , endPoint
     , extractPointsInRange
+    , foldOverRoute
+    , foldOverRouteRL
     , getAllGPXPointsInDict
     , getAllGPXPointsInNaturalOrder
     , getDualCoords

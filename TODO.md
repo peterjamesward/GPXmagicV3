@@ -11,22 +11,14 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
      orange and purple are (possibly) co-linear, or something.
 
 BUG: Points on the map should be elided to match the route line.
-
-???: There's this thing where map hit detect on 300K route is _very_ slow
-though eventually completes. I wonder if we'd be better off (i.e. more consistent)
-by using something closer to a whole-track fold. But some hybrid of a "keep track of the
-closest so far", with a measure of culling -- no need to descend into subtrees that are 
-clearly less promising.
+> They are but seems that edits spoil this.
 
 --
 
 # WIP
 
 Addenda video - steep climbs and how these are shown on the Profile view. 
-Plus global settings.
-
-Samir's bend detector (amount of angular change within X linear metres)
-> This goes in bend problems and uses a fold similar to the direction detection in Radiused'.
+Plus global settings. Plus localised render detail.
 
 ---
 
@@ -35,24 +27,25 @@ Samir's bend detector (amount of angular change within X linear metres)
 ## Tools
 
 2. Add whole track option w/out preview for Interpolate
-3. 1CQF (i.e. Simplify x N / Interpolate / Bezier )
-4. Limit gradients
-5. Intersections
-6. Fly-through
-7. Move & Stretch
-8. Graph Theory (renamed)
-9. Use Strava segment data
-10. Loops (inc. impact on others, such as Bezier).
-11. Lift and Shift
-12. SVG import
-13. Terrain
-14. Map style choice (Satellite if possible)
-15. Split and Join
-16. Texture for the ground plane.
+3. Extract all text for translation
+4. Use localised number formatting everywhere (for French use of , and .)
+5. 1CQF (i.e. Simplify x N / Interpolate / Bezier )
+6. Limit gradients
+7. Intersections
+8. Fly-through
+9. Move & Stretch
+10. Graph Theory (renamed)
+11. Use Strava segment data
+12. Loops (inc. impact on others, such as Bezier).
+13. Lift and Shift
+14. SVG import
+15. Terrain
+16. Map style choice (Satellite if possible)
+17. Split and Join
+18. Texture for the ground plane.
 
 New stuff:
-2. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
-3. JB loop detector (see below)
+1. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
 
 ## Keyboard shortcuts
 
