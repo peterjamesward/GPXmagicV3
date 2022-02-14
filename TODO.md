@@ -17,8 +17,7 @@ BUG: Points on the map should be elided to match the route line.
 
 # WIP
 
-Addenda video - steep climbs and how these are shown on the Profile view. 
-Plus global settings. Plus localised render detail.
+**Limit gradients**
 
 ---
 
@@ -26,21 +25,20 @@ Plus global settings. Plus localised render detail.
 
 ## Tools
 
-3. Limit gradients
-4. Intersections
-5. Fly-through
-6. Move & Stretch
-7. Graph Theory (renamed)
-8. Use Strava segment data
-9. Loops (inc. impact on others, such as Bezier).
-10. Lift and Shift
-11. SVG import
-12. Extract all text for translation
-13. Use localised number formatting everywhere (for French use of , and .)
-14. Terrain
-15. Map style choice (Satellite if possible)
-16. Split and Join
-17. Texture for the ground plane.
+1. Intersections
+2. Fly-through, 1st person view.
+3. Move & Stretch
+4. Graph Theory (renamed)
+5. Use Strava segment data
+6. Loops (inc. impact on others, such as Bezier).
+7. Lift and Shift
+8. SVG import
+9. Extract all text for translation
+10. Use localised number formatting everywhere (for French use of , and .)
+11. Terrain
+12. Map style choice (Satellite if possible)
+13. Split and Join
+14. Texture for the ground plane.
 
 New stuff:
 1. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
@@ -96,3 +94,8 @@ Then again, it's not really worth worrying about. If we have excessive points
 in a preview list, we can easily elide them by skipping through the list in the
 view; a PeteTree is OTT.
 ut is not too slow now with 973K points, so why bother?.
+
+## Icons
+
+Look at Font Awesome. May be worth swapping.
+
