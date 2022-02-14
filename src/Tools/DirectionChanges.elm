@@ -176,7 +176,7 @@ findBendsWithRadius tree options =
             in
             if abs turnDuringWindow >= Angle.inDegrees options.threshold then
                 ( newIndex + 1
-                , newWindow
+                , []
                 , ( newIndex
                   , Angle.degrees <| abs turnDuringWindow
                   )
