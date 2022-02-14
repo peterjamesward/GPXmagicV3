@@ -26,7 +26,6 @@ Plus global settings. Plus localised render detail.
 
 ## Tools
 
-1. Add whole track option w/out preview for Interpolate
 2. 1CQF (i.e. Simplify x N / Interpolate / Bezier )
 3. Limit gradients
 4. Intersections

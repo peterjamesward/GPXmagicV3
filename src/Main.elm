@@ -51,6 +51,7 @@ import Tools.CurveFormer
 import Tools.DeletePoints as DeletePoints
 import Tools.DisplaySettings
 import Tools.Interpolate
+import Tools.InterpolateOptions
 import Tools.Nudge
 import Tools.OutAndBack
 import Tools.Simplify
@@ -1284,7 +1285,13 @@ performActionsOnModel actions model =
                             Tools.Interpolate.apply options track
 
                         ( fromStart, fromEnd ) =
-                            TrackLoaded.getRangeFromMarkers track
+                            -- Repetition of this is untidy.
+                            case options.extent of
+                                Tools.InterpolateOptions.ExtentIsRange ->
+                                    TrackLoaded.getRangeFromMarkers track
+
+                                Tools.InterpolateOptions.ExtentIsTrack ->
+                                    ( 0, 0 )
 
                         newTrack =
                             track

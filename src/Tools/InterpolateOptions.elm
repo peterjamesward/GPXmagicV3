@@ -7,4 +7,11 @@ import Quantity exposing (Quantity)
 
 
 type alias Options =
-    { minimumSpacing : Quantity Float Meters }
+    { minimumSpacing : Quantity Float Meters
+    , extent : ExtentOption
+    }
+
+
+type ExtentOption
+    = ExtentIsRange
+    | ExtentIsTrack

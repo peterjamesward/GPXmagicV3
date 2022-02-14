@@ -17,19 +17,27 @@ import ViewPureStyles exposing (..)
 
 defaultOptions : Options
 defaultOptions =
-    { minimumSpacing = Length.meters 10.0 }
+    { minimumSpacing = Length.meters 10.0
+    , extent = ExtentIsRange
+    }
 
 
 type Msg
     = Apply
     | SetSpacing Float
+    | SetExtent ExtentOption
 
 
 computeNewPoints : Bool -> Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
 computeNewPoints excludeExisting options track =
     let
         ( fromStart, fromEnd ) =
-            TrackLoaded.getRangeFromMarkers track
+            case options.extent of
+                ExtentIsRange ->
+                    TrackLoaded.getRangeFromMarkers track
+
+                ExtentIsTrack ->
+                    ( 0, 0 )
 
         interpolateStartIndex =
             -- Sneaky (?) skip existing start points for preview.
@@ -96,7 +104,12 @@ apply : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
 apply options track =
     let
         ( fromStart, fromEnd ) =
-            TrackLoaded.getRangeFromMarkers track
+            case options.extent of
+                ExtentIsRange ->
+                    TrackLoaded.getRangeFromMarkers track
+
+                ExtentIsTrack ->
+                    ( 0, 0 )
 
         newCourse =
             computeNewPoints False options track
@@ -136,14 +149,20 @@ toolStateChange opened colour options track =
             ( options, [ HidePreview "interpolate" ] )
 
 
+actions : Options -> Color -> TrackLoaded msg -> List (ToolAction a)
 actions newOptions previewColour track =
-    [ ShowPreview
-        { tag = "interpolate"
-        , shape = PreviewCircle
-        , colour = previewColour
-        , points = computeNewPoints True newOptions track
-        }
-    ]
+    case newOptions.extent of
+        ExtentIsRange ->
+            [ ShowPreview
+                { tag = "interpolate"
+                , shape = PreviewCircle
+                , colour = previewColour
+                , points = computeNewPoints True newOptions track
+                }
+            ]
+
+        ExtentIsTrack ->
+            []
 
 
 update :
@@ -158,6 +177,13 @@ update msg options previewColour hasTrack =
             let
                 newOptions =
                     { options | minimumSpacing = Length.meters spacing }
+            in
+            ( newOptions, actions newOptions previewColour track )
+
+        ( Just track, SetExtent extent ) ->
+            let
+                newOptions =
+                    { options | extent = extent }
             in
             ( newOptions, actions newOptions previewColour track )
 
@@ -181,6 +207,20 @@ view imperial wrapper options track =
                 { onPress = Just <| wrapper Apply
                 , label = text "Interpolate"
                 }
+
+        extent =
+            Input.radioRow
+                [ padding 10
+                , spacing 5
+                ]
+                { onChange = wrapper << SetExtent
+                , selected = Just options.extent
+                , label = Input.labelHidden "Style"
+                , options =
+                    [ Input.option ExtentIsRange (text "Selected range\n(preview)")
+                    , Input.option ExtentIsTrack (text "Whole track\n(no preview)")
+                    ]
+                }
     in
     case track of
         Just isTrack ->
@@ -192,6 +232,7 @@ view imperial wrapper options track =
                 , Background.color FlatColors.ChinesePalette.antiFlashWhite
                 ]
                 [ el [ centerX ] <| spacingSlider imperial options wrapper
+                , el [ centerX ] extent
                 , el [ centerX ] <| fixButton
                 ]
 
