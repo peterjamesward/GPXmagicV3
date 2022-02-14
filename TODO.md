@@ -26,23 +26,23 @@ Plus global settings. Plus localised render detail.
 
 ## Tools
 
-2. Add whole track option w/out preview for Interpolate
-3. Extract all text for translation
-4. Use localised number formatting everywhere (for French use of , and .)
-5. 1CQF (i.e. Simplify x N / Interpolate / Bezier )
-6. Limit gradients
-7. Intersections
-8. Fly-through
-9. Move & Stretch
-10. Graph Theory (renamed)
-11. Use Strava segment data
-12. Loops (inc. impact on others, such as Bezier).
-13. Lift and Shift
-14. SVG import
-15. Terrain
-16. Map style choice (Satellite if possible)
-17. Split and Join
-18. Texture for the ground plane.
+1. Add whole track option w/out preview for Interpolate
+2. 1CQF (i.e. Simplify x N / Interpolate / Bezier )
+3. Limit gradients
+4. Intersections
+5. Fly-through
+6. Move & Stretch
+7. Graph Theory (renamed)
+8. Use Strava segment data
+9. Loops (inc. impact on others, such as Bezier).
+10. Lift and Shift
+11. SVG import
+12. Extract all text for translation
+13. Use localised number formatting everywhere (for French use of , and .)
+14. Terrain
+15. Map style choice (Satellite if possible)
+16. Split and Join
+17. Texture for the ground plane.
 
 New stuff:
 1. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
