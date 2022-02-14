@@ -23,9 +23,20 @@ I wonder if this should not just clamp the gradients but do something more like
 "Dolby" compression -- retain some sense of variation near the clamp by reducing
 other gradients. The logic doesn't change much, need to rewrite with folds anyway.
 
-## Texture for the ground plane 
+A simple compression is y = M * (2/pi) * atan (x / 2 pi)
+
+This is a "soft clamp" between +/- M.
+Interestingly, it's 2M/pi bit that ensures the clamp, and the x/2pi bit allows us
+to change the overall compression. Hence should be able to figure out how to adjust that
+second part to yield the desired "savings", after netting off losses and gains, assuming 
+we have separate limits for ascents and descents, as we do in v2.
+
+## Texture for the ground plane, road surface
 
 See https://github.com/ianmackenzie/elm-3d-scene/blob/1.0.1/examples/Texture.elm
+https://ambientcg.com/view?id=Grass004
+https://ambientcg.com/view?id=Asphalt001
+Credit: Contains assets from ambientCG.com, licensed under CC0 1.0 Universal.
 
 ---
 
