@@ -1,11 +1,14 @@
 module Tools.LimitGradients exposing (..)
 
+import Actions exposing (PreviewShape(..), ToolAction(..))
+import DomainModel exposing (EarthPoint, GPXSource)
 import Element exposing (..)
 import Element.Input as Input exposing (button)
 import Length exposing (Meters, meters)
 import Point3d
 import Quantity
-import Tools.LimitGradientOptions exposing (Options)
+import Tools.LimitGradientOptions exposing (ExtentOption(..), Options)
+import TrackLoaded exposing (TrackLoaded)
 import ViewPureStyles exposing (commonShortHorizontalSliderStyles, prettyButtonStyles)
 
 
@@ -13,62 +16,82 @@ type Msg
     = LimitGradient
     | SetMaximumAscent Float
     | SetMaximumDescent Float
+    | SetExtent ExtentOption
 
 
 defaultOptions : Options
 defaultOptions =
     { maximumAscent = 15.0
     , maximumDescent = 15.0
+    , extent = ExtentIsRange
     }
+
+
+actions newOptions previewColour track =
+    if newOptions.extent == ExtentIsRange then
+        [ ShowPreview
+            { tag = "limit"
+            , shape = PreviewCircle
+            , colour = previewColour
+            , points = computeNewPoints newOptions track
+            }
+        ]
+
+    else
+        [ HidePreview "limit" ]
 
 
 update :
     Msg
     -> Options
-    -> Track
-    -> ( Options, PostUpdateActions.PostUpdateAction trck msg )
-update msg settings track =
-    case msg of
-        SetMaximumAscent up ->
-            ( { settings | maximumAscent = up }
-            , PostUpdateActions.ActionNoOp
+    -> Element.Color
+    -> Maybe (TrackLoaded msg)
+    -> ( Options, List (ToolAction msg) )
+update msg options previewColour hasTrack =
+    case ( msg, hasTrack ) of
+        ( SetExtent extent, Just track ) ->
+            let
+                newOptions =
+                    { options | extent = extent }
+            in
+            ( newOptions
+            , actions newOptions previewColour track
             )
 
-        SetMaximumDescent down ->
-            ( { settings | maximumDescent = down }
-            , PostUpdateActions.ActionNoOp
+        ( SetMaximumAscent up, Just track ) ->
+            let
+                newOptions =
+                    { options | maximumAscent = up }
+            in
+            ( newOptions
+            , actions newOptions previewColour track
             )
 
-        LimitGradient ->
-            ( settings
-            , PostUpdateActions.ActionTrackChanged
-                TrackEditType.EditPreservesIndex
-                (buildActions settings track)
+        ( SetMaximumDescent down, Just track ) ->
+            let
+                newOptions =
+                    { options | maximumDescent = down }
+            in
+            ( newOptions
+            , actions newOptions previewColour track
+            )
+
+        ( LimitGradient, Just track ) ->
+            ( options
+            , []
             )
 
 
-buildActions : Options -> Track -> UndoEntry
-buildActions settings track =
+computeNewPoints : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
+computeNewPoints options track =
     let
-        marker =
-            Maybe.withDefault track.currentNode track.markedNode
+        ( fromStart, fromEnd ) =
+            case options.extent of
+                ExtentIsRange ->
+                    TrackLoaded.getRangeFromMarkers track
 
-        ( startIndex, endIndex, referenceNode ) =
-            if track.markedNode == Nothing then
-                ( track.currentNode.index, List.length track.trackPoints - 1, track.currentNode )
-
-            else if track.currentNode.index <= marker.index then
-                ( track.currentNode.index, marker.index, track.currentNode )
-
-            else
-                ( marker.index, track.currentNode.index, marker )
-
-        ( beforeEnd, afterEnd ) =
-            -- Note we must include point after the end, I think, so we can do a map2.
-            List.Extra.splitAt (1 + endIndex) track.trackPoints
-
-        ( beforeStart, targetZone ) =
-            List.Extra.splitAt startIndex beforeEnd
+                ExtentIsTrack ->
+                    ( 0, 0 )
 
         unclampedXYDeltas : List ( Length.Length, Length.Length )
         unclampedXYDeltas =
@@ -174,88 +197,12 @@ buildActions settings track =
             , revisedAltitudes = resultingElevations
             }
     in
-    { label = "Limit gradients"
-    , editFunction = apply undoRedoInfo
-    , undoFunction = undo undoRedoInfo
-    , newOrange = track.currentNode.index
-    , newPurple = Maybe.map .index track.markedNode
-    , oldOrange = track.currentNode.index
-    , oldPurple = Maybe.map .index track.markedNode
-    }
+    []
 
 
-apply : UndoRedoInfo -> Track -> EditResult
-apply undoRedoInfo track =
-    let
-        ( prefix, theRest ) =
-            track.trackPoints
-                |> List.Extra.splitAt undoRedoInfo.regionStart
 
-        ( region, suffix ) =
-            theRest
-                |> List.Extra.splitAt (undoRedoInfo.regionEnd - undoRedoInfo.regionStart)
-
-        adjusted =
-            -- Make it so.
-            List.map2
-                (\pt ele ->
-                    let
-                        ( oldX, oldY, _ ) =
-                            pt.xyz |> Point3d.coordinates
-
-                        newXYZ =
-                            Point3d.xyz oldX oldY ele
-                    in
-                    { pt | xyz = newXYZ }
-                )
-                region
-                undoRedoInfo.revisedAltitudes
-    in
-    { before = prefix
-    , edited = adjusted
-    , after = suffix
-    , earthReferenceCoordinates = track.earthReferenceCoordinates
-    , graph = track.graph
-    }
-
-
-undo : UndoRedoInfo -> Track -> EditResult
-undo undoRedoInfo track =
-    let
-        ( prefix, theRest ) =
-            track.trackPoints
-                |> List.Extra.splitAt undoRedoInfo.regionStart
-
-        ( region, suffix ) =
-            theRest
-                |> List.Extra.splitAt (undoRedoInfo.regionEnd - undoRedoInfo.regionStart)
-
-        adjusted =
-            -- Make it so.
-            List.map2
-                (\pt ele ->
-                    let
-                        ( oldX, oldY, _ ) =
-                            pt.xyz |> Point3d.coordinates
-
-                        newXYZ =
-                            Point3d.xyz oldX oldY ele
-                    in
-                    { pt | xyz = newXYZ }
-                )
-                region
-                undoRedoInfo.originalAltitudes
-    in
-    { before = prefix
-    , edited = adjusted
-    , after = suffix
-    , earthReferenceCoordinates = track.earthReferenceCoordinates
-    , graph = track.graph
-    }
-
-
-viewGradientLimitPane : Options -> (Msg -> msg) -> Track -> Element msg
-viewGradientLimitPane options wrapper track =
+view : Options -> (Msg -> msg) -> TrackLoaded msg -> Element msg
+view options wrapper track =
     let
         maxAscentSlider =
             Input.slider

@@ -17,7 +17,15 @@ BUG: Points on the map should be elided to match the route line.
 
 # WIP
 
-**Limit gradients**
+## Limit gradients
+
+I wonder if this should not just clamp the gradients but do something more like
+"Dolby" compression -- retain some sense of variation near the clamp by reducing
+other gradients. The logic doesn't change much, need to rewrite with folds anyway.
+
+## Texture for the ground plane 
+
+See https://github.com/ianmackenzie/elm-3d-scene/blob/1.0.1/examples/Texture.elm
 
 ---
 
@@ -25,12 +33,12 @@ BUG: Points on the map should be elided to match the route line.
 
 ## Tools
 
-1. Intersections
-2. Fly-through, 1st person view.
+1. Intersection detection
+2. Fly-through, 1st person view
 3. Move & Stretch
 4. Graph Theory (renamed)
 5. Use Strava segment data
-6. Loops (inc. impact on others, such as Bezier).
+6. Loops (inc. impact on others, such as Bezier)
 7. Lift and Shift
 8. SVG import
 9. Extract all text for translation
@@ -38,7 +46,6 @@ BUG: Points on the map should be elided to match the route line.
 11. Terrain
 12. Map style choice (Satellite if possible)
 13. Split and Join
-14. Texture for the ground plane.
 
 New stuff:
 1. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).

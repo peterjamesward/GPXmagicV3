@@ -13,6 +13,7 @@ import Tools.BezierOptions
 import Tools.CentroidAverageOptions
 import Tools.CurveFormerOptions
 import Tools.InterpolateOptions
+import Tools.LimitGradientOptions
 import Tools.MemoryUsage
 import Tools.NudgeOptions
 import Tools.OutAndBackOptions
@@ -48,6 +49,7 @@ type ToolAction msg
     | ApplySimplify
     | ApplyInterpolateWithOptions Tools.InterpolateOptions.Options
     | OneClickQuickFix
+    | LimitGradientWithOptions Tools.LimitGradientOptions.Options
 
 
 type PreviewShape
@@ -103,6 +105,9 @@ interpretAction action =
 
         OneClickQuickFix ->
             "one-click quick0fix"
+
+        LimitGradientWithOptions options ->
+            "limit gradients"
 
         _ ->
             "ask Pete to fix this message"
