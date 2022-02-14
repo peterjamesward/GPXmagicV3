@@ -19,6 +19,7 @@ import ViewPureStyles exposing (neatToolsBorder, noTrackMessage, sliderThumb, us
 type GradientProblem
     = AbruptChange
     | SteepClimb
+    | SteepDescent
 
 
 type alias Options =
@@ -118,6 +119,35 @@ findSteepClimbs options tree =
     }
 
 
+findSteepDescents : Options -> PeteTree -> Options
+findSteepDescents options tree =
+    let
+        foldFn :
+            RoadSection
+            -> ( Int, List ( Int, Float ) )
+            -> ( Int, List ( Int, Float ) )
+        foldFn road ( index, outputs ) =
+            if (0.0 - road.gradientAtStart) > options.threshold then
+                ( index + 1, ( index, road.gradientAtStart ) :: outputs )
+
+            else
+                ( index + 1, outputs )
+
+        ( _, breaches ) =
+            DomainModel.traverseTreeBetweenLimitsToDepth
+                0
+                (skipCount tree)
+                (always Nothing)
+                0
+                tree
+                foldFn
+                ( 0, [] )
+    in
+    { options
+        | breaches = List.reverse breaches
+        , currentBreach = 0
+    }
+
 toolStateChange :
     Bool
     -> Element.Color
@@ -179,6 +209,9 @@ update msg options previewColour hasTrack =
 
                 SteepClimb ->
                     findSteepClimbs opts track.trackTree
+
+                SteepDescent ->
+                    findSteepDescents opts track.trackTree
     in
     case msg of
         ViewNext ->
@@ -260,6 +293,7 @@ view msgWrapper options isTrack =
                         , options =
                             [ Input.option AbruptChange (text "Abrupt changes")
                             , Input.option SteepClimb (text "Steep climbs")
+                            , Input.option SteepDescent (text "Steep descents")
                             ]
                         , selected = Just options.mode
                         , label = labelHidden "Mode"
