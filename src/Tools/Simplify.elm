@@ -126,6 +126,18 @@ apply options track =
     )
 
 
+simplifyFor1CQF : TrackLoaded msg -> PeteTree
+simplifyFor1CQF track =
+    let
+        options =
+            findSimplifications defaultOptions track.trackTree
+
+        ( outputTree, oldPoints ) =
+            apply options track
+    in
+    outputTree |> Maybe.withDefault track.trackTree
+
+
 toolStateChange :
     Bool
     -> Element.Color

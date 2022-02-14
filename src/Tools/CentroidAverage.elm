@@ -90,6 +90,15 @@ applyUsingOptions options track =
     )
 
 
+centroidAverageFor1CQF : TrackLoaded msg -> PeteTree
+centroidAverageFor1CQF track =
+    let
+        ( outputTree, oldPoints ) =
+            applyUsingOptions defaultOptions track
+    in
+    outputTree |> Maybe.withDefault track.trackTree
+
+
 toolStateChange :
     Bool
     -> Element.Color

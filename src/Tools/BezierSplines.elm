@@ -106,6 +106,15 @@ applyUsingOptions options track =
     )
 
 
+bezierApproximationFor1CQF : TrackLoaded msg -> PeteTree
+bezierApproximationFor1CQF track =
+    let
+        ( outputTree, oldPoints, _ ) =
+            applyUsingOptions defaultOptions track
+    in
+    outputTree |> Maybe.withDefault track.trackTree
+
+
 toolStateChange :
     Bool
     -> Element.Color

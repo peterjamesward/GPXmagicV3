@@ -47,6 +47,7 @@ type ToolAction msg
     | OutAndBackApplyWithOptions Tools.OutAndBackOptions.Options
     | ApplySimplify
     | ApplyInterpolateWithOptions Tools.InterpolateOptions.Options
+    | OneClickQuickFix
 
 
 type PreviewShape
@@ -99,6 +100,9 @@ interpretAction action =
 
         ApplyInterpolateWithOptions options ->
             "interpolate"
+
+        OneClickQuickFix ->
+            "one-click quick0fix"
 
         _ ->
             "ask Pete to fix this message"

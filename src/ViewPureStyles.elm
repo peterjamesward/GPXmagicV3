@@ -50,12 +50,12 @@ commonLayoutStyles =
 
 
 prettyButtonStyles =
-    [ padding 10
-    , Border.width 2
+    [ Border.width 2
     , Border.rounded 4
+    , padding 2
     , Border.color FlatColors.ChinesePalette.bayWharf
     , Background.color FlatColors.ChinesePalette.frenchSkyBlue
-    , Font.color FlatColors.ChinesePalette.prestigeBlue
+    , Font.color FlatColors.ChinesePalette.antiFlashWhite
     , Font.size 16
 
     --, mouseOver

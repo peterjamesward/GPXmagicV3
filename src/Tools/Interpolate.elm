@@ -134,6 +134,15 @@ apply options track =
     )
 
 
+interpolateFor1CQF : TrackLoaded msg -> PeteTree
+interpolateFor1CQF track =
+    let
+        ( outputTree, oldPoints ) =
+            apply defaultOptions track
+    in
+    outputTree |> Maybe.withDefault track.trackTree
+
+
 toolStateChange :
     Bool
     -> Element.Color

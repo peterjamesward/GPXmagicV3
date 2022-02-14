@@ -53,6 +53,7 @@ import Tools.DisplaySettings
 import Tools.Interpolate
 import Tools.InterpolateOptions
 import Tools.Nudge
+import Tools.OneClickQuickFix
 import Tools.OutAndBack
 import Tools.Simplify
 import Tools.TrackInfoBox
@@ -92,6 +93,7 @@ type Msg
     | WriteGpxFile
     | FilenameChange String
     | TimeToUpdateMemory
+    | OneClickMsg Tools.OneClickQuickFix.Msg
     | NoOp
 
 
@@ -636,6 +638,19 @@ Please check the file contains GPX data.""" }
         TimeToUpdateMemory ->
             ( model, LocalStorage.storageGetMemoryUsage )
 
+        OneClickMsg oneClickMsg ->
+            let
+                actions =
+                    -- Some of the actions update the model, some issue commands.
+                    Tools.OneClickQuickFix.update oneClickMsg model.track
+
+                modelAfterActions =
+                    performActionsOnModel actions model
+            in
+            ( modelAfterActions
+            , performActionCommands actions modelAfterActions
+            )
+
 
 
 --task to write the data
@@ -987,6 +1002,7 @@ topLoadingBar model =
             Nothing ->
                 none
         , saveButton
+        , Tools.OneClickQuickFix.oneClickQuickFixButton OneClickMsg model.track
         , el [ alignRight ] <| PaneLayoutManager.paneLayoutMenu PaneMsg model.paneLayoutOptions
         , buyMeACoffeeButton
         , globalOptions model
@@ -1265,6 +1281,24 @@ performActionsOnModel actions model =
                     let
                         ( newTree, oldPoints ) =
                             Tools.Simplify.apply foldedModel.toolOptions.simplifySettings track
+
+                        ( fromStart, fromEnd ) =
+                            ( 0, 0 )
+
+                        newTrack =
+                            track
+                                |> TrackLoaded.addToUndoStack action
+                                    fromStart
+                                    fromEnd
+                                    oldPoints
+                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                    in
+                    { foldedModel | track = Just newTrack }
+
+                ( OneClickQuickFix, Just track ) ->
+                    let
+                        ( newTree, oldPoints ) =
+                            Tools.OneClickQuickFix.apply track
 
                         ( fromStart, fromEnd ) =
                             ( 0, 0 )

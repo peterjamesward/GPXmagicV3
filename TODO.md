@@ -26,7 +26,6 @@ Plus global settings. Plus localised render detail.
 
 ## Tools
 
-2. 1CQF (i.e. Simplify x N / Interpolate / Bezier )
 3. Limit gradients
 4. Intersections
 5. Fly-through
