@@ -1248,7 +1248,7 @@ performActionsOnModel actions model =
                             Tools.OutAndBack.apply options track
 
                         ( fromStart, fromEnd ) =
-                            (0,0)
+                            ( 0, 0 )
 
                         newTrack =
                             track
@@ -1266,7 +1266,7 @@ performActionsOnModel actions model =
                             Tools.Simplify.apply foldedModel.toolOptions.simplifySettings track
 
                         ( fromStart, fromEnd ) =
-                            (0,0)
+                            ( 0, 0 )
 
                         newTrack =
                             track
@@ -1305,7 +1305,10 @@ performActionsOnModel actions model =
                             }
 
                         index =
-                            DomainModel.nearestToLonLat startGpx track.trackTree
+                            DomainModel.nearestToLonLat
+                                startGpx
+                                track.currentPosition
+                                track.trackTree
 
                         positionBeforeDrag =
                             gpxPointFromIndex index track.trackTree

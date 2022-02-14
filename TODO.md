@@ -25,8 +25,6 @@ clearly less promising.
 Addenda video - steep climbs and how these are shown on the Profile view. 
 Plus global settings.
 
-Simpler, more stable hit detect for map click.
-
 Samir's bend detector (amount of angular change within X linear metres)
 > This goes in bend problems and uses a fold similar to the direction detection in Radiused'.
 

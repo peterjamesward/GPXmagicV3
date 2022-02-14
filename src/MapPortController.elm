@@ -255,7 +255,10 @@ processMapPortMessage lastState track json =
                                 }
 
                             index =
-                                DomainModel.nearestToLonLat gpxPoint track.trackTree
+                                DomainModel.nearestToLonLat
+                                    gpxPoint
+                                    track.currentPosition
+                                    track.trackTree
                         in
                         ( { lastState
                             | lastClickLon = lon1
