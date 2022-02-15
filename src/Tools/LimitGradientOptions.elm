@@ -9,6 +9,7 @@ type alias Options =
     , maximumDescent : Float
     , extent : ExtentOption
     , previewData : Maybe PeteTree
+    , previewDistance : Length.Length
     }
 
 

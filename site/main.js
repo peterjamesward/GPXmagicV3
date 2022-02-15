@@ -8644,8 +8644,8 @@ var $author$project$Tools$Interpolate$defaultOptions = {
 	minimumSpacing: $ianmackenzie$elm_units$Length$meters(10.0)
 };
 var $author$project$Tools$LimitGradientOptions$ExtentIsRange = {$: 'ExtentIsRange'};
-var $author$project$Tools$LimitGradients$defaultOptions = {extent: $author$project$Tools$LimitGradientOptions$ExtentIsRange, maximumAscent: 15.0, maximumDescent: 15.0};
 var $ianmackenzie$elm_units$Quantity$zero = $ianmackenzie$elm_units$Quantity$Quantity(0);
+var $author$project$Tools$LimitGradients$defaultOptions = {extent: $author$project$Tools$LimitGradientOptions$ExtentIsRange, maximumAscent: 15.0, maximumDescent: 15.0, previewData: $elm$core$Maybe$Nothing, previewDistance: $ianmackenzie$elm_units$Quantity$zero};
 var $author$project$Tools$Nudge$defaultOptions = {fadeExtent: $ianmackenzie$elm_units$Quantity$zero, horizontal: $ianmackenzie$elm_units$Quantity$zero, vertical: $ianmackenzie$elm_units$Quantity$zero};
 var $author$project$Tools$OutAndBack$defaultOptions = {offset: 0.0};
 var $author$project$Tools$Pointers$defaultOptions = {orange: 0, purple: $elm$core$Maybe$Nothing};
@@ -17421,19 +17421,42 @@ var $author$project$Tools$Interpolate$toolStateChange = F4(
 	});
 var $author$project$Tools$LimitGradients$actions = F3(
 	function (newOptions, previewColour, track) {
-		return _Utils_eq(newOptions.extent, $author$project$Tools$LimitGradientOptions$ExtentIsRange) ? _List_fromArray(
-			[
-				$author$project$Actions$ShowPreview(
-				{
-					colour: previewColour,
-					points: A2($author$project$Tools$LimitGradients$computeNewPoints, newOptions, track),
-					shape: $author$project$Actions$PreviewCircle,
-					tag: 'limit'
-				})
-			]) : _List_fromArray(
-			[
-				$author$project$Actions$HidePreview('limit')
-			]);
+		var _v0 = function () {
+			var _v1 = newOptions.extent;
+			if (_v1.$ === 'ExtentIsRange') {
+				return $author$project$TrackLoaded$getRangeFromMarkers(track);
+			} else {
+				return _Utils_Tuple2(0, 0);
+			}
+		}();
+		var fromStart = _v0.a;
+		var fromEnd = _v0.b;
+		if (_Utils_eq(newOptions.extent, $author$project$Tools$LimitGradientOptions$ExtentIsRange)) {
+			var _v2 = newOptions.previewData;
+			if (_v2.$ === 'Just') {
+				var previewTree = _v2.a;
+				return _List_fromArray(
+					[
+						$author$project$Actions$ShowPreview(
+						{
+							colour: previewColour,
+							points: A3($author$project$DomainModel$extractPointsInRange, fromStart, fromEnd, previewTree),
+							shape: $author$project$Actions$PreviewCircle,
+							tag: 'limit'
+						})
+					]);
+			} else {
+				return _List_fromArray(
+					[
+						$author$project$Actions$HidePreview('limit')
+					]);
+			}
+		} else {
+			return _List_fromArray(
+				[
+					$author$project$Actions$HidePreview('limit')
+				]);
+		}
 	});
 var $author$project$Tools$LimitGradients$toolStateChange = F4(
 	function (opened, colour, options, track) {
@@ -19087,14 +19110,13 @@ var $ianmackenzie$elm_units$Constants$mile = 5280 * $ianmackenzie$elm_units$Cons
 var $ianmackenzie$elm_units$Length$inMiles = function (length) {
 	return $ianmackenzie$elm_units$Length$inMeters(length) / $ianmackenzie$elm_units$Constants$mile;
 };
-var $author$project$ViewProfileCharts$renderProfileDataForCharts = F4(
-	function (imperial, bumps, context, track) {
+var $author$project$ViewProfileCharts$renderProfileDataForCharts = F3(
+	function (toolSettings, context, track) {
 		var trackLengthInView = A2(
 			$ianmackenzie$elm_units$Quantity$multiplyBy,
 			A2($elm$core$Basics$pow, 0.5, context.zoomLevel),
 			$author$project$DomainModel$trueLength(track.trackTree));
 		var pointOfInterest = context.followSelectedPoint ? A2($author$project$DomainModel$distanceFromIndex, track.currentPosition, track.trackTree) : $ianmackenzie$elm_geometry$Point3d$xCoordinate(context.focalPoint);
-		var lengthConversion = imperial ? $ianmackenzie$elm_units$Length$inMiles : $ianmackenzie$elm_units$Length$inMeters;
 		var leftEdge = A3(
 			$ianmackenzie$elm_units$Quantity$clamp,
 			$ianmackenzie$elm_units$Quantity$zero,
@@ -19107,6 +19129,8 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F4(
 				$ianmackenzie$elm_units$Quantity$half(trackLengthInView),
 				pointOfInterest));
 		var rightEdge = A2($ianmackenzie$elm_units$Quantity$plus, trackLengthInView, leftEdge);
+		var imperial = toolSettings.imperial;
+		var lengthConversion = imperial ? $ianmackenzie$elm_units$Length$inMiles : $ianmackenzie$elm_units$Length$inMeters;
 		var heightConversion = imperial ? $ianmackenzie$elm_units$Length$inFeet : $ianmackenzie$elm_units$Length$inMeters;
 		var foldFn = F2(
 			function (road, _v3) {
@@ -19166,14 +19190,14 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F4(
 		return _Utils_update(
 			context,
 			{
-				gradientProblems: bumps,
+				gradientProblems: A2($elm$core$List$map, $elm$core$Tuple$first, toolSettings.gradientProblemOptions.breaches),
 				imperial: imperial,
 				profileData: $elm$core$List$reverse(
 					A2($elm$core$List$cons, finalDatum, result))
 			});
 	});
-var $author$project$PaneLayoutManager$renderPaneIfProfileVisible = F4(
-	function (imperial, gradientChanges, pane, track) {
+var $author$project$PaneLayoutManager$renderPaneIfProfileVisible = F3(
+	function (toolSettings, pane, track) {
 		var _v0 = _Utils_Tuple2(pane.activeView, pane.profileContext);
 		if ((_v0.a.$ === 'ViewProfile') && (_v0.b.$ === 'Just')) {
 			var _v1 = _v0.a;
@@ -19182,7 +19206,7 @@ var $author$project$PaneLayoutManager$renderPaneIfProfileVisible = F4(
 				pane,
 				{
 					profileContext: $elm$core$Maybe$Just(
-						A4($author$project$ViewProfileCharts$renderProfileDataForCharts, imperial, gradientChanges, context, track))
+						A3($author$project$ViewProfileCharts$renderProfileDataForCharts, toolSettings, context, track))
 				});
 		} else {
 			return pane;
@@ -19252,26 +19276,25 @@ var $author$project$SceneBuilder3D$renderPreviews = function (previews) {
 		onePreview,
 		$elm$core$Dict$values(previews));
 };
-var $author$project$PaneLayoutManager$render = F6(
-	function (imperial, settings, gradientChanges, options, track, previews) {
+var $author$project$PaneLayoutManager$render = F4(
+	function (toolSettings, options, track, previews) {
 		return _Utils_update(
 			options,
 			{
-				pane1: A4($author$project$PaneLayoutManager$renderPaneIfProfileVisible, imperial, gradientChanges, options.pane1, track),
-				pane2: A4($author$project$PaneLayoutManager$renderPaneIfProfileVisible, imperial, gradientChanges, options.pane2, track),
-				pane3: A4($author$project$PaneLayoutManager$renderPaneIfProfileVisible, imperial, gradientChanges, options.pane3, track),
-				pane4: A4($author$project$PaneLayoutManager$renderPaneIfProfileVisible, imperial, gradientChanges, options.pane4, track),
+				pane1: A3($author$project$PaneLayoutManager$renderPaneIfProfileVisible, toolSettings, options.pane1, track),
+				pane2: A3($author$project$PaneLayoutManager$renderPaneIfProfileVisible, toolSettings, options.pane2, track),
+				pane3: A3($author$project$PaneLayoutManager$renderPaneIfProfileVisible, toolSettings, options.pane3, track),
+				pane4: A3($author$project$PaneLayoutManager$renderPaneIfProfileVisible, toolSettings, options.pane4, track),
 				scene3d: _Utils_ap(
 					$author$project$SceneBuilder3D$renderPreviews(previews),
-					A2($author$project$SceneBuilder3D$render3dView, settings, track))
+					A2($author$project$SceneBuilder3D$render3dView, toolSettings.displaySettings, track))
 			});
 	});
 var $author$project$Main$render = function (model) {
 	var _v0 = model.track;
 	if (_v0.$ === 'Just') {
 		var track = _v0.a;
-		var gradientChanges = A2($elm$core$List$map, $elm$core$Tuple$first, model.toolOptions.gradientProblemOptions.breaches);
-		var paneLayout = A6($author$project$PaneLayoutManager$render, model.toolOptions.imperial, model.toolOptions.displaySettings, gradientChanges, model.paneLayoutOptions, track, model.previews);
+		var paneLayout = A4($author$project$PaneLayoutManager$render, model.toolOptions, model.paneLayoutOptions, track, model.previews);
 		return _Utils_update(
 			model,
 			{paneLayoutOptions: paneLayout});
@@ -19279,15 +19302,15 @@ var $author$project$Main$render = function (model) {
 		return model;
 	}
 };
-var $author$project$PaneLayoutManager$renderProfile = F4(
-	function (imperial, gradientChanges, options, track) {
+var $author$project$PaneLayoutManager$renderProfile = F3(
+	function (toolSettings, options, track) {
 		return _Utils_update(
 			options,
 			{
-				pane1: A4($author$project$PaneLayoutManager$renderPaneIfProfileVisible, imperial, gradientChanges, options.pane1, track),
-				pane2: A4($author$project$PaneLayoutManager$renderPaneIfProfileVisible, imperial, gradientChanges, options.pane2, track),
-				pane3: A4($author$project$PaneLayoutManager$renderPaneIfProfileVisible, imperial, gradientChanges, options.pane3, track),
-				pane4: A4($author$project$PaneLayoutManager$renderPaneIfProfileVisible, imperial, gradientChanges, options.pane4, track)
+				pane1: A3($author$project$PaneLayoutManager$renderPaneIfProfileVisible, toolSettings, options.pane1, track),
+				pane2: A3($author$project$PaneLayoutManager$renderPaneIfProfileVisible, toolSettings, options.pane2, track),
+				pane3: A3($author$project$PaneLayoutManager$renderPaneIfProfileVisible, toolSettings, options.pane3, track),
+				pane4: A3($author$project$PaneLayoutManager$renderPaneIfProfileVisible, toolSettings, options.pane4, track)
 			});
 	});
 var $elm$json$Json$Decode$bool = _Json_decodeBool;
@@ -19741,12 +19764,7 @@ var $author$project$Main$performActionsOnModel = F2(
 								return _Utils_update(
 									foldedModel,
 									{
-										paneLayoutOptions: A4(
-											$author$project$PaneLayoutManager$renderProfile,
-											foldedModel.toolOptions.imperial,
-											A2($elm$core$List$map, $elm$core$Tuple$first, foldedModel.toolOptions.gradientProblemOptions.breaches),
-											foldedModel.paneLayoutOptions,
-											track)
+										paneLayoutOptions: A3($author$project$PaneLayoutManager$renderProfile, foldedModel.toolOptions, foldedModel.paneLayoutOptions, track)
 									});
 							} else {
 								break _v0$25;
@@ -25412,6 +25430,27 @@ var $author$project$Tools$Interpolate$update = F4(
 var $author$project$Actions$LimitGradientWithOptions = function (a) {
 	return {$: 'LimitGradientWithOptions', a: a};
 };
+var $author$project$Tools$LimitGradients$putPreviewInOptions = F2(
+	function (track, options) {
+		var adjustedPoints = A2($author$project$Tools$LimitGradients$computeNewPoints, options, track);
+		var _v0 = function () {
+			var _v1 = options.extent;
+			if (_v1.$ === 'ExtentIsRange') {
+				return $author$project$TrackLoaded$getRangeFromMarkers(track);
+			} else {
+				return _Utils_Tuple2(0, 0);
+			}
+		}();
+		var fromStart = _v0.a;
+		var fromEnd = _v0.b;
+		return _Utils_update(
+			options,
+			{
+				previewData: $author$project$DomainModel$treeFromSourcePoints(
+					A2($elm$core$List$map, $elm$core$Tuple$second, adjustedPoints)),
+				previewDistance: A2($author$project$DomainModel$distanceFromIndex, fromStart, track.trackTree)
+			});
+	});
 var $author$project$Tools$LimitGradients$update = F4(
 	function (msg, options, previewColour, hasTrack) {
 		var _v0 = _Utils_Tuple2(msg, hasTrack);
@@ -25420,27 +25459,36 @@ var $author$project$Tools$LimitGradients$update = F4(
 				case 'SetExtent':
 					var extent = _v0.a.a;
 					var track = _v0.b.a;
-					var newOptions = _Utils_update(
-						options,
-						{extent: extent});
+					var newOptions = A2(
+						$author$project$Tools$LimitGradients$putPreviewInOptions,
+						track,
+						_Utils_update(
+							options,
+							{extent: extent}));
 					return _Utils_Tuple2(
 						newOptions,
 						A3($author$project$Tools$LimitGradients$actions, newOptions, previewColour, track));
 				case 'SetMaximumAscent':
 					var up = _v0.a.a;
 					var track = _v0.b.a;
-					var newOptions = _Utils_update(
-						options,
-						{maximumAscent: up});
+					var newOptions = A2(
+						$author$project$Tools$LimitGradients$putPreviewInOptions,
+						track,
+						_Utils_update(
+							options,
+							{maximumAscent: up}));
 					return _Utils_Tuple2(
 						newOptions,
 						A3($author$project$Tools$LimitGradients$actions, newOptions, previewColour, track));
 				case 'SetMaximumDescent':
 					var down = _v0.a.a;
 					var track = _v0.b.a;
-					var newOptions = _Utils_update(
-						options,
-						{maximumDescent: down});
+					var newOptions = A2(
+						$author$project$Tools$LimitGradients$putPreviewInOptions,
+						track,
+						_Utils_update(
+							options,
+							{maximumDescent: down}));
 					return _Utils_Tuple2(
 						newOptions,
 						A3($author$project$Tools$LimitGradients$actions, newOptions, previewColour, track));
