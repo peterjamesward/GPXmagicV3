@@ -22,6 +22,7 @@ import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
 import SceneBuilder3D
 import Tools.DisplaySettingsOptions
+import ToolsController
 import TrackLoaded exposing (TrackLoaded)
 import ViewMap
 import ViewPlan
@@ -183,20 +184,25 @@ optionList =
 
 
 render :
-    Bool
-    -> Tools.DisplaySettingsOptions.Options
-    -> List Int
+    ToolsController.Options
     -> Options
     -> TrackLoaded msg
     -> Dict String PreviewData
     -> Options
-render imperial settings gradientChanges options track previews =
+render toolSettings options track previews =
     --Profile stuff now lives in the pane context, as each pane could
     --have different version!
+    let
+        imperial =
+            toolSettings.imperial
+
+        gradientChanges =
+            List.map Tuple.first toolSettings.gradientProblemOptions.breaches
+    in
     { options
         | scene3d =
             SceneBuilder3D.renderPreviews previews
-                ++ SceneBuilder3D.render3dView settings track
+                ++ SceneBuilder3D.render3dView toolSettings.displaySettings track
         , pane1 = renderPaneIfProfileVisible imperial gradientChanges options.pane1 track
         , pane2 = renderPaneIfProfileVisible imperial gradientChanges options.pane2 track
         , pane3 = renderPaneIfProfileVisible imperial gradientChanges options.pane3 track
@@ -204,9 +210,16 @@ render imperial settings gradientChanges options track previews =
     }
 
 
-renderProfile : Bool -> List Int -> Options -> TrackLoaded msg -> Options
-renderProfile imperial gradientChanges options track =
+renderProfile : ToolsController.Options -> Options -> TrackLoaded msg -> Options
+renderProfile toolSettings options track =
     -- Same but only renders profile, because of zoom, pan, or something.
+    let
+        imperial =
+            toolSettings.imperial
+
+        gradientChanges =
+            List.map Tuple.first toolSettings.gradientProblemOptions.breaches
+    in
     { options
         | pane1 = renderPaneIfProfileVisible imperial gradientChanges options.pane1 track
         , pane2 = renderPaneIfProfileVisible imperial gradientChanges options.pane2 track
