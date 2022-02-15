@@ -19162,10 +19162,11 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F3(
 			var _v2 = toolSettings.limitGradientSettings.previewData;
 			if (_v2.$ === 'Just') {
 				var previewTree = _v2.a;
+				var previewFirstIndex = A2($author$project$DomainModel$indexFromDistance, toolSettings.limitGradientSettings.previewDistance, track.trackTree);
 				return A7(
 					$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
-					leftIndex,
-					rightIndex,
+					leftIndex - previewFirstIndex,
+					rightIndex - previewFirstIndex,
 					depthFn,
 					0,
 					previewTree,

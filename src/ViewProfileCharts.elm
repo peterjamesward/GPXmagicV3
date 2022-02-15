@@ -567,9 +567,15 @@ renderProfileDataForCharts toolSettings context track =
         ( _, preview, _ ) =
             case toolSettings.limitGradientSettings.previewData of
                 Just previewTree ->
+                    let
+                        previewFirstIndex =
+                            indexFromDistance
+                                toolSettings.limitGradientSettings.previewDistance
+                                track.trackTree
+                    in
                     DomainModel.traverseTreeBetweenLimitsToDepth
-                        leftIndex
-                        rightIndex
+                        (leftIndex - previewFirstIndex)
+                        (rightIndex - previewFirstIndex)
                         depthFn
                         0
                         previewTree
