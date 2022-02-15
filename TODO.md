@@ -19,9 +19,7 @@ BUG: Points on the map should be elided to match the route line.
 
 ## Limit gradients
 
-Profile chart visualisation for Limit Gradients.
-Might be chance here to clean up the way that data are passed to the Charts. 
-
+Profile chart visualisation for Limit Gradients, needs fixing for Pan & Zoom, but good.
 
 ---
 
