@@ -10859,6 +10859,7 @@ var $author$project$ViewProfileCharts$initialiseView = F3(
 				imperial: false,
 				metresPerPixel: 10.0,
 				orbiting: $elm$core$Maybe$Nothing,
+				previewData: _List_Nil,
 				profileData: _List_Nil,
 				waitingForClickDelay: false,
 				zoomLevel: 0.0
@@ -19133,9 +19134,9 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F3(
 		var lengthConversion = imperial ? $ianmackenzie$elm_units$Length$inMiles : $ianmackenzie$elm_units$Length$inMeters;
 		var heightConversion = imperial ? $ianmackenzie$elm_units$Length$inFeet : $ianmackenzie$elm_units$Length$inMeters;
 		var foldFn = F2(
-			function (road, _v3) {
-				var distanceSoFar = _v3.a;
-				var outputs = _v3.b;
+			function (road, _v5) {
+				var distanceSoFar = _v5.a;
+				var outputs = _v5.b;
 				var newEntry = {
 					altitude: heightConversion(
 						$ianmackenzie$elm_geometry$Point3d$zCoordinate(road.startPoint)),
@@ -19157,7 +19158,25 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F3(
 			A2($author$project$DomainModel$indexFromDistance, rightEdge, track.trackTree));
 		var leftIndex = _v0.a;
 		var rightIndex = _v0.b;
-		var _v1 = A7(
+		var _v1 = function () {
+			var _v2 = toolSettings.limitGradientSettings.previewData;
+			if (_v2.$ === 'Just') {
+				var previewTree = _v2.a;
+				return A7(
+					$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
+					leftIndex,
+					rightIndex,
+					depthFn,
+					0,
+					previewTree,
+					foldFn,
+					_Utils_Tuple3(toolSettings.limitGradientSettings.previewDistance, _List_Nil, $elm$core$Maybe$Nothing));
+			} else {
+				return _Utils_Tuple3($ianmackenzie$elm_units$Quantity$zero, _List_Nil, $elm$core$Maybe$Nothing);
+			}
+		}();
+		var preview = _v1.b;
+		var _v3 = A7(
 			$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
 			leftIndex,
 			rightIndex,
@@ -19166,8 +19185,8 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F3(
 			track.trackTree,
 			foldFn,
 			_Utils_Tuple3(leftEdge, _List_Nil, $elm$core$Maybe$Nothing));
-		var result = _v1.b;
-		var _final = _v1.c;
+		var result = _v3.b;
+		var _final = _v3.c;
 		var finalDatum = function () {
 			if (_final.$ === 'Just') {
 				var finalLeaf = _final.a;
@@ -19192,6 +19211,7 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F3(
 			{
 				gradientProblems: A2($elm$core$List$map, $elm$core$Tuple$first, toolSettings.gradientProblemOptions.breaches),
 				imperial: imperial,
+				previewData: $elm$core$List$reverse(preview),
 				profileData: $elm$core$List$reverse(
 					A2($elm$core$List$cons, finalDatum, result))
 			});
@@ -42446,6 +42466,8 @@ var $author$project$DomainModel$gradientFromNode = function (treeNode) {
 				$author$project$DomainModel$endPoint(treeNode))),
 		$author$project$DomainModel$trueLength(treeNode));
 };
+var $terezka$elm_charts$Internal$Helpers$green = '#71c614';
+var $terezka$elm_charts$Chart$Attributes$green = $terezka$elm_charts$Internal$Helpers$green;
 var $terezka$elm_charts$Chart$Attributes$height = F2(
 	function (v, config) {
 		return _Utils_update(
@@ -42714,7 +42736,6 @@ var $terezka$elm_charts$Chart$Attributes$border = F2(
 var $terezka$elm_charts$Internal$Svg$defaultInterpolation = {attrs: _List_Nil, color: $terezka$elm_charts$Internal$Helpers$pink, dashed: _List_Nil, design: $elm$core$Maybe$Nothing, method: $elm$core$Maybe$Nothing, opacity: 0, width: 1};
 var $terezka$elm_charts$Internal$Helpers$blue = '#12A5ED';
 var $terezka$elm_charts$Internal$Helpers$brown = '#871c1c';
-var $terezka$elm_charts$Internal$Helpers$green = '#71c614';
 var $terezka$elm_charts$Internal$Helpers$moss = '#92b42c';
 var $terezka$elm_charts$Internal$Helpers$orange = '#FF8400';
 var $terezka$elm_charts$Internal$Helpers$purple = '#7b4dff';
@@ -46857,7 +46878,29 @@ var $author$project$ViewProfileCharts$view = F4(
 												]),
 											_List_Nil)
 										]),
-									context.profileData)
+									context.profileData),
+									A3(
+									$terezka$elm_charts$Chart$series,
+									function ($) {
+										return $.distance;
+									},
+									_List_fromArray(
+										[
+											A3(
+											$terezka$elm_charts$Chart$interpolated,
+											function ($) {
+												return $.altitude;
+											},
+											_List_fromArray(
+												[
+													$terezka$elm_charts$Chart$Attributes$width(2),
+													$terezka$elm_charts$Chart$Attributes$color($terezka$elm_charts$Chart$Attributes$green),
+													$terezka$elm_charts$Chart$Attributes$opacity(0.2),
+													$terezka$elm_charts$Chart$Attributes$gradient(_List_Nil)
+												]),
+											_List_Nil)
+										]),
+									context.previewData)
 								])))),
 					A2(
 					$mdgriffith$elm_ui$Element$el,
@@ -46963,7 +47006,28 @@ var $author$project$ViewProfileCharts$view = F4(
 												]),
 											_List_Nil)
 										]),
-									context.profileData)
+									context.profileData),
+									A3(
+									$terezka$elm_charts$Chart$series,
+									function ($) {
+										return $.distance;
+									},
+									_List_fromArray(
+										[
+											A3(
+											$terezka$elm_charts$Chart$interpolated,
+											function ($) {
+												return $.gradient;
+											},
+											_List_fromArray(
+												[
+													$terezka$elm_charts$Chart$Attributes$width(2),
+													$terezka$elm_charts$Chart$Attributes$stepped,
+													$terezka$elm_charts$Chart$Attributes$color($terezka$elm_charts$Chart$Attributes$green)
+												]),
+											_List_Nil)
+										]),
+									context.previewData)
 								]))))
 				]));
 	});
