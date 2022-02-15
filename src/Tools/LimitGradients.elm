@@ -27,6 +27,7 @@ defaultOptions =
     { maximumAscent = 15.0
     , maximumDescent = 15.0
     , extent = ExtentIsRange
+    , previewData = Nothing
     }
 
 

@@ -192,52 +192,37 @@ render :
 render toolSettings options track previews =
     --Profile stuff now lives in the pane context, as each pane could
     --have different version!
-    let
-        imperial =
-            toolSettings.imperial
-
-        gradientChanges =
-            List.map Tuple.first toolSettings.gradientProblemOptions.breaches
-    in
     { options
         | scene3d =
             SceneBuilder3D.renderPreviews previews
                 ++ SceneBuilder3D.render3dView toolSettings.displaySettings track
-        , pane1 = renderPaneIfProfileVisible imperial gradientChanges options.pane1 track
-        , pane2 = renderPaneIfProfileVisible imperial gradientChanges options.pane2 track
-        , pane3 = renderPaneIfProfileVisible imperial gradientChanges options.pane3 track
-        , pane4 = renderPaneIfProfileVisible imperial gradientChanges options.pane4 track
+        , pane1 = renderPaneIfProfileVisible toolSettings options.pane1 track
+        , pane2 = renderPaneIfProfileVisible toolSettings options.pane2 track
+        , pane3 = renderPaneIfProfileVisible toolSettings options.pane3 track
+        , pane4 = renderPaneIfProfileVisible toolSettings options.pane4 track
     }
 
 
 renderProfile : ToolsController.Options -> Options -> TrackLoaded msg -> Options
 renderProfile toolSettings options track =
     -- Same but only renders profile, because of zoom, pan, or something.
-    let
-        imperial =
-            toolSettings.imperial
-
-        gradientChanges =
-            List.map Tuple.first toolSettings.gradientProblemOptions.breaches
-    in
     { options
-        | pane1 = renderPaneIfProfileVisible imperial gradientChanges options.pane1 track
-        , pane2 = renderPaneIfProfileVisible imperial gradientChanges options.pane2 track
-        , pane3 = renderPaneIfProfileVisible imperial gradientChanges options.pane3 track
-        , pane4 = renderPaneIfProfileVisible imperial gradientChanges options.pane4 track
+        | pane1 = renderPaneIfProfileVisible toolSettings options.pane1 track
+        , pane2 = renderPaneIfProfileVisible toolSettings options.pane2 track
+        , pane3 = renderPaneIfProfileVisible toolSettings options.pane3 track
+        , pane4 = renderPaneIfProfileVisible toolSettings options.pane4 track
     }
 
 
-renderPaneIfProfileVisible : Bool -> List Int -> PaneContext -> TrackLoaded msg -> PaneContext
-renderPaneIfProfileVisible imperial gradientChanges pane track =
+renderPaneIfProfileVisible : ToolsController.Options -> PaneContext -> TrackLoaded msg -> PaneContext
+renderPaneIfProfileVisible toolSettings pane track =
     case ( pane.activeView, pane.profileContext ) of
         ( ViewProfile, Just context ) ->
             { pane
                 | profileContext =
                     Just <|
                         ViewProfileCharts.renderProfileDataForCharts
-                            imperial
-                            gradientChanges
+                            toolSettings
                             context
                             track
             }

@@ -1125,8 +1125,7 @@ performActionsOnModel actions model =
                     { foldedModel
                         | paneLayoutOptions =
                             PaneLayoutManager.renderProfile
-                                foldedModel.toolOptions.imperial
-                                (List.map Tuple.first foldedModel.toolOptions.gradientProblemOptions.breaches)
+                                foldedModel.toolOptions
                                 foldedModel.paneLayoutOptions
                                 track
                     }

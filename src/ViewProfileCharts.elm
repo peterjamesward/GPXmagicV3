@@ -26,6 +26,7 @@ import Length
 import Pixels exposing (Pixels)
 import Point3d exposing (Point3d)
 import Quantity exposing (Quantity, toFloatQuantity)
+import ToolsController
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (colourHexString)
 import Vector3d
@@ -451,10 +452,13 @@ type alias ProfileDatum =
     }
 
 
-renderProfileDataForCharts : Bool -> List Int -> Context -> TrackLoaded msg -> Context
-renderProfileDataForCharts imperial bumps context track =
+renderProfileDataForCharts : ToolsController.Options -> Context -> TrackLoaded msg -> Context
+renderProfileDataForCharts toolSettings context track =
     -- "bumps" = indices of abrupt gradient changes.
     let
+        imperial =
+            toolSettings.imperial
+
         lengthConversion =
             if imperial then
                 Length.inMiles
@@ -545,7 +549,7 @@ renderProfileDataForCharts imperial bumps context track =
     in
     { context
         | profileData = List.reverse (finalDatum :: result)
-        , gradientProblems = bumps
+        , gradientProblems = List.map Tuple.first toolSettings.gradientProblemOptions.breaches
         , imperial = imperial
     }
 
