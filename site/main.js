@@ -36707,7 +36707,11 @@ var $author$project$Tools$Interpolate$view = F4(
 			return $author$project$ViewPureStyles$noTrackMessage;
 		}
 	});
+var $author$project$Tools$LimitGradientOptions$ExtentIsTrack = {$: 'ExtentIsTrack'};
 var $author$project$Tools$LimitGradients$LimitGradient = {$: 'LimitGradient'};
+var $author$project$Tools$LimitGradients$SetExtent = function (a) {
+	return {$: 'SetExtent', a: a};
+};
 var $author$project$Tools$LimitGradients$SetMaximumAscent = function (a) {
 	return {$: 'SetMaximumAscent', a: a};
 };
@@ -36748,12 +36752,35 @@ var $author$project$Tools$LimitGradients$view = F2(
 				thumb: $mdgriffith$elm_ui$Element$Input$defaultThumb,
 				value: options.maximumAscent
 			});
-		return A2(
-			$mdgriffith$elm_ui$Element$wrappedRow,
+		var extent = A2(
+			$mdgriffith$elm_ui$Element$Input$radioRow,
 			_List_fromArray(
 				[
-					$mdgriffith$elm_ui$Element$spacing(10),
 					$mdgriffith$elm_ui$Element$padding(10),
+					$mdgriffith$elm_ui$Element$spacing(5)
+				]),
+			{
+				label: $mdgriffith$elm_ui$Element$Input$labelHidden('Style'),
+				onChange: A2($elm$core$Basics$composeL, wrapper, $author$project$Tools$LimitGradients$SetExtent),
+				options: _List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Element$Input$option,
+						$author$project$Tools$LimitGradientOptions$ExtentIsRange,
+						$mdgriffith$elm_ui$Element$text('Selected range\n(preview)')),
+						A2(
+						$mdgriffith$elm_ui$Element$Input$option,
+						$author$project$Tools$LimitGradientOptions$ExtentIsTrack,
+						$mdgriffith$elm_ui$Element$text('Whole track\n(no preview)'))
+					]),
+				selected: $elm$core$Maybe$Just(options.extent)
+			});
+		return A2(
+			$mdgriffith$elm_ui$Element$column,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$spacing(6),
+					$mdgriffith$elm_ui$Element$padding(6),
 					$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite),
 					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
 				]),
@@ -36769,6 +36796,11 @@ var $author$project$Tools$LimitGradients$view = F2(
 					_List_fromArray(
 						[$mdgriffith$elm_ui$Element$centerX]),
 					maxDescentSlider),
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[$mdgriffith$elm_ui$Element$centerX]),
+					extent),
 					A2(
 					$mdgriffith$elm_ui$Element$el,
 					_List_fromArray(

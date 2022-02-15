@@ -17,12 +17,11 @@ BUG: Points on the map should be elided to match the route line.
 
 # WIP
 
-## Texture for the ground plane, road surface
+## Limit gradients
 
-See https://github.com/ianmackenzie/elm-3d-scene/blob/1.0.1/examples/Texture.elm
-https://ambientcg.com/view?id=Grass004
-https://ambientcg.com/view?id=Asphalt001
-Credit: Contains assets from ambientCG.com, licensed under CC0 1.0 Universal.
+Profile chart visualisation for Limit Gradients.
+Might be chance here to clean up the way that data are passed to the Charts. 
+
 
 ---
 
@@ -30,22 +29,33 @@ Credit: Contains assets from ambientCG.com, licensed under CC0 1.0 Universal.
 
 ## Tools
 
-1. Intersection detection
-2. Fly-through, 1st person view
-3. Move & Stretch
-4. Graph Theory (renamed)
-5. Use Strava segment data
-6. Loops (inc. impact on others, such as Bezier)
-7. Lift and Shift
-8. SVG import
-9. Extract all text for translation
-10. Use localised number formatting everywhere (for French use of , and .)
-11. Terrain
-12. Map style choice (Satellite if possible)
-13. Split and Join
+Tools that require a range should say so when there isn't one! (David Ogle)
+
+1. Intersection detection ((?? JB loop detection ??)) 
+2. Ability to point-smooth transitions over a range.
+3. Editable names on docks
+4. Fly-through, 1st person view
+5. Move & Stretch
+6. Graph Theory (renamed)
+7. Use Strava segment data
+8. Loops (inc. impact on others, such as Bezier)
+9. Lift and Shift
+10. SVG import
+11. Extract all text for translation
+12. Use localised number formatting everywhere (for French use of , and .)
+13. Terrain
+14. Map style choice (Satellite if possible)
+15. Split and Join
 
 New stuff:
 1. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
+
+## Texture for the ground plane, road surface
+
+See https://github.com/ianmackenzie/elm-3d-scene/blob/1.0.1/examples/Texture.elm
+https://ambientcg.com/view?id=Grass004
+https://ambientcg.com/view?id=Asphalt001
+Credit: Contains assets from ambientCG.com, licensed under CC0 1.0 Universal.
 
 ## Keyboard shortcuts
 

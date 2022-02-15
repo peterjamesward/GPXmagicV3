@@ -292,6 +292,7 @@ computeNewPoints options track =
             ( gpx.altitude, ( earth, gpx ) :: outputs )
 
         ( _, adjustedPoints ) =
+            --TODO: Check if we should drop the startmost point.
             slopeInfo.roads |> List.foldl allocateProRata ( endAltitude, [] )
     in
     adjustedPoints
@@ -348,15 +349,30 @@ view options wrapper =
                 , value = options.maximumDescent
                 , thumb = Input.defaultThumb
                 }
+
+        extent =
+            Input.radioRow
+                [ padding 10
+                , spacing 5
+                ]
+                { onChange = wrapper << SetExtent
+                , selected = Just options.extent
+                , label = Input.labelHidden "Style"
+                , options =
+                    [ Input.option ExtentIsRange (text "Selected range\n(preview)")
+                    , Input.option ExtentIsTrack (text "Whole track\n(no preview)")
+                    ]
+                }
     in
-    wrappedRow
-        [ spacing 10
-        , padding 10
+    column
+        [ spacing 6
+        , padding 6
         , Background.color FlatColors.ChinesePalette.antiFlashWhite
         , width fill
         ]
         [ el [ centerX ] <| maxAscentSlider
         , el [ centerX ] <| maxDescentSlider
+        , el [ centerX ] <| extent
         , el [ centerX ] <|
             button
                 neatToolsBorder
