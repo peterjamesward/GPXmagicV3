@@ -70,6 +70,8 @@ type alias Context =
     , profileData : List ProfileDatum
     , gradientProblems : List Int
     , imperial : Bool
+    , previewTree : Maybe PeteTree -- this should share, not copy!
+    , previewDistance : Length.Length -- preview may start anywhere.
     }
 
 
@@ -551,6 +553,8 @@ renderProfileDataForCharts toolSettings context track =
         | profileData = List.reverse (finalDatum :: result)
         , gradientProblems = List.map Tuple.first toolSettings.gradientProblemOptions.breaches
         , imperial = imperial
+        , previewDistance = toolSettings.limitGradientSettings.previewDistance
+        , previewTree = toolSettings.limitGradientSettings.previewData
     }
 
 
@@ -584,4 +588,6 @@ initialiseView current treeNode currentContext =
             , profileData = []
             , gradientProblems = []
             , imperial = False
+            , previewTree = Nothing
+            , previewDistance = Quantity.zero
             }
