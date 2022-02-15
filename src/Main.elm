@@ -52,6 +52,8 @@ import Tools.DeletePoints as DeletePoints
 import Tools.DisplaySettings
 import Tools.Interpolate
 import Tools.InterpolateOptions
+import Tools.LimitGradientOptions
+import Tools.LimitGradients
 import Tools.Nudge
 import Tools.OneClickQuickFix
 import Tools.OutAndBack
@@ -1325,6 +1327,30 @@ performActionsOnModel actions model =
                                     TrackLoaded.getRangeFromMarkers track
 
                                 Tools.InterpolateOptions.ExtentIsTrack ->
+                                    ( 0, 0 )
+
+                        newTrack =
+                            track
+                                |> TrackLoaded.addToUndoStack action
+                                    fromStart
+                                    fromEnd
+                                    oldPoints
+                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                    in
+                    { foldedModel | track = Just newTrack }
+
+                ( LimitGradientWithOptions options, Just track ) ->
+                    let
+                        ( newTree, oldPoints ) =
+                            Tools.LimitGradients.apply options track
+
+                        ( fromStart, fromEnd ) =
+                            -- Repetition of this is untidy.
+                            case options.extent of
+                                Tools.LimitGradientOptions.ExtentIsRange ->
+                                    TrackLoaded.getRangeFromMarkers track
+
+                                Tools.LimitGradientOptions.ExtentIsTrack ->
                                     ( 0, 0 )
 
                         newTrack =

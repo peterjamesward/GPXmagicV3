@@ -1,15 +1,18 @@
 module Tools.LimitGradients exposing (..)
 
 import Actions exposing (PreviewShape(..), ToolAction(..))
-import DomainModel exposing (EarthPoint, GPXSource)
+import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, distanceFromIndex, earthPointFromIndex, skipCount, traverseTreeBetweenLimitsToDepth)
 import Element exposing (..)
+import Element.Background as Background
 import Element.Input as Input exposing (button)
-import Length exposing (Meters, meters)
-import Point3d
-import Quantity
+import FlatColors.ChinesePalette
+import Length exposing (Meters, inMeters, meters)
+import Point3d exposing (zCoordinate)
+import Quantity exposing (multiplyBy, zero)
 import Tools.LimitGradientOptions exposing (ExtentOption(..), Options)
 import TrackLoaded exposing (TrackLoaded)
-import ViewPureStyles exposing (commonShortHorizontalSliderStyles, prettyButtonStyles)
+import UtilsForViews exposing (showDecimal0)
+import ViewPureStyles exposing (commonShortHorizontalSliderStyles, neatToolsBorder, prettyButtonStyles)
 
 
 type Msg
@@ -78,8 +81,64 @@ update msg options previewColour hasTrack =
 
         ( LimitGradient, Just track ) ->
             ( options
-            , []
+            , [ Actions.LimitGradientWithOptions options
+              , TrackHasChanged
+              ]
             )
+
+        _ ->
+            ( options, [] )
+
+
+apply : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+apply options track =
+    let
+        ( fromStart, fromEnd ) =
+            case options.extent of
+                ExtentIsRange ->
+                    TrackLoaded.getRangeFromMarkers track
+
+                ExtentIsTrack ->
+                    ( 0, 0 )
+
+        newCourse =
+            computeNewPoints options track
+                |> List.map Tuple.second
+
+        newTree =
+            DomainModel.replaceRange
+                fromStart
+                fromEnd
+                track.referenceLonLat
+                newCourse
+                track.trackTree
+
+        oldPoints =
+            DomainModel.extractPointsInRange
+                fromStart
+                fromEnd
+                track.trackTree
+    in
+    ( newTree
+    , oldPoints |> List.map Tuple.second
+    )
+
+
+type SlopeStatus
+    = Clamped RoadSection Float
+    | NotClamped RoadSection Length.Length
+
+
+type alias SlopeStuff =
+    { roads : List SlopeStatus
+    , totalClamped : Length.Length -- altitude shortfall
+    , totalOffered : Length.Length -- how much sections have to spare
+    }
+
+
+emptySlopeStuff : SlopeStuff
+emptySlopeStuff =
+    { roads = [], totalClamped = zero, totalOffered = zero }
 
 
 computeNewPoints : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
@@ -93,116 +152,168 @@ computeNewPoints options track =
                 ExtentIsTrack ->
                     ( 0, 0 )
 
-        unclampedXYDeltas : List ( Length.Length, Length.Length )
-        unclampedXYDeltas =
-            -- Yields X and Y deltas looking forward from each track point.
-            List.map2
-                (\pt1 pt2 ->
-                    ( pt1.length
-                    , Point3d.zCoordinate pt2.xyz |> Quantity.minus (Point3d.zCoordinate pt1.xyz)
-                    )
-                )
-                targetZone
-                (List.drop 1 targetZone)
+        endIndex =
+            skipCount track.trackTree - fromEnd
 
-        clampedXYDeltas : List ( Length.Length, Length.Length )
-        clampedXYDeltas =
-            -- What the deltas would be with the ascent and descent limits applied.
-            List.map
-                (\( x, y ) ->
-                    ( x
-                    , Quantity.clamp
-                        (x |> Quantity.multiplyBy (negate settings.maximumDescent / 100.0))
-                        (x |> Quantity.multiplyBy (settings.maximumAscent / 100.0))
-                        y
-                    )
-                )
-                unclampedXYDeltas
+        ( startDistance, startAltitude ) =
+            ( distanceFromIndex fromStart track.trackTree
+            , earthPointFromIndex fromStart track.trackTree |> Point3d.zCoordinate
+            )
 
-        targetElevationChange =
-            -- Current change of elevation, derived directly by summation.
-            Quantity.sum <| List.map Tuple.second unclampedXYDeltas
+        ( endDistance, endAltitude ) =
+            ( distanceFromIndex endIndex track.trackTree
+            , earthPointFromIndex endIndex track.trackTree |> Point3d.zCoordinate
+            )
 
-        clampedElevationChange =
-            -- What the change would be with the limits in place.
-            Quantity.sum <| List.map Tuple.second clampedXYDeltas
+        averageSlope =
+            Quantity.ratio
+                (endAltitude |> Quantity.minus startAltitude)
+                (endDistance |> Quantity.minus startDistance)
 
-        elevationCorrection =
-            -- What overall impact do the limits have?
-            targetElevationChange |> Quantity.minus clampedElevationChange
+        slopeDiscoveryFn : RoadSection -> SlopeStuff -> SlopeStuff
+        slopeDiscoveryFn road slopeStuff =
+            let
+                altitudeChange : Length.Length
+                altitudeChange =
+                    zCoordinate road.endPoint
+                        |> Quantity.minus (zCoordinate road.startPoint)
 
-        offeredCorrections =
-            -- "Ask" each segment how much leeway they have from the limit (up or down)
-            if elevationCorrection |> Quantity.greaterThan Quantity.zero then
-                -- We need to gain height overall.
-                List.map
-                    (\( x, y ) ->
-                        (x |> Quantity.multiplyBy (settings.maximumAscent / 100.0))
-                            |> Quantity.minus y
-                    )
-                    clampedXYDeltas
+                givenSlope : Float
+                givenSlope =
+                    Quantity.ratio altitudeChange road.trueLength
 
-            else if elevationCorrection |> Quantity.lessThan Quantity.zero then
-                -- We need to lose height overall.
-                List.map
-                    (\( x, y ) ->
-                        (x |> Quantity.multiplyBy (settings.maximumDescent / 100.0))
-                            |> Quantity.minus y
-                    )
-                    clampedXYDeltas
+                clampedSlope : Float
+                clampedSlope =
+                    -- Easier to use fractions here.
+                    0.01
+                        * clamp (0 - options.maximumDescent)
+                            options.maximumAscent
+                            road.gradientAtStart
 
-            else
-                List.map (always Quantity.zero) clampedXYDeltas
+                altitudeGap : Length.Length
+                altitudeGap =
+                    altitudeChange
+                        |> Quantity.minus
+                            (road.trueLength |> multiplyBy clampedSlope)
 
-        totalOffered =
-            -- How much do we have to play with?
-            Quantity.sum offeredCorrections
+                altitudeIfAverageSlope : Length.Length
+                altitudeIfAverageSlope =
+                    road.trueLength |> multiplyBy averageSlope
 
-        proprtionNeeded =
-            -- Assuming less than one for now, or button should have been disabled.
-            if Quantity.abs elevationCorrection |> Quantity.lessThan (meters 0.1) then
-                -- 10 cm is near enough.
-                0
+                availableToOffer : Length.Length
+                availableToOffer =
+                    altitudeIfAverageSlope |> Quantity.minus altitudeChange
 
-            else
-                -- How much of what is available is needed?
-                Quantity.ratio elevationCorrection totalOffered
-                    |> clamp 0.0 1.0
+                thisSectionSummary : SlopeStatus
+                thisSectionSummary =
+                    if
+                        road.gradientAtStart
+                            <= options.maximumAscent
+                            && road.gradientAtStart
+                            >= (0 - options.maximumDescent)
+                    then
+                        NotClamped road availableToOffer
 
-        proRataCorrections =
-            -- What shall we ask from each segment, on this basis?
-            List.map
-                (Quantity.multiplyBy proprtionNeeded)
-                offeredCorrections
-
-        finalYDeltas =
-            -- What does that make the deltas?
-            List.map2
-                (\( x, y ) adjust -> y |> Quantity.plus adjust)
-                clampedXYDeltas
-                proRataCorrections
-
-        resultingElevations =
-            -- And from that, the running cumulative elevations?
-            List.Extra.scanl
-                Quantity.plus
-                (Point3d.zCoordinate referenceNode.xyz)
-                finalYDeltas
-
-        undoRedoInfo : UndoRedoInfo
-        undoRedoInfo =
-            { regionStart = startIndex
-            , regionEnd = endIndex
-            , originalAltitudes = targetZone |> List.map (.xyz >> Point3d.zCoordinate)
-            , revisedAltitudes = resultingElevations
+                    else
+                        Clamped road clampedSlope
+            in
+            { roads = thisSectionSummary :: slopeStuff.roads
+            , totalClamped = altitudeGap |> Quantity.plus slopeStuff.totalClamped
+            , totalOffered = availableToOffer |> Quantity.plus slopeStuff.totalOffered
             }
+
+        slopeInfo =
+            traverseTreeBetweenLimitsToDepth
+                fromStart
+                (skipCount track.trackTree - fromEnd)
+                (always Nothing)
+                0
+                track.trackTree
+                slopeDiscoveryFn
+                emptySlopeStuff
+
+        proRataToAllocate =
+            Quantity.ratio slopeInfo.totalOffered slopeInfo.totalClamped
+
+        adjustAltitude : Length.Length -> EarthPoint -> EarthPoint
+        adjustAltitude alt pt =
+            Point3d.xyz
+                (Point3d.xCoordinate pt)
+                (Point3d.yCoordinate pt)
+                alt
+
+        allocateProRata :
+            SlopeStatus
+            -> ( Length.Length, List ( EarthPoint, GPXSource ) )
+            -> ( Length.Length, List ( EarthPoint, GPXSource ) )
+        allocateProRata section ( altitude, outputs ) =
+            -- Note that sections are reversed so we are adjusting start altitude
+            -- working backwards from the end marker.
+            let
+                ( earth, gpx ) =
+                    case section of
+                        Clamped roadSection slope ->
+                            -- Apply clamped slope
+                            let
+                                altitudeChange =
+                                    roadSection.trueLength
+                                        |> multiplyBy slope
+
+                                newStartAltitude =
+                                    altitude |> Quantity.minus altitudeChange
+
+                                newStartPoint =
+                                    adjustAltitude newStartAltitude roadSection.startPoint
+
+                                baseGPX =
+                                    roadSection.sourceData |> Tuple.first
+                            in
+                            ( newStartPoint, { baseGPX | altitude = newStartAltitude } )
+
+                        NotClamped roadSection offered ->
+                            -- Apply pro-rata
+                            let
+                                altitudeChange =
+                                    roadSection.trueLength
+                                        |> multiplyBy (roadSection.gradientAtStart / 100.0)
+                                        |> Quantity.plus (offered |> multiplyBy proRataToAllocate)
+
+                                newStartAltitude =
+                                    altitude |> Quantity.minus altitudeChange
+
+                                newStartPoint =
+                                    adjustAltitude newStartAltitude roadSection.startPoint
+
+                                baseGPX =
+                                    roadSection.sourceData |> Tuple.first
+                            in
+                            ( newStartPoint, { baseGPX | altitude = newStartAltitude } )
+            in
+            ( gpx.altitude, ( earth, gpx ) :: outputs )
+
+        ( _, adjustedPoints ) =
+            slopeInfo.roads |> List.foldl allocateProRata ( endAltitude, [] )
     in
-    []
+    adjustedPoints
 
 
+toolStateChange :
+    Bool
+    -> Element.Color
+    -> Options
+    -> Maybe (TrackLoaded msg)
+    -> ( Options, List (ToolAction msg) )
+toolStateChange opened colour options track =
+    case ( opened, track ) of
+        ( True, Just theTrack ) ->
+            ( options, actions options colour theTrack )
 
-view : Options -> (Msg -> msg) -> TrackLoaded msg -> Element msg
-view options wrapper track =
+        _ ->
+            ( options, [ HidePreview "limit" ] )
+
+
+view : Options -> (Msg -> msg) -> Element msg
+view options wrapper =
     let
         maxAscentSlider =
             Input.slider
@@ -237,32 +348,21 @@ view options wrapper track =
                 , value = options.maximumDescent
                 , thumb = Input.defaultThumb
                 }
-
-        markedNode =
-            Maybe.withDefault track.currentNode track.markedNode
-
-        startPoint =
-            if track.currentNode.index <= markedNode.index then
-                track.currentNode
-
-            else
-                markedNode
-
-        endPoint =
-            if track.currentNode.index < markedNode.index then
-                markedNode
-
-            else
-                track.currentNode
     in
-    wrappedRow [ spacing 10, padding 10 ]
-        [ maxAscentSlider
-        , maxDescentSlider
-        , button
-            prettyButtonStyles
-            { onPress = Just <| wrapper <| LimitGradient
-            , label =
-                text <|
-                    "Apply limits"
-            }
+    wrappedRow
+        [ spacing 10
+        , padding 10
+        , Background.color FlatColors.ChinesePalette.antiFlashWhite
+        , width fill
+        ]
+        [ el [ centerX ] <| maxAscentSlider
+        , el [ centerX ] <| maxDescentSlider
+        , el [ centerX ] <|
+            button
+                neatToolsBorder
+                { onPress = Just <| wrapper <| LimitGradient
+                , label =
+                    text <|
+                        "Apply limits"
+                }
         ]

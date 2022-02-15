@@ -29,6 +29,8 @@ import Tools.DisplaySettingsOptions
 import Tools.GradientProblems
 import Tools.Interpolate
 import Tools.InterpolateOptions
+import Tools.LimitGradientOptions
+import Tools.LimitGradients
 import Tools.Nudge
 import Tools.NudgeOptions
 import Tools.OutAndBack
@@ -73,6 +75,7 @@ type ToolType
     | ToolOutAndBack
     | ToolSimplify
     | ToolInterpolate
+    | ToolLimitGradient
 
 
 type alias Options =
@@ -94,6 +97,7 @@ type alias Options =
     , outAndBackSettings : Tools.OutAndBackOptions.Options
     , simplifySettings : Tools.Simplify.Options
     , interpolateSettings : Tools.InterpolateOptions.Options
+    , limitGradientSettings : Tools.LimitGradientOptions.Options
     }
 
 
@@ -116,6 +120,7 @@ defaultOptions =
     , outAndBackSettings = Tools.OutAndBack.defaultOptions
     , simplifySettings = Tools.Simplify.defaultOptions
     , interpolateSettings = Tools.Interpolate.defaultOptions
+    , limitGradientSettings = Tools.LimitGradients.defaultOptions
     }
 
 
@@ -141,6 +146,7 @@ type ToolMsg
     | ToolOutAndBackMsg Tools.OutAndBack.Msg
     | ToolSimplifyMsg Tools.Simplify.Msg
     | ToolInterpolateMsg Tools.Interpolate.Msg
+    | ToolLimitGradientMsg Tools.LimitGradients.Msg
 
 
 type alias ToolEntry =
@@ -174,6 +180,7 @@ defaultTools =
     , outAndBackTool
     , simplifyTool
     , interpolateTool
+    , limitGradientTool
     ]
 
 
@@ -376,8 +383,22 @@ simplifyTool =
 interpolateTool : ToolEntry
 interpolateTool =
     { toolType = ToolInterpolate
-    , label = "Interpolate"
+    , label = "Add points"
     , info = "Add points"
+    , video = Nothing
+    , state = Contracted
+    , dock = DockUpperRight
+    , tabColour = FlatColors.FlatUIPalette.concrete
+    , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
+    , isPopupOpen = False
+    }
+
+
+limitGradientTool : ToolEntry
+limitGradientTool =
+    { toolType = ToolLimitGradient
+    , label = "Limit Gradients"
+    , info = "Limit Gradients"
     , video = Nothing
     , state = Contracted
     , dock = DockUpperRight
@@ -691,6 +712,19 @@ update toolMsg isTrack msgWrapper options =
             , actions
             )
 
+        ToolLimitGradientMsg msg ->
+            let
+                ( newOptions, actions ) =
+                    Tools.LimitGradients.update
+                        msg
+                        options.limitGradientSettings
+                        (getColour ToolInterpolate options.tools)
+                        isTrack
+            in
+            ( { options | limitGradientSettings = newOptions }
+            , actions
+            )
+
 
 refreshOpenTools :
     Maybe (TrackLoaded msg)
@@ -887,6 +921,20 @@ toolStateHasChanged toolType newState isTrack options =
 
                 newOptions =
                     { options | interpolateSettings = newToolOptions }
+            in
+            ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
+
+        ToolLimitGradient ->
+            let
+                ( newToolOptions, actions ) =
+                    Tools.LimitGradients.toolStateChange
+                        (newState == Expanded)
+                        (getColour toolType options.tools)
+                        options.limitGradientSettings
+                        isTrack
+
+                newOptions =
+                    { options | limitGradientSettings = newToolOptions }
             in
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
@@ -1147,6 +1195,11 @@ viewToolByType msgWrapper entry isTrack options =
                     options.interpolateSettings
                     isTrack
 
+            ToolLimitGradient ->
+                Tools.LimitGradients.view
+                    options.limitGradientSettings
+                    (msgWrapper << ToolLimitGradientMsg)
+
 
 
 -- Local storage management
@@ -1215,6 +1268,9 @@ encodeType toolType =
 
         ToolInterpolate ->
             "ToolInterpolate"
+
+        ToolLimitGradient ->
+            "ToolLimitGradient"
 
 
 encodeColour : Element.Color -> E.Value
