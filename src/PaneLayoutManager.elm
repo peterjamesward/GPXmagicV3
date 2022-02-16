@@ -209,20 +209,17 @@ renderProfile toolSettings track options =
                 | pane1 = renderPaneIfProfileVisible toolSettings options.pane1 track
             }
 
-
         PanesLeftRight ->
             { options
                 | pane1 = renderPaneIfProfileVisible toolSettings options.pane1 track
                 , pane2 = renderPaneIfProfileVisible toolSettings options.pane2 track
             }
 
-
         PanesUpperLower ->
             { options
                 | pane1 = renderPaneIfProfileVisible toolSettings options.pane1 track
                 , pane2 = renderPaneIfProfileVisible toolSettings options.pane2 track
             }
-
 
         PanesOnePlusTwo ->
             { options
@@ -231,7 +228,6 @@ renderProfile toolSettings track options =
                 , pane3 = renderPaneIfProfileVisible toolSettings options.pane3 track
             }
 
-
         PanesGrid ->
             { options
                 | pane1 = renderPaneIfProfileVisible toolSettings options.pane1 track
@@ -239,7 +235,6 @@ renderProfile toolSettings track options =
                 , pane3 = renderPaneIfProfileVisible toolSettings options.pane3 track
                 , pane4 = renderPaneIfProfileVisible toolSettings options.pane4 track
             }
-
 
 
 renderPaneIfProfileVisible : ToolsController.Options -> PaneContext -> TrackLoaded msg -> PaneContext
@@ -555,7 +550,9 @@ update paneMsg msgWrapper mTrack contentArea options =
             in
             ( newOptions
             , [ SetCurrent pos
-              , RenderProfile
+              , TrackHasChanged
+
+              --, RenderProfile
               , if mapFollowsOrange then
                     MapCenterOnCurrent
 

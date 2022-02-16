@@ -17462,14 +17462,27 @@ var $author$project$Tools$LimitGradients$actions = F3(
 				]);
 		}
 	});
+var $author$project$Tools$LimitGradients$putPreviewInOptions = F2(
+	function (track, options) {
+		var adjustedPoints = A2($author$project$Tools$LimitGradients$computeNewPoints, options, track);
+		return _Utils_update(
+			options,
+			{
+				previewData: A2(
+					$author$project$DomainModel$treeFromSourcesWithExistingReference,
+					A2($author$project$DomainModel$gpxPointFromIndex, 0, track.trackTree),
+					A2($elm$core$List$map, $elm$core$Tuple$second, adjustedPoints))
+			});
+	});
 var $author$project$Tools$LimitGradients$toolStateChange = F4(
 	function (opened, colour, options, track) {
 		var _v0 = _Utils_Tuple2(opened, track);
 		if (_v0.a && (_v0.b.$ === 'Just')) {
 			var theTrack = _v0.b.a;
+			var newOptions = A2($author$project$Tools$LimitGradients$putPreviewInOptions, theTrack, options);
 			return _Utils_Tuple2(
-				options,
-				A3($author$project$Tools$LimitGradients$actions, options, colour, theTrack));
+				newOptions,
+				A3($author$project$Tools$LimitGradients$actions, newOptions, colour, theTrack));
 		} else {
 			return _Utils_Tuple2(
 				options,
@@ -22610,7 +22623,7 @@ var $author$project$PaneLayoutManager$update = F5(
 					_List_fromArray(
 						[
 							$author$project$Actions$SetCurrent(pos),
-							$author$project$Actions$RenderProfile,
+							$author$project$Actions$TrackHasChanged,
 							mapFollowsOrange ? $author$project$Actions$MapCenterOnCurrent : $author$project$Actions$NoAction,
 							A2(
 							$author$project$Actions$DelayMessage,
@@ -25497,16 +25510,6 @@ var $author$project$Tools$Interpolate$update = F4(
 var $author$project$Actions$LimitGradientWithOptions = function (a) {
 	return {$: 'LimitGradientWithOptions', a: a};
 };
-var $author$project$Tools$LimitGradients$putPreviewInOptions = F2(
-	function (track, options) {
-		var adjustedPoints = A2($author$project$Tools$LimitGradients$computeNewPoints, options, track);
-		return _Utils_update(
-			options,
-			{
-				previewData: $author$project$DomainModel$treeFromSourcePoints(
-					A2($elm$core$List$map, $elm$core$Tuple$second, adjustedPoints))
-			});
-	});
 var $author$project$Tools$LimitGradients$update = F4(
 	function (msg, options, previewColour, hasTrack) {
 		var _v0 = _Utils_Tuple2(msg, hasTrack);
@@ -26155,7 +26158,7 @@ var $author$project$ToolsController$update = F4(
 					$author$project$Tools$LimitGradients$update,
 					msg,
 					options.limitGradientSettings,
-					A2($author$project$ToolsController$getColour, $author$project$ToolsController$ToolInterpolate, options.tools),
+					A2($author$project$ToolsController$getColour, $author$project$ToolsController$ToolLimitGradient, options.tools),
 					isTrack);
 				var newOptions = _v15.a;
 				var actions = _v15.b;

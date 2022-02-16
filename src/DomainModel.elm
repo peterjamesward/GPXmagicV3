@@ -37,6 +37,7 @@ module DomainModel exposing
     , trackPointsForOutput
     , traverseTreeBetweenLimitsToDepth
     , treeFromSourcePoints
+    , treeFromSourcesWithExistingReference
     , trueLength
     , updatePointByIndexInSitu
     )

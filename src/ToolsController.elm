@@ -718,7 +718,7 @@ update toolMsg isTrack msgWrapper options =
                     Tools.LimitGradients.update
                         msg
                         options.limitGradientSettings
-                        (getColour ToolInterpolate options.tools)
+                        (getColour ToolLimitGradient options.tools)
                         isTrack
             in
             ( { options | limitGradientSettings = newOptions }

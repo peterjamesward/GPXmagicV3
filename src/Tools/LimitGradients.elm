@@ -59,7 +59,11 @@ putPreviewInOptions track options =
             computeNewPoints options track
     in
     { options
-        | previewData = DomainModel.treeFromSourcePoints <| List.map Tuple.second adjustedPoints
+        | previewData =
+            DomainModel.treeFromSourcesWithExistingReference
+                (DomainModel.gpxPointFromIndex 0 track.trackTree)
+            <|
+                List.map Tuple.second adjustedPoints
     }
 
 
@@ -329,7 +333,13 @@ toolStateChange :
 toolStateChange opened colour options track =
     case ( opened, track ) of
         ( True, Just theTrack ) ->
-            ( options, actions options colour theTrack )
+            let
+                newOptions =
+                    putPreviewInOptions theTrack options
+            in
+            ( newOptions
+            , actions newOptions colour theTrack
+            )
 
         _ ->
             ( options, [ HidePreview "limit" ] )
