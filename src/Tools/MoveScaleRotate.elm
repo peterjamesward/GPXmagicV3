@@ -1,20 +1,15 @@
-module MoveScaleRotate exposing (..)
+module Tools.MoveScaleRotate exposing (..)
 
 import Angle exposing (Angle)
 import Axis3d
 import BoundingBox3d
-import Color
 import Direction3d
 import Element exposing (..)
 import Element.Input as Input exposing (button)
-import Json.Encode as E
 import Length exposing (Meters, inMeters)
 import List.Extra
-import LocalCoords exposing (LocalCoords)
 import Plane3d
 import Point3d
-import Quantity
-import Scene3d exposing (Entity)
 import Vector3d
 import ViewPureStyles exposing (..)
 
