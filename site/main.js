@@ -19134,9 +19134,9 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F3(
 		var lengthConversion = imperial ? $ianmackenzie$elm_units$Length$inMiles : $ianmackenzie$elm_units$Length$inMeters;
 		var heightConversion = imperial ? $ianmackenzie$elm_units$Length$inFeet : $ianmackenzie$elm_units$Length$inMeters;
 		var foldFn = F2(
-			function (road, _v5) {
-				var distanceSoFar = _v5.a;
-				var outputs = _v5.b;
+			function (road, _v8) {
+				var distanceSoFar = _v8.a;
+				var outputs = _v8.b;
 				var newEntry = {
 					altitude: heightConversion(
 						$ianmackenzie$elm_geometry$Point3d$zCoordinate(road.startPoint)),
@@ -19162,22 +19162,43 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F3(
 			var _v2 = toolSettings.limitGradientSettings.previewData;
 			if (_v2.$ === 'Just') {
 				var previewTree = _v2.a;
-				var previewFirstIndex = A2($author$project$DomainModel$indexFromDistance, toolSettings.limitGradientSettings.previewDistance, track.trackTree);
+				var _v3 = function () {
+					var _v4 = toolSettings.limitGradientSettings.extent;
+					if (_v4.$ === 'ExtentIsRange') {
+						return $author$project$TrackLoaded$getRangeFromMarkers(track);
+					} else {
+						return _Utils_Tuple2(0, 0);
+					}
+				}();
+				var fromStart = _v3.a;
+				var fromEnd = _v3.b;
+				var previewStartDistance = A2($author$project$DomainModel$distanceFromIndex, fromStart, track.trackTree);
+				var _v5 = _Utils_Tuple2(
+					A2(
+						$author$project$DomainModel$indexFromDistance,
+						A2($ianmackenzie$elm_units$Quantity$minus, previewStartDistance, leftEdge),
+						previewTree),
+					A2(
+						$author$project$DomainModel$indexFromDistance,
+						A2($ianmackenzie$elm_units$Quantity$minus, previewStartDistance, rightEdge),
+						previewTree));
+				var previewLeftIndex = _v5.a;
+				var previewRightIndex = _v5.b;
 				return A7(
 					$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
-					leftIndex - previewFirstIndex,
-					rightIndex - previewFirstIndex,
+					leftIndex - fromStart,
+					rightIndex - fromStart,
 					depthFn,
 					0,
 					previewTree,
 					foldFn,
-					_Utils_Tuple3(toolSettings.limitGradientSettings.previewDistance, _List_Nil, $elm$core$Maybe$Nothing));
+					_Utils_Tuple3(leftEdge, _List_Nil, $elm$core$Maybe$Nothing));
 			} else {
 				return _Utils_Tuple3($ianmackenzie$elm_units$Quantity$zero, _List_Nil, $elm$core$Maybe$Nothing);
 			}
 		}();
 		var preview = _v1.b;
-		var _v3 = A7(
+		var _v6 = A7(
 			$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
 			leftIndex,
 			rightIndex,
@@ -19186,8 +19207,8 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F3(
 			track.trackTree,
 			foldFn,
 			_Utils_Tuple3(leftEdge, _List_Nil, $elm$core$Maybe$Nothing));
-		var result = _v3.b;
-		var _final = _v3.c;
+		var result = _v6.b;
+		var _final = _v6.c;
 		var finalDatum = function () {
 			if (_final.$ === 'Just') {
 				var finalLeaf = _final.a;

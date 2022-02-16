@@ -26,6 +26,7 @@ import Length
 import Pixels exposing (Pixels)
 import Point3d exposing (Point3d)
 import Quantity exposing (Quantity, toFloatQuantity)
+import Tools.LimitGradientOptions exposing (ExtentOption(..))
 import ToolsController
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (colourHexString)
@@ -568,19 +569,37 @@ renderProfileDataForCharts toolSettings context track =
             case toolSettings.limitGradientSettings.previewData of
                 Just previewTree ->
                     let
-                        previewFirstIndex =
-                            indexFromDistance
-                                toolSettings.limitGradientSettings.previewDistance
-                                track.trackTree
+                        ( fromStart, fromEnd ) =
+                            case toolSettings.limitGradientSettings.extent of
+                                ExtentIsRange ->
+                                    TrackLoaded.getRangeFromMarkers track
+
+                                ExtentIsTrack ->
+                                    ( 0, 0 )
+
+                        previewStartDistance =
+                            distanceFromIndex fromStart track.trackTree
+
+                        ( previewLeftIndex, previewRightIndex ) =
+                            ( indexFromDistance
+                                (leftEdge |> Quantity.minus previewStartDistance)
+                                previewTree
+                            , indexFromDistance
+                                (rightEdge |> Quantity.minus previewStartDistance)
+                                previewTree
+                            )
                     in
                     DomainModel.traverseTreeBetweenLimitsToDepth
-                        (leftIndex - previewFirstIndex)
-                        (rightIndex - previewFirstIndex)
+                        (leftIndex - fromStart)
+                        (rightIndex - fromStart)
                         depthFn
                         0
                         previewTree
                         foldFn
-                        ( toolSettings.limitGradientSettings.previewDistance, [], Nothing )
+                        ( leftEdge
+                        , []
+                        , Nothing
+                        )
 
                 Nothing ->
                     ( Quantity.zero, [], Nothing )

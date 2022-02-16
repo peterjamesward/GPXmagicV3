@@ -10,8 +10,7 @@ BUG: Pointers are not reset on track load.
 BUG: Classic bend smoother consumes all memory on certain looped routes where
      orange and purple are (possibly) co-linear, or something.
 
-BUG: Points on the map should be elided to match the route line.
-> They are but seems that edits spoil this.
+BUG: Right edge of chart adrift on tight zoom.
 
 --
 
@@ -19,7 +18,7 @@ BUG: Points on the map should be elided to match the route line.
 
 ## Limit gradients
 
-Profile chart visualisation for Limit Gradients, needs fixing for Pan & Zoom, but good.
+Weirdness on Hour of Power, Ben Nevis. If limits are set high, should be a no-op.
 
 ---
 
@@ -30,23 +29,28 @@ Profile chart visualisation for Limit Gradients, needs fixing for Pan & Zoom, bu
 Tools that require a range should say so when there isn't one! (David Ogle)
 
 1. Intersection detection ((?? JB loop detection ??)) 
-2. Ability to point-smooth transitions over a range.
-3. Editable names on docks
-4. Fly-through, 1st person view
-5. Move & Stretch
-6. Graph Theory (renamed)
-7. Use Strava segment data
-8. Loops (inc. impact on others, such as Bezier)
-9. Lift and Shift
-10. SVG import
-11. Extract all text for translation
-12. Use localised number formatting everywhere (for French use of , and .)
-13. Terrain
-14. Map style choice (Satellite if possible)
-15. Split and Join
+2. Enable IP logging
+3. Ability to point-smooth transitions over a range
+4. Editable names on docks (edit in situ, plus color selector)
+5. Chart can only show one Preview; how do we determine which?
+6. Fly-through, 1st person view
+7. Move & Stretch
+8. Graph Theory (renamed)
+9. Use Strava segment data
+10. Loops (inc. impact on others, such as Bezier)
+11. Lift and Shift
+12. SVG import
+13. Extract all text for translation
+14. Use localised number formatting everywhere (for French use of , and .)
+15. Terrain
+16. Map style choice (Satellite if possible)
+17. Split and Join
 
 New stuff:
 1. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
+> This could be like a meta-box, or a "build your own 1CQF", in which
+> we pipeline existing features, just like 1CQF.
+> E.G. simplify > limit > interpolate > centroid.
 
 ## Texture for the ground plane, road surface
 
