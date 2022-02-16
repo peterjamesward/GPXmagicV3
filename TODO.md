@@ -4,6 +4,8 @@
 DEBT: Map sends more click messages each time we click. 
 > They are debounced but, still, why??
 
+DEBT: Memory update messages should originate from the TrackInfoBox tool.
+
 BUG: Curve Former should reset on track load.
 
 BUG: Pointers are not reset on track load.
@@ -25,7 +27,7 @@ SHow current (and final?) average slope in tool?
 
 Pan & Zoom still wrong for selection, OK for whole track only.
 
-Athens kills it (!!!)
+Athens kills it (!!!). The Chart build seems to do it.
 
 I have stopped the memory updates; they need to start when TrckInfo is opened.
 

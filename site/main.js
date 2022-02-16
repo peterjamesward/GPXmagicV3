@@ -11838,38 +11838,6 @@ var $author$project$MapPortController$hidePreview = function (tag) {
 					$elm$json$Json$Encode$string(tag))
 				])));
 };
-var $elm_community$list_extra$List$Extra$find = F2(
-	function (predicate, list) {
-		find:
-		while (true) {
-			if (!list.b) {
-				return $elm$core$Maybe$Nothing;
-			} else {
-				var first = list.a;
-				var rest = list.b;
-				if (predicate(first)) {
-					return $elm$core$Maybe$Just(first);
-				} else {
-					var $temp$predicate = predicate,
-						$temp$list = rest;
-					predicate = $temp$predicate;
-					list = $temp$list;
-					continue find;
-				}
-			}
-		}
-	});
-var $author$project$ToolsController$isToolOpen = F2(
-	function (toolType, entries) {
-		return !_Utils_eq(
-			A2(
-				$elm_community$list_extra$List$Extra$find,
-				function (tab) {
-					return _Utils_eq(tab.toolType, toolType) && _Utils_eq(tab.state, $author$project$ToolsController$Expanded);
-				},
-				entries),
-			$elm$core$Maybe$Nothing);
-	});
 var $author$project$MapPortController$refreshMap = $author$project$MapPortController$mapCommands(
 	$elm$json$Json$Encode$object(
 		_List_fromArray(
@@ -12166,7 +12134,7 @@ var $author$project$Main$performActionCommands = F2(
 						var value = _v5.b;
 						return A2($author$project$LocalStorage$storageSetItem, key, value);
 					case 'HeapStatusUpdate':
-						return A2($author$project$ToolsController$isToolOpen, $author$project$ToolsController$ToolTrackInfo, model.toolOptions.tools) ? A2($andrewMacmurray$elm_delay$Delay$after, 5000, $author$project$Main$TimeToUpdateMemory) : $elm$core$Platform$Cmd$none;
+						return A2($andrewMacmurray$elm_delay$Delay$after, 5000, $author$project$Main$TimeToUpdateMemory);
 					default:
 						break _v0$12;
 				}
@@ -13052,6 +13020,10 @@ var $author$project$Tools$LimitGradients$NotClamped = F2(
 	function (a, b) {
 		return {$: 'NotClamped', a: a, b: b};
 	});
+var $ianmackenzie$elm_units$Length$centimeters = function (numCentimeters) {
+	return $ianmackenzie$elm_units$Length$meters(0.01 * numCentimeters);
+};
+var $ianmackenzie$elm_units$Length$centimeter = $ianmackenzie$elm_units$Length$centimeters(1);
 var $elm$core$Basics$clamp = F3(
 	function (low, high, number) {
 		return (_Utils_cmp(number, low) < 0) ? low : ((_Utils_cmp(number, high) > 0) ? high : number);
@@ -13086,6 +13058,15 @@ var $author$project$DomainModel$distanceFromIndex = F2(
 		}
 	});
 var $author$project$Tools$LimitGradients$emptySlopeStuff = {roads: _List_Nil, totalClamped: $ianmackenzie$elm_units$Quantity$zero, totalOffered: $ianmackenzie$elm_units$Quantity$zero};
+var $ianmackenzie$elm_units$Quantity$equalWithin = F3(
+	function (_v0, _v1, _v2) {
+		var tolerance = _v0.a;
+		var x = _v1.a;
+		var y = _v2.a;
+		return _Utils_cmp(
+			$elm$core$Basics$abs(x - y),
+			tolerance) < 1;
+	});
 var $ianmackenzie$elm_units$Quantity$multiplyBy = F2(
 	function (scale, _v0) {
 		var value = _v0.a;
@@ -13124,7 +13105,7 @@ var $author$project$Tools$LimitGradients$computeNewPoints = F2(
 				A2($author$project$DomainModel$earthPointFromIndex, endIndex, track.trackTree)));
 		var endDistance = _v3.a;
 		var endAltitude = _v3.b;
-		var averageSlope = A2(
+		var averageSlope = (A3($ianmackenzie$elm_units$Quantity$equalWithin, $ianmackenzie$elm_units$Length$centimeter, startAltitude, endAltitude) || A3($ianmackenzie$elm_units$Quantity$equalWithin, $ianmackenzie$elm_units$Length$centimeter, startDistance, endDistance)) ? 0.0 : A2(
 			$ianmackenzie$elm_units$Quantity$ratio,
 			A2($ianmackenzie$elm_units$Quantity$minus, startAltitude, endAltitude),
 			A2($ianmackenzie$elm_units$Quantity$minus, startDistance, endDistance));
@@ -13142,7 +13123,6 @@ var $author$project$Tools$LimitGradients$computeNewPoints = F2(
 					altitudeChange);
 				var availableToOffer = A2($ianmackenzie$elm_units$Quantity$minus, altitudeChange, altitudeIfAverageSlope);
 				var thisSectionSummary = ((_Utils_cmp(road.gradientAtStart, options.maximumAscent) < 1) && (_Utils_cmp(road.gradientAtStart, 0 - options.maximumDescent) > -1)) ? A2($author$project$Tools$LimitGradients$NotClamped, road, availableToOffer) : A2($author$project$Tools$LimitGradients$Clamped, road, clampedSlope);
-				var givenSlope = A2($ianmackenzie$elm_units$Quantity$ratio, altitudeChange, road.trueLength);
 				return {
 					roads: A2($elm$core$List$cons, thisSectionSummary, slopeStuff.roads),
 					totalClamped: A2($ianmackenzie$elm_units$Quantity$plus, slopeStuff.totalClamped, altitudeGap),
@@ -13158,7 +13138,7 @@ var $author$project$Tools$LimitGradients$computeNewPoints = F2(
 			track.trackTree,
 			slopeDiscoveryFn,
 			$author$project$Tools$LimitGradients$emptySlopeStuff);
-		var proRataToAllocate = A2($ianmackenzie$elm_units$Quantity$ratio, slopeInfo.totalOffered, slopeInfo.totalClamped);
+		var proRataToAllocate = (A3($ianmackenzie$elm_units$Quantity$equalWithin, $ianmackenzie$elm_units$Length$centimeter, $ianmackenzie$elm_units$Quantity$zero, slopeInfo.totalClamped) || A3($ianmackenzie$elm_units$Quantity$equalWithin, $ianmackenzie$elm_units$Length$centimeter, $ianmackenzie$elm_units$Quantity$zero, slopeInfo.totalOffered)) ? 0.0 : A2($ianmackenzie$elm_units$Quantity$ratio, slopeInfo.totalOffered, slopeInfo.totalClamped);
 		var allocateProRata = F2(
 			function (section, _v7) {
 				var altitude = _v7.a;
@@ -15691,6 +15671,27 @@ var $author$project$DomainModel$nearestToLonLat = F3(
 			return bestIndex;
 		} else {
 			return current;
+		}
+	});
+var $elm_community$list_extra$List$Extra$find = F2(
+	function (predicate, list) {
+		find:
+		while (true) {
+			if (!list.b) {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var first = list.a;
+				var rest = list.b;
+				if (predicate(first)) {
+					return $elm$core$Maybe$Just(first);
+				} else {
+					var $temp$predicate = predicate,
+						$temp$list = rest;
+					predicate = $temp$predicate;
+					list = $temp$list;
+					continue find;
+				}
+			}
 		}
 	});
 var $smucode$elm_flat_colors$FlatColors$SwedishPalette$freeSpeechBlue = A3($mdgriffith$elm_ui$Element$rgb255, 60, 64, 198);
@@ -23486,6 +23487,17 @@ var $author$project$Tools$OneClickQuickFix$update = F2(
 		} else {
 			return _List_Nil;
 		}
+	});
+var $author$project$ToolsController$isToolOpen = F2(
+	function (toolType, entries) {
+		return !_Utils_eq(
+			A2(
+				$elm_community$list_extra$List$Extra$find,
+				function (tab) {
+					return _Utils_eq(tab.toolType, toolType) && _Utils_eq(tab.state, $author$project$ToolsController$Expanded);
+				},
+				entries),
+			$elm$core$Maybe$Nothing);
 	});
 var $author$project$ToolsController$setColour = F3(
 	function (toolType, colour, tool) {
