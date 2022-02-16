@@ -1603,15 +1603,7 @@ performActionCommands actions model =
                     LocalStorage.storageSetItem key value
 
                 ( HeapStatusUpdate _, _ ) ->
-                    if
-                        ToolsController.isToolOpen
-                            ToolsController.ToolTrackInfo
-                            model.toolOptions.tools
-                    then
-                        Delay.after 5000 TimeToUpdateMemory
-
-                    else
-                        Cmd.none
+                    Delay.after 5000 TimeToUpdateMemory
 
                 _ ->
                     Cmd.none

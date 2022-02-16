@@ -25,8 +25,6 @@ SHow current (and final?) average slope in tool?
 
 Pan & Zoom still wrong for selection, OK for whole track only.
 
-Not updating when pointer moves.
-
 Athens kills it (!!!)
 
 I have stopped the memory updates; they need to start when TrckInfo is opened.
