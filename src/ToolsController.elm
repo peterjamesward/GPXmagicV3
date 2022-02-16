@@ -1,6 +1,8 @@
 module ToolsController exposing (..)
 
 import Actions exposing (ToolAction(..))
+import Color exposing (black)
+import Dict exposing (Dict)
 import Element exposing (..)
 import Element.Background as Background exposing (color)
 import Element.Border as Border exposing (roundEach)
@@ -50,15 +52,6 @@ type ToolState
     | Disabled
 
 
-type ToolDock
-    = DockUpperLeft
-    | DockLowerLeft
-    | DockUpperRight
-    | DockLowerRight
-    | DockBottom
-    | DockNone
-
-
 type ToolType
     = ToolTrackInfo
     | ToolAbruptDirectionChanges
@@ -81,6 +74,7 @@ type ToolType
 type alias Options =
     -- Tool specific options
     { tools : List ToolEntry
+    , docks : Dict Int DockSettings
     , directionChangeOptions : AbruptDirectionChanges.Options
     , deleteOptions : DeletePoints.Options
     , pointerOptions : Pointers.Options
@@ -104,6 +98,7 @@ type alias Options =
 defaultOptions : Options
 defaultOptions =
     { tools = defaultTools
+    , docks = Dict.fromList dockList
     , directionChangeOptions = AbruptDirectionChanges.defaultOptions
     , deleteOptions = DeletePoints.defaultOptions
     , pointerOptions = Pointers.defaultOptions
@@ -129,6 +124,8 @@ type ToolMsg
     | ToolDockSelect ToolType ToolDock
     | ToolColourSelect ToolType Element.Color
     | ToolStateToggle ToolType ToolState
+    | DockPopupToggle Int
+    | DockNameChange Int String
     | DirectionChanges AbruptDirectionChanges.Msg
     | DeletePoints DeletePoints.Msg
     | PointerMsg Pointers.Msg
@@ -725,6 +722,40 @@ update toolMsg isTrack msgWrapper options =
             , actions
             )
 
+        DockPopupToggle int ->
+            case Dict.get int options.docks of
+                Just dock ->
+                    let
+                        newDocks =
+                            Dict.insert int
+                                { dock | dockPopupOpen = not dock.dockPopupOpen }
+                                options.docks
+
+                        newOptions =
+                            { options | docks = newDocks }
+                    in
+                    ( newOptions, [] )
+
+                Nothing ->
+                    ( options, [] )
+
+        DockNameChange int string ->
+            case Dict.get int options.docks of
+                Just dock ->
+                    let
+                        newDocks =
+                            Dict.insert int
+                                { dock | dockLabel = string }
+                                options.docks
+
+                        newOptions =
+                            { options | docks = newDocks }
+                    in
+                    ( newOptions, [] )
+
+                Nothing ->
+                    ( options, [] )
+
 
 refreshOpenTools :
     Maybe (TrackLoaded msg)
@@ -950,13 +981,16 @@ toolsForDock :
     -> Options
     -> Element msg
 toolsForDock dock msgWrapper isTrack options =
-    wrappedRow
-        [ spacing 4 ]
-    <|
-        (options.tools
-            |> List.filter (\t -> t.dock == dock)
-            |> List.map (viewTool msgWrapper isTrack options)
-        )
+    column [ width fill, spacing 5 ]
+        [ showDockHeader msgWrapper dock options.docks
+        , wrappedRow
+            [ spacing 4, width fill ]
+          <|
+            (options.tools
+                |> List.filter (\t -> t.dock == dock)
+                |> List.map (viewTool msgWrapper isTrack options)
+            )
+        ]
 
 
 viewTool :
@@ -1458,3 +1492,92 @@ imperialToggleMenuEntry msgWrapper options =
             else
                 text "Use imperial measures"
         }
+
+
+
+-- Dock stuff
+
+
+type alias DockSettings =
+    { dockPopupOpen : Bool
+    , dockLabel : String
+    , dockLabelColour : Element.Color
+    }
+
+
+type ToolDock
+    = DockUpperLeft
+    | DockLowerLeft
+    | DockUpperRight
+    | DockLowerRight
+    | DockBottom
+    | DockNone
+
+
+defaultDockColour =
+    FlatColors.FlatUIPalette.wetAsphalt
+
+
+dockList =
+    [ ( 1, DockSettings False "Information" defaultDockColour )
+    , ( 2, DockSettings False "Some tools" defaultDockColour )
+    , ( 3, DockSettings False "Space for tools" defaultDockColour )
+    , ( 4, DockSettings False "Bend tools" defaultDockColour )
+    , ( 5, DockSettings False "Basics" defaultDockColour )
+    ]
+
+
+showDockHeader : (ToolMsg -> msg) -> ToolDock -> Dict Int DockSettings -> Element msg
+showDockHeader msgWrapper dockId docks =
+    let
+        dockNumber =
+            case dockId of
+                DockUpperLeft ->
+                    1
+
+                DockLowerLeft ->
+                    2
+
+                DockUpperRight ->
+                    5
+
+                DockLowerRight ->
+                    4
+
+                DockBottom ->
+                    3
+
+                DockNone ->
+                    0
+
+        dock =
+            Dict.get dockNumber docks
+    in
+    case dock of
+        Nothing ->
+            none
+
+        Just dockSettings ->
+            row
+                [ width fill
+                , spacing 8
+                , height <| px 24
+                , Background.color dockSettings.dockLabelColour
+                , Font.color <| contrastingColour dockSettings.dockLabelColour
+                ]
+                [ Input.button [  ]
+                    { onPress = Just <| msgWrapper <| DockPopupToggle dockNumber
+                    , label = useIcon FeatherIcons.menu
+                    }
+                , case dockSettings.dockPopupOpen of
+                    True ->
+                        Input.text [ Font.color defaultDockColour ]
+                            { onChange = DockNameChange dockNumber >> msgWrapper
+                            , text = dockSettings.dockLabel
+                            , placeholder = Nothing
+                            , label = Input.labelHidden "name"
+                            }
+
+                    False ->
+                        text dockSettings.dockLabel
+                ]

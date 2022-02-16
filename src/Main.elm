@@ -877,7 +877,11 @@ upperLeftDockView model =
     layoutWith { options = [ noStaticStyleSheet ] }
         commonLayoutStyles
     <|
-        ToolsController.toolsForDock ToolsController.DockUpperLeft ToolsMsg model.track model.toolOptions
+        ToolsController.toolsForDock
+            ToolsController.DockUpperLeft
+            ToolsMsg
+            model.track
+            model.toolOptions
 
 
 lowerLeftDockView : Model -> Html Msg
