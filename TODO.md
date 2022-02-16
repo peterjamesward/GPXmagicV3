@@ -19,9 +19,6 @@ BUG: Right edge of chart adrift on tight zoom.
 
 # WIP
 
-## Limit gradients
-
-Pan & Zoom still wrong for selection, OK for whole track only.
 
 ---
 

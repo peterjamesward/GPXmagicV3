@@ -577,24 +577,12 @@ renderProfileDataForCharts toolSettings context track =
                             distanceFromIndex fromStart track.trackTree
 
                         previewInitialFoldDistance =
-                            Quantity.clamp
-                                Quantity.zero
-                                (trueLength track.trackTree |> Quantity.minus trackLengthInView)
                                 (Quantity.max leftEdge previewStartDistance)
 
                         ( leftPreviewIndex, rightPreviewIndex ) =
                             ( leftIndex - fromStart
                             , rightIndex - fromStart
                             )
-
-                        _ =
-                            Debug.log "(leftEdge, rightEdge)" ( leftEdge, rightEdge )
-
-                        _ =
-                            Debug.log "(leftIndex, rightIndex)" ( leftIndex, rightIndex )
-
-                        _ =
-                            Debug.log "previewStartDistance" previewStartDistance
                     in
                     DomainModel.traverseTreeBetweenLimitsToDepth
                         leftPreviewIndex
