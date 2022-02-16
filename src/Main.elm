@@ -232,19 +232,19 @@ init mflags origin navigationKey =
                 |> configureSplitter (SplitPane.px 200 <| Just ( 20, 200 ))
       , leftDockInternal =
             SplitPane.init Vertical
-                |> configureSplitter (SplitPane.px (500 // 2) <| Just ( 50, 400 ))
+                |> configureSplitter (SplitPane.px 400 <| Just ( 50, 600 ))
       , rightDockLeftEdge =
             SplitPane.init Horizontal
                 |> configureSplitter (SplitPane.px (800 - 200) <| Just ( 600, 990 ))
       , rightDockInternal =
             SplitPane.init Vertical
-                |> configureSplitter (SplitPane.px (500 // 2) <| Just ( 50, 400 ))
+                |> configureSplitter (SplitPane.px 400 <| Just ( 50, 600 ))
       , bottomDockTopEdge =
             SplitPane.init Vertical
-                |> configureSplitter (SplitPane.px (500 - 200) <| Just ( 300, 470 ))
+                |> configureSplitter (SplitPane.px (500 - 200) <| Just ( 300, 570 ))
       , toolOptions = ToolsController.defaultOptions
       , isPopupOpen = False
-      , backgroundColour = FlatColors.AussiePalette.wizardGrey
+      , backgroundColour = FlatColors.FlatUIPalette.silver
       }
     , Cmd.batch
         [ authCmd
