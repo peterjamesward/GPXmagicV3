@@ -196,22 +196,50 @@ render toolSettings options track previews =
         | scene3d =
             SceneBuilder3D.renderPreviews previews
                 ++ SceneBuilder3D.render3dView toolSettings.displaySettings track
-        , pane1 = renderPaneIfProfileVisible toolSettings options.pane1 track
-        , pane2 = renderPaneIfProfileVisible toolSettings options.pane2 track
-        , pane3 = renderPaneIfProfileVisible toolSettings options.pane3 track
-        , pane4 = renderPaneIfProfileVisible toolSettings options.pane4 track
     }
+        |> renderProfile toolSettings track
 
 
-renderProfile : ToolsController.Options -> Options -> TrackLoaded msg -> Options
-renderProfile toolSettings options track =
+renderProfile : ToolsController.Options -> TrackLoaded msg -> Options -> Options
+renderProfile toolSettings track options =
     -- Same but only renders profile, because of zoom, pan, or something.
-    { options
-        | pane1 = renderPaneIfProfileVisible toolSettings options.pane1 track
-        , pane2 = renderPaneIfProfileVisible toolSettings options.pane2 track
-        , pane3 = renderPaneIfProfileVisible toolSettings options.pane3 track
-        , pane4 = renderPaneIfProfileVisible toolSettings options.pane4 track
-    }
+    case options.paneLayout of
+        PanesOne ->
+            { options
+                | pane1 = renderPaneIfProfileVisible toolSettings options.pane1 track
+            }
+
+
+        PanesLeftRight ->
+            { options
+                | pane1 = renderPaneIfProfileVisible toolSettings options.pane1 track
+                , pane2 = renderPaneIfProfileVisible toolSettings options.pane2 track
+            }
+
+
+        PanesUpperLower ->
+            { options
+                | pane1 = renderPaneIfProfileVisible toolSettings options.pane1 track
+                , pane2 = renderPaneIfProfileVisible toolSettings options.pane2 track
+            }
+
+
+        PanesOnePlusTwo ->
+            { options
+                | pane1 = renderPaneIfProfileVisible toolSettings options.pane1 track
+                , pane2 = renderPaneIfProfileVisible toolSettings options.pane2 track
+                , pane3 = renderPaneIfProfileVisible toolSettings options.pane3 track
+            }
+
+
+        PanesGrid ->
+            { options
+                | pane1 = renderPaneIfProfileVisible toolSettings options.pane1 track
+                , pane2 = renderPaneIfProfileVisible toolSettings options.pane2 track
+                , pane3 = renderPaneIfProfileVisible toolSettings options.pane3 track
+                , pane4 = renderPaneIfProfileVisible toolSettings options.pane4 track
+            }
+
 
 
 renderPaneIfProfileVisible : ToolsController.Options -> PaneContext -> TrackLoaded msg -> PaneContext

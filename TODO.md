@@ -5,6 +5,7 @@ DEBT: Map sends more click messages each time we click.
 > They are debounced but, still, why??
 
 BUG: Curve Former should reset on track load.
+
 BUG: Pointers are not reset on track load.
 
 BUG: Classic bend smoother consumes all memory on certain looped routes where
@@ -18,7 +19,17 @@ BUG: Right edge of chart adrift on tight zoom.
 
 ## Limit gradients
 
-Weirdness on Hour of Power, Ben Nevis. If limits are set high, should be a no-op.
+**Weirdness** on Hour of Power, Ben Nevis. If limits are set high, should be a no-op.
+
+SHow current (and final?) average slope in tool?
+
+Pan & Zoom still wrong for selection, OK for whole track only.
+
+Not updating when pointer moves.
+
+Athens kills it (!!!)
+
+I have stopped the memory updates; they need to start when TrckInfo is opened.
 
 ---
 
@@ -28,23 +39,26 @@ Weirdness on Hour of Power, Ben Nevis. If limits are set high, should be a no-op
 
 Tools that require a range should say so when there isn't one! (David Ogle)
 
-1. Intersection detection ((?? JB loop detection ??)) 
-2. Enable IP logging
-3. Ability to point-smooth transitions over a range
-4. Editable names on docks (edit in situ, plus color selector)
+1. Enable IP logging (new database for v3)
+2. Ability to point-smooth transitions over a range
+3. Editable names on docks (edit in situ, plus color selector)
+4. Intersection detection ((?? JB loop detection ??)) 
 5. Chart can only show one Preview; how do we determine which?
-6. Fly-through, 1st person view
-7. Move & Stretch
-8. Graph Theory (renamed)
-9. Use Strava segment data
-10. Loops (inc. impact on others, such as Bezier)
-11. Lift and Shift
-12. SVG import
-13. Extract all text for translation
-14. Use localised number formatting everywhere (for French use of , and .)
-15. Terrain
-16. Map style choice (Satellite if possible)
-17. Split and Join
+6. Chart preview for Centroid, Bezier, point smoother
+7. Gaussian (including necessary interpolation)
+8. Fly-through, 1st person view
+9. Move & Stretch
+10. Improve default zoom
+11. Graph Theory (renamed)
+12. Use Strava segment data
+13. Loops (inc. impact on others, such as Bezier)
+14. Lift and Shift
+15. SVG import
+16. Extract all text for translation
+17. Use localised number formatting everywhere (for French use of , and .)
+18. Terrain (with texture)
+19. Map style choice (Satellite if possible)
+20. Split and Join
 
 New stuff:
 1. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).

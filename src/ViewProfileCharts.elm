@@ -580,14 +580,12 @@ renderProfileDataForCharts toolSettings context track =
                         previewStartDistance =
                             distanceFromIndex fromStart track.trackTree
 
-                        ( previewLeftIndex, previewRightIndex ) =
-                            ( indexFromDistance
-                                (leftEdge |> Quantity.minus previewStartDistance)
-                                previewTree
-                            , indexFromDistance
-                                (rightEdge |> Quantity.minus previewStartDistance)
-                                previewTree
-                            )
+                        _ = Debug.log "(leftEdge, rightEdge)" (leftEdge, rightEdge)
+
+                        _ = Debug.log "(leftIndex, rightIndex)" (leftIndex, rightIndex)
+
+                        _ = Debug.log "previewStartDistance" previewStartDistance
+
                     in
                     DomainModel.traverseTreeBetweenLimitsToDepth
                         (leftIndex - fromStart)
@@ -596,7 +594,7 @@ renderProfileDataForCharts toolSettings context track =
                         0
                         previewTree
                         foldFn
-                        ( leftEdge
+                        ( leftEdge |> Quantity.plus previewStartDistance
                         , []
                         , Nothing
                         )

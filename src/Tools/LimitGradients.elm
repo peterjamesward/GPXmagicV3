@@ -28,21 +28,11 @@ defaultOptions =
     , maximumDescent = 15.0
     , extent = ExtentIsRange
     , previewData = Nothing
-    , previewDistance = Quantity.zero
     }
 
 
 actions : Options -> Element.Color -> TrackLoaded msg -> List (ToolAction msg)
 actions newOptions previewColour track =
-    let
-        ( fromStart, fromEnd ) =
-            case newOptions.extent of
-                ExtentIsRange ->
-                    TrackLoaded.getRangeFromMarkers track
-
-                ExtentIsTrack ->
-                    ( 0, 0 )
-    in
     if newOptions.extent == ExtentIsRange then
         case newOptions.previewData of
             Just previewTree ->
@@ -50,8 +40,9 @@ actions newOptions previewColour track =
                     { tag = "limit"
                     , shape = PreviewCircle
                     , colour = previewColour
-                    , points = DomainModel.extractPointsInRange fromStart fromEnd previewTree
+                    , points = DomainModel.extractPointsInRange 0 0 previewTree
                     }
+                , RenderProfile
                 ]
 
             Nothing ->
@@ -66,18 +57,9 @@ putPreviewInOptions track options =
     let
         adjustedPoints =
             computeNewPoints options track
-
-        ( fromStart, fromEnd ) =
-            case options.extent of
-                ExtentIsRange ->
-                    TrackLoaded.getRangeFromMarkers track
-
-                ExtentIsTrack ->
-                    ( 0, 0 )
     in
     { options
         | previewData = DomainModel.treeFromSourcePoints <| List.map Tuple.second adjustedPoints
-        , previewDistance = DomainModel.distanceFromIndex fromStart track.trackTree
     }
 
 

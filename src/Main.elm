@@ -1126,8 +1126,8 @@ performActionsOnModel actions model =
                         | paneLayoutOptions =
                             PaneLayoutManager.renderProfile
                                 foldedModel.toolOptions
-                                foldedModel.paneLayoutOptions
                                 track
+                                foldedModel.paneLayoutOptions
                     }
 
                 ( DelayMessage int msg, Just track ) ->
@@ -1603,7 +1603,15 @@ performActionCommands actions model =
                     LocalStorage.storageSetItem key value
 
                 ( HeapStatusUpdate _, _ ) ->
-                    Delay.after 5000 TimeToUpdateMemory
+                    if
+                        ToolsController.isToolOpen
+                            ToolsController.ToolTrackInfo
+                            model.toolOptions.tools
+                    then
+                        Delay.after 5000 TimeToUpdateMemory
+
+                    else
+                        Cmd.none
 
                 _ ->
                     Cmd.none

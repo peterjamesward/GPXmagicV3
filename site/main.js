@@ -8644,8 +8644,8 @@ var $author$project$Tools$Interpolate$defaultOptions = {
 	minimumSpacing: $ianmackenzie$elm_units$Length$meters(10.0)
 };
 var $author$project$Tools$LimitGradientOptions$ExtentIsRange = {$: 'ExtentIsRange'};
+var $author$project$Tools$LimitGradients$defaultOptions = {extent: $author$project$Tools$LimitGradientOptions$ExtentIsRange, maximumAscent: 15.0, maximumDescent: 15.0, previewData: $elm$core$Maybe$Nothing};
 var $ianmackenzie$elm_units$Quantity$zero = $ianmackenzie$elm_units$Quantity$Quantity(0);
-var $author$project$Tools$LimitGradients$defaultOptions = {extent: $author$project$Tools$LimitGradientOptions$ExtentIsRange, maximumAscent: 15.0, maximumDescent: 15.0, previewData: $elm$core$Maybe$Nothing, previewDistance: $ianmackenzie$elm_units$Quantity$zero};
 var $author$project$Tools$Nudge$defaultOptions = {fadeExtent: $ianmackenzie$elm_units$Quantity$zero, horizontal: $ianmackenzie$elm_units$Quantity$zero, vertical: $ianmackenzie$elm_units$Quantity$zero};
 var $author$project$Tools$OutAndBack$defaultOptions = {offset: 0.0};
 var $author$project$Tools$Pointers$defaultOptions = {orange: 0, purple: $elm$core$Maybe$Nothing};
@@ -11838,6 +11838,38 @@ var $author$project$MapPortController$hidePreview = function (tag) {
 					$elm$json$Json$Encode$string(tag))
 				])));
 };
+var $elm_community$list_extra$List$Extra$find = F2(
+	function (predicate, list) {
+		find:
+		while (true) {
+			if (!list.b) {
+				return $elm$core$Maybe$Nothing;
+			} else {
+				var first = list.a;
+				var rest = list.b;
+				if (predicate(first)) {
+					return $elm$core$Maybe$Just(first);
+				} else {
+					var $temp$predicate = predicate,
+						$temp$list = rest;
+					predicate = $temp$predicate;
+					list = $temp$list;
+					continue find;
+				}
+			}
+		}
+	});
+var $author$project$ToolsController$isToolOpen = F2(
+	function (toolType, entries) {
+		return !_Utils_eq(
+			A2(
+				$elm_community$list_extra$List$Extra$find,
+				function (tab) {
+					return _Utils_eq(tab.toolType, toolType) && _Utils_eq(tab.state, $author$project$ToolsController$Expanded);
+				},
+				entries),
+			$elm$core$Maybe$Nothing);
+	});
 var $author$project$MapPortController$refreshMap = $author$project$MapPortController$mapCommands(
 	$elm$json$Json$Encode$object(
 		_List_fromArray(
@@ -12134,7 +12166,7 @@ var $author$project$Main$performActionCommands = F2(
 						var value = _v5.b;
 						return A2($author$project$LocalStorage$storageSetItem, key, value);
 					case 'HeapStatusUpdate':
-						return A2($andrewMacmurray$elm_delay$Delay$after, 5000, $author$project$Main$TimeToUpdateMemory);
+						return A2($author$project$ToolsController$isToolOpen, $author$project$ToolsController$ToolTrackInfo, model.toolOptions.tools) ? A2($andrewMacmurray$elm_delay$Delay$after, 5000, $author$project$Main$TimeToUpdateMemory) : $elm$core$Platform$Cmd$none;
 					default:
 						break _v0$12;
 				}
@@ -15661,27 +15693,6 @@ var $author$project$DomainModel$nearestToLonLat = F3(
 			return current;
 		}
 	});
-var $elm_community$list_extra$List$Extra$find = F2(
-	function (predicate, list) {
-		find:
-		while (true) {
-			if (!list.b) {
-				return $elm$core$Maybe$Nothing;
-			} else {
-				var first = list.a;
-				var rest = list.b;
-				if (predicate(first)) {
-					return $elm$core$Maybe$Just(first);
-				} else {
-					var $temp$predicate = predicate,
-						$temp$list = rest;
-					predicate = $temp$predicate;
-					list = $temp$list;
-					continue find;
-				}
-			}
-		}
-	});
 var $smucode$elm_flat_colors$FlatColors$SwedishPalette$freeSpeechBlue = A3($mdgriffith$elm_ui$Element$rgb255, 60, 64, 198);
 var $author$project$ToolsController$getColour = F2(
 	function (toolType, entries) {
@@ -17420,31 +17431,23 @@ var $author$project$Tools$Interpolate$toolStateChange = F4(
 					]));
 		}
 	});
+var $author$project$Actions$RenderProfile = {$: 'RenderProfile'};
 var $author$project$Tools$LimitGradients$actions = F3(
 	function (newOptions, previewColour, track) {
-		var _v0 = function () {
-			var _v1 = newOptions.extent;
-			if (_v1.$ === 'ExtentIsRange') {
-				return $author$project$TrackLoaded$getRangeFromMarkers(track);
-			} else {
-				return _Utils_Tuple2(0, 0);
-			}
-		}();
-		var fromStart = _v0.a;
-		var fromEnd = _v0.b;
 		if (_Utils_eq(newOptions.extent, $author$project$Tools$LimitGradientOptions$ExtentIsRange)) {
-			var _v2 = newOptions.previewData;
-			if (_v2.$ === 'Just') {
-				var previewTree = _v2.a;
+			var _v0 = newOptions.previewData;
+			if (_v0.$ === 'Just') {
+				var previewTree = _v0.a;
 				return _List_fromArray(
 					[
 						$author$project$Actions$ShowPreview(
 						{
 							colour: previewColour,
-							points: A3($author$project$DomainModel$extractPointsInRange, fromStart, fromEnd, previewTree),
+							points: A3($author$project$DomainModel$extractPointsInRange, 0, 0, previewTree),
 							shape: $author$project$Actions$PreviewCircle,
 							tag: 'limit'
-						})
+						}),
+						$author$project$Actions$RenderProfile
 					]);
 			} else {
 				return _List_fromArray(
@@ -19087,173 +19090,6 @@ var $author$project$SceneBuilder3D$render3dView = F2(
 			foldFn,
 			_Utils_ap(groundPlane, renderCurrentMarkers));
 	});
-var $ianmackenzie$elm_units$Quantity$clamp = F3(
-	function (_v0, _v1, _v2) {
-		var lower = _v0.a;
-		var upper = _v1.a;
-		var value = _v2.a;
-		return (_Utils_cmp(lower, upper) < 1) ? $ianmackenzie$elm_units$Quantity$Quantity(
-			A3($elm$core$Basics$clamp, lower, upper, value)) : $ianmackenzie$elm_units$Quantity$Quantity(
-			A3($elm$core$Basics$clamp, upper, lower, value));
-	});
-var $author$project$ColourPalette$gradientColourPastel = function (slope) {
-	return A3(
-		$avh4$elm_color$Color$hsl,
-		$author$project$ColourPalette$gradientHue(slope),
-		0.6,
-		0.7);
-};
-var $ianmackenzie$elm_units$Constants$foot = 12 * $ianmackenzie$elm_units$Constants$inch;
-var $ianmackenzie$elm_units$Length$inFeet = function (length) {
-	return $ianmackenzie$elm_units$Length$inMeters(length) / $ianmackenzie$elm_units$Constants$foot;
-};
-var $ianmackenzie$elm_units$Constants$mile = 5280 * $ianmackenzie$elm_units$Constants$foot;
-var $ianmackenzie$elm_units$Length$inMiles = function (length) {
-	return $ianmackenzie$elm_units$Length$inMeters(length) / $ianmackenzie$elm_units$Constants$mile;
-};
-var $author$project$ViewProfileCharts$renderProfileDataForCharts = F3(
-	function (toolSettings, context, track) {
-		var trackLengthInView = A2(
-			$ianmackenzie$elm_units$Quantity$multiplyBy,
-			A2($elm$core$Basics$pow, 0.5, context.zoomLevel),
-			$author$project$DomainModel$trueLength(track.trackTree));
-		var pointOfInterest = context.followSelectedPoint ? A2($author$project$DomainModel$distanceFromIndex, track.currentPosition, track.trackTree) : $ianmackenzie$elm_geometry$Point3d$xCoordinate(context.focalPoint);
-		var leftEdge = A3(
-			$ianmackenzie$elm_units$Quantity$clamp,
-			$ianmackenzie$elm_units$Quantity$zero,
-			A2(
-				$ianmackenzie$elm_units$Quantity$minus,
-				trackLengthInView,
-				$author$project$DomainModel$trueLength(track.trackTree)),
-			A2(
-				$ianmackenzie$elm_units$Quantity$minus,
-				$ianmackenzie$elm_units$Quantity$half(trackLengthInView),
-				pointOfInterest));
-		var rightEdge = A2($ianmackenzie$elm_units$Quantity$plus, trackLengthInView, leftEdge);
-		var imperial = toolSettings.imperial;
-		var lengthConversion = imperial ? $ianmackenzie$elm_units$Length$inMiles : $ianmackenzie$elm_units$Length$inMeters;
-		var heightConversion = imperial ? $ianmackenzie$elm_units$Length$inFeet : $ianmackenzie$elm_units$Length$inMeters;
-		var foldFn = F2(
-			function (road, _v8) {
-				var distanceSoFar = _v8.a;
-				var outputs = _v8.b;
-				var newEntry = {
-					altitude: heightConversion(
-						$ianmackenzie$elm_geometry$Point3d$zCoordinate(road.startPoint)),
-					colour: $author$project$ColourPalette$gradientColourPastel(road.gradientAtStart),
-					distance: lengthConversion(distanceSoFar),
-					gradient: road.gradientAtStart
-				};
-				return _Utils_Tuple3(
-					A2($ianmackenzie$elm_units$Quantity$plus, road.trueLength, distanceSoFar),
-					A2($elm$core$List$cons, newEntry, outputs),
-					$elm$core$Maybe$Just(road));
-			});
-		var depthFn = function (road) {
-			return $elm$core$Maybe$Just(
-				$elm$core$Basics$round(10 + context.zoomLevel));
-		};
-		var _v0 = _Utils_Tuple2(
-			A2($author$project$DomainModel$indexFromDistance, leftEdge, track.trackTree),
-			A2($author$project$DomainModel$indexFromDistance, rightEdge, track.trackTree));
-		var leftIndex = _v0.a;
-		var rightIndex = _v0.b;
-		var _v1 = function () {
-			var _v2 = toolSettings.limitGradientSettings.previewData;
-			if (_v2.$ === 'Just') {
-				var previewTree = _v2.a;
-				var _v3 = function () {
-					var _v4 = toolSettings.limitGradientSettings.extent;
-					if (_v4.$ === 'ExtentIsRange') {
-						return $author$project$TrackLoaded$getRangeFromMarkers(track);
-					} else {
-						return _Utils_Tuple2(0, 0);
-					}
-				}();
-				var fromStart = _v3.a;
-				var fromEnd = _v3.b;
-				var previewStartDistance = A2($author$project$DomainModel$distanceFromIndex, fromStart, track.trackTree);
-				var _v5 = _Utils_Tuple2(
-					A2(
-						$author$project$DomainModel$indexFromDistance,
-						A2($ianmackenzie$elm_units$Quantity$minus, previewStartDistance, leftEdge),
-						previewTree),
-					A2(
-						$author$project$DomainModel$indexFromDistance,
-						A2($ianmackenzie$elm_units$Quantity$minus, previewStartDistance, rightEdge),
-						previewTree));
-				var previewLeftIndex = _v5.a;
-				var previewRightIndex = _v5.b;
-				return A7(
-					$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
-					leftIndex - fromStart,
-					rightIndex - fromStart,
-					depthFn,
-					0,
-					previewTree,
-					foldFn,
-					_Utils_Tuple3(leftEdge, _List_Nil, $elm$core$Maybe$Nothing));
-			} else {
-				return _Utils_Tuple3($ianmackenzie$elm_units$Quantity$zero, _List_Nil, $elm$core$Maybe$Nothing);
-			}
-		}();
-		var preview = _v1.b;
-		var _v6 = A7(
-			$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
-			leftIndex,
-			rightIndex,
-			depthFn,
-			0,
-			track.trackTree,
-			foldFn,
-			_Utils_Tuple3(leftEdge, _List_Nil, $elm$core$Maybe$Nothing));
-		var result = _v6.b;
-		var _final = _v6.c;
-		var finalDatum = function () {
-			if (_final.$ === 'Just') {
-				var finalLeaf = _final.a;
-				return {
-					altitude: heightConversion(
-						$ianmackenzie$elm_geometry$Point3d$zCoordinate(finalLeaf.endPoint)),
-					colour: $author$project$ColourPalette$gradientColourPastel(finalLeaf.gradientAtEnd),
-					distance: lengthConversion(rightEdge),
-					gradient: finalLeaf.gradientAtEnd
-				};
-			} else {
-				return {
-					altitude: 0.0,
-					colour: $avh4$elm_color$Color$black,
-					distance: lengthConversion(rightEdge),
-					gradient: 0.0
-				};
-			}
-		}();
-		return _Utils_update(
-			context,
-			{
-				gradientProblems: A2($elm$core$List$map, $elm$core$Tuple$first, toolSettings.gradientProblemOptions.breaches),
-				imperial: imperial,
-				previewData: $elm$core$List$reverse(preview),
-				profileData: $elm$core$List$reverse(
-					A2($elm$core$List$cons, finalDatum, result))
-			});
-	});
-var $author$project$PaneLayoutManager$renderPaneIfProfileVisible = F3(
-	function (toolSettings, pane, track) {
-		var _v0 = _Utils_Tuple2(pane.activeView, pane.profileContext);
-		if ((_v0.a.$ === 'ViewProfile') && (_v0.b.$ === 'Just')) {
-			var _v1 = _v0.a;
-			var context = _v0.b.a;
-			return _Utils_update(
-				pane,
-				{
-					profileContext: $elm$core$Maybe$Just(
-						A3($author$project$ViewProfileCharts$renderProfileDataForCharts, toolSettings, context, track))
-				});
-		} else {
-			return pane;
-		}
-	});
 var $author$project$SceneBuilder3D$previewAsLine = F2(
 	function (color, points) {
 		var material = $ianmackenzie$elm_3d_scene$Scene3d$Material$matte(
@@ -19318,19 +19154,231 @@ var $author$project$SceneBuilder3D$renderPreviews = function (previews) {
 		onePreview,
 		$elm$core$Dict$values(previews));
 };
+var $ianmackenzie$elm_units$Quantity$clamp = F3(
+	function (_v0, _v1, _v2) {
+		var lower = _v0.a;
+		var upper = _v1.a;
+		var value = _v2.a;
+		return (_Utils_cmp(lower, upper) < 1) ? $ianmackenzie$elm_units$Quantity$Quantity(
+			A3($elm$core$Basics$clamp, lower, upper, value)) : $ianmackenzie$elm_units$Quantity$Quantity(
+			A3($elm$core$Basics$clamp, upper, lower, value));
+	});
+var $author$project$ColourPalette$gradientColourPastel = function (slope) {
+	return A3(
+		$avh4$elm_color$Color$hsl,
+		$author$project$ColourPalette$gradientHue(slope),
+		0.6,
+		0.7);
+};
+var $ianmackenzie$elm_units$Constants$foot = 12 * $ianmackenzie$elm_units$Constants$inch;
+var $ianmackenzie$elm_units$Length$inFeet = function (length) {
+	return $ianmackenzie$elm_units$Length$inMeters(length) / $ianmackenzie$elm_units$Constants$foot;
+};
+var $ianmackenzie$elm_units$Constants$mile = 5280 * $ianmackenzie$elm_units$Constants$foot;
+var $ianmackenzie$elm_units$Length$inMiles = function (length) {
+	return $ianmackenzie$elm_units$Length$inMeters(length) / $ianmackenzie$elm_units$Constants$mile;
+};
+var $elm$core$Debug$log = _Debug_log;
+var $author$project$ViewProfileCharts$renderProfileDataForCharts = F3(
+	function (toolSettings, context, track) {
+		var trackLengthInView = A2(
+			$ianmackenzie$elm_units$Quantity$multiplyBy,
+			A2($elm$core$Basics$pow, 0.5, context.zoomLevel),
+			$author$project$DomainModel$trueLength(track.trackTree));
+		var pointOfInterest = context.followSelectedPoint ? A2($author$project$DomainModel$distanceFromIndex, track.currentPosition, track.trackTree) : $ianmackenzie$elm_geometry$Point3d$xCoordinate(context.focalPoint);
+		var leftEdge = A3(
+			$ianmackenzie$elm_units$Quantity$clamp,
+			$ianmackenzie$elm_units$Quantity$zero,
+			A2(
+				$ianmackenzie$elm_units$Quantity$minus,
+				trackLengthInView,
+				$author$project$DomainModel$trueLength(track.trackTree)),
+			A2(
+				$ianmackenzie$elm_units$Quantity$minus,
+				$ianmackenzie$elm_units$Quantity$half(trackLengthInView),
+				pointOfInterest));
+		var rightEdge = A2($ianmackenzie$elm_units$Quantity$plus, trackLengthInView, leftEdge);
+		var imperial = toolSettings.imperial;
+		var lengthConversion = imperial ? $ianmackenzie$elm_units$Length$inMiles : $ianmackenzie$elm_units$Length$inMeters;
+		var heightConversion = imperial ? $ianmackenzie$elm_units$Length$inFeet : $ianmackenzie$elm_units$Length$inMeters;
+		var foldFn = F2(
+			function (road, _v10) {
+				var distanceSoFar = _v10.a;
+				var outputs = _v10.b;
+				var newEntry = {
+					altitude: heightConversion(
+						$ianmackenzie$elm_geometry$Point3d$zCoordinate(road.startPoint)),
+					colour: $author$project$ColourPalette$gradientColourPastel(road.gradientAtStart),
+					distance: lengthConversion(distanceSoFar),
+					gradient: road.gradientAtStart
+				};
+				return _Utils_Tuple3(
+					A2($ianmackenzie$elm_units$Quantity$plus, road.trueLength, distanceSoFar),
+					A2($elm$core$List$cons, newEntry, outputs),
+					$elm$core$Maybe$Just(road));
+			});
+		var depthFn = function (road) {
+			return $elm$core$Maybe$Just(
+				$elm$core$Basics$round(10 + context.zoomLevel));
+		};
+		var _v0 = _Utils_Tuple2(
+			A2($author$project$DomainModel$indexFromDistance, leftEdge, track.trackTree),
+			A2($author$project$DomainModel$indexFromDistance, rightEdge, track.trackTree));
+		var leftIndex = _v0.a;
+		var rightIndex = _v0.b;
+		var _v1 = function () {
+			var _v2 = toolSettings.limitGradientSettings.previewData;
+			if (_v2.$ === 'Just') {
+				var previewTree = _v2.a;
+				var _v3 = function () {
+					var _v4 = toolSettings.limitGradientSettings.extent;
+					if (_v4.$ === 'ExtentIsRange') {
+						return $author$project$TrackLoaded$getRangeFromMarkers(track);
+					} else {
+						return _Utils_Tuple2(0, 0);
+					}
+				}();
+				var fromStart = _v3.a;
+				var fromEnd = _v3.b;
+				var previewStartDistance = A2($author$project$DomainModel$distanceFromIndex, fromStart, track.trackTree);
+				var _v5 = A2(
+					$elm$core$Debug$log,
+					'(leftEdge, rightEdge)',
+					_Utils_Tuple2(leftEdge, rightEdge));
+				var _v6 = A2(
+					$elm$core$Debug$log,
+					'(leftIndex, rightIndex)',
+					_Utils_Tuple2(leftIndex, rightIndex));
+				var _v7 = A2($elm$core$Debug$log, 'previewStartDistance', previewStartDistance);
+				return A7(
+					$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
+					leftIndex - fromStart,
+					rightIndex - fromStart,
+					depthFn,
+					0,
+					previewTree,
+					foldFn,
+					_Utils_Tuple3(
+						A2($ianmackenzie$elm_units$Quantity$plus, previewStartDistance, leftEdge),
+						_List_Nil,
+						$elm$core$Maybe$Nothing));
+			} else {
+				return _Utils_Tuple3($ianmackenzie$elm_units$Quantity$zero, _List_Nil, $elm$core$Maybe$Nothing);
+			}
+		}();
+		var preview = _v1.b;
+		var _v8 = A7(
+			$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
+			leftIndex,
+			rightIndex,
+			depthFn,
+			0,
+			track.trackTree,
+			foldFn,
+			_Utils_Tuple3(leftEdge, _List_Nil, $elm$core$Maybe$Nothing));
+		var result = _v8.b;
+		var _final = _v8.c;
+		var finalDatum = function () {
+			if (_final.$ === 'Just') {
+				var finalLeaf = _final.a;
+				return {
+					altitude: heightConversion(
+						$ianmackenzie$elm_geometry$Point3d$zCoordinate(finalLeaf.endPoint)),
+					colour: $author$project$ColourPalette$gradientColourPastel(finalLeaf.gradientAtEnd),
+					distance: lengthConversion(rightEdge),
+					gradient: finalLeaf.gradientAtEnd
+				};
+			} else {
+				return {
+					altitude: 0.0,
+					colour: $avh4$elm_color$Color$black,
+					distance: lengthConversion(rightEdge),
+					gradient: 0.0
+				};
+			}
+		}();
+		return _Utils_update(
+			context,
+			{
+				gradientProblems: A2($elm$core$List$map, $elm$core$Tuple$first, toolSettings.gradientProblemOptions.breaches),
+				imperial: imperial,
+				previewData: $elm$core$List$reverse(preview),
+				profileData: $elm$core$List$reverse(
+					A2($elm$core$List$cons, finalDatum, result))
+			});
+	});
+var $author$project$PaneLayoutManager$renderPaneIfProfileVisible = F3(
+	function (toolSettings, pane, track) {
+		var _v0 = _Utils_Tuple2(pane.activeView, pane.profileContext);
+		if ((_v0.a.$ === 'ViewProfile') && (_v0.b.$ === 'Just')) {
+			var _v1 = _v0.a;
+			var context = _v0.b.a;
+			return _Utils_update(
+				pane,
+				{
+					profileContext: $elm$core$Maybe$Just(
+						A3($author$project$ViewProfileCharts$renderProfileDataForCharts, toolSettings, context, track))
+				});
+		} else {
+			return pane;
+		}
+	});
+var $author$project$PaneLayoutManager$renderProfile = F3(
+	function (toolSettings, track, options) {
+		var _v0 = options.paneLayout;
+		switch (_v0.$) {
+			case 'PanesOne':
+				return _Utils_update(
+					options,
+					{
+						pane1: A3($author$project$PaneLayoutManager$renderPaneIfProfileVisible, toolSettings, options.pane1, track)
+					});
+			case 'PanesLeftRight':
+				return _Utils_update(
+					options,
+					{
+						pane1: A3($author$project$PaneLayoutManager$renderPaneIfProfileVisible, toolSettings, options.pane1, track),
+						pane2: A3($author$project$PaneLayoutManager$renderPaneIfProfileVisible, toolSettings, options.pane2, track)
+					});
+			case 'PanesUpperLower':
+				return _Utils_update(
+					options,
+					{
+						pane1: A3($author$project$PaneLayoutManager$renderPaneIfProfileVisible, toolSettings, options.pane1, track),
+						pane2: A3($author$project$PaneLayoutManager$renderPaneIfProfileVisible, toolSettings, options.pane2, track)
+					});
+			case 'PanesOnePlusTwo':
+				return _Utils_update(
+					options,
+					{
+						pane1: A3($author$project$PaneLayoutManager$renderPaneIfProfileVisible, toolSettings, options.pane1, track),
+						pane2: A3($author$project$PaneLayoutManager$renderPaneIfProfileVisible, toolSettings, options.pane2, track),
+						pane3: A3($author$project$PaneLayoutManager$renderPaneIfProfileVisible, toolSettings, options.pane3, track)
+					});
+			default:
+				return _Utils_update(
+					options,
+					{
+						pane1: A3($author$project$PaneLayoutManager$renderPaneIfProfileVisible, toolSettings, options.pane1, track),
+						pane2: A3($author$project$PaneLayoutManager$renderPaneIfProfileVisible, toolSettings, options.pane2, track),
+						pane3: A3($author$project$PaneLayoutManager$renderPaneIfProfileVisible, toolSettings, options.pane3, track),
+						pane4: A3($author$project$PaneLayoutManager$renderPaneIfProfileVisible, toolSettings, options.pane4, track)
+					});
+		}
+	});
 var $author$project$PaneLayoutManager$render = F4(
 	function (toolSettings, options, track, previews) {
-		return _Utils_update(
-			options,
-			{
-				pane1: A3($author$project$PaneLayoutManager$renderPaneIfProfileVisible, toolSettings, options.pane1, track),
-				pane2: A3($author$project$PaneLayoutManager$renderPaneIfProfileVisible, toolSettings, options.pane2, track),
-				pane3: A3($author$project$PaneLayoutManager$renderPaneIfProfileVisible, toolSettings, options.pane3, track),
-				pane4: A3($author$project$PaneLayoutManager$renderPaneIfProfileVisible, toolSettings, options.pane4, track),
-				scene3d: _Utils_ap(
-					$author$project$SceneBuilder3D$renderPreviews(previews),
-					A2($author$project$SceneBuilder3D$render3dView, toolSettings.displaySettings, track))
-			});
+		return A3(
+			$author$project$PaneLayoutManager$renderProfile,
+			toolSettings,
+			track,
+			_Utils_update(
+				options,
+				{
+					scene3d: _Utils_ap(
+						$author$project$SceneBuilder3D$renderPreviews(previews),
+						A2($author$project$SceneBuilder3D$render3dView, toolSettings.displaySettings, track))
+				}));
 	});
 var $author$project$Main$render = function (model) {
 	var _v0 = model.track;
@@ -19344,17 +19392,6 @@ var $author$project$Main$render = function (model) {
 		return model;
 	}
 };
-var $author$project$PaneLayoutManager$renderProfile = F3(
-	function (toolSettings, options, track) {
-		return _Utils_update(
-			options,
-			{
-				pane1: A3($author$project$PaneLayoutManager$renderPaneIfProfileVisible, toolSettings, options.pane1, track),
-				pane2: A3($author$project$PaneLayoutManager$renderPaneIfProfileVisible, toolSettings, options.pane2, track),
-				pane3: A3($author$project$PaneLayoutManager$renderPaneIfProfileVisible, toolSettings, options.pane3, track),
-				pane4: A3($author$project$PaneLayoutManager$renderPaneIfProfileVisible, toolSettings, options.pane4, track)
-			});
-	});
 var $elm$json$Json$Decode$bool = _Json_decodeBool;
 var $author$project$ToolsController$restoreMeasure = F2(
 	function (options, value) {
@@ -19806,7 +19843,7 @@ var $author$project$Main$performActionsOnModel = F2(
 								return _Utils_update(
 									foldedModel,
 									{
-										paneLayoutOptions: A3($author$project$PaneLayoutManager$renderProfile, foldedModel.toolOptions, foldedModel.paneLayoutOptions, track)
+										paneLayoutOptions: A3($author$project$PaneLayoutManager$renderProfile, foldedModel.toolOptions, track, foldedModel.paneLayoutOptions)
 									});
 							} else {
 								break _v0$25;
@@ -20738,7 +20775,6 @@ var $author$project$PaneLayoutManager$ProfileViewMessage = F2(
 	function (a, b) {
 		return {$: 'ProfileViewMessage', a: a, b: b};
 	});
-var $author$project$Actions$RenderProfile = {$: 'RenderProfile'};
 var $author$project$Actions$SetCurrent = function (a) {
 	return {$: 'SetCurrent', a: a};
 };
@@ -23438,17 +23474,6 @@ var $author$project$Tools$OneClickQuickFix$update = F2(
 			return _List_Nil;
 		}
 	});
-var $author$project$ToolsController$isToolOpen = F2(
-	function (toolType, entries) {
-		return !_Utils_eq(
-			A2(
-				$elm_community$list_extra$List$Extra$find,
-				function (tab) {
-					return _Utils_eq(tab.toolType, toolType) && _Utils_eq(tab.state, $author$project$ToolsController$Expanded);
-				},
-				entries),
-			$elm$core$Maybe$Nothing);
-	});
 var $author$project$ToolsController$setColour = F3(
 	function (toolType, colour, tool) {
 		return _Utils_eq(tool.toolType, toolType) ? _Utils_update(
@@ -25475,22 +25500,11 @@ var $author$project$Actions$LimitGradientWithOptions = function (a) {
 var $author$project$Tools$LimitGradients$putPreviewInOptions = F2(
 	function (track, options) {
 		var adjustedPoints = A2($author$project$Tools$LimitGradients$computeNewPoints, options, track);
-		var _v0 = function () {
-			var _v1 = options.extent;
-			if (_v1.$ === 'ExtentIsRange') {
-				return $author$project$TrackLoaded$getRangeFromMarkers(track);
-			} else {
-				return _Utils_Tuple2(0, 0);
-			}
-		}();
-		var fromStart = _v0.a;
-		var fromEnd = _v0.b;
 		return _Utils_update(
 			options,
 			{
 				previewData: $author$project$DomainModel$treeFromSourcePoints(
-					A2($elm$core$List$map, $elm$core$Tuple$second, adjustedPoints)),
-				previewDistance: A2($author$project$DomainModel$distanceFromIndex, fromStart, track.trackTree)
+					A2($elm$core$List$map, $elm$core$Tuple$second, adjustedPoints))
 			});
 	});
 var $author$project$Tools$LimitGradients$update = F4(

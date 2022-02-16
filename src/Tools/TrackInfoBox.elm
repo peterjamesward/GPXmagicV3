@@ -1,5 +1,6 @@
 module Tools.TrackInfoBox exposing (..)
 
+import Actions exposing (ToolAction)
 import Angle
 import Axis2d
 import Direction2d
