@@ -19,3 +19,25 @@ if you have a GitHub account, you can also post issues, see current issues, and 
 https://github.com/peterjamesward/GPXmagicV3/issues
 
     """
+
+
+
+aboutText =
+    """
+
+# GPXmagic v3.0.1 (2679ce48)
+
+If v1 was the surprise indie hit, v2 the disappointing second album, here's hoping
+v3 is the polished studio album that delivers the goods.
+
+In this release:
+
+* Editable labels on the tool docking zones, so you can make it more yours.
+* A clean and efficient implementation of Limit Gradients.
+* Limit Gradients shows a preview on the Profile Charts, with zoom and pan.
+
+Thanks to all for feedback and suggestions. I'm working my way through the migration
+of tools from v2, which is sometimes straightforward, sometimes not, so progress
+is uneven.
+
+    """

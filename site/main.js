@@ -8898,19 +8898,19 @@ var $author$project$ToolsController$defaultDockColour = $smucode$elm_flat_colors
 var $author$project$ToolsController$dockList = _List_fromArray(
 	[
 		_Utils_Tuple2(
-		1,
+		'1',
 		A3($author$project$ToolsController$DockSettings, false, 'Information', $author$project$ToolsController$defaultDockColour)),
 		_Utils_Tuple2(
-		2,
+		'2',
 		A3($author$project$ToolsController$DockSettings, false, 'Some tools', $author$project$ToolsController$defaultDockColour)),
 		_Utils_Tuple2(
-		3,
+		'3',
 		A3($author$project$ToolsController$DockSettings, false, 'Space for tools', $author$project$ToolsController$defaultDockColour)),
 		_Utils_Tuple2(
-		4,
+		'4',
 		A3($author$project$ToolsController$DockSettings, false, 'Bend tools', $author$project$ToolsController$defaultDockColour)),
 		_Utils_Tuple2(
-		5,
+		'5',
 		A3($author$project$ToolsController$DockSettings, false, 'Basics', $author$project$ToolsController$defaultDockColour))
 	]);
 var $author$project$ToolsController$defaultOptions = {
@@ -10033,6 +10033,7 @@ var $author$project$Main$init = F3(
 						$author$project$LocalStorage$storageGetItem('measure'),
 						$author$project$LocalStorage$storageGetItem('background'),
 						$author$project$LocalStorage$storageGetItem('visuals'),
+						$author$project$LocalStorage$storageGetItem('docks'),
 						$author$project$LocalStorage$storageGetMemoryUsage
 					])));
 	});
@@ -19479,6 +19480,53 @@ var $author$project$Main$render = function (model) {
 		return model;
 	}
 };
+var $elm$json$Json$Decode$keyValuePairs = _Json_decodeKeyValuePairs;
+var $elm$json$Json$Decode$dict = function (decoder) {
+	return A2(
+		$elm$json$Json$Decode$map,
+		$elm$core$Dict$fromList,
+		$elm$json$Json$Decode$keyValuePairs(decoder));
+};
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $author$project$ToolsController$restoreDockSettings = F2(
+	function (options, values) {
+		var updateDock = F3(
+			function (k, v, dict) {
+				return A3(
+					$elm$core$Dict$update,
+					k,
+					function (dock) {
+						if (dock.$ === 'Just') {
+							var isDock = dock.a;
+							return $elm$core$Maybe$Just(
+								_Utils_update(
+									isDock,
+									{dockLabel: v}));
+						} else {
+							return $elm$core$Maybe$Nothing;
+						}
+					},
+					dict);
+			});
+		var useStoredSettings = function (settings) {
+			return A3($elm$core$Dict$foldl, updateDock, options.docks, settings);
+		};
+		var storedSettings = A2(
+			$elm$json$Json$Decode$decodeValue,
+			$elm$json$Json$Decode$dict($elm$json$Json$Decode$string),
+			values);
+		if (storedSettings.$ === 'Ok') {
+			var stored = storedSettings.a;
+			return _Utils_update(
+				options,
+				{
+					docks: useStoredSettings(stored)
+				});
+		} else {
+			var error = storedSettings.a;
+			return options;
+		}
+	});
 var $elm$json$Json$Decode$bool = _Json_decodeBool;
 var $author$project$ToolsController$restoreMeasure = F2(
 	function (options, value) {
@@ -19509,7 +19557,6 @@ var $author$project$Tools$DisplaySettingsOptions$StoredOptions = F4(
 		return {centreLine: centreLine, curtainStyle: curtainStyle, groundPlane: groundPlane, roadSurface: roadSurface};
 	});
 var $elm$json$Json$Decode$map4 = _Json_map4;
-var $elm$json$Json$Decode$string = _Json_decodeString;
 var $author$project$Tools$DisplaySettingsOptions$decoder = A5(
 	$elm$json$Json$Decode$map4,
 	$author$project$Tools$DisplaySettingsOptions$StoredOptions,
@@ -19588,29 +19635,6 @@ var $author$project$PaneLayoutManager$applyStoredPaneDetails = function (stored)
 			paneId: $author$project$PaneLayoutManager$decodePaneId(stored.paneId)
 		});
 };
-var $author$project$PaneLayoutManager$PanesGrid = {$: 'PanesGrid'};
-var $author$project$PaneLayoutManager$PanesLeftRight = {$: 'PanesLeftRight'};
-var $author$project$PaneLayoutManager$PanesOnePlusTwo = {$: 'PanesOnePlusTwo'};
-var $author$project$PaneLayoutManager$PanesUpperLower = {$: 'PanesUpperLower'};
-var $author$project$PaneLayoutManager$paneLayoutHelper = _List_fromArray(
-	[
-		_Utils_Tuple2($author$project$PaneLayoutManager$PanesOne, 'One'),
-		_Utils_Tuple2($author$project$PaneLayoutManager$PanesLeftRight, 'LR'),
-		_Utils_Tuple2($author$project$PaneLayoutManager$PanesUpperLower, 'UL'),
-		_Utils_Tuple2($author$project$PaneLayoutManager$PanesOnePlusTwo, 'OneUpTwoDown'),
-		_Utils_Tuple2($author$project$PaneLayoutManager$PanesGrid, 'Grid')
-	]);
-var $author$project$PaneLayoutManager$decodePanesLayout = function (layout) {
-	return A2(
-		$elm$core$Maybe$withDefault,
-		_Utils_Tuple2($author$project$PaneLayoutManager$PanesOne, 'One'),
-		A2(
-			$elm_community$list_extra$List$Extra$find,
-			function (entry) {
-				return _Utils_eq(entry.b, layout);
-			},
-			$author$project$PaneLayoutManager$paneLayoutHelper)).a;
-};
 var $author$project$PaneLayoutManager$RestoredOptions = F5(
 	function (layoutName, pane1, pane2, pane3, pane4) {
 		return {layoutName: layoutName, pane1: pane1, pane2: pane2, pane3: pane3, pane4: pane4};
@@ -19640,11 +19664,10 @@ var $author$project$PaneLayoutManager$restoreStoredValues = F2(
 			return _Utils_update(
 				$author$project$PaneLayoutManager$defaultOptions,
 				{
-					pane1: $author$project$PaneLayoutManager$applyStoredPaneDetails(fromStorage.pane1),
 					pane2: $author$project$PaneLayoutManager$applyStoredPaneDetails(fromStorage.pane2),
 					pane3: $author$project$PaneLayoutManager$applyStoredPaneDetails(fromStorage.pane3),
 					pane4: $author$project$PaneLayoutManager$applyStoredPaneDetails(fromStorage.pane4),
-					paneLayout: $author$project$PaneLayoutManager$decodePanesLayout(fromStorage.layoutName),
+					paneLayout: $author$project$PaneLayoutManager$PanesOne,
 					popupVisible: false
 				});
 		} else {
@@ -20316,6 +20339,12 @@ var $author$project$Main$performActionsOnModel = F2(
 										foldedModel,
 										{
 											toolOptions: A2($author$project$ToolsController$restoreStoredValues, foldedModel.toolOptions, value)
+										});
+								case 'docks':
+									return _Utils_update(
+										foldedModel,
+										{
+											toolOptions: A2($author$project$ToolsController$restoreDockSettings, foldedModel.toolOptions, value)
 										});
 								case 'panes':
 									return _Utils_update(
@@ -21275,6 +21304,18 @@ var $author$project$PaneLayoutManager$encodeOnePane = function (pane) {
 					$author$project$PaneLayoutManager$encodeView(pane.activeView)))
 			]));
 };
+var $author$project$PaneLayoutManager$PanesGrid = {$: 'PanesGrid'};
+var $author$project$PaneLayoutManager$PanesLeftRight = {$: 'PanesLeftRight'};
+var $author$project$PaneLayoutManager$PanesOnePlusTwo = {$: 'PanesOnePlusTwo'};
+var $author$project$PaneLayoutManager$PanesUpperLower = {$: 'PanesUpperLower'};
+var $author$project$PaneLayoutManager$paneLayoutHelper = _List_fromArray(
+	[
+		_Utils_Tuple2($author$project$PaneLayoutManager$PanesOne, 'One'),
+		_Utils_Tuple2($author$project$PaneLayoutManager$PanesLeftRight, 'LR'),
+		_Utils_Tuple2($author$project$PaneLayoutManager$PanesUpperLower, 'UL'),
+		_Utils_Tuple2($author$project$PaneLayoutManager$PanesOnePlusTwo, 'OneUpTwoDown'),
+		_Utils_Tuple2($author$project$PaneLayoutManager$PanesGrid, 'Grid')
+	]);
 var $author$project$PaneLayoutManager$encodePanesLayout = function (layout) {
 	return A2(
 		$elm$core$Maybe$withDefault,
@@ -23881,6 +23922,54 @@ var $author$project$Tools$OneClickQuickFix$update = F2(
 			return _List_Nil;
 		}
 	});
+var $elm$json$Json$Encode$dict = F3(
+	function (toKey, toValue, dictionary) {
+		return _Json_wrap(
+			A3(
+				$elm$core$Dict$foldl,
+				F3(
+					function (key, value, obj) {
+						return A3(
+							_Json_addField,
+							toKey(key),
+							toValue(value),
+							obj);
+					}),
+				_Json_emptyObject(_Utils_Tuple0),
+				dictionary));
+	});
+var $elm$core$Dict$map = F2(
+	function (func, dict) {
+		if (dict.$ === 'RBEmpty_elm_builtin') {
+			return $elm$core$Dict$RBEmpty_elm_builtin;
+		} else {
+			var color = dict.a;
+			var key = dict.b;
+			var value = dict.c;
+			var left = dict.d;
+			var right = dict.e;
+			return A5(
+				$elm$core$Dict$RBNode_elm_builtin,
+				color,
+				key,
+				A2(func, key, value),
+				A2($elm$core$Dict$map, func, left),
+				A2($elm$core$Dict$map, func, right));
+		}
+	});
+var $author$project$ToolsController$encodeDockState = function (docks) {
+	return A3(
+		$elm$json$Json$Encode$dict,
+		$elm$core$Basics$identity,
+		$elm$json$Json$Encode$string,
+		A2(
+			$elm$core$Dict$map,
+			F2(
+				function (k, v) {
+					return v.dockLabel;
+				}),
+			docks));
+};
 var $author$project$ToolsController$isToolOpen = F2(
 	function (toolType, entries) {
 		return !_Utils_eq(
@@ -26573,13 +26662,13 @@ var $author$project$ToolsController$update = F4(
 						{limitGradientSettings: newOptions}),
 					actions);
 			case 'DockPopupToggle':
-				var _int = toolMsg.a;
-				var _v16 = A2($elm$core$Dict$get, _int, options.docks);
+				var id = toolMsg.a;
+				var _v16 = A2($elm$core$Dict$get, id, options.docks);
 				if (_v16.$ === 'Just') {
 					var dock = _v16.a;
 					var newDocks = A3(
 						$elm$core$Dict$insert,
-						_int,
+						id,
 						_Utils_update(
 							dock,
 							{dockPopupOpen: !dock.dockPopupOpen}),
@@ -26607,7 +26696,15 @@ var $author$project$ToolsController$update = F4(
 					var newOptions = _Utils_update(
 						options,
 						{docks: newDocks});
-					return _Utils_Tuple2(newOptions, _List_Nil);
+					return _Utils_Tuple2(
+						newOptions,
+						_List_fromArray(
+							[
+								A2(
+								$author$project$Actions$StoreLocally,
+								'docks',
+								$author$project$ToolsController$encodeDockState(options.docks))
+							]));
 				} else {
 					return _Utils_Tuple2(options, _List_Nil);
 				}
@@ -32986,12 +33083,7 @@ var $mdgriffith$elm_ui$Element$Font$color = function (fontColor) {
 			'color',
 			fontColor));
 };
-var $mdgriffith$elm_ui$Element$Input$HiddenLabel = function (a) {
-	return {$: 'HiddenLabel', a: a};
-};
-var $mdgriffith$elm_ui$Element$Input$labelHidden = $mdgriffith$elm_ui$Element$Input$HiddenLabel;
-var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
-var $elm$svg$Svg$line = $elm$svg$Svg$trustedNode('line');
+var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
 var $feathericons$elm_feather$FeatherIcons$Icon = function (a) {
 	return {$: 'Icon', a: a};
 };
@@ -33012,46 +33104,32 @@ var $feathericons$elm_feather$FeatherIcons$makeBuilder = F2(
 				src: src
 			});
 	});
-var $elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
-var $elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
-var $elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
-var $elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
-var $feathericons$elm_feather$FeatherIcons$menu = A2(
+var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
+var $elm$svg$Svg$path = $elm$svg$Svg$trustedNode('path');
+var $feathericons$elm_feather$FeatherIcons$edit = A2(
 	$feathericons$elm_feather$FeatherIcons$makeBuilder,
-	'menu',
+	'edit',
 	_List_fromArray(
 		[
 			A2(
-			$elm$svg$Svg$line,
+			$elm$svg$Svg$path,
 			_List_fromArray(
 				[
-					$elm$svg$Svg$Attributes$x1('3'),
-					$elm$svg$Svg$Attributes$y1('12'),
-					$elm$svg$Svg$Attributes$x2('21'),
-					$elm$svg$Svg$Attributes$y2('12')
+					$elm$svg$Svg$Attributes$d('M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7')
 				]),
 			_List_Nil),
 			A2(
-			$elm$svg$Svg$line,
+			$elm$svg$Svg$path,
 			_List_fromArray(
 				[
-					$elm$svg$Svg$Attributes$x1('3'),
-					$elm$svg$Svg$Attributes$y1('6'),
-					$elm$svg$Svg$Attributes$x2('21'),
-					$elm$svg$Svg$Attributes$y2('6')
-				]),
-			_List_Nil),
-			A2(
-			$elm$svg$Svg$line,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$x1('3'),
-					$elm$svg$Svg$Attributes$y1('18'),
-					$elm$svg$Svg$Attributes$x2('21'),
-					$elm$svg$Svg$Attributes$y2('18')
+					$elm$svg$Svg$Attributes$d('M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z')
 				]),
 			_List_Nil)
 		]));
+var $mdgriffith$elm_ui$Element$Input$HiddenLabel = function (a) {
+	return {$: 'HiddenLabel', a: a};
+};
+var $mdgriffith$elm_ui$Element$Input$labelHidden = $mdgriffith$elm_ui$Element$Input$HiddenLabel;
 var $mdgriffith$elm_ui$Internal$Model$Px = function (a) {
 	return {$: 'Px', a: a};
 };
@@ -34094,17 +34172,17 @@ var $author$project$ToolsController$showDockHeader = F3(
 		var dockNumber = function () {
 			switch (dockId.$) {
 				case 'DockUpperLeft':
-					return 1;
+					return '1';
 				case 'DockLowerLeft':
-					return 2;
+					return '2';
 				case 'DockUpperRight':
-					return 5;
+					return '5';
 				case 'DockLowerRight':
-					return 4;
+					return '4';
 				case 'DockBottom':
-					return 3;
+					return '3';
 				default:
-					return 0;
+					return '0';
 			}
 		}();
 		var dock = A2($elm$core$Dict$get, dockNumber, docks);
@@ -34130,7 +34208,7 @@ var $author$project$ToolsController$showDockHeader = F3(
 						$mdgriffith$elm_ui$Element$Input$button,
 						_List_Nil,
 						{
-							label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$menu),
+							label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$edit),
 							onPress: $elm$core$Maybe$Just(
 								msgWrapper(
 									$author$project$ToolsController$DockPopupToggle(dockNumber)))
@@ -34298,8 +34376,6 @@ var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions = F3(
 var $elm$svg$Svg$circle = $elm$svg$Svg$trustedNode('circle');
 var $elm$svg$Svg$Attributes$cx = _VirtualDom_attribute('cx');
 var $elm$svg$Svg$Attributes$cy = _VirtualDom_attribute('cy');
-var $elm$svg$Svg$Attributes$d = _VirtualDom_attribute('d');
-var $elm$svg$Svg$path = $elm$svg$Svg$trustedNode('path');
 var $elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
 var $feathericons$elm_feather$FeatherIcons$settings = A2(
 	$feathericons$elm_feather$FeatherIcons$makeBuilder,
@@ -34423,8 +34499,13 @@ var $author$project$ToolsController$ToolDockSelect = F2(
 	function (a, b) {
 		return {$: 'ToolDockSelect', a: a, b: b};
 	});
+var $elm$svg$Svg$line = $elm$svg$Svg$trustedNode('line');
 var $elm$svg$Svg$Attributes$points = _VirtualDom_attribute('points');
 var $elm$svg$Svg$polyline = $elm$svg$Svg$trustedNode('polyline');
+var $elm$svg$Svg$Attributes$x1 = _VirtualDom_attribute('x1');
+var $elm$svg$Svg$Attributes$x2 = _VirtualDom_attribute('x2');
+var $elm$svg$Svg$Attributes$y1 = _VirtualDom_attribute('y1');
+var $elm$svg$Svg$Attributes$y2 = _VirtualDom_attribute('y2');
 var $feathericons$elm_feather$FeatherIcons$arrowDown = A2(
 	$feathericons$elm_feather$FeatherIcons$makeBuilder,
 	'arrow-down',
@@ -39899,6 +39980,48 @@ var $author$project$ViewPureStyles$conditionallyVisible = F2(
 				]),
 			element);
 	});
+var $author$project$About$aboutText = '\n\n# GPXmagic v3 0.1.0\n\nIf v1 was the surprise indie hit, v2 the disappointing second album, here\'s hoping\nv3 is the polished studio album that delivers the goods.\n\nIn this release:\n\n* Editable labels on the tool docking zones, so you can make it more yours.\n* A clean and efficient implementation of Limit Gradients.\n* Limit Gradients shows a preview on the Profile Charts, with zoom and pan.\n\nThanks to all for feedback and suggestions. I\'m working my way through the migration\nof tools from v2, which is sometimes straightforward, sometimes not, so progress\nis uneven.\n\n    ';
+var $elm_explorations$markdown$Markdown$defaultOptions = {
+	defaultHighlighting: $elm$core$Maybe$Nothing,
+	githubFlavored: $elm$core$Maybe$Just(
+		{breaks: false, tables: false}),
+	sanitize: true,
+	smartypants: false
+};
+var $elm_explorations$markdown$Markdown$toHtmlWith = _Markdown_toHtml;
+var $elm_explorations$markdown$Markdown$toHtml = $elm_explorations$markdown$Markdown$toHtmlWith($elm_explorations$markdown$Markdown$defaultOptions);
+var $author$project$ViewAbout$view = function (_v0) {
+	var contentWidth = _v0.a;
+	var contentHeight = _v0.b;
+	return A2(
+		$mdgriffith$elm_ui$Element$el,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$width(
+				$mdgriffith$elm_ui$Element$px(
+					$ianmackenzie$elm_units$Pixels$inPixels(contentWidth))),
+				$mdgriffith$elm_ui$Element$height(
+				$mdgriffith$elm_ui$Element$px(
+					$ianmackenzie$elm_units$Pixels$inPixels(contentHeight))),
+				$mdgriffith$elm_ui$Element$pointer,
+				$mdgriffith$elm_ui$Element$padding(20),
+				$mdgriffith$elm_ui$Element$Border$width(8),
+				$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$FlatUIPalette$asbestos),
+				$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$FlatUIPalette$clouds),
+				$mdgriffith$elm_ui$Element$scrollbarY
+			]),
+		A2(
+			$mdgriffith$elm_ui$Element$paragraph,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+				]),
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$html(
+					A2($elm_explorations$markdown$Markdown$toHtml, _List_Nil, $author$project$About$aboutText))
+				])));
+};
 var $author$project$ViewMap$ToggleDraggable = {$: 'ToggleDraggable'};
 var $author$project$ViewMap$ToggleFollowOrange = {$: 'ToggleFollowOrange'};
 var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
@@ -48391,7 +48514,11 @@ var $author$project$PaneLayoutManager$viewModeChoices = F2(
 				A2(
 				$mdgriffith$elm_ui$Element$Input$optionWith,
 				$author$project$PaneLayoutManager$ViewPlan,
-				$author$project$ViewPureStyles$radioButton('Plan'))
+				$author$project$ViewPureStyles$radioButton('Plan')),
+				A2(
+				$mdgriffith$elm_ui$Element$Input$optionWith,
+				$author$project$PaneLayoutManager$ViewInfo,
+				$author$project$ViewPureStyles$radioButton('About'))
 			]);
 		return A2(
 			$mdgriffith$elm_ui$Element$Input$radioRow,
@@ -48426,7 +48553,11 @@ var $author$project$PaneLayoutManager$viewModeChoicesNoMap = F2(
 				A2(
 				$mdgriffith$elm_ui$Element$Input$optionWith,
 				$author$project$PaneLayoutManager$ViewPlan,
-				$author$project$ViewPureStyles$radioButton('Plan'))
+				$author$project$ViewPureStyles$radioButton('Plan')),
+				A2(
+				$mdgriffith$elm_ui$Element$Input$optionWith,
+				$author$project$PaneLayoutManager$ViewInfo,
+				$author$project$ViewPureStyles$radioButton('About'))
 			]);
 		return A2(
 			$mdgriffith$elm_ui$Element$Input$radioRow,
@@ -48566,7 +48697,8 @@ var $author$project$PaneLayoutManager$viewPanes = F4(
 						return $mdgriffith$elm_ui$Element$none;
 					}
 				default:
-					return $mdgriffith$elm_ui$Element$none;
+					return $author$project$ViewAbout$view(
+						_Utils_Tuple2(paneWidth, paneHeight));
 			}
 		};
 		var viewPaneNoMap = function (pane) {
@@ -48757,15 +48889,6 @@ var $author$project$Main$rightDockView = function (model) {
 		$author$project$Main$lowerRightDockView(model),
 		model.rightDockInternal);
 };
-var $elm_explorations$markdown$Markdown$defaultOptions = {
-	defaultHighlighting: $elm$core$Maybe$Nothing,
-	githubFlavored: $elm$core$Maybe$Just(
-		{breaks: false, tables: false}),
-	sanitize: true,
-	smartypants: false
-};
-var $elm_explorations$markdown$Markdown$toHtmlWith = _Markdown_toHtml;
-var $elm_explorations$markdown$Markdown$toHtml = $elm_explorations$markdown$Markdown$toHtmlWith($elm_explorations$markdown$Markdown$defaultOptions);
 var $author$project$ViewPureStyles$showModalMessage = F3(
 	function (areaWidth, content, msg) {
 		return A2(

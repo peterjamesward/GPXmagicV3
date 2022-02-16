@@ -1,5 +1,6 @@
 module PaneLayoutManager exposing (..)
 
+import About
 import Actions exposing (..)
 import Dict exposing (Dict)
 import DomainModel exposing (skipCount)
@@ -24,6 +25,7 @@ import SceneBuilder3D
 import Tools.DisplaySettingsOptions
 import ToolsController
 import TrackLoaded exposing (TrackLoaded)
+import ViewAbout
 import ViewMap
 import ViewPlan
 import ViewProfileCharts
@@ -631,6 +633,7 @@ viewModeChoices msgWrapper context =
             , Input.optionWith ViewThird <| radioButton "Perspective"
             , Input.optionWith ViewProfile <| radioButton "Profile"
             , Input.optionWith ViewPlan <| radioButton "Plan"
+            , Input.optionWith ViewInfo <| radioButton "About"
             ]
     in
     Input.radioRow
@@ -651,6 +654,7 @@ viewModeChoicesNoMap msgWrapper pane =
             [ Input.optionWith ViewThird <| radioButton "Perspective"
             , Input.optionWith ViewProfile <| radioButton "Profile"
             , Input.optionWith ViewPlan <| radioButton "Plan"
+            , Input.optionWith ViewInfo <| radioButton "About"
             ]
     in
     Input.radioRow
@@ -739,7 +743,8 @@ viewPanes msgWrapper mTrack ( w, h ) options =
                             none
 
                 _ ->
-                    none
+                    ViewAbout.view
+                        ( paneWidth, paneHeight )
 
         viewPaneZeroWithMap pane =
             -- The Map DIV must be constructed once only, even before we have a Track,
@@ -917,9 +922,10 @@ restoreStoredValues options values =
     case D.decodeValue paneStateDecoder values of
         Ok fromStorage ->
             { defaultOptions
-                | paneLayout = decodePanesLayout fromStorage.layoutName
+                | paneLayout = PanesOne
                 , popupVisible = False
-                , pane1 = applyStoredPaneDetails fromStorage.pane1
+
+                --, pane1 = applyStoredPaneDetails fromStorage.pane1
                 , pane2 = applyStoredPaneDetails fromStorage.pane2
                 , pane3 = applyStoredPaneDetails fromStorage.pane3
                 , pane4 = applyStoredPaneDetails fromStorage.pane4

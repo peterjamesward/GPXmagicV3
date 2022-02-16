@@ -14,7 +14,7 @@ import FlatColors.SwedishPalette
 import Html.Attributes exposing (style)
 import Html.Events.Extra.Mouse as Mouse
 import Json.Decode as D exposing (field)
-import Json.Encode as E
+import Json.Encode as E exposing (string)
 import List.Extra
 import Tools.BendSmoother
 import Tools.BendSmootherOptions
@@ -74,7 +74,7 @@ type ToolType
 type alias Options =
     -- Tool specific options
     { tools : List ToolEntry
-    , docks : Dict Int DockSettings
+    , docks : Dict String DockSettings
     , directionChangeOptions : AbruptDirectionChanges.Options
     , deleteOptions : DeletePoints.Options
     , pointerOptions : Pointers.Options
@@ -124,8 +124,8 @@ type ToolMsg
     | ToolDockSelect ToolType ToolDock
     | ToolColourSelect ToolType Element.Color
     | ToolStateToggle ToolType ToolState
-    | DockPopupToggle Int
-    | DockNameChange Int String
+    | DockPopupToggle String
+    | DockNameChange String String
     | DirectionChanges AbruptDirectionChanges.Msg
     | DeletePoints DeletePoints.Msg
     | PointerMsg Pointers.Msg
@@ -722,12 +722,12 @@ update toolMsg isTrack msgWrapper options =
             , actions
             )
 
-        DockPopupToggle int ->
-            case Dict.get int options.docks of
+        DockPopupToggle id ->
+            case Dict.get id options.docks of
                 Just dock ->
                     let
                         newDocks =
-                            Dict.insert int
+                            Dict.insert id
                                 { dock | dockPopupOpen = not dock.dockPopupOpen }
                                 options.docks
 
@@ -751,7 +751,7 @@ update toolMsg isTrack msgWrapper options =
                         newOptions =
                             { options | docks = newDocks }
                     in
-                    ( newOptions, [] )
+                    ( newOptions, [ StoreLocally "docks" <| encodeDockState options.docks ] )
 
                 Nothing ->
                     ( options, [] )
@@ -1422,6 +1422,13 @@ encodeToolState options =
     E.list identity <| List.map encodeOneTool options.tools
 
 
+encodeDockState : Dict String DockSettings -> E.Value
+encodeDockState docks =
+    docks
+        |> Dict.map (\k v -> v.dockLabel)
+        |> E.dict identity E.string
+
+
 colourDecoder =
     D.map3 ColourTriplet
         (field "red" D.float)
@@ -1462,6 +1469,37 @@ restoreStoredValues options values =
     case toolsAsStored of
         Ok stored ->
             { options | tools = List.map (useStoredSettings stored) options.tools }
+
+        Err error ->
+            options
+
+
+restoreDockSettings : Options -> D.Value -> Options
+restoreDockSettings options values =
+    let
+        storedSettings =
+            D.decodeValue (D.dict D.string) values
+
+        useStoredSettings : Dict String String -> Dict String DockSettings
+        useStoredSettings settings =
+            Dict.foldl updateDock options.docks settings
+
+        updateDock : String -> String -> Dict String DockSettings -> Dict String DockSettings
+        updateDock k v dict =
+            dict
+                |> Dict.update k
+                    (\dock ->
+                        case dock of
+                            Just isDock ->
+                                Just { isDock | dockLabel = v }
+
+                            Nothing ->
+                                Nothing
+                    )
+    in
+    case storedSettings of
+        Ok stored ->
+            { options | docks = useStoredSettings stored }
 
         Err error ->
             options
@@ -1519,36 +1557,36 @@ defaultDockColour =
 
 
 dockList =
-    [ ( 1, DockSettings False "Information" defaultDockColour )
-    , ( 2, DockSettings False "Some tools" defaultDockColour )
-    , ( 3, DockSettings False "Space for tools" defaultDockColour )
-    , ( 4, DockSettings False "Bend tools" defaultDockColour )
-    , ( 5, DockSettings False "Basics" defaultDockColour )
+    [ ( "1", DockSettings False "Information" defaultDockColour )
+    , ( "2", DockSettings False "Some tools" defaultDockColour )
+    , ( "3", DockSettings False "Space for tools" defaultDockColour )
+    , ( "4", DockSettings False "Bend tools" defaultDockColour )
+    , ( "5", DockSettings False "Basics" defaultDockColour )
     ]
 
 
-showDockHeader : (ToolMsg -> msg) -> ToolDock -> Dict Int DockSettings -> Element msg
+showDockHeader : (ToolMsg -> msg) -> ToolDock -> Dict String DockSettings -> Element msg
 showDockHeader msgWrapper dockId docks =
     let
         dockNumber =
             case dockId of
                 DockUpperLeft ->
-                    1
+                    "1"
 
                 DockLowerLeft ->
-                    2
+                    "2"
 
                 DockUpperRight ->
-                    5
+                    "5"
 
                 DockLowerRight ->
-                    4
+                    "4"
 
                 DockBottom ->
-                    3
+                    "3"
 
                 DockNone ->
-                    0
+                    "0"
 
         dock =
             Dict.get dockNumber docks
@@ -1565,9 +1603,9 @@ showDockHeader msgWrapper dockId docks =
                 , Background.color dockSettings.dockLabelColour
                 , Font.color <| contrastingColour dockSettings.dockLabelColour
                 ]
-                [ Input.button [  ]
+                [ Input.button []
                     { onPress = Just <| msgWrapper <| DockPopupToggle dockNumber
-                    , label = useIcon FeatherIcons.menu
+                    , label = useIcon FeatherIcons.edit
                     }
                 , case dockSettings.dockPopupOpen of
                     True ->

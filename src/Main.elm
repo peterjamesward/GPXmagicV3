@@ -258,6 +258,7 @@ init mflags origin navigationKey =
         , LocalStorage.storageGetItem "measure"
         , LocalStorage.storageGetItem "background"
         , LocalStorage.storageGetItem "visuals"
+        , LocalStorage.storageGetItem "docks"
         , LocalStorage.storageGetMemoryUsage
         ]
     )
@@ -1434,6 +1435,12 @@ performActionsOnModel actions model =
                             { foldedModel
                                 | toolOptions =
                                     ToolsController.restoreStoredValues foldedModel.toolOptions value
+                            }
+
+                        "docks" ->
+                            { foldedModel
+                                | toolOptions =
+                                    ToolsController.restoreDockSettings foldedModel.toolOptions value
                             }
 
                         "panes" ->
