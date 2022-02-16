@@ -31,7 +31,6 @@ module DomainModel exposing
     , queryPointsUsingFilter
     , rebuildTree
     , replaceRange
-    , safeRatio
     , skipCount
     , sourceData
     , startPoint
@@ -1425,30 +1424,14 @@ trackPointsForOutput tree =
     foldOverRoute foldFn tree []
 
 
-safeRatio numerator denominator =
-    -- Ratio will sometimes not return given a zero.
-    if
-        (numerator |> Quantity.equalWithin Length.centimeter Quantity.zero)
-            || (denominator |> Quantity.equalWithin Length.centimeter Quantity.zero)
-    then
-        0.0
-
-    else
-        100.0 * Quantity.ratio numerator denominator
-
-
 gradientFromNode treeNode =
-    -- Warning, do not trust `ratio`
-    let
-        numerator =
-            Point3d.zCoordinate (endPoint treeNode)
-                |> Quantity.minus
-                    (Point3d.zCoordinate (startPoint treeNode))
-
-        denominator =
-            trueLength treeNode
-    in
-    safeRatio numerator denominator
+    Quantity.ratio
+        (Point3d.zCoordinate (endPoint treeNode)
+            |> Quantity.minus
+                (Point3d.zCoordinate (startPoint treeNode))
+        )
+        (trueLength treeNode)
+        |> (*) 100.0
 
 
 queryPointsUsingFilter :

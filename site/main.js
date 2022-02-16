@@ -12219,28 +12219,11 @@ var $ianmackenzie$elm_geometry$Point3d$interpolateFrom = F3(
 			{x: p1.x + (t * (p2.x - p1.x)), y: p1.y + (t * (p2.y - p1.y)), z: p1.z + (t * (p2.z - p1.z))}) : $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
 			{x: p2.x + ((1 - t) * (p1.x - p2.x)), y: p2.y + ((1 - t) * (p1.y - p2.y)), z: p2.z + ((1 - t) * (p1.z - p2.z))});
 	});
-var $ianmackenzie$elm_units$Length$centimeters = function (numCentimeters) {
-	return $ianmackenzie$elm_units$Length$meters(0.01 * numCentimeters);
-};
-var $ianmackenzie$elm_units$Length$centimeter = $ianmackenzie$elm_units$Length$centimeters(1);
-var $ianmackenzie$elm_units$Quantity$equalWithin = F3(
-	function (_v0, _v1, _v2) {
-		var tolerance = _v0.a;
-		var x = _v1.a;
-		var y = _v2.a;
-		return _Utils_cmp(
-			$elm$core$Basics$abs(x - y),
-			tolerance) < 1;
-	});
 var $ianmackenzie$elm_units$Quantity$ratio = F2(
 	function (_v0, _v1) {
 		var x = _v0.a;
 		var y = _v1.a;
 		return x / y;
-	});
-var $author$project$DomainModel$safeRatio = F2(
-	function (numerator, denominator) {
-		return (A3($ianmackenzie$elm_units$Quantity$equalWithin, $ianmackenzie$elm_units$Length$centimeter, $ianmackenzie$elm_units$Quantity$zero, numerator) || A3($ianmackenzie$elm_units$Quantity$equalWithin, $ianmackenzie$elm_units$Length$centimeter, $ianmackenzie$elm_units$Quantity$zero, denominator)) ? 0.0 : (100.0 * A2($ianmackenzie$elm_units$Quantity$ratio, numerator, denominator));
 	});
 var $author$project$Tools$Interpolate$computeNewPoints = F3(
 	function (excludeExisting, options, track) {
@@ -12248,9 +12231,9 @@ var $author$project$Tools$Interpolate$computeNewPoints = F3(
 		var interpolateRoadSection = F2(
 			function (road, _new) {
 				var intervalsNeeded = $elm$core$Basics$ceiling(
-					A2($author$project$DomainModel$safeRatio, road.trueLength, options.minimumSpacing));
+					A2($ianmackenzie$elm_units$Quantity$ratio, road.trueLength, options.minimumSpacing));
 				var spacingOnThisSegment = A2($ianmackenzie$elm_units$Quantity$divideBy, intervalsNeeded, road.trueLength);
-				var fractionalIncrement = A2($author$project$DomainModel$safeRatio, spacingOnThisSegment, road.trueLength);
+				var fractionalIncrement = A2($ianmackenzie$elm_units$Quantity$ratio, spacingOnThisSegment, road.trueLength);
 				var interpolatedPoints = A2(
 					$elm$core$List$map,
 					function (n) {
@@ -13037,6 +13020,10 @@ var $author$project$Tools$LimitGradients$NotClamped = F2(
 	function (a, b) {
 		return {$: 'NotClamped', a: a, b: b};
 	});
+var $ianmackenzie$elm_units$Length$centimeters = function (numCentimeters) {
+	return $ianmackenzie$elm_units$Length$meters(0.01 * numCentimeters);
+};
+var $ianmackenzie$elm_units$Length$centimeter = $ianmackenzie$elm_units$Length$centimeters(1);
 var $elm$core$Basics$clamp = F3(
 	function (low, high, number) {
 		return (_Utils_cmp(number, low) < 0) ? low : ((_Utils_cmp(number, high) > 0) ? high : number);
@@ -13071,6 +13058,15 @@ var $author$project$DomainModel$distanceFromIndex = F2(
 		}
 	});
 var $author$project$Tools$LimitGradients$emptySlopeStuff = {roads: _List_Nil, totalClamped: $ianmackenzie$elm_units$Quantity$zero, totalOffered: $ianmackenzie$elm_units$Quantity$zero};
+var $ianmackenzie$elm_units$Quantity$equalWithin = F3(
+	function (_v0, _v1, _v2) {
+		var tolerance = _v0.a;
+		var x = _v1.a;
+		var y = _v2.a;
+		return _Utils_cmp(
+			$elm$core$Basics$abs(x - y),
+			tolerance) < 1;
+	});
 var $ianmackenzie$elm_units$Quantity$multiplyBy = F2(
 	function (scale, _v0) {
 		var value = _v0.a;
@@ -13109,8 +13105,8 @@ var $author$project$Tools$LimitGradients$computeNewPoints = F2(
 				A2($author$project$DomainModel$earthPointFromIndex, endIndex, track.trackTree)));
 		var endDistance = _v3.a;
 		var endAltitude = _v3.b;
-		var averageSlope = A2(
-			$author$project$DomainModel$safeRatio,
+		var averageSlope = (A3($ianmackenzie$elm_units$Quantity$equalWithin, $ianmackenzie$elm_units$Length$centimeter, startAltitude, endAltitude) || A3($ianmackenzie$elm_units$Quantity$equalWithin, $ianmackenzie$elm_units$Length$centimeter, startDistance, endDistance)) ? 0.0 : A2(
+			$ianmackenzie$elm_units$Quantity$ratio,
 			A2($ianmackenzie$elm_units$Quantity$minus, startAltitude, endAltitude),
 			A2($ianmackenzie$elm_units$Quantity$minus, startDistance, endDistance));
 		var slopeDiscoveryFn = F2(
@@ -13142,7 +13138,7 @@ var $author$project$Tools$LimitGradients$computeNewPoints = F2(
 			track.trackTree,
 			slopeDiscoveryFn,
 			$author$project$Tools$LimitGradients$emptySlopeStuff);
-		var proRataToAllocate = A2($author$project$DomainModel$safeRatio, slopeInfo.totalOffered, slopeInfo.totalClamped);
+		var proRataToAllocate = (A3($ianmackenzie$elm_units$Quantity$equalWithin, $ianmackenzie$elm_units$Length$centimeter, $ianmackenzie$elm_units$Quantity$zero, slopeInfo.totalClamped) || A3($ianmackenzie$elm_units$Quantity$equalWithin, $ianmackenzie$elm_units$Length$centimeter, $ianmackenzie$elm_units$Quantity$zero, slopeInfo.totalOffered)) ? 0.0 : A2($ianmackenzie$elm_units$Quantity$ratio, slopeInfo.totalOffered, slopeInfo.totalClamped);
 		var allocateProRata = F2(
 			function (section, _v7) {
 				var altitude = _v7.a;
@@ -15138,12 +15134,12 @@ var $author$project$Tools$BendSmoother$arc3dFromThreePoints = F3(
 			$ianmackenzie$elm_geometry$Point3d$interpolateFrom,
 			pb,
 			pc,
-			A2($author$project$DomainModel$safeRatio, commonAmountToSteal, afterLength));
+			A2($ianmackenzie$elm_units$Quantity$ratio, commonAmountToSteal, afterLength));
 		var arcStart = A3(
 			$ianmackenzie$elm_geometry$Point3d$interpolateFrom,
 			pb,
 			pa,
-			A2($author$project$DomainModel$safeRatio, commonAmountToSteal, beforeLength));
+			A2($ianmackenzie$elm_units$Quantity$ratio, commonAmountToSteal, beforeLength));
 		if (trianglePlane.$ === 'Just') {
 			var plane = trianglePlane.a;
 			var _v2 = _Utils_Tuple3(
@@ -24557,7 +24553,7 @@ var $author$project$Tools$CurveFormer$makeCurveIfPossible = F2(
 								centreOnPlane,
 								i,
 								A2(
-									$author$project$DomainModel$safeRatio,
+									$ianmackenzie$elm_units$Quantity$ratio,
 									options.pushRadius,
 									A2($ianmackenzie$elm_units$Quantity$plus, options.pushRadius, options.transitionRadius)));
 							return {
@@ -24727,7 +24723,7 @@ var $author$project$Tools$CurveFormer$makeCurveIfPossible = F2(
 						var thisPointDistanceFromStart = A2($author$project$DomainModel$distanceFromIndex, idx, track.trackTree);
 						return _Utils_Tuple2(
 							A2(
-								$author$project$DomainModel$safeRatio,
+								$ianmackenzie$elm_units$Quantity$ratio,
 								A2($ianmackenzie$elm_units$Quantity$minus, startDistance, thisPointDistanceFromStart),
 								length),
 							$ianmackenzie$elm_geometry$Point3d$zCoordinate(
@@ -24891,7 +24887,7 @@ var $author$project$Tools$CurveFormer$makeCurveIfPossible = F2(
 					$elm$core$List$map2,
 					F2(
 						function (seg, dist) {
-							var proportionalDistance = A2($author$project$DomainModel$safeRatio, dist, actualNewLength);
+							var proportionalDistance = A2($ianmackenzie$elm_units$Quantity$ratio, dist, actualNewLength);
 							var originalSegmentStart = $ianmackenzie$elm_geometry$LineSegment2d$startPoint(seg);
 							var adjustment = A2($ianmackenzie$elm_units$Quantity$multiplyBy, proportionalDistance, altitudeChange);
 							var newAltitude = function () {
@@ -42511,14 +42507,15 @@ var $terezka$elm_charts$Chart$Attributes$gradient = F2(
 			});
 	});
 var $author$project$DomainModel$gradientFromNode = function (treeNode) {
-	var numerator = A2(
-		$ianmackenzie$elm_units$Quantity$minus,
-		$ianmackenzie$elm_geometry$Point3d$zCoordinate(
-			$author$project$DomainModel$startPoint(treeNode)),
-		$ianmackenzie$elm_geometry$Point3d$zCoordinate(
-			$author$project$DomainModel$endPoint(treeNode)));
-	var denominator = $author$project$DomainModel$trueLength(treeNode);
-	return A2($author$project$DomainModel$safeRatio, numerator, denominator);
+	return 100.0 * A2(
+		$ianmackenzie$elm_units$Quantity$ratio,
+		A2(
+			$ianmackenzie$elm_units$Quantity$minus,
+			$ianmackenzie$elm_geometry$Point3d$zCoordinate(
+				$author$project$DomainModel$startPoint(treeNode)),
+			$ianmackenzie$elm_geometry$Point3d$zCoordinate(
+				$author$project$DomainModel$endPoint(treeNode))),
+		$author$project$DomainModel$trueLength(treeNode));
 };
 var $terezka$elm_charts$Internal$Helpers$green = '#71c614';
 var $terezka$elm_charts$Chart$Attributes$green = $terezka$elm_charts$Internal$Helpers$green;

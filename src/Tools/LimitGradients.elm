@@ -192,9 +192,16 @@ computeNewPoints options track =
             )
 
         averageSlope =
-            DomainModel.safeRatio
-                (endAltitude |> Quantity.minus startAltitude)
-                (endDistance |> Quantity.minus startDistance)
+            if
+                (endAltitude |> Quantity.equalWithin Length.centimeter startAltitude)
+                    || (endDistance |> Quantity.equalWithin Length.centimeter startDistance)
+            then
+                0.0
+
+            else
+                Quantity.ratio
+                    (endAltitude |> Quantity.minus startAltitude)
+                    (endDistance |> Quantity.minus startDistance)
 
         slopeDiscoveryFn : RoadSection -> SlopeStuff -> SlopeStuff
         slopeDiscoveryFn road slopeStuff =
@@ -255,7 +262,14 @@ computeNewPoints options track =
                 emptySlopeStuff
 
         proRataToAllocate =
-            DomainModel.safeRatio slopeInfo.totalOffered slopeInfo.totalClamped
+            if
+                (slopeInfo.totalClamped |> Quantity.equalWithin Length.centimeter Quantity.zero)
+                    || (slopeInfo.totalOffered |> Quantity.equalWithin Length.centimeter Quantity.zero)
+            then
+                0.0
+
+            else
+                Quantity.ratio slopeInfo.totalOffered slopeInfo.totalClamped
 
         adjustAltitude : Length.Length -> EarthPoint -> EarthPoint
         adjustAltitude alt pt =
