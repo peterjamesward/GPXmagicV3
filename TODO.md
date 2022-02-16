@@ -21,15 +21,7 @@ BUG: Right edge of chart adrift on tight zoom.
 
 ## Limit gradients
 
-**Weirdness** on Hour of Power, Ben Nevis. If limits are set high, should be a no-op.
-
-SHow current (and final?) average slope in tool?
-
 Pan & Zoom still wrong for selection, OK for whole track only.
-
-Athens kills it (!!!). The Chart build seems to do it.
-
-I have stopped the memory updates; they need to start when TrckInfo is opened.
 
 ---
 
