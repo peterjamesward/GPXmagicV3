@@ -19199,7 +19199,7 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F3(
 			$ianmackenzie$elm_units$Quantity$multiplyBy,
 			A2($elm$core$Basics$pow, 0.5, context.zoomLevel),
 			$author$project$DomainModel$trueLength(track.trackTree));
-		var pointOfInterest = context.followSelectedPoint ? A2($author$project$DomainModel$distanceFromIndex, track.currentPosition, track.trackTree) : $ianmackenzie$elm_geometry$Point3d$xCoordinate(context.focalPoint);
+		var pointOfInterest = A2($author$project$DomainModel$distanceFromIndex, track.currentPosition, track.trackTree);
 		var leftEdge = A3(
 			$ianmackenzie$elm_units$Quantity$clamp,
 			$ianmackenzie$elm_units$Quantity$zero,
@@ -19216,9 +19216,9 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F3(
 		var lengthConversion = imperial ? $ianmackenzie$elm_units$Length$inMiles : $ianmackenzie$elm_units$Length$inMeters;
 		var heightConversion = imperial ? $ianmackenzie$elm_units$Length$inFeet : $ianmackenzie$elm_units$Length$inMeters;
 		var foldFn = F2(
-			function (road, _v10) {
-				var distanceSoFar = _v10.a;
-				var outputs = _v10.b;
+			function (road, _v11) {
+				var distanceSoFar = _v11.a;
+				var outputs = _v11.b;
 				var newEntry = {
 					altitude: heightConversion(
 						$ianmackenzie$elm_geometry$Point3d$zCoordinate(road.startPoint)),
@@ -19254,34 +19254,42 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F3(
 				}();
 				var fromStart = _v3.a;
 				var fromEnd = _v3.b;
+				var _v5 = _Utils_Tuple2(leftIndex - fromStart, rightIndex - fromStart);
+				var leftPreviewIndex = _v5.a;
+				var rightPreviewIndex = _v5.b;
 				var previewStartDistance = A2($author$project$DomainModel$distanceFromIndex, fromStart, track.trackTree);
-				var _v5 = A2(
+				var previewInitialFoldDistance = A3(
+					$ianmackenzie$elm_units$Quantity$clamp,
+					$ianmackenzie$elm_units$Quantity$zero,
+					A2(
+						$ianmackenzie$elm_units$Quantity$minus,
+						trackLengthInView,
+						$author$project$DomainModel$trueLength(track.trackTree)),
+					A2($ianmackenzie$elm_units$Quantity$max, leftEdge, previewStartDistance));
+				var _v6 = A2(
 					$elm$core$Debug$log,
 					'(leftEdge, rightEdge)',
 					_Utils_Tuple2(leftEdge, rightEdge));
-				var _v6 = A2(
+				var _v7 = A2(
 					$elm$core$Debug$log,
 					'(leftIndex, rightIndex)',
 					_Utils_Tuple2(leftIndex, rightIndex));
-				var _v7 = A2($elm$core$Debug$log, 'previewStartDistance', previewStartDistance);
+				var _v8 = A2($elm$core$Debug$log, 'previewStartDistance', previewStartDistance);
 				return A7(
 					$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
-					leftIndex - fromStart,
-					rightIndex - fromStart,
+					leftPreviewIndex,
+					rightPreviewIndex,
 					depthFn,
 					0,
 					previewTree,
 					foldFn,
-					_Utils_Tuple3(
-						A2($ianmackenzie$elm_units$Quantity$plus, previewStartDistance, leftEdge),
-						_List_Nil,
-						$elm$core$Maybe$Nothing));
+					_Utils_Tuple3(previewInitialFoldDistance, _List_Nil, $elm$core$Maybe$Nothing));
 			} else {
 				return _Utils_Tuple3($ianmackenzie$elm_units$Quantity$zero, _List_Nil, $elm$core$Maybe$Nothing);
 			}
 		}();
 		var preview = _v1.b;
-		var _v8 = A7(
+		var _v9 = A7(
 			$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
 			leftIndex,
 			rightIndex,
@@ -19290,8 +19298,8 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F3(
 			track.trackTree,
 			foldFn,
 			_Utils_Tuple3(leftEdge, _List_Nil, $elm$core$Maybe$Nothing));
-		var result = _v8.b;
-		var _final = _v8.c;
+		var result = _v9.b;
+		var _final = _v9.c;
 		var finalDatum = function () {
 			if (_final.$ === 'Just') {
 				var finalLeaf = _final.a;

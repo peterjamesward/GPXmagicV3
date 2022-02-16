@@ -495,11 +495,7 @@ renderProfileDataForCharts toolSettings context track =
             trueLength track.trackTree |> Quantity.multiplyBy (0.5 ^ context.zoomLevel)
 
         pointOfInterest =
-            if context.followSelectedPoint then
-                distanceFromIndex track.currentPosition track.trackTree
-
-            else
-                Point3d.xCoordinate context.focalPoint
+            distanceFromIndex track.currentPosition track.trackTree
 
         leftEdge =
             Quantity.clamp
@@ -580,21 +576,34 @@ renderProfileDataForCharts toolSettings context track =
                         previewStartDistance =
                             distanceFromIndex fromStart track.trackTree
 
-                        _ = Debug.log "(leftEdge, rightEdge)" (leftEdge, rightEdge)
+                        previewInitialFoldDistance =
+                            Quantity.clamp
+                                Quantity.zero
+                                (trueLength track.trackTree |> Quantity.minus trackLengthInView)
+                                (Quantity.max leftEdge previewStartDistance)
 
-                        _ = Debug.log "(leftIndex, rightIndex)" (leftIndex, rightIndex)
+                        ( leftPreviewIndex, rightPreviewIndex ) =
+                            ( leftIndex - fromStart
+                            , rightIndex - fromStart
+                            )
 
-                        _ = Debug.log "previewStartDistance" previewStartDistance
+                        _ =
+                            Debug.log "(leftEdge, rightEdge)" ( leftEdge, rightEdge )
 
+                        _ =
+                            Debug.log "(leftIndex, rightIndex)" ( leftIndex, rightIndex )
+
+                        _ =
+                            Debug.log "previewStartDistance" previewStartDistance
                     in
                     DomainModel.traverseTreeBetweenLimitsToDepth
-                        (leftIndex - fromStart)
-                        (rightIndex - fromStart)
+                        leftPreviewIndex
+                        rightPreviewIndex
                         depthFn
                         0
                         previewTree
                         foldFn
-                        ( leftEdge |> Quantity.plus previewStartDistance
+                        ( previewInitialFoldDistance
                         , []
                         , Nothing
                         )
