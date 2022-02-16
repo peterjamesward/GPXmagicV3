@@ -25,7 +25,7 @@ https://github.com/peterjamesward/GPXmagicV3/issues
 aboutText =
     """
 
-# GPXmagic v3.0.1 (2679ce48)
+# GPXmagic v3.0.1 (33d1c19b)
 
 If v1 was the surprise indie hit, v2 the disappointing second album, here's hoping
 v3 is the polished studio album that delivers the goods.
