@@ -19215,9 +19215,9 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F3(
 		var lengthConversion = imperial ? $ianmackenzie$elm_units$Length$inMiles : $ianmackenzie$elm_units$Length$inMeters;
 		var heightConversion = imperial ? $ianmackenzie$elm_units$Length$inFeet : $ianmackenzie$elm_units$Length$inMeters;
 		var foldFn = F2(
-			function (road, _v8) {
-				var distanceSoFar = _v8.a;
-				var outputs = _v8.b;
+			function (road, _v10) {
+				var distanceSoFar = _v10.a;
+				var outputs = _v10.b;
 				var newEntry = {
 					altitude: heightConversion(
 						$ianmackenzie$elm_geometry$Point3d$zCoordinate(road.startPoint)),
@@ -19240,39 +19240,25 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F3(
 		var leftIndex = _v0.a;
 		var rightIndex = _v0.b;
 		var _v1 = function () {
-			var _v2 = toolSettings.limitGradientSettings.previewData;
-			if (_v2.$ === 'Just') {
-				var previewTree = _v2.a;
-				var _v3 = function () {
-					var _v4 = toolSettings.limitGradientSettings.extent;
-					if (_v4.$ === 'ExtentIsRange') {
-						return $author$project$TrackLoaded$getRangeFromMarkers(track);
-					} else {
-						return _Utils_Tuple2(0, 0);
-					}
-				}();
-				var fromStart = _v3.a;
-				var fromEnd = _v3.b;
-				var _v5 = _Utils_Tuple2(leftIndex - fromStart, rightIndex - fromStart);
-				var leftPreviewIndex = _v5.a;
-				var rightPreviewIndex = _v5.b;
-				var previewStartDistance = A2($author$project$DomainModel$distanceFromIndex, fromStart, track.trackTree);
-				var previewInitialFoldDistance = A2($ianmackenzie$elm_units$Quantity$max, leftEdge, previewStartDistance);
-				return A7(
-					$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
-					leftPreviewIndex,
-					rightPreviewIndex,
-					depthFn,
-					0,
-					previewTree,
-					foldFn,
-					_Utils_Tuple3(previewInitialFoldDistance, _List_Nil, $elm$core$Maybe$Nothing));
+			var _v2 = toolSettings.limitGradientSettings.extent;
+			if (_v2.$ === 'ExtentIsRange') {
+				return $author$project$TrackLoaded$getRangeFromMarkers(track);
 			} else {
-				return _Utils_Tuple3($ianmackenzie$elm_units$Quantity$zero, _List_Nil, $elm$core$Maybe$Nothing);
+				return _Utils_Tuple2(0, 0);
 			}
 		}();
-		var preview = _v1.b;
-		var _v6 = A7(
+		var fromStart = _v1.a;
+		var fromEnd = _v1.b;
+		var previewEndDistance = A2(
+			$author$project$DomainModel$distanceFromIndex,
+			$author$project$DomainModel$skipCount(track.trackTree) - fromEnd,
+			track.trackTree);
+		var _v3 = _Utils_Tuple2(leftIndex - fromStart, rightIndex - fromStart);
+		var leftPreviewIndex = _v3.a;
+		var rightPreviewIndex = _v3.b;
+		var previewStartDistance = A2($author$project$DomainModel$distanceFromIndex, fromStart, track.trackTree);
+		var previewInitialFoldDistance = A2($ianmackenzie$elm_units$Quantity$max, leftEdge, previewStartDistance);
+		var _v4 = A7(
 			$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
 			leftIndex,
 			rightIndex,
@@ -19281,8 +19267,8 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F3(
 			track.trackTree,
 			foldFn,
 			_Utils_Tuple3(leftEdge, _List_Nil, $elm$core$Maybe$Nothing));
-		var result = _v6.b;
-		var _final = _v6.c;
+		var result = _v4.b;
+		var _final = _v4.c;
 		var finalDatum = function () {
 			if (_final.$ === 'Just') {
 				var finalLeaf = _final.a;
@@ -19302,12 +19288,58 @@ var $author$project$ViewProfileCharts$renderProfileDataForCharts = F3(
 				};
 			}
 		}();
+		var _v5 = function () {
+			var _v6 = toolSettings.limitGradientSettings.previewData;
+			if (_v6.$ === 'Just') {
+				var previewTree = _v6.a;
+				return A7(
+					$author$project$DomainModel$traverseTreeBetweenLimitsToDepth,
+					leftPreviewIndex,
+					rightPreviewIndex,
+					depthFn,
+					0,
+					previewTree,
+					foldFn,
+					_Utils_Tuple3(previewInitialFoldDistance, _List_Nil, $elm$core$Maybe$Nothing));
+			} else {
+				return _Utils_Tuple3($ianmackenzie$elm_units$Quantity$zero, _List_Nil, $elm$core$Maybe$Nothing);
+			}
+		}();
+		var preview = _v5.b;
+		var dangly = _v5.c;
+		var previewFinalDatum = function () {
+			if (dangly.$ === 'Just') {
+				var finalLeaf = dangly.a;
+				return {
+					altitude: heightConversion(
+						$ianmackenzie$elm_geometry$Point3d$zCoordinate(finalLeaf.endPoint)),
+					colour: $author$project$ColourPalette$gradientColourPastel(finalLeaf.gradientAtEnd),
+					distance: lengthConversion(
+						A2($ianmackenzie$elm_units$Quantity$min, rightEdge, previewEndDistance)),
+					gradient: finalLeaf.gradientAtEnd
+				};
+			} else {
+				return {
+					altitude: 0.0,
+					colour: $avh4$elm_color$Color$black,
+					distance: lengthConversion(rightEdge),
+					gradient: 0.0
+				};
+			}
+		}();
 		return _Utils_update(
 			context,
 			{
 				gradientProblems: A2($elm$core$List$map, $elm$core$Tuple$first, toolSettings.gradientProblemOptions.breaches),
 				imperial: imperial,
-				previewData: $elm$core$List$reverse(preview),
+				previewData: function () {
+					if (dangly.$ === 'Just') {
+						return $elm$core$List$reverse(
+							A2($elm$core$List$cons, previewFinalDatum, preview));
+					} else {
+						return _List_Nil;
+					}
+				}(),
 				profileData: $elm$core$List$reverse(
 					A2($elm$core$List$cons, finalDatum, result))
 			});

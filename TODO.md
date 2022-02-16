@@ -29,25 +29,26 @@ BUG: Right edge of chart adrift on tight zoom.
 Tools that require a range should say so when there isn't one! (David Ogle)
 
 1. Enable IP logging (new database for v3)
-2. Ability to point-smooth transitions over a range
-3. Editable names on docks (edit in situ, plus color selector)
-4. Intersection detection ((?? JB loop detection ??)) 
-5. Chart can only show one Preview; how do we determine which?
-6. Chart preview for Centroid, Bezier, point smoother
-7. Gaussian (including necessary interpolation)
-8. Fly-through, 1st person view
-9. Move & Stretch
-10. Improve default zoom
-11. Graph Theory (renamed)
-12. Use Strava segment data
-13. Loops (inc. impact on others, such as Bezier)
-14. Lift and Shift
-15. SVG import
-16. Extract all text for translation
-17. Use localised number formatting everywhere (for French use of , and .)
-18. Terrain (with texture)
-19. Map style choice (Satellite if possible)
-20. Split and Join
+2. Editable names on docks (edit in situ, plus color selector)
+3. Distribute tools into docks better
+4. Ability to point-smooth transitions over a range
+5. Intersection detection ((?? JB loop detection ??)) 
+6. Chart can only show one Preview; how do we determine which?
+7. Chart preview for Centroid, Bezier, point smoother
+8. Gaussian (including necessary interpolation)
+9. Fly-through, 1st person view
+10. Move & Stretch
+11. Improve default zoom
+12. Graph Theory (renamed)
+13. Use Strava segment data
+14. Loops (inc. impact on others, such as Bezier)
+15. Lift and Shift
+16. SVG import
+17. Extract all text for translation
+18. Use localised number formatting everywhere (for French use of , and .)
+19. Terrain (with texture)
+20. Map style choice (Satellite if possible)
+21. Split and Join
 
 New stuff:
 1. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).

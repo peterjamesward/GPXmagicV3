@@ -561,29 +561,32 @@ renderProfileDataForCharts toolSettings context track =
                     , colour = Color.black
                     }
 
-        ( _, preview, _ ) =
+        ( fromStart, fromEnd ) =
+            case toolSettings.limitGradientSettings.extent of
+                ExtentIsRange ->
+                    TrackLoaded.getRangeFromMarkers track
+
+                ExtentIsTrack ->
+                    ( 0, 0 )
+
+        previewStartDistance =
+            distanceFromIndex fromStart track.trackTree
+
+        previewEndDistance =
+            distanceFromIndex (skipCount track.trackTree - fromEnd)
+                track.trackTree
+
+        ( leftPreviewIndex, rightPreviewIndex ) =
+            ( leftIndex - fromStart
+            , rightIndex - fromStart
+            )
+
+        previewInitialFoldDistance =
+            Quantity.max leftEdge previewStartDistance
+
+        ( _, preview, dangly ) =
             case toolSettings.limitGradientSettings.previewData of
                 Just previewTree ->
-                    let
-                        ( fromStart, fromEnd ) =
-                            case toolSettings.limitGradientSettings.extent of
-                                ExtentIsRange ->
-                                    TrackLoaded.getRangeFromMarkers track
-
-                                ExtentIsTrack ->
-                                    ( 0, 0 )
-
-                        previewStartDistance =
-                            distanceFromIndex fromStart track.trackTree
-
-                        previewInitialFoldDistance =
-                                (Quantity.max leftEdge previewStartDistance)
-
-                        ( leftPreviewIndex, rightPreviewIndex ) =
-                            ( leftIndex - fromStart
-                            , rightIndex - fromStart
-                            )
-                    in
                     DomainModel.traverseTreeBetweenLimitsToDepth
                         leftPreviewIndex
                         rightPreviewIndex
@@ -598,12 +601,35 @@ renderProfileDataForCharts toolSettings context track =
 
                 Nothing ->
                     ( Quantity.zero, [], Nothing )
+
+        previewFinalDatum =
+            case dangly of
+                Just finalLeaf ->
+                    { distance = lengthConversion <| Quantity.min rightEdge previewEndDistance
+                    , altitude = heightConversion <| Point3d.zCoordinate finalLeaf.endPoint
+                    , gradient = finalLeaf.gradientAtEnd
+                    , colour = gradientColourPastel finalLeaf.gradientAtEnd
+                    }
+
+                Nothing ->
+                    -- Can happen!
+                    { distance = lengthConversion rightEdge
+                    , altitude = 0.0
+                    , gradient = 0.0
+                    , colour = Color.black
+                    }
     in
     { context
         | profileData = List.reverse (finalDatum :: result)
         , gradientProblems = List.map Tuple.first toolSettings.gradientProblemOptions.breaches
         , imperial = imperial
-        , previewData = List.reverse preview
+        , previewData =
+            case dangly of
+                Just _ ->
+                    List.reverse (previewFinalDatum :: preview)
+
+                Nothing ->
+                    []
     }
 
 
