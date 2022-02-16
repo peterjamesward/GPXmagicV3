@@ -29,11 +29,11 @@ BUG: Right edge of chart adrift on tight zoom.
 1. Lift and Shift
 2. SVG import
 3. Fly-through, 1st person view
-4. Graph Theory (renamed)
-5. Use Strava segment data
-6. Move & Stretch
-7. Loops (inc. impact on others, such as Bezier)
-8. Intersection detection ((?? JB loop detection ??))
+4. Use Strava segment data
+5. Move & Stretch
+6. Loops (inc. impact on others, such as Bezier)
+7. Intersection detection ((?? JB loop detection ??))
+8. Graph Theory (renamed)
 9. Ability to point-smooth transitions over a range
 10. Chart can only show one Preview; how do we determine which?
 11. Chart preview for Centroid, Bezier, point smoother
