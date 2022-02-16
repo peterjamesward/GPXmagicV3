@@ -28,7 +28,6 @@ BUG: Right edge of chart adrift on tight zoom.
 
 Tools that require a range should say so when there isn't one! (David Ogle)
 
-1. Enable IP logging (new database for v3)
 2. Editable names on docks (edit in situ, plus color selector)
 3. Distribute tools into docks better
 4. Ability to point-smooth transitions over a range

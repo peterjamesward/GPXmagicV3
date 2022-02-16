@@ -318,8 +318,7 @@ update msg model =
             ( { model | ipInfo = ipInfo }
             , Cmd.batch
                 [ MapPortController.createMap mapInfoWithLocation
-
-                --, MyIP.sendIpInfo model.time IpInfoAcknowledged ipInfo
+                , MyIP.sendIpInfo model.time IpInfoAcknowledged ipInfo
                 ]
             )
 
