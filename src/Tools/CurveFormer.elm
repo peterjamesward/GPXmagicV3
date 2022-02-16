@@ -894,7 +894,7 @@ makeCurveIfPossible track options =
                                             Point2d.interpolateFrom
                                                 centreOnPlane
                                                 i
-                                                (Quantity.ratio options.pushRadius
+                                                (DomainModel.safeRatio options.pushRadius
                                                     (Quantity.plus options.pushRadius options.transitionRadius)
                                                 )
                                     in
@@ -1114,9 +1114,11 @@ makeCurveIfPossible track options =
                                             thisPointDistanceFromStart =
                                                 DomainModel.distanceFromIndex idx track.trackTree
                                         in
-                                        ( Quantity.ratio (thisPointDistanceFromStart |> Quantity.minus startDistance)
+                                        ( DomainModel.safeRatio
+                                            (thisPointDistanceFromStart |> Quantity.minus startDistance)
                                             length
-                                        , Point3d.zCoordinate <| DomainModel.earthPointFromIndex idx track.trackTree
+                                        , Point3d.zCoordinate <|
+                                            DomainModel.earthPointFromIndex idx track.trackTree
                                         )
                                     )
                     in
@@ -1206,7 +1208,7 @@ makeCurveIfPossible track options =
                                             LineSegment2d.startPoint seg
 
                                         proportionalDistance =
-                                            Quantity.ratio dist actualNewLength
+                                            DomainModel.safeRatio dist actualNewLength
 
                                         adjustment =
                                             altitudeChange |> Quantity.multiplyBy proportionalDistance

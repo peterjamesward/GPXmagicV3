@@ -196,13 +196,13 @@ arc3dFromThreePoints pa pb pc =
             Point3d.interpolateFrom
                 pb
                 pa
-                (Quantity.ratio commonAmountToSteal beforeLength)
+                (DomainModel.safeRatio commonAmountToSteal beforeLength)
 
         arcEnd =
             Point3d.interpolateFrom
                 pb
                 pc
-                (Quantity.ratio commonAmountToSteal afterLength)
+                (DomainModel.safeRatio commonAmountToSteal afterLength)
 
         trianglePlane =
             SketchPlane3d.throughPoints pa pb pc

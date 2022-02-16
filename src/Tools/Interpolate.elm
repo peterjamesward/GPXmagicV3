@@ -52,14 +52,14 @@ computeNewPoints excludeExisting options track =
         interpolateRoadSection road new =
             let
                 intervalsNeeded =
-                    Quantity.ratio road.trueLength options.minimumSpacing
+                    DomainModel.safeRatio road.trueLength options.minimumSpacing
                         |> ceiling
 
                 spacingOnThisSegment =
                     road.trueLength |> Quantity.divideBy (toFloat intervalsNeeded)
 
                 fractionalIncrement =
-                    Quantity.ratio spacingOnThisSegment road.trueLength
+                    DomainModel.safeRatio spacingOnThisSegment road.trueLength
 
                 interpolatedPoints =
                     -- Includes start point!
