@@ -15,6 +15,7 @@ import Tools.CurveFormerOptions
 import Tools.InterpolateOptions
 import Tools.LimitGradientOptions
 import Tools.MemoryUsage
+import Tools.MoveScaleRotateOptions
 import Tools.NudgeOptions
 import Tools.OutAndBackOptions
 
@@ -50,6 +51,7 @@ type ToolAction msg
     | ApplyInterpolateWithOptions Tools.InterpolateOptions.Options
     | OneClickQuickFix
     | LimitGradientWithOptions Tools.LimitGradientOptions.Options
+    | ApplyRotateAndScale Tools.MoveScaleRotateOptions.Options
 
 
 type PreviewShape
@@ -108,6 +110,9 @@ interpretAction action =
 
         LimitGradientWithOptions options ->
             "limit gradients"
+
+        ApplyRotateAndScale _ ->
+            "rotate and scale"
 
         _ ->
             "ask Pete to fix this message"

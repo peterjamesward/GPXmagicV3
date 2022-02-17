@@ -54,6 +54,7 @@ import Tools.Interpolate
 import Tools.InterpolateOptions
 import Tools.LimitGradientOptions
 import Tools.LimitGradients
+import Tools.MoveScaleRotate
 import Tools.Nudge
 import Tools.OneClickQuickFix
 import Tools.OutAndBack
@@ -1352,6 +1353,24 @@ performActionsOnModel actions model =
 
                                 Tools.LimitGradientOptions.ExtentIsTrack ->
                                     ( 0, 0 )
+
+                        newTrack =
+                            track
+                                |> TrackLoaded.addToUndoStack action
+                                    fromStart
+                                    fromEnd
+                                    oldPoints
+                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                    in
+                    { foldedModel | track = Just newTrack }
+
+                ( ApplyRotateAndScale options, Just track ) ->
+                    let
+                        ( newTree, oldPoints ) =
+                            Tools.MoveScaleRotate.apply options track
+
+                        ( fromStart, fromEnd ) =
+                            ( 0, 0 )
 
                         newTrack =
                             track

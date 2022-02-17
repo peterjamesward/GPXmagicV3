@@ -36,6 +36,7 @@ import Tools.InterpolateOptions
 import Tools.LimitGradientOptions
 import Tools.LimitGradients
 import Tools.MoveScaleRotate
+import Tools.MoveScaleRotateOptions
 import Tools.Nudge
 import Tools.NudgeOptions
 import Tools.OutAndBack
@@ -96,7 +97,7 @@ type alias Options =
     , simplifySettings : Tools.Simplify.Options
     , interpolateSettings : Tools.InterpolateOptions.Options
     , limitGradientSettings : Tools.LimitGradientOptions.Options
-    , moveScaleRotateSettings : Tools.MoveScaleRotate.Options
+    , moveScaleRotateSettings : Tools.MoveScaleRotateOptions.Options
     }
 
 

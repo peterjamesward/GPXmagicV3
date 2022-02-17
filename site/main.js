@@ -13282,6 +13282,131 @@ var $author$project$Tools$LimitGradients$apply = F2(
 			newTree,
 			A2($elm$core$List$map, $elm$core$Tuple$second, oldPoints));
 	});
+var $ianmackenzie$elm_geometry$Point3d$rotateAround = F3(
+	function (_v0, _v1, _v2) {
+		var axis = _v0.a;
+		var angle = _v1.a;
+		var p = _v2.a;
+		var halfAngle = 0.5 * angle;
+		var qw = $elm$core$Basics$cos(halfAngle);
+		var sinHalfAngle = $elm$core$Basics$sin(halfAngle);
+		var _v3 = axis.originPoint;
+		var p0 = _v3.a;
+		var deltaX = p.x - p0.x;
+		var deltaY = p.y - p0.y;
+		var deltaZ = p.z - p0.z;
+		var _v4 = axis.direction;
+		var d = _v4.a;
+		var qx = d.x * sinHalfAngle;
+		var wx = qw * qx;
+		var xx = qx * qx;
+		var qy = d.y * sinHalfAngle;
+		var wy = qw * qy;
+		var xy = qx * qy;
+		var yy = qy * qy;
+		var a22 = 1 - (2 * (xx + yy));
+		var qz = d.z * sinHalfAngle;
+		var wz = qw * qz;
+		var a01 = 2 * (xy - wz);
+		var a10 = 2 * (xy + wz);
+		var xz = qx * qz;
+		var a02 = 2 * (xz + wy);
+		var a20 = 2 * (xz - wy);
+		var yz = qy * qz;
+		var a12 = 2 * (yz - wx);
+		var a21 = 2 * (yz + wx);
+		var zz = qz * qz;
+		var a00 = 1 - (2 * (yy + zz));
+		var a11 = 1 - (2 * (xx + zz));
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+			{x: ((p0.x + (a00 * deltaX)) + (a01 * deltaY)) + (a02 * deltaZ), y: ((p0.y + (a10 * deltaX)) + (a11 * deltaY)) + (a12 * deltaZ), z: ((p0.z + (a20 * deltaX)) + (a21 * deltaY)) + (a22 * deltaZ)});
+	});
+var $ianmackenzie$elm_geometry$Point3d$scaleAbout = F3(
+	function (_v0, k, _v1) {
+		var p0 = _v0.a;
+		var p = _v1.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+			{x: p0.x + (k * (p.x - p0.x)), y: p0.y + (k * (p.y - p0.y)), z: p0.z + (k * (p.z - p0.z))});
+	});
+var $ianmackenzie$elm_geometry$Geometry$Types$Axis3d = function (a) {
+	return {$: 'Axis3d', a: a};
+};
+var $ianmackenzie$elm_geometry$Axis3d$through = F2(
+	function (givenPoint, givenDirection) {
+		return $ianmackenzie$elm_geometry$Geometry$Types$Axis3d(
+			{direction: givenDirection, originPoint: givenPoint});
+	});
+var $ianmackenzie$elm_geometry$Geometry$Types$Direction3d = function (a) {
+	return {$: 'Direction3d', a: a};
+};
+var $ianmackenzie$elm_geometry$Direction3d$unsafe = function (givenComponents) {
+	return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(givenComponents);
+};
+var $ianmackenzie$elm_geometry$Direction3d$positiveZ = $ianmackenzie$elm_geometry$Direction3d$unsafe(
+	{x: 0, y: 0, z: 1});
+var $ianmackenzie$elm_geometry$Direction3d$z = $ianmackenzie$elm_geometry$Direction3d$positiveZ;
+var $author$project$Tools$MoveScaleRotate$rotateAndScale = F2(
+	function (settings, track) {
+		var centre = A3(
+			$ianmackenzie$elm_geometry$Point3d$xyz,
+			$ianmackenzie$elm_geometry$BoundingBox3d$midX(
+				$author$project$DomainModel$boundingBox(track.trackTree)),
+			$ianmackenzie$elm_geometry$BoundingBox3d$midY(
+				$author$project$DomainModel$boundingBox(track.trackTree)),
+			$ianmackenzie$elm_geometry$BoundingBox3d$minZ(
+				$author$project$DomainModel$boundingBox(track.trackTree)));
+		var axisOfRotation = A2(
+			$ianmackenzie$elm_geometry$Axis3d$through,
+			A2($author$project$DomainModel$earthPointFromIndex, track.currentPosition, track.trackTree),
+			$ianmackenzie$elm_geometry$Direction3d$z);
+		var rotateAndScaleEndPoint = F2(
+			function (road, outputs) {
+				return A2(
+					$elm$core$List$cons,
+					A3(
+						$ianmackenzie$elm_geometry$Point3d$scaleAbout,
+						centre,
+						settings.scaleFactor,
+						A3($ianmackenzie$elm_geometry$Point3d$rotateAround, axisOfRotation, settings.rotateAngle, road.endPoint)),
+					outputs);
+			});
+		var transformedEndPoints = A3($author$project$DomainModel$foldOverRouteRL, rotateAndScaleEndPoint, track.trackTree, _List_Nil);
+		var transformedStartPoint = A3(
+			$ianmackenzie$elm_geometry$Point3d$scaleAbout,
+			centre,
+			settings.scaleFactor,
+			A3(
+				$ianmackenzie$elm_geometry$Point3d$rotateAround,
+				axisOfRotation,
+				settings.rotateAngle,
+				A2($author$project$DomainModel$earthPointFromIndex, 0, track.trackTree)));
+		return A2(
+			$elm$core$List$map,
+			function (earth) {
+				return _Utils_Tuple2(
+					earth,
+					A2($author$project$DomainModel$gpxFromPointWithReference, track.referenceLonLat, earth));
+			},
+			A2($elm$core$List$cons, transformedStartPoint, transformedEndPoints));
+	});
+var $ianmackenzie$elm_geometry$Direction2d$positiveX = $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
+	{x: 1, y: 0});
+var $ianmackenzie$elm_geometry$Direction2d$x = $ianmackenzie$elm_geometry$Direction2d$positiveX;
+var $author$project$DomainModel$treeFromSourcePoints = function (track) {
+	var referencePoint = A2(
+		$elm$core$Maybe$withDefault,
+		A3($author$project$DomainModel$GPXSource, $ianmackenzie$elm_geometry$Direction2d$x, $ianmackenzie$elm_units$Quantity$zero, $ianmackenzie$elm_units$Quantity$zero),
+		$elm$core$List$head(track));
+	return A2($author$project$DomainModel$treeFromSourcesWithExistingReference, referencePoint, track);
+};
+var $author$project$Tools$MoveScaleRotate$apply = F2(
+	function (options, track) {
+		var newPoints = A2($author$project$Tools$MoveScaleRotate$rotateAndScale, options, track);
+		return _Utils_Tuple2(
+			$author$project$DomainModel$treeFromSourcePoints(
+				A2($elm$core$List$map, $elm$core$Tuple$second, newPoints)),
+			$author$project$DomainModel$getAllGPXPointsInNaturalOrder(track.trackTree));
+	});
 var $author$project$BezierSplines$SplineFoldState = F3(
 	function (roadMinusOne, roadMinusTwo, newPoints) {
 		return {newPoints: newPoints, roadMinusOne: roadMinusOne, roadMinusTwo: roadMinusTwo};
@@ -13819,15 +13944,6 @@ var $ianmackenzie$elm_geometry$Plane3d$through = F2(
 		return $ianmackenzie$elm_geometry$Geometry$Types$Plane3d(
 			{normalDirection: givenNormalDirection, originPoint: givenPoint});
 	});
-var $ianmackenzie$elm_geometry$Geometry$Types$Direction3d = function (a) {
-	return {$: 'Direction3d', a: a};
-};
-var $ianmackenzie$elm_geometry$Direction3d$unsafe = function (givenComponents) {
-	return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(givenComponents);
-};
-var $ianmackenzie$elm_geometry$Direction3d$positiveZ = $ianmackenzie$elm_geometry$Direction3d$unsafe(
-	{x: 0, y: 0, z: 1});
-var $ianmackenzie$elm_geometry$Direction3d$z = $ianmackenzie$elm_geometry$Direction3d$positiveZ;
 var $ianmackenzie$elm_geometry$Plane3d$xy = A2($ianmackenzie$elm_geometry$Plane3d$through, $ianmackenzie$elm_geometry$Point3d$origin, $ianmackenzie$elm_geometry$Direction3d$z);
 var $ianmackenzie$elm_geometry$Vector3d$xyz = F3(
 	function (_v0, _v1, _v2) {
@@ -14002,16 +14118,6 @@ var $author$project$DomainModel$getAllGPXPointsInDict = function (treeNode) {
 				$elm$core$Dict$empty)));
 	var outputs = _v0.b;
 	return outputs;
-};
-var $ianmackenzie$elm_geometry$Direction2d$positiveX = $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
-	{x: 1, y: 0});
-var $ianmackenzie$elm_geometry$Direction2d$x = $ianmackenzie$elm_geometry$Direction2d$positiveX;
-var $author$project$DomainModel$treeFromSourcePoints = function (track) {
-	var referencePoint = A2(
-		$elm$core$Maybe$withDefault,
-		A3($author$project$DomainModel$GPXSource, $ianmackenzie$elm_geometry$Direction2d$x, $ianmackenzie$elm_units$Quantity$zero, $ianmackenzie$elm_units$Quantity$zero),
-		$elm$core$List$head(track));
-	return A2($author$project$DomainModel$treeFromSourcesWithExistingReference, referencePoint, track);
 };
 var $elm$core$Dict$values = function (dict) {
 	return A3(
@@ -14871,14 +14977,6 @@ var $ianmackenzie$elm_geometry$Arc3d$throughPoints = F3(
 						A2($ianmackenzie$elm_geometry$Point3d$projectInto, sketchPlane, thirdPoint)));
 			},
 			A3($ianmackenzie$elm_geometry$SketchPlane3d$throughPoints, firstPoint, secondPoint, thirdPoint));
-	});
-var $ianmackenzie$elm_geometry$Geometry$Types$Axis3d = function (a) {
-	return {$: 'Axis3d', a: a};
-};
-var $ianmackenzie$elm_geometry$Axis3d$through = F2(
-	function (givenPoint, givenDirection) {
-		return $ianmackenzie$elm_geometry$Geometry$Types$Axis3d(
-			{direction: givenDirection, originPoint: givenPoint});
 	});
 var $ianmackenzie$elm_geometry$Axis3d$throughPoints = F2(
 	function (firstPoint, secondPoint) {
@@ -17563,96 +17661,6 @@ var $author$project$Tools$LimitGradients$toolStateChange = F4(
 					]));
 		}
 	});
-var $ianmackenzie$elm_geometry$Point3d$rotateAround = F3(
-	function (_v0, _v1, _v2) {
-		var axis = _v0.a;
-		var angle = _v1.a;
-		var p = _v2.a;
-		var halfAngle = 0.5 * angle;
-		var qw = $elm$core$Basics$cos(halfAngle);
-		var sinHalfAngle = $elm$core$Basics$sin(halfAngle);
-		var _v3 = axis.originPoint;
-		var p0 = _v3.a;
-		var deltaX = p.x - p0.x;
-		var deltaY = p.y - p0.y;
-		var deltaZ = p.z - p0.z;
-		var _v4 = axis.direction;
-		var d = _v4.a;
-		var qx = d.x * sinHalfAngle;
-		var wx = qw * qx;
-		var xx = qx * qx;
-		var qy = d.y * sinHalfAngle;
-		var wy = qw * qy;
-		var xy = qx * qy;
-		var yy = qy * qy;
-		var a22 = 1 - (2 * (xx + yy));
-		var qz = d.z * sinHalfAngle;
-		var wz = qw * qz;
-		var a01 = 2 * (xy - wz);
-		var a10 = 2 * (xy + wz);
-		var xz = qx * qz;
-		var a02 = 2 * (xz + wy);
-		var a20 = 2 * (xz - wy);
-		var yz = qy * qz;
-		var a12 = 2 * (yz - wx);
-		var a21 = 2 * (yz + wx);
-		var zz = qz * qz;
-		var a00 = 1 - (2 * (yy + zz));
-		var a11 = 1 - (2 * (xx + zz));
-		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
-			{x: ((p0.x + (a00 * deltaX)) + (a01 * deltaY)) + (a02 * deltaZ), y: ((p0.y + (a10 * deltaX)) + (a11 * deltaY)) + (a12 * deltaZ), z: ((p0.z + (a20 * deltaX)) + (a21 * deltaY)) + (a22 * deltaZ)});
-	});
-var $ianmackenzie$elm_geometry$Point3d$scaleAbout = F3(
-	function (_v0, k, _v1) {
-		var p0 = _v0.a;
-		var p = _v1.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
-			{x: p0.x + (k * (p.x - p0.x)), y: p0.y + (k * (p.y - p0.y)), z: p0.z + (k * (p.z - p0.z))});
-	});
-var $author$project$Tools$MoveScaleRotate$rotateAndScale = F2(
-	function (settings, track) {
-		var centre = A3(
-			$ianmackenzie$elm_geometry$Point3d$xyz,
-			$ianmackenzie$elm_geometry$BoundingBox3d$midX(
-				$author$project$DomainModel$boundingBox(track.trackTree)),
-			$ianmackenzie$elm_geometry$BoundingBox3d$midY(
-				$author$project$DomainModel$boundingBox(track.trackTree)),
-			$ianmackenzie$elm_geometry$BoundingBox3d$minZ(
-				$author$project$DomainModel$boundingBox(track.trackTree)));
-		var axisOfRotation = A2(
-			$ianmackenzie$elm_geometry$Axis3d$through,
-			A2($author$project$DomainModel$earthPointFromIndex, track.currentPosition, track.trackTree),
-			$ianmackenzie$elm_geometry$Direction3d$z);
-		var rotateAndScaleEndPoint = F2(
-			function (road, outputs) {
-				return A2(
-					$elm$core$List$cons,
-					A3(
-						$ianmackenzie$elm_geometry$Point3d$scaleAbout,
-						centre,
-						settings.scaleFactor,
-						A3($ianmackenzie$elm_geometry$Point3d$rotateAround, axisOfRotation, settings.rotateAngle, road.endPoint)),
-					outputs);
-			});
-		var transformedEndPoints = A3($author$project$DomainModel$foldOverRouteRL, rotateAndScaleEndPoint, track.trackTree, _List_Nil);
-		var transformedStartPoint = A3(
-			$ianmackenzie$elm_geometry$Point3d$scaleAbout,
-			centre,
-			settings.scaleFactor,
-			A3(
-				$ianmackenzie$elm_geometry$Point3d$rotateAround,
-				axisOfRotation,
-				settings.rotateAngle,
-				A2($author$project$DomainModel$earthPointFromIndex, 0, track.trackTree)));
-		return A2(
-			$elm$core$List$map,
-			function (earth) {
-				return _Utils_Tuple2(
-					earth,
-					A2($author$project$DomainModel$gpxFromPointWithReference, track.referenceLonLat, earth));
-			},
-			A2($elm$core$List$cons, transformedStartPoint, transformedEndPoints));
-	});
 var $author$project$Tools$MoveScaleRotate$actions = F3(
 	function (options, previewColour, track) {
 		return _List_fromArray(
@@ -20046,7 +20054,7 @@ var $author$project$Main$performActionsOnModel = F2(
 		var performAction = F2(
 			function (action, foldedModel) {
 				var _v0 = _Utils_Tuple2(action, foldedModel.track);
-				_v0$25:
+				_v0$26:
 				while (true) {
 					switch (_v0.a.$) {
 						case 'SetCurrent':
@@ -20062,7 +20070,7 @@ var $author$project$Main$performActionsOnModel = F2(
 												{currentPosition: position}))
 									});
 							} else {
-								break _v0$25;
+								break _v0$26;
 							}
 						case 'SetCurrentFromMapClick':
 							if (_v0.b.$ === 'Just') {
@@ -20077,7 +20085,7 @@ var $author$project$Main$performActionsOnModel = F2(
 												{currentPosition: position}))
 									});
 							} else {
-								break _v0$25;
+								break _v0$26;
 							}
 						case 'ShowPreview':
 							if (_v0.b.$ === 'Just') {
@@ -20089,7 +20097,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										previews: A3($elm$core$Dict$insert, previewData.tag, previewData, foldedModel.previews)
 									});
 							} else {
-								break _v0$25;
+								break _v0$26;
 							}
 						case 'HidePreview':
 							if (_v0.b.$ === 'Just') {
@@ -20101,7 +20109,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										previews: A2($elm$core$Dict$remove, tag, foldedModel.previews)
 									});
 							} else {
-								break _v0$25;
+								break _v0$26;
 							}
 						case 'RenderProfile':
 							if (_v0.b.$ === 'Just') {
@@ -20113,7 +20121,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										paneLayoutOptions: A3($author$project$PaneLayoutManager$renderProfile, foldedModel.toolOptions, track, foldedModel.paneLayoutOptions)
 									});
 							} else {
-								break _v0$25;
+								break _v0$26;
 							}
 						case 'DelayMessage':
 							if (_v0.b.$ === 'Just') {
@@ -20123,7 +20131,7 @@ var $author$project$Main$performActionsOnModel = F2(
 								var track = _v0.b.a;
 								return foldedModel;
 							} else {
-								break _v0$25;
+								break _v0$26;
 							}
 						case 'DeletePointsBetween':
 							if (_v0.b.$ === 'Just') {
@@ -20144,7 +20152,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$25;
+								break _v0$26;
 							}
 						case 'DeleteSinglePoint':
 							if (_v0.b.$ === 'Just') {
@@ -20165,7 +20173,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$25;
+								break _v0$26;
 							}
 						case 'BezierApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -20187,7 +20195,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$25;
+								break _v0$26;
 							}
 						case 'CentroidAverageApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -20209,7 +20217,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$25;
+								break _v0$26;
 							}
 						case 'CurveFormerApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -20236,7 +20244,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$25;
+								break _v0$26;
 							}
 						case 'NudgeApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -20263,7 +20271,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$25;
+								break _v0$26;
 							}
 						case 'BendSmootherApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -20285,7 +20293,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$25;
+								break _v0$26;
 							}
 						case 'OutAndBackApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -20307,7 +20315,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$25;
+								break _v0$26;
 							}
 						case 'ApplySimplify':
 							if (_v0.b.$ === 'Just') {
@@ -20329,7 +20337,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$25;
+								break _v0$26;
 							}
 						case 'OneClickQuickFix':
 							if (_v0.b.$ === 'Just') {
@@ -20351,7 +20359,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$25;
+								break _v0$26;
 							}
 						case 'ApplyInterpolateWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -20380,7 +20388,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$25;
+								break _v0$26;
 							}
 						case 'LimitGradientWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -20409,15 +20417,37 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$25;
+								break _v0$26;
+							}
+						case 'ApplyRotateAndScale':
+							if (_v0.b.$ === 'Just') {
+								var options = _v0.a.a;
+								var track = _v0.b.a;
+								var _v33 = A2($author$project$Tools$MoveScaleRotate$apply, options, track);
+								var newTree = _v33.a;
+								var oldPoints = _v33.b;
+								var _v34 = _Utils_Tuple2(0, 0);
+								var fromStart = _v34.a;
+								var fromEnd = _v34.b;
+								var newTrack = A2(
+									$author$project$TrackLoaded$useTreeWithRepositionedMarkers,
+									newTree,
+									A5($author$project$TrackLoaded$addToUndoStack, action, fromStart, fromEnd, oldPoints, track));
+								return _Utils_update(
+									foldedModel,
+									{
+										track: $elm$core$Maybe$Just(newTrack)
+									});
+							} else {
+								break _v0$26;
 							}
 						case 'PointMovedOnMap':
 							if (_v0.b.$ === 'Just') {
-								var _v33 = _v0.a;
-								var startLon = _v33.a;
-								var startLat = _v33.b;
-								var endLon = _v33.c;
-								var endLat = _v33.d;
+								var _v35 = _v0.a;
+								var startLon = _v35.a;
+								var startLat = _v35.b;
+								var endLon = _v35.c;
+								var endLat = _v35.d;
 								var track = _v0.b.a;
 								var startGpx = {
 									altitude: $ianmackenzie$elm_units$Quantity$zero,
@@ -20434,11 +20464,11 @@ var $author$project$Main$performActionsOnModel = F2(
 										$ianmackenzie$elm_units$Angle$degrees(endLon))
 								};
 								var newTree = A4($author$project$DomainModel$updatePointByIndexInSitu, index, endGpx, track.referenceLonLat, track.trackTree);
-								var _v34 = _Utils_Tuple2(
+								var _v36 = _Utils_Tuple2(
 									index,
 									$author$project$DomainModel$skipCount(track.trackTree) - index);
-								var fromStart = _v34.a;
-								var fromEnd = _v34.b;
+								var fromStart = _v36.a;
+								var fromEnd = _v36.b;
 								var newTrack = A5(
 									$author$project$TrackLoaded$addToUndoStack,
 									action,
@@ -20455,22 +20485,22 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$25;
+								break _v0$26;
 							}
 						case 'TrackHasChanged':
 							if (_v0.b.$ === 'Just') {
-								var _v35 = _v0.a;
+								var _v37 = _v0.a;
 								var track = _v0.b.a;
-								var _v36 = A2($author$project$ToolsController$refreshOpenTools, foldedModel.track, foldedModel.toolOptions);
-								var refreshedToolOptions = _v36.a;
-								var secondaryActions = _v36.b;
+								var _v38 = A2($author$project$ToolsController$refreshOpenTools, foldedModel.track, foldedModel.toolOptions);
+								var refreshedToolOptions = _v38.a;
+								var secondaryActions = _v38.b;
 								var innerModelWithNewToolSettings = _Utils_update(
 									foldedModel,
 									{toolOptions: refreshedToolOptions});
 								var modelAfterSecondaryActions = A2($author$project$Main$performActionsOnModel, secondaryActions, innerModelWithNewToolSettings);
 								return modelAfterSecondaryActions;
 							} else {
-								break _v0$25;
+								break _v0$26;
 							}
 						case 'SetMarker':
 							if (_v0.b.$ === 'Just') {
@@ -20485,12 +20515,12 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(updatedTrack)
 									});
 							} else {
-								break _v0$25;
+								break _v0$26;
 							}
 						case 'StoredValueRetrieved':
-							var _v37 = _v0.a;
-							var key = _v37.a;
-							var value = _v37.b;
+							var _v39 = _v0.a;
+							var key = _v39.a;
+							var value = _v39.b;
 							switch (key) {
 								case 'splits':
 									return A2($author$project$Main$decodeSplitValues, value, foldedModel);
@@ -20557,7 +20587,7 @@ var $author$project$Main$performActionsOnModel = F2(
 							return revisedModel;
 						case 'UndoLastAction':
 							if (_v0.b.$ === 'Just') {
-								var _v40 = _v0.a;
+								var _v42 = _v0.a;
 								var track = _v0.b.a;
 								return _Utils_update(
 									foldedModel,
@@ -20566,24 +20596,24 @@ var $author$project$Main$performActionsOnModel = F2(
 											$author$project$TrackLoaded$undoLastAction(track))
 									});
 							} else {
-								break _v0$25;
+								break _v0$26;
 							}
 						case 'RedoUndoneAction':
 							if (_v0.b.$ === 'Just') {
-								var _v41 = _v0.a;
+								var _v43 = _v0.a;
 								var track = _v0.b.a;
-								var _v42 = track.redos;
-								if (_v42.b) {
-									var redo = _v42.a;
-									var moreRedos = _v42.b;
+								var _v44 = track.redos;
+								if (_v44.b) {
+									var redo = _v44.a;
+									var moreRedos = _v44.b;
 									var modelAfterRedo = A2(
 										$author$project$Main$performActionsOnModel,
 										_List_fromArray(
 											[redo.action]),
 										model);
-									var _v43 = modelAfterRedo.track;
-									if (_v43.$ === 'Just') {
-										var trackAfterRedo = _v43.a;
+									var _v45 = modelAfterRedo.track;
+									if (_v45.$ === 'Just') {
+										var trackAfterRedo = _v45.a;
 										var trackWithCorrectRedoStack = _Utils_update(
 											trackAfterRedo,
 											{redos: moreRedos});
@@ -20599,10 +20629,10 @@ var $author$project$Main$performActionsOnModel = F2(
 									return foldedModel;
 								}
 							} else {
-								break _v0$25;
+								break _v0$26;
 							}
 						default:
-							break _v0$25;
+							break _v0$26;
 					}
 				}
 				return foldedModel;
@@ -26183,6 +26213,9 @@ var $author$project$Tools$LimitGradients$update = F4(
 			return _Utils_Tuple2(options, _List_Nil);
 		}
 	});
+var $author$project$Actions$ApplyRotateAndScale = function (a) {
+	return {$: 'ApplyRotateAndScale', a: a};
+};
 var $author$project$Tools$MoveScaleRotate$update = F4(
 	function (msg, settings, previewColour, hasTrack) {
 		var _v0 = _Utils_Tuple2(msg, hasTrack);
@@ -26212,7 +26245,11 @@ var $author$project$Tools$MoveScaleRotate$update = F4(
 					var newSettings = $author$project$Tools$MoveScaleRotate$defaultOptions;
 					return _Utils_Tuple2(
 						newSettings,
-						A3($author$project$Tools$MoveScaleRotate$actions, newSettings, previewColour, track));
+						_List_fromArray(
+							[
+								$author$project$Actions$ApplyRotateAndScale(settings),
+								$author$project$Actions$TrackHasChanged
+							]));
 				case 'Recentre':
 					var _v2 = _v0.a;
 					var track = _v0.b.a;
@@ -39729,6 +39766,8 @@ var $author$project$Actions$interpretAction = function (action) {
 		case 'LimitGradientWithOptions':
 			var options = action.a;
 			return 'limit gradients';
+		case 'ApplyRotateAndScale':
+			return 'rotate and scale';
 		default:
 			return 'ask Pete to fix this message';
 	}

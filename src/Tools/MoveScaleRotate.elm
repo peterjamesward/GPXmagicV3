@@ -5,7 +5,7 @@ import Angle exposing (Angle)
 import Axis3d
 import BoundingBox3d
 import Direction3d
-import DomainModel exposing (EarthPoint, GPXSource, RoadSection)
+import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (button)
@@ -13,6 +13,7 @@ import FlatColors.ChinesePalette
 import Length exposing (Meters)
 import Point3d
 import ToolTip exposing (buttonStylesWithTooltip)
+import Tools.MoveScaleRotateOptions exposing (Options)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal0, showDecimal2)
 import ViewPureStyles exposing (..)
@@ -25,12 +26,6 @@ type Msg
     | SetScale Float
     | Zero
     | UseMapElevations
-
-
-type alias Options =
-    { rotateAngle : Angle
-    , scaleFactor : Float
-    }
 
 
 defaultOptions : Options
@@ -100,7 +95,7 @@ update msg settings previewColour hasTrack =
                     defaultOptions
             in
             ( newSettings
-            , actions newSettings previewColour track
+            , [ ApplyRotateAndScale settings, TrackHasChanged ]
             )
 
         ( Recentre, Just track ) ->
@@ -210,6 +205,17 @@ rotateAndScale settings track =
             )
         )
         (transformedStartPoint :: transformedEndPoints)
+
+
+apply : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+apply options track =
+    let
+        newPoints =
+            rotateAndScale options track
+    in
+    ( DomainModel.treeFromSourcePoints <| List.map Tuple.second newPoints
+    , DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
+    )
 
 
 view :
