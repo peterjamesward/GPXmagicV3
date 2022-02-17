@@ -225,6 +225,9 @@ processMapPortMessage lastState track json =
             ( D.decodeValue (D.field "lat" D.float) json
             , D.decodeValue (D.field "lon" D.float) json
             )
+
+        elevations =
+            D.decodeValue (D.field "elevations" (D.list D.float)) json
     in
     case jsonMsg of
         Ok "click" ->
@@ -267,17 +270,14 @@ processMapPortMessage lastState track json =
         Ok "drag" ->
             ( lastState, draggedOnMap json track )
 
-        --( Ok "elevations", Just track ) ->
-        --    case elevations of
-        --        Ok mapElevations ->
-        --            processPostUpdateAction model
-        --                (PostUpdateActions.ActionTrackChanged
-        --                    TrackEditType.EditPreservesIndex
-        --                    (RotateRoute.buildMapElevations mapElevations track)
-        --                )
-        --
-        --        _ ->
-        --            ( Model model, Cmd.none )
+        Ok "elevations" ->
+            case elevations of
+                Ok mapElevations ->
+                    ( lastState, [ ApplyMapElevations mapElevations ] )
+
+                _ ->
+                    ( lastState, [] )
+
         _ ->
             ( lastState, [] )
 

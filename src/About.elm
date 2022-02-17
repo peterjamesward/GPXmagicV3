@@ -25,7 +25,7 @@ https://github.com/peterjamesward/GPXmagicV3/issues
 aboutText =
     """
 
-# GPXmagic v3.0.1 (33d1c19b)
+# GPXmagic v3.0.2 (33d1c19b)
 
 If v1 was the surprise indie hit, v2 the disappointing second album, here's hoping
 v3 is the polished studio album that delivers the goods.
@@ -35,7 +35,7 @@ In this release:
 * The Return/Enter key will apply your new name to a tool docking zone.
 * The Return/Enter key in the filename box will also save the GPX file.
 * Some controls will now have tooltips that appear as you move the mouse over them.
-* Move and Rotate has transitioned from v2.
+* Move and Rotate has transitioned from v2, but without "fetch elevations from map".
 
 Thanks to all for feedback and suggestions. I'm working my way through the migration
 of tools from v2, which is sometimes straightforward, sometimes not, so progress

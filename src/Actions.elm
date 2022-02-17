@@ -54,6 +54,8 @@ type ToolAction msg
     | LimitGradientWithOptions Tools.LimitGradientOptions.Options
     | ApplyRotateAndScale Tools.MoveScaleRotateOptions.Options
     | ApplyRecentre ( Float, Float )
+    | FetchMapElevations
+    | ApplyMapElevations (List Float)
 
 
 type PreviewShape
@@ -118,6 +120,9 @@ interpretAction action =
 
         ApplyRecentre _ ->
             "move"
+
+        ApplyMapElevations _ ->
+            "use map elevations"
 
         _ ->
             "tell Pete this needs a message"

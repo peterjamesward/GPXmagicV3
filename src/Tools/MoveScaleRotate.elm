@@ -113,20 +113,17 @@ update msg settings previewColour hasTrack =
             )
 
         ( UseMapElevations, Just track ) ->
-            let
-                newSettings =
-                    settings
-            in
-            ( newSettings
-            , actions newSettings previewColour track
+            ( settings
+            , [ FetchMapElevations ]
             )
 
         _ ->
             ( settings, [] )
 
 
-applyMapElevations : List Float -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
+applyMapElevations : List Float -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
 applyMapElevations elevations track =
+    --TODO: Ah, but what if we elided the track??
     let
         useNewElevation tp ele =
             Point3d.xyz
@@ -134,7 +131,9 @@ applyMapElevations elevations track =
                 (Point3d.yCoordinate tp)
                 (Length.meters ele)
     in
-    []
+    ( DomainModel.treeFromSourcePoints []
+    , DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
+    )
 
 
 computeRecentredPoints : ( Float, Float ) -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
@@ -347,7 +346,8 @@ view imperial options wrapper maybeTrack =
                     [ rotateButton
                     , zeroButton
                     , recentreButton
-                    , elevationFetchButton
+
+                    --, elevationFetchButton
                     ]
                 ]
 

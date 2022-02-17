@@ -1414,6 +1414,24 @@ performActionsOnModel actions model =
                     in
                     { foldedModel | track = Just newTrack }
 
+                ( ApplyMapElevations elevations, Just track ) ->
+                    let
+                        ( newTree, oldPoints ) =
+                            Tools.MoveScaleRotate.applyMapElevations elevations track
+
+                        ( fromStart, fromEnd ) =
+                            ( 0, 0 )
+
+                        newTrack =
+                            track
+                                |> TrackLoaded.addToUndoStack action
+                                    fromStart
+                                    fromEnd
+                                    oldPoints
+                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                    in
+                    { foldedModel | track = Just newTrack }
+
                 ( PointMovedOnMap startLon startLat endLon endLat, Just track ) ->
                     let
                         startGpx =
@@ -1675,6 +1693,9 @@ performActionCommands actions model =
 
                 ( HeapStatusUpdate _, _ ) ->
                     Delay.after 5000 TimeToUpdateMemory
+
+                ( FetchMapElevations, _ ) ->
+                    MapPortController.requestElevations
 
                 _ ->
                     Cmd.none
