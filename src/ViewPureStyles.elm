@@ -292,6 +292,10 @@ useIcon =
     html << FeatherIcons.toHtml [] << FeatherIcons.withSize 20
 
 
+useIconWithSize size =
+    html << FeatherIcons.toHtml [] << FeatherIcons.withSize size
+
+
 showModalMessage : Int -> String -> msg -> Element msg
 showModalMessage areaWidth content msg =
     column

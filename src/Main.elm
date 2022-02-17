@@ -42,6 +42,7 @@ import Quantity exposing (Quantity)
 import SceneBuilderMap
 import SplitPane.SplitPane as SplitPane exposing (..)
 import StravaAuth exposing (getStravaToken)
+import SvgPathExtractor
 import Task
 import Time
 import Tools.BendSmoother
@@ -73,6 +74,7 @@ type Msg
     = GpxRequested
     | GpxSelected File
     | GpxLoaded String
+    | ToggleLoadOptionMenu
     | OAuthMessage OAuthMsg
     | AdjustTimeZone Time.Zone
     | SetRenderDepth Int
@@ -98,6 +100,7 @@ type Msg
     | TimeToUpdateMemory
     | OneClickMsg Tools.OneClickQuickFix.Msg
     | FetchElevationsFromMap
+    | SvgMsg SvgPathExtractor.Msg
     | NoOp
 
 
@@ -107,6 +110,8 @@ type alias Model =
     , zone : Time.Zone
     , ipInfo : Maybe IpInfo
     , stravaAuthentication : O.Model
+    , loadOptionsMenuOpen : Bool
+    , svgFileOptions : SvgPathExtractor.Options
 
     -- Track stuff
     , track : Maybe (TrackLoaded Msg)
@@ -223,6 +228,8 @@ init mflags origin navigationKey =
       , zone = Time.utc
       , ipInfo = Nothing
       , stravaAuthentication = authData
+      , loadOptionsMenuOpen = False
+      , svgFileOptions = SvgPathExtractor.defaultOptions
       , track = Nothing
       , previews = Dict.empty
       , windowSize = ( 1000, 800 )
@@ -352,42 +359,44 @@ update msg model =
             case trackTree of
                 Just aTree ->
                     let
-                        newTrack : TrackLoaded Msg
+                        trackName =
+                            GpxParser.parseTrackName content
+                                |> Maybe.andThen (always model.filename)
+                                |> Maybe.withDefault "no track name"
+
+                        newTrack : Maybe (TrackLoaded Msg)
                         newTrack =
-                            { trackTree = aTree
-                            , currentPosition = 0
-                            , markerPosition = Nothing
-                            , renderDepth = 10
-                            , referenceLonLat =
-                                List.head gpxTrack
-                                    |> Maybe.withDefault (GPXSource Direction2d.x Quantity.zero Quantity.zero)
-                            , undos = []
-                            , redos = []
-                            , trackName = GpxParser.parseTrackName content
-                            , lastMapClick = ( 0, 0 )
-                            }
-
-                        modelWithTrack =
-                            { model
-                                | track = Just newTrack
-                                , paneLayoutOptions =
-                                    PaneLayoutManager.initialise
-                                        newTrack
-                                        model.paneLayoutOptions
-                                , modalMessage = Nothing
-                            }
-
-                        actions =
-                            [ TrackHasChanged, MapRefresh ]
-
-                        modelAfterActions =
-                            -- e.g. collect previews and render ...
-                            performActionsOnModel actions modelWithTrack
+                            TrackLoaded.trackFromPoints trackName gpxTrack
                     in
-                    ( modelAfterActions
-                    , Cmd.batch
-                        [ showTrackOnMapCentered newTrack ]
-                    )
+                    case newTrack of
+                        Just track ->
+                            let
+                                modelWithTrack =
+                                    { model
+                                        | track = newTrack
+                                        , paneLayoutOptions =
+                                            PaneLayoutManager.initialise
+                                                track
+                                                model.paneLayoutOptions
+                                        , modalMessage = Nothing
+                                    }
+
+                                actions =
+                                    [ TrackHasChanged, MapRefresh ]
+
+                                modelAfterActions =
+                                    -- e.g. collect previews and render ...
+                                    performActionsOnModel actions modelWithTrack
+                            in
+                            ( modelAfterActions
+                            , Cmd.batch
+                                [ showTrackOnMapCentered track ]
+                            )
+
+                        Nothing ->
+                            ( { model | modalMessage = Just "Sorry, unable to load that" }
+                            , Cmd.none
+                            )
 
                 Nothing ->
                     ( { model | modalMessage = Just """Sorry, unable to make a track.
@@ -658,9 +667,25 @@ Please check the file contains GPX data.""" }
             -- the map for elevation data. Let's do that.
             ( model, MapPortController.requestElevations )
 
+        ToggleLoadOptionMenu ->
+            ( { model | loadOptionsMenuOpen = not model.loadOptionsMenuOpen }
+            , Cmd.none
+            )
 
+        SvgMsg svgMsg ->
+            let
+                ( newOptions, actions ) =
+                    SvgPathExtractor.update
+                        svgMsg
+                        model.svgFileOptions
+                        SvgMsg
 
---task to write the data
+                newModel =
+                    { model | svgFileOptions = newOptions }
+            in
+            ( newModel
+            , performActionCommands actions newModel
+            )
 
 
 allocateSpaceForDocksAndContent : Int -> Int -> Model -> Model
@@ -967,6 +992,28 @@ viewPaneArea model =
 
 topLoadingBar model =
     let
+        moreOptionsButton =
+            button
+                [ padding 5
+                , Background.color FlatColors.ChinesePalette.antiFlashWhite
+                , Border.color FlatColors.FlatUIPalette.peterRiver
+                , Border.width 2
+                , inFront <|
+                    if model.loadOptionsMenuOpen then
+                        el
+                            [ moveRight 30
+                            , Background.color FlatColors.ChinesePalette.antiFlashWhite
+                            , htmlAttribute (style "z-index" "20")
+                            ]
+                            (SvgPathExtractor.view SvgMsg)
+
+                    else
+                        none
+                ]
+                { onPress = Just ToggleLoadOptionMenu
+                , label = useIconWithSize 12 FeatherIcons.moreHorizontal
+                }
+
         loadGpxButton =
             button
                 [ padding 5
@@ -999,6 +1046,7 @@ topLoadingBar model =
                ]
         )
         [ loadGpxButton
+        , moreOptionsButton
         , el [ Font.color <| contrastingColour model.backgroundColour ]
             (text <| bestTrackName model)
         , case model.filename of
@@ -1488,6 +1536,20 @@ performActionsOnModel actions model =
                     in
                     { foldedModel | track = Just newTrack }
 
+                ( TrackFromSvg svgContent, _ ) ->
+                    let
+                        newTrack =
+                            SvgPathExtractor.trackFromSvg
+                                model.svgFileOptions
+                                svgContent
+                    in
+                    case newTrack of
+                        Just _ ->
+                            { foldedModel | track = newTrack }
+
+                        Nothing ->
+                            { foldedModel | modalMessage = Just "Unable to extract SVG paths" }
+
                 ( TrackHasChanged, Just track ) ->
                     -- Must be wary of looping here.
                     -- Purpose is to refresh all tools' options and all presentations.
@@ -1709,6 +1771,12 @@ performActionCommands actions model =
 
                 ( FetchMapElevations, _ ) ->
                     MapPortController.requestElevations
+
+                ( SelectSvgFile message, _ ) ->
+                    Select.file [ "text/svg" ] message
+
+                ( LoadSvgFile message file, _ ) ->
+                    Task.perform message (File.toString file)
 
                 _ ->
                     Cmd.none

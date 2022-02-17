@@ -1,14 +1,20 @@
 module SvgPathExtractor exposing (..)
 
+import Actions exposing (ToolAction(..))
 import AltMath.Matrix4 as AltMath
 import AltMath.Vector3
-import BoundingBox2d
+import Angle
 import BoundingBox3d
 import CubicSpline3d
-import Element exposing (Element, text)
+import Direction2d
+import DomainModel
+import Element exposing (Element, moveDown, moveLeft, padding, text)
+import Element.Background as Background
+import Element.Border as Border
 import Element.Input as Input
 import File exposing (File)
-import File.Select as Select
+import FlatColors.ChinesePalette
+import FlatColors.FlatUIPalette
 import GpxParser exposing (asRegex)
 import Length exposing (Meters, inMeters, meters)
 import LineSegment3d
@@ -21,28 +27,19 @@ import Point3d exposing (Point3d)
 import Polyline3d
 import Quantity exposing (Quantity(..))
 import Regex
-import SketchPlane3d
-import SpatialIndex
-import Task
-import Track exposing (Track)
-import TrackPoint
-import Utils exposing (clickTolerance, flatBox)
+import TrackLoaded exposing (TrackLoaded)
 import Vector3d
-import ViewPureStyles exposing (prettyButtonStyles)
+import ViewPureStyles exposing (neatToolsBorder, prettyButtonStyles)
 import XmlParser exposing (Node(..))
 
 
 type alias Options =
-    { track : Maybe Track
-    , svgFilename : String
-    }
+    { svgFilename : String }
 
 
-empty : Options
-empty =
-    { track = Nothing
-    , svgFilename = "SVG"
-    }
+defaultOptions : Options
+defaultOptions =
+    { svgFilename = "SVG" }
 
 
 type Msg
@@ -57,21 +54,33 @@ type alias Path =
     }
 
 
-update : Msg -> Options -> (Msg -> msg) -> ( Options, Cmd msg )
-update msg model wrap =
+update : Msg -> Options -> (Msg -> msg) -> ( Options, List (ToolAction msg) )
+update msg options wrap =
     case msg of
         ReadFile ->
-            ( { model | track = Nothing }
-            , Select.file [ "text/svg" ] (wrap << FileSelected)
+            ( options
+            , [ SelectSvgFile (wrap << FileSelected) ]
+              --Select.file [ "text/svg" ] (wrap << FileSelected)
             )
 
         FileSelected file ->
-            ( { model | svgFilename = File.name file }
-            , Task.perform (wrap << FileLoaded) (File.toString file)
+            ( options
+            , [ LoadSvgFile (wrap << FileLoaded) file ]
+              --, Task.perform (wrap << FileLoaded) (File.toString file)
             )
 
         FileLoaded content ->
-            processXML model content
+            ( options
+            , [ TrackFromSvg content ]
+              --, Task.perform (wrap << FileLoaded) (File.toString file)
+            )
+
+
+trackFromSvg : Options -> String -> Maybe (TrackLoaded msg)
+trackFromSvg options content =
+    processXML
+        options
+        content
 
 
 type alias PathInfo =
@@ -171,7 +180,8 @@ parsePathInfo { d, transform } =
     }
 
 
-processXML model content =
+processXML : Options -> String -> Maybe (TrackLoaded msg)
+processXML options content =
     let
         xmlParse =
             XmlParser.parse content
@@ -213,58 +223,28 @@ processXML model content =
                             untransformedPaths
                                 |> List.foldl convertToPoints pathState
 
-                        trackPoints =
+                        pointZero =
+                            { longitude = Direction2d.x
+                            , latitude = Angle.degrees 0
+                            , altitude = Length.meters 0
+                            }
+
+                        gpxPoints =
                             finalPathState.outputs
-                                |> List.map TrackPoint.trackPointFromPoint
-                                |> TrackPoint.prepareTrackPoints
+                                |> List.map (DomainModel.gpxFromPointWithReference pointZero)
 
                         newTrack =
-                            let
-                                box =
-                                    BoundingBox3d.hullOfN .xyz trackPoints
-                                        |> Maybe.withDefault (BoundingBox3d.singleton Point3d.origin)
-
-                                emptyIndex =
-                                    -- Large split threshold to avoid excessive depth.
-                                    SpatialIndex.empty (flatBox box) (Length.meters 100.0)
-
-                                index =
-                                    List.foldl
-                                        (\point ->
-                                            SpatialIndex.add
-                                                { content = point
-                                                , box =
-                                                    BoundingBox2d.withDimensions clickTolerance
-                                                        (point.xyz |> Point3d.projectInto SketchPlane3d.xy)
-                                                }
-                                        )
-                                        emptyIndex
-                                        trackPoints
-                            in
-                            { trackName = Just model.svgFilename
-                            , trackPoints = trackPoints
-                            , reducedPoints = []
-                            , reductionLevel = 0
-                            , centreOfReduction = Nothing
-                            , currentNode =
-                                List.head trackPoints
-                                    |> Maybe.withDefault (TrackPoint.trackPointFromPoint Point3d.origin)
-                            , markedNode = Nothing
-                            , graph = Nothing
-                            , earthReferenceCoordinates = ( 0.0, 0.0, 0.0 )
-                            , box = box
-                            , spatialIndex = index
-                            }
+                            TrackLoaded.trackFromPoints
+                                options.svgFilename
+                                gpxPoints
                     in
-                    ( { model | track = Just newTrack }
-                    , Cmd.none
-                    )
+                    newTrack
 
                 _ ->
-                    ( model, Cmd.none )
+                    Nothing
 
-        _ ->
-            ( model, Cmd.none )
+        Err error ->
+            Nothing
 
 
 getAllXmlTags : XmlParser.Node -> List ( String, XmlParser.Node )
@@ -294,7 +274,11 @@ getAttribute attribute node =
 view : (Msg -> msg) -> Element msg
 view wrap =
     Input.button
-        prettyButtonStyles
+        [ padding 5
+        , Background.color FlatColors.ChinesePalette.antiFlashWhite
+        , Border.color FlatColors.FlatUIPalette.peterRiver
+        , Border.width 2
+        ]
         { onPress = Just (wrap ReadFile)
         , label = text "Extract paths from SVG file"
         }

@@ -1,7 +1,8 @@
 module TrackLoaded exposing (..)
 
 import Actions exposing (ToolAction)
-import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, TrackPoint, skipCount)
+import Direction2d
+import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, TrackPoint, skipCount, treeFromSourcePoints)
 import Json.Encode as E
 import Length exposing (inMeters)
 
@@ -15,7 +16,7 @@ type alias TrackLoaded msg =
     , trackName : Maybe String
     , undos : List (UndoEntry msg)
     , redos : List (UndoEntry msg)
-    , lastMapClick : (Float, Float)
+    , lastMapClick : ( Float, Float )
     }
 
 
@@ -34,6 +35,26 @@ type alias Options msg =
     { undos : List (UndoEntry msg)
     , redos : List (UndoEntry msg)
     }
+
+
+trackFromPoints : String -> List GPXSource -> Maybe (TrackLoaded msg)
+trackFromPoints trackName gpxTrack =
+    case treeFromSourcePoints gpxTrack of
+        Just aTree ->
+            Just
+                { trackTree = aTree
+                , currentPosition = 0
+                , markerPosition = Nothing
+                , renderDepth = 10
+                , referenceLonLat = DomainModel.gpxPointFromIndex 0 aTree
+                , undos = []
+                , redos = []
+                , trackName = Just trackName
+                , lastMapClick = ( 0, 0 )
+                }
+
+        Nothing ->
+            Nothing
 
 
 getRangeFromMarkers : TrackLoaded msg -> ( Int, Int )
@@ -67,7 +88,7 @@ addToUndoStack :
     -> List GPXSource
     -> TrackLoaded msg
     -> TrackLoaded msg
-addToUndoStack action fromStart fromEnd  oldPoints oldTrack =
+addToUndoStack action fromStart fromEnd oldPoints oldTrack =
     let
         undoEntry : UndoEntry msg
         undoEntry =
@@ -214,5 +235,3 @@ jsonProfileData track =
     in
     -- Nicely indented, why not.
     output
-
-
