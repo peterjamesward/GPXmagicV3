@@ -13,6 +13,7 @@ import Length
 import List.Extra
 import LocalCoords exposing (LocalCoords)
 import Quantity
+import ToolTip exposing (buttonStylesWithTooltip, myTooltip, tooltip)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showAngle, showDecimal0, showShortMeasure)
 import ViewPureStyles exposing (neatToolsBorder, noTrackMessage, sliderThumb, useIcon)
@@ -385,15 +386,18 @@ view imperial msgWrapper options isTrack =
                                             ++ (showAngle <| turn)
                                             ++ "º"
                                 , row [ centerX, spacing 10 ]
-                                    [ Input.button neatToolsBorder
+                                    [ Input.button
+                                        (buttonStylesWithTooltip below "Move to previous")
                                         { label = useIcon FeatherIcons.chevronLeft
                                         , onPress = Just <| msgWrapper <| ViewPrevious
                                         }
-                                    , Input.button neatToolsBorder
+                                    , Input.button
+                                        (buttonStylesWithTooltip below "Centre view on this issue")
                                         { label = useIcon FeatherIcons.mousePointer
                                         , onPress = Just <| msgWrapper <| SetCurrentPosition position
                                         }
-                                    , Input.button neatToolsBorder
+                                    , Input.button
+                                        (buttonStylesWithTooltip below "Move to next")
                                         { label = useIcon FeatherIcons.chevronRight
                                         , onPress = Just <| msgWrapper <| ViewNext
                                         }

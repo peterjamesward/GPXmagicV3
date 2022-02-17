@@ -5,18 +5,16 @@ import Angle exposing (Angle)
 import Axis3d
 import BoundingBox3d
 import Direction3d
-import DomainModel exposing (EarthPoint, GPXSource)
+import DomainModel exposing (EarthPoint, GPXSource, RoadSection)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
-import Length exposing (Meters, inMeters)
-import List.Extra
-import Plane3d
+import Length exposing (Meters)
 import Point3d
+import ToolTip exposing (buttonStylesWithTooltip)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal0, showDecimal2)
-import Vector3d
 import ViewPureStyles exposing (..)
 
 
@@ -65,7 +63,7 @@ actions options previewColour track =
         { tag = "affine"
         , shape = PreviewCircle
         , colour = previewColour
-        , points = computePoints options track
+        , points = rotateAndScale options track
         }
     ]
 
@@ -90,7 +88,7 @@ update msg settings previewColour hasTrack =
         ( SetScale scale, Just track ) ->
             let
                 newSettings =
-                    { settings | rotateAngle = theta }
+                    { settings | scaleFactor = scale }
             in
             ( newSettings
             , actions newSettings previewColour track
@@ -99,7 +97,7 @@ update msg settings previewColour hasTrack =
         ( RotateAndScale, Just track ) ->
             let
                 newSettings =
-                    { settings | rotateAngle = theta }
+                    defaultOptions
             in
             ( newSettings
             , actions newSettings previewColour track
@@ -108,7 +106,7 @@ update msg settings previewColour hasTrack =
         ( Recentre, Just track ) ->
             let
                 newSettings =
-                    { settings | rotateAngle = theta }
+                    settings
             in
             ( newSettings
             , actions newSettings previewColour track
@@ -122,103 +120,106 @@ update msg settings previewColour hasTrack =
         ( UseMapElevations, Just track ) ->
             let
                 newSettings =
-                    { settings | rotateAngle = theta }
+                    settings
             in
             ( newSettings
             , actions newSettings previewColour track
             )
 
+        _ ->
+            ( settings, [] )
 
-applyMapElevations : List Float -> Track -> EditResult
+
+applyMapElevations : List Float -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
 applyMapElevations elevations track =
     let
         useNewElevation tp ele =
             Point3d.xyz
-                (Point3d.xCoordinate tp.xyz)
-                (Point3d.yCoordinate tp.xyz)
+                (Point3d.xCoordinate tp)
+                (Point3d.yCoordinate tp)
                 (Length.meters ele)
-                |> TrackPoint.trackPointFromPoint
-
-        newPoints =
-            List.map2
-                useNewElevation
-                track.trackPoints
-                elevations
-                |> TrackPoint.prepareTrackPoints
-    in
-    { before = []
-    , edited = newPoints
-    , after = []
-    , earthReferenceCoordinates = track.earthReferenceCoordinates
-    , graph = track.graph
-    }
-
-
-recentre : ( Float, Float ) -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
-recentre ( lon, lat ) track =
-    -- To allow us to use the Purple marker as a designated reference,
-    -- we need to move the earth reference coords AND shift the track
-    -- by the opposite of the Purple position (?).
-    let
-        shiftedTrackPoints =
-            List.map shiftPoint track.trackPoints
-
-        shiftBasis =
-            case track.markedNode of
-                Just purple ->
-                    purple.xyz |> Point3d.projectOnto Plane3d.xy
-
-                Nothing ->
-                    Point3d.origin
-
-        shiftVector =
-            Vector3d.from shiftBasis Point3d.origin
-
-        shiftPoint =
-            .xyz
-                >> Point3d.translateBy shiftVector
-                >> trackPointFromPoint
     in
     []
+
+
+
+{-
+   recentre : ( Float, Float ) -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
+   recentre ( lon, lat ) track =
+       -- To allow us to use the Purple marker as a designated reference,
+       -- we need to move the earth reference coords AND shift the track
+       -- by the opposite of the Purple position (?).
+       let
+           shiftedTrackPoints =
+               List.map shiftPoint track.trackPoints
+
+           shiftBasis =
+               case track.markedNode of
+                   Just purple ->
+                       purple.xyz |> Point3d.projectOnto Plane3d.xy
+
+                   Nothing ->
+                       Point3d.origin
+
+           shiftVector =
+               Vector3d.from shiftBasis Point3d.origin
+
+           shiftPoint =
+               Point3d.translateBy shiftVector
+       in
+       []
+-}
 
 
 rotateAndScale : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
 rotateAndScale settings track =
     let
         centre =
-            -- Scale about centre of bounding box
+            -- Scale about centre of bounding box. Note the `minZ`.
             Point3d.xyz
-                (BoundingBox3d.midX track.box)
-                (BoundingBox3d.midY track.box)
-                (BoundingBox3d.minZ track.box)
+                (BoundingBox3d.midX <| DomainModel.boundingBox track.trackTree)
+                (BoundingBox3d.midY <| DomainModel.boundingBox track.trackTree)
+                (BoundingBox3d.minZ <| DomainModel.boundingBox track.trackTree)
 
         axisOfRotation =
             -- Rotate acts around Orange marker
-            Axis3d.through track.currentNode.xyz Direction3d.z
+            Axis3d.through
+                (DomainModel.earthPointFromIndex track.currentPosition track.trackTree)
+                Direction3d.z
 
-        rotatedRoute =
-            List.map rotatePoint track.trackPoints
+        rotateAndScaleEndPoint : RoadSection -> List EarthPoint -> List EarthPoint
+        rotateAndScaleEndPoint road outputs =
+            (road.endPoint
+                |> Point3d.rotateAround axisOfRotation settings.rotateAngle
+                |> Point3d.scaleAbout centre settings.scaleFactor
+            )
+                :: outputs
 
-        rotatePoint =
-            .xyz
-                >> Point3d.rotateAround axisOfRotation settings.rotateAngle
-                >> trackPointFromPoint
+        transformedEndPoints =
+            DomainModel.foldOverRouteRL rotateAndScaleEndPoint track.trackTree []
 
-        scaleAboutCentre point =
-            centre
-                |> Point3d.translateBy
-                    (point |> Vector3d.from centre |> Vector3d.scaleBy settings.scaleFactor)
-
-        transformedPoints =
-            List.map
-                (.xyz >> scaleAboutCentre >> trackPointFromPoint)
-                rotatedRoute
+        transformedStartPoint =
+            DomainModel.earthPointFromIndex 0 track.trackTree
+                |> Point3d.rotateAround axisOfRotation settings.rotateAngle
+                |> Point3d.scaleAbout centre settings.scaleFactor
     in
-    []
+    List.map
+        (\earth ->
+            ( earth
+            , DomainModel.gpxFromPointWithReference track.referenceLonLat earth
+            )
+        )
+        (transformedStartPoint :: transformedEndPoints)
 
 
-view : Bool -> Options -> ( Float, Float ) -> (Msg -> msg) -> Track -> Element msg
-view imperial options ( lastX, lastY ) wrapper track =
+view :
+    Bool
+    -> Options
+    -> ( Float, Float )
+    -> (Msg -> msg)
+    -> Maybe (TrackLoaded msg)
+    -> Element msg
+view imperial options ( lastX, lastY ) wrapper maybeTrack =
     let
         rotationSlider =
             Input.slider
@@ -252,20 +253,9 @@ view imperial options ( lastX, lastY ) wrapper track =
                 , thumb = Input.defaultThumb
                 }
 
-        ( lon, lat, _ ) =
-            track.earthReferenceCoordinates
-
-        trackLength =
-            case List.Extra.last track.trackPoints of
-                Just last ->
-                    inMeters last.distanceFromStart
-
-                _ ->
-                    0.0
-
         rotateButton =
             button
-                prettyButtonStyles
+                neatToolsBorder
                 { onPress = Just <| wrapper RotateAndScale
                 , label =
                     text <|
@@ -274,7 +264,7 @@ view imperial options ( lastX, lastY ) wrapper track =
 
         recentreButton =
             button
-                prettyButtonStyles
+                (buttonStylesWithTooltip below "Click on Map to set the destination")
                 { onPress = Just <| wrapper Recentre
                 , label =
                     text <|
@@ -287,28 +277,38 @@ view imperial options ( lastX, lastY ) wrapper track =
 
         zeroButton =
             button
-                prettyButtonStyles
+                neatToolsBorder
                 { onPress = Just <| wrapper Zero
                 , label = text "Zero"
                 }
 
         elevationFetchButton =
             button
-                prettyButtonStyles
+                neatToolsBorder
                 { onPress = Just <| wrapper UseMapElevations
                 , label = text "Use elevations fetched from Mapbox"
                 }
     in
-    wrappedRow
-        [ spacing 6
-        , padding 6
-        , Background.color FlatColors.ChinesePalette.antiFlashWhite
-        , width fill
-        ]
-        [ rotationSlider
-        , scaleSlider
-        , rotateButton
-        , zeroButton
-        , recentreButton
-        , elevationFetchButton
-        ]
+    case maybeTrack of
+        Just track ->
+            column
+                [ spacing 6
+                , padding 6
+                , Background.color FlatColors.ChinesePalette.antiFlashWhite
+                , width fill
+                ]
+                [ el [ centerX ] rotationSlider
+                , el [ centerX ] scaleSlider
+                , wrappedRow
+                    [ spacing 6
+                    , padding 6
+                    ]
+                    [ rotateButton
+                    , zeroButton
+                    , recentreButton
+                    , elevationFetchButton
+                    ]
+                ]
+
+        Nothing ->
+            noTrackMessage

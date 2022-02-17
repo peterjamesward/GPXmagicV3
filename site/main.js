@@ -8645,6 +8645,10 @@ var $author$project$Tools$Interpolate$defaultOptions = {
 };
 var $author$project$Tools$LimitGradientOptions$ExtentIsRange = {$: 'ExtentIsRange'};
 var $author$project$Tools$LimitGradients$defaultOptions = {extent: $author$project$Tools$LimitGradientOptions$ExtentIsRange, maximumAscent: 15.0, maximumDescent: 15.0, previewData: $elm$core$Maybe$Nothing};
+var $author$project$Tools$MoveScaleRotate$defaultOptions = {
+	rotateAngle: $ianmackenzie$elm_units$Angle$degrees(0),
+	scaleFactor: 1.0
+};
 var $ianmackenzie$elm_units$Quantity$zero = $ianmackenzie$elm_units$Quantity$Quantity(0);
 var $author$project$Tools$Nudge$defaultOptions = {fadeExtent: $ianmackenzie$elm_units$Quantity$zero, horizontal: $ianmackenzie$elm_units$Quantity$zero, vertical: $ianmackenzie$elm_units$Quantity$zero};
 var $author$project$Tools$OutAndBack$defaultOptions = {offset: 0.0};
@@ -8811,6 +8815,18 @@ var $author$project$ToolsController$limitGradientTool = {
 	toolType: $author$project$ToolsController$ToolLimitGradient,
 	video: $elm$core$Maybe$Nothing
 };
+var $author$project$ToolsController$ToolMoveScaleRotate = {$: 'ToolMoveScaleRotate'};
+var $author$project$ToolsController$moveScaleRotateTool = {
+	dock: $author$project$ToolsController$DockLowerLeft,
+	info: 'Lift & Shifts',
+	isPopupOpen: false,
+	label: 'Move & Scale',
+	state: $author$project$ToolsController$Contracted,
+	tabColour: $smucode$elm_flat_colors$FlatColors$FlatUIPalette$concrete,
+	textColour: $author$project$ViewPureStyles$contrastingColour($smucode$elm_flat_colors$FlatColors$FlatUIPalette$concrete),
+	toolType: $author$project$ToolsController$ToolMoveScaleRotate,
+	video: $elm$core$Maybe$Nothing
+};
 var $author$project$ToolsController$ToolNudge = {$: 'ToolNudge'};
 var $author$project$ToolsController$nudgeTool = {
 	dock: $author$project$ToolsController$DockLowerRight,
@@ -8888,7 +8904,7 @@ var $author$project$ToolsController$undoRedoTool = {
 	video: $elm$core$Maybe$Nothing
 };
 var $author$project$ToolsController$defaultTools = _List_fromArray(
-	[$author$project$ToolsController$pointersTool, $author$project$ToolsController$undoRedoTool, $author$project$ToolsController$trackInfoBox, $author$project$ToolsController$displaySettingsTool, $author$project$ToolsController$directionChangeTool, $author$project$ToolsController$gradientChangeTool, $author$project$ToolsController$deleteTool, $author$project$ToolsController$bezierSplinesTool, $author$project$ToolsController$centroidAverageTool, $author$project$ToolsController$curveFormerTool, $author$project$ToolsController$bendSmootherTool, $author$project$ToolsController$nudgeTool, $author$project$ToolsController$outAndBackTool, $author$project$ToolsController$simplifyTool, $author$project$ToolsController$interpolateTool, $author$project$ToolsController$limitGradientTool]);
+	[$author$project$ToolsController$pointersTool, $author$project$ToolsController$undoRedoTool, $author$project$ToolsController$trackInfoBox, $author$project$ToolsController$displaySettingsTool, $author$project$ToolsController$directionChangeTool, $author$project$ToolsController$gradientChangeTool, $author$project$ToolsController$deleteTool, $author$project$ToolsController$bezierSplinesTool, $author$project$ToolsController$centroidAverageTool, $author$project$ToolsController$curveFormerTool, $author$project$ToolsController$bendSmootherTool, $author$project$ToolsController$nudgeTool, $author$project$ToolsController$outAndBackTool, $author$project$ToolsController$simplifyTool, $author$project$ToolsController$interpolateTool, $author$project$ToolsController$limitGradientTool, $author$project$ToolsController$moveScaleRotateTool]);
 var $author$project$ToolsController$DockSettings = F3(
 	function (dockPopupOpen, dockLabel, dockLabelColour) {
 		return {dockLabel: dockLabel, dockLabelColour: dockLabelColour, dockPopupOpen: dockPopupOpen};
@@ -8927,6 +8943,7 @@ var $author$project$ToolsController$defaultOptions = {
 	infoOptions: $author$project$Tools$TrackInfoBox$defaultOptions,
 	interpolateSettings: $author$project$Tools$Interpolate$defaultOptions,
 	limitGradientSettings: $author$project$Tools$LimitGradients$defaultOptions,
+	moveScaleRotateSettings: $author$project$Tools$MoveScaleRotate$defaultOptions,
 	nudgeOptions: $author$project$Tools$Nudge$defaultOptions,
 	outAndBackSettings: $author$project$Tools$OutAndBack$defaultOptions,
 	pointerOptions: $author$project$Tools$Pointers$defaultOptions,
@@ -10711,8 +10728,10 @@ var $author$project$ToolsController$encodeType = function (toolType) {
 			return 'ToolSimplify';
 		case 'ToolInterpolate':
 			return 'ToolInterpolate';
-		default:
+		case 'ToolLimitGradient':
 			return 'ToolLimitGradient';
+		default:
+			return 'ToolMoveScaleRotate';
 	}
 };
 var $author$project$ToolsController$encodeOneTool = function (tool) {
@@ -17544,6 +17563,126 @@ var $author$project$Tools$LimitGradients$toolStateChange = F4(
 					]));
 		}
 	});
+var $ianmackenzie$elm_geometry$Point3d$rotateAround = F3(
+	function (_v0, _v1, _v2) {
+		var axis = _v0.a;
+		var angle = _v1.a;
+		var p = _v2.a;
+		var halfAngle = 0.5 * angle;
+		var qw = $elm$core$Basics$cos(halfAngle);
+		var sinHalfAngle = $elm$core$Basics$sin(halfAngle);
+		var _v3 = axis.originPoint;
+		var p0 = _v3.a;
+		var deltaX = p.x - p0.x;
+		var deltaY = p.y - p0.y;
+		var deltaZ = p.z - p0.z;
+		var _v4 = axis.direction;
+		var d = _v4.a;
+		var qx = d.x * sinHalfAngle;
+		var wx = qw * qx;
+		var xx = qx * qx;
+		var qy = d.y * sinHalfAngle;
+		var wy = qw * qy;
+		var xy = qx * qy;
+		var yy = qy * qy;
+		var a22 = 1 - (2 * (xx + yy));
+		var qz = d.z * sinHalfAngle;
+		var wz = qw * qz;
+		var a01 = 2 * (xy - wz);
+		var a10 = 2 * (xy + wz);
+		var xz = qx * qz;
+		var a02 = 2 * (xz + wy);
+		var a20 = 2 * (xz - wy);
+		var yz = qy * qz;
+		var a12 = 2 * (yz - wx);
+		var a21 = 2 * (yz + wx);
+		var zz = qz * qz;
+		var a00 = 1 - (2 * (yy + zz));
+		var a11 = 1 - (2 * (xx + zz));
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+			{x: ((p0.x + (a00 * deltaX)) + (a01 * deltaY)) + (a02 * deltaZ), y: ((p0.y + (a10 * deltaX)) + (a11 * deltaY)) + (a12 * deltaZ), z: ((p0.z + (a20 * deltaX)) + (a21 * deltaY)) + (a22 * deltaZ)});
+	});
+var $ianmackenzie$elm_geometry$Point3d$scaleAbout = F3(
+	function (_v0, k, _v1) {
+		var p0 = _v0.a;
+		var p = _v1.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+			{x: p0.x + (k * (p.x - p0.x)), y: p0.y + (k * (p.y - p0.y)), z: p0.z + (k * (p.z - p0.z))});
+	});
+var $author$project$Tools$MoveScaleRotate$rotateAndScale = F2(
+	function (settings, track) {
+		var centre = A3(
+			$ianmackenzie$elm_geometry$Point3d$xyz,
+			$ianmackenzie$elm_geometry$BoundingBox3d$midX(
+				$author$project$DomainModel$boundingBox(track.trackTree)),
+			$ianmackenzie$elm_geometry$BoundingBox3d$midY(
+				$author$project$DomainModel$boundingBox(track.trackTree)),
+			$ianmackenzie$elm_geometry$BoundingBox3d$minZ(
+				$author$project$DomainModel$boundingBox(track.trackTree)));
+		var axisOfRotation = A2(
+			$ianmackenzie$elm_geometry$Axis3d$through,
+			A2($author$project$DomainModel$earthPointFromIndex, track.currentPosition, track.trackTree),
+			$ianmackenzie$elm_geometry$Direction3d$z);
+		var rotateAndScaleEndPoint = F2(
+			function (road, outputs) {
+				return A2(
+					$elm$core$List$cons,
+					A3(
+						$ianmackenzie$elm_geometry$Point3d$scaleAbout,
+						centre,
+						settings.scaleFactor,
+						A3($ianmackenzie$elm_geometry$Point3d$rotateAround, axisOfRotation, settings.rotateAngle, road.endPoint)),
+					outputs);
+			});
+		var transformedEndPoints = A3($author$project$DomainModel$foldOverRouteRL, rotateAndScaleEndPoint, track.trackTree, _List_Nil);
+		var transformedStartPoint = A3(
+			$ianmackenzie$elm_geometry$Point3d$scaleAbout,
+			centre,
+			settings.scaleFactor,
+			A3(
+				$ianmackenzie$elm_geometry$Point3d$rotateAround,
+				axisOfRotation,
+				settings.rotateAngle,
+				A2($author$project$DomainModel$earthPointFromIndex, 0, track.trackTree)));
+		return A2(
+			$elm$core$List$map,
+			function (earth) {
+				return _Utils_Tuple2(
+					earth,
+					A2($author$project$DomainModel$gpxFromPointWithReference, track.referenceLonLat, earth));
+			},
+			A2($elm$core$List$cons, transformedStartPoint, transformedEndPoints));
+	});
+var $author$project$Tools$MoveScaleRotate$actions = F3(
+	function (options, previewColour, track) {
+		return _List_fromArray(
+			[
+				$author$project$Actions$ShowPreview(
+				{
+					colour: previewColour,
+					points: A2($author$project$Tools$MoveScaleRotate$rotateAndScale, options, track),
+					shape: $author$project$Actions$PreviewCircle,
+					tag: 'affine'
+				})
+			]);
+	});
+var $author$project$Tools$MoveScaleRotate$toolStateChange = F4(
+	function (opened, colour, options, track) {
+		var _v0 = _Utils_Tuple2(opened, track);
+		if (_v0.a && (_v0.b.$ === 'Just')) {
+			var theTrack = _v0.b.a;
+			return _Utils_Tuple2(
+				options,
+				A3($author$project$Tools$MoveScaleRotate$actions, options, colour, theTrack));
+		} else {
+			return _Utils_Tuple2(
+				options,
+				_List_fromArray(
+					[
+						$author$project$Actions$HidePreview('affine')
+					]));
+		}
+	});
 var $author$project$Tools$Nudge$previewActions = F3(
 	function (newOptions, colour, track) {
 		return _List_fromArray(
@@ -17890,7 +18029,7 @@ var $author$project$ToolsController$toolStateHasChanged = F4(
 							'tools',
 							$author$project$ToolsController$encodeToolState(options)),
 						actions));
-			default:
+			case 'ToolLimitGradient':
 				var _v12 = A4(
 					$author$project$Tools$LimitGradients$toolStateChange,
 					_Utils_eq(newState, $author$project$ToolsController$Expanded),
@@ -17902,6 +18041,27 @@ var $author$project$ToolsController$toolStateHasChanged = F4(
 				var newOptions = _Utils_update(
 					options,
 					{limitGradientSettings: newToolOptions});
+				return _Utils_Tuple2(
+					newOptions,
+					A2(
+						$elm$core$List$cons,
+						A2(
+							$author$project$Actions$StoreLocally,
+							'tools',
+							$author$project$ToolsController$encodeToolState(options)),
+						actions));
+			default:
+				var _v13 = A4(
+					$author$project$Tools$MoveScaleRotate$toolStateChange,
+					_Utils_eq(newState, $author$project$ToolsController$Expanded),
+					A2($author$project$ToolsController$getColour, toolType, options.tools),
+					options.moveScaleRotateSettings,
+					isTrack);
+				var newToolOptions = _v13.a;
+				var actions = _v13.b;
+				var newOptions = _Utils_update(
+					options,
+					{moveScaleRotateSettings: newToolOptions});
 				return _Utils_Tuple2(
 					newOptions,
 					A2(
@@ -22351,45 +22511,6 @@ var $ianmackenzie$elm_geometry$Direction3d$rotateAround = F3(
 		return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(
 			{x: ((a00 * d.x) + (a01 * d.y)) + (a02 * d.z), y: ((a10 * d.x) + (a11 * d.y)) + (a12 * d.z), z: ((a20 * d.x) + (a21 * d.y)) + (a22 * d.z)});
 	});
-var $ianmackenzie$elm_geometry$Point3d$rotateAround = F3(
-	function (_v0, _v1, _v2) {
-		var axis = _v0.a;
-		var angle = _v1.a;
-		var p = _v2.a;
-		var halfAngle = 0.5 * angle;
-		var qw = $elm$core$Basics$cos(halfAngle);
-		var sinHalfAngle = $elm$core$Basics$sin(halfAngle);
-		var _v3 = axis.originPoint;
-		var p0 = _v3.a;
-		var deltaX = p.x - p0.x;
-		var deltaY = p.y - p0.y;
-		var deltaZ = p.z - p0.z;
-		var _v4 = axis.direction;
-		var d = _v4.a;
-		var qx = d.x * sinHalfAngle;
-		var wx = qw * qx;
-		var xx = qx * qx;
-		var qy = d.y * sinHalfAngle;
-		var wy = qw * qy;
-		var xy = qx * qy;
-		var yy = qy * qy;
-		var a22 = 1 - (2 * (xx + yy));
-		var qz = d.z * sinHalfAngle;
-		var wz = qw * qz;
-		var a01 = 2 * (xy - wz);
-		var a10 = 2 * (xy + wz);
-		var xz = qx * qz;
-		var a02 = 2 * (xz + wy);
-		var a20 = 2 * (xz - wy);
-		var yz = qy * qz;
-		var a12 = 2 * (yz - wx);
-		var a21 = 2 * (yz + wx);
-		var zz = qz * qz;
-		var a00 = 1 - (2 * (yy + zz));
-		var a11 = 1 - (2 * (xx + zz));
-		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
-			{x: ((p0.x + (a00 * deltaX)) + (a01 * deltaY)) + (a02 * deltaZ), y: ((p0.y + (a10 * deltaX)) + (a11 * deltaY)) + (a12 * deltaZ), z: ((p0.z + (a20 * deltaX)) + (a21 * deltaY)) + (a22 * deltaZ)});
-	});
 var $ianmackenzie$elm_geometry$Frame3d$xDirection = function (_v0) {
 	var properties = _v0.a;
 	return properties.xDirection;
@@ -26060,6 +26181,61 @@ var $author$project$Tools$LimitGradients$update = F4(
 			return _Utils_Tuple2(options, _List_Nil);
 		}
 	});
+var $author$project$Tools$MoveScaleRotate$update = F4(
+	function (msg, settings, previewColour, hasTrack) {
+		var _v0 = _Utils_Tuple2(msg, hasTrack);
+		if (_v0.b.$ === 'Just') {
+			switch (_v0.a.$) {
+				case 'SetRotateAngle':
+					var theta = _v0.a.a;
+					var track = _v0.b.a;
+					var newSettings = _Utils_update(
+						settings,
+						{rotateAngle: theta});
+					return _Utils_Tuple2(
+						newSettings,
+						A3($author$project$Tools$MoveScaleRotate$actions, newSettings, previewColour, track));
+				case 'SetScale':
+					var scale = _v0.a.a;
+					var track = _v0.b.a;
+					var newSettings = _Utils_update(
+						settings,
+						{scaleFactor: scale});
+					return _Utils_Tuple2(
+						newSettings,
+						A3($author$project$Tools$MoveScaleRotate$actions, newSettings, previewColour, track));
+				case 'RotateAndScale':
+					var _v1 = _v0.a;
+					var track = _v0.b.a;
+					var newSettings = $author$project$Tools$MoveScaleRotate$defaultOptions;
+					return _Utils_Tuple2(
+						newSettings,
+						A3($author$project$Tools$MoveScaleRotate$actions, newSettings, previewColour, track));
+				case 'Recentre':
+					var _v2 = _v0.a;
+					var track = _v0.b.a;
+					var newSettings = settings;
+					return _Utils_Tuple2(
+						newSettings,
+						A3($author$project$Tools$MoveScaleRotate$actions, newSettings, previewColour, track));
+				case 'Zero':
+					var _v3 = _v0.a;
+					var track = _v0.b.a;
+					return _Utils_Tuple2(
+						$author$project$Tools$MoveScaleRotate$defaultOptions,
+						A3($author$project$Tools$MoveScaleRotate$actions, $author$project$Tools$MoveScaleRotate$defaultOptions, previewColour, track));
+				default:
+					var _v4 = _v0.a;
+					var track = _v0.b.a;
+					var newSettings = settings;
+					return _Utils_Tuple2(
+						newSettings,
+						A3($author$project$Tools$MoveScaleRotate$actions, newSettings, previewColour, track));
+			}
+		} else {
+			return _Utils_Tuple2(settings, _List_Nil);
+		}
+	});
 var $author$project$Actions$NudgeApplyWithOptions = function (a) {
 	return {$: 'NudgeApplyWithOptions', a: a};
 };
@@ -26354,40 +26530,42 @@ var $author$project$ToolsController$update = F4(
 				return _Utils_Tuple2(options, _List_Nil);
 			case 'ToolPopupToggle':
 				var toolType = toolMsg.a;
+				var newOptions = _Utils_update(
+					options,
+					{
+						tools: A2(
+							$elm$core$List$map,
+							$author$project$ToolsController$toggleToolPopup(toolType),
+							options.tools)
+					});
 				return _Utils_Tuple2(
-					_Utils_update(
-						options,
-						{
-							tools: A2(
-								$elm$core$List$map,
-								$author$project$ToolsController$toggleToolPopup(toolType),
-								options.tools)
-						}),
+					newOptions,
 					_List_fromArray(
 						[
 							A2(
 							$author$project$Actions$StoreLocally,
 							'tools',
-							$author$project$ToolsController$encodeToolState(options))
+							$author$project$ToolsController$encodeToolState(newOptions))
 						]));
 			case 'ToolDockSelect':
 				var toolType = toolMsg.a;
 				var toolDock = toolMsg.b;
+				var newOptions = _Utils_update(
+					options,
+					{
+						tools: A2(
+							$elm$core$List$map,
+							A2($author$project$ToolsController$setDock, toolType, toolDock),
+							options.tools)
+					});
 				return _Utils_Tuple2(
-					_Utils_update(
-						options,
-						{
-							tools: A2(
-								$elm$core$List$map,
-								A2($author$project$ToolsController$setDock, toolType, toolDock),
-								options.tools)
-						}),
+					newOptions,
 					_List_fromArray(
 						[
 							A2(
 							$author$project$Actions$StoreLocally,
 							'tools',
-							$author$project$ToolsController$encodeToolState(options))
+							$author$project$ToolsController$encodeToolState(newOptions))
 						]));
 			case 'ToolColourSelect':
 				var toolType = toolMsg.a;
@@ -26407,7 +26585,7 @@ var $author$project$ToolsController$update = F4(
 							A2(
 							$author$project$Actions$StoreLocally,
 							'tools',
-							$author$project$ToolsController$encodeToolState(options))
+							$author$project$ToolsController$encodeToolState(newOptions))
 						]));
 			case 'ToolStateToggle':
 				var toolType = toolMsg.a;
@@ -26680,7 +26858,7 @@ var $author$project$ToolsController$update = F4(
 				} else {
 					return _Utils_Tuple2(options, _List_Nil);
 				}
-			default:
+			case 'DockNameChange':
 				var _int = toolMsg.a;
 				var string = toolMsg.b;
 				var _v17 = A2($elm$core$Dict$get, _int, options.docks);
@@ -26708,6 +26886,21 @@ var $author$project$ToolsController$update = F4(
 				} else {
 					return _Utils_Tuple2(options, _List_Nil);
 				}
+			default:
+				var msg = toolMsg.a;
+				var _v18 = A4(
+					$author$project$Tools$MoveScaleRotate$update,
+					msg,
+					options.moveScaleRotateSettings,
+					A2($author$project$ToolsController$getColour, $author$project$ToolsController$ToolMoveScaleRotate, options.tools),
+					isTrack);
+				var newOptions = _v18.a;
+				var actions = _v18.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						options,
+						{moveScaleRotateSettings: newOptions}),
+					actions);
 		}
 	});
 var $author$project$WriteGPX$writeFooter = '</gpx>';
@@ -32927,6 +33120,10 @@ var $author$project$ToolsController$DockNameChange = F2(
 var $author$project$ToolsController$DockPopupToggle = function (a) {
 	return {$: 'DockPopupToggle', a: a};
 };
+var $mdgriffith$elm_ui$Internal$Model$Below = {$: 'Below'};
+var $mdgriffith$elm_ui$Element$below = function (element) {
+	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$Below, element);
+};
 var $mdgriffith$elm_ui$Internal$Model$Button = {$: 'Button'};
 var $mdgriffith$elm_ui$Internal$Model$Describe = function (a) {
 	return {$: 'Describe', a: a};
@@ -33130,6 +33327,122 @@ var $mdgriffith$elm_ui$Element$Input$HiddenLabel = function (a) {
 	return {$: 'HiddenLabel', a: a};
 };
 var $mdgriffith$elm_ui$Element$Input$labelHidden = $mdgriffith$elm_ui$Element$Input$HiddenLabel;
+var $mdgriffith$elm_ui$Element$el = F2(
+	function (attrs, child) {
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asEl,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+					attrs)),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+				_List_fromArray(
+					[child])));
+	});
+var $mdgriffith$elm_ui$Internal$Model$Paragraph = {$: 'Paragraph'};
+var $mdgriffith$elm_ui$Element$paragraph = F2(
+	function (attrs, children) {
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asParagraph,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Internal$Model$Describe($mdgriffith$elm_ui$Internal$Model$Paragraph),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$spacing(5),
+						attrs))),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+	});
+var $mdgriffith$elm_ui$Internal$Model$Px = function (a) {
+	return {$: 'Px', a: a};
+};
+var $mdgriffith$elm_ui$Element$px = $mdgriffith$elm_ui$Internal$Model$Px;
+var $mdgriffith$elm_ui$Element$rgb = F3(
+	function (r, g, b) {
+		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, r, g, b, 1);
+	});
+var $mdgriffith$elm_ui$Element$rgba = $mdgriffith$elm_ui$Internal$Model$Rgba;
+var $mdgriffith$elm_ui$Internal$Flag$borderRound = $mdgriffith$elm_ui$Internal$Flag$flag(17);
+var $mdgriffith$elm_ui$Element$Border$rounded = function (radius) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$borderRound,
+		A3(
+			$mdgriffith$elm_ui$Internal$Model$Single,
+			'br-' + $elm$core$String$fromInt(radius),
+			'border-radius',
+			$elm$core$String$fromInt(radius) + 'px'));
+};
+var $mdgriffith$elm_ui$Internal$Model$boxShadowClass = function (shadow) {
+	return $elm$core$String$concat(
+		_List_fromArray(
+			[
+				shadow.inset ? 'box-inset' : 'box-',
+				$mdgriffith$elm_ui$Internal$Model$floatClass(shadow.offset.a) + 'px',
+				$mdgriffith$elm_ui$Internal$Model$floatClass(shadow.offset.b) + 'px',
+				$mdgriffith$elm_ui$Internal$Model$floatClass(shadow.blur) + 'px',
+				$mdgriffith$elm_ui$Internal$Model$floatClass(shadow.size) + 'px',
+				$mdgriffith$elm_ui$Internal$Model$formatColorClass(shadow.color)
+			]));
+};
+var $mdgriffith$elm_ui$Internal$Flag$shadows = $mdgriffith$elm_ui$Internal$Flag$flag(19);
+var $mdgriffith$elm_ui$Element$Border$shadow = function (almostShade) {
+	var shade = {blur: almostShade.blur, color: almostShade.color, inset: false, offset: almostShade.offset, size: almostShade.size};
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$shadows,
+		A3(
+			$mdgriffith$elm_ui$Internal$Model$Single,
+			$mdgriffith$elm_ui$Internal$Model$boxShadowClass(shade),
+			'box-shadow',
+			$mdgriffith$elm_ui$Internal$Model$formatBoxShadow(shade)));
+};
+var $mdgriffith$elm_ui$Internal$Model$Text = function (a) {
+	return {$: 'Text', a: a};
+};
+var $mdgriffith$elm_ui$Element$text = function (content) {
+	return $mdgriffith$elm_ui$Internal$Model$Text(content);
+};
+var $author$project$ToolTip$myTooltip = function (str) {
+	return A2(
+		$mdgriffith$elm_ui$Element$el,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$Background$color(
+				A3($mdgriffith$elm_ui$Element$rgb, 0, 0, 0)),
+				$mdgriffith$elm_ui$Element$Font$color(
+				A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1)),
+				$mdgriffith$elm_ui$Element$padding(4),
+				$mdgriffith$elm_ui$Element$Border$rounded(5),
+				$mdgriffith$elm_ui$Element$Font$size(14),
+				$mdgriffith$elm_ui$Element$Border$shadow(
+				{
+					blur: 6,
+					color: A4($mdgriffith$elm_ui$Element$rgba, 0, 0, 0, 0.32),
+					offset: _Utils_Tuple2(0, 3),
+					size: 0
+				}),
+				$mdgriffith$elm_ui$Element$width(
+				$mdgriffith$elm_ui$Element$px(100))
+			]),
+		A2(
+			$mdgriffith$elm_ui$Element$paragraph,
+			_List_Nil,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$text(str)
+				])));
+};
 var $mdgriffith$elm_ui$Element$htmlAttribute = $mdgriffith$elm_ui$Internal$Model$Attr;
 var $author$project$ViewPureStyles$onEnter = function (msg) {
 	return $mdgriffith$elm_ui$Element$htmlAttribute(
@@ -33143,10 +33456,6 @@ var $author$project$ViewPureStyles$onEnter = function (msg) {
 				},
 				A2($elm$json$Json$Decode$field, 'key', $elm$json$Json$Decode$string))));
 };
-var $mdgriffith$elm_ui$Internal$Model$Px = function (a) {
-	return {$: 'Px', a: a};
-};
-var $mdgriffith$elm_ui$Element$px = $mdgriffith$elm_ui$Internal$Model$Px;
 var $mdgriffith$elm_ui$Internal$Model$AsRow = {$: 'AsRow'};
 var $mdgriffith$elm_ui$Internal$Model$asRow = $mdgriffith$elm_ui$Internal$Model$AsRow;
 var $mdgriffith$elm_ui$Element$row = F2(
@@ -33167,12 +33476,6 @@ var $mdgriffith$elm_ui$Element$row = F2(
 						attrs))),
 			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
 	});
-var $mdgriffith$elm_ui$Internal$Model$Text = function (a) {
-	return {$: 'Text', a: a};
-};
-var $mdgriffith$elm_ui$Element$text = function (content) {
-	return $mdgriffith$elm_ui$Internal$Model$Text(content);
-};
 var $mdgriffith$elm_ui$Element$Input$TextInputNode = function (a) {
 	return {$: 'TextInputNode', a: a};
 };
@@ -33316,10 +33619,6 @@ var $mdgriffith$elm_ui$Element$Border$color = function (clr) {
 			'border-color',
 			clr));
 };
-var $mdgriffith$elm_ui$Element$rgb = F3(
-	function (r, g, b) {
-		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, r, g, b, 1);
-	});
 var $mdgriffith$elm_ui$Element$Input$darkGrey = A3($mdgriffith$elm_ui$Element$rgb, 186 / 255, 189 / 255, 182 / 255);
 var $mdgriffith$elm_ui$Element$paddingXY = F2(
 	function (x, y) {
@@ -33351,17 +33650,6 @@ var $mdgriffith$elm_ui$Element$paddingXY = F2(
 		}
 	});
 var $mdgriffith$elm_ui$Element$Input$defaultTextPadding = A2($mdgriffith$elm_ui$Element$paddingXY, 12, 12);
-var $mdgriffith$elm_ui$Internal$Flag$borderRound = $mdgriffith$elm_ui$Internal$Flag$flag(17);
-var $mdgriffith$elm_ui$Element$Border$rounded = function (radius) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$borderRound,
-		A3(
-			$mdgriffith$elm_ui$Internal$Model$Single,
-			'br-' + $elm$core$String$fromInt(radius),
-			'border-radius',
-			$elm$core$String$fromInt(radius) + 'px'));
-};
 var $mdgriffith$elm_ui$Element$Input$white = A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1);
 var $mdgriffith$elm_ui$Internal$Model$BorderWidth = F5(
 	function (a, b, c, d, e) {
@@ -33805,24 +34093,6 @@ var $mdgriffith$elm_ui$Element$alpha = function (o) {
 			transparency));
 };
 var $mdgriffith$elm_ui$Element$Input$charcoal = A3($mdgriffith$elm_ui$Element$rgb, 136 / 255, 138 / 255, 133 / 255);
-var $mdgriffith$elm_ui$Element$el = F2(
-	function (attrs, child) {
-		return A4(
-			$mdgriffith$elm_ui$Internal$Model$element,
-			$mdgriffith$elm_ui$Internal$Model$asEl,
-			$mdgriffith$elm_ui$Internal$Model$div,
-			A2(
-				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-				A2(
-					$elm$core$List$cons,
-					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-					attrs)),
-			$mdgriffith$elm_ui$Internal$Model$Unkeyed(
-				_List_fromArray(
-					[child])));
-	});
-var $mdgriffith$elm_ui$Element$rgba = $mdgriffith$elm_ui$Internal$Model$Rgba;
 var $mdgriffith$elm_ui$Element$Input$renderPlaceholder = F3(
 	function (_v0, forPlaceholder, on) {
 		var placeholderAttrs = _v0.a;
@@ -34107,10 +34377,185 @@ var $mdgriffith$elm_ui$Element$Input$text = $mdgriffith$elm_ui$Element$Input$tex
 		spellchecked: false,
 		type_: $mdgriffith$elm_ui$Element$Input$TextInputNode('text')
 	});
+var $elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
+var $mdgriffith$elm_ui$Internal$Model$map = F2(
+	function (fn, el) {
+		switch (el.$) {
+			case 'Styled':
+				var styled = el.a;
+				return $mdgriffith$elm_ui$Internal$Model$Styled(
+					{
+						html: F2(
+							function (add, context) {
+								return A2(
+									$elm$virtual_dom$VirtualDom$map,
+									fn,
+									A2(styled.html, add, context));
+							}),
+						styles: styled.styles
+					});
+			case 'Unstyled':
+				var html = el.a;
+				return $mdgriffith$elm_ui$Internal$Model$Unstyled(
+					A2(
+						$elm$core$Basics$composeL,
+						$elm$virtual_dom$VirtualDom$map(fn),
+						html));
+			case 'Text':
+				var str = el.a;
+				return $mdgriffith$elm_ui$Internal$Model$Text(str);
+			default:
+				return $mdgriffith$elm_ui$Internal$Model$Empty;
+		}
+	});
+var $mdgriffith$elm_ui$Element$map = $mdgriffith$elm_ui$Internal$Model$map;
+var $mdgriffith$elm_ui$Internal$Model$Hover = {$: 'Hover'};
+var $mdgriffith$elm_ui$Internal$Model$PseudoSelector = F2(
+	function (a, b) {
+		return {$: 'PseudoSelector', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Flag$hover = $mdgriffith$elm_ui$Internal$Flag$flag(33);
+var $mdgriffith$elm_ui$Internal$Model$AlignX = function (a) {
+	return {$: 'AlignX', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$AlignY = function (a) {
+	return {$: 'AlignY', a: a};
+};
+var $elm$virtual_dom$VirtualDom$mapAttribute = _VirtualDom_mapAttribute;
+var $mdgriffith$elm_ui$Internal$Model$mapAttrFromStyle = F2(
+	function (fn, attr) {
+		switch (attr.$) {
+			case 'NoAttribute':
+				return $mdgriffith$elm_ui$Internal$Model$NoAttribute;
+			case 'Describe':
+				var description = attr.a;
+				return $mdgriffith$elm_ui$Internal$Model$Describe(description);
+			case 'AlignX':
+				var x = attr.a;
+				return $mdgriffith$elm_ui$Internal$Model$AlignX(x);
+			case 'AlignY':
+				var y = attr.a;
+				return $mdgriffith$elm_ui$Internal$Model$AlignY(y);
+			case 'Width':
+				var x = attr.a;
+				return $mdgriffith$elm_ui$Internal$Model$Width(x);
+			case 'Height':
+				var x = attr.a;
+				return $mdgriffith$elm_ui$Internal$Model$Height(x);
+			case 'Class':
+				var x = attr.a;
+				var y = attr.b;
+				return A2($mdgriffith$elm_ui$Internal$Model$Class, x, y);
+			case 'StyleClass':
+				var flag = attr.a;
+				var style = attr.b;
+				return A2($mdgriffith$elm_ui$Internal$Model$StyleClass, flag, style);
+			case 'Nearby':
+				var location = attr.a;
+				var elem = attr.b;
+				return A2(
+					$mdgriffith$elm_ui$Internal$Model$Nearby,
+					location,
+					A2($mdgriffith$elm_ui$Internal$Model$map, fn, elem));
+			case 'Attr':
+				var htmlAttr = attr.a;
+				return $mdgriffith$elm_ui$Internal$Model$Attr(
+					A2($elm$virtual_dom$VirtualDom$mapAttribute, fn, htmlAttr));
+			default:
+				var fl = attr.a;
+				var trans = attr.b;
+				return A2($mdgriffith$elm_ui$Internal$Model$TransformComponent, fl, trans);
+		}
+	});
+var $mdgriffith$elm_ui$Internal$Model$removeNever = function (style) {
+	return A2($mdgriffith$elm_ui$Internal$Model$mapAttrFromStyle, $elm$core$Basics$never, style);
+};
+var $mdgriffith$elm_ui$Internal$Model$unwrapDecsHelper = F2(
+	function (attr, _v0) {
+		var styles = _v0.a;
+		var trans = _v0.b;
+		var _v1 = $mdgriffith$elm_ui$Internal$Model$removeNever(attr);
+		switch (_v1.$) {
+			case 'StyleClass':
+				var style = _v1.b;
+				return _Utils_Tuple2(
+					A2($elm$core$List$cons, style, styles),
+					trans);
+			case 'TransformComponent':
+				var flag = _v1.a;
+				var component = _v1.b;
+				return _Utils_Tuple2(
+					styles,
+					A2($mdgriffith$elm_ui$Internal$Model$composeTransformation, trans, component));
+			default:
+				return _Utils_Tuple2(styles, trans);
+		}
+	});
+var $mdgriffith$elm_ui$Internal$Model$unwrapDecorations = function (attrs) {
+	var _v0 = A3(
+		$elm$core$List$foldl,
+		$mdgriffith$elm_ui$Internal$Model$unwrapDecsHelper,
+		_Utils_Tuple2(_List_Nil, $mdgriffith$elm_ui$Internal$Model$Untransformed),
+		attrs);
+	var styles = _v0.a;
+	var transform = _v0.b;
+	return A2(
+		$elm$core$List$cons,
+		$mdgriffith$elm_ui$Internal$Model$Transform(transform),
+		styles);
+};
+var $mdgriffith$elm_ui$Element$mouseOver = function (decs) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$hover,
+		A2(
+			$mdgriffith$elm_ui$Internal$Model$PseudoSelector,
+			$mdgriffith$elm_ui$Internal$Model$Hover,
+			$mdgriffith$elm_ui$Internal$Model$unwrapDecorations(decs)));
+};
+var $mdgriffith$elm_ui$Element$transparent = function (on) {
+	return on ? A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$transparency,
+		A2($mdgriffith$elm_ui$Internal$Model$Transparency, 'transparent', 1.0)) : A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$transparency,
+		A2($mdgriffith$elm_ui$Internal$Model$Transparency, 'visible', 0.0));
+};
+var $author$project$ToolTip$tooltip = F2(
+	function (usher, tooltip_) {
+		return $mdgriffith$elm_ui$Element$inFront(
+			A2(
+				$mdgriffith$elm_ui$Element$el,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$transparent(true),
+						$mdgriffith$elm_ui$Element$mouseOver(
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$transparent(false)
+							])),
+						A3(
+						$elm$core$Basics$composeL,
+						usher,
+						$mdgriffith$elm_ui$Element$map($elm$core$Basics$never),
+						A2(
+							$mdgriffith$elm_ui$Element$el,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+									$mdgriffith$elm_ui$Element$htmlAttribute(
+									A2($elm$html$Html$Attributes$style, 'pointerEvents', 'none'))
+								]),
+							tooltip_))
+					]),
+				$mdgriffith$elm_ui$Element$none));
+	});
 var $elm$svg$Svg$Attributes$class = _VirtualDom_attribute('class');
 var $elm$svg$Svg$Attributes$fill = _VirtualDom_attribute('fill');
 var $elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
-var $elm$virtual_dom$VirtualDom$map = _VirtualDom_map;
 var $elm$svg$Svg$map = $elm$virtual_dom$VirtualDom$map;
 var $elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
 var $elm$svg$Svg$Attributes$strokeLinecap = _VirtualDom_attribute('stroke-linecap');
@@ -34218,7 +34663,13 @@ var $author$project$ToolsController$showDockHeader = F3(
 					[
 						A2(
 						$mdgriffith$elm_ui$Element$Input$button,
-						_List_Nil,
+						_List_fromArray(
+							[
+								A2(
+								$author$project$ToolTip$tooltip,
+								$mdgriffith$elm_ui$Element$below,
+								$author$project$ToolTip$myTooltip('Click to edit label'))
+							]),
 						{
 							label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$edit),
 							onPress: $elm$core$Maybe$Just(
@@ -34261,14 +34712,8 @@ var $author$project$ToolsController$ToolStateToggle = F2(
 	function (a, b) {
 		return {$: 'ToolStateToggle', a: a, b: b};
 	});
-var $mdgriffith$elm_ui$Internal$Model$AlignX = function (a) {
-	return {$: 'AlignX', a: a};
-};
 var $mdgriffith$elm_ui$Internal$Model$Right = {$: 'Right'};
 var $mdgriffith$elm_ui$Element$alignRight = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Right);
-var $mdgriffith$elm_ui$Internal$Model$AlignY = function (a) {
-	return {$: 'AlignY', a: a};
-};
 var $mdgriffith$elm_ui$Internal$Model$Top = {$: 'Top'};
 var $mdgriffith$elm_ui$Element$alignTop = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$Top);
 var $mdgriffith$elm_ui$Internal$Model$CenterX = {$: 'CenterX'};
@@ -34726,6 +35171,9 @@ var $author$project$ToolsController$ToolInterpolateMsg = function (a) {
 };
 var $author$project$ToolsController$ToolLimitGradientMsg = function (a) {
 	return {$: 'ToolLimitGradientMsg', a: a};
+};
+var $author$project$ToolsController$ToolMoveScaleRotateMsg = function (a) {
+	return {$: 'ToolMoveScaleRotateMsg', a: a};
 };
 var $author$project$ToolsController$ToolNudgeMsg = function (a) {
 	return {$: 'ToolNudgeMsg', a: a};
@@ -35695,7 +36143,6 @@ var $mdgriffith$elm_ui$Internal$Model$getWidth = function (attrs) {
 		$elm$core$Maybe$Nothing,
 		attrs);
 };
-var $mdgriffith$elm_ui$Internal$Flag$hover = $mdgriffith$elm_ui$Internal$Flag$flag(33);
 var $elm$html$Html$Attributes$max = $elm$html$Html$Attributes$stringProperty('max');
 var $elm$html$Html$Attributes$min = $elm$html$Html$Attributes$stringProperty('min');
 var $mdgriffith$elm_ui$Element$spacingXY = F2(
@@ -35713,37 +36160,6 @@ var $elm$html$Html$Attributes$step = function (n) {
 	return A2($elm$html$Html$Attributes$stringProperty, 'step', n);
 };
 var $mdgriffith$elm_ui$Element$fillPortion = $mdgriffith$elm_ui$Internal$Model$Fill;
-var $mdgriffith$elm_ui$Internal$Model$map = F2(
-	function (fn, el) {
-		switch (el.$) {
-			case 'Styled':
-				var styled = el.a;
-				return $mdgriffith$elm_ui$Internal$Model$Styled(
-					{
-						html: F2(
-							function (add, context) {
-								return A2(
-									$elm$virtual_dom$VirtualDom$map,
-									fn,
-									A2(styled.html, add, context));
-							}),
-						styles: styled.styles
-					});
-			case 'Unstyled':
-				var html = el.a;
-				return $mdgriffith$elm_ui$Internal$Model$Unstyled(
-					A2(
-						$elm$core$Basics$composeL,
-						$elm$virtual_dom$VirtualDom$map(fn),
-						html));
-			case 'Text':
-				var str = el.a;
-				return $mdgriffith$elm_ui$Internal$Model$Text(str);
-			default:
-				return $mdgriffith$elm_ui$Internal$Model$Empty;
-		}
-	});
-var $elm$virtual_dom$VirtualDom$mapAttribute = _VirtualDom_mapAttribute;
 var $mdgriffith$elm_ui$Internal$Model$mapAttr = F2(
 	function (fn, attr) {
 		switch (attr.$) {
@@ -36129,25 +36545,6 @@ var $author$project$Tools$BendSmoother$bendSmoothnessSlider = F3(
 				thumb: $mdgriffith$elm_ui$Element$Input$defaultThumb,
 				value: options.bendTrackPointSpacing
 			});
-	});
-var $mdgriffith$elm_ui$Internal$Model$Paragraph = {$: 'Paragraph'};
-var $mdgriffith$elm_ui$Element$paragraph = F2(
-	function (attrs, children) {
-		return A4(
-			$mdgriffith$elm_ui$Internal$Model$element,
-			$mdgriffith$elm_ui$Internal$Model$asParagraph,
-			$mdgriffith$elm_ui$Internal$Model$div,
-			A2(
-				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Internal$Model$Describe($mdgriffith$elm_ui$Internal$Model$Paragraph),
-				A2(
-					$elm$core$List$cons,
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-					A2(
-						$elm$core$List$cons,
-						$mdgriffith$elm_ui$Element$spacing(5),
-						attrs))),
-			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
 	});
 var $author$project$ViewPureStyles$noTrackMessage = A2(
 	$mdgriffith$elm_ui$Element$paragraph,
@@ -36595,39 +36992,6 @@ var $mdgriffith$elm_ui$Element$rotate = function (angle) {
 			$mdgriffith$elm_ui$Internal$Model$Rotate,
 			_Utils_Tuple3(0, 0, 1),
 			angle));
-};
-var $mdgriffith$elm_ui$Internal$Model$boxShadowClass = function (shadow) {
-	return $elm$core$String$concat(
-		_List_fromArray(
-			[
-				shadow.inset ? 'box-inset' : 'box-',
-				$mdgriffith$elm_ui$Internal$Model$floatClass(shadow.offset.a) + 'px',
-				$mdgriffith$elm_ui$Internal$Model$floatClass(shadow.offset.b) + 'px',
-				$mdgriffith$elm_ui$Internal$Model$floatClass(shadow.blur) + 'px',
-				$mdgriffith$elm_ui$Internal$Model$floatClass(shadow.size) + 'px',
-				$mdgriffith$elm_ui$Internal$Model$formatColorClass(shadow.color)
-			]));
-};
-var $mdgriffith$elm_ui$Internal$Flag$shadows = $mdgriffith$elm_ui$Internal$Flag$flag(19);
-var $mdgriffith$elm_ui$Element$Border$shadow = function (almostShade) {
-	var shade = {blur: almostShade.blur, color: almostShade.color, inset: false, offset: almostShade.offset, size: almostShade.size};
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$shadows,
-		A3(
-			$mdgriffith$elm_ui$Internal$Model$Single,
-			$mdgriffith$elm_ui$Internal$Model$boxShadowClass(shade),
-			'box-shadow',
-			$mdgriffith$elm_ui$Internal$Model$formatBoxShadow(shade)));
-};
-var $mdgriffith$elm_ui$Element$transparent = function (on) {
-	return on ? A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$transparency,
-		A2($mdgriffith$elm_ui$Internal$Model$Transparency, 'transparent', 1.0)) : A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$transparency,
-		A2($mdgriffith$elm_ui$Internal$Model$Transparency, 'visible', 0.0));
 };
 var $mdgriffith$elm_ui$Element$Border$widthXY = F2(
 	function (x, y) {
@@ -37528,6 +37892,16 @@ var $author$project$Tools$DirectionChanges$SetThreshold = function (a) {
 };
 var $author$project$Tools$DirectionChanges$ViewNext = {$: 'ViewNext'};
 var $author$project$Tools$DirectionChanges$ViewPrevious = {$: 'ViewPrevious'};
+var $author$project$ToolTip$buttonStylesWithTooltip = F2(
+	function (usher, tooltip_) {
+		return A2(
+			$elm$core$List$cons,
+			A2(
+				$author$project$ToolTip$tooltip,
+				usher,
+				$author$project$ToolTip$myTooltip(tooltip_)),
+			$author$project$ViewPureStyles$neatToolsBorder);
+	});
 var $feathericons$elm_feather$FeatherIcons$chevronLeft = A2(
 	$feathericons$elm_feather$FeatherIcons$makeBuilder,
 	'chevron-left',
@@ -37757,7 +38131,7 @@ var $author$project$Tools$DirectionChanges$view = F4(
 												[
 													A2(
 													$mdgriffith$elm_ui$Element$Input$button,
-													$author$project$ViewPureStyles$neatToolsBorder,
+													A2($author$project$ToolTip$buttonStylesWithTooltip, $mdgriffith$elm_ui$Element$below, 'Move to previous'),
 													{
 														label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronLeft),
 														onPress: $elm$core$Maybe$Just(
@@ -37765,7 +38139,7 @@ var $author$project$Tools$DirectionChanges$view = F4(
 													}),
 													A2(
 													$mdgriffith$elm_ui$Element$Input$button,
-													$author$project$ViewPureStyles$neatToolsBorder,
+													A2($author$project$ToolTip$buttonStylesWithTooltip, $mdgriffith$elm_ui$Element$below, 'Centre view on this issue'),
 													{
 														label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$mousePointer),
 														onPress: $elm$core$Maybe$Just(
@@ -37774,7 +38148,7 @@ var $author$project$Tools$DirectionChanges$view = F4(
 													}),
 													A2(
 													$mdgriffith$elm_ui$Element$Input$button,
-													$author$project$ViewPureStyles$neatToolsBorder,
+													A2($author$project$ToolTip$buttonStylesWithTooltip, $mdgriffith$elm_ui$Element$below, 'Move to next'),
 													{
 														label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$chevronRight),
 														onPress: $elm$core$Maybe$Just(
@@ -38253,6 +38627,131 @@ var $author$project$Tools$LimitGradients$view = F2(
 								wrapper($author$project$Tools$LimitGradients$LimitGradient))
 						}))
 				]));
+	});
+var $author$project$Tools$MoveScaleRotate$Recentre = {$: 'Recentre'};
+var $author$project$Tools$MoveScaleRotate$RotateAndScale = {$: 'RotateAndScale'};
+var $author$project$Tools$MoveScaleRotate$SetRotateAngle = function (a) {
+	return {$: 'SetRotateAngle', a: a};
+};
+var $author$project$Tools$MoveScaleRotate$SetScale = function (a) {
+	return {$: 'SetScale', a: a};
+};
+var $author$project$Tools$MoveScaleRotate$UseMapElevations = {$: 'UseMapElevations'};
+var $author$project$Tools$MoveScaleRotate$Zero = {$: 'Zero'};
+var $author$project$Tools$MoveScaleRotate$view = F5(
+	function (imperial, options, _v0, wrapper, maybeTrack) {
+		var lastX = _v0.a;
+		var lastY = _v0.b;
+		var zeroButton = A2(
+			$mdgriffith$elm_ui$Element$Input$button,
+			$author$project$ViewPureStyles$neatToolsBorder,
+			{
+				label: $mdgriffith$elm_ui$Element$text('Zero'),
+				onPress: $elm$core$Maybe$Just(
+					wrapper($author$project$Tools$MoveScaleRotate$Zero))
+			});
+		var scaleSlider = A2(
+			$mdgriffith$elm_ui$Element$Input$slider,
+			$author$project$ViewPureStyles$commonShortHorizontalSliderStyles,
+			{
+				label: A2(
+					$mdgriffith$elm_ui$Element$Input$labelBelow,
+					_List_Nil,
+					$mdgriffith$elm_ui$Element$text(
+						'Scale: ' + $author$project$UtilsForViews$showDecimal2(options.scaleFactor))),
+				max: 1.0,
+				min: -1.0,
+				onChange: A2(
+					$elm$core$Basics$composeL,
+					A2($elm$core$Basics$composeL, wrapper, $author$project$Tools$MoveScaleRotate$SetScale),
+					function (x) {
+						return A2($elm$core$Basics$pow, 10.0, x);
+					}),
+				step: $elm$core$Maybe$Nothing,
+				thumb: $mdgriffith$elm_ui$Element$Input$defaultThumb,
+				value: A2($elm$core$Basics$logBase, 10, options.scaleFactor)
+			});
+		var rotationSlider = A2(
+			$mdgriffith$elm_ui$Element$Input$slider,
+			$author$project$ViewPureStyles$commonShortHorizontalSliderStyles,
+			{
+				label: A2(
+					$mdgriffith$elm_ui$Element$Input$labelBelow,
+					_List_Nil,
+					$mdgriffith$elm_ui$Element$text(
+						'Rotation: ' + $author$project$UtilsForViews$showDecimal0(
+							$ianmackenzie$elm_units$Angle$inDegrees(options.rotateAngle)))),
+				max: 30.0,
+				min: -30.0,
+				onChange: A2(
+					$elm$core$Basics$composeL,
+					A2($elm$core$Basics$composeL, wrapper, $author$project$Tools$MoveScaleRotate$SetRotateAngle),
+					$ianmackenzie$elm_units$Angle$degrees),
+				step: $elm$core$Maybe$Just(1.0),
+				thumb: $mdgriffith$elm_ui$Element$Input$defaultThumb,
+				value: $ianmackenzie$elm_units$Angle$inDegrees(options.rotateAngle)
+			});
+		var rotateButton = A2(
+			$mdgriffith$elm_ui$Element$Input$button,
+			$author$project$ViewPureStyles$neatToolsBorder,
+			{
+				label: $mdgriffith$elm_ui$Element$text('Rotate & Scale'),
+				onPress: $elm$core$Maybe$Just(
+					wrapper($author$project$Tools$MoveScaleRotate$RotateAndScale))
+			});
+		var recentreButton = A2(
+			$mdgriffith$elm_ui$Element$Input$button,
+			A2($author$project$ToolTip$buttonStylesWithTooltip, $mdgriffith$elm_ui$Element$below, 'Click on Map to set the destination'),
+			{
+				label: $mdgriffith$elm_ui$Element$text(
+					'Recentre at\n(' + ($elm$core$String$fromFloat(lastX) + (', ' + ($elm$core$String$fromFloat(lastY) + ')')))),
+				onPress: $elm$core$Maybe$Just(
+					wrapper($author$project$Tools$MoveScaleRotate$Recentre))
+			});
+		var elevationFetchButton = A2(
+			$mdgriffith$elm_ui$Element$Input$button,
+			$author$project$ViewPureStyles$neatToolsBorder,
+			{
+				label: $mdgriffith$elm_ui$Element$text('Use elevations fetched from Mapbox'),
+				onPress: $elm$core$Maybe$Just(
+					wrapper($author$project$Tools$MoveScaleRotate$UseMapElevations))
+			});
+		if (maybeTrack.$ === 'Just') {
+			var track = maybeTrack.a;
+			return A2(
+				$mdgriffith$elm_ui$Element$column,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$spacing(6),
+						$mdgriffith$elm_ui$Element$padding(6),
+						$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite),
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[$mdgriffith$elm_ui$Element$centerX]),
+						rotationSlider),
+						A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[$mdgriffith$elm_ui$Element$centerX]),
+						scaleSlider),
+						A2(
+						$mdgriffith$elm_ui$Element$wrappedRow,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$spacing(6),
+								$mdgriffith$elm_ui$Element$padding(6)
+							]),
+						_List_fromArray(
+							[rotateButton, zeroButton, recentreButton, elevationFetchButton]))
+					]));
+		} else {
+			return $author$project$ViewPureStyles$noTrackMessage;
+		}
 	});
 var $author$project$Tools$Nudge$SetFadeExtent = function (a) {
 	return {$: 'SetFadeExtent', a: a};
@@ -39429,11 +39928,19 @@ var $author$project$ToolsController$viewToolByType = F4(
 							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolInterpolateMsg),
 							options.interpolateSettings,
 							isTrack);
-					default:
+					case 'ToolLimitGradient':
 						return A2(
 							$author$project$Tools$LimitGradients$view,
 							options.limitGradientSettings,
 							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolLimitGradientMsg));
+					default:
+						return A5(
+							$author$project$Tools$MoveScaleRotate$view,
+							options.imperial,
+							options.moveScaleRotateSettings,
+							_Utils_Tuple2(0.0, 0.0),
+							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolMoveScaleRotateMsg),
+							isTrack);
 				}
 			}());
 	});

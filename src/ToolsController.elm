@@ -17,6 +17,7 @@ import Html.Events.Extra.Mouse as Mouse
 import Json.Decode as D exposing (field)
 import Json.Encode as E exposing (string)
 import List.Extra
+import ToolTip exposing (myTooltip, tooltip)
 import Tools.BendSmoother
 import Tools.BendSmootherOptions
 import Tools.BezierOptions
@@ -34,6 +35,7 @@ import Tools.Interpolate
 import Tools.InterpolateOptions
 import Tools.LimitGradientOptions
 import Tools.LimitGradients
+import Tools.MoveScaleRotate
 import Tools.Nudge
 import Tools.NudgeOptions
 import Tools.OutAndBack
@@ -70,6 +72,7 @@ type ToolType
     | ToolSimplify
     | ToolInterpolate
     | ToolLimitGradient
+    | ToolMoveScaleRotate
 
 
 type alias Options =
@@ -93,6 +96,7 @@ type alias Options =
     , simplifySettings : Tools.Simplify.Options
     , interpolateSettings : Tools.InterpolateOptions.Options
     , limitGradientSettings : Tools.LimitGradientOptions.Options
+    , moveScaleRotateSettings : Tools.MoveScaleRotate.Options
     }
 
 
@@ -117,6 +121,7 @@ defaultOptions =
     , simplifySettings = Tools.Simplify.defaultOptions
     , interpolateSettings = Tools.Interpolate.defaultOptions
     , limitGradientSettings = Tools.LimitGradients.defaultOptions
+    , moveScaleRotateSettings = Tools.MoveScaleRotate.defaultOptions
     }
 
 
@@ -145,6 +150,7 @@ type ToolMsg
     | ToolSimplifyMsg Tools.Simplify.Msg
     | ToolInterpolateMsg Tools.Interpolate.Msg
     | ToolLimitGradientMsg Tools.LimitGradients.Msg
+    | ToolMoveScaleRotateMsg Tools.MoveScaleRotate.Msg
 
 
 type alias ToolEntry =
@@ -179,6 +185,7 @@ defaultTools =
     , simplifyTool
     , interpolateTool
     , limitGradientTool
+    , moveScaleRotateTool
     ]
 
 
@@ -406,6 +413,20 @@ limitGradientTool =
     }
 
 
+moveScaleRotateTool : ToolEntry
+moveScaleRotateTool =
+    { toolType = ToolMoveScaleRotate
+    , label = "Move & Scale"
+    , info = "Lift & Shifts"
+    , video = Nothing
+    , state = Contracted
+    , dock = DockLowerLeft
+    , tabColour = FlatColors.FlatUIPalette.concrete
+    , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
+    , isPopupOpen = False
+    }
+
+
 toggleToolPopup : ToolType -> ToolEntry -> ToolEntry
 toggleToolPopup toolType tool =
     if tool.toolType == toolType then
@@ -486,13 +507,21 @@ update toolMsg isTrack msgWrapper options =
             ( options, [] )
 
         ToolPopupToggle toolType ->
-            ( { options | tools = List.map (toggleToolPopup toolType) options.tools }
-            , [ StoreLocally "tools" <| encodeToolState options ]
+            let
+                newOptions =
+                    { options | tools = List.map (toggleToolPopup toolType) options.tools }
+            in
+            ( newOptions
+            , [ StoreLocally "tools" <| encodeToolState newOptions ]
             )
 
         ToolDockSelect toolType toolDock ->
-            ( { options | tools = List.map (setDock toolType toolDock) options.tools }
-            , [ StoreLocally "tools" <| encodeToolState options ]
+            let
+                newOptions =
+                    { options | tools = List.map (setDock toolType toolDock) options.tools }
+            in
+            ( newOptions
+            , [ StoreLocally "tools" <| encodeToolState newOptions ]
             )
 
         ToolColourSelect toolType color ->
@@ -505,7 +534,7 @@ update toolMsg isTrack msgWrapper options =
                 toolStateHasChanged toolType Expanded isTrack newOptions
 
             else
-                ( newOptions, [ StoreLocally "tools" <| encodeToolState options ] )
+                ( newOptions, [ StoreLocally "tools" <| encodeToolState newOptions ] )
 
         ToolStateToggle toolType newState ->
             -- Record the new state, but also let the tool know!
@@ -757,6 +786,19 @@ update toolMsg isTrack msgWrapper options =
                 Nothing ->
                     ( options, [] )
 
+        ToolMoveScaleRotateMsg msg ->
+            let
+                ( newOptions, actions ) =
+                    Tools.MoveScaleRotate.update
+                        msg
+                        options.moveScaleRotateSettings
+                        (getColour ToolMoveScaleRotate options.tools)
+                        isTrack
+            in
+            ( { options | moveScaleRotateSettings = newOptions }
+            , actions
+            )
+
 
 refreshOpenTools :
     Maybe (TrackLoaded msg)
@@ -967,6 +1009,20 @@ toolStateHasChanged toolType newState isTrack options =
 
                 newOptions =
                     { options | limitGradientSettings = newToolOptions }
+            in
+            ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
+
+        ToolMoveScaleRotate ->
+            let
+                ( newToolOptions, actions ) =
+                    Tools.MoveScaleRotate.toolStateChange
+                        (newState == Expanded)
+                        (getColour toolType options.tools)
+                        options.moveScaleRotateSettings
+                        isTrack
+
+                newOptions =
+                    { options | moveScaleRotateSettings = newToolOptions }
             in
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
@@ -1235,6 +1291,14 @@ viewToolByType msgWrapper entry isTrack options =
                     options.limitGradientSettings
                     (msgWrapper << ToolLimitGradientMsg)
 
+            ToolMoveScaleRotate ->
+                Tools.MoveScaleRotate.view
+                    options.imperial
+                    options.moveScaleRotateSettings
+                    ( 0.0, 0.0 )
+                    (msgWrapper << ToolMoveScaleRotateMsg)
+                    isTrack
+
 
 
 -- Local storage management
@@ -1306,6 +1370,9 @@ encodeType toolType =
 
         ToolLimitGradient ->
             "ToolLimitGradient"
+
+        ToolMoveScaleRotate ->
+            "ToolMoveScaleRotate"
 
 
 encodeColour : Element.Color -> E.Value
@@ -1604,7 +1671,7 @@ showDockHeader msgWrapper dockId docks =
                 , Background.color dockSettings.dockLabelColour
                 , Font.color <| contrastingColour dockSettings.dockLabelColour
                 ]
-                [ Input.button []
+                [ Input.button [ tooltip below (myTooltip "Click to edit label") ]
                     { onPress = Just <| msgWrapper <| DockPopupToggle dockNumber
                     , label = useIcon FeatherIcons.edit
                     }
