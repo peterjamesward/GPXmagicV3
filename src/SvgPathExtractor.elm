@@ -15,6 +15,7 @@ import Element.Input as Input
 import File exposing (File)
 import FlatColors.ChinesePalette
 import FlatColors.FlatUIPalette
+import GeoCodeDecoders
 import GpxParser exposing (asRegex)
 import Length exposing (Meters, inMeters, meters)
 import LineSegment3d
@@ -34,16 +35,20 @@ import XmlParser exposing (Node(..))
 
 
 type alias Options =
-    { svgFilename : String }
+    { svgFilename : String
+    , ipInfo : Maybe GeoCodeDecoders.IpInfo
+    }
 
 
 defaultOptions : Options
 defaultOptions =
-    { svgFilename = "SVG" }
+    { svgFilename = "SVG"
+    , ipInfo = Nothing
+    }
 
 
 type Msg
-    = ReadFile
+    = ReadFile (Maybe GeoCodeDecoders.IpInfo)
     | FileSelected File
     | FileLoaded String
 
@@ -57,8 +62,12 @@ type alias Path =
 update : Msg -> Options -> (Msg -> msg) -> ( Options, List (ToolAction msg) )
 update msg options wrap =
     case msg of
-        ReadFile ->
-            ( options
+        ReadFile ipInfo ->
+            let
+                newOptions =
+                    { options | ipInfo = ipInfo }
+            in
+            ( newOptions
             , [ SelectSvgFile (wrap << FileSelected) ]
               --Select.file [ "text/svg" ] (wrap << FileSelected)
             )
@@ -183,6 +192,14 @@ processXML options content =
     let
         xmlParse =
             XmlParser.parse content
+
+        ( lon, lat ) =
+            case options.ipInfo of
+                Just ipInfo ->
+                    ( ipInfo.longitude, ipInfo.latitude )
+
+                Nothing ->
+                    ( 0, 52 )
     in
     case xmlParse of
         Ok { processingInstructions, docType, root } ->
@@ -222,8 +239,8 @@ processXML options content =
                                 |> List.foldl convertToPoints pathState
 
                         pointZero =
-                            { longitude = Direction2d.x
-                            , latitude = Angle.degrees 0
+                            { longitude = Direction2d.fromAngle <| Angle.degrees lon
+                            , latitude = Angle.degrees lat
                             , altitude = Length.meters 0
                             }
 
@@ -269,15 +286,15 @@ getAttribute attribute node =
             Nothing
 
 
-view : (Msg -> msg) -> Element msg
-view wrap =
+view : (Msg -> msg) -> Maybe GeoCodeDecoders.IpInfo -> Element msg
+view wrap ipInfo =
     Input.button
         [ padding 5
         , Background.color FlatColors.ChinesePalette.antiFlashWhite
         , Border.color FlatColors.FlatUIPalette.peterRiver
         , Border.width 2
         ]
-        { onPress = Just (wrap ReadFile)
+        { onPress = Just (wrap <| ReadFile ipInfo)
         , label = text "Extract paths from SVG file"
         }
 

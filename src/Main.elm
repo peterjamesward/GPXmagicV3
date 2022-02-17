@@ -45,6 +45,7 @@ import StravaAuth exposing (getStravaToken)
 import SvgPathExtractor
 import Task
 import Time
+import ToolTip exposing (myTooltip, tooltip)
 import Tools.BendSmoother
 import Tools.BezierSplines
 import Tools.CentroidAverage
@@ -1003,6 +1004,7 @@ topLoadingBar model =
                 , Background.color FlatColors.ChinesePalette.antiFlashWhite
                 , Border.color FlatColors.FlatUIPalette.peterRiver
                 , Border.width 2
+                , tooltip below (myTooltip "Other file options")
                 , inFront <|
                     if model.loadOptionsMenuOpen then
                         el
@@ -1010,7 +1012,7 @@ topLoadingBar model =
                             , Background.color FlatColors.ChinesePalette.antiFlashWhite
                             , htmlAttribute (style "z-index" "20")
                             ]
-                            (SvgPathExtractor.view SvgMsg)
+                            (SvgPathExtractor.view SvgMsg model.ipInfo )
 
                     else
                         none

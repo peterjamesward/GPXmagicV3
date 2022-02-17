@@ -8712,7 +8712,7 @@ var $author$project$PaneLayoutManager$defaultOptions = {
 	scene3d: _List_Nil,
 	sliderState: $author$project$PaneLayoutManager$SliderIdle
 };
-var $author$project$SvgPathExtractor$defaultOptions = {svgFilename: 'SVG'};
+var $author$project$SvgPathExtractor$defaultOptions = {ipInfo: $elm$core$Maybe$Nothing, svgFilename: 'SVG'};
 var $author$project$Tools$BendSmootherOptions$SmoothBend = {$: 'SmoothBend'};
 var $author$project$Tools$BendSmoother$defaultOptions = {bendTrackPointSpacing: 5.0, mode: $author$project$Tools$BendSmootherOptions$SmoothBend, segments: 1, smoothedBend: $elm$core$Maybe$Nothing};
 var $author$project$Tools$BezierOptions$Approximated = {$: 'Approximated'};
@@ -22025,6 +22025,17 @@ var $author$project$TrackLoaded$trackFromPoints = F2(
 var $author$project$SvgPathExtractor$processXML = F2(
 	function (options, content) {
 		var xmlParse = $jinjor$elm_xml_parser$XmlParser$parse(content);
+		var _v0 = function () {
+			var _v1 = options.ipInfo;
+			if (_v1.$ === 'Just') {
+				var ipInfo = _v1.a;
+				return _Utils_Tuple2(ipInfo.longitude, ipInfo.latitude);
+			} else {
+				return _Utils_Tuple2(0, 52);
+			}
+		}();
+		var lon = _v0.a;
+		var lat = _v0.b;
 		if (xmlParse.$ === 'Ok') {
 			var processingInstructions = xmlParse.a.processingInstructions;
 			var docType = xmlParse.a.docType;
@@ -22035,22 +22046,23 @@ var $author$project$SvgPathExtractor$processXML = F2(
 				var children = root.c;
 				var pointZero = {
 					altitude: $ianmackenzie$elm_units$Length$meters(0),
-					latitude: $ianmackenzie$elm_units$Angle$degrees(0),
-					longitude: $ianmackenzie$elm_geometry$Direction2d$x
+					latitude: $ianmackenzie$elm_units$Angle$degrees(lat),
+					longitude: $ianmackenzie$elm_geometry$Direction2d$fromAngle(
+						$ianmackenzie$elm_units$Angle$degrees(lon))
 				};
 				var pathState = {currentPoint: $ianmackenzie$elm_geometry$Point3d$origin, outputs: _List_Nil, startPoint: $ianmackenzie$elm_geometry$Point3d$origin};
 				var pathNodes = A2(
 					$elm$core$List$filter,
-					function (_v3) {
-						var t = _v3.a;
+					function (_v5) {
+						var t = _v5.a;
 						return t === 'path';
 					},
 					$elm$core$List$reverse(
 						$author$project$SvgPathExtractor$getAllXmlTags(root)));
 				var pathInfos = A2(
 					$elm$core$List$map,
-					function (_v2) {
-						var node = _v2.b;
+					function (_v4) {
+						var node = _v4.b;
 						return {
 							d: A2($author$project$SvgPathExtractor$getAttribute, 'd', node),
 							transform: A2($author$project$SvgPathExtractor$getAttribute, 'transform', node)
@@ -27454,8 +27466,12 @@ var $author$project$SvgPathExtractor$update = F3(
 	function (msg, options, wrap) {
 		switch (msg.$) {
 			case 'ReadFile':
-				return _Utils_Tuple2(
+				var ipInfo = msg.a;
+				var newOptions = _Utils_update(
 					options,
+					{ipInfo: ipInfo});
+				return _Utils_Tuple2(
+					newOptions,
 					_List_fromArray(
 						[
 							$author$project$Actions$SelectSvgFile(
@@ -53635,23 +53651,27 @@ var $author$project$ViewPureStyles$useIconWithSize = function (size) {
 			$feathericons$elm_feather$FeatherIcons$toHtml(_List_Nil)),
 		$feathericons$elm_feather$FeatherIcons$withSize(size));
 };
-var $author$project$SvgPathExtractor$ReadFile = {$: 'ReadFile'};
-var $author$project$SvgPathExtractor$view = function (wrap) {
-	return A2(
-		$mdgriffith$elm_ui$Element$Input$button,
-		_List_fromArray(
-			[
-				$mdgriffith$elm_ui$Element$padding(5),
-				$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite),
-				$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$FlatUIPalette$peterRiver),
-				$mdgriffith$elm_ui$Element$Border$width(2)
-			]),
-		{
-			label: $mdgriffith$elm_ui$Element$text('Extract paths from SVG file'),
-			onPress: $elm$core$Maybe$Just(
-				wrap($author$project$SvgPathExtractor$ReadFile))
-		});
+var $author$project$SvgPathExtractor$ReadFile = function (a) {
+	return {$: 'ReadFile', a: a};
 };
+var $author$project$SvgPathExtractor$view = F2(
+	function (wrap, ipInfo) {
+		return A2(
+			$mdgriffith$elm_ui$Element$Input$button,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$padding(5),
+					$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite),
+					$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$FlatUIPalette$peterRiver),
+					$mdgriffith$elm_ui$Element$Border$width(2)
+				]),
+			{
+				label: $mdgriffith$elm_ui$Element$text('Extract paths from SVG file'),
+				onPress: $elm$core$Maybe$Just(
+					wrap(
+						$author$project$SvgPathExtractor$ReadFile(ipInfo)))
+			});
+	});
 var $author$project$Main$topLoadingBar = function (model) {
 	var saveButton = A2(
 		$mdgriffith$elm_ui$Element$Input$button,
@@ -53674,6 +53694,10 @@ var $author$project$Main$topLoadingBar = function (model) {
 				$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite),
 				$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$FlatUIPalette$peterRiver),
 				$mdgriffith$elm_ui$Element$Border$width(2),
+				A2(
+				$author$project$ToolTip$tooltip,
+				$mdgriffith$elm_ui$Element$below,
+				$author$project$ToolTip$myTooltip('Other file options')),
 				$mdgriffith$elm_ui$Element$inFront(
 				model.loadOptionsMenuOpen ? A2(
 					$mdgriffith$elm_ui$Element$el,
@@ -53684,7 +53708,7 @@ var $author$project$Main$topLoadingBar = function (model) {
 							$mdgriffith$elm_ui$Element$htmlAttribute(
 							A2($elm$html$Html$Attributes$style, 'z-index', '20'))
 						]),
-					$author$project$SvgPathExtractor$view($author$project$Main$SvgMsg)) : $mdgriffith$elm_ui$Element$none)
+					A2($author$project$SvgPathExtractor$view, $author$project$Main$SvgMsg, model.ipInfo)) : $mdgriffith$elm_ui$Element$none)
 			]),
 		{
 			label: A2($author$project$ViewPureStyles$useIconWithSize, 12, $feathericons$elm_feather$FeatherIcons$moreHorizontal),
