@@ -433,7 +433,7 @@ toggleToolPopup toolType tool =
         { tool | isPopupOpen = not tool.isPopupOpen }
 
     else
-        tool
+        { tool | isPopupOpen = False }
 
 
 setToolState : ToolType -> ToolState -> ToolEntry -> ToolEntry
@@ -1089,7 +1089,20 @@ viewTool msgWrapper isTrack options toolEntry =
             , Background.color toolEntry.tabColour
             , Font.color toolEntry.textColour
             ]
-            [ Input.button [ centerX ]
+            [ Input.button
+                [ centerX
+                , tooltip below <|
+                    myTooltip <|
+                        case toolEntry.state of
+                            Expanded ->
+                                "Click to close"
+
+                            Contracted ->
+                                "Click to open"
+
+                            Disabled ->
+                                "Disabled"
+                ]
                 { onPress =
                     Just <|
                         msgWrapper <|
@@ -1117,27 +1130,27 @@ showDockOptions msgWrapper toolEntry =
         row
             neatToolsBorder
             [ Input.button
-                []
+                [ tooltip below (myTooltip "Move to upper left") ]
                 { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockUpperLeft
                 , label = useIcon FeatherIcons.arrowUpLeft
                 }
             , Input.button
-                []
+                [ tooltip below (myTooltip "Move to lower left") ]
                 { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockLowerLeft
                 , label = useIcon FeatherIcons.arrowDownLeft
                 }
             , Input.button
-                []
+                [ tooltip below (myTooltip "Move to bottom centre") ]
                 { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockBottom
                 , label = useIcon FeatherIcons.arrowDown
                 }
             , Input.button
-                []
+                [ tooltip below (myTooltip "Move to lower right") ]
                 { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockLowerRight
                 , label = useIcon FeatherIcons.arrowDownRight
                 }
             , Input.button
-                []
+                [ tooltip below (myTooltip "Move to upper right") ]
                 { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockUpperRight
                 , label = useIcon FeatherIcons.arrowUpRight
                 }

@@ -24127,7 +24127,9 @@ var $author$project$ToolsController$toggleToolPopup = F2(
 	function (toolType, tool) {
 		return _Utils_eq(tool.toolType, toolType) ? _Utils_update(
 			tool,
-			{isPopupOpen: !tool.isPopupOpen}) : tool;
+			{isPopupOpen: !tool.isPopupOpen}) : _Utils_update(
+			tool,
+			{isPopupOpen: false});
 	});
 var $author$project$Actions$BendSmootherApplyWithOptions = function (a) {
 	return {$: 'BendSmootherApplyWithOptions', a: a};
@@ -35090,7 +35092,13 @@ var $author$project$ToolsController$showDockOptions = F2(
 				[
 					A2(
 					$mdgriffith$elm_ui$Element$Input$button,
-					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							$author$project$ToolTip$tooltip,
+							$mdgriffith$elm_ui$Element$below,
+							$author$project$ToolTip$myTooltip('Move to upper left'))
+						]),
 					{
 						label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$arrowUpLeft),
 						onPress: $elm$core$Maybe$Just(
@@ -35099,7 +35107,13 @@ var $author$project$ToolsController$showDockOptions = F2(
 					}),
 					A2(
 					$mdgriffith$elm_ui$Element$Input$button,
-					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							$author$project$ToolTip$tooltip,
+							$mdgriffith$elm_ui$Element$below,
+							$author$project$ToolTip$myTooltip('Move to lower left'))
+						]),
 					{
 						label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$arrowDownLeft),
 						onPress: $elm$core$Maybe$Just(
@@ -35108,7 +35122,13 @@ var $author$project$ToolsController$showDockOptions = F2(
 					}),
 					A2(
 					$mdgriffith$elm_ui$Element$Input$button,
-					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							$author$project$ToolTip$tooltip,
+							$mdgriffith$elm_ui$Element$below,
+							$author$project$ToolTip$myTooltip('Move to bottom centre'))
+						]),
 					{
 						label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$arrowDown),
 						onPress: $elm$core$Maybe$Just(
@@ -35117,7 +35137,13 @@ var $author$project$ToolsController$showDockOptions = F2(
 					}),
 					A2(
 					$mdgriffith$elm_ui$Element$Input$button,
-					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							$author$project$ToolTip$tooltip,
+							$mdgriffith$elm_ui$Element$below,
+							$author$project$ToolTip$myTooltip('Move to lower right'))
+						]),
 					{
 						label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$arrowDownRight),
 						onPress: $elm$core$Maybe$Just(
@@ -35126,7 +35152,13 @@ var $author$project$ToolsController$showDockOptions = F2(
 					}),
 					A2(
 					$mdgriffith$elm_ui$Element$Input$button,
-					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							$author$project$ToolTip$tooltip,
+							$mdgriffith$elm_ui$Element$below,
+							$author$project$ToolTip$myTooltip('Move to upper right'))
+						]),
 					{
 						label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$arrowUpRight),
 						onPress: $elm$core$Maybe$Just(
@@ -40029,7 +40061,24 @@ var $author$project$ToolsController$viewTool = F4(
 							A2(
 							$mdgriffith$elm_ui$Element$Input$button,
 							_List_fromArray(
-								[$mdgriffith$elm_ui$Element$centerX]),
+								[
+									$mdgriffith$elm_ui$Element$centerX,
+									A2(
+									$author$project$ToolTip$tooltip,
+									$mdgriffith$elm_ui$Element$below,
+									$author$project$ToolTip$myTooltip(
+										function () {
+											var _v0 = toolEntry.state;
+											switch (_v0.$) {
+												case 'Expanded':
+													return 'Click to close';
+												case 'Contracted':
+													return 'Click to open';
+												default:
+													return 'Disabled';
+											}
+										}()))
+								]),
 							{
 								label: $mdgriffith$elm_ui$Element$text(toolEntry.label),
 								onPress: $elm$core$Maybe$Just(
