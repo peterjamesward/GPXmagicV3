@@ -12,6 +12,7 @@ import FeatherIcons
 import FlatColors.FlatUIPalette
 import FlatColors.SwedishPalette
 import Html.Attributes exposing (style)
+import Html.Events
 import Html.Events.Extra.Mouse as Mouse
 import Json.Decode as D exposing (field)
 import Json.Encode as E exposing (string)
@@ -42,7 +43,7 @@ import Tools.Simplify
 import Tools.TrackInfoBox as TrackInfoBox
 import Tools.UndoRedo as UndoRedo
 import TrackLoaded exposing (TrackLoaded)
-import ViewPureStyles exposing (contrastingColour, neatToolsBorder, useIcon)
+import ViewPureStyles exposing (contrastingColour, neatToolsBorder, onEnter, useIcon)
 import ViewThirdPerson exposing (stopProp)
 
 
@@ -439,7 +440,7 @@ nextToolState state =
 setDock : ToolType -> ToolDock -> ToolEntry -> ToolEntry
 setDock toolType dock tool =
     if tool.toolType == toolType then
-        { tool | dock = dock }
+        { tool | dock = dock, isPopupOpen = False }
 
     else
         tool
@@ -1609,7 +1610,10 @@ showDockHeader msgWrapper dockId docks =
                     }
                 , case dockSettings.dockPopupOpen of
                     True ->
-                        Input.text [ Font.color defaultDockColour ]
+                        Input.text
+                            [ Font.color defaultDockColour
+                            , onEnter (DockPopupToggle dockNumber |> msgWrapper)
+                            ]
                             { onChange = DockNameChange dockNumber >> msgWrapper
                             , text = dockSettings.dockLabel
                             , placeholder = Nothing

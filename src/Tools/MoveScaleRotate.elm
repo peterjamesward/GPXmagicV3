@@ -1,15 +1,21 @@
 module Tools.MoveScaleRotate exposing (..)
 
+import Actions exposing (PreviewShape(..), ToolAction(..))
 import Angle exposing (Angle)
 import Axis3d
 import BoundingBox3d
 import Direction3d
+import DomainModel exposing (EarthPoint, GPXSource)
 import Element exposing (..)
+import Element.Background as Background
 import Element.Input as Input exposing (button)
+import FlatColors.ChinesePalette
 import Length exposing (Meters, inMeters)
 import List.Extra
 import Plane3d
 import Point3d
+import TrackLoaded exposing (TrackLoaded)
+import UtilsForViews exposing (showDecimal0, showDecimal2)
 import Vector3d
 import ViewPureStyles exposing (..)
 
@@ -36,46 +42,90 @@ defaultOptions =
     }
 
 
+toolStateChange :
+    Bool
+    -> Element.Color
+    -> Options
+    -> Maybe (TrackLoaded msg)
+    -> ( Options, List (ToolAction msg) )
+toolStateChange opened colour options track =
+    case ( opened, track ) of
+        ( True, Just theTrack ) ->
+            ( options
+            , actions options colour theTrack
+            )
+
+        _ ->
+            ( options, [ HidePreview "affine" ] )
+
+
+actions : Options -> Element.Color -> TrackLoaded msg -> List (ToolAction msg)
+actions options previewColour track =
+    [ ShowPreview
+        { tag = "affine"
+        , shape = PreviewCircle
+        , colour = previewColour
+        , points = computePoints options track
+        }
+    ]
+
+
 update :
     Msg
     -> Options
-    -> ( Float, Float )
-    -> Track
-    -> ( Options, PostUpdateActions.PostUpdateAction trck cmd )
-update msg settings lastMapClick track =
-    case msg of
-        SetRotateAngle theta ->
-            ( { settings | rotateAngle = theta }
-            , PostUpdateActions.ActionPreview
+    -> Element.Color
+    -> Maybe (TrackLoaded msg)
+    -> ( Options, List (ToolAction msg) )
+update msg settings previewColour hasTrack =
+    case ( msg, hasTrack ) of
+        ( SetRotateAngle theta, Just track ) ->
+            let
+                newSettings =
+                    { settings | rotateAngle = theta }
+            in
+            ( newSettings
+            , actions newSettings previewColour track
             )
 
-        SetScale scale ->
-            ( { settings | scaleFactor = scale }
-            , PostUpdateActions.ActionPreview
+        ( SetScale scale, Just track ) ->
+            let
+                newSettings =
+                    { settings | rotateAngle = theta }
+            in
+            ( newSettings
+            , actions newSettings previewColour track
             )
 
-        RotateAndScale ->
-            ( settings
-            , PostUpdateActions.ActionTrackChanged
-                TrackEditType.EditPreservesIndex
-                (buildRotateAndScale settings track)
+        ( RotateAndScale, Just track ) ->
+            let
+                newSettings =
+                    { settings | rotateAngle = theta }
+            in
+            ( newSettings
+            , actions newSettings previewColour track
             )
 
-        Recentre ->
-            ( settings
-            , PostUpdateActions.ActionTrackChanged
-                TrackEditType.EditPreservesIndex
-                (buildRecentre settings lastMapClick track)
+        ( Recentre, Just track ) ->
+            let
+                newSettings =
+                    { settings | rotateAngle = theta }
+            in
+            ( newSettings
+            , actions newSettings previewColour track
             )
 
-        Zero ->
+        ( Zero, Just track ) ->
             ( defaultOptions
-            , PostUpdateActions.ActionPreview
+            , actions defaultOptions previewColour track
             )
 
-        UseMapElevations ->
-            ( settings
-            , PostUpdateActions.ActionFetchMapElevations
+        ( UseMapElevations, Just track ) ->
+            let
+                newSettings =
+                    { settings | rotateAngle = theta }
+            in
+            ( newSettings
+            , actions newSettings previewColour track
             )
 
 
@@ -104,7 +154,7 @@ applyMapElevations elevations track =
     }
 
 
-recentre : ( Float, Float ) -> Track -> EditResult
+recentre : ( Float, Float ) -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
 recentre ( lon, lat ) track =
     -- To allow us to use the Purple marker as a designated reference,
     -- we need to move the earth reference coords AND shift the track
@@ -129,15 +179,10 @@ recentre ( lon, lat ) track =
                 >> Point3d.translateBy shiftVector
                 >> trackPointFromPoint
     in
-    { before = []
-    , edited = shiftedTrackPoints
-    , after = []
-    , earthReferenceCoordinates = ( lon, lat, 0.0 )
-    , graph = track.graph
-    }
+    []
 
 
-rotateAndScale : Options -> Track -> EditResult
+rotateAndScale : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
 rotateAndScale settings track =
     let
         centre =
@@ -169,12 +214,7 @@ rotateAndScale settings track =
                 (.xyz >> scaleAboutCentre >> trackPointFromPoint)
                 rotatedRoute
     in
-    { before = []
-    , edited = transformedPoints
-    , after = []
-    , earthReferenceCoordinates = track.earthReferenceCoordinates
-    , graph = track.graph
-    }
+    []
 
 
 view : Bool -> Options -> ( Float, Float ) -> (Msg -> msg) -> Track -> Element msg
@@ -259,7 +299,12 @@ view imperial options ( lastX, lastY ) wrapper track =
                 , label = text "Use elevations fetched from Mapbox"
                 }
     in
-    wrappedRow [ spacing 5, padding 5 ]
+    wrappedRow
+        [ spacing 6
+        , padding 6
+        , Background.color FlatColors.ChinesePalette.antiFlashWhite
+        , width fill
+        ]
         [ rotationSlider
         , scaleSlider
         , rotateButton

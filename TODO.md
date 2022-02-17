@@ -13,12 +13,11 @@ BUG: Pointers are not reset on track load.
 BUG: Classic bend smoother consumes all memory on certain looped routes where
      orange and purple are (possibly) co-linear, or something.
 
-BUG: Right edge of chart adrift on tight zoom.
-
 --
 
 # WIP
 
+1. Lift and Shift
 
 ---
 
@@ -26,27 +25,28 @@ BUG: Right edge of chart adrift on tight zoom.
 
 ## Tools
 
-1. Lift and Shift
 2. SVG import
-3. Fly-through
-4. 1st person view
-5. Use Strava segment data
-6. Move & Stretch
-7. Loops (inc. impact on others, such as Bezier)
-8. Intersection detection ((?? JB loop detection ??))
-9. Graph Theory (renamed)
-10. Map style choice (Satellite if possible)
-11. Extract all text for translation
-12. Use localised number formatting everywhere (for French use of , and .)
-13. Ability to point-smooth transitions over a range
-14. Chart can only show one Preview; how do we determine which?
-15. Chart preview for Centroid, Bezier, point smoother
-16. Improve default zoom
-17. Terrain (with texture)
-18. Tools that require a range should say so when there isn't one! (David Ogle)
-19. Gaussian (including necessary interpolation)
-20. Split and Join
-21. Update the log dashboard to view v3 activity.
+3. Tooltips (in general)
+4. Fly-through
+5. 1st person view
+6. Use Strava segment data
+7. Move & Stretch
+8. Loops (inc. impact on others, such as Bezier)
+9. Intersection detection ((?? JB loop detection ??))
+10. Graph Theory (renamed)
+11. Map style choice (Satellite if possible)
+12. Extract all text for translation
+13. Use localised number formatting everywhere (for French use of , and .)
+14. Ability to point-smooth transitions over a range
+15. Chart can only show one Preview; how do we determine which?
+16. Chart preview for Centroid, Bezier, point smoother
+17. Improve default zoom
+18. Terrain (with texture)
+19. Tools that require a range should say so when there isn't one! (David Ogle)
+20. Gaussian (including necessary interpolation)
+21. Split and Join
+22. Update the log dashboard to view v3 activity.
+23. Draggable tools?
 
 New stuff:
 1. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).

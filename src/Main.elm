@@ -992,7 +992,10 @@ topLoadingBar model =
             (text <| bestTrackName model)
         , case model.filename of
             Just filename ->
-                Input.text [ padding 5 ]
+                Input.text
+                    [ padding 5
+                    , onEnter WriteGpxFile
+                    ]
                     { text = filename
                     , onChange = FilenameChange
                     , placeholder = Nothing

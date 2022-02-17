@@ -12,6 +12,8 @@ import FlatColors.AussiePalette
 import FlatColors.BritishPalette
 import FlatColors.ChinesePalette
 import Html.Attributes exposing (style)
+import Html.Events
+import Json.Decode as D
 import Markdown
 import Pixels exposing (Pixels)
 import Quantity exposing (Quantity)
@@ -326,6 +328,23 @@ showModalMessage areaWidth content msg =
                 }
             ]
         ]
+
+
+onEnter : msg -> Element.Attribute msg
+onEnter msg =
+    Element.htmlAttribute
+        (Html.Events.on "keyup"
+            (D.field "key" D.string
+                |> D.andThen
+                    (\key ->
+                        if key == "Enter" then
+                            D.succeed msg
+
+                        else
+                            D.fail "Not the enter key"
+                    )
+            )
+        )
 
 
 noTrackMessage =
