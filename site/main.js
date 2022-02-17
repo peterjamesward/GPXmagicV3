@@ -13282,131 +13282,6 @@ var $author$project$Tools$LimitGradients$apply = F2(
 			newTree,
 			A2($elm$core$List$map, $elm$core$Tuple$second, oldPoints));
 	});
-var $ianmackenzie$elm_geometry$Point3d$rotateAround = F3(
-	function (_v0, _v1, _v2) {
-		var axis = _v0.a;
-		var angle = _v1.a;
-		var p = _v2.a;
-		var halfAngle = 0.5 * angle;
-		var qw = $elm$core$Basics$cos(halfAngle);
-		var sinHalfAngle = $elm$core$Basics$sin(halfAngle);
-		var _v3 = axis.originPoint;
-		var p0 = _v3.a;
-		var deltaX = p.x - p0.x;
-		var deltaY = p.y - p0.y;
-		var deltaZ = p.z - p0.z;
-		var _v4 = axis.direction;
-		var d = _v4.a;
-		var qx = d.x * sinHalfAngle;
-		var wx = qw * qx;
-		var xx = qx * qx;
-		var qy = d.y * sinHalfAngle;
-		var wy = qw * qy;
-		var xy = qx * qy;
-		var yy = qy * qy;
-		var a22 = 1 - (2 * (xx + yy));
-		var qz = d.z * sinHalfAngle;
-		var wz = qw * qz;
-		var a01 = 2 * (xy - wz);
-		var a10 = 2 * (xy + wz);
-		var xz = qx * qz;
-		var a02 = 2 * (xz + wy);
-		var a20 = 2 * (xz - wy);
-		var yz = qy * qz;
-		var a12 = 2 * (yz - wx);
-		var a21 = 2 * (yz + wx);
-		var zz = qz * qz;
-		var a00 = 1 - (2 * (yy + zz));
-		var a11 = 1 - (2 * (xx + zz));
-		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
-			{x: ((p0.x + (a00 * deltaX)) + (a01 * deltaY)) + (a02 * deltaZ), y: ((p0.y + (a10 * deltaX)) + (a11 * deltaY)) + (a12 * deltaZ), z: ((p0.z + (a20 * deltaX)) + (a21 * deltaY)) + (a22 * deltaZ)});
-	});
-var $ianmackenzie$elm_geometry$Point3d$scaleAbout = F3(
-	function (_v0, k, _v1) {
-		var p0 = _v0.a;
-		var p = _v1.a;
-		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
-			{x: p0.x + (k * (p.x - p0.x)), y: p0.y + (k * (p.y - p0.y)), z: p0.z + (k * (p.z - p0.z))});
-	});
-var $ianmackenzie$elm_geometry$Geometry$Types$Axis3d = function (a) {
-	return {$: 'Axis3d', a: a};
-};
-var $ianmackenzie$elm_geometry$Axis3d$through = F2(
-	function (givenPoint, givenDirection) {
-		return $ianmackenzie$elm_geometry$Geometry$Types$Axis3d(
-			{direction: givenDirection, originPoint: givenPoint});
-	});
-var $ianmackenzie$elm_geometry$Geometry$Types$Direction3d = function (a) {
-	return {$: 'Direction3d', a: a};
-};
-var $ianmackenzie$elm_geometry$Direction3d$unsafe = function (givenComponents) {
-	return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(givenComponents);
-};
-var $ianmackenzie$elm_geometry$Direction3d$positiveZ = $ianmackenzie$elm_geometry$Direction3d$unsafe(
-	{x: 0, y: 0, z: 1});
-var $ianmackenzie$elm_geometry$Direction3d$z = $ianmackenzie$elm_geometry$Direction3d$positiveZ;
-var $author$project$Tools$MoveScaleRotate$rotateAndScale = F2(
-	function (settings, track) {
-		var centre = A3(
-			$ianmackenzie$elm_geometry$Point3d$xyz,
-			$ianmackenzie$elm_geometry$BoundingBox3d$midX(
-				$author$project$DomainModel$boundingBox(track.trackTree)),
-			$ianmackenzie$elm_geometry$BoundingBox3d$midY(
-				$author$project$DomainModel$boundingBox(track.trackTree)),
-			$ianmackenzie$elm_geometry$BoundingBox3d$minZ(
-				$author$project$DomainModel$boundingBox(track.trackTree)));
-		var axisOfRotation = A2(
-			$ianmackenzie$elm_geometry$Axis3d$through,
-			A2($author$project$DomainModel$earthPointFromIndex, track.currentPosition, track.trackTree),
-			$ianmackenzie$elm_geometry$Direction3d$z);
-		var rotateAndScaleEndPoint = F2(
-			function (road, outputs) {
-				return A2(
-					$elm$core$List$cons,
-					A3(
-						$ianmackenzie$elm_geometry$Point3d$scaleAbout,
-						centre,
-						settings.scaleFactor,
-						A3($ianmackenzie$elm_geometry$Point3d$rotateAround, axisOfRotation, settings.rotateAngle, road.endPoint)),
-					outputs);
-			});
-		var transformedEndPoints = A3($author$project$DomainModel$foldOverRouteRL, rotateAndScaleEndPoint, track.trackTree, _List_Nil);
-		var transformedStartPoint = A3(
-			$ianmackenzie$elm_geometry$Point3d$scaleAbout,
-			centre,
-			settings.scaleFactor,
-			A3(
-				$ianmackenzie$elm_geometry$Point3d$rotateAround,
-				axisOfRotation,
-				settings.rotateAngle,
-				A2($author$project$DomainModel$earthPointFromIndex, 0, track.trackTree)));
-		return A2(
-			$elm$core$List$map,
-			function (earth) {
-				return _Utils_Tuple2(
-					earth,
-					A2($author$project$DomainModel$gpxFromPointWithReference, track.referenceLonLat, earth));
-			},
-			A2($elm$core$List$cons, transformedStartPoint, transformedEndPoints));
-	});
-var $ianmackenzie$elm_geometry$Direction2d$positiveX = $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
-	{x: 1, y: 0});
-var $ianmackenzie$elm_geometry$Direction2d$x = $ianmackenzie$elm_geometry$Direction2d$positiveX;
-var $author$project$DomainModel$treeFromSourcePoints = function (track) {
-	var referencePoint = A2(
-		$elm$core$Maybe$withDefault,
-		A3($author$project$DomainModel$GPXSource, $ianmackenzie$elm_geometry$Direction2d$x, $ianmackenzie$elm_units$Quantity$zero, $ianmackenzie$elm_units$Quantity$zero),
-		$elm$core$List$head(track));
-	return A2($author$project$DomainModel$treeFromSourcesWithExistingReference, referencePoint, track);
-};
-var $author$project$Tools$MoveScaleRotate$apply = F2(
-	function (options, track) {
-		var newPoints = A2($author$project$Tools$MoveScaleRotate$rotateAndScale, options, track);
-		return _Utils_Tuple2(
-			$author$project$DomainModel$treeFromSourcePoints(
-				A2($elm$core$List$map, $elm$core$Tuple$second, newPoints)),
-			$author$project$DomainModel$getAllGPXPointsInNaturalOrder(track.trackTree));
-	});
 var $author$project$BezierSplines$SplineFoldState = F3(
 	function (roadMinusOne, roadMinusTwo, newPoints) {
 		return {newPoints: newPoints, roadMinusOne: roadMinusOne, roadMinusTwo: roadMinusTwo};
@@ -13944,6 +13819,15 @@ var $ianmackenzie$elm_geometry$Plane3d$through = F2(
 		return $ianmackenzie$elm_geometry$Geometry$Types$Plane3d(
 			{normalDirection: givenNormalDirection, originPoint: givenPoint});
 	});
+var $ianmackenzie$elm_geometry$Geometry$Types$Direction3d = function (a) {
+	return {$: 'Direction3d', a: a};
+};
+var $ianmackenzie$elm_geometry$Direction3d$unsafe = function (givenComponents) {
+	return $ianmackenzie$elm_geometry$Geometry$Types$Direction3d(givenComponents);
+};
+var $ianmackenzie$elm_geometry$Direction3d$positiveZ = $ianmackenzie$elm_geometry$Direction3d$unsafe(
+	{x: 0, y: 0, z: 1});
+var $ianmackenzie$elm_geometry$Direction3d$z = $ianmackenzie$elm_geometry$Direction3d$positiveZ;
 var $ianmackenzie$elm_geometry$Plane3d$xy = A2($ianmackenzie$elm_geometry$Plane3d$through, $ianmackenzie$elm_geometry$Point3d$origin, $ianmackenzie$elm_geometry$Direction3d$z);
 var $ianmackenzie$elm_geometry$Vector3d$xyz = F3(
 	function (_v0, _v1, _v2) {
@@ -14118,6 +14002,16 @@ var $author$project$DomainModel$getAllGPXPointsInDict = function (treeNode) {
 				$elm$core$Dict$empty)));
 	var outputs = _v0.b;
 	return outputs;
+};
+var $ianmackenzie$elm_geometry$Direction2d$positiveX = $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
+	{x: 1, y: 0});
+var $ianmackenzie$elm_geometry$Direction2d$x = $ianmackenzie$elm_geometry$Direction2d$positiveX;
+var $author$project$DomainModel$treeFromSourcePoints = function (track) {
+	var referencePoint = A2(
+		$elm$core$Maybe$withDefault,
+		A3($author$project$DomainModel$GPXSource, $ianmackenzie$elm_geometry$Direction2d$x, $ianmackenzie$elm_units$Quantity$zero, $ianmackenzie$elm_units$Quantity$zero),
+		$elm$core$List$head(track));
+	return A2($author$project$DomainModel$treeFromSourcesWithExistingReference, referencePoint, track);
 };
 var $elm$core$Dict$values = function (dict) {
 	return A3(
@@ -14978,6 +14872,14 @@ var $ianmackenzie$elm_geometry$Arc3d$throughPoints = F3(
 			},
 			A3($ianmackenzie$elm_geometry$SketchPlane3d$throughPoints, firstPoint, secondPoint, thirdPoint));
 	});
+var $ianmackenzie$elm_geometry$Geometry$Types$Axis3d = function (a) {
+	return {$: 'Axis3d', a: a};
+};
+var $ianmackenzie$elm_geometry$Axis3d$through = F2(
+	function (givenPoint, givenDirection) {
+		return $ianmackenzie$elm_geometry$Geometry$Types$Axis3d(
+			{direction: givenDirection, originPoint: givenPoint});
+	});
 var $ianmackenzie$elm_geometry$Axis3d$throughPoints = F2(
 	function (firstPoint, secondPoint) {
 		var _v0 = A2($ianmackenzie$elm_geometry$Direction3d$from, firstPoint, secondPoint);
@@ -15126,6 +15028,169 @@ var $author$project$Tools$OutAndBack$apply = F2(
 				_Utils_ap(returnInGpx, homeTurnInGpx)));
 		var newTree = $author$project$DomainModel$treeFromSourcePoints(newCourse);
 		return _Utils_Tuple2(newTree, oldPoints);
+	});
+var $ianmackenzie$elm_geometry$Point3d$projectOnto = F2(
+	function (_v0, _v1) {
+		var plane = _v0.a;
+		var p = _v1.a;
+		var _v2 = plane.originPoint;
+		var p0 = _v2.a;
+		var _v3 = plane.normalDirection;
+		var n = _v3.a;
+		var distance = (((p.x - p0.x) * n.x) + ((p.y - p0.y) * n.y)) + ((p.z - p0.z) * n.z);
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+			{x: p.x - (distance * n.x), y: p.y - (distance * n.y), z: p.z - (distance * n.z)});
+	});
+var $author$project$Tools$MoveScaleRotate$computeRecentredPoints = F2(
+	function (_v0, track) {
+		var lon = _v0.a;
+		var lat = _v0.b;
+		var shiftBasis = function () {
+			var _v1 = track.markerPosition;
+			if (_v1.$ === 'Just') {
+				var purple = _v1.a;
+				return A2(
+					$ianmackenzie$elm_geometry$Point3d$projectOnto,
+					$ianmackenzie$elm_geometry$Plane3d$xy,
+					A2($author$project$DomainModel$earthPointFromIndex, purple, track.trackTree));
+			} else {
+				return $ianmackenzie$elm_geometry$Point3d$origin;
+			}
+		}();
+		var shiftVector = A2($ianmackenzie$elm_geometry$Vector3d$from, shiftBasis, $ianmackenzie$elm_geometry$Point3d$origin);
+		var shiftPoint = $ianmackenzie$elm_geometry$Point3d$translateBy(shiftVector);
+		var shiftFn = F2(
+			function (road, outputs) {
+				return A2(
+					$elm$core$List$cons,
+					shiftPoint(road.endPoint),
+					outputs);
+			});
+		var shiftedTrackPoints = A2(
+			$elm$core$List$cons,
+			shiftPoint(
+				A2($author$project$DomainModel$earthPointFromIndex, 0, track.trackTree)),
+			A3($author$project$DomainModel$foldOverRouteRL, shiftFn, track.trackTree, _List_Nil));
+		var referenceGpx = {
+			altitude: $ianmackenzie$elm_units$Quantity$zero,
+			latitude: $ianmackenzie$elm_units$Angle$degrees(lat),
+			longitude: $ianmackenzie$elm_geometry$Direction2d$fromAngle(
+				$ianmackenzie$elm_units$Angle$degrees(lon))
+		};
+		return A2(
+			$elm$core$List$map,
+			function (earth) {
+				return _Utils_Tuple2(
+					earth,
+					A2($author$project$DomainModel$gpxFromPointWithReference, referenceGpx, earth));
+			},
+			shiftedTrackPoints);
+	});
+var $author$project$Tools$MoveScaleRotate$applyRecentre = F2(
+	function (newReference, track) {
+		var newPoints = A2($author$project$Tools$MoveScaleRotate$computeRecentredPoints, newReference, track);
+		return _Utils_Tuple2(
+			$author$project$DomainModel$treeFromSourcePoints(
+				A2($elm$core$List$map, $elm$core$Tuple$second, newPoints)),
+			$author$project$DomainModel$getAllGPXPointsInNaturalOrder(track.trackTree));
+	});
+var $ianmackenzie$elm_geometry$Point3d$rotateAround = F3(
+	function (_v0, _v1, _v2) {
+		var axis = _v0.a;
+		var angle = _v1.a;
+		var p = _v2.a;
+		var halfAngle = 0.5 * angle;
+		var qw = $elm$core$Basics$cos(halfAngle);
+		var sinHalfAngle = $elm$core$Basics$sin(halfAngle);
+		var _v3 = axis.originPoint;
+		var p0 = _v3.a;
+		var deltaX = p.x - p0.x;
+		var deltaY = p.y - p0.y;
+		var deltaZ = p.z - p0.z;
+		var _v4 = axis.direction;
+		var d = _v4.a;
+		var qx = d.x * sinHalfAngle;
+		var wx = qw * qx;
+		var xx = qx * qx;
+		var qy = d.y * sinHalfAngle;
+		var wy = qw * qy;
+		var xy = qx * qy;
+		var yy = qy * qy;
+		var a22 = 1 - (2 * (xx + yy));
+		var qz = d.z * sinHalfAngle;
+		var wz = qw * qz;
+		var a01 = 2 * (xy - wz);
+		var a10 = 2 * (xy + wz);
+		var xz = qx * qz;
+		var a02 = 2 * (xz + wy);
+		var a20 = 2 * (xz - wy);
+		var yz = qy * qz;
+		var a12 = 2 * (yz - wx);
+		var a21 = 2 * (yz + wx);
+		var zz = qz * qz;
+		var a00 = 1 - (2 * (yy + zz));
+		var a11 = 1 - (2 * (xx + zz));
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+			{x: ((p0.x + (a00 * deltaX)) + (a01 * deltaY)) + (a02 * deltaZ), y: ((p0.y + (a10 * deltaX)) + (a11 * deltaY)) + (a12 * deltaZ), z: ((p0.z + (a20 * deltaX)) + (a21 * deltaY)) + (a22 * deltaZ)});
+	});
+var $ianmackenzie$elm_geometry$Point3d$scaleAbout = F3(
+	function (_v0, k, _v1) {
+		var p0 = _v0.a;
+		var p = _v1.a;
+		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
+			{x: p0.x + (k * (p.x - p0.x)), y: p0.y + (k * (p.y - p0.y)), z: p0.z + (k * (p.z - p0.z))});
+	});
+var $author$project$Tools$MoveScaleRotate$rotateAndScale = F2(
+	function (settings, track) {
+		var centre = A3(
+			$ianmackenzie$elm_geometry$Point3d$xyz,
+			$ianmackenzie$elm_geometry$BoundingBox3d$midX(
+				$author$project$DomainModel$boundingBox(track.trackTree)),
+			$ianmackenzie$elm_geometry$BoundingBox3d$midY(
+				$author$project$DomainModel$boundingBox(track.trackTree)),
+			$ianmackenzie$elm_geometry$BoundingBox3d$minZ(
+				$author$project$DomainModel$boundingBox(track.trackTree)));
+		var axisOfRotation = A2(
+			$ianmackenzie$elm_geometry$Axis3d$through,
+			A2($author$project$DomainModel$earthPointFromIndex, track.currentPosition, track.trackTree),
+			$ianmackenzie$elm_geometry$Direction3d$z);
+		var rotateAndScaleEndPoint = F2(
+			function (road, outputs) {
+				return A2(
+					$elm$core$List$cons,
+					A3(
+						$ianmackenzie$elm_geometry$Point3d$scaleAbout,
+						centre,
+						settings.scaleFactor,
+						A3($ianmackenzie$elm_geometry$Point3d$rotateAround, axisOfRotation, settings.rotateAngle, road.endPoint)),
+					outputs);
+			});
+		var transformedEndPoints = A3($author$project$DomainModel$foldOverRouteRL, rotateAndScaleEndPoint, track.trackTree, _List_Nil);
+		var transformedStartPoint = A3(
+			$ianmackenzie$elm_geometry$Point3d$scaleAbout,
+			centre,
+			settings.scaleFactor,
+			A3(
+				$ianmackenzie$elm_geometry$Point3d$rotateAround,
+				axisOfRotation,
+				settings.rotateAngle,
+				A2($author$project$DomainModel$earthPointFromIndex, 0, track.trackTree)));
+		return A2(
+			$elm$core$List$map,
+			function (earth) {
+				return _Utils_Tuple2(
+					earth,
+					A2($author$project$DomainModel$gpxFromPointWithReference, track.referenceLonLat, earth));
+			},
+			A2($elm$core$List$cons, transformedStartPoint, transformedEndPoints));
+	});
+var $author$project$Tools$MoveScaleRotate$applyRotateAndScale = F2(
+	function (options, track) {
+		var newPoints = A2($author$project$Tools$MoveScaleRotate$rotateAndScale, options, track);
+		return _Utils_Tuple2(
+			$author$project$DomainModel$treeFromSourcePoints(
+				A2($elm$core$List$map, $elm$core$Tuple$second, newPoints)),
+			$author$project$DomainModel$getAllGPXPointsInNaturalOrder(track.trackTree));
 	});
 var $author$project$Tools$BendSmoother$applyClassicBendSmoother = F2(
 	function (options, track) {
@@ -19156,18 +19221,6 @@ var $ianmackenzie$elm_geometry$Plane3d$offsetBy = F2(
 			distance,
 			plane);
 	});
-var $ianmackenzie$elm_geometry$Point3d$projectOnto = F2(
-	function (_v0, _v1) {
-		var plane = _v0.a;
-		var p = _v1.a;
-		var _v2 = plane.originPoint;
-		var p0 = _v2.a;
-		var _v3 = plane.normalDirection;
-		var n = _v3.a;
-		var distance = (((p.x - p0.x) * n.x) + ((p.y - p0.y) * n.y)) + ((p.z - p0.z) * n.z);
-		return $ianmackenzie$elm_geometry$Geometry$Types$Point3d(
-			{x: p.x - (distance * n.x), y: p.y - (distance * n.y), z: p.z - (distance * n.z)});
-	});
 var $ianmackenzie$elm_geometry$LineSegment3d$projectOnto = F2(
 	function (plane, lineSegment) {
 		return A2(
@@ -20054,7 +20107,7 @@ var $author$project$Main$performActionsOnModel = F2(
 		var performAction = F2(
 			function (action, foldedModel) {
 				var _v0 = _Utils_Tuple2(action, foldedModel.track);
-				_v0$26:
+				_v0$28:
 				while (true) {
 					switch (_v0.a.$) {
 						case 'SetCurrent':
@@ -20070,7 +20123,7 @@ var $author$project$Main$performActionsOnModel = F2(
 												{currentPosition: position}))
 									});
 							} else {
-								break _v0$26;
+								break _v0$28;
 							}
 						case 'SetCurrentFromMapClick':
 							if (_v0.b.$ === 'Just') {
@@ -20085,7 +20138,7 @@ var $author$project$Main$performActionsOnModel = F2(
 												{currentPosition: position}))
 									});
 							} else {
-								break _v0$26;
+								break _v0$28;
 							}
 						case 'ShowPreview':
 							if (_v0.b.$ === 'Just') {
@@ -20097,7 +20150,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										previews: A3($elm$core$Dict$insert, previewData.tag, previewData, foldedModel.previews)
 									});
 							} else {
-								break _v0$26;
+								break _v0$28;
 							}
 						case 'HidePreview':
 							if (_v0.b.$ === 'Just') {
@@ -20109,7 +20162,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										previews: A2($elm$core$Dict$remove, tag, foldedModel.previews)
 									});
 							} else {
-								break _v0$26;
+								break _v0$28;
 							}
 						case 'RenderProfile':
 							if (_v0.b.$ === 'Just') {
@@ -20121,7 +20174,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										paneLayoutOptions: A3($author$project$PaneLayoutManager$renderProfile, foldedModel.toolOptions, track, foldedModel.paneLayoutOptions)
 									});
 							} else {
-								break _v0$26;
+								break _v0$28;
 							}
 						case 'DelayMessage':
 							if (_v0.b.$ === 'Just') {
@@ -20131,7 +20184,7 @@ var $author$project$Main$performActionsOnModel = F2(
 								var track = _v0.b.a;
 								return foldedModel;
 							} else {
-								break _v0$26;
+								break _v0$28;
 							}
 						case 'DeletePointsBetween':
 							if (_v0.b.$ === 'Just') {
@@ -20152,7 +20205,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$26;
+								break _v0$28;
 							}
 						case 'DeleteSinglePoint':
 							if (_v0.b.$ === 'Just') {
@@ -20173,7 +20226,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$26;
+								break _v0$28;
 							}
 						case 'BezierApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -20195,7 +20248,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$26;
+								break _v0$28;
 							}
 						case 'CentroidAverageApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -20217,7 +20270,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$26;
+								break _v0$28;
 							}
 						case 'CurveFormerApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -20244,7 +20297,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$26;
+								break _v0$28;
 							}
 						case 'NudgeApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -20271,7 +20324,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$26;
+								break _v0$28;
 							}
 						case 'BendSmootherApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -20293,7 +20346,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$26;
+								break _v0$28;
 							}
 						case 'OutAndBackApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -20315,7 +20368,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$26;
+								break _v0$28;
 							}
 						case 'ApplySimplify':
 							if (_v0.b.$ === 'Just') {
@@ -20337,7 +20390,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$26;
+								break _v0$28;
 							}
 						case 'OneClickQuickFix':
 							if (_v0.b.$ === 'Just') {
@@ -20359,7 +20412,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$26;
+								break _v0$28;
 							}
 						case 'ApplyInterpolateWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -20388,7 +20441,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$26;
+								break _v0$28;
 							}
 						case 'LimitGradientWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -20417,13 +20470,13 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$26;
+								break _v0$28;
 							}
 						case 'ApplyRotateAndScale':
 							if (_v0.b.$ === 'Just') {
 								var options = _v0.a.a;
 								var track = _v0.b.a;
-								var _v33 = A2($author$project$Tools$MoveScaleRotate$apply, options, track);
+								var _v33 = A2($author$project$Tools$MoveScaleRotate$applyRotateAndScale, options, track);
 								var newTree = _v33.a;
 								var oldPoints = _v33.b;
 								var _v34 = _Utils_Tuple2(0, 0);
@@ -20439,15 +20492,56 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$26;
+								break _v0$28;
+							}
+						case 'ApplyRecentre':
+							if (_v0.b.$ === 'Just') {
+								var coords = _v0.a.a;
+								var track = _v0.b.a;
+								var _v35 = A2($author$project$Tools$MoveScaleRotate$applyRecentre, coords, track);
+								var newTree = _v35.a;
+								var oldPoints = _v35.b;
+								var _v36 = _Utils_Tuple2(0, 0);
+								var fromStart = _v36.a;
+								var fromEnd = _v36.b;
+								var newTrack = function () {
+									var _v37 = track.lastMapClick;
+									var lon = _v37.a;
+									var lat = _v37.b;
+									var newReference = {
+										altitude: $ianmackenzie$elm_units$Quantity$zero,
+										latitude: $ianmackenzie$elm_units$Angle$degrees(lat),
+										longitude: $ianmackenzie$elm_geometry$Direction2d$fromAngle(
+											$ianmackenzie$elm_units$Angle$degrees(lon))
+									};
+									return A2(
+										$author$project$TrackLoaded$useTreeWithRepositionedMarkers,
+										newTree,
+										A5(
+											$author$project$TrackLoaded$addToUndoStack,
+											action,
+											fromStart,
+											fromEnd,
+											oldPoints,
+											_Utils_update(
+												track,
+												{referenceLonLat: newReference})));
+								}();
+								return _Utils_update(
+									foldedModel,
+									{
+										track: $elm$core$Maybe$Just(newTrack)
+									});
+							} else {
+								break _v0$28;
 							}
 						case 'PointMovedOnMap':
 							if (_v0.b.$ === 'Just') {
-								var _v35 = _v0.a;
-								var startLon = _v35.a;
-								var startLat = _v35.b;
-								var endLon = _v35.c;
-								var endLat = _v35.d;
+								var _v38 = _v0.a;
+								var startLon = _v38.a;
+								var startLat = _v38.b;
+								var endLon = _v38.c;
+								var endLat = _v38.d;
 								var track = _v0.b.a;
 								var startGpx = {
 									altitude: $ianmackenzie$elm_units$Quantity$zero,
@@ -20464,11 +20558,11 @@ var $author$project$Main$performActionsOnModel = F2(
 										$ianmackenzie$elm_units$Angle$degrees(endLon))
 								};
 								var newTree = A4($author$project$DomainModel$updatePointByIndexInSitu, index, endGpx, track.referenceLonLat, track.trackTree);
-								var _v36 = _Utils_Tuple2(
+								var _v39 = _Utils_Tuple2(
 									index,
 									$author$project$DomainModel$skipCount(track.trackTree) - index);
-								var fromStart = _v36.a;
-								var fromEnd = _v36.b;
+								var fromStart = _v39.a;
+								var fromEnd = _v39.b;
 								var newTrack = A5(
 									$author$project$TrackLoaded$addToUndoStack,
 									action,
@@ -20485,22 +20579,41 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$26;
+								break _v0$28;
+							}
+						case 'SaveLastMapClick':
+							if (_v0.b.$ === 'Just') {
+								var _v40 = _v0.a;
+								var lon = _v40.a;
+								var lat = _v40.b;
+								var track = _v0.b.a;
+								var newTrack = _Utils_update(
+									track,
+									{
+										lastMapClick: _Utils_Tuple2(lon, lat)
+									});
+								return _Utils_update(
+									foldedModel,
+									{
+										track: $elm$core$Maybe$Just(newTrack)
+									});
+							} else {
+								break _v0$28;
 							}
 						case 'TrackHasChanged':
 							if (_v0.b.$ === 'Just') {
-								var _v37 = _v0.a;
+								var _v41 = _v0.a;
 								var track = _v0.b.a;
-								var _v38 = A2($author$project$ToolsController$refreshOpenTools, foldedModel.track, foldedModel.toolOptions);
-								var refreshedToolOptions = _v38.a;
-								var secondaryActions = _v38.b;
+								var _v42 = A2($author$project$ToolsController$refreshOpenTools, foldedModel.track, foldedModel.toolOptions);
+								var refreshedToolOptions = _v42.a;
+								var secondaryActions = _v42.b;
 								var innerModelWithNewToolSettings = _Utils_update(
 									foldedModel,
 									{toolOptions: refreshedToolOptions});
 								var modelAfterSecondaryActions = A2($author$project$Main$performActionsOnModel, secondaryActions, innerModelWithNewToolSettings);
 								return modelAfterSecondaryActions;
 							} else {
-								break _v0$26;
+								break _v0$28;
 							}
 						case 'SetMarker':
 							if (_v0.b.$ === 'Just') {
@@ -20515,12 +20628,12 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(updatedTrack)
 									});
 							} else {
-								break _v0$26;
+								break _v0$28;
 							}
 						case 'StoredValueRetrieved':
-							var _v39 = _v0.a;
-							var key = _v39.a;
-							var value = _v39.b;
+							var _v43 = _v0.a;
+							var key = _v43.a;
+							var value = _v43.b;
 							switch (key) {
 								case 'splits':
 									return A2($author$project$Main$decodeSplitValues, value, foldedModel);
@@ -20587,7 +20700,7 @@ var $author$project$Main$performActionsOnModel = F2(
 							return revisedModel;
 						case 'UndoLastAction':
 							if (_v0.b.$ === 'Just') {
-								var _v42 = _v0.a;
+								var _v46 = _v0.a;
 								var track = _v0.b.a;
 								return _Utils_update(
 									foldedModel,
@@ -20596,24 +20709,24 @@ var $author$project$Main$performActionsOnModel = F2(
 											$author$project$TrackLoaded$undoLastAction(track))
 									});
 							} else {
-								break _v0$26;
+								break _v0$28;
 							}
 						case 'RedoUndoneAction':
 							if (_v0.b.$ === 'Just') {
-								var _v43 = _v0.a;
+								var _v47 = _v0.a;
 								var track = _v0.b.a;
-								var _v44 = track.redos;
-								if (_v44.b) {
-									var redo = _v44.a;
-									var moreRedos = _v44.b;
+								var _v48 = track.redos;
+								if (_v48.b) {
+									var redo = _v48.a;
+									var moreRedos = _v48.b;
 									var modelAfterRedo = A2(
 										$author$project$Main$performActionsOnModel,
 										_List_fromArray(
 											[redo.action]),
 										model);
-									var _v45 = modelAfterRedo.track;
-									if (_v45.$ === 'Just') {
-										var trackAfterRedo = _v45.a;
+									var _v49 = modelAfterRedo.track;
+									if (_v49.$ === 'Just') {
+										var trackAfterRedo = _v49.a;
 										var trackWithCorrectRedoStack = _Utils_update(
 											trackAfterRedo,
 											{redos: moreRedos});
@@ -20629,10 +20742,10 @@ var $author$project$Main$performActionsOnModel = F2(
 									return foldedModel;
 								}
 							} else {
-								break _v0$26;
+								break _v0$28;
 							}
 						default:
-							break _v0$26;
+							break _v0$28;
 					}
 				}
 				return foldedModel;
@@ -21539,6 +21652,10 @@ var $author$project$PaneLayoutManager$encodePaneState = function (options) {
 				$author$project$PaneLayoutManager$encodeOnePane(options.pane4))
 			]));
 };
+var $author$project$Actions$SaveLastMapClick = F2(
+	function (a, b) {
+		return {$: 'SaveLastMapClick', a: a, b: b};
+	});
 var $author$project$Actions$SetCurrentFromMapClick = function (a) {
 	return {$: 'SetCurrentFromMapClick', a: a};
 };
@@ -21640,6 +21757,7 @@ var $author$project$MapPortController$processMapPortMessage = F3(
 									_List_fromArray(
 										[
 											$author$project$Actions$SetCurrentFromMapClick(index),
+											A2($author$project$Actions$SaveLastMapClick, lon1, lat1),
 											$author$project$Actions$TrackHasChanged
 										]));
 							}
@@ -26213,6 +26331,9 @@ var $author$project$Tools$LimitGradients$update = F4(
 			return _Utils_Tuple2(options, _List_Nil);
 		}
 	});
+var $author$project$Actions$ApplyRecentre = function (a) {
+	return {$: 'ApplyRecentre', a: a};
+};
 var $author$project$Actions$ApplyRotateAndScale = function (a) {
 	return {$: 'ApplyRotateAndScale', a: a};
 };
@@ -26253,10 +26374,14 @@ var $author$project$Tools$MoveScaleRotate$update = F4(
 				case 'Recentre':
 					var _v2 = _v0.a;
 					var track = _v0.b.a;
-					var newSettings = settings;
 					return _Utils_Tuple2(
-						newSettings,
-						A3($author$project$Tools$MoveScaleRotate$actions, newSettings, previewColour, track));
+						settings,
+						_List_fromArray(
+							[
+								$author$project$Actions$ApplyRecentre(track.lastMapClick),
+								$author$project$Actions$TrackHasChanged,
+								$author$project$Actions$HidePreview('affine')
+							]));
 				case 'Zero':
 					var _v3 = _v0.a;
 					var track = _v0.b.a;
@@ -27049,6 +27174,7 @@ var $author$project$Main$update = F2(
 					var aTree = trackTree.a;
 					var newTrack = {
 						currentPosition: 0,
+						lastMapClick: _Utils_Tuple2(0, 0),
 						markerPosition: $elm$core$Maybe$Nothing,
 						redos: _List_Nil,
 						referenceLonLat: A2(
@@ -38707,10 +38833,8 @@ var $author$project$Tools$MoveScaleRotate$SetScale = function (a) {
 };
 var $author$project$Tools$MoveScaleRotate$UseMapElevations = {$: 'UseMapElevations'};
 var $author$project$Tools$MoveScaleRotate$Zero = {$: 'Zero'};
-var $author$project$Tools$MoveScaleRotate$view = F5(
-	function (imperial, options, _v0, wrapper, maybeTrack) {
-		var lastX = _v0.a;
-		var lastY = _v0.b;
+var $author$project$Tools$MoveScaleRotate$view = F4(
+	function (imperial, options, wrapper, maybeTrack) {
 		var zeroButton = A2(
 			$mdgriffith$elm_ui$Element$Input$button,
 			$author$project$ViewPureStyles$neatToolsBorder,
@@ -38768,15 +38892,34 @@ var $author$project$Tools$MoveScaleRotate$view = F5(
 				onPress: $elm$core$Maybe$Just(
 					wrapper($author$project$Tools$MoveScaleRotate$RotateAndScale))
 			});
-		var recentreButton = A2(
-			$mdgriffith$elm_ui$Element$Input$button,
-			A2($author$project$ToolTip$buttonStylesWithTooltip, $mdgriffith$elm_ui$Element$below, 'Click on Map to set the destination'),
-			{
-				label: $mdgriffith$elm_ui$Element$text(
-					'Recentre at\n(' + ($elm$core$String$fromFloat(lastX) + (', ' + ($elm$core$String$fromFloat(lastY) + ')')))),
-				onPress: $elm$core$Maybe$Just(
-					wrapper($author$project$Tools$MoveScaleRotate$Recentre))
-			});
+		var recentreButton = function () {
+			if (maybeTrack.$ === 'Just') {
+				var track = maybeTrack.a;
+				var _v2 = track.lastMapClick;
+				var lon = _v2.a;
+				var lat = _v2.b;
+				return A2(
+					$mdgriffith$elm_ui$Element$Input$button,
+					A2($author$project$ToolTip$buttonStylesWithTooltip, $mdgriffith$elm_ui$Element$below, 'Click on Map to set the destination'),
+					{
+						label: A2(
+							$mdgriffith$elm_ui$Element$paragraph,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+								]),
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$text(
+									'Move to ' + ($elm$core$String$fromFloat(lon) + (', ' + $elm$core$String$fromFloat(lat))))
+								])),
+						onPress: $elm$core$Maybe$Just(
+							wrapper($author$project$Tools$MoveScaleRotate$Recentre))
+					});
+			} else {
+				return $mdgriffith$elm_ui$Element$none;
+			}
+		}();
 		var elevationFetchButton = A2(
 			$mdgriffith$elm_ui$Element$Input$button,
 			$author$project$ViewPureStyles$neatToolsBorder,
@@ -39768,8 +39911,10 @@ var $author$project$Actions$interpretAction = function (action) {
 			return 'limit gradients';
 		case 'ApplyRotateAndScale':
 			return 'rotate and scale';
+		case 'ApplyRecentre':
+			return 'move';
 		default:
-			return 'ask Pete to fix this message';
+			return 'tell Pete this needs a message';
 	}
 };
 var $author$project$Tools$UndoRedo$viewWithTrack = F3(
@@ -40005,11 +40150,10 @@ var $author$project$ToolsController$viewToolByType = F4(
 							options.limitGradientSettings,
 							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolLimitGradientMsg));
 					default:
-						return A5(
+						return A4(
 							$author$project$Tools$MoveScaleRotate$view,
 							options.imperial,
 							options.moveScaleRotateSettings,
-							_Utils_Tuple2(0.0, 0.0),
 							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolMoveScaleRotateMsg),
 							isTrack);
 				}
@@ -40590,7 +40734,7 @@ var $author$project$ViewPureStyles$conditionallyVisible = F2(
 				]),
 			element);
 	});
-var $author$project$About$aboutText = '\n\n# GPXmagic v3.0.1 (33d1c19b)\n\nIf v1 was the surprise indie hit, v2 the disappointing second album, here\'s hoping\nv3 is the polished studio album that delivers the goods.\n\nIn this release:\n\n* Editable labels on the tool docking zones, so you can make it more yours.\n* A clean and efficient implementation of Limit Gradients.\n* Limit Gradients shows a preview on the Profile Charts, with zoom and pan.\n\nThanks to all for feedback and suggestions. I\'m working my way through the migration\nof tools from v2, which is sometimes straightforward, sometimes not, so progress\nis uneven.\n\n    ';
+var $author$project$About$aboutText = '\n\n# GPXmagic v3.0.1 (33d1c19b)\n\nIf v1 was the surprise indie hit, v2 the disappointing second album, here\'s hoping\nv3 is the polished studio album that delivers the goods.\n\nIn this release:\n\n* The Return/Enter key will apply your new name to a tool docking zone.\n* The Return/Enter key in the filename box will also save the GPX file.\n* Some controls will now have tooltips that appear as you move the mouse over them.\n* Move and Rotate has transitioned from v2.\n\nThanks to all for feedback and suggestions. I\'m working my way through the migration\nof tools from v2, which is sometimes straightforward, sometimes not, so progress\nis uneven.\n\n    ';
 var $elm_explorations$markdown$Markdown$defaultOptions = {
 	defaultHighlighting: $elm$core$Maybe$Nothing,
 	githubFlavored: $elm$core$Maybe$Just(

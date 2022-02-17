@@ -32,9 +32,10 @@ v3 is the polished studio album that delivers the goods.
 
 In this release:
 
-* Editable labels on the tool docking zones, so you can make it more yours.
-* A clean and efficient implementation of Limit Gradients.
-* Limit Gradients shows a preview on the Profile Charts, with zoom and pan.
+* The Return/Enter key will apply your new name to a tool docking zone.
+* The Return/Enter key in the filename box will also save the GPX file.
+* Some controls will now have tooltips that appear as you move the mouse over them.
+* Move and Rotate has transitioned from v2.
 
 Thanks to all for feedback and suggestions. I'm working my way through the migration
 of tools from v2, which is sometimes straightforward, sometimes not, so progress

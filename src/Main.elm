@@ -363,6 +363,7 @@ update msg model =
                             , undos = []
                             , redos = []
                             , trackName = GpxParser.parseTrackName content
+                            , lastMapClick = ( 0, 0 )
                             }
 
                         modelWithTrack =
@@ -536,7 +537,10 @@ Please check the file contains GPX data.""" }
             let
                 ( newToolOptions, actions ) =
                     -- Some of the actions update the model, some issue commands.
-                    ToolsController.update toolMsg model.track ToolsMsg model.toolOptions
+                    ToolsController.update toolMsg
+                        model.track
+                        ToolsMsg
+                        model.toolOptions
 
                 newModel =
                     { model | toolOptions = newToolOptions }
@@ -1367,13 +1371,41 @@ performActionsOnModel actions model =
                 ( ApplyRotateAndScale options, Just track ) ->
                     let
                         ( newTree, oldPoints ) =
-                            Tools.MoveScaleRotate.apply options track
+                            Tools.MoveScaleRotate.applyRotateAndScale options track
 
                         ( fromStart, fromEnd ) =
                             ( 0, 0 )
 
                         newTrack =
                             track
+                                |> TrackLoaded.addToUndoStack action
+                                    fromStart
+                                    fromEnd
+                                    oldPoints
+                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                    in
+                    { foldedModel | track = Just newTrack }
+
+                ( ApplyRecentre coords, Just track ) ->
+                    let
+                        ( newTree, oldPoints ) =
+                            Tools.MoveScaleRotate.applyRecentre coords track
+
+                        ( fromStart, fromEnd ) =
+                            ( 0, 0 )
+
+                        newTrack =
+                            let
+                                ( lon, lat ) =
+                                    track.lastMapClick
+
+                                newReference =
+                                    { longitude = Direction2d.fromAngle <| Angle.degrees lon
+                                    , latitude = Angle.degrees lat
+                                    , altitude = Quantity.zero
+                                    }
+                            in
+                            { track | referenceLonLat = newReference }
                                 |> TrackLoaded.addToUndoStack action
                                     fromStart
                                     fromEnd
@@ -1421,6 +1453,13 @@ performActionsOnModel actions model =
                                     fromStart
                                     fromEnd
                                     [ positionBeforeDrag ]
+                    in
+                    { foldedModel | track = Just newTrack }
+
+                ( SaveLastMapClick lon lat, Just track ) ->
+                    let
+                        newTrack =
+                            { track | lastMapClick = ( lon, lat ) }
                     in
                     { foldedModel | track = Just newTrack }
 

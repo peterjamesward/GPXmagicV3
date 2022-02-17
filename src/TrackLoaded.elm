@@ -13,10 +13,9 @@ type alias TrackLoaded msg =
     , renderDepth : Int
     , trackTree : PeteTree
     , trackName : Maybe String
-
-    -- Experimental placement of undo/redo stacks.
     , undos : List (UndoEntry msg)
     , redos : List (UndoEntry msg)
+    , lastMapClick : (Float, Float)
     }
 
 

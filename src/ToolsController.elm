@@ -1309,7 +1309,6 @@ viewToolByType msgWrapper entry isTrack options =
                 Tools.MoveScaleRotate.view
                     options.imperial
                     options.moveScaleRotateSettings
-                    ( 0.0, 0.0 )
                     (msgWrapper << ToolMoveScaleRotateMsg)
                     isTrack
 

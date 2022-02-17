@@ -109,14 +109,6 @@ centreMapOnCurrent track =
             ]
 
 
-
-{-
-   deferredMapRepaint msgWrapper =
-       -- This is now in JS, where it quietly just works.
-       after 50 (RepaintMap |> msgWrapper)
--}
-
-
 update :
     MapMsg
     -> TrackLoaded msg
@@ -138,13 +130,12 @@ toggleDragging isDragging track =
             ]
 
 
-
---requestElevations : Cmd msg
---requestElevations =
---    commandPort <|
---        E.object
---            [ ( "Cmd", E.string "Elev" )
---            ]
+requestElevations : Cmd msg
+requestElevations =
+    mapCommands <|
+        E.object
+            [ ( "Cmd", E.string "Elev" )
+            ]
 
 
 addTrackToMap : TrackLoaded msg -> Cmd msg
@@ -264,7 +255,10 @@ processMapPortMessage lastState track json =
                             | lastClickLon = lon1
                             , lastClickLat = lat1
                           }
-                        , [ SetCurrentFromMapClick index, TrackHasChanged ]
+                        , [ SetCurrentFromMapClick index
+                          , SaveLastMapClick lon1 lat1
+                          , TrackHasChanged
+                          ]
                         )
 
                 _ ->

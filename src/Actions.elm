@@ -24,6 +24,7 @@ type ToolAction msg
     = NoAction
     | SetCurrent Int -- move the orange pointer
     | SetCurrentFromMapClick Int -- to avoid re-centering the map!
+    | SaveLastMapClick Float Float
     | ShowPreview PreviewData -- add a tool's preview to the collection
     | HidePreview String -- remove a tools' preview
     | DelayMessage Int msg -- set a timer, useful for debouncing
@@ -52,6 +53,7 @@ type ToolAction msg
     | OneClickQuickFix
     | LimitGradientWithOptions Tools.LimitGradientOptions.Options
     | ApplyRotateAndScale Tools.MoveScaleRotateOptions.Options
+    | ApplyRecentre ( Float, Float )
 
 
 type PreviewShape
@@ -114,5 +116,8 @@ interpretAction action =
         ApplyRotateAndScale _ ->
             "rotate and scale"
 
+        ApplyRecentre _ ->
+            "move"
+
         _ ->
-            "ask Pete to fix this message"
+            "tell Pete this needs a message"

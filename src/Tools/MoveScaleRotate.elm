@@ -4,6 +4,7 @@ import Actions exposing (PreviewShape(..), ToolAction(..))
 import Angle exposing (Angle)
 import Axis3d
 import BoundingBox3d
+import Direction2d
 import Direction3d
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection)
 import Element exposing (..)
@@ -11,11 +12,14 @@ import Element.Background as Background
 import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
 import Length exposing (Meters)
+import Plane3d
 import Point3d
+import Quantity
 import ToolTip exposing (buttonStylesWithTooltip)
 import Tools.MoveScaleRotateOptions exposing (Options)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal0, showDecimal2)
+import Vector3d
 import ViewPureStyles exposing (..)
 
 
@@ -99,12 +103,8 @@ update msg settings previewColour hasTrack =
             )
 
         ( Recentre, Just track ) ->
-            let
-                newSettings =
-                    settings
-            in
-            ( newSettings
-            , actions newSettings previewColour track
+            ( settings
+            , [ ApplyRecentre track.lastMapClick, TrackHasChanged, HidePreview "affine" ]
             )
 
         ( Zero, Just track ) ->
@@ -137,33 +137,48 @@ applyMapElevations elevations track =
     []
 
 
+computeRecentredPoints : ( Float, Float ) -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
+computeRecentredPoints ( lon, lat ) track =
+    -- To allow us to use the Purple marker as a designated reference,
+    -- we need to move the earth reference coords AND shift the track
+    -- by the opposite of the Purple position (?).
+    let
+        referenceGpx =
+            { longitude = Direction2d.fromAngle <| Angle.degrees lon
+            , latitude = Angle.degrees lat
+            , altitude = Quantity.zero
+            }
 
-{-
-   recentre : ( Float, Float ) -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
-   recentre ( lon, lat ) track =
-       -- To allow us to use the Purple marker as a designated reference,
-       -- we need to move the earth reference coords AND shift the track
-       -- by the opposite of the Purple position (?).
-       let
-           shiftedTrackPoints =
-               List.map shiftPoint track.trackPoints
+        shiftFn : RoadSection -> List EarthPoint -> List EarthPoint
+        shiftFn road outputs =
+            shiftPoint road.endPoint :: outputs
 
-           shiftBasis =
-               case track.markedNode of
-                   Just purple ->
-                       purple.xyz |> Point3d.projectOnto Plane3d.xy
+        shiftedTrackPoints =
+            shiftPoint (DomainModel.earthPointFromIndex 0 track.trackTree)
+                :: DomainModel.foldOverRouteRL shiftFn track.trackTree []
 
-                   Nothing ->
-                       Point3d.origin
+        shiftBasis =
+            case track.markerPosition of
+                Just purple ->
+                    DomainModel.earthPointFromIndex purple track.trackTree
+                        |> Point3d.projectOnto Plane3d.xy
 
-           shiftVector =
-               Vector3d.from shiftBasis Point3d.origin
+                Nothing ->
+                    Point3d.origin
 
-           shiftPoint =
-               Point3d.translateBy shiftVector
-       in
-       []
--}
+        shiftVector =
+            Vector3d.from shiftBasis Point3d.origin
+
+        shiftPoint =
+            Point3d.translateBy shiftVector
+    in
+    shiftedTrackPoints
+        |> List.map
+            (\earth ->
+                ( earth
+                , DomainModel.gpxFromPointWithReference referenceGpx earth
+                )
+            )
 
 
 rotateAndScale : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
@@ -207,8 +222,8 @@ rotateAndScale settings track =
         (transformedStartPoint :: transformedEndPoints)
 
 
-apply : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
-apply options track =
+applyRotateAndScale : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyRotateAndScale options track =
     let
         newPoints =
             rotateAndScale options track
@@ -218,14 +233,24 @@ apply options track =
     )
 
 
+applyRecentre : ( Float, Float ) -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyRecentre newReference track =
+    let
+        newPoints =
+            computeRecentredPoints newReference track
+    in
+    ( DomainModel.treeFromSourcePoints <| List.map Tuple.second newPoints
+    , DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
+    )
+
+
 view :
     Bool
     -> Options
-    -> ( Float, Float )
     -> (Msg -> msg)
     -> Maybe (TrackLoaded msg)
     -> Element msg
-view imperial options ( lastX, lastY ) wrapper maybeTrack =
+view imperial options wrapper maybeTrack =
     let
         rotationSlider =
             Input.slider
@@ -269,17 +294,27 @@ view imperial options ( lastX, lastY ) wrapper maybeTrack =
                 }
 
         recentreButton =
-            button
-                (buttonStylesWithTooltip below "Click on Map to set the destination")
-                { onPress = Just <| wrapper Recentre
-                , label =
-                    text <|
-                        "Recentre at\n("
-                            ++ String.fromFloat lastX
-                            ++ ", "
-                            ++ String.fromFloat lastY
-                            ++ ")"
-                }
+            case maybeTrack of
+                Just track ->
+                    let
+                        ( lon, lat ) =
+                            track.lastMapClick
+                    in
+                    button
+                        (buttonStylesWithTooltip below "Click on Map to set the destination")
+                        { onPress = Just <| wrapper Recentre
+                        , label =
+                            paragraph [ width fill ]
+                                [ text <|
+                                    "Move to "
+                                        ++ String.fromFloat lon
+                                        ++ ", "
+                                        ++ String.fromFloat lat
+                                ]
+                        }
+
+                Nothing ->
+                    none
 
         zeroButton =
             button
