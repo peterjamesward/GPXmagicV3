@@ -17,10 +17,6 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 # WIP
 
-## Lift and Shift
-
-Need to do the map click thing and the elevations fetch.
-
 ---
 
 # BACKLOG, roughly in order ...
@@ -28,29 +24,29 @@ Need to do the map click thing and the elevations fetch.
 ## Tools
 
 2. SVG import
-3. Tooltips (in general)
-4. Fly-through
-5. 1st person view
-6. Use Strava segment data
-7. Move & Stretch
-8. Option to add 80m at Start, 200m at end for start/end gates in RGT
-9. Loops (inc. impact on others, such as Bezier)
-10. Intersection detection ((?? JB loop detection ??))
-11. Graph Theory (renamed)
-12. Map style choice (Satellite if possible)
-13. Extract all text for translation
-14. Use localised number formatting everywhere (for French use of , and .)
-15. Ability to point-smooth transitions over a range
-16. Chart can only show one Preview; how do we determine which?
-17. Chart preview for Centroid, Bezier, point smoother
-18. Improve default zoom
-19. Terrain (with texture)
-20. Tools that require a range should say so when there isn't one! (David Ogle)
-21. Gaussian (including necessary interpolation)
-22. Split and Join
-23. Update the log dashboard to view v3 activity.
-24. Draggable tools?
-25. Move tool: reverse geocode map click with https://positionstack.com 
+4. Tooltips (in general)
+5. Fly-through
+6. 1st person view
+7. Use Strava segment data
+8. Move & Stretch
+9. Option to add 80m at Start, 200m at end for start/end gates in RGT
+10. Loops (inc. impact on others, such as Bezier)
+11. Intersection detection ((?? JB loop detection ??))
+12. Graph Theory (renamed)
+13. Map style choice (Satellite if possible)
+14. Extract all text for translation
+15. Use localised number formatting everywhere (for French use of , and .)
+16. Ability to point-smooth transitions over a range
+17. Chart can only show one Preview; how do we determine which?
+18. Chart preview for Centroid, Bezier, point smoother
+19. Improve default zoom
+20. Terrain (with texture)
+21. Tools that require a range should say so when there isn't one! (David Ogle)
+22. Gaussian (including necessary interpolation)
+23. Split and Join
+24. Update the log dashboard to view v3 activity.
+25. Draggable tools?
+26. Move tool: reverse geocode map click with https://positionstack.com 
 
 New stuff:
 1. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).

@@ -14,6 +14,7 @@ module DomainModel exposing
     , extractPointsInRange
     , foldOverRoute
     , foldOverRouteRL
+    , getAllEarthPointsInNaturalOrder
     , getAllGPXPointsInDict
     , getAllGPXPointsInNaturalOrder
     , getDualCoords
@@ -1282,6 +1283,21 @@ getAllGPXPointsInNaturalOrder treeNode =
             foldOverRouteRL internalFoldFn treeNode []
     in
     gpxPointFromIndex 0 treeNode :: endPoints
+
+
+getAllEarthPointsInNaturalOrder : PeteTree -> List EarthPoint
+getAllEarthPointsInNaturalOrder treeNode =
+    -- A right-to-left traversal that is POINT focused.
+    -- Really handy for output or for tree rebuilding.
+    let
+        internalFoldFn : RoadSection -> List EarthPoint -> List EarthPoint
+        internalFoldFn road accum =
+            road.endPoint :: accum
+
+        endPoints =
+            foldOverRouteRL internalFoldFn treeNode []
+    in
+    earthPointFromIndex 0 treeNode :: endPoints
 
 
 getAllGPXPointsInDict : PeteTree -> Dict Int GPXSource

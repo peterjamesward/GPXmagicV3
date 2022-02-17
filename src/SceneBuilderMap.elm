@@ -69,22 +69,7 @@ pointsToJSON points =
     --};
     let
         features =
-            List.map makeFeature points
-
-        makeFeature tp =
-            E.object
-                [ ( "type", E.string "Feature" )
-                , ( "geometry", point tp )
-                ]
-
-        coordinates pt =
-            DomainModel.lngLatPair ( Direction2d.toAngle pt.longitude, pt.latitude, Quantity.zero )
-
-        point tp =
-            E.object
-                [ ( "type", E.string "Point" )
-                , ( "coordinates", coordinates tp )
-                ]
+            List.map makeFeatureFromGPX points
     in
     E.object
         [ ( "type", E.string "FeatureCollection" )
@@ -104,6 +89,14 @@ mapLocation point =
 latLonPair : ( Angle, Angle, Length.Length ) -> E.Value
 latLonPair ( lon, lat, ele ) =
     E.list E.float [ Angle.inDegrees lon, Angle.inDegrees lat ]
+
+
+latLonPairFromGpx : GPXSource -> E.Value
+latLonPairFromGpx { longitude, latitude, altitude } =
+    E.list E.float
+        [ Angle.inDegrees <| Direction2d.toAngle longitude
+        , Angle.inDegrees latitude
+        ]
 
 
 renderMapJson : TrackLoaded msg -> E.Value
@@ -184,6 +177,47 @@ renderMapJson track =
         ]
 
 
+renderMapJsonWithoutCulling : TrackLoaded msg -> E.Value
+renderMapJsonWithoutCulling track =
+    -- This version gives track suitable for map.addTrack.
+    -- Sadly, mapbox requires a different format for the track points.
+    let
+        geometry =
+            E.object
+                [ ( "type", E.string "LineString" )
+                , ( "coordinates", E.list identity coordinates )
+                ]
+
+        coordinates =
+            DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
+                |> List.map latLonPairFromGpx
+    in
+    E.object
+        [ ( "type", E.string "Feature" )
+        , ( "properties", E.object [] )
+        , ( "geometry", geometry )
+        ]
+
+
+makeFeatureFromGPX : GPXSource -> E.Value
+makeFeatureFromGPX { longitude, latitude, altitude } =
+    makeFeature ( longitude |> Direction2d.toAngle, latitude, altitude )
+
+
+makeFeature tp =
+    E.object
+        [ ( "type", E.string "Feature" )
+        , ( "geometry", makePoint tp )
+        ]
+
+
+makePoint lonLat =
+    E.object
+        [ ( "type", E.string "Point" )
+        , ( "coordinates", latLonPair lonLat )
+        ]
+
+
 trackPointsToJSON : TrackLoaded msg -> E.Value
 trackPointsToJSON track =
     -- Similar but each point is a feature so it is draggable.
@@ -231,18 +265,6 @@ trackPointsToJSON track =
                 |> Tuple.second
                 |> mapLocation
                 |> makeFeature
-
-        makeFeature tp =
-            E.object
-                [ ( "type", E.string "Feature" )
-                , ( "geometry", point tp )
-                ]
-
-        point lonLat =
-            E.object
-                [ ( "type", E.string "Point" )
-                , ( "coordinates", latLonPair lonLat )
-                ]
 
         features =
             missingLastPoint

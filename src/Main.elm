@@ -97,6 +97,7 @@ type Msg
     | FilenameChange String
     | TimeToUpdateMemory
     | OneClickMsg Tools.OneClickQuickFix.Msg
+    | FetchElevationsFromMap
     | NoOp
 
 
@@ -651,6 +652,11 @@ Please check the file contains GPX data.""" }
             ( modelAfterActions
             , performActionCommands actions modelAfterActions
             )
+
+        FetchElevationsFromMap ->
+            -- We have added the full track so that we can then ask
+            -- the map for elevation data. Let's do that.
+            ( model, MapPortController.requestElevations )
 
 
 
@@ -1693,6 +1699,12 @@ performActionCommands actions model =
 
                 ( HeapStatusUpdate _, _ ) ->
                     Delay.after 5000 TimeToUpdateMemory
+
+                ( AddFullTrackToMap, Just track ) ->
+                    Cmd.batch
+                        [ MapPortController.addFullTrackToMap track
+                        , Delay.after 100 FetchElevationsFromMap
+                        ]
 
                 ( FetchMapElevations, _ ) ->
                     MapPortController.requestElevations

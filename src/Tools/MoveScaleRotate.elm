@@ -113,8 +113,11 @@ update msg settings previewColour hasTrack =
             )
 
         ( UseMapElevations, Just track ) ->
+            -- This is problematic if the map points are elided due to quantity.
+            -- "Best" option is here to force a new set of points, then
+            -- do the fetch.
             ( settings
-            , [ FetchMapElevations ]
+            , [ AddFullTrackToMap ]
             )
 
         _ ->
@@ -123,16 +126,22 @@ update msg settings previewColour hasTrack =
 
 applyMapElevations : List Float -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
 applyMapElevations elevations track =
-    --TODO: Ah, but what if we elided the track??
+    -- We have previously forced a full load into the map (caveat user).
+    -- So these should be in order to match up with the domain model.
     let
-        useNewElevation tp ele =
-            Point3d.xyz
-                (Point3d.xCoordinate tp)
-                (Point3d.yCoordinate tp)
-                (Length.meters ele)
+        useNewElevation gpx newAltitude =
+            { gpx | altitude = Length.meters newAltitude }
+
+        currentPoints =
+            DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
+
+        adjustedPoints =
+            List.map2 useNewElevation currentPoints elevations
     in
-    ( DomainModel.treeFromSourcePoints []
-    , DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
+    ( DomainModel.treeFromSourcesWithExistingReference
+        track.referenceLonLat
+        adjustedPoints
+    , currentPoints
     )
 
 
@@ -324,7 +333,7 @@ view imperial options wrapper maybeTrack =
 
         elevationFetchButton =
             button
-                neatToolsBorder
+                (buttonStylesWithTooltip below "First, tilt the Map view to get elevation data")
                 { onPress = Just <| wrapper UseMapElevations
                 , label = text "Use elevations fetched from Mapbox"
                 }
@@ -346,8 +355,7 @@ view imperial options wrapper maybeTrack =
                     [ rotateButton
                     , zeroButton
                     , recentreButton
-
-                    --, elevationFetchButton
+                    , elevationFetchButton
                     ]
                 ]
 

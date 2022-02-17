@@ -54,6 +54,7 @@ type ToolAction msg
     | LimitGradientWithOptions Tools.LimitGradientOptions.Options
     | ApplyRotateAndScale Tools.MoveScaleRotateOptions.Options
     | ApplyRecentre ( Float, Float )
+    | AddFullTrackToMap
     | FetchMapElevations
     | ApplyMapElevations (List Float)
 

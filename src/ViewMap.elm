@@ -11,6 +11,7 @@ import FlatColors.ChinesePalette
 import Html.Attributes exposing (id)
 import Pixels exposing (Pixels, inPixels)
 import Quantity exposing (Quantity)
+import ToolTip exposing (myTooltip, tooltip)
 import TrackLoaded exposing (TrackLoaded)
 import ViewPureStyles exposing (useIcon)
 
@@ -87,7 +88,15 @@ view ( viewWidth, viewHeight ) mContext msgWrapper =
                 , padding 6
                 , spacing 8
                 ]
-                [ Input.button []
+                [ Input.button
+                    [ tooltip onLeft <|
+                        case context.followOrange of
+                            True ->
+                                myTooltip "Click to stop following Orange marker"
+
+                            False ->
+                                myTooltip "Click to follow Orange marker"
+                    ]
                     { onPress = Just <| msgWrapper ToggleFollowOrange
                     , label =
                         if context.followOrange then
@@ -96,7 +105,15 @@ view ( viewWidth, viewHeight ) mContext msgWrapper =
                         else
                             useIcon FeatherIcons.unlock
                     }
-                , Input.button []
+                , Input.button
+                    [ tooltip onLeft <|
+                        case context.draggable of
+                            True ->
+                                myTooltip "Click to disable point dragging"
+
+                            False ->
+                                myTooltip "Click to allow point dragging"
+                    ]
                     { onPress = Just <| msgWrapper ToggleDraggable
                     , label =
                         if context.draggable then
@@ -126,4 +143,3 @@ view ( viewWidth, viewHeight ) mContext msgWrapper =
         Nothing ->
             -- Keep the DOM hierarchy consistent.
             row [] [ el [ htmlAttribute (id "map") ] none ]
-
