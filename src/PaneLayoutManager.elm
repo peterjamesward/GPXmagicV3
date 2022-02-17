@@ -654,7 +654,6 @@ viewModeChoicesNoMap msgWrapper pane =
             [ Input.optionWith ViewThird <| radioButton "Perspective"
             , Input.optionWith ViewProfile <| radioButton "Profile"
             , Input.optionWith ViewPlan <| radioButton "Plan"
-            , Input.optionWith ViewInfo <| radioButton "About"
             ]
     in
     Input.radioRow

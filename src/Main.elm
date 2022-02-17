@@ -227,7 +227,7 @@ init mflags origin navigationKey =
       , previews = Dict.empty
       , windowSize = ( 1000, 800 )
       , contentArea = ( Pixels.pixels 800, Pixels.pixels 500 )
-      , modalMessage = Just About.introText
+      , modalMessage = Nothing
       , paneLayoutOptions = PaneLayoutManager.defaultOptions
       , leftDockRightEdge =
             SplitPane.init Horizontal
@@ -989,7 +989,7 @@ topLoadingBar model =
                 , label = text "Save GPX file"
                 }
     in
-    row
+    wrappedRow
         (commonLayoutStyles
             ++ [ spacing 20
                , padding 10
@@ -1006,6 +1006,7 @@ topLoadingBar model =
                 Input.text
                     [ padding 5
                     , onEnter WriteGpxFile
+                    , width <| minimum 200 <| fill
                     ]
                     { text = filename
                     , onChange = FilenameChange

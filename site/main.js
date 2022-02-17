@@ -9910,7 +9910,6 @@ var $author$project$StravaAuth$init = F4(
 					clearUrl);
 		}
 	});
-var $author$project$About$introText = '\nThank you for testing **GPXmagic v3**. It\'s very much the same but with a\nnew core engine, and a new "pro" look and feel.\n\nThe main drivers here are speed, stability, and customisation.\nIn other words, it should be (mostly) faster, handle more complex routes, and\nmake it easier for you to organise tools your way.\n\nThere are some new tools in the pipeline but the priority is to migrate most\nof the existing tools, maybe fixing some bugs in the process.\n\n**Please** do not post problems on FaceBook; it\'s impossible to keep track. It\'s better\n(for now) if you email me peter@stepwiserefinement.co.uk.\n\nif you have a GitHub account, you can also post issues, see current issues, and ask questions at\nhttps://github.com/peterjamesward/GPXmagicV3/issues\n\n    ';
 var $elm$time$Time$Posix = function (a) {
 	return {$: 'Posix', a: a};
 };
@@ -10012,7 +10011,7 @@ var $author$project$Main$init = F3(
 						$elm$core$Maybe$Just(
 							_Utils_Tuple2(20, 200))),
 					$author$project$SplitPane$SplitPane$init($author$project$SplitPane$SplitPane$Horizontal)),
-				modalMessage: $elm$core$Maybe$Just($author$project$About$introText),
+				modalMessage: $elm$core$Maybe$Nothing,
 				paneLayoutOptions: $author$project$PaneLayoutManager$defaultOptions,
 				previews: $elm$core$Dict$empty,
 				rightDockInternal: A2(
@@ -40879,7 +40878,7 @@ var $author$project$ViewPureStyles$conditionallyVisible = F2(
 				]),
 			element);
 	});
-var $author$project$About$aboutText = '\n\n# GPXmagic v3.0.2 (67c86613)\n\nIf v1 was the surprise indie hit, v2 the disappointing second album, here\'s hoping\nv3 is the polished studio album that delivers the goods.\n\nIn this release:\n\n* The Return/Enter key will apply your new name to a tool docking zone.\n* The Return/Enter key in the filename box will also save the GPX file.\n* Some controls will now have tooltips that appear as you move the mouse over them.\n* Move and Rotate has transitioned from v2, but without "fetch elevations from map".\n\nThanks to all for feedback and suggestions. I\'m working my way through the migration\nof tools from v2, which is sometimes straightforward, sometimes not, so progress\nis uneven.\n\n    ';
+var $author$project$About$aboutText = '\n\n# GPXmagic v3.0.2 (67c86613)\n\nIf v1 was the surprise indie hit, v2 the disappointing second album, here\'s hoping\nv3 is the polished studio album that delivers the goods.\n\nIn this release:\n\n* The Return/Enter key will apply your new name to a tool docking zone.\n* The Return/Enter key in the filename box will also save the GPX file.\n* Some controls will now have tooltips that appear as you move the mouse over them.\n* Move and Rotate has transitioned from v2.\n* Fetch elevations from map has transitioned. Caveats about accuracy apply.\n\nThanks to all for feedback and suggestions. I\'m working my way through the migration\nof tools from v2, which is sometimes straightforward, sometimes not, so progress\nis uneven.\n\n## Legal guff\n\n> peterjamesward/GPXmagicV3 is licensed under the\n> Creative Commons Zero v1.0 Universal license\n\nSource code available: https://github.com/peterjamesward/GPXmagicV3\n\n    ';
 var $elm_explorations$markdown$Markdown$defaultOptions = {
 	defaultHighlighting: $elm$core$Maybe$Nothing,
 	githubFlavored: $elm$core$Maybe$Just(
@@ -49482,11 +49481,7 @@ var $author$project$PaneLayoutManager$viewModeChoicesNoMap = F2(
 				A2(
 				$mdgriffith$elm_ui$Element$Input$optionWith,
 				$author$project$PaneLayoutManager$ViewPlan,
-				$author$project$ViewPureStyles$radioButton('Plan')),
-				A2(
-				$mdgriffith$elm_ui$Element$Input$optionWith,
-				$author$project$PaneLayoutManager$ViewInfo,
-				$author$project$ViewPureStyles$radioButton('About'))
+				$author$project$ViewPureStyles$radioButton('Plan'))
 			]);
 		return A2(
 			$mdgriffith$elm_ui$Element$Input$radioRow,
@@ -50146,6 +50141,14 @@ var $author$project$Main$globalOptions = function (model) {
 			}));
 };
 var $smucode$elm_flat_colors$FlatColors$AussiePalette$juneBud = A3($mdgriffith$elm_ui$Element$rgb255, 186, 220, 88);
+var $mdgriffith$elm_ui$Internal$Model$Min = F2(
+	function (a, b) {
+		return {$: 'Min', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Element$minimum = F2(
+	function (i, l) {
+		return A2($mdgriffith$elm_ui$Internal$Model$Min, i, l);
+	});
 var $author$project$Tools$OneClickQuickFix$Apply = {$: 'Apply'};
 var $smucode$elm_flat_colors$FlatColors$ChinesePalette$bayWharf = A3($mdgriffith$elm_ui$Element$rgb255, 116, 125, 140);
 var $smucode$elm_flat_colors$FlatColors$ChinesePalette$frenchSkyBlue = A3($mdgriffith$elm_ui$Element$rgb255, 112, 161, 255);
@@ -50479,7 +50482,7 @@ var $author$project$Main$topLoadingBar = function (model) {
 			onPress: $elm$core$Maybe$Just($author$project$Main$GpxRequested)
 		});
 	return A2(
-		$mdgriffith$elm_ui$Element$row,
+		$mdgriffith$elm_ui$Element$wrappedRow,
 		_Utils_ap(
 			$author$project$ViewPureStyles$commonLayoutStyles,
 			_List_fromArray(
@@ -50512,7 +50515,9 @@ var $author$project$Main$topLoadingBar = function (model) {
 						_List_fromArray(
 							[
 								$mdgriffith$elm_ui$Element$padding(5),
-								$author$project$ViewPureStyles$onEnter($author$project$Main$WriteGpxFile)
+								$author$project$ViewPureStyles$onEnter($author$project$Main$WriteGpxFile),
+								$mdgriffith$elm_ui$Element$width(
+								A2($mdgriffith$elm_ui$Element$minimum, 200, $mdgriffith$elm_ui$Element$fill))
 							]),
 						{
 							label: $mdgriffith$elm_ui$Element$Input$labelHidden('filename'),
