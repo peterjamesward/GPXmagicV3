@@ -71,16 +71,14 @@ update msg options wrap =
 
         FileLoaded content ->
             ( options
-            , [ TrackFromSvg content ]
+            , [ TrackFromSvg content, TrackHasChanged ]
               --, Task.perform (wrap << FileLoaded) (File.toString file)
             )
 
 
 trackFromSvg : Options -> String -> Maybe (TrackLoaded msg)
 trackFromSvg options content =
-    processXML
-        options
-        content
+    processXML options content
 
 
 type alias PathInfo =

@@ -17,8 +17,6 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 # WIP
 
-## SVG import
-
 ---
 
 # BACKLOG, roughly in order ...

@@ -370,27 +370,8 @@ update msg model =
                     in
                     case newTrack of
                         Just track ->
-                            let
-                                modelWithTrack =
-                                    { model
-                                        | track = newTrack
-                                        , paneLayoutOptions =
-                                            PaneLayoutManager.initialise
-                                                track
-                                                model.paneLayoutOptions
-                                        , modalMessage = Nothing
-                                    }
-
-                                actions =
-                                    [ TrackHasChanged, MapRefresh ]
-
-                                modelAfterActions =
-                                    -- e.g. collect previews and render ...
-                                    performActionsOnModel actions modelWithTrack
-                            in
-                            ( modelAfterActions
-                            , Cmd.batch
-                                [ showTrackOnMapCentered track ]
+                            ( adoptTrackInModel track model
+                            , showTrackOnMapCentered track
                             )
 
                         Nothing ->
@@ -682,10 +663,34 @@ Please check the file contains GPX data.""" }
 
                 newModel =
                     { model | svgFileOptions = newOptions }
+                        |> performActionsOnModel actions
             in
             ( newModel
             , performActionCommands actions newModel
             )
+
+
+adoptTrackInModel : TrackLoaded Msg -> Model -> Model
+adoptTrackInModel track model =
+    let
+        modelWithTrack =
+            { model
+                | track = Just track
+                , paneLayoutOptions =
+                    PaneLayoutManager.initialise
+                        track
+                        model.paneLayoutOptions
+                , modalMessage = Nothing
+            }
+
+        actions =
+            [ TrackHasChanged, MapRefresh ]
+
+        modelAfterActions =
+            -- e.g. collect previews and render ...
+            performActionsOnModel actions modelWithTrack
+    in
+    modelAfterActions
 
 
 allocateSpaceForDocksAndContent : Int -> Int -> Model -> Model
@@ -1544,8 +1549,8 @@ performActionsOnModel actions model =
                                 svgContent
                     in
                     case newTrack of
-                        Just _ ->
-                            { foldedModel | track = newTrack }
+                        Just track ->
+                            adoptTrackInModel track foldedModel
 
                         Nothing ->
                             { foldedModel | modalMessage = Just "Unable to extract SVG paths" }
@@ -1777,6 +1782,14 @@ performActionCommands actions model =
 
                 ( LoadSvgFile message file, _ ) ->
                     Task.perform message (File.toString file)
+
+                ( TrackFromSvg svgContent, _ ) ->
+                    case model.track of
+                        Just track ->
+                            showTrackOnMapCentered track
+
+                        Nothing ->
+                            Cmd.none
 
                 _ ->
                     Cmd.none
