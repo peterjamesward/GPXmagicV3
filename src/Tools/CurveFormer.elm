@@ -786,7 +786,6 @@ makeCurveIfPossible track options =
                 runningAverageDirectionChange idx road change =
                     case change of
                         ( Nothing, _ ) ->
-                            -- "Maybe it's his first time around"
                             ( Just road.directionAtStart, 0.0 )
 
                         ( Just previousDirection, prevTotal ) ->
@@ -800,7 +799,7 @@ makeCurveIfPossible track options =
                 ( _, changeInDirection ) =
                     Dict.foldl runningAverageDirectionChange ( Nothing, 0.0 ) capturedRoadSections
             in
-            changeInDirection < 0.0
+            changeInDirection > 0.0
 
         findAcceptableTransition : TransitionMode -> Int -> Int -> Maybe IntersectionInformation
         findAcceptableTransition mode idx1 idx2 =

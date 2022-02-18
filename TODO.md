@@ -28,23 +28,24 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 3. Use Strava segment data
 4. Move & Stretch
 5. Loops (inc. impact on others, such as Bezier)
-6. Intersection detection ((?? JB loop detection ??))
-7. Graph Theory (renamed)
-8. Map style choice (Satellite if possible)
-9. Tooltips (where useful)
-10. Extract all text for translation (Muriel)
-11. Use localised number formatting everywhere (for French use of , and .)
-12. Ability to point-smooth transitions over a range
-13. Chart can only show one Preview; how do we determine which?
-14. Chart preview for Centroid, Bezier, point smoother
-15. Improve default zoom
-16. Terrain (with texture)
-17. Tools that require a range should say so when there isn't one! (David Ogle)
-18. Gaussian (including necessary interpolation)
-19. Split and Join
-20. Update the log dashboard to view v3 activity.
-21. Draggable tools?
-22. Move tool: reverse geocode map click with https://positionstack.com 
+6. Option to show MG rendering cutoff.
+7. Intersection detection ((?? JB loop detection ??))
+8. Graph Theory (renamed)
+9. Map style choice (Satellite if possible)
+10. Tooltips (where useful)
+11. Extract all text for translation (Muriel)
+12. Use localised number formatting everywhere (for French use of , and .)
+13. Ability to point-smooth transitions over a range
+14. Chart can only show one Preview; how do we determine which?
+15. Chart preview for Centroid, Bezier, point smoother
+16. Improve default zoom
+17. Terrain (with texture)
+18. Tools that require a range should say so when there isn't one! (David Ogle)
+19. Gaussian (including necessary interpolation)
+20. Split and Join
+21. Update the log dashboard to view v3 activity.
+22. Draggable tools?
+23. Move tool: reverse geocode map click with https://positionstack.com 
 
 New stuff:
 1. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).

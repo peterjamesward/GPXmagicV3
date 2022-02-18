@@ -28567,7 +28567,7 @@ var $author$project$Tools$CurveFormer$makeCurveIfPossible = F2(
 				_Utils_Tuple2($elm$core$Maybe$Nothing, 0.0),
 				capturedRoadSections);
 			var changeInDirection = _v39.b;
-			return changeInDirection < 0.0;
+			return changeInDirection > 0.0;
 		}();
 		var findAcceptableTransition = F3(
 			function (mode, idx1, idx2) {
