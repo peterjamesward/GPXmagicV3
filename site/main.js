@@ -23302,9 +23302,11 @@ var $author$project$Tools$Flythrough$advanceInternal = F4(
 				tempus * A2($elm$core$Basics$pow, 10.0, speed)),
 			status.metresFromRouteStart);
 		var lastPointPassedIndex = A2($author$project$DomainModel$indexFromDistance, newDistance, track.trackTree);
-		var nextRoad = A2($author$project$DomainModel$leafFromIndex, lastPointPassedIndex + 1, track.trackTree);
+		var nextRoad = $author$project$DomainModel$asRecord(
+			A2($author$project$DomainModel$leafFromIndex, lastPointPassedIndex + 1, track.trackTree));
 		var lastPointDistance = A2($author$project$DomainModel$distanceFromIndex, lastPointPassedIndex, track.trackTree);
-		var currentRoad = A2($author$project$DomainModel$leafFromIndex, lastPointPassedIndex, track.trackTree);
+		var currentRoad = $author$project$DomainModel$asRecord(
+			A2($author$project$DomainModel$leafFromIndex, lastPointPassedIndex, track.trackTree));
 		var _v0 = status.running;
 		switch (_v0.$) {
 			case 'Idle':
@@ -23331,7 +23333,7 @@ var $author$project$Tools$Flythrough$advanceInternal = F4(
 							status,
 							{running: $author$project$Tools$Flythrough$Ended}));
 				} else {
-					var segLength = $author$project$DomainModel$trueLength(currentRoad);
+					var segLength = currentRoad.trueLength;
 					var segInsetMetres = A2($ianmackenzie$elm_units$Quantity$minus, lastPointDistance, newDistance);
 					var segRemaining = $ianmackenzie$elm_units$Length$inMeters(
 						A2($ianmackenzie$elm_units$Quantity$minus, segInsetMetres, segLength));
@@ -23340,23 +23342,15 @@ var $author$project$Tools$Flythrough$advanceInternal = F4(
 					var lookingAt = A2(
 						$ianmackenzie$elm_geometry$Point3d$translateBy,
 						A3($ianmackenzie$elm_geometry$Vector3d$xyz, $ianmackenzie$elm_units$Quantity$zero, $ianmackenzie$elm_units$Quantity$zero, $author$project$Tools$Flythrough$eyeHeight),
-						A3(
-							$ianmackenzie$elm_geometry$Point3d$interpolateFrom,
-							$author$project$DomainModel$endPoint(currentRoad),
-							$author$project$DomainModel$endPoint(nextRoad),
-							headTurnFraction));
+						A3($ianmackenzie$elm_geometry$Point3d$interpolateFrom, currentRoad.endPoint, nextRoad.endPoint, headTurnFraction));
 					var camera3d = A2(
 						$ianmackenzie$elm_geometry$Point3d$translateBy,
 						A3($ianmackenzie$elm_geometry$Vector3d$xyz, $ianmackenzie$elm_units$Quantity$zero, $ianmackenzie$elm_units$Quantity$zero, $author$project$Tools$Flythrough$eyeHeight),
-						A3(
-							$ianmackenzie$elm_geometry$Point3d$interpolateFrom,
-							$author$project$DomainModel$startPoint(currentRoad),
-							$author$project$DomainModel$endPoint(currentRoad),
-							segFraction));
+						A3($ianmackenzie$elm_geometry$Point3d$interpolateFrom, currentRoad.startPoint, currentRoad.endPoint, segFraction));
 					return $elm$core$Maybe$Just(
 						_Utils_update(
 							status,
-							{cameraPosition: camera3d, focusPoint: lookingAt, lastUpdated: newTime, metresFromRouteStart: newDistance}));
+							{cameraPosition: camera3d, focusPoint: lookingAt, gradient: currentRoad.gradientAtStart, lastUpdated: newTime, metresFromRouteStart: newDistance}));
 				}
 		}
 	});
@@ -29813,6 +29807,7 @@ var $author$project$Tools$Flythrough$prepareFlythrough = F2(
 			{
 				cameraPosition: eyePoint,
 				focusPoint: focusPoint,
+				gradient: currentRoad.gradientAtStart,
 				lastUpdated: $elm$time$Time$millisToPosix(0),
 				metresFromRouteStart: A2($author$project$DomainModel$distanceFromIndex, track.currentPosition, track.trackTree),
 				running: $author$project$Tools$Flythrough$AwaitingFirstTick
@@ -45001,6 +44996,65 @@ var $author$project$ViewFirstPerson$deriveViewPointAndCamera = F3(
 				viewpoint: cameraViewpoint
 			});
 	});
+var $author$project$UtilsForViews$elmuiColour = function (c) {
+	var _v0 = $avh4$elm_color$Color$toRgba(c);
+	var red = _v0.red;
+	var green = _v0.green;
+	var blue = _v0.blue;
+	var alpha = _v0.alpha;
+	return A3($mdgriffith$elm_ui$Element$rgb, red, green, blue);
+};
+var $mdgriffith$elm_ui$Internal$Model$MoveX = function (a) {
+	return {$: 'MoveX', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Flag$moveX = $mdgriffith$elm_ui$Internal$Flag$flag(25);
+var $mdgriffith$elm_ui$Element$moveRight = function (x) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$TransformComponent,
+		$mdgriffith$elm_ui$Internal$Flag$moveX,
+		$mdgriffith$elm_ui$Internal$Model$MoveX(x));
+};
+var $author$project$UtilsForViews$showDecimal1 = function (x) {
+	var locale = _Utils_update(
+		$cuducos$elm_format_number$FormatNumber$Locales$usLocale,
+		{
+			decimals: $cuducos$elm_format_number$FormatNumber$Locales$Exact(1),
+			negativePrefix: '-',
+			thousandSeparator: ''
+		});
+	return A2($cuducos$elm_format_number$FormatNumber$format, locale, x);
+};
+var $smucode$elm_flat_colors$FlatColors$ChinesePalette$white = A3($mdgriffith$elm_ui$Element$rgb255, 255, 255, 255);
+var $author$project$ViewFirstPerson$headUpDisplay = function (gradient) {
+	return A2(
+		$mdgriffith$elm_ui$Element$el,
+		_List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$alignTop,
+				$mdgriffith$elm_ui$Element$alignLeft,
+				$mdgriffith$elm_ui$Element$moveDown(10),
+				$mdgriffith$elm_ui$Element$moveRight(10),
+				$mdgriffith$elm_ui$Element$Background$color(
+				$author$project$UtilsForViews$elmuiColour(
+					$author$project$SceneBuilder3D$gradientColourPastel(gradient))),
+				$mdgriffith$elm_ui$Element$Font$size(30),
+				$mdgriffith$elm_ui$Element$Font$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$white),
+				$mdgriffith$elm_ui$Element$padding(6),
+				$mdgriffith$elm_ui$Element$width(
+				$mdgriffith$elm_ui$Element$px(100)),
+				$mdgriffith$elm_ui$Element$height(
+				$mdgriffith$elm_ui$Element$px(100)),
+				$mdgriffith$elm_ui$Element$Border$rounded(100),
+				$mdgriffith$elm_ui$Element$Border$width(2),
+				$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$white)
+			]),
+		A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[$mdgriffith$elm_ui$Element$centerX, $mdgriffith$elm_ui$Element$centerY]),
+			$mdgriffith$elm_ui$Element$text(
+				$author$project$UtilsForViews$showDecimal1(gradient))));
+};
 var $avh4$elm_color$Color$lightBlue = A4($avh4$elm_color$Color$RgbaSpace, 114 / 255, 159 / 255, 207 / 255, 1.0);
 var $ianmackenzie$elm_3d_scene$Scene3d$Light$CastsShadows = function (a) {
 	return {$: 'CastsShadows', a: a};
@@ -46244,9 +46298,21 @@ var $ianmackenzie$elm_3d_scene$Scene3d$sunny = function (_arguments) {
 };
 var $author$project$ViewFirstPerson$view = F6(
 	function (context, contentArea, track, scene, msgWrapper, mFlythrough) {
+		var flythroughHUD = function () {
+			if (mFlythrough.$ === 'Just') {
+				var flythrough = mFlythrough.a;
+				return $mdgriffith$elm_ui$Element$inFront(
+					$author$project$ViewFirstPerson$headUpDisplay(flythrough.gradient));
+			} else {
+				return $mdgriffith$elm_ui$Element$inFront($mdgriffith$elm_ui$Element$none);
+			}
+		}();
 		return A2(
 			$mdgriffith$elm_ui$Element$el,
-			A2($author$project$View3dCommonElements$common3dSceneAttributes, msgWrapper, context),
+			A2(
+				$elm$core$List$cons,
+				flythroughHUD,
+				A2($author$project$View3dCommonElements$common3dSceneAttributes, msgWrapper, context)),
 			$mdgriffith$elm_ui$Element$html(
 				$ianmackenzie$elm_3d_scene$Scene3d$sunny(
 					{
@@ -46344,10 +46410,6 @@ var $feathericons$elm_feather$FeatherIcons$move = A2(
 				]),
 			_List_Nil)
 		]));
-var $mdgriffith$elm_ui$Internal$Model$MoveX = function (a) {
-	return {$: 'MoveX', a: a};
-};
-var $mdgriffith$elm_ui$Internal$Flag$moveX = $mdgriffith$elm_ui$Internal$Flag$flag(25);
 var $mdgriffith$elm_ui$Element$moveLeft = function (x) {
 	return A2(
 		$mdgriffith$elm_ui$Internal$Model$TransformComponent,
@@ -46608,7 +46670,6 @@ var $feathericons$elm_feather$FeatherIcons$plus = A2(
 			_List_Nil)
 		]));
 var $author$project$ViewPlan$stopProp = {preventDefault: false, stopPropagation: true};
-var $smucode$elm_flat_colors$FlatColors$ChinesePalette$white = A3($mdgriffith$elm_ui$Element$rgb255, 255, 255, 255);
 var $author$project$ViewPlan$zoomButtons = F2(
 	function (msgWrapper, context) {
 		return A2(
@@ -54210,12 +54271,6 @@ var $feathericons$elm_feather$FeatherIcons$moreHorizontal = A2(
 				]),
 			_List_Nil)
 		]));
-var $mdgriffith$elm_ui$Element$moveRight = function (x) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$TransformComponent,
-		$mdgriffith$elm_ui$Internal$Flag$moveX,
-		$mdgriffith$elm_ui$Internal$Model$MoveX(x));
-};
 var $author$project$Tools$OneClickQuickFix$Apply = {$: 'Apply'};
 var $smucode$elm_flat_colors$FlatColors$ChinesePalette$bayWharf = A3($mdgriffith$elm_ui$Element$rgb255, 116, 125, 140);
 var $smucode$elm_flat_colors$FlatColors$ChinesePalette$frenchSkyBlue = A3($mdgriffith$elm_ui$Element$rgb255, 112, 161, 255);

@@ -33,17 +33,17 @@ view :
     -> Maybe Tools.Flythrough.Flythrough
     -> Element msg
 view context contentArea track scene msgWrapper mFlythrough =
-    --let
-    --    flythroughHUD =
-    --        case mFlythrough of
-    --            Just flythrough ->
-    --                inFront <| headUpDisplay flythrough.gradient
-    --
-    --            Nothing ->
-    --                inFront none
-    --in
+    let
+        flythroughHUD =
+            case mFlythrough of
+                Just flythrough ->
+                    inFront <| headUpDisplay flythrough.gradient
+
+                Nothing ->
+                    inFront none
+    in
     el
-        (common3dSceneAttributes msgWrapper context)
+        (flythroughHUD :: (common3dSceneAttributes msgWrapper context))
     <|
         html <|
             Scene3d.sunny

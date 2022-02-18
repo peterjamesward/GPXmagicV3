@@ -37,6 +37,7 @@ type alias Flythrough =
     , metresFromRouteStart : Length.Length
     , lastUpdated : Time.Posix
     , running : RunState
+    , gradient : Float
     }
 
 
@@ -86,9 +87,11 @@ advanceInternal newTime status speed track =
 
         currentRoad =
             DomainModel.leafFromIndex lastPointPassedIndex track.trackTree
+                |> asRecord
 
         nextRoad =
             DomainModel.leafFromIndex (lastPointPassedIndex + 1) track.trackTree
+                |> asRecord
 
         lastPointDistance =
             DomainModel.distanceFromIndex lastPointPassedIndex track.trackTree
@@ -123,7 +126,7 @@ advanceInternal newTime status speed track =
                         newDistance |> Quantity.minus lastPointDistance
 
                     segLength =
-                        DomainModel.trueLength currentRoad
+                        currentRoad.trueLength
 
                     segFraction =
                         Quantity.ratio segInsetMetres segLength
@@ -143,16 +146,16 @@ advanceInternal newTime status speed track =
                             (Vector3d.xyz Quantity.zero Quantity.zero eyeHeight)
                         <|
                             Point3d.interpolateFrom
-                                (DomainModel.startPoint currentRoad)
-                                (DomainModel.endPoint currentRoad)
+                                currentRoad.startPoint
+                                currentRoad.endPoint
                                 segFraction
 
                     lookingAt =
                         -- Should be looking at the next point, until we are close
                         -- enough to start looking at the one beyond that.
                         Point3d.interpolateFrom
-                            (DomainModel.endPoint currentRoad)
-                            (DomainModel.endPoint nextRoad)
+                            currentRoad.endPoint
+                            nextRoad.endPoint
                             headTurnFraction
                             |> Point3d.translateBy
                                 (Vector3d.xyz Quantity.zero Quantity.zero eyeHeight)
@@ -163,6 +166,7 @@ advanceInternal newTime status speed track =
                         , lastUpdated = newTime
                         , cameraPosition = camera3d
                         , focusPoint = lookingAt
+                        , gradient = currentRoad.gradientAtStart
                     }
 
 
@@ -360,6 +364,7 @@ prepareFlythrough track options =
         , focusPoint = focusPoint
         , lastUpdated = Time.millisToPosix 0
         , running = AwaitingFirstTick
+        , gradient = currentRoad.gradientAtStart
         }
 
 
