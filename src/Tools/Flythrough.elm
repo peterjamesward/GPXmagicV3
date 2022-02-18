@@ -33,7 +33,6 @@ type Msg
 
 type alias Flythrough =
     { cameraPosition : EarthPoint
-    , savedCurrentPosition : Int
     , focusPoint : EarthPoint
     , metresFromRouteStart : Length.Length
     , lastUpdated : Time.Posix
@@ -45,6 +44,7 @@ type alias Options =
     { flythroughSpeed : Float
     , flythrough : Maybe Flythrough
     , modelTime : Time.Posix
+    , savedCurrentPosition : Int
     }
 
 
@@ -52,6 +52,7 @@ defaultOptions =
     { flythroughSpeed = 1.0
     , flythrough = Nothing
     , modelTime = Time.millisToPosix 0
+    , savedCurrentPosition = 0
     }
 
 
@@ -59,13 +60,13 @@ eyeHeight =
     Length.meters 2.0
 
 
-flythrough :
+advanceInternal :
     Time.Posix
     -> Flythrough
     -> Float
     -> TrackLoaded msg
     -> Maybe Flythrough
-flythrough newTime status speed track =
+advanceInternal newTime status speed track =
     let
         tempus =
             toFloat (Time.posixToMillis newTime - Time.posixToMillis status.lastUpdated) / 1000.0
@@ -247,19 +248,65 @@ update :
     -> Msg
     -> TrackLoaded msg
     -> ( Options, List (ToolAction msg) )
-update options msg track =
+update options msg  track =
     case msg of
         SetFlythroughSpeed speed ->
-            ( { options | flythroughSpeed = speed }, [] )
+            ( { options | flythroughSpeed = speed }
+            , []
+            )
 
         StartFlythrough ->
-            ( startFlythrough track options, [] )
+            ( startFlythrough track options
+            , [ Actions.StartFlythoughTicks ]
+            )
 
         PauseFlythrough ->
-            ( togglePause options, [] )
+            ( togglePause options
+            , [ Actions.StopFlythroughTicks ]
+            )
 
         ResetFlythrough ->
-            ( { options | flythrough = Nothing }, [] )
+            ( { options | flythrough = Nothing }
+            , [ Actions.StopFlythroughTicks ]
+            )
+
+
+advanceFlythrough :
+    Time.Posix
+    -> Options
+    -> TrackLoaded msg
+    -> ( Options, List (ToolAction msg) )
+advanceFlythrough posixTime options track =
+    case options.flythrough of
+        Just flythrough ->
+            let
+                updatedFlythrough =
+                    advanceInternal
+                        posixTime
+                        flythrough
+                        options.flythroughSpeed
+                        track
+
+                newOptions =
+                    { options | flythrough = updatedFlythrough }
+            in
+            ( newOptions
+            , case updatedFlythrough of
+                Just stillFlying ->
+                    [ Actions.SetCurrent <|
+                        DomainModel.indexFromDistanceRoundedDown
+                            stillFlying.metresFromRouteStart
+                            track.trackTree
+                    ]
+
+                Nothing ->
+                    [ Actions.SetCurrent options.savedCurrentPosition
+                    , Actions.StopFlythroughTicks
+                    ]
+            )
+
+        Nothing ->
+            ( options, [ Actions.StopFlythroughTicks ] )
 
 
 prepareFlythrough : TrackLoaded msg -> Options -> Maybe Flythrough
@@ -288,7 +335,6 @@ prepareFlythrough track options =
         , cameraPosition = eyePoint
         , focusPoint = focusPoint
         , lastUpdated = options.modelTime
-        , savedCurrentPosition = track.currentPosition
         }
 
 
@@ -296,7 +342,10 @@ startFlythrough : TrackLoaded msg -> Options -> Options
 startFlythrough track options =
     case prepareFlythrough track options of
         Just flying ->
-            { options | flythrough = Just { flying | running = True } }
+            { options
+                | flythrough = Just { flying | running = True }
+                , savedCurrentPosition = track.currentPosition
+            }
 
         Nothing ->
             options

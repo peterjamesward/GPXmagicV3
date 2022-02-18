@@ -15,6 +15,7 @@ import Html.Events.Extra.Mouse as Mouse
 import Json.Decode as D exposing (field)
 import Json.Encode as E exposing (string)
 import List.Extra
+import Time
 import ToolTip exposing (myTooltip, tooltip)
 import Tools.BendSmoother
 import Tools.BendSmootherOptions
@@ -1761,3 +1762,14 @@ showDockHeader msgWrapper dockId docks =
                     False ->
                         text dockSettings.dockLabel
                 ]
+
+
+flythroughTick : Options -> Time.Posix -> TrackLoaded msg -> ( Options, List (ToolAction msg) )
+flythroughTick options posix track =
+    let
+        ( updatedFlythrough, actions ) =
+            Tools.Flythrough.advanceFlythrough posix options.flythroughSettings track
+    in
+    ( { options | flythroughSettings = updatedFlythrough }
+    , actions
+    )

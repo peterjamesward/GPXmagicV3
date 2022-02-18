@@ -25,6 +25,7 @@ module DomainModel exposing
     , gpxPointFromIndex
     , gradientFromNode
     , indexFromDistance
+    , indexFromDistanceRoundedDown
     , leafFromIndex
     , lngLatPair
     , nearestToLonLat
@@ -852,6 +853,22 @@ distanceFromIndex index treeNode =
                 Quantity.plus
                     (trueLength info.left)
                     (distanceFromIndex (index - skipCount info.left) info.right)
+
+
+indexFromDistanceRoundedDown : Length.Length -> PeteTree -> Int
+indexFromDistanceRoundedDown distance treeNode =
+    -- Must behave this way for flythrough
+    case treeNode of
+        Leaf info ->
+            0
+
+        Node info ->
+            if distance |> Quantity.lessThanOrEqualTo (trueLength info.left) then
+                indexFromDistance distance info.left
+
+            else
+                skipCount info.left
+                    + indexFromDistance (distance |> Quantity.minus (trueLength info.left)) info.right
 
 
 indexFromDistance : Length.Length -> PeteTree -> Int

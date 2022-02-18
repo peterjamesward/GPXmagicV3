@@ -9,6 +9,7 @@ import File exposing (File)
 import Json.Decode as E
 import LocalCoords exposing (LocalCoords)
 import Scene3d exposing (Entity)
+import Time
 import Tools.BendSmootherOptions
 import Tools.BezierOptions
 import Tools.CentroidAverageOptions
@@ -61,6 +62,8 @@ type ToolAction msg
     | SelectSvgFile (File -> msg)
     | LoadSvgFile (String -> msg) File
     | TrackFromSvg String
+    | StartFlythoughTicks
+    | StopFlythroughTicks
 
 
 type PreviewShape

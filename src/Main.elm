@@ -102,6 +102,7 @@ type Msg
     | OneClickMsg Tools.OneClickQuickFix.Msg
     | FetchElevationsFromMap
     | SvgMsg SvgPathExtractor.Msg
+    | FlythroughTick Time.Posix
     | NoOp
 
 
@@ -119,6 +120,7 @@ type alias Model =
 
     -- Visuals (scenes now in PaneLayoutManager)
     , previews : Dict String PreviewData
+    , flythroughRunning : Bool
 
     -- Layout stuff
     , windowSize : ( Float, Float )
@@ -233,6 +235,7 @@ init mflags origin navigationKey =
       , svgFileOptions = SvgPathExtractor.defaultOptions
       , track = Nothing
       , previews = Dict.empty
+      , flythroughRunning = False
       , windowSize = ( 1000, 800 )
       , contentArea = ( Pixels.pixels 800, Pixels.pixels 500 )
       , modalMessage = Nothing
@@ -669,6 +672,23 @@ Please check the file contains GPX data.""" }
             ( newModel
             , performActionCommands actions newModel
             )
+
+        FlythroughTick posix ->
+            -- Like a tool message, just isn't.
+            case model.track of
+                Just track ->
+                    let
+                        ( updatedToolOptions, actions ) =
+                            ToolsController.flythroughTick model.toolOptions posix track
+
+                        newModel =
+                            { model | toolOptions = updatedToolOptions }
+                                |> performActionsOnModel actions
+                    in
+                    ( newModel, performActionCommands actions newModel )
+
+                Nothing ->
+                    ( model, Cmd.none )
 
 
 adoptTrackInModel : TrackLoaded Msg -> Model -> Model
@@ -1159,6 +1179,11 @@ subscriptions model =
         , Sub.map SplitRightDockInternal <| SplitPane.subscriptions model.rightDockInternal
         , Sub.map SplitBottomDockTopEdge <| SplitPane.subscriptions model.bottomDockTopEdge
         , Browser.Events.onResize (\w h -> Resize w h)
+        , if model.flythroughRunning then
+            Time.every 100 FlythroughTick
+
+          else
+            Sub.none
         ]
 
 
@@ -1589,6 +1614,12 @@ performActionsOnModel actions model =
                             { track | markerPosition = maybeMarker }
                     in
                     { foldedModel | track = Just updatedTrack }
+
+                ( StartFlythoughTicks, Just track ) ->
+                    { foldedModel | flythroughRunning = True }
+
+                ( StopFlythroughTicks, Just track ) ->
+                    { foldedModel | flythroughRunning = False }
 
                 ( StoredValueRetrieved key value, _ ) ->
                     case key of

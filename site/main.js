@@ -8774,7 +8774,8 @@ var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
 var $author$project$Tools$Flythrough$defaultOptions = {
 	flythrough: $elm$core$Maybe$Nothing,
 	flythroughSpeed: 1.0,
-	modelTime: $elm$time$Time$millisToPosix(0)
+	modelTime: $elm$time$Time$millisToPosix(0),
+	savedCurrentPosition: 0
 };
 var $author$project$Tools$GradientProblems$AbruptChange = {$: 'AbruptChange'};
 var $author$project$Tools$GradientProblems$defaultOptions = {breaches: _List_Nil, currentBreach: 0, mode: $author$project$Tools$GradientProblems$AbruptChange, threshold: 10.0};
@@ -10142,6 +10143,7 @@ var $author$project$Main$init = F3(
 					$ianmackenzie$elm_units$Pixels$pixels(800),
 					$ianmackenzie$elm_units$Pixels$pixels(500)),
 				filename: $elm$core$Maybe$Nothing,
+				flythroughRunning: false,
 				ipInfo: $elm$core$Maybe$Nothing,
 				isPopupOpen: false,
 				leftDockInternal: A2(
@@ -10208,6 +10210,9 @@ var $elm$json$Json$Decode$int = _Json_decodeInt;
 var $elm$json$Json$Decode$list = _Json_decodeList;
 var $elm$json$Json$Decode$null = _Json_decodeNull;
 var $elm$json$Json$Decode$oneOf = _Json_oneOf;
+var $author$project$Main$FlythroughTick = function (a) {
+	return {$: 'FlythroughTick', a: a};
+};
 var $author$project$OAuthTypes$GotRandomBytes = function (a) {
 	return {$: 'GotRandomBytes', a: a};
 };
@@ -10243,37 +10248,37 @@ var $author$project$Main$StorageMessage = function (a) {
 	return {$: 'StorageMessage', a: a};
 };
 var $elm$core$Platform$Sub$batch = _Platform_batch;
-var $elm$core$Platform$Sub$map = _Platform_map;
-var $elm$json$Json$Decode$value = _Json_decodeValue;
-var $author$project$MapPortController$mapResponses = _Platform_incomingPort('mapResponses', $elm$json$Json$Decode$value);
-var $elm$browser$Browser$Events$Window = {$: 'Window'};
-var $elm$json$Json$Decode$field = _Json_decodeField;
-var $elm$browser$Browser$Events$MySub = F3(
-	function (a, b, c) {
-		return {$: 'MySub', a: a, b: b, c: c};
+var $elm$time$Time$Every = F2(
+	function (a, b) {
+		return {$: 'Every', a: a, b: b};
 	});
-var $elm$browser$Browser$Events$State = F2(
-	function (subs, pids) {
-		return {pids: pids, subs: subs};
+var $elm$time$Time$State = F2(
+	function (taggers, processes) {
+		return {processes: processes, taggers: taggers};
 	});
-var $elm$browser$Browser$Events$init = $elm$core$Task$succeed(
-	A2($elm$browser$Browser$Events$State, _List_Nil, $elm$core$Dict$empty));
-var $elm$browser$Browser$Events$nodeToKey = function (node) {
-	if (node.$ === 'Document') {
-		return 'd_';
-	} else {
-		return 'w_';
-	}
-};
-var $elm$browser$Browser$Events$addKey = function (sub) {
-	var node = sub.a;
-	var name = sub.b;
-	return _Utils_Tuple2(
-		_Utils_ap(
-			$elm$browser$Browser$Events$nodeToKey(node),
-			name),
-		sub);
-};
+var $elm$time$Time$init = $elm$core$Task$succeed(
+	A2($elm$time$Time$State, $elm$core$Dict$empty, $elm$core$Dict$empty));
+var $elm$time$Time$addMySub = F2(
+	function (_v0, state) {
+		var interval = _v0.a;
+		var tagger = _v0.b;
+		var _v1 = A2($elm$core$Dict$get, interval, state);
+		if (_v1.$ === 'Nothing') {
+			return A3(
+				$elm$core$Dict$insert,
+				interval,
+				_List_fromArray(
+					[tagger]),
+				state);
+		} else {
+			var taggers = _v1.a;
+			return A3(
+				$elm$core$Dict$insert,
+				interval,
+				A2($elm$core$List$cons, tagger, taggers),
+				state);
+		}
+	});
 var $elm$core$Process$kill = _Scheduler_kill;
 var $elm$core$Dict$foldl = F3(
 	function (func, acc, dict) {
@@ -10361,11 +10366,177 @@ var $elm$core$Dict$merge = F6(
 			intermediateResult,
 			leftovers);
 	});
+var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
+var $elm$time$Time$setInterval = _Time_setInterval;
+var $elm$core$Process$spawn = _Scheduler_spawn;
+var $elm$time$Time$spawnHelp = F3(
+	function (router, intervals, processes) {
+		if (!intervals.b) {
+			return $elm$core$Task$succeed(processes);
+		} else {
+			var interval = intervals.a;
+			var rest = intervals.b;
+			var spawnTimer = $elm$core$Process$spawn(
+				A2(
+					$elm$time$Time$setInterval,
+					interval,
+					A2($elm$core$Platform$sendToSelf, router, interval)));
+			var spawnRest = function (id) {
+				return A3(
+					$elm$time$Time$spawnHelp,
+					router,
+					rest,
+					A3($elm$core$Dict$insert, interval, id, processes));
+			};
+			return A2($elm$core$Task$andThen, spawnRest, spawnTimer);
+		}
+	});
+var $elm$time$Time$onEffects = F3(
+	function (router, subs, _v0) {
+		var processes = _v0.processes;
+		var rightStep = F3(
+			function (_v6, id, _v7) {
+				var spawns = _v7.a;
+				var existing = _v7.b;
+				var kills = _v7.c;
+				return _Utils_Tuple3(
+					spawns,
+					existing,
+					A2(
+						$elm$core$Task$andThen,
+						function (_v5) {
+							return kills;
+						},
+						$elm$core$Process$kill(id)));
+			});
+		var newTaggers = A3($elm$core$List$foldl, $elm$time$Time$addMySub, $elm$core$Dict$empty, subs);
+		var leftStep = F3(
+			function (interval, taggers, _v4) {
+				var spawns = _v4.a;
+				var existing = _v4.b;
+				var kills = _v4.c;
+				return _Utils_Tuple3(
+					A2($elm$core$List$cons, interval, spawns),
+					existing,
+					kills);
+			});
+		var bothStep = F4(
+			function (interval, taggers, id, _v3) {
+				var spawns = _v3.a;
+				var existing = _v3.b;
+				var kills = _v3.c;
+				return _Utils_Tuple3(
+					spawns,
+					A3($elm$core$Dict$insert, interval, id, existing),
+					kills);
+			});
+		var _v1 = A6(
+			$elm$core$Dict$merge,
+			leftStep,
+			bothStep,
+			rightStep,
+			newTaggers,
+			processes,
+			_Utils_Tuple3(
+				_List_Nil,
+				$elm$core$Dict$empty,
+				$elm$core$Task$succeed(_Utils_Tuple0)));
+		var spawnList = _v1.a;
+		var existingDict = _v1.b;
+		var killTask = _v1.c;
+		return A2(
+			$elm$core$Task$andThen,
+			function (newProcesses) {
+				return $elm$core$Task$succeed(
+					A2($elm$time$Time$State, newTaggers, newProcesses));
+			},
+			A2(
+				$elm$core$Task$andThen,
+				function (_v2) {
+					return A3($elm$time$Time$spawnHelp, router, spawnList, existingDict);
+				},
+				killTask));
+	});
+var $elm$time$Time$now = _Time_now($elm$time$Time$millisToPosix);
+var $elm$time$Time$onSelfMsg = F3(
+	function (router, interval, state) {
+		var _v0 = A2($elm$core$Dict$get, interval, state.taggers);
+		if (_v0.$ === 'Nothing') {
+			return $elm$core$Task$succeed(state);
+		} else {
+			var taggers = _v0.a;
+			var tellTaggers = function (time) {
+				return $elm$core$Task$sequence(
+					A2(
+						$elm$core$List$map,
+						function (tagger) {
+							return A2(
+								$elm$core$Platform$sendToApp,
+								router,
+								tagger(time));
+						},
+						taggers));
+			};
+			return A2(
+				$elm$core$Task$andThen,
+				function (_v1) {
+					return $elm$core$Task$succeed(state);
+				},
+				A2($elm$core$Task$andThen, tellTaggers, $elm$time$Time$now));
+		}
+	});
+var $elm$time$Time$subMap = F2(
+	function (f, _v0) {
+		var interval = _v0.a;
+		var tagger = _v0.b;
+		return A2(
+			$elm$time$Time$Every,
+			interval,
+			A2($elm$core$Basics$composeL, f, tagger));
+	});
+_Platform_effectManagers['Time'] = _Platform_createManager($elm$time$Time$init, $elm$time$Time$onEffects, $elm$time$Time$onSelfMsg, 0, $elm$time$Time$subMap);
+var $elm$time$Time$subscription = _Platform_leaf('Time');
+var $elm$time$Time$every = F2(
+	function (interval, tagger) {
+		return $elm$time$Time$subscription(
+			A2($elm$time$Time$Every, interval, tagger));
+	});
+var $elm$core$Platform$Sub$map = _Platform_map;
+var $elm$json$Json$Decode$value = _Json_decodeValue;
+var $author$project$MapPortController$mapResponses = _Platform_incomingPort('mapResponses', $elm$json$Json$Decode$value);
+var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
+var $elm$browser$Browser$Events$Window = {$: 'Window'};
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $elm$browser$Browser$Events$MySub = F3(
+	function (a, b, c) {
+		return {$: 'MySub', a: a, b: b, c: c};
+	});
+var $elm$browser$Browser$Events$State = F2(
+	function (subs, pids) {
+		return {pids: pids, subs: subs};
+	});
+var $elm$browser$Browser$Events$init = $elm$core$Task$succeed(
+	A2($elm$browser$Browser$Events$State, _List_Nil, $elm$core$Dict$empty));
+var $elm$browser$Browser$Events$nodeToKey = function (node) {
+	if (node.$ === 'Document') {
+		return 'd_';
+	} else {
+		return 'w_';
+	}
+};
+var $elm$browser$Browser$Events$addKey = function (sub) {
+	var node = sub.a;
+	var name = sub.b;
+	return _Utils_Tuple2(
+		_Utils_ap(
+			$elm$browser$Browser$Events$nodeToKey(node),
+			name),
+		sub);
+};
 var $elm$browser$Browser$Events$Event = F2(
 	function (key, event) {
 		return {event: event, key: key};
 	});
-var $elm$core$Platform$sendToSelf = _Platform_sendToSelf;
 var $elm$browser$Browser$Events$spawn = F3(
 	function (router, key, _v0) {
 		var node = _v0.a;
@@ -10552,7 +10723,6 @@ var $author$project$SplitPane$SplitPane$SplitterLeftAlone = function (a) {
 var $author$project$SplitPane$SplitPane$SplitterMove = function (a) {
 	return {$: 'SplitterMove', a: a};
 };
-var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $elm$browser$Browser$Events$Document = {$: 'Document'};
 var $elm$browser$Browser$Events$onMouseMove = A2($elm$browser$Browser$Events$on, $elm$browser$Browser$Events$Document, 'mousemove');
 var $elm$browser$Browser$Events$onMouseUp = A2($elm$browser$Browser$Events$on, $elm$browser$Browser$Events$Document, 'mouseup');
@@ -10625,7 +10795,8 @@ var $author$project$Main$subscriptions = function (model) {
 				F2(
 					function (w, h) {
 						return A2($author$project$Main$Resize, w, h);
-					}))
+					})),
+				model.flythroughRunning ? A2($elm$time$Time$every, 100, $author$project$Main$FlythroughTick) : $elm$core$Platform$Sub$none
 			]));
 };
 var $author$project$Main$GpxLoaded = function (a) {
@@ -22282,7 +22453,7 @@ var $author$project$Main$performActionsOnModel = F2(
 		var performAction = F2(
 			function (action, foldedModel) {
 				var _v0 = _Utils_Tuple2(action, foldedModel.track);
-				_v0$30:
+				_v0$32:
 				while (true) {
 					switch (_v0.a.$) {
 						case 'SetCurrent':
@@ -22298,7 +22469,7 @@ var $author$project$Main$performActionsOnModel = F2(
 												{currentPosition: position}))
 									});
 							} else {
-								break _v0$30;
+								break _v0$32;
 							}
 						case 'SetCurrentFromMapClick':
 							if (_v0.b.$ === 'Just') {
@@ -22313,7 +22484,7 @@ var $author$project$Main$performActionsOnModel = F2(
 												{currentPosition: position}))
 									});
 							} else {
-								break _v0$30;
+								break _v0$32;
 							}
 						case 'ShowPreview':
 							if (_v0.b.$ === 'Just') {
@@ -22325,7 +22496,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										previews: A3($elm$core$Dict$insert, previewData.tag, previewData, foldedModel.previews)
 									});
 							} else {
-								break _v0$30;
+								break _v0$32;
 							}
 						case 'HidePreview':
 							if (_v0.b.$ === 'Just') {
@@ -22337,7 +22508,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										previews: A2($elm$core$Dict$remove, tag, foldedModel.previews)
 									});
 							} else {
-								break _v0$30;
+								break _v0$32;
 							}
 						case 'RenderProfile':
 							if (_v0.b.$ === 'Just') {
@@ -22349,7 +22520,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										paneLayoutOptions: A3($author$project$PaneLayoutManager$renderProfile, foldedModel.toolOptions, track, foldedModel.paneLayoutOptions)
 									});
 							} else {
-								break _v0$30;
+								break _v0$32;
 							}
 						case 'DelayMessage':
 							if (_v0.b.$ === 'Just') {
@@ -22359,7 +22530,7 @@ var $author$project$Main$performActionsOnModel = F2(
 								var track = _v0.b.a;
 								return foldedModel;
 							} else {
-								break _v0$30;
+								break _v0$32;
 							}
 						case 'DeletePointsBetween':
 							if (_v0.b.$ === 'Just') {
@@ -22380,7 +22551,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$30;
+								break _v0$32;
 							}
 						case 'DeleteSinglePoint':
 							if (_v0.b.$ === 'Just') {
@@ -22401,7 +22572,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$30;
+								break _v0$32;
 							}
 						case 'BezierApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -22423,7 +22594,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$30;
+								break _v0$32;
 							}
 						case 'CentroidAverageApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -22445,7 +22616,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$30;
+								break _v0$32;
 							}
 						case 'CurveFormerApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -22472,7 +22643,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$30;
+								break _v0$32;
 							}
 						case 'NudgeApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -22499,7 +22670,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$30;
+								break _v0$32;
 							}
 						case 'BendSmootherApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -22521,7 +22692,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$30;
+								break _v0$32;
 							}
 						case 'OutAndBackApplyWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -22543,7 +22714,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$30;
+								break _v0$32;
 							}
 						case 'ApplySimplify':
 							if (_v0.b.$ === 'Just') {
@@ -22565,7 +22736,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$30;
+								break _v0$32;
 							}
 						case 'OneClickQuickFix':
 							if (_v0.b.$ === 'Just') {
@@ -22587,7 +22758,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$30;
+								break _v0$32;
 							}
 						case 'ApplyInterpolateWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -22616,7 +22787,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$30;
+								break _v0$32;
 							}
 						case 'LimitGradientWithOptions':
 							if (_v0.b.$ === 'Just') {
@@ -22645,7 +22816,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$30;
+								break _v0$32;
 							}
 						case 'ApplyRotateAndScale':
 							if (_v0.b.$ === 'Just') {
@@ -22684,7 +22855,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$30;
+								break _v0$32;
 							}
 						case 'ApplyRecentre':
 							if (_v0.b.$ === 'Just') {
@@ -22725,7 +22896,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$30;
+								break _v0$32;
 							}
 						case 'ApplyMapElevations':
 							if (_v0.b.$ === 'Just') {
@@ -22747,7 +22918,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$30;
+								break _v0$32;
 							}
 						case 'PointMovedOnMap':
 							if (_v0.b.$ === 'Just') {
@@ -22793,7 +22964,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$30;
+								break _v0$32;
 							}
 						case 'SaveLastMapClick':
 							if (_v0.b.$ === 'Just') {
@@ -22812,7 +22983,7 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(newTrack)
 									});
 							} else {
-								break _v0$30;
+								break _v0$32;
 							}
 						case 'TrackFromSvg':
 							var svgContent = _v0.a.a;
@@ -22840,7 +23011,7 @@ var $author$project$Main$performActionsOnModel = F2(
 								var modelAfterSecondaryActions = A2($author$project$Main$performActionsOnModel, secondaryActions, innerModelWithNewToolSettings);
 								return modelAfterSecondaryActions;
 							} else {
-								break _v0$30;
+								break _v0$32;
 							}
 						case 'SetMarker':
 							if (_v0.b.$ === 'Just') {
@@ -22855,12 +23026,32 @@ var $author$project$Main$performActionsOnModel = F2(
 										track: $elm$core$Maybe$Just(updatedTrack)
 									});
 							} else {
-								break _v0$30;
+								break _v0$32;
+							}
+						case 'StartFlythoughTicks':
+							if (_v0.b.$ === 'Just') {
+								var _v47 = _v0.a;
+								var track = _v0.b.a;
+								return _Utils_update(
+									foldedModel,
+									{flythroughRunning: true});
+							} else {
+								break _v0$32;
+							}
+						case 'StopFlythroughTicks':
+							if (_v0.b.$ === 'Just') {
+								var _v48 = _v0.a;
+								var track = _v0.b.a;
+								return _Utils_update(
+									foldedModel,
+									{flythroughRunning: false});
+							} else {
+								break _v0$32;
 							}
 						case 'StoredValueRetrieved':
-							var _v47 = _v0.a;
-							var key = _v47.a;
-							var value = _v47.b;
+							var _v49 = _v0.a;
+							var key = _v49.a;
+							var value = _v49.b;
 							switch (key) {
 								case 'splits':
 									return A2($author$project$Main$decodeSplitValues, value, foldedModel);
@@ -22927,7 +23118,7 @@ var $author$project$Main$performActionsOnModel = F2(
 							return revisedModel;
 						case 'UndoLastAction':
 							if (_v0.b.$ === 'Just') {
-								var _v50 = _v0.a;
+								var _v52 = _v0.a;
 								var track = _v0.b.a;
 								return _Utils_update(
 									foldedModel,
@@ -22936,24 +23127,24 @@ var $author$project$Main$performActionsOnModel = F2(
 											$author$project$TrackLoaded$undoLastAction(track))
 									});
 							} else {
-								break _v0$30;
+								break _v0$32;
 							}
 						case 'RedoUndoneAction':
 							if (_v0.b.$ === 'Just') {
-								var _v51 = _v0.a;
+								var _v53 = _v0.a;
 								var track = _v0.b.a;
-								var _v52 = track.redos;
-								if (_v52.b) {
-									var redo = _v52.a;
-									var moreRedos = _v52.b;
+								var _v54 = track.redos;
+								if (_v54.b) {
+									var redo = _v54.a;
+									var moreRedos = _v54.b;
 									var modelAfterRedo = A2(
 										$author$project$Main$performActionsOnModel,
 										_List_fromArray(
 											[redo.action]),
 										model);
-									var _v53 = modelAfterRedo.track;
-									if (_v53.$ === 'Just') {
-										var trackAfterRedo = _v53.a;
+									var _v55 = modelAfterRedo.track;
+									if (_v55.$ === 'Just') {
+										var trackAfterRedo = _v55.a;
 										var trackWithCorrectRedoStack = _Utils_update(
 											trackAfterRedo,
 											{redos: moreRedos});
@@ -22969,10 +23160,10 @@ var $author$project$Main$performActionsOnModel = F2(
 									return foldedModel;
 								}
 							} else {
-								break _v0$30;
+								break _v0$32;
 							}
 						default:
-							break _v0$30;
+							break _v0$32;
 					}
 				}
 				return foldedModel;
@@ -23094,6 +23285,135 @@ var $elm$file$File$Select$file = F2(
 			$elm$core$Task$perform,
 			toMsg,
 			_File_uploadOne(mimes));
+	});
+var $author$project$Actions$SetCurrent = function (a) {
+	return {$: 'SetCurrent', a: a};
+};
+var $author$project$Actions$StopFlythroughTicks = {$: 'StopFlythroughTicks'};
+var $author$project$Tools$Flythrough$eyeHeight = $ianmackenzie$elm_units$Length$meters(2.0);
+var $elm$time$Time$posixToMillis = function (_v0) {
+	var millis = _v0.a;
+	return millis;
+};
+var $author$project$Tools$Flythrough$advanceInternal = F4(
+	function (newTime, status, speed, track) {
+		var tempus = ($elm$time$Time$posixToMillis(newTime) - $elm$time$Time$posixToMillis(status.lastUpdated)) / 1000.0;
+		var newDistance = A2(
+			$ianmackenzie$elm_units$Quantity$plus,
+			$ianmackenzie$elm_units$Length$meters(
+				tempus * A2($elm$core$Basics$pow, 10.0, speed)),
+			status.metresFromRouteStart);
+		var lastPointPassedIndex = A2($author$project$DomainModel$indexFromDistance, newDistance, track.trackTree);
+		var nextRoad = A2($author$project$DomainModel$leafFromIndex, lastPointPassedIndex + 1, track.trackTree);
+		var lastPointDistance = A2($author$project$DomainModel$distanceFromIndex, lastPointPassedIndex, track.trackTree);
+		var currentRoad = A2($author$project$DomainModel$leafFromIndex, lastPointPassedIndex, track.trackTree);
+		if (!status.running) {
+			return $elm$core$Maybe$Just(
+				_Utils_update(
+					status,
+					{lastUpdated: newTime}));
+		} else {
+			if (A2(
+				$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo,
+				$author$project$DomainModel$trueLength(track.trackTree),
+				status.metresFromRouteStart)) {
+				return $elm$core$Maybe$Just(
+					_Utils_update(
+						status,
+						{running: false}));
+			} else {
+				var segLength = $author$project$DomainModel$trueLength(currentRoad);
+				var segInsetMetres = A2($ianmackenzie$elm_units$Quantity$minus, lastPointDistance, newDistance);
+				var segRemaining = $ianmackenzie$elm_units$Length$inMeters(
+					A2($ianmackenzie$elm_units$Quantity$minus, segInsetMetres, segLength));
+				var segFraction = A2($ianmackenzie$elm_units$Quantity$ratio, segInsetMetres, segLength);
+				var headTurnFraction = A3($elm$core$Basics$clamp, 0.0, 1.0, (10.0 - segRemaining) / 10.0);
+				var lookingAt = A2(
+					$ianmackenzie$elm_geometry$Point3d$translateBy,
+					A3($ianmackenzie$elm_geometry$Vector3d$xyz, $ianmackenzie$elm_units$Quantity$zero, $ianmackenzie$elm_units$Quantity$zero, $author$project$Tools$Flythrough$eyeHeight),
+					A3(
+						$ianmackenzie$elm_geometry$Point3d$interpolateFrom,
+						$author$project$DomainModel$endPoint(currentRoad),
+						$author$project$DomainModel$endPoint(nextRoad),
+						headTurnFraction));
+				var camera3d = A2(
+					$ianmackenzie$elm_geometry$Point3d$translateBy,
+					A3($ianmackenzie$elm_geometry$Vector3d$xyz, $ianmackenzie$elm_units$Quantity$zero, $ianmackenzie$elm_units$Quantity$zero, $author$project$Tools$Flythrough$eyeHeight),
+					A3(
+						$ianmackenzie$elm_geometry$Point3d$interpolateFrom,
+						$author$project$DomainModel$startPoint(currentRoad),
+						$author$project$DomainModel$endPoint(currentRoad),
+						segFraction));
+				return $elm$core$Maybe$Just(
+					_Utils_update(
+						status,
+						{cameraPosition: camera3d, focusPoint: lookingAt, lastUpdated: newTime, metresFromRouteStart: newDistance}));
+			}
+		}
+	});
+var $author$project$DomainModel$indexFromDistanceRoundedDown = F2(
+	function (distance, treeNode) {
+		if (treeNode.$ === 'Leaf') {
+			var info = treeNode.a;
+			return 0;
+		} else {
+			var info = treeNode.a;
+			return A2(
+				$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
+				$author$project$DomainModel$trueLength(info.left),
+				distance) ? A2($author$project$DomainModel$indexFromDistance, distance, info.left) : ($author$project$DomainModel$skipCount(info.left) + A2(
+				$author$project$DomainModel$indexFromDistance,
+				A2(
+					$ianmackenzie$elm_units$Quantity$minus,
+					$author$project$DomainModel$trueLength(info.left),
+					distance),
+				info.right));
+		}
+	});
+var $author$project$Tools$Flythrough$advanceFlythrough = F3(
+	function (posixTime, options, track) {
+		var _v0 = options.flythrough;
+		if (_v0.$ === 'Just') {
+			var flythrough = _v0.a;
+			var updatedFlythrough = A4($author$project$Tools$Flythrough$advanceInternal, posixTime, flythrough, options.flythroughSpeed, track);
+			var newOptions = _Utils_update(
+				options,
+				{flythrough: updatedFlythrough});
+			return _Utils_Tuple2(
+				newOptions,
+				function () {
+					if (updatedFlythrough.$ === 'Just') {
+						var stillFlying = updatedFlythrough.a;
+						return _List_fromArray(
+							[
+								$author$project$Actions$SetCurrent(
+								A2($author$project$DomainModel$indexFromDistanceRoundedDown, stillFlying.metresFromRouteStart, track.trackTree))
+							]);
+					} else {
+						return _List_fromArray(
+							[
+								$author$project$Actions$SetCurrent(options.savedCurrentPosition),
+								$author$project$Actions$StopFlythroughTicks
+							]);
+					}
+				}());
+		} else {
+			return _Utils_Tuple2(
+				options,
+				_List_fromArray(
+					[$author$project$Actions$StopFlythroughTicks]));
+		}
+	});
+var $author$project$ToolsController$flythroughTick = F3(
+	function (options, posix, track) {
+		var _v0 = A3($author$project$Tools$Flythrough$advanceFlythrough, posix, options.flythroughSettings, track);
+		var updatedFlythrough = _v0.a;
+		var actions = _v0.b;
+		return _Utils_Tuple2(
+			_Utils_update(
+				options,
+				{flythroughSettings: updatedFlythrough}),
+			actions);
 	});
 var $author$project$StravaAuth$getStravaToken = function (model) {
 	var _v0 = model.flow;
@@ -24334,7 +24654,6 @@ var $elm$http$Http$State = F2(
 	});
 var $elm$http$Http$init = $elm$core$Task$succeed(
 	A2($elm$http$Http$State, $elm$core$Dict$empty, _List_Nil));
-var $elm$core$Process$spawn = _Scheduler_spawn;
 var $elm$http$Http$updateReqs = F3(
 	function (router, cmds, reqs) {
 		updateReqs:
@@ -24578,10 +24897,6 @@ var $elm$time$Time$flooredDiv = F2(
 	function (numerator, denominator) {
 		return $elm$core$Basics$floor(numerator / denominator);
 	});
-var $elm$time$Time$posixToMillis = function (_v0) {
-	var millis = _v0.a;
-	return millis;
-};
 var $elm$time$Time$toAdjustedMinutesHelp = F3(
 	function (defaultOffset, posixMinutes, eras) {
 		toAdjustedMinutesHelp:
@@ -24840,9 +25155,6 @@ var $author$project$PaneLayoutManager$ProfileViewMessage = F2(
 	function (a, b) {
 		return {$: 'ProfileViewMessage', a: a, b: b};
 	});
-var $author$project$Actions$SetCurrent = function (a) {
-	return {$: 'SetCurrent', a: a};
-};
 var $author$project$PaneLayoutManager$SliderMoved = {$: 'SliderMoved'};
 var $author$project$PaneLayoutManager$SliderTimeout = {$: 'SliderTimeout'};
 var $author$project$PaneLayoutManager$SliderWaitingForTimeout = {$: 'SliderWaitingForTimeout'};
@@ -29473,7 +29785,7 @@ var $author$project$Tools$DisplaySettings$update = F2(
 					actions(newOptions));
 		}
 	});
-var $author$project$Tools$Flythrough$eyeHeight = $ianmackenzie$elm_units$Length$meters(2.0);
+var $author$project$Actions$StartFlythoughTicks = {$: 'StartFlythoughTicks'};
 var $author$project$Tools$Flythrough$prepareFlythrough = F2(
 	function (track, options) {
 		var currentRoad = $author$project$DomainModel$asRecord(
@@ -29493,8 +29805,7 @@ var $author$project$Tools$Flythrough$prepareFlythrough = F2(
 				focusPoint: focusPoint,
 				lastUpdated: options.modelTime,
 				metresFromRouteStart: A2($author$project$DomainModel$distanceFromIndex, track.currentPosition, track.trackTree),
-				running: false,
-				savedCurrentPosition: track.currentPosition
+				running: false
 			});
 	});
 var $author$project$Tools$Flythrough$startFlythrough = F2(
@@ -29508,7 +29819,8 @@ var $author$project$Tools$Flythrough$startFlythrough = F2(
 					flythrough: $elm$core$Maybe$Just(
 						_Utils_update(
 							flying,
-							{running: true}))
+							{running: true})),
+					savedCurrentPosition: track.currentPosition
 				});
 		} else {
 			return options;
@@ -29543,17 +29855,20 @@ var $author$project$Tools$Flythrough$update = F3(
 			case 'StartFlythrough':
 				return _Utils_Tuple2(
 					A2($author$project$Tools$Flythrough$startFlythrough, track, options),
-					_List_Nil);
+					_List_fromArray(
+						[$author$project$Actions$StartFlythoughTicks]));
 			case 'PauseFlythrough':
 				return _Utils_Tuple2(
 					$author$project$Tools$Flythrough$togglePause(options),
-					_List_Nil);
+					_List_fromArray(
+						[$author$project$Actions$StopFlythroughTicks]));
 			default:
 				return _Utils_Tuple2(
 					_Utils_update(
 						options,
 						{flythrough: $elm$core$Maybe$Nothing}),
-					_List_Nil);
+					_List_fromArray(
+						[$author$project$Actions$StopFlythroughTicks]));
 		}
 	});
 var $author$project$Tools$GradientProblems$findSteepClimbs = F2(
@@ -31012,7 +31327,7 @@ var $author$project$Main$update = F2(
 						model,
 						{loadOptionsMenuOpen: !model.loadOptionsMenuOpen}),
 					$elm$core$Platform$Cmd$none);
-			default:
+			case 'SvgMsg':
 				var svgMsg = msg.a;
 				var _v11 = A3($author$project$SvgPathExtractor$update, svgMsg, model.svgFileOptions, $author$project$Main$SvgMsg);
 				var newOptions = _v11.a;
@@ -31026,6 +31341,26 @@ var $author$project$Main$update = F2(
 				return _Utils_Tuple2(
 					newModel,
 					A2($author$project$Main$performActionCommands, actions, newModel));
+			default:
+				var posix = msg.a;
+				var _v12 = model.track;
+				if (_v12.$ === 'Just') {
+					var track = _v12.a;
+					var _v13 = A3($author$project$ToolsController$flythroughTick, model.toolOptions, posix, track);
+					var updatedToolOptions = _v13.a;
+					var actions = _v13.b;
+					var newModel = A2(
+						$author$project$Main$performActionsOnModel,
+						actions,
+						_Utils_update(
+							model,
+							{toolOptions: updatedToolOptions}));
+					return _Utils_Tuple2(
+						newModel,
+						A2($author$project$Main$performActionCommands, actions, newModel));
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
 		}
 	});
 var $author$project$Main$DismissModalMessage = {$: 'DismissModalMessage'};
