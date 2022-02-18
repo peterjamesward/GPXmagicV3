@@ -46,8 +46,8 @@ import Tools.Simplify
 import Tools.TrackInfoBox as TrackInfoBox
 import Tools.UndoRedo as UndoRedo
 import TrackLoaded exposing (TrackLoaded)
+import View3dCommonElements exposing (stopProp)
 import ViewPureStyles exposing (contrastingColour, neatToolsBorder, onEnter, useIcon)
-import ViewThirdPerson exposing (stopProp)
 
 
 type ToolState

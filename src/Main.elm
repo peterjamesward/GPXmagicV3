@@ -66,8 +66,8 @@ import ToolsController exposing (ToolEntry, encodeColour, encodeToolState)
 import TrackLoaded exposing (TrackLoaded)
 import Url exposing (Url)
 import UtilsForViews exposing (colourHexString)
+import View3dCommonElements exposing (stopProp)
 import ViewPureStyles exposing (..)
-import ViewThirdPerson exposing (stopProp)
 import WriteGPX
 
 

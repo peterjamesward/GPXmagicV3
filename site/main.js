@@ -14596,7 +14596,7 @@ var $author$project$ViewProfileCharts$initialiseView = F3(
 			};
 		}
 	});
-var $author$project$ViewThirdPerson$DragNone = {$: 'DragNone'};
+var $author$project$View3dCommonElements$DragNone = {$: 'DragNone'};
 var $ianmackenzie$elm_units$Length$kilometers = function (numKilometers) {
 	return $ianmackenzie$elm_units$Length$meters(1000 * numKilometers);
 };
@@ -14613,7 +14613,7 @@ var $author$project$ViewThirdPerson$initialiseView = F3(
 					cameraDistance: $ianmackenzie$elm_units$Length$kilometers(10),
 					cameraElevation: $ianmackenzie$elm_units$Angle$degrees(30),
 					defaultZoomLevel: 14.0,
-					dragAction: $author$project$ViewThirdPerson$DragNone,
+					dragAction: $author$project$View3dCommonElements$DragNone,
 					fieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
 					focalPoint: $author$project$DomainModel$startPoint(
 						A2($author$project$DomainModel$leafFromIndex, current, treeNode)),
@@ -14627,7 +14627,7 @@ var $author$project$ViewThirdPerson$initialiseView = F3(
 				cameraDistance: $ianmackenzie$elm_units$Length$kilometers(10),
 				cameraElevation: $ianmackenzie$elm_units$Angle$degrees(30),
 				defaultZoomLevel: 14.0,
-				dragAction: $author$project$ViewThirdPerson$DragNone,
+				dragAction: $author$project$View3dCommonElements$DragNone,
 				fieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
 				focalPoint: $author$project$DomainModel$startPoint(
 					A2($author$project$DomainModel$leafFromIndex, current, treeNode)),
@@ -25892,9 +25892,9 @@ var $author$project$ViewProfileCharts$update = F5(
 				return _Utils_Tuple2(context, _List_Nil);
 		}
 	});
-var $author$project$ViewThirdPerson$ClickDelayExpired = {$: 'ClickDelayExpired'};
-var $author$project$ViewThirdPerson$DragPan = {$: 'DragPan'};
-var $author$project$ViewThirdPerson$DragRotate = {$: 'DragRotate'};
+var $author$project$View3dCommonElements$ClickDelayExpired = {$: 'ClickDelayExpired'};
+var $author$project$View3dCommonElements$DragPan = {$: 'DragPan'};
+var $author$project$View3dCommonElements$DragRotate = {$: 'DragRotate'};
 var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$SecondButton = {$: 'SecondButton'};
 var $ianmackenzie$elm_geometry$SketchPlane3d$xDirection = function (_v0) {
 	var properties = _v0.a;
@@ -26178,7 +26178,7 @@ var $author$project$ViewThirdPerson$update = F5(
 				var newContext = _Utils_update(
 					context,
 					{
-						dragAction: alternate ? $author$project$ViewThirdPerson$DragRotate : $author$project$ViewThirdPerson$DragPan,
+						dragAction: alternate ? $author$project$View3dCommonElements$DragRotate : $author$project$View3dCommonElements$DragPan,
 						orbiting: $elm$core$Maybe$Just(event.offsetPos),
 						waitingForClickDelay: true
 					});
@@ -26189,7 +26189,7 @@ var $author$project$ViewThirdPerson$update = F5(
 							A2(
 							$author$project$Actions$DelayMessage,
 							250,
-							msgWrapper($author$project$ViewThirdPerson$ClickDelayExpired))
+							msgWrapper($author$project$View3dCommonElements$ClickDelayExpired))
 						]));
 			case 'ImageDrag':
 				var event = msg.a;
@@ -26260,7 +26260,7 @@ var $author$project$ViewThirdPerson$update = F5(
 				var event = msg.a;
 				var newContext = _Utils_update(
 					context,
-					{dragAction: $author$project$ViewThirdPerson$DragNone, orbiting: $elm$core$Maybe$Nothing});
+					{dragAction: $author$project$View3dCommonElements$DragNone, orbiting: $elm$core$Maybe$Nothing});
 				return _Utils_Tuple2(newContext, _List_Nil);
 			default:
 				return _Utils_Tuple2(
@@ -38656,7 +38656,7 @@ var $author$project$ToolsController$showDockOptions = F2(
 					})
 				])) : $mdgriffith$elm_ui$Element$none;
 	});
-var $author$project$ViewThirdPerson$stopProp = {preventDefault: false, stopPropagation: true};
+var $author$project$View3dCommonElements$stopProp = {preventDefault: false, stopPropagation: true};
 var $author$project$ToolsController$DeletePoints = function (a) {
 	return {$: 'DeletePoints', a: a};
 };
@@ -43499,7 +43499,7 @@ var $author$project$ToolsController$viewTool = F4(
 								A3(
 									$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
 									'click',
-									$author$project$ViewThirdPerson$stopProp,
+									$author$project$View3dCommonElements$stopProp,
 									A2(
 										$elm$core$Basics$composeR,
 										$elm$core$Basics$always($author$project$ToolsController$ToolNoOp),
@@ -43508,7 +43508,7 @@ var $author$project$ToolsController$viewTool = F4(
 								A3(
 									$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
 									'dblclick',
-									$author$project$ViewThirdPerson$stopProp,
+									$author$project$View3dCommonElements$stopProp,
 									A2(
 										$elm$core$Basics$composeR,
 										$elm$core$Basics$always($author$project$ToolsController$ToolNoOp),
@@ -43517,7 +43517,7 @@ var $author$project$ToolsController$viewTool = F4(
 								A3(
 									$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
 									'mousedown',
-									$author$project$ViewThirdPerson$stopProp,
+									$author$project$View3dCommonElements$stopProp,
 									A2(
 										$elm$core$Basics$composeR,
 										$elm$core$Basics$always($author$project$ToolsController$ToolNoOp),
@@ -43526,7 +43526,7 @@ var $author$project$ToolsController$viewTool = F4(
 								A3(
 									$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
 									'mouseup',
-									$author$project$ViewThirdPerson$stopProp,
+									$author$project$View3dCommonElements$stopProp,
 									A2(
 										$elm$core$Basics$composeR,
 										$elm$core$Basics$always($author$project$ToolsController$ToolNoOp),
@@ -52387,26 +52387,26 @@ var $author$project$ViewProfileCharts$view = F4(
 								]))))
 				]));
 	});
-var $author$project$ViewThirdPerson$ImageClick = function (a) {
-	return {$: 'ImageClick', a: a};
-};
-var $author$project$ViewThirdPerson$ImageDoubleClick = function (a) {
-	return {$: 'ImageDoubleClick', a: a};
-};
-var $author$project$ViewThirdPerson$ImageDrag = function (a) {
+var $author$project$View3dCommonElements$ImageDrag = function (a) {
 	return {$: 'ImageDrag', a: a};
 };
-var $author$project$ViewThirdPerson$ImageGrab = function (a) {
+var $author$project$View3dCommonElements$ImageClick = function (a) {
+	return {$: 'ImageClick', a: a};
+};
+var $author$project$View3dCommonElements$ImageDoubleClick = function (a) {
+	return {$: 'ImageDoubleClick', a: a};
+};
+var $author$project$View3dCommonElements$ImageGrab = function (a) {
 	return {$: 'ImageGrab', a: a};
 };
-var $author$project$ViewThirdPerson$ImageMouseWheel = function (a) {
+var $author$project$View3dCommonElements$ImageMouseWheel = function (a) {
 	return {$: 'ImageMouseWheel', a: a};
 };
-var $author$project$ViewThirdPerson$ImageNoOp = {$: 'ImageNoOp'};
-var $author$project$ViewThirdPerson$ImageRelease = function (a) {
+var $author$project$View3dCommonElements$ImageNoOp = {$: 'ImageNoOp'};
+var $author$project$View3dCommonElements$ImageRelease = function (a) {
 	return {$: 'ImageRelease', a: a};
 };
-var $author$project$ViewThirdPerson$onContextMenu = function (msg) {
+var $author$project$View3dCommonElements$onContextMenu = function (msg) {
 	return $mdgriffith$elm_ui$Element$htmlAttribute(
 		A2(
 			$elm$html$Html$Events$custom,
@@ -52414,11 +52414,11 @@ var $author$project$ViewThirdPerson$onContextMenu = function (msg) {
 			$elm$json$Json$Decode$succeed(
 				{message: msg, preventDefault: true, stopPropagation: true})));
 };
-var $author$project$ViewThirdPerson$ImageReset = {$: 'ImageReset'};
-var $author$project$ViewThirdPerson$ImageZoomIn = {$: 'ImageZoomIn'};
-var $author$project$ViewThirdPerson$ImageZoomOut = {$: 'ImageZoomOut'};
-var $author$project$ViewThirdPerson$ToggleFollowOrange = {$: 'ToggleFollowOrange'};
-var $author$project$ViewThirdPerson$zoomButtons = F2(
+var $author$project$View3dCommonElements$ImageReset = {$: 'ImageReset'};
+var $author$project$View3dCommonElements$ImageZoomIn = {$: 'ImageZoomIn'};
+var $author$project$View3dCommonElements$ImageZoomOut = {$: 'ImageZoomOut'};
+var $author$project$View3dCommonElements$ToggleFollowOrange = {$: 'ToggleFollowOrange'};
+var $author$project$View3dCommonElements$zoomButtons = F2(
 	function (msgWrapper, context) {
 		return A2(
 			$mdgriffith$elm_ui$Element$column,
@@ -52436,82 +52436,64 @@ var $author$project$ViewThirdPerson$zoomButtons = F2(
 					A3(
 						$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
 						'click',
-						$author$project$ViewThirdPerson$stopProp,
+						$author$project$View3dCommonElements$stopProp,
 						A2(
 							$elm$core$Basics$composeR,
-							$elm$core$Basics$always($author$project$ViewThirdPerson$ImageNoOp),
+							$elm$core$Basics$always($author$project$View3dCommonElements$ImageNoOp),
 							msgWrapper))),
 					$mdgriffith$elm_ui$Element$htmlAttribute(
 					A3(
 						$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
 						'dblclick',
-						$author$project$ViewThirdPerson$stopProp,
+						$author$project$View3dCommonElements$stopProp,
 						A2(
 							$elm$core$Basics$composeR,
-							$elm$core$Basics$always($author$project$ViewThirdPerson$ImageNoOp),
+							$elm$core$Basics$always($author$project$View3dCommonElements$ImageNoOp),
 							msgWrapper))),
 					$mdgriffith$elm_ui$Element$htmlAttribute(
 					A3(
 						$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
 						'mousedown',
-						$author$project$ViewThirdPerson$stopProp,
+						$author$project$View3dCommonElements$stopProp,
 						A2(
 							$elm$core$Basics$composeR,
-							$elm$core$Basics$always($author$project$ViewThirdPerson$ImageNoOp),
+							$elm$core$Basics$always($author$project$View3dCommonElements$ImageNoOp),
 							msgWrapper))),
 					$mdgriffith$elm_ui$Element$htmlAttribute(
 					A3(
 						$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
 						'mouseup',
-						$author$project$ViewThirdPerson$stopProp,
+						$author$project$View3dCommonElements$stopProp,
 						A2(
 							$elm$core$Basics$composeR,
-							$elm$core$Basics$always($author$project$ViewThirdPerson$ImageNoOp),
+							$elm$core$Basics$always($author$project$View3dCommonElements$ImageNoOp),
 							msgWrapper)))
 				]),
 			_List_fromArray(
 				[
 					A2(
 					$mdgriffith$elm_ui$Element$Input$button,
-					_List_fromArray(
-						[
-							A2(
-							$author$project$ToolTip$tooltip,
-							$mdgriffith$elm_ui$Element$onLeft,
-							$author$project$ToolTip$myTooltip('Zoom in'))
-						]),
+					_List_Nil,
 					{
 						label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$plus),
 						onPress: $elm$core$Maybe$Just(
-							msgWrapper($author$project$ViewThirdPerson$ImageZoomIn))
+							msgWrapper($author$project$View3dCommonElements$ImageZoomIn))
 					}),
 					A2(
 					$mdgriffith$elm_ui$Element$Input$button,
-					_List_fromArray(
-						[
-							A2(
-							$author$project$ToolTip$tooltip,
-							$mdgriffith$elm_ui$Element$onLeft,
-							$author$project$ToolTip$myTooltip('Zoom out'))
-						]),
+					_List_Nil,
 					{
 						label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$minus),
 						onPress: $elm$core$Maybe$Just(
-							msgWrapper($author$project$ViewThirdPerson$ImageZoomOut))
+							msgWrapper($author$project$View3dCommonElements$ImageZoomOut))
 					}),
 					A2(
 					$mdgriffith$elm_ui$Element$Input$button,
-					_List_fromArray(
-						[
-							A2(
-							$author$project$ToolTip$tooltip,
-							$mdgriffith$elm_ui$Element$onLeft,
-							$author$project$ToolTip$myTooltip('Reset'))
-						]),
+					_List_Nil,
 					{
 						label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$maximize),
 						onPress: $elm$core$Maybe$Just(
-							msgWrapper($author$project$ViewThirdPerson$ImageReset))
+							msgWrapper($author$project$View3dCommonElements$ImageReset))
 					}),
 					A2(
 					$mdgriffith$elm_ui$Element$Input$button,
@@ -52520,7 +52502,7 @@ var $author$project$ViewThirdPerson$zoomButtons = F2(
 							A2(
 							$author$project$ToolTip$tooltip,
 							$mdgriffith$elm_ui$Element$onLeft,
-							$author$project$ToolTip$myTooltip('Allow fee movement'))
+							$author$project$ToolTip$myTooltip('Stopp following Orange'))
 						]) : _List_fromArray(
 						[
 							A2(
@@ -52531,48 +52513,54 @@ var $author$project$ViewThirdPerson$zoomButtons = F2(
 					{
 						label: context.followSelectedPoint ? $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$lock) : $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$unlock),
 						onPress: $elm$core$Maybe$Just(
-							msgWrapper($author$project$ViewThirdPerson$ToggleFollowOrange))
+							msgWrapper($author$project$View3dCommonElements$ToggleFollowOrange))
 					})
 				]));
+	});
+var $author$project$View3dCommonElements$common3dSceneAttributes = F2(
+	function (msgWrapper, context) {
+		return _List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$htmlAttribute(
+				$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onDown(
+					A2($elm$core$Basics$composeR, $author$project$View3dCommonElements$ImageGrab, msgWrapper))),
+				$mdgriffith$elm_ui$Element$htmlAttribute(
+				$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onUp(
+					A2($elm$core$Basics$composeR, $author$project$View3dCommonElements$ImageRelease, msgWrapper))),
+				$mdgriffith$elm_ui$Element$htmlAttribute(
+				$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onClick(
+					A2($elm$core$Basics$composeR, $author$project$View3dCommonElements$ImageClick, msgWrapper))),
+				$mdgriffith$elm_ui$Element$htmlAttribute(
+				$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onDoubleClick(
+					A2($elm$core$Basics$composeR, $author$project$View3dCommonElements$ImageDoubleClick, msgWrapper))),
+				$mdgriffith$elm_ui$Element$htmlAttribute(
+				$mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWheel(
+					function (event) {
+						return msgWrapper(
+							$author$project$View3dCommonElements$ImageMouseWheel(event.deltaY));
+					})),
+				$author$project$View3dCommonElements$onContextMenu(
+				msgWrapper($author$project$View3dCommonElements$ImageNoOp)),
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+				$mdgriffith$elm_ui$Element$pointer,
+				$mdgriffith$elm_ui$Element$Border$width(0),
+				$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$peace),
+				$mdgriffith$elm_ui$Element$inFront(
+				A2($author$project$View3dCommonElements$zoomButtons, msgWrapper, context))
+			]);
 	});
 var $author$project$ViewThirdPerson$view = F5(
 	function (context, contentArea, track, scene, msgWrapper) {
 		var dragging = context.dragAction;
 		return A2(
 			$mdgriffith$elm_ui$Element$el,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$htmlAttribute(
-					$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onDown(
-						A2($elm$core$Basics$composeR, $author$project$ViewThirdPerson$ImageGrab, msgWrapper))),
-					(!_Utils_eq(dragging, $author$project$ViewThirdPerson$DragNone)) ? $mdgriffith$elm_ui$Element$htmlAttribute(
+			A2(
+				$elm$core$List$cons,
+				(!_Utils_eq(dragging, $author$project$View3dCommonElements$DragNone)) ? $mdgriffith$elm_ui$Element$htmlAttribute(
 					$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onMove(
-						A2($elm$core$Basics$composeR, $author$project$ViewThirdPerson$ImageDrag, msgWrapper))) : $mdgriffith$elm_ui$Element$pointer,
-					$mdgriffith$elm_ui$Element$htmlAttribute(
-					$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onUp(
-						A2($elm$core$Basics$composeR, $author$project$ViewThirdPerson$ImageRelease, msgWrapper))),
-					$mdgriffith$elm_ui$Element$htmlAttribute(
-					$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onClick(
-						A2($elm$core$Basics$composeR, $author$project$ViewThirdPerson$ImageClick, msgWrapper))),
-					$mdgriffith$elm_ui$Element$htmlAttribute(
-					$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onDoubleClick(
-						A2($elm$core$Basics$composeR, $author$project$ViewThirdPerson$ImageDoubleClick, msgWrapper))),
-					$mdgriffith$elm_ui$Element$htmlAttribute(
-					$mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWheel(
-						function (event) {
-							return msgWrapper(
-								$author$project$ViewThirdPerson$ImageMouseWheel(event.deltaY));
-						})),
-					$author$project$ViewThirdPerson$onContextMenu(
-					msgWrapper($author$project$ViewThirdPerson$ImageNoOp)),
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-					$mdgriffith$elm_ui$Element$pointer,
-					$mdgriffith$elm_ui$Element$Border$width(0),
-					$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$peace),
-					$mdgriffith$elm_ui$Element$inFront(
-					A2($author$project$ViewThirdPerson$zoomButtons, msgWrapper, context))
-				]),
+						A2($elm$core$Basics$composeR, $author$project$View3dCommonElements$ImageDrag, msgWrapper))) : $mdgriffith$elm_ui$Element$pointer,
+				A2($author$project$View3dCommonElements$common3dSceneAttributes, msgWrapper, context)),
 			$mdgriffith$elm_ui$Element$html(
 				$ianmackenzie$elm_3d_scene$Scene3d$sunny(
 					{
@@ -53295,25 +53283,25 @@ var $author$project$Main$globalOptions = function (model) {
 							A3(
 								$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
 								'click',
-								$author$project$ViewThirdPerson$stopProp,
+								$author$project$View3dCommonElements$stopProp,
 								$elm$core$Basics$always($author$project$Main$NoOp))),
 							$mdgriffith$elm_ui$Element$htmlAttribute(
 							A3(
 								$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
 								'dblclick',
-								$author$project$ViewThirdPerson$stopProp,
+								$author$project$View3dCommonElements$stopProp,
 								$elm$core$Basics$always($author$project$Main$NoOp))),
 							$mdgriffith$elm_ui$Element$htmlAttribute(
 							A3(
 								$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
 								'mousedown',
-								$author$project$ViewThirdPerson$stopProp,
+								$author$project$View3dCommonElements$stopProp,
 								$elm$core$Basics$always($author$project$Main$NoOp))),
 							$mdgriffith$elm_ui$Element$htmlAttribute(
 							A3(
 								$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
 								'mouseup',
-								$author$project$ViewThirdPerson$stopProp,
+								$author$project$View3dCommonElements$stopProp,
 								$elm$core$Basics$always($author$project$Main$NoOp))),
 							$mdgriffith$elm_ui$Element$htmlAttribute(
 							A2($elm$html$Html$Attributes$style, 'z-index', '20')),
@@ -53618,7 +53606,7 @@ var $author$project$PaneLayoutManager$showOptionsMenu = F2(
 					A3(
 						$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
 						'click',
-						$author$project$ViewThirdPerson$stopProp,
+						$author$project$View3dCommonElements$stopProp,
 						A2(
 							$elm$core$Basics$composeR,
 							$elm$core$Basics$always($author$project$PaneLayoutManager$PaneNoOp),
@@ -53627,7 +53615,7 @@ var $author$project$PaneLayoutManager$showOptionsMenu = F2(
 					A3(
 						$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
 						'dblclick',
-						$author$project$ViewThirdPerson$stopProp,
+						$author$project$View3dCommonElements$stopProp,
 						A2(
 							$elm$core$Basics$composeR,
 							$elm$core$Basics$always($author$project$PaneLayoutManager$PaneNoOp),
@@ -53636,7 +53624,7 @@ var $author$project$PaneLayoutManager$showOptionsMenu = F2(
 					A3(
 						$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
 						'mousedown',
-						$author$project$ViewThirdPerson$stopProp,
+						$author$project$View3dCommonElements$stopProp,
 						A2(
 							$elm$core$Basics$composeR,
 							$elm$core$Basics$always($author$project$PaneLayoutManager$PaneNoOp),
@@ -53645,7 +53633,7 @@ var $author$project$PaneLayoutManager$showOptionsMenu = F2(
 					A3(
 						$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions,
 						'mouseup',
-						$author$project$ViewThirdPerson$stopProp,
+						$author$project$View3dCommonElements$stopProp,
 						A2(
 							$elm$core$Basics$composeR,
 							$elm$core$Basics$always($author$project$PaneLayoutManager$PaneNoOp),

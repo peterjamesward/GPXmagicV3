@@ -1,6 +1,5 @@
 module PaneLayoutManager exposing (..)
 
-import About
 import Actions exposing (..)
 import Dict exposing (Dict)
 import DomainModel exposing (skipCount)
@@ -22,15 +21,15 @@ import Pixels exposing (Pixels)
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
 import SceneBuilder3D
-import Tools.DisplaySettingsOptions
 import ToolsController
 import TrackLoaded exposing (TrackLoaded)
+import View3dCommonElements exposing (stopProp)
 import ViewAbout
 import ViewMap
 import ViewPlan
 import ViewProfileCharts
 import ViewPureStyles exposing (..)
-import ViewThirdPerson exposing (stopProp)
+import ViewThirdPerson
 
 
 type ViewMode
@@ -43,7 +42,7 @@ type ViewMode
 
 
 type ViewContext
-    = ThirdPersonContext ViewThirdPerson.Context
+    = ThirdPersonContext View3dCommonElements.Context
     | MapContext ViewMap.Context
     | InfoContext
     | ProfileContext
@@ -72,7 +71,7 @@ type PaneId
 type alias PaneContext =
     { paneId : PaneId
     , activeView : ViewMode
-    , thirdPersonContext : Maybe ViewThirdPerson.Context
+    , thirdPersonContext : Maybe View3dCommonElements.Context
     , mapContext : Maybe ViewMap.Context
     , profileContext : Maybe ViewProfileCharts.Context
     , planContext : Maybe ViewPlan.Context
@@ -128,7 +127,7 @@ type Msg
     | SetCurrentPosition Int
     | TogglePopup
     | SetViewMode PaneId ViewMode
-    | ThirdPersonViewMessage PaneId ViewThirdPerson.Msg
+    | ThirdPersonViewMessage PaneId View3dCommonElements.Msg
     | ProfileViewMessage PaneId ViewProfileCharts.Msg
     | PlanViewMessage PaneId ViewPlan.Msg
     | MapPortsMessage MapPortController.MapMsg
