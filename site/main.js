@@ -30770,9 +30770,7 @@ var $author$project$Main$update = F2(
 						'tools',
 						$author$project$ToolsController$encodeToolState(newModel.toolOptions))
 					]);
-				return _Utils_Tuple2(
-					newModel,
-					A2($author$project$Main$performActionCommands, actions, newModel));
+				return _Utils_Tuple2(newModel, $elm$core$Platform$Cmd$none);
 			case 'WriteGpxFile':
 				var outputFilename = function () {
 					var _v10 = model.filename;
@@ -52475,7 +52473,13 @@ var $author$project$ViewThirdPerson$zoomButtons = F2(
 				[
 					A2(
 					$mdgriffith$elm_ui$Element$Input$button,
-					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							$author$project$ToolTip$tooltip,
+							$mdgriffith$elm_ui$Element$onLeft,
+							$author$project$ToolTip$myTooltip('Zoom in'))
+						]),
 					{
 						label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$plus),
 						onPress: $elm$core$Maybe$Just(
@@ -52483,7 +52487,13 @@ var $author$project$ViewThirdPerson$zoomButtons = F2(
 					}),
 					A2(
 					$mdgriffith$elm_ui$Element$Input$button,
-					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							$author$project$ToolTip$tooltip,
+							$mdgriffith$elm_ui$Element$onLeft,
+							$author$project$ToolTip$myTooltip('Zoom out'))
+						]),
 					{
 						label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$minus),
 						onPress: $elm$core$Maybe$Just(
@@ -52491,7 +52501,13 @@ var $author$project$ViewThirdPerson$zoomButtons = F2(
 					}),
 					A2(
 					$mdgriffith$elm_ui$Element$Input$button,
-					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							$author$project$ToolTip$tooltip,
+							$mdgriffith$elm_ui$Element$onLeft,
+							$author$project$ToolTip$myTooltip('Reset'))
+						]),
 					{
 						label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$maximize),
 						onPress: $elm$core$Maybe$Just(
@@ -52499,7 +52515,19 @@ var $author$project$ViewThirdPerson$zoomButtons = F2(
 					}),
 					A2(
 					$mdgriffith$elm_ui$Element$Input$button,
-					_List_Nil,
+					context.followSelectedPoint ? _List_fromArray(
+						[
+							A2(
+							$author$project$ToolTip$tooltip,
+							$mdgriffith$elm_ui$Element$onLeft,
+							$author$project$ToolTip$myTooltip('Allow fee movement'))
+						]) : _List_fromArray(
+						[
+							A2(
+							$author$project$ToolTip$tooltip,
+							$mdgriffith$elm_ui$Element$onLeft,
+							$author$project$ToolTip$myTooltip('Centre on Orange'))
+						]),
 					{
 						label: context.followSelectedPoint ? $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$lock) : $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$unlock),
 						onPress: $elm$core$Maybe$Just(

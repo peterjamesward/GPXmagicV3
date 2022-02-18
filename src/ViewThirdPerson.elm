@@ -28,6 +28,7 @@ import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
 import Spherical
+import ToolTip exposing (myTooltip, tooltip)
 import TrackLoaded exposing (TrackLoaded)
 import Vector3d
 import ViewPureStyles exposing (useIcon)
@@ -90,19 +91,25 @@ zoomButtons msgWrapper context =
         , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ImageNoOp >> msgWrapper)
         , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always ImageNoOp >> msgWrapper)
         ]
-        [ Input.button []
+        [ Input.button [ tooltip onLeft (myTooltip "Zoom in") ]
             { onPress = Just <| msgWrapper ImageZoomIn
             , label = useIcon FeatherIcons.plus
             }
-        , Input.button []
+        , Input.button [ tooltip onLeft (myTooltip "Zoom out") ]
             { onPress = Just <| msgWrapper ImageZoomOut
             , label = useIcon FeatherIcons.minus
             }
-        , Input.button []
+        , Input.button [ tooltip onLeft (myTooltip "Reset") ]
             { onPress = Just <| msgWrapper ImageReset
             , label = useIcon FeatherIcons.maximize
             }
-        , Input.button []
+        , Input.button
+            (if context.followSelectedPoint then
+                [ tooltip onLeft (myTooltip "Allow fee movement") ]
+
+             else
+                [ tooltip onLeft (myTooltip "Centre on Orange") ]
+            )
             { onPress = Just <| msgWrapper ToggleFollowOrange
             , label =
                 if context.followSelectedPoint then

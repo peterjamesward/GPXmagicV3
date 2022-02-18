@@ -592,7 +592,7 @@ Please check the file contains GPX data.""" }
                     [ StoreLocally "tools" <| encodeToolState newModel.toolOptions ]
             in
             ( newModel
-            , performActionCommands actions newModel
+            , Cmd.none
             )
 
         WriteGpxFile ->

@@ -19,6 +19,9 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 ## 1st person view
 
+## After restore tools, until next store, change menu to allow recovery 
+> as old state is still in store until overwritten.
+
 ---
 
 # BACKLOG, roughly in order ...
