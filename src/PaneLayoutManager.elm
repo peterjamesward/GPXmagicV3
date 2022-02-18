@@ -21,6 +21,7 @@ import Pixels exposing (Pixels)
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
 import SceneBuilder3D
+import Tools.Flythrough
 import ToolsController
 import TrackLoaded exposing (TrackLoaded)
 import View3dCommonElements exposing (stopProp)
@@ -721,8 +722,9 @@ viewPanes :
     -> Maybe (TrackLoaded msg)
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Options
+    -> Maybe Tools.Flythrough.Flythrough
     -> Element msg
-viewPanes msgWrapper mTrack ( w, h ) options =
+viewPanes msgWrapper mTrack ( w, h ) options mFlythrough =
     let
         ( paneWidth, paneHeight ) =
             dimensionsWithLayout options.paneLayout ( w, h )
@@ -751,6 +753,7 @@ viewPanes msgWrapper mTrack ( w, h ) options =
                                 track
                                 options.scene3d
                                 (msgWrapper << ThirdPersonViewMessage pane.paneId)
+                                mFlythrough
 
                         _ ->
                             none

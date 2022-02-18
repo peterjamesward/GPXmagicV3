@@ -44971,22 +44971,30 @@ var $ianmackenzie$elm_geometry$Direction2d$reverse = function (_v0) {
 	return $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
 		{x: -d.x, y: -d.y});
 };
-var $author$project$ViewFirstPerson$deriveViewPointAndCamera = F2(
-	function (context, track) {
+var $author$project$ViewFirstPerson$deriveViewPointAndCamera = F3(
+	function (context, track, mFlythrough) {
 		var localRoad = $author$project$DomainModel$asRecord(
 			A2($author$project$DomainModel$leafFromIndex, track.currentPosition, track.trackTree));
 		var gradientAsAngle = $ianmackenzie$elm_units$Angle$atan(localRoad.gradientAtStart / 100.0);
-		var cameraViewpoint = $ianmackenzie$elm_3d_camera$Viewpoint3d$orbitZ(
-			{
-				azimuth: $ianmackenzie$elm_geometry$Direction2d$toAngle(
-					$ianmackenzie$elm_geometry$Direction2d$reverse(localRoad.directionAtStart)),
-				distance: $ianmackenzie$elm_units$Length$meters(10),
-				elevation: A2(
-					$ianmackenzie$elm_units$Quantity$minus,
-					gradientAsAngle,
-					$ianmackenzie$elm_units$Angle$degrees(20.0)),
-				focalPoint: localRoad.startPoint
-			});
+		var cameraViewpoint = function () {
+			if (mFlythrough.$ === 'Nothing') {
+				return $ianmackenzie$elm_3d_camera$Viewpoint3d$orbitZ(
+					{
+						azimuth: $ianmackenzie$elm_geometry$Direction2d$toAngle(
+							$ianmackenzie$elm_geometry$Direction2d$reverse(localRoad.directionAtStart)),
+						distance: $ianmackenzie$elm_units$Length$meters(10),
+						elevation: A2(
+							$ianmackenzie$elm_units$Quantity$minus,
+							gradientAsAngle,
+							$ianmackenzie$elm_units$Angle$degrees(20.0)),
+						focalPoint: localRoad.startPoint
+					});
+			} else {
+				var flying = mFlythrough.a;
+				return $ianmackenzie$elm_3d_camera$Viewpoint3d$lookAt(
+					{eyePoint: flying.cameraPosition, focalPoint: flying.focusPoint, upDirection: $ianmackenzie$elm_geometry$Direction3d$positiveZ});
+			}
+		}();
 		return $ianmackenzie$elm_3d_camera$Camera3d$perspective(
 			{
 				verticalFieldOfView: $ianmackenzie$elm_units$Angle$degrees(120.0 - (context.zoomLevel * 2.0)),
@@ -46234,8 +46242,8 @@ var $ianmackenzie$elm_3d_scene$Scene3d$sunny = function (_arguments) {
 			whiteBalance: $ianmackenzie$elm_3d_scene$Scene3d$Light$daylight
 		});
 };
-var $author$project$ViewFirstPerson$view = F5(
-	function (context, contentArea, track, scene, msgWrapper) {
+var $author$project$ViewFirstPerson$view = F6(
+	function (context, contentArea, track, scene, msgWrapper, mFlythrough) {
 		return A2(
 			$mdgriffith$elm_ui$Element$el,
 			A2($author$project$View3dCommonElements$common3dSceneAttributes, msgWrapper, context),
@@ -46243,7 +46251,7 @@ var $author$project$ViewFirstPerson$view = F5(
 				$ianmackenzie$elm_3d_scene$Scene3d$sunny(
 					{
 						background: $ianmackenzie$elm_3d_scene$Scene3d$backgroundColor($avh4$elm_color$Color$lightBlue),
-						camera: A2($author$project$ViewFirstPerson$deriveViewPointAndCamera, context, track),
+						camera: A3($author$project$ViewFirstPerson$deriveViewPointAndCamera, context, track, mFlythrough),
 						clipDepth: $ianmackenzie$elm_units$Length$meters(1),
 						dimensions: contentArea,
 						entities: scene,
@@ -53528,8 +53536,8 @@ var $author$project$ViewPureStyles$wideSliderStylesWithWidth = function (w) {
 				$mdgriffith$elm_ui$Element$none))
 		]);
 };
-var $author$project$PaneLayoutManager$viewPanes = F4(
-	function (msgWrapper, mTrack, _v0, options) {
+var $author$project$PaneLayoutManager$viewPanes = F5(
+	function (msgWrapper, mTrack, _v0, options, mFlythrough) {
 		var w = _v0.a;
 		var h = _v0.b;
 		var slider = function () {
@@ -53590,7 +53598,7 @@ var $author$project$PaneLayoutManager$viewPanes = F4(
 					if ((_v5.a.$ === 'Just') && (_v5.b.$ === 'Just')) {
 						var context = _v5.a.a;
 						var track = _v5.b.a;
-						return A5(
+						return A6(
 							$author$project$ViewFirstPerson$view,
 							context,
 							_Utils_Tuple2(paneWidth, paneHeight),
@@ -53599,7 +53607,8 @@ var $author$project$PaneLayoutManager$viewPanes = F4(
 							A2(
 								$elm$core$Basics$composeL,
 								msgWrapper,
-								$author$project$PaneLayoutManager$ThirdPersonViewMessage(pane.paneId)));
+								$author$project$PaneLayoutManager$ThirdPersonViewMessage(pane.paneId)),
+							mFlythrough);
 					} else {
 						return $mdgriffith$elm_ui$Element$none;
 					}
@@ -53749,7 +53758,7 @@ var $author$project$Main$viewPaneArea = function (model) {
 				[$mdgriffith$elm_ui$Element$noStaticStyleSheet])
 		},
 		$author$project$ViewPureStyles$commonLayoutStyles,
-		A4($author$project$PaneLayoutManager$viewPanes, $author$project$Main$PaneMsg, model.track, model.contentArea, model.paneLayoutOptions));
+		A5($author$project$PaneLayoutManager$viewPanes, $author$project$Main$PaneMsg, model.track, model.contentArea, model.paneLayoutOptions, model.toolOptions.flythroughSettings.flythrough));
 };
 var $author$project$Main$centralAreaView = function (model) {
 	return A4(

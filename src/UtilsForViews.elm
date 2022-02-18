@@ -13,6 +13,15 @@ import Length
 import Speed exposing (Speed)
 
 
+elmuiColour : Color.Color -> Element.Color
+elmuiColour c =
+    let
+        { red, green, blue, alpha } =
+            Color.toRgba c
+    in
+    Element.rgb red green blue
+
+
 showLongMeasure : Bool -> Length.Length -> String
 showLongMeasure imperial distance =
     if imperial then

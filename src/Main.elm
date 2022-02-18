@@ -1015,6 +1015,7 @@ viewPaneArea model =
             model.track
             model.contentArea
             model.paneLayoutOptions
+            model.toolOptions.flythroughSettings.flythrough
 
 
 topLoadingBar model =
