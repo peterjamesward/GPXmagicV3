@@ -14538,18 +14538,18 @@ var $author$project$ViewPlan$initialiseView = F3(
 			return _Utils_update(
 				context,
 				{
-					defaultZoomLevel: 12.0,
+					defaultZoomLevel: 14.0,
 					dragAction: $author$project$ViewPlan$DragNone,
 					fieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
 					focalPoint: $author$project$DomainModel$startPoint(
 						A2($author$project$DomainModel$leafFromIndex, current, treeNode)),
 					orbiting: $elm$core$Maybe$Nothing,
 					waitingForClickDelay: false,
-					zoomLevel: 12.0
+					zoomLevel: 14.0
 				});
 		} else {
 			return {
-				defaultZoomLevel: 12.0,
+				defaultZoomLevel: 14.0,
 				dragAction: $author$project$ViewPlan$DragNone,
 				fieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
 				focalPoint: $author$project$DomainModel$startPoint(
@@ -14557,7 +14557,7 @@ var $author$project$ViewPlan$initialiseView = F3(
 				followSelectedPoint: true,
 				orbiting: $elm$core$Maybe$Nothing,
 				waitingForClickDelay: false,
-				zoomLevel: 12.0
+				zoomLevel: 14.0
 			};
 		}
 	});
@@ -14612,21 +14612,21 @@ var $author$project$ViewThirdPerson$initialiseView = F3(
 					cameraAzimuth: $ianmackenzie$elm_geometry$Direction2d$negativeY,
 					cameraDistance: $ianmackenzie$elm_units$Length$kilometers(10),
 					cameraElevation: $ianmackenzie$elm_units$Angle$degrees(30),
-					defaultZoomLevel: 10.0,
+					defaultZoomLevel: 14.0,
 					dragAction: $author$project$ViewThirdPerson$DragNone,
 					fieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
 					focalPoint: $author$project$DomainModel$startPoint(
 						A2($author$project$DomainModel$leafFromIndex, current, treeNode)),
 					orbiting: $elm$core$Maybe$Nothing,
 					waitingForClickDelay: false,
-					zoomLevel: 10.0
+					zoomLevel: 14.0
 				});
 		} else {
 			return {
 				cameraAzimuth: $ianmackenzie$elm_geometry$Direction2d$negativeY,
 				cameraDistance: $ianmackenzie$elm_units$Length$kilometers(10),
 				cameraElevation: $ianmackenzie$elm_units$Angle$degrees(30),
-				defaultZoomLevel: 10.0,
+				defaultZoomLevel: 14.0,
 				dragAction: $author$project$ViewThirdPerson$DragNone,
 				fieldOfView: $ianmackenzie$elm_units$Angle$degrees(45),
 				focalPoint: $author$project$DomainModel$startPoint(
@@ -14634,7 +14634,7 @@ var $author$project$ViewThirdPerson$initialiseView = F3(
 				followSelectedPoint: true,
 				orbiting: $elm$core$Maybe$Nothing,
 				waitingForClickDelay: false,
-				zoomLevel: 10.0
+				zoomLevel: 14.0
 			};
 		}
 	});
@@ -22602,7 +22602,24 @@ var $author$project$Main$performActionsOnModel = F2(
 								var newTrack = A2(
 									$author$project$TrackLoaded$useTreeWithRepositionedMarkers,
 									newTree,
-									A5($author$project$TrackLoaded$addToUndoStack, action, fromStart, fromEnd, oldPoints, track));
+									A5(
+										$author$project$TrackLoaded$addToUndoStack,
+										action,
+										fromStart,
+										fromEnd,
+										oldPoints,
+										_Utils_update(
+											track,
+											{
+												referenceLonLat: function () {
+													if (newTree.$ === 'Just') {
+														var aTree = newTree.a;
+														return A2($author$project$DomainModel$gpxPointFromIndex, 0, aTree);
+													} else {
+														return track.referenceLonLat;
+													}
+												}()
+											})));
 								return _Utils_update(
 									foldedModel,
 									{
@@ -22615,16 +22632,16 @@ var $author$project$Main$performActionsOnModel = F2(
 							if (_v0.b.$ === 'Just') {
 								var coords = _v0.a.a;
 								var track = _v0.b.a;
-								var _v35 = A2($author$project$Tools$MoveScaleRotate$applyRecentre, coords, track);
-								var newTree = _v35.a;
-								var oldPoints = _v35.b;
-								var _v36 = _Utils_Tuple2(0, 0);
-								var fromStart = _v36.a;
-								var fromEnd = _v36.b;
+								var _v36 = A2($author$project$Tools$MoveScaleRotate$applyRecentre, coords, track);
+								var newTree = _v36.a;
+								var oldPoints = _v36.b;
+								var _v37 = _Utils_Tuple2(0, 0);
+								var fromStart = _v37.a;
+								var fromEnd = _v37.b;
 								var newTrack = function () {
-									var _v37 = track.lastMapClick;
-									var lon = _v37.a;
-									var lat = _v37.b;
+									var _v38 = track.lastMapClick;
+									var lon = _v38.a;
+									var lat = _v38.b;
 									var newReference = {
 										altitude: $ianmackenzie$elm_units$Quantity$zero,
 										latitude: $ianmackenzie$elm_units$Angle$degrees(lat),
@@ -22656,12 +22673,12 @@ var $author$project$Main$performActionsOnModel = F2(
 							if (_v0.b.$ === 'Just') {
 								var elevations = _v0.a.a;
 								var track = _v0.b.a;
-								var _v38 = A2($author$project$Tools$MoveScaleRotate$applyMapElevations, elevations, track);
-								var newTree = _v38.a;
-								var oldPoints = _v38.b;
-								var _v39 = _Utils_Tuple2(0, 0);
-								var fromStart = _v39.a;
-								var fromEnd = _v39.b;
+								var _v39 = A2($author$project$Tools$MoveScaleRotate$applyMapElevations, elevations, track);
+								var newTree = _v39.a;
+								var oldPoints = _v39.b;
+								var _v40 = _Utils_Tuple2(0, 0);
+								var fromStart = _v40.a;
+								var fromEnd = _v40.b;
 								var newTrack = A2(
 									$author$project$TrackLoaded$useTreeWithRepositionedMarkers,
 									newTree,
@@ -22676,11 +22693,11 @@ var $author$project$Main$performActionsOnModel = F2(
 							}
 						case 'PointMovedOnMap':
 							if (_v0.b.$ === 'Just') {
-								var _v40 = _v0.a;
-								var startLon = _v40.a;
-								var startLat = _v40.b;
-								var endLon = _v40.c;
-								var endLat = _v40.d;
+								var _v41 = _v0.a;
+								var startLon = _v41.a;
+								var startLat = _v41.b;
+								var endLon = _v41.c;
+								var endLat = _v41.d;
 								var track = _v0.b.a;
 								var startGpx = {
 									altitude: $ianmackenzie$elm_units$Quantity$zero,
@@ -22697,11 +22714,11 @@ var $author$project$Main$performActionsOnModel = F2(
 										$ianmackenzie$elm_units$Angle$degrees(endLon))
 								};
 								var newTree = A4($author$project$DomainModel$updatePointByIndexInSitu, index, endGpx, track.referenceLonLat, track.trackTree);
-								var _v41 = _Utils_Tuple2(
+								var _v42 = _Utils_Tuple2(
 									index,
 									$author$project$DomainModel$skipCount(track.trackTree) - index);
-								var fromStart = _v41.a;
-								var fromEnd = _v41.b;
+								var fromStart = _v42.a;
+								var fromEnd = _v42.b;
 								var newTrack = A5(
 									$author$project$TrackLoaded$addToUndoStack,
 									action,
@@ -22722,9 +22739,9 @@ var $author$project$Main$performActionsOnModel = F2(
 							}
 						case 'SaveLastMapClick':
 							if (_v0.b.$ === 'Just') {
-								var _v42 = _v0.a;
-								var lon = _v42.a;
-								var lat = _v42.b;
+								var _v43 = _v0.a;
+								var lon = _v43.a;
+								var lat = _v43.b;
 								var track = _v0.b.a;
 								var newTrack = _Utils_update(
 									track,
@@ -22754,11 +22771,11 @@ var $author$project$Main$performActionsOnModel = F2(
 							}
 						case 'TrackHasChanged':
 							if (_v0.b.$ === 'Just') {
-								var _v44 = _v0.a;
+								var _v45 = _v0.a;
 								var track = _v0.b.a;
-								var _v45 = A2($author$project$ToolsController$refreshOpenTools, foldedModel.track, foldedModel.toolOptions);
-								var refreshedToolOptions = _v45.a;
-								var secondaryActions = _v45.b;
+								var _v46 = A2($author$project$ToolsController$refreshOpenTools, foldedModel.track, foldedModel.toolOptions);
+								var refreshedToolOptions = _v46.a;
+								var secondaryActions = _v46.b;
 								var innerModelWithNewToolSettings = _Utils_update(
 									foldedModel,
 									{toolOptions: refreshedToolOptions});
@@ -22783,9 +22800,9 @@ var $author$project$Main$performActionsOnModel = F2(
 								break _v0$30;
 							}
 						case 'StoredValueRetrieved':
-							var _v46 = _v0.a;
-							var key = _v46.a;
-							var value = _v46.b;
+							var _v47 = _v0.a;
+							var key = _v47.a;
+							var value = _v47.b;
 							switch (key) {
 								case 'splits':
 									return A2($author$project$Main$decodeSplitValues, value, foldedModel);
@@ -22852,7 +22869,7 @@ var $author$project$Main$performActionsOnModel = F2(
 							return revisedModel;
 						case 'UndoLastAction':
 							if (_v0.b.$ === 'Just') {
-								var _v49 = _v0.a;
+								var _v50 = _v0.a;
 								var track = _v0.b.a;
 								return _Utils_update(
 									foldedModel,
@@ -22865,20 +22882,20 @@ var $author$project$Main$performActionsOnModel = F2(
 							}
 						case 'RedoUndoneAction':
 							if (_v0.b.$ === 'Just') {
-								var _v50 = _v0.a;
+								var _v51 = _v0.a;
 								var track = _v0.b.a;
-								var _v51 = track.redos;
-								if (_v51.b) {
-									var redo = _v51.a;
-									var moreRedos = _v51.b;
+								var _v52 = track.redos;
+								if (_v52.b) {
+									var redo = _v52.a;
+									var moreRedos = _v52.b;
 									var modelAfterRedo = A2(
 										$author$project$Main$performActionsOnModel,
 										_List_fromArray(
 											[redo.action]),
 										model);
-									var _v52 = modelAfterRedo.track;
-									if (_v52.$ === 'Just') {
-										var trackAfterRedo = _v52.a;
+									var _v53 = modelAfterRedo.track;
+									if (_v53.$ === 'Just') {
+										var trackAfterRedo = _v53.a;
 										var trackWithCorrectRedoStack = _Utils_update(
 											trackAfterRedo,
 											{redos: moreRedos});
@@ -29674,7 +29691,9 @@ var $author$project$Tools$MoveScaleRotate$update = F4(
 				case 'RotateAndScale':
 					var _v1 = _v0.a;
 					var track = _v0.b.a;
-					var newSettings = $author$project$Tools$MoveScaleRotate$defaultOptions;
+					var newSettings = _Utils_update(
+						settings,
+						{scaleFactor: 1.0});
 					return _Utils_Tuple2(
 						newSettings,
 						_List_fromArray(

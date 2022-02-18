@@ -1012,7 +1012,7 @@ topLoadingBar model =
                             , Background.color FlatColors.ChinesePalette.antiFlashWhite
                             , htmlAttribute (style "z-index" "20")
                             ]
-                            (SvgPathExtractor.view SvgMsg model.ipInfo )
+                            (SvgPathExtractor.view SvgMsg model.ipInfo)
 
                     else
                         none
@@ -1439,7 +1439,15 @@ performActionsOnModel actions model =
                             ( 0, 0 )
 
                         newTrack =
-                            track
+                            { track
+                                | referenceLonLat =
+                                    case newTree of
+                                        Just aTree ->
+                                            gpxPointFromIndex 0 aTree
+
+                                        Nothing ->
+                                            track.referenceLonLat
+                            }
                                 |> TrackLoaded.addToUndoStack action
                                     fromStart
                                     fromEnd

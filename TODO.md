@@ -17,6 +17,8 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 # WIP
 
+## 1st person view
+
 ---
 
 # BACKLOG, roughly in order ...
@@ -25,7 +27,6 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 1. Tooltips (in general)
 2. Fly-through
-3. 1st person view
 4. Use Strava segment data
 5. Move & Stretch
 6. Option to add 80m at Start, 200m at end for start/end gates in RGT

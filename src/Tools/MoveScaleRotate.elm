@@ -96,7 +96,7 @@ update msg settings previewColour hasTrack =
         ( RotateAndScale, Just track ) ->
             let
                 newSettings =
-                    defaultOptions
+                    { settings | scaleFactor = 1.0 }
             in
             ( newSettings
             , [ ApplyRotateAndScale settings, TrackHasChanged ]
