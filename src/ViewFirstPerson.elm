@@ -1,25 +1,18 @@
-module ScenePainterFirst exposing (..)
+module ViewFirstPerson exposing (..)
 
-import Angle exposing (inDegrees)
+import Angle
 import Camera3d exposing (Camera3d)
 import Color
 import Direction2d
 import Direction3d exposing (negativeZ, positiveZ)
 import DomainModel exposing (asRecord)
 import Element exposing (..)
-import Element.Border as Border
-import FlatColors.ChinesePalette
-import Html.Events.Extra.Mouse as Mouse exposing (Button(..))
-import Html.Events.Extra.Wheel as Wheel
 import Length exposing (meters)
 import LocalCoords exposing (LocalCoords)
 import Pixels exposing (Pixels)
-import Point3d
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity, backgroundColor)
-import SketchPlane3d
 import TrackLoaded exposing (TrackLoaded)
-import Vector3d
 import View3dCommonElements exposing (..)
 import Viewpoint3d
 
@@ -64,6 +57,9 @@ deriveViewPointAndCamera context track =
             DomainModel.leafFromIndex track.currentPosition track.trackTree
                 |> asRecord
 
+        gradientAsAngle =
+            Angle.atan <| localRoad.gradientAtStart / 100.0
+
         cameraViewpoint =
             Viewpoint3d.orbitZ
                 { focalPoint = localRoad.startPoint
@@ -71,7 +67,7 @@ deriveViewPointAndCamera context track =
                     localRoad.directionAtStart
                         |> Direction2d.reverse
                         |> Direction2d.toAngle
-                , elevation = Angle.degrees 10.0
+                , elevation = Angle.degrees 20.0 |> Quantity.minus gradientAsAngle
                 , distance = Length.meters 10
                 }
     in

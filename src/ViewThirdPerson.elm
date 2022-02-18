@@ -49,6 +49,7 @@ view context contentArea track scene msgWrapper =
           else
             pointer
          )
+            :: (inFront <| zoomButtons msgWrapper context)
             :: common3dSceneAttributes msgWrapper context
         )
     <|

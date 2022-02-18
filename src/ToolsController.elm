@@ -47,7 +47,7 @@ import Tools.TrackInfoBox as TrackInfoBox
 import Tools.UndoRedo as UndoRedo
 import TrackLoaded exposing (TrackLoaded)
 import View3dCommonElements exposing (stopProp)
-import ViewPureStyles exposing (contrastingColour, neatToolsBorder, onEnter, useIcon)
+import ViewPureStyles exposing (contrastingColour, neatToolsBorder, onEnter, useIcon, useIconWithSize)
 
 
 type ToolState
@@ -1113,7 +1113,7 @@ viewTool msgWrapper isTrack options toolEntry =
                 }
             , Input.button [ alignRight ]
                 { onPress = Just <| msgWrapper <| ToolPopupToggle toolEntry.toolType
-                , label = useIcon FeatherIcons.settings
+                , label = useIconWithSize 14 FeatherIcons.settings
                 }
             ]
         , el [ Border.rounded 8, width fill, height fill ] <|

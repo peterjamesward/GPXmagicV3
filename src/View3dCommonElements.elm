@@ -85,7 +85,6 @@ common3dSceneAttributes msgWrapper context =
     , pointer
     , Border.width 0
     , Border.color FlatColors.ChinesePalette.peace
-    , inFront <| zoomButtons msgWrapper context
     ]
 
 

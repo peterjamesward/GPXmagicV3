@@ -25,6 +25,7 @@ import ToolsController
 import TrackLoaded exposing (TrackLoaded)
 import View3dCommonElements exposing (stopProp)
 import ViewAbout
+import ViewFirstPerson
 import ViewMap
 import ViewPlan
 import ViewProfileCharts
@@ -72,6 +73,7 @@ type alias PaneContext =
     { paneId : PaneId
     , activeView : ViewMode
     , thirdPersonContext : Maybe View3dCommonElements.Context
+    , firstPersonContext : Maybe View3dCommonElements.Context
     , mapContext : Maybe ViewMap.Context
     , profileContext : Maybe ViewProfileCharts.Context
     , planContext : Maybe ViewPlan.Context
@@ -102,6 +104,7 @@ defaultPaneContext =
     { paneId = Pane1
     , activeView = ViewInfo
     , thirdPersonContext = Nothing
+    , firstPersonContext = Nothing
     , mapContext = Nothing
     , profileContext = Nothing
     , planContext = Nothing
@@ -349,9 +352,20 @@ update paneMsg msgWrapper mTrack contentArea options =
                         Pane4 ->
                             options.pane4
 
+                effectiveContext =
+                    case paneInfo.activeView of
+                        ViewFirst ->
+                            paneInfo.firstPersonContext
+
+                        ViewThird ->
+                            paneInfo.thirdPersonContext
+
+                        _ ->
+                            Nothing
+
                 ( newContext, actions ) =
-                    case ( mTrack, paneInfo.thirdPersonContext ) of
-                        ( Just track, Just third ) ->
+                    case ( mTrack, effectiveContext ) of
+                        ( Just track, Just context ) ->
                             let
                                 ( new, act ) =
                                     ViewThirdPerson.update
@@ -359,7 +373,7 @@ update paneMsg msgWrapper mTrack contentArea options =
                                         (msgWrapper << ThirdPersonViewMessage Pane1)
                                         track
                                         (dimensionsWithLayout options.paneLayout contentArea)
-                                        third
+                                        context
                             in
                             ( Just new, act )
 
@@ -367,7 +381,15 @@ update paneMsg msgWrapper mTrack contentArea options =
                             ( Nothing, [] )
 
                 newPane =
-                    { paneInfo | thirdPersonContext = newContext }
+                    case paneInfo.activeView of
+                        ViewFirst ->
+                            { paneInfo | firstPersonContext = newContext }
+
+                        ViewThird ->
+                            { paneInfo | thirdPersonContext = newContext }
+
+                        _ ->
+                            paneInfo
 
                 newOptions =
                     case paneId of
@@ -630,6 +652,7 @@ viewModeChoices msgWrapper context =
         fullOptionList =
             [ Input.optionWith ViewMap <| radioButton "Map"
             , Input.optionWith ViewThird <| radioButton "Perspective"
+            , Input.optionWith ViewFirst <| radioButton "Rider view"
             , Input.optionWith ViewProfile <| radioButton "Profile"
             , Input.optionWith ViewPlan <| radioButton "Plan"
             , Input.optionWith ViewInfo <| radioButton "About"
@@ -651,6 +674,7 @@ viewModeChoicesNoMap msgWrapper pane =
     let
         reducedOptionList =
             [ Input.optionWith ViewThird <| radioButton "Perspective"
+            , Input.optionWith ViewFirst <| radioButton "Rider view"
             , Input.optionWith ViewProfile <| radioButton "Profile"
             , Input.optionWith ViewPlan <| radioButton "Plan"
             ]
@@ -706,6 +730,19 @@ viewPanes msgWrapper mTrack ( w, h ) options =
                     case ( pane.thirdPersonContext, mTrack ) of
                         ( Just context, Just track ) ->
                             ViewThirdPerson.view
+                                context
+                                ( paneWidth, paneHeight )
+                                track
+                                options.scene3d
+                                (msgWrapper << ThirdPersonViewMessage pane.paneId)
+
+                        _ ->
+                            none
+
+                ViewFirst ->
+                    case ( pane.thirdPersonContext, mTrack ) of
+                        ( Just context, Just track ) ->
+                            ViewFirstPerson.view
                                 context
                                 ( paneWidth, paneHeight )
                                 track

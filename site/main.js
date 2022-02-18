@@ -8694,7 +8694,7 @@ var $author$project$PaneLayoutManager$SliderIdle = {$: 'SliderIdle'};
 var $author$project$MapPortController$defaultMapState = {lastClickLat: 0.0, lastClickLon: 0.0};
 var $author$project$PaneLayoutManager$Pane1 = {$: 'Pane1'};
 var $author$project$PaneLayoutManager$ViewInfo = {$: 'ViewInfo'};
-var $author$project$PaneLayoutManager$defaultPaneContext = {activeView: $author$project$PaneLayoutManager$ViewInfo, mapContext: $elm$core$Maybe$Nothing, paneId: $author$project$PaneLayoutManager$Pane1, planContext: $elm$core$Maybe$Nothing, profileContext: $elm$core$Maybe$Nothing, thirdPersonContext: $elm$core$Maybe$Nothing};
+var $author$project$PaneLayoutManager$defaultPaneContext = {activeView: $author$project$PaneLayoutManager$ViewInfo, firstPersonContext: $elm$core$Maybe$Nothing, mapContext: $elm$core$Maybe$Nothing, paneId: $author$project$PaneLayoutManager$Pane1, planContext: $elm$core$Maybe$Nothing, profileContext: $elm$core$Maybe$Nothing, thirdPersonContext: $elm$core$Maybe$Nothing};
 var $author$project$PaneLayoutManager$defaultOptions = {
 	mapState: $author$project$MapPortController$defaultMapState,
 	pane1: $author$project$PaneLayoutManager$defaultPaneContext,
@@ -26369,11 +26369,22 @@ var $author$project$PaneLayoutManager$update = F5(
 							return options.pane4;
 					}
 				}();
+				var effectiveContext = function () {
+					var _v6 = paneInfo.activeView;
+					switch (_v6.$) {
+						case 'ViewFirst':
+							return paneInfo.firstPersonContext;
+						case 'ViewThird':
+							return paneInfo.thirdPersonContext;
+						default:
+							return $elm$core$Maybe$Nothing;
+					}
+				}();
 				var _v1 = function () {
-					var _v2 = _Utils_Tuple2(mTrack, paneInfo.thirdPersonContext);
+					var _v2 = _Utils_Tuple2(mTrack, effectiveContext);
 					if ((_v2.a.$ === 'Just') && (_v2.b.$ === 'Just')) {
 						var track = _v2.a.a;
-						var third = _v2.b.a;
+						var context = _v2.b.a;
 						var _v3 = A5(
 							$author$project$ViewThirdPerson$update,
 							imageMsg,
@@ -26383,7 +26394,7 @@ var $author$project$PaneLayoutManager$update = F5(
 								$author$project$PaneLayoutManager$ThirdPersonViewMessage($author$project$PaneLayoutManager$Pane1)),
 							track,
 							A2($author$project$PaneLayoutManager$dimensionsWithLayout, options.paneLayout, contentArea),
-							third);
+							context);
 						var _new = _v3.a;
 						var act = _v3.b;
 						return _Utils_Tuple2(
@@ -26395,9 +26406,21 @@ var $author$project$PaneLayoutManager$update = F5(
 				}();
 				var newContext = _v1.a;
 				var actions = _v1.b;
-				var newPane = _Utils_update(
-					paneInfo,
-					{thirdPersonContext: newContext});
+				var newPane = function () {
+					var _v5 = paneInfo.activeView;
+					switch (_v5.$) {
+						case 'ViewFirst':
+							return _Utils_update(
+								paneInfo,
+								{firstPersonContext: newContext});
+						case 'ViewThird':
+							return _Utils_update(
+								paneInfo,
+								{thirdPersonContext: newContext});
+						default:
+							return paneInfo;
+					}
+				}();
 				var newOptions = function () {
 					switch (paneId.$) {
 						case 'Pane1':
@@ -26434,12 +26457,12 @@ var $author$project$PaneLayoutManager$update = F5(
 							return options.pane4;
 					}
 				}();
-				var _v6 = function () {
-					var _v7 = _Utils_Tuple2(mTrack, paneInfo.planContext);
-					if ((_v7.a.$ === 'Just') && (_v7.b.$ === 'Just')) {
-						var track = _v7.a.a;
-						var planContext = _v7.b.a;
-						var _v8 = A5(
+				var _v8 = function () {
+					var _v9 = _Utils_Tuple2(mTrack, paneInfo.planContext);
+					if ((_v9.a.$ === 'Just') && (_v9.b.$ === 'Just')) {
+						var track = _v9.a.a;
+						var planContext = _v9.b.a;
+						var _v10 = A5(
 							$author$project$ViewPlan$update,
 							imageMsg,
 							A2(
@@ -26449,8 +26472,8 @@ var $author$project$PaneLayoutManager$update = F5(
 							track,
 							A2($author$project$PaneLayoutManager$dimensionsWithLayout, options.paneLayout, contentArea),
 							planContext);
-						var _new = _v8.a;
-						var act = _v8.b;
+						var _new = _v10.a;
+						var act = _v10.b;
 						return _Utils_Tuple2(
 							$elm$core$Maybe$Just(_new),
 							act);
@@ -26458,8 +26481,8 @@ var $author$project$PaneLayoutManager$update = F5(
 						return _Utils_Tuple2($elm$core$Maybe$Nothing, _List_Nil);
 					}
 				}();
-				var newContext = _v6.a;
-				var actions = _v6.b;
+				var newContext = _v8.a;
+				var actions = _v8.b;
 				var newPane = _Utils_update(
 					paneInfo,
 					{planContext: newContext});
@@ -26499,12 +26522,12 @@ var $author$project$PaneLayoutManager$update = F5(
 							return options.pane4;
 					}
 				}();
-				var _v11 = function () {
-					var _v12 = _Utils_Tuple2(mTrack, paneInfo.profileContext);
-					if ((_v12.a.$ === 'Just') && (_v12.b.$ === 'Just')) {
-						var track = _v12.a.a;
-						var profile = _v12.b.a;
-						var _v13 = A5(
+				var _v13 = function () {
+					var _v14 = _Utils_Tuple2(mTrack, paneInfo.profileContext);
+					if ((_v14.a.$ === 'Just') && (_v14.b.$ === 'Just')) {
+						var track = _v14.a.a;
+						var profile = _v14.b.a;
+						var _v15 = A5(
 							$author$project$ViewProfileCharts$update,
 							imageMsg,
 							A2(
@@ -26514,8 +26537,8 @@ var $author$project$PaneLayoutManager$update = F5(
 							track,
 							A2($author$project$PaneLayoutManager$dimensionsWithLayout, options.paneLayout, contentArea),
 							profile);
-						var _new = _v13.a;
-						var act = _v13.b;
+						var _new = _v15.a;
+						var act = _v15.b;
 						return _Utils_Tuple2(
 							$elm$core$Maybe$Just(_new),
 							act);
@@ -26523,8 +26546,8 @@ var $author$project$PaneLayoutManager$update = F5(
 						return _Utils_Tuple2($elm$core$Maybe$Nothing, _List_Nil);
 					}
 				}();
-				var newContext = _v11.a;
-				var actions = _v11.b;
+				var newContext = _v13.a;
+				var actions = _v13.b;
 				var newPane = _Utils_update(
 					paneInfo,
 					{profileContext: newContext});
@@ -26552,20 +26575,20 @@ var $author$project$PaneLayoutManager$update = F5(
 			case 'MapViewMessage':
 				var mapViewMsg = paneMsg.a;
 				var paneInfo = options.pane1;
-				var _v16 = function () {
-					var _v17 = _Utils_Tuple2(mTrack, paneInfo.mapContext);
-					if ((_v17.a.$ === 'Just') && (_v17.b.$ === 'Just')) {
-						var track = _v17.a.a;
-						var mapContext = _v17.b.a;
-						var _v18 = A5(
+				var _v18 = function () {
+					var _v19 = _Utils_Tuple2(mTrack, paneInfo.mapContext);
+					if ((_v19.a.$ === 'Just') && (_v19.b.$ === 'Just')) {
+						var track = _v19.a.a;
+						var mapContext = _v19.b.a;
+						var _v20 = A5(
 							$author$project$ViewMap$update,
 							mapViewMsg,
 							A2($elm$core$Basics$composeL, msgWrapper, $author$project$PaneLayoutManager$MapViewMessage),
 							track,
 							A2($author$project$PaneLayoutManager$dimensionsWithLayout, options.paneLayout, contentArea),
 							mapContext);
-						var _new = _v18.a;
-						var act = _v18.b;
+						var _new = _v20.a;
+						var act = _v20.b;
 						return _Utils_Tuple2(
 							$elm$core$Maybe$Just(_new),
 							act);
@@ -26573,8 +26596,8 @@ var $author$project$PaneLayoutManager$update = F5(
 						return _Utils_Tuple2($elm$core$Maybe$Nothing, _List_Nil);
 					}
 				}();
-				var newContext = _v16.a;
-				var actions = _v16.b;
+				var newContext = _v18.a;
+				var actions = _v18.b;
 				var newPane = _Utils_update(
 					paneInfo,
 					{mapContext: newContext});
@@ -26587,9 +26610,9 @@ var $author$project$PaneLayoutManager$update = F5(
 				var mapMsg = paneMsg.a;
 				if (mTrack.$ === 'Just') {
 					var track = mTrack.a;
-					var _v20 = A3($author$project$MapPortController$update, mapMsg, track, options.mapState);
-					var newState = _v20.a;
-					var actions = _v20.b;
+					var _v22 = A3($author$project$MapPortController$update, mapMsg, track, options.mapState);
+					var newState = _v22.a;
+					var actions = _v22.b;
 					return _Utils_Tuple2(
 						_Utils_update(
 							options,
@@ -26604,9 +26627,9 @@ var $author$project$PaneLayoutManager$update = F5(
 					options,
 					{sliderState: $author$project$PaneLayoutManager$SliderMoved});
 				var mapFollowsOrange = function () {
-					var _v21 = options.pane1.mapContext;
-					if (_v21.$ === 'Just') {
-						var mapContext = _v21.a;
+					var _v23 = options.pane1.mapContext;
+					if (_v23.$ === 'Just') {
+						var mapContext = _v23.a;
 						return mapContext.followOrange;
 					} else {
 						return false;
@@ -26629,8 +26652,8 @@ var $author$project$PaneLayoutManager$update = F5(
 					options,
 					{
 						sliderState: function () {
-							var _v22 = options.sliderState;
-							switch (_v22.$) {
+							var _v24 = options.sliderState;
+							switch (_v24.$) {
 								case 'SliderIdle':
 									return $author$project$PaneLayoutManager$SliderIdle;
 								case 'SliderMoved':
@@ -38657,6 +38680,15 @@ var $author$project$ToolsController$showDockOptions = F2(
 				])) : $mdgriffith$elm_ui$Element$none;
 	});
 var $author$project$View3dCommonElements$stopProp = {preventDefault: false, stopPropagation: true};
+var $author$project$ViewPureStyles$useIconWithSize = function (size) {
+	return A2(
+		$elm$core$Basics$composeL,
+		A2(
+			$elm$core$Basics$composeL,
+			$mdgriffith$elm_ui$Element$html,
+			$feathericons$elm_feather$FeatherIcons$toHtml(_List_Nil)),
+		$feathericons$elm_feather$FeatherIcons$withSize(size));
+};
 var $author$project$ToolsController$DeletePoints = function (a) {
 	return {$: 'DeletePoints', a: a};
 };
@@ -43590,7 +43622,7 @@ var $author$project$ToolsController$viewTool = F4(
 							_List_fromArray(
 								[$mdgriffith$elm_ui$Element$alignRight]),
 							{
-								label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$settings),
+								label: A2($author$project$ViewPureStyles$useIconWithSize, 14, $feathericons$elm_feather$FeatherIcons$settings),
 								onPress: $elm$core$Maybe$Just(
 									msgWrapper(
 										$author$project$ToolsController$ToolPopupToggle(toolEntry.toolType)))
@@ -44090,298 +44122,31 @@ var $author$project$ViewAbout$view = function (_v0) {
 					A2($elm_explorations$markdown$Markdown$toHtml, _List_Nil, $author$project$About$aboutText))
 				])));
 };
-var $author$project$ViewMap$ToggleDraggable = {$: 'ToggleDraggable'};
-var $author$project$ViewMap$ToggleFollowOrange = {$: 'ToggleFollowOrange'};
-var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
-var $elm$svg$Svg$rect = $elm$svg$Svg$trustedNode('rect');
-var $elm$svg$Svg$Attributes$rx = _VirtualDom_attribute('rx');
-var $elm$svg$Svg$Attributes$ry = _VirtualDom_attribute('ry');
-var $elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
-var $elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
-var $feathericons$elm_feather$FeatherIcons$lock = A2(
-	$feathericons$elm_feather$FeatherIcons$makeBuilder,
-	'lock',
-	_List_fromArray(
-		[
-			A2(
-			$elm$svg$Svg$rect,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$x('3'),
-					$elm$svg$Svg$Attributes$y('11'),
-					$elm$svg$Svg$Attributes$width('18'),
-					$elm$svg$Svg$Attributes$height('11'),
-					$elm$svg$Svg$Attributes$rx('2'),
-					$elm$svg$Svg$Attributes$ry('2')
-				]),
-			_List_Nil),
-			A2(
-			$elm$svg$Svg$path,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$d('M7 11V7a5 5 0 0 1 10 0v4')
-				]),
-			_List_Nil)
-		]));
-var $feathericons$elm_feather$FeatherIcons$move = A2(
-	$feathericons$elm_feather$FeatherIcons$makeBuilder,
-	'move',
-	_List_fromArray(
-		[
-			A2(
-			$elm$svg$Svg$polyline,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$points('5 9 2 12 5 15')
-				]),
-			_List_Nil),
-			A2(
-			$elm$svg$Svg$polyline,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$points('9 5 12 2 15 5')
-				]),
-			_List_Nil),
-			A2(
-			$elm$svg$Svg$polyline,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$points('15 19 12 22 9 19')
-				]),
-			_List_Nil),
-			A2(
-			$elm$svg$Svg$polyline,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$points('19 9 22 12 19 15')
-				]),
-			_List_Nil),
-			A2(
-			$elm$svg$Svg$line,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$x1('2'),
-					$elm$svg$Svg$Attributes$y1('12'),
-					$elm$svg$Svg$Attributes$x2('22'),
-					$elm$svg$Svg$Attributes$y2('12')
-				]),
-			_List_Nil),
-			A2(
-			$elm$svg$Svg$line,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$x1('12'),
-					$elm$svg$Svg$Attributes$y1('2'),
-					$elm$svg$Svg$Attributes$x2('12'),
-					$elm$svg$Svg$Attributes$y2('22')
-				]),
-			_List_Nil)
-		]));
-var $mdgriffith$elm_ui$Internal$Model$MoveX = function (a) {
-	return {$: 'MoveX', a: a};
-};
-var $mdgriffith$elm_ui$Internal$Flag$moveX = $mdgriffith$elm_ui$Internal$Flag$flag(25);
-var $mdgriffith$elm_ui$Element$moveLeft = function (x) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$TransformComponent,
-		$mdgriffith$elm_ui$Internal$Flag$moveX,
-		$mdgriffith$elm_ui$Internal$Model$MoveX(-x));
-};
-var $mdgriffith$elm_ui$Internal$Model$OnLeft = {$: 'OnLeft'};
-var $mdgriffith$elm_ui$Element$onLeft = function (element) {
-	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$OnLeft, element);
-};
-var $feathericons$elm_feather$FeatherIcons$unlock = A2(
-	$feathericons$elm_feather$FeatherIcons$makeBuilder,
-	'unlock',
-	_List_fromArray(
-		[
-			A2(
-			$elm$svg$Svg$rect,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$x('3'),
-					$elm$svg$Svg$Attributes$y('11'),
-					$elm$svg$Svg$Attributes$width('18'),
-					$elm$svg$Svg$Attributes$height('11'),
-					$elm$svg$Svg$Attributes$rx('2'),
-					$elm$svg$Svg$Attributes$ry('2')
-				]),
-			_List_Nil),
-			A2(
-			$elm$svg$Svg$path,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$d('M7 11V7a5 5 0 0 1 9.9-1')
-				]),
-			_List_Nil)
-		]));
-var $feathericons$elm_feather$FeatherIcons$x = A2(
-	$feathericons$elm_feather$FeatherIcons$makeBuilder,
-	'x',
-	_List_fromArray(
-		[
-			A2(
-			$elm$svg$Svg$line,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$x1('18'),
-					$elm$svg$Svg$Attributes$y1('6'),
-					$elm$svg$Svg$Attributes$x2('6'),
-					$elm$svg$Svg$Attributes$y2('18')
-				]),
-			_List_Nil),
-			A2(
-			$elm$svg$Svg$line,
-			_List_fromArray(
-				[
-					$elm$svg$Svg$Attributes$x1('6'),
-					$elm$svg$Svg$Attributes$y1('6'),
-					$elm$svg$Svg$Attributes$x2('18'),
-					$elm$svg$Svg$Attributes$y2('18')
-				]),
-			_List_Nil)
-		]));
-var $author$project$ViewMap$view = F3(
-	function (_v0, mContext, msgWrapper) {
-		var viewWidth = _v0.a;
-		var viewHeight = _v0.b;
-		var handyMapControls = function (context) {
-			return A2(
-				$mdgriffith$elm_ui$Element$column,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$alignTop,
-						$mdgriffith$elm_ui$Element$alignRight,
-						$mdgriffith$elm_ui$Element$moveDown(100),
-						$mdgriffith$elm_ui$Element$moveLeft(10),
-						$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite),
-						$mdgriffith$elm_ui$Element$Font$size(40),
-						$mdgriffith$elm_ui$Element$padding(6),
-						$mdgriffith$elm_ui$Element$spacing(8)
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$mdgriffith$elm_ui$Element$Input$button,
-						_List_fromArray(
-							[
-								A2(
-								$author$project$ToolTip$tooltip,
-								$mdgriffith$elm_ui$Element$onLeft,
-								function () {
-									var _v2 = context.followOrange;
-									if (_v2) {
-										return $author$project$ToolTip$myTooltip('Click to stop following Orange marker');
-									} else {
-										return $author$project$ToolTip$myTooltip('Click to follow Orange marker');
-									}
-								}())
-							]),
-						{
-							label: context.followOrange ? $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$lock) : $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$unlock),
-							onPress: $elm$core$Maybe$Just(
-								msgWrapper($author$project$ViewMap$ToggleFollowOrange))
-						}),
-						A2(
-						$mdgriffith$elm_ui$Element$Input$button,
-						_List_fromArray(
-							[
-								A2(
-								$author$project$ToolTip$tooltip,
-								$mdgriffith$elm_ui$Element$onLeft,
-								function () {
-									var _v3 = context.draggable;
-									if (_v3) {
-										return $author$project$ToolTip$myTooltip('Click to disable point dragging');
-									} else {
-										return $author$project$ToolTip$myTooltip('Click to allow point dragging');
-									}
-								}())
-							]),
-						{
-							label: context.draggable ? $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$move) : $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$x),
-							onPress: $elm$core$Maybe$Just(
-								msgWrapper($author$project$ViewMap$ToggleDraggable))
-						})
-					]));
-		};
-		if (mContext.$ === 'Just') {
-			var context = mContext.a;
-			return A2(
-				$mdgriffith$elm_ui$Element$row,
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$inFront(
-						handyMapControls(context))
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$mdgriffith$elm_ui$Element$el,
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$width(
-								$mdgriffith$elm_ui$Element$px(
-									$ianmackenzie$elm_units$Pixels$inPixels(viewWidth))),
-								$mdgriffith$elm_ui$Element$height(
-								$mdgriffith$elm_ui$Element$px(
-									$ianmackenzie$elm_units$Pixels$inPixels(viewHeight))),
-								$mdgriffith$elm_ui$Element$alignLeft,
-								$mdgriffith$elm_ui$Element$alignTop,
-								$mdgriffith$elm_ui$Element$Border$width(2),
-								$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$peace),
-								$mdgriffith$elm_ui$Element$htmlAttribute(
-								$elm$html$Html$Attributes$id('map'))
-							]),
-						$mdgriffith$elm_ui$Element$none)
-					]));
-		} else {
-			return A2(
-				$mdgriffith$elm_ui$Element$row,
-				_List_Nil,
-				_List_fromArray(
-					[
-						A2(
-						$mdgriffith$elm_ui$Element$el,
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$htmlAttribute(
-								$elm$html$Html$Attributes$id('map'))
-							]),
-						$mdgriffith$elm_ui$Element$none)
-					]));
-		}
-	});
-var $author$project$ViewPlan$ImageClick = function (a) {
-	return {$: 'ImageClick', a: a};
-};
-var $author$project$ViewPlan$ImageDoubleClick = function (a) {
-	return {$: 'ImageDoubleClick', a: a};
-};
-var $author$project$ViewPlan$ImageDrag = function (a) {
-	return {$: 'ImageDrag', a: a};
-};
-var $author$project$ViewPlan$ImageGrab = function (a) {
-	return {$: 'ImageGrab', a: a};
-};
-var $author$project$ViewPlan$ImageMouseWheel = function (a) {
-	return {$: 'ImageMouseWheel', a: a};
-};
-var $author$project$ViewPlan$ImageNoOp = {$: 'ImageNoOp'};
-var $author$project$ViewPlan$ImageRelease = function (a) {
-	return {$: 'ImageRelease', a: a};
-};
 var $ianmackenzie$elm_3d_scene$Scene3d$BackgroundColor = function (a) {
 	return {$: 'BackgroundColor', a: a};
 };
 var $ianmackenzie$elm_3d_scene$Scene3d$backgroundColor = function (color) {
 	return $ianmackenzie$elm_3d_scene$Scene3d$BackgroundColor(color);
 };
-var $avh4$elm_color$Color$lightBlue = A4($avh4$elm_color$Color$RgbaSpace, 114 / 255, 159 / 255, 207 / 255, 1.0);
+var $author$project$View3dCommonElements$ImageClick = function (a) {
+	return {$: 'ImageClick', a: a};
+};
+var $author$project$View3dCommonElements$ImageDoubleClick = function (a) {
+	return {$: 'ImageDoubleClick', a: a};
+};
+var $author$project$View3dCommonElements$ImageGrab = function (a) {
+	return {$: 'ImageGrab', a: a};
+};
+var $author$project$View3dCommonElements$ImageMouseWheel = function (a) {
+	return {$: 'ImageMouseWheel', a: a};
+};
+var $author$project$View3dCommonElements$ImageNoOp = {$: 'ImageNoOp'};
+var $author$project$View3dCommonElements$ImageRelease = function (a) {
+	return {$: 'ImageRelease', a: a};
+};
 var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$defaultOptions = {preventDefault: true, stopPropagation: false};
 var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onClick = A2($mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions, 'click', $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$defaultOptions);
-var $author$project$ViewPlan$onContextMenu = function (msg) {
+var $author$project$View3dCommonElements$onContextMenu = function (msg) {
 	return $mdgriffith$elm_ui$Element$htmlAttribute(
 		A2(
 			$elm$html$Html$Events$custom,
@@ -44391,7 +44156,6 @@ var $author$project$ViewPlan$onContextMenu = function (msg) {
 };
 var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onDoubleClick = A2($mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions, 'dblclick', $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$defaultOptions);
 var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onDown = A2($mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions, 'mousedown', $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$defaultOptions);
-var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onMove = A2($mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions, 'mousemove', $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$defaultOptions);
 var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onUp = A2($mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions, 'mouseup', $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$defaultOptions);
 var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$defaultOptions = {preventDefault: true, stopPropagation: false};
 var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$Event = F3(
@@ -44437,6 +44201,70 @@ var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWithOptions = F2(
 				$mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$eventDecoder));
 	});
 var $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWheel = $mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWithOptions($mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$defaultOptions);
+var $author$project$View3dCommonElements$common3dSceneAttributes = F2(
+	function (msgWrapper, context) {
+		return _List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$htmlAttribute(
+				$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onDown(
+					A2($elm$core$Basics$composeR, $author$project$View3dCommonElements$ImageGrab, msgWrapper))),
+				$mdgriffith$elm_ui$Element$htmlAttribute(
+				$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onUp(
+					A2($elm$core$Basics$composeR, $author$project$View3dCommonElements$ImageRelease, msgWrapper))),
+				$mdgriffith$elm_ui$Element$htmlAttribute(
+				$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onClick(
+					A2($elm$core$Basics$composeR, $author$project$View3dCommonElements$ImageClick, msgWrapper))),
+				$mdgriffith$elm_ui$Element$htmlAttribute(
+				$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onDoubleClick(
+					A2($elm$core$Basics$composeR, $author$project$View3dCommonElements$ImageDoubleClick, msgWrapper))),
+				$mdgriffith$elm_ui$Element$htmlAttribute(
+				$mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWheel(
+					function (event) {
+						return msgWrapper(
+							$author$project$View3dCommonElements$ImageMouseWheel(event.deltaY));
+					})),
+				$author$project$View3dCommonElements$onContextMenu(
+				msgWrapper($author$project$View3dCommonElements$ImageNoOp)),
+				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+				$mdgriffith$elm_ui$Element$pointer,
+				$mdgriffith$elm_ui$Element$Border$width(0),
+				$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$peace)
+			]);
+	});
+var $elm$core$Basics$atan = _Basics_atan;
+var $ianmackenzie$elm_units$Angle$atan = function (x) {
+	return $ianmackenzie$elm_units$Quantity$Quantity(
+		$elm$core$Basics$atan(x));
+};
+var $ianmackenzie$elm_geometry$Direction2d$reverse = function (_v0) {
+	var d = _v0.a;
+	return $ianmackenzie$elm_geometry$Geometry$Types$Direction2d(
+		{x: -d.x, y: -d.y});
+};
+var $author$project$ViewFirstPerson$deriveViewPointAndCamera = F2(
+	function (context, track) {
+		var localRoad = $author$project$DomainModel$asRecord(
+			A2($author$project$DomainModel$leafFromIndex, track.currentPosition, track.trackTree));
+		var gradientAsAngle = $ianmackenzie$elm_units$Angle$atan(localRoad.gradientAtStart / 100.0);
+		var cameraViewpoint = $ianmackenzie$elm_3d_camera$Viewpoint3d$orbitZ(
+			{
+				azimuth: $ianmackenzie$elm_geometry$Direction2d$toAngle(
+					$ianmackenzie$elm_geometry$Direction2d$reverse(localRoad.directionAtStart)),
+				distance: $ianmackenzie$elm_units$Length$meters(10),
+				elevation: A2(
+					$ianmackenzie$elm_units$Quantity$minus,
+					gradientAsAngle,
+					$ianmackenzie$elm_units$Angle$degrees(20.0)),
+				focalPoint: localRoad.startPoint
+			});
+		return $ianmackenzie$elm_3d_camera$Camera3d$perspective(
+			{
+				verticalFieldOfView: $ianmackenzie$elm_units$Angle$degrees(120.0 - (context.zoomLevel * 2.0)),
+				viewpoint: cameraViewpoint
+			});
+	});
+var $avh4$elm_color$Color$lightBlue = A4($avh4$elm_color$Color$RgbaSpace, 114 / 255, 159 / 255, 207 / 255, 1.0);
 var $ianmackenzie$elm_3d_scene$Scene3d$Light$CastsShadows = function (a) {
 	return {$: 'CastsShadows', a: a};
 };
@@ -45677,6 +45505,315 @@ var $ianmackenzie$elm_3d_scene$Scene3d$sunny = function (_arguments) {
 			whiteBalance: $ianmackenzie$elm_3d_scene$Scene3d$Light$daylight
 		});
 };
+var $author$project$ViewFirstPerson$view = F5(
+	function (context, contentArea, track, scene, msgWrapper) {
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			A2($author$project$View3dCommonElements$common3dSceneAttributes, msgWrapper, context),
+			$mdgriffith$elm_ui$Element$html(
+				$ianmackenzie$elm_3d_scene$Scene3d$sunny(
+					{
+						background: $ianmackenzie$elm_3d_scene$Scene3d$backgroundColor($avh4$elm_color$Color$lightBlue),
+						camera: A2($author$project$ViewFirstPerson$deriveViewPointAndCamera, context, track),
+						clipDepth: $ianmackenzie$elm_units$Length$meters(1),
+						dimensions: contentArea,
+						entities: scene,
+						shadows: false,
+						sunlightDirection: $ianmackenzie$elm_geometry$Direction3d$negativeZ,
+						upDirection: $ianmackenzie$elm_geometry$Direction3d$positiveZ
+					})));
+	});
+var $author$project$ViewMap$ToggleDraggable = {$: 'ToggleDraggable'};
+var $author$project$ViewMap$ToggleFollowOrange = {$: 'ToggleFollowOrange'};
+var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
+var $elm$svg$Svg$rect = $elm$svg$Svg$trustedNode('rect');
+var $elm$svg$Svg$Attributes$rx = _VirtualDom_attribute('rx');
+var $elm$svg$Svg$Attributes$ry = _VirtualDom_attribute('ry');
+var $elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
+var $elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
+var $feathericons$elm_feather$FeatherIcons$lock = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'lock',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$rect,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x('3'),
+					$elm$svg$Svg$Attributes$y('11'),
+					$elm$svg$Svg$Attributes$width('18'),
+					$elm$svg$Svg$Attributes$height('11'),
+					$elm$svg$Svg$Attributes$rx('2'),
+					$elm$svg$Svg$Attributes$ry('2')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$path,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$d('M7 11V7a5 5 0 0 1 10 0v4')
+				]),
+			_List_Nil)
+		]));
+var $feathericons$elm_feather$FeatherIcons$move = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'move',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$polyline,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$points('5 9 2 12 5 15')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$polyline,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$points('9 5 12 2 15 5')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$polyline,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$points('15 19 12 22 9 19')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$polyline,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$points('19 9 22 12 19 15')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x1('2'),
+					$elm$svg$Svg$Attributes$y1('12'),
+					$elm$svg$Svg$Attributes$x2('22'),
+					$elm$svg$Svg$Attributes$y2('12')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x1('12'),
+					$elm$svg$Svg$Attributes$y1('2'),
+					$elm$svg$Svg$Attributes$x2('12'),
+					$elm$svg$Svg$Attributes$y2('22')
+				]),
+			_List_Nil)
+		]));
+var $mdgriffith$elm_ui$Internal$Model$MoveX = function (a) {
+	return {$: 'MoveX', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Flag$moveX = $mdgriffith$elm_ui$Internal$Flag$flag(25);
+var $mdgriffith$elm_ui$Element$moveLeft = function (x) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$TransformComponent,
+		$mdgriffith$elm_ui$Internal$Flag$moveX,
+		$mdgriffith$elm_ui$Internal$Model$MoveX(-x));
+};
+var $mdgriffith$elm_ui$Internal$Model$OnLeft = {$: 'OnLeft'};
+var $mdgriffith$elm_ui$Element$onLeft = function (element) {
+	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$OnLeft, element);
+};
+var $feathericons$elm_feather$FeatherIcons$unlock = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'unlock',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$rect,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x('3'),
+					$elm$svg$Svg$Attributes$y('11'),
+					$elm$svg$Svg$Attributes$width('18'),
+					$elm$svg$Svg$Attributes$height('11'),
+					$elm$svg$Svg$Attributes$rx('2'),
+					$elm$svg$Svg$Attributes$ry('2')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$path,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$d('M7 11V7a5 5 0 0 1 9.9-1')
+				]),
+			_List_Nil)
+		]));
+var $feathericons$elm_feather$FeatherIcons$x = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'x',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x1('18'),
+					$elm$svg$Svg$Attributes$y1('6'),
+					$elm$svg$Svg$Attributes$x2('6'),
+					$elm$svg$Svg$Attributes$y2('18')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$line,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x1('6'),
+					$elm$svg$Svg$Attributes$y1('6'),
+					$elm$svg$Svg$Attributes$x2('18'),
+					$elm$svg$Svg$Attributes$y2('18')
+				]),
+			_List_Nil)
+		]));
+var $author$project$ViewMap$view = F3(
+	function (_v0, mContext, msgWrapper) {
+		var viewWidth = _v0.a;
+		var viewHeight = _v0.b;
+		var handyMapControls = function (context) {
+			return A2(
+				$mdgriffith$elm_ui$Element$column,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$alignTop,
+						$mdgriffith$elm_ui$Element$alignRight,
+						$mdgriffith$elm_ui$Element$moveDown(100),
+						$mdgriffith$elm_ui$Element$moveLeft(10),
+						$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite),
+						$mdgriffith$elm_ui$Element$Font$size(40),
+						$mdgriffith$elm_ui$Element$padding(6),
+						$mdgriffith$elm_ui$Element$spacing(8)
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Element$Input$button,
+						_List_fromArray(
+							[
+								A2(
+								$author$project$ToolTip$tooltip,
+								$mdgriffith$elm_ui$Element$onLeft,
+								function () {
+									var _v2 = context.followOrange;
+									if (_v2) {
+										return $author$project$ToolTip$myTooltip('Click to stop following Orange marker');
+									} else {
+										return $author$project$ToolTip$myTooltip('Click to follow Orange marker');
+									}
+								}())
+							]),
+						{
+							label: context.followOrange ? $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$lock) : $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$unlock),
+							onPress: $elm$core$Maybe$Just(
+								msgWrapper($author$project$ViewMap$ToggleFollowOrange))
+						}),
+						A2(
+						$mdgriffith$elm_ui$Element$Input$button,
+						_List_fromArray(
+							[
+								A2(
+								$author$project$ToolTip$tooltip,
+								$mdgriffith$elm_ui$Element$onLeft,
+								function () {
+									var _v3 = context.draggable;
+									if (_v3) {
+										return $author$project$ToolTip$myTooltip('Click to disable point dragging');
+									} else {
+										return $author$project$ToolTip$myTooltip('Click to allow point dragging');
+									}
+								}())
+							]),
+						{
+							label: context.draggable ? $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$move) : $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$x),
+							onPress: $elm$core$Maybe$Just(
+								msgWrapper($author$project$ViewMap$ToggleDraggable))
+						})
+					]));
+		};
+		if (mContext.$ === 'Just') {
+			var context = mContext.a;
+			return A2(
+				$mdgriffith$elm_ui$Element$row,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$inFront(
+						handyMapControls(context))
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$width(
+								$mdgriffith$elm_ui$Element$px(
+									$ianmackenzie$elm_units$Pixels$inPixels(viewWidth))),
+								$mdgriffith$elm_ui$Element$height(
+								$mdgriffith$elm_ui$Element$px(
+									$ianmackenzie$elm_units$Pixels$inPixels(viewHeight))),
+								$mdgriffith$elm_ui$Element$alignLeft,
+								$mdgriffith$elm_ui$Element$alignTop,
+								$mdgriffith$elm_ui$Element$Border$width(2),
+								$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$peace),
+								$mdgriffith$elm_ui$Element$htmlAttribute(
+								$elm$html$Html$Attributes$id('map'))
+							]),
+						$mdgriffith$elm_ui$Element$none)
+					]));
+		} else {
+			return A2(
+				$mdgriffith$elm_ui$Element$row,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$htmlAttribute(
+								$elm$html$Html$Attributes$id('map'))
+							]),
+						$mdgriffith$elm_ui$Element$none)
+					]));
+		}
+	});
+var $author$project$ViewPlan$ImageClick = function (a) {
+	return {$: 'ImageClick', a: a};
+};
+var $author$project$ViewPlan$ImageDoubleClick = function (a) {
+	return {$: 'ImageDoubleClick', a: a};
+};
+var $author$project$ViewPlan$ImageDrag = function (a) {
+	return {$: 'ImageDrag', a: a};
+};
+var $author$project$ViewPlan$ImageGrab = function (a) {
+	return {$: 'ImageGrab', a: a};
+};
+var $author$project$ViewPlan$ImageMouseWheel = function (a) {
+	return {$: 'ImageMouseWheel', a: a};
+};
+var $author$project$ViewPlan$ImageNoOp = {$: 'ImageNoOp'};
+var $author$project$ViewPlan$ImageRelease = function (a) {
+	return {$: 'ImageRelease', a: a};
+};
+var $author$project$ViewPlan$onContextMenu = function (msg) {
+	return $mdgriffith$elm_ui$Element$htmlAttribute(
+		A2(
+			$elm$html$Html$Events$custom,
+			'contextmenu',
+			$elm$json$Json$Decode$succeed(
+				{message: msg, preventDefault: true, stopPropagation: true})));
+};
+var $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onMove = A2($mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onWithOptions, 'mousemove', $mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$defaultOptions);
 var $author$project$ViewPlan$ImageReset = {$: 'ImageReset'};
 var $author$project$ViewPlan$ImageZoomIn = {$: 'ImageZoomIn'};
 var $author$project$ViewPlan$ImageZoomOut = {$: 'ImageZoomOut'};
@@ -52390,30 +52527,6 @@ var $author$project$ViewProfileCharts$view = F4(
 var $author$project$View3dCommonElements$ImageDrag = function (a) {
 	return {$: 'ImageDrag', a: a};
 };
-var $author$project$View3dCommonElements$ImageClick = function (a) {
-	return {$: 'ImageClick', a: a};
-};
-var $author$project$View3dCommonElements$ImageDoubleClick = function (a) {
-	return {$: 'ImageDoubleClick', a: a};
-};
-var $author$project$View3dCommonElements$ImageGrab = function (a) {
-	return {$: 'ImageGrab', a: a};
-};
-var $author$project$View3dCommonElements$ImageMouseWheel = function (a) {
-	return {$: 'ImageMouseWheel', a: a};
-};
-var $author$project$View3dCommonElements$ImageNoOp = {$: 'ImageNoOp'};
-var $author$project$View3dCommonElements$ImageRelease = function (a) {
-	return {$: 'ImageRelease', a: a};
-};
-var $author$project$View3dCommonElements$onContextMenu = function (msg) {
-	return $mdgriffith$elm_ui$Element$htmlAttribute(
-		A2(
-			$elm$html$Html$Events$custom,
-			'contextmenu',
-			$elm$json$Json$Decode$succeed(
-				{message: msg, preventDefault: true, stopPropagation: true})));
-};
 var $author$project$View3dCommonElements$ImageReset = {$: 'ImageReset'};
 var $author$project$View3dCommonElements$ImageZoomIn = {$: 'ImageZoomIn'};
 var $author$project$View3dCommonElements$ImageZoomOut = {$: 'ImageZoomOut'};
@@ -52517,39 +52630,6 @@ var $author$project$View3dCommonElements$zoomButtons = F2(
 					})
 				]));
 	});
-var $author$project$View3dCommonElements$common3dSceneAttributes = F2(
-	function (msgWrapper, context) {
-		return _List_fromArray(
-			[
-				$mdgriffith$elm_ui$Element$htmlAttribute(
-				$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onDown(
-					A2($elm$core$Basics$composeR, $author$project$View3dCommonElements$ImageGrab, msgWrapper))),
-				$mdgriffith$elm_ui$Element$htmlAttribute(
-				$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onUp(
-					A2($elm$core$Basics$composeR, $author$project$View3dCommonElements$ImageRelease, msgWrapper))),
-				$mdgriffith$elm_ui$Element$htmlAttribute(
-				$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onClick(
-					A2($elm$core$Basics$composeR, $author$project$View3dCommonElements$ImageClick, msgWrapper))),
-				$mdgriffith$elm_ui$Element$htmlAttribute(
-				$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onDoubleClick(
-					A2($elm$core$Basics$composeR, $author$project$View3dCommonElements$ImageDoubleClick, msgWrapper))),
-				$mdgriffith$elm_ui$Element$htmlAttribute(
-				$mpizenberg$elm_pointer_events$Html$Events$Extra$Wheel$onWheel(
-					function (event) {
-						return msgWrapper(
-							$author$project$View3dCommonElements$ImageMouseWheel(event.deltaY));
-					})),
-				$author$project$View3dCommonElements$onContextMenu(
-				msgWrapper($author$project$View3dCommonElements$ImageNoOp)),
-				$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-				$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-				$mdgriffith$elm_ui$Element$pointer,
-				$mdgriffith$elm_ui$Element$Border$width(0),
-				$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$peace),
-				$mdgriffith$elm_ui$Element$inFront(
-				A2($author$project$View3dCommonElements$zoomButtons, msgWrapper, context))
-			]);
-	});
 var $author$project$ViewThirdPerson$view = F5(
 	function (context, contentArea, track, scene, msgWrapper) {
 		var dragging = context.dragAction;
@@ -52560,7 +52640,11 @@ var $author$project$ViewThirdPerson$view = F5(
 				(!_Utils_eq(dragging, $author$project$View3dCommonElements$DragNone)) ? $mdgriffith$elm_ui$Element$htmlAttribute(
 					$mpizenberg$elm_pointer_events$Html$Events$Extra$Mouse$onMove(
 						A2($elm$core$Basics$composeR, $author$project$View3dCommonElements$ImageDrag, msgWrapper))) : $mdgriffith$elm_ui$Element$pointer,
-				A2($author$project$View3dCommonElements$common3dSceneAttributes, msgWrapper, context)),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$inFront(
+						A2($author$project$View3dCommonElements$zoomButtons, msgWrapper, context)),
+					A2($author$project$View3dCommonElements$common3dSceneAttributes, msgWrapper, context))),
 			$mdgriffith$elm_ui$Element$html(
 				$ianmackenzie$elm_3d_scene$Scene3d$sunny(
 					{
@@ -52620,6 +52704,10 @@ var $author$project$PaneLayoutManager$viewModeChoices = F2(
 				$author$project$ViewPureStyles$radioButton('Perspective')),
 				A2(
 				$mdgriffith$elm_ui$Element$Input$optionWith,
+				$author$project$PaneLayoutManager$ViewFirst,
+				$author$project$ViewPureStyles$radioButton('Rider view')),
+				A2(
+				$mdgriffith$elm_ui$Element$Input$optionWith,
 				$author$project$PaneLayoutManager$ViewProfile,
 				$author$project$ViewPureStyles$radioButton('Profile')),
 				A2(
@@ -52657,6 +52745,10 @@ var $author$project$PaneLayoutManager$viewModeChoicesNoMap = F2(
 				$mdgriffith$elm_ui$Element$Input$optionWith,
 				$author$project$PaneLayoutManager$ViewThird,
 				$author$project$ViewPureStyles$radioButton('Perspective')),
+				A2(
+				$mdgriffith$elm_ui$Element$Input$optionWith,
+				$author$project$PaneLayoutManager$ViewFirst,
+				$author$project$ViewPureStyles$radioButton('Rider view')),
 				A2(
 				$mdgriffith$elm_ui$Element$Input$optionWith,
 				$author$project$PaneLayoutManager$ViewProfile,
@@ -52768,11 +52860,29 @@ var $author$project$PaneLayoutManager$viewPanes = F4(
 					} else {
 						return $mdgriffith$elm_ui$Element$none;
 					}
-				case 'ViewPlan':
-					var _v5 = _Utils_Tuple2(pane.planContext, mTrack);
+				case 'ViewFirst':
+					var _v5 = _Utils_Tuple2(pane.thirdPersonContext, mTrack);
 					if ((_v5.a.$ === 'Just') && (_v5.b.$ === 'Just')) {
 						var context = _v5.a.a;
 						var track = _v5.b.a;
+						return A5(
+							$author$project$ViewFirstPerson$view,
+							context,
+							_Utils_Tuple2(paneWidth, paneHeight),
+							track,
+							options.scene3d,
+							A2(
+								$elm$core$Basics$composeL,
+								msgWrapper,
+								$author$project$PaneLayoutManager$ThirdPersonViewMessage(pane.paneId)));
+					} else {
+						return $mdgriffith$elm_ui$Element$none;
+					}
+				case 'ViewPlan':
+					var _v6 = _Utils_Tuple2(pane.planContext, mTrack);
+					if ((_v6.a.$ === 'Just') && (_v6.b.$ === 'Just')) {
+						var context = _v6.a.a;
+						var track = _v6.b.a;
 						return A5(
 							$author$project$ViewPlan$view,
 							context,
@@ -52787,10 +52897,10 @@ var $author$project$PaneLayoutManager$viewPanes = F4(
 						return $mdgriffith$elm_ui$Element$none;
 					}
 				case 'ViewProfile':
-					var _v6 = _Utils_Tuple2(pane.profileContext, mTrack);
-					if ((_v6.a.$ === 'Just') && (_v6.b.$ === 'Just')) {
-						var context = _v6.a.a;
-						var track = _v6.b.a;
+					var _v7 = _Utils_Tuple2(pane.profileContext, mTrack);
+					if ((_v7.a.$ === 'Just') && (_v7.b.$ === 'Just')) {
+						var context = _v7.a.a;
+						var track = _v7.b.a;
 						return A4(
 							$author$project$ViewProfileCharts$view,
 							context,
@@ -53677,15 +53787,6 @@ var $author$project$PaneLayoutManager$paneLayoutMenu = F2(
 			});
 	});
 var $smucode$elm_flat_colors$FlatColors$ChinesePalette$twinkleBlue = A3($mdgriffith$elm_ui$Element$rgb255, 206, 214, 224);
-var $author$project$ViewPureStyles$useIconWithSize = function (size) {
-	return A2(
-		$elm$core$Basics$composeL,
-		A2(
-			$elm$core$Basics$composeL,
-			$mdgriffith$elm_ui$Element$html,
-			$feathericons$elm_feather$FeatherIcons$toHtml(_List_Nil)),
-		$feathericons$elm_feather$FeatherIcons$withSize(size));
-};
 var $author$project$SvgPathExtractor$ReadFile = function (a) {
 	return {$: 'ReadFile', a: a};
 };
