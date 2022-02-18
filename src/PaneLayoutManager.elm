@@ -634,6 +634,9 @@ initialisePane track options pane =
         | thirdPersonContext =
             Just <|
                 ViewThirdPerson.initialiseView 0 track.trackTree pane.thirdPersonContext
+        , firstPersonContext =
+            Just <|
+                ViewThirdPerson.initialiseView 0 track.trackTree pane.firstPersonContext
         , profileContext =
             Just <|
                 ViewProfileCharts.initialiseView 0 track.trackTree pane.profileContext

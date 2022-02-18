@@ -14643,6 +14643,8 @@ var $author$project$PaneLayoutManager$initialisePane = F3(
 		return _Utils_update(
 			pane,
 			{
+				firstPersonContext: $elm$core$Maybe$Just(
+					A3($author$project$ViewThirdPerson$initialiseView, 0, track.trackTree, pane.firstPersonContext)),
 				mapContext: $elm$core$Maybe$Just(
 					$author$project$ViewMap$initialiseContext(pane.mapContext)),
 				planContext: $elm$core$Maybe$Just(
@@ -16329,7 +16331,7 @@ var $author$project$Tools$CurveFormer$toolStateChange = F4(
 			var theTrack = _v0.b.a;
 			return _Utils_Tuple2(
 				options,
-				A3($author$project$Tools$CurveFormer$previewActions, options, colour, theTrack));
+				A3($author$project$Tools$CurveFormer$previewActions, $author$project$Tools$CurveFormer$defaultOptions, colour, theTrack));
 		} else {
 			return _Utils_Tuple2(
 				options,
@@ -22212,6 +22214,7 @@ var $author$project$Main$adoptTrackInModel = F2(
 			{
 				modalMessage: $elm$core$Maybe$Nothing,
 				paneLayoutOptions: A2($author$project$PaneLayoutManager$initialise, track, model.paneLayoutOptions),
+				previews: $elm$core$Dict$empty,
 				track: $elm$core$Maybe$Just(track)
 			});
 		var actions = _List_fromArray(

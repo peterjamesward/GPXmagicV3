@@ -682,6 +682,7 @@ adoptTrackInModel track model =
                         track
                         model.paneLayoutOptions
                 , modalMessage = Nothing
+                , previews = Dict.empty
             }
 
         actions =

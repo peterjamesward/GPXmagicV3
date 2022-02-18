@@ -146,7 +146,7 @@ toolStateChange :
 toolStateChange opened colour options track =
     case ( opened, track ) of
         ( True, Just theTrack ) ->
-            ( options, previewActions options colour theTrack )
+            ( options, previewActions defaultOptions colour theTrack )
 
         _ ->
             ( options, [ HidePreview "formerOutcome", HidePreview "formerTool" ] )

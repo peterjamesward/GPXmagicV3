@@ -6,10 +6,6 @@ DEBT: Map sends more click messages each time we click.
 
 DEBT: Memory update messages should originate from the TrackInfoBox tool.
 
-BUG: Curve Former should reset on track load.
-
-BUG: Pointers are not reset on track load.
-
 BUG: Classic bend smoother consumes all memory on certain looped routes where
      orange and purple are (possibly) co-linear, or something.
 
