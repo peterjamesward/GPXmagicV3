@@ -36,14 +36,21 @@ type alias Flythrough =
     , focusPoint : EarthPoint
     , metresFromRouteStart : Length.Length
     , lastUpdated : Time.Posix
-    , running : Bool
+    , running : RunState
     }
+
+
+type RunState
+    = Idle
+    | AwaitingFirstTick
+    | Running
+    | Ended
+    | Paused
 
 
 type alias Options =
     { flythroughSpeed : Float
     , flythrough : Maybe Flythrough
-    , modelTime : Time.Posix
     , savedCurrentPosition : Int
     }
 
@@ -51,7 +58,6 @@ type alias Options =
 defaultOptions =
     { flythroughSpeed = 1.0
     , flythrough = Nothing
-    , modelTime = Time.millisToPosix 0
     , savedCurrentPosition = 0
     }
 
@@ -87,62 +93,77 @@ advanceInternal newTime status speed track =
         lastPointDistance =
             DomainModel.distanceFromIndex lastPointPassedIndex track.trackTree
     in
-    if not status.running then
-        Just { status | lastUpdated = newTime }
+    case status.running of
+        Idle ->
+            Just status
 
-    else if
-        status.metresFromRouteStart
-            |> Quantity.greaterThanOrEqualTo (DomainModel.trueLength track.trackTree)
-    then
-        Just { status | running = False }
+        AwaitingFirstTick ->
+            Just
+                { status
+                    | lastUpdated = newTime
+                    , running = Running
+                }
 
-    else
-        let
-            segInsetMetres =
-                newDistance |> Quantity.minus lastPointDistance
+        Paused ->
+            Just { status | lastUpdated = newTime }
 
-            segLength =
-                DomainModel.trueLength currentRoad
+        Ended ->
+            Just status
 
-            segFraction =
-                Quantity.ratio segInsetMetres segLength
+        Running ->
+            if
+                status.metresFromRouteStart
+                    |> Quantity.greaterThanOrEqualTo (DomainModel.trueLength track.trackTree)
+            then
+                Just { status | running = Ended }
 
-            segRemaining =
-                segLength
-                    |> Quantity.minus segInsetMetres
-                    |> Length.inMeters
+            else
+                let
+                    segInsetMetres =
+                        newDistance |> Quantity.minus lastPointDistance
 
-            headTurnFraction =
-                -- Allow for POV rotation as we near segment end.
-                clamp 0.0 1.0 <| (10.0 - segRemaining) / 10.0
+                    segLength =
+                        DomainModel.trueLength currentRoad
 
-            camera3d =
-                -- The camera is where the bike is!
-                Point3d.translateBy
-                    (Vector3d.xyz Quantity.zero Quantity.zero eyeHeight)
-                <|
-                    Point3d.interpolateFrom
-                        (DomainModel.startPoint currentRoad)
-                        (DomainModel.endPoint currentRoad)
-                        segFraction
+                    segFraction =
+                        Quantity.ratio segInsetMetres segLength
 
-            lookingAt =
-                -- Should be looking at the next point, until we are close
-                -- enough to start looking at the one beyond that.
-                Point3d.interpolateFrom
-                    (DomainModel.endPoint currentRoad)
-                    (DomainModel.endPoint nextRoad)
-                    headTurnFraction
-                    |> Point3d.translateBy
-                        (Vector3d.xyz Quantity.zero Quantity.zero eyeHeight)
-        in
-        Just
-            { status
-                | metresFromRouteStart = newDistance
-                , lastUpdated = newTime
-                , cameraPosition = camera3d
-                , focusPoint = lookingAt
-            }
+                    segRemaining =
+                        segLength
+                            |> Quantity.minus segInsetMetres
+                            |> Length.inMeters
+
+                    headTurnFraction =
+                        -- Allow for POV rotation as we near segment end.
+                        clamp 0.0 1.0 <| (10.0 - segRemaining) / 10.0
+
+                    camera3d =
+                        -- The camera is where the bike is!
+                        Point3d.translateBy
+                            (Vector3d.xyz Quantity.zero Quantity.zero eyeHeight)
+                        <|
+                            Point3d.interpolateFrom
+                                (DomainModel.startPoint currentRoad)
+                                (DomainModel.endPoint currentRoad)
+                                segFraction
+
+                    lookingAt =
+                        -- Should be looking at the next point, until we are close
+                        -- enough to start looking at the one beyond that.
+                        Point3d.interpolateFrom
+                            (DomainModel.endPoint currentRoad)
+                            (DomainModel.endPoint nextRoad)
+                            headTurnFraction
+                            |> Point3d.translateBy
+                                (Vector3d.xyz Quantity.zero Quantity.zero eyeHeight)
+                in
+                Just
+                    { status
+                        | metresFromRouteStart = newDistance
+                        , lastUpdated = newTime
+                        , cameraPosition = camera3d
+                        , focusPoint = lookingAt
+                    }
 
 
 view : Bool -> Options -> (Msg -> msg) -> Element msg
@@ -200,7 +221,7 @@ view imperial options wrapper =
                     playButton
 
                 Just flying ->
-                    pauseButton flying.running
+                    pauseButton <| flying.running == Running
     in
     column
         [ padding 10
@@ -248,7 +269,7 @@ update :
     -> Msg
     -> TrackLoaded msg
     -> ( Options, List (ToolAction msg) )
-update options msg  track =
+update options msg track =
     case msg of
         SetFlythroughSpeed speed ->
             ( { options | flythroughSpeed = speed }
@@ -331,10 +352,10 @@ prepareFlythrough track options =
     in
     Just
         { metresFromRouteStart = DomainModel.distanceFromIndex track.currentPosition track.trackTree
-        , running = False
         , cameraPosition = eyePoint
         , focusPoint = focusPoint
-        , lastUpdated = options.modelTime
+        , lastUpdated = Time.millisToPosix 0
+        , running = AwaitingFirstTick
         }
 
 
@@ -343,7 +364,7 @@ startFlythrough track options =
     case prepareFlythrough track options of
         Just flying ->
             { options
-                | flythrough = Just { flying | running = True }
+                | flythrough = Just flying
                 , savedCurrentPosition = track.currentPosition
             }
 
@@ -357,7 +378,19 @@ togglePause options =
         Just flying ->
             { options
                 | flythrough =
-                    Just { flying | running = not flying.running }
+                    Just
+                        { flying
+                            | running =
+                                case flying.running of
+                                    Paused ->
+                                        Running
+
+                                    Running ->
+                                        Paused
+
+                                    _ ->
+                                        flying.running
+                        }
             }
 
         Nothing ->
@@ -366,4 +399,9 @@ togglePause options =
 
 isActive : Options -> Bool
 isActive options =
-    Maybe.map .running options.flythrough |> Maybe.withDefault False
+    case options.flythrough of
+        Just fly ->
+            fly.running == Running
+
+        Nothing ->
+            False

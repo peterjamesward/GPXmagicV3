@@ -14,6 +14,7 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 # WIP
 
 1. Fly-through
+> Need to get time at which we start!
 
 ---
 

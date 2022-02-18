@@ -8767,16 +8767,7 @@ var $author$project$Tools$DirectionChanges$defaultOptions = {
 };
 var $author$project$Tools$DisplaySettingsOptions$PastelCurtain = {$: 'PastelCurtain'};
 var $author$project$Tools$DisplaySettings$defaultOptions = {centreLine: false, curtainStyle: $author$project$Tools$DisplaySettingsOptions$PastelCurtain, groundPlane: true, roadSurface: true};
-var $elm$time$Time$Posix = function (a) {
-	return {$: 'Posix', a: a};
-};
-var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
-var $author$project$Tools$Flythrough$defaultOptions = {
-	flythrough: $elm$core$Maybe$Nothing,
-	flythroughSpeed: 1.0,
-	modelTime: $elm$time$Time$millisToPosix(0),
-	savedCurrentPosition: 0
-};
+var $author$project$Tools$Flythrough$defaultOptions = {flythrough: $elm$core$Maybe$Nothing, flythroughSpeed: 1.0, savedCurrentPosition: 0};
 var $author$project$Tools$GradientProblems$AbruptChange = {$: 'AbruptChange'};
 var $author$project$Tools$GradientProblems$defaultOptions = {breaches: _List_Nil, currentBreach: 0, mode: $author$project$Tools$GradientProblems$AbruptChange, threshold: 10.0};
 var $author$project$Tools$InterpolateOptions$ExtentIsRange = {$: 'ExtentIsRange'};
@@ -10064,6 +10055,10 @@ var $author$project$StravaAuth$init = F4(
 					clearUrl);
 		}
 	});
+var $elm$time$Time$Posix = function (a) {
+	return {$: 'Posix', a: a};
+};
+var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
 var $ianmackenzie$elm_units$Pixels$pixels = function (numPixels) {
 	return $ianmackenzie$elm_units$Quantity$Quantity(numPixels);
 };
@@ -23290,6 +23285,8 @@ var $author$project$Actions$SetCurrent = function (a) {
 	return {$: 'SetCurrent', a: a};
 };
 var $author$project$Actions$StopFlythroughTicks = {$: 'StopFlythroughTicks'};
+var $author$project$Tools$Flythrough$Ended = {$: 'Ended'};
+var $author$project$Tools$Flythrough$Running = {$: 'Running'};
 var $author$project$Tools$Flythrough$eyeHeight = $ianmackenzie$elm_units$Length$meters(2.0);
 var $elm$time$Time$posixToMillis = function (_v0) {
 	var millis = _v0.a;
@@ -23307,48 +23304,59 @@ var $author$project$Tools$Flythrough$advanceInternal = F4(
 		var nextRoad = A2($author$project$DomainModel$leafFromIndex, lastPointPassedIndex + 1, track.trackTree);
 		var lastPointDistance = A2($author$project$DomainModel$distanceFromIndex, lastPointPassedIndex, track.trackTree);
 		var currentRoad = A2($author$project$DomainModel$leafFromIndex, lastPointPassedIndex, track.trackTree);
-		if (!status.running) {
-			return $elm$core$Maybe$Just(
-				_Utils_update(
-					status,
-					{lastUpdated: newTime}));
-		} else {
-			if (A2(
-				$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo,
-				$author$project$DomainModel$trueLength(track.trackTree),
-				status.metresFromRouteStart)) {
+		var _v0 = status.running;
+		switch (_v0.$) {
+			case 'Idle':
+				return $elm$core$Maybe$Just(status);
+			case 'AwaitingFirstTick':
 				return $elm$core$Maybe$Just(
 					_Utils_update(
 						status,
-						{running: false}));
-			} else {
-				var segLength = $author$project$DomainModel$trueLength(currentRoad);
-				var segInsetMetres = A2($ianmackenzie$elm_units$Quantity$minus, lastPointDistance, newDistance);
-				var segRemaining = $ianmackenzie$elm_units$Length$inMeters(
-					A2($ianmackenzie$elm_units$Quantity$minus, segInsetMetres, segLength));
-				var segFraction = A2($ianmackenzie$elm_units$Quantity$ratio, segInsetMetres, segLength);
-				var headTurnFraction = A3($elm$core$Basics$clamp, 0.0, 1.0, (10.0 - segRemaining) / 10.0);
-				var lookingAt = A2(
-					$ianmackenzie$elm_geometry$Point3d$translateBy,
-					A3($ianmackenzie$elm_geometry$Vector3d$xyz, $ianmackenzie$elm_units$Quantity$zero, $ianmackenzie$elm_units$Quantity$zero, $author$project$Tools$Flythrough$eyeHeight),
-					A3(
-						$ianmackenzie$elm_geometry$Point3d$interpolateFrom,
-						$author$project$DomainModel$endPoint(currentRoad),
-						$author$project$DomainModel$endPoint(nextRoad),
-						headTurnFraction));
-				var camera3d = A2(
-					$ianmackenzie$elm_geometry$Point3d$translateBy,
-					A3($ianmackenzie$elm_geometry$Vector3d$xyz, $ianmackenzie$elm_units$Quantity$zero, $ianmackenzie$elm_units$Quantity$zero, $author$project$Tools$Flythrough$eyeHeight),
-					A3(
-						$ianmackenzie$elm_geometry$Point3d$interpolateFrom,
-						$author$project$DomainModel$startPoint(currentRoad),
-						$author$project$DomainModel$endPoint(currentRoad),
-						segFraction));
+						{lastUpdated: newTime, running: $author$project$Tools$Flythrough$Running}));
+			case 'Paused':
 				return $elm$core$Maybe$Just(
 					_Utils_update(
 						status,
-						{cameraPosition: camera3d, focusPoint: lookingAt, lastUpdated: newTime, metresFromRouteStart: newDistance}));
-			}
+						{lastUpdated: newTime}));
+			case 'Ended':
+				return $elm$core$Maybe$Just(status);
+			default:
+				if (A2(
+					$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo,
+					$author$project$DomainModel$trueLength(track.trackTree),
+					status.metresFromRouteStart)) {
+					return $elm$core$Maybe$Just(
+						_Utils_update(
+							status,
+							{running: $author$project$Tools$Flythrough$Ended}));
+				} else {
+					var segLength = $author$project$DomainModel$trueLength(currentRoad);
+					var segInsetMetres = A2($ianmackenzie$elm_units$Quantity$minus, lastPointDistance, newDistance);
+					var segRemaining = $ianmackenzie$elm_units$Length$inMeters(
+						A2($ianmackenzie$elm_units$Quantity$minus, segInsetMetres, segLength));
+					var segFraction = A2($ianmackenzie$elm_units$Quantity$ratio, segInsetMetres, segLength);
+					var headTurnFraction = A3($elm$core$Basics$clamp, 0.0, 1.0, (10.0 - segRemaining) / 10.0);
+					var lookingAt = A2(
+						$ianmackenzie$elm_geometry$Point3d$translateBy,
+						A3($ianmackenzie$elm_geometry$Vector3d$xyz, $ianmackenzie$elm_units$Quantity$zero, $ianmackenzie$elm_units$Quantity$zero, $author$project$Tools$Flythrough$eyeHeight),
+						A3(
+							$ianmackenzie$elm_geometry$Point3d$interpolateFrom,
+							$author$project$DomainModel$endPoint(currentRoad),
+							$author$project$DomainModel$endPoint(nextRoad),
+							headTurnFraction));
+					var camera3d = A2(
+						$ianmackenzie$elm_geometry$Point3d$translateBy,
+						A3($ianmackenzie$elm_geometry$Vector3d$xyz, $ianmackenzie$elm_units$Quantity$zero, $ianmackenzie$elm_units$Quantity$zero, $author$project$Tools$Flythrough$eyeHeight),
+						A3(
+							$ianmackenzie$elm_geometry$Point3d$interpolateFrom,
+							$author$project$DomainModel$startPoint(currentRoad),
+							$author$project$DomainModel$endPoint(currentRoad),
+							segFraction));
+					return $elm$core$Maybe$Just(
+						_Utils_update(
+							status,
+							{cameraPosition: camera3d, focusPoint: lookingAt, lastUpdated: newTime, metresFromRouteStart: newDistance}));
+				}
 		}
 	});
 var $author$project$DomainModel$indexFromDistanceRoundedDown = F2(
@@ -29786,6 +29794,7 @@ var $author$project$Tools$DisplaySettings$update = F2(
 		}
 	});
 var $author$project$Actions$StartFlythoughTicks = {$: 'StartFlythoughTicks'};
+var $author$project$Tools$Flythrough$AwaitingFirstTick = {$: 'AwaitingFirstTick'};
 var $author$project$Tools$Flythrough$prepareFlythrough = F2(
 	function (track, options) {
 		var currentRoad = $author$project$DomainModel$asRecord(
@@ -29803,9 +29812,9 @@ var $author$project$Tools$Flythrough$prepareFlythrough = F2(
 			{
 				cameraPosition: eyePoint,
 				focusPoint: focusPoint,
-				lastUpdated: options.modelTime,
+				lastUpdated: $elm$time$Time$millisToPosix(0),
 				metresFromRouteStart: A2($author$project$DomainModel$distanceFromIndex, track.currentPosition, track.trackTree),
-				running: false
+				running: $author$project$Tools$Flythrough$AwaitingFirstTick
 			});
 	});
 var $author$project$Tools$Flythrough$startFlythrough = F2(
@@ -29816,16 +29825,14 @@ var $author$project$Tools$Flythrough$startFlythrough = F2(
 			return _Utils_update(
 				options,
 				{
-					flythrough: $elm$core$Maybe$Just(
-						_Utils_update(
-							flying,
-							{running: true})),
+					flythrough: $elm$core$Maybe$Just(flying),
 					savedCurrentPosition: track.currentPosition
 				});
 		} else {
 			return options;
 		}
 	});
+var $author$project$Tools$Flythrough$Paused = {$: 'Paused'};
 var $author$project$Tools$Flythrough$togglePause = function (options) {
 	var _v0 = options.flythrough;
 	if (_v0.$ === 'Just') {
@@ -29836,7 +29843,19 @@ var $author$project$Tools$Flythrough$togglePause = function (options) {
 				flythrough: $elm$core$Maybe$Just(
 					_Utils_update(
 						flying,
-						{running: !flying.running}))
+						{
+							running: function () {
+								var _v1 = flying.running;
+								switch (_v1.$) {
+									case 'Paused':
+										return $author$project$Tools$Flythrough$Running;
+									case 'Running':
+										return $author$project$Tools$Flythrough$Paused;
+									default:
+										return flying.running;
+								}
+							}()
+						}))
 			});
 	} else {
 		return options;
@@ -42440,7 +42459,8 @@ var $author$project$Tools$Flythrough$view = F3(
 				return playButton;
 			} else {
 				var flying = _v1.a;
-				return pauseButton(flying.running);
+				return pauseButton(
+					_Utils_eq(flying.running, $author$project$Tools$Flythrough$Running));
 			}
 		}();
 		var flythroughSpeedSlider = A2(
