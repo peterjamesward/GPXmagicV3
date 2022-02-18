@@ -91,15 +91,15 @@ zoomButtons msgWrapper context =
         , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ImageNoOp >> msgWrapper)
         , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always ImageNoOp >> msgWrapper)
         ]
-        [ Input.button [ tooltip onLeft (myTooltip "Zoom in") ]
+        [ Input.button []
             { onPress = Just <| msgWrapper ImageZoomIn
             , label = useIcon FeatherIcons.plus
             }
-        , Input.button [ tooltip onLeft (myTooltip "Zoom out") ]
+        , Input.button []
             { onPress = Just <| msgWrapper ImageZoomOut
             , label = useIcon FeatherIcons.minus
             }
-        , Input.button [ tooltip onLeft (myTooltip "Reset") ]
+        , Input.button []
             { onPress = Just <| msgWrapper ImageReset
             , label = useIcon FeatherIcons.maximize
             }
