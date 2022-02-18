@@ -8767,6 +8767,15 @@ var $author$project$Tools$DirectionChanges$defaultOptions = {
 };
 var $author$project$Tools$DisplaySettingsOptions$PastelCurtain = {$: 'PastelCurtain'};
 var $author$project$Tools$DisplaySettings$defaultOptions = {centreLine: false, curtainStyle: $author$project$Tools$DisplaySettingsOptions$PastelCurtain, groundPlane: true, roadSurface: true};
+var $elm$time$Time$Posix = function (a) {
+	return {$: 'Posix', a: a};
+};
+var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
+var $author$project$Tools$Flythrough$defaultOptions = {
+	flythrough: $elm$core$Maybe$Nothing,
+	flythroughSpeed: 1.0,
+	modelTime: $elm$time$Time$millisToPosix(0)
+};
 var $author$project$Tools$GradientProblems$AbruptChange = {$: 'AbruptChange'};
 var $author$project$Tools$GradientProblems$defaultOptions = {breaches: _List_Nil, currentBreach: 0, mode: $author$project$Tools$GradientProblems$AbruptChange, threshold: 10.0};
 var $author$project$Tools$InterpolateOptions$ExtentIsRange = {$: 'ExtentIsRange'};
@@ -8910,6 +8919,18 @@ var $author$project$ToolsController$displaySettingsTool = {
 	toolType: $author$project$ToolsController$ToolDisplaySettings,
 	video: $elm$core$Maybe$Nothing
 };
+var $author$project$ToolsController$ToolFlythrough = {$: 'ToolFlythrough'};
+var $author$project$ToolsController$flythroughTool = {
+	dock: $author$project$ToolsController$DockUpperLeft,
+	info: 'Fly-through',
+	isPopupOpen: false,
+	label: 'Fly-through',
+	state: $author$project$ToolsController$Contracted,
+	tabColour: $smucode$elm_flat_colors$FlatColors$FlatUIPalette$concrete,
+	textColour: $author$project$ViewPureStyles$contrastingColour($smucode$elm_flat_colors$FlatColors$FlatUIPalette$concrete),
+	toolType: $author$project$ToolsController$ToolFlythrough,
+	video: $elm$core$Maybe$Nothing
+};
 var $author$project$ToolsController$ToolGradientProblems = {$: 'ToolGradientProblems'};
 var $author$project$ToolsController$gradientChangeTool = {
 	dock: $author$project$ToolsController$DockLowerLeft,
@@ -9035,7 +9056,7 @@ var $author$project$ToolsController$undoRedoTool = {
 	video: $elm$core$Maybe$Nothing
 };
 var $author$project$ToolsController$defaultTools = _List_fromArray(
-	[$author$project$ToolsController$pointersTool, $author$project$ToolsController$undoRedoTool, $author$project$ToolsController$trackInfoBox, $author$project$ToolsController$displaySettingsTool, $author$project$ToolsController$directionChangeTool, $author$project$ToolsController$gradientChangeTool, $author$project$ToolsController$deleteTool, $author$project$ToolsController$bezierSplinesTool, $author$project$ToolsController$centroidAverageTool, $author$project$ToolsController$curveFormerTool, $author$project$ToolsController$bendSmootherTool, $author$project$ToolsController$nudgeTool, $author$project$ToolsController$outAndBackTool, $author$project$ToolsController$simplifyTool, $author$project$ToolsController$interpolateTool, $author$project$ToolsController$limitGradientTool, $author$project$ToolsController$moveScaleRotateTool]);
+	[$author$project$ToolsController$pointersTool, $author$project$ToolsController$undoRedoTool, $author$project$ToolsController$trackInfoBox, $author$project$ToolsController$displaySettingsTool, $author$project$ToolsController$directionChangeTool, $author$project$ToolsController$gradientChangeTool, $author$project$ToolsController$deleteTool, $author$project$ToolsController$bezierSplinesTool, $author$project$ToolsController$centroidAverageTool, $author$project$ToolsController$curveFormerTool, $author$project$ToolsController$bendSmootherTool, $author$project$ToolsController$nudgeTool, $author$project$ToolsController$outAndBackTool, $author$project$ToolsController$simplifyTool, $author$project$ToolsController$interpolateTool, $author$project$ToolsController$limitGradientTool, $author$project$ToolsController$moveScaleRotateTool, $author$project$ToolsController$flythroughTool]);
 var $author$project$ToolsController$DockSettings = F3(
 	function (dockPopupOpen, dockLabel, dockLabelColour) {
 		return {dockLabel: dockLabel, dockLabelColour: dockLabelColour, dockPopupOpen: dockPopupOpen};
@@ -9069,6 +9090,7 @@ var $author$project$ToolsController$defaultOptions = {
 	directionChangeOptions: $author$project$Tools$DirectionChanges$defaultOptions,
 	displaySettings: $author$project$Tools$DisplaySettings$defaultOptions,
 	docks: $elm$core$Dict$fromList($author$project$ToolsController$dockList),
+	flythroughSettings: $author$project$Tools$Flythrough$defaultOptions,
 	gradientProblemOptions: $author$project$Tools$GradientProblems$defaultOptions,
 	imperial: false,
 	infoOptions: $author$project$Tools$TrackInfoBox$defaultOptions,
@@ -10041,10 +10063,6 @@ var $author$project$StravaAuth$init = F4(
 					clearUrl);
 		}
 	});
-var $elm$time$Time$Posix = function (a) {
-	return {$: 'Posix', a: a};
-};
-var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
 var $ianmackenzie$elm_units$Pixels$pixels = function (numPixels) {
 	return $ianmackenzie$elm_units$Quantity$Quantity(numPixels);
 };
@@ -14888,8 +14906,10 @@ var $author$project$ToolsController$encodeType = function (toolType) {
 			return 'ToolInterpolate';
 		case 'ToolLimitGradient':
 			return 'ToolLimitGradient';
-		default:
+		case 'ToolMoveScaleRotate':
 			return 'ToolMoveScaleRotate';
+		default:
+			return 'ToolFlythrough';
 	}
 };
 var $author$project$ToolsController$encodeOneTool = function (tool) {
@@ -16644,6 +16664,20 @@ var $author$project$Tools$DirectionChanges$toolStateChange = F4(
 					]));
 		}
 	});
+var $author$project$Tools$Flythrough$toolStateChange = F4(
+	function (opened, colour, options, track) {
+		var _v0 = _Utils_Tuple2(opened, track);
+		if (_v0.a && (_v0.b.$ === 'Just')) {
+			var theTrack = _v0.b.a;
+			return _Utils_Tuple2(options, _List_Nil);
+		} else {
+			return _Utils_Tuple2(
+				_Utils_update(
+					options,
+					{flythrough: $elm$core$Maybe$Nothing}),
+				_List_Nil);
+		}
+	});
 var $author$project$Tools$GradientProblems$findAbruptDirectionChanges = F2(
 	function (options, tree) {
 		var foldFn = F2(
@@ -17213,7 +17247,7 @@ var $author$project$ToolsController$toolStateHasChanged = F4(
 							'tools',
 							$author$project$ToolsController$encodeToolState(options)),
 						actions));
-			default:
+			case 'ToolMoveScaleRotate':
 				var _v13 = A4(
 					$author$project$Tools$MoveScaleRotate$toolStateChange,
 					_Utils_eq(newState, $author$project$ToolsController$Expanded),
@@ -17225,6 +17259,27 @@ var $author$project$ToolsController$toolStateHasChanged = F4(
 				var newOptions = _Utils_update(
 					options,
 					{moveScaleRotateSettings: newToolOptions});
+				return _Utils_Tuple2(
+					newOptions,
+					A2(
+						$elm$core$List$cons,
+						A2(
+							$author$project$Actions$StoreLocally,
+							'tools',
+							$author$project$ToolsController$encodeToolState(options)),
+						actions));
+			default:
+				var _v14 = A4(
+					$author$project$Tools$Flythrough$toolStateChange,
+					_Utils_eq(newState, $author$project$ToolsController$Expanded),
+					A2($author$project$ToolsController$getColour, toolType, options.tools),
+					options.flythroughSettings,
+					isTrack);
+				var newToolOptions = _v14.a;
+				var actions = _v14.b;
+				var newOptions = _Utils_update(
+					options,
+					{flythroughSettings: newToolOptions});
 				return _Utils_Tuple2(
 					newOptions,
 					A2(
@@ -29418,6 +29473,89 @@ var $author$project$Tools$DisplaySettings$update = F2(
 					actions(newOptions));
 		}
 	});
+var $author$project$Tools$Flythrough$eyeHeight = $ianmackenzie$elm_units$Length$meters(2.0);
+var $author$project$Tools$Flythrough$prepareFlythrough = F2(
+	function (track, options) {
+		var currentRoad = $author$project$DomainModel$asRecord(
+			A2($author$project$DomainModel$leafFromIndex, track.currentPosition, track.trackTree));
+		var eyePoint = A2(
+			$ianmackenzie$elm_geometry$Point3d$translateBy,
+			A3($ianmackenzie$elm_geometry$Vector3d$xyz, $ianmackenzie$elm_units$Quantity$zero, $ianmackenzie$elm_units$Quantity$zero, $author$project$Tools$Flythrough$eyeHeight),
+			currentRoad.startPoint);
+		var focusPoint = A2(
+			$ianmackenzie$elm_geometry$Point3d$translateBy,
+			A3($ianmackenzie$elm_geometry$Vector3d$xyz, $ianmackenzie$elm_units$Quantity$zero, $ianmackenzie$elm_units$Quantity$zero, $author$project$Tools$Flythrough$eyeHeight),
+			currentRoad.endPoint);
+		var cameraShift = A3($ianmackenzie$elm_geometry$Point3d$interpolateFrom, eyePoint, focusPoint, -1.0);
+		return $elm$core$Maybe$Just(
+			{
+				cameraPosition: eyePoint,
+				focusPoint: focusPoint,
+				lastUpdated: options.modelTime,
+				metresFromRouteStart: A2($author$project$DomainModel$distanceFromIndex, track.currentPosition, track.trackTree),
+				running: false,
+				savedCurrentPosition: track.currentPosition
+			});
+	});
+var $author$project$Tools$Flythrough$startFlythrough = F2(
+	function (track, options) {
+		var _v0 = A2($author$project$Tools$Flythrough$prepareFlythrough, track, options);
+		if (_v0.$ === 'Just') {
+			var flying = _v0.a;
+			return _Utils_update(
+				options,
+				{
+					flythrough: $elm$core$Maybe$Just(
+						_Utils_update(
+							flying,
+							{running: true}))
+				});
+		} else {
+			return options;
+		}
+	});
+var $author$project$Tools$Flythrough$togglePause = function (options) {
+	var _v0 = options.flythrough;
+	if (_v0.$ === 'Just') {
+		var flying = _v0.a;
+		return _Utils_update(
+			options,
+			{
+				flythrough: $elm$core$Maybe$Just(
+					_Utils_update(
+						flying,
+						{running: !flying.running}))
+			});
+	} else {
+		return options;
+	}
+};
+var $author$project$Tools$Flythrough$update = F3(
+	function (options, msg, track) {
+		switch (msg.$) {
+			case 'SetFlythroughSpeed':
+				var speed = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						options,
+						{flythroughSpeed: speed}),
+					_List_Nil);
+			case 'StartFlythrough':
+				return _Utils_Tuple2(
+					A2($author$project$Tools$Flythrough$startFlythrough, track, options),
+					_List_Nil);
+			case 'PauseFlythrough':
+				return _Utils_Tuple2(
+					$author$project$Tools$Flythrough$togglePause(options),
+					_List_Nil);
+			default:
+				return _Utils_Tuple2(
+					_Utils_update(
+						options,
+						{flythrough: $elm$core$Maybe$Nothing}),
+					_List_Nil);
+		}
+	});
 var $author$project$Tools$GradientProblems$findSteepClimbs = F2(
 	function (options, tree) {
 		var foldFn = F2(
@@ -30406,7 +30544,7 @@ var $author$project$ToolsController$update = F4(
 				} else {
 					return _Utils_Tuple2(options, _List_Nil);
 				}
-			default:
+			case 'ToolMoveScaleRotateMsg':
 				var msg = toolMsg.a;
 				var _v18 = A4(
 					$author$project$Tools$MoveScaleRotate$update,
@@ -30420,6 +30558,23 @@ var $author$project$ToolsController$update = F4(
 					_Utils_update(
 						options,
 						{moveScaleRotateSettings: newOptions}),
+					actions);
+			default:
+				var flyMsg = toolMsg.a;
+				var _v19 = function () {
+					if (isTrack.$ === 'Just') {
+						var track = isTrack.a;
+						return A3($author$project$Tools$Flythrough$update, options.flythroughSettings, flyMsg, track);
+					} else {
+						return _Utils_Tuple2(options.flythroughSettings, _List_Nil);
+					}
+				}();
+				var newOptions = _v19.a;
+				var actions = _v19.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						options,
+						{flythroughSettings: newOptions}),
 					actions);
 		}
 	});
@@ -38716,6 +38871,9 @@ var $author$project$ToolsController$ToolCurveFormerMsg = function (a) {
 var $author$project$ToolsController$ToolDisplaySettingMsg = function (a) {
 	return {$: 'ToolDisplaySettingMsg', a: a};
 };
+var $author$project$ToolsController$ToolFlythroughMsg = function (a) {
+	return {$: 'ToolFlythroughMsg', a: a};
+};
 var $author$project$ToolsController$ToolGradientChangeMsg = function (a) {
 	return {$: 'ToolGradientChangeMsg', a: a};
 };
@@ -41813,6 +41971,216 @@ var $author$project$Tools$DisplaySettings$view = F2(
 					})
 				]));
 	});
+var $author$project$Tools$Flythrough$PauseFlythrough = {$: 'PauseFlythrough'};
+var $author$project$Tools$Flythrough$ResetFlythrough = {$: 'ResetFlythrough'};
+var $author$project$Tools$Flythrough$SetFlythroughSpeed = function (a) {
+	return {$: 'SetFlythroughSpeed', a: a};
+};
+var $author$project$Tools$Flythrough$StartFlythrough = {$: 'StartFlythrough'};
+var $ianmackenzie$elm_units$Speed$metersPerSecond = function (numMetersPerSecond) {
+	return $ianmackenzie$elm_units$Quantity$Quantity(numMetersPerSecond);
+};
+var $elm$svg$Svg$rect = $elm$svg$Svg$trustedNode('rect');
+var $elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
+var $elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
+var $feathericons$elm_feather$FeatherIcons$pause = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'pause',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$rect,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x('6'),
+					$elm$svg$Svg$Attributes$y('4'),
+					$elm$svg$Svg$Attributes$width('4'),
+					$elm$svg$Svg$Attributes$height('16')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$rect,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$x('14'),
+					$elm$svg$Svg$Attributes$y('4'),
+					$elm$svg$Svg$Attributes$width('4'),
+					$elm$svg$Svg$Attributes$height('16')
+				]),
+			_List_Nil)
+		]));
+var $elm$svg$Svg$polygon = $elm$svg$Svg$trustedNode('polygon');
+var $feathericons$elm_feather$FeatherIcons$play = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'play',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$polygon,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$points('5 3 19 12 5 21 5 3')
+				]),
+			_List_Nil)
+		]));
+var $feathericons$elm_feather$FeatherIcons$rewind = A2(
+	$feathericons$elm_feather$FeatherIcons$makeBuilder,
+	'rewind',
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$polygon,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$points('11 19 2 12 11 5 11 19')
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$polygon,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$points('22 19 13 12 22 5 22 19')
+				]),
+			_List_Nil)
+		]));
+var $author$project$UtilsForViews$showLongMeasure = F2(
+	function (imperial, distance) {
+		return imperial ? ($author$project$UtilsForViews$showDecimal2(
+			$ianmackenzie$elm_units$Length$inMiles(distance)) + ' miles') : ($author$project$UtilsForViews$showDecimal2(
+			$ianmackenzie$elm_units$Length$inMeters(distance)) + 'm');
+	});
+var $ianmackenzie$elm_units$Constants$second = 1;
+var $ianmackenzie$elm_units$Constants$minute = 60 * $ianmackenzie$elm_units$Constants$second;
+var $ianmackenzie$elm_units$Constants$hour = 60 * $ianmackenzie$elm_units$Constants$minute;
+var $ianmackenzie$elm_units$Speed$inMetersPerSecond = function (_v0) {
+	var numMetersPerSecond = _v0.a;
+	return numMetersPerSecond;
+};
+var $ianmackenzie$elm_units$Speed$inKilometersPerHour = function (speed) {
+	return ($ianmackenzie$elm_units$Constants$hour * $ianmackenzie$elm_units$Speed$inMetersPerSecond(speed)) * 0.001;
+};
+var $ianmackenzie$elm_units$Speed$inMilesPerHour = function (speed) {
+	return ($ianmackenzie$elm_units$Constants$hour / $ianmackenzie$elm_units$Constants$mile) * $ianmackenzie$elm_units$Speed$inMetersPerSecond(speed);
+};
+var $author$project$UtilsForViews$showSpeed = F2(
+	function (imperial, speed) {
+		return imperial ? ($author$project$UtilsForViews$showDecimal2(
+			$ianmackenzie$elm_units$Speed$inMilesPerHour(speed)) + 'mph') : ($author$project$UtilsForViews$showDecimal2(
+			$ianmackenzie$elm_units$Speed$inKilometersPerHour(speed)) + 'kph');
+	});
+var $author$project$Tools$Flythrough$view = F3(
+	function (imperial, options, wrapper) {
+		var speed = $ianmackenzie$elm_units$Speed$metersPerSecond(
+			A2($elm$core$Basics$pow, 10.0, options.flythroughSpeed));
+		var resetButton = A2(
+			$mdgriffith$elm_ui$Element$Input$button,
+			$author$project$ViewPureStyles$neatToolsBorder,
+			{
+				label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$rewind),
+				onPress: $elm$core$Maybe$Just(
+					wrapper($author$project$Tools$Flythrough$ResetFlythrough))
+			});
+		var playButton = A2(
+			$mdgriffith$elm_ui$Element$Input$button,
+			$author$project$ViewPureStyles$neatToolsBorder,
+			{
+				label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$play),
+				onPress: $elm$core$Maybe$Just(
+					wrapper($author$project$Tools$Flythrough$StartFlythrough))
+			});
+		var pauseButton = function (isRunning) {
+			return A2(
+				$mdgriffith$elm_ui$Element$Input$button,
+				$author$project$ViewPureStyles$neatToolsBorder,
+				{
+					label: $author$project$ViewPureStyles$useIcon(
+						isRunning ? $feathericons$elm_feather$FeatherIcons$pause : $feathericons$elm_feather$FeatherIcons$play),
+					onPress: $elm$core$Maybe$Just(
+						wrapper($author$project$Tools$Flythrough$PauseFlythrough))
+				});
+		};
+		var playPauseButton = function () {
+			var _v1 = options.flythrough;
+			if (_v1.$ === 'Nothing') {
+				return playButton;
+			} else {
+				var flying = _v1.a;
+				return pauseButton(flying.running);
+			}
+		}();
+		var flythroughSpeedSlider = A2(
+			$mdgriffith$elm_ui$Element$Input$slider,
+			$author$project$ViewPureStyles$commonShortHorizontalSliderStyles,
+			{
+				label: A2(
+					$mdgriffith$elm_ui$Element$Input$labelBelow,
+					_List_Nil,
+					$mdgriffith$elm_ui$Element$text(
+						'Speed = ' + A2($author$project$UtilsForViews$showSpeed, imperial, speed))),
+				max: 3.0,
+				min: 1.0,
+				onChange: A2($elm$core$Basics$composeL, wrapper, $author$project$Tools$Flythrough$SetFlythroughSpeed),
+				step: $elm$core$Maybe$Nothing,
+				thumb: $mdgriffith$elm_ui$Element$Input$defaultThumb,
+				value: options.flythroughSpeed
+			});
+		return A2(
+			$mdgriffith$elm_ui$Element$column,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$padding(10),
+					$mdgriffith$elm_ui$Element$spacing(10),
+					$mdgriffith$elm_ui$Element$centerX,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[$mdgriffith$elm_ui$Element$centerX]),
+					A2(
+						$mdgriffith$elm_ui$Element$row,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$padding(10),
+								$mdgriffith$elm_ui$Element$spacing(10),
+								$mdgriffith$elm_ui$Element$centerX
+							]),
+						_List_fromArray(
+							[resetButton, playPauseButton]))),
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[$mdgriffith$elm_ui$Element$centerX]),
+					flythroughSpeedSlider),
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[$mdgriffith$elm_ui$Element$centerX]),
+					function () {
+						var _v0 = options.flythrough;
+						if (_v0.$ === 'Just') {
+							var flying = _v0.a;
+							return A2(
+								$mdgriffith$elm_ui$Element$row,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$spacing(10)
+									]),
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$text('From start '),
+										$mdgriffith$elm_ui$Element$text(
+										A2($author$project$UtilsForViews$showLongMeasure, imperial, flying.metresFromRouteStart))
+									]));
+						} else {
+							return $mdgriffith$elm_ui$Element$none;
+						}
+					}())
+				]));
+	});
 var $author$project$Tools$GradientProblems$SetCurrentPosition = function (a) {
 	return {$: 'SetCurrentPosition', a: a};
 };
@@ -42616,12 +42984,6 @@ var $feathericons$elm_feather$FeatherIcons$chevronsRight = A2(
 				]),
 			_List_Nil)
 		]));
-var $author$project$UtilsForViews$showLongMeasure = F2(
-	function (imperial, distance) {
-		return imperial ? ($author$project$UtilsForViews$showDecimal2(
-			$ianmackenzie$elm_units$Length$inMiles(distance)) + ' miles') : ($author$project$UtilsForViews$showDecimal2(
-			$ianmackenzie$elm_units$Length$inMeters(distance)) + 'm');
-	});
 var $author$project$Tools$Pointers$positionDescription = F3(
 	function (imperial, pos, track) {
 		return 'Point ' + ($elm$core$String$fromInt(pos) + (', at ' + A2(
@@ -43498,13 +43860,19 @@ var $author$project$ToolsController$viewToolByType = F4(
 							$author$project$Tools$LimitGradients$view,
 							options.limitGradientSettings,
 							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolLimitGradientMsg));
-					default:
+					case 'ToolMoveScaleRotate':
 						return A4(
 							$author$project$Tools$MoveScaleRotate$view,
 							options.imperial,
 							options.moveScaleRotateSettings,
 							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolMoveScaleRotateMsg),
 							isTrack);
+					default:
+						return A3(
+							$author$project$Tools$Flythrough$view,
+							options.imperial,
+							options.flythroughSettings,
+							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolFlythroughMsg));
 				}
 			}());
 	});
@@ -44083,7 +44451,7 @@ var $author$project$ViewPureStyles$conditionallyVisible = F2(
 				]),
 			element);
 	});
-var $author$project$About$aboutText = '\n\n# GPXmagic v3.0.2 (67c86613)\n\nIf v1 was the surprise indie hit, v2 the disappointing second album, here\'s hoping\nv3 is the polished studio album that delivers the goods.\n\nIn this release:\n\n* The Return/Enter key will apply your new name to a tool docking zone.\n* The Return/Enter key in the filename box will also save the GPX file.\n* Some controls will now have tooltips that appear as you move the mouse over them.\n* Move and Rotate has transitioned from v2.\n* Fetch elevations from map has transitioned. Caveats about accuracy apply.\n\nThanks to all for feedback and suggestions. I\'m working my way through the migration\nof tools from v2, which is sometimes straightforward, sometimes not, so progress\nis uneven.\n\n## Legal guff\n\n> peterjamesward/GPXmagicV3 is licensed under the\n> Creative Commons Zero v1.0 Universal license\n\nSource code available: https://github.com/peterjamesward/GPXmagicV3\n\n    ';
+var $author$project$About$aboutText = '\n\n# GPXmagic v3.0.3 (049e9275)\n\n## In this release\n\n* Radius bend preview removed when track is changed.\n* Orange and Purple pointers are reset when track is changed.\n* Radiused bends sometimes got the bend direction wrong.\n* First-person "Rider view" added.\n* Fetch elevations from map has transitioned. Caveats about accuracy apply.\n* SVG file loading transitioned.\n\n## Still to-do from v2\n\n1. Fly-through\n2. Use Strava segment data\n3. Move & Stretch\n4. Loops (inc. impact on others, such as Bezier)\n5. Intersection detection ((?? JB loop detection ??))\n6. Graph Theory (renamed)\n7. Option to show MR rendering cutoff.\n\n## Legal guff\n\n> peterjamesward/GPXmagicV3 is licensed under the\n> Creative Commons Zero v1.0 Universal license\n\nSource code available: https://github.com/peterjamesward/GPXmagicV3\n\n    ';
 var $elm_explorations$markdown$Markdown$defaultOptions = {
 	defaultHighlighting: $elm$core$Maybe$Nothing,
 	githubFlavored: $elm$core$Maybe$Just(
@@ -45529,11 +45897,8 @@ var $author$project$ViewFirstPerson$view = F5(
 var $author$project$ViewMap$ToggleDraggable = {$: 'ToggleDraggable'};
 var $author$project$ViewMap$ToggleFollowOrange = {$: 'ToggleFollowOrange'};
 var $elm$html$Html$Attributes$id = $elm$html$Html$Attributes$stringProperty('id');
-var $elm$svg$Svg$rect = $elm$svg$Svg$trustedNode('rect');
 var $elm$svg$Svg$Attributes$rx = _VirtualDom_attribute('rx');
 var $elm$svg$Svg$Attributes$ry = _VirtualDom_attribute('ry');
-var $elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
-var $elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
 var $feathericons$elm_feather$FeatherIcons$lock = A2(
 	$feathericons$elm_feather$FeatherIcons$makeBuilder,
 	'lock',
@@ -49528,7 +49893,6 @@ var $terezka$elm_charts$Chart$AxisElement = F2(
 	function (a, b) {
 		return {$: 'AxisElement', a: a, b: b};
 	});
-var $elm$svg$Svg$polygon = $elm$svg$Svg$trustedNode('polygon');
 var $terezka$elm_charts$Internal$Svg$position = F6(
 	function (plane, rotation, x_, y_, xOff_, yOff_) {
 		return $elm$svg$Svg$Attributes$transform(

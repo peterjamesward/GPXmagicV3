@@ -1,7 +1,6 @@
 module ToolsController exposing (..)
 
 import Actions exposing (ToolAction(..))
-import Color exposing (black)
 import Dict exposing (Dict)
 import Element exposing (..)
 import Element.Background as Background exposing (color)
@@ -12,7 +11,6 @@ import FeatherIcons
 import FlatColors.FlatUIPalette
 import FlatColors.SwedishPalette
 import Html.Attributes exposing (style)
-import Html.Events
 import Html.Events.Extra.Mouse as Mouse
 import Json.Decode as D exposing (field)
 import Json.Encode as E exposing (string)
@@ -30,6 +28,7 @@ import Tools.DeletePoints as DeletePoints
 import Tools.DirectionChanges as AbruptDirectionChanges
 import Tools.DisplaySettings
 import Tools.DisplaySettingsOptions
+import Tools.Flythrough
 import Tools.GradientProblems
 import Tools.Interpolate
 import Tools.InterpolateOptions
@@ -74,6 +73,7 @@ type ToolType
     | ToolInterpolate
     | ToolLimitGradient
     | ToolMoveScaleRotate
+    | ToolFlythrough
 
 
 type alias Options =
@@ -98,6 +98,7 @@ type alias Options =
     , interpolateSettings : Tools.InterpolateOptions.Options
     , limitGradientSettings : Tools.LimitGradientOptions.Options
     , moveScaleRotateSettings : Tools.MoveScaleRotateOptions.Options
+    , flythroughSettings : Tools.Flythrough.Options
     }
 
 
@@ -123,6 +124,7 @@ defaultOptions =
     , interpolateSettings = Tools.Interpolate.defaultOptions
     , limitGradientSettings = Tools.LimitGradients.defaultOptions
     , moveScaleRotateSettings = Tools.MoveScaleRotate.defaultOptions
+    , flythroughSettings = Tools.Flythrough.defaultOptions
     }
 
 
@@ -152,6 +154,7 @@ type ToolMsg
     | ToolInterpolateMsg Tools.Interpolate.Msg
     | ToolLimitGradientMsg Tools.LimitGradients.Msg
     | ToolMoveScaleRotateMsg Tools.MoveScaleRotate.Msg
+    | ToolFlythroughMsg Tools.Flythrough.Msg
 
 
 type alias ToolEntry =
@@ -187,6 +190,7 @@ defaultTools =
     , interpolateTool
     , limitGradientTool
     , moveScaleRotateTool
+    , flythroughTool
     ]
 
 
@@ -422,6 +426,20 @@ moveScaleRotateTool =
     , video = Nothing
     , state = Contracted
     , dock = DockLowerLeft
+    , tabColour = FlatColors.FlatUIPalette.concrete
+    , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
+    , isPopupOpen = False
+    }
+
+
+flythroughTool : ToolEntry
+flythroughTool =
+    { toolType = ToolFlythrough
+    , label = "Fly-through"
+    , info = "Fly-through"
+    , video = Nothing
+    , state = Contracted
+    , dock = DockUpperLeft
     , tabColour = FlatColors.FlatUIPalette.concrete
     , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
     , isPopupOpen = False
@@ -800,6 +818,23 @@ update toolMsg isTrack msgWrapper options =
             , actions
             )
 
+        ToolFlythroughMsg flyMsg ->
+            let
+                ( newOptions, actions ) =
+                    case isTrack of
+                        Just track ->
+                            Tools.Flythrough.update
+                                options.flythroughSettings
+                                flyMsg
+                                track
+
+                        Nothing ->
+                            ( options.flythroughSettings, [] )
+            in
+            ( { options | flythroughSettings = newOptions }
+            , actions
+            )
+
 
 refreshOpenTools :
     Maybe (TrackLoaded msg)
@@ -1024,6 +1059,20 @@ toolStateHasChanged toolType newState isTrack options =
 
                 newOptions =
                     { options | moveScaleRotateSettings = newToolOptions }
+            in
+            ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
+
+        ToolFlythrough ->
+            let
+                ( newToolOptions, actions ) =
+                    Tools.Flythrough.toolStateChange
+                        (newState == Expanded)
+                        (getColour toolType options.tools)
+                        options.flythroughSettings
+                        isTrack
+
+                newOptions =
+                    { options | flythroughSettings = newToolOptions }
             in
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
@@ -1312,6 +1361,12 @@ viewToolByType msgWrapper entry isTrack options =
                     (msgWrapper << ToolMoveScaleRotateMsg)
                     isTrack
 
+            ToolFlythrough ->
+                Tools.Flythrough.view
+                    options.imperial
+                    options.flythroughSettings
+                    (msgWrapper << ToolFlythroughMsg)
+
 
 
 -- Local storage management
@@ -1386,6 +1441,9 @@ encodeType toolType =
 
         ToolMoveScaleRotate ->
             "ToolMoveScaleRotate"
+
+        ToolFlythrough ->
+            "ToolFlythrough"
 
 
 encodeColour : Element.Color -> E.Value

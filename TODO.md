@@ -13,21 +13,22 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 # WIP
 
+1. Fly-through
+
 ---
 
 # BACKLOG, roughly in order ...
 
 ## Tools: old, updated, & new
 
-1. Option to add 80m at Start, 200m at end for start/end gates in RGT
-2. Fly-through
-3. Use Strava segment data
-4. Move & Stretch
-5. Loops (inc. impact on others, such as Bezier)
-6. Option to show MG rendering cutoff.
-7. Intersection detection ((?? JB loop detection ??))
-8. Graph Theory (renamed)
-9. Map style choice (Satellite if possible)
+2. Use Strava segment data
+3. Move & Stretch
+4. Loops (inc. impact on others, such as Bezier)
+5. Intersection detection ((?? JB loop detection ??))
+6. Graph Theory (renamed)
+7. Option to show MR rendering cutoff.
+8. Map style choice (Satellite if possible)
+9. Option to add 80m at Start, 200m at end for start/end gates in RGT
 10. Tooltips (where useful)
 11. Extract all text for translation (Muriel)
 12. Use localised number formatting everywhere (for French use of , and .)
