@@ -261,7 +261,9 @@ toolStateChange opened colour options track =
             ( options, [] )
 
         _ ->
-            ( { options | flythrough = Nothing }, [] )
+            ( { options | flythrough = Nothing }
+            , [ Actions.StopFlythroughTicks ]
+            )
 
 
 update :
@@ -283,12 +285,14 @@ update options msg track =
 
         PauseFlythrough ->
             ( togglePause options
-            , [ Actions.StopFlythroughTicks ]
+            , []
             )
 
         ResetFlythrough ->
             ( { options | flythrough = Nothing }
-            , [ Actions.StopFlythroughTicks ]
+            , [ Actions.StopFlythroughTicks
+              , Actions.SetCurrent options.savedCurrentPosition
+              ]
             )
 
 

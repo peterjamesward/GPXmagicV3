@@ -16830,6 +16830,7 @@ var $author$project$Tools$DirectionChanges$toolStateChange = F4(
 					]));
 		}
 	});
+var $author$project$Actions$StopFlythroughTicks = {$: 'StopFlythroughTicks'};
 var $author$project$Tools$Flythrough$toolStateChange = F4(
 	function (opened, colour, options, track) {
 		var _v0 = _Utils_Tuple2(opened, track);
@@ -16841,7 +16842,8 @@ var $author$project$Tools$Flythrough$toolStateChange = F4(
 				_Utils_update(
 					options,
 					{flythrough: $elm$core$Maybe$Nothing}),
-				_List_Nil);
+				_List_fromArray(
+					[$author$project$Actions$StopFlythroughTicks]));
 		}
 	});
 var $author$project$Tools$GradientProblems$findAbruptDirectionChanges = F2(
@@ -23284,7 +23286,6 @@ var $elm$file$File$Select$file = F2(
 var $author$project$Actions$SetCurrent = function (a) {
 	return {$: 'SetCurrent', a: a};
 };
-var $author$project$Actions$StopFlythroughTicks = {$: 'StopFlythroughTicks'};
 var $author$project$Tools$Flythrough$Ended = {$: 'Ended'};
 var $author$project$Tools$Flythrough$Running = {$: 'Running'};
 var $author$project$Tools$Flythrough$eyeHeight = $ianmackenzie$elm_units$Length$meters(2.0);
@@ -29879,15 +29880,17 @@ var $author$project$Tools$Flythrough$update = F3(
 			case 'PauseFlythrough':
 				return _Utils_Tuple2(
 					$author$project$Tools$Flythrough$togglePause(options),
-					_List_fromArray(
-						[$author$project$Actions$StopFlythroughTicks]));
+					_List_Nil);
 			default:
 				return _Utils_Tuple2(
 					_Utils_update(
 						options,
 						{flythrough: $elm$core$Maybe$Nothing}),
 					_List_fromArray(
-						[$author$project$Actions$StopFlythroughTicks]));
+						[
+							$author$project$Actions$StopFlythroughTicks,
+							$author$project$Actions$SetCurrent(options.savedCurrentPosition)
+						]));
 		}
 	});
 var $author$project$Tools$GradientProblems$findSteepClimbs = F2(
