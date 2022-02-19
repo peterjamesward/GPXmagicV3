@@ -28,6 +28,7 @@ type Msg
     = SetFlythroughSpeed Float
     | StartFlythrough
     | PauseFlythrough
+    | ResumeFlythrough
     | ResetFlythrough
 
 
@@ -206,18 +207,20 @@ view imperial options wrapper =
                 , label = useIcon FeatherIcons.play
                 }
 
-        pauseButton isRunning =
+        pauseButton state =
             button
                 neatToolsBorder
-                { onPress = Just <| wrapper <| PauseFlythrough
-                , label =
-                    useIcon <|
-                        if isRunning then
-                            FeatherIcons.pause
+            <|
+                case state of
+                    Paused ->
+                        { onPress = Just <| wrapper ResumeFlythrough
+                        , label = useIcon FeatherIcons.play
+                        }
 
-                        else
-                            FeatherIcons.play
-                }
+                    _ ->
+                        { onPress = Just <| wrapper PauseFlythrough
+                        , label = useIcon FeatherIcons.pause
+                        }
 
         playPauseButton =
             case options.flythrough of
@@ -225,7 +228,7 @@ view imperial options wrapper =
                     playButton
 
                 Just flying ->
-                    pauseButton <| flying.running == Running
+                    pauseButton flying.running
     in
     column
         [ padding 10
@@ -288,9 +291,24 @@ update options msg track =
             )
 
         PauseFlythrough ->
-            ( togglePause options
-            , []
-            )
+            case options.flythrough of
+                Just flythrough ->
+                    ( { options | flythrough = Just { flythrough | running = Paused } }
+                    , [ Actions.StopFlythroughTicks ]
+                    )
+
+                Nothing ->
+                    ( options, [] )
+
+        ResumeFlythrough ->
+            case options.flythrough of
+                Just flythrough ->
+                    ( { options | flythrough = Just { flythrough | running = AwaitingFirstTick } }
+                    , [ Actions.StartFlythoughTicks ]
+                    )
+
+                Nothing ->
+                    ( options, [] )
 
         ResetFlythrough ->
             ( { options | flythrough = Nothing }

@@ -29788,8 +29788,9 @@ var $author$project$Tools$DisplaySettings$update = F2(
 					actions(newOptions));
 		}
 	});
-var $author$project$Actions$StartFlythoughTicks = {$: 'StartFlythoughTicks'};
 var $author$project$Tools$Flythrough$AwaitingFirstTick = {$: 'AwaitingFirstTick'};
+var $author$project$Tools$Flythrough$Paused = {$: 'Paused'};
+var $author$project$Actions$StartFlythoughTicks = {$: 'StartFlythoughTicks'};
 var $author$project$Tools$Flythrough$prepareFlythrough = F2(
 	function (track, options) {
 		var currentRoad = $author$project$DomainModel$asRecord(
@@ -29828,35 +29829,6 @@ var $author$project$Tools$Flythrough$startFlythrough = F2(
 			return options;
 		}
 	});
-var $author$project$Tools$Flythrough$Paused = {$: 'Paused'};
-var $author$project$Tools$Flythrough$togglePause = function (options) {
-	var _v0 = options.flythrough;
-	if (_v0.$ === 'Just') {
-		var flying = _v0.a;
-		return _Utils_update(
-			options,
-			{
-				flythrough: $elm$core$Maybe$Just(
-					_Utils_update(
-						flying,
-						{
-							running: function () {
-								var _v1 = flying.running;
-								switch (_v1.$) {
-									case 'Paused':
-										return $author$project$Tools$Flythrough$Running;
-									case 'Running':
-										return $author$project$Tools$Flythrough$Paused;
-									default:
-										return flying.running;
-								}
-							}()
-						}))
-			});
-	} else {
-		return options;
-	}
-};
 var $author$project$Tools$Flythrough$update = F3(
 	function (options, msg, track) {
 		switch (msg.$) {
@@ -29873,9 +29845,41 @@ var $author$project$Tools$Flythrough$update = F3(
 					_List_fromArray(
 						[$author$project$Actions$StartFlythoughTicks]));
 			case 'PauseFlythrough':
-				return _Utils_Tuple2(
-					$author$project$Tools$Flythrough$togglePause(options),
-					_List_Nil);
+				var _v1 = options.flythrough;
+				if (_v1.$ === 'Just') {
+					var flythrough = _v1.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							options,
+							{
+								flythrough: $elm$core$Maybe$Just(
+									_Utils_update(
+										flythrough,
+										{running: $author$project$Tools$Flythrough$Paused}))
+							}),
+						_List_fromArray(
+							[$author$project$Actions$StopFlythroughTicks]));
+				} else {
+					return _Utils_Tuple2(options, _List_Nil);
+				}
+			case 'ResumeFlythrough':
+				var _v2 = options.flythrough;
+				if (_v2.$ === 'Just') {
+					var flythrough = _v2.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							options,
+							{
+								flythrough: $elm$core$Maybe$Just(
+									_Utils_update(
+										flythrough,
+										{running: $author$project$Tools$Flythrough$AwaitingFirstTick}))
+							}),
+						_List_fromArray(
+							[$author$project$Actions$StartFlythoughTicks]));
+				} else {
+					return _Utils_Tuple2(options, _List_Nil);
+				}
 			default:
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -42325,6 +42329,7 @@ var $author$project$Tools$DisplaySettings$view = F2(
 	});
 var $author$project$Tools$Flythrough$PauseFlythrough = {$: 'PauseFlythrough'};
 var $author$project$Tools$Flythrough$ResetFlythrough = {$: 'ResetFlythrough'};
+var $author$project$Tools$Flythrough$ResumeFlythrough = {$: 'ResumeFlythrough'};
 var $author$project$Tools$Flythrough$SetFlythroughSpeed = function (a) {
 	return {$: 'SetFlythroughSpeed', a: a};
 };
@@ -42440,16 +42445,25 @@ var $author$project$Tools$Flythrough$view = F3(
 				onPress: $elm$core$Maybe$Just(
 					wrapper($author$project$Tools$Flythrough$StartFlythrough))
 			});
-		var pauseButton = function (isRunning) {
+		var pauseButton = function (state) {
 			return A2(
 				$mdgriffith$elm_ui$Element$Input$button,
 				$author$project$ViewPureStyles$neatToolsBorder,
-				{
-					label: $author$project$ViewPureStyles$useIcon(
-						isRunning ? $feathericons$elm_feather$FeatherIcons$pause : $feathericons$elm_feather$FeatherIcons$play),
-					onPress: $elm$core$Maybe$Just(
-						wrapper($author$project$Tools$Flythrough$PauseFlythrough))
-				});
+				function () {
+					if (state.$ === 'Paused') {
+						return {
+							label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$play),
+							onPress: $elm$core$Maybe$Just(
+								wrapper($author$project$Tools$Flythrough$ResumeFlythrough))
+						};
+					} else {
+						return {
+							label: $author$project$ViewPureStyles$useIcon($feathericons$elm_feather$FeatherIcons$pause),
+							onPress: $elm$core$Maybe$Just(
+								wrapper($author$project$Tools$Flythrough$PauseFlythrough))
+						};
+					}
+				}());
 		};
 		var playPauseButton = function () {
 			var _v1 = options.flythrough;
@@ -42457,8 +42471,7 @@ var $author$project$Tools$Flythrough$view = F3(
 				return playButton;
 			} else {
 				var flying = _v1.a;
-				return pauseButton(
-					_Utils_eq(flying.running, $author$project$Tools$Flythrough$Running));
+				return pauseButton(flying.running);
 			}
 		}();
 		var flythroughSpeedSlider = A2(

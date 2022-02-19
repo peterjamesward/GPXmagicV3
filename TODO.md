@@ -4,18 +4,20 @@
 DEBT: Map sends more click messages each time we click. 
 > They are debounced but, still, why??
 
-DEBT: Memory update messages should originate from the TrackInfoBox tool.
-
 BUG: Classic bend smoother consumes all memory on certain looped routes where
      orange and purple are (possibly) co-linear, or something.
+
+BUG: Should unsubscribe timer when Flythrough Paused, as it's preventing from dragging and tilting the Map.
 
 --
 
 # WIP
 
-1. Fly-through
-> Can't drag the Map with Flythrough tool open. (Not surprising really, given the rendering!)
-> May have to fully render Map once for Flythrough.
+Use Strava segment data
+* OAuth
+* Route load
+* Segment preview (incl on Chart?)
+* Segment load
 
 ---
 
@@ -23,28 +25,27 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 ## Tools: old, updated, & new
 
-2. Use Strava segment data
-3. Move & Stretch
-4. Loops (inc. impact on others, such as Bezier)
-5. Intersection detection ((?? JB loop detection ??))
-6. Graph Theory (renamed)
-7. Option to show MR rendering cutoff.
-8. Map style choice (Satellite if possible)
-9. Option to add 80m at Start, 200m at end for start/end gates in RGT
-10. Tooltips (where useful)
-11. Extract all text for translation (Muriel)
-12. Use localised number formatting everywhere (for French use of , and .)
-13. Ability to point-smooth transitions over a range
-14. Chart can only show one Preview; how do we determine which?
-15. Chart preview for Centroid, Bezier, point smoother
-16. Improve default zoom
-17. Terrain (with texture)
-18. Tools that require a range should say so when there isn't one! (David Ogle)
-19. Gaussian (including necessary interpolation)
-20. Split and Join
-21. Update the log dashboard to view v3 activity.
-22. Draggable tools?
-23. Move tool: reverse geocode map click with https://positionstack.com 
+1. Move & Stretch
+2. Loops (inc. impact on Bezier & Centroid)
+3. Intersection detection ((?? + loop detection ??))
+4. Graph Theory (renamed)
+5. Option to show MR rendering cutoff.
+6. Map style choice (Satellite if possible)
+7. Option to add 80m at Start, 200m at end for start/end gates in RGT
+8. Tooltips (where useful)
+9. Extract all text for translation (Muriel)
+10. Use localised number formatting everywhere (for French use of , and .)
+11. Ability to point-smooth transitions over a range
+12. Chart can only show one Preview; how do we determine which?
+13. Chart preview for Centroid, Bezier, point smoother
+14. Improve default zoom
+15. Terrain (with texture)
+16. Tools that require a range should say so when there isn't one! (David Ogle)
+17. Gaussian (including necessary interpolation)
+18. Split and Join
+19. Update the log dashboard to view v3 activity.
+20. Draggable tools?
+21. Move tool: reverse geocode map click with https://positionstack.com 
 
 New stuff:
 1. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
@@ -59,19 +60,9 @@ https://ambientcg.com/view?id=Grass004
 https://ambientcg.com/view?id=Asphalt001
 Credit: Contains assets from ambientCG.com, licensed under CC0 1.0 Universal.
 
-## Keyboard shortcuts
-
-> Let the user select a shortcut key for any tool.
-> Pressing the key opens the tool.
-> I like the idea but I think a "Set shortcuts" configuration would work better.
-
 ## Eliding previews
 
 Elide the creation of large previews. (mini-PeteTree?)
-
-## First person view & Flythrough
-
-Same as v2. Use 3d-scene. Improve (i.e. damp motion) camera tracking?
 
 ## Terrain
 
@@ -81,6 +72,7 @@ Tree walk combined with whole (visible) tree query, because <track loops>.
 ## Small stuff
 
 Put all Font, Colour etc into a Palette/Style module for ease of change.
+> Search for FlatUI references.
 
 ## Loop detection
 
