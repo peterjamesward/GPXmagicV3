@@ -1095,8 +1095,9 @@ topLoadingBar model =
                 none
         , saveButton
         , Tools.OneClickQuickFix.oneClickQuickFixButton OneClickMsg model.track
-        , el [ alignRight ] <| PaneLayoutManager.paneLayoutMenu PaneMsg model.paneLayoutOptions
         , buyMeACoffeeButton
+        , el [ alignRight ] <| StravaAuth.stravaButton model.stravaAuthentication OAuthMessage
+        , el [ alignRight ] <| PaneLayoutManager.paneLayoutMenu PaneMsg model.paneLayoutOptions
         , globalOptions model
         ]
 

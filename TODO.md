@@ -7,8 +7,6 @@ DEBT: Map sends more click messages each time we click.
 BUG: Classic bend smoother consumes all memory on certain looped routes where
      orange and purple are (possibly) co-linear, or something.
 
-BUG: Should unsubscribe timer when Flythrough Paused, as it's preventing from dragging and tilting the Map.
-
 --
 
 # WIP
@@ -17,7 +15,7 @@ Use Strava segment data
 * OAuth
 * Route load
 * Segment preview (incl on Chart?)
-* Segment load
+* Segment load, matching lon lat of end points.
 
 ---
 

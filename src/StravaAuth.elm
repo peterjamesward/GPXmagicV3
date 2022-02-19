@@ -4,9 +4,13 @@ import Base64.Encode as Base64
 import Browser.Navigation as Navigation exposing (Key)
 import Bytes exposing (Bytes)
 import Bytes.Encode as Bytes
-import Delay exposing ( after)
+import ColourPalette exposing (stravaOrange)
+import Delay exposing (after)
 import Element exposing (..)
+import Element.Background as Background
+import Element.Font as Font
 import Element.Input exposing (button)
+import FlatColors.ChinesePalette exposing (white)
 import Http
 import Json.Decode as Json
 import OAuth
@@ -306,16 +310,25 @@ stravaButton : Model -> (OAuthMsg -> msg) -> Element msg
 stravaButton model msgWrapper =
     let
         styles =
-            []
+            [ height <| px 24, moveUp 10 ]
 
         imgUrl =
-            Builder.relative ["images", "btn_strava_connectwith_orange.png" ] []
+            Builder.relative [ "images", "btn_strava_connectwith_orange.png" ] []
     in
     case model.flow of
         Done userInfo _ ->
-            column []
-                [ text "Connected to Strava as"
-                , text <| userInfo.firstname ++ " " ++ userInfo.lastname
+            column
+                [ Background.color stravaOrange
+                , Font.color white
+                , Font.size 12
+                , Font.family [ Font.typeface "Helvetica", Font.sansSerif ]
+                , padding 2
+                , width (maximum 150 <| fill)
+                ]
+                [ paragraph []
+                    [ text "Connected to Strava as "
+                    , text <| userInfo.firstname ++ " " ++ userInfo.lastname
+                    ]
                 ]
 
         _ ->

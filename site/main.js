@@ -54588,6 +54588,89 @@ var $author$project$PaneLayoutManager$paneLayoutMenu = F2(
 					msgWrapper($author$project$PaneLayoutManager$TogglePopup))
 			});
 	});
+var $author$project$OAuthTypes$SignInRequested = {$: 'SignInRequested'};
+var $mdgriffith$elm_ui$Internal$Model$Max = F2(
+	function (a, b) {
+		return {$: 'Max', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Element$maximum = F2(
+	function (i, l) {
+		return A2($mdgriffith$elm_ui$Internal$Model$Max, i, l);
+	});
+var $elm$url$Url$Builder$relative = F2(
+	function (pathSegments, parameters) {
+		return _Utils_ap(
+			A2($elm$core$String$join, '/', pathSegments),
+			$elm$url$Url$Builder$toQuery(parameters));
+	});
+var $author$project$ColourPalette$stravaOrange = A3($mdgriffith$elm_ui$Element$rgb255, 252, 76, 2);
+var $author$project$StravaAuth$stravaButton = F2(
+	function (model, msgWrapper) {
+		var styles = _List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$height(
+				$mdgriffith$elm_ui$Element$px(24)),
+				$mdgriffith$elm_ui$Element$moveUp(10)
+			]);
+		var imgUrl = A2(
+			$elm$url$Url$Builder$relative,
+			_List_fromArray(
+				['images', 'btn_strava_connectwith_orange.png']),
+			_List_Nil);
+		var _v0 = model.flow;
+		if (_v0.$ === 'Done') {
+			var userInfo = _v0.a;
+			return A2(
+				$mdgriffith$elm_ui$Element$column,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$Background$color($author$project$ColourPalette$stravaOrange),
+						$mdgriffith$elm_ui$Element$Font$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$white),
+						$mdgriffith$elm_ui$Element$Font$size(12),
+						$mdgriffith$elm_ui$Element$Font$family(
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$Font$typeface('Helvetica'),
+								$mdgriffith$elm_ui$Element$Font$sansSerif
+							])),
+						$mdgriffith$elm_ui$Element$padding(2),
+						$mdgriffith$elm_ui$Element$width(
+						A2($mdgriffith$elm_ui$Element$maximum, 150, $mdgriffith$elm_ui$Element$fill))
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Element$paragraph,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$text('Connected to Strava as '),
+								$mdgriffith$elm_ui$Element$text(userInfo.firstname + (' ' + userInfo.lastname))
+							]))
+					]));
+		} else {
+			return A2(
+				$mdgriffith$elm_ui$Element$Input$button,
+				styles,
+				{
+					label: A2(
+						$mdgriffith$elm_ui$Element$image,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$mouseOver(
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$alpha(0.7)
+									])),
+								$mdgriffith$elm_ui$Element$width(
+								$mdgriffith$elm_ui$Element$px(193))
+							]),
+						{description: 'Connect to Strava', src: imgUrl}),
+					onPress: $elm$core$Maybe$Just(
+						msgWrapper($author$project$OAuthTypes$SignInRequested))
+				});
+		}
+	});
 var $smucode$elm_flat_colors$FlatColors$ChinesePalette$twinkleBlue = A3($mdgriffith$elm_ui$Element$rgb255, 206, 214, 224);
 var $author$project$SvgPathExtractor$ReadFile = function (a) {
 	return {$: 'ReadFile', a: a};
@@ -54716,12 +54799,17 @@ var $author$project$Main$topLoadingBar = function (model) {
 			}(),
 				saveButton,
 				A2($author$project$Tools$OneClickQuickFix$oneClickQuickFixButton, $author$project$Main$OneClickMsg, model.track),
+				$author$project$Main$buyMeACoffeeButton,
+				A2(
+				$mdgriffith$elm_ui$Element$el,
+				_List_fromArray(
+					[$mdgriffith$elm_ui$Element$alignRight]),
+				A2($author$project$StravaAuth$stravaButton, model.stravaAuthentication, $author$project$Main$OAuthMessage)),
 				A2(
 				$mdgriffith$elm_ui$Element$el,
 				_List_fromArray(
 					[$mdgriffith$elm_ui$Element$alignRight]),
 				A2($author$project$PaneLayoutManager$paneLayoutMenu, $author$project$Main$PaneMsg, model.paneLayoutOptions)),
-				$author$project$Main$buyMeACoffeeButton,
 				$author$project$Main$globalOptions(model)
 			]));
 };
