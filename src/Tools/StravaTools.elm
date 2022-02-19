@@ -12,7 +12,7 @@ import Http
 import List.Extra
 import OAuthTypes as O exposing (Flow(..))
 import StravaAuth exposing (getStravaToken)
-import Tools.StravaAuth as StravaAuth exposing (getStravaToken)
+import StravaAuth as StravaAuth exposing (getStravaToken)
 import Tools.StravaDataLoad as StravaDataLoad exposing (..)
 import Tools.StravaTypes as StraveTypes exposing (..)
 import TrackLoaded exposing (TrackLoaded)
@@ -64,14 +64,31 @@ defaultOptions =
     }
 
 
+toolStateChange :
+    Bool
+    -> Element.Color
+    -> Options
+    -> Maybe (TrackLoaded msg)
+    -> ( Options, List (ToolAction msg) )
+toolStateChange opened colour options track =
+    --TODO: When opened, request Auth state.
+    case ( opened, track ) of
+        ( True, Just theTrack ) ->
+            ( options, [] )
+
+        _ ->
+            ( options
+            , [ Actions.StopFlythroughTicks ]
+            )
+
+
 update :
     Msg
     -> Options
-    -> O.Model
     -> (Msg -> msg)
     -> Maybe (TrackLoaded msg)
     -> ( Options, List (ToolAction msg) )
-update msg settings authentication wrap track =
+update msg settings wrap track =
     case msg of
         UserChangedRouteId url ->
             let
@@ -101,39 +118,39 @@ update msg settings authentication wrap track =
             )
 
         LoadExternalRoute ->
-            case getStravaToken authentication of
-                Just token ->
-                    ( { settings | stravaRoute = StravaRouteRequested }
-                    , []
-                    )
-
-                --, ActionCommand <|
-                --    requestStravaRouteHeader
-                --        (wrap << HandleRouteData)
-                --        settings.externalRouteId
-                --        token
-                --)
-                Nothing ->
+            --case getStravaToken authentication of
+            --    Just token ->
+            --        ( { settings | stravaRoute = StravaRouteRequested }
+            --        , []
+            --        )
+            --
+            --    --, ActionCommand <|
+            --    --    requestStravaRouteHeader
+            --    --        (wrap << HandleRouteData)
+            --    --        settings.externalRouteId
+            --    --        token
+            --    --)
+            --    Nothing ->
                     ( settings, [] )
 
         HandleRouteData response ->
-            case getStravaToken authentication of
-                Just token ->
-                    let
-                        stravaRoute =
-                            stravaProcessRoute response
-                    in
-                    ( { settings | stravaRoute = stravaRoute }
-                    , []
-                    )
-
-                --ActionCommand <|
-                --    requestStravaRoute
-                --        (wrap << GpxDownloaded)
-                --        settings.externalRouteId
-                --        token
-                --)
-                Nothing ->
+            --case getStravaToken authentication of
+            --    Just token ->
+            --        let
+            --            stravaRoute =
+            --                stravaProcessRoute response
+            --        in
+            --        ( { settings | stravaRoute = stravaRoute }
+            --        , []
+            --        )
+            --
+            --    --ActionCommand <|
+            --    --    requestStravaRoute
+            --    --        (wrap << GpxDownloaded)
+            --    --        settings.externalRouteId
+            --    --        token
+            --    --)
+            --    Nothing ->
                     ( settings, [] )
 
         GpxDownloaded response ->
@@ -146,33 +163,33 @@ update msg settings authentication wrap track =
                     ( settings, [] )
 
         LoadExternalSegment ->
-            case getStravaToken authentication of
-                Just token ->
-                    ( { settings | externalSegment = SegmentRequested }
-                    , []
-                    )
-
-                --PostUpdateActions.ActionCommand <|
-                --    requestStravaSegment
-                --        (wrap << HandleSegmentData)
-                --        settings.externalSegmentId
-                --        token
-                --)
-                Nothing ->
+            --case getStravaToken authentication of
+            --    Just token ->
+            --        ( { settings | externalSegment = SegmentRequested }
+            --        , []
+            --        )
+            --
+            --    --PostUpdateActions.ActionCommand <|
+            --    --    requestStravaSegment
+            --    --        (wrap << HandleSegmentData)
+            --    --        settings.externalSegmentId
+            --    --        token
+            --    --)
+            --    Nothing ->
                     ( settings, [] )
 
         LoadSegmentStreams ->
-            case getStravaToken authentication of
-                Just token ->
-                    ( settings, [] )
-
-                --, PostUpdateActions.ActionCommand <|
-                --    requestStravaSegmentStreams
-                --        (wrap << HandleSegmentStreams)
-                --        settings.externalSegmentId
-                --        token
-                --)
-                Nothing ->
+            --case getStravaToken authentication of
+            --    Just token ->
+            --        ( settings, [] )
+            --
+            --    --, PostUpdateActions.ActionCommand <|
+            --    --    requestStravaSegmentStreams
+            --    --        (wrap << HandleSegmentStreams)
+            --    --        settings.externalSegmentId
+            --    --        token
+            --    --)
+            --    Nothing ->
                     ( settings, [] )
 
         HandleSegmentData response ->
@@ -270,7 +287,7 @@ stravaRouteOption auth options wrap =
             none
 
 
-viewStravaTab : Options -> (Msg -> msg) -> TrackLoaded msg -> Element msg
+viewStravaTab : Options -> (Msg -> msg) -> Maybe (TrackLoaded msg) -> Element msg
 viewStravaTab options wrap track =
     let
         segmentIdField =
@@ -369,16 +386,11 @@ viewStravaTab options wrap track =
         , width fill
         , Background.color FlatColors.ChinesePalette.antiFlashWhite
         ]
-        <| case options.stravaStatus of
-            StravaDisconnected ->
-                StravaAuth.stravaButton
-
-            StravaConnected ->
-                [ stravaLink
-                , row [ spacing 10 ]
-                    [ segmentIdField
-                    , segmentButton
-                    , clearButton
-                    ]
-                , segmentInfo
-                ]
+        [ stravaLink
+        , row [ spacing 10 ]
+            [ segmentIdField
+            , segmentButton
+            , clearButton
+            ]
+        , segmentInfo
+        ]

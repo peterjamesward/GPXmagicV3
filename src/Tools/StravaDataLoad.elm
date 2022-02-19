@@ -8,9 +8,9 @@ import Length
 import LocalCoords exposing (LocalCoords)
 import OAuth exposing (Token, errorCodeToString, useToken)
 import Point2d
-import StravaTypes exposing (..)
+import Tools.StravaTypes as StravaTypes exposing (..)
 import Url.Builder as Builder
-import Utils exposing (httpErrorString)
+import UtilsForViews exposing (httpErrorString)
 
 
 stravaApiRoot =

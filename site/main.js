@@ -8786,6 +8786,10 @@ var $author$project$Tools$Nudge$defaultOptions = {fadeExtent: $ianmackenzie$elm_
 var $author$project$Tools$OutAndBack$defaultOptions = {offset: 0.0};
 var $author$project$Tools$Pointers$defaultOptions = {orange: 0, purple: $elm$core$Maybe$Nothing};
 var $author$project$Tools$Simplify$defaultOptions = {pointsToRemove: $elm$core$Dict$empty};
+var $author$project$Tools$StravaTypes$SegmentNone = {$: 'SegmentNone'};
+var $author$project$Tools$StravaTools$StravaDisconnected = {$: 'StravaDisconnected'};
+var $author$project$Tools$StravaTypes$StravaRouteNone = {$: 'StravaRouteNone'};
+var $author$project$Tools$StravaTools$defaultOptions = {externalRouteId: '', externalSegment: $author$project$Tools$StravaTypes$SegmentNone, externalSegmentId: '', lastHttpError: $elm$core$Maybe$Nothing, preview: _List_Nil, stravaRoute: $author$project$Tools$StravaTypes$StravaRouteNone, stravaStatus: $author$project$Tools$StravaTools$StravaDisconnected, stravaStreams: $elm$core$Maybe$Nothing};
 var $author$project$Tools$TrackInfoBox$InfoForTrack = {$: 'InfoForTrack'};
 var $author$project$Tools$TrackInfoBox$defaultOptions = {displayMode: $author$project$Tools$TrackInfoBox$InfoForTrack, memoryInfo: $elm$core$Maybe$Nothing};
 var $author$project$Tools$UndoRedo$Options = function (dummy) {
@@ -9022,6 +9026,18 @@ var $author$project$ToolsController$simplifyTool = {
 	toolType: $author$project$ToolsController$ToolSimplify,
 	video: $elm$core$Maybe$Nothing
 };
+var $author$project$ToolsController$ToolStrava = {$: 'ToolStrava'};
+var $author$project$ToolsController$stravaTool = {
+	dock: $author$project$ToolsController$DockUpperLeft,
+	info: 'Strava',
+	isPopupOpen: false,
+	label: 'Strava',
+	state: $author$project$ToolsController$Contracted,
+	tabColour: $smucode$elm_flat_colors$FlatColors$FlatUIPalette$concrete,
+	textColour: $author$project$ViewPureStyles$contrastingColour($smucode$elm_flat_colors$FlatColors$FlatUIPalette$concrete),
+	toolType: $author$project$ToolsController$ToolStrava,
+	video: $elm$core$Maybe$Nothing
+};
 var $author$project$ToolsController$ToolTrackInfo = {$: 'ToolTrackInfo'};
 var $author$project$ToolsController$trackInfoBox = {
 	dock: $author$project$ToolsController$DockUpperLeft,
@@ -9048,7 +9064,7 @@ var $author$project$ToolsController$undoRedoTool = {
 	video: $elm$core$Maybe$Nothing
 };
 var $author$project$ToolsController$defaultTools = _List_fromArray(
-	[$author$project$ToolsController$pointersTool, $author$project$ToolsController$undoRedoTool, $author$project$ToolsController$trackInfoBox, $author$project$ToolsController$displaySettingsTool, $author$project$ToolsController$directionChangeTool, $author$project$ToolsController$gradientChangeTool, $author$project$ToolsController$deleteTool, $author$project$ToolsController$bezierSplinesTool, $author$project$ToolsController$centroidAverageTool, $author$project$ToolsController$curveFormerTool, $author$project$ToolsController$bendSmootherTool, $author$project$ToolsController$nudgeTool, $author$project$ToolsController$outAndBackTool, $author$project$ToolsController$simplifyTool, $author$project$ToolsController$interpolateTool, $author$project$ToolsController$limitGradientTool, $author$project$ToolsController$moveScaleRotateTool, $author$project$ToolsController$flythroughTool]);
+	[$author$project$ToolsController$pointersTool, $author$project$ToolsController$undoRedoTool, $author$project$ToolsController$trackInfoBox, $author$project$ToolsController$displaySettingsTool, $author$project$ToolsController$directionChangeTool, $author$project$ToolsController$gradientChangeTool, $author$project$ToolsController$deleteTool, $author$project$ToolsController$bezierSplinesTool, $author$project$ToolsController$centroidAverageTool, $author$project$ToolsController$curveFormerTool, $author$project$ToolsController$bendSmootherTool, $author$project$ToolsController$nudgeTool, $author$project$ToolsController$outAndBackTool, $author$project$ToolsController$simplifyTool, $author$project$ToolsController$interpolateTool, $author$project$ToolsController$limitGradientTool, $author$project$ToolsController$moveScaleRotateTool, $author$project$ToolsController$flythroughTool, $author$project$ToolsController$stravaTool]);
 var $author$project$ToolsController$DockSettings = F3(
 	function (dockPopupOpen, dockLabel, dockLabelColour) {
 		return {dockLabel: dockLabel, dockLabelColour: dockLabelColour, dockPopupOpen: dockPopupOpen};
@@ -9093,6 +9109,7 @@ var $author$project$ToolsController$defaultOptions = {
 	outAndBackSettings: $author$project$Tools$OutAndBack$defaultOptions,
 	pointerOptions: $author$project$Tools$Pointers$defaultOptions,
 	simplifySettings: $author$project$Tools$Simplify$defaultOptions,
+	stravaSettings: $author$project$Tools$StravaTools$defaultOptions,
 	tools: $author$project$ToolsController$defaultTools,
 	undoRedoOptions: $author$project$Tools$UndoRedo$defaultOptions
 };
@@ -15074,8 +15091,10 @@ var $author$project$ToolsController$encodeType = function (toolType) {
 			return 'ToolLimitGradient';
 		case 'ToolMoveScaleRotate':
 			return 'ToolMoveScaleRotate';
-		default:
+		case 'ToolFlythrough':
 			return 'ToolFlythrough';
+		default:
+			return 'ToolStrava';
 	}
 };
 var $author$project$ToolsController$encodeOneTool = function (tool) {
@@ -17128,6 +17147,19 @@ var $author$project$Tools$Simplify$toolStateChange = F4(
 					]));
 		}
 	});
+var $author$project$Tools$StravaTools$toolStateChange = F4(
+	function (opened, colour, options, track) {
+		var _v0 = _Utils_Tuple2(opened, track);
+		if (_v0.a && (_v0.b.$ === 'Just')) {
+			var theTrack = _v0.b.a;
+			return _Utils_Tuple2(options, _List_Nil);
+		} else {
+			return _Utils_Tuple2(
+				options,
+				_List_fromArray(
+					[$author$project$Actions$StopFlythroughTicks]));
+		}
+	});
 var $author$project$ToolsController$toolStateHasChanged = F4(
 	function (toolType, newState, isTrack, options) {
 		switch (toolType.$) {
@@ -17436,7 +17468,7 @@ var $author$project$ToolsController$toolStateHasChanged = F4(
 							'tools',
 							$author$project$ToolsController$encodeToolState(options)),
 						actions));
-			default:
+			case 'ToolFlythrough':
 				var _v14 = A4(
 					$author$project$Tools$Flythrough$toolStateChange,
 					_Utils_eq(newState, $author$project$ToolsController$Expanded),
@@ -17448,6 +17480,27 @@ var $author$project$ToolsController$toolStateHasChanged = F4(
 				var newOptions = _Utils_update(
 					options,
 					{flythroughSettings: newToolOptions});
+				return _Utils_Tuple2(
+					newOptions,
+					A2(
+						$elm$core$List$cons,
+						A2(
+							$author$project$Actions$StoreLocally,
+							'tools',
+							$author$project$ToolsController$encodeToolState(options)),
+						actions));
+			default:
+				var _v15 = A4(
+					$author$project$Tools$StravaTools$toolStateChange,
+					_Utils_eq(newState, $author$project$ToolsController$Expanded),
+					A2($author$project$ToolsController$getColour, toolType, options.tools),
+					options.stravaSettings,
+					isTrack);
+				var newToolOptions = _v15.a;
+				var actions = _v15.b;
+				var newOptions = _Utils_update(
+					options,
+					{stravaSettings: newToolOptions});
 				return _Utils_Tuple2(
 					newOptions,
 					A2(
@@ -27925,6 +27978,9 @@ var $author$project$Tools$OneClickQuickFix$update = F2(
 			return _List_Nil;
 		}
 	});
+var $author$project$ToolsController$ToolStravaMsg = function (a) {
+	return {$: 'ToolStravaMsg', a: a};
+};
 var $elm$json$Json$Encode$dict = F3(
 	function (toKey, toValue, dictionary) {
 		return _Json_wrap(
@@ -30485,6 +30541,188 @@ var $author$project$Tools$Simplify$update = F4(
 		}
 		return _Utils_Tuple2(options, _List_Nil);
 	});
+var $author$project$Tools$StravaTypes$SegmentPreviewed = function (a) {
+	return {$: 'SegmentPreviewed', a: a};
+};
+var $author$project$Tools$StravaTypes$SegmentError = function (a) {
+	return {$: 'SegmentError', a: a};
+};
+var $author$project$Tools$StravaTypes$SegmentNotInRoute = function (a) {
+	return {$: 'SegmentNotInRoute', a: a};
+};
+var $author$project$Tools$StravaTypes$SegmentOk = function (a) {
+	return {$: 'SegmentOk', a: a};
+};
+var $ianmackenzie$elm_geometry$BoundingBox2d$contains = F2(
+	function (point, boundingBox) {
+		return A2(
+			$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo,
+			$ianmackenzie$elm_geometry$BoundingBox2d$minX(boundingBox),
+			$ianmackenzie$elm_geometry$Point2d$xCoordinate(point)) && (A2(
+			$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
+			$ianmackenzie$elm_geometry$BoundingBox2d$maxX(boundingBox),
+			$ianmackenzie$elm_geometry$Point2d$xCoordinate(point)) && (A2(
+			$ianmackenzie$elm_units$Quantity$greaterThanOrEqualTo,
+			$ianmackenzie$elm_geometry$BoundingBox2d$minY(boundingBox),
+			$ianmackenzie$elm_geometry$Point2d$yCoordinate(point)) && A2(
+			$ianmackenzie$elm_units$Quantity$lessThanOrEqualTo,
+			$ianmackenzie$elm_geometry$BoundingBox2d$maxY(boundingBox),
+			$ianmackenzie$elm_geometry$Point2d$yCoordinate(point))));
+	});
+var $author$project$UtilsForViews$httpErrorString = function (error) {
+	switch (error.$) {
+		case 'BadBody':
+			var message = error.a;
+			return 'Unable to handle response: ' + message;
+		case 'BadStatus':
+			var statusCode = error.a;
+			return 'Server error: ' + $elm$core$String$fromInt(statusCode);
+		case 'BadUrl':
+			var url = error.a;
+			return 'Invalid URL: ' + url;
+		case 'NetworkError':
+			return 'Network error';
+		default:
+			return 'Request timeout';
+	}
+};
+var $author$project$Tools$StravaDataLoad$stravaProcessSegment = F2(
+	function (response, box) {
+		var _v0 = $ianmackenzie$elm_geometry$BoundingBox3d$extrema(box);
+		var minX = _v0.minX;
+		var maxX = _v0.maxX;
+		var minY = _v0.minY;
+		var maxY = _v0.maxY;
+		var minZ = _v0.minZ;
+		var maxZ = _v0.maxZ;
+		var segmentInBox = function (segment) {
+			var start = A2($ianmackenzie$elm_geometry$Point2d$meters, segment.start_longitude, segment.start_latitude);
+			var flatBox = $ianmackenzie$elm_geometry$BoundingBox2d$fromExtrema(
+				{maxX: maxX, maxY: maxY, minX: minX, minY: minY});
+			var finish = A2($ianmackenzie$elm_geometry$Point2d$meters, segment.end_longitude, segment.end_latitude);
+			return A2($ianmackenzie$elm_geometry$BoundingBox2d$contains, start, flatBox) && A2($ianmackenzie$elm_geometry$BoundingBox2d$contains, finish, flatBox);
+		};
+		if (response.$ === 'Ok') {
+			var segment = response.a;
+			return segmentInBox(segment) ? $author$project$Tools$StravaTypes$SegmentOk(segment) : $author$project$Tools$StravaTypes$SegmentNotInRoute(segment);
+		} else {
+			var err = response.a;
+			return $author$project$Tools$StravaTypes$SegmentError(
+				$author$project$UtilsForViews$httpErrorString(err));
+		}
+	});
+var $author$project$Tools$StravaTools$update = F4(
+	function (msg, settings, wrap, track) {
+		switch (msg.$) {
+			case 'UserChangedRouteId':
+				var url = msg.a;
+				var routeId = A2(
+					$elm$core$Maybe$withDefault,
+					'',
+					$elm_community$list_extra$List$Extra$last(
+						A2($elm$core$String$split, '/', url)));
+				return _Utils_Tuple2(
+					_Utils_update(
+						settings,
+						{externalRouteId: routeId}),
+					_List_Nil);
+			case 'UserChangedSegmentId':
+				var url = msg.a;
+				var segmentId = A2(
+					$elm$core$Maybe$withDefault,
+					'',
+					$elm_community$list_extra$List$Extra$last(
+						A2($elm$core$String$split, '/', url)));
+				return _Utils_Tuple2(
+					_Utils_update(
+						settings,
+						{externalSegment: $author$project$Tools$StravaTypes$SegmentNone, externalSegmentId: segmentId}),
+					_List_Nil);
+			case 'LoadExternalRoute':
+				return _Utils_Tuple2(settings, _List_Nil);
+			case 'HandleRouteData':
+				var response = msg.a;
+				return _Utils_Tuple2(settings, _List_Nil);
+			case 'GpxDownloaded':
+				var response = msg.a;
+				if (response.$ === 'Ok') {
+					var content = response.a;
+					return _Utils_Tuple2(settings, _List_Nil);
+				} else {
+					return _Utils_Tuple2(settings, _List_Nil);
+				}
+			case 'LoadExternalSegment':
+				return _Utils_Tuple2(settings, _List_Nil);
+			case 'LoadSegmentStreams':
+				return _Utils_Tuple2(settings, _List_Nil);
+			case 'HandleSegmentData':
+				var response = msg.a;
+				if (track.$ === 'Just') {
+					var isTrack = track.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							settings,
+							{
+								externalSegment: A2(
+									$author$project$Tools$StravaDataLoad$stravaProcessSegment,
+									response,
+									$author$project$DomainModel$boundingBox(isTrack.trackTree))
+							}),
+						_List_Nil);
+				} else {
+					return _Utils_Tuple2(settings, _List_Nil);
+				}
+			case 'HandleSegmentStreams':
+				var response = msg.a;
+				var _v3 = _Utils_Tuple3(track, response, settings.externalSegment);
+				if (_v3.b.$ === 'Ok') {
+					if ((_v3.a.$ === 'Just') && (_v3.c.$ === 'SegmentOk')) {
+						var isTrack = _v3.a.a;
+						var streams = _v3.b.a;
+						var segment = _v3.c.a;
+						return _Utils_Tuple2(
+							_Utils_update(
+								settings,
+								{
+									externalSegment: $author$project$Tools$StravaTypes$SegmentPreviewed(segment),
+									stravaStreams: $elm$core$Maybe$Just(streams)
+								}),
+							_List_Nil);
+					} else {
+						return _Utils_Tuple2(settings, _List_Nil);
+					}
+				} else {
+					var err = _v3.b.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							settings,
+							{
+								lastHttpError: $elm$core$Maybe$Just(err)
+							}),
+						_List_Nil);
+				}
+			case 'PasteSegment':
+				var _v4 = _Utils_Tuple3(track, settings.externalSegment, settings.stravaStreams);
+				if (((_v4.a.$ === 'Just') && (_v4.b.$ === 'SegmentPreviewed')) && (_v4.c.$ === 'Just')) {
+					var isTrack = _v4.a.a;
+					var segment = _v4.b.a;
+					var streams = _v4.c.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							settings,
+							{externalSegment: $author$project$Tools$StravaTypes$SegmentNone, stravaStreams: $elm$core$Maybe$Nothing}),
+						_List_Nil);
+				} else {
+					return _Utils_Tuple2(settings, _List_Nil);
+				}
+			default:
+				return _Utils_Tuple2(
+					_Utils_update(
+						settings,
+						{externalSegment: $author$project$Tools$StravaTypes$SegmentNone, stravaStreams: $elm$core$Maybe$Nothing}),
+					_List_Nil);
+		}
+	});
 var $author$project$Tools$TrackInfoBox$update = F2(
 	function (msg, options) {
 		var mode = msg.a;
@@ -30895,7 +31133,7 @@ var $author$project$ToolsController$update = F4(
 						options,
 						{moveScaleRotateSettings: newOptions}),
 					actions);
-			default:
+			case 'ToolFlythroughMsg':
 				var flyMsg = toolMsg.a;
 				var _v19 = function () {
 					if (isTrack.$ === 'Just') {
@@ -30911,6 +31149,28 @@ var $author$project$ToolsController$update = F4(
 					_Utils_update(
 						options,
 						{flythroughSettings: newOptions}),
+					actions);
+			default:
+				var msg = toolMsg.a;
+				var _v21 = function () {
+					if (isTrack.$ === 'Just') {
+						var track = isTrack.a;
+						return A4(
+							$author$project$Tools$StravaTools$update,
+							msg,
+							options.stravaSettings,
+							A2($elm$core$Basics$composeR, $author$project$ToolsController$ToolStravaMsg, msgWrapper),
+							isTrack);
+					} else {
+						return _Utils_Tuple2(options.stravaSettings, _List_Nil);
+					}
+				}();
+				var newOptions = _v21.a;
+				var actions = _v21.b;
+				return _Utils_Tuple2(
+					_Utils_update(
+						options,
+						{stravaSettings: newOptions}),
 					actions);
 		}
 	});
@@ -44113,6 +44373,235 @@ var $author$project$Tools$UndoRedo$view = F3(
 					]));
 		}
 	});
+var $author$project$Tools$StravaTools$ClearSegment = {$: 'ClearSegment'};
+var $author$project$Tools$StravaTools$LoadExternalSegment = {$: 'LoadExternalSegment'};
+var $author$project$Tools$StravaTools$LoadSegmentStreams = {$: 'LoadSegmentStreams'};
+var $author$project$Tools$StravaTools$PasteSegment = {$: 'PasteSegment'};
+var $author$project$Tools$StravaTools$UserChangedSegmentId = function (a) {
+	return {$: 'UserChangedSegmentId', a: a};
+};
+var $author$project$ViewPureStyles$displayName = function (n) {
+	if (n.$ === 'Just') {
+		var s = n.a;
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$Font$size(20)
+				]),
+			$mdgriffith$elm_ui$Element$text(s));
+	} else {
+		return $mdgriffith$elm_ui$Element$none;
+	}
+};
+var $elm$html$Html$Attributes$href = function (url) {
+	return A2(
+		$elm$html$Html$Attributes$stringProperty,
+		'href',
+		_VirtualDom_noJavaScriptUri(url));
+};
+var $elm$html$Html$Attributes$rel = _VirtualDom_attribute('rel');
+var $elm$html$Html$Attributes$target = $elm$html$Html$Attributes$stringProperty('target');
+var $mdgriffith$elm_ui$Element$newTabLink = F2(
+	function (attrs, _v0) {
+		var url = _v0.url;
+		var label = _v0.label;
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asEl,
+			$mdgriffith$elm_ui$Internal$Model$NodeName('a'),
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Internal$Model$Attr(
+					$elm$html$Html$Attributes$href(url)),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Internal$Model$Attr(
+						$elm$html$Html$Attributes$rel('noopener noreferrer')),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Internal$Model$Attr(
+							$elm$html$Html$Attributes$target('_blank')),
+						A2(
+							$elm$core$List$cons,
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+							A2(
+								$elm$core$List$cons,
+								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentCenterX + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.link)))),
+									attrs)))))),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+				_List_fromArray(
+					[label])));
+	});
+var $mdgriffith$elm_ui$Element$Input$Placeholder = F2(
+	function (a, b) {
+		return {$: 'Placeholder', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Element$Input$placeholder = $mdgriffith$elm_ui$Element$Input$Placeholder;
+var $smucode$elm_flat_colors$FlatColors$ChinesePalette$bayWharf = A3($mdgriffith$elm_ui$Element$rgb255, 116, 125, 140);
+var $smucode$elm_flat_colors$FlatColors$ChinesePalette$frenchSkyBlue = A3($mdgriffith$elm_ui$Element$rgb255, 112, 161, 255);
+var $author$project$ViewPureStyles$prettyButtonStyles = _List_fromArray(
+	[
+		$mdgriffith$elm_ui$Element$Border$width(2),
+		$mdgriffith$elm_ui$Element$Border$rounded(4),
+		$mdgriffith$elm_ui$Element$padding(2),
+		$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$bayWharf),
+		$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$frenchSkyBlue),
+		$mdgriffith$elm_ui$Element$Font$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite),
+		$mdgriffith$elm_ui$Element$Font$size(16)
+	]);
+var $author$project$Tools$StravaDataLoad$stravaApiRoot = 'https://www.strava.com';
+var $author$project$ColourPalette$stravaOrange = A3($mdgriffith$elm_ui$Element$rgb255, 252, 76, 2);
+var $author$project$Tools$StravaTools$viewStravaTab = F3(
+	function (options, wrap, track) {
+		var stravaLink = function () {
+			var stravaUrl = A3(
+				$elm$url$Url$Builder$crossOrigin,
+				$author$project$Tools$StravaDataLoad$stravaApiRoot,
+				_List_fromArray(
+					['routes', options.externalRouteId]),
+				_List_Nil);
+			var _v3 = options.stravaRoute;
+			if (_v3.$ === 'StravaRouteOk') {
+				return A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$Font$size(14),
+							$mdgriffith$elm_ui$Element$padding(5)
+						]),
+					_List_fromArray(
+						[
+							$author$project$ViewPureStyles$displayName(
+							$elm$core$Maybe$Just(options.externalRouteId)),
+							A2(
+							$mdgriffith$elm_ui$Element$newTabLink,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$Font$color($author$project$ColourPalette$stravaOrange)
+								]),
+							{
+								label: $mdgriffith$elm_ui$Element$text('View on Strava'),
+								url: stravaUrl
+							})
+						]));
+			} else {
+				return $mdgriffith$elm_ui$Element$none;
+			}
+		}();
+		var segmentInfo = function () {
+			var _v2 = options.externalSegment;
+			switch (_v2.$) {
+				case 'SegmentRequested':
+					return $mdgriffith$elm_ui$Element$text('Waiting for segment');
+				case 'SegmentError':
+					var err = _v2.a;
+					return $mdgriffith$elm_ui$Element$text(err);
+				case 'SegmentNone':
+					return $mdgriffith$elm_ui$Element$text('Segment data not loaded, or not yet.');
+				case 'SegmentOk':
+					var segment = _v2.a;
+					return $mdgriffith$elm_ui$Element$text(segment.name);
+				case 'SegmentPreviewed':
+					var segment = _v2.a;
+					return $mdgriffith$elm_ui$Element$text('In preview');
+				default:
+					var segment = _v2.a;
+					return $mdgriffith$elm_ui$Element$text(segment.name);
+			}
+		}();
+		var segmentIdField = A2(
+			$mdgriffith$elm_ui$Element$Input$text,
+			_List_Nil,
+			{
+				label: $mdgriffith$elm_ui$Element$Input$labelHidden('Segment ID'),
+				onChange: A2($elm$core$Basics$composeL, wrap, $author$project$Tools$StravaTools$UserChangedSegmentId),
+				placeholder: $elm$core$Maybe$Just(
+					A2(
+						$mdgriffith$elm_ui$Element$Input$placeholder,
+						_List_Nil,
+						$mdgriffith$elm_ui$Element$text('Segment ID'))),
+				text: options.externalSegmentId
+			});
+		var segmentButton = function () {
+			var _v1 = options.externalSegment;
+			switch (_v1.$) {
+				case 'SegmentOk':
+					var segment = _v1.a;
+					return A2(
+						$mdgriffith$elm_ui$Element$Input$button,
+						$author$project$ViewPureStyles$prettyButtonStyles,
+						{
+							label: $mdgriffith$elm_ui$Element$text('Preview'),
+							onPress: $elm$core$Maybe$Just(
+								wrap($author$project$Tools$StravaTools$LoadSegmentStreams))
+						});
+				case 'SegmentPreviewed':
+					var segment = _v1.a;
+					return A2(
+						$mdgriffith$elm_ui$Element$Input$button,
+						$author$project$ViewPureStyles$prettyButtonStyles,
+						{
+							label: $mdgriffith$elm_ui$Element$text('Paste'),
+							onPress: $elm$core$Maybe$Just(
+								wrap($author$project$Tools$StravaTools$PasteSegment))
+						});
+				case 'SegmentNone':
+					return A2(
+						$mdgriffith$elm_ui$Element$Input$button,
+						$author$project$ViewPureStyles$prettyButtonStyles,
+						{
+							label: $mdgriffith$elm_ui$Element$text('Fetch header'),
+							onPress: $elm$core$Maybe$Just(
+								wrap($author$project$Tools$StravaTools$LoadExternalSegment))
+						});
+				case 'SegmentNotInRoute':
+					return $mdgriffith$elm_ui$Element$text('This segment is not\ncontained in the route');
+				default:
+					return $mdgriffith$elm_ui$Element$none;
+			}
+		}();
+		var clearButton = function () {
+			var _v0 = options.externalSegment;
+			if (_v0.$ === 'SegmentNone') {
+				return $mdgriffith$elm_ui$Element$none;
+			} else {
+				return A2(
+					$mdgriffith$elm_ui$Element$Input$button,
+					$author$project$ViewPureStyles$prettyButtonStyles,
+					{
+						label: $mdgriffith$elm_ui$Element$text('Clear'),
+						onPress: $elm$core$Maybe$Just(
+							wrap($author$project$Tools$StravaTools$ClearSegment))
+					});
+			}
+		}();
+		return A2(
+			$mdgriffith$elm_ui$Element$column,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$spacing(10),
+					$mdgriffith$elm_ui$Element$padding(10),
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite)
+				]),
+			_List_fromArray(
+				[
+					stravaLink,
+					A2(
+					$mdgriffith$elm_ui$Element$row,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$spacing(10)
+						]),
+					_List_fromArray(
+						[segmentIdField, segmentButton, clearButton])),
+					segmentInfo
+				]));
+	});
 var $author$project$ToolsController$viewToolByType = F4(
 	function (msgWrapper, entry, isTrack, options) {
 		return A2(
@@ -44233,12 +44722,18 @@ var $author$project$ToolsController$viewToolByType = F4(
 							options.moveScaleRotateSettings,
 							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolMoveScaleRotateMsg),
 							isTrack);
-					default:
+					case 'ToolFlythrough':
 						return A3(
 							$author$project$Tools$Flythrough$view,
 							options.imperial,
 							options.flythroughSettings,
 							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolFlythroughMsg));
+					default:
+						return A3(
+							$author$project$Tools$StravaTools$viewStravaTab,
+							options.stravaSettings,
+							A2($elm$core$Basics$composeL, msgWrapper, $author$project$ToolsController$ToolStravaMsg),
+							isTrack);
 				}
 			}());
 	});
@@ -54037,48 +54532,6 @@ var $mdgriffith$elm_ui$Element$image = F2(
 						$mdgriffith$elm_ui$Internal$Model$Unkeyed(_List_Nil))
 					])));
 	});
-var $elm$html$Html$Attributes$href = function (url) {
-	return A2(
-		$elm$html$Html$Attributes$stringProperty,
-		'href',
-		_VirtualDom_noJavaScriptUri(url));
-};
-var $elm$html$Html$Attributes$rel = _VirtualDom_attribute('rel');
-var $elm$html$Html$Attributes$target = $elm$html$Html$Attributes$stringProperty('target');
-var $mdgriffith$elm_ui$Element$newTabLink = F2(
-	function (attrs, _v0) {
-		var url = _v0.url;
-		var label = _v0.label;
-		return A4(
-			$mdgriffith$elm_ui$Internal$Model$element,
-			$mdgriffith$elm_ui$Internal$Model$asEl,
-			$mdgriffith$elm_ui$Internal$Model$NodeName('a'),
-			A2(
-				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Internal$Model$Attr(
-					$elm$html$Html$Attributes$href(url)),
-				A2(
-					$elm$core$List$cons,
-					$mdgriffith$elm_ui$Internal$Model$Attr(
-						$elm$html$Html$Attributes$rel('noopener noreferrer')),
-					A2(
-						$elm$core$List$cons,
-						$mdgriffith$elm_ui$Internal$Model$Attr(
-							$elm$html$Html$Attributes$target('_blank')),
-						A2(
-							$elm$core$List$cons,
-							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-							A2(
-								$elm$core$List$cons,
-								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-								A2(
-									$elm$core$List$cons,
-									$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentCenterX + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.link)))),
-									attrs)))))),
-			$mdgriffith$elm_ui$Internal$Model$Unkeyed(
-				_List_fromArray(
-					[label])));
-	});
 var $author$project$Main$buyMeACoffeeButton = A2(
 	$mdgriffith$elm_ui$Element$newTabLink,
 	_List_fromArray(
@@ -54285,18 +54738,6 @@ var $feathericons$elm_feather$FeatherIcons$moreHorizontal = A2(
 			_List_Nil)
 		]));
 var $author$project$Tools$OneClickQuickFix$Apply = {$: 'Apply'};
-var $smucode$elm_flat_colors$FlatColors$ChinesePalette$bayWharf = A3($mdgriffith$elm_ui$Element$rgb255, 116, 125, 140);
-var $smucode$elm_flat_colors$FlatColors$ChinesePalette$frenchSkyBlue = A3($mdgriffith$elm_ui$Element$rgb255, 112, 161, 255);
-var $author$project$ViewPureStyles$prettyButtonStyles = _List_fromArray(
-	[
-		$mdgriffith$elm_ui$Element$Border$width(2),
-		$mdgriffith$elm_ui$Element$Border$rounded(4),
-		$mdgriffith$elm_ui$Element$padding(2),
-		$mdgriffith$elm_ui$Element$Border$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$bayWharf),
-		$mdgriffith$elm_ui$Element$Background$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$frenchSkyBlue),
-		$mdgriffith$elm_ui$Element$Font$color($smucode$elm_flat_colors$FlatColors$ChinesePalette$antiFlashWhite),
-		$mdgriffith$elm_ui$Element$Font$size(16)
-	]);
 var $author$project$Tools$OneClickQuickFix$oneClickQuickFixButton = F2(
 	function (wrapper, track) {
 		if (track.$ === 'Just') {
@@ -54603,7 +55044,6 @@ var $elm$url$Url$Builder$relative = F2(
 			A2($elm$core$String$join, '/', pathSegments),
 			$elm$url$Url$Builder$toQuery(parameters));
 	});
-var $author$project$ColourPalette$stravaOrange = A3($mdgriffith$elm_ui$Element$rgb255, 252, 76, 2);
 var $author$project$StravaAuth$stravaButton = F2(
 	function (model, msgWrapper) {
 		var styles = _List_fromArray(

@@ -43,11 +43,12 @@ import Tools.OutAndBack
 import Tools.OutAndBackOptions
 import Tools.Pointers as Pointers
 import Tools.Simplify
+import Tools.StravaTools
 import Tools.TrackInfoBox as TrackInfoBox
 import Tools.UndoRedo as UndoRedo
 import TrackLoaded exposing (TrackLoaded)
 import View3dCommonElements exposing (stopProp)
-import ViewPureStyles exposing (contrastingColour, neatToolsBorder, onEnter, useIcon, useIconWithSize)
+import ViewPureStyles exposing (..)
 
 
 type ToolState
@@ -75,6 +76,7 @@ type ToolType
     | ToolLimitGradient
     | ToolMoveScaleRotate
     | ToolFlythrough
+    | ToolStrava
 
 
 type alias Options =
@@ -100,6 +102,7 @@ type alias Options =
     , limitGradientSettings : Tools.LimitGradientOptions.Options
     , moveScaleRotateSettings : Tools.MoveScaleRotateOptions.Options
     , flythroughSettings : Tools.Flythrough.Options
+    , stravaSettings : Tools.StravaTools.Options
     }
 
 
@@ -126,6 +129,7 @@ defaultOptions =
     , limitGradientSettings = Tools.LimitGradients.defaultOptions
     , moveScaleRotateSettings = Tools.MoveScaleRotate.defaultOptions
     , flythroughSettings = Tools.Flythrough.defaultOptions
+    , stravaSettings = Tools.StravaTools.defaultOptions
     }
 
 
@@ -156,6 +160,7 @@ type ToolMsg
     | ToolLimitGradientMsg Tools.LimitGradients.Msg
     | ToolMoveScaleRotateMsg Tools.MoveScaleRotate.Msg
     | ToolFlythroughMsg Tools.Flythrough.Msg
+    | ToolStravaMsg Tools.StravaTools.Msg
 
 
 type alias ToolEntry =
@@ -192,6 +197,7 @@ defaultTools =
     , limitGradientTool
     , moveScaleRotateTool
     , flythroughTool
+    , stravaTool
     ]
 
 
@@ -438,6 +444,20 @@ flythroughTool =
     { toolType = ToolFlythrough
     , label = "Fly-through"
     , info = "Fly-through"
+    , video = Nothing
+    , state = Contracted
+    , dock = DockUpperLeft
+    , tabColour = FlatColors.FlatUIPalette.concrete
+    , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
+    , isPopupOpen = False
+    }
+
+
+stravaTool : ToolEntry
+stravaTool =
+    { toolType = ToolStrava
+    , label = "Strava"
+    , info = "Strava"
     , video = Nothing
     , state = Contracted
     , dock = DockUpperLeft
@@ -836,6 +856,24 @@ update toolMsg isTrack msgWrapper options =
             , actions
             )
 
+        ToolStravaMsg msg ->
+            let
+                ( newOptions, actions ) =
+                    case isTrack of
+                        Just track ->
+                            Tools.StravaTools.update
+                                msg
+                                options.stravaSettings
+                                (ToolStravaMsg >> msgWrapper)
+                                isTrack
+
+                        Nothing ->
+                            ( options.stravaSettings, [] )
+            in
+            ( { options | stravaSettings = newOptions }
+            , actions
+            )
+
 
 refreshOpenTools :
     Maybe (TrackLoaded msg)
@@ -1074,6 +1112,20 @@ toolStateHasChanged toolType newState isTrack options =
 
                 newOptions =
                     { options | flythroughSettings = newToolOptions }
+            in
+            ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
+
+        ToolStrava ->
+            let
+                ( newToolOptions, actions ) =
+                    Tools.StravaTools.toolStateChange
+                        (newState == Expanded)
+                        (getColour toolType options.tools)
+                        options.stravaSettings
+                        isTrack
+
+                newOptions =
+                    { options | stravaSettings = newToolOptions }
             in
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
@@ -1368,6 +1420,12 @@ viewToolByType msgWrapper entry isTrack options =
                     options.flythroughSettings
                     (msgWrapper << ToolFlythroughMsg)
 
+            ToolStrava ->
+                Tools.StravaTools.viewStravaTab
+                    options.stravaSettings
+                    (msgWrapper << ToolStravaMsg)
+                    isTrack
+
 
 
 -- Local storage management
@@ -1445,6 +1503,9 @@ encodeType toolType =
 
         ToolFlythrough ->
             "ToolFlythrough"
+
+        ToolStrava ->
+            "ToolStrava"
 
 
 encodeColour : Element.Color -> E.Value

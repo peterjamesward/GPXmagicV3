@@ -404,8 +404,9 @@ Please check the file contains GPX data.""" }
                 Nothing ->
                     ( model, Cmd.none )
 
-        --Delegate wrapped OAuthmessages. Be bowled over if this works first time. Or fiftieth.
-        --Maybe look after to see if there is yet a token. Easy way to know.
+        --Delegate wrapped OAuthmessages.
+        --For v3, we're copying the state into the Tool, which is not ideal
+        --but most of the tools have no need to know about this.
         OAuthMessage authMsg ->
             let
                 ( newAuthData, authCmd ) =
