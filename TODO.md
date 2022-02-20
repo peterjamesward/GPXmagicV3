@@ -22,24 +22,22 @@ BUG: Dragging - Map points move slightly even when mouse does not.
 1. Move & Stretch
 2. Loops (inc. impact on Bezier & Centroid)
 3. Intersection detection ((?? + loop detection ??))
-4. Graph Theory (renamed)
-5. Split and Join
-6. Non-customisable keyboard alternatives for Load/Save/Undo/Redo/Fwd/Back/Purple (maybe 1-5 for views)
-+ <>> to move Orange, [] to move Purple
+4. Split and Join
+5. Graph Theory (renamed)
 6. Map style choice (Satellite if possible)
-7. Option to add 80m at Start, 200m at end for start/end gates in RGT
-8. Option to show MR rendering cutoff.
-9. Tooltips (where useful)
-10. Extract all text for translation (Muriel)
-11. Use localised number formatting everywhere (for French use of , and .)
-12. Ability to point-smooth transitions over a range
-13. Chart can only show one Preview; how do we determine which?
-14. Chart preview for Centroid, Bezier, point smoother
-16. Terrain (with texture)
-17. Tools that require a range should say so when there isn't one! (David Ogle)
-18. Gaussian (including necessary interpolation)
-20. Update the log dashboard to view v3 activity.
-21. Draggable tools?
+7. Chart can only show one Preview; how do we determine which?
+8. Chart preview for Centroid, Bezier, point smoother
+9. Extract all text for translation (Muriel)
+10. Use localised number formatting everywhere (for French use of , and .)
+11. Ability to point-smooth transitions over a range
+12. Terrain (with texture)
+13. Tools that require a range should say so when there isn't one! (David Ogle)
+14. Gaussian (including necessary interpolation)
+15. Option to add 80m at Start, 200m at end for start/end gates in RGT
+16. Option to show MR rendering cutoff.
+17. Tooltips (where useful)
+18. Non-customisable keyboard alternatives for Load/Save/Undo/Redo/Fwd/Back/Purple (maybe 1-5 for views)
+19. Draggable tools?
 
 New stuff:
 1. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
