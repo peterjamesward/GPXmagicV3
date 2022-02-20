@@ -1355,6 +1355,8 @@ performActionsOnModel actions model =
                     { foldedModel | track = Just newTrack }
 
                 ( PasteStravaSegment options, Just track ) ->
+                    -- This is like Nudge in that the affected area is given
+                    -- by the tool, not by the range markers.
                     let
                         ( newTree, oldPoints, ( entry, exit ) ) =
                             Tools.StravaTools.paste options track

@@ -39,8 +39,6 @@ type Msg
     | ConnectionInfo O.Token
 
 
-
-
 defaultOptions : Options
 defaultOptions =
     { stravaStatus = StravaDisconnected
@@ -214,14 +212,18 @@ update msg settings wrap track =
                     ( settings, [] )
 
         PasteSegment ->
-            case ( track, settings.externalSegment, settings.stravaStreams ) of
-                ( Just isTrack, SegmentPreviewed segment, Just streams ) ->
+            case ( track, settings.externalSegment ) of
+                ( Just isTrack, SegmentPreviewed segment ) ->
                     -- Note that we pass the OLD settings to the paste action.
                     ( { settings
                         | stravaStreams = Nothing
                         , externalSegment = SegmentNone
+                        , preview = []
                       }
-                    , [ PasteStravaSegment settings ]
+                    , [ PasteStravaSegment settings
+                      , HidePreview "strava"
+                      , TrackHasChanged
+                      ]
                     )
 
                 --case buildActions settings isTrack segment streams of
@@ -267,7 +269,7 @@ pointsFromStreams referencePoint streams =
 previewActions : Options -> Color -> TrackLoaded msg -> List (ToolAction msg)
 previewActions options colour track =
     [ ShowPreview
-        { tag = "Strava"
+        { tag = "strava"
         , shape = PreviewCircle
         , colour = colour
         , points = options.preview
@@ -284,7 +286,7 @@ paste options track =
     -- That's just based on track indexes. Might be a proble if we traverse it
     -- more than once, but let's park that thought.
     case ( options.externalSegment, options.preview ) of
-        ( SegmentOk segment, x1 :: xs ) ->
+        ( SegmentPreviewed segment, x1 :: xs ) ->
             let
                 segmentStartGpx =
                     GPXSource

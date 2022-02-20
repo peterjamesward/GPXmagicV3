@@ -13,12 +13,6 @@ BUG: Dragging - Map points move slightly even when mouse does not.
 
 # WIP
 
-Use Strava segment data
-* View needs updating
-* Route load - not loading on Map
-* Segment preview 
-* Segment load, matching lon lat of end points.
-
 ---
 
 # BACKLOG, roughly in order ...

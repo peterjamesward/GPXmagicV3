@@ -141,5 +141,8 @@ interpretAction action =
         ApplyMapElevations _ ->
             "use map elevations"
 
+        PasteStravaSegment _ ->
+            "Strava segment"
+
         _ ->
             "tell Pete this needs a message"
