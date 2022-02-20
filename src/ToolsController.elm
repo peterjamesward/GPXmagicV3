@@ -859,16 +859,11 @@ update toolMsg isTrack msgWrapper options =
         ToolStravaMsg msg ->
             let
                 ( newOptions, actions ) =
-                    case isTrack of
-                        Just track ->
-                            Tools.StravaTools.update
-                                msg
-                                options.stravaSettings
-                                (ToolStravaMsg >> msgWrapper)
-                                isTrack
-
-                        Nothing ->
-                            ( options.stravaSettings, [] )
+                    Tools.StravaTools.update
+                        msg
+                        options.stravaSettings
+                        (ToolStravaMsg >> msgWrapper)
+                        isTrack
             in
             ( { options | stravaSettings = newOptions }
             , actions
