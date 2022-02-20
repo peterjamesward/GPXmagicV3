@@ -4,26 +4,21 @@ module About exposing (..)
 aboutText =
     """
 
-# GPXmagic v3.0.3 (049e9275)
+# GPXmagic v3.0.4 (049e9275)
 
 ## In this release
 
-* Radius bend preview removed when track is changed.
-* Orange and Purple pointers are reset when track is changed.
-* Radiused bends sometimes got the bend direction wrong.
-* First-person "Rider view" added.
-* Fetch elevations from map has transitioned. Caveats about accuracy apply.
-* SVG file loading transitioned.
+* First person "Rider view"
+* Fly-through
+* Connect to Strava for import of routes and segment
 
 ## Still to-do from v2
 
-1. Fly-through
-2. Use Strava segment data
-3. Move & Stretch
-4. Loops (inc. impact on others, such as Bezier)
-5. Intersection detection ((?? JB loop detection ??))
-6. Graph Theory (renamed)
-7. Option to show MR rendering cutoff.
+1. Move & Stretch
+2. Loops (inc. impact on Bezier & Centroid)
+3. Intersection detection ((?? + loop detection ??))
+4. Split and Join
+5. Graph Theory (renamed)
 
 ## Legal guff
 
