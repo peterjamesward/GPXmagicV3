@@ -8888,11 +8888,11 @@ var $author$project$ToolsController$deleteTool = {
 	toolType: $author$project$ToolsController$ToolDeletePoints,
 	video: $elm$core$Maybe$Nothing
 };
-var $author$project$ToolsController$DockLowerLeft = {$: 'DockLowerLeft'};
+var $author$project$ToolsController$DockUpperLeft = {$: 'DockUpperLeft'};
 var $author$project$ToolsController$ToolAbruptDirectionChanges = {$: 'ToolAbruptDirectionChanges'};
 var $smucode$elm_flat_colors$FlatColors$FlatUIPalette$peterRiver = A3($mdgriffith$elm_ui$Element$rgb255, 52, 152, 219);
 var $author$project$ToolsController$directionChangeTool = {
-	dock: $author$project$ToolsController$DockLowerLeft,
+	dock: $author$project$ToolsController$DockUpperLeft,
 	info: 'These may need smoothing',
 	isPopupOpen: false,
 	label: 'Direction changes',
@@ -8902,7 +8902,6 @@ var $author$project$ToolsController$directionChangeTool = {
 	toolType: $author$project$ToolsController$ToolAbruptDirectionChanges,
 	video: $elm$core$Maybe$Nothing
 };
-var $author$project$ToolsController$DockUpperLeft = {$: 'DockUpperLeft'};
 var $author$project$ToolsController$ToolDisplaySettings = {$: 'ToolDisplaySettings'};
 var $author$project$ToolsController$displaySettingsTool = {
 	dock: $author$project$ToolsController$DockUpperLeft,
@@ -8915,9 +8914,10 @@ var $author$project$ToolsController$displaySettingsTool = {
 	toolType: $author$project$ToolsController$ToolDisplaySettings,
 	video: $elm$core$Maybe$Nothing
 };
+var $author$project$ToolsController$DockLowerLeft = {$: 'DockLowerLeft'};
 var $author$project$ToolsController$ToolFlythrough = {$: 'ToolFlythrough'};
 var $author$project$ToolsController$flythroughTool = {
-	dock: $author$project$ToolsController$DockUpperLeft,
+	dock: $author$project$ToolsController$DockLowerLeft,
 	info: 'Fly-through',
 	isPopupOpen: false,
 	label: 'Fly-through',
@@ -8929,7 +8929,7 @@ var $author$project$ToolsController$flythroughTool = {
 };
 var $author$project$ToolsController$ToolGradientProblems = {$: 'ToolGradientProblems'};
 var $author$project$ToolsController$gradientChangeTool = {
-	dock: $author$project$ToolsController$DockLowerLeft,
+	dock: $author$project$ToolsController$DockUpperLeft,
 	info: 'These may need smoothing',
 	isPopupOpen: false,
 	label: 'Gradient problems',
@@ -9028,7 +9028,7 @@ var $author$project$ToolsController$simplifyTool = {
 };
 var $author$project$ToolsController$ToolStrava = {$: 'ToolStrava'};
 var $author$project$ToolsController$stravaTool = {
-	dock: $author$project$ToolsController$DockUpperLeft,
+	dock: $author$project$ToolsController$DockLowerLeft,
 	info: 'Strava',
 	isPopupOpen: false,
 	label: 'Strava',
