@@ -44411,6 +44411,16 @@ var $author$project$Tools$TrackInfoBox$ChooseDisplayMode = function (a) {
 };
 var $author$project$Tools$TrackInfoBox$InfoForPoint = {$: 'InfoForPoint'};
 var $author$project$Tools$TrackInfoBox$InfoForSystem = {$: 'InfoForSystem'};
+var $author$project$UtilsForViews$showDecimal6 = function (x) {
+	var locale = _Utils_update(
+		$cuducos$elm_format_number$FormatNumber$Locales$usLocale,
+		{
+			decimals: $cuducos$elm_format_number$FormatNumber$Locales$Exact(6),
+			negativePrefix: '-',
+			thousandSeparator: ''
+		});
+	return A2($cuducos$elm_format_number$FormatNumber$format, locale, x);
+};
 var $author$project$Tools$TrackInfoBox$displayInfoForPoint = F2(
 	function (imperial, track) {
 		var labels = _List_fromArray(
@@ -44454,11 +44464,11 @@ var $author$project$Tools$TrackInfoBox$displayInfoForPoint = F2(
 							$mdgriffith$elm_ui$Element$text(
 							A2($author$project$UtilsForViews$showLongMeasure, imperial, distance)),
 							$mdgriffith$elm_ui$Element$text(
-							$author$project$UtilsForViews$showDecimal2(
+							$author$project$UtilsForViews$showDecimal6(
 								$ianmackenzie$elm_units$Angle$inDegrees(
 									$ianmackenzie$elm_geometry$Direction2d$toAngle(longitude)))),
 							$mdgriffith$elm_ui$Element$text(
-							$author$project$UtilsForViews$showDecimal2(
+							$author$project$UtilsForViews$showDecimal6(
 								$ianmackenzie$elm_units$Angle$inDegrees(latitude))),
 							$mdgriffith$elm_ui$Element$text(
 							A2($author$project$UtilsForViews$showShortMeasure, imperial, altitude)),
@@ -55640,7 +55650,7 @@ var $author$project$StravaAuth$stravaButton = F2(
 										$mdgriffith$elm_ui$Element$alpha(0.7)
 									])),
 								$mdgriffith$elm_ui$Element$width(
-								$mdgriffith$elm_ui$Element$px(193))
+								$mdgriffith$elm_ui$Element$px(160))
 							]),
 						{description: 'Connect to Strava', src: imgUrl}),
 					onPress: $elm$core$Maybe$Just(

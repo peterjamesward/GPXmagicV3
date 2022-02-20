@@ -5,13 +5,15 @@ DEBT: Map sends more click messages each time we click.
 > They are debounced but, still, why??
 
 BUG: Classic bend smoother consumes all memory on certain looped routes where
-     orange and purple are (possibly) co-linear, or something.
-
-BUG: Dragging - Map points move slightly even when mouse does not.
+     orange and purple are (possibly) co-linear, or something. (Samir bug)
 
 --
 
 # WIP
+
+BUG: Dragging - Map points move slightly and edit is registered even when mouse does not move.
+> Drag should not start until there's actual movement beyond some threshold ("sticky").
+> Note that the "dragging" status is just wrong.
 
 ---
 
@@ -30,10 +32,10 @@ BUG: Dragging - Map points move slightly even when mouse does not.
 9. Chart preview for Centroid, Bezier, point smoother
 10. Extract all text for translation (Muriel)
 11. Use localised number formatting everywhere (for French use of , and .)
-12. Terrain (with texture)
-13. Ability to point-smooth transitions over a range
-14. Tools that require a range should say so when there isn't one! (David Ogle)
-15. Gaussian (including necessary interpolation)
+12. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
+13. Terrain (with texture maybe)
+14. Ability to point-smooth transitions over a range
+15. Tools that require a range should say so when there isn't one! (David Ogle)
 16. --- Cut-off
 17. Option to add 80m at Start, 200m at end for start/end gates in RGT
 18. Option to show MR rendering cutoff.
@@ -42,7 +44,6 @@ BUG: Dragging - Map points move slightly even when mouse does not.
 21. Draggable tools?
 
 New stuff:
-1. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
 > This could be like a meta-box, or a "build your own 1CQF", in which
 > we pipeline existing features, just like 1CQF.
 > E.G. simplify > limit > interpolate > centroid.

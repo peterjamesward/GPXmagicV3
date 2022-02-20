@@ -338,7 +338,7 @@ stravaButton model msgWrapper =
                 , label =
                     image
                         [ mouseOver [ alpha 0.7 ]
-                        , width <| px 193
+                        , width <| px 160
                         ]
                         { src = imgUrl
                         , description = "Connect to Strava"

@@ -10,7 +10,7 @@ import Element.Background as Background
 import Element.Input as Input exposing (labelHidden)
 import FlatColors.ChinesePalette
 import TrackLoaded exposing (TrackLoaded)
-import UtilsForViews exposing (showDecimal0, showDecimal2, showLongMeasure, showShortMeasure)
+import UtilsForViews exposing (showDecimal0, showDecimal2, showDecimal6, showLongMeasure, showShortMeasure)
 
 
 type alias Options =
@@ -115,8 +115,8 @@ displayInfoForPoint imperial track =
         , column [ spacing 5 ]
             [ text <| String.fromInt index
             , text <| showLongMeasure imperial distance
-            , text <| showDecimal2 <| Angle.inDegrees <| Direction2d.toAngle longitude
-            , text <| showDecimal2 <| Angle.inDegrees <| latitude
+            , text <| showDecimal6 <| Angle.inDegrees <| Direction2d.toAngle longitude
+            , text <| showDecimal6 <| Angle.inDegrees <| latitude
             , text <| showShortMeasure imperial altitude
             , text <| showDecimal2 <| bearing
             , text <| showDecimal2 leaf.gradientAtStart
