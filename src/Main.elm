@@ -61,6 +61,8 @@ import Tools.Nudge
 import Tools.OneClickQuickFix
 import Tools.OutAndBack
 import Tools.Simplify
+import Tools.StravaDataLoad
+import Tools.StravaTools
 import Tools.TrackInfoBox
 import ToolsController exposing (ToolEntry, encodeColour, encodeToolState)
 import TrackLoaded exposing (TrackLoaded)
@@ -414,8 +416,21 @@ Please check the file contains GPX data.""" }
 
                 isToken =
                     getStravaToken newAuthData
+
+                ( withSharedToken, _ ) =
+                    case isToken of
+                        Just token ->
+                            update
+                                (ToolsMsg <|
+                                    ToolsController.ToolStravaMsg <|
+                                        Tools.StravaTools.ConnectionInfo token
+                                )
+                                model
+
+                        Nothing ->
+                            ( model, Cmd.none )
             in
-            ( { model | stravaAuthentication = newAuthData }
+            ( { withSharedToken | stravaAuthentication = newAuthData }
             , Cmd.map OAuthMessage authCmd
             )
 
@@ -1594,6 +1609,13 @@ performActionsOnModel actions model =
                         Nothing ->
                             { foldedModel | modalMessage = Just "Unable to extract SVG paths" }
 
+                ( LoadGpxFromStrava gpxContent, _ ) ->
+                    let
+                        ( modelWithNewTrack, _ ) =
+                            update (GpxLoaded gpxContent) foldedModel
+                    in
+                    modelWithNewTrack
+
                 ( TrackHasChanged, Just track ) ->
                     -- Must be wary of looping here.
                     -- Purpose is to refresh all tools' options and all presentations.
@@ -1835,6 +1857,18 @@ performActionCommands actions model =
 
                         Nothing ->
                             Cmd.none
+
+                ( RequestStravaRouteHeader msg routeId token, _ ) ->
+                    Tools.StravaDataLoad.requestStravaRouteHeader
+                        msg
+                        routeId
+                        token
+
+                ( RequestStravaRoute msg routeId token, _ ) ->
+                    Tools.StravaDataLoad.requestStravaRoute
+                        msg
+                        routeId
+                        token
 
                 _ ->
                     Cmd.none

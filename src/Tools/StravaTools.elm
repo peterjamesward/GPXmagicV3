@@ -10,9 +10,7 @@ import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
 import Http
 import List.Extra
-import OAuthTypes as O exposing (Flow(..))
-import StravaAuth exposing (getStravaToken)
-import StravaAuth as StravaAuth exposing (getStravaToken)
+import OAuth as O
 import Tools.StravaDataLoad as StravaDataLoad exposing (..)
 import Tools.StravaTypes as StraveTypes exposing (..)
 import TrackLoaded exposing (TrackLoaded)
@@ -32,11 +30,12 @@ type Msg
     | LoadExternalSegment
     | PasteSegment
     | ClearSegment
+    | ConnectionInfo O.Token
 
 
 type StravaStatus
     = StravaDisconnected
-    | StravaConnected
+    | StravaConnected O.Token
 
 
 type alias Options =
@@ -90,6 +89,10 @@ update :
     -> ( Options, List (ToolAction msg) )
 update msg settings wrap track =
     case msg of
+        ConnectionInfo token ->
+            let _ = Debug.log "got token" token in
+            ( { settings | stravaStatus = StravaConnected token }, [] )
+
         UserChangedRouteId url ->
             let
                 routeId =
@@ -118,47 +121,40 @@ update msg settings wrap track =
             )
 
         LoadExternalRoute ->
-            --case getStravaToken authentication of
-            --    Just token ->
-            --        ( { settings | stravaRoute = StravaRouteRequested }
-            --        , []
-            --        )
-            --
-            --    --, ActionCommand <|
-            --    --    requestStravaRouteHeader
-            --    --        (wrap << HandleRouteData)
-            --    --        settings.externalRouteId
-            --    --        token
-            --    --)
-            --    Nothing ->
+            -- It's a bit convoluted because a tool cannpt issue commands, but
+            -- must send instruction by way of Action back to Main.
+            case settings.stravaStatus of
+                StravaConnected token ->
+                    ( { settings | stravaRoute = StravaRouteRequested }
+                    , [ Actions.RequestStravaRouteHeader
+                            (wrap << HandleRouteData)
+                            settings.externalRouteId
+                            token
+                      ]
+                    )
+
+                StravaDisconnected ->
                     ( settings, [] )
 
         HandleRouteData response ->
-            --case getStravaToken authentication of
-            --    Just token ->
-            --        let
-            --            stravaRoute =
-            --                stravaProcessRoute response
-            --        in
-            --        ( { settings | stravaRoute = stravaRoute }
-            --        , []
-            --        )
-            --
-            --    --ActionCommand <|
-            --    --    requestStravaRoute
-            --    --        (wrap << GpxDownloaded)
-            --    --        settings.externalRouteId
-            --    --        token
-            --    --)
-            --    Nothing ->
+            case settings.stravaStatus of
+                StravaConnected token ->
+                    ( { settings | stravaRoute = stravaProcessRoute response }
+                    , [ Actions.RequestStravaRoute
+                            (wrap << GpxDownloaded)
+                            settings.externalRouteId
+                            token
+                      ]
+                    )
+
+                StravaDisconnected ->
                     ( settings, [] )
 
         GpxDownloaded response ->
             case response of
                 Ok content ->
-                    ( settings, [] )
+                    ( settings, [ Actions.LoadGpxFromStrava content ] )
 
-                --, PostUpdateActions.ActionNewRoute content GpxStrava )
                 Err _ ->
                     ( settings, [] )
 
@@ -176,7 +172,7 @@ update msg settings wrap track =
             --    --        token
             --    --)
             --    Nothing ->
-                    ( settings, [] )
+            ( settings, [] )
 
         LoadSegmentStreams ->
             --case getStravaToken authentication of
@@ -190,7 +186,7 @@ update msg settings wrap track =
             --    --        token
             --    --)
             --    Nothing ->
-                    ( settings, [] )
+            ( settings, [] )
 
         HandleSegmentData response ->
             case track of
@@ -258,7 +254,7 @@ update msg settings wrap track =
 --)
 
 
-stravaRouteOption : O.Model -> Options -> (Msg -> msg) -> Element msg
+stravaRouteOption : O.Token -> Options -> (Msg -> msg) -> Element msg
 stravaRouteOption auth options wrap =
     let
         routeIdField =
@@ -276,15 +272,10 @@ stravaRouteOption auth options wrap =
                 , label = text <| "Fetch route"
                 }
     in
-    case getStravaToken auth of
-        Just token ->
-            row [ spacing 10 ]
-                [ routeIdField
-                , routeButton
-                ]
-
-        Nothing ->
-            none
+    row [ spacing 10 ]
+        [ routeIdField
+        , routeButton
+        ]
 
 
 viewStravaTab : Options -> (Msg -> msg) -> Maybe (TrackLoaded msg) -> Element msg
@@ -386,11 +377,18 @@ viewStravaTab options wrap track =
         , width fill
         , Background.color FlatColors.ChinesePalette.antiFlashWhite
         ]
-        [ stravaLink
-        , row [ spacing 10 ]
-            [ segmentIdField
-            , segmentButton
-            , clearButton
-            ]
-        , segmentInfo
-        ]
+    <|
+        case options.stravaStatus of
+            StravaConnected token ->
+                [ stravaLink
+                , row [ spacing 10 ]
+                    [ stravaRouteOption token options wrap
+                    , segmentIdField
+                    , segmentButton
+                    , clearButton
+                    ]
+                , segmentInfo
+                ]
+
+            StravaDisconnected ->
+                [ text "Please connect to Strava" ]

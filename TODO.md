@@ -7,6 +7,8 @@ DEBT: Map sends more click messages each time we click.
 BUG: Classic bend smoother consumes all memory on certain looped routes where
      orange and purple are (possibly) co-linear, or something.
 
+BUG: Dragging - Map points move slightly even when mouse does not.
+
 --
 
 # WIP
@@ -27,23 +29,23 @@ Use Strava segment data
 2. Loops (inc. impact on Bezier & Centroid)
 3. Intersection detection ((?? + loop detection ??))
 4. Graph Theory (renamed)
-5. Option to show MR rendering cutoff.
+5. Split and Join
+6. Non-customisable keyboard alternatives for Load/Save/Undo/Redo/Fwd/Back/Purple (maybe 1-5 for views)
++ <>> to move Orange, [] to move Purple
 6. Map style choice (Satellite if possible)
 7. Option to add 80m at Start, 200m at end for start/end gates in RGT
-8. Tooltips (where useful)
-9. Extract all text for translation (Muriel)
-10. Use localised number formatting everywhere (for French use of , and .)
-11. Ability to point-smooth transitions over a range
-12. Chart can only show one Preview; how do we determine which?
-13. Chart preview for Centroid, Bezier, point smoother
-14. Improve default zoom
-15. Terrain (with texture)
-16. Tools that require a range should say so when there isn't one! (David Ogle)
-17. Gaussian (including necessary interpolation)
-18. Split and Join
-19. Update the log dashboard to view v3 activity.
-20. Draggable tools?
-21. Move tool: reverse geocode map click with https://positionstack.com 
+8. Option to show MR rendering cutoff.
+9. Tooltips (where useful)
+10. Extract all text for translation (Muriel)
+11. Use localised number formatting everywhere (for French use of , and .)
+12. Ability to point-smooth transitions over a range
+13. Chart can only show one Preview; how do we determine which?
+14. Chart preview for Centroid, Bezier, point smoother
+16. Terrain (with texture)
+17. Tools that require a range should say so when there isn't one! (David Ogle)
+18. Gaussian (including necessary interpolation)
+20. Update the log dashboard to view v3 activity.
+21. Draggable tools?
 
 New stuff:
 1. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
@@ -99,7 +101,7 @@ Hence, not just one-size-fits-all "preview".
 Then again, it's not really worth worrying about. If we have excessive points
 in a preview list, we can easily elide them by skipping through the list in the
 view; a PeteTree is OTT.
-ut is not too slow now with 973K points, so why bother?.
+But is not too slow now with 973K points, so why bother?.
 
 ## Icons
 

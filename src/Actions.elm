@@ -6,8 +6,10 @@ module Actions exposing (..)
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree)
 import Element
 import File exposing (File)
+import Http
 import Json.Decode as E
 import LocalCoords exposing (LocalCoords)
+import OAuth
 import Scene3d exposing (Entity)
 import Time
 import Tools.BendSmootherOptions
@@ -20,6 +22,7 @@ import Tools.MemoryUsage
 import Tools.MoveScaleRotateOptions
 import Tools.NudgeOptions
 import Tools.OutAndBackOptions
+import Tools.StravaTypes exposing (StravaRoute)
 
 
 type ToolAction msg
@@ -64,6 +67,9 @@ type ToolAction msg
     | TrackFromSvg String
     | StartFlythoughTicks
     | StopFlythroughTicks
+    | RequestStravaRouteHeader ((Result Http.Error StravaRoute) -> msg) String OAuth.Token
+    | RequestStravaRoute ((Result Http.Error String) -> msg) String OAuth.Token
+    | LoadGpxFromStrava String
 
 
 type PreviewShape
