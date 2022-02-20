@@ -1,19 +1,24 @@
 module Tools.StravaTools exposing (..)
 
-import Actions exposing (ToolAction)
+import Actions exposing (PreviewShape(..), ToolAction(..))
+import Angle
 import ColourPalette exposing (stravaOrange)
-import DomainModel exposing (EarthPoint, GPXSource, boundingBox)
+import Direction2d
+import DomainModel exposing (EarthPoint, GPXSource, PeteTree, boundingBox, skipCount)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Font as Font
 import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
 import Http
+import Length
 import List.Extra
 import OAuth as O
+import Quantity
 import ToolTip exposing (myTooltip, tooltip)
-import Tools.StravaDataLoad as StravaDataLoad exposing (..)
-import Tools.StravaTypes as StraveTypes exposing (..)
+import Tools.StravaDataLoad exposing (..)
+import Tools.StravaOptions exposing (Options, StravaStatus(..))
+import Tools.StravaTypes exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import Url.Builder as Builder
 import ViewPureStyles exposing (displayName, neatToolsBorder, prettyButtonStyles)
@@ -34,21 +39,6 @@ type Msg
     | ConnectionInfo O.Token
 
 
-type StravaStatus
-    = StravaDisconnected
-    | StravaConnected O.Token
-
-
-type alias Options =
-    { stravaStatus : StravaStatus
-    , externalSegmentId : String
-    , externalRouteId : String
-    , externalSegment : StravaSegmentStatus
-    , stravaRoute : StravaRouteStatus
-    , stravaStreams : Maybe StravaSegmentStreams
-    , lastHttpError : Maybe Http.Error
-    , preview : List ( EarthPoint, GPXSource )
-    }
 
 
 defaultOptions : Options
@@ -159,34 +149,18 @@ update msg settings wrap track =
                     ( settings, [] )
 
         LoadExternalSegment ->
-            --case getStravaToken authentication of
-            --    Just token ->
-            --        ( { settings | externalSegment = SegmentRequested }
-            --        , []
-            --        )
-            --
-            --    --PostUpdateActions.ActionCommand <|
-            --    --    requestStravaSegment
-            --    --        (wrap << HandleSegmentData)
-            --    --        settings.externalSegmentId
-            --    --        token
-            --    --)
-            --    Nothing ->
-            ( settings, [] )
+            case settings.stravaStatus of
+                StravaConnected token ->
+                    ( { settings | externalSegment = SegmentRequested }
+                    , [ Actions.RequestStravaSegment
+                            (wrap << HandleSegmentData)
+                            settings.externalSegmentId
+                            token
+                      ]
+                    )
 
-        LoadSegmentStreams ->
-            --case getStravaToken authentication of
-            --    Just token ->
-            --        ( settings, [] )
-            --
-            --    --, PostUpdateActions.ActionCommand <|
-            --    --    requestStravaSegmentStreams
-            --    --        (wrap << HandleSegmentStreams)
-            --    --        settings.externalSegmentId
-            --    --        token
-            --    --)
-            --    Nothing ->
-            ( settings, [] )
+                StravaDisconnected ->
+                    ( settings, [] )
 
         HandleSegmentData response ->
             case track of
@@ -203,18 +177,36 @@ update msg settings wrap track =
                 Nothing ->
                     ( settings, [] )
 
+        LoadSegmentStreams ->
+            case settings.stravaStatus of
+                StravaConnected token ->
+                    ( settings
+                    , [ Actions.RequestStravaSegmentStreams
+                            (wrap << HandleSegmentStreams)
+                            settings.externalSegmentId
+                            token
+                      ]
+                    )
+
+                StravaDisconnected ->
+                    ( settings, [] )
+
         HandleSegmentStreams response ->
             case ( track, response, settings.externalSegment ) of
                 ( Just isTrack, Ok streams, SegmentOk segment ) ->
-                    ( { settings
-                        | stravaStreams = Just streams
-                        , externalSegment = SegmentPreviewed segment
-                      }
-                    , []
-                    )
+                    let
+                        newSettings =
+                            { settings
+                                | stravaStreams = Just streams
+                                , externalSegment = SegmentPreviewed segment
+                                , preview =
+                                    pointsFromStreams
+                                        isTrack.referenceLonLat
+                                        streams
+                            }
+                    in
+                    ( newSettings, previewActions newSettings stravaOrange isTrack )
 
-                --, PostUpdateActions.ActionPreview
-                --)
                 ( _, Err err, _ ) ->
                     ( { settings | lastHttpError = Just err }, [] )
 
@@ -224,11 +216,12 @@ update msg settings wrap track =
         PasteSegment ->
             case ( track, settings.externalSegment, settings.stravaStreams ) of
                 ( Just isTrack, SegmentPreviewed segment, Just streams ) ->
+                    -- Note that we pass the OLD settings to the paste action.
                     ( { settings
                         | stravaStreams = Nothing
                         , externalSegment = SegmentNone
                       }
-                    , []
+                    , [ PasteStravaSegment settings ]
                     )
 
                 --case buildActions settings isTrack segment streams of
@@ -249,9 +242,107 @@ update msg settings wrap track =
             )
 
 
+pointsFromStreams : GPXSource -> StravaSegmentStreams -> List ( EarthPoint, GPXSource )
+pointsFromStreams referencePoint streams =
+    -- We need to apply the base point shift but using the original base point.
+    -- We can fudge this by prependng it to the track.
+    let
+        asGpx =
+            List.map2
+                (\latLon alt ->
+                    GPXSource
+                        (Direction2d.fromAngle <| Angle.degrees latLon.lng)
+                        (Angle.degrees latLon.lat)
+                        (Length.meters alt)
+                )
+                streams.latLngs.data
+                streams.altitude.data
 
---, PostUpdateActions.ActionPreview
---)
+        asEarthPoints =
+            List.map (DomainModel.pointFromGpxWithReference referencePoint) asGpx
+    in
+    List.map2 Tuple.pair asEarthPoints asGpx
+
+
+previewActions : Options -> Color -> TrackLoaded msg -> List (ToolAction msg)
+previewActions options colour track =
+    [ ShowPreview
+        { tag = "Strava"
+        , shape = PreviewCircle
+        , colour = colour
+        , points = options.preview
+        }
+    ]
+
+
+paste :
+    Options
+    -> TrackLoaded msg
+    -> ( Maybe PeteTree, List GPXSource, ( Int, Int ) )
+paste options track =
+    -- This will auto-reverse the segment if needed to match our direction of travel.
+    -- That's just based on track indexes. Might be a proble if we traverse it
+    -- more than once, but let's park that thought.
+    case ( options.externalSegment, options.preview ) of
+        ( SegmentOk segment, x1 :: xs ) ->
+            let
+                segmentStartGpx =
+                    GPXSource
+                        (Direction2d.fromAngle <| Angle.degrees segment.start_longitude)
+                        (Angle.degrees segment.start_latitude)
+                        Quantity.zero
+
+                segmentEndGpx =
+                    GPXSource
+                        (Direction2d.fromAngle <| Angle.degrees segment.end_longitude)
+                        (Angle.degrees segment.end_latitude)
+                        Quantity.zero
+
+                pStartingTrackPoint =
+                    -- Our first track point will be replaced with the first stream point
+                    DomainModel.nearestToLonLat
+                        segmentStartGpx
+                        0
+                        track.trackTree
+
+                pEndingTrackPoint =
+                    -- Our last track point will be replaced with the last stream point
+                    DomainModel.nearestToLonLat
+                        segmentEndGpx
+                        0
+                        track.trackTree
+
+                ( readyToPaste, useStart, useEnd ) =
+                    if pEndingTrackPoint < pStartingTrackPoint then
+                        ( List.reverse options.preview
+                        , pEndingTrackPoint
+                        , pStartingTrackPoint
+                        )
+
+                    else
+                        ( options.preview, pStartingTrackPoint, pEndingTrackPoint )
+
+                newTree =
+                    DomainModel.replaceRange
+                        useStart
+                        (skipCount track.trackTree - useEnd)
+                        track.referenceLonLat
+                        (List.map Tuple.second readyToPaste)
+                        track.trackTree
+
+                oldPoints =
+                    DomainModel.extractPointsInRange
+                        useStart
+                        (skipCount track.trackTree - useEnd)
+                        track.trackTree
+            in
+            ( newTree
+            , oldPoints |> List.map Tuple.second
+            , ( useStart, useEnd )
+            )
+
+        _ ->
+            ( Nothing, [], ( 0, 0 ) )
 
 
 viewStravaTab : Options -> (Msg -> msg) -> Maybe (TrackLoaded msg) -> Element msg
@@ -375,8 +466,8 @@ viewStravaTab options wrap track =
         , Background.color FlatColors.ChinesePalette.antiFlashWhite
         ]
     <|
-        case options.stravaStatus of
-            StravaConnected token ->
+        case ( options.stravaStatus, track ) of
+            ( StravaConnected token, Just _ ) ->
                 [ stravaLink
                 , routeIdField
                 , routeButton
@@ -386,5 +477,13 @@ viewStravaTab options wrap track =
                 , segmentInfo
                 ]
 
-            StravaDisconnected ->
+            ( StravaConnected token, Nothing ) ->
+                [ stravaLink
+                , routeIdField
+                , routeButton
+                , paragraph [] [ text """To load a segment from Strava, you need a route
+                 that contains the segment geographicaly.""" ]
+                ]
+
+            ( StravaDisconnected, _ ) ->
                 [ text "Please connect to Strava" ]

@@ -1354,6 +1354,24 @@ performActionsOnModel actions model =
                     in
                     { foldedModel | track = Just newTrack }
 
+                ( PasteStravaSegment options, Just track ) ->
+                    let
+                        ( newTree, oldPoints, ( entry, exit ) ) =
+                            Tools.StravaTools.paste options track
+
+                        ( fromStart, fromEnd ) =
+                            ( entry, skipCount track.trackTree - exit )
+
+                        newTrack =
+                            track
+                                |> TrackLoaded.addToUndoStack action
+                                    fromStart
+                                    fromEnd
+                                    oldPoints
+                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                    in
+                    { foldedModel | track = Just newTrack }
+
                 ( BendSmootherApplyWithOptions options, Just track ) ->
                     let
                         ( newTree, oldPoints ) =
@@ -1868,6 +1886,18 @@ performActionCommands actions model =
                     Tools.StravaDataLoad.requestStravaRoute
                         msg
                         routeId
+                        token
+
+                ( RequestStravaSegment msg segmentId token, _ ) ->
+                    Tools.StravaDataLoad.requestStravaSegment
+                        msg
+                        segmentId
+                        token
+
+                ( RequestStravaSegmentStreams msg segmentId token, _ ) ->
+                    Tools.StravaDataLoad.requestStravaSegmentStreams
+                        msg
+                        segmentId
                         token
 
                 _ ->

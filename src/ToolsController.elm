@@ -43,6 +43,7 @@ import Tools.OutAndBack
 import Tools.OutAndBackOptions
 import Tools.Pointers as Pointers
 import Tools.Simplify
+import Tools.StravaOptions
 import Tools.StravaTools
 import Tools.TrackInfoBox as TrackInfoBox
 import Tools.UndoRedo as UndoRedo
@@ -102,7 +103,7 @@ type alias Options =
     , limitGradientSettings : Tools.LimitGradientOptions.Options
     , moveScaleRotateSettings : Tools.MoveScaleRotateOptions.Options
     , flythroughSettings : Tools.Flythrough.Options
-    , stravaSettings : Tools.StravaTools.Options
+    , stravaSettings : Tools.StravaOptions.Options
     }
 
 

@@ -11,7 +11,6 @@ import Json.Decode as E
 import LocalCoords exposing (LocalCoords)
 import OAuth
 import Scene3d exposing (Entity)
-import Time
 import Tools.BendSmootherOptions
 import Tools.BezierOptions
 import Tools.CentroidAverageOptions
@@ -22,7 +21,8 @@ import Tools.MemoryUsage
 import Tools.MoveScaleRotateOptions
 import Tools.NudgeOptions
 import Tools.OutAndBackOptions
-import Tools.StravaTypes exposing (StravaRoute)
+import Tools.StravaOptions
+import Tools.StravaTypes exposing (StravaRoute, StravaSegment, StravaSegmentStreams)
 
 
 type ToolAction msg
@@ -70,6 +70,9 @@ type ToolAction msg
     | RequestStravaRouteHeader ((Result Http.Error StravaRoute) -> msg) String OAuth.Token
     | RequestStravaRoute ((Result Http.Error String) -> msg) String OAuth.Token
     | LoadGpxFromStrava String
+    | RequestStravaSegment ((Result Http.Error StravaSegment) -> msg) String OAuth.Token
+    | RequestStravaSegmentStreams ((Result Http.Error StravaSegmentStreams) -> msg) String OAuth.Token
+    | PasteStravaSegment Tools.StravaOptions.Options
 
 
 type PreviewShape

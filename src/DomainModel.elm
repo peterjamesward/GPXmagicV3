@@ -30,6 +30,7 @@ module DomainModel exposing
     , lngLatPair
     , nearestToLonLat
     , nearestToRay
+    , pointFromGpxWithReference
     , queryPointsUsingFilter
     , rebuildTree
     , replaceRange
