@@ -11,11 +11,12 @@ import FlatColors.ChinesePalette
 import Http
 import List.Extra
 import OAuth as O
+import ToolTip exposing (myTooltip, tooltip)
 import Tools.StravaDataLoad as StravaDataLoad exposing (..)
 import Tools.StravaTypes as StraveTypes exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import Url.Builder as Builder
-import ViewPureStyles exposing (displayName, prettyButtonStyles)
+import ViewPureStyles exposing (displayName, neatToolsBorder, prettyButtonStyles)
 
 
 type Msg
@@ -90,7 +91,6 @@ update :
 update msg settings wrap track =
     case msg of
         ConnectionInfo token ->
-            let _ = Debug.log "got token" token in
             ( { settings | stravaStatus = StravaConnected token }, [] )
 
         UserChangedRouteId url ->
@@ -254,39 +254,29 @@ update msg settings wrap track =
 --)
 
 
-stravaRouteOption : O.Token -> Options -> (Msg -> msg) -> Element msg
-stravaRouteOption auth options wrap =
-    let
-        routeIdField =
-            Input.text [ width (px 150) ]
-                { onChange = wrap << UserChangedRouteId
-                , text = options.externalRouteId
-                , placeholder = Just <| Input.placeholder [] <| text "Strava route ID"
-                , label = Input.labelHidden "Strava route ID"
-                }
-
-        routeButton =
-            button
-                prettyButtonStyles
-                { onPress = Just <| wrap LoadExternalRoute
-                , label = text <| "Fetch route"
-                }
-    in
-    row [ spacing 10 ]
-        [ routeIdField
-        , routeButton
-        ]
-
-
 viewStravaTab : Options -> (Msg -> msg) -> Maybe (TrackLoaded msg) -> Element msg
 viewStravaTab options wrap track =
     let
         segmentIdField =
-            Input.text []
+            Input.text
+                [ width (minimum 150 <| fill)
+                , tooltip below (myTooltip "Paste in a segment number or URL")
+                ]
                 { onChange = wrap << UserChangedSegmentId
                 , text = options.externalSegmentId
                 , placeholder = Just <| Input.placeholder [] <| text "Segment ID"
                 , label = Input.labelHidden "Segment ID"
+                }
+
+        routeIdField =
+            Input.text
+                [ width (minimum 150 <| fill)
+                , tooltip below (myTooltip "Paste in a route number or URL")
+                ]
+                { onChange = wrap << UserChangedRouteId
+                , text = options.externalRouteId
+                , placeholder = Just <| Input.placeholder [] <| text "Strava route ID"
+                , label = Input.labelHidden "Strava route ID"
                 }
 
         segmentButton =
@@ -296,21 +286,21 @@ viewStravaTab options wrap track =
             case options.externalSegment of
                 SegmentOk segment ->
                     button
-                        prettyButtonStyles
+                        neatToolsBorder
                         { onPress = Just <| wrap LoadSegmentStreams
                         , label = text "Preview"
                         }
 
                 SegmentPreviewed segment ->
                     button
-                        prettyButtonStyles
+                        neatToolsBorder
                         { onPress = Just <| wrap PasteSegment
                         , label = text "Paste"
                         }
 
                 SegmentNone ->
                     button
-                        prettyButtonStyles
+                        neatToolsBorder
                         { onPress = Just <| wrap LoadExternalSegment
                         , label = text <| "Fetch header"
                         }
@@ -328,7 +318,7 @@ viewStravaTab options wrap track =
 
                 _ ->
                     button
-                        prettyButtonStyles
+                        neatToolsBorder
                         { onPress = Just <| wrap ClearSegment
                         , label = text "Clear"
                         }
@@ -370,8 +360,15 @@ viewStravaTab options wrap track =
 
                 _ ->
                     none
+
+        routeButton =
+            button
+                neatToolsBorder
+                { onPress = Just <| wrap LoadExternalRoute
+                , label = text <| "Fetch route"
+                }
     in
-    column
+    wrappedRow
         [ spacing 10
         , padding 10
         , width fill
@@ -381,12 +378,11 @@ viewStravaTab options wrap track =
         case options.stravaStatus of
             StravaConnected token ->
                 [ stravaLink
-                , row [ spacing 10 ]
-                    [ stravaRouteOption token options wrap
-                    , segmentIdField
-                    , segmentButton
-                    , clearButton
-                    ]
+                , routeIdField
+                , routeButton
+                , segmentIdField
+                , segmentButton
+                , clearButton
                 , segmentInfo
                 ]
 
