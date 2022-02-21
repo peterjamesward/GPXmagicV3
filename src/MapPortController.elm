@@ -319,11 +319,15 @@ draggedOnMap json track =
         lat2 =
             D.decodeValue (D.at [ "end", "lat" ] D.float) json
     in
-    case ( ( lon1, lat1 ), ( lon2, lat2 ) ) of
-        ( ( Ok startLon, Ok startLat ), ( Ok endLon, Ok endLat ) ) ->
-            [ PointMovedOnMap startLon startLat endLon endLat
-            , TrackHasChanged
-            ]
+    if lon1 == lon2 && lat1 == lat2 then
+        []
 
-        _ ->
-            []
+    else
+        case ( ( lon1, lat1 ), ( lon2, lat2 ) ) of
+            ( ( Ok startLon, Ok startLat ), ( Ok endLon, Ok endLat ) ) ->
+                [ PointMovedOnMap startLon startLat endLon endLat
+                , TrackHasChanged
+                ]
+
+            _ ->
+                []

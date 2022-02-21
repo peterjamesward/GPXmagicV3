@@ -24838,23 +24838,27 @@ var $author$project$MapPortController$draggedOnMap = F2(
 					['start', 'lat']),
 				$elm$json$Json$Decode$float),
 			json);
-		var _v0 = _Utils_Tuple2(
-			_Utils_Tuple2(lon1, lat1),
-			_Utils_Tuple2(lon2, lat2));
-		if ((((_v0.a.a.$ === 'Ok') && (_v0.a.b.$ === 'Ok')) && (_v0.b.a.$ === 'Ok')) && (_v0.b.b.$ === 'Ok')) {
-			var _v1 = _v0.a;
-			var startLon = _v1.a.a;
-			var startLat = _v1.b.a;
-			var _v2 = _v0.b;
-			var endLon = _v2.a.a;
-			var endLat = _v2.b.a;
-			return _List_fromArray(
-				[
-					A4($author$project$Actions$PointMovedOnMap, startLon, startLat, endLon, endLat),
-					$author$project$Actions$TrackHasChanged
-				]);
-		} else {
+		if (_Utils_eq(lon1, lon2) && _Utils_eq(lat1, lat2)) {
 			return _List_Nil;
+		} else {
+			var _v0 = _Utils_Tuple2(
+				_Utils_Tuple2(lon1, lat1),
+				_Utils_Tuple2(lon2, lat2));
+			if ((((_v0.a.a.$ === 'Ok') && (_v0.a.b.$ === 'Ok')) && (_v0.b.a.$ === 'Ok')) && (_v0.b.b.$ === 'Ok')) {
+				var _v1 = _v0.a;
+				var startLon = _v1.a.a;
+				var startLat = _v1.b.a;
+				var _v2 = _v0.b;
+				var endLon = _v2.a.a;
+				var endLat = _v2.b.a;
+				return _List_fromArray(
+					[
+						A4($author$project$Actions$PointMovedOnMap, startLon, startLat, endLon, endLat),
+						$author$project$Actions$TrackHasChanged
+					]);
+			} else {
+				return _List_Nil;
+			}
 		}
 	});
 var $author$project$MapPortController$msgDecoder = A2($elm$json$Json$Decode$field, 'msg', $elm$json$Json$Decode$string);

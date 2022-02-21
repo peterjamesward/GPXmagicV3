@@ -11,10 +11,6 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 # WIP
 
-BUG: Dragging - Map points move slightly and edit is registered even when mouse does not move.
-> Drag should not start until there's actual movement beyond some threshold ("sticky").
-> Note that the "dragging" status is just wrong. v2 is not like this.
-
 ---
 
 # BACKLOG, roughly in order ...
