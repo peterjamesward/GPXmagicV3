@@ -21,7 +21,7 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 5. Graph Theory (notes below)
 6. --- Cut-off for release
 7. Map style choice (Satellite if possible)
-8. Chart can only show one Preview; how do we determine which?
+8. Chart can only show one Preview; how do we determine which? (? Menu on Chart ?)
 9. Chart preview for Centroid, Bezier, point smoother
 10. Extract all text for translation (Muriel)
 11. Use localised number formatting everywhere (for French use of , and .)
