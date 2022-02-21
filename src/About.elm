@@ -11,6 +11,7 @@ aboutText =
 * First person "Rider view"
 * Fly-through
 * Connect to Strava for import of routes and segment
+* Nudge limit now 7m, preview change to line style
 
 ## Still to-do from v2
 
