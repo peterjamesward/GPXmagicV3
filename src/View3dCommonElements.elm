@@ -118,7 +118,7 @@ zoomButtons msgWrapper context =
             }
         , Input.button
             (if context.followSelectedPoint then
-                [ tooltip onLeft (myTooltip "Stopp following Orange") ]
+                [ tooltip onLeft (myTooltip "Stop following Orange") ]
 
              else
                 [ tooltip onLeft (myTooltip "Centre on Orange") ]

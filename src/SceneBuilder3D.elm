@@ -135,9 +135,9 @@ render3dView settings track =
 
              else
                 [ Scene3d.point { radius = Pixels.pixels 1 }
-                    (Material.color black)
+                    (Material.color Color.charcoal)
                     road.startPoint
-                , Scene3d.lineSegment (Material.color black) <|
+                , Scene3d.lineSegment (Material.color Color.lightCharcoal) <|
                     LineSegment3d.from road.startPoint road.endPoint
                 ]
             )
@@ -155,13 +155,13 @@ render3dView settings track =
 
         renderCurrentMarkers : List (Entity LocalCoords)
         renderCurrentMarkers =
-            [ Scene3d.point { radius = Pixels.pixels 10 }
+            [ Scene3d.point { radius = Pixels.pixels 15 }
                 (Material.color lightOrange)
                 (earthPointFromIndex track.currentPosition track.trackTree)
             ]
                 ++ (case track.markerPosition of
                         Just marker ->
-                            [ Scene3d.point { radius = Pixels.pixels 9 }
+                            [ Scene3d.point { radius = Pixels.pixels 12 }
                                 (Material.color <| Color.fromRgba <| Element.toRgb <| FlatColors.AussiePalette.blurple)
                                 (earthPointFromIndex marker track.trackTree)
                             ]

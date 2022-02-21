@@ -4,7 +4,7 @@ module About exposing (..)
 aboutText =
     """
 
-# GPXmagic v3.0.4 (9563c560)
+# GPXmagic v3.0.4 (32e5bc30)
 
 ## In this release
 

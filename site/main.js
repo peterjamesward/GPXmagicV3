@@ -19473,7 +19473,6 @@ var $author$project$ToolsController$refreshOpenTools = F2(
 			options.tools);
 	});
 var $author$project$Tools$DisplaySettingsOptions$NoCurtain = {$: 'NoCurtain'};
-var $avh4$elm_color$Color$black = A4($avh4$elm_color$Color$RgbaSpace, 0 / 255, 0 / 255, 0 / 255, 1.0);
 var $smucode$elm_flat_colors$FlatColors$AussiePalette$blurple = A3($mdgriffith$elm_ui$Element$rgb255, 72, 52, 212);
 var $ianmackenzie$elm_geometry$Vector3d$meters = F3(
 	function (x, y, z) {
@@ -20387,6 +20386,7 @@ var $author$project$SceneBuilder3D$centreLineBetween = F2(
 			smallUpshiftTo(road.startPoint),
 			smallUpshiftTo(road.endPoint));
 	});
+var $avh4$elm_color$Color$charcoal = A4($avh4$elm_color$Color$RgbaSpace, 85 / 255, 87 / 255, 83 / 255, 1.0);
 var $avh4$elm_color$Color$darkGreen = A4($avh4$elm_color$Color$RgbaSpace, 78 / 255, 154 / 255, 6 / 255, 1.0);
 var $avh4$elm_color$Color$fromRgba = function (components) {
 	return A4($avh4$elm_color$Color$RgbaSpace, components.red, components.green, components.blue, components.alpha);
@@ -20456,6 +20456,7 @@ var $ianmackenzie$elm_units$Length$inches = function (numInches) {
 };
 var $ianmackenzie$elm_units$Length$inch = $ianmackenzie$elm_units$Length$inches(1);
 var $ianmackenzie$elm_units$Length$kilometer = $ianmackenzie$elm_units$Length$kilometers(1);
+var $avh4$elm_color$Color$lightCharcoal = A4($avh4$elm_color$Color$RgbaSpace, 136 / 255, 138 / 255, 133 / 255, 1.0);
 var $avh4$elm_color$Color$lightOrange = A4($avh4$elm_color$Color$RgbaSpace, 252 / 255, 175 / 255, 62 / 255, 1.0);
 var $ianmackenzie$elm_3d_scene$Scene3d$Types$LambertianMaterial = F3(
 	function (a, b, c) {
@@ -20540,7 +20541,7 @@ var $author$project$SceneBuilder3D$render3dView = F2(
 					A3(
 					$ianmackenzie$elm_3d_scene$Scene3d$point,
 					{
-						radius: $ianmackenzie$elm_units$Pixels$pixels(10)
+						radius: $ianmackenzie$elm_units$Pixels$pixels(15)
 					},
 					$ianmackenzie$elm_3d_scene$Scene3d$Material$color($avh4$elm_color$Color$lightOrange),
 					A2($author$project$DomainModel$earthPointFromIndex, track.currentPosition, track.trackTree))
@@ -20554,7 +20555,7 @@ var $author$project$SceneBuilder3D$render3dView = F2(
 							A3(
 							$ianmackenzie$elm_3d_scene$Scene3d$point,
 							{
-								radius: $ianmackenzie$elm_units$Pixels$pixels(9)
+								radius: $ianmackenzie$elm_units$Pixels$pixels(12)
 							},
 							$ianmackenzie$elm_3d_scene$Scene3d$Material$color(
 								$avh4$elm_color$Color$fromRgba(
@@ -20649,11 +20650,11 @@ var $author$project$SceneBuilder3D$render3dView = F2(
 						{
 							radius: $ianmackenzie$elm_units$Pixels$pixels(1)
 						},
-						$ianmackenzie$elm_3d_scene$Scene3d$Material$color($avh4$elm_color$Color$black),
+						$ianmackenzie$elm_3d_scene$Scene3d$Material$color($avh4$elm_color$Color$charcoal),
 						road.startPoint),
 						A2(
 						$ianmackenzie$elm_3d_scene$Scene3d$lineSegment,
-						$ianmackenzie$elm_3d_scene$Scene3d$Material$color($avh4$elm_color$Color$black),
+						$ianmackenzie$elm_3d_scene$Scene3d$Material$color($avh4$elm_color$Color$lightCharcoal),
 						A2($ianmackenzie$elm_geometry$LineSegment3d$from, road.startPoint, road.endPoint))
 					]),
 				_Utils_ap(
@@ -20743,6 +20744,7 @@ var $author$project$SceneBuilder3D$renderPreviews = function (previews) {
 		onePreview,
 		$elm$core$Dict$values(previews));
 };
+var $avh4$elm_color$Color$black = A4($avh4$elm_color$Color$RgbaSpace, 0 / 255, 0 / 255, 0 / 255, 1.0);
 var $ianmackenzie$elm_units$Quantity$clamp = F3(
 	function (_v0, _v1, _v2) {
 		var lower = _v0.a;
@@ -45856,7 +45858,7 @@ var $author$project$ViewPureStyles$conditionallyVisible = F2(
 				]),
 			element);
 	});
-var $author$project$About$aboutText = '\n\n# GPXmagic v3.0.4 (9563c560)\n\n## In this release\n\n* First person "Rider view"\n* Fly-through\n* Connect to Strava for import of routes and segment\n\n## Still to-do from v2\n\n1. Move & Stretch\n2. Loops (inc. impact on Bezier & Centroid)\n3. Intersection detection ((?? + loop detection ??))\n4. Split and Join\n5. Graph Theory (renamed)\n\n## Legal guff\n\n> peterjamesward/GPXmagicV3 is licensed under the\n> Creative Commons Zero v1.0 Universal license\n\nSource code available: https://github.com/peterjamesward/GPXmagicV3\n\n    ';
+var $author$project$About$aboutText = '\n\n# GPXmagic v3.0.4 (32e5bc30)\n\n## In this release\n\n* First person "Rider view"\n* Fly-through\n* Connect to Strava for import of routes and segment\n* Nudge limit now 7m, preview change to line style\n\n## Still to-do from v2\n\n1. Move & Stretch\n2. Loops (inc. impact on Bezier & Centroid)\n3. Intersection detection ((?? + loop detection ??))\n4. Split and Join\n5. Graph Theory (renamed)\n\n## Legal guff\n\n> peterjamesward/GPXmagicV3 is licensed under the\n> Creative Commons Zero v1.0 Universal license\n\nSource code available: https://github.com/peterjamesward/GPXmagicV3\n\n    ';
 var $elm_explorations$markdown$Markdown$defaultOptions = {
 	defaultHighlighting: $elm$core$Maybe$Nothing,
 	githubFlavored: $elm$core$Maybe$Just(
@@ -54461,7 +54463,7 @@ var $author$project$View3dCommonElements$zoomButtons = F2(
 							A2(
 							$author$project$ToolTip$tooltip,
 							$mdgriffith$elm_ui$Element$onLeft,
-							$author$project$ToolTip$myTooltip('Stopp following Orange'))
+							$author$project$ToolTip$myTooltip('Stop following Orange'))
 						]) : _List_fromArray(
 						[
 							A2(

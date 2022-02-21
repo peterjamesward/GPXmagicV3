@@ -13,11 +13,7 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 BUG: Dragging - Map points move slightly and edit is registered even when mouse does not move.
 > Drag should not start until there's actual movement beyond some threshold ("sticky").
-> Note that the "dragging" status is just wrong.
-
-Nudge: Increase max to 6m or so.
-
-Nudge: Change to line preview.
+> Note that the "dragging" status is just wrong. v2 is not like this.
 
 ---
 
@@ -30,22 +26,24 @@ Nudge: Change to line preview.
 3. Intersection detection ((?? + loop detection ??))
 4. Split and Join
 5. Graph Theory (renamed)
-6. --- Cut-off for release
-7. Map style choice (Satellite if possible)
-8. Chart can only show one Preview; how do we determine which?
-9. Chart preview for Centroid, Bezier, point smoother
-10. Extract all text for translation (Muriel)
-11. Use localised number formatting everywhere (for French use of , and .)
-12. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
-13. Terrain (with texture maybe)
-14. Ability to point-smooth transitions over a range
-15. Tools that require a range should say so when there isn't one! (David Ogle)
-16. --- Cut-off
-17. Option to add 80m at Start, 200m at end for start/end gates in RGT
-18. Option to show MR rendering cutoff.
-19. Tooltips (where useful)
-20. Non-customisable keyboard alternatives for Load/Save/Undo/Redo/Fwd/Back/Purple (maybe 1-5 for views)
-21. Draggable tools?
+6. Switch to Perspective on first track load.
+7. Persist Display preferences.
+8. --- Cut-off for release
+9. Map style choice (Satellite if possible)
+10. Chart can only show one Preview; how do we determine which?
+11. Chart preview for Centroid, Bezier, point smoother
+12. Extract all text for translation (Muriel)
+13. Use localised number formatting everywhere (for French use of , and .)
+14. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
+15. Terrain (with texture maybe)
+16. Ability to point-smooth transitions over a range
+17. Tools that require a range should say so when there isn't one! (David Ogle)
+18. --- Cut-off
+19. Option to add 80m at Start, 200m at end for start/end gates in RGT
+20. Option to show MR rendering cutoff.
+21. Tooltips (where useful)
+22. Non-customisable keyboard alternatives for Load/Save/Undo/Redo/Fwd/Back/Purple (maybe 1-5 for views)
+23. Draggable tools?
 
 New stuff:
 > This could be like a meta-box, or a "build your own 1CQF", in which
@@ -70,12 +68,19 @@ Tree walk combined with whole (visible) tree query, because <track loops>.
 
 ## Small stuff
 
+David Ogle: In V3 the trackpoints are pretty small - they get lost a bit in the black lines between the trackpoints. Could be worth making the trackpoints a bit bigger and/or making the joining lines a different colour (maybe grey would do it).
+
 Put all Font, Colour etc into a Palette/Style module for ease of change.
 > Search for FlatUI references.
 
 ## Loop detection
 
 **JB**: I have been getting a few Partner event gpx's lately that do a loop... but then continue around for say 25% of it before finishing which when a map is first loaded i do not notice until i start working on it... it would be nice if when a map is first loaded the points show a different colour when there is another course on top.. ie orange for the first lap but if it continues say red until it finishes..
+
+## Graphs
+
+David Ogle: After using graph theory you end up with out and back trackpoints in the same position... say the orange marker is near the end of the course and I select a trackpoint nearby, it always selects the one at the start of the course, instead of the one I was trying to select near the end. So I'm thinking if you've got 2 trackpoints in the same position, on selection (mouse click), it'd be good to select the one closest to the current position.
+
 
 ---
 
