@@ -21141,7 +21141,7 @@ var $author$project$Tools$DisplaySettingsOptions$decodeCurtain = function (value
 	}
 };
 var $author$project$Tools$DisplaySettingsOptions$StoredOptions = F4(
-	function (roadSurface, centreLine, groundPlane, curtainStyle) {
+	function (roadSurface, groundPlane, centreLine, curtainStyle) {
 		return {centreLine: centreLine, curtainStyle: curtainStyle, groundPlane: groundPlane, roadSurface: roadSurface};
 	});
 var $author$project$Tools$DisplaySettingsOptions$decoder = A5(

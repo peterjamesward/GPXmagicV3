@@ -16,8 +16,8 @@ type alias Options =
 
 type alias StoredOptions =
     { roadSurface : Bool
-    , centreLine : Bool
     , groundPlane : Bool
+    , centreLine : Bool
     , curtainStyle : String
     }
 
