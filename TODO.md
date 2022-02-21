@@ -68,8 +68,6 @@ Tree walk combined with whole (visible) tree query, because <track loops>.
 
 ## Small stuff
 
-David Ogle: In V3 the trackpoints are pretty small - they get lost a bit in the black lines between the trackpoints. Could be worth making the trackpoints a bit bigger and/or making the joining lines a different colour (maybe grey would do it).
-
 Put all Font, Colour etc into a Palette/Style module for ease of change.
 > Search for FlatUI references.
 

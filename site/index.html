@@ -164,7 +164,7 @@ function mapMessageHandler(msg) {
         case 'Track':
             if (isMapCreated) {
                 addLineToMap(msg.data, msg.points);
-                setClickMode('false', msg.points);
+                setClickMode(false, msg.points);
             }
             break;
 
@@ -367,11 +367,6 @@ function addLineToMap(data, points) {
         e;
     });
 
-  //  app.ports.mapResponses.send(
-  //    { 'msg' : 'track ready' }
-  //  );
-
-//    setTimeout(function() { map.resize(); }, 50);
 };
 
 function setClickMode(newMode, points) {
@@ -432,10 +427,10 @@ function setClickMode(newMode, points) {
             });
 
         } else {
-          map.off('mouseenter','points')
-             .off('mouseleave','points')
-             .off('mousedown','points')
-             .off('click','points')
+            map.off('mouseenter','points')
+               .off('mouseleave','points')
+               .off('mousedown','points')
+               .off('click','points')
         }
     };
 };
