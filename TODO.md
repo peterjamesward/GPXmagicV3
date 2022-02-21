@@ -8,13 +8,14 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 # WIP
 
+## Move & Stretch
+
 ---
 
 # BACKLOG, roughly in order ...
 
 ## Tools: old, updated, & new
 
-1. Move & Stretch
 2. Loops (inc. impact on Bezier & Centroid)
 3. Split and Join
 4. Intersection detection ((?? + loop detection ??))
