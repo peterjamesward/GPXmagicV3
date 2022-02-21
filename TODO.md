@@ -15,6 +15,10 @@ BUG: Dragging - Map points move slightly and edit is registered even when mouse 
 > Drag should not start until there's actual movement beyond some threshold ("sticky").
 > Note that the "dragging" status is just wrong.
 
+Nudge: Increase max to 6m or so.
+
+Nudge: Change to line preview.
+
 ---
 
 # BACKLOG, roughly in order ...

@@ -91,7 +91,7 @@ toolStateChange opened colour options track =
 previewActions newOptions colour track =
     [ ShowPreview
         { tag = "nudge"
-        , shape = PreviewCircle
+        , shape = PreviewLine
         , colour = colour
         , points = Tuple.second <| computeNudgedPoints newOptions track
         }
@@ -324,17 +324,17 @@ horizontalNudgeSlider imperial value wrap =
         , min =
             Length.inMeters <|
                 if imperial then
-                    Length.feet -16.0
+                    Length.feet -21.0
 
                 else
-                    Length.meters -5.0
+                    Length.meters -7.0
         , max =
             Length.inMeters <|
                 if imperial then
-                    Length.feet 16.0
+                    Length.feet 21.0
 
                 else
-                    Length.meters 5.0
+                    Length.meters 7.0
         , step = Nothing
         , value = Length.inMeters value
         , thumb = Input.defaultThumb
@@ -371,17 +371,17 @@ verticalNudgeSlider imperial value wrap =
             , min =
                 Length.inMeters <|
                     if imperial then
-                        Length.feet -16.0
+                        Length.feet -21.0
 
                     else
-                        Length.meters -5.0
+                        Length.meters -7.0
             , max =
                 Length.inMeters <|
                     if imperial then
-                        Length.feet 16.0
+                        Length.feet 21.0
 
                     else
-                        Length.meters 5.0
+                        Length.meters 7.0
             , step = Nothing
             , value = Length.inMeters value
             , thumb = Input.defaultThumb

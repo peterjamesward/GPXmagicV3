@@ -19003,6 +19003,7 @@ var $author$project$Tools$MoveScaleRotate$toolStateChange = F4(
 					]));
 		}
 	});
+var $author$project$Actions$PreviewLine = {$: 'PreviewLine'};
 var $author$project$Tools$Nudge$previewActions = F3(
 	function (newOptions, colour, track) {
 		return _List_fromArray(
@@ -19011,7 +19012,7 @@ var $author$project$Tools$Nudge$previewActions = F3(
 				{
 					colour: colour,
 					points: A2($author$project$Tools$Nudge$computeNudgedPoints, newOptions, track).b,
-					shape: $author$project$Actions$PreviewCircle,
+					shape: $author$project$Actions$PreviewLine,
 					tag: 'nudge'
 				})
 			]);
@@ -43826,9 +43827,9 @@ var $author$project$Tools$Nudge$horizontalNudgeSlider = F3(
 					$mdgriffith$elm_ui$Element$text(
 						A2($author$project$UtilsForViews$showShortMeasure, imperial, value))),
 				max: $ianmackenzie$elm_units$Length$inMeters(
-					imperial ? $ianmackenzie$elm_units$Length$feet(16.0) : $ianmackenzie$elm_units$Length$meters(5.0)),
+					imperial ? $ianmackenzie$elm_units$Length$feet(21.0) : $ianmackenzie$elm_units$Length$meters(7.0)),
 				min: $ianmackenzie$elm_units$Length$inMeters(
-					imperial ? $ianmackenzie$elm_units$Length$feet(-16.0) : $ianmackenzie$elm_units$Length$meters(-5.0)),
+					imperial ? $ianmackenzie$elm_units$Length$feet(-21.0) : $ianmackenzie$elm_units$Length$meters(-7.0)),
 				onChange: A2(
 					$elm$core$Basics$composeR,
 					$ianmackenzie$elm_units$Length$meters,
@@ -43901,9 +43902,9 @@ var $author$project$Tools$Nudge$verticalNudgeSlider = F3(
 						$mdgriffith$elm_ui$Element$text(
 							A2($author$project$UtilsForViews$showShortMeasure, imperial, value))),
 					max: $ianmackenzie$elm_units$Length$inMeters(
-						imperial ? $ianmackenzie$elm_units$Length$feet(16.0) : $ianmackenzie$elm_units$Length$meters(5.0)),
+						imperial ? $ianmackenzie$elm_units$Length$feet(21.0) : $ianmackenzie$elm_units$Length$meters(7.0)),
 					min: $ianmackenzie$elm_units$Length$inMeters(
-						imperial ? $ianmackenzie$elm_units$Length$feet(-16.0) : $ianmackenzie$elm_units$Length$meters(-5.0)),
+						imperial ? $ianmackenzie$elm_units$Length$feet(-21.0) : $ianmackenzie$elm_units$Length$meters(-7.0)),
 					onChange: A2(
 						$elm$core$Basics$composeR,
 						$ianmackenzie$elm_units$Length$meters,
@@ -45855,7 +45856,7 @@ var $author$project$ViewPureStyles$conditionallyVisible = F2(
 				]),
 			element);
 	});
-var $author$project$About$aboutText = '\n\n# GPXmagic v3.0.3 (049e9275)\n\n## In this release\n\n* Radius bend preview removed when track is changed.\n* Orange and Purple pointers are reset when track is changed.\n* Radiused bends sometimes got the bend direction wrong.\n* First-person "Rider view" added.\n* Fetch elevations from map has transitioned. Caveats about accuracy apply.\n* SVG file loading transitioned.\n\n## Still to-do from v2\n\n1. Fly-through\n2. Use Strava segment data\n3. Move & Stretch\n4. Loops (inc. impact on others, such as Bezier)\n5. Intersection detection ((?? JB loop detection ??))\n6. Graph Theory (renamed)\n7. Option to show MR rendering cutoff.\n\n## Legal guff\n\n> peterjamesward/GPXmagicV3 is licensed under the\n> Creative Commons Zero v1.0 Universal license\n\nSource code available: https://github.com/peterjamesward/GPXmagicV3\n\n    ';
+var $author$project$About$aboutText = '\n\n# GPXmagic v3.0.4 (9563c560)\n\n## In this release\n\n* First person "Rider view"\n* Fly-through\n* Connect to Strava for import of routes and segment\n\n## Still to-do from v2\n\n1. Move & Stretch\n2. Loops (inc. impact on Bezier & Centroid)\n3. Intersection detection ((?? + loop detection ??))\n4. Split and Join\n5. Graph Theory (renamed)\n\n## Legal guff\n\n> peterjamesward/GPXmagicV3 is licensed under the\n> Creative Commons Zero v1.0 Universal license\n\nSource code available: https://github.com/peterjamesward/GPXmagicV3\n\n    ';
 var $elm_explorations$markdown$Markdown$defaultOptions = {
 	defaultHighlighting: $elm$core$Maybe$Nothing,
 	githubFlavored: $elm$core$Maybe$Just(
