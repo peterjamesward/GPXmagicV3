@@ -1,9 +1,6 @@
 
 # BUGS & DEBT (for an 'easy' day)
 
-DEBT: Map sends more click messages each time we click. 
-> They are debounced but, still, why??
-
 BUG: Classic bend smoother consumes all memory on certain looped routes where
      orange and purple are (possibly) co-linear, or something. (Samir bug)
 
@@ -19,27 +16,25 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 1. Move & Stretch
 2. Loops (inc. impact on Bezier & Centroid)
-3. Intersection detection ((?? + loop detection ??))
-4. Split and Join
+3. Split and Join
+4. Intersection detection ((?? + loop detection ??))
 5. Graph Theory (notes below)
-6. Switch to Perspective on first track load.
-7. Persist Display preferences.
-8. --- Cut-off for release
-9. Map style choice (Satellite if possible)
-10. Chart can only show one Preview; how do we determine which?
-11. Chart preview for Centroid, Bezier, point smoother
-12. Extract all text for translation (Muriel)
-13. Use localised number formatting everywhere (for French use of , and .)
-14. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
-15. Terrain (with texture maybe)
-16. Ability to point-smooth transitions over a range
-17. Tools that require a range should say so when there isn't one! (David Ogle)
-18. --- Cut-off
-19. Option to add 80m at Start, 200m at end for start/end gates in RGT
-20. Option to show MR rendering cutoff.
-21. Tooltips (where useful)
-22. Non-customisable keyboard alternatives for Load/Save/Undo/Redo/Fwd/Back/Purple (maybe 1-5 for views)
-23. Draggable tools?
+6. --- Cut-off for release
+7. Map style choice (Satellite if possible)
+8. Chart can only show one Preview; how do we determine which?
+9. Chart preview for Centroid, Bezier, point smoother
+10. Extract all text for translation (Muriel)
+11. Use localised number formatting everywhere (for French use of , and .)
+12. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
+13. Terrain (with texture maybe)
+14. Ability to point-smooth transitions over a range
+15. Tools that require a range should say so when there isn't one! (David Ogle)
+16. --- Cut-off
+17. Option to add 80m at Start, 200m at end for start/end gates in RGT
+18. Option to show MR rendering cutoff.
+19. Tooltips (where useful)
+20. Non-customisable keyboard alternatives for Load/Save/Undo/Redo/Fwd/Back/Purple (maybe 1-5 for views)
+21. Draggable tools?
 
 New stuff:
 > This could be like a meta-box, or a "build your own 1CQF", in which
@@ -73,12 +68,17 @@ Put all Font, Colour etc into a Palette/Style module for ease of change.
 
 ## Graphs
 
-David Ogle: After using graph theory you end up with out and back trackpoints in the same position... say the orange marker is near the end of the course and I select a trackpoint nearby, it always selects the one at the start of the course, instead of the one I was trying to select near the end. So I'm thinking if you've got 2 trackpoints in the same position, on selection (mouse click), it'd be good to select the one closest to the current position.
+David Ogle: After using graph theory you end up with out and back track points in the same position... say the orange marker is near the end of the course and I select a track point nearby, it always selects the one at the start of the course, instead of the one I was trying to select near the end. So I'm thinking if you've got 2 track points in the same position, on selection (mouse click), it'd be good to select the one closest to the current position.
 
 
 ---
 
 # Parked
+
+## Map
+
+DEBT: Map sends more click messages each time we click.
+> They are debounced but, still, why??
 
 ## Laziness, optimisation
 
