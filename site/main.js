@@ -15112,6 +15112,7 @@ var $author$project$StravaAuth$getStravaToken = function (model) {
 			return $elm$core$Maybe$Nothing;
 	}
 };
+var $author$project$PaneLayoutManager$ViewThird = {$: 'ViewThird'};
 var $author$project$ViewMap$initialiseContext = function (currentContext) {
 	if (currentContext.$ === 'Just') {
 		var context = currentContext.a;
@@ -15243,6 +15244,7 @@ var $author$project$PaneLayoutManager$initialisePane = F3(
 		return _Utils_update(
 			pane,
 			{
+				activeView: _Utils_eq(pane.activeView, $author$project$PaneLayoutManager$ViewInfo) ? $author$project$PaneLayoutManager$ViewThird : pane.activeView,
 				firstPersonContext: $elm$core$Maybe$Just(
 					A3($author$project$ViewThirdPerson$initialiseView, 0, track.trackTree, pane.firstPersonContext)),
 				mapContext: $elm$core$Maybe$Just(
@@ -21191,7 +21193,6 @@ var $author$project$PaneLayoutManager$ViewFirst = {$: 'ViewFirst'};
 var $author$project$PaneLayoutManager$ViewMap = {$: 'ViewMap'};
 var $author$project$PaneLayoutManager$ViewPlan = {$: 'ViewPlan'};
 var $author$project$PaneLayoutManager$ViewProfile = {$: 'ViewProfile'};
-var $author$project$PaneLayoutManager$ViewThird = {$: 'ViewThird'};
 var $author$project$PaneLayoutManager$viewHelper = _List_fromArray(
 	[
 		_Utils_Tuple2($author$project$PaneLayoutManager$ViewInfo, 'info'),

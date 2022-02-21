@@ -632,7 +632,13 @@ initialise track options =
 initialisePane : TrackLoaded msg -> Options -> PaneContext -> PaneContext
 initialisePane track options pane =
     { pane
-        | thirdPersonContext =
+        | activeView =
+            if pane.activeView == ViewInfo then
+                ViewThird
+
+            else
+                pane.activeView
+        , thirdPersonContext =
             Just <|
                 ViewThirdPerson.initialiseView 0 track.trackTree pane.thirdPersonContext
         , firstPersonContext =

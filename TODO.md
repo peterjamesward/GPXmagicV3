@@ -21,7 +21,7 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 2. Loops (inc. impact on Bezier & Centroid)
 3. Intersection detection ((?? + loop detection ??))
 4. Split and Join
-5. Graph Theory (renamed)
+5. Graph Theory (notes below)
 6. Switch to Perspective on first track load.
 7. Persist Display preferences.
 8. --- Cut-off for release
