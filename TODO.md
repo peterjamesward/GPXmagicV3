@@ -8,22 +8,21 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 # WIP
 
-In Rotate and Scale, use slider to set desired track length (Samir).
-
 ---
 
 # BACKLOG, roughly in order ...
 
 ## Tools: old, updated, & new
 
-2. Loops (inc. impact on Bezier & Centroid)
-3. Split and Join
-4. Intersection detection ((?? + loop detection ??))
-5. Graph Theory (notes below)
-6. --- Cut-off for release
-7. Map style choice (Satellite if possible)
-8. Chart can only show one Preview; how do we determine which? (? Menu on Chart ?)
-9. Chart preview for Centroid, Bezier, point smoother
+1. Bend & Gradient problems toggle navigation/list
+2. Orange and Purple on Profile.
+3. Add (distance, altitude, gradient) to previews, so we can add to Profile view.
+4. Loops (inc. impact on Bezier & Centroid)
+5. Split and Join
+6. Intersection detection ((?? + loop detection ??))
+7. Graph Theory (notes below)
+8. --- Cut-off for release
+9. Map style choice (Satellite if possible)
 10. Extract all text for translation (Muriel)
 11. Use localised number formatting everywhere (for French use of , and .)
 12. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
