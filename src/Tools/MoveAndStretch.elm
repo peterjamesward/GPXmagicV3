@@ -456,8 +456,16 @@ stretchPoints options drag track =
             )
 
         ( firstPart, secondPart ) =
-            ( List.map Tuple.first <| DomainModel.extractPointsInRange fromStart drag track.trackTree
-            , List.map Tuple.first <| DomainModel.extractPointsInRange drag toEnd track.trackTree
+            ( List.map Tuple.first <|
+                DomainModel.extractPointsInRange
+                    fromStart
+                    (DomainModel.skipCount track.trackTree - drag)
+                    track.trackTree
+            , List.map Tuple.first <|
+                DomainModel.extractPointsInRange
+                    drag
+                    fromEnd
+                    track.trackTree
             )
 
         ( firstPartAxis, secondPartAxis ) =
@@ -479,12 +487,8 @@ stretchPoints options drag track =
                     Quantity.zero
 
         ( adjustedFirstPoints, adjustedSecondPoints ) =
-            ( List.map
-                adjustRelativeToStart
-                firstPart
-            , List.map
-                adjustRelativeToEnd
-                secondPart
+            ( List.map adjustRelativeToStart firstPart
+            , List.map adjustRelativeToEnd secondPart
             )
 
         adjustRelativeToStart pt =

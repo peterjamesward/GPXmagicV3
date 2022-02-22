@@ -10,6 +10,10 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 ## Move & Stretch
 
+plus:
+
+In Rotate and Scale, use slider to set desired track length (Samir).
+
 ---
 
 # BACKLOG, roughly in order ...
