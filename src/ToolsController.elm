@@ -35,6 +35,8 @@ import Tools.Interpolate
 import Tools.InterpolateOptions
 import Tools.LimitGradientOptions
 import Tools.LimitGradients
+import Tools.MoveAndStretch
+import Tools.MoveAndStretchOptions
 import Tools.MoveScaleRotate
 import Tools.MoveScaleRotateOptions
 import Tools.Nudge
@@ -78,6 +80,7 @@ type ToolType
     | ToolMoveScaleRotate
     | ToolFlythrough
     | ToolStrava
+    | ToolMoveAndStretch
 
 
 type alias Options =
@@ -104,6 +107,7 @@ type alias Options =
     , moveScaleRotateSettings : Tools.MoveScaleRotateOptions.Options
     , flythroughSettings : Tools.Flythrough.Options
     , stravaSettings : Tools.StravaOptions.Options
+    , moveAndStretchSettings : Tools.MoveAndStretchOptions.Options
     }
 
 
@@ -131,6 +135,7 @@ defaultOptions =
     , moveScaleRotateSettings = Tools.MoveScaleRotate.defaultOptions
     , flythroughSettings = Tools.Flythrough.defaultOptions
     , stravaSettings = Tools.StravaTools.defaultOptions
+    , moveAndStretchSettings = Tools.MoveAndStretch.defaultOptions
     }
 
 
@@ -162,6 +167,7 @@ type ToolMsg
     | ToolMoveScaleRotateMsg Tools.MoveScaleRotate.Msg
     | ToolFlythroughMsg Tools.Flythrough.Msg
     | ToolStravaMsg Tools.StravaTools.Msg
+    | ToolMoveAndStretchMsg Tools.MoveAndStretch.Msg
 
 
 type alias ToolEntry =
@@ -199,6 +205,7 @@ defaultTools =
     , moveScaleRotateTool
     , flythroughTool
     , stravaTool
+    , moveAndStretchTool
     ]
 
 
@@ -459,6 +466,20 @@ stravaTool =
     { toolType = ToolStrava
     , label = "Strava"
     , info = "Strava"
+    , video = Nothing
+    , state = Contracted
+    , dock = DockLowerLeft
+    , tabColour = FlatColors.FlatUIPalette.concrete
+    , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
+    , isPopupOpen = False
+    }
+
+
+moveAndStretchTool : ToolEntry
+moveAndStretchTool =
+    { toolType = ToolMoveAndStretch
+    , label = "Move, Stretch"
+    , info = "Move & Stretch"
     , video = Nothing
     , state = Contracted
     , dock = DockLowerLeft
@@ -822,7 +843,7 @@ update toolMsg isTrack msgWrapper options =
                         newOptions =
                             { options | docks = newDocks }
                     in
-                    ( newOptions, [ StoreLocally "docks" <| encodeDockState options.docks ] )
+                    ( newOptions, [ StoreLocally "docks" <| encodeDockState newOptions.docks ] )
 
                 Nothing ->
                     ( options, [] )
@@ -869,6 +890,24 @@ update toolMsg isTrack msgWrapper options =
             ( { options | stravaSettings = newOptions }
             , actions
             )
+
+        ToolMoveAndStretchMsg msg ->
+            case isTrack of
+                Just track ->
+                    let
+                        ( newOptions, actions ) =
+                            Tools.MoveAndStretch.update
+                                msg
+                                options.moveAndStretchSettings
+                                (ToolMoveAndStretchMsg >> msgWrapper)
+                                track
+                    in
+                    ( { options | moveAndStretchSettings = newOptions }
+                    , actions
+                    )
+
+                Nothing ->
+                    ( options, [] )
 
 
 refreshOpenTools :
@@ -1122,6 +1161,20 @@ toolStateHasChanged toolType newState isTrack options =
 
                 newOptions =
                     { options | stravaSettings = newToolOptions }
+            in
+            ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
+
+        ToolMoveAndStretch ->
+            let
+                ( newToolOptions, actions ) =
+                    Tools.MoveAndStretch.toolStateChange
+                        (newState == Expanded)
+                        (getColour toolType options.tools)
+                        options.moveAndStretchSettings
+                        isTrack
+
+                newOptions =
+                    { options | moveAndStretchSettings = newToolOptions }
             in
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
@@ -1422,6 +1475,18 @@ viewToolByType msgWrapper entry isTrack options =
                     (msgWrapper << ToolStravaMsg)
                     isTrack
 
+            ToolMoveAndStretch ->
+                case isTrack of
+                    Just track ->
+                        Tools.MoveAndStretch.view
+                            options.imperial
+                            options.moveAndStretchSettings
+                            (msgWrapper << ToolMoveAndStretchMsg)
+                            track
+
+                    Nothing ->
+                        noTrackMessage
+
 
 
 -- Local storage management
@@ -1502,6 +1567,9 @@ encodeType toolType =
 
         ToolStrava ->
             "ToolStrava"
+
+        ToolMoveAndStretch ->
+            "ToolMoveAndStretch"
 
 
 encodeColour : Element.Color -> E.Value

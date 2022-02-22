@@ -1,10 +1,12 @@
 module Tools.MoveAndStretch exposing (..)
 
-import Actions
+import Actions exposing (PreviewShape(..), ToolAction(..))
 import Axis3d
 import DomainModel exposing (EarthPoint)
 import Element exposing (..)
+import Element.Background as Background
 import Element.Input as Input
+import FlatColors.ChinesePalette
 import Html.Attributes
 import Html.Events.Extra.Pointer as Pointer
 import Length exposing (meters)
@@ -15,15 +17,12 @@ import Point3d
 import Quantity
 import Svg
 import Svg.Attributes as SA
-import Tools.MoveAndStretchOptions exposing (Mode(..), Options)
+import Tools.MoveAndStretchOptions exposing (Mode(..), Options, Point)
 import TrackLoaded exposing (TrackLoaded)
+import UtilsForViews exposing (showShortMeasure)
 import Vector2d
 import Vector3d
 import ViewPureStyles exposing (..)
-
-
-type alias Point =
-    Point2d.Point2d Length.Meters LocalCoords
 
 
 defaultOptions : Options
@@ -126,6 +125,31 @@ twoWayDragControl model wrapper =
         ]
 
 
+toolStateChange :
+    Bool
+    -> Element.Color
+    -> Options
+    -> Maybe (TrackLoaded msg)
+    -> ( Options, List (ToolAction msg) )
+toolStateChange opened colour options track =
+    case ( opened, track ) of
+        ( True, Just theTrack ) ->
+            ( options, previewActions options colour theTrack )
+
+        _ ->
+            ( options, [ HidePreview "stretch" ] )
+
+
+previewActions newOptions colour track =
+    [ ShowPreview
+        { tag = "stretch"
+        , shape = PreviewLine
+        , colour = colour
+        , points = []
+        }
+    ]
+
+
 update :
     Msg
     -> Options
@@ -209,74 +233,65 @@ minmax a b =
 
 
 view : Bool -> Options -> (Msg -> msg) -> TrackLoaded msg -> Element msg
-view imperial model wrapper track =
+view imperial options wrapper track =
     let
         ( nearEnd, fromEnd ) =
             TrackLoaded.getRangeFromMarkers track
 
         farEnd =
-            DomainModel.trueLength track.trackTree - fromEnd
+            DomainModel.skipCount track.trackTree - fromEnd
 
         canApply =
-            case model.mode of
+            case options.mode of
                 Translate ->
                     nearEnd < farEnd
 
-                Stretch ->s
+                Stretch ->
                     let
                         drag =
-                            model.stretchPointer |> Maybe.withDefault 0 |> toFloat
+                            options.stretchPointer |> Maybe.withDefault 0
                     in
-                    from < drag && drag < to
+                    nearEnd < drag && drag < farEnd
 
         heightSlider =
             Input.slider commonShortVerticalSliderStyles
                 { onChange = wrapper << StretchHeight
                 , label =
-                    Input.labelBelow [ alignRight ]
-                        (text <| showShortMeasure imperial (heightOffset model.heightSliderSetting))
+                    Input.labelBelow [  ]
+                        (text <| showShortMeasure imperial (heightOffset options.heightSliderSetting))
                 , min = -1.0
                 , max = 1.0
                 , step = Nothing
-                , value = model.heightSliderSetting
+                , value = options.heightSliderSetting
                 , thumb =
                     Input.defaultThumb
                 }
 
         showSliderInStretchMode =
-            case ( model.mode, track.markedNode ) of
-                ( Stretch, Just purple ) ->
-                    let
-                        ( from, to ) =
-                            minmax track.currentNode.index purple.index
-                    in
-                    Input.slider commonShortHorizontalSliderStyles
-                        { onChange = wrapper << DraggerMarker << round
-                        , label =
-                            Input.labelBelow []
-                                (text "Choose the point to drag")
-                        , min = from + 1
-                        , max = to - 1
-                        , step = Just 1.0
-                        , value = model.stretchPointer |> Maybe.withDefault 0 |> toFloat
-                        , thumb = Input.defaultThumb
-                        }
-
-                _ ->
-                    none
+            Input.slider commonShortHorizontalSliderStyles
+                { onChange = wrapper << DraggerMarker << round
+                , label =
+                    Input.labelBelow []
+                        (text "Choose the point to drag")
+                , min = toFloat <| nearEnd + 1
+                , max = toFloat <| farEnd - 1
+                , step = Just 1.0
+                , value = options.stretchPointer |> Maybe.withDefault 0 |> toFloat
+                , thumb = Input.defaultThumb
+                }
 
         showActionButtons =
             row [ spacing 5 ]
-                [ Input.button prettyButtonStyles
+                [ Input.button neatToolsBorder
                     { label = text "Zero", onPress = Just <| wrapper DraggerReset }
                 , if canApply then
-                    Input.button prettyButtonStyles
+                    Input.button neatToolsBorder
                         { label = text "Apply"
                         , onPress = Just <| wrapper DraggerApply
                         }
 
                   else
-                    Input.button prettyButtonStyles
+                    Input.button neatToolsBorder
                         { label = text "Not valid"
                         , onPress = Nothing
                         }
@@ -285,23 +300,27 @@ view imperial model wrapper track =
         showModeSelection =
             Input.checkbox []
                 { onChange = wrapper << DraggerModeToggle
-                , icon = checkboxIcon
-                , checked = model.mode == Stretch
+                , icon = Input.defaultCheckbox
+                , checked = options.mode == Stretch
                 , label = Input.labelRight [ centerY ] (text "Stretch")
                 }
     in
     -- Try with linear vector, switch to log or something else if needed.
-    row [ paddingEach { edges | right = 10 }, spacing 5 ]
-        [ twoWayDragControl model wrapper
+    row
+        [ padding 5
+        , spacing 5
+        , width fill
+        , Background.color FlatColors.ChinesePalette.antiFlashWhite
+        ]
+        [ twoWayDragControl options wrapper
         , column
             [ Element.alignLeft
             , Element.width Element.fill
-            , spacing 5
+            , spacing 10
             ]
-            [ markerTextHelper track
-            , showModeSelection
-            , showSliderInStretchMode
-            , showActionButtons
+            [ el [ centerX ] showModeSelection
+            , el [ centerX ] showSliderInStretchMode
+            , el [ centerX ] showActionButtons
             ]
         , heightSlider
         ]
@@ -327,84 +346,86 @@ movePoints options region =
         ( first, regionExcludingEnds ) =
             notLast |> List.Extra.splitAt 1
     in
-    List.map .xyz first
-        ++ List.map (.xyz >> translation) regionExcludingEnds
-        ++ List.map .xyz last
+    []
 
 
-stretchPoints : Options -> EarthPoint -> List EarthPoint -> List EarthPoint
-stretchPoints options stretcher region =
-    -- This used by preview and action.
-    -- Here we move points either side of the stretch marker.
-    let
-        ( xShift, yShift ) =
-            Vector2d.components options.vector
 
-        zShiftMax =
-            Vector3d.xyz
-                Quantity.zero
-                Quantity.zero
-                (heightOffset options.heightSliderSetting)
+{-
 
-        horizontalTranslation =
-            -- Negate y because SVG coordinates go downards.
-            Vector3d.xyz xShift (Quantity.negate yShift) (meters 0)
+   stretchPoints : Options -> EarthPoint -> List EarthPoint -> List EarthPoint
+   stretchPoints options stretcher region =
+       -- This used by preview and action.
+       -- Here we move points either side of the stretch marker.
+       let
+           ( xShift, yShift ) =
+               Vector2d.components options.vector
 
-        ( startAnchor, endAnchor ) =
-            ( region |> List.head |> Maybe.withDefault stretcher
-            , region |> List.Extra.last |> Maybe.withDefault stretcher
-            )
+           zShiftMax =
+               Vector3d.xyz
+                   Quantity.zero
+                   Quantity.zero
+                   (heightOffset options.heightSliderSetting)
 
-        ( firstPart, secondPart ) =
-            region |> List.Extra.splitAt (stretcher.index - startAnchor.index)
+           horizontalTranslation =
+               -- Negate y because SVG coordinates go downards.
+               Vector3d.xyz xShift (Quantity.negate yShift) (meters 0)
 
-        ( firstPartAxis, secondPartAxis ) =
-            ( Axis3d.throughPoints startAnchor.xyz stretcher.xyz
-            , Axis3d.throughPoints endAnchor.xyz stretcher.xyz
-            )
+           ( startAnchor, endAnchor ) =
+               ( region |> List.head |> Maybe.withDefault stretcher
+               , region |> List.Extra.last |> Maybe.withDefault stretcher
+               )
 
-        ( firstPartDistance, secondPartDistance ) =
-            ( Point3d.distanceFrom startAnchor.xyz stretcher.xyz
-            , Point3d.distanceFrom endAnchor.xyz stretcher.xyz
-            )
+           ( firstPart, secondPart ) =
+               region |> List.Extra.splitAt (stretcher.index - startAnchor.index)
 
-        distanceAlong maybeAxis p =
-            case maybeAxis of
-                Just axis ->
-                    p |> Point3d.signedDistanceAlong axis
+           ( firstPartAxis, secondPartAxis ) =
+               ( Axis3d.throughPoints startAnchor.xyz stretcher.xyz
+               , Axis3d.throughPoints endAnchor.xyz stretcher.xyz
+               )
 
-                Nothing ->
-                    Quantity.zero
+           ( firstPartDistance, secondPartDistance ) =
+               ( Point3d.distanceFrom startAnchor.xyz stretcher.xyz
+               , Point3d.distanceFrom endAnchor.xyz stretcher.xyz
+               )
 
-        ( adjustedFirstPoints, adjustedSecondPoints ) =
-            ( List.map
-                adjustRelativeToStart
-                firstPart
-            , List.map
-                adjustRelativeToEnd
-                secondPart
-            )
+           distanceAlong maybeAxis p =
+               case maybeAxis of
+                   Just axis ->
+                       p |> Point3d.signedDistanceAlong axis
 
-        adjustRelativeToStart pt =
-            let
-                proportion =
-                    Quantity.ratio
-                        (pt.xyz |> distanceAlong firstPartAxis)
-                        firstPartDistance
-            in
-            pt.xyz
-                |> Point3d.translateBy (horizontalTranslation |> Vector3d.scaleBy proportion)
-                |> Point3d.translateBy (zShiftMax |> Vector3d.scaleBy proportion)
+                   Nothing ->
+                       Quantity.zero
 
-        adjustRelativeToEnd pt =
-            let
-                proportion =
-                    Quantity.ratio
-                        (pt.xyz |> distanceAlong secondPartAxis)
-                        secondPartDistance
-            in
-            pt.xyz
-                |> Point3d.translateBy (horizontalTranslation |> Vector3d.scaleBy proportion)
-                |> Point3d.translateBy (zShiftMax |> Vector3d.scaleBy proportion)
-    in
-    adjustedFirstPoints ++ adjustedSecondPoints
+           ( adjustedFirstPoints, adjustedSecondPoints ) =
+               ( List.map
+                   adjustRelativeToStart
+                   firstPart
+               , List.map
+                   adjustRelativeToEnd
+                   secondPart
+               )
+
+           adjustRelativeToStart pt =
+               let
+                   proportion =
+                       Quantity.ratio
+                           (pt.xyz |> distanceAlong firstPartAxis)
+                           firstPartDistance
+               in
+               pt.xyz
+                   |> Point3d.translateBy (horizontalTranslation |> Vector3d.scaleBy proportion)
+                   |> Point3d.translateBy (zShiftMax |> Vector3d.scaleBy proportion)
+
+           adjustRelativeToEnd pt =
+               let
+                   proportion =
+                       Quantity.ratio
+                           (pt.xyz |> distanceAlong secondPartAxis)
+                           secondPartDistance
+               in
+               pt.xyz
+                   |> Point3d.translateBy (horizontalTranslation |> Vector3d.scaleBy proportion)
+                   |> Point3d.translateBy (zShiftMax |> Vector3d.scaleBy proportion)
+       in
+       adjustedFirstPoints ++ adjustedSecondPoints
+-}

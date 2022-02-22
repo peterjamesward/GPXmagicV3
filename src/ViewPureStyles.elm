@@ -359,6 +359,6 @@ noTrackMessage =
         , Background.color FlatColors.ChinesePalette.antiFlashWhite
         , centerX
         , centerY
-        , height <| px 100
+        , height fill
         ]
         [ text "Controls will appear here when a track is loaded." ]
