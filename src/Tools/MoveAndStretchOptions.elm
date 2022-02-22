@@ -1,6 +1,6 @@
 module Tools.MoveAndStretchOptions exposing (..)
 
-import DomainModel exposing (EarthPoint)
+import DomainModel exposing (EarthPoint, GPXSource)
 import Length
 import LocalCoords exposing (LocalCoords)
 import Point2d
@@ -9,7 +9,7 @@ import Vector2d
 
 type Mode
     = Translate
-    | Stretch
+    | Stretch Int
 
 
 type alias Point =
@@ -20,8 +20,7 @@ type alias Options =
     { vector : Vector2d.Vector2d Length.Meters LocalCoords
     , lastVector : Vector2d.Vector2d Length.Meters LocalCoords
     , dragging : Maybe Point
-    , preview : List EarthPoint
+    , preview : List ( EarthPoint, GPXSource )
     , mode : Mode
-    , stretchPointer : Maybe Int
     , heightSliderSetting : Float
     }

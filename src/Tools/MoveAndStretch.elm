@@ -2,7 +2,8 @@ module Tools.MoveAndStretch exposing (..)
 
 import Actions exposing (PreviewShape(..), ToolAction(..))
 import Axis3d
-import DomainModel exposing (EarthPoint)
+import Color
+import DomainModel exposing (EarthPoint, GPXSource)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input
@@ -17,6 +18,7 @@ import Point3d
 import Quantity
 import Svg
 import Svg.Attributes as SA
+import Tools.CurveFormer exposing (highlightPoints)
 import Tools.MoveAndStretchOptions exposing (Mode(..), Options, Point)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showShortMeasure)
@@ -32,7 +34,6 @@ defaultOptions =
     , dragging = Nothing
     , preview = []
     , mode = Translate
-    , stretchPointer = Nothing
     , heightSliderSetting = 0.0 -- Note this is not the length.
     }
 
@@ -137,7 +138,7 @@ toolStateChange opened colour options track =
             ( options, previewActions options colour theTrack )
 
         _ ->
-            ( options, [ HidePreview "stretch" ] )
+            ( options, [ HidePreview "stretch", HidePreview "streychMark" ] )
 
 
 previewActions newOptions colour track =
@@ -145,91 +146,167 @@ previewActions newOptions colour track =
         { tag = "stretch"
         , shape = PreviewLine
         , colour = colour
-        , points = []
+        , points = newOptions.preview
         }
+    , case newOptions.mode of
+        Stretch mark ->
+            ShowPreview
+                { tag = "stretchMark"
+                , shape =
+                    PreviewToolSupplied <|
+                        highlightPoints Color.white [ mark ] track
+                , colour = colour
+                , points = []
+                }
+
+        Translate ->
+            Actions.NoAction
     ]
+
+
+computeNewPoints : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
+computeNewPoints options track =
+    let
+        ( fromStart, fromEnd ) =
+            TrackLoaded.getRangeFromMarkers track
+
+        currentPoints =
+            List.map Tuple.first <|
+                DomainModel.extractPointsInRange fromStart fromEnd track.trackTree
+
+        newPoints =
+            case options.mode of
+                Translate ->
+                    movePoints options currentPoints
+
+                Stretch drag ->
+                    stretchPoints options drag track
+    in
+    newPoints
+        |> List.map
+            (\earth ->
+                ( earth
+                , DomainModel.gpxFromPointWithReference track.referenceLonLat earth
+                )
+            )
 
 
 update :
     Msg
     -> Options
     -> (Msg -> msg)
+    -> Color
     -> TrackLoaded msg
     -> ( Options, List (Actions.ToolAction msg) )
-update message model wrapper track =
+update message options wrapper previewColour track =
+    let
+        ( fromStart, fromEnd ) =
+            TrackLoaded.getRangeFromMarkers track
+    in
     case message of
         DraggerGrab offset ->
-            ( { model | dragging = Just offset }
-            , []
-            )
+            ( { options | dragging = Just offset }, [] )
 
         DraggerMove offset ->
-            case model.dragging of
+            case options.dragging of
                 Nothing ->
-                    ( model
-                    , []
-                    )
+                    ( options, [] )
 
                 Just dragStart ->
                     let
                         newVector =
-                            model.lastVector |> Vector2d.plus (Vector2d.from dragStart offset)
+                            options.lastVector |> Vector2d.plus (Vector2d.from dragStart offset)
+
+                        newOptions =
+                            { options | vector = newVector }
+
+                        preview =
+                            computeNewPoints newOptions track
+
+                        optionsWithPreview =
+                            { newOptions | preview = preview }
                     in
-                    ( { model | vector = newVector }
-                    , []
+                    ( optionsWithPreview
+                    , previewActions optionsWithPreview previewColour track
                     )
 
         DraggerRelease _ ->
-            ( { model
+            ( { options
                 | dragging = Nothing
-                , lastVector = model.vector
+                , lastVector = options.vector
               }
             , []
             )
 
         DraggerModeToggle bool ->
-            ( { model
-                | mode =
-                    case model.mode of
-                        Translate ->
-                            Stretch
+            let
+                newOptions =
+                    { options
+                        | mode =
+                            case options.mode of
+                                Translate ->
+                                    Stretch fromStart
 
-                        Stretch ->
-                            Translate
-              }
-            , []
+                                Stretch _ ->
+                                    Translate
+                    }
+
+                preview =
+                    computeNewPoints newOptions track
+
+                optionsWithPreview =
+                    { newOptions | preview = preview }
+            in
+            ( optionsWithPreview
+            , previewActions optionsWithPreview previewColour track
             )
 
         DraggerReset ->
-            ( { model
-                | dragging = Nothing
-                , vector = Vector2d.zero
-                , heightSliderSetting = 0.0
-                , preview = []
-              }
-            , []
-            )
+            let
+                newOptions =
+                    { options
+                        | dragging = Nothing
+                        , vector = Vector2d.zero
+                        , heightSliderSetting = 0.0
+                        , preview = []
+                    }
+            in
+            ( newOptions, [ HidePreview "stretch", HidePreview "streychMark" ] )
 
-        DraggerMarker int ->
-            ( { model | stretchPointer = Just int }
-            , []
+        DraggerMarker idx ->
+            let
+                newOptions =
+                    { options | mode = Stretch idx }
+
+                preview =
+                    computeNewPoints newOptions track
+
+                optionsWithPreview =
+                    { newOptions | preview = preview }
+            in
+            ( optionsWithPreview
+            , previewActions optionsWithPreview previewColour track
             )
 
         DraggerApply ->
-            ( { model | preview = [] }
-            , []
+            ( { options | preview = [] }
+            , [ HidePreview "stretch", HidePreview "streychMark" ]
             )
 
         StretchHeight x ->
-            ( { model | heightSliderSetting = x }
-            , []
+            let
+                newOptions =
+                    { options | heightSliderSetting = x }
+
+                preview =
+                    computeNewPoints newOptions track
+
+                optionsWithPreview =
+                    { newOptions | preview = preview }
+            in
+            ( optionsWithPreview
+            , previewActions optionsWithPreview previewColour track
             )
-
-
-minmax a b =
-    ( toFloat <| min a b
-    , toFloat <| max a b
-    )
 
 
 view : Bool -> Options -> (Msg -> msg) -> TrackLoaded msg -> Element msg
@@ -246,19 +323,13 @@ view imperial options wrapper track =
                 Translate ->
                     nearEnd < farEnd
 
-                Stretch ->
-                    let
-                        drag =
-                            options.stretchPointer |> Maybe.withDefault 0
-                    in
+                Stretch drag ->
                     nearEnd < drag && drag < farEnd
 
         heightSlider =
             Input.slider commonShortVerticalSliderStyles
                 { onChange = wrapper << StretchHeight
-                , label =
-                    Input.labelBelow [  ]
-                        (text <| showShortMeasure imperial (heightOffset options.heightSliderSetting))
+                , label = Input.labelHidden "Height"
                 , min = -1.0
                 , max = 1.0
                 , step = Nothing
@@ -268,17 +339,22 @@ view imperial options wrapper track =
                 }
 
         showSliderInStretchMode =
-            Input.slider commonShortHorizontalSliderStyles
-                { onChange = wrapper << DraggerMarker << round
-                , label =
-                    Input.labelBelow []
-                        (text "Choose the point to drag")
-                , min = toFloat <| nearEnd + 1
-                , max = toFloat <| farEnd - 1
-                , step = Just 1.0
-                , value = options.stretchPointer |> Maybe.withDefault 0 |> toFloat
-                , thumb = Input.defaultThumb
-                }
+            case options.mode of
+                Stretch drag ->
+                    Input.slider commonShortHorizontalSliderStyles
+                        { onChange = wrapper << DraggerMarker << round
+                        , label =
+                            Input.labelBelow []
+                                (text "Choose point to drag")
+                        , min = toFloat <| nearEnd + 1
+                        , max = toFloat <| farEnd - 1
+                        , step = Just 1.0
+                        , value = drag |> toFloat
+                        , thumb = Input.defaultThumb
+                        }
+
+                Translate ->
+                    none
 
         showActionButtons =
             row [ spacing 5 ]
@@ -301,7 +377,7 @@ view imperial options wrapper track =
             Input.checkbox []
                 { onChange = wrapper << DraggerModeToggle
                 , icon = Input.defaultCheckbox
-                , checked = options.mode == Stretch
+                , checked = options.mode /= Translate
                 , label = Input.labelRight [ centerY ] (text "Stretch")
                 }
     in
@@ -321,6 +397,10 @@ view imperial options wrapper track =
             [ el [ centerX ] showModeSelection
             , el [ centerX ] showSliderInStretchMode
             , el [ centerX ] showActionButtons
+            , el [ centerX ] <|
+                text <|
+                    "Height "
+                        ++ showShortMeasure imperial (heightOffset options.heightSliderSetting)
             ]
         , heightSlider
         ]
@@ -339,93 +419,94 @@ movePoints options region =
         translation =
             -- Negate y because SVG coordinates go downards.
             Point3d.translateBy (Vector3d.xyz xShift (Quantity.negate yShift) zShift)
-
-        ( notLast, last ) =
-            region |> List.Extra.splitAt (List.length region - 1)
-
-        ( first, regionExcludingEnds ) =
-            notLast |> List.Extra.splitAt 1
     in
-    []
+    List.map translation region
 
 
+stretchPoints : Options -> Int -> TrackLoaded msg -> List EarthPoint
+stretchPoints options drag track =
+    -- This used by preview and action.
+    -- Here we move points either side of the stretch marker.
+    let
+        ( fromStart, fromEnd ) =
+            TrackLoaded.getRangeFromMarkers track
 
-{-
+        toEnd =
+            DomainModel.skipCount track.trackTree - fromEnd
 
-   stretchPoints : Options -> EarthPoint -> List EarthPoint -> List EarthPoint
-   stretchPoints options stretcher region =
-       -- This used by preview and action.
-       -- Here we move points either side of the stretch marker.
-       let
-           ( xShift, yShift ) =
-               Vector2d.components options.vector
+        stretcher =
+            DomainModel.earthPointFromIndex drag track.trackTree
 
-           zShiftMax =
-               Vector3d.xyz
-                   Quantity.zero
-                   Quantity.zero
-                   (heightOffset options.heightSliderSetting)
+        ( xShift, yShift ) =
+            Vector2d.components options.vector
 
-           horizontalTranslation =
-               -- Negate y because SVG coordinates go downards.
-               Vector3d.xyz xShift (Quantity.negate yShift) (meters 0)
+        zShiftMax =
+            Vector3d.xyz
+                Quantity.zero
+                Quantity.zero
+                (heightOffset options.heightSliderSetting)
 
-           ( startAnchor, endAnchor ) =
-               ( region |> List.head |> Maybe.withDefault stretcher
-               , region |> List.Extra.last |> Maybe.withDefault stretcher
-               )
+        horizontalTranslation =
+            -- Negate y because SVG coordinates go downards.
+            Vector3d.xyz xShift (Quantity.negate yShift) (meters 0)
 
-           ( firstPart, secondPart ) =
-               region |> List.Extra.splitAt (stretcher.index - startAnchor.index)
+        ( startAnchor, endAnchor ) =
+            ( DomainModel.earthPointFromIndex fromStart track.trackTree
+            , DomainModel.earthPointFromIndex toEnd track.trackTree
+            )
 
-           ( firstPartAxis, secondPartAxis ) =
-               ( Axis3d.throughPoints startAnchor.xyz stretcher.xyz
-               , Axis3d.throughPoints endAnchor.xyz stretcher.xyz
-               )
+        ( firstPart, secondPart ) =
+            ( List.map Tuple.first <| DomainModel.extractPointsInRange fromStart drag track.trackTree
+            , List.map Tuple.first <| DomainModel.extractPointsInRange drag toEnd track.trackTree
+            )
 
-           ( firstPartDistance, secondPartDistance ) =
-               ( Point3d.distanceFrom startAnchor.xyz stretcher.xyz
-               , Point3d.distanceFrom endAnchor.xyz stretcher.xyz
-               )
+        ( firstPartAxis, secondPartAxis ) =
+            ( Axis3d.throughPoints startAnchor stretcher
+            , Axis3d.throughPoints endAnchor stretcher
+            )
 
-           distanceAlong maybeAxis p =
-               case maybeAxis of
-                   Just axis ->
-                       p |> Point3d.signedDistanceAlong axis
+        ( firstPartDistance, secondPartDistance ) =
+            ( Point3d.distanceFrom startAnchor stretcher
+            , Point3d.distanceFrom endAnchor stretcher
+            )
 
-                   Nothing ->
-                       Quantity.zero
+        distanceAlong maybeAxis p =
+            case maybeAxis of
+                Just axis ->
+                    p |> Point3d.signedDistanceAlong axis
 
-           ( adjustedFirstPoints, adjustedSecondPoints ) =
-               ( List.map
-                   adjustRelativeToStart
-                   firstPart
-               , List.map
-                   adjustRelativeToEnd
-                   secondPart
-               )
+                Nothing ->
+                    Quantity.zero
 
-           adjustRelativeToStart pt =
-               let
-                   proportion =
-                       Quantity.ratio
-                           (pt.xyz |> distanceAlong firstPartAxis)
-                           firstPartDistance
-               in
-               pt.xyz
-                   |> Point3d.translateBy (horizontalTranslation |> Vector3d.scaleBy proportion)
-                   |> Point3d.translateBy (zShiftMax |> Vector3d.scaleBy proportion)
+        ( adjustedFirstPoints, adjustedSecondPoints ) =
+            ( List.map
+                adjustRelativeToStart
+                firstPart
+            , List.map
+                adjustRelativeToEnd
+                secondPart
+            )
 
-           adjustRelativeToEnd pt =
-               let
-                   proportion =
-                       Quantity.ratio
-                           (pt.xyz |> distanceAlong secondPartAxis)
-                           secondPartDistance
-               in
-               pt.xyz
-                   |> Point3d.translateBy (horizontalTranslation |> Vector3d.scaleBy proportion)
-                   |> Point3d.translateBy (zShiftMax |> Vector3d.scaleBy proportion)
-       in
-       adjustedFirstPoints ++ adjustedSecondPoints
--}
+        adjustRelativeToStart pt =
+            let
+                proportion =
+                    Quantity.ratio
+                        (pt |> distanceAlong firstPartAxis)
+                        firstPartDistance
+            in
+            pt
+                |> Point3d.translateBy (horizontalTranslation |> Vector3d.scaleBy proportion)
+                |> Point3d.translateBy (zShiftMax |> Vector3d.scaleBy proportion)
+
+        adjustRelativeToEnd pt =
+            let
+                proportion =
+                    Quantity.ratio
+                        (pt |> distanceAlong secondPartAxis)
+                        secondPartDistance
+            in
+            pt
+                |> Point3d.translateBy (horizontalTranslation |> Vector3d.scaleBy proportion)
+                |> Point3d.translateBy (zShiftMax |> Vector3d.scaleBy proportion)
+    in
+    adjustedFirstPoints ++ adjustedSecondPoints

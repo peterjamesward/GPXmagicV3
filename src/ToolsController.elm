@@ -900,6 +900,7 @@ update toolMsg isTrack msgWrapper options =
                                 msg
                                 options.moveAndStretchSettings
                                 (ToolMoveAndStretchMsg >> msgWrapper)
+                                (getColour ToolMoveAndStretch options.tools)
                                 track
                     in
                     ( { options | moveAndStretchSettings = newOptions }
