@@ -4,14 +4,15 @@ module About exposing (..)
 aboutText =
     """
 
-# GPXmagic v3.0.4 (32e5bc30)
+# GPXmagic v3.0.5 (32e5bc30)
 
 ## In this release
 
-* First person "Rider view"
-* Fly-through
-* Connect to Strava for import of routes and segment
-* Nudge limit now 7m, preview change to line style
+* Map starts in "points aren't draggable mode"
+* When points are draggable, ignores clicks that do not move a point
+* Switches from "Info" to "Perspective" when track is loaded
+* Fixed bug in the saving of Display settings
+* Nudge sliders have 5cm (2in) increments, and you can use arrow keys one you've click a slider
 
 ## Still to-do from v2
 
