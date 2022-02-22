@@ -18,6 +18,7 @@ import Tools.CurveFormerOptions
 import Tools.InterpolateOptions
 import Tools.LimitGradientOptions
 import Tools.MemoryUsage
+import Tools.MoveAndStretchOptions
 import Tools.MoveScaleRotateOptions
 import Tools.NudgeOptions
 import Tools.OutAndBackOptions
@@ -73,6 +74,7 @@ type ToolAction msg
     | RequestStravaSegment ((Result Http.Error StravaSegment) -> msg) String OAuth.Token
     | RequestStravaSegmentStreams ((Result Http.Error StravaSegmentStreams) -> msg) String OAuth.Token
     | PasteStravaSegment Tools.StravaOptions.Options
+    | MoveAndStretchWithOptions Tools.MoveAndStretchOptions.Options
 
 
 type PreviewShape
@@ -143,6 +145,9 @@ interpretAction action =
 
         PasteStravaSegment _ ->
             "Strava segment"
+
+        MoveAndStretchWithOptions _ ->
+            "move / stretch"
 
         _ ->
             "tell Pete this needs a message"

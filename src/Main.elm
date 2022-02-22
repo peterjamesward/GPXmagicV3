@@ -56,6 +56,7 @@ import Tools.Interpolate
 import Tools.InterpolateOptions
 import Tools.LimitGradientOptions
 import Tools.LimitGradients
+import Tools.MoveAndStretch
 import Tools.MoveScaleRotate
 import Tools.Nudge
 import Tools.OneClickQuickFix
@@ -1417,6 +1418,24 @@ performActionsOnModel actions model =
 
                         ( fromStart, fromEnd ) =
                             ( 0, 0 )
+
+                        newTrack =
+                            track
+                                |> TrackLoaded.addToUndoStack action
+                                    fromStart
+                                    fromEnd
+                                    oldPoints
+                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                    in
+                    { foldedModel | track = Just newTrack }
+
+                ( MoveAndStretchWithOptions settings, Just track ) ->
+                    let
+                        ( newTree, oldPoints ) =
+                            Tools.MoveAndStretch.apply settings track
+
+                        ( fromStart, fromEnd ) =
+                            TrackLoaded.getRangeFromMarkers track
 
                         newTrack =
                             track

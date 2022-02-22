@@ -3,7 +3,7 @@ module Tools.MoveAndStretch exposing (..)
 import Actions exposing (PreviewShape(..), ToolAction(..))
 import Axis3d
 import Color
-import DomainModel exposing (EarthPoint, GPXSource)
+import DomainModel exposing (EarthPoint, GPXSource, PeteTree)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input
@@ -138,7 +138,7 @@ toolStateChange opened colour options track =
             ( options, previewActions options colour theTrack )
 
         _ ->
-            ( options, [ HidePreview "stretch", HidePreview "streychMark" ] )
+            ( options, [ HidePreview "stretch", HidePreview "stretchMark" ] )
 
 
 previewActions newOptions colour track =
@@ -189,6 +189,34 @@ computeNewPoints options track =
                 , DomainModel.gpxFromPointWithReference track.referenceLonLat earth
                 )
             )
+
+
+apply : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+apply options track =
+    let
+        ( fromStart, fromEnd ) =
+            TrackLoaded.getRangeFromMarkers track
+
+        gpxPoints =
+            options.preview |> List.map Tuple.second
+
+        newTree =
+            DomainModel.replaceRange
+                (fromStart + 1)
+                (fromEnd + 1)
+                track.referenceLonLat
+                gpxPoints
+                track.trackTree
+
+        oldPoints =
+            DomainModel.extractPointsInRange
+                fromStart
+                fromEnd
+                track.trackTree
+    in
+    ( newTree
+    , oldPoints |> List.map Tuple.second
+    )
 
 
 update :
@@ -271,7 +299,7 @@ update message options wrapper previewColour track =
                         , preview = []
                     }
             in
-            ( newOptions, [ HidePreview "stretch", HidePreview "streychMark" ] )
+            ( newOptions, [ HidePreview "stretch", HidePreview "stretchMark" ] )
 
         DraggerMarker idx ->
             let
@@ -289,8 +317,12 @@ update message options wrapper previewColour track =
             )
 
         DraggerApply ->
-            ( { options | preview = [] }
-            , [ HidePreview "stretch", HidePreview "streychMark" ]
+            ( options
+            , [ MoveAndStretchWithOptions options
+              , TrackHasChanged
+              , HidePreview "stretch"
+              , HidePreview "stretchMark"
+              ]
             )
 
         StretchHeight x ->
@@ -458,13 +490,13 @@ stretchPoints options drag track =
         ( firstPart, secondPart ) =
             ( List.map Tuple.first <|
                 DomainModel.extractPointsInRange
-                    fromStart
+                    (fromStart + 1)
                     (DomainModel.skipCount track.trackTree - drag)
                     track.trackTree
             , List.map Tuple.first <|
                 DomainModel.extractPointsInRange
-                    drag
-                    fromEnd
+                    (drag + 1)
+                    (fromEnd + 1)
                     track.trackTree
             )
 
