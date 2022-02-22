@@ -18,7 +18,7 @@ import Quantity
 import ToolTip exposing (buttonStylesWithTooltip)
 import Tools.MoveScaleRotateOptions exposing (Options)
 import TrackLoaded exposing (TrackLoaded)
-import UtilsForViews exposing (showDecimal0, showDecimal2)
+import UtilsForViews exposing (showDecimal0, showDecimal2, showLongMeasure)
 import Vector3d
 import ViewPureStyles exposing (..)
 
@@ -27,7 +27,7 @@ type Msg
     = RotateAndScale
     | SetRotateAngle Angle
     | Recentre
-    | SetScale Float
+    | SetTrackLength Float
     | Zero
     | UseMapElevations
 
@@ -35,7 +35,7 @@ type Msg
 defaultOptions : Options
 defaultOptions =
     { rotateAngle = Angle.degrees 0
-    , scaleFactor = 1.0
+    , desiredTrackLength = Length.kilometers 100.0
     }
 
 
@@ -84,21 +84,17 @@ update msg settings previewColour hasTrack =
             , actions newSettings previewColour track
             )
 
-        ( SetScale scale, Just track ) ->
+        ( SetTrackLength scale, Just track ) ->
             let
                 newSettings =
-                    { settings | scaleFactor = scale }
+                    { settings | desiredTrackLength = Length.kilometers scale }
             in
             ( newSettings
             , actions newSettings previewColour track
             )
 
         ( RotateAndScale, Just track ) ->
-            let
-                newSettings =
-                    { settings | scaleFactor = 1.0 }
-            in
-            ( newSettings
+            ( settings
             , [ ApplyRotateAndScale settings, TrackHasChanged ]
             )
 
@@ -205,11 +201,16 @@ rotateAndScale settings track =
                 (DomainModel.earthPointFromIndex track.currentPosition track.trackTree)
                 Direction3d.z
 
+        scaleFactor =
+            Quantity.ratio
+                settings.desiredTrackLength
+                (DomainModel.trueLength track.trackTree)
+
         rotateAndScaleEndPoint : RoadSection -> List EarthPoint -> List EarthPoint
         rotateAndScaleEndPoint road outputs =
             (road.endPoint
                 |> Point3d.rotateAround axisOfRotation settings.rotateAngle
-                |> Point3d.scaleAbout centre settings.scaleFactor
+                |> Point3d.scaleAbout centre scaleFactor
             )
                 :: outputs
 
@@ -219,7 +220,7 @@ rotateAndScale settings track =
         transformedStartPoint =
             DomainModel.earthPointFromIndex 0 track.trackTree
                 |> Point3d.rotateAround axisOfRotation settings.rotateAngle
-                |> Point3d.scaleAbout centre settings.scaleFactor
+                |> Point3d.scaleAbout centre scaleFactor
     in
     List.map
         (\earth ->
@@ -279,16 +280,16 @@ view imperial options wrapper maybeTrack =
         scaleSlider =
             Input.slider
                 commonShortHorizontalSliderStyles
-                { onChange = wrapper << SetScale << (\x -> 10.0 ^ x)
+                { onChange = wrapper << SetTrackLength
                 , label =
                     Input.labelBelow [] <|
                         text <|
-                            "Scale: "
-                                ++ showDecimal2 options.scaleFactor
-                , min = -1.0
-                , max = 1.0
-                , step = Nothing
-                , value = logBase 10 options.scaleFactor
+                            "Length: "
+                                ++ showLongMeasure imperial options.desiredTrackLength
+                , min = 1.0
+                , max = 100.0
+                , step = Just 1.0
+                , value = Length.inKilometers options.desiredTrackLength
                 , thumb = Input.defaultThumb
                 }
 
