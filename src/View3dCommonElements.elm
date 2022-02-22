@@ -118,10 +118,10 @@ zoomButtons msgWrapper context =
             }
         , Input.button
             (if context.followSelectedPoint then
-                [ tooltip onLeft (myTooltip "Stop following Orange") ]
+                [ tooltip onLeft (myTooltip "Locked to Orange") ]
 
              else
-                [ tooltip onLeft (myTooltip "Centre on Orange") ]
+                [ tooltip onLeft (myTooltip "Draggable") ]
             )
             { onPress = Just <| msgWrapper ToggleFollowOrange
             , label =

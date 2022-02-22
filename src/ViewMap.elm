@@ -92,10 +92,10 @@ view ( viewWidth, viewHeight ) mContext msgWrapper =
                     [ tooltip onLeft <|
                         case context.followOrange of
                             True ->
-                                myTooltip "Click to stop following Orange marker"
+                                myTooltip "Map locked to Orange"
 
                             False ->
-                                myTooltip "Click to follow Orange marker"
+                                myTooltip "Map is draggable"
                     ]
                     { onPress = Just <| msgWrapper ToggleFollowOrange
                     , label =

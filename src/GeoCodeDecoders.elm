@@ -88,7 +88,7 @@ encodeLogInfo record =
                 ]
     in
     Json.Encode.object
-        [ ( "table", Json.Encode.string "GPXmagicV3" )
+        [ ( "table", Json.Encode.string "GPXmagic" )
         , ( "record", data )
     ]
 

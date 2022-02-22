@@ -3,7 +3,6 @@ module MyIP exposing (processIpInfo, requestIpInformation, sendIpInfo)
 import GeoCodeDecoders exposing (IpInfo, encodeIpInfo, encodeLogInfo, ipInfoDecoder)
 import Http exposing (header)
 import Iso8601
-import Json.Encode
 import M3O exposing (m3O_API_TOKEN)
 import Time exposing (Posix)
 import Url.Builder as Builder

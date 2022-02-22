@@ -335,7 +335,14 @@ horizontalNudgeSlider imperial value wrap =
 
                 else
                     Length.meters 7.0
-        , step = Nothing
+        , step =
+            Just <|
+                Length.inMeters <|
+                    if imperial then
+                        Length.inches 2
+
+                    else
+                        Length.centimeters 5
         , value = Length.inMeters value
         , thumb = Input.defaultThumb
         }
@@ -382,7 +389,14 @@ verticalNudgeSlider imperial value wrap =
 
                     else
                         Length.meters 7.0
-            , step = Nothing
+            , step =
+                Just <|
+                    Length.inMeters <|
+                        if imperial then
+                            Length.inches 2
+
+                        else
+                            Length.centimeters 5
             , value = Length.inMeters value
             , thumb = Input.defaultThumb
             }
