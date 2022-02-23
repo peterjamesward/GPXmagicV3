@@ -2,12 +2,10 @@ module ViewProfileCharts exposing (..)
 
 import Actions exposing (ToolAction(..))
 import BoundingBox3d
-import Chart as C exposing (chart, interpolated, series, xAxis, xLabels, yAxis, yLabels)
-import Chart.Attributes as CA exposing (margin, withGrid)
+import Camera3d
 import Chart.Events as CE
-import Chart.Item as CI
 import Color
-import ColourPalette exposing (gradientColourPastel, gradientHue)
+import Direction3d exposing (negativeZ, positiveZ)
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
@@ -17,41 +15,26 @@ import Element.Input as Input
 import FeatherIcons
 import FlatColors.AussiePalette
 import FlatColors.ChinesePalette exposing (white)
-import Html.Attributes as HA
-import Html.Events as HE
 import Html.Events.Extra.Mouse as Mouse exposing (Button(..))
-import Html.Events.Extra.Wheel as Wheel
-import Json.Decode as D
 import Length
+import LocalCoords exposing (LocalCoords)
 import Pixels exposing (Pixels)
+import Point2d
 import Point3d exposing (Point3d)
 import Quantity exposing (Quantity, toFloatQuantity)
-import Tools.LimitGradientOptions exposing (ExtentOption(..))
-import ToolsController
+import Rectangle2d
+import Scene3d exposing (Entity, backgroundColor)
+import Spherical exposing (metresPerPixel)
 import TrackLoaded exposing (TrackLoaded)
-import UtilsForViews exposing (colourHexString)
 import Vector3d
+import View3dCommonElements exposing (Msg(..), common3dSceneAttributes)
 import ViewPureStyles exposing (useIcon)
+import Viewpoint3d
 
 
 type ClickZone
     = ZoneAltitude
     | ZoneGradient
-
-
-type Msg
-    = ImageMouseWheel Float
-    | ImageGrab ClickZone Mouse.Event
-    | ImageDrag ClickZone Mouse.Event
-    | ImageRelease ClickZone Mouse.Event
-    | ImageNoOp
-    | ImageClick (Maybe CE.Point)
-    | ImageDoubleClick ClickZone Mouse.Event
-    | ImageZoomIn
-    | ImageZoomOut
-    | ImageReset
-    | ClickDelayExpired
-    | ToggleFollowOrange
 
 
 type DragAction
@@ -68,10 +51,7 @@ type alias Context =
     , followSelectedPoint : Bool
     , metresPerPixel : Float -- Helps with dragging accurately.
     , waitingForClickDelay : Bool
-    , profileData : List ProfileDatum
-    , gradientProblems : List Int
-    , imperial : Bool
-    , previewData : List ProfileDatum
+    , profileScene : List (Entity LocalCoords)
     }
 
 
@@ -135,204 +115,59 @@ view :
     -> Element msg
 view context ( givenWidth, givenHeight ) track msgWrapper =
     let
-        currentPointAltitude =
-            earthPointFromIndex track.currentPosition track.trackTree
-                |> Point3d.zCoordinate
-                |> (if context.imperial then
-                        Length.inFeet
-
-                    else
-                        Length.inMeters
-                   )
-
-        currentPointGradient =
-            leafFromIndex track.currentPosition track.trackTree
-                |> gradientFromNode
-
-        currentPointDistance =
-            distanceFromIndex track.currentPosition track.trackTree
-                |> (if context.imperial then
-                        Length.inMiles
-
-                    else
-                        Length.inMeters
-                   )
-
         ( altitudeWidth, altitudeHeight ) =
             -- Subtract pixels we use for padding around the scene view.
             ( givenWidth
-                --|> Quantity.minus (Pixels.pixels 20)
-                |> Quantity.toFloatQuantity
-                |> Pixels.inPixels
             , givenHeight
-                --|> Quantity.minus (Pixels.pixels 20)
-                |> Quantity.toFloatQuantity
-                |> Quantity.multiplyBy splitProportion
-                |> Pixels.inPixels
             )
 
-        ( gradientWidth, gradientHeight ) =
-            ( givenWidth
-                --|> Quantity.minus (Pixels.pixels 20)
-                |> Quantity.toFloatQuantity
-                |> Pixels.inPixels
-            , givenHeight
-                --|> Quantity.minus (Pixels.pixels 20)
-                |> Quantity.toFloatQuantity
-                |> Quantity.multiplyBy (1.0 - splitProportion)
-                |> Pixels.inPixels
-            )
+        dragging =
+            context.dragAction
+    in
+    el
+        (pointer
+            :: (inFront <| zoomButtons msgWrapper context)
+            :: common3dSceneAttributes msgWrapper context
+        )
+    <|
+        html <|
+            Scene3d.unlit
+                { camera = deriveCamera track.trackTree context track.currentPosition
+                , dimensions = ( altitudeWidth, altitudeHeight )
+                , background = backgroundColor Color.lightBlue
+                , clipDepth = Length.meter
+                , entities = context.profileScene
+                }
 
-        backgroundColour =
-            colourHexString FlatColors.ChinesePalette.antiFlashWhite
 
-        markerLineAtDistance p dist =
-            C.line
-                [ CA.x1 dist
-                , CA.y1 p.y.min
-                , CA.y2 p.y.max
-                , CA.dashed [ 2, 2 ]
-                , CA.width 1
-                , CA.color CA.darkBlue
-                ]
+deriveCamera treeNode context currentPosition =
+    let
+        latitude =
+            effectiveLatitude <| leafFromIndex currentPosition treeNode
 
-        lengthConversion =
-            if context.imperial then
-                Length.inMiles
+        lookingAt =
+            if context.followSelectedPoint then
+                startPoint <| leafFromIndex currentPosition treeNode
 
             else
-                Length.inMeters
+                context.focalPoint
 
-        problemMarkers =
-            C.withPlane <|
-                \p ->
-                    List.map
-                        (\idx ->
-                            markerLineAtDistance p <|
-                                lengthConversion <|
-                                    distanceFromIndex idx track.trackTree
-                        )
-                        context.gradientProblems
+        eyePoint =
+            Point3d.translateBy
+                (Vector3d.meters 0.0 5000.0 0.0)
+                lookingAt
+
+        viewpoint =
+            Viewpoint3d.lookAt
+                { focalPoint = lookingAt
+                , eyePoint = eyePoint
+                , upDirection = Direction3d.positiveZ
+                }
     in
-    column []
-        [ el
-            [ width <| px <| round altitudeWidth
-            , height <| px <| round altitudeHeight
-            , htmlAttribute <| Wheel.onWheel (\event -> msgWrapper (ImageMouseWheel event.deltaY))
-            ]
-          <|
-            html <|
-                C.chart
-                    [ CA.height altitudeHeight
-                    , CA.width altitudeWidth
-                    , CA.htmlAttrs [ HA.style "background" backgroundColour ]
-                    , CA.range [ CA.likeData ]
-                    , CA.domain [ CA.likeData ]
-                    , CA.margin { top = 10, bottom = 30, left = 30, right = 20 }
-                    , CA.padding { top = 10, bottom = 30, left = 20, right = 20 }
-                    , CE.onClick (msgWrapper << ImageClick << Just) CE.getCoords
-                    ]
-                    [ C.xAxis []
-                    , C.xTicks []
-                    , C.xLabels []
-                    , C.yAxis []
-                    , C.yTicks []
-                    , C.yLabels []
-                    , C.withPlane <|
-                        \p ->
-                            [ C.line
-                                [ CA.x1 p.x.min
-                                , CA.y1 currentPointAltitude
-                                , CA.x2 p.x.max
-                                , CA.dashed [ 5, 5 ]
-                                , CA.color CA.red
-                                ]
-                            , C.line
-                                [ CA.x1 currentPointDistance
-                                , CA.y1 p.y.min
-                                , CA.y2 p.y.max
-                                , CA.dashed [ 5, 5 ]
-                                , CA.width 2
-                                , CA.color CA.red
-                                ]
-                            ]
-                    , problemMarkers
-                    , series .distance
-                        [ interpolated .altitude
-                            [ CA.width 2
-                            , CA.opacity 0.2
-                            , CA.gradient []
-                            ]
-                            []
-                        ]
-                        context.profileData
-                    , series .distance
-                        [ interpolated .altitude
-                            [ CA.width 2
-                            , CA.color CA.green
-                            , CA.opacity 0.2
-                            , CA.gradient []
-                            ]
-                            []
-                        ]
-                        context.previewData
-                    ]
-        , el
-            [ width <| px <| round gradientWidth
-            , height <| px <| round gradientHeight
-            , htmlAttribute <| Wheel.onWheel (\event -> msgWrapper (ImageMouseWheel event.deltaY))
-            ]
-          <|
-            html <|
-                C.chart
-                    [ CA.height gradientHeight
-                    , CA.width gradientWidth
-                    , CA.htmlAttrs [ HA.style "background" backgroundColour ]
-                    , CA.range [ CA.likeData ]
-                    , CA.domain [ CA.likeData ]
-                    , CA.margin { top = 20, bottom = 30, left = 30, right = 20 }
-                    , CA.padding { top = 20, bottom = 20, left = 20, right = 20 }
-                    , CE.onClick (msgWrapper << ImageClick << Just) CE.getCoords
-                    ]
-                    [ C.xAxis []
-                    , C.xTicks []
-                    , C.xLabels []
-                    , C.yAxis []
-                    , C.yTicks []
-                    , C.yLabels []
-                    , C.withPlane <|
-                        \p ->
-                            [ C.line
-                                [ CA.x1 p.x.min
-                                , CA.y1 currentPointGradient
-                                , CA.x2 p.x.max
-                                , CA.dashed [ 5, 5 ]
-                                , CA.color CA.red
-                                ]
-                            , C.line
-                                [ CA.x1 currentPointDistance
-                                , CA.y1 p.y.min
-                                , CA.y2 p.y.max
-                                , CA.dashed [ 5, 5 ]
-                                , CA.width 2
-                                , CA.color CA.red
-                                ]
-                            ]
-                    , problemMarkers
-                    , series .distance
-                        [ interpolated .gradient
-                            [ CA.width 2, CA.stepped ]
-                            []
-                        ]
-                        context.profileData
-                    , series .distance
-                        [ interpolated .gradient
-                            [ CA.width 2, CA.stepped, CA.color CA.green ]
-                            []
-                        ]
-                        context.previewData
-                    ]
-        ]
+    Camera3d.orthographic
+        { viewpoint = viewpoint
+        , viewportHeight = Length.meters <| 1200.0 * metresPerPixel context.zoomLevel latitude
+        }
 
 
 update :
@@ -353,31 +188,36 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
     case msg of
         ImageZoomIn ->
             ( { context | zoomLevel = clamp 0 10 <| context.zoomLevel + 0.5 }
+                |> renderProfileDataForCharts track
             , []
             )
 
         ImageZoomOut ->
             ( { context | zoomLevel = clamp 0 10 <| context.zoomLevel - 0.5 }
+                |> renderProfileDataForCharts track
             , []
             )
 
         ImageReset ->
-            ( initialiseView track.currentPosition track.trackTree (Just context), [] )
+            ( initialiseView track.currentPosition track.trackTree (Just context)
+                |> renderProfileDataForCharts track
+            , []
+            )
 
         ImageNoOp ->
             ( context, [] )
 
-        ImageClick point ->
-            case point of
-                Just isPoint ->
-                    ( context
-                    , [ Actions.SetCurrent <|
-                            indexFromDistance (Length.meters isPoint.x) track.trackTree
-                      ]
-                    )
+        ImageClick event ->
+            -- Click moves pointer but does not re-centre view. (Double click will.)
+            if context.waitingForClickDelay then
+                ( context
+                , [ SetCurrent <| detectHit event track ( givenWidth, givenHeight ) context
+                  , TrackHasChanged
+                  ]
+                )
 
-                Nothing ->
-                    ( context, [] )
+            else
+                ( context, [] )
 
         ClickDelayExpired ->
             ( { context | waitingForClickDelay = False }, [] )
@@ -392,9 +232,12 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
                         context.zoomLevel
                             + increment
             in
-            ( { context | zoomLevel = zoomLevel }, [] )
+            ( { context | zoomLevel = zoomLevel }
+                |> renderProfileDataForCharts track
+            , []
+            )
 
-        ImageGrab zone event ->
+        ImageGrab event ->
             -- Mouse behaviour depends which view is in use...
             -- Right-click or ctrl-click to mean rotate; otherwise pan.
             let
@@ -409,7 +252,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
             , [ DelayMessage 250 (msgWrapper ClickDelayExpired) ]
             )
 
-        ImageDrag zone event ->
+        ImageDrag event ->
             let
                 ( dx, dy ) =
                     event.offsetPos
@@ -430,12 +273,14 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
                                 , orbiting = Just ( dx, dy )
                             }
                     in
-                    ( newContext, [] )
+                    ( newContext |> renderProfileDataForCharts track
+                    , []
+                    )
 
                 _ ->
                     ( context, [] )
 
-        ImageRelease zone event ->
+        ImageRelease event ->
             ( { context
                 | orbiting = Nothing
                 , dragAction = DragNone
@@ -456,41 +301,14 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
             , []
             )
 
-        ImageDoubleClick clickZone event ->
+        ImageDoubleClick event ->
             ( context, [] )
 
 
-type alias ProfileDatum =
-    -- Intended for use with the terezka charts, but agnostic.
-    -- One required for each point
-    { distance : Float -- metres or miles depending on units setting
-    , altitude : Float -- metres or feet
-    , gradient : Float -- percent
-    , colour : Color.Color -- use average gradient if not Leaf
-    }
-
-
-renderProfileDataForCharts : ToolsController.Options -> Context -> TrackLoaded msg -> Context
-renderProfileDataForCharts toolSettings context track =
+renderProfileDataForCharts : TrackLoaded msg -> Context -> Context
+renderProfileDataForCharts track context =
     -- "bumps" = indices of abrupt gradient changes.
     let
-        imperial =
-            toolSettings.imperial
-
-        lengthConversion =
-            if imperial then
-                Length.inMiles
-
-            else
-                Length.inMeters
-
-        heightConversion =
-            if imperial then
-                Length.inFeet
-
-            else
-                Length.inMeters
-
         trackLengthInView =
             trueLength track.trackTree |> Quantity.multiplyBy (0.5 ^ context.zoomLevel)
 
@@ -517,20 +335,16 @@ renderProfileDataForCharts toolSettings context track =
 
         foldFn :
             RoadSection
-            -> ( Length.Length, List ProfileDatum, Maybe RoadSection )
-            -> ( Length.Length, List ProfileDatum, Maybe RoadSection )
+            -> ( Length.Length, List (Entity LocalCoords), Maybe RoadSection )
+            -> ( Length.Length, List (Entity LocalCoords), Maybe RoadSection )
         foldFn road ( distanceSoFar, outputs, _ ) =
             let
-                newEntry : ProfileDatum
+                newEntry : List (Entity LocalCoords)
                 newEntry =
-                    { distance = lengthConversion distanceSoFar
-                    , altitude = heightConversion <| Point3d.zCoordinate road.startPoint
-                    , gradient = road.gradientAtStart
-                    , colour = gradientColourPastel road.gradientAtStart
-                    }
+                    []
             in
             ( distanceSoFar |> Quantity.plus road.trueLength
-            , newEntry :: outputs
+            , newEntry ++ outputs
             , Just road
             )
 
@@ -547,90 +361,14 @@ renderProfileDataForCharts toolSettings context track =
         finalDatum =
             case final of
                 Just finalLeaf ->
-                    { distance = lengthConversion rightEdge
-                    , altitude = heightConversion <| Point3d.zCoordinate finalLeaf.endPoint
-                    , gradient = finalLeaf.gradientAtEnd
-                    , colour = gradientColourPastel finalLeaf.gradientAtEnd
-                    }
-
-                Nothing ->
-                    -- Can't happen
-                    { distance = lengthConversion rightEdge
-                    , altitude = 0.0
-                    , gradient = 0.0
-                    , colour = Color.black
-                    }
-
-        ( fromStart, fromEnd ) =
-            case toolSettings.limitGradientSettings.extent of
-                ExtentIsRange ->
-                    TrackLoaded.getRangeFromMarkers track
-
-                ExtentIsTrack ->
-                    ( 0, 0 )
-
-        previewStartDistance =
-            distanceFromIndex fromStart track.trackTree
-
-        previewEndDistance =
-            distanceFromIndex (skipCount track.trackTree - fromEnd)
-                track.trackTree
-
-        ( leftPreviewIndex, rightPreviewIndex ) =
-            ( leftIndex - fromStart
-            , rightIndex - fromStart
-            )
-
-        previewInitialFoldDistance =
-            Quantity.max leftEdge previewStartDistance
-
-        ( _, preview, dangly ) =
-            case toolSettings.limitGradientSettings.previewData of
-                Just previewTree ->
-                    DomainModel.traverseTreeBetweenLimitsToDepth
-                        leftPreviewIndex
-                        rightPreviewIndex
-                        depthFn
-                        0
-                        previewTree
-                        foldFn
-                        ( previewInitialFoldDistance
-                        , []
-                        , Nothing
-                        )
-
-                Nothing ->
-                    ( Quantity.zero, [], Nothing )
-
-        previewFinalDatum =
-            case dangly of
-                Just finalLeaf ->
-                    { distance = lengthConversion <| Quantity.min rightEdge previewEndDistance
-                    , altitude = heightConversion <| Point3d.zCoordinate finalLeaf.endPoint
-                    , gradient = finalLeaf.gradientAtEnd
-                    , colour = gradientColourPastel finalLeaf.gradientAtEnd
-                    }
-
-                Nothing ->
-                    -- Can happen!
-                    { distance = lengthConversion rightEdge
-                    , altitude = 0.0
-                    , gradient = 0.0
-                    , colour = Color.black
-                    }
-    in
-    { context
-        | profileData = List.reverse (finalDatum :: result)
-        , gradientProblems = List.map Tuple.first toolSettings.gradientProblemOptions.breaches
-        , imperial = imperial
-        , previewData =
-            case dangly of
-                Just _ ->
-                    List.reverse (previewFinalDatum :: preview)
-
-                Nothing ->
+                    -- Make sure we include final point
                     []
-    }
+
+                Nothing ->
+                    -- Can't happen (FLW)
+                    []
+    in
+    { context | profileScene = finalDatum ++ result }
 
 
 initialiseView :
@@ -660,8 +398,37 @@ initialiseView current treeNode currentContext =
             , followSelectedPoint = True
             , metresPerPixel = 10.0
             , waitingForClickDelay = False
-            , profileData = []
-            , gradientProblems = []
-            , imperial = False
-            , previewData = []
+            , profileScene = []
             }
+
+
+detectHit :
+    Mouse.Event
+    -> TrackLoaded msg
+    -> ( Quantity Int Pixels, Quantity Int Pixels )
+    -> Context
+    -> Int
+detectHit event track ( w, h ) context =
+    let
+        ( x, y ) =
+            event.offsetPos
+
+        screenPoint =
+            Point2d.pixels x y
+
+        ( wFloat, hFloat ) =
+            ( toFloatQuantity w, toFloatQuantity h )
+
+        screenRectangle =
+            Rectangle2d.from
+                (Point2d.xy Quantity.zero hFloat)
+                (Point2d.xy wFloat Quantity.zero)
+
+        camera =
+            -- Must use same camera derivation as for the 3D model, else pointless!
+            deriveCamera track.trackTree context track.currentPosition
+
+        ray =
+            Camera3d.ray camera screenRectangle screenPoint
+    in
+    nearestToRay ray track.trackTree

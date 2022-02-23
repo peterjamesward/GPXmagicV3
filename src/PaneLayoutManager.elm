@@ -132,7 +132,7 @@ type Msg
     | TogglePopup
     | SetViewMode PaneId ViewMode
     | ThirdPersonViewMessage PaneId View3dCommonElements.Msg
-    | ProfileViewMessage PaneId ViewProfileCharts.Msg
+    | ProfileViewMessage PaneId View3dCommonElements.Msg
     | PlanViewMessage PaneId ViewPlan.Msg
     | MapPortsMessage MapPortController.MapMsg
     | MapViewMessage ViewMap.Msg
@@ -250,9 +250,8 @@ renderPaneIfProfileVisible toolSettings pane track =
                 | profileContext =
                     Just <|
                         ViewProfileCharts.renderProfileDataForCharts
-                            toolSettings
-                            context
                             track
+                            context
             }
 
         _ ->

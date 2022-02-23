@@ -9,7 +9,7 @@ import Axis3d
 import BoundingBox2d
 import BoundingBox3d exposing (BoundingBox3d)
 import Color exposing (Color, black, darkGreen, green, lightOrange)
-import ColourPalette exposing (gradientHue, gradientHue2)
+import ColourPalette exposing (gradientColourPastel, gradientHue, gradientHue2)
 import Dict exposing (Dict)
 import Direction2d
 import DomainModel exposing (..)
@@ -30,11 +30,6 @@ import Tools.DisplaySettingsOptions exposing (CurtainStyle(..))
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (flatBox, fullDepthRenderingBoxSize)
 import Vector3d
-
-
-gradientColourPastel : Float -> Color.Color
-gradientColourPastel slope =
-    Color.hsl (gradientHue slope) 0.6 0.7
 
 
 render3dView : Tools.DisplaySettingsOptions.Options -> TrackLoaded msg -> List (Entity LocalCoords)
@@ -69,8 +64,8 @@ render3dView settings track =
 
                 modelMinZ =
                     boundingBox track.trackTree
-                    |> BoundingBox3d.minZ
-                    |> Quantity.minus (Length.inch)
+                        |> BoundingBox3d.minZ
+                        |> Quantity.minus Length.inch
             in
             if settings.groundPlane then
                 [ Scene3d.quad (Material.color Color.darkGreen)

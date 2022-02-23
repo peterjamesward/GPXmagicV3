@@ -3,6 +3,7 @@ module ViewFirstPerson exposing (..)
 import Angle
 import Camera3d exposing (Camera3d)
 import Color
+import ColourPalette exposing (gradientColourPastel)
 import Direction2d
 import Direction3d exposing (negativeZ, positiveZ)
 import DomainModel exposing (asRecord)
@@ -16,7 +17,6 @@ import LocalCoords exposing (LocalCoords)
 import Pixels exposing (Pixels)
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity, backgroundColor)
-import SceneBuilder3D exposing (gradientColourPastel)
 import Tools.Flythrough
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (elmuiColour, showDecimal1)
