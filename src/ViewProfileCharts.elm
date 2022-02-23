@@ -160,7 +160,7 @@ deriveCamera treeNode context currentPosition =
 
         eyePoint =
             Point3d.translateBy
-                (Vector3d.meters 50.0 50.0 50.0)
+                (Vector3d.meters 0.0 -100.0 0.0)
                 lookingAt
 
         viewpoint =
@@ -172,7 +172,7 @@ deriveCamera treeNode context currentPosition =
     in
     Camera3d.orthographic
         { viewpoint = viewpoint
-        , viewportHeight = Length.meters 100.0
+        , viewportHeight = Length.meters 1000.0
         }
 
 
@@ -313,10 +313,20 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
 
 profilePoint : Length.Length -> Float -> EarthPoint -> EarthPoint
 profilePoint distance gradient point =
+    --Cunningly, use Z for altitude and Y for gradient.
     Point3d.xyz
         distance
         (Length.meters gradient)
         (Point3d.zCoordinate point)
+
+
+groundPoint : Length.Length -> Float -> EarthPoint -> EarthPoint
+groundPoint distance gradient point =
+    --Cunningly, use Z for altitude and Y for gradient.
+    Point3d.xyz
+        distance
+        Quantity.zero
+        Quantity.zero
 
 
 renderProfileData : TrackLoaded msg -> Context -> Context
@@ -346,10 +356,11 @@ renderProfileData track context =
             )
 
         depthFn road =
+            --TODO: this.
             --Depth to ensure about 1000 values returned,
             Nothing
-            --Just <| round <| 10 + context.zoomLevel
 
+        --Just <| round <| 10 + context.zoomLevel
         makeVisibleSegment : Length.Length -> RoadSection -> List (Entity LocalCoords)
         makeVisibleSegment distance road =
             let
@@ -358,16 +369,35 @@ renderProfileData track context =
 
                 roadAsSegment =
                     LineSegment3d.from
-                        (profilePoint distance gradient road.startPoint)
-                        (profilePoint distance gradient road.endPoint)
+                        (profilePoint
+                            distance
+                            gradient
+                            road.startPoint
+                        )
+                        (profilePoint
+                            (distance |> Quantity.plus road.trueLength)
+                            gradient
+                            road.endPoint
+                        )
 
                 curtainHem =
-                    LineSegment3d.projectOnto floorPlane roadAsSegment
+                    -- Drop onto x-axis so visible from both angles
+                    LineSegment3d.from
+                        (groundPoint
+                            distance
+                            gradient
+                            road.startPoint
+                        )
+                        (groundPoint
+                            (distance |> Quantity.plus road.trueLength)
+                            gradient
+                            road.endPoint
+                        )
             in
             [ Scene3d.point { radius = Pixels.pixels 1 }
-                (Material.color Color.charcoal)
+                (Material.color Color.black)
                 (LineSegment3d.startPoint roadAsSegment)
-            , Scene3d.lineSegment (Material.color Color.charcoal) <|
+            , Scene3d.lineSegment (Material.color Color.black) <|
                 roadAsSegment
             , Scene3d.quad (Material.color <| gradientColourPastel gradient)
                 (LineSegment3d.startPoint roadAsSegment)
