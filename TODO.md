@@ -8,13 +8,20 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 # WIP
 
+**UPDATE**
+
+I'm thinking of going back to 3d for the profile view.
+If we make previews into PeteTrees, it should fit rather well.
+(We're re-rendering all the time anyway now.)
+Maybe use SVG for axes and overlays.
+
 ---
 
 # BACKLOG, roughly in order ...
 
 ## Tools: old, updated, & new
 
-1. Bend & Gradient problems toggle navigation/list
+1. Bend & Gradient problems toggle navigation <-> list
 2. Orange and Purple on Profile.
 3. Add (distance, altitude, gradient) to previews, so we can add to Profile view.
 4. Loops (inc. impact on Bezier & Centroid)

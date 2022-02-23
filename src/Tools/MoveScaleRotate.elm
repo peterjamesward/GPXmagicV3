@@ -285,7 +285,20 @@ view imperial options wrapper maybeTrack =
                     Input.labelBelow [] <|
                         text <|
                             "Length: "
-                                ++ showLongMeasure imperial options.desiredTrackLength
+                                ++ (if imperial then
+                                        showDecimal0
+                                            (Length.inMiles
+                                                options.desiredTrackLength
+                                            )
+                                            ++ "mi"
+
+                                    else
+                                        showDecimal0
+                                            (Length.inKilometers
+                                                options.desiredTrackLength
+                                            )
+                                            ++ "km"
+                                   )
                 , min = 1.0
                 , max = 100.0
                 , step = Just 1.0
