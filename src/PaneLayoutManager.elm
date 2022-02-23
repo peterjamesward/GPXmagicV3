@@ -14,6 +14,7 @@ import Html.Attributes exposing (style)
 import Html.Events.Extra.Mouse as Mouse
 import Json.Decode as D
 import Json.Encode as E
+import Length
 import List.Extra
 import LocalCoords exposing (LocalCoords)
 import MapPortController
@@ -819,11 +820,19 @@ viewPanes msgWrapper mTrack ( w, h ) options mFlythrough =
                     el [ centerX ] <|
                         Input.slider
                             (ViewPureStyles.wideSliderStylesWithWidth w)
-                            { onChange = round >> SetCurrentPosition >> msgWrapper
-                            , value = toFloat track.currentPosition
+                            { onChange =
+                                \dist ->
+                                    DomainModel.indexFromDistance (Length.meters dist) track.trackTree
+                                        |> SetCurrentPosition
+                                        |> msgWrapper
+                            , value =
+                                Length.inMeters <|
+                                    DomainModel.distanceFromIndex
+                                        track.currentPosition
+                                        track.trackTree
                             , label = Input.labelHidden "Current position slider"
                             , min = 0
-                            , max = toFloat <| skipCount track.trackTree
+                            , max = Length.inMeters <| DomainModel.trueLength track.trackTree
                             , step = Just 1
                             , thumb = sliderThumb
                             }

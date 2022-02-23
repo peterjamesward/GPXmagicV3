@@ -1,8 +1,7 @@
 module SceneBuilder3D exposing (..)
 
--- Much like 3D, but uses distance for horizontal scale.
--- Need to decide about Gradient.
--- Need to add an SVG overlay, maybe following mouse.
+-- In V3 there is only one 3d model, used for first, third, and Plan views.
+-- Profile is 2d drawing (or chart).
 
 import Actions exposing (PreviewData, PreviewShape(..))
 import Angle exposing (Angle)
