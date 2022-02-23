@@ -15,7 +15,7 @@ import LocalCoords exposing (LocalCoords)
 import Quantity
 import ToolTip exposing (buttonStylesWithTooltip, myTooltip, tooltip)
 import TrackLoaded exposing (TrackLoaded)
-import UtilsForViews exposing (showAngle, showDecimal0, showShortMeasure)
+import UtilsForViews exposing (showAngle, showDecimal0, showLongMeasure, showShortMeasure)
 import ViewPureStyles exposing (neatToolsBorder, noTrackMessage, sliderThumb, useIcon)
 
 
@@ -25,7 +25,13 @@ type alias Options =
     , currentBreach : Int
     , mode : DirectionChangeMode
     , radius : Length.Length
+    , resultMode : ResultMode
     }
+
+
+type ResultMode
+    = ResultList
+    | ResultNavigation
 
 
 type DirectionChangeMode
@@ -40,6 +46,7 @@ defaultOptions =
     , currentBreach = 0
     , mode = DirectionChangeAbrupt
     , radius = Length.meters 10.0
+    , resultMode = ResultNavigation
     }
 
 
@@ -50,6 +57,7 @@ type Msg
     | SetThreshold Angle
     | SetRadius Length.Length
     | SetMode DirectionChangeMode
+    | SetResultMode ResultMode
 
 
 findDirectionChanges : Options -> PeteTree -> Options
@@ -246,6 +254,13 @@ update msg options previewColour hasTrack =
             in
             ( populatedOptions, actions populatedOptions previewColour track )
 
+        ( SetResultMode mode, Just track ) ->
+            let
+                newOptions =
+                    { options | resultMode = mode }
+            in
+            ( newOptions, [] )
+
         ( ViewNext, _ ) ->
             let
                 breachIndex =
@@ -320,89 +335,131 @@ actions options previewColour track =
 
 view : Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
 view imperial msgWrapper options isTrack =
+    let
+        modeSelection =
+            Input.radioRow [ centerX, spacing 5 ]
+                { onChange = msgWrapper << SetMode
+                , options =
+                    [ Input.option DirectionChangeAbrupt (text "At point")
+                    , Input.option DirectionChangeWithRadius (text "With radius")
+                    ]
+                , selected = Just options.mode
+                , label = Input.labelHidden "Mode"
+                }
+
+        resultModeSelection =
+            Input.radioRow [ centerX, spacing 5 ]
+                { onChange = msgWrapper << SetResultMode
+                , options =
+                    [ Input.option ResultNavigation (text "Summary")
+                    , Input.option ResultList (text "List")
+                    ]
+                , selected = Just options.resultMode
+                , label = Input.labelHidden "Results mode"
+                }
+
+        angleSelection =
+            Input.slider
+                ViewPureStyles.shortSliderStyles
+                { onChange = Angle.degrees >> SetThreshold >> msgWrapper
+                , value = Angle.inDegrees options.threshold
+                , label =
+                    Input.labelBelow [] <|
+                        text <|
+                            "Direction change "
+                                ++ (String.fromInt <| round <| Angle.inDegrees options.threshold)
+                                ++ "º"
+                , min = 30
+                , max = 170
+                , step = Just 1
+                , thumb = sliderThumb
+                }
+
+        radiusSelection =
+            Input.slider
+                ViewPureStyles.shortSliderStyles
+                { onChange = Length.meters >> SetRadius >> msgWrapper
+                , value = Length.inMeters options.radius
+                , label =
+                    Input.labelBelow [] <|
+                        text <|
+                            "Radius "
+                                ++ showShortMeasure imperial options.radius
+                , min = 4.0
+                , max = 50.0
+                , step = Just 1
+                , thumb = sliderThumb
+                }
+
+        resultsNavigation =
+            case options.breaches of
+                [] ->
+                    el [ centerX, centerY ] <| text "None found"
+
+                a :: b ->
+                    let
+                        ( position, turn ) =
+                            Maybe.withDefault ( 0, Angle.degrees 0 ) <|
+                                List.Extra.getAt options.currentBreach options.breaches
+                    in
+                    column [ spacing 4, centerX ]
+                        [ el [ centerX ] <|
+                            text <|
+                                String.fromInt (options.currentBreach + 1)
+                                    ++ " of "
+                                    ++ (String.fromInt <| List.length options.breaches)
+                                    ++ " is "
+                                    ++ (showAngle <| turn)
+                                    ++ "º"
+                        , row [ centerX, spacing 10 ]
+                            [ Input.button
+                                (buttonStylesWithTooltip below "Move to previous")
+                                { label = useIcon FeatherIcons.chevronLeft
+                                , onPress = Just <| msgWrapper <| ViewPrevious
+                                }
+                            , Input.button
+                                (buttonStylesWithTooltip below "Centre view on this issue")
+                                { label = useIcon FeatherIcons.mousePointer
+                                , onPress = Just <| msgWrapper <| SetCurrentPosition position
+                                }
+                            , Input.button
+                                (buttonStylesWithTooltip below "Move to next")
+                                { label = useIcon FeatherIcons.chevronRight
+                                , onPress = Just <| msgWrapper <| ViewNext
+                                }
+                            ]
+                        ]
+
+        linkButton track point =
+            Input.button neatToolsBorder
+                { onPress = Just (msgWrapper <| SetCurrentPosition point)
+                , label =
+                    text <|
+                        showLongMeasure imperial <|
+                            DomainModel.distanceFromIndex point track
+                }
+    in
     case isTrack of
         Just track ->
             el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
-                column [ centerX, padding 4, spacing 4 ]
-                    [ Input.radio [ centerX, spacing 5 ]
-                        { onChange = msgWrapper << SetMode
-                        , options =
-                            [ Input.option DirectionChangeAbrupt (text "Abrupt changes")
-                            , Input.option DirectionChangeWithRadius (text "Significant bends")
-                            ]
-                        , selected = Just options.mode
-                        , label = Input.labelHidden "Mode"
-                        }
-                    , Input.slider
-                        ViewPureStyles.shortSliderStyles
-                        { onChange = Angle.degrees >> SetThreshold >> msgWrapper
-                        , value = Angle.inDegrees options.threshold
-                        , label =
-                            Input.labelBelow [] <|
-                                text <|
-                                    "Direction change "
-                                        ++ (String.fromInt <| round <| Angle.inDegrees options.threshold)
-                                        ++ "º"
-                        , min = 30
-                        , max = 170
-                        , step = Just 1
-                        , thumb = sliderThumb
-                        }
+                column [ centerX, padding 4, spacing 6 ]
+                    [ modeSelection
+                    , angleSelection
                     , if options.mode == DirectionChangeWithRadius then
-                        Input.slider
-                            ViewPureStyles.shortSliderStyles
-                            { onChange = Length.meters >> SetRadius >> msgWrapper
-                            , value = Length.inMeters options.radius
-                            , label =
-                                Input.labelBelow [] <|
-                                    text <|
-                                        "Radius "
-                                            ++ showShortMeasure imperial options.radius
-                            , min = 4.0
-                            , max = 50.0
-                            , step = Just 1
-                            , thumb = sliderThumb
-                            }
+                        radiusSelection
 
                       else
                         none
-                    , case options.breaches of
-                        [] ->
-                            el [ centerX, centerY ] <| text "None found"
+                    , resultModeSelection
+                    , case options.resultMode of
+                        ResultNavigation ->
+                            resultsNavigation
 
-                        a :: b ->
-                            let
-                                ( position, turn ) =
-                                    Maybe.withDefault ( 0, Angle.degrees 0 ) <|
-                                        List.Extra.getAt options.currentBreach options.breaches
-                            in
-                            column [ spacing 4, centerX ]
-                                [ el [ centerX ] <|
-                                    text <|
-                                        String.fromInt (options.currentBreach + 1)
-                                            ++ " of "
-                                            ++ (String.fromInt <| List.length options.breaches)
-                                            ++ " is "
-                                            ++ (showAngle <| turn)
-                                            ++ "º"
-                                , row [ centerX, spacing 10 ]
-                                    [ Input.button
-                                        (buttonStylesWithTooltip below "Move to previous")
-                                        { label = useIcon FeatherIcons.chevronLeft
-                                        , onPress = Just <| msgWrapper <| ViewPrevious
-                                        }
-                                    , Input.button
-                                        (buttonStylesWithTooltip below "Centre view on this issue")
-                                        { label = useIcon FeatherIcons.mousePointer
-                                        , onPress = Just <| msgWrapper <| SetCurrentPosition position
-                                        }
-                                    , Input.button
-                                        (buttonStylesWithTooltip below "Move to next")
-                                        { label = useIcon FeatherIcons.chevronRight
-                                        , onPress = Just <| msgWrapper <| ViewNext
-                                        }
-                                    ]
-                                ]
+                        ResultList ->
+                            wrappedRow [] <|
+                                List.map
+                                    (Tuple.first >> linkButton track.trackTree)
+                                    options.breaches
                     ]
 
         Nothing ->

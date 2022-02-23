@@ -1091,7 +1091,8 @@ topLoadingBar model =
                , Border.color FlatColors.ChinesePalette.twinkleBlue
                ]
         )
-        [ loadGpxButton
+        [ globalOptions model
+        , loadGpxButton
         , moreOptionsButton
         , el [ Font.color <| contrastingColour model.backgroundColour ]
             (text <| bestTrackName model)
@@ -1115,7 +1116,6 @@ topLoadingBar model =
         , buyMeACoffeeButton
         , el [ alignRight ] <| StravaAuth.stravaButton model.stravaAuthentication OAuthMessage
         , el [ alignRight ] <| PaneLayoutManager.paneLayoutMenu PaneMsg model.paneLayoutOptions
-        , el [ alignRight ] <| globalOptions model
         ]
 
 
@@ -1134,11 +1134,9 @@ buyMeACoffeeButton =
 globalOptions : Model -> Element Msg
 globalOptions model =
     el
-        [ alignRight
-        , inFront <|
+        [ inFront <|
             column
-                [ alignRight
-                , moveDown 26
+                [ moveDown 26
                 , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always NoOp)
                 , htmlAttribute <| Mouse.onWithOptions "dblclick" stopProp (always NoOp)
                 , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always NoOp)
@@ -1151,7 +1149,7 @@ globalOptions model =
         ]
     <|
         Input.button
-            [ alignRight, Font.color FlatColors.FlatUIPalette.carrot ]
+            [ Font.color FlatColors.FlatUIPalette.carrot ]
             { onPress = Just <| ToggleToolPopup
             , label = useIcon FeatherIcons.settings
             }
