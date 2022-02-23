@@ -5,6 +5,7 @@ import BoundingBox3d
 import Camera3d
 import Chart.Events as CE
 import Color
+import ColourPalette exposing (gradientColourPastel)
 import Direction3d exposing (negativeZ, positiveZ)
 import DomainModel exposing (..)
 import Element exposing (..)
@@ -15,16 +16,21 @@ import Element.Input as Input
 import FeatherIcons
 import FlatColors.AussiePalette
 import FlatColors.ChinesePalette exposing (white)
+import FlatColors.FlatUIPalette
 import Html.Events.Extra.Mouse as Mouse exposing (Button(..))
 import Length
+import LineSegment3d
 import LocalCoords exposing (LocalCoords)
 import Pixels exposing (Pixels)
+import Plane3d
 import Point2d
 import Point3d exposing (Point3d)
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
+import Scene3d.Material as Material
 import Spherical exposing (metresPerPixel)
+import Tools.DisplaySettingsOptions exposing (CurtainStyle(..))
 import TrackLoaded exposing (TrackLoaded)
 import Vector3d
 import View3dCommonElements exposing (Msg(..), common3dSceneAttributes)
@@ -154,7 +160,7 @@ deriveCamera treeNode context currentPosition =
 
         eyePoint =
             Point3d.translateBy
-                (Vector3d.meters 0.0 5000.0 0.0)
+                (Vector3d.meters 50.0 50.0 50.0)
                 lookingAt
 
         viewpoint =
@@ -166,7 +172,7 @@ deriveCamera treeNode context currentPosition =
     in
     Camera3d.orthographic
         { viewpoint = viewpoint
-        , viewportHeight = Length.meters <| 1200.0 * metresPerPixel context.zoomLevel latitude
+        , viewportHeight = Length.meters 100.0
         }
 
 
@@ -188,19 +194,19 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
     case msg of
         ImageZoomIn ->
             ( { context | zoomLevel = clamp 0 10 <| context.zoomLevel + 0.5 }
-                |> renderProfileDataForCharts track
+                |> renderProfileData track
             , []
             )
 
         ImageZoomOut ->
             ( { context | zoomLevel = clamp 0 10 <| context.zoomLevel - 0.5 }
-                |> renderProfileDataForCharts track
+                |> renderProfileData track
             , []
             )
 
         ImageReset ->
             ( initialiseView track.currentPosition track.trackTree (Just context)
-                |> renderProfileDataForCharts track
+                |> renderProfileData track
             , []
             )
 
@@ -233,7 +239,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
                             + increment
             in
             ( { context | zoomLevel = zoomLevel }
-                |> renderProfileDataForCharts track
+                |> renderProfileData track
             , []
             )
 
@@ -273,7 +279,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
                                 , orbiting = Just ( dx, dy )
                             }
                     in
-                    ( newContext |> renderProfileDataForCharts track
+                    ( newContext |> renderProfileData track
                     , []
                     )
 
@@ -305,15 +311,25 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
             ( context, [] )
 
 
-renderProfileDataForCharts : TrackLoaded msg -> Context -> Context
-renderProfileDataForCharts track context =
-    -- "bumps" = indices of abrupt gradient changes.
+profilePoint : Length.Length -> Float -> EarthPoint -> EarthPoint
+profilePoint distance gradient point =
+    Point3d.xyz
+        distance
+        (Length.meters gradient)
+        (Point3d.zCoordinate point)
+
+
+renderProfileData : TrackLoaded msg -> Context -> Context
+renderProfileData track context =
     let
         trackLengthInView =
             trueLength track.trackTree |> Quantity.multiplyBy (0.5 ^ context.zoomLevel)
 
         pointOfInterest =
             distanceFromIndex track.currentPosition track.trackTree
+
+        floorPlane =
+            Plane3d.xy |> Plane3d.offsetBy (BoundingBox3d.minZ <| boundingBox track.trackTree)
 
         leftEdge =
             Quantity.clamp
@@ -331,7 +347,34 @@ renderProfileDataForCharts track context =
 
         depthFn road =
             --Depth to ensure about 1000 values returned,
-            Just <| round <| 10 + context.zoomLevel
+            Nothing
+            --Just <| round <| 10 + context.zoomLevel
+
+        makeVisibleSegment : Length.Length -> RoadSection -> List (Entity LocalCoords)
+        makeVisibleSegment distance road =
+            let
+                gradient =
+                    DomainModel.gradientFromNode <| Leaf road
+
+                roadAsSegment =
+                    LineSegment3d.from
+                        (profilePoint distance gradient road.startPoint)
+                        (profilePoint distance gradient road.endPoint)
+
+                curtainHem =
+                    LineSegment3d.projectOnto floorPlane roadAsSegment
+            in
+            [ Scene3d.point { radius = Pixels.pixels 1 }
+                (Material.color Color.charcoal)
+                (LineSegment3d.startPoint roadAsSegment)
+            , Scene3d.lineSegment (Material.color Color.charcoal) <|
+                roadAsSegment
+            , Scene3d.quad (Material.color <| gradientColourPastel gradient)
+                (LineSegment3d.startPoint roadAsSegment)
+                (LineSegment3d.endPoint roadAsSegment)
+                (LineSegment3d.endPoint curtainHem)
+                (LineSegment3d.startPoint curtainHem)
+            ]
 
         foldFn :
             RoadSection
@@ -341,7 +384,7 @@ renderProfileDataForCharts track context =
             let
                 newEntry : List (Entity LocalCoords)
                 newEntry =
-                    []
+                    makeVisibleSegment distanceSoFar road
             in
             ( distanceSoFar |> Quantity.plus road.trueLength
             , newEntry ++ outputs
@@ -377,6 +420,13 @@ initialiseView :
     -> Maybe Context
     -> Context
 initialiseView current treeNode currentContext =
+    let
+        currentPoint =
+            earthPointFromIndex current treeNode
+
+        currentDistance =
+            distanceFromIndex current treeNode
+    in
     case currentContext of
         Just context ->
             { context
@@ -384,7 +434,7 @@ initialiseView current treeNode currentContext =
                 , dragAction = DragNone
                 , zoomLevel = 0.0
                 , defaultZoomLevel = 0.0
-                , focalPoint = treeNode |> leafFromIndex current |> startPoint
+                , focalPoint = profilePoint currentDistance 0.0 currentPoint
                 , metresPerPixel = 10.0
                 , waitingForClickDelay = False
             }
@@ -394,7 +444,7 @@ initialiseView current treeNode currentContext =
             , dragAction = DragNone
             , zoomLevel = 0.0
             , defaultZoomLevel = 0.0
-            , focalPoint = treeNode |> leafFromIndex current |> startPoint
+            , focalPoint = profilePoint currentDistance 0.0 currentPoint
             , followSelectedPoint = True
             , metresPerPixel = 10.0
             , waitingForClickDelay = False
@@ -431,4 +481,5 @@ detectHit event track ( w, h ) context =
         ray =
             Camera3d.ray camera screenRectangle screenPoint
     in
+    --TODO: Just intersect ray with XZ plane
     nearestToRay ray track.trackTree

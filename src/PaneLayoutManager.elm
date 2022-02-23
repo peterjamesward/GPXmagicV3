@@ -249,7 +249,7 @@ renderPaneIfProfileVisible toolSettings pane track =
             { pane
                 | profileContext =
                     Just <|
-                        ViewProfileCharts.renderProfileDataForCharts
+                        ViewProfileCharts.renderProfileData
                             track
                             context
             }
