@@ -302,7 +302,7 @@ view imperial options msgWrapper track =
     let
         vertical label increment =
             button
-                (alignRight ::neatToolsBorder)
+                (width fill ::neatToolsBorder)
                 { onPress = Just <| msgWrapper <| NudgeButton increment
                 , label = text label
                 }
