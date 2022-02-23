@@ -4,23 +4,24 @@ module About exposing (..)
 aboutText =
     """
 
-# GPXmagic v3.0.5 (6851b8da)
+# GPXmagic v3.0.6 (6851b8da)
 
-## In this release
+## In this release ...
 
-* Map starts in "points aren't draggable mode"
-* When points are draggable, ignores clicks that do not move a point
-* Switches from "Info" to "Perspective" when track is loaded
-* Fixed bug in the saving of Display settings
-* Nudge sliders have 5cm (2in) increments, and you can use arrow keys one you've click a slider
+* Move, Stretch transitioned from v2
+* When scaling track, user selects required length, in prevailing units
+* Buttons for fine control of vertical nudge
+* Option to display list of bend or gradient problems
+* Relocated global options menu to top left
 
-## Still to-do from v2
+## Coming up, not necessarily in order ...
 
-1. Move & Stretch
+1. Switch back to v2 style profile due to limitations of chart library
 2. Loops (inc. impact on Bezier & Centroid)
-3. Intersection detection ((?? + loop detection ??))
+3. Intersection and loop detection
 4. Split and Join
 5. Graph Theory (renamed)
+6. More altitude & gradient smoothing options
 
 ## Legal guff
 

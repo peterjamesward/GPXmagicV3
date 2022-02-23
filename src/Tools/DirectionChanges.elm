@@ -456,10 +456,10 @@ view imperial msgWrapper options isTrack =
                             resultsNavigation
 
                         ResultList ->
-                            wrappedRow [] <|
-                                List.map
-                                    (Tuple.first >> linkButton track.trackTree)
-                                    options.breaches
+                                wrappedRow [ height <| px 150, scrollbarY ] <|
+                                    List.map
+                                        (Tuple.first >> linkButton track.trackTree)
+                                        options.breaches
                     ]
 
         Nothing ->

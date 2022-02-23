@@ -11,8 +11,9 @@ import FeatherIcons
 import FlatColors.ChinesePalette
 import List.Extra
 import Quantity
+import ToolTip exposing (buttonStylesWithTooltip)
 import TrackLoaded exposing (TrackLoaded)
-import UtilsForViews exposing (showAngle, showDecimal2)
+import UtilsForViews exposing (showAngle, showDecimal2, showLongMeasure)
 import ViewPureStyles exposing (neatToolsBorder, noTrackMessage, sliderThumb, useIcon)
 
 
@@ -27,7 +28,13 @@ type alias Options =
     , breaches : List ( Int, Float )
     , currentBreach : Int
     , mode : GradientProblem
+    , resultMode : ResultMode
     }
+
+
+type ResultMode
+    = ResultList
+    | ResultNavigation
 
 
 defaultOptions =
@@ -35,6 +42,7 @@ defaultOptions =
     , breaches = []
     , currentBreach = 0
     , mode = AbruptChange
+    , resultMode = ResultNavigation
     }
 
 
@@ -44,6 +52,7 @@ type Msg
     | SetCurrentPosition Int
     | SetThreshold Float
     | SetMode GradientProblem
+    | SetResultMode ResultMode
 
 
 findAbruptDirectionChanges : Options -> PeteTree -> Options
@@ -147,6 +156,7 @@ findSteepDescents options tree =
         | breaches = List.reverse breaches
         , currentBreach = 0
     }
+
 
 toolStateChange :
     Bool
@@ -263,6 +273,9 @@ update msg options previewColour hasTrack =
                 Nothing ->
                     ( newOptions, [] )
 
+        SetResultMode mode ->
+            ( { options | resultMode = mode }, [] )
+
         SetMode mode ->
             let
                 newOptions =
@@ -282,71 +295,113 @@ update msg options previewColour hasTrack =
                     ( newOptions, [] )
 
 
-view : (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
-view msgWrapper options isTrack =
+view : Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view imperial msgWrapper options isTrack =
+    let
+        modeSelection =
+            Input.radio [ centerX, spacing 5 ]
+                { onChange = msgWrapper << SetMode
+                , options =
+                    [ Input.option AbruptChange (text "Abrupt changes")
+                    , Input.option SteepClimb (text "Steep climbs")
+                    , Input.option SteepDescent (text "Steep descents")
+                    ]
+                , selected = Just options.mode
+                , label = Input.labelHidden "Mode"
+                }
+
+        resultModeSelection =
+            Input.radioRow [ centerX, spacing 5 ]
+                { onChange = msgWrapper << SetResultMode
+                , options =
+                    [ Input.option ResultNavigation (text "Summary")
+                    , Input.option ResultList (text "List")
+                    ]
+                , selected = Just options.resultMode
+                , label = Input.labelHidden "Results mode"
+                }
+
+        thresholdSlider =
+            Input.slider
+                ViewPureStyles.shortSliderStyles
+                { onChange = SetThreshold >> msgWrapper
+                , value = options.threshold
+                , label = Input.labelHidden "Threshold"
+                , min = 3
+                , max = 20
+                , step = Just 1
+                , thumb = sliderThumb
+                }
+
+        resultsNavigation =
+            case options.breaches of
+                [] ->
+                    el [ centerX, centerY ] <| text "None found"
+
+                a :: b ->
+                    let
+                        ( position, turn ) =
+                            Maybe.withDefault ( 0, 0 ) <|
+                                List.Extra.getAt options.currentBreach options.breaches
+                    in
+                    column [ spacing 4, centerX ]
+                        [ el [ centerX ] <|
+                            text <|
+                                String.fromInt (options.currentBreach + 1)
+                                    ++ " of "
+                                    ++ (String.fromInt <| List.length options.breaches)
+                                    ++ " is "
+                                    ++ showDecimal2 turn
+                                    ++ "º"
+                        , row [ centerX, spacing 10 ]
+                            [ Input.button
+                                (buttonStylesWithTooltip below "Move to previous")
+                                { label = useIcon FeatherIcons.chevronLeft
+                                , onPress = Just <| msgWrapper <| ViewPrevious
+                                }
+                            , Input.button
+                                (buttonStylesWithTooltip below "Centre view on this issue")
+                                { label = useIcon FeatherIcons.mousePointer
+                                , onPress = Just <| msgWrapper <| SetCurrentPosition position
+                                }
+                            , Input.button
+                                (buttonStylesWithTooltip below "Move to next")
+                                { label = useIcon FeatherIcons.chevronRight
+                                , onPress = Just <| msgWrapper <| ViewNext
+                                }
+                            ]
+                        ]
+
+        linkButton track point =
+            Input.button neatToolsBorder
+                { onPress = Just (msgWrapper <| SetCurrentPosition point)
+                , label =
+                    text <|
+                        showLongMeasure imperial <|
+                            DomainModel.distanceFromIndex point track
+                }
+    in
     case isTrack of
         Just track ->
             el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
-                column [ centerX, padding 4, spacing 4 ]
-                    [ Input.radio [ centerX, spacing 5 ]
-                        { onChange = msgWrapper << SetMode
-                        , options =
-                            [ Input.option AbruptChange (text "Abrupt changes")
-                            , Input.option SteepClimb (text "Steep climbs")
-                            , Input.option SteepDescent (text "Steep descents")
-                            ]
-                        , selected = Just options.mode
-                        , label = labelHidden "Mode"
-                        }
-                    , Input.slider
-                        ViewPureStyles.shortSliderStyles
-                        { onChange = SetThreshold >> msgWrapper
-                        , value = options.threshold
-                        , label = Input.labelHidden "Threshold"
-                        , min = 3
-                        , max = 20
-                        , step = Just 1
-                        , thumb = sliderThumb
-                        }
+                column [ centerX, padding 4, spacing 6 ]
+                    [ el [ centerX ] modeSelection
+                    , el [ centerX ] thresholdSlider
                     , el [ centerX ] <|
                         text <|
                             "Threshold "
                                 ++ showDecimal2 options.threshold
                                 ++ "%"
-                    , case options.breaches of
-                        [] ->
-                            el [ centerX, centerY ] <| text "None found"
+                    , el [ centerX ] resultModeSelection
+                    , case options.resultMode of
+                        ResultNavigation ->
+                            resultsNavigation
 
-                        a :: b ->
-                            let
-                                ( position, turn ) =
-                                    Maybe.withDefault ( 0, 0 ) <|
-                                        List.Extra.getAt options.currentBreach options.breaches
-                            in
-                            column [ spacing 4, centerX ]
-                                [ el [ centerX ] <|
-                                    text <|
-                                        String.fromInt (options.currentBreach + 1)
-                                            ++ " of "
-                                            ++ (String.fromInt <| List.length options.breaches)
-                                            ++ " is "
-                                            ++ showDecimal2 turn
-                                            ++ "%"
-                                , row [ centerX, spacing 10 ]
-                                    [ Input.button neatToolsBorder
-                                        { label = useIcon FeatherIcons.chevronLeft
-                                        , onPress = Just <| msgWrapper <| ViewPrevious
-                                        }
-                                    , Input.button neatToolsBorder
-                                        { label = useIcon FeatherIcons.mousePointer
-                                        , onPress = Just <| msgWrapper <| SetCurrentPosition position
-                                        }
-                                    , Input.button neatToolsBorder
-                                        { label = useIcon FeatherIcons.chevronRight
-                                        , onPress = Just <| msgWrapper <| ViewNext
-                                        }
-                                    ]
-                                ]
+                        ResultList ->
+                            wrappedRow [ height <| px 150, scrollbarY ] <|
+                                List.map
+                                    (Tuple.first >> linkButton track.trackTree)
+                                    options.breaches
                     ]
 
         Nothing ->

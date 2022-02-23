@@ -1383,6 +1383,7 @@ viewToolByType msgWrapper entry isTrack options =
 
             ToolGradientProblems ->
                 Tools.GradientProblems.view
+                    options.imperial
                     (msgWrapper << ToolGradientChangeMsg)
                     options.gradientProblemOptions
                     isTrack

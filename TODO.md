@@ -21,7 +21,6 @@ Maybe use SVG for axes and overlays.
 
 ## Tools: old, updated, & new
 
-1. Bend & Gradient problems toggle navigation <-> list
 2. Orange and Purple on Profile (see update above)
 3. Add (distance, altitude, gradient) to previews, so we can add to Profile view.
 4. Loops (inc. impact on Bezier & Centroid)
