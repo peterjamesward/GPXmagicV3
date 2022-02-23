@@ -30,6 +30,7 @@ type Msg
     | SetFadeExtent (Quantity Float Meters)
     | ZeroNudgeFactors
     | ApplyWithOptions
+    | NudgeButton (Quantity Float Meters)
 
 
 defaultOptions : Options
@@ -268,6 +269,13 @@ update msg options previewColour hasTrack =
             in
             ( newOptions, previewActions newOptions previewColour track )
 
+        ( Just track, NudgeButton value ) ->
+            let
+                newOptions =
+                    { options | vertical = options.vertical |> Quantity.plus value }
+            in
+            ( newOptions, previewActions newOptions previewColour track )
+
         ( Just track, SetFadeExtent value ) ->
             let
                 newOptions =
@@ -291,6 +299,34 @@ update msg options previewColour hasTrack =
 
 view : Bool -> Options -> (Msg -> msg) -> Maybe (TrackLoaded msg) -> Element msg
 view imperial options msgWrapper track =
+    let
+        vertical label increment =
+            button
+                (alignRight ::neatToolsBorder)
+                { onPress = Just <| msgWrapper <| NudgeButton increment
+                , label = text label
+                }
+
+        verticalNudgeButtons =
+            column [ alignRight] <|
+                if imperial then
+                    [ vertical "+1yd" <| Length.yard
+                    , vertical "+1ft" <| Length.foot
+                    , vertical "+1in" <| Length.inch
+                    , vertical "-1in" <| Quantity.negate Length.inch
+                    , vertical "-1ft" <| Quantity.negate Length.foot
+                    , vertical "-1yd" <| Quantity.negate Length.yard
+                    ]
+
+                else
+                    [ vertical "+1m" <| Length.meter
+                    , vertical "+10cm" <| Length.centimeters 10
+                    , vertical "+1cm" <| Length.centimeter
+                    , vertical "-1cm" <| Quantity.negate Length.centimeter
+                    , vertical "-10cm" <| Quantity.negate <| Length.centimeters 10
+                    , vertical "-1m" <| Quantity.negate Length.meter
+                    ]
+    in
     case track of
         Nothing ->
             noTrackMessage
@@ -302,8 +338,9 @@ view imperial options msgWrapper track =
                 , spacing 5
                 , Background.color FlatColors.ChinesePalette.antiFlashWhite
                 ]
-                [ verticalNudgeSlider imperial options.vertical msgWrapper
-                , column [ width fill, centerX, padding 5, spacing 5 ]
+                [ verticalNudgeButtons
+                , verticalNudgeSlider imperial options.vertical msgWrapper
+                                  , column [ width fill, centerX, padding 5, spacing 5 ]
                     [ horizontalNudgeSlider imperial options.horizontal msgWrapper
                     , row [ padding 5, spacing 5 ]
                         [ nudgeButton options msgWrapper

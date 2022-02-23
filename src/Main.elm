@@ -1115,7 +1115,7 @@ topLoadingBar model =
         , buyMeACoffeeButton
         , el [ alignRight ] <| StravaAuth.stravaButton model.stravaAuthentication OAuthMessage
         , el [ alignRight ] <| PaneLayoutManager.paneLayoutMenu PaneMsg model.paneLayoutOptions
-        , globalOptions model
+        , el [ alignRight ] <| globalOptions model
         ]
 
 
