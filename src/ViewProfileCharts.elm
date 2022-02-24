@@ -346,6 +346,14 @@ groundPoint distance gradient point =
 renderProfileData : TrackLoaded msg -> Quantity Int Pixels -> Context -> Context
 renderProfileData track displayWidth context =
     let
+        currentPoint =
+            earthPointFromIndex track.currentPosition track.trackTree
+
+        fullRenderBox =
+            BoundingBox3d.withDimensions
+                ( Length.kilometer, Length.kilometer, Length.kilometer )
+                currentPoint
+
         trackLengthInView =
             trueLength track.trackTree |> Quantity.multiplyBy (0.5 ^ context.zoomLevel)
 
@@ -372,9 +380,14 @@ renderProfileData track displayWidth context =
             , indexFromDistance rightEdge track.trackTree
             )
 
+        depthFn : RoadSection -> Maybe Int
         depthFn road =
             --Depth to ensure about 1000 values returned,
-            Just <| round <| 10 + context.zoomLevel
+            if road.boundingBox |> BoundingBox3d.intersects fullRenderBox then
+                Nothing
+
+            else
+                Just <| round <| 10 + context.zoomLevel
 
         makeVisibleSegment : Length.Length -> RoadSection -> List (Entity LocalCoords)
         makeVisibleSegment distance road =

@@ -10,10 +10,12 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 ## WebGL profile view
 
-* Orange and Purple sometimes detached from points at close zoom.
+* Markers are "behind" points, increasingly along the route.
+* Looking like some "rounding error" as we change zoom level.
+
 * Need to paint final point.
 
-Add gradient view (camera on Z axis looking at XY)
+Add gradient view (camera on Z axis looking at XY).
 Previews. (Need to add distance).
 SVG overlay for Orange and Purple info.
 SVG overlay for info follows mouse.
@@ -24,7 +26,6 @@ SVG overlay for info follows mouse.
 
 ## Tools: old, updated, & new
 
-3. Add (distance, altitude, gradient) to previews, so we can add to Profile view.
 4. Loops (inc. impact on Bezier & Centroid)
 5. Split and Join
 6. Intersection detection ((?? + loop detection ??))
