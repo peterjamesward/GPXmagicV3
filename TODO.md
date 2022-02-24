@@ -24,7 +24,6 @@ SVG overlay for info follows mouse.
 
 ## Tools: old, updated, & new
 
-2. Orange and Purple on Profile (see update above)
 3. Add (distance, altitude, gradient) to previews, so we can add to Profile view.
 4. Loops (inc. impact on Bezier & Centroid)
 5. Split and Join

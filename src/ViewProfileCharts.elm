@@ -1,6 +1,7 @@
 module ViewProfileCharts exposing (..)
 
 import Actions exposing (ToolAction(..))
+import Axis3d
 import BoundingBox3d
 import Camera3d
 import Color exposing (lightOrange)
@@ -219,16 +220,15 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
 
         ImageClick event ->
             -- Click moves pointer but does not re-centre view. (Double click will.)
-            if context.waitingForClickDelay then
-                ( context
-                , [ SetCurrent <| detectHit event track ( givenWidth, givenHeight ) context
-                  , TrackHasChanged
-                  ]
-                )
+            --if context.waitingForClickDelay then
+            ( context
+            , [ SetCurrent <| detectHit event track ( givenWidth, givenHeight ) context
+              , TrackHasChanged
+              ]
+            )
 
-            else
-                ( context, [] )
-
+        --else
+        --    ( context, [] )
         ClickDelayExpired ->
             ( { context | waitingForClickDelay = False }, [] )
 
@@ -536,10 +536,17 @@ detectHit event track ( w, h ) context =
 
         camera =
             -- Must use same camera derivation as for the 3D model, else pointless!
-            deriveCamera track.trackTree context track.currentPosition (w,h)
+            deriveCamera track.trackTree context track.currentPosition ( w, h )
 
         ray =
             Camera3d.ray camera screenRectangle screenPoint
+
+        modelPoint =
+            ray |> Axis3d.intersectionWithPlane Plane3d.zx
     in
-    --TODO: Just intersect ray with XZ plane
-    nearestToRay ray track.trackTree
+    case modelPoint of
+        Just found ->
+            indexFromDistance (Point3d.xCoordinate found) track.trackTree
+
+        Nothing ->
+            track.currentPosition
