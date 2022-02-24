@@ -136,21 +136,25 @@ view :
 view context ( givenWidth, givenHeight ) track msgWrapper =
     let
         ( altitudeWidth, altitudeHeight ) =
-            -- Subtract pixels we use for padding around the scene view.
             ( givenWidth
             , givenHeight
+                |> Quantity.toFloatQuantity
+                |> Quantity.multiplyBy 0.5
+                |> Quantity.round
             )
-    in
-    el
-        (pointer
-            :: (inFront <| zoomButtons msgWrapper context)
-            :: common3dSceneAttributes msgWrapper context
-        )
-    <|
-        html <|
+
+        ( gradientWidth, gradientHeight ) =
+            ( givenWidth
+            , givenHeight
+                |> Quantity.toFloatQuantity
+                |> Quantity.multiplyBy 0.5
+                |> Quantity.round
+            )
+
+        altitudeScene =
             Scene3d.unlit
                 { camera =
-                    deriveCamera
+                    deriveAltitudeCamera
                         track.trackTree
                         context
                         track.currentPosition
@@ -161,8 +165,31 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                 , entities = context.profileScene
                 }
 
+        gradientScene =
+            Scene3d.unlit
+                { camera =
+                    deriveGradientCamera
+                        track.trackTree
+                        context
+                        track.currentPosition
+                        ( altitudeWidth, altitudeHeight )
+                , dimensions = ( gradientWidth, gradientHeight )
+                , background = backgroundColor Color.lightBlue
+                , clipDepth = Length.meter
+                , entities = context.profileScene
+                }
+    in
+    column
+        (pointer
+            :: (inFront <| zoomButtons msgWrapper context)
+            :: common3dSceneAttributes msgWrapper context
+        )
+        [ html <| altitudeScene
+        , html <| gradientScene
+        ]
 
-deriveCamera treeNode context currentPosition ( width, height ) =
+
+deriveAltitudeCamera treeNode context currentPosition ( width, height ) =
     let
         trackLengthInView =
             trueLength treeNode |> Quantity.multiplyBy (0.5 ^ context.zoomLevel)
@@ -196,6 +223,48 @@ deriveCamera treeNode context currentPosition ( width, height ) =
                 { focalPoint = lookingAt
                 , eyePoint = eyePoint
                 , upDirection = Direction3d.positiveZ
+                }
+    in
+    Camera3d.orthographic
+        { viewpoint = viewpoint
+        , viewportHeight = viewportHeight
+        }
+
+
+deriveGradientCamera treeNode context currentPosition ( width, height ) =
+    let
+        trackLengthInView =
+            trueLength treeNode |> Quantity.multiplyBy (0.5 ^ context.zoomLevel)
+
+        metresPerPixel =
+            Length.inMeters trackLengthInView / (toFloat <| Pixels.inPixels width)
+
+        viewportHeight =
+            Length.meters <| metresPerPixel * (toFloat <| Pixels.inPixels height)
+
+        lookingAt =
+            if context.followSelectedPoint then
+                Point3d.xyz
+                    (distanceFromIndex currentPosition treeNode)
+                    Quantity.zero
+                    (earthPointFromIndex currentPosition treeNode
+                        |> Point3d.zCoordinate
+                        |> Quantity.multiplyBy context.emphasis
+                    )
+
+            else
+                context.focalPoint
+
+        eyePoint =
+            Point3d.translateBy
+                (Vector3d.meters 0.0 0.0 1000.0)
+                lookingAt
+
+        viewpoint =
+            Viewpoint3d.lookAt
+                { focalPoint = lookingAt
+                , eyePoint = eyePoint
+                , upDirection = Direction3d.positiveY
                 }
     in
     Camera3d.orthographic
@@ -479,13 +548,18 @@ renderProfileData track displayWidth context =
                     []
 
         markers =
+            let
+                gradientAtOrange =
+                    leafFromIndex track.currentPosition track.trackTree
+                        |> gradientFromNode
+                        |> Length.meters
+            in
             [ Scene3d.point { radius = Pixels.pixels 10 }
                 (Material.color lightOrange)
               <|
                 Point3d.xyz
                     (distanceFromIndex track.currentPosition track.trackTree)
-                    (Length.meters -100)
-                    -- To avoid gradient
+                    gradientAtOrange
                     (earthPointFromIndex track.currentPosition track.trackTree
                         |> Point3d.zCoordinate
                         |> Quantity.multiplyBy context.emphasis
@@ -493,6 +567,12 @@ renderProfileData track displayWidth context =
             ]
                 ++ (case track.markerPosition of
                         Just marker ->
+                            let
+                                gradientAtPurple =
+                                    leafFromIndex marker track.trackTree
+                                        |> gradientFromNode
+                                        |> Length.meters
+                            in
                             [ Scene3d.point { radius = Pixels.pixels 10 }
                                 (Material.color <|
                                     Color.fromRgba <|
@@ -502,8 +582,7 @@ renderProfileData track displayWidth context =
                               <|
                                 Point3d.xyz
                                     (distanceFromIndex marker track.trackTree)
-                                    (Length.meters -100)
-                                    -- To avoid gradient
+                                    gradientAtPurple
                                     (earthPointFromIndex marker track.trackTree
                                         |> Point3d.zCoordinate
                                         |> Quantity.multiplyBy context.emphasis
@@ -591,7 +670,7 @@ detectHit event track ( w, h ) context =
 
         camera =
             -- Must use same camera derivation as for the 3D model, else pointless!
-            deriveCamera track.trackTree context track.currentPosition ( w, h )
+            deriveAltitudeCamera track.trackTree context track.currentPosition ( w, h )
 
         ray =
             Camera3d.ray camera screenRectangle screenPoint
