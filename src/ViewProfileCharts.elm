@@ -376,8 +376,14 @@ renderProfileData track displayWidth context =
             leftEdge |> Quantity.plus trackLengthInView
 
         ( leftIndex, rightIndex ) =
-            ( indexFromDistance leftEdge track.trackTree
-            , indexFromDistance rightEdge track.trackTree
+            -- Make sure we always have a spare point outside the image if possible.
+            ( indexFromDistance leftEdge track.trackTree - 1
+            , indexFromDistance rightEdge track.trackTree + 1
+            )
+
+        ( trueLeftEdge, trueRightEdge ) =
+            ( distanceFromIndex leftIndex track.trackTree
+            , distanceFromIndex rightIndex track.trackTree
             )
 
         depthFn : RoadSection -> Maybe Int
@@ -393,7 +399,9 @@ renderProfileData track displayWidth context =
         makeVisibleSegment distance road =
             let
                 gradient =
-                    DomainModel.gradientFromNode <| Leaf road
+                    clamp -50.0 50.0 <|
+                        DomainModel.gradientFromNode <|
+                            Leaf road
 
                 roadAsSegment =
                     LineSegment3d.from
@@ -458,7 +466,7 @@ renderProfileData track displayWidth context =
                 0
                 track.trackTree
                 foldFn
-                ( leftEdge, [], Nothing )
+                ( trueLeftEdge, [], Nothing )
 
         finalDatum =
             case final of

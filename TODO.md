@@ -10,10 +10,7 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 ## WebGL profile view
 
-* Markers are "behind" points, increasingly along the route.
-* Looking like some "rounding error" as we change zoom level.
-
-* Need to paint final point.
+* Profile vanishes at some zooms. (??)
 
 Add gradient view (camera on Z axis looking at XY).
 Previews. (Need to add distance).
