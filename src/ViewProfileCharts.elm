@@ -188,7 +188,7 @@ deriveCamera treeNode context currentPosition ( width, height ) =
 
         eyePoint =
             Point3d.translateBy
-                (Vector3d.meters 0.0 -100.0 0.0)
+                (Vector3d.meters 0.0 -500.0 0.0)
                 lookingAt
 
         viewpoint =
@@ -463,7 +463,8 @@ renderProfileData track displayWidth context =
               <|
                 Point3d.xyz
                     (distanceFromIndex track.currentPosition track.trackTree)
-                    Quantity.zero
+                    (Length.meters -100)
+                    -- To avoid gradient
                     (earthPointFromIndex track.currentPosition track.trackTree
                         |> Point3d.zCoordinate
                         |> Quantity.multiplyBy context.emphasis
@@ -480,7 +481,8 @@ renderProfileData track displayWidth context =
                               <|
                                 Point3d.xyz
                                     (distanceFromIndex marker track.trackTree)
-                                    Quantity.zero
+                                    (Length.meters -100)
+                                    -- To avoid gradient
                                     (earthPointFromIndex marker track.trackTree
                                         |> Point3d.zCoordinate
                                         |> Quantity.multiplyBy context.emphasis

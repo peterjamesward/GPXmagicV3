@@ -12,12 +12,13 @@ Open tools go to top of dock ??
 
 ## WebGL profile view
 
+* Orange and Purple sometimes detached from points at close zoom.
+
 Use Z for altitude, Y for gradient.
 Two views, differing only in camera angle.
 Previews. (Possibly using PeteTrees)
 SVG overlay for Orange and Purple info.
 SVG overlay for info follows mouse.
-Slider for emphasis.
 
 ---
 

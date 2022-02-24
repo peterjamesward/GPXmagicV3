@@ -1194,10 +1194,19 @@ toolsForDock dock msgWrapper isTrack options =
     column [ width fill, spacing 5 ]
         [ showDockHeader msgWrapper dock options.docks
         , wrappedRow
+            -- Open tools
             [ spacing 4, width fill ]
           <|
             (options.tools
-                |> List.filter (\t -> t.dock == dock)
+                |> List.filter (\t -> t.dock == dock && t.state == Expanded)
+                |> List.map (viewTool msgWrapper isTrack options)
+            )
+        , wrappedRow
+            -- Closed tools
+            [ spacing 4, width fill ]
+          <|
+            (options.tools
+                |> List.filter (\t -> t.dock == dock && t.state == Contracted)
                 |> List.map (viewTool msgWrapper isTrack options)
             )
         ]
