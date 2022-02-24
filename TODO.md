@@ -1,5 +1,5 @@
 
-# BUGS & DEBT (for an 'easy' day)
+# BUGS
 
 BUG: Classic bend smoother consumes all memory on certain looped routes where
      orange and purple are (possibly) co-linear, or something. (Samir bug)
@@ -8,12 +8,15 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 # WIP
 
-**UPDATE**
+## WebGL profile view
 
-I'm thinking of going back to 3d for the profile view.
-If we make previews into PeteTrees, it should fit rather well.
-(We're re-rendering all the time anyway now.)
-Maybe use SVG for axes and overlays.
+Use Z for altitude, Y for gradient.
+Proper position handling.
+Hit detect based on X (distance).
+Two views, differing only in camera angle.
+Previews. (Possibly using PeteTrees)
+SVG overlay for Orange and Purple info.
+SVG overlay for info follows mouse.
 
 ---
 

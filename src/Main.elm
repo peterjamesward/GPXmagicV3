@@ -291,6 +291,7 @@ render model =
                     PaneLayoutManager.render
                         model.toolOptions
                         model.paneLayoutOptions
+                        (Tuple.first model.contentArea)
                         track
                         model.previews
             in
@@ -1243,6 +1244,7 @@ performActionsOnModel actions model =
                         | paneLayoutOptions =
                             PaneLayoutManager.renderProfile
                                 foldedModel.toolOptions
+                                (Tuple.first model.contentArea)
                                 track
                                 foldedModel.paneLayoutOptions
                     }

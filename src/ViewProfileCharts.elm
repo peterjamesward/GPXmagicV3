@@ -3,8 +3,7 @@ module ViewProfileCharts exposing (..)
 import Actions exposing (ToolAction(..))
 import BoundingBox3d
 import Camera3d
-import Chart.Events as CE
-import Color
+import Color exposing (lightOrange)
 import ColourPalette exposing (gradientColourPastel)
 import Direction3d exposing (negativeZ, positiveZ)
 import DomainModel exposing (..)
@@ -16,7 +15,6 @@ import Element.Input as Input
 import FeatherIcons
 import FlatColors.AussiePalette
 import FlatColors.ChinesePalette exposing (white)
-import FlatColors.FlatUIPalette
 import Html.Events.Extra.Mouse as Mouse exposing (Button(..))
 import Length
 import LineSegment3d
@@ -29,8 +27,6 @@ import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
 import Scene3d.Material as Material
-import Spherical exposing (metresPerPixel)
-import Tools.DisplaySettingsOptions exposing (CurtainStyle(..))
 import TrackLoaded exposing (TrackLoaded)
 import Vector3d
 import View3dCommonElements exposing (Msg(..), common3dSceneAttributes)
@@ -126,9 +122,6 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
             ( givenWidth
             , givenHeight
             )
-
-        dragging =
-            context.dragAction
     in
     el
         (pointer
@@ -138,7 +131,12 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
     <|
         html <|
             Scene3d.unlit
-                { camera = deriveCamera track.trackTree context track.currentPosition
+                { camera =
+                    deriveCamera
+                        track.trackTree
+                        context
+                        track.currentPosition
+                        ( altitudeWidth, altitudeHeight )
                 , dimensions = ( altitudeWidth, altitudeHeight )
                 , background = backgroundColor Color.lightBlue
                 , clipDepth = Length.meter
@@ -146,14 +144,23 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                 }
 
 
-deriveCamera treeNode context currentPosition =
+deriveCamera treeNode context currentPosition ( width, height ) =
     let
-        latitude =
-            effectiveLatitude <| leafFromIndex currentPosition treeNode
+        trackLengthInView =
+            trueLength treeNode |> Quantity.multiplyBy (0.5 ^ context.zoomLevel)
+
+        metresPerPixel =
+            Length.inMeters trackLengthInView / (toFloat <| Pixels.inPixels width)
+
+        viewportHeight =
+            Length.meters <| metresPerPixel * (toFloat <| Pixels.inPixels height)
 
         lookingAt =
             if context.followSelectedPoint then
-                startPoint <| leafFromIndex currentPosition treeNode
+                Point3d.xyz
+                    (distanceFromIndex currentPosition treeNode)
+                    Quantity.zero
+                    (Point3d.zCoordinate <| earthPointFromIndex currentPosition treeNode)
 
             else
                 context.focalPoint
@@ -172,7 +179,7 @@ deriveCamera treeNode context currentPosition =
     in
     Camera3d.orthographic
         { viewpoint = viewpoint
-        , viewportHeight = Length.meters 1000.0
+        , viewportHeight = viewportHeight
         }
 
 
@@ -185,28 +192,25 @@ update :
     -> ( Context, List (ToolAction msg) )
 update msg msgWrapper track ( givenWidth, givenHeight ) context =
     let
-        centre =
-            BoundingBox3d.centerPoint <| boundingBox track.trackTree
-
         maxZoom =
             (logBase 2 <| toFloat <| skipCount track.trackTree) - 2
     in
     case msg of
         ImageZoomIn ->
             ( { context | zoomLevel = clamp 0 10 <| context.zoomLevel + 0.5 }
-                |> renderProfileData track
+                |> renderProfileData track givenWidth
             , []
             )
 
         ImageZoomOut ->
             ( { context | zoomLevel = clamp 0 10 <| context.zoomLevel - 0.5 }
-                |> renderProfileData track
+                |> renderProfileData track givenWidth
             , []
             )
 
         ImageReset ->
             ( initialiseView track.currentPosition track.trackTree (Just context)
-                |> renderProfileData track
+                |> renderProfileData track givenWidth
             , []
             )
 
@@ -239,7 +243,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
                             + increment
             in
             ( { context | zoomLevel = zoomLevel }
-                |> renderProfileData track
+                |> renderProfileData track givenWidth
             , []
             )
 
@@ -279,7 +283,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
                                 , orbiting = Just ( dx, dy )
                             }
                     in
-                    ( newContext |> renderProfileData track
+                    ( newContext |> renderProfileData track givenWidth
                     , []
                     )
 
@@ -296,14 +300,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
             )
 
         ToggleFollowOrange ->
-            ( { context
-                | followSelectedPoint = not context.followSelectedPoint
-                , focalPoint =
-                    Point3d.xyz
-                        (distanceFromIndex track.currentPosition track.trackTree)
-                        Quantity.zero
-                        (Point3d.zCoordinate centre)
-              }
+            ( { context | followSelectedPoint = not context.followSelectedPoint }
             , []
             )
 
@@ -329,11 +326,14 @@ groundPoint distance gradient point =
         Quantity.zero
 
 
-renderProfileData : TrackLoaded msg -> Context -> Context
-renderProfileData track context =
+renderProfileData : TrackLoaded msg -> Quantity Int Pixels -> Context -> Context
+renderProfileData track displayWidth context =
     let
         trackLengthInView =
             trueLength track.trackTree |> Quantity.multiplyBy (0.5 ^ context.zoomLevel)
+
+        metresPerPixel =
+            Length.inMeters trackLengthInView / (toFloat <| Pixels.inPixels displayWidth)
 
         pointOfInterest =
             distanceFromIndex track.currentPosition track.trackTree
@@ -356,11 +356,9 @@ renderProfileData track context =
             )
 
         depthFn road =
-            --TODO: this.
             --Depth to ensure about 1000 values returned,
-            Nothing
+            Just <| round <| 10 + context.zoomLevel
 
-        --Just <| round <| 10 + context.zoomLevel
         makeVisibleSegment : Length.Length -> RoadSection -> List (Entity LocalCoords)
         makeVisibleSegment distance road =
             let
@@ -382,17 +380,18 @@ renderProfileData track context =
 
                 curtainHem =
                     -- Drop onto x-axis so visible from both angles
-                    LineSegment3d.from
-                        (groundPoint
-                            distance
-                            gradient
-                            road.startPoint
-                        )
-                        (groundPoint
-                            (distance |> Quantity.plus road.trueLength)
-                            gradient
-                            road.endPoint
-                        )
+                    LineSegment3d.projectOnto floorPlane <|
+                        LineSegment3d.from
+                            (groundPoint
+                                distance
+                                gradient
+                                road.startPoint
+                            )
+                            (groundPoint
+                                (distance |> Quantity.plus road.trueLength)
+                                gradient
+                                road.endPoint
+                            )
             in
             [ Scene3d.point { radius = Pixels.pixels 1 }
                 (Material.color Color.black)
@@ -440,8 +439,39 @@ renderProfileData track context =
                 Nothing ->
                     -- Can't happen (FLW)
                     []
+
+        markers =
+            [ Scene3d.point { radius = Pixels.pixels 10 }
+                (Material.color lightOrange)
+              <|
+                profilePoint
+                    (distanceFromIndex track.currentPosition track.trackTree)
+                    0.0
+                    (earthPointFromIndex track.currentPosition track.trackTree)
+            ]
+                ++ (case track.markerPosition of
+                        Just marker ->
+                            [ Scene3d.point { radius = Pixels.pixels 10 }
+                                (Material.color <|
+                                    Color.fromRgba <|
+                                        Element.toRgb <|
+                                            FlatColors.AussiePalette.blurple
+                                )
+                              <|
+                                profilePoint
+                                    (distanceFromIndex marker track.trackTree)
+                                    0.0
+                                    (earthPointFromIndex marker track.trackTree)
+                            ]
+
+                        Nothing ->
+                            []
+                   )
     in
-    { context | profileScene = finalDatum ++ result }
+    { context
+        | profileScene = markers ++ finalDatum ++ result
+        , metresPerPixel = metresPerPixel
+    }
 
 
 initialiseView :
@@ -506,7 +536,7 @@ detectHit event track ( w, h ) context =
 
         camera =
             -- Must use same camera derivation as for the 3D model, else pointless!
-            deriveCamera track.trackTree context track.currentPosition
+            deriveCamera track.trackTree context track.currentPosition (w,h)
 
         ray =
             Camera3d.ray camera screenRectangle screenPoint
