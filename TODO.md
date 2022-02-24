@@ -8,15 +8,13 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 # WIP
 
-Open tools go to top of dock ??
-
 ## WebGL profile view
 
 * Orange and Purple sometimes detached from points at close zoom.
+* Need to paint final point.
 
-Use Z for altitude, Y for gradient.
-Two views, differing only in camera angle.
-Previews. (Possibly using PeteTrees)
+Add gradient view (camera on Z axis looking at XY)
+Previews. (Need to add distance).
 SVG overlay for Orange and Purple info.
 SVG overlay for info follows mouse.
 
