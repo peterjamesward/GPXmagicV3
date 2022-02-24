@@ -8,15 +8,16 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 # WIP
 
+Open tools go to top of dock ??
+
 ## WebGL profile view
 
 Use Z for altitude, Y for gradient.
-Proper position handling.
-Hit detect based on X (distance).
 Two views, differing only in camera angle.
 Previews. (Possibly using PeteTrees)
 SVG overlay for Orange and Purple info.
 SVG overlay for info follows mouse.
+Slider for emphasis.
 
 ---
 

@@ -298,6 +298,9 @@ update msg msgWrapper track area context =
             , []
             )
 
+        SetEmphasis int ->
+            ( context, [] )
+
 
 initialiseView :
     Int

@@ -34,6 +34,7 @@ type Msg
     | ImageReset
     | ClickDelayExpired
     | ToggleFollowOrange
+    | SetEmphasis Int
 
 
 type DragAction

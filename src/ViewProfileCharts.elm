@@ -55,6 +55,7 @@ type alias Context =
     , metresPerPixel : Float -- Helps with dragging accurately.
     , waitingForClickDelay : Bool
     , profileScene : List (Entity LocalCoords)
+    , emphasis : Float
     }
 
 
@@ -101,6 +102,22 @@ zoomButtons msgWrapper context =
 
                 else
                     useIcon FeatherIcons.unlock
+            }
+        , Input.button [ Font.size 14, centerX ]
+            { onPress = Just <| msgWrapper (SetEmphasis 8)
+            , label = text "x8"
+            }
+        , Input.button [ Font.size 14, centerX ]
+            { onPress = Just <| msgWrapper (SetEmphasis 4)
+            , label = text "x4"
+            }
+        , Input.button [ Font.size 14, centerX ]
+            { onPress = Just <| msgWrapper (SetEmphasis 2)
+            , label = text "x2"
+            }
+        , Input.button [ Font.size 14, centerX ]
+            { onPress = Just <| msgWrapper (SetEmphasis 1)
+            , label = text "x1"
             }
         ]
 
@@ -161,7 +178,10 @@ deriveCamera treeNode context currentPosition ( width, height ) =
                 Point3d.xyz
                     (distanceFromIndex currentPosition treeNode)
                     Quantity.zero
-                    (Point3d.zCoordinate <| earthPointFromIndex currentPosition treeNode)
+                    (earthPointFromIndex currentPosition treeNode
+                        |> Point3d.zCoordinate
+                        |> Quantity.multiplyBy context.emphasis
+                    )
 
             else
                 context.focalPoint
@@ -197,6 +217,12 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
             (logBase 2 <| toFloat <| skipCount track.trackTree) - 2
     in
     case msg of
+        SetEmphasis emphasis ->
+            ( { context | emphasis = toFloat emphasis }
+                |> renderProfileData track givenWidth
+            , []
+            )
+
         ImageZoomIn ->
             ( { context | zoomLevel = clamp 0 10 <| context.zoomLevel + 0.5 }
                 |> renderProfileData track givenWidth
@@ -308,15 +334,6 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
             ( context, [] )
 
 
-profilePoint : Length.Length -> Float -> EarthPoint -> EarthPoint
-profilePoint distance gradient point =
-    --Cunningly, use Z for altitude and Y for gradient.
-    Point3d.xyz
-        distance
-        (Length.meters gradient)
-        (Point3d.zCoordinate point)
-
-
 groundPoint : Length.Length -> Float -> EarthPoint -> EarthPoint
 groundPoint distance gradient point =
     --Cunningly, use Z for altitude and Y for gradient.
@@ -367,15 +384,15 @@ renderProfileData track displayWidth context =
 
                 roadAsSegment =
                     LineSegment3d.from
-                        (profilePoint
+                        (Point3d.xyz
                             distance
-                            gradient
-                            road.startPoint
+                            (Length.meters gradient)
+                            (road.startPoint |> Point3d.zCoordinate |> Quantity.multiplyBy context.emphasis)
                         )
-                        (profilePoint
+                        (Point3d.xyz
                             (distance |> Quantity.plus road.trueLength)
-                            gradient
-                            road.endPoint
+                            (Length.meters gradient)
+                            (road.endPoint |> Point3d.zCoordinate |> Quantity.multiplyBy context.emphasis)
                         )
 
                 curtainHem =
@@ -444,10 +461,13 @@ renderProfileData track displayWidth context =
             [ Scene3d.point { radius = Pixels.pixels 10 }
                 (Material.color lightOrange)
               <|
-                profilePoint
+                Point3d.xyz
                     (distanceFromIndex track.currentPosition track.trackTree)
-                    0.0
-                    (earthPointFromIndex track.currentPosition track.trackTree)
+                    Quantity.zero
+                    (earthPointFromIndex track.currentPosition track.trackTree
+                        |> Point3d.zCoordinate
+                        |> Quantity.multiplyBy context.emphasis
+                    )
             ]
                 ++ (case track.markerPosition of
                         Just marker ->
@@ -458,10 +478,13 @@ renderProfileData track displayWidth context =
                                             FlatColors.AussiePalette.blurple
                                 )
                               <|
-                                profilePoint
+                                Point3d.xyz
                                     (distanceFromIndex marker track.trackTree)
-                                    0.0
-                                    (earthPointFromIndex marker track.trackTree)
+                                    Quantity.zero
+                                    (earthPointFromIndex marker track.trackTree
+                                        |> Point3d.zCoordinate
+                                        |> Quantity.multiplyBy context.emphasis
+                                    )
                             ]
 
                         Nothing ->
@@ -494,7 +517,11 @@ initialiseView current treeNode currentContext =
                 , dragAction = DragNone
                 , zoomLevel = 0.0
                 , defaultZoomLevel = 0.0
-                , focalPoint = profilePoint currentDistance 0.0 currentPoint
+                , focalPoint =
+                    Point3d.xyz
+                        currentDistance
+                        Quantity.zero
+                        (Point3d.zCoordinate currentPoint |> Quantity.multiplyBy context.emphasis)
                 , metresPerPixel = 10.0
                 , waitingForClickDelay = False
             }
@@ -504,11 +531,16 @@ initialiseView current treeNode currentContext =
             , dragAction = DragNone
             , zoomLevel = 0.0
             , defaultZoomLevel = 0.0
-            , focalPoint = profilePoint currentDistance 0.0 currentPoint
+            , focalPoint =
+                Point3d.xyz
+                    currentDistance
+                    Quantity.zero
+                    (currentPoint |> Point3d.zCoordinate)
             , followSelectedPoint = True
             , metresPerPixel = 10.0
             , waitingForClickDelay = False
             , profileScene = []
+            , emphasis = 1.0
             }
 
 
