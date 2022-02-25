@@ -7,7 +7,9 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
+import Point3d
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
+import Quantity
 import Tools.BezierOptions as BezierOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (fullDepthRenderingBoxSize, showDecimal2)
@@ -43,6 +45,9 @@ computeNewPoints options track =
                 ExtentIsTrack ->
                     ( 0, 0 )
 
+        startPoint =
+            earthPointFromIndex fromStart track.trackTree
+
         splineFunction =
             case options.bezierStyle of
                 ThroughExisting ->
@@ -61,15 +66,24 @@ computeNewPoints options track =
                 track.trackTree
 
         previewPoints =
-            splineEarthPoints
-                |> List.map
-                    (\earth ->
-                        ( earth
-                        , DomainModel.gpxFromPointWithReference track.referenceLonLat earth
-                        )
-                    )
+            TrackLoaded.asPreviewPoints track fromStart splineEarthPoints
     in
-    TrackLoaded.asPreviewPoints track fromStart splineEarthPoints
+    case previewPoints of
+        p1 :: pRest ->
+            -- Correct first distance
+            previewPoints
+                |> List.map
+                    (\preview ->
+                        { preview
+                            | distance =
+                                preview.distance
+                                    |> Quantity.plus
+                                        (Point3d.distanceFrom startPoint p1.earthPoint)
+                        }
+                    )
+
+        _ ->
+            []
 
 
 applyUsingOptions :

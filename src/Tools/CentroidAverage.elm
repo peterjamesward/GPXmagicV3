@@ -49,7 +49,7 @@ computeNewPoints options track =
         earthPoints =
             centroidAverage False options fromStart fromEnd track.trackTree
     in
-    TrackLoaded.asPreviewPoints track fromStart earthPoints
+    TrackLoaded.asPreviewPoints track (fromStart + 1) earthPoints
 
 
 applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
