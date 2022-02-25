@@ -1,6 +1,6 @@
 module Tools.Interpolate exposing (..)
 
-import Actions exposing ( ToolAction(..))
+import Actions exposing (ToolAction(..))
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
@@ -39,6 +39,9 @@ computeNewPoints excludeExisting options track =
 
                 ExtentIsTrack ->
                     ( 0, 0 )
+
+        startPoint =
+            earthPointFromIndex fromStart track.trackTree
 
         interpolateStartIndex =
             -- Sneaky (?) skip existing start points for preview.
@@ -89,9 +92,26 @@ computeNewPoints excludeExisting options track =
                 []
                 |> List.reverse
 
-
+        previews =
+            -- But these are based on distance from first mark, need to
+            -- be based on first point.
+            TrackLoaded.asPreviewPoints track fromStart newPoints
     in
-    TrackLoaded.asPreviewPoints track fromStart newPoints
+    case previews of
+        p1 :: pRest ->
+            previews
+                |> List.map
+                    (\preview ->
+                        { preview
+                            | distance =
+                                preview.distance
+                                    |> Quantity.plus
+                                        (Point3d.distanceFrom startPoint p1.earthPoint)
+                        }
+                    )
+
+        _ ->
+            []
 
 
 apply : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
