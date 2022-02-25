@@ -607,71 +607,68 @@ renderProfileData track displayWidth previews context =
                         Nothing ->
                             []
                    )
+
+        renderPreviews : List (Entity LocalCoords)
+        renderPreviews =
+            let
+                onePreview : PreviewData -> List (Entity LocalCoords)
+                onePreview { tag, shape, colour, points } =
+                    case shape of
+                        PreviewCircle ->
+                            previewAsPoints colour points
+
+                        PreviewLine ->
+                            previewAsLine colour points
+
+                        PreviewToolSupplied callback ->
+                            -- This may be breaking one of those Elmish rules.
+                            []
+            in
+            previews |> Dict.values |> List.concatMap onePreview
+
+        profilePoint : PreviewPoint -> EarthPoint
+        profilePoint p =
+            Point3d.xyz
+                p.distance
+                (Length.meters <| compensateForZoom p.gradient)
+                (p.gpx.altitude |> Quantity.multiplyBy context.emphasis)
+
+        previewAsLine : Element.Color -> List PreviewPoint -> List (Entity LocalCoords)
+        previewAsLine color points =
+            let
+                material =
+                    Material.color <| Color.fromRgba <| Element.toRgb color
+
+                asSegment p1 p2 =
+                    LineSegment3d.from
+                        (profilePoint p1)
+                        (profilePoint p2)
+
+                preview p1 p2 =
+                    Scene3d.lineSegment material <| asSegment p1 p2
+            in
+            List.map2 preview points (List.drop 1 points)
+
+        previewAsPoints : Element.Color -> List PreviewPoint -> List (Entity LocalCoords)
+        previewAsPoints color points =
+            let
+                material =
+                    Material.color <| Color.fromRgba <| Element.toRgb color
+
+                highlightPoint p =
+                    Scene3d.point { radius = Pixels.pixels 8 } material <|
+                        profilePoint p
+            in
+            List.map highlightPoint points
     in
     { context
         | profileScene =
             markers
                 ++ finalDatum
-                ++ renderPreviews context previews
+                ++ renderPreviews
                 ++ result
         , metresPerPixel = metresPerPixel
     }
-
-
-renderPreviews : Context -> Dict String PreviewData -> List (Entity LocalCoords)
-renderPreviews context previews =
-    let
-        onePreview : PreviewData -> List (Entity LocalCoords)
-        onePreview { tag, shape, colour, points } =
-            case shape of
-                PreviewCircle ->
-                    previewAsPoints context.emphasis colour points
-
-                PreviewLine ->
-                    previewAsLine context.emphasis colour points
-
-                PreviewToolSupplied callback ->
-                    -- This may be breaking one of those Elmish rules.
-                    []
-    in
-    previews |> Dict.values |> List.concatMap onePreview
-
-
-profilePoint : Float -> PreviewPoint -> EarthPoint
-profilePoint emphasis p =
-    Point3d.xyz
-        p.distance
-        (Length.meters p.gradient)
-        (p.gpx.altitude |> Quantity.multiplyBy emphasis)
-
-
-previewAsLine : Float -> Element.Color -> List PreviewPoint -> List (Entity LocalCoords)
-previewAsLine emphasis color points =
-    let
-        material =
-            Material.color <| Color.fromRgba <| Element.toRgb color
-
-        asSegment p1 p2 =
-            LineSegment3d.from
-                (profilePoint emphasis p1)
-                (profilePoint emphasis p2)
-
-        preview p1 p2 =
-            Scene3d.lineSegment material <| asSegment p1 p2
-    in
-    List.map2 preview points (List.drop 1 points)
-
-
-previewAsPoints : Float -> Element.Color -> List PreviewPoint -> List (Entity LocalCoords)
-previewAsPoints emphasis color points =
-    let
-        material =
-            Material.color <| Color.fromRgba <| Element.toRgb color
-
-        highlightPoint p =
-            Scene3d.point { radius = Pixels.pixels 8 } material <| profilePoint emphasis p
-    in
-    List.map highlightPoint points
 
 
 initialiseView :
