@@ -86,7 +86,7 @@ toolStateChange opened colour options track =
                     { tag = "delete"
                     , shape = PreviewCircle
                     , colour = colour
-                    , points = TrackLoaded.asPreviewPoints theTrack fromStart previews
+                    , points = TrackLoaded.asPreviewPoints theTrack (fromStart + 1) previews
                     }
               ]
             )
