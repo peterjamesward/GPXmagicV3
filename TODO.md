@@ -12,11 +12,6 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 **BUG**: Profile vanishes at some zooms. (weird) e.g. Point 237 in Knoxville.
 
-Line preview style for profile needs to be thicker.
-
-Profile probably should not use "angled" curtain, but use two planes instead.
-Then less risk of obscuring other artefacts.
-
 SVG overlay for Orange and Purple info.
 SVG overlay for info follows mouse.
 

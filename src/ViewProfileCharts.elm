@@ -422,15 +422,6 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
             ( context, [] )
 
 
-groundPoint : Length.Length -> Float -> EarthPoint -> EarthPoint
-groundPoint distance gradient point =
-    --Cunningly, use Z for altitude and Y for gradient.
-    Point3d.xyz
-        distance
-        Quantity.zero
-        Quantity.zero
-
-
 renderProfileData :
     TrackLoaded msg
     -> Quantity Int Pixels
@@ -500,42 +491,62 @@ renderProfileData track displayWidth previews context =
                         DomainModel.gradientFromNode <|
                             Leaf road
 
-                roadAsSegment =
+                roadAsSegmentForAltitude =
                     LineSegment3d.from
                         (Point3d.xyz
                             distance
-                            (Length.meters <| compensateForZoom gradient)
+                            Quantity.zero
                             (road.startPoint |> Point3d.zCoordinate |> Quantity.multiplyBy context.emphasis)
                         )
                         (Point3d.xyz
                             (distance |> Quantity.plus road.trueLength)
-                            (Length.meters <| compensateForZoom gradient)
+                            Quantity.zero
                             (road.endPoint |> Point3d.zCoordinate |> Quantity.multiplyBy context.emphasis)
+                        )
+
+                roadAsSegmentForGradient =
+                    LineSegment3d.from
+                        (Point3d.xyz
+                            distance
+                            (Length.meters <| compensateForZoom gradient)
+                            Quantity.zero
+                        )
+                        (Point3d.xyz
+                            (distance |> Quantity.plus road.trueLength)
+                            (Length.meters <| compensateForZoom gradient)
+                            Quantity.zero
                         )
 
                 curtainHem =
                     -- Drop onto x-axis so visible from both angles
                     LineSegment3d.projectOnto floorPlane <|
                         LineSegment3d.from
-                            (groundPoint
+                            (Point3d.xyz
                                 distance
-                                (compensateForZoom gradient)
-                                road.startPoint
+                                Quantity.zero
+                                Quantity.zero
                             )
-                            (groundPoint
+                            (Point3d.xyz
                                 (distance |> Quantity.plus road.trueLength)
-                                (compensateForZoom gradient)
-                                road.endPoint
+                                Quantity.zero
+                                Quantity.zero
                             )
             in
             [ Scene3d.point { radius = Pixels.pixels 1 }
                 (Material.color Color.black)
-                (LineSegment3d.startPoint roadAsSegment)
+                (LineSegment3d.startPoint roadAsSegmentForAltitude)
             , Scene3d.lineSegment (Material.color Color.black) <|
-                roadAsSegment
+                roadAsSegmentForAltitude
             , Scene3d.quad (Material.color <| gradientColourPastel gradient)
-                (LineSegment3d.startPoint roadAsSegment)
-                (LineSegment3d.endPoint roadAsSegment)
+                (LineSegment3d.startPoint roadAsSegmentForAltitude)
+                (LineSegment3d.endPoint roadAsSegmentForAltitude)
+                (LineSegment3d.endPoint curtainHem)
+                (LineSegment3d.startPoint curtainHem)
+            , Scene3d.lineSegment (Material.color Color.black) <|
+                roadAsSegmentForGradient
+            , Scene3d.quad (Material.color <| gradientColourPastel gradient)
+                (LineSegment3d.startPoint roadAsSegmentForGradient)
+                (LineSegment3d.endPoint roadAsSegmentForGradient)
                 (LineSegment3d.endPoint curtainHem)
                 (LineSegment3d.startPoint curtainHem)
             ]
@@ -588,11 +599,18 @@ renderProfileData track displayWidth previews context =
               <|
                 Point3d.xyz
                     (distanceFromIndex track.currentPosition track.trackTree)
-                    gradientAtOrange
+                    Quantity.zero
                     (earthPointFromIndex track.currentPosition track.trackTree
                         |> Point3d.zCoordinate
                         |> Quantity.multiplyBy context.emphasis
                     )
+            , Scene3d.point { radius = Pixels.pixels 10 }
+                (Material.color lightOrange)
+              <|
+                Point3d.xyz
+                    (distanceFromIndex track.currentPosition track.trackTree)
+                    gradientAtOrange
+                    Quantity.zero
             ]
                 ++ (case track.markerPosition of
                         Just marker ->
@@ -612,16 +630,39 @@ renderProfileData track displayWidth previews context =
                               <|
                                 Point3d.xyz
                                     (distanceFromIndex marker track.trackTree)
-                                    gradientAtPurple
+                                    Quantity.zero
                                     (earthPointFromIndex marker track.trackTree
                                         |> Point3d.zCoordinate
                                         |> Quantity.multiplyBy context.emphasis
                                     )
+                            , Scene3d.point { radius = Pixels.pixels 10 }
+                                (Material.color <|
+                                    Color.fromRgba <|
+                                        Element.toRgb <|
+                                            FlatColors.AussiePalette.blurple
+                                )
+                              <|
+                                Point3d.xyz
+                                    (distanceFromIndex marker track.trackTree)
+                                    gradientAtPurple
+                                    Quantity.zero
                             ]
 
                         Nothing ->
                             []
                    )
+
+        pAltitude p =
+            Point3d.xyz
+                p.distance
+                Quantity.zero
+                (p.gpx.altitude |> Quantity.multiplyBy context.emphasis)
+
+        pGradient p =
+            Point3d.xyz
+                p.distance
+                (Length.meters <| compensateForZoom p.gradient)
+                Quantity.zero
 
         renderPreviews : List (Entity LocalCoords)
         renderPreviews =
@@ -641,13 +682,6 @@ renderProfileData track displayWidth previews context =
             in
             previews |> Dict.values |> List.concatMap onePreview
 
-        profilePoint : PreviewPoint -> EarthPoint
-        profilePoint p =
-            Point3d.xyz
-                p.distance
-                (Length.meters <| compensateForZoom p.gradient)
-                (p.gpx.altitude |> Quantity.multiplyBy context.emphasis)
-
         previewAsLine : Element.Color -> List PreviewPoint -> List (Entity LocalCoords)
         previewAsLine color points =
             let
@@ -663,8 +697,8 @@ renderProfileData track displayWidth previews context =
                     let
                         basisLine =
                             LineSegment3d.from
-                                (profilePoint p1)
-                                (profilePoint p2)
+                                (pAltitude p1)
+                                (pAltitude p2)
 
                         ( upperLine, lowerLine ) =
                             ( basisLine |> LineSegment3d.translateBy shiftUp
@@ -690,7 +724,7 @@ renderProfileData track displayWidth previews context =
 
                 highlightPoint p =
                     Scene3d.point { radius = Pixels.pixels 8 } material <|
-                        profilePoint p
+                        pAltitude p
             in
             List.map highlightPoint points
     in
