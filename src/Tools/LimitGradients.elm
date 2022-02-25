@@ -34,28 +34,49 @@ defaultOptions =
 
 actions : Options -> Element.Color -> TrackLoaded msg -> List (ToolAction msg)
 actions newOptions previewColour track =
-    --TODO: This could be a really big preview; may need depth limit.
-    if newOptions.extent == ExtentIsRange then
-        case newOptions.previewData of
-            Just previewTree ->
-                [ ShowPreview
-                    { tag = "limit"
-                    , shape = PreviewCircle
-                    , colour = previewColour
-                    , points = TrackLoaded.previewFromTree
-                        track.trackTree
+    case newOptions.previewData of
+        Just previewTree ->
+            let
+                uncorrectedPreview =
+                    TrackLoaded.previewFromTree
+                        previewTree
                         0
                         (skipCount track.trackTree)
                         10
-                    }
-                , RenderProfile
-                ]
 
-            Nothing ->
-                [ HidePreview "limit" ]
+                ( fromStart, fromEnd ) =
+                    case newOptions.extent of
+                        ExtentIsRange ->
+                            TrackLoaded.getRangeFromMarkers track
 
-    else
-        [ HidePreview "limit" ]
+                        ExtentIsTrack ->
+                            ( 0, 0 )
+
+                startDistance =
+                    distanceFromIndex fromStart track.trackTree
+
+                correctedPreview =
+                    uncorrectedPreview
+                        |> List.map
+                            (\preview ->
+                                { preview
+                                    | distance =
+                                        preview.distance
+                                            |> Quantity.plus startDistance
+                                }
+                            )
+            in
+            [ ShowPreview
+                { tag = "limit"
+                , shape = PreviewLine
+                , colour = previewColour
+                , points = correctedPreview
+                }
+            , RenderProfile
+            ]
+
+        Nothing ->
+            [ HidePreview "limit" ]
 
 
 putPreviewInOptions : TrackLoaded msg -> Options -> Options
@@ -68,8 +89,7 @@ putPreviewInOptions track options =
         | previewData =
             DomainModel.treeFromSourcesWithExistingReference
                 (DomainModel.gpxPointFromIndex 0 track.trackTree)
-            <|
-                List.map Tuple.second adjustedPoints
+                (List.map Tuple.second adjustedPoints)
     }
 
 
@@ -202,6 +222,7 @@ computeNewPoints options track =
                 (endAltitude |> Quantity.equalWithin Length.centimeter startAltitude)
                     || (endDistance |> Quantity.equalWithin Length.centimeter startDistance)
             then
+                -- Don't entirely trust Quantity.ratio
                 0.0
 
             else
@@ -407,8 +428,8 @@ view options wrapper =
                 , selected = Just options.extent
                 , label = Input.labelHidden "Style"
                 , options =
-                    [ Input.option ExtentIsRange (text "Selected range\n(preview)")
-                    , Input.option ExtentIsTrack (text "Whole track\n(no preview)")
+                    [ Input.option ExtentIsRange (text "Selected range")
+                    , Input.option ExtentIsTrack (text "Whole track")
                     ]
                 }
     in

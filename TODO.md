@@ -12,10 +12,8 @@ BUG: Limit Gradients shows whole track preview always.
 
 ## WebGL profile view
 
-Limit gradient preview! Needs tree culling. Applies to whole track when range selected.
+**BUG**: Profile vanishes at some zooms. (weird) Point 237 in Knoxville.
 
-* Profile vanishes at some zooms. (weird)
-* BUG - perhaps a /0 somewhere.
 
 SVG overlay for Orange and Purple info.
 SVG overlay for info follows mouse.

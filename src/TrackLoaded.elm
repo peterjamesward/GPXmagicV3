@@ -266,7 +266,7 @@ previewFromTree tree start end depthLimit =
         internalFoldFn road ( descendingDistance, accum ) =
             ( descendingDistance |> Quantity.minus road.trueLength
             , { distance = descendingDistance |> Quantity.minus road.trueLength
-              , gradient = road.gradientAtStart
+              , gradient = gradientFromNode <| Leaf road
               , earthPoint = road.endPoint
               , gpx = Tuple.second road.sourceData
               }
@@ -274,7 +274,8 @@ previewFromTree tree start end depthLimit =
             )
 
         ( _, endPoints ) =
-            foldOverRouteRL internalFoldFn tree ( endDistance, [] )
+            --foldOverRouteRL internalFoldFn tree ( endDistance, [] )
+            foldOverRouteRLwithDepthLimit depthLimit internalFoldFn tree ( endDistance, [] )
     in
     getAsPreviewPoint tree 0 :: endPoints
 

@@ -13,6 +13,7 @@ module DomainModel exposing
     , extractPointsInRange
     , foldOverRoute
     , foldOverRouteRL
+    , foldOverRouteRLwithDepthLimit
     , getAllEarthPointsInNaturalOrder
     , getAllGPXPointsInDict
     , getAllGPXPointsInNaturalOrder
@@ -1104,7 +1105,6 @@ getDualCoords tree index =
     )
 
 
-
 takeFromLeft : Int -> PeteTree -> Maybe PeteTree
 takeFromLeft leavesFromLeft treeNode =
     if leavesFromLeft <= 0 then
@@ -1278,6 +1278,23 @@ foldOverRouteRL foldFn treeNode accum =
             accum
                 |> foldOverRouteRL foldFn node.right
                 |> foldOverRouteRL foldFn node.left
+
+
+foldOverRouteRLwithDepthLimit : Int -> (RoadSection -> a -> a) -> PeteTree -> a -> a
+foldOverRouteRLwithDepthLimit depth foldFn treeNode accum =
+    -- A right to left walk allow the fold fn to cons and not need reversing.
+    case treeNode of
+        Leaf leaf ->
+            foldFn leaf accum
+
+        Node node ->
+            if depth > 0 then
+                accum
+                    |> foldOverRouteRLwithDepthLimit (depth - 1) foldFn node.right
+                    |> foldOverRouteRLwithDepthLimit (depth - 1) foldFn node.left
+
+            else
+                foldFn node.nodeContent accum
 
 
 getAllGPXPointsInNaturalOrder : PeteTree -> List GPXSource

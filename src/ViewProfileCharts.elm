@@ -399,7 +399,22 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
             )
 
         ToggleFollowOrange ->
-            ( { context | followSelectedPoint = not context.followSelectedPoint }
+            let
+                currentDistance =
+                    distanceFromIndex track.currentPosition track.trackTree
+
+                currentAltitude =
+                    gpxPointFromIndex track.currentPosition track.trackTree
+                        |> .altitude
+            in
+            ( { context
+                | followSelectedPoint = not context.followSelectedPoint
+                , focalPoint =
+                    Point3d.xyz
+                        currentDistance
+                        Quantity.zero
+                        currentAltitude
+              }
             , []
             )
 
