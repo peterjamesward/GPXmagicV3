@@ -204,43 +204,49 @@ render toolSettings options width track previews =
             SceneBuilder3D.renderPreviews previews
                 ++ SceneBuilder3D.render3dView toolSettings.displaySettings track
     }
-        |> renderProfile toolSettings width track
+        |> renderProfile toolSettings width track previews
 
 
-renderProfile : ToolsController.Options -> Quantity Int Pixels -> TrackLoaded msg -> Options -> Options
-renderProfile toolSettings width track options =
+renderProfile :
+    ToolsController.Options
+    -> Quantity Int Pixels
+    -> TrackLoaded msg
+    -> Dict String PreviewData
+    -> Options
+    -> Options
+renderProfile toolSettings width track previews options =
     -- Same but only renders profile, because of zoom, pan, or something.
     case options.paneLayout of
         PanesOne ->
             { options
-                | pane1 = renderPaneIfProfileVisible toolSettings options.pane1 width track
+                | pane1 = renderPaneIfProfileVisible toolSettings options.pane1 width track previews
             }
 
         PanesLeftRight ->
             { options
-                | pane1 = renderPaneIfProfileVisible toolSettings options.pane1 width track
-                , pane2 = renderPaneIfProfileVisible toolSettings options.pane2 width track
+                | pane1 = renderPaneIfProfileVisible toolSettings options.pane1 width track previews
+                , pane2 = renderPaneIfProfileVisible toolSettings options.pane2 width track previews
             }
 
         PanesUpperLower ->
             { options
-                | pane1 = renderPaneIfProfileVisible toolSettings options.pane1 width track
-                , pane2 = renderPaneIfProfileVisible toolSettings options.pane2 width track
+                | pane1 = renderPaneIfProfileVisible toolSettings options.pane1 width track previews
+                , pane2 = renderPaneIfProfileVisible toolSettings options.pane2 width track previews
             }
 
         PanesOnePlusTwo ->
             { options
-                | pane1 = renderPaneIfProfileVisible toolSettings options.pane1 width track
-                , pane2 = renderPaneIfProfileVisible toolSettings options.pane2 width track
-                , pane3 = renderPaneIfProfileVisible toolSettings options.pane3 width track
+                | pane1 = renderPaneIfProfileVisible toolSettings options.pane1 width track previews
+                , pane2 = renderPaneIfProfileVisible toolSettings options.pane2 width track previews
+                , pane3 = renderPaneIfProfileVisible toolSettings options.pane3 width track previews
             }
 
         PanesGrid ->
             { options
-                | pane1 = renderPaneIfProfileVisible toolSettings options.pane1 width  track
-                , pane2 = renderPaneIfProfileVisible toolSettings options.pane2 width  track
-                , pane3 = renderPaneIfProfileVisible toolSettings options.pane3 width  track
-                , pane4 = renderPaneIfProfileVisible toolSettings options.pane4 width  track
+                | pane1 = renderPaneIfProfileVisible toolSettings options.pane1 width track previews
+                , pane2 = renderPaneIfProfileVisible toolSettings options.pane2 width track previews
+                , pane3 = renderPaneIfProfileVisible toolSettings options.pane3 width track previews
+                , pane4 = renderPaneIfProfileVisible toolSettings options.pane4 width track previews
             }
 
 
@@ -249,8 +255,9 @@ renderPaneIfProfileVisible :
     -> PaneContext
     -> Quantity Int Pixels
     -> TrackLoaded msg
+    -> Dict String PreviewData
     -> PaneContext
-renderPaneIfProfileVisible toolSettings pane width track =
+renderPaneIfProfileVisible toolSettings pane width track previews =
     case ( pane.activeView, pane.profileContext ) of
         ( ViewProfile, Just context ) ->
             { pane
@@ -259,6 +266,7 @@ renderPaneIfProfileVisible toolSettings pane width track =
                         ViewProfileCharts.renderProfileData
                             track
                             width
+                            previews
                             context
             }
 
@@ -272,8 +280,9 @@ update :
     -> Maybe (TrackLoaded msg)
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Options
+    -> Dict String PreviewData
     -> ( Options, List (ToolAction msg) )
-update paneMsg msgWrapper mTrack contentArea options =
+update paneMsg msgWrapper mTrack contentArea options previews =
     let
         updatePaneWith : PaneId -> (PaneContext -> PaneContext) -> Options
         updatePaneWith id updateFn =
@@ -497,7 +506,9 @@ update paneMsg msgWrapper mTrack contentArea options =
                                         (msgWrapper << ProfileViewMessage Pane1)
                                         track
                                         (dimensionsWithLayout options.paneLayout contentArea)
+                                        previews
                                         profile
+
                             in
                             ( Just new, act )
 

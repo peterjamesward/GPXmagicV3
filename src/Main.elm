@@ -574,6 +574,7 @@ Please check the file contains GPX data.""" }
                         model.track
                         model.contentArea
                         model.paneLayoutOptions
+                        model.previews
 
                 newModel =
                     { model | paneLayoutOptions = newOptions }
@@ -1246,6 +1247,7 @@ performActionsOnModel actions model =
                                 foldedModel.toolOptions
                                 (Tuple.first model.contentArea)
                                 track
+                                foldedModel.previews
                                 foldedModel.paneLayoutOptions
                     }
 

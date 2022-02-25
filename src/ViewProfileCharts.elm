@@ -6,6 +6,7 @@ import BoundingBox3d
 import Camera3d
 import Color exposing (lightOrange)
 import ColourPalette exposing (gradientColourPastel)
+import Dict exposing (Dict)
 import Direction3d exposing (negativeZ, positiveZ)
 import DomainModel exposing (..)
 import Element exposing (..)
@@ -24,10 +25,12 @@ import Pixels exposing (Pixels)
 import Plane3d
 import Point2d
 import Point3d exposing (Point3d)
+import PreviewData exposing (PreviewData, PreviewPoint, PreviewShape(..))
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
 import Scene3d.Material as Material
+import SceneBuilder3D exposing (paintSomethingBetween)
 import TrackLoaded exposing (TrackLoaded)
 import Vector3d
 import View3dCommonElements exposing (Msg(..), common3dSceneAttributes)
@@ -278,9 +281,10 @@ update :
     -> (Msg -> msg)
     -> TrackLoaded msg
     -> ( Quantity Int Pixels, Quantity Int Pixels )
+    -> Dict String PreviewData
     -> Context
     -> ( Context, List (ToolAction msg) )
-update msg msgWrapper track ( givenWidth, givenHeight ) context =
+update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
     let
         maxZoom =
             (logBase 2 <| toFloat <| skipCount track.trackTree) - 2
@@ -288,25 +292,25 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
     case msg of
         SetEmphasis emphasis ->
             ( { context | emphasis = toFloat emphasis }
-                |> renderProfileData track givenWidth
+                |> renderProfileData track givenWidth previews
             , []
             )
 
         ImageZoomIn ->
             ( { context | zoomLevel = clamp 0 10 <| context.zoomLevel + 0.5 }
-                |> renderProfileData track givenWidth
+                |> renderProfileData track givenWidth previews
             , []
             )
 
         ImageZoomOut ->
             ( { context | zoomLevel = clamp 0 10 <| context.zoomLevel - 0.5 }
-                |> renderProfileData track givenWidth
+                |> renderProfileData track givenWidth previews
             , []
             )
 
         ImageReset ->
             ( initialiseView track.currentPosition track.trackTree (Just context)
-                |> renderProfileData track givenWidth
+                |> renderProfileData track givenWidth previews
             , []
             )
 
@@ -338,7 +342,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
                             + increment
             in
             ( { context | zoomLevel = zoomLevel }
-                |> renderProfileData track givenWidth
+                |> renderProfileData track givenWidth previews
             , []
             )
 
@@ -378,7 +382,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) context =
                                 , orbiting = Just ( dx, dy )
                             }
                     in
-                    ( newContext |> renderProfileData track givenWidth
+                    ( newContext |> renderProfileData track givenWidth previews
                     , []
                     )
 
@@ -412,8 +416,13 @@ groundPoint distance gradient point =
         Quantity.zero
 
 
-renderProfileData : TrackLoaded msg -> Quantity Int Pixels -> Context -> Context
-renderProfileData track displayWidth context =
+renderProfileData :
+    TrackLoaded msg
+    -> Quantity Int Pixels
+    -> Dict String PreviewData
+    -> Context
+    -> Context
+renderProfileData track displayWidth previews context =
     let
         currentPoint =
             earthPointFromIndex track.currentPosition track.trackTree
@@ -594,9 +603,64 @@ renderProfileData track displayWidth context =
                    )
     in
     { context
-        | profileScene = markers ++ finalDatum ++ result
+        | profileScene = markers ++ finalDatum ++ renderPreviews previews ++ result
         , metresPerPixel = metresPerPixel
     }
+
+
+renderPreviews : Dict String PreviewData -> List (Entity LocalCoords)
+renderPreviews previews =
+    let
+        onePreview : PreviewData -> List (Entity LocalCoords)
+        onePreview { tag, shape, colour, points } =
+            case shape of
+                PreviewCircle ->
+                    previewAsPoints colour points
+
+                PreviewLine ->
+                    previewAsLine colour points
+
+                PreviewToolSupplied callback ->
+                    -- This may be breaking one of those Elmish rules.
+                    []
+    in
+    previews |> Dict.values |> List.concatMap onePreview
+
+
+profilePoint : PreviewPoint -> EarthPoint
+profilePoint p =
+    Point3d.xyz
+        p.distance
+        (Length.meters p.gradient)
+        p.gpx.altitude
+
+
+previewAsLine : Element.Color -> List PreviewPoint -> List (Entity LocalCoords)
+previewAsLine color points =
+    let
+        material =
+            Material.matte <| Color.fromRgba <| Element.toRgb color
+
+        preview p1 p2 =
+            paintSomethingBetween
+                (Length.meters 0.5)
+                material
+                (profilePoint p1)
+                (profilePoint p2)
+    in
+    List.map2 preview points (List.drop 1 points) |> List.concat
+
+
+previewAsPoints : Element.Color -> List PreviewPoint -> List (Entity LocalCoords)
+previewAsPoints color points =
+    let
+        material =
+            Material.color <| Color.fromRgba <| Element.toRgb color
+
+        highlightPoint p =
+            Scene3d.point { radius = Pixels.pixels 7 } material <| profilePoint p
+    in
+    List.map highlightPoint points
 
 
 initialiseView :

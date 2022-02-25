@@ -4,17 +4,15 @@
 BUG: Classic bend smoother consumes all memory on certain looped routes where
      orange and purple are (possibly) co-linear, or something. (Samir bug)
 
+BUG: Limit Gradients shows whole track preview always.
+
 --
 
 # WIP
 
 ## WebGL profile view
 
-* Adding Profile info to Previews. Big edit but it'll be fine. Thanks to Elm.
-> This might be easier if I first make the tre traversals spit out index &
-> distance as well as RoadSection. Then again, maybe not.
-> I need a common function in TrackLoaded or DomainModel
-> that: `List EarthPoint -> List PreviewPoint`.
+* Previews on Profile
 
 * Profile vanishes at some zooms. (weird)
 
