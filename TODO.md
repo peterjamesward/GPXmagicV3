@@ -12,6 +12,7 @@ BUG: Limit Gradients shows whole track preview always.
 
 ## WebGL profile view
 
+Compensate for zoom needs to factor in track length!
 * Profile vanishes at some zooms. (weird)
 * BUG - perhaps a /0 somewhere.
 

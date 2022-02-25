@@ -438,6 +438,10 @@ renderProfileData track displayWidth previews context =
         metresPerPixel =
             Length.inMeters trackLengthInView / (toFloat <| Pixels.inPixels displayWidth)
 
+        compensateForZoom g =
+            -- Empirical!
+            2.0 * g * (0.5 ^ context.zoomLevel) * (Length.inKilometers <| trueLength track.trackTree)
+
         pointOfInterest =
             distanceFromIndex track.currentPosition track.trackTree
 
@@ -472,11 +476,6 @@ renderProfileData track displayWidth previews context =
 
             else
                 Just <| round <| 10 + context.zoomLevel
-
-        compensateForZoom g =
-            g * 30 * (0.5 ^ context.zoomLevel)
-
-
 
         makeVisibleSegment : Length.Length -> RoadSection -> List (Entity LocalCoords)
         makeVisibleSegment distance road =
@@ -574,7 +573,7 @@ renderProfileData track displayWidth previews context =
               <|
                 Point3d.xyz
                     (distanceFromIndex track.currentPosition track.trackTree)
-                    ( gradientAtOrange)
+                    gradientAtOrange
                     (earthPointFromIndex track.currentPosition track.trackTree
                         |> Point3d.zCoordinate
                         |> Quantity.multiplyBy context.emphasis
