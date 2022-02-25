@@ -12,14 +12,8 @@ BUG: Limit Gradients shows whole track preview always.
 
 ## WebGL profile view
 
-Check all previews on Profile:
-- Radiused bends wrong altitude
-- Delete wrong distance
-
 * Profile vanishes at some zooms. (weird)
-
-Do something to keep the gradient scale constant over zoom levels.
-> I guess this means increasing the displacement by the same scale, inverted.
+* BUG - perhaps a /0 somewhere.
 
 SVG overlay for Orange and Purple info.
 SVG overlay for info follows mouse.

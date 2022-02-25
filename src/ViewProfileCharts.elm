@@ -473,6 +473,11 @@ renderProfileData track displayWidth previews context =
             else
                 Just <| round <| 10 + context.zoomLevel
 
+        compensateForZoom g =
+            g * 30 * (0.5 ^ context.zoomLevel)
+
+
+
         makeVisibleSegment : Length.Length -> RoadSection -> List (Entity LocalCoords)
         makeVisibleSegment distance road =
             let
@@ -485,12 +490,12 @@ renderProfileData track displayWidth previews context =
                     LineSegment3d.from
                         (Point3d.xyz
                             distance
-                            (Length.meters gradient)
+                            (Length.meters <| compensateForZoom gradient)
                             (road.startPoint |> Point3d.zCoordinate |> Quantity.multiplyBy context.emphasis)
                         )
                         (Point3d.xyz
                             (distance |> Quantity.plus road.trueLength)
-                            (Length.meters gradient)
+                            (Length.meters <| compensateForZoom gradient)
                             (road.endPoint |> Point3d.zCoordinate |> Quantity.multiplyBy context.emphasis)
                         )
 
@@ -500,12 +505,12 @@ renderProfileData track displayWidth previews context =
                         LineSegment3d.from
                             (groundPoint
                                 distance
-                                gradient
+                                (compensateForZoom gradient)
                                 road.startPoint
                             )
                             (groundPoint
                                 (distance |> Quantity.plus road.trueLength)
-                                gradient
+                                (compensateForZoom gradient)
                                 road.endPoint
                             )
             in
@@ -561,6 +566,7 @@ renderProfileData track displayWidth previews context =
                 gradientAtOrange =
                     leafFromIndex track.currentPosition track.trackTree
                         |> gradientFromNode
+                        |> compensateForZoom
                         |> Length.meters
             in
             [ Scene3d.point { radius = Pixels.pixels 10 }
@@ -568,7 +574,7 @@ renderProfileData track displayWidth previews context =
               <|
                 Point3d.xyz
                     (distanceFromIndex track.currentPosition track.trackTree)
-                    gradientAtOrange
+                    ( gradientAtOrange)
                     (earthPointFromIndex track.currentPosition track.trackTree
                         |> Point3d.zCoordinate
                         |> Quantity.multiplyBy context.emphasis
@@ -580,6 +586,7 @@ renderProfileData track displayWidth previews context =
                                 gradientAtPurple =
                                     leafFromIndex marker track.trackTree
                                         |> gradientFromNode
+                                        |> compensateForZoom
                                         |> Length.meters
                             in
                             [ Scene3d.point { radius = Pixels.pixels 10 }
