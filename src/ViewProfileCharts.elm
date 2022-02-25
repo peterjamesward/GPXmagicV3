@@ -654,13 +654,31 @@ renderProfileData track displayWidth previews context =
                 material =
                     Material.color <| Color.fromRgba <| Element.toRgb color
 
+                ( shiftUp, shiftDown ) =
+                    ( Vector3d.withLength (Length.centimeters 20) Direction3d.positiveZ
+                    , Vector3d.withLength (Length.centimeters -20) Direction3d.positiveZ
+                    )
+
                 asSegment p1 p2 =
-                    LineSegment3d.from
-                        (profilePoint p1)
-                        (profilePoint p2)
+                    let
+                        basisLine =
+                            LineSegment3d.from
+                                (profilePoint p1)
+                                (profilePoint p2)
+
+                        ( upperLine, lowerLine ) =
+                            ( basisLine |> LineSegment3d.translateBy shiftUp
+                            , basisLine |> LineSegment3d.translateBy shiftDown
+                            )
+                    in
+                    Scene3d.quad material
+                        (LineSegment3d.startPoint upperLine)
+                        (LineSegment3d.endPoint upperLine)
+                        (LineSegment3d.endPoint lowerLine)
+                        (LineSegment3d.startPoint lowerLine)
 
                 preview p1 p2 =
-                    Scene3d.lineSegment material <| asSegment p1 p2
+                    asSegment p1 p2
             in
             List.map2 preview points (List.drop 1 points)
 
