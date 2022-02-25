@@ -1,6 +1,6 @@
 module Tools.BendSmoother exposing (..)
 
-import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
+import Actions exposing (ToolAction(..))
 import Angle
 import Arc2d exposing (Arc2d)
 import Arc3d exposing (Arc3d)
@@ -18,7 +18,8 @@ import Point2d exposing (Point2d)
 import Point3d exposing (Point3d, xCoordinate, yCoordinate, zCoordinate)
 import Polyline2d
 import Polyline3d
-import Quantity
+import PreviewData exposing (PreviewData, PreviewPoint, PreviewShape(..))
+import Quantity exposing (Quantity(..), minus)
 import SketchPlane3d
 import Tools.BendSmootherOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
@@ -49,24 +50,12 @@ type Msg
     | ApplySmoothPoint
 
 
-computeNewPoints : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
+computeNewPoints : Options -> TrackLoaded msg -> List PreviewPoint
 computeNewPoints options track =
-    let
-        ( fromStart, fromEnd ) =
-            TrackLoaded.getRangeFromMarkers track
-
-        previewPoints points =
-            points
-                |> List.map
-                    (\earth ->
-                        ( earth
-                        , DomainModel.gpxFromPointWithReference track.referenceLonLat earth
-                        )
-                    )
-    in
+    -- Already computed and saved in options.
     case options.smoothedBend of
         Just bend ->
-            previewPoints bend.nodes
+            bend.nodes
 
         Nothing ->
             []
@@ -112,8 +101,12 @@ applyClassicBendSmoother options track =
             TrackLoaded.getRangeFromMarkers track
 
         gpxPoints =
-            (Maybe.map .nodes options.smoothedBend |> Maybe.withDefault [])
-                |> List.map (DomainModel.gpxFromPointWithReference track.referenceLonLat)
+            case options.smoothedBend of
+                Just bend ->
+                    List.map .gpx bend.nodes
+
+                Nothing ->
+                    []
 
         newTree =
             DomainModel.replaceRange
@@ -280,15 +273,19 @@ toolStateChange opened colour options track =
             ( options, [ HidePreview "bend" ] )
 
 
-previewActions newOptions colour track =
-    -- Subverting this mechanism to show the discs and captured points on the views.
-    [ ShowPreview
-        { tag = "bend"
-        , shape = PreviewCircle
-        , colour = colour
-        , points = computeNewPoints newOptions track
-        }
-    ]
+previewActions options colour track =
+    case options.smoothedBend of
+        Just bend ->
+            [ ShowPreview
+                { tag = "bend"
+                , shape = PreviewCircle
+                , colour = colour
+                , points = bend.nodes
+                }
+            ]
+
+        Nothing ->
+            [ HidePreview "bend" ]
 
 
 update :
@@ -508,6 +505,22 @@ lookForSmoothBendOption trackPointSpacing track pointA pointD =
             , DomainModel.asRecord <| DomainModel.leafFromIndex (pointD - 1) track.trackTree
             )
 
+        ( startDistance, endDistance ) =
+            ( DomainModel.distanceFromIndex pointA track.trackTree
+            , DomainModel.distanceFromIndex pointD track.trackTree
+            )
+
+        ( startAltitude, endAltitude ) =
+            ( DomainModel.gpxPointFromIndex pointA track.trackTree |> .altitude
+            , DomainModel.gpxPointFromIndex pointD track.trackTree |> .altitude
+            )
+
+        averageGradient =
+            100
+                * Quantity.ratio
+                    (endAltitude |> Quantity.minus startAltitude)
+                    (endDistance |> Quantity.minus endDistance)
+
         -- Try to make minimal changes from v1. Is that wise?
         ( roadIn, roadOut ) =
             ( roadToGeometry roadAB, roadToGeometry roadCD )
@@ -532,8 +545,12 @@ lookForSmoothBendOption trackPointSpacing track pointA pointD =
     in
     case maybeArc of
         Just arc ->
+            let
+                nodes =
+                    makeSmoothBend trackPointSpacing roadAB roadCD arc
+            in
             Just
-                { nodes = makeSmoothBend trackPointSpacing roadAB roadCD arc
+                { nodes = TrackLoaded.asPreviewPoints track pointA nodes
                 , centre = Arc2d.centerPoint arc
                 , radius = Length.inMeters <| Arc2d.radius arc
                 , startIndex = pointA

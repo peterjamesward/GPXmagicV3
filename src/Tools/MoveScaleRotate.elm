@@ -1,6 +1,6 @@
 module Tools.MoveScaleRotate exposing (..)
 
-import Actions exposing (PreviewShape(..), ToolAction(..))
+import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
 import Axis3d
 import BoundingBox3d
@@ -14,6 +14,7 @@ import FlatColors.ChinesePalette
 import Length exposing (Meters)
 import Plane3d
 import Point3d
+import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity
 import ToolTip exposing (buttonStylesWithTooltip)
 import Tools.MoveScaleRotateOptions exposing (Options)
@@ -185,7 +186,7 @@ computeRecentredPoints ( lon, lat ) track =
             )
 
 
-rotateAndScale : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
+rotateAndScale : Options -> TrackLoaded msg -> List PreviewPoint
 rotateAndScale settings track =
     let
         centre =
@@ -222,12 +223,8 @@ rotateAndScale settings track =
                 |> Point3d.rotateAround axisOfRotation settings.rotateAngle
                 |> Point3d.scaleAbout centre scaleFactor
     in
-    List.map
-        (\earth ->
-            ( earth
-            , DomainModel.gpxFromPointWithReference track.referenceLonLat earth
-            )
-        )
+    TrackLoaded.asPreviewPoints track
+        0
         (transformedStartPoint :: transformedEndPoints)
 
 
@@ -237,7 +234,7 @@ applyRotateAndScale options track =
         newPoints =
             rotateAndScale options track
     in
-    ( DomainModel.treeFromSourcePoints <| List.map Tuple.second newPoints
+    ( DomainModel.treeFromSourcePoints <| List.map .gpx newPoints
     , DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
     )
 

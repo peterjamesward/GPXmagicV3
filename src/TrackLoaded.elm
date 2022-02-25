@@ -1,10 +1,11 @@
 module TrackLoaded exposing (..)
 
 import Actions exposing (ToolAction)
-import Direction2d
-import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, TrackPoint, skipCount, treeFromSourcePoints)
+import DomainModel exposing (..)
 import Json.Encode as E
 import Length exposing (inMeters)
+import PreviewData exposing (PreviewPoint)
+import Quantity
 
 
 type alias TrackLoaded msg =
@@ -235,3 +236,92 @@ jsonProfileData track =
     in
     -- Nicely indented, why not.
     output
+
+
+getAsPreviewPoint : PeteTree -> Int -> PreviewPoint
+getAsPreviewPoint tree index =
+    { distance = distanceFromIndex index tree
+    , gradient = gradientFromNode <| leafFromIndex index tree
+    , earthPoint = earthPointFromIndex index tree
+    , gpx = gpxPointFromIndex index tree
+    }
+
+
+buildPreview : List Int -> PeteTree -> List PreviewPoint
+buildPreview indices tree =
+    -- Helper for tool that need to highlight a non-contiguous set of points.
+    List.map (getAsPreviewPoint tree) indices
+
+
+previewFromTree : PeteTree -> Int -> Int -> Int -> List PreviewPoint
+previewFromTree tree start end depthLimit =
+    let
+        endDistance =
+            distanceFromIndex end tree
+
+        internalFoldFn :
+            RoadSection
+            -> ( Length.Length, List PreviewPoint )
+            -> ( Length.Length, List PreviewPoint )
+        internalFoldFn road ( descendingDistance, accum ) =
+            ( descendingDistance |> Quantity.minus road.trueLength
+            , { distance = descendingDistance |> Quantity.minus road.trueLength
+              , gradient = road.gradientAtStart
+              , earthPoint = road.endPoint
+              , gpx = Tuple.second road.sourceData
+              }
+                :: accum
+            )
+
+        ( _, endPoints ) =
+            foldOverRouteRL internalFoldFn tree ( endDistance, [] )
+    in
+    getAsPreviewPoint tree 0 :: endPoints
+
+
+asPreviewPoints : TrackLoaded msg -> Int -> List EarthPoint -> List PreviewPoint
+asPreviewPoints track startIndex earths =
+    let
+        startDistance =
+            DomainModel.distanceFromIndex startIndex track.trackTree
+
+        foldFn earth ( distance, mLastGpx, outputs ) =
+            let
+                thisGpx =
+                    DomainModel.gpxFromPointWithReference track.referenceLonLat earth
+
+                thisDistance =
+                    case mLastGpx of
+                        Just lastGpx ->
+                            DomainModel.gpxDistance lastGpx thisGpx
+
+                        Nothing ->
+                            -- Avoid divide by zero
+                            Length.centimeter
+
+                thisGradient =
+                    case mLastGpx of
+                        Just lastGpx ->
+                            Quantity.ratio
+                                (thisGpx.altitude |> Quantity.minus lastGpx.altitude)
+                                thisDistance
+
+                        Nothing ->
+                            0.0
+
+                thisPreview =
+                    { earthPoint = earth
+                    , gpx = thisGpx
+                    , distance = thisDistance
+                    , gradient = thisGradient
+                    }
+            in
+            ( distance |> Quantity.plus thisDistance
+            , Just thisGpx
+            , thisPreview :: outputs
+            )
+
+        ( _, _, reversed ) =
+            List.foldl foldFn ( startDistance, Nothing, [] ) earths
+    in
+    List.reverse reversed

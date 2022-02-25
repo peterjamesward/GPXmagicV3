@@ -18,6 +18,7 @@ import List.Extra
 import LocalCoords exposing (LocalCoords)
 import MapPortController
 import Pixels exposing (Pixels)
+import PreviewData exposing (PreviewData)
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
 import SceneBuilder3D

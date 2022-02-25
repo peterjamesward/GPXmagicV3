@@ -8,8 +8,10 @@ import Element
 import File exposing (File)
 import Http
 import Json.Decode as E
+import Length
 import LocalCoords exposing (LocalCoords)
 import OAuth
+import PreviewData exposing (PreviewData)
 import Scene3d exposing (Entity)
 import Tools.BendSmootherOptions
 import Tools.BezierOptions
@@ -68,27 +70,13 @@ type ToolAction msg
     | TrackFromSvg String
     | StartFlythoughTicks
     | StopFlythroughTicks
-    | RequestStravaRouteHeader ((Result Http.Error StravaRoute) -> msg) String OAuth.Token
-    | RequestStravaRoute ((Result Http.Error String) -> msg) String OAuth.Token
+    | RequestStravaRouteHeader (Result Http.Error StravaRoute -> msg) String OAuth.Token
+    | RequestStravaRoute (Result Http.Error String -> msg) String OAuth.Token
     | LoadGpxFromStrava String
-    | RequestStravaSegment ((Result Http.Error StravaSegment) -> msg) String OAuth.Token
-    | RequestStravaSegmentStreams ((Result Http.Error StravaSegmentStreams) -> msg) String OAuth.Token
+    | RequestStravaSegment (Result Http.Error StravaSegment -> msg) String OAuth.Token
+    | RequestStravaSegmentStreams (Result Http.Error StravaSegmentStreams -> msg) String OAuth.Token
     | PasteStravaSegment Tools.StravaOptions.Options
     | MoveAndStretchWithOptions Tools.MoveAndStretchOptions.Options
-
-
-type PreviewShape
-    = PreviewCircle
-    | PreviewLine
-    | PreviewToolSupplied (List (Entity LocalCoords))
-
-
-type alias PreviewData =
-    { tag : String
-    , shape : PreviewShape
-    , colour : Element.Color
-    , points : List ( EarthPoint, GPXSource )
-    }
 
 
 interpretAction : ToolAction msg -> String

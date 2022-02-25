@@ -1,12 +1,13 @@
 module Tools.BezierSplines exposing (..)
 
-import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
+import Actions exposing (ToolAction(..))
 import BezierSplines
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
+import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Tools.BezierOptions as BezierOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (fullDepthRenderingBoxSize, showDecimal2)
@@ -31,7 +32,7 @@ type Msg
     | SetExtent ExtentOption
 
 
-computeNewPoints : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
+computeNewPoints : Options -> TrackLoaded msg -> List PreviewPoint
 computeNewPoints options track =
     let
         ( fromStart, fromEnd ) =
@@ -68,7 +69,7 @@ computeNewPoints options track =
                         )
                     )
     in
-    previewPoints
+    TrackLoaded.asPreviewPoints track fromStart splineEarthPoints
 
 
 applyUsingOptions :
@@ -90,7 +91,7 @@ applyUsingOptions options track =
                 (fromStart + 1)
                 (fromEnd + 1)
                 track.referenceLonLat
-                (List.map Tuple.second <| computeNewPoints options track)
+                (List.map .gpx <| computeNewPoints options track)
                 track.trackTree
 
         oldPoints =

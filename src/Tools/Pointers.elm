@@ -1,8 +1,6 @@
 module Tools.Pointers exposing (..)
 
-import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
-import Angle exposing (Angle)
-import Direction2d
+import Actions exposing (ToolAction(..))
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), asRecord, skipCount)
 import Element exposing (..)
 import Element.Background as Background
@@ -12,11 +10,9 @@ import Element.Input as Input
 import FeatherIcons
 import FlatColors.AussiePalette
 import FlatColors.ChinesePalette
-import List.Extra
-import Quantity
 import TrackLoaded exposing (TrackLoaded)
-import UtilsForViews exposing (showAngle, showLongMeasure)
-import ViewPureStyles exposing (neatToolsBorder, sliderThumb, useIcon)
+import UtilsForViews exposing (showLongMeasure)
+import ViewPureStyles exposing (useIcon)
 
 
 type alias Options =
@@ -182,6 +178,7 @@ view imperial msgWrapper options isTrack =
             , centerY
             , centerX
             ]
+
         orangeStyle =
             [ Border.color FlatColors.AussiePalette.quinceJelly
             , Border.rounded 4

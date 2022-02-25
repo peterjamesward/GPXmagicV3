@@ -1,16 +1,13 @@
 module SceneBuilderMap exposing (..)
 
-import Actions exposing (PreviewData, PreviewShape(..))
 import Angle exposing (Angle)
 import BoundingBox3d exposing (BoundingBox3d)
-import Dict exposing (Dict)
 import Direction2d
 import DomainModel exposing (..)
-import Element
 import Json.Encode as E
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
-import Quantity
+import PreviewData exposing (PreviewData, PreviewShape(..))
 import TrackLoaded exposing (TrackLoaded)
 
 
@@ -18,10 +15,10 @@ renderPreview : PreviewData -> E.Value
 renderPreview { tag, shape, colour, points } =
     case shape of
         PreviewCircle ->
-            pointsToJSON <| List.map Tuple.second points
+            pointsToJSON <| List.map .gpx points
 
         PreviewLine ->
-            lineToJSON <| List.map Tuple.second points
+            lineToJSON <| List.map .gpx points
 
         PreviewToolSupplied _ ->
             -- Can't do arbitrary stuff on the Map.

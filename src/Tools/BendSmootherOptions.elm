@@ -7,6 +7,7 @@ import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
 import Point2d exposing (Point2d)
 import Point3d exposing (Point3d)
+import PreviewData exposing (PreviewPoint)
 
 
 type alias Options =
@@ -23,7 +24,7 @@ type SmoothMode
 
 
 type alias SmoothedBend =
-    { nodes : List EarthPoint
+    { nodes : List PreviewPoint
     , centre : Point2d Meters LocalCoords
     , radius : Float
     , startIndex : Int -- Lead-in node that is NOT to be replaced

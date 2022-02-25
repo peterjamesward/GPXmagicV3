@@ -1,7 +1,6 @@
 module Main exposing (main)
 
-import About
-import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
+import Actions exposing ( ToolAction(..))
 import Angle
 import Browser exposing (application)
 import Browser.Dom as Dom exposing (getViewport, getViewportOf)
@@ -38,6 +37,7 @@ import OAuthPorts as O exposing (randomBytes)
 import OAuthTypes as O exposing (OAuthMsg(..))
 import PaneLayoutManager exposing (Msg(..), ViewMode(..))
 import Pixels exposing (Pixels)
+import PreviewData exposing (PreviewData, PreviewShape(..))
 import Quantity exposing (Quantity)
 import SceneBuilderMap
 import SplitPane.SplitPane as SplitPane exposing (..)

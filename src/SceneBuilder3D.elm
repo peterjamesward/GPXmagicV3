@@ -3,26 +3,23 @@ module SceneBuilder3D exposing (..)
 -- In V3 there is only one 3d model, used for first, third, and Plan views.
 -- Profile is 2d drawing (or chart).
 
-import Actions exposing (PreviewData, PreviewShape(..))
 import Angle exposing (Angle)
 import Axis3d
-import BoundingBox2d
 import BoundingBox3d exposing (BoundingBox3d)
 import Color exposing (Color, black, darkGreen, green, lightOrange)
 import ColourPalette exposing (gradientColourPastel, gradientHue, gradientHue2)
 import Dict exposing (Dict)
-import Direction2d
 import DomainModel exposing (..)
 import Element
 import FlatColors.AussiePalette
 import FlatColors.FlatUIPalette
-import Json.Encode as E
 import Length exposing (Meters)
 import LineSegment3d
 import LocalCoords exposing (LocalCoords)
 import Pixels
 import Plane3d exposing (Plane3d)
 import Point3d
+import PreviewData exposing (PreviewData, PreviewShape(..))
 import Quantity
 import Scene3d exposing (Entity)
 import Scene3d.Material as Material
@@ -182,10 +179,10 @@ renderPreviews previews =
         onePreview { tag, shape, colour, points } =
             case shape of
                 PreviewCircle ->
-                    previewAsPoints colour <| List.map Tuple.first points
+                    previewAsPoints colour <| List.map .earthPoint points
 
                 PreviewLine ->
-                    previewAsLine colour <| List.map Tuple.first points
+                    previewAsLine colour <| List.map .earthPoint points
 
                 PreviewToolSupplied callback ->
                     -- This may be breaking one of those Elmish rules.

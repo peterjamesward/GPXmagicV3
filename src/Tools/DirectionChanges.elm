@@ -1,6 +1,6 @@
 module Tools.DirectionChanges exposing (..)
 
-import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
+import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
 import Direction2d exposing (Direction2d)
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), RoadSection, asRecord, skipCount)
@@ -12,6 +12,7 @@ import FlatColors.ChinesePalette
 import Length
 import List.Extra
 import LocalCoords exposing (LocalCoords)
+import PreviewData exposing (PreviewShape(..))
 import Quantity
 import ToolTip exposing (buttonStylesWithTooltip, myTooltip, tooltip)
 import TrackLoaded exposing (TrackLoaded)
@@ -224,7 +225,7 @@ toolStateChange opened colour options track =
                     , shape = PreviewCircle
                     , colour = colour
                     , points =
-                        DomainModel.buildPreview
+                        TrackLoaded.buildPreview
                             (List.map Tuple.first populatedOptions.breaches)
                             theTrack.trackTree
                     }
@@ -326,7 +327,7 @@ actions options previewColour track =
         , shape = PreviewCircle
         , colour = previewColour
         , points =
-            DomainModel.buildPreview
+            TrackLoaded.buildPreview
                 (List.map Tuple.first options.breaches)
                 track.trackTree
         }
@@ -456,10 +457,10 @@ view imperial msgWrapper options isTrack =
                             resultsNavigation
 
                         ResultList ->
-                                wrappedRow [ height <| px 150, scrollbarY ] <|
-                                    List.map
-                                        (Tuple.first >> linkButton track.trackTree)
-                                        options.breaches
+                            wrappedRow [ height <| px 150, scrollbarY ] <|
+                                List.map
+                                    (Tuple.first >> linkButton track.trackTree)
+                                    options.breaches
                     ]
 
         Nothing ->

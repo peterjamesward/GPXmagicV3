@@ -10,10 +10,17 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 ## WebGL profile view
 
-* Profile vanishes at some zooms. (??)
+* Adding Profile info to Previews. Big edit but it'll be fine. Thanks to Elm.
+> This might be easier if I first make the tre traversals spit out index &
+> distance as well as RoadSection. Then again, maybe not.
+> I need a common function in TrackLoaded or DomainModel
+> that: `List EarthPoint -> List PreviewPoint`.
 
-Add gradient view (camera on Z axis looking at XY).
-Previews. (Need to add distance).
+* Profile vanishes at some zooms. (weird)
+
+Do something to keep the gradient scale constant over zoom levels.
+> I guess this means increasing the displacement by the same scale, inverted.
+
 SVG overlay for Orange and Purple info.
 SVG overlay for info follows mouse.
 

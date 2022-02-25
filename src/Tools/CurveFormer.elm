@@ -1,6 +1,6 @@
 module Tools.CurveFormer exposing (..)
 
-import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
+import Actions exposing (ToolAction(..))
 import Angle
 import Arc2d
 import Arc3d
@@ -8,7 +8,6 @@ import Axis2d
 import BoundingBox2d
 import Circle3d exposing (Circle3d)
 import Color
-import ColourPalette exposing (warningColor)
 import Dict exposing (Dict)
 import Direction2d exposing (Direction2d)
 import Direction3d
@@ -16,7 +15,6 @@ import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, endPo
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (button)
-import FeatherIcons
 import FlatColors.ChinesePalette
 import Geometry101
 import Html.Attributes
@@ -28,11 +26,11 @@ import List.Extra
 import LocalCoords exposing (LocalCoords)
 import Maybe.Extra
 import Pixels
-import Plane3d
 import Point2d exposing (Point2d)
 import Point3d
 import Polyline2d
 import Polyline3d
+import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
 import Scene3d.Material as Material
@@ -42,11 +40,10 @@ import Svg.Attributes as SA
 import SweptAngle
 import Tools.CurveFormerOptions exposing (GradientSmoothing(..), Options, Point)
 import TrackLoaded exposing (TrackLoaded)
-import Triangle3d
-import UtilsForViews exposing (flatBox, showDecimal2, showShortMeasure)
+import UtilsForViews exposing (flatBox, showShortMeasure)
 import Vector2d
 import Vector3d
-import ViewPureStyles exposing (checkboxIcon, commonShortHorizontalSliderStyles, disabledToolsBorder, edges, neatToolsBorder, noTrackMessage, prettyButtonStyles, useIcon)
+import ViewPureStyles exposing (commonShortHorizontalSliderStyles, disabledToolsBorder, edges, neatToolsBorder, noTrackMessage, prettyButtonStyles, useIcon)
 
 
 defaultOptions : Options
@@ -85,7 +82,7 @@ type Msg
     | ApplyWithOptions
 
 
-computeNewPoints : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
+computeNewPoints : Options -> TrackLoaded msg -> List PreviewPoint
 computeNewPoints options track =
     let
         ( fromStart, fromEnd ) =
@@ -93,17 +90,8 @@ computeNewPoints options track =
 
         earthPoints =
             options.newTrackPoints
-
-        previewPoints =
-            earthPoints
-                |> List.map
-                    (\earth ->
-                        ( earth
-                        , DomainModel.gpxFromPointWithReference track.referenceLonLat earth
-                        )
-                    )
     in
-    previewPoints
+    TrackLoaded.asPreviewPoints track fromStart earthPoints
 
 
 applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource, ( Int, Int ) )
@@ -119,7 +107,7 @@ applyUsingOptions options track =
                         (fromStart + 1)
                         (fromEnd + 1)
                         track.referenceLonLat
-                        (List.map Tuple.second <| computeNewPoints options track)
+                        (List.map .gpx <| computeNewPoints options track)
                         track.trackTree
 
                 oldPoints =

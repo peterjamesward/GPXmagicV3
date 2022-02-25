@@ -1,6 +1,6 @@
 module Tools.CentroidAverage exposing (..)
 
-import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
+import Actions exposing (ToolAction(..))
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, getDualCoords, leafFromIndex, skipCount, startPoint, traverseTreeBetweenLimitsToDepth)
 import Element exposing (..)
 import Element.Background as Background
@@ -8,6 +8,7 @@ import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
 import Plane3d
 import Point3d
+import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity
 import Tools.CentroidAverageOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
@@ -34,7 +35,7 @@ type Msg
     | ApplyWithOptions
 
 
-computeNewPoints : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
+computeNewPoints : Options -> TrackLoaded msg -> List PreviewPoint
 computeNewPoints options track =
     let
         ( fromStart, fromEnd ) =
@@ -47,17 +48,8 @@ computeNewPoints options track =
 
         earthPoints =
             centroidAverage False options fromStart fromEnd track.trackTree
-
-        previewPoints =
-            earthPoints
-                |> List.map
-                    (\earth ->
-                        ( earth
-                        , DomainModel.gpxFromPointWithReference track.referenceLonLat earth
-                        )
-                    )
     in
-    previewPoints
+    TrackLoaded.asPreviewPoints track fromStart earthPoints
 
 
 applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
@@ -76,7 +68,7 @@ applyUsingOptions options track =
                 (fromStart + 1)
                 (fromEnd + 1)
                 track.referenceLonLat
-                (List.map Tuple.second <| computeNewPoints options track)
+                (List.map .gpx <| computeNewPoints options track)
                 track.trackTree
 
         oldPoints =

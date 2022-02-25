@@ -1,8 +1,6 @@
 module Tools.GradientProblems exposing (..)
 
-import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
-import Angle exposing (Angle)
-import Direction2d
+import Actions exposing ( ToolAction(..))
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), RoadSection, asRecord, skipCount)
 import Element exposing (..)
 import Element.Background as Background
@@ -10,7 +8,7 @@ import Element.Input as Input exposing (labelHidden)
 import FeatherIcons
 import FlatColors.ChinesePalette
 import List.Extra
-import Quantity
+import PreviewData exposing (PreviewShape(..))
 import ToolTip exposing (buttonStylesWithTooltip)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showAngle, showDecimal2, showLongMeasure)
@@ -178,7 +176,7 @@ toolStateChange opened colour options track =
                     , shape = PreviewCircle
                     , colour = colour
                     , points =
-                        DomainModel.buildPreview
+                        TrackLoaded.buildPreview
                             (List.map Tuple.first populatedOptions.breaches)
                             theTrack.trackTree
                     }
@@ -206,7 +204,7 @@ update msg options previewColour hasTrack =
                 , shape = PreviewCircle
                 , colour = previewColour
                 , points =
-                    DomainModel.buildPreview
+                    TrackLoaded.buildPreview
                         (List.map Tuple.first opts.breaches)
                         track.trackTree
                 }

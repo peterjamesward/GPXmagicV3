@@ -1,6 +1,6 @@
 module Tools.Simplify exposing (..)
 
-import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
+import Actions exposing (ToolAction(..))
 import Dict exposing (Dict)
 import DomainModel exposing (..)
 import Element exposing (..)
@@ -8,6 +8,7 @@ import Element.Background as Background
 import Element.Input as Input
 import FlatColors.ChinesePalette
 import Length exposing (Meters)
+import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (Quantity, Squared)
 import TrackLoaded exposing (TrackLoaded)
 import Triangle3d
@@ -170,7 +171,7 @@ actions colour options track =
         , shape = PreviewCircle
         , colour = colour
         , points =
-            DomainModel.buildPreview
+            TrackLoaded.buildPreview
                 (Dict.keys options.pointsToRemove)
                 track.trackTree
         }

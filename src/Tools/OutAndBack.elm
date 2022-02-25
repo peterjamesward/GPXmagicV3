@@ -1,8 +1,6 @@
 module Tools.OutAndBack exposing (..)
 
-import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
-import Angle
-import Arc2d exposing (Arc2d)
+import Actions exposing ( ToolAction(..))
 import Arc3d exposing (Arc3d)
 import Axis3d
 import DomainModel exposing (..)
@@ -10,23 +8,17 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
-import Geometry101 as G exposing (..)
 import Length exposing (Meters, inMeters, meters)
-import LineSegment2d
 import List.Extra
 import LocalCoords exposing (LocalCoords)
 import Point2d exposing (Point2d)
 import Point3d exposing (Point3d, xCoordinate, yCoordinate, zCoordinate)
-import Polyline2d
 import Polyline3d
 import Quantity
-import SketchPlane3d
 import Tools.Nudge
 import Tools.OutAndBackOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showShortMeasure)
-import Vector2d
-import Vector3d
 import ViewPureStyles exposing (..)
 
 

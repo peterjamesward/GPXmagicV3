@@ -1,12 +1,13 @@
 module Tools.DeletePoints exposing (..)
 
-import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
+import Actions exposing (ToolAction(..))
 import BoundingBox3d
-import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, getDualCoords, leafFromIndex, skipCount, startPoint, traverseTreeBetweenLimitsToDepth)
+import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, earthPointFromIndex, getDualCoords, leafFromIndex, skipCount, startPoint, traverseTreeBetweenLimitsToDepth)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input
 import FlatColors.ChinesePalette
+import PreviewData exposing (PreviewShape(..))
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (fullDepthRenderingBoxSize)
 import ViewPureStyles exposing (neatToolsBorder)
@@ -58,9 +59,9 @@ toolStateChange opened colour options track =
                     else
                         Just 10
 
-                foldFn : RoadSection -> List ( EarthPoint, GPXSource ) -> List ( EarthPoint, GPXSource )
+                foldFn : RoadSection -> List EarthPoint -> List EarthPoint
                 foldFn road accum =
-                    ( road.startPoint, Tuple.first road.sourceData )
+                    road.startPoint
                         :: accum
 
                 previews =
@@ -78,14 +79,14 @@ toolStateChange opened colour options track =
                                         []
 
                         Nothing ->
-                            [ getDualCoords theTrack.trackTree fromStart ]
+                            [ earthPointFromIndex fromStart theTrack.trackTree ]
             in
             ( { options | singlePoint = theTrack.markerPosition == Nothing }
             , [ ShowPreview
                     { tag = "delete"
                     , shape = PreviewCircle
                     , colour = colour
-                    , points = previews --DomainModel.buildPreview previews theTrack.trackTree
+                    , points = TrackLoaded.asPreviewPoints theTrack fromStart previews
                     }
               ]
             )

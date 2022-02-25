@@ -1,13 +1,14 @@
 module Tools.LimitGradients exposing (..)
 
-import Actions exposing (PreviewShape(..), ToolAction(..))
-import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, distanceFromIndex, earthPointFromIndex, skipCount, traverseTreeBetweenLimitsToDepth)
+import Actions exposing (ToolAction(..))
+import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
 import Length exposing (Meters, inMeters, meters)
 import Point3d exposing (zCoordinate)
+import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (multiplyBy, zero)
 import Tools.LimitGradientOptions exposing (ExtentOption(..), Options)
 import TrackLoaded exposing (TrackLoaded)
@@ -33,6 +34,7 @@ defaultOptions =
 
 actions : Options -> Element.Color -> TrackLoaded msg -> List (ToolAction msg)
 actions newOptions previewColour track =
+    --TODO: This could be a really big preview; may need depth limit.
     if newOptions.extent == ExtentIsRange then
         case newOptions.previewData of
             Just previewTree ->
@@ -40,7 +42,11 @@ actions newOptions previewColour track =
                     { tag = "limit"
                     , shape = PreviewCircle
                     , colour = previewColour
-                    , points = DomainModel.extractPointsInRange 0 0 previewTree
+                    , points = TrackLoaded.previewFromTree
+                        track.trackTree
+                        0
+                        (skipCount track.trackTree)
+                        10
                     }
                 , RenderProfile
                 ]

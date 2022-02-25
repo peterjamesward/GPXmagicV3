@@ -1,6 +1,6 @@
 module Tools.MoveAndStretch exposing (..)
 
-import Actions exposing (PreviewShape(..), ToolAction(..))
+import Actions exposing (ToolAction(..))
 import Axis3d
 import Color
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree)
@@ -11,10 +11,9 @@ import FlatColors.ChinesePalette
 import Html.Attributes
 import Html.Events.Extra.Pointer as Pointer
 import Length exposing (meters)
-import List.Extra
-import LocalCoords exposing (LocalCoords)
 import Point2d
 import Point3d
+import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity
 import Svg
 import Svg.Attributes as SA
@@ -164,7 +163,7 @@ previewActions newOptions colour track =
     ]
 
 
-computeNewPoints : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
+computeNewPoints : Options -> TrackLoaded msg -> List PreviewPoint
 computeNewPoints options track =
     let
         ( fromStart, fromEnd ) =
@@ -182,13 +181,7 @@ computeNewPoints options track =
                 Stretch drag ->
                     stretchPoints options drag track
     in
-    newPoints
-        |> List.map
-            (\earth ->
-                ( earth
-                , DomainModel.gpxFromPointWithReference track.referenceLonLat earth
-                )
-            )
+    TrackLoaded.asPreviewPoints track fromStart newPoints
 
 
 apply : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
@@ -198,7 +191,7 @@ apply options track =
             TrackLoaded.getRangeFromMarkers track
 
         gpxPoints =
-            options.preview |> List.map Tuple.second
+            options.preview |> List.map .gpx
 
         newTree =
             DomainModel.replaceRange

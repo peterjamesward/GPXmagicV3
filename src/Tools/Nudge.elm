@@ -1,7 +1,6 @@
 module Tools.Nudge exposing (..)
 
-import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
-import Angle
+import Actions exposing (ToolAction(..))
 import Direction2d exposing (Direction2d)
 import Direction3d
 import DomainModel exposing (..)
@@ -10,11 +9,10 @@ import Element.Background as Background
 import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
 import Length exposing (Meters, inMeters)
-import LineSegment2d
 import LocalCoords exposing (LocalCoords)
 import Point2d exposing (Point2d)
 import Point3d exposing (Point3d, xCoordinate, yCoordinate, zCoordinate)
-import Polyline2d
+import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity exposing (Quantity)
 import SketchPlane3d
 import Tools.NudgeOptions exposing (..)
@@ -59,7 +57,7 @@ applyUsingOptions options track =
                 actualStart
                 (skipCount track.trackTree - actualEnd)
                 track.referenceLonLat
-                (List.map Tuple.second newPoints)
+                (List.map .gpx newPoints)
                 track.trackTree
 
         oldPoints =
@@ -102,7 +100,7 @@ previewActions newOptions colour track =
 computeNudgedPoints :
     Options
     -> TrackLoaded msg
-    -> ( ( Int, Int ), List ( EarthPoint, GPXSource ) )
+    -> ( ( Int, Int ), List PreviewPoint )
 computeNudgedPoints settings track =
     --TODO: Rewrite using a fold; this is rather slack, though "good enough".
     let
@@ -177,13 +175,7 @@ computeNudgedPoints settings track =
             List.map nudge <| List.range startIncludingFade endIncludingFade
 
         previewPoints =
-            newEarthPoints
-                |> List.map
-                    (\earth ->
-                        ( earth
-                        , DomainModel.gpxFromPointWithReference track.referenceLonLat earth
-                        )
-                    )
+            TrackLoaded.asPreviewPoints track fromStart newEarthPoints
     in
     ( ( startIncludingFade, endIncludingFade ), previewPoints )
 
@@ -302,13 +294,13 @@ view imperial options msgWrapper track =
     let
         vertical label increment =
             button
-                (width fill ::neatToolsBorder)
+                (width fill :: neatToolsBorder)
                 { onPress = Just <| msgWrapper <| NudgeButton increment
                 , label = text label
                 }
 
         verticalNudgeButtons =
-            column [ alignRight] <|
+            column [ alignRight ] <|
                 if imperial then
                     [ vertical "+1yd" <| Length.yard
                     , vertical "+1ft" <| Length.foot
@@ -340,7 +332,7 @@ view imperial options msgWrapper track =
                 ]
                 [ verticalNudgeButtons
                 , verticalNudgeSlider imperial options.vertical msgWrapper
-                                  , column [ width fill, centerX, padding 5, spacing 5 ]
+                , column [ width fill, centerX, padding 5, spacing 5 ]
                     [ horizontalNudgeSlider imperial options.horizontal msgWrapper
                     , row [ padding 5, spacing 5 ]
                         [ nudgeButton options msgWrapper

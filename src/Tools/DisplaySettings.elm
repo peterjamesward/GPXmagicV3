@@ -1,6 +1,6 @@
 module Tools.DisplaySettings exposing (..)
 
-import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
+import Actions exposing (ToolAction(..))
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (button)

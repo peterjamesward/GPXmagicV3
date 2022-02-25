@@ -1,6 +1,6 @@
 module Tools.StravaTools exposing (..)
 
-import Actions exposing (PreviewShape(..), ToolAction(..))
+import Actions exposing (ToolAction(..))
 import Angle
 import ColourPalette exposing (stravaOrange)
 import Direction2d
@@ -14,6 +14,7 @@ import Http
 import Length
 import List.Extra
 import OAuth as O
+import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity
 import ToolTip exposing (myTooltip, tooltip)
 import Tools.StravaDataLoad exposing (..)
@@ -199,7 +200,8 @@ update msg settings wrap track =
                                 , externalSegment = SegmentPreviewed segment
                                 , preview =
                                     pointsFromStreams
-                                        isTrack.referenceLonLat
+                                        isTrack
+                                        segment
                                         streams
                             }
                     in
@@ -244,11 +246,27 @@ update msg settings wrap track =
             )
 
 
-pointsFromStreams : GPXSource -> StravaSegmentStreams -> List ( EarthPoint, GPXSource )
-pointsFromStreams referencePoint streams =
+pointsFromStreams :
+    TrackLoaded msg
+    -> StravaSegment
+    -> StravaSegmentStreams
+    -> List PreviewPoint
+pointsFromStreams track segment streams =
     -- We need to apply the base point shift but using the original base point.
-    -- We can fudge this by prependng it to the track.
+    -- We can fudge this by consing it to the track.
     let
+        startGpx =
+            { longitude = Direction2d.fromAngle <| Angle.degrees segment.start_longitude
+            , latitude = Angle.degrees segment.start_latitude
+            , altitude = Quantity.zero
+            }
+
+        fromStart =
+            DomainModel.nearestToLonLat
+                startGpx
+                track.currentPosition
+                track.trackTree
+
         asGpx =
             List.map2
                 (\latLon alt ->
@@ -261,9 +279,11 @@ pointsFromStreams referencePoint streams =
                 streams.altitude.data
 
         asEarthPoints =
-            List.map (DomainModel.pointFromGpxWithReference referencePoint) asGpx
+            List.map
+                (DomainModel.pointFromGpxWithReference track.referenceLonLat)
+                asGpx
     in
-    List.map2 Tuple.pair asEarthPoints asGpx
+    TrackLoaded.asPreviewPoints track fromStart asEarthPoints
 
 
 previewActions : Options -> Color -> TrackLoaded msg -> List (ToolAction msg)
@@ -329,7 +349,7 @@ paste options track =
                         useStart
                         (skipCount track.trackTree - useEnd)
                         track.referenceLonLat
-                        (List.map Tuple.second readyToPaste)
+                        (List.map .gpx readyToPaste)
                         track.trackTree
 
                 oldPoints =

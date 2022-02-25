@@ -6,7 +6,6 @@ module DomainModel exposing
     , TrackPoint
     , asRecord
     , boundingBox
-    , buildPreview
     , distanceFromIndex
     , earthPointFromIndex
     , effectiveLatitude
@@ -46,7 +45,6 @@ module DomainModel exposing
     )
 
 import Angle exposing (Angle)
-import Axis2d
 import Axis3d exposing (Axis3d)
 import BoundingBox3d exposing (BoundingBox3d)
 import Dict exposing (Dict)
@@ -54,7 +52,6 @@ import Direction2d exposing (Direction2d)
 import Json.Encode as E
 import Length exposing (Length, Meters, inMeters)
 import LocalCoords exposing (LocalCoords)
-import Maybe.Extra as Maybe
 import Point3d exposing (Point3d)
 import Quantity exposing (Quantity)
 import Sphere3d exposing (Sphere3d)
@@ -1107,11 +1104,6 @@ getDualCoords tree index =
     )
 
 
-buildPreview : List Int -> PeteTree -> List ( EarthPoint, GPXSource )
-buildPreview indices tree =
-    -- Helper for tool that need to highlight a non-contiguous set of points.
-    List.map (getDualCoords tree) indices
-
 
 takeFromLeft : Int -> PeteTree -> Maybe PeteTree
 takeFromLeft leavesFromLeft treeNode =
@@ -1370,16 +1362,6 @@ traverseTreeBetweenLimitsToDepth :
 traverseTreeBetweenLimitsToDepth startingAt endingAt depthFunction currentDepth thisNode foldFn accum =
     -- NOTE this does a left-right traversal and conses the road sections,
     -- so the road comes out "backwards" in terms of road segments.
-    let
-        nodeData =
-            asRecord thisNode
-
-        start =
-            ( nodeData.startPoint, Tuple.first nodeData.sourceData )
-
-        end =
-            ( nodeData.endPoint, Tuple.second nodeData.sourceData )
-    in
     {-
        Do the FF thing.
        If startingAt >= my skipcount, return accum

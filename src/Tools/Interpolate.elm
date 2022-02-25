@@ -1,6 +1,6 @@
 module Tools.Interpolate exposing (..)
 
-import Actions exposing (PreviewData, PreviewShape(..), ToolAction(..))
+import Actions exposing ( ToolAction(..))
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
@@ -8,6 +8,7 @@ import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
 import Length exposing (Meters, inMeters, meters)
 import Point3d
+import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity
 import Tools.InterpolateOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
@@ -28,7 +29,7 @@ type Msg
     | SetExtent ExtentOption
 
 
-computeNewPoints : Bool -> Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
+computeNewPoints : Bool -> Options -> TrackLoaded msg -> List PreviewPoint
 computeNewPoints excludeExisting options track =
     let
         ( fromStart, fromEnd ) =
@@ -88,16 +89,9 @@ computeNewPoints excludeExisting options track =
                 []
                 |> List.reverse
 
-        previewPoints =
-            newPoints
-                |> List.map
-                    (\earth ->
-                        ( earth
-                        , DomainModel.gpxFromPointWithReference track.referenceLonLat earth
-                        )
-                    )
+
     in
-    previewPoints
+    TrackLoaded.asPreviewPoints track fromStart newPoints
 
 
 apply : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
@@ -113,7 +107,7 @@ apply options track =
 
         newCourse =
             computeNewPoints False options track
-                |> List.map Tuple.second
+                |> List.map .gpx
 
         newTree =
             DomainModel.replaceRange
