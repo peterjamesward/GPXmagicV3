@@ -82,18 +82,6 @@ type Msg
     | ApplyWithOptions
 
 
-computeNewPoints : Options -> TrackLoaded msg -> List PreviewPoint
-computeNewPoints options track =
-    let
-        ( fromStart, fromEnd ) =
-            TrackLoaded.getRangeFromMarkers track
-
-        earthPoints =
-            options.newTrackPoints
-    in
-    TrackLoaded.asPreviewPoints track fromStart earthPoints
-
-
 applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource, ( Int, Int ) )
 applyUsingOptions options track =
     case options.fixedAttachmentPoints of
@@ -107,7 +95,7 @@ applyUsingOptions options track =
                         (fromStart + 1)
                         (fromEnd + 1)
                         track.referenceLonLat
-                        (List.map .gpx <| computeNewPoints options track)
+                        (List.map .gpx <| options.newTrackPoints)
                         track.trackTree
 
                 oldPoints =
@@ -146,7 +134,7 @@ previewActions newOptions colour track =
         { tag = "formerOutcome"
         , shape = PreviewCircle
         , colour = colour
-        , points = computeNewPoints newOptions track
+        , points = newOptions.newTrackPoints
         }
     , ShowPreview
         { tag = "formerTool"
@@ -1231,12 +1219,23 @@ makeCurveIfPossible track options =
 
                 _ ->
                     Nothing
+
+        previewPoints =
+            case entryInformation of
+                Just entry ->
+                    TrackLoaded.asPreviewPoints
+                        track
+                        entry.index
+                        newBendEntirely
+
+                Nothing ->
+                    []
     in
     { options
         | pointsWithinCircle = pointsWithinCircle
         , pointsWithinDisc = pointsWithinDisc
         , pointsAreContiguous = areContiguous capturedRoadSections
-        , newTrackPoints = newBendEntirely
+        , newTrackPoints = previewPoints
         , fixedAttachmentPoints = attachmentPoints
     }
 

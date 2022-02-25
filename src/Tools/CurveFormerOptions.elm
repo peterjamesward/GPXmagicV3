@@ -8,6 +8,7 @@ import DomainModel exposing (EarthPoint, RoadSection)
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
 import Point2d exposing (Point2d)
+import PreviewData exposing (PreviewPoint)
 import Quantity exposing (Quantity)
 import Vector2d exposing (Vector2d)
 
@@ -35,7 +36,7 @@ type alias Options =
     , pointsWithinDisc : Dict Int RoadSection
     --, circle : Maybe (Circle3d Meters LocalCoords)
     , pointsAreContiguous : Bool
-    , newTrackPoints : List EarthPoint
+    , newTrackPoints : List PreviewPoint
     , fixedAttachmentPoints : Maybe ( Int, Int )
     , transitionRadius : Quantity Float Meters
     , lastVector : Vector2d Meters LocalCoords

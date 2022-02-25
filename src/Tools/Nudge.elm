@@ -175,7 +175,7 @@ computeNudgedPoints settings track =
             List.map nudge <| List.range startIncludingFade endIncludingFade
 
         previewPoints =
-            TrackLoaded.asPreviewPoints track fromStart newEarthPoints
+            TrackLoaded.asPreviewPoints track startIncludingFade newEarthPoints
     in
     ( ( startIncludingFade, endIncludingFade ), previewPoints )
 

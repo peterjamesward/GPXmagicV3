@@ -302,9 +302,10 @@ asPreviewPoints track startIndex earths =
                 thisGradient =
                     case mLastGpx of
                         Just lastGpx ->
-                            Quantity.ratio
-                                (thisGpx.altitude |> Quantity.minus lastGpx.altitude)
-                                thisDistance
+                            100
+                                * Quantity.ratio
+                                    (thisGpx.altitude |> Quantity.minus lastGpx.altitude)
+                                    thisDistance
 
                         Nothing ->
                             0.0
@@ -312,7 +313,7 @@ asPreviewPoints track startIndex earths =
                 thisPreview =
                     { earthPoint = earth
                     , gpx = thisGpx
-                    , distance = thisDistance
+                    , distance = distance
                     , gradient = thisGradient
                     }
             in

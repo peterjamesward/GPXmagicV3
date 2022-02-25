@@ -12,7 +12,9 @@ BUG: Limit Gradients shows whole track preview always.
 
 ## WebGL profile view
 
-* Previews on Profile
+Check all previews on Profile:
+- Radiused bends wrong altitude
+- Delete wrong distance
 
 * Profile vanishes at some zooms. (weird)
 

@@ -505,22 +505,6 @@ lookForSmoothBendOption trackPointSpacing track pointA pointD =
             , DomainModel.asRecord <| DomainModel.leafFromIndex (pointD - 1) track.trackTree
             )
 
-        ( startDistance, endDistance ) =
-            ( DomainModel.distanceFromIndex pointA track.trackTree
-            , DomainModel.distanceFromIndex pointD track.trackTree
-            )
-
-        ( startAltitude, endAltitude ) =
-            ( DomainModel.gpxPointFromIndex pointA track.trackTree |> .altitude
-            , DomainModel.gpxPointFromIndex pointD track.trackTree |> .altitude
-            )
-
-        averageGradient =
-            100
-                * Quantity.ratio
-                    (endAltitude |> Quantity.minus startAltitude)
-                    (endDistance |> Quantity.minus endDistance)
-
         -- Try to make minimal changes from v1. Is that wise?
         ( roadIn, roadOut ) =
             ( roadToGeometry roadAB, roadToGeometry roadCD )
@@ -548,9 +532,31 @@ lookForSmoothBendOption trackPointSpacing track pointA pointD =
             let
                 nodes =
                     makeSmoothBend trackPointSpacing roadAB roadCD arc
+
+                distanceToBend =
+                    case nodes of
+                        p1 :: pRest ->
+                            Point3d.distanceFrom
+                                (DomainModel.earthPointFromIndex pointA track.trackTree)
+                                p1
+
+                        _ ->
+                            Quantity.zero
+
+                previewsWithAdjustedDistance =
+                    -- Untidy distance adjustment
+                    TrackLoaded.asPreviewPoints track pointA nodes
+                        |> List.map
+                            (\preview ->
+                                { preview
+                                    | distance =
+                                        preview.distance
+                                            |> Quantity.plus distanceToBend
+                                }
+                            )
             in
             Just
-                { nodes = TrackLoaded.asPreviewPoints track pointA nodes
+                { nodes = previewsWithAdjustedDistance
                 , centre = Arc2d.centerPoint arc
                 , radius = Length.inMeters <| Arc2d.radius arc
                 , startIndex = pointA
