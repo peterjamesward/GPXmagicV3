@@ -19,24 +19,26 @@ SVG overlay for info follows mouse.
 
 ## Tools: old, updated, & new
 
-4. Loops (inc. impact on Bezier & Centroid)
-5. Split and Join
-6. Intersection detection ((?? + loop detection ??))
-7. Graph Theory (notes below and from DO's emails)
-9. Map style choice (Just call setStyle with the URL - see index.html)
-8. --- Cut-off for release
-10. Extract all text for translation (Muriel)
-11. Use localised number formatting everywhere (for French use of , and .)
-12. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
-13. Terrain (with texture maybe)
-14. Ability to point-smooth transitions over a range
-15. Tools that require a range should say so when there isn't one! (David Ogle)
-16. --- Cut-off
-17. Option to add 80m at Start, 200m at end for start/end gates in RGT
-18. Option to show MR rendering cutoff.
-19. Tooltips (where useful)
-20. Non-customisable keyboard alternatives for Load/Save/Undo/Redo/Fwd/Back/Purple (maybe 1-5 for views)
-21. Draggable tools?
+1. Loops (inc. impact on Bezier & Centroid)
+2. Split and Join
+3. Intersection detection ((?? + loop detection ??))
+4. Graph Theory (notes below and from DO's emails)
+5. Map style choice (Just call setStyle with the URL - see index.html)
+
+--- Cut-off for release
+7. Extract all text for translation (Muriel)
+8. Use localised number formatting everywhere (for French use of , and .)
+9. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
+10. Terrain (with texture maybe)
+11. Ability to point-smooth transitions over a range
+12. Tools that require a range should say so when there isn't one! (David Ogle)
+
+--- Cut-off
+14. Option to add 80m at Start, 200m at end for start/end gates in RGT
+15. Option to show MR rendering cutoff.
+16. Tooltips (where useful)
+17. Non-customisable keyboard alternatives for Load/Save/Undo/Redo/Fwd/Back/Purple (maybe 1-5 for views)
+18. Draggable tools?
 
 New stuff:
 > This could be like a meta-box, or a "build your own 1CQF", in which
