@@ -208,8 +208,8 @@ function mapMessageHandler(msg) {
         case 'Style':
             if (isMapCreated) {
                 map.setStyle(msg.style);
-                trackAdded = false;
                 pointsLayerAdded = false;
+                trackAdded = false;
             }
             break;
 
@@ -287,7 +287,8 @@ function makeTheMap(msg) {
             //style: 'mapbox://styles/mapbox/streets-v11',
             //style: 'mapbox://styles/mapbox/satellite-v9',
             //style: 'mapbox://styles/mapbox/satellite-streets-v11',
-            style: 'mapbox://styles/mapbox/outdoors-v11',
+            //style: 'mapbox://styles/mapbox/outdoors-v11',
+            style: msg.style,
             center: [msg.lon, msg.lat],
             zoom: msg.zoom
         });
@@ -298,26 +299,6 @@ function makeTheMap(msg) {
             canvas  = map.getCanvasContainer();
             // Add zoom and rotation controls to the map.
             map.addControl(new mapboxgl.NavigationControl());
-
-            // Add terrain source, with slight exaggeration
-            map.addSource('mapbox-dem', {
-              'type': 'raster-dem',
-              'url': 'mapbox://mapbox.terrain-rgb',
-              'tileSize': 512,
-              'maxzoom': 14
-            });
-            map.setTerrain({ 'source': 'mapbox-dem'});
-
-            // add a sky layer that will show when the map is highly pitched
-            map.addLayer({
-              'id': 'sky',
-              'type': 'sky',
-              'paint': {
-              'sky-type': 'atmosphere',
-              'sky-atmosphere-sun': [0.0, 0.0],
-              'sky-atmosphere-sun-intensity': 15
-              }
-            });
 
             app.ports.mapResponses.send({ 'msg' : 'map ready' });
             map.resize();
@@ -330,6 +311,29 @@ function makeTheMap(msg) {
         //console.log('no map node');
         app.ports.mapResponses.send({ 'msg' : 'no node' });
     };
+};
+
+
+function addDecorations() {
+      // Add terrain source, with slight exaggeration
+      map.addSource('mapbox-dem', {
+        'type': 'raster-dem',
+        'url': 'mapbox://mapbox.terrain-rgb',
+        'tileSize': 512,
+        'maxzoom': 14
+      });
+      map.setTerrain({ 'source': 'mapbox-dem'});
+
+      // add a sky layer that will show when the map is highly pitched
+      map.addLayer({
+        'id': 'sky',
+        'type': 'sky',
+        'paint': {
+        'sky-type': 'atmosphere',
+        'sky-atmosphere-sun': [0.0, 0.0],
+        'sky-atmosphere-sun-intensity': 15
+        }
+      });
 };
 
 function centreMap(lon, lat) {
@@ -367,8 +371,6 @@ function addLineToMap(data, points) {
         }
     });
 
-    map.setTerrain({ 'source': 'mapbox-dem'});
-
     trackAdded = true;
     map.on('click', function(e) {
       app.ports.mapResponses.send
@@ -379,6 +381,8 @@ function addLineToMap(data, points) {
         );
         e;
     });
+
+    addDecorations();
 
 };
 

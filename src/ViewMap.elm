@@ -63,6 +63,14 @@ mapUrl style =
             "mapbox://styles/mapbox/outdoors-v11"
 
 
+defaultStyle =
+    MapOutdoors
+
+
+defaultStyleUrl =
+    mapUrl defaultStyle
+
+
 initialiseContext : Maybe Context -> Context
 initialiseContext currentContext =
     case currentContext of
@@ -78,7 +86,7 @@ initialiseContext currentContext =
             , followOrange = False
             , draggable = False
             , mapStyleMenuOpen = False
-            , mapStyle = MapOutdoors
+            , mapStyle = defaultStyle
             }
 
 

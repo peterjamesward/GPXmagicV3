@@ -70,6 +70,7 @@ import TrackLoaded exposing (TrackLoaded)
 import Url exposing (Url)
 import UtilsForViews exposing (colourHexString)
 import View3dCommonElements exposing (stopProp)
+import ViewMap
 import ViewPureStyles exposing (..)
 import WriteGPX
 
@@ -336,7 +337,9 @@ update msg model =
             in
             ( { model | ipInfo = ipInfo }
             , Cmd.batch
-                [ MapPortController.createMap mapInfoWithLocation
+                [ MapPortController.createMap
+                    ViewMap.defaultStyleUrl
+                    mapInfoWithLocation
                 , MyIP.sendIpInfo model.time IpInfoAcknowledged ipInfo
                 ]
             )

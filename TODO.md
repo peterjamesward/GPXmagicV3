@@ -4,8 +4,6 @@
 BUG: Classic bend smoother consumes all memory on certain looped routes where
      orange and purple are (possibly) co-linear, or something. (Samir bug)
 
-BUG: Map style change loses terrain.
-
 --
 
 # WIP

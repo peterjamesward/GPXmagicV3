@@ -44,8 +44,8 @@ port mapCommands : E.Value -> Cmd msg
 port mapResponses : (E.Value -> msg) -> Sub msg
 
 
-createMap : MapInfo -> Cmd msg
-createMap info =
+createMap : String -> MapInfo -> Cmd msg
+createMap style info =
     mapCommands <|
         E.object
             [ ( "Cmd", E.string "Init" )
@@ -53,6 +53,7 @@ createMap info =
             , ( "lon", E.float info.centreLon )
             , ( "lat", E.float info.centreLat )
             , ( "zoom", E.float info.mapZoom )
+            , ( "style", E.string style)
             ]
 
 
