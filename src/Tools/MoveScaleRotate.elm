@@ -224,7 +224,7 @@ rotateAndScale settings track =
                 |> Point3d.scaleAbout centre scaleFactor
     in
     TrackLoaded.asPreviewPoints track
-        0
+        Quantity.zero
         (transformedStartPoint :: transformedEndPoints)
 
 

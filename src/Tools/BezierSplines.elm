@@ -48,6 +48,9 @@ computeNewPoints options track =
         startPoint =
             earthPointFromIndex fromStart track.trackTree
 
+        distanceToPreview =
+            distanceFromIndex fromStart track.trackTree
+
         splineFunction =
             case options.bezierStyle of
                 ThroughExisting ->
@@ -66,7 +69,7 @@ computeNewPoints options track =
                 track.trackTree
 
         previewPoints =
-            TrackLoaded.asPreviewPoints track fromStart splineEarthPoints
+            TrackLoaded.asPreviewPoints track distanceToPreview splineEarthPoints
     in
     case previewPoints of
         p1 :: pRest ->

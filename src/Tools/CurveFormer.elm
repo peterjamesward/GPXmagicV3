@@ -1225,7 +1225,7 @@ makeCurveIfPossible track options =
                 Just entry ->
                     TrackLoaded.asPreviewPoints
                         track
-                        entry.index
+                        (DomainModel.distanceFromIndex entry.index track.trackTree)
                         newBendEntirely
 
                 Nothing ->

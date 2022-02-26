@@ -10,8 +10,11 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 ## WebGL profile view
 
-SVG overlay for Orange and Purple info.
+SVG overlay for Orange and Purple info. (white text on matching colour panels?)
 SVG overlay for info follows mouse.
+
+The preview traversal for Limit Gradients should be limited as we zoom in,
+with depth reflecting the zoom level, as for the main track.
 
 ---
 

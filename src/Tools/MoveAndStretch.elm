@@ -181,7 +181,10 @@ computeNewPoints options track =
                 Stretch drag ->
                     stretchPoints options drag track
     in
-    TrackLoaded.asPreviewPoints track fromStart newPoints
+    TrackLoaded.asPreviewPoints
+        track
+        (DomainModel.distanceFromIndex fromStart track.trackTree)
+        newPoints
 
 
 apply : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )

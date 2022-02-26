@@ -280,12 +280,9 @@ previewFromTree tree start end depthLimit =
     getAsPreviewPoint tree 0 :: endPoints
 
 
-asPreviewPoints : TrackLoaded msg -> Int -> List EarthPoint -> List PreviewPoint
-asPreviewPoints track startIndex earths =
+asPreviewPoints : TrackLoaded msg -> Length.Length -> List EarthPoint -> List PreviewPoint
+asPreviewPoints track startDistance earths =
     let
-        startDistance =
-            DomainModel.distanceFromIndex startIndex track.trackTree
-
         foldFn earth ( distance, mLastGpx, outputs ) =
             let
                 thisGpx =

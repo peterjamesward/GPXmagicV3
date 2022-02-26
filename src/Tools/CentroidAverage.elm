@@ -46,10 +46,13 @@ computeNewPoints options track =
                 ExtentTrack ->
                     ( 0, 0 )
 
+        distanceToPreview =
+            DomainModel.distanceFromIndex (fromStart + 1) track.trackTree
+
         earthPoints =
             centroidAverage False options fromStart fromEnd track.trackTree
     in
-    TrackLoaded.asPreviewPoints track (fromStart + 1) earthPoints
+    TrackLoaded.asPreviewPoints track distanceToPreview earthPoints
 
 
 applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )

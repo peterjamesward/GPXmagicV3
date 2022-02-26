@@ -95,7 +95,10 @@ computeNewPoints excludeExisting options track =
         previews =
             -- But these are based on distance from first mark, need to
             -- be based on first point.
-            TrackLoaded.asPreviewPoints track fromStart newPoints
+            TrackLoaded.asPreviewPoints
+                track
+                (DomainModel.distanceFromIndex fromStart track.trackTree)
+                newPoints
     in
     case previews of
         p1 :: pRest ->

@@ -283,7 +283,9 @@ pointsFromStreams track segment streams =
                 (DomainModel.pointFromGpxWithReference track.referenceLonLat)
                 asGpx
     in
-    TrackLoaded.asPreviewPoints track fromStart asEarthPoints
+    TrackLoaded.asPreviewPoints track
+        (DomainModel.distanceFromIndex fromStart track.trackTree)
+        asEarthPoints
 
 
 previewActions : Options -> Color -> TrackLoaded msg -> List (ToolAction msg)

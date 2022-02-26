@@ -534,26 +534,21 @@ lookForSmoothBendOption trackPointSpacing track pointA pointD =
                     makeSmoothBend trackPointSpacing roadAB roadCD arc
 
                 distanceToBend =
-                    case nodes of
-                        p1 :: pRest ->
-                            Point3d.distanceFrom
-                                (DomainModel.earthPointFromIndex pointA track.trackTree)
-                                p1
+                    DomainModel.distanceFromIndex pointA track.trackTree
+                        |> Quantity.plus
+                            (case nodes of
+                                p1 :: pRest ->
+                                    Point3d.distanceFrom
+                                        (DomainModel.earthPointFromIndex pointA track.trackTree)
+                                        p1
 
-                        _ ->
-                            Quantity.zero
+                                _ ->
+                                    Quantity.zero
+                            )
 
                 previewsWithAdjustedDistance =
                     -- Untidy distance adjustment
-                    TrackLoaded.asPreviewPoints track pointA nodes
-                        |> List.map
-                            (\preview ->
-                                { preview
-                                    | distance =
-                                        preview.distance
-                                            |> Quantity.plus distanceToBend
-                                }
-                            )
+                    TrackLoaded.asPreviewPoints track distanceToBend nodes
             in
             Just
                 { nodes = previewsWithAdjustedDistance
