@@ -8,6 +8,7 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 # WIP
 
+**Loops** (inc. impact on Bezier & Centroid)
 
 ---
 
@@ -15,25 +16,24 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 ## Tools: old, updated, & new
 
-2. Loops (inc. impact on Bezier & Centroid)
-3. Split and Join
-4. Intersection detection ((?? + loop detection ??))
-5. Graph Theory (notes below and from DO's emails)
+1. Split and Join
+2. Intersection detection ((?? + loop detection ??))
+3. Graph Theory (notes below and from DO's emails)
 
 --- Cut-off for release
-7. Extract all text for translation (Muriel)
-8. Use localised number formatting everywhere (for French use of , and .)
-9. Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
-10. Terrain (with texture maybe)
-11. Ability to point-smooth transitions over a range
-12. Tools that require a range should say so when there isn't one! (David Ogle)
+- Extract all text for translation (Muriel)
+- Use localised number formatting everywhere (for French use of , and .)
+- Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
+- Terrain (with texture maybe)
+- Ability to point-smooth transitions over a range
+- Tools that require a range should say so when there isn't one! (David Ogle)
 
 --- Cut-off
-14. Option to add 80m at Start, 200m at end for start/end gates in RGT
-15. Option to show MR rendering cutoff.
-16. Tooltips (where useful)
-17. Non-customisable keyboard alternatives for Load/Save/Undo/Redo/Fwd/Back/Purple (maybe 1-5 for views)
-18. Draggable tools?
+- Option to add 80m at Start, 200m at end for start/end gates in RGT
+- Option to show MR rendering cutoff.
+- Tooltips (where useful)
+- Non-customisable keyboard alternatives for Load/Save/Undo/Redo/Fwd/Back/Purple (maybe 1-5 for views)
+- Draggable tools?
 
 New stuff:
 > This could be like a meta-box, or a "build your own 1CQF", in which
