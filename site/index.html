@@ -315,7 +315,8 @@ function makeTheMap(msg) {
 
 
 function addDecorations() {
-      // Add terrain source, with slight exaggeration
+
+   if (! map.isSourceLoaded('mapbox-dem') ) {
       map.addSource('mapbox-dem', {
         'type': 'raster-dem',
         'url': 'mapbox://mapbox.terrain-rgb',
@@ -323,7 +324,9 @@ function addDecorations() {
         'maxzoom': 14
       });
       map.setTerrain({ 'source': 'mapbox-dem'});
+   };
 
+   if ( map.getLayer('sky') === undefined) {
       // add a sky layer that will show when the map is highly pitched
       map.addLayer({
         'id': 'sky',
@@ -334,6 +337,7 @@ function addDecorations() {
         'sky-atmosphere-sun-intensity': 15
         }
       });
+   };
 };
 
 function centreMap(lon, lat) {
