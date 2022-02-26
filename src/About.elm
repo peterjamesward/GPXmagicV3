@@ -4,7 +4,7 @@ module About exposing (..)
 aboutText =
     """
 
-# GPXmagic v3.0.7 (ccc3dded)
+# GPXmagic v3.0.7 (cc482872)
 
 ## In this release ...
 
@@ -13,7 +13,7 @@ aboutText =
 * Most previews appear in Profile view, as circles (likely to improve).
 * Open tools jump to the top of their docking zone.
 * Overlay on Profile show current point location (metric only for now).
-* Choice of map styles, but switching styles loses the terrain.
+* Choice of map styles.
 
 ## Coming up, not necessarily in order ...
 
