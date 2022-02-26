@@ -53,6 +53,7 @@ type ToolAction msg
     | CurveFormerApplyWithOptions Tools.CurveFormerOptions.Options
     | BendSmootherApplyWithOptions Tools.BendSmootherOptions.Options
     | MakeMapPointsDraggable Bool
+    | SetMapStyle String
     | PointMovedOnMap Float Float Float Float
     | NudgeApplyWithOptions Tools.NudgeOptions.Options
     | OutAndBackApplyWithOptions Tools.OutAndBackOptions.Options

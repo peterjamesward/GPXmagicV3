@@ -5,7 +5,7 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
-import Element.Input as Input exposing (button)
+import Element.Input as Input exposing (button, labelHidden)
 import FeatherIcons
 import FlatColors.ChinesePalette
 import Html.Attributes exposing (id)
@@ -21,12 +21,46 @@ type alias Context =
     , lastMapClick : ( Float, Float )
     , followOrange : Bool
     , draggable : Bool
+    , mapStyleMenuOpen : Bool
+    , mapStyle : MapStyle
     }
 
 
 type Msg
     = ToggleFollowOrange
     | ToggleDraggable
+    | ToggleMapStyleMenu
+    | ChooseMapStyle MapStyle
+
+
+
+--style: 'mapbox://styles/mapbox/streets-v11',
+--style: 'mapbox://styles/mapbox/satellite-v9',
+--style: 'mapbox://styles/mapbox/satellite-streets-v11',
+--style: 'mapbox://styles/mapbox/outdoors-v11',
+
+
+type MapStyle
+    = MapStreets
+    | MapSatellite
+    | MapSatelliteStreets
+    | MapOutdoors
+
+
+mapUrl : MapStyle -> String
+mapUrl style =
+    case style of
+        MapStreets ->
+            "mapbox://styles/mapbox/streets-v11"
+
+        MapSatellite ->
+            "mapbox://styles/mapbox/satellite-v9"
+
+        MapSatelliteStreets ->
+            "mapbox://styles/mapbox/satellite-streets-v11"
+
+        MapOutdoors ->
+            "mapbox://styles/mapbox/outdoors-v11"
 
 
 initialiseContext : Maybe Context -> Context
@@ -43,6 +77,8 @@ initialiseContext currentContext =
             , lastMapClick = ( 0, 0 )
             , followOrange = False
             , draggable = False
+            , mapStyleMenuOpen = False
+            , mapStyle = MapOutdoors
             }
 
 
@@ -58,6 +94,16 @@ update msg msgWrapper track area context =
         ToggleFollowOrange ->
             ( { context | followOrange = not context.followOrange }
             , []
+            )
+
+        ToggleMapStyleMenu ->
+            ( { context | mapStyleMenuOpen = not context.mapStyleMenuOpen }
+            , []
+            )
+
+        ChooseMapStyle style ->
+            ( { context | mapStyle = style }
+            , [ SetMapStyle <| mapUrl style ]
             )
 
         ToggleDraggable ->
@@ -122,7 +168,40 @@ view ( viewWidth, viewHeight ) mContext msgWrapper =
                         else
                             useIcon FeatherIcons.x
                     }
+                , Input.button
+                    [ tooltip onLeft (myTooltip "Choose map style")
+                    , inFront <| el [ alignRight ] <| mapStyleChoices context
+                    ]
+                    { onPress = Just <| msgWrapper ToggleMapStyleMenu
+                    , label = useIcon FeatherIcons.layers
+                    }
                 ]
+
+        mapStyleChoices : Context -> Element msg
+        mapStyleChoices context =
+            if context.mapStyleMenuOpen then
+                Input.radio
+                    [ centerX
+                    , spacing 5
+                    , padding 5
+                    , Font.size 12
+                    , alignRight
+                    , moveLeft 40
+                    , Background.color FlatColors.ChinesePalette.antiFlashWhite
+                    ]
+                    { onChange = msgWrapper << ChooseMapStyle
+                    , options =
+                        [ Input.option MapStreets (text "Streets")
+                        , Input.option MapOutdoors (text "Outdoors")
+                        , Input.option MapSatellite (text "Satellite")
+                        , Input.option MapSatelliteStreets (text "Satellite streets")
+                        ]
+                    , selected = Just context.mapStyle
+                    , label = labelHidden "map styles"
+                    }
+
+            else
+                none
     in
     case mContext of
         Just context ->

@@ -14,11 +14,11 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 ## Tools: old, updated, & new
 
-1. Loops (inc. impact on Bezier & Centroid)
-2. Split and Join
-3. Intersection detection ((?? + loop detection ??))
-4. Graph Theory (notes below and from DO's emails)
-5. Map style choice (Just call setStyle with the URL - see index.html)
+1. Map style choice (Just call setStyle with the URL - see index.html)
+2. Loops (inc. impact on Bezier & Centroid)
+3. Split and Join
+4. Intersection detection ((?? + loop detection ??))
+5. Graph Theory (notes below and from DO's emails)
 
 --- Cut-off for release
 7. Extract all text for translation (Muriel)
@@ -53,6 +53,8 @@ Tree walk combined with whole (visible) tree query, because <track loops>.
 (Expand bounding boxes to allow for road width.)
 
 ## Small stuff
+
+Maybe convert all markers to SVG with overlay.
 
 Put all Font, Colour etc into a Palette/Style module for ease of change.
 > Search for FlatUI references.

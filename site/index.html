@@ -201,7 +201,15 @@ function mapMessageHandler(msg) {
 
         case 'Zoom':
             if (isMapCreated) {
-                map.setZoom(msg.zoom)
+                map.setZoom(msg.zoom);
+            }
+            break;
+
+        case 'Style':
+            if (isMapCreated) {
+                map.setStyle(msg.style);
+                trackAdded = false;
+                pointsLayerAdded = false;
             }
             break;
 
@@ -358,6 +366,8 @@ function addLineToMap(data, points) {
             'line-width': 8
         }
     });
+
+    map.setTerrain({ 'source': 'mapbox-dem'});
 
     trackAdded = true;
     map.on('click', function(e) {

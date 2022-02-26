@@ -138,6 +138,15 @@ requestElevations =
             ]
 
 
+setMapStyle : String -> Cmd msg
+setMapStyle url =
+    mapCommands <|
+        E.object
+            [ ( "Cmd", E.string "Style" )
+            , ( "style", E.string url )
+            ]
+
+
 addTrackToMap : TrackLoaded msg -> Cmd msg
 addTrackToMap track =
     -- This is to add the route as a polyline, with selective rendering

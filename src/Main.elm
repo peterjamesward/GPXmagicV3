@@ -1,6 +1,6 @@
 module Main exposing (main)
 
-import Actions exposing ( ToolAction(..))
+import Actions exposing (ToolAction(..))
 import Angle
 import Browser exposing (application)
 import Browser.Dom as Dom exposing (getViewport, getViewportOf)
@@ -104,6 +104,7 @@ type Msg
     | TimeToUpdateMemory
     | OneClickMsg Tools.OneClickQuickFix.Msg
     | FetchElevationsFromMap
+    | ReplaceTrackOnMapAfterStyleChange
     | SvgMsg SvgPathExtractor.Msg
     | FlythroughTick Time.Posix
     | NoOp
@@ -670,6 +671,18 @@ Please check the file contains GPX data.""" }
             -- We have added the full track so that we can then ask
             -- the map for elevation data. Let's do that.
             ( model, MapPortController.requestElevations )
+
+        ReplaceTrackOnMapAfterStyleChange ->
+            -- We have added the full track so that we can then ask
+            -- the map for elevation data. Let's do that.
+            let
+                actions =
+                    [ TrackHasChanged ]
+
+                newModel =
+                    performActionsOnModel actions model
+            in
+            ( newModel, performActionCommands actions newModel )
 
         ToggleLoadOptionMenu ->
             ( { model | loadOptionsMenuOpen = not model.loadOptionsMenuOpen }
@@ -1884,6 +1897,12 @@ performActionCommands actions model =
 
                 ( FetchMapElevations, _ ) ->
                     MapPortController.requestElevations
+
+                ( SetMapStyle url, _ ) ->
+                    Cmd.batch
+                        [ MapPortController.setMapStyle url
+                        , Delay.after 1000 ReplaceTrackOnMapAfterStyleChange
+                        ]
 
                 ( SelectSvgFile message, _ ) ->
                     Select.file [ "text/svg" ] message
