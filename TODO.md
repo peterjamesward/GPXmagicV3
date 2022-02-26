@@ -8,14 +8,6 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 # WIP
 
-## WebGL profile view
-
-SVG overlay for Orange and Purple info. (white text on matching colour panels?)
-SVG overlay for info follows mouse.
-
-The preview traversal for Limit Gradients should be limited as we zoom in,
-with depth reflecting the zoom level, as for the main track.
-
 ---
 
 # BACKLOG, roughly in order ...
@@ -64,6 +56,9 @@ Tree walk combined with whole (visible) tree query, because <track loops>.
 
 Put all Font, Colour etc into a Palette/Style module for ease of change.
 > Search for FlatUI references.
+ 
+The preview traversal for Limit Gradients should be width-limited as we zoom in,
+with depth reflecting the zoom level, as for the main track.
 
 ## Loop detection
 

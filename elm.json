@@ -31,6 +31,7 @@
             "ianmackenzie/elm-3d-camera": "3.1.0",
             "ianmackenzie/elm-3d-scene": "1.0.1",
             "ianmackenzie/elm-geometry": "3.9.1",
+            "ianmackenzie/elm-geometry-svg": "3.0.0",
             "ianmackenzie/elm-interval": "2.0.0",
             "ianmackenzie/elm-units": "2.9.0",
             "icidasset/elm-binary": "2.1.0",

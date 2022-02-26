@@ -1,12 +1,15 @@
 module ViewProfileCharts exposing (..)
 
 import Actions exposing (ToolAction(..))
+import Axis2d
 import Axis3d
 import BoundingBox3d
 import Camera3d
+import Circle2d
 import Color exposing (lightOrange)
 import ColourPalette exposing (gradientColourPastel)
 import Dict exposing (Dict)
+import Direction2d
 import Direction3d exposing (negativeZ, positiveZ)
 import DomainModel exposing (..)
 import Element exposing (..)
@@ -17,6 +20,8 @@ import Element.Input as Input
 import FeatherIcons
 import FlatColors.AussiePalette
 import FlatColors.ChinesePalette exposing (white)
+import Frame2d
+import Geometry.Svg as Svg
 import Html.Events.Extra.Mouse as Mouse exposing (Button(..))
 import Length
 import LineSegment3d
@@ -25,13 +30,17 @@ import Pixels exposing (Pixels)
 import Plane3d
 import Point2d
 import Point3d exposing (Point3d)
+import Point3d.Projection as Point3d
 import PreviewData exposing (PreviewData, PreviewPoint, PreviewShape(..))
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
 import Scene3d.Material as Material
-import SceneBuilder3D exposing (paintSomethingBetween)
+import Svg exposing (Svg)
+import Svg.Attributes exposing (..)
 import TrackLoaded exposing (TrackLoaded)
+import UtilsForViews exposing (showDecimal2, showDecimal6, showLongMeasure, showShortMeasure)
+import Vector2d
 import Vector3d
 import View3dCommonElements exposing (Msg(..), common3dSceneAttributes)
 import ViewPureStyles exposing (useIcon)
@@ -76,7 +85,7 @@ zoomButtons msgWrapper context =
         , Background.color white
         , Font.size 40
         , padding 6
-        , spacing 8
+        , Element.spacing 8
         , Border.width 1
         , Border.rounded 4
         , Border.color FlatColors.AussiePalette.blurple
@@ -181,13 +190,112 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                 , clipDepth = Length.meter
                 , entities = context.profileScene
                 }
+
+        ( svgWidth, svgHeight ) =
+            ( String.fromInt <| Pixels.inPixels altitudeWidth
+            , String.fromInt <| Pixels.inPixels altitudeHeight
+            )
+
+        altitudeOverlay =
+            Svg.svg
+                [ Svg.Attributes.width svgWidth
+                , Svg.Attributes.height svgHeight
+                ]
+                [ Svg.relativeTo topLeftFrame <|
+                    Svg.g [] (orangeSvg :: orangeText ++ purpleSvg)
+                ]
+
+        screenRectangle =
+            Rectangle2d.from
+                Point2d.origin
+                (Point2d.xy
+                    (Quantity.toFloatQuantity altitudeWidth)
+                    (Quantity.toFloatQuantity altitudeHeight)
+                )
+
+        camera =
+            deriveAltitudeCamera
+                track.trackTree
+                context
+                track.currentPosition
+                ( altitudeWidth, altitudeHeight )
+
+        orangeLeaf =
+            asRecord <| DomainModel.leafFromIndex track.currentPosition track.trackTree
+
+        orange2d =
+            pointInAltitudeView context track.currentPosition track.trackTree
+                |> Point3d.toScreenSpace camera screenRectangle
+
+        orangeSvg =
+            Svg.circle2d
+                [ Svg.Attributes.stroke "orange"
+                , Svg.Attributes.strokeWidth "4"
+                , Svg.Attributes.fill "none"
+                ]
+                (Circle2d.withRadius (Pixels.float 8) orange2d)
+
+        purpleSvg =
+            case track.markerPosition of
+                Just purple ->
+                    let
+                        purple2d =
+                            pointInAltitudeView context purple track.trackTree
+                                |> Point3d.toScreenSpace camera screenRectangle
+                    in
+                    [ Svg.circle2d
+                        [ Svg.Attributes.stroke "purple"
+                        , Svg.Attributes.strokeWidth "4"
+                        , Svg.Attributes.fill "none"
+                        ]
+                        (Circle2d.withRadius (Pixels.float 8) purple2d)
+                    ]
+
+                Nothing ->
+                    []
+
+        textLine lineNum content =
+            Svg.text_
+                [ Svg.Attributes.fill "black"
+                , Svg.Attributes.fontFamily "Sans serif"
+                , Svg.Attributes.fontSize "20px"
+                , Svg.Attributes.stroke "none"
+                , Svg.Attributes.x
+                    (String.fromFloat
+                        (Pixels.toFloat (Point2d.xCoordinate orange2d) + 20)
+                    )
+                , Svg.Attributes.y
+                    (String.fromFloat
+                        (Pixels.toFloat (Point2d.yCoordinate orange2d) - lineNum * 20)
+                    )
+                ]
+                [ Svg.text content ]
+                -- Hack: flip the text upside down since our later
+                -- 'Svg.relativeTo topLeftFrame' call will flip it
+                -- back right side up
+                |> Svg.mirrorAcross (Axis2d.through orange2d Direction2d.x)
+
+        orangeText =
+            [ textLine 1 <| showDecimal2 <| orangeLeaf.gradientAtStart
+            , textLine 2 <| showShortMeasure False <| Point3d.zCoordinate <| orangeLeaf.startPoint
+            , textLine 3 <|
+                showLongMeasure False <|
+                    DomainModel.distanceFromIndex track.currentPosition track.trackTree
+            ]
+
+        topLeftFrame =
+            Frame2d.atPoint
+                (Point2d.xy Quantity.zero (Quantity.toFloatQuantity altitudeHeight))
+                |> Frame2d.reverseY
     in
     column
         (pointer
             :: (inFront <| zoomButtons msgWrapper context)
             :: common3dSceneAttributes msgWrapper context
         )
-        [ html <| altitudeScene
+        [ Element.el
+            [ Element.inFront (Element.html altitudeOverlay) ]
+            (Element.html altitudeScene)
         , html <| gradientScene
         ]
 
@@ -218,7 +326,7 @@ deriveAltitudeCamera treeNode context currentPosition ( width, height ) =
 
         eyePoint =
             Point3d.translateBy
-                (Vector3d.meters 0.0 -500.0 0.0)
+                (Vector3d.meters 0.0 -50000.0 0.0)
                 lookingAt
 
         viewpoint =
@@ -422,6 +530,21 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
             ( context, [] )
 
 
+pointInAltitudeView : Context -> Int -> PeteTree -> EarthPoint
+pointInAltitudeView context i tree =
+    let
+        distance =
+            DomainModel.distanceFromIndex i tree
+
+        altitude =
+            DomainModel.gpxPointFromIndex i tree |> .altitude
+    in
+    Point3d.xyz
+        distance
+        Quantity.zero
+        (altitude |> Quantity.multiplyBy context.emphasis)
+
+
 renderProfileData :
     TrackLoaded msg
     -> Quantity Int Pixels
@@ -586,76 +709,10 @@ renderProfileData track displayWidth previews context =
                     -- Can't happen (FLW)
                     []
 
-        markers =
-            let
-                gradientAtOrange =
-                    leafFromIndex track.currentPosition track.trackTree
-                        |> gradientFromNode
-                        |> compensateForZoom
-                        |> Length.meters
-            in
-            [ Scene3d.point { radius = Pixels.pixels 10 }
-                (Material.color lightOrange)
-              <|
-                Point3d.xyz
-                    (distanceFromIndex track.currentPosition track.trackTree)
-                    Quantity.zero
-                    (earthPointFromIndex track.currentPosition track.trackTree
-                        |> Point3d.zCoordinate
-                        |> Quantity.multiplyBy context.emphasis
-                    )
-            , Scene3d.point { radius = Pixels.pixels 10 }
-                (Material.color lightOrange)
-              <|
-                Point3d.xyz
-                    (distanceFromIndex track.currentPosition track.trackTree)
-                    gradientAtOrange
-                    Quantity.zero
-            ]
-                ++ (case track.markerPosition of
-                        Just marker ->
-                            let
-                                gradientAtPurple =
-                                    leafFromIndex marker track.trackTree
-                                        |> gradientFromNode
-                                        |> compensateForZoom
-                                        |> Length.meters
-                            in
-                            [ Scene3d.point { radius = Pixels.pixels 10 }
-                                (Material.color <|
-                                    Color.fromRgba <|
-                                        Element.toRgb <|
-                                            FlatColors.AussiePalette.blurple
-                                )
-                              <|
-                                Point3d.xyz
-                                    (distanceFromIndex marker track.trackTree)
-                                    Quantity.zero
-                                    (earthPointFromIndex marker track.trackTree
-                                        |> Point3d.zCoordinate
-                                        |> Quantity.multiplyBy context.emphasis
-                                    )
-                            , Scene3d.point { radius = Pixels.pixels 10 }
-                                (Material.color <|
-                                    Color.fromRgba <|
-                                        Element.toRgb <|
-                                            FlatColors.AussiePalette.blurple
-                                )
-                              <|
-                                Point3d.xyz
-                                    (distanceFromIndex marker track.trackTree)
-                                    gradientAtPurple
-                                    Quantity.zero
-                            ]
-
-                        Nothing ->
-                            []
-                   )
-
         pAltitude p =
             Point3d.xyz
                 p.distance
-                Quantity.zero
+                (Length.meters -45000)
                 (p.gpx.altitude |> Quantity.multiplyBy context.emphasis)
 
         pGradient p =
@@ -730,8 +787,7 @@ renderProfileData track displayWidth previews context =
     in
     { context
         | profileScene =
-            markers
-                ++ finalDatum
+            finalDatum
                 ++ renderPreviews
                 ++ result
         , metresPerPixel = metresPerPixel

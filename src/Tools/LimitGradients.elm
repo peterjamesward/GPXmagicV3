@@ -68,7 +68,7 @@ actions newOptions previewColour track =
             in
             [ ShowPreview
                 { tag = "limit"
-                , shape = PreviewLine
+                , shape = PreviewCircle
                 , colour = previewColour
                 , points = correctedPreview
                 }
