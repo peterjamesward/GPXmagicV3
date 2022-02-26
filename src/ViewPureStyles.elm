@@ -10,7 +10,7 @@ import Element.Input as Input exposing (Thumb, thumb)
 import FeatherIcons
 import FlatColors.AussiePalette
 import FlatColors.BritishPalette
-import FlatColors.ChinesePalette
+import FlatColors.ChinesePalette exposing (white)
 import Html.Attributes exposing (style)
 import Html.Events
 import Json.Decode as D
@@ -240,11 +240,12 @@ wideSliderStyles =
 
 
 neatToolsBorder =
-    [ Background.color FlatColors.ChinesePalette.antiFlashWhite
-    , Border.color FlatColors.ChinesePalette.bruschettaTomato
+    [ Background.color FlatColors.ChinesePalette.saturatedSky
+    , Border.color FlatColors.ChinesePalette.frenchSkyBlue
     , Border.rounded 4
     , Border.width 2
-    , padding 3
+    , Font.color white
+    , padding 4
     ]
 
 

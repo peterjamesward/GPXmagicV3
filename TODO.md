@@ -21,9 +21,13 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 3. Graph Theory (notes below and from DO's emails)
 
 --- Cut-off for release
+- Info popup for all tools.
+- SVG for previews on Profile - get nice smooth lines.
+- SVG overlay on 3d views.
+- Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
+- Non-customisable keyboard alternatives for Load/Save/Undo/Redo/Fwd/Back/Purple (maybe 1-5 for views)
 - Extract all text for translation (Muriel)
 - Use localised number formatting everywhere (for French use of , and .)
-- Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
 - Terrain (with texture maybe)
 - Ability to point-smooth transitions over a range
 - Tools that require a range should say so when there isn't one! (David Ogle)
@@ -32,7 +36,6 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 - Option to add 80m at Start, 200m at end for start/end gates in RGT
 - Option to show MR rendering cutoff.
 - Tooltips (where useful)
-- Non-customisable keyboard alternatives for Load/Save/Undo/Redo/Fwd/Back/Purple (maybe 1-5 for views)
 - Draggable tools?
 
 New stuff:

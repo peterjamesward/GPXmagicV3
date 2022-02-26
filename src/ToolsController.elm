@@ -1252,19 +1252,7 @@ viewTool msgWrapper isTrack options toolEntry =
             , Font.color toolEntry.textColour
             ]
             [ Input.button
-                [ centerX
-                , tooltip below <|
-                    myTooltip <|
-                        case toolEntry.state of
-                            Expanded ->
-                                "Click to close"
-
-                            Contracted ->
-                                "Click to open"
-
-                            Disabled ->
-                                "Disabled"
-                ]
+                [ centerX ]
                 { onPress =
                     Just <|
                         msgWrapper <|
