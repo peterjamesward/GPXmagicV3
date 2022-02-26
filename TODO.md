@@ -4,9 +4,12 @@
 BUG: Classic bend smoother consumes all memory on certain looped routes where
      orange and purple are (possibly) co-linear, or something. (Samir bug)
 
+BUG: Map style change loses terrain.
+
 --
 
 # WIP
+
 
 ---
 
@@ -14,7 +17,6 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 ## Tools: old, updated, & new
 
-1. Map style choice (Just call setStyle with the URL - see index.html)
 2. Loops (inc. impact on Bezier & Centroid)
 3. Split and Join
 4. Intersection detection ((?? + loop detection ??))

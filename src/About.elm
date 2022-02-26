@@ -4,24 +4,24 @@ module About exposing (..)
 aboutText =
     """
 
-# GPXmagic v3.0.6 (6851b8da)
+# GPXmagic v3.0.7 (6851b8da)
 
 ## In this release ...
 
-* Move, Stretch transitioned from v2
-* When scaling track, user selects required length, in prevailing units
-* Buttons for fine control of vertical nudge
-* Option to display list of bend or gradient problems
-* Relocated global options menu to top left
+* We have gone back to the previous style of Profile view but with the gradient below.
+* x1, x2, x4, x8 choice for vertical emphasis on Profile view.
+* Most previews appear in Profile view, as circles (likely to improve).
+* Open tools jump to the top of their docking zone.
+* Overlay on Profile show current point location (metric only for now).
+* Choice of map styles, but switching styles loses the terrain.
 
 ## Coming up, not necessarily in order ...
 
-1. Switch back to v2 style profile due to limitations of chart library
-2. Loops (inc. impact on Bezier & Centroid)
-3. Intersection and loop detection
-4. Split and Join
-5. Graph Theory (renamed)
-6. More altitude & gradient smoothing options
+1. Loops (inc. impact on Bezier & Centroid)
+2. Intersection and loop detection
+3. Split and Join
+4. Graph Theory (rework)
+5. More altitude & gradient smoothing options
 
 ## Legal guff
 
