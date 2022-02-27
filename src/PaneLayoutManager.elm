@@ -160,6 +160,7 @@ showOptionsMenu msgWrapper options =
     if options.popupVisible then
         el
             [ moveDown 30
+            , moveLeft 30
             , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always PaneNoOp >> msgWrapper)
             , htmlAttribute <| Mouse.onWithOptions "dblclick" stopProp (always PaneNoOp >> msgWrapper)
             , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always PaneNoOp >> msgWrapper)
@@ -168,7 +169,7 @@ showOptionsMenu msgWrapper options =
             ]
         <|
             Input.radio
-                (neatToolsBorder
+                (subtleToolStyles
                     ++ [ padding 10, spacing 10 ]
                 )
                 { options = optionList

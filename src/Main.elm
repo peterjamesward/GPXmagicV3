@@ -1160,7 +1160,6 @@ globalOptions model =
                 , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always NoOp)
                 , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always NoOp)
                 , htmlAttribute (style "z-index" "20")
-                , Background.color FlatColors.AussiePalette.coastalBreeze
                 ]
                 [ showOptionsMenu model
                 ]
@@ -1183,18 +1182,18 @@ showOptionsMenu model =
                 }
     in
     if model.isPopupOpen then
-        column (spacing 4 :: neatToolsBorder)
-            [ row (alignRight :: width fill :: neatToolsBorder)
+        column (spacing 4 :: subtleToolStyles)
+            [ row (alignRight :: width fill :: subtleToolStyles)
                 [ colourBlock FlatColors.FlatUIPalette.silver
                 , colourBlock FlatColors.FlatUIPalette.asbestos
                 , colourBlock FlatColors.FlatUIPalette.wetAsphalt
                 ]
-            , el (alignRight :: width fill :: neatToolsBorder) <|
+            , el (alignRight :: width fill :: subtleToolStyles) <|
                 Input.button [ alignRight ]
                     { onPress = Just <| RestoreDefaultToolLayout
                     , label = text "Restore default layout"
                     }
-            , el (alignRight :: width fill :: neatToolsBorder) <|
+            , el (alignRight :: width fill :: subtleToolStyles) <|
                 ToolsController.imperialToggleMenuEntry ToolsMsg model.toolOptions
             ]
 

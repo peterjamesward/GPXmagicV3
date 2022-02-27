@@ -216,7 +216,7 @@ trackInfoBox =
     , info = "Here is some useful information"
     , video = Nothing
     , state = Contracted
-    , dock = DockUpperLeft
+    , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.peterRiver
     , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
     , isPopupOpen = False
@@ -230,7 +230,7 @@ displaySettingsTool =
     , info = "How it looks"
     , video = Nothing
     , state = Contracted
-    , dock = DockUpperLeft
+    , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.peterRiver
     , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
     , isPopupOpen = False
@@ -258,7 +258,7 @@ directionChangeTool =
     , info = "These may need smoothing"
     , video = Nothing
     , state = Contracted
-    , dock = DockUpperLeft
+    , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.peterRiver
     , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
     , isPopupOpen = False
@@ -272,7 +272,7 @@ gradientChangeTool =
     , info = "These may need smoothing"
     , video = Nothing
     , state = Contracted
-    , dock = DockUpperLeft
+    , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.peterRiver
     , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
     , isPopupOpen = False
@@ -300,7 +300,7 @@ deleteTool =
     , info = "Away with ye"
     , video = Nothing
     , state = Contracted
-    , dock = DockLowerRight
+    , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.concrete
     , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
     , isPopupOpen = False
@@ -314,7 +314,7 @@ bezierSplinesTool =
     , info = "Make it smoother"
     , video = Nothing
     , state = Contracted
-    , dock = DockLowerRight
+    , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.amethyst
     , textColour = contrastingColour FlatColors.FlatUIPalette.amethyst
     , isPopupOpen = False
@@ -328,7 +328,7 @@ centroidAverageTool =
     , info = "Make it smoother"
     , video = Nothing
     , state = Contracted
-    , dock = DockLowerRight
+    , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.amethyst
     , textColour = contrastingColour FlatColors.FlatUIPalette.amethyst
     , isPopupOpen = False
@@ -342,7 +342,7 @@ curveFormerTool =
     , info = "Make it smoother"
     , video = Nothing
     , state = Contracted
-    , dock = DockLowerRight
+    , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.turquoise
     , textColour = contrastingColour FlatColors.FlatUIPalette.turquoise
     , isPopupOpen = False
@@ -356,7 +356,7 @@ bendSmootherTool =
     , info = "Make it smoother"
     , video = Nothing
     , state = Contracted
-    , dock = DockLowerRight
+    , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.greenSea
     , textColour = contrastingColour FlatColors.FlatUIPalette.greenSea
     , isPopupOpen = False
@@ -370,7 +370,7 @@ nudgeTool =
     , info = "Make it smoother"
     , video = Nothing
     , state = Contracted
-    , dock = DockLowerRight
+    , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.concrete
     , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
     , isPopupOpen = False
@@ -384,7 +384,7 @@ outAndBackTool =
     , info = "ET go home"
     , video = Nothing
     , state = Contracted
-    , dock = DockLowerLeft
+    , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.concrete
     , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
     , isPopupOpen = False
@@ -398,7 +398,7 @@ simplifyTool =
     , info = "Reduce noise"
     , video = Nothing
     , state = Contracted
-    , dock = DockLowerLeft
+    , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.concrete
     , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
     , isPopupOpen = False
@@ -412,7 +412,7 @@ interpolateTool =
     , info = "Add points"
     , video = Nothing
     , state = Contracted
-    , dock = DockLowerLeft
+    , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.concrete
     , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
     , isPopupOpen = False
@@ -426,7 +426,7 @@ limitGradientTool =
     , info = "Limit Gradients"
     , video = Nothing
     , state = Contracted
-    , dock = DockLowerLeft
+    , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.concrete
     , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
     , isPopupOpen = False
@@ -440,7 +440,7 @@ moveScaleRotateTool =
     , info = "Lift & Shifts"
     , video = Nothing
     , state = Contracted
-    , dock = DockLowerLeft
+    , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.concrete
     , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
     , isPopupOpen = False
@@ -454,7 +454,7 @@ flythroughTool =
     , info = "Fly-through"
     , video = Nothing
     , state = Contracted
-    , dock = DockLowerLeft
+    , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.concrete
     , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
     , isPopupOpen = False
@@ -468,7 +468,7 @@ stravaTool =
     , info = "Strava"
     , video = Nothing
     , state = Contracted
-    , dock = DockLowerLeft
+    , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.concrete
     , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
     , isPopupOpen = False
@@ -482,7 +482,7 @@ moveAndStretchTool =
     , info = "Move & Stretch"
     , video = Nothing
     , state = Contracted
-    , dock = DockLowerLeft
+    , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.concrete
     , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
     , isPopupOpen = False
@@ -1246,8 +1246,6 @@ viewTool msgWrapper isTrack options toolEntry =
             [ width fill
             , spacing 8
             , height <| px 24
-
-            --, padding 4
             , Background.color toolEntry.tabColour
             , Font.color toolEntry.textColour
             ]
@@ -1821,11 +1819,11 @@ defaultDockColour =
 
 
 dockList =
-    [ ( "1", DockSettings False "Information" defaultDockColour )
-    , ( "2", DockSettings False "Some tools" defaultDockColour )
-    , ( "3", DockSettings False "Space for tools" defaultDockColour )
-    , ( "4", DockSettings False "Bend tools" defaultDockColour )
-    , ( "5", DockSettings False "Basics" defaultDockColour )
+    [ ( "1", DockSettings False "Upper left" defaultDockColour )
+    , ( "2", DockSettings False "Lower left" defaultDockColour )
+    , ( "3", DockSettings False "Central" defaultDockColour )
+    , ( "4", DockSettings False "Lower right" defaultDockColour )
+    , ( "5", DockSettings False "Upper right" defaultDockColour )
     ]
 
 

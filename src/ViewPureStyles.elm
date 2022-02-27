@@ -1,6 +1,6 @@
 module ViewPureStyles exposing (..)
 
-import Color exposing (blue)
+import Color exposing (black, blue)
 import ColourPalette exposing (buttonBackground, buttonShadow, buttonText, collapsedTabBorder, radioButtonDefault, radioButtonSelected, radioButtonText, scrollbarBackground)
 import Element exposing (..)
 import Element.Background as Background
@@ -249,12 +249,13 @@ neatToolsBorder =
     ]
 
 
-disabledToolsBorder =
+subtleToolStyles =
     [ Background.color FlatColors.ChinesePalette.antiFlashWhite
-    , Border.color FlatColors.ChinesePalette.peace
+    , Border.color FlatColors.ChinesePalette.ufoGreen
     , Border.rounded 4
     , Border.width 2
-    , padding 3
+    , padding 4
+    , Font.color FlatColors.ChinesePalette.prestigeBlue
     ]
 
 

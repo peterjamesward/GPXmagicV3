@@ -43,7 +43,7 @@ import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (flatBox, showShortMeasure)
 import Vector2d
 import Vector3d
-import ViewPureStyles exposing (commonShortHorizontalSliderStyles, disabledToolsBorder, edges, neatToolsBorder, noTrackMessage, prettyButtonStyles, useIcon)
+import ViewPureStyles exposing (commonShortHorizontalSliderStyles, subtleToolStyles, edges, neatToolsBorder, noTrackMessage, prettyButtonStyles, useIcon)
 
 
 defaultOptions : Options
@@ -339,7 +339,7 @@ view imperial wrapper options track =
 
                     ( _, False ) ->
                         Input.button
-                            (width fill :: disabledToolsBorder)
+                            (width fill :: subtleToolStyles)
                             { label = paragraph [ width fill ] <| [ text "Not found" ]
                             , onPress = Nothing
                             }
