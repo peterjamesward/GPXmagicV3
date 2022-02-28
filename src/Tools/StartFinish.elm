@@ -1,7 +1,9 @@
 module Tools.StartFinish exposing (..)
 
 import Actions exposing (ToolAction(..))
+import Axis3d
 import CubicSpline3d exposing (CubicSpline3d)
+import Direction3d
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
@@ -10,15 +12,18 @@ import FlatColors.ChinesePalette
 import Length exposing (Meters)
 import List.Extra
 import LocalCoords exposing (LocalCoords)
+import Plane3d
 import Point2d
 import Point3d
 import Polyline3d exposing (Polyline3d)
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity exposing (Quantity)
 import SketchPlane3d
+import ToolTip exposing (buttonStylesWithTooltip)
 import Tools.StartFinishTypes exposing (ClosingInfo, Loopiness(..), Options)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showShortMeasure)
+import Vector3d
 import ViewPureStyles exposing (neatToolsBorder)
 
 
@@ -26,6 +31,7 @@ type Msg
     = CloseTheLoop
     | ReverseTrack
     | ChangeLoopStart Int
+    | AddRiderPens
 
 
 defaultOptions : Options
@@ -71,6 +77,13 @@ view imperial options track wrap =
                 { onPress = Just (wrap <| ChangeLoopStart c)
                 , label = paragraph [] [ text "Move start/finish to current point" ]
                 }
+
+        addRiderPens =
+            button
+                (buttonStylesWithTooltip below "Add 60m at start, 140m at end")
+                { onPress = Just (wrap <| AddRiderPens)
+                , label = paragraph [] [ text "Add RGT pens" ]
+                }
     in
     column
         [ spacing 10
@@ -95,6 +108,7 @@ view imperial options track wrap =
                     ]
                 , loopButton
                 , reverseButton
+                , addRiderPens
                 ]
 
             NotALoop gap ->
@@ -106,6 +120,7 @@ view imperial options track wrap =
                     ]
                 , loopButton
                 , reverseButton
+                , addRiderPens
                 ]
 
 
@@ -123,11 +138,18 @@ update msg options track =
 
         ReverseTrack ->
             ( { options | pointsToClose = [] }
-            , [ Actions.ReverseTrack, TrackHasChanged ] )
+            , [ Actions.ReverseTrack, TrackHasChanged ]
+            )
 
         ChangeLoopStart tp ->
             ( { options | pointsToClose = [] }
-            , [ Actions.MoveStartPoint track.currentPosition,TrackHasChanged] )
+            , [ Actions.MoveStartPoint track.currentPosition, TrackHasChanged ]
+            )
+
+        AddRiderPens ->
+            ( { options | pointsToClose = [] }
+            , [ Actions.AddRiderPens, TrackHasChanged ]
+            )
 
 
 toolStateChange :
@@ -284,7 +306,7 @@ applyMoveStart index track =
         oldPoints =
             DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
 
-        (beforeNewStart, afterNewStart) =
+        ( beforeNewStart, afterNewStart ) =
             List.Extra.splitAt index oldPoints
 
         newPoints =
@@ -294,3 +316,36 @@ applyMoveStart index track =
     , oldPoints
     )
 
+
+addPens : TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+addPens track =
+    let
+        oldPoints =
+            DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
+
+        ( firstLeaf, lastLeaf ) =
+            ( getFirstLeaf track.trackTree, getLastLeaf track.trackTree )
+
+        ( startDirection, endDirection ) =
+            ( Direction3d.on SketchPlane3d.xy firstLeaf.directionAtStart
+            , Direction3d.on SketchPlane3d.xy lastLeaf.directionAtEnd
+            )
+
+        ( startVector, endVector ) =
+            ( Vector3d.withLength (Length.meters -60) startDirection
+            , Vector3d.withLength (Length.meters 140) endDirection
+            )
+
+        ( newStart, newEnd ) =
+            ( Point3d.translateBy startVector firstLeaf.startPoint
+                |> gpxFromPointWithReference track.referenceLonLat
+            , Point3d.translateBy endVector lastLeaf.endPoint
+                |> gpxFromPointWithReference track.referenceLonLat
+            )
+
+        newPoints =
+            newStart :: oldPoints ++ [ newEnd ]
+    in
+    ( DomainModel.treeFromSourcePoints newPoints
+    , oldPoints
+    )

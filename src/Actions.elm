@@ -82,6 +82,7 @@ type ToolAction msg
     | CloseLoopWithOptions Tools.StartFinishTypes.Options
     | ReverseTrack
     | MoveStartPoint Int
+    | AddRiderPens
 
 
 interpretAction : ToolAction msg -> String
@@ -150,6 +151,9 @@ interpretAction action =
 
         MoveStartPoint _ ->
             "move start"
+
+        AddRiderPens ->
+            "add rider pens"
 
         _ ->
             "tell Pete this needs a message"

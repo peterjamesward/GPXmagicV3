@@ -1589,6 +1589,30 @@ performActionsOnModel actions model =
                     in
                     { foldedModel | track = Just newTrack }
 
+                ( AddRiderPens, Just track ) ->
+                    let
+                        ( newTree, oldPoints ) =
+                            Tools.StartFinish.addPens track
+
+                        newTrack =
+                            track
+                                |> TrackLoaded.addToUndoStack action 0 0 oldPoints
+                                |> (\trk ->
+                                        case newTree of
+                                            Just aNewTree ->
+                                                { trk
+                                                    | trackTree = aNewTree
+                                                    , currentPosition = 0
+                                                    , markerPosition = Nothing
+                                                    , referenceLonLat = gpxPointFromIndex 0 aNewTree
+                                                }
+
+                                            Nothing ->
+                                                trk
+                                   )
+                    in
+                    { foldedModel | track = Just newTrack }
+
                 ( ApplyRotateAndScale options, Just track ) ->
                     let
                         ( newTree, oldPoints ) =

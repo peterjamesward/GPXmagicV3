@@ -13,8 +13,6 @@ BUG: Sometimes will not display file open dialog. Also splitters stop working.
 
 **Loops**
 
-- Move start/finish
-- Add start and finish pen option (not on loops)
 - Centroid average to work on loop
 - Bezier smoothing to work on loop
 
