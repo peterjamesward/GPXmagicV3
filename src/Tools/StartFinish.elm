@@ -62,16 +62,7 @@ view imperial options track wrap =
             button
                 neatToolsBorder
                 { onPress = Just <| wrap ReverseTrack
-                , label =
-                    paragraph []
-                        [ text <|
-                            case track.markerPosition of
-                                Just _ ->
-                                    "Reverse the track\nbetween the markers"
-
-                                Nothing ->
-                                    "Reverse the track"
-                        ]
+                , label = paragraph [] [ text "Reverse the track" ]
                 }
 
         changeStartButton c =
@@ -131,7 +122,7 @@ update msg options track =
             )
 
         ReverseTrack ->
-            ( options, [] )
+            ( options, [ Actions.ReverseTrack, TrackHasChanged ] )
 
         ChangeLoopStart tp ->
             ( options, [] )
@@ -159,7 +150,7 @@ toolStateChange opened colour options track =
                     Point2d.distanceFrom first last
 
                 ( loopiness, points ) =
-                    if separation |> Quantity.lessThanOrEqualTo Length.meter then
+                    if separation |> Quantity.lessThanOrEqualTo (Length.meters 5.0) then
                         ( IsALoop, [] )
 
                     else if separation |> Quantity.lessThanOrEqualTo (Length.meters 100) then
@@ -271,4 +262,15 @@ applyCloseLoop options track =
     in
     ( DomainModel.treeFromSourcePoints newPoints
     , DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
+    )
+
+
+applyReverse : TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyReverse track =
+    let
+        oldPoints =
+            DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
+    in
+    ( DomainModel.treeFromSourcePoints <| List.reverse oldPoints
+    , oldPoints
     )

@@ -1550,6 +1550,21 @@ performActionsOnModel actions model =
                     in
                     { foldedModel | track = Just newTrack }
 
+                ( ReverseTrack, Just track ) ->
+                    let
+                        ( newTree, oldPoints ) =
+                            Tools.StartFinish.applyReverse track
+
+                        newTrack =
+                            track
+                                |> TrackLoaded.addToUndoStack action
+                                    0
+                                    0
+                                    oldPoints
+                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                    in
+                    { foldedModel | track = Just newTrack }
+
                 ( ApplyRotateAndScale options, Just track ) ->
                     let
                         ( newTree, oldPoints ) =

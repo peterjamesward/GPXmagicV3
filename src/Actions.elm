@@ -80,6 +80,7 @@ type ToolAction msg
     | PasteStravaSegment Tools.StravaOptions.Options
     | MoveAndStretchWithOptions Tools.MoveAndStretchOptions.Options
     | CloseLoopWithOptions Tools.StartFinishTypes.Options
+    | ReverseTrack
 
 
 interpretAction : ToolAction msg -> String
@@ -142,6 +143,9 @@ interpretAction action =
 
         CloseLoopWithOptions _ ->
             "close loop"
+
+        ReverseTrack ->
+            "reverse route"
 
         _ ->
             "tell Pete this needs a message"
