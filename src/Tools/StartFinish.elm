@@ -1,24 +1,23 @@
 module Tools.StartFinish exposing (..)
 
 import Actions exposing (ToolAction(..))
-import Direction3d
+import CubicSpline3d exposing (CubicSpline3d)
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input exposing (button)
 import FlatColors.ChinesePalette
-import Length exposing (Meters, inMeters, meters)
-import List.Extra
+import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
 import Point2d
 import Point3d
-import PreviewData exposing (PreviewShape(..))
+import Polyline3d exposing (Polyline3d)
+import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity exposing (Quantity)
 import SketchPlane3d
 import Tools.StartFinishTypes exposing (ClosingInfo, Loopiness(..), Options)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showShortMeasure)
-import Vector3d
 import ViewPureStyles exposing (neatToolsBorder)
 
 
@@ -156,19 +155,20 @@ toolStateChange opened colour options track =
                 separation =
                     Point2d.distanceFrom first last
 
-                loopiness =
+                ( loopiness, points ) =
                     if separation |> Quantity.lessThanOrEqualTo Length.meter then
-                        IsALoop
+                        ( IsALoop, [] )
 
                     else if separation |> Quantity.lessThanOrEqualTo (Length.meters 100) then
-                        AlmostLoop separation
+                        ( AlmostLoop separation, closeTheLoop theTrack )
 
                     else
-                        NotALoop separation
+                        ( NotALoop separation, [] )
 
                 newOptions =
                     { options
                         | loopiness = loopiness
+                        , pointsToClose = points
                     }
             in
             ( newOptions, previewActions newOptions colour theTrack )
@@ -186,3 +186,38 @@ previewActions newOptions colour track =
         , points = newOptions.pointsToClose
         }
     ]
+
+
+closeTheLoop : TrackLoaded msg -> List PreviewPoint
+closeTheLoop track =
+    -- Experiment with splines here as a simple and fairly general method.
+    let
+        ( lastLeaf, firstLeaf ) =
+            ( DomainModel.getLastLeaf track.trackTree
+            , DomainModel.getFirstLeaf track.trackTree
+            )
+
+        ( ( b1, c1 ), ( a2, b2 ) ) =
+            ( ( lastLeaf.startPoint, lastLeaf.endPoint )
+            , ( firstLeaf.startPoint, firstLeaf.endPoint )
+            )
+
+        spline : CubicSpline3d Meters LocalCoords
+        spline =
+            -- From previous road start to end, using control points
+            -- from adjacent edges.
+            CubicSpline3d.fromControlPoints b1 c1 a2 b2
+
+        polylineFromSpline : Polyline3d Meters LocalCoords
+        polylineFromSpline =
+            CubicSpline3d.approximate
+                (Length.meters 0.1)
+                spline
+
+        vertices : List EarthPoint
+        vertices =
+            Polyline3d.vertices polylineFromSpline
+                |> List.drop 1
+                |> List.reverse
+    in
+    TrackLoaded.asPreviewPoints track (trueLength track.trackTree) vertices
