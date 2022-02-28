@@ -122,10 +122,12 @@ update msg options track =
             )
 
         ReverseTrack ->
-            ( options, [ Actions.ReverseTrack, TrackHasChanged ] )
+            ( { options | pointsToClose = [] }
+            , [ Actions.ReverseTrack, TrackHasChanged ] )
 
         ChangeLoopStart tp ->
-            ( options, [] )
+            ( { options | pointsToClose = [] }
+            , [ Actions.MoveStartPoint track.currentPosition,TrackHasChanged] )
 
 
 toolStateChange :
@@ -274,3 +276,21 @@ applyReverse track =
     ( DomainModel.treeFromSourcePoints <| List.reverse oldPoints
     , oldPoints
     )
+
+
+applyMoveStart : Int -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyMoveStart index track =
+    let
+        oldPoints =
+            DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
+
+        (beforeNewStart, afterNewStart) =
+            List.Extra.splitAt index oldPoints
+
+        newPoints =
+            afterNewStart ++ beforeNewStart
+    in
+    ( DomainModel.treeFromSourcePoints newPoints
+    , oldPoints
+    )
+

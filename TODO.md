@@ -5,6 +5,7 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
      orange and purple are (possibly) co-linear, or something. (Samir bug)
 
 BUG: Sometimes will not display file open dialog. Also splitters stop working.
+> Debuggers shows messages arriving, not obvious why they should not be processed.
 
 --
 
@@ -12,7 +13,7 @@ BUG: Sometimes will not display file open dialog. Also splitters stop working.
 
 **Loops**
 
-- Move start/finish action
+- Move start/finish
 - Add start and finish pen option (not on loops)
 - Centroid average to work on loop
 - Bezier smoothing to work on loop
@@ -49,22 +50,23 @@ New stuff:
 > we pipeline existing features, just like 1CQF.
 > E.G. simplify > limit > interpolate > centroid.
 
+## Offset/nudge logic
+
+Just don't blindly mitre. For each pair of RoadSection, see if the points will
+"overlap" and don't emit them all. May need some interpolation for altitude or whatever.
+Perhaps just try Bezier on interior turns.
+
+## Terrain
+
+Tree walk combined with whole (visible) tree query, because <track loops>.
+(Expand bounding boxes to allow for road width.)
+
 ## Texture for the ground plane, road surface
 
 See https://github.com/ianmackenzie/elm-3d-scene/blob/1.0.1/examples/Texture.elm
 https://ambientcg.com/view?id=Grass004
 https://ambientcg.com/view?id=Asphalt001
 Credit: Contains assets from ambientCG.com, licensed under CC0 1.0 Universal.
-
-## Offset/nudge logic
-
-Just don't blindly mitre. For each pair of RoadSection, see if the points will
-"overlap" and don't emit them all. May need some interpolation for altitude or whatever.
-
-## Terrain
-
-Tree walk combined with whole (visible) tree query, because <track loops>.
-(Expand bounding boxes to allow for road width.)
 
 ## Small stuff
 

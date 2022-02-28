@@ -81,6 +81,7 @@ type ToolAction msg
     | MoveAndStretchWithOptions Tools.MoveAndStretchOptions.Options
     | CloseLoopWithOptions Tools.StartFinishTypes.Options
     | ReverseTrack
+    | MoveStartPoint Int
 
 
 interpretAction : ToolAction msg -> String
@@ -146,6 +147,9 @@ interpretAction action =
 
         ReverseTrack ->
             "reverse route"
+
+        MoveStartPoint _ ->
+            "move start"
 
         _ ->
             "tell Pete this needs a message"
