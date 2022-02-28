@@ -15,6 +15,7 @@ import Html.Events.Extra.Mouse as Mouse
 import Json.Decode as D exposing (field)
 import Json.Encode as E exposing (string)
 import List.Extra
+import Quantity
 import Time
 import ToolTip exposing (myTooltip, tooltip)
 import Tools.BendSmoother
@@ -45,6 +46,8 @@ import Tools.OutAndBack
 import Tools.OutAndBackOptions
 import Tools.Pointers as Pointers
 import Tools.Simplify
+import Tools.StartFinishTypes exposing (Loopiness(..))
+import Tools.StartFinish
 import Tools.StravaOptions
 import Tools.StravaTools
 import Tools.TrackInfoBox as TrackInfoBox
@@ -81,6 +84,7 @@ type ToolType
     | ToolFlythrough
     | ToolStrava
     | ToolMoveAndStretch
+    | ToolStartFinish
 
 
 type alias Options =
@@ -108,6 +112,7 @@ type alias Options =
     , flythroughSettings : Tools.Flythrough.Options
     , stravaSettings : Tools.StravaOptions.Options
     , moveAndStretchSettings : Tools.MoveAndStretchOptions.Options
+    , startFinishOptions : Tools.StartFinishTypes.Options
     }
 
 
@@ -136,6 +141,7 @@ defaultOptions =
     , flythroughSettings = Tools.Flythrough.defaultOptions
     , stravaSettings = Tools.StravaTools.defaultOptions
     , moveAndStretchSettings = Tools.MoveAndStretch.defaultOptions
+    , startFinishOptions = Tools.StartFinish.defaultOptions
     }
 
 
@@ -168,6 +174,7 @@ type ToolMsg
     | ToolFlythroughMsg Tools.Flythrough.Msg
     | ToolStravaMsg Tools.StravaTools.Msg
     | ToolMoveAndStretchMsg Tools.MoveAndStretch.Msg
+    | ToolStartFinishMsg Tools.StartFinish.Msg
 
 
 type alias ToolEntry =
@@ -206,6 +213,7 @@ defaultTools =
     , flythroughTool
     , stravaTool
     , moveAndStretchTool
+    , startFinishTool
     ]
 
 
@@ -480,6 +488,19 @@ moveAndStretchTool =
     { toolType = ToolMoveAndStretch
     , label = "Move, Stretch"
     , info = "Move & Stretch"
+    , video = Nothing
+    , state = Contracted
+    , dock = DockUpperRight
+    , tabColour = FlatColors.FlatUIPalette.concrete
+    , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
+    , isPopupOpen = False
+    }
+
+startFinishTool : ToolEntry
+startFinishTool =
+    { toolType = ToolStartFinish
+    , label = "Start/Finish"
+    , info = "Start/Finish"
     , video = Nothing
     , state = Contracted
     , dock = DockUpperRight
@@ -910,6 +931,25 @@ update toolMsg isTrack msgWrapper options =
                 Nothing ->
                     ( options, [] )
 
+        ToolStartFinishMsg msg ->
+            case isTrack of
+                Just track ->
+                    let
+                        ( newOptions, actions ) =
+                            Tools.StartFinish.update
+                                msg
+                                options.startFinishOptions
+                                track
+                    in
+                    ( { options | startFinishOptions = newOptions }
+                    , actions
+                    )
+
+                Nothing ->
+                    ( options, [] )
+
+
+
 
 refreshOpenTools :
     Maybe (TrackLoaded msg)
@@ -1178,6 +1218,22 @@ toolStateHasChanged toolType newState isTrack options =
                     { options | moveAndStretchSettings = newToolOptions }
             in
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
+
+        ToolStartFinish ->
+            let
+                ( newToolOptions, actions ) =
+                    Tools.StartFinish.toolStateChange
+                        (newState == Expanded)
+                        (getColour toolType options.tools)
+                        options.startFinishOptions
+                        isTrack
+
+                newOptions =
+                    { options | startFinishOptions = newToolOptions }
+            in
+            ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
+
+
 
 
 
@@ -1484,6 +1540,17 @@ viewToolByType msgWrapper entry isTrack options =
                     Nothing ->
                         noTrackMessage
 
+            ToolStartFinish ->
+                case isTrack of
+                    Just track ->
+                        Tools.StartFinish.view
+                            options.imperial
+                            options.startFinishOptions
+                            track
+                            (msgWrapper << ToolStartFinishMsg)
+                    Nothing ->
+                        noTrackMessage
+
 
 
 -- Local storage management
@@ -1567,6 +1634,9 @@ encodeType toolType =
 
         ToolMoveAndStretch ->
             "ToolMoveAndStretch"
+
+        ToolStartFinish ->
+            "ToolStartFinish"
 
 
 encodeColour : Element.Color -> E.Value

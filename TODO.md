@@ -4,11 +4,18 @@
 BUG: Classic bend smoother consumes all memory on certain looped routes where
      orange and purple are (possibly) co-linear, or something. (Samir bug)
 
+BUG: Sometimes will not display file open dialog. Also splitters stop working.
+
 --
 
 # WIP
 
 **Loops** (inc. impact on Bezier & Centroid)
+
+Now called Start/Finish.
+- Better loop closure - ?? Bezier ??
+- Add start and finish pen option.
+- Loop closing should add a suitable radiused turn.
 
 ---
 
@@ -33,7 +40,6 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 - Tools that require a range should say so when there isn't one! (David Ogle)
 
 --- Cut-off
-- Option to add 80m at Start, 200m at end for start/end gates in RGT
 - Option to show MR rendering cutoff.
 - Tooltips (where useful)
 - Draggable tools?
@@ -49,6 +55,11 @@ See https://github.com/ianmackenzie/elm-3d-scene/blob/1.0.1/examples/Texture.elm
 https://ambientcg.com/view?id=Grass004
 https://ambientcg.com/view?id=Asphalt001
 Credit: Contains assets from ambientCG.com, licensed under CC0 1.0 Universal.
+
+## Offset/nudge logic
+
+Just don't blindly mitre. For each pair of RoadSection, see if the points will
+"overlap" and don't emit them all. May need some interpolation for altitude or whatever.
 
 ## Terrain
 

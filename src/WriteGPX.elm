@@ -19,7 +19,7 @@ preamble =
     <name>Cycling</name>
     <author>
       <link href="https://www.stepwiserefinement.co.uk">
-        <text>GPXmagic 2.0</text>
+        <text>GPXmagic v3</text>
         <type>text/html</type>
       </link>
     </author>
