@@ -197,9 +197,14 @@ closeTheLoop track =
             , DomainModel.getFirstLeaf track.trackTree
             )
 
+        ( midOfLast, midOfFirst ) =
+            ( Point3d.midpoint lastLeaf.startPoint lastLeaf.endPoint
+            , Point3d.midpoint firstLeaf.startPoint firstLeaf.endPoint
+            )
+
         ( ( b1, c1 ), ( a2, b2 ) ) =
-            ( ( lastLeaf.startPoint, lastLeaf.endPoint )
-            , ( firstLeaf.startPoint, firstLeaf.endPoint )
+            ( ( midOfLast, lastLeaf.endPoint )
+            , ( firstLeaf.startPoint, midOfFirst )
             )
 
         spline : CubicSpline3d Meters LocalCoords
