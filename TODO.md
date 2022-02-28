@@ -10,12 +10,12 @@ BUG: Sometimes will not display file open dialog. Also splitters stop working.
 
 # WIP
 
-**Loops** (inc. impact on Bezier & Centroid)
+**Loops**
 
-Now called Start/Finish.
-- Better loop closure - ?? Bezier ??
-- Add start and finish pen option.
-- Loop closing should add a suitable radiused turn.
+- Move start/finish action
+- Add start and finish pen option (not on loops)
+- Centroid average to work on loop
+- Bezier smoothing to work on loop
 
 ---
 
