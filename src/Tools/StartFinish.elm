@@ -8,6 +8,7 @@ import Element.Background as Background
 import Element.Input exposing (button)
 import FlatColors.ChinesePalette
 import Length exposing (Meters)
+import List.Extra
 import LocalCoords exposing (LocalCoords)
 import Point2d
 import Point3d
@@ -125,7 +126,9 @@ update :
 update msg options track =
     case msg of
         CloseTheLoop ->
-            ( options, [] )
+            ( { options | pointsToClose = [], loopiness = IsALoop }
+            , [ CloseLoopWithOptions options, TrackHasChanged ]
+            )
 
         ReverseTrack ->
             ( options, [] )
@@ -222,7 +225,50 @@ closeTheLoop track =
         vertices : List EarthPoint
         vertices =
             Polyline3d.vertices polylineFromSpline
-                |> List.drop 1
-                |> List.reverse
     in
     TrackLoaded.asPreviewPoints track (trueLength track.trackTree) vertices
+
+
+applyCloseLoop : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyCloseLoop options track =
+    -- Let's deem the new start to be the spline point nearest the origin.
+    let
+        numberedSplinePoints =
+            List.indexedMap Tuple.pair options.pointsToClose
+
+        newGpxPoints =
+            List.map .gpx options.pointsToClose
+
+        newStartPoint =
+            numberedSplinePoints
+                |> List.Extra.minimumBy
+                    (\( idx, preview ) ->
+                        preview.earthPoint
+                            |> Point3d.distanceFrom Point3d.origin
+                            |> Length.inMeters
+                    )
+
+        ( newEndPoints, newStartPoints ) =
+            case newStartPoint of
+                Just ( index, _ ) ->
+                    List.Extra.splitAt index newGpxPoints
+
+                Nothing ->
+                    -- Hmm. Put them at the end.
+                    ( newGpxPoints, [] )
+
+        collectStartPointsInReverse : RoadSection -> List GPXSource -> List GPXSource
+        collectStartPointsInReverse road outputs =
+            -- We don't want the very start or the very end.
+            Tuple.first road.sourceData :: outputs
+
+        oldPoints =
+            List.reverse <|
+                DomainModel.foldOverRoute collectStartPointsInReverse track.trackTree []
+
+        newPoints =
+            newStartPoints ++ List.drop 1 oldPoints ++ newEndPoints
+    in
+    ( DomainModel.treeFromSourcePoints newPoints
+    , DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
+    )

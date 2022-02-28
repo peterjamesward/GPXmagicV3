@@ -62,6 +62,7 @@ import Tools.Nudge
 import Tools.OneClickQuickFix
 import Tools.OutAndBack
 import Tools.Simplify
+import Tools.StartFinish
 import Tools.StravaDataLoad
 import Tools.StravaTools
 import Tools.TrackInfoBox
@@ -1529,6 +1530,21 @@ performActionsOnModel actions model =
                                 |> TrackLoaded.addToUndoStack action
                                     fromStart
                                     fromEnd
+                                    oldPoints
+                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                    in
+                    { foldedModel | track = Just newTrack }
+
+                ( CloseLoopWithOptions options, Just track ) ->
+                    let
+                        ( newTree, oldPoints ) =
+                            Tools.StartFinish.applyCloseLoop options track
+
+                        newTrack =
+                            track
+                                |> TrackLoaded.addToUndoStack action
+                                    0
+                                    0
                                     oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in

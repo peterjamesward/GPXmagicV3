@@ -24,6 +24,7 @@ import Tools.MoveAndStretchOptions
 import Tools.MoveScaleRotateOptions
 import Tools.NudgeOptions
 import Tools.OutAndBackOptions
+import Tools.StartFinishTypes
 import Tools.StravaOptions
 import Tools.StravaTypes exposing (StravaRoute, StravaSegment, StravaSegmentStreams)
 
@@ -78,6 +79,7 @@ type ToolAction msg
     | RequestStravaSegmentStreams (Result Http.Error StravaSegmentStreams -> msg) String OAuth.Token
     | PasteStravaSegment Tools.StravaOptions.Options
     | MoveAndStretchWithOptions Tools.MoveAndStretchOptions.Options
+    | CloseLoopWithOptions Tools.StartFinishTypes.Options
 
 
 interpretAction : ToolAction msg -> String
@@ -137,6 +139,9 @@ interpretAction action =
 
         MoveAndStretchWithOptions _ ->
             "move / stretch"
+
+        CloseLoopWithOptions _ ->
+            "close loop"
 
         _ ->
             "tell Pete this needs a message"
