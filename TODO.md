@@ -8,11 +8,24 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 > Debuggers shows messages arriving, not obvious why they should not be processed.
 > Can't save file when this happens.
 
+BUG: 
+```
+evented.js:149 Error: There is no source with ID 'mapbox-dem'
+at Map.isSourceLoaded (map.js:1660:38)
+at addDecorations (index.html:319:14)
+at addLineToMap (index.html:389:5)
+at Array.mapMessageHandler (index.html:166:17)
+at Function.f (main.js:2219:19)
+at A3 (main.js:59:28)
+at Object.b (main.js:1978:7)
+at _Scheduler_step (main.js:1822:20)
+at _Scheduler_enqueue (main.js:1784:3)
+at main.js:1812:5
+```
+
 --
 
 # WIP
-
-## Split and Join
 
 ---
 

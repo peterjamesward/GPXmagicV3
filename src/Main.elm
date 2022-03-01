@@ -2060,6 +2060,12 @@ performActionCommands actions model =
                         segmentId
                         token
 
+                ( WriteTrackSections sections, Just track ) ->
+                    Tools.SplitAndJoin.writeOneSection
+                        sections
+                        model.toolOptions.splitAndJoinOptions
+                        track
+
                 _ ->
                     Cmd.none
     in

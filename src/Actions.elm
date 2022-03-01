@@ -82,6 +82,7 @@ type ToolAction msg
     | LoadGpxFile (String -> msg) File
     | TrackFromGpx String
     | ParseAndAppend String
+    | WriteTrackSections (List ( Int, Float, Float ))
 
 
 interpretAction : ToolAction msg -> String

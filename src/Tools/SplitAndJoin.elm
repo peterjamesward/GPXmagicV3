@@ -7,7 +7,7 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (button)
 import File exposing (File)
-import File.Download
+import File.Download as Download
 import File.Select as Select
 import FlatColors.ChinesePalette
 import GpxParser
@@ -67,90 +67,100 @@ update msg settings mTrack wrap =
 
         --, ActionCommand <| Task.perform (msgWrapper << FileLoaded) (File.toString file)
         FileLoaded content ->
-            ( settings, [ Actions.ParseAndAppend content ] )
+            ( settings, [ Actions.ParseAndAppend content, Actions.TrackHasChanged ] )
 
         SplitTrack ->
-            ( settings, [] )
+            let
+                trackSplits =
+                    calculateSections (trueLength mTrack.trackTree) settings
+            in
+            ( settings
+            , [ Actions.WriteTrackSections trackSplits
+              , Actions.DelayMessage 2000 <| wrap <| WriteSection <| List.drop 1 trackSplits
+              ]
+            )
 
-        --, ActionCommand <|
-        --    Delay.after 100 <|
-        --        msgWrapper <|
-        --            WriteSection <|
-        --                writeSections
-        --                    mTrack
-        --                    (trueLength mTrack.trackTree)
-        --                    settings
-        --)
-        WriteSection sections ->
-            case sections of
-                ( index, start, end ) :: rest ->
+        WriteSection moreSections ->
+            case moreSections of
+                section1 :: evenMoreSections ->
+                    ( settings
+                    , [ Actions.WriteTrackSections moreSections
+                      , Actions.DelayMessage 2000 <| wrap <| WriteSection <| evenMoreSections
+                      ]
+                    )
+
+                [] ->
+                    ( settings, [] )
+
+
+writeOneSection : List ( Int, Float, Float ) -> Options -> TrackLoaded msg -> Cmd msg
+writeOneSection sections options track =
+    case sections of
+        ( index, start, end ) :: rest ->
+            let
+                ( metricStart, metricEnd ) =
+                    if options.addBuffers then
+                        ( Length.meters (start - 60.0)
+                        , Length.meters (end + 140.0)
+                        )
+
+                    else
+                        ( Length.meters start
+                        , Length.meters end
+                        )
+
+                trackName =
+                    track.trackName |> Maybe.withDefault "track"
+
+                filename =
+                    trackName
+                        ++ "_"
+                        ++ withLeadingZeros 2 (String.fromInt index)
+                        ++ ".gpx"
+
+                trackExtract =
+                    -- This is a mini-track
                     let
-                        ( metricStart, metricEnd ) =
-                            if settings.addBuffers then
-                                ( Length.meters (start - 60.0)
-                                , Length.meters (end + 140.0)
-                                )
-
-                            else
-                                ( Length.meters start
-                                , Length.meters end
-                                )
-
-                        trackName =
-                            mTrack.trackName |> Maybe.withDefault "track"
-
-                        filename =
-                            trackName
-                                ++ "_"
-                                ++ withLeadingZeros 2 (String.fromInt index)
-                                ++ ".gpx"
-
-                        trackExtract =
-                            -- This is a mini-track
-                            let
-                                ( startIndex, endIndex ) =
-                                    ( indexFromDistance metricStart mTrack.trackTree
-                                    , indexFromDistance metricEnd mTrack.trackTree
-                                    )
-                            in
-                            TrackLoaded.trackFromPoints trackName <|
-                                List.map Tuple.second <|
-                                    DomainModel.extractPointsInRange startIndex endIndex mTrack.trackTree
-
-                        processingFunction =
-                            if settings.applyAutofix then
-                                \atrack ->
-                                    let
-                                        ( fixedTree, _ ) =
-                                            OneClickQuickFix.apply atrack
-                                    in
-                                    { atrack
-                                        | trackTree =
-                                            -- If fix fails, use original tree.
-                                            Maybe.withDefault atrack.trackTree fixedTree
-                                    }
-
-                            else
-                                identity
-
-                        content =
-                            case trackExtract of
-                                Just subTrack ->
-                                    WriteGPX.writeGPX mTrack.trackName <| processingFunction subTrack
-
-                                Nothing ->
-                                    ""
+                        ( startIndex, endIndex ) =
+                            ( indexFromDistance metricStart track.trackTree
+                            , indexFromDistance metricEnd track.trackTree
+                            )
                     in
-                    ( settings, [] )
+                    TrackLoaded.trackFromPoints trackName <|
+                        List.map Tuple.second <|
+                            DomainModel.extractPointsInRange
+                                startIndex
+                                (skipCount track.trackTree - endIndex)
+                                track.trackTree
 
-                --, ActionCommand <|
-                --    Cmd.batch
-                --        [ File.Download.string filename "text/xml" content
-                --        , Delay.after 2000 <| msgWrapper <| WriteSection rest
-                --        ]
-                --)
-                _ ->
-                    ( settings, [] )
+                processingFunction =
+                    if options.applyAutofix then
+                        \atrack ->
+                            let
+                                ( fixedTree, _ ) =
+                                    OneClickQuickFix.apply atrack
+                            in
+                            { atrack
+                                | trackTree =
+                                    -- If fix fails, use original tree.
+                                    Maybe.withDefault atrack.trackTree fixedTree
+                            }
+
+                    else
+                        identity
+
+                content =
+                    case trackExtract of
+                        Just subTrack ->
+                            WriteGPX.writeGPX track.trackName <| processingFunction subTrack
+
+                        Nothing ->
+                            "failed to make the track section"
+            in
+            Download.string filename "text/gpx" content
+
+        _ ->
+            Cmd.none
 
 
 toolStateChange :
@@ -168,9 +178,8 @@ toolStateChange opened colour options track =
             ( options, [] )
 
 
-writeSections : TrackLoaded msg -> Length.Length -> Options -> List ( Int, Float, Float )
-writeSections track length options =
-    -- Doesn't *actually* split the track, just writes out the files.
+calculateSections : Length.Length -> Options -> List ( Int, Float, Float )
+calculateSections length options =
     -- This function works out where the splits are, then each section is
     -- written out using the runtime, which kicks off the next.
     let
