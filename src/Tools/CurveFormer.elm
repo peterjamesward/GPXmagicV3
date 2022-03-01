@@ -724,7 +724,7 @@ makeCurveIfPossible track options =
                     else
                         dict
             in
-            DomainModel.queryPointsUsingFilter
+            DomainModel.queryRoadsUsingFilter
                 overlapsCircleAndRange
                 track.trackTree
                 collector
@@ -740,7 +740,7 @@ makeCurveIfPossible track options =
                     else
                         dict
             in
-            DomainModel.queryPointsUsingFilter
+            DomainModel.queryRoadsUsingFilter
                 overlapsDiscAndRange
                 track.trackTree
                 collector

@@ -31,7 +31,7 @@ module DomainModel exposing
     , nearestToLonLat
     , nearestToRay
     , pointFromGpxWithReference
-    , queryPointsUsingFilter
+    , queryRoadsUsingFilter
     , rebuildTree
     , replaceRange
     , skipCount
@@ -1467,13 +1467,13 @@ gradientFromNode treeNode =
         |> (*) 100.0
 
 
-queryPointsUsingFilter :
+queryRoadsUsingFilter :
     (Int -> Int -> RoadSection -> Bool)
     -> PeteTree
     -> (Int -> RoadSection -> a -> a)
     -> a
     -> a
-queryPointsUsingFilter filterFn treeNode foldFn accum =
+queryRoadsUsingFilter filterFn treeNode foldFn accum =
     let
         helper : Int -> Int -> PeteTree -> a -> a
         helper starting ending someNode myAccumulator =
