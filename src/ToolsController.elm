@@ -978,6 +978,7 @@ update toolMsg isTrack msgWrapper options =
                                 msg
                                 options.splitAndJoinOptions
                                 track
+                                (msgWrapper << ToolSplitJoinMsg)
                     in
                     ( { options | splitAndJoinOptions = newOptions }
                     , actions

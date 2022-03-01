@@ -2,7 +2,7 @@ module Tools.SplitAndJoin exposing (..)
 
 import Actions exposing (ToolAction)
 import Delay
-import DomainModel exposing (indexFromDistance, skipCount, trueLength)
+import DomainModel exposing (GPXSource, PeteTree, indexFromDistance, skipCount, trueLength)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (button)
@@ -46,59 +46,28 @@ update :
     Msg
     -> Options
     -> TrackLoaded msg
+    -> (Msg -> msg)
     -> ( Options, List (Actions.ToolAction msg) )
-update msg settings mTrack =
+update msg settings mTrack wrap =
     case msg of
         SetSplitLimit n ->
-            ( { settings
-                | splitLimit = n
-              }
-            , []
-            )
+            ( { settings | splitLimit = n }, [] )
 
-        ToggleBuffers state ->
-            ( { settings
-                | addBuffers = not settings.addBuffers
-              }
-            , []
-            )
+        ToggleBuffers _ ->
+            ( { settings | addBuffers = not settings.addBuffers }, [] )
 
         ToggleAutofix _ ->
-            ( { settings
-                | applyAutofix = not settings.applyAutofix
-              }
-            , []
-            )
+            ( { settings | applyAutofix = not settings.applyAutofix }, [] )
 
         AppendFile ->
-            ( settings, [] )
+            ( settings, [ Actions.SelectGpxFile (wrap << FileSelected) ] )
 
-        --, ActionCommand <| Cmd.map msgWrapper <| Select.file [ "text/gpx" ] FileSelected
         FileSelected file ->
-            ( settings, [] )
+            ( settings, [ Actions.LoadGpxFile (wrap << FileLoaded) file ] )
 
         --, ActionCommand <| Task.perform (msgWrapper << FileLoaded) (File.toString file)
         FileLoaded content ->
-            -- You'd think we could just concatenate the track point lists.
-            -- Tried that, but they have different bounding boxes and "Ghanians".
-            -- Life might be easier just to spin up a new GPX string and start over!
-            -- Let's see if we can fix this without that resort. We did, not elegantly.
-            let
-                track2 =
-                    content
-                        |> GpxParser.parseGPXPoints
-                        |> TrackLoaded.trackFromPoints
-                            (GpxParser.parseTrackName content |> Maybe.withDefault "track")
-            in
-            case track2 of
-                Just isNewTrack ->
-                    ( settings
-                    , []
-                      -- Append new track
-                    )
-
-                Nothing ->
-                    ( settings, [] )
+            ( settings, [ Actions.ParseAndAppend content ] )
 
         SplitTrack ->
             ( settings, [] )
@@ -326,3 +295,18 @@ view imperial options wrapper track =
                 [ text "Files will be written to Downloads folder at two second intervals." ]
         , el [ centerX ] appendFileButton
         ]
+
+
+parseAndAppend : String -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+parseAndAppend content track =
+    let
+        track2 =
+            GpxParser.parseGPXPoints content
+
+        currentGpx =
+            DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
+
+        newTree =
+            (currentGpx ++ track2) |> DomainModel.treeFromSourcePoints
+    in
+    ( newTree, currentGpx )

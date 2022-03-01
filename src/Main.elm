@@ -62,6 +62,7 @@ import Tools.Nudge
 import Tools.OneClickQuickFix
 import Tools.OutAndBack
 import Tools.Simplify
+import Tools.SplitAndJoin
 import Tools.StartFinish
 import Tools.StartFinishTypes exposing (Loopiness(..))
 import Tools.StravaDataLoad
@@ -1751,6 +1752,21 @@ performActionsOnModel actions model =
                         Nothing ->
                             { foldedModel | modalMessage = Just "Unable to extract SVG paths" }
 
+                ( ParseAndAppend gpxContent, Just track ) ->
+                    let
+                        ( newTree, oldPoints ) =
+                            Tools.SplitAndJoin.parseAndAppend gpxContent track
+
+                        newTrack =
+                            track
+                                |> TrackLoaded.addToUndoStack action
+                                    0
+                                    0
+                                    oldPoints
+                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                    in
+                    { foldedModel | track = Just newTrack }
+
                 ( LoadGpxFromStrava gpxContent, _ ) ->
                     let
                         ( modelWithNewTrack, _ ) =
@@ -1999,6 +2015,20 @@ performActionCommands actions model =
                     Task.perform message (File.toString file)
 
                 ( TrackFromSvg svgContent, _ ) ->
+                    case model.track of
+                        Just track ->
+                            showTrackOnMapCentered track
+
+                        Nothing ->
+                            Cmd.none
+
+                ( SelectGpxFile message, _ ) ->
+                    Select.file [ "text/gpx" ] message
+
+                ( LoadGpxFile message file, _ ) ->
+                    Task.perform message (File.toString file)
+
+                ( TrackFromGpx gpxContent, _ ) ->
                     case model.track of
                         Just track ->
                             showTrackOnMapCentered track

@@ -78,6 +78,10 @@ type ToolAction msg
     | ReverseTrack
     | MoveStartPoint Int
     | AddRiderPens
+    | SelectGpxFile (File -> msg)
+    | LoadGpxFile (String -> msg) File
+    | TrackFromGpx String
+    | ParseAndAppend String
 
 
 interpretAction : ToolAction msg -> String
@@ -149,6 +153,9 @@ interpretAction action =
 
         AddRiderPens ->
             "add rider pens"
+
+        ParseAndAppend _ ->
+            "append gpx"
 
         _ ->
             "tell Pete this needs a message"
