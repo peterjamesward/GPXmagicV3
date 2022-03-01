@@ -15,7 +15,6 @@ import Html.Events.Extra.Mouse as Mouse
 import Json.Decode as D exposing (field)
 import Json.Encode as E exposing (string)
 import List.Extra
-import Quantity
 import Time
 import ToolTip exposing (myTooltip, tooltip)
 import Tools.BendSmoother
@@ -46,8 +45,10 @@ import Tools.OutAndBack
 import Tools.OutAndBackOptions
 import Tools.Pointers as Pointers
 import Tools.Simplify
-import Tools.StartFinishTypes exposing (Loopiness(..))
+import Tools.SplitAndJoin
+import Tools.SplitAndJoinOptions
 import Tools.StartFinish
+import Tools.StartFinishTypes exposing (Loopiness(..))
 import Tools.StravaOptions
 import Tools.StravaTools
 import Tools.TrackInfoBox as TrackInfoBox
@@ -85,6 +86,7 @@ type ToolType
     | ToolStrava
     | ToolMoveAndStretch
     | ToolStartFinish
+    | ToolSplitAndJoin
 
 
 type alias Options =
@@ -113,6 +115,7 @@ type alias Options =
     , stravaSettings : Tools.StravaOptions.Options
     , moveAndStretchSettings : Tools.MoveAndStretchOptions.Options
     , startFinishOptions : Tools.StartFinishTypes.Options
+    , splitAndJoinOptions : Tools.SplitAndJoinOptions.Options
     }
 
 
@@ -142,6 +145,7 @@ defaultOptions =
     , stravaSettings = Tools.StravaTools.defaultOptions
     , moveAndStretchSettings = Tools.MoveAndStretch.defaultOptions
     , startFinishOptions = Tools.StartFinish.defaultOptions
+    , splitAndJoinOptions = Tools.SplitAndJoin.defaultOptions
     }
 
 
@@ -175,6 +179,7 @@ type ToolMsg
     | ToolStravaMsg Tools.StravaTools.Msg
     | ToolMoveAndStretchMsg Tools.MoveAndStretch.Msg
     | ToolStartFinishMsg Tools.StartFinish.Msg
+    | ToolSplitJoinMsg Tools.SplitAndJoin.Msg
 
 
 type alias ToolEntry =
@@ -214,6 +219,7 @@ defaultTools =
     , stravaTool
     , moveAndStretchTool
     , startFinishTool
+    , splitAndJoinTool
     ]
 
 
@@ -496,11 +502,26 @@ moveAndStretchTool =
     , isPopupOpen = False
     }
 
+
 startFinishTool : ToolEntry
 startFinishTool =
     { toolType = ToolStartFinish
     , label = "Start/Finish"
     , info = "Start/Finish"
+    , video = Nothing
+    , state = Contracted
+    , dock = DockUpperRight
+    , tabColour = FlatColors.FlatUIPalette.concrete
+    , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
+    , isPopupOpen = False
+    }
+
+
+splitAndJoinTool : ToolEntry
+splitAndJoinTool =
+    { toolType = ToolSplitAndJoin
+    , label = "Split & Join"
+    , info = "Split & Join"
     , video = Nothing
     , state = Contracted
     , dock = DockUpperRight
@@ -948,7 +969,22 @@ update toolMsg isTrack msgWrapper options =
                 Nothing ->
                     ( options, [] )
 
+        ToolSplitJoinMsg msg ->
+            case isTrack of
+                Just track ->
+                    let
+                        ( newOptions, actions ) =
+                            Tools.SplitAndJoin.update
+                                msg
+                                options.splitAndJoinOptions
+                                track
+                    in
+                    ( { options | splitAndJoinOptions = newOptions }
+                    , actions
+                    )
 
+                Nothing ->
+                    ( options, [] )
 
 
 refreshOpenTools :
@@ -1233,7 +1269,19 @@ toolStateHasChanged toolType newState isTrack options =
             in
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
+        ToolSplitAndJoin ->
+            let
+                ( newToolOptions, actions ) =
+                    Tools.SplitAndJoin.toolStateChange
+                        (newState == Expanded)
+                        (getColour toolType options.tools)
+                        options.splitAndJoinOptions
+                        isTrack
 
+                newOptions =
+                    { options | splitAndJoinOptions = newToolOptions }
+            in
+            ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
 
 
@@ -1548,6 +1596,19 @@ viewToolByType msgWrapper entry isTrack options =
                             options.startFinishOptions
                             track
                             (msgWrapper << ToolStartFinishMsg)
+
+                    Nothing ->
+                        noTrackMessage
+
+            ToolSplitAndJoin ->
+                case isTrack of
+                    Just track ->
+                        Tools.SplitAndJoin.view
+                            options.imperial
+                            options.splitAndJoinOptions
+                            (msgWrapper << ToolSplitJoinMsg)
+                            track
+
                     Nothing ->
                         noTrackMessage
 
@@ -1637,6 +1698,9 @@ encodeType toolType =
 
         ToolStartFinish ->
             "ToolStartFinish"
+
+        ToolSplitAndJoin ->
+            "ToolSplitAndJoin"
 
 
 encodeColour : Element.Color -> E.Value

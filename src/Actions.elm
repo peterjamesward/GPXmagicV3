@@ -3,16 +3,11 @@ module Actions exposing (..)
 -- This wee DSL allows any tool to ask Main to update the model and display stuff
 -- (including on the Map) without the tools needing knowledge of the model or ports.
 
-import DomainModel exposing (EarthPoint, GPXSource, PeteTree)
-import Element
 import File exposing (File)
 import Http
 import Json.Decode as E
-import Length
-import LocalCoords exposing (LocalCoords)
 import OAuth
 import PreviewData exposing (PreviewData)
-import Scene3d exposing (Entity)
 import Tools.BendSmootherOptions
 import Tools.BezierOptions
 import Tools.CentroidAverageOptions

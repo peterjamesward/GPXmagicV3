@@ -63,6 +63,7 @@ import Tools.OneClickQuickFix
 import Tools.OutAndBack
 import Tools.Simplify
 import Tools.StartFinish
+import Tools.StartFinishTypes exposing (Loopiness(..))
 import Tools.StravaDataLoad
 import Tools.StravaTools
 import Tools.TrackInfoBox
@@ -1311,7 +1312,9 @@ performActionsOnModel actions model =
                 ( BezierApplyWithOptions options, Just track ) ->
                     let
                         ( newTree, oldPoints, ( fromStart, fromEnd ) ) =
-                            Tools.BezierSplines.applyUsingOptions options track
+                            Tools.BezierSplines.applyUsingOptions
+                                options
+                                track
 
                         newTrack =
                             track

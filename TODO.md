@@ -4,17 +4,15 @@
 BUG: Classic bend smoother consumes all memory on certain looped routes where
      orange and purple are (possibly) co-linear, or something. (Samir bug)
 
-BUG: Sometimes will not display file open dialog. Also splitters stop working.
+**BUG**: Sometimes will not display file open dialog. Also splitters stop working.
 > Debuggers shows messages arriving, not obvious why they should not be processed.
+> Can't save file when this happens.
 
 --
 
 # WIP
 
-**Loops**
-
-- Centroid average to work on loop
-- Bezier smoothing to work on loop
+## Split and Join
 
 ---
 
@@ -22,11 +20,10 @@ BUG: Sometimes will not display file open dialog. Also splitters stop working.
 
 ## Tools: old, updated, & new
 
-1. Split and Join
-2. Intersection detection ((?? + loop detection ??))
-3. Graph Theory (notes below and from DO's emails)
+1. Intersection detection ((?? + loop detection ??))
+2. Graph Theory (notes below and from DO's emails)
 
---- Cut-off for release
+--- _Cut-off for release_
 - Info popup for all tools.
 - SVG for previews on Profile - get nice smooth lines.
 - SVG overlay on 3d views.
@@ -38,7 +35,7 @@ BUG: Sometimes will not display file open dialog. Also splitters stop working.
 - Ability to point-smooth transitions over a range
 - Tools that require a range should say so when there isn't one! (David Ogle)
 
---- Cut-off
+--- _Cut-off_
 - Option to show MR rendering cutoff.
 - Tooltips (where useful)
 - Draggable tools?
@@ -52,12 +49,17 @@ New stuff:
 
 Just don't blindly mitre. For each pair of RoadSection, see if the points will
 "overlap" and don't emit them all. May need some interpolation for altitude or whatever.
-Perhaps just try Bezier on interior turns.
+> Perhaps just try Bezier on interior turns.
 
 ## Terrain
 
 Tree walk combined with whole (visible) tree query, because <track loops>.
 (Expand bounding boxes to allow for road width.)
+
+## Loops
+
+- Centroid average to work over S/F on loop
+- Bezier smoothing to work over S/F on loop
 
 ## Texture for the ground plane, road surface
 

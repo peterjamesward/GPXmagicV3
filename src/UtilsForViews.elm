@@ -23,6 +23,11 @@ elmuiColour c =
     Element.rgb red green blue
 
 
+withLeadingZeros : Int -> String -> String
+withLeadingZeros beforePoint raw =
+    String.repeat (beforePoint - String.length raw) "0"
+        ++ raw
+
 
 httpErrorString : Http.Error -> String
 httpErrorString error =
@@ -41,7 +46,6 @@ httpErrorString error =
 
         Http.Timeout ->
             "Request timeout"
-
 
 
 showLongMeasure : Bool -> Length.Length -> String

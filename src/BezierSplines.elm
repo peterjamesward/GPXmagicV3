@@ -133,14 +133,29 @@ bezierSplinesThroughExistingPoints isLoop tension tolerance startIndx endIndex t
             ( entryPoint, b, exitPoint )
 
         foldOutput =
-            DomainModel.traverseTreeBetweenLimitsToDepth
-                startIndx
-                endIndex
-                (always Nothing)
-                0
-                treeNode
-                foldFn
-                (SplineFoldState Nothing Nothing [])
+            if isLoop then
+                DomainModel.traverseTreeBetweenLimitsToDepth
+                    startIndx
+                    endIndex
+                    (always Nothing)
+                    0
+                    treeNode
+                    foldFn
+                    (SplineFoldState
+                        (Just <| DomainModel.getLastLeaf treeNode)
+                        Nothing
+                        []
+                    )
+
+            else
+                DomainModel.traverseTreeBetweenLimitsToDepth
+                    startIndx
+                    endIndex
+                    (always Nothing)
+                    0
+                    treeNode
+                    foldFn
+                    (SplineFoldState Nothing Nothing [])
     in
     foldOutput.newPoints |> List.reverse
 
