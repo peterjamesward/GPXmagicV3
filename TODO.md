@@ -8,24 +8,13 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 > Debuggers shows messages arriving, not obvious why they should not be processed.
 > Can't save file when this happens.
 
-BUG: 
-```
-evented.js:149 Error: There is no source with ID 'mapbox-dem'
-at Map.isSourceLoaded (map.js:1660:38)
-at addDecorations (index.html:319:14)
-at addLineToMap (index.html:389:5)
-at Array.mapMessageHandler (index.html:166:17)
-at Function.f (main.js:2219:19)
-at A3 (main.js:59:28)
-at Object.b (main.js:1978:7)
-at _Scheduler_step (main.js:1822:20)
-at _Scheduler_enqueue (main.js:1784:3)
-at main.js:1812:5
-```
-
 --
 
 # WIP
+
+## Intersection detection 
+
+**JB**: I have been getting a few Partner event gpx's lately that do a loop... but then continue around for say 25% of it before finishing which when a map is first loaded i do not notice until i start working on it... it would be nice if when a map is first loaded the points show a different colour when there is another course on top.. ie orange for the first lap but if it continues say red until it finishes..
 
 ---
 
@@ -33,7 +22,6 @@ at main.js:1812:5
 
 ## Tools: old, updated, & new
 
-1. Intersection detection ((?? + loop detection ??))
 2. Graph Theory (notes below and from DO's emails)
 
 --- _Cut-off for release_
@@ -90,10 +78,6 @@ Put all Font, Colour etc into a Palette/Style module for ease of change.
  
 The preview traversal for Limit Gradients should be width-limited as we zoom in,
 with depth reflecting the zoom level, as for the main track.
-
-## Loop detection
-
-**JB**: I have been getting a few Partner event gpx's lately that do a loop... but then continue around for say 25% of it before finishing which when a map is first loaded i do not notice until i start working on it... it would be nice if when a map is first loaded the points show a different colour when there is another course on top.. ie orange for the first lap but if it continues say red until it finishes..
 
 ## Graphs
 
