@@ -1,4 +1,4 @@
-module RoadIndex exposing (Intersection, findFeatures)
+module RoadIndex exposing (..)
 
 {-
    Here we compile a dictionary of Leaf so that we can see which Leafs:
@@ -24,13 +24,13 @@ import Quantity
 import SketchPlane3d
 
 
-type alias Point =
+type alias PointXY =
     -- 2D projections of Earth Points.
     Point2d Meters LocalCoords
 
 
 type IntersectionType
-    = Intersection Point
+    = Crossing PointXY
     | SameDirection
     | ContraDirection
 
@@ -42,7 +42,7 @@ type alias Intersection =
 
 
 type alias RoadIndex =
-    -- Dict will contain only "prior" occurences of the road section. (?)
+    -- Dict will contain only "prior" occurrences of the road section. (?)
     Dict Int (List Intersection)
 
 
@@ -51,23 +51,23 @@ findFeatures treeNode =
     -- Top level API, folds over the tree to build the dictionary.
     let
         forEachLeaf : RoadSection -> ( Int, RoadIndex ) -> ( Int, RoadIndex )
-        forEachLeaf road ( myLeafNumber, dict ) =
+        forEachLeaf myRoad ( myLeafNumber, dict ) =
             let
                 thisSegment =
-                    LineSegment3d.from road.startPoint road.endPoint
+                    LineSegment3d.from myRoad.startPoint myRoad.endPoint
                         |> LineSegment3d.projectInto SketchPlane3d.xy
 
                 thisAxis =
                     Axis2d.through
-                        (road.startPoint |> Point3d.projectInto SketchPlane3d.xy)
-                        road.directionAtStart
+                        (myRoad.startPoint |> Point3d.projectInto SketchPlane3d.xy)
+                        myRoad.directionAtStart
 
                 perhapsSameRoad : Int -> Int -> RoadSection -> Bool
                 perhapsSameRoad startIdx endIdx otherRoad =
                     -- Is this section of the tree of interest?
                     -- Yes, if bounding box intersects and it is prior in the route.
                     (endIdx < myLeafNumber)
-                        && (otherRoad.boundingBox |> intersects road.boundingBox)
+                        && (otherRoad.boundingBox |> intersects myRoad.boundingBox)
 
                 roadHasOverlap : Int -> RoadSection -> RoadIndex -> RoadIndex
                 roadHasOverlap otherIndex otherRoad innerDict =
@@ -104,7 +104,7 @@ findFeatures treeNode =
                                 ( Just pt, _, _ ) ->
                                     Just
                                         { otherSegment = otherIndex
-                                        , category = Intersection pt
+                                        , category = Crossing pt
                                         }
 
                                 ( Nothing, Just _, True ) ->

@@ -1,0 +1,197 @@
+module Tools.Intersections exposing (..)
+
+import Actions exposing (ToolAction(..))
+import Dict
+import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), RoadSection, asRecord, skipCount)
+import Element exposing (..)
+import Element.Background as Background
+import Element.Input as Input exposing (labelHidden)
+import FeatherIcons
+import FlatColors.ChinesePalette
+import List.Extra
+import PreviewData exposing (PreviewShape(..))
+import RoadIndex
+import ToolTip exposing (buttonStylesWithTooltip)
+import TrackLoaded exposing (TrackLoaded)
+import UtilsForViews exposing (showDecimal0, showLongMeasure, showShortMeasure)
+import ViewPureStyles exposing (neatToolsBorder, noTrackMessage, useIcon)
+
+
+type alias Options =
+    { features : RoadIndex.RoadIndex
+    , current : Int
+    , resultMode : ResultMode
+    }
+
+
+type ResultMode
+    = ResultList
+    | ResultNavigation
+
+
+defaultOptions : Options
+defaultOptions =
+    { features = Dict.empty
+    , current = 0
+    , resultMode = ResultNavigation
+    }
+
+
+type Msg
+    = ViewNext
+    | ViewPrevious
+    | SetCurrentPosition Int
+    | SetResultMode ResultMode
+
+
+toolStateChange :
+    Bool
+    -> Element.Color
+    -> Options
+    -> Maybe (TrackLoaded msg)
+    -> ( Options, List (ToolAction msg) )
+toolStateChange opened colour options track =
+    case ( opened, track ) of
+        ( True, Just theTrack ) ->
+            -- Make sure we have up to date breaches and preview is shown.
+            let
+                newOptions =
+                    { options
+                        | features =
+                            RoadIndex.findFeatures theTrack.trackTree
+                    }
+            in
+            ( newOptions
+            , [ ShowPreview
+                    { tag = "features"
+                    , shape = PreviewCircle
+                    , colour = colour
+                    , points =
+                        TrackLoaded.buildPreview
+                            (Dict.keys newOptions.features)
+                            theTrack.trackTree
+                    }
+              ]
+            )
+
+        _ ->
+            -- Hide preview
+            ( options, [ HidePreview "features" ] )
+
+
+update :
+    Msg
+    -> Options
+    -> (Msg -> msg)
+    -> ( Options, List (ToolAction msg) )
+update msg options wrap =
+    case msg of
+        SetResultMode mode ->
+            let
+                newOptions =
+                    { options | resultMode = mode }
+            in
+            ( newOptions, [] )
+
+        ViewNext ->
+            let
+                index =
+                    min (Dict.size options.features - 1) (options.current + 1)
+
+                newOptions =
+                    { options | current = index }
+
+                position =
+                    Dict.keys options.features
+                        |> List.Extra.getAt index
+                        |> Maybe.withDefault 0
+            in
+            ( newOptions, [ SetCurrent position ] )
+
+        ViewPrevious ->
+            let
+                index =
+                    max 0 (options.current + 1)
+
+                newOptions =
+                    { options | current = index }
+
+                position =
+                    Dict.keys options.features
+                        |> List.Extra.getAt index
+                        |> Maybe.withDefault 0
+            in
+            ( newOptions, [ SetCurrent position ] )
+
+        SetCurrentPosition position ->
+            ( options, [ SetCurrent position ] )
+
+
+view : Bool -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
+view imperial msgWrapper options track =
+    let
+        resultModeSelection =
+            Input.radioRow [ centerX, spacing 5 ]
+                { onChange = msgWrapper << SetResultMode
+                , options =
+                    [ Input.option ResultNavigation (text "Summary")
+                    , Input.option ResultList (text "List")
+                    ]
+                , selected = Just options.resultMode
+                , label = Input.labelHidden "Results mode"
+                }
+
+        resultsNavigation =
+            case Dict.keys options.features of
+                [] ->
+                    el [ centerX, centerY ] <| text "None found"
+
+                a :: b ->
+                    column [ spacing 4, centerX ]
+                        [ el [ centerX ] <|
+                            text <|
+                                String.fromInt (options.current + 1)
+                                    ++ " of "
+                                    ++ (String.fromInt <| Dict.size options.features)
+                        , row [ centerX, spacing 10 ]
+                            [ Input.button
+                                (buttonStylesWithTooltip below "Move to previous")
+                                { label = useIcon FeatherIcons.chevronLeft
+                                , onPress = Just <| msgWrapper <| ViewPrevious
+                                }
+                            , Input.button
+                                (buttonStylesWithTooltip below "Centre view on this issue")
+                                { label = useIcon FeatherIcons.mousePointer
+                                , onPress = Just <| msgWrapper <| SetCurrentPosition a
+                                }
+                            , Input.button
+                                (buttonStylesWithTooltip below "Move to next")
+                                { label = useIcon FeatherIcons.chevronRight
+                                , onPress = Just <| msgWrapper <| ViewNext
+                                }
+                            ]
+                        ]
+
+        linkButton point =
+            Input.button neatToolsBorder
+                { onPress = Just (msgWrapper <| SetCurrentPosition point)
+                , label =
+                    text <|
+                        showLongMeasure imperial <|
+                            DomainModel.distanceFromIndex point track.trackTree
+                }
+    in
+    el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
+        column [ centerX, padding 5, spacing 8 ]
+            [ resultModeSelection
+            , case options.resultMode of
+                ResultNavigation ->
+                    resultsNavigation
+
+                ResultList ->
+                    wrappedRow [ height <| px 150, scrollbarY ] <|
+                        List.map
+                            linkButton
+                        <|
+                            Dict.keys options.features
+            ]

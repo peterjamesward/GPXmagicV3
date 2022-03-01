@@ -33,6 +33,7 @@ import Tools.Flythrough
 import Tools.GradientProblems
 import Tools.Interpolate
 import Tools.InterpolateOptions
+import Tools.Intersections
 import Tools.LimitGradientOptions
 import Tools.LimitGradients
 import Tools.MoveAndStretch
@@ -87,6 +88,7 @@ type ToolType
     | ToolMoveAndStretch
     | ToolStartFinish
     | ToolSplitAndJoin
+    | ToolIntersections
 
 
 type alias Options =
@@ -116,6 +118,7 @@ type alias Options =
     , moveAndStretchSettings : Tools.MoveAndStretchOptions.Options
     , startFinishOptions : Tools.StartFinishTypes.Options
     , splitAndJoinOptions : Tools.SplitAndJoinOptions.Options
+    , intersectionOptions : Tools.Intersections.Options
     }
 
 
@@ -146,6 +149,7 @@ defaultOptions =
     , moveAndStretchSettings = Tools.MoveAndStretch.defaultOptions
     , startFinishOptions = Tools.StartFinish.defaultOptions
     , splitAndJoinOptions = Tools.SplitAndJoin.defaultOptions
+    , intersectionOptions = Tools.Intersections.defaultOptions
     }
 
 
@@ -180,6 +184,7 @@ type ToolMsg
     | ToolMoveAndStretchMsg Tools.MoveAndStretch.Msg
     | ToolStartFinishMsg Tools.StartFinish.Msg
     | ToolSplitJoinMsg Tools.SplitAndJoin.Msg
+    | ToolIntersectionMsg Tools.Intersections.Msg
 
 
 type alias ToolEntry =
@@ -220,6 +225,7 @@ defaultTools =
     , moveAndStretchTool
     , startFinishTool
     , splitAndJoinTool
+    , intersectionsTool
     ]
 
 
@@ -522,6 +528,20 @@ splitAndJoinTool =
     { toolType = ToolSplitAndJoin
     , label = "Split & Join"
     , info = "Split & Join"
+    , video = Nothing
+    , state = Contracted
+    , dock = DockUpperRight
+    , tabColour = FlatColors.FlatUIPalette.concrete
+    , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
+    , isPopupOpen = False
+    }
+
+
+intersectionsTool : ToolEntry
+intersectionsTool =
+    { toolType = ToolIntersections
+    , label = "Intersections"
+    , info = "and such-like"
     , video = Nothing
     , state = Contracted
     , dock = DockUpperRight
@@ -987,6 +1007,23 @@ update toolMsg isTrack msgWrapper options =
                 Nothing ->
                     ( options, [] )
 
+        ToolIntersectionMsg msg ->
+            case isTrack of
+                Just track ->
+                    let
+                        ( newOptions, actions ) =
+                            Tools.Intersections.update
+                                msg
+                                options.intersectionOptions
+                                (msgWrapper << ToolIntersectionMsg)
+                    in
+                    ( { options | intersectionOptions = newOptions }
+                    , actions
+                    )
+
+                Nothing ->
+                    ( options, [] )
+
 
 refreshOpenTools :
     Maybe (TrackLoaded msg)
@@ -1281,6 +1318,20 @@ toolStateHasChanged toolType newState isTrack options =
 
                 newOptions =
                     { options | splitAndJoinOptions = newToolOptions }
+            in
+            ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
+
+        ToolIntersections ->
+            let
+                ( newToolOptions, actions ) =
+                    Tools.Intersections.toolStateChange
+                        (newState == Expanded)
+                        (getColour toolType options.tools)
+                        options.intersectionOptions
+                        isTrack
+
+                newOptions =
+                    { options | intersectionOptions = newToolOptions }
             in
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
@@ -1613,6 +1664,18 @@ viewToolByType msgWrapper entry isTrack options =
                     Nothing ->
                         noTrackMessage
 
+            ToolIntersections ->
+                case isTrack of
+                    Just track ->
+                        Tools.Intersections.view
+                            options.imperial
+                            (msgWrapper << ToolIntersectionMsg)
+                            options.intersectionOptions
+                            track
+
+                    Nothing ->
+                        noTrackMessage
+
 
 
 -- Local storage management
@@ -1702,6 +1765,9 @@ encodeType toolType =
 
         ToolSplitAndJoin ->
             "ToolSplitAndJoin"
+
+        ToolIntersections ->
+            "ToolIntersections"
 
 
 encodeColour : Element.Color -> E.Value
