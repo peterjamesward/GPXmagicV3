@@ -316,7 +316,7 @@ function makeTheMap(msg) {
 
 function addDecorations() {
 
-   if (! map.isSourceLoaded('mapbox-dem') ) {
+   if (! map.getSource('mapbox-dem')) { //   ! map.isSourceLoaded('mapbox-dem') ) {
       map.addSource('mapbox-dem', {
         'type': 'raster-dem',
         'url': 'mapbox://mapbox.terrain-rgb',
