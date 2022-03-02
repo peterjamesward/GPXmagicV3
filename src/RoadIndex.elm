@@ -56,7 +56,7 @@ findFeatures treeNode =
 
         ( _, _, intersections ) =
             foldOverRoute
-                forEachLeaf
+                checkLeafForIntersections
                 treeNode
                 ( 0
                 , SpatialIndex.empty planarBox (Length.meters 5.0)
@@ -66,11 +66,11 @@ findFeatures treeNode =
     intersections
 
 
-forEachLeaf :
+checkLeafForIntersections :
     RoadSection
     -> ( Int, RoadIndex, List Intersection )
     -> ( Int, RoadIndex, List Intersection )
-forEachLeaf myRoad ( myLeafNumber, index, intersects ) =
+checkLeafForIntersections myRoad ( myLeafNumber, index, intersects ) =
     let
         thisSegment =
             LineSegment3d.from myRoad.startPoint myRoad.endPoint
@@ -87,8 +87,8 @@ forEachLeaf myRoad ( myLeafNumber, index, intersects ) =
                 (myRoad.startPoint |> Point3d.projectInto SketchPlane3d.xy)
                 myRoad.directionAtStart
 
-        overlaps : List ( Int, RoadSection )
-        overlaps =
+        candidates : List ( Int, RoadSection )
+        candidates =
             SpatialIndex.query index prepContent.box
                 |> List.map .content
 
@@ -114,6 +114,9 @@ forEachLeaf myRoad ( myLeafNumber, index, intersects ) =
                 proximal =
                     axisSeparation |> Interval.contains Quantity.zero
 
+                notAdjacent =
+                    abs (myLeafNumber - otherIndex) > 1
+
                 parallelAndClose =
                     proximal && axisIntersection == Nothing
 
@@ -132,34 +135,38 @@ forEachLeaf myRoad ( myLeafNumber, index, intersects ) =
 
                 intersection : Maybe Intersection
                 intersection =
-                    case ( intersectPoint, parallelAndClose, sameDirection ) of
-                        ( Just pt, _, _ ) ->
-                            Just
-                                { thisSegment = myLeafNumber
-                                , otherSegment = otherIndex
-                                , category = Crossing pt
-                                }
+                    if notAdjacent then
+                        case ( intersectPoint, parallelAndClose, sameDirection ) of
+                            ( Just pt, _, _ ) ->
+                                Just
+                                    { thisSegment = myLeafNumber
+                                    , otherSegment = otherIndex
+                                    , category = Crossing pt
+                                    }
 
-                        ( Nothing, True, True ) ->
-                            Just
-                                { thisSegment = myLeafNumber
-                                , otherSegment = otherIndex
-                                , category = SameDirection
-                                }
+                            ( Nothing, True, True ) ->
+                                Just
+                                    { thisSegment = myLeafNumber
+                                    , otherSegment = otherIndex
+                                    , category = SameDirection
+                                    }
 
-                        ( Nothing, True, False ) ->
-                            Just
-                                { thisSegment = myLeafNumber
-                                , otherSegment = otherIndex
-                                , category = ContraDirection
-                                }
+                            ( Nothing, True, False ) ->
+                                Just
+                                    { thisSegment = myLeafNumber
+                                    , otherSegment = otherIndex
+                                    , category = ContraDirection
+                                    }
 
-                        _ ->
-                            Nothing
+                            _ ->
+                                Nothing
+
+                    else
+                        Nothing
             in
             intersection
     in
     ( myLeafNumber + 1
     , SpatialIndex.add prepContent index
-    , List.filterMap roadHasOverlap overlaps ++ intersects
+    , List.filterMap roadHasOverlap candidates ++ intersects
     )
