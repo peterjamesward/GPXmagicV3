@@ -14,7 +14,9 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 ## Intersection detection 
 
-- Debug.
+- Rewrite RoadIndex to use quad-tree, see if faster as expected.
+
+- Require manual refresh, not on TrackChanged.
 
 **JB**: I have been getting a few Partner event gpx's lately that do a loop... but then continue around for say 25% of it before finishing which when a map is first loaded i do not notice until i start working on it... it would be nice if when a map is first loaded the points show a different colour when there is another course on top.. ie orange for the first lap but if it continues say red until it finishes..
 
