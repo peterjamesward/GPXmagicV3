@@ -11,9 +11,7 @@ module RoadIndex exposing (..)
 -}
 
 import Axis2d
-import BoundingBox3d exposing (intersects)
-import Dict exposing (Dict)
-import DomainModel exposing (PeteTree, RoadSection, foldOverRoute, queryRoadsUsingFilter)
+import DomainModel exposing (PeteTree, RoadSection, foldOverRoute)
 import Length exposing (Length, Meters)
 import LineSegment2d exposing (LineSegment2d)
 import LineSegment3d
@@ -23,6 +21,8 @@ import Point3d
 import Quantity
 import Quantity.Interval as Interval
 import SketchPlane3d
+import SpatialIndex exposing (SpatialContent, SpatialNode)
+import UtilsForViews exposing (flatBox)
 
 
 type alias PointXY =
@@ -44,121 +44,122 @@ type alias Intersection =
 
 
 type alias RoadIndex =
-    -- Dict will contain only "prior" occurrences of the road section. (?)
-    Dict Int (List Intersection)
+    SpatialNode ( Int, RoadSection ) Meters LocalCoords
 
 
-findFeatures : PeteTree -> RoadIndex
+findFeatures : PeteTree -> List Intersection
 findFeatures treeNode =
     -- Top level API, folds over the tree to build the dictionary.
     let
-        forEachLeaf : RoadSection -> ( Int, RoadIndex ) -> ( Int, RoadIndex )
-        forEachLeaf myRoad ( myLeafNumber, dict ) =
+        planarBox =
+            DomainModel.boundingBox treeNode |> flatBox
+
+        ( _, _, intersections ) =
+            foldOverRoute
+                forEachLeaf
+                treeNode
+                ( 0
+                , SpatialIndex.empty planarBox (Length.meters 5.0)
+                , []
+                )
+    in
+    intersections
+
+
+forEachLeaf :
+    RoadSection
+    -> ( Int, RoadIndex, List Intersection )
+    -> ( Int, RoadIndex, List Intersection )
+forEachLeaf myRoad ( myLeafNumber, index, intersects ) =
+    let
+        thisSegment =
+            LineSegment3d.from myRoad.startPoint myRoad.endPoint
+                |> LineSegment3d.projectInto SketchPlane3d.xy
+
+        prepContent : SpatialContent ( Int, RoadSection ) Meters LocalCoords
+        prepContent =
+            { content = ( myLeafNumber, myRoad )
+            , box = flatBox myRoad.boundingBox
+            }
+
+        thisAxis =
+            Axis2d.through
+                (myRoad.startPoint |> Point3d.projectInto SketchPlane3d.xy)
+                myRoad.directionAtStart
+
+        overlaps : List ( Int, RoadSection )
+        overlaps =
+            SpatialIndex.query index prepContent.box
+                |> List.map .content
+
+        roadHasOverlap : ( Int, RoadSection ) -> Maybe Intersection
+        roadHasOverlap ( otherIndex, otherRoad ) =
+            -- Work out what type of overlap this is and add to index.
             let
-                --_ = Debug.log "myLeafNumber" myLeafNumber
-                thisSegment =
-                    LineSegment3d.from myRoad.startPoint myRoad.endPoint
+                otherSegment =
+                    LineSegment3d.from otherRoad.startPoint otherRoad.endPoint
                         |> LineSegment3d.projectInto SketchPlane3d.xy
 
-                thisAxis =
-                    Axis2d.through
-                        (myRoad.startPoint |> Point3d.projectInto SketchPlane3d.xy)
-                        myRoad.directionAtStart
+                intersectPoint =
+                    -- See if lines cross (not Nothing)
+                    LineSegment2d.intersectionPoint thisSegment otherSegment
 
-                perhapsSameRoad : Int -> Int -> RoadSection -> Bool
-                perhapsSameRoad startIdx endIdx otherRoad =
-                    -- Is this section of the tree of interest?
-                    -- Yes, if bounding box intersects and it is prior in the route.
-                    (startIdx < myLeafNumber - 1)
-                        && (otherRoad.boundingBox |> intersects myRoad.boundingBox)
+                axisIntersection =
+                    -- Nothing means co-linear, in either direction
+                    otherSegment |> LineSegment2d.intersectionWithAxis thisAxis
 
-                roadHasOverlap : Int -> RoadSection -> RoadIndex -> RoadIndex
-                roadHasOverlap otherIndex otherRoad innerDict =
-                    -- Work out what type of overlap this is and add to index.
-                    let
-                        otherSegment =
-                            LineSegment3d.from otherRoad.startPoint otherRoad.endPoint
-                                |> LineSegment3d.projectInto SketchPlane3d.xy
+                axisSeparation =
+                    otherSegment |> LineSegment2d.signedDistanceFrom thisAxis
 
-                        intersectPoint =
-                            -- See if lines cross (not Nothing)
-                            LineSegment2d.intersectionPoint thisSegment otherSegment
+                proximal =
+                    axisSeparation |> Interval.contains Quantity.zero
 
-                        axisIntersection =
-                            -- Nothing means co-linear, in either direction
-                            otherSegment |> LineSegment2d.intersectionWithAxis thisAxis
+                parallelAndClose =
+                    proximal && axisIntersection == Nothing
 
-                        axisSeparation =
-                            otherSegment |> LineSegment2d.signedDistanceFrom thisAxis
+                ( startAlongAxis, endAlongAxis ) =
+                    -- Should allow us to determine direction
+                    ( otherRoad.startPoint
+                        |> Point3d.projectInto SketchPlane3d.xy
+                        |> Point2d.signedDistanceAlong thisAxis
+                    , otherRoad.endPoint
+                        |> Point3d.projectInto SketchPlane3d.xy
+                        |> Point2d.signedDistanceAlong thisAxis
+                    )
 
-                        proximal =
-                            axisSeparation |> Interval.contains Quantity.zero
+                sameDirection =
+                    startAlongAxis |> Quantity.lessThanOrEqualTo Quantity.zero
 
-                        parallelAndClose =
-                            proximal && axisIntersection == Nothing
+                intersection : Maybe Intersection
+                intersection =
+                    case ( intersectPoint, parallelAndClose, sameDirection ) of
+                        ( Just pt, _, _ ) ->
+                            Just
+                                { thisSegment = myLeafNumber
+                                , otherSegment = otherIndex
+                                , category = Crossing pt
+                                }
 
-                        ( startAlongAxis, endAlongAxis ) =
-                            -- Should allow us to determine direction
-                            ( otherRoad.startPoint
-                                |> Point3d.projectInto SketchPlane3d.xy
-                                |> Point2d.signedDistanceAlong thisAxis
-                            , otherRoad.endPoint
-                                |> Point3d.projectInto SketchPlane3d.xy
-                                |> Point2d.signedDistanceAlong thisAxis
-                            )
+                        ( Nothing, True, True ) ->
+                            Just
+                                { thisSegment = myLeafNumber
+                                , otherSegment = otherIndex
+                                , category = SameDirection
+                                }
 
-                        sameDirection =
-                            startAlongAxis |> Quantity.lessThanOrEqualTo Quantity.zero
+                        ( Nothing, True, False ) ->
+                            Just
+                                { thisSegment = myLeafNumber
+                                , otherSegment = otherIndex
+                                , category = ContraDirection
+                                }
 
-                        intersection : Maybe Intersection
-                        intersection =
-                            case ( intersectPoint, parallelAndClose, sameDirection ) of
-                                ( Just pt, _, _ ) ->
-                                    Just
-                                        { thisSegment = myLeafNumber
-                                        , otherSegment = otherIndex
-                                        , category = Crossing pt
-                                        }
-
-                                ( Nothing, True, True ) ->
-                                    Just
-                                        { thisSegment = myLeafNumber
-                                        , otherSegment = otherIndex
-                                        , category = SameDirection
-                                        }
-
-                                ( Nothing, True, False ) ->
-                                    Just
-                                        { thisSegment = myLeafNumber
-                                        , otherSegment = otherIndex
-                                        , category = ContraDirection
-                                        }
-
-                                _ ->
-                                    Nothing
-
-                        existingEntries =
-                            Dict.get myLeafNumber innerDict
-                                |> Maybe.withDefault []
-                    in
-                    case intersection of
-                        Just intersect ->
-                            innerDict
-                                |> Dict.insert myLeafNumber (intersect :: existingEntries)
-
-                        Nothing ->
-                            innerDict
-
-                priors =
-                    queryRoadsUsingFilter
-                        perhapsSameRoad
-                        treeNode
-                        roadHasOverlap
-                        dict
+                        _ ->
+                            Nothing
             in
-            ( myLeafNumber + 1, priors )
-
-        ( _, completeIndex ) =
-            foldOverRoute forEachLeaf treeNode ( 0, Dict.empty )
+            intersection
     in
-    completeIndex
+    ( myLeafNumber + 1
+    , SpatialIndex.add prepContent index
+    , List.filterMap roadHasOverlap overlaps ++ intersects
+    )

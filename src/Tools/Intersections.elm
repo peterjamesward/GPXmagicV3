@@ -57,10 +57,7 @@ toolStateChange opened colour options track =
             let
                 newOptions =
                     { options
-                        | features =
-                            List.concat <|
-                                Dict.values <|
-                                    RoadIndex.findFeatures theTrack.trackTree
+                        | features = RoadIndex.findFeatures theTrack.trackTree
                     }
             in
             ( newOptions

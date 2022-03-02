@@ -59,7 +59,10 @@ empty box minSize =
         }
 
 
-add : SpatialContent contentType units coords -> SpatialNode contentType units coords -> SpatialNode contentType units coords
+add :
+    SpatialContent contentType units coords
+    -> SpatialNode contentType units coords
+    -> SpatialNode contentType units coords
 add content current =
     -- If the content will fit into a child, pass it down the child, new child if needed.
     -- Otherwise, add it to the contents at this level.
@@ -213,8 +216,10 @@ queryWithFold current queryArea folder accumulator =
                     |> queryWithFold node.ne queryArea folder
                     |> queryWithFold node.se queryArea folder
                     |> queryWithFold node.sw queryArea folder
+
             else
                 accumulator
+
 
 queryAllContaining :
     SpatialNode contentType units coords
