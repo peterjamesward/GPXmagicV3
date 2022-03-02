@@ -14,7 +14,6 @@ import Axis2d
 import BoundingBox3d exposing (intersects)
 import Dict exposing (Dict)
 import DomainModel exposing (PeteTree, RoadSection, foldOverRoute, queryRoadsUsingFilter)
-import Quantity.Interval as Interval
 import Length exposing (Length, Meters)
 import LineSegment2d exposing (LineSegment2d)
 import LineSegment3d
@@ -22,6 +21,7 @@ import LocalCoords exposing (LocalCoords)
 import Point2d exposing (Point2d)
 import Point3d
 import Quantity
+import Quantity.Interval as Interval
 import SketchPlane3d
 
 
@@ -37,7 +37,8 @@ type IntersectionType
 
 
 type alias Intersection =
-    { otherSegment : Int
+    { thisSegment : Int
+    , otherSegment : Int
     , category : IntersectionType
     }
 
@@ -114,19 +115,22 @@ findFeatures treeNode =
                             case ( intersectPoint, parallelAndClose, sameDirection ) of
                                 ( Just pt, _, _ ) ->
                                     Just
-                                        { otherSegment = otherIndex
+                                        { thisSegment = myLeafNumber
+                                        , otherSegment = otherIndex
                                         , category = Crossing pt
                                         }
 
                                 ( Nothing, True, True ) ->
                                     Just
-                                        { otherSegment = otherIndex
+                                        { thisSegment = myLeafNumber
+                                        , otherSegment = otherIndex
                                         , category = SameDirection
                                         }
 
                                 ( Nothing, True, False ) ->
                                     Just
-                                        { otherSegment = otherIndex
+                                        { thisSegment = myLeafNumber
+                                        , otherSegment = otherIndex
                                         , category = ContraDirection
                                         }
 

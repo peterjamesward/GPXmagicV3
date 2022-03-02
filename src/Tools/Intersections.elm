@@ -10,7 +10,7 @@ import FeatherIcons
 import FlatColors.ChinesePalette
 import List.Extra
 import PreviewData exposing (PreviewShape(..))
-import RoadIndex
+import RoadIndex exposing (Intersection)
 import ToolTip exposing (buttonStylesWithTooltip)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal0, showLongMeasure, showShortMeasure)
@@ -18,7 +18,7 @@ import ViewPureStyles exposing (neatToolsBorder, noTrackMessage, useIcon)
 
 
 type alias Options =
-    { features : RoadIndex.RoadIndex
+    { features : List Intersection
     , current : Int
     , resultMode : ResultMode
     }
@@ -31,7 +31,7 @@ type ResultMode
 
 defaultOptions : Options
 defaultOptions =
-    { features = Dict.empty
+    { features = []
     , current = 0
     , resultMode = ResultNavigation
     }
@@ -58,7 +58,9 @@ toolStateChange opened colour options track =
                 newOptions =
                     { options
                         | features =
-                            RoadIndex.findFeatures theTrack.trackTree
+                            List.concat <|
+                                Dict.values <|
+                                    RoadIndex.findFeatures theTrack.trackTree
                     }
             in
             ( newOptions
@@ -68,7 +70,7 @@ toolStateChange opened colour options track =
                     , colour = colour
                     , points =
                         TrackLoaded.buildPreview
-                            (Dict.keys newOptions.features)
+                            (List.map .thisSegment newOptions.features)
                             theTrack.trackTree
                     }
               ]
@@ -96,14 +98,15 @@ update msg options wrap =
         ViewNext ->
             let
                 index =
-                    min (Dict.size options.features - 1) (options.current + 1)
+                    min (List.length options.features - 1) (options.current + 1)
 
                 newOptions =
                     { options | current = index }
 
                 position =
-                    Dict.keys options.features
+                    options.features
                         |> List.Extra.getAt index
+                        |> Maybe.map .thisSegment
                         |> Maybe.withDefault 0
             in
             ( newOptions, [ SetCurrent position ] )
@@ -117,8 +120,9 @@ update msg options wrap =
                     { options | current = index }
 
                 position =
-                    Dict.keys options.features
+                    options.features
                         |> List.Extra.getAt index
+                        |> Maybe.map .thisSegment
                         |> Maybe.withDefault 0
             in
             ( newOptions, [ SetCurrent position ] )
@@ -142,7 +146,7 @@ view imperial msgWrapper options track =
                 }
 
         resultsNavigation =
-            case Dict.keys options.features of
+            case options.features of
                 [] ->
                     el [ centerX, centerY ] <| text "None found"
 
@@ -152,7 +156,7 @@ view imperial msgWrapper options track =
                             text <|
                                 String.fromInt (options.current + 1)
                                     ++ " of "
-                                    ++ (String.fromInt <| Dict.size options.features)
+                                    ++ (String.fromInt <| List.length options.features)
                         , row [ centerX, spacing 10 ]
                             [ Input.button
                                 (buttonStylesWithTooltip below "Move to previous")
@@ -162,7 +166,7 @@ view imperial msgWrapper options track =
                             , Input.button
                                 (buttonStylesWithTooltip below "Centre view on this issue")
                                 { label = useIcon FeatherIcons.mousePointer
-                                , onPress = Just <| msgWrapper <| SetCurrentPosition a
+                                , onPress = Just <| msgWrapper <| SetCurrentPosition a.thisSegment
                                 }
                             , Input.button
                                 (buttonStylesWithTooltip below "Move to next")
@@ -193,5 +197,5 @@ view imperial msgWrapper options track =
                         List.map
                             linkButton
                         <|
-                            Dict.keys options.features
+                            List.map .thisSegment options.features
             ]
