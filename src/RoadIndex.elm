@@ -14,6 +14,7 @@ import Axis2d
 import BoundingBox3d exposing (intersects)
 import Dict exposing (Dict)
 import DomainModel exposing (PeteTree, RoadSection, foldOverRoute, queryRoadsUsingFilter)
+import Quantity.Interval as Interval
 import Length exposing (Length, Meters)
 import LineSegment2d exposing (LineSegment2d)
 import LineSegment3d
@@ -53,6 +54,7 @@ findFeatures treeNode =
         forEachLeaf : RoadSection -> ( Int, RoadIndex ) -> ( Int, RoadIndex )
         forEachLeaf myRoad ( myLeafNumber, dict ) =
             let
+                --_ = Debug.log "myLeafNumber" myLeafNumber
                 thisSegment =
                     LineSegment3d.from myRoad.startPoint myRoad.endPoint
                         |> LineSegment3d.projectInto SketchPlane3d.xy
@@ -66,7 +68,7 @@ findFeatures treeNode =
                 perhapsSameRoad startIdx endIdx otherRoad =
                     -- Is this section of the tree of interest?
                     -- Yes, if bounding box intersects and it is prior in the route.
-                    (endIdx < myLeafNumber)
+                    (startIdx < myLeafNumber - 1)
                         && (otherRoad.boundingBox |> intersects myRoad.boundingBox)
 
                 roadHasOverlap : Int -> RoadSection -> RoadIndex -> RoadIndex
@@ -85,6 +87,15 @@ findFeatures treeNode =
                             -- Nothing means co-linear, in either direction
                             otherSegment |> LineSegment2d.intersectionWithAxis thisAxis
 
+                        axisSeparation =
+                            otherSegment |> LineSegment2d.signedDistanceFrom thisAxis
+
+                        proximal =
+                            axisSeparation |> Interval.contains Quantity.zero
+
+                        parallelAndClose =
+                            proximal && axisIntersection == Nothing
+
                         ( startAlongAxis, endAlongAxis ) =
                             -- Should allow us to determine direction
                             ( otherRoad.startPoint
@@ -100,20 +111,20 @@ findFeatures treeNode =
 
                         intersection : Maybe Intersection
                         intersection =
-                            case ( intersectPoint, axisIntersection, sameDirection ) of
+                            case ( intersectPoint, parallelAndClose, sameDirection ) of
                                 ( Just pt, _, _ ) ->
                                     Just
                                         { otherSegment = otherIndex
                                         , category = Crossing pt
                                         }
 
-                                ( Nothing, Just _, True ) ->
+                                ( Nothing, True, True ) ->
                                     Just
                                         { otherSegment = otherIndex
                                         , category = SameDirection
                                         }
 
-                                ( Nothing, Just _, False ) ->
+                                ( Nothing, True, False ) ->
                                     Just
                                         { otherSegment = otherIndex
                                         , category = ContraDirection

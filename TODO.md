@@ -6,13 +6,15 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 **BUG**: Sometimes will not display file open dialog. Also splitters stop working.
 > Debuggers shows messages arriving, not obvious why they should not be processed.
-> Can't save file when this happens.
+> Can't save file when this happens, so rather poor show.
 
 --
 
 # WIP
 
 ## Intersection detection 
+
+- Debug.
 
 **JB**: I have been getting a few Partner event gpx's lately that do a loop... but then continue around for say 25% of it before finishing which when a map is first loaded i do not notice until i start working on it... it would be nice if when a map is first loaded the points show a different colour when there is another course on top.. ie orange for the first lap but if it continues say red until it finishes..
 
@@ -22,7 +24,8 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 ## Tools: old, updated, & new
 
-2. Graph Theory (notes below and from DO's emails)
+1. Graph Theory (notes below and from DO's emails)
+2. Dragging the 3D view turns off the lock
 
 --- _Cut-off for release_
 - Info popup for all tools.
