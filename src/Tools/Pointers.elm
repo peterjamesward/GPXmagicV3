@@ -86,7 +86,7 @@ update msg options previewColour hasTrack =
                             restrictToTrack orange 1
                     in
                     ( { options | orange = position }
-                    , [ SetCurrent position, TrackHasChanged ]
+                    , [ SetCurrent position, MarkerMoved ]
                     )
 
                 PointerBackwardOne ->
@@ -95,7 +95,7 @@ update msg options previewColour hasTrack =
                             restrictToTrack orange -1
                     in
                     ( { options | orange = position }
-                    , [ SetCurrent position, TrackHasChanged ]
+                    , [ SetCurrent position, MarkerMoved ]
                     )
 
                 PointerFastForward ->
@@ -104,7 +104,7 @@ update msg options previewColour hasTrack =
                             restrictToTrack orange (skipCount track.trackTree // 20)
                     in
                     ( { options | orange = position }
-                    , [ SetCurrent position, TrackHasChanged ]
+                    , [ SetCurrent position, MarkerMoved ]
                     )
 
                 PointerRewind ->
@@ -113,17 +113,17 @@ update msg options previewColour hasTrack =
                             restrictToTrack orange (0 - skipCount track.trackTree // 20)
                     in
                     ( { options | orange = position }
-                    , [ SetCurrent position, TrackHasChanged ]
+                    , [ SetCurrent position, MarkerMoved ]
                     )
 
                 DropMarker ->
                     ( { options | purple = Just orange }
-                    , [ SetMarker <| Just orange, TrackHasChanged ]
+                    , [ SetMarker <| Just orange, MarkerMoved ]
                     )
 
                 LiftMarker ->
                     ( { options | purple = Nothing }
-                    , [ SetMarker Nothing, TrackHasChanged ]
+                    , [ SetMarker Nothing, MarkerMoved ]
                     )
 
                 MarkerForwardOne ->
@@ -139,7 +139,7 @@ update msg options previewColour hasTrack =
                     ( { options
                         | purple = position
                       }
-                    , [ SetMarker position, TrackHasChanged ]
+                    , [ SetMarker position, MarkerMoved ]
                     )
 
                 MarkerBackwardOne ->
@@ -155,7 +155,7 @@ update msg options previewColour hasTrack =
                     ( { options
                         | purple = position
                       }
-                    , [ SetMarker position, TrackHasChanged ]
+                    , [ SetMarker position, MarkerMoved ]
                     )
 
 

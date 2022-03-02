@@ -166,7 +166,7 @@ update msg msgWrapper track area context =
             if context.waitingForClickDelay then
                 ( context
                 , [ SetCurrent <| detectHit event track area context
-                  , TrackHasChanged
+                  , MarkerMoved
                   ]
                 )
 
@@ -180,7 +180,7 @@ update msg msgWrapper track area context =
             in
             ( { context | focalPoint = earthPointFromIndex nearestPoint track.trackTree }
             , [ SetCurrent nearestPoint
-              , TrackHasChanged
+              , MarkerMoved
               ]
             )
 

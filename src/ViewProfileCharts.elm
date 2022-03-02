@@ -430,7 +430,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
             --if context.waitingForClickDelay then
             ( context
             , [ SetCurrent <| detectHit event track ( givenWidth, givenHeight ) context
-              , TrackHasChanged
+              , MarkerMoved
               ]
             )
 

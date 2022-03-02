@@ -14,7 +14,13 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 ## Intersection detection 
 
-- Debug.
+Rewrite RoadIndex to use quad-tree; see if faster.
+
+BUG: Should not do it again if colour is changed! 
+Or if user just clicks, forcing a rerender 
+(actually poor show that we can't distinguish that -- TrackChanged should make the distinction !!!)
+Should warn user of expected time.
+Needs to display info in list.
 
 **JB**: I have been getting a few Partner event gpx's lately that do a loop... but then continue around for say 25% of it before finishing which when a map is first loaded i do not notice until i start working on it... it would be nice if when a map is first loaded the points show a different colour when there is another course on top.. ie orange for the first lap but if it continues say red until it finishes..
 
@@ -24,8 +30,9 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 ## Tools: old, updated, & new
 
-1. Graph Theory (notes below and from DO's emails)
-2. Dragging the 3D view turns off the lock
+1. Selecting new point should be distinct in TrackChanged; the track hasn't really changed and not all tools will care!
+2. Graph Theory (notes below and from DO's emails)
+3. Dragging the 3D view turns off the lock
 
 --- _Cut-off for release_
 - Info popup for all tools.

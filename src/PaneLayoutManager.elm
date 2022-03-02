@@ -593,7 +593,7 @@ update paneMsg msgWrapper mTrack contentArea options previews =
             in
             ( newOptions
             , [ SetCurrent pos
-              , TrackHasChanged
+              , MarkerMoved
 
               --, RenderProfile
               , if mapFollowsOrange then
