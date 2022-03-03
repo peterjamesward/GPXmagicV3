@@ -24,6 +24,9 @@ renderPreview { tag, shape, colour, points } =
             -- Can't do arbitrary stuff on the Map.
             E.null
 
+        PreviewProfile _ ->
+            E.null
+
 
 lineToJSON : List GPXSource -> E.Value
 lineToJSON points =

@@ -848,6 +848,10 @@ renderProfileData track displayWidth previews context =
                         PreviewToolSupplied callback ->
                             -- This may be breaking one of those Elmish rules.
                             []
+
+                        PreviewProfile _ ->
+                            -- This will be rendered in SVG.
+                            []
             in
             previews |> Dict.values |> List.concatMap onePreview
 

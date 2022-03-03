@@ -1,6 +1,7 @@
 module ToolsController exposing (..)
 
 import Actions exposing (ToolAction(..))
+import ColourPalette exposing (stravaOrange)
 import Dict exposing (Dict)
 import Element exposing (..)
 import Element.Background as Background exposing (color)
@@ -489,8 +490,8 @@ stravaTool =
     , video = Nothing
     , state = Contracted
     , dock = DockUpperRight
-    , tabColour = FlatColors.FlatUIPalette.orange
-    , textColour = contrastingColour FlatColors.FlatUIPalette.orange
+    , tabColour = stravaOrange
+    , textColour = contrastingColour stravaOrange
     , isPopupOpen = False
     }
 

@@ -187,6 +187,10 @@ renderPreviews previews =
                 PreviewToolSupplied callback ->
                     -- This may be breaking one of those Elmish rules.
                     callback
+
+                PreviewProfile _ ->
+                    -- We don't (yet) do these in 3d.
+                    []
     in
     previews |> Dict.values |> List.concatMap onePreview
 

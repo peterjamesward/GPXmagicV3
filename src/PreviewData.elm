@@ -11,6 +11,7 @@ type PreviewShape
     = PreviewCircle
     | PreviewLine
     | PreviewToolSupplied (List (Entity LocalCoords))
+    | PreviewProfile PeteTree -- experimental for filter previews on Profile only.
 
 
 type alias PreviewData =
@@ -28,4 +29,3 @@ type alias PreviewPoint =
     , earthPoint : EarthPoint
     , gpx : GPXSource
     }
-
