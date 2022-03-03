@@ -367,6 +367,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
     in
     column
         (pointer
+            :: Background.color FlatColors.ChinesePalette.antiFlashWhite
             :: (inFront <| zoomButtons msgWrapper context)
             :: common3dSceneAttributes msgWrapper context
         )
@@ -647,8 +648,7 @@ renderProfileData :
     -> Context
 renderProfileData track displayWidth context =
     let
-        --TODO: Consider moving this, oddly enough, into view.
-        -- ALthough, looks like it's reusable as it stands, if we use a dummy context.
+        --TODO: Defer render into `view`
         currentPoint =
             earthPointFromIndex track.currentPosition track.trackTree
 
