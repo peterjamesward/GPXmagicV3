@@ -36,7 +36,7 @@ defaultOptions =
     , measurementNoise = 3.0
     , useDeltaSlope = False
     , maximumAscent = 15.0
-    , maximumDescent = -15.0
+    , maximumDescent = 15.0
     , windowSize = 5
     }
 

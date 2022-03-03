@@ -369,12 +369,8 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
             :: (inFront <| zoomButtons msgWrapper context)
             :: common3dSceneAttributes msgWrapper context
         )
-        [ Element.el
-            [ Element.inFront (Element.html altitudeOverlay) ]
-            (Element.html altitudeScene)
-        , Element.el
-            [ Element.inFront (Element.html gradientOverlay) ]
-            (Element.html gradientScene)
+        [ Element.html altitudeOverlay
+        , Element.html gradientOverlay
         ]
 
 
