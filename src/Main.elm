@@ -71,7 +71,7 @@ import Tools.TrackInfoBox
 import ToolsController exposing (ToolEntry, encodeColour, encodeToolState)
 import TrackLoaded exposing (TrackLoaded)
 import Url exposing (Url)
-import UtilsForViews exposing (colourHexString)
+import UtilsForViews exposing (uiColourHexString)
 import View3dCommonElements exposing (stopProp)
 import ViewMap
 import ViewPureStyles exposing (..)
@@ -1928,14 +1928,14 @@ performActionCommands actions model =
                             MapPortController.showPreview
                                 useThisData.tag
                                 "circle"
-                                (colourHexString useThisData.colour)
+                                (uiColourHexString useThisData.colour)
                                 (SceneBuilderMap.renderPreview useThisData)
 
                         PreviewLine ->
                             MapPortController.showPreview
                                 useThisData.tag
                                 "line"
-                                (colourHexString useThisData.colour)
+                                (uiColourHexString useThisData.colour)
                                 (SceneBuilderMap.renderPreview useThisData)
 
                         _ ->

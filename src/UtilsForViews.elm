@@ -134,8 +134,8 @@ showDecimal6 x =
     format locale x
 
 
-colourHexString : Element.Color -> String
-colourHexString colour =
+uiColourHexString : Element.Color -> String
+uiColourHexString colour =
     let
         { red, green, blue, alpha } =
             Element.toRgb colour
@@ -153,6 +153,30 @@ colourHexString colour =
         ++ (leadingZeroes <| Hex.toString redInt)
         ++ (leadingZeroes <| Hex.toString greenInt)
         ++ (leadingZeroes <| Hex.toString blueInt)
+
+
+
+colourHexString : Color.Color -> String
+colourHexString colour =
+    let
+        { red, green, blue, alpha } =
+            Color.toRgba colour
+
+        ( redInt, greenInt, blueInt ) =
+            ( floor <| red * 255
+            , floor <| green * 255
+            , floor <| blue * 255
+            )
+
+        leadingZeroes str =
+            String.repeat (2 - String.length str) "0" ++ str
+    in
+    "#"
+        ++ (leadingZeroes <| Hex.toString redInt)
+        ++ (leadingZeroes <| Hex.toString greenInt)
+        ++ (leadingZeroes <| Hex.toString blueInt)
+
+
 
 
 fullDepthRenderingBoxSize =

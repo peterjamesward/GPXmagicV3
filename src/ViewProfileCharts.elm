@@ -31,6 +31,7 @@ import Plane3d
 import Point2d exposing (Point2d)
 import Point3d exposing (Point3d)
 import Point3d.Projection as Point3d
+import Polygon2d
 import Polyline2d
 import PreviewData exposing (PreviewData, PreviewPoint, PreviewShape(..))
 import Quantity exposing (Quantity, toFloatQuantity)
@@ -208,6 +209,8 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                         (orangeSvg :: orangeText ++ purpleSvg)
                 , Svg.relativeTo topLeftFrame <|
                     pointsAsPolyline context.altitudeSvgPoints
+                , Svg.relativeTo topLeftFrame <|
+                    curtainFromPoints context.altitudeSvgPoints
                 ]
 
         pointsAsPolyline : List (Point3d Meters LocalCoords) -> Svg msg
@@ -224,6 +227,47 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                 , Svg.Attributes.strokeLinejoin "round"
                 ]
                 (Polyline2d.fromVertices pointsInScreenSpace)
+
+        curtainFromPoints : List (Point3d Meters LocalCoords) -> Svg msg
+        curtainFromPoints points =
+            let
+                pointsInScreenSpace =
+                    points |> List.map (Point3d.toScreenSpace camera screenRectangle)
+
+                originInScreenSpace =
+                    Point3d.toScreenSpace camera screenRectangle Point3d.origin
+
+                someDistanceInScreenSpace =
+                    Point3d.toScreenSpace camera screenRectangle <|
+                        Point3d.meters 1000 0 0
+
+                screenAxis =
+                    Axis2d.throughPoints originInScreenSpace someDistanceInScreenSpace
+                        |> Maybe.withDefault Axis2d.x
+
+                onePolygon pt0 pt1 pt2 =
+                    -- pt0 is 3d original so we can get gradient, pt1 and 2 in screen space.
+                    Svg.polygon2d
+                        [ Svg.Attributes.stroke "none"
+                        , Svg.Attributes.fill <|
+                            UtilsForViews.colourHexString <|
+                                gradientColourPastel <|
+                                    Length.inMeters (Point3d.yCoordinate pt0)
+                        ]
+                        (Polygon2d.singleLoop
+                            [ pt1
+                            , pt2
+                            , pt2 |> Point2d.projectOnto screenAxis
+                            , pt1 |> Point2d.projectOnto screenAxis
+                            ]
+                        )
+            in
+            Svg.g [] <|
+                List.map3
+                    onePolygon
+                    points
+                    pointsInScreenSpace
+                    (List.drop 1 pointsInScreenSpace)
 
         screenRectangle =
             Rectangle2d.from
