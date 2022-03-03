@@ -38,9 +38,44 @@ type alias Options msg =
     }
 
 
+removeAdjacentDuplicates : List GPXSource -> List GPXSource
+removeAdjacentDuplicates gpxs =
+    -- Just removing stationary points fixes so many problems.
+    let
+        areSame : GPXSource -> GPXSource -> Bool
+        areSame a b =
+            a.latitude == b.latitude && a.longitude == b.longitude
+
+        helper inputs outputs =
+            -- Conses non-stationary points on to outputs.
+            -- Note that outputs therefore also has last point at its head.
+            case ( inputs, outputs ) of
+                ( [], _ ) ->
+                    outputs
+
+                ( firstInput :: moreInputs, [] ) ->
+                    helper moreInputs [ firstInput ]
+
+                ( finalInput :: [], previousOutput :: _ ) ->
+                    if areSame finalInput previousOutput then
+                        outputs
+
+                    else
+                        finalInput :: outputs
+
+                ( someInput :: moreInputs, previousOutput :: _ ) ->
+                    if areSame someInput previousOutput then
+                        helper moreInputs outputs
+
+                    else
+                        helper moreInputs (someInput :: outputs)
+    in
+    List.reverse <| helper gpxs []
+
+
 trackFromPoints : String -> List GPXSource -> Maybe (TrackLoaded msg)
 trackFromPoints trackName gpxTrack =
-    case treeFromSourcePoints gpxTrack of
+    case treeFromSourcePoints <| removeAdjacentDuplicates gpxTrack of
         Just aTree ->
             Just
                 { trackTree = aTree

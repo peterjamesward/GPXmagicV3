@@ -54,8 +54,8 @@ import Tools.DeletePoints as DeletePoints
 import Tools.DisplaySettings
 import Tools.Interpolate
 import Tools.InterpolateOptions
-import Tools.LimitGradientOptions
-import Tools.LimitGradients
+import Tools.ProfileSmoothOptions
+import Tools.ProfileSmooth
 import Tools.MoveAndStretch
 import Tools.MoveScaleRotate
 import Tools.Nudge
@@ -1518,15 +1518,15 @@ performActionsOnModel actions model =
                 ( LimitGradientWithOptions options, Just track ) ->
                     let
                         ( newTree, oldPoints ) =
-                            Tools.LimitGradients.apply options track
+                            Tools.ProfileSmooth.apply options track
 
                         ( fromStart, fromEnd ) =
                             -- Repetition of this is untidy.
                             case options.extent of
-                                Tools.LimitGradientOptions.ExtentIsRange ->
+                                Tools.ProfileSmoothOptions.ExtentIsRange ->
                                     TrackLoaded.getRangeFromMarkers track
 
-                                Tools.LimitGradientOptions.ExtentIsTrack ->
+                                Tools.ProfileSmoothOptions.ExtentIsTrack ->
                                     ( 0, 0 )
 
                         newTrack =

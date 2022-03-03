@@ -34,8 +34,8 @@ import Tools.GradientProblems
 import Tools.Interpolate
 import Tools.InterpolateOptions
 import Tools.Intersections
-import Tools.LimitGradientOptions
-import Tools.LimitGradients
+import Tools.ProfileSmoothOptions
+import Tools.ProfileSmooth
 import Tools.MoveAndStretch
 import Tools.MoveAndStretchOptions
 import Tools.MoveScaleRotate
@@ -81,7 +81,7 @@ type ToolType
     | ToolOutAndBack
     | ToolSimplify
     | ToolInterpolate
-    | ToolLimitGradient
+    | ToolProfileSmooth
     | ToolMoveScaleRotate
     | ToolFlythrough
     | ToolStrava
@@ -111,7 +111,7 @@ type alias Options =
     , outAndBackSettings : Tools.OutAndBackOptions.Options
     , simplifySettings : Tools.Simplify.Options
     , interpolateSettings : Tools.InterpolateOptions.Options
-    , limitGradientSettings : Tools.LimitGradientOptions.Options
+    , profileSmoothSettings : Tools.ProfileSmoothOptions.Options
     , moveScaleRotateSettings : Tools.MoveScaleRotateOptions.Options
     , flythroughSettings : Tools.Flythrough.Options
     , stravaSettings : Tools.StravaOptions.Options
@@ -142,7 +142,7 @@ defaultOptions =
     , outAndBackSettings = Tools.OutAndBack.defaultOptions
     , simplifySettings = Tools.Simplify.defaultOptions
     , interpolateSettings = Tools.Interpolate.defaultOptions
-    , limitGradientSettings = Tools.LimitGradients.defaultOptions
+    , profileSmoothSettings = Tools.ProfileSmooth.defaultOptions
     , moveScaleRotateSettings = Tools.MoveScaleRotate.defaultOptions
     , flythroughSettings = Tools.Flythrough.defaultOptions
     , stravaSettings = Tools.StravaTools.defaultOptions
@@ -177,7 +177,7 @@ type ToolMsg
     | ToolOutAndBackMsg Tools.OutAndBack.Msg
     | ToolSimplifyMsg Tools.Simplify.Msg
     | ToolInterpolateMsg Tools.Interpolate.Msg
-    | ToolLimitGradientMsg Tools.LimitGradients.Msg
+    | ToolProfileSmoothMsg Tools.ProfileSmooth.Msg
     | ToolMoveScaleRotateMsg Tools.MoveScaleRotate.Msg
     | ToolFlythroughMsg Tools.Flythrough.Msg
     | ToolStravaMsg Tools.StravaTools.Msg
@@ -218,7 +218,7 @@ defaultTools =
     , outAndBackTool
     , simplifyTool
     , interpolateTool
-    , limitGradientTool
+    , profileSmoothTool
     , moveScaleRotateTool
     , flythroughTool
     , stravaTool
@@ -439,11 +439,11 @@ interpolateTool =
     }
 
 
-limitGradientTool : ToolEntry
-limitGradientTool =
-    { toolType = ToolLimitGradient
-    , label = "Limit Gradients"
-    , info = "Limit Gradients"
+profileSmoothTool : ToolEntry
+profileSmoothTool =
+    { toolType = ToolProfileSmooth
+    , label = "Smooth Profile"
+    , info = "Smooth profile"
     , video = Nothing
     , state = Contracted
     , dock = DockUpperRight
@@ -863,16 +863,16 @@ update toolMsg isTrack msgWrapper options =
             , actions
             )
 
-        ToolLimitGradientMsg msg ->
+        ToolProfileSmoothMsg msg ->
             let
                 ( newOptions, actions ) =
-                    Tools.LimitGradients.update
+                    Tools.ProfileSmooth.update
                         msg
-                        options.limitGradientSettings
-                        (getColour ToolLimitGradient options.tools)
+                        options.profileSmoothSettings
+                        (getColour ToolProfileSmooth options.tools)
                         isTrack
             in
-            ( { options | limitGradientSettings = newOptions }
+            ( { options | profileSmoothSettings = newOptions }
             , actions
             )
 
@@ -1223,17 +1223,17 @@ toolStateHasChanged toolType newState isTrack options =
             in
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
-        ToolLimitGradient ->
+        ToolProfileSmooth ->
             let
                 ( newToolOptions, actions ) =
-                    Tools.LimitGradients.toolStateChange
+                    Tools.ProfileSmooth.toolStateChange
                         (newState == Expanded)
                         (getColour toolType options.tools)
-                        options.limitGradientSettings
+                        options.profileSmoothSettings
                         isTrack
 
                 newOptions =
-                    { options | limitGradientSettings = newToolOptions }
+                    { options | profileSmoothSettings = newToolOptions }
             in
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
@@ -1604,10 +1604,10 @@ viewToolByType msgWrapper entry isTrack options =
                     options.interpolateSettings
                     isTrack
 
-            ToolLimitGradient ->
-                Tools.LimitGradients.view
-                    options.limitGradientSettings
-                    (msgWrapper << ToolLimitGradientMsg)
+            ToolProfileSmooth ->
+                Tools.ProfileSmooth.view
+                    options.profileSmoothSettings
+                    (msgWrapper << ToolProfileSmoothMsg)
 
             ToolMoveScaleRotate ->
                 Tools.MoveScaleRotate.view
@@ -1745,8 +1745,8 @@ encodeType toolType =
         ToolInterpolate ->
             "ToolInterpolate"
 
-        ToolLimitGradient ->
-            "ToolLimitGradient"
+        ToolProfileSmooth ->
+            "ToolProfileSmooth"
 
         ToolMoveScaleRotate ->
             "ToolMoveScaleRotate"

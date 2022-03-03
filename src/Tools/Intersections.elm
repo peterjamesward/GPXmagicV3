@@ -173,13 +173,35 @@ view imperial msgWrapper options track =
                             ]
                         ]
 
-        linkButton point =
+        linkButton : Intersection -> Element msg
+        linkButton { thisSegment, otherSegment, category } =
+            let
+                distamceText =
+                    " at "
+                        ++ (showLongMeasure imperial <|
+                                DomainModel.distanceFromIndex thisSegment track.trackTree
+                           )
+
+                categoryText =
+                    case category of
+                        RoadIndex.Crossing pointXY ->
+                            " crosses "
+
+                        RoadIndex.SameDirection ->
+                            " loops "
+
+                        RoadIndex.ContraDirection ->
+                            " reverses "
+
+                thisText =
+                    String.fromInt thisSegment
+
+                otherText =
+                    String.fromInt otherSegment
+            in
             Input.button neatToolsBorder
-                { onPress = Just (msgWrapper <| SetCurrentPosition point)
-                , label =
-                    text <|
-                        showLongMeasure imperial <|
-                            DomainModel.distanceFromIndex point track.trackTree
+                { onPress = Just (msgWrapper <| SetCurrentPosition thisSegment)
+                , label = text <| thisText ++ categoryText ++ otherText ++ distamceText
                 }
     in
     el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
@@ -190,9 +212,6 @@ view imperial msgWrapper options track =
                     resultsNavigation
 
                 ResultList ->
-                    wrappedRow [ height <| px 150, scrollbarY ] <|
-                        List.map
-                            linkButton
-                        <|
-                            List.map .thisSegment options.features
+                    column [ height <| px 150, scrollbarY ] <|
+                        List.map linkButton options.features
             ]

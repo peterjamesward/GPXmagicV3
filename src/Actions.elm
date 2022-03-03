@@ -13,7 +13,7 @@ import Tools.BezierOptions
 import Tools.CentroidAverageOptions
 import Tools.CurveFormerOptions
 import Tools.InterpolateOptions
-import Tools.LimitGradientOptions
+import Tools.ProfileSmoothOptions
 import Tools.MemoryUsage
 import Tools.MoveAndStretchOptions
 import Tools.MoveScaleRotateOptions
@@ -56,7 +56,7 @@ type ToolAction msg
     | ApplySimplify
     | ApplyInterpolateWithOptions Tools.InterpolateOptions.Options
     | OneClickQuickFix
-    | LimitGradientWithOptions Tools.LimitGradientOptions.Options
+    | LimitGradientWithOptions Tools.ProfileSmoothOptions.Options
     | ApplyRotateAndScale Tools.MoveScaleRotateOptions.Options
     | ApplyRecentre ( Float, Float )
     | AddFullTrackToMap

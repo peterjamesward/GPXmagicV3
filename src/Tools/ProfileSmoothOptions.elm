@@ -1,4 +1,4 @@
-module Tools.LimitGradientOptions exposing (..)
+module Tools.ProfileSmoothOptions exposing (..)
 
 import DomainModel exposing (PeteTree)
 import Length

@@ -63,7 +63,7 @@ findFeatures treeNode =
                 , []
                 )
     in
-    intersections
+    List.reverse intersections
 
 
 checkLeafForIntersections :
