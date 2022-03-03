@@ -217,7 +217,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                     points |> List.map (Point3d.toScreenSpace camera screenRectangle)
             in
             Svg.polyline2d
-                [ Svg.Attributes.stroke "blue"
+                [ Svg.Attributes.stroke "black"
                 , Svg.Attributes.fill "none"
                 , Svg.Attributes.strokeWidth "3"
                 , Svg.Attributes.strokeLinecap "round"
@@ -742,6 +742,16 @@ renderProfileData track displayWidth previews context =
                 (foldFn makeSvgPoint)
                 ( trueLeftEdge, [], Nothing )
 
+        finalSvgPoint =
+            let
+                leaf =
+                    asRecord <| leafFromIndex rightIndex track.trackTree
+            in
+            Point3d.xyz
+                rightEdge
+                (Length.meters <| compensateForZoom leaf.gradientAtStart)
+                (leaf.endPoint |> Point3d.zCoordinate |> Quantity.multiplyBy context.emphasis)
+
         finalDatum =
             case final of
                 Just finalLeaf ->
@@ -834,7 +844,7 @@ renderProfileData track displayWidth previews context =
                 ++ renderPreviews
                 ++ entities
         , metresPerPixel = metresPerPixel
-        , altitudeSvgPoints = altitudeSvgPoints
+        , altitudeSvgPoints = finalSvgPoint :: altitudeSvgPoints
     }
 
 
