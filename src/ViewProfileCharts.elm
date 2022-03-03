@@ -41,7 +41,7 @@ import Scene3d.Material as Material
 import Svg exposing (Svg)
 import Svg.Attributes exposing (..)
 import TrackLoaded exposing (TrackLoaded)
-import UtilsForViews exposing (showDecimal2, showDecimal6, showLongMeasure, showShortMeasure)
+import UtilsForViews exposing (colourHexString, showDecimal2, showDecimal6, showLongMeasure, showShortMeasure, uiColourHexString)
 import Vector2d
 import Vector3d
 import View3dCommonElements exposing (Msg(..), common3dSceneAttributes)
@@ -222,7 +222,9 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
                         altitudeWidth
                         context
             in
-            pointsAsAltitudePolyline "green" dummyContext.altitudeSvgPoints
+            pointsAsAltitudePolyline
+                (uiColourHexString colour)
+                dummyContext.altitudeSvgPoints
 
         pointsAsAltitudePolyline : String -> List (Point3d Meters LocalCoords) -> Svg msg
         pointsAsAltitudePolyline colour points =
