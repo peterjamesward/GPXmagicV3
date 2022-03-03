@@ -205,19 +205,29 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                 , Svg.Attributes.height svgHeight
                 ]
                 [ Svg.relativeTo topLeftFrame <|
-                    Svg.g []
-                        (orangeSvg :: orangeText ++ purpleSvg)
+                    pointsAsAltitudePolyline context.altitudeSvgPoints
                 , Svg.relativeTo topLeftFrame <|
-                    pointsAsPolyline context.altitudeSvgPoints
-                --, Svg.relativeTo topLeftFrame <|
-                --    curtainFromPoints context.altitudeSvgPoints
+                    Svg.g []
+                        (orangeAltitudeSvg :: orangeText ++ purpleSvg)
                 ]
 
-        pointsAsPolyline : List (Point3d Meters LocalCoords) -> Svg msg
-        pointsAsPolyline points =
+        gradientOverlay =
+            Svg.svg
+                [ Svg.Attributes.width svgWidth
+                , Svg.Attributes.height svgHeight
+                ]
+                [ Svg.relativeTo topLeftFrame <|
+                    pointsAsGradientPolyline context.altitudeSvgPoints
+                , Svg.relativeTo topLeftFrame <|
+                    Svg.g []
+                        (orangeGradientSvg :: orangeText)
+                ]
+
+        pointsAsAltitudePolyline : List (Point3d Meters LocalCoords) -> Svg msg
+        pointsAsAltitudePolyline points =
             let
                 pointsInScreenSpace =
-                    points |> List.map (Point3d.toScreenSpace camera screenRectangle)
+                    points |> List.map (Point3d.toScreenSpace altitudeCamera altitudeScreenRectangle)
             in
             Svg.polyline2d
                 [ Svg.Attributes.stroke "black"
@@ -228,48 +238,23 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                 ]
                 (Polyline2d.fromVertices pointsInScreenSpace)
 
-        curtainFromPoints : List (Point3d Meters LocalCoords) -> Svg msg
-        curtainFromPoints points =
+        pointsAsGradientPolyline : List (Point3d Meters LocalCoords) -> Svg msg
+        pointsAsGradientPolyline points =
             let
                 pointsInScreenSpace =
-                    points |> List.map (Point3d.toScreenSpace camera screenRectangle)
-
-                originInScreenSpace =
-                    Point3d.toScreenSpace camera screenRectangle Point3d.origin
-
-                someDistanceInScreenSpace =
-                    Point3d.toScreenSpace camera screenRectangle <|
-                        Point3d.meters 1000 0 0
-
-                screenAxis =
-                    Axis2d.throughPoints originInScreenSpace someDistanceInScreenSpace
-                        |> Maybe.withDefault Axis2d.x
-
-                onePolygon pt0 pt1 pt2 =
-                    -- pt0 is 3d original so we can get gradient, pt1 and 2 in screen space.
-                    Svg.polygon2d
-                        [ Svg.Attributes.stroke "none"
-                        , Svg.Attributes.fill <|
-                            UtilsForViews.colourHexString <|
-                                gradientColourPastel <|
-                                    Length.inMeters (Point3d.yCoordinate pt0)
-                        ]
-                        (Polygon2d.singleLoop
-                            [ pt1
-                            , pt2
-                            , pt2 |> Point2d.projectOnto screenAxis
-                            , pt1 |> Point2d.projectOnto screenAxis
-                            ]
-                        )
-            in
-            Svg.g [] <|
-                List.map3
-                    onePolygon
                     points
-                    pointsInScreenSpace
-                    (List.drop 1 pointsInScreenSpace)
+                        |> List.map (Point3d.toScreenSpace gradientCamera gradientScreenRectangle)
+            in
+            Svg.polyline2d
+                [ Svg.Attributes.stroke "black"
+                , Svg.Attributes.fill "none"
+                , Svg.Attributes.strokeWidth "3"
+                , Svg.Attributes.strokeLinecap "round"
+                , Svg.Attributes.strokeLinejoin "round"
+                ]
+                (Polyline2d.fromVertices pointsInScreenSpace)
 
-        screenRectangle =
+        altitudeScreenRectangle =
             Rectangle2d.from
                 Point2d.origin
                 (Point2d.xy
@@ -277,8 +262,23 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                     (Quantity.toFloatQuantity altitudeHeight)
                 )
 
-        camera =
+        gradientScreenRectangle =
+            Rectangle2d.from
+                Point2d.origin
+                (Point2d.xy
+                    (Quantity.toFloatQuantity gradientWidth)
+                    (Quantity.toFloatQuantity gradientHeight)
+                )
+
+        altitudeCamera =
             deriveAltitudeCamera
+                track.trackTree
+                context
+                track.currentPosition
+                ( altitudeWidth, altitudeHeight )
+
+        gradientCamera =
+            deriveGradientCamera
                 track.trackTree
                 context
                 track.currentPosition
@@ -287,17 +287,29 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
         orangeLeaf =
             asRecord <| DomainModel.leafFromIndex track.currentPosition track.trackTree
 
-        orange2d =
+        orangeAltitude2d =
             pointInAltitudeView context track.currentPosition track.trackTree
-                |> Point3d.toScreenSpace camera screenRectangle
+                |> Point3d.toScreenSpace altitudeCamera altitudeScreenRectangle
 
-        orangeSvg =
+        orangeAltitudeSvg =
             Svg.circle2d
                 [ Svg.Attributes.stroke "orange"
                 , Svg.Attributes.strokeWidth "4"
                 , Svg.Attributes.fill "none"
                 ]
-                (Circle2d.withRadius (Pixels.float 10) orange2d)
+                (Circle2d.withRadius (Pixels.float 10) orangeAltitude2d)
+
+        orangeGradient2d =
+            pointInGradientView context track.currentPosition track.trackTree
+                |> Point3d.toScreenSpace gradientCamera gradientScreenRectangle
+
+        orangeGradientSvg =
+            Svg.circle2d
+                [ Svg.Attributes.stroke "orange"
+                , Svg.Attributes.strokeWidth "4"
+                , Svg.Attributes.fill "none"
+                ]
+                (Circle2d.withRadius (Pixels.float 10) orangeGradient2d)
 
         purpleSvg =
             case track.markerPosition of
@@ -305,7 +317,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                     let
                         purple2d =
                             pointInAltitudeView context purple track.trackTree
-                                |> Point3d.toScreenSpace camera screenRectangle
+                                |> Point3d.toScreenSpace altitudeCamera altitudeScreenRectangle
                     in
                     [ Svg.circle2d
                         [ Svg.Attributes.stroke "purple"
@@ -326,18 +338,18 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                 , Svg.Attributes.stroke "none"
                 , Svg.Attributes.x
                     (String.fromFloat
-                        (Pixels.toFloat (Point2d.xCoordinate orange2d) + 20)
+                        (Pixels.toFloat (Point2d.xCoordinate orangeAltitude2d) + 20)
                     )
                 , Svg.Attributes.y
                     (String.fromFloat
-                        (Pixels.toFloat (Point2d.yCoordinate orange2d) - lineNum * 20)
+                        (Pixels.toFloat (Point2d.yCoordinate orangeAltitude2d) - lineNum * 20)
                     )
                 ]
                 [ Svg.text content ]
                 -- Hack: flip the text upside down since our later
                 -- 'Svg.relativeTo topLeftFrame' call will flip it
                 -- back right side up
-                |> Svg.mirrorAcross (Axis2d.through orange2d Direction2d.x)
+                |> Svg.mirrorAcross (Axis2d.through orangeAltitude2d Direction2d.x)
 
         orangeText =
             [ textLine 1 <| (showDecimal2 orangeLeaf.gradientAtStart ++ "%")
@@ -360,7 +372,9 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
         [ Element.el
             [ Element.inFront (Element.html altitudeOverlay) ]
             (Element.html altitudeScene)
-        , html <| gradientScene
+        , Element.el
+            [ Element.inFront (Element.html gradientOverlay) ]
+            (Element.html gradientScene)
         ]
 
 
@@ -609,6 +623,26 @@ pointInAltitudeView context i tree =
         (altitude |> Quantity.multiplyBy context.emphasis)
 
 
+pointInGradientView : Context -> Int -> PeteTree -> EarthPoint
+pointInGradientView context i tree =
+    let
+        distance =
+            DomainModel.distanceFromIndex i tree
+
+        gradient =
+            DomainModel.leafFromIndex i tree
+                |> DomainModel.gradientFromNode
+
+        compensateForZoom g =
+            -- Empirical!
+            2.0 * g * (0.5 ^ context.zoomLevel) * (Length.inKilometers <| trueLength tree)
+    in
+    Point3d.xyz
+        distance
+        (Length.meters <| compensateForZoom gradient)
+        Quantity.zero
+
+
 renderProfileData :
     TrackLoaded msg
     -> Quantity Int Pixels
@@ -719,25 +753,8 @@ renderProfileData track displayWidth previews context =
                                 Quantity.zero
                             )
             in
-            [ Scene3d.point { radius = Pixels.pixels 1 }
-                (Material.color Color.black)
-                (LineSegment3d.startPoint roadAsSegmentForAltitude)
-
-            --, Scene3d.lineSegment (Material.color Color.black) <|
-            --    roadAsSegmentForAltitude
-            --, Scene3d.quad (Material.color <| gradientColourPastel gradient)
-            --    (LineSegment3d.startPoint roadAsSegmentForAltitude)
-            --    (LineSegment3d.endPoint roadAsSegmentForAltitude)
-            --    (LineSegment3d.endPoint curtainHem)
-            --    (LineSegment3d.startPoint curtainHem)
-
-            , Scene3d.lineSegment (Material.color Color.black) <|
+            [ Scene3d.lineSegment (Material.color Color.black) <|
                 roadAsSegmentForGradient
-            --, Scene3d.quad (Material.color <| gradientColourPastel gradient)
-            --    (LineSegment3d.startPoint roadAsSegmentForGradient)
-            --    (LineSegment3d.endPoint roadAsSegmentForGradient)
-            --    (LineSegment3d.endPoint curtainHem)
-            --    (LineSegment3d.startPoint curtainHem)
             ]
 
         makeSvgPoint : Length.Length -> RoadSection -> List (Point3d Meters LocalCoords)
@@ -766,16 +783,15 @@ renderProfileData track displayWidth previews context =
             , Just road
             )
 
-        ( _, entities, final ) =
-            DomainModel.traverseTreeBetweenLimitsToDepth
-                leftIndex
-                rightIndex
-                depthFn
-                0
-                track.trackTree
-                (foldFn make3dSegment)
-                ( trueLeftEdge, [], Nothing )
-
+        --( _, entities, final ) =
+        --    DomainModel.traverseTreeBetweenLimitsToDepth
+        --        leftIndex
+        --        rightIndex
+        --        depthFn
+        --        0
+        --        track.trackTree
+        --        (foldFn make3dSegment)
+        --        ( trueLeftEdge, [], Nothing )
         ( _, altitudeSvgPoints, _ ) =
             DomainModel.traverseTreeBetweenLimitsToDepth
                 leftIndex
@@ -796,16 +812,15 @@ renderProfileData track displayWidth previews context =
                 (Length.meters <| compensateForZoom leaf.gradientAtStart)
                 (leaf.endPoint |> Point3d.zCoordinate |> Quantity.multiplyBy context.emphasis)
 
-        finalDatum =
-            case final of
-                Just finalLeaf ->
-                    -- Make sure we include final point
-                    []
-
-                Nothing ->
-                    -- Can't happen (FLW)
-                    []
-
+        --finalDatum =
+        --    case final of
+        --        Just finalLeaf ->
+        --            -- Make sure we include final point
+        --            []
+        --
+        --        Nothing ->
+        --            -- Can't happen (FLW)
+        --            []
         pAltitude p =
             Point3d.xyz
                 p.distance
@@ -884,9 +899,10 @@ renderProfileData track displayWidth previews context =
     in
     { context
         | profileScene =
-            finalDatum
-                ++ renderPreviews
-                ++ entities
+            --finalDatum
+            renderPreviews
+
+        --++ entities
         , metresPerPixel = metresPerPixel
         , altitudeSvgPoints = finalSvgPoint :: altitudeSvgPoints
     }
