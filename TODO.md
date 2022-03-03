@@ -12,23 +12,26 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 # WIP
 
-Going to pop in some filters from GPX Smoother. 
-Tempted to push all this into Limit Gradients and call it "Profile"
-If we match this with a nice (SVG) profile preview, we're good.
+## SVG profile rendering
 
-Do the SVG profile line first, for Bezier, Centroid, Nudge, Limit Gradients.
+Gradient in SVG
+Previews in SVG
+PeteTree previews for  Bezier, Centroid, Nudge, Limit Gradients.
+
 (I think there's a rendering error on Profile for centroid anyway.)
-Reckon all the Profile will end up as SVG again. Funny.
 
-Just the top three here:
+## Profile smoothing
 
-- Elavation box smoothing is simple running average of altitude.
-- Slope box smoothing does running average of gradients.
-- Kalman is what it is; not complex and seems to give some good results by damping gradient changes.
-But not:
+To deal with Vuew GPX Smoother.
+
+- **Elavation box** smoothing is simple running average of altitude.
+- **Slope box** smoothing does running average of gradients.
+- **Kalman** is what it is; not complex and seems to give some good results by damping gradient changes.
+
+- But not:
 - Savitzky-Golay is more complex least-squares based thing (not referenced by JB).
 - Elevate points is vertical Nudge.
-- Flatten points is Limit Gradients without the redistribution.
+- Flatten points (is Limit Gradients without the redistribution)
 
 
 ---

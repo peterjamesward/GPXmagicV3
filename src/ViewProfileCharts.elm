@@ -209,8 +209,8 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                         (orangeSvg :: orangeText ++ purpleSvg)
                 , Svg.relativeTo topLeftFrame <|
                     pointsAsPolyline context.altitudeSvgPoints
-                , Svg.relativeTo topLeftFrame <|
-                    curtainFromPoints context.altitudeSvgPoints
+                --, Svg.relativeTo topLeftFrame <|
+                --    curtainFromPoints context.altitudeSvgPoints
                 ]
 
         pointsAsPolyline : List (Point3d Meters LocalCoords) -> Svg msg
@@ -297,7 +297,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                 , Svg.Attributes.strokeWidth "4"
                 , Svg.Attributes.fill "none"
                 ]
-                (Circle2d.withRadius (Pixels.float 8) orange2d)
+                (Circle2d.withRadius (Pixels.float 10) orange2d)
 
         purpleSvg =
             case track.markerPosition of
