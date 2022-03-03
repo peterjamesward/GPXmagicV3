@@ -18,7 +18,6 @@ Zero line for gradient.
 PeteTree previews for Bezier, Centroid, Nudge, Limit Gradients and new Filters.
 Info on mouse move.
 Scales?
-Background?
 
 ## Profile smoothing
 

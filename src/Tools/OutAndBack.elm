@@ -82,7 +82,7 @@ apply options track =
                 nudge =
                     { noNudge
                         | horizontal = Quantity.negate <| Length.meters options.offset
-                        , vertical = Length.centimeter
+                        , vertical = Quantity.negate Length.centimeter
                     }
             in
             List.map (useNudgeTool nudge) (List.range 0 (skipCount track.trackTree))
