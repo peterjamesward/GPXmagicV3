@@ -237,8 +237,8 @@ trackInfoBox =
     , video = Nothing
     , state = Contracted
     , dock = DockUpperRight
-    , tabColour = FlatColors.FlatUIPalette.peterRiver
-    , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
+    , tabColour = FlatColors.FlatUIPalette.turquoise
+    , textColour = contrastingColour FlatColors.FlatUIPalette.turquoise
     , isPopupOpen = False
     }
 
@@ -251,8 +251,8 @@ displaySettingsTool =
     , video = Nothing
     , state = Contracted
     , dock = DockUpperRight
-    , tabColour = FlatColors.FlatUIPalette.peterRiver
-    , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
+    , tabColour = FlatColors.FlatUIPalette.emerald
+    , textColour = contrastingColour FlatColors.FlatUIPalette.emerald
     , isPopupOpen = False
     }
 
@@ -265,8 +265,8 @@ undoRedoTool =
     , video = Nothing
     , state = Expanded
     , dock = DockUpperRight
-    , tabColour = FlatColors.FlatUIPalette.sunFlower
-    , textColour = contrastingColour FlatColors.FlatUIPalette.sunFlower
+    , tabColour = FlatColors.FlatUIPalette.peterRiver
+    , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
     , isPopupOpen = False
     }
 
@@ -279,8 +279,8 @@ directionChangeTool =
     , video = Nothing
     , state = Contracted
     , dock = DockUpperRight
-    , tabColour = FlatColors.FlatUIPalette.peterRiver
-    , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
+    , tabColour = FlatColors.FlatUIPalette.amethyst
+    , textColour = contrastingColour FlatColors.FlatUIPalette.amethyst
     , isPopupOpen = False
     }
 
@@ -293,8 +293,8 @@ gradientChangeTool =
     , video = Nothing
     , state = Contracted
     , dock = DockUpperRight
-    , tabColour = FlatColors.FlatUIPalette.peterRiver
-    , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
+    , tabColour = FlatColors.FlatUIPalette.wetAsphalt
+    , textColour = contrastingColour FlatColors.FlatUIPalette.wetAsphalt
     , isPopupOpen = False
     }
 
@@ -321,8 +321,8 @@ deleteTool =
     , video = Nothing
     , state = Contracted
     , dock = DockUpperRight
-    , tabColour = FlatColors.FlatUIPalette.concrete
-    , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
+    , tabColour = FlatColors.FlatUIPalette.greenSea
+    , textColour = contrastingColour FlatColors.FlatUIPalette.greenSea
     , isPopupOpen = False
     }
 
@@ -335,8 +335,8 @@ bezierSplinesTool =
     , video = Nothing
     , state = Contracted
     , dock = DockUpperRight
-    , tabColour = FlatColors.FlatUIPalette.amethyst
-    , textColour = contrastingColour FlatColors.FlatUIPalette.amethyst
+    , tabColour = FlatColors.FlatUIPalette.nephritis
+    , textColour = contrastingColour FlatColors.FlatUIPalette.nephritis
     , isPopupOpen = False
     }
 
@@ -349,8 +349,8 @@ centroidAverageTool =
     , video = Nothing
     , state = Contracted
     , dock = DockUpperRight
-    , tabColour = FlatColors.FlatUIPalette.amethyst
-    , textColour = contrastingColour FlatColors.FlatUIPalette.amethyst
+    , tabColour = FlatColors.FlatUIPalette.belizeHole
+    , textColour = contrastingColour FlatColors.FlatUIPalette.belizeHole
     , isPopupOpen = False
     }
 
@@ -363,8 +363,8 @@ curveFormerTool =
     , video = Nothing
     , state = Contracted
     , dock = DockUpperRight
-    , tabColour = FlatColors.FlatUIPalette.turquoise
-    , textColour = contrastingColour FlatColors.FlatUIPalette.turquoise
+    , tabColour = FlatColors.FlatUIPalette.wisteria
+    , textColour = contrastingColour FlatColors.FlatUIPalette.wisteria
     , isPopupOpen = False
     }
 
@@ -377,8 +377,8 @@ bendSmootherTool =
     , video = Nothing
     , state = Contracted
     , dock = DockUpperRight
-    , tabColour = FlatColors.FlatUIPalette.greenSea
-    , textColour = contrastingColour FlatColors.FlatUIPalette.greenSea
+    , tabColour = FlatColors.FlatUIPalette.midnightBlue
+    , textColour = contrastingColour FlatColors.FlatUIPalette.midnightBlue
     , isPopupOpen = False
     }
 
@@ -391,8 +391,8 @@ nudgeTool =
     , video = Nothing
     , state = Contracted
     , dock = DockUpperRight
-    , tabColour = FlatColors.FlatUIPalette.concrete
-    , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
+    , tabColour = FlatColors.FlatUIPalette.sunFlower
+    , textColour = contrastingColour FlatColors.FlatUIPalette.sunFlower
     , isPopupOpen = False
     }
 
@@ -405,8 +405,8 @@ outAndBackTool =
     , video = Nothing
     , state = Contracted
     , dock = DockUpperRight
-    , tabColour = FlatColors.FlatUIPalette.concrete
-    , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
+    , tabColour = FlatColors.FlatUIPalette.carrot
+    , textColour = contrastingColour FlatColors.FlatUIPalette.carrot
     , isPopupOpen = False
     }
 
@@ -419,8 +419,8 @@ simplifyTool =
     , video = Nothing
     , state = Contracted
     , dock = DockUpperRight
-    , tabColour = FlatColors.FlatUIPalette.concrete
-    , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
+    , tabColour = FlatColors.FlatUIPalette.alizarin
+    , textColour = contrastingColour FlatColors.FlatUIPalette.alizarin
     , isPopupOpen = False
     }
 
@@ -433,8 +433,8 @@ interpolateTool =
     , video = Nothing
     , state = Contracted
     , dock = DockUpperRight
-    , tabColour = FlatColors.FlatUIPalette.concrete
-    , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
+    , tabColour = FlatColors.FlatUIPalette.clouds
+    , textColour = contrastingColour FlatColors.FlatUIPalette.clouds
     , isPopupOpen = False
     }
 
@@ -461,8 +461,8 @@ moveScaleRotateTool =
     , video = Nothing
     , state = Contracted
     , dock = DockUpperRight
-    , tabColour = FlatColors.FlatUIPalette.concrete
-    , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
+    , tabColour = FlatColors.FlatUIPalette.pomegranate
+    , textColour = contrastingColour FlatColors.FlatUIPalette.pomegranate
     , isPopupOpen = False
     }
 
@@ -475,8 +475,8 @@ flythroughTool =
     , video = Nothing
     , state = Contracted
     , dock = DockUpperRight
-    , tabColour = FlatColors.FlatUIPalette.concrete
-    , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
+    , tabColour = FlatColors.FlatUIPalette.pumpkin
+    , textColour = contrastingColour FlatColors.FlatUIPalette.pumpkin
     , isPopupOpen = False
     }
 
@@ -489,8 +489,8 @@ stravaTool =
     , video = Nothing
     , state = Contracted
     , dock = DockUpperRight
-    , tabColour = FlatColors.FlatUIPalette.concrete
-    , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
+    , tabColour = FlatColors.FlatUIPalette.orange
+    , textColour = contrastingColour FlatColors.FlatUIPalette.orange
     , isPopupOpen = False
     }
 
@@ -503,8 +503,8 @@ moveAndStretchTool =
     , video = Nothing
     , state = Contracted
     , dock = DockUpperRight
-    , tabColour = FlatColors.FlatUIPalette.concrete
-    , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
+    , tabColour = FlatColors.FlatUIPalette.silver
+    , textColour = contrastingColour FlatColors.FlatUIPalette.silver
     , isPopupOpen = False
     }
 
@@ -517,8 +517,8 @@ startFinishTool =
     , video = Nothing
     , state = Contracted
     , dock = DockUpperRight
-    , tabColour = FlatColors.FlatUIPalette.concrete
-    , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
+    , tabColour = FlatColors.FlatUIPalette.asbestos
+    , textColour = contrastingColour FlatColors.FlatUIPalette.asbestos
     , isPopupOpen = False
     }
 
@@ -531,8 +531,8 @@ splitAndJoinTool =
     , video = Nothing
     , state = Contracted
     , dock = DockUpperRight
-    , tabColour = FlatColors.FlatUIPalette.concrete
-    , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
+    , tabColour = FlatColors.FlatUIPalette.turquoise
+    , textColour = contrastingColour FlatColors.FlatUIPalette.turquoise
     , isPopupOpen = False
     }
 
@@ -545,8 +545,8 @@ intersectionsTool =
     , video = Nothing
     , state = Contracted
     , dock = DockUpperRight
-    , tabColour = FlatColors.FlatUIPalette.concrete
-    , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
+    , tabColour = FlatColors.FlatUIPalette.emerald
+    , textColour = contrastingColour FlatColors.FlatUIPalette.emerald
     , isPopupOpen = False
     }
 
