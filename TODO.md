@@ -12,11 +12,13 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 # WIP
 
-Also: Quietly remove points with no horizontal separation.
-
 Going to pop in some filters from GPX Smoother. 
 Tempted to push all this into Limit Gradients and call it "Profile"
 If we match this with a nice (SVG) profile preview, we're good.
+
+Do the SVG profile line first, for Bezier, Centroid, Nudge, Limit Gradients.
+(I think there's a rendering error on Profile for centroid anyway.)
+Reckon all the Profile will end up as SVG again. Funny.
 
 Just the top three here:
 

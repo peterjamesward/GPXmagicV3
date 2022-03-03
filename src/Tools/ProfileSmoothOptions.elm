@@ -5,12 +5,23 @@ import Length
 
 
 type alias Options =
-    { maximumAscent : Float
-    , maximumDescent : Float
-    , extent : ExtentOption
+    { extent : ExtentOption
     , previewData : Maybe PeteTree
+    , smoothMethod : SmoothMethod
+    , maximumAscent : Float
+    , maximumDescent : Float
+    , processNoise : Float
+    , measurementNoise : Float
+    , useDeltaSlope : Bool
+    , windowSize : Int
     }
 
+
+type SmoothMethod
+    = MethodLimit
+    | MethodGradients
+    | MethodAltitudes
+    | MethodKalmanFilter
 
 
 type ExtentOption

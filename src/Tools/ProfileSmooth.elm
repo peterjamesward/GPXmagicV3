@@ -10,7 +10,7 @@ import Length exposing (Meters, inMeters, meters)
 import Point3d exposing (zCoordinate)
 import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (multiplyBy, zero)
-import Tools.ProfileSmoothOptions exposing (ExtentOption(..), Options)
+import Tools.ProfileSmoothOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal0)
 import ViewPureStyles exposing (commonShortHorizontalSliderStyles, neatToolsBorder, prettyButtonStyles)
@@ -21,14 +21,23 @@ type Msg
     | SetMaximumAscent Float
     | SetMaximumDescent Float
     | SetExtent ExtentOption
+    | SetProcessNoise Float
+    | SetMeasurementNoise Float
+    | SetDeltaSlope Bool
+    | SetWindowSize Int
 
 
 defaultOptions : Options
 defaultOptions =
-    { maximumAscent = 15.0
-    , maximumDescent = 15.0
+    { smoothMethod = MethodLimit
     , extent = ExtentIsRange
     , previewData = Nothing
+    , processNoise = 0.01
+    , measurementNoise = 3.0
+    , useDeltaSlope = False
+    , maximumAscent = 15.0
+    , maximumDescent = -15.0
+    , windowSize = 5
     }
 
 

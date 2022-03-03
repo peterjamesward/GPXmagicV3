@@ -23,14 +23,15 @@ import FlatColors.ChinesePalette exposing (white)
 import Frame2d
 import Geometry.Svg as Svg
 import Html.Events.Extra.Mouse as Mouse exposing (Button(..))
-import Length
+import Length exposing (Meters)
 import LineSegment3d
 import LocalCoords exposing (LocalCoords)
 import Pixels exposing (Pixels)
 import Plane3d
-import Point2d
+import Point2d exposing (Point2d)
 import Point3d exposing (Point3d)
 import Point3d.Projection as Point3d
+import Polyline2d
 import PreviewData exposing (PreviewData, PreviewPoint, PreviewShape(..))
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
@@ -68,6 +69,7 @@ type alias Context =
     , waitingForClickDelay : Bool
     , profileScene : List (Entity LocalCoords)
     , emphasis : Float
+    , altitudeSvgPoints : List (Point3d Meters LocalCoords)
     }
 
 
@@ -202,8 +204,26 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                 , Svg.Attributes.height svgHeight
                 ]
                 [ Svg.relativeTo topLeftFrame <|
-                    Svg.g [] (orangeSvg :: orangeText ++ purpleSvg)
+                    Svg.g []
+                        (orangeSvg :: orangeText ++ purpleSvg)
+                , Svg.relativeTo topLeftFrame <|
+                    pointsAsPolyline context.altitudeSvgPoints
                 ]
+
+        pointsAsPolyline : List (Point3d Meters LocalCoords) -> Svg msg
+        pointsAsPolyline points =
+            let
+                pointsInScreenSpace =
+                    points |> List.map (Point3d.toScreenSpace camera screenRectangle)
+            in
+            Svg.polyline2d
+                [ Svg.Attributes.stroke "blue"
+                , Svg.Attributes.fill "none"
+                , Svg.Attributes.strokeWidth "3"
+                , Svg.Attributes.strokeLinecap "round"
+                , Svg.Attributes.strokeLinejoin "round"
+                ]
+                (Polyline2d.fromVertices pointsInScreenSpace)
 
         screenRectangle =
             Rectangle2d.from
@@ -276,7 +296,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                 |> Svg.mirrorAcross (Axis2d.through orange2d Direction2d.x)
 
         orangeText =
-            [ textLine 1 <| showDecimal2 <| orangeLeaf.gradientAtStart
+            [ textLine 1 <| (showDecimal2 orangeLeaf.gradientAtStart ++ "%")
             , textLine 2 <| showShortMeasure False <| Point3d.zCoordinate <| orangeLeaf.startPoint
             , textLine 3 <|
                 showLongMeasure False <|
@@ -606,8 +626,8 @@ renderProfileData track displayWidth previews context =
             else
                 Just <| round <| 10 + context.zoomLevel
 
-        makeVisibleSegment : Length.Length -> RoadSection -> List (Entity LocalCoords)
-        makeVisibleSegment distance road =
+        make3dSegment : Length.Length -> RoadSection -> List (Entity LocalCoords)
+        make3dSegment distance road =
             let
                 gradient =
                     clamp -50.0 50.0 <|
@@ -658,15 +678,17 @@ renderProfileData track displayWidth previews context =
             [ Scene3d.point { radius = Pixels.pixels 1 }
                 (Material.color Color.black)
                 (LineSegment3d.startPoint roadAsSegmentForAltitude)
-            , Scene3d.lineSegment (Material.color Color.black) <|
-                roadAsSegmentForAltitude
+
+            --, Scene3d.lineSegment (Material.color Color.black) <|
+            --    roadAsSegmentForAltitude
             , Scene3d.quad (Material.color <| gradientColourPastel gradient)
                 (LineSegment3d.startPoint roadAsSegmentForAltitude)
                 (LineSegment3d.endPoint roadAsSegmentForAltitude)
                 (LineSegment3d.endPoint curtainHem)
                 (LineSegment3d.startPoint curtainHem)
-            , Scene3d.lineSegment (Material.color Color.black) <|
-                roadAsSegmentForGradient
+
+            --, Scene3d.lineSegment (Material.color Color.black) <|
+            --    roadAsSegmentForGradient
             , Scene3d.quad (Material.color <| gradientColourPastel gradient)
                 (LineSegment3d.startPoint roadAsSegmentForGradient)
                 (LineSegment3d.endPoint roadAsSegmentForGradient)
@@ -674,29 +696,50 @@ renderProfileData track displayWidth previews context =
                 (LineSegment3d.startPoint curtainHem)
             ]
 
+        makeSvgPoint : Length.Length -> RoadSection -> List (Point3d Meters LocalCoords)
+        makeSvgPoint distance road =
+            --TODO: Use a fold over the tree to create a polyline and render it with
+            -- slightly rounded joints.
+            [ Point3d.xyz
+                distance
+                (Length.meters <| compensateForZoom road.gradientAtStart)
+                (road.startPoint |> Point3d.zCoordinate |> Quantity.multiplyBy context.emphasis)
+            ]
+
         foldFn :
-            RoadSection
-            -> ( Length.Length, List (Entity LocalCoords), Maybe RoadSection )
-            -> ( Length.Length, List (Entity LocalCoords), Maybe RoadSection )
-        foldFn road ( distanceSoFar, outputs, _ ) =
+            (Length.Length -> RoadSection -> List renderable)
+            -> RoadSection
+            -> ( Length.Length, List renderable, Maybe RoadSection )
+            -> ( Length.Length, List renderable, Maybe RoadSection )
+        foldFn renderFn road ( distanceSoFar, outputs, _ ) =
             let
-                newEntry : List (Entity LocalCoords)
+                newEntry : List renderable
                 newEntry =
-                    makeVisibleSegment distanceSoFar road
+                    renderFn distanceSoFar road
             in
             ( distanceSoFar |> Quantity.plus road.trueLength
             , newEntry ++ outputs
             , Just road
             )
 
-        ( _, result, final ) =
+        ( _, entities, final ) =
             DomainModel.traverseTreeBetweenLimitsToDepth
                 leftIndex
                 rightIndex
                 depthFn
                 0
                 track.trackTree
-                foldFn
+                (foldFn make3dSegment)
+                ( trueLeftEdge, [], Nothing )
+
+        ( _, altitudeSvgPoints, _ ) =
+            DomainModel.traverseTreeBetweenLimitsToDepth
+                leftIndex
+                rightIndex
+                depthFn
+                0
+                track.trackTree
+                (foldFn makeSvgPoint)
                 ( trueLeftEdge, [], Nothing )
 
         finalDatum =
@@ -789,8 +832,9 @@ renderProfileData track displayWidth previews context =
         | profileScene =
             finalDatum
                 ++ renderPreviews
-                ++ result
+                ++ entities
         , metresPerPixel = metresPerPixel
+        , altitudeSvgPoints = altitudeSvgPoints
     }
 
 
@@ -838,6 +882,7 @@ initialiseView current treeNode currentContext =
             , waitingForClickDelay = False
             , profileScene = []
             , emphasis = 1.0
+            , altitudeSvgPoints = []
             }
 
 
