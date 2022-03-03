@@ -147,8 +147,9 @@ view :
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> TrackLoaded msg
     -> (Msg -> msg)
+    -> Dict String PreviewData
     -> Element msg
-view context ( givenWidth, givenHeight ) track msgWrapper =
+view context ( givenWidth, givenHeight ) track msgWrapper previews =
     let
         ( altitudeWidth, altitudeHeight ) =
             ( givenWidth
@@ -166,52 +167,27 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                 |> Quantity.round
             )
 
-        altitudeScene =
-            Scene3d.unlit
-                { camera =
-                    deriveAltitudeCamera
-                        track.trackTree
-                        context
-                        track.currentPosition
-                        ( altitudeWidth, altitudeHeight )
-                , dimensions = ( altitudeWidth, altitudeHeight )
-                , background = backgroundColor Color.lightBlue
-                , clipDepth = Length.meter
-                , entities = context.profileScene
-                }
-
-        gradientScene =
-            Scene3d.unlit
-                { camera =
-                    deriveGradientCamera
-                        track.trackTree
-                        context
-                        track.currentPosition
-                        ( altitudeWidth, altitudeHeight )
-                , dimensions = ( gradientWidth, gradientHeight )
-                , background = backgroundColor Color.lightBlue
-                , clipDepth = Length.meter
-                , entities = context.profileScene
-                }
-
         ( svgWidth, svgHeight ) =
             ( String.fromInt <| Pixels.inPixels altitudeWidth
             , String.fromInt <| Pixels.inPixels altitudeHeight
             )
 
-        altitudeOverlay =
+        altitudeChart =
             Svg.svg
                 [ Svg.Attributes.width svgWidth
                 , Svg.Attributes.height svgHeight
                 ]
                 [ Svg.relativeTo topLeftFrame <|
-                    pointsAsAltitudePolyline context.altitudeSvgPoints
+                    pointsAsAltitudePolyline "black" context.altitudeSvgPoints
                 , Svg.relativeTo topLeftFrame <|
                     Svg.g []
                         (orangeAltitudeSvg :: orangeText ++ purpleSvg)
+                , Svg.relativeTo topLeftFrame <|
+                    Svg.g []
+                        altitudePreviews
                 ]
 
-        gradientOverlay =
+        gradientChart =
             Svg.svg
                 [ Svg.Attributes.width svgWidth
                 , Svg.Attributes.height svgHeight
@@ -223,14 +199,39 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
                         (orangeGradientSvg :: orangeText)
                 ]
 
-        pointsAsAltitudePolyline : List (Point3d Meters LocalCoords) -> Svg msg
-        pointsAsAltitudePolyline points =
+        altitudePreviews : List (Svg msg)
+        altitudePreviews =
+            Dict.foldl makePreview [] previews
+
+        makePreview : String -> PreviewData -> List (Svg msg) -> List (Svg msg)
+        makePreview k preview outputs =
+            case preview.shape of
+                PreviewProfile previewTree ->
+                    makeProfilePreview preview.colour previewTree :: outputs
+
+                _ ->
+                    outputs
+
+        makeProfilePreview : Color -> PeteTree -> Svg msg
+        makeProfilePreview colour previewTree =
+            let
+                dummyContext : Context
+                dummyContext =
+                    renderProfileData
+                        { track | trackTree = previewTree }
+                        altitudeWidth
+                        context
+            in
+            pointsAsAltitudePolyline "green" dummyContext.altitudeSvgPoints
+
+        pointsAsAltitudePolyline : String -> List (Point3d Meters LocalCoords) -> Svg msg
+        pointsAsAltitudePolyline colour points =
             let
                 pointsInScreenSpace =
                     points |> List.map (Point3d.toScreenSpace altitudeCamera altitudeScreenRectangle)
             in
             Svg.polyline2d
-                [ Svg.Attributes.stroke "black"
+                [ Svg.Attributes.stroke colour
                 , Svg.Attributes.fill "none"
                 , Svg.Attributes.strokeWidth "3"
                 , Svg.Attributes.strokeLinecap "round"
@@ -369,8 +370,8 @@ view context ( givenWidth, givenHeight ) track msgWrapper =
             :: (inFront <| zoomButtons msgWrapper context)
             :: common3dSceneAttributes msgWrapper context
         )
-        [ Element.html altitudeOverlay
-        , Element.html gradientOverlay
+        [ Element.html altitudeChart
+        , Element.html gradientChart
         ]
 
 
@@ -474,25 +475,25 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
     case msg of
         SetEmphasis emphasis ->
             ( { context | emphasis = toFloat emphasis }
-                |> renderProfileData track givenWidth previews
+                |> renderProfileData track givenWidth
             , []
             )
 
         ImageZoomIn ->
             ( { context | zoomLevel = clamp 0 10 <| context.zoomLevel + 0.5 }
-                |> renderProfileData track givenWidth previews
+                |> renderProfileData track givenWidth
             , []
             )
 
         ImageZoomOut ->
             ( { context | zoomLevel = clamp 0 10 <| context.zoomLevel - 0.5 }
-                |> renderProfileData track givenWidth previews
+                |> renderProfileData track givenWidth
             , []
             )
 
         ImageReset ->
             ( initialiseView track.currentPosition track.trackTree (Just context)
-                |> renderProfileData track givenWidth previews
+                |> renderProfileData track givenWidth
             , []
             )
 
@@ -524,7 +525,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
                             + increment
             in
             ( { context | zoomLevel = zoomLevel }
-                |> renderProfileData track givenWidth previews
+                |> renderProfileData track givenWidth
             , []
             )
 
@@ -564,7 +565,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
                                 , orbiting = Just ( dx, dy )
                             }
                     in
-                    ( newContext |> renderProfileData track givenWidth previews
+                    ( newContext |> renderProfileData track givenWidth
                     , []
                     )
 
@@ -642,11 +643,12 @@ pointInGradientView context i tree =
 renderProfileData :
     TrackLoaded msg
     -> Quantity Int Pixels
-    -> Dict String PreviewData
     -> Context
     -> Context
-renderProfileData track displayWidth previews context =
+renderProfileData track displayWidth context =
     let
+        --TODO: Consider moving this, oddly enough, into view.
+        -- ALthough, looks like it's reusable as it stands, if we use a dummy context.
         currentPoint =
             earthPointFromIndex track.currentPosition track.trackTree
 
@@ -700,59 +702,6 @@ renderProfileData track displayWidth previews context =
             else
                 Just <| round <| 10 + context.zoomLevel
 
-        make3dSegment : Length.Length -> RoadSection -> List (Entity LocalCoords)
-        make3dSegment distance road =
-            let
-                gradient =
-                    clamp -50.0 50.0 <|
-                        DomainModel.gradientFromNode <|
-                            Leaf road
-
-                roadAsSegmentForAltitude =
-                    LineSegment3d.from
-                        (Point3d.xyz
-                            distance
-                            Quantity.zero
-                            (road.startPoint |> Point3d.zCoordinate |> Quantity.multiplyBy context.emphasis)
-                        )
-                        (Point3d.xyz
-                            (distance |> Quantity.plus road.trueLength)
-                            Quantity.zero
-                            (road.endPoint |> Point3d.zCoordinate |> Quantity.multiplyBy context.emphasis)
-                        )
-
-                roadAsSegmentForGradient =
-                    LineSegment3d.from
-                        (Point3d.xyz
-                            distance
-                            (Length.meters <| compensateForZoom gradient)
-                            Quantity.zero
-                        )
-                        (Point3d.xyz
-                            (distance |> Quantity.plus road.trueLength)
-                            (Length.meters <| compensateForZoom gradient)
-                            Quantity.zero
-                        )
-
-                curtainHem =
-                    -- Drop onto x-axis so visible from both angles
-                    LineSegment3d.projectOnto floorPlane <|
-                        LineSegment3d.from
-                            (Point3d.xyz
-                                distance
-                                Quantity.zero
-                                Quantity.zero
-                            )
-                            (Point3d.xyz
-                                (distance |> Quantity.plus road.trueLength)
-                                Quantity.zero
-                                Quantity.zero
-                            )
-            in
-            [ Scene3d.lineSegment (Material.color Color.black) <|
-                roadAsSegmentForGradient
-            ]
-
         makeSvgPoint : Length.Length -> RoadSection -> List (Point3d Meters LocalCoords)
         makeSvgPoint distance road =
             --TODO: Use a fold over the tree to create a polyline and render it with
@@ -779,16 +728,8 @@ renderProfileData track displayWidth previews context =
             , Just road
             )
 
-        --( _, entities, final ) =
-        --    DomainModel.traverseTreeBetweenLimitsToDepth
-        --        leftIndex
-        --        rightIndex
-        --        depthFn
-        --        0
-        --        track.trackTree
-        --        (foldFn make3dSegment)
-        --        ( trueLeftEdge, [], Nothing )
         ( _, altitudeSvgPoints, _ ) =
+            --TODO: Make function that takes tree and colour, returns SVG. Use it in view.
             DomainModel.traverseTreeBetweenLimitsToDepth
                 leftIndex
                 rightIndex
@@ -807,102 +748,9 @@ renderProfileData track displayWidth previews context =
                 rightEdge
                 (Length.meters <| compensateForZoom leaf.gradientAtStart)
                 (leaf.endPoint |> Point3d.zCoordinate |> Quantity.multiplyBy context.emphasis)
-
-        --finalDatum =
-        --    case final of
-        --        Just finalLeaf ->
-        --            -- Make sure we include final point
-        --            []
-        --
-        --        Nothing ->
-        --            -- Can't happen (FLW)
-        --            []
-        pAltitude p =
-            Point3d.xyz
-                p.distance
-                (Length.meters -45000)
-                (p.gpx.altitude |> Quantity.multiplyBy context.emphasis)
-
-        pGradient p =
-            Point3d.xyz
-                p.distance
-                (Length.meters <| compensateForZoom p.gradient)
-                Quantity.zero
-
-        renderPreviews : List (Entity LocalCoords)
-        renderPreviews =
-            let
-                onePreview : PreviewData -> List (Entity LocalCoords)
-                onePreview { tag, shape, colour, points } =
-                    case shape of
-                        PreviewCircle ->
-                            previewAsPoints colour points
-
-                        PreviewLine ->
-                            previewAsLine colour points
-
-                        PreviewToolSupplied callback ->
-                            -- This may be breaking one of those Elmish rules.
-                            []
-
-                        PreviewProfile _ ->
-                            -- This will be rendered in SVG.
-                            []
-            in
-            previews |> Dict.values |> List.concatMap onePreview
-
-        previewAsLine : Element.Color -> List PreviewPoint -> List (Entity LocalCoords)
-        previewAsLine color points =
-            let
-                material =
-                    Material.color <| Color.fromRgba <| Element.toRgb color
-
-                ( shiftUp, shiftDown ) =
-                    ( Vector3d.withLength (Length.centimeters 20) Direction3d.positiveZ
-                    , Vector3d.withLength (Length.centimeters -20) Direction3d.positiveZ
-                    )
-
-                asSegment p1 p2 =
-                    let
-                        basisLine =
-                            LineSegment3d.from
-                                (pAltitude p1)
-                                (pAltitude p2)
-
-                        ( upperLine, lowerLine ) =
-                            ( basisLine |> LineSegment3d.translateBy shiftUp
-                            , basisLine |> LineSegment3d.translateBy shiftDown
-                            )
-                    in
-                    Scene3d.quad material
-                        (LineSegment3d.startPoint upperLine)
-                        (LineSegment3d.endPoint upperLine)
-                        (LineSegment3d.endPoint lowerLine)
-                        (LineSegment3d.startPoint lowerLine)
-
-                preview p1 p2 =
-                    asSegment p1 p2
-            in
-            List.map2 preview points (List.drop 1 points)
-
-        previewAsPoints : Element.Color -> List PreviewPoint -> List (Entity LocalCoords)
-        previewAsPoints color points =
-            let
-                material =
-                    Material.color <| Color.fromRgba <| Element.toRgb color
-
-                highlightPoint p =
-                    Scene3d.point { radius = Pixels.pixels 8 } material <|
-                        pAltitude p
-            in
-            List.map highlightPoint points
     in
     { context
-        | profileScene =
-            --finalDatum
-            renderPreviews
-
-        --++ entities
+        | profileScene = []
         , metresPerPixel = metresPerPixel
         , altitudeSvgPoints = finalSvgPoint :: altitudeSvgPoints
     }

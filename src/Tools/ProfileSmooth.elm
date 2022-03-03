@@ -65,6 +65,8 @@ actions newOptions previewColour track =
                     distanceFromIndex fromStart track.trackTree
 
                 correctedPreview =
+                    -- Apply offset so preview appears at the right place.
+                    --TODO: Will not need this when profiles are done differntly.
                     uncorrectedPreview
                         |> List.map
                             (\preview ->
@@ -74,6 +76,9 @@ actions newOptions previewColour track =
                                             |> Quantity.plus startDistance
                                 }
                             )
+
+                ( newTreeForProfilePreview, _ ) =
+                    apply newOptions track
             in
             [ ShowPreview
                 { tag = "limit"
@@ -81,6 +86,17 @@ actions newOptions previewColour track =
                 , colour = previewColour
                 , points = correctedPreview
                 }
+            , case newTreeForProfilePreview of
+                Just newTree ->
+                    ShowPreview
+                        { tag = "limitProfile"
+                        , shape = PreviewProfile newTree
+                        , colour = previewColour
+                        , points = []
+                        }
+
+                Nothing ->
+                    NoAction
             , RenderProfile
             ]
 

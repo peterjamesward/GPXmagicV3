@@ -1,3 +1,13 @@
+# My own thoughts
+
+Let user select track point match tolerance.
+Let user manually coalesce two track-points.
+Let user manually remove unwanted track-point locally.
+Apply 1cm drop on all traversals bar the first for each leg.
+Use some of DO's terminology.
+Allow only a few edits on one edge at a time.
+Use SVG overlays to label edges for easier selection.
+
 # Emails from David Ogle
 
 Here goes... few ideas for improvements:

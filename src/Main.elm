@@ -1058,6 +1058,7 @@ viewPaneArea model =
             model.contentArea
             model.paneLayoutOptions
             model.toolOptions.flythroughSettings.flythrough
+            model.previews
 
 
 topLoadingBar model =

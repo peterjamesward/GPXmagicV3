@@ -15,8 +15,9 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 ## SVG profile rendering
 
 Zero line for gradient.
-Previews in SVG. Make Profile previews special, emphasis on altitude & gradient smoothers.
-PeteTree previews for  Bezier, Centroid, Nudge, Limit Gradients.
+Previews in SVG. 
+Make Profile previews special, emphasis on altitude & gradient smoothers.
+PeteTree previews for  Bezier, Centroid, Nudge, Limit Gradients and new Filters.
 Info on mouse move.
 Scales?
 
@@ -24,7 +25,8 @@ Scales?
 
 To deal with Vuew GPX Smoother.
 
-- **Elavation box** smoothing is simple running average of altitude.
+- **Limit Gradient** = as current but option to not redistribute, just to clamp.
+- **Elevation box** smoothing is simple running average of altitude.
 - **Slope box** smoothing does running average of gradients.
 - **Kalman** is what it is; not complex and seems to give some good results by damping gradient changes.
 
