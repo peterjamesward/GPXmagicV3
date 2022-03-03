@@ -725,19 +725,19 @@ renderProfileData track displayWidth previews context =
 
             --, Scene3d.lineSegment (Material.color Color.black) <|
             --    roadAsSegmentForAltitude
-            , Scene3d.quad (Material.color <| gradientColourPastel gradient)
-                (LineSegment3d.startPoint roadAsSegmentForAltitude)
-                (LineSegment3d.endPoint roadAsSegmentForAltitude)
-                (LineSegment3d.endPoint curtainHem)
-                (LineSegment3d.startPoint curtainHem)
+            --, Scene3d.quad (Material.color <| gradientColourPastel gradient)
+            --    (LineSegment3d.startPoint roadAsSegmentForAltitude)
+            --    (LineSegment3d.endPoint roadAsSegmentForAltitude)
+            --    (LineSegment3d.endPoint curtainHem)
+            --    (LineSegment3d.startPoint curtainHem)
 
-            --, Scene3d.lineSegment (Material.color Color.black) <|
-            --    roadAsSegmentForGradient
-            , Scene3d.quad (Material.color <| gradientColourPastel gradient)
-                (LineSegment3d.startPoint roadAsSegmentForGradient)
-                (LineSegment3d.endPoint roadAsSegmentForGradient)
-                (LineSegment3d.endPoint curtainHem)
-                (LineSegment3d.startPoint curtainHem)
+            , Scene3d.lineSegment (Material.color Color.black) <|
+                roadAsSegmentForGradient
+            --, Scene3d.quad (Material.color <| gradientColourPastel gradient)
+            --    (LineSegment3d.startPoint roadAsSegmentForGradient)
+            --    (LineSegment3d.endPoint roadAsSegmentForGradient)
+            --    (LineSegment3d.endPoint curtainHem)
+            --    (LineSegment3d.startPoint curtainHem)
             ]
 
         makeSvgPoint : Length.Length -> RoadSection -> List (Point3d Meters LocalCoords)
