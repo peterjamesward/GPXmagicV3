@@ -25,6 +25,8 @@ type Msg
     | SetMeasurementNoise Float
     | SetDeltaSlope Bool
     | SetWindowSize Int
+    | ChooseMethod SmoothMethod
+    | SetRedistribution Bool
 
 
 defaultOptions : Options
@@ -38,6 +40,7 @@ defaultOptions =
     , maximumAscent = 15.0
     , maximumDescent = 15.0
     , windowSize = 5
+    , limitRedistributes = True
     }
 
 
@@ -98,11 +101,11 @@ update :
     Msg
     -> Options
     -> Element.Color
-    -> Maybe (TrackLoaded msg)
+    -> TrackLoaded msg
     -> ( Options, List (ToolAction msg) )
-update msg options previewColour hasTrack =
-    case ( msg, hasTrack ) of
-        ( SetExtent extent, Just track ) ->
+update msg options previewColour track =
+    case msg of
+        SetExtent extent ->
             let
                 newOptions =
                     { options | extent = extent }
@@ -112,7 +115,7 @@ update msg options previewColour hasTrack =
             , actions newOptions previewColour track
             )
 
-        ( SetMaximumAscent up, Just track ) ->
+        SetMaximumAscent up ->
             let
                 newOptions =
                     { options | maximumAscent = up }
@@ -122,7 +125,7 @@ update msg options previewColour hasTrack =
             , actions newOptions previewColour track
             )
 
-        ( SetMaximumDescent down, Just track ) ->
+        SetMaximumDescent down ->
             let
                 newOptions =
                     { options | maximumDescent = down }
@@ -132,27 +135,79 @@ update msg options previewColour hasTrack =
             , actions newOptions previewColour track
             )
 
-        ( LimitGradient, Just track ) ->
+        LimitGradient ->
             ( options
             , [ Actions.LimitGradientWithOptions options
               , TrackHasChanged
               ]
             )
 
-        _ ->
-            ( options, [] )
+        SetProcessNoise noise ->
+            let
+                newOptions =
+                    { options | processNoise = noise }
+                        |> putPreviewInOptions track
+            in
+            ( newOptions
+            , actions newOptions previewColour track
+            )
+
+        SetMeasurementNoise noise ->
+            let
+                newOptions =
+                    { options | measurementNoise = noise }
+                        |> putPreviewInOptions track
+            in
+            ( newOptions
+            , actions newOptions previewColour track
+            )
+
+        SetDeltaSlope delta ->
+            let
+                newOptions =
+                    { options | useDeltaSlope = delta }
+                        |> putPreviewInOptions track
+            in
+            ( newOptions
+            , actions newOptions previewColour track
+            )
+
+        SetWindowSize size ->
+            let
+                newOptions =
+                    { options | windowSize = size }
+                        |> putPreviewInOptions track
+            in
+            ( newOptions
+            , actions newOptions previewColour track
+            )
+
+        ChooseMethod smoothMethod ->
+            let
+                newOptions =
+                    { options | smoothMethod = smoothMethod }
+                        |> putPreviewInOptions track
+            in
+            ( newOptions
+            , actions newOptions previewColour track
+            )
+
+        SetRedistribution flag ->
+            let
+                newOptions =
+                    { options | limitRedistributes = flag }
+                        |> putPreviewInOptions track
+            in
+            ( newOptions
+            , actions newOptions previewColour track
+            )
 
 
 apply : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
 apply options track =
     let
         ( fromStart, fromEnd ) =
-            case options.extent of
-                ExtentIsRange ->
-                    TrackLoaded.getRangeFromMarkers track
-
-                ExtentIsTrack ->
-                    ( 0, 0 )
+            ( 0, 0 )
 
         newCourse =
             computeNewPoints options track
@@ -196,6 +251,31 @@ emptySlopeStuff =
 
 computeNewPoints : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
 computeNewPoints options track =
+    case options.smoothMethod of
+        MethodLimit ->
+            if options.limitRedistributes then
+                limitGradientsWithRedistribution options track
+
+            else
+                simpleLimitGradients options track
+
+        MethodGradients ->
+            []
+
+        MethodAltitudes ->
+            []
+
+        MethodKalmanFilter ->
+            []
+
+
+limitGradientsWithRedistribution : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
+limitGradientsWithRedistribution options track =
+    {-
+       This method attempts to find other opportunities to make up for the lost
+       altitude changes, so as to preserve the atitudes at the end points.
+       That, of course, is not always possible.
+    -}
     let
         ( fromStart, fromEnd ) =
             case options.extent of
@@ -299,13 +379,6 @@ computeNewPoints options track =
             else
                 Quantity.ratio slopeInfo.totalOffered slopeInfo.totalClamped
 
-        adjustAltitude : Length.Length -> EarthPoint -> EarthPoint
-        adjustAltitude alt pt =
-            Point3d.xyz
-                (Point3d.xCoordinate pt)
-                (Point3d.yCoordinate pt)
-                alt
-
         allocateProRata :
             SlopeStatus
             -> ( Length.Length, List ( EarthPoint, GPXSource ) )
@@ -360,6 +433,67 @@ computeNewPoints options track =
             slopeInfo.roads |> List.foldl allocateProRata ( endAltitude, [] )
     in
     adjustedPoints
+
+
+adjustAltitude : Length.Length -> EarthPoint -> EarthPoint
+adjustAltitude alt pt =
+    Point3d.xyz
+        (Point3d.xCoordinate pt)
+        (Point3d.yCoordinate pt)
+        alt
+
+
+simpleLimitGradients : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
+simpleLimitGradients options track =
+    {-
+       This method simply clamps the gradients and works out the resulting altitudes.
+       It's what Vue GPX Smoother does.
+       Interestingly, we must continue to the track end even when finished clamping.
+       (Or we could make this whole track only.)
+    -}
+    let
+        startAltitude =
+            gpxPointFromIndex 0 track.trackTree |> .altitude
+
+        clamper :
+            RoadSection
+            -> ( Length.Length, List ( EarthPoint, GPXSource ) )
+            -> ( Length.Length, List ( EarthPoint, GPXSource ) )
+        clamper road ( lastAltitude, outputs ) =
+            let
+                newGradient =
+                    clamp
+                        (0 - options.maximumDescent)
+                        options.maximumAscent
+                        road.gradientAtStart
+
+                newEndAltitude =
+                    road.trueLength
+                        |> Quantity.multiplyBy (newGradient / 100.0)
+                        |> Quantity.plus lastAltitude
+
+                newEarthPoint =
+                    adjustAltitude newEndAltitude road.endPoint
+
+                currentGpx =
+                    Tuple.second road.sourceData
+
+                newGpx =
+                    { currentGpx | altitude = newEndAltitude }
+            in
+            ( newEndAltitude, ( newEarthPoint, newGpx ) :: outputs )
+
+        ( _, adjustedPoints ) =
+            DomainModel.traverseTreeBetweenLimitsToDepth
+                0
+                (skipCount track.trackTree)
+                (always Nothing)
+                0
+                track.trackTree
+                clamper
+                ( startAltitude, [ getDualCoords track.trackTree 0 ] )
+    in
+    List.reverse adjustedPoints
 
 
 toolStateChange :
@@ -433,22 +567,50 @@ view options wrapper =
                     , Input.option ExtentIsTrack (text "Whole track")
                     ]
                 }
+
+        limitGradientsMethod =
+            column [ spacing 10 ]
+                [ el [ centerX ] <| maxAscentSlider
+                , el [ centerX ] <| maxDescentSlider
+                , el [ centerX ] <|
+                    Input.checkbox []
+                        { onChange = wrapper << SetRedistribution
+                        , icon = Input.defaultCheckbox
+                        , checked = options.limitRedistributes
+                        , label = Input.labelRight [] (text "Try to preserve altitudes")
+                        }
+                , el [ centerX ] <|
+                    button
+                        neatToolsBorder
+                        { onPress = Just <| wrapper <| LimitGradient
+                        , label =
+                            text <|
+                                "Apply limits"
+                        }
+                ]
+
+        modeChoice =
+            Input.radio
+                [ padding 10
+                , spacing 5
+                ]
+                { onChange = wrapper << ChooseMethod
+                , selected = Just options.smoothMethod
+                , label = Input.labelHidden "Method"
+                , options =
+                    [ Input.option MethodLimit (text "Limit gradients")
+                    , Input.option MethodAltitudes (text "Smooth altitudes")
+                    , Input.option MethodGradients (text "Smooth gradients")
+                    , Input.option MethodKalmanFilter (text "SKalman filter")
+                    ]
+                }
     in
-    column
+    wrappedRow
         [ spacing 6
         , padding 6
         , Background.color FlatColors.ChinesePalette.antiFlashWhite
         , width fill
         ]
-        [ el [ centerX ] <| maxAscentSlider
-        , el [ centerX ] <| maxDescentSlider
-        , el [ centerX ] <| extent
-        , el [ centerX ] <|
-            button
-                neatToolsBorder
-                { onPress = Just <| wrapper <| LimitGradient
-                , label =
-                    text <|
-                        "Apply limits"
-                }
+        [ modeChoice
+        , limitGradientsMethod
         ]

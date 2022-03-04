@@ -1521,20 +1521,11 @@ performActionsOnModel actions model =
                         ( newTree, oldPoints ) =
                             Tools.ProfileSmooth.apply options track
 
-                        ( fromStart, fromEnd ) =
-                            -- Repetition of this is untidy.
-                            case options.extent of
-                                Tools.ProfileSmoothOptions.ExtentIsRange ->
-                                    TrackLoaded.getRangeFromMarkers track
-
-                                Tools.ProfileSmoothOptions.ExtentIsTrack ->
-                                    ( 0, 0 )
-
                         newTrack =
                             track
                                 |> TrackLoaded.addToUndoStack action
-                                    fromStart
-                                    fromEnd
+                                    0
+                                    0
                                     oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in

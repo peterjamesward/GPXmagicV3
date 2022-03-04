@@ -6,11 +6,9 @@ import Axis3d
 import BoundingBox3d
 import Camera3d
 import Circle2d
-import Color exposing (lightOrange)
-import ColourPalette exposing (gradientColourPastel)
 import Dict exposing (Dict)
 import Direction2d
-import Direction3d exposing (negativeZ, positiveZ)
+import Direction3d
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
@@ -24,25 +22,21 @@ import Frame2d
 import Geometry.Svg as Svg
 import Html.Events.Extra.Mouse as Mouse exposing (Button(..))
 import Length exposing (Meters)
-import LineSegment3d
 import LocalCoords exposing (LocalCoords)
 import Pixels exposing (Pixels)
 import Plane3d
 import Point2d exposing (Point2d, xCoordinate, yCoordinate)
 import Point3d exposing (Point3d)
 import Point3d.Projection as Point3d
-import Polygon2d
 import Polyline2d
 import PreviewData exposing (PreviewData, PreviewPoint, PreviewShape(..))
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
-import Scene3d exposing (Entity, backgroundColor)
-import Scene3d.Material as Material
+import Scene3d exposing (Entity)
 import Svg exposing (Svg)
 import Svg.Attributes exposing (..)
 import TrackLoaded exposing (TrackLoaded)
-import UtilsForViews exposing (colourHexString, showDecimal2, showDecimal6, showLongMeasure, showShortMeasure, uiColourHexString)
-import Vector2d
+import UtilsForViews exposing (showDecimal2, showLongMeasure, showShortMeasure, uiColourHexString)
 import Vector3d
 import View3dCommonElements exposing (Msg(..), common3dSceneAttributes)
 import ViewPureStyles exposing (useIcon)
@@ -70,6 +64,7 @@ type alias Context =
     , waitingForClickDelay : Bool
     , profileScene : List (Entity LocalCoords)
     , emphasis : Float
+    , mouseEvent : Maybe Mouse.Event
     }
 
 
@@ -360,6 +355,9 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
 
         ImageDoubleClick event ->
             ( context, [] )
+
+        MouseMove event ->
+            ( { context | mouseEvent = Just event }, [] )
 
 
 pointInAltitudeView : Context -> Int -> PeteTree -> EarthPoint
@@ -768,6 +766,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
         (pointer
             :: Background.color FlatColors.ChinesePalette.antiFlashWhite
             :: (inFront <| zoomButtons msgWrapper context)
+            --:: (htmlAttribute <| Mouse.onMove (MouseMove >> msgWrapper))
             :: common3dSceneAttributes msgWrapper context
         )
         [ Element.html altitudeChart
@@ -819,6 +818,7 @@ initialiseView current treeNode currentContext =
             , waitingForClickDelay = False
             , profileScene = []
             , emphasis = 1.0
+            , mouseEvent = Nothing
             }
 
 

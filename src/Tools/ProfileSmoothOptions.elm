@@ -14,6 +14,7 @@ type alias Options =
     , measurementNoise : Float
     , useDeltaSlope : Bool
     , windowSize : Int
+    , limitRedistributes : Bool
     }
 
 

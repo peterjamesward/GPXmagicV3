@@ -865,17 +865,22 @@ update toolMsg isTrack msgWrapper options =
             )
 
         ToolProfileSmoothMsg msg ->
-            let
-                ( newOptions, actions ) =
-                    Tools.ProfileSmooth.update
-                        msg
-                        options.profileSmoothSettings
-                        (getColour ToolProfileSmooth options.tools)
-                        isTrack
-            in
-            ( { options | profileSmoothSettings = newOptions }
-            , actions
-            )
+            case isTrack of
+                Just track ->
+                    let
+                        ( newOptions, actions ) =
+                            Tools.ProfileSmooth.update
+                                msg
+                                options.profileSmoothSettings
+                                (getColour ToolProfileSmooth options.tools)
+                                track
+                    in
+                    ( { options | profileSmoothSettings = newOptions }
+                    , actions
+                    )
+
+                Nothing ->
+                    ( options, [] )
 
         DockPopupToggle id ->
             case Dict.get id options.docks of

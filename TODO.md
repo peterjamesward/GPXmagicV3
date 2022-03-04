@@ -12,14 +12,9 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 # WIP
 
-## SVG profile rendering
-
-Info on mouse move.
-Scales?
-
 ## Profile smoothing
 
-To deal with Vuew GPX Smoother.
+To remove need for Vue GPX Smoother.
 
 - **Limit Gradient** = as current but option to not redistribute, just to clamp.
 - **Elevation box** smoothing is simple running average of altitude.
@@ -42,11 +37,8 @@ To deal with Vuew GPX Smoother.
 2. Info popup for all tools.
 
 --- _Cut-off for release_
-- Out & back lower return by 1cm.
 - Terrain as from v2 but with texture maybe
-- SVG for previews on Profile - get nice smooth lines.
 - SVG overlay on 3d views.
-- Super smoothing  (think GPXsmoother, but different, key feature is ability to "fix" regions).
 - Non-customisable keyboard alternatives for Load/Save/Undo/Redo/Fwd/Back/Purple (maybe 1-5 for views)
 - Extract all text for translation (Muriel)
 - Use localised number formatting everywhere (for French use of , and .)
@@ -57,6 +49,11 @@ To deal with Vuew GPX Smoother.
 - Option to show MR rendering cutoff.
 - Tooltips (where useful)
 - Draggable tools?
+
+## SVG profile rendering
+
+Info on mouse move.
+Scales?
 
 ## New smoothing
 

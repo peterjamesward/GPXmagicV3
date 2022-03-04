@@ -9,12 +9,7 @@ import Direction2d exposing (Direction2d)
 import Direction3d exposing (negativeZ, positiveZ)
 import DomainModel exposing (..)
 import Element exposing (..)
-import Element.Border as Border
-import FlatColors.ChinesePalette exposing (white)
-import Html.Events as HE
 import Html.Events.Extra.Mouse as Mouse exposing (Button(..))
-import Html.Events.Extra.Wheel as Wheel
-import Json.Decode as D
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
 import Pixels exposing (Pixels)
@@ -299,6 +294,10 @@ update msg msgWrapper track area context =
             )
 
         SetEmphasis int ->
+            ( context, [] )
+
+        MouseMove _ ->
+            -- Only interested if dragging.
             ( context, [] )
 
 
