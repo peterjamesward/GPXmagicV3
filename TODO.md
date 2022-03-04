@@ -16,8 +16,6 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 PeteTree previews for Bezier, Centroid, Nudge, Limit Gradients and new Filters.
 
-Previews on Gradient curve also.
-Gradient should not be sloped, should be steps.
 Info on mouse move.
 Zero line for gradient.
 Scales?

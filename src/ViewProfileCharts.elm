@@ -28,7 +28,7 @@ import LineSegment3d
 import LocalCoords exposing (LocalCoords)
 import Pixels exposing (Pixels)
 import Plane3d
-import Point2d exposing (Point2d)
+import Point2d exposing (Point2d, xCoordinate, yCoordinate)
 import Point3d exposing (Point3d)
 import Point3d.Projection as Point3d
 import Polygon2d
@@ -492,7 +492,6 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
         renderProfileData : TrackLoaded msg -> List EarthPoint
         renderProfileData trackToRender =
             let
-
                 ( leftIndex, rightIndex ) =
                     -- Make sure we always have a spare point outside the image if possible.
                     ( indexFromDistance leftEdge trackToRender.trackTree - 1
@@ -538,7 +537,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
         makeAltitudePreview k preview outputs =
             case preview.shape of
                 PreviewProfile previewTree ->
-                  makeAltitudePreviewHelper preview.colour previewTree :: outputs
+                    makeAltitudePreviewHelper preview.colour previewTree :: outputs
 
                 _ ->
                     outputs
@@ -547,7 +546,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
         makeGradientPreview k preview outputs =
             case preview.shape of
                 PreviewProfile previewTree ->
-                     makeGradientPreviewHelper preview.colour previewTree :: outputs
+                    makeGradientPreviewHelper preview.colour previewTree :: outputs
 
                 _ ->
                     outputs
@@ -583,10 +582,29 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
 
         pointsAsGradientPolyline : String -> List (Point3d Meters LocalCoords) -> Svg msg
         pointsAsGradientPolyline colour points =
+            --TODO: Make stepped, not interpolated.
             let
                 pointsInScreenSpace =
-                    points
-                        |> List.map (Point3d.toScreenSpace gradientCamera gradientScreenRectangle)
+                    List.map
+                        (Point3d.toScreenSpace gradientCamera gradientScreenRectangle)
+                        points
+
+                makeStep :
+                    Point2d Pixels LocalCoords
+                    -> Point2d Pixels LocalCoords
+                    -> List (Point2d Pixels LocalCoords)
+                makeStep pt1 pt2 =
+                    [ pt1
+                    , Point2d.xy (xCoordinate pt2) (yCoordinate pt1)
+                    , pt2
+                    ]
+
+                steppedLines =
+                    List.concat <|
+                        List.map2
+                            makeStep
+                            pointsInScreenSpace
+                            (List.drop 1 pointsInScreenSpace)
             in
             Svg.polyline2d
                 [ Svg.Attributes.stroke colour
@@ -595,7 +613,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
                 , Svg.Attributes.strokeLinecap "round"
                 , Svg.Attributes.strokeLinejoin "round"
                 ]
-                (Polyline2d.fromVertices pointsInScreenSpace)
+                (Polyline2d.fromVertices steppedLines)
 
         altitudeScreenRectangle =
             Rectangle2d.from
