@@ -70,7 +70,6 @@ type alias Context =
     , waitingForClickDelay : Bool
     , profileScene : List (Entity LocalCoords)
     , emphasis : Float
-    , altitudeSvgPoints : List (Point3d Meters LocalCoords)
     }
 
 
@@ -142,6 +141,262 @@ splitProportion =
     0.5
 
 
+deriveAltitudeCamera treeNode context currentPosition ( width, height ) =
+    let
+        trackLengthInView =
+            trueLength treeNode |> Quantity.multiplyBy (0.5 ^ context.zoomLevel)
+
+        metresPerPixel =
+            Length.inMeters trackLengthInView / (toFloat <| Pixels.inPixels width)
+
+        viewportHeight =
+            Length.meters <| metresPerPixel * (toFloat <| Pixels.inPixels height)
+
+        lookingAt =
+            if context.followSelectedPoint then
+                Point3d.xyz
+                    (distanceFromIndex currentPosition treeNode)
+                    Quantity.zero
+                    (earthPointFromIndex currentPosition treeNode
+                        |> Point3d.zCoordinate
+                        |> Quantity.multiplyBy context.emphasis
+                    )
+
+            else
+                context.focalPoint
+
+        eyePoint =
+            Point3d.translateBy
+                (Vector3d.meters 0.0 -50000.0 0.0)
+                lookingAt
+
+        viewpoint =
+            Viewpoint3d.lookAt
+                { focalPoint = lookingAt
+                , eyePoint = eyePoint
+                , upDirection = Direction3d.positiveZ
+                }
+    in
+    Camera3d.orthographic
+        { viewpoint = viewpoint
+        , viewportHeight = viewportHeight
+        }
+
+
+deriveGradientCamera treeNode context currentPosition ( width, height ) =
+    let
+        trackLengthInView =
+            trueLength treeNode |> Quantity.multiplyBy (0.5 ^ context.zoomLevel)
+
+        metresPerPixel =
+            Length.inMeters trackLengthInView / (toFloat <| Pixels.inPixels width)
+
+        viewportHeight =
+            Length.meters <| metresPerPixel * (toFloat <| Pixels.inPixels height)
+
+        lookingAt =
+            if context.followSelectedPoint then
+                Point3d.xyz
+                    (distanceFromIndex currentPosition treeNode)
+                    Quantity.zero
+                    (earthPointFromIndex currentPosition treeNode
+                        |> Point3d.zCoordinate
+                        |> Quantity.multiplyBy context.emphasis
+                    )
+
+            else
+                context.focalPoint
+
+        eyePoint =
+            Point3d.translateBy
+                (Vector3d.meters 0.0 0.0 1000.0)
+                lookingAt
+
+        viewpoint =
+            Viewpoint3d.lookAt
+                { focalPoint = lookingAt
+                , eyePoint = eyePoint
+                , upDirection = Direction3d.positiveY
+                }
+    in
+    Camera3d.orthographic
+        { viewpoint = viewpoint
+        , viewportHeight = viewportHeight
+        }
+
+
+update :
+    Msg
+    -> (Msg -> msg)
+    -> TrackLoaded msg
+    -> ( Quantity Int Pixels, Quantity Int Pixels )
+    -> Dict String PreviewData
+    -> Context
+    -> ( Context, List (ToolAction msg) )
+update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
+    let
+        maxZoom =
+            (logBase 2 <| toFloat <| skipCount track.trackTree) - 2
+    in
+    case msg of
+        SetEmphasis emphasis ->
+            ( { context | emphasis = toFloat emphasis }
+            , []
+            )
+
+        ImageZoomIn ->
+            ( { context | zoomLevel = clamp 0 10 <| context.zoomLevel + 0.5 }
+            , []
+            )
+
+        ImageZoomOut ->
+            ( { context | zoomLevel = clamp 0 10 <| context.zoomLevel - 0.5 }
+            , []
+            )
+
+        ImageReset ->
+            ( initialiseView track.currentPosition track.trackTree (Just context)
+            , []
+            )
+
+        ImageNoOp ->
+            ( context, [] )
+
+        ImageClick event ->
+            -- Click moves pointer but does not re-centre view. (Double click will.)
+            --if context.waitingForClickDelay then
+            ( context
+            , [ SetCurrent <| detectHit event track ( givenWidth, givenHeight ) context
+              , TrackHasChanged
+              ]
+            )
+
+        --else
+        --    ( context, [] )
+        ClickDelayExpired ->
+            ( { context | waitingForClickDelay = False }, [] )
+
+        ImageMouseWheel deltaY ->
+            let
+                increment =
+                    -0.001 * deltaY
+
+                zoomLevel =
+                    clamp 0 maxZoom <|
+                        context.zoomLevel
+                            + increment
+            in
+            ( { context | zoomLevel = zoomLevel }, [] )
+
+        ImageGrab event ->
+            -- Mouse behaviour depends which view is in use...
+            -- Right-click or ctrl-click to mean rotate; otherwise pan.
+            let
+                newContext =
+                    { context
+                        | orbiting = Just event.offsetPos
+                        , dragAction = DragPan
+                        , waitingForClickDelay = True
+                    }
+            in
+            ( newContext
+            , [ DelayMessage 250 (msgWrapper ClickDelayExpired) ]
+            )
+
+        ImageDrag event ->
+            let
+                ( dx, dy ) =
+                    event.offsetPos
+            in
+            case ( context.dragAction, context.orbiting ) of
+                ( DragPan, Just ( startX, startY ) ) ->
+                    let
+                        shiftVector =
+                            Vector3d.meters
+                                ((startX - dx) * context.metresPerPixel)
+                                0
+                                0
+
+                        newContext =
+                            { context
+                                | focalPoint =
+                                    context.focalPoint |> Point3d.translateBy shiftVector
+                                , orbiting = Just ( dx, dy )
+                            }
+                    in
+                    ( newContext, [] )
+
+                _ ->
+                    ( context, [] )
+
+        ImageRelease event ->
+            ( { context
+                | orbiting = Nothing
+                , dragAction = DragNone
+                , waitingForClickDelay = False
+              }
+            , []
+            )
+
+        ToggleFollowOrange ->
+            let
+                currentDistance =
+                    distanceFromIndex track.currentPosition track.trackTree
+
+                currentAltitude =
+                    gpxPointFromIndex track.currentPosition track.trackTree
+                        |> .altitude
+            in
+            ( { context
+                | followSelectedPoint = not context.followSelectedPoint
+                , focalPoint =
+                    Point3d.xyz
+                        currentDistance
+                        Quantity.zero
+                        currentAltitude
+              }
+            , []
+            )
+
+        ImageDoubleClick event ->
+            ( context, [] )
+
+
+pointInAltitudeView : Context -> Int -> PeteTree -> EarthPoint
+pointInAltitudeView context i tree =
+    let
+        distance =
+            DomainModel.distanceFromIndex i tree
+
+        altitude =
+            DomainModel.gpxPointFromIndex i tree |> .altitude
+    in
+    Point3d.xyz
+        distance
+        Quantity.zero
+        (altitude |> Quantity.multiplyBy context.emphasis)
+
+
+pointInGradientView : Context -> Int -> PeteTree -> EarthPoint
+pointInGradientView context i tree =
+    let
+        distance =
+            DomainModel.distanceFromIndex i tree
+
+        gradient =
+            DomainModel.leafFromIndex i tree
+                |> DomainModel.gradientFromNode
+
+        compensateForZoom g =
+            -- Empirical!
+            2.0 * g * (0.5 ^ context.zoomLevel) * (Length.inKilometers <| trueLength tree)
+    in
+    Point3d.xyz
+        distance
+        (Length.meters <| compensateForZoom gradient)
+        Quantity.zero
+
+
 view :
     Context
     -> ( Quantity Int Pixels, Quantity Int Pixels )
@@ -178,7 +433,8 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
                 , Svg.Attributes.height svgHeight
                 ]
                 [ Svg.relativeTo topLeftFrame <|
-                    pointsAsAltitudePolyline "black" context.altitudeSvgPoints
+                    pointsAsAltitudePolyline "black" <|
+                        renderProfileData track
                 , Svg.relativeTo topLeftFrame <|
                     Svg.g []
                         (orangeAltitudeSvg :: orangeText ++ purpleSvg)
@@ -193,11 +449,111 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
                 , Svg.Attributes.height svgHeight
                 ]
                 [ Svg.relativeTo topLeftFrame <|
-                    pointsAsGradientPolyline context.altitudeSvgPoints
+                    pointsAsGradientPolyline <|
+                        renderProfileData track
                 , Svg.relativeTo topLeftFrame <|
                     Svg.g []
                         (orangeGradientSvg :: orangeText)
                 ]
+
+        currentPoint =
+            earthPointFromIndex track.currentPosition track.trackTree
+
+        fullRenderBox =
+            BoundingBox3d.withDimensions
+                ( Length.kilometer, Length.kilometer, Length.kilometer )
+                currentPoint
+
+        trackLengthInView =
+            trueLength track.trackTree |> Quantity.multiplyBy (0.5 ^ context.zoomLevel)
+
+        compensateForZoom g =
+            -- Empirical!
+            2.0 * g * (0.5 ^ context.zoomLevel) * (Length.inKilometers <| trueLength track.trackTree)
+
+        pointOfInterest =
+            distanceFromIndex track.currentPosition track.trackTree
+
+        leftEdge =
+            Quantity.clamp
+                Quantity.zero
+                (trueLength track.trackTree |> Quantity.minus trackLengthInView)
+                (pointOfInterest |> Quantity.minus (Quantity.half trackLengthInView))
+
+        rightEdge =
+            leftEdge |> Quantity.plus trackLengthInView
+
+        depthFn : RoadSection -> Maybe Int
+        depthFn road =
+            --Depth to ensure about 1000 values returned,
+            if road.boundingBox |> BoundingBox3d.intersects fullRenderBox then
+                Nothing
+
+            else
+                Just <| round <| 10 + context.zoomLevel
+
+        makeSvgPoint : Length.Length -> RoadSection -> List (Point3d Meters LocalCoords)
+        makeSvgPoint distance road =
+            --TODO: Use a fold over the tree to create a polyline and render it with
+            -- slightly rounded joints.
+            [ Point3d.xyz
+                distance
+                (Length.meters <| compensateForZoom road.gradientAtStart)
+                (road.startPoint |> Point3d.zCoordinate |> Quantity.multiplyBy context.emphasis)
+            ]
+
+        foldFn :
+            (Length.Length -> RoadSection -> List renderable)
+            -> RoadSection
+            -> ( Length.Length, List renderable, Maybe RoadSection )
+            -> ( Length.Length, List renderable, Maybe RoadSection )
+        foldFn renderFn road ( distanceSoFar, outputs, _ ) =
+            let
+                newEntry : List renderable
+                newEntry =
+                    renderFn distanceSoFar road
+            in
+            ( distanceSoFar |> Quantity.plus road.trueLength
+            , newEntry ++ outputs
+            , Just road
+            )
+
+        renderProfileData : TrackLoaded msg -> List EarthPoint
+        renderProfileData trackToRender =
+            let
+
+                ( leftIndex, rightIndex ) =
+                    -- Make sure we always have a spare point outside the image if possible.
+                    ( indexFromDistance leftEdge trackToRender.trackTree - 1
+                    , indexFromDistance rightEdge trackToRender.trackTree + 1
+                    )
+
+                ( trueLeftEdge, trueRightEdge ) =
+                    ( distanceFromIndex leftIndex track.trackTree
+                    , distanceFromIndex rightIndex track.trackTree
+                    )
+
+                ( _, altitudeSvgPoints, _ ) =
+                    DomainModel.traverseTreeBetweenLimitsToDepth
+                        leftIndex
+                        rightIndex
+                        depthFn
+                        0
+                        trackToRender.trackTree
+                        (foldFn makeSvgPoint)
+                        ( trueLeftEdge, [], Nothing )
+
+                finalSvgPoint =
+                    let
+                        leaf =
+                            asRecord <| leafFromIndex rightIndex trackToRender.trackTree
+                    in
+                    Point3d.xyz
+                        rightEdge
+                        (Length.meters <| compensateForZoom leaf.gradientAtStart)
+                        (leaf.endPoint |> Point3d.zCoordinate |> Quantity.multiplyBy context.emphasis)
+            in
+            finalSvgPoint :: altitudeSvgPoints
 
         altitudePreviews : List (Svg msg)
         altitudePreviews =
@@ -214,17 +570,10 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
 
         makeProfilePreview : Color -> PeteTree -> Svg msg
         makeProfilePreview colour previewTree =
-            let
-                dummyContext : Context
-                dummyContext =
-                    renderProfileData
-                        { track | trackTree = previewTree }
-                        altitudeWidth
-                        context
-            in
             pointsAsAltitudePolyline
                 (uiColourHexString colour)
-                dummyContext.altitudeSvgPoints
+            <|
+                renderProfileData { track | trackTree = previewTree }
 
         pointsAsAltitudePolyline : String -> List (Point3d Meters LocalCoords) -> Svg msg
         pointsAsAltitudePolyline colour points =
@@ -378,386 +727,6 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
         ]
 
 
-deriveAltitudeCamera treeNode context currentPosition ( width, height ) =
-    let
-        trackLengthInView =
-            trueLength treeNode |> Quantity.multiplyBy (0.5 ^ context.zoomLevel)
-
-        metresPerPixel =
-            Length.inMeters trackLengthInView / (toFloat <| Pixels.inPixels width)
-
-        viewportHeight =
-            Length.meters <| metresPerPixel * (toFloat <| Pixels.inPixels height)
-
-        lookingAt =
-            if context.followSelectedPoint then
-                Point3d.xyz
-                    (distanceFromIndex currentPosition treeNode)
-                    Quantity.zero
-                    (earthPointFromIndex currentPosition treeNode
-                        |> Point3d.zCoordinate
-                        |> Quantity.multiplyBy context.emphasis
-                    )
-
-            else
-                context.focalPoint
-
-        eyePoint =
-            Point3d.translateBy
-                (Vector3d.meters 0.0 -50000.0 0.0)
-                lookingAt
-
-        viewpoint =
-            Viewpoint3d.lookAt
-                { focalPoint = lookingAt
-                , eyePoint = eyePoint
-                , upDirection = Direction3d.positiveZ
-                }
-    in
-    Camera3d.orthographic
-        { viewpoint = viewpoint
-        , viewportHeight = viewportHeight
-        }
-
-
-deriveGradientCamera treeNode context currentPosition ( width, height ) =
-    let
-        trackLengthInView =
-            trueLength treeNode |> Quantity.multiplyBy (0.5 ^ context.zoomLevel)
-
-        metresPerPixel =
-            Length.inMeters trackLengthInView / (toFloat <| Pixels.inPixels width)
-
-        viewportHeight =
-            Length.meters <| metresPerPixel * (toFloat <| Pixels.inPixels height)
-
-        lookingAt =
-            if context.followSelectedPoint then
-                Point3d.xyz
-                    (distanceFromIndex currentPosition treeNode)
-                    Quantity.zero
-                    (earthPointFromIndex currentPosition treeNode
-                        |> Point3d.zCoordinate
-                        |> Quantity.multiplyBy context.emphasis
-                    )
-
-            else
-                context.focalPoint
-
-        eyePoint =
-            Point3d.translateBy
-                (Vector3d.meters 0.0 0.0 1000.0)
-                lookingAt
-
-        viewpoint =
-            Viewpoint3d.lookAt
-                { focalPoint = lookingAt
-                , eyePoint = eyePoint
-                , upDirection = Direction3d.positiveY
-                }
-    in
-    Camera3d.orthographic
-        { viewpoint = viewpoint
-        , viewportHeight = viewportHeight
-        }
-
-
-update :
-    Msg
-    -> (Msg -> msg)
-    -> TrackLoaded msg
-    -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> Dict String PreviewData
-    -> Context
-    -> ( Context, List (ToolAction msg) )
-update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
-    let
-        maxZoom =
-            (logBase 2 <| toFloat <| skipCount track.trackTree) - 2
-    in
-    case msg of
-        SetEmphasis emphasis ->
-            ( { context | emphasis = toFloat emphasis }
-                |> renderProfileData track givenWidth
-            , []
-            )
-
-        ImageZoomIn ->
-            ( { context | zoomLevel = clamp 0 10 <| context.zoomLevel + 0.5 }
-                |> renderProfileData track givenWidth
-            , []
-            )
-
-        ImageZoomOut ->
-            ( { context | zoomLevel = clamp 0 10 <| context.zoomLevel - 0.5 }
-                |> renderProfileData track givenWidth
-            , []
-            )
-
-        ImageReset ->
-            ( initialiseView track.currentPosition track.trackTree (Just context)
-                |> renderProfileData track givenWidth
-            , []
-            )
-
-        ImageNoOp ->
-            ( context, [] )
-
-        ImageClick event ->
-            -- Click moves pointer but does not re-centre view. (Double click will.)
-            --if context.waitingForClickDelay then
-            ( context
-            , [ SetCurrent <| detectHit event track ( givenWidth, givenHeight ) context
-              , TrackHasChanged
-              ]
-            )
-
-        --else
-        --    ( context, [] )
-        ClickDelayExpired ->
-            ( { context | waitingForClickDelay = False }, [] )
-
-        ImageMouseWheel deltaY ->
-            let
-                increment =
-                    -0.001 * deltaY
-
-                zoomLevel =
-                    clamp 0 maxZoom <|
-                        context.zoomLevel
-                            + increment
-            in
-            ( { context | zoomLevel = zoomLevel }
-                |> renderProfileData track givenWidth
-            , []
-            )
-
-        ImageGrab event ->
-            -- Mouse behaviour depends which view is in use...
-            -- Right-click or ctrl-click to mean rotate; otherwise pan.
-            let
-                newContext =
-                    { context
-                        | orbiting = Just event.offsetPos
-                        , dragAction = DragPan
-                        , waitingForClickDelay = True
-                    }
-            in
-            ( newContext
-            , [ DelayMessage 250 (msgWrapper ClickDelayExpired) ]
-            )
-
-        ImageDrag event ->
-            let
-                ( dx, dy ) =
-                    event.offsetPos
-            in
-            case ( context.dragAction, context.orbiting ) of
-                ( DragPan, Just ( startX, startY ) ) ->
-                    let
-                        shiftVector =
-                            Vector3d.meters
-                                ((startX - dx) * context.metresPerPixel)
-                                0
-                                0
-
-                        newContext =
-                            { context
-                                | focalPoint =
-                                    context.focalPoint |> Point3d.translateBy shiftVector
-                                , orbiting = Just ( dx, dy )
-                            }
-                    in
-                    ( newContext |> renderProfileData track givenWidth
-                    , []
-                    )
-
-                _ ->
-                    ( context, [] )
-
-        ImageRelease event ->
-            ( { context
-                | orbiting = Nothing
-                , dragAction = DragNone
-                , waitingForClickDelay = False
-              }
-            , []
-            )
-
-        ToggleFollowOrange ->
-            let
-                currentDistance =
-                    distanceFromIndex track.currentPosition track.trackTree
-
-                currentAltitude =
-                    gpxPointFromIndex track.currentPosition track.trackTree
-                        |> .altitude
-            in
-            ( { context
-                | followSelectedPoint = not context.followSelectedPoint
-                , focalPoint =
-                    Point3d.xyz
-                        currentDistance
-                        Quantity.zero
-                        currentAltitude
-              }
-            , []
-            )
-
-        ImageDoubleClick event ->
-            ( context, [] )
-
-
-pointInAltitudeView : Context -> Int -> PeteTree -> EarthPoint
-pointInAltitudeView context i tree =
-    let
-        distance =
-            DomainModel.distanceFromIndex i tree
-
-        altitude =
-            DomainModel.gpxPointFromIndex i tree |> .altitude
-    in
-    Point3d.xyz
-        distance
-        Quantity.zero
-        (altitude |> Quantity.multiplyBy context.emphasis)
-
-
-pointInGradientView : Context -> Int -> PeteTree -> EarthPoint
-pointInGradientView context i tree =
-    let
-        distance =
-            DomainModel.distanceFromIndex i tree
-
-        gradient =
-            DomainModel.leafFromIndex i tree
-                |> DomainModel.gradientFromNode
-
-        compensateForZoom g =
-            -- Empirical!
-            2.0 * g * (0.5 ^ context.zoomLevel) * (Length.inKilometers <| trueLength tree)
-    in
-    Point3d.xyz
-        distance
-        (Length.meters <| compensateForZoom gradient)
-        Quantity.zero
-
-
-renderProfileData :
-    TrackLoaded msg
-    -> Quantity Int Pixels
-    -> Context
-    -> Context
-renderProfileData track displayWidth context =
-    let
-        --TODO: Defer render into `view`
-        currentPoint =
-            earthPointFromIndex track.currentPosition track.trackTree
-
-        fullRenderBox =
-            BoundingBox3d.withDimensions
-                ( Length.kilometer, Length.kilometer, Length.kilometer )
-                currentPoint
-
-        trackLengthInView =
-            trueLength track.trackTree |> Quantity.multiplyBy (0.5 ^ context.zoomLevel)
-
-        metresPerPixel =
-            Length.inMeters trackLengthInView / (toFloat <| Pixels.inPixels displayWidth)
-
-        compensateForZoom g =
-            -- Empirical!
-            2.0 * g * (0.5 ^ context.zoomLevel) * (Length.inKilometers <| trueLength track.trackTree)
-
-        pointOfInterest =
-            distanceFromIndex track.currentPosition track.trackTree
-
-        floorPlane =
-            Plane3d.xy |> Plane3d.offsetBy (BoundingBox3d.minZ <| boundingBox track.trackTree)
-
-        leftEdge =
-            Quantity.clamp
-                Quantity.zero
-                (trueLength track.trackTree |> Quantity.minus trackLengthInView)
-                (pointOfInterest |> Quantity.minus (Quantity.half trackLengthInView))
-
-        rightEdge =
-            leftEdge |> Quantity.plus trackLengthInView
-
-        ( leftIndex, rightIndex ) =
-            -- Make sure we always have a spare point outside the image if possible.
-            ( indexFromDistance leftEdge track.trackTree - 1
-            , indexFromDistance rightEdge track.trackTree + 1
-            )
-
-        ( trueLeftEdge, trueRightEdge ) =
-            ( distanceFromIndex leftIndex track.trackTree
-            , distanceFromIndex rightIndex track.trackTree
-            )
-
-        depthFn : RoadSection -> Maybe Int
-        depthFn road =
-            --Depth to ensure about 1000 values returned,
-            if road.boundingBox |> BoundingBox3d.intersects fullRenderBox then
-                Nothing
-
-            else
-                Just <| round <| 10 + context.zoomLevel
-
-        makeSvgPoint : Length.Length -> RoadSection -> List (Point3d Meters LocalCoords)
-        makeSvgPoint distance road =
-            --TODO: Use a fold over the tree to create a polyline and render it with
-            -- slightly rounded joints.
-            [ Point3d.xyz
-                distance
-                (Length.meters <| compensateForZoom road.gradientAtStart)
-                (road.startPoint |> Point3d.zCoordinate |> Quantity.multiplyBy context.emphasis)
-            ]
-
-        foldFn :
-            (Length.Length -> RoadSection -> List renderable)
-            -> RoadSection
-            -> ( Length.Length, List renderable, Maybe RoadSection )
-            -> ( Length.Length, List renderable, Maybe RoadSection )
-        foldFn renderFn road ( distanceSoFar, outputs, _ ) =
-            let
-                newEntry : List renderable
-                newEntry =
-                    renderFn distanceSoFar road
-            in
-            ( distanceSoFar |> Quantity.plus road.trueLength
-            , newEntry ++ outputs
-            , Just road
-            )
-
-        ( _, altitudeSvgPoints, _ ) =
-            --TODO: Make function that takes tree and colour, returns SVG. Use it in view.
-            DomainModel.traverseTreeBetweenLimitsToDepth
-                leftIndex
-                rightIndex
-                depthFn
-                0
-                track.trackTree
-                (foldFn makeSvgPoint)
-                ( trueLeftEdge, [], Nothing )
-
-        finalSvgPoint =
-            let
-                leaf =
-                    asRecord <| leafFromIndex rightIndex track.trackTree
-            in
-            Point3d.xyz
-                rightEdge
-                (Length.meters <| compensateForZoom leaf.gradientAtStart)
-                (leaf.endPoint |> Point3d.zCoordinate |> Quantity.multiplyBy context.emphasis)
-    in
-    { context
-        | profileScene = []
-        , metresPerPixel = metresPerPixel
-        , altitudeSvgPoints = finalSvgPoint :: altitudeSvgPoints
-    }
-
-
 initialiseView :
     Int
     -> PeteTree
@@ -802,7 +771,6 @@ initialiseView current treeNode currentContext =
             , waitingForClickDelay = False
             , profileScene = []
             , emphasis = 1.0
-            , altitudeSvgPoints = []
             }
 
 

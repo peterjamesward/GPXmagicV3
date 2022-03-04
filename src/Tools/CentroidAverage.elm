@@ -107,21 +107,39 @@ toolStateChange opened colour options track =
 
         _ ->
             -- Hide preview
-            ( options, [ HidePreview "centroid" ] )
+            ( options, [ HidePreview "centroid", HidePreview "centroidprofile" ] )
 
 
 actions newOptions previewColour track =
-    if newOptions.extent == ExtentRange then
-        [ ShowPreview
-            { tag = "centroid"
-            , shape = PreviewCircle
-            , colour = previewColour
-            , points = computeNewPoints newOptions track
-            }
-        ]
+    let
+        ( previewTree, _ ) =
+            applyUsingOptions newOptions track
 
-    else
-        [ HidePreview "centroid" ]
+        normalPreview =
+            ShowPreview
+                { tag = "centroid"
+                , shape = PreviewCircle
+                , colour = previewColour
+                , points = computeNewPoints newOptions track
+                }
+
+        profilePreview tree =
+            ShowPreview
+                { tag = "centroidprofile"
+                , shape = PreviewProfile tree
+                , colour = previewColour
+                , points = []
+                }
+    in
+    case ( newOptions.extent, previewTree ) of
+        ( ExtentRange, Just tree ) ->
+            [ normalPreview, profilePreview tree ]
+
+        ( ExtentTrack, Just tree ) ->
+            [ profilePreview tree ]
+
+        _ ->
+            [ HidePreview "centroid", HidePreview "centroidprofile" ]
 
 
 update :

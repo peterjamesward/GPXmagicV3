@@ -14,9 +14,15 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 ## SVG profile rendering
 
-Zero line for gradient.
 PeteTree previews for Bezier, Centroid, Nudge, Limit Gradients and new Filters.
+> Something weird with Bezier. Zooming shortens the line.
+> Similar but not as bad with Centroid. Is it track length difference?
+> Could be. Must check that consistent distance scale is used.
+
+Previews on Gradient curve also.
+Gradient should not be sloped, should be steps.
 Info on mouse move.
+Zero line for gradient.
 Scales?
 
 ## Profile smoothing

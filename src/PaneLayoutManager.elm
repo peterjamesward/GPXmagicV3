@@ -259,18 +259,19 @@ renderPaneIfProfileVisible :
     -> Dict String PreviewData
     -> PaneContext
 renderPaneIfProfileVisible toolSettings pane width track previews =
-    case ( pane.activeView, pane.profileContext ) of
-        ( ViewProfile, Just context ) ->
-            { pane
-                | profileContext =
-                    Just <|
-                        ViewProfileCharts.renderProfileData
-                            track
-                            width
-                            context
-            }
-
-        _ ->
+    -- Not doing this here now, moved into view.
+    --case ( pane.activeView, pane.profileContext ) of
+    --    ( ViewProfile, Just context ) ->
+    --        { pane
+    --            | profileContext =
+    --                Just <|
+    --                    ViewProfileCharts.renderProfileData
+    --                        track
+    --                        width
+    --                        context
+    --        }
+    --
+    --    _ ->
             pane
 
 

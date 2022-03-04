@@ -148,21 +148,39 @@ toolStateChange opened colour options track =
 
         _ ->
             -- Hide preview
-            ( options, [ HidePreview "bezier" ] )
+            ( options, [ HidePreview "bezier", HidePreview "bezierprofile" ] )
 
 
 actions newOptions previewColour track =
-    if newOptions.extent == ExtentIsRange then
-        [ ShowPreview
-            { tag = "bezier"
-            , shape = PreviewCircle
-            , colour = previewColour
-            , points = computeNewPoints newOptions track
-            }
-        ]
+    let
+        ( previewTree, _, _ ) =
+            applyUsingOptions newOptions track
 
-    else
-        [ HidePreview "bezier" ]
+        normalPreview =
+            ShowPreview
+                { tag = "bezier"
+                , shape = PreviewCircle
+                , colour = previewColour
+                , points = computeNewPoints newOptions track
+                }
+
+        profilePreview tree =
+            ShowPreview
+                { tag = "bezierprofile"
+                , shape = PreviewProfile tree
+                , colour = previewColour
+                , points = []
+                }
+    in
+    case ( newOptions.extent, previewTree ) of
+        ( ExtentIsRange, Just tree ) ->
+            [ normalPreview, profilePreview tree ]
+
+        ( ExtentIsTrack, Just tree ) ->
+            [ profilePreview tree ]
+
+        _ ->
+            [ HidePreview "bezier", HidePreview "bezierprofile" ]
 
 
 update :
