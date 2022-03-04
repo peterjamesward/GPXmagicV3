@@ -275,9 +275,7 @@ jsonProfileData track =
 
 getAsPreviewPoint : PeteTree -> Int -> PreviewPoint
 getAsPreviewPoint tree index =
-    { distance = distanceFromIndex index tree
-    , gradient = gradientFromNode <| leafFromIndex index tree
-    , earthPoint = earthPointFromIndex index tree
+    { earthPoint = earthPointFromIndex index tree
     , gpx = gpxPointFromIndex index tree
     }
 
@@ -300,9 +298,7 @@ previewFromTree tree start end depthLimit =
             -> ( Length.Length, List PreviewPoint )
         internalFoldFn road ( descendingDistance, accum ) =
             ( descendingDistance |> Quantity.minus road.trueLength
-            , { distance = descendingDistance |> Quantity.minus road.trueLength
-              , gradient = gradientFromNode <| Leaf road
-              , earthPoint = road.endPoint
+            , { earthPoint = road.endPoint
               , gpx = Tuple.second road.sourceData
               }
                 :: accum
@@ -332,22 +328,9 @@ asPreviewPoints track startDistance earths =
                             -- Avoid divide by zero
                             Length.centimeter
 
-                thisGradient =
-                    case mLastGpx of
-                        Just lastGpx ->
-                            100
-                                * Quantity.ratio
-                                    (thisGpx.altitude |> Quantity.minus lastGpx.altitude)
-                                    thisDistance
-
-                        Nothing ->
-                            0.0
-
                 thisPreview =
                     { earthPoint = earth
                     , gpx = thisGpx
-                    , distance = distance
-                    , gradient = thisGradient
                     }
             in
             ( distance |> Quantity.plus thisDistance

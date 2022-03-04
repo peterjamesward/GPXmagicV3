@@ -427,35 +427,6 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
             , String.fromInt <| Pixels.inPixels altitudeHeight
             )
 
-        altitudeChart =
-            Svg.svg
-                [ Svg.Attributes.width svgWidth
-                , Svg.Attributes.height svgHeight
-                ]
-                [ Svg.relativeTo topLeftFrame <|
-                    pointsAsAltitudePolyline "black" <|
-                        renderProfileData track
-                , Svg.relativeTo topLeftFrame <|
-                    Svg.g []
-                        (orangeAltitudeSvg :: orangeText ++ purpleSvg)
-                , Svg.relativeTo topLeftFrame <|
-                    Svg.g []
-                        altitudePreviews
-                ]
-
-        gradientChart =
-            Svg.svg
-                [ Svg.Attributes.width svgWidth
-                , Svg.Attributes.height svgHeight
-                ]
-                [ Svg.relativeTo topLeftFrame <|
-                    pointsAsGradientPolyline <|
-                        renderProfileData track
-                , Svg.relativeTo topLeftFrame <|
-                    Svg.g []
-                        (orangeGradientSvg :: orangeText)
-                ]
-
         currentPoint =
             earthPointFromIndex track.currentPosition track.trackTree
 
@@ -529,8 +500,8 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
                     )
 
                 ( trueLeftEdge, trueRightEdge ) =
-                    ( distanceFromIndex leftIndex track.trackTree
-                    , distanceFromIndex rightIndex track.trackTree
+                    ( distanceFromIndex leftIndex trackToRender.trackTree
+                    , distanceFromIndex rightIndex trackToRender.trackTree
                     )
 
                 ( _, altitudeSvgPoints, _ ) =
@@ -553,7 +524,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
                         (Length.meters <| compensateForZoom leaf.gradientAtStart)
                         (leaf.endPoint |> Point3d.zCoordinate |> Quantity.multiplyBy context.emphasis)
             in
-            finalSvgPoint :: altitudeSvgPoints
+            (finalSvgPoint :: altitudeSvgPoints) |> List.reverse
 
         altitudePreviews : List (Svg msg)
         altitudePreviews =
@@ -635,6 +606,35 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
                 context
                 track.currentPosition
                 ( altitudeWidth, altitudeHeight )
+
+        altitudeChart =
+            Svg.svg
+                [ Svg.Attributes.width svgWidth
+                , Svg.Attributes.height svgHeight
+                ]
+                [ Svg.relativeTo topLeftFrame <|
+                    pointsAsAltitudePolyline "black" <|
+                        renderProfileData track
+                , Svg.relativeTo topLeftFrame <|
+                    Svg.g []
+                        (orangeAltitudeSvg :: orangeText ++ purpleSvg)
+                , Svg.relativeTo topLeftFrame <|
+                    Svg.g []
+                        altitudePreviews
+                ]
+
+        gradientChart =
+            Svg.svg
+                [ Svg.Attributes.width svgWidth
+                , Svg.Attributes.height svgHeight
+                ]
+                [ Svg.relativeTo topLeftFrame <|
+                    pointsAsGradientPolyline <|
+                        renderProfileData track
+                , Svg.relativeTo topLeftFrame <|
+                    Svg.g []
+                        (orangeGradientSvg :: orangeText)
+                ]
 
         orangeLeaf =
             asRecord <| DomainModel.leafFromIndex track.currentPosition track.trackTree

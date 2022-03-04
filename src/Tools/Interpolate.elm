@@ -100,21 +100,7 @@ computeNewPoints excludeExisting options track =
                 (DomainModel.distanceFromIndex fromStart track.trackTree)
                 newPoints
     in
-    case previews of
-        p1 :: pRest ->
-            previews
-                |> List.map
-                    (\preview ->
-                        { preview
-                            | distance =
-                                preview.distance
-                                    |> Quantity.plus
-                                        (Point3d.distanceFrom startPoint p1.earthPoint)
-                        }
-                    )
-
-        _ ->
-            []
+    previews
 
 
 apply : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )

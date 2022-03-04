@@ -46,36 +46,12 @@ actions newOptions previewColour track =
     case newOptions.previewData of
         Just previewTree ->
             let
-                uncorrectedPreview =
+                normalPreview =
                     TrackLoaded.previewFromTree
                         previewTree
                         0
                         (skipCount track.trackTree)
                         10
-
-                ( fromStart, fromEnd ) =
-                    case newOptions.extent of
-                        ExtentIsRange ->
-                            TrackLoaded.getRangeFromMarkers track
-
-                        ExtentIsTrack ->
-                            ( 0, 0 )
-
-                startDistance =
-                    distanceFromIndex fromStart track.trackTree
-
-                correctedPreview =
-                    -- Apply offset so preview appears at the right place.
-                    --TODO: Will not need this when profiles are done differntly.
-                    uncorrectedPreview
-                        |> List.map
-                            (\preview ->
-                                { preview
-                                    | distance =
-                                        preview.distance
-                                            |> Quantity.plus startDistance
-                                }
-                            )
 
                 ( newTreeForProfilePreview, _ ) =
                     apply newOptions track
@@ -84,7 +60,7 @@ actions newOptions previewColour track =
                 { tag = "limit"
                 , shape = PreviewCircle
                 , colour = previewColour
-                , points = correctedPreview
+                , points = normalPreview
                 }
             , case newTreeForProfilePreview of
                 Just newTree ->
@@ -404,7 +380,7 @@ toolStateChange opened colour options track =
             )
 
         _ ->
-            ( options, [ HidePreview "limit" ] )
+            ( options, [ HidePreview "limit", HidePreview "limitProfile" ] )
 
 
 view : Options -> (Msg -> msg) -> Element msg

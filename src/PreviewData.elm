@@ -24,8 +24,6 @@ type alias PreviewData =
 
 
 type alias PreviewPoint =
-    { distance : Length.Length
-    , gradient : Float
-    , earthPoint : EarthPoint
+    { earthPoint : EarthPoint
     , gpx : GPXSource
     }

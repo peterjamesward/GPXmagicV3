@@ -28,7 +28,6 @@ defaultOptions =
 type Msg
     = SetBezierTension Float
     | SetBezierTolerance Float
-    | BezierSplines
     | BezierApplyWithOptions
     | SetBezierStyle BezierStyle
     | SetExtent ExtentOption
@@ -44,9 +43,6 @@ computeNewPoints options track =
 
                 ExtentIsTrack ->
                     ( 0, 0 )
-
-        startPoint =
-            earthPointFromIndex fromStart track.trackTree
 
         distanceToPreview =
             distanceFromIndex fromStart track.trackTree
@@ -71,22 +67,7 @@ computeNewPoints options track =
         previewPoints =
             TrackLoaded.asPreviewPoints track distanceToPreview splineEarthPoints
     in
-    case previewPoints of
-        p1 :: pRest ->
-            -- Correct first distance
-            previewPoints
-                |> List.map
-                    (\preview ->
-                        { preview
-                            | distance =
-                                preview.distance
-                                    |> Quantity.plus
-                                        (Point3d.distanceFrom startPoint p1.earthPoint)
-                        }
-                    )
-
-        _ ->
-            []
+    previewPoints
 
 
 applyUsingOptions :
@@ -151,33 +132,34 @@ toolStateChange opened colour options track =
             ( options, [ HidePreview "bezier", HidePreview "bezierprofile" ] )
 
 
-actions newOptions previewColour track =
+actions options previewColour track =
     let
         ( previewTree, _, _ ) =
-            applyUsingOptions newOptions track
+            -- What would the track become if applied?
+            applyUsingOptions options track
 
         normalPreview =
             ShowPreview
                 { tag = "bezier"
                 , shape = PreviewCircle
                 , colour = previewColour
-                , points = computeNewPoints newOptions track
+                , points = computeNewPoints options track
                 }
 
-        profilePreview tree =
+        profilePreview ptree =
             ShowPreview
                 { tag = "bezierprofile"
-                , shape = PreviewProfile tree
+                , shape = PreviewProfile ptree
                 , colour = previewColour
                 , points = []
                 }
     in
-    case ( newOptions.extent, previewTree ) of
-        ( ExtentIsRange, Just tree ) ->
-            [ normalPreview, profilePreview tree ]
+    case ( options.extent, previewTree ) of
+        ( ExtentIsRange, Just ptree ) ->
+            [ normalPreview, profilePreview ptree ]
 
-        ( ExtentIsTrack, Just tree ) ->
-            [ profilePreview tree ]
+        ( ExtentIsTrack, Just ptree ) ->
+            [ profilePreview ptree ]
 
         _ ->
             [ HidePreview "bezier", HidePreview "bezierprofile" ]
