@@ -260,10 +260,10 @@ computeNewPoints options track =
                 simpleLimitGradients options track
 
         MethodGradients ->
-            []
+            averageGradientsWithWindow options track
 
         MethodAltitudes ->
-            []
+            smoothAltitudesWithWindowAverage options track
 
         MethodKalmanFilter ->
             []
@@ -443,6 +443,106 @@ adjustAltitude alt pt =
         alt
 
 
+smoothAltitudesWithWindowAverage : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
+smoothAltitudesWithWindowAverage options track =
+    {-
+       Use a running average of altitude.
+    -}
+    let
+        startAltitude =
+            gpxPointFromIndex 0 track.trackTree |> .altitude
+
+        smoother :
+            RoadSection
+            -> ( List Length.Length, List ( EarthPoint, GPXSource ) )
+            -> ( List Length.Length, List ( EarthPoint, GPXSource ) )
+        smoother road ( window, outputs ) =
+            let
+                newEndAltitude =
+                    Quantity.sum window
+                        |> Quantity.plus currentGpx.altitude
+                        |> Quantity.divideBy (toFloat <| 1 + List.length window)
+
+                newEarthPoint =
+                    adjustAltitude newEndAltitude road.endPoint
+
+                currentGpx =
+                    Tuple.second road.sourceData
+
+                newGpx =
+                    { currentGpx | altitude = newEndAltitude }
+            in
+            ( List.take options.windowSize (newEndAltitude :: window)
+            , ( newEarthPoint, newGpx ) :: outputs
+            )
+
+        ( _, adjustedPoints ) =
+            DomainModel.traverseTreeBetweenLimitsToDepth
+                0
+                (skipCount track.trackTree)
+                (always Nothing)
+                0
+                track.trackTree
+                smoother
+                ( [ startAltitude ], [ getDualCoords track.trackTree 0 ] )
+    in
+    List.reverse adjustedPoints
+
+
+averageGradientsWithWindow : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
+averageGradientsWithWindow options track =
+    {-
+       Use a running average of gradients and derive altitudes.
+    -}
+    let
+        startAltitude =
+            gpxPointFromIndex 0 track.trackTree |> .altitude
+
+        startGradient =
+            leafFromIndex 0 track.trackTree |> asRecord |> .gradientAtStart
+
+        smoother :
+            RoadSection
+            -> ( List Float, Length.Length, List ( EarthPoint, GPXSource ) )
+            -> ( List Float, Length.Length, List ( EarthPoint, GPXSource ) )
+        smoother road ( window, lastAltitude, outputs ) =
+            let
+                newGradient =
+                    (List.sum window + road.gradientAtStart)
+                        / (toFloat <| 1 + List.length window)
+
+                newEndAltitude =
+                    road.trueLength
+                        |> Quantity.multiplyBy (newGradient / 100.0)
+                        |> Quantity.plus lastAltitude
+
+                newEarthPoint =
+                    adjustAltitude newEndAltitude road.endPoint
+
+                currentGpx =
+                    Tuple.second road.sourceData
+
+                newGpx =
+                    { currentGpx | altitude = newEndAltitude }
+            in
+            ( List.take options.windowSize (road.gradientAtStart :: window)
+            , newEndAltitude
+            , ( newEarthPoint, newGpx ) :: outputs
+            )
+
+        ( _, _, adjustedPoints ) =
+            DomainModel.traverseTreeBetweenLimitsToDepth
+                0
+                (skipCount track.trackTree)
+                (always Nothing)
+                0
+                track.trackTree
+                smoother
+                ( [ startGradient ], startAltitude, [ getDualCoords track.trackTree 0 ] )
+    in
+    List.reverse adjustedPoints
+
+
 simpleLimitGradients : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
 simpleLimitGradients options track =
     {-
@@ -554,6 +654,22 @@ view options wrapper =
                 , thumb = Input.defaultThumb
                 }
 
+        windowSizeSlider =
+            Input.slider
+                commonShortHorizontalSliderStyles
+                { onChange = wrapper << SetWindowSize << round
+                , label =
+                    Input.labelBelow [] <|
+                        text <|
+                            "Window: "
+                                ++ String.fromInt options.windowSize
+                , min = 2.0
+                , max = 10.0
+                , step = Just 1.0
+                , value = toFloat options.windowSize
+                , thumb = Input.defaultThumb
+                }
+
         extent =
             Input.radioRow
                 [ padding 10
@@ -589,6 +705,32 @@ view options wrapper =
                         }
                 ]
 
+        smoothAltitudes =
+            column [ spacing 10 ]
+                [ el [ centerX ] <| windowSizeSlider
+                , el [ centerX ] <|
+                    button
+                        neatToolsBorder
+                        { onPress = Just <| wrapper <| LimitGradient
+                        , label =
+                            paragraph []
+                                [ text "Smooth by averaging altitudes using a moving window" ]
+                        }
+                ]
+
+        smoothGradiente =
+            column [ spacing 10 ]
+                [ el [ centerX ] <| windowSizeSlider
+                , el [ centerX ] <|
+                    button
+                        neatToolsBorder
+                        { onPress = Just <| wrapper <| LimitGradient
+                        , label =
+                            paragraph []
+                                [ text "Smooth by averaging gradients using a moving window" ]
+                        }
+                ]
+
         modeChoice =
             Input.radio
                 [ padding 10
@@ -612,5 +754,16 @@ view options wrapper =
         , width fill
         ]
         [ modeChoice
-        , limitGradientsMethod
+        , case options.smoothMethod of
+            MethodLimit ->
+                limitGradientsMethod
+
+            MethodAltitudes ->
+                smoothAltitudes
+
+            MethodGradients ->
+                smoothGradiente
+
+            MethodKalmanFilter ->
+                none
         ]
