@@ -528,20 +528,40 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
 
         altitudePreviews : List (Svg msg)
         altitudePreviews =
-            Dict.foldl makePreview [] previews
+            Dict.foldl makeAltitudePreview [] previews
 
-        makePreview : String -> PreviewData -> List (Svg msg) -> List (Svg msg)
-        makePreview k preview outputs =
+        gradientPreviews : List (Svg msg)
+        gradientPreviews =
+            Dict.foldl makeGradientPreview [] previews
+
+        makeAltitudePreview : String -> PreviewData -> List (Svg msg) -> List (Svg msg)
+        makeAltitudePreview k preview outputs =
             case preview.shape of
                 PreviewProfile previewTree ->
-                    makeProfilePreview preview.colour previewTree :: outputs
+                  makeAltitudePreviewHelper preview.colour previewTree :: outputs
 
                 _ ->
                     outputs
 
-        makeProfilePreview : Color -> PeteTree -> Svg msg
-        makeProfilePreview colour previewTree =
+        makeGradientPreview : String -> PreviewData -> List (Svg msg) -> List (Svg msg)
+        makeGradientPreview k preview outputs =
+            case preview.shape of
+                PreviewProfile previewTree ->
+                     makeGradientPreviewHelper preview.colour previewTree :: outputs
+
+                _ ->
+                    outputs
+
+        makeAltitudePreviewHelper : Color -> PeteTree -> Svg msg
+        makeAltitudePreviewHelper colour previewTree =
             pointsAsAltitudePolyline
+                (uiColourHexString colour)
+            <|
+                renderProfileData { track | trackTree = previewTree }
+
+        makeGradientPreviewHelper : Color -> PeteTree -> Svg msg
+        makeGradientPreviewHelper colour previewTree =
+            pointsAsGradientPolyline
                 (uiColourHexString colour)
             <|
                 renderProfileData { track | trackTree = previewTree }
@@ -561,15 +581,15 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
                 ]
                 (Polyline2d.fromVertices pointsInScreenSpace)
 
-        pointsAsGradientPolyline : List (Point3d Meters LocalCoords) -> Svg msg
-        pointsAsGradientPolyline points =
+        pointsAsGradientPolyline : String -> List (Point3d Meters LocalCoords) -> Svg msg
+        pointsAsGradientPolyline colour points =
             let
                 pointsInScreenSpace =
                     points
                         |> List.map (Point3d.toScreenSpace gradientCamera gradientScreenRectangle)
             in
             Svg.polyline2d
-                [ Svg.Attributes.stroke "black"
+                [ Svg.Attributes.stroke colour
                 , Svg.Attributes.fill "none"
                 , Svg.Attributes.strokeWidth "3"
                 , Svg.Attributes.strokeLinecap "round"
@@ -629,11 +649,14 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
                 , Svg.Attributes.height svgHeight
                 ]
                 [ Svg.relativeTo topLeftFrame <|
-                    pointsAsGradientPolyline <|
+                    pointsAsGradientPolyline "black" <|
                         renderProfileData track
                 , Svg.relativeTo topLeftFrame <|
                     Svg.g []
                         (orangeGradientSvg :: orangeText)
+                , Svg.relativeTo topLeftFrame <|
+                    Svg.g []
+                        gradientPreviews
                 ]
 
         orangeLeaf =
