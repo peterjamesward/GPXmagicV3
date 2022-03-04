@@ -14,10 +14,7 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 ## SVG profile rendering
 
-PeteTree previews for Bezier, Centroid, Nudge, Limit Gradients and new Filters.
-
 Info on mouse move.
-Zero line for gradient.
 Scales?
 
 ## Profile smoothing

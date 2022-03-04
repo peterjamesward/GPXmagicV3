@@ -666,7 +666,8 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
                 [ Svg.Attributes.width svgWidth
                 , Svg.Attributes.height svgHeight
                 ]
-                [ Svg.relativeTo topLeftFrame <|
+                [ Svg.relativeTo topLeftFrame distanceAxis
+                , Svg.relativeTo topLeftFrame <|
                     pointsAsGradientPolyline "black" <|
                         renderProfileData track
                 , Svg.relativeTo topLeftFrame <|
@@ -675,6 +676,12 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
                 , Svg.relativeTo topLeftFrame <|
                     Svg.g []
                         gradientPreviews
+                ]
+
+        distanceAxis =
+            pointsAsGradientPolyline "gray"
+                [ Point3d.xyz leftEdge Quantity.zero Quantity.zero
+                , Point3d.xyz rightEdge Quantity.zero Quantity.zero
                 ]
 
         orangeLeaf =
