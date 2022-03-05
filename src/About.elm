@@ -4,24 +4,30 @@ module About exposing (..)
 aboutText =
     """
 
-# GPXmagic v3.0.7 (cc482872)
+# GPXmagic v3.0.8 (cc482872)
 
 ## In this release ...
 
-* We have gone back to the previous style of Profile view but with the gradient below.
-* x1, x2, x4, x8 choice for vertical emphasis on Profile view.
-* Most previews appear in Profile view, as circles (likely to improve).
-* Open tools jump to the top of their docking zone.
-* Overlay on Profile show current point location (metric only for now).
-* Choice of map styles.
+* Blue buttons make a long-awaited return
+* Looped track now transitioned from v2, now called "Start/Finish"
+* Closing a loop now uses a Bezier spline to introduce a curve at the start/finish
+* For non-looped tracks, Start/Finish provides to add RGT start and end pens by simply extending the track linearly
+* "Split & Join" transitioned from v2
+* "Intersections" transitioned from v2 and now highlights sections of track that are re-used, and in which direction
+* The Profile view has lost its colours again, but gained the ability to show previews
+* "Out and Back" lowers the return leg by 1cm to avoid track flicker on RGT (thanks David Ogle)
+* Bezier splines and Centroid average preview on Profile view (for whole track only)
+* "Limit gradients" renamed to "Smooth Profile"
+* "Smooth Profile" provides a gradient limiting function on the whole track
+* "Smooth Profile" provides a "rolling average" altitude smoother on the whole track
+* "Smooth Profile" provides a "rolling average" gradient smoother on the whole track
+* All the above give a live preview on Profile view, and others
+* Tools are coloured to allow easier search; you can of course change these colours
+* All tools default to upper right dock, similar to v2.
 
 ## Coming up, not necessarily in order ...
 
-1. Loops (inc. impact on Bezier & Centroid)
-2. Intersection and loop detection
-3. Split and Join
-4. Graph Theory (rework)
-5. More altitude & gradient smoothing options
+1. Graph theory
 
 ## Legal guff
 
