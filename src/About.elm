@@ -3,8 +3,7 @@ module About exposing (..)
 
 aboutText =
     """
-
-# GPXmagic v3.0.8 (cc482872)
+# GPXmagic v3.0.8 (b2d61024)
 
 ## In this release ...
 
@@ -28,6 +27,8 @@ aboutText =
 ## Coming up, not necessarily in order ...
 
 1. Graph theory
+2. Terrain
+3. French
 
 ## Legal guff
 
