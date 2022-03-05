@@ -22,7 +22,7 @@ type SmoothMethod
     = MethodLimit
     | MethodGradients
     | MethodAltitudes
-    | MethodKalmanFilter
+    | MethodGaussian
 
 
 type ExtentOption

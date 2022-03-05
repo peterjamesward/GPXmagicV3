@@ -272,7 +272,7 @@ renderPaneIfProfileVisible toolSettings pane width track previews =
     --        }
     --
     --    _ ->
-            pane
+    pane
 
 
 update :
@@ -509,7 +509,6 @@ update paneMsg msgWrapper mTrack contentArea options previews =
                                         (dimensionsWithLayout options.paneLayout contentArea)
                                         previews
                                         profile
-
                             in
                             ( Just new, act )
 
@@ -854,37 +853,43 @@ viewPanes msgWrapper mTrack ( w, h ) options mFlythrough previews =
     in
     column [ alignTop, width fill ]
         [ wrappedRow [ centerX, width fill ] <|
-            case options.paneLayout of
-                PanesOne ->
-                    [ viewPaneZeroWithMap options.pane1
-                    , slider
-                    ]
+            if mTrack == Nothing then
+                [ viewPaneZeroWithMap defaultOptions.pane1
+                , slider
+                ]
 
-                PanesLeftRight ->
-                    [ viewPaneZeroWithMap options.pane1
-                    , viewPaneNoMap options.pane2
-                    , slider
-                    ]
+            else
+                case options.paneLayout of
+                    PanesOne ->
+                        [ viewPaneZeroWithMap options.pane1
+                        , slider
+                        ]
 
-                PanesUpperLower ->
-                    [ viewPaneZeroWithMap options.pane1
-                    , viewPaneNoMap options.pane2
-                    , slider
-                    ]
+                    PanesLeftRight ->
+                        [ viewPaneZeroWithMap options.pane1
+                        , viewPaneNoMap options.pane2
+                        , slider
+                        ]
 
-                PanesGrid ->
-                    [ viewPaneZeroWithMap options.pane1
-                    , viewPaneNoMap options.pane2
-                    , viewPaneNoMap options.pane3
-                    , viewPaneNoMap options.pane4
-                    , slider
-                    ]
+                    PanesUpperLower ->
+                        [ viewPaneZeroWithMap options.pane1
+                        , viewPaneNoMap options.pane2
+                        , slider
+                        ]
 
-                PanesOnePlusTwo ->
-                    -- Later.
-                    [ viewPaneZeroWithMap options.pane1
-                    , slider
-                    ]
+                    PanesGrid ->
+                        [ viewPaneZeroWithMap options.pane1
+                        , viewPaneNoMap options.pane2
+                        , viewPaneNoMap options.pane3
+                        , viewPaneNoMap options.pane4
+                        , slider
+                        ]
+
+                    PanesOnePlusTwo ->
+                        -- Later.
+                        [ viewPaneZeroWithMap options.pane1
+                        , slider
+                        ]
         ]
 
 
@@ -990,10 +995,9 @@ restoreStoredValues options values =
     case D.decodeValue paneStateDecoder values of
         Ok fromStorage ->
             { defaultOptions
-                | paneLayout = PanesOne
+                | paneLayout = decodePanesLayout fromStorage.layoutName
                 , popupVisible = False
-
-                --, pane1 = applyStoredPaneDetails fromStorage.pane1
+                , pane1 = applyStoredPaneDetails fromStorage.pane1
                 , pane2 = applyStoredPaneDetails fromStorage.pane2
                 , pane3 = applyStoredPaneDetails fromStorage.pane3
                 , pane4 = applyStoredPaneDetails fromStorage.pane4

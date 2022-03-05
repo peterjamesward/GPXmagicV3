@@ -39,8 +39,8 @@ defaultOptions =
     , useDeltaSlope = False
     , maximumAscent = 15.0
     , maximumDescent = 15.0
-    , windowSize = 5
-    , limitRedistributes = True
+    , windowSize = 2
+    , limitRedistributes = False
     }
 
 
@@ -265,7 +265,7 @@ computeNewPoints options track =
         MethodAltitudes ->
             smoothAltitudesWithWindowAverage options track
 
-        MethodKalmanFilter ->
+        MethodGaussian ->
             []
 
 
@@ -443,50 +443,87 @@ adjustAltitude alt pt =
         alt
 
 
+type alias AverageSmoothState =
+    { leading : List ( EarthPoint, GPXSource ) -- head = oldest
+    , trailing : List ( EarthPoint, GPXSource ) -- same, head = most recent
+    , outputs : List ( EarthPoint, GPXSource )
+    , leadingEdgeDistance : Length.Length
+    }
+
+
 smoothAltitudesWithWindowAverage : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
 smoothAltitudesWithWindowAverage options track =
     {-
        Use a running average of altitude.
     -}
     let
-        startAltitude =
-            gpxPointFromIndex 0 track.trackTree |> .altitude
+        startState : AverageSmoothState
+        startState =
+            { leading = []
+            , trailing = []
+            , outputs = [ getDualCoords track.trackTree 0 ]
+            , leadingEdgeDistance = Quantity.zero
+            }
 
-        smoother :
+        slidingWindowSnoother :
             RoadSection
-            -> ( List Length.Length, List ( EarthPoint, GPXSource ) )
-            -> ( List Length.Length, List ( EarthPoint, GPXSource ) )
-        smoother road ( window, outputs ) =
+            -> AverageSmoothState
+            -> AverageSmoothState
+        slidingWindowSnoother road { leading, trailing, outputs, leadingEdgeDistance } =
             let
-                newEndAltitude =
-                    Quantity.sum window
-                        |> Quantity.plus currentGpx.altitude
-                        |> Quantity.divideBy (toFloat <| 1 + List.length window)
+                extendedLeadingBuffer =
+                    leading ++ [ ( road.endPoint, Tuple.second road.sourceData ) ]
 
-                newEarthPoint =
-                    adjustAltitude newEndAltitude road.endPoint
+                ( newLeading, newTrailing ) =
+                    if (List.length extendedLeadingBuffer > options.windowSize) then
+                        -- Move one across to the trailing side
+                        ( List.drop 1 extendedLeadingBuffer
+                        , List.take 1 extendedLeadingBuffer ++ trailing )
 
-                currentGpx =
-                    Tuple.second road.sourceData
+                    else
+                        (extendedLeadingBuffer, trailing)
 
-                newGpx =
-                    { currentGpx | altitude = newEndAltitude }
+                newOutputs =
+                    -- Start outputting when leading is full (trailing is not empty).
+                    case newTrailing of
+                        [] ->
+                            outputs
+
+                        ( justPassedEarthPoint, justPassedGpx ) :: others ->
+                            let
+                                mergeListsForAltitude =
+                                    (leading ++ trailing)
+                                        |> List.map (zCoordinate << Tuple.first)
+
+                                averageAltitude =
+                                    Quantity.sum mergeListsForAltitude
+                                        |> Quantity.divideBy (toFloat <| List.length mergeListsForAltitude)
+
+                                revisedEarthPoint =
+                                    adjustAltitude averageAltitude justPassedEarthPoint
+
+                                revisedGpx =
+                                    { justPassedGpx | altitude = averageAltitude }
+                            in
+                            ( revisedEarthPoint, revisedGpx ) :: outputs
             in
-            ( List.take options.windowSize (newEndAltitude :: window)
-            , ( newEarthPoint, newGpx ) :: outputs
-            )
+            { leading = newLeading
+            , trailing = List.take options.windowSize <| newTrailing
+            , outputs = newOutputs
+            , leadingEdgeDistance = leadingEdgeDistance |> Quantity.plus road.trueLength
+            }
 
-        ( _, adjustedPoints ) =
+        finalState =
             DomainModel.traverseTreeBetweenLimitsToDepth
                 0
                 (skipCount track.trackTree)
                 (always Nothing)
                 0
                 track.trackTree
-                smoother
-                ( [ startAltitude ], [ getDualCoords track.trackTree 0 ] )
+                slidingWindowSnoother
+                startState
     in
-    List.reverse adjustedPoints
+    List.reverse finalState.outputs
 
 
 averageGradientsWithWindow : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
@@ -503,13 +540,13 @@ averageGradientsWithWindow options track =
 
         smoother :
             RoadSection
-            -> ( List Float, Length.Length, List ( EarthPoint, GPXSource ) )
-            -> ( List Float, Length.Length, List ( EarthPoint, GPXSource ) )
-        smoother road ( window, lastAltitude, outputs ) =
+            -> ( ( List Float, List Float ), Length.Length, List ( EarthPoint, GPXSource ) )
+            -> ( ( List Float, List Float ), Length.Length, List ( EarthPoint, GPXSource ) )
+        smoother road ( ( leading, trailing ), lastAltitude, outputs ) =
             let
                 newGradient =
-                    (List.sum window + road.gradientAtStart)
-                        / (toFloat <| 1 + List.length window)
+                    (List.sum leading + List.sum trailing + road.gradientAtStart)
+                        / (toFloat <| 1 + List.length leading + List.length trailing)
 
                 newEndAltitude =
                     road.trueLength
@@ -525,7 +562,9 @@ averageGradientsWithWindow options track =
                 newGpx =
                     { currentGpx | altitude = newEndAltitude }
             in
-            ( List.take options.windowSize (road.gradientAtStart :: window)
+            ( ( List.take options.windowSize (List.drop 1 leading ++ [ road.gradientAtStart ])
+              , List.take options.windowSize (List.take 1 leading ++ trailing)
+              )
             , newEndAltitude
             , ( newEarthPoint, newGpx ) :: outputs
             )
@@ -538,7 +577,7 @@ averageGradientsWithWindow options track =
                 0
                 track.trackTree
                 smoother
-                ( [ startGradient ], startAltitude, [ getDualCoords track.trackTree 0 ] )
+                ( ( [ startGradient ], [] ), startAltitude, [ getDualCoords track.trackTree 0 ] )
     in
     List.reverse adjustedPoints
 
@@ -661,10 +700,10 @@ view options wrapper =
                 , label =
                     Input.labelBelow [] <|
                         text <|
-                            "Window: "
+                            "Points either side: "
                                 ++ String.fromInt options.windowSize
-                , min = 2.0
-                , max = 10.0
+                , min = 1.0
+                , max = 8.0
                 , step = Just 1.0
                 , value = toFloat options.windowSize
                 , thumb = Input.defaultThumb
@@ -688,13 +727,14 @@ view options wrapper =
             column [ spacing 10 ]
                 [ el [ centerX ] <| maxAscentSlider
                 , el [ centerX ] <| maxDescentSlider
-                , el [ centerX ] <|
-                    Input.checkbox []
-                        { onChange = wrapper << SetRedistribution
-                        , icon = Input.defaultCheckbox
-                        , checked = options.limitRedistributes
-                        , label = Input.labelRight [] (text "Try to preserve altitudes")
-                        }
+
+                --, el [ centerX ] <|
+                --    Input.checkbox []
+                --        { onChange = wrapper << SetRedistribution
+                --        , icon = Input.defaultCheckbox
+                --        , checked = options.limitRedistributes
+                --        , label = Input.labelRight [] (text "Try to preserve altitudes")
+                --        }
                 , el [ centerX ] <|
                     button
                         neatToolsBorder
@@ -714,7 +754,7 @@ view options wrapper =
                         { onPress = Just <| wrapper <| LimitGradient
                         , label =
                             paragraph []
-                                [ text "Smooth by averaging altitudes using a moving window" ]
+                                [ text "Smooth by averaging altitudes with nearby points" ]
                         }
                 ]
 
@@ -727,14 +767,14 @@ view options wrapper =
                         { onPress = Just <| wrapper <| LimitGradient
                         , label =
                             paragraph []
-                                [ text "Smooth by averaging gradients using a moving window" ]
+                                [ text "Smooth by averaging gradients with nearby points" ]
                         }
                 ]
 
         modeChoice =
             Input.radio
                 [ padding 10
-                , spacing 5
+                , spacing 10
                 ]
                 { onChange = wrapper << ChooseMethod
                 , selected = Just options.smoothMethod
@@ -743,7 +783,7 @@ view options wrapper =
                     [ Input.option MethodLimit (text "Limit gradients")
                     , Input.option MethodAltitudes (text "Smooth altitudes")
                     , Input.option MethodGradients (text "Smooth gradients")
-                    , Input.option MethodKalmanFilter (text "SKalman filter")
+                    , Input.option MethodGaussian (text "Gaussian")
                     ]
                 }
     in
@@ -764,6 +804,6 @@ view options wrapper =
             MethodGradients ->
                 smoothGradiente
 
-            MethodKalmanFilter ->
+            MethodGaussian ->
                 none
         ]

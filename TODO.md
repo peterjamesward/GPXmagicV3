@@ -8,7 +8,6 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 > Debuggers shows messages arriving, not obvious why they should not be processed.
 > Can't save file when this happens, so rather poor show.
 
-BUG: Not restoring pane layout.
 
 --
 
@@ -16,18 +15,10 @@ BUG: Not restoring pane layout.
 
 ## Profile smoothing
 
-To remove need for Vue GPX Smoother.
+Not all tool changes are reflected in Profile preview.
 
-- **Limit Gradient** = as current but option to not redistribute, just to clamp.
-- **Elevation box** smoothing is simple running average of altitude.
-- **Slope box** smoothing does running average of gradients.
-- **Kalman** is what it is; not complex and seems to give some good results by damping gradient changes.
-
-- But not:
-- Savitzky-Golay is more complex least-squares based thing (not referenced by JB).
-- Elevate points is vertical Nudge.
-- Flatten points (is Limit Gradients without the redistribution)
-
+Gaussian altitude smoothing with distance window should be fairly good and not too complex.
+Then we can release.
 
 ---
 
@@ -58,6 +49,8 @@ Info on mouse move.
 Scales?
 
 ## New smoothing
+
+Done centred window. Need to provide option for distance (or other) weighting. This can be later.
 
 > This could be like a meta-box, or a "build your own 1CQF", in which
 > we pipeline existing features, just like 1CQF.
