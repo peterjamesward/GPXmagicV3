@@ -13,7 +13,7 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 # WIP
 
-1. Straighten tool.
+1. Straighten tool. - not using Axis!!
 2. Graph Theory (notes below and from DO's emails)
 
 ---

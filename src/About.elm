@@ -3,10 +3,11 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.0.8 (b2d61024)
+# GPXmagic v3.0.8.1 (b2d61024)
 
 ## In this release ...
 
+* Straighten tool, with option to preserve elevations
 * Blue buttons make a long-awaited return
 * Looped track now transitioned from v2, now called "Start/Finish"
 * Closing a loop now uses a Bezier spline to introduce a curve at the start/finish

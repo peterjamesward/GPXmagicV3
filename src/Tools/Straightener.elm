@@ -7,8 +7,11 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
-import Point3d
-import TrackLoaded exposing (TrackLoaded)
+import Length
+import LineSegment3d
+import Point3d exposing (zCoordinate)
+import Quantity
+import TrackLoaded exposing (TrackLoaded, adjustAltitude)
 import ViewPureStyles exposing (neatToolsBorder, prettyButtonStyles)
 
 
@@ -91,41 +94,55 @@ computeNewPoints options track =
             , DomainModel.earthPointFromIndex endIndex track.trackTree
             )
 
+        ( startDistance, endDistance ) =
+            ( DomainModel.distanceFromIndex fromStart track.trackTree
+            , DomainModel.distanceFromIndex endIndex track.trackTree
+            )
+
+        trackDistance =
+            endDistance |> Quantity.minus startDistance
+
         idealLine =
-            Axis3d.throughPoints startPoint endPoint
+            LineSegment3d.from startPoint endPoint
 
-        applyAdjustment : RoadSection -> List EarthPoint -> List EarthPoint
-        applyAdjustment road outputs =
+        straightLineDistance =
+            LineSegment3d.length idealLine
+
+        applyAdjustment :
+            RoadSection
+            -> ( Length.Length, List EarthPoint )
+            -> ( Length.Length, List EarthPoint )
+        applyAdjustment road ( distance, outputs ) =
             let
+                proportionOfTrackDistance =
+                    Quantity.ratio distance trackDistance
+
+                interpolatedPoint =
+                    LineSegment3d.interpolate idealLine proportionOfTrackDistance
+
                 newPoint =
-                    case idealLine of
-                        Just axis ->
-                            if options.preserveAltitude then
-                                TrackLoaded.adjustAltitude
-                                    (Point3d.zCoordinate road.startPoint)
-                                    (Point3d.projectOntoAxis axis road.startPoint)
+                    if options.preserveAltitude then
+                        adjustAltitude (zCoordinate road.startPoint) interpolatedPoint
 
-                            else
-                                Point3d.projectOntoAxis axis road.startPoint
-
-                        Nothing ->
-                            road.startPoint
+                    else
+                        interpolatedPoint
             in
-            newPoint :: outputs
+            ( distance |> Quantity.plus road.trueLength
+            , newPoint :: outputs
+            )
 
-        adjustedPoints =
-            List.reverse <|
-                List.drop 1 <|
-                    DomainModel.traverseTreeBetweenLimitsToDepth
-                        fromStart
-                        endIndex
-                        (always Nothing)
-                        0
-                        track.trackTree
-                        applyAdjustment
-                        []
+        ( _, adjustedPoints ) =
+            DomainModel.traverseTreeBetweenLimitsToDepth
+                fromStart
+                endIndex
+                (always Nothing)
+                0
+                track.trackTree
+                applyAdjustment
+                ( Quantity.zero, [] )
     in
     adjustedPoints
+        |> List.reverse
         |> List.map
             (\earth ->
                 ( earth
