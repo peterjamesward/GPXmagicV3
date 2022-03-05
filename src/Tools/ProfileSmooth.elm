@@ -447,7 +447,6 @@ type alias AverageSmoothState =
     { leading : List ( EarthPoint, GPXSource ) -- head = oldest
     , trailing : List ( EarthPoint, GPXSource ) -- same, head = most recent
     , outputs : List ( EarthPoint, GPXSource )
-    , leadingEdgeDistance : Length.Length
     }
 
 
@@ -462,26 +461,26 @@ smoothAltitudesWithWindowAverage options track =
             { leading = []
             , trailing = []
             , outputs = [ getDualCoords track.trackTree 0 ]
-            , leadingEdgeDistance = Quantity.zero
             }
 
         slidingWindowSnoother :
             RoadSection
             -> AverageSmoothState
             -> AverageSmoothState
-        slidingWindowSnoother road { leading, trailing, outputs, leadingEdgeDistance } =
+        slidingWindowSnoother road { leading, trailing, outputs } =
             let
                 extendedLeadingBuffer =
                     leading ++ [ ( road.endPoint, Tuple.second road.sourceData ) ]
 
                 ( newLeading, newTrailing ) =
-                    if (List.length extendedLeadingBuffer > options.windowSize) then
+                    if List.length extendedLeadingBuffer > options.windowSize then
                         -- Move one across to the trailing side
                         ( List.drop 1 extendedLeadingBuffer
-                        , List.take 1 extendedLeadingBuffer ++ trailing )
+                        , List.take 1 extendedLeadingBuffer ++ trailing
+                        )
 
                     else
-                        (extendedLeadingBuffer, trailing)
+                        ( extendedLeadingBuffer, trailing )
 
                 newOutputs =
                     -- Start outputting when leading is full (trailing is not empty).
@@ -510,8 +509,37 @@ smoothAltitudesWithWindowAverage options track =
             { leading = newLeading
             , trailing = List.take options.windowSize <| newTrailing
             , outputs = newOutputs
-            , leadingEdgeDistance = leadingEdgeDistance |> Quantity.plus road.trueLength
             }
+
+        flusher : AverageSmoothState -> List ( EarthPoint, GPXSource )
+        flusher { leading, trailing, outputs } =
+            -- We have stopped receiving any more at the leading edge, but we must
+            -- process what we have acquired.
+            case leading of
+                [] ->
+                    List.reverse outputs
+
+                ( justPassedEarthPoint, justPassedGpx ) :: others ->
+                    let
+                        mergeListsForAltitude =
+                            (leading ++ trailing)
+                                |> List.map (zCoordinate << Tuple.first)
+
+                        averageAltitude =
+                            Quantity.sum mergeListsForAltitude
+                                |> Quantity.divideBy (toFloat <| List.length mergeListsForAltitude)
+
+                        revisedEarthPoint =
+                            adjustAltitude averageAltitude justPassedEarthPoint
+
+                        revisedGpx =
+                            { justPassedGpx | altitude = averageAltitude }
+                    in
+                    flusher
+                        { leading = List.drop 1 leading
+                        , trailing = List.take 1 leading ++ trailing
+                        , outputs = ( revisedEarthPoint, revisedGpx ) :: outputs
+                        }
 
         finalState =
             DomainModel.traverseTreeBetweenLimitsToDepth
@@ -523,7 +551,15 @@ smoothAltitudesWithWindowAverage options track =
                 slidingWindowSnoother
                 startState
     in
-    List.reverse finalState.outputs
+    flusher finalState
+
+
+type alias GradientSmootherState =
+    { leading : List RoadSection -- head = oldest
+    , trailing : List RoadSection -- same, head = most recent
+    , outputs : List ( EarthPoint, GPXSource )
+    , leadingEdgeDistance : Length.Length
+    }
 
 
 averageGradientsWithWindow : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
@@ -532,54 +568,15 @@ averageGradientsWithWindow options track =
        Use a running average of gradients and derive altitudes.
     -}
     let
-        startAltitude =
-            gpxPointFromIndex 0 track.trackTree |> .altitude
-
-        startGradient =
-            leafFromIndex 0 track.trackTree |> asRecord |> .gradientAtStart
-
-        smoother :
-            RoadSection
-            -> ( ( List Float, List Float ), Length.Length, List ( EarthPoint, GPXSource ) )
-            -> ( ( List Float, List Float ), Length.Length, List ( EarthPoint, GPXSource ) )
-        smoother road ( ( leading, trailing ), lastAltitude, outputs ) =
-            let
-                newGradient =
-                    (List.sum leading + List.sum trailing + road.gradientAtStart)
-                        / (toFloat <| 1 + List.length leading + List.length trailing)
-
-                newEndAltitude =
-                    road.trueLength
-                        |> Quantity.multiplyBy (newGradient / 100.0)
-                        |> Quantity.plus lastAltitude
-
-                newEarthPoint =
-                    adjustAltitude newEndAltitude road.endPoint
-
-                currentGpx =
-                    Tuple.second road.sourceData
-
-                newGpx =
-                    { currentGpx | altitude = newEndAltitude }
-            in
-            ( ( List.take options.windowSize (List.drop 1 leading ++ [ road.gradientAtStart ])
-              , List.take options.windowSize (List.take 1 leading ++ trailing)
-              )
-            , newEndAltitude
-            , ( newEarthPoint, newGpx ) :: outputs
-            )
-
-        ( _, _, adjustedPoints ) =
-            DomainModel.traverseTreeBetweenLimitsToDepth
-                0
-                (skipCount track.trackTree)
-                (always Nothing)
-                0
-                track.trackTree
-                smoother
-                ( ( [ startGradient ], [] ), startAltitude, [ getDualCoords track.trackTree 0 ] )
+        startState : GradientSmootherState
+        startState =
+            { leading = []
+            , trailing = []
+            , outputs = [ getDualCoords track.trackTree 0 ]
+            , leadingEdgeDistance = Quantity.zero
+            }
     in
-    List.reverse adjustedPoints
+    []
 
 
 simpleLimitGradients : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
