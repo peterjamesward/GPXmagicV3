@@ -13,13 +13,6 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 # WIP
 
-## Profile smoothing
-
-Not all tool changes are reflected in Profile preview.
-
-Gaussian altitude smoothing with distance window should be fairly good and not too complex.
-Then we can release.
-
 ---
 
 # BACKLOG, roughly in order ...

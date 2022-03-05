@@ -265,9 +265,6 @@ computeNewPoints options track =
         MethodAltitudes ->
             smoothAltitudesWithWindowAverage options track
 
-        MethodGaussian ->
-            []
-
 
 limitGradientsWithRedistribution : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
 limitGradientsWithRedistribution options track =
@@ -828,7 +825,7 @@ view options wrapper =
                 }
 
         limitGradientsMethod =
-            column [ spacing 10 ]
+            column [ spacing 10, centerX ]
                 [ el [ centerX ] <| maxAscentSlider
                 , el [ centerX ] <| maxDescentSlider
 
@@ -850,28 +847,24 @@ view options wrapper =
                 ]
 
         smoothAltitudes =
-            column [ spacing 10 ]
+            column [ spacing 10, centerX ]
                 [ el [ centerX ] <| windowSizeSlider
                 , el [ centerX ] <|
                     button
                         neatToolsBorder
                         { onPress = Just <| wrapper <| LimitGradient
-                        , label =
-                            paragraph []
-                                [ text "Smooth by averaging altitudes with nearby points" ]
+                        , label = text "Smooth by averaging altitudes\nwith nearby points"
                         }
                 ]
 
-        smoothGradiente =
-            column [ spacing 10 ]
+        smoothGradients =
+            column [ spacing 10, centerX ]
                 [ el [ centerX ] <| windowSizeSlider
                 , el [ centerX ] <|
                     button
                         neatToolsBorder
                         { onPress = Just <| wrapper <| LimitGradient
-                        , label =
-                            paragraph []
-                                [ text "Smooth by averaging gradients with nearby points" ]
+                        , label = text "Smooth by averaging gradients\nwith nearby points"
                         }
                 ]
 
@@ -887,7 +880,6 @@ view options wrapper =
                     [ Input.option MethodLimit (text "Limit gradients")
                     , Input.option MethodAltitudes (text "Smooth altitudes")
                     , Input.option MethodGradients (text "Smooth gradients")
-                    , Input.option MethodGaussian (text "Gaussian")
                     ]
                 }
     in
@@ -906,8 +898,5 @@ view options wrapper =
                 smoothAltitudes
 
             MethodGradients ->
-                smoothGradiente
-
-            MethodGaussian ->
-                none
+                smoothGradients
         ]
