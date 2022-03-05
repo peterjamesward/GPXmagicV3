@@ -491,7 +491,7 @@ smoothAltitudesWithWindowAverage options track =
                         ( justPassedEarthPoint, justPassedGpx ) :: others ->
                             let
                                 mergeListsForAltitude =
-                                    (leading ++ trailing)
+                                    (newLeading ++ newTrailing)
                                         |> List.map (zCoordinate << Tuple.first)
 
                                 averageAltitude =
@@ -558,7 +558,7 @@ type alias GradientSmootherState =
     { leading : List RoadSection -- head = oldest
     , trailing : List RoadSection -- same, head = most recent
     , outputs : List ( EarthPoint, GPXSource )
-    , leadingEdgeDistance : Length.Length
+    , lastAltitude : Length.Length
     }
 
 
@@ -573,10 +573,117 @@ averageGradientsWithWindow options track =
             { leading = []
             , trailing = []
             , outputs = [ getDualCoords track.trackTree 0 ]
-            , leadingEdgeDistance = Quantity.zero
+            , lastAltitude = gpxPointFromIndex 0 track.trackTree |> .altitude
             }
+
+        slidingWindowSnoother :
+            RoadSection
+            -> GradientSmootherState
+            -> GradientSmootherState
+        slidingWindowSnoother road { leading, trailing, outputs, lastAltitude } =
+            let
+                extendedLeadingBuffer =
+                    leading ++ [ road ]
+
+                ( newLeading, newTrailing ) =
+                    if List.length extendedLeadingBuffer > options.windowSize then
+                        -- Move one across to the trailing side
+                        ( List.drop 1 extendedLeadingBuffer
+                        , List.take 1 extendedLeadingBuffer ++ trailing
+                        )
+
+                    else
+                        ( extendedLeadingBuffer, trailing )
+
+                ( newOutputs, nextAltitude ) =
+                    -- Start outputting when leading is full (trailing is not empty).
+                    case newTrailing of
+                        [] ->
+                            ( outputs, lastAltitude )
+
+                        justPassedRoad :: others ->
+                            let
+                                mergeListsForGradient =
+                                    -- At this stage, newTrailing has the "current" entry.
+                                    (newLeading ++ newTrailing)
+                                        |> List.map .gradientAtStart
+
+                                averageGradient =
+                                    List.sum mergeListsForGradient / (toFloat <| List.length mergeListsForGradient)
+
+                                newAltitude =
+                                    justPassedRoad.trueLength
+                                        |> multiplyBy (averageGradient / 100.0)
+                                        |> Quantity.plus lastAltitude
+
+                                revisedEarthPoint =
+                                    adjustAltitude newAltitude justPassedRoad.endPoint
+
+                                justPassedGpx =
+                                    Tuple.second justPassedRoad.sourceData
+
+                                revisedGpx =
+                                    { justPassedGpx | altitude = newAltitude }
+                            in
+                            ( ( revisedEarthPoint, revisedGpx ) :: outputs
+                            , newAltitude
+                            )
+            in
+            { leading = newLeading
+            , trailing = List.take options.windowSize <| newTrailing
+            , outputs = newOutputs
+            , lastAltitude = nextAltitude
+            }
+
+        flusher : GradientSmootherState -> List ( EarthPoint, GPXSource )
+        flusher { leading, trailing, outputs, lastAltitude } =
+            -- We have stopped receiving any more at the leading edge, but we must
+            -- process what we have acquired.
+            case leading of
+                [] ->
+                    List.reverse outputs
+
+                justPassedRoad :: others ->
+                    let
+                        mergeListsForGradient =
+                            (leading ++ trailing)
+                                |> List.map .gradientAtStart
+
+                        averageGradient =
+                            List.sum mergeListsForGradient / (toFloat <| List.length mergeListsForGradient)
+
+                        newAltitude =
+                            justPassedRoad.trueLength
+                                |> multiplyBy (averageGradient / 100.0)
+                                |> Quantity.plus lastAltitude
+
+                        revisedEarthPoint =
+                            adjustAltitude newAltitude justPassedRoad.endPoint
+
+                        justPassedGpx =
+                            Tuple.second justPassedRoad.sourceData
+
+                        revisedGpx =
+                            { justPassedGpx | altitude = newAltitude }
+                    in
+                    flusher
+                        { leading = List.drop 1 leading
+                        , trailing = List.take 1 leading ++ trailing
+                        , outputs = ( revisedEarthPoint, revisedGpx ) :: outputs
+                        , lastAltitude = newAltitude
+                        }
+
+        finalState =
+            DomainModel.traverseTreeBetweenLimitsToDepth
+                0
+                (skipCount track.trackTree)
+                (always Nothing)
+                0
+                track.trackTree
+                slidingWindowSnoother
+                startState
     in
-    []
+    flusher finalState
 
 
 simpleLimitGradients : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
