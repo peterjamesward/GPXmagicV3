@@ -13,13 +13,15 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 # WIP
 
+1. Straighten tool.
+2. Graph Theory (notes below and from DO's emails)
+
 ---
 
 # BACKLOG, roughly in order ...
 
 ## Tools: old, updated, & new
 
-1. Graph Theory (notes below and from DO's emails)
 2. Info popup for all tools.
 
 --- _Cut-off for release_

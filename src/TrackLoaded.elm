@@ -4,6 +4,7 @@ import Actions exposing (ToolAction)
 import DomainModel exposing (..)
 import Json.Encode as E
 import Length exposing (inMeters)
+import Point3d
 import PreviewData exposing (PreviewPoint)
 import Quantity
 
@@ -342,3 +343,11 @@ asPreviewPoints track startDistance earths =
             List.foldl foldFn ( startDistance, Nothing, [] ) earths
     in
     List.reverse reversed
+
+
+adjustAltitude : Length.Length -> EarthPoint -> EarthPoint
+adjustAltitude alt pt =
+    Point3d.xyz
+        (Point3d.xCoordinate pt)
+        (Point3d.yCoordinate pt)
+        alt

@@ -54,17 +54,18 @@ import Tools.DeletePoints as DeletePoints
 import Tools.DisplaySettings
 import Tools.Interpolate
 import Tools.InterpolateOptions
-import Tools.ProfileSmoothOptions
-import Tools.ProfileSmooth
 import Tools.MoveAndStretch
 import Tools.MoveScaleRotate
 import Tools.Nudge
 import Tools.OneClickQuickFix
 import Tools.OutAndBack
+import Tools.ProfileSmooth
+import Tools.ProfileSmoothOptions
 import Tools.Simplify
 import Tools.SplitAndJoin
 import Tools.StartFinish
 import Tools.StartFinishTypes exposing (Loopiness(..))
+import Tools.Straightener
 import Tools.StravaDataLoad
 import Tools.StravaTools
 import Tools.TrackInfoBox
@@ -1505,6 +1506,24 @@ performActionsOnModel actions model =
 
                                 Tools.InterpolateOptions.ExtentIsTrack ->
                                     ( 0, 0 )
+
+                        newTrack =
+                            track
+                                |> TrackLoaded.addToUndoStack action
+                                    fromStart
+                                    fromEnd
+                                    oldPoints
+                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                    in
+                    { foldedModel | track = Just newTrack }
+
+                ( Straighten, Just track ) ->
+                    let
+                        ( newTree, oldPoints ) =
+                            Tools.Straightener.apply model.toolOptions.straightenOptions track
+
+                        ( fromStart, fromEnd ) =
+                            TrackLoaded.getRangeFromMarkers track
 
                         newTrack =
                             track

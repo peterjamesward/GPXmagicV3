@@ -83,6 +83,7 @@ type ToolAction msg
     | TrackFromGpx String
     | ParseAndAppend String
     | WriteTrackSections (List ( Int, Float, Float ))
+    | Straighten
 
 
 interpretAction : ToolAction msg -> String
@@ -157,6 +158,9 @@ interpretAction action =
 
         ParseAndAppend _ ->
             "append gpx"
+
+        Straighten ->
+            "straighten"
 
         _ ->
             "tell Pete this needs a message"

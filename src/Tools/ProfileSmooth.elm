@@ -11,7 +11,7 @@ import Point3d exposing (zCoordinate)
 import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (multiplyBy, zero)
 import Tools.ProfileSmoothOptions exposing (..)
-import TrackLoaded exposing (TrackLoaded)
+import TrackLoaded exposing (TrackLoaded, adjustAltitude)
 import UtilsForViews exposing (showDecimal0)
 import ViewPureStyles exposing (commonShortHorizontalSliderStyles, neatToolsBorder, prettyButtonStyles)
 
@@ -430,14 +430,6 @@ limitGradientsWithRedistribution options track =
             slopeInfo.roads |> List.foldl allocateProRata ( endAltitude, [] )
     in
     adjustedPoints
-
-
-adjustAltitude : Length.Length -> EarthPoint -> EarthPoint
-adjustAltitude alt pt =
-    Point3d.xyz
-        (Point3d.xCoordinate pt)
-        (Point3d.yCoordinate pt)
-        alt
 
 
 type alias AverageSmoothState =

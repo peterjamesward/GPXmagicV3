@@ -35,8 +35,6 @@ import Tools.GradientProblems
 import Tools.Interpolate
 import Tools.InterpolateOptions
 import Tools.Intersections
-import Tools.ProfileSmoothOptions
-import Tools.ProfileSmooth
 import Tools.MoveAndStretch
 import Tools.MoveAndStretchOptions
 import Tools.MoveScaleRotate
@@ -46,11 +44,14 @@ import Tools.NudgeOptions
 import Tools.OutAndBack
 import Tools.OutAndBackOptions
 import Tools.Pointers as Pointers
+import Tools.ProfileSmooth
+import Tools.ProfileSmoothOptions
 import Tools.Simplify
 import Tools.SplitAndJoin
 import Tools.SplitAndJoinOptions
 import Tools.StartFinish
 import Tools.StartFinishTypes exposing (Loopiness(..))
+import Tools.Straightener
 import Tools.StravaOptions
 import Tools.StravaTools
 import Tools.TrackInfoBox as TrackInfoBox
@@ -90,6 +91,7 @@ type ToolType
     | ToolStartFinish
     | ToolSplitAndJoin
     | ToolIntersections
+    | ToolStraighten
 
 
 type alias Options =
@@ -120,6 +122,7 @@ type alias Options =
     , startFinishOptions : Tools.StartFinishTypes.Options
     , splitAndJoinOptions : Tools.SplitAndJoinOptions.Options
     , intersectionOptions : Tools.Intersections.Options
+    , straightenOptions : Tools.Straightener.Options
     }
 
 
@@ -151,6 +154,7 @@ defaultOptions =
     , startFinishOptions = Tools.StartFinish.defaultOptions
     , splitAndJoinOptions = Tools.SplitAndJoin.defaultOptions
     , intersectionOptions = Tools.Intersections.defaultOptions
+    , straightenOptions = Tools.Straightener.defaultOptions
     }
 
 
@@ -186,6 +190,7 @@ type ToolMsg
     | ToolStartFinishMsg Tools.StartFinish.Msg
     | ToolSplitJoinMsg Tools.SplitAndJoin.Msg
     | ToolIntersectionMsg Tools.Intersections.Msg
+    | ToolStraightenMsg Tools.Straightener.Msg
 
 
 type alias ToolEntry =
@@ -227,6 +232,7 @@ defaultTools =
     , startFinishTool
     , splitAndJoinTool
     , intersectionsTool
+    , straightenTool
     ]
 
 
@@ -548,6 +554,20 @@ intersectionsTool =
     , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.emerald
     , textColour = contrastingColour FlatColors.FlatUIPalette.emerald
+    , isPopupOpen = False
+    }
+
+
+straightenTool : ToolEntry
+straightenTool =
+    { toolType = ToolStraighten
+    , label = "Straighten"
+    , info = "and such-like"
+    , video = Nothing
+    , state = Contracted
+    , dock = DockUpperRight
+    , tabColour = FlatColors.FlatUIPalette.peterRiver
+    , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
     , isPopupOpen = False
     }
 
@@ -1030,6 +1050,17 @@ update toolMsg isTrack msgWrapper options =
                 Nothing ->
                     ( options, [] )
 
+        ToolStraightenMsg msg ->
+            let
+                ( newOptions, actions ) =
+                    Tools.Straightener.update
+                        msg
+                        options.straightenOptions
+            in
+            ( { options | straightenOptions = newOptions }
+            , actions
+            )
+
 
 refreshOpenTools :
     Maybe (TrackLoaded msg)
@@ -1340,6 +1371,9 @@ toolStateHasChanged toolType newState isTrack options =
                     { options | intersectionOptions = newToolOptions }
             in
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
+
+        ToolStraighten ->
+            ( options, [] )
 
 
 
@@ -1682,6 +1716,17 @@ viewToolByType msgWrapper entry isTrack options =
                     Nothing ->
                         noTrackMessage
 
+            ToolStraighten ->
+                case isTrack of
+                    Just track ->
+                        Tools.Straightener.view
+                            (msgWrapper << ToolStraightenMsg)
+                            options.straightenOptions
+                            track
+
+                    Nothing ->
+                        noTrackMessage
+
 
 
 -- Local storage management
@@ -1774,6 +1819,9 @@ encodeType toolType =
 
         ToolIntersections ->
             "ToolIntersections"
+
+        ToolStraighten ->
+            "ToolStraighten"
 
 
 encodeColour : Element.Color -> E.Value
