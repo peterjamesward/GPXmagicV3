@@ -32,6 +32,8 @@ import Tools.DisplaySettings
 import Tools.DisplaySettingsOptions
 import Tools.Flythrough
 import Tools.GradientProblems
+import Tools.Graph
+import Tools.GraphOptions
 import Tools.Interpolate
 import Tools.InterpolateOptions
 import Tools.Intersections
@@ -92,6 +94,7 @@ type ToolType
     | ToolSplitAndJoin
     | ToolIntersections
     | ToolStraighten
+    | ToolGraph
 
 
 type alias Options =
@@ -123,6 +126,7 @@ type alias Options =
     , splitAndJoinOptions : Tools.SplitAndJoinOptions.Options
     , intersectionOptions : Tools.Intersections.Options
     , straightenOptions : Tools.Straightener.Options
+    , graphOptions : Tools.GraphOptions.Options
     }
 
 
@@ -155,6 +159,7 @@ defaultOptions =
     , splitAndJoinOptions = Tools.SplitAndJoin.defaultOptions
     , intersectionOptions = Tools.Intersections.defaultOptions
     , straightenOptions = Tools.Straightener.defaultOptions
+    , graphOptions = Tools.Graph.defaultOptions
     }
 
 
@@ -191,6 +196,7 @@ type ToolMsg
     | ToolSplitJoinMsg Tools.SplitAndJoin.Msg
     | ToolIntersectionMsg Tools.Intersections.Msg
     | ToolStraightenMsg Tools.Straightener.Msg
+    | ToolGraphMsg Tools.Graph.Msg
 
 
 type alias ToolEntry =
@@ -233,6 +239,7 @@ defaultTools =
     , splitAndJoinTool
     , intersectionsTool
     , straightenTool
+    , graphTool
     ]
 
 
@@ -568,6 +575,20 @@ straightenTool =
     , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.peterRiver
     , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
+    , isPopupOpen = False
+    }
+
+
+graphTool : ToolEntry
+graphTool =
+    { toolType = ToolGraph
+    , label = "Route maker"
+    , info = "and such-like"
+    , video = Nothing
+    , state = Contracted
+    , dock = DockUpperRight
+    , tabColour = FlatColors.FlatUIPalette.amethyst
+    , textColour = contrastingColour FlatColors.FlatUIPalette.amethyst
     , isPopupOpen = False
     }
 
@@ -1061,6 +1082,23 @@ update toolMsg isTrack msgWrapper options =
             , actions
             )
 
+        ToolGraphMsg msg ->
+            case isTrack of
+                Just track ->
+                    let
+                        ( newOptions, actions ) =
+                            Tools.Graph.update
+                                msg
+                                options.graphOptions
+                                (msgWrapper << ToolGraphMsg)
+                    in
+                    ( { options | graphOptions = newOptions }
+                    , actions
+                    )
+
+                Nothing ->
+                    ( options, [] )
+
 
 refreshOpenTools :
     Maybe (TrackLoaded msg)
@@ -1373,7 +1411,10 @@ toolStateHasChanged toolType newState isTrack options =
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
         ToolStraighten ->
-            ( options, [] )
+            ( options, [ StoreLocally "tools" <| encodeToolState options ] )
+
+        ToolGraph ->
+            ( options, [ StoreLocally "tools" <| encodeToolState options ] )
 
 
 
@@ -1727,6 +1768,16 @@ viewToolByType msgWrapper entry isTrack options =
                     Nothing ->
                         noTrackMessage
 
+            ToolGraph ->
+                case isTrack of
+                    Just track ->
+                        Tools.Graph.view
+                            (msgWrapper << ToolGraphMsg)
+                            options.graphOptions
+
+                    Nothing ->
+                        noTrackMessage
+
 
 
 -- Local storage management
@@ -1822,6 +1873,9 @@ encodeType toolType =
 
         ToolStraighten ->
             "ToolStraighten"
+
+        ToolGraph ->
+            "ToolGraph"
 
 
 encodeColour : Element.Color -> E.Value

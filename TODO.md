@@ -13,8 +13,20 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 # WIP
 
-1. Straighten tool. - not using Axis!!
-2. Graph Theory (notes below and from DO's emails)
+## Graph Theory 
+
+(notes below and from DO's emails)
+
+I'm going to do as much as I can from scratch and only use v2 for reference.
+Though I bring the view over to make a start.
+
+**David Ogle**:
+> After using graph theory you end up with out and back track points in the same position...
+> say the orange marker is near the end of the course and I select a track point nearby,
+> it always selects the one at the start of the course, instead of the one I was trying to
+> select near the end. So I'm thinking if you've got 2 track points in the same position,
+> on selection (mouse click), it'd be good to select the one closest to the current position.
+
 
 ---
 
@@ -86,15 +98,6 @@ Maybe convert all markers to SVG with overlay.
 Put all Font, Colour etc into a Palette/Style module for ease of change.
 > Search for FlatUI references.
  
-## Graphs
-
-**David Ogle**: 
-After using graph theory you end up with out and back track points in the same position... 
-say the orange marker is near the end of the course and I select a track point nearby, 
-it always selects the one at the start of the course, instead of the one I was trying to 
-select near the end. So I'm thinking if you've got 2 track points in the same position, 
-on selection (mouse click), it'd be good to select the one closest to the current position.
-
 ---
 
 # Parked
