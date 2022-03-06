@@ -144,7 +144,8 @@ view msgWrapper options track =
     el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
         el [ centerX, padding 4, spacing 4, height <| px 50 ] <|
             if wholeTrackIsSelected then
-                text "Sorry, I can't let you do that."
+                el [ padding 5, centerX, centerY ] <|
+                    text "Sorry, I can't let you do that."
 
             else
                 Input.button (centerY :: neatToolsBorder)

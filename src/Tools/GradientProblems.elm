@@ -1,6 +1,6 @@
 module Tools.GradientProblems exposing (..)
 
-import Actions exposing ( ToolAction(..))
+import Actions exposing (ToolAction(..))
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), RoadSection, asRecord, skipCount)
 import Element exposing (..)
 import Element.Background as Background
@@ -371,7 +371,7 @@ view imperial msgWrapper options isTrack =
                         ]
 
         linkButton track point =
-            Input.button neatToolsBorder
+            Input.button (alignTop :: neatToolsBorder)
                 { onPress = Just (msgWrapper <| SetCurrentPosition point)
                 , label =
                     text <|
@@ -396,7 +396,15 @@ view imperial msgWrapper options isTrack =
                             resultsNavigation
 
                         ResultList ->
-                            wrappedRow [ height <| px 150, scrollbarY ] <|
+                            wrappedRow
+                                [ scrollbarY
+                                , height <|
+                                    maximum 300 <|
+                                        px (List.length options.breaches // 3 * 24)
+                                , spacingXY 6 6
+                                , alignTop
+                                ]
+                            <|
                                 List.map
                                     (Tuple.first >> linkButton track.trackTree)
                                     options.breaches
