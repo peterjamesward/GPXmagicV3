@@ -1622,7 +1622,15 @@ viewToolByType msgWrapper entry isTrack options =
                     isTrack
 
             ToolDeletePoints ->
-                DeletePoints.view (msgWrapper << DeletePoints) options.deleteOptions
+                case isTrack of
+                    Just track ->
+                        DeletePoints.view
+                            (msgWrapper << DeletePoints)
+                            options.deleteOptions
+                            track
+
+                    Nothing ->
+                        noTrackMessage
 
             ToolPointers ->
                 Pointers.view

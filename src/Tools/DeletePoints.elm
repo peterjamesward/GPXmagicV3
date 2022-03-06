@@ -132,19 +132,30 @@ update msg options previewColour hasTrack =
             ( options, [] )
 
 
-view : (Msg -> msg) -> Options -> Element msg
-view msgWrapper options =
+view : (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
+view msgWrapper options track =
+    let
+        ( fromStart, fromEnd ) =
+            TrackLoaded.getRangeFromMarkers track
+
+        wholeTrackIsSelected =
+            fromStart == 0 && fromEnd == 0
+    in
     el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
         el [ centerX, padding 4, spacing 4, height <| px 50 ] <|
-            Input.button (centerY :: neatToolsBorder)
-                { onPress = Just (msgWrapper DeletePointOrPoints)
-                , label =
-                    if options.singlePoint then
-                        text "Delete single point"
+            if wholeTrackIsSelected then
+                text "Sorry, I can't let you do that."
 
-                    else
-                        text "Delete between markers"
-                }
+            else
+                Input.button (centerY :: neatToolsBorder)
+                    { onPress = Just (msgWrapper DeletePointOrPoints)
+                    , label =
+                        if options.singlePoint then
+                            text "Delete single point"
+
+                        else
+                            text "Delete between and including markers"
+                    }
 
 
 
@@ -177,8 +188,8 @@ deletePointsBetween fromStart fromEnd track =
     let
         newTree =
             DomainModel.replaceRange
-                (fromStart + 1)
-                (fromEnd + 1)
+                fromStart
+                fromEnd
                 track.referenceLonLat
                 []
                 track.trackTree
@@ -187,8 +198,8 @@ deletePointsBetween fromStart fromEnd track =
             -- The Nothing here means no depth limit, so we get all the points.
             -- Note we have to reverse them.
             DomainModel.extractPointsInRange
-                fromStart
-                fromEnd
+                (fromStart - 1)
+                (fromEnd - 1)
                 track.trackTree
     in
     ( newTree
