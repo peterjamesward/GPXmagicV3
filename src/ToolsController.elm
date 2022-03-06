@@ -1090,6 +1090,7 @@ update toolMsg isTrack msgWrapper options =
                             Tools.Graph.update
                                 msg
                                 options.graphOptions
+                                track
                                 (msgWrapper << ToolGraphMsg)
                     in
                     ( { options | graphOptions = newOptions }

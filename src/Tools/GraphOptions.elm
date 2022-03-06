@@ -1,9 +1,10 @@
 module Tools.GraphOptions exposing (..)
 
-
 import Dict exposing (Dict)
 import Length exposing (Meters)
 import Quantity exposing (Quantity)
+
+
 type Direction
     = Forwards
     | Backwards
@@ -24,8 +25,9 @@ type alias EdgeKey =
 
 type alias Options =
     { graph : Maybe Graph
-    , pointTolerance : Quantity Float Meters  -- How close in metres to consider points equal.
+    , pointTolerance : Quantity Float Meters -- How close in metres to consider points equal.
     , minimumEdgeLength : Quantity Float Meters -- So we can ignore short self-loops
+    , centreLineOffset : Length.Length
     }
 
 
@@ -34,7 +36,6 @@ type alias Graph =
     , edges : Dict EdgeKey ( Int, Int )
     , userRoute : List Traversal
     , canonicalRoute : List Traversal
-    , centreLineOffset : Length.Length
     , trackPointToCanonical : Dict XY PointType
     , selectedTraversal : Maybe Int
     }

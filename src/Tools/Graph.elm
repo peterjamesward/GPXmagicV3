@@ -13,7 +13,8 @@ import FlatColors.ChinesePalette
 import Length exposing (Length, Meters, inMeters)
 import Quantity exposing (Quantity, zero)
 import Tools.GraphOptions exposing (..)
-import UtilsForViews exposing (showDecimal2)
+import TrackLoaded exposing (TrackLoaded)
+import UtilsForViews exposing (showDecimal2, showShortMeasure)
 import ViewPureStyles exposing (commonShortHorizontalSliderStyles, neatToolsBorder)
 
 
@@ -22,6 +23,7 @@ defaultOptions =
     { graph = Nothing
     , pointTolerance = Length.meter
     , minimumEdgeLength = Length.meters 100
+    , centreLineOffset = Length.meters 0.0
     }
 
 
@@ -31,7 +33,6 @@ emptyGraph =
     , edges = Dict.empty
     , userRoute = []
     , canonicalRoute = []
-    , centreLineOffset = Length.meters 0.0
     , trackPointToCanonical = Dict.empty
     , selectedTraversal = Nothing
     }
@@ -39,17 +40,19 @@ emptyGraph =
 
 type Msg
     = GraphAnalyse
-    | CentreLineOffset Float
+    | CentreLineOffset (Quantity Float Meters)
     | ConvertFromGraph
     | HighlightTraversal Traversal
     | RemoveLastTraversal
     | AddTraversalFromCurrent
-    | AddFirstTraversal
+    | SelectStartNode
+    | SetPointTolerance (Quantity Float Meters)
+    | SetMinimumEdge (Quantity Float Meters)
 
 
 infoText =
     """
-Route maker finds repeated sections of a route. You can then pick and choose which 
+Here we find repeated sections of a route. You can then pick and choose which
 sectons to ride, making your own route based on the original. This will ensure that
 each time you use a section, the altitudes will match and render well in RGT.
 """
@@ -59,9 +62,7 @@ view : (Msg -> msg) -> Options -> Element msg
 view wrapper options =
     let
         offset =
-            Maybe.map .centreLineOffset options.graph
-                |> Maybe.map inMeters
-                |> Maybe.withDefault 0.0
+            Length.inMeters options.centreLineOffset
 
         analyseButton =
             I.button neatToolsBorder
@@ -72,13 +73,13 @@ view wrapper options =
         finishButton =
             I.button neatToolsBorder
                 { onPress = Just (wrapper ConvertFromGraph)
-                , label = text "Convert from Graph"
+                , label = text "Convert back into route"
                 }
 
         offsetSlider =
             I.slider
                 commonShortHorizontalSliderStyles
-                { onChange = wrapper << CentreLineOffset
+                { onChange = wrapper << CentreLineOffset << Length.meters
                 , label =
                     I.labelBelow [] <|
                         text <|
@@ -101,24 +102,43 @@ view wrapper options =
                 , thumb = I.defaultThumb
                 }
 
+        pointToleranceSlider =
+            I.slider
+                commonShortHorizontalSliderStyles
+                { onChange = wrapper << SetPointTolerance << Length.meters
+                , label =
+                    I.labelBelow [] <|
+                        text <|
+                            "Consider points equal if within "
+                                ++ showShortMeasure False options.pointTolerance
+                , min = 0.1
+                , max = 10.0
+                , step = Just 0.1
+                , value = Length.inMeters options.pointTolerance
+                , thumb = I.defaultThumb
+                }
+
+        minEdgeSlider =
+            I.slider
+                commonShortHorizontalSliderStyles
+                { onChange = wrapper << SetMinimumEdge << Length.meters
+                , label =
+                    I.labelBelow [] <|
+                        text <|
+                            "Ignore sections shorter than "
+                                ++ showShortMeasure False options.minimumEdgeLength
+                , min = 10.0
+                , max = 100.0
+                , step = Just 5.0
+                , value = Length.inMeters options.minimumEdgeLength
+                , thumb = I.defaultThumb
+                }
+
         removeButton =
-            --TODO: Put a tarshcan icon on the last line.
+            --TODO: Put a trashcan icon on the last line.
             I.button neatToolsBorder
                 { onPress = Just (wrapper RemoveLastTraversal)
                 , label = text "Remove traversal\nlast in list"
-                }
-
-        addButton =
-            I.button neatToolsBorder
-                { onPress = Just (wrapper AddTraversalFromCurrent)
-                , label = text "Add traversal\nat Orange marker"
-                }
-
-        addFirstButton =
-            --TODO: Replace with select start node, then arcs.
-            I.button neatToolsBorder
-                { onPress = Just (wrapper AddFirstTraversal)
-                , label = text "Add traversal using\nPurple and Orange markers"
                 }
     in
     el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
@@ -126,6 +146,8 @@ view wrapper options =
             Nothing ->
                 column [ width fill, padding 20, spacing 20 ]
                     [ paragraph [] [ text infoText ]
+                    , pointToleranceSlider
+                    , minEdgeSlider
                     , analyseButton
                     ]
 
@@ -140,17 +162,42 @@ view wrapper options =
                     , row [ width fill, spaceEvenly, paddingXY 20 10, spacingXY 20 10 ] <|
                         if List.length g.userRoute > 0 then
                             [ removeButton
-                            , addButton
                             ]
 
                         else
-                            [ addFirstButton ]
+                            [ none ]
                     ]
 
 
-update : Msg -> Options -> (Msg -> msg) -> ( Options, List (Actions.ToolAction msg) )
-update msg options wrapper =
-    ( options, [] )
+update : Msg -> Options -> TrackLoaded msg -> (Msg -> msg) -> ( Options, List (Actions.ToolAction msg) )
+update msg options track wrapper =
+    case msg of
+        SetPointTolerance quantity ->
+            ( { options | pointTolerance = quantity }, [] )
+
+        SetMinimumEdge quantity ->
+            ( { options | minimumEdgeLength = quantity }, [] )
+
+        GraphAnalyse ->
+            ( options, [] )
+
+        HighlightTraversal traversal ->
+            ( options, [] )
+
+        SelectStartNode ->
+            ( options, [] )
+
+        AddTraversalFromCurrent ->
+            ( options, [] )
+
+        RemoveLastTraversal ->
+            ( options, [] )
+
+        CentreLineOffset float ->
+            ( { options | centreLineOffset = float }, [] )
+
+        ConvertFromGraph ->
+            ( options, [] )
 
 
 
