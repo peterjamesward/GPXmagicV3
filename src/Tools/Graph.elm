@@ -9,13 +9,15 @@ import Dict exposing (Dict)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as I
+import FeatherIcons
 import FlatColors.ChinesePalette
 import Length exposing (Length, Meters, inMeters)
 import Quantity exposing (Quantity, zero)
+import ToolTip exposing (tooltip)
 import Tools.GraphOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal2, showShortMeasure)
-import ViewPureStyles exposing (commonShortHorizontalSliderStyles, neatToolsBorder)
+import ViewPureStyles exposing (commonShortHorizontalSliderStyles, neatToolsBorder, useIcon)
 
 
 defaultOptions : Options
@@ -48,6 +50,17 @@ type Msg
     | SelectStartNode
     | SetPointTolerance (Quantity Float Meters)
     | SetMinimumEdge (Quantity Float Meters)
+    | DisplayInfo String String
+
+
+textDictionary : ( String, Dict String String )
+textDictionary =
+    ( "graph"
+    , Dict.fromList
+        [ ( "info", infoText )
+        , ( "tolerance", toleranceText )
+        ]
+    )
 
 
 infoText =
@@ -55,6 +68,12 @@ infoText =
 Here we find repeated sections of a route. You can then pick and choose which
 sectons to ride, making your own route based on the original. This will ensure that
 each time you use a section, the altitudes will match and render well in RGT.
+"""
+
+
+toleranceText =
+    """
+Blah blah about the meaning of it all.
 """
 
 
@@ -103,20 +122,27 @@ view wrapper options =
                 }
 
         pointToleranceSlider =
-            I.slider
-                commonShortHorizontalSliderStyles
-                { onChange = wrapper << SetPointTolerance << Length.meters
-                , label =
-                    I.labelBelow [] <|
-                        text <|
-                            "Consider points equal if within "
-                                ++ showShortMeasure False options.pointTolerance
-                , min = 0.1
-                , max = 10.0
-                , step = Just 0.1
-                , value = Length.inMeters options.pointTolerance
-                , thumb = I.defaultThumb
-                }
+            row [ spacing 5 ]
+                [ none
+                , I.button []
+                    { onPress = Just (wrapper <| DisplayInfo "graph" "tolerance")
+                    , label = useIcon FeatherIcons.info
+                    }
+                , I.slider
+                    commonShortHorizontalSliderStyles
+                    { onChange = wrapper << SetPointTolerance << Length.meters
+                    , label =
+                        I.labelBelow [] <|
+                            text <|
+                                "Consider points equal if within "
+                                    ++ showShortMeasure False options.pointTolerance
+                    , min = 0.1
+                    , max = 10.0
+                    , step = Just 0.1
+                    , value = Length.inMeters options.pointTolerance
+                    , thumb = I.defaultThumb
+                    }
+                ]
 
         minEdgeSlider =
             I.slider
@@ -198,6 +224,9 @@ update msg options track wrapper =
 
         ConvertFromGraph ->
             ( options, [] )
+
+        DisplayInfo tool text ->
+            ( options, [ Actions.DisplayInfo tool text ] )
 
 
 buildGraph : Options -> TrackLoaded msg -> Maybe Graph

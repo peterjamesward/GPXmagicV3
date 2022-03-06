@@ -136,6 +136,7 @@ type alias Model =
     , contentArea : ( Quantity Int Pixels, Quantity Int Pixels )
     , modalMessage : Maybe String
     , paneLayoutOptions : PaneLayoutManager.Options
+    , infoText : Maybe ( String, String )
 
     -- Splitters
     , leftDockRightEdge : SplitPane.State
@@ -148,6 +149,7 @@ type alias Model =
     , toolOptions : ToolsController.Options
     , isPopupOpen : Bool
     , backgroundColour : Element.Color
+    , infoTextDict : Dict String (Dict String String)
     }
 
 
@@ -249,6 +251,7 @@ init mflags origin navigationKey =
       , contentArea = ( Pixels.pixels 800, Pixels.pixels 500 )
       , modalMessage = Nothing
       , paneLayoutOptions = PaneLayoutManager.defaultOptions
+      , infoText = Nothing
       , leftDockRightEdge =
             SplitPane.init Horizontal
                 |> configureSplitter (SplitPane.px 200 <| Just ( 20, 200 ))
@@ -267,6 +270,7 @@ init mflags origin navigationKey =
       , toolOptions = ToolsController.defaultOptions
       , isPopupOpen = False
       , backgroundColour = FlatColors.FlatUIPalette.silver
+      , infoTextDict = initTextDictionaries
       }
     , Cmd.batch
         [ authCmd
@@ -284,6 +288,11 @@ init mflags origin navigationKey =
         , LocalStorage.storageGetMemoryUsage
         ]
     )
+
+
+initTextDictionaries =
+    --TODO: Include PaneLayout in this scheme.
+    ToolsController.initTextDictionaries
 
 
 render : Model -> Model
@@ -891,6 +900,7 @@ view model =
                             Nothing ->
                                 none
                    )
+                :: (inFront <| infoTextPopup model.infoText model.infoTextDict)
                 :: commonLayoutStyles
             )
           <|
@@ -1158,6 +1168,35 @@ buyMeACoffeeButton =
         }
 
 
+infoTextPopup :
+    Maybe ( String, String )
+    -> Dict String (Dict String String)
+    -> Element Msg
+infoTextPopup maybeSomething dict =
+    case maybeSomething of
+        Just ( tool, tag ) ->
+            case Dict.get tool dict of
+                Just innerDict ->
+                    case Dict.get tag innerDict of
+                        Just gotText ->
+                            el
+                                [ Background.color FlatColors.ChinesePalette.antiFlashWhite
+                                , padding 10
+                                , moveRight 200
+                                , moveDown 200
+                                ]
+                                (text gotText)
+
+                        Nothing ->
+                            none
+
+                Nothing ->
+                    none
+
+        Nothing ->
+            none
+
+
 globalOptions : Model -> Element Msg
 globalOptions model =
     el
@@ -1236,6 +1275,21 @@ performActionsOnModel actions model =
         performAction : ToolAction Msg -> Model -> Model
         performAction action foldedModel =
             case ( action, foldedModel.track ) of
+                ( DisplayInfo tool text, _ ) ->
+                    { foldedModel
+                        | infoText =
+                            case foldedModel.infoText of
+                                Just ( isTool, isText ) ->
+                                    if tool == isTool && text == isText then
+                                        Nothing
+
+                                    else
+                                        Just ( tool, text )
+
+                                Nothing ->
+                                    Just ( tool, text )
+                    }
+
                 ( SetCurrent position, Just track ) ->
                     { foldedModel
                         | track =

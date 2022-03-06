@@ -84,6 +84,7 @@ type ToolAction msg
     | ParseAndAppend String
     | WriteTrackSections (List ( Int, Float, Float ))
     | Straighten
+    | DisplayInfo String String
 
 
 interpretAction : ToolAction msg -> String

@@ -2213,3 +2213,9 @@ flythroughTick options posix track =
     ( { options | flythroughSettings = updatedFlythrough }
     , actions
     )
+
+
+initTextDictionaries : Dict String (Dict String String)
+initTextDictionaries =
+    Dict.fromList
+        [  Tools.Graph.textDictionary ]
