@@ -87,7 +87,7 @@ view wrap options =
                     ]
                 }
     in
-    column
+    wrappedRow
         [ spacing 5
         , padding 5
         , centerX
@@ -95,31 +95,33 @@ view wrap options =
         , Background.color FlatColors.ChinesePalette.antiFlashWhite
         ]
         [ el [ centerX ] curtainChoice
-        , Input.checkbox
-            [ padding 5
-            , spacing 5
+        , column []
+            [ Input.checkbox
+                [ padding 5
+                , spacing 5
+                ]
+                { onChange = wrap << SetRoadSurface
+                , checked = options.roadSurface
+                , label = Input.labelLeft [] <| text "Road surface"
+                , icon = Input.defaultCheckbox
+                }
+            , Input.checkbox
+                [ padding 5
+                , spacing 5
+                ]
+                { onChange = wrap << SetGroundPlane
+                , checked = options.groundPlane
+                , label = Input.labelLeft [] <| text "Ground"
+                , icon = Input.defaultCheckbox
+                }
+            , Input.checkbox
+                [ padding 5
+                , spacing 5
+                ]
+                { onChange = wrap << SetCentreLine
+                , checked = options.centreLine
+                , label = Input.labelLeft [] <| text "Centre line"
+                , icon = Input.defaultCheckbox
+                }
             ]
-            { onChange = wrap << SetRoadSurface
-            , checked = options.roadSurface
-            , label = Input.labelLeft [] <| text "Road surface"
-            , icon = Input.defaultCheckbox
-            }
-        , Input.checkbox
-            [ padding 5
-            , spacing 5
-            ]
-            { onChange = wrap << SetGroundPlane
-            , checked = options.groundPlane
-            , label = Input.labelLeft [] <| text "Ground"
-            , icon = Input.defaultCheckbox
-            }
-        , Input.checkbox
-            [ padding 5
-            , spacing 5
-            ]
-            { onChange = wrap << SetCentreLine
-            , checked = options.centreLine
-            , label = Input.labelLeft [] <| text "Centre line"
-            , icon = Input.defaultCheckbox
-            }
         ]

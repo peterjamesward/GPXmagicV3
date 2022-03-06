@@ -432,7 +432,7 @@ view imperial msgWrapper options isTrack =
                         ]
 
         linkButton track point =
-            Input.button neatToolsBorder
+            Input.button (alignTop :: neatToolsBorder)
                 { onPress = Just (msgWrapper <| SetCurrentPosition point)
                 , label =
                     text <|
@@ -443,21 +443,29 @@ view imperial msgWrapper options isTrack =
     case isTrack of
         Just track ->
             el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
-                column [ centerX, padding 4, spacing 6 ]
-                    [ modeSelection
-                    , angleSelection
+                column [ padding 4, spacing 6, width fill ]
+                    [ el [ centerX ] modeSelection
+                    , el [ centerX ] angleSelection
                     , if options.mode == DirectionChangeWithRadius then
-                        radiusSelection
+                        el [ centerX ] radiusSelection
 
                       else
                         none
-                    , resultModeSelection
+                    , el [ centerX ] resultModeSelection
                     , case options.resultMode of
                         ResultNavigation ->
                             resultsNavigation
 
                         ResultList ->
-                            wrappedRow [ height <| px 150, scrollbarY ] <|
+                            wrappedRow
+                                [ scrollbarY
+                                , height <|
+                                    maximum 300 <|
+                                        px (List.length options.breaches // 3 * 24)
+                                , spacingXY 6 6
+                                , alignTop
+                                ]
+                            <|
                                 List.map
                                     (Tuple.first >> linkButton track.trackTree)
                                     options.breaches

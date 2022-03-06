@@ -179,7 +179,7 @@ update msg options track wrapper =
             ( { options | minimumEdgeLength = quantity }, [] )
 
         GraphAnalyse ->
-            ( options, [] )
+            ( { options | graph = buildGraph options track }, [] )
 
         HighlightTraversal traversal ->
             ( options, [] )
@@ -198,6 +198,34 @@ update msg options track wrapper =
 
         ConvertFromGraph ->
             ( options, [] )
+
+
+buildGraph : Options -> TrackLoaded msg -> Maybe Graph
+buildGraph option track =
+    {-
+       As in v1 & 2, the only way I know if to see which track points have more than two neighbours.
+       Hence build a Dict using XY and the entries being a list of points that share the location.
+       We might then have a user interaction step to refine the node list.
+       First, let's get to the point where we can display nodes.
+    -}
+    let
+        nodes =
+            Dict.empty
+
+        edges =
+            Dict.empty
+
+        trackPointDict =
+            Dict.empty
+    in
+    Just
+        { nodes = nodes
+        , edges = edges
+        , userRoute = []
+        , canonicalRoute = []
+        , trackPointToCanonical = trackPointDict -- ??
+        , selectedTraversal = Nothing
+        }
 
 
 
