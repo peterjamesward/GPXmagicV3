@@ -17,13 +17,13 @@ import ToolTip exposing (tooltip)
 import Tools.GraphOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal2, showShortMeasure)
-import ViewPureStyles exposing (commonShortHorizontalSliderStyles, neatToolsBorder, useIcon)
+import ViewPureStyles exposing (commonShortHorizontalSliderStyles, infoButton, neatToolsBorder, useIcon)
 
 
 defaultOptions : Options
 defaultOptions =
     { graph = Nothing
-    , pointTolerance = Length.meter
+    , pointTolerance = Length.meters 4.0
     , minimumEdgeLength = Length.meters 100
     , centreLineOffset = Length.meters 0.0
     }
@@ -53,12 +53,22 @@ type Msg
     | DisplayInfo String String
 
 
+toolID : String
+toolID =
+    "graph"
+
+
 textDictionary : ( String, Dict String String )
 textDictionary =
-    ( "graph"
+    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
+    -- ToolsController can use these for info button and tool label.
+    ( toolID
     , Dict.fromList
-        [ ( "info", infoText )
-        , ( "tolerance", toleranceText )
+        [ ( toolID, "Route builder" )
+        , ( "info", infoText )
+        , ( "tolerance", "About the tolerance setting" )
+        , ( "offset", "About the offset setting" )
+        , ( "minEdge", "About the minimum edge setting" )
         ]
     )
 
@@ -96,38 +106,39 @@ view wrapper options =
                 }
 
         offsetSlider =
-            I.slider
-                commonShortHorizontalSliderStyles
-                { onChange = wrapper << CentreLineOffset << Length.meters
-                , label =
-                    I.labelBelow [] <|
-                        text <|
-                            "Offset = "
-                                ++ (showDecimal2 <| abs offset)
-                                ++ "m "
-                                ++ (if offset < 0.0 then
-                                        "left"
+            row [ spacing 5 ]
+                [ none
+                , infoButton (wrapper <| DisplayInfo "graph" "offset")
+                , I.slider
+                    commonShortHorizontalSliderStyles
+                    { onChange = wrapper << CentreLineOffset << Length.meters
+                    , label =
+                        I.labelBelow [] <|
+                            text <|
+                                "Offset = "
+                                    ++ (showDecimal2 <| abs offset)
+                                    ++ "m "
+                                    ++ (if offset < 0.0 then
+                                            "left"
 
-                                    else if offset > 0.0 then
-                                        "right"
+                                        else if offset > 0.0 then
+                                            "right"
 
-                                    else
-                                        ""
-                                   )
-                , min = -5.0
-                , max = 5.0
-                , step = Just 0.25
-                , value = offset
-                , thumb = I.defaultThumb
-                }
+                                        else
+                                            ""
+                                       )
+                    , min = -5.0
+                    , max = 5.0
+                    , step = Just 0.25
+                    , value = offset
+                    , thumb = I.defaultThumb
+                    }
+                ]
 
         pointToleranceSlider =
             row [ spacing 5 ]
                 [ none
-                , I.button []
-                    { onPress = Just (wrapper <| DisplayInfo "graph" "tolerance")
-                    , label = useIcon FeatherIcons.info
-                    }
+                , infoButton (wrapper <| DisplayInfo "graph" "tolerance")
                 , I.slider
                     commonShortHorizontalSliderStyles
                     { onChange = wrapper << SetPointTolerance << Length.meters
@@ -136,29 +147,33 @@ view wrapper options =
                             text <|
                                 "Consider points equal if within "
                                     ++ showShortMeasure False options.pointTolerance
-                    , min = 0.1
+                    , min = 1.0
                     , max = 10.0
-                    , step = Just 0.1
+                    , step = Just 1.0
                     , value = Length.inMeters options.pointTolerance
                     , thumb = I.defaultThumb
                     }
                 ]
 
         minEdgeSlider =
-            I.slider
-                commonShortHorizontalSliderStyles
-                { onChange = wrapper << SetMinimumEdge << Length.meters
-                , label =
-                    I.labelBelow [] <|
-                        text <|
-                            "Ignore sections shorter than "
-                                ++ showShortMeasure False options.minimumEdgeLength
-                , min = 10.0
-                , max = 100.0
-                , step = Just 5.0
-                , value = Length.inMeters options.minimumEdgeLength
-                , thumb = I.defaultThumb
-                }
+            row [ spacing 5 ]
+                [ none
+                , infoButton (wrapper <| DisplayInfo "graph" "minEdge")
+                , I.slider
+                    commonShortHorizontalSliderStyles
+                    { onChange = wrapper << SetMinimumEdge << Length.meters
+                    , label =
+                        I.labelBelow [] <|
+                            text <|
+                                "Ignore sections shorter than "
+                                    ++ showShortMeasure False options.minimumEdgeLength
+                    , min = 10.0
+                    , max = 100.0
+                    , step = Just 5.0
+                    , value = Length.inMeters options.minimumEdgeLength
+                    , thumb = I.defaultThumb
+                    }
+                ]
 
         removeButton =
             --TODO: Put a trashcan icon on the last line.
@@ -172,6 +187,7 @@ view wrapper options =
             Nothing ->
                 column [ width fill, padding 20, spacing 20 ]
                     [ paragraph [] [ text infoText ]
+                    , infoButton (wrapper <| DisplayInfo "graph" "info")
                     , pointToleranceSlider
                     , minEdgeSlider
                     , analyseButton

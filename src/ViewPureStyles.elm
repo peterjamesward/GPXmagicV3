@@ -211,6 +211,14 @@ displayName n =
             none
 
 
+infoButton onPress =
+    --Input.button []
+    --    { onPress = Just onPress
+    --    , label = useIcon FeatherIcons.info
+    --    }
+    none
+
+
 wideSliderStylesWithWidth : Quantity Int Pixels -> List (Attribute msg)
 wideSliderStylesWithWidth w =
     let

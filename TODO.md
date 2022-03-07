@@ -34,7 +34,11 @@ Though I bring the view over to make a start.
 
 ## Tools: old, updated, & new
 
-2. Info popup for all tools.
+2. Info popup for all tools. == WIP, improve presentation in main.
+> Pass around `textLookup` function from main. 
+> This can become a closure with the active language dictionary so language
+> switching is all done in main.
+> Example in Graph, which I shall disable for now.
 
 --- _Cut-off for release_
 - Terrain as from v2 but with texture maybe

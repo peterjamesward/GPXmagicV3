@@ -1182,8 +1182,8 @@ infoTextPopup maybeSomething dict =
                             el
                                 [ Background.color FlatColors.ChinesePalette.antiFlashWhite
                                 , padding 10
-                                , moveRight 200
-                                , moveDown 200
+                                , centerY
+                                , centerX
                                 ]
                                 (text gotText)
 

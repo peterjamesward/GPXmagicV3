@@ -30,6 +30,7 @@ import Tools.DeletePoints as DeletePoints
 import Tools.DirectionChanges as AbruptDirectionChanges
 import Tools.DisplaySettings
 import Tools.DisplaySettingsOptions
+import Tools.Essentials
 import Tools.Flythrough
 import Tools.GradientProblems
 import Tools.Graph
@@ -45,7 +46,6 @@ import Tools.Nudge
 import Tools.NudgeOptions
 import Tools.OutAndBack
 import Tools.OutAndBackOptions
-import Tools.Pointers as Pointers
 import Tools.ProfileSmooth
 import Tools.ProfileSmoothOptions
 import Tools.Simplify
@@ -57,7 +57,6 @@ import Tools.Straightener
 import Tools.StravaOptions
 import Tools.StravaTools
 import Tools.TrackInfoBox as TrackInfoBox
-import Tools.UndoRedo as UndoRedo
 import TrackLoaded exposing (TrackLoaded)
 import View3dCommonElements exposing (stopProp)
 import ViewPureStyles exposing (..)
@@ -73,8 +72,7 @@ type ToolType
     = ToolTrackInfo
     | ToolAbruptDirectionChanges
     | ToolDeletePoints
-    | ToolPointers
-    | ToolUndoRedo
+    | ToolEssentials
     | ToolBezierSplines
     | ToolCentroidAverage
     | ToolCurveFormer
@@ -103,8 +101,7 @@ type alias Options =
     , docks : Dict String DockSettings
     , directionChangeOptions : AbruptDirectionChanges.Options
     , deleteOptions : DeletePoints.Options
-    , pointerOptions : Pointers.Options
-    , undoRedoOptions : UndoRedo.Options
+    , essentialOptions : Tools.Essentials.Options
     , imperial : Bool
     , bezierSplineOptions : Tools.BezierOptions.Options
     , centroidAverageOptions : Tools.CentroidAverageOptions.Options
@@ -136,8 +133,7 @@ defaultOptions =
     , docks = Dict.fromList dockList
     , directionChangeOptions = AbruptDirectionChanges.defaultOptions
     , deleteOptions = DeletePoints.defaultOptions
-    , pointerOptions = Pointers.defaultOptions
-    , undoRedoOptions = UndoRedo.defaultOptions
+    , essentialOptions = Tools.Essentials.defaultOptions
     , imperial = False
     , bezierSplineOptions = Tools.BezierSplines.defaultOptions
     , centroidAverageOptions = Tools.CentroidAverage.defaultOptions
@@ -172,8 +168,7 @@ type ToolMsg
     | DockNameChange String String
     | DirectionChanges AbruptDirectionChanges.Msg
     | DeletePoints DeletePoints.Msg
-    | PointerMsg Pointers.Msg
-    | UndoRedoMsg UndoRedo.Msg
+    | ToolEssentialsMsg Tools.Essentials.Msg
     | ToggleImperial
     | ToolNoOp
     | ToolBezierMsg Tools.BezierSplines.Msg
@@ -215,8 +210,7 @@ type alias ToolEntry =
 defaultTools : List ToolEntry
 defaultTools =
     -- One list or five, or six? Try one. Arguably a Dict but POITROAE.
-    [ pointersTool
-    , undoRedoTool
+    [ essentialsTool
     , trackInfoBox
     , displaySettingsTool
     , directionChangeTool
@@ -271,20 +265,6 @@ displaySettingsTool =
     }
 
 
-undoRedoTool : ToolEntry
-undoRedoTool =
-    { toolType = ToolUndoRedo
-    , label = "Undo & Redo"
-    , info = "Like time travel"
-    , video = Nothing
-    , state = Expanded
-    , dock = DockUpperRight
-    , tabColour = FlatColors.FlatUIPalette.peterRiver
-    , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
-    , isPopupOpen = False
-    }
-
-
 directionChangeTool : ToolEntry
 directionChangeTool =
     { toolType = ToolAbruptDirectionChanges
@@ -313,10 +293,10 @@ gradientChangeTool =
     }
 
 
-pointersTool : ToolEntry
-pointersTool =
-    { toolType = ToolPointers
-    , label = "Pointers"
+essentialsTool : ToolEntry
+essentialsTool =
+    { toolType = ToolEssentials
+    , label = "Essentials"
     , info = "Use to bracket edits"
     , video = Nothing
     , state = Expanded
@@ -747,29 +727,16 @@ update toolMsg isTrack msgWrapper options =
             , actions
             )
 
-        PointerMsg msg ->
+        ToolEssentialsMsg msg ->
             let
                 ( newOptions, actions ) =
-                    Pointers.update
+                    Tools.Essentials.update
                         msg
-                        options.pointerOptions
-                        (getColour ToolPointers options.tools)
+                        options.essentialOptions
+                        (getColour ToolEssentials options.tools)
                         isTrack
             in
-            ( { options | pointerOptions = newOptions }
-            , actions
-            )
-
-        UndoRedoMsg msg ->
-            let
-                ( newOptions, actions ) =
-                    UndoRedo.update
-                        msg
-                        options.undoRedoOptions
-                        (getColour ToolUndoRedo options.tools)
-                        isTrack
-            in
-            ( { options | undoRedoOptions = newOptions }
+            ( { options | essentialOptions = newOptions }
             , actions
             )
 
@@ -1164,22 +1131,19 @@ toolStateHasChanged toolType newState isTrack options =
             in
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
-        ToolPointers ->
+        ToolEssentials ->
             let
                 ( newToolOptions, actions ) =
-                    Pointers.toolStateChange
+                    Tools.Essentials.toolStateChange
                         (newState == Expanded)
                         (getColour toolType options.tools)
-                        options.pointerOptions
+                        options.essentialOptions
                         isTrack
 
                 newOptions =
-                    { options | pointerOptions = newToolOptions }
+                    { options | essentialOptions = newToolOptions }
             in
             ( newOptions, [ StoreLocally "tools" <| encodeToolState options ] )
-
-        ToolUndoRedo ->
-            ( options, [] )
 
         ToolBezierSplines ->
             let
@@ -1632,15 +1596,12 @@ viewToolByType msgWrapper entry isTrack options =
                     Nothing ->
                         noTrackMessage
 
-            ToolPointers ->
-                Pointers.view
+            ToolEssentials ->
+                Tools.Essentials.view
                     options.imperial
-                    (msgWrapper << PointerMsg)
-                    options.pointerOptions
+                    (msgWrapper << ToolEssentialsMsg)
+                    options.essentialOptions
                     isTrack
-
-            ToolUndoRedo ->
-                UndoRedo.view (msgWrapper << UndoRedoMsg) options.undoRedoOptions isTrack
 
             ToolBezierSplines ->
                 Tools.BezierSplines.view (msgWrapper << ToolBezierMsg) options.bezierSplineOptions
@@ -1820,11 +1781,8 @@ encodeType toolType =
         ToolDeletePoints ->
             "ToolDeletePoints"
 
-        ToolPointers ->
-            "ToolPointers"
-
-        ToolUndoRedo ->
-            "ToolUndoRedo"
+        ToolEssentials ->
+            "ToolEssentials"
 
         ToolBezierSplines ->
             "ToolBezierSplines"
@@ -2218,4 +2176,4 @@ flythroughTick options posix track =
 initTextDictionaries : Dict String (Dict String String)
 initTextDictionaries =
     Dict.fromList
-        [  Tools.Graph.textDictionary ]
+        [ Tools.Graph.textDictionary ]
