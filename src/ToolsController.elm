@@ -9,6 +9,7 @@ import Element.Border as Border exposing (roundEach)
 import Element.Font as Font
 import Element.Input as Input
 import FeatherIcons
+import FlatColors.ChinesePalette
 import FlatColors.FlatUIPalette
 import FlatColors.SwedishPalette
 import Html.Attributes exposing (style)
@@ -67,6 +68,8 @@ type ToolState
     | Contracted
     | Disabled
     | AlwaysOpen
+    | SettingsOpen
+    | SettingsClosed -- hack.
 
 
 type ToolType
@@ -94,6 +97,7 @@ type ToolType
     | ToolIntersections
     | ToolStraighten
     | ToolGraph
+    | ToolSettings
 
 
 type alias Options =
@@ -167,6 +171,7 @@ type ToolMsg
     | ToolStateToggle ToolType ToolState
     | DockPopupToggle String
     | DockNameChange String String
+    | DisplayInfo String String
     | DirectionChanges AbruptDirectionChanges.Msg
     | DeletePoints DeletePoints.Msg
     | ToolEssentialsMsg Tools.Essentials.Msg
@@ -235,7 +240,22 @@ defaultTools =
     , intersectionsTool
     , straightenTool
     , graphTool
+    , toolSettings
     ]
+
+
+toolSettings : ToolEntry
+toolSettings =
+    { toolType = ToolSettings
+    , label = "Tool Settings"
+    , info = "Here is some useful information"
+    , video = Nothing
+    , state = SettingsClosed
+    , dock = DockUpperRight
+    , tabColour = FlatColors.FlatUIPalette.midnightBlue
+    , textColour = contrastingColour FlatColors.FlatUIPalette.midnightBlue
+    , isPopupOpen = False
+    }
 
 
 trackInfoBox : ToolEntry
@@ -607,6 +627,12 @@ nextToolState state =
         AlwaysOpen ->
             AlwaysOpen
 
+        SettingsOpen ->
+            SettingsClosed
+
+        SettingsClosed ->
+            SettingsOpen
+
 
 setDock : ToolType -> ToolDock -> ToolEntry -> ToolEntry
 setDock toolType dock tool =
@@ -664,6 +690,9 @@ update toolMsg isTrack msgWrapper options =
             ( newOptions
             , [ StoreLocally "tools" <| encodeToolState newOptions ]
             )
+
+        DisplayInfo id tag ->
+            ( options, [ Actions.DisplayInfo id tag ] )
 
         ToolDockSelect toolType toolDock ->
             let
@@ -1385,6 +1414,9 @@ toolStateHasChanged toolType newState isTrack options =
         ToolGraph ->
             ( options, [ StoreLocally "tools" <| encodeToolState options ] )
 
+        ToolSettings ->
+            ( options, [ StoreLocally "tools" <| encodeToolState options ] )
+
 
 
 --View stuff
@@ -1397,34 +1429,90 @@ toolsForDock :
     -> Options
     -> Element msg
 toolsForDock dock msgWrapper isTrack options =
-    column [ width fill, height fill, spacing 5, scrollbarY ]
-        [ none
-        --, showDockHeader msgWrapper dock options.docks
+    column [ width fill, height fill ]
+        [ column [ width fill, height fill, spacing 5, scrollbarY ]
+            [ none
+
+            --, showDockHeader msgWrapper dock options.docks
+            , wrappedRow
+                -- Permanent tools
+                [ spacing 4, width fill ]
+              <|
+                (options.tools
+                    |> List.filter (\t -> t.dock == dock && t.state == AlwaysOpen)
+                    |> List.map (viewTool msgWrapper isTrack options)
+                )
+            , wrappedRow
+                -- Open tools
+                [ spacing 4, width fill ]
+              <|
+                (options.tools
+                    |> List.filter (\t -> t.dock == dock && t.state == Expanded)
+                    |> List.map (viewTool msgWrapper isTrack options)
+                )
+            , wrappedRow
+                -- Closed tools
+                [ spacing 4, width fill ]
+              <|
+                (options.tools
+                    |> List.filter (\t -> t.dock == dock && t.state == Contracted)
+                    |> List.map (viewTool msgWrapper isTrack options)
+                )
+            ]
         , wrappedRow
             -- Permanent tools
             [ spacing 4, width fill ]
           <|
             (options.tools
-                |> List.filter (\t -> t.dock == dock && t.state == AlwaysOpen)
-                |> List.map (viewTool msgWrapper isTrack options)
-            )
-        , wrappedRow
-            -- Open tools
-            [ spacing 4, width fill ]
-          <|
-            (options.tools
-                |> List.filter (\t -> t.dock == dock && t.state == Expanded)
-                |> List.map (viewTool msgWrapper isTrack options)
-            )
-        , wrappedRow
-            -- Closed tools
-            [ spacing 4, width fill ]
-          <|
-            (options.tools
-                |> List.filter (\t -> t.dock == dock && t.state == Contracted)
+                |> List.filter (\t -> t.dock == dock && (t.state == SettingsOpen || t.state == SettingsClosed))
                 |> List.map (viewTool msgWrapper isTrack options)
             )
         ]
+
+
+viewToolSettings : Options -> (ToolMsg -> msg) -> Element msg
+viewToolSettings options wrapper =
+    let
+        fullOptionList tool =
+            if (tool.toolType == ToolSettings) || (tool.toolType == ToolEssentials) then
+                [ Input.optionWith DockUpperLeft <| compactRadioButton "Left"
+                , Input.optionWith DockUpperRight <| compactRadioButton "Right"
+                , Input.optionWith tool.dock <| compactRadioButton "           "
+                ]
+
+            else
+                [ Input.optionWith DockUpperLeft <| compactRadioButton "Left"
+                , Input.optionWith DockUpperRight <| compactRadioButton "Right"
+                , Input.optionWith DockNone <| compactRadioButton "Hidden"
+                ]
+
+        locationChoices : ToolEntry -> Element msg
+        locationChoices tool =
+            Input.radioRow
+                [ spacing 5
+                , paddingEach { top = 4, left = 4, bottom = 0, right = 0 }
+                ]
+                { onChange = wrapper << ToolDockSelect tool.toolType
+                , selected = Just tool.dock
+                , label =
+                    Input.labelRight [ paddingXY 10 0 ] <|
+                        row [ spacing 4 ]
+                            [ infoButton (wrapper <| DisplayInfo "dummy" "info")
+                            , text tool.label
+                            ]
+                , options = fullOptionList tool
+                }
+    in
+    column
+        [ width fill
+        , height <| px 300
+        , scrollbarY
+        , Background.color FlatColors.ChinesePalette.antiFlashWhite
+        , padding 10
+        , spacing 3
+        ]
+    <|
+        List.map locationChoices options.tools
 
 
 viewTool :
@@ -1479,7 +1567,7 @@ viewTool msgWrapper isTrack options toolEntry =
                 }
             ]
         , el [ Border.rounded 8, width fill, height fill ] <|
-            if toolEntry.state == Expanded || toolEntry.state == AlwaysOpen then
+            if toolEntry.state == Expanded || toolEntry.state == AlwaysOpen || toolEntry.state == SettingsOpen then
                 viewToolByType msgWrapper toolEntry isTrack options
 
             else
@@ -1497,6 +1585,7 @@ showDockOptions msgWrapper toolEntry =
                 { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockUpperLeft
                 , label = useIcon FeatherIcons.arrowLeft
                 }
+
             --, Input.button
             --    [ tooltip below (myTooltip "Move to lower left") ]
             --    { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockLowerLeft
@@ -1761,6 +1850,9 @@ viewToolByType msgWrapper entry isTrack options =
                     Nothing ->
                         noTrackMessage
 
+            ToolSettings ->
+                viewToolSettings options msgWrapper
+
 
 
 -- Local storage management
@@ -1857,6 +1949,9 @@ encodeType toolType =
         ToolGraph ->
             "ToolGraph"
 
+        ToolSettings ->
+            "ToolSettings"
+
 
 encodeColour : Element.Color -> E.Value
 encodeColour colour =
@@ -1896,6 +1991,12 @@ encodeState state =
         AlwaysOpen ->
             "always"
 
+        SettingsOpen ->
+            "open"
+
+        SettingsClosed ->
+            "closed"
+
 
 decodeState : String -> ToolState
 decodeState state =
@@ -1911,6 +2012,12 @@ decodeState state =
 
         "always" ->
             AlwaysOpen
+
+        "closed" ->
+            SettingsClosed
+
+        "open" ->
+            SettingsOpen
 
         _ ->
             Contracted

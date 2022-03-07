@@ -201,6 +201,37 @@ radioButton label state =
             text label
 
 
+compactRadioButton label state =
+    el
+        [ spacing 1
+        , padding 1
+        , Border.color FlatColors.ChinesePalette.clearChill
+        , Border.width <|
+            if state == Input.Selected then
+                1
+
+            else
+                0
+
+        --, Border.roundEach { topLeft = 6, bottomLeft = 0, topRight = 6, bottomRight = 0 }
+        , Background.color <|
+            if state == Input.Selected then
+                FlatColors.ChinesePalette.antiFlashWhite
+
+            else
+                FlatColors.ChinesePalette.peace
+        , Font.color <|
+            if state == Input.Selected then
+                FlatColors.ChinesePalette.prestigeBlue
+
+            else
+                FlatColors.ChinesePalette.antiFlashWhite
+        ]
+    <|
+        el [ centerX, centerY ] <|
+            text label
+
+
 displayName n =
     case n of
         Just s ->
@@ -212,11 +243,11 @@ displayName n =
 
 
 infoButton onPress =
-    --Input.button []
-    --    { onPress = Just onPress
-    --    , label = useIcon FeatherIcons.info
-    --    }
-    none
+    Input.button []
+        { onPress = Just onPress
+        , label = useIconWithSize 12 FeatherIcons.info
+        }
+    --none
 
 
 wideSliderStylesWithWidth : Quantity Int Pixels -> List (Attribute msg)
