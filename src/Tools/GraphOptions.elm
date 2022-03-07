@@ -1,6 +1,7 @@
 module Tools.GraphOptions exposing (..)
 
 import Dict exposing (Dict)
+import DomainModel exposing (PeteTree)
 import Length exposing (Meters)
 import Quantity exposing (Quantity)
 import TrackLoaded exposing (TrackLoaded)
@@ -24,17 +25,17 @@ type alias EdgeKey =
     ( Int, Int )
 
 
-type alias Options msg =
-    { graph : Maybe (Graph msg)
+type alias Options =
+    { graph : Maybe Graph
     , pointTolerance : Quantity Float Meters -- How close in metres to consider points equal.
     , minimumEdgeLength : Quantity Float Meters -- So we can ignore short self-loops
     , centreLineOffset : Length.Length
     }
 
 
-type alias Graph msg =
+type alias Graph =
     { nodes : Dict Int ()
-    , edges : Dict EdgeKey (TrackLoaded msg)
+    , edges : Dict EdgeKey PeteTree
     , userRoute : List Traversal
     , canonicalRoute : List Traversal
     , selectedTraversal : Maybe Int

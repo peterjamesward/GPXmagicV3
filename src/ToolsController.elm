@@ -100,7 +100,7 @@ type ToolType
     | ToolSettings
 
 
-type alias Options msg =
+type alias Options =
     -- Tool specific options
     { tools : List ToolEntry
     , docks : Dict String DockSettings
@@ -128,11 +128,11 @@ type alias Options msg =
     , splitAndJoinOptions : Tools.SplitAndJoinOptions.Options
     , intersectionOptions : Tools.Intersections.Options
     , straightenOptions : Tools.Straightener.Options
-    , graphOptions : Tools.GraphOptions.Options msg
+    , graphOptions : Tools.GraphOptions.Options
     }
 
 
-defaultOptions : Options msg
+defaultOptions : Options
 defaultOptions =
     { tools = defaultTools
     , docks = Dict.fromList dockList
@@ -675,8 +675,8 @@ update :
     ToolMsg
     -> Maybe (TrackLoaded msg)
     -> (ToolMsg -> msg)
-    -> Options msg
-    -> ( Options msg, List (ToolAction msg) )
+    -> Options
+    -> ( Options, List (ToolAction msg) )
 update toolMsg isTrack msgWrapper options =
     case toolMsg of
         ToolNoOp ->
@@ -1103,8 +1103,8 @@ update toolMsg isTrack msgWrapper options =
 
 refreshOpenTools :
     Maybe (TrackLoaded msg)
-    -> Options msg
-    -> ( Options msg, List (ToolAction msg) )
+    -> Options
+    -> ( Options, List (ToolAction msg) )
 refreshOpenTools isTrack options =
     -- Track, or something has changed; tool data is stale.
     -- Same impact as tools being opened, so we'll re-use that.
@@ -1127,8 +1127,8 @@ toolStateHasChanged :
     ToolType
     -> ToolState
     -> Maybe (TrackLoaded msg)
-    -> Options msg
-    -> ( Options msg, List (ToolAction msg) )
+    -> Options
+    -> ( Options, List (ToolAction msg) )
 toolStateHasChanged toolType newState isTrack options =
     case toolType of
         ToolTrackInfo ->
@@ -1426,12 +1426,12 @@ toolsForDock :
     ToolDock
     -> (ToolMsg -> msg)
     -> Maybe (TrackLoaded msg)
-    -> Options msg
+    -> Options
     -> Element msg
 toolsForDock dock msgWrapper isTrack options =
     column [ width fill, height fill ]
         [ column [ width fill, height fill, spacing 5, scrollbarY ]
-            [ column [ width fill ]
+            [ column [ width fill, spacing 5 ]
                 (options.tools
                     |> List.filter
                         (\t -> t.dock == dock && (t.state == AlwaysOpen || t.state == SettingsOpen || t.state == SettingsClosed))
@@ -1439,7 +1439,7 @@ toolsForDock dock msgWrapper isTrack options =
                 )
             , wrappedRow
                 -- Open tools
-                [ spacing 4, width fill ]
+                []
               <|
                 (options.tools
                     |> List.filter (\t -> t.dock == dock && t.state == Expanded)
@@ -1447,7 +1447,7 @@ toolsForDock dock msgWrapper isTrack options =
                 )
             , wrappedRow
                 -- Closed tools
-                [ spacing 4, width fill ]
+                []
               <|
                 (options.tools
                     |> List.filter (\t -> t.dock == dock && t.state == Contracted)
@@ -1457,7 +1457,7 @@ toolsForDock dock msgWrapper isTrack options =
         ]
 
 
-viewToolSettings : Options msg -> (ToolMsg -> msg) -> Element msg
+viewToolSettings : Options -> (ToolMsg -> msg) -> Element msg
 viewToolSettings options wrapper =
     let
         fullOptionList tool =
@@ -1505,61 +1505,62 @@ viewToolSettings options wrapper =
 viewTool :
     (ToolMsg -> msg)
     -> Maybe (TrackLoaded msg)
-    -> Options msg
+    -> Options
     -> ToolEntry
     -> Element msg
 viewTool msgWrapper isTrack options toolEntry =
-    column
-        [ width fill
-        , alignTop
-        , htmlAttribute (style "vertical-align" "top")
-        , spacing 0
-        , Border.width 4
-        , Border.color toolEntry.tabColour
-        , Border.rounded 8
-        , Background.color toolEntry.tabColour
-        , inFront <|
-            column
-                [ alignRight
-                , moveDown 26
-                , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always ToolNoOp >> msgWrapper)
-                , htmlAttribute <| Mouse.onWithOptions "dblclick" stopProp (always ToolNoOp >> msgWrapper)
-                , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ToolNoOp >> msgWrapper)
-                , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always ToolNoOp >> msgWrapper)
-                , htmlAttribute (style "z-index" "20")
-                ]
-                [ showDockOptions msgWrapper toolEntry
-                , showColourOptions msgWrapper toolEntry
-                ]
-        ]
-        [ row
+    el [ padding 4, width fill, alignTop ] <|
+        column
             [ width fill
-            , spacing 8
-            , height <| px 24
+            , alignTop
+            , htmlAttribute (style "vertical-align" "top")
+            , spacing 0
+            , Border.width 4
+            , Border.color toolEntry.tabColour
+            , Border.rounded 8
             , Background.color toolEntry.tabColour
-            , Font.color toolEntry.textColour
+            , inFront <|
+                column
+                    [ alignRight
+                    , moveDown 26
+                    , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always ToolNoOp >> msgWrapper)
+                    , htmlAttribute <| Mouse.onWithOptions "dblclick" stopProp (always ToolNoOp >> msgWrapper)
+                    , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ToolNoOp >> msgWrapper)
+                    , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always ToolNoOp >> msgWrapper)
+                    , htmlAttribute (style "z-index" "20")
+                    ]
+                    [ showDockOptions msgWrapper toolEntry
+                    , showColourOptions msgWrapper toolEntry
+                    ]
             ]
-            [ Input.button
-                [ centerX ]
-                { onPress =
-                    Just <|
-                        msgWrapper <|
-                            ToolStateToggle toolEntry.toolType <|
-                                nextToolState toolEntry.state
-                , label = text toolEntry.label
-                }
-            , Input.button [ alignRight ]
-                { onPress = Just <| msgWrapper <| ToolPopupToggle toolEntry.toolType
-                , label = useIconWithSize 14 FeatherIcons.settings
-                }
-            ]
-        , el [ Border.rounded 8, width fill, height fill ] <|
-            if toolEntry.state == Expanded || toolEntry.state == AlwaysOpen || toolEntry.state == SettingsOpen then
-                viewToolByType msgWrapper toolEntry isTrack options
+            [ row
+                [ width fill
+                , spacing 8
+                , height <| px 24
+                , Background.color toolEntry.tabColour
+                , Font.color toolEntry.textColour
+                ]
+                [ Input.button
+                    [ centerX ]
+                    { onPress =
+                        Just <|
+                            msgWrapper <|
+                                ToolStateToggle toolEntry.toolType <|
+                                    nextToolState toolEntry.state
+                    , label = text toolEntry.label
+                    }
+                , Input.button [ alignRight ]
+                    { onPress = Just <| msgWrapper <| ToolPopupToggle toolEntry.toolType
+                    , label = useIconWithSize 14 FeatherIcons.settings
+                    }
+                ]
+            , el [ Border.rounded 8, width fill, height fill ] <|
+                if toolEntry.state == Expanded || toolEntry.state == AlwaysOpen || toolEntry.state == SettingsOpen then
+                    viewToolByType msgWrapper toolEntry isTrack options
 
-            else
-                none
-        ]
+                else
+                    none
+            ]
 
 
 showDockOptions : (ToolMsg -> msg) -> ToolEntry -> Element msg
@@ -1650,7 +1651,7 @@ viewToolByType :
     (ToolMsg -> msg)
     -> ToolEntry
     -> Maybe (TrackLoaded msg)
-    -> Options msg
+    -> Options
     -> Element msg
 viewToolByType msgWrapper entry isTrack options =
     el
@@ -2068,7 +2069,7 @@ encodeOneTool tool =
         ]
 
 
-encodeToolState : Options msg -> E.Value
+encodeToolState : Options -> E.Value
 encodeToolState options =
     E.list identity <| List.map encodeOneTool options.tools
 
@@ -2096,7 +2097,7 @@ toolDecoder =
         (field "text" colourDecoder)
 
 
-restoreStoredValues : Options msg -> D.Value -> Options msg
+restoreStoredValues : Options -> D.Value -> Options
 restoreStoredValues options values =
     -- Care! Need to overlay restored values on to the current tools.
     let
@@ -2125,7 +2126,7 @@ restoreStoredValues options values =
             options
 
 
-restoreDockSettings : Options msg -> D.Value -> Options msg
+restoreDockSettings : Options -> D.Value -> Options
 restoreDockSettings options values =
     let
         storedSettings =
@@ -2156,7 +2157,7 @@ restoreDockSettings options values =
             options
 
 
-restoreMeasure : Options msg -> D.Value -> Options msg
+restoreMeasure : Options -> D.Value -> Options
 restoreMeasure options value =
     -- Care! Need to overlay restored values on to the current tools.
     let
@@ -2275,7 +2276,7 @@ showDockHeader msgWrapper dockId docks =
                 ]
 
 
-flythroughTick : Options msg -> Time.Posix -> TrackLoaded msg -> ( Options msg, List (ToolAction msg) )
+flythroughTick : Options -> Time.Posix -> TrackLoaded msg -> ( Options, List (ToolAction msg) )
 flythroughTick options posix track =
     let
         ( updatedFlythrough, actions ) =

@@ -191,7 +191,7 @@ optionList =
 
 
 render :
-    ToolsController.Options msg
+    ToolsController.Options
     -> Options
     -> Quantity Int Pixels
     -> TrackLoaded msg

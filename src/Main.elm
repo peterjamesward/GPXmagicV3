@@ -52,6 +52,7 @@ import Tools.CentroidAverage
 import Tools.CurveFormer
 import Tools.DeletePoints as DeletePoints
 import Tools.DisplaySettings
+import Tools.Graph
 import Tools.GraphOptions exposing (Graph)
 import Tools.Interpolate
 import Tools.InterpolateOptions
@@ -141,7 +142,7 @@ type alias Model =
     , rightDockLeftEdge : SplitPane.State
 
     -- Tools
-    , toolOptions : ToolsController.Options Msg
+    , toolOptions : ToolsController.Options
     , isPopupOpen : Bool
     , backgroundColour : Element.Color
     , infoTextDict : Dict String (Dict String String)
@@ -678,6 +679,18 @@ Please check the file contains GPX data.""" }
 adoptTrackInModel : TrackLoaded Msg -> Model -> Model
 adoptTrackInModel track model =
     let
+        toolOptions =
+            model.toolOptions
+
+        graphOptions =
+            toolOptions.graphOptions
+
+        graphFromTrack =
+            { graphOptions | graph = Just <| Tools.Graph.trivialGraph track }
+
+        newToolOptions =
+            { toolOptions | graphOptions = graphFromTrack }
+
         modelWithTrack =
             { model
                 | track = Just track
@@ -687,6 +700,7 @@ adoptTrackInModel track model =
                         model.paneLayoutOptions
                 , modalMessage = Nothing
                 , previews = Dict.empty
+                , toolOptions = newToolOptions
             }
 
         actions =

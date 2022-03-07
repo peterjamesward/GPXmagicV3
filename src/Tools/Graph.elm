@@ -18,7 +18,7 @@ import UtilsForViews exposing (showDecimal2, showShortMeasure)
 import ViewPureStyles exposing (commonShortHorizontalSliderStyles, infoButton, neatToolsBorder, useIcon)
 
 
-defaultOptions : Options msg
+defaultOptions : Options
 defaultOptions =
     { graph = Nothing
     , pointTolerance = Length.meters 4.0
@@ -27,7 +27,7 @@ defaultOptions =
     }
 
 
-emptyGraph : Graph msg
+emptyGraph : Graph
 emptyGraph =
     { nodes = Dict.empty
     , edges = Dict.empty
@@ -84,7 +84,7 @@ Blah blah about the meaning of it all.
 """
 
 
-view : (Msg -> msg) -> Options msg -> Element msg
+view : (Msg -> msg) -> Options -> Element msg
 view wrapper options =
     let
         offset =
@@ -210,10 +210,10 @@ view wrapper options =
 
 update :
     Msg
-    -> Options msg
+    -> Options
     -> TrackLoaded msg
     -> (Msg -> msg)
-    -> ( Options msg, List (Actions.ToolAction msg) )
+    -> ( Options, List (Actions.ToolAction msg) )
 update msg options track wrapper =
     case msg of
         SetPointTolerance quantity ->
@@ -247,7 +247,7 @@ update msg options track wrapper =
             ( options, [ Actions.DisplayInfo tool text ] )
 
 
-buildGraph : Options msg -> TrackLoaded msg -> Graph msg
+buildGraph : Options -> TrackLoaded msg -> Graph
 buildGraph option track =
     {-
        As in v1 & 2, the only way I know if to see which track points have more than two neighbours.
@@ -273,8 +273,8 @@ buildGraph option track =
     }
 
 
-trivialGraph : Options msg -> TrackLoaded msg -> Graph msg
-trivialGraph options track =
+trivialGraph : TrackLoaded msg -> Graph
+trivialGraph track =
     {-
        This just gives us the start and end points, maybe one node if track is looped.
        It's a good place to start and means we can then start visualising.
@@ -286,15 +286,15 @@ trivialGraph options track =
 
         edges =
             Dict.fromList
-                [ ( ( 1, 2 ), track ) ]
+                [ ( ( 1, 2 ), track.trackTree ) ]
 
-        trackPointDict =
-            Dict.empty
+        traversal =
+            { edge = ( 1, 2 ), direction = Forwards }
     in
     { nodes = nodes
     , edges = edges
-    , userRoute = []
-    , canonicalRoute = []
+    , userRoute = [ traversal ]
+    , canonicalRoute = [ traversal ]
     , selectedTraversal = Nothing
     }
 
