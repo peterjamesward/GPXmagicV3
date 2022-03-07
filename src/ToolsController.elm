@@ -66,6 +66,7 @@ type ToolState
     = Expanded
     | Contracted
     | Disabled
+    | AlwaysOpen
 
 
 type ToolType
@@ -299,7 +300,7 @@ essentialsTool =
     , label = "Essentials"
     , info = "Use to bracket edits"
     , video = Nothing
-    , state = Expanded
+    , state = AlwaysOpen
     , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.orange
     , textColour = contrastingColour FlatColors.FlatUIPalette.orange
@@ -602,6 +603,9 @@ nextToolState state =
 
         Disabled ->
             Disabled
+
+        AlwaysOpen ->
+            AlwaysOpen
 
 
 setDock : ToolType -> ToolDock -> ToolEntry -> ToolEntry
@@ -1400,6 +1404,14 @@ toolsForDock dock msgWrapper isTrack options =
             [ spacing 4, width fill ]
           <|
             (options.tools
+                |> List.filter (\t -> t.dock == dock && t.state == AlwaysOpen)
+                |> List.map (viewTool msgWrapper isTrack options)
+            )
+        , wrappedRow
+            -- Open tools
+            [ spacing 4, width fill ]
+          <|
+            (options.tools
                 |> List.filter (\t -> t.dock == dock && t.state == Expanded)
                 |> List.map (viewTool msgWrapper isTrack options)
             )
@@ -1466,7 +1478,7 @@ viewTool msgWrapper isTrack options toolEntry =
                 }
             ]
         , el [ Border.rounded 8, width fill, height fill ] <|
-            if toolEntry.state == Expanded then
+            if toolEntry.state == Expanded || toolEntry.state == AlwaysOpen then
                 viewToolByType msgWrapper toolEntry isTrack options
 
             else
@@ -1880,6 +1892,9 @@ encodeState state =
         Disabled ->
             "disabled"
 
+        AlwaysOpen ->
+            "always"
+
 
 decodeState : String -> ToolState
 decodeState state =
@@ -1892,6 +1907,9 @@ decodeState state =
 
         "disabled" ->
             Disabled
+
+        "always" ->
+            AlwaysOpen
 
         _ ->
             Contracted
