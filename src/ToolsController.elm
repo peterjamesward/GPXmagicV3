@@ -1398,9 +1398,10 @@ toolsForDock :
     -> Element msg
 toolsForDock dock msgWrapper isTrack options =
     column [ width fill, spacing 5 ]
-        [ showDockHeader msgWrapper dock options.docks
+        [ none
+        --, showDockHeader msgWrapper dock options.docks
         , wrappedRow
-            -- Open tools
+            -- Permanent tools
             [ spacing 4, width fill ]
           <|
             (options.tools
@@ -1492,29 +1493,29 @@ showDockOptions msgWrapper toolEntry =
         row
             neatToolsBorder
             [ Input.button
-                [ tooltip below (myTooltip "Move to upper left") ]
+                [ tooltip below (myTooltip "Move to left") ]
                 { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockUpperLeft
-                , label = useIcon FeatherIcons.arrowUpLeft
+                , label = useIcon FeatherIcons.arrowLeft
                 }
+            --, Input.button
+            --    [ tooltip below (myTooltip "Move to lower left") ]
+            --    { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockLowerLeft
+            --    , label = useIcon FeatherIcons.arrowDownLeft
+            --    }
+            --, Input.button
+            --    [ tooltip below (myTooltip "Move to bottom centre") ]
+            --    { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockBottom
+            --    , label = useIcon FeatherIcons.arrowDown
+            --    }
+            --, Input.button
+            --    [ tooltip below (myTooltip "Move to lower right") ]
+            --    { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockLowerRight
+            --    , label = useIcon FeatherIcons.arrowDownRight
+            --    }
             , Input.button
-                [ tooltip below (myTooltip "Move to lower left") ]
-                { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockLowerLeft
-                , label = useIcon FeatherIcons.arrowDownLeft
-                }
-            , Input.button
-                [ tooltip below (myTooltip "Move to bottom centre") ]
-                { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockBottom
-                , label = useIcon FeatherIcons.arrowDown
-                }
-            , Input.button
-                [ tooltip below (myTooltip "Move to lower right") ]
-                { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockLowerRight
-                , label = useIcon FeatherIcons.arrowDownRight
-                }
-            , Input.button
-                [ tooltip below (myTooltip "Move to upper right") ]
+                [ tooltip below (myTooltip "Move to right") ]
                 { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockUpperRight
-                , label = useIcon FeatherIcons.arrowUpRight
+                , label = useIcon FeatherIcons.arrowRight
                 }
             ]
 
