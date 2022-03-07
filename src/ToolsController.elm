@@ -216,7 +216,8 @@ type alias ToolEntry =
 defaultTools : List ToolEntry
 defaultTools =
     -- One list or five, or six? Try one. Arguably a Dict but POITROAE.
-    [ essentialsTool
+    [ toolSettings
+    , essentialsTool
     , trackInfoBox
     , displaySettingsTool
     , directionChangeTool
@@ -240,14 +241,13 @@ defaultTools =
     , intersectionsTool
     , straightenTool
     , graphTool
-    , toolSettings
     ]
 
 
 toolSettings : ToolEntry
 toolSettings =
     { toolType = ToolSettings
-    , label = "Tool Settings"
+    , label = "Show/Hide tools"
     , info = "Here is some useful information"
     , video = Nothing
     , state = SettingsClosed
@@ -1431,15 +1431,10 @@ toolsForDock :
 toolsForDock dock msgWrapper isTrack options =
     column [ width fill, height fill ]
         [ column [ width fill, height fill, spacing 5, scrollbarY ]
-            [ none
-
-            --, showDockHeader msgWrapper dock options.docks
-            , wrappedRow
-                -- Permanent tools
-                [ spacing 4, width fill ]
-              <|
+            [ column [ width fill ]
                 (options.tools
-                    |> List.filter (\t -> t.dock == dock && t.state == AlwaysOpen)
+                    |> List.filter
+                        (\t -> t.dock == dock && (t.state == AlwaysOpen || t.state == SettingsOpen || t.state == SettingsClosed))
                     |> List.map (viewTool msgWrapper isTrack options)
                 )
             , wrappedRow
@@ -1459,14 +1454,6 @@ toolsForDock dock msgWrapper isTrack options =
                     |> List.map (viewTool msgWrapper isTrack options)
                 )
             ]
-        , wrappedRow
-            -- Permanent tools
-            [ spacing 4, width fill ]
-          <|
-            (options.tools
-                |> List.filter (\t -> t.dock == dock && (t.state == SettingsOpen || t.state == SettingsClosed))
-                |> List.map (viewTool msgWrapper isTrack options)
-            )
         ]
 
 

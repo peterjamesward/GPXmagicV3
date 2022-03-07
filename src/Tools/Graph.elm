@@ -33,7 +33,6 @@ emptyGraph =
     , edges = Dict.empty
     , userRoute = []
     , canonicalRoute = []
-    , trackPointToCanonical = Dict.empty
     , selectedTraversal = Nothing
     }
 
@@ -270,13 +269,12 @@ buildGraph option track =
     , edges = edges
     , userRoute = []
     , canonicalRoute = []
-    , trackPointToCanonical = trackPointDict -- ??
     , selectedTraversal = Nothing
     }
 
 
 trivialGraph : Options msg -> TrackLoaded msg -> Graph msg
-trivialGraph option track =
+trivialGraph options track =
     {-
        This just gives us the start and end points, maybe one node if track is looped.
        It's a good place to start and means we can then start visualising.
@@ -287,7 +285,8 @@ trivialGraph option track =
                 [ ( 1, () ), ( 2, () ) ]
 
         edges =
-            Dict.empty
+            Dict.fromList
+                [ ( ( 1, 2 ), track ) ]
 
         trackPointDict =
             Dict.empty
@@ -296,7 +295,6 @@ trivialGraph option track =
     , edges = edges
     , userRoute = []
     , canonicalRoute = []
-    , trackPointToCanonical = trackPointDict -- ??
     , selectedTraversal = Nothing
     }
 

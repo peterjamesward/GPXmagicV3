@@ -37,7 +37,6 @@ type alias Graph msg =
     , edges : Dict EdgeKey (TrackLoaded msg)
     , userRoute : List Traversal
     , canonicalRoute : List Traversal
-    , trackPointToCanonical : Dict XY PointType
     , selectedTraversal : Maybe Int
     }
 
