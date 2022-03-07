@@ -1397,7 +1397,7 @@ toolsForDock :
     -> Options
     -> Element msg
 toolsForDock dock msgWrapper isTrack options =
-    column [ width fill, spacing 5 ]
+    column [ width fill, height fill, spacing 5, scrollbarY ]
         [ none
         --, showDockHeader msgWrapper dock options.docks
         , wrappedRow
