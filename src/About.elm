@@ -3,27 +3,20 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.0.8.1 (b2d61024)
+# GPXmagic v3.0.9 (b2d61024)
 
 ## In this release ...
 
-* Straighten tool, with option to preserve elevations
-* Blue buttons make a long-awaited return
-* Looped track now transitioned from v2, now called "Start/Finish"
-* Closing a loop now uses a Bezier spline to introduce a curve at the start/finish
-* For non-looped tracks, Start/Finish provides to add RGT start and end pens by simply extending the track linearly
-* "Split & Join" transitioned from v2
-* "Intersections" transitioned from v2 and now highlights sections of track that are re-used, and in which direction
-* The Profile view has lost its colours again, but gained the ability to show previews
-* "Out and Back" lowers the return leg by 1cm to avoid track flicker on RGT (thanks David Ogle)
-* Bezier splines and Centroid average preview on Profile view (for whole track only)
-* "Limit gradients" renamed to "Smooth Profile"
-* "Smooth Profile" provides a gradient limiting function on the whole track
-* "Smooth Profile" provides a "rolling average" altitude smoother on the whole track
-* "Smooth Profile" provides a "rolling average" gradient smoother on the whole track
-* All the above give a live preview on Profile view, and others
-* Tools are coloured to allow easier search; you can of course change these colours
-* All tools default to upper right dock, similar to v2.
+* Layout is simplified. Only one tool dock on each side and no naming of docks.
+This is in response to user feedback, should provide flexibility without intimidation.
+
+* _Pointers_ and _Undo Redo_ are merged into _Essentials_. This cannot be closed.
+
+* New _Tool Settings_ at bottom of dock, allows quick access to tool positioning and
+provides ability to hide tools (and get them back). Will provide information on each
+tool when I get round to writing it.
+
+* Tool docks scroll vertically if there are more expanded than will fit in the window.
 
 ## Coming up, not necessarily in order ...
 

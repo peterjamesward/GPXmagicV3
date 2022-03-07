@@ -94,7 +94,7 @@ view wrap options =
         , width fill
         , Background.color FlatColors.ChinesePalette.antiFlashWhite
         ]
-        [ el [ centerX ] curtainChoice
+        [ curtainChoice
         , column []
             [ Input.checkbox
                 [ padding 5
