@@ -964,11 +964,11 @@ rightDockInternalConfig =
 
 rightDockView : Model -> Html Msg
 rightDockView model =
-    SplitPane.view
-        rightDockInternalConfig
+    --SplitPane.view
+    --    rightDockInternalConfig
         (upperRightDockView model)
-        (lowerRightDockView model)
-        model.rightDockInternal
+        --(lowerRightDockView model)
+        --model.rightDockInternal
 
 
 notTheRightDockView : Model -> Html Msg
@@ -982,11 +982,11 @@ notTheRightDockView model =
 
 leftDockView : Model -> Html Msg
 leftDockView model =
-    SplitPane.view
-        leftDockInternalConfig
+    --SplitPane.view
+    --    leftDockInternalConfig
         (upperLeftDockView model)
-        (lowerLeftDockView model)
-        model.leftDockInternal
+        --(lowerLeftDockView model)
+        --model.leftDockInternal
 
 
 upperLeftDockView : Model -> Html Msg
@@ -1051,11 +1051,11 @@ bottomDockView model =
 
 centralAreaView : Model -> Html Msg
 centralAreaView model =
-    SplitPane.view
-        bottomDockConfig
+    --SplitPane.view
+    --    bottomDockConfig
         (viewPaneArea model)
-        (bottomDockView model)
-        model.bottomDockTopEdge
+        --(bottomDockView model)
+        --model.bottomDockTopEdge
 
 
 viewPaneArea : Model -> Html Msg
