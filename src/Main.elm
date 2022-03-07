@@ -52,6 +52,7 @@ import Tools.CentroidAverage
 import Tools.CurveFormer
 import Tools.DeletePoints as DeletePoints
 import Tools.DisplaySettings
+import Tools.GraphOptions exposing (Graph)
 import Tools.Interpolate
 import Tools.InterpolateOptions
 import Tools.MoveAndStretch
@@ -91,10 +92,7 @@ type Msg
     | IpInfoAcknowledged (Result Http.Error ())
     | StorageMessage E.Value
     | SplitLeftDockRightEdge SplitPane.Msg
-    | SplitLeftDockInternal SplitPane.Msg
     | SplitRightDockLeftEdge SplitPane.Msg
-    | SplitRightDockInternal SplitPane.Msg
-    | SplitBottomDockTopEdge SplitPane.Msg
     | Resize Int Int
     | GotWindowSize (Result Dom.Error Dom.Viewport)
     | ToolsMsg ToolsController.ToolMsg
@@ -140,13 +138,10 @@ type alias Model =
 
     -- Splitters
     , leftDockRightEdge : SplitPane.State
-    , leftDockInternal : SplitPane.State
     , rightDockLeftEdge : SplitPane.State
-    , rightDockInternal : SplitPane.State
-    , bottomDockTopEdge : SplitPane.State
 
     -- Tools
-    , toolOptions : ToolsController.Options
+    , toolOptions : ToolsController.Options Msg
     , isPopupOpen : Bool
     , backgroundColour : Element.Color
     , infoTextDict : Dict String (Dict String String)
@@ -158,9 +153,6 @@ encodeSplitValues model =
     E.object
         [ ( "left", E.float <| getPosition model.leftDockRightEdge )
         , ( "right", E.float <| getPosition model.rightDockLeftEdge )
-        , ( "bottom", E.float <| getPosition model.bottomDockTopEdge )
-        , ( "internalleft", E.float <| getPosition model.leftDockInternal )
-        , ( "internalright", E.float <| getPosition model.rightDockInternal )
         ]
 
 
@@ -198,18 +190,9 @@ decodeSplitValues values model =
                 | leftDockRightEdge =
                     SplitPane.init Horizontal
                         |> configureSplitter (SplitPane.px data.left <| Just ( 20, width // 3 ))
-                , leftDockInternal =
-                    SplitPane.init Vertical
-                        |> configureSplitter (SplitPane.px data.leftInternal <| Just ( 50, height - 75 ))
                 , rightDockLeftEdge =
                     SplitPane.init Horizontal
                         |> configureSplitter (SplitPane.px data.right <| Just ( 2 * width // 3, width - 20 ))
-                , rightDockInternal =
-                    SplitPane.init Vertical
-                        |> configureSplitter (SplitPane.px data.rightInternal <| Just ( 50, height - 75 ))
-                , bottomDockTopEdge =
-                    SplitPane.init Vertical
-                        |> configureSplitter (SplitPane.px data.bottom <| Just ( height * 2 // 3, height - 75 ))
             }
                 |> adjustSpaceForContent
 
@@ -255,18 +238,9 @@ init mflags origin navigationKey =
       , leftDockRightEdge =
             SplitPane.init Horizontal
                 |> configureSplitter (SplitPane.px 200 <| Just ( 20, 200 ))
-      , leftDockInternal =
-            SplitPane.init Vertical
-                |> configureSplitter (SplitPane.px 400 <| Just ( 50, 600 ))
       , rightDockLeftEdge =
             SplitPane.init Horizontal
                 |> configureSplitter (SplitPane.px (800 - 200) <| Just ( 600, 990 ))
-      , rightDockInternal =
-            SplitPane.init Vertical
-                |> configureSplitter (SplitPane.px 400 <| Just ( 50, 600 ))
-      , bottomDockTopEdge =
-            SplitPane.init Vertical
-                |> configureSplitter (SplitPane.px (500 - 200) <| Just ( 300, 570 ))
       , toolOptions = ToolsController.defaultOptions
       , isPopupOpen = False
       , backgroundColour = FlatColors.FlatUIPalette.silver
@@ -481,52 +455,10 @@ Please check the file contains GPX data.""" }
                 newModel
             )
 
-        SplitLeftDockInternal m ->
-            let
-                newModel =
-                    { model | leftDockInternal = SplitPane.update m model.leftDockInternal }
-                        |> adjustSpaceForContent
-            in
-            ( newModel
-            , performActionCommands
-                [ MapRefresh
-                , StoreLocally "splits" (encodeSplitValues model)
-                ]
-                newModel
-            )
-
         SplitRightDockLeftEdge m ->
             let
                 newModel =
                     { model | rightDockLeftEdge = SplitPane.update m model.rightDockLeftEdge }
-                        |> adjustSpaceForContent
-            in
-            ( newModel
-            , performActionCommands
-                [ MapRefresh
-                , StoreLocally "splits" (encodeSplitValues model)
-                ]
-                newModel
-            )
-
-        SplitRightDockInternal m ->
-            let
-                newModel =
-                    { model | rightDockInternal = SplitPane.update m model.rightDockInternal }
-                        |> adjustSpaceForContent
-            in
-            ( newModel
-            , performActionCommands
-                [ MapRefresh
-                , StoreLocally "splits" (encodeSplitValues model)
-                ]
-                newModel
-            )
-
-        SplitBottomDockTopEdge m ->
-            let
-                newModel =
-                    { model | bottomDockTopEdge = SplitPane.update m model.bottomDockTopEdge }
                         |> adjustSpaceForContent
             in
             ( newModel
@@ -780,15 +712,6 @@ allocateSpaceForDocksAndContent newWidth newHeight model =
             -- Note that this measurement is from the left window edge,
             -- but we seek to preserve the width of the dock her.
             truncate startWidth - (truncate <| getPosition model.rightDockLeftEdge)
-
-        currentBottomSplit =
-            truncate <| getPosition model.bottomDockTopEdge
-
-        currentLeftInternal =
-            truncate <| getPosition model.leftDockInternal
-
-        currentRightInternal =
-            truncate <| getPosition model.rightDockInternal
     in
     { model
         | windowSize = ( toFloat newWidth, toFloat newHeight )
@@ -798,29 +721,11 @@ allocateSpaceForDocksAndContent newWidth newHeight model =
                     (SplitPane.px currentLeftSplit <|
                         Just ( 20, newWidth // 3 )
                     )
-        , leftDockInternal =
-            SplitPane.init Vertical
-                |> configureSplitter
-                    (SplitPane.px currentLeftInternal <|
-                        Just ( 50, newHeight - 75 )
-                    )
         , rightDockLeftEdge =
             SplitPane.init Horizontal
                 |> configureSplitter
                     (SplitPane.px (newWidth - currentRightSplit) <|
                         Just ( 2 * newWidth // 3, newWidth - 20 )
-                    )
-        , rightDockInternal =
-            SplitPane.init Vertical
-                |> configureSplitter
-                    (SplitPane.px currentRightInternal <|
-                        Just ( 50, newHeight - 75 )
-                    )
-        , bottomDockTopEdge =
-            SplitPane.init Vertical
-                |> configureSplitter
-                    (SplitPane.px currentBottomSplit <|
-                        Just ( newHeight * 2 // 3, newHeight - 75 )
                     )
     }
         |> adjustSpaceForContent
@@ -839,18 +744,14 @@ adjustSpaceForContent model =
                 - SplitPane.getPosition model.leftDockRightEdge
                 - reservedWidth
 
-        availableHeightPixels =
-            SplitPane.getPosition model.bottomDockTopEdge
-                - reservedHeight
-
         ( reservedWidth, reservedHeight ) =
             -- This by experiment, not ideal.
-            ( 20, 80 )
+            ( 20, 160 )
     in
     { model
         | contentArea =
             ( Pixels.pixels <| round availableWidthPixels
-            , Pixels.pixels <| round availableHeightPixels
+            , Pixels.pixels <| round (height - reservedHeight)
             )
     }
 
@@ -938,37 +839,16 @@ rightDockConfig =
         }
 
 
-bottomDockConfig : ViewConfig Msg
-bottomDockConfig =
-    createViewConfig
-        { toMsg = SplitBottomDockTopEdge
-        , customSplitter = Nothing
-        }
-
-
-leftDockInternalConfig : ViewConfig Msg
-leftDockInternalConfig =
-    createViewConfig
-        { toMsg = SplitLeftDockInternal
-        , customSplitter = Nothing
-        }
-
-
-rightDockInternalConfig : ViewConfig Msg
-rightDockInternalConfig =
-    createViewConfig
-        { toMsg = SplitRightDockInternal
-        , customSplitter = Nothing
-        }
-
-
 rightDockView : Model -> Html Msg
 rightDockView model =
     --SplitPane.view
     --    rightDockInternalConfig
-        (upperRightDockView model)
-        --(lowerRightDockView model)
-        --model.rightDockInternal
+    upperRightDockView model
+
+
+
+--(lowerRightDockView model)
+--model.rightDockInternal
 
 
 notTheRightDockView : Model -> Html Msg
@@ -984,9 +864,12 @@ leftDockView : Model -> Html Msg
 leftDockView model =
     --SplitPane.view
     --    leftDockInternalConfig
-        (upperLeftDockView model)
-        --(lowerLeftDockView model)
-        --model.leftDockInternal
+    upperLeftDockView model
+
+
+
+--(lowerLeftDockView model)
+--model.leftDockInternal
 
 
 upperLeftDockView : Model -> Html Msg
@@ -1053,9 +936,12 @@ centralAreaView : Model -> Html Msg
 centralAreaView model =
     --SplitPane.view
     --    bottomDockConfig
-        (viewPaneArea model)
-        --(bottomDockView model)
-        --model.bottomDockTopEdge
+    viewPaneArea model
+
+
+
+--(bottomDockView model)
+--model.bottomDockTopEdge
 
 
 viewPaneArea : Model -> Html Msg
@@ -1150,7 +1036,8 @@ topLoadingBar model =
                 none
         , saveButton
         , Tools.OneClickQuickFix.oneClickQuickFixButton OneClickMsg model.track
-        , buyMeACoffeeButton
+
+        --, buyMeACoffeeButton
         , el [ alignRight ] <| StravaAuth.stravaButton model.stravaAuthentication OAuthMessage
         , el [ alignRight ] <| PaneLayoutManager.paneLayoutMenu PaneMsg model.paneLayoutOptions
         ]
@@ -1179,13 +1066,14 @@ infoTextPopup maybeSomething dict =
                 Just innerDict ->
                     case Dict.get tag innerDict of
                         Just gotText ->
-                            el
+                            paragraph
                                 [ Background.color FlatColors.ChinesePalette.antiFlashWhite
                                 , padding 10
                                 , centerY
                                 , centerX
+                                , width <| Element.px 400
                                 ]
-                                (text gotText)
+                                [ text gotText ]
 
                         Nothing ->
                             none
@@ -1256,10 +1144,7 @@ subscriptions model =
         , MapPortController.mapResponses (PaneMsg << MapPortsMessage << MapPortController.MapPortMessage)
         , LocalStorage.storageResponses StorageMessage
         , Sub.map SplitLeftDockRightEdge <| SplitPane.subscriptions model.leftDockRightEdge
-        , Sub.map SplitLeftDockInternal <| SplitPane.subscriptions model.leftDockInternal
         , Sub.map SplitRightDockLeftEdge <| SplitPane.subscriptions model.rightDockLeftEdge
-        , Sub.map SplitRightDockInternal <| SplitPane.subscriptions model.rightDockInternal
-        , Sub.map SplitBottomDockTopEdge <| SplitPane.subscriptions model.bottomDockTopEdge
         , Browser.Events.onResize (\w h -> Resize w h)
         , if model.flythroughRunning then
             Time.every 100 FlythroughTick
@@ -1316,17 +1201,6 @@ performActionsOnModel actions model =
                     { foldedModel
                         | previews =
                             Dict.remove tag foldedModel.previews
-                    }
-
-                ( RenderProfile, Just track ) ->
-                    { foldedModel
-                        | paneLayoutOptions =
-                            PaneLayoutManager.renderProfile
-                                foldedModel.toolOptions
-                                (Tuple.first model.contentArea)
-                                track
-                                foldedModel.previews
-                                foldedModel.paneLayoutOptions
                     }
 
                 ( DelayMessage int msg, Just track ) ->

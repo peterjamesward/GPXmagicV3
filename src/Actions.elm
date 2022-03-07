@@ -86,7 +86,6 @@ type ToolAction msg
     | Straighten
     | DisplayInfo String String
 
-
 interpretAction : ToolAction msg -> String
 interpretAction action =
     -- Only needed for track modifying actions that go in the undo stack.

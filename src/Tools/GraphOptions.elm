@@ -3,6 +3,7 @@ module Tools.GraphOptions exposing (..)
 import Dict exposing (Dict)
 import Length exposing (Meters)
 import Quantity exposing (Quantity)
+import TrackLoaded exposing (TrackLoaded)
 
 
 type Direction
@@ -23,17 +24,17 @@ type alias EdgeKey =
     ( Int, Int )
 
 
-type alias Options =
-    { graph : Maybe Graph
+type alias Options msg =
+    { graph : Maybe (Graph msg)
     , pointTolerance : Quantity Float Meters -- How close in metres to consider points equal.
     , minimumEdgeLength : Quantity Float Meters -- So we can ignore short self-loops
     , centreLineOffset : Length.Length
     }
 
 
-type alias Graph =
-    { nodes : Dict XY Int
-    , edges : Dict EdgeKey ( Int, Int )
+type alias Graph msg =
+    { nodes : Dict Int ()
+    , edges : Dict EdgeKey (TrackLoaded msg)
     , userRoute : List Traversal
     , canonicalRoute : List Traversal
     , trackPointToCanonical : Dict XY PointType

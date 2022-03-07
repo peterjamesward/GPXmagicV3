@@ -9,18 +9,16 @@ import Dict exposing (Dict)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as I
-import FeatherIcons
 import FlatColors.ChinesePalette
 import Length exposing (Length, Meters, inMeters)
 import Quantity exposing (Quantity, zero)
-import ToolTip exposing (tooltip)
 import Tools.GraphOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal2, showShortMeasure)
 import ViewPureStyles exposing (commonShortHorizontalSliderStyles, infoButton, neatToolsBorder, useIcon)
 
 
-defaultOptions : Options
+defaultOptions : Options msg
 defaultOptions =
     { graph = Nothing
     , pointTolerance = Length.meters 4.0
@@ -29,7 +27,7 @@ defaultOptions =
     }
 
 
-emptyGraph : Graph
+emptyGraph : Graph msg
 emptyGraph =
     { nodes = Dict.empty
     , edges = Dict.empty
@@ -87,7 +85,7 @@ Blah blah about the meaning of it all.
 """
 
 
-view : (Msg -> msg) -> Options -> Element msg
+view : (Msg -> msg) -> Options msg -> Element msg
 view wrapper options =
     let
         offset =
@@ -211,7 +209,12 @@ view wrapper options =
                     ]
 
 
-update : Msg -> Options -> TrackLoaded msg -> (Msg -> msg) -> ( Options, List (Actions.ToolAction msg) )
+update :
+    Msg
+    -> Options msg
+    -> TrackLoaded msg
+    -> (Msg -> msg)
+    -> ( Options msg, List (Actions.ToolAction msg) )
 update msg options track wrapper =
     case msg of
         SetPointTolerance quantity ->
@@ -221,7 +224,7 @@ update msg options track wrapper =
             ( { options | minimumEdgeLength = quantity }, [] )
 
         GraphAnalyse ->
-            ( { options | graph = buildGraph options track }, [] )
+            ( { options | graph = Just <| buildGraph options track }, [] )
 
         HighlightTraversal traversal ->
             ( options, [] )
@@ -245,7 +248,7 @@ update msg options track wrapper =
             ( options, [ Actions.DisplayInfo tool text ] )
 
 
-buildGraph : Options -> TrackLoaded msg -> Maybe Graph
+buildGraph : Options msg -> TrackLoaded msg -> Graph msg
 buildGraph option track =
     {-
        As in v1 & 2, the only way I know if to see which track points have more than two neighbours.
@@ -263,14 +266,39 @@ buildGraph option track =
         trackPointDict =
             Dict.empty
     in
-    Just
-        { nodes = nodes
-        , edges = edges
-        , userRoute = []
-        , canonicalRoute = []
-        , trackPointToCanonical = trackPointDict -- ??
-        , selectedTraversal = Nothing
-        }
+    { nodes = nodes
+    , edges = edges
+    , userRoute = []
+    , canonicalRoute = []
+    , trackPointToCanonical = trackPointDict -- ??
+    , selectedTraversal = Nothing
+    }
+
+
+trivialGraph : Options msg -> TrackLoaded msg -> Graph msg
+trivialGraph option track =
+    {-
+       This just gives us the start and end points, maybe one node if track is looped.
+       It's a good place to start and means we can then start visualising.
+    -}
+    let
+        nodes =
+            Dict.fromList
+                [ ( 1, () ), ( 2, () ) ]
+
+        edges =
+            Dict.empty
+
+        trackPointDict =
+            Dict.empty
+    in
+    { nodes = nodes
+    , edges = edges
+    , userRoute = []
+    , canonicalRoute = []
+    , trackPointToCanonical = trackPointDict -- ??
+    , selectedTraversal = Nothing
+    }
 
 
 

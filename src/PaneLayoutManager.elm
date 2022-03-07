@@ -191,7 +191,7 @@ optionList =
 
 
 render :
-    ToolsController.Options
+    ToolsController.Options msg
     -> Options
     -> Quantity Int Pixels
     -> TrackLoaded msg
@@ -205,74 +205,6 @@ render toolSettings options width track previews =
             SceneBuilder3D.renderPreviews previews
                 ++ SceneBuilder3D.render3dView toolSettings.displaySettings track
     }
-        |> renderProfile toolSettings width track previews
-
-
-renderProfile :
-    ToolsController.Options
-    -> Quantity Int Pixels
-    -> TrackLoaded msg
-    -> Dict String PreviewData
-    -> Options
-    -> Options
-renderProfile toolSettings width track previews options =
-    -- Same but only renders profile, because of zoom, pan, or something.
-    case options.paneLayout of
-        PanesOne ->
-            { options
-                | pane1 = renderPaneIfProfileVisible toolSettings options.pane1 width track previews
-            }
-
-        PanesLeftRight ->
-            { options
-                | pane1 = renderPaneIfProfileVisible toolSettings options.pane1 width track previews
-                , pane2 = renderPaneIfProfileVisible toolSettings options.pane2 width track previews
-            }
-
-        PanesUpperLower ->
-            { options
-                | pane1 = renderPaneIfProfileVisible toolSettings options.pane1 width track previews
-                , pane2 = renderPaneIfProfileVisible toolSettings options.pane2 width track previews
-            }
-
-        PanesOnePlusTwo ->
-            { options
-                | pane1 = renderPaneIfProfileVisible toolSettings options.pane1 width track previews
-                , pane2 = renderPaneIfProfileVisible toolSettings options.pane2 width track previews
-                , pane3 = renderPaneIfProfileVisible toolSettings options.pane3 width track previews
-            }
-
-        PanesGrid ->
-            { options
-                | pane1 = renderPaneIfProfileVisible toolSettings options.pane1 width track previews
-                , pane2 = renderPaneIfProfileVisible toolSettings options.pane2 width track previews
-                , pane3 = renderPaneIfProfileVisible toolSettings options.pane3 width track previews
-                , pane4 = renderPaneIfProfileVisible toolSettings options.pane4 width track previews
-            }
-
-
-renderPaneIfProfileVisible :
-    ToolsController.Options
-    -> PaneContext
-    -> Quantity Int Pixels
-    -> TrackLoaded msg
-    -> Dict String PreviewData
-    -> PaneContext
-renderPaneIfProfileVisible toolSettings pane width track previews =
-    -- Not doing this here now, moved into view.
-    --case ( pane.activeView, pane.profileContext ) of
-    --    ( ViewProfile, Just context ) ->
-    --        { pane
-    --            | profileContext =
-    --                Just <|
-    --                    ViewProfileCharts.renderProfileData
-    --                        track
-    --                        width
-    --                        context
-    --        }
-    --
-    --    _ ->
-    pane
 
 
 update :
