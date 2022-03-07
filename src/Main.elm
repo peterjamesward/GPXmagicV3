@@ -2030,6 +2030,6 @@ showTrackOnMapCentered track =
     Cmd.batch
         -- Must repaint track on so that selective rendering works.
         [ MapPortController.addTrackToMap track
-        , MapPortController.centreMapOnCurrent track
+        , MapPortController.zoomMapToFitTrack track
         , MapPortController.addMarkersToMap track
         ]

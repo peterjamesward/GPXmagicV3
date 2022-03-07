@@ -1509,7 +1509,7 @@ viewTool :
     -> ToolEntry
     -> Element msg
 viewTool msgWrapper isTrack options toolEntry =
-    el [ padding 4, width fill, alignTop ] <|
+    el [ padding 2, width fill, alignTop ] <|
         column
             [ width fill
             , alignTop

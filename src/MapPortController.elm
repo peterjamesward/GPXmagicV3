@@ -2,12 +2,14 @@ port module MapPortController exposing (..)
 
 import Actions exposing (ToolAction(..))
 import Angle
+import BoundingBox3d
 import Direction2d
 import DomainModel exposing (..)
 import Json.Decode as D exposing (Decoder, field, string)
 import Json.Encode as E
 import Length
 import MapboxKey exposing (mapboxKey)
+import Point3d
 import SceneBuilderMap
 import TrackLoaded exposing (TrackLoaded)
 
@@ -53,7 +55,7 @@ createMap style info =
             , ( "lon", E.float info.centreLon )
             , ( "lat", E.float info.centreLat )
             , ( "zoom", E.float info.mapZoom )
-            , ( "style", E.string style)
+            , ( "style", E.string style )
             ]
 
 
@@ -107,6 +109,43 @@ centreMapOnCurrent track =
             , ( "token", E.string mapboxKey )
             , ( "lon", E.float <| Angle.inDegrees <| Direction2d.toAngle longitude )
             , ( "lat", E.float <| Angle.inDegrees latitude )
+            ]
+
+
+zoomMapToFitTrack : TrackLoaded msg -> Cmd msg
+zoomMapToFitTrack track =
+    let
+        { longitude, latitude, altitude } =
+            gpxPointFromIndex track.currentPosition track.trackTree
+
+        { minX, maxX, minY, maxY, minZ, maxZ } =
+            BoundingBox3d.extrema <| boundingBox track.trackTree
+
+        ( swCorner, neCorner ) =
+            ( Point3d.xyz minX minY minZ, Point3d.xyz maxX maxY minZ )
+
+        ( swGpx, neGpx ) =
+            ( DomainModel.gpxFromPointWithReference track.referenceLonLat swCorner
+            , DomainModel.gpxFromPointWithReference track.referenceLonLat neCorner
+            )
+
+        ( swLonLat, neLonLat ) =
+            ( [ E.float <| Angle.inDegrees <| Direction2d.toAngle swGpx.longitude
+              , E.float <| Angle.inDegrees swGpx.latitude
+              ]
+            , [ E.float <| Angle.inDegrees <| Direction2d.toAngle neGpx.longitude
+              , E.float <| Angle.inDegrees neGpx.latitude
+              ]
+            )
+
+        bbox =
+            [ E.list identity swLonLat, E.list identity neLonLat ]
+    in
+    mapCommands <|
+        E.object
+            [ ( "Cmd", E.string "Bounds" )
+            , ( "token", E.string mapboxKey )
+            , ( "bbox", E.list identity bbox )
             ]
 
 

@@ -199,6 +199,13 @@ function mapMessageHandler(msg) {
             }
             break;
 
+        case 'Bounds':
+            if (isMapCreated) {
+                console.log(msg.bbox);
+                map.fitBounds(msg.bbox, { animate : false });
+            }
+            break;
+
         case 'Zoom':
             if (isMapCreated) {
                 map.setZoom(msg.zoom);
