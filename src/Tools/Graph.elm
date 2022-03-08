@@ -5,16 +5,19 @@ module Tools.Graph exposing (..)
 -- of track points multiple times and in each direction.
 
 import Actions
+import BoundingBox3d
 import Dict exposing (Dict)
+import DomainModel
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as I
 import FlatColors.ChinesePalette
 import Length exposing (Length, Meters, inMeters)
+import Point3d
 import Quantity exposing (Quantity, zero)
 import Tools.GraphOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
-import UtilsForViews exposing (showDecimal2, showShortMeasure)
+import UtilsForViews exposing (showDecimal2, showLongMeasure, showShortMeasure)
 import ViewPureStyles exposing (commonShortHorizontalSliderStyles, infoButton, neatToolsBorder, useIcon)
 
 
@@ -24,6 +27,7 @@ defaultOptions =
     , pointTolerance = Length.meters 4.0
     , minimumEdgeLength = Length.meters 100
     , centreLineOffset = Length.meters 0.0
+    , boundingBox = BoundingBox3d.singleton Point3d.origin
     }
 
 
@@ -286,10 +290,10 @@ trivialGraph track =
 
         edges =
             Dict.fromList
-                [ ( ( 1, 2 ), track.trackTree ) ]
+                [ ( 1, ( 1, 2, track.trackTree ) ) ]
 
         traversal =
-            { edge = ( 1, 2 ), direction = Forwards }
+            { edge = 1, direction = Forwards }
     in
     { nodes = nodes
     , edges = edges

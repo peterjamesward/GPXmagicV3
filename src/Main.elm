@@ -160,9 +160,6 @@ encodeSplitValues model =
 type alias SplitDecode =
     { left : Int
     , right : Int
-    , bottom : Int
-    , leftInternal : Int
-    , rightInternal : Int
     }
 
 
@@ -170,12 +167,9 @@ decodeSplitValues : E.Value -> Model -> Model
 decodeSplitValues values model =
     let
         decoder =
-            D.map5 SplitDecode
+            D.map2 SplitDecode
                 (D.field "left" D.int)
                 (D.field "right" D.int)
-                (D.field "bottom" D.int)
-                (D.field "internalleft" D.int)
-                (D.field "internalright" D.int)
 
         decoded =
             D.decodeValue decoder values
@@ -190,7 +184,7 @@ decodeSplitValues values model =
             { model
                 | leftDockRightEdge =
                     SplitPane.init Horizontal
-                        |> configureSplitter (SplitPane.px data.left <| Just ( 20, width // 3 ))
+                        |> configureSplitter (SplitPane.px data.left <| Just ( 20, 200 ))
                 , rightDockLeftEdge =
                     SplitPane.init Horizontal
                         |> configureSplitter (SplitPane.px data.right <| Just ( 2 * width // 3, width - 20 ))
