@@ -82,14 +82,16 @@ displayInfoForPoint imperial track =
         index =
             track.currentPosition
 
-        leaf =
-            leafFromIndex index track.trackTree |> asRecord
+        ( leaf, gpxPoint ) =
+            ( leafFromIndex index track.trackTree |> asRecord
+            , gpxPointFromIndex index track.trackTree
+            )
 
         distance =
             distanceFromIndex index track.trackTree
 
         { longitude, latitude, altitude } =
-            Tuple.first leaf.sourceData
+            gpxPoint
 
         bearing =
             leaf.directionAtStart

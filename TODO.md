@@ -8,9 +8,8 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 > Debuggers shows messages arriving, not obvious why they should not be processed.
 > Can't save file when this happens, so rather poor show.
 
-**BUG**: Docks have X scrollbars (David Ogle)
-> It's due to the "width: calc(100% + 4px); " that you're setting in a few places:
-> Def caused by adding padding in the wrappedRows. :(
+**BUG**: Interpolate Undo out by one.
+
 --
 
 # WIP
