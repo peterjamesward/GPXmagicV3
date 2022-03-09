@@ -248,7 +248,7 @@ view imperial wrapper options track =
 
         extent =
             el [ centerX, width fill ] <|
-                paragraph []
+                paragraph [ centerX]
                     [ text """Use both markers to apply to a range, otherwise applies to whole track""" ]
 
         --Input.radioRow

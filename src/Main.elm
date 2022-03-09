@@ -184,7 +184,7 @@ decodeSplitValues values model =
             { model
                 | leftDockRightEdge =
                     SplitPane.init Horizontal
-                        |> configureSplitter (SplitPane.px data.left <| Just ( 20, 200 ))
+                        |> configureSplitter (SplitPane.px data.left <| Just ( 20, width // 3 ))
                 , rightDockLeftEdge =
                     SplitPane.init Horizontal
                         |> configureSplitter (SplitPane.px data.right <| Just ( 2 * width // 3, width - 20 ))
@@ -232,7 +232,7 @@ init mflags origin navigationKey =
       , infoText = Nothing
       , leftDockRightEdge =
             SplitPane.init Horizontal
-                |> configureSplitter (SplitPane.px 200 <| Just ( 20, 200 ))
+                |> configureSplitter (SplitPane.px 200 <| Just ( 20, 300 ))
       , rightDockLeftEdge =
             SplitPane.init Horizontal
                 |> configureSplitter (SplitPane.px (800 - 200) <| Just ( 600, 990 ))
