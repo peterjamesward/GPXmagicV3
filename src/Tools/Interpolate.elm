@@ -155,7 +155,19 @@ toolStateChange :
 toolStateChange opened colour options track =
     case ( opened, track ) of
         ( True, Just theTrack ) ->
-            ( options, actions options colour theTrack )
+            let
+                newOptions =
+                    { options
+                        | extent =
+                            case theTrack.markerPosition of
+                                Just purple ->
+                                    ExtentIsRange
+
+                                Nothing ->
+                                    ExtentIsTrack
+                    }
+            in
+            ( newOptions, actions newOptions colour theTrack )
 
         _ ->
             ( options, [ HidePreview "interpolate" ] )
@@ -163,18 +175,20 @@ toolStateChange opened colour options track =
 
 actions : Options -> Color -> TrackLoaded msg -> List (ToolAction a)
 actions newOptions previewColour track =
-    case newOptions.extent of
-        ExtentIsRange ->
-            [ ShowPreview
-                { tag = "interpolate"
-                , shape = PreviewCircle
-                , colour = previewColour
-                , points = computeNewPoints True newOptions track
-                }
-            ]
+    --case newOptions.extent of
+    --    ExtentIsRange ->
+    [ ShowPreview
+        { tag = "interpolate"
+        , shape = PreviewCircle
+        , colour = previewColour
+        , points = computeNewPoints True newOptions track
+        }
+    ]
 
-        ExtentIsTrack ->
-            []
+
+
+--ExtentIsTrack ->
+--    []
 
 
 update :
@@ -200,8 +214,20 @@ update msg options previewColour hasTrack =
             ( newOptions, actions newOptions previewColour track )
 
         ( Just track, Apply ) ->
-            ( options
-            , [ Actions.ApplyInterpolateWithOptions options
+            let
+                newOptions =
+                    { options
+                        | extent =
+                            case track.markerPosition of
+                                Just purple ->
+                                    ExtentIsRange
+
+                                Nothing ->
+                                    ExtentIsTrack
+                    }
+            in
+            ( newOptions
+            , [ Actions.ApplyInterpolateWithOptions newOptions
               , TrackHasChanged
               ]
             )
@@ -221,18 +247,22 @@ view imperial wrapper options track =
                 }
 
         extent =
-            Input.radioRow
-                [ padding 10
-                , spacing 5
-                ]
-                { onChange = wrapper << SetExtent
-                , selected = Just options.extent
-                , label = Input.labelHidden "Style"
-                , options =
-                    [ Input.option ExtentIsRange (text "Selected range\n(preview)")
-                    , Input.option ExtentIsTrack (text "Whole track\n(no preview)")
-                    ]
-                }
+            el [ centerX, width fill ] <|
+                paragraph []
+                    [ text """Use both markers to apply to a range, otherwise applies to whole track""" ]
+
+        --Input.radioRow
+        --    [ padding 10
+        --    , spacing 5
+        --    ]
+        --    { onChange = wrapper << SetExtent
+        --    , selected = Just options.extent
+        --    , label = Input.labelHidden "Style"
+        --    , options =
+        --        [ Input.option ExtentIsRange (text "Selected range\n(preview)")
+        --        , Input.option ExtentIsTrack (text "Whole track\n(no preview)")
+        --        ]
+        --    }
     in
     case track of
         Just isTrack ->

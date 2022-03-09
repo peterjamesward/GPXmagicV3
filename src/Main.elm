@@ -332,9 +332,7 @@ update msg model =
         GpxRequested ->
             ( { model | modalMessage = Just """Select GPX file.
 
-Please note this sometimes fails, reason unknown
-
-In that case, please reload the page in the browser and try again.""" }
+If the File Open dialog does not appear, please reload the page in the browser and try again.""" }
             , Select.file [ "text/gpx" ] GpxSelected
             )
 
