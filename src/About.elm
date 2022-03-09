@@ -3,20 +3,21 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.0.9 (d76f6508)
+# GPXmagic v3.0.10 (d76f6508)
 
 ## In this release ...
 
-* Layout is simplified. Only one tool dock on each side and no naming of docks.
-This is in response to user feedback, should provide flexibility without intimidation.
+* Bug fix: Dock widths were not being restored.
 
-* _Pointers_ and _Undo Redo_ are merged into _Essentials_. This cannot be closed.
+* Bug fix: It was not possible to see information for the final point.
 
-* New _Tool Settings_ at bottom of dock, allows quick access to tool positioning and
-provides ability to hide tools (and get them back). Will provide information on each
-tool when I get round to writing it.
+* Bug fix: Interpolate on whole track followed by Undo was losing a point.
 
-* Tool docks scroll vertically if there are more expanded than will fit in the window.
+* Bug fix: Left dock width was too restricted.
+
+* Map is (should be) automatically zoomed to fit route when route loaded.
+
+** Big thanks to David Ogle **
 
 ## Coming up, not necessarily in order ...
 

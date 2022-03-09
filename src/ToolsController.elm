@@ -240,7 +240,7 @@ defaultTools =
     , splitAndJoinTool
     , intersectionsTool
     , straightenTool
-    , graphTool
+    --, graphTool
     ]
 
 
