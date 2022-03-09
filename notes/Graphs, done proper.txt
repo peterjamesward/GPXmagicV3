@@ -1,0 +1,79 @@
+I now understand Graphs (maybe) in relation to tracks.
+
+A track is just a graph with two implied nodes, at start end end. One in case of a loop.
+
+Editing a graph allows only a few operations:
+
+- Add a node
+- Add an edge
+- Delete an edge
+- Delete a node that has no edges (or delete edges to it)
+- Coalesce two nodes
+- Insert a node on an edge
+
+Graph editing happens "on a higher plane" that supports only these.
+We make explicit the first two, by having nodes in Model.
+
+We can use this to "formalise" Loops, Split & Join, if we wish. (Even Strava segment insert.)
+
+User can only edit one (canonical) edge at one time.
+(Moving an endpoint moves that nodes for other connected edges.)
+
+The question is how the UI reflects this.
+
+The graph could be displayed in a new view that emphasises nodes and elides edges.
+It could be like Plan, in SVG.
+Editing perhaps "nearly direct" on the image using popup buttons under the mouse.
+Optional Map underlay?
+
+In Graph edit mode, all other editing tools Disabled.
+
+Graphs can be Saved and Loaded but in proprietary compact format.
+(Save button changes to reflect this.)
+This is just for user convenience to revisit a graph.
+Separate Undo/Redo stack for graph edits (probably just holding the graph shape).
+
+Dropping "into" an edge to edit it enables edit tools, should lock Graph open.
+We could show inactive edges elided in different rendering. Or not, initially.
+Exiting this mode must be in the graph tool.
+
+As before, a fully traversed graph becomes once more a trivial two (or one) node graph.
+
+I fancy calling it "Network" with "stations" and "lines" or "legs", just to emphasise the different mode.
+Maybe "Metro", "station", "track", since then we know where "track" sits in the scheme of things.
+"Leg" is a traversal.
+
+This could be quite elegant.
+Imagine the graph drawn in SVG.
+When mouse moves over a feature, that feature is highlighted.
+As the mouse moves (or on click) a small toolbar appears, according to context:
+
+- on an edge: ("Edit this track", "Add station here", "Remove this track"
+- on a node: ("Delete", "Create edge to..." "Merge with...")
+- on blank: ("Add a station here", "Insert a GPX track")
+
+Note that final one: it's like Join but moves into local space at the click point.
+
+Also use direct clicking for adding traversals.
+Node: "Start here" (if no route or this node connects to the current start), "Move here" (if not amiguous).
+Edge: "Use this track"
+
+Tool shows traversal list, replicates these functions, allows selection with clear highlighting (same as hover).
+Also needs "Finish editing this track".
+
+Could it be that there is no "graph mode"? We just flip between track edits and graph edits?
+The only big thing is the concept of "current track".
+The graph tool is then really for viewing & editing traversals, much as it is now.
+
+In a little more depth, we store the graph as a set of nodes and edges.
+Each edge is a PeteTree.
+There is always a current traversal, but it could be empty.
+If the traversal is not empty, there is always a current edge.
+All edges are rendered in all views but the current edge is distinct.
+Non-current edges render at low depth.
+Moving the pointer, or clicking anywhere, can change the current edge.
+Changing the current edge clears Purple if dropped.
+Orange pointer is meaningful only in context of current edge.
+Purple cannot be moved outside current edge.
+If current edge is adjacent to traversal, option given to add it (either end).
+Only end nodes of current edge are map-draggable (this could be revisited).

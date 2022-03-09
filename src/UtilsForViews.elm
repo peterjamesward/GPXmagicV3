@@ -155,7 +155,6 @@ uiColourHexString colour =
         ++ (leadingZeroes <| Hex.toString blueInt)
 
 
-
 colourHexString : Color.Color -> String
 colourHexString colour =
     let
@@ -177,10 +176,8 @@ colourHexString colour =
         ++ (leadingZeroes <| Hex.toString blueInt)
 
 
-
-
 fullDepthRenderingBoxSize =
-    --TODO: put box side in model
+    --TODO: put box size in model
     Length.kilometers 4
 
 

@@ -10,6 +10,13 @@ Use SVG overlays to label edges for easier selection.
 
 # Emails from David Ogle
 
+> After using graph theory you end up with out and back track points in the same position...
+> say the orange marker is near the end of the course and I select a track point nearby,
+> it always selects the one at the start of the course, instead of the one I was trying to
+> select near the end. So I'm thinking if you've got 2 track points in the same position,
+> on selection (mouse click), it'd be good to select the one closest to the current position.
+
+
 Here goes... few ideas for improvements:
 
 - Rename the tool name from "Graph Theory" to "Track Builder".

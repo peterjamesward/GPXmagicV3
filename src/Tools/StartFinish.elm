@@ -255,6 +255,7 @@ applyCloseLoop options track =
             List.map .gpx options.pointsToClose
 
         newStartPoint =
+            -- Take the nearest to the current start as the new start.
             numberedSplinePoints
                 |> List.Extra.minimumBy
                     (\( idx, preview ) ->
@@ -265,27 +266,31 @@ applyCloseLoop options track =
 
         ( newEndPoints, newStartPoints ) =
             case newStartPoint of
+                -- Note the new S/F appears twice.
                 Just ( index, _ ) ->
-                    List.Extra.splitAt index newGpxPoints
+                    ( List.take (index + 1) newGpxPoints
+                    , List.drop index newGpxPoints
+                    )
 
                 Nothing ->
                     -- Hmm. Put them at the end.
                     ( newGpxPoints, [] )
 
-        collectStartPointsInReverse : RoadSection -> List GPXSource -> List GPXSource
-        collectStartPointsInReverse road outputs =
+        collecEndPointsInReverse : RoadSection -> List GPXSource -> List GPXSource
+        collecEndPointsInReverse road outputs =
             -- We don't want the very start or the very end.
-            Tuple.first road.sourceData :: outputs
+            Tuple.second road.sourceData :: outputs
 
         oldPoints =
-            List.reverse <|
-                DomainModel.foldOverRoute collectStartPointsInReverse track.trackTree []
+            DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
 
         newPoints =
-            newStartPoints ++ List.drop 1 oldPoints ++ newEndPoints
+            newStartPoints
+                ++ (List.drop 1 <| List.take (skipCount track.trackTree - 1) oldPoints)
+                ++ newEndPoints
     in
     ( DomainModel.treeFromSourcePoints newPoints
-    , DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
+    , oldPoints
     )
 
 

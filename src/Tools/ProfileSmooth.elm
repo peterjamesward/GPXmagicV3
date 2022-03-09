@@ -426,7 +426,6 @@ limitGradientsWithRedistribution options track =
             ( gpx.altitude, ( earth, gpx ) :: outputs )
 
         ( _, adjustedPoints ) =
-            --TODO: Check if we should drop the startmost point.
             slopeInfo.roads |> List.foldl allocateProRata ( endAltitude, [] )
     in
     adjustedPoints

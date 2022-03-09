@@ -201,7 +201,7 @@ function mapMessageHandler(msg) {
 
         case 'Bounds':
             if (isMapCreated) {
-                console.log(msg.bbox);
+                //console.log(msg.bbox);
                 map.fitBounds(msg.bbox, { animate : false });
             }
             break;

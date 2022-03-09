@@ -70,7 +70,6 @@ apply options track =
 
         outwardLeg =
             -- nudge entire route one way, in natural order
-            --TODO: Use the traversal function; Nudge should also.
             let
                 nudge =
                     { noNudge | horizontal = Length.meters options.offset }

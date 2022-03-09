@@ -9,6 +9,7 @@ import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
 import PreviewData exposing (PreviewData, PreviewShape(..))
 import TrackLoaded exposing (TrackLoaded)
+import UtilsForViews
 
 
 renderPreview : PreviewData -> E.Value
@@ -105,8 +106,7 @@ renderMapJson track =
     -- Sadly, mapbox requires a different format for the track points.
     let
         boxSide =
-            --TODO: put box side in model
-            Length.kilometers 4
+            UtilsForViews.fullDepthRenderingBoxSize
 
         makeVisibleSegment : PeteTree -> E.Value
         makeVisibleSegment node =

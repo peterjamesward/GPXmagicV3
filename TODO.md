@@ -8,50 +8,44 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 > Debuggers shows messages arriving, not obvious why they should not be processed.
 > Can't save file when this happens, so rather poor show.
 
+**BUG**: Orange position not displayed in Essentials box on track load.
+
 --
 
 # WIP
+
+## Random
+
+Smooth Profile to work over range.
+
+Bring back auto-fix on Bend and Gradient problems.
+
+Direction changes => Bend Problems (?)
+
+Write info text for all Tools.
+
+Provide info text capability on top bar and on view panes.
 
 ## Graph Theory 
 
 (notes below and from DO's emails)
 
-I'm going to do as much as I can from scratch and only use v2 for reference.
-Though I bring the view over to make a start.
-
-**David Ogle**:
-> After using graph theory you end up with out and back track points in the same position...
-> say the orange marker is near the end of the course and I select a track point nearby,
-> it always selects the one at the start of the course, instead of the one I was trying to
-> select near the end. So I'm thinking if you've got 2 track points in the same position,
-> on selection (mouse click), it'd be good to select the one closest to the current position.
-
-
 ---
 
-# BACKLOG, roughly in order ...
+# BACKLOG
 
 ## Tools: old, updated, & new
 
-2. Info popup for all tools. == WIP, improve presentation in main.
-> Pass around `textLookup` function from main. 
-> This can become a closure with the active language dictionary so language
-> switching is all done in main.
-> Example in Graph, which I shall disable for now.
-
 --- _Cut-off for release_
 - Terrain as from v2 but with texture maybe
-- SVG overlay on 3d views.
+- SVG overlay on 3d views. (?)
 - Non-customisable keyboard alternatives for Load/Save/Undo/Redo/Fwd/Back/Purple (maybe 1-5 for views)
 - Extract all text for translation (Muriel)
 - Use localised number formatting everywhere (for French use of , and .)
 - Ability to point-smooth transitions over a range
 - Tools that require a range should say so when there isn't one! (David Ogle)
 
---- _Cut-off_
-- Option to show MR rendering cutoff.
-- Tooltips (where useful)
-- Draggable tools?
+--- _Cut off completely
 
 ## SVG profile rendering
 
@@ -77,11 +71,6 @@ good its the visual way of seeing the changes with the Elevation
 chart, Slope and Elevation profile making it easy to see exactly what
 the changes are doing.
 
-## Terrain
-
-Tree walk combined with whole (visible) tree query, because <track loops>.
-(Expand bounding boxes to allow for road width.)
-
 ## Loops
 
 - Centroid average to work over S/F on loop
@@ -95,8 +84,6 @@ https://ambientcg.com/view?id=Asphalt001
 Credit: Contains assets from ambientCG.com, licensed under CC0 1.0 Universal.
 
 ## Small stuff
-
-Maybe convert all markers to SVG with overlay.
 
 Put all Font, Colour etc into a Palette/Style module for ease of change.
 > Search for FlatUI references.
@@ -119,3 +106,9 @@ DEBT: Map sends more click messages each time we click.
 ## Laziness, optimisation
 
 Don't render anything that's not visible.
+
+## more
+
+- Option to show MR rendering cutoff.
+- Tooltips (where useful)
+- Draggable tools?

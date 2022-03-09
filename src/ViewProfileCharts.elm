@@ -463,8 +463,6 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
 
         makeSvgPoint : Length.Length -> RoadSection -> List (Point3d Meters LocalCoords)
         makeSvgPoint distance road =
-            --TODO: Use a fold over the tree to create a polyline and render it with
-            -- slightly rounded joints.
             [ Point3d.xyz
                 distance
                 (Length.meters <| compensateForZoom road.gradientAtStart)
@@ -580,7 +578,6 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
 
         pointsAsGradientPolyline : String -> List (Point3d Meters LocalCoords) -> Svg msg
         pointsAsGradientPolyline colour points =
-            --TODO: Make stepped, not interpolated.
             let
                 pointsInScreenSpace =
                     List.map

@@ -102,7 +102,6 @@ computeNudgedPoints :
     -> TrackLoaded msg
     -> ( ( Int, Int ), List PreviewPoint )
 computeNudgedPoints settings track =
-    --TODO: Rewrite using a fold; this is rather slack, though "good enough".
     let
         ( fromStart, fromEnd ) =
             TrackLoaded.getRangeFromMarkers track
