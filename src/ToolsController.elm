@@ -240,6 +240,7 @@ defaultTools =
     , splitAndJoinTool
     , intersectionsTool
     , straightenTool
+
     --, graphTool
     ]
 
@@ -252,7 +253,7 @@ toolSettings =
     , video = Nothing
     , state = SettingsClosed
     , dock = DockUpperRight
-    , tabColour = FlatColors.FlatUIPalette.midnightBlue
+    , tabColour = rgtPurple
     , textColour = contrastingColour FlatColors.FlatUIPalette.midnightBlue
     , isPopupOpen = False
     }
@@ -289,7 +290,7 @@ displaySettingsTool =
 directionChangeTool : ToolEntry
 directionChangeTool =
     { toolType = ToolAbruptDirectionChanges
-    , label = "Direction changes"
+    , label = "Bend problems"
     , info = "These may need smoothing"
     , video = Nothing
     , state = Contracted
@@ -345,7 +346,7 @@ deleteTool =
 bezierSplinesTool : ToolEntry
 bezierSplinesTool =
     { toolType = ToolBezierSplines
-    , label = "Bezier splines"
+    , label = "Smooth with splines"
     , info = "Make it smoother"
     , video = Nothing
     , state = Contracted
@@ -359,7 +360,7 @@ bezierSplinesTool =
 centroidAverageTool : ToolEntry
 centroidAverageTool =
     { toolType = ToolCentroidAverage
-    , label = "Centroid Average"
+    , label = "Smooth with 3d average"
     , info = "Make it smoother"
     , video = Nothing
     , state = Contracted
@@ -387,7 +388,7 @@ curveFormerTool =
 bendSmootherTool : ToolEntry
 bendSmootherTool =
     { toolType = ToolBendSmoother
-    , label = "Classic bends"
+    , label = "Smooth with arcs"
     , info = "Make it smoother"
     , video = Nothing
     , state = Contracted
@@ -443,7 +444,7 @@ simplifyTool =
 interpolateTool : ToolEntry
 interpolateTool =
     { toolType = ToolInterpolate
-    , label = "Add points"
+    , label = "Insert points"
     , info = "Add points"
     , video = Nothing
     , state = Contracted
@@ -1618,13 +1619,13 @@ showColourOptions msgWrapper toolEntry =
                 , colourBlock FlatColors.FlatUIPalette.emerald
                 , colourBlock FlatColors.FlatUIPalette.peterRiver
                 , colourBlock FlatColors.FlatUIPalette.amethyst
-                , colourBlock FlatColors.FlatUIPalette.wetAsphalt
+                , colourBlock rgtDark
                 ]
             , row []
                 [ colourBlock FlatColors.FlatUIPalette.greenSea
                 , colourBlock FlatColors.FlatUIPalette.nephritis
                 , colourBlock FlatColors.FlatUIPalette.belizeHole
-                , colourBlock FlatColors.FlatUIPalette.wisteria
+                , colourBlock rgtPurple
                 , colourBlock FlatColors.FlatUIPalette.midnightBlue
                 ]
             , row []

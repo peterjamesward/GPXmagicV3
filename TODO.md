@@ -26,6 +26,10 @@ Write info text for all Tools.
 
 Provide info text capability on top bar and on view panes.
 
+Usability suggestions from DavidO.
+
+
+
 ## Graph Theory 
 
 (notes below and from DO's emails)

@@ -7,15 +7,7 @@ aboutText =
 
 ## In this release ...
 
-* Bug fix: Dock widths were not being restored.
-
-* Bug fix: It was not possible to see information for the final point.
-
-* Bug fix: Interpolate on whole track followed by Undo was losing a point.
-
-* Bug fix: Left dock width was too restricted.
-
-* Map is (should be) automatically zoomed to fit route when route loaded.
+* Dark colour theme echoes RGT colours.
 
 ** Big thanks to David Ogle **
 

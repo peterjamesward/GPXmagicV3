@@ -126,8 +126,8 @@ render3dView settings track =
                     road.endPoint
 
              else
-                [ Scene3d.point { radius = Pixels.pixels 1 }
-                    (Material.color Color.charcoal)
+                [ Scene3d.point { radius = Pixels.pixels 2 }
+                    (Material.color Color.black)
                     road.startPoint
                 , Scene3d.lineSegment (Material.color Color.lightCharcoal) <|
                     LineSegment3d.from road.startPoint road.endPoint

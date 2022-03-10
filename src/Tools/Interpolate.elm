@@ -243,7 +243,7 @@ view imperial wrapper options track =
             button
                 neatToolsBorder
                 { onPress = Just <| wrapper Apply
-                , label = text "Interpolate"
+                , label = text "Insert points"
                 }
 
         extent =

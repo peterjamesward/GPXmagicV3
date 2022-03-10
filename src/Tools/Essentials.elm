@@ -326,37 +326,37 @@ viewPointers imperial msgWrapper options track =
                     text <| positionDescription imperial something track.trackTree
 
                 Nothing ->
-                    text "---"
+                        text "Use Orange and Purple markers\nto select track for editing."
         ]
 
 
 viewUndoRedo : (Msg -> msg) -> TrackLoaded msg -> Element msg
 viewUndoRedo msgWrapper track =
     el [ centerX ] <|
-    wrappedRow
-        [ width fill, padding 20, spacing 10, centerX ]
-        [ case track.undos of
-            [] ->
-                Input.button neatToolsBorder
-                    { onPress = Nothing
-                    , label = text "Nothing to Undo"
-                    }
+        wrappedRow
+            [ width fill, padding 20, spacing 10, centerX ]
+            [ case track.undos of
+                [] ->
+                    Input.button neatToolsBorder
+                        { onPress = Nothing
+                        , label = text "Nothing to Undo"
+                        }
 
-            undo :: _ ->
-                Input.button (alignRight :: neatToolsBorder)
-                    { onPress = Just (msgWrapper Undo)
-                    , label = text <| "Undo " ++ Actions.interpretAction undo.action
-                    }
-        , case track.redos of
-            [] ->
-                Input.button neatToolsBorder
-                    { onPress = Nothing
-                    , label = text "Nothing to Redo"
-                    }
+                undo :: _ ->
+                    Input.button (alignRight :: neatToolsBorder)
+                        { onPress = Just (msgWrapper Undo)
+                        , label = text <| "Undo " ++ Actions.interpretAction undo.action
+                        }
+            , case track.redos of
+                [] ->
+                    Input.button neatToolsBorder
+                        { onPress = Nothing
+                        , label = text "Nothing to Redo"
+                        }
 
-            redo :: _ ->
-                Input.button (alignRight :: neatToolsBorder)
-                    { onPress = Just (msgWrapper Redo)
-                    , label = text <| "Redo " ++ Actions.interpretAction redo.action
-                    }
-        ]
+                redo :: _ ->
+                    Input.button (alignRight :: neatToolsBorder)
+                        { onPress = Just (msgWrapper Redo)
+                        , label = text <| "Redo " ++ Actions.interpretAction redo.action
+                        }
+            ]

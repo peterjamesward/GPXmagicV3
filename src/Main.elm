@@ -6,6 +6,7 @@ import Browser exposing (application)
 import Browser.Dom as Dom exposing (getViewport, getViewportOf)
 import Browser.Events
 import Browser.Navigation exposing (Key)
+import Color
 import Delay
 import Dict exposing (Dict)
 import Direction2d
@@ -1108,7 +1109,10 @@ globalOptions model =
         ]
     <|
         Input.button
-            [ Font.color FlatColors.FlatUIPalette.carrot ]
+            [ Font.color FlatColors.ChinesePalette.antiFlashWhite
+            , Background.color rgtPurple
+            , padding 2
+            ]
             { onPress = Just <| ToggleToolPopup
             , label = useIcon FeatherIcons.settings
             }
@@ -1128,7 +1132,7 @@ showOptionsMenu model =
             [ row (alignRight :: width fill :: subtleToolStyles)
                 [ colourBlock FlatColors.FlatUIPalette.silver
                 , colourBlock FlatColors.FlatUIPalette.asbestos
-                , colourBlock FlatColors.FlatUIPalette.wetAsphalt
+                , colourBlock rgtDark
                 ]
             , el (alignRight :: width fill :: subtleToolStyles) <|
                 Input.button [ alignRight ]

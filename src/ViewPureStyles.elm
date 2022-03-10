@@ -30,6 +30,14 @@ toolRowLayout =
     ]
 
 
+rgtPurple =
+    Element.rgb255 53 5 57
+
+
+rgtDark =
+    Element.rgb255 14 0 28
+
+
 edges =
     { left = 0, right = 0, top = 0, bottom = 0 }
 
@@ -247,7 +255,10 @@ infoButton onPress =
         { onPress = Just onPress
         , label = useIconWithSize 12 FeatherIcons.info
         }
-    --none
+
+
+
+--none
 
 
 wideSliderStylesWithWidth : Quantity Int Pixels -> List (Attribute msg)
