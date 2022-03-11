@@ -12,7 +12,7 @@ import PreviewData exposing (PreviewShape(..))
 import ToolTip exposing (buttonStylesWithTooltip)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showAngle, showDecimal2, showLongMeasure)
-import ViewPureStyles exposing (neatToolsBorder, noTrackMessage, sliderThumb, useIcon)
+import ViewPureStyles exposing (infoButton, neatToolsBorder, noTrackMessage, sliderThumb, useIcon)
 
 
 type GradientProblem
@@ -51,6 +51,8 @@ type Msg
     | SetThreshold Float
     | SetMode GradientProblem
     | SetResultMode ResultMode
+    | Autofix
+    | DisplayInfo String String
 
 
 findAbruptDirectionChanges : Options -> PeteTree -> Options
@@ -292,6 +294,12 @@ update msg options previewColour hasTrack =
                 Nothing ->
                     ( newOptions, [] )
 
+        Autofix ->
+            ( options, [] )
+
+        DisplayInfo id tag ->
+            ( options, [] )
+
 
 view : Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
 view imperial msgWrapper options isTrack =
@@ -378,6 +386,21 @@ view imperial msgWrapper options isTrack =
                         showLongMeasure imperial <|
                             DomainModel.distanceFromIndex point track
                 }
+
+        autofixButton =
+            if options.breaches == [] then
+                none
+
+            else
+                row [ spacing 4 ]
+                    [ none
+                    , infoButton (msgWrapper <| DisplayInfo "id" "tag")
+                    , Input.button
+                        (alignTop :: neatToolsBorder)
+                        { onPress = Just (msgWrapper Autofix)
+                        , label = text "Smooth these points"
+                        }
+                    ]
     in
     case isTrack of
         Just track ->
@@ -390,6 +413,7 @@ view imperial msgWrapper options isTrack =
                             "Threshold "
                                 ++ showDecimal2 options.threshold
                                 ++ "%"
+                    , el [ centerX ] autofixButton
                     , el [ centerX ] resultModeSelection
                     , case options.resultMode of
                         ResultNavigation ->

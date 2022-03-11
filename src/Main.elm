@@ -1017,7 +1017,7 @@ topLoadingBar model =
             ++ [ spacing 20
                , padding 10
                , width fill
-               , Border.widthEach { left = 0, right = 0, top = 0, bottom = 1 }
+               , Border.widthEach { left = 0, right = 0, top = 0, bottom = 2 }
                , Border.color FlatColors.ChinesePalette.twinkleBlue
                ]
         )

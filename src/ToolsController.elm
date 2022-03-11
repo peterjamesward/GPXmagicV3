@@ -722,17 +722,22 @@ update toolMsg isTrack msgWrapper options =
                 |> toolStateHasChanged toolType newState isTrack
 
         DirectionChanges msg ->
-            let
-                ( newOptions, actions ) =
-                    AbruptDirectionChanges.update
-                        msg
-                        options.directionChangeOptions
-                        (getColour ToolAbruptDirectionChanges options.tools)
-                        isTrack
-            in
-            ( { options | directionChangeOptions = newOptions }
-            , actions
-            )
+            case isTrack of
+                Just track ->
+                    let
+                        ( newOptions, actions ) =
+                            AbruptDirectionChanges.update
+                                msg
+                                options.directionChangeOptions
+                                (getColour ToolAbruptDirectionChanges options.tools)
+                                track
+                    in
+                    ( { options | directionChangeOptions = newOptions }
+                    , actions
+                    )
+
+                Nothing ->
+                    ( options, [] )
 
         ToolGradientChangeMsg msg ->
             let

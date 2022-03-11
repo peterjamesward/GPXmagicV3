@@ -17,7 +17,7 @@ import Quantity
 import ToolTip exposing (buttonStylesWithTooltip, myTooltip, tooltip)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showAngle, showDecimal0, showLongMeasure, showShortMeasure)
-import ViewPureStyles exposing (neatToolsBorder, noTrackMessage, sliderThumb, useIcon)
+import ViewPureStyles exposing (infoButton, neatToolsBorder, noTrackMessage, sliderThumb, useIcon)
 
 
 type alias Options =
@@ -59,6 +59,8 @@ type Msg
     | SetRadius Length.Length
     | SetMode DirectionChangeMode
     | SetResultMode ResultMode
+    | Autofix
+    | DisplayInfo String String
 
 
 findDirectionChanges : Options -> PeteTree -> Options
@@ -241,11 +243,11 @@ update :
     Msg
     -> Options
     -> Element.Color
-    -> Maybe (TrackLoaded msg)
+    -> TrackLoaded msg
     -> ( Options, List (ToolAction msg) )
-update msg options previewColour hasTrack =
-    case ( msg, hasTrack ) of
-        ( SetMode mode, Just track ) ->
+update msg options previewColour track =
+    case msg of
+        SetMode mode ->
             let
                 newOptions =
                     { options | mode = mode, breaches = [] }
@@ -255,14 +257,14 @@ update msg options previewColour hasTrack =
             in
             ( populatedOptions, actions populatedOptions previewColour track )
 
-        ( SetResultMode mode, Just track ) ->
+        SetResultMode mode ->
             let
                 newOptions =
                     { options | resultMode = mode }
             in
             ( newOptions, [] )
 
-        ( ViewNext, _ ) ->
+        ViewNext ->
             let
                 breachIndex =
                     min (List.length options.breaches - 1) (options.currentBreach + 1)
@@ -276,7 +278,7 @@ update msg options previewColour hasTrack =
             in
             ( newOptions, [ SetCurrent position ] )
 
-        ( ViewPrevious, _ ) ->
+        ViewPrevious ->
             let
                 breachIndex =
                     max 0 (options.currentBreach - 1)
@@ -290,10 +292,10 @@ update msg options previewColour hasTrack =
             in
             ( newOptions, [ SetCurrent position ] )
 
-        ( SetCurrentPosition position, _ ) ->
+        SetCurrentPosition position ->
             ( options, [ SetCurrent position ] )
 
-        ( SetThreshold angle, Just track ) ->
+        SetThreshold angle ->
             let
                 newOptions =
                     { options | threshold = angle }
@@ -305,7 +307,7 @@ update msg options previewColour hasTrack =
             , actions options previewColour track
             )
 
-        ( SetRadius radius, Just track ) ->
+        SetRadius radius ->
             let
                 newOptions =
                     { options | radius = radius }
@@ -317,7 +319,10 @@ update msg options previewColour hasTrack =
             , actions options previewColour track
             )
 
-        _ ->
+        Autofix ->
+            ( options, [] )
+
+        DisplayInfo id tag ->
             ( options, [] )
 
 
@@ -439,6 +444,21 @@ view imperial msgWrapper options isTrack =
                         showLongMeasure imperial <|
                             DomainModel.distanceFromIndex point track
                 }
+
+        autofixButton =
+            if options.breaches == [] then
+                none
+
+            else
+                row [ spacing 4 ]
+                    [ none
+                    , infoButton (msgWrapper <| DisplayInfo "id" "tag")
+                    , Input.button
+                        (alignTop :: neatToolsBorder)
+                        { onPress = Just (msgWrapper Autofix)
+                        , label = text "Smooth these points"
+                        }
+                    ]
     in
     case isTrack of
         Just track ->
@@ -451,6 +471,7 @@ view imperial msgWrapper options isTrack =
 
                       else
                         none
+                    , el [ centerX ] autofixButton
                     , el [ centerX ] resultModeSelection
                     , case options.resultMode of
                         ResultNavigation ->
