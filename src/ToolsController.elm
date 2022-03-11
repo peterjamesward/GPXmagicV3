@@ -602,7 +602,7 @@ splitAndJoinTool =
 intersectionsTool : ToolEntry
 intersectionsTool =
     { toolType = ToolIntersections
-    , toolId = "intersections"
+    , toolId = Tools.Intersections.toolID
     , label = "Intersections"
     , info = "and such-like"
     , video = Nothing
@@ -2377,4 +2377,5 @@ initTextDictionaries =
         , Tools.Essentials.textDictionary
         , Tools.Flythrough.textDictionary
         , Tools.Interpolate.textDictionary
+        , Tools.Intersections.textDictionary
         ]

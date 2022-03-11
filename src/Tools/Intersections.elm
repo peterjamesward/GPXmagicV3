@@ -1,7 +1,7 @@
 module Tools.Intersections exposing (..)
 
 import Actions exposing (ToolAction(..))
-import Dict
+import Dict exposing (Dict)
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), RoadSection, asRecord, skipCount)
 import Element exposing (..)
 import Element.Background as Background
@@ -42,6 +42,33 @@ type Msg
     | ViewPrevious
     | SetCurrentPosition Int
     | SetResultMode ResultMode
+    | DisplayInfo String String
+
+
+toolID : String
+toolID =
+    "intersections"
+
+
+textDictionary : ( String, Dict String String )
+textDictionary =
+    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
+    -- ToolsController can use these for info button and tool label.
+    ( toolID
+    , Dict.fromList
+        [ ( toolID, "Intersections" )
+        , ( "info", infoText )
+        ]
+    )
+
+
+infoText =
+    """This helps to find places where one road section crosses another, or where a piece
+of road is used more than once, either in the same or the opposite direction.
+
+This is gateway to thinking of a route as something that can be navigated differently,
+but that's where _Route builder_ comes to play.
+"""
 
 
 toolStateChange :
@@ -126,6 +153,9 @@ update msg options wrap =
 
         SetCurrentPosition position ->
             ( options, [ SetCurrent position ] )
+
+        DisplayInfo tool tag ->
+            ( options, [ Actions.DisplayInfo tool tag ] )
 
 
 view : Bool -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
