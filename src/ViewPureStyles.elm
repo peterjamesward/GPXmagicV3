@@ -38,6 +38,14 @@ rgtDark =
     Element.rgb255 14 0 28
 
 
+ukraineBlue =
+    rgb255 0 87 183
+
+
+ukraineYellow =
+    rgb255 255 221 0
+
+
 edges =
     { left = 0, right = 0, top = 0, bottom = 0 }
 

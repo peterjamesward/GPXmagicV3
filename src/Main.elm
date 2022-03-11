@@ -814,18 +814,30 @@ view model =
             )
           <|
             column [ width fill, height fill ]
-                [ topLoadingBar model
-                , html <|
-                    div
-                        [ style "width" "100%"
-                        , style "height" "100%"
-                        ]
-                        [ SplitPane.view
-                            rightDockConfig
-                            (notTheRightDockView model)
-                            (rightDockView model)
-                            model.rightDockLeftEdge
-                        ]
+                [ el
+                    [ width fill
+                    , Border.widthEach { edges | bottom = 6 }
+                    , Border.color ukraineBlue
+                    ]
+                  <|
+                    topLoadingBar model
+                , el
+                    [ width fill
+                    , Border.widthEach { edges | top = 6 }
+                    , Border.color ukraineYellow
+                    ]
+                  <|
+                    html <|
+                        div
+                            [ style "width" "100%"
+                            , style "height" "100%"
+                            ]
+                            [ SplitPane.view
+                                rightDockConfig
+                                (notTheRightDockView model)
+                                (rightDockView model)
+                                model.rightDockLeftEdge
+                            ]
                 ]
         ]
     }
@@ -1018,8 +1030,8 @@ topLoadingBar model =
             ++ [ spacing 20
                , padding 10
                , width fill
-               , Border.widthEach { left = 0, right = 0, top = 0, bottom = 2 }
-               , Border.color FlatColors.ChinesePalette.twinkleBlue
+               --, Border.widthEach { left = 0, right = 0, top = 0, bottom = 2 }
+               --, Border.color FlatColors.ChinesePalette.twinkleBlue
                ]
         )
         [ globalOptions model
