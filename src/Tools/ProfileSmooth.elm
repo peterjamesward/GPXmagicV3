@@ -21,9 +21,6 @@ type Msg
     | SetMaximumAscent Float
     | SetMaximumDescent Float
     | SetExtent ExtentOption
-    | SetProcessNoise Float
-    | SetMeasurementNoise Float
-    | SetDeltaSlope Bool
     | SetWindowSize Int
     | ChooseMethod SmoothMethod
     | SetRedistribution Bool
@@ -34,9 +31,6 @@ defaultOptions =
     { smoothMethod = MethodLimit
     , extent = ExtentIsRange
     , previewData = Nothing
-    , processNoise = 0.01
-    , measurementNoise = 3.0
-    , useDeltaSlope = False
     , maximumAscent = 15.0
     , maximumDescent = 15.0
     , windowSize = 2
@@ -142,35 +136,6 @@ update msg options previewColour track =
               ]
             )
 
-        SetProcessNoise noise ->
-            let
-                newOptions =
-                    { options | processNoise = noise }
-                        |> putPreviewInOptions track
-            in
-            ( newOptions
-            , actions newOptions previewColour track
-            )
-
-        SetMeasurementNoise noise ->
-            let
-                newOptions =
-                    { options | measurementNoise = noise }
-                        |> putPreviewInOptions track
-            in
-            ( newOptions
-            , actions newOptions previewColour track
-            )
-
-        SetDeltaSlope delta ->
-            let
-                newOptions =
-                    { options | useDeltaSlope = delta }
-                        |> putPreviewInOptions track
-            in
-            ( newOptions
-            , actions newOptions previewColour track
-            )
 
         SetWindowSize size ->
             let

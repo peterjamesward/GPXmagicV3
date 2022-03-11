@@ -8,6 +8,7 @@ aboutText =
 ## In this release ...
 
 * Dark colour theme echoes RGT colours.
+* Numerous small usability improvements.
 
 ** Big thanks to David Ogle **
 

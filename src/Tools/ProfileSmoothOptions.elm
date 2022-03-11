@@ -10,9 +10,6 @@ type alias Options =
     , smoothMethod : SmoothMethod
     , maximumAscent : Float
     , maximumDescent : Float
-    , processNoise : Float
-    , measurementNoise : Float
-    , useDeltaSlope : Bool
     , windowSize : Int
     , limitRedistributes : Bool
     }

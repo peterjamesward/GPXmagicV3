@@ -20,15 +20,9 @@ Smooth Profile to work over range.
 
 Bring back auto-fix on Bend and Gradient problems.
 
-Direction changes => Bend Problems (?)
-
 Write info text for all Tools.
 
 Provide info text capability on top bar and on view panes.
-
-Usability suggestions from DavidO.
-
-
 
 ## Graph Theory 
 
@@ -47,9 +41,10 @@ Usability suggestions from DavidO.
 - Extract all text for translation (Muriel)
 - Use localised number formatting everywhere (for French use of , and .)
 - Ability to point-smooth transitions over a range
-- Tools that require a range should say so when there isn't one! (David Ogle)
 
 --- _Cut off completely
+
+"Tip of the day" tool?
 
 ## SVG profile rendering
 
