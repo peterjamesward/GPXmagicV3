@@ -3,14 +3,15 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.0.10 (c8952897)
+# GPXmagic v3.0.11 (c8952897)
 
 ## In this release ...
 
-* Dark colour theme echoes RGT colours.
-* Numerous small usability improvements.
+* Numerous small usability improvements
+* Info text for some tools in "Tools summary" tool
+* Profile smoothers work over range if Purple marker is positioned
 
-** Big thanks to David Ogle **
+** Big thanks again to David Ogle **
 
 ## Coming up, not necessarily in order ...
 
