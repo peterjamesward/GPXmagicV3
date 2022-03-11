@@ -24,7 +24,6 @@ defaultOptions =
     { weighting = 1.0
     , applyToAltitude = True
     , applyToPosition = True
-    , extent = ExtentRange
     }
 
 
@@ -72,11 +71,11 @@ computeNewPoints : Options -> TrackLoaded msg -> List PreviewPoint
 computeNewPoints options track =
     let
         ( fromStart, fromEnd ) =
-            case options.extent of
-                ExtentRange ->
+            case track.markerPosition of
+                Just _ ->
                     TrackLoaded.getRangeFromMarkers track
 
-                ExtentTrack ->
+                Nothing ->
                     ( 0, 0 )
 
         distanceToPreview =
@@ -92,11 +91,11 @@ applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSour
 applyUsingOptions options track =
     let
         ( fromStart, fromEnd ) =
-            case options.extent of
-                ExtentRange ->
+            case track.markerPosition of
+                Just _ ->
                     TrackLoaded.getRangeFromMarkers track
 
-                ExtentTrack ->
+                Nothing ->
                     ( 0, 0 )
 
         newTree =
@@ -164,12 +163,9 @@ actions newOptions previewColour track =
                 , points = []
                 }
     in
-    case ( newOptions.extent, previewTree ) of
-        ( ExtentRange, Just tree ) ->
+    case previewTree of
+        Just tree ->
             [ normalPreview, profilePreview tree ]
-
-        ( ExtentTrack, Just tree ) ->
-            [ profilePreview tree ]
 
         _ ->
             [ HidePreview "centroid", HidePreview "centroidprofile" ]
@@ -204,13 +200,6 @@ update msg options previewColour hasTrack =
             in
             ( newOptions, actions newOptions previewColour track )
 
-        ( Just track, SetExtent extent ) ->
-            let
-                newOptions =
-                    { options | extent = extent }
-            in
-            ( newOptions, actions newOptions previewColour track )
-
         ( Just track, ApplyWithOptions ) ->
             ( options
             , [ Actions.CentroidAverageApplyWithOptions options
@@ -222,8 +211,8 @@ update msg options previewColour hasTrack =
             ( options, [] )
 
 
-view : (Msg -> msg) -> Options -> Element msg
-view wrap options =
+view : (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
+view wrap options track =
     let
         sliders =
             column [ centerX, width fill, spacing 5 ]
@@ -272,18 +261,12 @@ view wrap options =
                     }
 
         extent =
-            Input.radioRow
-                [ padding 10
-                , spacing 5
-                ]
-                { onChange = wrap << SetExtent
-                , selected = Just options.extent
-                , label = Input.labelHidden "Style"
-                , options =
-                    [ Input.option ExtentRange (text "Selected range\n(preview)")
-                    , Input.option ExtentTrack (text "Whole track\n(no preview)")
-                    ]
-                }
+            paragraph [] <|
+                if track.markerPosition == Nothing then
+                    [ text """Applies to whole track""" ]
+
+                else
+                    [ text "Applies between markers" ]
     in
     column
         [ spacing 5

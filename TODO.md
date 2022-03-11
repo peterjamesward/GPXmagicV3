@@ -16,7 +16,7 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 ## Random
 
-Bring back auto-fix on Bend and Gradient problems.
+Centroid smoother to use markers implicitly.
 
 Write info text for all Tools.
 

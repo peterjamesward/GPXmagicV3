@@ -1757,7 +1757,15 @@ viewToolByType msgWrapper entry isTrack options =
                 Tools.BezierSplines.view (msgWrapper << ToolBezierMsg) options.bezierSplineOptions
 
             ToolCentroidAverage ->
-                Tools.CentroidAverage.view (msgWrapper << ToolCentroidMsg) options.centroidAverageOptions
+                case isTrack of
+                    Just track ->
+                        Tools.CentroidAverage.view
+                            (msgWrapper << ToolCentroidMsg)
+                            options.centroidAverageOptions
+                            track
+
+                    Nothing ->
+                        noTrackMessage
 
             ToolCurveFormer ->
                 Tools.CurveFormer.view

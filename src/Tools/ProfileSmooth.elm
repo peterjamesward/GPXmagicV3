@@ -851,20 +851,6 @@ view options wrapper track =
                 , thumb = Input.defaultThumb
                 }
 
-        extent =
-            Input.radioRow
-                [ padding 10
-                , spacing 5
-                ]
-                { onChange = wrapper << SetExtent
-                , selected = Just options.extent
-                , label = Input.labelHidden "Style"
-                , options =
-                    [ Input.option ExtentIsRange (text "Selected range")
-                    , Input.option ExtentIsTrack (text "Whole track")
-                    ]
-                }
-
         limitGradientsMethod =
             column [ spacing 10, centerX ]
                 [ el [ centerX ] <| maxAscentSlider
