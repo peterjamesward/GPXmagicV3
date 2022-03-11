@@ -113,6 +113,7 @@ type Msg
     | ReplaceTrackOnMapAfterStyleChange
     | SvgMsg SvgPathExtractor.Msg
     | FlythroughTick Time.Posix
+    | HideInfoPopup
     | NoOp
 
 
@@ -669,6 +670,9 @@ Please check the file contains GPX data.""" }
                 Nothing ->
                     ( model, Cmd.none )
 
+        HideInfoPopup ->
+            ( { model | infoText = Nothing }, Cmd.none )
+
 
 adoptTrackInModel : TrackLoaded Msg -> Model -> Model
 adoptTrackInModel track model =
@@ -1079,13 +1083,20 @@ infoTextPopup :
     -> Dict String (Dict String String)
     -> Element Msg
 infoTextPopup maybeSomething dict =
+    let
+        close =
+            Input.button [ Font.color rgtPurple, alignRight ]
+                { onPress = Just HideInfoPopup
+                , label = useIconWithSize 20 FeatherIcons.x
+                }
+    in
     case maybeSomething of
         Just ( tool, tag ) ->
             case Dict.get tool dict of
                 Just innerDict ->
                     case Dict.get tag innerDict of
                         Just gotText ->
-                            paragraph
+                            column
                                 [ Background.color FlatColors.ChinesePalette.antiFlashWhite
                                 , padding 10
                                 , centerY
@@ -1095,8 +1106,10 @@ infoTextPopup maybeSomething dict =
                                 , Border.width 4
                                 , Border.rounded 10
                                 ]
-                            <|
-                                [ html <| Markdown.toHtml [] gotText ]
+                                [ close
+                                , paragraph []
+                                    [ html <| Markdown.toHtml [] gotText ]
+                                ]
 
                         Nothing ->
                             none
