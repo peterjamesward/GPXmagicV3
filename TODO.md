@@ -16,8 +16,6 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 ## Random
 
-Smooth Profile to work over range.
-
 Bring back auto-fix on Bend and Gradient problems.
 
 Write info text for all Tools.

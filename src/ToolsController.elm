@@ -1747,9 +1747,15 @@ viewToolByType msgWrapper entry isTrack options =
                     isTrack
 
             ToolProfileSmooth ->
-                Tools.ProfileSmooth.view
-                    options.profileSmoothSettings
-                    (msgWrapper << ToolProfileSmoothMsg)
+                case isTrack of
+                    Just track ->
+                        Tools.ProfileSmooth.view
+                            options.profileSmoothSettings
+                            (msgWrapper << ToolProfileSmoothMsg)
+                            track
+
+                    Nothing ->
+                        noTrackMessage
 
             ToolMoveScaleRotate ->
                 Tools.MoveScaleRotate.view
