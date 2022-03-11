@@ -467,7 +467,7 @@ outAndBackTool =
 simplifyTool : ToolEntry
 simplifyTool =
     { toolType = ToolSimplify
-    , toolId = "simplify"
+    , toolId = Tools.Simplify.toolID
     , label = "Simplify"
     , info = "Reduce noise"
     , video = Nothing
@@ -497,7 +497,7 @@ interpolateTool =
 profileSmoothTool : ToolEntry
 profileSmoothTool =
     { toolType = ToolProfileSmooth
-    , toolId = "profile"
+    , toolId = Tools.ProfileSmooth.toolID
     , label = "Smooth Profile"
     , info = "Smooth profile"
     , video = Nothing
@@ -587,7 +587,7 @@ startFinishTool =
 splitAndJoinTool : ToolEntry
 splitAndJoinTool =
     { toolType = ToolSplitAndJoin
-    , toolId = "split"
+    , toolId = Tools.SplitAndJoin.toolID
     , label = "Split & Join"
     , info = "Split & Join"
     , video = Nothing
@@ -945,17 +945,22 @@ update toolMsg isTrack msgWrapper options =
             )
 
         ToolSimplifyMsg msg ->
-            let
-                ( newOptions, actions ) =
-                    Tools.Simplify.update
-                        msg
-                        options.simplifySettings
-                        (getColour ToolSimplify options.tools)
-                        isTrack
-            in
-            ( { options | simplifySettings = newOptions }
-            , actions
-            )
+            case isTrack of
+                Just track ->
+                    let
+                        ( newOptions, actions ) =
+                            Tools.Simplify.update
+                                msg
+                                options.simplifySettings
+                                (getColour ToolSimplify options.tools)
+                                track
+                    in
+                    ( { options | simplifySettings = newOptions }
+                    , actions
+                    )
+
+                Nothing ->
+                    ( options, [] )
 
         ToolInterpolateMsg msg ->
             let
@@ -2387,4 +2392,7 @@ initTextDictionaries =
         , Tools.MoveScaleRotate.textDictionary
         , Tools.Nudge.textDictionary
         , Tools.OutAndBack.textDictionary
+        , Tools.ProfileSmooth.textDictionary
+        , Tools.Simplify.textDictionary
+        , Tools.SplitAndJoin.textDictionary
         ]

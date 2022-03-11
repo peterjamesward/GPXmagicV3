@@ -2,6 +2,7 @@ module Tools.SplitAndJoin exposing (..)
 
 import Actions exposing (ToolAction)
 import Delay
+import Dict exposing (Dict)
 import DomainModel exposing (GPXSource, PeteTree, indexFromDistance, skipCount, trueLength)
 import Element exposing (..)
 import Element.Background as Background
@@ -32,6 +33,39 @@ type Msg
     | FileSelected File
     | FileLoaded String
     | ToggleAutofix Bool
+    | DisplayInfo String String
+
+
+toolID : String
+toolID =
+    "split/join"
+
+
+textDictionary : ( String, Dict String String )
+textDictionary =
+    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
+    -- ToolsController can use these for info button and tool label.
+    ( toolID
+    , Dict.fromList
+        [ ( toolID, "Split & Join" )
+        , ( "info", infoText )
+        ]
+    )
+
+
+infoText =
+    """Got an excessively long route? Why not ride in it sections?
+
+The _Split_ option here divides the track into roughly equal sections to achieve a set maximum length.
+(There's a slight variance due to track point spacing.) Optionally, add the RGT start and end pens
+at the joins to make sure you do the whole original ride.
+
+Conversely, if you have two GPX files that are in real-life nearby, you can append a second route
+to your current route. **Note** this will not attempt to match locations, directions or altitude.
+
+Remember, you can move any route to any place in the world with _Move & Scale_, so can can
+use this to Everest your fave climbs.
+"""
 
 
 defaultOptions : Options
@@ -91,6 +125,9 @@ update msg settings mTrack wrap =
 
                 [] ->
                     ( settings, [] )
+
+        DisplayInfo tool tag ->
+            ( settings, [ Actions.DisplayInfo tool tag ] )
 
 
 writeOneSection : List ( Int, Float, Float ) -> Options -> TrackLoaded msg -> Cmd msg

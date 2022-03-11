@@ -1,6 +1,6 @@
 module Tools.OutAndBack exposing (..)
 
-import Actions exposing ( ToolAction(..))
+import Actions exposing (ToolAction(..))
 import Arc3d exposing (Arc3d)
 import Axis3d
 import Dict exposing (Dict)
