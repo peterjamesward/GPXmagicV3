@@ -3,6 +3,7 @@ module Tools.OutAndBack exposing (..)
 import Actions exposing ( ToolAction(..))
 import Arc3d exposing (Arc3d)
 import Axis3d
+import Dict exposing (Dict)
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
@@ -34,6 +35,38 @@ type alias Point =
 type Msg
     = ApplyOutAndBack
     | SetOffset Float
+    | DisplayInfo String String
+
+
+toolID : String
+toolID =
+    "bytheway"
+
+
+textDictionary : ( String, Dict String String )
+textDictionary =
+    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
+    -- ToolsController can use these for info button and tool label.
+    ( toolID
+    , Dict.fromList
+        [ ( toolID, "Out and Back" )
+        , ( "info", infoText )
+        ]
+    )
+
+
+infoText =
+    """Also known as the **Bytheway special**, this tool makes it a snap to turn any route into
+an "Out and Back" by reversing direction at the end and returning to the start.
+
+If you want to have separate tracks, use the _Offset_ slider to move the tracks to the left
+or right of the centre-line (the original track). If you prefer no offset, you risk head-on
+collisions with other riders; your choice. Note that, as with _Nudge_, beware of closely-spaced
+points and sharp bends.
+
+The return leg is 1cm lower than the outbound leg to avoid surface flickering in RGT when you
+have no offset.
+"""
 
 
 computeNewPoints : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )

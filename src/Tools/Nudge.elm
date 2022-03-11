@@ -1,6 +1,7 @@
 module Tools.Nudge exposing (..)
 
 import Actions exposing (ToolAction(..))
+import Dict exposing (Dict)
 import Direction2d exposing (Direction2d)
 import Direction3d
 import DomainModel exposing (..)
@@ -29,6 +30,38 @@ type Msg
     | ZeroNudgeFactors
     | ApplyWithOptions
     | NudgeButton (Quantity Float Meters)
+    | DisplayInfo String String
+
+
+toolID : String
+toolID =
+    "nudge"
+
+
+textDictionary : ( String, Dict String String )
+textDictionary =
+    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
+    -- ToolsController can use these for info button and tool label.
+    ( toolID
+    , Dict.fromList
+        [ ( toolID, "Nudge" )
+        , ( "info", infoText )
+        ]
+    )
+
+
+infoText =
+    """Sometimes all it takes is a little _Nudge_.
+    
+A track point, or a run of points, is slightly out of line from where you want it (them).
+With Nudge, you can move a single point, or range of points, sideways and up or down.
+
+What "sideways" means is a but subtle with bends. Nudge moves along what a carpenter would 
+recognise as the mitre line, effectively half of the turn. **Be aware** than closely spaced
+points nudged together can overlap on the inside of a bend. GPXmagic will not stop this.
+
+The optional _Fade_ slider lets you gradually blend the Nudged section with the neighbouring track.
+"""
 
 
 defaultOptions : Options
@@ -245,50 +278,50 @@ update :
     Msg
     -> Options
     -> Element.Color
-    -> Maybe (TrackLoaded msg)
+    -> TrackLoaded msg
     -> ( Options, List (ToolAction msg) )
-update msg options previewColour hasTrack =
-    case ( hasTrack, msg ) of
-        ( Just track, SetHorizontalNudgeFactor value ) ->
+update msg options previewColour track =
+    case msg of
+        SetHorizontalNudgeFactor value ->
             let
                 newOptions =
                     { options | horizontal = value }
             in
             ( newOptions, previewActions newOptions previewColour track )
 
-        ( Just track, SetVerticalNudgeFactor value ) ->
+        SetVerticalNudgeFactor value ->
             let
                 newOptions =
                     { options | vertical = value }
             in
             ( newOptions, previewActions newOptions previewColour track )
 
-        ( Just track, NudgeButton value ) ->
+        NudgeButton value ->
             let
                 newOptions =
                     { options | vertical = options.vertical |> Quantity.plus value }
             in
             ( newOptions, previewActions newOptions previewColour track )
 
-        ( Just track, SetFadeExtent value ) ->
+        SetFadeExtent value ->
             let
                 newOptions =
                     { options | fadeExtent = value }
             in
             ( newOptions, previewActions newOptions previewColour track )
 
-        ( Just track, ZeroNudgeFactors ) ->
+        ZeroNudgeFactors ->
             ( defaultOptions, [ HidePreview "nudge" ] )
 
-        ( Just track, ApplyWithOptions ) ->
+        ApplyWithOptions ->
             ( options
             , [ Actions.NudgeApplyWithOptions options
               , TrackHasChanged
               ]
             )
 
-        _ ->
-            ( options, [] )
+        DisplayInfo tool tag ->
+            ( options, [ Actions.DisplayInfo tool tag ] )
 
 
 view : Bool -> Options -> (Msg -> msg) -> Maybe (TrackLoaded msg) -> Element msg

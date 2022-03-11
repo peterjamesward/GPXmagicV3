@@ -437,7 +437,7 @@ bendSmootherTool =
 nudgeTool : ToolEntry
 nudgeTool =
     { toolType = ToolNudge
-    , toolId = "nudge"
+    , toolId = Tools.Nudge.toolID
     , label = "Nudge"
     , info = "Make it smoother"
     , video = Nothing
@@ -452,7 +452,7 @@ nudgeTool =
 outAndBackTool : ToolEntry
 outAndBackTool =
     { toolType = ToolOutAndBack
-    , toolId = "outandback"
+    , toolId = Tools.OutAndBack.toolID
     , label = "Out and Back"
     , info = "ET go home"
     , video = Nothing
@@ -886,17 +886,22 @@ update toolMsg isTrack msgWrapper options =
                     ( options, [] )
 
         ToolNudgeMsg msg ->
-            let
-                ( newOptions, actions ) =
-                    Tools.Nudge.update
-                        msg
-                        options.nudgeOptions
-                        (getColour ToolNudge options.tools)
-                        isTrack
-            in
-            ( { options | nudgeOptions = newOptions }
-            , actions
-            )
+            case isTrack of
+                Just track ->
+                    let
+                        ( newOptions, actions ) =
+                            Tools.Nudge.update
+                                msg
+                                options.nudgeOptions
+                                (getColour ToolNudge options.tools)
+                                track
+                    in
+                    ( { options | nudgeOptions = newOptions }
+                    , actions
+                    )
+
+                Nothing ->
+                    ( options, [] )
 
         ToggleImperial ->
             let
@@ -2380,4 +2385,6 @@ initTextDictionaries =
         , Tools.Intersections.textDictionary
         , Tools.MoveAndStretch.textDictionary
         , Tools.MoveScaleRotate.textDictionary
+        , Tools.Nudge.textDictionary
+        , Tools.OutAndBack.textDictionary
         ]
