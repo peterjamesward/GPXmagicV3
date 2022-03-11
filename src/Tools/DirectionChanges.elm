@@ -460,8 +460,9 @@ view imperial msgWrapper options isTrack =
                             wrappedRow
                                 [ scrollbarY
                                 , height <|
-                                    maximum 300 <|
-                                        px (List.length options.breaches // 3 * 24)
+                                    px <|
+                                        clamp 24 300 <|
+                                            (List.length options.breaches // 3 * 24)
                                 , spacingXY 6 6
                                 , alignTop
                                 ]
