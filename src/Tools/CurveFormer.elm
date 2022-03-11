@@ -80,6 +80,48 @@ type Msg
     | SetSpacing Float
     | ToggleUsePullRadius Bool
     | ApplyWithOptions
+    | DisplayInfo String String
+
+
+toolID : String
+toolID =
+    "radius"
+
+
+textDictionary : ( String, Dict String String )
+textDictionary =
+    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
+    -- ToolsController can use these for info button and tool label.
+    ( toolID
+    , Dict.fromList
+        [ ( toolID, "Radiused bends" )
+        , ( "info", infoText )
+        ]
+    )
+
+
+infoText =
+    """Switchback? Roundabout? What you need is to construct your own bend with a
+desired radius. This tools lets you do that, plus nice entry and exit lines.
+
+I recommend using Plan view, so that you can see what you're doing with the tool.
+When you drag on the black circle control, you see a circle moving on the Plan view.
+Adjust the radius with the top slider and imagine you're "pushing" this circle into
+the bend to shape it.
+
+The _Joining radius_ slider changes the radius of the entry and exit lines.
+
+Generally this tool increases the radius, but some points may need to be pulled in,
+so use "Include outliers" to do that. This will reveal yet another slider.
+
+If you have sections of track close together, the software can't always tell where you
+intend the bend to be; in these cases, it may help to place the Orange and Purple markers
+either side of the bend, meaning "this section of track contains the bend."
+
+Finally, you can either use a constant gradient over the new bend, or you can ask it
+to respect the existing altitudes, inasmuch as that is possible.
+"""
+
 
 
 applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource, ( Int, Int ) )

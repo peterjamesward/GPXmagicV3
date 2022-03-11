@@ -1,6 +1,7 @@
 module Tools.DisplaySettings exposing (..)
 
 import Actions exposing (ToolAction(..))
+import Dict exposing (Dict)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (button)
@@ -23,6 +24,32 @@ type Msg
     | SetCurtainStyle CurtainStyle
     | SetCentreLine Bool
     | SetGroundPlane Bool
+    | DisplayInfo String String
+
+
+toolID : String
+toolID =
+    "display"
+
+
+textDictionary : ( String, Dict String String )
+textDictionary =
+    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
+    -- ToolsController can use these for info button and tool label.
+    ( toolID
+    , Dict.fromList
+        [ ( toolID, "Display settings" )
+        , ( "info", infoText )
+        ]
+    )
+
+
+infoText =
+    """Change how the road appears in the 3D views. You can select to see the road surface,
+a dropped "curtain" either plain or shaded to show gradient, There's also a centre line
+for the road matching the gradient colour. For good measure, you can turn off the green
+"ground" plane and see the route from below.
+"""
 
 
 restoreSettings : D.Value -> Options -> Options
@@ -67,6 +94,9 @@ update msg options =
                     { options | curtainStyle = curtainStyle }
             in
             ( newOptions, actions newOptions )
+
+        DisplayInfo tool tag ->
+            ( options, [ Actions.DisplayInfo tool tag ] )
 
 
 view : (Msg -> msg) -> Options -> Element msg

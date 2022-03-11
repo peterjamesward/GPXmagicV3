@@ -200,6 +200,30 @@ type ToolMsg
     | ToolGraphMsg Tools.Graph.Msg
 
 
+toolID : String
+toolID =
+    "tools"
+
+
+textDictionary : ( String, Dict String String )
+textDictionary =
+    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
+    -- ToolsController can use these for info button and tool label.
+    ( toolID
+    , Dict.fromList
+        [ ( toolID, "tools" )
+        , ( "info", infoText )
+        ]
+    )
+
+
+infoText =
+    """Quickly place tools on the left or right of the display, or hide them completely.
+
+Also, access a quick description of what the tool does and how (and when) to use it.
+"""
+
+
 type alias ToolEntry =
     { toolType : ToolType
     , toolId : String
@@ -249,7 +273,7 @@ toolSettings : ToolEntry
 toolSettings =
     { toolType = ToolSettings
     , toolId = "tools"
-    , label = "Show/Hide tools"
+    , label = "Tools summary"
     , info = "Here is some useful information"
     , video = Nothing
     , state = SettingsClosed
@@ -278,7 +302,7 @@ trackInfoBox =
 displaySettingsTool : ToolEntry
 displaySettingsTool =
     { toolType = ToolDisplaySettings
-    , toolId = "display"
+    , toolId = Tools.DisplaySettings.toolID
     , label = "Display"
     , info = "How it looks"
     , video = Nothing
@@ -338,7 +362,7 @@ essentialsTool =
 deleteTool : ToolEntry
 deleteTool =
     { toolType = ToolDeletePoints
-    , toolId = "delete"
+    , toolId = DeletePoints.toolID
     , label = "Delete points"
     , info = "Away with ye"
     , video = Nothing
@@ -383,7 +407,7 @@ centroidAverageTool =
 curveFormerTool : ToolEntry
 curveFormerTool =
     { toolType = ToolCurveFormer
-    , toolId = "radiused"
+    , toolId = Tools.CurveFormer.toolID
     , label = "Radiused bends"
     , info = "Make it smoother"
     , video = Nothing
@@ -2338,4 +2362,8 @@ initTextDictionaries =
         , Tools.BendSmoother.textDictionary
         , Tools.BezierSplines.textDictionary
         , Tools.CentroidAverage.textDictionary
+        , Tools.CurveFormer.textDictionary
+        , DeletePoints.textDictionary
+        , Tools.DisplaySettings.textDictionary
+        , textDictionary
         ]

@@ -829,9 +829,7 @@ view model =
                   <|
                     html <|
                         div
-                            [ style "width" "100%"
-                            , style "height" "100%"
-                            ]
+                            [ style "width" "100%", style "height" "100%" ]
                             [ SplitPane.view
                                 rightDockConfig
                                 (notTheRightDockView model)
@@ -1030,6 +1028,7 @@ topLoadingBar model =
             ++ [ spacing 20
                , padding 10
                , width fill
+
                --, Border.widthEach { left = 0, right = 0, top = 0, bottom = 2 }
                --, Border.color FlatColors.ChinesePalette.twinkleBlue
                ]
