@@ -2,6 +2,7 @@ module Tools.BezierSplines exposing (..)
 
 import Actions exposing (ToolAction(..))
 import BezierSplines
+import Dict exposing (Dict)
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
@@ -31,6 +32,38 @@ type Msg
     | BezierApplyWithOptions
     | SetBezierStyle BezierStyle
     | SetExtent ExtentOption
+    | DisplayInfo String String
+
+
+toolID : String
+toolID =
+    "splines"
+
+
+textDictionary : ( String, Dict String String )
+textDictionary =
+    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
+    -- ToolsController can use these for info button and tool label.
+    ( toolID
+    , Dict.fromList
+        [ ( toolID, "Smooth with splines" )
+        , ( "info", infoText )
+        ]
+    )
+
+
+infoText =
+    """Splines are a common way to engineer a smooth curve. They work in three dimensions
+    and so can help with gradient and direction changes.
+
+We have two variants:
+
+- Passing through existing points is useful when you have relatively few points and
+you want them not to move, but need more points to define a curve.
+
+- Using existing points as a guide if useful when you have many points but don't
+actually want or need to pass through them.
+"""
 
 
 computeNewPoints : Options -> TrackLoaded msg -> List PreviewPoint

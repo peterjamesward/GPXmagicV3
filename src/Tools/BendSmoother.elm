@@ -4,6 +4,7 @@ import Actions exposing (ToolAction(..))
 import Angle
 import Arc2d exposing (Arc2d)
 import Arc3d exposing (Arc3d)
+import Dict exposing (Dict)
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, endPoint, skipCount, startPoint)
 import Element exposing (..)
 import Element.Background as Background
@@ -49,6 +50,36 @@ type Msg
     | SetMode SmoothMode
     | SetSegments Int
     | ApplySmoothPoint
+    | DisplayInfo String String
+
+
+toolID : String
+toolID =
+    "arcs"
+
+
+textDictionary : ( String, Dict String String )
+textDictionary =
+    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
+    -- ToolsController can use these for info button and tool label.
+    ( toolID
+    , Dict.fromList
+        [ ( toolID, "Smooth with arcs" )
+        , ( "info", infoText )
+        ]
+    )
+
+
+infoText =
+    """Find a circular arc to replace an existing bend, by moving the Orange and
+Purple markers to find an acceptable solution. 
+
+Set the spacing to control the fineness of the replacement bend.
+
+This will also enforce a uniform gradient along the new arc.
+
+_Radiused bends_ offers a slightly different approach.
+"""
 
 
 computeNewPoints : Options -> TrackLoaded msg -> List PreviewPoint
@@ -320,11 +351,11 @@ update :
     Msg
     -> Options
     -> Element.Color
-    -> Maybe (TrackLoaded msg)
+    -> TrackLoaded msg
     -> ( Options, List (ToolAction msg) )
-update msg options previewColour hasTrack =
-    case ( hasTrack, msg ) of
-        ( Just track, SetBendTrackPointSpacing spacing ) ->
+update msg options previewColour track =
+    case msg of
+        SetBendTrackPointSpacing spacing ->
             let
                 newOptions =
                     { options | bendTrackPointSpacing = spacing }
@@ -332,36 +363,36 @@ update msg options previewColour hasTrack =
             in
             ( newOptions, previewActions newOptions previewColour track )
 
-        ( Just track, ApplySmoothBend ) ->
+        ApplySmoothBend ->
             ( options
             , [ Actions.BendSmootherApplyWithOptions options
               , TrackHasChanged
               ]
             )
 
-        ( Just track, SetMode mode ) ->
+        SetMode mode ->
             let
                 newOptions =
                     { options | mode = mode }
             in
             ( newOptions, [] )
 
-        ( Just track, SetSegments segments ) ->
+        SetSegments segments ->
             let
                 newOptions =
                     { options | segments = segments }
             in
             ( newOptions, [] )
 
-        ( Just track, ApplySmoothPoint ) ->
+        ApplySmoothPoint ->
             ( options
             , [ Actions.BendSmootherApplyWithOptions options
               , TrackHasChanged
               ]
             )
 
-        _ ->
-            ( options, [] )
+        DisplayInfo tool tag ->
+            ( options, [ Actions.DisplayInfo tool tag ] )
 
 
 viewBendControls : Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg

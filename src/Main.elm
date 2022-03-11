@@ -1080,6 +1080,9 @@ infoTextPopup maybeSomething dict =
                                 , centerY
                                 , centerX
                                 , width <| Element.px 400
+                                , Border.color rgtPurple
+                                , Border.width 4
+                                , Border.rounded 10
                                 ]
                             <|
                                 [ html <| Markdown.toHtml [] gotText ]

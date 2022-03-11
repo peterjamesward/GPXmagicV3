@@ -31,7 +31,7 @@ toolRowLayout =
 
 
 rgtPurple =
-    Element.rgb255 53 5 57
+    Element.rgb255 237 0 73
 
 
 rgtDark =

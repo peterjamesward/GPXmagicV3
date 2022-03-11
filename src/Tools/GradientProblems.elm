@@ -75,9 +75,12 @@ textDictionary =
 
 
 infoText =
-    """Find points where the gradient changes significantly, or is a noticeablysteep ascent or descent.
+    """Find points where the gradient changes significantly, or is a noticeably
+    steep ascent or descent.
 
-From here, you can jump directly to the sections of track and use other tools to fix the problems.
+From here, you can jump directly to the sections of track.
+You can use a quick-fix here to simply round off the points or (usually better),
+use _Profile Smoother_, _Smooth with Splines_, _Simplify_ or _Nudge_.
 """
 
 
@@ -86,7 +89,7 @@ autofixText =
 tool to change the number of points that are added to smooth each point.
 
 You should use this only for trivial fixes; there are better tools for smoothing
-serious issues. This tool can even make things worse."""
+serious issues."""
 
 
 findAbruptDirectionChanges : Options -> PeteTree -> Options

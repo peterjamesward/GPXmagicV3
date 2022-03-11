@@ -202,6 +202,7 @@ type ToolMsg
 
 type alias ToolEntry =
     { toolType : ToolType
+    , toolId : String
     , label : String
     , info : String
     , video : Maybe String
@@ -215,7 +216,6 @@ type alias ToolEntry =
 
 defaultTools : List ToolEntry
 defaultTools =
-    -- One list or five, or six? Try one. Arguably a Dict but POITROAE.
     [ toolSettings
     , essentialsTool
     , trackInfoBox
@@ -248,6 +248,7 @@ defaultTools =
 toolSettings : ToolEntry
 toolSettings =
     { toolType = ToolSettings
+    , toolId = "tools"
     , label = "Show/Hide tools"
     , info = "Here is some useful information"
     , video = Nothing
@@ -262,6 +263,7 @@ toolSettings =
 trackInfoBox : ToolEntry
 trackInfoBox =
     { toolType = ToolTrackInfo
+    , toolId = "info"
     , label = "Information"
     , info = "Here is some useful information"
     , video = Nothing
@@ -276,6 +278,7 @@ trackInfoBox =
 displaySettingsTool : ToolEntry
 displaySettingsTool =
     { toolType = ToolDisplaySettings
+    , toolId = "display"
     , label = "Display"
     , info = "How it looks"
     , video = Nothing
@@ -290,6 +293,7 @@ displaySettingsTool =
 directionChangeTool : ToolEntry
 directionChangeTool =
     { toolType = ToolAbruptDirectionChanges
+    , toolId = DirectionChanges.toolID
     , label = "Bend problems"
     , info = "These may need smoothing"
     , video = Nothing
@@ -304,6 +308,7 @@ directionChangeTool =
 gradientChangeTool : ToolEntry
 gradientChangeTool =
     { toolType = ToolGradientProblems
+    , toolId = Tools.GradientProblems.toolID
     , label = "Gradient problems"
     , info = "These may need smoothing"
     , video = Nothing
@@ -318,6 +323,7 @@ gradientChangeTool =
 essentialsTool : ToolEntry
 essentialsTool =
     { toolType = ToolEssentials
+    , toolId = "essentials"
     , label = "Essentials"
     , info = "Use to bracket edits"
     , video = Nothing
@@ -332,6 +338,7 @@ essentialsTool =
 deleteTool : ToolEntry
 deleteTool =
     { toolType = ToolDeletePoints
+    , toolId = "delete"
     , label = "Delete points"
     , info = "Away with ye"
     , video = Nothing
@@ -346,6 +353,7 @@ deleteTool =
 bezierSplinesTool : ToolEntry
 bezierSplinesTool =
     { toolType = ToolBezierSplines
+    , toolId = Tools.BezierSplines.toolID
     , label = "Smooth with splines"
     , info = "Make it smoother"
     , video = Nothing
@@ -360,6 +368,7 @@ bezierSplinesTool =
 centroidAverageTool : ToolEntry
 centroidAverageTool =
     { toolType = ToolCentroidAverage
+    , toolId = Tools.CentroidAverage.toolID
     , label = "Smooth with 3d average"
     , info = "Make it smoother"
     , video = Nothing
@@ -374,6 +383,7 @@ centroidAverageTool =
 curveFormerTool : ToolEntry
 curveFormerTool =
     { toolType = ToolCurveFormer
+    , toolId = "radiused"
     , label = "Radiused bends"
     , info = "Make it smoother"
     , video = Nothing
@@ -388,6 +398,7 @@ curveFormerTool =
 bendSmootherTool : ToolEntry
 bendSmootherTool =
     { toolType = ToolBendSmoother
+    , toolId = Tools.BendSmoother.toolID
     , label = "Smooth with arcs"
     , info = "Make it smoother"
     , video = Nothing
@@ -402,6 +413,7 @@ bendSmootherTool =
 nudgeTool : ToolEntry
 nudgeTool =
     { toolType = ToolNudge
+    , toolId = "nudge"
     , label = "Nudge"
     , info = "Make it smoother"
     , video = Nothing
@@ -416,6 +428,7 @@ nudgeTool =
 outAndBackTool : ToolEntry
 outAndBackTool =
     { toolType = ToolOutAndBack
+    , toolId = "outandback"
     , label = "Out and Back"
     , info = "ET go home"
     , video = Nothing
@@ -430,6 +443,7 @@ outAndBackTool =
 simplifyTool : ToolEntry
 simplifyTool =
     { toolType = ToolSimplify
+    , toolId = "simplify"
     , label = "Simplify"
     , info = "Reduce noise"
     , video = Nothing
@@ -444,6 +458,7 @@ simplifyTool =
 interpolateTool : ToolEntry
 interpolateTool =
     { toolType = ToolInterpolate
+    , toolId = "interpolate"
     , label = "Insert points"
     , info = "Add points"
     , video = Nothing
@@ -458,6 +473,7 @@ interpolateTool =
 profileSmoothTool : ToolEntry
 profileSmoothTool =
     { toolType = ToolProfileSmooth
+    , toolId = "profile"
     , label = "Smooth Profile"
     , info = "Smooth profile"
     , video = Nothing
@@ -472,6 +488,7 @@ profileSmoothTool =
 moveScaleRotateTool : ToolEntry
 moveScaleRotateTool =
     { toolType = ToolMoveScaleRotate
+    , toolId = "affine"
     , label = "Move & Scale"
     , info = "Lift & Shifts"
     , video = Nothing
@@ -486,6 +503,7 @@ moveScaleRotateTool =
 flythroughTool : ToolEntry
 flythroughTool =
     { toolType = ToolFlythrough
+    , toolId = "flythrough"
     , label = "Fly-through"
     , info = "Fly-through"
     , video = Nothing
@@ -500,6 +518,7 @@ flythroughTool =
 stravaTool : ToolEntry
 stravaTool =
     { toolType = ToolStrava
+    , toolId = "strava"
     , label = "Strava"
     , info = "Strava"
     , video = Nothing
@@ -514,6 +533,7 @@ stravaTool =
 moveAndStretchTool : ToolEntry
 moveAndStretchTool =
     { toolType = ToolMoveAndStretch
+    , toolId = "move"
     , label = "Move, Stretch"
     , info = "Move & Stretch"
     , video = Nothing
@@ -528,6 +548,7 @@ moveAndStretchTool =
 startFinishTool : ToolEntry
 startFinishTool =
     { toolType = ToolStartFinish
+    , toolId = "loop"
     , label = "Start/Finish"
     , info = "Start/Finish"
     , video = Nothing
@@ -542,6 +563,7 @@ startFinishTool =
 splitAndJoinTool : ToolEntry
 splitAndJoinTool =
     { toolType = ToolSplitAndJoin
+    , toolId = "split"
     , label = "Split & Join"
     , info = "Split & Join"
     , video = Nothing
@@ -556,6 +578,7 @@ splitAndJoinTool =
 intersectionsTool : ToolEntry
 intersectionsTool =
     { toolType = ToolIntersections
+    , toolId = "intersections"
     , label = "Intersections"
     , info = "and such-like"
     , video = Nothing
@@ -570,6 +593,7 @@ intersectionsTool =
 straightenTool : ToolEntry
 straightenTool =
     { toolType = ToolStraighten
+    , toolId = "straighten"
     , label = "Straighten"
     , info = "and such-like"
     , video = Nothing
@@ -584,6 +608,7 @@ straightenTool =
 graphTool : ToolEntry
 graphTool =
     { toolType = ToolGraph
+    , toolId = Tools.Graph.toolID
     , label = "Route maker"
     , info = "and such-like"
     , video = Nothing
@@ -819,17 +844,22 @@ update toolMsg isTrack msgWrapper options =
             )
 
         ToolBendSmootherMsg msg ->
-            let
-                ( newOptions, actions ) =
-                    Tools.BendSmoother.update
-                        msg
-                        options.bendSmootherOptions
-                        (getColour ToolBendSmoother options.tools)
-                        isTrack
-            in
-            ( { options | bendSmootherOptions = newOptions }
-            , actions
-            )
+            case isTrack of
+                Just track ->
+                    let
+                        ( newOptions, actions ) =
+                            Tools.BendSmoother.update
+                                msg
+                                options.bendSmootherOptions
+                                (getColour ToolBendSmoother options.tools)
+                                track
+                    in
+                    ( { options | bendSmootherOptions = newOptions }
+                    , actions
+                    )
+
+                Nothing ->
+                    ( options, [] )
 
         ToolNudgeMsg msg ->
             let
@@ -1490,7 +1520,7 @@ viewToolSettings options wrapper =
                 , label =
                     Input.labelRight [ paddingXY 10 0 ] <|
                         row [ spacing 4 ]
-                            [ infoButton (wrapper <| DisplayInfo "dummy" "info")
+                            [ infoButton (wrapper <| DisplayInfo tool.toolId "info")
                             , text tool.label
                             ]
                 , options = fullOptionList tool
@@ -2305,4 +2335,7 @@ initTextDictionaries =
         [ Tools.Graph.textDictionary
         , DirectionChanges.textDictionary
         , Tools.GradientProblems.textDictionary
+        , Tools.BendSmoother.textDictionary
+        , Tools.BezierSplines.textDictionary
+        , Tools.CentroidAverage.textDictionary
         ]
