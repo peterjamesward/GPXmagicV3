@@ -8,7 +8,7 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 > Debuggers shows messages arriving, not obvious why they should not be processed.
 > Can't save file when this happens, so rather poor show.
 
-**BUG**: Orange position not displayed in Essentials box on track load.
+**BUG**: Undo single point smooth removes a point at track start.
 
 --
 

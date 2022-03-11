@@ -7,7 +7,6 @@ module Tools.Graph exposing (..)
 import Actions
 import BoundingBox3d
 import Dict exposing (Dict)
-import DomainModel
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as I
@@ -247,8 +246,8 @@ update msg options track wrapper =
         ConvertFromGraph ->
             ( options, [] )
 
-        DisplayInfo tool text ->
-            ( options, [ Actions.DisplayInfo tool text ] )
+        DisplayInfo tool tag ->
+            ( options, [ Actions.DisplayInfo tool tag ] )
 
 
 buildGraph : Options -> TrackLoaded msg -> Graph

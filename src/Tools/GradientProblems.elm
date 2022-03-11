@@ -1,6 +1,7 @@
 module Tools.GradientProblems exposing (..)
 
 import Actions exposing (ToolAction(..))
+import Dict exposing (Dict)
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), RoadSection, asRecord, skipCount)
 import Element exposing (..)
 import Element.Background as Background
@@ -53,6 +54,39 @@ type Msg
     | SetResultMode ResultMode
     | Autofix
     | DisplayInfo String String
+
+
+toolID : String
+toolID =
+    "gradients"
+
+
+textDictionary : ( String, Dict String String )
+textDictionary =
+    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
+    -- ToolsController can use these for info button and tool label.
+    ( toolID
+    , Dict.fromList
+        [ ( toolID, "Gradient problems" )
+        , ( "info", infoText )
+        , ( "autofix", autofixText )
+        ]
+    )
+
+
+infoText =
+    """Find points where the gradient changes significantly, or is a noticeablysteep ascent or descent.
+
+From here, you can jump directly to the sections of track and use other tools to fix the problems.
+"""
+
+
+autofixText =
+    """Smooth each of these individually using the single point _Smooth with arcs_. Use that
+tool to change the number of points that are added to smooth each point.
+
+You should use this only for trivial fixes; there are better tools for smoothing
+serious issues. This tool can even make things worse."""
 
 
 findAbruptDirectionChanges : Options -> PeteTree -> Options
@@ -295,10 +329,14 @@ update msg options previewColour hasTrack =
                     ( newOptions, [] )
 
         Autofix ->
-            ( options, [] )
+            ( options
+            , [ Actions.Autofix <| List.map Tuple.first options.breaches
+              , TrackHasChanged
+              ]
+            )
 
         DisplayInfo id tag ->
-            ( options, [] )
+            ( options, [ Actions.DisplayInfo id tag ] )
 
 
 view : Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
@@ -394,7 +432,7 @@ view imperial msgWrapper options isTrack =
             else
                 row [ spacing 4 ]
                     [ none
-                    , infoButton (msgWrapper <| DisplayInfo "id" "tag")
+                    , infoButton (msgWrapper <| DisplayInfo "gradients" "autofix")
                     , Input.button
                         (alignTop :: neatToolsBorder)
                         { onPress = Just (msgWrapper Autofix)

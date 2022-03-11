@@ -12,6 +12,7 @@ import FlatColors.ChinesePalette
 import Geometry101 as G exposing (distance, findIntercept, interpolateLine, isAfter, isBefore, lineEquationFromTwoPoints, lineIntersection, linePerpendicularTo, pointAlongRoad, pointsToGeometry)
 import Length exposing (Meters, inMeters, meters)
 import LineSegment2d
+import List.Extra
 import LocalCoords exposing (LocalCoords)
 import Plane3d
 import Point2d exposing (Point2d)
@@ -124,6 +125,33 @@ applyClassicBendSmoother options track =
     in
     ( newTree
     , oldPoints |> List.map Tuple.second
+    )
+
+
+softenMultiplePoints : Options -> List Int -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+softenMultiplePoints options indices track =
+    -- There may be a more efficient way...
+    let
+        helper : Int -> ( PeteTree, List GPXSource ) -> ( PeteTree, List GPXSource )
+        helper index ( previousTree, _ ) =
+            case
+                softenSinglePoint options.segments index { track | trackTree = previousTree }
+            of
+                ( Just newTree, lastSetOfOldPoints ) ->
+                    ( newTree, lastSetOfOldPoints )
+
+                ( Nothing, lastSetOfOldPoints ) ->
+                    ( track.trackTree, lastSetOfOldPoints )
+
+        ( finalTree, oldPoints ) =
+            -- Indices must be in descending order or we lose context.
+            indices
+                |> List.sort
+                |> List.reverse
+                |> List.foldl helper ( track.trackTree, [] )
+    in
+    ( Just finalTree
+    , DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
     )
 
 

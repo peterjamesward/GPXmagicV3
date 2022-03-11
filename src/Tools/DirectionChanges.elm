@@ -2,6 +2,7 @@ module Tools.DirectionChanges exposing (..)
 
 import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
+import Dict exposing (Dict)
 import Direction2d exposing (Direction2d)
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), RoadSection, asRecord, skipCount)
 import Element exposing (..)
@@ -61,6 +62,40 @@ type Msg
     | SetResultMode ResultMode
     | Autofix
     | DisplayInfo String String
+
+
+toolID : String
+toolID =
+    "bends"
+
+
+textDictionary : ( String, Dict String String )
+textDictionary =
+    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
+    -- ToolsController can use these for info button and tool label.
+    ( toolID
+    , Dict.fromList
+        [ ( toolID, "Bend problems" )
+        , ( "info", infoText )
+        , ( "autofix", autofixText )
+        ]
+    )
+
+
+infoText =
+    """Find points where the road direction changes significantly, or find
+sections of track that may be a bend with a small radius.
+
+From here, you can jump directly to the sections of track and use other tools to fix the problems.
+"""
+
+
+autofixText =
+    """Smooth each of these individually using the single point _Smooth with arcs_. Use that
+tool to change the number of points that are added to smooth each point.
+
+You should use this only for trivial fixes; there are better tools for smoothing
+serious issues. This tool can even make things worse."""
 
 
 findDirectionChanges : Options -> PeteTree -> Options
@@ -320,10 +355,14 @@ update msg options previewColour track =
             )
 
         Autofix ->
-            ( options, [] )
+            ( options
+            , [ Actions.Autofix <| List.map Tuple.first options.breaches
+              , TrackHasChanged
+              ]
+            )
 
         DisplayInfo id tag ->
-            ( options, [] )
+            ( options, [ Actions.DisplayInfo id tag ] )
 
 
 actions options previewColour track =
@@ -452,7 +491,7 @@ view imperial msgWrapper options isTrack =
             else
                 row [ spacing 4 ]
                     [ none
-                    , infoButton (msgWrapper <| DisplayInfo "id" "tag")
+                    , infoButton (msgWrapper <| DisplayInfo "bends" "autofix")
                     , Input.button
                         (alignTop :: neatToolsBorder)
                         { onPress = Just (msgWrapper Autofix)

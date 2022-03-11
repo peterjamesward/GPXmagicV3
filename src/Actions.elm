@@ -13,12 +13,12 @@ import Tools.BezierOptions
 import Tools.CentroidAverageOptions
 import Tools.CurveFormerOptions
 import Tools.InterpolateOptions
-import Tools.ProfileSmoothOptions
 import Tools.MemoryUsage
 import Tools.MoveAndStretchOptions
 import Tools.MoveScaleRotateOptions
 import Tools.NudgeOptions
 import Tools.OutAndBackOptions
+import Tools.ProfileSmoothOptions
 import Tools.StartFinishTypes
 import Tools.StravaOptions
 import Tools.StravaTypes exposing (StravaRoute, StravaSegment, StravaSegmentStreams)
@@ -85,6 +85,8 @@ type ToolAction msg
     | WriteTrackSections (List ( Int, Float, Float ))
     | Straighten
     | DisplayInfo String String
+    | Autofix (List Int)
+
 
 interpretAction : ToolAction msg -> String
 interpretAction action =
@@ -161,6 +163,9 @@ interpretAction action =
 
         Straighten ->
             "straighten"
+
+        Autofix _ ->
+            "smooth points"
 
         _ ->
             "tell Pete this needs a message"

@@ -28,7 +28,7 @@ import Tools.CentroidAverageOptions
 import Tools.CurveFormer
 import Tools.CurveFormerOptions
 import Tools.DeletePoints as DeletePoints
-import Tools.DirectionChanges as AbruptDirectionChanges
+import Tools.DirectionChanges as DirectionChanges
 import Tools.DisplaySettings
 import Tools.DisplaySettingsOptions
 import Tools.Essentials
@@ -104,7 +104,7 @@ type alias Options =
     -- Tool specific options
     { tools : List ToolEntry
     , docks : Dict String DockSettings
-    , directionChangeOptions : AbruptDirectionChanges.Options
+    , directionChangeOptions : DirectionChanges.Options
     , deleteOptions : DeletePoints.Options
     , essentialOptions : Tools.Essentials.Options
     , imperial : Bool
@@ -136,7 +136,7 @@ defaultOptions : Options
 defaultOptions =
     { tools = defaultTools
     , docks = Dict.fromList dockList
-    , directionChangeOptions = AbruptDirectionChanges.defaultOptions
+    , directionChangeOptions = DirectionChanges.defaultOptions
     , deleteOptions = DeletePoints.defaultOptions
     , essentialOptions = Tools.Essentials.defaultOptions
     , imperial = False
@@ -172,7 +172,7 @@ type ToolMsg
     | DockPopupToggle String
     | DockNameChange String String
     | DisplayInfo String String
-    | DirectionChanges AbruptDirectionChanges.Msg
+    | DirectionChanges DirectionChanges.Msg
     | DeletePoints DeletePoints.Msg
     | ToolEssentialsMsg Tools.Essentials.Msg
     | ToggleImperial
@@ -726,7 +726,7 @@ update toolMsg isTrack msgWrapper options =
                 Just track ->
                     let
                         ( newOptions, actions ) =
-                            AbruptDirectionChanges.update
+                            DirectionChanges.update
                                 msg
                                 options.directionChangeOptions
                                 (getColour ToolAbruptDirectionChanges options.tools)
@@ -1145,7 +1145,7 @@ toolStateHasChanged toolType newState isTrack options =
             -- having its own options, that's more tricky than it's worth.
             let
                 ( newToolOptions, actions ) =
-                    AbruptDirectionChanges.toolStateChange
+                    DirectionChanges.toolStateChange
                         (newState == Expanded)
                         (getColour toolType options.tools)
                         options.directionChangeOptions
@@ -1668,7 +1668,7 @@ viewToolByType msgWrapper entry isTrack options =
                 TrackInfoBox.view (msgWrapper << ToolInfoMsg) options.imperial isTrack options.infoOptions
 
             ToolAbruptDirectionChanges ->
-                AbruptDirectionChanges.view
+                DirectionChanges.view
                     options.imperial
                     (msgWrapper << DirectionChanges)
                     options.directionChangeOptions
@@ -2302,4 +2302,7 @@ flythroughTick options posix track =
 initTextDictionaries : Dict String (Dict String String)
 initTextDictionaries =
     Dict.fromList
-        [ Tools.Graph.textDictionary ]
+        [ Tools.Graph.textDictionary
+        , DirectionChanges.textDictionary
+        , Tools.GradientProblems.textDictionary
+        ]

@@ -33,6 +33,7 @@ import Json.Decode as D
 import Json.Encode as E exposing (string)
 import LocalStorage
 import MapPortController
+import Markdown
 import MyIP
 import OAuthPorts as O exposing (randomBytes)
 import OAuthTypes as O exposing (OAuthMsg(..))
@@ -1080,7 +1081,8 @@ infoTextPopup maybeSomething dict =
                                 , centerX
                                 , width <| Element.px 400
                                 ]
-                                [ text gotText ]
+                            <|
+                                [ html <| Markdown.toHtml [] gotText ]
 
                         Nothing ->
                             none
@@ -1348,6 +1350,27 @@ performActionsOnModel actions model =
 
                         ( fromStart, fromEnd ) =
                             TrackLoaded.getRangeFromMarkers track
+
+                        newTrack =
+                            track
+                                |> TrackLoaded.addToUndoStack action
+                                    fromStart
+                                    fromEnd
+                                    oldPoints
+                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                    in
+                    { foldedModel | track = Just newTrack }
+
+                ( Autofix indices, Just track ) ->
+                    let
+                        ( newTree, oldPoints ) =
+                            Tools.BendSmoother.softenMultiplePoints
+                                model.toolOptions.bendSmootherOptions
+                                indices
+                                track
+
+                        ( fromStart, fromEnd ) =
+                            ( 0, 0 )
 
                         newTrack =
                             track
