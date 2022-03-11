@@ -347,7 +347,7 @@ gradientChangeTool =
 essentialsTool : ToolEntry
 essentialsTool =
     { toolType = ToolEssentials
-    , toolId = "essentials"
+    , toolId = Tools.Essentials.toolID
     , label = "Essentials"
     , info = "Use to bracket edits"
     , video = Nothing
@@ -482,7 +482,7 @@ simplifyTool =
 interpolateTool : ToolEntry
 interpolateTool =
     { toolType = ToolInterpolate
-    , toolId = "interpolate"
+    , toolId = Tools.Interpolate.toolID
     , label = "Insert points"
     , info = "Add points"
     , video = Nothing
@@ -527,7 +527,7 @@ moveScaleRotateTool =
 flythroughTool : ToolEntry
 flythroughTool =
     { toolType = ToolFlythrough
-    , toolId = "flythrough"
+    , toolId = Tools.Flythrough.toolID
     , label = "Fly-through"
     , info = "Fly-through"
     , video = Nothing
@@ -2374,4 +2374,7 @@ initTextDictionaries =
         , DeletePoints.textDictionary
         , Tools.DisplaySettings.textDictionary
         , textDictionary
+        , Tools.Essentials.textDictionary
+        , Tools.Flythrough.textDictionary
+        , Tools.Interpolate.textDictionary
         ]

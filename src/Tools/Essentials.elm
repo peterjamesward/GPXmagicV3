@@ -1,6 +1,7 @@
 module Tools.Essentials exposing (..)
 
 import Actions exposing (ToolAction(..))
+import Dict exposing (Dict)
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), asRecord, skipCount)
 import Element exposing (..)
 import Element.Background as Background
@@ -38,6 +39,37 @@ type Msg
     | MarkerBackwardOne
     | Undo
     | Redo
+    | DisplayInfo String String
+
+
+toolID : String
+toolID =
+    "essentials"
+
+
+textDictionary : ( String, Dict String String )
+textDictionary =
+    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
+    -- ToolsController can use these for info button and tool label.
+    ( toolID
+    , Dict.fromList
+        [ ( toolID, "Essentials" )
+        , ( "info", infoText )
+        ]
+    )
+
+
+infoText =
+    """Most of the editing tools require either a single point or a range of points to work on.
+
+The top buttons in this tool allow you to move an Orange marker along the track to select a single point.
+
+There is a button to place a Purple marker at the current position, and then to move the Purple marker.
+This defines a range which you can then use for tools that require it.
+
+Below the pointer controls are the Undo and Redo buttons. These let you go back and forward over the
+previous ten edits. Once you make a different change, you can only Undo.
+"""
 
 
 toolStateChange :
@@ -169,6 +201,9 @@ update msg options previewColour hasTrack =
                     ( options
                     , [ RedoUndoneAction, TrackHasChanged ]
                     )
+
+                DisplayInfo tool tag ->
+                    ( options, [ Actions.DisplayInfo tool tag ] )
 
 
 positionDescription : Bool -> Int -> PeteTree -> String
@@ -326,7 +361,7 @@ viewPointers imperial msgWrapper options track =
                     text <| positionDescription imperial something track.trackTree
 
                 Nothing ->
-                        text "Use Orange and Purple markers\nto select track for editing."
+                    text "Use Orange and Purple markers\nto select track for editing."
         ]
 
 
