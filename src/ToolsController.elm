@@ -512,7 +512,7 @@ profileSmoothTool =
 moveScaleRotateTool : ToolEntry
 moveScaleRotateTool =
     { toolType = ToolMoveScaleRotate
-    , toolId = "affine"
+    , toolId = Tools.MoveScaleRotate.toolID
     , label = "Move & Scale"
     , info = "Lift & Shifts"
     , video = Nothing
@@ -557,7 +557,7 @@ stravaTool =
 moveAndStretchTool : ToolEntry
 moveAndStretchTool =
     { toolType = ToolMoveAndStretch
-    , toolId = "move"
+    , toolId = Tools.MoveAndStretch.toolID
     , label = "Move, Stretch"
     , info = "Move & Stretch"
     , video = Nothing
@@ -2378,4 +2378,6 @@ initTextDictionaries =
         , Tools.Flythrough.textDictionary
         , Tools.Interpolate.textDictionary
         , Tools.Intersections.textDictionary
+        , Tools.MoveAndStretch.textDictionary
+        , Tools.MoveScaleRotate.textDictionary
         ]
