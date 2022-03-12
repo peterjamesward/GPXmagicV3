@@ -38,7 +38,7 @@ type Msg
 
 toolID : String
 toolID =
-    "splines"
+    "centroid"
 
 
 textDictionary : ( String, Dict String String )

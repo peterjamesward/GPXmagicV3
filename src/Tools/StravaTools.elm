@@ -3,6 +3,7 @@ module Tools.StravaTools exposing (..)
 import Actions exposing (ToolAction(..))
 import Angle
 import ColourPalette exposing (stravaOrange)
+import Dict exposing (Dict)
 import Direction2d
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree, boundingBox, skipCount)
 import Element exposing (..)
@@ -38,6 +39,34 @@ type Msg
     | PasteSegment
     | ClearSegment
     | ConnectionInfo O.Token
+    | DisplayInfo String String
+
+
+toolID : String
+toolID =
+    "strava"
+
+
+textDictionary : ( String, Dict String String )
+textDictionary =
+    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
+    -- ToolsController can use these for info button and tool label.
+    ( toolID
+    , Dict.fromList
+        [ ( toolID, "Strava" )
+        , ( "info", infoText )
+        ]
+    )
+
+
+infoText =
+    """The Strava tool has two functions:
+1. Import a route direct from Strava for smoothing
+
+2. Place a Strava segment into your current route. Some people like the "accuracy" of segments.
+
+You must firtst authenticate with Strava using the button on the top bar; do that before loading a GPX.
+"""
 
 
 defaultOptions : Options
@@ -244,6 +273,9 @@ update msg settings wrap track =
             ( { settings | stravaStreams = Nothing, externalSegment = SegmentNone }
             , []
             )
+
+        DisplayInfo tool tag ->
+            ( settings, [ Actions.DisplayInfo tool tag ] )
 
 
 pointsFromStreams :

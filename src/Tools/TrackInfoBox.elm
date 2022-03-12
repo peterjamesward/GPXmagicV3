@@ -3,6 +3,7 @@ module Tools.TrackInfoBox exposing (..)
 import Actions exposing (ToolAction)
 import Angle
 import Axis2d
+import Dict exposing (Dict)
 import Direction2d
 import DomainModel exposing (..)
 import Element exposing (..)
@@ -41,6 +42,29 @@ defaultOptions =
 
 type Msg
     = ChooseDisplayMode InformationContext
+    | DisplayInfo String String
+
+
+toolID : String
+toolID =
+    "info"
+
+
+textDictionary : ( String, Dict String String )
+textDictionary =
+    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
+    -- ToolsController can use these for info button and tool label.
+    ( toolID
+    , Dict.fromList
+        [ ( toolID, "Information" )
+        , ( "info", infoText )
+        ]
+    )
+
+
+infoText =
+    """View information about the current point, the whole track, and memory usage.
+"""
 
 
 update : Msg -> Options -> Options
@@ -48,6 +72,9 @@ update msg options =
     case msg of
         ChooseDisplayMode mode ->
             { options | displayMode = mode }
+
+        DisplayInfo _ _ ->
+            ( options )
 
 
 trackInfoList : List ( Element msg, Bool -> RoadSection -> Element msg )

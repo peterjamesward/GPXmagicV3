@@ -287,7 +287,7 @@ toolSettings =
 trackInfoBox : ToolEntry
 trackInfoBox =
     { toolType = ToolTrackInfo
-    , toolId = "info"
+    , toolId = TrackInfoBox.toolID
     , label = "Information"
     , info = "Here is some useful information"
     , video = Nothing
@@ -542,7 +542,7 @@ flythroughTool =
 stravaTool : ToolEntry
 stravaTool =
     { toolType = ToolStrava
-    , toolId = "strava"
+    , toolId = Tools.StravaTools.toolID
     , label = "Strava"
     , info = "Strava"
     , video = Nothing
@@ -572,7 +572,7 @@ moveAndStretchTool =
 startFinishTool : ToolEntry
 startFinishTool =
     { toolType = ToolStartFinish
-    , toolId = "loop"
+    , toolId = Tools.StartFinish.toolID
     , label = "Start/Finish"
     , info = "Start/Finish"
     , video = Nothing
@@ -617,7 +617,7 @@ intersectionsTool =
 straightenTool : ToolEntry
 straightenTool =
     { toolType = ToolStraighten
-    , toolId = "straighten"
+    , toolId = Tools.Straightener.toolID
     , label = "Straighten"
     , info = "and such-like"
     , video = Nothing
@@ -2395,4 +2395,8 @@ initTextDictionaries =
         , Tools.ProfileSmooth.textDictionary
         , Tools.Simplify.textDictionary
         , Tools.SplitAndJoin.textDictionary
+        , Tools.StartFinish.textDictionary
+        , Tools.Straightener.textDictionary
+        , Tools.StravaTools.textDictionary
+        , TrackInfoBox.textDictionary
         ]
