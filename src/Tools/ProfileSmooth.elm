@@ -898,6 +898,7 @@ view options wrapper track =
             column [ spacing 10, centerX ]
                 [ el [ centerX ] <| maxAscentSlider
                 , el [ centerX ] <| maxDescentSlider
+                , extent
                 , el [ centerX ] <|
                     button
                         neatToolsBorder
@@ -911,6 +912,7 @@ view options wrapper track =
         smoothAltitudes =
             column [ spacing 10, centerX ]
                 [ el [ centerX ] <| windowSizeSlider
+                , extent
                 , el [ centerX ] <|
                     button
                         neatToolsBorder
@@ -922,6 +924,7 @@ view options wrapper track =
         smoothGradients =
             column [ spacing 10, centerX ]
                 [ el [ centerX ] <| windowSizeSlider
+                , extent
                 , el [ centerX ] <|
                     button
                         neatToolsBorder
@@ -944,6 +947,14 @@ view options wrapper track =
                     , Input.option MethodGradients (text "Smooth gradients")
                     ]
                 }
+
+        extent =
+            paragraph [] <|
+                if track.markerPosition == Nothing then
+                    [ text """Applies to whole track""" ]
+
+                else
+                    [ text "Applies between markers" ]
     in
     wrappedRow
         [ spacing 6
@@ -951,13 +962,7 @@ view options wrapper track =
         , Background.color FlatColors.ChinesePalette.antiFlashWhite
         , width fill
         ]
-        [ paragraph [] <|
-            if track.markerPosition == Nothing then
-                [ text """Applies to whole track""" ]
-
-            else
-                [ text "Applies between markers" ]
-        , modeChoice
+        [ modeChoice
         , case options.smoothMethod of
             MethodLimit ->
                 limitGradientsMethod

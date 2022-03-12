@@ -16,8 +16,6 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 ## Random
 
-Write info text for all Tools.
-
 Provide info text capability on top bar and on view panes.
 
 ## Graph Theory 

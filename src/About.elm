@@ -3,13 +3,12 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.0.11 (929b7bea)
+# GPXmagic v3.0.12 (929b7bea)
 
 ## In this release ...
 
 * Numerous small usability improvements
-* Info text for some tools in "Tools summary" tool
-* Profile smoothers work over range if Purple marker is positioned
+* Info text for all tools in "Tools summary" tool
 
 ** Big thanks again to David Ogle **
 

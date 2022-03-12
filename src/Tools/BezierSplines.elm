@@ -70,12 +70,11 @@ computeNewPoints : Options -> TrackLoaded msg -> List PreviewPoint
 computeNewPoints options track =
     let
         ( fromStart, fromEnd ) =
-            case options.extent of
-                ExtentIsRange ->
-                    TrackLoaded.getRangeFromMarkers track
+            if track.markerPosition /= Nothing then
+                TrackLoaded.getRangeFromMarkers track
 
-                ExtentIsTrack ->
-                    ( 0, 0 )
+            else
+                ( 0, 0 )
 
         distanceToPreview =
             distanceFromIndex fromStart track.trackTree
@@ -110,12 +109,11 @@ applyUsingOptions :
 applyUsingOptions options track =
     let
         ( fromStart, fromEnd ) =
-            case options.extent of
-                ExtentIsRange ->
-                    TrackLoaded.getRangeFromMarkers track
+            if track.markerPosition /= Nothing then
+                TrackLoaded.getRangeFromMarkers track
 
-                ExtentIsTrack ->
-                    ( 0, 0 )
+            else
+                ( 0, 0 )
 
         newTree =
             DomainModel.replaceRange
@@ -245,8 +243,8 @@ update msg options previewColour hasTrack =
             ( options, [] )
 
 
-view : (Msg -> msg) -> Options -> Element msg
-view wrap options =
+view : (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
+view wrap options track =
     let
         sliders =
             column [ centerX, width fill, spacing 5 ]
@@ -293,18 +291,12 @@ view wrap options =
                 }
 
         extent =
-            Input.radioRow
-                [ padding 10
-                , spacing 5
-                ]
-                { onChange = wrap << SetExtent
-                , selected = Just options.extent
-                , label = Input.labelHidden "Style"
-                , options =
-                    [ Input.option ExtentIsRange (text "Selected range\n(preview)")
-                    , Input.option ExtentIsTrack (text "Whole track\n(no preview)")
-                    ]
-                }
+            paragraph [] <|
+                if track.markerPosition == Nothing then
+                    [ text """Applies to whole track""" ]
+
+                else
+                    [ text "Applies between markers" ]
 
         actionButton =
             el [ centerX, width fill, spacing 5 ] <|
