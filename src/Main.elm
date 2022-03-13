@@ -974,6 +974,7 @@ viewPaneArea model =
         PaneLayoutManager.viewPanes
             PaneMsg
             model.track
+            model.toolOptions.graphOptions.graph
             model.contentArea
             model.paneLayoutOptions
             model.toolOptions.flythroughSettings.flythrough

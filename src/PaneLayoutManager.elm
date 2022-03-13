@@ -23,11 +23,13 @@ import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
 import SceneBuilder3D
 import Tools.Flythrough
+import Tools.GraphOptions
 import ToolsController
 import TrackLoaded exposing (TrackLoaded)
 import View3dCommonElements exposing (stopProp)
 import ViewAbout
 import ViewFirstPerson
+import ViewGraph
 import ViewMap
 import ViewPlan
 import ViewProfileCharts
@@ -42,6 +44,7 @@ type ViewMode
     | ViewPlan
     | ViewProfile
     | ViewMap
+    | ViewGraph
 
 
 type ViewContext
@@ -49,6 +52,7 @@ type ViewContext
     | MapContext ViewMap.Context
     | InfoContext
     | ProfileContext
+    | GraphContext
 
 
 type PaneType
@@ -79,6 +83,7 @@ type alias PaneContext =
     , mapContext : Maybe ViewMap.Context
     , profileContext : Maybe ViewProfileCharts.Context
     , planContext : Maybe ViewPlan.Context
+    , graphContext : Maybe ViewGraph.Context
     }
 
 
@@ -110,6 +115,7 @@ defaultPaneContext =
     , mapContext = Nothing
     , profileContext = Nothing
     , planContext = Nothing
+    , graphContext = Nothing
     }
 
 
@@ -135,6 +141,7 @@ type Msg
     | ThirdPersonViewMessage PaneId View3dCommonElements.Msg
     | ProfileViewMessage PaneId View3dCommonElements.Msg
     | PlanViewMessage PaneId ViewPlan.Msg
+    | GraphViewMessage PaneId ViewGraph.Msg
     | MapPortsMessage MapPortController.MapMsg
     | MapViewMessage ViewMap.Msg
     | SliderTimeout
@@ -411,6 +418,60 @@ update paneMsg msgWrapper mTrack contentArea options previews =
             in
             ( newOptions, actions )
 
+        GraphViewMessage paneId imageMsg ->
+            let
+                paneInfo =
+                    -- Tedious is good, tedious works.
+                    --TODO: Local refactor here.
+                    case paneId of
+                        Pane1 ->
+                            options.pane1
+
+                        Pane2 ->
+                            options.pane2
+
+                        Pane3 ->
+                            options.pane3
+
+                        Pane4 ->
+                            options.pane4
+
+                ( newContext, actions ) =
+                    case ( mTrack, paneInfo.graphContext ) of
+                        ( Just track, Just graphContext ) ->
+                            let
+                                ( new, act ) =
+                                    ViewGraph.update
+                                        imageMsg
+                                        (msgWrapper << GraphViewMessage Pane1)
+                                        track
+                                        (dimensionsWithLayout options.paneLayout contentArea)
+                                        graphContext
+                            in
+                            ( Just new, act )
+
+                        _ ->
+                            ( Nothing, [] )
+
+                newPane =
+                    { paneInfo | graphContext = newContext }
+
+                newOptions =
+                    case paneId of
+                        Pane1 ->
+                            { options | pane1 = newPane }
+
+                        Pane2 ->
+                            { options | pane2 = newPane }
+
+                        Pane3 ->
+                            { options | pane3 = newPane }
+
+                        Pane4 ->
+                            { options | pane4 = newPane }
+            in
+            ( newOptions, actions )
+
         ProfileViewMessage paneId imageMsg ->
             let
                 paneInfo =
@@ -600,6 +661,9 @@ initialisePane track options pane =
         , planContext =
             Just <|
                 ViewPlan.initialiseView 0 track.trackTree pane.planContext
+        , graphContext =
+            Just <|
+                ViewGraph.initialiseView 0 track.trackTree pane.graphContext
         , mapContext =
             Just <|
                 ViewMap.initialiseContext pane.mapContext
@@ -615,6 +679,7 @@ viewModeChoices msgWrapper context =
             , Input.optionWith ViewFirst <| radioButton "Rider view"
             , Input.optionWith ViewProfile <| radioButton "Profile"
             , Input.optionWith ViewPlan <| radioButton "Plan"
+            , Input.optionWith ViewGraph <| radioButton "Route"
             , Input.optionWith ViewInfo <| radioButton "About"
             ]
     in
@@ -637,6 +702,7 @@ viewModeChoicesNoMap msgWrapper pane =
             , Input.optionWith ViewFirst <| radioButton "Rider view"
             , Input.optionWith ViewProfile <| radioButton "Profile"
             , Input.optionWith ViewPlan <| radioButton "Plan"
+            , Input.optionWith ViewGraph <| radioButton "Route"
             ]
     in
     Input.radioRow
@@ -676,12 +742,13 @@ dimensionsWithLayout layout ( w, h ) =
 viewPanes :
     (Msg -> msg)
     -> Maybe (TrackLoaded msg)
+    -> Maybe Tools.GraphOptions.Graph
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Options
     -> Maybe Tools.Flythrough.Flythrough
     -> Dict String PreviewData
     -> Element msg
-viewPanes msgWrapper mTrack ( w, h ) options mFlythrough previews =
+viewPanes msgWrapper mTrack graph ( w, h ) options mFlythrough previews =
     let
         ( paneWidth, paneHeight ) =
             dimensionsWithLayout options.paneLayout ( w, h )
@@ -724,6 +791,19 @@ viewPanes msgWrapper mTrack ( w, h ) options mFlythrough previews =
                                 track
                                 options.scene3d
                                 (msgWrapper << PlanViewMessage pane.paneId)
+
+                        _ ->
+                            none
+
+                ViewGraph ->
+                    case ( pane.graphContext, mTrack ) of
+                        ( Just context, Just track ) ->
+                            ViewGraph.view
+                                context
+                                ( paneWidth, paneHeight )
+                                graph
+                                options.scene3d
+                                (msgWrapper << GraphViewMessage pane.paneId)
 
                         _ ->
                             none

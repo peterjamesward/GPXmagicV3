@@ -8,37 +8,58 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 > Debuggers shows messages arriving, not obvious why they should not be processed.
 > Can't save file when this happens, so rather poor show.
 
-**BUG**: Undo single point smooth removes a point at track start.
+**BUG**: Undo single point smooth at track start removes a point.
 
 --
 
 # WIP
 
-## Random
+## Route Builder
 
-Provide info text capability on top bar and on view panes.
-
-## Graph Theory 
-
-(notes below and from DO's emails)
+~~Clone graph view from plan view.~~
+~~Pass Graph into the View.~~
+~~Add SVG overlays for Nodes ...~~
+... and Edges.
+> Down-sample edges (depth 5-ish).
+Test concept of popup action menus on the view.
+> onClick method on `inFront` => message => update => Maybe MousePosition => moveLeft/Down.
+Port Node detection / canonical Edge code.
+Add "switch editing track".
+Add "merge Nodes".
+Add "delete Edge".
+Add "delete Node" ( 1-in, 1-out only )
+Add "split edge at pointer" function.
+Link traversals to display (active Edge).
+Remove and add traversal functions - ideally with tools on the view.
+Port/Redo route walking with offset (better inside bends please).
+Save/Load graph (in a single file, not necessarily XML).
 
 ---
 
 # BACKLOG
 
+## Usability
+
+Drag curve former circle directly in Plan View.
+Ditto for Move & Stretch, possibly Nudge.
+
 ## Tools: old, updated, & new
 
 --- _Cut-off for release_
 - Terrain as from v2 but with texture maybe
-- SVG overlay on 3d views. (?)
 - Non-customisable keyboard alternatives for Load/Save/Undo/Redo/Fwd/Back/Purple (maybe 1-5 for views)
 - Extract all text for translation (Muriel)
 - Use localised number formatting everywhere (for French use of , and .)
 - Ability to point-smooth transitions over a range
 
---- _Cut off completely
+--- Cut off completely
 
-"Tip of the day" tool?
+"Tip of the day" tool? (Davie Ogle will write tips.)
+
+## Help
+
+Provide info text capability on top bar and on view panes.
+Specific areas within tools as needed.
 
 ## SVG profile rendering
 

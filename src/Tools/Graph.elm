@@ -7,6 +7,7 @@ module Tools.Graph exposing (..)
 import Actions
 import BoundingBox3d
 import Dict exposing (Dict)
+import DomainModel exposing (skipCount)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as I
@@ -76,7 +77,7 @@ textDictionary =
 infoText =
     """
 Here we find repeated sections of a route. You can then pick and choose which
-sectons to ride, making your own route based on the original. This will ensure that
+sections to ride, making your own route based on the original. This will ensure that
 each time you use a section, the altitudes will match and render well in RGT.
 """
 
@@ -283,9 +284,14 @@ trivialGraph track =
        It's a good place to start and means we can then start visualising.
     -}
     let
+        (startNode, endNode) =
+            ( DomainModel.earthPointFromIndex 0 track.trackTree
+            , DomainModel.earthPointFromIndex (skipCount track.trackTree) track.trackTree
+            )
+
         nodes =
             Dict.fromList
-                [ ( 1, () ), ( 2, () ) ]
+                [ ( 1, startNode ), ( 2, endNode ) ]
 
         edges =
             Dict.fromList

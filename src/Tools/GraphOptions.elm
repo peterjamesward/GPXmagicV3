@@ -5,6 +5,8 @@ import Dict exposing (Dict)
 import DomainModel exposing (PeteTree)
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
+import Point2d exposing (Point2d)
+import Point3d exposing (Point3d)
 import Quantity exposing (Quantity)
 
 
@@ -29,7 +31,7 @@ type alias Options =
 
 
 type alias Graph =
-    { nodes : Dict Int ()
+    { nodes : Dict Int (Point3d Meters LocalCoords)
     , edges : Dict Int ( Int, Int, PeteTree )
     , userRoute : List Traversal
     , canonicalRoute : List Traversal
