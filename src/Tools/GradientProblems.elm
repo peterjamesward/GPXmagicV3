@@ -468,6 +468,7 @@ view imperial msgWrapper options isTrack =
                                         clamp 24 300 <|
                                             (List.length options.breaches // 3 * 24)
                                 , spacingXY 6 6
+                                , padding 6
                                 , alignTop
                                 ]
                             <|
