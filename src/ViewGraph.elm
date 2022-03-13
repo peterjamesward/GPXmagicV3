@@ -7,10 +7,8 @@ module ViewGraph exposing (..)
 import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
 import Axis2d exposing (Axis2d)
-import Axis3d
 import Camera3d exposing (Camera3d)
 import Circle2d
-import Color exposing (Color)
 import Dict
 import Direction2d exposing (Direction2d)
 import Direction3d exposing (negativeZ, positiveY, positiveZ)
@@ -24,32 +22,27 @@ import FeatherIcons
 import FlatColors.ChinesePalette exposing (white)
 import FlatColors.FlatUIPalette
 import Frame2d
-import Frame3d exposing (Frame3d)
 import Geometry.Svg as Svg
-import Html exposing (Html)
 import Html.Attributes as Attributes
 import Html.Events as HE
 import Html.Events.Extra.Mouse as Mouse exposing (Button(..))
 import Html.Events.Extra.Wheel as Wheel
 import Json.Decode as D
 import Length exposing (Length, Meters)
-import LineSegment3d exposing (LineSegment3d)
-import LineSegment3d.Projection as LineSegment3d
 import LocalCoords exposing (LocalCoords)
 import Pixels exposing (Pixels, inPixels)
-import Point2d
+import Point2d exposing (Point2d)
 import Point3d exposing (Point3d)
 import Point3d.Projection as Point3d
 import Polyline2d
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
-import Scene3d exposing (Entity, backgroundColor)
+import Scene3d exposing (Entity)
 import Spherical exposing (metresPerPixel)
 import Svg exposing (Svg)
 import Svg.Attributes
 import Tools.GraphOptions exposing (Graph)
 import TrackLoaded exposing (TrackLoaded)
-import Vector2d
 import Vector3d
 import ViewPureStyles exposing (useIcon)
 import Viewpoint3d exposing (Viewpoint3d)
@@ -83,6 +76,7 @@ type alias Context =
     , focalPoint : EarthPoint
     , waitingForClickDelay : Bool
     , followSelectedPoint : Bool
+    , clickPoint : Maybe (Point2d Pixels LocalCoords)
     }
 
 
@@ -115,6 +109,7 @@ initialiseView current treeNode currentContext =
                 treeNode |> leafFromIndex current |> startPoint
             , waitingForClickDelay = False
             , followSelectedPoint = False
+            , clickPoint = Nothing
             }
 
 
@@ -254,7 +249,7 @@ view context ( width, height ) mGraph scene msgWrapper =
                     DomainModel.traverseTreeBetweenLimitsToDepth
                         0
                         (skipCount tree)
-                        (always <| Just 5)
+                        (always <| Just 4)
                         0
                         tree
                         edgeFold

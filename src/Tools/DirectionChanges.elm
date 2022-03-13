@@ -525,6 +525,7 @@ view imperial msgWrapper options isTrack =
                                             (List.length options.breaches // 3 * 24)
                                 , spacingXY 6 6
                                 , alignTop
+                                , padding 6
                                 ]
                             <|
                                 List.map
