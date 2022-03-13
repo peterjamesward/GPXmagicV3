@@ -31,16 +31,6 @@ defaultOptions =
     }
 
 
-emptyGraph : Graph
-emptyGraph =
-    { nodes = Dict.empty
-    , edges = Dict.empty
-    , userRoute = []
-    , canonicalRoute = []
-    , selectedTraversal = Nothing
-    }
-
-
 type Msg
     = GraphAnalyse
     | CentreLineOffset (Quantity Float Meters)
@@ -274,6 +264,7 @@ buildGraph option track =
     , userRoute = []
     , canonicalRoute = []
     , selectedTraversal = Nothing
+    , referenceLonLat = track.referenceLonLat
     }
 
 
@@ -284,7 +275,7 @@ trivialGraph track =
        It's a good place to start and means we can then start visualising.
     -}
     let
-        (startNode, endNode) =
+        ( startNode, endNode ) =
             ( DomainModel.earthPointFromIndex 0 track.trackTree
             , DomainModel.earthPointFromIndex (skipCount track.trackTree) track.trackTree
             )
@@ -305,6 +296,7 @@ trivialGraph track =
     , userRoute = [ traversal ]
     , canonicalRoute = [ traversal ]
     , selectedTraversal = Nothing
+    , referenceLonLat = track.referenceLonLat
     }
 
 

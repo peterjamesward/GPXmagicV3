@@ -35,7 +35,7 @@ Perspective view by default? It currently takes loads of clicks to get it to a u
 ~~Add SVG overlays for Nodes ...~~
 ~~... and Edges.~~
 ~~> Down-sample edges (depth 5-ish).~~
-Graph needs a referenceLonLat.
+~~Graph needs a referenceLonLat.~~
 Test concept of popup action menus on the view.
 > onClick method on `inFront` => message => update => Maybe MousePosition => moveLeft/Down.
 

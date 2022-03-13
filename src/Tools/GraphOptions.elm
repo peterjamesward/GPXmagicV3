@@ -2,7 +2,7 @@ module Tools.GraphOptions exposing (..)
 
 import BoundingBox3d exposing (BoundingBox3d)
 import Dict exposing (Dict)
-import DomainModel exposing (PeteTree)
+import DomainModel exposing (GPXSource, PeteTree)
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
 import Point2d exposing (Point2d)
@@ -36,6 +36,7 @@ type alias Graph =
     , userRoute : List Traversal
     , canonicalRoute : List Traversal
     , selectedTraversal : Maybe Int
+    , referenceLonLat : GPXSource
     }
 
 
