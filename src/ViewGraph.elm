@@ -267,7 +267,7 @@ view context ( width, height ) mGraph scene msgWrapper =
             startPoint :: List.reverse svgPoints
 
         -- Create text SVG labels beside each projected 2D point
-        svgLabels =
+        nodeLabels =
             nodes2d
                 |> Dict.map
                     (\index vertex ->
@@ -287,6 +287,37 @@ view context ( width, height ) mGraph scene msgWrapper =
                     )
                 |> Dict.values
 
+        -- Create text SVG labels beside each projected edge
+        edgeLabels =
+            case mGraph of
+                Just graph ->
+                    graph.edges
+                        |> Dict.toList
+                        |> List.map
+                            (\( index, ( node1, node2, tree ) ) ->
+                                let
+                                    labelAt =
+                                        earthPointFromIndex (skipCount tree // 2) tree
+                                            |> Point3d.toScreenSpace camera screenRectangle
+                                in
+                                Svg.text_
+                                    [ Svg.Attributes.fill "rgb(250, 250, 250)"
+                                    , Svg.Attributes.fontFamily "monospace"
+                                    , Svg.Attributes.fontSize "20px"
+                                    , Svg.Attributes.stroke "none"
+                                    , Svg.Attributes.x (String.fromFloat (Pixels.toFloat (Point2d.xCoordinate labelAt) + 10))
+                                    , Svg.Attributes.y (String.fromFloat (Pixels.toFloat (Point2d.yCoordinate labelAt)))
+                                    ]
+                                    [ Svg.text ("e" ++ String.fromInt index) ]
+                                    -- Hack: flip the text upside down since our later
+                                    -- 'Svg.relativeTo topLeftFrame' call will flip it
+                                    -- back right side up
+                                    |> Svg.mirrorAcross (Axis2d.through labelAt Direction2d.x)
+                            )
+
+                Nothing ->
+                    []
+
         -- Used for converting from coordinates relative to the bottom-left
         -- corner of the 2D drawing into coordinates relative to the top-left
         -- corner (which is what SVG natively works in)
@@ -302,7 +333,7 @@ view context ( width, height ) mGraph scene msgWrapper =
                 , Attributes.height <| Pixels.inPixels height
                 ]
                 [ Svg.relativeTo topLeftFrame
-                    (Svg.g [] (svgNodes ++ svgEdges ++ svgLabels))
+                    (Svg.g [] (svgNodes ++ svgEdges ++ nodeLabels ++ edgeLabels))
                 ]
     in
     el
