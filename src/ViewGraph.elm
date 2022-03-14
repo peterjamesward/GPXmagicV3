@@ -6,6 +6,7 @@ module ViewGraph exposing (..)
 
 import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
+import Arc2d
 import Axis2d exposing (Axis2d)
 import Camera3d exposing (Camera3d)
 import Circle2d
@@ -281,13 +282,34 @@ view context ( width, height ) mGraph msgWrapper =
                         0
                         tree
                         edgeFold
-                        []
+                        [ startPoint ]
 
                 startPoint =
                     DomainModel.earthPointFromIndex 0 tree
                         |> Point3d.toScreenSpace camera screenRectangle
             in
-            startPoint :: List.reverse svgPoints
+            svgPoints
+
+        renderEdgeArc : PeteTree -> List (Point2d.Point2d Pixels coordinates)
+        renderEdgeArc tree =
+            -- If we can construct an arc, use it, otherwise just two lines.
+            let
+                ( start, mid, end ) =
+                    ( DomainModel.earthPointFromIndex 0 tree
+                        |> Point3d.toScreenSpace camera screenRectangle
+                    , DomainModel.earthPointFromIndex (skipCount tree // 2) tree
+                        |> Point3d.toScreenSpace camera screenRectangle
+                    , DomainModel.earthPointFromIndex (skipCount tree) tree
+                        |> Point3d.toScreenSpace camera screenRectangle
+                    )
+            in
+            case Arc2d.throughPoints start mid end of
+                Just arc ->
+                    Arc2d.approximate (Pixels.pixels 5) arc
+                        |> Polyline2d.vertices
+
+                Nothing ->
+                    [ start, mid, end ]
 
         -- Create text SVG labels beside each projected 2D point
         nodeLabels =

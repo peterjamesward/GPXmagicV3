@@ -42,6 +42,7 @@ Perspective view by default? It currently takes loads of clicks to get it to a u
 
 Proforma popup menus for Node and Edge.
 
+~~Use circular arc for edge?~~
 Transition v2 Node detection / canonical Edge code.
 Save/Load graph (in a single file, not necessarily XML, maybe CBOR maybe text).
 Add "switch editing track". 
