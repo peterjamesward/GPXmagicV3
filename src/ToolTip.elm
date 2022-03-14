@@ -6,7 +6,7 @@ import Element.Border as Border
 import Element.Font as Font
 import Html exposing (Html)
 import Html.Attributes
-import ViewPureStyles exposing (neatToolsBorder)
+import ViewPureStyles exposing (neatToolsBorder, rgtPurple)
 
 
 example : Html msg
@@ -22,13 +22,13 @@ example =
 myTooltip : String -> Element msg
 myTooltip str =
     el
-        [ Background.color (rgb 0 0 0)
+        [ Background.color rgtPurple
         , Font.color (rgb 1 1 1)
         , padding 4
         , Border.rounded 5
         , Font.size 14
-        , Border.shadow
-            { offset = ( 0, 3 ), blur = 6, size = 0, color = rgba 0 0 0 0.32 }
+        --, Border.shadow
+        --    { offset = ( 0, 3 ), blur = 6, size = 0, color = rgba 0 0 0 0.32 }
         , width <| px 100
         ]
         (paragraph [] [ text str ])

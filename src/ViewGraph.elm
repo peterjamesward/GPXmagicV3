@@ -43,6 +43,7 @@ import Scene3d exposing (Entity)
 import Spherical exposing (metresPerPixel)
 import Svg exposing (Svg)
 import Svg.Attributes
+import ToolTip exposing (myTooltip, tooltip)
 import Tools.GraphOptions exposing (ClickDetect(..), Graph)
 import TrackLoaded exposing (TrackLoaded)
 import Vector3d
@@ -187,7 +188,7 @@ popup msgWrapper context =
                 , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always ImageNoOp >> msgWrapper)
                 ]
                 [ popupMenu
-                , Input.button []
+                , Input.button [ tooltip below (myTooltip "Close menu") ]
                     { onPress = Just <| msgWrapper PopupHide
                     , label = useIcon FeatherIcons.x
                     }
