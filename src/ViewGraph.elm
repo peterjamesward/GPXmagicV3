@@ -245,22 +245,24 @@ view context ( width, height ) mGraph msgWrapper =
                         |> Dict.values
                         |> List.map
                             (\( node1, node2, edge ) ->
-                                pointsAsPolyline "black" <|
-                                    renderEdge edge
+                                renderEdgeArc edge
                             )
 
                 Nothing ->
                     []
 
+        edgeAttributes colour =
+            [ Svg.Attributes.stroke colour
+            , Svg.Attributes.fill "none"
+            , Svg.Attributes.strokeWidth "3"
+            , Svg.Attributes.strokeLinecap "round"
+            , Svg.Attributes.strokeLinejoin "round"
+            ]
+
         pointsAsPolyline : String -> List (Point2d.Point2d units coordinates) -> Svg msg
         pointsAsPolyline colour points =
             Svg.polyline2d
-                [ Svg.Attributes.stroke colour
-                , Svg.Attributes.fill "none"
-                , Svg.Attributes.strokeWidth "3"
-                , Svg.Attributes.strokeLinecap "round"
-                , Svg.Attributes.strokeLinejoin "round"
-                ]
+                (edgeAttributes colour)
                 (Polyline2d.fromVertices points)
 
         edgeFold :
@@ -271,14 +273,14 @@ view context ( width, height ) mGraph msgWrapper =
             Point3d.toScreenSpace camera screenRectangle road.endPoint
                 :: outputs
 
-        renderEdge : PeteTree -> List (Point2d.Point2d Pixels coordinates)
+        renderEdge : PeteTree -> Svg msg
         renderEdge tree =
             let
                 svgPoints =
                     DomainModel.traverseTreeBetweenLimitsToDepth
                         0
                         (skipCount tree)
-                        (always <| Just 4)
+                        (always <| Just 2)
                         0
                         tree
                         edgeFold
@@ -288,9 +290,9 @@ view context ( width, height ) mGraph msgWrapper =
                     DomainModel.earthPointFromIndex 0 tree
                         |> Point3d.toScreenSpace camera screenRectangle
             in
-            svgPoints
+            svgPoints |> pointsAsPolyline "black"
 
-        renderEdgeArc : PeteTree -> List (Point2d.Point2d Pixels coordinates)
+        renderEdgeArc : PeteTree -> Svg msg
         renderEdgeArc tree =
             -- If we can construct an arc, use it, otherwise just two lines.
             let
@@ -305,11 +307,10 @@ view context ( width, height ) mGraph msgWrapper =
             in
             case Arc2d.throughPoints start mid end of
                 Just arc ->
-                    Arc2d.approximate (Pixels.pixels 5) arc
-                        |> Polyline2d.vertices
+                    arc |> Svg.arc2d (edgeAttributes "black")
 
                 Nothing ->
-                    [ start, mid, end ]
+                    renderEdge tree
 
         -- Create text SVG labels beside each projected 2D point
         nodeLabels =
