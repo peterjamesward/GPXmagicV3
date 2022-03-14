@@ -7,7 +7,7 @@ module Tools.Graph exposing (..)
 import Actions
 import BoundingBox3d
 import Dict exposing (Dict)
-import DomainModel exposing (EarthPoint, RoadSection, skipCount)
+import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, skipCount)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as I
@@ -296,8 +296,73 @@ buildGraph track =
                 |> List.indexedMap Tuple.pair
                 |> Dict.fromList
 
+        swap ( a, b ) =
+            ( b, a )
+
+        inverseNodes : Dict XY Int
+        inverseNodes =
+            -- We need to lookup each point to see if it's a node.
+            nodes |> Dict.toList |> List.map swap |> Dict.fromList
+
+        ( lastPointOnRoute, lastGpx ) =
+            DomainModel.getDualCoords track.trackTree (skipCount track.trackTree)
+
+        ( _, _, edgeList ) =
+            -- Edges can be another fold over the route but we now know where the nodes are
+            -- and one version of the edge between two nodes becomes definitive. If we foldRL
+            -- and replace each time, it will be the "first" occurence in the route.
+            DomainModel.foldOverRouteRL
+                splitIntoEdges
+                track.trackTree
+                ( Dict.get (makeXY lastPointOnRoute) inverseNodes |> Maybe.withDefault 0
+                , [ lastGpx ]
+                , []
+                )
+
+        splitIntoEdges :
+            RoadSection
+            -> ( Int, List GPXSource, List ( Int, Int, PeteTree ) )
+            -> ( Int, List GPXSource, List ( Int, Int, PeteTree ) )
+        splitIntoEdges road ( edgeEndNodeIndex, currentEdge, edgesOut ) =
+            -- Looking at startPoint, because route end is already in the output,
+            -- stay same edge if not a node, new node end one edge, starts another.
+            case Dict.get (makeXY road.startPoint) inverseNodes of
+                Nothing ->
+                    ( edgeEndNodeIndex
+                    , Tuple.second road.sourceData :: currentEdge
+                    , edgesOut
+                    )
+
+                Just edgeStartNodeIndex ->
+                    let
+                        treeFromEdge =
+                            DomainModel.treeFromSourcesWithExistingReference
+                                track.referenceLonLat
+                                (Tuple.first road.sourceData :: currentEdge)
+                    in
+                    case treeFromEdge of
+                        Just newTree ->
+                            let
+                                completedEdge =
+                                    ( edgeStartNodeIndex
+                                    , edgeEndNodeIndex
+                                    , newTree
+                                    )
+                            in
+                            ( edgeStartNodeIndex
+                            , [ Tuple.first road.sourceData ]
+                            , completedEdge :: edgesOut
+                            )
+
+                        Nothing ->
+                            -- Shouldn't.
+                            ( edgeStartNodeIndex
+                            , [ Tuple.first road.sourceData ]
+                            , edgesOut
+                            )
+
         edges =
-            Dict.empty
+            edgeList |> List.indexedMap Tuple.pair |> Dict.fromList
     in
     { nodes = nodes
     , edges = edges
