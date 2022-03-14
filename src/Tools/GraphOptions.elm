@@ -40,6 +40,12 @@ type alias Graph =
     }
 
 
+type ClickDetect
+    = ClickNode Int
+    | ClickEdge Int
+    | ClickNone
+
+
 type alias Traversal =
     { edge : Int -- Canonical index of edge
     , direction : Direction

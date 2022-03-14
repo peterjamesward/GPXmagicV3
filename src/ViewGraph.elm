@@ -30,6 +30,7 @@ import Html.Events.Extra.Mouse as Mouse exposing (Button(..))
 import Html.Events.Extra.Wheel as Wheel
 import Json.Decode as D
 import Length exposing (Length, Meters)
+import List.Extra
 import LocalCoords exposing (LocalCoords)
 import Pixels exposing (Pixels, inPixels)
 import Point2d exposing (Point2d)
@@ -42,7 +43,7 @@ import Scene3d exposing (Entity)
 import Spherical exposing (metresPerPixel)
 import Svg exposing (Svg)
 import Svg.Attributes
-import Tools.GraphOptions exposing (Graph)
+import Tools.GraphOptions exposing (ClickDetect(..), Graph)
 import TrackLoaded exposing (TrackLoaded)
 import Vector3d
 import ViewPureStyles exposing (rgtDark, useIcon)
@@ -78,6 +79,7 @@ type alias Context =
     , waitingForClickDelay : Bool
     , followSelectedPoint : Bool
     , clickPoint : Maybe ( Float, Float )
+    , clickFeature : ClickDetect
     }
 
 
@@ -111,6 +113,7 @@ initialiseView current treeNode currentContext =
             , waitingForClickDelay = False
             , followSelectedPoint = False
             , clickPoint = Nothing
+            , clickFeature = ClickNone
             }
 
 
@@ -151,6 +154,18 @@ zoomButtons msgWrapper context =
 
 popup : (Msg -> msg) -> Context -> Element msg
 popup msgWrapper context =
+    let
+        popupMenu =
+            case context.clickFeature of
+                ClickNone ->
+                    none
+
+                ClickNode node ->
+                    text <| "Node " ++ String.fromInt node
+
+                ClickEdge edge ->
+                    text <| "Edge " ++ String.fromInt edge
+    in
     case context.clickPoint of
         Nothing ->
             none
@@ -171,7 +186,7 @@ popup msgWrapper context =
                 , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ImageNoOp >> msgWrapper)
                 , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always ImageNoOp >> msgWrapper)
                 ]
-                [ text "POPUP"
+                [ popupMenu
                 , Input.button []
                     { onPress = Just <| msgWrapper PopupHide
                     , label = useIcon FeatherIcons.x
@@ -440,11 +455,11 @@ deriveCamera context =
 update :
     Msg
     -> (Msg -> msg)
-    -> TrackLoaded msg
+    -> Graph
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Context
     -> ( Context, List (ToolAction msg) )
-update msg msgWrapper track area context =
+update msg msgWrapper graph area context =
     -- Second return value indicates whether selection needs to change.
     case msg of
         ImageGrab event ->
@@ -514,7 +529,10 @@ update msg msgWrapper track area context =
 
         ImageClick event ->
             if context.waitingForClickDelay then
-                ( { context | clickPoint = Just <| event.offsetPos }
+                ( { context
+                    | clickPoint = Just <| event.offsetPos
+                    , clickFeature = detectHit event graph area context
+                  }
                 , []
                 )
 
@@ -543,11 +561,13 @@ update msg msgWrapper track area context =
 
 detectHit :
     Mouse.Event
-    -> TrackLoaded msg
+    -> Graph
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Context
-    -> Int
-detectHit event track ( w, h ) context =
+    -> ClickDetect
+detectHit event graph ( w, h ) context =
+    -- Need to see which edge is best.
+    -- If we get a node 0 or `skipCount` from any edge, it's a Node.
     let
         ( x, y ) =
             event.offsetPos
@@ -569,5 +589,60 @@ detectHit event track ( w, h ) context =
 
         ray =
             Camera3d.ray camera screenRectangle screenPoint
+
+        candidates : List ( Int, ( Int, Bool, Quantity Float Pixels ) )
+        candidates =
+            graph.edges
+                |> Dict.toList
+                |> List.map
+                    (\( edgeIndex, ( startNode, endNode, tree ) ) ->
+                        let
+                            thisEdgeNearestIndex =
+                                nearestToRay ray tree
+
+                            thisEdgeNearestPoint =
+                                earthPointFromIndex thisEdgeNearestIndex tree
+                                    |> Point3d.toScreenSpace camera screenRectangle
+                        in
+                        ( edgeIndex
+                        , ( thisEdgeNearestIndex
+                          , thisEdgeNearestIndex == skipCount tree
+                          , Point2d.distanceFrom screenPoint thisEdgeNearestPoint
+                          )
+                        )
+                    )
+
+        bestCandidate =
+            candidates
+                |> List.Extra.minimumBy
+                    (\( edge, ( point, isEnd, dist ) ) -> Pixels.inPixels dist)
+
+        returnStartNode edgeIndex =
+            case Dict.get edgeIndex graph.edges of
+                Nothing ->
+                    ClickNone
+
+                Just ( startNode, endNode, tree ) ->
+                    ClickNode startNode
+
+        returnEndNode edgeIndex =
+            case Dict.get edgeIndex graph.edges of
+                Nothing ->
+                    ClickNone
+
+                Just ( startNode, endNode, tree ) ->
+                    ClickNode endNode
     in
-    nearestToRay ray track.trackTree
+    case bestCandidate of
+        Nothing ->
+            ClickNone
+
+        Just ( edgeIndex, ( pointIndex, isEnd, dist ) ) ->
+            if pointIndex == 0 then
+                returnStartNode edgeIndex
+
+            else if isEnd then
+                returnEndNode edgeIndex
+
+            else
+                ClickEdge edgeIndex

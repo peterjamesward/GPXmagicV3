@@ -40,7 +40,8 @@ Perspective view by default? It currently takes loads of clicks to get it to a u
 ~~Test concept of popup action menus on the view.~~
 ~~> onClick method on `inFront` => message => update => Maybe MousePosition => moveLeft/Down.~~
 
-Proforma popup menus for Node and Edge.
+~~Hit detect for Nodes and Edges.~~
+~~Proforma popup menus for Node and Edge.~~
 
 ~~Use circular arc for edge?~~
 Transition v2 Node detection / canonical Edge code.

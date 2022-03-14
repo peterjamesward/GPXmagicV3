@@ -521,6 +521,7 @@ Please check the file contains GPX data.""" }
                         paneMsg
                         PaneMsg
                         model.track
+                        model.toolOptions.graphOptions.graph
                         model.contentArea
                         model.paneLayoutOptions
                         model.previews

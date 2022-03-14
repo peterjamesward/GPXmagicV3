@@ -23,7 +23,7 @@ import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
 import SceneBuilder3D
 import Tools.Flythrough
-import Tools.GraphOptions
+import Tools.GraphOptions exposing (Graph)
 import ToolsController
 import TrackLoaded exposing (TrackLoaded)
 import View3dCommonElements exposing (stopProp)
@@ -218,11 +218,12 @@ update :
     Msg
     -> (Msg -> msg)
     -> Maybe (TrackLoaded msg)
+    -> Maybe Graph
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Options
     -> Dict String PreviewData
     -> ( Options, List (ToolAction msg) )
-update paneMsg msgWrapper mTrack contentArea options previews =
+update paneMsg msgWrapper mTrack mGraph contentArea options previews =
     let
         updatePaneWith : PaneId -> (PaneContext -> PaneContext) -> Options
         updatePaneWith id updateFn =
@@ -437,14 +438,14 @@ update paneMsg msgWrapper mTrack contentArea options previews =
                             options.pane4
 
                 ( newContext, actions ) =
-                    case ( mTrack, paneInfo.graphContext ) of
-                        ( Just track, Just graphContext ) ->
+                    case ( mGraph, paneInfo.graphContext ) of
+                        ( Just graph, Just graphContext ) ->
                             let
                                 ( new, act ) =
                                     ViewGraph.update
                                         imageMsg
                                         (msgWrapper << GraphViewMessage Pane1)
-                                        track
+                                        graph
                                         (dimensionsWithLayout options.paneLayout contentArea)
                                         graphContext
                             in
