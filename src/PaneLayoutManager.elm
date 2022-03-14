@@ -802,7 +802,6 @@ viewPanes msgWrapper mTrack graph ( w, h ) options mFlythrough previews =
                                 context
                                 ( paneWidth, paneHeight )
                                 graph
-                                options.scene3d
                                 (msgWrapper << GraphViewMessage pane.paneId)
 
                         _ ->

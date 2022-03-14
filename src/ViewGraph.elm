@@ -44,7 +44,7 @@ import Svg.Attributes
 import Tools.GraphOptions exposing (Graph)
 import TrackLoaded exposing (TrackLoaded)
 import Vector3d
-import ViewPureStyles exposing (useIcon)
+import ViewPureStyles exposing (rgtDark, useIcon)
 import Viewpoint3d exposing (Viewpoint3d)
 
 
@@ -55,11 +55,11 @@ type Msg
     | ImageRelease Mouse.Event
     | ImageNoOp
     | ImageClick Mouse.Event
-    | ImageDoubleClick Mouse.Event
     | ImageZoomIn
     | ImageZoomOut
     | ImageReset
     | ClickDelayExpired
+    | PopupHide
 
 
 type DragAction
@@ -76,7 +76,7 @@ type alias Context =
     , focalPoint : EarthPoint
     , waitingForClickDelay : Bool
     , followSelectedPoint : Bool
-    , clickPoint : Maybe (Point2d Pixels LocalCoords)
+    , clickPoint : Maybe ( Float, Float )
     }
 
 
@@ -148,6 +148,36 @@ zoomButtons msgWrapper context =
         ]
 
 
+popup : (Msg -> msg) -> Context -> Element msg
+popup msgWrapper context =
+    case context.clickPoint of
+        Nothing ->
+            none
+
+        Just ( x, y ) ->
+            row
+                [ alignTop
+                , alignLeft
+                , moveDown y
+                , moveRight x
+                , Background.color rgtDark
+                , Font.color FlatColors.ChinesePalette.antiFlashWhite
+                , Font.size 14
+                , padding 6
+                , spacing 8
+                , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always ImageNoOp >> msgWrapper)
+                , htmlAttribute <| Mouse.onWithOptions "dblclick" stopProp (always ImageNoOp >> msgWrapper)
+                , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ImageNoOp >> msgWrapper)
+                , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always ImageNoOp >> msgWrapper)
+                ]
+                [ text "POPUP"
+                , Input.button []
+                    { onPress = Just <| msgWrapper PopupHide
+                    , label = useIcon FeatherIcons.x
+                    }
+                ]
+
+
 onContextMenu : a -> Element.Attribute a
 onContextMenu msg =
     HE.custom "contextmenu"
@@ -163,12 +193,10 @@ onContextMenu msg =
 view :
     Context
     -> ( Quantity Int Pixels, Quantity Int Pixels )
-    ---> TrackLoaded msg
     -> Maybe Graph
-    -> List (Entity LocalCoords)
     -> (Msg -> msg)
     -> Element msg
-view context ( width, height ) mGraph scene msgWrapper =
+view context ( width, height ) mGraph msgWrapper =
     let
         dragging =
             context.dragAction
@@ -340,7 +368,6 @@ view context ( width, height ) mGraph scene msgWrapper =
             pointer
         , htmlAttribute <| Mouse.onUp (ImageRelease >> msgWrapper)
         , htmlAttribute <| Mouse.onClick (ImageClick >> msgWrapper)
-        , htmlAttribute <| Mouse.onDoubleClick (ImageDoubleClick >> msgWrapper)
         , htmlAttribute <| Wheel.onWheel (\event -> msgWrapper (ImageMouseWheel event.deltaY))
         , onContextMenu (msgWrapper ImageNoOp)
         , Element.width fill
@@ -350,6 +377,7 @@ view context ( width, height ) mGraph scene msgWrapper =
         , Border.color FlatColors.ChinesePalette.peace
         , Background.color FlatColors.FlatUIPalette.emerald
         , inFront <| zoomButtons msgWrapper context
+        , inFront <| popup msgWrapper context
         ]
     <|
         Element.html svgElement
@@ -462,27 +490,13 @@ update msg msgWrapper track area context =
             )
 
         ImageClick event ->
-            -- Click moves pointer but does not re-centre view. (Double click will.)
             if context.waitingForClickDelay then
-                ( context
-                , [ SetCurrent <| detectHit event track area context
-                  , TrackHasChanged
-                  ]
+                ( { context | clickPoint = Just <| event.offsetPos }
+                , []
                 )
 
             else
                 ( context, [] )
-
-        ImageDoubleClick event ->
-            let
-                nearestPoint =
-                    detectHit event track area context
-            in
-            ( { context | focalPoint = earthPointFromIndex nearestPoint track.trackTree }
-            , [ SetCurrent nearestPoint
-              , TrackHasChanged
-              ]
-            )
 
         ImageZoomIn ->
             ( { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + 0.5 }
@@ -497,7 +511,10 @@ update msg msgWrapper track area context =
         ImageReset ->
             ( { context | zoomLevel = context.defaultZoomLevel }, [] )
 
-        _ ->
+        PopupHide ->
+            ( { context | clickPoint = Nothing }, [] )
+
+        ImageNoOp ->
             ( context, [] )
 
 

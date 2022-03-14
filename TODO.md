@@ -36,19 +36,27 @@ Perspective view by default? It currently takes loads of clicks to get it to a u
 ~~... and Edges.~~
 ~~> Down-sample edges (depth 5-ish).~~
 ~~Graph needs a referenceLonLat.~~
-Test concept of popup action menus on the view.
-> onClick method on `inFront` => message => update => Maybe MousePosition => moveLeft/Down.
+
+~~Test concept of popup action menus on the view.~~
+~~> onClick method on `inFront` => message => update => Maybe MousePosition => moveLeft/Down.~~
+
+Proforma popup menus for Node and Edge.
 
 Transition v2 Node detection / canonical Edge code.
-Add "switch editing track".
-Add "merge Nodes".
+Save/Load graph (in a single file, not necessarily XML, maybe CBOR maybe text).
+Add "switch editing track". 
+Highlight selected on Route view.
 Add "delete Edge".
 Add "delete Node" ( 1-in, 1-out only; joins trees )
+Add "coalesce Nodes".
 Add "split edge at pointer" function.
+Controls to build traversals.
 Link traversals to display (active Edge).
 Remove and add traversal functions - ideally with tools on the view.
 Port/Redo route walking with offset (better inside bends please).
-Save/Load graph (in a single file, not necessarily XML).
+Add lollipops when offset < min radius.
+Idea: Since we render edges at limited depth, why not precompute spline approx for <smoothness>.
+
 
 ---
 
