@@ -161,10 +161,10 @@ popup msgWrapper context =
                     none
 
                 ClickNode node ->
-                    text <| "Node " ++ String.fromInt node
+                    text <| "Place " ++ String.fromInt node
 
                 ClickEdge edge ->
-                    text <| "Edge " ++ String.fromInt edge
+                    text <| "Road " ++ String.fromInt edge
     in
     case context.clickPoint of
         Nothing ->
@@ -327,20 +327,23 @@ view context ( width, height ) mGraph msgWrapper =
                 Nothing ->
                     renderEdge tree
 
+        textAttributes atPoint =
+            [ Svg.Attributes.fill "rgb(250, 250, 250)"
+            , Svg.Attributes.fontFamily "sans serif"
+            , Svg.Attributes.fontSize "14px"
+            , Svg.Attributes.stroke "none"
+            , Svg.Attributes.x (String.fromFloat (Pixels.toFloat (Point2d.xCoordinate atPoint) + 10))
+            , Svg.Attributes.y (String.fromFloat (Pixels.toFloat (Point2d.yCoordinate atPoint)))
+            ]
+
         -- Create text SVG labels beside each projected 2D point
         nodeLabels =
             nodes2d
                 |> Dict.map
                     (\index vertex ->
                         Svg.text_
-                            [ Svg.Attributes.fill "rgb(250, 250, 250)"
-                            , Svg.Attributes.fontFamily "monospace"
-                            , Svg.Attributes.fontSize "20px"
-                            , Svg.Attributes.stroke "none"
-                            , Svg.Attributes.x (String.fromFloat (Pixels.toFloat (Point2d.xCoordinate vertex) + 10))
-                            , Svg.Attributes.y (String.fromFloat (Pixels.toFloat (Point2d.yCoordinate vertex)))
-                            ]
-                            [ Svg.text ("p" ++ String.fromInt index) ]
+                            (textAttributes vertex)
+                            [ Svg.text ("Place " ++ String.fromInt index) ]
                             -- Hack: flip the text upside down since our later
                             -- 'Svg.relativeTo topLeftFrame' call will flip it
                             -- back right side up
@@ -362,14 +365,8 @@ view context ( width, height ) mGraph msgWrapper =
                                             |> Point3d.toScreenSpace camera screenRectangle
                                 in
                                 Svg.text_
-                                    [ Svg.Attributes.fill "rgb(250, 250, 250)"
-                                    , Svg.Attributes.fontFamily "monospace"
-                                    , Svg.Attributes.fontSize "20px"
-                                    , Svg.Attributes.stroke "none"
-                                    , Svg.Attributes.x (String.fromFloat (Pixels.toFloat (Point2d.xCoordinate labelAt) + 10))
-                                    , Svg.Attributes.y (String.fromFloat (Pixels.toFloat (Point2d.yCoordinate labelAt)))
-                                    ]
-                                    [ Svg.text ("e" ++ String.fromInt index) ]
+                                    (textAttributes labelAt)
+                                    [ Svg.text ("Road " ++ String.fromInt index) ]
                                     -- Hack: flip the text upside down since our later
                                     -- 'Svg.relativeTo topLeftFrame' call will flip it
                                     -- back right side up

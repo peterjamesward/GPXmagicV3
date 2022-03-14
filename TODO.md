@@ -36,16 +36,14 @@ Perspective view by default? It currently takes loads of clicks to get it to a u
 ~~... and Edges.~~
 ~~> Down-sample edges (depth 5-ish).~~
 ~~Graph needs a referenceLonLat.~~
-
 ~~Test concept of popup action menus on the view.~~
 ~~> onClick method on `inFront` => message => update => Maybe MousePosition => moveLeft/Down.~~
-
 ~~Hit detect for Nodes and Edges.~~
 ~~Proforma popup menus for Node and Edge.~~
-
 ~~Use circular arc for edge?~~
+
 Transition v2 Node detection / canonical Edge code.
-Save/Load graph (in a single file, not necessarily XML, maybe CBOR maybe text).
+Save/Load graph (in a single file, not necessarily XML, maybe CBOR, maybe text).
 Add "switch editing track". 
 Highlight selected on Route view.
 Add "delete Edge".
