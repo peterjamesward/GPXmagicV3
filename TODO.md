@@ -43,6 +43,9 @@ Perspective view by default? It currently takes loads of clicks to get it to a u
 ~~Use circular arc for edge?~~
 
 Transition v2 Node detection / canonical Edge code.
+> May try simpler version without canonicalization, since user can tidy it up.
+
+Start with `trivialGraph`; analyse button => proper graph.
 Save/Load graph (in a single file, not necessarily XML, maybe CBOR, maybe text).
 Add "switch editing track". 
 Highlight selected on Route view.

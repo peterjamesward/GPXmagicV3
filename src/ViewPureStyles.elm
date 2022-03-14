@@ -31,11 +31,11 @@ toolRowLayout =
 
 
 rgtPurple =
-    Element.rgb255 237 0 73
+    Element.rgb255 63 0 73
 
 
 rgtDark =
-    Element.rgb255 14 0 28
+    Element.rgb255 12 0 22
 
 
 ukraineBlue =

@@ -7,14 +7,17 @@ module Tools.Graph exposing (..)
 import Actions
 import BoundingBox3d
 import Dict exposing (Dict)
-import DomainModel exposing (skipCount)
+import DomainModel exposing (EarthPoint, RoadSection, skipCount)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as I
 import FlatColors.ChinesePalette
 import Length exposing (Length, Meters, inMeters)
+import Point2d
 import Point3d
 import Quantity exposing (Quantity, zero)
+import Set exposing (Set)
+import SketchPlane3d
 import Tools.GraphOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal2, showLongMeasure, showShortMeasure)
@@ -76,6 +79,13 @@ toleranceText =
     """
 Blah blah about the meaning of it all.
 """
+
+
+makeXY : EarthPoint -> XY
+makeXY earth =
+    earth
+        |> Point3d.projectInto SketchPlane3d.xy
+        |> Point2d.toTuple inMeters
 
 
 view : (Msg -> msg) -> Options -> Element msg
@@ -217,7 +227,7 @@ update msg options track wrapper =
             ( { options | minimumEdgeLength = quantity }, [] )
 
         GraphAnalyse ->
-            ( { options | graph = Just <| buildGraph options track }, [] )
+            ( { options | graph = Just <| buildGraph track }, [] )
 
         HighlightTraversal traversal ->
             ( options, [] )
@@ -241,22 +251,52 @@ update msg options track wrapper =
             ( options, [ Actions.DisplayInfo tool tag ] )
 
 
-buildGraph : Options -> TrackLoaded msg -> Graph
-buildGraph option track =
+buildGraph : TrackLoaded msg -> Graph
+buildGraph track =
     {-
-       As in v1 & 2, the only way I know if to see which track points have more than two neighbours.
+       As in v1 & 2, the only way I know is to see which track points have more than two neighbours.
        Hence build a Dict using XY and the entries being a list of points that share the location.
        We might then have a user interaction step to refine the node list.
        First, let's get to the point where we can display nodes.
     -}
     let
+        countNeighbours : RoadSection -> Dict XY (Set XY) -> Dict XY (Set XY)
+        countNeighbours road countDict =
+            -- Nicer that v2 thanks to use of road segments.
+            -- Note we are interested in neighbours with distinct XYs.
+            let
+                ( startXY, endXY ) =
+                    ( makeXY road.startPoint
+                    , makeXY road.endPoint
+                    )
+
+                ( startNeighbours, endNeighbours ) =
+                    ( Dict.get startXY countDict |> Maybe.withDefault Set.empty
+                    , Dict.get endXY countDict |> Maybe.withDefault Set.empty
+                    )
+            in
+            countDict
+                |> Dict.insert startXY (Set.insert endXY startNeighbours)
+                |> Dict.insert endXY (Set.insert startXY endNeighbours)
+
+        pointNeighbours : Dict XY (Set XY)
+        pointNeighbours =
+            -- What neighbours hath each track point?
+            -- Note that the List.head will be earliest in the route, hence preferred.
+            DomainModel.foldOverRouteRL
+                countNeighbours
+                track.trackTree
+                Dict.empty
+
         nodes =
-            Dict.empty
+            -- Two neighbours is just an edge point, anything else is a node.
+            pointNeighbours
+                |> Dict.filter (\pt neighbours -> Set.size neighbours /= 2)
+                |> Dict.keys
+                |> List.indexedMap Tuple.pair
+                |> Dict.fromList
 
         edges =
-            Dict.empty
-
-        trackPointDict =
             Dict.empty
     in
     { nodes = nodes
@@ -282,7 +322,7 @@ trivialGraph track =
 
         nodes =
             Dict.fromList
-                [ ( 1, startNode ), ( 2, endNode ) ]
+                [ ( 1, makeXY startNode ), ( 2, makeXY endNode ) ]
 
         edges =
             Dict.fromList

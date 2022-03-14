@@ -31,7 +31,7 @@ type alias Options =
 
 
 type alias Graph =
-    { nodes : Dict Int (Point3d Meters LocalCoords)
+    { nodes : Dict Int XY
     , edges : Dict Int ( Int, Int, PeteTree )
     , userRoute : List Traversal
     , canonicalRoute : List Traversal

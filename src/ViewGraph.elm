@@ -29,7 +29,7 @@ import Html.Events as HE
 import Html.Events.Extra.Mouse as Mouse exposing (Button(..))
 import Html.Events.Extra.Wheel as Wheel
 import Json.Decode as D
-import Length exposing (Length, Meters)
+import Length exposing (Length, Meters, meters)
 import List.Extra
 import LocalCoords exposing (LocalCoords)
 import Pixels exposing (Pixels, inPixels)
@@ -40,6 +40,7 @@ import Polyline2d
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity)
+import SketchPlane3d
 import Spherical exposing (metresPerPixel)
 import Svg exposing (Svg)
 import Svg.Attributes
@@ -234,7 +235,13 @@ view context ( width, height ) mGraph msgWrapper =
             case mGraph of
                 Just graph ->
                     graph.nodes
-                        |> Dict.map (\k a -> a |> Point3d.toScreenSpace camera screenRectangle)
+                        |> Dict.map
+                            (\idx pt ->
+                                pt
+                                    |> Point2d.fromTuple meters
+                                    |> Point3d.on SketchPlane3d.xy
+                                    |> Point3d.toScreenSpace camera screenRectangle
+                            )
 
                 Nothing ->
                     Dict.empty
