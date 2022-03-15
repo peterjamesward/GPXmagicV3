@@ -76,8 +76,8 @@ initialiseView current treeNode currentContext =
                 | fieldOfView = Angle.degrees 45
                 , orbiting = Nothing
                 , dragAction = DragNone
-                , zoomLevel = 14.0
-                , defaultZoomLevel = 14.0
+                , zoomLevel = 16.0
+                , defaultZoomLevel = 16.0
                 , focalPoint =
                     treeNode |> leafFromIndex current |> startPoint
                 , waitingForClickDelay = False
@@ -87,8 +87,8 @@ initialiseView current treeNode currentContext =
             { fieldOfView = Angle.degrees 45
             , orbiting = Nothing
             , dragAction = DragNone
-            , zoomLevel = 14.0
-            , defaultZoomLevel = 14.0
+            , zoomLevel = 16.0
+            , defaultZoomLevel = 16.0
             , focalPoint =
                 treeNode |> leafFromIndex current |> startPoint
             , waitingForClickDelay = False

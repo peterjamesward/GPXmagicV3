@@ -14,15 +14,6 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 **BUG**: Bend/Gradient problems "centre view on this issue" button -
 if the map is draggable it doesn't centre the view on the issue.
-
-**BUG**: Text in the Undo/Redo buttons should match the new tool names (for example,
-after inserting points it still says "Undo interpolate").
-
-**BUG**: Plan view is really zoomed out by default. Could it match the zooming on the 
-Perspective view by default? It currently takes loads of clicks to get it to a usable zoom level.
-
-**BUG**: The horizontal scrollbar issue the guy on FB mentioned is due to this:
-<<looks like wrapperRow still has a -3px margin>>
  
 --
 
