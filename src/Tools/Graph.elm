@@ -10,6 +10,8 @@ import Dict exposing (Dict)
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), RoadSection, skipCount, trueLength)
 import Element exposing (..)
 import Element.Background as Background
+import Element.Border as Border
+import Element.Font as Font
 import Element.Input as I
 import FlatColors.ChinesePalette
 import Length exposing (Length, Meters, inMeters)
@@ -22,7 +24,7 @@ import SketchPlane3d
 import Tools.GraphOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal2, showLongMeasure, showShortMeasure)
-import ViewPureStyles exposing (commonShortHorizontalSliderStyles, infoButton, neatToolsBorder, useIcon)
+import ViewPureStyles exposing (commonShortHorizontalSliderStyles, infoButton, neatToolsBorder, rgtDark, rgtPurple, useIcon)
 
 
 defaultOptions : Options
@@ -184,6 +186,63 @@ view wrapper options =
                     ]
                 }
 
+        traversalsTable : Element msg
+        traversalsTable =
+            let
+                headerAttrs =
+                    [ Font.bold
+                    , Font.color rgtDark
+                    , Border.widthEach { bottom = 2, top = 0, left = 0, right = 0 }
+                    , Border.color rgtPurple
+                    ]
+            in
+            column
+                [ width <| maximum 500 fill
+                , height <| px 300
+                , spacing 10
+                , padding 5
+                , Border.width 2
+                , Border.rounded 6
+                , Border.color rgtDark
+                ]
+                [ row [ width fill ]
+                    [ el ((width <| fillPortion 1) :: headerAttrs) <| text "From"
+                    , el ((width <| fillPortion 1) :: headerAttrs) <| text "Along"
+                    , el ((width <| fillPortion 1) :: headerAttrs) <| text "To"
+                    , el ((width <| fillPortion 1) :: headerAttrs) <| text "Distance"
+                    ]
+
+                -- workaround for a bug: it's necessary to wrap `table` in an `el`
+                -- to get table height attribute to apply
+                , el [ width fill ] <|
+                    table
+                        [ width fill
+                        , height <| px 250
+                        , scrollbarY
+                        , spacing 10
+                        ]
+                        { data = traversals
+                        , columns =
+                            [ { header = none
+                              , width = fillPortion 1
+                              , view = \t -> text t.startPlace
+                              }
+                            , { header = none
+                              , width = fillPortion 1
+                              , view = \t -> text t.road
+                              }
+                            , { header = none
+                              , width = fillPortion 1
+                              , view = \t -> text t.endPlace
+                              }
+                            , { header = none
+                              , width = fillPortion 1
+                              , view = \t -> text t.length
+                              }
+                            ]
+                        }
+                ]
+
         removeButton =
             --TODO: Put a trashcan icon on the last line.
             I.button neatToolsBorder
@@ -202,7 +261,7 @@ view wrapper options =
                 [ infoButton (wrapper <| DisplayInfo "graph" "info")
                 , analyseButton
                 ]
-            , traversalList
+            , traversalsTable
             , offsetSlider
             , finishButton
             ]

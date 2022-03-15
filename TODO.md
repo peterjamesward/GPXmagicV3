@@ -33,7 +33,7 @@ Perspective view by default? It currently takes loads of clicks to get it to a u
 ~~Start with `trivialGraph`; **analyse** button => proper graph.~~
 ~~Is Route visible only when Route Builder tool open?~~
 ~~Display traversals in tool.~~
-Make table scrollable and prettier.
+~~Make table scrollable and prettier.~~
 Add "remove last" and "clear" traversal buttons.
 Add forward and back in traversal list.
 Highlight current traversal in list and on route.
