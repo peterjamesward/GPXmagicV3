@@ -33,23 +33,24 @@ if the map is draggable it doesn't centre the view on the issue.
 
 **BUG** - total length > track length, and in the York Tri course you can see
 clearly erroneous traversals, so the analysis is wrong. Oops.
+> (13-14 followed by 13-15) perhaps self-loops confuse the logic?
 
 Add "remove last" and "clear" traversal buttons.
+Remove and add traversal functions - ideally with tools on the view.
+Make node and edge labels clickable.
+Port/Redo route walking with offset (better inside bends please).
+Add lollipops when offset < min radius.
 Add "edit road"; changes active Track.
 Add "delete Edge".
-Add "remove Node" ( 1-in, 1-out only; joins trees )
+Add "remove Node" ( 1-in, 1-out only; joins edges )
 Add "delete node and its edges"
 Add "coalesce Nodes".
 Add "split edge at pointer" function.
-Controls to build traversals.
-Remove and add traversal functions - ideally with tools on the view.
-Port/Redo route walking with offset (better inside bends please).
-Make node and edge labels clickable.
-Add lollipops when offset < min radius.
 Save/Load graph (in a single file, not necessarily XML, maybe CBOR, maybe text).
 Clean up parameters passed from main to PaneLayoutManager.
 Load new track should reset analyzed state.
 Centre Plan view on selected traversal.
+Scroll table so active row is in view?
 
 
 ---
