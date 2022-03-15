@@ -34,6 +34,7 @@ defaultOptions =
     , centreLineOffset = Length.meters 0.0
     , boundingBox = BoundingBox3d.singleton Point3d.origin
     , selectedTraversal = 0
+    , analyzed = False
     }
 
 
@@ -91,10 +92,17 @@ view wrapper options =
             Length.inMeters options.centreLineOffset
 
         analyseButton =
-            I.button neatToolsBorder
-                { onPress = Just (wrapper GraphAnalyse)
-                , label = text "Find key places"
-                }
+            if options.analyzed then
+                none
+
+            else
+                row [ spacing 3 ]
+                    [ infoButton (wrapper <| DisplayInfo "graph" "info")
+                    , I.button neatToolsBorder
+                        { onPress = Just (wrapper GraphAnalyse)
+                        , label = text "Find key places"
+                        }
+                    ]
 
         finishButton =
             I.button neatToolsBorder
@@ -151,16 +159,19 @@ view wrapper options =
                                         { startPlace = "Place "
                                         , road = "road "
                                         , endPlace = "place"
-                                        , length = "unknown"
+                                        , length = Quantity.zero
                                         }
 
                                     Just ( ( n1, n2, _ ), tree ) ->
                                         { startPlace = "Place " ++ String.fromInt n1
                                         , road = "road " ++ String.fromInt trav.edge
                                         , endPlace = "place " ++ String.fromInt n2
-                                        , length = showShortMeasure False <| trueLength tree
+                                        , length = trueLength tree
                                         }
                             )
+
+        totalLength =
+            traversals |> List.map .length |> Quantity.sum
 
         dataStyles selected =
             if selected then
@@ -180,6 +191,13 @@ view wrapper options =
                     [ Font.bold
                     , Font.color rgtDark
                     , Border.widthEach { bottom = 2, top = 0, left = 0, right = 0 }
+                    , Border.color rgtPurple
+                    ]
+
+                footerAttrs =
+                    [ Font.bold
+                    , Font.color rgtDark
+                    , Border.widthEach { bottom = 0, top = 2, left = 0, right = 0 }
                     , Border.color rgtPurple
                     ]
             in
@@ -204,7 +222,7 @@ view wrapper options =
                 , el [ width fill ] <|
                     indexedTable
                         [ width fill
-                        , height <| px 250
+                        , height <| px 220
                         , scrollbarY
                         , spacing 4
                         ]
@@ -236,10 +254,19 @@ view wrapper options =
                               , view =
                                     \i t ->
                                         el (dataStyles (i == options.selectedTraversal)) <|
-                                            text t.length
+                                            text <|
+                                                showLongMeasure False t.length
                               }
                             ]
                         }
+                , row [ width fill ]
+                    [ el ((width <| fillPortion 1) :: footerAttrs) <| text " "
+                    , el ((width <| fillPortion 1) :: footerAttrs) <| text " "
+                    , el ((width <| fillPortion 1) :: footerAttrs) <| text " "
+                    , el ((width <| fillPortion 1) :: footerAttrs) <|
+                        text <|
+                            showLongMeasure False totalLength
+                    ]
                 ]
 
         traversalNext =
@@ -270,8 +297,7 @@ view wrapper options =
     <|
         column [ width fill, padding 4, spacing 10 ]
             [ row [ centerX, width fill, spacing 10 ]
-                [ infoButton (wrapper <| DisplayInfo "graph" "info")
-                , analyseButton
+                [ analyseButton
                 , traversalPrevious
                 , traversalNext
                 ]
@@ -290,7 +316,12 @@ update :
 update msg options track wrapper =
     case msg of
         GraphAnalyse ->
-            ( { options | graph = Just <| buildGraph track }, [] )
+            ( { options
+                | graph = Just <| buildGraph track
+                , analyzed = True
+              }
+            , []
+            )
 
         HighlightTraversal traversal ->
             ( { options | selectedTraversal = traversal }, [] )

@@ -5,6 +5,7 @@ import Dict exposing (Dict)
 import DomainModel exposing (GPXSource, PeteTree)
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
+import Quantity exposing (Quantity)
 
 
 type Direction
@@ -23,6 +24,7 @@ type alias Options =
     , centreLineOffset : Length.Length
     , boundingBox : BoundingBox3d Length.Meters LocalCoords
     , selectedTraversal : Int
+    , analyzed : Bool
     }
 
 
@@ -50,7 +52,7 @@ type alias TraversalDisplay =
     { startPlace : String
     , road : String
     , endPlace : String
-    , length : String
+    , length : Quantity Float Meters
     }
 
 

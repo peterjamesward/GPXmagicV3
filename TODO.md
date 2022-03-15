@@ -27,10 +27,14 @@ if the map is draggable it doesn't centre the view on the issue.
 ~~Make table scrollable and prettier.~~
 ~~Add forward and back in traversal list.~~
 ~~Highlight current traversal in list and on route.~~
+~~Option to show edges as arcs or elided roads.~~
+~~Disable analyze button once used (graph state needed).~~
+
 Add "remove last" and "clear" traversal buttons.
 Add "edit road"; changes active Track.
 Add "delete Edge".
-Add "delete Node" ( 1-in, 1-out only; joins trees )
+Add "remove Node" ( 1-in, 1-out only; joins trees )
+Add "delete node and its edges"
 Add "coalesce Nodes".
 Add "split edge at pointer" function.
 Controls to build traversals.
@@ -39,6 +43,9 @@ Port/Redo route walking with offset (better inside bends please).
 Make node and edge labels clickable.
 Add lollipops when offset < min radius.
 Save/Load graph (in a single file, not necessarily XML, maybe CBOR, maybe text).
+Clean up parameters passed from main to PaneLayoutManager.
+Load new track should reset analyzed state.
+BUG? - total length > track length,
 
 
 ---

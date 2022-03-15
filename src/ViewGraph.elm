@@ -39,14 +39,12 @@ import Point3d.Projection as Point3d
 import Polyline2d
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
-import Scene3d exposing (Entity)
 import SketchPlane3d
 import Spherical exposing (metresPerPixel)
 import Svg exposing (Svg)
 import Svg.Attributes
 import ToolTip exposing (myTooltip, tooltip)
 import Tools.GraphOptions exposing (ClickDetect(..), Graph)
-import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (colourHexString, uiColourHexString)
 import Vector3d
 import ViewPureStyles exposing (rgtDark, rgtPurple, useIcon)
@@ -65,11 +63,17 @@ type Msg
     | ImageReset
     | ClickDelayExpired
     | PopupHide
+    | ToggleEdgeMode
 
 
 type DragAction
     = DragNone
     | DragPan
+
+
+type EdgeMode
+    = EdgeArc
+    | EdgeSketch
 
 
 type alias Context =
@@ -83,6 +87,7 @@ type alias Context =
     , followSelectedPoint : Bool
     , clickPoint : Maybe ( Float, Float )
     , clickFeature : ClickDetect
+    , edgeMode : EdgeMode
     }
 
 
@@ -117,6 +122,7 @@ initialiseView current treeNode currentContext =
             , followSelectedPoint = False
             , clickPoint = Nothing
             , clickFeature = ClickNone
+            , edgeMode = EdgeSketch
             }
 
 
@@ -151,6 +157,12 @@ zoomButtons msgWrapper context =
         , Input.button []
             { onPress = Just <| msgWrapper ImageReset
             , label = useIcon FeatherIcons.maximize
+            }
+        , Input.button
+            [ tooltip onLeft (myTooltip "Change how\nroads are drawn")
+            ]
+            { onPress = Just <| msgWrapper ToggleEdgeMode
+            , label = useIcon FeatherIcons.activity
             }
         ]
 
@@ -270,7 +282,12 @@ view context ( width, height ) mGraph options msgWrapper =
                         |> Dict.toList
                         |> List.map
                             (\( index, ( ( node1, node2, disc ), edge ) ) ->
-                                renderEdgeArc index edge
+                                case context.edgeMode of
+                                    EdgeArc ->
+                                        renderEdgeArc index edge
+
+                                    EdgeSketch ->
+                                        renderEdge index edge
                             )
 
                 Nothing ->
@@ -583,6 +600,19 @@ update msg msgWrapper graph area context =
 
         ImageNoOp ->
             ( context, [] )
+
+        ToggleEdgeMode ->
+            ( { context
+                | edgeMode =
+                    case context.edgeMode of
+                        EdgeSketch ->
+                            EdgeArc
+
+                        EdgeArc ->
+                            EdgeSketch
+              }
+            , []
+            )
 
 
 detectHit :
