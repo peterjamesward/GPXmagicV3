@@ -5,7 +5,6 @@ import Dict exposing (Dict)
 import DomainModel exposing (GPXSource, PeteTree)
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
-import Quantity exposing (Quantity)
 
 
 type Direction
@@ -21,8 +20,6 @@ type alias XY =
 
 type alias Options =
     { graph : Maybe Graph
-    , pointTolerance : Quantity Float Meters -- How close in metres to consider points equal.
-    , minimumEdgeLength : Quantity Float Meters -- So we can ignore short self-loops
     , centreLineOffset : Length.Length
     , boundingBox : BoundingBox3d Length.Meters LocalCoords
     }
@@ -46,6 +43,14 @@ type ClickDetect
 type alias Traversal =
     { edge : Int -- Canonical index of edge
     , direction : Direction
+    }
+
+
+type alias TraversalDisplay =
+    { startPlace : String
+    , road : String
+    , endPlace : String
+    , length : String
     }
 
 

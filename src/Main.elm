@@ -685,7 +685,7 @@ adoptTrackInModel track model =
             toolOptions.graphOptions
 
         graphFromTrack =
-            { graphOptions | graph = Just <| Tools.Graph.buildGraph track }
+            { graphOptions | graph = Just <| Tools.Graph.trivialGraph track }
 
         newToolOptions =
             { toolOptions | graphOptions = graphFromTrack }

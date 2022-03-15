@@ -30,26 +30,24 @@ Perspective view by default? It currently takes loads of clicks to get it to a u
 
 ## Route Builder
 
-Graph looks pretty good, but:
-1. Can't (easily, or sometimes at all) select a Place;
-2. May need some XY tolerance;
-3. Not adopting the canon.
-
-Start with `trivialGraph`; analyse button => proper graph.
-Save/Load graph (in a single file, not necessarily XML, maybe CBOR, maybe text).
-Make node and edge labels clickable.
+~~Start with `trivialGraph`; **analyse** button => proper graph.~~
+~~Is Route visible only when Route Builder tool open?~~
+~~Display traversals in tool.~~
+Make table scrollable and prettier.
+Add "remove last" and "clear" traversal buttons.
+Add forward and back in traversal list.
+Highlight current traversal in list and on route.
 Add "switch editing track". 
-Highlight selected on Route view.
 Add "delete Edge".
 Add "delete Node" ( 1-in, 1-out only; joins trees )
 Add "coalesce Nodes".
 Add "split edge at pointer" function.
 Controls to build traversals.
-Link traversals to display (active Edge).
 Remove and add traversal functions - ideally with tools on the view.
 Port/Redo route walking with offset (better inside bends please).
+Make node and edge labels clickable.
 Add lollipops when offset < min radius.
-Idea: Since we render edges at limited depth, why not precompute spline approx for <smoothness>.
+Save/Load graph (in a single file, not necessarily XML, maybe CBOR, maybe text).
 
 
 ---

@@ -99,16 +99,16 @@ interpretAction action =
             "delete single point"
 
         BezierApplyWithOptions options ->
-            "Bezier spline"
+            "smooth with spline"
 
         CentroidAverageApplyWithOptions options ->
-            "centroid average"
+            "smooth with 3d average"
 
         CurveFormerApplyWithOptions options ->
-            "curve former"
+            "radiused bend"
 
         BendSmootherApplyWithOptions options ->
-            "bend smoother"
+            "circuler arc"
 
         PointMovedOnMap _ _ _ _ ->
             "move on map"
@@ -123,7 +123,7 @@ interpretAction action =
             "simplify"
 
         ApplyInterpolateWithOptions options ->
-            "interpolate"
+            "insert points"
 
         OneClickQuickFix ->
             "one-click quick0fix"

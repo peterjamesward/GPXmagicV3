@@ -7,7 +7,7 @@ module Tools.Graph exposing (..)
 import Actions
 import BoundingBox3d
 import Dict exposing (Dict)
-import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), RoadSection, skipCount)
+import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), RoadSection, skipCount, trueLength)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as I
@@ -28,8 +28,6 @@ import ViewPureStyles exposing (commonShortHorizontalSliderStyles, infoButton, n
 defaultOptions : Options
 defaultOptions =
     { graph = Nothing
-    , pointTolerance = Length.meters 4.0
-    , minimumEdgeLength = Length.meters 100
     , centreLineOffset = Length.meters 0.0
     , boundingBox = BoundingBox3d.singleton Point3d.origin
     }
@@ -43,8 +41,6 @@ type Msg
     | RemoveLastTraversal
     | AddTraversalFromCurrent
     | SelectStartNode
-    | SetPointTolerance (Quantity Float Meters)
-    | SetMinimumEdge (Quantity Float Meters)
     | DisplayInfo String String
 
 
@@ -61,25 +57,17 @@ textDictionary =
     , Dict.fromList
         [ ( toolID, "Route builder" )
         , ( "info", infoText )
-        , ( "tolerance", "About the tolerance setting" )
         , ( "offset", "About the offset setting" )
-        , ( "minEdge", "About the minimum edge setting" )
         ]
     )
 
 
 infoText =
-    """
-Here we find repeated sections of a route. You can then pick and choose which
-sections to ride, making your own route based on the original. This will ensure that
-each time you use a section, the altitudes will match and render well in RGT.
-"""
-
-
-toleranceText =
-    """
-Blah blah about the meaning of it all.
-"""
+    """We follow the route looking for places and road sections that are used more than once.
+This allows us to divide the route
+ into a list of sections, where each section follows one piece of road from one place to
+other (or the same place). Once we've done that, you'll be able to change
+the route you take between places. Use the Route view to help construct a new route."""
 
 
 makeXY : EarthPoint -> XY
@@ -101,7 +89,7 @@ view wrapper options =
         analyseButton =
             I.button neatToolsBorder
                 { onPress = Just (wrapper GraphAnalyse)
-                , label = text "Find route sections"
+                , label = text "Find key places"
                 }
 
         finishButton =
@@ -140,45 +128,61 @@ view wrapper options =
                     }
                 ]
 
-        pointToleranceSlider =
-            row [ spacing 5 ]
-                [ none
-                , infoButton (wrapper <| DisplayInfo "graph" "tolerance")
-                , I.slider
-                    commonShortHorizontalSliderStyles
-                    { onChange = wrapper << SetPointTolerance << Length.meters
-                    , label =
-                        I.labelBelow [] <|
-                            text <|
-                                "Consider points equal if within "
-                                    ++ showShortMeasure False options.pointTolerance
-                    , min = 1.0
-                    , max = 10.0
-                    , step = Just 1.0
-                    , value = Length.inMeters options.pointTolerance
-                    , thumb = I.defaultThumb
-                    }
-                ]
+        traversals =
+            -- Display-ready version of the route.
+            case options.graph of
+                Nothing ->
+                    []
 
-        minEdgeSlider =
-            row [ spacing 5 ]
-                [ none
-                , infoButton (wrapper <| DisplayInfo "graph" "minEdge")
-                , I.slider
-                    commonShortHorizontalSliderStyles
-                    { onChange = wrapper << SetMinimumEdge << Length.meters
-                    , label =
-                        I.labelBelow [] <|
-                            text <|
-                                "Ignore sections shorter than "
-                                    ++ showShortMeasure False options.minimumEdgeLength
-                    , min = 10.0
-                    , max = 100.0
-                    , step = Just 5.0
-                    , value = Length.inMeters options.minimumEdgeLength
-                    , thumb = I.defaultThumb
-                    }
+                Just graph ->
+                    graph.userRoute
+                        |> List.map
+                            (\trav ->
+                                let
+                                    edge =
+                                        Dict.get trav.edge graph.edges
+                                in
+                                case edge of
+                                    Nothing ->
+                                        { startPlace = "Place "
+                                        , road = "road "
+                                        , endPlace = "place"
+                                        , length = "unknown"
+                                        }
+
+                                    Just ( ( n1, n2, _ ), tree ) ->
+                                        { startPlace = "Place " ++ String.fromInt n1
+                                        , road = "road " ++ String.fromInt trav.edge
+                                        , endPlace = "place " ++ String.fromInt n2
+                                        , length = showShortMeasure False <| trueLength tree
+                                        }
+                            )
+
+        traversalList =
+            Element.table
+                [ width fill
+                , spacingXY 10 4
                 ]
+                { data = traversals
+                , columns =
+                    [ { header = text "From"
+                      , width = fill
+                      , view = \t -> text t.startPlace
+                      }
+                    , { header = text "Along"
+                      , width = fill
+                      , view = \t -> text t.road
+                      }
+                    , { header = text "To"
+                      , width = fill
+                      , view = \t -> text t.endPlace
+                      }
+                    , { header = text "Distance"
+                      , width = fill
+                      , view = \t -> text t.length
+                      }
+                    ]
+                }
 
         removeButton =
             --TODO: Put a trashcan icon on the last line.
@@ -187,33 +191,21 @@ view wrapper options =
                 , label = text "Remove traversal\nlast in list"
                 }
     in
-    el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
-        case options.graph of
-            Nothing ->
-                column [ width fill, padding 20, spacing 20 ]
-                    [ paragraph [] [ text infoText ]
-                    , infoButton (wrapper <| DisplayInfo "graph" "info")
-                    , pointToleranceSlider
-                    , minEdgeSlider
-                    , analyseButton
-                    ]
-
-            Just g ->
-                column [ width fill, spaceEvenly, paddingXY 20 10, spacingXY 20 10 ]
-                    [ row [ width fill, spaceEvenly, paddingXY 20 10, spacingXY 20 10 ]
-                        [ offsetSlider
-                        , finishButton
-                        ]
-
-                    --, showTheRoute g wrapper
-                    , row [ width fill, spaceEvenly, paddingXY 20 10, spacingXY 20 10 ] <|
-                        if List.length g.userRoute > 0 then
-                            [ removeButton
-                            ]
-
-                        else
-                            [ none ]
-                    ]
+    el
+        [ width fill
+        , Background.color FlatColors.ChinesePalette.antiFlashWhite
+        , padding 4
+        ]
+    <|
+        column [ width fill, padding 4, spacing 10 ]
+            [ row [ centerX, width fill, spacing 10 ]
+                [ infoButton (wrapper <| DisplayInfo "graph" "info")
+                , analyseButton
+                ]
+            , traversalList
+            , offsetSlider
+            , finishButton
+            ]
 
 
 update :
@@ -224,12 +216,6 @@ update :
     -> ( Options, List (Actions.ToolAction msg) )
 update msg options track wrapper =
     case msg of
-        SetPointTolerance quantity ->
-            ( { options | pointTolerance = quantity }, [] )
-
-        SetMinimumEdge quantity ->
-            ( { options | minimumEdgeLength = quantity }, [] )
-
         GraphAnalyse ->
             ( { options | graph = Just <| buildGraph track }, [] )
 
@@ -457,7 +443,7 @@ buildGraph track =
     in
     { nodes = nodes
     , edges = finalEdgeFinder.edgesDict
-    , userRoute = finalEdgeFinder.traversals
+    , userRoute = List.reverse finalEdgeFinder.traversals
     , selectedTraversal = Nothing
     , referenceLonLat = track.referenceLonLat
     }
