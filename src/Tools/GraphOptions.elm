@@ -5,14 +5,12 @@ import Dict exposing (Dict)
 import DomainModel exposing (GPXSource, PeteTree)
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
-import Point2d exposing (Point2d)
-import Point3d exposing (Point3d)
 import Quantity exposing (Quantity)
 
 
 type Direction
-    = Forwards
-    | Backwards
+    = Natural -- from low node to high
+    | Reverse -- from high to low
 
 
 type alias XY =
@@ -32,9 +30,8 @@ type alias Options =
 
 type alias Graph =
     { nodes : Dict Int XY
-    , edges : Dict Int ( Int, Int, PeteTree )
+    , edges : Dict Int ( ( Int, Int, XY ), PeteTree ) -- key == (low node index, high node index, point 1 XY)
     , userRoute : List Traversal
-    , canonicalRoute : List Traversal
     , selectedTraversal : Maybe Int
     , referenceLonLat : GPXSource
     }

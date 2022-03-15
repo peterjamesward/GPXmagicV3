@@ -28,6 +28,7 @@ module DomainModel exposing
     , indexFromDistanceRoundedDown
     , leafFromIndex
     , lngLatPair
+    , makeLeaf
     , nearestToLonLat
     , nearestToRay
     , pointFromGpxWithReference
@@ -281,6 +282,11 @@ gpxFromPointWithReference reference point =
         (Direction2d.fromAngle longitude)
         latitude
         (Length.meters altitude)
+
+
+makeLeaf : GPXSource -> GPXSource -> GPXSource -> PeteTree
+makeLeaf reference earth1 earth2 =
+    Leaf <| makeRoadSection reference earth1 earth2
 
 
 makeRoadSection : GPXSource -> GPXSource -> GPXSource -> RoadSection

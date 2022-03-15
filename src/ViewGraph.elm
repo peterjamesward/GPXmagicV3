@@ -267,7 +267,7 @@ view context ( width, height ) mGraph msgWrapper =
                     graph.edges
                         |> Dict.values
                         |> List.map
-                            (\( node1, node2, edge ) ->
+                            (\( ( node1, node2, disc ), edge ) ->
                                 renderEdgeArc edge
                             )
 
@@ -366,7 +366,7 @@ view context ( width, height ) mGraph msgWrapper =
                     graph.edges
                         |> Dict.toList
                         |> List.map
-                            (\( index, ( node1, node2, tree ) ) ->
+                            (\( index, ( ( node1, node2, disc ), tree ) ) ->
                                 let
                                     labelAt =
                                         earthPointFromIndex (skipCount tree // 2) tree
@@ -600,7 +600,7 @@ detectHit event graph ( w, h ) context =
             graph.edges
                 |> Dict.toList
                 |> List.map
-                    (\( edgeIndex, ( startNode, endNode, tree ) ) ->
+                    (\( edgeIndex, ( ( startNode, endNode, disc ), tree ) ) ->
                         let
                             thisEdgeNearestIndex =
                                 nearestToRay ray tree
@@ -627,7 +627,7 @@ detectHit event graph ( w, h ) context =
                 Nothing ->
                     ClickNone
 
-                Just ( startNode, endNode, tree ) ->
+                Just ( ( startNode, endNode, disc ), tree ) ->
                     ClickNode startNode
 
         returnEndNode edgeIndex =
@@ -635,7 +635,7 @@ detectHit event graph ( w, h ) context =
                 Nothing ->
                     ClickNone
 
-                Just ( startNode, endNode, tree ) ->
+                Just ( ( startNode, endNode, disc ), tree ) ->
                     ClickNode endNode
     in
     case bestCandidate of

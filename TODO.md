@@ -30,23 +30,14 @@ Perspective view by default? It currently takes loads of clicks to get it to a u
 
 ## Route Builder
 
-~~Clone graph view from plan view.~~
-~~Pass Graph into the View.~~
-~~Add SVG overlays for Nodes ...~~
-~~... and Edges.~~
-~~> Down-sample edges (depth 5-ish).~~
-~~Graph needs a referenceLonLat.~~
-~~Test concept of popup action menus on the view.~~
-~~> onClick method on `inFront` => message => update => Maybe MousePosition => moveLeft/Down.~~
-~~Hit detect for Nodes and Edges.~~
-~~Proforma popup menus for Node and Edge.~~
-~~Use circular arc for edge?~~
-
-Transition v2 Node detection / canonical Edge code.
-> May try simpler version without canonicalization, since user can tidy it up.
+Graph looks pretty good, but:
+1. Can't (easily, or sometimes at all) select a Place;
+2. May need some XY tolerance;
+3. Not adopting the canon.
 
 Start with `trivialGraph`; analyse button => proper graph.
 Save/Load graph (in a single file, not necessarily XML, maybe CBOR, maybe text).
+Make node and edge labels clickable.
 Add "switch editing track". 
 Highlight selected on Route view.
 Add "delete Edge".
