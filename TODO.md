@@ -29,6 +29,7 @@ if the map is draggable it doesn't centre the view on the issue.
 ~~Highlight current traversal in list and on route.~~
 ~~Option to show edges as arcs or elided roads.~~
 ~~Disable analyze button once used (graph state needed).~~
+~~Add "show" button to table rows.~~
 
 Add "remove last" and "clear" traversal buttons.
 Add "edit road"; changes active Track.
@@ -46,6 +47,7 @@ Save/Load graph (in a single file, not necessarily XML, maybe CBOR, maybe text).
 Clean up parameters passed from main to PaneLayoutManager.
 Load new track should reset analyzed state.
 BUG? - total length > track length,
+Centre Plan view on selected traversal.
 
 
 ---

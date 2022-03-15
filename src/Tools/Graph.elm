@@ -211,10 +211,11 @@ view wrapper options =
                 , Border.color rgtDark
                 ]
                 [ row [ width fill ]
-                    [ el ((width <| fillPortion 1) :: headerAttrs) <| text "From"
-                    , el ((width <| fillPortion 1) :: headerAttrs) <| text "Along"
-                    , el ((width <| fillPortion 1) :: headerAttrs) <| text "To"
-                    , el ((width <| fillPortion 1) :: headerAttrs) <| text "Distance"
+                    [ el ((width <| fillPortion 1) :: headerAttrs) <| text "  "
+                    , el ((width <| fillPortion 2) :: headerAttrs) <| text "From"
+                    , el ((width <| fillPortion 2) :: headerAttrs) <| text "Along"
+                    , el ((width <| fillPortion 2) :: headerAttrs) <| text "To"
+                    , el ((width <| fillPortion 2) :: headerAttrs) <| text "Distance"
                     ]
 
                 -- workaround for a bug: it's necessary to wrap `table` in an `el`
@@ -232,25 +233,34 @@ view wrapper options =
                               , width = fillPortion 1
                               , view =
                                     \i t ->
+                                        I.button []
+                                            { onPress = Just <| wrapper <| HighlightTraversal i
+                                            , label = useIcon FeatherIcons.eye
+                                            }
+                              }
+                            , { header = none
+                              , width = fillPortion 2
+                              , view =
+                                    \i t ->
                                         el (dataStyles (i == options.selectedTraversal)) <|
                                             text t.startPlace
                               }
                             , { header = none
-                              , width = fillPortion 1
+                              , width = fillPortion 2
                               , view =
                                     \i t ->
                                         el (dataStyles (i == options.selectedTraversal)) <|
                                             text t.road
                               }
                             , { header = none
-                              , width = fillPortion 1
+                              , width = fillPortion 2
                               , view =
                                     \i t ->
                                         el (dataStyles (i == options.selectedTraversal)) <|
                                             text t.endPlace
                               }
                             , { header = none
-                              , width = fillPortion 1
+                              , width = fillPortion 2
                               , view =
                                     \i t ->
                                         el (dataStyles (i == options.selectedTraversal)) <|
@@ -261,9 +271,10 @@ view wrapper options =
                         }
                 , row [ width fill ]
                     [ el ((width <| fillPortion 1) :: footerAttrs) <| text " "
-                    , el ((width <| fillPortion 1) :: footerAttrs) <| text " "
-                    , el ((width <| fillPortion 1) :: footerAttrs) <| text " "
-                    , el ((width <| fillPortion 1) :: footerAttrs) <|
+                    , el ((width <| fillPortion 2) :: footerAttrs) <| text " "
+                    , el ((width <| fillPortion 2) :: footerAttrs) <| text " "
+                    , el ((width <| fillPortion 2) :: footerAttrs) <| text " "
+                    , el ((width <| fillPortion 2) :: footerAttrs) <|
                         text <|
                             showLongMeasure False totalLength
                     ]
