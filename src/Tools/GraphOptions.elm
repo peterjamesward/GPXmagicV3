@@ -22,6 +22,7 @@ type alias Options =
     { graph : Maybe Graph
     , centreLineOffset : Length.Length
     , boundingBox : BoundingBox3d Length.Meters LocalCoords
+    , selectedTraversal : Int
     }
 
 
@@ -29,7 +30,6 @@ type alias Graph =
     { nodes : Dict Int XY
     , edges : Dict Int ( ( Int, Int, XY ), PeteTree ) -- key == (low node index, high node index, point 1 XY)
     , userRoute : List Traversal
-    , selectedTraversal : Maybe Int
     , referenceLonLat : GPXSource
     }
 

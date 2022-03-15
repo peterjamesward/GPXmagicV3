@@ -744,12 +744,13 @@ viewPanes :
     (Msg -> msg)
     -> Maybe (TrackLoaded msg)
     -> Maybe Tools.GraphOptions.Graph
+    -> Tools.GraphOptions.Options
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Options
     -> Maybe Tools.Flythrough.Flythrough
     -> Dict String PreviewData
     -> Element msg
-viewPanes msgWrapper mTrack graph ( w, h ) options mFlythrough previews =
+viewPanes msgWrapper mTrack graph graphOptions ( w, h ) options mFlythrough previews =
     let
         ( paneWidth, paneHeight ) =
             dimensionsWithLayout options.paneLayout ( w, h )
@@ -803,6 +804,7 @@ viewPanes msgWrapper mTrack graph ( w, h ) options mFlythrough previews =
                                 context
                                 ( paneWidth, paneHeight )
                                 graph
+                                graphOptions
                                 (msgWrapper << GraphViewMessage pane.paneId)
 
                         _ ->

@@ -13,6 +13,7 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Element.Input as I
+import FeatherIcons
 import FlatColors.ChinesePalette
 import Length exposing (Length, Meters, inMeters)
 import List.Extra
@@ -24,7 +25,7 @@ import SketchPlane3d
 import Tools.GraphOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal2, showLongMeasure, showShortMeasure)
-import ViewPureStyles exposing (commonShortHorizontalSliderStyles, infoButton, neatToolsBorder, rgtDark, rgtPurple, useIcon)
+import ViewPureStyles exposing (commonShortHorizontalSliderStyles, infoButton, neatToolsBorder, rgtDark, rgtPurple, useIcon, useIconWithSize)
 
 
 defaultOptions : Options
@@ -32,6 +33,7 @@ defaultOptions =
     { graph = Nothing
     , centreLineOffset = Length.meters 0.0
     , boundingBox = BoundingBox3d.singleton Point3d.origin
+    , selectedTraversal = 0
     }
 
 
@@ -39,7 +41,7 @@ type Msg
     = GraphAnalyse
     | CentreLineOffset (Quantity Float Meters)
     | ConvertFromGraph
-    | HighlightTraversal Traversal
+    | HighlightTraversal Int
     | RemoveLastTraversal
     | AddTraversalFromCurrent
     | SelectStartNode
@@ -160,31 +162,16 @@ view wrapper options =
                                         }
                             )
 
-        traversalList =
-            Element.table
-                [ width fill
-                , spacingXY 10 4
+        dataStyles selected =
+            if selected then
+                [ Font.color FlatColors.ChinesePalette.antiFlashWhite
+                , Font.bold
+                , Background.color rgtPurple
+                , padding 2
                 ]
-                { data = traversals
-                , columns =
-                    [ { header = text "From"
-                      , width = fill
-                      , view = \t -> text t.startPlace
-                      }
-                    , { header = text "Along"
-                      , width = fill
-                      , view = \t -> text t.road
-                      }
-                    , { header = text "To"
-                      , width = fill
-                      , view = \t -> text t.endPlace
-                      }
-                    , { header = text "Distance"
-                      , width = fill
-                      , view = \t -> text t.length
-                      }
-                    ]
-                }
+
+            else
+                [ Font.color rgtDark, padding 2 ]
 
         traversalsTable : Element msg
         traversalsTable =
@@ -215,39 +202,64 @@ view wrapper options =
                 -- workaround for a bug: it's necessary to wrap `table` in an `el`
                 -- to get table height attribute to apply
                 , el [ width fill ] <|
-                    table
+                    indexedTable
                         [ width fill
                         , height <| px 250
                         , scrollbarY
-                        , spacing 10
+                        , spacing 4
                         ]
                         { data = traversals
                         , columns =
                             [ { header = none
                               , width = fillPortion 1
-                              , view = \t -> text t.startPlace
+                              , view =
+                                    \i t ->
+                                        el (dataStyles (i == options.selectedTraversal)) <|
+                                            text t.startPlace
                               }
                             , { header = none
                               , width = fillPortion 1
-                              , view = \t -> text t.road
+                              , view =
+                                    \i t ->
+                                        el (dataStyles (i == options.selectedTraversal)) <|
+                                            text t.road
                               }
                             , { header = none
                               , width = fillPortion 1
-                              , view = \t -> text t.endPlace
+                              , view =
+                                    \i t ->
+                                        el (dataStyles (i == options.selectedTraversal)) <|
+                                            text t.endPlace
                               }
                             , { header = none
                               , width = fillPortion 1
-                              , view = \t -> text t.length
+                              , view =
+                                    \i t ->
+                                        el (dataStyles (i == options.selectedTraversal)) <|
+                                            text t.length
                               }
                             ]
                         }
                 ]
 
-        removeButton =
-            --TODO: Put a trashcan icon on the last line.
+        traversalNext =
             I.button neatToolsBorder
-                { onPress = Just (wrapper RemoveLastTraversal)
-                , label = text "Remove traversal\nlast in list"
+                { onPress =
+                    Just <|
+                        wrapper <|
+                            HighlightTraversal <|
+                                min (List.length traversals - 1) (options.selectedTraversal + 1)
+                , label = useIconWithSize 16 FeatherIcons.chevronRight
+                }
+
+        traversalPrevious =
+            I.button neatToolsBorder
+                { onPress =
+                    Just <|
+                        wrapper <|
+                            HighlightTraversal <|
+                                max 0 (options.selectedTraversal - 1)
+                , label = useIconWithSize 16 FeatherIcons.chevronLeft
                 }
     in
     el
@@ -260,6 +272,8 @@ view wrapper options =
             [ row [ centerX, width fill, spacing 10 ]
                 [ infoButton (wrapper <| DisplayInfo "graph" "info")
                 , analyseButton
+                , traversalPrevious
+                , traversalNext
                 ]
             , traversalsTable
             , offsetSlider
@@ -279,7 +293,7 @@ update msg options track wrapper =
             ( { options | graph = Just <| buildGraph track }, [] )
 
         HighlightTraversal traversal ->
-            ( options, [] )
+            ( { options | selectedTraversal = traversal }, [] )
 
         SelectStartNode ->
             ( options, [] )
@@ -503,7 +517,6 @@ buildGraph track =
     { nodes = nodes
     , edges = finalEdgeFinder.edgesDict
     , userRoute = List.reverse finalEdgeFinder.traversals
-    , selectedTraversal = Nothing
     , referenceLonLat = track.referenceLonLat
     }
 
@@ -535,7 +548,6 @@ trivialGraph track =
     { nodes = nodes
     , edges = edges
     , userRoute = [ traversal ]
-    , selectedTraversal = Nothing
     , referenceLonLat = track.referenceLonLat
     }
 

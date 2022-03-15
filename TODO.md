@@ -25,10 +25,10 @@ if the map is draggable it doesn't centre the view on the issue.
 ~~Is Route visible only when Route Builder tool open?~~
 ~~Display traversals in tool.~~
 ~~Make table scrollable and prettier.~~
+~~Add forward and back in traversal list.~~
+~~Highlight current traversal in list and on route.~~
 Add "remove last" and "clear" traversal buttons.
-Add forward and back in traversal list.
-Highlight current traversal in list and on route.
-Add "switch editing track". 
+Add "edit road"; changes active Track.
 Add "delete Edge".
 Add "delete Node" ( 1-in, 1-out only; joins trees )
 Add "coalesce Nodes".

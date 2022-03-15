@@ -47,8 +47,9 @@ import Svg.Attributes
 import ToolTip exposing (myTooltip, tooltip)
 import Tools.GraphOptions exposing (ClickDetect(..), Graph)
 import TrackLoaded exposing (TrackLoaded)
+import UtilsForViews exposing (colourHexString, uiColourHexString)
 import Vector3d
-import ViewPureStyles exposing (rgtDark, useIcon)
+import ViewPureStyles exposing (rgtDark, rgtPurple, useIcon)
 import Viewpoint3d exposing (Viewpoint3d)
 
 
@@ -212,9 +213,10 @@ view :
     Context
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Maybe Graph
+    -> Tools.GraphOptions.Options
     -> (Msg -> msg)
     -> Element msg
-view context ( width, height ) mGraph msgWrapper =
+view context ( width, height ) mGraph options msgWrapper =
     let
         dragging =
             context.dragAction
@@ -265,27 +267,46 @@ view context ( width, height ) mGraph msgWrapper =
             case mGraph of
                 Just graph ->
                     graph.edges
-                        |> Dict.values
+                        |> Dict.toList
                         |> List.map
-                            (\( ( node1, node2, disc ), edge ) ->
-                                renderEdgeArc edge
+                            (\( index, ( ( node1, node2, disc ), edge ) ) ->
+                                renderEdgeArc index edge
                             )
 
                 Nothing ->
                     []
 
-        edgeAttributes colour =
-            [ Svg.Attributes.stroke colour
-            , Svg.Attributes.fill "none"
-            , Svg.Attributes.strokeWidth "3"
-            , Svg.Attributes.strokeLinecap "round"
-            , Svg.Attributes.strokeLinejoin "round"
-            ]
+        edgeToHighlight =
+            case mGraph of
+                Nothing ->
+                    -1
 
-        pointsAsPolyline : String -> List (Point2d.Point2d units coordinates) -> Svg msg
-        pointsAsPolyline colour points =
+                Just graph ->
+                    List.Extra.getAt options.selectedTraversal graph.userRoute
+                        |> Maybe.map .edge
+                        |> Maybe.withDefault -1
+
+        edgeAttributes edgeIndex =
+            if edgeIndex == edgeToHighlight then
+                [ Svg.Attributes.stroke <| uiColourHexString rgtPurple
+                , Svg.Attributes.fill "none"
+                , Svg.Attributes.strokeWidth "5"
+                , Svg.Attributes.strokeLinecap "round"
+                , Svg.Attributes.strokeLinejoin "round"
+                ]
+
+            else
+                [ Svg.Attributes.stroke <| uiColourHexString FlatColors.FlatUIPalette.peterRiver
+                , Svg.Attributes.fill "none"
+                , Svg.Attributes.strokeWidth "3"
+                , Svg.Attributes.strokeLinecap "round"
+                , Svg.Attributes.strokeLinejoin "round"
+                ]
+
+        pointsAsPolyline : Int -> List (Point2d.Point2d units coordinates) -> Svg msg
+        pointsAsPolyline edgeIndex points =
             Svg.polyline2d
-                (edgeAttributes colour)
+                (edgeAttributes edgeIndex)
                 (Polyline2d.fromVertices points)
 
         edgeFold :
@@ -296,8 +317,8 @@ view context ( width, height ) mGraph msgWrapper =
             Point3d.toScreenSpace camera screenRectangle road.endPoint
                 :: outputs
 
-        renderEdge : PeteTree -> Svg msg
-        renderEdge tree =
+        renderEdge : Int -> PeteTree -> Svg msg
+        renderEdge edgeIndex tree =
             let
                 svgPoints =
                     DomainModel.traverseTreeBetweenLimitsToDepth
@@ -313,10 +334,10 @@ view context ( width, height ) mGraph msgWrapper =
                     DomainModel.earthPointFromIndex 0 tree
                         |> Point3d.toScreenSpace camera screenRectangle
             in
-            svgPoints |> pointsAsPolyline "black"
+            svgPoints |> pointsAsPolyline edgeIndex
 
-        renderEdgeArc : PeteTree -> Svg msg
-        renderEdgeArc tree =
+        renderEdgeArc : Int -> PeteTree -> Svg msg
+        renderEdgeArc edgeIndex tree =
             -- If we can construct an arc, use it, otherwise just two lines.
             let
                 ( start, mid, end ) =
@@ -330,10 +351,10 @@ view context ( width, height ) mGraph msgWrapper =
             in
             case Arc2d.throughPoints start mid end of
                 Just arc ->
-                    arc |> Svg.arc2d (edgeAttributes "black")
+                    arc |> Svg.arc2d (edgeAttributes edgeIndex)
 
                 Nothing ->
-                    renderEdge tree
+                    renderEdge edgeIndex tree
 
         textAttributes atPoint =
             [ Svg.Attributes.fill "rgb(250, 250, 250)"
