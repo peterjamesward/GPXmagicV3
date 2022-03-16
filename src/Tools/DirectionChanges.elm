@@ -463,7 +463,7 @@ view imperial msgWrapper options isTrack =
                                 , onPress = Just <| msgWrapper <| ViewPrevious
                                 }
                             , Input.button
-                                (buttonStylesWithTooltip below "Centre view on this issue")
+                                (buttonStylesWithTooltip below "Move pointer to this issue\n(Is the padlock on?)")
                                 { label = useIcon FeatherIcons.mousePointer
                                 , onPress = Just <| msgWrapper <| SetCurrentPosition position
                                 }

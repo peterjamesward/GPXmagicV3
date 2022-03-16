@@ -8,9 +8,6 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 **BUG**: When using "Move start/finish to current point" it creates a gap.
 
-**BUG**: Bend/Gradient problems "centre view on this issue" button -
-if the map is draggable it doesn't centre the view on the issue.
- 
 --
 
 # WIP
