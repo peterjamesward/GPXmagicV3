@@ -218,12 +218,12 @@ update :
     Msg
     -> (Msg -> msg)
     -> Maybe (TrackLoaded msg)
-    -> Maybe Graph
+    -> Graph
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Options
     -> Dict String PreviewData
     -> ( Options, List (ToolAction msg) )
-update paneMsg msgWrapper mTrack mGraph contentArea options previews =
+update paneMsg msgWrapper mTrack graph contentArea options previews =
     let
         updatePaneWith : PaneId -> (PaneContext -> PaneContext) -> Options
         updatePaneWith id updateFn =
@@ -438,8 +438,8 @@ update paneMsg msgWrapper mTrack mGraph contentArea options previews =
                             options.pane4
 
                 ( newContext, actions ) =
-                    case ( mGraph, paneInfo.graphContext ) of
-                        ( Just graph, Just graphContext ) ->
+                    case paneInfo.graphContext of
+                        Just graphContext ->
                             let
                                 ( new, act ) =
                                     ViewGraph.update
@@ -743,7 +743,7 @@ dimensionsWithLayout layout ( w, h ) =
 viewPanes :
     (Msg -> msg)
     -> Maybe (TrackLoaded msg)
-    -> Maybe Tools.GraphOptions.Graph
+    -> Tools.GraphOptions.Graph
     -> Tools.GraphOptions.Options
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Options

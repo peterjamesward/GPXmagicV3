@@ -5,8 +5,10 @@ module Tools.Graph exposing (..)
 -- of track points multiple times and in each direction.
 
 import Actions
+import Angle
 import BoundingBox3d
 import Dict exposing (Dict)
+import Direction2d
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), RoadSection, skipCount, trueLength)
 import Element exposing (..)
 import Element.Background as Background
@@ -22,6 +24,7 @@ import Point3d
 import Quantity exposing (Quantity, zero)
 import Set exposing (Set)
 import SketchPlane3d
+import ToolTip exposing (myTooltip, tooltip)
 import Tools.GraphOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal2, showLongMeasure, showShortMeasure)
@@ -30,7 +33,7 @@ import ViewPureStyles exposing (commonShortHorizontalSliderStyles, infoButton, n
 
 defaultOptions : Options
 defaultOptions =
-    { graph = Nothing
+    { graph = emptyGraph
     , centreLineOffset = Length.meters 0.0
     , boundingBox = BoundingBox3d.singleton Point3d.origin
     , selectedTraversal = 0
@@ -47,6 +50,19 @@ type Msg
     | AddTraversalFromCurrent
     | SelectStartNode
     | DisplayInfo String String
+
+
+emptyGraph : Graph
+emptyGraph =
+    { nodes = Dict.empty
+    , edges = Dict.empty
+    , userRoute = []
+    , referenceLonLat =
+        { latitude = Angle.degrees 0
+        , longitude = Direction2d.positiveX
+        , altitude = Quantity.zero
+        }
+    }
 
 
 toolID : String
@@ -142,42 +158,41 @@ view wrapper options =
 
         traversals =
             -- Display-ready version of the route.
-            case options.graph of
-                Nothing ->
-                    []
+            let
+                graph =
+                    options.graph
+            in
+            graph.userRoute
+                |> List.map
+                    (\{ edge, direction } ->
+                        let
+                            edgeInfo =
+                                Dict.get edge graph.edges
+                        in
+                        case edgeInfo of
+                            Nothing ->
+                                { startPlace = "Place "
+                                , road = "road "
+                                , endPlace = "place"
+                                , length = Quantity.zero
+                                }
 
-                Just graph ->
-                    graph.userRoute
-                        |> List.map
-                            (\{ edge, direction } ->
-                                let
-                                    edgeInfo =
-                                        Dict.get edge graph.edges
-                                in
-                                case edgeInfo of
-                                    Nothing ->
-                                        { startPlace = "Place "
-                                        , road = "road "
-                                        , endPlace = "place"
-                                        , length = Quantity.zero
+                            Just ( ( n1, n2, _ ), tree ) ->
+                                case direction of
+                                    Natural ->
+                                        { startPlace = "Place " ++ String.fromInt n1
+                                        , road = "road " ++ String.fromInt edge
+                                        , endPlace = "place " ++ String.fromInt n2
+                                        , length = trueLength tree
                                         }
 
-                                    Just ( ( n1, n2, _ ), tree ) ->
-                                        case direction of
-                                            Natural ->
-                                                { startPlace = "Place " ++ String.fromInt n1
-                                                , road = "road " ++ String.fromInt edge
-                                                , endPlace = "place " ++ String.fromInt n2
-                                                , length = trueLength tree
-                                                }
-
-                                            Reverse ->
-                                                { startPlace = "Place " ++ String.fromInt n2
-                                                , road = "road " ++ String.fromInt edge
-                                                , endPlace = "place " ++ String.fromInt n1
-                                                , length = trueLength tree
-                                                }
-                            )
+                                    Reverse ->
+                                        { startPlace = "Place " ++ String.fromInt n2
+                                        , road = "road " ++ String.fromInt edge
+                                        , endPlace = "place " ++ String.fromInt n1
+                                        , length = trueLength tree
+                                        }
+                    )
 
         totalLength =
             traversals |> List.map .length |> Quantity.sum
@@ -242,10 +257,20 @@ view wrapper options =
                               , width = fillPortion 1
                               , view =
                                     \i t ->
-                                        I.button []
-                                            { onPress = Just <| wrapper <| HighlightTraversal i
-                                            , label = useIcon FeatherIcons.eye
-                                            }
+                                        row [ spacing 2 ]
+                                            [ if i + 1 == List.length traversals then
+                                                I.button []
+                                                    { onPress = Just <| wrapper RemoveLastTraversal
+                                                    , label = useIcon FeatherIcons.delete
+                                                    }
+
+                                              else
+                                                none
+                                            , I.button [ tooltip below (myTooltip "Remove") ]
+                                                { onPress = Just <| wrapper <| HighlightTraversal i
+                                                , label = useIcon FeatherIcons.eye
+                                                }
+                                            ]
                               }
                             , { header = none
                               , width = fillPortion 2
@@ -337,7 +362,7 @@ update msg options track wrapper =
     case msg of
         GraphAnalyse ->
             ( { options
-                | graph = Just <| buildGraph track
+                | graph = buildGraph track
                 , analyzed = True
               }
             , []
@@ -353,7 +378,9 @@ update msg options track wrapper =
             ( options, [] )
 
         RemoveLastTraversal ->
-            ( options, [] )
+            ( options
+            , []
+            )
 
         CentreLineOffset float ->
             ( { options | centreLineOffset = float }, [] )

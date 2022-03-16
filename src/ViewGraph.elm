@@ -224,11 +224,11 @@ onContextMenu msg =
 view :
     Context
     -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> Maybe Graph
+    -> Graph
     -> Tools.GraphOptions.Options
     -> (Msg -> msg)
     -> Element msg
-view context ( width, height ) mGraph options msgWrapper =
+view context ( width, height ) graph options msgWrapper =
     let
         dragging =
             context.dragAction
@@ -246,19 +246,14 @@ view context ( width, height ) mGraph options msgWrapper =
         -- Take all vertices of the logo shape, rotate them the same amount as
         -- the logo itself and then project them into 2D screen space
         nodes2d =
-            case mGraph of
-                Just graph ->
-                    graph.nodes
-                        |> Dict.map
-                            (\idx pt ->
-                                pt
-                                    |> Point2d.fromTuple meters
-                                    |> Point3d.on SketchPlane3d.xy
-                                    |> Point3d.toScreenSpace camera screenRectangle
-                            )
-
-                Nothing ->
-                    Dict.empty
+            graph.nodes
+                |> Dict.map
+                    (\idx pt ->
+                        pt
+                            |> Point2d.fromTuple meters
+                            |> Point3d.on SketchPlane3d.xy
+                            |> Point3d.toScreenSpace camera screenRectangle
+                    )
 
         -- Create an SVG circle at each Node
         svgNodes =
@@ -276,32 +271,22 @@ view context ( width, height ) mGraph options msgWrapper =
 
         -- Create an SVG line for each Edge, approximated.
         svgEdges =
-            case mGraph of
-                Just graph ->
-                    graph.edges
-                        |> Dict.toList
-                        |> List.map
-                            (\( index, ( ( node1, node2, disc ), edge ) ) ->
-                                case context.edgeMode of
-                                    EdgeArc ->
-                                        renderEdgeArc index edge
+            graph.edges
+                |> Dict.toList
+                |> List.map
+                    (\( index, ( ( node1, node2, disc ), edge ) ) ->
+                        case context.edgeMode of
+                            EdgeArc ->
+                                renderEdgeArc index edge
 
-                                    EdgeSketch ->
-                                        renderEdge index edge
-                            )
-
-                Nothing ->
-                    []
+                            EdgeSketch ->
+                                renderEdge index edge
+                    )
 
         edgeToHighlight =
-            case mGraph of
-                Nothing ->
-                    -1
-
-                Just graph ->
-                    List.Extra.getAt options.selectedTraversal graph.userRoute
-                        |> Maybe.map .edge
-                        |> Maybe.withDefault -1
+            List.Extra.getAt options.selectedTraversal graph.userRoute
+                |> Maybe.map .edge
+                |> Maybe.withDefault -1
 
         edgeAttributes edgeIndex =
             if edgeIndex == edgeToHighlight then
@@ -399,28 +384,23 @@ view context ( width, height ) mGraph options msgWrapper =
 
         -- Create text SVG labels beside each projected edge
         edgeLabels =
-            case mGraph of
-                Just graph ->
-                    graph.edges
-                        |> Dict.toList
-                        |> List.map
-                            (\( index, ( ( node1, node2, disc ), tree ) ) ->
-                                let
-                                    labelAt =
-                                        earthPointFromIndex (skipCount tree // 2) tree
-                                            |> Point3d.toScreenSpace camera screenRectangle
-                                in
-                                Svg.text_
-                                    (textAttributes labelAt)
-                                    [ Svg.text ("Road " ++ String.fromInt index) ]
-                                    -- Hack: flip the text upside down since our later
-                                    -- 'Svg.relativeTo topLeftFrame' call will flip it
-                                    -- back right side up
-                                    |> Svg.mirrorAcross (Axis2d.through labelAt Direction2d.x)
-                            )
-
-                Nothing ->
-                    []
+            graph.edges
+                |> Dict.toList
+                |> List.map
+                    (\( index, ( ( node1, node2, disc ), tree ) ) ->
+                        let
+                            labelAt =
+                                earthPointFromIndex (skipCount tree // 2) tree
+                                    |> Point3d.toScreenSpace camera screenRectangle
+                        in
+                        Svg.text_
+                            (textAttributes labelAt)
+                            [ Svg.text ("Road " ++ String.fromInt index) ]
+                            -- Hack: flip the text upside down since our later
+                            -- 'Svg.relativeTo topLeftFrame' call will flip it
+                            -- back right side up
+                            |> Svg.mirrorAcross (Axis2d.through labelAt Direction2d.x)
+                    )
 
         -- Used for converting from coordinates relative to the bottom-left
         -- corner of the 2D drawing into coordinates relative to the top-left

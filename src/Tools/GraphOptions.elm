@@ -20,7 +20,7 @@ type alias XY =
 
 
 type alias Options =
-    { graph : Maybe Graph
+    { graph :  Graph
     , centreLineOffset : Length.Length
     , boundingBox : BoundingBox3d Length.Meters LocalCoords
     , selectedTraversal : Int
