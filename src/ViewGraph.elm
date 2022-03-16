@@ -44,6 +44,7 @@ import Spherical exposing (metresPerPixel)
 import Svg exposing (Svg)
 import Svg.Attributes
 import ToolTip exposing (myTooltip, tooltip)
+import Tools.Graph
 import Tools.GraphOptions exposing (ClickDetect(..), Direction(..), Graph)
 import UtilsForViews exposing (colourHexString, uiColourHexString)
 import Vector3d
@@ -64,6 +65,7 @@ type Msg
     | ClickDelayExpired
     | PopupHide
     | ToggleEdgeMode
+    | AddTraversal Int
 
 
 type DragAction
@@ -167,19 +169,27 @@ zoomButtons msgWrapper context =
         ]
 
 
-popup : (Msg -> msg) -> Context -> Element msg
-popup msgWrapper context =
+popup : (Msg -> msg) -> Context -> Tools.GraphOptions.Options -> Element msg
+popup msgWrapper context options =
     let
         popupMenu =
             case context.clickFeature of
                 ClickNone ->
-                    none
+                    []
 
                 ClickNode node ->
-                    text <| "Place " ++ String.fromInt node
+                    []
 
                 ClickEdge edge ->
-                    text <| "Road " ++ String.fromInt edge
+                    if Tools.Graph.edgeCanBeAdded edge options then
+                        [ Input.button [ tooltip below (myTooltip "Add to route") ]
+                            { onPress = Just <| msgWrapper <| AddTraversal edge
+                            , label = useIcon FeatherIcons.plus
+                            }
+                        ]
+
+                    else
+                        []
     in
     case context.clickPoint of
         Nothing ->
@@ -201,12 +211,13 @@ popup msgWrapper context =
                 , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ImageNoOp >> msgWrapper)
                 , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always ImageNoOp >> msgWrapper)
                 ]
-                [ popupMenu
-                , Input.button [ tooltip below (myTooltip "Close menu") ]
-                    { onPress = Just <| msgWrapper PopupHide
-                    , label = useIcon FeatherIcons.x
-                    }
-                ]
+                (popupMenu
+                    ++ [ Input.button [ tooltip below (myTooltip "Close menu") ]
+                            { onPress = Just <| msgWrapper PopupHide
+                            , label = useIcon FeatherIcons.x
+                            }
+                       ]
+                )
 
 
 onContextMenu : a -> Element.Attribute a
@@ -288,6 +299,15 @@ view context ( width, height ) graph options msgWrapper =
                 |> Maybe.map .edge
                 |> Maybe.withDefault -1
 
+        arrowAttributes atPoint =
+            [ Svg.Attributes.fill <| uiColourHexString rgtPurple
+            , Svg.Attributes.fontFamily "sans serif"
+            , Svg.Attributes.fontSize "20px"
+            , Svg.Attributes.stroke "none"
+            , Svg.Attributes.x (String.fromFloat (Pixels.toFloat (Point2d.xCoordinate atPoint) + 10))
+            , Svg.Attributes.y (String.fromFloat (Pixels.toFloat (Point2d.yCoordinate atPoint) + 10))
+            ]
+
         arrowsOnHighlightedEdge =
             case List.Extra.getAt options.selectedTraversal graph.userRoute of
                 Nothing ->
@@ -320,7 +340,7 @@ view context ( width, height ) graph options msgWrapper =
                                             toAngle <| Direction2d.reverse midLeaf.directionAtStart
                             in
                             [ Svg.text_
-                                (textAttributes p1)
+                                (arrowAttributes p1)
                                 [ Svg.text ">>>>" ]
                                 -- Hack: flip the text upside down since our later
                                 -- 'Svg.relativeTo topLeftFrame' call will flip it
@@ -486,7 +506,7 @@ view context ( width, height ) graph options msgWrapper =
         , Border.color FlatColors.ChinesePalette.peace
         , Background.color FlatColors.FlatUIPalette.emerald
         , inFront <| zoomButtons msgWrapper context
-        , inFront <| popup msgWrapper context
+        , inFront <| popup msgWrapper context options
         ]
     <|
         Element.html svgElement
@@ -641,6 +661,9 @@ update msg msgWrapper graph area context =
               }
             , []
             )
+
+        AddTraversal edge ->
+            ( context, [ Actions.AddTraversal edge ] )
 
 
 detectHit :

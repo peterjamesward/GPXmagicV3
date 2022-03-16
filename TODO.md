@@ -19,11 +19,14 @@ if the map is draggable it doesn't centre the view on the issue.
 
 ## Route Builder
 
-Add "remove last" and "clear" traversal buttons.
 Remove and add traversal functions - ideally with tools on the view.
-Make node and edge labels clickable.
+
 Port/Redo route walking with offset (better inside bends please).
+
 Add lollipops when offset < min radius.
+
+Improve highlight edge direction with an arrow on each section.
+
 Add "edit road"; changes active Track.
 Add "delete Edge".
 Add "remove Node" ( 1-in, 1-out only; joins edges )

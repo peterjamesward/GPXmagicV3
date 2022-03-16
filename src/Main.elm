@@ -1772,6 +1772,22 @@ performActionsOnModel actions model =
                     in
                     { foldedModel | track = Just newTrack }
 
+                ( AddTraversal edge, Just track ) ->
+                    let
+                        toolOptions =
+                            foldedModel.toolOptions
+
+                        graphOptions =
+                            toolOptions.graphOptions
+
+                        newGraphOptions =
+                            Tools.Graph.addTraversal edge graphOptions
+
+                        newToolOptions =
+                            { toolOptions | graphOptions = newGraphOptions }
+                    in
+                    { foldedModel | toolOptions = newToolOptions }
+
                 ( LoadGpxFromStrava gpxContent, _ ) ->
                     let
                         ( modelWithNewTrack, _ ) =

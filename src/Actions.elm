@@ -86,6 +86,7 @@ type ToolAction msg
     | Straighten
     | DisplayInfo String String
     | Autofix (List Int)
+    | AddTraversal Int
 
 
 interpretAction : ToolAction msg -> String

@@ -102,6 +102,98 @@ makeXY earth =
     ( x, y )
 
 
+edgeCanBeAdded : Int -> Options -> Bool
+edgeCanBeAdded newEdge options =
+    -- Edge can be added if either node is same as final node of last traversal,
+    -- or if there are no traversals.
+    case
+        ( List.Extra.last options.graph.userRoute
+        , Dict.get newEdge options.graph.edges
+        )
+    of
+        ( Just { edge, direction }, Just ( ( n1, n2, xy ), _ ) ) ->
+            case Dict.get edge options.graph.edges of
+                Just ( ( start, end, via ), _ ) ->
+                    let
+                        finalNode =
+                            if direction == Natural then
+                                end
+
+                            else
+                                start
+                    in
+                    finalNode == n1 || finalNode == n2
+
+                Nothing ->
+                    False
+
+        ( Nothing, Just ( ( n1, n2, xy ), _ ) ) ->
+            True
+
+        _ ->
+            False
+
+
+addTraversal : Int -> Options -> Options
+addTraversal newEdge options =
+    let
+        graph =
+            options.graph
+    in
+    case
+        ( List.Extra.last graph.userRoute
+        , Dict.get newEdge graph.edges
+        )
+    of
+        ( Just { edge, direction }, Just ( ( n1, n2, xy ), _ ) ) ->
+            case Dict.get edge graph.edges of
+                Just ( ( start, end, via ), _ ) ->
+                    let
+                        finalNode =
+                            if direction == Natural then
+                                end
+
+                            else
+                                start
+
+                        newEdgeDirection =
+                            if finalNode == n1 then
+                                Natural
+
+                            else
+                                Reverse
+
+                        newGraph =
+                            { graph
+                                | userRoute =
+                                    graph.userRoute ++ [ { edge = newEdge, direction = newEdgeDirection } ]
+                            }
+                    in
+                    { options
+                        | graph = newGraph
+                        , selectedTraversal = List.length newGraph.userRoute - 1
+                    }
+
+                Nothing ->
+                    options
+
+        ( Nothing, Just ( ( n1, n2, xy ), _ ) ) ->
+            let
+                newGraph =
+                    { graph
+                        | userRoute =
+                            graph.userRoute ++ [ { edge = newEdge, direction = Natural } ]
+                    }
+            in
+            { options
+                | graph = newGraph
+                , selectedTraversal = List.length newGraph.userRoute - 1
+            }
+
+        _ ->
+            options
+
+
 view : (Msg -> msg) -> Options -> Element msg
 view wrapper options =
     let
@@ -419,7 +511,7 @@ update msg options track wrapper =
             in
             ( { options
                 | graph = newGraph
-                , selectedTraversal = min options.selectedTraversal (List.length newGraph.userRoute - 1)
+                , selectedTraversal = List.length newGraph.userRoute - 1
               }
             , []
             )
