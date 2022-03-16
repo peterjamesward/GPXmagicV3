@@ -4,8 +4,7 @@
 BUG: Classic bend smoother consumes all memory on certain looped routes where
      orange and purple are (possibly) co-linear, or something. (Samir bug)
 
-**BUG**: Undo single point smooth at track start removes a point.
-
+BUG: Undo single point smooth at track start removes a point.
 
 --
 
@@ -13,15 +12,18 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 ## Route Builder
 
-- Clear route button (only when analyzed).
+- Port/Redo route walking with offset (see Out & Back).
 
-- Port/Redo route walking with offset (better inside bends please).
+- Add "edit road"; changes active Track so road can be edited.
+
+(Now, equal to v1/2.)
 
 - Add lollipops when offset < min radius. (also on out and back)
 
+- Better inside lines.
+
 - Improve highlight edge direction with an arrow on each section.
 
-- Add "edit road"; changes active Track.
 - Add "split edge at pointer" function.
 
 - Save/Load graph (in a single file, not necessarily XML, maybe CBOR, maybe text).
@@ -63,8 +65,6 @@ Scales?
 
 ## New smoothing
 
-Done centred window. Need to provide option for distance (or other) weighting. This can be later.
-
 > This could be like a meta-box, or a "build your own 1CQF", in which
 > we pipeline existing features, just like 1CQF.
 > E.G. simplify > limit > interpolate > centroid.
@@ -91,6 +91,8 @@ See https://github.com/ianmackenzie/elm-3d-scene/blob/1.0.1/examples/Texture.elm
 https://ambientcg.com/view?id=Grass004
 https://ambientcg.com/view?id=Asphalt001
 Credit: Contains assets from ambientCG.com, licensed under CC0 1.0 Universal.
+
+Could be based on OSM land use data.
 
 ## Small stuff
 

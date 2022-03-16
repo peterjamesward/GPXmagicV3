@@ -51,6 +51,7 @@ type Msg
     | SelectStartNode
     | DisplayInfo String String
     | FlipDirection Int
+    | ClearRoute
 
 
 emptyGraph : Graph
@@ -232,6 +233,16 @@ view wrapper options =
                         , label = text "Find key places"
                         }
                     ]
+
+        clearRouteButton =
+            if options.analyzed then
+                I.button neatToolsBorder
+                    { onPress = Just (wrapper ClearRoute)
+                    , label = text "Clear the route"
+                    }
+
+            else
+                none
 
         finishButton =
             I.button neatToolsBorder
@@ -486,6 +497,7 @@ view wrapper options =
                 [ analyseButton
                 , traversalPrevious
                 , traversalNext
+                , clearRouteButton
                 ]
             , traversalsTable
             , offsetSlider
@@ -574,6 +586,21 @@ update msg options track wrapper =
 
         DisplayInfo tool tag ->
             ( options, [ Actions.DisplayInfo tool tag ] )
+
+        ClearRoute ->
+            let
+                graph =
+                    options.graph
+
+                newGraph =
+                    { graph | userRoute = [] }
+            in
+            ( { options
+                | graph = newGraph
+                , selectedTraversal = 0
+              }
+            , []
+            )
 
 
 type alias EdgeFinder =
