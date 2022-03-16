@@ -19,8 +19,6 @@ if the map is draggable it doesn't centre the view on the issue.
 
 ## Route Builder
 
-Remove and add traversal functions - ideally with tools on the view.
-
 Port/Redo route walking with offset (better inside bends please).
 
 Add lollipops when offset < min radius.
@@ -28,15 +26,10 @@ Add lollipops when offset < min radius.
 Improve highlight edge direction with an arrow on each section.
 
 Add "edit road"; changes active Track.
-Add "delete Edge".
-Add "remove Node" ( 1-in, 1-out only; joins edges )
-Add "delete node and its edges"
-Add "coalesce Nodes".
 Add "split edge at pointer" function.
+
 Save/Load graph (in a single file, not necessarily XML, maybe CBOR, maybe text).
-Clean up parameters passed from main to PaneLayoutManager.
 Centre Plan view on selected traversal.
-Scroll table so active row is in view?
 
 
 ---

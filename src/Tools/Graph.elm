@@ -134,6 +134,26 @@ edgeCanBeAdded newEdge options =
             False
 
 
+edgeCanBeFlipped : Int -> Options -> Bool
+edgeCanBeFlipped newEdge options =
+    -- Edge can be flipped if either is only traversal or is self-loop.
+    case
+        ( options.graph.userRoute
+        , Dict.get newEdge options.graph.edges
+        )
+    of
+        ( [ { edge, direction } ], Just ( ( n1, n2, xy ), _ ) ) ->
+            -- Can flip because only edge (if its the same edge
+            edge == newEdge
+
+        ( t1 :: t2 :: tN, Just ( ( n1, n2, xy ), _ ) ) ->
+            -- Can be flipped if self-loop
+            n1 == n2
+
+        _ ->
+            False
+
+
 addTraversal : Int -> Options -> Options
 addTraversal newEdge options =
     let

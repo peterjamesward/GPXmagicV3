@@ -214,7 +214,7 @@ popup msgWrapper context options =
                 (popupMenu
                     ++ [ Input.button [ tooltip below (myTooltip "Close menu") ]
                             { onPress = Just <| msgWrapper PopupHide
-                            , label = useIcon FeatherIcons.x
+                            , label = useIcon FeatherIcons.minus
                             }
                        ]
                 )
