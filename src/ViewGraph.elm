@@ -341,7 +341,7 @@ view context ( width, height ) mGraph options msgWrapper =
                     DomainModel.traverseTreeBetweenLimitsToDepth
                         0
                         (skipCount tree)
-                        (always <| Just 2)
+                        (always <| Just 8)
                         0
                         tree
                         edgeFold

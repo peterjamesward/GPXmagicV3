@@ -4,9 +4,7 @@
 BUG: Classic bend smoother consumes all memory on certain looped routes where
      orange and purple are (possibly) co-linear, or something. (Samir bug)
 
-**BUG**: Sometimes will not display file open dialog. Also splitters stop working.
-> Debuggers shows messages arriving, not obvious why they should not be processed.
-> Can't save file when this happens, so rather poor show.
+**BUG** Position slider does not result in update of data in Essentials box.
 
 **BUG**: Undo single point smooth at track start removes a point.
 
@@ -21,19 +19,8 @@ if the map is draggable it doesn't centre the view on the issue.
 
 ## Route Builder
 
-~~Start with `trivialGraph`; **analyse** button => proper graph.~~
-~~Is Route visible only when Route Builder tool open?~~
-~~Display traversals in tool.~~
-~~Make table scrollable and prettier.~~
-~~Add forward and back in traversal list.~~
-~~Highlight current traversal in list and on route.~~
-~~Option to show edges as arcs or elided roads.~~
-~~Disable analyze button once used (graph state needed).~~
-~~Add "show" button to table rows.~~
-
-**BUG** - total length > track length, and in the York Tri course you can see
-clearly erroneous traversals, so the analysis is wrong. Oops.
-> (13-14 followed by 13-15) perhaps self-loops confuse the logic?
+**BUG** - yields nothing on a loop (Hillingdon). Obvious neightbour count issue.
+**BUG** - start point on York Tri is not a correct Place. (Don't use 0).
 
 Add "remove last" and "clear" traversal buttons.
 Remove and add traversal functions - ideally with tools on the view.
@@ -48,7 +35,6 @@ Add "coalesce Nodes".
 Add "split edge at pointer" function.
 Save/Load graph (in a single file, not necessarily XML, maybe CBOR, maybe text).
 Clean up parameters passed from main to PaneLayoutManager.
-Load new track should reset analyzed state.
 Centre Plan view on selected traversal.
 Scroll table so active row is in view?
 

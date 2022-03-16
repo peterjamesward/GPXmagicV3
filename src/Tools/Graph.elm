@@ -82,7 +82,7 @@ makeXY earth =
         { x, y, z } =
             Point3d.toRecord inMeters earth
     in
-    ( toFloat <| round x, toFloat <| round y )
+    ( x, y )
 
 
 view : (Msg -> msg) -> Options -> Element msg
@@ -149,12 +149,12 @@ view wrapper options =
                 Just graph ->
                     graph.userRoute
                         |> List.map
-                            (\trav ->
+                            (\{ edge, direction } ->
                                 let
-                                    edge =
-                                        Dict.get trav.edge graph.edges
+                                    edgeInfo =
+                                        Dict.get edge graph.edges
                                 in
-                                case edge of
+                                case edgeInfo of
                                     Nothing ->
                                         { startPlace = "Place "
                                         , road = "road "
@@ -163,11 +163,20 @@ view wrapper options =
                                         }
 
                                     Just ( ( n1, n2, _ ), tree ) ->
-                                        { startPlace = "Place " ++ String.fromInt n1
-                                        , road = "road " ++ String.fromInt trav.edge
-                                        , endPlace = "place " ++ String.fromInt n2
-                                        , length = trueLength tree
-                                        }
+                                        case direction of
+                                            Natural ->
+                                                { startPlace = "Place " ++ String.fromInt n1
+                                                , road = "road " ++ String.fromInt edge
+                                                , endPlace = "place " ++ String.fromInt n2
+                                                , length = trueLength tree
+                                                }
+
+                                            Reverse ->
+                                                { startPlace = "Place " ++ String.fromInt n2
+                                                , road = "road " ++ String.fromInt edge
+                                                , endPlace = "place " ++ String.fromInt n1
+                                                , length = trueLength tree
+                                                }
                             )
 
         totalLength =
@@ -213,8 +222,8 @@ view wrapper options =
                 [ row [ width fill ]
                     [ el ((width <| fillPortion 1) :: headerAttrs) <| text "  "
                     , el ((width <| fillPortion 2) :: headerAttrs) <| text "From"
-                    , el ((width <| fillPortion 2) :: headerAttrs) <| text "Along"
                     , el ((width <| fillPortion 2) :: headerAttrs) <| text "To"
+                    , el ((width <| fillPortion 2) :: headerAttrs) <| text "Along"
                     , el ((width <| fillPortion 2) :: headerAttrs) <| text "Distance"
                     ]
 
@@ -246,18 +255,18 @@ view wrapper options =
                                             text t.startPlace
                               }
                             , { header = none
+                               , width = fillPortion 2
+                               , view =
+                                     \i t ->
+                                         el (dataStyles (i == options.selectedTraversal)) <|
+                                             text t.endPlace
+                               }
+                             , { header = none
                               , width = fillPortion 2
                               , view =
                                     \i t ->
                                         el (dataStyles (i == options.selectedTraversal)) <|
                                             text t.road
-                              }
-                            , { header = none
-                              , width = fillPortion 2
-                              , view =
-                                    \i t ->
-                                        el (dataStyles (i == options.selectedTraversal)) <|
-                                            text t.endPlace
                               }
                             , { header = none
                               , width = fillPortion 2
@@ -510,7 +519,8 @@ buildGraph track =
                                     }
                             in
                             { inputState
-                                | currentEdge = newEdge
+                                | startNodeIndex = nodeIndex
+                                , currentEdge = [ ( road.endPoint, pointGpx ) ]
                                 , traversals = traversal :: inputState.traversals
                             }
 
