@@ -341,6 +341,9 @@ applyReverse track =
 
 applyMoveStart : Int -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
 applyMoveStart index track =
+    -- A littel more care needed.
+    -- Where the S/F join we have two points; one must be removed.
+    -- At the new S?F we need to have thw same point at start and at end.
     let
         oldPoints =
             DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
@@ -349,7 +352,7 @@ applyMoveStart index track =
             List.Extra.splitAt index oldPoints
 
         newPoints =
-            afterNewStart ++ beforeNewStart
+            afterNewStart ++ (List.drop 1 beforeNewStart) ++ (List.take 1 afterNewStart)
     in
     ( DomainModel.treeFromSourcePoints newPoints
     , oldPoints

@@ -78,6 +78,9 @@ textDictionary =
         [ ( toolID, "Bend problems" )
         , ( "info", infoText )
         , ( "autofix", autofixText )
+        , ( "locate", """These buttons will move the Orange pointer through the list of issues.
+
+**Note**: this will only centre the views which have the padlock closed.""")
         ]
     )
 
@@ -457,7 +460,8 @@ view imperial msgWrapper options isTrack =
                                     ++ (showAngle <| turn)
                                     ++ "º"
                         , row [ centerX, spacing 10 ]
-                            [ Input.button
+                            [ infoButton <| msgWrapper <| DisplayInfo "bends" "locate"
+                            , Input.button
                                 (buttonStylesWithTooltip below "Move to previous")
                                 { label = useIcon FeatherIcons.chevronLeft
                                 , onPress = Just <| msgWrapper <| ViewPrevious

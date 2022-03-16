@@ -14,7 +14,7 @@ import RoadIndex exposing (Intersection)
 import ToolTip exposing (buttonStylesWithTooltip)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal0, showLongMeasure, showShortMeasure)
-import ViewPureStyles exposing (neatToolsBorder, noTrackMessage, useIcon)
+import ViewPureStyles exposing (infoButton, neatToolsBorder, noTrackMessage, useIcon)
 
 
 type alias Options =
@@ -185,7 +185,8 @@ view imperial msgWrapper options track =
                                     ++ " of "
                                     ++ (String.fromInt <| List.length options.features)
                         , row [ centerX, spacing 10 ]
-                            [ Input.button
+                            [ infoButton <| msgWrapper <| DisplayInfo "bends" "locate"
+                            , Input.button
                                 (buttonStylesWithTooltip below "Move to previous")
                                 { label = useIcon FeatherIcons.chevronLeft
                                 , onPress = Just <| msgWrapper <| ViewPrevious

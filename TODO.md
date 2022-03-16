@@ -6,7 +6,6 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 **BUG**: Undo single point smooth at track start removes a point.
 
-**BUG**: When using "Move start/finish to current point" it creates a gap.
 
 --
 

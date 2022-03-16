@@ -401,7 +401,8 @@ view imperial msgWrapper options isTrack =
                                     ++ showDecimal2 turn
                                     ++ "º"
                         , row [ centerX, spacing 10 ]
-                            [ Input.button
+                            [ infoButton <| msgWrapper <| DisplayInfo "bends" "locate"
+                            , Input.button
                                 (buttonStylesWithTooltip below "Move to previous")
                                 { label = useIcon FeatherIcons.chevronLeft
                                 , onPress = Just <| msgWrapper <| ViewPrevious
