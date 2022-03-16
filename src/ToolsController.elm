@@ -1179,7 +1179,7 @@ refreshOpenTools isTrack options =
     -- Same impact as tools being opened, so we'll re-use that.
     let
         refreshOpenTool entry ( inputOptions, collectingActions ) =
-            if entry.state == Expanded then
+            if entry.state == Expanded || entry.state == AlwaysOpen then
                 let
                     ( incrementalModel, incrementalActions ) =
                         toolStateHasChanged entry.toolType Expanded isTrack inputOptions

@@ -4,8 +4,6 @@
 BUG: Classic bend smoother consumes all memory on certain looped routes where
      orange and purple are (possibly) co-linear, or something. (Samir bug)
 
-**BUG** Position slider does not result in update of data in Essentials box.
-
 **BUG**: Undo single point smooth at track start removes a point.
 
 **BUG**: When using "Move start/finish to current point" it creates a gap.
@@ -19,17 +17,20 @@ if the map is draggable it doesn't centre the view on the issue.
 
 ## Route Builder
 
-Port/Redo route walking with offset (better inside bends please).
+- Clear route button (only when analyzed).
 
-Add lollipops when offset < min radius.
+- Port/Redo route walking with offset (better inside bends please).
 
-Improve highlight edge direction with an arrow on each section.
+- Add lollipops when offset < min radius. (also on out and back)
 
-Add "edit road"; changes active Track.
-Add "split edge at pointer" function.
+- Improve highlight edge direction with an arrow on each section.
 
-Save/Load graph (in a single file, not necessarily XML, maybe CBOR, maybe text).
-Centre Plan view on selected traversal.
+- Add "edit road"; changes active Track.
+- Add "split edge at pointer" function.
+
+- Save/Load graph (in a single file, not necessarily XML, maybe CBOR, maybe text).
+
+- Centre Plan view on selected traversal.
 
 
 ---
