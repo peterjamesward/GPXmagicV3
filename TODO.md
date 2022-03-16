@@ -19,9 +19,6 @@ if the map is draggable it doesn't centre the view on the issue.
 
 ## Route Builder
 
-**BUG** - yields nothing on a loop (Hillingdon). Obvious neightbour count issue.
-**BUG** - start point on York Tri is not a correct Place. (Don't use 0).
-
 Add "remove last" and "clear" traversal buttons.
 Remove and add traversal functions - ideally with tools on the view.
 Make node and edge labels clickable.

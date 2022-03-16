@@ -255,13 +255,13 @@ view wrapper options =
                                             text t.startPlace
                               }
                             , { header = none
-                               , width = fillPortion 2
-                               , view =
-                                     \i t ->
-                                         el (dataStyles (i == options.selectedTraversal)) <|
-                                             text t.endPlace
-                               }
-                             , { header = none
+                              , width = fillPortion 2
+                              , view =
+                                    \i t ->
+                                        el (dataStyles (i == options.selectedTraversal)) <|
+                                            text t.endPlace
+                              }
+                            , { header = none
                               , width = fillPortion 2
                               , view =
                                     \i t ->
@@ -411,10 +411,24 @@ buildGraph track =
                 track.trackTree
                 Dict.empty
 
+        ( trackStartXY, trackEndXY ) =
+            ( makeXY <| DomainModel.earthPointFromIndex 0 track.trackTree
+            , makeXY <| DomainModel.earthPointFromIndex (skipCount track.trackTree) track.trackTree
+            )
+
         nodes =
             -- Two neighbours is just an edge point, anything else is a node.
+            -- But make sure the endpoints are there, as loops can cause a problem here.
             pointNeighbours
-                |> Dict.filter (\pt neighbours -> Set.size neighbours /= 2)
+                |> Dict.filter
+                    (\pt neighbours ->
+                        Set.size neighbours
+                            /= 2
+                            || pt
+                            == trackStartXY
+                            || pt
+                            == trackEndXY
+                    )
                 |> Dict.keys
                 |> List.indexedMap Tuple.pair
                 |> Dict.fromList
