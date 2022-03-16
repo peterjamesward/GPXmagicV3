@@ -50,6 +50,7 @@ type Msg
     | AddTraversalFromCurrent
     | SelectStartNode
     | DisplayInfo String String
+    | FlipDirection Int
 
 
 emptyGraph : Graph
@@ -156,6 +157,7 @@ view wrapper options =
                     }
                 ]
 
+        traversals : List TraversalDisplay
         traversals =
             -- Display-ready version of the route.
             let
@@ -171,25 +173,25 @@ view wrapper options =
                         in
                         case edgeInfo of
                             Nothing ->
-                                { startPlace = "Place "
-                                , road = "road "
-                                , endPlace = "place"
+                                { startPlace = -1
+                                , road = -1
+                                , endPlace = -1
                                 , length = Quantity.zero
                                 }
 
                             Just ( ( n1, n2, _ ), tree ) ->
                                 case direction of
                                     Natural ->
-                                        { startPlace = "Place " ++ String.fromInt n1
-                                        , road = "road " ++ String.fromInt edge
-                                        , endPlace = "place " ++ String.fromInt n2
+                                        { startPlace = n1
+                                        , road = edge
+                                        , endPlace = n2
                                         , length = trueLength tree
                                         }
 
                                     Reverse ->
-                                        { startPlace = "Place " ++ String.fromInt n2
-                                        , road = "road " ++ String.fromInt edge
-                                        , endPlace = "place " ++ String.fromInt n1
+                                        { startPlace = n2
+                                        , road = edge
+                                        , endPlace = n1
                                         , length = trueLength tree
                                         }
                     )
@@ -270,6 +272,22 @@ view wrapper options =
 
                                               else
                                                 none
+                                            , if
+                                                List.length traversals
+                                                    == 1
+                                                    || t.startPlace
+                                                    == t.endPlace
+                                              then
+                                                I.button
+                                                    [ alignRight
+                                                    , tooltip below (myTooltip "Reverse")
+                                                    ]
+                                                    { onPress = Just <| wrapper <| FlipDirection i
+                                                    , label = useIcon FeatherIcons.refreshCw
+                                                    }
+
+                                              else
+                                                none
                                             , I.button
                                                 [ alignRight ]
                                                 { onPress = Just <| wrapper <| HighlightTraversal i
@@ -282,21 +300,27 @@ view wrapper options =
                               , view =
                                     \i t ->
                                         el (dataStyles (i == options.selectedTraversal)) <|
-                                            text t.startPlace
+                                            text <|
+                                                "Place "
+                                                    ++ String.fromInt t.startPlace
                               }
                             , { header = none
                               , width = fillPortion 2
                               , view =
                                     \i t ->
                                         el (dataStyles (i == options.selectedTraversal)) <|
-                                            text t.endPlace
+                                            text <|
+                                                "place "
+                                                    ++ String.fromInt t.endPlace
                               }
                             , { header = none
                               , width = fillPortion 2
                               , view =
                                     \i t ->
                                         el (dataStyles (i == options.selectedTraversal)) <|
-                                            text t.road
+                                            text <|
+                                                "road "
+                                                    ++ String.fromInt t.road
                               }
                             , { header = none
                               , width = fillPortion 2
@@ -391,6 +415,36 @@ update msg options track wrapper =
                     { graph
                         | userRoute =
                             List.take (List.length graph.userRoute - 1) graph.userRoute
+                    }
+            in
+            ( { options
+                | graph = newGraph
+                , selectedTraversal = min options.selectedTraversal (List.length newGraph.userRoute - 1)
+              }
+            , []
+            )
+
+        FlipDirection i ->
+            let
+                graph =
+                    options.graph
+
+                newGraph =
+                    { graph
+                        | userRoute =
+                            graph.userRoute
+                                |> List.Extra.updateAt i
+                                    (\t ->
+                                        { t
+                                            | direction =
+                                                case t.direction of
+                                                    Natural ->
+                                                        Reverse
+
+                                                    Reverse ->
+                                                        Natural
+                                        }
+                                    )
                     }
             in
             ( { options

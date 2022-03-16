@@ -11,7 +11,7 @@ import Axis2d exposing (Axis2d)
 import Camera3d exposing (Camera3d)
 import Circle2d
 import Dict
-import Direction2d exposing (Direction2d)
+import Direction2d exposing (Direction2d, toAngle)
 import Direction3d exposing (negativeZ, positiveY, positiveZ)
 import DomainModel exposing (..)
 import Element exposing (..)
@@ -44,7 +44,7 @@ import Spherical exposing (metresPerPixel)
 import Svg exposing (Svg)
 import Svg.Attributes
 import ToolTip exposing (myTooltip, tooltip)
-import Tools.GraphOptions exposing (ClickDetect(..), Graph)
+import Tools.GraphOptions exposing (ClickDetect(..), Direction(..), Graph)
 import UtilsForViews exposing (colourHexString, uiColourHexString)
 import Vector3d
 import ViewPureStyles exposing (rgtDark, rgtPurple, useIcon)
@@ -288,6 +288,47 @@ view context ( width, height ) graph options msgWrapper =
                 |> Maybe.map .edge
                 |> Maybe.withDefault -1
 
+        arrowsOnHighlightedEdge =
+            case List.Extra.getAt options.selectedTraversal graph.userRoute of
+                Nothing ->
+                    []
+
+                Just { edge, direction } ->
+                    case Dict.get edge graph.edges of
+                        Nothing ->
+                            []
+
+                        Just ( _, edgeTree ) ->
+                            let
+                                midPoint =
+                                    skipCount edgeTree // 2
+
+                                midLeaf =
+                                    asRecord <| leafFromIndex midPoint edgeTree
+
+                                ( p1, p2 ) =
+                                    ( midLeaf.startPoint |> Point3d.toScreenSpace camera screenRectangle
+                                    , midLeaf.endPoint |> Point3d.toScreenSpace camera screenRectangle
+                                    )
+
+                                rotation =
+                                    case direction of
+                                        Natural ->
+                                            toAngle midLeaf.directionAtStart
+
+                                        Reverse ->
+                                            toAngle <| Direction2d.reverse midLeaf.directionAtStart
+                            in
+                            [ Svg.text_
+                                (textAttributes p1)
+                                [ Svg.text ">>>>" ]
+                                -- Hack: flip the text upside down since our later
+                                -- 'Svg.relativeTo topLeftFrame' call will flip it
+                                -- back right side up
+                                |> Svg.mirrorAcross (Axis2d.through p1 Direction2d.x)
+                                |> Svg.rotateAround p1 rotation
+                            ]
+
         edgeAttributes edgeIndex =
             if edgeIndex == edgeToHighlight then
                 [ Svg.Attributes.stroke <| uiColourHexString rgtPurple
@@ -417,7 +458,14 @@ view context ( width, height ) graph options msgWrapper =
                 , Attributes.height <| Pixels.inPixels height
                 ]
                 [ Svg.relativeTo topLeftFrame
-                    (Svg.g [] (svgNodes ++ svgEdges ++ nodeLabels ++ edgeLabels))
+                    (Svg.g []
+                        (svgNodes
+                            ++ svgEdges
+                            ++ nodeLabels
+                            ++ edgeLabels
+                            ++ arrowsOnHighlightedEdge
+                        )
+                    )
                 ]
     in
     el

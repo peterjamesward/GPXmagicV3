@@ -49,9 +49,9 @@ type alias Traversal =
 
 
 type alias TraversalDisplay =
-    { startPlace : String
-    , road : String
-    , endPlace : String
+    { startPlace : Int
+    , road : Int
+    , endPlace : Int
     , length : Quantity Float Meters
     }
 
