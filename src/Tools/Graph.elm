@@ -257,16 +257,19 @@ view wrapper options =
                               , width = fillPortion 1
                               , view =
                                     \i t ->
-                                        row [ spacing 2 ]
+                                        row [ spacing 2, alignRight ]
                                             [ if i + 1 == List.length traversals then
-                                                I.button []
+                                                I.button [ alignRight ]
                                                     { onPress = Just <| wrapper RemoveLastTraversal
                                                     , label = useIcon FeatherIcons.delete
                                                     }
 
                                               else
                                                 none
-                                            , I.button [ tooltip below (myTooltip "Remove") ]
+                                            , I.button
+                                                [ alignRight
+                                                , tooltip below (myTooltip "Remove")
+                                                ]
                                                 { onPress = Just <| wrapper <| HighlightTraversal i
                                                 , label = useIcon FeatherIcons.eye
                                                 }
@@ -378,7 +381,20 @@ update msg options track wrapper =
             ( options, [] )
 
         RemoveLastTraversal ->
-            ( options
+            let
+                graph =
+                    options.graph
+
+                newGraph =
+                    { graph
+                        | userRoute =
+                            List.take (List.length graph.userRoute - 1) graph.userRoute
+                    }
+            in
+            ( { options
+                | graph = newGraph
+                , selectedTraversal = min options.selectedTraversal (List.length newGraph.userRoute - 1)
+              }
             , []
             )
 
