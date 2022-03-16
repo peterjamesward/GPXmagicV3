@@ -261,11 +261,11 @@ view context ( width, height ) graph options msgWrapper =
                 |> Dict.map
                     (\index vertex ->
                         Svg.circle2d
-                            [ Svg.Attributes.stroke "white"
-                            , Svg.Attributes.strokeWidth "2"
+                            [ Svg.Attributes.stroke "red"
+                            , Svg.Attributes.strokeWidth "3"
                             , Svg.Attributes.fill "none"
                             ]
-                            (Circle2d.withRadius (Pixels.float 6) vertex)
+                            (Circle2d.withRadius (Pixels.float 8) vertex)
                     )
                 |> Dict.values
 
@@ -361,7 +361,7 @@ view context ( width, height ) graph options msgWrapper =
         textAttributes atPoint =
             [ Svg.Attributes.fill "rgb(250, 250, 250)"
             , Svg.Attributes.fontFamily "sans serif"
-            , Svg.Attributes.fontSize "14px"
+            , Svg.Attributes.fontSize "16px"
             , Svg.Attributes.stroke "none"
             , Svg.Attributes.x (String.fromFloat (Pixels.toFloat (Point2d.xCoordinate atPoint) + 10))
             , Svg.Attributes.y (String.fromFloat (Pixels.toFloat (Point2d.yCoordinate atPoint)))

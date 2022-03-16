@@ -257,9 +257,13 @@ view wrapper options =
                               , width = fillPortion 1
                               , view =
                                     \i t ->
-                                        row [ spacing 2, alignRight ]
+                                        row
+                                            [ spacing 2 ]
                                             [ if i + 1 == List.length traversals then
-                                                I.button [ alignRight ]
+                                                I.button
+                                                    [ alignRight
+                                                    , tooltip below (myTooltip "Remove")
+                                                    ]
                                                     { onPress = Just <| wrapper RemoveLastTraversal
                                                     , label = useIcon FeatherIcons.delete
                                                     }
@@ -267,9 +271,7 @@ view wrapper options =
                                               else
                                                 none
                                             , I.button
-                                                [ alignRight
-                                                , tooltip below (myTooltip "Remove")
-                                                ]
+                                                [ alignRight ]
                                                 { onPress = Just <| wrapper <| HighlightTraversal i
                                                 , label = useIcon FeatherIcons.eye
                                                 }
