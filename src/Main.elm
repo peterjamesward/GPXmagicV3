@@ -1931,6 +1931,13 @@ performActionsOnModel actions model =
                         _ ->
                             foldedModel
 
+                ( LockToolOpen open id, _ ) ->
+                    let
+                        newToolOptions =
+                            ToolsController.lockToolOpen open id foldedModel.toolOptions
+                    in
+                    { foldedModel | toolOptions = newToolOptions }
+
                 _ ->
                     foldedModel
     in

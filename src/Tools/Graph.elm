@@ -19,11 +19,9 @@ import FeatherIcons
 import FlatColors.ChinesePalette
 import Length exposing (Length, Meters, inMeters)
 import List.Extra
-import Point2d
 import Point3d
 import Quantity exposing (Quantity, zero)
 import Set exposing (Set)
-import SketchPlane3d
 import ToolTip exposing (myTooltip, tooltip)
 import Tools.GraphOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
@@ -38,6 +36,7 @@ defaultOptions =
     , boundingBox = BoundingBox3d.singleton Point3d.origin
     , selectedTraversal = 0
     , analyzed = False
+    , originalTrack = []
     }
 
 
@@ -52,6 +51,7 @@ type Msg
     | DisplayInfo String String
     | FlipDirection Int
     | ClearRoute
+    | RevertToTrack
 
 
 emptyGraph : Graph msg
@@ -239,6 +239,16 @@ view wrapper options =
                 I.button neatToolsBorder
                     { onPress = Just (wrapper ClearRoute)
                     , label = text "Clear the route"
+                    }
+
+            else
+                none
+
+        revertButton =
+            if options.analyzed then
+                I.button neatToolsBorder
+                    { onPress = Just (wrapper RevertToTrack)
+                    , label = text "Revert to track"
                     }
 
             else
@@ -498,6 +508,7 @@ view wrapper options =
                 , traversalPrevious
                 , traversalNext
                 , clearRouteButton
+                , revertButton
                 ]
             , traversalsTable
             , offsetSlider
@@ -517,8 +528,20 @@ update msg options track wrapper =
             ( { options
                 | graph = buildGraph track
                 , analyzed = True
+                , originalTrack = DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
               }
             , []
+              --, [ Actions.LockToolOpen True toolID ]
+            )
+
+        RevertToTrack ->
+            ( { options
+                | graph = trivialGraph track
+                , analyzed = False
+                , originalTrack = []
+              }
+            , []
+              --, [ Actions.LockToolOpen True toolID ]
             )
 
         HighlightTraversal traversal ->

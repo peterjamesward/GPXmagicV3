@@ -12,8 +12,10 @@ BUG: Undo single point smooth at track start removes a point.
 
 ## Route Builder
 
-- Unified Undo/Redo for graph & track operations.
-> Simple union type, track edits wrapped with Edge index.
+- Option to revert to original track (Undo at Graph level)
+> Although if the graph "session" is a single action on edge 0, this just falls out.
+> Good to have though.
+> Similarly, option to go back into Graph if walked route is not ideal.
 
 - Add "edit road"; changes active Track so road can be edited.
 > Properly, we're always editing a graph edge, but that means that we should

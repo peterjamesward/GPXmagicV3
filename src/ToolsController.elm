@@ -683,6 +683,29 @@ nextToolState state =
             SettingsOpen
 
 
+lockToolOpen : Bool -> String -> Options msg -> Options msg
+lockToolOpen keepOpen id options =
+    let
+        tools =
+            options.tools
+
+        newTools =
+            tools
+                |> List.Extra.updateIf (\tool -> tool.toolId == id)
+                    (\tool ->
+                        { tool
+                            | state =
+                                if keepOpen then
+                                    AlwaysOpen
+
+                                else
+                                    Expanded
+                        }
+                    )
+    in
+    { options | tools = newTools }
+
+
 setDock : ToolType -> ToolDock -> ToolEntry -> ToolEntry
 setDock toolType dock tool =
     if tool.toolType == toolType then
