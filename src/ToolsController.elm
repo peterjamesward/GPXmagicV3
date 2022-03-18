@@ -100,7 +100,7 @@ type ToolType
     | ToolSettings
 
 
-type alias Options =
+type alias Options msg =
     -- Tool specific options
     { tools : List ToolEntry
     , docks : Dict String DockSettings
@@ -128,11 +128,11 @@ type alias Options =
     , splitAndJoinOptions : Tools.SplitAndJoinOptions.Options
     , intersectionOptions : Tools.Intersections.Options
     , straightenOptions : Tools.Straightener.Options
-    , graphOptions : Tools.GraphOptions.Options
+    , graphOptions : Tools.GraphOptions.Options msg
     }
 
 
-defaultOptions : Options
+defaultOptions : Options msg
 defaultOptions =
     { tools = defaultTools
     , docks = Dict.fromList dockList
@@ -724,8 +724,8 @@ update :
     ToolMsg
     -> Maybe (TrackLoaded msg)
     -> (ToolMsg -> msg)
-    -> Options
-    -> ( Options, List (ToolAction msg) )
+    -> Options msg
+    -> ( Options msg, List (ToolAction msg) )
 update toolMsg isTrack msgWrapper options =
     case toolMsg of
         ToolNoOp ->
@@ -1172,8 +1172,8 @@ update toolMsg isTrack msgWrapper options =
 
 refreshOpenTools :
     Maybe (TrackLoaded msg)
-    -> Options
-    -> ( Options, List (ToolAction msg) )
+    -> Options msg
+    -> ( Options msg, List (ToolAction msg) )
 refreshOpenTools isTrack options =
     -- Track, or something has changed; tool data is stale.
     -- Same impact as tools being opened, so we'll re-use that.
@@ -1196,8 +1196,8 @@ toolStateHasChanged :
     ToolType
     -> ToolState
     -> Maybe (TrackLoaded msg)
-    -> Options
-    -> ( Options, List (ToolAction msg) )
+    -> Options msg
+    -> ( Options msg, List (ToolAction msg) )
 toolStateHasChanged toolType newState isTrack options =
     case toolType of
         ToolTrackInfo ->
@@ -1495,7 +1495,7 @@ toolsForDock :
     ToolDock
     -> (ToolMsg -> msg)
     -> Maybe (TrackLoaded msg)
-    -> Options
+    -> Options msg
     -> Element msg
 toolsForDock dock msgWrapper isTrack options =
     column [ width fill, height fill ]
@@ -1526,7 +1526,7 @@ toolsForDock dock msgWrapper isTrack options =
         ]
 
 
-viewToolSettings : Options -> (ToolMsg -> msg) -> Element msg
+viewToolSettings : Options msg -> (ToolMsg -> msg) -> Element msg
 viewToolSettings options wrapper =
     let
         fullOptionList tool =
@@ -1574,7 +1574,7 @@ viewToolSettings options wrapper =
 viewTool :
     (ToolMsg -> msg)
     -> Maybe (TrackLoaded msg)
-    -> Options
+    -> Options msg
     -> ToolEntry
     -> Element msg
 viewTool msgWrapper isTrack options toolEntry =
@@ -1720,7 +1720,7 @@ viewToolByType :
     (ToolMsg -> msg)
     -> ToolEntry
     -> Maybe (TrackLoaded msg)
-    -> Options
+    -> Options msg
     -> Element msg
 viewToolByType msgWrapper entry isTrack options =
     el
@@ -2160,7 +2160,7 @@ encodeOneTool tool =
         ]
 
 
-encodeToolState : Options -> E.Value
+encodeToolState : Options msg -> E.Value
 encodeToolState options =
     E.list identity <| List.map encodeOneTool options.tools
 
@@ -2188,7 +2188,7 @@ toolDecoder =
         (field "text" colourDecoder)
 
 
-restoreStoredValues : Options -> D.Value -> Options
+restoreStoredValues : Options msg -> D.Value -> Options msg
 restoreStoredValues options values =
     -- Care! Need to overlay restored values on to the current tools.
     let
@@ -2217,7 +2217,7 @@ restoreStoredValues options values =
             options
 
 
-restoreDockSettings : Options -> D.Value -> Options
+restoreDockSettings : Options msg -> D.Value -> Options msg
 restoreDockSettings options values =
     let
         storedSettings =
@@ -2248,7 +2248,7 @@ restoreDockSettings options values =
             options
 
 
-restoreMeasure : Options -> D.Value -> Options
+restoreMeasure : Options msg -> D.Value -> Options msg
 restoreMeasure options value =
     -- Care! Need to overlay restored values on to the current tools.
     let
@@ -2367,7 +2367,7 @@ showDockHeader msgWrapper dockId docks =
                 ]
 
 
-flythroughTick : Options -> Time.Posix -> TrackLoaded msg -> ( Options, List (ToolAction msg) )
+flythroughTick : Options msg -> Time.Posix -> TrackLoaded msg -> ( Options msg, List (ToolAction msg) )
 flythroughTick options posix track =
     let
         ( updatedFlythrough, actions ) =

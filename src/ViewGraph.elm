@@ -169,7 +169,7 @@ zoomButtons msgWrapper context =
         ]
 
 
-popup : (Msg -> msg) -> Context -> Tools.GraphOptions.Options -> Element msg
+popup : (Msg -> msg) -> Context -> Tools.GraphOptions.Options msg -> Element msg
 popup msgWrapper context options =
     let
         popupMenu =
@@ -235,8 +235,8 @@ onContextMenu msg =
 view :
     Context
     -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> Graph
-    -> Tools.GraphOptions.Options
+    -> Graph msg
+    -> Tools.GraphOptions.Options msg
     -> (Msg -> msg)
     -> Element msg
 view context ( width, height ) graph options msgWrapper =
@@ -288,10 +288,10 @@ view context ( width, height ) graph options msgWrapper =
                     (\( index, ( ( node1, node2, disc ), edge ) ) ->
                         case context.edgeMode of
                             EdgeArc ->
-                                renderEdgeArc index edge
+                                renderEdgeArc index edge.trackTree
 
                             EdgeSketch ->
-                                renderEdge index edge
+                                renderEdge index edge.trackTree
                     )
 
         edgeToHighlight =
@@ -318,13 +318,13 @@ view context ( width, height ) graph options msgWrapper =
                         Nothing ->
                             []
 
-                        Just ( _, edgeTree ) ->
+                        Just ( _, edgeTrack ) ->
                             let
                                 midPoint =
-                                    skipCount edgeTree // 2
+                                    skipCount edgeTrack.trackTree // 2
 
                                 midLeaf =
-                                    asRecord <| leafFromIndex midPoint edgeTree
+                                    asRecord <| leafFromIndex midPoint edgeTrack.trackTree
 
                                 ( p1, p2 ) =
                                     ( midLeaf.startPoint |> Point3d.toScreenSpace camera screenRectangle
@@ -448,10 +448,10 @@ view context ( width, height ) graph options msgWrapper =
             graph.edges
                 |> Dict.toList
                 |> List.map
-                    (\( index, ( ( node1, node2, disc ), tree ) ) ->
+                    (\( index, ( ( node1, node2, disc ), track ) ) ->
                         let
                             labelAt =
-                                earthPointFromIndex (skipCount tree // 2) tree
+                                earthPointFromIndex (skipCount track.trackTree // 2) track.trackTree
                                     |> Point3d.toScreenSpace camera screenRectangle
                         in
                         Svg.text_
@@ -546,7 +546,7 @@ deriveCamera context =
 update :
     Msg
     -> (Msg -> msg)
-    -> Graph
+    -> Graph msg
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Context
     -> ( Context, List (ToolAction msg) )
@@ -668,7 +668,7 @@ update msg msgWrapper graph area context =
 
 detectHit :
     Mouse.Event
-    -> Graph
+    -> Graph msg
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Context
     -> ClickDetect
@@ -702,18 +702,18 @@ detectHit event graph ( w, h ) context =
             graph.edges
                 |> Dict.toList
                 |> List.map
-                    (\( edgeIndex, ( ( startNode, endNode, disc ), tree ) ) ->
+                    (\( edgeIndex, ( ( startNode, endNode, disc ), track ) ) ->
                         let
                             thisEdgeNearestIndex =
-                                nearestToRay ray tree
+                                nearestToRay ray track.trackTree
 
                             thisEdgeNearestPoint =
-                                earthPointFromIndex thisEdgeNearestIndex tree
+                                earthPointFromIndex thisEdgeNearestIndex track.trackTree
                                     |> Point3d.toScreenSpace camera screenRectangle
                         in
                         ( edgeIndex
                         , ( thisEdgeNearestIndex
-                          , thisEdgeNearestIndex == skipCount tree
+                          , thisEdgeNearestIndex == skipCount track.trackTree
                           , Point2d.distanceFrom screenPoint thisEdgeNearestPoint
                           )
                         )

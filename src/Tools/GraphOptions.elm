@@ -6,6 +6,7 @@ import DomainModel exposing (GPXSource, PeteTree)
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
 import Quantity exposing (Quantity)
+import TrackLoaded exposing (TrackLoaded)
 
 
 type Direction
@@ -19,8 +20,8 @@ type alias XY =
     ( Float, Float )
 
 
-type alias Options =
-    { graph :  Graph
+type alias Options msg =
+    { graph :  Graph msg
     , centreLineOffset : Length.Length
     , boundingBox : BoundingBox3d Length.Meters LocalCoords
     , selectedTraversal : Int
@@ -28,9 +29,9 @@ type alias Options =
     }
 
 
-type alias Graph =
+type alias Graph msg =
     { nodes : Dict Int XY
-    , edges : Dict Int ( ( Int, Int, XY ), PeteTree ) -- key == (low node index, high node index, point 1 XY)
+    , edges : Dict Int ( ( Int, Int, XY ), TrackLoaded msg ) -- key == (low node index, high node index, point 1 XY)
     , userRoute : List Traversal
     , referenceLonLat : GPXSource
     }

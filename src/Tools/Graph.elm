@@ -31,7 +31,7 @@ import UtilsForViews exposing (showDecimal2, showLongMeasure, showShortMeasure)
 import ViewPureStyles exposing (commonShortHorizontalSliderStyles, infoButton, neatToolsBorder, rgtDark, rgtPurple, useIcon, useIconWithSize)
 
 
-defaultOptions : Options
+defaultOptions : Options msg
 defaultOptions =
     { graph = emptyGraph
     , centreLineOffset = Length.meters 0.0
@@ -54,7 +54,7 @@ type Msg
     | ClearRoute
 
 
-emptyGraph : Graph
+emptyGraph : Graph msg
 emptyGraph =
     { nodes = Dict.empty
     , edges = Dict.empty
@@ -103,7 +103,7 @@ makeXY earth =
     ( x, y )
 
 
-edgeCanBeAdded : Int -> Options -> Bool
+edgeCanBeAdded : Int -> Options msg -> Bool
 edgeCanBeAdded newEdge options =
     -- Edge can be added if either node is same as final node of last traversal,
     -- or if there are no traversals.
@@ -135,7 +135,7 @@ edgeCanBeAdded newEdge options =
             False
 
 
-edgeCanBeFlipped : Int -> Options -> Bool
+edgeCanBeFlipped : Int -> Options msg -> Bool
 edgeCanBeFlipped newEdge options =
     -- Edge can be flipped if either is only traversal or is self-loop.
     case
@@ -155,7 +155,7 @@ edgeCanBeFlipped newEdge options =
             False
 
 
-addTraversal : Int -> Options -> Options
+addTraversal : Int -> Options msg -> Options msg
 addTraversal newEdge options =
     let
         graph =
@@ -215,7 +215,7 @@ addTraversal newEdge options =
             options
 
 
-view : (Msg -> msg) -> Options -> Element msg
+view : (Msg -> msg) -> Options msg -> Element msg
 view wrapper options =
     let
         offset =
@@ -302,20 +302,20 @@ view wrapper options =
                                 , length = Quantity.zero
                                 }
 
-                            Just ( ( n1, n2, _ ), tree ) ->
+                            Just ( ( n1, n2, _ ), track ) ->
                                 case direction of
                                     Natural ->
                                         { startPlace = n1
                                         , road = edge
                                         , endPlace = n2
-                                        , length = trueLength tree
+                                        , length = trueLength track.trackTree
                                         }
 
                                     Reverse ->
                                         { startPlace = n2
                                         , road = edge
                                         , endPlace = n1
-                                        , length = trueLength tree
+                                        , length = trueLength track.trackTree
                                         }
                     )
 
@@ -507,10 +507,10 @@ view wrapper options =
 
 update :
     Msg
-    -> Options
+    -> Options msg
     -> TrackLoaded msg
     -> (Msg -> msg)
-    -> ( Options, List (Actions.ToolAction msg) )
+    -> ( Options msg, List (Actions.ToolAction msg) )
 update msg options track wrapper =
     case msg of
         GraphAnalyse ->
@@ -603,16 +603,16 @@ update msg options track wrapper =
             )
 
 
-type alias EdgeFinder =
+type alias EdgeFinder msg =
     { startNodeIndex : Int
     , currentEdge : List ( EarthPoint, GPXSource )
     , edgeResolverDict : Dict ( Int, Int, XY ) ( Int, PeteTree )
-    , edgesDict : Dict Int ( ( Int, Int, XY ), PeteTree )
+    , edgesDict : Dict Int ( ( Int, Int, XY ), TrackLoaded msg )
     , traversals : List Traversal
     }
 
 
-buildGraph : TrackLoaded msg -> Graph
+buildGraph : TrackLoaded msg -> Graph msg
 buildGraph track =
     {-
        As in v1 & 2, the only way I know is to see which track points have more than two neighbours.
@@ -682,7 +682,7 @@ buildGraph track =
         ( firstPoint, firstGpx ) =
             DomainModel.getDualCoords track.trackTree 0
 
-        finalEdgeFinder : EdgeFinder
+        finalEdgeFinder : EdgeFinder msg
         finalEdgeFinder =
             {-
                Walk the route again, but check each point against node index.
@@ -698,7 +698,7 @@ buildGraph track =
                 track.trackTree
                 initialEdgeFinder
 
-        initialEdgeFinder : EdgeFinder
+        initialEdgeFinder : EdgeFinder msg
         initialEdgeFinder =
             { startNodeIndex = Dict.get (makeXY firstPoint) inverseNodes |> Maybe.withDefault 0
             , currentEdge = [ ( firstPoint, firstGpx ) ]
@@ -709,8 +709,8 @@ buildGraph track =
 
         splitIntoEdges :
             RoadSection
-            -> EdgeFinder
-            -> EdgeFinder
+            -> EdgeFinder msg
+            -> EdgeFinder msg
         splitIntoEdges road inputState =
             let
                 pointXY =
@@ -790,6 +790,11 @@ buildGraph track =
                                         (List.map Tuple.second orientedEdge)
                                         |> Maybe.withDefault (Leaf road)
 
+                                newEdgeTrack =
+                                    TrackLoaded.newTrackFromTree
+                                        track.referenceLonLat
+                                        newEdgeTree
+
                                 newEdgeIndex =
                                     Dict.size inputState.edgesDict
 
@@ -813,7 +818,7 @@ buildGraph track =
                             , edgesDict =
                                 Dict.insert
                                     newEdgeIndex
-                                    ( newEdgeKey, newEdgeTree )
+                                    ( newEdgeKey, newEdgeTrack )
                                     inputState.edgesDict
                             , traversals = traversal :: inputState.traversals
                             }
@@ -825,7 +830,7 @@ buildGraph track =
     }
 
 
-trivialGraph : TrackLoaded msg -> Graph
+trivialGraph : TrackLoaded msg -> Graph msg
 trivialGraph track =
     {-
        This just gives us the start and end points, maybe one node if track is looped.
@@ -844,7 +849,7 @@ trivialGraph track =
 
         edges =
             Dict.fromList
-                [ ( 1, ( ( 1, 2, makeXY discriminator ), track.trackTree ) ) ]
+                [ ( 1, ( ( 1, 2, makeXY discriminator ), track ) ) ]
 
         traversal =
             { edge = 1, direction = Natural }

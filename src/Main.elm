@@ -145,7 +145,7 @@ type alias Model =
     , rightDockLeftEdge : SplitPane.State
 
     -- Tools
-    , toolOptions : ToolsController.Options
+    , toolOptions : ToolsController.Options Msg
     , isPopupOpen : Bool
     , backgroundColour : Element.Color
     , infoTextDict : Dict String (Dict String String)

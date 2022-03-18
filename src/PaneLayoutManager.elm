@@ -198,7 +198,7 @@ optionList =
 
 
 render :
-    ToolsController.Options
+    ToolsController.Options msg
     -> Options
     -> Quantity Int Pixels
     -> TrackLoaded msg
@@ -218,7 +218,7 @@ update :
     Msg
     -> (Msg -> msg)
     -> Maybe (TrackLoaded msg)
-    -> Graph
+    -> Graph msg
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Options
     -> Dict String PreviewData
@@ -743,8 +743,8 @@ dimensionsWithLayout layout ( w, h ) =
 viewPanes :
     (Msg -> msg)
     -> Maybe (TrackLoaded msg)
-    -> Tools.GraphOptions.Graph
-    -> Tools.GraphOptions.Options
+    -> Tools.GraphOptions.Graph msg
+    -> Tools.GraphOptions.Options msg
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Options
     -> Maybe Tools.Flythrough.Flythrough

@@ -12,17 +12,26 @@ BUG: Undo single point smooth at track start removes a point.
 
 ## Route Builder
 
-- Port/Redo route walking with offset (see Out & Back).
+- Unified Undo/Redo for graph & track operations.
+> Simple union type, track edits wrapped with Edge index.
 
 - Add "edit road"; changes active Track so road can be edited.
+> Properly, we're always editing a graph edge, but that means that we should
+> move TrackLoaded _inside_ Graph, and have a current track. (edges : Dict Int TrackLoaded).
+> Which is not too hard.
+> Perhaps, in graph mode (i.e. Analyzed) set state to AlwaysOpen as a reminder of mode.
+> Could also Disable inappropriate tools.
+> Similarly, disable Save GPX (?)
+
+- Transition route walking with offset (see Out & Back for the fold).
+> Easiest is just to concatenate the tracks and use that fold.
+> I.e., don't try to smooth the junctions.
 
 (Now, equal to v1/2.)
 
 - Add lollipops when offset < min radius. (also on out and back)
 
-- Better inside lines.
-
-- Improve highlight edge direction with an arrow on each section.
+- Improve traversal direction with an arrow on each section.
 
 - Add "split edge at pointer" function.
 
@@ -41,6 +50,8 @@ Drag curve former circle directly in Plan View.
 Ditto for Move & Stretch, possibly Nudge.
 
 ## Tools: old, updated, & new
+
+- Optionally show OSM land-use polygons on ground plane.
 
 --- _Cut-off for release_
 - Terrain as from v2 but with texture maybe

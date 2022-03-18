@@ -39,6 +39,20 @@ type alias Options msg =
     }
 
 
+newTrackFromTree : GPXSource -> PeteTree -> TrackLoaded msg
+newTrackFromTree refLonLat newTree =
+    { currentPosition = 0
+    , markerPosition = Nothing
+    , referenceLonLat = refLonLat
+    , renderDepth = 10
+    , trackTree = newTree
+    , trackName = Nothing
+    , undos = []
+    , redos = []
+    , lastMapClick = ( 0, 0 )
+    }
+
+
 removeAdjacentDuplicates : List GPXSource -> List GPXSource
 removeAdjacentDuplicates gpxs =
     -- Just removing stationary points fixes so many problems.
