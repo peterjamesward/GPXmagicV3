@@ -4,7 +4,7 @@ module Tools.Graph exposing (..)
 -- between the road (nodes) and the trackpoints, so we can traverse sections
 -- of track points multiple times and in each direction.
 
-import Actions
+import Actions exposing (ToolAction)
 import Angle
 import BoundingBox3d
 import Dict exposing (Dict)
@@ -225,6 +225,44 @@ getTrack : Int -> Options msg -> Maybe (TrackLoaded msg)
 getTrack edge options =
     Dict.get edge options.graph.edges
         |> Maybe.map Tuple.second
+
+
+toolStateChange :
+    Bool
+    -> Element.Color
+    -> Options msg
+    -> Maybe (TrackLoaded msg)
+    -> ( Options msg, List (ToolAction msg) )
+toolStateChange opened colour options track =
+    case ( opened, track ) of
+        ( True, Just theTrack ) ->
+            let
+                graph =
+                    options.graph
+
+                lastTrack =
+                    Dict.get options.editingTrack graph.edges
+
+                newGraph =
+                    -- Graph must always refer to the latest version of the active track.
+                    { graph
+                        | edges =
+                            case lastTrack of
+                                Just ( nodeStuff, _ ) ->
+                                    Dict.insert
+                                        options.editingTrack
+                                        ( nodeStuff, theTrack )
+                                        graph.edges
+
+                                Nothing ->
+                                    graph.edges
+                    }
+            in
+            ( { options | graph = newGraph }, [] )
+
+        _ ->
+            -- Hide preview
+            ( options, [] )
 
 
 view : (Msg -> msg) -> Options msg -> Element msg

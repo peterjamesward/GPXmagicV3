@@ -1504,7 +1504,18 @@ toolStateHasChanged toolType newState isTrack options =
             ( options, [ StoreLocally "tools" <| encodeToolState options ] )
 
         ToolGraph ->
-            ( options, [ StoreLocally "tools" <| encodeToolState options ] )
+            let
+                ( newGraphOptions, actions ) =
+                    Tools.Graph.toolStateChange
+                        True
+                        (getColour toolType options.tools)
+                        options.graphOptions
+                        isTrack
+
+                newOptions =
+                    { options | graphOptions = newGraphOptions }
+            in
+            ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
         ToolSettings ->
             ( options, [ StoreLocally "tools" <| encodeToolState options ] )
