@@ -81,7 +81,10 @@ textDictionary =
     , Dict.fromList
         [ ( toolID, "Route builder" )
         , ( "info", infoText )
-        , ( "offset", "About the offset setting" )
+        , ( "offset", "Offset the generated road using this route as the centre-line." )
+        , ( "render", """Create a single road, using your route and offsetting the road
+from the centre line (if you want to avoid collisions with oncoming avatars). As the same
+road section is used for each passage, there should be no height differences.""" )
         ]
     )
 
@@ -305,10 +308,14 @@ view wrapper options =
                 none
 
         finishButton =
-            I.button neatToolsBorder
-                { onPress = Just (wrapper ConvertFromGraph)
-                , label = text "Convert back into route"
-                }
+            row [ spacing 3 ]
+                [ infoButton (wrapper <| DisplayInfo "graph" "render")
+                , I.button
+                    neatToolsBorder
+                    { onPress = Just (wrapper ConvertFromGraph)
+                    , label = text "Convert back into route"
+                    }
+                ]
 
         offsetSlider =
             row [ spacing 5 ]

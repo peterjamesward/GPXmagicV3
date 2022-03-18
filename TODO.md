@@ -12,9 +12,6 @@ BUG: Undo single point smooth at track start removes a point.
 
 ## Route Builder
 
-- Add "edit road"; changes active Track so road can be edited.
-- > Need to implement action in Main.
-
 - Transition route walking with offset (see Out & Back for the fold).
 > Easiest is just to concatenate the tracks and use that fold.
 > I.e., don't try to smooth the junctions.
