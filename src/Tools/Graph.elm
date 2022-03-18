@@ -585,7 +585,7 @@ update msg options track wrapper =
             ( { options
                 | graph = buildGraph track
                 , analyzed = True
-                , originalTrack = DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
+                , originalTrack = track
               }
             , []
               --, [ Actions.LockToolOpen True toolID ]

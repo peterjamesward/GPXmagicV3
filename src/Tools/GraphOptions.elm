@@ -26,7 +26,7 @@ type alias Options msg =
     , boundingBox : BoundingBox3d Length.Meters LocalCoords
     , selectedTraversal : Int
     , analyzed : Bool
-    , originalTrack : List GPXSource
+    , originalTrack : TrackLoaded msg
     , editingTrack : Int
     }
 
