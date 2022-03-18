@@ -89,6 +89,7 @@ type ToolAction msg
     | AddTraversal Int
     | LockToolOpen Bool String
     | ChangeActiveTrack Int
+    | MakeRouteFromGraph
 
 
 interpretAction : ToolAction msg -> String

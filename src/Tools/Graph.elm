@@ -9,7 +9,7 @@ import Angle
 import BoundingBox3d
 import Dict exposing (Dict)
 import Direction2d
-import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), RoadSection, skipCount, trueLength)
+import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), RoadSection, gpxFromPointWithReference, skipCount, trueLength)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -24,6 +24,7 @@ import Quantity exposing (Quantity, zero)
 import Set exposing (Set)
 import ToolTip exposing (myTooltip, tooltip)
 import Tools.GraphOptions exposing (..)
+import Tools.Nudge
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal2, showLongMeasure, showShortMeasure)
 import ViewPureStyles exposing (commonShortHorizontalSliderStyles, infoButton, neatToolsBorder, rgtDark, rgtPurple, useIcon, useIconWithSize)
@@ -47,8 +48,6 @@ type Msg
     | ConvertFromGraph
     | HighlightTraversal Int
     | RemoveLastTraversal
-    | AddTraversalFromCurrent
-    | SelectStartNode
     | DisplayInfo String String
     | FlipDirection Int
     | ClearRoute
@@ -613,12 +612,6 @@ update msg options track wrapper =
         HighlightTraversal traversal ->
             ( { options | selectedTraversal = traversal }, [] )
 
-        SelectStartNode ->
-            ( options, [] )
-
-        AddTraversalFromCurrent ->
-            ( options, [] )
-
         RemoveLastTraversal ->
             let
                 graph =
@@ -671,7 +664,7 @@ update msg options track wrapper =
             ( { options | centreLineOffset = float }, [] )
 
         ConvertFromGraph ->
-            ( options, [] )
+            ( options, [ Actions.MakeRouteFromGraph ] )
 
         DisplayInfo tool tag ->
             ( options, [ Actions.DisplayInfo tool tag ] )
@@ -947,6 +940,123 @@ trivialGraph track =
     , edges = edges
     , userRoute = [ traversal ]
     , referenceLonLat = track.referenceLonLat
+    }
+
+
+makeNewRoute : Options msg -> Options msg
+makeNewRoute options =
+    -- This will walk the route, apply offset, push the old track on the Undo stack
+    -- and then become a "trivialGraph" of the new route.
+    -- Also note we nudge down by 1cm any edges that are revisited.
+    -- Code is very similar to Out & Back.
+    -- Yes, this nduges each point separately; don't care.
+    -- But in the interest of elegance, we'll reverse the traversal list,
+    -- do all the nudging from the far end, then we will have the new track in the right order.
+    let
+        graph =
+            options.graph
+
+        oldPoints =
+            case options.originalTrack of
+                Just oldTrack ->
+                    DomainModel.getAllGPXPointsInNaturalOrder oldTrack.trackTree
+
+                Nothing ->
+                    []
+
+        noNudge =
+            Tools.Nudge.defaultOptions
+
+        useNudgeTool nudgeOption track index =
+            -- Simple wrapper to use internal operation in Nudge
+            Tools.Nudge.nudgeTrackPoint
+                nudgeOption
+                1.0
+                index
+                track
+
+        doOneLeg { edge, direction } ( visitedEdges, outputs ) =
+            -- nudge entire route one way, in natural order, inefficiently.
+            let
+                edgeTrack =
+                    Dict.get edge graph.edges
+
+                directionNudge =
+                    case direction of
+                        Natural ->
+                            { noNudge | horizontal = options.centreLineOffset }
+
+                        Reverse ->
+                            { noNudge | horizontal = Quantity.negate options.centreLineOffset }
+
+                nudge =
+                    if Set.member edge visitedEdges then
+                        { directionNudge | vertical = Quantity.negate Length.centimeter }
+
+                    else
+                        { directionNudge | horizontal = options.centreLineOffset }
+
+                nudgePoints =
+                    case edgeTrack of
+                        Just ( _, track ) ->
+                            let
+                                pointOrder =
+                                    case direction of
+                                        Natural ->
+                                            List.reverse <|
+                                                List.range 0 (skipCount track.trackTree)
+
+                                        Reverse ->
+                                            List.range 0 (skipCount track.trackTree)
+                            in
+                            pointOrder
+                                |> List.map (useNudgeTool nudge track)
+                                |> List.map (gpxFromPointWithReference graph.referenceLonLat)
+
+                        Nothing ->
+                            []
+            in
+            ( Set.insert edge visitedEdges, nudgePoints ++ outputs )
+
+        ( _, newPoints ) =
+            options.graph.userRoute
+                |> List.reverse
+                |> List.foldl doOneLeg ( Set.empty, [] )
+
+        newTree =
+            DomainModel.treeFromSourcesWithExistingReference
+                graph.referenceLonLat
+                newPoints
+
+        newTrack =
+            case ( options.originalTrack, newTree ) of
+                ( Just originalTrack, Just tree ) ->
+                    { originalTrack
+                        | trackTree = tree
+                    }
+                        |> TrackLoaded.addToUndoStack
+                            Actions.MakeRouteFromGraph
+                            0
+                            0
+                            oldPoints
+                        |> Just
+
+                _ ->
+                    -- We're screwed.
+                    Nothing
+    in
+    { options
+        | graph =
+            case Maybe.map trivialGraph newTrack of
+                Just newGraph ->
+                    newGraph
+
+                Nothing ->
+                    graph
+        , selectedTraversal = 0
+        , analyzed = False
+        , originalTrack = Nothing
+        , editingTrack = 0
     }
 
 
