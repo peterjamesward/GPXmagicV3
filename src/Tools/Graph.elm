@@ -36,7 +36,7 @@ defaultOptions =
     , boundingBox = BoundingBox3d.singleton Point3d.origin
     , selectedTraversal = 0
     , analyzed = False
-    , originalTrack = []
+    , originalTrack = Nothing
     , editingTrack = 0
     }
 
@@ -301,7 +301,7 @@ view wrapper options =
             if options.analyzed then
                 I.button neatToolsBorder
                     { onPress = Just (wrapper RevertToTrack)
-                    , label = text "Revert to track"
+                    , label = text "Revert to original track"
                     }
 
             else
@@ -585,7 +585,7 @@ update msg options track wrapper =
             ( { options
                 | graph = buildGraph track
                 , analyzed = True
-                , originalTrack = track
+                , originalTrack = Just track
               }
             , []
               --, [ Actions.LockToolOpen True toolID ]
@@ -593,11 +593,20 @@ update msg options track wrapper =
 
         RevertToTrack ->
             ( { options
-                | graph = trivialGraph track
+                | graph =
+                    case options.originalTrack of
+                        Just original ->
+                            trivialGraph original
+
+                        Nothing ->
+                            -- Oh dear!
+                            options.graph
                 , analyzed = False
-                , originalTrack = []
+                , originalTrack = Nothing
+                , editingTrack = 0
+                , selectedTraversal = 0
               }
-            , []
+            , [ Actions.ChangeActiveTrack 0 ]
               --, [ Actions.LockToolOpen True toolID ]
             )
 
@@ -925,14 +934,14 @@ trivialGraph track =
 
         nodes =
             Dict.fromList
-                [ ( 1, makeXY startNode ), ( 2, makeXY endNode ) ]
+                [ ( 0, makeXY startNode ), ( 2, makeXY endNode ) ]
 
         edges =
             Dict.fromList
-                [ ( 1, ( ( 1, 2, makeXY discriminator ), track ) ) ]
+                [ ( 0, ( ( 1, 2, makeXY discriminator ), track ) ) ]
 
         traversal =
-            { edge = 1, direction = Natural }
+            { edge = 0, direction = Natural }
     in
     { nodes = nodes
     , edges = edges
