@@ -1788,6 +1788,24 @@ performActionsOnModel actions model =
                     in
                     { foldedModel | toolOptions = newToolOptions }
 
+                ( ChangeActiveTrack edge, Just track ) ->
+                    let
+                        toolOptions =
+                            foldedModel.toolOptions
+
+                        graphOptions =
+                            toolOptions.graphOptions
+
+                        newGraphOptions =
+                            Tools.Graph.changeActiveTrack edge graphOptions
+
+                        newToolOptions =
+                            { toolOptions | graphOptions = newGraphOptions }
+                    in
+                    { foldedModel | toolOptions = newToolOptions
+                     , track = Tools.Graph.getTrack edge graphOptions
+                     }
+
                 ( LoadGpxFromStrava gpxContent, _ ) ->
                     let
                         ( modelWithNewTrack, _ ) =

@@ -37,6 +37,7 @@ defaultOptions =
     , selectedTraversal = 0
     , analyzed = False
     , originalTrack = []
+    , editingTrack = 0
     }
 
 
@@ -213,6 +214,17 @@ addTraversal newEdge options =
 
         _ ->
             options
+
+
+changeActiveTrack : Int -> Options msg -> Options msg
+changeActiveTrack edge options =
+    { options | editingTrack = edge }
+
+
+getTrack : Int -> Options msg -> Maybe (TrackLoaded msg)
+getTrack edge options =
+    Dict.get edge options.graph.edges
+        |> Maybe.map Tuple.second
 
 
 view : (Msg -> msg) -> Options msg -> Element msg

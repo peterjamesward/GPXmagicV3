@@ -12,22 +12,14 @@ BUG: Undo single point smooth at track start removes a point.
 
 ## Route Builder
 
-- Option to revert to original track (Undo at Graph level)
-> Although if the graph "session" is a single action on edge 0, this just falls out.
-> Good to have though.
-> Similarly, option to go back into Graph if walked route is not ideal.
-
 - Add "edit road"; changes active Track so road can be edited.
-> Properly, we're always editing a graph edge, but that means that we should
-> move TrackLoaded _inside_ Graph, and have a current track. (edges : Dict Int TrackLoaded).
-> Which is not too hard.
-> Perhaps, in graph mode (i.e. Analyzed) set state to AlwaysOpen as a reminder of mode.
-> Could also Disable inappropriate tools.
-> Similarly, disable Save GPX (?)
+- > Need to implement action in Main.
 
 - Transition route walking with offset (see Out & Back for the fold).
 > Easiest is just to concatenate the tracks and use that fold.
 > I.e., don't try to smooth the junctions.
+
+- "Walk route" should go on Undo stack, with original track as source.
 
 (Now, equal to v1/2.)
 

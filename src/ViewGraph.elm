@@ -667,10 +667,14 @@ update msg msgWrapper graph area context =
             )
 
         AddTraversal edge ->
-            ( context, [ Actions.AddTraversal edge ] )
+            ( { context | clickFeature = ClickNone }
+            , [ Actions.AddTraversal edge ]
+            )
 
         EditRoad edge ->
-            ( context, [] )
+            ( { context | clickFeature = ClickNone }
+            , [ Actions.ChangeActiveTrack edge ]
+            )
 
 
 detectHit :

@@ -88,6 +88,7 @@ type ToolAction msg
     | Autofix (List Int)
     | AddTraversal Int
     | LockToolOpen Bool String
+    | ChangeActiveTrack Int
 
 
 interpretAction : ToolAction msg -> String

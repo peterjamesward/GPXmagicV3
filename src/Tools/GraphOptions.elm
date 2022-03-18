@@ -27,6 +27,7 @@ type alias Options msg =
     , selectedTraversal : Int
     , analyzed : Bool
     , originalTrack : List GPXSource
+    , editingTrack : Int
     }
 
 
