@@ -66,6 +66,7 @@ type Msg
     | PopupHide
     | ToggleEdgeMode
     | AddTraversal Int
+    | EditRoad Int
 
 
 type DragAction
@@ -181,22 +182,31 @@ popup msgWrapper context options =
                     []
 
                 ClickEdge edge ->
-                    if Tools.Graph.edgeCanBeAdded edge options then
-                        [ Input.button [ tooltip below (myTooltip "Add to route") ]
+                    [ text <| "Road " ++ String.fromInt edge ++ "..."
+                    , if Tools.Graph.edgeCanBeAdded edge options then
+                        Input.button []
                             { onPress = Just <| msgWrapper <| AddTraversal edge
-                            , label = useIcon FeatherIcons.plus
+                            , label = text "Add to route"
                             }
-                        ]
 
-                    else
-                        []
+                      else
+                        none
+                    , Input.button []
+                        { onPress = Just <| msgWrapper <| EditRoad edge
+                        , label = text "Edit this road"
+                        }
+                    , Input.button []
+                        { onPress = Just <| msgWrapper PopupHide
+                        , label = text "Close menu"
+                        }
+                    ]
     in
     case context.clickPoint of
         Nothing ->
             none
 
         Just ( x, y ) ->
-            row
+            column
                 [ alignTop
                 , alignLeft
                 , moveDown y
@@ -211,13 +221,7 @@ popup msgWrapper context options =
                 , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ImageNoOp >> msgWrapper)
                 , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always ImageNoOp >> msgWrapper)
                 ]
-                (popupMenu
-                    ++ [ Input.button [ tooltip below (myTooltip "Close menu") ]
-                            { onPress = Just <| msgWrapper PopupHide
-                            , label = useIcon FeatherIcons.minus
-                            }
-                       ]
-                )
+                popupMenu
 
 
 onContextMenu : a -> Element.Attribute a
@@ -664,6 +668,9 @@ update msg msgWrapper graph area context =
 
         AddTraversal edge ->
             ( context, [ Actions.AddTraversal edge ] )
+
+        EditRoad edge ->
+            ( context, [] )
 
 
 detectHit :
