@@ -489,7 +489,7 @@ view imperial msgWrapper options isTrack =
                 }
 
         autofixButton =
-            if options.breaches == [] then
+            if options.breaches == [] || options.mode == DirectionChangeWithRadius then
                 none
 
             else
