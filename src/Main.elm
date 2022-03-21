@@ -1807,7 +1807,7 @@ performActionsOnModel actions model =
                         , track = Tools.Graph.getTrack edge graphOptions
                     }
 
-                ( MakeRouteFromGraph , Just track ) ->
+                ( MakeRouteFromGraph, Just track ) ->
                     let
                         toolOptions =
                             foldedModel.toolOptions
@@ -1823,7 +1823,8 @@ performActionsOnModel actions model =
                     in
                     { foldedModel
                         | toolOptions = newToolOptions
-                        , track = Tools.Graph.getTrack 0 graphOptions
+                        , track =
+                            Tools.Graph.getTrack 0 graphOptions
                     }
 
                 ( LoadGpxFromStrava gpxContent, _ ) ->

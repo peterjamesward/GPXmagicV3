@@ -6,23 +6,35 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 
 BUG: Undo single point smooth at track start removes a point.
 
+BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
+> Is only rendering; asked JB to check.
+> May fix if we just reposition Orange based on distance.
+
+BUG: Bend Problems in Radius mode should not show quick fix button.
+
 --
 
 # WIP
 
 ## Route Builder
 
-- Transition route walking with offset (see Out & Back for the fold).
-> Easiest is just to concatenate the tracks and use that fold.
-> I.e., don't try to smooth the junctions.
+- Route walking with offset.
+> Need code to trim edges for minimum radius at junctions.
+> Must slightly reduce length to allow for bend, before the offset is applied.
+> Could be both ends or one (start/finish).
 
-- "Walk route" should go on Undo stack, with original track as source.
+- Prevaricating over whether "minimum radius" should apply to all the route or just junctions.
+> I guess best is optional. JB would like this anyway as part of generic smoothing.
 
-(Now, equal to v1/2.)
+- "Walk route" must go on Undo stack, with original track as source.
+
+- Is it possible to deal neatly (i.e. discount) colinear points such as in "Cuckney 10 mile"?
+
+(Now, >= v1/2.)
 
 - Add lollipops when offset < min radius. (also on out and back)
 
-- Improve traversal direction with an arrow on each section.
+- Improve traversal direction display with an arrow on each section.
 
 - Add "split edge at pointer" function.
 
@@ -35,6 +47,10 @@ BUG: Undo single point smooth at track start removes a point.
 
 # BACKLOG
 
+## 1CQF
+
+Allow the use of markers for partial application.
+
 ## Usability
 
 Drag curve former circle directly in Plan View.
@@ -42,7 +58,7 @@ Ditto for Move & Stretch, possibly Nudge.
 
 ## Tools: old, updated, & new
 
-- Optionally show OSM land-use polygons on ground plane.
+- Optionally show OSM land-use polygons on ground plane. (Not sure about Terrain.)
 
 --- _Cut-off for release_
 - Terrain as from v2 but with texture maybe
@@ -70,17 +86,6 @@ Scales?
 > This could be like a meta-box, or a "build your own 1CQF", in which
 > we pipeline existing features, just like 1CQF.
 > E.G. simplify > limit > interpolate > centroid.
-
-John Bytheway:
-> I still find myself using GPX Smoother, I find it easier to see the
-difference using the different algorithms made on the course and which
-I need to use where to keep the course as faithful as possible whilst
-making them smoother. I would really like the options they use, my go
-to is the Slope box smoothing followed by the Kalman filter then
-elevation box smoothing, but its not just those options that make it
-good its the visual way of seeing the changes with the Elevation
-chart, Slope and Elevation profile making it easy to see exactly what
-the changes are doing.
 
 ## Loops
 

@@ -5,11 +5,14 @@ module Tools.Graph exposing (..)
 -- of track points multiple times and in each direction.
 
 import Actions exposing (ToolAction)
-import Angle
+import Angle exposing (Angle)
+import Arc2d exposing (Arc2d)
+import Arc3d exposing (Arc3d)
 import BoundingBox3d
+import Circle2d exposing (Circle2d)
 import Dict exposing (Dict)
 import Direction2d
-import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), RoadSection, gpxFromPointWithReference, skipCount, trueLength)
+import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), RoadSection, asRecord, skipCount, trueLength)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -19,21 +22,26 @@ import FeatherIcons
 import FlatColors.ChinesePalette
 import Length exposing (Length, Meters, inMeters)
 import List.Extra
+import LocalCoords exposing (LocalCoords)
+import Maybe.Extra
 import Point3d
+import Polyline3d
 import Quantity exposing (Quantity, zero)
 import Set exposing (Set)
 import ToolTip exposing (myTooltip, tooltip)
 import Tools.GraphOptions exposing (..)
 import Tools.Nudge
+import Tools.NudgeOptions
 import TrackLoaded exposing (TrackLoaded)
-import UtilsForViews exposing (showDecimal2, showLongMeasure, showShortMeasure)
-import ViewPureStyles exposing (commonShortHorizontalSliderStyles, infoButton, neatToolsBorder, rgtDark, rgtPurple, useIcon, useIconWithSize)
+import UtilsForViews exposing (showDecimal2, showLongMeasure)
+import ViewPureStyles exposing (..)
 
 
 defaultOptions : Options msg
 defaultOptions =
     { graph = emptyGraph
     , centreLineOffset = Length.meters 0.0
+    , minimumRadiusAtPlaces = Length.meters 3.0
     , boundingBox = BoundingBox3d.singleton Point3d.origin
     , selectedTraversal = 0
     , analyzed = False
@@ -943,121 +951,190 @@ trivialGraph track =
     }
 
 
+type alias Junction =
+    { arc : Maybe (Arc3d Meters LocalCoords)
+    , trim : Quantity Float Meters
+    }
+
+
 makeNewRoute : Options msg -> Options msg
 makeNewRoute options =
-    -- This will walk the route, apply offset, push the old track on the Undo stack
-    -- and then become a "trivialGraph" of the new route.
-    -- Also note we nudge down by 1cm any edges that are revisited.
-    -- Code is very similar to Out & Back.
-    -- Yes, this nduges each point separately; don't care.
-    -- But in the interest of elegance, we'll reverse the traversal list,
-    -- do all the nudging from the far end, then we will have the new track in the right order.
+    {-
+       This will walk the route, apply offset, push the old track on the Undo stack
+       and then become a "trivialGraph" of the new route.
+       Also note we nudge down by 1cm any edges that are revisited.
+       Don't forget to push the old points on Undo stack.
+
+        Nope, not doing a fold at traversal level since it gets unduly complicated.
+        We need to consider a traversal and both its neighbours, to work out any edge
+        shortening, so a triple map is conceptually easier, and a simple recursive
+        function more so.
+    -}
     let
         graph =
             options.graph
 
-        oldPoints =
-            case options.originalTrack of
-                Just oldTrack ->
-                    DomainModel.getAllGPXPointsInNaturalOrder oldTrack.trackTree
-
-                Nothing ->
-                    []
-
-        noNudge =
-            Tools.Nudge.defaultOptions
-
         useNudgeTool nudgeOption track index =
-            -- Simple wrapper to use internal operation in Nudge
+            -- Simple wrapper to use internal operation in Nudge; not efficient!
             Tools.Nudge.nudgeTrackPoint
                 nudgeOption
                 1.0
                 index
                 track
 
-        doOneLeg { edge, direction } ( visitedEdges, outputs ) =
-            -- nudge entire route one way, in natural order, inefficiently.
-            let
-                edgeTrack =
-                    Dict.get edge graph.edges
+        dummyJunction : Junction
+        dummyJunction =
+            --TODO: If S/F loop, this becomes a proper junction.
+            { arc = Nothing, trim = Quantity.zero }
 
-                directionNudge =
+        junctions : List Junction
+        junctions =
+            -- Took me so long to see this. Getting old?
+            -- There will be one fewer junctions than edges.
+            List.map2
+                computeJunction
+                graph.userRoute
+                (List.drop 1 graph.userRoute)
+
+        renderedArcs : List (List EarthPoint)
+        renderedArcs =
+            List.map renderJunction junctions
+
+        isNotFirstUseOfEdge : List Bool
+        isNotFirstUseOfEdge =
+            -- Good practice for RGT is to depress subsequent edge pass by 1cm; avoids flicker.
+            let
+                ( _, flags ) =
+                    List.foldl
+                        (\{ edge, direction } ( traversed, outputs ) ->
+                            ( Set.insert edge traversed
+                            , Set.member edge traversed :: outputs
+                            )
+                        )
+                        ( Set.empty, [] )
+                        graph.userRoute
+            in
+            List.reverse flags
+
+        trimmedTraversals : List (List EarthPoint)
+        trimmedTraversals =
+            List.map4
+                trimTraversal
+                (dummyJunction :: junctions)
+                graph.userRoute
+                isNotFirstUseOfEdge
+                (junctions ++ [ dummyJunction ])
+
+        trimTraversal : Junction -> Traversal -> Bool -> Junction -> List EarthPoint
+        trimTraversal preceding { edge, direction } repetition following =
+            -- Emit offset points but not within the trim areas.
+            case Dict.get edge graph.edges of
+                Just ( ( n1, n2, via ), track ) ->
+                    -- It's a real edge, offset flipped if reversed.
+                    -- Compute offset points on unflipped edge then flip if reversed.
+                    let
+                        ( correctedOffset, startTrim, endTrim ) =
+                            case direction of
+                                Natural ->
+                                    ( options.centreLineOffset
+                                    , preceding.trim
+                                    , following.trim
+                                    )
+
+                                Reverse ->
+                                    ( Quantity.negate options.centreLineOffset
+                                    , following.trim
+                                    , preceding.trim
+                                    )
+
+                        ( firstOffsetIndex, lastOffsetIndex ) =
+                            -- Puts us in a place where can just use Nudge. Hmm.
+                            ( DomainModel.indexFromDistance startTrim track.trackTree
+                            , DomainModel.indexFromDistance
+                                (trueLength track.trackTree |> Quantity.minus endTrim)
+                                track.trackTree
+                                - 1
+                            )
+
+                        defaultNudge =
+                            Tools.Nudge.defaultOptions
+
+                        nudgeOptions : Tools.NudgeOptions.Options
+                        nudgeOptions =
+                            { defaultNudge
+                                | horizontal = correctedOffset
+                                , vertical =
+                                    if repetition then
+                                        Length.centimeters -1
+
+                                    else
+                                        Quantity.zero
+                            }
+
+                        nudgedPoints =
+                            List.range firstOffsetIndex lastOffsetIndex
+                                |> List.map (useNudgeTool nudgeOptions track)
+                    in
                     case direction of
                         Natural ->
-                            { noNudge | horizontal = options.centreLineOffset }
+                            nudgedPoints
 
                         Reverse ->
-                            { noNudge | horizontal = Quantity.negate options.centreLineOffset }
+                            List.reverse nudgedPoints
 
-                nudge =
-                    if Set.member edge visitedEdges then
-                        { directionNudge | vertical = Quantity.negate Length.centimeter }
+                Nothing ->
+                    []
 
-                    else
-                        { directionNudge | horizontal = options.centreLineOffset }
+        newEarthPoints =
+            List.take 1 trimmedTraversals
+                ++ List.Extra.interweave renderedArcs (List.drop 1 trimmedTraversals)
 
-                nudgePoints =
-                    case edgeTrack of
-                        Just ( _, track ) ->
-                            let
-                                pointOrder =
-                                    case direction of
-                                        Natural ->
-                                            List.reverse <|
-                                                List.range 0 (skipCount track.trackTree)
+        computeJunction : Traversal -> Traversal -> Junction
+        computeJunction incoming outgoing =
+            dummyJunction
 
-                                        Reverse ->
-                                            List.range 0 (skipCount track.trackTree)
-                            in
-                            pointOrder
-                                |> List.map (useNudgeTool nudge track)
-                                |> List.map (gpxFromPointWithReference graph.referenceLonLat)
+        renderJunction : Junction -> List EarthPoint
+        renderJunction junction =
+            case junction.arc of
+                Just arc ->
+                    arc
+                        |> Arc3d.approximate (Length.meters 0.1)
+                        |> Polyline3d.vertices
 
-                        Nothing ->
-                            []
-            in
-            ( Set.insert edge visitedEdges, nudgePoints ++ outputs )
+                Nothing ->
+                    []
 
-        ( _, newPoints ) =
-            options.graph.userRoute
-                |> List.reverse
-                |> List.foldl doOneLeg ( Set.empty, [] )
-
-        newTree =
-            DomainModel.treeFromSourcesWithExistingReference
-                graph.referenceLonLat
-                newPoints
-
+        newTrack : Maybe (TrackLoaded msg)
         newTrack =
-            case ( options.originalTrack, newTree ) of
-                ( Just originalTrack, Just tree ) ->
-                    { originalTrack
-                        | trackTree = tree
-                    }
+            newEarthPoints
+                |> List.concat
+                |> List.map (DomainModel.gpxFromPointWithReference graph.referenceLonLat)
+                |> DomainModel.treeFromSourcesWithExistingReference graph.referenceLonLat
+                |> Maybe.map (TrackLoaded.newTrackFromTree graph.referenceLonLat)
+    in
+    case ( options.originalTrack, newTrack ) of
+        ( Just oldTrack, Just track ) ->
+            -- All has worked.
+            let
+                trackWithUndo =
+                    track
                         |> TrackLoaded.addToUndoStack
                             Actions.MakeRouteFromGraph
                             0
                             0
-                            oldPoints
-                        |> Just
+                            (DomainModel.getAllGPXPointsInNaturalOrder oldTrack.trackTree)
+            in
+            { options
+                | graph = trivialGraph trackWithUndo
+                , selectedTraversal = 0
+                , analyzed = False
+                , originalTrack = Nothing
+                , editingTrack = 0
+            }
 
-                _ ->
-                    -- We're screwed.
-                    Nothing
-    in
-    { options
-        | graph =
-            case Maybe.map trivialGraph newTrack of
-                Just newGraph ->
-                    newGraph
-
-                Nothing ->
-                    graph
-        , selectedTraversal = 0
-        , analyzed = False
-        , originalTrack = Nothing
-        , editingTrack = 0
-    }
+        _ ->
+            -- Not so much worked.
+            options
 
 
 

@@ -23,6 +23,7 @@ type alias XY =
 type alias Options msg =
     { graph :  Graph msg
     , centreLineOffset : Length.Length
+    , minimumRadiusAtPlaces : Length.Length
     , boundingBox : BoundingBox3d Length.Meters LocalCoords
     , selectedTraversal : Int
     , analyzed : Bool
