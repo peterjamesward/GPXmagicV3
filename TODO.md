@@ -25,6 +25,8 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 
 - Update Map.
 
+- Undo render should revert to graph with traversals.
+
 - Redo?
 
 - Option to close loop is S == F.

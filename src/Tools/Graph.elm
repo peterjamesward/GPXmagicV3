@@ -1004,6 +1004,9 @@ makeNewRoute options =
                 graph.userRoute
                 (List.drop 1 graph.userRoute)
 
+        _ =
+            Debug.log "junctions" junctions
+
         renderedArcs : List (List EarthPoint)
         renderedArcs =
             List.map renderJunction junctions
@@ -1195,9 +1198,10 @@ makeNewRoute options =
                         arcMidpoint3d =
                             Arc2d.midpoint arc |> Point3d.on planeFor2dArc
                     in
-                    { arc = Arc3d.throughPoints trimLocationInbound arcMidpoint3d trimLocationOutbound
-                    , trim = trim
-                    }
+                    dummyJunction
+                    --{ arc = Arc3d.throughPoints trimLocationInbound arcMidpoint3d trimLocationOutbound
+                    --, trim = trim
+                    --}
 
                 _ ->
                     dummyJunction
@@ -1206,7 +1210,21 @@ makeNewRoute options =
         renderJunction junction =
             case junction.arc of
                 Just arc ->
+                    -- Note the given arc is for the centre line, we need to consider offset now.
+                    let
+                        centre =
+                            Arc3d.centerPoint arc
+
+                        radius =
+                            Arc3d.radius arc
+
+                        scaleFactor =
+                            Quantity.ratio
+                                (Quantity.plus radius options.centreLineOffset)
+                                radius
+                    in
                     arc
+                        |> Arc3d.scaleAbout centre scaleFactor
                         |> Arc3d.approximate (Length.meters 0.1)
                         |> Polyline3d.vertices
 
