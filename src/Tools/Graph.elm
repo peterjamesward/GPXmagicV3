@@ -21,19 +21,23 @@ import Element.Input as I
 import FeatherIcons
 import FlatColors.ChinesePalette
 import Length exposing (Length, Meters, inMeters)
+import LineSegment3d
 import List.Extra
 import LocalCoords exposing (LocalCoords)
 import Maybe.Extra
+import Point2d
 import Point3d
 import Polyline3d
 import Quantity exposing (Quantity, zero)
 import Set exposing (Set)
+import SketchPlane3d
 import ToolTip exposing (myTooltip, tooltip)
 import Tools.GraphOptions exposing (..)
 import Tools.Nudge
 import Tools.NudgeOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal2, showLongMeasure)
+import Vector3d
 import ViewPureStyles exposing (..)
 
 
@@ -315,14 +319,18 @@ view wrapper options =
                 none
 
         finishButton =
-            row [ spacing 3 ]
-                [ infoButton (wrapper <| DisplayInfo "graph" "render")
-                , I.button
-                    neatToolsBorder
-                    { onPress = Just (wrapper ConvertFromGraph)
-                    , label = text "Convert back into route"
-                    }
-                ]
+            if options.analyzed && List.length options.graph.userRoute > 0 then
+                row [ spacing 3 ]
+                    [ infoButton (wrapper <| DisplayInfo "graph" "render")
+                    , I.button
+                        neatToolsBorder
+                        { onPress = Just (wrapper ConvertFromGraph)
+                        , label = text "Convert back into route"
+                        }
+                    ]
+
+            else
+                none
 
         offsetSlider =
             row [ spacing 5 ]
@@ -1090,8 +1098,109 @@ makeNewRoute options =
                 ++ List.Extra.interweave renderedArcs (List.drop 1 trimmedTraversals)
 
         computeJunction : Traversal -> Traversal -> Junction
-        computeJunction incoming outgoing =
-            dummyJunction
+        computeJunction inbound outbound =
+            -- This is the bit of new geometry. We need the "end" direction of the inbound edge
+            -- (allowing for Direction) and the "start" direction of the outbound.
+            -- We work out the arc needed to give the minimum radius at centre-line.
+            -- We work out how much this impedes on the edges (the "trim").
+            -- We compute the "arc" according to the direction and offset.
+            -- Note we actually make a 2D arc, then interpolate altitudes to get 3D.
+            -- First thing is all the necessary dictionary lookups.
+            case ( Dict.get inbound.edge graph.edges, Dict.get outbound.edge graph.edges ) of
+                ( Just ( _, inTrack ), Just ( _, outTrack ) ) ->
+                    let
+                        ( inboundDirection, inboundRoad ) =
+                            case inbound.direction of
+                                Natural ->
+                                    let
+                                        leaf =
+                                            DomainModel.getLastLeaf inTrack.trackTree
+                                    in
+                                    ( leaf.directionAtEnd
+                                    , LineSegment3d.from leaf.startPoint leaf.endPoint
+                                    )
+
+                                Reverse ->
+                                    let
+                                        leaf =
+                                            DomainModel.getFirstLeaf inTrack.trackTree
+                                    in
+                                    ( leaf.directionAtStart
+                                    , LineSegment3d.from leaf.endPoint leaf.startPoint
+                                    )
+
+                        ( outboundDirection, outboundRoad ) =
+                            case outbound.direction of
+                                Natural ->
+                                    let
+                                        leaf =
+                                            DomainModel.getFirstLeaf outTrack.trackTree
+                                    in
+                                    ( leaf.directionAtStart
+                                    , LineSegment3d.from leaf.startPoint leaf.endPoint
+                                    )
+
+                                Reverse ->
+                                    let
+                                        leaf =
+                                            DomainModel.getLastLeaf outTrack.trackTree
+                                    in
+                                    ( leaf.directionAtEnd |> Direction2d.reverse
+                                    , LineSegment3d.from leaf.endPoint leaf.startPoint
+                                    )
+
+                        useRadius =
+                            Quantity.max
+                                Quantity.zero
+                                (options.minimumRadiusAtPlaces |> Quantity.minus options.centreLineOffset)
+
+                        turnAngle =
+                            outboundDirection |> Direction2d.angleFrom inboundDirection
+
+                        trim =
+                            --This could be wrong if not in the ultimate leaf but good enough for now.
+                            options.minimumRadiusAtPlaces
+                                |> Quantity.multiplyBy
+                                    (Angle.sin <| Quantity.half turnAngle)
+
+                        ( trimLocationInbound, trimLocationOutbound ) =
+                            --TODO: Which leaf does the trim occur in?
+                            ( LineSegment3d.interpolate
+                                inboundRoad
+                                (Quantity.ratio trim <| LineSegment3d.length inboundRoad)
+                            , LineSegment3d.interpolate
+                                outboundRoad
+                                (Quantity.ratio trim <| LineSegment3d.length outboundRoad)
+                            )
+
+                        meanHeight =
+                            Quantity.half <|
+                                Quantity.plus
+                                    (Point3d.zCoordinate trimLocationInbound)
+                                    (Point3d.zCoordinate trimLocationOutbound)
+
+                        planeFor2dArc =
+                            SketchPlane3d.xy
+                                |> SketchPlane3d.translateBy (Vector3d.xyz Quantity.zero Quantity.zero meanHeight)
+
+                        ( inboundTrim2d, outboundTrim2d ) =
+                            ( trimLocationInbound |> Point3d.projectInto planeFor2dArc
+                            , trimLocationOutbound |> Point3d.projectInto planeFor2dArc
+                            )
+
+                        arc : Arc2d Meters LocalCoords
+                        arc =
+                            Arc2d.from inboundTrim2d outboundTrim2d turnAngle
+
+                        arcMidpoint3d =
+                            Arc2d.midpoint arc |> Point3d.on planeFor2dArc
+                    in
+                    { arc = Arc3d.throughPoints trimLocationInbound arcMidpoint3d trimLocationOutbound
+                    , trim = trim
+                    }
+
+                _ ->
+                    dummyJunction
 
         renderJunction : Junction -> List EarthPoint
         renderJunction junction =

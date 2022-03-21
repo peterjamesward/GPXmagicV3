@@ -1824,7 +1824,7 @@ performActionsOnModel actions model =
                     { foldedModel
                         | toolOptions = newToolOptions
                         , track =
-                            Tools.Graph.getTrack 0 graphOptions
+                            Tools.Graph.getTrack 0 newGraphOptions
                     }
 
                 ( LoadGpxFromStrava gpxContent, _ ) ->

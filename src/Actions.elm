@@ -171,5 +171,8 @@ interpretAction action =
         Autofix _ ->
             "smooth points"
 
+        MakeRouteFromGraph ->
+            "route maker"
+
         _ ->
             "tell Pete this needs a message"

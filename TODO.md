@@ -10,8 +10,6 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 > Is only rendering; asked JB to check.
 > May fix if we just reposition Orange based on distance.
 
-BUG: Bend Problems in Radius mode should not show quick fix button.
-
 --
 
 # WIP
@@ -23,14 +21,15 @@ BUG: Bend Problems in Radius mode should not show quick fix button.
 > Must slightly reduce length to allow for bend, before the offset is applied.
 > Could be both ends or one (start/finish).
 
-- Prevaricating over whether "minimum radius" should apply to all the route or just junctions.
-> I guess best is optional. JB would like this anyway as part of generic smoothing.
-
 - "Walk route" must go on Undo stack, with original track as source.
 
-- Is it possible to deal neatly (i.e. discount) colinear points such as in "Cuckney 10 mile"?
+- Update Map.
 
-(Now, >= v1/2.)
+- Redo?
+
+- Option to close loop is S == F.
+
+(Now, >= v1,v2)
 
 - Add lollipops when offset < min radius. (also on out and back)
 
