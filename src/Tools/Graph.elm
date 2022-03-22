@@ -714,7 +714,7 @@ update msg options track wrapper =
             ( { options | minimumRadiusAtPlaces = float }, [] )
 
         ConvertFromGraph ->
-            ( options, [ Actions.MakeRouteFromGraph ] )
+            ( options, [ Actions.MakeRouteFromGraph, Actions.TrackHasChanged ] )
 
         DisplayInfo tool tag ->
             ( options, [ Actions.DisplayInfo tool tag ] )
@@ -1059,9 +1059,6 @@ makeNewRoute options =
                 computeJunction
                 graph.userRoute
                 (List.drop 1 graph.userRoute)
-
-        _ =
-            Debug.log "junctions" junctions
 
         renderedArcs : List (List EarthPoint)
         renderedArcs =

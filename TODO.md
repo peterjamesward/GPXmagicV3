@@ -7,8 +7,7 @@ BUG: Classic bend smoother consumes all memory on certain looped routes where
 BUG: Undo single point smooth at track start removes a point.
 
 BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
-> Is only rendering; asked JB to check.
-> May fix if we just reposition Orange based on distance.
+> Awaiting script from JB.
 
 --
 
@@ -22,7 +21,8 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 
 - Redo.
 
-- Update Map after walking new route.
+- Places with large radius, looks like the trimming is not working well.
+> Not surprising, since using the radius is not the way!
 
 - Zoom on Route mouse-centred?
 
