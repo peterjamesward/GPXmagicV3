@@ -8,6 +8,7 @@ import Actions exposing (ToolAction)
 import Angle exposing (Angle)
 import Arc2d exposing (Arc2d)
 import Arc3d exposing (Arc3d)
+import Axis2d
 import BoundingBox3d
 import Circle2d exposing (Circle2d)
 import Dict exposing (Dict)
@@ -21,7 +22,9 @@ import Element.Font as Font
 import Element.Input as I
 import FeatherIcons
 import FlatColors.ChinesePalette
-import Length exposing (Length, Meters, inMeters)
+import Geometry101
+import Length exposing (Length, Meters, inMeters, meters)
+import LineSegment2d
 import LineSegment3d
 import List.Extra
 import LocalCoords exposing (LocalCoords)
@@ -1156,9 +1159,7 @@ makeNewRoute options =
                                     )
 
                         turnAngle =
-                            inboundDirection
-                                |> Direction2d.angleFrom
-                                    outboundDirection
+                            outboundDirection |> Direction2d.angleFrom inboundDirection
 
                         trim =
                             --This could be wrong if not in the ultimate leaf but good enough for now.
@@ -1203,18 +1204,78 @@ makeNewRoute options =
                             , outboundTrim2d |> Point2d.translateBy offsetVectorOutbound
                             )
 
-                        arc : Arc2d Meters LocalCoords
+                        ( inboundRoad2d, outboundRoad2d ) =
+                            ( inboundRoad |> LineSegment3d.projectInto planeFor2dArc
+                            , outboundRoad |> LineSegment3d.projectInto planeFor2dArc
+                            )
+
+                        ( inboundLineEquation, outboundLineEquation ) =
+                            ( Geometry101.lineEquationFromTwoPoints
+                                (Point2d.toRecord inMeters <| LineSegment2d.startPoint inboundRoad2d)
+                                (Point2d.toRecord inMeters <| LineSegment2d.endPoint inboundRoad2d)
+                            , Geometry101.lineEquationFromTwoPoints
+                                (Point2d.toRecord inMeters <| LineSegment2d.startPoint outboundRoad2d)
+                                (Point2d.toRecord inMeters <| LineSegment2d.endPoint outboundRoad2d)
+                            )
+
+                        ( perpToInbound, perToOutbound ) =
+                            ( Geometry101.linePerpendicularTo
+                                inboundLineEquation
+                                (Point2d.toRecord inMeters inboundTrim2d)
+                            , Geometry101.linePerpendicularTo
+                                outboundLineEquation
+                                (Point2d.toRecord inMeters outboundTrim2d)
+                            )
+
+                        actualVertex =
+                            Maybe.map (Point2d.fromRecord meters) <|
+                                Geometry101.lineIntersection
+                                    inboundLineEquation
+                                    outboundLineEquation
+
+                        arcCentre =
+                            Maybe.map (Point2d.fromRecord meters) <|
+                                Geometry101.lineIntersection
+                                    perpToInbound
+                                    perToOutbound
+
+                        centreToMidpoint =
+                            case ( arcCentre, actualVertex ) of
+                                ( Just centre, Just vertex ) ->
+                                    Axis2d.throughPoints centre vertex
+
+                                _ ->
+                                    Nothing
+
+                        radius =
+                            case arcCentre of
+                                Just centre ->
+                                    Just <| Point2d.distanceFrom centre inboundTrim2d
+
+                                Nothing ->
+                                    Nothing
+
+                        arc : Maybe (Arc2d Meters LocalCoords)
                         arc =
-                            Arc2d.from offsetInboundTrimPoint offsetOutboundTrimPoint turnAngle
+                            case ( centreToMidpoint, radius ) of
+                                ( Just axis, Just theRadius ) ->
+                                    Arc2d.throughPoints
+                                        offsetInboundTrimPoint
+                                        (Point2d.along axis theRadius)
+                                        offsetOutboundTrimPoint
+
+                                _ ->
+                                    Nothing
                     in
                     -- We make a 3d arc through the same points.
-                    { arc =
-                        Arc3d.throughPoints
-                            (offsetInboundTrimPoint |> Point3d.on planeFor2dArc)
-                            (Arc2d.midpoint arc |> Point3d.on planeFor2dArc)
-                            (offsetOutboundTrimPoint |> Point3d.on planeFor2dArc)
-                    , trim = trim
-                    }
+                    case arc of
+                        Just foundArc ->
+                            { arc = Just <| Arc3d.on planeFor2dArc foundArc
+                            , trim = trim
+                            }
+
+                        Nothing ->
+                            dummyJunction
 
                 _ ->
                     dummyJunction
