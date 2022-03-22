@@ -17,19 +17,26 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 ## Route Builder
 
 - Route walking with offset.
-> Need code to trim edges for minimum radius at junctions.
-> Must slightly reduce length to allow for bend, before the offset is applied.
-> Could be both ends or one (start/finish).
+> Arc needs work.
+> If trim == 0, do not nudge end points, mitre them!
+
+- "Round and round" shows we really need the node and edge removal, or better way
+- to discriminate between close/superimposed edges.
+- e.g. can't select 15-16.
+> Maybe present list of available roads at end of route.
+> Add a phase to remove edges that are "equivalent" - same nodes, "close" somehow.
 
 - "Walk route" must go on Undo stack, with original track as source.
 
-- Update Map.
+- Update Map after walking new route.
 
 - Undo render should revert to graph with traversals.
 
-- Redo?
+- Redo.
 
-- Option to close loop is S == F.
+- Option to close loop if S == F.
+
+- Zoom on Route mouse-centred?
 
 (Now, >= v1,v2)
 

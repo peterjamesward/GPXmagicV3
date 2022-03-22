@@ -12,6 +12,7 @@ import BoundingBox3d
 import Circle2d exposing (Circle2d)
 import Dict exposing (Dict)
 import Direction2d
+import Direction3d
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), RoadSection, asRecord, skipCount, trueLength)
 import Element exposing (..)
 import Element.Background as Background
@@ -37,6 +38,7 @@ import Tools.Nudge
 import Tools.NudgeOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal2, showLongMeasure)
+import Vector2d
 import Vector3d
 import ViewPureStyles exposing (..)
 
@@ -1119,8 +1121,9 @@ makeNewRoute options =
                                         leaf =
                                             DomainModel.getLastLeaf inTrack.trackTree
                                     in
+                                    -- Segment directed AWAY from extremity.
                                     ( leaf.directionAtEnd
-                                    , LineSegment3d.from leaf.startPoint leaf.endPoint
+                                    , LineSegment3d.from leaf.endPoint leaf.startPoint
                                     )
 
                                 Reverse ->
@@ -1128,8 +1131,8 @@ makeNewRoute options =
                                         leaf =
                                             DomainModel.getFirstLeaf inTrack.trackTree
                                     in
-                                    ( leaf.directionAtStart
-                                    , LineSegment3d.from leaf.endPoint leaf.startPoint
+                                    ( Direction2d.reverse leaf.directionAtStart
+                                    , LineSegment3d.from leaf.startPoint leaf.endPoint
                                     )
 
                         ( outboundDirection, outboundRoad ) =
@@ -1148,14 +1151,9 @@ makeNewRoute options =
                                         leaf =
                                             DomainModel.getLastLeaf outTrack.trackTree
                                     in
-                                    ( leaf.directionAtEnd |> Direction2d.reverse
+                                    ( Direction2d.reverse leaf.directionAtEnd
                                     , LineSegment3d.from leaf.endPoint leaf.startPoint
                                     )
-
-                        useRadius =
-                            Quantity.max
-                                Quantity.zero
-                                (options.minimumRadiusAtPlaces |> Quantity.minus options.centreLineOffset)
 
                         turnAngle =
                             outboundDirection |> Direction2d.angleFrom inboundDirection
@@ -1163,8 +1161,6 @@ makeNewRoute options =
                         trim =
                             --This could be wrong if not in the ultimate leaf but good enough for now.
                             options.minimumRadiusAtPlaces
-                                |> Quantity.multiplyBy
-                                    (Angle.sin <| Quantity.half turnAngle)
 
                         ( trimLocationInbound, trimLocationOutbound ) =
                             --TODO: Which leaf does the trim occur in?
@@ -1176,12 +1172,21 @@ makeNewRoute options =
                                 (Quantity.ratio trim <| LineSegment3d.length outboundRoad)
                             )
 
+                        ( offsetVectorInbound, offsetVectorOutbound ) =
+                            ( Vector2d.withLength options.centreLineOffset
+                                (Direction2d.rotateClockwise inboundDirection)
+                            , Vector2d.withLength options.centreLineOffset
+                                (Direction2d.rotateClockwise outboundDirection)
+                            )
+
                         meanHeight =
                             Quantity.half <|
                                 Quantity.plus
                                     (Point3d.zCoordinate trimLocationInbound)
                                     (Point3d.zCoordinate trimLocationOutbound)
 
+                        -- If we now apply offset to the start and end (which we can), we
+                        -- make the offset arc not the centre line arc here.
                         planeFor2dArc =
                             SketchPlane3d.xy
                                 |> SketchPlane3d.translateBy (Vector3d.xyz Quantity.zero Quantity.zero meanHeight)
@@ -1191,17 +1196,23 @@ makeNewRoute options =
                             , trimLocationOutbound |> Point3d.projectInto planeFor2dArc
                             )
 
+                        ( offsetInboundTrimPoint, offsetOutboundTrimPoint ) =
+                            ( inboundTrim2d |> Point2d.translateBy offsetVectorInbound
+                            , outboundTrim2d |> Point2d.translateBy offsetVectorOutbound
+                            )
+
                         arc : Arc2d Meters LocalCoords
                         arc =
-                            Arc2d.from inboundTrim2d outboundTrim2d turnAngle
-
-                        arcMidpoint3d =
-                            Arc2d.midpoint arc |> Point3d.on planeFor2dArc
+                            Arc2d.from offsetInboundTrimPoint offsetOutboundTrimPoint turnAngle
                     in
-                    dummyJunction
-                    --{ arc = Arc3d.throughPoints trimLocationInbound arcMidpoint3d trimLocationOutbound
-                    --, trim = trim
-                    --}
+                    -- We make a 3d arc through the same points.
+                    { arc =
+                        Arc3d.throughPoints
+                            (offsetInboundTrimPoint |> Point3d.on planeFor2dArc)
+                            (Arc2d.midpoint arc |> Point3d.on planeFor2dArc)
+                            (offsetOutboundTrimPoint |> Point3d.on planeFor2dArc)
+                    , trim = trim
+                    }
 
                 _ ->
                     dummyJunction
@@ -1210,21 +1221,7 @@ makeNewRoute options =
         renderJunction junction =
             case junction.arc of
                 Just arc ->
-                    -- Note the given arc is for the centre line, we need to consider offset now.
-                    let
-                        centre =
-                            Arc3d.centerPoint arc
-
-                        radius =
-                            Arc3d.radius arc
-
-                        scaleFactor =
-                            Quantity.ratio
-                                (Quantity.plus radius options.centreLineOffset)
-                                radius
-                    in
                     arc
-                        |> Arc3d.scaleAbout centre scaleFactor
                         |> Arc3d.approximate (Length.meters 0.1)
                         |> Polyline3d.vertices
 
