@@ -1156,7 +1156,9 @@ makeNewRoute options =
                                     )
 
                         turnAngle =
-                            outboundDirection |> Direction2d.angleFrom inboundDirection
+                            inboundDirection
+                                |> Direction2d.angleFrom
+                                    outboundDirection
 
                         trim =
                             --This could be wrong if not in the ultimate leaf but good enough for now.
