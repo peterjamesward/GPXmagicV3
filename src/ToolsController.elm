@@ -1650,7 +1650,28 @@ viewTool msgWrapper isTrack options toolEntry =
                             msgWrapper <|
                                 ToolStateToggle toolEntry.toolType <|
                                     nextToolState toolEntry.state
-                    , label = text toolEntry.label
+                    , label =
+                        row [ alignLeft, spacing 10 ]
+                            [ case toolEntry.state of
+                                Expanded ->
+                                    useIconWithSize 16 <| FeatherIcons.chevronsUp
+
+                                Contracted ->
+                                    useIconWithSize 16 <| FeatherIcons.chevronsDown
+
+                                Disabled ->
+                                    useIconWithSize 16 <| FeatherIcons.slash
+
+                                AlwaysOpen ->
+                                    none
+
+                                SettingsOpen ->
+                                    useIconWithSize 16 <| FeatherIcons.chevronsUp
+
+                                SettingsClosed ->
+                                    useIconWithSize 16 <| FeatherIcons.chevronsDown
+                            , text toolEntry.label
+                            ]
                     }
                 , Input.button [ alignRight ]
                     { onPress = Just <| msgWrapper <| ToolPopupToggle toolEntry.toolType
