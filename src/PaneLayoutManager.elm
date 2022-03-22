@@ -985,6 +985,7 @@ viewHelper =
     , ( ViewPlan, "plan" )
     , ( ViewProfile, "profile" )
     , ( ViewMap, "map" )
+    , ( ViewGraph, "route" )
     ]
 
 
