@@ -834,14 +834,36 @@ buildGraph track =
                         newEdge =
                             ( road.endPoint, pointGpx ) :: inputState.currentEdge
 
-                        orientedEdge : List ( EarthPoint, GPXSource )
-                        orientedEdge =
+                        orientedEdgeCouldBeLeaf : List ( EarthPoint, GPXSource )
+                        orientedEdgeCouldBeLeaf =
                             if nodeIndex > inputState.startNodeIndex then
                                 -- Conventional order, good, but must flip the edge
                                 List.reverse newEdge
 
                             else
                                 newEdge
+
+                        orientedEdge : List ( EarthPoint, GPXSource )
+                        orientedEdge =
+                            -- Not good if no midpoints, as can't select.
+                            case orientedEdgeCouldBeLeaf of
+                                [ ( startEarth, startGpx ), ( endEarth, endGpx ) ] ->
+                                    let
+                                        midEarth =
+                                            Point3d.midpoint startEarth endEarth
+
+                                        midGpx =
+                                            DomainModel.gpxFromPointWithReference
+                                                track.referenceLonLat
+                                                midEarth
+                                    in
+                                    [ ( startEarth, startGpx )
+                                    , ( midEarth, midGpx )
+                                    , ( endEarth, endGpx )
+                                    ]
+
+                                _ ->
+                                    orientedEdgeCouldBeLeaf
 
                         discriminator : XY
                         discriminator =

@@ -16,21 +16,9 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 
 ## Route Builder
 
-- Route walking with offset.
-> Arc needs work.
-> If trim == 0, do not nudge end points, mitre them!
-
-- "Round and round" shows we really need the node and edge removal, or better way
-- to discriminate between close/superimposed edges.
-- e.g. can't select 15-16.
-> Maybe present list of available roads at end of route.
-> Add a phase to remove edges that are "equivalent" - same nodes, "close" somehow.
-
-- "Walk route" must go on Undo stack, with original track as source.
+- "Walk route" must go on Undo stack, with previous Graph state. (Edges may have been edited.)
 
 - Update Map after walking new route.
-
-- Undo render should revert to graph with traversals.
 
 - Redo.
 
