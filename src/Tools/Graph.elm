@@ -1158,9 +1158,6 @@ makeNewRoute options =
                                     , LineSegment3d.from leaf.endPoint leaf.startPoint
                                     )
 
-                        turnAngle =
-                            outboundDirection |> Direction2d.angleFrom inboundDirection
-
                         trim =
                             --This could be wrong if not in the ultimate leaf but good enough for now.
                             options.minimumRadiusAtPlaces
@@ -1209,29 +1206,31 @@ makeNewRoute options =
                             , outboundRoad |> LineSegment3d.projectInto planeFor2dArc
                             )
 
+                        geometryPoint point =
+                            Point2d.toRecord inMeters point
+
+                        lineEquationFromSegment segment =
+                            Geometry101.lineEquationFromTwoPoints
+                                (geometryPoint <| LineSegment2d.startPoint segment)
+                                (geometryPoint <| LineSegment2d.endPoint segment)
+
                         ( inboundLineEquation, outboundLineEquation ) =
-                            ( Geometry101.lineEquationFromTwoPoints
-                                (Point2d.toRecord inMeters <| LineSegment2d.startPoint inboundRoad2d)
-                                (Point2d.toRecord inMeters <| LineSegment2d.endPoint inboundRoad2d)
-                            , Geometry101.lineEquationFromTwoPoints
-                                (Point2d.toRecord inMeters <| LineSegment2d.startPoint outboundRoad2d)
-                                (Point2d.toRecord inMeters <| LineSegment2d.endPoint outboundRoad2d)
+                            ( lineEquationFromSegment inboundRoad2d
+                            , lineEquationFromSegment outboundRoad2d
                             )
 
                         ( perpToInbound, perToOutbound ) =
                             ( Geometry101.linePerpendicularTo
                                 inboundLineEquation
-                                (Point2d.toRecord inMeters inboundTrim2d)
+                                (geometryPoint inboundTrim2d)
                             , Geometry101.linePerpendicularTo
                                 outboundLineEquation
-                                (Point2d.toRecord inMeters outboundTrim2d)
+                                (geometryPoint outboundTrim2d)
                             )
 
                         actualVertex =
-                            Maybe.map (Point2d.fromRecord meters) <|
-                                Geometry101.lineIntersection
-                                    inboundLineEquation
-                                    outboundLineEquation
+                            LineSegment3d.startPoint outboundRoad
+                                |> Point3d.projectInto planeFor2dArc
 
                         arcCentre =
                             Maybe.map (Point2d.fromRecord meters) <|
@@ -1239,22 +1238,25 @@ makeNewRoute options =
                                     perpToInbound
                                     perToOutbound
 
-                        centreToMidpoint =
-                            case ( arcCentre, actualVertex ) of
-                                ( Just centre, Just vertex ) ->
-                                    Axis2d.throughPoints centre vertex
-
-                                _ ->
-                                    Nothing
-
-                        radius =
+                        ( centreToMidpoint, radius ) =
+                            -- If there's an arc, get an axis and radius to find the midpoint.
                             case arcCentre of
                                 Just centre ->
-                                    Just <| Point2d.distanceFrom centre inboundTrim2d
+                                    ( Axis2d.throughPoints centre actualVertex
+                                    , Just <| Point2d.distanceFrom centre offsetInboundTrimPoint
+                                    )
 
-                                Nothing ->
-                                    Nothing
+                                _ ->
+                                    ( Nothing, Nothing )
 
+                        {-
+                           _ = Debug.log "inboundDirection" <| Direction2d.toAngle inboundDirection
+                           _ = Debug.log "outboundDirection" <| Direction2d.toAngle outboundDirection
+                           _ = Debug.log "actualVertex" actualVertex
+                           _ = Debug.log "arcCentre" arcCentre
+                           _ = Debug.log "centreToMidpoint" centreToMidpoint
+                           _ = Debug.log "radius" radius
+                        -}
                         arc : Maybe (Arc2d Meters LocalCoords)
                         arc =
                             case ( centreToMidpoint, radius ) of
