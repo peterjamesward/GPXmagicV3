@@ -1477,13 +1477,36 @@ performActionsOnModel actions model =
                         ( fromStart, fromEnd ) =
                             ( 0, 0 )
 
+                        ( newOrange, newPurple ) =
+                            ( indexFromDistance
+                                (distanceFromIndex track.currentPosition track.trackTree)
+                                (newTree |> Maybe.withDefault track.trackTree)
+                            , case track.markerPosition of
+                                Just purple ->
+                                    Just <|
+                                        indexFromDistance
+                                            (distanceFromIndex purple track.trackTree)
+                                            (newTree |> Maybe.withDefault track.trackTree)
+
+                                Nothing ->
+                                    Nothing
+                            )
+
                         newTrack =
                             track
                                 |> TrackLoaded.addToUndoStack action
                                     fromStart
                                     fromEnd
                                     oldPoints
-                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                                |> (\trk ->
+                                        { trk
+                                            | trackTree = Maybe.withDefault trk.trackTree newTree
+                                            , currentPosition = newOrange
+                                            , markerPosition = newPurple
+                                        }
+                                   )
+
+                        --|> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
                     { foldedModel | track = Just newTrack }
 

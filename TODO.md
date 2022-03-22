@@ -17,12 +17,12 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 ## Route Builder
 
 - "Walk route" must go on Undo stack, with previous Graph state. (Edges may have been edited.)
-
-- Update Map after walking new route.
+- "Analyse" should go on Undo with previous Track.
+> Be wary of import loops!!
 
 - Redo.
 
-- Option to close loop if S == F.
+- Update Map after walking new route.
 
 - Zoom on Route mouse-centred?
 
@@ -30,13 +30,11 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 
 - Add lollipops when offset < min radius. (also on out and back)
 
+- Option to close loop if S == F.
+
 - Improve traversal direction display with an arrow on each section.
 
 - Add "split edge at pointer" function.
-
-- Save/Load graph (in a single file, not necessarily XML, maybe CBOR, maybe text).
-
-- Centre Plan view on selected traversal.
 
 
 ---
