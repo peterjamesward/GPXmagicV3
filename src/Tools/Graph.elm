@@ -1206,9 +1206,15 @@ makeNewRoute options =
                                     , LineSegment3d.from leaf.endPoint leaf.startPoint
                                     )
 
+                        turnAngle =
+                            outboundDirection
+                                |> Direction2d.angleFrom inboundDirection
+                                |> Quantity.abs
+
                         trim =
                             --This could be wrong if not in the ultimate leaf but good enough for now.
                             options.minimumRadiusAtPlaces
+                                |> Quantity.multiplyBy (Angle.inRadians turnAngle)
 
                         ( trimLocationInbound, trimLocationOutbound ) =
                             --TODO: Which leaf does the trim occur in?
