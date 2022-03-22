@@ -62,6 +62,7 @@ defaultOptions =
 type Msg
     = GraphAnalyse
     | CentreLineOffset (Quantity Float Meters)
+    | MinimumRadius (Quantity Float Meters)
     | ConvertFromGraph
     | HighlightTraversal Int
     | RemoveLastTraversal
@@ -98,6 +99,7 @@ textDictionary =
         [ ( toolID, "Route builder" )
         , ( "info", infoText )
         , ( "offset", "Offset the generated road using this route as the centre-line." )
+        , ( "radius", "When passing a place, will attempt use this to create the bend." )
         , ( "render", """Create a single road, using your route and offsetting the road
 from the centre line (if you want to avoid collisions with oncoming avatars). As the same
 road section is used for each passage, there should be no height differences.""" )
@@ -290,6 +292,9 @@ view wrapper options =
         offset =
             Length.inMeters options.centreLineOffset
 
+        radius =
+            Length.inMeters options.minimumRadiusAtPlaces
+
         analyseButton =
             if options.analyzed then
                 none
@@ -363,6 +368,27 @@ view wrapper options =
                     , max = 5.0
                     , step = Just 0.25
                     , value = offset
+                    , thumb = I.defaultThumb
+                    }
+                ]
+
+        minRadiusSlider =
+            row [ spacing 5 ]
+                [ none
+                , infoButton (wrapper <| DisplayInfo "graph" "radius")
+                , I.slider
+                    commonShortHorizontalSliderStyles
+                    { onChange = wrapper << MinimumRadius << Length.meters
+                    , label =
+                        I.labelBelow [] <|
+                            text <|
+                                "Radius = "
+                                    ++ (showDecimal2 <| abs radius)
+                                    ++ "m "
+                    , min = 1.0
+                    , max = 15.0
+                    , step = Just 1.0
+                    , value = radius
                     , thumb = I.defaultThumb
                     }
                 ]
@@ -588,7 +614,7 @@ view wrapper options =
                 , revertButton
                 ]
             , traversalsTable
-            , offsetSlider
+            , wrappedRow [ spacing 5 ] [ offsetSlider, minRadiusSlider ]
             , finishButton
             ]
 
@@ -683,6 +709,9 @@ update msg options track wrapper =
 
         CentreLineOffset float ->
             ( { options | centreLineOffset = float }, [] )
+
+        MinimumRadius float ->
+            ( { options | minimumRadiusAtPlaces = float }, [] )
 
         ConvertFromGraph ->
             ( options, [ Actions.MakeRouteFromGraph ] )
