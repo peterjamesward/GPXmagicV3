@@ -15,6 +15,8 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 
 Make video for Route maker.
 
+Route maker -- previous Undo stack should be restored when Undo-ing from walk route.
+
 ---
 
 # BACKLOG

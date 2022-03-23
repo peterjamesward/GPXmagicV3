@@ -8,7 +8,10 @@ aboutText =
 ## In this release ...
 
 * _Route maker_ and the accompanying _Route" view - the replacement and upgrade to Graph theory.
+**CAVEAT**: When you use Route maker, previous Undo information is lost. I'll fix that soon.
+
 * Some bug fixes.
+
 * Some usability tweaks (thanks again, David Ogle).
 
 ## Coming up, not necessarily in order ...
