@@ -1843,11 +1843,20 @@ performActionsOnModel actions model =
 
                         newToolOptions =
                             { toolOptions | graphOptions = newGraphOptions }
+
+                        newTrack =
+                            case Tools.Graph.getTrack 0 newGraphOptions of
+                                Just foundNewTrack ->
+                                    foundNewTrack
+                                        |> TrackLoaded.addToUndoStack action 0 0 []
+                                        |> Just
+
+                                Nothing ->
+                                    foldedModel.track
                     in
                     { foldedModel
                         | toolOptions = newToolOptions
-                        , track =
-                            Tools.Graph.getTrack 0 newGraphOptions
+                        , track = newTrack
                     }
 
                 ( LoadGpxFromStrava gpxContent, _ ) ->
@@ -1968,7 +1977,37 @@ performActionsOnModel actions model =
                     revisedModel
 
                 ( UndoLastAction, Just track ) ->
-                    { foldedModel | track = Just <| TrackLoaded.undoLastAction track }
+                    -- Without massive replumbing, I'm making the "graph walker" undo special.
+                    -- We'll see how this goes; a better solution may arise.
+                    let
+                        topUndoAction =
+                            track.undos |> List.head |> Maybe.map .action
+                    in
+                    case topUndoAction of
+                        Just Actions.MakeRouteFromGraph ->
+                            let
+                                toolOptions =
+                                    foldedModel.toolOptions
+
+                                graphOptions =
+                                    toolOptions.graphOptions
+
+                                newGraphOptions =
+                                    Tools.Graph.undoWalkRoute graphOptions
+
+                                newToolOptions =
+                                    { toolOptions | graphOptions = newGraphOptions }
+
+                                newTrack =
+                                    Tools.Graph.getTrack 0 newGraphOptions
+                            in
+                            { foldedModel
+                                | toolOptions = newToolOptions
+                                , track = newTrack
+                            }
+
+                        _ ->
+                            { foldedModel | track = Just <| TrackLoaded.undoLastAction track }
 
                 ( RedoUndoneAction, Just track ) ->
                     case track.redos of

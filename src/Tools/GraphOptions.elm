@@ -21,7 +21,7 @@ type alias XY =
 
 
 type alias Options msg =
-    { graph :  Graph msg
+    { graph : Graph msg
     , centreLineOffset : Length.Length
     , minimumRadiusAtPlaces : Length.Length
     , boundingBox : BoundingBox3d Length.Meters LocalCoords
@@ -29,6 +29,8 @@ type alias Options msg =
     , analyzed : Bool
     , originalTrack : Maybe (TrackLoaded msg)
     , editingTrack : Int
+    , undoGraph : Maybe (Graph msg) -- our private undo stack (of one).
+    , undoOriginalTrack : Maybe (TrackLoaded msg)
     }
 
 

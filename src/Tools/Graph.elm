@@ -56,6 +56,8 @@ defaultOptions =
     , analyzed = False
     , originalTrack = Nothing
     , editingTrack = 0
+    , undoGraph = Nothing
+    , undoOriginalTrack = Nothing
     }
 
 
@@ -1373,10 +1375,29 @@ makeNewRoute options =
                 , analyzed = False
                 , originalTrack = Nothing
                 , editingTrack = 0
+                , undoGraph = Just graph
+                , undoOriginalTrack = options.originalTrack
             }
 
         _ ->
             -- Not so much worked.
+            options
+
+
+undoWalkRoute : Options msg -> Options msg
+undoWalkRoute options =
+    case options.undoGraph of
+        Just undoGraph ->
+            { options
+                | graph = undoGraph
+                , selectedTraversal = 0
+                , analyzed = True
+                , originalTrack = options.undoOriginalTrack
+                , editingTrack = 0
+                , undoGraph = Nothing
+            }
+
+        Nothing ->
             options
 
 

@@ -15,15 +15,6 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 
 ## Route Builder
 
-- "Walk route" must go on Undo stack, with previous Graph state. (Edges may have been edited.)
-- "Analyse" should go on Undo with previous Track.
-> Be wary of import loops!!
-
-- Redo.
-
-- Places with large radius, looks like the trimming is not working well.
-> Not surprising, since using the radius is not the way!
-
 - Zoom on Route mouse-centred?
 
 (Now, >= v1,v2)
