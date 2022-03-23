@@ -13,28 +13,27 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 
 # WIP
 
-## Route Builder
-
-- Zoom on Route mouse-centred?
-
-(Now, >= v1,v2)
-
-- Add lollipops when offset < min radius. (also on out and back)
-
-- Option to close loop if S == F.
-
-- Improve traversal direction display with an arrow on each section.
-
-- Add "split edge at pointer" function.
-
+Make video for Route maker.
 
 ---
 
 # BACKLOG
 
+## Display 
+
+- Optionally show OSM land-use polygons on ground plane. (Not sure about Terrain.)
+
 ## 1CQF
 
 Allow the use of markers for partial application.
+
+## Route Builder
+
+- Zoom on Route mouse-centred?
+- Add lollipops when offset < min radius. (also on out and back)
+- Option to close loop if S == F.
+- Improve traversal direction display with an arrow on each section.
+- Add "split edge at pointer" function, when editing an edge.
 
 ## Usability
 
@@ -42,8 +41,6 @@ Drag curve former circle directly in Plan View.
 Ditto for Move & Stretch, possibly Nudge.
 
 ## Tools: old, updated, & new
-
-- Optionally show OSM land-use polygons on ground plane. (Not sure about Terrain.)
 
 --- _Cut-off for release_
 - Terrain as from v2 but with texture maybe
