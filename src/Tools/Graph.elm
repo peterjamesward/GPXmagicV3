@@ -654,7 +654,7 @@ update msg options track wrapper =
                 , editingTrack = 0
                 , selectedTraversal = 0
               }
-            , [ Actions.ChangeActiveTrack 0 ]
+            , [ Actions.ChangeActiveTrack 0, Actions.TrackHasChanged ]
               --, [ Actions.LockToolOpen True toolID ]
             )
 

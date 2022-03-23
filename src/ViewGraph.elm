@@ -673,7 +673,7 @@ update msg msgWrapper graph area context =
 
         EditRoad edge ->
             ( { context | clickFeature = ClickNone }
-            , [ Actions.ChangeActiveTrack edge ]
+            , [ Actions.ChangeActiveTrack edge, Actions.TrackHasChanged ]
             )
 
 
