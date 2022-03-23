@@ -3,20 +3,19 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.0.12 (1dbd4fb4)
+# GPXmagic v3.0.13 (1dbd4fb4)
 
 ## In this release ...
 
-* Numerous small usability improvements
-* Info text for all tools in "Tools summary" tool
-
-** Big thanks again to David Ogle **
+* _Route maker_ and the accompanying _Route" view - the replacement and upgrade to Graph theory.
+* Some bug fixes.
+* Some usability tweaks (thanks again, David Ogle).
 
 ## Coming up, not necessarily in order ...
 
-1. Graph theory
-2. Terrain
-3. French
+1. Terrain
+2. Land use (what?)
+3. French (quoi?)
 
 ## Legal guff
 
