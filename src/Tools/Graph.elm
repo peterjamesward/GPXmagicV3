@@ -293,7 +293,9 @@ addSelfLoop node options =
 
                             else
                                 ( start
-                                , DomainModel.getFirstLeaf track.trackTree |> .directionAtStart
+                                , DomainModel.getFirstLeaf track.trackTree
+                                    |> .directionAtStart
+                                    |> Direction2d.reverse
                                 , DomainModel.earthPointFromIndex 0 track.trackTree
                                 )
 
