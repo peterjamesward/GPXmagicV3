@@ -3,12 +3,16 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.0.13 (748ba836)
+# GPXmagic v3.1.0
+
+(748ba836)
 
 ## In this release ...
 
-* _Route maker_ and the accompanying _Route" view - the replacement and upgrade to Graph theory.
-**CAVEAT**: When you use Route maker, previous Undo information is lost. I'll fix that soon.
+* __Route maker__ tool and the accompanying "__Route__" view - the replacement and upgrade to Graph theory.
+
+> This may feel like going down the rabbit hole. Please watch the video; it may help:
+https://youtu.be/90GZbpgZjnw
 
 * Some bug fixes.
 

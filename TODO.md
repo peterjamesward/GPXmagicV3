@@ -13,9 +13,9 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 
 # WIP
 
-Make video for Route maker.
+## Route maker
 
-Route maker -- previous Undo stack should be restored when Undo-ing from walk route.
+Make video for Route maker.
 
 ---
 
@@ -23,7 +23,7 @@ Route maker -- previous Undo stack should be restored when Undo-ing from walk ro
 
 ## Display 
 
-- Optionally show OSM land-use polygons on ground plane. (Not sure about Terrain.)
+Optionally show OSM land-use polygons on ground plane. (Not sure about Terrain.)
 
 ## 1CQF
 
@@ -41,24 +41,18 @@ Allow the use of markers for partial application.
 
 Drag curve former circle directly in Plan View.
 Ditto for Move & Stretch, possibly Nudge.
+Provide info text capability on top bar and on view panes.
+Specific areas within tools as needed.
 
 ## Tools: old, updated, & new
 
---- _Cut-off for release_
 - Terrain as from v2 but with texture maybe
+- Can we auto-radius hairpins?
 - Non-customisable keyboard alternatives for Load/Save/Undo/Redo/Fwd/Back/Purple (maybe 1-5 for views)
 - Extract all text for translation (Muriel)
 - Use localised number formatting everywhere (for French use of , and .)
 - Ability to point-smooth transitions over a range
-
---- Cut off completely
-
-"Tip of the day" tool? (Davie Ogle will write tips.)
-
-## Help
-
-Provide info text capability on top bar and on view panes.
-Specific areas within tools as needed.
+- "Tip of the day" tool? (Davie Ogle will write tips.)
 
 ## SVG profile rendering
 
@@ -109,8 +103,3 @@ DEBT: Map sends more click messages each time we click.
 
 Don't render anything that's not visible.
 
-## more
-
-- Option to show MR rendering cutoff.
-- Tooltips (where useful)
-- Draggable tools?

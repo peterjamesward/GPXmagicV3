@@ -98,7 +98,7 @@ textDictionary =
     -- ToolsController can use these for info button and tool label.
     ( toolID
     , Dict.fromList
-        [ ( toolID, "Route builder" )
+        [ ( toolID, "Route maker" )
         , ( "info", infoText )
         , ( "offset", "Offset the generated road using this route as the centre-line." )
         , ( "radius", "When passing a place, will attempt use this to create the bend." )
@@ -111,10 +111,14 @@ road section is used for each passage, there should be no height differences."""
 
 infoText =
     """We follow the route looking for places and road sections that are used more than once.
-This allows us to divide the route
- into a list of sections, where each section follows one piece of road from one place to
-other (or the same place). Once we've done that, you'll be able to change
-the route you take between places. Use the Route view to help construct a new route."""
+This allows us to divide the route into a list of Roads, where each Road goes from from one
+Place to other (or the same Place).
+
+Once we've done that, you'll be able to change the route you take between places.
+Use the **Route** view to help construct a new route.
+
+You can also select a single road for editing using (most of) the normal tools. Any changes
+you make here will be reflected in the resulting route so all the altitudes will agree."""
 
 
 makeXY : EarthPoint -> XY
