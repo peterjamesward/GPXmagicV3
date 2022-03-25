@@ -46,7 +46,7 @@ import Svg.Attributes
 import ToolTip exposing (myTooltip, tooltip)
 import Tools.Graph
 import Tools.GraphOptions exposing (ClickDetect(..), Direction(..), Graph)
-import UtilsForViews exposing (colourHexString, uiColourHexString)
+import UtilsForViews exposing (colourHexString, showShortMeasure, uiColourHexString)
 import Vector3d
 import ViewPureStyles exposing (rgtDark, rgtPurple, useIcon)
 import Viewpoint3d exposing (Viewpoint3d)
@@ -67,6 +67,7 @@ type Msg
     | ToggleEdgeMode
     | AddTraversal Int
     | EditRoad Int
+    | AddSelfLoop Int
 
 
 type DragAction
@@ -179,7 +180,24 @@ popup msgWrapper context options =
                     []
 
                 ClickNode node ->
-                    []
+                    [ text <| "Place " ++ String.fromInt node ++ "..."
+                    , if Tools.Graph.loopCanBeAdded node options then
+                        Input.button []
+                            { onPress = Just <| msgWrapper <| AddSelfLoop node
+                            , label =
+                                text <|
+                                    "Add "
+                                        ++ showShortMeasure False options.minimumRadiusAtPlaces
+                                        ++ " loop here"
+                            }
+
+                      else
+                        none
+                    , Input.button []
+                        { onPress = Just <| msgWrapper PopupHide
+                        , label = text "Close menu"
+                        }
+                    ]
 
                 ClickEdge edge ->
                     [ text <| "Road " ++ String.fromInt edge ++ "..."
@@ -669,6 +687,11 @@ update msg msgWrapper graph area context =
         AddTraversal edge ->
             ( { context | clickFeature = ClickNone }
             , [ Actions.AddTraversal edge ]
+            )
+
+        AddSelfLoop node ->
+            ( { context | clickFeature = ClickNode node }
+            , [ Actions.AddSelfLoop node ]
             )
 
         EditRoad edge ->

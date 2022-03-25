@@ -1811,6 +1811,22 @@ performActionsOnModel actions model =
                     in
                     { foldedModel | toolOptions = newToolOptions }
 
+                ( AddSelfLoop node, Just track ) ->
+                    let
+                        toolOptions =
+                            foldedModel.toolOptions
+
+                        graphOptions =
+                            toolOptions.graphOptions
+
+                        newGraphOptions =
+                            Tools.Graph.addSelfLoop node graphOptions
+
+                        newToolOptions =
+                            { toolOptions | graphOptions = newGraphOptions }
+                    in
+                    { foldedModel | toolOptions = newToolOptions }
+
                 ( ChangeActiveTrack edge, Just track ) ->
                     let
                         toolOptions =

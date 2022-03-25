@@ -9,6 +9,7 @@ import Angle exposing (Angle)
 import Arc2d exposing (Arc2d)
 import Arc3d exposing (Arc3d)
 import Axis2d
+import Axis3d
 import BoundingBox3d
 import Circle2d exposing (Circle2d)
 import Dict exposing (Dict)
@@ -29,6 +30,7 @@ import LineSegment3d
 import List.Extra
 import LocalCoords exposing (LocalCoords)
 import Maybe.Extra
+import Plane3d
 import Point2d
 import Point3d
 import Polyline3d
@@ -163,6 +165,32 @@ edgeCanBeAdded newEdge options =
             False
 
 
+loopCanBeAdded : Int -> Options msg -> Bool
+loopCanBeAdded node options =
+    -- Loop can be added if node is same as final node of last traversal.
+    case
+        List.Extra.last options.graph.userRoute
+    of
+        Just { edge, direction } ->
+            case Dict.get edge options.graph.edges of
+                Just ( ( start, end, via ), _ ) ->
+                    let
+                        finalNode =
+                            if direction == Natural then
+                                end
+
+                            else
+                                start
+                    in
+                    finalNode == node
+
+                Nothing ->
+                    False
+
+        Nothing ->
+            False
+
+
 edgeCanBeFlipped : Int -> Options msg -> Bool
 edgeCanBeFlipped newEdge options =
     -- Edge can be flipped if either is only traversal or is self-loop.
@@ -240,6 +268,108 @@ addTraversal newEdge options =
             }
 
         _ ->
+            options
+
+
+addSelfLoop : Int -> Options msg -> Options msg
+addSelfLoop node options =
+    let
+        graph =
+            options.graph
+    in
+    case
+        List.Extra.last graph.userRoute
+    of
+        Just { edge, direction } ->
+            case Dict.get edge graph.edges of
+                Just ( ( start, end, via ), track ) ->
+                    let
+                        ( finalNode, edgeDirection, endPoint ) =
+                            if direction == Natural then
+                                ( end
+                                , DomainModel.getLastLeaf track.trackTree |> .directionAtEnd
+                                , DomainModel.earthPointFromIndex (skipCount track.trackTree) track.trackTree
+                                )
+
+                            else
+                                ( start
+                                , DomainModel.getFirstLeaf track.trackTree |> .directionAtStart
+                                , DomainModel.earthPointFromIndex 0 track.trackTree
+                                )
+
+                        --TODO: Get direction at end and extrapolate to find diametrically opposite point.
+                        loopOpposite =
+                            endPoint
+                                |> Point3d.translateBy
+                                    (Vector3d.withLength
+                                        (Quantity.twice options.minimumRadiusAtPlaces)
+                                        (edgeDirection |> Direction3d.on SketchPlane3d.xy)
+                                    )
+
+                        loopCentre =
+                            Point3d.midpoint endPoint loopOpposite
+
+                        --TODO: Find points where we want the arc to start and end (direction not important).
+                        axis =
+                            Axis3d.withDirection Direction3d.positiveZ loopCentre
+
+                        ( arcStart, arcEnd ) =
+                            ( endPoint |> Point3d.rotateAround axis (Angle.degrees 30)
+                            , endPoint |> Point3d.rotateAround axis (Angle.degrees -30)
+                            )
+
+                        --TODO: Make arc and crude approximation.
+                        arc =
+                            Arc3d.throughPoints arcStart loopOpposite arcEnd
+                    in
+                    case arc of
+                        Just isArc ->
+                            --TODO: Make new edge from the arc and insert in dictionary.
+                            let
+                                edgePoints =
+                                    isArc
+                                        |> Arc3d.approximate (Length.meters 0.1)
+                                        |> Polyline3d.vertices
+                                        |> List.map (DomainModel.gpxFromPointWithReference graph.referenceLonLat)
+
+                                newEdgeKey =
+                                    ( node, node, makeXY loopOpposite )
+
+                                newEdgeTree =
+                                    DomainModel.treeFromSourcesWithExistingReference
+                                        track.referenceLonLat
+                                        edgePoints
+
+                                newEdgeTrack =
+                                    Maybe.map (TrackLoaded.newTrackFromTree track.referenceLonLat)
+                                        newEdgeTree
+
+                                newEdgeIndex =
+                                    Dict.size graph.edges
+
+                                newGraph =
+                                    case newEdgeTrack of
+                                        Just newTrack ->
+                                            { graph
+                                                | edges =
+                                                    Dict.insert
+                                                        newEdgeIndex
+                                                        ( newEdgeKey, newTrack )
+                                                        graph.edges
+                                            }
+
+                                        Nothing ->
+                                            graph
+                            in
+                            { options | graph = newGraph }
+
+                        Nothing ->
+                            options
+
+                Nothing ->
+                    options
+
+        Nothing ->
             options
 
 

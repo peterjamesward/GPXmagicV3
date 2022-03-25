@@ -15,7 +15,8 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 
 ## Route maker
 
-Make video for Route maker.
+Add lollipop turns. (Self-loop at Node currently at route end.)
+> Nearly perfect first time but wrong in one direction.
 
 ---
 

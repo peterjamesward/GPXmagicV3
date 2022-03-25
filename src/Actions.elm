@@ -87,6 +87,7 @@ type ToolAction msg
     | DisplayInfo String String
     | Autofix (List Int)
     | AddTraversal Int
+    | AddSelfLoop Int
     | LockToolOpen Bool String
     | ChangeActiveTrack Int
     | MakeRouteFromGraph
