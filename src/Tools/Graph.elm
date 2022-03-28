@@ -125,12 +125,19 @@ you make here will be reflected in the resulting route so all the altitudes will
 
 makeXY : EarthPoint -> XY
 makeXY earth =
-    -- Rounding to one metre bakes in some tolerance.
+    -- An important part of the graph is to remove height differences on repeated passes.
     let
-        { x, y, z } =
-            Point3d.toRecord inMeters earth
+        ( x, y, _ ) =
+            Point3d.toTuple Length.inFeet earth
+
+        ( xRounded, yRounded ) =
+            ( toFloat <| round x, toFloat <| round y )
+
+        ( useX, useY ) =
+            Point2d.fromTuple Length.feet ( xRounded, yRounded )
+                |> Point2d.toTuple Length.inMeters
     in
-    ( x, y )
+    ( useX, useY )
 
 
 edgeCanBeAdded : Int -> Options msg -> Bool
