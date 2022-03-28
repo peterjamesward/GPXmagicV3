@@ -526,7 +526,7 @@ view context ( width, height ) graph options msgWrapper =
         , pointer
         , Border.width 0
         , Border.color FlatColors.ChinesePalette.peace
-        , Background.color FlatColors.FlatUIPalette.emerald
+        , Background.color FlatColors.FlatUIPalette.silver
         , inFront <| zoomButtons msgWrapper context
         , inFront <| popup msgWrapper context options
         ]
