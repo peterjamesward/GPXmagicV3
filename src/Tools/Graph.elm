@@ -1307,62 +1307,96 @@ makeNewRoute options =
                             case inbound.direction of
                                 Natural ->
                                     let
+                                        leafIndex =
+                                            DomainModel.indexFromDistance
+                                                (trueLength inTrack.trackTree |> Quantity.minus trim)
+                                                inTrack.trackTree
+
                                         leaf =
+                                            DomainModel.leafFromIndex leafIndex inTrack.trackTree
+                                                |> asRecord
+
+                                        lastLeaf =
                                             DomainModel.getLastLeaf inTrack.trackTree
                                     in
-                                    -- Segment directed AWAY from extremity.
                                     ( leaf.directionAtEnd
-                                    , LineSegment3d.from leaf.endPoint leaf.startPoint
+                                    , LineSegment3d.from leaf.startPoint lastLeaf.endPoint
                                     )
 
                                 Reverse ->
                                     let
+                                        leafIndex =
+                                            DomainModel.indexFromDistance
+                                                trim
+                                                inTrack.trackTree
+
                                         leaf =
+                                            DomainModel.leafFromIndex leafIndex inTrack.trackTree
+                                                |> asRecord
+
+                                        firstLeaf =
                                             DomainModel.getFirstLeaf inTrack.trackTree
                                     in
                                     ( Direction2d.reverse leaf.directionAtStart
-                                    , LineSegment3d.from leaf.startPoint leaf.endPoint
+                                    , LineSegment3d.from firstLeaf.startPoint leaf.startPoint
                                     )
+
+                        trim =
+                            -- CHANGE. Actually prune the trees to get the right leaf.
+                            -- Will need to do this in the traversal rendering as well.
+                            -- This changes the "minimum radius" semantics.
+                            options.minimumRadiusAtPlaces
 
                         ( outboundDirection, outboundRoad ) =
                             case outbound.direction of
                                 Natural ->
                                     let
+                                        leafIndex =
+                                            DomainModel.indexFromDistance
+                                                trim
+                                                outTrack.trackTree
+
                                         leaf =
+                                            DomainModel.leafFromIndex leafIndex outTrack.trackTree
+                                                |> asRecord
+
+                                        firstLeaf =
                                             DomainModel.getFirstLeaf outTrack.trackTree
                                     in
                                     ( leaf.directionAtStart
-                                    , LineSegment3d.from leaf.startPoint leaf.endPoint
+                                    , LineSegment3d.from firstLeaf.startPoint leaf.endPoint
                                     )
 
                                 Reverse ->
                                     let
+                                        leafIndex =
+                                            DomainModel.indexFromDistance
+                                                (trueLength outTrack.trackTree |> Quantity.minus trim)
+                                                outTrack.trackTree
+
                                         leaf =
+                                            DomainModel.leafFromIndex leafIndex outTrack.trackTree
+                                                |> asRecord
+
+                                        lastLeaf =
                                             DomainModel.getLastLeaf outTrack.trackTree
                                     in
                                     ( Direction2d.reverse leaf.directionAtEnd
-                                    , LineSegment3d.from leaf.endPoint leaf.startPoint
+                                    , LineSegment3d.from lastLeaf.endPoint leaf.startPoint
                                     )
+
+                        ( trimLocationInbound, trimLocationOutbound ) =
+                            ( LineSegment3d.interpolate
+                                (LineSegment3d.reverse inboundRoad)
+                                (Quantity.ratio trim <| LineSegment3d.length inboundRoad)
+                            , LineSegment3d.interpolate
+                                (LineSegment3d.reverse outboundRoad)
+                                (Quantity.ratio trim <| LineSegment3d.length outboundRoad)
+                            )
 
                         turnAngle =
                             outboundDirection
                                 |> Direction2d.angleFrom inboundDirection
-                                |> Quantity.abs
-
-                        trim =
-                            --This could be wrong if not in the ultimate leaf but good enough for now.
-                            options.minimumRadiusAtPlaces
-                                |> Quantity.multiplyBy (Angle.inRadians turnAngle)
-
-                        ( trimLocationInbound, trimLocationOutbound ) =
-                            --TODO: Which leaf does the trim occur in?
-                            ( LineSegment3d.interpolate
-                                inboundRoad
-                                (Quantity.ratio trim <| LineSegment3d.length inboundRoad)
-                            , LineSegment3d.interpolate
-                                outboundRoad
-                                (Quantity.ratio trim <| LineSegment3d.length outboundRoad)
-                            )
 
                         ( offsetVectorInbound, offsetVectorOutbound ) =
                             ( Vector2d.withLength options.centreLineOffset
@@ -1420,45 +1454,19 @@ makeNewRoute options =
                                 (geometryPoint outboundTrim2d)
                             )
 
-                        actualVertex =
-                            LineSegment3d.startPoint outboundRoad
-                                |> Point3d.projectInto planeFor2dArc
-
                         arcCentre =
                             Maybe.map (Point2d.fromRecord meters) <|
                                 Geometry101.lineIntersection
                                     perpToInbound
                                     perToOutbound
 
-                        ( centreToMidpoint, radius ) =
-                            -- If there's an arc, get an axis and radius to find the midpoint.
-                            case arcCentre of
-                                Just centre ->
-                                    ( Axis2d.throughPoints centre actualVertex
-                                    , Just <| Point2d.distanceFrom centre offsetInboundTrimPoint
-                                    )
-
-                                _ ->
-                                    ( Nothing, Nothing )
-
-                        {-
-                           _ = Debug.log "inboundDirection" <| Direction2d.toAngle inboundDirection
-                           _ = Debug.log "outboundDirection" <| Direction2d.toAngle outboundDirection
-                           _ = Debug.log "actualVertex" actualVertex
-                           _ = Debug.log "arcCentre" arcCentre
-                           _ = Debug.log "centreToMidpoint" centreToMidpoint
-                           _ = Debug.log "radius" radius
-                        -}
                         arc : Maybe (Arc2d Meters LocalCoords)
                         arc =
-                            case ( centreToMidpoint, radius ) of
-                                ( Just axis, Just theRadius ) ->
-                                    Arc2d.throughPoints
-                                        offsetInboundTrimPoint
-                                        (Point2d.along axis theRadius)
-                                        offsetOutboundTrimPoint
+                            case arcCentre of
+                                Just centre ->
+                                    Just <| Arc2d.sweptAround centre turnAngle offsetInboundTrimPoint
 
-                                _ ->
+                                Nothing ->
                                     Nothing
                     in
                     -- We make a 3d arc through the same points.
