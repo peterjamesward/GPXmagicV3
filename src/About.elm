@@ -3,20 +3,24 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.1.0
+# GPXmagic v3.1.1
 
 (f43d2982)
 
 ## In this release ...
 
-* __Route maker__ tool and the accompanying "__Route__" view - the replacement and upgrade to Graph theory.
+* When you're building a route in _Route maker_ and you want to "double back" along the same Road,
+you can now click on the Place and add a loop back to the same Place. Use the Radius slider in the
+Route maker tool to adjust the radius. You can then add this loop to your route; be sure to check
+the direction you use!
 
-> This may feel like going down the rabbit hole. Please watch the video; it may help:
-https://youtu.be/90GZbpgZjnw
+* _Route maker_ will warn if there are many Places (more than 10% of trackpoints). Remember, it's
+intended for use with _planned_ routes, not _recorded_ rides. (Thanks David, again.)
+
+* The joins at Places are better but I advise you to always check and smooth them after you have
+created the new route.
 
 * Some bug fixes.
-
-* Some usability tweaks (thanks again, David Ogle).
 
 ## Coming up, not necessarily in order ...
 
