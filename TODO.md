@@ -13,15 +13,6 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 
 # WIP
 
-## Route maker
-
-Prune the transition edges to match the trim at Places.
-
-Use angle from trim points to vertex, not angle at vertex.
-Also, maybe leave out the first and last arc points.
-
-Display message if it looks like track was IRL (ratio of nodes to points?)
-
 ---
 
 # BACKLOG

@@ -107,6 +107,8 @@ textDictionary =
         , ( "render", """Create a single road, using your route and offsetting the road
 from the centre line (if you want to avoid collisions with oncoming avatars). As the same
 road section is used for each passage, there should be no height differences.""" )
+        , ( "manyNodes", """Hmm. That's a lot of Places. Route maker works best with 
+GPX files from a route planner, not from recorded rides. That could be the issue here.""" )
         ]
     )
 
@@ -773,13 +775,20 @@ update :
 update msg options track wrapper =
     case msg of
         GraphAnalyse ->
-            ( { options
-                | graph = buildGraph track
-                , analyzed = True
-                , originalTrack = Just track
-              }
-            , []
-              --, [ Actions.LockToolOpen True toolID ]
+            let
+                newOptions =
+                    { options
+                        | graph = buildGraph track
+                        , analyzed = True
+                        , originalTrack = Just track
+                    }
+            in
+            ( newOptions
+            , if Dict.size newOptions.graph.nodes > skipCount track.trackTree // 10 then
+                [ Actions.DisplayInfo "graph" "manyNodes" ]
+
+              else
+                []
             )
 
         RevertToTrack ->
