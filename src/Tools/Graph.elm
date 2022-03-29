@@ -1339,12 +1339,12 @@ makeNewRoute options =
                                 Natural ->
                                     DomainModel.interpolateTrack
                                         trim
-                                        inTrack.trackTree
+                                        outTrack.trackTree
 
                                 Reverse ->
                                     DomainModel.interpolateTrack
-                                        (trueLength inTrack.trackTree |> Quantity.minus trim)
-                                        inTrack.trackTree
+                                        (trueLength outTrack.trackTree |> Quantity.minus trim)
+                                        outTrack.trackTree
 
                         ( inboundDirection, outboundDirection ) =
                             ( Direction3d.from inboundTrimPoint actualVertex
