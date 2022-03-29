@@ -26,6 +26,7 @@ module DomainModel exposing
     , gradientFromNode
     , indexFromDistance
     , indexFromDistanceRoundedDown
+    , interpolateTrack
     , leafFromIndex
     , lngLatPair
     , makeLeaf
@@ -893,6 +894,31 @@ indexFromDistance distance treeNode =
             else
                 skipCount info.left
                     + indexFromDistance (distance |> Quantity.minus (trueLength info.left)) info.right
+
+
+interpolateTrack : Length.Length -> PeteTree -> ( Int, EarthPoint )
+interpolateTrack distance treeNode =
+    case treeNode of
+        Leaf info ->
+            ( 0
+            , Point3d.interpolateFrom
+                info.startPoint
+                info.endPoint
+                (Quantity.ratio distance info.trueLength)
+            )
+
+        Node info ->
+            if distance |> Quantity.lessThanOrEqualTo (trueLength info.left) then
+                interpolateTrack distance info.left
+
+            else
+                let
+                    ( rightIndex, rightPoint ) =
+                        interpolateTrack (distance |> Quantity.minus (trueLength info.left)) info.right
+                in
+                ( rightIndex + skipCount info.left
+                , rightPoint
+                )
 
 
 nearestToRay :

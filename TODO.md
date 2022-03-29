@@ -15,16 +15,26 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 
 ## Route maker
 
-Correct the transition radius at Places for lollipop turns.
-> Probably always wrong but these turns reveal it.
+Prune the transition edges to match the trim at Places.
+
+Use angle from trim points to vertex, not angle at vertex.
+Also, maybe leave out the first and last arc points.
+
+Display message if it looks like track was IRL (ratio of nodes to points?)
 
 ---
 
 # BACKLOG
 
+## Route maker
+
+Post-process graph to see if we can remove IRL noise.
+
 ## Display 
 
 Optionally show OSM land-use polygons on ground plane. (Not sure about Terrain.)
+
+Terrain as from v2 but with texture maybe
 
 ## 1CQF
 
@@ -33,21 +43,18 @@ Allow the use of markers for partial application.
 ## Route Builder
 
 - Zoom on Route mouse-centred?
-- Add lollipops when offset < min radius. (also on out and back)
-- Option to close loop if S == F.
-- Improve traversal direction display with an arrow on each section.
-- Add "split edge at pointer" function, when editing an edge.
+- Improve traversal direction display (with an arrow on each section?).
+- Add "split edge at pointer" function, when editing an edge (?).
 
 ## Usability
 
-Drag curve former circle directly in Plan View.
+Drag Curve Former circle directly in Plan View.
 Ditto for Move & Stretch, possibly Nudge.
 Provide info text capability on top bar and on view panes.
 Specific areas within tools as needed.
 
 ## Tools: old, updated, & new
 
-- Terrain as from v2 but with texture maybe
 - Can we auto-radius hairpins?
 - Non-customisable keyboard alternatives for Load/Save/Undo/Redo/Fwd/Back/Purple (maybe 1-5 for views)
 - Extract all text for translation (Muriel)
@@ -77,8 +84,6 @@ See https://github.com/ianmackenzie/elm-3d-scene/blob/1.0.1/examples/Texture.elm
 https://ambientcg.com/view?id=Grass004
 https://ambientcg.com/view?id=Asphalt001
 Credit: Contains assets from ambientCG.com, licensed under CC0 1.0 Universal.
-
-Could be based on OSM land use data.
 
 ## Small stuff
 
