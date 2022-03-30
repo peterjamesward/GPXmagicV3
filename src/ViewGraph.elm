@@ -29,6 +29,7 @@ import Html.Events as HE
 import Html.Events.Extra.Mouse as Mouse exposing (Button(..))
 import Html.Events.Extra.Wheel as Wheel
 import Json.Decode as D
+import Json.Encode as E
 import Length exposing (Length, Meters, meters)
 import List.Extra
 import LocalCoords exposing (LocalCoords)
@@ -704,6 +705,7 @@ update msg msgWrapper graph area context =
               }
             , [ Actions.ChangeActiveTrack edge
               , Actions.TrackHasChanged
+              , Actions.StoreLocally "editmessagedisplayed" (E.bool True)
               , if context.haveDisplayedEditingReminder then
                     Actions.NoAction
 

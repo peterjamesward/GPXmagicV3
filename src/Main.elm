@@ -258,6 +258,7 @@ init mflags origin navigationKey =
         , LocalStorage.storageGetItem "visuals"
         , LocalStorage.storageGetItem "docks"
         , LocalStorage.storageGetMemoryUsage
+        , LocalStorage.storageGetItem "editmessagedisplayed"
         ]
     )
 

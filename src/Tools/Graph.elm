@@ -106,13 +106,14 @@ textDictionary =
         , ( "radius", "When passing a place, will attempt use this to create the bend." )
         , ( "render", """Create a single road, using your route and offsetting the road
 from the centre line (if you want to avoid collisions with oncoming avatars). As the same
-road section is used for each passage, there should be no height differences.""" )
+road section is used for each passage, there should be no height differences (apart from
+the 1cm difference we put in to avoid flicker in RGT.""" )
         , ( "manyNodes", """Hmm. That's a lot of Places. Route maker works best with 
 GPX files from a route planner, not from recorded rides. That could be the issue here.""" )
         , ( "edit", """Please use any of the other views to edit this section of track.
 Any changes you make will be reflected here.
 
-**NOTE** Please do not use _Save GPX file_ as that will save only the active section.""")
+**NOTE** Please do not use _Save GPX file_ while editing a section, as that will save only the active section.""")
         ]
     )
 
