@@ -666,7 +666,7 @@ update msg msgWrapper graph area context =
             ( { context | zoomLevel = context.defaultZoomLevel }, [] )
 
         PopupHide ->
-            ( { context | clickPoint = Nothing }, [] )
+            ( { context | clickPoint = Nothing, clickFeature = ClickNone }, [] )
 
         ImageNoOp ->
             ( context, [] )
@@ -685,17 +685,17 @@ update msg msgWrapper graph area context =
             )
 
         AddTraversal edge ->
-            ( { context | clickFeature = ClickNone }
+            ( { context | clickPoint = Nothing, clickFeature = ClickNone }
             , [ Actions.AddTraversal edge ]
             )
 
         AddSelfLoop node ->
-            ( { context | clickFeature = ClickNode node }
+            ( { context | clickPoint = Nothing, clickFeature = ClickNone }
             , [ Actions.AddSelfLoop node ]
             )
 
         EditRoad edge ->
-            ( { context | clickFeature = ClickNone }
+            ( { context | clickPoint = Nothing, clickFeature = ClickNone }
             , [ Actions.ChangeActiveTrack edge, Actions.TrackHasChanged ]
             )
 
