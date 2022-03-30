@@ -109,6 +109,10 @@ from the centre line (if you want to avoid collisions with oncoming avatars). As
 road section is used for each passage, there should be no height differences.""" )
         , ( "manyNodes", """Hmm. That's a lot of Places. Route maker works best with 
 GPX files from a route planner, not from recorded rides. That could be the issue here.""" )
+        , ( "edit", """Please use any of the other views to edit this section of track.
+Any changes you make will be reflected here.
+
+**NOTE** Please do not use _Save GPX file_ as that will save only the active section.""")
         ]
     )
 

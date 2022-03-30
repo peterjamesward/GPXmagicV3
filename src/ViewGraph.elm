@@ -92,6 +92,7 @@ type alias Context =
     , clickPoint : Maybe ( Float, Float )
     , clickFeature : ClickDetect
     , edgeMode : EdgeMode
+    , haveDisplayedEditingReminder : Bool
     }
 
 
@@ -127,6 +128,7 @@ initialiseView current treeNode currentContext =
             , clickPoint = Nothing
             , clickFeature = ClickNone
             , edgeMode = EdgeSketch
+            , haveDisplayedEditingReminder = False
             }
 
 
@@ -695,8 +697,19 @@ update msg msgWrapper graph area context =
             )
 
         EditRoad edge ->
-            ( { context | clickPoint = Nothing, clickFeature = ClickNone }
-            , [ Actions.ChangeActiveTrack edge, Actions.TrackHasChanged ]
+            ( { context
+                | clickPoint = Nothing
+                , clickFeature = ClickNone
+                , haveDisplayedEditingReminder = True
+              }
+            , [ Actions.ChangeActiveTrack edge
+              , Actions.TrackHasChanged
+              , if context.haveDisplayedEditingReminder then
+                    Actions.NoAction
+
+                else
+                    Actions.DisplayInfo "graph" "edit"
+              ]
             )
 
 
