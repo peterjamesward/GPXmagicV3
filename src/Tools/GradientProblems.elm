@@ -466,7 +466,7 @@ view imperial msgWrapper options isTrack =
                                 [ scrollbarY
                                 , height <|
                                     px <|
-                                        clamp 24 300 <|
+                                        clamp 32 300 <|
                                             (List.length options.breaches // 3 * 24)
                                 , spacingXY 6 6
                                 , padding 6

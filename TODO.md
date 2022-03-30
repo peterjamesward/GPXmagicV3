@@ -13,19 +13,15 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 
 # WIP
 
+Terrain as from v2 but with texture maybe
+
 ---
 
 # BACKLOG
 
-## Route maker
-
-Post-process graph to see if we can remove IRL noise.
-
 ## Display 
 
 Optionally show OSM land-use polygons on ground plane. (Not sure about Terrain.)
-
-Terrain as from v2 but with texture maybe
 
 ## 1CQF
 
@@ -36,6 +32,7 @@ Allow the use of markers for partial application.
 - Zoom on Route mouse-centred?
 - Improve traversal direction display (with an arrow on each section?).
 - Add "split edge at pointer" function, when editing an edge (?).
+- Improve behaviour with IRL rides (use code from Intersections?)
 
 ## Usability
 
