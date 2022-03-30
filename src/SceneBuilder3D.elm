@@ -5,6 +5,7 @@ module SceneBuilder3D exposing (..)
 
 import Angle exposing (Angle)
 import Axis3d
+import BoundingBox2d exposing (BoundingBox2d)
 import BoundingBox3d exposing (BoundingBox3d)
 import Color exposing (Color, black, darkGreen, green, lightOrange)
 import ColourPalette exposing (gradientColourPastel, gradientHue, gradientHue2)
@@ -18,23 +19,27 @@ import LineSegment3d
 import LocalCoords exposing (LocalCoords)
 import Pixels
 import Plane3d exposing (Plane3d)
-import Point3d
+import Point2d
+import Point3d exposing (Point3d)
 import PreviewData exposing (PreviewData, PreviewShape(..))
-import Quantity
+import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
 import Scene3d.Material as Material
+import SpatialIndex exposing (SpatialContent)
 import Tools.DisplaySettingsOptions exposing (CurtainStyle(..))
 import TrackLoaded exposing (TrackLoaded)
+import Utils exposing (reversingCons)
 import UtilsForViews exposing (flatBox, fullDepthRenderingBoxSize)
 import Vector3d
+
+
+roadWidth =
+    Length.meters 4.0
 
 
 render3dView : Tools.DisplaySettingsOptions.Options -> TrackLoaded msg -> List (Entity LocalCoords)
 render3dView settings track =
     let
-        roadWidth =
-            Length.meters 4.0
-
         nominalRenderDepth =
             clamp 1 10 <|
                 round <|
@@ -161,15 +166,23 @@ render3dView settings track =
                         Nothing ->
                             []
                    )
+
+        terrain =
+            if settings.terrainFineness > 0.0 then
+                makeTerrain settings nearbySpace track.trackTree
+
+            else
+                []
     in
-    DomainModel.traverseTreeBetweenLimitsToDepth
-        0
-        (skipCount track.trackTree)
-        depthFn
-        0
-        track.trackTree
-        foldFn
-        (groundPlane ++ renderCurrentMarkers)
+    terrain
+        ++ DomainModel.traverseTreeBetweenLimitsToDepth
+            0
+            (skipCount track.trackTree)
+            depthFn
+            0
+            track.trackTree
+            foldFn
+            (groundPlane ++ renderCurrentMarkers)
 
 
 renderPreviews : Dict String PreviewData -> List (Entity LocalCoords)
@@ -266,3 +279,335 @@ centreLineBetween colouringFn road =
         (Material.color <| colouringFn gradient)
         (smallUpshiftTo road.startPoint)
         (smallUpshiftTo road.endPoint)
+
+
+
+-- These types only for the spatial index we use to paint the terrain.
+
+
+type alias IndexEntry =
+    { elevation : Quantity Float Meters
+    , road : ( EarthPoint, EarthPoint )
+    }
+
+
+type alias RoadBox =
+    { localBounds : BoundingBox3d Length.Meters LocalCoords
+    , road : ( Point3d Meters LocalCoords, Point3d Meters LocalCoords )
+    }
+
+
+type alias Index =
+    SpatialIndex.SpatialNode IndexEntry Length.Meters LocalCoords
+
+
+makeTerrain :
+    Tools.DisplaySettingsOptions.Options
+    -> BoundingBox3d Length.Meters LocalCoords
+    -> PeteTree
+    -> List (Entity LocalCoords)
+makeTerrain options box trackTree =
+    let
+        terrain =
+            trackTree
+                |> indexTerrain box
+                |> terrainFromIndex
+                    (flatBox box)
+                    (flatBox box)
+                    NoContext
+                    options
+                    (BoundingBox3d.minZ box)
+    in
+    terrain
+
+
+indexTerrain :
+    BoundingBox3d Length.Meters LocalCoords
+    -> PeteTree
+    -> Index
+indexTerrain box trackTree =
+    let
+        emptyIndex =
+            -- The last parameter here is not the quality, it
+            -- only affects the index efficiency.
+            SpatialIndex.empty (flatBox box) (Length.meters 100.0)
+
+        makeRoadBox : RoadSection -> List RoadBox -> List RoadBox
+        makeRoadBox road boxes =
+            let
+                halfWidthVector =
+                    Vector3d.from road.startPoint road.endPoint
+                        |> Vector3d.projectOnto Plane3d.xy
+                        |> Vector3d.scaleTo roadWidth
+
+                ( leftKerbVector, rightKerbVector ) =
+                    ( Vector3d.rotateAround Axis3d.z (Angle.degrees 90) halfWidthVector
+                    , Vector3d.rotateAround Axis3d.z (Angle.degrees -90) halfWidthVector
+                    )
+
+                ( leftNearKerb, rightNearKerb ) =
+                    ( Point3d.translateBy leftKerbVector road.startPoint
+                    , Point3d.translateBy rightKerbVector road.startPoint
+                    )
+
+                ( leftFarKerb, rightFarKerb ) =
+                    ( Point3d.translateBy leftKerbVector road.endPoint
+                    , Point3d.translateBy rightKerbVector road.endPoint
+                    )
+            in
+            { localBounds =
+                BoundingBox3d.hull leftNearKerb [ leftFarKerb, rightFarKerb, rightNearKerb ]
+            , road = ( road.startPoint, road.endPoint )
+            }
+                :: boxes
+
+        tarmac =
+            DomainModel.foldOverRoute makeRoadBox trackTree []
+
+        indexContent =
+            List.map
+                (\{ localBounds, road } ->
+                    { content =
+                        { elevation = localBounds |> BoundingBox3d.minZ
+                        , road = road
+                        }
+                    , box = flatBox localBounds
+                    }
+                )
+                tarmac
+
+        indexedContent =
+            List.foldl SpatialIndex.add emptyIndex indexContent
+    in
+    indexedContent
+
+
+type LocationContext
+    = NoContext
+    | NW
+    | NE
+    | SE
+    | SW
+
+
+type alias TerrainFoldState =
+    { minAltitude : Quantity Float Meters
+    , resultBox : BoundingBox2d Meters LocalCoords
+    , count : Int
+    }
+
+
+terrainFromIndex :
+    BoundingBox2d.BoundingBox2d Length.Meters LocalCoords
+    -> BoundingBox2d.BoundingBox2d Length.Meters LocalCoords
+    -> LocationContext
+    -> Tools.DisplaySettingsOptions.Options
+    -> Quantity Float Meters
+    -> Index
+    -> List (Entity LocalCoords)
+terrainFromIndex myBox enclosingBox orientation options baseElevation index =
+    -- I played with the idea of pushing some of this work into the SpatialIndex but
+    -- concluded (rightly, I think) that it would be wrong, other than using the new queryWithFold
+    -- function to bring back both the minimum altitude and the aggregate content bounding box
+    -- for each query. That's a marginal saving but maybe easier to comprehend.
+    -- (Turned out to be 7x speed uplift, so not exactly marginal.)
+    let
+        centre =
+            BoundingBox2d.centerPoint myBox
+
+        initialFoldState : TerrainFoldState
+        initialFoldState =
+            { minAltitude = Quantity.positiveInfinity
+            , resultBox = BoundingBox2d.singleton centre
+            , count = 0
+            }
+
+        queryFoldFunction :
+            SpatialContent IndexEntry Meters LocalCoords
+            -> TerrainFoldState
+            -> TerrainFoldState
+        queryFoldFunction entry accum =
+            { minAltitude = Quantity.min accum.minAltitude entry.content.elevation
+            , resultBox = BoundingBox2d.union accum.resultBox entry.box
+            , count = accum.count + 1
+            }
+
+        { minAltitude, resultBox, count } =
+            SpatialIndex.queryWithFold index myBox queryFoldFunction initialFoldState
+
+        topBeforeAdjustment =
+            if minAltitude |> Quantity.greaterThanOrEqualTo Quantity.positiveInfinity then
+                baseElevation
+
+            else
+                minAltitude
+
+        top =
+            -- Just avoid interference with road surface.
+            topBeforeAdjustment |> Quantity.minus (Length.meters 0.1)
+
+        elevatiomIncrease =
+            topBeforeAdjustment |> Quantity.minus baseElevation
+
+        myExtrema =
+            BoundingBox2d.extrema myBox
+
+        parentExtrema =
+            BoundingBox2d.extrema enclosingBox
+
+        contentBox =
+            -- This box encloses our points. It defines the top of the frustrum and the base for the next level.
+            resultBox
+                |> BoundingBox2d.intersection myBox
+                |> Maybe.withDefault (BoundingBox2d.singleton centre)
+
+        contentExtrema =
+            BoundingBox2d.extrema contentBox
+
+        plateauExtrema =
+            -- How big would the top be if we sloped the sides at 45 degrees?
+            { minX = Quantity.min contentExtrema.minX (myExtrema.minX |> Quantity.plus elevatiomIncrease)
+            , minY = Quantity.min contentExtrema.minY (myExtrema.minY |> Quantity.plus elevatiomIncrease)
+            , maxX = Quantity.max contentExtrema.maxX (myExtrema.maxX |> Quantity.minus elevatiomIncrease)
+            , maxY = Quantity.max contentExtrema.maxY (myExtrema.maxY |> Quantity.minus elevatiomIncrease)
+            }
+
+        { nwChildBox, neChildBox, swChildBox, seChildBox } =
+            { nwChildBox =
+                BoundingBox2d.from centre (Point2d.xy myExtrema.minX myExtrema.maxY)
+                    |> BoundingBox2d.intersection contentBox
+                    |> Maybe.withDefault contentBox
+            , neChildBox =
+                BoundingBox2d.from centre (Point2d.xy myExtrema.maxX myExtrema.maxY)
+                    |> BoundingBox2d.intersection contentBox
+                    |> Maybe.withDefault contentBox
+            , swChildBox =
+                BoundingBox2d.from centre (Point2d.xy myExtrema.minX myExtrema.minY)
+                    |> BoundingBox2d.intersection contentBox
+                    |> Maybe.withDefault contentBox
+            , seChildBox =
+                BoundingBox2d.from centre (Point2d.xy myExtrema.maxX myExtrema.minY)
+                    |> BoundingBox2d.intersection contentBox
+                    |> Maybe.withDefault contentBox
+            }
+
+        isNotTiny bx =
+            let
+                ( width, height ) =
+                    BoundingBox2d.dimensions bx
+
+                splitSize =
+                    Length.meters <| 100 / clamp 1.0 10.0 options.terrainFineness
+            in
+            (width |> Quantity.greaterThan splitSize)
+                && (height |> Quantity.greaterThan splitSize)
+                && count
+                > 1
+
+        topColour =
+            terrainColourFromHeight <| Length.inMeters top
+
+        sideColour =
+            terrainColourFromHeight <| 0.5 * (Length.inMeters top + Length.inMeters baseElevation)
+
+        northernBottomEdge =
+            if orientation == NW || orientation == NE then
+                parentExtrema.maxY
+
+            else
+                myExtrema.maxY
+
+        southernBottomEdge =
+            if orientation == SW || orientation == SE then
+                parentExtrema.minY
+
+            else
+                myExtrema.minY
+
+        easternBottomEdge =
+            if orientation == NE || orientation == SE then
+                parentExtrema.maxX
+
+            else
+                myExtrema.maxX
+
+        westernBottomEdge =
+            if orientation == NW || orientation == SW then
+                parentExtrema.minX
+
+            else
+                myExtrema.minX
+
+        northernSlope =
+            -- Better to write this slowly. Use inner minX, maxX at top
+            Scene3d.quad (Material.matte sideColour)
+                (Point3d.xyz plateauExtrema.minX plateauExtrema.maxY top)
+                (Point3d.xyz plateauExtrema.maxX plateauExtrema.maxY top)
+                (Point3d.xyz easternBottomEdge northernBottomEdge baseElevation)
+                (Point3d.xyz westernBottomEdge northernBottomEdge baseElevation)
+
+        southernSlope =
+            -- Better to write this slowly. Use inner minX, maxX at top
+            Scene3d.quad (Material.matte sideColour)
+                (Point3d.xyz plateauExtrema.minX plateauExtrema.minY top)
+                (Point3d.xyz plateauExtrema.maxX plateauExtrema.minY top)
+                (Point3d.xyz easternBottomEdge southernBottomEdge baseElevation)
+                (Point3d.xyz westernBottomEdge southernBottomEdge baseElevation)
+
+        westernSlope =
+            -- Better to write this slowly. Use inner minX, maxX at top
+            Scene3d.quad (Material.matte sideColour)
+                (Point3d.xyz plateauExtrema.minX plateauExtrema.minY top)
+                (Point3d.xyz plateauExtrema.minX plateauExtrema.maxY top)
+                (Point3d.xyz westernBottomEdge northernBottomEdge baseElevation)
+                (Point3d.xyz westernBottomEdge southernBottomEdge baseElevation)
+
+        easternSlope =
+            -- Better to write this slowly. Use inner minX, maxX at top
+            Scene3d.quad (Material.matte sideColour)
+                (Point3d.xyz plateauExtrema.maxX plateauExtrema.minY top)
+                (Point3d.xyz plateauExtrema.maxX plateauExtrema.maxY top)
+                (Point3d.xyz easternBottomEdge northernBottomEdge baseElevation)
+                (Point3d.xyz easternBottomEdge southernBottomEdge baseElevation)
+
+        thisLevelSceneElements =
+            if top |> Quantity.greaterThan baseElevation then
+                [ Scene3d.quad (Material.matte topColour)
+                    (Point3d.xyz plateauExtrema.maxX plateauExtrema.maxY top)
+                    (Point3d.xyz plateauExtrema.maxX plateauExtrema.minY top)
+                    (Point3d.xyz plateauExtrema.minX plateauExtrema.minY top)
+                    (Point3d.xyz plateauExtrema.minX plateauExtrema.maxY top)
+                , northernSlope
+                , southernSlope
+                , westernSlope
+                , easternSlope
+                ]
+
+            else
+                []
+    in
+    thisLevelSceneElements
+        ++ -- No point recursing if one element only.
+           (if isNotTiny myBox then
+                List.concat
+                    [ terrainFromIndex nwChildBox contentBox NW options top index
+                    , terrainFromIndex neChildBox contentBox NE options top index
+                    , terrainFromIndex seChildBox contentBox SE options top index
+                    , terrainFromIndex swChildBox contentBox SW options top index
+                    ]
+
+            else
+                []
+           )
+
+
+terrainColourFromHeight : Float -> Color.Color
+terrainColourFromHeight height =
+    let
+        lightness =
+            clamp 0.1 0.9 <| sqrt <| sqrt <| abs <| height / 3000.0
+    in
+    Color.hsl
+        ((80.0 + 50.0 * sin height) / 255)
+        (133 / 255)
+        lightness

@@ -8,6 +8,7 @@ import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
 import Json.Decode as D
 import Tools.DisplaySettingsOptions exposing (..)
+import ViewPureStyles exposing (commonShortHorizontalSliderStyles)
 
 
 defaultOptions : Options
@@ -16,6 +17,7 @@ defaultOptions =
     , curtainStyle = PastelCurtain
     , centreLine = False
     , groundPlane = True
+    , terrainFineness = 0.0
     }
 
 
@@ -24,6 +26,7 @@ type Msg
     | SetCurtainStyle CurtainStyle
     | SetCentreLine Bool
     | SetGroundPlane Bool
+    | SetTerrainFineness Float
     | DisplayInfo String String
 
 
@@ -95,6 +98,13 @@ update msg options =
             in
             ( newOptions, actions newOptions )
 
+        SetTerrainFineness terrain ->
+            let
+                newOptions =
+                    { options | terrainFineness = terrain }
+            in
+            ( newOptions, actions newOptions )
+
         DisplayInfo tool tag ->
             ( options, [ Actions.DisplayInfo tool tag ] )
 
@@ -154,4 +164,19 @@ view wrap options =
                 , icon = Input.defaultCheckbox
                 }
             ]
+        , Input.slider commonShortHorizontalSliderStyles
+            { onChange = wrap << SetTerrainFineness
+            , label =
+                Input.labelBelow [] <|
+                    if options.terrainFineness == 0.0 then
+                        text "Terrain off"
+
+                    else
+                        text "Terrain quality"
+            , min = 0.0
+            , max = 3.0
+            , step = Nothing
+            , value = options.terrainFineness
+            , thumb = Input.defaultThumb
+            }
         ]

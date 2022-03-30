@@ -13,8 +13,6 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 
 # WIP
 
-Terrain as from v2 but with texture maybe
-
 ---
 
 # BACKLOG

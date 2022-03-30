@@ -11,6 +11,7 @@ type alias Options =
     , centreLine : Bool
     , groundPlane : Bool
     , curtainStyle : CurtainStyle
+    , terrainFineness : Float -- 0.0 => OFF
     }
 
 
@@ -54,6 +55,7 @@ decode json current =
             , centreLine = decoded.centreLine
             , groundPlane = decoded.groundPlane
             , curtainStyle = decodeCurtain decoded.curtainStyle
+            , terrainFineness = 0.0
             }
 
         Err error ->
