@@ -13,17 +13,28 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 
 # WIP
 
+## Land use display option
+
+Optionally show OSM land-use polygons on ground plane. (Not sure about Terrain.)
+
+- ~~Test with a simple bounding box query to get "natural", "landuse" tags.~~
+- See how it works out drawing polygons.
+- Make a decision.
+- Considering using elevations from map (sneaky nice)
+- Decide if it can sit with terrain.
+
+
 ---
 
 # BACKLOG
 
-## Display 
-
-Optionally show OSM land-use polygons on ground plane. (Not sure about Terrain.)
-
 ## 1CQF
+## New smoothing
 
 Allow the use of markers for partial application.
+> This could be like a meta-box, or a "build your own 1CQF", in which
+> we pipeline existing features, just like 1CQF.
+> E.G. simplify > limit > interpolate > centroid.
 
 ## Route Builder
 
@@ -34,14 +45,17 @@ Allow the use of markers for partial application.
 
 ## Usability
 
-Drag Curve Former circle directly in Plan View.
+Drag Curve Former circle directly in Plan View. (Add an SVG "handle" to hit detect.)
 Ditto for Move & Stretch, possibly Nudge.
 Provide info text capability on top bar and on view panes.
 Specific areas within tools as needed.
 
+Variant of "request from local storage" that takes a wrapped message so that the return value
+can be directed to a tool or a view.
+
 ## Tools: old, updated, & new
 
-- Can we auto-radius hairpins?
+- Can we auto-radius hairpins? (Combo of Samir's tool and Radius Bends?)
 - Non-customisable keyboard alternatives for Load/Save/Undo/Redo/Fwd/Back/Purple (maybe 1-5 for views)
 - Extract all text for translation (Muriel)
 - Use localised number formatting everywhere (for French use of , and .)
@@ -52,12 +66,6 @@ Specific areas within tools as needed.
 
 Info on mouse move.
 Scales?
-
-## New smoothing
-
-> This could be like a meta-box, or a "build your own 1CQF", in which
-> we pipeline existing features, just like 1CQF.
-> E.G. simplify > limit > interpolate > centroid.
 
 ## Loops
 

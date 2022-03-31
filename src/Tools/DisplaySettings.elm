@@ -18,6 +18,7 @@ defaultOptions =
     , centreLine = False
     , groundPlane = True
     , terrainFineness = 0.0
+    , landUse = False
     }
 
 
@@ -26,6 +27,7 @@ type Msg
     | SetCurtainStyle CurtainStyle
     | SetCentreLine Bool
     | SetGroundPlane Bool
+    | SetLandUse Bool
     | SetTerrainFineness Float
     | DisplayInfo String String
 
@@ -74,6 +76,13 @@ update msg options =
             let
                 newOptions =
                     { options | centreLine = state }
+            in
+            ( newOptions, actions newOptions )
+
+        SetLandUse state ->
+            let
+                newOptions =
+                    { options | landUse = state }
             in
             ( newOptions, actions newOptions )
 
@@ -142,7 +151,7 @@ view wrap options =
                 ]
                 { onChange = wrap << SetRoadSurface
                 , checked = options.roadSurface
-                , label = Input.labelLeft [] <| text "Road surface"
+                , label = Input.labelRight [] <| text "Road surface"
                 , icon = Input.defaultCheckbox
                 }
             , Input.checkbox
@@ -151,7 +160,7 @@ view wrap options =
                 ]
                 { onChange = wrap << SetGroundPlane
                 , checked = options.groundPlane
-                , label = Input.labelLeft [] <| text "Ground"
+                , label = Input.labelRight [] <| text "Ground"
                 , icon = Input.defaultCheckbox
                 }
             , Input.checkbox
@@ -160,7 +169,16 @@ view wrap options =
                 ]
                 { onChange = wrap << SetCentreLine
                 , checked = options.centreLine
-                , label = Input.labelLeft [] <| text "Centre line"
+                , label = Input.labelRight [] <| text "Centre line"
+                , icon = Input.defaultCheckbox
+                }
+            , Input.checkbox
+                [ padding 5
+                , spacing 5
+                ]
+                { onChange = wrap << SetLandUse
+                , checked = options.landUse
+                , label = Input.labelRight [] <| text "Land use"
                 , icon = Input.defaultCheckbox
                 }
             ]

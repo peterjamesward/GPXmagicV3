@@ -31,6 +31,8 @@ import Html.Events.Extra.Mouse as Mouse
 import Http
 import Json.Decode as D
 import Json.Encode as E exposing (string)
+import LandUseDataOSM
+import LandUseDataTypes
 import LocalStorage
 import MapPortController
 import Markdown
@@ -114,6 +116,7 @@ type Msg
     | SvgMsg SvgPathExtractor.Msg
     | FlythroughTick Time.Posix
     | HideInfoPopup
+    | ReceivedLandUseData (Result Http.Error LandUseDataTypes.OSMLandUseData)
     | NoOp
 
 
@@ -132,6 +135,7 @@ type alias Model =
     -- Visuals (scenes now in PaneLayoutManager)
     , previews : Dict String PreviewData
     , flythroughRunning : Bool
+    , landUseData : LandUseDataTypes.LandUseData
 
     -- Layout stuff
     , windowSize : ( Float, Float )
@@ -227,6 +231,7 @@ init mflags origin navigationKey =
       , svgFileOptions = SvgPathExtractor.defaultOptions
       , track = Nothing
       , previews = Dict.empty
+      , landUseData = LandUseDataOSM.emptyLandUse
       , flythroughRunning = False
       , windowSize = ( 1000, 800 )
       , contentArea = ( Pixels.pixels 800, Pixels.pixels 500 )
@@ -258,7 +263,6 @@ init mflags origin navigationKey =
         , LocalStorage.storageGetItem "visuals"
         , LocalStorage.storageGetItem "docks"
         , LocalStorage.storageGetMemoryUsage
-        , LocalStorage.storageGetItem "editmessagedisplayed"
         ]
     )
 
@@ -335,7 +339,7 @@ update msg model =
 
         GpxRequested ->
             ( { model | modalMessage = Just """Select GPX file.
-
+            
 If the File Open dialog does not appear, please reload the page in the browser and try again.""" }
             , Select.file [ "text/gpx" ] GpxSelected
             )
@@ -371,7 +375,12 @@ If the File Open dialog does not appear, please reload the page in the browser a
                     case newTrack of
                         Just track ->
                             ( adoptTrackInModel track model
-                            , showTrackOnMapCentered track
+                            , Cmd.batch
+                                [ showTrackOnMapCentered track
+                                , LandUseDataOSM.requestLandUseData
+                                    ReceivedLandUseData
+                                    track
+                                ]
                             )
 
                         Nothing ->
@@ -675,6 +684,16 @@ Please check the file contains GPX data.""" }
         HideInfoPopup ->
             ( { model | infoText = Nothing }, Cmd.none )
 
+        ReceivedLandUseData results ->
+            case model.track of
+                Just track ->
+                    ( { model | landUseData = LandUseDataOSM.processLandUseData results track }
+                    , Cmd.none
+                    )
+
+                Nothing ->
+                    ( model, Cmd.none )
+
 
 adoptTrackInModel : TrackLoaded Msg -> Model -> Model
 adoptTrackInModel track model =
@@ -707,7 +726,9 @@ adoptTrackInModel track model =
             }
 
         actions =
-            [ TrackHasChanged, MapRefresh ]
+            [ TrackHasChanged
+            , MapRefresh
+            ]
 
         modelAfterActions =
             -- e.g. collect previews and render ...
@@ -2160,13 +2181,8 @@ performActionCommands actions model =
                 ( LoadSvgFile message file, _ ) ->
                     Task.perform message (File.toString file)
 
-                ( TrackFromSvg svgContent, _ ) ->
-                    case model.track of
-                        Just track ->
-                            showTrackOnMapCentered track
-
-                        Nothing ->
-                            Cmd.none
+                ( TrackFromSvg svgContent, Just track ) ->
+                    showTrackOnMapCentered track
 
                 ( SelectGpxFile message, _ ) ->
                     Select.file [ "text/gpx" ] message
@@ -2174,13 +2190,8 @@ performActionCommands actions model =
                 ( LoadGpxFile message file, _ ) ->
                     Task.perform message (File.toString file)
 
-                ( TrackFromGpx gpxContent, _ ) ->
-                    case model.track of
-                        Just track ->
-                            showTrackOnMapCentered track
-
-                        Nothing ->
-                            Cmd.none
+                ( TrackFromGpx gpxContent, Just track ) ->
+                    showTrackOnMapCentered track
 
                 ( RequestStravaRouteHeader msg routeId token, _ ) ->
                     Tools.StravaDataLoad.requestStravaRouteHeader

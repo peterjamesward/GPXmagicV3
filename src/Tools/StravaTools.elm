@@ -139,7 +139,7 @@ update msg settings wrap track =
             )
 
         LoadExternalRoute ->
-            -- It's a bit convoluted because a tool cannpt issue commands, but
+            -- It's a bit convoluted because a tool cannot issue commands, but
             -- must send instruction by way of Action back to Main.
             case settings.stravaStatus of
                 StravaConnected token ->

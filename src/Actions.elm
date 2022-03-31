@@ -6,6 +6,7 @@ module Actions exposing (..)
 import File exposing (File)
 import Http
 import Json.Decode as E
+import LandUseDataTypes
 import OAuth
 import PreviewData exposing (PreviewData)
 import Tools.BendSmootherOptions
