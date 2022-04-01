@@ -181,10 +181,19 @@ render3dView settings track landUse =
                             []
                    )
 
+        spatialIndex =
+            indexTerrain nearbySpace track.trackTree
+
         terrain =
             --(move index creation into this function, pass index to terrain and landuse)
             if settings.terrainFineness > 0.0 then
-                makeTerrain settings nearbySpace track.trackTree
+                spatialIndex
+                    |> terrainFromIndex
+                        (flatBox nearbySpace)
+                        (flatBox nearbySpace)
+                        NoContext
+                        settings
+                        (BoundingBox3d.minZ nearbySpace)
 
             else
                 []
@@ -567,26 +576,6 @@ type alias Index =
     SpatialIndex.SpatialNode IndexEntry Length.Meters LocalCoords
 
 
-makeTerrain :
-    Tools.DisplaySettingsOptions.Options
-    -> BoundingBox3d Length.Meters LocalCoords
-    -> PeteTree
-    -> List (Entity LocalCoords)
-makeTerrain options box trackTree =
-    let
-        terrain =
-            trackTree
-                |> indexTerrain box
-                |> terrainFromIndex
-                    (flatBox box)
-                    (flatBox box)
-                    NoContext
-                    options
-                    (BoundingBox3d.minZ box)
-    in
-    terrain
-
-
 indexTerrain :
     BoundingBox3d Length.Meters LocalCoords
     -> PeteTree
@@ -712,7 +701,7 @@ terrainFromIndex myBox enclosingBox orientation options baseElevation index =
             -- Just avoid interference with road surface.
             topBeforeAdjustment |> Quantity.minus (Length.meters 0.1)
 
-        elevatiomIncrease =
+        elevationIncrease =
             topBeforeAdjustment |> Quantity.minus baseElevation
 
         myExtrema =
@@ -732,10 +721,10 @@ terrainFromIndex myBox enclosingBox orientation options baseElevation index =
 
         plateauExtrema =
             -- How big would the top be if we sloped the sides at 45 degrees?
-            { minX = Quantity.min contentExtrema.minX (myExtrema.minX |> Quantity.plus elevatiomIncrease)
-            , minY = Quantity.min contentExtrema.minY (myExtrema.minY |> Quantity.plus elevatiomIncrease)
-            , maxX = Quantity.max contentExtrema.maxX (myExtrema.maxX |> Quantity.minus elevatiomIncrease)
-            , maxY = Quantity.max contentExtrema.maxY (myExtrema.maxY |> Quantity.minus elevatiomIncrease)
+            { minX = Quantity.min contentExtrema.minX (myExtrema.minX |> Quantity.plus elevationIncrease)
+            , minY = Quantity.min contentExtrema.minY (myExtrema.minY |> Quantity.plus elevationIncrease)
+            , maxX = Quantity.max contentExtrema.maxX (myExtrema.maxX |> Quantity.minus elevationIncrease)
+            , maxY = Quantity.max contentExtrema.maxY (myExtrema.maxY |> Quantity.minus elevationIncrease)
             }
 
         { nwChildBox, neChildBox, swChildBox, seChildBox } =
