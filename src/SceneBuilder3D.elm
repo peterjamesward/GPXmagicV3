@@ -227,6 +227,34 @@ emptyStuff =
     { scenes = [], unknownTags = Dict.empty }
 
 
+nodeColourMap =
+    Dict.fromList
+        [ ( "tree", Color.darkGreen )
+        , ( "rock", Color.lightBrown )
+        , ( "peak", Color.white )
+        , ( "water", Color.lightBlue )
+        , ( "residential", colorFromElmUiColour FlatColors.CanadianPalette.doubleDragonSkin )
+        ]
+
+
+polygonColourMap =
+    Dict.fromList
+        [ ( "wood", Color.darkGreen )
+        , ( "water", Color.lightBlue )
+        , ( "recreation_ground", Color.lightGreen )
+        , ( "grass", Color.lightGreen )
+        , ( "meadow", Color.lightYellow )
+        , ( "farmland", colorFromElmUiColour FlatColors.AmericanPalette.lightGreenishBlue )
+        , ( "grassland", colorFromElmUiColour FlatColors.AmericanPalette.mintLeaf )
+        , ( "forest", Color.darkGreen )
+        , ( "industrial", Color.darkGray )
+        , ( "residential", colorFromElmUiColour FlatColors.AmericanPalette.firstDate )
+        , ( "retail", colorFromElmUiColour FlatColors.FlatUIPalette.carrot )
+        , ( "railway", colorFromElmUiColour FlatColors.FlatUIPalette.silver )
+        , ( "brownfield", Color.brown )
+        ]
+
+
 makeLandUse :
     LandUseDataTypes.LandUseData
     -> Index
@@ -316,37 +344,13 @@ makeLandUse landUse index tree groundPlane =
                             stuff
 
                         Just natural ->
-                            case natural of
-                                "tree" ->
-                                    { scenes = drawCone Color.darkGreen node.at ++ stuff.scenes
+                            case Dict.get natural nodeColourMap of
+                                Just colour ->
+                                    { scenes = drawCone colour node.at ++ stuff.scenes
                                     , unknownTags = stuff.unknownTags
                                     }
 
-                                "rock" ->
-                                    { scenes = drawCone Color.lightBrown node.at ++ stuff.scenes
-                                    , unknownTags = stuff.unknownTags
-                                    }
-
-                                "peak" ->
-                                    { scenes = drawCone Color.white node.at ++ stuff.scenes
-                                    , unknownTags = stuff.unknownTags
-                                    }
-
-                                "water" ->
-                                    { scenes = drawCone Color.lightBlue node.at ++ stuff.scenes
-                                    , unknownTags = stuff.unknownTags
-                                    }
-
-                                "residential" ->
-                                    { scenes =
-                                        drawCone
-                                            (colorFromElmUiColour FlatColors.CanadianPalette.doubleDragonSkin)
-                                            node.at
-                                            ++ stuff.scenes
-                                    , unknownTags = stuff.unknownTags
-                                    }
-
-                                _ ->
+                                Nothing ->
                                     { scenes = stuff.scenes
                                     , unknownTags = Dict.insert "natural" natural stuff.unknownTags
                                     }
@@ -360,113 +364,25 @@ makeLandUse landUse index tree groundPlane =
                 Just tags ->
                     let
                         useTag =
-                            case
-                                ( Dict.get "natural" tags
-                                , Dict.get "landuse" tags
-                                )
-                            of
-                                ( _, Just usage ) ->
-                                    Just usage
+                            Maybe.withDefault "" <|
+                                case
+                                    ( Dict.get "natural" tags
+                                    , Dict.get "landuse" tags
+                                    )
+                                of
+                                    ( _, Just usage ) ->
+                                        Just usage
 
-                                ( Just natural, Nothing ) ->
-                                    Just natural
+                                    ( Just natural, Nothing ) ->
+                                        Just natural
 
-                                _ ->
-                                    Nothing
+                                    _ ->
+                                        Nothing
                     in
-                    case useTag of
-                        Just "wood" ->
-                            { scenes = drawPolygon Color.darkGreen way.nodes :: stuff.scenes
+                    case Dict.get useTag polygonColourMap of
+                        Just colour ->
+                            { scenes = drawPolygon colour way.nodes :: stuff.scenes
                             , unknownTags = stuff.unknownTags
-                            }
-
-                        Just "water" ->
-                            { scenes = drawPolygon Color.lightBlue way.nodes :: stuff.scenes
-                            , unknownTags = stuff.unknownTags
-                            }
-
-                        Just "recreation_ground" ->
-                            { scenes = drawPolygon Color.lightGreen way.nodes :: stuff.scenes
-                            , unknownTags = stuff.unknownTags
-                            }
-
-                        Just "grass" ->
-                            { scenes = drawPolygon Color.lightGreen way.nodes :: stuff.scenes
-                            , unknownTags = stuff.unknownTags
-                            }
-
-                        Just "meadow" ->
-                            { scenes = drawPolygon Color.lightYellow way.nodes :: stuff.scenes
-                            , unknownTags = stuff.unknownTags
-                            }
-
-                        Just "farmland" ->
-                            { scenes =
-                                drawPolygon
-                                    (colorFromElmUiColour FlatColors.AmericanPalette.lightGreenishBlue)
-                                    way.nodes
-                                    :: stuff.scenes
-                            , unknownTags = stuff.unknownTags
-                            }
-
-                        Just "grassland" ->
-                            { scenes =
-                                drawPolygon
-                                    (colorFromElmUiColour FlatColors.AmericanPalette.mintLeaf)
-                                    way.nodes
-                                    :: stuff.scenes
-                            , unknownTags = stuff.unknownTags
-                            }
-
-                        Just "forest" ->
-                            { scenes = drawPolygon Color.darkGreen way.nodes :: stuff.scenes
-                            , unknownTags = stuff.unknownTags
-                            }
-
-                        Just "industrial" ->
-                            { scenes = drawPolygon Color.darkGray way.nodes :: stuff.scenes
-                            , unknownTags = stuff.unknownTags
-                            }
-
-                        Just "residential" ->
-                            { scenes =
-                                drawPolygon
-                                    (colorFromElmUiColour FlatColors.AmericanPalette.firstDate)
-                                    way.nodes
-                                    :: stuff.scenes
-                            , unknownTags = stuff.unknownTags
-                            }
-
-                        Just "retail" ->
-                            { scenes =
-                                drawPolygon
-                                    (colorFromElmUiColour FlatColors.FlatUIPalette.carrot)
-                                    way.nodes
-                                    :: stuff.scenes
-                            , unknownTags = stuff.unknownTags
-                            }
-
-                        Just "railway" ->
-                            { scenes =
-                                drawPolygon
-                                    (colorFromElmUiColour FlatColors.FlatUIPalette.silver)
-                                    way.nodes
-                                    :: stuff.scenes
-                            , unknownTags = stuff.unknownTags
-                            }
-
-                        Just "brownfield" ->
-                            { scenes =
-                                drawPolygon
-                                    Color.brown
-                                    way.nodes
-                                    :: stuff.scenes
-                            , unknownTags = stuff.unknownTags
-                            }
-
-                        Just other ->
-                            { scenes = stuff.scenes
-                            , unknownTags = Dict.insert "tag" other stuff.unknownTags
                             }
 
                         Nothing ->
