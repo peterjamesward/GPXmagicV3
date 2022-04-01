@@ -58,6 +58,10 @@ processLandUseData results track =
             convertToLocalCoords track landUse
 
         Err error ->
+            let
+                _ =
+                    Debug.log "ERROR" error
+            in
             emptyLandUse
 
 
@@ -213,7 +217,6 @@ queryFromBoundingBox track =
     (
       node["natural"]({0},{1},{2},{3});
       way["natural"]({0},{1},{2},{3}) (if:length()>500);
-      relation["natural"]({0},{1},{2},{3});
       node["landuse"]({0},{1},{2},{3});
       way["landuse"]({0},{1},{2},{3}) (if:length()>500);
     );

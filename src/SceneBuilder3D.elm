@@ -289,6 +289,16 @@ makeLandUse landUse groundPlane =
                                     , unknownTags = stuff.unknownTags
                                     }
 
+                                "peak" ->
+                                    { scenes = drawCone Color.white node.at ++ stuff.scenes
+                                    , unknownTags = stuff.unknownTags
+                                    }
+
+                                "water" ->
+                                    { scenes = drawCone Color.lightBlue node.at ++ stuff.scenes
+                                    , unknownTags = stuff.unknownTags
+                                    }
+
                                 "residential" ->
                                     { scenes =
                                         drawCone
@@ -349,6 +359,24 @@ makeLandUse landUse groundPlane =
 
                         Just "meadow" ->
                             { scenes = drawPolygon Color.lightYellow way.nodes :: stuff.scenes
+                            , unknownTags = stuff.unknownTags
+                            }
+
+                        Just "farmland" ->
+                            { scenes =
+                                drawPolygon
+                                    (colorFromElmUiColour FlatColors.AmericanPalette.lightGreenishBlue)
+                                    way.nodes
+                                    :: stuff.scenes
+                            , unknownTags = stuff.unknownTags
+                            }
+
+                        Just "grassland" ->
+                            { scenes =
+                                drawPolygon
+                                    (colorFromElmUiColour FlatColors.AmericanPalette.mintLeaf)
+                                    way.nodes
+                                    :: stuff.scenes
                             , unknownTags = stuff.unknownTags
                             }
 

@@ -693,7 +693,10 @@ Please check the file contains GPX data.""" }
         ReceivedLandUseData results ->
             case model.track of
                 Just track ->
-                    ( { model | landUseData = LandUseDataOSM.processLandUseData results track }
+                    ( { model
+                        | landUseData = LandUseDataOSM.processLandUseData results track
+                        , needsRendering = True
+                      }
                     , Cmd.none
                     )
 
@@ -729,6 +732,7 @@ adoptTrackInModel track model =
                 , modalMessage = Nothing
                 , previews = Dict.empty
                 , toolOptions = newToolOptions
+                , landUseData = LandUseDataOSM.emptyLandUse
             }
 
         actions =
