@@ -18,6 +18,7 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 - Report if GET fails or times out or parse fails.
 - Add a control that lists named features, select to centre.
 - Try with spatial index and find nearest EarthPoint on track to give altitude.
+> Mind, using the track is not so bad.
 - Rules for combining with terrain: land use prevails, terrain colour is fallback.
 
 ---

@@ -200,7 +200,7 @@ render3dView settings track landUse =
 
         landUseElements =
             if settings.landUse then
-                makeLandUse landUse track.trackTree
+                makeLandUse landUse spatialIndex floorPlane
 
             else
                 []
@@ -229,28 +229,30 @@ emptyStuff =
 
 makeLandUse :
     LandUseDataTypes.LandUseData
-    -> PeteTree
+    -> Index
+    -> Plane3d Meters LocalCoords
     -> List (Entity LocalCoords)
-makeLandUse landUse tree =
+makeLandUse landUse index groundPlane =
     --Start simple, with any trees
     let
-        --floorPlane =
-        --    groundPlane |> Plane3d.translateBy (Vector3d.centimeters 0 0 1)
-        nearestTrackPoint point =
-            --TODO: This query should be replaced by using the spatial index
-            DomainModel.nearestToRay
-                (Axis3d.withDirection Direction3d.positiveZ point)
-                tree
-
         drawCone colour at =
             let
+                { minAltitude, resultBox, count } =
+                    queryAltitudeFromIndex index
+                        (BoundingBox2d.singleton <| Point3d.projectInto SketchPlane3d.xy at)
+
+                useAltitude =
+                    if minAltitude |> Quantity.lessThan Quantity.positiveInfinity then
+                        minAltitude
+
+                    else
+                        Point3d.zCoordinate <| Plane3d.originPoint groundPlane
+
                 altitudeAdjusted =
                     Point3d.xyz
                         (Point3d.xCoordinate at)
                         (Point3d.yCoordinate at)
-                        (Point3d.zCoordinate <|
-                            DomainModel.earthPointFromIndex (nearestTrackPoint at) tree
-                        )
+                        useAltitude
 
                 tip =
                     Point3d.translateBy
@@ -269,21 +271,33 @@ makeLandUse landUse tree =
             -- Must draw a 2D polygon so we can triangulate it.
             -- Ian MacKenzie makes this a pleasure.
             let
+                polygon =
+                    nodes
+                        |> List.map (.at >> Point3d.projectInto SketchPlane3d.xy)
+                        |> Polygon2d.singleLoop
+
+                { minAltitude, resultBox, count } =
+                    queryAltitudeFromIndex index
+                        (Maybe.withDefault (BoundingBox2d.singleton Point2d.origin) <|
+                            Polygon2d.boundingBox polygon
+                        )
+
+                useAltitude =
+                    if minAltitude |> Quantity.lessThan Quantity.positiveInfinity then
+                        minAltitude
+
+                    else
+                        Point3d.zCoordinate <| Plane3d.originPoint groundPlane
+
                 restoreAltitude : Point2d Meters LocalCoords -> Point3d Meters LocalCoords
                 restoreAltitude point =
                     Point3d.xyz
                         (Point2d.xCoordinate point)
                         (Point2d.yCoordinate point)
-                        (Point3d.zCoordinate <|
-                            DomainModel.earthPointFromIndex
-                                (nearestTrackPoint <| Point3d.on SketchPlane3d.xy point)
-                                tree
-                        )
+                        (useAltitude |> Quantity.minus Length.centimeter)
 
                 mesh =
-                    nodes
-                        |> List.map (.at >> Point3d.projectInto SketchPlane3d.xy)
-                        |> Polygon2d.singleLoop
+                    polygon
                         |> Polygon2d.triangulate
                         |> TriangularMesh.mapVertices restoreAltitude
             in
@@ -661,9 +675,38 @@ type LocationContext
 
 type alias TerrainFoldState =
     { minAltitude : Quantity Float Meters
-    , resultBox : BoundingBox2d Meters LocalCoords
+    , resultBox : Maybe (BoundingBox2d Meters LocalCoords)
     , count : Int
     }
+
+
+queryAltitudeFromIndex : Index -> BoundingBox2d Meters LocalCoords -> TerrainFoldState
+queryAltitudeFromIndex index myBox =
+    let
+        initialFoldState : TerrainFoldState
+        initialFoldState =
+            { minAltitude = Quantity.positiveInfinity
+            , resultBox = Nothing
+            , count = 0
+            }
+
+        queryFoldFunction :
+            SpatialContent IndexEntry Meters LocalCoords
+            -> TerrainFoldState
+            -> TerrainFoldState
+        queryFoldFunction entry accum =
+            { minAltitude = Quantity.min accum.minAltitude entry.content.elevation
+            , resultBox =
+                case accum.resultBox of
+                    Just oldBox ->
+                        Just <| BoundingBox2d.union oldBox entry.box
+
+                    Nothing ->
+                        Just <| entry.box
+            , count = accum.count + 1
+            }
+    in
+    SpatialIndex.queryWithFold index myBox queryFoldFunction initialFoldState
 
 
 terrainFromIndex :
@@ -684,25 +727,8 @@ terrainFromIndex myBox enclosingBox orientation options baseElevation index =
         centre =
             BoundingBox2d.centerPoint myBox
 
-        initialFoldState : TerrainFoldState
-        initialFoldState =
-            { minAltitude = Quantity.positiveInfinity
-            , resultBox = BoundingBox2d.singleton centre
-            , count = 0
-            }
-
-        queryFoldFunction :
-            SpatialContent IndexEntry Meters LocalCoords
-            -> TerrainFoldState
-            -> TerrainFoldState
-        queryFoldFunction entry accum =
-            { minAltitude = Quantity.min accum.minAltitude entry.content.elevation
-            , resultBox = BoundingBox2d.union accum.resultBox entry.box
-            , count = accum.count + 1
-            }
-
         { minAltitude, resultBox, count } =
-            SpatialIndex.queryWithFold index myBox queryFoldFunction initialFoldState
+            queryAltitudeFromIndex index myBox
 
         topBeforeAdjustment =
             if minAltitude |> Quantity.greaterThanOrEqualTo Quantity.positiveInfinity then
@@ -726,9 +752,14 @@ terrainFromIndex myBox enclosingBox orientation options baseElevation index =
 
         contentBox =
             -- This box encloses our points. It defines the top of the frustrum and the base for the next level.
-            resultBox
-                |> BoundingBox2d.intersection myBox
-                |> Maybe.withDefault (BoundingBox2d.singleton centre)
+            case resultBox of
+                Just box ->
+                    box
+                        |> BoundingBox2d.intersection myBox
+                        |> Maybe.withDefault myBox
+
+                Nothing ->
+                    myBox
 
         contentExtrema =
             BoundingBox2d.extrema contentBox
