@@ -136,6 +136,7 @@ type alias Model =
     , previews : Dict String PreviewData
     , flythroughRunning : Bool
     , landUseData : LandUseDataTypes.LandUseData
+    , needsRendering : Bool
 
     -- Layout stuff
     , windowSize : ( Float, Float )
@@ -232,6 +233,7 @@ init mflags origin navigationKey =
       , track = Nothing
       , previews = Dict.empty
       , landUseData = LandUseDataOSM.emptyLandUse
+      , needsRendering = False
       , flythroughRunning = False
       , windowSize = ( 1000, 800 )
       , contentArea = ( Pixels.pixels 800, Pixels.pixels 500 )
@@ -276,8 +278,8 @@ render : Model -> Model
 render model =
     -- This is or should be the one place where rendering for 3D (and similar) happens.
     -- Map is different: it's imperative by nature, and we don't need to retain the json.
-    case model.track of
-        Just track ->
+    case ( model.track, model.needsRendering ) of
+        ( Just track, True ) ->
             let
                 paneLayout =
                     PaneLayoutManager.render
@@ -288,9 +290,12 @@ render model =
                         model.previews
                         model.landUseData
             in
-            { model | paneLayoutOptions = paneLayout }
+            { model
+                | paneLayoutOptions = paneLayout
+                , needsRendering = False
+            }
 
-        Nothing ->
+        _ ->
             model
 
 
@@ -1228,6 +1233,9 @@ performActionsOnModel actions model =
         performAction : ToolAction Msg -> Model -> Model
         performAction action foldedModel =
             case ( action, foldedModel.track ) of
+                ( ReRender, Just _ ) ->
+                    { foldedModel | needsRendering = True }
+
                 ( DisplayInfo tool text, _ ) ->
                     { foldedModel
                         | infoText =
@@ -1247,12 +1255,14 @@ performActionsOnModel actions model =
                     { foldedModel
                         | track =
                             Just { track | currentPosition = position }
+                        , needsRendering = True
                     }
 
                 ( SetCurrentFromMapClick position, Just track ) ->
                     { foldedModel
                         | track =
                             Just { track | currentPosition = position }
+                        , needsRendering = True
                     }
 
                 ( ShowPreview previewData, Just track ) ->
@@ -1263,12 +1273,14 @@ performActionsOnModel actions model =
                     { foldedModel
                         | previews =
                             Dict.insert previewData.tag previewData foldedModel.previews
+                        , needsRendering = True
                     }
 
                 ( HidePreview tag, Just track ) ->
                     { foldedModel
                         | previews =
                             Dict.remove tag foldedModel.previews
+                        , needsRendering = True
                     }
 
                 ( DelayMessage int msg, Just track ) ->
@@ -1288,7 +1300,10 @@ performActionsOnModel actions model =
                                     oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
 
                 ( DeleteSinglePoint fromStart fromEnd, Just track ) ->
                     let
@@ -1306,7 +1321,10 @@ performActionsOnModel actions model =
                                     oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
 
                 ( BezierApplyWithOptions options, Just track ) ->
                     let
@@ -1323,7 +1341,10 @@ performActionsOnModel actions model =
                                     oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
 
                 ( CentroidAverageApplyWithOptions options, Just track ) ->
                     let
@@ -1341,7 +1362,10 @@ performActionsOnModel actions model =
                                     oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
 
                 ( CurveFormerApplyWithOptions options, Just track ) ->
                     let
@@ -1359,7 +1383,10 @@ performActionsOnModel actions model =
                                     oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
 
                 ( NudgeApplyWithOptions options, Just track ) ->
                     let
@@ -1377,7 +1404,10 @@ performActionsOnModel actions model =
                                     oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
 
                 ( PasteStravaSegment options, Just track ) ->
                     -- This is like Nudge in that the affected area is given
@@ -1397,7 +1427,10 @@ performActionsOnModel actions model =
                                     oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
 
                 ( BendSmootherApplyWithOptions options, Just track ) ->
                     let
@@ -1415,7 +1448,10 @@ performActionsOnModel actions model =
                                     oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
 
                 ( Autofix indices, Just track ) ->
                     let
@@ -1436,7 +1472,10 @@ performActionsOnModel actions model =
                                     oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
 
                 ( OutAndBackApplyWithOptions options, Just track ) ->
                     let
@@ -1454,7 +1493,10 @@ performActionsOnModel actions model =
                                     oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
 
                 ( ApplySimplify, Just track ) ->
                     let
@@ -1472,7 +1514,10 @@ performActionsOnModel actions model =
                                     oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
 
                 ( MoveAndStretchWithOptions settings, Just track ) ->
                     let
@@ -1490,7 +1535,10 @@ performActionsOnModel actions model =
                                     oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
 
                 ( OneClickQuickFix, Just track ) ->
                     let
@@ -1531,7 +1579,10 @@ performActionsOnModel actions model =
 
                         --|> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
 
                 ( ApplyInterpolateWithOptions options, Just track ) ->
                     let
@@ -1555,7 +1606,10 @@ performActionsOnModel actions model =
                                     oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
 
                 ( Straighten, Just track ) ->
                     let
@@ -1573,7 +1627,10 @@ performActionsOnModel actions model =
                                     oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
 
                 ( LimitGradientWithOptions options, Just track ) ->
                     let
@@ -1588,7 +1645,10 @@ performActionsOnModel actions model =
                                     oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
 
                 ( CloseLoopWithOptions options, Just track ) ->
                     let
@@ -1603,7 +1663,10 @@ performActionsOnModel actions model =
                                     oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
 
                 ( ReverseTrack, Just track ) ->
                     let
@@ -1618,7 +1681,10 @@ performActionsOnModel actions model =
                                     oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
 
                 ( MoveStartPoint newStart, Just track ) ->
                     let
@@ -1642,7 +1708,10 @@ performActionsOnModel actions model =
                                                 trk
                                    )
                     in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
 
                 ( AddRiderPens, Just track ) ->
                     let
@@ -1666,7 +1735,10 @@ performActionsOnModel actions model =
                                                 trk
                                    )
                     in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
 
                 ( ApplyRotateAndScale options, Just track ) ->
                     let
@@ -1692,7 +1764,10 @@ performActionsOnModel actions model =
                                     oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
 
                 ( ApplyRecentre coords, Just track ) ->
                     let
@@ -1720,7 +1795,10 @@ performActionsOnModel actions model =
                                     oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
 
                 ( ApplyMapElevations elevations, Just track ) ->
                     let
@@ -1738,7 +1816,10 @@ performActionsOnModel actions model =
                                     oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
 
                 ( PointMovedOnMap startLon startLat endLon endLat, Just track ) ->
                     let
@@ -1780,7 +1861,10 @@ performActionsOnModel actions model =
                                     fromEnd
                                     [ positionBeforeDrag ]
                     in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
 
                 ( SaveLastMapClick lon lat, Just track ) ->
                     let
@@ -1816,7 +1900,10 @@ performActionsOnModel actions model =
                                     oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
-                    { foldedModel | track = Just newTrack }
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
 
                 ( AddTraversal edge, Just track ) ->
                     let
@@ -1867,6 +1954,7 @@ performActionsOnModel actions model =
                     { foldedModel
                         | toolOptions = newToolOptions
                         , track = Tools.Graph.getTrack edge graphOptions
+                        , needsRendering = True
                     }
 
                 ( MakeRouteFromGraph, Just track ) ->
@@ -1896,6 +1984,7 @@ performActionsOnModel actions model =
                     { foldedModel
                         | toolOptions = newToolOptions
                         , track = newTrack
+                        , needsRendering = True
                     }
 
                 ( LoadGpxFromStrava gpxContent, _ ) ->
@@ -1920,14 +2009,19 @@ performActionsOnModel actions model =
                             innerModelWithNewToolSettings |> performActionsOnModel secondaryActions
                     in
                     -- This model should contain all updated previews from open tools.
-                    modelAfterSecondaryActions
+                    { modelAfterSecondaryActions
+                        | needsRendering = True
+                    }
 
                 ( SetMarker maybeMarker, Just track ) ->
                     let
                         updatedTrack =
                             { track | markerPosition = maybeMarker }
                     in
-                    { foldedModel | track = Just updatedTrack }
+                    { foldedModel
+                        | track = Just updatedTrack
+                        , needsRendering = True
+                    }
 
                 ( StartFlythoughTicks, Just track ) ->
                     { foldedModel | flythroughRunning = True }
@@ -2043,6 +2137,7 @@ performActionsOnModel actions model =
                             { foldedModel
                                 | toolOptions = newToolOptions
                                 , track = newTrack
+                                , needsRendering = True
                             }
 
                         _ ->
@@ -2062,7 +2157,10 @@ performActionsOnModel actions model =
                                         trackWithCorrectRedoStack =
                                             { trackAfterRedo | redos = moreRedos }
                                     in
-                                    { modelAfterRedo | track = Just trackWithCorrectRedoStack }
+                                    { modelAfterRedo
+                                        | track = Just trackWithCorrectRedoStack
+                                        , needsRendering = True
+                                    }
 
                                 Nothing ->
                                     -- Not good, live with it.

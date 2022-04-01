@@ -27,6 +27,7 @@ import Tools.StravaTypes exposing (StravaRoute, StravaSegment, StravaSegmentStre
 
 type ToolAction msg
     = NoAction
+    | ReRender
     | SetCurrent Int -- move the orange pointer
     | SetCurrentFromMapClick Int -- to avoid re-centering the map!
     | SaveLastMapClick Float Float

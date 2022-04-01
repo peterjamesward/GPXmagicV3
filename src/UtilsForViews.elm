@@ -23,6 +23,20 @@ elmuiColour c =
     Element.rgb red green blue
 
 
+colorFromElmUiColour : Element.Color -> Color.Color
+colorFromElmUiColour c =
+    let
+        { red, green, blue } =
+            Element.toRgb c
+    in
+    Color.fromRgba
+        { red = red
+        , green = green
+        , blue = blue
+        , alpha = 1.0
+        }
+
+
 withLeadingZeros : Int -> String -> String
 withLeadingZeros beforePoint raw =
     String.repeat (beforePoint - String.length raw) "0"

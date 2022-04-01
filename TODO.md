@@ -9,9 +9,11 @@ BUG: Undo single point smooth at track start removes a point.
 BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 > Awaiting script from JB.
 
-**BUG**: Memory usage update is re-rendering. Seems unnecessary!
+**BUG**: Memory usage update causes re-rendering. Seems unnecessary!
 
-**BUG**: Zooming should **not** redraw.
+**BUG**: Zooming should **not** cause redraw.
+
+MUST DO: Legal stuff for Strava, MapBox, OSM, &c on About page.
 
 --
 

@@ -69,7 +69,9 @@ update :
 update msg options =
     let
         actions newOptions =
-            [ StoreLocally "visuals" <| encode newOptions ]
+            [ StoreLocally "visuals" <| encode newOptions
+            , ReRender
+            ]
     in
     case msg of
         SetCentreLine state ->

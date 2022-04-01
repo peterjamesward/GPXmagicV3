@@ -14,6 +14,7 @@ import Dict exposing (Dict)
 import Direction3d
 import DomainModel exposing (..)
 import Element
+import FlatColors.AmericanPalette
 import FlatColors.AussiePalette
 import FlatColors.FlatUIPalette
 import LandUseDataOSM
@@ -37,7 +38,7 @@ import Tools.DisplaySettingsOptions exposing (CurtainStyle(..))
 import TrackLoaded exposing (TrackLoaded)
 import TriangularMesh
 import Utils exposing (reversingCons)
-import UtilsForViews exposing (flatBox, fullDepthRenderingBoxSize)
+import UtilsForViews exposing (colorFromElmUiColour, flatBox, fullDepthRenderingBoxSize)
 import Vector3d
 
 
@@ -349,12 +350,29 @@ makeLandUse landUse floorPlane =
                             }
 
                         Just "residential" ->
-                            { scenes = drawPolygon Color.lightGray way.nodes :: stuff.scenes
+                            { scenes =
+                                drawPolygon
+                                    (colorFromElmUiColour FlatColors.AmericanPalette.firstDate)
+                                    way.nodes
+                                    :: stuff.scenes
+                            , unknownTags = stuff.unknownTags
+                            }
+
+                        Just "retail" ->
+                            { scenes =
+                                drawPolygon
+                                    (colorFromElmUiColour FlatColors.FlatUIPalette.carrot)
+                                    way.nodes
+                                    :: stuff.scenes
                             , unknownTags = stuff.unknownTags
                             }
 
                         Just "railway" ->
-                            { scenes = drawPolygon Color.black way.nodes :: stuff.scenes
+                            { scenes =
+                                drawPolygon
+                                    (colorFromElmUiColour FlatColors.FlatUIPalette.silver)
+                                    way.nodes
+                                    :: stuff.scenes
                             , unknownTags = stuff.unknownTags
                             }
 
