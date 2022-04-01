@@ -200,7 +200,7 @@ render3dView settings track landUse =
 
         landUseElements =
             if settings.landUse then
-                makeLandUse landUse spatialIndex floorPlane
+                makeLandUse landUse spatialIndex track.trackTree floorPlane
 
             else
                 []
@@ -230,29 +230,30 @@ emptyStuff =
 makeLandUse :
     LandUseDataTypes.LandUseData
     -> Index
+    -> PeteTree
     -> Plane3d Meters LocalCoords
     -> List (Entity LocalCoords)
-makeLandUse landUse index groundPlane =
-    --Start simple, with any trees
+makeLandUse landUse index tree groundPlane =
+    --TODO: Collect the bounding boxes and altitudes as we go, then add these to
+    --the Index, returning the new Index as well, which we then use to render Terrain!
+    --Means changing the fold state to include index but well worthwhile.
+    --Will have to pretend that there are roads, or change the index entry.
     let
         drawCone colour at =
             let
-                { minAltitude, resultBox, count } =
-                    queryAltitudeFromIndex index
-                        (BoundingBox2d.singleton <| Point3d.projectInto SketchPlane3d.xy at)
-
-                useAltitude =
-                    if minAltitude |> Quantity.lessThan Quantity.positiveInfinity then
-                        minAltitude
-
-                    else
-                        Point3d.zCoordinate <| Plane3d.originPoint groundPlane
+                nearestPoint =
+                    DomainModel.earthPointFromIndex
+                        (DomainModel.nearestToRay
+                            (Axis3d.withDirection Direction3d.positiveZ at)
+                            tree
+                        )
+                        tree
 
                 altitudeAdjusted =
                     Point3d.xyz
                         (Point3d.xCoordinate at)
                         (Point3d.yCoordinate at)
-                        useAltitude
+                        (Point3d.zCoordinate nearestPoint)
 
                 tip =
                     Point3d.translateBy
