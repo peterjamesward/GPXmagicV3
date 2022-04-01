@@ -14,6 +14,7 @@ import Html.Attributes exposing (style)
 import Html.Events.Extra.Mouse as Mouse
 import Json.Decode as D
 import Json.Encode as E
+import LandUseDataTypes
 import List.Extra
 import LocalCoords exposing (LocalCoords)
 import MapPortController
@@ -203,14 +204,15 @@ render :
     -> Quantity Int Pixels
     -> TrackLoaded msg
     -> Dict String PreviewData
+    -> LandUseDataTypes.LandUseData
     -> Options
-render toolSettings options width track previews =
+render toolSettings options width track previews landUse =
     --Profile stuff now lives in the pane context, as each pane could
     --have different version!
     { options
         | scene3d =
             SceneBuilder3D.renderPreviews previews
-                ++ SceneBuilder3D.render3dView toolSettings.displaySettings track
+                ++ SceneBuilder3D.render3dView toolSettings.displaySettings track landUse
     }
 
 

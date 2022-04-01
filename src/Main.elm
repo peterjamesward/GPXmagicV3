@@ -286,6 +286,7 @@ render model =
                         (Tuple.first model.contentArea)
                         track
                         model.previews
+                        model.landUseData
             in
             { model | paneLayoutOptions = paneLayout }
 

@@ -129,6 +129,25 @@ convertToLocalCoords track raw =
     }
 
 
+listTrees : LandUseData -> List LandUseNode
+listTrees landUse =
+    landUse.nodes
+        |> List.filter
+            (\node ->
+                case node.tags of
+                    Just tagDict ->
+                        case Dict.get "natural" tagDict of
+                            Just "tree" ->
+                                True
+
+                            _ ->
+                                False
+
+                    Nothing ->
+                        False
+            )
+
+
 landUseDecoder : D.Decoder OSMLandUseData
 landUseDecoder =
     D.map OSMLandUseData

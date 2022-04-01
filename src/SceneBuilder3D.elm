@@ -9,25 +9,33 @@ import BoundingBox2d exposing (BoundingBox2d)
 import BoundingBox3d exposing (BoundingBox3d)
 import Color exposing (Color, black, darkGreen, green, lightOrange)
 import ColourPalette exposing (gradientColourPastel, gradientHue, gradientHue2)
+import Cone3d
 import Dict exposing (Dict)
+import Direction3d
 import DomainModel exposing (..)
 import Element
 import FlatColors.AussiePalette
 import FlatColors.FlatUIPalette
+import LandUseDataOSM
+import LandUseDataTypes
 import Length exposing (Meters)
 import LineSegment3d
 import LocalCoords exposing (LocalCoords)
 import Pixels
 import Plane3d exposing (Plane3d)
-import Point2d
+import Point2d exposing (Point2d)
 import Point3d exposing (Point3d)
+import Polygon2d
 import PreviewData exposing (PreviewData, PreviewShape(..))
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
 import Scene3d.Material as Material
+import Scene3d.Mesh as Mesh
+import SketchPlane3d
 import SpatialIndex exposing (SpatialContent)
 import Tools.DisplaySettingsOptions exposing (CurtainStyle(..))
 import TrackLoaded exposing (TrackLoaded)
+import TriangularMesh
 import Utils exposing (reversingCons)
 import UtilsForViews exposing (flatBox, fullDepthRenderingBoxSize)
 import Vector3d
@@ -37,8 +45,12 @@ roadWidth =
     Length.meters 4.0
 
 
-render3dView : Tools.DisplaySettingsOptions.Options -> TrackLoaded msg -> List (Entity LocalCoords)
-render3dView settings track =
+render3dView :
+    Tools.DisplaySettingsOptions.Options
+    -> TrackLoaded msg
+    -> LandUseDataTypes.LandUseData
+    -> List (Entity LocalCoords)
+render3dView settings track landUse =
     let
         nominalRenderDepth =
             clamp 1 10 <|
@@ -70,7 +82,7 @@ render3dView settings track =
                         |> Quantity.minus Length.inch
             in
             if settings.groundPlane then
-                [ Scene3d.quad (Material.color Color.darkGreen)
+                [ Scene3d.quad (Material.color Color.grey)
                     (Point3d.xyz minX minY modelMinZ)
                     (Point3d.xyz minX maxY modelMinZ)
                     (Point3d.xyz maxX maxY modelMinZ)
@@ -168,13 +180,25 @@ render3dView settings track =
                    )
 
         terrain =
+            --(move index creation into this function, pass index to terrain and landuse)
             if settings.terrainFineness > 0.0 then
                 makeTerrain settings nearbySpace track.trackTree
 
             else
                 []
+
+        landUseElements =
+            --TODO: Better to just map over nodes and ways rather than repeated filtering.
+            --TODO: Log any un-rendered `natural` values so we can prioritise. Ditto `landuse`.
+            --TODO: Share spatial index with terrain, use to derive altitude from nearest point.
+            if settings.landUse then
+                makeLandUse landUse floorPlane
+
+            else
+                []
     in
     terrain
+        ++ landUseElements
         ++ DomainModel.traverseTreeBetweenLimitsToDepth
             0
             (skipCount track.trackTree)
@@ -183,6 +207,126 @@ render3dView settings track =
             track.trackTree
             foldFn
             (groundPlane ++ renderCurrentMarkers)
+
+
+type alias LandUseStuff =
+    { scenes : List (Entity LocalCoords)
+    , unknownTags : Dict String String
+    }
+
+
+emptyStuff =
+    { scenes = [], unknownTags = Dict.empty }
+
+
+makeLandUse :
+    LandUseDataTypes.LandUseData
+    -> Plane3d Meters coordinates
+    -> List (Entity LocalCoords)
+makeLandUse landUse floorPlane =
+    --Start simple, with any trees
+    let
+        drawTree at =
+            let
+                tip =
+                    Point3d.translateBy
+                        (Vector3d.withLength (Length.meters 10) Direction3d.positiveZ)
+                        at
+            in
+            case Cone3d.from at tip (Length.meters 4) of
+                Just cone ->
+                    [ Scene3d.cone (Material.color Color.darkGreen) cone ]
+
+                Nothing ->
+                    []
+
+        drawPolygon : Color -> List LandUseDataTypes.LandUseNode -> Entity LocalCoords
+        drawPolygon colour nodes =
+            -- Must draw a 2D polygon so we can triangulate it.
+            -- Ian MacKenzie makes this a pleasure.
+            let
+                restoreAltitude : Point2d Meters LocalCoords -> Point3d Meters LocalCoords
+                restoreAltitude point =
+                    Point3d.xyz
+                        (Point2d.xCoordinate point)
+                        (Point2d.yCoordinate point)
+                        (Point3d.zCoordinate <| Plane3d.originPoint floorPlane)
+
+                mesh =
+                    nodes
+                        |> List.map (.at >> Point3d.projectInto SketchPlane3d.xy)
+                        |> Polygon2d.singleLoop
+                        |> Polygon2d.triangulate
+                        |> TriangularMesh.mapVertices restoreAltitude
+            in
+            Scene3d.mesh (Material.color colour) (Mesh.indexedTriangles mesh)
+
+        drawNode : LandUseDataTypes.LandUseNode -> LandUseStuff -> LandUseStuff
+        drawNode node stuff =
+            case node.tags of
+                Nothing ->
+                    stuff
+
+                Just tags ->
+                    case Dict.get "natural" tags of
+                        Nothing ->
+                            stuff
+
+                        Just natural ->
+                            case natural of
+                                "tree" ->
+                                    { scenes = drawTree node.at ++ stuff.scenes
+                                    , unknownTags = stuff.unknownTags
+                                    }
+
+                                _ ->
+                                    { scenes = stuff.scenes
+                                    , unknownTags = Dict.insert "natural" natural stuff.unknownTags
+                                    }
+
+        drawWay : LandUseDataTypes.LandUseWay -> LandUseStuff -> LandUseStuff
+        drawWay way stuff =
+            case way.tags of
+                Nothing ->
+                    stuff
+
+                Just tags ->
+                    case Dict.get "natural" tags of
+                        Nothing ->
+                            stuff
+
+                        Just natural ->
+                            case natural of
+                                "wood" ->
+                                    { scenes = drawPolygon Color.darkGreen way.nodes :: stuff.scenes
+                                    , unknownTags = stuff.unknownTags
+                                    }
+
+                                "water" ->
+                                    { scenes = drawPolygon Color.lightBlue way.nodes :: stuff.scenes
+                                    , unknownTags = stuff.unknownTags
+                                    }
+
+                                _ ->
+                                    { scenes = stuff.scenes
+                                    , unknownTags = Dict.insert "natural" natural stuff.unknownTags
+                                    }
+
+        nodeStuff =
+            landUse.nodes
+                |> List.foldl drawNode emptyStuff
+
+        wayStuff =
+            landUse.ways
+                |> List.foldl drawWay emptyStuff
+
+        _ =
+            Debug.log "NODES" nodeStuff.unknownTags
+
+        _ =
+            Debug.log "WAYS" wayStuff.unknownTags
+    in
+    nodeStuff.scenes ++ wayStuff.scenes
 
 
 renderPreviews : Dict String PreviewData -> List (Entity LocalCoords)

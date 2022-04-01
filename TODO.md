@@ -9,6 +9,10 @@ BUG: Undo single point smooth at track start removes a point.
 BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 > Awaiting script from JB.
 
+BUG: Memory usage update is re-rendering. Seems unnecessary!
+
+BUG: Zooming should **not** redraw.
+
 --
 
 # WIP
@@ -18,11 +22,10 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 Optionally show OSM land-use polygons on ground plane. (Not sure about Terrain.)
 
 - ~~Test with a simple bounding box query to get "natural", "landuse" tags.~~
-- See how it works out drawing polygons.
-- Make a decision.
-- Considering using elevations from map (sneaky nice)
-- Decide if it can sit with terrain.
-
+- ~~See how it works out drawing polygons (lakes may not be flat!)~~
+- ~~Make a decision.~~
+- Try with spatial index and find nearest EarthPoint on track to give altitude.
+- Disable Land Use checkbox until data arrive.
 
 ---
 
