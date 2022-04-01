@@ -16,6 +16,7 @@ import DomainModel exposing (..)
 import Element
 import FlatColors.AmericanPalette
 import FlatColors.AussiePalette
+import FlatColors.CanadianPalette
 import FlatColors.FlatUIPalette
 import LandUseDataOSM
 import LandUseDataTypes
@@ -224,9 +225,12 @@ makeLandUse :
     LandUseDataTypes.LandUseData
     -> Plane3d Meters coordinates
     -> List (Entity LocalCoords)
-makeLandUse landUse floorPlane =
+makeLandUse landUse groundPlane =
     --Start simple, with any trees
     let
+        floorPlane =
+            groundPlane |> Plane3d.translateBy (Vector3d.centimeters 0 0 1)
+
         drawCone colour at =
             let
                 tip =
@@ -282,6 +286,15 @@ makeLandUse landUse floorPlane =
 
                                 "rock" ->
                                     { scenes = drawCone Color.lightBrown node.at ++ stuff.scenes
+                                    , unknownTags = stuff.unknownTags
+                                    }
+
+                                "residential" ->
+                                    { scenes =
+                                        drawCone
+                                            (colorFromElmUiColour FlatColors.CanadianPalette.doubleDragonSkin)
+                                            node.at
+                                            ++ stuff.scenes
                                     , unknownTags = stuff.unknownTags
                                     }
 
@@ -371,6 +384,15 @@ makeLandUse landUse floorPlane =
                             { scenes =
                                 drawPolygon
                                     (colorFromElmUiColour FlatColors.FlatUIPalette.silver)
+                                    way.nodes
+                                    :: stuff.scenes
+                            , unknownTags = stuff.unknownTags
+                            }
+
+                        Just "brownfield" ->
+                            { scenes =
+                                drawPolygon
+                                    Color.brown
                                     way.nodes
                                     :: stuff.scenes
                             , unknownTags = stuff.unknownTags

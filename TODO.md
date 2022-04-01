@@ -9,11 +9,7 @@ BUG: Undo single point smooth at track start removes a point.
 BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 > Awaiting script from JB.
 
-**BUG**: Memory usage update causes re-rendering. Seems unnecessary!
-
-**BUG**: Zooming should **not** cause redraw.
-
-MUST DO: Legal stuff for Strava, MapBox, OSM, &c on About page.
+**MUST DO**: Legal stuff for Strava, MapBox, OSM, &c on About page.
 
 --
 
@@ -21,6 +17,10 @@ MUST DO: Legal stuff for Strava, MapBox, OSM, &c on About page.
 
 ## Land use display option
 
+- Report if GET fails or times out.
+- Why not showing (e.g. Cycling.gpx)?
+- Add a control that lists named features, select to centre.
+- Not clearing on track change.
 - Improve bounding box
 - Try with spatial index and find nearest EarthPoint on track to give altitude.
 - Disable Land Use checkbox until data arrive.
