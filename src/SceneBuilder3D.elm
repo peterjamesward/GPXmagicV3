@@ -199,11 +199,8 @@ render3dView settings track landUse =
                 []
 
         landUseElements =
-            --TODO: Better to just map over nodes and ways rather than repeated filtering.
-            --TODO: Log any un-rendered `natural` values so we can prioritise. Ditto `landuse`.
-            --TODO: Share spatial index with terrain, use to derive altitude from nearest point.
             if settings.landUse then
-                makeLandUse landUse floorPlane
+                makeLandUse landUse track.trackTree
 
             else
                 []
@@ -232,22 +229,35 @@ emptyStuff =
 
 makeLandUse :
     LandUseDataTypes.LandUseData
-    -> Plane3d Meters coordinates
+    -> PeteTree
     -> List (Entity LocalCoords)
-makeLandUse landUse groundPlane =
+makeLandUse landUse tree =
     --Start simple, with any trees
     let
-        floorPlane =
-            groundPlane |> Plane3d.translateBy (Vector3d.centimeters 0 0 1)
+        --floorPlane =
+        --    groundPlane |> Plane3d.translateBy (Vector3d.centimeters 0 0 1)
+        nearestTrackPoint point =
+            --TODO: This query should be replaced by using the spatial index
+            DomainModel.nearestToRay
+                (Axis3d.withDirection Direction3d.positiveZ point)
+                tree
 
         drawCone colour at =
             let
+                altitudeAdjusted =
+                    Point3d.xyz
+                        (Point3d.xCoordinate at)
+                        (Point3d.yCoordinate at)
+                        (Point3d.zCoordinate <|
+                            DomainModel.earthPointFromIndex (nearestTrackPoint at) tree
+                        )
+
                 tip =
                     Point3d.translateBy
                         (Vector3d.withLength (Length.meters 10) Direction3d.positiveZ)
-                        at
+                        altitudeAdjusted
             in
-            case Cone3d.from at tip (Length.meters 4) of
+            case Cone3d.from altitudeAdjusted tip (Length.meters 4) of
                 Just cone ->
                     [ Scene3d.cone (Material.color colour) cone ]
 
@@ -264,7 +274,11 @@ makeLandUse landUse groundPlane =
                     Point3d.xyz
                         (Point2d.xCoordinate point)
                         (Point2d.yCoordinate point)
-                        (Point3d.zCoordinate <| Plane3d.originPoint floorPlane)
+                        (Point3d.zCoordinate <|
+                            DomainModel.earthPointFromIndex
+                                (nearestTrackPoint <| Point3d.on SketchPlane3d.xy point)
+                                tree
+                        )
 
                 mesh =
                     nodes
