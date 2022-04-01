@@ -479,11 +479,11 @@ makeLandUse landUse index groundPlane =
             landUse.ways
                 |> List.foldl drawWay emptyStuff
 
-        _ =
-            Debug.log "NODES" nodeStuff.unknownTags
-
-        _ =
-            Debug.log "WAYS" wayStuff.unknownTags
+        --_ =
+        --    Debug.log "NODES" nodeStuff.unknownTags
+        --
+        --_ =
+        --    Debug.log "WAYS" wayStuff.unknownTags
     in
     nodeStuff.scenes ++ wayStuff.scenes
 

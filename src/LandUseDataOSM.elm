@@ -58,10 +58,6 @@ processLandUseData results track =
             convertToLocalCoords track landUse
 
         Err error ->
-            let
-                _ =
-                    Debug.log "ERROR" error
-            in
             emptyLandUse
 
 
