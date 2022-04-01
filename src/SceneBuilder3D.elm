@@ -226,7 +226,7 @@ makeLandUse :
 makeLandUse landUse floorPlane =
     --Start simple, with any trees
     let
-        drawTree at =
+        drawCone colour at =
             let
                 tip =
                     Point3d.translateBy
@@ -235,7 +235,7 @@ makeLandUse landUse floorPlane =
             in
             case Cone3d.from at tip (Length.meters 4) of
                 Just cone ->
-                    [ Scene3d.cone (Material.color Color.darkGreen) cone ]
+                    [ Scene3d.cone (Material.color colour) cone ]
 
                 Nothing ->
                     []
@@ -275,7 +275,12 @@ makeLandUse landUse floorPlane =
                         Just natural ->
                             case natural of
                                 "tree" ->
-                                    { scenes = drawTree node.at ++ stuff.scenes
+                                    { scenes = drawCone Color.darkGreen node.at ++ stuff.scenes
+                                    , unknownTags = stuff.unknownTags
+                                    }
+
+                                "rock" ->
+                                    { scenes = drawCone Color.lightBrown node.at ++ stuff.scenes
                                     , unknownTags = stuff.unknownTags
                                     }
 
@@ -291,26 +296,75 @@ makeLandUse landUse floorPlane =
                     stuff
 
                 Just tags ->
-                    case Dict.get "natural" tags of
-                        Nothing ->
-                            stuff
+                    let
+                        useTag =
+                            case
+                                ( Dict.get "natural" tags
+                                , Dict.get "landuse" tags
+                                )
+                            of
+                                ( _, Just usage ) ->
+                                    Just usage
 
-                        Just natural ->
-                            case natural of
-                                "wood" ->
-                                    { scenes = drawPolygon Color.darkGreen way.nodes :: stuff.scenes
-                                    , unknownTags = stuff.unknownTags
-                                    }
-
-                                "water" ->
-                                    { scenes = drawPolygon Color.lightBlue way.nodes :: stuff.scenes
-                                    , unknownTags = stuff.unknownTags
-                                    }
+                                ( Just natural, Nothing ) ->
+                                    Just natural
 
                                 _ ->
-                                    { scenes = stuff.scenes
-                                    , unknownTags = Dict.insert "natural" natural stuff.unknownTags
-                                    }
+                                    Nothing
+                    in
+                    case useTag of
+                        Just "wood" ->
+                            { scenes = drawPolygon Color.darkGreen way.nodes :: stuff.scenes
+                            , unknownTags = stuff.unknownTags
+                            }
+
+                        Just "water" ->
+                            { scenes = drawPolygon Color.lightBlue way.nodes :: stuff.scenes
+                            , unknownTags = stuff.unknownTags
+                            }
+
+                        Just "recreation_ground" ->
+                            { scenes = drawPolygon Color.lightGreen way.nodes :: stuff.scenes
+                            , unknownTags = stuff.unknownTags
+                            }
+
+                        Just "grass" ->
+                            { scenes = drawPolygon Color.lightGreen way.nodes :: stuff.scenes
+                            , unknownTags = stuff.unknownTags
+                            }
+
+                        Just "meadow" ->
+                            { scenes = drawPolygon Color.lightYellow way.nodes :: stuff.scenes
+                            , unknownTags = stuff.unknownTags
+                            }
+
+                        Just "forest" ->
+                            { scenes = drawPolygon Color.darkGreen way.nodes :: stuff.scenes
+                            , unknownTags = stuff.unknownTags
+                            }
+
+                        Just "industrial" ->
+                            { scenes = drawPolygon Color.darkGray way.nodes :: stuff.scenes
+                            , unknownTags = stuff.unknownTags
+                            }
+
+                        Just "residential" ->
+                            { scenes = drawPolygon Color.lightGray way.nodes :: stuff.scenes
+                            , unknownTags = stuff.unknownTags
+                            }
+
+                        Just "railway" ->
+                            { scenes = drawPolygon Color.black way.nodes :: stuff.scenes
+                            , unknownTags = stuff.unknownTags
+                            }
+
+                        Just other ->
+                            { scenes = stuff.scenes
+                            , unknownTags = Dict.insert "tag" other stuff.unknownTags
+                            }
+
+                        Nothing ->
+                            stuff
 
         nodeStuff =
             landUse.nodes
