@@ -9,7 +9,9 @@ aboutText =
 
 ## In this release ...
 
-* Land use data can be displayed, but currently only at ground level.
+* Land use data (sourced from Open Street Map) can be displayed, but does not yet play well with Terrain turned on.
+
+* Changes to eliminate unnecessary repaints.
 
 ## Legal guff
 
