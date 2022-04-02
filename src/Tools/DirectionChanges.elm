@@ -10,11 +10,11 @@ import Element.Background as Background
 import Element.Input as Input exposing (labelHidden)
 import FeatherIcons
 import FlatColors.ChinesePalette
-import Length
+import Length exposing (Meters)
 import List.Extra
 import LocalCoords exposing (LocalCoords)
 import PreviewData exposing (PreviewShape(..))
-import Quantity
+import Quantity exposing (Quantity)
 import ToolTip exposing (buttonStylesWithTooltip, myTooltip, tooltip)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showAngle, showDecimal0, showLongMeasure, showShortMeasure)
@@ -23,8 +23,10 @@ import ViewPureStyles exposing (infoButton, neatToolsBorder, noTrackMessage, sli
 
 type alias Options =
     { threshold : Angle
-    , breaches : List ( Int, Angle )
-    , currentBreach : Int
+    , singlePointBreaches : List ( Int, Angle )
+    , bendBreaches : List ( List Int, Quantity Float Meters )
+    , currentPointBreach : Int
+    , currentBendBreach : Int
     , mode : DirectionChangeMode
     , radius : Length.Length
     , resultMode : ResultMode
@@ -44,8 +46,10 @@ type DirectionChangeMode
 defaultOptions : Options
 defaultOptions =
     { threshold = Angle.degrees 120
-    , breaches = []
-    , currentBreach = 0
+    , singlePointBreaches = []
+    , bendBreaches = []
+    , currentPointBreach = 0
+    , currentBendBreach = 0
     , mode = DirectionChangeAbrupt
     , radius = Length.meters 10.0
     , resultMode = ResultNavigation
@@ -80,7 +84,7 @@ textDictionary =
         , ( "autofix", autofixText )
         , ( "locate", """These buttons will move the Orange pointer through the list of issues.
 
-**Note**: this will only centre the views which have the padlock closed.""")
+**Note**: this will only centre the views which have the padlock closed.""" )
         ]
     )
 
@@ -144,22 +148,23 @@ findDirectionChanges options tree =
     case options.mode of
         DirectionChangeAbrupt ->
             { options
-                | breaches = helper 0 tree []
-                , currentBreach = 0
+                | singlePointBreaches = helper 0 tree []
+                , currentPointBreach = 0
             }
 
         DirectionChangeWithRadius ->
             { options
-                | breaches = findBendsWithRadius tree options
-                , currentBreach = 0
+                | bendBreaches = findBendsWithRadius tree options
+                , currentBendBreach = 0
             }
 
 
-findBendsWithRadius : PeteTree -> Options -> List ( Int, Angle )
+findBendsWithRadius : PeteTree -> Options -> List ( List Int, Quantity Float Meters )
 findBendsWithRadius tree options =
+    --TODO: Add correction needed to the outputs.
     {-
-       The UI says direction change and radius but what we look for is the
-       given direction change over a track length equivalent to the radius.
+       The UI says direction change and radius but we look for the given direction
+       change over a track length of radius * direction change in radians.
     -}
     let
         windowLength =
@@ -190,8 +195,8 @@ findBendsWithRadius tree options =
 
         runningDirectionChange :
             RoadSection
-            -> ( Int, List ( Int, RoadSection ), List ( Int, Angle ) )
-            -> ( Int, List ( Int, RoadSection ), List ( Int, Angle ) )
+            -> ( Int, List ( Int, RoadSection ), List ( List Int, Quantity Float Meters ) )
+            -> ( Int, List ( Int, RoadSection ), List ( List Int, Quantity Float Meters ) )
         runningDirectionChange road ( newIndex, window, outputs ) =
             {-
                Think of this as a variable window function.
@@ -207,10 +212,10 @@ findBendsWithRadius tree options =
                         (( newIndex, road ) :: window)
 
                 turnDuringWindow =
-                    degreesTurned newWindow
+                    radiansTurned newWindow
 
-                degreesTurned : List ( Int, RoadSection ) -> Float
-                degreesTurned sections =
+                radiansTurned : List ( Int, RoadSection ) -> Float
+                radiansTurned sections =
                     case sections of
                         [] ->
                             0
@@ -221,14 +226,14 @@ findBendsWithRadius tree options =
                         ( _, first ) :: ( n, second ) :: more ->
                             second.directionAtStart
                                 |> Direction2d.angleFrom first.directionAtStart
-                                |> Angle.inDegrees
-                                |> (+) (degreesTurned (( n, second ) :: more))
+                                |> Angle.inRadians
+                                |> (+) (radiansTurned (( n, second ) :: more))
             in
-            if abs turnDuringWindow >= Angle.inDegrees options.threshold then
+            if abs turnDuringWindow >= Angle.inRadians options.threshold then
                 ( newIndex + 1
                 , []
-                , ( newIndex
-                  , Angle.degrees <| abs turnDuringWindow
+                , ( newIndex :: List.map Tuple.first window
+                  , windowLength |> Quantity.divideBy turnDuringWindow
                   )
                     :: outputs
                 )
@@ -266,7 +271,7 @@ toolStateChange opened colour options track =
                     , colour = colour
                     , points =
                         TrackLoaded.buildPreview
-                            (List.map Tuple.first populatedOptions.breaches)
+                            (List.map Tuple.first populatedOptions.singlePointBreaches)
                             theTrack.trackTree
                     }
               ]
@@ -288,7 +293,11 @@ update msg options previewColour track =
         SetMode mode ->
             let
                 newOptions =
-                    { options | mode = mode, breaches = [] }
+                    { options
+                        | mode = mode
+                        , singlePointBreaches = []
+                        , bendBreaches = []
+                    }
 
                 populatedOptions =
                     findDirectionChanges newOptions track.trackTree
@@ -303,35 +312,92 @@ update msg options previewColour track =
             ( newOptions, [] )
 
         ViewNext ->
-            let
-                breachIndex =
-                    min (List.length options.breaches - 1) (options.currentBreach + 1)
+            case options.mode of
+                DirectionChangeAbrupt ->
+                    let
+                        breachIndex =
+                            min (List.length options.singlePointBreaches - 1) (options.currentPointBreach + 1)
 
-                newOptions =
-                    { options | currentBreach = breachIndex }
+                        newOptions =
+                            { options | currentPointBreach = breachIndex }
 
-                ( position, _ ) =
-                    Maybe.withDefault ( 0, Angle.degrees 0 ) <|
-                        List.Extra.getAt breachIndex newOptions.breaches
-            in
-            ( newOptions, [ SetCurrent position ] )
+                        ( position, _ ) =
+                            Maybe.withDefault ( 0, Angle.degrees 0 ) <|
+                                List.Extra.getAt breachIndex newOptions.singlePointBreaches
+                    in
+                    ( newOptions, [ SetCurrent position ] )
+
+                DirectionChangeWithRadius ->
+                    let
+                        breachIndex =
+                            min (List.length options.bendBreaches - 1) (options.currentBendBreach + 1)
+
+                        newOptions =
+                            { options | currentBendBreach = breachIndex }
+
+                        ( points, _ ) =
+                            Maybe.withDefault ( [ 0 ], Quantity.zero ) <|
+                                List.Extra.getAt breachIndex newOptions.bendBreaches
+                    in
+                    case points of
+                        [] ->
+                            ( newOptions, [] )
+
+                        position :: _ ->
+                            ( newOptions, [ SetCurrent position ] )
 
         ViewPrevious ->
-            let
-                breachIndex =
-                    max 0 (options.currentBreach - 1)
+            case options.mode of
+                DirectionChangeAbrupt ->
+                    let
+                        breachIndex =
+                            max 0 (options.currentPointBreach - 1)
 
-                newOptions =
-                    { options | currentBreach = breachIndex }
+                        newOptions =
+                            { options | currentPointBreach = breachIndex }
 
-                ( position, _ ) =
-                    Maybe.withDefault ( 0, Angle.degrees 0 ) <|
-                        List.Extra.getAt breachIndex newOptions.breaches
-            in
-            ( newOptions, [ SetCurrent position ] )
+                        ( position, _ ) =
+                            Maybe.withDefault ( 0, Angle.degrees 0 ) <|
+                                List.Extra.getAt breachIndex newOptions.singlePointBreaches
+                    in
+                    ( newOptions, [ SetCurrent position ] )
+
+                DirectionChangeWithRadius ->
+                    let
+                        breachIndex =
+                            max 0 (options.currentBendBreach - 1)
+
+                        newOptions =
+                            { options | currentBendBreach = breachIndex }
+
+                        ( points, _ ) =
+                            Maybe.withDefault ( [ 0 ], Quantity.zero ) <|
+                                List.Extra.getAt breachIndex newOptions.bendBreaches
+                    in
+                    case points of
+                        [] ->
+                            ( newOptions, [] )
+
+                        position :: _ ->
+                            ( newOptions, [ SetCurrent position ] )
 
         SetCurrentPosition position ->
-            ( options, [ SetCurrent position ] )
+            case options.mode of
+                DirectionChangeAbrupt ->
+                    case List.Extra.getAt position options.singlePointBreaches of
+                        Just ( point, _ ) ->
+                            ( options, [ SetCurrent point ] )
+
+                        Nothing ->
+                            ( options, [] )
+
+                DirectionChangeWithRadius ->
+                    case List.Extra.getAt position options.bendBreaches of
+                        Just ( point :: _, _ ) ->
+                            ( options, [ SetCurrent point ] )
+
+                        _ ->
+                            ( options, [] )
 
         SetThreshold angle ->
             let
@@ -359,7 +425,7 @@ update msg options previewColour track =
 
         Autofix ->
             ( options
-            , [ Actions.Autofix <| List.map Tuple.first options.breaches
+            , [ Actions.Autofix <| List.map Tuple.first options.singlePointBreaches
               , TrackHasChanged
               ]
             )
@@ -374,9 +440,16 @@ actions options previewColour track =
         , shape = PreviewCircle
         , colour = previewColour
         , points =
-            TrackLoaded.buildPreview
-                (List.map Tuple.first options.breaches)
-                track.trackTree
+            case options.mode of
+                DirectionChangeAbrupt ->
+                    TrackLoaded.buildPreview
+                        (List.map Tuple.first options.singlePointBreaches)
+                        track.trackTree
+
+                DirectionChangeWithRadius ->
+                    TrackLoaded.buildPreview
+                        (List.filterMap (Tuple.first >> List.head) options.bendBreaches)
+                        track.trackTree
         }
     ]
 
@@ -439,8 +512,28 @@ view imperial msgWrapper options isTrack =
                 , thumb = sliderThumb
                 }
 
-        resultsNavigation =
-            case options.breaches of
+        commonButtons current =
+            row [ centerX, spacing 10 ]
+                [ infoButton <| msgWrapper <| DisplayInfo "bends" "locate"
+                , Input.button
+                    (buttonStylesWithTooltip below "Move to previous")
+                    { label = useIcon FeatherIcons.chevronLeft
+                    , onPress = Just <| msgWrapper <| ViewPrevious
+                    }
+                , Input.button
+                    (buttonStylesWithTooltip below "Move pointer to this issue\n(Is the padlock on?)")
+                    { label = useIcon FeatherIcons.mousePointer
+                    , onPress = Just <| msgWrapper <| SetCurrentPosition current
+                    }
+                , Input.button
+                    (buttonStylesWithTooltip below "Move to next")
+                    { label = useIcon FeatherIcons.chevronRight
+                    , onPress = Just <| msgWrapper <| ViewNext
+                    }
+                ]
+
+        singlePointResultsNavigation breaches =
+            case breaches of
                 [] ->
                     el [ centerX, centerY ] <| text "None found"
 
@@ -448,38 +541,43 @@ view imperial msgWrapper options isTrack =
                     let
                         ( position, turn ) =
                             Maybe.withDefault ( 0, Angle.degrees 0 ) <|
-                                List.Extra.getAt options.currentBreach options.breaches
+                                List.Extra.getAt options.currentPointBreach options.singlePointBreaches
                     in
                     column [ spacing 4, centerX ]
                         [ el [ centerX ] <|
                             text <|
-                                String.fromInt (options.currentBreach + 1)
+                                String.fromInt (options.currentPointBreach + 1)
                                     ++ " of "
-                                    ++ (String.fromInt <| List.length options.breaches)
-                                    ++ " is "
+                                    ++ (String.fromInt <| List.length options.singlePointBreaches)
+                                    ++ ", "
                                     ++ (showAngle <| turn)
                                     ++ "º"
-                        , row [ centerX, spacing 10 ]
-                            [ infoButton <| msgWrapper <| DisplayInfo "bends" "locate"
-                            , Input.button
-                                (buttonStylesWithTooltip below "Move to previous")
-                                { label = useIcon FeatherIcons.chevronLeft
-                                , onPress = Just <| msgWrapper <| ViewPrevious
-                                }
-                            , Input.button
-                                (buttonStylesWithTooltip below "Move pointer to this issue\n(Is the padlock on?)")
-                                { label = useIcon FeatherIcons.mousePointer
-                                , onPress = Just <| msgWrapper <| SetCurrentPosition position
-                                }
-                            , Input.button
-                                (buttonStylesWithTooltip below "Move to next")
-                                { label = useIcon FeatherIcons.chevronRight
-                                , onPress = Just <| msgWrapper <| ViewNext
-                                }
-                            ]
+                        , commonButtons options.currentPointBreach
                         ]
 
-        linkButton track point =
+        bendResultsNavigation breaches =
+            case breaches of
+                [] ->
+                    el [ centerX, centerY ] <| text "None found"
+
+                a :: b ->
+                    let
+                        ( window, radius ) =
+                            Maybe.withDefault ( [ 0 ], Quantity.zero ) <|
+                                List.Extra.getAt options.currentBendBreach options.bendBreaches
+                    in
+                    column [ spacing 4, centerX ]
+                        [ el [ centerX ] <|
+                            text <|
+                                String.fromInt (options.currentBendBreach + 1)
+                                    ++ " of "
+                                    ++ (String.fromInt <| List.length options.bendBreaches)
+                                    ++ ", radius "
+                                    ++ showShortMeasure imperial (Quantity.abs radius)
+                        , commonButtons options.currentBendBreach
+                        ]
+
+        singlePointLinkButton track point =
             Input.button (alignTop :: neatToolsBorder)
                 { onPress = Just (msgWrapper <| SetCurrentPosition point)
                 , label =
@@ -488,8 +586,16 @@ view imperial msgWrapper options isTrack =
                             DomainModel.distanceFromIndex point track
                 }
 
+        bendLinkButton track ( window, _ ) =
+            case List.head window of
+                Just point ->
+                    singlePointLinkButton track point
+
+                Nothing ->
+                    none
+
         autofixButton =
-            if options.breaches == [] || options.mode == DirectionChangeWithRadius then
+            if options.singlePointBreaches == [] || options.mode == DirectionChangeWithRadius then
                 none
 
             else
@@ -502,39 +608,50 @@ view imperial msgWrapper options isTrack =
                         , label = text "Smooth these points"
                         }
                     ]
+
+        wrappedRowStyle =
+            -- Pain getting this wrapped row to look OK.
+            [ scrollbarY
+            , height <|
+                px <|
+                    clamp 32 300 <|
+                        (List.length options.singlePointBreaches // 3 * 24)
+            , spacingXY 6 6
+            , alignTop
+            , padding 6
+            ]
     in
     case isTrack of
         Just track ->
             el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
                 column [ padding 4, spacing 6, width fill ]
-                    [ el [ centerX ] modeSelection
-                    , el [ centerX ] angleSelection
+                    [ modeSelection
+                    , angleSelection
                     , if options.mode == DirectionChangeWithRadius then
-                        el [ centerX ] radiusSelection
+                        radiusSelection
 
                       else
                         none
                     , el [ centerX ] autofixButton
                     , el [ centerX ] resultModeSelection
-                    , case options.resultMode of
-                        ResultNavigation ->
-                            resultsNavigation
+                    , case ( options.mode, options.resultMode ) of
+                        ( DirectionChangeAbrupt, ResultNavigation ) ->
+                            singlePointResultsNavigation options.singlePointBreaches
 
-                        ResultList ->
-                            wrappedRow
-                                [ scrollbarY
-                                , height <|
-                                    px <|
-                                        clamp 32 300 <|
-                                            (List.length options.breaches // 3 * 24)
-                                , spacingXY 6 6
-                                , alignTop
-                                , padding 6
-                                ]
-                            <|
+                        ( DirectionChangeAbrupt, ResultList ) ->
+                            wrappedRow wrappedRowStyle <|
                                 List.map
-                                    (Tuple.first >> linkButton track.trackTree)
-                                    options.breaches
+                                    (Tuple.first >> singlePointLinkButton track.trackTree)
+                                    options.singlePointBreaches
+
+                        ( DirectionChangeWithRadius, ResultNavigation ) ->
+                            bendResultsNavigation options.bendBreaches
+
+                        ( DirectionChangeWithRadius, ResultList ) ->
+                            wrappedRow wrappedRowStyle <|
+                                List.map
+                                    (bendLinkButton track.trackTree)
+                                    options.bendBreaches
                     ]
 
         Nothing ->

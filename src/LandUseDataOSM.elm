@@ -23,11 +23,6 @@ apiRoot =
     "https://overpass.kumi.systems"
 
 
-emptyOSM : OSMLandUseData
-emptyOSM =
-    { elements = [] }
-
-
 emptyLandUse : LandUseData
 emptyLandUse =
     { nodes = []
@@ -127,25 +122,6 @@ convertToLocalCoords track raw =
     { nodes = Dict.values nodeDict
     , ways = ways
     }
-
-
-listTrees : LandUseData -> List LandUseNode
-listTrees landUse =
-    landUse.nodes
-        |> List.filter
-            (\node ->
-                case node.tags of
-                    Just tagDict ->
-                        case Dict.get "natural" tagDict of
-                            Just "tree" ->
-                                True
-
-                            _ ->
-                                False
-
-                    Nothing ->
-                        False
-            )
 
 
 landUseDecoder : D.Decoder OSMLandUseData

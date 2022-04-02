@@ -13,24 +13,23 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 
 # WIP
 
-## Land use display option
+## Minimum radius
 
-- Report if GET fails or times out or parse fails.
-- Add a control that lists named features, select to centre. (Can also show errors.)
+Using the 'Samir' bend detection method, add option to `Apply minimum'.
+This will simply nudge the range of points outwards by the radius shortfall.
+Must first make sure we capture the full extent of the bend, to the point where
+the net direction change over distance is within limits.
 
 ---
 
 # BACKLOG
 
-## Minimum radius
+## Land use display option
 
-Using the Samir bend detection, add option to `Apply minimum'.
-This will simply nudge the range of points outwards by the radius shortfall.
-Must first make sure we capture the full extent of the bend, to the point where
-the net direction change over distance is within limits.
+- Report if GET fails or times out or parse fails.
+- Add a control that lists named features, select to centre. (Can also show errors.)
 
-## 1CQF
-## New smoothing
+## 1CQF / New smoothing
 
 Allow the use of markers for partial application.
 > This could be like a meta-box, or a "build your own 1CQF", in which
@@ -56,7 +55,6 @@ can be directed to a tool or a view.
 
 ## Tools: old, updated, & new
 
-- Can we auto-radius hairpins? (Combo of Samir's tool and Radius Bends?)
 - Non-customisable keyboard alternatives for Load/Save/Undo/Redo/Fwd/Back/Purple (maybe 1-5 for views)
 - Extract all text for translation (Muriel)
 - Use localised number formatting everywhere (for French use of , and .)
@@ -93,7 +91,6 @@ Put all Font, Colour etc into a Palette/Style module for ease of change.
 
 Just don't blindly mitre. For each pair of RoadSection, see if the points will
 "overlap" and don't emit them all. May need some interpolation for altitude or whatever.
-> Perhaps just try Bezier on interior turns.
 
 ## Map
 
