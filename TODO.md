@@ -20,6 +20,9 @@ This will simply nudge the range of points outwards by the radius shortfall.
 Must first make sure we capture the full extent of the bend, to the point where
 the net direction change over distance is within limits.
 
+Nearly there:
+- Integrate the Nudge logic (with single Undo for the multiple case)
+
 ---
 
 # BACKLOG

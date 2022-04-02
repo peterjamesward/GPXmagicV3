@@ -65,6 +65,8 @@ type Msg
     | SetMode DirectionChangeMode
     | SetResultMode ResultMode
     | Autofix
+    | NudgeOne
+    | NudgeAll
     | DisplayInfo String String
 
 
@@ -80,29 +82,23 @@ textDictionary =
     ( toolID
     , Dict.fromList
         [ ( toolID, "Bend problems" )
-        , ( "info", infoText )
-        , ( "autofix", autofixText )
-        , ( "locate", """These buttons will move the Orange pointer through the list of issues.
-
-**Note**: this will only centre the views which have the padlock closed.""" )
-        ]
-    )
-
-
-infoText =
-    """Find points where the road direction changes significantly, or find
+        , ( "info", """Find points where the road direction changes significantly, or find
 sections of track that may be a bend with a small radius.
 
-From here, you can jump directly to the sections of track and use other tools to fix the problems.
-"""
-
-
-autofixText =
-    """Smooth each of these individually using the single point _Smooth with arcs_. Use that
+From here, you can jump directly to the sections of track and use other tools to fix the problems.""" )
+        , ( "autofix", """Smooth each of these individually using the single point _Smooth with arcs_. Use that
 tool to change the number of points that are added to smooth each point.
 
 You should use this only for trivial fixes; there are better tools for smoothing
-serious issues. This tool can even make things worse."""
+serious issues. This tool can even make things worse.""" )
+        , ( "locate", """These buttons will move the Orange pointer through the list of issues.
+
+**Note**: this will only centre the views which have the padlock closed.""" )
+        , ( "widen", """Nudge the points on the bend(s) outwards to increase the radius.
+
+You may get better results from using the _Smooth with Arcs_ or _Radiused Bends_ tools.""" )
+        ]
+    )
 
 
 findDirectionChanges : Options -> PeteTree -> Options
@@ -384,20 +380,10 @@ update msg options previewColour track =
         SetCurrentPosition position ->
             case options.mode of
                 DirectionChangeAbrupt ->
-                    case List.Extra.getAt position options.singlePointBreaches of
-                        Just ( point, _ ) ->
-                            ( options, [ SetCurrent point ] )
-
-                        Nothing ->
-                            ( options, [] )
+                    ( options, [ SetCurrent position ] )
 
                 DirectionChangeWithRadius ->
-                    case List.Extra.getAt position options.bendBreaches of
-                        Just ( point :: _, _ ) ->
-                            ( options, [ SetCurrent point ] )
-
-                        _ ->
-                            ( options, [] )
+                    ( options, [ SetCurrent position ] )
 
         SetThreshold angle ->
             let
@@ -428,6 +414,16 @@ update msg options previewColour track =
             , [ Actions.Autofix <| List.map Tuple.first options.singlePointBreaches
               , TrackHasChanged
               ]
+            )
+
+        NudgeOne ->
+            ( options
+            , []
+            )
+
+        NudgeAll ->
+            ( options
+            , []
             )
 
         DisplayInfo id tag ->
@@ -609,13 +605,33 @@ view imperial msgWrapper options isTrack =
                         }
                     ]
 
-        wrappedRowStyle =
+        bendButtonFix =
+            if options.bendBreaches == [] || options.mode == DirectionChangeAbrupt then
+                none
+
+            else
+                wrappedRow [ spacing 4 ]
+                    [ none
+                    , infoButton (msgWrapper <| DisplayInfo "bends" "widen")
+                    , Input.button
+                        (alignTop :: neatToolsBorder)
+                        { onPress = Just (msgWrapper NudgeOne)
+                        , label = text "Widen current bend"
+                        }
+                    , Input.button
+                        (alignTop :: neatToolsBorder)
+                        { onPress = Just (msgWrapper NudgeAll)
+                        , label = text "Widen these bends"
+                        }
+                    ]
+
+        wrappedRowStyle breaches =
             -- Pain getting this wrapped row to look OK.
             [ scrollbarY
             , height <|
                 px <|
                     clamp 32 300 <|
-                        (List.length options.singlePointBreaches // 3 * 24)
+                        (List.length breaches // 3 * 24)
             , spacingXY 6 6
             , alignTop
             , padding 6
@@ -633,13 +649,14 @@ view imperial msgWrapper options isTrack =
                       else
                         none
                     , el [ centerX ] autofixButton
+                    , el [ centerX ] bendButtonFix
                     , el [ centerX ] resultModeSelection
                     , case ( options.mode, options.resultMode ) of
                         ( DirectionChangeAbrupt, ResultNavigation ) ->
                             singlePointResultsNavigation options.singlePointBreaches
 
                         ( DirectionChangeAbrupt, ResultList ) ->
-                            wrappedRow wrappedRowStyle <|
+                            wrappedRow (wrappedRowStyle options.singlePointBreaches) <|
                                 List.map
                                     (Tuple.first >> singlePointLinkButton track.trackTree)
                                     options.singlePointBreaches
@@ -648,7 +665,7 @@ view imperial msgWrapper options isTrack =
                             bendResultsNavigation options.bendBreaches
 
                         ( DirectionChangeWithRadius, ResultList ) ->
-                            wrappedRow wrappedRowStyle <|
+                            wrappedRow (wrappedRowStyle options.bendBreaches) <|
                                 List.map
                                     (bendLinkButton track.trackTree)
                                     options.bendBreaches
