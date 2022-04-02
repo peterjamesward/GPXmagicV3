@@ -548,7 +548,7 @@ view imperial msgWrapper options isTrack =
                                     ++ ", "
                                     ++ (showAngle <| turn)
                                     ++ "º"
-                        , commonButtons options.currentPointBreach
+                        , commonButtons position
                         ]
 
         bendResultsNavigation breaches =
@@ -561,6 +561,9 @@ view imperial msgWrapper options isTrack =
                         ( window, radius ) =
                             Maybe.withDefault ( [ 0 ], Quantity.zero ) <|
                                 List.Extra.getAt options.currentBendBreach options.bendBreaches
+
+                        at =
+                            Maybe.withDefault 0 <| List.head window
                     in
                     column [ spacing 4, centerX ]
                         [ el [ centerX ] <|
@@ -570,7 +573,7 @@ view imperial msgWrapper options isTrack =
                                     ++ (String.fromInt <| List.length options.bendBreaches)
                                     ++ ", radius "
                                     ++ showShortMeasure imperial (Quantity.abs radius)
-                        , commonButtons options.currentBendBreach
+                        , commonButtons at
                         ]
 
         singlePointLinkButton track point =
