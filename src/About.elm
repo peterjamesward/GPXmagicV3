@@ -3,15 +3,14 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.1.3
+# GPXmagic v3.1.4
 
 (5cbf1801)
 
 ## In this release ...
 
-* Land use data (sourced from Open Street Map) can be displayed, but does not yet play well with Terrain turned on.
-
-* Changes to eliminate unnecessary repaints.
+* Land use data now works with terrain. This (IMHO) makes terrain more pleasing by inferring altitudes
+away from the route. It is NOT topographically accurate. There may be flying trees.
 
 ## Legal guff
 

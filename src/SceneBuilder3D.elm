@@ -79,11 +79,12 @@ render3dView settings track landUse =
                     BoundingBox3d.extrema nearbySpace
 
                 modelMinZ =
+                    -- Drop an inch to prevent flicker.
                     boundingBox track.trackTree
                         |> BoundingBox3d.minZ
-                        |> Quantity.minus Length.inch
+                        |> Quantity.minus (Length.inches 6)
             in
-            if settings.groundPlane then
+            if settings.groundPlane && settings.terrainFineness == 0.0 then
                 [ Scene3d.quad (Material.color Color.grey)
                     (Point3d.xyz minX minY modelMinZ)
                     (Point3d.xyz minX maxY modelMinZ)
@@ -184,23 +185,22 @@ render3dView settings track landUse =
         spatialIndex =
             indexTerrain nearbySpace track.trackTree
 
+        ( landUseElements, indexWithLandUse ) =
+            if settings.landUse then
+                makeLandUse landUse spatialIndex track.trackTree floorPlane
+
+            else
+                ( [], spatialIndex )
+
         terrain =
-            --(move index creation into this function, pass index to terrain and landuse)
             if settings.terrainFineness > 0.0 then
-                spatialIndex
+                indexWithLandUse
                     |> terrainFromIndex
                         (flatBox nearbySpace)
                         (flatBox nearbySpace)
                         NoContext
                         settings
                         (BoundingBox3d.minZ nearbySpace)
-
-            else
-                []
-
-        landUseElements =
-            if settings.landUse then
-                makeLandUse landUse spatialIndex track.trackTree floorPlane
 
             else
                 []
@@ -220,27 +220,21 @@ render3dView settings track landUse =
 type alias LandUseStuff =
     { scenes : List (Entity LocalCoords)
     , unknownTags : Dict String String
+    , updatedIndex : Index
     }
 
 
-emptyStuff =
-    { scenes = [], unknownTags = Dict.empty }
-
-
 nodeColourMap =
+    Dict.fromList
+
+
+landUseColours =
     Dict.fromList
         [ ( "tree", Color.darkGreen )
         , ( "rock", Color.lightBrown )
         , ( "peak", Color.white )
         , ( "water", Color.lightBlue )
-        , ( "residential", colorFromElmUiColour FlatColors.CanadianPalette.doubleDragonSkin )
-        ]
-
-
-polygonColourMap =
-    Dict.fromList
-        [ ( "wood", Color.darkGreen )
-        , ( "water", Color.lightBlue )
+        , ( "wood", Color.darkGreen )
         , ( "recreation_ground", Color.lightGreen )
         , ( "grass", Color.lightGreen )
         , ( "meadow", Color.lightYellow )
@@ -260,13 +254,17 @@ makeLandUse :
     -> Index
     -> PeteTree
     -> Plane3d Meters LocalCoords
-    -> List (Entity LocalCoords)
+    -> ( List (Entity LocalCoords), Index )
 makeLandUse landUse index tree groundPlane =
     --TODO: Collect the bounding boxes and altitudes as we go, then add these to
     --the Index, returning the new Index as well, which we then use to render Terrain!
     --Means changing the fold state to include index but well worthwhile.
     --Will have to pretend that there are roads, or change the index entry.
     let
+        drawCone :
+            Color
+            -> EarthPoint
+            -> Maybe ( Entity LocalCoords, SpatialContent IndexEntry Meters LocalCoords )
         drawCone colour at =
             let
                 nearestPoint =
@@ -290,12 +288,23 @@ makeLandUse landUse index tree groundPlane =
             in
             case Cone3d.from altitudeAdjusted tip (Length.meters 4) of
                 Just cone ->
-                    [ Scene3d.cone (Material.color colour) cone ]
+                    Just
+                        ( Scene3d.cone (Material.color colour) cone
+                        , { content = { altitude = Point3d.zCoordinate nearestPoint }
+                          , box =
+                                BoundingBox2d.withDimensions
+                                    ( Length.meters 8, Length.meters 8 )
+                                    (at |> Point3d.projectInto SketchPlane3d.xy)
+                          }
+                        )
 
                 Nothing ->
-                    []
+                    Nothing
 
-        drawPolygon : Color -> List LandUseDataTypes.LandUseNode -> Entity LocalCoords
+        drawPolygon :
+            Color
+            -> List LandUseDataTypes.LandUseNode
+            -> ( Entity LocalCoords, SpatialContent IndexEntry Meters LocalCoords )
         drawPolygon colour nodes =
             -- Must draw a 2D polygon so we can triangulate it.
             -- Ian MacKenzie makes this a pleasure.
@@ -330,7 +339,13 @@ makeLandUse landUse index tree groundPlane =
                         |> Polygon2d.triangulate
                         |> TriangularMesh.mapVertices restoreAltitude
             in
-            Scene3d.mesh (Material.color colour) (Mesh.indexedTriangles mesh)
+            ( Scene3d.mesh (Material.color colour) (Mesh.indexedTriangles mesh)
+            , { content = { altitude = useAltitude }
+              , box =
+                    Polygon2d.boundingBox polygon
+                        |> Maybe.withDefault (BoundingBox2d.singleton Point2d.origin)
+              }
+            )
 
         drawNode : LandUseDataTypes.LandUseNode -> LandUseStuff -> LandUseStuff
         drawNode node stuff =
@@ -344,15 +359,22 @@ makeLandUse landUse index tree groundPlane =
                             stuff
 
                         Just natural ->
-                            case Dict.get natural nodeColourMap of
+                            case Dict.get natural landUseColours of
                                 Just colour ->
-                                    { scenes = drawCone colour node.at ++ stuff.scenes
-                                    , unknownTags = stuff.unknownTags
-                                    }
+                                    -- Careful, the drawing could (compiler-wise) fail.
+                                    case drawCone colour node.at of
+                                        Just ( gotCone, indexEntry ) ->
+                                            { scenes = gotCone :: stuff.scenes
+                                            , unknownTags = stuff.unknownTags
+                                            , updatedIndex = SpatialIndex.add indexEntry stuff.updatedIndex
+                                            }
+
+                                        Nothing ->
+                                            stuff
 
                                 Nothing ->
-                                    { scenes = stuff.scenes
-                                    , unknownTags = Dict.insert "natural" natural stuff.unknownTags
+                                    { stuff
+                                        | unknownTags = Dict.insert "natural" natural stuff.unknownTags
                                     }
 
         drawWay : LandUseDataTypes.LandUseWay -> LandUseStuff -> LandUseStuff
@@ -379,10 +401,15 @@ makeLandUse landUse index tree groundPlane =
                                     _ ->
                                         Nothing
                     in
-                    case Dict.get useTag polygonColourMap of
+                    case Dict.get useTag landUseColours of
                         Just colour ->
-                            { scenes = drawPolygon colour way.nodes :: stuff.scenes
+                            let
+                                ( polygon, indexEntry ) =
+                                    drawPolygon colour way.nodes
+                            in
+                            { scenes = polygon :: stuff.scenes
                             , unknownTags = stuff.unknownTags
+                            , updatedIndex = SpatialIndex.add indexEntry stuff.updatedIndex
                             }
 
                         Nothing ->
@@ -390,11 +417,12 @@ makeLandUse landUse index tree groundPlane =
 
         nodeStuff =
             landUse.nodes
-                |> List.foldl drawNode emptyStuff
+                |> List.foldl drawNode
+                    { scenes = [], unknownTags = Dict.empty, updatedIndex = index }
 
         wayStuff =
             landUse.ways
-                |> List.foldl drawWay emptyStuff
+                |> List.foldl drawWay nodeStuff
 
         --_ =
         --    Debug.log "NODES" nodeStuff.unknownTags
@@ -402,7 +430,7 @@ makeLandUse landUse index tree groundPlane =
         --_ =
         --    Debug.log "WAYS" wayStuff.unknownTags
     in
-    nodeStuff.scenes ++ wayStuff.scenes
+    ( wayStuff.scenes, wayStuff.updatedIndex )
 
 
 renderPreviews : Dict String PreviewData -> List (Entity LocalCoords)
@@ -506,15 +534,7 @@ centreLineBetween colouringFn road =
 
 
 type alias IndexEntry =
-    { elevation : Quantity Float Meters
-    , road : ( EarthPoint, EarthPoint )
-    }
-
-
-type alias RoadBox =
-    { localBounds : BoundingBox3d Length.Meters LocalCoords
-    , road : ( Point3d Meters LocalCoords, Point3d Meters LocalCoords )
-    }
+    { altitude : Quantity Float Meters }
 
 
 type alias Index =
@@ -532,8 +552,8 @@ indexTerrain box trackTree =
             -- only affects the index efficiency.
             SpatialIndex.empty (flatBox box) (Length.meters 100.0)
 
-        makeRoadBox : RoadSection -> List RoadBox -> List RoadBox
-        makeRoadBox road boxes =
+        indexRoadSection : RoadSection -> Index -> Index
+        indexRoadSection road index =
             let
                 halfWidthVector =
                     Vector3d.from road.startPoint road.endPoint
@@ -554,32 +574,17 @@ indexTerrain box trackTree =
                     ( Point3d.translateBy leftKerbVector road.endPoint
                     , Point3d.translateBy rightKerbVector road.endPoint
                     )
+
+                localBounds =
+                    BoundingBox3d.hull leftNearKerb [ leftFarKerb, rightFarKerb, rightNearKerb ]
             in
-            { localBounds =
-                BoundingBox3d.hull leftNearKerb [ leftFarKerb, rightFarKerb, rightNearKerb ]
-            , road = ( road.startPoint, road.endPoint )
-            }
-                :: boxes
-
-        tarmac =
-            DomainModel.foldOverRoute makeRoadBox trackTree []
-
-        indexContent =
-            List.map
-                (\{ localBounds, road } ->
-                    { content =
-                        { elevation = localBounds |> BoundingBox3d.minZ
-                        , road = road
-                        }
-                    , box = flatBox localBounds
-                    }
-                )
-                tarmac
-
-        indexedContent =
-            List.foldl SpatialIndex.add emptyIndex indexContent
+            SpatialIndex.add
+                { content = { altitude = BoundingBox3d.minZ localBounds }
+                , box = flatBox localBounds
+                }
+                index
     in
-    indexedContent
+    DomainModel.foldOverRoute indexRoadSection trackTree emptyIndex
 
 
 type LocationContext
@@ -612,7 +617,7 @@ queryAltitudeFromIndex index myBox =
             -> TerrainFoldState
             -> TerrainFoldState
         queryFoldFunction entry accum =
-            { minAltitude = Quantity.min accum.minAltitude entry.content.elevation
+            { minAltitude = Quantity.min accum.minAltitude entry.content.altitude
             , resultBox =
                 case accum.resultBox of
                     Just oldBox ->
@@ -656,7 +661,7 @@ terrainFromIndex myBox enclosingBox orientation options baseElevation index =
 
         top =
             -- Just avoid interference with road surface.
-            topBeforeAdjustment |> Quantity.minus (Length.meters 0.1)
+            topBeforeAdjustment |> Quantity.minus Length.foot
 
         elevationIncrease =
             topBeforeAdjustment |> Quantity.minus baseElevation

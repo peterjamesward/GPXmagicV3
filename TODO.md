@@ -17,7 +17,6 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 
 - Report if GET fails or times out or parse fails.
 - Add a control that lists named features, select to centre. (Can also show errors.)
-- Rules for combining with terrain: land use prevails, terrain colour is fallback.
 
 ---
 
