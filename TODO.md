@@ -13,9 +13,22 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 
 # WIP
 
+## Land use
+
+- Add tool:
+     - Display legend, wrapped row of colour bars with text inside;
+     - Display named places; click will set focal point (on some views);
+     - Possibly, display tags for view click location (on some views).
+
 ## Minimum radius
 
-- Integrate the Nudge logic, single case
+Current scheme is "OK-ish".
+
+- Try again with estimating centre:
+> Work out radius on perpendicular for all points, take centroid of those points.
+> Substitute for window with arc at given radius (not quite sure what start & end will be).
+
+If successful, add multiple case
 - (with single Undo for the multiple case)
 
 ---
