@@ -444,7 +444,7 @@ actions options previewColour track =
 
                 DirectionChangeWithRadius ->
                     TrackLoaded.buildPreview
-                        (List.filterMap (Tuple.first >> List.head) options.bendBreaches)
+                        (List.concatMap Tuple.first options.bendBreaches)
                         track.trackTree
         }
     ]

@@ -10,7 +10,7 @@ import Json.Encode as E
 import Length
 import MapboxKey exposing (mapboxKey)
 import Point3d
-import SceneBuilderMap
+import SceneBuilderMap exposing (latLonPairFromGpx)
 import TrackLoaded exposing (TrackLoaded)
 
 
@@ -175,6 +175,16 @@ requestElevations =
     mapCommands <|
         E.object
             [ ( "Cmd", E.string "Elev" )
+            ]
+
+
+fetchElevationsForPoints : List GPXSource -> Cmd msg
+fetchElevationsForPoints rawData =
+    -- See if we can use the Map to give us some altitude for land use data.
+    mapCommands <|
+        E.object
+            [ ( "Cmd", E.string "LandUse" )
+            , ( "data", E.list latLonPairFromGpx rawData )
             ]
 
 
@@ -343,6 +353,14 @@ processMapPortMessage lastState track json =
             case elevations of
                 Ok mapElevations ->
                     ( lastState, [ ApplyMapElevations mapElevations ] )
+
+                _ ->
+                    ( lastState, [] )
+
+        Ok "landuse" ->
+            case elevations of
+                Ok mapElevations ->
+                    ( lastState, [ ApplyLandUseAltitudes mapElevations ] )
 
                 _ ->
                     ( lastState, [] )

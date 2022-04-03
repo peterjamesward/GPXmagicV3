@@ -15,13 +15,17 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 
 ## Minimum radius
 
-Using the 'Samir' bend detection method, add option to `Apply minimum'.
-This will simply nudge the range of points outwards by the radius shortfall.
-Must first make sure we capture the full extent of the bend, to the point where
-the net direction change over distance is within limits.
+- Preview disappears when click on track
+- Seem to need to move a control for previews to appear
+- Suspect that the logic is actually **flawed**, as increasing radius should increase breaches but doesn't.
+> This could be (partly) a problem with preview or the window starting **before** the bend.
+- Integrate the Nudge logic, single case
+- (with single Undo for the multiple case)
 
-Nearly there:
-- Integrate the Nudge logic (with single Undo for the multiple case)
+## Land use
+
+Less vivid colours.
+It is worth trying to fetch altitudes from Map.
 
 ---
 

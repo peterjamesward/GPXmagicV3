@@ -100,7 +100,7 @@ applyUsingOptions options track =
                 track.trackTree
     in
     ( newTree
-    , oldPoints |> List.map Tuple.second
+    , List.map Tuple.second oldPoints
     , ( actualStart, actualEnd )
     )
 

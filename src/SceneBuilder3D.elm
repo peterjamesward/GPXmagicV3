@@ -267,30 +267,16 @@ makeLandUse landUse index tree groundPlane =
             -> Maybe ( Entity LocalCoords, SpatialContent IndexEntry Meters LocalCoords )
         drawCone colour at =
             let
-                nearestPoint =
-                    DomainModel.earthPointFromIndex
-                        (DomainModel.nearestToRay
-                            (Axis3d.withDirection Direction3d.positiveZ at)
-                            tree
-                        )
-                        tree
-
-                altitudeAdjusted =
-                    Point3d.xyz
-                        (Point3d.xCoordinate at)
-                        (Point3d.yCoordinate at)
-                        (Point3d.zCoordinate nearestPoint)
-
                 tip =
                     Point3d.translateBy
                         (Vector3d.withLength (Length.meters 10) Direction3d.positiveZ)
-                        altitudeAdjusted
+                        at
             in
-            case Cone3d.from altitudeAdjusted tip (Length.meters 4) of
+            case Cone3d.from at tip (Length.meters 4) of
                 Just cone ->
                     Just
                         ( Scene3d.cone (Material.color colour) cone
-                        , { content = { altitude = Point3d.zCoordinate nearestPoint }
+                        , { content = { altitude = Point3d.zCoordinate at }
                           , box =
                                 BoundingBox2d.withDimensions
                                     ( Length.meters 8, Length.meters 8 )
@@ -300,6 +286,20 @@ makeLandUse landUse index tree groundPlane =
 
                 Nothing ->
                     Nothing
+
+        xyNodeIndex : Dict ( Float, Float ) (Quantity Float Meters)
+        xyNodeIndex =
+            --Ghastly hack
+            landUse.nodes
+                |> List.map
+                    (\node ->
+                        ( ( Length.inMeters <| Point3d.xCoordinate node.at
+                          , Length.inMeters <| Point3d.yCoordinate node.at
+                          )
+                        , Point3d.zCoordinate node.at
+                        )
+                    )
+                |> Dict.fromList
 
         drawPolygon :
             Color
@@ -314,25 +314,23 @@ makeLandUse landUse index tree groundPlane =
                         |> List.map (.at >> Point3d.projectInto SketchPlane3d.xy)
                         |> Polygon2d.singleLoop
 
-                { minAltitude, resultBox, count } =
-                    queryAltitudeFromIndex index
-                        (Maybe.withDefault (BoundingBox2d.singleton Point2d.origin) <|
-                            Polygon2d.boundingBox polygon
-                        )
-
-                useAltitude =
-                    if minAltitude |> Quantity.lessThan Quantity.positiveInfinity then
-                        minAltitude
-
-                    else
-                        Point3d.zCoordinate <| Plane3d.originPoint groundPlane
-
                 restoreAltitude : Point2d Meters LocalCoords -> Point3d Meters LocalCoords
                 restoreAltitude point =
-                    Point3d.xyz
-                        (Point2d.xCoordinate point)
-                        (Point2d.yCoordinate point)
-                        (useAltitude |> Quantity.minus Length.centimeter)
+                    case
+                        Dict.get
+                            ( Length.inMeters <| Point2d.xCoordinate point
+                            , Length.inMeters <| Point2d.yCoordinate point
+                            )
+                            xyNodeIndex
+                    of
+                        Just altitude ->
+                            Point3d.xyz
+                                (Point2d.xCoordinate point)
+                                (Point2d.yCoordinate point)
+                                altitude
+
+                        Nothing ->
+                            point |> Point3d.on SketchPlane3d.xy
 
                 mesh =
                     polygon
@@ -340,7 +338,7 @@ makeLandUse landUse index tree groundPlane =
                         |> TriangularMesh.mapVertices restoreAltitude
             in
             ( Scene3d.mesh (Material.color colour) (Mesh.indexedTriangles mesh)
-            , { content = { altitude = useAltitude }
+            , { content = { altitude = Quantity.zero }
               , box =
                     Polygon2d.boundingBox polygon
                         |> Maybe.withDefault (BoundingBox2d.singleton Point2d.origin)

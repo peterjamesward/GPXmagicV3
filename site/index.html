@@ -236,6 +236,23 @@ function mapMessageHandler(msg) {
                 );
             }
             break;
+
+        case 'LandUse':
+          // Ask Map for altitude data corresponding to land use nodes.
+            if (isMapCreated) {
+                const elevations =
+                    msg.data.map(
+                        v => map.queryTerrainElevation(v)
+                    );
+                //console.log(elevations);
+
+                app.ports.mapResponses.send(
+                  { 'msg' : 'landuse'
+                  , 'elevations' : elevations
+                  }
+                );
+            }
+            break;
     };
 };
 

@@ -5,14 +5,16 @@ import BoundingBox2d
 import BoundingBox3d exposing (BoundingBox3d)
 import Dict exposing (Dict)
 import Direction2d
-import DomainModel
+import DomainModel exposing (GPXSource)
 import Http exposing (emptyBody)
 import Json.Decode as D exposing (Decoder, field)
 import LandUseDataTypes exposing (..)
 import Length
 import LocalCoords exposing (LocalCoords)
+import MapPortController
 import Point2d
 import Point3d
+import Quantity
 import String.Interpolate exposing (interpolate)
 import TrackLoaded exposing (TrackLoaded)
 import Url.Builder as Builder
@@ -27,6 +29,7 @@ emptyLandUse : LandUseData
 emptyLandUse =
     { nodes = []
     , ways = []
+    , rawData = { elements = [] }
     }
 
 
@@ -46,18 +49,50 @@ requestLandUseData msg track =
         }
 
 
-processLandUseData : Result Http.Error OSMLandUseData -> TrackLoaded msg -> LandUseData
+processLandUseData : Result Http.Error OSMLandUseData -> TrackLoaded msg -> ( LandUseData, Cmd msg )
 processLandUseData results track =
     case results of
         Ok landUse ->
-            convertToLocalCoords track landUse
+            -- Just save raw, process when we have altitudes from Map.
+            ( { nodes = [], ways = [], rawData = landUse }
+            , fetchAltitudesFromMap landUse
+            )
 
         Err error ->
-            emptyLandUse
+            ( emptyLandUse, Cmd.none )
 
 
-convertToLocalCoords : TrackLoaded msg -> OSMLandUseData -> LandUseData
-convertToLocalCoords track raw =
+fetchAltitudesFromMap : OSMLandUseData -> Cmd msg
+fetchAltitudesFromMap raw =
+    let
+        rawNodes : List OSMLandUseNode
+        rawNodes =
+            List.filterMap
+                (\element ->
+                    case element of
+                        OSMNode node ->
+                            Just node
+
+                        _ ->
+                            Nothing
+                )
+                raw.elements
+
+        gpxLike =
+            rawNodes
+                |> List.map
+                    (\rawNode ->
+                        { longitude = rawNode.lon |> Angle.degrees |> Direction2d.fromAngle
+                        , latitude = rawNode.lat |> Angle.degrees
+                        , altitude = Quantity.zero
+                        }
+                    )
+    in
+    MapPortController.fetchElevationsForPoints gpxLike
+
+
+applyAltitudes : List Float -> TrackLoaded msg -> LandUseData -> LandUseData
+applyAltitudes altitudes track justRaw =
     let
         groundLevel =
             BoundingBox3d.minZ <| DomainModel.boundingBox track.trackTree
@@ -73,26 +108,27 @@ convertToLocalCoords track raw =
                         _ ->
                             Nothing
                 )
-                raw.elements
+                justRaw.rawData.elements
 
         nodeDict : Dict Int LandUseNode
         nodeDict =
             Dict.fromList <|
-                List.map
-                    (\rawNode ->
+                List.map2
+                    (\rawNode altitude ->
                         ( rawNode.id
                         , { at =
                                 DomainModel.pointFromGpxWithReference
                                     track.referenceLonLat
                                     { longitude = rawNode.lon |> Angle.degrees |> Direction2d.fromAngle
                                     , latitude = rawNode.lat |> Angle.degrees
-                                    , altitude = groundLevel
+                                    , altitude = Length.meters altitude
                                     }
                           , tags = rawNode.tags
                           }
                         )
                     )
                     rawNodes
+                    altitudes
 
         rawWays : List OSMLandUseWay
         rawWays =
@@ -105,7 +141,7 @@ convertToLocalCoords track raw =
                         _ ->
                             Nothing
                 )
-                raw.elements
+                justRaw.rawData.elements
 
         ways =
             List.map convertWay rawWays
@@ -121,6 +157,7 @@ convertToLocalCoords track raw =
     in
     { nodes = Dict.values nodeDict
     , ways = ways
+    , rawData = { elements = [] } -- discard raw data
     }
 
 

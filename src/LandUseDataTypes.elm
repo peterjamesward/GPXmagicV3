@@ -11,6 +11,7 @@ type alias OSMLandUseData =
 type alias LandUseData =
     { nodes : List LandUseNode
     , ways : List LandUseWay
+    , rawData : OSMLandUseData
     }
 
 

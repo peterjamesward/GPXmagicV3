@@ -693,12 +693,11 @@ Please check the file contains GPX data.""" }
         ReceivedLandUseData results ->
             case model.track of
                 Just track ->
-                    ( { model
-                        | landUseData = LandUseDataOSM.processLandUseData results track
-                        , needsRendering = True
-                      }
-                    , Cmd.none
-                    )
+                    let
+                        ( landUse, cmds ) =
+                            LandUseDataOSM.processLandUseData results track
+                    in
+                    ( { model | landUseData = landUse }, cmds )
 
                 Nothing ->
                     ( model, Cmd.none )
@@ -1822,6 +1821,16 @@ performActionsOnModel actions model =
                     in
                     { foldedModel
                         | track = Just newTrack
+                        , needsRendering = True
+                    }
+
+                ( ApplyLandUseAltitudes altitudes, Just track ) ->
+                    { foldedModel
+                        | landUseData =
+                            LandUseDataOSM.applyAltitudes
+                                altitudes
+                                track
+                                foldedModel.landUseData
                         , needsRendering = True
                     }
 

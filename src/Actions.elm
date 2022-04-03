@@ -64,6 +64,7 @@ type ToolAction msg
     | AddFullTrackToMap
     | FetchMapElevations
     | ApplyMapElevations (List Float)
+    | ApplyLandUseAltitudes (List Float)
     | SelectSvgFile (File -> msg)
     | LoadSvgFile (String -> msg) File
     | TrackFromSvg String
