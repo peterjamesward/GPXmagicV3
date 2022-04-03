@@ -22,11 +22,6 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 - Integrate the Nudge logic, single case
 - (with single Undo for the multiple case)
 
-## Land use
-
-Less vivid colours.
-It is worth trying to fetch altitudes from Map.
-
 ---
 
 # BACKLOG

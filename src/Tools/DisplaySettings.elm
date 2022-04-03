@@ -7,8 +7,9 @@ import Element.Background as Background
 import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
 import Json.Decode as D
+import LandUseDataTypes
 import Tools.DisplaySettingsOptions exposing (..)
-import ViewPureStyles exposing (commonShortHorizontalSliderStyles)
+import ViewPureStyles exposing (commonShortHorizontalSliderStyles, infoButton)
 
 
 defaultOptions : Options
@@ -18,7 +19,7 @@ defaultOptions =
     , centreLine = False
     , groundPlane = True
     , terrainFineness = 0.0
-    , landUse = False
+    , landUse = LandUseDataTypes.LandUseHidden
     }
 
 
@@ -27,7 +28,7 @@ type Msg
     | SetCurtainStyle CurtainStyle
     | SetCentreLine Bool
     | SetGroundPlane Bool
-    | SetLandUse Bool
+    | SetLandUse LandUseDataTypes.LandUseDisplay
     | SetTerrainFineness Float
     | DisplayInfo String String
 
@@ -45,6 +46,28 @@ textDictionary =
     , Dict.fromList
         [ ( toolID, "Display settings" )
         , ( "info", infoText )
+        , ( "landuse"
+          , """You can fetch Open Street Map data that describes the land use.
+ This is colour coded:
+ * tree = darkGreen
+ * rock = lightBrown
+ * peak = white
+ * water = lightBlue
+ * wood = darkGreen
+ * recreation_ground = lightGreen
+ * grass = lightGreen
+ * meadow = lightYellow
+ * farmland= lightGreenishBlue
+ * grassland = mintLeaf
+ * forest = darkGreen
+ * industrial = darkGray
+ * residential= pink
+ * retail = carrot
+ * railway = silver
+ * brownfield = brown
+
+You can show these "flat" or "sloped" Be warned, when "sloped", it may obscure the road!"""
+          )
         ]
     )
 
@@ -130,11 +153,31 @@ view wrap options =
                 ]
                 { onChange = wrap << SetCurtainStyle
                 , selected = Just options.curtainStyle
-                , label = Input.labelHidden "Curtain"
+                , label = Input.labelBelow [] (text "Curtain")
                 , options =
-                    [ Input.option NoCurtain (text "No curtain")
+                    [ Input.option NoCurtain (text "None")
                     , Input.option PlainCurtain (text "Plain")
                     , Input.option PastelCurtain (text "Coloured")
+                    ]
+                }
+
+        landUseChoice =
+            Input.radio
+                [ padding 5
+                , spacing 5
+                ]
+                { onChange = wrap << SetLandUse
+                , selected = Just options.landUse
+                , label =
+                    Input.labelBelow [] <|
+                        row [ spacing 4 ]
+                            [ text "Land Use"
+                            , infoButton (wrap <| DisplayInfo "display" "landuse")
+                            ]
+                , options =
+                    [ Input.option LandUseDataTypes.LandUseHidden (text "None")
+                    , Input.option LandUseDataTypes.LandUsePlanar (text "Flat")
+                    , Input.option LandUseDataTypes.LandUseSloped (text "3D")
                     ]
                 }
     in
@@ -174,16 +217,8 @@ view wrap options =
                 , label = Input.labelRight [] <| text "Centre line"
                 , icon = Input.defaultCheckbox
                 }
-            , Input.checkbox
-                [ padding 5
-                , spacing 5
-                ]
-                { onChange = wrap << SetLandUse
-                , checked = options.landUse
-                , label = Input.labelRight [] <| text "Land use"
-                , icon = Input.defaultCheckbox
-                }
             ]
+        , landUseChoice
         , Input.slider commonShortHorizontalSliderStyles
             { onChange = wrap << SetTerrainFineness
             , label =

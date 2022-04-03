@@ -186,11 +186,15 @@ render3dView settings track landUse =
             indexTerrain nearbySpace track.trackTree
 
         ( landUseElements, indexWithLandUse ) =
-            if settings.landUse then
-                makeLandUse landUse spatialIndex track.trackTree floorPlane
+            case settings.landUse of
+                LandUseDataTypes.LandUseHidden ->
+                    ( [], spatialIndex )
 
-            else
-                ( [], spatialIndex )
+                LandUseDataTypes.LandUseSloped ->
+                    makeLandUseSloped landUse spatialIndex track.trackTree floorPlane
+
+                LandUseDataTypes.LandUsePlanar ->
+                    makeLandUsePlanar landUse spatialIndex track.trackTree floorPlane
 
         terrain =
             if settings.terrainFineness > 0.0 then
@@ -249,17 +253,13 @@ landUseColours =
         ]
 
 
-makeLandUse :
+makeLandUsePlanar :
     LandUseDataTypes.LandUseData
     -> Index
     -> PeteTree
     -> Plane3d Meters LocalCoords
     -> ( List (Entity LocalCoords), Index )
-makeLandUse landUse index tree groundPlane =
-    --TODO: Collect the bounding boxes and altitudes as we go, then add these to
-    --the Index, returning the new Index as well, which we then use to render Terrain!
-    --Means changing the fold state to include index but well worthwhile.
-    --Will have to pretend that there are roads, or change the index entry.
+makeLandUsePlanar landUse index tree groundPlane =
     let
         drawCone :
             Color
@@ -267,16 +267,30 @@ makeLandUse landUse index tree groundPlane =
             -> Maybe ( Entity LocalCoords, SpatialContent IndexEntry Meters LocalCoords )
         drawCone colour at =
             let
+                nearestPoint =
+                    DomainModel.earthPointFromIndex
+                        (DomainModel.nearestToRay
+                            (Axis3d.withDirection Direction3d.positiveZ at)
+                            tree
+                        )
+                        tree
+
+                altitudeAdjusted =
+                    Point3d.xyz
+                        (Point3d.xCoordinate at)
+                        (Point3d.yCoordinate at)
+                        (Point3d.zCoordinate nearestPoint)
+
                 tip =
                     Point3d.translateBy
                         (Vector3d.withLength (Length.meters 10) Direction3d.positiveZ)
-                        at
+                        altitudeAdjusted
             in
-            case Cone3d.from at tip (Length.meters 4) of
+            case Cone3d.from altitudeAdjusted tip (Length.meters 4) of
                 Just cone ->
                     Just
                         ( Scene3d.cone (Material.color colour) cone
-                        , { content = { altitude = Point3d.zCoordinate at }
+                        , { content = { altitude = Point3d.zCoordinate nearestPoint }
                           , box =
                                 BoundingBox2d.withDimensions
                                     ( Length.meters 8, Length.meters 8 )
@@ -286,20 +300,6 @@ makeLandUse landUse index tree groundPlane =
 
                 Nothing ->
                     Nothing
-
-        xyNodeIndex : Dict ( Float, Float ) (Quantity Float Meters)
-        xyNodeIndex =
-            --Ghastly hack
-            landUse.nodes
-                |> List.map
-                    (\node ->
-                        ( ( Length.inMeters <| Point3d.xCoordinate node.at
-                          , Length.inMeters <| Point3d.yCoordinate node.at
-                          )
-                        , Point3d.zCoordinate node.at
-                        )
-                    )
-                |> Dict.fromList
 
         drawPolygon :
             Color
@@ -314,23 +314,25 @@ makeLandUse landUse index tree groundPlane =
                         |> List.map (.at >> Point3d.projectInto SketchPlane3d.xy)
                         |> Polygon2d.singleLoop
 
+                { minAltitude, resultBox, count } =
+                    queryAltitudeFromIndex index
+                        (Maybe.withDefault (BoundingBox2d.singleton Point2d.origin) <|
+                            Polygon2d.boundingBox polygon
+                        )
+
+                useAltitude =
+                    if minAltitude |> Quantity.lessThan Quantity.positiveInfinity then
+                        minAltitude
+
+                    else
+                        Point3d.zCoordinate <| Plane3d.originPoint groundPlane
+
                 restoreAltitude : Point2d Meters LocalCoords -> Point3d Meters LocalCoords
                 restoreAltitude point =
-                    case
-                        Dict.get
-                            ( Length.inMeters <| Point2d.xCoordinate point
-                            , Length.inMeters <| Point2d.yCoordinate point
-                            )
-                            xyNodeIndex
-                    of
-                        Just altitude ->
-                            Point3d.xyz
-                                (Point2d.xCoordinate point)
-                                (Point2d.yCoordinate point)
-                                altitude
-
-                        Nothing ->
-                            point |> Point3d.on SketchPlane3d.xy
+                    Point3d.xyz
+                        (Point2d.xCoordinate point)
+                        (Point2d.yCoordinate point)
+                        (useAltitude |> Quantity.minus Length.centimeter)
 
                 mesh =
                     polygon
@@ -338,7 +340,7 @@ makeLandUse landUse index tree groundPlane =
                         |> TriangularMesh.mapVertices restoreAltitude
             in
             ( Scene3d.mesh (Material.color colour) (Mesh.indexedTriangles mesh)
-            , { content = { altitude = Quantity.zero }
+            , { content = { altitude = useAltitude }
               , box =
                     Polygon2d.boundingBox polygon
                         |> Maybe.withDefault (BoundingBox2d.singleton Point2d.origin)
@@ -408,6 +410,192 @@ makeLandUse landUse index tree groundPlane =
                             { scenes = polygon :: stuff.scenes
                             , unknownTags = stuff.unknownTags
                             , updatedIndex = SpatialIndex.add indexEntry stuff.updatedIndex
+                            }
+
+                        Nothing ->
+                            stuff
+
+        nodeStuff =
+            landUse.nodes
+                |> List.foldl drawNode
+                    { scenes = [], unknownTags = Dict.empty, updatedIndex = index }
+
+        wayStuff =
+            landUse.ways
+                |> List.foldl drawWay nodeStuff
+
+        --_ =
+        --    Debug.log "NODES" nodeStuff.unknownTags
+        --
+        --_ =
+        --    Debug.log "WAYS" wayStuff.unknownTags
+    in
+    ( wayStuff.scenes, wayStuff.updatedIndex )
+
+
+makeLandUseSloped :
+    LandUseDataTypes.LandUseData
+    -> Index
+    -> PeteTree
+    -> Plane3d Meters LocalCoords
+    -> ( List (Entity LocalCoords), Index )
+makeLandUseSloped landUse index tree groundPlane =
+    let
+        drawCone :
+            Color
+            -> EarthPoint
+            -> Maybe ( Entity LocalCoords, SpatialContent IndexEntry Meters LocalCoords )
+        drawCone colour at =
+            let
+                tip =
+                    Point3d.translateBy
+                        (Vector3d.withLength (Length.meters 10) Direction3d.positiveZ)
+                        at
+            in
+            case Cone3d.from at tip (Length.meters 4) of
+                Just cone ->
+                    Just
+                        ( Scene3d.cone (Material.color colour) cone
+                        , { content = { altitude = Point3d.zCoordinate at }
+                          , box =
+                                BoundingBox2d.withDimensions
+                                    ( Length.meters 8, Length.meters 8 )
+                                    (at |> Point3d.projectInto SketchPlane3d.xy)
+                          }
+                        )
+
+                Nothing ->
+                    Nothing
+
+        xyNodeIndex : Dict ( Float, Float ) (Quantity Float Meters)
+        xyNodeIndex =
+            --Ghastly hack
+            landUse.nodes
+                |> List.map
+                    (\node ->
+                        ( ( Length.inMeters <| Point3d.xCoordinate node.at
+                          , Length.inMeters <| Point3d.yCoordinate node.at
+                          )
+                        , Point3d.zCoordinate node.at
+                        )
+                    )
+                |> Dict.fromList
+
+        drawPolygon :
+            Color
+            -> List LandUseDataTypes.LandUseNode
+            -> ( Entity LocalCoords, List (SpatialContent IndexEntry Meters LocalCoords) )
+        drawPolygon colour nodes =
+            -- Must draw a 2D polygon so we can triangulate it.
+            -- Ian MacKenzie makes this a pleasure.
+            let
+                polygon =
+                    nodes
+                        |> List.map (.at >> Point3d.projectInto SketchPlane3d.xy)
+                        |> Polygon2d.singleLoop
+
+                restoreAltitude : Point2d Meters LocalCoords -> Point3d Meters LocalCoords
+                restoreAltitude point =
+                    case
+                        Dict.get
+                            ( Length.inMeters <| Point2d.xCoordinate point
+                            , Length.inMeters <| Point2d.yCoordinate point
+                            )
+                            xyNodeIndex
+                    of
+                        Just altitude ->
+                            Point3d.xyz
+                                (Point2d.xCoordinate point)
+                                (Point2d.yCoordinate point)
+                                altitude
+
+                        Nothing ->
+                            point |> Point3d.on SketchPlane3d.xy
+
+                mesh =
+                    polygon
+                        |> Polygon2d.triangulate
+                        |> TriangularMesh.mapVertices restoreAltitude
+
+                vertexIndexEntry vertex =
+                    { content = { altitude = Point3d.zCoordinate vertex }
+                    , box =
+                        BoundingBox2d.withDimensions
+                            ( Length.meters 10, Length.meters 10 )
+                            (vertex |> Point3d.projectInto SketchPlane3d.xy)
+                    }
+            in
+            ( Scene3d.mesh (Material.color colour) (Mesh.indexedTriangles mesh)
+            , List.map (.at >> vertexIndexEntry) nodes
+            )
+
+        drawNode : LandUseDataTypes.LandUseNode -> LandUseStuff -> LandUseStuff
+        drawNode node stuff =
+            case node.tags of
+                Nothing ->
+                    stuff
+
+                Just tags ->
+                    case Dict.get "natural" tags of
+                        Nothing ->
+                            stuff
+
+                        Just natural ->
+                            case Dict.get natural landUseColours of
+                                Just colour ->
+                                    -- Careful, the drawing could (compiler-wise) fail.
+                                    case drawCone colour node.at of
+                                        Just ( gotCone, indexEntry ) ->
+                                            { scenes = gotCone :: stuff.scenes
+                                            , unknownTags = stuff.unknownTags
+                                            , updatedIndex = SpatialIndex.add indexEntry stuff.updatedIndex
+                                            }
+
+                                        Nothing ->
+                                            stuff
+
+                                Nothing ->
+                                    { stuff
+                                        | unknownTags = Dict.insert "natural" natural stuff.unknownTags
+                                    }
+
+        drawWay : LandUseDataTypes.LandUseWay -> LandUseStuff -> LandUseStuff
+        drawWay way stuff =
+            case way.tags of
+                Nothing ->
+                    stuff
+
+                Just tags ->
+                    let
+                        useTag =
+                            Maybe.withDefault "" <|
+                                case
+                                    ( Dict.get "natural" tags
+                                    , Dict.get "landuse" tags
+                                    )
+                                of
+                                    ( _, Just usage ) ->
+                                        Just usage
+
+                                    ( Just natural, Nothing ) ->
+                                        Just natural
+
+                                    _ ->
+                                        Nothing
+
+                        addToIndex : SpatialContent IndexEntry Meters LocalCoords -> Index -> Index
+                        addToIndex content indexing =
+                            SpatialIndex.add content indexing
+                    in
+                    case Dict.get useTag landUseColours of
+                        Just colour ->
+                            let
+                                ( polygon, indexEntries ) =
+                                    drawPolygon colour way.nodes
+                            in
+                            { scenes = polygon :: stuff.scenes
+                            , unknownTags = stuff.unknownTags
+                            , updatedIndex = List.foldl addToIndex stuff.updatedIndex indexEntries
                             }
 
                         Nothing ->

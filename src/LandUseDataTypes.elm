@@ -4,6 +4,12 @@ import Dict exposing (Dict)
 import DomainModel exposing (EarthPoint)
 
 
+type LandUseDisplay
+    = LandUseHidden
+    | LandUsePlanar
+    | LandUseSloped
+
+
 type alias OSMLandUseData =
     { elements : List OSMLandUseElement }
 

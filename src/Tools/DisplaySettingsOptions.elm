@@ -4,6 +4,7 @@ module Tools.DisplaySettingsOptions exposing (..)
 
 import Json.Decode as D
 import Json.Encode as E
+import LandUseDataTypes
 
 
 type alias Options =
@@ -12,7 +13,7 @@ type alias Options =
     , groundPlane : Bool
     , curtainStyle : CurtainStyle
     , terrainFineness : Float -- 0.0 => OFF
-    , landUse : Bool
+    , landUse : LandUseDataTypes.LandUseDisplay
     }
 
 
@@ -57,7 +58,7 @@ decode json current =
             , groundPlane = decoded.groundPlane
             , curtainStyle = decodeCurtain decoded.curtainStyle
             , terrainFineness = 0.0
-            , landUse = False
+            , landUse = LandUseDataTypes.LandUseHidden
             }
 
         Err error ->
