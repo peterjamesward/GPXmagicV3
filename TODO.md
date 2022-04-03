@@ -15,10 +15,6 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 
 ## Minimum radius
 
-- Preview disappears when click on track
-- Seem to need to move a control for previews to appear
-- Suspect that the logic is actually **flawed**, as increasing radius should increase breaches but doesn't.
-> This could be (partly) a problem with preview or the window starting **before** the bend.
 - Integrate the Nudge logic, single case
 - (with single Undo for the multiple case)
 

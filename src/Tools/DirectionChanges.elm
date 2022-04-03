@@ -261,16 +261,7 @@ toolStateChange opened colour options track =
                     findDirectionChanges options theTrack.trackTree
             in
             ( populatedOptions
-            , [ ShowPreview
-                    { tag = "kinks"
-                    , shape = PreviewCircle
-                    , colour = colour
-                    , points =
-                        TrackLoaded.buildPreview
-                            (List.map Tuple.first populatedOptions.singlePointBreaches)
-                            theTrack.trackTree
-                    }
-              ]
+            , actions populatedOptions colour theTrack
             )
 
         _ ->
@@ -431,6 +422,10 @@ update msg options previewColour track =
 
 
 actions options previewColour track =
+    let
+        add1 x =
+            x + 1
+    in
     [ ShowPreview
         { tag = "kinks"
         , shape = PreviewCircle
@@ -444,7 +439,7 @@ actions options previewColour track =
 
                 DirectionChangeWithRadius ->
                     TrackLoaded.buildPreview
-                        (List.concatMap Tuple.first options.bendBreaches)
+                        (List.map add1 (List.concatMap Tuple.first options.bendBreaches))
                         track.trackTree
         }
     ]
