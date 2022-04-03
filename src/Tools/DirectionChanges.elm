@@ -230,7 +230,7 @@ findBendsWithRadius tree options =
                 -- NOTE: Adding 1 to the points, as these look like the ones that need a nudge.
                 ( newIndex + 1
                 , []
-                , ( newIndex :: List.map Tuple.first window |> List.map add1
+                , ( newIndex + 1 :: newIndex :: List.map Tuple.first window
                   , windowLength |> Quantity.divideBy turnDuringWindow
                   )
                     :: outputs
@@ -414,9 +414,19 @@ update msg options previewColour track =
                 ( points, estimatedRadius ) =
                     Maybe.withDefault ( [], Quantity.zero ) <|
                         List.Extra.getAt options.currentBendBreach options.bendBreaches
+
+                desired =
+                    if estimatedRadius |> Quantity.greaterThanOrEqualToZero then
+                        options.radius
+
+                    else
+                        Quantity.negate options.radius
+
+                _ =
+                    Debug.log "Adjustment" (Quantity.minus desired estimatedRadius)
             in
             ( options
-            , [ Actions.WidenBend points (Quantity.minus options.radius estimatedRadius)
+            , [ Actions.WidenBend points (Quantity.minus desired estimatedRadius)
               , TrackHasChanged
               ]
             )
