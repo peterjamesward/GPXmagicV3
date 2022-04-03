@@ -16,6 +16,7 @@ import LocalCoords exposing (LocalCoords)
 import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (Quantity)
 import ToolTip exposing (buttonStylesWithTooltip, myTooltip, tooltip)
+import Tools.Nudge
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showAngle, showDecimal0, showLongMeasure, showShortMeasure)
 import ViewPureStyles exposing (infoButton, neatToolsBorder, noTrackMessage, sliderThumb, useIcon)
@@ -226,9 +227,10 @@ findBendsWithRadius tree options =
                                 |> (+) (radiansTurned (( n, second ) :: more))
             in
             if abs turnDuringWindow >= Angle.inRadians options.threshold then
+                -- NOTE: Adding 1 to the points, as these look like the ones that need a nudge.
                 ( newIndex + 1
                 , []
-                , ( newIndex :: List.map Tuple.first window
+                , ( newIndex :: List.map Tuple.first window |> List.map add1
                   , windowLength |> Quantity.divideBy turnDuringWindow
                   )
                     :: outputs
@@ -408,8 +410,15 @@ update msg options previewColour track =
             )
 
         NudgeOne ->
+            let
+                ( points, estimatedRadius ) =
+                    Maybe.withDefault ( [], Quantity.zero ) <|
+                        List.Extra.getAt options.currentBendBreach options.bendBreaches
+            in
             ( options
-            , []
+            , [ Actions.WidenBend points (Quantity.minus options.radius estimatedRadius)
+              , TrackHasChanged
+              ]
             )
 
         NudgeAll ->
@@ -421,11 +430,11 @@ update msg options previewColour track =
             ( options, [ Actions.DisplayInfo id tag ] )
 
 
+add1 x =
+    x + 1
+
+
 actions options previewColour track =
-    let
-        add1 x =
-            x + 1
-    in
     [ ShowPreview
         { tag = "kinks"
         , shape = PreviewCircle
@@ -439,7 +448,7 @@ actions options previewColour track =
 
                 DirectionChangeWithRadius ->
                     TrackLoaded.buildPreview
-                        (List.map add1 (List.concatMap Tuple.first options.bendBreaches))
+                        (List.concatMap Tuple.first options.bendBreaches)
                         track.trackTree
         }
     ]
@@ -616,11 +625,12 @@ view imperial msgWrapper options isTrack =
                         { onPress = Just (msgWrapper NudgeOne)
                         , label = text "Widen current bend"
                         }
-                    , Input.button
-                        (alignTop :: neatToolsBorder)
-                        { onPress = Just (msgWrapper NudgeAll)
-                        , label = text "Widen these bends"
-                        }
+
+                    --, Input.button
+                    --    (alignTop :: neatToolsBorder)
+                    --    { onPress = Just (msgWrapper NudgeAll)
+                    --    , label = text "Widen these bends"
+                    --    }
                     ]
 
         wrappedRowStyle breaches =
@@ -671,3 +681,12 @@ view imperial msgWrapper options isTrack =
 
         Nothing ->
             noTrackMessage
+
+
+widenBend :
+    List Int
+    -> Quantity Float Meters
+    -> TrackLoaded msg
+    -> ( Maybe PeteTree, List GPXSource, ( Int, Int ) )
+widenBend points adjustment track =
+    Tools.Nudge.widenBendHelper points adjustment track

@@ -55,6 +55,7 @@ import Tools.BezierSplines
 import Tools.CentroidAverage
 import Tools.CurveFormer
 import Tools.DeletePoints as DeletePoints
+import Tools.DirectionChanges
 import Tools.DisplaySettings
 import Tools.Graph
 import Tools.GraphOptions exposing (Graph)
@@ -2006,6 +2007,28 @@ performActionsOnModel actions model =
                             update (GpxLoaded gpxContent) foldedModel
                     in
                     modelWithNewTrack
+
+                (Actions.WidenBend points adjustment, Just track) ->
+                    -- This for one contiguous set of points, i.e. one bend.
+                    let
+                        ( newTree, oldPoints, ( entry, exit ) ) =
+                            Tools.DirectionChanges.widenBend points adjustment track
+
+                        ( fromStart, fromEnd ) =
+                            ( entry, skipCount track.trackTree - exit )
+
+                        newTrack =
+                            track
+                                |> TrackLoaded.addToUndoStack action
+                                    fromStart
+                                    fromEnd
+                                    oldPoints
+                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                    in
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
 
                 ( TrackHasChanged, Just track ) ->
                     -- Must be wary of looping here.

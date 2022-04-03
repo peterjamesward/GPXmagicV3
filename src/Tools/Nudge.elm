@@ -105,6 +105,51 @@ applyUsingOptions options track =
     )
 
 
+widenBendHelper :
+    List Int
+    -> Quantity Float Meters
+    -> TrackLoaded msg
+    -> ( Maybe PeteTree, List GPXSource, ( Int, Int ) )
+widenBendHelper points adjustment track =
+    -- See DirectionChanges for where this used.
+    case ( List.minimum points, List.maximum points ) of
+        ( Just statedStart, Just statedEnd ) ->
+            let
+                useDummyOptions =
+                    { defaultOptions | horizontal = adjustment, fadeExtent = Length.meters 10 }
+
+                useDummyTrack =
+                    { track
+                        | currentPosition = statedStart
+                        , markerPosition = Just statedEnd
+                    }
+
+                ( (actualStart, actualEnd), newPoints ) =
+                    computeNudgedPoints useDummyOptions useDummyTrack
+
+                newTree =
+                    DomainModel.replaceRange
+                        actualStart
+                        (skipCount track.trackTree - actualEnd)
+                        track.referenceLonLat
+                        (List.map .gpx newPoints)
+                        track.trackTree
+
+                oldPoints =
+                    DomainModel.extractPointsInRange
+                        actualStart
+                        (skipCount track.trackTree - actualEnd)
+                        track.trackTree
+            in
+            ( newTree
+            , List.map Tuple.second oldPoints
+            , ( actualStart, actualEnd )
+            )
+
+        _ ->
+            ( Nothing, [], ( 0, 0 ) )
+
+
 toolStateChange :
     Bool
     -> Element.Color

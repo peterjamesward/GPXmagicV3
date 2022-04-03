@@ -7,8 +7,10 @@ import File exposing (File)
 import Http
 import Json.Decode as E
 import LandUseDataTypes
+import Length exposing (Meters)
 import OAuth
 import PreviewData exposing (PreviewData)
+import Quantity exposing (Quantity)
 import Tools.BendSmootherOptions
 import Tools.BezierOptions
 import Tools.CentroidAverageOptions
@@ -94,6 +96,7 @@ type ToolAction msg
     | LockToolOpen Bool String
     | ChangeActiveTrack Int
     | MakeRouteFromGraph
+    | WidenBend (List Int) (Quantity Float Meters)
 
 
 interpretAction : ToolAction msg -> String
@@ -177,6 +180,9 @@ interpretAction action =
 
         MakeRouteFromGraph ->
             "route maker"
+
+        WidenBend _ _ ->
+            "widen bend"
 
         _ ->
             "tell Pete this needs a message"
