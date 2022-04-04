@@ -2,6 +2,7 @@ module ViewThirdPerson exposing (..)
 
 import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
+import Axis2d
 import Axis3d
 import Camera3d exposing (Camera3d)
 import Circle2d
@@ -14,9 +15,11 @@ import Element exposing (..)
 import Frame2d
 import Geometry.Svg as Svg
 import Html.Events.Extra.Mouse as Mouse exposing (Button(..))
+import LandUseDataTypes
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
 import Pixels exposing (Pixels)
+import Plane3d
 import Point2d
 import Point3d
 import Point3d.Projection as Point3d
@@ -26,6 +29,7 @@ import Scene3d exposing (Entity, backgroundColor)
 import Spherical
 import Svg
 import Svg.Attributes
+import Tools.DisplaySettingsOptions
 import TrackLoaded exposing (TrackLoaded)
 import Vector3d
 import View3dCommonElements exposing (..)
@@ -34,12 +38,13 @@ import Viewpoint3d exposing (Viewpoint3d)
 
 view :
     Context
+    -> Tools.DisplaySettingsOptions.Options
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> TrackLoaded msg
     -> List (Entity LocalCoords)
     -> (Msg -> msg)
     -> Element msg
-view context ( givenWidth, givenHeight ) track scene msgWrapper =
+view context display ( givenWidth, givenHeight ) track scene msgWrapper =
     let
         dragging =
             context.dragAction
@@ -66,29 +71,64 @@ view context ( givenWidth, givenHeight ) track scene msgWrapper =
                 )
 
         nodes2d =
-            track.landUseData.places
-                |> Dict.map
-                    (\name place ->
-                        place |> Point3d.toScreenSpace camera screenRectangle
-                    )
+            case display.landUse of
+                LandUseDataTypes.LandUseSloped ->
+                    track.landUseData.places
+                        |> Dict.map
+                            (\name place ->
+                                place |> Point3d.toScreenSpace camera screenRectangle
+                            )
 
-        -- Create an SVG circle at each Node
+                LandUseDataTypes.LandUseHidden ->
+                    Dict.empty
+
+                LandUseDataTypes.LandUsePlanar ->
+                    track.landUseData.places
+                        |> Dict.map
+                            (\name place ->
+                                place
+                                    |> Point3d.projectOnto Plane3d.xy
+                                    |> Point3d.toScreenSpace camera screenRectangle
+                            )
+
+        textAttributes atPoint =
+            [ Svg.Attributes.fill "white"
+            , Svg.Attributes.fontFamily "sans-serif"
+            , Svg.Attributes.fontSize "12px"
+            , Svg.Attributes.stroke "none"
+            , Svg.Attributes.x (String.fromFloat (Pixels.toFloat (Point2d.xCoordinate atPoint) + 10))
+            , Svg.Attributes.y (String.fromFloat (Pixels.toFloat (Point2d.yCoordinate atPoint)))
+            ]
+
+        -- Create an SVG label at each place
         placeNames =
             nodes2d
                 |> Dict.map
                     (\name vertex ->
-                        Svg.circle2d
-                            [ Svg.Attributes.stroke "white"
-                            , Svg.Attributes.strokeWidth "3"
-                            , Svg.Attributes.fill "none"
+                        Svg.g []
+                            [ Svg.circle2d
+                                [ Svg.Attributes.stroke "white"
+                                , Svg.Attributes.strokeWidth "1"
+                                , Svg.Attributes.fill "none"
+                                ]
+                                (Circle2d.withRadius (Pixels.float 3) vertex)
+                            , Svg.text_
+                                (textAttributes vertex)
+                                [ Svg.text name ]
+                                -- Hack: flip the text upside down since our later
+                                -- 'Svg.relativeTo topLeftFrame' call will flip it
+                                -- back right side up
+                                |> Svg.mirrorAcross (Axis2d.through vertex Direction2d.x)
                             ]
-                            (Circle2d.withRadius (Pixels.float 8) vertex)
                     )
                 |> Dict.values
                 |> Svg.g []
 
         placesOverlay =
-            if Dict.isEmpty track.landUseData.places then
+            if
+                Dict.isEmpty track.landUseData.places
+                    || not display.placeNames
+            then
                 none
 
             else

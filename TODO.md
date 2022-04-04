@@ -9,6 +9,9 @@ BUG: Undo single point smooth at track start removes a point.
 BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 > Awaiting script from JB.
 
+BUG: Move & Stretch does not move Start and Finish 
+> Not sure if DO means S/F or the range markers, probably the latter.
+
 --
 
 # WIP

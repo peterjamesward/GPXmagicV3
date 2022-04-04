@@ -20,6 +20,7 @@ defaultOptions =
     , groundPlane = True
     , terrainFineness = 0.0
     , landUse = LandUseDataTypes.LandUseHidden
+    , placeNames = False
     }
 
 
@@ -31,6 +32,7 @@ type Msg
     | SetLandUse LandUseDataTypes.LandUseDisplay
     | SetTerrainFineness Float
     | DisplayInfo String String
+    | SetPlaceNames Bool
 
 
 toolID : String
@@ -101,6 +103,13 @@ update msg options =
             let
                 newOptions =
                     { options | centreLine = state }
+            in
+            ( newOptions, actions newOptions )
+
+        SetPlaceNames state ->
+            let
+                newOptions =
+                    { options | placeNames = state }
             in
             ( newOptions, actions newOptions )
 
@@ -215,6 +224,15 @@ view wrap options =
                 { onChange = wrap << SetCentreLine
                 , checked = options.centreLine
                 , label = Input.labelRight [] <| text "Centre line"
+                , icon = Input.defaultCheckbox
+                }
+            , Input.checkbox
+                [ padding 5
+                , spacing 5
+                ]
+                { onChange = wrap << SetPlaceNames
+                , checked = options.placeNames
+                , label = Input.labelRight [] <| text "Place names"
                 , icon = Input.defaultCheckbox
                 }
             ]

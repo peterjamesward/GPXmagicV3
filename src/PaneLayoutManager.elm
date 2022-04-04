@@ -23,6 +23,7 @@ import PreviewData exposing (PreviewData)
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
 import SceneBuilder3D
+import Tools.DisplaySettingsOptions
 import Tools.Flythrough
 import Tools.GraphOptions exposing (Graph)
 import ToolsController
@@ -746,12 +747,13 @@ viewPanes :
     -> Maybe (TrackLoaded msg)
     -> Tools.GraphOptions.Graph msg
     -> Tools.GraphOptions.Options msg
+    -> Tools.DisplaySettingsOptions.Options
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Options
     -> Maybe Tools.Flythrough.Flythrough
     -> Dict String PreviewData
     -> Element msg
-viewPanes msgWrapper mTrack graph graphOptions ( w, h ) options mFlythrough previews =
+viewPanes msgWrapper mTrack graph graphOptions displayOptions ( w, h ) options mFlythrough previews =
     let
         ( paneWidth, paneHeight ) =
             dimensionsWithLayout options.paneLayout ( w, h )
@@ -763,6 +765,7 @@ viewPanes msgWrapper mTrack graph graphOptions ( w, h ) options mFlythrough prev
                         ( Just context, Just track ) ->
                             ViewThirdPerson.view
                                 context
+                                displayOptions
                                 ( paneWidth, paneHeight )
                                 track
                                 options.scene3d

@@ -14,6 +14,7 @@ type alias Options =
     , curtainStyle : CurtainStyle
     , terrainFineness : Float -- 0.0 => OFF
     , landUse : LandUseDataTypes.LandUseDisplay
+    , placeNames : Bool
     }
 
 
@@ -59,6 +60,7 @@ decode json current =
             , curtainStyle = decodeCurtain decoded.curtainStyle
             , terrainFineness = 0.0
             , landUse = LandUseDataTypes.LandUseHidden
+            , placeNames = False
             }
 
         Err error ->

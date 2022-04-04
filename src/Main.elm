@@ -1013,6 +1013,7 @@ viewPaneArea model =
             model.track
             model.toolOptions.graphOptions.graph
             model.toolOptions.graphOptions
+            model.toolOptions.displaySettings
             model.contentArea
             model.paneLayoutOptions
             model.toolOptions.flythroughSettings.flythrough
