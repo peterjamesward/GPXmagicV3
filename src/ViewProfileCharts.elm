@@ -728,7 +728,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
         textLine lineNum content =
             Svg.text_
                 [ Svg.Attributes.fill "black"
-                , Svg.Attributes.fontFamily "Sans serif"
+                , Svg.Attributes.fontFamily "sans-serif"
                 , Svg.Attributes.fontSize "20px"
                 , Svg.Attributes.stroke "none"
                 , Svg.Attributes.x
