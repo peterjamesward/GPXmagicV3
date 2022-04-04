@@ -4,6 +4,7 @@ module SceneBuilder3D exposing (..)
 -- Profile is 2d drawing (or chart).
 
 import Angle exposing (Angle)
+import Array
 import Axis3d
 import BoundingBox2d exposing (BoundingBox2d)
 import BoundingBox3d exposing (BoundingBox3d)
@@ -467,20 +468,6 @@ makeLandUseSloped landUse index tree groundPlane =
                 Nothing ->
                     Nothing
 
-        xyNodeIndex : Dict ( Float, Float ) (Quantity Float Meters)
-        xyNodeIndex =
-            --Ghastly hack
-            landUse.nodes
-                |> List.map
-                    (\node ->
-                        ( ( Length.inMeters <| Point3d.xCoordinate node.at
-                          , Length.inMeters <| Point3d.yCoordinate node.at
-                          )
-                        , Point3d.zCoordinate node.at
-                        )
-                    )
-                |> Dict.fromList
-
         drawPolygon :
             Color
             -> List LandUseDataTypes.LandUseNode
@@ -494,28 +481,22 @@ makeLandUseSloped landUse index tree groundPlane =
                         |> List.map (.at >> Point3d.projectInto SketchPlane3d.xy)
                         |> Polygon2d.singleLoop
 
-                restoreAltitude : Point2d Meters LocalCoords -> Point3d Meters LocalCoords
-                restoreAltitude point =
-                    case
-                        Dict.get
-                            ( Length.inMeters <| Point2d.xCoordinate point
-                            , Length.inMeters <| Point2d.yCoordinate point
-                            )
-                            xyNodeIndex
-                    of
-                        Just altitude ->
-                            Point3d.xyz
-                                (Point2d.xCoordinate point)
-                                (Point2d.yCoordinate point)
-                                altitude
-
-                        Nothing ->
-                            point |> Point3d.on SketchPlane3d.xy
-
-                mesh =
+                mesh2d =
                     polygon
                         |> Polygon2d.triangulate
-                        |> TriangularMesh.mapVertices restoreAltitude
+
+                mesh3d =
+                    let
+                        vertices2d =
+                            TriangularMesh.vertices mesh2d
+
+                        faceIndices =
+                            TriangularMesh.faceIndices mesh2d
+
+                        vertices3d =
+                            Array.fromList <| List.map .at nodes
+                    in
+                    TriangularMesh.indexed vertices3d faceIndices
 
                 vertexIndexEntry vertex =
                     { content = { altitude = Point3d.zCoordinate vertex }
@@ -525,7 +506,7 @@ makeLandUseSloped landUse index tree groundPlane =
                             (vertex |> Point3d.projectInto SketchPlane3d.xy)
                     }
             in
-            ( Scene3d.mesh (Material.color colour) (Mesh.indexedTriangles mesh)
+            ( Scene3d.mesh (Material.color colour) (Mesh.indexedTriangles mesh3d)
             , List.map (.at >> vertexIndexEntry) nodes
             )
 

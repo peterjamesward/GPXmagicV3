@@ -18,6 +18,7 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 - Add tool: (possibly clone Display)
      - Display legend, wrapped row of colour bars with text inside;
      - Display named places; click will set focal point (on some views);
+     - ~~Possibly, SVG overlay with names if tool is open (no, it's not the Map)~~
      - Possibly, display tags for view click location (on some views).
 
 ## Minimum radius
@@ -25,7 +26,7 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 Current scheme is "OK-ish".
 
 - Try again with estimating centre:
-> Work out radius on perpendicular for all points, take centroid of those points.
+> Using estimated radius on perpendicular for points in window, take centroid of those points.
 > Substitute for window with **arc** at given radius (was thinking interpolation but this is obvious conclusion).
 > Not quite sure what start & end will be as ideally would be tangential.
 
