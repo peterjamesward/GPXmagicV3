@@ -12,6 +12,7 @@ import FlatColors.ChinesePalette
 import LandUseDataTypes
 import SceneBuilder3D
 import Tools.LandUseColours exposing (landUseColours)
+import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (elmuiColour)
 import ViewPureStyles exposing (contrastingColour)
 
@@ -53,6 +54,7 @@ textDictionary =
         ]
     )
 
+
 update :
     Msg
     -> (Msg -> msg)
@@ -70,31 +72,36 @@ update msg wrapper options =
             ( options, [ Actions.DisplayInfo tool tag ] )
 
 
-view : (Msg -> msg) -> Options -> Element msg
-view wrap options =
+view : (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view wrap options maybeTrack =
     let
-        modeSelection =
-            Input.radioRow [ centerX, spacing 5 ]
-                { onChange = wrap << SetMode
-                , options =
-                    [ Input.option Legend (text "Legend")
-                    , Input.option Names (text "Places")
-                    ]
-                , selected = Just options.mode
-                , label = Input.labelHidden "Mode"
-                }
+        status =
+            case maybeTrack of
+                Just track ->
+                    case track.landUseData.status of
+                        LandUseDataTypes.LandUseError err ->
+                            err
+
+                        LandUseDataTypes.LandUseNoTrack ->
+                            "No track loaded yet"
+
+                        LandUseDataTypes.LandUseWaitingOSM ->
+                            "Waiting for OSM data"
+
+                        LandUseDataTypes.LandUseWaitingMap ->
+                            "Waiting for altitude data"
+
+                        LandUseDataTypes.LandUseOK ->
+                            "Success in the realm of land use"
+
+                Nothing ->
+                    "Land use will be fetched when you load a track"
     in
     el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
         column [ padding 4, spacing 6, width fill ]
             [ none
-
-            --, modeSelection
-            , case options.mode of
-                Legend ->
-                    legend
-
-                Names ->
-                    none
+            , paragraph [] [ text status ]
+            , legend
             ]
 
 

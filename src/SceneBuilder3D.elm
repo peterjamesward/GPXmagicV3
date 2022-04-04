@@ -54,9 +54,8 @@ roadWidth =
 render3dView :
     Tools.DisplaySettingsOptions.Options
     -> TrackLoaded msg
-    -> LandUseDataTypes.LandUseData
     -> List (Entity LocalCoords)
-render3dView settings track landUse =
+render3dView settings track =
     let
         nominalRenderDepth =
             clamp 1 10 <|
@@ -195,10 +194,10 @@ render3dView settings track landUse =
                     ( [], spatialIndex )
 
                 LandUseDataTypes.LandUseSloped ->
-                    makeLandUseSloped landUse spatialIndex track.trackTree floorPlane
+                    makeLandUseSloped track.landUseData spatialIndex track.trackTree floorPlane
 
                 LandUseDataTypes.LandUsePlanar ->
-                    makeLandUsePlanar landUse spatialIndex track.trackTree floorPlane
+                    makeLandUsePlanar track.landUseData spatialIndex track.trackTree floorPlane
 
         terrain =
             if settings.terrainFineness > 0.0 then
@@ -230,7 +229,6 @@ type alias LandUseStuff =
     , unknownTags : Dict String String
     , updatedIndex : Index
     }
-
 
 
 makeLandUsePlanar :

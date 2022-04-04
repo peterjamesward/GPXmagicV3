@@ -136,7 +136,6 @@ type alias Model =
     -- Visuals (scenes now in PaneLayoutManager)
     , previews : Dict String PreviewData
     , flythroughRunning : Bool
-    , landUseData : LandUseDataTypes.LandUseData
     , needsRendering : Bool
 
     -- Layout stuff
@@ -233,7 +232,6 @@ init mflags origin navigationKey =
       , svgFileOptions = SvgPathExtractor.defaultOptions
       , track = Nothing
       , previews = Dict.empty
-      , landUseData = LandUseDataOSM.emptyLandUse
       , needsRendering = False
       , flythroughRunning = False
       , windowSize = ( 1000, 800 )
@@ -289,7 +287,6 @@ render model =
                         (Tuple.first model.contentArea)
                         track
                         model.previews
-                        model.landUseData
             in
             { model
                 | paneLayoutOptions = paneLayout
@@ -697,8 +694,13 @@ Please check the file contains GPX data.""" }
                     let
                         ( landUse, cmds ) =
                             LandUseDataOSM.processLandUseData results track
+
+                        newTrack =
+                            { track
+                                | landUseData = landUse
+                            }
                     in
-                    ( { model | landUseData = landUse }, cmds )
+                    ( { model | track = Just newTrack }, cmds )
 
                 Nothing ->
                     ( model, Cmd.none )
@@ -732,7 +734,6 @@ adoptTrackInModel track model =
                 , modalMessage = Nothing
                 , previews = Dict.empty
                 , toolOptions = newToolOptions
-                , landUseData = LandUseDataOSM.emptyLandUse
             }
 
         actions =
@@ -1826,12 +1827,17 @@ performActionsOnModel actions model =
                     }
 
                 ( ApplyLandUseAltitudes altitudes, Just track ) ->
+                    let
+                        newTrack =
+                            { track
+                                | landUseData =
+                                    LandUseDataOSM.applyAltitudes
+                                        altitudes
+                                        track
+                            }
+                    in
                     { foldedModel
-                        | landUseData =
-                            LandUseDataOSM.applyAltitudes
-                                altitudes
-                                track
-                                foldedModel.landUseData
+                        | track = Just newTrack
                         , needsRendering = True
                     }
 
@@ -2008,7 +2014,7 @@ performActionsOnModel actions model =
                     in
                     modelWithNewTrack
 
-                (Actions.WidenBend points adjustment, Just track) ->
+                ( Actions.WidenBend points adjustment, Just track ) ->
                     -- This for one contiguous set of points, i.e. one bend.
                     let
                         ( newTree, oldPoints, ( entry, exit ) ) =

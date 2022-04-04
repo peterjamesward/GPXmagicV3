@@ -204,15 +204,14 @@ render :
     -> Quantity Int Pixels
     -> TrackLoaded msg
     -> Dict String PreviewData
-    -> LandUseDataTypes.LandUseData
     -> Options
-render toolSettings options width track previews landUse =
+render toolSettings options width track previews =
     --Profile stuff now lives in the pane context, as each pane could
     --have different version!
     { options
         | scene3d =
             SceneBuilder3D.renderPreviews previews
-                ++ SceneBuilder3D.render3dView toolSettings.displaySettings track landUse
+                ++ SceneBuilder3D.render3dView toolSettings.displaySettings track
     }
 
 

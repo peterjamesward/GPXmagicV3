@@ -13,6 +13,11 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 
 # WIP
 
+## Land use
+
+- Display HTTP & parse errors in tool (e.g. 504)
+- SVG overlay with place names -- you know you want to.
+
 ## Minimum radius (whole track or range thereof)
 
 Just had a thought. If we use `Point3d.circumcenter` along the track (range), and if _anywhere_ the
@@ -27,10 +32,6 @@ Current scheme is "OK-ish".
 
 If successful, add multiple case
 - (with single Undo for the multiple case)
-
-## Land use
-  
-- SVG overlay with place names -- you know you want to.
 
 ---
 

@@ -20,7 +20,26 @@ type alias LandUseData =
     , ways : List LandUseWay
     , rawData : OSMLandUseData
     , places : Dict String EarthPoint
+    , status : LandUseStatus
     }
+
+
+emptyLandUse : LandUseData
+emptyLandUse =
+    { nodes = []
+    , ways = []
+    , rawData = { elements = [] }
+    , places = Dict.empty
+    , status = LandUseNoTrack
+    }
+
+
+type LandUseStatus
+    = LandUseNoTrack
+    | LandUseWaitingOSM
+    | LandUseWaitingMap
+    | LandUseOK
+    | LandUseError String
 
 
 type OSMLandUseElement

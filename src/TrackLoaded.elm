@@ -3,6 +3,7 @@ module TrackLoaded exposing (..)
 import Actions exposing (ToolAction)
 import DomainModel exposing (..)
 import Json.Encode as E
+import LandUseDataTypes
 import Length exposing (inMeters)
 import Point3d
 import PreviewData exposing (PreviewPoint)
@@ -19,6 +20,7 @@ type alias TrackLoaded msg =
     , undos : List (UndoEntry msg)
     , redos : List (UndoEntry msg)
     , lastMapClick : ( Float, Float )
+    , landUseData : LandUseDataTypes.LandUseData
     }
 
 
@@ -50,6 +52,7 @@ newTrackFromTree refLonLat newTree =
     , undos = []
     , redos = []
     , lastMapClick = ( 0, 0 )
+    , landUseData = LandUseDataTypes.emptyLandUse
     }
 
 
@@ -90,6 +93,10 @@ removeAdjacentDuplicates gpxs =
 
 trackFromPoints : String -> List GPXSource -> Maybe (TrackLoaded msg)
 trackFromPoints trackName gpxTrack =
+    let
+        landuse =
+            LandUseDataTypes.emptyLandUse
+    in
     case treeFromSourcePoints <| removeAdjacentDuplicates gpxTrack of
         Just aTree ->
             Just
@@ -102,6 +109,7 @@ trackFromPoints trackName gpxTrack =
                 , redos = []
                 , trackName = Just trackName
                 , lastMapClick = ( 0, 0 )
+                , landUseData = { landuse | status = LandUseDataTypes.LandUseWaitingOSM }
                 }
 
         Nothing ->

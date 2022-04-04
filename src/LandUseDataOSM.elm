@@ -15,19 +15,11 @@ import Quantity
 import String.Interpolate
 import TrackLoaded exposing (TrackLoaded)
 import Url.Builder as Builder
+import Utils
 
 
 apiRoot =
     "https://overpass.kumi.systems"
-
-
-emptyLandUse : LandUseData
-emptyLandUse =
-    { nodes = []
-    , ways = []
-    , rawData = { elements = [] }
-    , places = Dict.empty
-    }
 
 
 requestLandUseData : (Result Http.Error OSMLandUseData -> msg) -> TrackLoaded msg -> Cmd msg
@@ -51,7 +43,10 @@ processLandUseData results track =
     case results of
         Ok landUse ->
             -- Just save raw, process when we have altitudes from Map.
-            ( { nodes = [], ways = [], rawData = landUse, places = Dict.empty }
+            ( { emptyLandUse
+                | rawData = landUse
+                , status = LandUseWaitingMap
+              }
             , fetchAltitudesFromMap landUse
             )
 
@@ -60,7 +55,9 @@ processLandUseData results track =
                 _ =
                     Debug.log "error" error
             in
-            ( emptyLandUse, Cmd.none )
+            ( { emptyLandUse | status = LandUseError <| Utils.errorToString error }
+            , Cmd.none
+            )
 
 
 fetchAltitudesFromMap : OSMLandUseData -> Cmd msg
@@ -92,14 +89,16 @@ fetchAltitudesFromMap raw =
     MapPortController.fetchElevationsForPoints gpxLike
 
 
-applyAltitudes : List (Maybe Float) -> TrackLoaded msg -> LandUseData -> LandUseData
-applyAltitudes altitudes track justRaw =
-    --TODO: Allow for `null` elevations.
+applyAltitudes : List (Maybe Float) -> TrackLoaded msg -> LandUseData
+applyAltitudes altitudes track =
     let
+        justRaw =
+            track.landUseData
+
         groundLevel =
             DomainModel.boundingBox track.trackTree
-            |> BoundingBox3d.minZ
-            |> Quantity.minus (Length.foot)
+                |> BoundingBox3d.minZ
+                |> Quantity.minus Length.foot
 
         rawNodes : List OSMLandUseNode
         rawNodes =
@@ -218,6 +217,7 @@ applyAltitudes altitudes track justRaw =
     , ways = ways
     , places = places
     , rawData = { elements = [] } -- discard raw data
+    , status = LandUseOK
     }
 
 
