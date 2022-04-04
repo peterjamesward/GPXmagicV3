@@ -16,7 +16,14 @@ BUG: Move & Stretch does not move Start and Finish
 
 # WIP
 
+## Place names
+
+Make overlay re-usable and use on Plan and maybe First person views.
+
 ## Minimum radius (whole track or range thereof)
+
+Possibly put this inside Radiused Bends tool, as a "Automatic" mode.
+(Could optionally replace points with arc; would then be consistent.)
 
 Just had a thought. If we use `Point3d.circumcenter` along the track (range), and if _anywhere_ the
 circumcircle has less than `radius`, we displace the points (if needed) outwards to the desired radius.

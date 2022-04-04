@@ -793,6 +793,7 @@ viewPanes msgWrapper mTrack graph graphOptions displayOptions ( w, h ) options m
                         ( Just context, Just track ) ->
                             ViewPlan.view
                                 context
+                                displayOptions
                                 ( paneWidth, paneHeight )
                                 track
                                 options.scene3d

@@ -26,8 +26,10 @@ import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
 import Spherical exposing (metresPerPixel)
+import Tools.DisplaySettingsOptions
 import TrackLoaded exposing (TrackLoaded)
 import Vector3d
+import View3dCommonElements exposing (placesOverlay)
 import ViewPureStyles exposing (useIcon)
 import Viewpoint3d exposing (Viewpoint3d)
 
@@ -154,15 +156,22 @@ onContextMenu msg =
 
 view :
     Context
+    -> Tools.DisplaySettingsOptions.Options
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> TrackLoaded msg
     -> List (Entity LocalCoords)
     -> (Msg -> msg)
     -> Element msg
-view context contentArea track scene msgWrapper =
+view context display contentArea track scene msgWrapper =
     let
         dragging =
             context.dragAction
+
+        camera =
+            deriveCamera track.trackTree context track.currentPosition
+
+        overlay =
+            placesOverlay display contentArea track camera
     in
     el
         [ htmlAttribute <| Mouse.onDown (ImageGrab >> msgWrapper)
@@ -181,12 +190,13 @@ view context contentArea track scene msgWrapper =
         , pointer
         , Border.width 0
         , Border.color FlatColors.ChinesePalette.peace
+        , inFront <| overlay
         , inFront <| zoomButtons msgWrapper context
         ]
     <|
         html <|
             Scene3d.sunny
-                { camera = deriveCamera track.trackTree context track.currentPosition
+                { camera = camera
                 , dimensions = contentArea
                 , background = backgroundColor Color.lightBlue
                 , clipDepth = Length.meters 1
