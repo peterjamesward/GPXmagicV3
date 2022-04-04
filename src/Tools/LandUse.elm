@@ -11,6 +11,7 @@ import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
 import LandUseDataTypes
 import SceneBuilder3D
+import Tools.LandUseColours exposing (landUseColours)
 import UtilsForViews exposing (elmuiColour)
 import ViewPureStyles exposing (contrastingColour)
 
@@ -51,7 +52,6 @@ textDictionary =
         , ( "info", """Displays the colour legend for land use data, and a list of named places.""" )
         ]
     )
-
 
 update :
     Msg
@@ -119,7 +119,7 @@ legend =
         ]
     <|
         List.map showLegendEntry <|
-            Dict.toList SceneBuilder3D.landUseColours
+            Dict.toList landUseColours
 
 
 names : LandUseDataTypes.LandUseData -> Element msg

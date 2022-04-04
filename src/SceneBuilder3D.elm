@@ -19,6 +19,8 @@ import FlatColors.AmericanPalette
 import FlatColors.AussiePalette
 import FlatColors.CanadianPalette
 import FlatColors.FlatUIPalette
+import FlatColors.FrenchPalette
+import FlatColors.IndianPalette
 import LandUseDataOSM
 import LandUseDataTypes
 import Length exposing (Meters)
@@ -37,6 +39,7 @@ import Scene3d.Mesh as Mesh
 import SketchPlane3d
 import SpatialIndex exposing (SpatialContent)
 import Tools.DisplaySettingsOptions exposing (CurtainStyle(..))
+import Tools.LandUseColours exposing (landUseColours)
 import TrackLoaded exposing (TrackLoaded)
 import TriangularMesh
 import Utils exposing (reversingCons)
@@ -86,7 +89,7 @@ render3dView settings track landUse =
                         |> Quantity.minus (Length.inches 6)
             in
             if settings.groundPlane && settings.terrainFineness == 0.0 then
-                [ Scene3d.quad (Material.color Color.grey)
+                [ Scene3d.quad (Material.color <| colorFromElmUiColour FlatColors.IndianPalette.keppel)
                     (Point3d.xyz minX minY modelMinZ)
                     (Point3d.xyz minX maxY modelMinZ)
                     (Point3d.xyz maxX maxY modelMinZ)
@@ -228,30 +231,6 @@ type alias LandUseStuff =
     , updatedIndex : Index
     }
 
-
-nodeColourMap =
-    Dict.fromList
-
-
-landUseColours =
-    Dict.fromList
-        [ ( "tree", Color.darkGreen )
-        , ( "rock", Color.lightBrown )
-        , ( "peak", Color.white )
-        , ( "water", Color.lightBlue )
-        , ( "wood", Color.darkGreen )
-        , ( "recreation_ground", Color.lightGreen )
-        , ( "grass", Color.lightGreen )
-        , ( "meadow", Color.lightYellow )
-        , ( "farmland", colorFromElmUiColour FlatColors.AmericanPalette.lightGreenishBlue )
-        , ( "grassland", colorFromElmUiColour FlatColors.AmericanPalette.mintLeaf )
-        , ( "forest", Color.darkGreen )
-        , ( "industrial", Color.darkGray )
-        , ( "residential", colorFromElmUiColour FlatColors.AmericanPalette.firstDate )
-        , ( "retail", colorFromElmUiColour FlatColors.FlatUIPalette.carrot )
-        , ( "railway", colorFromElmUiColour FlatColors.FlatUIPalette.silver )
-        , ( "brownfield", Color.brown )
-        ]
 
 
 makeLandUsePlanar :
