@@ -15,8 +15,10 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 
 ## Land use
 
-- Display HTTP & parse errors in tool (e.g. 504)
 - SVG overlay with place names -- you know you want to.
+> Needs a display option
+> Needs to reflect 2d or 3d
+> Needs to show the names!
 
 ## Minimum radius (whole track or range thereof)
 

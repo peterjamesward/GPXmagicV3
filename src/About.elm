@@ -9,12 +9,22 @@ aboutText =
 
 ## In this release ...
 
-* New _Land use_ tool simply displays the colour legend. (More to come.)
+* New _Land use_ tool simply displays the colour legend and any error messages.
 
 * The _Bend problems_ tool, in _With radius_ mode, has a new "Widen bend" button.
 This attempts to widen the bend by the simple act of "kicking out" the track points
 to roughly the desired radius. May need more than one attempt, depending on the
 shape of the bend. (The GPXmagic elves are working on something better.)
+
+## Acknowledgements
+
+* Special thanks to David Ogle for thorough testing, great bug reports, usability advice, and more.
+
+* Thanks to John Bytheway for v3 ideas and support.
+
+* Thanks to all those who've provided support, comments and help along the way.
+
+* Thank to RGT for having the Magic Roads concept and an excellent indoor cycling platform.
 
 ## Legal guff
 

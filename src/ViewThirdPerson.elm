@@ -4,21 +4,28 @@ import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
 import Axis3d
 import Camera3d exposing (Camera3d)
+import Circle2d
 import Color
+import Dict
 import Direction2d exposing (Direction2d)
 import Direction3d exposing (negativeZ, positiveZ)
 import DomainModel exposing (..)
 import Element exposing (..)
+import Frame2d
+import Geometry.Svg as Svg
 import Html.Events.Extra.Mouse as Mouse exposing (Button(..))
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
 import Pixels exposing (Pixels)
 import Point2d
 import Point3d
+import Point3d.Projection as Point3d
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
 import Spherical
+import Svg
+import Svg.Attributes
 import TrackLoaded exposing (TrackLoaded)
 import Vector3d
 import View3dCommonElements exposing (..)
@@ -32,10 +39,65 @@ view :
     -> List (Entity LocalCoords)
     -> (Msg -> msg)
     -> Element msg
-view context contentArea track scene msgWrapper =
+view context ( givenWidth, givenHeight ) track scene msgWrapper =
     let
         dragging =
             context.dragAction
+
+        camera =
+            deriveCamera track.trackTree context track.currentPosition
+
+        topLeftFrame =
+            Frame2d.atPoint
+                (Point2d.xy Quantity.zero (Quantity.toFloatQuantity givenHeight))
+                |> Frame2d.reverseY
+
+        ( svgWidth, svgHeight ) =
+            ( String.fromInt <| Pixels.inPixels givenWidth
+            , String.fromInt <| Pixels.inPixels givenHeight
+            )
+
+        screenRectangle =
+            Rectangle2d.from
+                Point2d.origin
+                (Point2d.xy
+                    (Quantity.toFloatQuantity givenWidth)
+                    (Quantity.toFloatQuantity givenHeight)
+                )
+
+        nodes2d =
+            track.landUseData.places
+                |> Dict.map
+                    (\name place ->
+                        place |> Point3d.toScreenSpace camera screenRectangle
+                    )
+
+        -- Create an SVG circle at each Node
+        placeNames =
+            nodes2d
+                |> Dict.map
+                    (\name vertex ->
+                        Svg.circle2d
+                            [ Svg.Attributes.stroke "white"
+                            , Svg.Attributes.strokeWidth "3"
+                            , Svg.Attributes.fill "none"
+                            ]
+                            (Circle2d.withRadius (Pixels.float 8) vertex)
+                    )
+                |> Dict.values
+                |> Svg.g []
+
+        placesOverlay =
+            if Dict.isEmpty track.landUseData.places then
+                none
+
+            else
+                html <|
+                    Svg.svg
+                        [ Svg.Attributes.width svgWidth
+                        , Svg.Attributes.height svgHeight
+                        ]
+                        [ Svg.relativeTo topLeftFrame placeNames ]
     in
     el
         ((if dragging /= DragNone then
@@ -44,6 +106,7 @@ view context contentArea track scene msgWrapper =
           else
             pointer
          )
+            :: (inFront <| placesOverlay)
             :: (inFront <| zoomButtons msgWrapper context)
             :: common3dSceneAttributes msgWrapper context
         )
@@ -51,7 +114,7 @@ view context contentArea track scene msgWrapper =
         html <|
             Scene3d.sunny
                 { camera = deriveCamera track.trackTree context track.currentPosition
-                , dimensions = contentArea
+                , dimensions = ( givenWidth, givenHeight )
                 , background = backgroundColor Color.lightBlue
                 , clipDepth = Length.meters 1
                 , entities = scene
