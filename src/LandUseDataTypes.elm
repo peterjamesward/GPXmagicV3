@@ -18,6 +18,7 @@ type alias LandUseData =
     { nodes : List LandUseNode
     , ways : List LandUseWay
     , rawData : OSMLandUseData
+    , places : Dict String EarthPoint
     }
 
 

@@ -26,6 +26,7 @@ emptyLandUse =
     { nodes = []
     , ways = []
     , rawData = { elements = [] }
+    , places = Dict.empty
     }
 
 
@@ -50,7 +51,7 @@ processLandUseData results track =
     case results of
         Ok landUse ->
             -- Just save raw, process when we have altitudes from Map.
-            ( { nodes = [], ways = [], rawData = landUse }
+            ( { nodes = [], ways = [], rawData = landUse, places = Dict.empty }
             , fetchAltitudesFromMap landUse
             )
 
@@ -150,9 +151,50 @@ applyAltitudes altitudes track justRaw =
                     |> List.filterMap identity
             , tags = rawWay.tags
             }
+
+        nodes =
+            Dict.values nodeDict
+
+        places =
+            Dict.union
+                (List.foldl addNamedNode Dict.empty nodes)
+                (List.foldl addNamedWay Dict.empty ways)
+
+        addNamedNode node names =
+            case node.tags of
+                Just tags ->
+                    case Dict.get "name" tags of
+                        Just hasName ->
+                            Dict.insert hasName node.at names
+
+                        Nothing ->
+                            names
+
+                Nothing ->
+                    names
+
+        addNamedWay way names =
+            case way.tags of
+                Just tags ->
+                    case Dict.get "name" tags of
+                        Just hasName ->
+                            let
+                                centroid =
+                                    Maybe.withDefault Point3d.origin <|
+                                        Point3d.centroidN <|
+                                            List.map .at way.nodes
+                            in
+                            Dict.insert hasName centroid names
+
+                        Nothing ->
+                            names
+
+                Nothing ->
+                    names
     in
-    { nodes = Dict.values nodeDict
+    { nodes = nodes
     , ways = ways
+    , places = places
     , rawData = { elements = [] } -- discard raw data
     }
 

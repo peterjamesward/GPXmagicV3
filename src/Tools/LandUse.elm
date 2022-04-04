@@ -3,6 +3,7 @@ module Tools.LandUse exposing (..)
 import Actions exposing (ToolAction(..))
 import Color
 import Dict exposing (Dict)
+import DomainModel exposing (EarthPoint)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Font as Font
@@ -85,7 +86,9 @@ view wrap options =
     in
     el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
         column [ padding 4, spacing 6, width fill ]
-            [ modeSelection
+            [ none
+
+            --, modeSelection
             , case options.mode of
                 Legend ->
                     legend
@@ -117,3 +120,23 @@ legend =
     <|
         List.map showLegendEntry <|
             Dict.toList SceneBuilder3D.landUseColours
+
+
+names : LandUseDataTypes.LandUseData -> Element msg
+names landUse =
+    let
+        showNameEntry : ( String, EarthPoint ) -> Element msg
+        showNameEntry ( name, position ) =
+            el
+                [ padding 5
+                , Font.bold
+                ]
+            <|
+                text name
+    in
+    wrappedRow
+        [ spacingXY 6 6
+        , alignTop
+        , padding 6
+        ]
+        (landUse.places |> Dict.toList |> List.map showNameEntry)

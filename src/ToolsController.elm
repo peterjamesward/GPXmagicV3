@@ -2024,7 +2024,9 @@ viewToolByType msgWrapper entry isTrack options =
                 viewToolSettings options msgWrapper
 
             ToolLandUse ->
-                Tools.LandUse.view (msgWrapper << ToolLandUseMsg) options.landUseOptions
+                Tools.LandUse.view
+                    (msgWrapper << ToolLandUseMsg)
+                    options.landUseOptions
 
 
 
