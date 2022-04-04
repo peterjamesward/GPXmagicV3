@@ -50,23 +50,9 @@ textDictionary =
         , ( "info", infoText )
         , ( "landuse"
           , """You can fetch Open Street Map data that describes the land use.
- This is colour coded:
- * tree = darkGreen
- * rock = lightBrown
- * peak = white
- * water = lightBlue
- * wood = darkGreen
- * recreation_ground = lightGreen
- * grass = lightGreen
- * meadow = lightYellow
- * farmland= lightGreenishBlue
- * grassland = mintLeaf
- * forest = darkGreen
- * industrial = darkGray
- * residential= pink
- * retail = carrot
- * railway = silver
- * brownfield = brown
+
+The colours used are shown in the _Land use_ tool, which will also show any errors
+obtaining the data.
 
 You can show these "flat" or "sloped" Be warned, when "sloped", it may obscure the road!"""
           )

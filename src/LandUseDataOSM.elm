@@ -51,10 +51,6 @@ processLandUseData results track =
             )
 
         Err error ->
-            let
-                _ =
-                    Debug.log "error" error
-            in
             ( { emptyLandUse | status = LandUseError <| Utils.errorToString error }
             , Cmd.none
             )

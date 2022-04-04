@@ -71,25 +71,22 @@ view context display ( givenWidth, givenHeight ) track scene msgWrapper =
                 )
 
         nodes2d =
-            case display.landUse of
-                LandUseDataTypes.LandUseSloped ->
+            --case display.landUse of
+            --    LandUseDataTypes.LandUseSloped ->
                     track.landUseData.places
                         |> Dict.map
                             (\name place ->
                                 place |> Point3d.toScreenSpace camera screenRectangle
                             )
 
-                LandUseDataTypes.LandUseHidden ->
-                    Dict.empty
-
-                LandUseDataTypes.LandUsePlanar ->
-                    track.landUseData.places
-                        |> Dict.map
-                            (\name place ->
-                                place
-                                    |> Point3d.projectOnto Plane3d.xy
-                                    |> Point3d.toScreenSpace camera screenRectangle
-                            )
+                --_ ->
+                --    track.landUseData.places
+                --        |> Dict.map
+                --            (\name place ->
+                --                place
+                --                    |> Point3d.projectOnto Plane3d.xy
+                --                    |> Point3d.toScreenSpace camera screenRectangle
+                --            )
 
         textAttributes atPoint =
             [ Svg.Attributes.fill "white"
