@@ -421,9 +421,6 @@ update msg options previewColour track =
 
                     else
                         Quantity.negate options.radius
-
-                _ =
-                    Debug.log "Adjustment" (Quantity.minus desired estimatedRadius)
             in
             ( options
             , [ Actions.WidenBend points (Quantity.minus desired estimatedRadius)
