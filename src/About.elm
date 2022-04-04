@@ -3,15 +3,18 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.1.5
+# GPXmagic v3.1.6
 
 (77b5e292)
 
 ## In this release ...
 
-* You can choose to have land use data drawn "flat" or "sloped" which will attempt to drape
-it over the terrain. When "sloped", it may obscure the road. It also makes Terrain work really hard
-so will slow down the display updates. I have no intention of fixing either.
+* New _Land use_ tool simply displays the colour legend. (More to come.)
+
+* The _Bend problems_ tool, in _With radius_ mode, has a new "Widen bend" button.
+This attempts to widen the bend by the simple act of "kicking out" the track points
+to roughly the desired radius. May need more than one attempt, depending on the
+shape of the bend. (The GPXmagic elves are working on something better.)
 
 ## Legal guff
 

@@ -13,22 +13,30 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 
 # WIP
 
-## Minimum radius
+## Minimum radius (localised)
 
 Current scheme is "OK-ish".
 
 - Try again with estimating centre (as a separate button):
-> Using estimated radius on perpendicular for points in window, take centroid of those points.
+> Repeated estimation of centre by using Point3d.circumcircle along the window, then centroid.
 > Substitute for window with **arc** at given radius (was thinking interpolation but this is obvious conclusion).
 > Not quite sure what start & end will be as ideally would be tangential.
 
 If successful, add multiple case
 - (with single Undo for the multiple case)
 
+## Minimum radius (whole track or range thereof)
+
+Just had a thought. If we use `Point3d.circumcenter` along the track (range), and if _anywhere_ the 
+circumcircle has less than `radius`, we displace the points (if needed) outwards to the desired radius. 
+Note that each point (except extremes) is part of three triangles so we would (I guess) use the mean 
+(centroid) of the possible displacements.
+
 ## Land use
 
 - Add tool: (possibly clone Display)
-    - Display legend, wrapped row of colour bars with text inside;
+    - ~~Display legend, wrapped row of colour bars with text inside;~~
+    - Move land use data into the tool or TrackLoaded (both inconvenient but better than Main);
     - Display named places; click will set focal point (on some views);
     - ~~Possibly, SVG overlay with names if tool is open (no, it's not the Map)~~
     - Possibly, display tags for view click location (on some views).
