@@ -2,10 +2,6 @@ module Tools.LandUseColours exposing (..)
 
 import Color
 import Dict
-import FlatColors.AmericanPalette
-import FlatColors.FlatUIPalette
-import FlatColors.FrenchPalette
-import UtilsForViews exposing (colorFromElmUiColour)
 
 
 landUseColours =
@@ -24,6 +20,7 @@ landUseColours =
         , ( "industrial", Color.darkGray )
         , ( "residential", Color.rgb255 0xC5 0xB6 0xA5 )
         , ( "retail", Color.rgb255 0xCE 0x95 0x79 )
-        , ( "railway", colorFromElmUiColour FlatColors.FlatUIPalette.silver )
+        , ( "railway", Color.rgb255 0x87 0x7A 0x6B )
         , ( "brownfield", Color.brown )
+        , ( "quarry", Color.rgb255 0x87 0x82 0x83 )
         ]

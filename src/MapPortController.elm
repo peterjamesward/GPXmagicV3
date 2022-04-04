@@ -306,7 +306,8 @@ processMapPortMessage lastState track json =
             )
 
         elevations =
-            D.decodeValue (D.field "elevations" (D.list D.float)) json
+            --TODO: Could contain `null` values.
+            D.decodeValue (D.field "elevations" (D.list (D.nullable D.float))) json
     in
     case jsonMsg of
         Ok "click" ->

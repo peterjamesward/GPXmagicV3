@@ -2,6 +2,7 @@ module LandUseDataTypes exposing (..)
 
 import Dict exposing (Dict)
 import DomainModel exposing (EarthPoint)
+import Http
 
 
 type LandUseDisplay

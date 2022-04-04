@@ -155,13 +155,18 @@ update msg settings previewColour hasTrack =
             ( settings, [] )
 
 
-applyMapElevations : List Float -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyMapElevations : List (Maybe Float) -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
 applyMapElevations elevations track =
     -- We have previously forced a full load into the map (caveat user).
     -- So these should be in order to match up with the domain model.
     let
         useNewElevation gpx newAltitude =
-            { gpx | altitude = Length.meters newAltitude }
+            case newAltitude of
+                Just altitude ->
+                    { gpx | altitude = Length.meters altitude }
+
+                Nothing ->
+                    gpx
 
         currentPoints =
             DomainModel.getAllGPXPointsInNaturalOrder track.trackTree

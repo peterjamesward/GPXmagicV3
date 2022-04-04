@@ -56,6 +56,10 @@ processLandUseData results track =
             )
 
         Err error ->
+            let
+                _ =
+                    Debug.log "error" error
+            in
             ( emptyLandUse, Cmd.none )
 
 
@@ -88,11 +92,14 @@ fetchAltitudesFromMap raw =
     MapPortController.fetchElevationsForPoints gpxLike
 
 
-applyAltitudes : List Float -> TrackLoaded msg -> LandUseData -> LandUseData
+applyAltitudes : List (Maybe Float) -> TrackLoaded msg -> LandUseData -> LandUseData
 applyAltitudes altitudes track justRaw =
+    --TODO: Allow for `null` elevations.
     let
         groundLevel =
-            BoundingBox3d.minZ <| DomainModel.boundingBox track.trackTree
+            DomainModel.boundingBox track.trackTree
+            |> BoundingBox3d.minZ
+            |> Quantity.minus (Length.foot)
 
         rawNodes : List OSMLandUseNode
         rawNodes =
@@ -111,18 +118,33 @@ applyAltitudes altitudes track justRaw =
         nodeDict =
             Dict.fromList <|
                 List.map2
-                    (\rawNode altitude ->
-                        ( rawNode.id
-                        , { at =
-                                DomainModel.pointFromGpxWithReference
-                                    track.referenceLonLat
-                                    { longitude = rawNode.lon |> Angle.degrees |> Direction2d.fromAngle
-                                    , latitude = rawNode.lat |> Angle.degrees
-                                    , altitude = Length.meters altitude
-                                    }
-                          , tags = rawNode.tags
-                          }
-                        )
+                    (\rawNode maybeAltitude ->
+                        case maybeAltitude of
+                            Just altitude ->
+                                ( rawNode.id
+                                , { at =
+                                        DomainModel.pointFromGpxWithReference
+                                            track.referenceLonLat
+                                            { longitude = rawNode.lon |> Angle.degrees |> Direction2d.fromAngle
+                                            , latitude = rawNode.lat |> Angle.degrees
+                                            , altitude = Length.meters altitude
+                                            }
+                                  , tags = rawNode.tags
+                                  }
+                                )
+
+                            Nothing ->
+                                ( rawNode.id
+                                , { at =
+                                        DomainModel.pointFromGpxWithReference
+                                            track.referenceLonLat
+                                            { longitude = rawNode.lon |> Angle.degrees |> Direction2d.fromAngle
+                                            , latitude = rawNode.lat |> Angle.degrees
+                                            , altitude = groundLevel
+                                            }
+                                  , tags = rawNode.tags
+                                  }
+                                )
                     )
                     rawNodes
                     altitudes

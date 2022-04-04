@@ -30,8 +30,6 @@ If successful, add multiple case
 
 ## Land use
   
-- Move land use data into the tool or TrackLoaded (both inconvenient but better than Main);
-- Use Legend to allow user to choose which tag values they see (click to toggle, default small list);
 - SVG overlay with place names -- you know you want to.
 
 ---

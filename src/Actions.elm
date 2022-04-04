@@ -65,8 +65,8 @@ type ToolAction msg
     | ApplyRecentre ( Float, Float )
     | AddFullTrackToMap
     | FetchMapElevations
-    | ApplyMapElevations (List Float)
-    | ApplyLandUseAltitudes (List Float)
+    | ApplyMapElevations (List (Maybe Float))
+    | ApplyLandUseAltitudes (List (Maybe Float))
     | SelectSvgFile (File -> msg)
     | LoadSvgFile (String -> msg) File
     | TrackFromSvg String
