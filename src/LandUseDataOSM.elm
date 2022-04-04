@@ -1,24 +1,20 @@
 module LandUseDataOSM exposing (..)
 
 import Angle
-import BoundingBox2d
 import BoundingBox3d exposing (BoundingBox3d)
 import Dict exposing (Dict)
 import Direction2d
 import DomainModel exposing (GPXSource)
-import Http exposing (emptyBody)
-import Json.Decode as D exposing (Decoder, field)
+import Http
+import Json.Decode as D exposing (Decoder)
 import LandUseDataTypes exposing (..)
 import Length
-import LocalCoords exposing (LocalCoords)
 import MapPortController
-import Point2d
 import Point3d
 import Quantity
-import String.Interpolate exposing (interpolate)
+import String.Interpolate
 import TrackLoaded exposing (TrackLoaded)
 import Url.Builder as Builder
-import UtilsForViews exposing (httpErrorString)
 
 
 apiRoot =

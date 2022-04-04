@@ -39,6 +39,7 @@ import Tools.GraphOptions
 import Tools.Interpolate
 import Tools.InterpolateOptions
 import Tools.Intersections
+import Tools.LandUse
 import Tools.MoveAndStretch
 import Tools.MoveAndStretchOptions
 import Tools.MoveScaleRotate
@@ -98,6 +99,7 @@ type ToolType
     | ToolStraighten
     | ToolGraph
     | ToolSettings
+    | ToolLandUse
 
 
 type alias Options msg =
@@ -129,6 +131,7 @@ type alias Options msg =
     , intersectionOptions : Tools.Intersections.Options
     , straightenOptions : Tools.Straightener.Options
     , graphOptions : Tools.GraphOptions.Options msg
+    , landUseOptions : Tools.LandUse.Options
     }
 
 
@@ -161,6 +164,7 @@ defaultOptions =
     , intersectionOptions = Tools.Intersections.defaultOptions
     , straightenOptions = Tools.Straightener.defaultOptions
     , graphOptions = Tools.Graph.defaultOptions
+    , landUseOptions = Tools.LandUse.defaultOptions
     }
 
 
@@ -198,6 +202,7 @@ type ToolMsg
     | ToolIntersectionMsg Tools.Intersections.Msg
     | ToolStraightenMsg Tools.Straightener.Msg
     | ToolGraphMsg Tools.Graph.Msg
+    | ToolLandUseMsg Tools.LandUse.Msg
 
 
 toolID : String
@@ -265,6 +270,7 @@ defaultTools =
     , intersectionsTool
     , straightenTool
     , graphTool
+    , landUseTool
     ]
 
 
@@ -639,6 +645,21 @@ graphTool =
     , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.amethyst
     , textColour = contrastingColour FlatColors.FlatUIPalette.amethyst
+    , isPopupOpen = False
+    }
+
+
+landUseTool : ToolEntry
+landUseTool =
+    { toolType = ToolLandUse
+    , toolId = Tools.LandUse.toolID
+    , label = "Land use"
+    , info = "and such-like"
+    , video = Nothing
+    , state = Contracted
+    , dock = DockUpperRight
+    , tabColour = FlatColors.FlatUIPalette.wetAsphalt
+    , textColour = contrastingColour FlatColors.FlatUIPalette.wetAsphalt
     , isPopupOpen = False
     }
 
@@ -1192,6 +1213,18 @@ update toolMsg isTrack msgWrapper options =
                 Nothing ->
                     ( options, [] )
 
+        ToolLandUseMsg msg ->
+            let
+                ( newOptions, actions ) =
+                    Tools.LandUse.update
+                        msg
+                        (msgWrapper << ToolLandUseMsg)
+                        options.landUseOptions
+            in
+            ( { options | landUseOptions = newOptions }
+            , actions
+            )
+
 
 refreshOpenTools :
     Maybe (TrackLoaded msg)
@@ -1518,6 +1551,9 @@ toolStateHasChanged toolType newState isTrack options =
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
         ToolSettings ->
+            ( options, [ StoreLocally "tools" <| encodeToolState options ] )
+
+        ToolLandUse ->
             ( options, [ StoreLocally "tools" <| encodeToolState options ] )
 
 
@@ -1987,6 +2023,9 @@ viewToolByType msgWrapper entry isTrack options =
             ToolSettings ->
                 viewToolSettings options msgWrapper
 
+            ToolLandUse ->
+                Tools.LandUse.view (msgWrapper << ToolLandUseMsg) options.landUseOptions
+
 
 
 -- Local storage management
@@ -2085,6 +2124,9 @@ encodeType toolType =
 
         ToolSettings ->
             "ToolSettings"
+
+        ToolLandUse ->
+            "ToolLandUse"
 
 
 encodeColour : Element.Color -> E.Value
@@ -2461,4 +2503,5 @@ initTextDictionaries =
         , Tools.Straightener.textDictionary
         , Tools.StravaTools.textDictionary
         , TrackInfoBox.textDictionary
+        , Tools.LandUse.textDictionary
         ]
