@@ -3,18 +3,16 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.1.6
+# GPXmagic v3.1.7
 
 (5fbad322)
 
 ## In this release ...
 
 * New _Land use_ tool simply displays the colour legend and any error messages.
+(Sometimes the servers are busy, so no data are available.)
 
-* The _Bend problems_ tool, in _With radius_ mode, has a new "Widen bend" button.
-This attempts to widen the bend by the simple act of "kicking out" the track points
-to roughly the desired radius. May need more than one attempt, depending on the
-shape of the bend. (The GPXmagic elves are working on something better.)
+* New _Display option_ setting to reveal any named places given by Open Street Map.
 
 ## Acknowledgements
 
