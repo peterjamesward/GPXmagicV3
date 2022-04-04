@@ -16,13 +16,6 @@ BUG: Move & Stretch does not move Start and Finish
 
 # WIP
 
-## Land use
-
-- SVG overlay with place names -- you know you want to.
-> Needs a display option
-> Needs to reflect 2d or 3d
-> Needs to show the names!
-
 ## Minimum radius (whole track or range thereof)
 
 Just had a thought. If we use `Point3d.circumcenter` along the track (range), and if _anywhere_ the
