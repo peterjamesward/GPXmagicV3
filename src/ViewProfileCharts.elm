@@ -729,7 +729,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
             Svg.text_
                 [ Svg.Attributes.fill "black"
                 , Svg.Attributes.fontFamily "sans-serif"
-                , Svg.Attributes.fontSize "20px"
+                , Svg.Attributes.fontSize "14px"
                 , Svg.Attributes.stroke "none"
                 , Svg.Attributes.x
                     (String.fromFloat

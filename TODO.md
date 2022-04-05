@@ -25,7 +25,8 @@ Just had a thought. If we use `Point3d.circumcenter` along the track (range), an
 circumcircle has less than `radius`, we displace the points (if needed) outwards to the desired radius.
 Note that each point (except extremes) is part of three triangles so we would (I guess) use the mean
 (centroid) of the possible displacements.
-> Do this first, then the localised solution falls out.
+> This hare-brained scheme will not work. It bakes in assumptions about the track.
+> Better, is something akin to the gradient box smoother.
 
 ## Minimum radius (localised)
 
