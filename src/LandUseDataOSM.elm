@@ -25,13 +25,10 @@ apiRoot =
 requestLandUseData : (Result Http.Error OSMLandUseData -> msg) -> TrackLoaded msg -> Cmd msg
 requestLandUseData msg track =
     Http.request
-        { method = "GET"
+        { method = "POST"
         , headers = []
-        , url =
-            Builder.crossOrigin apiRoot
-                [ "api", "interpreter" ]
-                [ Builder.string "data" <| queryFromBoundingBox track ]
-        , body = Http.emptyBody
+        , url = Builder.crossOrigin apiRoot [ "api", "interpreter" ] []
+        , body = Http.stringBody "" <| queryFromBoundingBox track
         , expect = Http.expectJson msg landUseDecoder
         , timeout = Nothing
         , tracker = Nothing

@@ -1,7 +1,7 @@
 
 # BUGS
 
-BUG: Classic bend smoother consumes all memory on certain looped routes where
+BUG: Classic bend smoother consumes all memory on some looped routes where
      orange and purple are (possibly) co-linear, or something. (Samir bug)
 
 BUG: Undo single point smooth at track start removes a point.
@@ -18,31 +18,21 @@ BUG: Move & Stretch does not move Start and Finish
 
 ## Minimum radius (whole track or range thereof)
 
-Possibly put this inside Radiused Bends tool, as a "Automatic" mode.
-(Could optionally replace points with arc; would then be consistent.)
-
-Just had a thought. If we use `Point3d.circumcenter` along the track (range), and if _anywhere_ the
-circumcircle has less than `radius`, we displace the points (if needed) outwards to the desired radius.
-Note that each point (except extremes) is part of three triangles so we would (I guess) use the mean
-(centroid) of the possible displacements.
-> This hare-brained scheme will not work. It bakes in assumptions about the track.
-> Better, is something akin to the gradient box smoother.
+Akin to gradient smoothing (actually gradient derivative smoothing).
+Thing is, I'd like it to less non-directional, so smoothing has symmetric effect.
+Is this possible?
+I imagine a window operation now, with a "length" of radius * pi/2 (so quite small).
+This has limited flexibility. Squeezing it over the track will leave the track smooth
+at that scale but unchanged at longer scales. It could be a 2d/3d tool. Interesting.
 
 ## Minimum radius (localised)
 
 Current scheme is "OK-ish".
-
-If successful, add multiple case
-- (with single Undo for the multiple case)
+Ideally, will fall out of general scheme above,
 
 ---
 
 # BACKLOG
-
-## Land use display option
-
-- Report if GET fails or times out or parse fails.
-- Add a control that lists named features, select to centre. (Can also show errors.)
 
 ## 1CQF / New smoothing
 
