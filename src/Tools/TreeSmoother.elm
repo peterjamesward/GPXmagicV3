@@ -99,8 +99,8 @@ computeNewPoints depth track =
                     )
 
                 ( thisArcEnd, nextArcStart ) =
-                    ( Point3d.along startAxis <| Length.meters 6.0
-                    , Point3d.along endAxis <| Length.meters -6.0
+                    ( Point3d.along startAxis <| Length.meters 10.0
+                    , Point3d.along endAxis <| Length.meters -10.0
                     )
 
                 arc =
@@ -118,14 +118,13 @@ computeNewPoints depth track =
                     case arc of
                         Just realArc ->
                             realArc
-                                |> Arc3d.approximate (Length.meters 0.1)
+                                |> Arc3d.approximate (Length.meters 0.5)
                                 |> Polyline3d.vertices
 
                         Nothing ->
                             []
 
                 triangle1 =
-                    -- Minor inefficiency re-creating triangles is not worth worrying about.
                     Triangle3d.from
                         road.startPoint
                         thisArcEnd
@@ -152,7 +151,7 @@ computeNewPoints depth track =
                 polylineFromSpline : Polyline3d Meters LocalCoords
                 polylineFromSpline =
                     CubicSpline3d.approximate
-                        (Length.meters 0.1)
+                        (Length.meters 1.0)
                         spline
 
                 vertices : List EarthPoint
@@ -236,7 +235,7 @@ toolStateChange opened colour options track =
             ( options, previewActions options colour theTrack )
 
         _ ->
-            ( options, [ HidePreview "bend" ] )
+            ( options, [ HidePreview "recursive" ] )
 
 
 previewActions options colour track =
