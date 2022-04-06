@@ -81,6 +81,10 @@ computeNewPoints : Int -> TrackLoaded msg -> List PreviewPoint
 computeNewPoints depth track =
     -- Fold has to alternate arcs and splines/clothoids.
     -- Maybe do them separately and the interweave.
+    -- UPDATE: Simple fixed depth fold is not good enough.
+    -- Options?
+    -- 1: Use adaptive depth (not a fold) based on distance metric;
+    -- 2: Use Bend finder to locate radius bends, treat rest as "straight".
     let
         makeLeadInAndArc : RoadSection -> FoldState -> FoldState
         makeLeadInAndArc road foldState =

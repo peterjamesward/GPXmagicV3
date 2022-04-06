@@ -497,7 +497,7 @@ view imperial msgWrapper options isTrack =
                             "Direction change "
                                 ++ (String.fromInt <| round <| Angle.inDegrees options.threshold)
                                 ++ "º"
-                , min = 30
+                , min = 15
                 , max = 170
                 , step = Just 1
                 , thumb = sliderThumb
@@ -514,7 +514,7 @@ view imperial msgWrapper options isTrack =
                             "Radius "
                                 ++ showShortMeasure imperial options.radius
                 , min = 4.0
-                , max = 50.0
+                , max = 100.0
                 , step = Just 1
                 , thumb = sliderThumb
                 }
