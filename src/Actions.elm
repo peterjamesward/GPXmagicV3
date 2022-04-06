@@ -61,6 +61,8 @@ type ToolAction msg
     | ApplyInterpolateWithOptions Tools.InterpolateOptions.Options
     | OneClickQuickFix
     | LimitGradientWithOptions Tools.ProfileSmoothOptions.Options
+    | SmoothAltitudes Tools.ProfileSmoothOptions.Options
+    | SmoothGradients Tools.ProfileSmoothOptions.Options
     | ApplyRotateAndScale Tools.MoveScaleRotateOptions.Options
     | ApplyRecentre ( Float, Float )
     | AddFullTrackToMap
@@ -141,6 +143,12 @@ interpretAction action =
 
         LimitGradientWithOptions options ->
             "limit gradients"
+
+        SmoothAltitudes options ->
+            "smooth altitudes"
+
+        SmoothGradients options ->
+            "smooth gradients"
 
         ApplyRotateAndScale _ ->
             "rotate and scale"

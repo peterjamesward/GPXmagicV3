@@ -12,27 +12,42 @@ BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
 BUG: Move & Stretch does not move Start and Finish 
 > Not sure if DO means S/F or the range markers, probably the latter.
 
+BUG: (DO)
+
+- Opened the Move/Stretch tool and set a range - this displayed a preview.
+- Hid the tool using the Tools summary section 
+  - (the tool was still expanded when I selected "Hidden") 
+  - the Move/Stretch preview was still visible.
+- Re-opened the file and the preview was still in place.
+
+TWEAK:
+For altitude and gradient smoothing, reduce the averaging window at each end of the range
+to avoid "spikes" when it suddenly ends.
+
 --
 
 # WIP
 
-## Minimum radius (whole track or range thereof)
+## The Holy Grail of smoothers
 
-Akin to gradient smoothing (actually gradient derivative smoothing).
-Thing is, I'd like it to less non-directional, so smoothing has symmetric effect.
-Is this possible?
-I imagine a window operation now, with a "length" of radius * pi/2 (so quite small).
-This has limited flexibility. Squeezing it over the track will leave the track smooth
-at that scale but unchanged at longer scales. It could be a 2d/3d tool. Interesting.
-
-## Minimum radius (localised)
-
-Current scheme is "OK-ish".
-Ideally, will fall out of general scheme above,
-
+See private notes (sorry if you're following on github).
+ 
 ---
 
 # BACKLOG
+
+## Timed segments
+
+If Christian can supply tags, tool to list and edit Time Segments, defined by markers
+and nameable; these will be embedded in the output GPX.
+
+## Integrate with track DB back-end
+
+Launch with track URL, save does a POST.
+
+## Black-box mode
+
+Runs server-side (Node.js?), receives track via POST, returns smoothed.
 
 ## 1CQF / New smoothing
 

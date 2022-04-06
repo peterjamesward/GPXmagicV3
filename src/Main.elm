@@ -1656,6 +1656,42 @@ performActionsOnModel actions model =
                         , needsRendering = True
                     }
 
+                ( SmoothAltitudes options, Just track ) ->
+                    let
+                        ( newTree, oldPoints ) =
+                            Tools.ProfileSmooth.apply options track
+
+                        newTrack =
+                            track
+                                |> TrackLoaded.addToUndoStack action
+                                    0
+                                    0
+                                    oldPoints
+                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                    in
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
+
+                ( SmoothGradients options, Just track ) ->
+                    let
+                        ( newTree, oldPoints ) =
+                            Tools.ProfileSmooth.apply options track
+
+                        newTrack =
+                            track
+                                |> TrackLoaded.addToUndoStack action
+                                    0
+                                    0
+                                    oldPoints
+                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                    in
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
+
                 ( CloseLoopWithOptions options, Just track ) ->
                     let
                         ( newTree, oldPoints ) =

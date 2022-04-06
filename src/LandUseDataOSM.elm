@@ -26,9 +26,9 @@ requestLandUseData : (Result Http.Error OSMLandUseData -> msg) -> TrackLoaded ms
 requestLandUseData msg track =
     Http.request
         { method = "POST"
-        , headers = []
+        , headers = [ Http.header "User-Agent" "GPXmagic v3 (peterjamesward@me.com)" ]
         , url = Builder.crossOrigin apiRoot [ "api", "interpreter" ] []
-        , body = Http.stringBody "" <| queryFromBoundingBox track
+        , body = Http.stringBody "text/plain" <| queryFromBoundingBox track
         , expect = Http.expectJson msg landUseDecoder
         , timeout = Nothing
         , tracker = Nothing
@@ -274,18 +274,16 @@ queryFromBoundingBox track =
             )
     in
     String.Interpolate.interpolate
-        """
-    [out:json][timeout:30];
-    (
-      node["natural"]({0},{1},{2},{3});
-      way["natural"]({0},{1},{2},{3}) (if:length()>500);
-      node["landuse"]({0},{1},{2},{3});
-      way["landuse"]({0},{1},{2},{3}) (if:length()>500);
-    );
-    out body;
-    >;
-    out skel qt;
-    """
+        """[out:json][timeout:30];
+(
+node["natural"]({0},{1},{2},{3});
+way["natural"]({0},{1},{2},{3}) (if:length()>500);
+node["landuse"]({0},{1},{2},{3});
+way["landuse"]({0},{1},{2},{3}) (if:length()>500);
+);
+out body;
+>;
+out skel qt;"""
         [ String.fromFloat <| Angle.inDegrees minLat
         , String.fromFloat <| Angle.inDegrees minLon
         , String.fromFloat <| Angle.inDegrees maxLat

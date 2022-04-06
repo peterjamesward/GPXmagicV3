@@ -19,6 +19,8 @@ import ViewPureStyles exposing (commonShortHorizontalSliderStyles, neatToolsBord
 
 type Msg
     = LimitGradient
+    | SmoothAltitudes
+    | SmoothGradients
     | SetMaximumAscent Float
     | SetMaximumDescent Float
     | SetExtent ExtentOption
@@ -172,6 +174,20 @@ update msg options previewColour track =
         LimitGradient ->
             ( options
             , [ Actions.LimitGradientWithOptions options
+              , TrackHasChanged
+              ]
+            )
+
+        SmoothAltitudes ->
+            ( options
+            , [ Actions.SmoothAltitudes options
+              , TrackHasChanged
+              ]
+            )
+
+        SmoothGradients ->
+            ( options
+            , [ Actions.SmoothGradients options
               , TrackHasChanged
               ]
             )
@@ -916,7 +932,7 @@ view options wrapper track =
                 , el [ centerX ] <|
                     button
                         neatToolsBorder
-                        { onPress = Just <| wrapper <| LimitGradient
+                        { onPress = Just <| wrapper <| SmoothAltitudes
                         , label = text "Smooth by averaging altitudes\nwith nearby points"
                         }
                 ]
@@ -928,7 +944,7 @@ view options wrapper track =
                 , el [ centerX ] <|
                     button
                         neatToolsBorder
-                        { onPress = Just <| wrapper <| LimitGradient
+                        { onPress = Just <| wrapper <| SmoothGradients
                         , label = text "Smooth by averaging gradients\nwith nearby points"
                         }
                 ]
