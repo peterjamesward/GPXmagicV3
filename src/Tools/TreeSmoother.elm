@@ -20,6 +20,7 @@ import Point2d exposing (Point2d)
 import Point3d
 import Polyline3d exposing (Polyline3d)
 import PreviewData exposing (PreviewData, PreviewPoint, PreviewShape(..))
+import Quantity
 import Tools.BendSmoother
 import Tools.TreeSmootherOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
@@ -71,6 +72,7 @@ infoText =
 type alias FoldState =
     { arcStart : Maybe EarthPoint
     , vertex : Maybe EarthPoint
+    , previous : Maybe RoadSection
     , outputs : List (List EarthPoint)
     }
 
@@ -99,8 +101,15 @@ computeNewPoints depth track =
                     )
 
                 ( thisArcEnd, nextArcStart ) =
-                    ( Point3d.along startAxis <| Length.meters 10.0
-                    , Point3d.along endAxis <| Length.meters -10.0
+                    ( Point3d.along startAxis <|
+                        Quantity.min
+                            (Length.meters 10.0)
+                            (Maybe.withDefault Quantity.zero <| Maybe.map .trueLength foldState.previous)
+                    , Point3d.along endAxis <|
+                        Quantity.negate <|
+                            Quantity.min
+                                (Length.meters 10.0)
+                                road.trueLength
                     )
 
                 arc =
@@ -163,6 +172,7 @@ computeNewPoints depth track =
             { arcStart = Just nextArcStart
             , vertex = Just road.endPoint
             , outputs = vertices :: arcApproximation :: foldState.outputs
+            , previous = Just road
             }
 
         dualFormat : EarthPoint -> PreviewPoint
@@ -181,7 +191,11 @@ computeNewPoints depth track =
                     0
                     track.trackTree
                     makeLeadInAndArc
-                    { arcStart = Nothing, vertex = Nothing, outputs = [] }
+                    { arcStart = Nothing
+                    , vertex = Nothing
+                    , previous = Nothing
+                    , outputs = []
+                    }
 
 
 applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
