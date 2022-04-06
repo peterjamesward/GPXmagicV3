@@ -15,6 +15,7 @@ type alias Options =
     , terrainFineness : Float -- 0.0 => OFF
     , landUse : LandUseDataTypes.LandUseDisplay
     , placeNames : Bool
+    , showConstraintsAtLevel : Maybe Int
     }
 
 
@@ -61,6 +62,7 @@ decode json current =
             , terrainFineness = 0.0
             , landUse = LandUseDataTypes.LandUseHidden
             , placeNames = False
+            , showConstraintsAtLevel = Nothing
             }
 
         Err error ->

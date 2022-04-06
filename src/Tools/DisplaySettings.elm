@@ -21,6 +21,7 @@ defaultOptions =
     , terrainFineness = 0.0
     , landUse = LandUseDataTypes.LandUseHidden
     , placeNames = False
+    , showConstraintsAtLevel = Nothing
     }
 
 
@@ -33,6 +34,7 @@ type Msg
     | SetTerrainFineness Float
     | DisplayInfo String String
     | SetPlaceNames Bool
+    | SetConstraintLevel Int
 
 
 toolID : String
@@ -131,6 +133,20 @@ update msg options =
             let
                 newOptions =
                     { options | terrainFineness = terrain }
+            in
+            ( newOptions, actions newOptions )
+
+        SetConstraintLevel level ->
+            let
+                newOptions =
+                    { options
+                        | showConstraintsAtLevel =
+                            if level > 0 then
+                                Just level
+
+                            else
+                                Nothing
+                    }
             in
             ( newOptions, actions newOptions )
 

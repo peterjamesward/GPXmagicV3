@@ -65,8 +65,8 @@ bezierSplinesThroughExistingPoints isLoop tension tolerance startIndx endIndex t
 
                         ( ( c1, b1, a1 ), ( c2, b2, a2 ) ) =
                             -- Might not be the order you expected.
-                            ( controlPointsFromTriangle triangle1
-                            , controlPointsFromTriangle triangle2
+                            ( controlPointsFromTriangle tension triangle1
+                            , controlPointsFromTriangle tension triangle2
                             )
 
                         spline : CubicSpline3d Meters LocalCoords
@@ -92,45 +92,6 @@ bezierSplinesThroughExistingPoints isLoop tension tolerance startIndx endIndex t
                         , roadMinusOne = Just road
                         , newPoints = vertices ++ state.newPoints
                     }
-
-        controlPointsFromTriangle :
-            Triangle3d Meters LocalCoords
-            -> ( ControlPoint, ControlPoint, ControlPoint )
-        controlPointsFromTriangle triangle =
-            let
-                ( _, b, _ ) =
-                    Triangle3d.vertices triangle
-
-                ( entryEdge, exitEdge, oppositeEdge ) =
-                    Triangle3d.edges triangle
-
-                ( ab, ac, bc ) =
-                    ( Length.inMeters <| LineSegment3d.length entryEdge
-                    , Length.inMeters <| LineSegment3d.length oppositeEdge
-                    , Length.inMeters <| LineSegment3d.length exitEdge
-                    )
-
-                ( entryFactor, exitFactor ) =
-                    ( -1.0 * tension * ab / (ab + bc)
-                    , tension * bc / (ab + bc)
-                    )
-
-                controlPointVector =
-                    Vector3d.from
-                        (LineSegment3d.startPoint oppositeEdge)
-                        (LineSegment3d.endPoint oppositeEdge)
-
-                ( entryScaleVector, exitScalevector ) =
-                    ( Vector3d.scaleBy entryFactor controlPointVector
-                    , Vector3d.scaleBy exitFactor controlPointVector
-                    )
-
-                ( entryPoint, exitPoint ) =
-                    ( Point3d.translateBy entryScaleVector b
-                    , Point3d.translateBy exitScalevector b
-                    )
-            in
-            ( entryPoint, b, exitPoint )
 
         foldOutput =
             if isLoop then
@@ -158,6 +119,47 @@ bezierSplinesThroughExistingPoints isLoop tension tolerance startIndx endIndex t
                     (SplineFoldState Nothing Nothing [])
     in
     foldOutput.newPoints |> List.reverse
+
+
+controlPointsFromTriangle :
+    Float
+    -> Triangle3d Meters LocalCoords
+    -> ( ControlPoint, ControlPoint, ControlPoint )
+controlPointsFromTriangle tension triangle =
+    let
+        ( _, b, _ ) =
+            Triangle3d.vertices triangle
+
+        ( entryEdge, exitEdge, oppositeEdge ) =
+            Triangle3d.edges triangle
+
+        ( ab, ac, bc ) =
+            ( Length.inMeters <| LineSegment3d.length entryEdge
+            , Length.inMeters <| LineSegment3d.length oppositeEdge
+            , Length.inMeters <| LineSegment3d.length exitEdge
+            )
+
+        ( entryFactor, exitFactor ) =
+            ( -1.0 * tension * ab / (ab + bc)
+            , tension * bc / (ab + bc)
+            )
+
+        controlPointVector =
+            Vector3d.from
+                (LineSegment3d.startPoint oppositeEdge)
+                (LineSegment3d.endPoint oppositeEdge)
+
+        ( entryScaleVector, exitScalevector ) =
+            ( Vector3d.scaleBy entryFactor controlPointVector
+            , Vector3d.scaleBy exitFactor controlPointVector
+            )
+
+        ( entryPoint, exitPoint ) =
+            ( Point3d.translateBy entryScaleVector b
+            , Point3d.translateBy exitScalevector b
+            )
+    in
+    ( entryPoint, b, exitPoint )
 
 
 bezierSplineApproximation : Bool -> Float -> Float -> Int -> Int -> PeteTree -> List EarthPoint

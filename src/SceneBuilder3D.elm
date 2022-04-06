@@ -12,6 +12,7 @@ import Color exposing (Color, black, darkGreen, green, lightOrange)
 import ColourPalette exposing (gradientColourPastel, gradientHue, gradientHue2)
 import Cone3d
 import Dict exposing (Dict)
+import Direction2d
 import Direction3d
 import DomainModel exposing (..)
 import Element

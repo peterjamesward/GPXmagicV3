@@ -59,6 +59,8 @@ import Tools.Straightener
 import Tools.StravaOptions
 import Tools.StravaTools
 import Tools.TrackInfoBox as TrackInfoBox
+import Tools.TreeSmoother
+import Tools.TreeSmootherOptions
 import TrackLoaded exposing (TrackLoaded)
 import View3dCommonElements exposing (stopProp)
 import ViewPureStyles exposing (..)
@@ -100,6 +102,7 @@ type ToolType
     | ToolGraph
     | ToolSettings
     | ToolLandUse
+    | ToolTreeSmoother
 
 
 type alias Options msg =
@@ -132,6 +135,7 @@ type alias Options msg =
     , straightenOptions : Tools.Straightener.Options
     , graphOptions : Tools.GraphOptions.Options msg
     , landUseOptions : Tools.LandUse.Options
+    , treeSmootherOptions : Tools.TreeSmootherOptions.Options
     }
 
 
@@ -165,6 +169,7 @@ defaultOptions =
     , straightenOptions = Tools.Straightener.defaultOptions
     , graphOptions = Tools.Graph.defaultOptions
     , landUseOptions = Tools.LandUse.defaultOptions
+    , treeSmootherOptions = Tools.TreeSmoother.defaultOptions
     }
 
 
@@ -203,6 +208,7 @@ type ToolMsg
     | ToolStraightenMsg Tools.Straightener.Msg
     | ToolGraphMsg Tools.Graph.Msg
     | ToolLandUseMsg Tools.LandUse.Msg
+    | ToolTreeSmootherMsg Tools.TreeSmoother.Msg
 
 
 toolID : String
@@ -256,6 +262,7 @@ defaultTools =
     , centroidAverageTool
     , curveFormerTool
     , bendSmootherTool
+    , treeSmootherTool
     , nudgeTool
     , outAndBackTool
     , simplifyTool
@@ -435,6 +442,21 @@ bendSmootherTool =
     , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.midnightBlue
     , textColour = contrastingColour FlatColors.FlatUIPalette.midnightBlue
+    , isPopupOpen = False
+    }
+
+
+treeSmootherTool : ToolEntry
+treeSmootherTool =
+    { toolType = ToolTreeSmoother
+    , toolId = Tools.TreeSmoother.toolID
+    , label = "Holistic smoother"
+    , info = "Make it smoother"
+    , video = Nothing
+    , state = Contracted
+    , dock = DockUpperRight
+    , tabColour = FlatColors.FlatUIPalette.sunFlower
+    , textColour = contrastingColour FlatColors.FlatUIPalette.sunFlower
     , isPopupOpen = False
     }
 
@@ -1225,6 +1247,24 @@ update toolMsg isTrack msgWrapper options =
             , actions
             )
 
+        ToolTreeSmootherMsg msg ->
+            case isTrack of
+                Just track ->
+                    let
+                        ( newOptions, actions ) =
+                            Tools.TreeSmoother.update
+                                msg
+                                options.treeSmootherOptions
+                                (getColour ToolTreeSmoother options.tools)
+                                track
+                    in
+                    ( { options | treeSmootherOptions = newOptions }
+                    , actions
+                    )
+
+                Nothing ->
+                    ( options, [] )
+
 
 refreshOpenTools :
     Maybe (TrackLoaded msg)
@@ -1556,6 +1596,20 @@ toolStateHasChanged toolType newState isTrack options =
         ToolLandUse ->
             ( options, [ StoreLocally "tools" <| encodeToolState options ] )
 
+        ToolTreeSmoother ->
+            let
+                ( newToolOptions, actions ) =
+                    Tools.TreeSmoother.toolStateChange
+                        (newState == Expanded)
+                        (getColour toolType options.tools)
+                        options.treeSmootherOptions
+                        isTrack
+
+                newOptions =
+                    { options | treeSmootherOptions = newToolOptions }
+            in
+            ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
+
 
 
 --View stuff
@@ -1733,22 +1787,6 @@ showDockOptions msgWrapper toolEntry =
                 { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockUpperLeft
                 , label = useIcon FeatherIcons.arrowLeft
                 }
-
-            --, Input.button
-            --    [ tooltip below (myTooltip "Move to lower left") ]
-            --    { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockLowerLeft
-            --    , label = useIcon FeatherIcons.arrowDownLeft
-            --    }
-            --, Input.button
-            --    [ tooltip below (myTooltip "Move to bottom centre") ]
-            --    { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockBottom
-            --    , label = useIcon FeatherIcons.arrowDown
-            --    }
-            --, Input.button
-            --    [ tooltip below (myTooltip "Move to lower right") ]
-            --    { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockLowerRight
-            --    , label = useIcon FeatherIcons.arrowDownRight
-            --    }
             , Input.button
                 [ tooltip below (myTooltip "Move to right") ]
                 { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockUpperRight
@@ -2029,6 +2067,18 @@ viewToolByType msgWrapper entry isTrack options =
                     options.landUseOptions
                     isTrack
 
+            ToolTreeSmoother ->
+                case isTrack of
+                    Just track ->
+                        Tools.TreeSmoother.view
+                            options.imperial
+                            (msgWrapper << ToolTreeSmootherMsg)
+                            options.treeSmootherOptions
+                            track
+
+                    Nothing ->
+                        noTrackMessage
+
 
 
 -- Local storage management
@@ -2130,6 +2180,9 @@ encodeType toolType =
 
         ToolLandUse ->
             "ToolLandUse"
+
+        ToolTreeSmoother ->
+            "ToolTreeSmoother"
 
 
 encodeColour : Element.Color -> E.Value
