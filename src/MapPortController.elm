@@ -199,6 +199,9 @@ setMapStyle url =
 
 addTrackToMap : TrackLoaded msg -> Cmd msg
 addTrackToMap track =
+    addFullTrackToMap track
+
+{-
     -- This is to add the route as a polyline, with selective rendering
     -- We will separately add track points as draggable features.
     let
@@ -215,6 +218,7 @@ addTrackToMap track =
             , ( "data", SceneBuilderMap.renderMapJson track ) -- Route as polyline
             , ( "points", SceneBuilderMap.trackPointsToJSON track ) -- Make track points draggable
             ]
+-}
 
 
 addFullTrackToMap : TrackLoaded msg -> Cmd msg
@@ -233,7 +237,7 @@ addFullTrackToMap track =
             , ( "lat", E.float <| Angle.inDegrees latitude )
             , ( "zoom", E.float 10.0 )
             , ( "data", SceneBuilderMap.renderMapJsonWithoutCulling track ) -- Route as polyline
-            , ( "points", SceneBuilderMap.trackPointsToJSON track ) -- Make track points draggable
+            , ( "points", SceneBuilderMap.trackPointsToJSONwithoutCulling track ) -- Make track points draggable
             ]
 
 

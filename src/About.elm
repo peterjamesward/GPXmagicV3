@@ -3,13 +3,13 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.1.9
+# GPXmagic v3.1.10
 
 (0c54a8bc)
 
 ## In this release ...
 
-* Corrected error in Undo for Centroid Average smoother.
+* Map view displays all points all the time.
 
 ## Acknowledgements
 

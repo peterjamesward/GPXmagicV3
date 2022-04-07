@@ -281,3 +281,56 @@ trackPointsToJSON track =
         [ ( "type", E.string "FeatureCollection" )
         , ( "features", E.list identity features )
         ]
+
+
+trackPointsToJSONwithoutCulling : TrackLoaded msg -> E.Value
+trackPointsToJSONwithoutCulling track =
+    -- Similar but each point is a feature so it is draggable.
+    --var geojson = {
+    --    'type': 'FeatureCollection',
+    --    'features': [
+    --        {
+    --            'type': 'Feature',
+    --            'geometry': {
+    --                'type': 'Point',
+    --                'coordinates': [0, 0]
+    --            }
+    --        }
+    --    ]
+    --};
+    let
+        depthFn : RoadSection -> Maybe Int
+        depthFn road =
+            Nothing
+
+        foldFn : RoadSection -> List E.Value -> List E.Value
+        foldFn road output =
+            let
+                ( lon, lat, alt ) =
+                    mapLocation <| Tuple.first road.sourceData
+            in
+            makeFeature ( lon, lat, alt ) :: output
+
+        missingLastPoint =
+            track.trackTree
+                |> getLastLeaf
+                |> .sourceData
+                |> Tuple.second
+                |> mapLocation
+                |> makeFeature
+
+        features =
+            missingLastPoint
+                :: DomainModel.traverseTreeBetweenLimitsToDepth
+                    0
+                    (skipCount track.trackTree)
+                    depthFn
+                    0
+                    track.trackTree
+                    foldFn
+                    []
+    in
+    E.object
+        [ ( "type", E.string "FeatureCollection" )
+        , ( "features", E.list identity features )
+        ]

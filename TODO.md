@@ -6,10 +6,7 @@ BUG: Classic bend smoother consumes all memory on some looped routes where
 
 BUG: Undo single point smooth at track start removes a point.
 
-BUG: Map is not showing full detail after 1CQF, maybe, needs checking.
-> Awaiting script from JB.
-
-BUG: Move & Stretch does not move marked points. 
+NOT A BUG: Move & Stretch does not move marked points. 
 > This is intentional. May not be right though.
 
 BUG: (DavidO)
@@ -20,9 +17,7 @@ BUG: (DavidO)
   - the Move/Stretch preview was still visible.
 - Re-opened the file and the preview was still in place.
 
-TWEAK:
-For altitude and gradient smoothing, reduce the averaging window at each end of the range
-to avoid "spikes" when it suddenly ends.
+BUG: Smooth with Splines whole track, not working to S/F.
 
 --
 
@@ -55,12 +50,10 @@ Launch with track URL, save does a POST.
 
 Runs server-side (Node.js?), receives track via POST, returns smoothed.
 
-## 1CQF / New smoothing
+## Smoothing
 
-Allow the use of markers for partial application.
-> This could be like a meta-box, or a "build your own 1CQF", in which
-> we pipeline existing features, just like 1CQF.
-> E.G. simplify > limit > interpolate > centroid.
+For altitude and gradient smoothing, reduce the averaging window at each end of the range
+to avoid "spikes" when it suddenly ends.
 
 ## Route Builder
 
