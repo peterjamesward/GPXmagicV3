@@ -98,12 +98,15 @@ applyUsingOptions options track =
                 Nothing ->
                     ( 0, 0 )
 
+        newPoints =
+            computeNewPoints options track
+
         newTree =
             DomainModel.replaceRange
                 (fromStart + 1)
                 (fromEnd + 1)
                 track.referenceLonLat
-                (List.map .gpx <| computeNewPoints options track)
+                (List.map .gpx <| newPoints)
                 track.trackTree
 
         oldPoints =

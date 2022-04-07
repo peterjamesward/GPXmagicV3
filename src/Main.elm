@@ -1358,7 +1358,12 @@ performActionsOnModel actions model =
                             Tools.CentroidAverage.applyUsingOptions options track
 
                         ( fromStart, fromEnd ) =
-                            TrackLoaded.getRangeFromMarkers track
+                            case track.markerPosition of
+                                Just _ ->
+                                    TrackLoaded.getRangeFromMarkers track
+
+                                Nothing ->
+                                    ( 0, 0 )
 
                         newTrack =
                             track

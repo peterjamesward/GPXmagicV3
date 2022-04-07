@@ -3,13 +3,13 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.1.8
+# GPXmagic v3.1.9
 
-(7c75d204)
+(0c54a8bc)
 
 ## In this release ...
 
-* Strava tool displays an error if a route cannot be loaded.
+* Corrected error in Undo for Centroid Average smoother.
 
 ## Acknowledgements
 
