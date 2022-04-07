@@ -203,7 +203,6 @@ addTrackToMap track =
 
 {-
     -- This is to add the route as a polyline, with selective rendering
-    -- We will separately add track points as draggable features.
     let
         { longitude, latitude, altitude } =
             gpxPointFromIndex track.currentPosition track.trackTree
@@ -224,7 +223,6 @@ addTrackToMap track =
 addFullTrackToMap : TrackLoaded msg -> Cmd msg
 addFullTrackToMap track =
     -- This is to add the route as a polyline, without selective rendering
-    -- We will separately add track points as draggable features.
     let
         { longitude, latitude, altitude } =
             gpxPointFromIndex track.currentPosition track.trackTree

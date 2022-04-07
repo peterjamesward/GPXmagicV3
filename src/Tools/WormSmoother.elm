@@ -1,4 +1,4 @@
-module Tools.TreeSmoother exposing (..)
+module Tools.WormSmoother exposing (..)
 
 import Actions exposing (ToolAction(..))
 import Angle
@@ -22,7 +22,7 @@ import Polyline3d exposing (Polyline3d)
 import PreviewData exposing (PreviewData, PreviewPoint, PreviewShape(..))
 import Quantity
 import Tools.BendSmoother
-import Tools.TreeSmootherOptions exposing (..)
+import Tools.WormSmootherOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import Triangle3d
 import Utils
@@ -31,8 +31,11 @@ import ViewPureStyles exposing (..)
 
 defaultOptions : Options
 defaultOptions =
-    { depth = 5
-    , mode = Bezier
+    { -- User adjustable
+      wormLength = Quantity.zero
+    , minRadius = Quantity.zero
+    , maxDeltaGradient = Angle.degrees 0
+    , outputSpacing = Quantity.zero
     }
 
 
@@ -42,7 +45,6 @@ type alias Point =
 
 type Msg
     = SetDepth Int
-    | SetMode SmoothMode
     | Apply
     | DisplayInfo String String
 
@@ -204,13 +206,7 @@ computeNewPoints depth track =
 
 applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
 applyUsingOptions options track =
-    case options.mode of
-        Bezier ->
-            applyWithBezier options.depth track
-
-        Clothoid ->
-            --TODO: !
-            ( Nothing, [] )
+    ( Nothing, [] )
 
 
 applyWithBezier : Int -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
@@ -249,9 +245,8 @@ toolStateChange :
     -> ( Options, List (ToolAction msg) )
 toolStateChange opened colour options track =
     case ( opened, track ) of
-        ( True, Just theTrack ) ->
-            ( options, previewActions options colour theTrack )
-
+        --( True, Just theTrack ) ->
+        --    ( options, previewActions options colour theTrack )
         _ ->
             ( options, [ HidePreview "recursive" ] )
 
@@ -274,29 +269,24 @@ update :
     -> ( Options, List (ToolAction msg) )
 update msg options previewColour track =
     case msg of
-        SetDepth depth ->
-            let
-                newOptions =
-                    { options | depth = depth }
-            in
-            ( newOptions, previewActions newOptions previewColour track )
-
-        Apply ->
-            ( options
-            , [ Actions.RecursiveSmootherApplyWithOptions options
-              , TrackHasChanged
-              ]
-            )
-
-        SetMode mode ->
-            let
-                newOptions =
-                    { options | mode = mode }
-            in
-            ( newOptions, [] )
-
+        --SetDepth depth ->
+        --    let
+        --        newOptions =
+        --            { options | depth = depth }
+        --    in
+        --    ( options, previewActions opt previewColour track )
+        --
+        --Apply ->
+        --    ( options
+        --    , [ Actions.RecursiveSmootherApplyWithOptions options
+        --      , TrackHasChanged
+        --      ]
+        --    )
         DisplayInfo tool tag ->
             ( options, [ Actions.DisplayInfo tool tag ] )
+
+        _ ->
+            ( options, [] )
 
 
 view : Bool -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
@@ -308,18 +298,6 @@ view imperial wrapper options track =
                 { onPress = Just <| wrapper Apply
                 , label = text "Smooth"
                 }
-
-        depthSlider =
-            Input.slider
-                commonShortHorizontalSliderStyles
-                { onChange = wrapper << SetDepth << round
-                , label = Input.labelBelow [] <| text <| "Depth: " ++ String.fromInt options.depth
-                , min = 2.0
-                , max = 18.0
-                , step = Just 1.0
-                , value = toFloat options.depth
-                , thumb = Input.defaultThumb
-                }
     in
     column
         [ padding 10
@@ -328,6 +306,6 @@ view imperial wrapper options track =
         , centerX
         , Background.color FlatColors.ChinesePalette.antiFlashWhite
         ]
-        [ depthSlider
+        [ none
         , applyButton
         ]
