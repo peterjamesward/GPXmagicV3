@@ -3,16 +3,13 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.1.7
+# GPXmagic v3.1.8
 
 (7c75d204)
 
 ## In this release ...
 
-* New _Land use_ tool simply displays the colour legend and any error messages.
-(Sometimes the servers are busy, so no data are available.)
-
-* New _Display option_ setting to reveal any named places given by Open Street Map.
+* Strava tool displays an error if a route cannot be loaded.
 
 ## Acknowledgements
 

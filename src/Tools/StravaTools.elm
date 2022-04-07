@@ -157,12 +157,21 @@ update msg settings wrap track =
         HandleRouteData response ->
             case settings.stravaStatus of
                 StravaConnected token ->
-                    ( { settings | stravaRoute = stravaProcessRoute response }
-                    , [ Actions.RequestStravaRoute
-                            (wrap << GpxDownloaded)
-                            settings.externalRouteId
-                            token
-                      ]
+                    let
+                        result =
+                            stravaProcessRoute response
+                    in
+                    ( { settings | stravaRoute = result }
+                    , case result of
+                        StravaRouteOk _ ->
+                            [ Actions.RequestStravaRoute
+                                (wrap << GpxDownloaded)
+                                settings.externalRouteId
+                                token
+                            ]
+
+                        _ ->
+                            []
                     )
 
                 StravaDisconnected ->
@@ -504,6 +513,9 @@ viewStravaTab options wrap track =
                             , label = text "View on Strava"
                             }
                         ]
+
+                StravaRouteError err ->
+                    paragraph [] [ text err ]
 
                 _ ->
                     none

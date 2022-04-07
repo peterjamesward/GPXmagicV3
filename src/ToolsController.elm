@@ -262,7 +262,7 @@ defaultTools =
     , centroidAverageTool
     , curveFormerTool
     , bendSmootherTool
-    , treeSmootherTool
+    --, treeSmootherTool
     , nudgeTool
     , outAndBackTool
     , simplifyTool

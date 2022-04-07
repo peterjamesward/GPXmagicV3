@@ -28,9 +28,15 @@ to avoid "spikes" when it suddenly ends.
 
 # WIP
 
-## The Holy Grail of smoothers
+## Adaptive smoothing
 
-See private notes (sorry if you're following on github).
+Experimenting with arc detection and splines (later, clothoids, maybe) to "parse" the track:
+- Use cicrumcircle as radius estimate
+- Categorise continuous sections as ( < min radius, > min radius, straightish, straight ), say.
+- Apply relevant approximation (min radius, consistent radius, spline?, straight )
+- Check for direction, slope, curvature continuity at joins
+- User-adjustable bend cutoff and quality of approximation
+- Retro-fit to Bend Problems.
  
 ---
 
