@@ -33,13 +33,6 @@ type Msg
     | ChooseMapStyle MapStyle
 
 
-
---style: 'mapbox://styles/mapbox/streets-v11',
---style: 'mapbox://styles/mapbox/satellite-v9',
---style: 'mapbox://styles/mapbox/satellite-streets-v11',
---style: 'mapbox://styles/mapbox/outdoors-v11',
-
-
 type MapStyle
     = MapStreets
     | MapSatellite
@@ -120,7 +113,9 @@ update msg msgWrapper track area context =
                     { context | draggable = not context.draggable }
             in
             ( newOptions
-            , [ MakeMapPointsDraggable newOptions.draggable ]
+            , [ MakeMapPointsDraggable newOptions.draggable
+              , TrackHasChanged
+              ]
             )
 
 

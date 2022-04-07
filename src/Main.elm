@@ -137,6 +137,7 @@ type alias Model =
     , previews : Dict String PreviewData
     , flythroughRunning : Bool
     , needsRendering : Bool
+    , mapPointsDraggable : Bool
 
     -- Layout stuff
     , windowSize : ( Float, Float )
@@ -231,6 +232,7 @@ init mflags origin navigationKey =
       , loadOptionsMenuOpen = False
       , svgFileOptions = SvgPathExtractor.defaultOptions
       , track = Nothing
+      , mapPointsDraggable = False
       , previews = Dict.empty
       , needsRendering = False
       , flythroughRunning = False
@@ -380,7 +382,7 @@ If the File Open dialog does not appear, please reload the page in the browser a
                         Just track ->
                             ( adoptTrackInModel track model
                             , Cmd.batch
-                                [ showTrackOnMapCentered track
+                                [ showTrackOnMapCentered model.mapPointsDraggable track
                                 , LandUseDataOSM.requestLandUseData
                                     ReceivedLandUseData
                                     track
@@ -408,7 +410,7 @@ Please check the file contains GPX data.""" }
                         newModel =
                             { model | track = Just track }
                     in
-                    ( newModel, showTrackOnMapCentered newTrack )
+                    ( newModel, showTrackOnMapCentered model.mapPointsDraggable newTrack )
 
                 Nothing ->
                     ( model, Cmd.none )
@@ -1239,6 +1241,9 @@ performActionsOnModel actions model =
         performAction : ToolAction Msg -> Model -> Model
         performAction action foldedModel =
             case ( action, foldedModel.track ) of
+                ( MakeMapPointsDraggable flag, _ ) ->
+                    { foldedModel | mapPointsDraggable = flag }
+
                 ( ReRender, Just _ ) ->
                     { foldedModel | needsRendering = True }
 
@@ -2329,7 +2334,11 @@ performActionCommands actions model =
 
                 ( TrackHasChanged, Just track ) ->
                     Cmd.batch
-                        [ MapPortController.addTrackToMap track
+                        [ if model.mapPointsDraggable then
+                            MapPortController.addFullTrackToMap track
+
+                          else
+                            MapPortController.addTrackToMap track
                         , MapPortController.addMarkersToMap track
                         , Cmd.batch <| List.map showPreviewOnMap (Dict.keys model.previews)
                         ]
@@ -2365,7 +2374,7 @@ performActionCommands actions model =
                     Task.perform message (File.toString file)
 
                 ( TrackFromSvg svgContent, Just track ) ->
-                    showTrackOnMapCentered track
+                    showTrackOnMapCentered model.mapPointsDraggable track
 
                 ( SelectGpxFile message, _ ) ->
                     Select.file [ "text/gpx" ] message
@@ -2374,7 +2383,7 @@ performActionCommands actions model =
                     Task.perform message (File.toString file)
 
                 ( TrackFromGpx gpxContent, Just track ) ->
-                    showTrackOnMapCentered track
+                    showTrackOnMapCentered model.mapPointsDraggable track
 
                 ( RequestStravaRouteHeader msg routeId token, _ ) ->
                     Tools.StravaDataLoad.requestStravaRouteHeader
@@ -2412,11 +2421,15 @@ performActionCommands actions model =
     Cmd.batch <| List.map performAction actions
 
 
-showTrackOnMapCentered : TrackLoaded msg -> Cmd msg
-showTrackOnMapCentered track =
+showTrackOnMapCentered : Bool -> TrackLoaded msg -> Cmd msg
+showTrackOnMapCentered useFull track =
     Cmd.batch
         -- Must repaint track on so that selective rendering works.
-        [ MapPortController.addTrackToMap track
+        [ if useFull then
+            MapPortController.addFullTrackToMap track
+
+          else
+            MapPortController.addTrackToMap track
         , MapPortController.zoomMapToFitTrack track
         , MapPortController.addMarkersToMap track
         ]

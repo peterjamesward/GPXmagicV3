@@ -59,8 +59,8 @@ import Tools.Straightener
 import Tools.StravaOptions
 import Tools.StravaTools
 import Tools.TrackInfoBox as TrackInfoBox
-import Tools.TreeSmoother
-import Tools.TreeSmootherOptions
+import Tools.WormSmoother
+import Tools.WormSmootherOptions
 import TrackLoaded exposing (TrackLoaded)
 import View3dCommonElements exposing (stopProp)
 import ViewPureStyles exposing (..)
@@ -135,7 +135,7 @@ type alias Options msg =
     , straightenOptions : Tools.Straightener.Options
     , graphOptions : Tools.GraphOptions.Options msg
     , landUseOptions : Tools.LandUse.Options
-    , treeSmootherOptions : Tools.TreeSmootherOptions.Options
+    , treeSmootherOptions : Tools.WormSmootherOptions.Options
     }
 
 
@@ -169,7 +169,7 @@ defaultOptions =
     , straightenOptions = Tools.Straightener.defaultOptions
     , graphOptions = Tools.Graph.defaultOptions
     , landUseOptions = Tools.LandUse.defaultOptions
-    , treeSmootherOptions = Tools.TreeSmoother.defaultOptions
+    , treeSmootherOptions = Tools.WormSmoother.defaultOptions
     }
 
 
@@ -208,7 +208,7 @@ type ToolMsg
     | ToolStraightenMsg Tools.Straightener.Msg
     | ToolGraphMsg Tools.Graph.Msg
     | ToolLandUseMsg Tools.LandUse.Msg
-    | ToolTreeSmootherMsg Tools.TreeSmoother.Msg
+    | ToolTreeSmootherMsg Tools.WormSmoother.Msg
 
 
 toolID : String
@@ -449,7 +449,7 @@ bendSmootherTool =
 treeSmootherTool : ToolEntry
 treeSmootherTool =
     { toolType = ToolTreeSmoother
-    , toolId = Tools.TreeSmoother.toolID
+    , toolId = Tools.WormSmoother.toolID
     , label = "Holistic smoother"
     , info = "Make it smoother"
     , video = Nothing
@@ -1252,7 +1252,7 @@ update toolMsg isTrack msgWrapper options =
                 Just track ->
                     let
                         ( newOptions, actions ) =
-                            Tools.TreeSmoother.update
+                            Tools.WormSmoother.update
                                 msg
                                 options.treeSmootherOptions
                                 (getColour ToolTreeSmoother options.tools)
@@ -1599,7 +1599,7 @@ toolStateHasChanged toolType newState isTrack options =
         ToolTreeSmoother ->
             let
                 ( newToolOptions, actions ) =
-                    Tools.TreeSmoother.toolStateChange
+                    Tools.WormSmoother.toolStateChange
                         (newState == Expanded)
                         (getColour toolType options.tools)
                         options.treeSmootherOptions
@@ -2070,7 +2070,7 @@ viewToolByType msgWrapper entry isTrack options =
             ToolTreeSmoother ->
                 case isTrack of
                     Just track ->
-                        Tools.TreeSmoother.view
+                        Tools.WormSmoother.view
                             options.imperial
                             (msgWrapper << ToolTreeSmootherMsg)
                             options.treeSmootherOptions
