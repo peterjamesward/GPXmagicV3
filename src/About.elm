@@ -3,13 +3,13 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.1.10
+# GPXmagic v3.1.11
 
 (e389bde1)
 
 ## In this release ...
 
-* Map view displays all points all the time.
+* Fix bug where Simplify (or One-Click Quick-Fix) applied after moving first point on Map would move the entire course.
 
 ## Acknowledgements
 
