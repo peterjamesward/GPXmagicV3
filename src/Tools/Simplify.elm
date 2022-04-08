@@ -148,7 +148,8 @@ apply options track =
 
         newTree : Maybe PeteTree
         newTree =
-            DomainModel.treeFromSourcePoints <| Dict.values newCourse
+            DomainModel.treeFromSourcesWithExistingReference track.referenceLonLat <|
+                Dict.values newCourse
 
         oldPoints : List GPXSource
         oldPoints =
