@@ -143,7 +143,7 @@ computeNewPoints options track =
             else
                 let
                     lastPassedPoint =
-                        DomainModel.indexFromDistance window.nextDistance track.trackTree
+                        DomainModel.indexFromDistanceRoundedDown window.nextDistance track.trackTree
 
                     newWindow =
                         if lastPassedPoint == window.lastTrackIndex then
@@ -279,7 +279,7 @@ computeNewPoints options track =
                                 newDirection
                                 moreTheta
                                 morePhi
-                                (point :: outputs)
+                                (newPoint :: outputs)
 
                         _ ->
                             outputs
@@ -289,10 +289,15 @@ computeNewPoints options track =
                 startDirection
                 (List.reverse result.outputDeltaTheta)
                 (List.reverse result.outputDeltaPhi)
-                []
+                [ firstLeaf.startPoint ]
     in
-    --Utils.elide <|
-    TrackLoaded.asPreviewPoints track Quantity.zero derivedTrackForwards
+    derivedTrackForwards
+        |> List.map
+            (\earth ->
+                { earthPoint = earth
+                , gpx = DomainModel.gpxFromPointWithReference track.referenceLonLat earth
+                }
+            )
 
 
 applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )

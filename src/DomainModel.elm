@@ -870,11 +870,11 @@ indexFromDistanceRoundedDown distance treeNode =
 
         Node info ->
             if distance |> Quantity.lessThanOrEqualTo (trueLength info.left) then
-                indexFromDistance distance info.left
+                indexFromDistanceRoundedDown distance info.left
 
             else
                 skipCount info.left
-                    + indexFromDistance (distance |> Quantity.minus (trueLength info.left)) info.right
+                    + indexFromDistanceRoundedDown (distance |> Quantity.minus (trueLength info.left)) info.right
 
 
 indexFromDistance : Length.Length -> PeteTree -> Int

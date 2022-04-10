@@ -11,8 +11,8 @@ meanRadius =
 
 
 metresPerDegree =
-    78846.81
-
+    --78846.81
+    meanRadius * pi / 180.0
 
 
 metresPerPixelAtEquatorZoomZero =
@@ -22,6 +22,7 @@ metresPerPixelAtEquatorZoomZero =
 metresPerPixel : Float -> Angle -> Float
 metresPerPixel zoomLevel latitude =
     Angle.cos latitude * metresPerPixelAtEquatorZoomZero / 2.0 ^ zoomLevel
+
 
 
 -- Equirectangular approximation
