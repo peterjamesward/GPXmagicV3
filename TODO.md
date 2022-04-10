@@ -50,6 +50,15 @@ We can but try. See if it's even remotely feasible. Coding is easier than maths,
 > Very interesting. Done forward pass only.
 > Something not quite right about the deltaDeltaTheta.
 > Gradient not quite right but not disastrous.
+> Fix these then add backward pass and figure out how to combine them.
+
+---
+
+# BACKLOG
+
+## Donations
+
+Restore the PayPal link.
 
 ## Adaptive smoothing
 
@@ -59,10 +68,6 @@ We can but try. See if it's even remotely feasible. Coding is easier than maths,
 4) Lines and arcs otherwise
 5) Tangents between adjacent arcs
 6) Splines between arc & straight
-
----
-
-# BACKLOG
 
 ## De-noise / Simplify
 
