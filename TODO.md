@@ -49,7 +49,7 @@ We can but try. See if it's even remotely feasible. Coding is easier than maths,
 
 > Very interesting. Done forward pass only.
 > Something not quite right about the deltaDeltaTheta.
-> Gradient not quite right but not disastrous.
+> Gradient not enforcing maxPhi.
 > Fix these then add backward pass and figure out how to combine them.
 
 ---
