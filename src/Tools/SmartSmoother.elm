@@ -139,7 +139,7 @@ computeNewPoints options track =
                 window.nextDistance
                     |> Quantity.greaterThanOrEqualTo (DomainModel.trueLength track.trackTree)
             then
-                -- Show's ever. Note lists are consed and hence reversed.
+                -- Show's over. Note lists are consed and hence reversed.
                 window
 
             else
@@ -195,6 +195,7 @@ computeNewPoints options track =
                                 unspentDeltaTheta =
                                     window.unspentDeltaTheta |> Quantity.plus deltaThetaHere
 
+                                --TODO: I think is all the same below here so should be able to factor this better.
                                 availableDeltaTheta =
                                     Quantity.clamp
                                         (window.lastDeltaTheta |> Quantity.minus settings.maxDeltaDeltaTheta)
