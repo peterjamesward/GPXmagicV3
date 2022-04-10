@@ -215,6 +215,7 @@ computeNewPoints options track =
                             in
                             { window
                                 | lastTrackDirection = newLeaf.directionAtStart
+                                , lastTrackIndex = lastPassedPoint
                                 , outputDeltaTheta = availableDeltaTheta :: window.outputDeltaTheta
                                 , outputDeltaPhi = availableDeltaPhi :: window.outputDeltaPhi
                                 , unspentDeltaTheta = unspentDeltaTheta |> Quantity.minus availableDeltaTheta
@@ -224,11 +225,11 @@ computeNewPoints options track =
                             }
                 in
                 -- This I hope is properly tail recursive.
-                { newWindow
-                    | nextDistance = window.nextDistance |> Quantity.plus Length.meter
-                    , lastTrackIndex = lastPassedPoint
-                }
-                    |> filterForwards
+                filterForwards
+                    { newWindow
+                        | nextDistance = window.nextDistance |> Quantity.plus Length.meter
+                        , lastTrackIndex = lastPassedPoint
+                    }
 
         derivedTrackForwards : List EarthPoint
         derivedTrackForwards =
@@ -291,8 +292,7 @@ computeNewPoints options track =
                 []
     in
     --Utils.elide <|
-        Utils.elide <|
-            TrackLoaded.asPreviewPoints track Quantity.zero derivedTrackForwards
+    TrackLoaded.asPreviewPoints track Quantity.zero derivedTrackForwards
 
 
 applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
