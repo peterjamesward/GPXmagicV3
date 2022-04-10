@@ -285,8 +285,8 @@ computeNewPoints options track =
             accumulate
                 firstLeaf.startPoint
                 startDirection
-                result.outputDeltaTheta
-                result.outputDeltaPhi
+                (List.reverse result.outputDeltaTheta)
+                (List.reverse result.outputDeltaPhi)
                 []
     in
     TrackLoaded.asPreviewPoints track Quantity.zero derivedTrackForwards
