@@ -163,8 +163,8 @@ computeNewPoints options track =
 
                                 availableDeltaPhi =
                                     Quantity.clamp
-                                        (window.lastDeltaPhi |> Quantity.minus settings.maxDeltaPhi)
-                                        (window.lastDeltaPhi |> Quantity.plus settings.maxDeltaPhi)
+                                        (Quantity.negate settings.maxPhi |> Quantity.minus window.lastPhi)
+                                        (settings.maxPhi |> Quantity.minus window.lastPhi)
                                     <|
                                         Quantity.clamp
                                             (Quantity.negate settings.maxDeltaPhi)
@@ -216,8 +216,8 @@ computeNewPoints options track =
 
                                 availableDeltaPhi =
                                     Quantity.clamp
-                                        (window.lastDeltaPhi |> Quantity.minus settings.maxDeltaPhi)
-                                        (window.lastDeltaPhi |> Quantity.plus settings.maxDeltaPhi)
+                                        (Quantity.negate settings.maxPhi |> Quantity.minus window.lastPhi)
+                                        (settings.maxPhi |> Quantity.minus window.lastPhi)
                                     <|
                                         Quantity.clamp
                                             (Quantity.negate settings.maxDeltaPhi)

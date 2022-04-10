@@ -50,6 +50,7 @@ We can but try. See if it's even remotely feasible. Coding is easier than maths,
 > Very interesting. Done forward pass only.
 > Something not quite right about the deltaDeltaTheta.
 > Gradient not enforcing maxPhi.
+> Should almost certainly run until captured data is exhausted.
 > Fix these then add backward pass and figure out how to combine them.
 
 ---
