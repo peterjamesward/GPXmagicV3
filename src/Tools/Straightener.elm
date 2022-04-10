@@ -65,7 +65,7 @@ update :
 update msg options =
     case msg of
         StraightenStraight ->
-            ( options, [ Actions.Straighten ] )
+            ( options, [ Actions.Straighten, Actions.TrackHasChanged ] )
 
         SetPreserveAltitude bool ->
             ( { options | preserveAltitude = bool }, [] )

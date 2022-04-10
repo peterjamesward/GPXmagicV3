@@ -69,6 +69,7 @@ import Tools.OutAndBack
 import Tools.ProfileSmooth
 import Tools.ProfileSmoothOptions
 import Tools.Simplify
+import Tools.SmartSmoother
 import Tools.SplitAndJoin
 import Tools.StartFinish
 import Tools.StartFinishTypes exposing (Loopiness(..))

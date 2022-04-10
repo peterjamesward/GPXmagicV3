@@ -25,7 +25,7 @@ import Tools.ProfileSmoothOptions
 import Tools.StartFinishTypes
 import Tools.StravaOptions
 import Tools.StravaTypes exposing (StravaRoute, StravaSegment, StravaSegmentStreams)
-import Tools.WormSmootherOptions
+import Tools.SmartSmootherOptions
 
 
 type ToolAction msg
@@ -53,7 +53,7 @@ type ToolAction msg
     | CentroidAverageApplyWithOptions Tools.CentroidAverageOptions.Options
     | CurveFormerApplyWithOptions Tools.CurveFormerOptions.Options
     | BendSmootherApplyWithOptions Tools.BendSmootherOptions.Options
-    | RecursiveSmootherApplyWithOptions Tools.WormSmootherOptions.Options
+    | RecursiveSmootherApplyWithOptions Tools.SmartSmootherOptions.Options
     | MakeMapPointsDraggable Bool
     | SetMapStyle String
     | PointMovedOnMap Float Float Float Float

@@ -3,13 +3,13 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.1.11
+# GPXmagic v3.1.12
 
-(e389bde1)
+(612bd5cf)
 
 ## In this release ...
 
-* Fix bug where Simplify (or One-Click Quick-Fix) applied after moving first point on Map would move the entire course.
+* Fix bug where Map was not updated after Straighten.
 
 ## Acknowledgements
 
@@ -17,7 +17,7 @@ aboutText =
 
 * Thanks to John Bytheway for v3 ideas and support.
 
-* Thanks to all those who've provided support, comments and help along the way.
+* Thanks to all those who've provided support, comments, bug reports, and help along the way.
 
 * Thank to RGT for having the Magic Roads concept and an excellent indoor cycling platform.
 
