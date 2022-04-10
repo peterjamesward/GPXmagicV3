@@ -22,6 +22,26 @@ combineLists lists =
     List.foldl reversingCons [] lists
 
 
+elide : List a -> List a
+elide input =
+    -- Fold is essential  for performance.
+    -- Two passes here means we get the list back the right way round.
+    let
+        helper : List a -> List a -> List a
+        helper accum source =
+            case source of
+                aa :: bb :: cc ->
+                    helper (aa :: accum) cc
+
+                [ zz ] ->
+                    zz :: accum
+
+                [] ->
+                    accum
+    in
+    input |> helper [] |> helper []
+
+
 errorToString : Http.Error -> String
 errorToString error =
     case error of

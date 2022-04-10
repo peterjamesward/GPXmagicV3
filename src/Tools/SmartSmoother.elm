@@ -133,10 +133,11 @@ computeNewPoints options track =
         filterForwards : Window -> Window
         filterForwards window =
             if
+                -- Probably should drain our unspent??
                 window.nextDistance
                     |> Quantity.greaterThanOrEqualTo (DomainModel.trueLength track.trackTree)
             then
-                -- Show's ever.
+                -- Show's ever. Note lists are consed and hence reversed.
                 window
 
             else
@@ -154,8 +155,8 @@ computeNewPoints options track =
                                         (window.lastDeltaTheta |> Quantity.plus settings.maxDeltaDeltaTheta)
                                     <|
                                         Quantity.clamp
-                                            (Quantity.negate settings.maxDeltaDeltaTheta)
-                                            settings.maxDeltaDeltaTheta
+                                            (Quantity.negate settings.maxDeltaTheta)
+                                            settings.maxDeltaTheta
                                             window.unspentDeltaTheta
 
                                 availableDeltaPhi =
@@ -193,8 +194,8 @@ computeNewPoints options track =
                                         (window.lastDeltaTheta |> Quantity.plus settings.maxDeltaDeltaTheta)
                                     <|
                                         Quantity.clamp
-                                            (Quantity.negate settings.maxDeltaDeltaTheta)
-                                            settings.maxDeltaDeltaTheta
+                                            (Quantity.negate settings.maxDeltaTheta)
+                                            settings.maxDeltaTheta
                                             window.unspentDeltaTheta
 
                                 phiHere =
@@ -280,7 +281,7 @@ computeNewPoints options track =
                                 (point :: outputs)
 
                         _ ->
-                            List.reverse <| outputs
+                            outputs
             in
             accumulate
                 firstLeaf.startPoint
@@ -289,7 +290,9 @@ computeNewPoints options track =
                 (List.reverse result.outputDeltaPhi)
                 []
     in
-    TrackLoaded.asPreviewPoints track Quantity.zero derivedTrackForwards
+    --Utils.elide <|
+        Utils.elide <|
+            TrackLoaded.asPreviewPoints track Quantity.zero derivedTrackForwards
 
 
 applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
@@ -322,7 +325,7 @@ previewActions options colour track =
         { tag = "smart"
         , shape = PreviewCircle
         , colour = colour
-        , points = options.newPoints
+        , points = computeNewPoints options track
         }
     ]
 

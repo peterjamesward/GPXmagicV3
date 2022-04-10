@@ -208,7 +208,7 @@ type ToolMsg
     | ToolStraightenMsg Tools.Straightener.Msg
     | ToolGraphMsg Tools.Graph.Msg
     | ToolLandUseMsg Tools.LandUse.Msg
-    | ToolTreeSmootherMsg Tools.SmartSmoother.Msg
+    | ToolSmartSmootherMsg Tools.SmartSmoother.Msg
 
 
 toolID : String
@@ -1247,7 +1247,7 @@ update toolMsg isTrack msgWrapper options =
             , actions
             )
 
-        ToolTreeSmootherMsg msg ->
+        ToolSmartSmootherMsg msg ->
             case isTrack of
                 Just track ->
                     let
@@ -2072,7 +2072,7 @@ viewToolByType msgWrapper entry isTrack options =
                     Just track ->
                         Tools.SmartSmoother.view
                             options.imperial
-                            (msgWrapper << ToolTreeSmootherMsg)
+                            (msgWrapper << ToolSmartSmootherMsg)
                             options.smartSmootherOptions
                             track
 
