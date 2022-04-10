@@ -53,7 +53,7 @@ type ToolAction msg
     | CentroidAverageApplyWithOptions Tools.CentroidAverageOptions.Options
     | CurveFormerApplyWithOptions Tools.CurveFormerOptions.Options
     | BendSmootherApplyWithOptions Tools.BendSmootherOptions.Options
-    | RecursiveSmootherApplyWithOptions Tools.SmartSmootherOptions.Options
+    | SmartSmootherApplyWithOptions Tools.SmartSmootherOptions.Options
     | MakeMapPointsDraggable Bool
     | SetMapStyle String
     | PointMovedOnMap Float Float Float Float

@@ -9,8 +9,7 @@ BUG: Undo single point smooth at track start removes a point.
 NOT A BUG: Move & Stretch does not move marked points. 
 > This is intentional. May not be right though.
 
-BUG: (DavidO)
-
+BUG?: (DavidO)
 - Opened the Move/Stretch tool and set a range - this displayed a preview.
 - Hid the tool using the Tools summary section 
   - (the tool was still expanded when I selected "Hidden") 
@@ -22,15 +21,33 @@ TWEAK:
 For altitude and gradient smoothing, reduce the averaging window at each end of the range
 to avoid "spikes" when it suddenly ends.
 
-BUG: Map not painted after Straighten.
+BUG: Now Map has full track, clicking should not redraw it!
 
 --
 
 # WIP
 
-## Adaptive smoothing
+## Smoothing by averaging & limiting curvature
 
-?? How to make it all msg driven, or should I not bother??
+What effect does this have? If we replace curvature (the N in TNB) with the average of nearby
+(possibly interpolated) points. We would have to extend the averaging range so that the vector
+sum of the directions takes us "back on tracK" or as near as can be. Also, at the same time, to
+ensure that the average curvature never exceeds the maximum allowed.
+
+Can this be implemented point-wise? Would we ever be able to follow a track (e.g. Lacets)?
+
+Appealing simplicity and symmetry, but subtleties. Say we are on a hairpin of > max curvature.
+We set the curvature to max and then seek sufficient points either side such that the net
+total curvature is equalled, AND (ideally) we are somewhere near the original track and direction!
+
+Maybe this is achieved by working out how far this extends both sides but the implication is that
+when we look at the other points, they must respect this range. That is, if the bend point is
+at 100m, but the search extends over the range 60 .. 140, then when we are solving for 60, we
+must look out as far as 100 (or 140?).
+
+We can but try. See if it's even remotely feasible. Coding is easier than maths, for me today.
+
+## Adaptive smoothing
 
 1) Analysis of curvature (two planes)
 2) Placement of arcs
@@ -98,13 +115,6 @@ Scales?
 - Centroid average to work over S/F on loop
 - Bezier smoothing to work over S/F on loop
 
-## Texture for the ground plane, road surface
-
-See https://github.com/ianmackenzie/elm-3d-scene/blob/1.0.1/examples/Texture.elm
-https://ambientcg.com/view?id=Grass004
-https://ambientcg.com/view?id=Asphalt001
-Credit: Contains assets from ambientCG.com, licensed under CC0 1.0 Universal.
-
 ## Small stuff
 
 Put all Font, Colour etc into a Palette/Style module for ease of change.
@@ -114,9 +124,16 @@ Put all Font, Colour etc into a Palette/Style module for ease of change.
 
 # Parked
 
+## Texture for the ground plane, road surface
+
+See https://github.com/ianmackenzie/elm-3d-scene/blob/1.0.1/examples/Texture.elm
+https://ambientcg.com/view?id=Grass004
+https://ambientcg.com/view?id=Asphalt001
+Credit: Contains assets from ambientCG.com, licensed under CC0 1.0 Universal.
+
 ## Offset/nudge logic
 
-Just don't blindly mitre. For each pair of RoadSection, see if the points will
+Don't just mitre. For each pair of RoadSection, see if the points will
 "overlap" and don't emit them all. May need some interpolation for altitude or whatever.
 
 ## Map

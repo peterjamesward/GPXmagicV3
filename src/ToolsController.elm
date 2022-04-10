@@ -450,7 +450,7 @@ smartSmootherTool : ToolEntry
 smartSmootherTool =
     { toolType = ToolSmartSmoother
     , toolId = Tools.SmartSmoother.toolID
-    , label = "Holistic smoother"
+    , label = "Smart smoother"
     , info = "Make it smoother"
     , video = Nothing
     , state = Contracted
