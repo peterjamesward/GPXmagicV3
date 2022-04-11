@@ -8,7 +8,7 @@
 
 ## Views of the route
 
-## List of all the tools
+## All the tools ...
 
 ## Organising your workspace
 
