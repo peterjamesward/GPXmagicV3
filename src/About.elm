@@ -10,8 +10,8 @@ aboutText =
 ## In this release ...
 
 * **Smart smoother** could be the new go-to for quick smoothing of hairpins, removal of IRL noise,
-reducing gradients and generally making things smoother. It's not unlike the gradient smoother in
-_Smooth profile_ but it works for bends, and it makes (in general, imho) pleasing transitions.
+reducing gradients and totally making things smoother. It's not unlike the gradient smoother in
+_Smooth profile_ but it works for bends and gradients, and gives smooth transitions.
 
 ## Acknowledgements
 
