@@ -21,7 +21,7 @@ TWEAK:
 For altitude and gradient smoothing, reduce the averaging window at each end of the range
 to avoid "spikes" when it suddenly ends.
 
-BUG: Now Map has full track, clicking should not redraw it!
+**BUG**: Now Map has full track, clicking should not redraw it!
 
 --
 
@@ -29,7 +29,7 @@ BUG: Now Map has full track, clicking should not redraw it!
 
 ## Smart smoother
 
-Info text.
+Better positioning of markers (distance based).
 
 Make it the new 1CQF.
 
@@ -41,20 +41,12 @@ Make it the new 1CQF.
 
 Restore the PayPal link.
 
-## Adaptive smoothing
-
-1) Analysis of curvature (two planes)
-2) Placement of arcs
-3) Bezier for intermediates
-4) Lines and arcs otherwise
-5) Tangents between adjacent arcs
-6) Splines between arc & straight
-
 ## De-noise / Simplify
 
 This could be improved. Should preferentially remove any points where the triangle has a large
 deflection and a short baseline, not just based on area. Also, an effective quality filter 
 would be to restrict the angular change in both planes. Will do this prior to curvature analysis.
+> Obviated by smart smoother?
 
 ## Timed segments
 
@@ -113,6 +105,16 @@ Put all Font, Colour etc into a Palette/Style module for ease of change.
 ---
 
 # Parked
+
+## Adaptive smoothing
+
+Not needed now smart smoother rules.
+1) Analysis of curvature (two planes)
+2) Placement of arcs
+3) Bezier for intermediates
+4) Lines and arcs otherwise
+5) Tangents between adjacent arcs
+6) Splines between arc & straight
 
 ## Texture for the ground plane, road surface
 

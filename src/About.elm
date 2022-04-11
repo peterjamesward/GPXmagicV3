@@ -3,13 +3,15 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.1.12
+# GPXmagic v3.2.0
 
 (e4c82060)
 
 ## In this release ...
 
-* Fix bug where Map was not updated after Straighten.
+* **Smart smoother** could be the new go-to for quick smoothing of hairpins, removal of IRL noise,
+reducing gradients and generally making things smoother. It's not unlike the gradient smoother in
+_Smooth profile_ but it works for bends, and it makes (in general, imho) pleasing transitions.
 
 ## Acknowledgements
 

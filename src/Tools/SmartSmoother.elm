@@ -35,8 +35,8 @@ import ViewPureStyles exposing (..)
 
 defaultOptions : Options
 defaultOptions =
-    { minRadius = Length.meters 8
-    , minTransition = Length.meters 5
+    { minRadius = Length.meters 4
+    , minTransition = Length.meters 4.5
     , maxGradient = 20
     , newPoints = []
     }
@@ -62,14 +62,29 @@ textDictionary =
     ( toolID
     , Dict.fromList
         [ ( toolID, "Smart smoother" )
-        , ( "info", infoText )
+        , ( "info", """Smart smoother applies three constraints to the track:
+
+1. A minimum turning radius - this applies to all turns but is most noticeable on hairpins which
+will become circular arcs (rather like _Radiused Bends_)
+
+2. How quickly you wish to enter and leave bends, because in real life you don't just
+jerk on the handlebars, it takes time to lean into a bend The result is approximately
+a "Clothoid" or "Euler spiral".
+
+3. Gradients, up and down. Yes, we already have _Limit Gradients_ but you get this for free.
+
+On a sequence of hairpins, you need to find an acceptable combination of minimum radius and
+lead-in to get the horizontal separation about right.
+
+On a long track, the numerical technique used means the smoothed track can increasingly
+deviate from the original track; you may prefer to work in sections.
+
+It's also _really_ good at removing noise from IRL rides.""" )
         , ( "radius", "Bends with a radius smaller than this will be replaced by a circular arc." )
+        , ( "transition", "The length of track it takes to lean into a bend, or get back on the straight." )
+        , ( "gradient", "The maximum steepness of any ascent or descent." )
         ]
     )
-
-
-infoText =
-    """Smooths the whole track by as yet uncertain means."""
 
 
 type alias WindowSettings =
@@ -636,30 +651,34 @@ view imperial wrapper options track =
                 ]
 
         transitionSlider =
-            Input.slider commonShortHorizontalSliderStyles
-                { onChange = wrapper << SetMinTransition << Length.meters
-                , label =
-                    Input.labelRight []
-                        (text <| "Meters of turn-in " ++ showShortMeasure imperial options.minTransition)
-                , min = 1.0
-                , max = 10.0
-                , step = Just 0.5
-                , value = Length.inMeters options.minTransition
-                , thumb = Input.defaultThumb
-                }
+            row [ spacing 3 ]
+                [ Input.slider commonShortHorizontalSliderStyles
+                    { onChange = wrapper << SetMinTransition << Length.meters
+                    , label = Input.labelHidden "transtions"
+                    , min = 1.0
+                    , max = 10.0
+                    , step = Just 0.5
+                    , value = Length.inMeters options.minTransition
+                    , thumb = Input.defaultThumb
+                    }
+                , infoButton <| wrapper <| DisplayInfo "smart" "transition"
+                , text <| "Meters of turn-in " ++ showShortMeasure imperial options.minTransition
+                ]
 
         gradientSlider =
-            Input.slider commonShortHorizontalSliderStyles
-                { onChange = wrapper << SetMaxGradient
-                , label =
-                    Input.labelRight []
-                        (text <| "Maximum gradient " ++ showDecimal2 options.maxGradient)
-                , min = 10.0
-                , max = 30.0
-                , step = Just 0.5
-                , value = options.maxGradient
-                , thumb = Input.defaultThumb
-                }
+            row [ spacing 3 ]
+                [ Input.slider commonShortHorizontalSliderStyles
+                    { onChange = wrapper << SetMaxGradient
+                    , label = Input.labelHidden "gradient"
+                    , min = 10.0
+                    , max = 30.0
+                    , step = Just 0.5
+                    , value = options.maxGradient
+                    , thumb = Input.defaultThumb
+                    }
+                , infoButton <| wrapper <| DisplayInfo "smart" "gradient"
+                , text <| "Maximum gradient " ++ showDecimal2 options.maxGradient
+                ]
 
         analysis =
             -- Will be a data table showing results of analysis
