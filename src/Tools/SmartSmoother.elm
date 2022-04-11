@@ -34,8 +34,8 @@ import ViewPureStyles exposing (..)
 
 defaultOptions : Options
 defaultOptions =
-    { minRadius = Length.meters 5
-    , minTransition = Length.meters 10
+    { minRadius = Length.meters 8
+    , minTransition = Length.meters 5
     , maxGradient = 20
     , newPoints = []
     }
@@ -99,6 +99,19 @@ type alias Window =
 computeNewPoints : Options -> TrackLoaded msg -> List PreviewPoint
 computeNewPoints options track =
     let
+        ( fromStart, fromEnd ) =
+            if track.markerPosition == Nothing then
+                --Default whole track
+                ( 0, 0 )
+
+            else
+                TrackLoaded.getRangeFromMarkers track
+
+        ( distanceAtStart, distanceAtEnd ) =
+            ( DomainModel.distanceFromIndex fromStart track.trackTree
+            , DomainModel.distanceFromIndex (skipCount track.trackTree - fromEnd) track.trackTree
+            )
+
         settings : WindowSettings
         settings =
             let
@@ -118,7 +131,8 @@ computeNewPoints options track =
         forwardWindow =
             let
                 firstLeaf =
-                    DomainModel.getFirstLeaf track.trackTree
+                    DomainModel.asRecord <|
+                        DomainModel.leafFromIndex fromStart track.trackTree
 
                 targetPhi =
                     Quantity.clamp
@@ -126,7 +140,7 @@ computeNewPoints options track =
                         settings.maxPhi
                         (Angle.atan <| firstLeaf.gradientAtStart / 100.0)
             in
-            { nextDistance = Quantity.zero
+            { nextDistance = distanceAtStart
             , lastTrackIndex = 0
             , lastTrackDirection = firstLeaf.directionAtStart
             , lastPhi = targetPhi
@@ -138,15 +152,48 @@ computeNewPoints options track =
             , lastDeltaTheta = Quantity.zero
             }
 
+        withDeltaConstraints window unspentDeltaTheta =
+            Quantity.clamp
+                (window.lastDeltaTheta |> Quantity.minus settings.maxDeltaDeltaTheta)
+                (window.lastDeltaTheta |> Quantity.plus settings.maxDeltaDeltaTheta)
+            <|
+                Quantity.clamp
+                    (Quantity.negate settings.maxDeltaTheta)
+                    settings.maxDeltaTheta
+                    window.unspentDeltaTheta
+
+        withPhiConstraints window targetPhi =
+            Quantity.clamp
+                (Quantity.negate settings.maxDeltaPhi)
+                settings.maxDeltaPhi
+                (targetPhi |> Quantity.minus window.lastPhi)
+
         filterForwards : Window -> Window
         filterForwards window =
-            if
-                -- Probably should drain our unspent??
-                window.nextDistance
-                    |> Quantity.greaterThanOrEqualTo (DomainModel.trueLength track.trackTree)
-            then
-                -- Show's over. Note lists are consed and hence reversed.
-                window
+            if window.nextDistance |> Quantity.greaterThanOrEqualTo distanceAtEnd then
+                if
+                    not (Quantity.equalWithin (Angle.degrees 2) window.unspentDeltaTheta Quantity.zero)
+                        || not (Quantity.equalWithin (Angle.degrees 2) window.lastPhi window.targetPhi)
+                then
+                    -- Probably should drain our unspent??
+                    -- Show's over. Note lists are consed and hence reversed.
+                    let
+                        availableDeltaTheta =
+                            withDeltaConstraints window window.unspentDeltaTheta
+
+                        availableDeltaPhi =
+                            withPhiConstraints window window.unspentDeltaTheta
+                    in
+                    { window
+                        | outputDeltaTheta = availableDeltaTheta :: window.outputDeltaTheta
+                        , outputDeltaPhi = availableDeltaPhi :: window.outputDeltaPhi
+                        , unspentDeltaTheta = window.unspentDeltaTheta |> Quantity.minus availableDeltaTheta
+                        , lastDeltaTheta = availableDeltaTheta
+                        , lastPhi = window.lastPhi |> Quantity.plus availableDeltaPhi
+                    }
+
+                else
+                    window
 
             else
                 let
@@ -158,20 +205,10 @@ computeNewPoints options track =
                             -- Nothing new, just empty our tank.
                             let
                                 availableDeltaTheta =
-                                    Quantity.clamp
-                                        (window.lastDeltaTheta |> Quantity.minus settings.maxDeltaDeltaTheta)
-                                        (window.lastDeltaTheta |> Quantity.plus settings.maxDeltaDeltaTheta)
-                                    <|
-                                        Quantity.clamp
-                                            (Quantity.negate settings.maxDeltaTheta)
-                                            settings.maxDeltaTheta
-                                            window.unspentDeltaTheta
+                                    withDeltaConstraints window window.unspentDeltaTheta
 
                                 availableDeltaPhi =
-                                    Quantity.clamp
-                                        (Quantity.negate settings.maxDeltaPhi)
-                                        settings.maxDeltaPhi
-                                        (window.targetPhi |> Quantity.minus window.lastPhi)
+                                    withPhiConstraints window window.targetPhi
                             in
                             { window
                                 | outputDeltaTheta = availableDeltaTheta :: window.outputDeltaTheta
@@ -192,31 +229,20 @@ computeNewPoints options track =
                                     newLeaf.directionAtStart
                                         |> Direction2d.angleFrom window.lastTrackDirection
 
-                                unspentDeltaTheta =
-                                    window.unspentDeltaTheta |> Quantity.plus deltaThetaHere
-
-                                --TODO: I think is all the same below here so should be able to factor this better.
-                                availableDeltaTheta =
-                                    Quantity.clamp
-                                        (window.lastDeltaTheta |> Quantity.minus settings.maxDeltaDeltaTheta)
-                                        (window.lastDeltaTheta |> Quantity.plus settings.maxDeltaDeltaTheta)
-                                    <|
-                                        Quantity.clamp
-                                            (Quantity.negate settings.maxDeltaTheta)
-                                            settings.maxDeltaTheta
-                                            window.unspentDeltaTheta
-
                                 targetPhi =
                                     Quantity.clamp
                                         (Quantity.negate settings.maxPhi)
                                         settings.maxPhi
                                         (Angle.atan <| newLeaf.gradientAtStart / 100.0)
 
+                                unspentDeltaTheta =
+                                    window.unspentDeltaTheta |> Quantity.plus deltaThetaHere
+
+                                availableDeltaTheta =
+                                    withDeltaConstraints window unspentDeltaTheta
+
                                 availableDeltaPhi =
-                                    Quantity.clamp
-                                        (Quantity.negate settings.maxDeltaPhi)
-                                        settings.maxDeltaPhi
-                                        (window.targetPhi |> Quantity.minus window.lastPhi)
+                                    withPhiConstraints window targetPhi
                             in
                             { window
                                 | lastTrackDirection = newLeaf.directionAtStart
@@ -241,7 +267,8 @@ computeNewPoints options track =
             -- This just to look at the preview! Is simply summing the changes!
             let
                 firstLeaf =
-                    DomainModel.getFirstLeaf track.trackTree
+                    DomainModel.asRecord <|
+                        DomainModel.leafFromIndex fromStart track.trackTree
 
                 result =
                     filterForwards forwardWindow
@@ -295,14 +322,214 @@ computeNewPoints options track =
                 (List.reverse result.outputDeltaTheta)
                 (List.reverse result.outputDeltaPhi)
                 [ firstLeaf.startPoint ]
+
+        {-
+           -- Do it all again, but from Finish to Start.
+           -- If I didn't have Covid-brain, this might be a doddle.
+           -- I shall (endeavour) to negate the quantities as we encounter them, so the core
+           -- logic is the same, then we flip all the deltas again at the end.
+
+           reverseWindow : Window
+           reverseWindow =
+               let
+                   firstLeaf =
+                       DomainModel.getLastLeaf track.trackTree
+
+                   targetPhi =
+                       Quantity.clamp
+                           (Quantity.negate settings.maxPhi)
+                           settings.maxPhi
+                           (Quantity.negate <| Angle.atan <| firstLeaf.gradientAtEnd/ 100.0)
+               in
+               { nextDistance = Quantity.zero
+               , lastTrackIndex = 0
+               , lastTrackDirection = firstLeaf.directionAtStart
+               , lastPhi = targetPhi
+               , targetPhi = targetPhi
+               , outputDeltaTheta = []
+               , outputDeltaPhi = []
+               , unspentDeltaTheta = Quantity.zero
+               , unspentPhi = Quantity.zero
+               , lastDeltaTheta = Quantity.zero
+               }
+
+           withDeltaConstraints window unspentDeltaTheta =
+               Quantity.clamp
+                   (window.lastDeltaTheta |> Quantity.minus settings.maxDeltaDeltaTheta)
+                   (window.lastDeltaTheta |> Quantity.plus settings.maxDeltaDeltaTheta)
+               <|
+                   Quantity.clamp
+                       (Quantity.negate settings.maxDeltaTheta)
+                       settings.maxDeltaTheta
+                       window.unspentDeltaTheta
+
+           withPhiConstraints window targetPhi =
+               Quantity.clamp
+                   (Quantity.negate settings.maxDeltaPhi)
+                   settings.maxDeltaPhi
+                   (targetPhi |> Quantity.minus window.lastPhi)
+
+           filterForwards : Window -> Window
+           filterForwards window =
+               if
+                   window.nextDistance
+                       |> Quantity.greaterThanOrEqualTo (DomainModel.trueLength track.trackTree)
+               then
+                   if
+                       not (Quantity.equalWithin (Angle.degrees 2) window.unspentDeltaTheta Quantity.zero)
+                           || not (Quantity.equalWithin (Angle.degrees 2) window.lastPhi window.targetPhi)
+                   then
+                       -- Probably should drain our unspent??
+                       -- Show's over. Note lists are consed and hence reversed.
+                       let
+                           availableDeltaTheta =
+                               withDeltaConstraints window window.unspentDeltaTheta
+
+                           availableDeltaPhi =
+                               withPhiConstraints window window.unspentDeltaTheta
+                       in
+                       { window
+                           | outputDeltaTheta = availableDeltaTheta :: window.outputDeltaTheta
+                           , outputDeltaPhi = availableDeltaPhi :: window.outputDeltaPhi
+                           , unspentDeltaTheta = window.unspentDeltaTheta |> Quantity.minus availableDeltaTheta
+                           , lastDeltaTheta = availableDeltaTheta
+                           , lastPhi = window.lastPhi |> Quantity.plus availableDeltaPhi
+                       }
+
+                   else
+                       window
+
+               else
+                   let
+                       lastPassedPoint =
+                           DomainModel.indexFromDistanceRoundedDown window.nextDistance track.trackTree
+
+                       newWindow =
+                           if lastPassedPoint == window.lastTrackIndex then
+                               -- Nothing new, just empty our tank.
+                               let
+                                   availableDeltaTheta =
+                                       withDeltaConstraints window window.unspentDeltaTheta
+
+                                   availableDeltaPhi =
+                                       withPhiConstraints window window.targetPhi
+                               in
+                               { window
+                                   | outputDeltaTheta = availableDeltaTheta :: window.outputDeltaTheta
+                                   , outputDeltaPhi = availableDeltaPhi :: window.outputDeltaPhi
+                                   , unspentDeltaTheta = window.unspentDeltaTheta |> Quantity.minus availableDeltaTheta
+                                   , lastDeltaTheta = availableDeltaTheta
+                                   , lastPhi = window.lastPhi |> Quantity.plus availableDeltaPhi
+                               }
+
+                           else
+                               -- This will adjust all our levels
+                               let
+                                   newLeaf =
+                                       DomainModel.asRecord <|
+                                           DomainModel.leafFromIndex lastPassedPoint track.trackTree
+
+                                   deltaThetaHere =
+                                       newLeaf.directionAtStart
+                                           |> Direction2d.angleFrom window.lastTrackDirection
+
+                                   targetPhi =
+                                       Quantity.clamp
+                                           (Quantity.negate settings.maxPhi)
+                                           settings.maxPhi
+                                           (Angle.atan <| newLeaf.gradientAtStart / 100.0)
+
+                                   unspentDeltaTheta =
+                                       window.unspentDeltaTheta |> Quantity.plus deltaThetaHere
+
+                                   availableDeltaTheta =
+                                       withDeltaConstraints window unspentDeltaTheta
+
+                                   availableDeltaPhi =
+                                       withPhiConstraints window targetPhi
+                               in
+                               { window
+                                   | lastTrackDirection = newLeaf.directionAtStart
+                                   , lastTrackIndex = lastPassedPoint
+                                   , outputDeltaTheta = availableDeltaTheta :: window.outputDeltaTheta
+                                   , outputDeltaPhi = availableDeltaPhi :: window.outputDeltaPhi
+                                   , unspentDeltaTheta = unspentDeltaTheta |> Quantity.minus availableDeltaTheta
+                                   , lastDeltaTheta = availableDeltaTheta
+                                   , lastPhi = window.lastPhi |> Quantity.plus availableDeltaPhi
+                                   , targetPhi = targetPhi
+                               }
+                   in
+                   -- This I hope is properly tail recursive.
+                   filterForwards
+                       { newWindow
+                           | nextDistance = window.nextDistance |> Quantity.plus Length.meter
+                           , lastTrackIndex = lastPassedPoint
+                       }
+
+           derivedTrackForwards : List EarthPoint
+           derivedTrackForwards =
+               -- This just to look at the preview! Is simply summing the changes!
+               let
+                   firstLeaf =
+                       DomainModel.getFirstLeaf track.trackTree
+
+                   result =
+                       filterForwards forwardWindow
+
+                   startDirection =
+                       Direction3d.xyZ
+                           (Direction2d.toAngle firstLeaf.directionAtStart)
+                           (Angle.atan <| firstLeaf.gradientAtStart / 100.0)
+
+                   accumulate :
+                       Point3d Meters LocalCoords
+                       -> Direction3d LocalCoords
+                       -> List Angle
+                       -> List Angle
+                       -> List EarthPoint
+                       -> List EarthPoint
+                   accumulate point direction deltaThetas deltaPhis outputs =
+                       case ( deltaThetas, deltaPhis ) of
+                           ( dTheta :: moreTheta, dPhi :: morePhi ) ->
+                               let
+                                   vector =
+                                       Vector3d.withLength Length.meter direction
+
+                                   newPoint =
+                                       point |> Point3d.translateBy vector
+
+                                   newDirection =
+                                       Direction3d.xyZ
+                                           (direction
+                                               |> Direction3d.azimuthIn SketchPlane3d.xy
+                                               |> Quantity.plus dTheta
+                                           )
+                                           (direction
+                                               |> Direction3d.elevationFrom SketchPlane3d.xy
+                                               |> Quantity.plus dPhi
+                                           )
+                               in
+                               accumulate
+                                   newPoint
+                                   newDirection
+                                   moreTheta
+                                   morePhi
+                                   (newPoint :: outputs)
+
+                           _ ->
+                               outputs
+               in
+               accumulate
+                   firstLeaf.startPoint
+                   startDirection
+                   (List.reverse result.outputDeltaTheta)
+                   (List.reverse result.outputDeltaPhi)
+                   [ firstLeaf.startPoint ]
+
+        -}
     in
     derivedTrackForwards
-        |> List.map
-            (\earth ->
-                { earthPoint = earth
-                , gpx = DomainModel.gpxFromPointWithReference track.referenceLonLat earth
-                }
-            )
+        |> TrackLoaded.asPreviewPoints track distanceAtStart
 
 
 applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
@@ -335,7 +562,7 @@ previewActions options colour track =
         { tag = "smart"
         , shape = PreviewCircle
         , colour = colour
-        , points = computeNewPoints options track
+        , points = Utils.elide <| computeNewPoints options track
         }
     ]
 
@@ -397,7 +624,7 @@ view imperial wrapper options track =
                     , label = Input.labelHidden "minimum radius"
                     , min = 4.0
                     , max = 20.0
-                    , step = Nothing
+                    , step = Just 0.5
                     , value = Length.inMeters options.minRadius
                     , thumb = Input.defaultThumb
                     }
@@ -413,7 +640,7 @@ view imperial wrapper options track =
                         (text <| "Meters of turn-in " ++ showShortMeasure imperial options.minTransition)
                 , min = 1.0
                 , max = 10.0
-                , step = Nothing
+                , step = Just 0.5
                 , value = Length.inMeters options.minTransition
                 , thumb = Input.defaultThumb
                 }
@@ -426,7 +653,7 @@ view imperial wrapper options track =
                         (text <| "Maximum gradient " ++ showDecimal2 options.maxGradient)
                 , min = 10.0
                 , max = 30.0
-                , step = Nothing
+                , step = Just 0.5
                 , value = options.maxGradient
                 , thumb = Input.defaultThumb
                 }
