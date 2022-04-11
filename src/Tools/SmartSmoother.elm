@@ -68,7 +68,7 @@ textDictionary =
 will become circular arcs (rather like _Radiused Bends_)
 
 2. How quickly you wish to enter and leave bends, because in real life you don't just
-jerk on the handlebars, it takes time to lean into a bend The result is approximately
+jerk on the handlebars, it takes time to lean into a bend. The result is approximately
 a "Clothoid" or "Euler spiral".
 
 3. Gradients, up and down. Yes, we already have _Limit Gradients_ but you get this for free.
