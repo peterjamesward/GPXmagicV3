@@ -29,7 +29,8 @@ to avoid "spikes" when it suddenly ends.
 
 ## Smart smoother
 
-Better positioning of markers (distance based).
+Gradient stuff (reverse) not quite there.
+> If this is fixed, it should stop the gradual loss of altitude over Lacets.
 
 Make it the new 1CQF.
 

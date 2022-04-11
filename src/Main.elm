@@ -49,6 +49,7 @@ import StravaAuth exposing (getStravaToken)
 import SvgPathExtractor
 import Task
 import Time
+import TipJar
 import ToolTip exposing (myTooltip, tooltip)
 import Tools.BendSmoother
 import Tools.BezierSplines
@@ -1106,6 +1107,7 @@ topLoadingBar model =
         --, buyMeACoffeeButton
         , el [ alignRight ] <| StravaAuth.stravaButton model.stravaAuthentication OAuthMessage
         , el [ alignRight ] <| PaneLayoutManager.paneLayoutMenu PaneMsg model.paneLayoutOptions
+        , el [ alignRight ] <| buyMeACoffeeButton
         ]
 
 

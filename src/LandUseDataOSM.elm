@@ -26,7 +26,7 @@ requestLandUseData : (Result Http.Error OSMLandUseData -> msg) -> TrackLoaded ms
 requestLandUseData msg track =
     Http.request
         { method = "POST"
-        , headers = [ Http.header "User-Agent" "GPXmagic v3 (peterjamesward@me.com)" ]
+        , headers = []
         , url = Builder.crossOrigin apiRoot [ "api", "interpreter" ] []
         , body = Http.stringBody "text/plain" <| queryFromBoundingBox track
         , expect = Http.expectJson msg landUseDecoder
