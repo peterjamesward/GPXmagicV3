@@ -89,10 +89,10 @@ type alias Window =
     , outputDeltaTheta : List Angle
     , outputDeltaPhi : List Angle
     , unspentDeltaTheta : Angle
-    , unspentDeltaPhi : Angle
     , lastDeltaTheta : Angle
+    , targetPhi : Angle
     , lastPhi : Angle
-    , lastDeltaPhi : Angle
+    , unspentPhi : Angle
     }
 
 
@@ -119,17 +119,23 @@ computeNewPoints options track =
             let
                 firstLeaf =
                     DomainModel.getFirstLeaf track.trackTree
+
+                targetPhi =
+                    Quantity.clamp
+                        (Quantity.negate settings.maxPhi)
+                        settings.maxPhi
+                        (Angle.atan <| firstLeaf.gradientAtStart / 100.0)
             in
             { nextDistance = Quantity.zero
             , lastTrackIndex = 0
             , lastTrackDirection = firstLeaf.directionAtStart
-            , lastPhi = Angle.atan (firstLeaf.gradientAtStart / 100.0)
+            , lastPhi = targetPhi
+            , targetPhi = targetPhi
             , outputDeltaTheta = []
             , outputDeltaPhi = []
             , unspentDeltaTheta = Quantity.zero
-            , unspentDeltaPhi = Quantity.zero
+            , unspentPhi = Quantity.zero
             , lastDeltaTheta = Quantity.zero
-            , lastDeltaPhi = Quantity.zero
             }
 
         filterForwards : Window -> Window
@@ -163,22 +169,16 @@ computeNewPoints options track =
 
                                 availableDeltaPhi =
                                     Quantity.clamp
-                                        (Quantity.negate settings.maxPhi |> Quantity.minus window.lastPhi)
-                                        (settings.maxPhi |> Quantity.minus window.lastPhi)
-                                    <|
-                                        Quantity.clamp
-                                            (Quantity.negate settings.maxDeltaPhi)
-                                            settings.maxDeltaPhi
-                                            window.unspentDeltaPhi
+                                        (Quantity.negate settings.maxDeltaPhi)
+                                        settings.maxDeltaPhi
+                                        (window.targetPhi |> Quantity.minus window.lastPhi)
                             in
                             { window
                                 | outputDeltaTheta = availableDeltaTheta :: window.outputDeltaTheta
                                 , outputDeltaPhi = availableDeltaPhi :: window.outputDeltaPhi
                                 , unspentDeltaTheta = window.unspentDeltaTheta |> Quantity.minus availableDeltaTheta
-                                , unspentDeltaPhi = window.unspentDeltaPhi |> Quantity.minus availableDeltaPhi
                                 , lastDeltaTheta = availableDeltaTheta
                                 , lastPhi = window.lastPhi |> Quantity.plus availableDeltaPhi
-                                , lastDeltaPhi = availableDeltaPhi
                             }
 
                         else
@@ -206,24 +206,17 @@ computeNewPoints options track =
                                             settings.maxDeltaTheta
                                             window.unspentDeltaTheta
 
-                                phiHere =
-                                    Angle.atan <| newLeaf.gradientAtStart / 100.0
-
-                                deltaPhiHere =
-                                    phiHere |> Quantity.minus window.lastPhi
-
-                                unspentDeltaPhi =
-                                    window.unspentDeltaPhi |> Quantity.plus deltaPhiHere
+                                targetPhi =
+                                    Quantity.clamp
+                                        (Quantity.negate settings.maxPhi)
+                                        settings.maxPhi
+                                        (Angle.atan <| newLeaf.gradientAtStart / 100.0)
 
                                 availableDeltaPhi =
                                     Quantity.clamp
-                                        (Quantity.negate settings.maxPhi |> Quantity.minus window.lastPhi)
-                                        (settings.maxPhi |> Quantity.minus window.lastPhi)
-                                    <|
-                                        Quantity.clamp
-                                            (Quantity.negate settings.maxDeltaPhi)
-                                            settings.maxDeltaPhi
-                                            unspentDeltaPhi
+                                        (Quantity.negate settings.maxDeltaPhi)
+                                        settings.maxDeltaPhi
+                                        (window.targetPhi |> Quantity.minus window.lastPhi)
                             in
                             { window
                                 | lastTrackDirection = newLeaf.directionAtStart
@@ -231,10 +224,9 @@ computeNewPoints options track =
                                 , outputDeltaTheta = availableDeltaTheta :: window.outputDeltaTheta
                                 , outputDeltaPhi = availableDeltaPhi :: window.outputDeltaPhi
                                 , unspentDeltaTheta = unspentDeltaTheta |> Quantity.minus availableDeltaTheta
-                                , unspentDeltaPhi = unspentDeltaPhi |> Quantity.minus availableDeltaPhi
                                 , lastDeltaTheta = availableDeltaTheta
                                 , lastPhi = window.lastPhi |> Quantity.plus availableDeltaPhi
-                                , lastDeltaPhi = availableDeltaPhi
+                                , targetPhi = targetPhi
                             }
                 in
                 -- This I hope is properly tail recursive.

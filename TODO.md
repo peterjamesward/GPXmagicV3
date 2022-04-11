@@ -52,6 +52,8 @@ We can but try. See if it's even remotely feasible. Coding is easier than maths,
 > Gradient not enforcing maxPhi.
 > Should almost certainly run until captured data is exhausted.
 > Fix these then add backward pass and figure out how to combine them.
+> This may involve a "shift" element, relating to new track length.
+> Work between markers.
 
 ---
 
