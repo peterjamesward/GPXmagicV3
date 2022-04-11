@@ -26,6 +26,7 @@ module DomainModel exposing
     , gradientFromNode
     , indexFromDistance
     , indexFromDistanceRoundedDown
+    , indexFromDistanceRoundedUp
     , interpolateTrack
     , leafFromIndex
     , lngLatPair
@@ -875,6 +876,22 @@ indexFromDistanceRoundedDown distance treeNode =
             else
                 skipCount info.left
                     + indexFromDistanceRoundedDown (distance |> Quantity.minus (trueLength info.left)) info.right
+
+
+indexFromDistanceRoundedUp : Length.Length -> PeteTree -> Int
+indexFromDistanceRoundedUp distance treeNode =
+    -- Must behave this way for Smart Smoother
+    case treeNode of
+        Leaf info ->
+            1
+
+        Node info ->
+            if distance |> Quantity.lessThanOrEqualTo (trueLength info.left) then
+                indexFromDistanceRoundedUp distance info.left
+
+            else
+                skipCount info.left
+                    + indexFromDistanceRoundedUp (distance |> Quantity.minus (trueLength info.left)) info.right
 
 
 indexFromDistance : Length.Length -> PeteTree -> Int

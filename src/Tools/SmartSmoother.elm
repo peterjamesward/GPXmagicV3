@@ -190,6 +190,7 @@ computeNewPoints options track =
                         , unspentDeltaTheta = window.unspentDeltaTheta |> Quantity.minus availableDeltaTheta
                         , lastDeltaTheta = availableDeltaTheta
                         , lastPhi = window.lastPhi |> Quantity.plus availableDeltaPhi
+                        , nextDistance = window.nextDistance |> Quantity.plus Length.meter
                     }
 
                 else
@@ -323,213 +324,212 @@ computeNewPoints options track =
                 (List.reverse result.outputDeltaPhi)
                 [ firstLeaf.startPoint ]
 
-        {-
-           -- Do it all again, but from Finish to Start.
-           -- If I didn't have Covid-brain, this might be a doddle.
-           -- I shall (endeavour) to negate the quantities as we encounter them, so the core
-           -- logic is the same, then we flip all the deltas again at the end.
+        -- Do it all again, but from Finish to Start.
+        -- If I didn't have Covid-brain, this might be a doddle.
+        -- I shall (endeavour) to negate the quantities as we encounter them, so the core
+        -- logic is the same, then we flip all the deltas again at the end.
+        reverseWindow : Window
+        reverseWindow =
+            let
+                firstLeaf =
+                    DomainModel.asRecord <|
+                        DomainModel.leafFromIndex
+                            (skipCount track.trackTree - fromEnd)
+                            track.trackTree
 
-           reverseWindow : Window
-           reverseWindow =
-               let
-                   firstLeaf =
-                       DomainModel.getLastLeaf track.trackTree
+                targetPhi =
+                    Quantity.clamp
+                        (Quantity.negate settings.maxPhi)
+                        settings.maxPhi
+                        (Quantity.negate <| Angle.atan <| firstLeaf.gradientAtEnd / 100.0)
+            in
+            { nextDistance = distanceAtEnd
+            , lastTrackIndex = skipCount track.trackTree - fromEnd
+            , lastTrackDirection = Direction2d.reverse firstLeaf.directionAtStart
+            , lastPhi = targetPhi
+            , targetPhi = targetPhi
+            , outputDeltaTheta = []
+            , outputDeltaPhi = []
+            , unspentDeltaTheta = Quantity.zero
+            , unspentPhi = Quantity.zero
+            , lastDeltaTheta = Quantity.zero
+            }
 
-                   targetPhi =
-                       Quantity.clamp
-                           (Quantity.negate settings.maxPhi)
-                           settings.maxPhi
-                           (Quantity.negate <| Angle.atan <| firstLeaf.gradientAtEnd/ 100.0)
-               in
-               { nextDistance = Quantity.zero
-               , lastTrackIndex = 0
-               , lastTrackDirection = firstLeaf.directionAtStart
-               , lastPhi = targetPhi
-               , targetPhi = targetPhi
-               , outputDeltaTheta = []
-               , outputDeltaPhi = []
-               , unspentDeltaTheta = Quantity.zero
-               , unspentPhi = Quantity.zero
-               , lastDeltaTheta = Quantity.zero
-               }
+        filterReverse : Window -> Window
+        filterReverse window =
+            if window.nextDistance |> Quantity.lessThanOrEqualTo distanceAtStart then
+                if
+                    not (Quantity.equalWithin (Angle.degrees 2) window.unspentDeltaTheta Quantity.zero)
+                        || not (Quantity.equalWithin (Angle.degrees 2) window.lastPhi window.targetPhi)
+                then
+                    -- Probably should drain our unspent??
+                    -- Show's over. Note lists are consed and hence reversed.
+                    let
+                        _ =
+                            Debug.log "Draining" window
 
-           withDeltaConstraints window unspentDeltaTheta =
-               Quantity.clamp
-                   (window.lastDeltaTheta |> Quantity.minus settings.maxDeltaDeltaTheta)
-                   (window.lastDeltaTheta |> Quantity.plus settings.maxDeltaDeltaTheta)
-               <|
-                   Quantity.clamp
-                       (Quantity.negate settings.maxDeltaTheta)
-                       settings.maxDeltaTheta
-                       window.unspentDeltaTheta
+                        availableDeltaTheta =
+                            withDeltaConstraints window window.unspentDeltaTheta
 
-           withPhiConstraints window targetPhi =
-               Quantity.clamp
-                   (Quantity.negate settings.maxDeltaPhi)
-                   settings.maxDeltaPhi
-                   (targetPhi |> Quantity.minus window.lastPhi)
+                        availableDeltaPhi =
+                            withPhiConstraints window window.unspentDeltaTheta
+                    in
+                    { window
+                        | outputDeltaTheta = availableDeltaTheta :: window.outputDeltaTheta
+                        , outputDeltaPhi = availableDeltaPhi :: window.outputDeltaPhi
+                        , unspentDeltaTheta = window.unspentDeltaTheta |> Quantity.minus availableDeltaTheta
+                        , lastDeltaTheta = availableDeltaTheta
+                        , lastPhi = window.lastPhi |> Quantity.plus availableDeltaPhi
+                        , nextDistance = window.nextDistance |> Quantity.minus Length.meter
+                    }
 
-           filterForwards : Window -> Window
-           filterForwards window =
-               if
-                   window.nextDistance
-                       |> Quantity.greaterThanOrEqualTo (DomainModel.trueLength track.trackTree)
-               then
-                   if
-                       not (Quantity.equalWithin (Angle.degrees 2) window.unspentDeltaTheta Quantity.zero)
-                           || not (Quantity.equalWithin (Angle.degrees 2) window.lastPhi window.targetPhi)
-                   then
-                       -- Probably should drain our unspent??
-                       -- Show's over. Note lists are consed and hence reversed.
-                       let
-                           availableDeltaTheta =
-                               withDeltaConstraints window window.unspentDeltaTheta
+                else
+                    let
+                        _ =
+                            Debug.log "Finished" window
+                    in
+                    window
 
-                           availableDeltaPhi =
-                               withPhiConstraints window window.unspentDeltaTheta
-                       in
-                       { window
-                           | outputDeltaTheta = availableDeltaTheta :: window.outputDeltaTheta
-                           , outputDeltaPhi = availableDeltaPhi :: window.outputDeltaPhi
-                           , unspentDeltaTheta = window.unspentDeltaTheta |> Quantity.minus availableDeltaTheta
-                           , lastDeltaTheta = availableDeltaTheta
-                           , lastPhi = window.lastPhi |> Quantity.plus availableDeltaPhi
-                       }
+            else
+                let
+                    lastPassedPoint =
+                        DomainModel.indexFromDistanceRoundedUp window.nextDistance track.trackTree
 
-                   else
-                       window
+                    newWindow =
+                        if lastPassedPoint == window.lastTrackIndex then
+                            -- Nothing new, just empty our tank.
+                            let
+                                _ =
+                                    Debug.log "depleting" window
 
-               else
-                   let
-                       lastPassedPoint =
-                           DomainModel.indexFromDistanceRoundedDown window.nextDistance track.trackTree
+                                availableDeltaTheta =
+                                    withDeltaConstraints window window.unspentDeltaTheta
 
-                       newWindow =
-                           if lastPassedPoint == window.lastTrackIndex then
-                               -- Nothing new, just empty our tank.
-                               let
-                                   availableDeltaTheta =
-                                       withDeltaConstraints window window.unspentDeltaTheta
+                                availableDeltaPhi =
+                                    withPhiConstraints window window.targetPhi
+                            in
+                            { window
+                                | outputDeltaTheta = availableDeltaTheta :: window.outputDeltaTheta
+                                , outputDeltaPhi = availableDeltaPhi :: window.outputDeltaPhi
+                                , unspentDeltaTheta = window.unspentDeltaTheta |> Quantity.minus availableDeltaTheta
+                                , lastDeltaTheta = availableDeltaTheta
+                                , lastPhi = window.lastPhi |> Quantity.plus availableDeltaPhi
+                            }
 
-                                   availableDeltaPhi =
-                                       withPhiConstraints window window.targetPhi
-                               in
-                               { window
-                                   | outputDeltaTheta = availableDeltaTheta :: window.outputDeltaTheta
-                                   , outputDeltaPhi = availableDeltaPhi :: window.outputDeltaPhi
-                                   , unspentDeltaTheta = window.unspentDeltaTheta |> Quantity.minus availableDeltaTheta
-                                   , lastDeltaTheta = availableDeltaTheta
-                                   , lastPhi = window.lastPhi |> Quantity.plus availableDeltaPhi
-                               }
+                        else
+                            -- This will adjust all our levels
+                            let
+                                _ =
+                                    Debug.log "adding" window
 
-                           else
-                               -- This will adjust all our levels
-                               let
-                                   newLeaf =
-                                       DomainModel.asRecord <|
-                                           DomainModel.leafFromIndex lastPassedPoint track.trackTree
+                                newLeaf =
+                                    DomainModel.asRecord <|
+                                        DomainModel.leafFromIndex (lastPassedPoint - 1) track.trackTree
 
-                                   deltaThetaHere =
-                                       newLeaf.directionAtStart
-                                           |> Direction2d.angleFrom window.lastTrackDirection
+                                deltaThetaHere =
+                                    newLeaf.directionAtStart
+                                        |> Direction2d.reverse
+                                        |> Direction2d.angleFrom window.lastTrackDirection
 
-                                   targetPhi =
-                                       Quantity.clamp
-                                           (Quantity.negate settings.maxPhi)
-                                           settings.maxPhi
-                                           (Angle.atan <| newLeaf.gradientAtStart / 100.0)
+                                targetPhi =
+                                    Quantity.clamp
+                                        (Quantity.negate settings.maxPhi)
+                                        settings.maxPhi
+                                        (Quantity.negate <| Angle.atan <| newLeaf.gradientAtStart / 100.0)
 
-                                   unspentDeltaTheta =
-                                       window.unspentDeltaTheta |> Quantity.plus deltaThetaHere
+                                unspentDeltaTheta =
+                                    window.unspentDeltaTheta |> Quantity.plus deltaThetaHere
 
-                                   availableDeltaTheta =
-                                       withDeltaConstraints window unspentDeltaTheta
+                                availableDeltaTheta =
+                                    withDeltaConstraints window unspentDeltaTheta
 
-                                   availableDeltaPhi =
-                                       withPhiConstraints window targetPhi
-                               in
-                               { window
-                                   | lastTrackDirection = newLeaf.directionAtStart
-                                   , lastTrackIndex = lastPassedPoint
-                                   , outputDeltaTheta = availableDeltaTheta :: window.outputDeltaTheta
-                                   , outputDeltaPhi = availableDeltaPhi :: window.outputDeltaPhi
-                                   , unspentDeltaTheta = unspentDeltaTheta |> Quantity.minus availableDeltaTheta
-                                   , lastDeltaTheta = availableDeltaTheta
-                                   , lastPhi = window.lastPhi |> Quantity.plus availableDeltaPhi
-                                   , targetPhi = targetPhi
-                               }
-                   in
-                   -- This I hope is properly tail recursive.
-                   filterForwards
-                       { newWindow
-                           | nextDistance = window.nextDistance |> Quantity.plus Length.meter
-                           , lastTrackIndex = lastPassedPoint
-                       }
+                                availableDeltaPhi =
+                                    withPhiConstraints window targetPhi
+                            in
+                            { window
+                                | lastTrackDirection = Direction2d.reverse newLeaf.directionAtStart
+                                , lastTrackIndex = lastPassedPoint
+                                , outputDeltaTheta = availableDeltaTheta :: window.outputDeltaTheta
+                                , outputDeltaPhi = availableDeltaPhi :: window.outputDeltaPhi
+                                , unspentDeltaTheta = unspentDeltaTheta |> Quantity.minus availableDeltaTheta
+                                , lastDeltaTheta = availableDeltaTheta
+                                , lastPhi = window.lastPhi |> Quantity.plus availableDeltaPhi
+                                , targetPhi = targetPhi
+                            }
+                in
+                -- This I hope is properly tail recursive.
+                filterReverse
+                    { newWindow
+                        | nextDistance = window.nextDistance |> Quantity.minus Length.meter
+                        , lastTrackIndex = lastPassedPoint
+                    }
 
-           derivedTrackForwards : List EarthPoint
-           derivedTrackForwards =
-               -- This just to look at the preview! Is simply summing the changes!
-               let
-                   firstLeaf =
-                       DomainModel.getFirstLeaf track.trackTree
+        derivedTrackReverse : List EarthPoint
+        derivedTrackReverse =
+            -- This just to look at the preview! Is simply summing the changes!
+            let
+                firstLeaf =
+                    DomainModel.asRecord <|
+                        DomainModel.leafFromIndex
+                            (skipCount track.trackTree - fromEnd)
+                            track.trackTree
 
-                   result =
-                       filterForwards forwardWindow
+                result =
+                    filterReverse reverseWindow
 
-                   startDirection =
-                       Direction3d.xyZ
-                           (Direction2d.toAngle firstLeaf.directionAtStart)
-                           (Angle.atan <| firstLeaf.gradientAtStart / 100.0)
+                startDirection =
+                    Direction3d.reverse <|
+                        Direction3d.xyZ
+                            (Direction2d.toAngle firstLeaf.directionAtStart)
+                            (Angle.atan <| firstLeaf.gradientAtStart / 100.0)
 
-                   accumulate :
-                       Point3d Meters LocalCoords
-                       -> Direction3d LocalCoords
-                       -> List Angle
-                       -> List Angle
-                       -> List EarthPoint
-                       -> List EarthPoint
-                   accumulate point direction deltaThetas deltaPhis outputs =
-                       case ( deltaThetas, deltaPhis ) of
-                           ( dTheta :: moreTheta, dPhi :: morePhi ) ->
-                               let
-                                   vector =
-                                       Vector3d.withLength Length.meter direction
+                accumulate :
+                    Point3d Meters LocalCoords
+                    -> Direction3d LocalCoords
+                    -> List Angle
+                    -> List Angle
+                    -> List EarthPoint
+                    -> List EarthPoint
+                accumulate point direction deltaThetas deltaPhis outputs =
+                    case ( deltaThetas, deltaPhis ) of
+                        ( dTheta :: moreTheta, dPhi :: morePhi ) ->
+                            let
+                                vector =
+                                    Vector3d.withLength Length.meter direction
 
-                                   newPoint =
-                                       point |> Point3d.translateBy vector
+                                newPoint =
+                                    point |> Point3d.translateBy vector
 
-                                   newDirection =
-                                       Direction3d.xyZ
-                                           (direction
-                                               |> Direction3d.azimuthIn SketchPlane3d.xy
-                                               |> Quantity.plus dTheta
-                                           )
-                                           (direction
-                                               |> Direction3d.elevationFrom SketchPlane3d.xy
-                                               |> Quantity.plus dPhi
-                                           )
-                               in
-                               accumulate
-                                   newPoint
-                                   newDirection
-                                   moreTheta
-                                   morePhi
-                                   (newPoint :: outputs)
+                                newDirection =
+                                    Direction3d.xyZ
+                                        (direction
+                                            |> Direction3d.azimuthIn SketchPlane3d.xy
+                                            |> Quantity.plus dTheta
+                                        )
+                                        (direction
+                                            |> Direction3d.elevationFrom SketchPlane3d.xy
+                                            |> Quantity.plus dPhi
+                                        )
+                            in
+                            accumulate
+                                newPoint
+                                newDirection
+                                moreTheta
+                                morePhi
+                                (newPoint :: outputs)
 
-                           _ ->
-                               outputs
-               in
-               accumulate
-                   firstLeaf.startPoint
-                   startDirection
-                   (List.reverse result.outputDeltaTheta)
-                   (List.reverse result.outputDeltaPhi)
-                   [ firstLeaf.startPoint ]
-
-        -}
+                        _ ->
+                            outputs
+            in
+            accumulate
+                firstLeaf.endPoint
+                startDirection
+                (List.reverse result.outputDeltaTheta)
+                (List.reverse result.outputDeltaPhi)
+                [ firstLeaf.endPoint ]
     in
-    derivedTrackForwards
-        |> TrackLoaded.asPreviewPoints track distanceAtStart
+    derivedTrackReverse
+        |> TrackLoaded.asPreviewPoints track distanceAtEnd
 
 
 applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
