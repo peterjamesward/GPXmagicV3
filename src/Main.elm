@@ -1384,6 +1384,32 @@ performActionsOnModel actions model =
                         , needsRendering = True
                     }
 
+                ( SmartSmootherApplyWithOptions options, Just track ) ->
+                    let
+                        ( newTree, oldPoints ) =
+                            Tools.SmartSmoother.applyUsingOptions options track
+
+                        ( fromStart, fromEnd ) =
+                            case track.markerPosition of
+                                Just _ ->
+                                    TrackLoaded.getRangeFromMarkers track
+
+                                Nothing ->
+                                    ( 0, 0 )
+
+                        newTrack =
+                            track
+                                |> TrackLoaded.addToUndoStack action
+                                    fromStart
+                                    fromEnd
+                                    oldPoints
+                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                    in
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
+
                 ( CurveFormerApplyWithOptions options, Just track ) ->
                     let
                         ( newTree, oldPoints, ( entry, exit ) ) =

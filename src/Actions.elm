@@ -194,5 +194,8 @@ interpretAction action =
         WidenBend _ _ ->
             "widen bend"
 
+        SmartSmootherApplyWithOptions _ ->
+            "smart smoother"
+
         _ ->
             "tell Pete this needs a message"

@@ -27,29 +27,11 @@ BUG: Now Map has full track, clicking should not redraw it!
 
 # WIP
 
-## Smoothing by averaging & limiting curvature
+## Smart smoother
 
-What effect does this have? If we replace curvature (the N in TNB) with the average of nearby
-(possibly interpolated) points. We would have to extend the averaging range so that the vector
-sum of the directions takes us "back on tracK" or as near as can be. Also, at the same time, to
-ensure that the average curvature never exceeds the maximum allowed.
+Info text.
 
-Can this be implemented point-wise? Would we ever be able to follow a track (e.g. Lacets)?
-
-Appealing simplicity and symmetry, but subtleties. Say we are on a hairpin of > max curvature.
-We set the curvature to max and then seek sufficient points either side such that the net
-total curvature is equalled, AND (ideally) we are somewhere near the original track and direction!
-
-Maybe this is achieved by working out how far this extends both sides but the implication is that
-when we look at the other points, they must respect this range. That is, if the bend point is
-at 100m, but the search extends over the range 60 .. 140, then when we are solving for 60, we
-must look out as far as 100 (or 140?).
-
-We can but try. See if it's even remotely feasible. Coding is easier than maths, for me today.
-
-> Fix these then add backward pass and figure out how to combine them.
-> This may involve a "shift" element, relating to new track length.
-> Profile Preview
+Make it the new 1CQF.
 
 ---
 

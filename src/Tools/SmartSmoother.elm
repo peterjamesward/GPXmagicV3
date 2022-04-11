@@ -97,7 +97,7 @@ type alias Window =
     }
 
 
-computeNewPoints : Options -> TrackLoaded msg -> ( List PreviewPoint, List PreviewPoint )
+computeNewPoints : Options -> TrackLoaded msg -> List PreviewPoint
 computeNewPoints options track =
     let
         ( fromStart, fromEnd ) =
@@ -264,67 +264,6 @@ computeNewPoints options track =
                         , lastTrackIndex = lastPassedPoint
                     }
 
-        derivedTrackForwards : List EarthPoint
-        derivedTrackForwards =
-            -- This just to look at the preview! Is simply summing the changes!
-            let
-                firstLeaf =
-                    DomainModel.asRecord <|
-                        DomainModel.leafFromIndex fromStart track.trackTree
-
-                result =
-                    filterForwards forwardWindow
-
-                startDirection =
-                    Direction3d.xyZ
-                        (Direction2d.toAngle firstLeaf.directionAtStart)
-                        (Angle.atan <| firstLeaf.gradientAtStart / 100.0)
-
-                accumulate :
-                    Point3d Meters LocalCoords
-                    -> Direction3d LocalCoords
-                    -> List Angle
-                    -> List Angle
-                    -> List EarthPoint
-                    -> List EarthPoint
-                accumulate point direction deltaThetas deltaPhis outputs =
-                    case ( deltaThetas, deltaPhis ) of
-                        ( dTheta :: moreTheta, dPhi :: morePhi ) ->
-                            let
-                                vector =
-                                    Vector3d.withLength Length.meter direction
-
-                                newPoint =
-                                    point |> Point3d.translateBy vector
-
-                                newDirection =
-                                    Direction3d.xyZ
-                                        (direction
-                                            |> Direction3d.azimuthIn SketchPlane3d.xy
-                                            |> Quantity.plus dTheta
-                                        )
-                                        (direction
-                                            |> Direction3d.elevationFrom SketchPlane3d.xy
-                                            |> Quantity.plus dPhi
-                                        )
-                            in
-                            accumulate
-                                newPoint
-                                newDirection
-                                moreTheta
-                                morePhi
-                                (newPoint :: outputs)
-
-                        _ ->
-                            outputs
-            in
-            accumulate
-                firstLeaf.startPoint
-                startDirection
-                (List.reverse result.outputDeltaTheta)
-                (List.reverse result.outputDeltaPhi)
-                [ firstLeaf.startPoint ]
-
         -- Do it all again, but from Finish to Start.
         -- If I didn't have Covid-brain, this might be a doddle.
         -- I shall (endeavour) to negate the quantities as we encounter them, so the core
@@ -452,35 +391,64 @@ computeNewPoints options track =
                         , lastTrackIndex = lastPassedPoint
                     }
 
-        derivedTrackReverse : List EarthPoint
-        derivedTrackReverse =
-            -- This just to look at the preview! Is simply summing the changes!
+        derivedTrackForwards : List EarthPoint
+        derivedTrackForwards =
             let
                 firstLeaf =
                     DomainModel.asRecord <|
-                        DomainModel.leafFromIndex
-                            (skipCount track.trackTree - fromEnd)
-                            track.trackTree
+                        DomainModel.leafFromIndex fromStart track.trackTree
 
-                result =
-                    filterReverse reverseWindow
+                ( forwardsDeltaThetas, forwardsDeltaPhis ) =
+                    let
+                        finalWindow =
+                            filterForwards forwardWindow
+                    in
+                    -- These were consed so we reverse them here.
+                    ( List.reverse finalWindow.outputDeltaTheta
+                    , List.reverse finalWindow.outputDeltaPhi
+                    )
+
+                ( reverseDeltaThetas, reverseDeltaPhis ) =
+                    let
+                        finalWindow =
+                            filterReverse reverseWindow
+                    in
+                    -- Our traversal consed these in the natural order, as it happens.
+                    ( finalWindow.outputDeltaTheta
+                    , finalWindow.outputDeltaPhi
+                    )
+
+                combineDeltas : Angle -> Angle -> Angle -> Angle -> ( Angle, Angle )
+                combineDeltas forwardDTheta forwardDPhi reverseDTheta reverseDPhi =
+                    ( Quantity.half <| Quantity.plus forwardDTheta <| Quantity.negate reverseDTheta
+                    , forwardDPhi
+                      -- TODO: Find out why.
+                    )
+
+                --( forwardDTheta, forwardDPhi)
+                combinedDeltaLists =
+                    List.map4
+                        combineDeltas
+                        forwardsDeltaThetas
+                        forwardsDeltaPhis
+                        reverseDeltaThetas
+                        reverseDeltaPhis
 
                 startDirection =
-                    Direction3d.reverse <|
-                        Direction3d.xyZ
-                            (Direction2d.toAngle firstLeaf.directionAtStart)
-                            (Angle.atan <| firstLeaf.gradientAtStart / 100.0)
+                    Direction3d.xyZ
+                        (Direction2d.toAngle firstLeaf.directionAtStart)
+                        (Angle.atan <| firstLeaf.gradientAtStart / 100.0)
 
                 accumulate :
                     Point3d Meters LocalCoords
                     -> Direction3d LocalCoords
-                    -> List Angle
-                    -> List Angle
+                    -> List ( Angle, Angle )
                     -> List EarthPoint
                     -> List EarthPoint
-                accumulate point direction deltaThetas deltaPhis outputs =
-                    case ( deltaThetas, deltaPhis ) of
-                        ( dTheta :: moreTheta, dPhi :: morePhi ) ->
+                accumulate point direction deltas outputs =
+                    -- Note this will cons into a reversed list.
+                    case deltas of
+                        ( dTheta, dPhi ) :: moreDeltas ->
                             let
                                 vector =
                                     Vector3d.withLength Length.meter direction
@@ -502,28 +470,55 @@ computeNewPoints options track =
                             accumulate
                                 newPoint
                                 newDirection
-                                moreTheta
-                                morePhi
+                                moreDeltas
                                 (newPoint :: outputs)
 
                         _ ->
                             outputs
             in
             accumulate
-                firstLeaf.endPoint
+                firstLeaf.startPoint
                 startDirection
-                (List.reverse result.outputDeltaTheta)
-                (List.reverse result.outputDeltaPhi)
-                [ firstLeaf.endPoint ]
+                combinedDeltaLists
+                [ firstLeaf.startPoint ]
     in
-    ( derivedTrackForwards |> TrackLoaded.asPreviewPoints track distanceAtStart
-    , derivedTrackReverse |> TrackLoaded.asPreviewPoints track distanceAtEnd
-    )
+    derivedTrackForwards
+        |> Utils.elide
+        |> List.reverse
+        |> TrackLoaded.asPreviewPoints track distanceAtStart
 
 
 applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
 applyUsingOptions options track =
-    ( Nothing, [] )
+    let
+        ( fromStart, fromEnd ) =
+            case track.markerPosition of
+                Just _ ->
+                    TrackLoaded.getRangeFromMarkers track
+
+                Nothing ->
+                    ( 0, 0 )
+
+        newPoints =
+            computeNewPoints options track
+
+        newTree =
+            DomainModel.replaceRange
+                fromStart
+                fromEnd
+                track.referenceLonLat
+                (List.map .gpx <| newPoints)
+                track.trackTree
+
+        oldPoints =
+            DomainModel.extractPointsInRange
+                fromStart
+                fromEnd
+                track.trackTree
+    in
+    ( newTree
+    , oldPoints |> List.map Tuple.second
+    )
 
 
 toolStateChange :
@@ -537,36 +532,42 @@ toolStateChange opened colour options track =
         ( True, Just theTrack ) ->
             let
                 newOptions =
-                    { options | newPoints = Tuple.first <| computeNewPoints options theTrack }
+                    { options | newPoints = computeNewPoints options theTrack }
             in
             ( newOptions, previewActions newOptions colour theTrack )
 
         _ ->
-            ( options, [ HidePreview "forwards", HidePreview "reverse" ] )
+            ( options, [ HidePreview "smart" ] )
 
 
 previewActions : Options -> Color -> TrackLoaded msg -> List (ToolAction msg)
 previewActions options colour track =
     let
-        ( forwards, reverse ) =
-            computeNewPoints options track
+        ( previewTree, _ ) =
+            applyUsingOptions options track
 
-        downSamplePreview =
-            Loop.for (round <| logBase 100.0 <| toFloat <| List.length forwards) Utils.elide
+        normalPreview =
+            ShowPreview
+                { tag = "smart"
+                , shape = PreviewCircle
+                , colour = colour
+                , points = computeNewPoints options track
+                }
+
+        profilePreview tree =
+            ShowPreview
+                { tag = "smartprofile"
+                , shape = PreviewProfile tree
+                , colour = colour
+                , points = []
+                }
     in
-    [ ShowPreview
-        { tag = "forwards"
-        , shape = PreviewCircle
-        , colour = colour
-        , points = downSamplePreview forwards
-        }
-    , ShowPreview
-        { tag = "reverse"
-        , shape = PreviewCircle
-        , colour = contrastingColour colour
-        , points = downSamplePreview reverse
-        }
-    ]
+    case previewTree of
+        Just pTree ->
+            [ normalPreview, profilePreview pTree ]
+
+        _ ->
+            [ HidePreview "smart", HidePreview "smartprofile" ]
 
 
 update :
