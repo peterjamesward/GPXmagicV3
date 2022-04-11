@@ -324,7 +324,7 @@ computeNewPoints options track =
                             withDeltaConstraints window window.unspentDeltaTheta
 
                         availableDeltaPhi =
-                            withPhiConstraints window window.unspentDeltaTheta
+                            withPhiConstraints window window.targetPhi
                     in
                     { window
                         | outputDeltaTheta = availableDeltaTheta :: window.outputDeltaTheta
@@ -436,11 +436,11 @@ computeNewPoints options track =
                 combineDeltas : Angle -> Angle -> Angle -> Angle -> ( Angle, Angle )
                 combineDeltas forwardDTheta forwardDPhi reverseDTheta reverseDPhi =
                     ( Quantity.half <| Quantity.plus forwardDTheta <| Quantity.negate reverseDTheta
-                    , forwardDPhi
-                      -- TODO: Find out why.
+                    , --Quantity.half <|  Quantity.plus
+                      forwardDPhi
+                      --<| reverseDPhi
                     )
 
-                --( forwardDTheta, forwardDPhi)
                 combinedDeltaLists =
                     List.map4
                         combineDeltas

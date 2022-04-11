@@ -1,4 +1,4 @@
-## Welcome to GitHub Pages
+# GPXmagic V3, the user guide
 
 You can use the [editor on GitHub](https://github.com/peterjamesward/GPXmagicV3/edit/master/docs/index.md) to maintain and preview the content for your website in Markdown files.
 

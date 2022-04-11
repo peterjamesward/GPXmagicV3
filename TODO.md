@@ -21,7 +21,8 @@ TWEAK:
 For altitude and gradient smoothing, reduce the averaging window at each end of the range
 to avoid "spikes" when it suddenly ends.
 
-**BUG**: Now Map has full track, clicking should not redraw it!
+**BUG**: Now Map has full track, moving Orange should not redraw it!
+> Is aesthetic rather than logic fault.
 
 --
 
@@ -29,8 +30,9 @@ to avoid "spikes" when it suddenly ends.
 
 ## Smart smoother
 
-Gradient stuff (reverse) not quite there.
-> If this is fixed, it should stop the gradual loss of altitude over Lacets.
+Option to try and preserve overall altitude change.
+It would then continue to eke out saved-up gradient instead of using the new slope as target.
+"unspentDeltaPhi", basically.
 
 Make it the new 1CQF.
 
@@ -38,9 +40,9 @@ Make it the new 1CQF.
 
 # BACKLOG
 
-## Donations
+## User manual
 
-Restore the PayPal link.
+Yes, really.
 
 ## De-noise / Simplify
 
