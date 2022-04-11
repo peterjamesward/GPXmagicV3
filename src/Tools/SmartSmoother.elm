@@ -16,6 +16,7 @@ import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
 import Length exposing (Meters, inMeters, meters)
 import LocalCoords exposing (LocalCoords)
+import Loop
 import Point2d exposing (Point2d)
 import Point3d exposing (Point3d)
 import Polyline3d exposing (Polyline3d)
@@ -96,7 +97,7 @@ type alias Window =
     }
 
 
-computeNewPoints : Options -> TrackLoaded msg -> List PreviewPoint
+computeNewPoints : Options -> TrackLoaded msg -> ( List PreviewPoint, List PreviewPoint )
 computeNewPoints options track =
     let
         ( fromStart, fromEnd ) =
@@ -365,9 +366,6 @@ computeNewPoints options track =
                     -- Probably should drain our unspent??
                     -- Show's over. Note lists are consed and hence reversed.
                     let
-                        _ =
-                            Debug.log "Draining" window
-
                         availableDeltaTheta =
                             withDeltaConstraints window window.unspentDeltaTheta
 
@@ -384,10 +382,6 @@ computeNewPoints options track =
                     }
 
                 else
-                    let
-                        _ =
-                            Debug.log "Finished" window
-                    in
                     window
 
             else
@@ -399,9 +393,6 @@ computeNewPoints options track =
                         if lastPassedPoint == window.lastTrackIndex then
                             -- Nothing new, just empty our tank.
                             let
-                                _ =
-                                    Debug.log "depleting" window
-
                                 availableDeltaTheta =
                                     withDeltaConstraints window window.unspentDeltaTheta
 
@@ -419,9 +410,6 @@ computeNewPoints options track =
                         else
                             -- This will adjust all our levels
                             let
-                                _ =
-                                    Debug.log "adding" window
-
                                 newLeaf =
                                     DomainModel.asRecord <|
                                         DomainModel.leafFromIndex (lastPassedPoint - 1) track.trackTree
@@ -528,8 +516,9 @@ computeNewPoints options track =
                 (List.reverse result.outputDeltaPhi)
                 [ firstLeaf.endPoint ]
     in
-    derivedTrackReverse
-        |> TrackLoaded.asPreviewPoints track distanceAtEnd
+    ( derivedTrackForwards |> TrackLoaded.asPreviewPoints track distanceAtStart
+    , derivedTrackReverse |> TrackLoaded.asPreviewPoints track distanceAtEnd
+    )
 
 
 applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
@@ -548,21 +537,34 @@ toolStateChange opened colour options track =
         ( True, Just theTrack ) ->
             let
                 newOptions =
-                    { options | newPoints = computeNewPoints options theTrack }
+                    { options | newPoints = Tuple.first <| computeNewPoints options theTrack }
             in
             ( newOptions, previewActions newOptions colour theTrack )
 
         _ ->
-            ( options, [ HidePreview "smart" ] )
+            ( options, [ HidePreview "forwards", HidePreview "reverse" ] )
 
 
 previewActions : Options -> Color -> TrackLoaded msg -> List (ToolAction msg)
 previewActions options colour track =
+    let
+        ( forwards, reverse ) =
+            computeNewPoints options track
+
+        downSamplePreview =
+            Loop.for (round <| logBase 100.0 <| toFloat <| List.length forwards) Utils.elide
+    in
     [ ShowPreview
-        { tag = "smart"
+        { tag = "forwards"
         , shape = PreviewCircle
         , colour = colour
-        , points = Utils.elide <| computeNewPoints options track
+        , points = downSamplePreview forwards
+        }
+    , ShowPreview
+        { tag = "reverse"
+        , shape = PreviewCircle
+        , colour = contrastingColour colour
+        , points = downSamplePreview reverse
         }
     ]
 
