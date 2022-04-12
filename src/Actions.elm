@@ -123,7 +123,7 @@ interpretAction action =
             "radiused bend"
 
         BendSmootherApplyWithOptions options ->
-            "circuler arc"
+            "circular arc"
 
         PointMovedOnMap _ _ _ _ ->
             "move on map"

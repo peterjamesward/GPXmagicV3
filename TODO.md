@@ -26,6 +26,8 @@ to avoid "spikes" when it suddenly ends.
 
 Restore default layout should reset sliders.
 
+BUG: Splines through points excludes penultimate points. Is this new?
+
 --
 
 # WIP
