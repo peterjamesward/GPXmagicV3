@@ -3,13 +3,13 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.2.1
+# GPXmagic v3.2.2
 
 (1cb9c37d)
 
 ## In this release ...
 
-* Was trying to load some JavaScript files that it doesn't actually need.
+* Videos to explain the use of each tool (not yet all there).
 
 ## Acknowledgements
 
