@@ -35,13 +35,7 @@ ENHANCEMENT: More tools should use distance as a basis restoring markers after e
 
 # WIP
 
-## Smart smoother
-
-Option to try and preserve overall altitude change.
-It would then continue to eke out saved-up gradient instead of using the new slope as target.
-"unspentDeltaPhi", basically.
-
-Make it the new 1CQF.
+## Videos
 
 ---
 
