@@ -27,6 +27,7 @@ type Msg
     = Seek
     | Apply
     | DisplayInfo String String
+    | FlushUndo
 
 
 toolID : String
@@ -230,6 +231,9 @@ update msg options previewColour track =
         Apply ->
             ( options, [ Actions.ApplySimplify, TrackHasChanged ] )
 
+        FlushUndo ->
+            ( options, [ Actions.FlushUndo ] )
+
         DisplayInfo tool tag ->
             ( options, [ Actions.DisplayInfo tool tag ] )
 
@@ -241,6 +245,7 @@ view msgWrapper options isTrack =
             column
                 [ width fill
                 , padding 10
+                , spacing 10
                 , Background.color FlatColors.ChinesePalette.antiFlashWhite
                 ]
                 [ el [ centerX ] <|
@@ -260,6 +265,13 @@ view msgWrapper options isTrack =
                                         , text <| " points"
                                         ]
                                 }
+                , el [ centerX ] <|
+                    Input.button neatToolsBorder
+                        { onPress = Just <| msgWrapper FlushUndo
+                        , label =
+                            paragraph [] <|
+                                [ text "Flush Undo stack" ]
+                        }
                 ]
 
         Nothing ->

@@ -17,16 +17,19 @@ BUG?: (DavidO)
 - Re-opened the file and the preview was still in place.
 > Sounds like options not being reset on track load.
 
-TWEAK:
+ENHANCEMENT:
 For altitude and gradient smoothing, reduce the averaging window at each end of the range
 to avoid "spikes" when it suddenly ends.
 
-**BUG**: Now Map has full track, moving Orange should not redraw it!
+BUG: Now Map has full track, moving Orange should not redraw it!
 > Is aesthetic rather than logic fault.
 
 Restore default layout should reset sliders.
 
 BUG: Splines through points excludes penultimate points. Is this new?
+
+ENHANCEMENT: More tools should use distance as a basis restoring markers after edit.
+> Simplify for one.
 
 --
 

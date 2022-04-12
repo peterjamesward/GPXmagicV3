@@ -5,7 +5,7 @@ aboutText =
     """
 # GPXmagic v3.2.2
 
-(1cb9c37d)
+(9793a92a)
 
 ## In this release ...
 

@@ -60,6 +60,7 @@ type ToolAction msg
     | NudgeApplyWithOptions Tools.NudgeOptions.Options
     | OutAndBackApplyWithOptions Tools.OutAndBackOptions.Options
     | ApplySimplify
+    | FlushUndo
     | ApplyInterpolateWithOptions Tools.InterpolateOptions.Options
     | OneClickQuickFix
     | LimitGradientWithOptions Tools.ProfileSmoothOptions.Options

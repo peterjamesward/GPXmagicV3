@@ -2324,6 +2324,16 @@ performActionsOnModel actions model =
                         _ ->
                             foldedModel
 
+                ( FlushUndo, Just track ) ->
+                    { foldedModel
+                        | track =
+                            Just
+                                { track
+                                    | undos = []
+                                    , redos = []
+                                }
+                    }
+
                 ( LockToolOpen open id, _ ) ->
                     let
                         newToolOptions =
