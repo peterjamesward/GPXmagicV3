@@ -3,15 +3,13 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.2.0
+# GPXmagic v3.2.1
 
 (1cb9c37d)
 
 ## In this release ...
 
-* **Smart smoother** could be the new go-to for quick smoothing of hairpins, removal of IRL noise,
-reducing gradients and totally making things smoother. It's not unlike the gradient smoother in
-_Smooth profile_ but it works for bends and gradients, and gives smooth transitions.
+* Was trying to load some JavaScript files that it doesn't actually need.
 
 ## Acknowledgements
 

@@ -4,6 +4,8 @@
 
 ## [The philosophy](philosophy.md)
 
+## Browser compatibility
+
 ## Tour of the screen
 
 ## Get started -- load a route

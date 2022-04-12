@@ -51,6 +51,8 @@ import Tools.OutAndBackOptions
 import Tools.ProfileSmooth
 import Tools.ProfileSmoothOptions
 import Tools.Simplify
+import Tools.SmartSmoother
+import Tools.SmartSmootherOptions
 import Tools.SplitAndJoin
 import Tools.SplitAndJoinOptions
 import Tools.StartFinish
@@ -59,8 +61,6 @@ import Tools.Straightener
 import Tools.StravaOptions
 import Tools.StravaTools
 import Tools.TrackInfoBox as TrackInfoBox
-import Tools.SmartSmoother
-import Tools.SmartSmootherOptions
 import TrackLoaded exposing (TrackLoaded)
 import View3dCommonElements exposing (stopProp)
 import ViewPureStyles exposing (..)
@@ -287,7 +287,7 @@ toolSettings =
     , toolId = "tools"
     , label = "Tools summary"
     , info = "Here is some useful information"
-    , video = Nothing
+    , video = Just "https://youtu.be/nQJtjDy_Qi4"
     , state = SettingsClosed
     , dock = DockUpperRight
     , tabColour = rgtPurple
@@ -1733,7 +1733,18 @@ viewTool msgWrapper isTrack options toolEntry =
                 , Background.color toolEntry.tabColour
                 , Font.color toolEntry.textColour
                 ]
-                [ Input.button
+                [ case toolEntry.video of
+                    Just video ->
+                        newTabLink
+                            [ alignLeft
+                            , tooltip below (myTooltip "Watch the video")   ]
+                            { url = video
+                            , label = useIconWithSize 18 FeatherIcons.video
+                            }
+
+                    Nothing ->
+                        none
+                , Input.button
                     [ centerX ]
                     { onPress =
                         Just <|
