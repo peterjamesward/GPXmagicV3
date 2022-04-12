@@ -24,6 +24,8 @@ to avoid "spikes" when it suddenly ends.
 **BUG**: Now Map has full track, moving Orange should not redraw it!
 > Is aesthetic rather than logic fault.
 
+Restore default layout should reset sliders.
+
 --
 
 # WIP

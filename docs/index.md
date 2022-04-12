@@ -2,6 +2,8 @@
 
 ![Image](images/Screenshot 2022-04-11 at 17.54.57.png)
 
+## [The philosophy](philosophy.md)
+
 ## Tour of the screen
 
 ## Get started -- load a route
