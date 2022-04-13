@@ -3,12 +3,15 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.2.3
+# GPXmagic v3.2.4
 
 (10ae5448)
 
 ## In this release ...
 
+* Reduced repainting on Map view; should be a cleaner experience moving along the track.
+
+### In 3.2.3
 * All tools now have a video. Some are shared.
 
 * Fixed bug where Move & Stretch was duplicating end points.
