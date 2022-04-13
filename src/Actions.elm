@@ -44,6 +44,7 @@ type ToolAction msg
     | DeletePointsBetween Int Int -- fromStart, fromEnd
     | DeleteSinglePoint Int Int -- fromStart, fromEnd
     | TrackHasChanged -- Tools need to update to reflect any change in track
+    | PointerChange -- Need to refresh views, but not replace the track on map
     | SetMarker (Maybe Int) -- position the purple marker
     | UndoLastAction
     | RedoUndoneAction

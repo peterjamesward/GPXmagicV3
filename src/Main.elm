@@ -2205,6 +2205,24 @@ performActionsOnModel actions model =
                         | needsRendering = True
                     }
 
+                ( PointerChange, Just track ) ->
+                    -- Unlike above, do not repaint map.
+                    --TODO: Isolate what this is supposed to achieve, and just do it.
+                    let
+                        ( refreshedToolOptions, secondaryActions ) =
+                            ToolsController.refreshOpenTools foldedModel.track foldedModel.toolOptions
+
+                        innerModelWithNewToolSettings =
+                            { foldedModel | toolOptions = refreshedToolOptions }
+
+                        modelAfterSecondaryActions =
+                            innerModelWithNewToolSettings |> performActionsOnModel secondaryActions
+                    in
+                    -- This model should contain all updated previews from open tools.
+                    { modelAfterSecondaryActions
+                        | needsRendering = True
+                    }
+
                 ( SetMarker maybeMarker, Just track ) ->
                     let
                         updatedTrack =
@@ -2212,7 +2230,8 @@ performActionsOnModel actions model =
                     in
                     { foldedModel
                         | track = Just updatedTrack
-                        , needsRendering = True
+
+                        --, needsRendering = True
                     }
 
                 ( StartFlythoughTicks, Just track ) ->
@@ -2455,6 +2474,11 @@ performActionCommands actions model =
                         , MapPortController.addMarkersToMap track
                         , Cmd.batch <| List.map showPreviewOnMap (Dict.keys model.previews)
                         ]
+
+                ( PointerChange, Just track ) ->
+                    Cmd.batch <|
+                        MapPortController.addMarkersToMap track
+                            :: List.map showPreviewOnMap (Dict.keys model.previews)
 
                 ( SetMarker maybeMarker, Just track ) ->
                     MapPortController.addMarkersToMap track

@@ -201,22 +201,24 @@ addTrackToMap : TrackLoaded msg -> Cmd msg
 addTrackToMap track =
     addFullTrackToMap track
 
+
+
 {-
-    -- This is to add the route as a polyline, with selective rendering
-    let
-        { longitude, latitude, altitude } =
-            gpxPointFromIndex track.currentPosition track.trackTree
-    in
-    mapCommands <|
-        E.object
-            [ ( "Cmd", E.string "Track" )
-            , ( "token", E.string mapboxKey )
-            , ( "lon", E.float <| Angle.inDegrees <| Direction2d.toAngle longitude )
-            , ( "lat", E.float <| Angle.inDegrees latitude )
-            , ( "zoom", E.float 10.0 )
-            , ( "data", SceneBuilderMap.renderMapJson track ) -- Route as polyline
-            , ( "points", SceneBuilderMap.trackPointsToJSON track ) -- Make track points draggable
-            ]
+   -- This is to add the route as a polyline, with selective rendering
+   let
+       { longitude, latitude, altitude } =
+           gpxPointFromIndex track.currentPosition track.trackTree
+   in
+   mapCommands <|
+       E.object
+           [ ( "Cmd", E.string "Track" )
+           , ( "token", E.string mapboxKey )
+           , ( "lon", E.float <| Angle.inDegrees <| Direction2d.toAngle longitude )
+           , ( "lat", E.float <| Angle.inDegrees latitude )
+           , ( "zoom", E.float 10.0 )
+           , ( "data", SceneBuilderMap.renderMapJson track ) -- Route as polyline
+           , ( "points", SceneBuilderMap.trackPointsToJSON track ) -- Make track points draggable
+           ]
 -}
 
 
@@ -341,7 +343,7 @@ processMapPortMessage lastState track json =
                           }
                         , [ SetCurrentFromMapClick index
                           , SaveLastMapClick lon1 lat1
-                          , TrackHasChanged
+                          , PointerChange
                           ]
                         )
 

@@ -146,7 +146,7 @@ type Msg
     | GraphViewMessage PaneId ViewGraph.Msg
     | MapPortsMessage MapPortController.MapMsg
     | MapViewMessage ViewMap.Msg
-    | SliderTimeout
+    --| SliderTimeout
     | PaneNoOp
 
 
@@ -588,49 +588,47 @@ update paneMsg msgWrapper mTrack graph contentArea options previews =
             in
             ( newOptions
             , [ SetCurrent pos
-              , TrackHasChanged
-
-              --, RenderProfile
+              , PointerChange
               , if mapFollowsOrange then
                     MapCenterOnCurrent
 
                 else
                     Actions.NoAction
-              , Actions.DelayMessage 100 (msgWrapper SliderTimeout)
+              --, Actions.DelayMessage 100 (msgWrapper SliderTimeout)
               ]
             )
 
-        SliderTimeout ->
-            let
-                newOptions =
-                    { options
-                        | sliderState =
-                            case options.sliderState of
-                                SliderIdle ->
-                                    SliderIdle
-
-                                SliderMoved ->
-                                    SliderWaitingForTimeout
-
-                                SliderWaitingForTimeout ->
-                                    SliderIdle
-                    }
-            in
-            ( newOptions
-            , [ if options.sliderState /= SliderIdle && newOptions.sliderState == SliderIdle then
-                    -- Force re-render once only.
-                    TrackHasChanged
-
-                else
-                    Actions.NoAction
-              , if newOptions.sliderState /= SliderIdle then
-                    -- Ask for a timer, to see if control has stopped moving.
-                    Actions.DelayMessage 100 (msgWrapper SliderTimeout)
-
-                else
-                    Actions.NoAction
-              ]
-            )
+        --SliderTimeout ->
+        --    let
+        --        newOptions =
+        --            { options
+        --                | sliderState =
+        --                    case options.sliderState of
+        --                        SliderIdle ->
+        --                            SliderIdle
+        --
+        --                        SliderMoved ->
+        --                            SliderWaitingForTimeout
+        --
+        --                        SliderWaitingForTimeout ->
+        --                            SliderIdle
+        --            }
+        --    in
+        --    ( newOptions
+        --    , [ if options.sliderState /= SliderIdle && newOptions.sliderState == SliderIdle then
+        --            -- Force re-render once only.
+        --            TrackHasChanged
+        --
+        --        else
+        --            Actions.NoAction
+        --      , if newOptions.sliderState /= SliderIdle then
+        --            -- Ask for a timer, to see if control has stopped moving.
+        --            Actions.DelayMessage 100 (msgWrapper SliderTimeout)
+        --
+        --        else
+        --            Actions.NoAction
+        --      ]
+        --    )
 
 
 initialise : TrackLoaded msg -> Options -> Options
