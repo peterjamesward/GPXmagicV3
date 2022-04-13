@@ -65,15 +65,18 @@ stravaProcessSegment response box =
             let
                 flatBox =
                     BoundingBox2d.fromExtrema { minX = minX, maxX = maxX, minY = minY, maxY = maxY }
-
-                start =
-                    Point2d.meters segment.start_longitude segment.start_latitude
-
-                finish =
-                    Point2d.meters segment.end_longitude segment.end_latitude
             in
-            BoundingBox2d.contains start flatBox
-                && BoundingBox2d.contains finish flatBox
+            case ( segment.start_latlng, segment.end_latlng ) of
+                ( [ start_latitude, start_longitude ], [ end_latitude, end_longitude ] ) ->
+                    BoundingBox2d.contains
+                        (Point2d.meters start_longitude start_latitude)
+                        flatBox
+                        && BoundingBox2d.contains
+                            (Point2d.meters start_longitude start_latitude)
+                            flatBox
+
+                _ ->
+                    False
     in
     case response of
         Ok segment ->
@@ -89,15 +92,27 @@ stravaProcessSegment response box =
 
 stravaSegmentDecoder : D.Decoder StravaSegment
 stravaSegmentDecoder =
-    D.map8 StravaSegment
+    D.map6 StravaSegment
         (D.at [ "name" ] D.string)
         (D.at [ "distance" ] D.float)
         (D.at [ "elevation_high" ] D.float)
         (D.at [ "elevation_low" ] D.float)
-        (D.at [ "start_latitude" ] D.float)
-        (D.at [ "start_longitude" ] D.float)
-        (D.at [ "end_latitude" ] D.float)
-        (D.at [ "end_longitude" ] D.float)
+        (D.at [ "start_latlng" ] (D.list D.float))
+        (D.at [ "end_latlng" ] (D.list D.float))
+
+
+
+{-
+   So the Strava <lovely folk> have changed this to
+          "start_latlng": [
+              51.731801,
+              -0.822131
+          ],
+          "end_latlng": [
+              51.724531,
+              -0.808531
+          ],
+-}
 
 
 requestStravaSegmentStreams : (Result Http.Error StravaSegmentStreams -> msg) -> String -> Token -> Cmd msg

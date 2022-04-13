@@ -31,6 +31,12 @@ BUG: Splines through points excludes penultimate points. Is this new?
 ENHANCEMENT: More tools should use distance as a basis restoring markers after edit.
 > Simplify for one.
 
+BUG: Extracts path from SVG with Perspective view. Switch to Map.
+Map only partially drawn and splitters stop working (!).
+Select Map first and it's OK.
+
+BUG: Strava segment fetch after route fetch fails.
+
 --
 
 # WIP

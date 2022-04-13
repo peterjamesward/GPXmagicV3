@@ -110,7 +110,7 @@ advanceInternal newTime status speed track =
                 |> Quantity.plus (Length.meters <| tempus * 10.0 ^ speed)
 
         lastPointPassedIndex =
-            DomainModel.indexFromDistance newDistance track.trackTree
+            DomainModel.indexFromDistanceRoundedDown newDistance track.trackTree
 
         currentRoad =
             DomainModel.leafFromIndex lastPointPassedIndex track.trackTree

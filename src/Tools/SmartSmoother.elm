@@ -552,7 +552,7 @@ toolStateChange opened colour options track =
             ( newOptions, previewActions newOptions colour theTrack )
 
         _ ->
-            ( options, [ HidePreview "smart" ] )
+            ( options, [ HidePreview "smart", HidePreview "smartprofile" ] )
 
 
 previewActions : Options -> Color -> TrackLoaded msg -> List (ToolAction msg)

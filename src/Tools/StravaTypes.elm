@@ -6,10 +6,10 @@ type alias StravaSegment =
     , distance : Float
     , elevation_high : Float
     , elevation_low : Float
-    , start_latitude : Float
-    , start_longitude : Float
-    , end_latitude : Float
-    , end_longitude : Float
+    , start_latlng : List Float
+    , end_latlng : List Float
+    --, start_latitude : Float
+    --, start_longitude : Float
     }
 
 

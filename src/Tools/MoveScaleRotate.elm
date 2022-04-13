@@ -70,7 +70,7 @@ of Ghana by default (zero longitude, zero latitude), and certainly will not be t
 defaultOptions : Options
 defaultOptions =
     { rotateAngle = Angle.degrees 0
-    , desiredTrackLength = Length.kilometers 100.0
+    , desiredTrackLength = Length.kilometers 10.0
     }
 
 
@@ -139,8 +139,12 @@ update msg settings previewColour hasTrack =
             )
 
         ( Zero, Just track ) ->
-            ( defaultOptions
-            , actions defaultOptions previewColour track
+            let
+                newSettings =
+                    { defaultOptions | desiredTrackLength = DomainModel.trueLength track.trackTree }
+            in
+            ( newSettings
+            , actions newSettings previewColour track
             )
 
         ( UseMapElevations, Just track ) ->

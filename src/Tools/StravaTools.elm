@@ -266,15 +266,6 @@ update msg settings wrap track =
                       ]
                     )
 
-                --case buildActions settings isTrack segment streams of
-                --    Just action ->
-                --        PostUpdateActions.ActionTrackChanged
-                --            TrackEditType.EditPreservesIndex
-                --            action
-                --
-                --    Nothing ->
-                --        PostUpdateActions.ActionNoOp
-                --)
                 _ ->
                     ( settings, [] )
 
@@ -287,6 +278,21 @@ update msg settings wrap track =
             ( settings, [ Actions.DisplayInfo tool tag ] )
 
 
+extractFromLngLat latlng =
+    case latlng of
+        [ latitude, longitude ] ->
+            { longitude = Direction2d.fromAngle <| Angle.degrees longitude
+            , latitude = Angle.degrees latitude
+            , altitude = Quantity.zero
+            }
+
+        _ ->
+            { longitude = Direction2d.positiveX
+            , latitude = Quantity.zero
+            , altitude = Quantity.zero
+            }
+
+
 pointsFromStreams :
     TrackLoaded msg
     -> StravaSegment
@@ -297,10 +303,7 @@ pointsFromStreams track segment streams =
     -- We can fudge this by consing it to the track.
     let
         startGpx =
-            { longitude = Direction2d.fromAngle <| Angle.degrees segment.start_longitude
-            , latitude = Angle.degrees segment.start_latitude
-            , altitude = Quantity.zero
-            }
+            extractFromLngLat segment.start_latlng
 
         fromStart =
             DomainModel.nearestToLonLat
@@ -352,16 +355,10 @@ paste options track =
         ( SegmentPreviewed segment, x1 :: xs ) ->
             let
                 segmentStartGpx =
-                    GPXSource
-                        (Direction2d.fromAngle <| Angle.degrees segment.start_longitude)
-                        (Angle.degrees segment.start_latitude)
-                        Quantity.zero
+                    extractFromLngLat segment.start_latlng
 
                 segmentEndGpx =
-                    GPXSource
-                        (Direction2d.fromAngle <| Angle.degrees segment.end_longitude)
-                        (Angle.degrees segment.end_latitude)
-                        Quantity.zero
+                    extractFromLngLat segment.end_latlng
 
                 pStartingTrackPoint =
                     -- Our first track point will be replaced with the first stream point
