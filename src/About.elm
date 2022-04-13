@@ -3,13 +3,19 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.2.2
+# GPXmagic v3.2.3
 
 (9793a92a)
 
 ## In this release ...
 
-* Videos to explain the use of each tool (not yet all there).
+* All tools now have a video. Some are shared.
+
+* Fixed bug where Move & Stretch was duplicating end points.
+
+* Fixed bug caused by Strava changing the segment API.
+
+* Added "Flush Undo" button in Simplify, which may help if memory usage is high.
 
 ## Acknowledgements
 
