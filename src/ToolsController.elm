@@ -1737,7 +1737,8 @@ viewTool msgWrapper isTrack options toolEntry =
                     Just video ->
                         newTabLink
                             [ alignLeft
-                            , tooltip below (myTooltip "Watch the video")   ]
+                            , tooltip below (myTooltip "Watch the video")
+                            ]
                             { url = video
                             , label = useIconWithSize 18 FeatherIcons.video
                             }

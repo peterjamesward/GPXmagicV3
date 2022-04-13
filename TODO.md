@@ -45,6 +45,8 @@ Specific areas within tools as needed.
 Variant of "request from local storage" that takes a wrapped message so that the return value
 can be directed to a tool or a view.
 
+Try to move out the residual tool-specific stuff in Main.performActions.
+
 ## Tools: old, updated, & new
 
 - Non-customisable keyboard alternatives for Load/Save/Undo/Redo/Fwd/Back/Purple (maybe 1-5 for views)
