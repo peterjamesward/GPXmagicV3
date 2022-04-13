@@ -17,6 +17,8 @@ aboutText =
 
 * Added "Flush Undo" button in Simplify, which may help if memory usage is high.
 
+* Simplify tool better preserves Orange and Purple marker positions.
+
 ## Acknowledgements
 
 * Special thanks to David Ogle for thorough testing, great bug reports, usability advice, and more.
