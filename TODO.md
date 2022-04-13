@@ -35,7 +35,7 @@ BUG: Extracts path from SVG with Perspective view. Switch to Map.
 Map only partially drawn and splitters stop working (!).
 Select Map first and it's OK.
 
-BUG: Strava segment fetch after route fetch fails.
+BUG: Move and Stretch- move duplicates end points.
 
 --
 

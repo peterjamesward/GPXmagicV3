@@ -232,16 +232,16 @@ apply options track =
 
         newTree =
             DomainModel.replaceRange
-                (fromStart + 1)
-                (fromEnd + 1)
+                (fromStart )
+                (fromEnd )
                 track.referenceLonLat
                 gpxPoints
                 track.trackTree
 
         oldPoints =
             DomainModel.extractPointsInRange
-                fromStart
-                fromEnd
+                (fromStart )
+                (fromEnd )
                 track.trackTree
     in
     ( newTree
