@@ -1,55 +1,9 @@
 
-# BUGS
-
-BUG: Classic bend smoother consumes all memory on some looped routes where
-     orange and purple are (possibly) co-linear, or something. (Samir bug)
-
-BUG: Undo single point smooth at track start removes a point.
-
-NOT A BUG: Move & Stretch does not move marked points. 
-> This is intentional. May not be right though.
-
-BUG?: (DavidO)
-- Opened the Move/Stretch tool and set a range - this displayed a preview.
-- Hid the tool using the Tools summary section 
-  - (the tool was still expanded when I selected "Hidden") 
-  - the Move/Stretch preview was still visible.
-- Re-opened the file and the preview was still in place.
-> Sounds like options not being reset on track load.
-
-ENHANCEMENT:
-For altitude and gradient smoothing, reduce the averaging window at each end of the range
-to avoid "spikes" when it suddenly ends.
-
-BUG: Now Map has full track, moving Orange should not redraw it!
-> Is aesthetic rather than logic fault.
-
-Restore default layout should reset sliders.
-
-BUG: Splines through points excludes penultimate points. Is this new?
-
-ENHANCEMENT: More tools should use distance as a basis restoring markers after edit.
-> Simplify for one.
-
-BUG: Extracts path from SVG with Perspective view. Switch to Map.
-Map only partially drawn and splitters stop working (!).
-Select Map first and it's OK.
-
-BUG: Move and Stretch- move duplicates end points.
-
---
-
 # WIP
-
-## Videos
 
 ---
 
 # BACKLOG
-
-## User manual
-
-Yes, really.
 
 ## De-noise / Simplify
 
@@ -85,6 +39,8 @@ Drag Curve Former circle directly in Plan View. (Add an SVG "handle" to hit dete
 Ditto for Move & Stretch, possibly Nudge.
 Provide info text capability on top bar and on view panes.
 Specific areas within tools as needed.
+
+## Technical debt
 
 Variant of "request from local storage" that takes a wrapped message so that the return value
 can be directed to a tool or a view.
