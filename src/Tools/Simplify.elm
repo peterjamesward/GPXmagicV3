@@ -10,6 +10,8 @@ import FlatColors.ChinesePalette
 import Length exposing (Meters)
 import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (Quantity, Squared)
+import String.Interpolate
+import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import Triangle3d
@@ -213,6 +215,10 @@ update msg options previewColour track =
 
 view : I18NOptions.Options -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
 view location msgWrapper options isTrack =
+    let
+        i18n =
+            I18N.text location toolId
+    in
     case isTrack of
         Just track ->
             column
@@ -226,16 +232,17 @@ view location msgWrapper options isTrack =
                         case Dict.size options.pointsToRemove of
                             0 ->
                                 { onPress = Just <| msgWrapper Seek
-                                , label = text "Search"
+                                , label = i18n "search"
                                 }
 
                             quantity ->
                                 { onPress = Just <| msgWrapper Apply
                                 , label =
                                     paragraph [] <|
-                                        [ text "Remove "
-                                        , text <| String.fromInt quantity
-                                        , text <| " points"
+                                        [ text <|
+                                            String.Interpolate.interpolate
+                                                (I18N.localisedString location toolId "remove")
+                                                [ String.fromInt quantity ]
                                         ]
                                 }
                 , el [ centerX ] <|
@@ -243,7 +250,7 @@ view location msgWrapper options isTrack =
                         { onPress = Just <| msgWrapper FlushUndo
                         , label =
                             paragraph [] <|
-                                [ text "Flush Undo stack" ]
+                                [ i18n "flush" ]
                         }
                 ]
 

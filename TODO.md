@@ -20,7 +20,7 @@ Time to plough through all the tools. Again.
 , ~~smartSmootherTool~~
 , ~~nudgeTool~~
 , ~~outAndBackTool~~
-, simplifyTool
+, ~~simplifyTool~~
 , interpolateTool
 , profileSmoothTool
 , moveScaleRotateTool

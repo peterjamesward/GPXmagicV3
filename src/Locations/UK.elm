@@ -554,6 +554,9 @@ quite pleasing results in many cases.
         , ( "simplify"
           , Dict.fromList
                 [ ( "label", """Simplify""" )
+                , ( "search", """Search""")
+                , ( "remove", """Remove {0} points""")
+                , ( "flush", """Clear Undo stack""")
                 , ( "info"
                   , """
 Recorded "IRL" rides contain a lot of GPS "noise". GPS is accurate only to a few metres,
