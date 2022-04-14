@@ -17,7 +17,9 @@ import List.Extra
 import OAuth as O
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity
-import ToolTip exposing (myTooltip, tooltip)
+import ToolTip exposing (localisedTooltip, myTooltip, tooltip)
+import Tools.I18N as I18N
+import Tools.I18NOptions as I18NOptions
 import Tools.StravaDataLoad exposing (..)
 import Tools.StravaOptions exposing (Options, StravaStatus(..))
 import Tools.StravaTypes exposing (..)
@@ -384,28 +386,31 @@ paste options track =
             ( Nothing, [], ( 0, 0 ) )
 
 
-viewStravaTab : Options -> (Msg -> msg) -> Maybe (TrackLoaded msg) -> Element msg
-viewStravaTab options wrap track =
+viewStravaTab : I18NOptions.Options -> Options -> (Msg -> msg) -> Maybe (TrackLoaded msg) -> Element msg
+viewStravaTab location options wrap track =
     let
+        i18n =
+            I18N.text location toolId
+
         segmentIdField =
             Input.text
                 [ width (minimum 150 <| fill)
-                , tooltip below (myTooltip "Paste in a segment number or URL")
+                , tooltip below (localisedTooltip location toolId "segmenttip")
                 ]
                 { onChange = wrap << UserChangedSegmentId
                 , text = options.externalSegmentId
-                , placeholder = Just <| Input.placeholder [] <| text "Segment ID"
+                , placeholder = Just <| Input.placeholder [] <| i18n "segmentid"
                 , label = Input.labelHidden "Segment ID"
                 }
 
         routeIdField =
             Input.text
                 [ width (minimum 150 <| fill)
-                , tooltip below (myTooltip "Paste in a route number or URL")
+                , tooltip below (localisedTooltip location toolId "routetip")
                 ]
                 { onChange = wrap << UserChangedRouteId
                 , text = options.externalRouteId
-                , placeholder = Just <| Input.placeholder [] <| text "Strava route ID"
+                , placeholder = Just <| Input.placeholder [] <| i18n "routeid"
                 , label = Input.labelHidden "Strava route ID"
                 }
 
@@ -418,25 +423,25 @@ viewStravaTab options wrap track =
                     button
                         neatToolsBorder
                         { onPress = Just <| wrap LoadSegmentStreams
-                        , label = text "Preview"
+                        , label = i18n "preview"
                         }
 
                 SegmentPreviewed segment ->
                     button
                         neatToolsBorder
                         { onPress = Just <| wrap PasteSegment
-                        , label = text "Paste"
+                        , label = i18n "paste"
                         }
 
                 SegmentNone ->
                     button
                         neatToolsBorder
                         { onPress = Just <| wrap LoadExternalSegment
-                        , label = text <| "Fetch header"
+                        , label = i18n "fetch"
                         }
 
                 SegmentNotInRoute _ ->
-                    text "This segment is not\ncontained in the route"
+                    i18n "badsegment"
 
                 _ ->
                     none
@@ -450,25 +455,25 @@ viewStravaTab options wrap track =
                     button
                         neatToolsBorder
                         { onPress = Just <| wrap ClearSegment
-                        , label = text "Clear"
+                        , label = i18n "clear"
                         }
 
         segmentInfo =
             case options.externalSegment of
                 SegmentRequested ->
-                    text "Waiting for segment"
+                    i18n "waiting"
 
                 SegmentError err ->
                     text err
 
                 SegmentNone ->
-                    text "Segment data not loaded, or not yet."
+                    i18n "none"
 
                 SegmentOk segment ->
                     text segment.name
 
                 SegmentPreviewed segment ->
-                    text "In preview"
+                    i18n "loaded"
 
                 SegmentNotInRoute segment ->
                     text segment.name
@@ -484,7 +489,7 @@ viewStravaTab options wrap track =
                         [ displayName <| Just options.externalRouteId
                         , newTabLink [ Font.color stravaOrange ]
                             { url = stravaUrl
-                            , label = text "View on Strava"
+                            , label = i18n "view"
                             }
                         ]
 
@@ -498,10 +503,10 @@ viewStravaTab options wrap track =
             button
                 neatToolsBorder
                 { onPress = Just <| wrap LoadExternalRoute
-                , label = text <| "Fetch route"
+                , label = i18n "route"
                 }
     in
-    wrappedRow
+    column
         [ spacing 10
         , padding 10
         , width fill
@@ -511,10 +516,14 @@ viewStravaTab options wrap track =
         case ( options.stravaStatus, track ) of
             ( StravaConnected token, Just _ ) ->
                 [ stravaLink
-                , routeIdField
-                , routeButton
-                , segmentIdField
-                , segmentButton
+                , row [ spacing 10 ]
+                    [ routeIdField
+                    , routeButton
+                    ]
+                , row [ spacing 10 ]
+                    [ segmentIdField
+                    , segmentButton
+                    ]
                 , clearButton
                 , segmentInfo
                 ]
@@ -523,9 +532,8 @@ viewStravaTab options wrap track =
                 [ stravaLink
                 , routeIdField
                 , routeButton
-                , paragraph [] [ text """To load a segment from Strava, you need a route
-                 that contains the segment geographicaly.""" ]
+                , paragraph [] [ i18n "about" ]
                 ]
 
             ( StravaDisconnected, _ ) ->
-                [ text "Please connect to Strava" ]
+                [ i18n "connect" ]

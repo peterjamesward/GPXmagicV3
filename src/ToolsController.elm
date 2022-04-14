@@ -1946,6 +1946,7 @@ viewToolByType location msgWrapper entry isTrack options =
 
             ToolStrava ->
                 Tools.StravaTools.viewStravaTab
+                    location
                     options.stravaSettings
                     (msgWrapper << ToolStravaMsg)
                     isTrack
