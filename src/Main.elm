@@ -1155,8 +1155,11 @@ showOptionsMenu model =
         chooseLanguage : I18NOptions.Options -> Element Msg
         chooseLanguage location =
             Input.button
-                [ width fill, Font.size 48 ]
-                { label = text location.country.flag
+                [ width fill
+                , Font.size 40
+                , tooltip below (myTooltip location.country.name)
+                ]
+                { label = el [centerX ] <| text location.country.flag
                 , onPress = Just <| Language location
                 }
     in
