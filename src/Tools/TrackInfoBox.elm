@@ -128,8 +128,8 @@ displayInfoForPoint location imperial track =
         , column [ spacing 5 ]
             [ text <| String.fromInt index
             , text <| showLongMeasure imperial distance
-            , text <| showDecimal6 <| Angle.inDegrees <| Direction2d.toAngle longitude
-            , text <| showDecimal6 <| Angle.inDegrees <| latitude
+            , text <| UtilsForViews.longitudeString <| Direction2d.toAngle longitude
+            , text <| UtilsForViews.latitudeString <| latitude
             , text <| showShortMeasure imperial altitude
             , text <| showDecimal2 <| bearing
             , text <| showDecimal2 leaf.gradientAtStart
