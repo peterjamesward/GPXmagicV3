@@ -15,7 +15,7 @@ Time to plough through all the tools. Again.
 , ~~deleteTool~~
 , ~~bezierSplinesTool~~
 , ~~centroidAverageTool~~
-, curveFormerTool
+, ~~curveFormerTool~~
 , bendSmootherTool
 , smartSmootherTool
 , nudgeTool

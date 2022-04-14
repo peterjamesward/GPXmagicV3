@@ -240,6 +240,15 @@ actually want or need to pass through them.
         , ( "radius"
           , Dict.fromList
                 [ ( "label", """Radiused bends""" )
+                , ( "radius", """Bend radius {0}""" )
+                , ( "join", """Joining radius {0}""" )
+                , ( "inclusion", """Inclusion zone {0}""" )
+                , ( "spacing", """Spacing {0}""" )
+                , ( "Reset", """Reset""" )
+                , ( "Apply", """Apply""" )
+                , ( "none", """Not found""" )
+                , ( "gradient", """Smooth gradient""" )
+                , ( "outliers", """Include outliers""" )
                 , ( "info", """
  Switchback? Roundabout? What you need is to construct your own bend with a
  desired radius. This tools lets you do that, plus nice entry and exit lines.

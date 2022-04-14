@@ -35,10 +35,12 @@ import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
 import Scene3d.Material as Material
 import SketchPlane3d
+import String.Interpolate
 import Svg
 import Svg.Attributes as SA
 import SweptAngle
 import Tools.CurveFormerOptions exposing (GradientSmoothing(..), Options, Point)
+import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (flatBox, showShortMeasure)
@@ -274,6 +276,9 @@ update msg options previewColour hasTrack =
 view : I18NOptions.Options -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
 view location imperial wrapper options track =
     let
+        i18n =
+            I18N.text location toolId
+
         squared x =
             x * x
 
@@ -281,8 +286,11 @@ view location imperial wrapper options track =
             Input.slider commonShortHorizontalSliderStyles
                 { onChange = wrapper << SetPushRadius << squared
                 , label =
-                    Input.labelBelow []
-                        (text <| "Bend radius " ++ showShortMeasure imperial options.pushRadius)
+                    Input.labelBelow [] <|
+                        text <|
+                            String.Interpolate.interpolate
+                                (I18N.localisedString location toolId "radius")
+                                [ showShortMeasure imperial options.pushRadius ]
                 , min = 2.0
                 , max = 10.0
                 , step = Nothing
@@ -294,8 +302,11 @@ view location imperial wrapper options track =
             Input.slider commonShortHorizontalSliderStyles
                 { onChange = wrapper << SetTransitionRadius << squared
                 , label =
-                    Input.labelBelow []
-                        (text <| "Joining radius " ++ showShortMeasure imperial options.transitionRadius)
+                    Input.labelBelow [] <|
+                        text <|
+                            String.Interpolate.interpolate
+                                (I18N.localisedString location toolId "join")
+                                [ showShortMeasure imperial options.transitionRadius ]
                 , min = 2.0
                 , max = 10.0
                 , step = Nothing
@@ -307,8 +318,11 @@ view location imperial wrapper options track =
             Input.slider commonShortHorizontalSliderStyles
                 { onChange = wrapper << SetDiscWidth
                 , label =
-                    Input.labelBelow []
-                        (text <| "Inclusion zone " ++ showShortMeasure imperial options.pullRadius)
+                    Input.labelBelow [] <|
+                        text <|
+                            String.Interpolate.interpolate
+                                (I18N.localisedString location toolId "join")
+                                [ showShortMeasure imperial options.pullRadius ]
                 , min = 1.0
                 , max = 40.0
                 , step = Nothing
@@ -320,8 +334,11 @@ view location imperial wrapper options track =
             Input.slider commonShortHorizontalSliderStyles
                 { onChange = wrapper << SetSpacing
                 , label =
-                    Input.labelBelow []
-                        (text <| "Spacing " ++ showShortMeasure imperial options.spacing)
+                    Input.labelBelow [] <|
+                        text <|
+                            String.Interpolate.interpolate
+                                (I18N.localisedString location toolId "spacing")
+                                [ showShortMeasure imperial options.spacing ]
                 , min = 2.0
                 , max = 10.0
                 , step = Nothing
@@ -332,21 +349,21 @@ view location imperial wrapper options track =
         showActionButtons =
             row [ padding 5, spacing 5, width fill ]
                 [ Input.button neatToolsBorder
-                    { label = text "Reset"
+                    { label = i18n "Reset"
                     , onPress = Just <| wrapper DraggerReset
                     }
                 , case ( List.length options.newTrackPoints >= 3, options.pointsAreContiguous ) of
                     ( _, True ) ->
                         Input.button
                             neatToolsBorder
-                            { label = text "Apply"
+                            { label = i18n "Apply"
                             , onPress = Just <| wrapper ApplyWithOptions
                             }
 
                     ( _, False ) ->
                         Input.button
                             (width fill :: subtleToolStyles)
-                            { label = paragraph [ width fill ] <| [ text "Not found" ]
+                            { label = paragraph [ width fill ] <| [ i18n "none" ]
                             , onPress = Nothing
                             }
                 ]
@@ -365,7 +382,7 @@ view location imperial wrapper options track =
                            )
                 , icon = Input.defaultCheckbox
                 , checked = options.smoothGradient == Holistic
-                , label = Input.labelRight [ centerY ] (text "Smooth gradient")
+                , label = Input.labelRight [ centerY ] (i18n "gradient")
                 }
 
         showPullSelection =
@@ -373,7 +390,7 @@ view location imperial wrapper options track =
                 { onChange = wrapper << ToggleUsePullRadius
                 , icon = Input.defaultCheckbox
                 , checked = options.usePullRadius
-                , label = Input.labelRight [ centerY ] (text "Include outliers")
+                , label = Input.labelRight [ centerY ] (i18n "outliers")
                 }
     in
     case track of
