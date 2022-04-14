@@ -16,6 +16,10 @@ import UtilsForViews exposing (showAngle, showDecimal2, showLongMeasure)
 import ViewPureStyles exposing (infoButton, neatToolsBorder, noTrackMessage, sliderThumb, useIcon)
 
 
+toolId =
+    "gradients"
+
+
 type GradientProblem
     = AbruptChange
     | SteepClimb
@@ -54,42 +58,6 @@ type Msg
     | SetResultMode ResultMode
     | Autofix
     | DisplayInfo String String
-
-
-toolID : String
-toolID =
-    "gradients"
-
-
-textDictionary : ( String, Dict String String )
-textDictionary =
-    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
-    -- ToolsController can use these for info button and tool label.
-    ( toolID
-    , Dict.fromList
-        [ ( toolID, "Gradient problems" )
-        , ( "info", infoText )
-        , ( "autofix", autofixText )
-        ]
-    )
-
-
-infoText =
-    """Find points where the gradient changes significantly, or is a noticeably
-    steep ascent or descent.
-
-From here, you can jump directly to the sections of track.
-You can use a quick-fix here to simply round off the points or (usually better),
-use _Profile Smoother_, _Smooth with Splines_, _Simplify_ or _Nudge_.
-"""
-
-
-autofixText =
-    """Smooth each of these individually using the single point _Smooth with arcs_. Use that
-tool to change the number of points that are added to smooth each point.
-
-You should use this only for trivial fixes; there are better tools for smoothing
-serious issues."""
 
 
 findAbruptDirectionChanges : Options -> PeteTree -> Options

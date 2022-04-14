@@ -14,6 +14,10 @@ import UtilsForViews exposing (fullDepthRenderingBoxSize)
 import ViewPureStyles exposing (neatToolsBorder)
 
 
+toolId =
+    "delete"
+
+
 type alias Options =
     { singlePoint : Bool
     , pointsToBeDeleted : List Int
@@ -30,35 +34,6 @@ defaultOptions =
 type Msg
     = DeletePointOrPoints -- One button serves both cases.
     | DisplayInfo String String
-
-
-toolID : String
-toolID =
-    "delete"
-
-
-textDictionary : ( String, Dict String String )
-textDictionary =
-    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
-    -- ToolsController can use these for info button and tool label.
-    ( toolID
-    , Dict.fromList
-        [ ( toolID, "Delete" )
-        , ( "info", infoText )
-        ]
-    )
-
-
-infoText =
-    """If you've got a single point -- or more -- out of line, sometimes the best thing
-to do is just Delete them.
-
-Delete a single point by placing the Orange marker, or several points by using both Orange
-and Purple. Delete includes the points where the markers are.
-
-Don't worry, it won't let you delete the whole track.
-"""
-
 
 
 toolStateChange :

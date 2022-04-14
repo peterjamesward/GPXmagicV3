@@ -46,6 +46,7 @@
             "rtfeldman/elm-hex": "1.0.0",
             "rtfeldman/elm-iso8601-date-strings": "1.1.4",
             "smucode/elm-flat-colors": "1.0.1",
+            "supermario/elm-countries": "1.1.1",
             "terezka/elm-charts": "3.0.0",
             "truqu/elm-base64": "2.0.4"
         },

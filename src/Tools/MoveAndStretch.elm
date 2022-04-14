@@ -27,6 +27,10 @@ import Vector3d
 import ViewPureStyles exposing (..)
 
 
+toolId =
+    "stretch"
+
+
 defaultOptions : Options
 defaultOptions =
     { vector = Vector2d.zero
@@ -48,38 +52,6 @@ type Msg
     | DraggerApply
     | StretchHeight Float
     | DisplayInfo String String
-
-
-toolID : String
-toolID =
-    "stretch"
-
-
-textDictionary : ( String, Dict String String )
-textDictionary =
-    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
-    -- ToolsController can use these for info button and tool label.
-    ( toolID
-    , Dict.fromList
-        [ ( toolID, "Move and Stretch" )
-        , ( "info", infoText )
-        ]
-    )
-
-
-infoText =
-    """Think of this as _Nudge_, supercharged. Use the markers to define a section of track,
-then the circular 2-way drag control to move this section freely. There's a height adjustment
-as well.
-
-The real value of this tool is "Stretch" mode. Suppose you have a series of switchbacks
-but they're too tightly packed for RGT Magic Roads. In stretch mode, you move a white marker
-along the track between the Orange and Purple. Now, when you drag the 2-way control, the
-white marker follows the drag and the track either side "stretches" to follow it.
-
-With a bit of practice, you can add some separation to the switchbacks. It probably has
-other uses as well, but this was the justification.
-"""
 
 
 radius =
@@ -232,16 +204,16 @@ apply options track =
 
         newTree =
             DomainModel.replaceRange
-                (fromStart )
-                (fromEnd )
+                fromStart
+                fromEnd
                 track.referenceLonLat
                 gpxPoints
                 track.trackTree
 
         oldPoints =
             DomainModel.extractPointsInRange
-                (fromStart )
-                (fromEnd )
+                fromStart
+                fromEnd
                 track.trackTree
     in
     ( newTree

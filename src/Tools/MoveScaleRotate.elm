@@ -25,6 +25,10 @@ import Vector3d
 import ViewPureStyles exposing (..)
 
 
+toolId =
+    "affine"
+
+
 type Msg
     = RotateAndScale
     | SetRotateAngle Angle
@@ -33,38 +37,6 @@ type Msg
     | Zero
     | UseMapElevations
     | DisplayInfo String String
-
-
-toolID : String
-toolID =
-    "affine"
-
-
-textDictionary : ( String, Dict String String )
-textDictionary =
-    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
-    -- ToolsController can use these for info button and tool label.
-    ( toolID
-    , Dict.fromList
-        [ ( toolID, "Move,Scale,Rotate" )
-        , ( "info", infoText )
-        ]
-    )
-
-
-infoText =
-    """Want to ride Ventoux in the Sahara? Want your local loop to be a bit longer, or a lot?
-
-Move, Scale & Rotate lets you perform some simple transformations on the whole route. It's maths.
-
-Scale and Rotate are fairly obvious but Move requires you to use the Map view to identify where
-you want your route. The coordinates of the last map click are displayed in the tool. Without the
-Purple marker, the centre point of the route is moved to the last map click position. With the
-Purple marker, the Purple marker is moved there; this can give you more control over placement.
-
-This tool is also useful if you import an SVG drawing, as these will appear off the coast
-of Ghana by default (zero longitude, zero latitude), and certainly will not be the right length.
-"""
 
 
 defaultOptions : Options

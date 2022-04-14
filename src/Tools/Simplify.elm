@@ -15,6 +15,10 @@ import Triangle3d
 import ViewPureStyles exposing (neatToolsBorder, noTrackMessage)
 
 
+toolId =
+    "simplify"
+
+
 type alias Options =
     { pointsToRemove : Dict Int Int }
 
@@ -28,38 +32,6 @@ type Msg
     | Apply
     | DisplayInfo String String
     | FlushUndo
-
-
-toolID : String
-toolID =
-    "simplify"
-
-
-textDictionary : ( String, Dict String String )
-textDictionary =
-    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
-    -- ToolsController can use these for info button and tool label.
-    ( toolID
-    , Dict.fromList
-        [ ( toolID, "Simplify" )
-        , ( "info", infoText )
-        ]
-    )
-
-
-infoText =
-    """Recorded "IRL" rides contain a lot of GPS "noise". GPS is accurate only to a few metres,
-more sampling will not change this. Some of the other tools can help to reduce this noise,
-but it can be more effective to simply remove some (many) of the points that don't really
-contribute much to the shape of the route. Those that can be discarded, should be.
-
-This tool assigns to each point a value representing its contribution, defined by the area
-of the triangle it makes with its neighbours. Those with the smallest 20% contribution are
-identified, then a check is made to avoid removing adjacent points.
-
-This proves in practice rather effective at removing "noise" without detracting from the
-shape of the route.
-"""
 
 
 findSimplifications : Options -> PeteTree -> Options

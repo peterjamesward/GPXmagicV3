@@ -26,6 +26,10 @@ import Url.Builder as Builder
 import ViewPureStyles exposing (displayName, neatToolsBorder, prettyButtonStyles)
 
 
+toolId =
+    "strava"
+
+
 type Msg
     = UserChangedRouteId String
     | LoadExternalRoute
@@ -40,33 +44,6 @@ type Msg
     | ClearSegment
     | ConnectionInfo O.Token
     | DisplayInfo String String
-
-
-toolID : String
-toolID =
-    "strava"
-
-
-textDictionary : ( String, Dict String String )
-textDictionary =
-    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
-    -- ToolsController can use these for info button and tool label.
-    ( toolID
-    , Dict.fromList
-        [ ( toolID, "Strava" )
-        , ( "info", infoText )
-        ]
-    )
-
-
-infoText =
-    """The Strava tool has two functions:
-1. Import a route direct from Strava for smoothing
-
-2. Place a Strava segment into your current route. Some people like the "accuracy" of segments.
-
-You must firtst authenticate with Strava using the button on the top bar; do that before loading a GPX.
-"""
 
 
 defaultOptions : Options

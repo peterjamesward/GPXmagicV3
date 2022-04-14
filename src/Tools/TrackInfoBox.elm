@@ -14,6 +14,10 @@ import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal0, showDecimal2, showDecimal6, showLongMeasure, showShortMeasure)
 
 
+toolId =
+    "info"
+
+
 type alias Options =
     { displayMode : InformationContext
     , memoryInfo : Maybe MemoryInfo
@@ -45,28 +49,6 @@ type Msg
     | DisplayInfo String String
 
 
-toolID : String
-toolID =
-    "info"
-
-
-textDictionary : ( String, Dict String String )
-textDictionary =
-    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
-    -- ToolsController can use these for info button and tool label.
-    ( toolID
-    , Dict.fromList
-        [ ( toolID, "Information" )
-        , ( "info", infoText )
-        ]
-    )
-
-
-infoText =
-    """View information about the current point, the whole track, and memory usage.
-"""
-
-
 update : Msg -> Options -> Options
 update msg options =
     case msg of
@@ -74,7 +56,7 @@ update msg options =
             { options | displayMode = mode }
 
         DisplayInfo _ _ ->
-            ( options )
+            options
 
 
 trackInfoList : List ( Element msg, Bool -> RoadSection -> Element msg )

@@ -31,6 +31,10 @@ import Vector3d
 import ViewPureStyles exposing (..)
 
 
+toolId =
+    "arcs"
+
+
 defaultOptions : Options
 defaultOptions =
     { bendTrackPointSpacing = 5.0
@@ -51,35 +55,6 @@ type Msg
     | SetSegments Int
     | ApplySmoothPoint
     | DisplayInfo String String
-
-
-toolID : String
-toolID =
-    "arcs"
-
-
-textDictionary : ( String, Dict String String )
-textDictionary =
-    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
-    -- ToolsController can use these for info button and tool label.
-    ( toolID
-    , Dict.fromList
-        [ ( toolID, "Smooth with arcs" )
-        , ( "info", infoText )
-        ]
-    )
-
-
-infoText =
-    """Find a circular arc to replace an existing bend, by moving the Orange and
-Purple markers to find an acceptable solution. 
-
-Set the spacing to control the fineness of the replacement bend.
-
-This will also enforce a uniform gradient along the new arc.
-
-_Radiused bends_ offers a slightly different approach.
-"""
 
 
 computeNewPoints : Options -> TrackLoaded msg -> List PreviewPoint

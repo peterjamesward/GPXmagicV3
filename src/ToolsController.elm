@@ -18,7 +18,7 @@ import Json.Decode as D exposing (field)
 import Json.Encode as E exposing (string)
 import List.Extra
 import Time
-import ToolTip exposing (myTooltip, tooltip)
+import ToolTip exposing (localisedTooltip, myTooltip, tooltip)
 import Tools.BendSmoother
 import Tools.BendSmootherOptions
 import Tools.BezierOptions
@@ -36,6 +36,8 @@ import Tools.Flythrough
 import Tools.GradientProblems
 import Tools.Graph
 import Tools.GraphOptions
+import Tools.I18N as I18N
+import Tools.I18NOptions as I18NOptions
 import Tools.Interpolate
 import Tools.InterpolateOptions
 import Tools.Intersections
@@ -211,35 +213,9 @@ type ToolMsg
     | ToolSmartSmootherMsg Tools.SmartSmoother.Msg
 
 
-toolID : String
-toolID =
-    "tools"
-
-
-textDictionary : ( String, Dict String String )
-textDictionary =
-    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
-    -- ToolsController can use these for info button and tool label.
-    ( toolID
-    , Dict.fromList
-        [ ( toolID, "tools" )
-        , ( "info", infoText )
-        ]
-    )
-
-
-infoText =
-    """Quickly place tools on the left or right of the display, or hide them completely.
-
-Also, access a quick description of what the tool does and how (and when) to use it.
-"""
-
-
 type alias ToolEntry =
     { toolType : ToolType
     , toolId : String
-    , label : String
-    , info : String
     , video : Maybe String
     , state : ToolState
     , dock : ToolDock
@@ -285,8 +261,6 @@ toolSettings : ToolEntry
 toolSettings =
     { toolType = ToolSettings
     , toolId = "tools"
-    , label = "Tools summary"
-    , info = "Here is some useful information"
     , video = Just "https://youtu.be/nQJtjDy_Qi4"
     , state = SettingsClosed
     , dock = DockUpperRight
@@ -299,9 +273,7 @@ toolSettings =
 trackInfoBox : ToolEntry
 trackInfoBox =
     { toolType = ToolTrackInfo
-    , toolId = TrackInfoBox.toolID
-    , label = "Information"
-    , info = "Here is some useful information"
+    , toolId = TrackInfoBox.toolId
     , video = Just "https://youtu.be/SgiVpQYxG8I"
     , state = Contracted
     , dock = DockUpperRight
@@ -314,9 +286,7 @@ trackInfoBox =
 displaySettingsTool : ToolEntry
 displaySettingsTool =
     { toolType = ToolDisplaySettings
-    , toolId = Tools.DisplaySettings.toolID
-    , label = "Display"
-    , info = "How it looks"
+    , toolId = Tools.DisplaySettings.toolId
     , video = Just "https://youtu.be/SgiVpQYxG8I"
     , state = Contracted
     , dock = DockUpperRight
@@ -329,9 +299,7 @@ displaySettingsTool =
 directionChangeTool : ToolEntry
 directionChangeTool =
     { toolType = ToolAbruptDirectionChanges
-    , toolId = DirectionChanges.toolID
-    , label = "Bend problems"
-    , info = "These may need smoothing"
+    , toolId = DirectionChanges.toolId
     , video = Just "https://youtu.be/IzjoHTQN0Lk"
     , state = Contracted
     , dock = DockUpperRight
@@ -344,9 +312,7 @@ directionChangeTool =
 gradientChangeTool : ToolEntry
 gradientChangeTool =
     { toolType = ToolGradientProblems
-    , toolId = Tools.GradientProblems.toolID
-    , label = "Gradient problems"
-    , info = "These may need smoothing"
+    , toolId = Tools.GradientProblems.toolId
     , video = Just "https://youtu.be/IMn-MkxYFtc"
     , state = Contracted
     , dock = DockUpperRight
@@ -359,9 +325,7 @@ gradientChangeTool =
 essentialsTool : ToolEntry
 essentialsTool =
     { toolType = ToolEssentials
-    , toolId = Tools.Essentials.toolID
-    , label = "Essentials"
-    , info = "Use to bracket edits"
+    , toolId = Tools.Essentials.toolId
     , video = Just "https://youtu.be/SgiVpQYxG8I"
     , state = AlwaysOpen
     , dock = DockUpperRight
@@ -374,9 +338,7 @@ essentialsTool =
 deleteTool : ToolEntry
 deleteTool =
     { toolType = ToolDeletePoints
-    , toolId = DeletePoints.toolID
-    , label = "Delete points"
-    , info = "Away with ye"
+    , toolId = DeletePoints.toolId
     , video = Just "https://youtu.be/3qobNm46TQw"
     , state = Contracted
     , dock = DockUpperRight
@@ -389,9 +351,7 @@ deleteTool =
 bezierSplinesTool : ToolEntry
 bezierSplinesTool =
     { toolType = ToolBezierSplines
-    , toolId = Tools.BezierSplines.toolID
-    , label = "Smooth with splines"
-    , info = "Make it smoother"
+    , toolId = Tools.BezierSplines.toolId
     , video = Just "https://youtu.be/UuDfZYagvIU"
     , state = Contracted
     , dock = DockUpperRight
@@ -404,9 +364,7 @@ bezierSplinesTool =
 centroidAverageTool : ToolEntry
 centroidAverageTool =
     { toolType = ToolCentroidAverage
-    , toolId = Tools.CentroidAverage.toolID
-    , label = "Smooth with 3d average"
-    , info = "Make it smoother"
+    , toolId = Tools.CentroidAverage.toolId
     , video = Just "https://youtu.be/1C8clUhpQ20"
     , state = Contracted
     , dock = DockUpperRight
@@ -419,9 +377,7 @@ centroidAverageTool =
 curveFormerTool : ToolEntry
 curveFormerTool =
     { toolType = ToolCurveFormer
-    , toolId = Tools.CurveFormer.toolID
-    , label = "Radiused bends"
-    , info = "Make it smoother"
+    , toolId = Tools.CurveFormer.toolId
     , video = Just "https://youtu.be/J81QZ6P6nV4"
     , state = Contracted
     , dock = DockUpperRight
@@ -434,9 +390,7 @@ curveFormerTool =
 bendSmootherTool : ToolEntry
 bendSmootherTool =
     { toolType = ToolBendSmoother
-    , toolId = Tools.BendSmoother.toolID
-    , label = "Smooth with arcs"
-    , info = "Make it smoother"
+    , toolId = Tools.BendSmoother.toolId
     , video = Just "https://youtu.be/Qahop5xkuP0"
     , state = Contracted
     , dock = DockUpperRight
@@ -449,9 +403,7 @@ bendSmootherTool =
 smartSmootherTool : ToolEntry
 smartSmootherTool =
     { toolType = ToolSmartSmoother
-    , toolId = Tools.SmartSmoother.toolID
-    , label = "Smart smoother"
-    , info = "Make it smoother"
+    , toolId = Tools.SmartSmoother.toolId
     , video = Just "https://youtu.be/6cSTQgvcRuw"
     , state = Contracted
     , dock = DockUpperRight
@@ -464,9 +416,7 @@ smartSmootherTool =
 nudgeTool : ToolEntry
 nudgeTool =
     { toolType = ToolNudge
-    , toolId = Tools.Nudge.toolID
-    , label = "Nudge"
-    , info = "Make it smoother"
+    , toolId = Tools.Nudge.toolId
     , video = Just "https://youtu.be/lZslQzyplPM"
     , state = Contracted
     , dock = DockUpperRight
@@ -479,9 +429,7 @@ nudgeTool =
 outAndBackTool : ToolEntry
 outAndBackTool =
     { toolType = ToolOutAndBack
-    , toolId = Tools.OutAndBack.toolID
-    , label = "Out and Back"
-    , info = "ET go home"
+    , toolId = Tools.OutAndBack.toolId
     , video = Just "https://youtu.be/7gh5-r5uuOs"
     , state = Contracted
     , dock = DockUpperRight
@@ -494,9 +442,7 @@ outAndBackTool =
 simplifyTool : ToolEntry
 simplifyTool =
     { toolType = ToolSimplify
-    , toolId = Tools.Simplify.toolID
-    , label = "Simplify"
-    , info = "Reduce noise"
+    , toolId = Tools.Simplify.toolId
     , video = Just "https://youtu.be/dmK9PIlH04c"
     , state = Contracted
     , dock = DockUpperRight
@@ -509,9 +455,7 @@ simplifyTool =
 interpolateTool : ToolEntry
 interpolateTool =
     { toolType = ToolInterpolate
-    , toolId = Tools.Interpolate.toolID
-    , label = "Insert points"
-    , info = "Add points"
+    , toolId = Tools.Interpolate.toolId
     , video = Just "https://youtu.be/i5rALJ_42n0"
     , state = Contracted
     , dock = DockUpperRight
@@ -524,9 +468,7 @@ interpolateTool =
 profileSmoothTool : ToolEntry
 profileSmoothTool =
     { toolType = ToolProfileSmooth
-    , toolId = Tools.ProfileSmooth.toolID
-    , label = "Smooth Profile"
-    , info = "Smooth profile"
+    , toolId = Tools.ProfileSmooth.toolId
     , video = Just "https://youtu.be/XJGYt8LfTvQ"
     , state = Contracted
     , dock = DockUpperRight
@@ -539,9 +481,7 @@ profileSmoothTool =
 moveScaleRotateTool : ToolEntry
 moveScaleRotateTool =
     { toolType = ToolMoveScaleRotate
-    , toolId = Tools.MoveScaleRotate.toolID
-    , label = "Move & Scale"
-    , info = "Lift & Shifts"
+    , toolId = Tools.MoveScaleRotate.toolId
     , video = Just "https://youtu.be/tWLm1vhASCQ"
     , state = Contracted
     , dock = DockUpperRight
@@ -554,9 +494,7 @@ moveScaleRotateTool =
 flythroughTool : ToolEntry
 flythroughTool =
     { toolType = ToolFlythrough
-    , toolId = Tools.Flythrough.toolID
-    , label = "Fly-through"
-    , info = "Fly-through"
+    , toolId = Tools.Flythrough.toolId
     , video = Just "https://youtu.be/w9M2zund_6s"
     , state = Contracted
     , dock = DockUpperRight
@@ -569,9 +507,7 @@ flythroughTool =
 stravaTool : ToolEntry
 stravaTool =
     { toolType = ToolStrava
-    , toolId = Tools.StravaTools.toolID
-    , label = "Strava"
-    , info = "Strava"
+    , toolId = Tools.StravaTools.toolId
     , video = Just "https://youtu.be/plG5rP0bbug"
     , state = Contracted
     , dock = DockUpperRight
@@ -584,9 +520,7 @@ stravaTool =
 moveAndStretchTool : ToolEntry
 moveAndStretchTool =
     { toolType = ToolMoveAndStretch
-    , toolId = Tools.MoveAndStretch.toolID
-    , label = "Move, Stretch"
-    , info = "Move & Stretch"
+    , toolId = Tools.MoveAndStretch.toolId
     , video = Just "https://youtu.be/gnDlQMxf8wk"
     , state = Contracted
     , dock = DockUpperRight
@@ -599,9 +533,7 @@ moveAndStretchTool =
 startFinishTool : ToolEntry
 startFinishTool =
     { toolType = ToolStartFinish
-    , toolId = Tools.StartFinish.toolID
-    , label = "Start/Finish"
-    , info = "Start/Finish"
+    , toolId = Tools.StartFinish.toolId
     , video = Just "https://youtu.be/NPcFRKKfx0w"
     , state = Contracted
     , dock = DockUpperRight
@@ -614,9 +546,7 @@ startFinishTool =
 splitAndJoinTool : ToolEntry
 splitAndJoinTool =
     { toolType = ToolSplitAndJoin
-    , toolId = Tools.SplitAndJoin.toolID
-    , label = "Split & Join"
-    , info = "Split & Join"
+    , toolId = Tools.SplitAndJoin.toolId
     , video = Just "https://youtu.be/2dHqHWjyT7w"
     , state = Contracted
     , dock = DockUpperRight
@@ -629,9 +559,7 @@ splitAndJoinTool =
 intersectionsTool : ToolEntry
 intersectionsTool =
     { toolType = ToolIntersections
-    , toolId = Tools.Intersections.toolID
-    , label = "Intersections"
-    , info = "and such-like"
+    , toolId = Tools.Intersections.toolId
     , video = Just "https://youtu.be/iWI1ASujFR4"
     , state = Contracted
     , dock = DockUpperRight
@@ -644,9 +572,7 @@ intersectionsTool =
 straightenTool : ToolEntry
 straightenTool =
     { toolType = ToolStraighten
-    , toolId = Tools.Straightener.toolID
-    , label = "Straighten"
-    , info = "and such-like"
+    , toolId = Tools.Straightener.toolId
     , video = Just "https://youtu.be/B_LX9BmuoxE"
     , state = Contracted
     , dock = DockUpperRight
@@ -659,9 +585,7 @@ straightenTool =
 graphTool : ToolEntry
 graphTool =
     { toolType = ToolGraph
-    , toolId = Tools.Graph.toolID
-    , label = "Route maker"
-    , info = "and such-like"
+    , toolId = Tools.Graph.toolId
     , video = Just "https://youtu.be/90GZbpgZjnw"
     , state = Contracted
     , dock = DockUpperRight
@@ -674,9 +598,7 @@ graphTool =
 landUseTool : ToolEntry
 landUseTool =
     { toolType = ToolLandUse
-    , toolId = Tools.LandUse.toolID
-    , label = "Land use"
-    , info = "and such-like"
+    , toolId = Tools.LandUse.toolId
     , video = Just "https://youtu.be/SgiVpQYxG8I"
     , state = Contracted
     , dock = DockUpperRight
@@ -1616,19 +1538,20 @@ toolStateHasChanged toolType newState isTrack options =
 
 
 toolsForDock :
-    ToolDock
+    I18NOptions.Options
+    -> ToolDock
     -> (ToolMsg -> msg)
     -> Maybe (TrackLoaded msg)
     -> Options msg
     -> Element msg
-toolsForDock dock msgWrapper isTrack options =
+toolsForDock location dock msgWrapper isTrack options =
     column [ width fill, height fill ]
         [ column [ width fill, height fill, spacing 5, scrollbarY ]
             [ column [ width fill, spacing 5 ]
                 (options.tools
                     |> List.filter
                         (\t -> t.dock == dock && (t.state == AlwaysOpen || t.state == SettingsOpen || t.state == SettingsClosed))
-                    |> List.map (viewTool msgWrapper isTrack options)
+                    |> List.map (viewTool location msgWrapper isTrack options)
                 )
             , wrappedRow
                 -- Open tools
@@ -1636,7 +1559,7 @@ toolsForDock dock msgWrapper isTrack options =
               <|
                 (options.tools
                     |> List.filter (\t -> t.dock == dock && t.state == Expanded)
-                    |> List.map (viewTool msgWrapper isTrack options)
+                    |> List.map (viewTool location msgWrapper isTrack options)
                 )
             , wrappedRow
                 -- Closed tools
@@ -1644,26 +1567,29 @@ toolsForDock dock msgWrapper isTrack options =
               <|
                 (options.tools
                     |> List.filter (\t -> t.dock == dock && t.state == Contracted)
-                    |> List.map (viewTool msgWrapper isTrack options)
+                    |> List.map (viewTool location msgWrapper isTrack options)
                 )
             ]
         ]
 
 
-viewToolSettings : Options msg -> (ToolMsg -> msg) -> Element msg
-viewToolSettings options wrapper =
+viewToolSettings : I18NOptions.Options -> Options msg -> (ToolMsg -> msg) -> Element msg
+viewToolSettings location options wrapper =
     let
+        optionHelper =
+            compactRadioButton << I18N.localisedString location "tools"
+
         fullOptionList tool =
             if (tool.toolType == ToolSettings) || (tool.toolType == ToolEssentials) then
-                [ Input.optionWith DockUpperLeft <| compactRadioButton "Left"
-                , Input.optionWith DockUpperRight <| compactRadioButton "Right"
-                , Input.optionWith tool.dock <| compactRadioButton "           "
+                [ Input.optionWith DockUpperLeft <| optionHelper "onleft"
+                , Input.optionWith DockUpperRight <| optionHelper "onright"
+                , Input.optionWith tool.dock <| optionHelper "blank"
                 ]
 
             else
-                [ Input.optionWith DockUpperLeft <| compactRadioButton "Left"
-                , Input.optionWith DockUpperRight <| compactRadioButton "Right"
-                , Input.optionWith DockNone <| compactRadioButton "Hidden"
+                [ Input.optionWith DockUpperLeft <| optionHelper "onleft"
+                , Input.optionWith DockUpperRight <| optionHelper "onright"
+                , Input.optionWith DockNone <| optionHelper "hidden"
                 ]
 
         locationChoices : ToolEntry -> Element msg
@@ -1678,7 +1604,7 @@ viewToolSettings options wrapper =
                     Input.labelRight [ paddingXY 10 0 ] <|
                         row [ spacing 4 ]
                             [ infoButton (wrapper <| DisplayInfo tool.toolId "info")
-                            , text tool.label
+                            , I18N.text location tool.toolId "label"
                             ]
                 , options = fullOptionList tool
                 }
@@ -1696,12 +1622,13 @@ viewToolSettings options wrapper =
 
 
 viewTool :
-    (ToolMsg -> msg)
+    I18NOptions.Options
+    -> (ToolMsg -> msg)
     -> Maybe (TrackLoaded msg)
     -> Options msg
     -> ToolEntry
     -> Element msg
-viewTool msgWrapper isTrack options toolEntry =
+viewTool location msgWrapper isTrack options toolEntry =
     el [ padding 2, width fill, alignTop ] <|
         column
             [ width fill
@@ -1722,7 +1649,7 @@ viewTool msgWrapper isTrack options toolEntry =
                     , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always ToolNoOp >> msgWrapper)
                     , htmlAttribute (style "z-index" "20")
                     ]
-                    [ showDockOptions msgWrapper toolEntry
+                    [ showDockOptions location msgWrapper toolEntry
                     , showColourOptions msgWrapper toolEntry
                     ]
             ]
@@ -1772,7 +1699,7 @@ viewTool msgWrapper isTrack options toolEntry =
 
                                 SettingsClosed ->
                                     useIconWithSize 16 <| FeatherIcons.chevronsDown
-                            , text toolEntry.label
+                            , I18N.text location toolEntry.toolId "label"
                             ]
                     }
                 , Input.button [ alignRight ]
@@ -1782,25 +1709,25 @@ viewTool msgWrapper isTrack options toolEntry =
                 ]
             , el [ Border.rounded 8, width fill, height fill ] <|
                 if toolEntry.state == Expanded || toolEntry.state == AlwaysOpen || toolEntry.state == SettingsOpen then
-                    viewToolByType msgWrapper toolEntry isTrack options
+                    viewToolByType location msgWrapper toolEntry isTrack options
 
                 else
                     none
             ]
 
 
-showDockOptions : (ToolMsg -> msg) -> ToolEntry -> Element msg
-showDockOptions msgWrapper toolEntry =
+showDockOptions : I18NOptions.Options -> (ToolMsg -> msg) -> ToolEntry -> Element msg
+showDockOptions location msgWrapper toolEntry =
     if toolEntry.isPopupOpen then
         row
             neatToolsBorder
             [ Input.button
-                [ tooltip below (myTooltip "Move to left") ]
+                [ tooltip below (localisedTooltip location "tools" "left") ]
                 { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockUpperLeft
                 , label = useIcon FeatherIcons.arrowLeft
                 }
             , Input.button
-                [ tooltip below (myTooltip "Move to right") ]
+                [ tooltip below (localisedTooltip location "tools" "right") ]
                 { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockUpperRight
                 , label = useIcon FeatherIcons.arrowRight
                 }
@@ -1858,12 +1785,13 @@ showColourOptions msgWrapper toolEntry =
 
 
 viewToolByType :
-    (ToolMsg -> msg)
+    I18NOptions.Options
+    -> (ToolMsg -> msg)
     -> ToolEntry
     -> Maybe (TrackLoaded msg)
     -> Options msg
     -> Element msg
-viewToolByType msgWrapper entry isTrack options =
+viewToolByType location msgWrapper entry isTrack options =
     el
         [ centerX, padding 2, width fill, Border.rounded 4 ]
     <|
@@ -2071,7 +1999,7 @@ viewToolByType msgWrapper entry isTrack options =
                         noTrackMessage
 
             ToolSettings ->
-                viewToolSettings options msgWrapper
+                viewToolSettings location options msgWrapper
 
             ToolLandUse ->
                 Tools.LandUse.view
@@ -2541,36 +2469,3 @@ flythroughTick options posix track =
     ( { options | flythroughSettings = updatedFlythrough }
     , actions
     )
-
-
-initTextDictionaries : Dict String (Dict String String)
-initTextDictionaries =
-    Dict.fromList
-        [ Tools.Graph.textDictionary
-        , DirectionChanges.textDictionary
-        , Tools.GradientProblems.textDictionary
-        , Tools.BendSmoother.textDictionary
-        , Tools.BezierSplines.textDictionary
-        , Tools.CentroidAverage.textDictionary
-        , Tools.CurveFormer.textDictionary
-        , DeletePoints.textDictionary
-        , Tools.DisplaySettings.textDictionary
-        , textDictionary
-        , Tools.Essentials.textDictionary
-        , Tools.Flythrough.textDictionary
-        , Tools.Interpolate.textDictionary
-        , Tools.Intersections.textDictionary
-        , Tools.MoveAndStretch.textDictionary
-        , Tools.MoveScaleRotate.textDictionary
-        , Tools.Nudge.textDictionary
-        , Tools.OutAndBack.textDictionary
-        , Tools.ProfileSmooth.textDictionary
-        , Tools.Simplify.textDictionary
-        , Tools.SplitAndJoin.textDictionary
-        , Tools.StartFinish.textDictionary
-        , Tools.Straightener.textDictionary
-        , Tools.StravaTools.textDictionary
-        , TrackInfoBox.textDictionary
-        , Tools.LandUse.textDictionary
-        , Tools.SmartSmoother.textDictionary
-        ]

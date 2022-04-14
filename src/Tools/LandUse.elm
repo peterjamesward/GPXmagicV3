@@ -17,6 +17,10 @@ import UtilsForViews exposing (elmuiColour)
 import ViewPureStyles exposing (contrastingColour)
 
 
+toolId =
+    "landuse"
+
+
 type alias Options =
     { mode : Mode }
 
@@ -36,23 +40,6 @@ type Msg
     = SetMode Mode
     | CentreOnPlace String
     | DisplayInfo String String
-
-
-toolID : String
-toolID =
-    "landuse"
-
-
-textDictionary : ( String, Dict String String )
-textDictionary =
-    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
-    -- ToolsController can use these for info button and tool label.
-    ( toolID
-    , Dict.fromList
-        [ ( toolID, "Land use" )
-        , ( "info", """Displays the colour legend for land use data, and a list of named places.""" )
-        ]
-    )
 
 
 update :

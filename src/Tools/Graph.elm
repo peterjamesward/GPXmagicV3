@@ -48,6 +48,10 @@ import Vector3d
 import ViewPureStyles exposing (..)
 
 
+toolId =
+    "graph"
+
+
 defaultOptions : Options msg
 defaultOptions =
     { graph = emptyGraph
@@ -87,47 +91,6 @@ emptyGraph =
         , altitude = Quantity.zero
         }
     }
-
-
-toolID : String
-toolID =
-    "graph"
-
-
-textDictionary : ( String, Dict String String )
-textDictionary =
-    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
-    -- ToolsController can use these for info button and tool label.
-    ( toolID
-    , Dict.fromList
-        [ ( toolID, "Route maker" )
-        , ( "info", infoText )
-        , ( "offset", "Offset the generated road using this route as the centre-line." )
-        , ( "radius", "When passing a place, will attempt use this to create the bend." )
-        , ( "render", """Create a single road, using your route and offsetting the road
-from the centre line (if you want to avoid collisions with oncoming avatars). As the same
-road section is used for each passage, there should be no height differences (apart from
-the 1cm difference we put in to avoid flicker in RGT.""" )
-        , ( "manyNodes", """Hmm. That's a lot of Places. Route maker works best with 
-GPX files from a route planner, not from recorded rides. That could be the issue here.""" )
-        , ( "edit", """Please use any of the other views to edit this section of track.
-Any changes you make will be reflected here.
-
-**NOTE** Please do not use _Save GPX file_ while editing a section, as that will save only the active section.""")
-        ]
-    )
-
-
-infoText =
-    """We follow the route looking for places and road sections that are used more than once.
-This allows us to divide the route into a list of Roads, where each Road goes from from one
-Place to other (or the same Place).
-
-Once we've done that, you'll be able to change the route you take between places.
-Use the **Route** view to help construct a new route.
-
-You can also select a single road for editing using (most of) the normal tools. Any changes
-you make here will be reflected in the resulting route so all the altitudes will agree."""
 
 
 makeXY : EarthPoint -> XY

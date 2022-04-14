@@ -1,9 +1,22 @@
 
 # WIP
 
+## I18N
+
+Multiple language dictionaries.
+Number formats.
+System of measure -- aargh, but UK GB NI wants both, so remains a separate option.
+
 ---
 
 # BACKLOG
+
+## Technical debt
+
+Variant of "request from local storage" that takes a wrapped message so that the return value
+can be directed to a tool or a view.
+
+Try to move out the residual tool-specific stuff in Main.performActions.
 
 ## De-noise / Simplify
 
@@ -12,16 +25,16 @@ deflection and a short baseline, not just based on area. Also, an effective qual
 would be to restrict the angular change in both planes. Will do this prior to curvature analysis.
 > Obviated by smart smoother?
 
-## Timed segments
+## RGT: Timed segments
 
 If Christian can supply tags, tool to list and edit Time Segments, defined by markers
 and nameable; these will be embedded in the output GPX.
 
-## Integrate with track DB back-end
+## RGT: Integrate with track DB back-end
 
 Launch with track URL, save does a POST.
 
-## Black-box mode
+## RGT: Black-box mode
 
 Runs server-side (Node.js?), receives track via POST, returns smoothed.
 > `elm-serverless` can do this, may be other ways.
@@ -39,13 +52,6 @@ Drag Curve Former circle directly in Plan View. (Add an SVG "handle" to hit dete
 Ditto for Move & Stretch, possibly Nudge.
 Provide info text capability on top bar and on view panes.
 Specific areas within tools as needed.
-
-## Technical debt
-
-Variant of "request from local storage" that takes a wrapped message so that the return value
-can be directed to a tool or a view.
-
-Try to move out the residual tool-specific stuff in Main.performActions.
 
 ## Tools: old, updated, & new
 

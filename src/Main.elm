@@ -50,7 +50,7 @@ import SvgPathExtractor
 import Task
 import Time
 import TipJar
-import ToolTip exposing (myTooltip, tooltip)
+import ToolTip exposing (localisedTooltip, myTooltip, tooltip)
 import Tools.BendSmoother
 import Tools.BezierSplines
 import Tools.CentroidAverage
@@ -60,6 +60,8 @@ import Tools.DirectionChanges
 import Tools.DisplaySettings
 import Tools.Graph
 import Tools.GraphOptions exposing (Graph)
+import Tools.I18N as I18N
+import Tools.I18NOptions as I18NOptions
 import Tools.Interpolate
 import Tools.InterpolateOptions
 import Tools.MoveAndStretch
@@ -131,6 +133,7 @@ type alias Model =
     , stravaAuthentication : O.Model
     , loadOptionsMenuOpen : Bool
     , svgFileOptions : SvgPathExtractor.Options
+    , location : I18NOptions.Options
 
     -- Track stuff
     , track : Maybe (TrackLoaded Msg)
@@ -156,7 +159,6 @@ type alias Model =
     , toolOptions : ToolsController.Options Msg
     , isPopupOpen : Bool
     , backgroundColour : Element.Color
-    , infoTextDict : Dict String (Dict String String)
     }
 
 
@@ -233,6 +235,7 @@ init mflags origin navigationKey =
       , stravaAuthentication = authData
       , loadOptionsMenuOpen = False
       , svgFileOptions = SvgPathExtractor.defaultOptions
+      , location = I18N.defaultOptions
       , track = Nothing
       , mapPointsDraggable = False
       , previews = Dict.empty
@@ -252,7 +255,6 @@ init mflags origin navigationKey =
       , toolOptions = ToolsController.defaultOptions
       , isPopupOpen = False
       , backgroundColour = FlatColors.FlatUIPalette.silver
-      , infoTextDict = initTextDictionaries
       }
     , Cmd.batch
         [ authCmd
@@ -270,11 +272,6 @@ init mflags origin navigationKey =
         , LocalStorage.storageGetMemoryUsage
         ]
     )
-
-
-initTextDictionaries =
-    --TODO: Include PaneLayout in this scheme.
-    ToolsController.initTextDictionaries
 
 
 render : Model -> Model
@@ -821,7 +818,7 @@ composeTitle model =
 bestTrackName model =
     case model.track of
         Nothing ->
-            "no track"
+            I18N.localisedString model.location "main" "notrack"
 
         Just track ->
             case track.trackName of
@@ -834,7 +831,7 @@ bestTrackName model =
                             filename
 
                         Nothing ->
-                            "unnamed track"
+                            I18N.localisedString model.location "main" "unnamed"
 
 
 view : Model -> Browser.Document Msg
@@ -854,7 +851,7 @@ view model =
                             Nothing ->
                                 none
                    )
-                :: (inFront <| infoTextPopup model.infoText model.infoTextDict)
+                :: (inFront <| infoTextPopup model.location model.infoText)
                 :: commonLayoutStyles
             )
           <|
@@ -941,19 +938,8 @@ upperLeftDockView model =
         commonLayoutStyles
     <|
         ToolsController.toolsForDock
+            model.location
             ToolsController.DockUpperLeft
-            ToolsMsg
-            model.track
-            model.toolOptions
-
-
-lowerLeftDockView : Model -> Html Msg
-lowerLeftDockView model =
-    layoutWith { options = [ noStaticStyleSheet ] }
-        commonLayoutStyles
-    <|
-        ToolsController.toolsForDock
-            ToolsController.DockLowerLeft
             ToolsMsg
             model.track
             model.toolOptions
@@ -965,31 +951,8 @@ upperRightDockView model =
         commonLayoutStyles
     <|
         ToolsController.toolsForDock
+            model.location
             ToolsController.DockUpperRight
-            ToolsMsg
-            model.track
-            model.toolOptions
-
-
-lowerRightDockView : Model -> Html Msg
-lowerRightDockView model =
-    layoutWith { options = [ noStaticStyleSheet ] }
-        commonLayoutStyles
-    <|
-        ToolsController.toolsForDock
-            ToolsController.DockLowerRight
-            ToolsMsg
-            model.track
-            model.toolOptions
-
-
-bottomDockView : Model -> Html Msg
-bottomDockView model =
-    layoutWith { options = [ noStaticStyleSheet ] }
-        commonLayoutStyles
-    <|
-        ToolsController.toolsForDock
-            ToolsController.DockBottom
             ToolsMsg
             model.track
             model.toolOptions
@@ -997,14 +960,7 @@ bottomDockView model =
 
 centralAreaView : Model -> Html Msg
 centralAreaView model =
-    --SplitPane.view
-    --    bottomDockConfig
     viewPaneArea model
-
-
-
---(bottomDockView model)
---model.bottomDockTopEdge
 
 
 viewPaneArea : Model -> Html Msg
@@ -1013,6 +969,7 @@ viewPaneArea model =
         commonLayoutStyles
     <|
         PaneLayoutManager.viewPanes
+            model.location
             PaneMsg
             model.track
             model.toolOptions.graphOptions.graph
@@ -1026,13 +983,17 @@ viewPaneArea model =
 
 topLoadingBar model =
     let
+        localHelper : String -> Element msg
+        localHelper =
+            text << I18N.localisedString model.location "main"
+
         moreOptionsButton =
             button
                 [ padding 5
                 , Background.color FlatColors.ChinesePalette.antiFlashWhite
                 , Border.color FlatColors.FlatUIPalette.peterRiver
                 , Border.width 2
-                , tooltip below (myTooltip "Other file options")
+                , tooltip below (localisedTooltip model.location "main" "import")
                 , inFront <|
                     if model.loadOptionsMenuOpen then
                         el
@@ -1057,7 +1018,7 @@ topLoadingBar model =
                 , Border.width 2
                 ]
                 { onPress = Just GpxRequested
-                , label = text "Load GPX file"
+                , label = localHelper "loadgpx"
                 }
 
         saveButton =
@@ -1068,7 +1029,7 @@ topLoadingBar model =
                 , Border.width 2
                 ]
                 { onPress = Just WriteGpxFile
-                , label = text "Save GPX file"
+                , label = localHelper "savegpx"
                 }
     in
     wrappedRow
@@ -1076,9 +1037,6 @@ topLoadingBar model =
             ++ [ spacing 20
                , padding 10
                , width fill
-
-               --, Border.widthEach { left = 0, right = 0, top = 0, bottom = 2 }
-               --, Border.color FlatColors.ChinesePalette.twinkleBlue
                ]
         )
         [ globalOptions model
@@ -1103,10 +1061,8 @@ topLoadingBar model =
                 none
         , saveButton
         , Tools.OneClickQuickFix.oneClickQuickFixButton OneClickMsg model.track
-
-        --, buyMeACoffeeButton
         , el [ alignRight ] <| StravaAuth.stravaButton model.stravaAuthentication OAuthMessage
-        , el [ alignRight ] <| PaneLayoutManager.paneLayoutMenu PaneMsg model.paneLayoutOptions
+        , el [ alignRight ] <| PaneLayoutManager.paneLayoutMenu model.location PaneMsg model.paneLayoutOptions
         , el [ alignRight ] <| buyMeACoffeeButton
         ]
 
@@ -1124,10 +1080,10 @@ buyMeACoffeeButton =
 
 
 infoTextPopup :
-    Maybe ( String, String )
-    -> Dict String (Dict String String)
+    I18NOptions.Options
+    -> Maybe ( String, String )
     -> Element Msg
-infoTextPopup maybeSomething dict =
+infoTextPopup location maybeSomething =
     let
         close =
             Input.button [ Font.color rgtPurple, alignRight ]
@@ -1137,30 +1093,20 @@ infoTextPopup maybeSomething dict =
     in
     case maybeSomething of
         Just ( tool, tag ) ->
-            case Dict.get tool dict of
-                Just innerDict ->
-                    case Dict.get tag innerDict of
-                        Just gotText ->
-                            column
-                                [ Background.color FlatColors.ChinesePalette.antiFlashWhite
-                                , padding 10
-                                , centerY
-                                , centerX
-                                , width <| Element.px 400
-                                , Border.color rgtPurple
-                                , Border.width 4
-                                , Border.rounded 10
-                                ]
-                                [ close
-                                , paragraph []
-                                    [ html <| Markdown.toHtml [] gotText ]
-                                ]
-
-                        Nothing ->
-                            none
-
-                Nothing ->
-                    none
+            column
+                [ Background.color FlatColors.ChinesePalette.antiFlashWhite
+                , padding 10
+                , centerY
+                , centerX
+                , width <| Element.px 400
+                , Border.color rgtPurple
+                , Border.width 4
+                , Border.rounded 10
+                ]
+                [ close
+                , paragraph []
+                    [ html <| Markdown.toHtml [] <| I18N.localisedString location tool tag ]
+                ]
 
         Nothing ->
             none

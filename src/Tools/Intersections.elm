@@ -17,6 +17,10 @@ import UtilsForViews exposing (showDecimal0, showLongMeasure, showShortMeasure)
 import ViewPureStyles exposing (infoButton, neatToolsBorder, noTrackMessage, useIcon)
 
 
+toolId =
+    "intersections"
+
+
 type alias Options =
     { features : List Intersection
     , current : Int
@@ -43,32 +47,6 @@ type Msg
     | SetCurrentPosition Int
     | SetResultMode ResultMode
     | DisplayInfo String String
-
-
-toolID : String
-toolID =
-    "intersections"
-
-
-textDictionary : ( String, Dict String String )
-textDictionary =
-    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
-    -- ToolsController can use these for info button and tool label.
-    ( toolID
-    , Dict.fromList
-        [ ( toolID, "Intersections" )
-        , ( "info", infoText )
-        ]
-    )
-
-
-infoText =
-    """This helps to find places where one road section crosses another, or where a piece
-of road is used more than once, either in the same or the opposite direction.
-
-This is gateway to thinking of a route as something that can be navigated differently,
-but that's where _Route builder_ comes to play.
-"""
 
 
 toolStateChange :

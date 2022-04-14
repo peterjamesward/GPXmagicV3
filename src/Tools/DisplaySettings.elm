@@ -12,6 +12,10 @@ import Tools.DisplaySettingsOptions exposing (..)
 import ViewPureStyles exposing (commonShortHorizontalSliderStyles, infoButton)
 
 
+toolId =
+    "display"
+
+
 defaultOptions : Options
 defaultOptions =
     { roadSurface = True
@@ -35,39 +39,6 @@ type Msg
     | DisplayInfo String String
     | SetPlaceNames Bool
     | SetConstraintLevel Int
-
-
-toolID : String
-toolID =
-    "display"
-
-
-textDictionary : ( String, Dict String String )
-textDictionary =
-    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
-    -- ToolsController can use these for info button and tool label.
-    ( toolID
-    , Dict.fromList
-        [ ( toolID, "Display settings" )
-        , ( "info", infoText )
-        , ( "landuse"
-          , """You can fetch Open Street Map data that describes the land use.
-
-The colours used are shown in the _Land use_ tool, which will also show any errors
-obtaining the data.
-
-You can show these "flat" or "sloped" Be warned, when "sloped", it may obscure the road!"""
-          )
-        ]
-    )
-
-
-infoText =
-    """Change how the road appears in the 3D views. You can select to see the road surface,
-a dropped "curtain" either plain or shaded to show gradient, There's also a centre line
-for the road matching the gradient colour. For good measure, you can turn off the green
-"ground" plane and see the route from below.
-"""
 
 
 restoreSettings : D.Value -> Options -> Options

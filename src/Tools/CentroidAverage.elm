@@ -19,6 +19,10 @@ import Vector3d
 import ViewPureStyles exposing (commonShortHorizontalSliderStyles, neatToolsBorder, prettyButtonStyles)
 
 
+toolId =
+    "centroid"
+
+
 defaultOptions : Options
 defaultOptions =
     { weighting = 1.0
@@ -34,37 +38,6 @@ type Msg
     | SetExtent Extent
     | ApplyWithOptions
     | DisplayInfo String String
-
-
-toolID : String
-toolID =
-    "centroid"
-
-
-textDictionary : ( String, Dict String String )
-textDictionary =
-    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
-    -- ToolsController can use these for info button and tool label.
-    ( toolID
-    , Dict.fromList
-        [ ( toolID, "Centroid average" )
-        , ( "info", infoText )
-        ]
-    )
-
-
-infoText =
-    """A simple way to remove "noise" from a track is by taking the average of each
-point with its neighbours. This tool does that in three dimensions, but lets you
-decide whether to apply this to the position or altitude.
-
-You can choose any "weighting" between the original points and the averaged points.
-
-You can use this repeatedly to spread the averaging effect over more points.
-
-If you're interested, the average we use is the centroid of the triangle defined
-by a point and its neighbours.
-"""
 
 
 computeNewPoints : Options -> TrackLoaded msg -> List PreviewPoint

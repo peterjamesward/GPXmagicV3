@@ -16,37 +16,14 @@ import TrackLoaded exposing (TrackLoaded, adjustAltitude)
 import ViewPureStyles exposing (neatToolsBorder, prettyButtonStyles)
 
 
+toolId =
+    "straight"
+
+
 type Msg
     = StraightenStraight
     | SetPreserveAltitude Bool
     | DisplayInfo String String
-
-
-toolID : String
-toolID =
-    "straight"
-
-
-textDictionary : ( String, Dict String String )
-textDictionary =
-    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
-    -- ToolsController can use these for info button and tool label.
-    ( toolID
-    , Dict.fromList
-        [ ( toolID, "Straightener" )
-        , ( "info", infoText )
-        ]
-    )
-
-
-infoText =
-    """Sometimes you just want a straight to be straight and it's tedious to get rid of
-all the wriggles. Sure, you could delete some of the points, but you might want to
-keep some altitude changes.
-Straightener is simple and single minded. It takes all the points in the range and lines
-them up. It will either retain their altitudes or impose a constant gradient. Note that
-keeping the altitudes and squishing the points up increases gradients.
-"""
 
 
 type alias Options =

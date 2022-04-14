@@ -28,41 +28,16 @@ import Vector3d
 import ViewPureStyles exposing (neatToolsBorder)
 
 
+toolId =
+    "loop"
+
+
 type Msg
     = CloseTheLoop
     | ReverseTrack
     | ChangeLoopStart Int
     | AddRiderPens
     | DisplayInfo String String
-
-
-toolID : String
-toolID =
-    "loop"
-
-
-textDictionary : ( String, Dict String String )
-textDictionary =
-    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
-    -- ToolsController can use these for info button and tool label.
-    ( toolID
-    , Dict.fromList
-        [ ( toolID, "Start/Finish" )
-        , ( "info", infoText )
-        ]
-    )
-
-
-infoText =
-    """RGT will recognise a loop if the two ends are sufficiently close. But it won't
-make it smooth for you.
-
-Here's a few options:
-
-1. Add a spline to join the start and finish, completing a loop
-2. Move the Start/Finish to somewhere else on the loop
-3. If it's not a loop, add 60m before the start and 140m after the end for the RGT rider pens.
-"""
 
 
 defaultOptions : Options
@@ -352,7 +327,7 @@ applyMoveStart index track =
             List.Extra.splitAt index oldPoints
 
         newPoints =
-            afterNewStart ++ (List.drop 1 beforeNewStart) ++ (List.take 1 afterNewStart)
+            afterNewStart ++ List.drop 1 beforeNewStart ++ List.take 1 afterNewStart
     in
     ( DomainModel.treeFromSourcePoints newPoints
     , oldPoints

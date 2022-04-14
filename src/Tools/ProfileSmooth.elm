@@ -17,6 +17,10 @@ import UtilsForViews exposing (showDecimal0)
 import ViewPureStyles exposing (commonShortHorizontalSliderStyles, neatToolsBorder, prettyButtonStyles)
 
 
+toolId =
+    "profilesmooth"
+
+
 type Msg
     = LimitGradient
     | SmoothAltitudes
@@ -28,44 +32,6 @@ type Msg
     | ChooseMethod SmoothMethod
     | SetRedistribution Bool
     | DisplayInfo String String
-
-
-toolID : String
-toolID =
-    "profilesmooth"
-
-
-textDictionary : ( String, Dict String String )
-textDictionary =
-    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
-    -- ToolsController can use these for info button and tool label.
-    ( toolID
-    , Dict.fromList
-        [ ( toolID, "Profile smoothing" )
-        , ( "info", infoText )
-        ]
-    )
-
-
-infoText =
-    """There's no one way to achieve a smooth altitude profile. It depends whether you begin with a recorded
-or a planned ride; it depends whether you favour accuracy or smoothness; whether you want
-precise elevations or moderate gradients.
-
-This tool offers (currently) three methods to control altitude, each can work over a range or
-the whole track.
-
-1. Limit ascents and descents to set maxima. This will simply remove any gradients outside
-the limits you set. This will affect the altitude for the rest of the course.
-
-2. Replace the _altitude_ at each point with the average of a range of nearby points. Note that this
-does not factor in the distance between points; it's a straight numerical average. It's basically
-the "altitude box smoother" in another tool.
-
-3. Replace the _gradient_ at each point with the numerical average gradient over nearby points.
-Note that changing the gradient at even one point affects all subsequent points. This produces
-quite pleasing results in many cases.
-"""
 
 
 defaultOptions : Options

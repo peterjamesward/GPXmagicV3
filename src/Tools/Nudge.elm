@@ -23,6 +23,10 @@ import Vector3d
 import ViewPureStyles exposing (..)
 
 
+toolId =
+    "nudge"
+
+
 type Msg
     = SetHorizontalNudgeFactor (Quantity Float Meters)
     | SetVerticalNudgeFactor (Quantity Float Meters)
@@ -31,37 +35,6 @@ type Msg
     | ApplyWithOptions
     | NudgeButton (Quantity Float Meters)
     | DisplayInfo String String
-
-
-toolID : String
-toolID =
-    "nudge"
-
-
-textDictionary : ( String, Dict String String )
-textDictionary =
-    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
-    -- ToolsController can use these for info button and tool label.
-    ( toolID
-    , Dict.fromList
-        [ ( toolID, "Nudge" )
-        , ( "info", infoText )
-        ]
-    )
-
-
-infoText =
-    """Sometimes all it takes is a little _Nudge_.
-    
-A track point, or a run of points, is slightly out of line from where you want it (them).
-With Nudge, you can move a single point, or range of points, sideways and up or down.
-
-What "sideways" means is a but subtle with bends. Nudge moves along what a carpenter would 
-recognise as the mitre line, effectively half of the turn. **Be aware** than closely spaced
-points nudged together can overlap on the inside of a bend. GPXmagic will not stop this.
-
-The optional _Fade_ slider lets you gradually blend the Nudged section with the neighbouring track.
-"""
 
 
 defaultOptions : Options
@@ -124,7 +97,7 @@ widenBendHelper points adjustment track =
                         , markerPosition = Just statedEnd
                     }
 
-                ( (actualStart, actualEnd), newPoints ) =
+                ( ( actualStart, actualEnd ), newPoints ) =
                     computeNudgedPoints useDummyOptions useDummyTrack
 
                 newTree =

@@ -6,6 +6,8 @@ import Element.Border as Border
 import Element.Font as Font
 import Html exposing (Html)
 import Html.Attributes
+import Tools.I18N as I18N
+import Tools.I18NOptions as I18NOptions
 import ViewPureStyles exposing (neatToolsBorder, rgtPurple)
 
 
@@ -19,6 +21,11 @@ example =
             ]
 
 
+localisedTooltip : I18NOptions.Options -> String -> String -> Element msg
+localisedTooltip location tool tag =
+    myTooltip <| I18N.localisedString location tool tag
+
+
 myTooltip : String -> Element msg
 myTooltip str =
     el
@@ -27,8 +34,6 @@ myTooltip str =
         , padding 4
         , Border.rounded 5
         , Font.size 14
-        --, Border.shadow
-        --    { offset = ( 0, 3 ), blur = 6, size = 0, color = rgba 0 0 0 0.32 }
         , width <| px 100
         ]
         (paragraph [] [ text str ])
@@ -43,8 +48,10 @@ tooltip usher tooltip_ =
             , transparent True
             , mouseOver [ transparent False ]
             , (usher << Element.map never) <|
-                el [ width fill
-                , htmlAttribute (Html.Attributes.style "pointerEvents" "none") ]
+                el
+                    [ width fill
+                    , htmlAttribute (Html.Attributes.style "pointerEvents" "none")
+                    ]
                     tooltip_
             ]
             none

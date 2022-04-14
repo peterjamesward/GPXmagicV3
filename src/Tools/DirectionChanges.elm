@@ -22,6 +22,10 @@ import UtilsForViews exposing (showAngle, showDecimal0, showLongMeasure, showSho
 import ViewPureStyles exposing (infoButton, neatToolsBorder, noTrackMessage, sliderThumb, useIcon)
 
 
+toolId =
+    "bends"
+
+
 type alias Options =
     { threshold : Angle
     , singlePointBreaches : List ( Int, Angle )
@@ -69,37 +73,6 @@ type Msg
     | NudgeOne
     | NudgeAll
     | DisplayInfo String String
-
-
-toolID : String
-toolID =
-    "bends"
-
-
-textDictionary : ( String, Dict String String )
-textDictionary =
-    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
-    -- ToolsController can use these for info button and tool label.
-    ( toolID
-    , Dict.fromList
-        [ ( toolID, "Bend problems" )
-        , ( "info", """Find points where the road direction changes significantly, or find
-sections of track that may be a bend with a small radius.
-
-From here, you can jump directly to the sections of track and use other tools to fix the problems.""" )
-        , ( "autofix", """Smooth each of these individually using the single point _Smooth with arcs_. Use that
-tool to change the number of points that are added to smooth each point.
-
-You should use this only for trivial fixes; there are better tools for smoothing
-serious issues. This tool can even make things worse.""" )
-        , ( "locate", """These buttons will move the Orange pointer through the list of issues.
-
-**Note**: this will only centre the views which have the padlock closed.""" )
-        , ( "widen", """Nudge the points on the bend(s) outwards to increase the radius.
-
-You may get better results from using the _Smooth with Arcs_ or _Radiused Bends_ tools.""" )
-        ]
-    )
 
 
 findDirectionChanges : Options -> PeteTree -> Options

@@ -26,6 +26,8 @@ import SceneBuilder3D
 import Tools.DisplaySettingsOptions
 import Tools.Flythrough
 import Tools.GraphOptions exposing (Graph)
+import Tools.I18N as I18N
+import Tools.I18NOptions as I18NOptions
 import ToolsController
 import TrackLoaded exposing (TrackLoaded)
 import View3dCommonElements exposing (stopProp)
@@ -146,26 +148,26 @@ type Msg
     | GraphViewMessage PaneId ViewGraph.Msg
     | MapPortsMessage MapPortController.MapMsg
     | MapViewMessage ViewMap.Msg
-    --| SliderTimeout
+      --| SliderTimeout
     | PaneNoOp
 
 
-paneLayoutMenu : (Msg -> msg) -> Options -> Element msg
-paneLayoutMenu msgWrapper options =
+paneLayoutMenu : I18NOptions.Options -> (Msg -> msg) -> Options -> Element msg
+paneLayoutMenu location msgWrapper options =
     Input.button
         [ padding 5
         , Background.color FlatColors.ChinesePalette.antiFlashWhite
         , Border.color FlatColors.FlatUIPalette.peterRiver
         , Border.width 2
-        , inFront <| showOptionsMenu msgWrapper options
+        , inFront <| showOptionsMenu location msgWrapper options
         ]
         { onPress = Just <| msgWrapper TogglePopup
-        , label = E.text "Choose layout"
+        , label = I18N.text location "panes" "layout"
         }
 
 
-showOptionsMenu : (Msg -> msg) -> Options -> Element msg
-showOptionsMenu msgWrapper options =
+showOptionsMenu : I18NOptions.Options -> (Msg -> msg) -> Options -> Element msg
+showOptionsMenu location msgWrapper options =
     if options.popupVisible then
         el
             [ moveDown 30
@@ -181,21 +183,25 @@ showOptionsMenu msgWrapper options =
                 (subtleToolStyles
                     ++ [ padding 10, spacing 10 ]
                 )
-                { options = optionList
+                { options = optionList location
                 , onChange = msgWrapper << SetPaneLayout
                 , selected = Just options.paneLayout
-                , label = Input.labelHidden "Choose layout"
+                , label = Input.labelHidden "layout"
                 }
 
     else
         none
 
 
-optionList =
-    [ Input.option PanesOne <| row [ spacing 20 ] [ useIcon FeatherIcons.square, E.text "Just the one" ]
-    , Input.option PanesLeftRight <| row [ spacing 20 ] [ useIcon FeatherIcons.columns, E.text "Cupboards" ]
-    , Input.option PanesUpperLower <| row [ spacing 20 ] [ useIcon FeatherIcons.server, E.text "Drawers" ]
-    , Input.option PanesGrid <| row [ spacing 20 ] [ useIcon FeatherIcons.grid, E.text "Grid of four" ]
+optionList location =
+    let
+        localise =
+            I18N.text location "panes"
+    in
+    [ Input.option PanesOne <| row [ spacing 20 ] [ useIcon FeatherIcons.square, localise "one" ]
+    , Input.option PanesLeftRight <| row [ spacing 20 ] [ useIcon FeatherIcons.columns, localise "tall" ]
+    , Input.option PanesUpperLower <| row [ spacing 20 ] [ useIcon FeatherIcons.server, localise "flat" ]
+    , Input.option PanesGrid <| row [ spacing 20 ] [ useIcon FeatherIcons.grid, localise "grid" ]
     ]
 
 
@@ -594,41 +600,44 @@ update paneMsg msgWrapper mTrack graph contentArea options previews =
 
                 else
                     Actions.NoAction
+
               --, Actions.DelayMessage 100 (msgWrapper SliderTimeout)
               ]
             )
 
-        --SliderTimeout ->
-        --    let
-        --        newOptions =
-        --            { options
-        --                | sliderState =
-        --                    case options.sliderState of
-        --                        SliderIdle ->
-        --                            SliderIdle
-        --
-        --                        SliderMoved ->
-        --                            SliderWaitingForTimeout
-        --
-        --                        SliderWaitingForTimeout ->
-        --                            SliderIdle
-        --            }
-        --    in
-        --    ( newOptions
-        --    , [ if options.sliderState /= SliderIdle && newOptions.sliderState == SliderIdle then
-        --            -- Force re-render once only.
-        --            TrackHasChanged
-        --
-        --        else
-        --            Actions.NoAction
-        --      , if newOptions.sliderState /= SliderIdle then
-        --            -- Ask for a timer, to see if control has stopped moving.
-        --            Actions.DelayMessage 100 (msgWrapper SliderTimeout)
-        --
-        --        else
-        --            Actions.NoAction
-        --      ]
-        --    )
+
+
+--SliderTimeout ->
+--    let
+--        newOptions =
+--            { options
+--                | sliderState =
+--                    case options.sliderState of
+--                        SliderIdle ->
+--                            SliderIdle
+--
+--                        SliderMoved ->
+--                            SliderWaitingForTimeout
+--
+--                        SliderWaitingForTimeout ->
+--                            SliderIdle
+--            }
+--    in
+--    ( newOptions
+--    , [ if options.sliderState /= SliderIdle && newOptions.sliderState == SliderIdle then
+--            -- Force re-render once only.
+--            TrackHasChanged
+--
+--        else
+--            Actions.NoAction
+--      , if newOptions.sliderState /= SliderIdle then
+--            -- Ask for a timer, to see if control has stopped moving.
+--            Actions.DelayMessage 100 (msgWrapper SliderTimeout)
+--
+--        else
+--            Actions.NoAction
+--      ]
+--    )
 
 
 initialise : TrackLoaded msg -> Options -> Options
@@ -671,17 +680,20 @@ initialisePane track options pane =
     }
 
 
-viewModeChoices : (Msg -> msg) -> PaneContext -> Element msg
-viewModeChoices msgWrapper context =
+viewModeChoices : I18NOptions.Options -> (Msg -> msg) -> PaneContext -> Element msg
+viewModeChoices location msgWrapper context =
     let
+        localise =
+            radioButton << I18N.localisedString location "panes"
+
         fullOptionList =
-            [ Input.optionWith ViewMap <| radioButton "Map"
-            , Input.optionWith ViewThird <| radioButton "Perspective"
-            , Input.optionWith ViewFirst <| radioButton "Rider view"
-            , Input.optionWith ViewProfile <| radioButton "Profile"
-            , Input.optionWith ViewPlan <| radioButton "Plan"
-            , Input.optionWith ViewGraph <| radioButton "Route"
-            , Input.optionWith ViewInfo <| radioButton "About"
+            [ Input.optionWith ViewMap <| localise "Map"
+            , Input.optionWith ViewThird <| localise "Perspective"
+            , Input.optionWith ViewFirst <| localise "Rider"
+            , Input.optionWith ViewProfile <| localise "Profile"
+            , Input.optionWith ViewPlan <| localise "Plan"
+            , Input.optionWith ViewGraph <| localise "Route"
+            , Input.optionWith ViewInfo <| localise "About"
             ]
     in
     Input.radioRow
@@ -695,15 +707,18 @@ viewModeChoices msgWrapper context =
         }
 
 
-viewModeChoicesNoMap : (Msg -> msg) -> PaneContext -> Element msg
-viewModeChoicesNoMap msgWrapper pane =
+viewModeChoicesNoMap : I18NOptions.Options -> (Msg -> msg) -> PaneContext -> Element msg
+viewModeChoicesNoMap location msgWrapper pane =
     let
+        localise =
+            radioButton << I18N.localisedString location "panes"
+
         reducedOptionList =
-            [ Input.optionWith ViewThird <| radioButton "Perspective"
-            , Input.optionWith ViewFirst <| radioButton "Rider view"
-            , Input.optionWith ViewProfile <| radioButton "Profile"
-            , Input.optionWith ViewPlan <| radioButton "Plan"
-            , Input.optionWith ViewGraph <| radioButton "Route"
+            [ Input.optionWith ViewThird <| localise "Perspective"
+            , Input.optionWith ViewFirst <| localise "Rider"
+            , Input.optionWith ViewProfile <| localise "Profile"
+            , Input.optionWith ViewPlan <| localise "Plan"
+            , Input.optionWith ViewGraph <| localise "Route"
             ]
     in
     Input.radioRow
@@ -741,7 +756,8 @@ dimensionsWithLayout layout ( w, h ) =
 
 
 viewPanes :
-    (Msg -> msg)
+    I18NOptions.Options
+    -> (Msg -> msg)
     -> Maybe (TrackLoaded msg)
     -> Tools.GraphOptions.Graph msg
     -> Tools.GraphOptions.Options msg
@@ -751,7 +767,7 @@ viewPanes :
     -> Maybe Tools.Flythrough.Flythrough
     -> Dict String PreviewData
     -> Element msg
-viewPanes msgWrapper mTrack graph graphOptions displayOptions ( w, h ) options mFlythrough previews =
+viewPanes location msgWrapper mTrack graph graphOptions displayOptions ( w, h ) options mFlythrough previews =
     let
         ( paneWidth, paneHeight ) =
             dimensionsWithLayout options.paneLayout ( w, h )
@@ -834,7 +850,7 @@ viewPanes msgWrapper mTrack graph graphOptions displayOptions ( w, h ) options m
             -- The Map DIV must be constructed once only, even before we have a Track,
             -- or the map gets upset. So we use CSS to show and hide these elements.
             column [ width fill, centerX ]
-                [ viewModeChoices msgWrapper pane
+                [ viewModeChoices location msgWrapper pane
                 , conditionallyVisible (pane.activeView /= ViewMap) <|
                     showNonMapViews pane
                 , conditionallyVisible (pane.activeView == ViewMap) <|
@@ -846,7 +862,7 @@ viewPanes msgWrapper mTrack graph graphOptions displayOptions ( w, h ) options m
 
         viewPaneNoMap pane =
             column [ width fill, alignTop, centerX ]
-                [ viewModeChoicesNoMap msgWrapper pane
+                [ viewModeChoicesNoMap location msgWrapper pane
                 , showNonMapViews pane
                 ]
 
@@ -858,7 +874,7 @@ viewPanes msgWrapper mTrack graph graphOptions displayOptions ( w, h ) options m
                             (ViewPureStyles.wideSliderStylesWithWidth w)
                             { onChange = round >> SetCurrentPosition >> msgWrapper
                             , value = toFloat track.currentPosition
-                            , label = Input.labelHidden "Current position slider"
+                            , label = Input.labelHidden "position"
                             , min = 0
                             , max = toFloat <| skipCount track.trackTree
                             , step = Just 1

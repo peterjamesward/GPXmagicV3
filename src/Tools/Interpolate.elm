@@ -17,6 +17,10 @@ import UtilsForViews exposing (showShortMeasure)
 import ViewPureStyles exposing (..)
 
 
+toolId =
+    "insert"
+
+
 defaultOptions : Options
 defaultOptions =
     { minimumSpacing = Length.meters 10.0
@@ -29,34 +33,6 @@ type Msg
     | SetSpacing Float
     | SetExtent ExtentOption
     | DisplayInfo String String
-
-
-toolID : String
-toolID =
-    "insert"
-
-
-textDictionary : ( String, Dict String String )
-textDictionary =
-    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
-    -- ToolsController can use these for info button and tool label.
-    ( toolID
-    , Dict.fromList
-        [ ( toolID, "Insert points" )
-        , ( "info", infoText )
-        ]
-    )
-
-
-infoText =
-    """Sometimes you need more track points to create the precise shape you need, perhaps
-by _Nudge_-ing them or dragging them on a map. Also, when you're using some of the track
-smoothing tools, it can improve the outcome to have points more closely spaced.
-
-This tool will enforce a _maximum_ spacing between points. This can mean that the resulting
-spacing varies from one section to another.
-"""
-
 
 
 computeNewPoints : Bool -> Options -> TrackLoaded msg -> List PreviewPoint

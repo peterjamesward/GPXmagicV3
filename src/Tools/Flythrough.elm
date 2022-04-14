@@ -19,10 +19,8 @@ import Vector3d
 import ViewPureStyles exposing (commonShortHorizontalSliderStyles, neatToolsBorder, prettyButtonStyles, useIcon)
 
 
-
-{-
-   Note that for v3, Flythrough needs to update the current point for rendering to work
--}
+toolId =
+    "fly"
 
 
 type Msg
@@ -32,30 +30,6 @@ type Msg
     | ResumeFlythrough
     | ResetFlythrough
     | DisplayInfo String String
-
-
-toolID : String
-toolID =
-    "fly"
-
-
-textDictionary : ( String, Dict String String )
-textDictionary =
-    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
-    -- ToolsController can use these for info button and tool label.
-    ( toolID
-    , Dict.fromList
-        [ ( toolID, "Flythrough" )
-        , ( "info", infoText )
-        ]
-    )
-
-
-infoText =
-    """It's often useful to see the track as the rider would see in in RGT. We don't have the
-sophisticated scenery that RGT offers, but you can set the ride in motion and adjust the speed
-to get a quick feel for how it might ride.
-"""
 
 
 type alias Flythrough =

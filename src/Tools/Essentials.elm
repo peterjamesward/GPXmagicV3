@@ -16,6 +16,10 @@ import UtilsForViews exposing (showLongMeasure)
 import ViewPureStyles exposing (neatToolsBorder, noTrackMessage, useIcon)
 
 
+toolId =
+    "essentials"
+
+
 type alias Options =
     { orange : Int
     , purple : Maybe Int
@@ -40,36 +44,6 @@ type Msg
     | Undo
     | Redo
     | DisplayInfo String String
-
-
-toolID : String
-toolID =
-    "essentials"
-
-
-textDictionary : ( String, Dict String String )
-textDictionary =
-    -- Introducing the convention of toolID, its use as a text tag, and the "info" tag.
-    -- ToolsController can use these for info button and tool label.
-    ( toolID
-    , Dict.fromList
-        [ ( toolID, "Essentials" )
-        , ( "info", infoText )
-        ]
-    )
-
-
-infoText =
-    """Most of the editing tools require either a single point or a range of points to work on.
-
-The top buttons in this tool allow you to move an Orange marker along the track to select a single point.
-
-There is a button to place a Purple marker at the current position, and then to move the Purple marker.
-This defines a range which you can then use for tools that require it.
-
-Below the pointer controls are the Undo and Redo buttons. These let you go back and forward over the
-previous ten edits. Once you make a different change, you can only Undo.
-"""
 
 
 toolStateChange :
