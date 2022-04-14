@@ -30,7 +30,7 @@ Time to plough through all the tools. Again.
 , ~~startFinishTool~~
 , ~~splitAndJoinTool~~
 , ~~intersectionsTool~~
-, straightenTool
+, ~~straightenTool~~
 , graphTool
 , landUseTool
 ]

@@ -2007,6 +2007,7 @@ viewToolByType location msgWrapper entry isTrack options =
                 case isTrack of
                     Just track ->
                         Tools.Straightener.view
+                            location
                             (msgWrapper << ToolStraightenMsg)
                             options.straightenOptions
                             track

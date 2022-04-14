@@ -663,6 +663,9 @@ Here's a few options:
         , ( "straight"
           , Dict.fromList
                 [ ( "label", """Straightener""" )
+                , ( "straight", """Straighten between markers""")
+                , ( "altitudes", """Preserve altitudes""")
+                , ( "range", """This tool requires a range.""")
                 , ( "info", """
 Sometimes you just want a straight to be straight and it's tedious to get rid of
 all the wriggles. Sure, you could delete some of the points, but you might want to

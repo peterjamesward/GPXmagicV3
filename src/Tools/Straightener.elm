@@ -12,6 +12,8 @@ import Length
 import LineSegment3d
 import Point3d exposing (zCoordinate)
 import Quantity
+import Tools.I18N as I18N
+import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded, adjustAltitude)
 import ViewPureStyles exposing (neatToolsBorder, prettyButtonStyles)
 
@@ -51,16 +53,17 @@ update msg options =
             ( options, [ Actions.DisplayInfo tool tag ] )
 
 
-view : (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
-view wrapper options track =
+view : I18NOptions.Options -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
+view location wrapper options track =
     let
+        i18n =
+            I18N.text location toolId
+
         straightenButton =
             button
                 neatToolsBorder
                 { onPress = Just <| wrapper StraightenStraight
-                , label =
-                    text <|
-                        "Straighten between markers"
+                , label = i18n "straight"
                 }
     in
     column
@@ -76,17 +79,13 @@ view wrapper options track =
                     { onChange = wrapper << SetPreserveAltitude
                     , icon = Input.defaultCheckbox
                     , checked = options.preserveAltitude
-                    , label = Input.labelRight [] <| text "Preserve altitudes"
+                    , label = Input.labelRight [] <| i18n "altitudes"
                     }
             , el [ centerX ] straightenButton
             ]
 
         else
-            [ paragraph [ padding 10, centerX ]
-                [ text "The straighten tool requires a range. "
-                , text "Drop the marker and move it away from the current pointer."
-                ]
-            ]
+            [ i18n "range" ]
 
 
 computeNewPoints : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
