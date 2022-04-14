@@ -11,6 +11,8 @@ import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
 import LandUseDataTypes
 import SceneBuilder3D
+import Tools.I18N as I18N
+import Tools.I18NOptions as I18NOPtions
 import Tools.LandUseColours exposing (landUseColours)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (elmuiColour)
@@ -59,35 +61,38 @@ update msg wrapper options =
             ( options, [ Actions.DisplayInfo tool tag ] )
 
 
-view : (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
-view wrap options maybeTrack =
+view : I18NOPtions.Options -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view location wrap options maybeTrack =
     let
+        i18n =
+            I18N.text location toolId
+
         status =
             case maybeTrack of
                 Just track ->
                     case track.landUseData.status of
                         LandUseDataTypes.LandUseError err ->
-                            err
+                            text err
 
                         LandUseDataTypes.LandUseNoTrack ->
-                            "No track loaded yet"
+                            i18n "notrack"
 
                         LandUseDataTypes.LandUseWaitingOSM ->
-                            "Waiting for OSM data"
+                            i18n "waiting"
 
                         LandUseDataTypes.LandUseWaitingMap ->
-                            "Waiting for altitude data"
+                            i18n "altitude"
 
                         LandUseDataTypes.LandUseOK ->
-                            "Success in the realm of land use"
+                            i18n "success"
 
                 Nothing ->
-                    "Land use will be fetched when you load a track"
+                    i18n "notrack"
     in
     el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
         column [ padding 4, spacing 6, width fill ]
             [ none
-            , paragraph [] [ text status ]
+            , paragraph [] [  status ]
             , legend
             ]
 

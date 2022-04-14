@@ -2031,6 +2031,7 @@ viewToolByType location msgWrapper entry isTrack options =
 
             ToolLandUse ->
                 Tools.LandUse.view
+                    location
                     (msgWrapper << ToolLandUseMsg)
                     options.landUseOptions
                     isTrack

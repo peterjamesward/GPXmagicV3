@@ -32,7 +32,7 @@ Time to plough through all the tools. Again.
 , ~~intersectionsTool~~
 , ~~straightenTool~~
 , ~~graphTool~~
-, landUseTool
+, ~~landUseTool~~
 ]
 
 

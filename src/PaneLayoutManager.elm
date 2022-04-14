@@ -821,6 +821,7 @@ viewPanes location msgWrapper mTrack graph graphOptions displayOptions ( w, h ) 
                     case ( pane.graphContext, mTrack ) of
                         ( Just context, Just track ) ->
                             ViewGraph.view
+                                location
                                 context
                                 ( paneWidth, paneHeight )
                                 graph

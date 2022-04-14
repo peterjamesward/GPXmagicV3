@@ -759,6 +759,10 @@ View information about the current point, the whole track, and memory usage.
         , ( "landuse"
           , Dict.fromList
                 [ ( "label", """Land use""" )
+                , ( "notrack", """No track loaded yet""" )
+                , ( "waiting", """Waiting for land use data""" )
+                , ( "altitude", """Waiting for altitude data""" )
+                , ( "success", """Land use data acquired""" )
                 , ( "info", """
 Displays the colour legend for land use data, and a list of named places.
 """ )
