@@ -68,6 +68,24 @@ If the File Open dialog does not appear, please reload the page in the browser a
         , ( "graph"
           , Dict.fromList
                 [ ( "label", """Route maker""" )
+                , ( "find", """Find key places""" )
+                , ( "clear", """Clear the route""" )
+                , ( "revert", """Revert to original track""" )
+                , ( "convert", """Make a new track with this route""" )
+                , ( "isOffset", """Offset: {0}m {1}""" )
+                , ( "left", """left""" )
+                , ( "right", """right""" )
+                , ( "isRadius", """Radius {0}m""" )
+                , ( "blank", """   """ )
+                , ( "from", """From""" )
+                , ( "to", """To""" )
+                , ( "along", """Along""" )
+                , ( "distance", """Distance""" )
+                , ( "remove", """Remove""" )
+                , ( "reverse", """Reverse""" )
+                , ( "place1", """Place {0}""" )
+                , ( "place2", """place {0}""" )
+                , ( "road", """road {0}""" )
                 , ( "info", """
 We follow the route looking for places and road sections that are used more than once.
 This allows us to divide the route into a list of Roads, where each Road goes from from one
@@ -435,13 +453,13 @@ spacing varies from one section to another.
         , ( "intersections"
           , Dict.fromList
                 [ ( "label", """Intersections""" )
-                , ( "Summary", """Summary""")
-                , ( "List", """List""")
-                , ( "none", """None found""")
+                , ( "Summary", """Summary""" )
+                , ( "List", """List""" )
+                , ( "none", """None found""" )
                 , ( "prev", """Move to previous""" )
                 , ( "this", """Move pointer to this issue (Is the padlock on?)""" )
                 , ( "next", """Move to next""" )
-                , ( "detail", """{0} {1} {2} at {3}""")
+                , ( "detail", """{0} {1} {2} at {3}""" )
                 , ( "info", """
 This helps to find places where one road section crosses another, or where a piece
 of road is used more than once, either in the same or the opposite direction.
@@ -663,9 +681,9 @@ Here's a few options:
         , ( "straight"
           , Dict.fromList
                 [ ( "label", """Straightener""" )
-                , ( "straight", """Straighten between markers""")
-                , ( "altitudes", """Preserve altitudes""")
-                , ( "range", """This tool requires a range.""")
+                , ( "straight", """Straighten between markers""" )
+                , ( "altitudes", """Preserve altitudes""" )
+                , ( "range", """This tool requires a range.""" )
                 , ( "info", """
 Sometimes you just want a straight to be straight and it's tedious to get rid of
 all the wriggles. Sure, you could delete some of the points, but you might want to

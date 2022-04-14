@@ -2019,6 +2019,7 @@ viewToolByType location msgWrapper entry isTrack options =
                 case isTrack of
                     Just track ->
                         Tools.Graph.view
+                            location
                             (msgWrapper << ToolGraphMsg)
                             options.graphOptions
 

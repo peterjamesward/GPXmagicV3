@@ -37,8 +37,11 @@ import Polyline3d
 import Quantity exposing (Quantity, zero)
 import Set exposing (Set)
 import SketchPlane3d
-import ToolTip exposing (myTooltip, tooltip)
+import String.Interpolate
+import ToolTip exposing (localisedTooltip, myTooltip, tooltip)
 import Tools.GraphOptions exposing (..)
+import Tools.I18N as I18N
+import Tools.I18NOptions as I18NOptions
 import Tools.Nudge
 import Tools.NudgeOptions
 import TrackLoaded exposing (TrackLoaded)
@@ -401,9 +404,12 @@ toolStateChange opened colour options track =
             ( options, [] )
 
 
-view : (Msg -> msg) -> Options msg -> Element msg
-view wrapper options =
+view : I18NOptions.Options -> (Msg -> msg) -> Options msg -> Element msg
+view location wrapper options =
     let
+        i18n =
+            I18N.text location toolId
+
         offset =
             Length.inMeters options.centreLineOffset
 
@@ -419,7 +425,7 @@ view wrapper options =
                     [ infoButton (wrapper <| DisplayInfo "graph" "info")
                     , I.button neatToolsBorder
                         { onPress = Just (wrapper GraphAnalyse)
-                        , label = text "Find key places"
+                        , label = i18n "find"
                         }
                     ]
 
@@ -427,7 +433,7 @@ view wrapper options =
             if options.analyzed then
                 I.button neatToolsBorder
                     { onPress = Just (wrapper ClearRoute)
-                    , label = text "Clear the route"
+                    , label = i18n "clear"
                     }
 
             else
@@ -437,7 +443,7 @@ view wrapper options =
             if options.analyzed then
                 I.button neatToolsBorder
                     { onPress = Just (wrapper RevertToTrack)
-                    , label = text "Revert to original track"
+                    , label = i18n "revert"
                     }
 
             else
@@ -450,7 +456,7 @@ view wrapper options =
                     , I.button
                         neatToolsBorder
                         { onPress = Just (wrapper ConvertFromGraph)
-                        , label = text "Convert back into route"
+                        , label = i18n "convert"
                         }
                     ]
 
@@ -467,18 +473,18 @@ view wrapper options =
                     , label =
                         I.labelBelow [] <|
                             text <|
-                                "Offset = "
-                                    ++ (showDecimal2 <| abs offset)
-                                    ++ "m "
-                                    ++ (if offset < 0.0 then
-                                            "left"
+                                String.Interpolate.interpolate
+                                    (I18N.localisedString location toolId "isOffset")
+                                    [ showDecimal2 <| abs offset
+                                    , if offset < 0.0 then
+                                        I18N.localisedString location toolId "left"
 
-                                        else if offset > 0.0 then
-                                            "right"
+                                      else if offset > 0.0 then
+                                        I18N.localisedString location toolId "right"
 
-                                        else
-                                            ""
-                                       )
+                                      else
+                                        ""
+                                    ]
                     , min = -5.0
                     , max = 5.0
                     , step = Just 0.25
@@ -497,9 +503,9 @@ view wrapper options =
                     , label =
                         I.labelBelow [] <|
                             text <|
-                                "Radius = "
-                                    ++ (showDecimal2 <| abs radius)
-                                    ++ "m "
+                                String.Interpolate.interpolate
+                                    (I18N.localisedString location toolId "isRadius")
+                                    [ showDecimal2 <| abs radius ]
                     , min = 1.0
                     , max = 15.0
                     , step = Just 1.0
@@ -588,11 +594,11 @@ view wrapper options =
                 , Border.color rgtDark
                 ]
                 [ row [ width fill ]
-                    [ el ((width <| fillPortion 1) :: headerAttrs) <| text "  "
-                    , el ((width <| fillPortion 2) :: headerAttrs) <| text "From"
-                    , el ((width <| fillPortion 2) :: headerAttrs) <| text "To"
-                    , el ((width <| fillPortion 2) :: headerAttrs) <| text "Along"
-                    , el ((width <| fillPortion 2) :: headerAttrs) <| text "Distance"
+                    [ el ((width <| fillPortion 1) :: headerAttrs) <| i18n "blank"
+                    , el ((width <| fillPortion 2) :: headerAttrs) <| i18n "from"
+                    , el ((width <| fillPortion 2) :: headerAttrs) <| i18n "to"
+                    , el ((width <| fillPortion 2) :: headerAttrs) <| i18n "along"
+                    , el ((width <| fillPortion 2) :: headerAttrs) <| i18n "distance"
                     ]
 
                 -- workaround for a bug: it's necessary to wrap `table` in an `el`
@@ -615,7 +621,7 @@ view wrapper options =
                                             [ if i + 1 == List.length traversals then
                                                 I.button
                                                     [ alignRight
-                                                    , tooltip below (myTooltip "Remove")
+                                                    , tooltip below (localisedTooltip location toolId "remove")
                                                     ]
                                                     { onPress = Just <| wrapper RemoveLastTraversal
                                                     , label = useIcon FeatherIcons.delete
@@ -631,7 +637,7 @@ view wrapper options =
                                               then
                                                 I.button
                                                     [ alignRight
-                                                    , tooltip below (myTooltip "Reverse")
+                                                    , tooltip below (localisedTooltip location toolId "reverse")
                                                     ]
                                                     { onPress = Just <| wrapper <| FlipDirection i
                                                     , label = useIcon FeatherIcons.refreshCw
@@ -652,8 +658,9 @@ view wrapper options =
                                     \i t ->
                                         el (dataStyles (i == options.selectedTraversal)) <|
                                             text <|
-                                                "Place "
-                                                    ++ String.fromInt t.startPlace
+                                                String.Interpolate.interpolate
+                                                    (I18N.localisedString location toolId "place1")
+                                                    [ String.fromInt t.startPlace ]
                               }
                             , { header = none
                               , width = fillPortion 2
@@ -661,8 +668,9 @@ view wrapper options =
                                     \i t ->
                                         el (dataStyles (i == options.selectedTraversal)) <|
                                             text <|
-                                                "place "
-                                                    ++ String.fromInt t.endPlace
+                                                String.Interpolate.interpolate
+                                                    (I18N.localisedString location toolId "place2")
+                                                    [ String.fromInt t.endPlace ]
                               }
                             , { header = none
                               , width = fillPortion 2
@@ -670,8 +678,9 @@ view wrapper options =
                                     \i t ->
                                         el (dataStyles (i == options.selectedTraversal)) <|
                                             text <|
-                                                "road "
-                                                    ++ String.fromInt t.road
+                                                String.Interpolate.interpolate
+                                                    (I18N.localisedString location toolId "road")
+                                                    [ String.fromInt t.road ]
                               }
                             , { header = none
                               , width = fillPortion 2

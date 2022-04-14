@@ -47,6 +47,7 @@ import Svg.Attributes
 import ToolTip exposing (myTooltip, tooltip)
 import Tools.Graph
 import Tools.GraphOptions exposing (ClickDetect(..), Direction(..), Graph)
+import Tools.I18NOptions as I18NOptions
 import UtilsForViews exposing (colourHexString, showShortMeasure, uiColourHexString)
 import Vector3d
 import ViewPureStyles exposing (rgtDark, rgtPurple, useIcon)
@@ -258,13 +259,14 @@ onContextMenu msg =
 
 
 view :
-    Context
+    I18NOptions.Options
+    -> Context
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Graph msg
     -> Tools.GraphOptions.Options msg
     -> (Msg -> msg)
     -> Element msg
-view context ( width, height ) graph options msgWrapper =
+view location context ( width, height ) graph options msgWrapper =
     let
         dragging =
             context.dragAction

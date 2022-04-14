@@ -31,7 +31,7 @@ Time to plough through all the tools. Again.
 , ~~splitAndJoinTool~~
 , ~~intersectionsTool~~
 , ~~straightenTool~~
-, graphTool
+, ~~graphTool~~
 , landUseTool
 ]
 
