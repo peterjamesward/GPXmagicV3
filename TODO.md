@@ -10,7 +10,7 @@ Time to plough through all the tools. Again.
 , ~~essentialsTool~~
 , ~~trackInfoBox~~
 , ~~displaySettingsTool~~
-, directionChangeTool
+, ~~directionChangeTool~~
 , gradientChangeTool
 , deleteTool
 , bezierSplinesTool

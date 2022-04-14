@@ -15,7 +15,9 @@ import List.Extra
 import LocalCoords exposing (LocalCoords)
 import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (Quantity)
+import String.Interpolate
 import ToolTip exposing (buttonStylesWithTooltip, myTooltip, tooltip)
+import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.Nudge
 import TrackLoaded exposing (TrackLoaded)
@@ -438,12 +440,15 @@ actions options previewColour track =
 view : I18NOptions.Options -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
 view location imperial msgWrapper options isTrack =
     let
+        i18n =
+            I18N.text location toolId
+
         modeSelection =
             Input.radioRow [ centerX, spacing 5 ]
                 { onChange = msgWrapper << SetMode
                 , options =
-                    [ Input.option DirectionChangeAbrupt (text "At point")
-                    , Input.option DirectionChangeWithRadius (text "With radius")
+                    [ Input.option DirectionChangeAbrupt (i18n "usepoint")
+                    , Input.option DirectionChangeWithRadius (i18n "useradius")
                     ]
                 , selected = Just options.mode
                 , label = Input.labelHidden "Mode"
@@ -453,8 +458,8 @@ view location imperial msgWrapper options isTrack =
             Input.radioRow [ centerX, spacing 5 ]
                 { onChange = msgWrapper << SetResultMode
                 , options =
-                    [ Input.option ResultNavigation (text "Summary")
-                    , Input.option ResultList (text "List")
+                    [ Input.option ResultNavigation (i18n "summary")
+                    , Input.option ResultList (i18n "list")
                     ]
                 , selected = Just options.resultMode
                 , label = Input.labelHidden "Results mode"
@@ -468,9 +473,9 @@ view location imperial msgWrapper options isTrack =
                 , label =
                     Input.labelBelow [] <|
                         text <|
-                            "Direction change "
-                                ++ (String.fromInt <| round <| Angle.inDegrees options.threshold)
-                                ++ "º"
+                            String.Interpolate.interpolate
+                                (I18N.localisedString location toolId "change")
+                                [ String.fromInt <| round <| Angle.inDegrees options.threshold ]
                 , min = 15
                 , max = 170
                 , step = Just 1
@@ -485,8 +490,9 @@ view location imperial msgWrapper options isTrack =
                 , label =
                     Input.labelBelow [] <|
                         text <|
-                            "Radius "
-                                ++ showShortMeasure imperial options.radius
+                            String.Interpolate.interpolate
+                                (I18N.localisedString location toolId "radius")
+                                [ showShortMeasure imperial options.radius ]
                 , min = 4.0
                 , max = 100.0
                 , step = Just 1
@@ -497,17 +503,17 @@ view location imperial msgWrapper options isTrack =
             row [ centerX, spacing 10 ]
                 [ infoButton <| msgWrapper <| DisplayInfo "bends" "locate"
                 , Input.button
-                    (buttonStylesWithTooltip below "Move to previous")
+                    (buttonStylesWithTooltip below <| I18N.localisedString location toolId "prev")
                     { label = useIcon FeatherIcons.chevronLeft
                     , onPress = Just <| msgWrapper <| ViewPrevious
                     }
                 , Input.button
-                    (buttonStylesWithTooltip below "Move pointer to this issue\n(Is the padlock on?)")
+                    (buttonStylesWithTooltip below <| I18N.localisedString location toolId "this")
                     { label = useIcon FeatherIcons.mousePointer
                     , onPress = Just <| msgWrapper <| SetCurrentPosition current
                     }
                 , Input.button
-                    (buttonStylesWithTooltip below "Move to next")
+                    (buttonStylesWithTooltip below <| I18N.localisedString location toolId "next")
                     { label = useIcon FeatherIcons.chevronRight
                     , onPress = Just <| msgWrapper <| ViewNext
                     }
@@ -516,7 +522,7 @@ view location imperial msgWrapper options isTrack =
         singlePointResultsNavigation breaches =
             case breaches of
                 [] ->
-                    el [ centerX, centerY ] <| text "None found"
+                    el [ centerX, centerY ] <| i18n "none"
 
                 a :: b ->
                     let
@@ -527,19 +533,19 @@ view location imperial msgWrapper options isTrack =
                     column [ spacing 4, centerX ]
                         [ el [ centerX ] <|
                             text <|
-                                String.fromInt (options.currentPointBreach + 1)
-                                    ++ " of "
-                                    ++ (String.fromInt <| List.length options.singlePointBreaches)
-                                    ++ ", "
-                                    ++ (showAngle <| turn)
-                                    ++ "º"
+                                String.Interpolate.interpolate
+                                    (I18N.localisedString location toolId ".of.")
+                                    [ String.fromInt (options.currentPointBreach + 1)
+                                    , String.fromInt <| List.length options.singlePointBreaches
+                                    , showAngle <| turn
+                                    ]
                         , commonButtons position
                         ]
 
         bendResultsNavigation breaches =
             case breaches of
                 [] ->
-                    el [ centerX, centerY ] <| text "None found"
+                    el [ centerX, centerY ] <| i18n "none"
 
                 a :: b ->
                     let
@@ -553,11 +559,12 @@ view location imperial msgWrapper options isTrack =
                     column [ spacing 4, centerX ]
                         [ el [ centerX ] <|
                             text <|
-                                String.fromInt (options.currentBendBreach + 1)
-                                    ++ " of "
-                                    ++ (String.fromInt <| List.length options.bendBreaches)
-                                    ++ ", radius "
-                                    ++ showShortMeasure imperial (Quantity.abs radius)
+                                String.Interpolate.interpolate
+                                    (I18N.localisedString location toolId ".radius.")
+                                    [ String.fromInt (options.currentBendBreach + 1)
+                                    , String.fromInt <| List.length options.bendBreaches
+                                    , showShortMeasure imperial (Quantity.abs radius)
+                                    ]
                         , commonButtons at
                         ]
 
@@ -589,7 +596,7 @@ view location imperial msgWrapper options isTrack =
                     , Input.button
                         (alignTop :: neatToolsBorder)
                         { onPress = Just (msgWrapper Autofix)
-                        , label = text "Smooth these points"
+                        , label = i18n "smooth"
                         }
                     ]
 
@@ -604,13 +611,8 @@ view location imperial msgWrapper options isTrack =
                     , Input.button
                         (alignTop :: neatToolsBorder)
                         { onPress = Just (msgWrapper NudgeOne)
-                        , label = text "Widen current bend"
+                        , label = i18n "adjust"
                         }
-
-                    --, Input.button
-                    --    (alignTop :: neatToolsBorder)
-                    --    { onPress = Just (msgWrapper NudgeAll)
-                    --    , label = text "Widen these bends"
                     --    }
                     ]
 

@@ -102,6 +102,21 @@ Any changes you make will be reflected here.
         , ( "bends"
           , Dict.fromList
                 [ ( "label", """Bend problems""" )
+                , ( "usepoint", """At a point""" )
+                , ( "useradius", """With a radius""" )
+                , ( "summary", """Summary""" )
+                , ( "list", """List""" )
+                , ( "change", """Direction change {0}º""" )
+                , ( "radius", """Radius {0}""" )
+                , ( "prev", """Move to previous""" )
+                , ( "this", """Move pointer to this issue
+(Is the padlock on?)""" )
+                , ( "next", """Move to next""" )
+                , ( "none", """None found""" )
+                , ( ".of.", """{0} of {1}, {2}º""" )
+                , ( ".radius.", """{0} of {1}, radius {2}º""" )
+                , ( "smooth", """Smooth these points""" )
+                , ( "adjust", """Widen current bend""" )
                 , ( "info", """
 Find points where the road direction changes significantly, or find
 sections of track that may be a bend with a small radius.
@@ -246,12 +261,12 @@ Don't worry, it won't let you delete the whole track.
                 , ( "Land Use", """Land Use""" )
                 , ( "Flat", """Flat""" )
                 , ( "3D", """3D""" )
-                , ( "road", """Road surface""")
-                , ( "Ground", """Ground""")
-                , ( "Centre line", """Centre line""")
-                , ( "Place names", """Place names""")
-                , ( "noterrain", """Terrain off""")
-                , ( "quality", """Terrain quality""")
+                , ( "road", """Road surface""" )
+                , ( "Ground", """Ground""" )
+                , ( "Centre line", """Centre line""" )
+                , ( "Place names", """Place names""" )
+                , ( "noterrain", """Terrain off""" )
+                , ( "quality", """Terrain quality""" )
                 , ( "info", """
 Change how the road appears in the 3D views. You can select to see the road surface,
 a dropped "curtain" either plain or shaded to show gradient, There's also a centre line
