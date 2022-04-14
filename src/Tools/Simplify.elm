@@ -10,6 +10,7 @@ import FlatColors.ChinesePalette
 import Length exposing (Meters)
 import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (Quantity, Squared)
+import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import Triangle3d
 import ViewPureStyles exposing (neatToolsBorder, noTrackMessage)
@@ -210,8 +211,8 @@ update msg options previewColour track =
             ( options, [ Actions.DisplayInfo tool tag ] )
 
 
-view : (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
-view msgWrapper options isTrack =
+view : I18NOptions.Options -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view location msgWrapper options isTrack =
     case isTrack of
         Just track ->
             column
@@ -247,7 +248,7 @@ view msgWrapper options isTrack =
                 ]
 
         Nothing ->
-            noTrackMessage
+            noTrackMessage location
 
 
 guidanceText =

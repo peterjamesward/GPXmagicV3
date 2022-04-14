@@ -11,6 +11,7 @@ import FlatColors.ChinesePalette
 import List.Extra
 import PreviewData exposing (PreviewShape(..))
 import ToolTip exposing (buttonStylesWithTooltip)
+import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showAngle, showDecimal2, showLongMeasure)
 import ViewPureStyles exposing (infoButton, neatToolsBorder, noTrackMessage, sliderThumb, useIcon)
@@ -310,8 +311,8 @@ update msg options previewColour hasTrack =
             ( options, [ Actions.DisplayInfo id tag ] )
 
 
-view : Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
-view imperial msgWrapper options isTrack =
+view : I18NOptions.Options -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view location imperial msgWrapper options isTrack =
     let
         modeSelection =
             Input.radio [ centerX, spacing 5 ]
@@ -447,4 +448,4 @@ view imperial msgWrapper options isTrack =
                     ]
 
         Nothing ->
-            noTrackMessage
+            noTrackMessage location

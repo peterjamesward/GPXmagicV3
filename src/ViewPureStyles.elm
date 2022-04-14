@@ -17,6 +17,8 @@ import Json.Decode as D
 import Markdown
 import Pixels exposing (Pixels)
 import Quantity exposing (Quantity)
+import Tools.I18N as I18N
+import Tools.I18NOptions as I18NOptions
 
 
 defaultRowLayout =
@@ -356,8 +358,8 @@ useIconWithSize size =
     html << FeatherIcons.toHtml [] << FeatherIcons.withSize size
 
 
-showModalMessage : Int -> String -> msg -> Element msg
-showModalMessage areaWidth content msg =
+showModalMessage : I18NOptions.Options -> Int -> String -> msg -> Element msg
+showModalMessage location areaWidth content msg =
     column
         [ centerY
         , centerX
@@ -373,7 +375,7 @@ showModalMessage areaWidth content msg =
             , Background.color FlatColors.AussiePalette.quinceJelly
             , Font.color FlatColors.AussiePalette.coastalBreeze
             ]
-            [ text "Message"
+            [ I18N.text location "main" "message"
             ]
         , column
             [ Background.color FlatColors.AussiePalette.coastalBreeze
@@ -388,7 +390,7 @@ showModalMessage areaWidth content msg =
                 [ html <| Markdown.toHtml [] content ]
             , Input.button neatToolsBorder
                 { onPress = Just msg
-                , label = text "Dismiss"
+                , label = I18N.text location "main" "dismiss"
                 }
             ]
         ]
@@ -411,7 +413,7 @@ onEnter msg =
         )
 
 
-noTrackMessage =
+noTrackMessage location =
     paragraph
         [ padding 20
         , spacing 5
@@ -421,4 +423,4 @@ noTrackMessage =
         , centerY
         , height fill
         ]
-        [ text "Controls will appear here when a track is loaded." ]
+        [ I18N.text location "tools" "notrack" ]

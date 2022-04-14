@@ -16,6 +16,7 @@ import LocalCoords exposing (LocalCoords)
 import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (Quantity)
 import ToolTip exposing (buttonStylesWithTooltip, myTooltip, tooltip)
+import Tools.I18NOptions as I18NOptions
 import Tools.Nudge
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showAngle, showDecimal0, showLongMeasure, showShortMeasure)
@@ -434,8 +435,8 @@ actions options previewColour track =
     ]
 
 
-view : Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
-view imperial msgWrapper options isTrack =
+view : I18NOptions.Options -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view location imperial msgWrapper options isTrack =
     let
         modeSelection =
             Input.radioRow [ centerX, spacing 5 ]
@@ -660,7 +661,7 @@ view imperial msgWrapper options isTrack =
                     ]
 
         Nothing ->
-            noTrackMessage
+            noTrackMessage location
 
 
 widenBend :

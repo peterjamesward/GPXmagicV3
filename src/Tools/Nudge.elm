@@ -16,6 +16,7 @@ import Point3d exposing (Point3d, xCoordinate, yCoordinate, zCoordinate)
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity exposing (Quantity)
 import SketchPlane3d
+import Tools.I18NOptions as I18NOptions
 import Tools.NudgeOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showShortMeasure)
@@ -342,8 +343,8 @@ update msg options previewColour track =
             ( options, [ Actions.DisplayInfo tool tag ] )
 
 
-view : Bool -> Options -> (Msg -> msg) -> Maybe (TrackLoaded msg) -> Element msg
-view imperial options msgWrapper track =
+view : I18NOptions.Options -> Bool -> Options -> (Msg -> msg) -> Maybe (TrackLoaded msg) -> Element msg
+view location imperial options msgWrapper track =
     let
         vertical label increment =
             button
@@ -374,7 +375,7 @@ view imperial options msgWrapper track =
     in
     case track of
         Nothing ->
-            noTrackMessage
+            noTrackMessage location
 
         Just isTrack ->
             row

@@ -11,6 +11,7 @@ import Element.Input as Input
 import FeatherIcons
 import FlatColors.AussiePalette
 import FlatColors.ChinesePalette
+import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showLongMeasure)
 import ViewPureStyles exposing (neatToolsBorder, noTrackMessage, useIcon)
@@ -188,8 +189,8 @@ positionDescription imperial pos track =
         ++ (showLongMeasure imperial <| DomainModel.distanceFromIndex pos track)
 
 
-view : Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
-view imperial msgWrapper options isTrack =
+view : I18NOptions.Options -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view location imperial msgWrapper options isTrack =
     column
         [ width fill
         , Background.color FlatColors.ChinesePalette.antiFlashWhite
@@ -202,7 +203,7 @@ view imperial msgWrapper options isTrack =
                 ]
 
             Nothing ->
-                [ noTrackMessage ]
+                [ noTrackMessage location ]
 
 
 viewPointers : Bool -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg

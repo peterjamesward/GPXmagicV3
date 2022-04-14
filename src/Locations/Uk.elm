@@ -26,6 +26,18 @@ textDictionary =
                 , ( "notrack", """No track loaded""" )
                 , ( "unnamed", """Unnamed track""" )
                 , ( "import", """Other file options""" )
+                , ( "askgpx", """
+Select GPX file.
+
+If the File Open dialog does not appear, please reload the page in the browser and try again.
+""" )
+                , ( "loading", """Loading ...""" )
+                , ( "noload", """Sorry, unable to load that file""" )
+                , ( "nogpx", """Could not make a track. Are you sure that's a GPX file?""" )
+                , ( "nowrite", """Sorry, unable to write the file""" )
+                , ( "nosvg", """Sorry, could not extract SVG paths""" )
+                , ( "message", """Message""" )
+                , ( "dismiss", """Dismiss""" )
                 ]
           )
         , ( "panes"
@@ -244,6 +256,7 @@ You can show these "flat" or "sloped" Be warned, when "sloped", it may obscure t
                 , ( "onleft", """Left""" )
                 , ( "onright", """Right""" )
                 , ( "hidden", """Hidden""" )
+                , ( "notrack", """Controls will appear here when a track is loaded.""" )
                 , ( "blank", """           """ )
                 , ( "info", """
 Quickly place tools on the left or right of the display, or hide them completely.

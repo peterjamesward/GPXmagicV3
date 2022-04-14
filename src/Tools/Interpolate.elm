@@ -11,6 +11,7 @@ import Length exposing (Meters, inMeters, meters)
 import Point3d
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity
+import Tools.I18NOptions as I18NOptions
 import Tools.InterpolateOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showShortMeasure)
@@ -242,8 +243,8 @@ update msg options previewColour hasTrack =
             ( options, [] )
 
 
-view : Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
-view imperial wrapper options track =
+view : I18NOptions.Options -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view location imperial wrapper options track =
     let
         fixButton =
             button
@@ -272,7 +273,7 @@ view imperial wrapper options track =
                 ]
 
         Nothing ->
-            noTrackMessage
+            noTrackMessage location
 
 
 spacingSlider : Bool -> Options -> (Msg -> msg) -> Element msg

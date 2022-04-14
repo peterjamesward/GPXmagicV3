@@ -39,6 +39,7 @@ import Svg
 import Svg.Attributes as SA
 import SweptAngle
 import Tools.CurveFormerOptions exposing (GradientSmoothing(..), Options, Point)
+import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (flatBox, showShortMeasure)
 import Vector2d
@@ -270,8 +271,8 @@ update msg options previewColour hasTrack =
             ( options, [] )
 
 
-view : Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
-view imperial wrapper options track =
+view : I18NOptions.Options -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view location imperial wrapper options track =
     let
         squared x =
             x * x
@@ -406,7 +407,7 @@ view imperial wrapper options track =
                 ]
 
         Nothing ->
-            noTrackMessage
+            noTrackMessage location
 
 
 point : ( Float, Float ) -> Point

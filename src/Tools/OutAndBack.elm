@@ -16,6 +16,7 @@ import Point2d exposing (Point2d)
 import Point3d exposing (Point3d, xCoordinate, yCoordinate, zCoordinate)
 import Polyline3d
 import Quantity
+import Tools.I18NOptions as I18NOptions
 import Tools.Nudge
 import Tools.OutAndBackOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
@@ -252,8 +253,8 @@ update msg options hasTrack =
             ( options, [] )
 
 
-view : Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
-view imperial wrapper options track =
+view : I18NOptions.Options -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view location imperial wrapper options track =
     let
         fixButton =
             button
@@ -276,7 +277,7 @@ view imperial wrapper options track =
                 ]
 
         Nothing ->
-            noTrackMessage
+            noTrackMessage location
 
 
 offsetSlider : Bool -> Options -> (Msg -> msg) -> Element msg

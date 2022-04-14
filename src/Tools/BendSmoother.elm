@@ -24,6 +24,7 @@ import PreviewData exposing (PreviewData, PreviewPoint, PreviewShape(..))
 import Quantity exposing (Quantity(..), minus)
 import SketchPlane3d
 import Tools.BendSmootherOptions exposing (..)
+import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showShortMeasure)
 import Vector2d
@@ -370,8 +371,14 @@ update msg options previewColour track =
             ( options, [ Actions.DisplayInfo tool tag ] )
 
 
-viewBendControls : Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
-viewBendControls imperial wrapper options track =
+viewBendControls :
+    I18NOptions.Options
+    -> Bool
+    -> (Msg -> msg)
+    -> Options
+    -> Maybe (TrackLoaded msg)
+    -> Element msg
+viewBendControls location imperial wrapper options track =
     let
         fixBendButton smooth =
             button
@@ -403,11 +410,11 @@ viewBendControls imperial wrapper options track =
                 ]
 
         Nothing ->
-            noTrackMessage
+            noTrackMessage location
 
 
-viewPointControls : Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
-viewPointControls imperial wrapper options track =
+viewPointControls : I18NOptions.Options -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+viewPointControls location imperial wrapper options track =
     let
         fixButton =
             button
@@ -429,11 +436,11 @@ viewPointControls imperial wrapper options track =
                 ]
 
         Nothing ->
-            noTrackMessage
+            noTrackMessage location
 
 
-view : Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
-view imperial wrapper options track =
+view : I18NOptions.Options -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view location imperial wrapper options track =
     column
         [ padding 10
         , spacing 5
@@ -454,10 +461,10 @@ view imperial wrapper options track =
                 }
         , case options.mode of
             SmoothBend ->
-                viewBendControls imperial wrapper options track
+                viewBendControls location imperial wrapper options track
 
             SmoothPoint ->
-                viewPointControls imperial wrapper options track
+                viewPointControls location imperial wrapper options track
         ]
 
 

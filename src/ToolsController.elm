@@ -1801,6 +1801,7 @@ viewToolByType location msgWrapper entry isTrack options =
 
             ToolAbruptDirectionChanges ->
                 DirectionChanges.view
+                    location
                     options.imperial
                     (msgWrapper << DirectionChanges)
                     options.directionChangeOptions
@@ -1808,6 +1809,7 @@ viewToolByType location msgWrapper entry isTrack options =
 
             ToolGradientProblems ->
                 Tools.GradientProblems.view
+                    location
                     options.imperial
                     (msgWrapper << ToolGradientChangeMsg)
                     options.gradientProblemOptions
@@ -1822,10 +1824,11 @@ viewToolByType location msgWrapper entry isTrack options =
                             track
 
                     Nothing ->
-                        noTrackMessage
+                        noTrackMessage location
 
             ToolEssentials ->
                 Tools.Essentials.view
+                    location
                     options.imperial
                     (msgWrapper << ToolEssentialsMsg)
                     options.essentialOptions
@@ -1840,7 +1843,7 @@ viewToolByType location msgWrapper entry isTrack options =
                             track
 
                     Nothing ->
-                        noTrackMessage
+                        noTrackMessage location
 
             ToolCentroidAverage ->
                 case isTrack of
@@ -1851,10 +1854,11 @@ viewToolByType location msgWrapper entry isTrack options =
                             track
 
                     Nothing ->
-                        noTrackMessage
+                        noTrackMessage location
 
             ToolCurveFormer ->
                 Tools.CurveFormer.view
+                    location
                     options.imperial
                     (msgWrapper << ToolCurveFormerMsg)
                     options.curveFormerOptions
@@ -1862,6 +1866,7 @@ viewToolByType location msgWrapper entry isTrack options =
 
             ToolBendSmoother ->
                 Tools.BendSmoother.view
+                    location
                     options.imperial
                     (msgWrapper << ToolBendSmootherMsg)
                     options.bendSmootherOptions
@@ -1869,6 +1874,7 @@ viewToolByType location msgWrapper entry isTrack options =
 
             ToolNudge ->
                 Tools.Nudge.view
+                    location
                     options.imperial
                     options.nudgeOptions
                     (msgWrapper << ToolNudgeMsg)
@@ -1881,6 +1887,7 @@ viewToolByType location msgWrapper entry isTrack options =
 
             ToolOutAndBack ->
                 Tools.OutAndBack.view
+                    location
                     options.imperial
                     (msgWrapper << ToolOutAndBackMsg)
                     options.outAndBackSettings
@@ -1888,12 +1895,14 @@ viewToolByType location msgWrapper entry isTrack options =
 
             ToolSimplify ->
                 Tools.Simplify.view
+                    location
                     (msgWrapper << ToolSimplifyMsg)
                     options.simplifySettings
                     isTrack
 
             ToolInterpolate ->
                 Tools.Interpolate.view
+                    location
                     options.imperial
                     (msgWrapper << ToolInterpolateMsg)
                     options.interpolateSettings
@@ -1908,10 +1917,11 @@ viewToolByType location msgWrapper entry isTrack options =
                             track
 
                     Nothing ->
-                        noTrackMessage
+                        noTrackMessage location
 
             ToolMoveScaleRotate ->
                 Tools.MoveScaleRotate.view
+                    location
                     options.imperial
                     options.moveScaleRotateSettings
                     (msgWrapper << ToolMoveScaleRotateMsg)
@@ -1939,7 +1949,7 @@ viewToolByType location msgWrapper entry isTrack options =
                             track
 
                     Nothing ->
-                        noTrackMessage
+                        noTrackMessage location
 
             ToolStartFinish ->
                 case isTrack of
@@ -1951,7 +1961,7 @@ viewToolByType location msgWrapper entry isTrack options =
                             (msgWrapper << ToolStartFinishMsg)
 
                     Nothing ->
-                        noTrackMessage
+                        noTrackMessage location
 
             ToolSplitAndJoin ->
                 case isTrack of
@@ -1963,7 +1973,7 @@ viewToolByType location msgWrapper entry isTrack options =
                             track
 
                     Nothing ->
-                        noTrackMessage
+                        noTrackMessage location
 
             ToolIntersections ->
                 case isTrack of
@@ -1975,7 +1985,7 @@ viewToolByType location msgWrapper entry isTrack options =
                             track
 
                     Nothing ->
-                        noTrackMessage
+                        noTrackMessage location
 
             ToolStraighten ->
                 case isTrack of
@@ -1986,7 +1996,7 @@ viewToolByType location msgWrapper entry isTrack options =
                             track
 
                     Nothing ->
-                        noTrackMessage
+                        noTrackMessage location
 
             ToolGraph ->
                 case isTrack of
@@ -1996,7 +2006,7 @@ viewToolByType location msgWrapper entry isTrack options =
                             options.graphOptions
 
                     Nothing ->
-                        noTrackMessage
+                        noTrackMessage location
 
             ToolSettings ->
                 viewToolSettings location options msgWrapper
@@ -2017,7 +2027,7 @@ viewToolByType location msgWrapper entry isTrack options =
                             track
 
                     Nothing ->
-                        noTrackMessage
+                        noTrackMessage location
 
 
 

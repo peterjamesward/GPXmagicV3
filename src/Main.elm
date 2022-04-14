@@ -343,16 +343,14 @@ update msg model =
             ( model, Cmd.none )
 
         GpxRequested ->
-            ( { model | modalMessage = Just """Select GPX file.
-            
-If the File Open dialog does not appear, please reload the page in the browser and try again.""" }
+            ( { model | modalMessage = Just "askgpx" }
             , Select.file [ "text/gpx" ] GpxSelected
             )
 
         GpxSelected file ->
             ( { model
                 | filename = Just (File.name file)
-                , modalMessage = Just <| ("Loading " ++ File.name file)
+                , modalMessage = Just "loading"
               }
             , Task.perform GpxLoaded (File.toString file)
             )
@@ -389,13 +387,12 @@ If the File Open dialog does not appear, please reload the page in the browser a
                             )
 
                         Nothing ->
-                            ( { model | modalMessage = Just "Sorry, unable to load that" }
+                            ( { model | modalMessage = Just "noload" }
                             , Cmd.none
                             )
 
                 Nothing ->
-                    ( { model | modalMessage = Just """Sorry, unable to make a track.
-Please check the file contains GPX data.""" }
+                    ( { model | modalMessage = Just "nogpx" }
                     , Cmd.none
                     )
 
@@ -606,7 +603,7 @@ Please check the file contains GPX data.""" }
                     )
 
                 Nothing ->
-                    ( { model | modalMessage = Just "Sorry, unable to write the file" }
+                    ( { model | modalMessage = Just "nowrite" }
                     , Cmd.none
                     )
 
@@ -844,8 +841,9 @@ view model =
                         case model.modalMessage of
                             Just message ->
                                 showModalMessage
+                                    model.location
                                     (Pixels.inPixels <| Tuple.first model.contentArea)
-                                    message
+                                    (I18N.localisedString model.location "main" message)
                                     DismissModalMessage
 
                             Nothing ->
@@ -2001,7 +1999,7 @@ performActionsOnModel actions model =
                             adoptTrackInModel track foldedModel
 
                         Nothing ->
-                            { foldedModel | modalMessage = Just "Unable to extract SVG paths" }
+                            { foldedModel | modalMessage = Just "nosvg" }
 
                 ( ParseAndAppend gpxContent, Just track ) ->
                     let

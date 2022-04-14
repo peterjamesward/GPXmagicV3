@@ -18,6 +18,7 @@ import Point3d
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity
 import ToolTip exposing (buttonStylesWithTooltip)
+import Tools.I18NOptions as I18NOptions
 import Tools.MoveScaleRotateOptions exposing (Options)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal0, showDecimal2, showLongMeasure)
@@ -266,12 +267,13 @@ applyRecentre newReference track =
 
 
 view :
-    Bool
+    I18NOptions.Options
+    -> Bool
     -> Options
     -> (Msg -> msg)
     -> Maybe (TrackLoaded msg)
     -> Element msg
-view imperial options wrapper maybeTrack =
+view location imperial options wrapper maybeTrack =
     let
         rotationSlider =
             Input.slider
@@ -386,4 +388,4 @@ view imperial options wrapper maybeTrack =
                 ]
 
         Nothing ->
-            noTrackMessage
+            noTrackMessage location
