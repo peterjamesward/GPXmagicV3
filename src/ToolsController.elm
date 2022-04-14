@@ -1797,7 +1797,12 @@ viewToolByType location msgWrapper entry isTrack options =
     <|
         case entry.toolType of
             ToolTrackInfo ->
-                TrackInfoBox.view (msgWrapper << ToolInfoMsg) options.imperial isTrack options.infoOptions
+                TrackInfoBox.view
+                    location
+                    (msgWrapper << ToolInfoMsg)
+                    options.imperial
+                    isTrack
+                    options.infoOptions
 
             ToolAbruptDirectionChanges ->
                 DirectionChanges.view
@@ -2366,15 +2371,15 @@ restoreMeasure options value =
             options
 
 
-imperialToggleMenuEntry msgWrapper options =
+imperialToggleMenuEntry location msgWrapper options =
     Input.button [ alignRight ]
         { onPress = Just <| msgWrapper ToggleImperial
         , label =
             if options.imperial then
-                text "Use metric measures"
+                I18N.text location "main" "metric"
 
             else
-                text "Use imperial measures"
+                I18N.text location "main" "imperial"
         }
 
 

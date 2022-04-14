@@ -10,6 +10,8 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (labelHidden)
 import FlatColors.ChinesePalette
+import Tools.I18N as I18N
+import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal0, showDecimal2, showDecimal6, showLongMeasure, showShortMeasure)
 
@@ -59,34 +61,34 @@ update msg options =
             options
 
 
-trackInfoList : List ( Element msg, Bool -> RoadSection -> Element msg )
+trackInfoList : List ( String, Bool -> RoadSection -> Element msg )
 trackInfoList =
-    [ ( text "Points"
+    [ ( "points"
       , \imperial info -> info.skipCount |> (+) 1 |> String.fromInt |> text
       )
-    , ( text "Length"
+    , ( "length"
       , \imperial info -> info.trueLength |> showLongMeasure imperial |> text
       )
-    , ( text "Ascent"
+    , ( "ascent"
       , \imperial info -> info.altitudeGained |> showLongMeasure imperial |> text
       )
-    , ( text "Descent"
+    , ( "descent"
       , \imperial info -> info.altitudeLost |> showLongMeasure imperial |> text
       )
-    , ( text "Climbing"
+    , ( "climbing"
       , \imperial info -> info.distanceClimbing |> showLongMeasure imperial |> text
       )
-    , ( text "Descending"
+    , ( "descending"
       , \imperial info -> info.distanceDescending |> showLongMeasure imperial |> text
       )
-    , ( text "Steepest"
+    , ( "steepest"
       , \imperial info -> info.steepestClimb |> showDecimal2 |> text
       )
     ]
 
 
-displayInfoForPoint : Bool -> TrackLoaded msg -> Element msg
-displayInfoForPoint imperial track =
+displayInfoForPoint : I18NOptions.Options -> Bool -> TrackLoaded msg -> Element msg
+displayInfoForPoint location imperial track =
     let
         index =
             track.currentPosition
@@ -109,20 +111,20 @@ displayInfoForPoint imperial track =
                 |> negate
 
         labels =
-            [ "Number"
-            , "Distance"
-            , "Longitude"
-            , "Latitude"
-            , "Altitude"
-            , "Bearing"
-            , "Gradient"
+            [ "number"
+            , "distance"
+            , "longitude"
+            , "latitude"
+            , "altitude"
+            , "bearing"
+            , "gradient"
             ]
     in
     row
         [ padding 10
         , spacing 5
         ]
-        [ column [ spacing 5 ] <| List.map text labels
+        [ column [ spacing 5 ] <| List.map (I18N.text location "info") labels
         , column [ spacing 5 ]
             [ text <| String.fromInt index
             , text <| showLongMeasure imperial distance
@@ -136,11 +138,12 @@ displayInfoForPoint imperial track =
 
 
 displayValuesWithTrack :
-    Bool
-    -> List ( Element msg, Bool -> RoadSection -> Element msg )
+    I18NOptions.Options
+    -> Bool
+    -> List ( String, Bool -> RoadSection -> Element msg )
     -> TrackLoaded msg
     -> Element msg
-displayValuesWithTrack imperial infoList track =
+displayValuesWithTrack location imperial infoList track =
     let
         info =
             asRecord <| track.trackTree
@@ -149,13 +152,17 @@ displayValuesWithTrack imperial infoList track =
         [ padding 10
         , spacing 5
         ]
-        [ column [ spacing 5 ] <| List.map (\( txt, _ ) -> txt) infoList
+        [ column [ spacing 5 ] <| List.map (\( txt, _ ) -> I18N.text location "info" txt) infoList
         , column [ spacing 5 ] <| List.map (\( _, fn ) -> fn imperial info) infoList
         ]
 
 
-view : (Msg -> msg) -> Bool -> Maybe (TrackLoaded msg) -> Options -> Element msg
-view wrapper imperial ifTrack options =
+view : I18NOptions.Options -> (Msg -> msg) -> Bool -> Maybe (TrackLoaded msg) -> Options -> Element msg
+view location wrapper imperial ifTrack options =
+    let
+        helper =
+            I18N.text location "info"
+    in
     el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
         case ifTrack of
             Just track ->
@@ -163,27 +170,27 @@ view wrapper imperial ifTrack options =
                     [ Input.radioRow [ centerX, spacing 5 ]
                         { onChange = wrapper << ChooseDisplayMode
                         , options =
-                            [ Input.option InfoForTrack (text "Track")
-                            , Input.option InfoForPoint (text "Point")
-                            , Input.option InfoForSystem (text "Memory")
+                            [ Input.option InfoForTrack (helper "track")
+                            , Input.option InfoForPoint (helper "point")
+                            , Input.option InfoForSystem (helper "memory")
                             ]
                         , selected = Just options.displayMode
-                        , label = labelHidden "Oj"
+                        , label = labelHidden "mode"
                         }
                     , case options.displayMode of
                         InfoForTrack ->
-                            displayValuesWithTrack imperial trackInfoList track
+                            displayValuesWithTrack location imperial trackInfoList track
 
                         InfoForPoint ->
-                            displayInfoForPoint imperial track
+                            displayInfoForPoint location imperial track
 
                         InfoForSystem ->
-                            displayMemoryDetails options
+                            displayMemoryDetails location options
                     ]
 
             Nothing ->
                 paragraph [ padding 10 ]
-                    [ text "Information will show here when a track is loaded." ]
+                    [ helper "notrack" ]
 
 
 updateMemory : MemoryInfo -> Options -> Options
@@ -191,13 +198,13 @@ updateMemory memory options =
     { options | memoryInfo = Just memory }
 
 
-displayMemoryDetails : Options -> Element msg
-displayMemoryDetails options =
+displayMemoryDetails : I18NOptions.Options -> Options -> Element msg
+displayMemoryDetails location options =
     let
         labels =
-            [ "Heap limit"
-            , "Heap size"
-            , "Used heap"
+            [ "limit"
+            , "size"
+            , "heap"
             ]
 
         asMB value =
@@ -210,14 +217,14 @@ displayMemoryDetails options =
     in
     case options.memoryInfo of
         Nothing ->
-            text "Not available"
+            I18N.text location "info" "none"
 
         Just memory ->
             row
                 [ padding 10
                 , spacing 5
                 ]
-                [ column [ spacing 5 ] <| List.map text labels
+                [ column [ spacing 5 ] <| List.map (I18N.text location "info") labels
                 , column [ spacing 5 ]
                     [ text <| asMB memory.jsHeapSizeLimit
                     , text <| asMB memory.totalJSHeapSize

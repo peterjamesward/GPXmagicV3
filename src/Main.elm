@@ -1155,10 +1155,10 @@ showOptionsMenu model =
             , el (alignRight :: width fill :: subtleToolStyles) <|
                 Input.button [ alignRight ]
                     { onPress = Just <| RestoreDefaultToolLayout
-                    , label = text "Restore default layout"
+                    , label = I18N.text model.location "main" "default"
                     }
             , el (alignRight :: width fill :: subtleToolStyles) <|
-                ToolsController.imperialToggleMenuEntry ToolsMsg model.toolOptions
+                ToolsController.imperialToggleMenuEntry model.location ToolsMsg model.toolOptions
             ]
 
     else

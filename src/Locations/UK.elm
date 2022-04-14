@@ -39,6 +39,9 @@ If the File Open dialog does not appear, please reload the page in the browser a
                 , ( "message", """Message""" )
                 , ( "dismiss", """Dismiss""" )
                 , ( "1CQF", "One-click Quick Fix!" )
+                , ( "default", """Restore default tool layout""" )
+                , ( "imperial", """Use Imperial measures""" )
+                , ( "metric", """Use Metric measures""" )
                 ]
           )
         , ( "panes"
@@ -543,6 +546,28 @@ You must first authenticate with Strava using the button on the top bar; do that
         , ( "info"
           , Dict.fromList
                 [ ( "label", """Information""" )
+                , ( "track", """Track""" )
+                , ( "point", """Point""" )
+                , ( "points", """Points""" )
+                , ( "memory", """Memory""" )
+                , ( "length", """Length""" )
+                , ( "ascent", """Ascent""" )
+                , ( "descent", """Descent""" )
+                , ( "climbing", """Climbing""" )
+                , ( "descending", """Descending""" )
+                , ( "steepest", """Steepest""" )
+                , ( "number", """Number""" )
+                , ( "distance", """Distance""" )
+                , ( "longitude", """Longitude""" )
+                , ( "latitude", """Latitude""" )
+                , ( "altitude", """Altitude""" )
+                , ( "bearing", """Bearing""" )
+                , ( "gradient", """Gradient""" )
+                , ( "none", """Not available""" )
+                , ( "limit", """Heap limit""" )
+                , ( "size", """Heap size""" )
+                , ( "heap", """Used heap""" )
+                , ( "notrack", """Information will show here when a track is loaded.""" )
                 , ( "info", """
 View information about the current point, the whole track, and memory usage.
 """ )
