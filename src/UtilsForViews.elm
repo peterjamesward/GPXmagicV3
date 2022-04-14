@@ -202,3 +202,53 @@ flatBox box =
             BoundingBox3d.extrema box
     in
     BoundingBox2d.fromExtrema { minX = minX, maxX = maxX, minY = minY, maxY = maxY }
+
+
+longitudeString angle =
+    let
+        { sign, degrees, minutes, seconds } =
+            Angle.toDms angle
+
+        signString =
+            case sign of
+                Angle.Positive ->
+                    "E"
+
+                Angle.Negative ->
+                    "W"
+    in
+    String.concat
+        [ signString
+        , " "
+        , String.fromInt degrees
+        , "° "
+        , String.fromInt minutes
+        , "′ "
+        , String.fromInt <| round seconds
+        , "″"
+        ]
+
+
+latitudeString angle =
+    let
+        { sign, degrees, minutes, seconds } =
+            Angle.toDms angle
+
+        signString =
+            case sign of
+                Angle.Positive ->
+                    "N"
+
+                Angle.Negative ->
+                    "S"
+    in
+    String.concat
+        [ signString
+        , " "
+        , String.fromInt degrees
+        , "° "
+        , String.fromInt minutes
+        , "′ "
+        , String.fromInt <| round seconds
+        , "″"
+        ]

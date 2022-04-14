@@ -17,7 +17,9 @@ import Plane3d
 import Point3d
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity
+import String.Interpolate
 import ToolTip exposing (buttonStylesWithTooltip)
+import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.MoveScaleRotateOptions exposing (Options)
 import TrackLoaded exposing (TrackLoaded)
@@ -275,6 +277,9 @@ view :
     -> Element msg
 view location imperial options wrapper maybeTrack =
     let
+        i18n =
+            I18N.text location toolId
+
         rotationSlider =
             Input.slider
                 commonShortHorizontalSliderStyles
@@ -282,8 +287,9 @@ view location imperial options wrapper maybeTrack =
                 , label =
                     Input.labelBelow [] <|
                         text <|
-                            "Rotation: "
-                                ++ (showDecimal0 <| Angle.inDegrees options.rotateAngle)
+                            String.Interpolate.interpolate
+                                (I18N.localisedString location toolId "rotation")
+                                [ showDecimal0 <| Angle.inDegrees options.rotateAngle ]
                 , min = -30.0
                 , max = 30.0
                 , step = Just 1.0
@@ -298,21 +304,15 @@ view location imperial options wrapper maybeTrack =
                 , label =
                     Input.labelBelow [] <|
                         text <|
-                            "Length: "
-                                ++ (if imperial then
-                                        showDecimal0
-                                            (Length.inMiles
-                                                options.desiredTrackLength
-                                            )
-                                            ++ "mi"
+                            if imperial then
+                                String.Interpolate.interpolate
+                                    (I18N.localisedString location toolId "imperial")
+                                    [ showDecimal0 <| Length.inMiles options.desiredTrackLength ]
 
-                                    else
-                                        showDecimal0
-                                            (Length.inKilometers
-                                                options.desiredTrackLength
-                                            )
-                                            ++ "km"
-                                   )
+                            else
+                                String.Interpolate.interpolate
+                                    (I18N.localisedString location toolId "metric")
+                                    [ showDecimal0 <| Length.inKilometers options.desiredTrackLength ]
                 , min = 1.0
                 , max = 100.0
                 , step = Just 1.0
@@ -324,9 +324,7 @@ view location imperial options wrapper maybeTrack =
             button
                 neatToolsBorder
                 { onPress = Just <| wrapper RotateAndScale
-                , label =
-                    text <|
-                        "Rotate & Scale"
+                , label = i18n "apply"
                 }
 
         recentreButton =
@@ -340,13 +338,12 @@ view location imperial options wrapper maybeTrack =
                         (buttonStylesWithTooltip below "Click on Map to set the destination")
                         { onPress = Just <| wrapper Recentre
                         , label =
-                            paragraph [ width fill ]
-                                [ text <|
-                                    "Move to "
-                                        ++ String.fromFloat lon
-                                        ++ ", "
-                                        ++ String.fromFloat lat
-                                ]
+                            text <|
+                                String.Interpolate.interpolate
+                                    (I18N.localisedString location toolId "move")
+                                    [ UtilsForViews.longitudeString <| Angle.degrees lon
+                                    , UtilsForViews.latitudeString <| Angle.degrees lat
+                                    ]
                         }
 
                 Nothing ->
@@ -356,14 +353,14 @@ view location imperial options wrapper maybeTrack =
             button
                 neatToolsBorder
                 { onPress = Just <| wrapper Zero
-                , label = text "Zero"
+                , label = i18n "Zero"
                 }
 
         elevationFetchButton =
             button
                 (buttonStylesWithTooltip below "First, tilt the Map view to get elevation data")
                 { onPress = Just <| wrapper UseMapElevations
-                , label = text "Use elevations fetched from Mapbox"
+                , label = i18n "elevations"
                 }
     in
     case maybeTrack of

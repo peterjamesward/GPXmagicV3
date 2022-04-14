@@ -463,6 +463,15 @@ other uses as well, but this was the justification.
         , ( "affine"
           , Dict.fromList
                 [ ( "label", """Move,Scale,Rotate""" )
+                , ( "rotation", """Rotation: {0}""" )
+                , ( "imperial", """Length {0} miles""" )
+                , ( "metric", """Length {0} km""" )
+                , ( "apply", """Rotate and Scale""" )
+                , ( "move", """Move to
+{0}
+{1}""" )
+                , ( "Zero", "Zero sliders" )
+                , ( "elevations", """Use elevations from Mapbox""" )
                 , ( "info"
                   , """
 Want to ride Ventoux in the Sahara? Want your local loop to be a bit longer, or a lot?
