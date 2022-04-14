@@ -407,6 +407,8 @@ previous ten edits. Once you make a different change, you can only Undo.
         , ( "fly"
           , Dict.fromList
                 [ ( "label", """Flythrough""" )
+                , ( "speed", """Speed = {0}""")
+                , ( "where" , """From start {0}""")
                 , ( "info", """
 It's often useful to see the track as the rider would see in in RGT. We don't have the
 sophisticated scenery that RGT offers, but you can set the ride in motion and adjust the speed

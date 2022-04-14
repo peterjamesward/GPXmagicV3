@@ -24,7 +24,7 @@ Time to plough through all the tools. Again.
 , ~~interpolateTool~~
 , ~~profileSmoothTool~~
 , ~~moveScaleRotateTool~~
-, flythroughTool
+, ~~flythroughTool~~
 , stravaTool
 , moveAndStretchTool
 , startFinishTool

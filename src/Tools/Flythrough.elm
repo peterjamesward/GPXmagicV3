@@ -12,7 +12,10 @@ import Length
 import Point3d exposing (Point3d)
 import Quantity
 import Speed
+import String.Interpolate
 import Time
+import Tools.I18N as I18N
+import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showLongMeasure, showSpeed)
 import Vector3d
@@ -171,9 +174,12 @@ advanceInternal newTime status speed track =
                     }
 
 
-view : Bool -> Options -> (Msg -> msg) -> Element msg
-view imperial options wrapper =
+view : I18NOptions.Options -> Bool -> Options -> (Msg -> msg) -> Element msg
+view location imperial options wrapper =
     let
+        i18n =
+            I18N.text location toolId
+
         speed =
             Speed.metersPerSecond (10.0 ^ options.flythroughSpeed)
 
@@ -184,8 +190,9 @@ view imperial options wrapper =
                 , label =
                     Input.labelBelow [] <|
                         text <|
-                            "Speed = "
-                                ++ showSpeed imperial speed
+                            String.Interpolate.interpolate
+                                (I18N.localisedString location toolId "speed")
+                                [ showSpeed imperial speed ]
                 , min = 1.0 -- i.e. 1
                 , max = 3.0 -- i.e. 1000
                 , step = Nothing
@@ -246,10 +253,10 @@ view imperial options wrapper =
         , el [ centerX ] <|
             case options.flythrough of
                 Just flying ->
-                    row [ spacing 10 ]
-                        [ text "From start "
-                        , text <| showLongMeasure imperial flying.metresFromRouteStart
-                        ]
+                    text <|
+                        String.Interpolate.interpolate
+                            (I18N.localisedString location toolId "where")
+                            [ showLongMeasure imperial flying.metresFromRouteStart ]
 
                 Nothing ->
                     none

@@ -1939,6 +1939,7 @@ viewToolByType location msgWrapper entry isTrack options =
 
             ToolFlythrough ->
                 Tools.Flythrough.view
+                    location
                     options.imperial
                     options.flythroughSettings
                     (msgWrapper << ToolFlythroughMsg)
