@@ -16,6 +16,8 @@ import Point2d exposing (Point2d)
 import Point3d exposing (Point3d, xCoordinate, yCoordinate, zCoordinate)
 import Polyline3d
 import Quantity
+import String.Interpolate
+import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.Nudge
 import Tools.OutAndBackOptions exposing (..)
@@ -256,11 +258,43 @@ update msg options hasTrack =
 view : I18NOptions.Options -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
 view location imperial wrapper options track =
     let
+        i18n =
+            I18N.text location toolId
+
+        offsetSlider =
+            Input.slider
+                commonShortHorizontalSliderStyles
+                { onChange = wrapper << SetOffset
+                , label =
+                    Input.labelBelow [] <|
+                        text <|
+                            String.Interpolate.interpolate
+                                (I18N.localisedString location toolId "offset")
+                                [ showShortMeasure imperial (Length.meters options.offset) ]
+                , min =
+                    Length.inMeters <|
+                        if imperial then
+                            Length.feet -16.0
+
+                        else
+                            Length.meters -5.0
+                , max =
+                    Length.inMeters <|
+                        if imperial then
+                            Length.feet 16.0
+
+                        else
+                            Length.meters 5.0
+                , step = Just 0.5
+                , value = options.offset
+                , thumb = Input.defaultThumb
+                }
+
         fixButton =
             button
                 neatToolsBorder
                 { onPress = Just <| wrapper ApplyOutAndBack
-                , label = text "Make out and back"
+                , label = i18n "apply"
                 }
     in
     case track of
@@ -272,39 +306,9 @@ view location imperial wrapper options track =
                 , centerX
                 , Background.color FlatColors.ChinesePalette.antiFlashWhite
                 ]
-                [ el [ centerX ] <| offsetSlider imperial options wrapper
+                [ el [ centerX ] <| offsetSlider
                 , el [ centerX ] <| fixButton
                 ]
 
         Nothing ->
             noTrackMessage location
-
-
-offsetSlider : Bool -> Options -> (Msg -> msg) -> Element msg
-offsetSlider imperial options wrap =
-    Input.slider
-        commonShortHorizontalSliderStyles
-        { onChange = wrap << SetOffset
-        , label =
-            Input.labelBelow [] <|
-                text <|
-                    "Offset: "
-                        ++ showShortMeasure imperial (Length.meters options.offset)
-        , min =
-            Length.inMeters <|
-                if imperial then
-                    Length.feet -16.0
-
-                else
-                    Length.meters -5.0
-        , max =
-            Length.inMeters <|
-                if imperial then
-                    Length.feet 16.0
-
-                else
-                    Length.meters 5.0
-        , step = Just 0.5
-        , value = options.offset
-        , thumb = Input.defaultThumb
-        }

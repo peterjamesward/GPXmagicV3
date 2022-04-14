@@ -19,7 +19,7 @@ Time to plough through all the tools. Again.
 , ~~bendSmootherTool~~
 , ~~smartSmootherTool~~
 , ~~nudgeTool~~
-, outAndBackTool
+, ~~outAndBackTool~~
 , simplifyTool
 , interpolateTool
 , profileSmoothTool

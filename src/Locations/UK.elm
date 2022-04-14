@@ -509,6 +509,8 @@ The optional _Fade_ slider lets you gradually blend the Nudged section with the 
         , ( "bytheway"
           , Dict.fromList
                 [ ( "label", """Out and Back""" )
+                , ( "apply", """Make out and back""")
+                , ( "offset", """Offset {0}""")
                 , ( "info"
                   , """
 Also known as the **Bytheway special**, this tool makes it a snap to turn any route into
