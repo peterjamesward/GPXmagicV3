@@ -239,6 +239,19 @@ Don't worry, it won't let you delete the whole track.
         , ( "display"
           , Dict.fromList
                 [ ( "label", """Display settings""" )
+                , ( "Curtain", """Curtain style""" )
+                , ( "None", """None""" )
+                , ( "Plain", """Plain""" )
+                , ( "Coloured", """Coloured""" )
+                , ( "Land Use", """Land Use""" )
+                , ( "Flat", """Flat""" )
+                , ( "3D", """3D""" )
+                , ( "road", """Road surface""")
+                , ( "Ground", """Ground""")
+                , ( "Centre line", """Centre line""")
+                , ( "Place names", """Place names""")
+                , ( "noterrain", """Terrain off""")
+                , ( "quality", """Terrain quality""")
                 , ( "info", """
 Change how the road appears in the 3D views. You can select to see the road surface,
 a dropped "curtain" either plain or shaded to show gradient, There's also a centre line

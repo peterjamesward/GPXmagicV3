@@ -9,6 +9,8 @@ import FlatColors.ChinesePalette
 import Json.Decode as D
 import LandUseDataTypes
 import Tools.DisplaySettingsOptions exposing (..)
+import Tools.I18N as I18N
+import Tools.I18NOptions as I18NOptions
 import ViewPureStyles exposing (commonShortHorizontalSliderStyles, infoButton)
 
 
@@ -125,9 +127,12 @@ update msg options =
             ( options, [ Actions.DisplayInfo tool tag ] )
 
 
-view : (Msg -> msg) -> Options -> Element msg
-view wrap options =
+view : I18NOptions.Options -> (Msg -> msg) -> Options -> Element msg
+view location wrap options =
     let
+        i18n =
+            I18N.text location toolId
+
         curtainChoice =
             Input.radio
                 [ padding 5
@@ -135,11 +140,11 @@ view wrap options =
                 ]
                 { onChange = wrap << SetCurtainStyle
                 , selected = Just options.curtainStyle
-                , label = Input.labelBelow [] (text "Curtain")
+                , label = Input.labelBelow [] (i18n "Curtain")
                 , options =
-                    [ Input.option NoCurtain (text "None")
-                    , Input.option PlainCurtain (text "Plain")
-                    , Input.option PastelCurtain (text "Coloured")
+                    [ Input.option NoCurtain (i18n "None")
+                    , Input.option PlainCurtain (i18n "Plain")
+                    , Input.option PastelCurtain (i18n "Coloured")
                     ]
                 }
 
@@ -153,13 +158,13 @@ view wrap options =
                 , label =
                     Input.labelBelow [] <|
                         row [ spacing 4 ]
-                            [ text "Land Use"
+                            [ i18n "Land Use"
                             , infoButton (wrap <| DisplayInfo "display" "landuse")
                             ]
                 , options =
-                    [ Input.option LandUseDataTypes.LandUseHidden (text "None")
-                    , Input.option LandUseDataTypes.LandUsePlanar (text "Flat")
-                    , Input.option LandUseDataTypes.LandUseSloped (text "3D")
+                    [ Input.option LandUseDataTypes.LandUseHidden (i18n "None")
+                    , Input.option LandUseDataTypes.LandUsePlanar (i18n "Flat")
+                    , Input.option LandUseDataTypes.LandUseSloped (i18n "3D")
                     ]
                 }
     in
@@ -178,7 +183,7 @@ view wrap options =
                 ]
                 { onChange = wrap << SetRoadSurface
                 , checked = options.roadSurface
-                , label = Input.labelRight [] <| text "Road surface"
+                , label = Input.labelRight [] <| i18n "road"
                 , icon = Input.defaultCheckbox
                 }
             , Input.checkbox
@@ -215,10 +220,10 @@ view wrap options =
             , label =
                 Input.labelBelow [] <|
                     if options.terrainFineness == 0.0 then
-                        text "Terrain off"
+                        i18n "noterrain"
 
                     else
-                        text "Terrain quality"
+                        i18n "quality"
             , min = 0.0
             , max = 3.0
             , step = Nothing

@@ -1887,6 +1887,7 @@ viewToolByType location msgWrapper entry isTrack options =
 
             ToolDisplaySettings ->
                 Tools.DisplaySettings.view
+                    location
                     (msgWrapper << ToolDisplaySettingMsg)
                     options.displaySettings
 

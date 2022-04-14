@@ -9,7 +9,7 @@ Time to plough through all the tools. Again.
 [ ~~toolSettings~~
 , ~~essentialsTool~~
 , ~~trackInfoBox~~
-, displaySettingsTool
+, ~~displaySettingsTool~~
 , directionChangeTool
 , gradientChangeTool
 , deleteTool
