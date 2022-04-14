@@ -4,37 +4,7 @@
 ## I18N
 
 Multiple language dictionaries.
-Time to plough through all the tools. Again.
-
-[ ~~toolSettings~~
-, ~~essentialsTool~~
-, ~~trackInfoBox~~
-, ~~displaySettingsTool~~
-, ~~directionChangeTool~~
-, ~~gradientChangeTool~~
-, ~~deleteTool~~
-, ~~bezierSplinesTool~~
-, ~~centroidAverageTool~~
-, ~~curveFormerTool~~
-, ~~bendSmootherTool~~
-, ~~smartSmootherTool~~
-, ~~nudgeTool~~
-, ~~outAndBackTool~~
-, ~~simplifyTool~~
-, ~~interpolateTool~~
-, ~~profileSmoothTool~~
-, ~~moveScaleRotateTool~~
-, ~~flythroughTool~~
-, ~~stravaTool~~
-, ~~moveAndStretchTool~~
-, ~~startFinishTool~~
-, ~~splitAndJoinTool~~
-, ~~intersectionsTool~~
-, ~~straightenTool~~
-, ~~graphTool~~
-, ~~landUseTool~~
-]
-
+> Waiting for response from Muriel.
 
 ---
 
