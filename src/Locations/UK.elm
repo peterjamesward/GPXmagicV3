@@ -417,6 +417,9 @@ to get a quick feel for how it might ride.
         , ( "insert"
           , Dict.fromList
                 [ ( "label", """Insert points""" )
+                , ( "apply", """Insert points""" )
+                , ( "usage", """Use both markers to apply to a range, otherwise applies to whole track""" )
+                , ( "spacing", """Spacing: {0}""" )
                 , ( "info", """
 Sometimes you need more track points to create the precise shape you need, perhaps
 by _Nudge_-ing them or dragging them on a map. Also, when you're using some of the track
@@ -489,9 +492,9 @@ Purple marker, the Purple marker is moved there; this can give you more control 
                 , ( "-1cm", """-1cm""" )
                 , ( "-10cm", """-10cm""" )
                 , ( "-1m", """-1m""" )
-                , ( "fade", """Fade in/out""")
-                , ( "Apply", """Apply""")
-                , ( "Zero", """Reset sliders""")
+                , ( "fade", """Fade in/out""" )
+                , ( "Apply", """Apply""" )
+                , ( "Zero", """Reset sliders""" )
                 , ( "info", """
 Sometimes all it takes is a little _Nudge_.
 
@@ -509,8 +512,8 @@ The optional _Fade_ slider lets you gradually blend the Nudged section with the 
         , ( "bytheway"
           , Dict.fromList
                 [ ( "label", """Out and Back""" )
-                , ( "apply", """Make out and back""")
-                , ( "offset", """Offset {0}""")
+                , ( "apply", """Make out and back""" )
+                , ( "offset", """Offset {0}""" )
                 , ( "info"
                   , """
 Also known as the **Bytheway special**, this tool makes it a snap to turn any route into
@@ -554,9 +557,9 @@ quite pleasing results in many cases.
         , ( "simplify"
           , Dict.fromList
                 [ ( "label", """Simplify""" )
-                , ( "search", """Search""")
-                , ( "remove", """Remove {0} points""")
-                , ( "flush", """Clear Undo stack""")
+                , ( "search", """Search""" )
+                , ( "remove", """Remove {0} points""" )
+                , ( "flush", """Clear Undo stack""" )
                 , ( "info"
                   , """
 Recorded "IRL" rides contain a lot of GPS "noise". GPS is accurate only to a few metres,

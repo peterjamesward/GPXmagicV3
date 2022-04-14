@@ -11,6 +11,8 @@ import Length exposing (Meters, inMeters, meters)
 import Point3d
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity
+import String.Interpolate
+import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.InterpolateOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
@@ -246,6 +248,9 @@ update msg options previewColour hasTrack =
 view : I18NOptions.Options -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
 view location imperial wrapper options track =
     let
+        i18n =
+            I18N.text location toolId
+
         fixButton =
             button
                 neatToolsBorder
@@ -256,7 +261,24 @@ view location imperial wrapper options track =
         extent =
             el [ centerX, width fill ] <|
                 paragraph [ centerX ]
-                    [ text """Use both markers to apply to a range, otherwise applies to whole track""" ]
+                    [ i18n "usage" ]
+
+        spacingSlider =
+            Input.slider
+                commonShortHorizontalSliderStyles
+                { onChange = wrapper << SetSpacing
+                , label =
+                    Input.labelBelow [] <|
+                        text <|
+                            String.Interpolate.interpolate
+                                (I18N.localisedString location toolId "spacing")
+                                [ showShortMeasure imperial options.minimumSpacing ]
+                , min = 1.0
+                , max = 50.0
+                , step = Just 0.5
+                , value = Length.inMeters options.minimumSpacing
+                , thumb = Input.defaultThumb
+                }
     in
     case track of
         Just isTrack ->
@@ -267,28 +289,10 @@ view location imperial wrapper options track =
                 , centerX
                 , Background.color FlatColors.ChinesePalette.antiFlashWhite
                 ]
-                [ el [ centerX ] <| spacingSlider imperial options wrapper
+                [ el [ centerX ] <| spacingSlider
                 , el [ centerX ] extent
                 , el [ centerX ] <| fixButton
                 ]
 
         Nothing ->
             noTrackMessage location
-
-
-spacingSlider : Bool -> Options -> (Msg -> msg) -> Element msg
-spacingSlider imperial options wrap =
-    Input.slider
-        commonShortHorizontalSliderStyles
-        { onChange = wrap << SetSpacing
-        , label =
-            Input.labelBelow [] <|
-                text <|
-                    "Spacing: "
-                        ++ showShortMeasure imperial options.minimumSpacing
-        , min = 1.0
-        , max = 50.0
-        , step = Just 0.5
-        , value = Length.inMeters options.minimumSpacing
-        , thumb = Input.defaultThumb
-        }

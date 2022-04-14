@@ -21,7 +21,7 @@ Time to plough through all the tools. Again.
 , ~~nudgeTool~~
 , ~~outAndBackTool~~
 , ~~simplifyTool~~
-, interpolateTool
+, ~~interpolateTool~~
 , profileSmoothTool
 , moveScaleRotateTool
 , flythroughTool
