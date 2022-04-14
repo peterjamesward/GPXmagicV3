@@ -20,7 +20,10 @@ import Polyline3d exposing (Polyline3d)
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity exposing (Quantity)
 import SketchPlane3d
+import String.Interpolate
 import ToolTip exposing (buttonStylesWithTooltip)
+import Tools.I18N as I18N
+import Tools.I18NOptions as I18NOptions
 import Tools.StartFinishTypes exposing (ClosingInfo, Loopiness(..), Options)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showShortMeasure)
@@ -47,9 +50,12 @@ defaultOptions =
     }
 
 
-view : Bool -> Options -> TrackLoaded msg -> (Msg -> msg) -> Element msg
-view imperial options track wrap =
+view : I18NOptions.Options -> Bool -> Options -> TrackLoaded msg -> (Msg -> msg) -> Element msg
+view location imperial options track wrap =
     let
+        i18n =
+            I18N.text location toolId
+
         loopButton =
             button
                 neatToolsBorder
@@ -57,38 +63,38 @@ view imperial options track wrap =
                 case options.loopiness of
                     AlmostLoop _ ->
                         { onPress = Just <| wrap CloseTheLoop
-                        , label = paragraph [] [ text "Make the track into a loop" ]
+                        , label = paragraph [] [ i18n "make" ]
                         }
 
                     IsALoop ->
                         { onPress = Nothing
-                        , label = paragraph [] [ text "Already a loop" ]
+                        , label = paragraph [] [ i18n "loop" ]
                         }
 
                     NotALoop _ ->
                         { onPress = Nothing
-                        , label = paragraph [] [ text "Gap is too big" ]
+                        , label = paragraph [] [ i18n "biggap" ]
                         }
 
         reverseButton =
             button
                 neatToolsBorder
                 { onPress = Just <| wrap ReverseTrack
-                , label = paragraph [] [ text "Reverse the track" ]
+                , label = paragraph [] [ i18n "reverse" ]
                 }
 
         changeStartButton c =
             button
                 neatToolsBorder
                 { onPress = Just (wrap <| ChangeLoopStart c)
-                , label = paragraph [] [ text "Move start/finish to current point" ]
+                , label = paragraph [] [ i18n "move" ]
                 }
 
         addRiderPens =
             button
-                (buttonStylesWithTooltip below "Add 60m at start, 140m at end")
+                (buttonStylesWithTooltip below <| I18N.localisedString location toolId "pens")
                 { onPress = Just (wrap <| AddRiderPens)
-                , label = paragraph [] [ text "Add RGT pens" ]
+                , label = paragraph [] [ i18n "add" ]
                 }
     in
     column
@@ -100,7 +106,7 @@ view imperial options track wrap =
     <|
         case options.loopiness of
             IsALoop ->
-                [ paragraph [] [ text "This track is a loop." ]
+                [ paragraph [] [ i18n "isloop" ]
                 , changeStartButton track.currentPosition
                 , reverseButton
                 ]
@@ -108,9 +114,9 @@ view imperial options track wrap =
             AlmostLoop gap ->
                 [ paragraph []
                     [ text <|
-                        "This track is "
-                            ++ showShortMeasure imperial gap
-                            ++ " away from a loop"
+                        String.Interpolate.interpolate
+                            (I18N.localisedString location toolId "isnear")
+                            [ showShortMeasure imperial gap ]
                     ]
                 , loopButton
                 , reverseButton
@@ -120,9 +126,9 @@ view imperial options track wrap =
             NotALoop gap ->
                 [ paragraph []
                     [ text <|
-                        "This track is "
-                            ++ showShortMeasure imperial gap
-                            ++ " away from a loop"
+                        String.Interpolate.interpolate
+                            (I18N.localisedString location toolId "isnear")
+                            [ showShortMeasure imperial gap ]
                     ]
                 , loopButton
                 , reverseButton

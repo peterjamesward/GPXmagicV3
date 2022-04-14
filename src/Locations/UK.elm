@@ -451,8 +451,8 @@ but that's where _Route builder_ comes to play.
                 , ( "Zero", """Zero""" )
                 , ( "invalid", """Not valid""" )
                 , ( "apply", """Apply""" )
-                , ( "Stretch", """Stretch""")
-                , ( "height", """Height {0}""")
+                , ( "Stretch", """Stretch""" )
+                , ( "height", """Height {0}""" )
                 , ( "info", """
 Think of this as _Nudge_, supercharged. Use the markers to define a section of track,
 then the circular 2-way drag control to move this section freely. There's a height adjustment
@@ -626,6 +626,15 @@ use this to Everest your fave climbs.
         , ( "loop"
           , Dict.fromList
                 [ ( "label", """Start/Finish""" )
+                , ( "make", """Make the track into a loop""" )
+                , ( "loop", """The track is already a loop""" )
+                , ( "biggap", """Gap is too big""" )
+                , ( "reverse" , """Reverse the track""")
+                , ( "move", """Move Start/Finish to the Orange marker""")
+                , ( "pens", """Add 60m at start, 140m at end""")
+                , ( "add", """Add RGT pens""")
+                , ( "isloop", """This track is a loop""")
+                , ( "isnear", """This track is {0} away from a loop""")
                 , ( "info", """
 RGT will recognise a loop if the two ends are sufficiently close. But it won't
 make it smooth for you.

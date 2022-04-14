@@ -1968,6 +1968,7 @@ viewToolByType location msgWrapper entry isTrack options =
                 case isTrack of
                     Just track ->
                         Tools.StartFinish.view
+                            location
                             options.imperial
                             options.startFinishOptions
                             track
