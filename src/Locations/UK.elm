@@ -608,6 +608,12 @@ shape of the route.
         , ( "split/join"
           , Dict.fromList
                 [ ( "label", """Split & Join""" )
+                , ( "max", """Max length {0}""" )
+                , ( "pens", """Allow for RGT start and end pens""" )
+                , ( "1CQF", """Apply one-click quick fix to each section""" )
+                , ( "split", """Split into {0} files of {1}""" )
+                , ( "append", """Append a GPX file""" )
+                , ( "note", """Files will be written to Downloads folder at two second intervals.""" )
                 , ( "info", """
 Got an excessively long route? Why not ride in it sections?
 
@@ -629,12 +635,12 @@ use this to Everest your fave climbs.
                 , ( "make", """Make the track into a loop""" )
                 , ( "loop", """The track is already a loop""" )
                 , ( "biggap", """Gap is too big""" )
-                , ( "reverse" , """Reverse the track""")
-                , ( "move", """Move Start/Finish to the Orange marker""")
-                , ( "pens", """Add 60m at start, 140m at end""")
-                , ( "add", """Add RGT pens""")
-                , ( "isloop", """This track is a loop""")
-                , ( "isnear", """This track is {0} away from a loop""")
+                , ( "reverse", """Reverse the track""" )
+                , ( "move", """Move Start/Finish to the Orange marker""" )
+                , ( "pens", """Add 60m at start, 140m at end""" )
+                , ( "add", """Add RGT pens""" )
+                , ( "isloop", """This track is a loop""" )
+                , ( "isnear", """This track is {0} away from a loop""" )
                 , ( "info", """
 RGT will recognise a loop if the two ends are sufficiently close. But it won't
 make it smooth for you.

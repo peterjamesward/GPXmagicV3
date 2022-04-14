@@ -1981,6 +1981,7 @@ viewToolByType location msgWrapper entry isTrack options =
                 case isTrack of
                     Just track ->
                         Tools.SplitAndJoin.view
+                            location
                             options.imperial
                             options.splitAndJoinOptions
                             (msgWrapper << ToolSplitJoinMsg)

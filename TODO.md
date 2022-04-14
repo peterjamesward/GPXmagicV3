@@ -27,8 +27,8 @@ Time to plough through all the tools. Again.
 , ~~flythroughTool~~
 , ~~stravaTool~~
 , ~~moveAndStretchTool~~
-, startFinishTool
-, splitAndJoinTool
+, ~~startFinishTool~~
+, ~~splitAndJoinTool~~
 , intersectionsTool
 , straightenTool
 , graphTool

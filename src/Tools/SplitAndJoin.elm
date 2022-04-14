@@ -15,7 +15,10 @@ import GpxParser
 import Length
 import List.Extra
 import Quantity
+import String.Interpolate
 import Task
+import Tools.I18N as I18N
+import Tools.I18NOptions as I18NOptions
 import Tools.OneClickQuickFix as OneClickQuickFix
 import Tools.SplitAndJoinOptions exposing (Options)
 import TrackLoaded exposing (TrackLoaded)
@@ -221,9 +224,12 @@ calculateSections length options =
         (List.drop 1 splitPoints)
 
 
-view : Bool -> Options -> (Msg -> msg) -> TrackLoaded msg -> Element msg
-view imperial options wrapper track =
+view : I18NOptions.Options -> Bool -> Options -> (Msg -> msg) -> TrackLoaded msg -> Element msg
+view location imperial options wrapper track =
     let
+        i18n =
+            I18N.text location toolId
+
         effectiveLength =
             if options.addBuffers then
                 options.splitLimit |> Quantity.minus (Length.meters 200.0)
@@ -242,7 +248,12 @@ view imperial options wrapper track =
                 Input.slider
                     commonShortHorizontalSliderStyles
                     { onChange = wrapper << SetSplitLimit << Length.miles
-                    , label = Input.labelBelow [] <| text <| "Max: " ++ showLongMeasure True options.splitLimit
+                    , label =
+                        Input.labelBelow [] <|
+                            text <|
+                                String.Interpolate.interpolate
+                                    (I18N.localisedString location toolId "max")
+                                    [ showLongMeasure True options.splitLimit ]
                     , min = 12.0
                     , max = 65.0
                     , step = Just 1.0
@@ -254,7 +265,12 @@ view imperial options wrapper track =
                 Input.slider
                     commonShortHorizontalSliderStyles
                     { onChange = wrapper << SetSplitLimit << Length.kilometers
-                    , label = Input.labelBelow [] <| text <| "Max : " ++ showLongMeasure imperial options.splitLimit
+                    , label =
+                        Input.labelBelow [] <|
+                            text <|
+                                String.Interpolate.interpolate
+                                    (I18N.localisedString location toolId "max")
+                                    [ showLongMeasure True options.splitLimit ]
                     , min = 20.0
                     , max = 100.0
                     , step = Just 1.0
@@ -267,7 +283,7 @@ view imperial options wrapper track =
                 { onChange = wrapper << ToggleBuffers
                 , icon = Input.defaultCheckbox
                 , checked = options.addBuffers
-                , label = Input.labelRight [ centerY ] (text "Allow for start and end pens")
+                , label = Input.labelRight [ centerY ] (i18n "pens")
                 }
 
         quickFixCheckbox =
@@ -275,7 +291,7 @@ view imperial options wrapper track =
                 { onChange = wrapper << ToggleAutofix
                 , icon = Input.defaultCheckbox
                 , checked = options.applyAutofix
-                , label = Input.labelRight [ centerY ] (text "Apply one-click-quick-fix to each section")
+                , label = Input.labelRight [ centerY ] (i18n "1CQF")
                 }
 
         splitButton =
@@ -284,19 +300,18 @@ view imperial options wrapper track =
                 { onPress = Just <| wrapper <| SplitTrack
                 , label =
                     text <|
-                        "Split into "
-                            ++ String.fromInt splitCount
-                            ++ " files\n"
-                            ++ "each "
-                            ++ showLongMeasure imperial splitLength
-                            ++ " long"
+                        String.Interpolate.interpolate
+                            (I18N.localisedString location toolId "split")
+                            [ String.fromInt splitCount
+                            , showLongMeasure imperial splitLength
+                            ]
                 }
 
         appendFileButton =
             button
                 neatToolsBorder
                 { onPress = Just <| wrapper <| AppendFile
-                , label = text "Append file ..."
+                , label = i18n "append"
                 }
     in
     column
@@ -310,7 +325,7 @@ view imperial options wrapper track =
         , el [ centerX ] splitButton
         , el [ centerX ] <|
             paragraph []
-                [ text "Files will be written to Downloads folder at two second intervals." ]
+                [ i18n "note"  ]
         , el [ centerX ] appendFileButton
         ]
 
