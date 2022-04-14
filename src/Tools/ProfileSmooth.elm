@@ -11,6 +11,9 @@ import Length exposing (Meters, inMeters, meters)
 import Point3d exposing (zCoordinate)
 import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (multiplyBy, zero)
+import String.Interpolate
+import Tools.I18N as I18N
+import Tools.I18NOptions as I18NOptions
 import Tools.ProfileSmoothOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded, adjustAltitude)
 import UtilsForViews exposing (showDecimal0)
@@ -823,9 +826,12 @@ toolStateChange opened colour options track =
             ( options, [ HidePreview "limit", HidePreview "limitProfile" ] )
 
 
-view : Options -> (Msg -> msg) -> TrackLoaded msg -> Element msg
-view options wrapper track =
+view : I18NOptions.Options -> Options -> (Msg -> msg) -> TrackLoaded msg -> Element msg
+view location options wrapper track =
     let
+        i18n =
+            I18N.text location toolId
+
         maxAscentSlider =
             Input.slider
                 commonShortHorizontalSliderStyles
@@ -833,9 +839,9 @@ view options wrapper track =
                 , label =
                     Input.labelBelow [] <|
                         text <|
-                            "Uphill: "
-                                ++ showDecimal0 options.maximumAscent
-                                ++ "%"
+                            String.Interpolate.interpolate
+                                (I18N.localisedString location toolId "uphill")
+                                [ showDecimal0 options.maximumAscent ]
                 , min = 10.0
                 , max = 25.0
                 , step = Just 1.0
@@ -850,9 +856,9 @@ view options wrapper track =
                 , label =
                     Input.labelBelow [] <|
                         text <|
-                            "Downhill: "
-                                ++ showDecimal0 options.maximumDescent
-                                ++ "%"
+                            String.Interpolate.interpolate
+                                (I18N.localisedString location toolId "downhill")
+                                [ showDecimal0 options.maximumDescent ]
                 , min = 10.0
                 , max = 25.0
                 , step = Just 1.0
@@ -867,8 +873,9 @@ view options wrapper track =
                 , label =
                     Input.labelBelow [] <|
                         text <|
-                            "Points either side: "
-                                ++ String.fromInt options.windowSize
+                            String.Interpolate.interpolate
+                                (I18N.localisedString location toolId "window")
+                                [ String.fromInt options.windowSize ]
                 , min = 1.0
                 , max = 8.0
                 , step = Just 1.0
@@ -885,9 +892,7 @@ view options wrapper track =
                     button
                         neatToolsBorder
                         { onPress = Just <| wrapper <| LimitGradient
-                        , label =
-                            text <|
-                                "Apply limits"
+                        , label = paragraph [] [i18n "apply"]
                         }
                 ]
 
@@ -899,7 +904,7 @@ view options wrapper track =
                     button
                         neatToolsBorder
                         { onPress = Just <| wrapper <| SmoothAltitudes
-                        , label = text "Smooth by averaging altitudes\nwith nearby points"
+                        , label = paragraph [] [ i18n "altitudes" ]
                         }
                 ]
 
@@ -911,7 +916,7 @@ view options wrapper track =
                     button
                         neatToolsBorder
                         { onPress = Just <| wrapper <| SmoothGradients
-                        , label = text "Smooth by averaging gradients\nwith nearby points"
+                        , label = paragraph [] [ i18n "gradients" ]
                         }
                 ]
 
@@ -924,19 +929,19 @@ view options wrapper track =
                 , selected = Just options.smoothMethod
                 , label = Input.labelHidden "Method"
                 , options =
-                    [ Input.option MethodLimit (text "Limit gradients")
-                    , Input.option MethodAltitudes (text "Smooth altitudes")
-                    , Input.option MethodGradients (text "Smooth gradients")
+                    [ Input.option MethodLimit (i18n "uselimit")
+                    , Input.option MethodAltitudes (i18n "usealts")
+                    , Input.option MethodGradients (i18n "usegrad")
                     ]
                 }
 
         extent =
             paragraph [] <|
                 if track.markerPosition == Nothing then
-                    [ text """Applies to whole track""" ]
+                    [ i18n "whole" ]
 
                 else
-                    [ text "Applies between markers" ]
+                    [ i18n "part" ]
     in
     wrappedRow
         [ spacing 6

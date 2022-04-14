@@ -533,6 +533,17 @@ have no offset.
         , ( "profilesmooth"
           , Dict.fromList
                 [ ( "label", """Profile smoothing""" )
+                , ( "uphill", """Uphill {0}%""" )
+                , ( "downhill", """Downhill {0}%""" )
+                , ( "window", """Points either side: {0}""" )
+                , ( "apply", """Apply limits to gradients""" )
+                , ( "altitudes", """Smooth by averaging altitudes""" )
+                , ( "gradients", """Smooth by averaging gradients""" )
+                , ( "uselimit", """Limit gradients""" )
+                , ( "usealts", """Smooth altitudes""" )
+                , ( "usegrad", """Smooth gradients""" )
+                , ( "whole", """Applies to whole track""" )
+                , ( "part", """Applies between markers""" )
                 , ( "info", """
 There's no one way to achieve a smooth altitude profile. It depends whether you begin with a recorded
 or a planned ride; it depends whether you favour accuracy or smoothness; whether you want

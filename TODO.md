@@ -22,7 +22,7 @@ Time to plough through all the tools. Again.
 , ~~outAndBackTool~~
 , ~~simplifyTool~~
 , ~~interpolateTool~~
-, profileSmoothTool
+, ~~profileSmoothTool~~
 , moveScaleRotateTool
 , flythroughTool
 , stravaTool

@@ -1921,6 +1921,7 @@ viewToolByType location msgWrapper entry isTrack options =
                 case isTrack of
                     Just track ->
                         Tools.ProfileSmooth.view
+                            location
                             options.profileSmoothSettings
                             (msgWrapper << ToolProfileSmoothMsg)
                             track
