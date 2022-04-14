@@ -29,8 +29,9 @@ import Quantity exposing (Quantity)
 import Rectangle2d
 import Svg
 import Svg.Attributes
-import ToolTip exposing (myTooltip, tooltip)
+import ToolTip exposing (localisedTooltip, myTooltip, tooltip)
 import Tools.DisplaySettingsOptions
+import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import ViewPureStyles exposing (useIcon)
 
@@ -104,8 +105,8 @@ common3dSceneAttributes msgWrapper context =
     ]
 
 
-zoomButtons : (Msg -> msg) -> Context -> Element msg
-zoomButtons msgWrapper context =
+zoomButtons : I18NOptions.Options -> (Msg -> msg) -> Context -> Element msg
+zoomButtons location msgWrapper context =
     column
         [ alignTop
         , alignRight
@@ -134,10 +135,10 @@ zoomButtons msgWrapper context =
             }
         , Input.button
             (if context.followSelectedPoint then
-                [ tooltip onLeft (myTooltip "Locked to Orange") ]
+                [ tooltip onLeft (localisedTooltip location "panes" "locked") ]
 
              else
-                [ tooltip onLeft (myTooltip "Draggable") ]
+                [ tooltip onLeft (localisedTooltip location "panes" "unlocked") ]
             )
             { onPress = Just <| msgWrapper ToggleFollowOrange
             , label =

@@ -778,6 +778,7 @@ viewPanes location msgWrapper mTrack graph graphOptions displayOptions ( w, h ) 
                     case ( pane.thirdPersonContext, mTrack ) of
                         ( Just context, Just track ) ->
                             ViewThirdPerson.view
+                                location
                                 context
                                 displayOptions
                                 ( paneWidth, paneHeight )
@@ -855,6 +856,7 @@ viewPanes location msgWrapper mTrack graph graphOptions displayOptions ( w, h ) 
                     showNonMapViews pane
                 , conditionallyVisible (pane.activeView == ViewMap) <|
                     ViewMap.view
+                        location
                         ( paneWidth, paneHeight )
                         pane.mapContext
                         (msgWrapper << MapViewMessage)

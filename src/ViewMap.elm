@@ -11,7 +11,8 @@ import FlatColors.ChinesePalette
 import Html.Attributes exposing (id)
 import Pixels exposing (Pixels, inPixels)
 import Quantity exposing (Quantity)
-import ToolTip exposing (myTooltip, tooltip)
+import ToolTip exposing (localisedTooltip, myTooltip, tooltip)
+import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import ViewPureStyles exposing (useIcon)
 
@@ -120,11 +121,12 @@ update msg msgWrapper track area context =
 
 
 view :
-    ( Quantity Int Pixels, Quantity Int Pixels )
+    I18NOptions.Options
+    -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Maybe Context
     -> (Msg -> msg)
     -> Element msg
-view ( viewWidth, viewHeight ) mContext msgWrapper =
+view location ( viewWidth, viewHeight ) mContext msgWrapper =
     let
         handyMapControls context =
             column
@@ -141,10 +143,10 @@ view ( viewWidth, viewHeight ) mContext msgWrapper =
                     [ tooltip onLeft <|
                         case context.followOrange of
                             True ->
-                                myTooltip "Map locked to Orange"
+                                localisedTooltip location "panes" "locked"
 
                             False ->
-                                myTooltip "Map is draggable"
+                                localisedTooltip location "panes" "unlocked"
                     ]
                     { onPress = Just <| msgWrapper ToggleFollowOrange
                     , label =
@@ -158,10 +160,10 @@ view ( viewWidth, viewHeight ) mContext msgWrapper =
                     [ tooltip onLeft <|
                         case context.draggable of
                             True ->
-                                myTooltip "Click to disable point dragging"
+                                localisedTooltip location "panes" "drag"
 
                             False ->
-                                myTooltip "Click to allow point dragging"
+                                localisedTooltip location "panes" "nodrag"
                     ]
                     { onPress = Just <| msgWrapper ToggleDraggable
                     , label =
@@ -172,7 +174,7 @@ view ( viewWidth, viewHeight ) mContext msgWrapper =
                             useIcon FeatherIcons.x
                     }
                 , Input.button
-                    [ tooltip onLeft (myTooltip "Choose map style")
+                    [ tooltip onLeft (localisedTooltip location "panes" "mapstyle")
                     , inFront <| el [ alignRight ] <| mapStyleChoices context
                     ]
                     { onPress = Just <| msgWrapper ToggleMapStyleMenu

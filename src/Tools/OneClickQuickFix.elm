@@ -24,6 +24,8 @@ import Loop
 import Quantity
 import Tools.BezierSplines
 import Tools.CentroidAverage
+import Tools.I18N as I18N
+import Tools.I18NOptions as I18NOptions
 import Tools.Interpolate
 import Tools.Simplify
 import TrackLoaded exposing (TrackLoaded)
@@ -87,14 +89,14 @@ apply originalTrack =
     )
 
 
-oneClickQuickFixButton : (Msg -> msg) -> Maybe (TrackLoaded msg) -> Element msg
-oneClickQuickFixButton wrapper track =
+oneClickQuickFixButton : I18NOptions.Options -> (Msg -> msg) -> Maybe (TrackLoaded msg) -> Element msg
+oneClickQuickFixButton location wrapper track =
     case track of
         Just _ ->
             Input.button
                 (height (px 30) :: centerY :: prettyButtonStyles)
                 { onPress = Just (wrapper Apply)
-                , label = Element.text "One-click Quick-fix!"
+                , label = I18N.text location "main" "1CQF"
                 }
 
         Nothing ->

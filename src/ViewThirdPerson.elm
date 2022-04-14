@@ -20,6 +20,7 @@ import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
 import Spherical
 import Tools.DisplaySettingsOptions
+import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import Vector3d
 import View3dCommonElements exposing (..)
@@ -27,14 +28,15 @@ import Viewpoint3d exposing (Viewpoint3d)
 
 
 view :
-    Context
+    I18NOptions.Options
+    -> Context
     -> Tools.DisplaySettingsOptions.Options
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> TrackLoaded msg
     -> List (Entity LocalCoords)
     -> (Msg -> msg)
     -> Element msg
-view context display contentArea track scene msgWrapper =
+view location context display contentArea track scene msgWrapper =
     let
         dragging =
             context.dragAction
@@ -53,7 +55,7 @@ view context display contentArea track scene msgWrapper =
             pointer
          )
             :: (inFront <| overlay)
-            :: (inFront <| zoomButtons msgWrapper context)
+            :: (inFront <| zoomButtons location msgWrapper context)
             :: common3dSceneAttributes msgWrapper context
         )
     <|

@@ -38,6 +38,7 @@ If the File Open dialog does not appear, please reload the page in the browser a
                 , ( "nosvg", """Sorry, could not extract SVG paths""" )
                 , ( "message", """Message""" )
                 , ( "dismiss", """Dismiss""" )
+                , ( "1CQF", "One-click Quick Fix!")
                 ]
           )
         , ( "panes"
@@ -54,6 +55,11 @@ If the File Open dialog does not appear, please reload the page in the browser a
                 , ( "Plan", """Plan""" )
                 , ( "Route", """Route""" )
                 , ( "About", """About""" )
+                , ( "locked", """Locked to Orange""" )
+                , ( "unlocked", """Draggable""" )
+                , ( "drag", """Click to prevent point dragging""" )
+                , ( "nodrag", """Click to allow point dragging""" )
+                , ( "mapstyle", """Choose map style""" )
                 ]
           )
         , ( "graph"
