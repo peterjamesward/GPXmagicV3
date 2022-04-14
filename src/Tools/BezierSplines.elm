@@ -11,7 +11,10 @@ import FlatColors.ChinesePalette
 import Point3d
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity
+import String.Interpolate
 import Tools.BezierOptions as BezierOptions exposing (..)
+import Tools.I18N as I18N
+import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (fullDepthRenderingBoxSize, showDecimal2)
 import ViewPureStyles exposing (commonShortHorizontalSliderStyles, neatToolsBorder, prettyButtonStyles)
@@ -216,9 +219,12 @@ update msg options previewColour hasTrack =
             ( options, [] )
 
 
-view : (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
-view wrap options track =
+view : I18NOptions.Options -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
+view location wrap options track =
     let
+        i18n =
+            I18N.text location toolId
+
         sliders =
             column [ centerX, width fill, spacing 5 ]
                 [ Input.slider commonShortHorizontalSliderStyles
@@ -226,8 +232,9 @@ view wrap options track =
                     , label =
                         Input.labelBelow [] <|
                             text <|
-                                "Tension "
-                                    ++ showDecimal2 options.bezierTension
+                                String.Interpolate.interpolate
+                                    (I18N.localisedString location toolId "tension")
+                                    [ showDecimal2 options.bezierTension ]
                     , min = 0.0
                     , max = 1.0
                     , step = Nothing
@@ -239,8 +246,9 @@ view wrap options track =
                     , label =
                         Input.labelBelow [] <|
                             text <|
-                                "Tolerance "
-                                    ++ showDecimal2 options.bezierTolerance
+                                String.Interpolate.interpolate
+                                    (I18N.localisedString location toolId "tolerance")
+                                    [ showDecimal2 options.bezierTolerance ]
                     , min = 1.0
                     , max = 10.0
                     , step = Just 0.5
@@ -258,24 +266,24 @@ view wrap options track =
                 , selected = Just options.bezierStyle
                 , label = Input.labelHidden "Style"
                 , options =
-                    [ Input.option ThroughExisting (text "Through existing points")
-                    , Input.option Approximated (text "Approximating existing points")
+                    [ Input.option ThroughExisting (i18n "through")
+                    , Input.option Approximated (i18n "approx")
                     ]
                 }
 
         extent =
             paragraph [] <|
                 if track.markerPosition == Nothing then
-                    [ text """Applies to whole track""" ]
+                    [ i18n "whole" ]
 
                 else
-                    [ text "Applies between markers" ]
+                    [ i18n "part" ]
 
         actionButton =
             el [ centerX, width fill, spacing 5 ] <|
                 button (width fill :: neatToolsBorder)
                     { onPress = Just <| wrap BezierApplyWithOptions
-                    , label = paragraph [] [ text "Apply" ]
+                    , label = paragraph [] [ i18n "apply" ]
                     }
     in
     column

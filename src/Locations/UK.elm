@@ -195,6 +195,13 @@ _Radiused bends_ offers a slightly different approach.
         , ( "splines"
           , Dict.fromList
                 [ ( "label", """Smooth with splines""" )
+                , ( "tension", """Tension: {0}""" )
+                , ( "tolerance", """Tolerance: {0}""" )
+                , ( "through", """Through existing points""" )
+                , ( "approx", """Approximating existing points""" )
+                , ( "whole", """Applies to whole track""" )
+                , ( "part", """Applies between markers""" )
+                , ( "apply", """Apply""" )
                 , ( "info", """
 Splines are a common way to engineer a smooth curve. They work in three dimensions
 and so can help with gradient and direction changes.

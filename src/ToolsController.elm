@@ -1844,6 +1844,7 @@ viewToolByType location msgWrapper entry isTrack options =
                 case isTrack of
                     Just track ->
                         Tools.BezierSplines.view
+                            location
                             (msgWrapper << ToolBezierMsg)
                             options.bezierSplineOptions
                             track

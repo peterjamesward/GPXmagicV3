@@ -13,7 +13,7 @@ Time to plough through all the tools. Again.
 , ~~directionChangeTool~~
 , ~~gradientChangeTool~~
 , ~~deleteTool~~
-, bezierSplinesTool
+, ~~bezierSplinesTool~~
 , centroidAverageTool
 , curveFormerTool
 , bendSmootherTool
