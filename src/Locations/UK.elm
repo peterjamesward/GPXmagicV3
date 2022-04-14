@@ -180,6 +180,12 @@ serious issues.
         , ( "arcs"
           , Dict.fromList
                 [ ( "label", """Smooth with arcs""" )
+                , ( "Bend", """Bend""")
+                , ( "Point", """Point""")
+                , ( "none", """No bend found""")
+                , ( "smooth", """Smooth between markers,
+Radius {0}""")
+                , ( "spacing", """Spacing: {0}""" )
                 , ( "info", """
 Find a circular arc to replace an existing bend, by moving the Orange and
 Purple markers to find an acceptable solution. 

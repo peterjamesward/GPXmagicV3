@@ -23,7 +23,9 @@ import Polyline3d
 import PreviewData exposing (PreviewData, PreviewPoint, PreviewShape(..))
 import Quantity exposing (Quantity(..), minus)
 import SketchPlane3d
+import String.Interpolate
 import Tools.BendSmootherOptions exposing (..)
+import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showShortMeasure)
@@ -380,6 +382,9 @@ viewBendControls :
     -> Element msg
 viewBendControls location imperial wrapper options track =
     let
+        i18n =
+            I18N.text location toolId
+
         fixBendButton smooth =
             button
                 neatToolsBorder
@@ -389,12 +394,13 @@ viewBendControls location imperial wrapper options track =
                         Just isSmooth ->
                             paragraph [] <|
                                 [ text <|
-                                    "Smooth between markers\nRadius "
-                                        ++ showShortMeasure imperial (Length.meters isSmooth.radius)
+                                    String.Interpolate.interpolate
+                                        (I18N.localisedString location toolId "")
+                                        [ showShortMeasure imperial (Length.meters isSmooth.radius) ]
                                 ]
 
                         Nothing ->
-                            text "No bend found"
+                            i18n "none"
                 }
     in
     case track of
@@ -405,7 +411,7 @@ viewBendControls location imperial wrapper options track =
                 , width fill
                 , centerX
                 ]
-                [ el [ centerX ] <| bendSmoothnessSlider imperial options wrapper
+                [ el [ centerX ] <| bendSmoothnessSlider location imperial options wrapper
                 , el [ centerX ] <| fixBendButton options.smoothedBend
                 ]
 
@@ -441,6 +447,10 @@ viewPointControls location imperial wrapper options track =
 
 view : I18NOptions.Options -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
 view location imperial wrapper options track =
+    let
+        i18n =
+            I18N.text location toolId
+    in
     column
         [ padding 10
         , spacing 5
@@ -452,8 +462,8 @@ view location imperial wrapper options track =
             Input.radioRow
                 [ spacing 5 ]
                 { options =
-                    [ Input.option SmoothBend <| text "Bend"
-                    , Input.option SmoothPoint <| text "Point"
+                    [ Input.option SmoothBend <| i18n "Bend"
+                    , Input.option SmoothPoint <| i18n "Point"
                     ]
                 , onChange = wrapper << SetMode
                 , selected = Just options.mode
@@ -468,16 +478,17 @@ view location imperial wrapper options track =
         ]
 
 
-bendSmoothnessSlider : Bool -> Options -> (Msg -> msg) -> Element msg
-bendSmoothnessSlider imperial options wrap =
+bendSmoothnessSlider : I18NOptions.Options -> Bool -> Options -> (Msg -> msg) -> Element msg
+bendSmoothnessSlider location imperial options wrap =
     Input.slider
         commonShortHorizontalSliderStyles
         { onChange = wrap << SetBendTrackPointSpacing
         , label =
             Input.labelBelow [] <|
                 text <|
-                    "Spacing: "
-                        ++ showShortMeasure imperial (Length.meters options.bendTrackPointSpacing)
+                    String.Interpolate.interpolate
+                        (I18N.localisedString location toolId "spacing")
+                        [ showShortMeasure imperial (Length.meters options.bendTrackPointSpacing) ]
         , min =
             Length.inMeters <|
                 if imperial then
