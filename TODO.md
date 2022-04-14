@@ -4,7 +4,6 @@
 ## I18N
 
 Multiple language dictionaries.
-> Waiting for response from Muriel.
 
 ---
 

@@ -4,6 +4,7 @@ import Countries exposing (Country)
 import Dict exposing (Dict)
 import Element exposing (Element)
 import FormatNumber.Locales exposing (frenchLocale)
+import List.Extra
 import Locations.UK
 import Tools.I18NOptions exposing (Options)
 
@@ -25,6 +26,15 @@ frOptions =
     , locale = frenchLocale
     , textDictionary = Dict.empty
     }
+
+
+fromCountryCode code =
+    case List.Extra.find (\loc -> loc.country.code == code) availableI18N of
+        Just location ->
+            location
+
+        Nothing ->
+            defaultLocation
 
 
 localisedString : Options -> String -> String -> String

@@ -111,6 +111,7 @@ type Msg
     | RepaintMap
     | ToggleToolPopup
     | BackgroundColour Element.Color
+    | Language I18NOptions.Options
     | RestoreDefaultToolLayout
     | WriteGpxFile
     | FilenameChange String
@@ -269,6 +270,7 @@ init mflags origin navigationKey =
         , LocalStorage.storageGetItem "background"
         , LocalStorage.storageGetItem "visuals"
         , LocalStorage.storageGetItem "docks"
+        , LocalStorage.storageGetItem "location"
         , LocalStorage.storageGetMemoryUsage
         ]
     )
@@ -301,6 +303,11 @@ render model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        Language location ->
+            ( { model | location = location }
+            , LocalStorage.storageSetItem "location" <| E.string location.country.code
+            )
+
         AdjustTimeZone newZone ->
             ( { model | zone = newZone }
             , MyIP.requestIpInformation ReceivedIpDetails
@@ -1144,6 +1151,14 @@ showOptionsMenu model =
                 { label = none
                 , onPress = Just <| BackgroundColour colour
                 }
+
+        chooseLanguage : I18NOptions.Options -> Element Msg
+        chooseLanguage location =
+            Input.button
+                [ width fill, Font.size 48 ]
+                { label = text location.country.flag
+                , onPress = Just <| Language location
+                }
     in
     if model.isPopupOpen then
         column (spacing 4 :: subtleToolStyles)
@@ -1159,6 +1174,8 @@ showOptionsMenu model =
                     }
             , el (alignRight :: width fill :: subtleToolStyles) <|
                 ToolsController.imperialToggleMenuEntry model.location ToolsMsg model.toolOptions
+            , row [ spaceEvenly, width fill ] <|
+                List.map chooseLanguage I18N.availableI18N
             ]
 
     else
@@ -2186,6 +2203,14 @@ performActionsOnModel actions model =
 
                 ( StoredValueRetrieved key value, _ ) ->
                     case key of
+                        "location" ->
+                            case D.decodeValue D.string value of
+                                Ok countryCode ->
+                                    { foldedModel | location = I18N.fromCountryCode countryCode }
+
+                                Err _ ->
+                                    foldedModel
+
                         "splits" ->
                             foldedModel |> decodeSplitValues value
 
