@@ -435,6 +435,13 @@ spacing varies from one section to another.
         , ( "intersections"
           , Dict.fromList
                 [ ( "label", """Intersections""" )
+                , ( "Summary", """Summary""")
+                , ( "List", """List""")
+                , ( "none", """None found""")
+                , ( "prev", """Move to previous""" )
+                , ( "this", """Move pointer to this issue (Is the padlock on?)""" )
+                , ( "next", """Move to next""" )
+                , ( "detail", """{0} {1} {2} at {3}""")
                 , ( "info", """
 This helps to find places where one road section crosses another, or where a piece
 of road is used more than once, either in the same or the opposite direction.

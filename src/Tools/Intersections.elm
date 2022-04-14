@@ -11,7 +11,10 @@ import FlatColors.ChinesePalette
 import List.Extra
 import PreviewData exposing (PreviewShape(..))
 import RoadIndex exposing (Intersection)
+import String.Interpolate
 import ToolTip exposing (buttonStylesWithTooltip)
+import Tools.I18N as I18N
+import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal0, showLongMeasure, showShortMeasure)
 import ViewPureStyles exposing (infoButton, neatToolsBorder, noTrackMessage, useIcon)
@@ -136,15 +139,18 @@ update msg options wrap =
             ( options, [ Actions.DisplayInfo tool tag ] )
 
 
-view : Bool -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
-view imperial msgWrapper options track =
+view : I18NOptions.Options -> Bool -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
+view location imperial msgWrapper options track =
     let
+        i18n =
+            I18N.text location toolId
+
         resultModeSelection =
             Input.radioRow [ centerX, spacing 5 ]
                 { onChange = msgWrapper << SetResultMode
                 , options =
-                    [ Input.option ResultNavigation (text "Summary")
-                    , Input.option ResultList (text "List")
+                    [ Input.option ResultNavigation (i18n "Summary")
+                    , Input.option ResultList (i18n "List")
                     ]
                 , selected = Just options.resultMode
                 , label = Input.labelHidden "Results mode"
@@ -153,7 +159,7 @@ view imperial msgWrapper options track =
         resultsNavigation =
             case options.features of
                 [] ->
-                    el [ centerX, centerY ] <| text "None found"
+                    el [ centerX, centerY ] <| i18n "none"
 
                 a :: b ->
                     column [ spacing 4, centerX ]
@@ -165,17 +171,17 @@ view imperial msgWrapper options track =
                         , row [ centerX, spacing 10 ]
                             [ infoButton <| msgWrapper <| DisplayInfo "bends" "locate"
                             , Input.button
-                                (buttonStylesWithTooltip below "Move to previous")
+                                (buttonStylesWithTooltip below <| I18N.localisedString location toolId "prev")
                                 { label = useIcon FeatherIcons.chevronLeft
                                 , onPress = Just <| msgWrapper <| ViewPrevious
                                 }
                             , Input.button
-                                (buttonStylesWithTooltip below "Centre view on this issue")
+                                (buttonStylesWithTooltip below <| I18N.localisedString location toolId "this")
                                 { label = useIcon FeatherIcons.mousePointer
                                 , onPress = Just <| msgWrapper <| SetCurrentPosition a.thisSegment
                                 }
                             , Input.button
-                                (buttonStylesWithTooltip below "Move to next")
+                                (buttonStylesWithTooltip below <| I18N.localisedString location toolId "next")
                                 { label = useIcon FeatherIcons.chevronRight
                                 , onPress = Just <| msgWrapper <| ViewNext
                                 }
@@ -185,22 +191,19 @@ view imperial msgWrapper options track =
         linkButton : Intersection -> Element msg
         linkButton { thisSegment, otherSegment, category } =
             let
-                distamceText =
-                    " at "
-                        ++ (showLongMeasure imperial <|
-                                DomainModel.distanceFromIndex thisSegment track.trackTree
-                           )
+                distanceText =
+                    showLongMeasure imperial <| DomainModel.distanceFromIndex thisSegment track.trackTree
 
                 categoryText =
                     case category of
                         RoadIndex.Crossing pointXY ->
-                            " crosses "
+                            "crosses"
 
                         RoadIndex.SameDirection ->
-                            " loops "
+                            "loops"
 
                         RoadIndex.ContraDirection ->
-                            " reverses "
+                            "reverses"
 
                 thisText =
                     String.fromInt thisSegment
@@ -210,7 +213,11 @@ view imperial msgWrapper options track =
             in
             Input.button neatToolsBorder
                 { onPress = Just (msgWrapper <| SetCurrentPosition thisSegment)
-                , label = text <| thisText ++ categoryText ++ otherText ++ distamceText
+                , label =
+                    text <|
+                        String.Interpolate.interpolate
+                            (I18N.localisedString location toolId "detail")
+                            [ thisText, categoryText, otherText, distanceText ]
                 }
     in
     el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|

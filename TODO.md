@@ -29,7 +29,7 @@ Time to plough through all the tools. Again.
 , ~~moveAndStretchTool~~
 , ~~startFinishTool~~
 , ~~splitAndJoinTool~~
-, intersectionsTool
+, ~~intersectionsTool~~
 , straightenTool
 , graphTool
 , landUseTool

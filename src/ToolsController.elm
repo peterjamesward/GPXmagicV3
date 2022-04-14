@@ -1994,6 +1994,7 @@ viewToolByType location msgWrapper entry isTrack options =
                 case isTrack of
                     Just track ->
                         Tools.Intersections.view
+                            location
                             options.imperial
                             (msgWrapper << ToolIntersectionMsg)
                             options.intersectionOptions
