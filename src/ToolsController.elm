@@ -1955,6 +1955,7 @@ viewToolByType location msgWrapper entry isTrack options =
                 case isTrack of
                     Just track ->
                         Tools.MoveAndStretch.view
+                            location
                             options.imperial
                             options.moveAndStretchSettings
                             (msgWrapper << ToolMoveAndStretchMsg)

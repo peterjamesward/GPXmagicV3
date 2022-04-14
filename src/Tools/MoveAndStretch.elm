@@ -16,9 +16,12 @@ import Point2d
 import Point3d
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity
+import String.Interpolate
 import Svg
 import Svg.Attributes as SA
 import Tools.CurveFormer exposing (highlightPoints)
+import Tools.I18N as I18N
+import Tools.I18NOptions as I18NOptions
 import Tools.MoveAndStretchOptions exposing (Mode(..), Options, Point)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showShortMeasure)
@@ -346,9 +349,12 @@ update message options wrapper previewColour track =
             ( options, [ Actions.DisplayInfo tool tag ] )
 
 
-view : Bool -> Options -> (Msg -> msg) -> TrackLoaded msg -> Element msg
-view imperial options wrapper track =
+view : I18NOptions.Options -> Bool -> Options -> (Msg -> msg) -> TrackLoaded msg -> Element msg
+view location imperial options wrapper track =
     let
+        i18n =
+            I18N.text location toolId
+
         ( nearEnd, fromEnd ) =
             TrackLoaded.getRangeFromMarkers track
 
@@ -381,8 +387,7 @@ view imperial options wrapper track =
                     Input.slider commonShortHorizontalSliderStyles
                         { onChange = wrapper << DraggerMarker << round
                         , label =
-                            Input.labelBelow []
-                                (text "Choose point to drag")
+                            Input.labelBelow [] (i18n "white")
                         , min = toFloat <| nearEnd + 1
                         , max = toFloat <| farEnd - 1
                         , step = Just 1.0
@@ -396,16 +401,16 @@ view imperial options wrapper track =
         showActionButtons =
             row [ spacing 5 ]
                 [ Input.button neatToolsBorder
-                    { label = text "Zero", onPress = Just <| wrapper DraggerReset }
+                    { label = i18n "Zero", onPress = Just <| wrapper DraggerReset }
                 , if canApply then
                     Input.button neatToolsBorder
-                        { label = text "Apply"
+                        { label = i18n "apply"
                         , onPress = Just <| wrapper DraggerApply
                         }
 
                   else
                     Input.button neatToolsBorder
-                        { label = text "Not valid"
+                        { label = i18n "invalid"
                         , onPress = Nothing
                         }
                 ]
@@ -415,7 +420,7 @@ view imperial options wrapper track =
                 { onChange = wrapper << DraggerModeToggle
                 , icon = Input.defaultCheckbox
                 , checked = options.mode /= Translate
-                , label = Input.labelRight [ centerY ] (text "Stretch")
+                , label = Input.labelRight [ centerY ] (i18n "Stretch")
                 }
     in
     -- Try with linear vector, switch to log or something else if needed.
@@ -436,8 +441,9 @@ view imperial options wrapper track =
             , el [ centerX ] showActionButtons
             , el [ centerX ] <|
                 text <|
-                    "Height "
-                        ++ showShortMeasure imperial (heightOffset options.heightSliderSetting)
+                    String.Interpolate.interpolate
+                        (I18N.localisedString location toolId "height")
+                        [ showShortMeasure imperial (heightOffset options.heightSliderSetting) ]
             ]
         , heightSlider
         ]

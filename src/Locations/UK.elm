@@ -447,6 +447,12 @@ but that's where _Route builder_ comes to play.
         , ( "stretch"
           , Dict.fromList
                 [ ( "label", """Move and Stretch""" )
+                , ( "white", """Choose point to drag""" )
+                , ( "Zero", """Zero""" )
+                , ( "invalid", """Not valid""" )
+                , ( "apply", """Apply""" )
+                , ( "Stretch", """Stretch""")
+                , ( "height", """Height {0}""")
                 , ( "info", """
 Think of this as _Nudge_, supercharged. Use the markers to define a section of track,
 then the circular 2-way drag control to move this section freely. There's a height adjustment

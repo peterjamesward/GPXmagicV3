@@ -26,7 +26,7 @@ Time to plough through all the tools. Again.
 , ~~moveScaleRotateTool~~
 , ~~flythroughTool~~
 , ~~stravaTool~~
-, moveAndStretchTool
+, ~~moveAndStretchTool~~
 , startFinishTool
 , splitAndJoinTool
 , intersectionsTool
