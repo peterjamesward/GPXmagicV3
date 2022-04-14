@@ -219,6 +219,10 @@ actually want or need to pass through them.
         , ( "centroid"
           , Dict.fromList
                 [ ( "label", """Centroid average""" )
+                , ( "weight", """Weighting {0}""" )
+                , ( "Position", """Position""" )
+                , ( "Altitude", """Altitude""" )
+                , ( "Apply", """Apply""" )
                 , ( "info", """
  A simple way to remove "noise" from a track is by taking the average of each
  point with its neighbours. This tool does that in three dimensions, but lets you

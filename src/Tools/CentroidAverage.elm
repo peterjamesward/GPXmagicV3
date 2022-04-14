@@ -11,7 +11,10 @@ import Plane3d
 import Point3d
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity
+import String.Interpolate
 import Tools.CentroidAverageOptions exposing (..)
+import Tools.I18N as I18N
+import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import Triangle3d
 import UtilsForViews exposing (fullDepthRenderingBoxSize, showDecimal2)
@@ -187,9 +190,17 @@ update msg options previewColour hasTrack =
             ( options, [] )
 
 
-view : (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
-view wrap options track =
+view :
+    I18NOptions.Options
+    -> (Msg -> msg)
+    -> Options
+    -> TrackLoaded msg
+    -> Element msg
+view location wrap options track =
     let
+        i18n =
+            I18N.text location toolId
+
         sliders =
             column [ centerX, width fill, spacing 5 ]
                 [ Input.slider commonShortHorizontalSliderStyles
@@ -197,8 +208,9 @@ view wrap options track =
                     , label =
                         Input.labelBelow [] <|
                             text <|
-                                "Weighting "
-                                    ++ showDecimal2 options.weighting
+                                String.Interpolate.interpolate
+                                    (I18N.localisedString location toolId "weight")
+                                    [ showDecimal2 options.weighting ]
                     , min = 0.0
                     , max = 1.0
                     , step = Nothing
@@ -215,7 +227,7 @@ view wrap options track =
                     ]
                     { onChange = wrap << TogglePosition
                     , checked = options.applyToPosition
-                    , label = Input.labelLeft [] <| text "Position"
+                    , label = Input.labelLeft [] <| i18n "Position"
                     , icon = Input.defaultCheckbox
                     }
                 , Input.checkbox
@@ -224,7 +236,7 @@ view wrap options track =
                     ]
                     { onChange = wrap << ToggleAltitude
                     , checked = options.applyToAltitude
-                    , label = Input.labelRight [] <| text "Altitude"
+                    , label = Input.labelRight [] <| i18n "Altitude"
                     , icon = Input.defaultCheckbox
                     }
                 ]
@@ -233,7 +245,7 @@ view wrap options track =
             el [ centerX, width fill, spacing 5 ] <|
                 button (width fill :: neatToolsBorder)
                     { onPress = Just <| wrap ApplyWithOptions
-                    , label = paragraph [] [ text "Apply" ]
+                    , label = paragraph [] [ i18n "Apply" ]
                     }
 
         extent =

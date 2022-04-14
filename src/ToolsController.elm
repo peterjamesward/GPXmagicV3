@@ -1856,6 +1856,7 @@ viewToolByType location msgWrapper entry isTrack options =
                 case isTrack of
                     Just track ->
                         Tools.CentroidAverage.view
+                            location
                             (msgWrapper << ToolCentroidMsg)
                             options.centroidAverageOptions
                             track

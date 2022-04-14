@@ -14,7 +14,7 @@ Time to plough through all the tools. Again.
 , ~~gradientChangeTool~~
 , ~~deleteTool~~
 , ~~bezierSplinesTool~~
-, centroidAverageTool
+, ~~centroidAverageTool~~
 , curveFormerTool
 , bendSmootherTool
 , smartSmootherTool
