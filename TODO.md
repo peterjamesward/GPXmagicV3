@@ -18,7 +18,7 @@ Time to plough through all the tools. Again.
 , ~~curveFormerTool~~
 , ~~bendSmootherTool~~
 , ~~smartSmootherTool~~
-, nudgeTool
+, ~~nudgeTool~~
 , outAndBackTool
 , simplifyTool
 , interpolateTool

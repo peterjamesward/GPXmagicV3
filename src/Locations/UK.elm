@@ -477,6 +477,21 @@ Purple marker, the Purple marker is moved there; this can give you more control 
         , ( "nudge"
           , Dict.fromList
                 [ ( "label", """Nudge""" )
+                , ( "+1yd", """+1yd""" )
+                , ( "+1ft", """+1ft""" )
+                , ( "+1in", """+1in""" )
+                , ( "-1in", """-1in""" )
+                , ( "-1ft", """-1ft""" )
+                , ( "-1yd", """-1yd""" )
+                , ( "+1m", """+1m""" )
+                , ( "+10cm", """+10cm""" )
+                , ( "+1cm", """+1cm""" )
+                , ( "-1cm", """-1cm""" )
+                , ( "-10cm", """-10cm""" )
+                , ( "-1m", """-1m""" )
+                , ( "fade", """Fade in/out""")
+                , ( "Apply", """Apply""")
+                , ( "Zero", """Reset sliders""")
                 , ( "info", """
 Sometimes all it takes is a little _Nudge_.
 

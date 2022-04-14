@@ -16,6 +16,7 @@ import Point3d exposing (Point3d, xCoordinate, yCoordinate, zCoordinate)
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity exposing (Quantity)
 import SketchPlane3d
+import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.NudgeOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
@@ -346,11 +347,109 @@ update msg options previewColour track =
 view : I18NOptions.Options -> Bool -> Options -> (Msg -> msg) -> Maybe (TrackLoaded msg) -> Element msg
 view location imperial options msgWrapper track =
     let
+        i18n =
+            I18N.text location toolId
+
+        horizontalNudgeSlider  =
+            Input.slider
+                commonShortHorizontalSliderStyles
+                { onChange = Length.meters >> SetHorizontalNudgeFactor >> msgWrapper
+                , label = Input.labelBelow [ centerX ] <| text <| showShortMeasure imperial options.horizontal
+                , min =
+                    Length.inMeters <|
+                        if imperial then
+                            Length.feet -21.0
+
+                        else
+                            Length.meters -7.0
+                , max =
+                    Length.inMeters <|
+                        if imperial then
+                            Length.feet 21.0
+
+                        else
+                            Length.meters 7.0
+                , step =
+                    Just <|
+                        Length.inMeters <|
+                            if imperial then
+                                Length.inches 2
+
+                            else
+                                Length.centimeters 5
+                , value = Length.inMeters options.horizontal
+                , thumb = Input.defaultThumb
+                }
+
+        fadeSlider  =
+            Input.slider
+                commonShortHorizontalSliderStyles
+                { onChange = Length.meters >> SetFadeExtent >> msgWrapper
+                , label = Input.labelBelow [ centerX ] <| text <| showShortMeasure imperial options.fadeExtent
+                , min = 0.0
+                , max =
+                    Length.inMeters <|
+                        if imperial then
+                            Length.feet 160.0
+
+                        else
+                            Length.meters 50.0
+                , step = Nothing
+                , value = Length.inMeters options.fadeExtent
+                , thumb = Input.defaultThumb
+                }
+
+        verticalNudgeSlider =
+            el [ width fill, alignRight, paddingEach { edges | left = 10 } ] <|
+                Input.slider
+                    commonShortVerticalSliderStyles
+                    { onChange = Length.meters >> SetVerticalNudgeFactor >> msgWrapper
+                    , label = Input.labelBelow [ centerY ] <| text <| showShortMeasure imperial options.vertical
+                    , min =
+                        Length.inMeters <|
+                            if imperial then
+                                Length.feet -21.0
+
+                            else
+                                Length.meters -7.0
+                    , max =
+                        Length.inMeters <|
+                            if imperial then
+                                Length.feet 21.0
+
+                            else
+                                Length.meters 7.0
+                    , step =
+                        Just <|
+                            Length.inMeters <|
+                                if imperial then
+                                    Length.inches 2
+
+                                else
+                                    Length.centimeters 5
+                    , value = Length.inMeters options.vertical
+                    , thumb = Input.defaultThumb
+                    }
+
+        nudgeButton =
+            button
+                neatToolsBorder
+                { onPress = Just <| msgWrapper ApplyWithOptions
+                , label = i18n "Apply"
+                }
+
+        zeroButton =
+            button
+                neatToolsBorder
+                { onPress = Just <| msgWrapper ZeroNudgeFactors
+                , label = i18n "Zero"
+                }
+
         vertical label increment =
             button
                 (width fill :: neatToolsBorder)
                 { onPress = Just <| msgWrapper <| NudgeButton increment
-                , label = text label
+                , label = i18n label
                 }
 
         verticalNudgeButtons =
@@ -385,119 +484,14 @@ view location imperial options msgWrapper track =
                 , Background.color FlatColors.ChinesePalette.antiFlashWhite
                 ]
                 [ verticalNudgeButtons
-                , verticalNudgeSlider imperial options.vertical msgWrapper
+                , verticalNudgeSlider
                 , column [ width fill, centerX, padding 5, spacing 5 ]
-                    [ horizontalNudgeSlider imperial options.horizontal msgWrapper
+                    [ horizontalNudgeSlider
                     , row [ padding 5, spacing 5 ]
-                        [ nudgeButton options msgWrapper
-                        , zeroButton msgWrapper
+                        [ nudgeButton
+                        , zeroButton
                         ]
-                    , text "Fade in/out"
-                    , fadeSlider imperial options.fadeExtent msgWrapper
+                    , i18n "fade"
+                    , fadeSlider
                     ]
                 ]
-
-
-horizontalNudgeSlider : Bool -> Length.Length -> (Msg -> msg) -> Element msg
-horizontalNudgeSlider imperial value wrap =
-    Input.slider
-        commonShortHorizontalSliderStyles
-        { onChange = Length.meters >> SetHorizontalNudgeFactor >> wrap
-        , label = Input.labelBelow [ centerX ] <| text <| showShortMeasure imperial value
-        , min =
-            Length.inMeters <|
-                if imperial then
-                    Length.feet -21.0
-
-                else
-                    Length.meters -7.0
-        , max =
-            Length.inMeters <|
-                if imperial then
-                    Length.feet 21.0
-
-                else
-                    Length.meters 7.0
-        , step =
-            Just <|
-                Length.inMeters <|
-                    if imperial then
-                        Length.inches 2
-
-                    else
-                        Length.centimeters 5
-        , value = Length.inMeters value
-        , thumb = Input.defaultThumb
-        }
-
-
-fadeSlider : Bool -> Length.Length -> (Msg -> msg) -> Element msg
-fadeSlider imperial value wrap =
-    Input.slider
-        commonShortHorizontalSliderStyles
-        { onChange = Length.meters >> SetFadeExtent >> wrap
-        , label = Input.labelBelow [ centerX ] <| text <| showShortMeasure imperial value
-        , min = 0.0
-        , max =
-            Length.inMeters <|
-                if imperial then
-                    Length.feet 160.0
-
-                else
-                    Length.meters 50.0
-        , step = Nothing
-        , value = Length.inMeters value
-        , thumb = Input.defaultThumb
-        }
-
-
-verticalNudgeSlider : Bool -> Quantity Float Meters -> (Msg -> msg) -> Element msg
-verticalNudgeSlider imperial value wrap =
-    el [ width fill, alignRight, paddingEach { edges | left = 10 } ] <|
-        Input.slider
-            commonShortVerticalSliderStyles
-            { onChange = Length.meters >> SetVerticalNudgeFactor >> wrap
-            , label = Input.labelBelow [ centerY ] <| text <| showShortMeasure imperial value
-            , min =
-                Length.inMeters <|
-                    if imperial then
-                        Length.feet -21.0
-
-                    else
-                        Length.meters -7.0
-            , max =
-                Length.inMeters <|
-                    if imperial then
-                        Length.feet 21.0
-
-                    else
-                        Length.meters 7.0
-            , step =
-                Just <|
-                    Length.inMeters <|
-                        if imperial then
-                            Length.inches 2
-
-                        else
-                            Length.centimeters 5
-            , value = Length.inMeters value
-            , thumb = Input.defaultThumb
-            }
-
-
-nudgeButton : Options -> (Msg -> msg) -> Element msg
-nudgeButton settings wrap =
-    button
-        neatToolsBorder
-        { onPress = Just <| wrap ApplyWithOptions
-        , label = text "Apply"
-        }
-
-
-zeroButton : (Msg -> msg) -> Element msg
-zeroButton wrap =
-    button
-        neatToolsBorder
-        { onPress = Just <| wrap ZeroNudgeFactors
-        , label = text "Zero sliders"
-        }
