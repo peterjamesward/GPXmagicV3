@@ -4,8 +4,37 @@
 ## I18N
 
 Multiple language dictionaries.
-Number formats.
-System of measure -- aargh, but UK GB NI wants both, so remains a separate option.
+Time to plough through all the tools. Again.
+
+[ ~~toolSettings~~
+, ~~essentialsTool~~
+, trackInfoBox
+, displaySettingsTool
+, directionChangeTool
+, gradientChangeTool
+, deleteTool
+, bezierSplinesTool
+, centroidAverageTool
+, curveFormerTool
+, bendSmootherTool
+, smartSmootherTool
+, nudgeTool
+, outAndBackTool
+, simplifyTool
+, interpolateTool
+, profileSmoothTool
+, moveScaleRotateTool
+, flythroughTool
+, stravaTool
+, moveAndStretchTool
+, startFinishTool
+, splitAndJoinTool
+, intersectionsTool
+, straightenTool
+, graphTool
+, landUseTool
+]
+
 
 ---
 

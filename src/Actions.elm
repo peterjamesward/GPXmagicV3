@@ -15,6 +15,8 @@ import Tools.BendSmootherOptions
 import Tools.BezierOptions
 import Tools.CentroidAverageOptions
 import Tools.CurveFormerOptions
+import Tools.I18N as I18N
+import Tools.I18NOptions as I18NOptions
 import Tools.InterpolateOptions
 import Tools.MemoryUsage
 import Tools.MoveAndStretchOptions
@@ -22,10 +24,10 @@ import Tools.MoveScaleRotateOptions
 import Tools.NudgeOptions
 import Tools.OutAndBackOptions
 import Tools.ProfileSmoothOptions
+import Tools.SmartSmootherOptions
 import Tools.StartFinishTypes
 import Tools.StravaOptions
 import Tools.StravaTypes exposing (StravaRoute, StravaSegment, StravaSegmentStreams)
-import Tools.SmartSmootherOptions
 
 
 type ToolAction msg
@@ -105,99 +107,100 @@ type ToolAction msg
     | WidenBend (List Int) (Quantity Float Meters)
 
 
-interpretAction : ToolAction msg -> String
-interpretAction action =
+interpretAction : I18NOptions.Options -> ToolAction msg -> String
+interpretAction location action =
     -- Only needed for track modifying actions that go in the undo stack.
-    case action of
-        DeletePointsBetween fromStart fromEnd ->
-            "deletion of points"
+    I18N.localisedString location "action" <|
+        case action of
+            DeletePointsBetween fromStart fromEnd ->
+                "deleteN"
 
-        DeleteSinglePoint fromStart fromEnd ->
-            "delete single point"
+            DeleteSinglePoint fromStart fromEnd ->
+                "delete1"
 
-        BezierApplyWithOptions options ->
-            "smooth with spline"
+            BezierApplyWithOptions options ->
+                "spline"
 
-        CentroidAverageApplyWithOptions options ->
-            "smooth with 3d average"
+            CentroidAverageApplyWithOptions options ->
+                "centroid"
 
-        CurveFormerApplyWithOptions options ->
-            "radiused bend"
+            CurveFormerApplyWithOptions options ->
+                "radius"
 
-        BendSmootherApplyWithOptions options ->
-            "circular arc"
+            BendSmootherApplyWithOptions options ->
+                "arc"
 
-        PointMovedOnMap _ _ _ _ ->
-            "move on map"
+            PointMovedOnMap _ _ _ _ ->
+                "map"
 
-        NudgeApplyWithOptions options ->
-            "nudge"
+            NudgeApplyWithOptions options ->
+                "nudge"
 
-        OutAndBackApplyWithOptions options ->
-            "out and back"
+            OutAndBackApplyWithOptions options ->
+                "outback"
 
-        ApplySimplify ->
-            "simplify"
+            ApplySimplify ->
+                "simplify"
 
-        ApplyInterpolateWithOptions options ->
-            "insert points"
+            ApplyInterpolateWithOptions options ->
+                "insert"
 
-        OneClickQuickFix ->
-            "one-click quick0fix"
+            OneClickQuickFix ->
+                "1CQF"
 
-        LimitGradientWithOptions options ->
-            "limit gradients"
+            LimitGradientWithOptions options ->
+                "limit"
 
-        SmoothAltitudes options ->
-            "smooth altitudes"
+            SmoothAltitudes options ->
+                "altitudes"
 
-        SmoothGradients options ->
-            "smooth gradients"
+            SmoothGradients options ->
+                "gradients"
 
-        ApplyRotateAndScale _ ->
-            "rotate and scale"
+            ApplyRotateAndScale _ ->
+                "scale"
 
-        ApplyRecentre _ ->
-            "move"
+            ApplyRecentre _ ->
+                "move"
 
-        ApplyMapElevations _ ->
-            "use map elevations"
+            ApplyMapElevations _ ->
+                "elevations"
 
-        PasteStravaSegment _ ->
-            "Strava segment"
+            PasteStravaSegment _ ->
+                "segment"
 
-        MoveAndStretchWithOptions _ ->
-            "move / stretch"
+            MoveAndStretchWithOptions _ ->
+                "stretch"
 
-        CloseLoopWithOptions _ ->
-            "close loop"
+            CloseLoopWithOptions _ ->
+                "close"
 
-        ReverseTrack ->
-            "reverse route"
+            ReverseTrack ->
+                "reverse"
 
-        MoveStartPoint _ ->
-            "move start"
+            MoveStartPoint _ ->
+                "start"
 
-        AddRiderPens ->
-            "add rider pens"
+            AddRiderPens ->
+                "pens"
 
-        ParseAndAppend _ ->
-            "append gpx"
+            ParseAndAppend _ ->
+                "append"
 
-        Straighten ->
-            "straighten"
+            Straighten ->
+                "straighten"
 
-        Autofix _ ->
-            "smooth points"
+            Autofix _ ->
+                "autofix"
 
-        MakeRouteFromGraph ->
-            "route maker"
+            MakeRouteFromGraph ->
+                "route"
 
-        WidenBend _ _ ->
-            "widen bend"
+            WidenBend _ _ ->
+                "widen"
 
-        SmartSmootherApplyWithOptions _ ->
-            "smart smoother"
+            SmartSmootherApplyWithOptions _ ->
+                "smart"
 
-        _ ->
-            "tell Pete this needs a message"
+            _ ->
+                "unknown"

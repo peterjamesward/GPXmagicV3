@@ -4,18 +4,18 @@ import Countries exposing (Country)
 import Dict exposing (Dict)
 import Element exposing (Element)
 import FormatNumber.Locales exposing (frenchLocale)
-import Locations.Uk
+import Locations.UK
 import Tools.I18NOptions exposing (Options)
 
 
 defaultOptions : Options
 defaultOptions =
-    Locations.Uk.ukOptions
+    Locations.UK.ukOptions
 
 
 availableI18N : List Options
 availableI18N =
-    [ Locations.Uk.ukOptions
+    [ Locations.UK.ukOptions
     , frOptions
     ]
 
@@ -36,10 +36,10 @@ localisedString location tool tag =
                     gotText
 
                 Nothing ->
-                    "Tag " ++ tag ++ " not found"
+                    "Text: " ++ tool ++ ":" ++ tag ++ "?"
 
         Nothing ->
-            "Tool " ++ tool ++ " not found"
+            "Text: " ++ tool ++ ":*?"
 
 
 text : Options -> String -> String -> Element msg

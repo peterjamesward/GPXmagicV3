@@ -1,4 +1,4 @@
-module Locations.Uk exposing (..)
+module Locations.UK exposing (..)
 
 import Countries exposing (Country)
 import Dict exposing (Dict)
@@ -31,14 +31,14 @@ Select GPX file.
 
 If the File Open dialog does not appear, please reload the page in the browser and try again.
 """ )
-                , ( "loading", """Loading ...""" )
+                , ( "loading", """Loading GPX file ...""" )
                 , ( "noload", """Sorry, unable to load that file""" )
                 , ( "nogpx", """Could not make a track. Are you sure that's a GPX file?""" )
                 , ( "nowrite", """Sorry, unable to write the file""" )
                 , ( "nosvg", """Sorry, could not extract SVG paths""" )
                 , ( "message", """Message""" )
                 , ( "dismiss", """Dismiss""" )
-                , ( "1CQF", "One-click Quick Fix!")
+                , ( "1CQF", "One-click Quick Fix!" )
                 ]
           )
         , ( "panes"
@@ -271,9 +271,51 @@ Also, access a quick description of what the tool does and how (and when) to use
 """ )
                 ]
           )
+        , ( "action"
+          , Dict.fromList
+                [ ( "deleteN", """deletion of points""" )
+                , ( "delete1", """delete one point""" )
+                , ( "spline", """smooth with splines""" )
+                , ( "centroid", """smooth with 3D average""" )
+                , ( "radius", """radiused bend""" )
+                , ( "arc", """circular arc""" )
+                , ( "map", """move on map""" )
+                , ( "nudge", """nudge""" )
+                , ( "outback", """out and back""" )
+                , ( "simplify", """simplify""" )
+                , ( "insert", """insert points""" )
+                , ( "1CQF", """one-click quick fix""" )
+                , ( "limit", """limit gradients""" )
+                , ( "altitudes", """smooth altitudes""" )
+                , ( "gradients", """smooth gradients""" )
+                , ( "scale", """rotate and scale""" )
+                , ( "elevations", """use altitudes from map""" )
+                , ( "segment", """insert segment from Strava""" )
+                , ( "stretch", """move and stretch""" )
+                , ( "close", """close loop""" )
+                , ( "reverse", """reverse track direction""" )
+                , ( "start", """move start points""" )
+                , ( "pens", """add RGT rider pens""" )
+                , ( "append", """append GPX track""" )
+                , ( "straighten", """straighten""" )
+                , ( "autofix", """autofix""" )
+                , ( "route", """turn route into new track""" )
+                , ( "widen", """widen bend""" )
+                , ( "smart", """smart smoother""" )
+                , ( "unknown", """(what was that?)""" )
+                ]
+          )
         , ( "essentials"
           , Dict.fromList
                 [ ( "label", """Essentials""" )
+                , ( "point", """Point {0} at {1}""" )
+                , ( "lift", """Lift purple marker""" )
+                , ( "drop", """Drop purple marker""" )
+                , ( "note", """Use Orange and Purple markers to select track for editing.""" )
+                , ( "noundo", """Nothing to Undo""" )
+                , ( "noredo", """Nothing to Redo""" )
+                , ( "undo", """Undo {0}""" )
+                , ( "redo", """Redo {0}""" )
                 , ( "info", """
 Most of the editing tools require either a single point or a range of points to work on.
 
