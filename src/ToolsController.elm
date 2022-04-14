@@ -1824,6 +1824,7 @@ viewToolByType location msgWrapper entry isTrack options =
                 case isTrack of
                     Just track ->
                         DeletePoints.view
+                            location
                             (msgWrapper << DeletePoints)
                             options.deleteOptions
                             track

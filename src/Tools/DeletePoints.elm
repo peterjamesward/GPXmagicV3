@@ -9,6 +9,8 @@ import Element.Background as Background
 import Element.Input as Input
 import FlatColors.ChinesePalette
 import PreviewData exposing (PreviewShape(..))
+import Tools.I18N as I18N
+import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (fullDepthRenderingBoxSize)
 import ViewPureStyles exposing (neatToolsBorder)
@@ -138,9 +140,12 @@ update msg options previewColour hasTrack =
             ( options, [] )
 
 
-view : (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
-view msgWrapper options track =
+view : I18NOptions.Options -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
+view location msgWrapper options track =
     let
+        i18n =
+            I18N.text location toolId
+
         ( fromStart, fromEnd ) =
             TrackLoaded.getRangeFromMarkers track
 
@@ -151,17 +156,17 @@ view msgWrapper options track =
         el [ centerX, padding 4, spacing 4, height <| px 50 ] <|
             if wholeTrackIsSelected then
                 el [ padding 5, centerX, centerY ] <|
-                    text "Sorry, I can't let you do that."
+                    i18n "sorry"
 
             else
                 Input.button (centerY :: neatToolsBorder)
                     { onPress = Just (msgWrapper DeletePointOrPoints)
                     , label =
                         if options.singlePoint then
-                            text "Delete single point"
+                            i18n "single"
 
                         else
-                            text "Delete between and including markers"
+                            i18n "many"
                     }
 
 

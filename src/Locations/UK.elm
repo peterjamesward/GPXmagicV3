@@ -159,7 +159,7 @@ You may get better results from using the _Smooth with Arcs_ or _Radiused Bends_
                 , ( ".radius.", """{0} of {1}, radius {2}º""" )
                 , ( "smooth", """Smooth these points""" )
                 , ( "adjust", """Widen current bend""" )
-                , ( "threshold", """Threshold {0}%""")
+                , ( "threshold", """Threshold {0}%""" )
                 , ( "info", """
 Find points where the gradient changes significantly, or is a noticeably
 steep ascent or descent.
@@ -255,6 +255,9 @@ actually want or need to pass through them.
         , ( "delete"
           , Dict.fromList
                 [ ( "label", """Delete""" )
+                , ( "sorry", """Sorry, I can't let you do that.""" )
+                , ( "single", """Delete single point""" )
+                , ( "many", """Delete between and including markers""" )
                 , ( "info", """
 If you've got a single point -- or more -- out of line, sometimes the best thing
 to do is just Delete them.

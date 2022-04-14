@@ -12,7 +12,7 @@ Time to plough through all the tools. Again.
 , ~~displaySettingsTool~~
 , ~~directionChangeTool~~
 , ~~gradientChangeTool~~
-, deleteTool
+, ~~deleteTool~~
 , bezierSplinesTool
 , centroidAverageTool
 , curveFormerTool
