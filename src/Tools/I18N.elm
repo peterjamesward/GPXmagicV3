@@ -8,14 +8,14 @@ import Locations.UK
 import Tools.I18NOptions exposing (Options)
 
 
-defaultOptions : Options
-defaultOptions =
-    Locations.UK.ukOptions
+defaultLocation : Options
+defaultLocation =
+    Locations.UK.options
 
 
 availableI18N : List Options
 availableI18N =
-    [ Locations.UK.ukOptions
+    [ Locations.UK.options
     , frOptions
     ]
 
@@ -29,17 +29,34 @@ frOptions =
 
 localisedString : Options -> String -> String -> String
 localisedString location tool tag =
-    case Dict.get tool location.textDictionary of
-        Just innerDict ->
-            case Dict.get tag innerDict of
+    let
+        fromActiveLocation =
+            case Dict.get tool location.textDictionary of
+                Just innerDict ->
+                    Dict.get tag innerDict
+
+                Nothing ->
+                    Nothing
+
+        fromDefault =
+            case Dict.get tool defaultLocation.textDictionary of
+                Just innerDict ->
+                    Dict.get tag innerDict
+
+                Nothing ->
+                    Nothing
+    in
+    case fromActiveLocation of
+        Just gotText ->
+            gotText
+
+        Nothing ->
+            case fromDefault of
                 Just gotText ->
                     gotText
 
                 Nothing ->
-                    "Text: " ++ tool ++ ":" ++ tag ++ "?"
-
-        Nothing ->
-            "Text: " ++ tool ++ ":*?"
+                    tool ++ ":" ++ tag ++ "?"
 
 
 text : Options -> String -> String -> Element msg

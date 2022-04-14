@@ -5,7 +5,7 @@ import Dict exposing (Dict)
 import FormatNumber.Locales exposing (usLocale)
 
 
-ukOptions =
+options =
     { country = Country "United Kingdom of Great Britain and Northern Ireland" "GB" "🇬🇧"
     , locale =
         { usLocale
