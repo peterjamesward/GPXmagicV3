@@ -10,7 +10,9 @@ import FeatherIcons
 import FlatColors.ChinesePalette
 import List.Extra
 import PreviewData exposing (PreviewShape(..))
+import String.Interpolate
 import ToolTip exposing (buttonStylesWithTooltip)
+import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showAngle, showDecimal2, showLongMeasure)
@@ -314,13 +316,16 @@ update msg options previewColour hasTrack =
 view : I18NOptions.Options -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
 view location imperial msgWrapper options isTrack =
     let
+        i18n =
+            I18N.text location toolId
+
         modeSelection =
             Input.radio [ centerX, spacing 5 ]
                 { onChange = msgWrapper << SetMode
                 , options =
-                    [ Input.option AbruptChange (text "Abrupt changes")
-                    , Input.option SteepClimb (text "Steep climbs")
-                    , Input.option SteepDescent (text "Steep descents")
+                    [ Input.option AbruptChange (i18n "usepoint")
+                    , Input.option SteepClimb (i18n "climbs")
+                    , Input.option SteepDescent (i18n "descents")
                     ]
                 , selected = Just options.mode
                 , label = Input.labelHidden "Mode"
@@ -330,8 +335,8 @@ view location imperial msgWrapper options isTrack =
             Input.radioRow [ centerX, spacing 5 ]
                 { onChange = msgWrapper << SetResultMode
                 , options =
-                    [ Input.option ResultNavigation (text "Summary")
-                    , Input.option ResultList (text "List")
+                    [ Input.option ResultNavigation (i18n "summary")
+                    , Input.option ResultList (i18n "list")
                     ]
                 , selected = Just options.resultMode
                 , label = Input.labelHidden "Results mode"
@@ -352,7 +357,7 @@ view location imperial msgWrapper options isTrack =
         resultsNavigation =
             case options.breaches of
                 [] ->
-                    el [ centerX, centerY ] <| text "None found"
+                    el [ centerX, centerY ] <| i18n "none"
 
                 a :: b ->
                     let
@@ -363,26 +368,26 @@ view location imperial msgWrapper options isTrack =
                     column [ spacing 4, centerX ]
                         [ el [ centerX ] <|
                             text <|
-                                String.fromInt (options.currentBreach + 1)
-                                    ++ " of "
-                                    ++ (String.fromInt <| List.length options.breaches)
-                                    ++ " is "
-                                    ++ showDecimal2 turn
-                                    ++ "º"
+                                String.Interpolate.interpolate
+                                    (I18N.localisedString location toolId ".of.")
+                                    [ String.fromInt (options.currentBreach + 1)
+                                    , String.fromInt <| List.length options.breaches
+                                    , showDecimal2 turn
+                                    ]
                         , row [ centerX, spacing 10 ]
                             [ infoButton <| msgWrapper <| DisplayInfo "bends" "locate"
                             , Input.button
-                                (buttonStylesWithTooltip below "Move to previous")
+                                (buttonStylesWithTooltip below <| I18N.localisedString location toolId "prev")
                                 { label = useIcon FeatherIcons.chevronLeft
                                 , onPress = Just <| msgWrapper <| ViewPrevious
                                 }
                             , Input.button
-                                (buttonStylesWithTooltip below "Centre view on this issue")
+                                (buttonStylesWithTooltip below <| I18N.localisedString location toolId "this")
                                 { label = useIcon FeatherIcons.mousePointer
                                 , onPress = Just <| msgWrapper <| SetCurrentPosition position
                                 }
                             , Input.button
-                                (buttonStylesWithTooltip below "Move to next")
+                                (buttonStylesWithTooltip below <| I18N.localisedString location toolId "next")
                                 { label = useIcon FeatherIcons.chevronRight
                                 , onPress = Just <| msgWrapper <| ViewNext
                                 }
@@ -409,7 +414,7 @@ view location imperial msgWrapper options isTrack =
                     , Input.button
                         (alignTop :: neatToolsBorder)
                         { onPress = Just (msgWrapper Autofix)
-                        , label = text "Smooth these points"
+                        , label = i18n "smooth"
                         }
                     ]
     in
@@ -421,9 +426,9 @@ view location imperial msgWrapper options isTrack =
                     , el [ centerX ] thresholdSlider
                     , el [ centerX ] <|
                         text <|
-                            "Threshold "
-                                ++ showDecimal2 options.threshold
-                                ++ "%"
+                            String.Interpolate.interpolate
+                                (I18N.localisedString location toolId "threshold")
+                                [ showDecimal2 options.threshold ]
                     , el [ centerX ] autofixButton
                     , el [ centerX ] resultModeSelection
                     , case options.resultMode of

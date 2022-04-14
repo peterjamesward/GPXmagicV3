@@ -11,7 +11,7 @@ Time to plough through all the tools. Again.
 , ~~trackInfoBox~~
 , ~~displaySettingsTool~~
 , ~~directionChangeTool~~
-, gradientChangeTool
+, ~~gradientChangeTool~~
 , deleteTool
 , bezierSplinesTool
 , centroidAverageTool

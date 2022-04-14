@@ -109,8 +109,7 @@ Any changes you make will be reflected here.
                 , ( "change", """Direction change {0}º""" )
                 , ( "radius", """Radius {0}""" )
                 , ( "prev", """Move to previous""" )
-                , ( "this", """Move pointer to this issue
-(Is the padlock on?)""" )
+                , ( "this", """Move pointer to this issue (Is the padlock on?)""" )
                 , ( "next", """Move to next""" )
                 , ( "none", """None found""" )
                 , ( ".of.", """{0} of {1}, {2}º""" )
@@ -145,6 +144,22 @@ You may get better results from using the _Smooth with Arcs_ or _Radiused Bends_
         , ( "gradients"
           , Dict.fromList
                 [ ( "label", """Gradient problems""" )
+                , ( "usepoint", """Sudden change""" )
+                , ( "climbs", """Steep climbs""" )
+                , ( "descents", """Steep descents""" )
+                , ( "summary", """Summary""" )
+                , ( "list", """List""" )
+                , ( "change", """Direction change {0}º""" )
+                , ( "radius", """Radius {0}""" )
+                , ( "prev", """Move to previous""" )
+                , ( "this", """Move pointer to this issue (Is the padlock on?)""" )
+                , ( "next", """Move to next""" )
+                , ( "none", """None found""" )
+                , ( ".of.", """{0} of {1} is {2}º""" )
+                , ( ".radius.", """{0} of {1}, radius {2}º""" )
+                , ( "smooth", """Smooth these points""" )
+                , ( "adjust", """Widen current bend""" )
+                , ( "threshold", """Threshold {0}%""")
                 , ( "info", """
 Find points where the gradient changes significantly, or is a noticeably
 steep ascent or descent.
