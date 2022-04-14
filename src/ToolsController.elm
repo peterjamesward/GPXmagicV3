@@ -2030,6 +2030,7 @@ viewToolByType location msgWrapper entry isTrack options =
                 case isTrack of
                     Just track ->
                         Tools.SmartSmoother.view
+                            location
                             options.imperial
                             (msgWrapper << ToolSmartSmootherMsg)
                             options.smartSmootherOptions

@@ -180,11 +180,11 @@ serious issues.
         , ( "arcs"
           , Dict.fromList
                 [ ( "label", """Smooth with arcs""" )
-                , ( "Bend", """Bend""")
-                , ( "Point", """Point""")
-                , ( "none", """No bend found""")
+                , ( "Bend", """Bend""" )
+                , ( "Point", """Point""" )
+                , ( "none", """No bend found""" )
                 , ( "smooth", """Smooth between markers,
-Radius {0}""")
+Radius {0}""" )
                 , ( "spacing", """Spacing: {0}""" )
                 , ( "info", """
 Find a circular arc to replace an existing bend, by moving the Orange and
@@ -656,6 +656,10 @@ Displays the colour legend for land use data, and a list of named places.
         , ( "smart"
           , Dict.fromList
                 [ ( "label", """Smart smoother""" )
+                , ( "viewminimum", """Minimum radius {0}""" )
+                , ( "viewtransition", """Meters of turn-in {0}""" )
+                , ( "viewgradient", """Maximum gradient {0}""" )
+                , ( "Smooth", """Smooth""" )
                 , ( "info", """
 Smart smoother applies three constraints to the track:
 

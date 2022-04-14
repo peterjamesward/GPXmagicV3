@@ -23,7 +23,10 @@ import Polyline3d exposing (Polyline3d)
 import PreviewData exposing (PreviewData, PreviewPoint, PreviewShape(..))
 import Quantity exposing (Quantity)
 import SketchPlane3d
+import String.Interpolate
 import Tools.BendSmoother
+import Tools.I18N as I18N
+import Tools.I18NOptions as I18NOptions
 import Tools.SmartSmootherOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import Triangle3d
@@ -592,14 +595,17 @@ update msg options previewColour track =
             ( newOptions, previewActions newOptions previewColour track )
 
 
-view : Bool -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
-view imperial wrapper options track =
+view : I18NOptions.Options -> Bool -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
+view location imperial wrapper options track =
     let
+        i18n =
+            I18N.text location toolId
+
         applyButton =
             button
                 neatToolsBorder
                 { onPress = Just <| wrapper Apply
-                , label = text "Smooth"
+                , label = i18n "Smooth"
                 }
 
         minRadiusSlider =
@@ -614,14 +620,17 @@ view imperial wrapper options track =
                     , thumb = Input.defaultThumb
                     }
                 , infoButton <| wrapper <| DisplayInfo "smart" "radius"
-                , text <| "Minimum radius " ++ showShortMeasure imperial options.minRadius
+                , text <|
+                    String.Interpolate.interpolate
+                        (I18N.localisedString location toolId "viewminimum")
+                        [ showShortMeasure imperial options.minRadius ]
                 ]
 
         transitionSlider =
             row [ spacing 3 ]
                 [ Input.slider commonShortHorizontalSliderStyles
                     { onChange = wrapper << SetMinTransition << Length.meters
-                    , label = Input.labelHidden "transtions"
+                    , label = Input.labelHidden "transitions"
                     , min = 1.0
                     , max = 10.0
                     , step = Just 0.5
@@ -629,7 +638,10 @@ view imperial wrapper options track =
                     , thumb = Input.defaultThumb
                     }
                 , infoButton <| wrapper <| DisplayInfo "smart" "transition"
-                , text <| "Meters of turn-in " ++ showShortMeasure imperial options.minTransition
+                , text <|
+                    String.Interpolate.interpolate
+                        (I18N.localisedString location toolId "viewtransition")
+                        [ showShortMeasure imperial options.minTransition ]
                 ]
 
         gradientSlider =
@@ -644,12 +656,11 @@ view imperial wrapper options track =
                     , thumb = Input.defaultThumb
                     }
                 , infoButton <| wrapper <| DisplayInfo "smart" "gradient"
-                , text <| "Maximum gradient " ++ showDecimal2 options.maxGradient
+                , text <|
+                    String.Interpolate.interpolate
+                        (I18N.localisedString location toolId "viewgradient")
+                        [ showDecimal2 options.maxGradient ]
                 ]
-
-        analysis =
-            -- Will be a data table showing results of analysis
-            text "Analysis here..."
     in
     column
         [ padding 10
