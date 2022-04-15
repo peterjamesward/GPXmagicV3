@@ -13,6 +13,7 @@ import File.Download as Download
 import File.Select as Select
 import FlatColors.ChinesePalette
 import FormatNumber.Locales exposing (frenchLocale)
+import Http
 import Json.Decode as D
 import Json.Encode as E
 import List.Extra
@@ -30,6 +31,7 @@ type Msg
     | Upload
     | FileChosen File
     | FileLoaded String
+    | Dictionary (Result Http.Error (Dict String (Dict String String)))
 
 
 defaultLocation : Location
@@ -328,6 +330,18 @@ update msg wrapper ( location, options ) =
                 Err _ ->
                     ( location, options, Cmd.none )
 
+        Dictionary result ->
+            let
+                _ =
+                    Debug.log "result" result
+            in
+            case result of
+                Ok remoteDict ->
+                    ( { location | textDictionary = remoteDict }, options, Cmd.none )
+
+                Err _ ->
+                    ( location, options, Cmd.none )
+
 
 locationToJson : Location -> E.Value
 locationToJson location =
@@ -337,3 +351,15 @@ locationToJson location =
 locationDecoder : D.Decoder (Dict String (Dict String String))
 locationDecoder =
     D.dict (D.dict D.string)
+
+
+base =
+    "https://s3.eu-west-1.amazonaws.com/stepwiserefinement.co.uk/GPXmagicV3Lab/"
+
+
+requestDictionary : (Msg -> msg) -> String -> Cmd msg
+requestDictionary wrapper countryCode =
+    Http.get
+        { url = "languages/" ++ countryCode ++ ".JSON"
+        , expect = Http.expectJson (wrapper << Dictionary) locationDecoder
+        }

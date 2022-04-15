@@ -311,7 +311,14 @@ update msg model =
     case msg of
         Language location ->
             ( { model | location = location }
-            , LocalStorage.storageSetItem "location" <| E.string location.country.code
+            , Cmd.batch
+                [ LocalStorage.storageSetItem "location" <| E.string location.country.code
+                , if Dict.isEmpty location.textDictionary then
+                    I18N.requestDictionary I18NMsg location.country.code
+
+                  else
+                    Cmd.none
+                ]
             )
 
         ToggleLanguageEditor ->
