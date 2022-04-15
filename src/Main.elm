@@ -321,11 +321,11 @@ update msg model =
 
         I18NMsg i18n ->
             let
-                ( newLocation, newOptions ) =
-                    I18N.update i18n ( model.location, model.languageEditor )
+                ( newLocation, newOptions, cmds ) =
+                    I18N.update i18n I18NMsg ( model.location, model.languageEditor )
             in
             ( { model | location = newLocation, languageEditor = newOptions }
-            , Cmd.none
+            , cmds
             )
 
         AdjustTimeZone newZone ->

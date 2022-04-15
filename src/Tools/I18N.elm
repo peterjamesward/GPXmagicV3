@@ -8,10 +8,16 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
+import File exposing (File)
+import File.Download as Download
+import File.Select as Select
 import FlatColors.ChinesePalette
 import FormatNumber.Locales exposing (frenchLocale)
+import Json.Decode as D
+import Json.Encode as E
 import List.Extra
 import Locations.UK
+import Task
 import Tools.I18NOptions exposing (Location, Options)
 
 
@@ -22,6 +28,8 @@ type Msg
     | Update
     | Download
     | Upload
+    | FileChosen File
+    | FileLoaded String
 
 
 defaultLocation : Location
@@ -223,12 +231,13 @@ editor wrapper location options =
         ]
 
 
-update : Msg -> ( Location, Options ) -> ( Location, Options )
-update msg ( location, options ) =
+update : Msg -> (Msg -> msg) -> ( Location, Options ) -> ( Location, Options, Cmd msg )
+update msg wrapper ( location, options ) =
     case msg of
         ChooseOuter key ->
             ( location
             , { options | editorOuter = Just key }
+            , Cmd.none
             )
 
         ChooseInner key ->
@@ -248,10 +257,14 @@ update msg ( location, options ) =
                         Nothing ->
                             Nothing
               }
+            , Cmd.none
             )
 
         ContentChange content ->
-            ( location, { options | editorValue = Just content } )
+            ( location
+            , { options | editorValue = Just content }
+            , Cmd.none
+            )
 
         Update ->
             let
@@ -279,10 +292,48 @@ update msg ( location, options ) =
                         _ ->
                             location.textDictionary
             in
-            ( { location | textDictionary = newOuterDict }, options )
+            ( { location | textDictionary = newOuterDict }
+            , options
+            , Cmd.none
+            )
 
         Download ->
-            ( location, options )
+            ( location
+            , options
+            , Download.string "LOCATION.JSON" "text/json" <|
+                E.encode 4 <|
+                    locationToJson location
+            )
 
         Upload ->
-            ( location, options )
+            ( location
+            , options
+            , Select.file [ "text/json" ] (wrapper << FileChosen)
+            )
+
+        FileChosen file ->
+            ( location
+            , options
+            , Task.perform (wrapper << FileLoaded) (File.toString file)
+            )
+
+        FileLoaded content ->
+            case D.decodeString locationDecoder content of
+                Ok newDictionary ->
+                    ( { location | textDictionary = newDictionary }
+                    , options
+                    , Cmd.none
+                    )
+
+                Err _ ->
+                    ( location, options, Cmd.none )
+
+
+locationToJson : Location -> E.Value
+locationToJson location =
+    E.dict identity (E.dict identity E.string) location.textDictionary
+
+
+locationDecoder : D.Decoder (Dict String (Dict String String))
+locationDecoder =
+    D.dict (D.dict D.string)

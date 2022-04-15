@@ -5,12 +5,6 @@
 
 Awaiting French support from Muriel.
 
-Integrated language file editor:
-- ~~Opens at foot of screen~~
-- ~~Two list boxes, one text entry field, save button~~
-- Export to JSON, import from JSON
-- ~~Immediate updates on the screen!~~
-
 ---
 
 # BACKLOG
