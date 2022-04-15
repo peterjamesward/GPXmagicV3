@@ -135,8 +135,8 @@ editor wrapper location options =
                 Element.text key
 
         valueEditor =
-            el [ width <| px 600 ] <|
-                case options.editorValue of
+            column [ width <| px 800 ]
+                [ case options.editorValue of
                     Just value ->
                         Input.multiline
                             [ Border.rounded 6
@@ -153,6 +153,18 @@ editor wrapper location options =
 
                     Nothing ->
                         none
+                , row [ padding 40, spacing 20 ]
+                    [ updateButton, saveButton, loadButton ]
+                ]
+
+        updateButton =
+            Element.text "UPDATE"
+
+        saveButton =
+            Element.text "SAVE TO DOWNLOADS"
+
+        loadButton =
+            Element.text "LOAD LANGUAGE FILE"
     in
     column
         [ Background.color FlatColors.ChinesePalette.antiFlashWhite
@@ -215,4 +227,4 @@ update msg ( location, options ) =
             )
 
         ContentChange content ->
-            ( location, {options | editorValue = Just content} )
+            ( location, { options | editorValue = Just content } )
