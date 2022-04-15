@@ -9,7 +9,6 @@ import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
 import FlatColors.ChinesePalette
-import FlatColors.FlatUIPalette
 import FormatNumber.Locales exposing (frenchLocale)
 import List.Extra
 import Locations.UK
@@ -136,28 +135,23 @@ editor wrapper location options =
                 Element.text key
 
         valueEditor =
-            el
-                [ alignTop
-                , padding 20
-                , Border.width 2
-                , Border.color FlatColors.FlatUIPalette.asbestos
-                ]
-            <|
-                case ( options.editorOuter, options.editorInner ) of
-                    ( Just outer, Just inner ) ->
-                        case Dict.get outer location.textDictionary of
-                            Nothing ->
-                                none
+            el [ width <| px 600 ] <|
+                case options.editorValue of
+                    Just value ->
+                        Input.multiline
+                            [ Border.rounded 6
+                            , Border.width 2
+                            , Border.color <| rgb255 0x72 0x9F 0xCF
+                            , width fill
+                            ]
+                            { onChange = wrapper << ContentChange
+                            , text = value
+                            , placeholder = Just <| Input.placeholder [] <| Element.text "Appears to be empty"
+                            , label = Input.labelHidden "text"
+                            , spellcheck = False
+                            }
 
-                            Just innerDict ->
-                                case Dict.get inner innerDict of
-                                    Just isValue ->
-                                        Element.text isValue
-
-                                    Nothing ->
-                                        Element.text ""
-
-                    _ ->
+                    Nothing ->
                         none
     in
     column
@@ -197,10 +191,28 @@ update : Msg -> ( Location, Options ) -> ( Location, Options )
 update msg ( location, options ) =
     case msg of
         ChooseOuter key ->
-            ( location, { options | editorOuter = Just key } )
+            ( location
+            , { options | editorOuter = Just key }
+            )
 
         ChooseInner key ->
-            ( location, { options | editorInner = Just key } )
+            ( location
+            , { options
+                | editorInner = Just key
+                , editorValue =
+                    case options.editorOuter of
+                        Just outer ->
+                            case Dict.get outer location.textDictionary of
+                                Just innerDict ->
+                                    Dict.get key innerDict
 
-        ContentChange string ->
-            ( location, options )
+                                Nothing ->
+                                    Nothing
+
+                        Nothing ->
+                            Nothing
+              }
+            )
+
+        ContentChange content ->
+            ( location, {options | editorValue = Just content} )
