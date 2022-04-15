@@ -1,12 +1,15 @@
 module Tools.I18N exposing (..)
 
+import Color
 import Countries exposing (Country)
 import Dict exposing (Dict)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
+import Element.Font as Font
 import Element.Input as Input
 import FlatColors.ChinesePalette
+import FlatColors.FlatUIPalette
 import FormatNumber.Locales exposing (frenchLocale)
 import List.Extra
 import Locations.UK
@@ -15,6 +18,8 @@ import Tools.I18NOptions exposing (Location, Options)
 
 type Msg
     = ContentChange String
+    | ChooseOuter String
+    | ChooseInner String
 
 
 defaultLocation : Location
@@ -94,39 +99,108 @@ editor : (Msg -> msg) -> Location -> Options -> Element msg
 editor wrapper location options =
     let
         outerDictionaryList =
-            column [ spacing 2 ] <| List.map Element.text (Dict.keys location.textDictionary)
-    in
-    Element.el [ alignBottom, alignLeft, moveUp 50, moveRight 50 ] <|
-        column
-            [ Background.color FlatColors.ChinesePalette.antiFlashWhite
-            , padding 10
-            , spacing 10
-            , centerY
-            , centerX
-            , Border.color FlatColors.ChinesePalette.saturatedSky
-            , Border.width 4
-            , Border.rounded 10
-            ]
-            [ Element.text location.country.name
-            , row [ spacing 10 ]
-                [ outerDictionaryList
-                , Input.text
-                    [ padding 5
-
-                    --, onEnter WriteGpxFile
-                    , width <| minimum 200 <| fill
-                    ]
-                    { text = "test"
-                    , onChange = wrapper << ContentChange
-                    , placeholder = Nothing
-                    , label = Input.labelHidden "text"
-                    }
+            Input.radio
+                [ padding 4
+                , spacing 3
                 ]
+                { onChange = wrapper << ChooseOuter
+                , selected = options.editorOuter
+                , label = Input.labelHidden "outer"
+                , options = List.map option (Dict.keys location.textDictionary)
+                }
+
+        innerDictionaryList inner =
+            Input.radio
+                [ padding 4
+                , spacing 3
+                ]
+                { onChange = wrapper << ChooseInner
+                , selected = options.editorInner
+                , label = Input.labelHidden "inner"
+                , options = List.map option (Dict.keys inner)
+                }
+
+        option key =
+            Input.optionWith key (button key)
+
+        button key state =
+            Element.el
+                [ if state == Input.Selected then
+                    Font.bold
+
+                  else
+                    Font.italic
+                , alignTop
+                ]
+            <|
+                Element.text key
+
+        valueEditor =
+            el
+                [ alignTop
+                , padding 20
+                , Border.width 2
+                , Border.color FlatColors.FlatUIPalette.asbestos
+                ]
+            <|
+                case ( options.editorOuter, options.editorInner ) of
+                    ( Just outer, Just inner ) ->
+                        case Dict.get outer location.textDictionary of
+                            Nothing ->
+                                none
+
+                            Just innerDict ->
+                                case Dict.get inner innerDict of
+                                    Just isValue ->
+                                        Element.text isValue
+
+                                    Nothing ->
+                                        Element.text ""
+
+                    _ ->
+                        none
+    in
+    column
+        [ Background.color FlatColors.ChinesePalette.antiFlashWhite
+        , padding 10
+        , spacing 10
+        , Border.color FlatColors.ChinesePalette.saturatedSky
+        , Border.width 4
+        , Border.rounded 10
+        , alignBottom
+        , alignLeft
+        , moveUp 50
+        , moveRight 50
+        ]
+        [ el [ Font.bold ] <| Element.text location.country.name
+        , row [ spacing 10, alignTop ]
+            [ outerDictionaryList
+            , case options.editorOuter of
+                Nothing ->
+                    none
+
+                Just key ->
+                    case Dict.get key location.textDictionary of
+                        Just innerDict ->
+                            row [ alignTop, spacing 10 ]
+                                [ innerDictionaryList innerDict
+                                , valueEditor
+                                ]
+
+                        Nothing ->
+                            none
             ]
+        ]
 
 
 update : Msg -> ( Location, Options ) -> ( Location, Options )
 update msg ( location, options ) =
     case msg of
+        ChooseOuter key ->
+            ( location, { options | editorOuter = Just key } )
+
+        ChooseInner key ->
+            ( location, { options | editorInner = Just key } )
+
         ContentChange string ->
             ( location, options )
