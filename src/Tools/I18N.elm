@@ -2,7 +2,10 @@ module Tools.I18N exposing (..)
 
 import Countries exposing (Country)
 import Dict exposing (Dict)
-import Element exposing (Element)
+import Element exposing (..)
+import Element.Background as Background
+import Element.Border as Border
+import FlatColors.ChinesePalette
 import FormatNumber.Locales exposing (frenchLocale)
 import List.Extra
 import Locations.UK
@@ -72,3 +75,20 @@ localisedString location tool tag =
 text : Options -> String -> String -> Element msg
 text location tool tag =
     Element.text <| localisedString location tool tag
+
+
+editor : Options -> Element msg
+editor options =
+    Element.el [ alignBottom, alignLeft, moveUp 50, moveRight 50 ] <|
+        column
+            [ Background.color FlatColors.ChinesePalette.antiFlashWhite
+            , padding 10
+            , centerY
+            , centerX
+            , width <| Element.px 400
+            , Border.color FlatColors.ChinesePalette.saturatedSky
+            , Border.width 4
+            , Border.rounded 10
+            ]
+            [ Element.text options.country.name
+            ]

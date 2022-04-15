@@ -112,6 +112,7 @@ type Msg
     | ToggleToolPopup
     | BackgroundColour Element.Color
     | Language I18NOptions.Options
+    | ToggleLanguageEditor
     | RestoreDefaultToolLayout
     | WriteGpxFile
     | FilenameChange String
@@ -160,6 +161,7 @@ type alias Model =
     , toolOptions : ToolsController.Options Msg
     , isPopupOpen : Bool
     , backgroundColour : Element.Color
+    , languageEditorOpen : Bool
     }
 
 
@@ -256,6 +258,7 @@ init mflags origin navigationKey =
       , toolOptions = ToolsController.defaultOptions
       , isPopupOpen = False
       , backgroundColour = FlatColors.FlatUIPalette.silver
+      , languageEditorOpen = False
       }
     , Cmd.batch
         [ authCmd
@@ -306,6 +309,11 @@ update msg model =
         Language location ->
             ( { model | location = location }
             , LocalStorage.storageSetItem "location" <| E.string location.country.code
+            )
+
+        ToggleLanguageEditor ->
+            ( { model | languageEditorOpen = not model.languageEditorOpen }
+            , Cmd.none
             )
 
         AdjustTimeZone newZone ->
@@ -857,6 +865,13 @@ view model =
                                 none
                    )
                 :: (inFront <| infoTextPopup model.location model.infoText)
+                :: (inFront <|
+                        if model.languageEditorOpen then
+                            (I18N.editor model.location)
+
+                        else
+                            none
+                   )
                 :: commonLayoutStyles
             )
           <|
@@ -1159,8 +1174,15 @@ showOptionsMenu model =
                 , Font.size 40
                 , tooltip below (myTooltip location.country.name)
                 ]
-                { label = el [centerX ] <| text location.country.flag
+                { label = el [ centerX ] <| text location.country.flag
                 , onPress = Just <| Language location
+                }
+
+        languageEditor =
+            Input.button
+                subtleToolStyles
+                { label = text "Show/Hide language file editor"
+                , onPress = Just ToggleLanguageEditor
                 }
     in
     if model.isPopupOpen then
@@ -1179,6 +1201,7 @@ showOptionsMenu model =
                 ToolsController.imperialToggleMenuEntry model.location ToolsMsg model.toolOptions
             , row [ spaceEvenly, width fill ] <|
                 List.map chooseLanguage I18N.availableI18N
+            , languageEditor
             ]
 
     else
