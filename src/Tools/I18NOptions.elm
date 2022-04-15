@@ -5,10 +5,14 @@ import Dict exposing (Dict)
 import FormatNumber.Locales exposing (Locale)
 
 
+type alias TwoLevelDict =
+    Dict String (Dict String String)
+
+
 type alias Location =
     { country : Country
     , locale : Locale
-    , textDictionary : Dict String (Dict String String) -- Building on ToolsController namespaces.
+    , textDictionary : TwoLevelDict -- Building on ToolsController namespaces.
     }
 
 

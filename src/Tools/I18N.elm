@@ -1,6 +1,5 @@
 module Tools.I18N exposing (..)
 
-import Color
 import Countries exposing (Country)
 import Dict exposing (Dict)
 import Element exposing (..)
@@ -19,7 +18,7 @@ import Json.Encode as E
 import List.Extra
 import Locations.UK
 import Task
-import Tools.I18NOptions exposing (Location, Options)
+import Tools.I18NOptions exposing (Location, Options, TwoLevelDict)
 
 
 type Msg
@@ -31,7 +30,7 @@ type Msg
     | Upload
     | FileChosen File
     | FileLoaded String
-    | Dictionary (Result Http.Error (Dict String (Dict String String)))
+    | Dictionary (Result Http.Error TwoLevelDict)
 
 
 defaultLocation : Location
@@ -50,11 +49,14 @@ defaultOptions =
 availableI18N : List Location
 availableI18N =
     [ Locations.UK.location
-    , frLocation
+    --, frLocation
     ]
 
 
 frLocation =
+    -- Selecting an available country with empty dicts will download the dictionary
+    -- with filename "languages/<country code>.JSON.
+    -- Se we can have many countries without a large download.
     { country = Country "France" "FR" "🇫🇷"
     , locale = frenchLocale
     , textDictionary = Dict.empty
@@ -348,13 +350,9 @@ locationToJson location =
     E.dict identity (E.dict identity E.string) location.textDictionary
 
 
-locationDecoder : D.Decoder (Dict String (Dict String String))
+locationDecoder : D.Decoder TwoLevelDict
 locationDecoder =
     D.dict (D.dict D.string)
-
-
-base =
-    "https://s3.eu-west-1.amazonaws.com/stepwiserefinement.co.uk/GPXmagicV3Lab/"
 
 
 requestDictionary : (Msg -> msg) -> String -> Cmd msg

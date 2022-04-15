@@ -5,8 +5,6 @@
 
 Awaiting French support from Muriel.
 
-Load JSON file from URL.
-
 ---
 
 # BACKLOG
