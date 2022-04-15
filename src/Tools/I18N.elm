@@ -20,6 +20,8 @@ type Msg
     | ChooseOuter String
     | ChooseInner String
     | Update
+    | Download
+    | Upload
 
 
 defaultLocation : Location
@@ -159,16 +161,34 @@ editor wrapper location options =
                 ]
 
         updateButton =
-            Input.button []
+            Input.button
+                [ Border.width 3
+                , Border.rounded 6
+                , Border.color <| rgb255 0x72 0x9F 0xCF
+                ]
                 { onPress = Just <| wrapper Update
                 , label = Element.text "UPDATE"
                 }
 
         saveButton =
-            Element.text "SAVE TO DOWNLOADS"
+            Input.button
+                [ Border.width 3
+                , Border.rounded 6
+                , Border.color <| rgb255 0x72 0x9F 0xCF
+                ]
+                { onPress = Just <| wrapper Download
+                , label = Element.text "SAVE TO DOWNLOADS"
+                }
 
         loadButton =
-            Element.text "LOAD LANGUAGE FILE"
+            Input.button
+                [ Border.width 3
+                , Border.rounded 6
+                , Border.color <| rgb255 0x72 0x9F 0xCF
+                ]
+                { onPress = Just <| wrapper Upload
+                , label = Element.text "LOAD LANGUAGE FILE"
+                }
     in
     column
         [ Background.color FlatColors.ChinesePalette.antiFlashWhite
@@ -260,3 +280,9 @@ update msg ( location, options ) =
                             location.textDictionary
             in
             ( { location | textDictionary = newOuterDict }, options )
+
+        Download ->
+            ( location, options )
+
+        Upload ->
+            ( location, options )
