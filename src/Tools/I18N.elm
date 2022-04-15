@@ -19,6 +19,7 @@ type Msg
     = ContentChange String
     | ChooseOuter String
     | ChooseInner String
+    | Update
 
 
 defaultLocation : Location
@@ -158,7 +159,10 @@ editor wrapper location options =
                 ]
 
         updateButton =
-            Element.text "UPDATE"
+            Input.button []
+                { onPress = Just <| wrapper Update
+                , label = Element.text "UPDATE"
+                }
 
         saveButton =
             Element.text "SAVE TO DOWNLOADS"
@@ -228,3 +232,31 @@ update msg ( location, options ) =
 
         ContentChange content ->
             ( location, { options | editorValue = Just content } )
+
+        Update ->
+            let
+                innerDict =
+                    case options.editorOuter of
+                        Just outer ->
+                            Dict.get outer location.textDictionary
+
+                        Nothing ->
+                            Nothing
+
+                newInnerDict =
+                    case ( options.editorInner, innerDict, options.editorValue ) of
+                        ( Just innerKey, Just isInnerDict, Just value ) ->
+                            Just <| Dict.insert innerKey value isInnerDict
+
+                        _ ->
+                            Nothing
+
+                newOuterDict =
+                    case ( options.editorOuter, newInnerDict ) of
+                        ( Just outerKey, Just newInner ) ->
+                            Dict.insert outerKey newInner location.textDictionary
+
+                        _ ->
+                            location.textDictionary
+            in
+            ( { location | textDictionary = newOuterDict }, options )
