@@ -139,7 +139,7 @@ update msg options wrap =
             ( options, [ Actions.DisplayInfo tool tag ] )
 
 
-view : I18NOptions.Options -> Bool -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
+view : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
 view location imperial msgWrapper options track =
     let
         i18n =

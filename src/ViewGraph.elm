@@ -259,7 +259,7 @@ onContextMenu msg =
 
 
 view :
-    I18NOptions.Options
+    I18NOptions.Location
     -> Context
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Graph msg

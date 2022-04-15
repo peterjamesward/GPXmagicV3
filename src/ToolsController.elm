@@ -1538,7 +1538,7 @@ toolStateHasChanged toolType newState isTrack options =
 
 
 toolsForDock :
-    I18NOptions.Options
+    I18NOptions.Location
     -> ToolDock
     -> (ToolMsg -> msg)
     -> Maybe (TrackLoaded msg)
@@ -1573,7 +1573,7 @@ toolsForDock location dock msgWrapper isTrack options =
         ]
 
 
-viewToolSettings : I18NOptions.Options -> Options msg -> (ToolMsg -> msg) -> Element msg
+viewToolSettings : I18NOptions.Location -> Options msg -> (ToolMsg -> msg) -> Element msg
 viewToolSettings location options wrapper =
     let
         optionHelper =
@@ -1622,7 +1622,7 @@ viewToolSettings location options wrapper =
 
 
 viewTool :
-    I18NOptions.Options
+    I18NOptions.Location
     -> (ToolMsg -> msg)
     -> Maybe (TrackLoaded msg)
     -> Options msg
@@ -1716,7 +1716,7 @@ viewTool location msgWrapper isTrack options toolEntry =
             ]
 
 
-showDockOptions : I18NOptions.Options -> (ToolMsg -> msg) -> ToolEntry -> Element msg
+showDockOptions : I18NOptions.Location -> (ToolMsg -> msg) -> ToolEntry -> Element msg
 showDockOptions location msgWrapper toolEntry =
     if toolEntry.isPopupOpen then
         row
@@ -1785,7 +1785,7 @@ showColourOptions msgWrapper toolEntry =
 
 
 viewToolByType :
-    I18NOptions.Options
+    I18NOptions.Location
     -> (ToolMsg -> msg)
     -> ToolEntry
     -> Maybe (TrackLoaded msg)

@@ -21,7 +21,7 @@ example =
             ]
 
 
-localisedTooltip : I18NOptions.Options -> String -> String -> Element msg
+localisedTooltip : I18NOptions.Location -> String -> String -> Element msg
 localisedTooltip location tool tag =
     myTooltip <| I18N.localisedString location tool tag
 

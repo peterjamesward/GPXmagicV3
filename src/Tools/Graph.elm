@@ -404,7 +404,7 @@ toolStateChange opened colour options track =
             ( options, [] )
 
 
-view : I18NOptions.Options -> (Msg -> msg) -> Options msg -> Element msg
+view : I18NOptions.Location -> (Msg -> msg) -> Options msg -> Element msg
 view location wrapper options =
     let
         i18n =

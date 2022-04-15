@@ -111,7 +111,7 @@ type Msg
     | RepaintMap
     | ToggleToolPopup
     | BackgroundColour Element.Color
-    | Language I18NOptions.Options
+    | Language I18NOptions.Location
     | ToggleLanguageEditor
     | RestoreDefaultToolLayout
     | WriteGpxFile
@@ -124,6 +124,7 @@ type Msg
     | FlythroughTick Time.Posix
     | HideInfoPopup
     | ReceivedLandUseData (Result Http.Error LandUseDataTypes.OSMLandUseData)
+    | I18NMsg I18N.Msg
     | NoOp
 
 
@@ -135,7 +136,7 @@ type alias Model =
     , stravaAuthentication : O.Model
     , loadOptionsMenuOpen : Bool
     , svgFileOptions : SvgPathExtractor.Options
-    , location : I18NOptions.Options
+    , location : I18NOptions.Location
 
     -- Track stuff
     , track : Maybe (TrackLoaded Msg)
@@ -162,6 +163,7 @@ type alias Model =
     , isPopupOpen : Bool
     , backgroundColour : Element.Color
     , languageEditorOpen : Bool
+    , languageEditor : I18NOptions.Options
     }
 
 
@@ -259,6 +261,7 @@ init mflags origin navigationKey =
       , isPopupOpen = False
       , backgroundColour = FlatColors.FlatUIPalette.silver
       , languageEditorOpen = False
+      , languageEditor = I18N.defaultOptions
       }
     , Cmd.batch
         [ authCmd
@@ -313,6 +316,15 @@ update msg model =
 
         ToggleLanguageEditor ->
             ( { model | languageEditorOpen = not model.languageEditorOpen }
+            , Cmd.none
+            )
+
+        I18NMsg i18n ->
+            let
+                ( newLocation, newOptions ) =
+                    I18N.update i18n ( model.location, model.languageEditor )
+            in
+            ( { model | location = newLocation, languageEditor = newOptions }
             , Cmd.none
             )
 
@@ -867,7 +879,7 @@ view model =
                 :: (inFront <| infoTextPopup model.location model.infoText)
                 :: (inFront <|
                         if model.languageEditorOpen then
-                            (I18N.editor model.location)
+                            I18N.editor I18NMsg model.location model.languageEditor
 
                         else
                             none
@@ -1100,7 +1112,7 @@ buyMeACoffeeButton =
 
 
 infoTextPopup :
-    I18NOptions.Options
+    I18NOptions.Location
     -> Maybe ( String, String )
     -> Element Msg
 infoTextPopup location maybeSomething =
@@ -1167,7 +1179,7 @@ showOptionsMenu model =
                 , onPress = Just <| BackgroundColour colour
                 }
 
-        chooseLanguage : I18NOptions.Options -> Element Msg
+        chooseLanguage : I18NOptions.Location -> Element Msg
         chooseLanguage location =
             Input.button
                 [ width fill

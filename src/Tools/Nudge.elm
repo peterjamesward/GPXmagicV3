@@ -344,7 +344,7 @@ update msg options previewColour track =
             ( options, [ Actions.DisplayInfo tool tag ] )
 
 
-view : I18NOptions.Options -> Bool -> Options -> (Msg -> msg) -> Maybe (TrackLoaded msg) -> Element msg
+view : I18NOptions.Location -> Bool -> Options -> (Msg -> msg) -> Maybe (TrackLoaded msg) -> Element msg
 view location imperial options msgWrapper track =
     let
         i18n =

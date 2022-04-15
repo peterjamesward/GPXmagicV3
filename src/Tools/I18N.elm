@@ -5,26 +5,39 @@ import Dict exposing (Dict)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
+import Element.Input as Input
 import FlatColors.ChinesePalette
 import FormatNumber.Locales exposing (frenchLocale)
 import List.Extra
 import Locations.UK
-import Tools.I18NOptions exposing (Options)
+import Tools.I18NOptions exposing (Location, Options)
 
 
-defaultLocation : Options
+type Msg
+    = ContentChange String
+
+
+defaultLocation : Location
 defaultLocation =
-    Locations.UK.options
+    Locations.UK.location
 
 
-availableI18N : List Options
+defaultOptions : Options
+defaultOptions =
+    { editorOuter = Nothing
+    , editorInner = Nothing
+    , editorValue = Nothing
+    }
+
+
+availableI18N : List Location
 availableI18N =
-    [ Locations.UK.options
-    , frOptions
+    [ Locations.UK.location
+    , frLocation
     ]
 
 
-frOptions =
+frLocation =
     { country = Country "France" "FR" "🇫🇷"
     , locale = frenchLocale
     , textDictionary = Dict.empty
@@ -40,7 +53,7 @@ fromCountryCode code =
             defaultLocation
 
 
-localisedString : Options -> String -> String -> String
+localisedString : Location -> String -> String -> String
 localisedString location tool tag =
     let
         fromActiveLocation =
@@ -72,23 +85,48 @@ localisedString location tool tag =
                     tool ++ ":" ++ tag ++ "?"
 
 
-text : Options -> String -> String -> Element msg
+text : Location -> String -> String -> Element msg
 text location tool tag =
     Element.text <| localisedString location tool tag
 
 
-editor : Options -> Element msg
-editor options =
+editor : (Msg -> msg) -> Location -> Options -> Element msg
+editor wrapper location options =
+    let
+        outerDictionaryList =
+            column [ spacing 2 ] <| List.map Element.text (Dict.keys location.textDictionary)
+    in
     Element.el [ alignBottom, alignLeft, moveUp 50, moveRight 50 ] <|
         column
             [ Background.color FlatColors.ChinesePalette.antiFlashWhite
             , padding 10
+            , spacing 10
             , centerY
             , centerX
-            , width <| Element.px 400
             , Border.color FlatColors.ChinesePalette.saturatedSky
             , Border.width 4
             , Border.rounded 10
             ]
-            [ Element.text options.country.name
+            [ Element.text location.country.name
+            , row [ spacing 10 ]
+                [ outerDictionaryList
+                , Input.text
+                    [ padding 5
+
+                    --, onEnter WriteGpxFile
+                    , width <| minimum 200 <| fill
+                    ]
+                    { text = "test"
+                    , onChange = wrapper << ContentChange
+                    , placeholder = Nothing
+                    , label = Input.labelHidden "text"
+                    }
+                ]
             ]
+
+
+update : Msg -> ( Location, Options ) -> ( Location, Options )
+update msg ( location, options ) =
+    case msg of
+        ContentChange string ->
+            ( location, options )

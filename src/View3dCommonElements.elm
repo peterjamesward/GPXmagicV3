@@ -105,7 +105,7 @@ common3dSceneAttributes msgWrapper context =
     ]
 
 
-zoomButtons : I18NOptions.Options -> (Msg -> msg) -> Context -> Element msg
+zoomButtons : I18NOptions.Location -> (Msg -> msg) -> Context -> Element msg
 zoomButtons location msgWrapper context =
     column
         [ alignTop

@@ -87,7 +87,7 @@ trackInfoList =
     ]
 
 
-displayInfoForPoint : I18NOptions.Options -> Bool -> TrackLoaded msg -> Element msg
+displayInfoForPoint : I18NOptions.Location -> Bool -> TrackLoaded msg -> Element msg
 displayInfoForPoint location imperial track =
     let
         index =
@@ -138,7 +138,7 @@ displayInfoForPoint location imperial track =
 
 
 displayValuesWithTrack :
-    I18NOptions.Options
+    I18NOptions.Location
     -> Bool
     -> List ( String, Bool -> RoadSection -> Element msg )
     -> TrackLoaded msg
@@ -157,7 +157,7 @@ displayValuesWithTrack location imperial infoList track =
         ]
 
 
-view : I18NOptions.Options -> (Msg -> msg) -> Bool -> Maybe (TrackLoaded msg) -> Options -> Element msg
+view : I18NOptions.Location -> (Msg -> msg) -> Bool -> Maybe (TrackLoaded msg) -> Options -> Element msg
 view location wrapper imperial ifTrack options =
     let
         helper =
@@ -198,7 +198,7 @@ updateMemory memory options =
     { options | memoryInfo = Just memory }
 
 
-displayMemoryDetails : I18NOptions.Options -> Options -> Element msg
+displayMemoryDetails : I18NOptions.Location -> Options -> Element msg
 displayMemoryDetails location options =
     let
         labels =

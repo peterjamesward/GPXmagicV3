@@ -174,7 +174,7 @@ advanceInternal newTime status speed track =
                     }
 
 
-view : I18NOptions.Options -> Bool -> Options -> (Msg -> msg) -> Element msg
+view : I18NOptions.Location -> Bool -> Options -> (Msg -> msg) -> Element msg
 view location imperial options wrapper =
     let
         i18n =

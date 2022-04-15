@@ -191,7 +191,7 @@ update msg options previewColour hasTrack =
 
 
 view :
-    I18NOptions.Options
+    I18NOptions.Location
     -> (Msg -> msg)
     -> Options
     -> TrackLoaded msg

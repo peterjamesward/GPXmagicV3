@@ -358,7 +358,7 @@ useIconWithSize size =
     html << FeatherIcons.toHtml [] << FeatherIcons.withSize size
 
 
-showModalMessage : I18NOptions.Options -> Int -> String -> msg -> Element msg
+showModalMessage : I18NOptions.Location -> Int -> String -> msg -> Element msg
 showModalMessage location areaWidth content msg =
     column
         [ centerY

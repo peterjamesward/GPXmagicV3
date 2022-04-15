@@ -386,7 +386,7 @@ paste options track =
             ( Nothing, [], ( 0, 0 ) )
 
 
-viewStravaTab : I18NOptions.Options -> Options -> (Msg -> msg) -> Maybe (TrackLoaded msg) -> Element msg
+viewStravaTab : I18NOptions.Location -> Options -> (Msg -> msg) -> Maybe (TrackLoaded msg) -> Element msg
 viewStravaTab location options wrap track =
     let
         i18n =

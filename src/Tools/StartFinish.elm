@@ -50,7 +50,7 @@ defaultOptions =
     }
 
 
-view : I18NOptions.Options -> Bool -> Options -> TrackLoaded msg -> (Msg -> msg) -> Element msg
+view : I18NOptions.Location -> Bool -> Options -> TrackLoaded msg -> (Msg -> msg) -> Element msg
 view location imperial options track wrap =
     let
         i18n =

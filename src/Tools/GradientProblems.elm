@@ -313,7 +313,7 @@ update msg options previewColour hasTrack =
             ( options, [ Actions.DisplayInfo id tag ] )
 
 
-view : I18NOptions.Options -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
 view location imperial msgWrapper options isTrack =
     let
         i18n =

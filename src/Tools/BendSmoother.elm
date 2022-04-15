@@ -374,7 +374,7 @@ update msg options previewColour track =
 
 
 viewBendControls :
-    I18NOptions.Options
+    I18NOptions.Location
     -> Bool
     -> (Msg -> msg)
     -> Options
@@ -419,7 +419,7 @@ viewBendControls location imperial wrapper options track =
             noTrackMessage location
 
 
-viewPointControls : I18NOptions.Options -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+viewPointControls : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
 viewPointControls location imperial wrapper options track =
     let
         fixButton =
@@ -445,7 +445,7 @@ viewPointControls location imperial wrapper options track =
             noTrackMessage location
 
 
-view : I18NOptions.Options -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
 view location imperial wrapper options track =
     let
         i18n =
@@ -478,7 +478,7 @@ view location imperial wrapper options track =
         ]
 
 
-bendSmoothnessSlider : I18NOptions.Options -> Bool -> Options -> (Msg -> msg) -> Element msg
+bendSmoothnessSlider : I18NOptions.Location -> Bool -> Options -> (Msg -> msg) -> Element msg
 bendSmoothnessSlider location imperial options wrap =
     Input.slider
         commonShortHorizontalSliderStyles

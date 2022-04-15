@@ -219,7 +219,7 @@ update msg options previewColour hasTrack =
             ( options, [] )
 
 
-view : I18NOptions.Options -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
+view : I18NOptions.Location -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
 view location wrap options track =
     let
         i18n =

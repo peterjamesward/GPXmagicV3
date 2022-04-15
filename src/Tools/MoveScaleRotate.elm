@@ -269,7 +269,7 @@ applyRecentre newReference track =
 
 
 view :
-    I18NOptions.Options
+    I18NOptions.Location
     -> Bool
     -> Options
     -> (Msg -> msg)

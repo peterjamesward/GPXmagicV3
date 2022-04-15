@@ -89,7 +89,7 @@ apply originalTrack =
     )
 
 
-oneClickQuickFixButton : I18NOptions.Options -> (Msg -> msg) -> Maybe (TrackLoaded msg) -> Element msg
+oneClickQuickFixButton : I18NOptions.Location -> (Msg -> msg) -> Maybe (TrackLoaded msg) -> Element msg
 oneClickQuickFixButton location wrapper track =
     case track of
         Just _ ->

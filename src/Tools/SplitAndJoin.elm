@@ -224,7 +224,7 @@ calculateSections length options =
         (List.drop 1 splitPoints)
 
 
-view : I18NOptions.Options -> Bool -> Options -> (Msg -> msg) -> TrackLoaded msg -> Element msg
+view : I18NOptions.Location -> Bool -> Options -> (Msg -> msg) -> TrackLoaded msg -> Element msg
 view location imperial options wrapper track =
     let
         i18n =

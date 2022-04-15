@@ -152,7 +152,7 @@ type Msg
     | PaneNoOp
 
 
-paneLayoutMenu : I18NOptions.Options -> (Msg -> msg) -> Options -> Element msg
+paneLayoutMenu : I18NOptions.Location -> (Msg -> msg) -> Options -> Element msg
 paneLayoutMenu location msgWrapper options =
     Input.button
         [ padding 5
@@ -166,7 +166,7 @@ paneLayoutMenu location msgWrapper options =
         }
 
 
-showOptionsMenu : I18NOptions.Options -> (Msg -> msg) -> Options -> Element msg
+showOptionsMenu : I18NOptions.Location -> (Msg -> msg) -> Options -> Element msg
 showOptionsMenu location msgWrapper options =
     if options.popupVisible then
         el
@@ -680,7 +680,7 @@ initialisePane track options pane =
     }
 
 
-viewModeChoices : I18NOptions.Options -> (Msg -> msg) -> PaneContext -> Element msg
+viewModeChoices : I18NOptions.Location -> (Msg -> msg) -> PaneContext -> Element msg
 viewModeChoices location msgWrapper context =
     let
         localise =
@@ -707,7 +707,7 @@ viewModeChoices location msgWrapper context =
         }
 
 
-viewModeChoicesNoMap : I18NOptions.Options -> (Msg -> msg) -> PaneContext -> Element msg
+viewModeChoicesNoMap : I18NOptions.Location -> (Msg -> msg) -> PaneContext -> Element msg
 viewModeChoicesNoMap location msgWrapper pane =
     let
         localise =
@@ -756,7 +756,7 @@ dimensionsWithLayout layout ( w, h ) =
 
 
 viewPanes :
-    I18NOptions.Options
+    I18NOptions.Location
     -> (Msg -> msg)
     -> Maybe (TrackLoaded msg)
     -> Tools.GraphOptions.Graph msg

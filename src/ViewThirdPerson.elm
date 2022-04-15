@@ -28,7 +28,7 @@ import Viewpoint3d exposing (Viewpoint3d)
 
 
 view :
-    I18NOptions.Options
+    I18NOptions.Location
     -> Context
     -> Tools.DisplaySettingsOptions.Options
     -> ( Quantity Int Pixels, Quantity Int Pixels )

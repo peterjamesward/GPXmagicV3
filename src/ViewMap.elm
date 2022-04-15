@@ -121,7 +121,7 @@ update msg msgWrapper track area context =
 
 
 view :
-    I18NOptions.Options
+    I18NOptions.Location
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Maybe Context
     -> (Msg -> msg)

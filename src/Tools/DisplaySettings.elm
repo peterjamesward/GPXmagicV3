@@ -127,7 +127,7 @@ update msg options =
             ( options, [ Actions.DisplayInfo tool tag ] )
 
 
-view : I18NOptions.Options -> (Msg -> msg) -> Options -> Element msg
+view : I18NOptions.Location -> (Msg -> msg) -> Options -> Element msg
 view location wrap options =
     let
         i18n =

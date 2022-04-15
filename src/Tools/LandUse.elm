@@ -61,7 +61,7 @@ update msg wrapper options =
             ( options, [ Actions.DisplayInfo tool tag ] )
 
 
-view : I18NOPtions.Options -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view : I18NOPtions.Location -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
 view location wrap options maybeTrack =
     let
         i18n =

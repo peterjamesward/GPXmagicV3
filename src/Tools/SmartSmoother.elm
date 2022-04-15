@@ -595,7 +595,7 @@ update msg options previewColour track =
             ( newOptions, previewActions newOptions previewColour track )
 
 
-view : I18NOptions.Options -> Bool -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
+view : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
 view location imperial wrapper options track =
     let
         i18n =

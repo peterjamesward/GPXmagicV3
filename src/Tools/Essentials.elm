@@ -183,7 +183,7 @@ update msg options previewColour hasTrack =
                     ( options, [ Actions.DisplayInfo tool tag ] )
 
 
-positionDescription : I18NOptions.Options -> Bool -> Int -> PeteTree -> String
+positionDescription : I18NOptions.Location -> Bool -> Int -> PeteTree -> String
 positionDescription location imperial pos track =
     let
         localString =
@@ -196,7 +196,7 @@ positionDescription location imperial pos track =
         ]
 
 
-view : I18NOptions.Options -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
+view : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
 view location imperial msgWrapper options isTrack =
     column
         [ width fill
@@ -213,7 +213,7 @@ view location imperial msgWrapper options isTrack =
                 [ noTrackMessage location ]
 
 
-viewPointers : I18NOptions.Options -> Bool -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
+viewPointers : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
 viewPointers location imperial msgWrapper options track =
     let
         purpleStyle =
@@ -347,7 +347,7 @@ viewPointers location imperial msgWrapper options track =
         ]
 
 
-viewUndoRedo : I18NOptions.Options -> (Msg -> msg) -> TrackLoaded msg -> Element msg
+viewUndoRedo : I18NOptions.Location -> (Msg -> msg) -> TrackLoaded msg -> Element msg
 viewUndoRedo location msgWrapper track =
     el [ centerX ] <|
         wrappedRow

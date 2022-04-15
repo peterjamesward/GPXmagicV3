@@ -349,7 +349,7 @@ update message options wrapper previewColour track =
             ( options, [ Actions.DisplayInfo tool tag ] )
 
 
-view : I18NOptions.Options -> Bool -> Options -> (Msg -> msg) -> TrackLoaded msg -> Element msg
+view : I18NOptions.Location -> Bool -> Options -> (Msg -> msg) -> TrackLoaded msg -> Element msg
 view location imperial options wrapper track =
     let
         i18n =

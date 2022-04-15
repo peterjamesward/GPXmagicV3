@@ -826,7 +826,7 @@ toolStateChange opened colour options track =
             ( options, [ HidePreview "limit", HidePreview "limitProfile" ] )
 
 
-view : I18NOptions.Options -> Options -> (Msg -> msg) -> TrackLoaded msg -> Element msg
+view : I18NOptions.Location -> Options -> (Msg -> msg) -> TrackLoaded msg -> Element msg
 view location options wrapper track =
     let
         i18n =
