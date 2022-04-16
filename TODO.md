@@ -5,9 +5,6 @@
 
 Awaiting French support from Muriel.
 
-## Small stuff
-
-
 ---
 
 # BACKLOG
@@ -77,37 +74,3 @@ Put all Font, Colour etc into a Palette/Style module for ease of change.
 > Search for FlatUI references.
  
 ---
-
-# Parked
-
-## Adaptive smoothing
-
-Not needed now smart smoother rules.
-1) Analysis of curvature (two planes)
-2) Placement of arcs
-3) Bezier for intermediates
-4) Lines and arcs otherwise
-5) Tangents between adjacent arcs
-6) Splines between arc & straight
-
-## Texture for the ground plane, road surface
-
-See https://github.com/ianmackenzie/elm-3d-scene/blob/1.0.1/examples/Texture.elm
-https://ambientcg.com/view?id=Grass004
-https://ambientcg.com/view?id=Asphalt001
-Credit: Contains assets from ambientCG.com, licensed under CC0 1.0 Universal.
-
-## Offset/nudge logic
-
-Don't just mitre. For each pair of RoadSection, see if the points will
-"overlap" and don't emit them all. May need some interpolation for altitude or whatever.
-
-## Map
-
-DEBT: Map sends more click messages each time we click.
-> They are debounced but, still, why??
-
-## Laziness, optimisation
-
-Don't render anything that's not visible.
-
