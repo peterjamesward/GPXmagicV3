@@ -6,7 +6,6 @@ import Browser exposing (application)
 import Browser.Dom as Dom exposing (getViewport, getViewportOf)
 import Browser.Events
 import Browser.Navigation exposing (Key)
-import Color
 import Delay
 import Dict exposing (Dict)
 import Direction2d
@@ -49,7 +48,6 @@ import StravaAuth exposing (getStravaToken)
 import SvgPathExtractor
 import Task
 import Time
-import TipJar
 import ToolTip exposing (localisedTooltip, myTooltip, tooltip)
 import Tools.BendSmoother
 import Tools.BezierSplines
@@ -70,12 +68,10 @@ import Tools.Nudge
 import Tools.OneClickQuickFix
 import Tools.OutAndBack
 import Tools.ProfileSmooth
-import Tools.ProfileSmoothOptions
 import Tools.Simplify
 import Tools.SmartSmoother
 import Tools.SplitAndJoin
 import Tools.StartFinish
-import Tools.StartFinishTypes exposing (Loopiness(..))
 import Tools.Straightener
 import Tools.StravaDataLoad
 import Tools.StravaTools
@@ -266,8 +262,6 @@ init mflags origin navigationKey =
     , Cmd.batch
         [ authCmd
         , Task.perform AdjustTimeZone Time.here
-
-        --, LocalStorage.storageListKeys
         , Task.attempt GotWindowSize Dom.getViewport
         , LocalStorage.storageGetItem "splits"
         , LocalStorage.storageGetItem "tools"
@@ -387,7 +381,8 @@ update msg model =
                 [ MapPortController.createMap
                     ViewMap.defaultStyleUrl
                     mapInfoWithLocation
-                , MyIP.sendIpInfo model.time IpInfoAcknowledged ipInfo
+
+                --, MyIP.sendIpInfo model.time IpInfoAcknowledged ipInfo
                 ]
             )
 
@@ -959,14 +954,7 @@ rightDockConfig =
 
 rightDockView : Model -> Html Msg
 rightDockView model =
-    --SplitPane.view
-    --    rightDockInternalConfig
     upperRightDockView model
-
-
-
---(lowerRightDockView model)
---model.rightDockInternal
 
 
 notTheRightDockView : Model -> Html Msg
@@ -980,14 +968,7 @@ notTheRightDockView model =
 
 leftDockView : Model -> Html Msg
 leftDockView model =
-    --SplitPane.view
-    --    leftDockInternalConfig
     upperLeftDockView model
-
-
-
---(lowerLeftDockView model)
---model.leftDockInternal
 
 
 upperLeftDockView : Model -> Html Msg
@@ -1119,10 +1100,12 @@ topLoadingBar model =
             Nothing ->
                 none
         , saveButton
-        , Tools.OneClickQuickFix.oneClickQuickFixButton model.location OneClickMsg model.track
-        , el [ alignRight ] <| StravaAuth.stravaButton model.stravaAuthentication OAuthMessage
-        , el [ alignRight ] <| PaneLayoutManager.paneLayoutMenu model.location PaneMsg model.paneLayoutOptions
-        , el [ alignRight ] <| buyMeACoffeeButton
+        , row [ alignRight, spacing 5 ]
+            [ Tools.OneClickQuickFix.oneClickQuickFixButton model.location OneClickMsg model.track
+            , StravaAuth.stravaButton model.stravaAuthentication OAuthMessage
+            , PaneLayoutManager.paneLayoutMenu model.location PaneMsg model.paneLayoutOptions
+            , buyMeACoffeeButton
+            ]
         ]
 
 
@@ -2596,12 +2579,13 @@ performActionCommands actions model =
 showTrackOnMapCentered : Bool -> TrackLoaded msg -> Cmd msg
 showTrackOnMapCentered useFull track =
     Cmd.batch
-        -- Must repaint track on so that selective rendering works.
-        [ if useFull then
-            MapPortController.addFullTrackToMap track
-
-          else
-            MapPortController.addTrackToMap track
+        -- Selective rendering on Map unpopular.
+        --[ if useFull then
+        --    MapPortController.addFullTrackToMap track
+        --
+        --  else
+        --    MapPortController.addTrackToMap track
+        [ MapPortController.addFullTrackToMap track
         , MapPortController.zoomMapToFitTrack track
         , MapPortController.addMarkersToMap track
         ]

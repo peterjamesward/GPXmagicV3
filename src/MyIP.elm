@@ -64,38 +64,37 @@ processIpInfo response =
 
 sendIpInfo : Posix -> (Result Http.Error () -> msg) -> Maybe IpInfo -> Cmd msg
 sendIpInfo time msg ipInfo =
-    Cmd.none
+    case ipInfo of
+        Just info ->
+            let
+                logInfo =
+                    { timestamp = String.left 10 <| Iso8601.fromTime time
+                    , ip = info.ip
+                    , country = info.country
+                    , region = info.region
+                    , city = info.city
+                    , zip = info.zip
+                    , latitude = info.latitude
+                    , longitude = info.longitude
+                    }
+            in
+            Http.request
+                { method = "POST"
+                , headers =
+                    [ Http.header "Authorization" ("Bearer " ++ m3O_API_TOKEN)
+                    ]
+                , url = Builder.crossOrigin loggerRoot [ "v1", "db", "Create" ] []
+                , body = Http.jsonBody <| encodeLogInfo logInfo
+                , expect = Http.expectWhatever msg
+                , timeout = Nothing
+                , tracker = Nothing
+                }
+
+        Nothing ->
+            Cmd.none
 
 
 
---case ipInfo of
---    Just info ->
---        let
---            logInfo =
---                { timestamp = String.left 10 <| Iso8601.fromTime time
---                , ip = info.ip
---                , country = info.country
---                , region = info.region
---                , city = info.city
---                , zip = info.zip
---                , latitude = info.latitude
---                , longitude = info.longitude
---                }
---        in
---        Http.request
---            { method = "POST"
---            , headers =
---                [ Http.header "Authorization" ("Bearer " ++ m3O_API_TOKEN)
---                ]
---            , url = Builder.crossOrigin loggerRoot [ "v1", "db", "Create" ] []
---            , body = Http.jsonBody <| encodeLogInfo logInfo
---            , expect = Http.expectWhatever msg
---            , timeout = Nothing
---            , tracker = Nothing
---            }
---
---    Nothing ->
---        Cmd.none
 {-
    curl "https://api.m3o.com/v1/db/Create" \
    2-H "Content-Type: application/json" \
