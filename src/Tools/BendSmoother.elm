@@ -395,7 +395,7 @@ viewBendControls location imperial wrapper options track =
                             paragraph [] <|
                                 [ text <|
                                     String.Interpolate.interpolate
-                                        (I18N.localisedString location toolId "")
+                                        (I18N.localisedString location toolId "smooth")
                                         [ showShortMeasure imperial (Length.meters isSmooth.radius) ]
                                 ]
 

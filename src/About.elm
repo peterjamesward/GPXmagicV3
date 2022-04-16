@@ -3,11 +3,15 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.2.5
+# GPXmagic v3.2.6
 
-(1b9ef543)
+(6f08b42f)
 
 ## In this release ...
+
+* Arc smoother button was incorrectly labelled in Bend mode.
+
+## 3.2.5
 
 * Escapes special characters in the track name.
 
