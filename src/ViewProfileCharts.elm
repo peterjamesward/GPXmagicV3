@@ -646,14 +646,11 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
                 , Svg.Attributes.height svgHeight
                 ]
                 [ Svg.relativeTo topLeftFrame <|
-                    pointsAsAltitudePolyline "black" <|
-                        renderProfileData track
-                , Svg.relativeTo topLeftFrame <|
                     Svg.g []
-                        (orangeAltitudeSvg :: orangeText ++ purpleSvg)
-                , Svg.relativeTo topLeftFrame <|
-                    Svg.g []
-                        altitudePreviews
+                        [ pointsAsAltitudePolyline "black" <| renderProfileData track
+                        , Svg.g [] (orangeAltitudeSvg :: orangeText ++ purpleSvg)
+                        , Svg.g [] altitudePreviews
+                        ]
                 ]
 
         gradientChart =
@@ -661,16 +658,13 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
                 [ Svg.Attributes.width svgWidth
                 , Svg.Attributes.height svgHeight
                 ]
-                [ Svg.relativeTo topLeftFrame distanceAxis
-                , Svg.relativeTo topLeftFrame <|
-                    pointsAsGradientPolyline "black" <|
-                        renderProfileData track
-                , Svg.relativeTo topLeftFrame <|
+                [ Svg.relativeTo topLeftFrame <|
                     Svg.g []
-                        (orangeGradientSvg :: orangeText)
-                , Svg.relativeTo topLeftFrame <|
-                    Svg.g []
-                        gradientPreviews
+                        [ distanceAxis
+                        , pointsAsGradientPolyline "black" <| renderProfileData track
+                        , Svg.g [] (orangeGradientSvg :: orangeText)
+                        , Svg.g [] gradientPreviews
+                        ]
                 ]
 
         distanceAxis =

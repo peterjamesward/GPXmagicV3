@@ -1082,8 +1082,8 @@ topLoadingBar model =
         [ globalOptions model
         , loadGpxButton
         , moreOptionsButton
-        , el [ Font.color <| contrastingColour model.backgroundColour ]
-            (text <| bestTrackName model)
+        --, el [ Font.color <| contrastingColour model.backgroundColour ]
+        --    (text <| bestTrackName model)
         , case model.filename of
             Just filename ->
                 Input.text

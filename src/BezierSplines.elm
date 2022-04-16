@@ -29,8 +29,7 @@ type alias SplineFoldState =
 
 bezierSplinesThroughExistingPoints : Bool -> Float -> Float -> Int -> Int -> PeteTree -> List EarthPoint
 bezierSplinesThroughExistingPoints isLoop tension tolerance startIndx endIndex treeNode =
-    --TODO: Note that once we have control points, the routines are identical; factor this out.
-    --TODO: Wrap around on loop.
+    -- TODO: Wrap around on loop.
     let
         foldFn : RoadSection -> SplineFoldState -> SplineFoldState
         foldFn road state =
@@ -164,7 +163,6 @@ controlPointsFromTriangle tension triangle =
 
 bezierSplineApproximation : Bool -> Float -> Float -> Int -> Int -> PeteTree -> List EarthPoint
 bezierSplineApproximation isLoop tension tolerance startIndx endIndex treeNode =
-    --TODO: Note that once we have control points, the routines are identical; factor this out.
     --TODO: Wrap around on loop.
     let
         midPoint : RoadSection -> Point3d Meters LocalCoords
