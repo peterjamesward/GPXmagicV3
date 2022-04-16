@@ -30,7 +30,7 @@ import Html.Events.Extra.Mouse as Mouse exposing (Button(..))
 import Html.Events.Extra.Wheel as Wheel
 import Json.Decode as D
 import Json.Encode as E
-import Length exposing (Length, Meters, meters)
+import Length exposing (Length, Meters, inMeters, meters)
 import List.Extra
 import LocalCoords exposing (LocalCoords)
 import Pixels exposing (Pixels, inPixels)
@@ -49,6 +49,7 @@ import Tools.Graph
 import Tools.GraphOptions exposing (ClickDetect(..), Direction(..), Graph)
 import Tools.I18NOptions as I18NOptions
 import UtilsForViews exposing (colourHexString, showShortMeasure, uiColourHexString)
+import Vector2d
 import Vector3d
 import ViewPureStyles exposing (rgtDark, rgtPurple, useIcon)
 import Viewpoint3d exposing (Viewpoint3d)
@@ -95,6 +96,7 @@ type alias Context =
     , clickFeature : ClickDetect
     , edgeMode : EdgeMode
     , haveDisplayedEditingReminder : Bool
+    , mouseHere : Point2d Pixels LocalCoords
     }
 
 
@@ -131,6 +133,7 @@ initialiseView current treeNode currentContext =
             , clickFeature = ClickNone
             , edgeMode = EdgeSketch
             , haveDisplayedEditingReminder = False
+            , mouseHere = Point2d.origin
             }
 
 
@@ -517,11 +520,8 @@ view location context ( width, height ) graph options msgWrapper =
     in
     el
         [ htmlAttribute <| Mouse.onDown (ImageGrab >> msgWrapper)
-        , if dragging /= DragNone then
-            htmlAttribute <| Mouse.onMove (ImageDrag >> msgWrapper)
-
-          else
-            pointer
+        , -- if dragging /= DragNone then
+          htmlAttribute <| Mouse.onMove (ImageDrag >> msgWrapper)
         , htmlAttribute <| Mouse.onUp (ImageRelease >> msgWrapper)
         , htmlAttribute <| Mouse.onClick (ImageClick >> msgWrapper)
         , htmlAttribute <| Wheel.onWheel (\event -> msgWrapper (ImageMouseWheel event.deltaY))
@@ -626,7 +626,10 @@ update msg msgWrapper graph area context =
                     )
 
                 _ ->
-                    ( context, [] )
+                    -- Not dragging, just track mouse so we can use it to centre zooming.
+                    ( { context | mouseHere = Point2d.fromTuple Pixels.pixels event.offsetPos }
+                    , []
+                    )
 
         ImageRelease _ ->
             ( { context
@@ -637,11 +640,49 @@ update msg msgWrapper graph area context =
             )
 
         ImageMouseWheel deltaY ->
+            --TODO: Zooming should be such that the mouse position is fixed.
+            --1. Find the vector in model space from focal point to mouse before the zoom.
+            --2. Change the zoom.
+            --3. Reverse vector (1) from mouse to give new focal point.
+            -- (This may simplify!)
             let
                 increment =
                     -0.001 * deltaY
+
+                newZoom =
+                    clamp 0.0 22.0 <| context.zoomLevel + increment
+
+                ( width, height ) =
+                    area
+
+                screenCentre =
+                    Point2d.midpoint
+                        Point2d.origin
+                        (Point2d.xy (Quantity.toFloatQuantity width) (Quantity.toFloatQuantity height))
+
+                shiftVectorBefore =
+                    Vector2d.from   context.mouseHere screenCentre
+                        |> Vector2d.scaleBy
+                            (Spherical.metresPerPixel context.zoomLevel (Angle.degrees 30))
+
+                shiftVectorAfter =
+                    Vector2d.from  context.mouseHere screenCentre
+                        |> Vector2d.scaleBy
+                            (Spherical.metresPerPixel newZoom (Angle.degrees 30))
+
+                shift =
+                    shiftVectorAfter
+                        |> Vector2d.minus shiftVectorBefore
+                        |> Vector2d.toTuple inPixels
+                        |> Vector2d.fromTuple meters
+                        |> Vector2d.mirrorAcross Axis2d.x
+
+                newFocalPoint =
+                    context.focalPoint
+                        |> Point3d.translateBy
+                            (Vector3d.on SketchPlane3d.xy shift)
             in
-            ( { context | zoomLevel = clamp 0.0 22.0 <| context.zoomLevel + increment }
+            ( { context | zoomLevel = newZoom, focalPoint = newFocalPoint }
             , []
             )
 

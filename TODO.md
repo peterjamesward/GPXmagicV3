@@ -39,7 +39,6 @@ Runs server-side (Node.js?), receives track via POST, returns smoothed.
 
 ## Route Builder
 
-- Zoom on Route mouse-centred?
 - Improve traversal direction display (with an arrow on each section?).
 - Add "split edge at pointer" function, when editing an edge (?).
 - Improve behaviour with IRL rides (use code from Intersections?)
