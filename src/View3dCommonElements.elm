@@ -33,7 +33,7 @@ import ToolTip exposing (localisedTooltip, myTooltip, tooltip)
 import Tools.DisplaySettingsOptions
 import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
-import ViewPureStyles exposing (useIcon)
+import ViewPureStyles exposing (stopProp, useIcon)
 
 
 type Msg
@@ -72,10 +72,6 @@ type alias Context =
     , waitingForClickDelay : Bool
     , followSelectedPoint : Bool
     }
-
-
-stopProp =
-    { stopPropagation = True, preventDefault = False }
 
 
 onContextMenu : a -> Element.Attribute a

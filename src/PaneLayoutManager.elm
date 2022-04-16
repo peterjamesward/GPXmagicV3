@@ -30,7 +30,7 @@ import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import ToolsController
 import TrackLoaded exposing (TrackLoaded)
-import View3dCommonElements exposing (stopProp)
+import View3dCommonElements
 import ViewAbout
 import ViewFirstPerson
 import ViewGraph
@@ -160,6 +160,7 @@ paneLayoutMenu location msgWrapper options =
         , Border.color FlatColors.FlatUIPalette.peterRiver
         , Border.width 2
         , inFront <| showOptionsMenu location msgWrapper options
+        , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always TogglePopup >> msgWrapper)
         ]
         { onPress = Just <| msgWrapper TogglePopup
         , label = I18N.text location "panes" "layout"

@@ -84,7 +84,6 @@ import ToolsController exposing (ToolEntry, encodeColour, encodeToolState)
 import TrackLoaded exposing (TrackLoaded)
 import Url exposing (Url)
 import UtilsForViews exposing (uiColourHexString)
-import View3dCommonElements exposing (stopProp)
 import ViewMap
 import ViewPureStyles exposing (..)
 import WriteGPX
@@ -125,6 +124,7 @@ type Msg
     | HideInfoPopup
     | ReceivedLandUseData (Result Http.Error LandUseDataTypes.OSMLandUseData)
     | I18NMsg I18N.Msg
+    | BackgroundClick Mouse.Event
     | NoOp
 
 
@@ -309,6 +309,20 @@ render model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        BackgroundClick _ ->
+            let
+                paneStuff =
+                    model.paneLayoutOptions
+            in
+            ( { model
+                | infoText = Nothing
+                , isPopupOpen = False
+                , loadOptionsMenuOpen = False
+                , paneLayoutOptions = { paneStuff | popupVisible = False }
+              }
+            , Cmd.none
+            )
+
         Language location ->
             ( { model | location = location }
             , Cmd.batch
@@ -891,6 +905,7 @@ view model =
                         else
                             none
                    )
+                :: (htmlAttribute <| Mouse.onClick BackgroundClick)
                 :: commonLayoutStyles
             )
           <|
@@ -1044,6 +1059,7 @@ topLoadingBar model =
 
                     else
                         none
+                , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always ToggleLoadOptionMenu)
                 ]
                 { onPress = Just ToggleLoadOptionMenu
                 , label = useIconWithSize 12 FeatherIcons.moreHorizontal
@@ -1171,6 +1187,7 @@ globalOptions model =
             [ Font.color FlatColors.ChinesePalette.antiFlashWhite
             , Background.color rgtPurple
             , padding 2
+            , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always ToggleToolPopup)
             ]
             { onPress = Just <| ToggleToolPopup
             , label = useIcon FeatherIcons.settings

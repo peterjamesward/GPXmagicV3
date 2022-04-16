@@ -5,6 +5,10 @@
 
 Awaiting French support from Muriel.
 
+## Small stuff
+
+Click on background should remove any popups.
+
 ---
 
 # BACKLOG

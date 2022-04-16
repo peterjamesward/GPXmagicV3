@@ -64,7 +64,6 @@ import Tools.StravaOptions
 import Tools.StravaTools
 import Tools.TrackInfoBox as TrackInfoBox
 import TrackLoaded exposing (TrackLoaded)
-import View3dCommonElements exposing (stopProp)
 import ViewPureStyles exposing (..)
 
 

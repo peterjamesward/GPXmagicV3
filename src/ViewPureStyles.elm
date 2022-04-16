@@ -13,6 +13,7 @@ import FlatColors.BritishPalette
 import FlatColors.ChinesePalette exposing (white)
 import Html.Attributes exposing (style)
 import Html.Events
+import Html.Events.Extra.Mouse as Mouse
 import Json.Decode as D
 import Markdown
 import Pixels exposing (Pixels)
@@ -260,8 +261,14 @@ displayName n =
             none
 
 
+stopProp =
+    { stopPropagation = True, preventDefault = False }
+
+
 infoButton onPress =
-    Input.button []
+    Input.button
+        [ htmlAttribute <| Mouse.onWithOptions "click" stopProp (always onPress)
+        ]
         { onPress = Just onPress
         , label = useIconWithSize 12 FeatherIcons.info
         }
