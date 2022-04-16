@@ -9,6 +9,8 @@ aboutText =
 
 ## In this release ...
 
+* Escapes special characters in the track name.
+
 * Internal preparation for multiple language support.
 
 * Minor, long-deferred, minor tidy-ups.
