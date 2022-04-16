@@ -279,7 +279,6 @@ addSelfLoop node options =
                                 , DomainModel.earthPointFromIndex 0 track.trackTree
                                 )
 
-                        --TODO: Get direction at end and extrapolate to find diametrically opposite point.
                         loopOpposite =
                             endPoint
                                 |> Point3d.translateBy
@@ -291,7 +290,6 @@ addSelfLoop node options =
                         loopCentre =
                             Point3d.midpoint endPoint loopOpposite
 
-                        --TODO: Find points where we want the arc to start and end (direction not important).
                         axis =
                             Axis3d.withDirection Direction3d.positiveZ loopCentre
 
@@ -300,13 +298,11 @@ addSelfLoop node options =
                             , endPoint |> Point3d.rotateAround axis (Angle.degrees -30)
                             )
 
-                        --TODO: Make arc and crude approximation.
                         arc =
                             Arc3d.throughPoints arcStart loopOpposite arcEnd
                     in
                     case arc of
                         Just isArc ->
-                            --TODO: Make new edge from the arc and insert in dictionary.
                             let
                                 edgePoints =
                                     isArc
@@ -1242,7 +1238,6 @@ makeNewRoute options =
                                     Quantity.negate options.centreLineOffset
 
                         ( firstOffsetIndex, lastOffsetIndex ) =
-                            --TODO: Not at start and end.
                             -- Other than start and end of route, trim back the edge to allow for the Place arc.
                             ( DomainModel.indexFromDistance trim track.trackTree + 1
                             , DomainModel.indexFromDistance

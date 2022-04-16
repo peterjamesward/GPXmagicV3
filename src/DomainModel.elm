@@ -492,9 +492,6 @@ replaceRange :
     -> PeteTree
     -> Maybe PeteTree
 replaceRange fromStart fromEnd withReferencePoint newPoints currentTree =
-    --TODO: Rather than fanny around internally only to rebuild, just rebuild!
-    --Sadly, I seem unable to correctly write this, although I think I had
-    --simply forgotten that this was recursing internally. That would explain a lot.
     let
         leftBit =
             takePointsFromLeft fromStart currentTree
@@ -579,7 +576,6 @@ replaceRangeInternal fromStart fromEnd withReferencePoint newPoints currentTree 
         Also, note the caller MUST have previously derived GPX co-ords, not local metric points,
         using functions that belong in TrackLoaded.
     --}
-    --TODO: Rewrite without inspection of children. Let the children decide for themselves.
     case currentTree of
         Leaf _ ->
             buildNewNodeWithRange fromStart fromEnd withReferencePoint newPoints currentTree
@@ -1120,7 +1116,6 @@ nearestToLonLat click current treeNode =
 
 containingSphere : BoundingBox3d Meters LocalCoords -> Sphere3d Meters LocalCoords
 containingSphere box =
-    --TODO: Move to geometry support.
     let
         here =
             BoundingBox3d.centerPoint box
@@ -1142,13 +1137,12 @@ containingSphere box =
 
 lngLatPair : ( Angle, Angle, Length.Length ) -> E.Value
 lngLatPair ( longitude, latitude, _ ) =
-    --TODO: Move to encoding support.
     E.list E.float [ Angle.inDegrees longitude, Angle.inDegrees latitude ]
 
 
 getDualCoords : PeteTree -> Int -> ( EarthPoint, GPXSource )
 getDualCoords tree index =
-    --TODO: Rather glaring inefficiency here.
+    --Rather glaring inefficiency here but 2x is still N log N.
     ( earthPointFromIndex index tree
     , gpxPointFromIndex index tree
     )
@@ -1481,7 +1475,7 @@ traverseTreeBetweenLimitsToDepth startingAt endingAt depthFunction currentDepth 
 
 trackPointsForOutput : PeteTree -> List TrackPoint
 trackPointsForOutput tree =
-    --TODO: This seems to ignore the final point
+    --NOTE: This ignores the final point, caller must add.
     let
         foldFn : RoadSection -> List TrackPoint -> List TrackPoint
         foldFn node accum =

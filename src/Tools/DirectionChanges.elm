@@ -134,7 +134,6 @@ findDirectionChanges options tree =
 
 findBendsWithRadius : PeteTree -> Options -> List ( List Int, Quantity Float Meters )
 findBendsWithRadius tree options =
-    --TODO: Add correction needed to the outputs.
     {-
        The UI says direction change and radius but we look for the given direction
        change over a track length of radius * direction change in radians.

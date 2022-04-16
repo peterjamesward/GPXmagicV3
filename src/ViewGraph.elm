@@ -640,7 +640,6 @@ update msg msgWrapper graph area context =
             )
 
         ImageMouseWheel deltaY ->
-            --TODO: Zooming should be such that the mouse position is fixed.
             --1. Find the vector in model space from focal point to mouse before the zoom.
             --2. Change the zoom.
             --3. Reverse vector (1) from mouse to give new focal point.
