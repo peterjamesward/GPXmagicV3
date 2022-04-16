@@ -333,10 +333,6 @@ update msg wrapper ( location, options ) =
                     ( location, options, Cmd.none )
 
         Dictionary result ->
-            let
-                _ =
-                    Debug.log "result" result
-            in
             case result of
                 Ok remoteDict ->
                     ( { location | textDictionary = remoteDict }, options, Cmd.none )

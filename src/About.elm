@@ -3,25 +3,17 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.2.4
+# GPXmagic v3.2.5
 
 (c0d8bbd4)
 
 ## In this release ...
 
-* Reduced repainting on Map view; should be a cleaner experience moving along the track.
+* Internal preparation for multiple language support.
 
-### In 3.2.3
+* Minor, long-deferred, minor tidy-ups.
 
-* All tools now have a video. Some are shared.
-
-* Fixed bug where Move & Stretch was duplicating end points.
-
-* Fixed bug caused by Strava changing the segment API.
-
-* Added "Flush Undo" button in Simplify, which may help if memory usage is high.
-
-* Simplify tool better preserves Orange and Purple marker positions.
+* Clicking on the window background will close non-model popups.
 
 ## Acknowledgements
 
