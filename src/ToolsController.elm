@@ -1664,6 +1664,11 @@ viewTool location msgWrapper isTrack options toolEntry =
                         newTabLink
                             [ alignLeft
                             , tooltip below (myTooltip "Watch the video")
+                            , htmlAttribute <|
+                                Mouse.onWithOptions
+                                    "click"
+                                    stopProp
+                                    (always << msgWrapper <| ToolNoOp)
                             ]
                             { url = video
                             , label = useIconWithSize 18 FeatherIcons.video

@@ -13,7 +13,7 @@ aboutText =
 
 * Minor, long-deferred, minor tidy-ups.
 
-* Clicking on the window background will close non-model popups.
+* Clicking on the window background will close non-modal popups.
 
 ## Acknowledgements
 
@@ -23,7 +23,7 @@ aboutText =
 
 * Thanks to all those who've provided support, comments, bug reports, and help along the way.
 
-* Thank to RGT for having the Magic Roads concept and an excellent indoor cycling platform.
+* Thanks to RGT for having the Magic Roads concept and an excellent indoor cycling platform.
 
 ## Legal guff
 

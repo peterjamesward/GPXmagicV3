@@ -404,7 +404,8 @@ Also, access a quick description of what the tool does and how (and when) to use
                 , ( "point", """Point {0} at {1}""" )
                 , ( "lift", """Lift purple marker""" )
                 , ( "drop", """Drop purple marker""" )
-                , ( "note", """Use Orange and Purple markers to select track for editing.""" )
+                , ( "note", """Use Orange and Purple markers
+to select track for editing.""" )
                 , ( "noundo", """Nothing to Undo""" )
                 , ( "noredo", """Nothing to Redo""" )
                 , ( "undo", """Undo {0}""" )
