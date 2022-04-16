@@ -40,6 +40,7 @@
             "jinjor/elm-xml-parser": "2.0.0",
             "justgook/alt-linear-algebra": "2.0.0",
             "lukewestby/elm-string-interpolate": "1.0.4",
+            "marcosh/elm-html-to-unicode": "1.0.4",
             "mdgriffith/elm-ui": "1.1.8",
             "mpizenberg/elm-pointer-events": "4.0.2",
             "noahzgordon/elm-color-extra": "1.0.2",

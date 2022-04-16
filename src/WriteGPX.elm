@@ -3,6 +3,7 @@ module WriteGPX exposing (writeGPX)
 import Angle
 import Direction2d
 import DomainModel exposing (GPXSource)
+import ElmEscapeHtml
 import Length
 import TrackLoaded exposing (TrackLoaded)
 
@@ -16,7 +17,7 @@ preamble =
   xsi:schemaLocation="http://www.topografix.com/GPX/1/1
   http://www.topografix.com/GPX/1/1/gpx.xsd">
   <metadata>
-    <name>Cycling</name>
+    <name>Smoothed with GPXmagic</name>
     <author>
       <link href="https://www.stepwiserefinement.co.uk">
         <text>GPXmagic v3</text>
@@ -49,7 +50,7 @@ writeTrack name trackPoints =
     """
   <trk>
     <name>"""
-        ++ name
+        ++ ElmEscapeHtml.escape name
         ++ """</name>
     <trkseg>
 """
