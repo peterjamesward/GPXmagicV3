@@ -234,8 +234,12 @@ update :
     -> ( Options, List (ToolAction msg) )
 update paneMsg msgWrapper mTrack graph contentArea options previews =
     let
-        updatePaneWith : PaneId -> (PaneContext -> PaneContext) -> Options
+        updatePaneWith :
+            PaneId
+            -> (PaneContext -> ( PaneContext, List (ToolAction msg) ))
+            -> ( Options, List (ToolAction msg) )
         updatePaneWith id updateFn =
+            -- Helper avoids tedious repetition of these case statements.
             let
                 currentPane =
                     case id of
@@ -251,21 +255,24 @@ update paneMsg msgWrapper mTrack graph contentArea options previews =
                         Pane4 ->
                             options.pane4
 
-                updatedPane =
+                ( updatedPane, actions ) =
                     updateFn currentPane
+
+                updatedOptions =
+                    case id of
+                        Pane1 ->
+                            { options | pane1 = updatedPane }
+
+                        Pane2 ->
+                            { options | pane2 = updatedPane }
+
+                        Pane3 ->
+                            { options | pane3 = updatedPane }
+
+                        Pane4 ->
+                            { options | pane4 = updatedPane }
             in
-            case id of
-                Pane1 ->
-                    { options | pane1 = updatedPane }
-
-                Pane2 ->
-                    { options | pane2 = updatedPane }
-
-                Pane3 ->
-                    { options | pane3 = updatedPane }
-
-                Pane4 ->
-                    { options | pane4 = updatedPane }
+            ( updatedOptions, actions )
     in
     case paneMsg of
         PaneNoOp ->
@@ -287,12 +294,14 @@ update paneMsg msgWrapper mTrack graph contentArea options previews =
 
         SetViewMode paneId viewMode ->
             let
-                newOptions =
+                ( newOptions, _ ) =
                     updatePaneWith paneId
                         (\pane ->
-                            { pane
+                            ( { pane
                                 | activeView = viewMode
-                            }
+                              }
+                            , []
+                            )
                         )
             in
             ( newOptions
@@ -303,241 +312,142 @@ update paneMsg msgWrapper mTrack graph contentArea options previews =
 
         ThirdPersonViewMessage paneId imageMsg ->
             let
-                paneInfo =
-                    -- Tedious is good, tedious works.
-                    --TODO: Local refactor here.
-                    case paneId of
-                        Pane1 ->
-                            options.pane1
+                paneUpdateFunction : PaneContext -> ( PaneContext, List (ToolAction msg) )
+                paneUpdateFunction paneInfo =
+                    let
+                        effectiveContext =
+                            case paneInfo.activeView of
+                                ViewFirst ->
+                                    paneInfo.firstPersonContext
 
-                        Pane2 ->
-                            options.pane2
+                                ViewThird ->
+                                    paneInfo.thirdPersonContext
 
-                        Pane3 ->
-                            options.pane3
+                                _ ->
+                                    Nothing
 
-                        Pane4 ->
-                            options.pane4
+                        ( newContext, actions ) =
+                            case ( mTrack, effectiveContext ) of
+                                ( Just track, Just context ) ->
+                                    let
+                                        ( new, act ) =
+                                            ViewThirdPerson.update
+                                                imageMsg
+                                                (msgWrapper << ThirdPersonViewMessage Pane1)
+                                                track
+                                                (dimensionsWithLayout options.paneLayout contentArea)
+                                                context
+                                    in
+                                    ( Just new, act )
 
-                effectiveContext =
-                    case paneInfo.activeView of
-                        ViewFirst ->
-                            paneInfo.firstPersonContext
+                                _ ->
+                                    ( Nothing, [] )
 
-                        ViewThird ->
-                            paneInfo.thirdPersonContext
+                        newPane =
+                            case paneInfo.activeView of
+                                ViewFirst ->
+                                    { paneInfo | firstPersonContext = newContext }
 
-                        _ ->
-                            Nothing
+                                ViewThird ->
+                                    { paneInfo | thirdPersonContext = newContext }
 
-                ( newContext, actions ) =
-                    case ( mTrack, effectiveContext ) of
-                        ( Just track, Just context ) ->
-                            let
-                                ( new, act ) =
-                                    ViewThirdPerson.update
-                                        imageMsg
-                                        (msgWrapper << ThirdPersonViewMessage Pane1)
-                                        track
-                                        (dimensionsWithLayout options.paneLayout contentArea)
-                                        context
-                            in
-                            ( Just new, act )
-
-                        _ ->
-                            ( Nothing, [] )
-
-                newPane =
-                    case paneInfo.activeView of
-                        ViewFirst ->
-                            { paneInfo | firstPersonContext = newContext }
-
-                        ViewThird ->
-                            { paneInfo | thirdPersonContext = newContext }
-
-                        _ ->
-                            paneInfo
-
-                newOptions =
-                    case paneId of
-                        Pane1 ->
-                            { options | pane1 = newPane }
-
-                        Pane2 ->
-                            { options | pane2 = newPane }
-
-                        Pane3 ->
-                            { options | pane3 = newPane }
-
-                        Pane4 ->
-                            { options | pane4 = newPane }
+                                _ ->
+                                    paneInfo
+                    in
+                    ( newPane, actions )
             in
-            ( newOptions, actions )
+            updatePaneWith paneId paneUpdateFunction
 
         PlanViewMessage paneId imageMsg ->
             let
-                paneInfo =
-                    -- Tedious is good, tedious works.
-                    --TODO: Local refactor here.
-                    case paneId of
-                        Pane1 ->
-                            options.pane1
+                paneUpdateFunction : PaneContext -> ( PaneContext, List (ToolAction msg) )
+                paneUpdateFunction paneInfo =
+                    let
+                        ( newContext, actions ) =
+                            case ( mTrack, paneInfo.planContext ) of
+                                ( Just track, Just planContext ) ->
+                                    let
+                                        ( new, act ) =
+                                            ViewPlan.update
+                                                imageMsg
+                                                (msgWrapper << PlanViewMessage Pane1)
+                                                track
+                                                (dimensionsWithLayout options.paneLayout contentArea)
+                                                planContext
+                                    in
+                                    ( Just new, act )
 
-                        Pane2 ->
-                            options.pane2
+                                _ ->
+                                    ( Nothing, [] )
 
-                        Pane3 ->
-                            options.pane3
-
-                        Pane4 ->
-                            options.pane4
-
-                ( newContext, actions ) =
-                    case ( mTrack, paneInfo.planContext ) of
-                        ( Just track, Just planContext ) ->
-                            let
-                                ( new, act ) =
-                                    ViewPlan.update
-                                        imageMsg
-                                        (msgWrapper << PlanViewMessage Pane1)
-                                        track
-                                        (dimensionsWithLayout options.paneLayout contentArea)
-                                        planContext
-                            in
-                            ( Just new, act )
-
-                        _ ->
-                            ( Nothing, [] )
-
-                newPane =
-                    { paneInfo | planContext = newContext }
-
-                newOptions =
-                    case paneId of
-                        Pane1 ->
-                            { options | pane1 = newPane }
-
-                        Pane2 ->
-                            { options | pane2 = newPane }
-
-                        Pane3 ->
-                            { options | pane3 = newPane }
-
-                        Pane4 ->
-                            { options | pane4 = newPane }
+                        newPane =
+                            { paneInfo | planContext = newContext }
+                    in
+                    ( newPane, actions )
             in
-            ( newOptions, actions )
+            updatePaneWith paneId paneUpdateFunction
 
         GraphViewMessage paneId imageMsg ->
             let
-                paneInfo =
-                    -- Tedious is good, tedious works.
-                    --TODO: Local refactor here.
-                    case paneId of
-                        Pane1 ->
-                            options.pane1
+                paneUpdateFunction : PaneContext -> ( PaneContext, List (ToolAction msg) )
+                paneUpdateFunction paneInfo =
+                    let
+                        ( newContext, actions ) =
+                            case paneInfo.graphContext of
+                                Just graphContext ->
+                                    let
+                                        ( new, act ) =
+                                            ViewGraph.update
+                                                imageMsg
+                                                (msgWrapper << GraphViewMessage Pane1)
+                                                graph
+                                                (dimensionsWithLayout options.paneLayout contentArea)
+                                                graphContext
+                                    in
+                                    ( Just new, act )
 
-                        Pane2 ->
-                            options.pane2
+                                _ ->
+                                    ( Nothing, [] )
 
-                        Pane3 ->
-                            options.pane3
-
-                        Pane4 ->
-                            options.pane4
-
-                ( newContext, actions ) =
-                    case paneInfo.graphContext of
-                        Just graphContext ->
-                            let
-                                ( new, act ) =
-                                    ViewGraph.update
-                                        imageMsg
-                                        (msgWrapper << GraphViewMessage Pane1)
-                                        graph
-                                        (dimensionsWithLayout options.paneLayout contentArea)
-                                        graphContext
-                            in
-                            ( Just new, act )
-
-                        _ ->
-                            ( Nothing, [] )
-
-                newPane =
-                    { paneInfo | graphContext = newContext }
-
-                newOptions =
-                    case paneId of
-                        Pane1 ->
-                            { options | pane1 = newPane }
-
-                        Pane2 ->
-                            { options | pane2 = newPane }
-
-                        Pane3 ->
-                            { options | pane3 = newPane }
-
-                        Pane4 ->
-                            { options | pane4 = newPane }
+                        newPane =
+                            { paneInfo | graphContext = newContext }
+                    in
+                    ( newPane, actions )
             in
-            ( newOptions, actions )
+            updatePaneWith paneId paneUpdateFunction
 
         ProfileViewMessage paneId imageMsg ->
             let
-                paneInfo =
-                    -- Tedious is good, tedious works.
-                    --TODO: Local refactor here.
-                    case paneId of
-                        Pane1 ->
-                            options.pane1
+                paneUpdateFunction : PaneContext -> ( PaneContext, List (ToolAction msg) )
+                paneUpdateFunction paneInfo =
+                    let
+                        ( newContext, actions ) =
+                            case ( mTrack, paneInfo.profileContext ) of
+                                ( Just track, Just profile ) ->
+                                    let
+                                        ( new, act ) =
+                                            ViewProfileCharts.update
+                                                imageMsg
+                                                (msgWrapper << ProfileViewMessage Pane1)
+                                                track
+                                                (dimensionsWithLayout options.paneLayout contentArea)
+                                                previews
+                                                profile
+                                    in
+                                    ( Just new, act )
 
-                        Pane2 ->
-                            options.pane2
+                                _ ->
+                                    ( Nothing, [] )
 
-                        Pane3 ->
-                            options.pane3
-
-                        Pane4 ->
-                            options.pane4
-
-                ( newContext, actions ) =
-                    case ( mTrack, paneInfo.profileContext ) of
-                        ( Just track, Just profile ) ->
-                            let
-                                ( new, act ) =
-                                    ViewProfileCharts.update
-                                        imageMsg
-                                        (msgWrapper << ProfileViewMessage Pane1)
-                                        track
-                                        (dimensionsWithLayout options.paneLayout contentArea)
-                                        previews
-                                        profile
-                            in
-                            ( Just new, act )
-
-                        _ ->
-                            ( Nothing, [] )
-
-                newPane =
-                    { paneInfo | profileContext = newContext }
-
-                newOptions =
-                    case paneId of
-                        Pane1 ->
-                            { options | pane1 = newPane }
-
-                        Pane2 ->
-                            { options | pane2 = newPane }
-
-                        Pane3 ->
-                            { options | pane3 = newPane }
-
-                        Pane4 ->
-                            { options | pane4 = newPane }
+                        newPane =
+                            { paneInfo | profileContext = newContext }
+                    in
+                    ( newPane, actions )
             in
-            ( newOptions, actions )
+            updatePaneWith paneId paneUpdateFunction
 
         MapViewMessage mapViewMsg ->
+            -- Can only be pane 1!
             let
                 paneInfo =
                     options.pane1
