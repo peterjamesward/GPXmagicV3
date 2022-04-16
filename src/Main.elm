@@ -313,12 +313,16 @@ update msg model =
             let
                 paneStuff =
                     model.paneLayoutOptions
+
+                toolsStuff =
+                    ToolsController.clearPopups model.toolOptions
             in
             ( { model
                 | infoText = Nothing
                 , isPopupOpen = False
                 , loadOptionsMenuOpen = False
                 , paneLayoutOptions = { paneStuff | popupVisible = False }
+                , toolOptions = toolsStuff
               }
             , Cmd.none
             )

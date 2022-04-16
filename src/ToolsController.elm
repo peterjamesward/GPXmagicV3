@@ -1701,7 +1701,14 @@ viewTool location msgWrapper isTrack options toolEntry =
                             , I18N.text location toolEntry.toolId "label"
                             ]
                     }
-                , Input.button [ alignRight ]
+                , Input.button
+                    [ alignRight
+                    , htmlAttribute <|
+                        Mouse.onWithOptions
+                            "click"
+                            stopProp
+                            (always << msgWrapper <| ToolPopupToggle toolEntry.toolType)
+                    ]
                     { onPress = Just <| msgWrapper <| ToolPopupToggle toolEntry.toolType
                     , label = useIconWithSize 14 FeatherIcons.settings
                     }
@@ -1734,6 +1741,15 @@ showDockOptions location msgWrapper toolEntry =
 
     else
         none
+
+
+clearPopups : Options msg -> Options msg
+clearPopups options =
+    let
+        clearPopup tool =
+            { tool | isPopupOpen = False }
+    in
+    { options | tools = List.map clearPopup options.tools }
 
 
 showColourOptions : (ToolMsg -> msg) -> ToolEntry -> Element msg
