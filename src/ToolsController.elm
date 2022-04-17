@@ -8,6 +8,7 @@ import Element.Background as Background exposing (color)
 import Element.Border as Border exposing (roundEach)
 import Element.Font as Font
 import Element.Input as Input
+import Element.Lazy
 import FeatherIcons
 import FlatColors.ChinesePalette
 import FlatColors.FlatUIPalette
@@ -1628,6 +1629,23 @@ viewTool :
     -> ToolEntry
     -> Element msg
 viewTool location msgWrapper isTrack options toolEntry =
+    Element.Lazy.lazy5
+        viewToolLazy
+        location
+        msgWrapper
+        isTrack
+        options
+        toolEntry
+
+
+viewToolLazy :
+    I18NOptions.Location
+    -> (ToolMsg -> msg)
+    -> Maybe (TrackLoaded msg)
+    -> Options msg
+    -> ToolEntry
+    -> Element msg
+viewToolLazy location msgWrapper isTrack options toolEntry =
     el [ padding 2, width fill, alignTop ] <|
         column
             [ width fill
