@@ -26,6 +26,7 @@ import LandUseDataOSM
 import LandUseDataTypes
 import Length exposing (Meters)
 import LineSegment3d
+import List.Extra
 import LocalCoords exposing (LocalCoords)
 import Pixels
 import Plane3d exposing (Plane3d)
@@ -269,7 +270,7 @@ makeLandUsePlanar landUse index tree groundPlane =
                 Just cone ->
                     Just
                         ( Scene3d.cone (Material.color colour) cone
-                        , { content = { altitude = Point3d.zCoordinate nearestPoint }
+                        , { content = { leafIndex = -1, altitude = Point3d.zCoordinate nearestPoint }
                           , box =
                                 BoundingBox2d.withDimensions
                                     ( Length.meters 8, Length.meters 8 )
@@ -319,7 +320,7 @@ makeLandUsePlanar landUse index tree groundPlane =
                         |> TriangularMesh.mapVertices restoreAltitude
             in
             ( Scene3d.mesh (Material.color colour) (Mesh.indexedTriangles mesh)
-            , { content = { altitude = useAltitude }
+            , { content = { leafIndex = -1, altitude = useAltitude }
               , box =
                     Polygon2d.boundingBox polygon
                         |> Maybe.withDefault (BoundingBox2d.singleton Point2d.origin)
@@ -402,12 +403,6 @@ makeLandUsePlanar landUse index tree groundPlane =
         wayStuff =
             landUse.ways
                 |> List.foldl drawWay nodeStuff
-
-        --_ =
-        --    Debug.log "NODES" nodeStuff.unknownTags
-        --
-        --_ =
-        --    Debug.log "WAYS" wayStuff.unknownTags
     in
     ( wayStuff.scenes, wayStuff.updatedIndex )
 
@@ -435,7 +430,7 @@ makeLandUseSloped landUse index tree groundPlane =
                 Just cone ->
                     Just
                         ( Scene3d.cone (Material.color colour) cone
-                        , { content = { altitude = Point3d.zCoordinate at }
+                        , { content = { leafIndex = -1, altitude = Point3d.zCoordinate at }
                           , box =
                                 BoundingBox2d.withDimensions
                                     ( Length.meters 8, Length.meters 8 )
@@ -451,23 +446,110 @@ makeLandUseSloped landUse index tree groundPlane =
             -> List LandUseDataTypes.LandUseNode
             -> ( Entity LocalCoords, List (SpatialContent IndexEntry Meters LocalCoords) )
         drawPolygon colour nodes =
-            -- Must draw a 2D polygon so we can triangulate it.
-            -- Ian MacKenzie makes this a pleasure.
+            -- TODO: See if any road(s) traverse the polygon.
+            -- 1. Bounding box test, in many cases will return no leafs.
+            -- 2. If returns leafs, try to find contiguous set of leaves that
+            --      a) Starts outside,
+            --      b) Passes inside,
+            --      c) Ends outside.
+            -- 3. Find the crossing points of the road at the polygon edges
+            -- 4. Create two new polygons, one each side, using offset road edges.
+            -- 5. Recurse with the smaller polygons in case multiple raods.
+            -- Will be a bit trickier because the left and right polygon road
+            -- edges take altitude from road, not from the land use.
             let
                 polygon =
+                    -- Triangulation works in 2D, so we briefly lose altitude info.
+                    -- But that works better for road intersection as well!
                     nodes
                         |> List.map (.at >> Point3d.projectInto SketchPlane3d.xy)
                         |> Polygon2d.singleLoop
 
+                nearbyRoads =
+                    case Polygon2d.boundingBox polygon of
+                        Just polygonBox ->
+                            SpatialIndex.query index polygonBox
+
+                        Nothing ->
+                            []
+
+                entryRoad =
+                    -- Ignoring an obvious special case or three, if any of the roads pass
+                    -- through the polygon, there will be one that starts outside and ends
+                    -- inside, and if more than one, one will have the lowest index.
+                    let
+                        isEntryRoad { content, box } =
+                            let
+                                { leafIndex, altitude } =
+                                    content
+
+                                leaf =
+                                    DomainModel.asRecord <|
+                                        DomainModel.leafFromIndex leafIndex tree
+
+                                ( start2d, end2d ) =
+                                    ( Point3d.projectInto SketchPlane3d.xy leaf.startPoint
+                                    , Point3d.projectInto SketchPlane3d.xy leaf.endPoint
+                                    )
+                            in
+                            (not <| Polygon2d.contains start2d polygon)
+                                && Polygon2d.contains end2d polygon
+                    in
+                    List.filter isEntryRoad nearbyRoads
+                        |> List.Extra.minimumBy (.content >> .leafIndex)
+
+                exitRoad =
+                    -- If there is an exit road, let us proceed along it until we find
+                    -- the leaf that leaves (good joke that).
+                    case entryRoad of
+                        Just isEntryRoad ->
+                            let
+                                entryIndex =
+                                    isEntryRoad.content.leafIndex
+
+                                walker testIndex =
+                                    -- Minimal risk of stack explosion here.
+                                    let
+                                        leaf =
+                                            DomainModel.asRecord <|
+                                                DomainModel.leafFromIndex testIndex tree
+
+                                        ( start2d, end2d ) =
+                                            ( Point3d.projectInto SketchPlane3d.xy leaf.startPoint
+                                            , Point3d.projectInto SketchPlane3d.xy leaf.endPoint
+                                            )
+                                    in
+                                    if testIndex > skipCount tree then
+                                        -- Avoid embarrassing infinite recurse!
+                                        -- Split the polygon here.
+                                        Just testIndex
+
+                                    else if
+                                        Polygon2d.contains start2d polygon
+                                            && (not <| Polygon2d.contains end2d polygon)
+                                    then
+                                        Just testIndex
+
+                                    else
+                                        walker <| testIndex + 1
+                            in
+                            walker <| entryIndex + 1
+
+                        Nothing ->
+                            Nothing
+
+                -- If there is an entry road, we need to find which polygon edge it crosses,
+                -- and where, so that we can create the new vertices along the left of the road.
+                -- (Polygon points by convention are counter-clockwise.)
+                _ =
+                    Debug.log "entry and exit" ( entryRoad, exitRoad )
+
                 mesh2d =
-                    polygon
-                        |> Polygon2d.triangulate
+                    Polygon2d.triangulate polygon
 
                 mesh3d =
+                    -- Make a 3D mesh using the original polygon vertices with altitudes.
                     let
-                        vertices2d =
-                            TriangularMesh.vertices mesh2d
-
                         faceIndices =
                             TriangularMesh.faceIndices mesh2d
 
@@ -477,7 +559,7 @@ makeLandUseSloped landUse index tree groundPlane =
                     TriangularMesh.indexed vertices3d faceIndices
 
                 vertexIndexEntry vertex =
-                    { content = { altitude = Point3d.zCoordinate vertex }
+                    { content = { leafIndex = -1, altitude = Point3d.zCoordinate vertex }
                     , box =
                         BoundingBox2d.withDimensions
                             ( Length.meters 10, Length.meters 10 )
@@ -568,12 +650,6 @@ makeLandUseSloped landUse index tree groundPlane =
         wayStuff =
             landUse.ways
                 |> List.foldl drawWay nodeStuff
-
-        --_ =
-        --    Debug.log "NODES" nodeStuff.unknownTags
-        --
-        --_ =
-        --    Debug.log "WAYS" wayStuff.unknownTags
     in
     ( wayStuff.scenes, wayStuff.updatedIndex )
 
@@ -679,7 +755,9 @@ centreLineBetween colouringFn road =
 
 
 type alias IndexEntry =
-    { altitude : Quantity Float Meters }
+    { leafIndex : Int
+    , altitude : Quantity Float Meters
+    }
 
 
 type alias Index =
@@ -697,8 +775,8 @@ indexTerrain box trackTree =
             -- only affects the index efficiency.
             SpatialIndex.empty (flatBox box) (Length.meters 100.0)
 
-        indexRoadSection : RoadSection -> Index -> Index
-        indexRoadSection road index =
+        indexRoadSection : RoadSection -> ( Int, Index ) -> ( Int, Index )
+        indexRoadSection road ( leafIndex, spaceIndex ) =
             let
                 halfWidthVector =
                     Vector3d.from road.startPoint road.endPoint
@@ -723,13 +801,21 @@ indexTerrain box trackTree =
                 localBounds =
                     BoundingBox3d.hull leftNearKerb [ leftFarKerb, rightFarKerb, rightNearKerb ]
             in
-            SpatialIndex.add
-                { content = { altitude = BoundingBox3d.minZ localBounds }
+            ( leafIndex + 1
+            , SpatialIndex.add
+                { content =
+                    { leafIndex = leafIndex
+                    , altitude = BoundingBox3d.minZ localBounds
+                    }
                 , box = flatBox localBounds
                 }
-                index
+                spaceIndex
+            )
+
+        ( _, populatedIndex ) =
+            DomainModel.foldOverRoute indexRoadSection trackTree ( 0, emptyIndex )
     in
-    DomainModel.foldOverRoute indexRoadSection trackTree emptyIndex
+    populatedIndex
 
 
 type LocationContext
