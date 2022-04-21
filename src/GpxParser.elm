@@ -32,7 +32,7 @@ parseGPXPoints : String -> List GPXSource
 parseGPXPoints xml =
     let
         trkpts =
-            Regex.find (asRegex "<trkpt((.|\\n|\\r)*?)trkpt>") xml |> List.map .match
+            Regex.find (asRegex "<trkpt((.|\\n|\\r)*?)(trkpt>|\\/>)") xml |> List.map .match
 
         latitude trkpt =
             Regex.find (asRegex "lat=\\\"([\\d\\.-]*)\\\"") trkpt |> matches
