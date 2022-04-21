@@ -470,6 +470,9 @@ makeLandUseSloped landUse index tree groundPlane =
             -- Will be a bit trickier because the left and right polygon road
             -- edges take altitude from road, not from the land use.
             let
+                _ =
+                    Debug.log "drawPolygon" <| List.length nodes
+
                 polygon =
                     -- Triangulation works in 2D, so we briefly lose altitude info.
                     -- But that works better for road intersection as well!
@@ -621,10 +624,10 @@ makeLandUseSloped landUse index tree groundPlane =
                 correctNodeOrder =
                     case ( polygonIsClockwise, entryRoadEntersAfterVertex ) of
                         ( Just True, Just vertex ) ->
-                            List.reverse <| rotateLeft vertex nodes
+                            List.reverse <| rotateLeft (1 + vertex) nodes
 
                         ( Just False, Just vertex ) ->
-                            rotateLeft (vertex + 1) nodes
+                            rotateLeft vertex nodes
 
                         _ ->
                             nodes
@@ -723,32 +726,39 @@ makeLandUseSloped landUse index tree groundPlane =
                             (vertex |> Point3d.projectInto SketchPlane3d.xy)
                     }
             in
-            case ( leftSubPolygon, rightSubPolygon ) of
-                ( leftBoundary :: _, rightBoundary :: _ ) ->
-                    -- Recurse in case there are more road transepts!
-                    -- It would have made more sense to do this at the `foldl` but here we are.
-                    --let
-                    --    ( leftMesh, leftIndexEntries ) =
-                    --        drawPolygon colour leftSubPolygon
-                    --
-                    --    ( rightMesh, rightIndexEntries ) =
-                    --        drawPolygon colour rightSubPolygon
-                    --in
-                    ( Scene3d.group <|
-                        List.concat <|
-                            [ previewAsLine FlatColors.RussianPalette.cornflower leftSubPolygon
-                            , previewAsLine FlatColors.RussianPalette.rosyHighlight rightSubPolygon
-                            ]
-                    , []
-                    )
+            if List.length nodes < 3 then
+                -- Ignore trivial polygons to avoid infinite recursion.
+                ( Scene3d.group []
+                , []
+                )
 
-                --( Scene3d.group [ leftMesh, rightMesh ]
-                --, leftIndexEntries ++ rightIndexEntries
-                --)
-                _ ->
-                    ( Scene3d.mesh (Material.color colour) (Mesh.indexedTriangles mesh3d)
-                    , List.map vertexIndexEntry nodes
-                    )
+            else
+                case ( leftSubPolygon, rightSubPolygon ) of
+                    ( [], [] ) ->
+                        ( Scene3d.mesh (Material.color colour) (Mesh.indexedTriangles mesh3d)
+                        , List.map vertexIndexEntry nodes
+                        )
+
+                    ( _, _ ) ->
+                        ( Scene3d.group <|
+                            List.concat <|
+                                [ previewAsLine FlatColors.RussianPalette.cornflower leftSubPolygon
+                                , previewAsLine FlatColors.RussianPalette.rosyHighlight rightSubPolygon
+                                ]
+                        , []
+                        )
+                        -- Recurse in case there are more road transits!
+                        -- It would have made more sense to do this at the `foldl` but here we are.
+                        --let
+                        --    ( leftMesh, leftIndexEntries ) =
+                        --        drawPolygon colour leftSubPolygon
+                        --
+                        --    ( rightMesh, rightIndexEntries ) =
+                        --        drawPolygon colour rightSubPolygon
+                        --in
+                        --( Scene3d.group [ leftMesh, rightMesh ]
+                        --, leftIndexEntries ++ rightIndexEntries
+                        --)
 
         drawNode : LandUseDataTypes.LandUseNode -> LandUseStuff -> LandUseStuff
         drawNode node stuff =
