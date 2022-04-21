@@ -1263,7 +1263,7 @@ makeNewRoute options =
 
                         nudgedPoints =
                             List.range firstOffsetIndex lastOffsetIndex
-                                |> List.map (useNudgeTool nudgeOptions track)
+                                |> List.map (useNudgeTool nudgeOptions track.trackTree)
                     in
                     case direction of
                         Natural ->

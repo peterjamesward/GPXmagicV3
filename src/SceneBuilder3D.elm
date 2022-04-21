@@ -22,9 +22,11 @@ import FlatColors.CanadianPalette
 import FlatColors.FlatUIPalette
 import FlatColors.FrenchPalette
 import FlatColors.IndianPalette
+import FlatColors.RussianPalette
 import LandUseDataOSM
 import LandUseDataTypes
 import Length exposing (Meters)
+import LineSegment2d exposing (LineSegment2d)
 import LineSegment3d
 import List.Extra
 import LocalCoords exposing (LocalCoords)
@@ -42,6 +44,7 @@ import SketchPlane3d
 import SpatialIndex exposing (SpatialContent)
 import Tools.DisplaySettingsOptions exposing (CurtainStyle(..))
 import Tools.LandUseColours exposing (landUseColours)
+import Tools.Nudge
 import TrackLoaded exposing (TrackLoaded)
 import TriangularMesh
 import Utils exposing (reversingCons)
@@ -407,6 +410,15 @@ makeLandUsePlanar landUse index tree groundPlane =
     ( wayStuff.scenes, wayStuff.updatedIndex )
 
 
+type alias PolygonSplitter =
+    { leftPolygonBeforeEntry : List EarthPoint
+    , newPointsForRoad : List EarthPoint
+    , leftPolygonAfterEntry : List EarthPoint
+    , rightPolygon : List EarthPoint
+    , foundCrossings : Int
+    }
+
+
 makeLandUseSloped :
     LandUseDataTypes.LandUseData
     -> Index
@@ -443,7 +455,7 @@ makeLandUseSloped landUse index tree groundPlane =
 
         drawPolygon :
             Color
-            -> List LandUseDataTypes.LandUseNode
+            -> List EarthPoint
             -> ( Entity LocalCoords, List (SpatialContent IndexEntry Meters LocalCoords) )
         drawPolygon colour nodes =
             -- TODO: See if any road(s) traverse the polygon.
@@ -462,7 +474,7 @@ makeLandUseSloped landUse index tree groundPlane =
                     -- Triangulation works in 2D, so we briefly lose altitude info.
                     -- But that works better for road intersection as well!
                     nodes
-                        |> List.map (.at >> Point3d.projectInto SketchPlane3d.xy)
+                        |> List.map (Point3d.projectInto SketchPlane3d.xy)
                         |> Polygon2d.singleLoop
 
                 nearbyRoads =
@@ -473,7 +485,7 @@ makeLandUseSloped landUse index tree groundPlane =
                         Nothing ->
                             []
 
-                entryRoad =
+                entryRoadIndex =
                     -- Ignoring an obvious special case or three, if any of the roads pass
                     -- through the polygon, there will be one that starts outside and ends
                     -- inside, and if more than one, one will have the lowest index.
@@ -498,17 +510,17 @@ makeLandUseSloped landUse index tree groundPlane =
                     List.filter isEntryRoad nearbyRoads
                         |> List.Extra.minimumBy (.content >> .leafIndex)
 
-                exitRoad =
+                exitRoadIndex =
                     -- If there is an exit road, let us proceed along it until we find
                     -- the leaf that leaves (good joke that).
-                    case entryRoad of
+                    case entryRoadIndex of
                         Just isEntryRoad ->
                             let
                                 entryIndex =
                                     isEntryRoad.content.leafIndex
 
                                 walker testIndex =
-                                    -- Minimal risk of stack explosion here.
+                                    -- Small risk of stack explosion here.
                                     let
                                         leaf =
                                             DomainModel.asRecord <|
@@ -538,11 +550,130 @@ makeLandUseSloped landUse index tree groundPlane =
                         Nothing ->
                             Nothing
 
+                ( entryLeaf, exitLeaf ) =
+                    case ( entryRoadIndex, exitRoadIndex ) of
+                        ( Just goesIn, Just comesOut ) ->
+                            ( Just <| asRecord <| DomainModel.leafFromIndex goesIn.content.leafIndex tree
+                            , Just <| asRecord <| DomainModel.leafFromIndex comesOut tree
+                            )
+
+                        _ ->
+                            ( Nothing, Nothing )
+
                 -- If there is an entry road, we need to find which polygon edge it crosses,
                 -- and where, so that we can create the new vertices along the left of the road.
                 -- (Polygon points by convention are counter-clockwise.)
+                ( entryRoadEntersAfterVertex, exitRoadLeavesAfterVertex ) =
+                    case ( entryLeaf, exitLeaf ) of
+                        ( Just goesIn, Just comesOut ) ->
+                            let
+                                entryLine =
+                                    LineSegment3d.from goesIn.startPoint goesIn.endPoint
+                                        |> LineSegment3d.projectInto SketchPlane3d.xy
+
+                                exitLine =
+                                    LineSegment3d.from comesOut.startPoint comesOut.endPoint
+                                        |> LineSegment3d.projectInto SketchPlane3d.xy
+
+                                polygonEdgesInOrder =
+                                    -- Not sure I can trust `.edges`.
+                                    List.map2 Tuple.pair nodes (List.drop 1 nodes)
+
+                                edgeIndexIntersectWithEntry =
+                                    polygonEdgesInOrder
+                                        |> List.Extra.findIndex
+                                            (\( start, end ) ->
+                                                case
+                                                    LineSegment2d.intersectionPoint
+                                                        (LineSegment3d.from start end
+                                                            |> LineSegment3d.projectInto SketchPlane3d.xy
+                                                        )
+                                                        entryLine
+                                                of
+                                                    Just intersect ->
+                                                        True
+
+                                                    Nothing ->
+                                                        False
+                                            )
+
+                                edgeIndexIntersectWithExit =
+                                    polygonEdgesInOrder
+                                        |> List.Extra.findIndex
+                                            (\( start, end ) ->
+                                                case
+                                                    LineSegment2d.intersectionPoint
+                                                        (LineSegment3d.from start end
+                                                            |> LineSegment3d.projectInto SketchPlane3d.xy
+                                                        )
+                                                        exitLine
+                                                of
+                                                    Just intersect ->
+                                                        True
+
+                                                    Nothing ->
+                                                        False
+                                            )
+                            in
+                            ( edgeIndexIntersectWithEntry, edgeIndexIntersectWithExit )
+
+                        _ ->
+                            ( Nothing, Nothing )
+
+                {-
+                   We should now know, if the road intersects the polygon, enough to construct
+                   two separate polygons, one each side of the road. Polygons are always constructed
+                   anti-clockwise but it matters not in which order we the polygons so we can
+                   start from the lower index.
+                   From console output, this looks promising.
+                -}
                 _ =
-                    Debug.log "entry and exit" ( entryRoad, exitRoad )
+                    Debug.log "Entry and exit leaves" ( entryRoadIndex, exitRoadIndex )
+
+                _ =
+                    Debug.log "Crossing edge indices" ( entryRoadEntersAfterVertex, exitRoadLeavesAfterVertex )
+
+                -- Now it's decision time. If there is a transiting road, we must make two
+                -- polygon and recurse. If not, we can just make a mesh for this polygon.
+                -- (Now's as good a time as any to apologise for this odd coding style;
+                -- I've been deferring this inevitable crux.)
+                ( leftSubPolygon, rightSubPolygon ) =
+                    case
+                        ( ( entryRoadIndex, exitRoadIndex )
+                        , ( entryRoadEntersAfterVertex, exitRoadLeavesAfterVertex )
+                        )
+                    of
+                        ( ( Just inRoad, Just outRoad ), ( Just inVertex, Just outVertex ) ) ->
+                            let
+                                ( lowerVertex, higherVertex ) =
+                                    ( min inVertex outVertex
+                                    , max inVertex outVertex
+                                    )
+
+                                ( firstTwoParts, lastPart ) =
+                                    nodes |> List.Extra.splitAt (higherVertex + 1)
+
+                                ( firstPart, secondPart ) =
+                                    firstTwoParts |> List.Extra.splitAt (lowerVertex + 1)
+
+                                ( roadNudgedLeft, roadNudgedRight ) =
+                                    nudgeHelper ( 1 + inRoad.content.leafIndex, outRoad ) tree
+                            in
+                            if inVertex < outVertex then
+                                ( roadNudgedRight ++ secondPart
+                                , roadNudgedLeft ++ (lastPart ++ firstPart)
+                                )
+
+                            else if inVertex > outVertex then
+                                ( roadNudgedLeft ++ secondPart
+                                , roadNudgedRight ++ lastPart ++ firstPart
+                                )
+
+                            else
+                                ( [], [] )
+
+                        _ ->
+                            ( [], [] )
 
                 mesh2d =
                     Polygon2d.triangulate polygon
@@ -554,7 +685,7 @@ makeLandUseSloped landUse index tree groundPlane =
                             TriangularMesh.faceIndices mesh2d
 
                         vertices3d =
-                            Array.fromList <| List.map .at nodes
+                            Array.fromList nodes
                     in
                     TriangularMesh.indexed vertices3d faceIndices
 
@@ -566,8 +697,30 @@ makeLandUseSloped landUse index tree groundPlane =
                             (vertex |> Point3d.projectInto SketchPlane3d.xy)
                     }
             in
+            --case ( leftSubPolygon, rightSubPolygon ) of
+            --    ( leftBoundary :: _, rightBoundary :: _ ) ->
+            -- Recurse in case there are more road transepts!
+            -- It would have made more sense to do this at the `foldl` but here we are.
+            --let
+            --    ( leftMesh, leftIndexEntries ) =
+            --        drawPolygon colour leftSubPolygon
+            --
+            --    ( rightMesh, rightIndexEntries ) =
+            --        drawPolygon colour rightSubPolygon
+            --in
+            --( Scene3d.group <|
+            --    List.concat <|
+            --        [ previewAsLine FlatColors.RussianPalette.cornflower leftSubPolygon
+            --        , previewAsLine FlatColors.RussianPalette.rosyHighlight rightSubPolygon
+            --        ]
+            --, []
+            --)
+            --( Scene3d.group [ leftMesh, rightMesh ]
+            --, leftIndexEntries ++ rightIndexEntries
+            --)
+            --_ ->
             ( Scene3d.mesh (Material.color colour) (Mesh.indexedTriangles mesh3d)
-            , List.map (.at >> vertexIndexEntry) nodes
+            , List.map vertexIndexEntry nodes
             )
 
         drawNode : LandUseDataTypes.LandUseNode -> LandUseStuff -> LandUseStuff
@@ -630,9 +783,10 @@ makeLandUseSloped landUse index tree groundPlane =
                     in
                     case Dict.get useTag landUseColours of
                         Just colour ->
+                            -- Only draw polygons we know how to colour!
                             let
                                 ( polygon, indexEntries ) =
-                                    drawPolygon colour way.nodes
+                                    drawPolygon colour <| List.map .at way.nodes
                             in
                             { scenes = polygon :: stuff.scenes
                             , unknownTags = stuff.unknownTags
@@ -652,6 +806,43 @@ makeLandUseSloped landUse index tree groundPlane =
                 |> List.foldl drawWay nodeStuff
     in
     ( wayStuff.scenes, wayStuff.updatedIndex )
+
+
+nudgeHelper : ( Int, Int ) -> PeteTree -> ( List EarthPoint, List EarthPoint )
+nudgeHelper ( fromIdx, toIdx ) tree =
+    -- So we can make a new polygon boundary along the road edges.
+    let
+        _ =
+            Debug.log "nudge helper" ( fromIdx, toIdx )
+
+        noNudge =
+            Tools.Nudge.defaultOptions
+
+        useNudgeTool nudgeOption index =
+            -- Simple wrapper to use internal operation in Nudge
+            Tools.Nudge.nudgeTrackPoint
+                nudgeOption
+                1.0
+                index
+                tree
+
+        leftEdge =
+            let
+                nudge =
+                    { noNudge | horizontal = Length.meters -4 }
+            in
+            List.map (useNudgeTool nudge) (List.range fromIdx toIdx)
+
+        rightEdge =
+            let
+                nudge =
+                    { noNudge | horizontal = Length.meters 4 }
+            in
+            List.map (useNudgeTool nudge) (List.range fromIdx toIdx)
+    in
+    ( leftEdge
+    , List.reverse rightEdge
+    )
 
 
 renderPreviews : Dict String PreviewData -> List (Entity LocalCoords)

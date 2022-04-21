@@ -221,7 +221,7 @@ computeNudgedPoints settings track =
                     else
                         0.0
             in
-            nudgeTrackPoint settings fade index track
+            nudgeTrackPoint settings fade index track.trackTree
 
         newEarthPoints =
             List.map nudge <| List.range startIncludingFade endIncludingFade
@@ -235,17 +235,17 @@ computeNudgedPoints settings track =
     ( ( startIncludingFade, endIncludingFade ), previewPoints )
 
 
-effectiveDirection : Int -> TrackLoaded msg -> Direction2d LocalCoords
-effectiveDirection index track =
+effectiveDirection : Int -> PeteTree -> Direction2d LocalCoords
+effectiveDirection index tree =
     --In v1 and v2, each point had its before and after directions.
     --That's not stored in v3, but not too hard to compute.
     let
         precedingLeaf =
             -- Will be first leaf if index is zero.
-            leafFromIndex (index - 1) track.trackTree |> asRecord
+            leafFromIndex (index - 1) tree |> asRecord
 
         thisLeaf =
-            leafFromIndex index track.trackTree |> asRecord
+            leafFromIndex index tree |> asRecord
 
         deviation =
             Direction2d.angleFrom
@@ -263,18 +263,18 @@ effectiveDirection index track =
     bisectedAngle
 
 
-nudgeTrackPoint : Options -> Float -> Int -> TrackLoaded msg -> EarthPoint
-nudgeTrackPoint options fade index track =
+nudgeTrackPoint : Options -> Float -> Int -> PeteTree -> EarthPoint
+nudgeTrackPoint options fade index tree =
     if fade == 0 then
-        earthPointFromIndex index track.trackTree
+        earthPointFromIndex index tree
 
     else
         let
             current =
-                earthPointFromIndex index track.trackTree
+                earthPointFromIndex index tree
 
             horizontalDirection =
-                effectiveDirection index track
+                effectiveDirection index tree
                     |> Direction2d.rotateClockwise
                     |> Direction3d.on SketchPlane3d.xy
 
@@ -350,7 +350,7 @@ view location imperial options msgWrapper track =
         i18n =
             I18N.text location toolId
 
-        horizontalNudgeSlider  =
+        horizontalNudgeSlider =
             Input.slider
                 commonShortHorizontalSliderStyles
                 { onChange = Length.meters >> SetHorizontalNudgeFactor >> msgWrapper
@@ -381,7 +381,7 @@ view location imperial options msgWrapper track =
                 , thumb = Input.defaultThumb
                 }
 
-        fadeSlider  =
+        fadeSlider =
             Input.slider
                 commonShortHorizontalSliderStyles
                 { onChange = Length.meters >> SetFadeExtent >> msgWrapper

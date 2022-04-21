@@ -5,23 +5,17 @@
 
 Awaiting French support from Muriel.
 
+## Land use 3D rendering
+
+Divide polygons along road edges.
+I suspect that OSM may not be consistent about polygon direction.
+How do I know? Can I deal with it?
+Maybe I can, because I can figure out the direction of the polygon edge that crosses the road.
+In fact, this may make it easier to just "follow the edges".
+
 ---
 
 # BACKLOG
-
-## Technical debt
-
-Variant of "request from local storage" that takes a wrapped message so that the return value
-can be directed to a tool or a view.
-
-Try to move out the residual tool-specific stuff in Main.performActions.
-
-## De-noise / Simplify
-
-This could be improved. Should preferentially remove any points where the triangle has a large
-deflection and a short baseline, not just based on area. Also, an effective quality filter 
-would be to restrict the angular change in both planes. Will do this prior to curvature analysis.
-> Obviated by smart smoother?
 
 ## RGT: Timed segments
 
@@ -37,6 +31,11 @@ Launch with track URL, save does a POST.
 Runs server-side (Node.js?), receives track via POST, returns smoothed.
 > `elm-serverless` can do this, may be other ways.
 
+## SVG profile rendering
+
+Info on mouse move.
+Scales?
+
 ## Route Builder
 
 - Improve traversal direction display (with an arrow on each section?).
@@ -50,18 +49,24 @@ Ditto for Move & Stretch, possibly Nudge.
 Provide info text capability on top bar and on view panes.
 Specific areas within tools as needed.
 
+## Technical debt
+
+Variant of "request from local storage" that takes a wrapped message so that the return value
+can be directed to a tool or a view.
+
+Try to move out the residual tool-specific stuff in Main.performActions.
+
+## De-noise / Simplify
+
+This could be improved. Should preferentially remove any points where the triangle has a large
+deflection and a short baseline, not just based on area. Also, an effective quality filter
+would be to restrict the angular change in both planes. Will do this prior to curvature analysis.
+> Obviated by smart smoother?
+
 ## Tools: old, updated, & new
 
 - Non-customisable keyboard alternatives for Load/Save/Undo/Redo/Fwd/Back/Purple (maybe 1-5 for views)
-- Extract all text for translation (Muriel)
 - Use localised number formatting everywhere (for French use of , and .)
-- Ability to point-smooth transitions over a range
-- "Tip of the day" tool? (Davie Ogle will write tips.)
-
-## SVG profile rendering
-
-Info on mouse move.
-Scales?
 
 ## Loops
 

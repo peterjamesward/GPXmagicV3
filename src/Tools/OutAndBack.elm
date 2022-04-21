@@ -75,7 +75,7 @@ apply options track =
                 nudgeOption
                 1.0
                 index
-                track
+                track.trackTree
 
         outwardLeg =
             -- nudge entire route one way, in natural order
