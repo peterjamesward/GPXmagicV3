@@ -740,25 +740,37 @@ makeLandUseSloped landUse index tree groundPlane =
                         )
 
                     ( _, _ ) ->
-                        ( Scene3d.group <|
-                            List.concat <|
-                                [ previewAsLine FlatColors.RussianPalette.cornflower leftSubPolygon
-                                , previewAsLine FlatColors.RussianPalette.rosyHighlight rightSubPolygon
-                                ]
-                        , []
-                        )
+                        --( Scene3d.group <|
+                        --    List.concat <|
+                        --        [ previewAsLine FlatColors.RussianPalette.cornflower leftSubPolygon
+                        --        , previewAsLine FlatColors.RussianPalette.rosyHighlight rightSubPolygon
+                        --        ]
+                        --, []
+                        --)
                         -- Recurse in case there are more road transits!
                         -- It would have made more sense to do this at the `foldl` but here we are.
-                        --let
-                        --    ( leftMesh, leftIndexEntries ) =
-                        --        drawPolygon colour leftSubPolygon
-                        --
-                        --    ( rightMesh, rightIndexEntries ) =
-                        --        drawPolygon colour rightSubPolygon
-                        --in
-                        --( Scene3d.group [ leftMesh, rightMesh ]
-                        --, leftIndexEntries ++ rightIndexEntries
-                        --)
+                        let
+                            ( leftMesh, leftIndexEntries ) =
+                                if List.length leftSubPolygon < List.length nodes then
+                                    drawPolygon colour leftSubPolygon
+
+                                else
+                                    ( Scene3d.group []
+                                    , []
+                                    )
+
+                            ( rightMesh, rightIndexEntries ) =
+                                if List.length rightSubPolygon < List.length nodes then
+                                    drawPolygon colour rightSubPolygon
+
+                                else
+                                    ( Scene3d.group []
+                                    , []
+                                    )
+                        in
+                        ( Scene3d.group [ leftMesh, rightMesh ]
+                        , leftIndexEntries ++ rightIndexEntries
+                        )
 
         drawNode : LandUseDataTypes.LandUseNode -> LandUseStuff -> LandUseStuff
         drawNode node stuff =
