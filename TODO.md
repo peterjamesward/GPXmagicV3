@@ -7,10 +7,8 @@ Awaiting French support from Muriel.
 
 ## Land use 3D rendering
 
-Code needs tidying.
-Some of the sub-polygons are disappearing.
-There's an "out by one" error so a singleton point inside polygon not handled properly.
-Would not be too hard to handle the cases where the S/F were inside a polygon.
+What was basically an experiment proved the idea but not the implementation.
+It needs doing properly, including the start and finish cases.
 
 ---
 
