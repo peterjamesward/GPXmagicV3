@@ -3,29 +3,18 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.2.6
+# GPXmagic v3.2.7
 
 (7e6dd577)
 
 ## In this release ...
 
-* Arc smoother button was incorrectly labelled in Bend mode.
+* Tool UI update is "lazy". This should be invisible, but please let me know if you see
+anything that fails to update.
 
-## 3.2.5
-
-* Escapes special characters in the track name.
-
-* Internal preparation for multiple language support.
-
-* Minor, long-deferred, minor tidy-ups.
-
-* Clicking on the window background will close non-modal popups.
+* Safely handles GPX files with no altitude data and abbreviated track-point tag closure.
 
 ## Acknowledgements
-
-* Special thanks to David Ogle for thorough testing, great bug reports, usability advice, and more.
-
-* Thanks to John Bytheway for v3 ideas and support.
 
 * Thanks to all those who've provided support, comments, bug reports, and help along the way.
 
