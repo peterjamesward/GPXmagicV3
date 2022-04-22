@@ -1,22 +1,4 @@
 
-# BUG
-
-Doesn't cater any more for GPX senza altitude.
-
-```<?xml version="1.0" ?>
-<gpx xmlns="http://www.topografix.com/GPX/1/1">
- <trk>
-  <name>ITHO Stage 1 (BOA)</name>
-  <trkseg>
-   <trkpt lat="35.3185" lon="25.09936"/>
-   <trkpt lat="35.31786" lon="25.09918"/>
-   <trkpt lat="35.31751" lon="25.09909"/>
-   <trkpt lat="35.31738" lon="25.09905"/>
-   <trkpt lat="35.31737" lon="25.09915"/>
-   <trkpt lat="35.31702" lon="25.09905"/>
-   <trkpt lat="35.31667" lon="25.09895"/>
-```
-
 # WIP
 
 ## I18N
@@ -25,11 +7,9 @@ Awaiting French support from Muriel.
 
 ## Land use 3D rendering
 
-Divide polygons along road edges.
-I suspect that OSM may not be consistent about polygon direction.
-How do I know? Can I deal with it?
-Maybe I can, because I can figure out the direction of the polygon edge that crosses the road.
-In fact, this may make it easier to just "follow the edges".
+Code needs tidying. 
+There's an "out by one" error so a singleton point inside polygon not handled properly.
+Would not be too hard to handle the cases where the S/F were inside a polygon.
 
 ---
 
