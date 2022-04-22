@@ -470,9 +470,6 @@ makeLandUseSloped landUse index tree groundPlane =
             -- Will be a bit trickier because the left and right polygon road
             -- edges take altitude from road, not from the land use.
             let
-                _ =
-                    Debug.log "drawPolygon" <| List.length nodes
-
                 polygon =
                     -- Triangulation works in 2D, so we briefly lose altitude info.
                     -- But that works better for road intersection as well!
@@ -728,50 +725,61 @@ makeLandUseSloped landUse index tree groundPlane =
             in
             if List.length nodes < 3 then
                 -- Ignore trivial polygons to avoid infinite recursion.
-                ( Scene3d.group []
+                ( Scene3d.nothing
                 , []
                 )
 
             else
-                case ( leftSubPolygon, rightSubPolygon ) of
-                    ( [], [] ) ->
-                        ( Scene3d.mesh (Material.color colour) (Mesh.indexedTriangles mesh3d)
-                        , List.map vertexIndexEntry nodes
-                        )
+                --case ( leftSubPolygon, rightSubPolygon ) of
+                --    ( [], [] ) ->
+                ( Scene3d.mesh (Material.color colour) (Mesh.indexedTriangles mesh3d)
+                , List.map vertexIndexEntry nodes
+                )
 
-                    ( _, _ ) ->
-                        --( Scene3d.group <|
-                        --    List.concat <|
-                        --        [ previewAsLine FlatColors.RussianPalette.cornflower leftSubPolygon
-                        --        , previewAsLine FlatColors.RussianPalette.rosyHighlight rightSubPolygon
-                        --        ]
-                        --, []
-                        --)
-                        -- Recurse in case there are more road transits!
-                        -- It would have made more sense to do this at the `foldl` but here we are.
-                        let
-                            ( leftMesh, leftIndexEntries ) =
-                                if List.length leftSubPolygon < List.length nodes then
-                                    drawPolygon colour leftSubPolygon
-
-                                else
-                                    ( Scene3d.group []
-                                    , []
-                                    )
-
-                            ( rightMesh, rightIndexEntries ) =
-                                if List.length rightSubPolygon < List.length nodes then
-                                    drawPolygon colour rightSubPolygon
-
-                                else
-                                    ( Scene3d.group []
-                                    , []
-                                    )
-                        in
-                        ( Scene3d.group [ leftMesh, rightMesh ]
-                        , leftIndexEntries ++ rightIndexEntries
-                        )
-
+        --( _, _ ) ->
+        --    ( Scene3d.group <|
+        --        List.concat <|
+        --            [ previewAsLine FlatColors.RussianPalette.cornflower leftSubPolygon
+        --            , previewAsLine FlatColors.RussianPalette.rosyHighlight rightSubPolygon
+        --            ]
+        --    , []
+        --    )
+        -- Recurse in case there are more road transits!
+        -- It would have made more sense to do this at the `foldl` but here we are.
+        --let
+        --    ( leftPolygonArea, rightPolygonArea ) =
+        --        -- Only recurse if area reduced.
+        --        ( leftSubPolygon
+        --            |> List.map (Point3d.projectInto SketchPlane3d.xy)
+        --            |> Polygon2d.singleLoop
+        --            |> Polygon2d.area
+        --        , rightSubPolygon
+        --            |> List.map (Point3d.projectInto SketchPlane3d.xy)
+        --            |> Polygon2d.singleLoop
+        --            |> Polygon2d.area
+        --        )
+        --
+        --    ( leftMesh, leftIndexEntries ) =
+        --        if leftPolygonArea |> Quantity.lessThan (Polygon2d.area polygon) then
+        --            drawPolygon colour leftSubPolygon
+        --
+        --        else
+        --            ( Scene3d.nothing
+        --            , []
+        --            )
+        --
+        --    ( rightMesh, rightIndexEntries ) =
+        --        if rightPolygonArea |> Quantity.lessThan (Polygon2d.area polygon) then
+        --            drawPolygon colour rightSubPolygon
+        --
+        --        else
+        --            ( Scene3d.nothing
+        --            , []
+        --            )
+        --in
+        --( Scene3d.group [ leftMesh, rightMesh ]
+        --, leftIndexEntries ++ rightIndexEntries
+        --)
         drawNode : LandUseDataTypes.LandUseNode -> LandUseStuff -> LandUseStuff
         drawNode node stuff =
             case node.tags of
@@ -861,9 +869,6 @@ nudgeHelper : ( Int, Int ) -> PeteTree -> ( List EarthPoint, List EarthPoint )
 nudgeHelper ( fromIdx, toIdx ) tree =
     -- So we can make a new polygon boundary along the road edges.
     let
-        _ =
-            Debug.log "nudge helper" ( fromIdx, toIdx )
-
         noNudge =
             Tools.Nudge.defaultOptions
 
