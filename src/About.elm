@@ -3,16 +3,13 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.2.7
+# GPXmagic v3.2.8
 
 (d0efe0be)
 
 ## In this release ...
 
-* Tool UI update is "lazy". This should be invisible, but please let me know if you see
-anything that fails to update.
-
-* Safely handles GPX files with no altitude data and abbreviated track-point tag closure.
+* Language editor.
 
 ## Acknowledgements
 

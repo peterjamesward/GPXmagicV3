@@ -1225,8 +1225,7 @@ showOptionsMenu model =
                 ToolsController.imperialToggleMenuEntry model.location ToolsMsg model.toolOptions
             , row [ spaceEvenly, width fill ] <|
                 List.map chooseLanguage I18N.availableI18N
-
-            --, languageEditor
+            , languageEditor
             ]
 
     else
