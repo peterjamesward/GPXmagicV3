@@ -54,38 +54,46 @@ actions newOptions previewColour track =
     case newOptions.previewData of
         Just previewTree ->
             let
+                ( start, end ) =
+                    case track.markerPosition of
+                        Just _ ->
+                            TrackLoaded.getRangeFromMarkers track
+
+                        Nothing ->
+                            ( 0, 0 )
+
                 normalPreview =
                     TrackLoaded.previewFromTree
                         previewTree
-                        0
-                        (skipCount track.trackTree)
+                        start
+                        (skipCount previewTree - end)
                         10
 
                 ( newTreeForProfilePreview, _ ) =
                     apply newOptions track
             in
-            [ ShowPreview
-                { tag = "limit"
-                , shape = PreviewCircle
-                , colour = previewColour
-                , points = normalPreview
-                }
-            , case newTreeForProfilePreview of
+            case newTreeForProfilePreview of
                 Just newTree ->
-                    ShowPreview
+                    [ ShowPreview
+                        { tag = "limit"
+                        , shape = PreviewCircle
+                        , colour = previewColour
+                        , points = normalPreview
+                        }
+                    , ShowPreview
                         { tag = "limitProfile"
                         , shape = PreviewProfile newTree
                         , colour = previewColour
                         , points = []
                         }
+                    , RenderProfile
+                    ]
 
                 Nothing ->
-                    NoAction
-            , RenderProfile
-            ]
+                    [ HidePreview "limit", HidePreview "limitprofile" ]
 
         Nothing ->
-            [ HidePreview "limit" ]
+            [ HidePreview "limit", HidePreview "limitprofile" ]
 
 
 putPreviewInOptions : TrackLoaded msg -> Options -> Options
@@ -892,7 +900,7 @@ view location options wrapper track =
                     button
                         neatToolsBorder
                         { onPress = Just <| wrapper <| LimitGradient
-                        , label = paragraph [] [i18n "apply"]
+                        , label = paragraph [] [ i18n "apply" ]
                         }
                 ]
 

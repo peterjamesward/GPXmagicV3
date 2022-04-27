@@ -328,10 +328,16 @@ previewFromTree tree start end depthLimit =
             )
 
         ( _, endPoints ) =
-            --foldOverRouteRL internalFoldFn tree ( endDistance, [] )
-            foldOverRouteRLwithDepthLimit depthLimit internalFoldFn tree ( endDistance, [] )
+            DomainModel.traverseTreeBetweenLimitsToDepth
+                start
+                end
+                (always <| Just depthLimit)
+                0
+                tree
+                internalFoldFn
+                ( endDistance, [] )
     in
-    getAsPreviewPoint tree 0 :: endPoints
+    getAsPreviewPoint tree start :: endPoints
 
 
 asPreviewPoints : TrackLoaded msg -> Length.Length -> List EarthPoint -> List PreviewPoint
