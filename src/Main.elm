@@ -121,6 +121,7 @@ type Msg
     | ReceivedLandUseData (Result Http.Error LandUseDataTypes.OSMLandUseData)
     | I18NMsg I18N.Msg
     | BackgroundClick Mouse.Event
+    | DisplayWelcome
     | NoOp
 
 
@@ -149,6 +150,7 @@ type alias Model =
     , modalMessage : Maybe String
     , paneLayoutOptions : PaneLayoutManager.Options
     , infoText : Maybe ( String, String )
+    , welcomeDisplayed : Bool
 
     -- Splitters
     , leftDockRightEdge : SplitPane.State
@@ -247,6 +249,7 @@ init mflags origin navigationKey =
       , modalMessage = Nothing
       , paneLayoutOptions = PaneLayoutManager.defaultOptions
       , infoText = Nothing
+      , welcomeDisplayed = False
       , leftDockRightEdge =
             SplitPane.init Horizontal
                 |> configureSplitter (SplitPane.px 200 <| Just ( 20, 300 ))
@@ -272,6 +275,8 @@ init mflags origin navigationKey =
         , LocalStorage.storageGetItem "docks"
         , LocalStorage.storageGetItem "location"
         , LocalStorage.storageGetMemoryUsage
+        , LocalStorage.storageGetItem "welcome"
+        , Delay.after 100 DisplayWelcome
         ]
     )
 
@@ -303,6 +308,15 @@ render model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        DisplayWelcome ->
+            if model.welcomeDisplayed then
+                ( model, Cmd.none )
+
+            else
+                ( { model | infoText = Just ( "main", "welcome" ) }
+                , LocalStorage.storageSetItem "welcome" (E.bool True)
+                )
+
         BackgroundClick _ ->
             let
                 paneStuff =
@@ -2253,6 +2267,13 @@ performActionsOnModel actions model =
 
                 ( StoredValueRetrieved key value, _ ) ->
                     case key of
+                        "welcome" ->
+                            if D.decodeValue D.bool value == Ok True then
+                                { foldedModel | welcomeDisplayed = True }
+
+                            else
+                                foldedModel
+
                         "location" ->
                             case D.decodeValue D.string value of
                                 Ok countryCode ->

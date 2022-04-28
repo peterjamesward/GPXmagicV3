@@ -42,6 +42,21 @@ If the File Open dialog does not appear, please reload the page in the browser a
                 , ( "default", """Restore default tool layout""" )
                 , ( "imperial", """Use Imperial measures""" )
                 , ( "metric", """Use Metric measures""" )
+                , ( "welcome", """
+# Welcome to GPXmagic
+
+## Quickstart
+
+Begin with **Load GPX file** -- the white button on the top bar.
+
+For many cases, especially if you have a recorded ride, you only need the blue **One-click Quick Fix** button!
+(This appears at the top when you've loaded a file.)
+
+If that doesn't work for you, there are many specialised tools to fix common issues. Each of these has
+an explanatory video you can view by clicking the camera icon.
+
+Click anywhere to dismiss this message. It will probably not appear again.
+""")
                 ]
           )
         , ( "panes"
