@@ -3,14 +3,13 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.2.10
+# GPXmagic v3.2.11
 
 (a46ec27f)
 
 ## In this release ...
 
-* Fixed bug where Profile Smooth preview was showing for whole track length instead of between markers.
-(Another good spot from David Ogle).
+* Message pops up for first time users to help get started. This will appear only once.
 
 ## Acknowledgements
 
