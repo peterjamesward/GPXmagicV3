@@ -45,6 +45,8 @@ If the File Open dialog does not appear, please reload the page in the browser a
                 , ( "welcome", """
 # Welcome to GPXmagic
 
+**GPXmagic V3 works best with Chrome** (by far)
+
 ## Quickstart
 
 Begin with **Load GPX file** -- the white button on the top bar.
