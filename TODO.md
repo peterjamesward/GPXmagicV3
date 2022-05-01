@@ -1,9 +1,11 @@
 
 # WIP
 
-## I18N
+## Languages
 
 Awaiting French support from Muriel.
+Possible sign-ups for German, Dutch, Spanish.
+Need more work on number formats.
 
 ## Land use 3D rendering
 

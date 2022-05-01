@@ -3,13 +3,15 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.2.11
+# GPXmagic v3.2.12
 
 (a3cef3b0)
 
 ## In this release ...
 
-* Message pops up for first time users to help get started. This will appear only once.
+* V3 is now the official release.
+
+* In case of problems the previous version 2.9.5 is [here](https://s3.eu-west-1.amazonaws.com/stepwiserefinement.co.uk/GPXmagic_2_9_5/index.html)
 
 ## Acknowledgements
 
