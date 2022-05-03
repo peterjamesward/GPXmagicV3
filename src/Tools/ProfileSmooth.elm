@@ -32,6 +32,7 @@ type Msg
     | SetMaximumDescent Float
     | SetExtent ExtentOption
     | SetWindowSize Int
+    | SetBumpiness Float
     | ChooseMethod SmoothMethod
     | SetRedistribution Bool
     | DisplayInfo String String
@@ -46,6 +47,7 @@ defaultOptions =
     , maximumDescent = 15.0
     , windowSize = 2
     , limitRedistributes = False
+    , bumpiness = 0.0
     }
 
 
@@ -142,6 +144,16 @@ update msg options previewColour track =
             let
                 newOptions =
                     { options | maximumDescent = down }
+                        |> putPreviewInOptions track
+            in
+            ( newOptions
+            , actions newOptions previewColour track
+            )
+
+        SetBumpiness bumpiness ->
+            let
+                newOptions =
+                    { options | bumpiness = bumpiness }
                         |> putPreviewInOptions track
             in
             ( newOptions
@@ -264,6 +276,94 @@ computeNewPoints options track =
 
         MethodAltitudes ->
             smoothAltitudesWithWindowAverage options track
+
+        MethodUniform ->
+            useUniformGradient options.bumpiness track
+
+
+useUniformGradient : Float -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
+useUniformGradient bumpiness track =
+    -- This is the original v1 bump smoother. Astonished that people want this.
+    -- This implementation uses a fold over the whole track, really just to be
+    -- consistent with others here and because it's not really less efficient
+    -- than multiple modifications in situ, each of which essential builds a new tree.
+    let
+        ( startIndex, fromEnd ) =
+            -- Note that this option is permitted only when there's a range.
+            TrackLoaded.getRangeFromMarkers track
+
+        endIndex =
+            skipCount track.trackTree - fromEnd
+
+        ( startDistance, endDistance ) =
+            ( distanceFromIndex startIndex track.trackTree
+            , distanceFromIndex endIndex track.trackTree
+            )
+
+        ( startAltitude, endAltitude ) =
+            ( gpxPointFromIndex startIndex track.trackTree |> .altitude
+            , gpxPointFromIndex endIndex track.trackTree |> .altitude
+            )
+
+        rangeLength =
+            endDistance |> Quantity.minus startDistance
+
+        uniformSmoother : RoadSection -> ( Int, List ( EarthPoint, GPXSource ) ) -> ( Int, List ( EarthPoint, GPXSource ) )
+        uniformSmoother road ( index, outputs ) =
+            let
+                newPoint =
+                    if index > startIndex && index < endIndex then
+                        let
+                            oldGPX =
+                                Tuple.second road.sourceData
+
+                            distanceHere =
+                                distanceFromIndex index track.trackTree
+
+                            ( distanceFromStart, distanceFromEnd ) =
+                                ( distanceHere |> Quantity.minus startDistance
+                                , endDistance |> Quantity.minus distanceHere
+                                )
+
+                            proportionFromStart =
+                                Quantity.ratio distanceFromStart rangeLength
+
+                            altitudeIfUniform =
+                                Quantity.plus
+                                    (endAltitude |> Quantity.multiplyBy proportionFromStart)
+                                    (startAltitude |> Quantity.multiplyBy (1.0 - proportionFromStart))
+
+                            newAltitude =
+                                Quantity.plus
+                                    (altitudeIfUniform |> Quantity.multiplyBy (1.0 - bumpiness))
+                                    (oldGPX.altitude |> Quantity.multiplyBy bumpiness)
+                        in
+                        ( Point3d.xyz
+                            (Point3d.xCoordinate road.endPoint)
+                            (Point3d.yCoordinate road.endPoint)
+                            newAltitude
+                        , { oldGPX | altitude = newAltitude }
+                        )
+
+                    else
+                        ( road.endPoint, Tuple.second road.sourceData )
+            in
+            ( index + 1, newPoint :: outputs )
+    in
+    if track.markerPosition == Nothing then
+        []
+
+    else
+        List.reverse <|
+            Tuple.second <|
+                DomainModel.traverseTreeBetweenLimitsToDepth
+                    0
+                    (skipCount track.trackTree)
+                    (always Nothing)
+                    0
+                    track.trackTree
+                    uniformSmoother
+                    ( 1, [ getDualCoords track.trackTree 0 ] )
 
 
 limitGradientsWithRedistribution : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
@@ -891,6 +991,23 @@ view location options wrapper track =
                 , thumb = Input.defaultThumb
                 }
 
+        bumpinessSlider =
+            Input.slider
+                commonShortHorizontalSliderStyles
+                { onChange = wrapper << SetBumpiness
+                , label =
+                    Input.labelBelow [] <|
+                        text <|
+                            String.Interpolate.interpolate
+                                (I18N.localisedString location toolId "bumpiness")
+                                [ showDecimal0 <| 100.0 * options.bumpiness ]
+                , min = 0.0
+                , max = 1.0
+                , step = Just 0.05
+                , value = options.bumpiness
+                , thumb = Input.defaultThumb
+                }
+
         limitGradientsMethod =
             column [ spacing 10, centerX ]
                 [ el [ centerX ] <| maxAscentSlider
@@ -928,6 +1045,23 @@ view location options wrapper track =
                         }
                 ]
 
+        smoothUniform =
+            column [ spacing 10, centerX ]
+                [ el [ centerX ] <| bumpinessSlider
+                , paragraph [] <|
+                    if track.markerPosition == Nothing then
+                        [ i18n "needpart" ]
+
+                    else
+                        [ i18n "part" ]
+                , el [ centerX ] <|
+                    button
+                        neatToolsBorder
+                        { onPress = Just <| wrapper <| SmoothGradients
+                        , label = paragraph [] [ i18n "uniform" ]
+                        }
+                ]
+
         modeChoice =
             Input.radio
                 [ padding 10
@@ -940,6 +1074,7 @@ view location options wrapper track =
                     [ Input.option MethodLimit (i18n "uselimit")
                     , Input.option MethodAltitudes (i18n "usealts")
                     , Input.option MethodGradients (i18n "usegrad")
+                    , Input.option MethodUniform (i18n "useuniform")
                     ]
                 }
 
@@ -967,4 +1102,7 @@ view location options wrapper track =
 
             MethodGradients ->
                 smoothGradients
+
+            MethodUniform ->
+                smoothUniform
         ]

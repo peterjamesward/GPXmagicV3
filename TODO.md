@@ -7,14 +7,19 @@ Awaiting French support from Muriel.
 Possible sign-ups for German, Dutch, Spanish.
 Need more work on number formats.
 
-## Land use 3D rendering
+## Straightener
 
-What was basically an experiment proved the idea but not the implementation.
-It needs doing properly, including the start and finish cases.
+1. Instead of "preserve altitudes", have a slider from 0 - 100% affect.
+2. Option to leave positions alone, so it replicates the gradient leveller from v1/2.
 
 ---
 
 # BACKLOG
+
+## Land use 3D rendering
+
+What was basically an experiment proved the idea but not the implementation.
+It needs doing properly, including the start and finish cases.
 
 ## RGT: Timed segments
 

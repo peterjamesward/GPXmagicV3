@@ -596,14 +596,18 @@ have no offset.
                 , ( "uphill", """Uphill {0}%""" )
                 , ( "downhill", """Downhill {0}%""" )
                 , ( "window", """Points either side: {0}""" )
+                , ( "bumpiness", """Bumpiness: {0}%""" )
                 , ( "apply", """Apply limits to gradients""" )
                 , ( "altitudes", """Smooth by averaging altitudes""" )
                 , ( "gradients", """Smooth by averaging gradients""" )
+                , ( "uniform", """Use a uniform gradient across the range""" )
                 , ( "uselimit", """Limit gradients""" )
                 , ( "usealts", """Smooth altitudes""" )
                 , ( "usegrad", """Smooth gradients""" )
+                , ( "useuniform", """Apply uniform gradient""" )
                 , ( "whole", """Applies to whole track""" )
                 , ( "part", """Applies between markers""" )
+                , ( "needpart", """This method requires a range""" )
                 , ( "info", """
 There's no one way to achieve a smooth altitude profile. It depends whether you begin with a recorded
 or a planned ride; it depends whether you favour accuracy or smoothness; whether you want

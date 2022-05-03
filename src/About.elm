@@ -3,15 +3,18 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.2.12 (e575add3)
+# GPXmagic v3.2.13 (e575add3)
 
 **GPXmagic V3 works best with Chrome** (by far)
-
-## In this release ...
 
 * V3 is now the official release.
 
 * In case of problems the previous version 2.9.5 is [here](https://s3.eu-west-1.amazonaws.com/stepwiserefinement.co.uk/GPXmagic_2_9_5/index.html)
+
+## In this update ...
+
+* The v1 Gradient Smoother is back under Profile Smoothing - Apply uniform gradient. Use the slider
+to control how closely to approach uniform gradient or keep existing altitudes.
 
 ## Acknowledgements
 

@@ -12,6 +12,7 @@ type alias Options =
     , maximumDescent : Float
     , windowSize : Int
     , limitRedistributes : Bool
+    , bumpiness : Float
     }
 
 
@@ -19,6 +20,7 @@ type SmoothMethod
     = MethodLimit
     | MethodGradients
     | MethodAltitudes
+    | MethodUniform -- v1, v2 gradient smoother
 
 
 type ExtentOption
