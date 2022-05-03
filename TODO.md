@@ -7,11 +7,6 @@ Awaiting French support from Muriel.
 Possible sign-ups for German, Dutch, Spanish.
 Need more work on number formats.
 
-## Straightener
-
-1. Instead of "preserve altitudes", have a slider from 0 - 100% affect.
-2. Option to leave positions alone, so it replicates the gradient leveller from v1/2.
-
 ---
 
 # BACKLOG

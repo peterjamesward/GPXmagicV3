@@ -8,8 +8,7 @@ aboutText =
 **GPXmagic V3 works best with Chrome** (by far)
 
 * V3 is now the official release.
-
-* In case of problems the previous version 2.9.5 is [here](https://s3.eu-west-1.amazonaws.com/stepwiserefinement.co.uk/GPXmagic_2_9_5/index.html)
+    The previous version 2.9.5 is [here](https://s3.eu-west-1.amazonaws.com/stepwiserefinement.co.uk/GPXmagic_2_9_5/index.html)
 
 ## In this update ...
 
