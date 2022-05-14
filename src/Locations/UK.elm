@@ -796,6 +796,7 @@ Displays the colour legend for land use data, and a list of named places.
                 , ( "viewminimum", """Minimum radius {0}""" )
                 , ( "viewtransition", """Meters of turn-in {0}""" )
                 , ( "viewgradient", """Maximum gradient {0}""" )
+                , ( "viewblend", """Blend {0}""")
                 , ( "Smooth", """Smooth""" )
                 , ( "info", """
 Smart smoother applies three constraints to the track:
@@ -820,6 +821,7 @@ It's also _really_ good at removing noise from IRL rides.
                 , ( "radius", """Bends with a radius smaller than this will be replaced by a circular arc.""" )
                 , ( "transition", """The length of track it takes to lean into a bend, or get back on the straight.""" )
                 , ( "gradient", """The maximum steepness of any ascent or descent.""" )
+                , ( "blend", """Varies the emphasis between outward and backwards lines.""")
                 ]
           )
         ]

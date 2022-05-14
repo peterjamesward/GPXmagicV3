@@ -46,6 +46,7 @@ defaultOptions =
     , minTransition = Length.meters 4.5
     , maxGradient = 20
     , newPoints = []
+    , blend = 0.5
     }
 
 
@@ -53,6 +54,7 @@ type Msg
     = SetMinRadius (Quantity Float Meters)
     | SetMinTransition (Quantity Float Meters)
     | SetMaxGradient Float
+    | SetBlend Float
     | Apply
     | DisplayInfo String String
 
@@ -405,10 +407,11 @@ computeNewPoints options track =
 
                 combineDeltas : Angle -> Angle -> Angle -> Angle -> ( Angle, Angle )
                 combineDeltas forwardDTheta forwardDPhi reverseDTheta reverseDPhi =
-                    ( Quantity.half <| Quantity.plus forwardDTheta <| Quantity.negate reverseDTheta
-                    , --Quantity.half <|  Quantity.plus
-                      forwardDPhi
-                      --<| reverseDPhi
+                    ( --Quantity.half <|
+                      Quantity.plus
+                        (forwardDTheta |> Quantity.multiplyBy options.blend)
+                        (Quantity.negate reverseDTheta |> Quantity.multiplyBy (1.0 - options.blend))
+                    , forwardDPhi
                     )
 
                 combinedDeltaLists =
@@ -594,6 +597,13 @@ update msg options previewColour track =
             in
             ( newOptions, previewActions newOptions previewColour track )
 
+        SetBlend blend ->
+            let
+                newOptions =
+                    { options | blend = blend }
+            in
+            ( newOptions, previewActions newOptions previewColour track )
+
 
 view : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
 view location imperial wrapper options track =
@@ -615,7 +625,7 @@ view location imperial wrapper options track =
                     , label = Input.labelHidden "minimum radius"
                     , min = 4.0
                     , max = 20.0
-                    , step = Just 0.5
+                    , step = Just 0.1
                     , value = Length.inMeters options.minRadius
                     , thumb = Input.defaultThumb
                     }
@@ -633,7 +643,7 @@ view location imperial wrapper options track =
                     , label = Input.labelHidden "transitions"
                     , min = 1.0
                     , max = 10.0
-                    , step = Just 0.5
+                    , step = Just 0.1
                     , value = Length.inMeters options.minTransition
                     , thumb = Input.defaultThumb
                     }
@@ -661,6 +671,24 @@ view location imperial wrapper options track =
                         (I18N.localisedString location toolId "viewgradient")
                         [ showDecimal2 options.maxGradient ]
                 ]
+
+        blendSlider =
+            row [ spacing 3 ]
+                [ Input.slider commonShortHorizontalSliderStyles
+                    { onChange = wrapper << SetBlend
+                    , label = Input.labelHidden "blend"
+                    , min = 0.0
+                    , max = 1.0
+                    , step = Nothing
+                    , value = options.blend
+                    , thumb = Input.defaultThumb
+                    }
+                , infoButton <| wrapper <| DisplayInfo "smart" "blend"
+                , text <|
+                    String.Interpolate.interpolate
+                        (I18N.localisedString location toolId "viewblend")
+                        [ showDecimal2 options.blend ]
+                ]
     in
     column
         [ padding 10
@@ -672,6 +700,7 @@ view location imperial wrapper options track =
         [ none
         , minRadiusSlider
         , transitionSlider
+        , blendSlider
         , gradientSlider
         , applyButton
         ]

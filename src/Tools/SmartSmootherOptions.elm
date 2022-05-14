@@ -14,5 +14,6 @@ type alias Options =
     , minTransition : Quantity Float Meters -- length needed to go from straight to min radius
     , maxGradient : Float -- tan of maxPhi
     , newPoints : List PreviewPoint
+    , blend : Float -- [0,1] relative proportions of forward and reverse deltas.
     }
 

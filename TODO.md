@@ -1,6 +1,11 @@
 
 # WIP
 
+## Smart smoother
+
+Slider for variable blend between forward and backward delta-thetas.
+> May make little difference but worth a look-see.
+
 ## Languages
 
 Awaiting French support from Muriel.
@@ -13,7 +18,8 @@ Need more work on number formats.
 
 ## Land use 3D rendering
 
-What was basically an experiment proved the idea but not the implementation.
+Experiment proved the idea but not the implementation.
+Roads should divide polygons, but care needed over directionality and crossing points.
 It needs doing properly, including the start and finish cases.
 
 ## RGT: Timed segments

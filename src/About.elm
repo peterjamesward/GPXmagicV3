@@ -3,7 +3,7 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.2.13 (5e155b68)
+# GPXmagic v3.2.14 (5e155b68)
 
 **GPXmagic V3 works best with Chrome** (by far)
 
@@ -12,8 +12,10 @@ aboutText =
 
 ## In this update ...
 
-* The v1 Gradient Smoother is back under Profile Smoothing - Apply uniform gradient. Use the slider
-to control how closely to approach uniform gradient or keep existing altitudes.
+* Minor tweaks to Smart Smoother:
+  - Increment for radius and turn-in is now 0.1m rather than 0.5
+  - New "blend" control allows you to vary the relative influence of the forward and reverse routes, which
+  can result in a more suitable result.
 
 ## Acknowledgements
 
