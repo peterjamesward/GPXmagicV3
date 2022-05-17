@@ -17,20 +17,6 @@ Experiment proved the idea but not the implementation.
 Roads should divide polygons, but care needed over directionality and crossing points.
 It needs doing properly, including the start and finish cases.
 
-## RGT: Timed segments
-
-If Christian can supply tags, tool to list and edit Time Segments, defined by markers
-and nameable; these will be embedded in the output GPX.
-
-## RGT: Integrate with track DB back-end
-
-Launch with track URL, save does a POST.
-
-## RGT: Black-box mode
-
-Runs server-side (Node.js?), receives track via POST, returns smoothed.
-> `elm-serverless` can do this, may be other ways.
-
 ## SVG profile rendering
 
 Info on mouse move.
