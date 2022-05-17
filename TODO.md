@@ -1,11 +1,6 @@
 
 # WIP
 
-## Smart smoother
-
-Slider for variable blend between forward and backward delta-thetas.
-> May make little difference but worth a look-see.
-
 ## Languages
 
 Awaiting French support from Muriel.
