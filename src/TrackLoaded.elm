@@ -4,10 +4,10 @@ import Actions exposing (ToolAction)
 import DomainModel exposing (..)
 import Json.Encode as E
 import LandUseDataTypes
-import Length exposing (inMeters)
+import Length exposing (Meters, inMeters)
 import Point3d
 import PreviewData exposing (PreviewPoint)
-import Quantity
+import Quantity exposing (Quantity)
 
 
 type alias TrackLoaded msg =
@@ -21,8 +21,15 @@ type alias TrackLoaded msg =
     , redos : List (UndoEntry msg)
     , lastMapClick : ( Float, Float )
     , landUseData : LandUseDataTypes.LandUseData
+    , segments : List TrackSegment
     }
 
+type alias TrackSegment =
+    -- Used for RGT timed segments.
+    { distanceToStart : Quantity Float Meters
+    , distanceToEnd : Quantity Float Meters
+    , name : Maybe String
+    }
 
 type alias UndoEntry msg =
     { action : ToolAction msg
@@ -53,12 +60,13 @@ newTrackFromTree refLonLat newTree =
     , redos = []
     , lastMapClick = ( 0, 0 )
     , landUseData = LandUseDataTypes.emptyLandUse
+    , segments = []
     }
 
 
 removeAdjacentDuplicates : List GPXSource -> List GPXSource
 removeAdjacentDuplicates gpxs =
-    -- Just removing stationary points fixes so many problems.
+    -- Simply removing stationary points fixes many problems.
     let
         areSame : GPXSource -> GPXSource -> Bool
         areSame a b =
@@ -110,6 +118,7 @@ trackFromPoints trackName gpxTrack =
                 , trackName = Just trackName
                 , lastMapClick = ( 0, 0 )
                 , landUseData = { landuse | status = LandUseDataTypes.LandUseWaitingOSM }
+                , segments = []
                 }
 
         Nothing ->

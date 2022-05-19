@@ -421,39 +421,28 @@ update msg model =
                 gpxTrack =
                     GpxParser.parseGPXPoints content
 
-                trackTree =
-                    treeFromSourcePoints gpxTrack
+                trackName =
+                    GpxParser.parseTrackName content
+                        |> Maybe.andThen (always model.filename)
+                        |> Maybe.withDefault "no track name"
+
+                newTrack : Maybe (TrackLoaded Msg)
+                newTrack =
+                    TrackLoaded.trackFromPoints trackName gpxTrack
             in
-            case trackTree of
-                Just aTree ->
-                    let
-                        trackName =
-                            GpxParser.parseTrackName content
-                                |> Maybe.andThen (always model.filename)
-                                |> Maybe.withDefault "no track name"
-
-                        newTrack : Maybe (TrackLoaded Msg)
-                        newTrack =
-                            TrackLoaded.trackFromPoints trackName gpxTrack
-                    in
-                    case newTrack of
-                        Just track ->
-                            ( adoptTrackInModel track model
-                            , Cmd.batch
-                                [ showTrackOnMapCentered model.mapPointsDraggable track
-                                , LandUseDataOSM.requestLandUseData
-                                    ReceivedLandUseData
-                                    track
-                                ]
-                            )
-
-                        Nothing ->
-                            ( { model | modalMessage = Just "noload" }
-                            , Cmd.none
-                            )
+            case newTrack of
+                Just track ->
+                    ( adoptTrackInModel track model
+                    , Cmd.batch
+                        [ showTrackOnMapCentered model.mapPointsDraggable track
+                        , LandUseDataOSM.requestLandUseData
+                            ReceivedLandUseData
+                            track
+                        ]
+                    )
 
                 Nothing ->
-                    ( { model | modalMessage = Just "nogpx" }
+                    ( { model | modalMessage = Just "noload" }
                     , Cmd.none
                     )
 
