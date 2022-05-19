@@ -117,6 +117,26 @@ trackFromSegments trackName segments =
                 |> List.map (Tuple.second >> List.length)
                 |> List.Extra.scanl (+) 0
 
+        combineContiguousSameNameSegments : List TrackSegment -> List TrackSegment
+        combineContiguousSameNameSegments segs =
+            case segs of
+                seg1 :: seg2 :: anymore ->
+                    if seg1.endIndex == seg2.startIndex && seg1.name == seg2.name then
+                        let
+                            combined =
+                                { startIndex = seg1.startIndex
+                                , endIndex = seg2.endIndex
+                                , name = seg1.name
+                                }
+                        in
+                        combineContiguousSameNameSegments (combined :: anymore)
+
+                    else
+                        seg1 :: combineContiguousSameNameSegments (List.drop 1 segs)
+
+                _ ->
+                    segs
+
         segmentInfo segment offset nextOffset =
             case segment of
                 ( Just name, points ) ->
@@ -134,8 +154,9 @@ trackFromSegments trackName segments =
             Just
                 { track
                     | segments =
-                        List.filterMap identity <|
-                            List.map3 segmentInfo segments segmentOffsets (List.drop 1 segmentOffsets)
+                        combineContiguousSameNameSegments <|
+                            List.filterMap identity <|
+                                List.map3 segmentInfo segments segmentOffsets (List.drop 1 segmentOffsets)
                 }
 
         Nothing ->
