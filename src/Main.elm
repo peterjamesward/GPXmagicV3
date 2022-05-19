@@ -421,12 +421,15 @@ update msg model =
                 gpxTrack =
                     GpxParser.parseGPXPoints content
 
+                gpxSegments =
+                    GpxParser.parseSegments content
+
                 trackName =
                     GpxParser.parseTrackName content
                         |> Maybe.andThen (always model.filename)
                         |> Maybe.withDefault "no track name"
             in
-            case TrackLoaded.trackFromPoints trackName gpxTrack of
+            case TrackLoaded.trackFromSegments trackName gpxSegments of
                 Just track ->
                     ( adoptTrackInModel track model
                     , Cmd.batch

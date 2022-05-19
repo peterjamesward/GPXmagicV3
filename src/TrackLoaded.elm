@@ -5,6 +5,7 @@ import DomainModel exposing (..)
 import Json.Encode as E
 import LandUseDataTypes
 import Length exposing (Meters, inMeters)
+import List.Extra
 import Point3d
 import PreviewData exposing (PreviewPoint)
 import Quantity exposing (Quantity)
@@ -24,12 +25,14 @@ type alias TrackLoaded msg =
     , segments : List TrackSegment
     }
 
+
 type alias TrackSegment =
     -- Used for RGT timed segments.
-    { distanceToStart : Quantity Float Meters
-    , distanceToEnd : Quantity Float Meters
+    { startIndex : Int
+    , endIndex : Int
     , name : Maybe String
     }
+
 
 type alias UndoEntry msg =
     { action : ToolAction msg
@@ -97,6 +100,46 @@ removeAdjacentDuplicates gpxs =
                         helper moreInputs (someInput :: outputs)
     in
     List.reverse <| helper gpxs []
+
+
+trackFromSegments : String -> List ( Maybe String, List GPXSource ) -> Maybe (TrackLoaded msg)
+trackFromSegments trackName segments =
+    --TODO: Support for Named Segments.
+    let
+        allPoints =
+            List.concatMap Tuple.second segments
+
+        baseTrack =
+            trackFromPoints trackName allPoints
+
+        segmentOffsets =
+            segments
+                |> List.map (Tuple.second >> List.length)
+                |> List.Extra.scanl (+) 0
+
+        segmentInfo segment offset nextOffset =
+            case segment of
+                ( Just name, points ) ->
+                    Just
+                        { startIndex = offset
+                        , endIndex = nextOffset
+                        , name = Just name
+                        }
+
+                _ ->
+                    Nothing
+    in
+    case baseTrack of
+        Just track ->
+            Just
+                { track
+                    | segments =
+                        List.filterMap identity <|
+                            List.map3 segmentInfo segments segmentOffsets (List.drop 1 segmentOffsets)
+                }
+
+        Nothing ->
+            Nothing
 
 
 trackFromPoints : String -> List GPXSource -> Maybe (TrackLoaded msg)

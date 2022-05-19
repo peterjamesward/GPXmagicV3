@@ -28,6 +28,35 @@ parseTrackName xml =
                     n
 
 
+parseSegments : String -> List ( Maybe String, List GPXSource )
+parseSegments xml =
+    -- This will become our new entry point and works at the <trkseg> level so they can be named.
+    let
+        trksegs =
+            Regex.find (asRegex "<trkseg((.|\\n|\\r)*?)\\/trkseg>") xml |> List.map .match
+
+        trkpts trkseg =
+            parseGPXPoints trkseg
+
+        segname trkseg =
+            case Regex.find (asRegex "<rgt:name>(.*)<\\/rgt:name>") trkseg of
+                [] ->
+                    Nothing
+
+                x :: _ ->
+                    case x.submatches of
+                        [] ->
+                            Nothing
+
+                        n :: _ ->
+                            n
+
+        segment trkseg =
+            ( segname trkseg, trkpts trkseg )
+    in
+    List.map segment trksegs
+
+
 parseGPXPoints : String -> List GPXSource
 parseGPXPoints xml =
     let
