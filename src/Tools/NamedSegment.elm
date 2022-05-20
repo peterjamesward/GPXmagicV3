@@ -375,7 +375,7 @@ update msg options track wrapper =
                         DomainModel.distanceFromIndex
                             (DomainModel.skipCount track.trackTree - fromEnd)
                             track.trackTree
-                    , name = "???????"
+                    , name = "ENTER NAME HERE"
                     }
             in
             ( { options

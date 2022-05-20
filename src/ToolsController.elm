@@ -1741,7 +1741,7 @@ viewToolLazy location msgWrapper isTrack options toolEntry =
                                     (always << msgWrapper <| ToolNoOp)
                             ]
                             { url = video
-                            , label = useIconWithSize 18 FeatherIcons.video
+                            , label = useIconWithSize 18 FeatherIcons.youtube
                             }
 
                     Nothing ->

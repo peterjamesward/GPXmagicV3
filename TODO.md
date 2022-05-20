@@ -11,8 +11,6 @@ Need more work on number formats.
 
 Select segment, _Essentials_ does not reflect purple dropped.
 
-"Steepest" not working.
-
 ## Tools organisation
 
 Group by class: Curves, Gradients, etc. Does this work?
