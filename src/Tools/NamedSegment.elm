@@ -5,6 +5,7 @@ module Tools.NamedSegment exposing (..)
 -- of track points multiple times and in each direction.
 
 import Actions exposing (ToolAction)
+import DomainModel exposing (RoadSection)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -12,12 +13,13 @@ import Element.Font as Font
 import Element.Input as Input
 import FlatColors.ChinesePalette
 import Length exposing (Meters)
+import List.Extra
 import Quantity exposing (Quantity)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.NamedSegmentOptions exposing (NamedSegment, Options)
 import TrackLoaded exposing (TrackLoaded)
-import UtilsForViews exposing (showLongMeasure)
+import UtilsForViews exposing (showLongMeasure, showShortMeasure)
 import ViewPureStyles exposing (rgtDark, rgtPurple)
 
 
@@ -150,13 +152,60 @@ view location wrapper options track =
                         }
                 ]
 
+        labels =
+            [ "distance"
+            , "ascent"
+            , "descent"
+            ]
+
         selectedSegmentDetail =
             case options.selectedSegment of
                 Just selected ->
-                    row []
-                        [ text "labels"
-                        , text "values"
-                        ]
+                    -- Should be in list but of course we check
+                    case List.Extra.getAt selected options.namedSegments of
+                        Nothing ->
+                            paragraph [] [ i18n "select" ]
+
+                        Just segment ->
+                            let
+                                ( startIndex, endIndex ) =
+                                    ( DomainModel.indexFromDistance segment.startDistance track.trackTree
+                                    , DomainModel.indexFromDistance segment.endDistance track.trackTree
+                                    )
+
+                                ( ascent, descent ) =
+                                    DomainModel.traverseTreeBetweenLimitsToDepth
+                                        startIndex
+                                        endIndex
+                                        (always Nothing)
+                                        0
+                                        track.trackTree
+                                        upsAndDowns
+                                        ( Quantity.zero, Quantity.zero )
+
+                                distance =
+                                    segment.endDistance |> Quantity.minus segment.startDistance
+
+                                upsAndDowns :
+                                    RoadSection
+                                    -> ( Quantity Float Meters, Quantity Float Meters )
+                                    -> ( Quantity Float Meters, Quantity Float Meters )
+                                upsAndDowns road ( up, down ) =
+                                    ( Quantity.plus up road.altitudeGained
+                                    , Quantity.plus down road.altitudeLost
+                                    )
+                            in
+                            row
+                                [ padding 10
+                                , spacing 5
+                                ]
+                                [ column [ spacing 5 ] <| List.map (I18N.text location "info") labels
+                                , column [ spacing 5 ]
+                                    [ text <| showLongMeasure False distance
+                                    , text <| showShortMeasure False ascent
+                                    , text <| showShortMeasure False descent
+                                    ]
+                                ]
 
                 Nothing ->
                     paragraph [] [ i18n "select" ]

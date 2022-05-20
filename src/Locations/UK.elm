@@ -832,6 +832,9 @@ It's also _really_ good at removing noise from IRL rides.
           , ( "start", """Starts at""")
           , ( "end", """Ends at""")
           , ( "select", """Please click on a segment name for details""")
+          , ( "distance", """Length""")
+          , ( "ascent", """Ascent""")
+          , ( "descent", """Descent""")
           ]
           )
         ]
