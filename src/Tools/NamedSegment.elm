@@ -42,6 +42,7 @@ type Msg
     | UpdateSegment
     | ChangeName String
     | DeleteSegment
+    | CreateSegment
 
 
 initialise : List NamedSegment -> Options
@@ -243,6 +244,13 @@ view location wrapper options track =
 
                 Nothing ->
                     paragraph [] [ i18n "select" ]
+
+        newSegmentButton =
+            --TODO: Disable if not acceptable (overlap or too close)
+            Input.button []
+                { onPress = Just <| wrapper CreateSegment
+                , label = i18n "create"
+                }
     in
     el
         [ width fill
@@ -253,6 +261,7 @@ view location wrapper options track =
         column [ width fill, padding 4, spacing 10 ]
             [ segmentsTable
             , selectedSegmentDetail
+            , newSegmentButton
             ]
 
 
@@ -353,6 +362,30 @@ update msg options track wrapper =
                               }
                             , []
                             )
+
+        CreateSegment ->
+            -- Note validation is in the view, so create without checking overlaps.
+            let
+                ( fromStart, fromEnd ) =
+                    TrackLoaded.getRangeFromMarkers track
+
+                newSegment =
+                    { startDistance = DomainModel.distanceFromIndex fromStart track.trackTree
+                    , endDistance =
+                        DomainModel.distanceFromIndex
+                            (DomainModel.skipCount track.trackTree - fromEnd)
+                            track.trackTree
+                    , name = "???????"
+                    }
+            in
+            ( { options
+                | namedSegments =
+                    List.sortBy
+                        (.startDistance >> Length.inMeters)
+                        (newSegment :: options.namedSegments)
+              }
+            , []
+            )
 
 
 

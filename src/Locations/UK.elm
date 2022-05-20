@@ -838,6 +838,8 @@ It's also _really_ good at removing noise from IRL rides.
           , ( "steepest", """Steepest""")
           , ( "update", """Update with current marker positions""")
           , ( "delete", """Delete this segment (no Undo!)""")
+          , ( "create", """Create from markers""")
+          , ( "newname", """TYPE NAME HERE""")
           ]
           )
         ]
