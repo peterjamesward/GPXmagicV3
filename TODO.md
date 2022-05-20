@@ -7,6 +7,14 @@ Awaiting French support from Muriel.
 Possible sign-ups for German, Dutch, Spanish.
 Need more work on number formats.
 
+## Named Segments
+
+See private notes.
+
+## Tools organisation
+
+Group by class: Curves, Gradients, etc. Does this work?
+
 ---
 
 # BACKLOG

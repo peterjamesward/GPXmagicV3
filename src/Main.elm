@@ -64,6 +64,7 @@ import Tools.Interpolate
 import Tools.InterpolateOptions
 import Tools.MoveAndStretch
 import Tools.MoveScaleRotate
+import Tools.NamedSegment
 import Tools.NamedSegmentOptions exposing (NamedSegment)
 import Tools.Nudge
 import Tools.OneClickQuickFix
@@ -431,7 +432,7 @@ update msg model =
                         |> Maybe.withDefault "no track name"
             in
             case TrackLoaded.trackFromSegments trackName gpxSegments of
-                Just (track, segments) ->
+                Just ( track, segments ) ->
                     ( adoptTrackInModel track segments model
                     , Cmd.batch
                         [ showTrackOnMapCentered model.mapPointsDraggable track
@@ -770,7 +771,10 @@ adoptTrackInModel track segments model =
             }
 
         newToolOptions =
-            { toolOptions | graphOptions = graphFromTrack }
+            { toolOptions
+                | graphOptions = graphFromTrack
+                , namedSegmentOptions = Tools.NamedSegment.initialise segments
+            }
 
         modelWithTrack =
             { model
