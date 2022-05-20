@@ -251,6 +251,33 @@ view location wrapper options track =
                 { onPress = Just <| wrapper CreateSegment
                 , label = i18n "create"
                 }
+
+        goodSeparation : List NamedSegment -> Bool
+        goodSeparation segs =
+            -- Note the list should be sorted beforehand!
+            case segs of
+                seg1 :: seg2 :: moreSegs ->
+                    (seg1.startDistance |> Quantity.greaterThan (Length.meters 110))
+                        && (seg1.endDistance
+                                |> Quantity.plus (Length.meters 50)
+                                |> Quantity.lessThan seg2.startDistance
+                           )
+                        && goodSeparation (seg2 :: moreSegs)
+
+                [ lastSeg ] ->
+                    lastSeg.endDistance
+                        |> Quantity.plus (Length.meters 200)
+                        |> Quantity.lessThan (DomainModel.trueLength track.trackTree)
+
+                [] ->
+                    True
+
+        overlapWarning =
+            if goodSeparation options.namedSegments then
+                none
+
+            else
+                text "WARNING WARNING"
     in
     el
         [ width fill
@@ -262,6 +289,7 @@ view location wrapper options track =
             [ segmentsTable
             , selectedSegmentDetail
             , newSegmentButton
+            , overlapWarning
             ]
 
 
