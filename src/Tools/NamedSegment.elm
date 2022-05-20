@@ -11,16 +11,18 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
+import FeatherIcons
 import FlatColors.ChinesePalette
 import Length exposing (Meters)
 import List.Extra
 import Quantity exposing (Quantity)
+import ToolTip exposing (localisedTooltip, tooltip)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.NamedSegmentOptions exposing (NamedSegment, Options)
 import TrackLoaded exposing (TrackLoaded)
-import UtilsForViews exposing (showLongMeasure, showShortMeasure)
-import ViewPureStyles exposing (rgtDark, rgtPurple)
+import UtilsForViews exposing (showDecimal2, showLongMeasure, showShortMeasure)
+import ViewPureStyles exposing (rgtDark, rgtPurple, useIcon)
 
 
 toolId =
@@ -37,6 +39,9 @@ defaultOptions =
 type Msg
     = NoOp
     | SelectSegment Int
+    | UpdateSegment
+    | ChangeName String
+    | DeleteSegment
 
 
 initialise : List NamedSegment -> Options
@@ -120,10 +125,20 @@ view location wrapper options track =
                               , width = fillPortion 2
                               , view =
                                     \i t ->
-                                        Input.button (dataStyles (Just i == options.selectedSegment))
-                                            { label = text t.name
-                                            , onPress = Just <| wrapper <| SelectSegment i
-                                            }
+                                        if Just i == options.selectedSegment then
+                                            -- Editable name
+                                            Input.text (dataStyles True)
+                                                { onChange = wrapper << ChangeName
+                                                , text = t.name
+                                                , placeholder = Nothing
+                                                , label = Input.labelHidden "name"
+                                                }
+
+                                        else
+                                            Input.button (dataStyles False)
+                                                { label = text t.name
+                                                , onPress = Just <| wrapper <| SelectSegment i
+                                                }
                               }
                             , { header = none
                               , width = fillPortion 1
@@ -145,8 +160,24 @@ view location wrapper options track =
                               , width = fillPortion 1
                               , view =
                                     \i t ->
-                                        el (dataStyles (Just i == options.selectedSegment)) <|
-                                            text "actions"
+                                        if Just i == options.selectedSegment then
+                                            row [ spaceEvenly ]
+                                                [ Input.button
+                                                    [ tooltip onLeft (localisedTooltip location toolId "update")
+                                                    ]
+                                                    { label = useIcon FeatherIcons.checkCircle
+                                                    , onPress = Just <| wrapper UpdateSegment
+                                                    }
+                                                , Input.button
+                                                    [ tooltip onLeft (localisedTooltip location toolId "delete")
+                                                    ]
+                                                    { label = useIcon FeatherIcons.trash2
+                                                    , onPress = Just <| wrapper DeleteSegment
+                                                    }
+                                                ]
+
+                                        else
+                                            none
                               }
                             ]
                         }
@@ -156,6 +187,7 @@ view location wrapper options track =
             [ "distance"
             , "ascent"
             , "descent"
+            , "steepest"
             ]
 
         selectedSegmentDetail =
@@ -173,7 +205,7 @@ view location wrapper options track =
                                     , DomainModel.indexFromDistance segment.endDistance track.trackTree
                                     )
 
-                                ( ascent, descent ) =
+                                ( ascent, descent, maxGrade ) =
                                     DomainModel.traverseTreeBetweenLimitsToDepth
                                         startIndex
                                         endIndex
@@ -181,18 +213,19 @@ view location wrapper options track =
                                         0
                                         track.trackTree
                                         upsAndDowns
-                                        ( Quantity.zero, Quantity.zero )
+                                        ( Quantity.zero, Quantity.zero, 0.0 )
 
                                 distance =
                                     segment.endDistance |> Quantity.minus segment.startDistance
 
                                 upsAndDowns :
                                     RoadSection
-                                    -> ( Quantity Float Meters, Quantity Float Meters )
-                                    -> ( Quantity Float Meters, Quantity Float Meters )
-                                upsAndDowns road ( up, down ) =
+                                    -> ( Quantity Float Meters, Quantity Float Meters, Float )
+                                    -> ( Quantity Float Meters, Quantity Float Meters, Float )
+                                upsAndDowns road ( up, down, steepest ) =
                                     ( Quantity.plus up road.altitudeGained
                                     , Quantity.plus down road.altitudeLost
+                                    , max steepest road.gradientAtStart
                                     )
                             in
                             row
@@ -204,6 +237,7 @@ view location wrapper options track =
                                     [ text <| showLongMeasure False distance
                                     , text <| showShortMeasure False ascent
                                     , text <| showShortMeasure False descent
+                                    , text <| showDecimal2 maxGrade
                                     ]
                                 ]
 
@@ -234,7 +268,91 @@ update msg options track wrapper =
             ( { options | selectedSegment = Nothing }, [] )
 
         SelectSegment seg ->
-            ( { options | selectedSegment = Just seg }, [] )
+            case List.Extra.getAt seg options.namedSegments of
+                Just segment ->
+                    let
+                        ( startIndex, endIndex ) =
+                            ( DomainModel.indexFromDistance segment.startDistance track.trackTree
+                            , DomainModel.indexFromDistance segment.endDistance track.trackTree
+                            )
+                    in
+                    ( { options | selectedSegment = Just seg }
+                    , [ Actions.SetCurrent startIndex
+                      , Actions.SetMarker (Just endIndex)
+                      ]
+                    )
+
+                Nothing ->
+                    ( { options | selectedSegment = Nothing }, [] )
+
+        UpdateSegment ->
+            case options.selectedSegment of
+                Nothing ->
+                    ( { options | selectedSegment = Nothing }, [] )
+
+                Just index ->
+                    case List.Extra.getAt index options.namedSegments of
+                        Nothing ->
+                            ( { options | selectedSegment = Nothing }, [] )
+
+                        Just segment ->
+                            let
+                                ( fromStart, fromEnd ) =
+                                    TrackLoaded.getRangeFromMarkers track
+
+                                endIndex =
+                                    DomainModel.skipCount track.trackTree - fromEnd
+
+                                updated =
+                                    { segment
+                                        | startDistance = DomainModel.distanceFromIndex fromStart track.trackTree
+                                        , endDistance = DomainModel.distanceFromIndex endIndex track.trackTree
+                                    }
+                            in
+                            ( { options
+                                | namedSegments = List.Extra.updateAt index (always updated) options.namedSegments
+                              }
+                            , []
+                            )
+
+        DeleteSegment ->
+            case options.selectedSegment of
+                Nothing ->
+                    ( { options | selectedSegment = Nothing }, [] )
+
+                Just index ->
+                    case List.Extra.getAt index options.namedSegments of
+                        Nothing ->
+                            ( { options | selectedSegment = Nothing }, [] )
+
+                        Just segment ->
+                            ( { options
+                                | namedSegments = List.Extra.removeAt index options.namedSegments
+                                , selectedSegment = Nothing
+                              }
+                            , []
+                            )
+
+        ChangeName newName ->
+            case options.selectedSegment of
+                Nothing ->
+                    ( { options | selectedSegment = Nothing }, [] )
+
+                Just index ->
+                    case List.Extra.getAt index options.namedSegments of
+                        Nothing ->
+                            ( { options | selectedSegment = Nothing }, [] )
+
+                        Just segment ->
+                            let
+                                updated =
+                                    { segment | name = newName }
+                            in
+                            ( { options
+                                | namedSegments = List.Extra.updateAt index (always updated) options.namedSegments
+                              }
+                            , []
+                            )
 
 
 

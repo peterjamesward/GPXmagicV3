@@ -829,12 +829,15 @@ It's also _really_ good at removing noise from IRL rides.
           [ ( "label", """Named segments""")
           , ( "info", """Add segments thath RGT can use for timing.""")
           , ( "name", """Name""")
-          , ( "start", """Starts at""")
-          , ( "end", """Ends at""")
+          , ( "start", """Start""")
+          , ( "end", """Finish""")
           , ( "select", """Please click on a segment name for details""")
           , ( "distance", """Length""")
           , ( "ascent", """Ascent""")
           , ( "descent", """Descent""")
+          , ( "steepest", """Steepest""")
+          , ( "update", """Update with current marker positions""")
+          , ( "delete", """Delete this segment (no Undo!)""")
           ]
           )
         ]

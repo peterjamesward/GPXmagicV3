@@ -9,7 +9,7 @@ Need more work on number formats.
 
 ## Named Segments
 
-See private notes.
+Select segment, _Essentials_ does not reflect purple dropped.
 
 ## Tools organisation
 
