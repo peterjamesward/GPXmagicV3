@@ -47,6 +47,8 @@ import Tools.MoveAndStretch
 import Tools.MoveAndStretchOptions
 import Tools.MoveScaleRotate
 import Tools.MoveScaleRotateOptions
+import Tools.NamedSegment
+import Tools.NamedSegmentOptions
 import Tools.Nudge
 import Tools.NudgeOptions
 import Tools.OutAndBack
@@ -105,6 +107,7 @@ type ToolType
     | ToolSettings
     | ToolLandUse
     | ToolSmartSmoother
+    | ToolNamedSegments
 
 
 type alias Options msg =
@@ -138,6 +141,7 @@ type alias Options msg =
     , graphOptions : Tools.GraphOptions.Options msg
     , landUseOptions : Tools.LandUse.Options
     , smartSmootherOptions : Tools.SmartSmootherOptions.Options
+    , namedSegmentOptions : Tools.NamedSegmentOptions.Options
     }
 
 
@@ -172,6 +176,7 @@ defaultOptions =
     , graphOptions = Tools.Graph.defaultOptions
     , landUseOptions = Tools.LandUse.defaultOptions
     , smartSmootherOptions = Tools.SmartSmoother.defaultOptions
+    , namedSegmentOptions = Tools.NamedSegment.defaultOptions
     }
 
 
@@ -211,6 +216,7 @@ type ToolMsg
     | ToolGraphMsg Tools.Graph.Msg
     | ToolLandUseMsg Tools.LandUse.Msg
     | ToolSmartSmootherMsg Tools.SmartSmoother.Msg
+    | ToolNamedSegmentMsg Tools.NamedSegment.Msg
 
 
 type alias ToolEntry =
@@ -244,6 +250,7 @@ defaultTools =
     , simplifyTool
     , interpolateTool
     , profileSmoothTool
+    , namedSegmentTool
     , moveScaleRotateTool
     , flythroughTool
     , stravaTool
@@ -474,6 +481,19 @@ profileSmoothTool =
     , dock = DockUpperRight
     , tabColour = FlatColors.FlatUIPalette.concrete
     , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
+    , isPopupOpen = False
+    }
+
+
+namedSegmentTool : ToolEntry
+namedSegmentTool =
+    { toolType = ToolNamedSegments
+    , toolId = Tools.NamedSegment.toolId
+    , video = Nothing
+    , state = Contracted
+    , dock = DockUpperRight
+    , tabColour = rgtPurple
+    , textColour = contrastingColour rgtPurple
     , isPopupOpen = False
     }
 
@@ -1187,6 +1207,24 @@ update toolMsg isTrack msgWrapper options =
                 Nothing ->
                     ( options, [] )
 
+        ToolNamedSegmentMsg msg ->
+            case isTrack of
+                Just track ->
+                    let
+                        ( newOptions, actions ) =
+                            Tools.NamedSegment.update
+                                msg
+                                options.namedSegmentOptions
+                                track
+                                (msgWrapper << ToolNamedSegmentMsg)
+                    in
+                    ( { options | namedSegmentOptions = newOptions }
+                    , actions
+                    )
+
+                Nothing ->
+                    ( options, [] )
+
 
 refreshOpenTools :
     Maybe (TrackLoaded msg)
@@ -1529,6 +1567,20 @@ toolStateHasChanged toolType newState isTrack options =
 
                 newOptions =
                     { options | smartSmootherOptions = newToolOptions }
+            in
+            ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
+
+        ToolNamedSegments ->
+            let
+                ( newToolOptions, actions ) =
+                    Tools.NamedSegment.toolStateChange
+                        (newState == Expanded)
+                        (getColour toolType options.tools)
+                        options.namedSegmentOptions
+                        isTrack
+
+                newOptions =
+                    { options | namedSegmentOptions = newToolOptions }
             in
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
@@ -2087,6 +2139,18 @@ viewToolByType location msgWrapper entry isTrack options =
                     Nothing ->
                         noTrackMessage location
 
+            ToolNamedSegments ->
+                case isTrack of
+                    Just track ->
+                        Tools.NamedSegment.view
+                            location
+                            (msgWrapper << ToolNamedSegmentMsg)
+                            options.namedSegmentOptions
+                            track
+
+                    Nothing ->
+                        noTrackMessage location
+
 
 
 -- Local storage management
@@ -2191,6 +2255,10 @@ encodeType toolType =
 
         ToolSmartSmoother ->
             "ToolTreeSmoother"
+
+        ToolNamedSegments ->
+            "ToolNamedSegments"
+
 
 
 encodeColour : Element.Color -> E.Value

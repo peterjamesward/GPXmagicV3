@@ -9,6 +9,7 @@ import List.Extra
 import Point3d
 import PreviewData exposing (PreviewPoint)
 import Quantity exposing (Quantity)
+import Tools.NamedSegmentOptions exposing (NamedSegment)
 
 
 type alias TrackLoaded msg =
@@ -22,15 +23,6 @@ type alias TrackLoaded msg =
     , redos : List (UndoEntry msg)
     , lastMapClick : ( Float, Float )
     , landUseData : LandUseDataTypes.LandUseData
-    , segments : List TrackSegment
-    }
-
-
-type alias TrackSegment =
-    -- Used for RGT timed segments.
-    { startIndex : Int
-    , endIndex : Int
-    , name : Maybe String
     }
 
 
@@ -63,7 +55,6 @@ newTrackFromTree refLonLat newTree =
     , redos = []
     , lastMapClick = ( 0, 0 )
     , landUseData = LandUseDataTypes.emptyLandUse
-    , segments = []
     }
 
 
@@ -102,7 +93,7 @@ removeAdjacentDuplicates gpxs =
     List.reverse <| helper gpxs []
 
 
-trackFromSegments : String -> List ( Maybe String, List GPXSource ) -> Maybe (TrackLoaded msg)
+trackFromSegments : String -> List ( Maybe String, List GPXSource ) -> Maybe ( TrackLoaded msg, List NamedSegment )
 trackFromSegments trackName segments =
     --TODO: Support for Named Segments.
     let
@@ -117,19 +108,19 @@ trackFromSegments trackName segments =
                 |> List.map (Tuple.second >> List.length)
                 |> List.Extra.scanl (+) 0
 
-        combineContiguousSameNameSegments : List TrackSegment -> List TrackSegment
+        combineContiguousSameNameSegments : List NamedSegment -> List NamedSegment
         combineContiguousSameNameSegments segs =
             case segs of
-                seg1 :: seg2 :: anymore ->
-                    if seg1.endIndex == seg2.startIndex && seg1.name == seg2.name then
+                seg1 :: seg2 :: more ->
+                    if seg1.endDistance == seg2.startDistance && seg1.name == seg2.name then
                         let
                             combined =
-                                { startIndex = seg1.startIndex
-                                , endIndex = seg2.endIndex
+                                { startDistance = seg1.startDistance
+                                , endDistance = seg2.endDistance
                                 , name = seg1.name
                                 }
                         in
-                        combineContiguousSameNameSegments (combined :: anymore)
+                        combineContiguousSameNameSegments (combined :: more)
 
                     else
                         seg1 :: combineContiguousSameNameSegments (List.drop 1 segs)
@@ -137,13 +128,15 @@ trackFromSegments trackName segments =
                 _ ->
                     segs
 
-        segmentInfo segment offset nextOffset =
+        segmentInfo : TrackLoaded msg -> ( Maybe String, List GPXSource ) -> Int -> Int -> Maybe NamedSegment
+        segmentInfo track segment offset nextOffset =
+            -- Switch from index based to distance based.
             case segment of
                 ( Just name, points ) ->
                     Just
-                        { startIndex = offset
-                        , endIndex = nextOffset
-                        , name = Just name
+                        { startDistance = distanceFromIndex offset track.trackTree
+                        , endDistance = distanceFromIndex nextOffset track.trackTree
+                        , name = name
                         }
 
                 _ ->
@@ -152,12 +145,11 @@ trackFromSegments trackName segments =
     case baseTrack of
         Just track ->
             Just
-                { track
-                    | segments =
-                        combineContiguousSameNameSegments <|
-                            List.filterMap identity <|
-                                List.map3 segmentInfo segments segmentOffsets (List.drop 1 segmentOffsets)
-                }
+                ( track
+                , combineContiguousSameNameSegments <|
+                    List.filterMap identity <|
+                        List.map3 (segmentInfo track) segments segmentOffsets (List.drop 1 segmentOffsets)
+                )
 
         Nothing ->
             Nothing
@@ -182,7 +174,6 @@ trackFromPoints trackName gpxTrack =
                 , trackName = Just trackName
                 , lastMapClick = ( 0, 0 )
                 , landUseData = { landuse | status = LandUseDataTypes.LandUseWaitingOSM }
-                , segments = []
                 }
 
         Nothing ->

@@ -64,6 +64,7 @@ import Tools.Interpolate
 import Tools.InterpolateOptions
 import Tools.MoveAndStretch
 import Tools.MoveScaleRotate
+import Tools.NamedSegmentOptions exposing (NamedSegment)
 import Tools.Nudge
 import Tools.OneClickQuickFix
 import Tools.OutAndBack
@@ -430,8 +431,8 @@ update msg model =
                         |> Maybe.withDefault "no track name"
             in
             case TrackLoaded.trackFromSegments trackName gpxSegments of
-                Just track ->
-                    ( adoptTrackInModel track model
+                Just (track, segments) ->
+                    ( adoptTrackInModel track segments model
                     , Cmd.batch
                         [ showTrackOnMapCentered model.mapPointsDraggable track
                         , LandUseDataOSM.requestLandUseData
@@ -753,8 +754,8 @@ update msg model =
                     ( model, Cmd.none )
 
 
-adoptTrackInModel : TrackLoaded Msg -> Model -> Model
-adoptTrackInModel track model =
+adoptTrackInModel : TrackLoaded Msg -> List NamedSegment -> Model -> Model
+adoptTrackInModel track segments model =
     let
         toolOptions =
             model.toolOptions
@@ -2065,7 +2066,7 @@ performActionsOnModel actions model =
                     in
                     case newTrack of
                         Just track ->
-                            adoptTrackInModel track foldedModel
+                            adoptTrackInModel track [] foldedModel
 
                         Nothing ->
                             { foldedModel | modalMessage = Just "nosvg" }

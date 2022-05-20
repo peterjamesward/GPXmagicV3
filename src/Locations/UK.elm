@@ -824,4 +824,13 @@ It's also _really_ good at removing noise from IRL rides.
                 , ( "blend", """Varies the emphasis between outward and backwards lines.""")
                 ]
           )
+        , ( "segments"
+          , Dict.fromList
+          [ ( "label", """Named segments""")
+          , ( "info", """Add segments thath RGT can use for timing.""")
+          , ( "name", """Name""")
+          , ( "start", """Starts at""")
+          , ( "end", """Ends at""")
+          ]
+          )
         ]
