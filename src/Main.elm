@@ -650,7 +650,10 @@ update msg model =
                 Just track ->
                     ( model
                     , Download.string outputFilename "text/gpx" <|
-                        WriteGPX.writeGPX model.filename track
+                        WriteGPX.writeGPX
+                            model.filename
+                            track
+                            model.toolOptions.namedSegmentOptions.namedSegments
                     )
 
                 Nothing ->

@@ -164,7 +164,7 @@ writeOneSection sections options track =
                 content =
                     case trackExtract of
                         Just subTrack ->
-                            WriteGPX.writeGPX track.trackName <| processingFunction subTrack
+                            WriteGPX.writeGPX track.trackName (processingFunction subTrack) []
 
                         Nothing ->
                             "failed to make the track section"
@@ -325,7 +325,7 @@ view location imperial options wrapper track =
         , el [ centerX ] splitButton
         , el [ centerX ] <|
             paragraph []
-                [ i18n "note"  ]
+                [ i18n "note" ]
         , el [ centerX ] appendFileButton
         ]
 

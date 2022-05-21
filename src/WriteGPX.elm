@@ -5,6 +5,7 @@ import Direction2d
 import DomainModel exposing (GPXSource)
 import ElmEscapeHtml
 import Length
+import Tools.NamedSegmentOptions exposing (NamedSegment)
 import TrackLoaded exposing (TrackLoaded)
 
 
@@ -28,8 +29,11 @@ preamble =
 """
 
 
-writePreamble =
+writePreamble trackName =
     preamble
+        ++ """<trk>  <name>"""
+        ++ ElmEscapeHtml.escape trackName
+        ++ """</name>"""
 
 
 writeTrackPoint : GPXSource -> String
@@ -45,39 +49,66 @@ writeTrackPoint gpx =
         ++ "</trkpt>\n"
 
 
-writeTrack : String -> List ( GPXSource ) -> String
-writeTrack name trackPoints =
-    """
-  <trk>
-    <name>"""
-        ++ ElmEscapeHtml.escape name
-        ++ """</name>
-    <trkseg>
-"""
+writeSegment : Maybe String -> List GPXSource -> String
+writeSegment segmentName trackPoints =
+    let
+        namePart =
+            case segmentName of
+                Just name ->
+                    "<optional><rgt:name>" ++ ElmEscapeHtml.escape name ++ "</rgt:name></optional>"
+
+                Nothing ->
+                    ""
+    in
+    "\n<trkseg>\n"
         ++ String.concat (List.map writeTrackPoint trackPoints)
-        ++ """    </trkseg>
-  </trk>
- """
+        ++ namePart
+        ++ "</trkseg>\n"
 
 
 writeFooter =
-    "</gpx>"
+    "</trk></gpx>\n"
 
 
-writeGPX : Maybe String -> TrackLoaded msg -> String
-writeGPX name track =
+writeGPX : Maybe String -> TrackLoaded msg -> List NamedSegment -> String
+writeGPX name track segments =
+    --May need to consider storage and excessive concatenation, but try obvious first.
     let
-        points =
-            DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
-
         useName =
-            case name of
-                Just n ->
-                    n
+            Maybe.withDefault "A track from GPXmagic" name
+
+        writeSegments segs startFrom =
+            case segs of
+                seg :: moreSegs ->
+                    let
+                        ( segStartIndex, segEndIndex ) =
+                            ( DomainModel.indexFromDistance seg.startDistance track.trackTree
+                            , DomainModel.indexFromDistance seg.endDistance track.trackTree
+                            )
+
+                        precedingPoints =
+                            List.map Tuple.second <|
+                                DomainModel.extractPointsInRange
+                                    startFrom
+                                    (DomainModel.skipCount track.trackTree - segStartIndex + 1)
+                                    track.trackTree
+
+                        segmentPoints =
+                            List.map Tuple.second <|
+                                DomainModel.extractPointsInRange
+                                    segStartIndex
+                                    (DomainModel.skipCount track.trackTree - segEndIndex + 1)
+                                    track.trackTree
+                    in
+                    writeSegment Nothing precedingPoints
+                        ++ writeSegment (Just seg.name) segmentPoints
+                        ++ writeSegments moreSegs segEndIndex
 
                 _ ->
-                    "A track from GPXmagic"
+                    writeSegment Nothing <|
+                        List.map Tuple.second <|
+                            DomainModel.extractPointsInRange startFrom 0 track.trackTree
     in
-    writePreamble
-        ++ writeTrack useName points
+    writePreamble useName
+        ++ writeSegments segments 0
         ++ writeFooter

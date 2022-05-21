@@ -95,7 +95,6 @@ removeAdjacentDuplicates gpxs =
 
 trackFromSegments : String -> List ( Maybe String, List GPXSource ) -> Maybe ( TrackLoaded msg, List NamedSegment )
 trackFromSegments trackName segments =
-    --TODO: Support for Named Segments.
     let
         allPoints =
             List.concatMap Tuple.second segments

@@ -10,10 +10,11 @@ Need more work on number formats.
 ## Named Segments
 
 Select segment, _Essentials_ does not reflect purple dropped.
+Writing out one too many points at segment end.
 
 ## Tools organisation
 
-Group by class: Curves, Gradients, etc. Does this work?
+Group [or filter ?] by class: Curves, Gradients, etc. Does this work?
 
 ---
 

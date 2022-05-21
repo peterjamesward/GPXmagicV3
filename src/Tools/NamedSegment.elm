@@ -12,6 +12,7 @@ import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
 import FeatherIcons
+import FlatColors.AmericanPalette
 import FlatColors.ChinesePalette
 import Length exposing (Meters)
 import List.Extra
@@ -22,7 +23,7 @@ import Tools.I18NOptions as I18NOptions
 import Tools.NamedSegmentOptions exposing (NamedSegment, Options)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal2, showLongMeasure, showShortMeasure)
-import ViewPureStyles exposing (rgtDark, rgtPurple, useIcon)
+import ViewPureStyles exposing (neatToolsBorder, rgtDark, rgtPurple, useIcon, useIconWithSize)
 
 
 toolId =
@@ -246,11 +247,11 @@ view location wrapper options track =
                     paragraph [] [ i18n "select" ]
 
         newSegmentButton =
-            --TODO: Disable if not acceptable (overlap or too close)
-            Input.button []
-                { onPress = Just <| wrapper CreateSegment
-                , label = i18n "create"
-                }
+            el [ centerX ] <|
+                Input.button neatToolsBorder
+                    { onPress = Just <| wrapper CreateSegment
+                    , label = i18n "create"
+                    }
 
         goodSeparation : List NamedSegment -> Bool
         goodSeparation segs =
@@ -265,9 +266,11 @@ view location wrapper options track =
                         && goodSeparation (seg2 :: moreSegs)
 
                 [ lastSeg ] ->
-                    lastSeg.endDistance
-                        |> Quantity.plus (Length.meters 200)
-                        |> Quantity.lessThan (DomainModel.trueLength track.trackTree)
+                    (lastSeg.startDistance |> Quantity.greaterThan (Length.meters 110))
+                        && (lastSeg.endDistance
+                                |> Quantity.plus (Length.meters 200)
+                                |> Quantity.lessThan (DomainModel.trueLength track.trackTree)
+                           )
 
                 [] ->
                     True
@@ -277,7 +280,30 @@ view location wrapper options track =
                 none
 
             else
-                text "WARNING WARNING"
+                row
+                    [ width fill
+                    , padding 5
+                    , spacing 5
+                    , Background.color FlatColors.AmericanPalette.brightYarrow
+                    ]
+                    [ useIconWithSize 48 FeatherIcons.alertTriangle
+                    , paragraph [] [ text <| I18N.localisedString location toolId "warning" ]
+                    ]
+
+        duplicateWarning =
+            if List.Extra.allDifferentBy .name options.namedSegments then
+                none
+
+            else
+                row
+                    [ width fill
+                    , padding 5
+                    , spacing 5
+                    , Background.color FlatColors.AmericanPalette.brightYarrow
+                    ]
+                    [ useIconWithSize 48 FeatherIcons.alertTriangle
+                    , paragraph [] [ text <| I18N.localisedString location toolId "duplicate" ]
+                    ]
     in
     el
         [ width fill
@@ -290,6 +316,7 @@ view location wrapper options track =
             , selectedSegmentDetail
             , newSegmentButton
             , overlapWarning
+            , duplicateWarning
             ]
 
 

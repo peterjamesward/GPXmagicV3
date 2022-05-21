@@ -3,6 +3,7 @@ module GpxParser exposing (..)
 import Angle
 import Direction2d
 import DomainModel exposing (GPXSource)
+import ElmEscapeHtml
 import Length
 import Quantity
 import Regex
@@ -25,7 +26,7 @@ parseTrackName xml =
                     Nothing
 
                 n :: _ ->
-                    n
+                    Maybe.map ElmEscapeHtml.unescape n
 
 
 parseSegments : String -> List ( Maybe String, List GPXSource )
@@ -49,7 +50,7 @@ parseSegments xml =
                             Nothing
 
                         n :: _ ->
-                            n
+                            Maybe.map ElmEscapeHtml.unescape n
 
         segment trkseg =
             ( segname trkseg, trkpts trkseg )

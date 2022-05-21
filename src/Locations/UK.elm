@@ -840,6 +840,11 @@ It's also _really_ good at removing noise from IRL rides.
           , ( "delete", """Delete this segment (no Undo!)""")
           , ( "create", """Create from markers""")
           , ( "newname", """TYPE NAME HERE""")
+          , ( "warning", """
+RGT requires named segments to be at least 110m from the start, 190m from the end,
+ and at least 50m apart. At least one of the segments needs changing!""")
+          , ( "duplicate", """
+Please ensure that segments have distinct names. RGT will merge contiguous segments with the same name""")
           ]
           )
         ]
