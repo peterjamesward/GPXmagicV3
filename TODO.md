@@ -12,7 +12,6 @@ Need more work on number formats.
 ## Named Segments
 
 Select segment, _Essentials_ does not reflect purple dropped.
-Strava segments do the expected.
 
 ---
 

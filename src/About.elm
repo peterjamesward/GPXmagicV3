@@ -3,7 +3,7 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.2.14 (9d787e35)
+# GPXmagic v3.3.0 (a5196c46)
 
 **GPXmagic V3 works best with Chrome** (by far)
 
@@ -12,10 +12,7 @@ aboutText =
 
 ## In this update ...
 
-* Minor tweaks to Smart Smoother:
-  - Increment for radius and turn-in is now 0.1m rather than 0.5
-  - New "blend" control allows you to vary the relative influence of the forward and reverse routes, which
-  can result in a more suitable result.
+* Named segments. These can be added or edited manually or derived from Strava segments.
 
 ## Acknowledgements
 
