@@ -1,4 +1,6 @@
 
+# BUGS
+
 # WIP
 
 ## Languages
@@ -10,15 +12,15 @@ Need more work on number formats.
 ## Named Segments
 
 Select segment, _Essentials_ does not reflect purple dropped.
-Writing out one too many points at segment end.
-
-## Tools organisation
-
-Group [or filter ?] by class: Curves, Gradients, etc. Does this work?
+Strava segments do the expected.
 
 ---
 
 # BACKLOG
+
+## Tools organisation
+
+Group [or filter ?] by class: Curves, Gradients, etc. Does this work?
 
 ## Land use 3D rendering
 

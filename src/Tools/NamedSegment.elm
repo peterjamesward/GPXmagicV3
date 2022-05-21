@@ -320,6 +320,16 @@ view location wrapper options track =
             ]
 
 
+addSegment : NamedSegment -> Options -> Options
+addSegment segment options =
+    { options
+        | namedSegments =
+            List.sortBy
+                (.startDistance >> Length.inMeters)
+                (segment :: options.namedSegments)
+    }
+
+
 update :
     Msg
     -> Options
@@ -433,12 +443,7 @@ update msg options track wrapper =
                     , name = "ENTER NAME HERE"
                     }
             in
-            ( { options
-                | namedSegments =
-                    List.sortBy
-                        (.startDistance >> Length.inMeters)
-                        (newSegment :: options.namedSegments)
-              }
+            ( addSegment newSegment options
             , []
             )
 

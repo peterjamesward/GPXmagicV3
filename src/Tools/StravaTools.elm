@@ -257,6 +257,19 @@ update msg settings wrap track =
             ( settings, [ Actions.DisplayInfo tool tag ] )
 
 
+segmentName : Options -> Maybe String
+segmentName options =
+    case options.externalSegment of
+        SegmentOk segment ->
+            Just segment.name
+
+        SegmentPreviewed segment ->
+            Just segment.name
+
+        _ ->
+            Nothing
+
+
 extractFromLngLat latlng =
     case latlng of
         [ latitude, longitude ] ->
@@ -395,7 +408,7 @@ viewStravaTab location options wrap track =
         segmentIdField =
             Input.text
                 [ width (minimum 150 <| fill)
-                , tooltip below (localisedTooltip location toolId "segmenttip")
+                --, tooltip below (localisedTooltip location toolId "segmenttip")
                 ]
                 { onChange = wrap << UserChangedSegmentId
                 , text = options.externalSegmentId
@@ -406,7 +419,7 @@ viewStravaTab location options wrap track =
         routeIdField =
             Input.text
                 [ width (minimum 150 <| fill)
-                , tooltip below (localisedTooltip location toolId "routetip")
+                --, tooltip below (localisedTooltip location toolId "routetip")
                 ]
                 { onChange = wrap << UserChangedRouteId
                 , text = options.externalRouteId

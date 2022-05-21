@@ -365,7 +365,7 @@ update msg model =
 
         AdjustTimeZone newZone ->
             ( { model | zone = newZone }
-            , MyIP.requestIpInformation ReceivedIpDetails
+            , Cmd.none --MyIP.requestIpInformation ReceivedIpDetails
             )
 
         DismissModalMessage ->
@@ -1522,6 +1522,34 @@ performActionsOnModel actions model =
                         ( fromStart, fromEnd ) =
                             ( entry, skipCount track.trackTree - exit )
 
+                        namedSegment =
+                            case Tools.StravaTools.segmentName options of
+                                Just name ->
+                                    Just
+                                        { name = name
+                                        , startDistance = distanceFromIndex entry track.trackTree
+                                        , endDistance = distanceFromIndex exit track.trackTree
+                                        }
+
+                                Nothing ->
+                                    Nothing
+
+                        toolOptions =
+                            model.toolOptions
+
+                        newSegmentOptions =
+                            case namedSegment of
+                                Just segment ->
+                                    Tools.NamedSegment.addSegment
+                                        segment
+                                        toolOptions.namedSegmentOptions
+
+                                Nothing ->
+                                    toolOptions.namedSegmentOptions
+
+                        newToolOptions =
+                            { toolOptions | namedSegmentOptions = newSegmentOptions }
+
                         newTrack =
                             track
                                 |> TrackLoaded.addToUndoStack action
@@ -1533,6 +1561,7 @@ performActionsOnModel actions model =
                     { foldedModel
                         | track = Just newTrack
                         , needsRendering = True
+                        , toolOptions = newToolOptions
                     }
 
                 ( BendSmootherApplyWithOptions options, Just track ) ->
