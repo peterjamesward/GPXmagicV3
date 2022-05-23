@@ -11,11 +11,17 @@ Need more work on number formats.
 
 ## Named Segments
 
-Select segment, _Essentials_ does not reflect purple dropped.
+Select segment: _Essentials_ does not reflect purple dropped.
 
 ---
 
 # BACKLOG
+
+## Route Maker
+
+Use code from Intersections to improve Node and Edge detection.
+
+Improve traversal direction display (with an arrow on each section?).
 
 ## Tools organisation
 
@@ -32,12 +38,6 @@ It needs doing properly, including the start and finish cases.
 Info on mouse move.
 Scales?
 
-## Route Builder
-
-- Improve traversal direction display (with an arrow on each section?).
-- Add "split edge at pointer" function, when editing an edge (?).
-- Improve behaviour with IRL rides (use code from Intersections?)
-
 ## Usability
 
 Drag Curve Former circle directly in Plan View. (Add an SVG "handle" to hit detect.)
@@ -51,6 +51,8 @@ Variant of "request from local storage" that takes a wrapped message so that the
 can be directed to a tool or a view.
 
 Try to move out the residual tool-specific stuff in Main.performActions.
+
+Put all Font, Colour etc into a Palette/Style module for ease of change.
 
 ## De-noise / Simplify
 
@@ -69,9 +71,5 @@ would be to restrict the angular change in both planes. Will do this prior to cu
 - Centroid average to work over S/F on loop
 - Bezier smoothing to work over S/F on loop
 
-## Small stuff
-
-Put all Font, Colour etc into a Palette/Style module for ease of change.
-> Search for FlatUI references.
  
 ---
