@@ -40,7 +40,7 @@ parseSegments xml =
             parseGPXPoints trkseg
 
         segname trkseg =
-            case Regex.find (asRegex "<rgt:name>(.*)<\\/rgt:name>") trkseg of
+            case Regex.find (asRegex "<rgt:namedSegment>(.*)<\\/rgt:namedSegment>") trkseg of
                 [] ->
                     Nothing
 

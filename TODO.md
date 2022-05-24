@@ -11,10 +11,12 @@ Need more work on number formats.
 
 ## Named Segments
 
-Select segment: _Essentials_ does not reflect purple dropped (is Track updated properly?).
-
 Imperial measure support.
 Check I18N.
+
+Do not assume rgt namespace, get it from here:
+`xmlns:rgt="http://www.rgtcycling.com/XML/GpxExtensions/v1">`
+
 
 ---
 
@@ -24,7 +26,11 @@ Check I18N.
 
 Use a SpatialIndex to look for any colinear points from "other" road segments and use them
 to divide each segment into two (or more) sections. Then when we run the neighbour counting
-we should have consistent results.
+we should have consistent results.  
+
+    divideAtColinearPoints : Index -> RoadSection -> List RoadSection
+
+- With variable tolerance on the co-linearity test, this may work with IRL rides.
 
 Improve traversal direction display (with an arrow on each section?).
 
