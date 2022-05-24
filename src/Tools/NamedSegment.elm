@@ -353,6 +353,7 @@ update msg options track wrapper =
                     ( { options | selectedSegment = Just seg }
                     , [ Actions.SetCurrent startIndex
                       , Actions.SetMarker (Just endIndex)
+                      , Actions.PointerChange
                       ]
                     )
 

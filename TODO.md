@@ -11,7 +11,10 @@ Need more work on number formats.
 
 ## Named Segments
 
-Select segment: _Essentials_ does not reflect purple dropped.
+Select segment: _Essentials_ does not reflect purple dropped (is Track updated properly?).
+
+Imperial measure support.
+Check I18N.
 
 ---
 
@@ -19,7 +22,9 @@ Select segment: _Essentials_ does not reflect purple dropped.
 
 ## Route Maker
 
-Use code from Intersections to improve Node and Edge detection.
+Use a SpatialIndex to look for any colinear points from "other" road segments and use them
+to divide each segment into two (or more) sections. Then when we run the neighbour counting
+we should have consistent results.
 
 Improve traversal direction display (with an arrow on each section?).
 
