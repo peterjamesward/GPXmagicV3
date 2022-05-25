@@ -33,6 +33,34 @@ parseSegments : String -> List ( Maybe String, List GPXSource )
 parseSegments xml =
     -- This will become our new entry point and works at the <trkseg> level so they can be named.
     let
+        rgtNamespace =
+            Maybe.withDefault "rgt" <|
+                case
+                    Regex.find
+                        (asRegex
+                            "xmlns:(.*)=\\\"http:\\/\\/www\\.rgtcycling\\.com\\/XML\\/GpxExtensions"
+                        )
+                        xml
+                of
+                    match :: _ ->
+                        case match.submatches of
+                            n :: _ ->
+                                n
+
+                            [] ->
+                                Nothing
+
+                    [] ->
+                        Nothing
+
+        segmentTag =
+            rgtNamespace ++ ":namedSegment"
+
+        ( openTag, closeTag ) =
+            ( "<" ++ segmentTag ++ ">"
+            , "<\\/" ++ segmentTag ++ ">"
+            )
+
         trksegs =
             Regex.find (asRegex "<trkseg((.|\\n|\\r)*?)\\/trkseg>") xml |> List.map .match
 
@@ -40,7 +68,7 @@ parseSegments xml =
             parseGPXPoints trkseg
 
         segname trkseg =
-            case Regex.find (asRegex "<rgt:namedSegment>(.*)<\\/rgt:namedSegment>") trkseg of
+            case Regex.find (asRegex <| openTag ++ "(.*)" ++ closeTag) trkseg of
                 [] ->
                     Nothing
 

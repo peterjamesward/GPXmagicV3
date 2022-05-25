@@ -12,8 +12,9 @@ import TrackLoaded exposing (TrackLoaded)
 preamble =
     """<?xml version='1.0' encoding='UTF-8'?>
 <gpx version="1.1"
-  creator="https://www.stepwiserefinement.co.uk"
+  creator="GPXmagic"
   xmlns="http://www.topografix.com/GPX/1/1"
+  xmlns:rgt="http://www.rgtcycling.com/XML/GpxExtensions/v1">
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.topografix.com/GPX/1/1
   http://www.topografix.com/GPX/1/1/gpx.xsd">
@@ -55,7 +56,9 @@ writeSegment segmentName trackPoints =
         namePart =
             case segmentName of
                 Just name ->
-                    "<optional><rgt:name>" ++ ElmEscapeHtml.escape name ++ "</rgt:name></optional>"
+                    "<extensions><rgt:namedSegment>"
+                        ++ ElmEscapeHtml.escape name
+                        ++ "</rgt:namedSegment></extensions>"
 
                 Nothing ->
                     ""

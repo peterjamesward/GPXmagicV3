@@ -3,20 +3,17 @@
 
 # WIP
 
-## Languages
-
-Awaiting French support from Muriel.
-Possible sign-ups for German, Dutch, Spanish.
-Need more work on number formats.
-
 ## Named Segments
 
-Imperial measure support.
-Check I18N.
+Imperial measure support in `view`.
 
-Do not assume rgt namespace, get it from here:
-`xmlns:rgt="http://www.rgtcycling.com/XML/GpxExtensions/v1">`
+Do not assume rgt namespace in parser, get it from here:
+<gpx creator="StravaGPX" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd" version="1.1"
+xmlns="http://www.topografix.com/GPX/1/1"
+xmlns:rgt="http://www.rgtcycling.com/XML/GpxExtensions/v1">
 
+> Add the above to the output!
 
 ---
 
@@ -24,19 +21,25 @@ Do not assume rgt namespace, get it from here:
 
 ## Route Maker
 
-Use a SpatialIndex to look for any colinear points from "other" road segments and use them
+Use a SpatialIndex to look for any collinear points from "other" road segments and use them
 to divide each segment into two (or more) sections. Then when we run the neighbour counting
 we should have consistent results.  
 
-    divideAtColinearPoints : Index -> RoadSection -> List RoadSection
+    divideAtCollinearPoints : Index -> RoadSection -> List RoadSection
 
-- With variable tolerance on the co-linearity test, this may work with IRL rides.
+- With variable tolerance on the co-linearity test, this may work better with IRL rides.
 
 Improve traversal direction display (with an arrow on each section?).
 
 ## Tools organisation
 
-Group [or filter ?] by class: Curves, Gradients, etc. Does this work?
+**Filter** by tag: Curves, Gradients, Issues etc. Each tool may have more than one tag.
+
+## Languages
+
+Awaiting French support from Muriel.
+Possible sign-ups for German, Dutch, Spanish.
+Need more work on number formats.
 
 ## Land use 3D rendering
 
