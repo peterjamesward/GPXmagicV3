@@ -69,8 +69,8 @@ toolStateChange opened colour options track =
             ( options, [] )
 
 
-view : I18NOptions.Location -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
-view location wrapper options track =
+view : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
+view location imperial wrapper options track =
     let
         i18n =
             I18N.text location toolId
@@ -148,7 +148,7 @@ view location wrapper options track =
                                     \i t ->
                                         el (dataStyles (Just i == options.selectedSegment)) <|
                                             text <|
-                                                showLongMeasure False t.startDistance
+                                                showLongMeasure imperial t.startDistance
                               }
                             , { header = none
                               , width = fillPortion 1
@@ -156,7 +156,7 @@ view location wrapper options track =
                                     \i t ->
                                         el (dataStyles (Just i == options.selectedSegment)) <|
                                             text <|
-                                                showLongMeasure False t.endDistance
+                                                showLongMeasure imperial t.endDistance
                               }
                             , { header = none
                               , width = fillPortion 1
@@ -236,9 +236,9 @@ view location wrapper options track =
                                 ]
                                 [ column [ spacing 5 ] <| List.map (I18N.text location "info") labels
                                 , column [ spacing 5 ]
-                                    [ text <| showLongMeasure False distance
-                                    , text <| showShortMeasure False ascent
-                                    , text <| showShortMeasure False descent
+                                    [ text <| showLongMeasure imperial distance
+                                    , text <| showShortMeasure imperial ascent
+                                    , text <| showShortMeasure imperial descent
                                     , text <| showDecimal2 maxGrade
                                     ]
                                 ]

@@ -2144,6 +2144,7 @@ viewToolByType location msgWrapper entry isTrack options =
                     Just track ->
                         Tools.NamedSegment.view
                             location
+                            options.imperial
                             (msgWrapper << ToolNamedSegmentMsg)
                             options.namedSegmentOptions
                             track

@@ -3,18 +3,6 @@
 
 # WIP
 
-## Named Segments
-
-Imperial measure support in `view`.
-
-Do not assume rgt namespace in parser, get it from here:
-<gpx creator="StravaGPX" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd" version="1.1"
-xmlns="http://www.topografix.com/GPX/1/1"
-xmlns:rgt="http://www.rgtcycling.com/XML/GpxExtensions/v1">
-
-> Add the above to the output!
-
 ---
 
 # BACKLOG
