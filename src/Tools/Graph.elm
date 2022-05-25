@@ -10,7 +10,8 @@ import Arc2d exposing (Arc2d)
 import Arc3d exposing (Arc3d)
 import Axis2d
 import Axis3d
-import BoundingBox3d
+import BoundingBox2d exposing (BoundingBox2d)
+import BoundingBox3d exposing (BoundingBox3d)
 import Circle2d exposing (Circle2d)
 import Dict exposing (Dict)
 import Direction2d
@@ -35,8 +36,10 @@ import Point2d
 import Point3d
 import Polyline3d
 import Quantity exposing (Quantity, zero)
+import SceneBuilder3D
 import Set exposing (Set)
 import SketchPlane3d
+import SpatialIndex exposing (SpatialContent)
 import String.Interpolate
 import ToolTip exposing (localisedTooltip, myTooltip, tooltip)
 import Tools.GraphOptions exposing (..)
@@ -45,7 +48,7 @@ import Tools.I18NOptions as I18NOptions
 import Tools.Nudge
 import Tools.NudgeOptions
 import TrackLoaded exposing (TrackLoaded)
-import UtilsForViews exposing (showDecimal2, showLongMeasure, showShortMeasure)
+import UtilsForViews exposing (flatBox, showDecimal2, showLongMeasure, showShortMeasure)
 import Vector2d
 import Vector3d
 import ViewPureStyles exposing (..)
@@ -756,6 +759,186 @@ view location imperial wrapper options =
                 ]
 
 
+type alias IndexEntry =
+    { leafIndex : Int }
+
+
+type alias Index =
+    SpatialIndex.SpatialNode IndexEntry Length.Meters LocalCoords
+
+
+indexRoad :
+    BoundingBox2d Length.Meters LocalCoords
+    -> PeteTree
+    -> Index
+indexRoad box trackTree =
+    let
+        emptyIndex =
+            -- The last parameter here is not the quality, it
+            -- only affects the index efficiency.
+            SpatialIndex.empty box (Length.meters 100.0)
+
+        indexRoadSection : RoadSection -> ( Int, Index ) -> ( Int, Index )
+        indexRoadSection road ( leafIndex, spaceIndex ) =
+            let
+                localBounds =
+                    DomainModel.boundingBox (Leaf road)
+                        |> flatBox
+                        |> BoundingBox2d.expandBy (Length.meters 5)
+            in
+            ( leafIndex + 1
+            , SpatialIndex.add
+                { content = { leafIndex = leafIndex }
+                , box = localBounds
+                }
+                spaceIndex
+            )
+
+        ( _, populatedIndex ) =
+            DomainModel.foldOverRoute indexRoadSection trackTree ( 0, emptyIndex )
+    in
+    populatedIndex
+
+
+mergeNearbyRoutePointsOverTree : Length.Length -> TrackLoaded msg -> TrackLoaded msg
+mergeNearbyRoutePointsOverTree tolerance track =
+    {- NEW in 3.4, we pre-process the whole route looking for what may be passes along the
+       same route but NOT having matching points. We do this using a SpatialIndex (of course)
+       and a user-set tolerance of proximity matching. The result is a NEW COPY of the route
+       with additional points corresponding to each proximal point.
+
+       I WONDER if this should be a separate edit action, at least initially ...
+       (Let's plough on, as we do.)
+
+       (Ideally, we would just move the slider and see this take effect.)
+    -}
+    let
+        growBox box =
+            BoundingBox2d.expandBy (Length.meters 5) box
+
+        nearbySpace =
+            growBox <| flatBox <| DomainModel.boundingBox track.trackTree
+
+        index =
+            -- Luckily the terrain index gives us Box -> List (leaf index)
+            indexRoad nearbySpace track.trackTree
+
+        ( _, newEarthPoints ) =
+            DomainModel.foldOverRouteRL
+                includeNearbyPoints
+                track.trackTree
+                ( DomainModel.skipCount track.trackTree - 1, [] )
+
+        includeNearbyPoints : RoadSection -> ( Int, List EarthPoint ) -> ( Int, List EarthPoint )
+        includeNearbyPoints road ( thisLeafIndex, outputPoints ) =
+            {- Query index for nearby road sections (i.e. overlapping bounding boxes).
+               From that, make a list of points that are collinear within tolerance.
+               From that, make a new list of points, in correct order, with interpolated altitudes.
+               Cons them on the output (we are folding RL so building from the end, as it were).
+            -}
+            let
+                thisSegment =
+                    LineSegment3d.from road.startPoint road.endPoint
+                        |> LineSegment3d.projectInto SketchPlane3d.xy
+
+                thisSegmentLength =
+                    LineSegment2d.length thisSegment
+
+                thisAsAxis =
+                    Axis2d.through
+                        (LineSegment2d.startPoint thisSegment)
+                        road.directionAtStart
+
+                candidateLeaves : List Int
+                candidateLeaves =
+                    -- Leaves that may have an endpoint that lays near our section.
+                    -- Ignore ourself and our immediate neighbours.
+                    SpatialIndex.query index (flatBox road.boundingBox)
+                        |> List.map (.content >> .leafIndex)
+                        |> List.filter (\i -> i < thisLeafIndex - 1 || i > thisLeafIndex + 1)
+
+                candidatePoints : List Int
+                candidatePoints =
+                    -- Beware having same point twice, end of one leaf, start of next.
+                    (candidateLeaves
+                        ++ List.map ((+) 1) candidateLeaves
+                    )
+                        |> List.Extra.unique
+
+                nearbyPoints :
+                    List
+                        { otherPoint : EarthPoint
+                        , distanceAlongAxis : Length.Length
+                        , distanceFromAxis : Length.Length
+                        }
+                nearbyPoints =
+                    -- These are points that seem to be close but not necessarily interesting.
+                    List.map
+                        (\i -> checkPoint <| DomainModel.earthPointFromIndex i track.trackTree)
+                        candidatePoints
+
+                checkPoint point =
+                    let
+                        xy =
+                            point |> Point3d.projectInto SketchPlane3d.xy
+
+                        ( distanceAlong, distanceFrom ) =
+                            ( xy |> Point2d.signedDistanceAlong thisAsAxis
+                            , xy |> Point2d.signedDistanceFrom thisAsAxis
+                            )
+
+                        proportionalDistance =
+                            Quantity.ratio distanceAlong thisSegmentLength
+
+                        interpolationForAltitude =
+                            Point3d.interpolateFrom road.startPoint road.endPoint proportionalDistance
+
+                        possibleNewPoint =
+                            Point3d.xyz
+                                (Point3d.xCoordinate point)
+                                (Point3d.yCoordinate point)
+                                (Point3d.zCoordinate interpolationForAltitude)
+                    in
+                    { otherPoint = possibleNewPoint
+                    , distanceAlongAxis = distanceAlong
+                    , distanceFromAxis = distanceFrom
+                    }
+
+                _ =
+                    Debug.log "USABLE" ( thisLeafIndex, usableNearbyPoints )
+
+
+                usableNearbyPoints =
+                    -- Now filter them using tolerance and order them by distance
+                    -- Formatted like this for clarity.
+                    nearbyPoints
+                        |> List.filter (\p -> p.distanceAlongAxis |> Quantity.greaterThanZero)
+                        |> List.filter (\p -> p.distanceAlongAxis |> Quantity.lessThan thisSegmentLength)
+                        |> List.filter (\p -> p.distanceFromAxis |> Quantity.abs |> Quantity.lessThanOrEqualTo tolerance)
+                        |> List.sortBy (.distanceAlongAxis >> Length.inMeters)
+            in
+            ( thisLeafIndex - 1
+            , List.map .otherPoint usableNearbyPoints
+                ++ (road.endPoint :: outputPoints)
+            )
+
+        newGPXPoints =
+            List.map
+                (DomainModel.gpxFromPointWithReference track.referenceLonLat)
+                (DomainModel.earthPointFromIndex 0 track.trackTree
+                    :: newEarthPoints
+                )
+    in
+    --TODO: Skip this rebuild if no new points were added.
+    { track
+        | trackTree =
+            DomainModel.treeFromSourcesWithExistingReference
+                track.referenceLonLat
+                newGPXPoints
+                |> Maybe.withDefault track.trackTree
+    }
+
+
 update :
     Msg
     -> Options msg
@@ -766,15 +949,18 @@ update msg options track wrapper =
     case msg of
         GraphAnalyse ->
             let
+                enhancedTrack =
+                    mergeNearbyRoutePointsOverTree options.matchingTolerance track
+
                 newOptions =
                     { options
-                        | graph = buildGraph track
+                        | graph = buildGraph enhancedTrack
                         , analyzed = True
                         , originalTrack = Just track
                     }
             in
             ( newOptions
-            , if Dict.size newOptions.graph.nodes > skipCount track.trackTree // 10 then
+            , if Dict.size newOptions.graph.nodes > skipCount enhancedTrack.trackTree // 10 then
                 [ Actions.DisplayInfo "graph" "manyNodes" ]
 
               else
@@ -896,13 +1082,11 @@ buildGraph track =
     {-
        As in v1 & 2, the only way I know is to see which track points have more than two neighbours.
        Hence build a Dict using XY and the entries being a list of points that share the location.
-       We might then have a user interaction step to refine the node list.
-       First, let's get to the point where we can display nodes.
     -}
     let
         countNeighbours : RoadSection -> Dict XY (Set XY) -> Dict XY (Set XY)
         countNeighbours road countDict =
-            -- Nicer that v2 thanks to use of road segments.
+            -- Nicer than v2 thanks to use of road segments.
             -- Note we are interested in neighbours with distinct XYs.
             let
                 ( startXY, endXY ) =
