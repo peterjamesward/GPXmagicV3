@@ -90,6 +90,7 @@ Click anywhere to dismiss this message. It will probably not appear again.
                 , ( "revert", """Revert to original track""" )
                 , ( "convert", """Make a new track with this route""" )
                 , ( "isOffset", """Offset: {0}m {1}""" )
+                , ( "isTolerance", """Tolerance: {0}""" )
                 , ( "left", """left""" )
                 , ( "right", """right""" )
                 , ( "isRadius", """Radius {0}m""" )
@@ -113,6 +114,11 @@ Use the **Route** view to help construct a new route.
 
 You can also select a single road for editing using (most of) the normal tools. Any changes
 you make here will be reflected in the resulting route so all the altitudes will agree.
+""" )
+                , ( "tolerance", """
+Distance within which nearby points will be seen as on the same road.
+
+Adjust this value to find the best outcome for IRL rides, also ridewithgps.
 """ )
                 , ( "offset", """Offset the generated road using this route as the centre-line.""" )
                 , ( "radius", """When passing a place, will attempt use this to create the bend.""" )

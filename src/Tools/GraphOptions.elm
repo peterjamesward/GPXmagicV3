@@ -22,6 +22,7 @@ type alias XY =
 
 type alias Options msg =
     { graph : Graph msg
+    , matchingTolerance : Length.Length -- When to treat a nearby point as on the same road section.
     , centreLineOffset : Length.Length
     , minimumRadiusAtPlaces : Length.Length
     , boundingBox : BoundingBox3d Length.Meters LocalCoords

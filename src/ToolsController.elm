@@ -2110,6 +2110,7 @@ viewToolByType location msgWrapper entry isTrack options =
                     Just track ->
                         Tools.Graph.view
                             location
+                            options.imperial
                             (msgWrapper << ToolGraphMsg)
                             options.graphOptions
 

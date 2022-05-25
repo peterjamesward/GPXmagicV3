@@ -45,7 +45,7 @@ import Tools.I18NOptions as I18NOptions
 import Tools.Nudge
 import Tools.NudgeOptions
 import TrackLoaded exposing (TrackLoaded)
-import UtilsForViews exposing (showDecimal2, showLongMeasure)
+import UtilsForViews exposing (showDecimal2, showLongMeasure, showShortMeasure)
 import Vector2d
 import Vector3d
 import ViewPureStyles exposing (..)
@@ -58,6 +58,7 @@ toolId =
 defaultOptions : Options msg
 defaultOptions =
     { graph = emptyGraph
+    , matchingTolerance = Length.meters 3.0
     , centreLineOffset = Length.meters 0.0
     , minimumRadiusAtPlaces = Length.meters 3.0
     , boundingBox = BoundingBox3d.singleton Point3d.origin
@@ -81,6 +82,7 @@ type Msg
     | FlipDirection Int
     | ClearRoute
     | RevertToTrack
+    | SetTolerance (Quantity Float Meters)
 
 
 emptyGraph : Graph msg
@@ -400,8 +402,8 @@ toolStateChange opened colour options track =
             ( options, [] )
 
 
-view : I18NOptions.Location -> (Msg -> msg) -> Options msg -> Element msg
-view location wrapper options =
+view : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options msg -> Element msg
+view location imperial wrapper options =
     let
         i18n =
             I18N.text location toolId
@@ -413,40 +415,28 @@ view location wrapper options =
             Length.inMeters options.minimumRadiusAtPlaces
 
         analyseButton =
-            if options.analyzed then
-                none
-
-            else
-                row [ spacing 3 ]
-                    [ infoButton (wrapper <| DisplayInfo "graph" "info")
-                    , I.button neatToolsBorder
-                        { onPress = Just (wrapper GraphAnalyse)
-                        , label = i18n "find"
-                        }
-                    ]
+            row [ spacing 3 ]
+                [ infoButton (wrapper <| DisplayInfo "graph" "info")
+                , I.button neatToolsBorder
+                    { onPress = Just (wrapper GraphAnalyse)
+                    , label = i18n "find"
+                    }
+                ]
 
         clearRouteButton =
-            if options.analyzed then
-                I.button neatToolsBorder
-                    { onPress = Just (wrapper ClearRoute)
-                    , label = i18n "clear"
-                    }
-
-            else
-                none
+            I.button neatToolsBorder
+                { onPress = Just (wrapper ClearRoute)
+                , label = i18n "clear"
+                }
 
         revertButton =
-            if options.analyzed then
-                I.button neatToolsBorder
-                    { onPress = Just (wrapper RevertToTrack)
-                    , label = i18n "revert"
-                    }
-
-            else
-                none
+            I.button neatToolsBorder
+                { onPress = Just (wrapper RevertToTrack)
+                , label = i18n "revert"
+                }
 
         finishButton =
-            if options.analyzed && List.length options.graph.userRoute > 0 then
+            if List.length options.graph.userRoute > 0 then
                 row [ spacing 3 ]
                     [ infoButton (wrapper <| DisplayInfo "graph" "render")
                     , I.button
@@ -458,6 +448,27 @@ view location wrapper options =
 
             else
                 none
+
+        toleranceSlider =
+            row [ spacing 5 ]
+                [ none
+                , infoButton (wrapper <| DisplayInfo "graph" "tolerance")
+                , I.slider
+                    commonShortHorizontalSliderStyles
+                    { onChange = wrapper << SetTolerance << Length.meters
+                    , label =
+                        I.labelBelow [] <|
+                            text <|
+                                String.Interpolate.interpolate
+                                    (I18N.localisedString location toolId "isTolerance")
+                                    [ showShortMeasure imperial options.matchingTolerance ]
+                    , min = 0.0
+                    , max = 5.0
+                    , step = Just 0.5
+                    , value = Length.inMeters options.matchingTolerance
+                    , thumb = I.defaultThumb
+                    }
+                ]
 
         offsetSlider =
             row [ spacing 5 ]
@@ -725,18 +736,24 @@ view location wrapper options =
         , padding 4
         ]
     <|
-        column [ width fill, padding 4, spacing 10 ]
-            [ row [ centerX, width fill, spacing 10 ]
-                [ analyseButton
-                , traversalPrevious
-                , traversalNext
-                , clearRouteButton
-                , revertButton
+        if options.analyzed then
+            column [ width fill, padding 4, spacing 10 ]
+                [ row [ centerX, width fill, spacing 10 ]
+                    [ traversalPrevious
+                    , traversalNext
+                    , clearRouteButton
+                    , revertButton
+                    ]
+                , traversalsTable
+                , wrappedRow [ spacing 5 ] [ offsetSlider, minRadiusSlider ]
+                , finishButton
                 ]
-            , traversalsTable
-            , wrappedRow [ spacing 5 ] [ offsetSlider, minRadiusSlider ]
-            , finishButton
-            ]
+
+        else
+            row [ centerX, width fill, spacing 10 ]
+                [ toleranceSlider
+                , analyseButton
+                ]
 
 
 update :
@@ -833,6 +850,9 @@ update msg options track wrapper =
               }
             , []
             )
+
+        SetTolerance tolerance ->
+            ( { options | matchingTolerance = tolerance }, [] )
 
         CentreLineOffset float ->
             ( { options | centreLineOffset = float }, [] )

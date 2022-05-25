@@ -1,23 +1,30 @@
 
 # BUGS
 
+(Nothing urgent)
+
+--- 
+
 # WIP
-
----
-
-# BACKLOG
 
 ## Route Maker
 
 Use a SpatialIndex to look for any collinear points from "other" road segments and use them
 to divide each segment into two (or more) sections. Then when we run the neighbour counting
-we should have consistent results.  
+we should have consistent results.
 
-    divideAtCollinearPoints : Index -> RoadSection -> List RoadSection
+    divideAtCollinearPoints : SpatialIndex -> RoadSection -> List RoadSection/GPXSource
 
 - With variable tolerance on the co-linearity test, this may work better with IRL rides.
+- Altitude is by interpolation on "current" section, not from outlier.
 
 Improve traversal direction display (with an arrow on each section?).
+
+Retrofit this approach into Intersections.
+
+---
+
+# BACKLOG
 
 ## Tools organisation
 
