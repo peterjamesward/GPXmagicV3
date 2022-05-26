@@ -800,6 +800,16 @@ indexRoad box trackTree =
     populatedIndex
 
 
+type alias Proximal =
+    -- This point is near this leaf; should they be combined?
+    { leafIndex : Int
+    , pointIndex : Int
+    , otherPoint : EarthPoint
+    , distanceAlongAxis : Length.Length
+    , distanceFromAxis : Length.Length
+    }
+
+
 mergeNearbyRoutePointsOverTree : Length.Length -> TrackLoaded msg -> TrackLoaded msg
 mergeNearbyRoutePointsOverTree tolerance track =
     {- NEW in 3.4, we pre-process the whole route looking for what may be passes along the
@@ -823,13 +833,15 @@ mergeNearbyRoutePointsOverTree tolerance track =
             -- Luckily the terrain index gives us Box -> List (leaf index)
             indexRoad nearbySpace track.trackTree
 
-        ( _, newEarthPoints ) =
+        _ = Debug.log "PROXIMALS" proximalPoints
+
+        ( _, proximalPoints ) =
             DomainModel.foldOverRouteRL
                 includeNearbyPoints
                 track.trackTree
                 ( DomainModel.skipCount track.trackTree - 1, [] )
 
-        includeNearbyPoints : RoadSection -> ( Int, List EarthPoint ) -> ( Int, List EarthPoint )
+        includeNearbyPoints : RoadSection -> ( Int, List Proximal ) -> ( Int, List Proximal )
         includeNearbyPoints road ( thisLeafIndex, outputPoints ) =
             {- Query index for nearby road sections (i.e. overlapping bounding boxes).
                From that, make a list of points that are collinear within tolerance.
@@ -865,20 +877,32 @@ mergeNearbyRoutePointsOverTree tolerance track =
                     )
                         |> List.Extra.unique
 
-                nearbyPoints :
-                    List
-                        { otherPoint : EarthPoint
-                        , distanceAlongAxis : Length.Length
-                        , distanceFromAxis : Length.Length
-                        }
+                nearbyPoints : List Proximal
                 nearbyPoints =
                     -- These are points that seem to be close but not necessarily interesting.
-                    List.map
-                        (\i -> checkPoint <| DomainModel.earthPointFromIndex i track.trackTree)
-                        candidatePoints
+                    List.map checkPoint candidatePoints
+                        |> List.filter (\p -> p.distanceAlongAxis |> Quantity.greaterThanZero)
+                        |> List.filter (\p -> p.distanceAlongAxis |> Quantity.lessThan thisSegmentLength)
+                        |> List.filter (\p -> p.distanceFromAxis |> Quantity.abs |> Quantity.lessThanOrEqualTo tolerance)
+                        |> List.filter
+                            (\p ->
+                                not <|
+                                    Point3d.equalWithin (Length.meters 0.5)
+                                        p.otherPoint
+                                        road.startPoint
+                            )
+                        |> List.filter
+                            (\p ->
+                                not <|
+                                    Point3d.equalWithin (Length.meters 0.5)
+                                        p.otherPoint
+                                        road.endPoint
+                            )
 
-                checkPoint point =
+                checkPoint otherIndex =
                     let
+                        point = DomainModel.earthPointFromIndex otherIndex track.trackTree
+
                         xy =
                             point |> Point3d.projectInto SketchPlane3d.xy
 
@@ -899,44 +923,21 @@ mergeNearbyRoutePointsOverTree tolerance track =
                                 (Point3d.yCoordinate point)
                                 (Point3d.zCoordinate interpolationForAltitude)
                     in
-                    { otherPoint = possibleNewPoint
+                    { leafIndex = thisLeafIndex
+                    , pointIndex = otherIndex
+                    , otherPoint = possibleNewPoint
                     , distanceAlongAxis = distanceAlong
                     , distanceFromAxis = distanceFrom
                     }
 
-                _ =
-                    Debug.log "USABLE" ( thisLeafIndex, usableNearbyPoints )
-
-
-                usableNearbyPoints =
-                    -- Now filter them using tolerance and order them by distance
-                    -- Formatted like this for clarity.
-                    nearbyPoints
-                        |> List.filter (\p -> p.distanceAlongAxis |> Quantity.greaterThanZero)
-                        |> List.filter (\p -> p.distanceAlongAxis |> Quantity.lessThan thisSegmentLength)
-                        |> List.filter (\p -> p.distanceFromAxis |> Quantity.abs |> Quantity.lessThanOrEqualTo tolerance)
-                        |> List.sortBy (.distanceAlongAxis >> Length.inMeters)
             in
             ( thisLeafIndex - 1
-            , List.map .otherPoint usableNearbyPoints
-                ++ (road.endPoint :: outputPoints)
+            , nearbyPoints ++ outputPoints
             )
 
-        newGPXPoints =
-            List.map
-                (DomainModel.gpxFromPointWithReference track.referenceLonLat)
-                (DomainModel.earthPointFromIndex 0 track.trackTree
-                    :: newEarthPoints
-                )
     in
     --TODO: Skip this rebuild if no new points were added.
-    { track
-        | trackTree =
-            DomainModel.treeFromSourcesWithExistingReference
-                track.referenceLonLat
-                newGPXPoints
-                |> Maybe.withDefault track.trackTree
-    }
+    track
 
 
 update :
@@ -956,7 +957,7 @@ update msg options track wrapper =
                     { options
                         | graph = buildGraph enhancedTrack
                         , analyzed = True
-                        , originalTrack = Just track
+                        , originalTrack = Just enhancedTrack
                     }
             in
             ( newOptions

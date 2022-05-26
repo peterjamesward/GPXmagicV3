@@ -9,14 +9,17 @@
 
 ## Route Maker
 
-Use a SpatialIndex to look for any collinear points from "other" road segments and use them
-to divide each segment into two (or more) sections. Then when we run the neighbour counting
-we should have consistent results.
+Need another step.
+The concept is sound but we can't find and fix in one pass.
+Need a list of (road, point) pairs.
+Need to make sure that each point is associated with the best road.
+Need to decide whether to impose collinearity or not.
 
-    divideAtCollinearPoints : SpatialIndex -> RoadSection -> List RoadSection/GPXSource
+From a UI perspective, can we Preview where the Places will be as the slider moves?
 
-- With variable tolerance on the co-linearity test, this may work better with IRL rides.
-- Altitude is by interpolation on "current" section, not from outlier.
+Output route derivation is bad -- is this the radiused turns?
+
+ALSO, Clear the Route now doesn't go back to the original `originalTrack`!
 
 Improve traversal direction display (with an arrow on each section?).
 
@@ -28,7 +31,13 @@ Retrofit this approach into Intersections.
 
 ## Tools organisation
 
-**Filter** by tag: Curves, Gradients, Issues etc. Each tool may have more than one tag.
+**Filter** by tag:
+  - Curves, 
+  - Gradients, 
+  - Issues,
+  - ???
+
+Each tool may have more than one tag.
 
 ## Languages
 
