@@ -23,6 +23,7 @@ import Element.Border as Border
 import Element.Font as Font
 import Element.Input as I
 import FeatherIcons
+import FlatColors.AmericanPalette
 import FlatColors.ChinesePalette
 import Geometry101
 import Length exposing (Length, Meters, inMeters, meters)
@@ -35,6 +36,7 @@ import Plane3d
 import Point2d
 import Point3d
 import Polyline3d
+import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (Quantity, zero)
 import SceneBuilder3D
 import Set exposing (Set)
@@ -810,7 +812,7 @@ type alias Proximal =
     }
 
 
-mergeNearbyRoutePointsOverTree : Length.Length -> TrackLoaded msg -> TrackLoaded msg
+mergeNearbyRoutePointsOverTree : Length.Length -> TrackLoaded msg -> List Proximal
 mergeNearbyRoutePointsOverTree tolerance track =
     {- NEW in 3.4, we pre-process the whole route looking for what may be passes along the
        same route but NOT having matching points. We do this using a SpatialIndex (of course)
@@ -833,8 +835,8 @@ mergeNearbyRoutePointsOverTree tolerance track =
             -- Luckily the terrain index gives us Box -> List (leaf index)
             indexRoad nearbySpace track.trackTree
 
-        _ = Debug.log "PROXIMALS" proximalPoints
-
+        --_ =
+        --    Debug.log "PROXIMALS" proximalPoints
         ( _, proximalPoints ) =
             DomainModel.foldOverRouteRL
                 includeNearbyPoints
@@ -901,7 +903,8 @@ mergeNearbyRoutePointsOverTree tolerance track =
 
                 checkPoint otherIndex =
                     let
-                        point = DomainModel.earthPointFromIndex otherIndex track.trackTree
+                        point =
+                            DomainModel.earthPointFromIndex otherIndex track.trackTree
 
                         xy =
                             point |> Point3d.projectInto SketchPlane3d.xy
@@ -929,15 +932,12 @@ mergeNearbyRoutePointsOverTree tolerance track =
                     , distanceAlongAxis = distanceAlong
                     , distanceFromAxis = distanceFrom
                     }
-
             in
             ( thisLeafIndex - 1
             , nearbyPoints ++ outputPoints
             )
-
     in
-    --TODO: Skip this rebuild if no new points were added.
-    track
+    proximalPoints
 
 
 update :
@@ -950,18 +950,15 @@ update msg options track wrapper =
     case msg of
         GraphAnalyse ->
             let
-                enhancedTrack =
-                    mergeNearbyRoutePointsOverTree options.matchingTolerance track
-
                 newOptions =
                     { options
-                        | graph = buildGraph enhancedTrack
+                        | graph = buildGraph track
                         , analyzed = True
-                        , originalTrack = Just enhancedTrack
+                        , originalTrack = Just track
                     }
             in
             ( newOptions
-            , if Dict.size newOptions.graph.nodes > skipCount enhancedTrack.trackTree // 10 then
+            , if Dict.size newOptions.graph.nodes > skipCount track.trackTree // 10 then
                 [ Actions.DisplayInfo "graph" "manyNodes" ]
 
               else
@@ -1039,7 +1036,20 @@ update msg options track wrapper =
             )
 
         SetTolerance tolerance ->
-            ( { options | matchingTolerance = tolerance }, [] )
+            let
+                candidatePoints =
+                    mergeNearbyRoutePointsOverTree options.matchingTolerance track
+                        |> List.map .pointIndex
+            in
+            ( { options | matchingTolerance = tolerance }
+            , [ Actions.ShowPreview
+                    { tag = "graph"
+                    , shape = PreviewCircle
+                    , colour = FlatColors.AmericanPalette.brightYarrow
+                    , points = TrackLoaded.buildPreview candidatePoints track.trackTree
+                    }
+              ]
+            )
 
         CentreLineOffset float ->
             ( { options | centreLineOffset = float }, [] )
