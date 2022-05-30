@@ -13,6 +13,7 @@ import Axis3d
 import BoundingBox2d exposing (BoundingBox2d)
 import BoundingBox3d exposing (BoundingBox3d)
 import Circle2d exposing (Circle2d)
+import Color
 import Dict exposing (Dict)
 import Direction2d
 import Direction3d
@@ -32,12 +33,15 @@ import LineSegment3d
 import List.Extra
 import LocalCoords exposing (LocalCoords)
 import Maybe.Extra
+import Pixels
 import Plane3d
 import Point2d
 import Point3d
 import Polyline3d
 import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (Quantity, zero)
+import Scene3d exposing (Entity)
+import Scene3d.Material as Material
 import SceneBuilder3D
 import Set exposing (Set)
 import SketchPlane3d
@@ -63,7 +67,7 @@ toolId =
 defaultOptions : Options msg
 defaultOptions =
     { graph = emptyGraph
-    , matchingTolerance = Length.meters 3.0
+    , matchingTolerance = Length.meters 0.5
     , centreLineOffset = Length.meters 0.0
     , minimumRadiusAtPlaces = Length.meters 3.0
     , boundingBox = BoundingBox3d.singleton Point3d.origin
@@ -73,6 +77,7 @@ defaultOptions =
     , editingTrack = 0
     , undoGraph = Nothing
     , undoOriginalTrack = Nothing
+    , straightenedPoints = []
     }
 
 
@@ -468,8 +473,8 @@ view location imperial wrapper options =
                                     (I18N.localisedString location toolId "isTolerance")
                                     [ showShortMeasure imperial options.matchingTolerance ]
                     , min = 0.0
-                    , max = 5.0
-                    , step = Just 0.5
+                    , max = 2.0
+                    , step = Nothing
                     , value = Length.inMeters options.matchingTolerance
                     , thumb = I.defaultThumb
                     }
@@ -756,8 +761,8 @@ view location imperial wrapper options =
 
         else
             row [ centerX, width fill, spacing 10 ]
-                [ toleranceSlider
-                , analyseButton
+                [ --toleranceSlider
+                  analyseButton
                 ]
 
 
@@ -802,31 +807,11 @@ indexRoad box trackTree =
     populatedIndex
 
 
-type alias Proximal =
-    -- This point is near this leaf; should they be combined?
-    { leafIndex : Int
-    , pointIndex : Int
-    , otherPoint : EarthPoint
-    , distanceAlongAxis : Length.Length
-    , distanceFromAxis : Length.Length
-    }
-
-
 mergeNearbyRoutePointsOverTree : Length.Length -> TrackLoaded msg -> List Proximal
 mergeNearbyRoutePointsOverTree tolerance track =
-    {- NEW in 3.4, we pre-process the whole route looking for what may be passes along the
-       same route but NOT having matching points. We do this using a SpatialIndex (of course)
-       and a user-set tolerance of proximity matching. The result is a NEW COPY of the route
-       with additional points corresponding to each proximal point.
-
-       I WONDER if this should be a separate edit action, at least initially ...
-       (Let's plough on, as we do.)
-
-       (Ideally, we would just move the slider and see this take effect.)
-    -}
     let
         growBox box =
-            BoundingBox2d.expandBy (Length.meters 5) box
+            BoundingBox2d.expandBy tolerance box
 
         nearbySpace =
             growBox <| flatBox <| DomainModel.boundingBox track.trackTree
@@ -834,110 +819,8 @@ mergeNearbyRoutePointsOverTree tolerance track =
         index =
             -- Luckily the terrain index gives us Box -> List (leaf index)
             indexRoad nearbySpace track.trackTree
-
-        --_ =
-        --    Debug.log "PROXIMALS" proximalPoints
-        ( _, proximalPoints ) =
-            DomainModel.foldOverRouteRL
-                includeNearbyPoints
-                track.trackTree
-                ( DomainModel.skipCount track.trackTree - 1, [] )
-
-        includeNearbyPoints : RoadSection -> ( Int, List Proximal ) -> ( Int, List Proximal )
-        includeNearbyPoints road ( thisLeafIndex, outputPoints ) =
-            {- Query index for nearby road sections (i.e. overlapping bounding boxes).
-               From that, make a list of points that are collinear within tolerance.
-               From that, make a new list of points, in correct order, with interpolated altitudes.
-               Cons them on the output (we are folding RL so building from the end, as it were).
-            -}
-            let
-                thisSegment =
-                    LineSegment3d.from road.startPoint road.endPoint
-                        |> LineSegment3d.projectInto SketchPlane3d.xy
-
-                thisSegmentLength =
-                    LineSegment2d.length thisSegment
-
-                thisAsAxis =
-                    Axis2d.through
-                        (LineSegment2d.startPoint thisSegment)
-                        road.directionAtStart
-
-                candidateLeaves : List Int
-                candidateLeaves =
-                    -- Leaves that may have an endpoint that lays near our section.
-                    -- Ignore ourself and our immediate neighbours.
-                    SpatialIndex.query index (flatBox road.boundingBox)
-                        |> List.map (.content >> .leafIndex)
-                        |> List.filter (\i -> i < thisLeafIndex - 1 || i > thisLeafIndex + 1)
-
-                candidatePoints : List Int
-                candidatePoints =
-                    -- Beware having same point twice, end of one leaf, start of next.
-                    (candidateLeaves
-                        ++ List.map ((+) 1) candidateLeaves
-                    )
-                        |> List.Extra.unique
-
-                nearbyPoints : List Proximal
-                nearbyPoints =
-                    -- These are points that seem to be close but not necessarily interesting.
-                    List.map checkPoint candidatePoints
-                        |> List.filter (\p -> p.distanceAlongAxis |> Quantity.greaterThanZero)
-                        |> List.filter (\p -> p.distanceAlongAxis |> Quantity.lessThan thisSegmentLength)
-                        |> List.filter (\p -> p.distanceFromAxis |> Quantity.abs |> Quantity.lessThanOrEqualTo tolerance)
-                        |> List.filter
-                            (\p ->
-                                not <|
-                                    Point3d.equalWithin (Length.meters 0.5)
-                                        p.otherPoint
-                                        road.startPoint
-                            )
-                        |> List.filter
-                            (\p ->
-                                not <|
-                                    Point3d.equalWithin (Length.meters 0.5)
-                                        p.otherPoint
-                                        road.endPoint
-                            )
-
-                checkPoint otherIndex =
-                    let
-                        point =
-                            DomainModel.earthPointFromIndex otherIndex track.trackTree
-
-                        xy =
-                            point |> Point3d.projectInto SketchPlane3d.xy
-
-                        ( distanceAlong, distanceFrom ) =
-                            ( xy |> Point2d.signedDistanceAlong thisAsAxis
-                            , xy |> Point2d.signedDistanceFrom thisAsAxis
-                            )
-
-                        proportionalDistance =
-                            Quantity.ratio distanceAlong thisSegmentLength
-
-                        interpolationForAltitude =
-                            Point3d.interpolateFrom road.startPoint road.endPoint proportionalDistance
-
-                        possibleNewPoint =
-                            Point3d.xyz
-                                (Point3d.xCoordinate point)
-                                (Point3d.yCoordinate point)
-                                (Point3d.zCoordinate interpolationForAltitude)
-                    in
-                    { leafIndex = thisLeafIndex
-                    , pointIndex = otherIndex
-                    , otherPoint = possibleNewPoint
-                    , distanceAlongAxis = distanceAlong
-                    , distanceFromAxis = distanceFrom
-                    }
-            in
-            ( thisLeafIndex - 1
-            , nearbyPoints ++ outputPoints
-            )
     in
-    proximalPoints
+    []
 
 
 update :
@@ -981,7 +864,6 @@ update msg options track wrapper =
                 , selectedTraversal = 0
               }
             , [ Actions.ChangeActiveTrack 0, Actions.TrackHasChanged ]
-              --, [ Actions.LockToolOpen True toolID ]
             )
 
         HighlightTraversal traversal ->
@@ -1037,16 +919,27 @@ update msg options track wrapper =
 
         SetTolerance tolerance ->
             let
-                candidatePoints =
+                pointInformation =
                     mergeNearbyRoutePointsOverTree options.matchingTolerance track
-                        |> List.map .pointIndex
+
+                candidatePoints =
+                    List.map .pointIndex pointInformation
             in
-            ( { options | matchingTolerance = tolerance }
+            ( { options
+                | matchingTolerance = tolerance
+                , straightenedPoints = pointInformation
+              }
             , [ Actions.ShowPreview
                     { tag = "graph"
                     , shape = PreviewCircle
                     , colour = FlatColors.AmericanPalette.brightYarrow
                     , points = TrackLoaded.buildPreview candidatePoints track.trackTree
+                    }
+              , Actions.ShowPreview
+                    { tag = "graphTool"
+                    , shape = PreviewToolSupplied <| showNewPoints pointInformation track
+                    , colour = FlatColors.AmericanPalette.brightYarrow
+                    , points = []
                     }
               ]
             )
@@ -1086,6 +979,30 @@ type alias EdgeFinder msg =
     , edgesDict : Dict Int ( ( Int, Int, XY ), TrackLoaded msg )
     , traversals : List Traversal
     }
+
+
+showNewPoints : List Proximal -> TrackLoaded msg -> List (Entity LocalCoords)
+showNewPoints pointInfo track =
+    let
+        oldPoints =
+            TrackLoaded.buildPreview
+                (List.map .pointIndex pointInfo)
+                track.trackTree
+                |> List.map .earthPoint
+
+        material =
+            Material.color Color.blue
+
+        highlightPoint point =
+            Scene3d.point { radius = Pixels.pixels 5 } material point
+
+        showVector newPoint oldPoint =
+            Scene3d.lineSegment
+                material
+                (LineSegment3d.from oldPoint newPoint.adjustedPoint)
+    in
+    List.map (.adjustedPoint >> highlightPoint) pointInfo
+        ++ List.map2 showVector pointInfo oldPoints
 
 
 buildGraph : TrackLoaded msg -> Graph msg

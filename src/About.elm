@@ -3,7 +3,7 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.3.0 (a5196c46)
+# GPXmagic v3.3.1 (a5196c46)
 
 **GPXmagic V3 works best with Chrome** (by far)
 
@@ -13,6 +13,8 @@ aboutText =
 ## In this update ...
 
 * Named segments. These can be added or edited manually or derived from Strava segments.
+
+* Preparatory work and internal improvements.
 
 ## Acknowledgements
 
@@ -24,7 +26,7 @@ aboutText =
 
 Compatible with Strava, for the purpose of loading route and segment data.
 
-GPXmagicV3 is currently not open-source but source code is available on request.
+GPXmagicV3 is open source at https://github.com/peterjamesward/GPXmagicV3
 
 Contains numerous libraries under various licence terms, all of which are available in source
 form via https://package.elm-lang.org.

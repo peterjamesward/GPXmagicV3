@@ -9,21 +9,14 @@
 
 ## Route Maker
 
-Need another step.
-The concept is sound but we can't find and fix in one pass.
-Need a list of (road, point) pairs.
-Need to make sure that each point is associated with the best road.
-Need to decide whether to impose collinearity or not.
-
-From a UI perspective, can we Preview where the Places will be as the slider moves?
+Leaf x Point is wrong. It's more about Leafs. Two Leafs in prioximty affect each other.
+Handwritten notes I think cover the cases, but needs formalising.
 
 Output route derivation is bad -- is this the radiused turns?
 
-ALSO, Clear the Route now doesn't go back to the original `originalTrack`!
-
 Improve traversal direction display (with an arrow on each section?).
 
-Retrofit this approach into Intersections.
+Retrofit this approach into Intersections (??).
 
 ---
 

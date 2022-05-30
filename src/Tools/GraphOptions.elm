@@ -2,7 +2,7 @@ module Tools.GraphOptions exposing (..)
 
 import BoundingBox3d exposing (BoundingBox3d)
 import Dict exposing (Dict)
-import DomainModel exposing (GPXSource, PeteTree)
+import DomainModel exposing (EarthPoint, GPXSource, PeteTree)
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
 import Quantity exposing (Quantity)
@@ -32,6 +32,7 @@ type alias Options msg =
     , editingTrack : Int
     , undoGraph : Maybe (Graph msg) -- our private undo stack (of one).
     , undoOriginalTrack : Maybe (TrackLoaded msg)
+    , straightenedPoints : List Proximal
     }
 
 
@@ -65,3 +66,13 @@ type alias TraversalDisplay =
 
 type alias Route =
     List Traversal
+
+
+type alias Proximal =
+    -- This point is near this leaf; should they be combined?
+    { leafIndex : Int
+    , pointIndex : Int
+    , adjustedPoint : EarthPoint -- nearby point moved to be collinear.
+    , distanceAlongAxis : Length.Length
+    , distanceFromAxis : Length.Length
+    }
