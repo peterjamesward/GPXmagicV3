@@ -109,6 +109,14 @@ type ToolType
     | ToolSmartSmoother
     | ToolNamedSegments
 
+type ToolCategory
+    = TcInformation
+    | TcBends
+    | TcGradients
+    | TcWholeTrack
+    | TcRoute
+    | TcMisc
+
 
 type alias Options msg =
     -- Tool specific options
@@ -228,6 +236,7 @@ type alias ToolEntry =
     , tabColour : Element.Color
     , textColour : Element.Color
     , isPopupOpen : Bool
+    , categories : List ToolCategory
     }
 
 
@@ -274,6 +283,7 @@ toolSettings =
     , tabColour = rgtPurple
     , textColour = contrastingColour FlatColors.FlatUIPalette.midnightBlue
     , isPopupOpen = False
+    , categories = [ TcMisc ]
     }
 
 
@@ -287,6 +297,7 @@ trackInfoBox =
     , tabColour = FlatColors.FlatUIPalette.turquoise
     , textColour = contrastingColour FlatColors.FlatUIPalette.turquoise
     , isPopupOpen = False
+    , categories = [ TcInformation ]
     }
 
 
@@ -300,6 +311,7 @@ displaySettingsTool =
     , tabColour = FlatColors.FlatUIPalette.emerald
     , textColour = contrastingColour FlatColors.FlatUIPalette.emerald
     , isPopupOpen = False
+    , categories = [ TcInformation ]
     }
 
 
@@ -313,6 +325,7 @@ directionChangeTool =
     , tabColour = FlatColors.FlatUIPalette.amethyst
     , textColour = contrastingColour FlatColors.FlatUIPalette.amethyst
     , isPopupOpen = False
+    , categories = [ TcInformation ]
     }
 
 
@@ -326,6 +339,7 @@ gradientChangeTool =
     , tabColour = FlatColors.FlatUIPalette.wetAsphalt
     , textColour = contrastingColour FlatColors.FlatUIPalette.wetAsphalt
     , isPopupOpen = False
+    , categories = [ TcGradients ]
     }
 
 
@@ -339,6 +353,7 @@ essentialsTool =
     , tabColour = FlatColors.FlatUIPalette.orange
     , textColour = contrastingColour FlatColors.FlatUIPalette.orange
     , isPopupOpen = False
+    , categories = [ ] -- Always visible anyway
     }
 
 
@@ -352,6 +367,7 @@ deleteTool =
     , tabColour = FlatColors.FlatUIPalette.greenSea
     , textColour = contrastingColour FlatColors.FlatUIPalette.greenSea
     , isPopupOpen = False
+    , categories = [ TcMisc ]
     }
 
 
@@ -365,6 +381,7 @@ bezierSplinesTool =
     , tabColour = FlatColors.FlatUIPalette.nephritis
     , textColour = contrastingColour FlatColors.FlatUIPalette.nephritis
     , isPopupOpen = False
+    , categories = [ TcWholeTrack, TcBends, TcGradients ]
     }
 
 
@@ -378,6 +395,7 @@ centroidAverageTool =
     , tabColour = FlatColors.FlatUIPalette.belizeHole
     , textColour = contrastingColour FlatColors.FlatUIPalette.belizeHole
     , isPopupOpen = False
+    , categories = [ TcGradients, TcBends, TcWholeTrack ]
     }
 
 
@@ -391,6 +409,7 @@ curveFormerTool =
     , tabColour = FlatColors.FlatUIPalette.wisteria
     , textColour = contrastingColour FlatColors.FlatUIPalette.wisteria
     , isPopupOpen = False
+    , categories = [ TcBends ]
     }
 
 
@@ -404,6 +423,7 @@ bendSmootherTool =
     , tabColour = FlatColors.FlatUIPalette.midnightBlue
     , textColour = contrastingColour FlatColors.FlatUIPalette.midnightBlue
     , isPopupOpen = False
+    , categories = [ TcBends ]
     }
 
 
@@ -417,6 +437,7 @@ smartSmootherTool =
     , tabColour = FlatColors.FlatUIPalette.sunFlower
     , textColour = contrastingColour FlatColors.FlatUIPalette.sunFlower
     , isPopupOpen = False
+    , categories = [ TcBends, TcWholeTrack, TcGradients ]
     }
 
 
@@ -430,6 +451,7 @@ nudgeTool =
     , tabColour = FlatColors.FlatUIPalette.sunFlower
     , textColour = contrastingColour FlatColors.FlatUIPalette.sunFlower
     , isPopupOpen = False
+    , categories = [ TcMisc ]
     }
 
 
@@ -443,6 +465,7 @@ outAndBackTool =
     , tabColour = FlatColors.FlatUIPalette.carrot
     , textColour = contrastingColour FlatColors.FlatUIPalette.carrot
     , isPopupOpen = False
+    , categories = [ TcRoute ]
     }
 
 
@@ -456,6 +479,7 @@ simplifyTool =
     , tabColour = FlatColors.FlatUIPalette.alizarin
     , textColour = contrastingColour FlatColors.FlatUIPalette.alizarin
     , isPopupOpen = False
+    , categories = [ TcWholeTrack ]
     }
 
 
@@ -469,6 +493,7 @@ interpolateTool =
     , tabColour = FlatColors.FlatUIPalette.clouds
     , textColour = contrastingColour FlatColors.FlatUIPalette.clouds
     , isPopupOpen = False
+    , categories = [ TcMisc ]
     }
 
 
@@ -482,6 +507,7 @@ profileSmoothTool =
     , tabColour = FlatColors.FlatUIPalette.concrete
     , textColour = contrastingColour FlatColors.FlatUIPalette.concrete
     , isPopupOpen = False
+    , categories = [ TcGradients ]
     }
 
 
@@ -495,6 +521,7 @@ namedSegmentTool =
     , tabColour = rgtPurple
     , textColour = contrastingColour rgtPurple
     , isPopupOpen = False
+    , categories = [ TcMisc ]
     }
 
 
@@ -508,6 +535,7 @@ moveScaleRotateTool =
     , tabColour = FlatColors.FlatUIPalette.pomegranate
     , textColour = contrastingColour FlatColors.FlatUIPalette.pomegranate
     , isPopupOpen = False
+    , categories = [ TcMisc, TcWholeTrack ]
     }
 
 
@@ -521,6 +549,7 @@ flythroughTool =
     , tabColour = FlatColors.FlatUIPalette.pumpkin
     , textColour = contrastingColour FlatColors.FlatUIPalette.pumpkin
     , isPopupOpen = False
+    , categories = [ TcInformation ]
     }
 
 
@@ -534,6 +563,7 @@ stravaTool =
     , tabColour = stravaOrange
     , textColour = contrastingColour stravaOrange
     , isPopupOpen = False
+    , categories = [ TcMisc ]
     }
 
 
@@ -547,6 +577,7 @@ moveAndStretchTool =
     , tabColour = FlatColors.FlatUIPalette.silver
     , textColour = contrastingColour FlatColors.FlatUIPalette.silver
     , isPopupOpen = False
+    , categories = [ TcMisc ]
     }
 
 
@@ -560,6 +591,7 @@ startFinishTool =
     , tabColour = FlatColors.FlatUIPalette.asbestos
     , textColour = contrastingColour FlatColors.FlatUIPalette.asbestos
     , isPopupOpen = False
+    , categories = [ TcMisc ]
     }
 
 
@@ -573,6 +605,7 @@ splitAndJoinTool =
     , tabColour = FlatColors.FlatUIPalette.turquoise
     , textColour = contrastingColour FlatColors.FlatUIPalette.turquoise
     , isPopupOpen = False
+    , categories = [ TcMisc, TcWholeTrack ]
     }
 
 
@@ -586,6 +619,7 @@ intersectionsTool =
     , tabColour = FlatColors.FlatUIPalette.emerald
     , textColour = contrastingColour FlatColors.FlatUIPalette.emerald
     , isPopupOpen = False
+    , categories = [ TcInformation ]
     }
 
 
@@ -599,6 +633,7 @@ straightenTool =
     , tabColour = FlatColors.FlatUIPalette.peterRiver
     , textColour = contrastingColour FlatColors.FlatUIPalette.peterRiver
     , isPopupOpen = False
+    , categories = [ TcMisc ]
     }
 
 
@@ -612,6 +647,7 @@ graphTool =
     , tabColour = FlatColors.FlatUIPalette.amethyst
     , textColour = contrastingColour FlatColors.FlatUIPalette.amethyst
     , isPopupOpen = False
+    , categories = [ TcRoute ]
     }
 
 
@@ -625,6 +661,7 @@ landUseTool =
     , tabColour = FlatColors.FlatUIPalette.wetAsphalt
     , textColour = contrastingColour FlatColors.FlatUIPalette.wetAsphalt
     , isPopupOpen = False
+    , categories = [ TcInformation ]
     }
 
 

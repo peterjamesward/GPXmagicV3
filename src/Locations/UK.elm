@@ -833,7 +833,7 @@ It's also _really_ good at removing noise from IRL rides.
         , ( "segments"
           , Dict.fromList
           [ ( "label", """Named segments""")
-          , ( "info", """Add segments thath RGT can use for timing.""")
+          , ( "info", """Name sections of track. I suspect there'll be a use for this soon.""")
           , ( "name", """Name""")
           , ( "start", """Start""")
           , ( "end", """Finish""")
@@ -847,10 +847,13 @@ It's also _really_ good at removing noise from IRL rides.
           , ( "create", """Create from markers""")
           , ( "newname", """TYPE NAME HERE""")
           , ( "warning", """
-RGT requires named segments to be at least 110m from the start, 190m from the end,
- and at least 50m apart. At least one of the segments needs changing!""")
+Named segments should be at least 110m from the start, 190m from the end, and at least 50m apart.
+
+At least one of the segments needs changing!""")
           , ( "duplicate", """
-Please ensure that segments have distinct names. RGT will merge contiguous segments with the same name""")
+Please ensure that segments have distinct names.
+
+RGT will merge contiguous segments with the same name""")
           ]
           )
         ]

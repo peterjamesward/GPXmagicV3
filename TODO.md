@@ -7,30 +7,29 @@
 
 # WIP
 
+## Tools organisation
+
+**Filter** by tag:
+- Curves,
+- Gradients,
+- Issues,
+- ???
+
+Each tool may have more than one tag.
+
+---
+
+# BACKLOG
+
 ## Route Maker
 
-Leaf x Point is wrong. It's more about Leafs. Two Leafs in prioximty affect each other.
-Handwritten notes I think cover the cases, but needs formalising.
+There's more to this. More than two traversals nearby, for instance.
 
 Output route derivation is bad -- is this the radiused turns?
 
 Improve traversal direction display (with an arrow on each section?).
 
 Retrofit this approach into Intersections (??).
-
----
-
-# BACKLOG
-
-## Tools organisation
-
-**Filter** by tag:
-  - Curves, 
-  - Gradients, 
-  - Issues,
-  - ???
-
-Each tool may have more than one tag.
 
 ## Languages
 
