@@ -6,6 +6,8 @@ import Axis3d
 import BoundingBox3d
 import Camera3d
 import Circle2d
+import Color
+import ColourPalette exposing (gradientColourPastel)
 import Dict exposing (Dict)
 import Direction2d
 import Direction3d
@@ -28,6 +30,7 @@ import Plane3d
 import Point2d exposing (Point2d, xCoordinate, yCoordinate)
 import Point3d exposing (Point3d)
 import Point3d.Projection as Point3d
+import Polygon2d
 import Polyline2d
 import PreviewData exposing (PreviewData, PreviewPoint, PreviewShape(..))
 import Quantity exposing (Quantity, toFloatQuantity)
@@ -36,7 +39,7 @@ import Scene3d exposing (Entity)
 import Svg exposing (Svg)
 import Svg.Attributes exposing (..)
 import TrackLoaded exposing (TrackLoaded)
-import UtilsForViews exposing (showDecimal2, showLongMeasure, showShortMeasure, uiColourHexString)
+import UtilsForViews exposing (colourHexString, showDecimal2, showLongMeasure, showShortMeasure, uiColourHexString)
 import Vector3d
 import View3dCommonElements exposing (Msg(..), common3dSceneAttributes)
 import ViewPureStyles exposing (useIcon)
@@ -463,9 +466,10 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
 
         makeSvgPoint : Length.Length -> RoadSection -> List (Point3d Meters LocalCoords)
         makeSvgPoint distance road =
+            -- This is crucial, note that we put distance in X, altitude in Z and gradient in Y
             [ Point3d.xyz
                 distance
-                (Length.meters <| compensateForZoom road.gradientAtStart)
+                (Length.meters road.gradientAtStart)
                 (road.startPoint |> Point3d.zCoordinate |> Quantity.multiplyBy context.emphasis)
             ]
 
@@ -516,7 +520,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
                     in
                     Point3d.xyz
                         rightEdge
-                        (Length.meters <| compensateForZoom leaf.gradientAtStart)
+                        (Length.meters leaf.gradientAtStart)
                         (leaf.endPoint |> Point3d.zCoordinate |> Quantity.multiplyBy context.emphasis)
             in
             (finalSvgPoint :: altitudeSvgPoints) |> List.reverse
@@ -576,12 +580,61 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
                 ]
                 (Polyline2d.fromVertices pointsInScreenSpace)
 
-        pointsAsGradientPolyline : String -> List (Point3d Meters LocalCoords) -> Svg msg
-        pointsAsGradientPolyline colour points =
+        pointsToColouredCurtain : List (Point3d Meters LocalCoords) -> Svg msg
+        pointsToColouredCurtain points =
             let
                 pointsInScreenSpace =
                     List.map
-                        (Point3d.toScreenSpace gradientCamera gradientScreenRectangle)
+                        (Point3d.toScreenSpace altitudeCamera gradientScreenRectangle)
+                        points
+
+                gradients =
+                    List.map
+                        (Point3d.yCoordinate >> Length.inMeters >> gradientColourPastel)
+                        points
+
+                makeSection :
+                    Point2d Pixels LocalCoords
+                    -> Point2d Pixels LocalCoords
+                    -> Color.Color
+                    -> Svg msg
+                makeSection pt1 pt2 colour =
+                    Svg.polygon2d
+                        [ Svg.Attributes.stroke "none"
+                        , Svg.Attributes.fill <| colourHexString colour
+                        ]
+                    <|
+                        Polygon2d.singleLoop
+                            [ pt1
+                            , pt2
+                            , pt2 |> Point2d.projectOnto Axis2d.x
+                            , pt1 |> Point2d.projectOnto Axis2d.x
+                            ]
+
+                steppedLines =
+                    List.map3
+                        makeSection
+                        pointsInScreenSpace
+                        (List.drop 1 pointsInScreenSpace)
+                        gradients
+            in
+            Svg.g [] steppedLines
+
+        pointsAsGradientPolyline : String -> List (Point3d Meters LocalCoords) -> Svg msg
+        pointsAsGradientPolyline colour points =
+            let
+                zoomAdjust pt =
+                    -- NOTE This is one of our weird combined points.
+                    Point3d.xyz
+                        (Point3d.xCoordinate pt)
+                        (Point3d.yCoordinate pt |> Quantity.multiplyBy (compensateForZoom 1.0))
+                        (Point3d.zCoordinate pt)
+
+                pointsInScreenSpace =
+                    List.map
+                        (zoomAdjust
+                            >> Point3d.toScreenSpace gradientCamera gradientScreenRectangle
+                        )
                         points
 
                 makeStep :
@@ -640,6 +693,9 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
                 track.currentPosition
                 ( altitudeWidth, altitudeHeight )
 
+        renderDataOnce =
+            renderProfileData track
+
         altitudeChart =
             Svg.svg
                 [ Svg.Attributes.width svgWidth
@@ -647,7 +703,8 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
                 ]
                 [ Svg.relativeTo topLeftFrame <|
                     Svg.g []
-                        [ pointsAsAltitudePolyline "black" <| renderProfileData track
+                        [ pointsAsAltitudePolyline "black" <| renderDataOnce
+                        , pointsToColouredCurtain <| renderDataOnce
                         , Svg.g [] (orangeAltitudeSvg :: orangeText ++ purpleSvg)
                         , Svg.g [] altitudePreviews
                         ]
@@ -661,7 +718,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
                 [ Svg.relativeTo topLeftFrame <|
                     Svg.g []
                         [ distanceAxis
-                        , pointsAsGradientPolyline "black" <| renderProfileData track
+                        , pointsAsGradientPolyline "black" <| renderDataOnce
                         , Svg.g [] (orangeGradientSvg :: orangeText)
                         , Svg.g [] gradientPreviews
                         ]

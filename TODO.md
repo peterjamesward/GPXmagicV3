@@ -1,11 +1,18 @@
 
 # BUGS
 
-Large track loading now seems very slow & blows stack sometimes. Parsing?
 
 --- 
 
 # WIP
+
+Redo segment parsing. 
+At worst, write own parser. 
+But try grepping for trkpt but also looking to see if there anything `</trkpt>HERE</trkpt>` :)
+
+---
+
+# BACKLOG
 
 ## Tools organisation
 
@@ -16,10 +23,6 @@ Large track loading now seems very slow & blows stack sometimes. Parsing?
 - ???
 
 Each tool may have more than one tag.
-
----
-
-# BACKLOG
 
 ## Route Maker
 

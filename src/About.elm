@@ -3,7 +3,7 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.3.2 (7d6cb084)
+# GPXmagic v3.3.3 (7d6cb084)
 
 **GPXmagic V3 works best with Chrome** (by far)
 
@@ -13,6 +13,8 @@ aboutText =
 ## In this update ...
 
 * Sorry, I have had to temporarily remove the ability to read any embedded segment names in a GPX file.
+
+* Profile altitude chart has coloured curtain again, at last.
 
 
 ## Acknowledgements
