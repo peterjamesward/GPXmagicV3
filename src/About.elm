@@ -3,7 +3,7 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.3.1 (6e806bf2)
+# GPXmagic v3.3.2 (6e806bf2)
 
 **GPXmagic V3 works best with Chrome** (by far)
 
@@ -12,9 +12,8 @@ aboutText =
 
 ## In this update ...
 
-* Named segments. These can be added or edited manually or derived from Strava segments.
+* Sorry, I have had to temporarily remove the ability to read any embedded segment names in a GPX file.
 
-* Preparatory work and internal improvements.
 
 ## Acknowledgements
 

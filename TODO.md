@@ -1,7 +1,7 @@
 
 # BUGS
 
-(Nothing urgent)
+Large track loading now seems very slow & blows stack sometimes. Parsing?
 
 --- 
 

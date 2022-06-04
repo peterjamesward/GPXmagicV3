@@ -1718,6 +1718,7 @@ viewTool :
     -> ToolEntry
     -> Element msg
 viewTool location msgWrapper isTrack options toolEntry =
+    -- Possible performance gain by being lazy here. Who knows?
     Element.Lazy.lazy5
         viewToolLazy
         location

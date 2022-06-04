@@ -424,7 +424,8 @@ update msg model =
                     GpxParser.parseGPXPoints content
 
                 gpxSegments =
-                    GpxParser.parseSegments content
+                    --GpxParser.parseSegments content
+                    [ ( Nothing, gpxTrack ) ]
 
                 trackName =
                     GpxParser.parseTrackName content
