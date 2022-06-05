@@ -12,16 +12,13 @@ aboutText =
 
 ## In this update ...
 
-* Sorry, I have had to temporarily remove the ability to read any embedded segment names in a GPX file.
-
-* Profile altitude chart has coloured curtain again, at last.
-
+* Displays track name (not author name) in page title.
 
 ## Acknowledgements
 
 * Thanks to all those who've provided support, comments, bug reports, and help along the way.
 
-* Thanks to RGT for having the Magic Roads concept and an excellent indoor cycling platform.
+* Thanks to RGT for the Magic Roads concept and an excellent indoor cycling platform.
 
 ## Legal guff
 

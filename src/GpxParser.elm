@@ -60,30 +60,8 @@ parseSegments xml =
             ( "<" ++ segmentTag ++ ">"
             , "<\\/" ++ segmentTag ++ ">"
             )
-
-        trksegs =
-            Regex.find (asRegex "<trkseg((.|\\n|\\r)*?)\\/trkseg>") xml |> List.map .match
-
-        trkpts trkseg =
-            parseGPXPoints trkseg
-
-        segname trkseg =
-            case Regex.find (asRegex <| openTag ++ "(.*)" ++ closeTag) trkseg of
-                [] ->
-                    Nothing
-
-                x :: _ ->
-                    case x.submatches of
-                        [] ->
-                            Nothing
-
-                        n :: _ ->
-                            Maybe.map ElmEscapeHtml.unescape n
-
-        segment trkseg =
-            ( segname trkseg, trkpts trkseg )
     in
-    List.map segment trksegs
+    [ ( Nothing, parseGPXPoints xml) ]
 
 
 parseGPXPoints : String -> List GPXSource
