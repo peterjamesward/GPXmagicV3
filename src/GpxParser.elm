@@ -5,11 +5,9 @@ import Direction2d
 import DomainModel exposing (GPXSource)
 import ElmEscapeHtml
 import Length
-import List.Extra
 import Quantity
 import Regex
 import Spherical
-import XmlParser
 
 
 asRegex t =
@@ -18,7 +16,7 @@ asRegex t =
 
 
 parseTrackName xml =
-    case Regex.find (asRegex "<trk>[.|\\s]*<name>(.*)<\\/name>") xml of
+    case Regex.find (asRegex "<trk>.*<name>(.*)<\\/name>") xml of
         [] ->
             Nothing
 
@@ -31,12 +29,11 @@ parseTrackName xml =
                     Maybe.map ElmEscapeHtml.unescape n
 
 
-parseGPX : String -> List ( Maybe String, List GPXSource )
-parseGPX xml =
+parseSegments : String -> List ( Maybe String, List GPXSource )
+parseSegments xml =
     -- This will become our new entry point and works at the <trkseg> level so they can be named.
     let
         rgtNamespace =
-            --TODO: Look through attributes of "gpx" element.
             Maybe.withDefault "rgt" <|
                 case
                     Regex.find
@@ -56,136 +53,83 @@ parseGPX xml =
                     [] ->
                         Nothing
 
+        segmentTag =
+            rgtNamespace ++ ":namedSegment"
+
+        ( openTag, closeTag ) =
+            ( "<" ++ segmentTag ++ ">"
+            , "<\\/" ++ segmentTag ++ ">"
+            )
+
+        trksegs =
+            Regex.find (asRegex "<trkseg((.|\\n|\\r)*?)\\/trkseg>") xml |> List.map .match
+
+        trkpts trkseg =
+            parseGPXPoints trkseg
+
+        segname trkseg =
+            case Regex.find (asRegex <| openTag ++ "(.*)" ++ closeTag) trkseg of
+                [] ->
+                    Nothing
+
+                x :: _ ->
+                    case x.submatches of
+                        [] ->
+                            Nothing
+
+                        n :: _ ->
+                            Maybe.map ElmEscapeHtml.unescape n
+
+        segment trkseg =
+            ( segname trkseg, trkpts trkseg )
     in
-    case XmlParser.parse xml of
-        Ok parseTree ->
-            parseSegments parseTree.root
-
-        Err deadEnds ->
-            []
+    List.map segment trksegs
 
 
-parseSegments : XmlParser.Node -> List ( Maybe String, List GPXSource )
-parseSegments node =
+parseGPXPoints : String -> List GPXSource
+parseGPXPoints xml =
     let
-        collectSegments :
-            XmlParser.Node
-            -> List ( Maybe String, List GPXSource )
-            -> List ( Maybe String, List GPXSource )
-        collectSegments child collection =
-            case child of
-                XmlParser.Element "trkseg" attributes children ->
-                    parseOneSegment children collection
+        trkpts =
+            Regex.find (asRegex "<trkpt((.|\\n|\\r)*?)(trkpt>|\\/>)") xml |> List.map .match
 
-                _ ->
-                    collection
-    in
-    case node of
-        XmlParser.Element "gpx" attributes children ->
-            children
-                |> childrenFromFirstTag "trk"
-                |> List.foldl collectSegments []
-                |> List.reverse
+        latitude trkpt =
+            Regex.find (asRegex "lat=\\\"([\\d\\.-]*)\\\"") trkpt |> matches
 
-        _ ->
-            []
+        longitude trkpt =
+            Regex.find (asRegex "lon=\\\"([\\d\\.-]*)\\\"") trkpt |> matches
 
+        elevation trkpt =
+            Regex.find (asRegex "<ele>([\\d\\.-]*)<\\/ele>") trkpt |> matches
 
-parseOneSegment :
-    List XmlParser.Node
-    -> List ( Maybe String, List GPXSource )
-    -> List ( Maybe String, List GPXSource )
-parseOneSegment nodes collection =
-    let
-        collectTrackPoints :
-            XmlParser.Node
-            -> ( Maybe String, List GPXSource )
-            -> ( Maybe String, List GPXSource )
-        collectTrackPoints child ( segName, pointCollection ) =
-            case child of
-                XmlParser.Element "trkpt" attributes children ->
-                    ( segName, parseTrackPoint attributes children pointCollection )
+        earthVector trkpt =
+            -- This just to remove anything with a weird combination of values.
+            case ( latitude trkpt, longitude trkpt, elevation trkpt ) of
+                ( (Just lat) :: _, (Just lon) :: _, (Just alt) :: _ ) ->
+                    Just <|
+                        GPXSource
+                            (Direction2d.fromAngle <| Angle.degrees lon)
+                            (Angle.degrees lat)
+                            (Length.meters alt)
 
-                XmlParser.Element "extensions" attributes children ->
-                    ( getSegmentName children, pointCollection )
-
-                _ ->
-                    ( segName, pointCollection )
-
-        getSegmentName : List XmlParser.Node -> Maybe String
-        getSegmentName optionals =
-            case childrenFromFirstTag "rgt:namedSegment" optionals of
-                (XmlParser.Text txt) :: _ ->
-                    Just txt
+                ( (Just lat) :: _, (Just lon) :: _, _ ) ->
+                    Just <|
+                        GPXSource
+                            (Direction2d.fromAngle <| Angle.degrees lon)
+                            (Angle.degrees lat)
+                            (Length.meters 0)
 
                 _ ->
                     Nothing
 
-        ( segmentName, segmentPoints ) =
-            nodes |> List.foldl collectTrackPoints ( Nothing, [] )
+        matches xs =
+            List.map value xs
+
+        value x =
+            case x.submatches of
+                (Just val) :: _ ->
+                    String.toFloat val
+
+                _ ->
+                    Nothing
     in
-    ( segmentName, List.reverse segmentPoints ) :: collection
-
-
-childrenFromFirstTag : String -> List XmlParser.Node -> List XmlParser.Node
-childrenFromFirstTag tag nodes =
-    case nodes of
-        (XmlParser.Element childTag attributes children) :: moreNodes ->
-            if childTag == tag then
-                children
-
-            else
-                childrenFromFirstTag tag moreNodes
-
-        _ :: moreNodes ->
-            childrenFromFirstTag tag moreNodes
-
-        [] ->
-            []
-
-
-parseTrackPoint : List XmlParser.Attribute -> List XmlParser.Node -> List GPXSource -> List GPXSource
-parseTrackPoint attributes children outputs =
-    let
-        latitude =
-            List.Extra.find (\attr -> attr.name == "lat") attributes
-                |> Maybe.map .value
-                |> Maybe.andThen String.toFloat
-
-        longitude =
-            List.Extra.find (\attr -> attr.name == "lon") attributes
-                |> Maybe.map .value
-                |> Maybe.andThen String.toFloat
-
-        elevation =
-            childrenFromFirstTag "ele" children
-                |> List.head
-                |> Maybe.andThen numberFromXml
-    in
-    case ( latitude, longitude, elevation ) of
-        ( Just lat, Just lon, Just alt ) ->
-            GPXSource
-                (Direction2d.fromAngle <| Angle.degrees lon)
-                (Angle.degrees lat)
-                (Length.meters alt)
-                :: outputs
-
-        ( Just lat, Just lon, _ ) ->
-            GPXSource
-                (Direction2d.fromAngle <| Angle.degrees lon)
-                (Angle.degrees lat)
-                (Length.meters 0)
-                :: outputs
-
-        _ ->
-            outputs
-
-
-numberFromXml : XmlParser.Node -> Maybe Float
-numberFromXml node =
-    case node of
-        XmlParser.Text txt ->
-            String.toFloat txt
-
-        XmlParser.Element tag attrs children ->
-            Nothing
+    trkpts |> List.map earthVector |> List.filterMap identity
