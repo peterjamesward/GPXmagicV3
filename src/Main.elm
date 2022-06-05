@@ -23,7 +23,7 @@ import FlatColors.AussiePalette
 import FlatColors.ChinesePalette
 import FlatColors.FlatUIPalette
 import GeoCodeDecoders exposing (IpInfo)
-import GpxParser exposing (parseGPXPoints)
+import GpxParser exposing (parseGPX)
 import Html exposing (Html, div)
 import Html.Attributes exposing (id, style)
 import Html.Events.Extra.Mouse as Mouse
@@ -420,12 +420,8 @@ update msg model =
 
         GpxLoaded content ->
             let
-                gpxTrack =
-                    GpxParser.parseGPXPoints content
-
                 gpxSegments =
-                    --GpxParser.parseSegments content
-                    [ ( Nothing, gpxTrack ) ]
+                    GpxParser.parseGPX content
 
                 trackName =
                     GpxParser.parseTrackName content

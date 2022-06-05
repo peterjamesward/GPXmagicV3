@@ -334,7 +334,9 @@ parseAndAppend : String -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
 parseAndAppend content track =
     let
         track2 =
-            GpxParser.parseGPXPoints content
+            --TODO: Segments support
+            GpxParser.parseGPX content
+                |> List.concatMap Tuple.second
 
         currentGpx =
             DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
