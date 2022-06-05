@@ -93,19 +93,14 @@ removeAdjacentDuplicates gpxs =
     List.reverse <| helper gpxs []
 
 
-trackFromSegments : String -> List ( Maybe String, List GPXSource ) -> Maybe ( TrackLoaded msg, List NamedSegment )
-trackFromSegments trackName segments =
+trackFromSegments :
+    String
+    -> ( List GPXSource, List ( String, Int, Int ) )
+    -> Maybe ( TrackLoaded msg, List NamedSegment )
+trackFromSegments trackName ( allPoints, segments ) =
     let
-        allPoints =
-            List.concatMap Tuple.second segments
-
         baseTrack =
             trackFromPoints trackName allPoints
-
-        segmentOffsets =
-            segments
-                |> List.map (Tuple.second >> List.length)
-                |> List.Extra.scanl (+) 0
 
         combineContiguousSameNameSegments : List NamedSegment -> List NamedSegment
         combineContiguousSameNameSegments segs =
@@ -127,27 +122,21 @@ trackFromSegments trackName segments =
                 _ ->
                     segs
 
-        segmentInfo : TrackLoaded msg -> ( Maybe String, List GPXSource ) -> Int -> Int -> Maybe NamedSegment
-        segmentInfo track segment offset nextOffset =
+        convertSegment : TrackLoaded msg -> ( String, Int, Int ) -> NamedSegment
+        convertSegment track ( name, offset, nextOffset ) =
             -- Switch from index based to distance based.
-            case segment of
-                ( Just name, points ) ->
-                    Just
-                        { startDistance = distanceFromIndex offset track.trackTree
-                        , endDistance = distanceFromIndex nextOffset track.trackTree
-                        , name = name
-                        }
-
-                _ ->
-                    Nothing
+            { startDistance = distanceFromIndex offset track.trackTree
+            , endDistance = distanceFromIndex nextOffset track.trackTree
+            , name = name
+            }
     in
     case baseTrack of
         Just track ->
             Just
                 ( track
-                , combineContiguousSameNameSegments <|
-                    List.filterMap identity <|
-                        List.map3 (segmentInfo track) segments segmentOffsets (List.drop 1 segmentOffsets)
+                , segments
+                    |> List.map (convertSegment track)
+                    |> combineContiguousSameNameSegments
                 )
 
         Nothing ->

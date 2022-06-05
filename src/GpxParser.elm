@@ -5,6 +5,7 @@ import Direction2d
 import DomainModel exposing (GPXSource)
 import ElmEscapeHtml
 import Length
+import List.Extra
 import Quantity
 import Regex
 import Spherical
@@ -29,9 +30,9 @@ parseTrackName xml =
                     Maybe.map ElmEscapeHtml.unescape n
 
 
-parseSegments : String -> List ( Maybe String, List GPXSource )
+parseSegments : String -> ( List GPXSource, List ( String, Int, Int ) )
 parseSegments xml =
-    -- This will become our new entry point and works at the <trkseg> level so they can be named.
+    -- Return available segment names with the range of included track point indices.
     let
         rgtNamespace =
             Maybe.withDefault "rgt" <|
@@ -53,22 +54,68 @@ parseSegments xml =
                     [] ->
                         Nothing
 
-        segmentTag =
-            rgtNamespace ++ ":namedSegment"
+        trackPoints =
+            parseGPXPoints xml
 
-        ( openTag, closeTag ) =
-            ( "<" ++ segmentTag ++ ">"
-            , "<\\/" ++ segmentTag ++ ">"
+        trackSegmentStarts =
+            Regex.find (asRegex "<trkseg>") xml
+                |> List.map .index
+
+        oneBefore : Maybe Int -> Int
+        oneBefore x =
+            x |> Maybe.withDefault 1 |> (+) -1
+
+        namedSegments =
+            Regex.find (asRegex "namedSegment>(.*)<\\/") xml
+
+        segmentExtent : Regex.Match -> ( String, Int, Int )
+        segmentExtent match =
+            -- 1. Which segment contains this name?
+            -- 2. Which track points does that segment contain?
+            -- Controversially returns whole track in should-not-occur condition.
+            let
+                segmentIndex =
+                    oneBefore <| List.Extra.find ((>) match.index) trackSegmentStarts
+
+                segmentStartOffset =
+                    List.Extra.getAt segmentIndex trackSegmentStarts
+                        |> Maybe.withDefault 0
+
+                segmentEndOffset =
+                    List.Extra.getAt (1 + segmentIndex) trackSegmentStarts
+                        |> Maybe.withDefault (String.length xml - 1)
+
+                firstContainedPoint =
+                    List.Extra.find (Tuple.second >> (>) segmentStartOffset) trackPoints
+                        |> Maybe.map Tuple.second
+                        |> Maybe.withDefault 0
+
+                lastContainedPoint =
+                    List.Extra.find (Tuple.second >> (>) segmentEndOffset) trackPoints
+                        |> Maybe.map Tuple.second
+                        |> Maybe.withDefault (List.length trackPoints - 1)
+            in
+            ( case match.submatches of
+                (Just sub1) :: _ ->
+                    sub1
+
+                _ ->
+                    ""
+            , firstContainedPoint
+            , lastContainedPoint
             )
     in
-    [ ( Nothing, parseGPXPoints xml) ]
+    ( List.map Tuple.first trackPoints
+    , List.map segmentExtent namedSegments
+    )
 
 
-parseGPXPoints : String -> List GPXSource
+parseGPXPoints : String -> List ( GPXSource, Int )
 parseGPXPoints xml =
+    -- Returning the file offset will allow us to correlate segment names!
     let
         trkpts =
-            Regex.find (asRegex "(<trkpt(.|\\s)*?)(trkpt>|\\/>)") xml |> List.map .match
+            Regex.find (asRegex "(<trkpt(.|\\s)*?)(trkpt>|\\/>)") xml
 
         latitude trkpt =
             Regex.find (asRegex "lat=\\\"([\\d\\.-]*)\\\"") trkpt |> matches
@@ -79,22 +126,31 @@ parseGPXPoints xml =
         elevation trkpt =
             Regex.find (asRegex "<ele>([\\d\\.-]*)<\\/ele>") trkpt |> matches
 
+        earthVector : Regex.Match -> Maybe ( GPXSource, Int )
         earthVector trkpt =
             -- This just to remove anything with a weird combination of values.
-            case ( latitude trkpt, longitude trkpt, elevation trkpt ) of
+            let
+                trkptString =
+                    trkpt.match
+            in
+            case ( latitude trkptString, longitude trkptString, elevation trkptString ) of
                 ( (Just lat) :: _, (Just lon) :: _, (Just alt) :: _ ) ->
                     Just <|
-                        GPXSource
+                        ( GPXSource
                             (Direction2d.fromAngle <| Angle.degrees lon)
                             (Angle.degrees lat)
                             (Length.meters alt)
+                        , trkpt.index
+                        )
 
                 ( (Just lat) :: _, (Just lon) :: _, _ ) ->
                     Just <|
-                        GPXSource
+                        ( GPXSource
                             (Direction2d.fromAngle <| Angle.degrees lon)
                             (Angle.degrees lat)
                             (Length.meters 0)
+                        , trkpt.index
+                        )
 
                 _ ->
                     Nothing

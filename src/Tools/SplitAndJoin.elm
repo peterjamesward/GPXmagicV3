@@ -335,8 +335,7 @@ parseAndAppend content track =
     let
         track2 =
             --TODO: Segments support
-            GpxParser.parseSegments content
-                |> List.concatMap Tuple.second
+            GpxParser.parseSegments content |> Tuple.first
 
         currentGpx =
             DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
