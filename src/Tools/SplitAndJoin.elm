@@ -335,7 +335,7 @@ parseAndAppend content track =
     let
         track2 =
             --TODO: Segments support
-            GpxParser.parseGPX content
+            GpxParser.parseSegments content
                 |> List.concatMap Tuple.second
 
         currentGpx =
