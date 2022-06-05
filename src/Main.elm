@@ -424,9 +424,12 @@ update msg model =
                     GpxParser.parseGPX content
 
                 trackName =
-                    GpxParser.parseTrackName content
-                        |> Maybe.andThen (always model.filename)
-                        |> Maybe.withDefault "no track name"
+                    case GpxParser.parseTrackName content of
+                        Just gotTrackName ->
+                            gotTrackName
+
+                        Nothing ->
+                            model.filename |> Maybe.withDefault "no track name"
             in
             case TrackLoaded.trackFromSegments trackName gpxSegments of
                 Just ( track, segments ) ->
@@ -860,7 +863,7 @@ adjustSpaceForContent model =
 composeTitle model =
     case model.track of
         Nothing ->
-            "GPXmagic Labs V3 concepts"
+            "GPXmagic"
 
         Just track ->
             "GPXmagic - " ++ bestTrackName model
@@ -877,12 +880,9 @@ bestTrackName model =
                     trackname
 
                 Nothing ->
-                    case model.filename of
-                        Just filename ->
-                            filename
-
-                        Nothing ->
-                            I18N.localisedString model.location "main" "unnamed"
+                    model.filename
+                        |> Maybe.withDefault
+                            (I18N.localisedString model.location "main" "unnamed")
 
 
 view : Model -> Browser.Document Msg
