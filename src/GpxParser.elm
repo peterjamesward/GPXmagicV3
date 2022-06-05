@@ -65,7 +65,7 @@ parseSegments xml =
             Debug.log "SEGMENTS" trackSegmentStarts
 
         namedSegments =
-            Regex.find (asRegex "namedSegment>(.*)<\\/") xml
+            Regex.find (asRegex "namedSegment>(.*)<\\/.*:namedSegment") xml
 
         segmentExtent : Regex.Match -> ( String, Int, Int )
         segmentExtent match =
@@ -74,7 +74,11 @@ parseSegments xml =
             -- Controversially returns whole track in should-not-occur condition.
             let
                 segmentIndex =
-                    match.number
+                    List.Extra.findIndex
+                        (\segStart -> segStart > match.index)
+                        trackSegmentStarts
+                        |> Maybe.withDefault (List.length trackSegmentStarts)
+                        |> (+) -1
 
                 segmentStartOffset =
                     List.Extra.getAt segmentIndex trackSegmentStarts
@@ -87,12 +91,11 @@ parseSegments xml =
                 _ =
                     Debug.log "OFFSETS" ( segmentStartOffset, segmentEndOffset )
 
-                --_ =
-                --    Debug.log "POINTS" trackPoints
-
-                _ = Debug.log "INDICES" (firstContainedPoint, lastContainedPoint)
+                _ =
+                    Debug.log "INDICES" ( firstContainedPoint, lastContainedPoint )
 
                 firstContainedPoint =
+                    -- First track point that appears later in the file than the trkseg.
                     List.Extra.findIndex
                         (\( _, tpOffset ) ->
                             tpOffset > segmentStartOffset
@@ -101,16 +104,17 @@ parseSegments xml =
                         |> Maybe.withDefault 0
 
                 lastContainedPoint =
+                    -- Last track point preceding the next trkseg.
                     List.Extra.findIndex
                         (\( _, tpOffset ) ->
                             tpOffset > segmentEndOffset
                         )
                         trackPoints
-                        |> Maybe.withDefault (List.length trackPoints - 1)
+                        |> Maybe.withDefault (List.length trackPoints)
             in
             ( case match.submatches of
                 (Just sub1) :: _ ->
-                    sub1
+                    ElmEscapeHtml.unescape sub1
 
                 _ ->
                     ""
