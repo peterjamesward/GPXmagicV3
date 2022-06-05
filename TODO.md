@@ -1,14 +1,9 @@
 
 # BUGS
 
-
 --- 
 
 # WIP
-
-OK using XML parser but assembly of trkpt is not good.
-Try implementing the tag search as a fold so we don't construct temp lists.
-(i.e. use a collector function that is applied to all matching tags.)
 
 ---
 

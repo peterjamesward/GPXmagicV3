@@ -61,9 +61,8 @@ parseSegments xml =
             Regex.find (asRegex "<trkseg>") xml
                 |> List.map .index
 
-        oneBefore : Maybe Int -> Int
-        oneBefore x =
-            x |> Maybe.withDefault 1 |> (+) -1
+        _ =
+            Debug.log "SEGMENTS" trackSegmentStarts
 
         namedSegments =
             Regex.find (asRegex "namedSegment>(.*)<\\/") xml
@@ -75,7 +74,7 @@ parseSegments xml =
             -- Controversially returns whole track in should-not-occur condition.
             let
                 segmentIndex =
-                    oneBefore <| List.Extra.find ((>) match.index) trackSegmentStarts
+                    match.number
 
                 segmentStartOffset =
                     List.Extra.getAt segmentIndex trackSegmentStarts
@@ -85,14 +84,28 @@ parseSegments xml =
                     List.Extra.getAt (1 + segmentIndex) trackSegmentStarts
                         |> Maybe.withDefault (String.length xml - 1)
 
+                _ =
+                    Debug.log "OFFSETS" ( segmentStartOffset, segmentEndOffset )
+
+                --_ =
+                --    Debug.log "POINTS" trackPoints
+
+                _ = Debug.log "INDICES" (firstContainedPoint, lastContainedPoint)
+
                 firstContainedPoint =
-                    List.Extra.find (Tuple.second >> (>) segmentStartOffset) trackPoints
-                        |> Maybe.map Tuple.second
+                    List.Extra.findIndex
+                        (\( _, tpOffset ) ->
+                            tpOffset > segmentStartOffset
+                        )
+                        trackPoints
                         |> Maybe.withDefault 0
 
                 lastContainedPoint =
-                    List.Extra.find (Tuple.second >> (>) segmentEndOffset) trackPoints
-                        |> Maybe.map Tuple.second
+                    List.Extra.findIndex
+                        (\( _, tpOffset ) ->
+                            tpOffset > segmentEndOffset
+                        )
+                        trackPoints
                         |> Maybe.withDefault (List.length trackPoints - 1)
             in
             ( case match.submatches of
