@@ -18,7 +18,7 @@ asRegex t =
 
 
 parseTrackName xml =
-    case Regex.find (asRegex "<name>(.*)<\\/name>") xml of
+    case Regex.find (asRegex "<trk>[.|\\s]*<name>(.*)<\\/name>") xml of
         [] ->
             Nothing
 
