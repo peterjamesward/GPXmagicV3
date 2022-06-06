@@ -41,7 +41,7 @@ type Msg
     = NoOp
     | SelectSegment Int
     | UpdateSegment
-    | ChangeName String
+    | ChangeName Int String
     | DeleteSegment
     | CreateSegment
 
@@ -127,20 +127,12 @@ view location imperial wrapper options track =
                               , width = fillPortion 2
                               , view =
                                     \i t ->
-                                        if Just i == options.selectedSegment then
-                                            -- Editable name
-                                            Input.text (dataStyles True)
-                                                { onChange = wrapper << ChangeName
-                                                , text = t.name
-                                                , placeholder = Nothing
-                                                , label = Input.labelHidden "name"
-                                                }
-
-                                        else
-                                            Input.button (dataStyles False)
-                                                { label = text t.name
-                                                , onPress = Just <| wrapper <| SelectSegment i
-                                                }
+                                        Input.text (dataStyles (Just i == options.selectedSegment))
+                                            { onChange = wrapper << (ChangeName i)
+                                            , text = t.name
+                                            , placeholder = Nothing
+                                            , label = Input.labelHidden "name"
+                                            }
                               }
                             , { header = none
                               , width = fillPortion 1
@@ -179,7 +171,14 @@ view location imperial wrapper options track =
                                                 ]
 
                                         else
-                                            none
+                                            row [ spaceEvenly ]
+                                                [ Input.button
+                                                    [ tooltip onLeft (localisedTooltip location toolId "show")
+                                                    ]
+                                                    { label = useIcon FeatherIcons.eye
+                                                    , onPress = Just <| wrapper (SelectSegment i)
+                                                    }
+                                                ]
                               }
                             ]
                         }
@@ -408,26 +407,21 @@ update msg options track wrapper =
                             , []
                             )
 
-        ChangeName newName ->
-            case options.selectedSegment of
+        ChangeName index newName ->
+            case List.Extra.getAt index options.namedSegments of
                 Nothing ->
                     ( { options | selectedSegment = Nothing }, [] )
 
-                Just index ->
-                    case List.Extra.getAt index options.namedSegments of
-                        Nothing ->
-                            ( { options | selectedSegment = Nothing }, [] )
-
-                        Just segment ->
-                            let
-                                updated =
-                                    { segment | name = newName }
-                            in
-                            ( { options
-                                | namedSegments = List.Extra.updateAt index (always updated) options.namedSegments
-                              }
-                            , []
-                            )
+                Just segment ->
+                    let
+                        updated =
+                            { segment | name = newName }
+                    in
+                    ( { options
+                        | namedSegments = List.Extra.updateAt index (always updated) options.namedSegments
+                      }
+                    , []
+                    )
 
         CreateSegment ->
             -- Note validation is in the view, so create without checking overlaps.

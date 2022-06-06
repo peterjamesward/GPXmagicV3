@@ -3,7 +3,7 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.3.4 (781673f6)
+# GPXmagic v3.3.5 (781673f6)
 
 **GPXmagic V3 works best with Chrome** (by far)
 
@@ -12,9 +12,9 @@ aboutText =
 
 ## In this update ...
 
-* Displays track name (not author name) in page title.
+* Slight change to Named Segments UI.
 
-* Uses old fast GPX parser that does not read named segments.
+* Slight change to gradient colours.
 
 ## Acknowledgements
 

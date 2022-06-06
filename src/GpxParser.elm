@@ -61,9 +61,6 @@ parseSegments xml =
             Regex.find (asRegex "<trkseg>") xml
                 |> List.map .index
 
-        _ =
-            Debug.log "SEGMENTS" trackSegmentStarts
-
         namedSegments =
             Regex.find (asRegex "namedSegment>(.*)<\\/.*:namedSegment") xml
 
@@ -87,12 +84,6 @@ parseSegments xml =
                 segmentEndOffset =
                     List.Extra.getAt (1 + segmentIndex) trackSegmentStarts
                         |> Maybe.withDefault (String.length xml - 1)
-
-                _ =
-                    Debug.log "OFFSETS" ( segmentStartOffset, segmentEndOffset )
-
-                _ =
-                    Debug.log "INDICES" ( firstContainedPoint, lastContainedPoint )
 
                 firstContainedPoint =
                     -- First track point that appears later in the file than the trkseg.
