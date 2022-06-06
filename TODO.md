@@ -1,6 +1,9 @@
 
 # BUGS
 
+Second click on Segment name does not position markers (not a button now).
+> Use an "eye" icon or whatever Route Maker does.
+
 --- 
 
 # WIP

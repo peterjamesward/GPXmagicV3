@@ -17,10 +17,10 @@ gradientHue slope =
             (clamp -20.0 20.0 slope + 20.0) / 40.0
 
         steepestAscentHue =
-            (Color.toHsla Color.darkRed).hue
+            (Color.toHsla <| Color.rgb255 255 30 30).hue
 
         steepestDescentHue =
-            (Color.toHsla Color.purple).hue
+            (Color.toHsla <| Color.rgb255 143 87 255).hue
     in
     x * steepestAscentHue + (1.0 - x) * steepestDescentHue
 
