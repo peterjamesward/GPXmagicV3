@@ -32,7 +32,7 @@ type alias Options msg =
     , editingTrack : Int
     , undoGraph : Maybe (Graph msg) -- our private undo stack (of one).
     , undoOriginalTrack : Maybe (TrackLoaded msg)
-    , straightenedPoints : List Proximal
+    , straightenedPoints : List NearbyPointMapping
     }
 
 
@@ -68,11 +68,6 @@ type alias Route =
     List Traversal
 
 
-type alias Proximal =
-    -- This point is near this leaf; should they be combined?
-    { leafIndex : Int
-    , pointIndex : Int
-    , adjustedPoint : EarthPoint -- nearby point moved to be collinear.
-    , distanceAlongAxis : Length.Length
-    , distanceFromAxis : Length.Length
-    }
+type NearbyPointMapping
+    = MapPoint Int Int -- map point $1 to prior point $2
+    | MapNewPoint Int Int Length.Length -- map point $1 to distance $3 along prior segment $2

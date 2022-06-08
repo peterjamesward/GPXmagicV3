@@ -1,12 +1,19 @@
 
 # BUGS
 
-Second click on Segment name does not position markers (not a button now).
-> Use an "eye" icon or whatever Route Maker does.
-
 --- 
 
 # WIP
+
+## Route Maker
+
+Latest idea is to walk the route, indexing as we go, each time looking for prior nearby
+points and lines. Don't fix as we go, but build a "mapping" between affected points and their
+prior, which is either a prior point or a "new" point along a line.
+When checking for priors, we also check to see if there's an existing mapping, so we don't
+create unnecessary "new" points; they are reused if within tolerance.
+We then create a new route by applying the "mappings" - new points are inserted in correct
+order, and mapped points acquire the XY of their basis.
 
 ---
 
@@ -21,16 +28,6 @@ Second click on Segment name does not position markers (not a button now).
 - ???
 
 Each tool may have more than one tag.
-
-## Route Maker
-
-There's more to this. More than two traversals nearby, for instance.
-
-Output route derivation is bad -- is this the radiused turns?
-
-Improve traversal direction display (with an arrow on each section?).
-
-Retrofit this approach into Intersections (??).
 
 ## Languages
 

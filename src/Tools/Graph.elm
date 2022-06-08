@@ -409,7 +409,7 @@ toolStateChange opened colour options track =
 
         _ ->
             -- Hide preview
-            ( options, [] )
+            ( options, [ Actions.HidePreview "graph" ] )
 
 
 view : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options msg -> Element msg
@@ -774,11 +774,12 @@ type alias Index =
     SpatialIndex.SpatialNode IndexEntry Length.Meters LocalCoords
 
 
-indexRoad :
+indexRoute :
     BoundingBox2d Length.Meters LocalCoords
+    -> Length.Length
     -> PeteTree
     -> Index
-indexRoad box trackTree =
+indexRoute box tolerance trackTree =
     let
         emptyIndex =
             -- The last parameter here is not the quality, it
@@ -791,7 +792,7 @@ indexRoad box trackTree =
                 localBounds =
                     DomainModel.boundingBox (Leaf road)
                         |> flatBox
-                        |> BoundingBox2d.expandBy (Length.meters 5)
+                        |> BoundingBox2d.expandBy tolerance
             in
             ( leafIndex + 1
             , SpatialIndex.add
@@ -807,8 +808,8 @@ indexRoad box trackTree =
     populatedIndex
 
 
-mergeNearbyRoutePointsOverTree : Length.Length -> TrackLoaded msg -> List Proximal
-mergeNearbyRoutePointsOverTree tolerance track =
+identifyPointsToBeMergedWithPriors : Length.Length -> TrackLoaded msg -> List NearbyPointMapping
+identifyPointsToBeMergedWithPriors tolerance track =
     let
         growBox box =
             BoundingBox2d.expandBy tolerance box
@@ -817,10 +818,24 @@ mergeNearbyRoutePointsOverTree tolerance track =
             growBox <| flatBox <| DomainModel.boundingBox track.trackTree
 
         index =
-            -- Luckily the terrain index gives us Box -> List (leaf index)
-            indexRoad nearbySpace track.trackTree
+            indexRoute nearbySpace tolerance track.trackTree
     in
+    {-
+       Latest idea is to walk the route, indexing as we go, each time looking for prior nearby
+       points and lines. Don't fix as we go, but build a "mapping" between affected points and their
+       prior, which is either a prior point or a "new" point along a line.
+       When checking for priors, we also check to see if there's an existing mapping, so we don't
+       create unnecessary "new" points; they are reused if within tolerance.
+       We then create a new route by applying the "mappings" - new points are inserted in correct
+       order, and mapped points acquire the XY of their basis.
+       Do this in two phases, so we can preview the proposed mappings.
+    -}
     []
+
+
+updateRouteUsingPriorMapping : List NearbyPointMapping -> TrackLoaded msg -> TrackLoaded msg
+updateRouteUsingPriorMapping mapping track =
+    track
 
 
 update :
@@ -920,10 +935,7 @@ update msg options track wrapper =
         SetTolerance tolerance ->
             let
                 pointInformation =
-                    mergeNearbyRoutePointsOverTree options.matchingTolerance track
-
-                candidatePoints =
-                    List.map .pointIndex pointInformation
+                    identifyPointsToBeMergedWithPriors options.matchingTolerance track
             in
             ( { options
                 | matchingTolerance = tolerance
@@ -931,12 +943,6 @@ update msg options track wrapper =
               }
             , [ Actions.ShowPreview
                     { tag = "graph"
-                    , shape = PreviewCircle
-                    , colour = FlatColors.AmericanPalette.brightYarrow
-                    , points = TrackLoaded.buildPreview candidatePoints track.trackTree
-                    }
-              , Actions.ShowPreview
-                    { tag = "graphTool"
                     , shape = PreviewToolSupplied <| showNewPoints pointInformation track
                     , colour = FlatColors.AmericanPalette.brightYarrow
                     , points = []
@@ -981,28 +987,29 @@ type alias EdgeFinder msg =
     }
 
 
-showNewPoints : List Proximal -> TrackLoaded msg -> List (Entity LocalCoords)
+showNewPoints : List NearbyPointMapping -> TrackLoaded msg -> List (Entity LocalCoords)
 showNewPoints pointInfo track =
-    let
-        oldPoints =
-            TrackLoaded.buildPreview
-                (List.map .pointIndex pointInfo)
-                track.trackTree
-                |> List.map .earthPoint
-
-        material =
-            Material.color Color.blue
-
-        highlightPoint point =
-            Scene3d.point { radius = Pixels.pixels 5 } material point
-
-        showVector newPoint oldPoint =
-            Scene3d.lineSegment
-                material
-                (LineSegment3d.from oldPoint newPoint.adjustedPoint)
-    in
-    List.map (.adjustedPoint >> highlightPoint) pointInfo
-        ++ List.map2 showVector pointInfo oldPoints
+    []
+    --let
+    --    oldPoints =
+    --        TrackLoaded.buildPreview
+    --            (List.map .pointIndex pointInfo)
+    --            track.trackTree
+    --            |> List.map .earthPoint
+    --
+    --    material =
+    --        Material.color Color.blue
+    --
+    --    highlightPoint point =
+    --        Scene3d.point { radius = Pixels.pixels 5 } material point
+    --
+    --    showVector newPoint oldPoint =
+    --        Scene3d.lineSegment
+    --            material
+    --            (LineSegment3d.from oldPoint newPoint.adjustedPoint)
+    --in
+    --List.map (.adjustedPoint >> highlightPoint) pointInfo
+    --    ++ List.map2 showVector pointInfo oldPoints
 
 
 buildGraph : TrackLoaded msg -> Graph msg
