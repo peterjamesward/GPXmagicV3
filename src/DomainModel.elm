@@ -31,6 +31,7 @@ module DomainModel exposing
     , leafFromIndex
     , lngLatPair
     , makeLeaf
+    , makeRoadSection
     , nearestToLonLat
     , nearestToRay
     , pointFromGpxWithReference

@@ -7,13 +7,8 @@
 
 ## Route Maker
 
-Latest idea is to walk the route, indexing as we go, each time looking for prior nearby
-points and lines. Don't fix as we go, but build a "mapping" between affected points and their
-prior, which is either a prior point or a "new" point along a line.
-When checking for priors, we also check to see if there's an existing mapping, so we don't
-create unnecessary "new" points; they are reused if within tolerance.
-We then create a new route by applying the "mappings" - new points are inserted in correct
-order, and mapped points acquire the XY of their basis.
+Have what could be the "right" cleaned-up, declarative, formulation to try.
+NOTE: May want the "snap nearby roads together" option without needing graphs.
 
 ---
 

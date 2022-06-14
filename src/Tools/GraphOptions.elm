@@ -69,5 +69,25 @@ type alias Route =
 
 
 type NearbyPointMapping
-    = MapPoint Int Int -- map point $1 to prior point $2
-    | MapNewPoint Int Int Length.Length -- map point $1 to distance $3 along prior segment $2
+    = MapPoint Int -- map subject point to prior point
+    | MapNewPoint Int Length.Length -- map subject point to distance $3 along prior segment
+
+
+type alias MappedPoint =
+    -- Intend to use this both for "raw" mappings ("projected point") and for
+    -- "tidied-up" mappings, where we coalesce those within `tolerance`.
+    { mapSubject : Int
+    , mapTarget : NearbyPointMapping
+    , mapPosition : EarthPoint
+    }
+
+
+type alias CoalescedMappedPoint =
+    -- If we combine adjacent points, should be easier to replace with projected points.
+    -- BUT HOW DO we refer to target points? Distance, perhaps?
+    -- Well, maybe just consuming until we are near the last point will suffice.
+    { firstSubject : Int
+    , lastSubject : Int
+    , mapTargetStart : NearbyPointMapping
+    , mapTargetEnd : NearbyPointMapping
+    }

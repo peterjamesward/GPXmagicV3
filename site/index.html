@@ -461,7 +461,7 @@ function setClickMode(newMode, points) {
             });
 
             map.on('click', function(e) {
-              console.log("click", e);
+              //console.log("click", e);
               app.ports.mapResponses.send
                   ( { 'msg' : 'click'
                     , 'lon' : e.lngLat.lng

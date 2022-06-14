@@ -761,81 +761,254 @@ view location imperial wrapper options =
 
         else
             row [ centerX, width fill, spacing 10 ]
-                [ --toleranceSlider
-                  analyseButton
+                [ toleranceSlider
+                , analyseButton
                 ]
 
 
-type alias IndexEntry =
+type alias LeafIndexEntry =
     { leafIndex : Int }
 
 
-type alias Index =
-    SpatialIndex.SpatialNode IndexEntry Length.Meters LocalCoords
+type alias LeafIndex =
+    SpatialIndex.SpatialNode LeafIndexEntry Length.Meters LocalCoords
 
 
-indexRoute :
-    BoundingBox2d Length.Meters LocalCoords
-    -> Length.Length
-    -> PeteTree
-    -> Index
-indexRoute box tolerance trackTree =
-    let
-        emptyIndex =
-            -- The last parameter here is not the quality, it
-            -- only affects the index efficiency.
-            SpatialIndex.empty box (Length.meters 100.0)
+type alias PointIndexEntry =
+    { pointIndex : Int }
 
-        indexRoadSection : RoadSection -> ( Int, Index ) -> ( Int, Index )
-        indexRoadSection road ( leafIndex, spaceIndex ) =
-            let
-                localBounds =
-                    DomainModel.boundingBox (Leaf road)
-                        |> flatBox
-                        |> BoundingBox2d.expandBy tolerance
-            in
-            ( leafIndex + 1
-            , SpatialIndex.add
-                { content = { leafIndex = leafIndex }
-                , box = localBounds
-                }
-                spaceIndex
-            )
 
-        ( _, populatedIndex ) =
-            DomainModel.foldOverRoute indexRoadSection trackTree ( 0, emptyIndex )
-    in
-    populatedIndex
+type alias PointIndex =
+    SpatialIndex.SpatialNode PointIndexEntry Length.Meters LocalCoords
 
 
 identifyPointsToBeMergedWithPriors : Length.Length -> TrackLoaded msg -> List NearbyPointMapping
 identifyPointsToBeMergedWithPriors tolerance track =
     let
-        growBox box =
+        addTolerance box =
             BoundingBox2d.expandBy tolerance box
 
-        nearbySpace =
-            growBox <| flatBox <| DomainModel.boundingBox track.trackTree
+        growBox =
+            -- We just make our index area slightly larger but I forget why.
+            addTolerance <|
+                flatBox <|
+                    DomainModel.boundingBox track.trackTree
 
-        index =
-            indexRoute nearbySpace tolerance track.trackTree
+        pointWithTolerance pt =
+            addTolerance <|
+                BoundingBox2d.singleton <|
+                    Point3d.projectInto SketchPlane3d.xy pt
+
+        emptyPointIndex =
+            -- The last parameter here is not the quality, it
+            -- only affects the index efficiency.
+            SpatialIndex.empty growBox (Length.meters 100.0)
+
+        ( _, pointIndex ) =
+            -- Pre-pop with first point so the fold can focus on the leaf end points.
+            DomainModel.foldOverRoute
+                indexPoint
+                track.trackTree
+                ( 1
+                , SpatialIndex.add
+                    { content = { pointIndex = 0 }
+                    , box =
+                        pointWithTolerance <|
+                            DomainModel.earthPointFromIndex 0 track.trackTree
+                    }
+                    emptyPointIndex
+                )
+
+        localBounds road =
+            -- Use to form a query for each leaf.
+            DomainModel.boundingBox (Leaf road)
+                |> flatBox
+                |> addTolerance
+
+        indexPoint : RoadSection -> ( Int, PointIndex ) -> ( Int, PointIndex )
+        indexPoint leaf ( pointNumber, indexBuild ) =
+            ( pointNumber + 1
+            , SpatialIndex.add
+                { content = { pointIndex = pointNumber }
+                , box =
+                    leaf.endPoint
+                        |> Point3d.projectInto SketchPlane3d.xy
+                        |> BoundingBox2d.singleton
+                        |> addTolerance
+                }
+                indexBuild
+            )
+
+        pointsNearPoint : EarthPoint -> List Int -> List Int
+        pointsNearPoint pt candidates =
+            -- Geometric check on proximity, also needed for point zero.
+            let
+                thisPoint2d =
+                    Point3d.projectInto SketchPlane3d.xy pt
+            in
+            candidates
+                |> List.filter
+                    (\ptidx ->
+                        DomainModel.earthPointFromIndex ptidx track.trackTree
+                            |> Point3d.projectInto SketchPlane3d.xy
+                            |> Point2d.equalWithin tolerance thisPoint2d
+                    )
+
+        pointsNearRoad : RoadSection -> List Int -> List ( Int, Length.Length, Length.Length )
+        pointsNearRoad road candidates =
+            -- Points within tolerance of road but not within tolerance of either end.
+            let
+                axis =
+                    Axis2d.through
+                        (road.startPoint |> Point3d.projectInto SketchPlane3d.xy)
+                        road.directionAtStart
+
+                maxAlong =
+                    trueLength (Leaf road) |> Quantity.minus tolerance
+
+                getDetails : Int -> ( Int, Length.Length, Length.Length )
+                getDetails candidate =
+                    let
+                        pt =
+                            DomainModel.earthPointFromIndex candidate track.trackTree
+                                |> Point3d.projectInto SketchPlane3d.xy
+                    in
+                    ( candidate
+                    , Point2d.signedDistanceAlong axis pt
+                    , Point2d.signedDistanceFrom axis pt |> Quantity.abs
+                    )
+            in
+            candidates
+                |> List.map getDetails
+                |> List.filter (\( _, along, _ ) -> along |> Quantity.greaterThan tolerance)
+                |> List.filter (\( _, along, _ ) -> along |> Quantity.lessThan maxAlong)
+                |> List.filter (\( _, _, from ) -> from |> Quantity.lessThanOrEqualTo tolerance)
+
+        identifyMappings :
+            RoadSection
+            -> ( Int, List MappedPoint )
+            -> ( Int, List MappedPoint )
+        identifyMappings road ( leafNumber, existingMappings ) =
+            -- Pretty sure now (!) that we "project" all *future* nearby points onto the
+            -- earliest possible traversal of each road section.
+            -- We do not "project" points with a lower index (already processed).
+            -- We must not map any point that is already the subject of a mapping (first dibs rule).
+            -- We must not map *onto* any point that is already the subject of a mapping (projection).
+            let
+                allNearbyPoints =
+                    SpatialIndex.query pointIndex (localBounds road)
+                        |> List.map (.content >> .pointIndex)
+
+                pointsNearRoadStart : List Int
+                pointsNearRoadStart =
+                    -- Most likely these were grabbed by the previous leaf end point,
+                    -- so we will not use this collection.
+                    pointsNearPoint road.startPoint allNearbyPoints
+
+                pointsNearRoadEnd : List Int
+                pointsNearRoadEnd =
+                    pointsNearPoint road.endPoint allNearbyPoints
+                        --TODO: Not sure about first filter.
+                        |> List.filter (\idx -> idx > leafNumber + 1)
+                        |> List.filter (not << existingMapSubject)
+                        |> List.sort
+
+                pointsNearRoadNotEnd : List ( Int, Length.Length, Length.Length )
+                pointsNearRoadNotEnd =
+                    pointsNearRoad road allNearbyPoints
+                        --TODO: Not sure about first filter.
+                        |> List.filter (\( idx, _, _ ) -> idx > leafNumber + 1)
+                        |> List.filter (\( idx, _, _ ) -> (not << existingMapSubject) idx)
+                        |> List.sortBy (\( idx, _, _ ) -> idx)
+
+                existingMapSubject idx =
+                    let
+                        hasIdx : MappedPoint -> Bool
+                        hasIdx map =
+                            map.mapSubject == idx
+                    in
+                    List.Extra.find hasIdx existingMappings /= Nothing
+            in
+            if not <| existingMapSubject (leafNumber + 1) then
+                -- Is OK to use this leaf end point as a target
+                case ( pointsNearRoadEnd, pointsNearRoadNotEnd ) of
+                    ( newSubject :: _, _ ) ->
+                        -- Prefer point mappings
+                        ( leafNumber + 1
+                        , { mapSubject = newSubject
+                          , mapTarget = MapPoint (leafNumber + 1)
+                          , mapPosition = road.endPoint
+                          }
+                            :: existingMappings
+                        )
+
+                    ( _, ( newSubject, along, from ) :: _ ) ->
+                        -- It's a new intermediate point
+                        ( leafNumber + 1
+                        , { mapSubject = newSubject
+                          , mapTarget = MapNewPoint (leafNumber + 1) along
+                          , mapPosition = road.endPoint
+                          }
+                            :: existingMappings
+                        )
+
+                    _ ->
+                        -- No new mapping
+                        ( leafNumber + 1, existingMappings )
+
+            else
+                -- This end point is a target, no transitive mappings allowed.
+                ( leafNumber + 1, existingMappings )
+
+        pointZeroMappings : ( Int, List MappedPoint )
+        pointZeroMappings =
+            -- Fold ignores the route start point, so we preload that with a bit of a hack.
+            let
+                leaf0 =
+                    asRecord <| DomainModel.leafFromIndex 0 track.trackTree
+
+                dummyStartRoad =
+                    DomainModel.makeRoadSection
+                        track.referenceLonLat
+                        (Tuple.first leaf0.sourceData)
+                        (Tuple.first leaf0.sourceData)
+            in
+            identifyMappings dummyStartRoad ( -1, [] )
+
+        ( _, mappingsForRoute ) =
+            DomainModel.foldOverRoute
+                identifyMappings
+                track.trackTree
+                pointZeroMappings
+
+        _ =
+            Debug.log "MAPPINGS" mappingsForRoute
+
+        coalesceMappings : List MappedPoint -> List CoalescedMappedPoint
+        coalesceMappings rawMappings =
+            -- Primitive mappings are made by dropping a perpendicular from a mapped point
+            -- onto a line segment. Here we look for adjacent projected points that are
+            -- closer than 'tolerance' and combine them, creating an revised mapping.
+            -- Use the point centroid as the combined target point.
+            -- Simple recursion on ASSUMPTION there are relatively few mappings!
+            []
+
+        emitNewPoints :
+            RoadSection
+            -> ( Int, List EarthPoint )
+            -> ( Int, List EarthPoint )
+        emitNewPoints road ( pointNumber, outputs ) =
+            {-
+                -- This is "top level" declarative form.
+                -- PROBABLY NEED A PROPER TYPE FOR FOLD STATE,
+               if isMappedPoint pointNumber then
+                   emitNewPointsUntilEndOfMappedRegion pointNumber outputs
+               else
+                   emitUnmappedPoint pointNumber outputs
+            -}
+            ( pointNumber + 1, outputs )
     in
-    {-
-       Latest idea is to walk the route, indexing as we go, each time looking for prior nearby
-       points and lines. Don't fix as we go, but build a "mapping" between affected points and their
-       prior, which is either a prior point or a "new" point along a line.
-       When checking for priors, we also check to see if there's an existing mapping, so we don't
-       create unnecessary "new" points; they are reused if within tolerance.
-       We then create a new route by applying the "mappings" - new points are inserted in correct
-       order, and mapped points acquire the XY of their basis.
-       Do this in two phases, so we can preview the proposed mappings.
-    -}
     []
-
-
-updateRouteUsingPriorMapping : List NearbyPointMapping -> TrackLoaded msg -> TrackLoaded msg
-updateRouteUsingPriorMapping mapping track =
-    track
 
 
 update :
@@ -990,26 +1163,29 @@ type alias EdgeFinder msg =
 showNewPoints : List NearbyPointMapping -> TrackLoaded msg -> List (Entity LocalCoords)
 showNewPoints pointInfo track =
     []
-    --let
-    --    oldPoints =
-    --        TrackLoaded.buildPreview
-    --            (List.map .pointIndex pointInfo)
-    --            track.trackTree
-    --            |> List.map .earthPoint
-    --
-    --    material =
-    --        Material.color Color.blue
-    --
-    --    highlightPoint point =
-    --        Scene3d.point { radius = Pixels.pixels 5 } material point
-    --
-    --    showVector newPoint oldPoint =
-    --        Scene3d.lineSegment
-    --            material
-    --            (LineSegment3d.from oldPoint newPoint.adjustedPoint)
-    --in
-    --List.map (.adjustedPoint >> highlightPoint) pointInfo
-    --    ++ List.map2 showVector pointInfo oldPoints
+
+
+
+--let
+--    oldPoints =
+--        TrackLoaded.buildPreview
+--            (List.map .pointIndex pointInfo)
+--            track.trackTree
+--            |> List.map .earthPoint
+--
+--    material =
+--        Material.color Color.blue
+--
+--    highlightPoint point =
+--        Scene3d.point { radius = Pixels.pixels 5 } material point
+--
+--    showVector newPoint oldPoint =
+--        Scene3d.lineSegment
+--            material
+--            (LineSegment3d.from oldPoint newPoint.adjustedPoint)
+--in
+--List.map (.adjustedPoint >> highlightPoint) pointInfo
+--    ++ List.map2 showVector pointInfo oldPoints
 
 
 buildGraph : TrackLoaded msg -> Graph msg
