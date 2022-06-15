@@ -7,8 +7,7 @@
 
 ## Route Maker
 
-Have what could be the "right" cleaned-up, declarative, formulation to try.
-NOTE: May want the "snap nearby roads together" option without needing graphs.
+Probable "out by one" error in subject and object. 
 
 ---
 
