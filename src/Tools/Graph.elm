@@ -857,24 +857,23 @@ identifyPointsToBeMergedWithPriors tolerance track =
                 indexBuild
             )
 
-{-
-        Data flow outline.
-        1. Make spatial indexes of points and leaves, for quick but approximate nearness queries.
-        2. For each point, look for leaves within tolerance.
-            a. For each such leaf, get distance along leaf and foot of perpendicular.
-        3. Collect these "feet" by Leaf.
-        4. Update tree by converting each affected Leaf into a shrub (in situ perhaps?).
-        Now have tree', enhanced by "virtual points" where leaves are close to points.
-        5. For each point, find nearby points within tolerance.
-        6. Sort "points with vicini" in descending order of vicini count.
-        7. Work through this sorted list, forming groups where a group is a set of previously unclaimed vicini.
-        8. For each cluster, derive the centroid.
-        9. For each point in all clusters, derive mapping to centroid.
-        10. Apply mappings by updating points (in situ perhaps?).
-        Now have tree'' which has adjusted points at cluster centroids.
-        Proof of pudding awaited ...
--}
-
+        {-
+           Data flow outline.
+           1. Make spatial indexes of points and leaves, for quick but approximate nearness queries.
+           2. For each point, look for leaves within tolerance.
+               a. For each such leaf, get distance along leaf and foot of perpendicular.
+           3. Collect these "feet" by Leaf.
+           4. Update tree by converting each affected Leaf into a shrub (in situ perhaps?).
+           Now have tree', enhanced by "virtual points" where leaves are close to points.
+           5. For each point, find nearby points within tolerance.
+           6. Sort "points with vicini" in descending order of vicini count.
+           7. Work through this sorted list, forming groups (a set of previously unclaimed vicini).
+           8. For each cluster, derive the centroid.
+           9. For each point in all clusters, derive mapping to centroid.
+           10. Apply mappings by updating points (in situ perhaps?).
+           Now have tree'' which has adjusted points at cluster centroids.
+           Proof of pudding awaited ...
+        -}
         pointsNearPoint : EarthPoint -> List Int
         pointsNearPoint pt =
             -- Prelude to finding clusters of points.

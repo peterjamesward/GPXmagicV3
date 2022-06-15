@@ -32,7 +32,6 @@ type alias Options msg =
     , editingTrack : Int
     , undoGraph : Maybe (Graph msg) -- our private undo stack (of one).
     , undoOriginalTrack : Maybe (TrackLoaded msg)
-    , straightenedPoints : List NearbyPointMapping
     }
 
 
@@ -68,26 +67,30 @@ type alias Route =
     List Traversal
 
 
-type NearbyPointMapping
-    = MapPoint Int -- map subject point to prior point
-    | MapNewPoint Int Length.Length -- map subject point to distance $3 along prior segment
-
-
 type alias MappedPoint =
-    -- Intend to use this both for "raw" mappings ("projected point") and for
-    -- "tidied-up" mappings, where we coalesce those within `tolerance`.
+    -- for expressing that a point needs to be moved by pre-processor.
     { mapSubject : Int
-    , mapTarget : NearbyPointMapping
     , mapPosition : EarthPoint
     }
 
 
-type alias CoalescedMappedPoint =
-    -- If we combine adjacent points, should be easier to replace with projected points.
-    -- BUT HOW DO we refer to target points? Distance, perhaps?
-    -- Well, maybe just consuming until we are near the last point will suffice.
-    { firstSubject : Int
-    , lastSubject : Int
-    , mapTargetStart : NearbyPointMapping
-    , mapTargetEnd : NearbyPointMapping
+type alias InsertedPointOnLeaf =
+    -- for expressing that we need a new point inserted in a leaf, it being the
+    -- point closest to a "nearby" point.
+    { leafIndex : Int
+    , distanceAlong : Quantity Float Meters
+    , earthPoint : EarthPoint
+    }
+
+
+type alias NearbyPoints =
+    { owner : Int
+    , nearby : List Int
+    , count : Int
+    }
+
+
+type alias Cluster =
+    { centroid : EarthPoint
+    , pointsToAdjust : List Int
     }
