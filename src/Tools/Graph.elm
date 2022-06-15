@@ -77,7 +77,7 @@ defaultOptions =
     , editingTrack = 0
     , undoGraph = Nothing
     , undoOriginalTrack = Nothing
-    , straightenedPoints = []
+    , clustersForPreview = []
     }
 
 
@@ -782,7 +782,7 @@ type alias PointIndex =
     SpatialIndex.SpatialNode PointIndexEntry Length.Meters LocalCoords
 
 
-identifyPointsToBeMergedWithPriors : Length.Length -> TrackLoaded msg -> List NearbyPointMapping
+identifyPointsToBeMergedWithPriors : Length.Length -> TrackLoaded msg -> List Cluster
 identifyPointsToBeMergedWithPriors tolerance track =
     let
         addTolerance box =
@@ -831,14 +831,12 @@ identifyPointsToBeMergedWithPriors tolerance track =
             DomainModel.foldOverRoute
                 indexLeaf
                 track.trackTree
-                ( 1
+                ( 0
                 , SpatialIndex.add
-                    { content = { pointIndex = 0 }
-                    , box =
-                        pointWithTolerance <|
-                            DomainModel.earthPointFromIndex 0 track.trackTree
+                    { content = { leafIndex = 0 }
+                    , box = localBounds <| DomainModel.getFirstLeaf track.trackTree
                     }
-                    emptyPointIndex
+                    emptyLeafIndex
                 )
 
         localBounds road =
@@ -852,7 +850,19 @@ identifyPointsToBeMergedWithPriors tolerance track =
             ( pointNumber + 1
             , SpatialIndex.add
                 { content = { pointIndex = pointNumber }
-                , box = BoundingBox2d.singleton leaf.endPoint
+                , box =
+                    BoundingBox2d.singleton <|
+                        Point3d.projectInto SketchPlane3d.xy leaf.endPoint
+                }
+                indexBuild
+            )
+
+        indexLeaf : RoadSection -> ( Int, LeafIndex ) -> ( Int, LeafIndex )
+        indexLeaf leaf ( leafNumber, indexBuild ) =
+            ( leafNumber + 1
+            , SpatialIndex.add
+                { content = { leafIndex = leafNumber }
+                , box = localBounds leaf
                 }
                 indexBuild
             )
@@ -862,7 +872,7 @@ identifyPointsToBeMergedWithPriors tolerance track =
            1. Make spatial indexes of points and leaves, for quick but approximate nearness queries.
            2. For each point, look for leaves within tolerance.
                a. For each such leaf, get distance along leaf and foot of perpendicular.
-           3. Collect these "feet" by Leaf.
+           3. Collect these perpendicular "feet" by Leaf, sorted by `distanceAlong`.
            4. Update tree by converting each affected Leaf into a shrub (in situ perhaps?).
            Now have tree', enhanced by "virtual points" where leaves are close to points.
            5. For each point, find nearby points within tolerance.
@@ -893,6 +903,92 @@ identifyPointsToBeMergedWithPriors tolerance track =
                             |> Point3d.projectInto SketchPlane3d.xy
                             |> Point2d.equalWithin tolerance thisPoint2d
                     )
+
+        findNearbyLeaves : EarthPoint -> List InsertedPointOnLeaf
+        findNearbyLeaves pt =
+            -- Use spatial leaf index then refine with geometry.
+            let
+                thisPoint2d =
+                    Point3d.projectInto SketchPlane3d.xy pt
+
+                results =
+                    SpatialIndex.query leafIndex (pointWithTolerance pt)
+                        |> List.map (.content >> .leafIndex)
+
+                isClose : Int -> Maybe InsertedPointOnLeaf
+                isClose indexOfLeaf =
+                    let
+                        leaf =
+                            asRecord <|
+                                DomainModel.leafFromIndex indexOfLeaf track.trackTree
+
+                        axis2d =
+                            Axis2d.through
+                                (leaf.startPoint |> Point3d.projectInto SketchPlane3d.xy)
+                                leaf.directionAtStart
+
+                        axis3d =
+                            Axis3d.throughPoints leaf.startPoint leaf.endPoint
+                                |> Maybe.withDefault Axis3d.z
+
+                        ( along, from, foot ) =
+                            -- Proximity test in 2D as altitudes may vary greatly.
+                            ( pt |> Point3d.signedDistanceAlong axis3d
+                            , thisPoint2d |> Point2d.signedDistanceFrom axis2d
+                            , pt |> Point3d.projectOntoAxis axis3d
+                            )
+
+                        isShortPerp =
+                            from |> Quantity.lessThanOrEqualTo tolerance
+
+                        isAfterStart =
+                            along |> Quantity.greaterThanZero
+
+                        isBeforeEnd =
+                            along |> Quantity.lessThan (trueLength (Leaf leaf))
+                    in
+                    if isShortPerp && isAfterStart && isBeforeEnd then
+                        Just
+                            { leafIndex = indexOfLeaf
+                            , distanceAlong = along
+                            , earthPoint = foot
+                            }
+
+                    else
+                        Nothing
+
+                geometricallyClose =
+                    results |> List.filterMap isClose
+            in
+            geometricallyClose
+
+        findNearbyLeavesFoldFn :
+            RoadSection
+            -> ( Int, List ( Int, List InsertedPointOnLeaf ) )
+            -> ( Int, List ( Int, List InsertedPointOnLeaf ) )
+        findNearbyLeavesFoldFn road ( indexOfLeaf, outputs ) =
+            let
+                nearby =
+                    findNearbyLeaves road.endPoint
+            in
+            ( indexOfLeaf + 1
+            , if List.head nearby == Nothing then
+                outputs
+
+              else
+                ( indexOfLeaf, nearby ) :: outputs
+            )
+
+        findAllNearbyLeaves : ( Int, List ( Int, List InsertedPointOnLeaf ) )
+        findAllNearbyLeaves =
+            -- TODO: Point zero.
+            DomainModel.foldOverRoute
+                findNearbyLeavesFoldFn
+                track.trackTree
+                ( 0, [] )
+
+        _ =
+            Debug.log "LEAVES" findAllNearbyLeaves
 
         identifyMappings :
             RoadSection
@@ -1029,7 +1125,7 @@ update msg options track wrapper =
             in
             ( { options
                 | matchingTolerance = tolerance
-                , straightenedPoints = pointInformation
+                , clustersForPreview = pointInformation
               }
             , [ Actions.ShowPreview
                     { tag = "graph"
@@ -1077,7 +1173,7 @@ type alias EdgeFinder msg =
     }
 
 
-showNewPoints : List NearbyPointMapping -> TrackLoaded msg -> List (Entity LocalCoords)
+showNewPoints : List Cluster -> TrackLoaded msg -> List (Entity LocalCoords)
 showNewPoints pointInfo track =
     []
 
