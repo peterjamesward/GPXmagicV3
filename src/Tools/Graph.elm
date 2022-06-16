@@ -78,6 +78,7 @@ defaultOptions =
     , undoGraph = Nothing
     , undoOriginalTrack = Nothing
     , clustersForPreview = []
+    , perpsForPreview = []
     }
 
 
@@ -782,8 +783,8 @@ type alias PointIndex =
     SpatialIndex.SpatialNode PointIndexEntry Length.Meters LocalCoords
 
 
-identifyPointsToBeMergedWithPriors : Length.Length -> TrackLoaded msg -> List Cluster
-identifyPointsToBeMergedWithPriors tolerance track =
+identifyPointsToBeMerged : Length.Length -> TrackLoaded msg -> List InsertedPointOnLeaf
+identifyPointsToBeMerged tolerance track =
     let
         addTolerance box =
             BoundingBox2d.expandBy tolerance box
@@ -1021,7 +1022,9 @@ identifyPointsToBeMergedWithPriors tolerance track =
             -}
             ( pointNumber + 1, outputs )
     in
-    []
+    findAllNearbyLeaves
+        |> Tuple.second
+        |> List.concatMap Tuple.second
 
 
 update :
@@ -1121,11 +1124,11 @@ update msg options track wrapper =
         SetTolerance tolerance ->
             let
                 pointInformation =
-                    identifyPointsToBeMergedWithPriors options.matchingTolerance track
+                    identifyPointsToBeMerged options.matchingTolerance track
             in
             ( { options
                 | matchingTolerance = tolerance
-                , clustersForPreview = pointInformation
+                , perpsForPreview = pointInformation
               }
             , [ Actions.ShowPreview
                     { tag = "graph"
@@ -1173,32 +1176,24 @@ type alias EdgeFinder msg =
     }
 
 
-showNewPoints : List Cluster -> TrackLoaded msg -> List (Entity LocalCoords)
+showNewPoints : List InsertedPointOnLeaf -> TrackLoaded msg -> List (Entity LocalCoords)
 showNewPoints pointInfo track =
-    []
+    let
+        locations =
+            pointInfo |> List.map .earthPoint
 
+        material =
+            Material.color Color.blue
 
+        highlightPoint point =
+            Scene3d.point { radius = Pixels.pixels 5 } material point
 
---let
---    oldPoints =
---        TrackLoaded.buildPreview
---            (List.map .pointIndex pointInfo)
---            track.trackTree
---            |> List.map .earthPoint
---
---    material =
---        Material.color Color.blue
---
---    highlightPoint point =
---        Scene3d.point { radius = Pixels.pixels 5 } material point
---
---    showVector newPoint oldPoint =
---        Scene3d.lineSegment
---            material
---            (LineSegment3d.from oldPoint newPoint.adjustedPoint)
---in
---List.map (.adjustedPoint >> highlightPoint) pointInfo
---    ++ List.map2 showVector pointInfo oldPoints
+        showVector newPoint oldPoint =
+            Scene3d.lineSegment
+                material
+                (LineSegment3d.from oldPoint newPoint.adjustedPoint)
+    in
+    List.map highlightPoint locations
 
 
 buildGraph : TrackLoaded msg -> Graph msg

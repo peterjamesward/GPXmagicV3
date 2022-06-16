@@ -33,6 +33,7 @@ type alias Options msg =
     , undoGraph : Maybe (Graph msg) -- our private undo stack (of one).
     , undoOriginalTrack : Maybe (TrackLoaded msg)
     , clustersForPreview : List Cluster
+    , perpsForPreview : List InsertedPointOnLeaf
     }
 
 
