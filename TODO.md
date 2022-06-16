@@ -7,7 +7,9 @@
 
 ## Route Maker
 
-Probable "out by one" error in subject and object. 
+Working on holistic point/track alignment concept.
+
+-- Seems to find perp'r feet even on single traversals e.g. Hillingdon!
 
 ---
 
@@ -48,6 +50,10 @@ Provide info text capability on top bar and on view panes.
 Specific areas within tools as needed.
 
 ## Technical debt
+
+Each leaf stores the end points, in two formats. Adjacent leaves do not share these,
+so we duplicate the points without good cause. We should create shared Point structures.
+This ought to reduce memory significantly on long tracks.
 
 Variant of "request from local storage" that takes a wrapped message so that the return value
 can be directed to a tool or a view.

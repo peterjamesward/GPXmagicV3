@@ -27,6 +27,7 @@ module DomainModel exposing
     , indexFromDistance
     , indexFromDistanceRoundedDown
     , indexFromDistanceRoundedUp
+    , insertPointsIntoLeaf
     , interpolateTrack
     , leafFromIndex
     , lngLatPair
@@ -741,6 +742,52 @@ treeFromSourcePoints track =
                 |> Maybe.withDefault (GPXSource Direction2d.x Quantity.zero Quantity.zero)
     in
     treeFromSourcesWithExistingReference referencePoint track
+
+
+insertPointsIntoLeaf : Int -> GPXSource -> List GPXSource -> PeteTree -> PeteTree
+insertPointsIntoLeaf leafNumber reference newInternalPoints tree =
+    -- This provides a way to "refine" a leaf without recreating the tree.
+    -- Could be premature optimisation but feels like the right thing to do.
+    let
+        helper leafOffset treeNode =
+            case treeNode of
+                Leaf leaf ->
+                    let
+                        ( gpxStart, gpxEnd ) =
+                            leaf.sourceData
+                    in
+                    case
+                        treeFromSourcesWithExistingReference
+                            reference
+                            (gpxStart :: newInternalPoints ++ [ gpxEnd ])
+                    of
+                        Just newTree ->
+                            newTree
+
+                        Nothing ->
+                            treeNode
+
+                Node node ->
+                    -- recurse to find the target
+                    if leafOffset < skipCount node.left then
+                        Node
+                            { node
+                                | left =
+                                    helper
+                                        leafOffset
+                                        node.left
+                            }
+
+                    else
+                        Node
+                            { node
+                                | right =
+                                    helper
+                                        (leafOffset - skipCount node.left)
+                                        node.right
+                            }
+    in
+    helper 0 tree
 
 
 treeFromSourcesWithExistingReference : GPXSource -> List GPXSource -> Maybe PeteTree

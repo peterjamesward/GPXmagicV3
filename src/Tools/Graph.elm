@@ -474,7 +474,7 @@ view location imperial wrapper options =
                                     (I18N.localisedString location toolId "isTolerance")
                                     [ showShortMeasure imperial options.matchingTolerance ]
                     , min = 0.0
-                    , max = 2.0
+                    , max = 5.0
                     , step = Nothing
                     , value = Length.inMeters options.matchingTolerance
                     , thumb = I.defaultThumb
@@ -912,8 +912,8 @@ identifyPointsToBeMerged tolerance track =
            2. For each point, look for leaves within tolerance.
                a. For each such leaf, get distance along leaf and foot of perpendicular.
         -}
-        findNearbyLeaves : EarthPoint -> List InsertedPointOnLeaf
-        findNearbyLeaves pt =
+        findNearbyLeaves : Int -> EarthPoint -> List InsertedPointOnLeaf
+        findNearbyLeaves pointNumber pt =
             -- Use spatial leaf index then refine with geometry.
             let
                 thisPoint2d =
@@ -924,11 +924,11 @@ identifyPointsToBeMerged tolerance track =
                         |> List.map (.content >> .leafIndex)
 
                 isClose : Int -> Maybe InsertedPointOnLeaf
-                isClose indexOfLeaf =
+                isClose leafNumber =
                     let
                         leaf =
                             asRecord <|
-                                DomainModel.leafFromIndex indexOfLeaf track.trackTree
+                                DomainModel.leafFromIndex leafNumber track.trackTree
 
                         axis2d =
                             Axis2d.through
@@ -950,14 +950,20 @@ identifyPointsToBeMerged tolerance track =
                             from |> Quantity.lessThanOrEqualTo tolerance
 
                         isAfterStart =
+                            -- Exclusion zones around end points as we will find these anyway.
                             along |> Quantity.greaterThanZero
 
                         isBeforeEnd =
-                            along |> Quantity.lessThan (trueLength (Leaf leaf))
+                            along
+                                --|> Quantity.plus tolerance
+                                |> Quantity.lessThan (trueLength (Leaf leaf))
+
+                        isNotNeighbour =
+                            leafNumber /= pointNumber && leafNumber /= (pointNumber + 1)
                     in
-                    if isShortPerp && isAfterStart && isBeforeEnd then
+                    if isNotNeighbour && isShortPerp && isAfterStart && isBeforeEnd then
                         Just
-                            { leafIndex = indexOfLeaf
+                            { leafIndex = leafNumber
                             , distanceAlong = along
                             , earthPoint = foot
                             }
@@ -974,27 +980,29 @@ identifyPointsToBeMerged tolerance track =
             RoadSection
             -> ( Int, List ( Int, List InsertedPointOnLeaf ) )
             -> ( Int, List ( Int, List InsertedPointOnLeaf ) )
-        findNearbyLeavesFoldFn road ( indexOfLeaf, outputs ) =
+        findNearbyLeavesFoldFn road ( pointNumber, outputs ) =
             let
                 nearby =
-                    findNearbyLeaves road.endPoint
+                    findNearbyLeaves pointNumber road.endPoint
             in
-            ( indexOfLeaf + 1
+            ( pointNumber + 1
             , if List.head nearby == Nothing then
                 outputs
 
               else
-                ( indexOfLeaf, nearby ) :: outputs
+                ( pointNumber + 1, nearby ) :: outputs
             )
 
         --findAllNearbyLeaves : ( Int, List ( Int, List InsertedPointOnLeaf ) )
         ( _, findAllNearbyLeaves ) =
-            -- TODO: Point zero.
             DomainModel.foldOverRoute
                 findNearbyLeavesFoldFn
                 track.trackTree
                 ( 0
-                , [ ( 0, findNearbyLeaves <| DomainModel.earthPointFromIndex 0 track.trackTree ) ]
+                , [ ( 0
+                    , findNearbyLeaves 0 <| DomainModel.earthPointFromIndex 0 track.trackTree
+                    )
+                  ]
                 )
 
         --_ =
@@ -1034,9 +1042,29 @@ identifyPointsToBeMerged tolerance track =
             Dict.map sortEachLeafEntries leafDictUnsorted
 
         {-
-           4. Update tree by converting each affected Leaf into a shrub (in situ perhaps?).
+           4. Update tree by converting each affected Leaf into a "branch" (in situ perhaps?).
            Now have tree', enhanced by "virtual points" where leaves are close to points.
         -}
+        insertPointsInLeaf : Int -> List InsertedPointOnLeaf -> PeteTree -> PeteTree
+        insertPointsInLeaf leafNumber newPoints tree =
+            let
+                asGPX =
+                    newPoints
+                        |> List.map (.earthPoint >> DomainModel.gpxFromPointWithReference track.referenceLonLat)
+            in
+            DomainModel.insertPointsIntoLeaf
+                leafNumber
+                track.referenceLonLat
+                asGPX
+                track.trackTree
+
+        treeWithAddedPoints : PeteTree
+        treeWithAddedPoints =
+            Dict.foldl
+                insertPointsInLeaf
+                track.trackTree
+                perpendicularFeetGroupedByLeaf
+
         identifyMappings :
             RoadSection
             -> ( Int, List MappedPoint )
