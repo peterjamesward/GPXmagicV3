@@ -2207,7 +2207,10 @@ performActionsOnModel actions model =
                 ( CombineNearbyPoints, Just track ) ->
                     let
                         newTree =
-                            Just <| Tools.Graph.combineNearbyPoints model.toolOptions.graphOptions track
+                            Just <|
+                                Tools.Graph.combineNearbyPoints
+                                    model.toolOptions.graphOptions
+                                    track
 
                         oldPoints =
                             DomainModel.getAllGPXPointsInNaturalOrder track.trackTree

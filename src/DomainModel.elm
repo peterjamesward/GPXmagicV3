@@ -770,24 +770,16 @@ insertPointsIntoLeaf leafNumber reference newInternalPoints tree =
                 Node node ->
                     -- recurse to find the target
                     if leafOffset < skipCount node.left then
-                        Node
-                            { node
-                                | left =
-                                    helper
-                                        leafOffset
-                                        node.left
-                            }
+                        joiningNode
+                            (helper leafOffset node.left)
+                            node.right
 
                     else
-                        Node
-                            { node
-                                | right =
-                                    helper
-                                        (leafOffset - skipCount node.left)
-                                        node.right
-                            }
+                        joiningNode
+                            node.left
+                            (helper (leafOffset - skipCount node.left) node.right)
     in
-    helper 0 tree
+    helper leafNumber tree
 
 
 treeFromSourcesWithExistingReference : GPXSource -> List GPXSource -> Maybe PeteTree

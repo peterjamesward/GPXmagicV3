@@ -8,9 +8,7 @@
 ## Route Maker
 
 Working on holistic point/track alignment concept.
-
-* See _zigzag.gpx.
-  - Why find farther edge first? 
+Is better but zigzag test does not behave.
 
 ---
 

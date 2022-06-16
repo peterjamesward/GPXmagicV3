@@ -954,7 +954,7 @@ identifyPointsToBeMerged tolerance track =
                         ( along, from, foot ) =
                             -- Proximity test in 2D as altitudes may vary greatly.
                             ( pt |> Point3d.signedDistanceAlong axis3d
-                            , thisPoint2d |> Point2d.signedDistanceFrom axis2d
+                            , thisPoint2d |> Point2d.signedDistanceFrom axis2d |> Quantity.abs
                             , pt |> Point3d.projectOntoAxis axis3d
                             )
 
