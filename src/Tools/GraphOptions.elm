@@ -34,6 +34,7 @@ type alias Options msg =
     , undoOriginalTrack : Maybe (TrackLoaded msg)
     , clustersForPreview : List Cluster
     , perpsForPreview : List InsertedPointOnLeaf
+    , suggestedNewTrack : Maybe PeteTree
     }
 
 

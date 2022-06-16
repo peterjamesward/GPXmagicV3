@@ -9,7 +9,7 @@
 
 Working on holistic point/track alignment concept.
 
--- Seems to find perp'r feet even on single traversals e.g. Hillingdon!
+* The suggestions look good but the insertions on leaves is wrong.
 
 ---
 

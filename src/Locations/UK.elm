@@ -86,6 +86,7 @@ Click anywhere to dismiss this message. It will probably not appear again.
           , Dict.fromList
                 [ ( "label", """Route maker""" )
                 , ( "find", """Find key places""" )
+                , ( "adopt", """Adopt this track""")
                 , ( "clear", """Clear the route""" )
                 , ( "revert", """Revert to original track""" )
                 , ( "convert", """Make a new track with this route""" )
@@ -138,6 +139,7 @@ Any changes you make will be reflected here.
 
 **NOTE** Please do not use _Save GPX file_ while editing a section, as that will save only the active section.
 """ )
+                , ( "adoptInfo", """Make permanent the suggested new points.""")
                 ]
           )
         , ( "bends"
@@ -419,6 +421,7 @@ Also, access a quick description of what the tool does and how (and when) to use
                 , ( "widen", """widen bend""" )
                 , ( "smart", """smart smoother""" )
                 , ( "unknown", """(what was that?)""" )
+                , ( "combine", """combine nearby points""")
                 ]
           )
         , ( "essentials"

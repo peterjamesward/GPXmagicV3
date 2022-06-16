@@ -2204,6 +2204,30 @@ performActionsOnModel actions model =
                         , needsRendering = True
                     }
 
+                ( CombineNearbyPoints, Just track ) ->
+                    let
+                        newTree =
+                            Just <| Tools.Graph.combineNearbyPoints model.toolOptions.graphOptions track
+
+                        oldPoints =
+                            DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
+
+                        ( fromStart, fromEnd ) =
+                            ( 0, 0 )
+
+                        newTrack =
+                            track
+                                |> TrackLoaded.addToUndoStack action
+                                    fromStart
+                                    fromEnd
+                                    oldPoints
+                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                    in
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
+
                 ( LoadGpxFromStrava gpxContent, _ ) ->
                     let
                         ( modelWithNewTrack, _ ) =

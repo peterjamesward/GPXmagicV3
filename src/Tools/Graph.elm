@@ -12,7 +12,6 @@ import Axis2d
 import Axis3d
 import BoundingBox2d exposing (BoundingBox2d)
 import BoundingBox3d exposing (BoundingBox3d)
-import Circle2d exposing (Circle2d)
 import Color
 import Dict exposing (Dict)
 import Direction2d
@@ -32,9 +31,7 @@ import LineSegment2d
 import LineSegment3d
 import List.Extra
 import LocalCoords exposing (LocalCoords)
-import Maybe.Extra
 import Pixels
-import Plane3d
 import Point2d
 import Point3d
 import Polyline3d
@@ -42,7 +39,6 @@ import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (Quantity, zero)
 import Scene3d exposing (Entity)
 import Scene3d.Material as Material
-import SceneBuilder3D
 import Set exposing (Set)
 import SketchPlane3d
 import SpatialIndex exposing (SpatialContent)
@@ -79,6 +75,7 @@ defaultOptions =
     , undoOriginalTrack = Nothing
     , clustersForPreview = []
     , perpsForPreview = []
+    , suggestedNewTrack = Nothing
     }
 
 
@@ -94,6 +91,7 @@ type Msg
     | ClearRoute
     | RevertToTrack
     | SetTolerance (Quantity Float Meters)
+    | AdoptNewTrack
 
 
 emptyGraph : Graph msg
@@ -434,6 +432,15 @@ view location imperial wrapper options =
                     }
                 ]
 
+        adoptTrackButton =
+            row [ spacing 3 ]
+                [ infoButton (wrapper <| DisplayInfo "graph" "adoptInfo")
+                , I.button neatToolsBorder
+                    { onPress = Just (wrapper AdoptNewTrack)
+                    , label = i18n "adopt"
+                    }
+                ]
+
         clearRouteButton =
             I.button neatToolsBorder
                 { onPress = Just (wrapper ClearRoute)
@@ -761,8 +768,9 @@ view location imperial wrapper options =
                 ]
 
         else
-            row [ centerX, width fill, spacing 10 ]
+            wrappedRow [ centerX, width fill, spacing 10 ]
                 [ toleranceSlider
+                , adoptTrackButton
                 , analyseButton
                 ]
 
@@ -783,7 +791,7 @@ type alias PointIndex =
     SpatialIndex.SpatialNode PointIndexEntry Length.Meters LocalCoords
 
 
-identifyPointsToBeMerged : Length.Length -> TrackLoaded msg -> List InsertedPointOnLeaf
+identifyPointsToBeMerged : Length.Length -> TrackLoaded msg -> ( List InsertedPointOnLeaf, PeteTree )
 identifyPointsToBeMerged tolerance track =
     {-
        Data flow outline.
@@ -1081,8 +1089,9 @@ identifyPointsToBeMerged tolerance track =
         _ =
             Debug.log "MAPPINGS" mappingsForRoute
     in
-    findAllNearbyLeaves
-        |> List.concatMap Tuple.second
+    ( findAllNearbyLeaves |> List.concatMap Tuple.second
+    , treeWithAddedPoints
+    )
 
 
 update :
@@ -1093,6 +1102,9 @@ update :
     -> ( Options msg, List (Actions.ToolAction msg) )
 update msg options track wrapper =
     case msg of
+        AdoptNewTrack ->
+            ( options, [ Actions.CombineNearbyPoints, Actions.TrackHasChanged ] )
+
         GraphAnalyse ->
             let
                 newOptions =
@@ -1181,17 +1193,18 @@ update msg options track wrapper =
 
         SetTolerance tolerance ->
             let
-                pointInformation =
+                ( pointInformation, suggested ) =
                     identifyPointsToBeMerged options.matchingTolerance track
             in
             ( { options
                 | matchingTolerance = tolerance
                 , perpsForPreview = pointInformation
+                , suggestedNewTrack = Just suggested
               }
             , [ Actions.ShowPreview
                     { tag = "graph"
                     , shape = PreviewToolSupplied <| showNewPoints pointInformation track
-                    , colour = FlatColors.AmericanPalette.brightYarrow
+                    , colour = FlatColors.AmericanPalette.sourLemon
                     , points = []
                     }
               ]
@@ -1527,6 +1540,11 @@ type alias Junction =
     { arc : Maybe (Arc3d Meters LocalCoords)
     , trim : Quantity Float Meters
     }
+
+
+combineNearbyPoints : Options msg -> TrackLoaded msg -> PeteTree
+combineNearbyPoints options track =
+    options.suggestedNewTrack |> Maybe.withDefault track.trackTree
 
 
 makeNewRoute : Options msg -> Options msg

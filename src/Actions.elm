@@ -6,7 +6,6 @@ module Actions exposing (..)
 import File exposing (File)
 import Http
 import Json.Decode as E
-import LandUseDataTypes
 import Length exposing (Meters)
 import OAuth
 import PreviewData exposing (PreviewData)
@@ -104,6 +103,7 @@ type ToolAction msg
     | LockToolOpen Bool String
     | ChangeActiveTrack Int
     | MakeRouteFromGraph
+    | CombineNearbyPoints
     | WidenBend (List Int) (Quantity Float Meters)
 
 
@@ -201,6 +201,9 @@ interpretAction location action =
 
             SmartSmootherApplyWithOptions _ ->
                 "smart"
+
+            CombineNearbyPoints ->
+                "combine"
 
             _ ->
                 "unknown"
