@@ -80,7 +80,8 @@ type alias MappedPoint =
 type alias InsertedPointOnLeaf =
     -- for expressing that we need a new point inserted in a leaf, it being the
     -- point closest to a "nearby" point.
-    { leafIndex : Int
+    { sourcePointNumber : Int
+    , leafNumber : Int
     , distanceAlong : Quantity Float Meters
     , earthPoint : EarthPoint
     }

@@ -9,7 +9,8 @@
 
 Working on holistic point/track alignment concept.
 
-* The suggestions look good but the insertions on leaves is wrong.
+* See _zigzag.gpx.
+  - Why find farther edge first? 
 
 ---
 

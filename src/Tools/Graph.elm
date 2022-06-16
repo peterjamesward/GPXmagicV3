@@ -920,19 +920,23 @@ identifyPointsToBeMerged tolerance track =
            2. For each point, look for leaves within tolerance.
                a. For each such leaf, get distance along leaf and foot of perpendicular.
         -}
-        findNearbyLeaves : Int -> EarthPoint -> List InsertedPointOnLeaf
-        findNearbyLeaves pointNumber pt =
+        findNearbyLeaves : Int -> List InsertedPointOnLeaf
+        findNearbyLeaves pointNumber =
             -- Use spatial leaf index then refine with geometry.
             let
+                pt =
+                    DomainModel.earthPointFromIndex pointNumber track.trackTree
+
                 thisPoint2d =
                     Point3d.projectInto SketchPlane3d.xy pt
 
                 results =
                     SpatialIndex.query leafIndex (pointWithTolerance pt)
                         |> List.map (.content >> .leafIndex)
+                        |> List.Extra.unique
 
-                isClose : Int -> Maybe InsertedPointOnLeaf
-                isClose leafNumber =
+                isThisLeafClose : Int -> Maybe InsertedPointOnLeaf
+                isThisLeafClose leafNumber =
                     let
                         leaf =
                             asRecord <|
@@ -958,20 +962,18 @@ identifyPointsToBeMerged tolerance track =
                             from |> Quantity.lessThanOrEqualTo tolerance
 
                         isAfterStart =
-                            -- Exclusion zones around end points as we will find these anyway.
                             along |> Quantity.greaterThanZero
 
                         isBeforeEnd =
-                            along
-                                --|> Quantity.plus tolerance
-                                |> Quantity.lessThan (trueLength (Leaf leaf))
+                            along |> Quantity.lessThan (trueLength (Leaf leaf))
 
-                        isNotNeighbour =
-                            leafNumber /= pointNumber && leafNumber /= (pointNumber + 1)
+                        isNotConnected =
+                            leafNumber /= pointNumber && leafNumber + 1 /= pointNumber
                     in
-                    if isNotNeighbour && isShortPerp && isAfterStart && isBeforeEnd then
+                    if isNotConnected && isShortPerp && isAfterStart && isBeforeEnd then
                         Just
-                            { leafIndex = leafNumber
+                            { sourcePointNumber = pointNumber
+                            , leafNumber = leafNumber
                             , distanceAlong = along
                             , earthPoint = foot
                             }
@@ -980,41 +982,39 @@ identifyPointsToBeMerged tolerance track =
                         Nothing
 
                 geometricallyClose =
-                    results |> List.filterMap isClose
+                    results |> List.filterMap isThisLeafClose
             in
             geometricallyClose
 
+        --|> List.Extra.uniqueBy .leafNumber
         findNearbyLeavesFoldFn :
             RoadSection
-            -> ( Int, List ( Int, List InsertedPointOnLeaf ) )
-            -> ( Int, List ( Int, List InsertedPointOnLeaf ) )
-        findNearbyLeavesFoldFn road ( pointNumber, outputs ) =
-            let
-                nearby =
-                    findNearbyLeaves pointNumber road.endPoint
-            in
-            ( pointNumber + 1
-            , if List.head nearby == Nothing then
-                outputs
+            -> ( Int, List InsertedPointOnLeaf )
+            -> ( Int, List InsertedPointOnLeaf )
+        findNearbyLeavesFoldFn road ( leafNumber, outputs ) =
+            ( leafNumber + 1
+            , case findNearbyLeaves (leafNumber + 1) of
+                [] ->
+                    outputs
 
-              else
-                ( pointNumber + 1, nearby ) :: outputs
+                nearby ->
+                    nearby ++ outputs
             )
 
         --findAllNearbyLeaves : ( Int, List ( Int, List InsertedPointOnLeaf ) )
         ( _, findAllNearbyLeaves ) =
+            -- Want "nearby" for all points. Our model traverses leaves, so we
+            -- preload the start point and use the end point of each leaf.
             DomainModel.foldOverRoute
                 findNearbyLeavesFoldFn
                 track.trackTree
                 ( 0
-                , [ ( 0
-                    , findNearbyLeaves 0 <| DomainModel.earthPointFromIndex 0 track.trackTree
-                    )
-                  ]
+                , findNearbyLeaves 0
                 )
 
-        --_ =
-        --    Debug.log "LEAVES" findAllNearbyLeaves
+        _ =
+            Debug.log "LEAVES" findAllNearbyLeaves
+
         {-
            We have the feet of the perpendiculars to nearby leaves.
            3. Collect these perpendicular "feet" by Leaf, sorted by `distanceAlong`.
@@ -1024,16 +1024,16 @@ identifyPointsToBeMerged tolerance track =
             -- Can't see a suitable function in List.Extra, so do it by hand.
             let
                 addToLeafDict newEntry dict =
-                    case Dict.get newEntry.leafIndex dict of
+                    case Dict.get newEntry.leafNumber dict of
                         Just prevEntries ->
                             Dict.insert
-                                newEntry.leafIndex
+                                newEntry.leafNumber
                                 (newEntry :: prevEntries)
                                 dict
 
                         Nothing ->
                             Dict.insert
-                                newEntry.leafIndex
+                                newEntry.leafNumber
                                 [ newEntry ]
                                 dict
 
@@ -1041,11 +1041,13 @@ identifyPointsToBeMerged tolerance track =
                     List.foldl
                         addToLeafDict
                         Dict.empty
-                        (List.concatMap Tuple.second findAllNearbyLeaves)
+                        findAllNearbyLeaves
 
                 sortEachLeafEntries : Int -> List InsertedPointOnLeaf -> List InsertedPointOnLeaf
                 sortEachLeafEntries _ unsorted =
-                    List.sortBy (.distanceAlong >> Length.inMeters) unsorted
+                    unsorted
+                        |> List.Extra.uniqueBy (.distanceAlong >> Length.inMeters)
+                        |> List.sortBy (.distanceAlong >> Length.inMeters)
             in
             Dict.map sortEachLeafEntries leafDictUnsorted
 
@@ -1089,7 +1091,7 @@ identifyPointsToBeMerged tolerance track =
         _ =
             Debug.log "MAPPINGS" mappingsForRoute
     in
-    ( findAllNearbyLeaves |> List.concatMap Tuple.second
+    ( findAllNearbyLeaves
     , treeWithAddedPoints
     )
 
