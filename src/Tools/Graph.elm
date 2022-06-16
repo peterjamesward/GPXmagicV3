@@ -785,6 +785,23 @@ type alias PointIndex =
 
 identifyPointsToBeMerged : Length.Length -> TrackLoaded msg -> List InsertedPointOnLeaf
 identifyPointsToBeMerged tolerance track =
+    {-
+       Data flow outline.
+       1. Make spatial indexes of points and leaves, for quick but approximate nearness queries.
+       2. For each point, look for leaves within tolerance.
+           a. For each such leaf, get distance along leaf and foot of perpendicular.
+       3. Collect these perpendicular "feet" by Leaf, sorted by `distanceAlong`.
+       4. Update tree by converting each affected Leaf into a shrub (in situ perhaps?).
+       Now have tree', enhanced by "virtual points" where leaves are close to points.
+       5. For each point, find nearby points within tolerance.
+       6. Sort "points with vicini" in descending order of vicini count.
+       7. Work through this sorted list, forming groups (a set of previously unclaimed vicini).
+       8. For each cluster, derive the centroid.
+       9. For each point in all clusters, derive mapping to centroid.
+       10. Apply mappings by updating points (in situ perhaps?).
+       Now have tree'' which has adjusted points at cluster centroids.
+       Proof of pudding awaited ...
+    -}
     let
         addTolerance box =
             BoundingBox2d.expandBy tolerance box
@@ -812,6 +829,9 @@ identifyPointsToBeMerged tolerance track =
             -- only affects the index efficiency.
             SpatialIndex.empty growBox (Length.meters 100.0)
 
+        {-
+           1. Make spatial indexes of points and leaves, for quick but approximate nearness queries.
+        -}
         ( _, pointIndex ) =
             -- Pre-pop with first point so the fold can focus on the leaf end points.
             DomainModel.foldOverRoute
@@ -868,23 +888,6 @@ identifyPointsToBeMerged tolerance track =
                 indexBuild
             )
 
-        {-
-           Data flow outline.
-           1. Make spatial indexes of points and leaves, for quick but approximate nearness queries.
-           2. For each point, look for leaves within tolerance.
-               a. For each such leaf, get distance along leaf and foot of perpendicular.
-           3. Collect these perpendicular "feet" by Leaf, sorted by `distanceAlong`.
-           4. Update tree by converting each affected Leaf into a shrub (in situ perhaps?).
-           Now have tree', enhanced by "virtual points" where leaves are close to points.
-           5. For each point, find nearby points within tolerance.
-           6. Sort "points with vicini" in descending order of vicini count.
-           7. Work through this sorted list, forming groups (a set of previously unclaimed vicini).
-           8. For each cluster, derive the centroid.
-           9. For each point in all clusters, derive mapping to centroid.
-           10. Apply mappings by updating points (in situ perhaps?).
-           Now have tree'' which has adjusted points at cluster centroids.
-           Proof of pudding awaited ...
-        -}
         pointsNearPoint : EarthPoint -> List Int
         pointsNearPoint pt =
             -- Prelude to finding clusters of points.
@@ -905,6 +908,10 @@ identifyPointsToBeMerged tolerance track =
                             |> Point2d.equalWithin tolerance thisPoint2d
                     )
 
+        {-
+           2. For each point, look for leaves within tolerance.
+               a. For each such leaf, get distance along leaf and foot of perpendicular.
+        -}
         findNearbyLeaves : EarthPoint -> List InsertedPointOnLeaf
         findNearbyLeaves pt =
             -- Use spatial leaf index then refine with geometry.
@@ -980,17 +987,56 @@ identifyPointsToBeMerged tolerance track =
                 ( indexOfLeaf, nearby ) :: outputs
             )
 
-        findAllNearbyLeaves : ( Int, List ( Int, List InsertedPointOnLeaf ) )
-        findAllNearbyLeaves =
+        --findAllNearbyLeaves : ( Int, List ( Int, List InsertedPointOnLeaf ) )
+        ( _, findAllNearbyLeaves ) =
             -- TODO: Point zero.
             DomainModel.foldOverRoute
                 findNearbyLeavesFoldFn
                 track.trackTree
-                ( 0, [] )
+                ( 0
+                , [ ( 0, findNearbyLeaves <| DomainModel.earthPointFromIndex 0 track.trackTree ) ]
+                )
 
-        _ =
-            Debug.log "LEAVES" findAllNearbyLeaves
+        --_ =
+        --    Debug.log "LEAVES" findAllNearbyLeaves
+        {-
+           We have the feet of the perpendiculars to nearby leaves.
+           3. Collect these perpendicular "feet" by Leaf, sorted by `distanceAlong`.
+        -}
+        perpendicularFeetGroupedByLeaf : Dict Int (List InsertedPointOnLeaf)
+        perpendicularFeetGroupedByLeaf =
+            -- Can't see a suitable function in List.Extra, so do it by hand.
+            let
+                addToLeafDict newEntry dict =
+                    case Dict.get newEntry.leafIndex dict of
+                        Just prevEntries ->
+                            Dict.insert
+                                newEntry.leafIndex
+                                (newEntry :: prevEntries)
+                                dict
 
+                        Nothing ->
+                            Dict.insert
+                                newEntry.leafIndex
+                                [ newEntry ]
+                                dict
+
+                leafDictUnsorted =
+                    List.foldl
+                        addToLeafDict
+                        Dict.empty
+                        (List.concatMap Tuple.second findAllNearbyLeaves)
+
+                sortEachLeafEntries : Int -> List InsertedPointOnLeaf -> List InsertedPointOnLeaf
+                sortEachLeafEntries _ unsorted =
+                    List.sortBy (.distanceAlong >> Length.inMeters) unsorted
+            in
+            Dict.map sortEachLeafEntries leafDictUnsorted
+
+        {-
+           4. Update tree by converting each affected Leaf into a shrub (in situ perhaps?).
+           Now have tree', enhanced by "virtual points" where leaves are close to points.
+        -}
         identifyMappings :
             RoadSection
             -> ( Int, List MappedPoint )
@@ -1006,24 +1052,8 @@ identifyPointsToBeMerged tolerance track =
 
         _ =
             Debug.log "MAPPINGS" mappingsForRoute
-
-        emitNewPoints :
-            RoadSection
-            -> ( Int, List EarthPoint )
-            -> ( Int, List EarthPoint )
-        emitNewPoints road ( pointNumber, outputs ) =
-            {-
-                -- This is "top level" declarative form.
-                -- PROBABLY NEED A PROPER TYPE FOR FOLD STATE,
-               if isMappedPoint pointNumber then
-                   emitNewPointsUntilEndOfMappedRegion pointNumber outputs
-               else
-                   emitUnmappedPoint pointNumber outputs
-            -}
-            ( pointNumber + 1, outputs )
     in
     findAllNearbyLeaves
-        |> Tuple.second
         |> List.concatMap Tuple.second
 
 
