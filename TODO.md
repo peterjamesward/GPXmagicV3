@@ -8,9 +8,7 @@
 ## Route Maker
 
 Working on holistic point/track alignment concept.
-
-* Show preview when opened or track updated (normal rules).
-+ Hide preview when route is adopted.
+NICE!
 
 ---
 

@@ -1061,18 +1061,27 @@ identifyPointsToBeMerged tolerance track =
                     emptyPointIndex
                 )
 
-        pointsNearPoint : EarthPoint -> PeteTree -> List Int
-        pointsNearPoint pt tree =
+        pointsNearPoint : Int -> PeteTree -> List Int
+        pointsNearPoint pointNumber tree =
             -- Prelude to finding clusters of points.
             -- Use spatial point index then refine with geometry.
-            --NOTE: This will include the query point.
+            --NOTE: This will NOW NOT include the query point.
+            --NOTE: This MUST NOT include points that are merely close along the track; the
+            -- intent is to find points separated along the track but close in space.
+            --Hence we can filter using this.
             let
+                pt =
+                    DomainModel.earthPointFromIndex pointNumber tree
+
                 thisPoint2d =
                     Point3d.projectInto SketchPlane3d.xy pt
 
                 results =
                     SpatialIndex.query pointIndex (pointWithTolerance pt)
                         |> List.map (.content >> .pointIndex)
+
+                thisPointTrackDistance =
+                    DomainModel.distanceFromIndex pointNumber tree
             in
             results
                 |> List.filter
@@ -1082,12 +1091,19 @@ identifyPointsToBeMerged tolerance track =
                             |> Point2d.equalWithin tolerance thisPoint2d
                     )
 
+        --|> List.filter
+        --    (\ptidx ->
+        --        DomainModel.distanceFromIndex ptidx tree
+        --            |> Quantity.minus thisPointTrackDistance
+        --            |> Quantity.abs
+        --            |> Quantity.greaterThan tolerance
+        --    )
         pointsNearPointFoldWrapper :
             RoadSection
             -> ( Int, List ( Int, List Int ) )
             -> ( Int, List ( Int, List Int ) )
         pointsNearPointFoldWrapper road ( leafNumber, collection ) =
-            case pointsNearPoint road.endPoint treeWithAddedPoints of
+            case pointsNearPoint (leafNumber + 1) treeWithAddedPoints of
                 [] ->
                     ( leafNumber + 1, collection )
 
@@ -1102,9 +1118,7 @@ identifyPointsToBeMerged tolerance track =
                 treeWithAddedPoints
                 ( 0
                 , case
-                    pointsNearPoint
-                        (DomainModel.earthPointFromIndex 0 treeWithAddedPoints)
-                        treeWithAddedPoints
+                    pointsNearPoint 0 treeWithAddedPoints
                   of
                     [] ->
                         []
@@ -1121,9 +1135,9 @@ identifyPointsToBeMerged tolerance track =
         groupsOfNearbyPoints =
             let
                 groupsInDescendingSizeOrder =
-                    -- Since the queries return the home point, we don't need the first Int.
+                    -- Since the queries return DON'T the home point, we don't need the first Int.
                     nearbyPointsForEachPoint
-                        |> List.map Tuple.second
+                        |> List.map (\( home, others ) -> home :: others)
                         |> List.sortBy (List.length >> negate)
 
                 retainUnclaimedGroupMembers :
@@ -1188,8 +1202,23 @@ identifyPointsToBeMerged tolerance track =
             let
                 mapCluster : Cluster -> PeteTree -> PeteTree
                 mapCluster cluster outputTree =
-                    --TODO: Don't move adjacent points to the same place!!!
-                    outputTree
+                    --Each move modifies tree so must be a fold.
+                    let
+                        asGPS =
+                            DomainModel.gpxFromPointWithReference track.referenceLonLat cluster.centroid
+                    in
+                    List.foldl
+                        (movePoint asGPS)
+                        outputTree
+                        cluster.pointsToAdjust
+
+                movePoint : GPXSource -> Int -> PeteTree -> PeteTree
+                movePoint centroid pointNumber tree =
+                    DomainModel.updatePointByIndexInSitu
+                        pointNumber
+                        centroid
+                        track.referenceLonLat
+                        tree
             in
             List.foldl
                 mapCluster
@@ -1656,7 +1685,12 @@ type alias Junction =
 
 combineNearbyPoints : Options msg -> TrackLoaded msg -> PeteTree
 combineNearbyPoints options track =
-    options.suggestedNewTrack |> Maybe.withDefault track.trackTree
+    options.suggestedNewTrack
+        |> Maybe.withDefault track.trackTree
+        |> DomainModel.getAllGPXPointsInNaturalOrder
+        |> TrackLoaded.removeAdjacentDuplicates
+        |> DomainModel.treeFromSourcesWithExistingReference track.referenceLonLat
+        |> Maybe.withDefault track.trackTree
 
 
 makeNewRoute : Options msg -> Options msg
