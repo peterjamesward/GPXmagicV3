@@ -403,8 +403,11 @@ toolStateChange opened colour options track =
                                 Nothing ->
                                     graph.edges
                     }
+
+                newOptions =
+                    { options | graph = newGraph }
             in
-            ( { options | graph = newGraph }, [] )
+            lookForClusters newOptions newOptions.matchingTolerance theTrack
 
         _ ->
             -- Hide preview
@@ -1235,6 +1238,15 @@ identifyPointsToBeMerged tolerance track =
     )
 
 
+makePreview clusters track =
+    Actions.ShowPreview
+        { tag = "graph"
+        , shape = PreviewToolSupplied <| showNewPoints clusters track
+        , colour = FlatColors.AmericanPalette.sourLemon
+        , points = []
+        }
+
+
 update :
     Msg
     -> Options msg
@@ -1333,23 +1345,7 @@ update msg options track wrapper =
             )
 
         SetTolerance tolerance ->
-            let
-                ( clusters, suggested ) =
-                    identifyPointsToBeMerged options.matchingTolerance track
-            in
-            ( { options
-                | matchingTolerance = tolerance
-                , clustersForPreview = clusters
-                , suggestedNewTrack = Just suggested
-              }
-            , [ Actions.ShowPreview
-                    { tag = "graph"
-                    , shape = PreviewToolSupplied <| showNewPoints clusters track
-                    , colour = FlatColors.AmericanPalette.sourLemon
-                    , points = []
-                    }
-              ]
-            )
+            lookForClusters options tolerance track
 
         CentreLineOffset float ->
             ( { options | centreLineOffset = float }, [] )
@@ -1377,6 +1373,25 @@ update msg options track wrapper =
               }
             , []
             )
+
+
+lookForClusters :
+    Options msg
+    -> Quantity Float Meters
+    -> TrackLoaded msg
+    -> ( Options msg, List (ToolAction msg) )
+lookForClusters options tolerance track =
+    let
+        ( clusters, suggested ) =
+            identifyPointsToBeMerged tolerance track
+    in
+    ( { options
+        | matchingTolerance = tolerance
+        , clustersForPreview = clusters
+        , suggestedNewTrack = Just suggested
+      }
+    , [ makePreview clusters track ]
+    )
 
 
 type alias EdgeFinder msg =
@@ -1683,14 +1698,16 @@ type alias Junction =
     }
 
 
-combineNearbyPoints : Options msg -> TrackLoaded msg -> PeteTree
+combineNearbyPoints : Options msg -> TrackLoaded msg -> ( Options msg, PeteTree )
 combineNearbyPoints options track =
-    options.suggestedNewTrack
+    ( { options | suggestedNewTrack = Nothing }
+    , options.suggestedNewTrack
         |> Maybe.withDefault track.trackTree
         |> DomainModel.getAllGPXPointsInNaturalOrder
         |> TrackLoaded.removeAdjacentDuplicates
         |> DomainModel.treeFromSourcesWithExistingReference track.referenceLonLat
         |> Maybe.withDefault track.trackTree
+    )
 
 
 makeNewRoute : Options msg -> Options msg

@@ -7,8 +7,7 @@
 
 ## Route Maker
 
-Working on holistic point/track alignment concept.
-NICE!
+Needs video.
 
 ---
 

@@ -1577,7 +1577,7 @@ toolStateHasChanged toolType newState isTrack options =
             let
                 ( newGraphOptions, actions ) =
                     Tools.Graph.toolStateChange
-                        True
+                        (newState == Expanded)
                         (getColour toolType options.tools)
                         options.graphOptions
                         isTrack

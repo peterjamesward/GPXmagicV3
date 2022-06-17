@@ -2206,29 +2206,53 @@ performActionsOnModel actions model =
 
                 ( CombineNearbyPoints, Just track ) ->
                     let
-                        newTree =
-                            Just <|
-                                Tools.Graph.combineNearbyPoints
-                                    model.toolOptions.graphOptions
-                                    track
+                        oldToolOptions =
+                            model.toolOptions
+
+                        oldGraphOptions =
+                            oldToolOptions.graphOptions
+
+                        ( newGraphOptions, newTree ) =
+                            Tools.Graph.combineNearbyPoints
+                                oldGraphOptions
+                                track
+
+                        newToolOptions =
+                            { oldToolOptions | graphOptions = newGraphOptions }
 
                         oldPoints =
                             DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
 
-                        ( fromStart, fromEnd ) =
-                            ( 0, 0 )
+                        ( newOrange, newPurple ) =
+                            ( indexFromDistance
+                                (distanceFromIndex track.currentPosition track.trackTree)
+                                newTree
+                            , case track.markerPosition of
+                                Just purple ->
+                                    Just <|
+                                        indexFromDistance
+                                            (distanceFromIndex purple track.trackTree)
+                                            newTree
+
+                                Nothing ->
+                                    Nothing
+                            )
 
                         newTrack =
                             track
-                                |> TrackLoaded.addToUndoStack action
-                                    fromStart
-                                    fromEnd
-                                    oldPoints
-                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                                |> TrackLoaded.addToUndoStack action 0 0 oldPoints
+                                |> (\trk ->
+                                        { trk
+                                            | trackTree = newTree
+                                            , currentPosition = newOrange
+                                            , markerPosition = newPurple
+                                        }
+                                   )
                     in
                     { foldedModel
                         | track = Just newTrack
                         , needsRendering = True
+                        , toolOptions = newToolOptions
                     }
 
                 ( LoadGpxFromStrava gpxContent, _ ) ->
