@@ -1183,28 +1183,13 @@ identifyPointsToBeMerged tolerance track =
            (Step 9 is merely a restatement of Cluster, so will skip.)
            10. Apply mappings by updating points (`updatePointByIndexInSitu` perhaps?).
         -}
-        treeWithMovedPoints : PeteTree
-        treeWithMovedPoints =
+        treeWithCentroidsApplied : PeteTree
+        treeWithCentroidsApplied =
             let
                 mapCluster : Cluster -> PeteTree -> PeteTree
                 mapCluster cluster outputTree =
-                    --Each move modifies tree so must be a fold.
-                    let
-                        asGPS =
-                            DomainModel.gpxFromPointWithReference track.referenceLonLat cluster.centroid
-                    in
-                    List.foldl
-                        (movePoint asGPS)
-                        outputTree
-                        cluster.pointsToAdjust
-
-                movePoint : GPXSource -> Int -> PeteTree -> PeteTree
-                movePoint centroid pointNumber tree =
-                    DomainModel.updatePointByIndexInSitu
-                        pointNumber
-                        centroid
-                        track.referenceLonLat
-                        tree
+                    --TODO: Don't move adjacent points to the same place!!!
+                    outputTree
             in
             List.foldl
                 mapCluster
@@ -1217,7 +1202,7 @@ identifyPointsToBeMerged tolerance track =
         -}
     in
     ( clustersWithCentroids
-    , treeWithMovedPoints
+    , treeWithCentroidsApplied
     )
 
 
