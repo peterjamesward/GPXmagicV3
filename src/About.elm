@@ -13,7 +13,8 @@ aboutText =
 ## In this update ...
 
 * New feature in **Route maker** that "snaps" together nearby points. This can really improve
-the results if you start with a route planned in Strava or an IRL ride. Video explains more.
+the results if you start with a route planned in Strava or an IRL ride.
+Video (https://youtu.be/NLpeMnJjMUs) explains more.
 
 ## Acknowledgements
 
