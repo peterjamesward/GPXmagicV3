@@ -3,7 +3,7 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.3.5 (9e7e2d95)
+# GPXmagic v3.3.6 (9e7e2d95)
 
 **GPXmagic V3 works best with Chrome** (by far)
 
@@ -12,9 +12,8 @@ aboutText =
 
 ## In this update ...
 
-* Slight change to Named Segments UI.
-
-* Slight change to gradient colours.
+* New feature in **Route maker** that "snaps" together nearby points. This can really improve
+the results if you start with a route planned in Strava or an IRL ride. Video explains more.
 
 ## Acknowledgements
 

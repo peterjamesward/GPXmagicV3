@@ -1413,7 +1413,7 @@ showNewPoints pointInfo track =
             Material.color Color.white
 
         highlightPoint point =
-            Scene3d.point { radius = Pixels.pixels 5 } material point
+            Scene3d.point { radius = Pixels.pixels 3 } material point
 
         showVector newPoint oldPoint =
             Scene3d.lineSegment
