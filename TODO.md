@@ -8,7 +8,8 @@
 ## Route Maker
 
 Working on holistic point/track alignment concept.
-Is better but zigzag test does not behave.
+
+GREAT but need to avoid or remove duplicate points now.
 
 ---
 
