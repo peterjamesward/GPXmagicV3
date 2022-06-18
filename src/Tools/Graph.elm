@@ -1094,13 +1094,17 @@ identifyPointsToBeMerged tolerance track =
                             |> Point2d.equalWithin tolerance thisPoint2d
                     )
 
-        --|> List.filter
-        --    (\ptidx ->
-        --        DomainModel.distanceFromIndex ptidx tree
-        --            |> Quantity.minus thisPointTrackDistance
-        --            |> Quantity.abs
-        --            |> Quantity.greaterThan tolerance
-        --    )
+        {-
+           I thought it would be better to exclude points that are close by dint of being along the route.
+           Turns out this is empirically less pleasing, adding more Nodes to the Graph.
+                          |> List.filter
+                              (\ptidx ->
+                                  DomainModel.distanceFromIndex ptidx tree
+                                      |> Quantity.minus thisPointTrackDistance
+                                      |> Quantity.abs
+                                      |> Quantity.greaterThan tolerance
+                              )
+        -}
         pointsNearPointFoldWrapper :
             RoadSection
             -> ( Int, List ( Int, List Int ) )

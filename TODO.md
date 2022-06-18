@@ -5,10 +5,6 @@
 
 # WIP
 
-## Route Maker
-
-Needs video.
-
 ---
 
 # BACKLOG
@@ -29,6 +25,19 @@ Awaiting French support from Muriel.
 Possible sign-ups for German, Dutch, Spanish.
 Need more work on number formats.
 
+## Technical debt
+
+Each leaf stores the end points, in two formats. Adjacent leaves do not share these,
+so we duplicate the points without good cause. We should create shared Point structures.
+This ought to reduce memory significantly on long tracks.
+
+Variant of "request from local storage" that takes a wrapped message so that the return value
+can be directed to a tool or a view.
+
+Try to move out the residual tool-specific stuff in Main.performActions.
+
+Put all Font, Colour etc into a Palette/Style module for ease of change.
+
 ## Land use 3D rendering
 
 Experiment proved the idea but not the implementation.
@@ -46,19 +55,6 @@ Drag Curve Former circle directly in Plan View. (Add an SVG "handle" to hit dete
 Ditto for Move & Stretch, possibly Nudge.
 Provide info text capability on top bar and on view panes.
 Specific areas within tools as needed.
-
-## Technical debt
-
-Each leaf stores the end points, in two formats. Adjacent leaves do not share these,
-so we duplicate the points without good cause. We should create shared Point structures.
-This ought to reduce memory significantly on long tracks.
-
-Variant of "request from local storage" that takes a wrapped message so that the return value
-can be directed to a tool or a view.
-
-Try to move out the residual tool-specific stuff in Main.performActions.
-
-Put all Font, Colour etc into a Palette/Style module for ease of change.
 
 ## De-noise / Simplify
 
