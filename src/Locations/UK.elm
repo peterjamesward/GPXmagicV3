@@ -26,7 +26,7 @@ textDictionary =
                 , ( "notrack", """No track loaded""" )
                 , ( "unnamed", """Unnamed track""" )
                 , ( "import", """Other file options""" )
-                , ( "saveOptions", """RGT settings""")
+                , ( "saveOptions", """RGT settings""" )
                 , ( "askgpx", """Select GPX file.
 
 If the File Open dialog does not appear, please reload the page in the browser and try again.
@@ -58,7 +58,14 @@ If that doesn't work for you, there are many specialised tools to fix common iss
 an explanatory video you can view by clicking the camera icon.
 
 Click anywhere to dismiss this message. It will probably not appear again.
-""")
+""" )
+                ]
+          )
+        , ( "rgtOptions"
+          , Dict.fromList
+                [ ( "elevation", """Disable elevation fixes""" )
+                , ( "smoothing", """Disable advanced smoothing""" )
+                , ( "maxSlope", """Maximum slope: {0}%""" )
                 ]
           )
         , ( "panes"
@@ -86,7 +93,7 @@ Click anywhere to dismiss this message. It will probably not appear again.
           , Dict.fromList
                 [ ( "label", """Route maker""" )
                 , ( "find", """Find key places""" )
-                , ( "adopt", """Adopt this track""")
+                , ( "adopt", """Adopt this track""" )
                 , ( "clear", """Clear the route""" )
                 , ( "revert", """Revert to original track""" )
                 , ( "convert", """Make a new track with this route""" )
@@ -139,7 +146,7 @@ Any changes you make will be reflected here.
 
 **NOTE** Please do not use _Save GPX file_ while editing a section, as that will save only the active section.
 """ )
-                , ( "adoptInfo", """Make permanent the suggested new points.""")
+                , ( "adoptInfo", """Make permanent the suggested new points.""" )
                 ]
           )
         , ( "bends"
@@ -421,7 +428,7 @@ Also, access a quick description of what the tool does and how (and when) to use
                 , ( "widen", """widen bend""" )
                 , ( "smart", """smart smoother""" )
                 , ( "unknown", """(what was that?)""" )
-                , ( "combine", """combine nearby points""")
+                , ( "combine", """combine nearby points""" )
                 ]
           )
         , ( "essentials"
@@ -805,7 +812,7 @@ Displays the colour legend for land use data, and a list of named places.
                 , ( "viewminimum", """Minimum radius {0}""" )
                 , ( "viewtransition", """Meters of turn-in {0}""" )
                 , ( "viewgradient", """Maximum gradient {0}""" )
-                , ( "viewblend", """Blend {0}""")
+                , ( "viewblend", """Blend {0}""" )
                 , ( "Smooth", """Smooth""" )
                 , ( "info", """
 Smart smoother applies three constraints to the track:
@@ -830,34 +837,34 @@ It's also _really_ good at removing noise from IRL rides.
                 , ( "radius", """Bends with a radius smaller than this will be replaced by a circular arc.""" )
                 , ( "transition", """The length of track it takes to lean into a bend, or get back on the straight.""" )
                 , ( "gradient", """The maximum steepness of any ascent or descent.""" )
-                , ( "blend", """Varies the emphasis between outward and backwards lines.""")
+                , ( "blend", """Varies the emphasis between outward and backwards lines.""" )
                 ]
           )
         , ( "segments"
           , Dict.fromList
-          [ ( "label", """Named segments""")
-          , ( "info", """Name sections of track. I suspect there'll be a use for this soon.""")
-          , ( "name", """Name""")
-          , ( "start", """Start""")
-          , ( "end", """Finish""")
-          , ( "select", """Please click on a segment name for details""")
-          , ( "distance", """Length""")
-          , ( "ascent", """Ascent""")
-          , ( "descent", """Descent""")
-          , ( "steepest", """Steepest""")
-          , ( "show", """Select this section with markers""")
-          , ( "update", """Update with current marker positions""")
-          , ( "delete", """Delete this segment (no Undo!)""")
-          , ( "create", """Create from markers""")
-          , ( "newname", """TYPE NAME HERE""")
-          , ( "warning", """
+                [ ( "label", """Named segments""" )
+                , ( "info", """Name sections of track. I suspect there'll be a use for this soon.""" )
+                , ( "name", """Name""" )
+                , ( "start", """Start""" )
+                , ( "end", """Finish""" )
+                , ( "select", """Please click on a segment name for details""" )
+                , ( "distance", """Length""" )
+                , ( "ascent", """Ascent""" )
+                , ( "descent", """Descent""" )
+                , ( "steepest", """Steepest""" )
+                , ( "show", """Select this section with markers""" )
+                , ( "update", """Update with current marker positions""" )
+                , ( "delete", """Delete this segment (no Undo!)""" )
+                , ( "create", """Create from markers""" )
+                , ( "newname", """TYPE NAME HERE""" )
+                , ( "warning", """
 Named segments should be at least 110m from the start, 190m from the end, and at least 50m apart.
 
-At least one of the segments needs changing!""")
-          , ( "duplicate", """
+At least one of the segments needs changing!""" )
+                , ( "duplicate", """
 Please ensure that segments have distinct names.
 
-RGT will merge contiguous segments with the same name""")
-          ]
+RGT will merge contiguous segments with the same name""" )
+                ]
           )
         ]

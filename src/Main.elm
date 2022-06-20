@@ -70,6 +70,7 @@ import Tools.Nudge
 import Tools.OneClickQuickFix
 import Tools.OutAndBack
 import Tools.ProfileSmooth
+import Tools.RGTOptions
 import Tools.Simplify
 import Tools.SmartSmoother
 import Tools.SplitAndJoin
@@ -125,6 +126,7 @@ type Msg
     | I18NMsg I18N.Msg
     | BackgroundClick Mouse.Event
     | DisplayWelcome
+    | RGTOptions Tools.RGTOptions.Msg
     | NoOp
 
 
@@ -166,6 +168,7 @@ type alias Model =
     , backgroundColour : Element.Color
     , languageEditorOpen : Bool
     , languageEditor : I18NOptions.Options
+    , rgtOptions : Tools.RGTOptions.Options
     }
 
 
@@ -266,6 +269,7 @@ init mflags origin navigationKey =
       , backgroundColour = FlatColors.FlatUIPalette.silver
       , languageEditorOpen = False
       , languageEditor = I18N.defaultOptions
+      , rgtOptions = Tools.RGTOptions.defaults
       }
     , Cmd.batch
         [ authCmd
@@ -321,6 +325,11 @@ update msg model =
                 ( { model | infoText = Just ( "main", "welcome" ) }
                 , LocalStorage.storageSetItem "welcome" (E.bool True)
                 )
+
+        RGTOptions options ->
+            ( { model | rgtOptions = Tools.RGTOptions.update options model.rgtOptions }
+            , Cmd.none
+            )
 
         BackgroundClick _ ->
             let
@@ -1093,18 +1102,28 @@ topLoadingBar model =
                     , Border.color FlatColors.FlatUIPalette.peterRiver
                     , Border.width 2
                     , tooltip below (localisedTooltip model.location "main" "saveOptions")
-                , inFront <|
-                    if model.rgtOptionsVisible then
-                        el
-                            [ moveDown 20
-                            , Background.color FlatColors.ChinesePalette.antiFlashWhite
-                            , htmlAttribute (style "z-index" "20")
-                            ]
+                    , inFront <|
+                        if model.rgtOptionsVisible then
+                            el
+                                [ moveDown 24
+                                , Border.color FlatColors.FlatUIPalette.peterRiver
+                                , Border.width 2
+                                , Background.color FlatColors.ChinesePalette.antiFlashWhite
+                                , htmlAttribute (style "z-index" "20")
+                                , htmlAttribute <|
+                                    Mouse.onWithOptions
+                                        "click"
+                                        stopProp
+                                        (always NoOp)
+                                ]
+                            <|
+                                Tools.RGTOptions.view
+                                    model.location
+                                    model.rgtOptions
+                                    RGTOptions
 
-
-                    else
-                        none
-
+                        else
+                            none
                     ]
                     { onPress = Just ToggleRGTOptions
                     , label = useIconWithSize 14 FeatherIcons.list
