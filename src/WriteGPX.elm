@@ -100,7 +100,7 @@ writeGPX name track segments =
                             List.map Tuple.second <|
                                 DomainModel.extractPointsInRange
                                     segStartIndex
-                                    (DomainModel.skipCount track.trackTree - segEndIndex + 1)
+                                    (DomainModel.skipCount track.trackTree - segEndIndex)
                                     track.trackTree
                     in
                     writeSegment Nothing precedingPoints
@@ -110,7 +110,10 @@ writeGPX name track segments =
                 _ ->
                     writeSegment Nothing <|
                         List.map Tuple.second <|
-                            DomainModel.extractPointsInRange startFrom 0 track.trackTree
+                            DomainModel.extractPointsInRange
+                                (startFrom + 1)
+                                0
+                                track.trackTree
     in
     writePreamble useName
         ++ writeSegments segments 0

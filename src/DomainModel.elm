@@ -1296,13 +1296,17 @@ extractPointsInRange fromStart fromEnd trackTree =
                 :: ( road.startPoint, Tuple.first road.sourceData )
                 :: List.drop 1 accum
     in
-    List.reverse <|
-        traverseTreeBetween
-            fromStart
-            (skipCount trackTree - fromEnd)
-            trackTree
-            myFoldFn
-            []
+    if fromStart + fromEnd == skipCount trackTree then
+        [ getDualCoords trackTree fromStart ]
+
+    else
+        List.reverse <|
+            traverseTreeBetween
+                fromStart
+                (skipCount trackTree - fromEnd)
+                trackTree
+                myFoldFn
+                []
 
 
 safeEnumerateEndPoints : Maybe PeteTree -> List ( EarthPoint, GPXSource )
