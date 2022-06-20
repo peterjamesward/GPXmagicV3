@@ -3,7 +3,7 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.3.6 (0544c21b)
+# GPXmagic v3.3.7 (0544c21b)
 
 **GPXmagic V3 works best with Chrome** (by far)
 
@@ -12,9 +12,9 @@ aboutText =
 
 ## In this update ...
 
-* New feature in **Route maker** that "snaps" together nearby points. This can really improve
-the results if you start with a route planned in Strava or an IRL ride.
-Video (https://youtu.be/NLpeMnJjMUs) explains more.
+* Fixed "out by one error" in Named Segments. The points at the orange and purple marker should now
+be correctly written within the segment. My understanding is that the segment end gate is placed at
+the final point *within* the segment. I have tested this with a two-point segment and all seems well.
 
 ## Acknowledgements
 
