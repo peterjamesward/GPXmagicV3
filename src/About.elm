@@ -10,7 +10,13 @@ aboutText =
 * V3 is now the official release.
     The previous version 2.9.5 is [here](https://s3.eu-west-1.amazonaws.com/stepwiserefinement.co.uk/GPXmagic_2_9_5/index.html)
 
-## In this update ...
+## In this update
+
+* New options menu next to Save button that allows selecting the new RGT GPX parser options.
+
+(If that means nothing, don't use it.)
+
+## In 3.3.7
 
 * Fixed "out by one error" in Named Segments. The points at the orange and purple marker should now
 be correctly written within the segment. My understanding is that the segment end gate is placed at
