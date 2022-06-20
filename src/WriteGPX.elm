@@ -5,7 +5,9 @@ import Direction2d
 import DomainModel exposing (GPXSource)
 import ElmEscapeHtml
 import Length
+import String.Interpolate
 import Tools.NamedSegmentOptions exposing (NamedSegment)
+import Tools.RGTOptions
 import TrackLoaded exposing (TrackLoaded)
 
 
@@ -30,8 +32,54 @@ preamble =
 """
 
 
-writePreamble trackName =
+
+{-
+   <extensions>
+   <rgt:parserOptions>
+   <rgt:disableElevationFixes/>
+   <rgt:disableAdvancedSmoothing/>
+   <rgt:maxSlope>20</rgt:maxSlope>
+   </rgt:parserOptions>
+   </extensions>
+-}
+
+
+optionsIfNotDefault : Tools.RGTOptions.Options -> String
+optionsIfNotDefault options =
+    if options == Tools.RGTOptions.defaults then
+        ""
+
+    else
+        String.concat
+            [ """<extensions>
+<rgt:parserOptions>"""
+            , if options.disableElevationFixes then
+                """
+<rgt:disableElevationFixes/>"""
+
+              else
+                ""
+            , if options.disableAdvancedSmoothing then
+                """
+<rgt:disableAdvancedSmoothing/>"""
+
+              else
+                ""
+            , String.Interpolate.interpolate
+                """
+<rgt:maxSlope>{0}</rgt:maxSlope>"""
+                [ String.fromFloat options.maxSlope ]
+            , """
+</rgt:parserOptions>
+</extensions>
+"""
+            ]
+
+
+writePreamble : String -> Tools.RGTOptions.Options -> String
+writePreamble trackName rgtOptions =
     preamble
+        ++ optionsIfNotDefault rgtOptions
         ++ """<trk>  <name>"""
         ++ ElmEscapeHtml.escape trackName
         ++ """</name>"""
@@ -73,8 +121,8 @@ writeFooter =
     "</trk></gpx>\n"
 
 
-writeGPX : Maybe String -> TrackLoaded msg -> List NamedSegment -> String
-writeGPX name track segments =
+writeGPX : Maybe String -> Tools.RGTOptions.Options -> TrackLoaded msg -> List NamedSegment -> String
+writeGPX name options track segments =
     --May need to consider storage and excessive concatenation, but try obvious first.
     let
         useName =
@@ -115,6 +163,6 @@ writeGPX name track segments =
                                 0
                                 track.trackTree
     in
-    writePreamble useName
+    writePreamble useName options
         ++ writeSegments segments 0
         ++ writeFooter

@@ -669,6 +669,7 @@ update msg model =
                     , Download.string outputFilename "text/gpx" <|
                         WriteGPX.writeGPX
                             model.filename
+                            model.rgtOptions
                             track
                             model.toolOptions.namedSegmentOptions.namedSegments
                     )
@@ -2715,6 +2716,7 @@ performActionCommands actions model =
                         sections
                         model.toolOptions.splitAndJoinOptions
                         track
+                        model.rgtOptions
 
                 _ ->
                     Cmd.none

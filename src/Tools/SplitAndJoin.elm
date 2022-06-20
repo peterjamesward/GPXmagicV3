@@ -20,6 +20,7 @@ import Task
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.OneClickQuickFix as OneClickQuickFix
+import Tools.RGTOptions
 import Tools.SplitAndJoinOptions exposing (Options)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showLongMeasure, withLeadingZeros)
@@ -105,8 +106,13 @@ update msg settings mTrack wrap =
             ( settings, [ Actions.DisplayInfo tool tag ] )
 
 
-writeOneSection : List ( Int, Float, Float ) -> Options -> TrackLoaded msg -> Cmd msg
-writeOneSection sections options track =
+writeOneSection :
+    List ( Int, Float, Float )
+    -> Options
+    -> TrackLoaded msg
+    -> Tools.RGTOptions.Options
+    -> Cmd msg
+writeOneSection sections options track rgtOptions =
     case sections of
         ( index, start, end ) :: rest ->
             let
@@ -164,7 +170,11 @@ writeOneSection sections options track =
                 content =
                     case trackExtract of
                         Just subTrack ->
-                            WriteGPX.writeGPX track.trackName (processingFunction subTrack) []
+                            WriteGPX.writeGPX
+                                track.trackName
+                                rgtOptions
+                                (processingFunction subTrack)
+                                []
 
                         Nothing ->
                             "failed to make the track section"
