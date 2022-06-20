@@ -53,22 +53,26 @@ optionsIfNotDefault options =
         String.concat
             [ """<extensions>
 <rgt:parserOptions>"""
-            , if options.disableElevationFixes then
+            , if options.disableElevationFixes /= Tools.RGTOptions.defaults.disableElevationFixes then
                 """
 <rgt:disableElevationFixes/>"""
 
               else
                 ""
-            , if options.disableAdvancedSmoothing then
+            , if options.disableAdvancedSmoothing /= Tools.RGTOptions.defaults.disableAdvancedSmoothing then
                 """
 <rgt:disableAdvancedSmoothing/>"""
 
               else
                 ""
-            , String.Interpolate.interpolate
-                """
+            , if options.maxSlope /= Tools.RGTOptions.defaults.maxSlope then
+                String.Interpolate.interpolate
+                    """
 <rgt:maxSlope>{0}</rgt:maxSlope>"""
-                [ String.fromFloat options.maxSlope ]
+                    [ String.fromFloat options.maxSlope ]
+
+              else
+                ""
             , """
 </rgt:parserOptions>
 </extensions>
