@@ -102,6 +102,7 @@ parseSegments xml =
                         )
                         trackPoints
                         |> Maybe.withDefault (List.length trackPoints)
+                        |> (+) -1
             in
             ( case match.submatches of
                 (Just sub1) :: _ ->
