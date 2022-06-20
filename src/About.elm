@@ -16,6 +16,8 @@ aboutText =
 be correctly written within the segment. My understanding is that the segment end gate is placed at
 the final point *within* the segment. I have tested this with a two-point segment and all seems well.
 
+* Route maker hides white "snap" dots once route is analyzed.
+
 ## Acknowledgements
 
 * Thanks to all those who've provided support, comments, bug reports, and help along the way.

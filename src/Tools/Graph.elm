@@ -407,7 +407,11 @@ toolStateChange opened colour options track =
                 newOptions =
                     { options | graph = newGraph }
             in
-            lookForClusters newOptions newOptions.matchingTolerance theTrack
+            if not options.analyzed then
+                lookForClusters newOptions newOptions.matchingTolerance theTrack
+
+            else
+                ( newOptions, [ Actions.HidePreview "graph" ] )
 
         _ ->
             -- Hide preview
@@ -1269,14 +1273,17 @@ update msg options track wrapper =
                         | graph = buildGraph track
                         , analyzed = True
                         , originalTrack = Just track
+                        , suggestedNewTrack = Nothing
                     }
             in
             ( newOptions
             , if Dict.size newOptions.graph.nodes > skipCount track.trackTree // 10 then
-                [ Actions.DisplayInfo "graph" "manyNodes" ]
+                [ Actions.DisplayInfo "graph" "manyNodes"
+                , Actions.HidePreview "graph"
+                ]
 
               else
-                []
+                [ Actions.HidePreview "graph" ]
             )
 
         RevertToTrack ->
