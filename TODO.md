@@ -5,20 +5,6 @@
 
 # WIP
 
-## Implement these RGT options
-
-Looks like a new tool.
-
-```xml
-<extensions> 
-<rgt:parserOptions> 
-<rgt:disableElevationFixes/>
-<rgt:disableAdvancedSmoothing/>
-<rgt:maxSlope>20</rgt:maxSlope> 
-</rgt:parserOptions> 
-</extensions>
-```
-
 ---
 
 # BACKLOG
