@@ -5,15 +5,19 @@
 
 # WIP
 
-## Route maker
+## Implement these RGT options
 
-Hide preview when 'Analysed'
+Looks like a new tool.
 
-## Internal 
-
-Each leaf stores the end points, in two formats. Adjacent leaves do not share these,
-so we duplicate the points without good cause. We should create shared Point structures.
-This ought to reduce memory significantly on long tracks.
+```xml
+<extensions> 
+<rgt:parserOptions> 
+<rgt:disableElevationFixes/>
+<rgt:disableAdvancedSmoothing/>
+<rgt:maxSlope>20</rgt:maxSlope> 
+</rgt:parserOptions> 
+</extensions>
+```
 
 ---
 

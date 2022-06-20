@@ -92,6 +92,7 @@ type Msg
     | GpxSelected File
     | GpxLoaded String
     | ToggleLoadOptionMenu
+    | ToggleRGTOptions
     | OAuthMessage OAuthMsg
     | AdjustTimeZone Time.Zone
     | SetRenderDepth Int
@@ -136,6 +137,7 @@ type alias Model =
     , loadOptionsMenuOpen : Bool
     , svgFileOptions : SvgPathExtractor.Options
     , location : I18NOptions.Location
+    , rgtOptionsVisible : Bool
 
     -- Track stuff
     , track : Maybe (TrackLoaded Msg)
@@ -240,6 +242,7 @@ init mflags origin navigationKey =
       , stravaAuthentication = authData
       , loadOptionsMenuOpen = False
       , svgFileOptions = SvgPathExtractor.defaultOptions
+      , rgtOptionsVisible = False
       , location = I18N.defaultLocation
       , track = Nothing
       , mapPointsDraggable = False
@@ -347,6 +350,11 @@ update msg model =
                   else
                     Cmd.none
                 ]
+            )
+
+        ToggleRGTOptions ->
+            ( { model | rgtOptionsVisible = not model.rgtOptionsVisible }
+            , Cmd.none
             )
 
         ToggleLanguageEditor ->
@@ -1069,15 +1077,39 @@ topLoadingBar model =
                 }
 
         saveButton =
-            button
-                [ padding 5
-                , Background.color FlatColors.AussiePalette.juneBud
-                , Border.color FlatColors.FlatUIPalette.peterRiver
-                , Border.width 2
+            row [ spacing 0, padding 0 ]
+                [ button
+                    [ padding 5
+                    , Background.color FlatColors.AussiePalette.juneBud
+                    , Border.color FlatColors.FlatUIPalette.peterRiver
+                    , Border.width 2
+                    ]
+                    { onPress = Just WriteGpxFile
+                    , label = localHelper "savegpx"
+                    }
+                , button
+                    [ padding 5
+                    , Background.color FlatColors.AussiePalette.juneBud
+                    , Border.color FlatColors.FlatUIPalette.peterRiver
+                    , Border.width 2
+                    , tooltip below (localisedTooltip model.location "main" "saveOptions")
+                , inFront <|
+                    if model.rgtOptionsVisible then
+                        el
+                            [ moveDown 20
+                            , Background.color FlatColors.ChinesePalette.antiFlashWhite
+                            , htmlAttribute (style "z-index" "20")
+                            ]
+
+
+                    else
+                        none
+
+                    ]
+                    { onPress = Just ToggleRGTOptions
+                    , label = useIconWithSize 14 FeatherIcons.list
+                    }
                 ]
-                { onPress = Just WriteGpxFile
-                , label = localHelper "savegpx"
-                }
     in
     wrappedRow
         (commonLayoutStyles

@@ -26,8 +26,8 @@ textDictionary =
                 , ( "notrack", """No track loaded""" )
                 , ( "unnamed", """Unnamed track""" )
                 , ( "import", """Other file options""" )
-                , ( "askgpx", """
-Select GPX file.
+                , ( "saveOptions", """RGT settings""")
+                , ( "askgpx", """Select GPX file.
 
 If the File Open dialog does not appear, please reload the page in the browser and try again.
 """ )
