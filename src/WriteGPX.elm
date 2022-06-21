@@ -53,13 +53,13 @@ optionsIfNotDefault options =
         String.concat
             [ """<extensions>
 <rgt:parserOptions>"""
-            , if options.disableElevationFixes /= Tools.RGTOptions.defaults.disableElevationFixes then
+            , if options.disableElevationFixes then
                 """
 <rgt:disableElevationFixes/>"""
 
               else
                 ""
-            , if options.disableAdvancedSmoothing /= Tools.RGTOptions.defaults.disableAdvancedSmoothing then
+            , if options.disableAdvancedSmoothing then
                 """
 <rgt:disableAdvancedSmoothing/>"""
 
