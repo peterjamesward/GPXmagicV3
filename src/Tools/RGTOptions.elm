@@ -10,14 +10,14 @@ module Tools.RGTOptions exposing (..)
    </extensions>
 -}
 
-import Element exposing (Element, centerX, column, el, padding, spacing, text)
+import Element exposing (Element, centerX, column, el, padding, paragraph, spacing, text)
 import Element.Background as Background
 import Element.Input as Input
 import FlatColors.ChinesePalette
 import String.Interpolate
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18N
-import ViewPureStyles exposing (commonShortHorizontalSliderStyles)
+import ViewPureStyles exposing (commonShortHorizontalSliderStyles, infoButton)
 
 
 type alias Options =
@@ -103,7 +103,8 @@ view location options wrap =
         , padding 5
         , Background.color FlatColors.ChinesePalette.antiFlashWhite
         ]
-        [ elevation
+        [ paragraph [] [ i18n "info" ]
+        , elevation
         , smoothing
-        , el [centerX] maxSlope
+        , el [ centerX ] maxSlope
         ]

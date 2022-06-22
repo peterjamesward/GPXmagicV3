@@ -66,6 +66,9 @@ Click anywhere to dismiss this message. It will probably not appear again.
                 [ ( "elevation", """Disable elevation fixes""" )
                 , ( "smoothing", """Disable advanced smoothing""" )
                 , ( "maxSlope", """Maximum slope: {0}%""" )
+                , ( "info", """These options write special flags in the GPX file that will
+mean something to the Wahoo RGT Magic Roads parser. They have no effect here in GPXmagic.
+""")
                 ]
           )
         , ( "panes"

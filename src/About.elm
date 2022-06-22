@@ -7,7 +7,11 @@ aboutText =
 
 **GPXmagic V3 works best with Chrome** (by far)
 
-## In this update
+## In 3.3.8
+
+* Make it really clear that the RGT options have no effect in GPXmagic.
+
+## In 3.3.8
 
 * New options menu next to Save button that allows selecting the new RGT GPX parser options.
 
