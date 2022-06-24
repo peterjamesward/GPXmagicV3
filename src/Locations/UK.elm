@@ -95,8 +95,8 @@ mean something to the Wahoo RGT Magic Roads parser. They have no effect here in 
         , ( "graph"
           , Dict.fromList
                 [ ( "label", """Route maker""" )
-                , ( "find", """Merge points and enter Route maker mode.""" )
-                , ( "adopt", """Merge points only.""" )
+                , ( "find", """Enter Route maker mode""" )
+                , ( "adopt", """Merge nearby points""" )
                 , ( "adoptInfo", """You may want to "snap" multiple passes of the track
 together to remove discrepancies, but you're content with the original route and don't
 want to use the other features of Route maker to define your own route.""" )
