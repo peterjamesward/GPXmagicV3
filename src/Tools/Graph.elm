@@ -75,7 +75,8 @@ defaultOptions =
     , undoOriginalTrack = Nothing
     , clustersForPreview = []
     , perpsForPreview = []
-    , suggestedNewTrack = Nothing
+    , suggestedNewTree = Nothing
+    , suggestedNewGraph = Nothing
     }
 
 
@@ -1246,10 +1247,10 @@ identifyPointsToBeMerged tolerance track =
     )
 
 
-makePreview clusters track =
+makePreview options track =
     Actions.ShowPreview
         { tag = "graph"
-        , shape = PreviewToolSupplied <| showNewPoints clusters track
+        , shape = PreviewToolSupplied <| showNewPoints options.clustersForPreview track
         , colour = FlatColors.AmericanPalette.sourLemon
         , points = []
         }
@@ -1273,7 +1274,7 @@ update msg options track wrapper =
                         | graph = buildGraph track
                         , analyzed = True
                         , originalTrack = Just track
-                        , suggestedNewTrack = Nothing
+                        , suggestedNewTree = Nothing
                     }
             in
             ( newOptions
@@ -1393,15 +1394,30 @@ lookForClusters :
     -> ( Options msg, List (ToolAction msg) )
 lookForClusters options tolerance track =
     let
-        ( clusters, suggested ) =
+        ( clusters, suggestedNewTree ) =
             identifyPointsToBeMerged tolerance track
+
+        suggestedNewTrack =
+            { track
+                | trackTree =
+                    --Absurd but experimenting.
+                    suggestedNewTree
+                        |> DomainModel.getAllGPXPointsInNaturalOrder
+                        |> TrackLoaded.removeAdjacentDuplicates
+                        |> DomainModel.treeFromSourcesWithExistingReference track.referenceLonLat
+                        |> Maybe.withDefault suggestedNewTree
+            }
+
+        newOptions =
+            { options
+                | matchingTolerance = tolerance
+                , clustersForPreview = clusters
+                , suggestedNewTree = Just suggestedNewTree
+                , suggestedNewGraph = Just <| buildGraph suggestedNewTrack
+            }
     in
-    ( { options
-        | matchingTolerance = tolerance
-        , clustersForPreview = clusters
-        , suggestedNewTrack = Just suggested
-      }
-    , [ makePreview clusters track ]
+    ( newOptions
+    , [ makePreview newOptions track ]
     )
 
 
@@ -1711,8 +1727,8 @@ type alias Junction =
 
 combineNearbyPoints : Options msg -> TrackLoaded msg -> ( Options msg, PeteTree )
 combineNearbyPoints options track =
-    ( { options | suggestedNewTrack = Nothing }
-    , options.suggestedNewTrack
+    ( { options | suggestedNewTree = Nothing }
+    , options.suggestedNewTree
         |> Maybe.withDefault track.trackTree
         |> DomainModel.getAllGPXPointsInNaturalOrder
         |> TrackLoaded.removeAdjacentDuplicates

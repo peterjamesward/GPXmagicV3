@@ -670,7 +670,6 @@ viewPanes :
     I18NOptions.Location
     -> (Msg -> msg)
     -> Maybe (TrackLoaded msg)
-    -> Tools.GraphOptions.Graph msg
     -> Tools.GraphOptions.Options msg
     -> Tools.DisplaySettingsOptions.Options
     -> ( Quantity Int Pixels, Quantity Int Pixels )
@@ -678,7 +677,7 @@ viewPanes :
     -> Maybe Tools.Flythrough.Flythrough
     -> Dict String PreviewData
     -> Element msg
-viewPanes location msgWrapper mTrack graph graphOptions displayOptions ( w, h ) options mFlythrough previews =
+viewPanes location msgWrapper mTrack graphOptions displayOptions ( w, h ) options mFlythrough previews =
     let
         ( paneWidth, paneHeight ) =
             dimensionsWithLayout options.paneLayout ( w, h )
@@ -735,7 +734,6 @@ viewPanes location msgWrapper mTrack graph graphOptions displayOptions ( w, h ) 
                                 location
                                 context
                                 ( paneWidth, paneHeight )
-                                graph
                                 graphOptions
                                 (msgWrapper << GraphViewMessage pane.paneId)
 

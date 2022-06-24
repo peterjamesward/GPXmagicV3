@@ -3,7 +3,7 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.3.8 (6cb67092)
+# GPXmagic v3.3.8 (2b00ae59)
 
 **GPXmagic V3 works best with Chrome** (by far)
 
@@ -11,19 +11,7 @@ aboutText =
 
 * Make it really clear that the RGT options have no effect in GPXmagic.
 
-## In 3.3.8
-
-* New options menu next to Save button that allows selecting the new RGT GPX parser options.
-
 (If that means nothing, don't use it.)
-
-## In 3.3.7
-
-* Fixed "out by one error" in Named Segments. The points at the orange and purple marker should now
-be correctly written within the segment. My understanding is that the segment end gate is placed at
-the final point *within* the segment. I have tested this with a two-point segment and all seems well.
-
-* Route maker hides white "snap" dots once route is analyzed.
 
 ## Acknowledgements
 

@@ -265,17 +265,19 @@ view :
     I18NOptions.Location
     -> Context
     -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> Graph msg
     -> Tools.GraphOptions.Options msg
     -> (Msg -> msg)
     -> Element msg
-view location context ( width, height ) graph options msgWrapper =
+view location context ( width, height ) options msgWrapper =
     let
         dragging =
             context.dragAction
 
         camera =
             deriveCamera context
+
+        graph =
+            options.suggestedNewGraph |> Maybe.withDefault options.graph
 
         -- Defines the shape of the 'screen' that we will be using when
         -- projecting 3D points into 2D
@@ -284,8 +286,6 @@ view location context ( width, height ) graph options msgWrapper =
                 Point2d.origin
                 (Point2d.xy (Quantity.toFloatQuantity width) (Quantity.toFloatQuantity height))
 
-        -- Take all vertices of the logo shape, rotate them the same amount as
-        -- the logo itself and then project them into 2D screen space
         nodes2d =
             graph.nodes
                 |> Dict.map
@@ -660,12 +660,12 @@ update msg msgWrapper graph area context =
                         (Point2d.xy (Quantity.toFloatQuantity width) (Quantity.toFloatQuantity height))
 
                 shiftVectorBefore =
-                    Vector2d.from   context.mouseHere screenCentre
+                    Vector2d.from context.mouseHere screenCentre
                         |> Vector2d.scaleBy
                             (Spherical.metresPerPixel context.zoomLevel (Angle.degrees 30))
 
                 shiftVectorAfter =
-                    Vector2d.from  context.mouseHere screenCentre
+                    Vector2d.from context.mouseHere screenCentre
                         |> Vector2d.scaleBy
                             (Spherical.metresPerPixel newZoom (Angle.degrees 30))
 
