@@ -432,7 +432,7 @@ view location imperial wrapper options =
             Length.inMeters options.minimumRadiusAtPlaces
 
         analyseButton =
-            row [ spacing 3 ]
+            row [ spacing 3, width fill ]
                 [ infoButton (wrapper <| DisplayInfo "graph" "info")
                 , I.button neatToolsBorder
                     { onPress = Just (wrapper GraphAnalyse)
@@ -441,7 +441,7 @@ view location imperial wrapper options =
                 ]
 
         adoptTrackButton =
-            row [ spacing 3 ]
+            row [ spacing 3, width fill ]
                 [ infoButton (wrapper <| DisplayInfo "graph" "adoptInfo")
                 , I.button neatToolsBorder
                     { onPress = Just (wrapper AdoptNewTrack)
@@ -1278,13 +1278,7 @@ update msg options track wrapper =
                     }
             in
             ( newOptions
-            , if Dict.size newOptions.graph.nodes > skipCount track.trackTree // 10 then
-                [ Actions.DisplayInfo "graph" "manyNodes"
-                , Actions.HidePreview "graph"
-                ]
-
-              else
-                [ Actions.HidePreview "graph" ]
+            , [ Actions.HidePreview "graph" ]
             )
 
         RevertToTrack ->

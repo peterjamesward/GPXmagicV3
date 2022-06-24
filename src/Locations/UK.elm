@@ -95,8 +95,11 @@ mean something to the Wahoo RGT Magic Roads parser. They have no effect here in 
         , ( "graph"
           , Dict.fromList
                 [ ( "label", """Route maker""" )
-                , ( "find", """Find key places""" )
-                , ( "adopt", """Adopt this track""" )
+                , ( "find", """Merge points and enter Route maker mode.""" )
+                , ( "adopt", """Merge points only.""" )
+                , ( "adoptInfo", """You may want to "snap" multiple passes of the track
+together to remove discrepancies, but you're content with the original route and don't
+want to use the other features of Route maker to define your own route.""" )
                 , ( "clear", """Clear the route""" )
                 , ( "revert", """Revert to original track""" )
                 , ( "convert", """Make a new track with this route""" )
@@ -149,7 +152,6 @@ Any changes you make will be reflected here.
 
 **NOTE** Please do not use _Save GPX file_ while editing a section, as that will save only the active section.
 """ )
-                , ( "adoptInfo", """Make permanent the suggested new points.""" )
                 ]
           )
         , ( "bends"

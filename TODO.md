@@ -11,7 +11,8 @@ UX is probably better with live preview of how tolerance affects Key Places.
 But need two options:
 1. Just accept the new merged track points.
 2. Take the new track points AND start working on the graph.
-Not sure data and logic flow permits this.
+
+Should work but unclear how exactly to massage the Track & Graph for option 2.
 
 ---
 
