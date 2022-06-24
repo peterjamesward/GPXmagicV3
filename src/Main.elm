@@ -2173,6 +2173,28 @@ performActionsOnModel actions model =
                         , needsRendering = True
                     }
 
+                ( StartRoutePlanning, Just track ) ->
+                    let
+                        toolOptions =
+                            foldedModel.toolOptions
+
+                        graphOptions =
+                            toolOptions.graphOptions
+
+                        ( newGraphOptions, newTree ) =
+                            Tools.Graph.enterRoutePlanningMode graphOptions track
+
+                        newToolOptions =
+                            { toolOptions | graphOptions = newGraphOptions }
+
+                        newTrack =
+                            { track | trackTree = newTree }
+                    in
+                    { foldedModel
+                        | toolOptions = newToolOptions
+                        , track = Just newTrack
+                    }
+
                 ( AddTraversal edge, Just track ) ->
                     let
                         toolOptions =

@@ -1265,20 +1265,18 @@ update :
 update msg options track wrapper =
     case msg of
         AdoptNewTrack ->
-            ( options, [ Actions.CombineNearbyPoints, Actions.TrackHasChanged ] )
+            ( options
+            , [ Actions.CombineNearbyPoints
+              , Actions.TrackHasChanged
+              ]
+            )
 
         GraphAnalyse ->
-            let
-                newOptions =
-                    { options
-                        | graph = buildGraph track
-                        , analyzed = True
-                        , originalTrack = Just track
-                        , suggestedNewTree = Nothing
-                    }
-            in
-            ( newOptions
-            , [ Actions.HidePreview "graph" ]
+            ( options
+            , [ Actions.CombineNearbyPoints
+              , Actions.StartRoutePlanning
+              , Actions.HidePreview "graph"
+              ]
             )
 
         RevertToTrack ->
@@ -1717,6 +1715,18 @@ type alias Junction =
     { arc : Maybe (Arc3d Meters LocalCoords)
     , trim : Quantity Float Meters
     }
+
+
+enterRoutePlanningMode : Options msg -> TrackLoaded msg -> ( Options msg, PeteTree )
+enterRoutePlanningMode options track =
+    ( { options
+        | graph = buildGraph track
+        , analyzed = True
+        , originalTrack = Just track
+        , suggestedNewTree = Nothing
+      }
+    , options.suggestedNewTree |> Maybe.withDefault track.trackTree
+    )
 
 
 combineNearbyPoints : Options msg -> TrackLoaded msg -> ( Options msg, PeteTree )

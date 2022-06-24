@@ -101,6 +101,7 @@ type ToolAction msg
     | AddTraversal Int
     | AddSelfLoop Int
     | LockToolOpen Bool String
+    | StartRoutePlanning
     | ChangeActiveTrack Int
     | MakeRouteFromGraph
     | CombineNearbyPoints
