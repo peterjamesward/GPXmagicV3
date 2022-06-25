@@ -3,15 +3,23 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.3.8 (2b00ae59)
+# GPXmagic v3.3.9 (2b00ae59)
 
 **GPXmagic V3 works best with Chrome** (by far)
 
-## In 3.3.8
+## In 3.3.9
 
-* Make it really clear that the RGT options have no effect in GPXmagic.
+In Route maker:
 
-(If that means nothing, don't use it.)
+- In "Route" view, as you change the tolerance, you will see how that affects how the route
+is divided into Places and Roads. This should help determine the best tolerance.
+
+- The buttons are re-labelled and work _slightly_ differently. "Merge nearby points" will
+simply combine the nearby points (as a normal track edit) but will not then enter the Route
+setting mode. Whereas "Enter route maker mode" will also merge the points but will then take
+you into the route planning mode of Route maker.
+
+There'll be a new video up soon to demonstrate.
 
 ## Acknowledgements
 

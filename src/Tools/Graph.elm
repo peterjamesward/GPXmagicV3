@@ -1273,7 +1273,11 @@ update msg options track wrapper =
 
         GraphAnalyse ->
             ( options
-            , [ Actions.CombineNearbyPoints
+            , [ if options.matchingTolerance |> Quantity.greaterThanZero then
+                    Actions.CombineNearbyPoints
+
+                else
+                    Actions.NoAction
               , Actions.StartRoutePlanning
               , Actions.HidePreview "graph"
               ]
