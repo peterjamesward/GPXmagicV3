@@ -82,6 +82,7 @@ import Tools.TrackInfoBox
 import ToolsController exposing (ToolEntry, encodeColour, encodeToolState)
 import TrackLoaded exposing (TrackLoaded)
 import Url exposing (Url)
+import Url.Builder as Builder
 import UtilsForViews exposing (uiColourHexString)
 import ViewMap
 import ViewPureStyles exposing (..)
@@ -92,6 +93,9 @@ type Msg
     = GpxRequested
     | GpxSelected File
     | GpxLoaded String
+    | LoadFromUrlChanged String
+    | LoadFromUrl
+    | GpxFromUrl (Result Http.Error String)
     | ToggleLoadOptionMenu
     | ToggleRGTOptions
     | OAuthMessage OAuthMsg
@@ -140,6 +144,7 @@ type alias Model =
     , svgFileOptions : SvgPathExtractor.Options
     , location : I18NOptions.Location
     , rgtOptionsVisible : Bool
+    , loadFromUrl : Maybe String
 
     -- Track stuff
     , track : Maybe (TrackLoaded Msg)
@@ -246,6 +251,7 @@ init mflags origin navigationKey =
       , loadOptionsMenuOpen = False
       , svgFileOptions = SvgPathExtractor.defaultOptions
       , rgtOptionsVisible = False
+      , loadFromUrl = Nothing
       , location = I18N.defaultLocation
       , track = Nothing
       , mapPointsDraggable = False
@@ -316,6 +322,36 @@ render model =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
+    let
+        processGpxContent content =
+            let
+                gpxSegments =
+                    GpxParser.parseSegments content
+
+                trackName =
+                    case GpxParser.parseTrackName content of
+                        Just gotTrackName ->
+                            gotTrackName
+
+                        Nothing ->
+                            model.filename |> Maybe.withDefault "no track name"
+            in
+            case TrackLoaded.trackFromSegments trackName gpxSegments of
+                Just ( track, segments ) ->
+                    ( adoptTrackInModel track segments model
+                    , Cmd.batch
+                        [ showTrackOnMapCentered model.mapPointsDraggable track
+                        , LandUseDataOSM.requestLandUseData
+                            ReceivedLandUseData
+                            track
+                        ]
+                    )
+
+                Nothing ->
+                    ( { model | modalMessage = Just "noload" }
+                    , Cmd.none
+                    )
+    in
     case msg of
         DisplayWelcome ->
             if model.welcomeDisplayed then
@@ -422,6 +458,54 @@ update msg model =
         IpInfoAcknowledged _ ->
             ( model, Cmd.none )
 
+        LoadFromUrlChanged url ->
+            ( { model
+                | loadFromUrl =
+                    if url == "" then
+                        Nothing
+
+                    else
+                        Just url
+              }
+            , Cmd.none
+            )
+
+        LoadFromUrl ->
+            ( model
+            , case model.loadFromUrl of
+                Just url ->
+                    Http.get
+                        { url = url
+                        , expect = Http.expectString GpxFromUrl
+                        }
+
+                {-
+                   Http.request
+                       { method = "GET"
+                       , headers = []
+
+                       --[ Http.header "Access-Control-Allow-Origin" "*"
+                       --, Http.header "Origin" ""
+                       --]
+                       , url = Builder.crossOrigin url [] []
+                       , body = Http.emptyBody
+                       , expect = Http.expectString GpxFromUrl
+                       , timeout = Nothing
+                       , tracker = Nothing
+                       }
+                -}
+                Nothing ->
+                    Cmd.none
+            )
+
+        GpxFromUrl result ->
+            case result of
+                Ok content ->
+                    processGpxContent content
+
+                Err err ->
+                    ( model, Cmd.none )
+
         GpxRequested ->
             ( { model | modalMessage = Just "askgpx" }
             , Select.file [ "text/gpx" ] GpxSelected
@@ -436,33 +520,7 @@ update msg model =
             )
 
         GpxLoaded content ->
-            let
-                gpxSegments =
-                    GpxParser.parseSegments content
-
-                trackName =
-                    case GpxParser.parseTrackName content of
-                        Just gotTrackName ->
-                            gotTrackName
-
-                        Nothing ->
-                            model.filename |> Maybe.withDefault "no track name"
-            in
-            case TrackLoaded.trackFromSegments trackName gpxSegments of
-                Just ( track, segments ) ->
-                    ( adoptTrackInModel track segments model
-                    , Cmd.batch
-                        [ showTrackOnMapCentered model.mapPointsDraggable track
-                        , LandUseDataOSM.requestLandUseData
-                            ReceivedLandUseData
-                            track
-                        ]
-                    )
-
-                Nothing ->
-                    ( { model | modalMessage = Just "noload" }
-                    , Cmd.none
-                    )
+            processGpxContent content
 
         SetRenderDepth depth ->
             case model.track of
@@ -1059,12 +1117,21 @@ topLoadingBar model =
                 , tooltip below (localisedTooltip model.location "main" "import")
                 , inFront <|
                     if model.loadOptionsMenuOpen then
-                        el
+                        column
                             [ moveRight 30
                             , Background.color FlatColors.ChinesePalette.antiFlashWhite
                             , htmlAttribute (style "z-index" "20")
+                            , padding 5
+                            , spacing 5
+                            , Border.color FlatColors.ChinesePalette.peace
+                            , Border.rounded 4
+                            , Border.width 2
                             ]
-                            (SvgPathExtractor.view SvgMsg model.ipInfo)
+                            [ SvgPathExtractor.view SvgMsg model.ipInfo
+
+                            -- Hidden until CORS thing sorted.
+                            --, loadFromUrl
+                            ]
 
                     else
                         none
@@ -1073,6 +1140,29 @@ topLoadingBar model =
                 { onPress = Just ToggleLoadOptionMenu
                 , label = useIconWithSize 12 FeatherIcons.moreHorizontal
                 }
+
+        loadFromUrl =
+            row []
+                [ Input.text
+                    [ padding 5
+                    , width <| minimum 200 <| fill
+                    , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always NoOp)
+                    ]
+                    { text = model.loadFromUrl |> Maybe.withDefault ""
+                    , onChange = LoadFromUrlChanged
+                    , placeholder = Just <| Input.placeholder [] <| localHelper "urlhelp"
+                    , label = Input.labelHidden "URL"
+                    }
+                , button
+                    [ padding 5
+                    , Background.color FlatColors.ChinesePalette.antiFlashWhite
+                    , Border.color FlatColors.FlatUIPalette.peterRiver
+                    , Border.width 2
+                    ]
+                    { onPress = Just LoadFromUrl
+                    , label = localHelper "loadurl"
+                    }
+                ]
 
         loadGpxButton =
             button
@@ -1140,9 +1230,6 @@ topLoadingBar model =
         [ globalOptions model
         , loadGpxButton
         , moreOptionsButton
-
-        --, el [ Font.color <| contrastingColour model.backgroundColour ]
-        --    (text <| bestTrackName model)
         , case model.filename of
             Just filename ->
                 Input.text
