@@ -5,13 +5,21 @@
 
 # WIP
 
-## Load
+## Route maker
 
-Download from URL.
+Icing on the cake for Route Maker would be to be able to delete places/roads.
+> No problem now there’s the popup menu.
+
+Still think it'd be good to automatically select the Route tab when "Enter route maker mode" is
+selected (or display a dialog message saying to use the Route tab if it isn't open).
 
 ---
 
 # BACKLOG
+
+## Load
+
+Download from URL.
 
 ## Tools organisation
 

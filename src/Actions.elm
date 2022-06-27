@@ -100,6 +100,7 @@ type ToolAction msg
     | Autofix (List Int)
     | AddTraversal Int
     | AddSelfLoop Int
+    | DeleteEdge Int
     | LockToolOpen Bool String
     | StartRoutePlanning
     | ChangeActiveTrack Int

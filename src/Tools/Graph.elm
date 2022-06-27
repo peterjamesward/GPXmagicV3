@@ -157,6 +157,14 @@ edgeCanBeAdded newEdge options =
             False
 
 
+edgeCanBeDeleted : Int -> Options msg -> Bool
+edgeCanBeDeleted edge options =
+    -- Edge can be deleted if it's not the only edge and it's not used in the route.
+    Dict.size options.graph.edges
+        > 1
+        && (not <| List.any (\traversal -> traversal.edge == edge) options.graph.userRoute)
+
+
 loopCanBeAdded : Int -> Options msg -> Bool
 loopCanBeAdded node options =
     -- Loop can be added if node is same as final node of last traversal.
@@ -202,6 +210,13 @@ edgeCanBeFlipped newEdge options =
         _ ->
             False
 
+
+deleteEdge : Int -> Options msg -> Options msg
+deleteEdge edge options =
+    -- Check is not used in route.
+    -- Remove edge from dictionary.
+    -- If either end node has no other edges, remove them as well.
+    options
 
 addTraversal : Int -> Options msg -> Options msg
 addTraversal newEdge options =

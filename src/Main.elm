@@ -2314,6 +2314,22 @@ performActionsOnModel actions model =
                     in
                     { foldedModel | toolOptions = newToolOptions }
 
+                ( DeleteEdge edge, Just track ) ->
+                    let
+                        toolOptions =
+                            foldedModel.toolOptions
+
+                        graphOptions =
+                            toolOptions.graphOptions
+
+                        newGraphOptions =
+                            Tools.Graph.deleteEdge edge graphOptions
+
+                        newToolOptions =
+                            { toolOptions | graphOptions = newGraphOptions }
+                    in
+                    { foldedModel | toolOptions = newToolOptions }
+
                 ( ChangeActiveTrack edge, Just track ) ->
                     let
                         toolOptions =

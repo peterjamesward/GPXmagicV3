@@ -69,6 +69,7 @@ type Msg
     | PopupHide
     | ToggleEdgeMode
     | AddTraversal Int
+    | DeleteRoad Int
     | EditRoad Int
     | AddSelfLoop Int
 
@@ -220,6 +221,14 @@ popup msgWrapper context options =
                         { onPress = Just <| msgWrapper <| EditRoad edge
                         , label = text "Edit this road"
                         }
+                    , if Tools.Graph.edgeCanBeDeleted edge options then
+                        Input.button []
+                            { onPress = Just <| msgWrapper <| DeleteRoad edge
+                            , label = text "Delete this Road"
+                            }
+
+                      else
+                        none
                     , Input.button []
                         { onPress = Just <| msgWrapper PopupHide
                         , label = text "Close menu"
@@ -754,6 +763,11 @@ update msg msgWrapper graph area context =
                 else
                     Actions.DisplayInfo "graph" "edit"
               ]
+            )
+
+        DeleteRoad edge ->
+            ( { context | clickPoint = Nothing, clickFeature = ClickNone }
+            , [ Actions.DeleteEdge edge ]
             )
 
 
