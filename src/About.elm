@@ -3,21 +3,23 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.3.9 (e10db30d)
+# GPXmagic v3.3.10 (e10db30d)
 
 **GPXmagic V3 works best with Chrome** (by far)
 
-## In 3.3.9
+## Changes
 
 In Route maker:
 
-- In "Route" view, as you change the tolerance, you will see how that affects how the route
-is divided into Places and Roads. This should help determine the best tolerance.
+- When you click "Enter route maker mode", the track display will switch to the Route view, unless
+you already have this visible. You will need this to make changes to the route.
 
-- The buttons are re-labelled and work _slightly_ differently. "Merge nearby points" will
-simply combine the nearby points (as a normal track edit) but will not then enter the Route
-setting mode. Whereas "Enter route maker mode" will also merge the points but will then take
-you into the route planning mode of Route maker.
+- There's a new menu option in the Route view when you click on a Road. If the Road is not being
+used in the route, you can delete the road. If either end Place now has no Roads, they will also
+be deleted.
+
+- If you deleted the wrong Road, you can use the new "Undo delete road" button which appears below
+the Route listing.
 
 There'll be a new video up soon to demonstrate.
 

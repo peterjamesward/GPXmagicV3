@@ -5,14 +5,6 @@
 
 # WIP
 
-## Route maker
-
-David Ogle: Icing on the cake for Route Maker would be to be able to delete places/roads.
-> Looks OK.
-
-David Ogle: Still think it'd be good to automatically select the Route tab when "Enter route maker mode" is
-selected (or display a dialog message saying to use the Route tab if it isn't open).
-
 ---
 
 # BACKLOG
