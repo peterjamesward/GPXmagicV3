@@ -9,16 +9,19 @@ aboutText =
 
 ## Changes
 
-In Route maker:
+In **Route maker**:
 
-- When you click "Enter route maker mode", the track display will switch to the Route view, unless
-you already have this visible. You will need this to make changes to the route.
+- When you click _Enter route maker mode_, the track display will switch to the Route view, unless
+you already have this visible.
 
 - There's a new menu option in the Route view when you click on a Road. If the Road is not being
-used in the route, you can delete the road. If either end Place now has no Roads, they will also
-be deleted.
+used in the route, you can delete the road.
 
-- If you deleted the wrong Road, you can use the new "Undo delete road" button which appears below
+- If either Place at the deleted Road ends now has no Roads, they will also be deleted.
+
+- You may want to do this straight after _Clear the route_, to remove unwanted clutter.
+
+- If you deleted the wrong Road, you can use the new _Undo delete road_ button that appears below
 the Route listing.
 
 There'll be a new video up soon to demonstrate.
