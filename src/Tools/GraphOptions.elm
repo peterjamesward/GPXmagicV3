@@ -36,6 +36,7 @@ type alias Options msg =
     , perpsForPreview : List InsertedPointOnLeaf
     , suggestedNewTree : Maybe PeteTree
     , suggestedNewGraph : Maybe (Graph msg)
+    , graphUndos : List (Graph msg)
     }
 
 

@@ -2274,12 +2274,16 @@ performActionsOnModel actions model =
                         newToolOptions =
                             { toolOptions | graphOptions = newGraphOptions }
 
+                        newPaneLayout =
+                            PaneLayoutManager.forceRouteView foldedModel.paneLayoutOptions
+
                         newTrack =
                             { track | trackTree = newTree }
                     in
                     { foldedModel
                         | toolOptions = newToolOptions
                         , track = Just newTrack
+                        , paneLayoutOptions = newPaneLayout
                     }
 
                 ( AddTraversal edge, Just track ) ->
@@ -2322,11 +2326,8 @@ performActionsOnModel actions model =
                         graphOptions =
                             toolOptions.graphOptions
 
-                        newGraphOptions =
-                            Tools.Graph.deleteEdge edge graphOptions
-
                         newToolOptions =
-                            { toolOptions | graphOptions = newGraphOptions }
+                            { toolOptions | graphOptions = Tools.Graph.deleteEdge edge graphOptions }
                     in
                     { foldedModel | toolOptions = newToolOptions }
 

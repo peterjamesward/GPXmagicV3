@@ -511,44 +511,41 @@ update paneMsg msgWrapper mTrack graph contentArea options previews =
 
                 else
                     Actions.NoAction
-
-              --, Actions.DelayMessage 100 (msgWrapper SliderTimeout)
               ]
             )
 
 
+isViewVisible : ViewMode -> Options -> Bool
+isViewVisible mode options =
+    List.any (\pane -> pane.activeView == mode) <|
+        case options.paneLayout of
+            PanesOne ->
+                [ options.pane1 ]
 
---SliderTimeout ->
---    let
---        newOptions =
---            { options
---                | sliderState =
---                    case options.sliderState of
---                        SliderIdle ->
---                            SliderIdle
---
---                        SliderMoved ->
---                            SliderWaitingForTimeout
---
---                        SliderWaitingForTimeout ->
---                            SliderIdle
---            }
---    in
---    ( newOptions
---    , [ if options.sliderState /= SliderIdle && newOptions.sliderState == SliderIdle then
---            -- Force re-render once only.
---            TrackHasChanged
---
---        else
---            Actions.NoAction
---      , if newOptions.sliderState /= SliderIdle then
---            -- Ask for a timer, to see if control has stopped moving.
---            Actions.DelayMessage 100 (msgWrapper SliderTimeout)
---
---        else
---            Actions.NoAction
---      ]
---    )
+            PanesLeftRight ->
+                [ options.pane1, options.pane2 ]
+
+            PanesUpperLower ->
+                [ options.pane1, options.pane2 ]
+
+            PanesOnePlusTwo ->
+                [ options.pane1, options.pane2, options.pane3 ]
+
+            PanesGrid ->
+                [ options.pane1, options.pane2, options.pane3, options.pane4 ]
+
+
+forceRouteView : Options -> Options
+forceRouteView options =
+    if isViewVisible ViewGraph options then
+        options
+
+    else
+        let
+            pane1 =
+                options.pane1
+        in
+        { options | pane1 = { pane1 | activeView = ViewGraph } }
 
 
 initialise : TrackLoaded msg -> Options -> Options

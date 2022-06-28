@@ -77,6 +77,7 @@ defaultOptions =
     , perpsForPreview = []
     , suggestedNewTree = Nothing
     , suggestedNewGraph = Nothing
+    , graphUndos = []
     }
 
 
@@ -93,6 +94,7 @@ type Msg
     | RevertToTrack
     | SetTolerance (Quantity Float Meters)
     | AdoptNewTrack
+    | UndoDeleteRoad
 
 
 emptyGraph : Graph msg
@@ -216,7 +218,46 @@ deleteEdge edge options =
     -- Check is not used in route.
     -- Remove edge from dictionary.
     -- If either end node has no other edges, remove them as well.
-    options
+    let
+        graph =
+            options.graph
+
+        newGraph =
+            { graph | edges = Dict.remove edge graph.edges }
+                |> pruneOrphanedNodes
+    in
+    { options
+        | graph = newGraph
+        , graphUndos = graph :: options.graphUndos
+    }
+
+
+pruneOrphanedNodes : Graph msg -> Graph msg
+pruneOrphanedNodes graph =
+    let
+        nodeHasEdge k v =
+            not <| List.isEmpty <| listEdgesForNode k graph
+    in
+    { graph | nodes = Dict.filter nodeHasEdge graph.nodes }
+
+
+listEdgesForNode : Int -> Graph msg -> List Int
+listEdgesForNode node graph =
+    let
+        incoming =
+            graph.edges
+                |> Dict.filter
+                    (\_ ( ( fromNode, _, _ ), _ ) -> fromNode == node)
+                |> Dict.keys
+
+        outgoing =
+            graph.edges
+                |> Dict.filter
+                    (\_ ( ( _, toNode, _ ), _ ) -> toNode == node)
+                |> Dict.keys
+    in
+    List.Extra.unique (incoming ++ outgoing)
+
 
 addTraversal : Int -> Options msg -> Options msg
 addTraversal newEdge options =
@@ -477,13 +518,26 @@ view location imperial wrapper options =
                 }
 
         finishButton =
-            if List.length options.graph.userRoute > 0 then
+            if not <| List.isEmpty options.graph.userRoute then
                 row [ spacing 3 ]
                     [ infoButton (wrapper <| DisplayInfo "graph" "render")
                     , I.button
                         neatToolsBorder
                         { onPress = Just (wrapper ConvertFromGraph)
                         , label = i18n "convert"
+                        }
+                    ]
+
+            else
+                none
+
+        undoButton =
+            if not <| List.isEmpty options.graphUndos then
+                row [ spacing 3 ]
+                    [ I.button
+                        neatToolsBorder
+                        { onPress = Just (wrapper UndoDeleteRoad)
+                        , label = i18n "undo"
                         }
                     ]
 
@@ -786,6 +840,7 @@ view location imperial wrapper options =
                     , revertButton
                     ]
                 , traversalsTable
+                , undoButton
                 , wrappedRow [ spacing 5 ] [ offsetSlider, minRadiusSlider ]
                 , finishButton
                 ]
@@ -1392,10 +1447,23 @@ update msg options track wrapper =
             in
             ( { options
                 | graph = newGraph
-                , selectedTraversal = 0
+                , selectedTraversal = -1
               }
             , []
             )
+
+        UndoDeleteRoad ->
+            case options.graphUndos of
+                lastVersion :: olderVersions ->
+                    ( { options
+                        | graph = lastVersion
+                        , graphUndos = olderVersions
+                      }
+                    , []
+                    )
+
+                _ ->
+                    ( options, [] )
 
 
 lookForClusters :
@@ -1743,6 +1811,8 @@ enterRoutePlanningMode options track =
         , analyzed = True
         , originalTrack = Just track
         , suggestedNewTree = Nothing
+        , suggestedNewGraph = Nothing
+        , graphUndos = []
       }
     , options.suggestedNewTree |> Maybe.withDefault track.trackTree
     )

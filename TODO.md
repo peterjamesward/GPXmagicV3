@@ -7,10 +7,10 @@
 
 ## Route maker
 
-Icing on the cake for Route Maker would be to be able to delete places/roads.
-> No problem now there’s the popup menu.
+David Ogle: Icing on the cake for Route Maker would be to be able to delete places/roads.
+> Looks OK.
 
-Still think it'd be good to automatically select the Route tab when "Enter route maker mode" is
+David Ogle: Still think it'd be good to automatically select the Route tab when "Enter route maker mode" is
 selected (or display a dialog message saying to use the Route tab if it isn't open).
 
 ---
@@ -20,6 +20,7 @@ selected (or display a dialog message saying to use the Route tab if it isn't op
 ## Load
 
 Download from URL.
+> CORS issues.
 
 ## Tools organisation
 
@@ -42,7 +43,7 @@ Need more work on number formats.
 Variant of "request from local storage" that takes a wrapped message so that the return value
 can be directed to a tool or a view.
 
-Try to move out the residual tool-specific stuff in Main.performActions.
+Remove tool-specific stuff in Main.performActions.
 
 Put all Font, Colour etc into a Palette/Style module for ease of change.
 
