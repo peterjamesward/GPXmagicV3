@@ -9,14 +9,6 @@
 
 # BACKLOG
 
-## Route maker
-
-Delete Place in context menu if exactly two roads (can happen after Road delete) 
--OR- do this automatically after Road delete.
-In either case, combine two Roads into one, allowing for directions of course.
-
-> Needs debugging.
-
 ## Load
 
 Download from URL.

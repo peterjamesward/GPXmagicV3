@@ -350,7 +350,7 @@ removeIfRedundantPlace node graph =
             if low1 < low2 then
                 let
                     newEdge1 =
-                        ( ( low1, low2, via1 ), joinTracks (reverseTrack track1) track2 )
+                        ( ( low1, low2, via1 ), joinTracks track1 (reverseTrack track2) )
                 in
                 { graph
                     | edges =
@@ -364,7 +364,7 @@ removeIfRedundantPlace node graph =
             else if low2 < low1 then
                 let
                     newEdge2 =
-                        ( ( low2, low1, via2 ), joinTracks (reverseTrack track2) track1 )
+                        ( ( low2, low1, via2 ), joinTracks track2 (reverseTrack track1) )
                 in
                 { graph
                     | edges =
