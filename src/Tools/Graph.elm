@@ -307,7 +307,7 @@ removeIfRedundantPlace node graph =
                 ( edge2Index, ( ( _, high2, via2 ), track2 ) ) =
                     asLow2
             in
-            if high1 < high2 then
+            if high1 <= high2 then
                 let
                     newEdge1 =
                         ( ( high1, high2, via1 ), joinTracks (reverseTrack track1) track2 )
@@ -321,7 +321,8 @@ removeIfRedundantPlace node graph =
                     , nodes = Dict.remove node graph.nodes
                 }
 
-            else if high2 < high1 then
+            else
+                --if high2 < high1 then
                 let
                     newEdge2 =
                         ( ( high2, high1, via2 ), joinTracks (reverseTrack track2) track1 )
@@ -335,10 +336,6 @@ removeIfRedundantPlace node graph =
                     , nodes = Dict.remove node graph.nodes
                 }
 
-            else
-                -- Must ignore the "self loop" case.
-                graph
-
         ( [], [ asHigh1, asHigh2 ] ) ->
             let
                 ( edge1Index, ( ( low1, _, via1 ), track1 ) ) =
@@ -347,7 +344,7 @@ removeIfRedundantPlace node graph =
                 ( edge2Index, ( ( low2, _, via2 ), track2 ) ) =
                     asHigh2
             in
-            if low1 < low2 then
+            if low1 <= low2 then
                 let
                     newEdge1 =
                         ( ( low1, low2, via1 ), joinTracks track1 (reverseTrack track2) )
@@ -361,7 +358,8 @@ removeIfRedundantPlace node graph =
                     , nodes = Dict.remove node graph.nodes
                 }
 
-            else if low2 < low1 then
+            else
+                --if low2 < low1 then
                 let
                     newEdge2 =
                         ( ( low2, low1, via2 ), joinTracks track2 (reverseTrack track1) )
@@ -374,10 +372,6 @@ removeIfRedundantPlace node graph =
                             |> Dict.insert edge1Index newEdge2
                     , nodes = Dict.remove node graph.nodes
                 }
-
-            else
-                -- Must ignore the "self loop" case.
-                graph
 
         ( [ asLow ], [ asHigh ] ) ->
             let

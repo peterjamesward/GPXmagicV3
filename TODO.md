@@ -1,6 +1,9 @@
 
 # BUGS
 
+* Route maker post road delete place pruning does not detect case of A=B-C when B-C is deleted,
+it should be able to remove B and leave the A-A self-loop.
+
 --- 
 
 # WIP

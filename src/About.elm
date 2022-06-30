@@ -3,7 +3,7 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.3.11 (717db0a7)
+# GPXmagic v3.3.12 (717db0a7)
 
 **GPXmagic V3 works best with Chrome** (by far)
 
@@ -12,7 +12,7 @@ aboutText =
 In **Route maker**:
 
 - When you Delete a Road, if that causes the Places at either end to simply be way points on
-the track but not actually offer any choice of route, they are removed.
+the track but not actually offer any choice of route, they are removed, slightly better.
 
 There'll be a new video up one day to demonstrate.
 
