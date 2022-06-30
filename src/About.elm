@@ -3,7 +3,7 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.3.10 (821cd804)
+# GPXmagic v3.3.11 (821cd804)
 
 **GPXmagic V3 works best with Chrome** (by far)
 
@@ -11,20 +11,10 @@ aboutText =
 
 In **Route maker**:
 
-- When you click _Enter route maker mode_, the track display will switch to the Route view, unless
-you already have this visible.
+- When you Delete a Road, if that causes the Places at either end to simply be way points on
+the track but not actually offer any choice of route, they are removed.
 
-- There's a new menu option in the Route view when you click on a Road. If the Road is not being
-used in the route, you can delete the road.
-
-- If either Place at the deleted Road ends now has no Roads, they will also be deleted.
-
-- You may want to do this straight after _Clear the route_, to remove unwanted clutter.
-
-- If you deleted the wrong Road, you can use the new _Undo delete road_ button that appears below
-the Route listing.
-
-There'll be a new video up soon to demonstrate.
+There'll be a new video up one day to demonstrate.
 
 ## Acknowledgements
 
