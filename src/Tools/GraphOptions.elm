@@ -40,9 +40,14 @@ type alias Options msg =
     }
 
 
+type alias Edge msg =
+    -- (low node index, high node index, point 1 XY)
+    ( ( Int, Int, XY ), TrackLoaded msg )
+
+
 type alias Graph msg =
     { nodes : Dict Int XY
-    , edges : Dict Int ( ( Int, Int, XY ), TrackLoaded msg ) -- key == (low node index, high node index, point 1 XY)
+    , edges : Dict Int (Edge msg)
     , userRoute : List Traversal
     , referenceLonLat : GPXSource
     }
