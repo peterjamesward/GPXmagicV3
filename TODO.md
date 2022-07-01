@@ -1,8 +1,8 @@
 
 # BUGS
 
-* Route maker post road delete place pruning does not detect case of A=B-C when B-C is deleted,
-it should be able to remove B and leave the A-A self-loop.
+* It's possible to arrive at a route with one Road and no Places.
+> Strictly, place is implied but not in the Nodes dict!
 
 --- 
 

@@ -318,7 +318,13 @@ removeIfRedundantPlace node graph =
                             |> Dict.remove edge1Index
                             |> Dict.remove edge2Index
                             |> Dict.insert edge1Index newEdge1
-                    , nodes = Dict.remove node graph.nodes
+                    , nodes =
+                        if node == high1 then
+                            -- Don't remove if self-loop
+                            graph.nodes
+
+                        else
+                            Dict.remove node graph.nodes
                 }
 
             else
@@ -333,7 +339,13 @@ removeIfRedundantPlace node graph =
                             |> Dict.remove edge1Index
                             |> Dict.remove edge2Index
                             |> Dict.insert edge1Index newEdge2
-                    , nodes = Dict.remove node graph.nodes
+                    , nodes =
+                        if node == high1 then
+                            -- Don't remove if self-loop
+                            graph.nodes
+
+                        else
+                            Dict.remove node graph.nodes
                 }
 
         ( [], [ asHigh1, asHigh2 ] ) ->
@@ -355,7 +367,13 @@ removeIfRedundantPlace node graph =
                             |> Dict.remove edge1Index
                             |> Dict.remove edge2Index
                             |> Dict.insert edge1Index newEdge1
-                    , nodes = Dict.remove node graph.nodes
+                    , nodes =
+                        if node == low1 then
+                            -- Don't remove if self-loop
+                            graph.nodes
+
+                        else
+                            Dict.remove node graph.nodes
                 }
 
             else
@@ -370,7 +388,13 @@ removeIfRedundantPlace node graph =
                             |> Dict.remove edge1Index
                             |> Dict.remove edge2Index
                             |> Dict.insert edge1Index newEdge2
-                    , nodes = Dict.remove node graph.nodes
+                    , nodes =
+                        if node == low1 then
+                            -- Don't remove if self-loop
+                            graph.nodes
+
+                        else
+                            Dict.remove node graph.nodes
                 }
 
         ( [ asLow ], [ asHigh ] ) ->
@@ -390,7 +414,13 @@ removeIfRedundantPlace node graph =
                         |> Dict.remove edge1Index
                         |> Dict.remove edge2Index
                         |> Dict.insert edge1Index newEdge
-                , nodes = Dict.remove node graph.nodes
+                , nodes =
+                        if node == high then
+                            -- Don't remove if self-loop
+                            graph.nodes
+
+                        else
+                            Dict.remove node graph.nodes
             }
 
         _ ->
