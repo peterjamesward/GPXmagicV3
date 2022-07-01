@@ -1,9 +1,6 @@
 
 # BUGS
 
-* It's possible to arrive at a route with one Road and no Places.
-> Strictly, place is implied but not in the Nodes dict!
-
 --- 
 
 # WIP
