@@ -121,7 +121,8 @@ want to use the other features of Route maker to define your own route.""" )
                 , ( "place1", """Place {0}""" )
                 , ( "place2", """place {0}""" )
                 , ( "road", """road {0}""" )
-                , ( "guidanceNotAnalyzed", """Route maker converts your track into sections.
+                , ( "guidanceNotAnalyzed", """Route maker partitions the track into sections
+ of Road between key Places.
 Switch to the Route view to see a preview.
 Use the tolerance slider to ensure key Places are correctly positioned.""" )
                 , ( "guidanceAnalyzed", """You can now change the route and
@@ -145,8 +146,9 @@ Distance within which nearby points will be seen as on the same road.
 
 Adjust this value to find the best outcome for IRL rides, also ridewithgps.
 """ )
-                , ( "offset", """Offset the generated road using this route as the centre-line.""" )
-                , ( "radius", """When passing a place, will attempt use this to create the bend.""" )
+                , ( "offset", """Using this route as the centre-line, offset the new track to
+separate traffic in different directions.""" )
+                , ( "radius", """When passing a Place, attempt to use this radius between sections.""" )
                 , ( "render", """
 Create a single road, using your route and offsetting the road
 from the centre line (if you want to avoid collisions with oncoming avatars). As the same
