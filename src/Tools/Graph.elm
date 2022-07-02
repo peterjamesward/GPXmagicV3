@@ -324,7 +324,7 @@ removeIfRedundantPlace node graph =
                         --    graph.nodes
                         --
                         --else
-                            Dict.remove node graph.nodes
+                        Dict.remove node graph.nodes
                 }
 
             else
@@ -345,7 +345,7 @@ removeIfRedundantPlace node graph =
                         --    graph.nodes
                         --
                         --else
-                            Dict.remove node graph.nodes
+                        Dict.remove node graph.nodes
                 }
 
         ( [], [ asHigh1, asHigh2 ] ) ->
@@ -373,7 +373,7 @@ removeIfRedundantPlace node graph =
                         --    graph.nodes
                         --
                         --else
-                            Dict.remove node graph.nodes
+                        Dict.remove node graph.nodes
                 }
 
             else
@@ -394,7 +394,7 @@ removeIfRedundantPlace node graph =
                         --    graph.nodes
                         --
                         --else
-                            Dict.remove node graph.nodes
+                        Dict.remove node graph.nodes
                 }
 
         ( [ asLow ], [ asHigh ] ) ->
@@ -415,12 +415,12 @@ removeIfRedundantPlace node graph =
                         |> Dict.remove edge2Index
                         |> Dict.insert edge1Index newEdge
                 , nodes =
-                        if node == high then
-                            -- Don't remove if self-loop
-                            graph.nodes
+                    if node == high then
+                        -- Don't remove if self-loop
+                        graph.nodes
 
-                        else
-                            Dict.remove node graph.nodes
+                    else
+                        Dict.remove node graph.nodes
             }
 
         _ ->
@@ -1020,14 +1020,30 @@ view location imperial wrapper options =
                                 max 0 (options.selectedTraversal - 1)
                 , label = useIconWithSize 16 FeatherIcons.chevronLeft
                 }
+
+        guidanceText =
+            row []
+                [ useIconWithSize 20 FeatherIcons.info
+                , paragraph [ padding 4 ]
+                    [ if options.analyzed then
+                        if List.isEmpty options.graph.userRoute then
+                            i18n "guidanceNoRoute"
+
+                        else
+                            i18n "guidanceAnalyzed"
+
+                      else
+                        i18n "guidanceNotAnalyzed"
+                    ]
+                ]
     in
-    el
+    column
         [ width fill
         , Background.color FlatColors.ChinesePalette.antiFlashWhite
         , padding 4
         ]
-    <|
-        if options.analyzed then
+        [ guidanceText
+        , if options.analyzed then
             column [ width fill, padding 4, spacing 10 ]
                 [ row [ centerX, width fill, spacing 10 ]
                     [ traversalPrevious
@@ -1041,12 +1057,13 @@ view location imperial wrapper options =
                 , finishButton
                 ]
 
-        else
+          else
             wrappedRow [ centerX, width fill, spacing 10 ]
                 [ toleranceSlider
                 , adoptTrackButton
                 , analyseButton
                 ]
+        ]
 
 
 type alias LeafIndexEntry =

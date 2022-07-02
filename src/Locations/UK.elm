@@ -24,7 +24,7 @@ textDictionary =
                 [ ( "loadgpx", """Load GPX file""" )
                 , ( "savegpx", """Save GPX file""" )
                 , ( "loadurl", """Load GPX from HTTP URL""" )
-                , ( "urlhelp", """Paste or type web address of GPX file here""")
+                , ( "urlhelp", """Paste or type web address of GPX file here""" )
                 , ( "notrack", """No track loaded""" )
                 , ( "unnamed", """Unnamed track""" )
                 , ( "import", """Other file options""" )
@@ -70,7 +70,7 @@ Click anywhere to dismiss this message. It will probably not appear again.
                 , ( "maxSlope", """Maximum slope: {0}%""" )
                 , ( "info", """These options write special flags in the GPX file that will
 mean something to the Wahoo RGT Magic Roads parser. They have no effect here in GPXmagic.
-""")
+""" )
                 ]
           )
         , ( "panes"
@@ -107,7 +107,7 @@ want to use the other features of Route maker to define your own route.""" )
                 , ( "convert", """Make a new track with this route""" )
                 , ( "isOffset", """Offset: {0}m {1}""" )
                 , ( "isTolerance", """Tolerance: {0}""" )
-                , ( "undo", """Undo delete Road""")
+                , ( "undo", """Undo delete Road""" )
                 , ( "left", """left""" )
                 , ( "right", """right""" )
                 , ( "isRadius", """Radius {0}m""" )
@@ -121,6 +121,14 @@ want to use the other features of Route maker to define your own route.""" )
                 , ( "place1", """Place {0}""" )
                 , ( "place2", """place {0}""" )
                 , ( "road", """road {0}""" )
+                , ( "guidanceNotAnalyzed", """Route maker converts your track into sections.
+Switch to the Route view to see a preview.
+Use the tolerance slider to ensure key Places are correctly positioned.""" )
+                , ( "guidanceAnalyzed", """You can now change the route and
+edit individual sections. Click on a Road or Place to see available actions.
+You can clear the route completely, and remove unwanted Roads.
+When ready, make a complete new track with optional offset.""" )
+                , ( "guidanceNoRoute", """To build your route clicking on a road and select "Add to route".""" )
                 , ( "info", """
 We follow the route looking for places and road sections that are used more than once.
 This allows us to divide the route into a list of Roads, where each Road goes from from one
