@@ -3,7 +3,7 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.3.14 (c6d353d2)
+# GPXmagic v3.3.14 (1652d54d)
 
 **GPXmagic V3 works best with Chrome** (by far)
 
