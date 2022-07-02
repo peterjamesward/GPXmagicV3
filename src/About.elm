@@ -9,12 +9,7 @@ aboutText =
 
 ## Changes
 
-In **Route maker**:
-
-- When you Delete a Road, if that causes the Places at either end to simply be way points on
-the track but not actually offer any choice of route, they are removed, slightly better.
-
-There'll be a new video up one day to demonstrate.
+* Added some guidance text to Route maker. (Kindly suggested by David Ogle.)
 
 ## Acknowledgements
 
