@@ -1022,7 +1022,10 @@ view location imperial wrapper options =
                 }
 
         guidanceText =
-            row []
+            row
+                [ Background.color FlatColors.AmericanPalette.lightGreenishBlue
+                , Border.rounded 5
+                ]
                 [ useIconWithSize 20 FeatherIcons.info
                 , paragraph [ padding 4 ]
                     [ if options.analyzed then
