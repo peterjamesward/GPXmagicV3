@@ -477,7 +477,11 @@ addTraversal newEdge options =
                                 lastEdgeInfo.lowNode
 
                         newEdgeDirection =
-                            if finalNode == addedEdgeInfo.lowNode then
+                            -- Special case if added section is a loop.
+                            if addedEdgeInfo.lowNode == addedEdgeInfo.highNode then
+                                Natural
+
+                            else if finalNode == addedEdgeInfo.lowNode then
                                 Natural
 
                             else
@@ -1977,7 +1981,7 @@ buildGraph track =
                                     , highNode = highNode
                                     , via = discriminator
                                     , track = newEdgeTrack
-                                    , originalDirection = Natural
+                                    , originalDirection = traversal.direction
                                     }
                                     inputState.edgesDict
                             , traversals = traversal :: inputState.traversals

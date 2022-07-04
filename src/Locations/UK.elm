@@ -129,7 +129,8 @@ Use the tolerance slider to ensure key Places are correctly positioned.""" )
 edit individual sections. Click on a Road or Place to see available actions.
 You can clear the route completely, and remove unwanted Roads.
 When ready, make a complete new track with optional offset.""" )
-                , ( "guidanceNoRoute", """To build your route clicking on a road and select "Add to route".""" )
+                , ( "guidanceNoRoute", """To build your route, click on a road and select "Add to route".
+ Always check the direction of loops and reverse if necessary in the route list.""" )
                 , ( "info", """
 We follow the route looking for places and road sections that are used more than once.
 This allows us to divide the route into a list of Roads, where each Road goes from from one
