@@ -5,6 +5,9 @@
 
 # WIP
 
+Something else I've just noticed with the Bassetlaw gpx file - the direction of the loop road it generates is in the wrong direction.
+It's easy to change the direction in the list, but it'd be ideal if it could detect the direction based on the trackpoints, so by default the route is always in the direction of the original track.
+
 ---
 
 # BACKLOG

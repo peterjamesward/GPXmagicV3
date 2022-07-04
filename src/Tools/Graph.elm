@@ -136,23 +136,24 @@ edgeCanBeAdded newEdge options =
         , Dict.get newEdge options.graph.edges
         )
     of
-        ( Just { edge, direction }, Just ( ( n1, n2, xy ), _ ) ) ->
-            case Dict.get edge options.graph.edges of
-                Just ( ( start, end, via ), _ ) ->
+        ( Just lastTraversal, Just clickedEdge ) ->
+            case Dict.get lastTraversal.edge options.graph.edges of
+                Just currentLastEdge ->
                     let
                         finalNode =
-                            if direction == Natural then
-                                end
+                            if lastTraversal.direction == Natural then
+                                currentLastEdge.highNode
 
                             else
-                                start
+                                currentLastEdge.lowNode
                     in
-                    finalNode == n1 || finalNode == n2
+                    finalNode == clickedEdge.lowNode || finalNode == clickedEdge.highNode
 
                 Nothing ->
                     False
 
-        ( Nothing, Just ( ( n1, n2, xy ), _ ) ) ->
+        ( Nothing, Just _ ) ->
+            -- Any edge can be the first edge used.
             True
 
         _ ->
@@ -173,16 +174,16 @@ loopCanBeAdded node options =
     case
         List.Extra.last options.graph.userRoute
     of
-        Just { edge, direction } ->
-            case Dict.get edge options.graph.edges of
-                Just ( ( start, end, via ), _ ) ->
+        Just traversal ->
+            case Dict.get traversal.edge options.graph.edges of
+                Just finalEdge ->
                     let
                         finalNode =
-                            if direction == Natural then
-                                end
+                            if traversal.direction == Natural then
+                                finalEdge.highNode
 
                             else
-                                start
+                                finalEdge.lowNode
                     in
                     finalNode == node
 
@@ -201,13 +202,13 @@ edgeCanBeFlipped newEdge options =
         , Dict.get newEdge options.graph.edges
         )
     of
-        ( [ { edge, direction } ], Just ( ( n1, n2, xy ), _ ) ) ->
-            -- Can flip because only edge (if its the same edge
-            edge == newEdge
+        ( [ traversal ], Just edgeInfo ) ->
+            -- Can flip because only edge (if it's the same edge
+            traversal.edge == newEdge
 
-        ( t1 :: t2 :: tN, Just ( ( n1, n2, xy ), _ ) ) ->
+        ( t1 :: t2 :: tN, Just edgeInfo ) ->
             -- Can be flipped if self-loop
-            n1 == n2
+            edgeInfo.lowNode == edgeInfo.highNode
 
         _ ->
             False
@@ -221,18 +222,15 @@ deleteEdge edge options =
     let
         graph =
             options.graph
-
-        edgeInfo =
-            Dict.get edge graph.edges
     in
-    case edgeInfo of
-        Just ( ( lowNode, highNode, _ ), _ ) ->
+    case Dict.get edge graph.edges of
+        Just edgeInfo ->
             let
                 newGraph =
                     { graph | edges = Dict.remove edge graph.edges }
                         |> pruneOrphanedNodes
-                        |> removeIfRedundantPlace lowNode
-                        |> removeIfRedundantPlace highNode
+                        |> removeIfRedundantPlace edgeInfo.lowNode
+                        |> removeIfRedundantPlace edgeInfo.highNode
             in
             { options
                 | graph = newGraph
@@ -301,16 +299,21 @@ removeIfRedundantPlace node graph =
         ( [ asLow1, asLow2 ], [] ) ->
             -- Combined edge is from lowest to highest of the "high ends", flipping the first.
             let
-                ( edge1Index, ( ( _, high1, via1 ), track1 ) ) =
+                ( edge1Index, edge1Info ) =
                     asLow1
 
-                ( edge2Index, ( ( _, high2, via2 ), track2 ) ) =
+                ( edge2Index, edge2Info ) =
                     asLow2
             in
-            if high1 <= high2 then
+            if edge1Info.highNode <= edge2Info.highNode then
                 let
                     newEdge1 =
-                        ( ( high1, high2, via1 ), joinTracks (reverseTrack track1) track2 )
+                        { lowNode = edge1Info.highNode
+                        , highNode = edge2Info.highNode
+                        , via = edge1Info.via
+                        , track = joinTracks (reverseTrack edge1Info.track) edge2Info.track
+                        , originalDirection = edge2Info.originalDirection
+                        }
                 in
                 { graph
                     | edges =
@@ -318,20 +321,19 @@ removeIfRedundantPlace node graph =
                             |> Dict.remove edge1Index
                             |> Dict.remove edge2Index
                             |> Dict.insert edge1Index newEdge1
-                    , nodes =
-                        --if node == high1 then
-                        --    -- Don't remove if self-loop
-                        --    graph.nodes
-                        --
-                        --else
-                        Dict.remove node graph.nodes
+                    , nodes = Dict.remove node graph.nodes
                 }
 
             else
                 --if high2 < high1 then
                 let
                     newEdge2 =
-                        ( ( high2, high1, via2 ), joinTracks (reverseTrack track2) track1 )
+                        { lowNode = edge2Info.highNode
+                        , highNode = edge1Info.highNode
+                        , via = edge2Info.via
+                        , track = joinTracks (reverseTrack edge2Info.track) edge1Info.track
+                        , originalDirection = edge1Info.originalDirection
+                        }
                 in
                 { graph
                     | edges =
@@ -339,27 +341,26 @@ removeIfRedundantPlace node graph =
                             |> Dict.remove edge1Index
                             |> Dict.remove edge2Index
                             |> Dict.insert edge1Index newEdge2
-                    , nodes =
-                        --if node == high1 then
-                        --    -- Don't remove if self-loop
-                        --    graph.nodes
-                        --
-                        --else
-                        Dict.remove node graph.nodes
+                    , nodes = Dict.remove node graph.nodes
                 }
 
         ( [], [ asHigh1, asHigh2 ] ) ->
             let
-                ( edge1Index, ( ( low1, _, via1 ), track1 ) ) =
+                ( edge1Index, edge1Info ) =
                     asHigh1
 
-                ( edge2Index, ( ( low2, _, via2 ), track2 ) ) =
+                ( edge2Index, edge2Info ) =
                     asHigh2
             in
-            if low1 <= low2 then
+            if edge1Info.lowNode <= edge2Info.lowNode then
                 let
                     newEdge1 =
-                        ( ( low1, low2, via1 ), joinTracks track1 (reverseTrack track2) )
+                        { lowNode = edge1Info.lowNode
+                        , highNode = edge2Info.lowNode
+                        , via = edge1Info.via
+                        , track = joinTracks edge1Info.track (reverseTrack edge2Info.track)
+                        , originalDirection = edge1Info.originalDirection
+                        }
                 in
                 { graph
                     | edges =
@@ -367,20 +368,19 @@ removeIfRedundantPlace node graph =
                             |> Dict.remove edge1Index
                             |> Dict.remove edge2Index
                             |> Dict.insert edge1Index newEdge1
-                    , nodes =
-                        --if node == low1 then
-                        --    -- Don't remove if self-loop
-                        --    graph.nodes
-                        --
-                        --else
-                        Dict.remove node graph.nodes
+                    , nodes = Dict.remove node graph.nodes
                 }
 
             else
                 --if low2 < low1 then
                 let
                     newEdge2 =
-                        ( ( low2, low1, via2 ), joinTracks track2 (reverseTrack track1) )
+                        { lowNode = edge2Info.lowNode
+                        , highNode = edge1Info.lowNode
+                        , via = edge2Info.via
+                        , track = joinTracks edge2Info.track (reverseTrack edge1Info.track)
+                        , originalDirection = edge1Info.originalDirection
+                        }
                 in
                 { graph
                     | edges =
@@ -388,25 +388,24 @@ removeIfRedundantPlace node graph =
                             |> Dict.remove edge1Index
                             |> Dict.remove edge2Index
                             |> Dict.insert edge1Index newEdge2
-                    , nodes =
-                        --if node == low1 then
-                        --    -- Don't remove if self-loop
-                        --    graph.nodes
-                        --
-                        --else
-                        Dict.remove node graph.nodes
+                    , nodes = Dict.remove node graph.nodes
                 }
 
         ( [ asLow ], [ asHigh ] ) ->
             let
-                ( edge1Index, ( ( _, high, via1 ), track1 ) ) =
+                ( edge1Index, edge1Info ) =
                     asLow
 
-                ( edge2Index, ( ( low, _, via2 ), track2 ) ) =
+                ( edge2Index, edge2Info ) =
                     asHigh
 
                 newEdge =
-                    ( ( low, high, via2 ), joinTracks track2 track1 )
+                    { lowNode = edge1Info.lowNode
+                    , highNode = edge2Info.lowNode
+                    , via = edge1Info.via
+                    , track = joinTracks edge2Info.track edge1Info.track
+                    , originalDirection = edge1Info.originalDirection
+                    }
             in
             { graph
                 | edges =
@@ -415,7 +414,7 @@ removeIfRedundantPlace node graph =
                         |> Dict.remove edge2Index
                         |> Dict.insert edge1Index newEdge
                 , nodes =
-                    if node == high then
+                    if node == edge1Info.highNode then
                         -- Don't remove if self-loop
                         graph.nodes
 
@@ -434,13 +433,13 @@ listEdgesForNode node graph =
         withLowNode =
             graph.edges
                 |> Dict.filter
-                    (\_ ( ( lowNode, _, _ ), _ ) -> lowNode == node)
+                    (\_ edgeInfo -> edgeInfo.lowNode == node)
                 |> Dict.toList
 
         withHighNode =
             graph.edges
                 |> Dict.filter
-                    (\_ ( ( _, highNode, _ ), _ ) -> highNode == node)
+                    (\_ edgeInfo -> edgeInfo.highNode == node)
                 |> Dict.toList
     in
     ( withLowNode, withHighNode )
@@ -466,19 +465,19 @@ addTraversal newEdge options =
         , Dict.get newEdge graph.edges
         )
     of
-        ( Just { edge, direction }, Just ( ( n1, n2, xy ), _ ) ) ->
-            case Dict.get edge graph.edges of
-                Just ( ( start, end, via ), _ ) ->
+        ( Just traversal, Just addedEdgeInfo ) ->
+            case Dict.get traversal.edge graph.edges of
+                Just lastEdgeInfo ->
                     let
                         finalNode =
-                            if direction == Natural then
-                                end
+                            if traversal.direction == Natural then
+                                lastEdgeInfo.highNode
 
                             else
-                                start
+                                lastEdgeInfo.lowNode
 
                         newEdgeDirection =
-                            if finalNode == n1 then
+                            if finalNode == addedEdgeInfo.lowNode then
                                 Natural
 
                             else
@@ -498,7 +497,7 @@ addTraversal newEdge options =
                 Nothing ->
                     options
 
-        ( Nothing, Just ( ( n1, n2, xy ), _ ) ) ->
+        ( Nothing, Just addedEdgeInfo ) ->
             let
                 newGraph =
                     { graph
@@ -524,23 +523,25 @@ addSelfLoop node options =
     case
         List.Extra.last graph.userRoute
     of
-        Just { edge, direction } ->
-            case Dict.get edge graph.edges of
-                Just ( ( start, end, via ), track ) ->
+        Just traversal ->
+            case Dict.get traversal.edge graph.edges of
+                Just edgeInfo ->
                     let
                         ( finalNode, edgeDirection, endPoint ) =
-                            if direction == Natural then
-                                ( end
-                                , DomainModel.getLastLeaf track.trackTree |> .directionAtEnd
-                                , DomainModel.earthPointFromIndex (skipCount track.trackTree) track.trackTree
+                            if traversal.direction == Natural then
+                                ( edgeInfo.highNode
+                                , DomainModel.getLastLeaf edgeInfo.track.trackTree |> .directionAtEnd
+                                , DomainModel.earthPointFromIndex
+                                    (skipCount edgeInfo.track.trackTree)
+                                    edgeInfo.track.trackTree
                                 )
 
                             else
-                                ( start
-                                , DomainModel.getFirstLeaf track.trackTree
+                                ( edgeInfo.lowNode
+                                , DomainModel.getFirstLeaf edgeInfo.track.trackTree
                                     |> .directionAtStart
                                     |> Direction2d.reverse
-                                , DomainModel.earthPointFromIndex 0 track.trackTree
+                                , DomainModel.earthPointFromIndex 0 edgeInfo.track.trackTree
                                 )
 
                         loopOpposite =
@@ -574,16 +575,19 @@ addSelfLoop node options =
                                         |> Polyline3d.vertices
                                         |> List.map (DomainModel.gpxFromPointWithReference graph.referenceLonLat)
 
-                                newEdgeKey =
-                                    ( node, node, makeXY loopOpposite )
+                                newEdgeInfo =
+                                    { lowNode = node
+                                    , highNode = node
+                                    , via = makeXY loopOpposite
+                                    }
 
                                 newEdgeTree =
                                     DomainModel.treeFromSourcesWithExistingReference
-                                        track.referenceLonLat
+                                        edgeInfo.track.referenceLonLat
                                         edgePoints
 
                                 newEdgeTrack =
-                                    Maybe.map (TrackLoaded.newTrackFromTree track.referenceLonLat)
+                                    Maybe.map (TrackLoaded.newTrackFromTree edgeInfo.track.referenceLonLat)
                                         newEdgeTree
 
                                 newEdgeIndex =
@@ -596,7 +600,12 @@ addSelfLoop node options =
                                                 | edges =
                                                     Dict.insert
                                                         newEdgeIndex
-                                                        ( newEdgeKey, newTrack )
+                                                        { lowNode = newEdgeInfo.lowNode
+                                                        , highNode = newEdgeInfo.highNode
+                                                        , via = newEdgeInfo.via
+                                                        , track = newTrack
+                                                        , originalDirection = Natural
+                                                        }
                                                         graph.edges
                                             }
 
@@ -623,7 +632,7 @@ changeActiveTrack edge options =
 getTrack : Int -> Options msg -> Maybe (TrackLoaded msg)
 getTrack edge options =
     Dict.get edge options.graph.edges
-        |> Maybe.map Tuple.second
+        |> Maybe.map .track
 
 
 toolStateChange :
@@ -647,10 +656,10 @@ toolStateChange opened colour options track =
                     { graph
                         | edges =
                             case lastTrack of
-                                Just ( nodeStuff, _ ) ->
+                                Just edgeInfo ->
                                     Dict.insert
                                         options.editingTrack
-                                        ( nodeStuff, theTrack )
+                                        { edgeInfo | track = theTrack }
                                         graph.edges
 
                                 Nothing ->
@@ -821,12 +830,8 @@ view location imperial wrapper options =
             in
             graph.userRoute
                 |> List.map
-                    (\{ edge, direction } ->
-                        let
-                            edgeInfo =
-                                Dict.get edge graph.edges
-                        in
-                        case edgeInfo of
+                    (\traversal ->
+                        case Dict.get traversal.edge graph.edges of
                             Nothing ->
                                 { startPlace = -1
                                 , road = -1
@@ -834,20 +839,20 @@ view location imperial wrapper options =
                                 , length = Quantity.zero
                                 }
 
-                            Just ( ( n1, n2, _ ), track ) ->
-                                case direction of
+                            Just edgeInfo ->
+                                case traversal.direction of
                                     Natural ->
-                                        { startPlace = n1
-                                        , road = edge
-                                        , endPlace = n2
-                                        , length = trueLength track.trackTree
+                                        { startPlace = edgeInfo.lowNode
+                                        , road = traversal.edge
+                                        , endPlace = edgeInfo.highNode
+                                        , length = trueLength edgeInfo.track.trackTree
                                         }
 
                                     Reverse ->
-                                        { startPlace = n2
-                                        , road = edge
-                                        , endPlace = n1
-                                        , length = trueLength track.trackTree
+                                        { startPlace = edgeInfo.highNode
+                                        , road = traversal.edge
+                                        , endPlace = edgeInfo.lowNode
+                                        , length = trueLength edgeInfo.track.trackTree
                                         }
                     )
 
@@ -1720,7 +1725,7 @@ type alias EdgeFinder msg =
     { startNodeIndex : Int
     , currentEdge : List ( EarthPoint, GPXSource )
     , edgeResolverDict : Dict ( Int, Int, XY ) ( Int, PeteTree )
-    , edgesDict : Dict Int ( ( Int, Int, XY ), TrackLoaded msg )
+    , edgesDict : Dict Int (Edge msg)
     , traversals : List Traversal
     }
 
@@ -1934,9 +1939,6 @@ buildGraph track =
                             -- and into the outputs dictionary,
                             -- _and_ we record the traversal.
                             let
-                                newEdgeKey =
-                                    ( lowNode, highNode, discriminator )
-
                                 newEdgeTree =
                                     DomainModel.treeFromSourcesWithExistingReference
                                         track.referenceLonLat
@@ -1965,13 +1967,18 @@ buildGraph track =
                             , currentEdge = [ ( road.endPoint, pointGpx ) ]
                             , edgeResolverDict =
                                 Dict.insert
-                                    newEdgeKey
+                                    ( lowNode, highNode, discriminator )
                                     ( newEdgeIndex, newEdgeTree )
                                     inputState.edgeResolverDict
                             , edgesDict =
                                 Dict.insert
                                     newEdgeIndex
-                                    ( newEdgeKey, newEdgeTrack )
+                                    { lowNode = lowNode
+                                    , highNode = highNode
+                                    , via = discriminator
+                                    , track = newEdgeTrack
+                                    , originalDirection = Natural
+                                    }
                                     inputState.edgesDict
                             , traversals = traversal :: inputState.traversals
                             }
@@ -2002,7 +2009,15 @@ trivialGraph track =
 
         edges =
             Dict.fromList
-                [ ( 0, ( ( 1, 2, makeXY discriminator ), track ) ) ]
+                [ ( 0
+                  , { lowNode = 1
+                    , highNode = 2
+                    , via = makeXY discriminator
+                    , track = track
+                    , originalDirection = Natural
+                    }
+                  )
+                ]
 
         traversal =
             { edge = 0, direction = Natural }
@@ -2123,7 +2138,7 @@ makeNewRoute options =
         trimTraversal preceding { edge, direction } repetition following =
             -- Emit offset points but not within the trim areas.
             case Dict.get edge graph.edges of
-                Just ( ( n1, n2, via ), track ) ->
+                Just edgeInfo ->
                     -- It's a real edge, offset flipped if reversed.
                     -- Compute offset points on unflipped edge then flip if reversed.
                     let
@@ -2137,10 +2152,10 @@ makeNewRoute options =
 
                         ( firstOffsetIndex, lastOffsetIndex ) =
                             -- Other than start and end of route, trim back the edge to allow for the Place arc.
-                            ( DomainModel.indexFromDistance trim track.trackTree + 1
+                            ( DomainModel.indexFromDistance trim edgeInfo.track.trackTree + 1
                             , DomainModel.indexFromDistance
-                                (trueLength track.trackTree |> Quantity.minus trim)
-                                track.trackTree
+                                (trueLength edgeInfo.track.trackTree |> Quantity.minus trim)
+                                edgeInfo.track.trackTree
                                 - 1
                             )
 
@@ -2161,7 +2176,7 @@ makeNewRoute options =
 
                         nudgedPoints =
                             List.range firstOffsetIndex lastOffsetIndex
-                                |> List.map (useNudgeTool nudgeOptions track.trackTree)
+                                |> List.map (useNudgeTool nudgeOptions edgeInfo.track.trackTree)
                     in
                     case direction of
                         Natural ->
@@ -2187,43 +2202,43 @@ makeNewRoute options =
             -- Note we actually make a 2D arc, then interpolate altitudes to get 3D.
             -- First thing is all the necessary dictionary lookups.
             case ( Dict.get inbound.edge graph.edges, Dict.get outbound.edge graph.edges ) of
-                ( Just ( _, inTrack ), Just ( _, outTrack ) ) ->
+                ( Just inEdge, Just outEdge ) ->
                     let
                         actualVertex =
                             case inbound.direction of
                                 Natural ->
                                     DomainModel.earthPointFromIndex
-                                        (skipCount inTrack.trackTree)
-                                        inTrack.trackTree
+                                        (skipCount inEdge.track.trackTree)
+                                        inEdge.track.trackTree
 
                                 Reverse ->
                                     DomainModel.earthPointFromIndex
                                         0
-                                        inTrack.trackTree
+                                        inEdge.track.trackTree
 
                         ( inboundTrimIndex, inboundTrimPoint ) =
                             case inbound.direction of
                                 Natural ->
                                     DomainModel.interpolateTrack
-                                        (trueLength inTrack.trackTree |> Quantity.minus trim)
-                                        inTrack.trackTree
+                                        (trueLength inEdge.track.trackTree |> Quantity.minus trim)
+                                        inEdge.track.trackTree
 
                                 Reverse ->
                                     DomainModel.interpolateTrack
                                         trim
-                                        inTrack.trackTree
+                                        inEdge.track.trackTree
 
                         ( outboundTrimIndex, outboundTrimPoint ) =
                             case outbound.direction of
                                 Natural ->
                                     DomainModel.interpolateTrack
                                         trim
-                                        outTrack.trackTree
+                                        outEdge.track.trackTree
 
                                 Reverse ->
                                     DomainModel.interpolateTrack
-                                        (trueLength outTrack.trackTree |> Quantity.minus trim)
-                                        outTrack.trackTree
+                                        (trueLength outEdge.track.trackTree |> Quantity.minus trim)
+                                        outEdge.track.trackTree
 
                         ( inboundDirection, outboundDirection ) =
                             ( Direction3d.from inboundTrimPoint actualVertex

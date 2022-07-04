@@ -324,13 +324,13 @@ view location context ( width, height ) options msgWrapper =
             graph.edges
                 |> Dict.toList
                 |> List.map
-                    (\( index, ( ( node1, node2, disc ), edge ) ) ->
+                    (\( index, edgeInfo ) ->
                         case context.edgeMode of
                             EdgeArc ->
-                                renderEdgeArc index edge.trackTree
+                                renderEdgeArc index edgeInfo.track.trackTree
 
                             EdgeSketch ->
-                                renderEdge index edge.trackTree
+                                renderEdge index edgeInfo.track.trackTree
                     )
 
         edgeToHighlight =
@@ -357,13 +357,13 @@ view location context ( width, height ) options msgWrapper =
                         Nothing ->
                             []
 
-                        Just ( _, edgeTrack ) ->
+                        Just edgeInfo ->
                             let
                                 midPoint =
-                                    skipCount edgeTrack.trackTree // 2
+                                    skipCount edgeInfo.track.trackTree // 2
 
                                 midLeaf =
-                                    asRecord <| leafFromIndex midPoint edgeTrack.trackTree
+                                    asRecord <| leafFromIndex midPoint edgeInfo.track.trackTree
 
                                 ( p1, p2 ) =
                                     ( midLeaf.startPoint |> Point3d.toScreenSpace camera screenRectangle
@@ -487,10 +487,12 @@ view location context ( width, height ) options msgWrapper =
             graph.edges
                 |> Dict.toList
                 |> List.map
-                    (\( index, ( ( node1, node2, disc ), track ) ) ->
+                    (\( index, edgeInfo ) ->
                         let
                             labelAt =
-                                earthPointFromIndex (skipCount track.trackTree // 2) track.trackTree
+                                earthPointFromIndex
+                                    (skipCount edgeInfo.track.trackTree // 2)
+                                    edgeInfo.track.trackTree
                                     |> Point3d.toScreenSpace camera screenRectangle
                         in
                         Svg.text_
@@ -807,18 +809,18 @@ detectHit event graph ( w, h ) context =
             graph.edges
                 |> Dict.toList
                 |> List.map
-                    (\( edgeIndex, ( ( startNode, endNode, disc ), track ) ) ->
+                    (\( edgeIndex, edgeInfo ) ->
                         let
                             thisEdgeNearestIndex =
-                                nearestToRay ray track.trackTree
+                                nearestToRay ray edgeInfo.track.trackTree
 
                             thisEdgeNearestPoint =
-                                earthPointFromIndex thisEdgeNearestIndex track.trackTree
+                                earthPointFromIndex thisEdgeNearestIndex edgeInfo.track.trackTree
                                     |> Point3d.toScreenSpace camera screenRectangle
                         in
                         ( edgeIndex
                         , ( thisEdgeNearestIndex
-                          , thisEdgeNearestIndex == skipCount track.trackTree
+                          , thisEdgeNearestIndex == skipCount edgeInfo.track.trackTree
                           , Point2d.distanceFrom screenPoint thisEdgeNearestPoint
                           )
                         )
@@ -834,16 +836,16 @@ detectHit event graph ( w, h ) context =
                 Nothing ->
                     ClickNone
 
-                Just ( ( startNode, endNode, disc ), tree ) ->
-                    ClickNode startNode
+                Just edgeInfo ->
+                    ClickNode edgeInfo.lowNode
 
         returnEndNode edgeIndex =
             case Dict.get edgeIndex graph.edges of
                 Nothing ->
                     ClickNone
 
-                Just ( ( startNode, endNode, disc ), tree ) ->
-                    ClickNode endNode
+                Just edgeInfo ->
+                    ClickNode edgeInfo.highNode
     in
     case bestCandidate of
         Nothing ->

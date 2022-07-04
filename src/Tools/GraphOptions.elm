@@ -42,7 +42,13 @@ type alias Options msg =
 
 type alias Edge msg =
     -- (low node index, high node index, point 1 XY)
-    ( ( Int, Int, XY ), TrackLoaded msg )
+    --( ( Int, Int, XY ), TrackLoaded msg )
+    { lowNode : Int
+    , highNode : Int
+    , via : XY
+    , track : TrackLoaded msg
+    , originalDirection : Direction
+    }
 
 
 type alias Graph msg =
