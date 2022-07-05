@@ -1873,7 +1873,7 @@ buildGraph track =
 
                         orientedEdgeCouldBeLeaf : List ( EarthPoint, GPXSource )
                         orientedEdgeCouldBeLeaf =
-                            if nodeIndex > inputState.startNodeIndex then
+                            if nodeIndex >= inputState.startNodeIndex then
                                 -- Conventional order, good, but must flip the edge
                                 List.reverse newEdge
 
@@ -1907,7 +1907,8 @@ buildGraph track =
                             -- As there can be more than one edge 'tween  two nodes,
                             -- we take the index 1 point to discriminate. That's why
                             -- the edge orientation matters.
-                            List.Extra.getAt 1 orientedEdge
+                            orientedEdge
+                                |> List.Extra.getAt 1
                                 |> Maybe.map Tuple.first
                                 |> Maybe.map makeXY
                                 |> Maybe.withDefault pointXY
