@@ -3,13 +3,15 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.3.14 (1652d54d)
+# GPXmagic v3.3.15 (1652d54d)
 
 **GPXmagic V3 works best with Chrome** (by far)
 
 ## Changes
 
-* Added some guidance text to Route maker. (Kindly suggested by David Ogle.)
+* Route maker should be better at capturing the direction when a Road goes directly
+from one Place back to the same Place. But please always check that the direction is
+correct when you add it to a new route.
 
 ## Acknowledgements
 
