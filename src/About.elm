@@ -3,7 +3,7 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.3.15 (7dea493a)
+# GPXmagic v3.3.16 (7dea493a)
 
 **GPXmagic V3 works (by far) best with Chrome (and some derivatives)**
 
@@ -12,6 +12,9 @@ aboutText =
 * Route maker should be better at capturing the direction when a Road goes directly
 from one Place back to the same Place. But please always check that the direction is
 correct when you add it to a new route.
+
+* When you use Route maker to create a new route, the Route maker tool will close
+and your view will revert to the view it was before you analyzed the original route.
 
 ## Acknowledgements
 

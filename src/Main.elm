@@ -2268,14 +2268,14 @@ performActionsOnModel actions model =
                         graphOptions =
                             toolOptions.graphOptions
 
+                        newPaneLayout =
+                            PaneLayoutManager.forceRouteView foldedModel.paneLayoutOptions
+
                         ( newGraphOptions, newTree ) =
                             Tools.Graph.enterRoutePlanningMode graphOptions track
 
                         newToolOptions =
                             { toolOptions | graphOptions = newGraphOptions }
-
-                        newPaneLayout =
-                            PaneLayoutManager.forceRouteView foldedModel.paneLayoutOptions
 
                         newTrack =
                             { track | trackTree = newTree }
@@ -2283,6 +2283,28 @@ performActionsOnModel actions model =
                     { foldedModel
                         | toolOptions = newToolOptions
                         , track = Just newTrack
+                        , paneLayoutOptions = newPaneLayout
+                    }
+
+                ( ExitRoutePlanning, Just track ) ->
+                    let
+                        toolOptions =
+                            foldedModel.toolOptions
+
+                        newPaneLayout =
+                            PaneLayoutManager.exitRouteView foldedModel.paneLayoutOptions
+
+                        newToolOptions =
+                            -- Hack here.
+                            { toolOptions
+                                | tools =
+                                    List.map
+                                        (ToolsController.setToolState ToolsController.ToolGraph ToolsController.Contracted)
+                                        toolOptions.tools
+                            }
+                    in
+                    { foldedModel
+                        | toolOptions = newToolOptions
                         , paneLayoutOptions = newPaneLayout
                     }
 

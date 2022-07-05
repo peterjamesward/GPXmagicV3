@@ -155,6 +155,8 @@ Create a single road, using your route and offsetting the road
 from the centre line (if you want to avoid collisions with oncoming avatars). As the same
 road section is used for each passage, there should be no height differences (apart from
 the 1cm difference we put in to avoid flicker in RGT.
+
+This will restore your previous view and close the Route maker tool.
 """ )
                 , ( "manyNodes", """
 Hmm, that's a lot of Places. Route maker works best with 

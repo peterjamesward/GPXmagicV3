@@ -101,6 +101,7 @@ type alias Options =
     , sliderState : SliderState
     , scene3d : List (Entity LocalCoords)
     , mapState : MapPortController.MapState
+    , viewBeforeRouteViewForced : Maybe ViewMode
     }
 
 
@@ -134,6 +135,7 @@ defaultOptions =
     , sliderState = SliderIdle
     , scene3d = []
     , mapState = MapPortController.defaultMapState
+    , viewBeforeRouteViewForced = Nothing
     }
 
 
@@ -545,7 +547,27 @@ forceRouteView options =
             pane1 =
                 options.pane1
         in
-        { options | pane1 = { pane1 | activeView = ViewGraph } }
+        { options
+            | pane1 = { pane1 | activeView = ViewGraph }
+            , viewBeforeRouteViewForced = Just options.pane1.activeView
+        }
+
+
+exitRouteView : Options -> Options
+exitRouteView options =
+    let
+        pane1 =
+            options.pane1
+    in
+    case ( options.viewBeforeRouteViewForced, pane1.activeView ) of
+        ( Just savedView, ViewGraph ) ->
+            { options
+                | pane1 = { pane1 | activeView = savedView }
+                , viewBeforeRouteViewForced = Nothing
+            }
+
+        _ ->
+            options
 
 
 initialise : TrackLoaded msg -> Options -> Options

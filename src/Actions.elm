@@ -103,6 +103,7 @@ type ToolAction msg
     | DeleteEdge Int
     | LockToolOpen Bool String
     | StartRoutePlanning
+    | ExitRoutePlanning
     | ChangeActiveTrack Int
     | MakeRouteFromGraph
     | CombineNearbyPoints

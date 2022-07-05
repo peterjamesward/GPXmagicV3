@@ -63,7 +63,7 @@ toolId =
 defaultOptions : Options msg
 defaultOptions =
     { graph = emptyGraph
-    , matchingTolerance = Length.meters 0.5
+    , matchingTolerance = Length.meters 1.5
     , centreLineOffset = Length.meters 0.0
     , minimumRadiusAtPlaces = Length.meters 3.0
     , boundingBox = BoundingBox3d.singleton Point3d.origin
@@ -1657,7 +1657,13 @@ update msg options track wrapper =
             ( { options | minimumRadiusAtPlaces = float }, [] )
 
         ConvertFromGraph ->
-            ( options, [ Actions.MakeRouteFromGraph, Actions.TrackHasChanged ] )
+            ( options
+            , [ Actions.MakeRouteFromGraph
+              , Actions.TrackHasChanged
+              , Actions.ExitRoutePlanning
+              , Actions.HidePreview "graph"
+              ]
+            )
 
         DisplayInfo tool tag ->
             ( options, [ Actions.DisplayInfo tool tag ] )
