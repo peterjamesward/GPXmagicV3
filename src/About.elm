@@ -3,18 +3,13 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.3.16 (0bd90085)
+# GPXmagic v3.3.17 (0bd90085)
 
 **GPXmagic V3 works (by far) best with Chrome (and some derivatives)**
 
 ## Changes
 
-* Route maker should be better at capturing the direction when a Road goes directly
-from one Place back to the same Place. But please always check that the direction is
-correct when you add it to a new route.
-
-* When you use Route maker to create a new route, the Route maker tool will close
-and your view will revert to the view it was before you analyzed the original route.
+* Legend in Profile view was not correctly showing elevation for the final point.
 
 ## Acknowledgements
 
