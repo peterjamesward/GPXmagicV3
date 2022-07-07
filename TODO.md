@@ -1,9 +1,20 @@
 
 # BUGS
 
+David Ogle:
+```text
+[Say] the orange marker is near the end of the course and I select a trackpoint nearby,  
+it tends to select the one at the start of the course, instead of the one I was trying  
+to select near the end. So I'm thinking if you've got 2 trackpoints in the same position, 
+on selection (mouse click), it'd be good to select the one closest to the current position.
+```
+> Use Point or Line spatial index?
+
 --- 
 
 # WIP
+
+Click detect - can we prefer a point closer by track distance? (David O)
 
 ---
 
@@ -31,6 +42,8 @@ Possible sign-ups for German, Dutch, Spanish.
 Need more work on number formats.
 
 ## Technical debt
+
+**Can use Axis3d instead of line equation representation??**
 
 Variant of "request from local storage" that takes a wrapped message so that the return value
 can be directed to a tool or a view.
