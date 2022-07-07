@@ -733,6 +733,9 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
         orangeLeaf =
             asRecord <| DomainModel.leafFromIndex track.currentPosition track.trackTree
 
+        orangePoint =
+            DomainModel.earthPointFromIndex track.currentPosition track.trackTree
+
         orangeAltitude2d =
             pointInAltitudeView context track.currentPosition track.trackTree
                 |> Point3d.toScreenSpace altitudeCamera altitudeScreenRectangle
@@ -799,7 +802,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
 
         orangeText =
             [ textLine 1 <| (showDecimal2 orangeLeaf.gradientAtStart ++ "%")
-            , textLine 2 <| showShortMeasure False <| Point3d.zCoordinate <| orangeLeaf.startPoint
+            , textLine 2 <| showShortMeasure False <| Point3d.zCoordinate <| orangePoint
             , textLine 3 <|
                 showLongMeasure False <|
                     DomainModel.distanceFromIndex track.currentPosition track.trackTree
