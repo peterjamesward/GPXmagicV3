@@ -1,9 +1,6 @@
 
 # BUGS
 
-Scott Kelly: "the legend on the profile view was showing elevation for the point just 
-previous to the point that the orange pointer was situated upon."
-
 --- 
 
 # WIP
