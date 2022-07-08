@@ -1078,14 +1078,6 @@ view location imperial wrapper options =
         ]
 
 
-type alias LeafIndexEntry =
-    { leafIndex : Int }
-
-
-type alias LeafIndex =
-    SpatialIndex.SpatialNode LeafIndexEntry Length.Meters LocalCoords
-
-
 type alias PointIndexEntry =
     { pointIndex : Int }
 
@@ -1134,28 +1126,6 @@ identifyPointsToBeMerged tolerance track =
             -- only affects the index efficiency.
             SpatialIndex.empty growBox (Length.meters 100.0)
 
-        emptyLeafIndex : LeafIndex
-        emptyLeafIndex =
-            -- The last parameter here is not the quality, it
-            -- only affects the index efficiency.
-            SpatialIndex.empty growBox (Length.meters 100.0)
-
-        {-
-           1. Make spatial indexes of points and leaves, for quick but approximate nearness queries.
-        -}
-        ( _, leafIndex ) =
-            -- Pre-pop with first point so the fold can focus on the leaf end points.
-            DomainModel.foldOverRoute
-                indexLeaf
-                track.trackTree
-                ( 0
-                , SpatialIndex.add
-                    { content = { leafIndex = 0 }
-                    , box = localBounds <| DomainModel.getFirstLeaf track.trackTree
-                    }
-                    emptyLeafIndex
-                )
-
         localBounds road =
             -- Use to form a query for each leaf.
             DomainModel.boundingBox (Leaf road)
@@ -1170,16 +1140,6 @@ identifyPointsToBeMerged tolerance track =
                 , box =
                     BoundingBox2d.singleton <|
                         Point3d.projectInto SketchPlane3d.xy leaf.endPoint
-                }
-                indexBuild
-            )
-
-        indexLeaf : RoadSection -> ( Int, LeafIndex ) -> ( Int, LeafIndex )
-        indexLeaf leaf ( leafNumber, indexBuild ) =
-            ( leafNumber + 1
-            , SpatialIndex.add
-                { content = { leafIndex = leafNumber }
-                , box = localBounds leaf
                 }
                 indexBuild
             )
@@ -1199,7 +1159,7 @@ identifyPointsToBeMerged tolerance track =
                     Point3d.projectInto SketchPlane3d.xy pt
 
                 results =
-                    SpatialIndex.query leafIndex (pointWithTolerance pt)
+                    SpatialIndex.query track.leafIndex (pointWithTolerance pt)
                         |> List.map (.content >> .leafIndex)
                         |> List.Extra.unique
 

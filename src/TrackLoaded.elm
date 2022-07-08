@@ -6,10 +6,13 @@ import Json.Encode as E
 import LandUseDataTypes
 import Length exposing (Meters, inMeters)
 import List.Extra
+import LocalCoords exposing (LocalCoords)
 import Point3d
 import PreviewData exposing (PreviewPoint)
 import Quantity exposing (Quantity)
+import SpatialIndex
 import Tools.NamedSegmentOptions exposing (NamedSegment)
+import UtilsForViews
 
 
 type alias TrackLoaded msg =
@@ -23,7 +26,16 @@ type alias TrackLoaded msg =
     , redos : List (UndoEntry msg)
     , lastMapClick : ( Float, Float )
     , landUseData : LandUseDataTypes.LandUseData
+    , leafIndex : LeafIndex
     }
+
+
+type alias LeafIndexEntry =
+    { leafIndex : Int }
+
+
+type alias LeafIndex =
+    SpatialIndex.SpatialNode LeafIndexEntry Length.Meters LocalCoords
 
 
 type alias UndoEntry msg =
@@ -55,6 +67,7 @@ newTrackFromTree refLonLat newTree =
     , redos = []
     , lastMapClick = ( 0, 0 )
     , landUseData = LandUseDataTypes.emptyLandUse
+    , leafIndex = indexLeaves newTree
     }
 
 
@@ -143,6 +156,48 @@ trackFromSegments trackName ( allPoints, segments ) =
             Nothing
 
 
+indexLeaves : PeteTree -> LeafIndex
+indexLeaves tree =
+    let
+        emptyLeafIndex : LeafIndex
+        emptyLeafIndex =
+            -- The last parameter here is not the quality, it
+            -- only affects the index efficiency.
+            SpatialIndex.empty
+                (UtilsForViews.flatBox <| DomainModel.boundingBox tree)
+                (Length.meters 100.0)
+
+        indexLeaf : RoadSection -> ( Int, LeafIndex ) -> ( Int, LeafIndex )
+        indexLeaf leaf ( leafNumber, indexBuild ) =
+            ( leafNumber + 1
+            , SpatialIndex.add
+                { content = { leafIndex = leafNumber }
+                , box = localBounds leaf
+                }
+                indexBuild
+            )
+
+        localBounds road =
+            -- Use to form a query for each leaf.
+            DomainModel.boundingBox (Leaf road)
+                |> UtilsForViews.flatBox
+
+        ( _, leafIndex ) =
+            -- Pre-pop with first point so the fold can focus on the leaf end points.
+            DomainModel.foldOverRoute
+                indexLeaf
+                tree
+                ( 0
+                , SpatialIndex.add
+                    { content = { leafIndex = 0 }
+                    , box = localBounds <| DomainModel.getFirstLeaf tree
+                    }
+                    emptyLeafIndex
+                )
+    in
+    leafIndex
+
+
 trackFromPoints : String -> List GPXSource -> Maybe (TrackLoaded msg)
 trackFromPoints trackName gpxTrack =
     let
@@ -162,6 +217,7 @@ trackFromPoints trackName gpxTrack =
                 , trackName = Just trackName
                 , lastMapClick = ( 0, 0 )
                 , landUseData = { landuse | status = LandUseDataTypes.LandUseWaitingOSM }
+                , leafIndex = indexLeaves aTree
                 }
 
         Nothing ->
