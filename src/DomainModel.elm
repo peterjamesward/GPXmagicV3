@@ -52,14 +52,19 @@ module DomainModel exposing
 
 import Angle exposing (Angle)
 import Axis3d exposing (Axis3d)
+import BoundingBox2d
 import BoundingBox3d exposing (BoundingBox3d)
 import Dict exposing (Dict)
 import Direction2d exposing (Direction2d)
 import Json.Encode as E
+import LeafIndex exposing (LeafIndex, LeafIndexEntry)
 import Length exposing (Length, Meters, inMeters)
+import List.Extra
 import LocalCoords exposing (LocalCoords)
 import Point3d exposing (Point3d)
 import Quantity exposing (Quantity)
+import SketchPlane3d
+import SpatialIndex
 import Sphere3d exposing (Sphere3d)
 import Spherical as Spherical exposing (range)
 
@@ -97,7 +102,7 @@ type alias RoadSection =
 
     -- For rapid location of points using non-map views...
     , boundingBox : BoundingBox3d Meters LocalCoords
-    , sphere : Sphere3d Meters LocalCoords
+    --, sphere : Sphere3d Meters LocalCoords
     , trueLength : Quantity Float Meters
     , skipCount : Int
 
@@ -225,9 +230,9 @@ boundingBox treeNode =
     treeNode |> asRecord |> .boundingBox
 
 
-sphere : PeteTree -> Sphere3d Meters LocalCoords
-sphere treeNode =
-    treeNode |> asRecord |> .sphere
+--sphere : PeteTree -> Sphere3d Meters LocalCoords
+--sphere treeNode =
+--    treeNode |> asRecord |> .sphere
 
 
 medianLongitude : PeteTree -> Direction2d LocalCoords
@@ -352,7 +357,7 @@ makeRoadSectionKnowingLocalCoords ( earth1, local1 ) ( earth2, local2 ) =
     , startPoint = local1
     , endPoint = local2
     , boundingBox = box
-    , sphere = containingSphere box
+    --, sphere = containingSphere box
     , trueLength = range
     , skipCount = 1
     , medianLongitude = medianLon
@@ -405,7 +410,7 @@ combineInfo info1 info2 =
     , startPoint = startPoint info1
     , endPoint = endPoint info2
     , boundingBox = box
-    , sphere = containingSphere box
+    --, sphere = containingSphere box
     , trueLength = Quantity.plus (trueLength info1) (trueLength info2)
     , skipCount = skipCount info1 + skipCount info2
     , medianLongitude = sharedMedian
@@ -977,80 +982,52 @@ interpolateTrack distance treeNode =
 nearestToRay :
     Axis3d Meters LocalCoords
     -> PeteTree
+    -> LeafIndex
     -> Int
-nearestToRay ray treeNode =
-    -- Build a new query here.
-    -- Try: compute distance to each box centres.
-    -- At each level, pick "closest" child and recurse.
-    -- Not good enough. Need deeper search, say for all intersected boxes.
-    -- Bit of recursive magic to get the "index" number.
+    -> Int
+nearestToRay ray tree leafIndex current =
+    -- Find track point nearest to ray, but where there's a tie, use closest (numerically) to current point.
     let
-        helper withNode skip =
-            case withNode of
-                Leaf leaf ->
-                    let
-                        startDistance =
-                            leaf.startPoint |> Point3d.distanceFromAxis ray
+        valuationFunction : LeafIndexEntry -> Quantity Float Meters
+        valuationFunction leafEntry =
+            -- For simplicity, look only at end point, so point and leaf numbers match.
+            -- Means caller must deal with the final point.
+            let
+                pointToTest =
+                    earthPointFromIndex
+                        leafEntry.leafIndex
+                        tree
+            in
+            pointToTest
+                |> Point3d.distanceFromAxis ray
+                |> Quantity.abs
 
-                        endDistance =
-                            leaf.endPoint |> Point3d.distanceFromAxis ray
-                    in
-                    if startDistance |> Quantity.lessThanOrEqualTo endDistance then
-                        ( skip, startDistance )
+        pointZero =
+            earthPointFromIndex 0 tree
 
-                    else
-                        ( skip + 1, endDistance )
+        pointZeroAsContent =
+            -- Gaargh.
+            { content = { leafIndex = 0 }
+            , box = (pointZero |> Point3d.projectInto SketchPlane3d.xy) |> BoundingBox2d.singleton
+            }
 
-                Node node ->
-                    let
-                        ( leftIntersects, rightIntersects ) =
-                            ( Axis3d.intersectionWithSphere (sphere node.left) ray /= Nothing
-                            , Axis3d.intersectionWithSphere (sphere node.right) ray /= Nothing
-                            )
+        contenders =
+            --NOTE because we use end points, we have to check point 0 for ourselves.
+            SpatialIndex.queryNearestToAxisUsing
+                leafIndex
+                ray
+                valuationFunction
+                { currentBestMetric = pointZero |> Point3d.distanceFromAxis ray
+                , currentBestContent = [ pointZeroAsContent ]
+                }
 
-                        leftDistance =
-                            -- How close are we to the neighbourhood?
-                            sphere node.left
-                                |> Sphere3d.centerPoint
-                                |> Point3d.distanceFromAxis ray
-                                |> Quantity.minus (sphere node.left |> Sphere3d.radius)
-
-                        rightDistance =
-                            sphere node.right
-                                |> Sphere3d.centerPoint
-                                |> Point3d.distanceFromAxis ray
-                                |> Quantity.minus (sphere node.right |> Sphere3d.radius)
-                    in
-                    case ( leftIntersects, rightIntersects ) of
-                        ( True, True ) ->
-                            -- Could go either way
-                            let
-                                ( leftBestIndex, leftBestDistance ) =
-                                    helper node.left skip
-
-                                ( rightBestIndex, rightBestDistance ) =
-                                    helper node.right (skip + skipCount node.left)
-                            in
-                            if leftBestDistance |> Quantity.lessThanOrEqualTo rightBestDistance then
-                                ( leftBestIndex, leftBestDistance )
-
-                            else
-                                ( rightBestIndex, rightBestDistance )
-
-                        ( True, False ) ->
-                            helper node.left skip
-
-                        ( False, True ) ->
-                            helper node.right (skip + skipCount node.left)
-
-                        ( False, False ) ->
-                            if leftDistance |> Quantity.lessThanOrEqualTo rightDistance then
-                                helper node.left skip
-
-                            else
-                                helper node.right (skip + skipCount node.left)
+        --_ =
+        --    Debug.log "CONTENDERS" <| List.map (.content >> .leafIndex) contenders.currentBestContent
     in
-    Tuple.first <| helper treeNode 0
+    contenders.currentBestContent
+        |> List.Extra.minimumBy (\one -> abs (one.content.leafIndex - current))
+        |> Maybe.map (.content >> .leafIndex)
+        |> Maybe.withDefault current
 
 
 gpxDistance : GPXSource -> GPXSource -> Length.Length

@@ -12,11 +12,9 @@ it tends to select the one at the start of the course, instead of the one I was 
 to select near the end. So I'm thinking if you've got 2 trackpoints in the same position, 
 on selection (mouse click), it'd be good to select the one closest to the current position.
 ```
-> Take spatial index (for Leaf, not Point) from Graph into TrackLoaded, keep up to date.
-> Query using ray, return list of close points, choose between closest based on "point number".
-> Worry that extra processing is too slow for general use. Must try!
-> Could push it right down into DomainModel but that feels obscure.
+> Not working on Plan.
 
+?? Will we be able to dispense with the "spheres" in the tree ??
 
 ---
 

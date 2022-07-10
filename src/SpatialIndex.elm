@@ -17,14 +17,18 @@ module SpatialIndex exposing
 -}
 
 import Axis2d
+import Axis3d
 import BoundingBox2d
+import Length exposing (Meters)
 import LineSegment2d
 import List.Extra
 import Point2d
+import Point3d
 import Polygon2d
 import Quantity exposing (Quantity(..))
 import Quantity.Interval as Interval
 import Rectangle2d
+import SketchPlane3d
 
 
 type alias SpatialContent contentType units coords =
@@ -246,47 +250,140 @@ queryAllContaining current point =
                 []
 
 
+type alias FoldStateForNearest contentType units coords =
+    { currentBestMetric : Quantity Float units
+    , currentBestContent : List (SpatialContent contentType units coords)
+    }
+
+
 queryNearestToAxisUsing :
-    SpatialNode contentType units coords
-    -> Axis2d.Axis2d units coords
-    -> (contentType -> Float)
-    -> Maybe (SpatialContent contentType units coords)
-queryNearestToAxisUsing current axis valuation =
-    case current of
-        Blank ->
-            Nothing
-
-        SpatialNode node ->
+    SpatialNode contentType Meters coords
+    -> Axis3d.Axis3d Meters coords
+    -> (contentType -> Quantity Float Meters)
+    -> FoldStateForNearest contentType Meters coords
+    -> FoldStateForNearest contentType Meters coords
+queryNearestToAxisUsing current axis valuation initialState =
+    -- Repurposed to improve our hit detection. Not loss of generality in units.
+    let
+        updateNearestWithContent :
+            SpatialContent contentType Meters coords
+            -> FoldStateForNearest contentType Meters coords
+            -> FoldStateForNearest contentType Meters coords
+        updateNearestWithContent indexEntry state =
             let
-                boxSides =
-                    node.box
-                        |> Rectangle2d.fromBoundingBox
-                        |> Rectangle2d.toPolygon
-                        |> Polygon2d.edges
-
-                intersected =
-                    List.any
-                        (\edge -> LineSegment2d.intersectionWithAxis axis edge /= Nothing)
-                        boxSides
+                metric =
+                    valuation indexEntry.content
             in
-            if intersected then
-                [ List.Extra.minimumBy (.content >> valuation) node.contents ]
-                    ++ [ queryNearestToAxisUsing node.nw axis valuation
-                       , queryNearestToAxisUsing node.ne axis valuation
-                       , queryNearestToAxisUsing node.se axis valuation
-                       , queryNearestToAxisUsing node.sw axis valuation
-                       ]
-                    |> List.filterMap identity
-                    |> List.Extra.minimumBy (.content >> valuation)
+            if metric |> Quantity.equalWithin Length.inch state.currentBestMetric then
+                -- Add to the output set, let caller choose
+                { state | currentBestContent = indexEntry :: state.currentBestContent }
+
+            else if metric |> Quantity.lessThan state.currentBestMetric then
+                -- This beats the old list, start a new one
+                { currentBestContent = [ indexEntry ]
+                , currentBestMetric = metric
+                }
 
             else
-                Nothing
+                -- Can't improve on input
+                state
+
+        helperWithAxis :
+            SpatialNode contentType Meters coords
+            -> Axis2d.Axis2d Meters coord
+            -> FoldStateForNearest contentType Meters coords
+            -> FoldStateForNearest contentType Meters coords
+        helperWithAxis node axis2d inputState =
+            case node of
+                Blank ->
+                    inputState
+
+                SpatialNode hasContent ->
+                    -- First test to see if bounding box is safely BEYOND the threshold,
+                    -- in which case, pass on the list immediately.
+                    -- If any of our content MATCH the threshold, add them to the list.
+                    -- If LESS than threshold, form a new list.
+                    -- Otherwise, pass the list on.
+                    let
+                        boxWithThreshold =
+                            hasContent.box |> BoundingBox2d.expandBy inputState.currentBestMetric
+
+                        { minX, maxX, minY, maxY } =
+                            BoundingBox2d.extrema boxWithThreshold
+
+                        ( ( se, ne ), ( nw, sw ) ) =
+                            ( ( Point2d.xy maxX minY, Point2d.xy maxX maxY )
+                            , ( Point2d.xy minX minY, Point2d.xy minX maxY )
+                            )
+
+                        ( ( north, south ), ( east, west ) ) =
+                            ( ( LineSegment2d.from ne nw
+                              , LineSegment2d.from se sw
+                              )
+                            , ( LineSegment2d.from ne se
+                              , LineSegment2d.from nw sw
+                              )
+                            )
+
+                        boundsWithinThreshold =
+                            -- If axis crosses our extended boundary, cannot ignore this node.
+                            -- Without this pruning, we'd be looking at every point!
+                            [ LineSegment2d.intersectionWithAxis axis2d north
+                            , LineSegment2d.intersectionWithAxis axis2d south
+                            , LineSegment2d.intersectionWithAxis axis2d east
+                            , LineSegment2d.intersectionWithAxis axis2d west
+                            ]
+                                |> List.filterMap identity
+                                |> List.isEmpty
+                                |> not
+                    in
+                    if boundsWithinThreshold then
+                        --We must examine contents at our node level AND ask our children.
+                        let
+                            updatedNearest =
+                                List.foldl updateNearestWithContent inputState hasContent.contents
+                        in
+                        updatedNearest
+                            |> helperWithAxis hasContent.ne axis2d
+                            |> helperWithAxis hasContent.nw axis2d
+                            |> helperWithAxis hasContent.se axis2d
+                            |> helperWithAxis hasContent.sw axis2d
+
+                    else
+                        --Nothing of interest in this node.
+                        inputState
+
+        helperWithPoint :
+            SpatialNode contentType Meters coords
+            -> Point2d.Point2d Meters coords
+            -> FoldStateForNearest contentType Meters coords
+            -> FoldStateForNearest contentType Meters coords
+        helperWithPoint node point2d inputState =
+            queryAllContaining node point2d
+                |> List.foldl updateNearestWithContent inputState
+    in
+    -- Can't prune with bounding boxes if we seek the nearest.
+    -- Find nearest at this level, ask children if they can better it.
+    -- If there's a tie, return all candidates, caller decides.
+    case axis |> Axis3d.projectInto SketchPlane3d.xy of
+        Just axis2d ->
+            helperWithAxis
+                current
+                axis2d
+                initialState
+
+        Nothing ->
+            -- Vertical ray, use closest to point, not to axis
+            helperWithPoint
+                current
+                Point2d.origin
+                initialState
 
 
 toList : SpatialNode contentType units coords -> List (SpatialContent contentType units coords)
 toList current =
     -- Helper reduces lift shuffling.
-    toListInternal current [] |> List.concat
+    List.concat <| toListInternal current []
 
 
 toListInternal :

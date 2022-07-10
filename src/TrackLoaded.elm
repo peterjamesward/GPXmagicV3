@@ -4,6 +4,7 @@ import Actions exposing (ToolAction)
 import DomainModel exposing (..)
 import Json.Encode as E
 import LandUseDataTypes
+import LeafIndex exposing (LeafIndex)
 import Length exposing (Meters, inMeters)
 import List.Extra
 import LocalCoords exposing (LocalCoords)
@@ -29,13 +30,6 @@ type alias TrackLoaded msg =
     , leafIndex : LeafIndex
     }
 
-
-type alias LeafIndexEntry =
-    { leafIndex : Int }
-
-
-type alias LeafIndex =
-    SpatialIndex.SpatialNode LeafIndexEntry Length.Meters LocalCoords
 
 
 type alias UndoEntry msg =

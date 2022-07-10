@@ -812,7 +812,11 @@ detectHit event graph ( w, h ) context =
                     (\( edgeIndex, edgeInfo ) ->
                         let
                             thisEdgeNearestIndex =
-                                nearestToRay ray edgeInfo.track.trackTree
+                                nearestToRay
+                                    ray
+                                    edgeInfo.track.trackTree
+                                    edgeInfo.track.leafIndex
+                                    edgeInfo.track.currentPosition
 
                             thisEdgeNearestPoint =
                                 earthPointFromIndex thisEdgeNearestIndex edgeInfo.track.trackTree

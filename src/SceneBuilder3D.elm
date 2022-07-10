@@ -202,7 +202,7 @@ render3dView settings track =
                     makeLandUseSloped track.landUseData spatialIndex track.trackTree floorPlane
 
                 LandUseDataTypes.LandUsePlanar ->
-                    makeLandUsePlanar track.landUseData spatialIndex track.trackTree floorPlane
+                    makeLandUsePlanar track.landUseData spatialIndex track floorPlane
 
         terrain =
             if settings.terrainFineness > 0.0 then
@@ -239,10 +239,10 @@ type alias LandUseStuff =
 makeLandUsePlanar :
     LandUseDataTypes.LandUseData
     -> Index
-    -> PeteTree
+    -> TrackLoaded msg
     -> Plane3d Meters LocalCoords
     -> ( List (Entity LocalCoords), Index )
-makeLandUsePlanar landUse index tree groundPlane =
+makeLandUsePlanar landUse index track groundPlane =
     let
         drawCone :
             Color
@@ -254,9 +254,11 @@ makeLandUsePlanar landUse index tree groundPlane =
                     DomainModel.earthPointFromIndex
                         (DomainModel.nearestToRay
                             (Axis3d.withDirection Direction3d.positiveZ at)
-                            tree
+                            track.trackTree
+                            track.leafIndex
+                            track.currentPosition
                         )
-                        tree
+                        track.trackTree
 
                 altitudeAdjusted =
                     Point3d.xyz
