@@ -21,13 +21,9 @@ import Axis3d
 import BoundingBox2d
 import Length exposing (Meters)
 import LineSegment2d
-import List.Extra
 import Point2d
-import Point3d
-import Polygon2d
 import Quantity exposing (Quantity(..))
 import Quantity.Interval as Interval
-import Rectangle2d
 import SketchPlane3d
 
 
@@ -359,8 +355,40 @@ queryNearestToAxisUsing current axis valuation initialState =
             -> FoldStateForNearest contentType Meters coords
             -> FoldStateForNearest contentType Meters coords
         helperWithPoint node point2d inputState =
-            queryAllContaining node point2d
-                |> List.foldl updateNearestWithContent inputState
+            --TODO: These two cases are structurally so similar, there may be a refactoring.
+            --HINT: It's the pruning test `boundsWithinThreshold`.
+            case node of
+                Blank ->
+                    inputState
+
+                SpatialNode hasContent ->
+                    -- First test to see if bounding box is safely BEYOND the threshold,
+                    -- in which case, pass on the list immediately.
+                    -- If any of our content MATCH the threshold, add them to the list.
+                    -- If LESS than threshold, form a new list.
+                    -- Otherwise, pass the list on.
+                    let
+                        boxWithThreshold =
+                            hasContent.box |> BoundingBox2d.expandBy inputState.currentBestMetric
+
+                        boundsWithinThreshold =
+                            boxWithThreshold |> BoundingBox2d.contains point2d
+                    in
+                    if boundsWithinThreshold then
+                        --We must examine contents at our node level AND ask our children.
+                        let
+                            updatedNearest =
+                                List.foldl updateNearestWithContent inputState hasContent.contents
+                        in
+                        updatedNearest
+                            |> helperWithPoint hasContent.ne point2d
+                            |> helperWithPoint hasContent.nw point2d
+                            |> helperWithPoint hasContent.se point2d
+                            |> helperWithPoint hasContent.sw point2d
+
+                    else
+                        --Nothing of interest in this node.
+                        inputState
     in
     -- Can't prune with bounding boxes if we seek the nearest.
     -- Find nearest at this level, ask children if they can better it.

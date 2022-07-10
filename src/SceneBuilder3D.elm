@@ -16,14 +16,9 @@ import Direction2d
 import Direction3d
 import DomainModel exposing (..)
 import Element
-import FlatColors.AmericanPalette
 import FlatColors.AussiePalette
-import FlatColors.CanadianPalette
 import FlatColors.FlatUIPalette
-import FlatColors.FrenchPalette
 import FlatColors.IndianPalette
-import FlatColors.RussianPalette
-import LandUseDataOSM
 import LandUseDataTypes
 import Length exposing (Meters)
 import LineSegment2d exposing (LineSegment2d)
@@ -47,7 +42,6 @@ import Tools.LandUseColours exposing (landUseColours)
 import Tools.Nudge
 import TrackLoaded exposing (TrackLoaded)
 import TriangularMesh
-import Utils exposing (reversingCons)
 import UtilsForViews exposing (colorFromElmUiColour, flatBox, fullDepthRenderingBoxSize)
 import Vector3d
 
@@ -156,7 +150,7 @@ render3dView settings track =
              else
                 [ Scene3d.point { radius = Pixels.pixels 2 }
                     (Material.color Color.black)
-                    road.startPoint
+                    road.endPoint
                 , Scene3d.lineSegment (Material.color Color.lightCharcoal) <|
                     LineSegment3d.from road.startPoint road.endPoint
                 ]
@@ -168,6 +162,11 @@ render3dView settings track =
                     else
                         []
                    )
+
+        renderPointZero =
+            Scene3d.point { radius = Pixels.pixels 2 }
+                (Material.color Color.black)
+                (DomainModel.getFirstLeaf track.trackTree |> .startPoint)
 
         foldFn : RoadSection -> List (Entity LocalCoords) -> List (Entity LocalCoords)
         foldFn road scene =
@@ -217,7 +216,8 @@ render3dView settings track =
             else
                 []
     in
-    terrain
+    renderPointZero
+        :: terrain
         ++ landUseElements
         ++ DomainModel.traverseTreeBetweenLimitsToDepth
             0

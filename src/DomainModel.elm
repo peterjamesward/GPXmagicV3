@@ -102,6 +102,7 @@ type alias RoadSection =
 
     -- For rapid location of points using non-map views...
     , boundingBox : BoundingBox3d Meters LocalCoords
+
     --, sphere : Sphere3d Meters LocalCoords
     , trueLength : Quantity Float Meters
     , skipCount : Int
@@ -228,6 +229,7 @@ skipCount treeNode =
 boundingBox : PeteTree -> BoundingBox3d Meters LocalCoords
 boundingBox treeNode =
     treeNode |> asRecord |> .boundingBox
+
 
 
 --sphere : PeteTree -> Sphere3d Meters LocalCoords
@@ -357,6 +359,7 @@ makeRoadSectionKnowingLocalCoords ( earth1, local1 ) ( earth2, local2 ) =
     , startPoint = local1
     , endPoint = local2
     , boundingBox = box
+
     --, sphere = containingSphere box
     , trueLength = range
     , skipCount = 1
@@ -410,6 +413,7 @@ combineInfo info1 info2 =
     , startPoint = startPoint info1
     , endPoint = endPoint info2
     , boundingBox = box
+
     --, sphere = containingSphere box
     , trueLength = Quantity.plus (trueLength info1) (trueLength info2)
     , skipCount = skipCount info1 + skipCount info2
@@ -995,7 +999,7 @@ nearestToRay ray tree leafIndex current =
             let
                 pointToTest =
                     earthPointFromIndex
-                        leafEntry.leafIndex
+                        (leafEntry.leafIndex)
                         tree
             in
             pointToTest
@@ -1021,8 +1025,8 @@ nearestToRay ray tree leafIndex current =
                 , currentBestContent = [ pointZeroAsContent ]
                 }
 
-        --_ =
-        --    Debug.log "CONTENDERS" <| List.map (.content >> .leafIndex) contenders.currentBestContent
+        _ =
+            Debug.log "CONTENDERS" <| List.map (.content >> .leafIndex) contenders.currentBestContent
     in
     contenders.currentBestContent
         |> List.Extra.minimumBy (\one -> abs (one.content.leafIndex - current))
