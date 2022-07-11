@@ -1,10 +1,6 @@
 
 # BUGS
 
-Final point not rendered.
-
-Can't click detect final point.
-
 --- 
 
 # WIP
@@ -16,7 +12,6 @@ it tends to select the one at the start of the course, instead of the one I was 
 to select near the end. So I'm thinking if you've got 2 trackpoints in the same position, 
 on selection (mouse click), it'd be good to select the one closest to the current position.
 ```
-> **Click detect always giving Point Zero on Plan.**
 
 ---
 

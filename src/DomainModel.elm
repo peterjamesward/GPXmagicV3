@@ -997,40 +997,49 @@ nearestToRay ray tree leafIndex current =
             -- For simplicity, look only at end point, so point and leaf numbers match.
             -- Means caller must deal with the final point.
             let
-                pointToTest =
-                    earthPointFromIndex
-                        (leafEntry.leafIndex)
-                        tree
+                leafToTest =
+                    asRecord <| leafFromIndex leafEntry.leafIndex tree
             in
-            pointToTest
-                |> Point3d.distanceFromAxis ray
-                |> Quantity.abs
+            Quantity.min
+                (Point3d.distanceFromAxis ray leafToTest.startPoint)
+                (Point3d.distanceFromAxis ray leafToTest.endPoint)
 
-        pointZero =
-            earthPointFromIndex 0 tree
-
-        pointZeroAsContent =
-            -- Gaargh.
-            { content = { leafIndex = 0 }
-            , box = (pointZero |> Point3d.projectInto SketchPlane3d.xy) |> BoundingBox2d.singleton
-            }
-
-        contenders =
-            --NOTE because we use end points, we have to check point 0 for ourselves.
+        nearestLeafs =
             SpatialIndex.queryNearestToAxisUsing
                 leafIndex
                 ray
                 valuationFunction
-                { currentBestMetric = pointZero |> Point3d.distanceFromAxis ray
-                , currentBestContent = [ pointZeroAsContent ]
+                { currentBestMetric = Quantity.positiveInfinity
+                , currentBestContent = []
                 }
 
+        nearestPoints =
+            List.Extra.unique <|
+                List.map nearestPointForLeaf nearestLeafs.currentBestContent
+
+        nearestPointForLeaf leafEntry =
+            let
+                indexOfLeaf =
+                    leafEntry.content.leafIndex
+
+                leafToTest =
+                    asRecord <| leafFromIndex indexOfLeaf tree
+            in
+            if
+                Point3d.distanceFromAxis ray leafToTest.startPoint
+                    |> Quantity.lessThanOrEqualTo
+                        (Point3d.distanceFromAxis ray leafToTest.endPoint)
+            then
+                indexOfLeaf
+
+            else
+                indexOfLeaf + 1
+
         _ =
-            Debug.log "CONTENDERS" <| List.map (.content >> .leafIndex) contenders.currentBestContent
+            Debug.log "POINTS" nearestPoints
     in
-    contenders.currentBestContent
-        |> List.Extra.minimumBy (\one -> abs (one.content.leafIndex - current))
-        |> Maybe.map (.content >> .leafIndex)
+    nearestPoints
+        |> List.Extra.minimumBy (\pointIndex -> abs (pointIndex - current))
         |> Maybe.withDefault current
 
 

@@ -21,7 +21,9 @@ import Axis3d
 import BoundingBox2d
 import Length exposing (Meters)
 import LineSegment2d
+import Plane3d
 import Point2d
+import Point3d
 import Quantity exposing (Quantity(..))
 import Quantity.Interval as Interval
 import SketchPlane3d
@@ -393,19 +395,26 @@ queryNearestToAxisUsing current axis valuation initialState =
     -- Can't prune with bounding boxes if we seek the nearest.
     -- Find nearest at this level, ask children if they can better it.
     -- If there's a tie, return all candidates, caller decides.
-    case axis |> Axis3d.projectInto SketchPlane3d.xy of
-        Just axis2d ->
+    case
+        ( axis |> Axis3d.projectInto SketchPlane3d.xy
+        , axis |> Axis3d.intersectionWithPlane Plane3d.xy
+        )
+    of
+        ( Just axis2d, _ ) ->
             helperWithAxis
                 current
                 axis2d
                 initialState
 
-        Nothing ->
+        ( Nothing, Just pointOnXY ) ->
             -- Vertical ray, use closest to point, not to axis
             helperWithPoint
                 current
-                Point2d.origin
+                (pointOnXY |> Point3d.projectInto SketchPlane3d.xy)
                 initialState
+
+        _ ->
+            initialState
 
 
 toList : SpatialNode contentType units coords -> List (SpatialContent contentType units coords)
