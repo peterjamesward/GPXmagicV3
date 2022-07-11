@@ -1034,9 +1034,6 @@ nearestToRay ray tree leafIndex current =
 
             else
                 indexOfLeaf + 1
-
-        _ =
-            Debug.log "POINTS" nearestPoints
     in
     nearestPoints
         |> List.Extra.minimumBy (\pointIndex -> abs (pointIndex - current))
