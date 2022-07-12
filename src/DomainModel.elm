@@ -56,6 +56,7 @@ import BoundingBox2d
 import BoundingBox3d exposing (BoundingBox3d)
 import Dict exposing (Dict)
 import Direction2d exposing (Direction2d)
+import Direction3d
 import Json.Encode as E
 import LeafIndex exposing (LeafIndex, LeafIndexEntry)
 import Length exposing (Length, Meters, inMeters)
@@ -1056,110 +1057,18 @@ nearestToLonLat :
     GPXSource
     -> Int
     -> PeteTree
+    -> GPXSource
+    -> LeafIndex
     -> Int
-nearestToLonLat click current treeNode =
-    -- Easier to conceive if we frame this as "can you beat the given?".
+nearestToLonLat click current treeNode referenceLonLat leafIndex =
     let
-        currentGpx =
-            gpxPointFromIndex current treeNode
+        asEarthPoint =
+            pointFromGpxWithReference referenceLonLat click
 
-        canDoBetter : Int -> ( Int, Length ) -> PeteTree -> Maybe ( Int, Length )
-        canDoBetter thisIndex ( bestIndex, bestDistance ) thisNode =
-            case thisNode of
-                Leaf leaf ->
-                    let
-                        ( startDistance, endDistance ) =
-                            -- Will not touch all leaves, doubling up is OK
-                            ( gpxDistance (Tuple.first leaf.sourceData) click
-                            , gpxDistance (Tuple.second leaf.sourceData) click
-                            )
-
-                        bestThisLeaf =
-                            if startDistance |> Quantity.lessThan endDistance then
-                                ( thisIndex, startDistance )
-
-                            else
-                                ( thisIndex + 1, endDistance )
-                    in
-                    if bestThisLeaf |> Tuple.second |> Quantity.lessThan bestDistance then
-                        Just bestThisLeaf
-
-                    else
-                        Nothing
-
-                Node node ->
-                    -- Only recurse if our bounding box suggests we can do better.
-                    if
-                        bestAvailableDistanceGuess click thisNode
-                            |> Quantity.lessThan bestDistance
-                    then
-                        case
-                            canDoBetter
-                                thisIndex
-                                ( bestIndex, bestDistance )
-                                node.left
-                        of
-                            Just ( leftIndex, leftDistance ) ->
-                                -- Left is new champion, for how long>
-                                case
-                                    canDoBetter
-                                        (thisIndex + skipCount node.left)
-                                        ( leftIndex, leftDistance )
-                                        node.right
-                                of
-                                    Just ( rightIndex, rightDistance ) ->
-                                        -- Right did better
-                                        Just ( rightIndex, rightDistance )
-
-                                    Nothing ->
-                                        -- Left is still better
-                                        Just ( leftIndex, leftDistance )
-
-                            Nothing ->
-                                -- Left came up empty, try the right
-                                case
-                                    canDoBetter
-                                        (thisIndex + skipCount node.left)
-                                        ( bestIndex, bestDistance )
-                                        node.right
-                                of
-                                    Just ( rightIndex, rightDistance ) ->
-                                        -- Right did better
-                                        Just ( rightIndex, rightDistance )
-
-                                    Nothing ->
-                                        Nothing
-
-                    else
-                        Nothing
+        asRay =
+            Axis3d.withDirection Direction3d.negativeZ asEarthPoint
     in
-    case canDoBetter 0 ( current, gpxDistance currentGpx click ) treeNode of
-        Just ( bestIndex, bestRange ) ->
-            bestIndex
-
-        Nothing ->
-            current
-
-
-containingSphere : BoundingBox3d Meters LocalCoords -> Sphere3d Meters LocalCoords
-containingSphere box =
-    let
-        here =
-            BoundingBox3d.centerPoint box
-
-        ( xs, ys, zs ) =
-            BoundingBox3d.dimensions box
-
-        radius =
-            Quantity.half <|
-                Quantity.sqrt <|
-                    Quantity.sum
-                        [ Quantity.squared xs
-                        , Quantity.squared ys
-                        , Quantity.squared zs
-                        ]
-    in
-    Sphere3d.withRadius radius here
+    nearestToRay asRay treeNode leafIndex current
 
 
 lngLatPair : ( Angle, Angle, Length.Length ) -> E.Value

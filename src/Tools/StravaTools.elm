@@ -302,6 +302,8 @@ pointsFromStreams track segment streams =
                 startGpx
                 track.currentPosition
                 track.trackTree
+                track.referenceLonLat
+                track.leafIndex
 
         asGpx =
             List.map2
@@ -358,6 +360,8 @@ paste options track =
                         segmentStartGpx
                         0
                         track.trackTree
+                        track.referenceLonLat
+                        track.leafIndex
 
                 pEndingTrackPoint =
                     -- Our last track point will be replaced with the last stream point
@@ -365,6 +369,8 @@ paste options track =
                         segmentEndGpx
                         0
                         track.trackTree
+                        track.referenceLonLat
+                        track.leafIndex
 
                 ( readyToPaste, useStart, useEnd ) =
                     if pEndingTrackPoint < pStartingTrackPoint then
@@ -408,6 +414,7 @@ viewStravaTab location options wrap track =
         segmentIdField =
             Input.text
                 [ width (minimum 150 <| fill)
+
                 --, tooltip below (localisedTooltip location toolId "segmenttip")
                 ]
                 { onChange = wrap << UserChangedSegmentId
@@ -419,6 +426,7 @@ viewStravaTab location options wrap track =
         routeIdField =
             Input.text
                 [ width (minimum 150 <| fill)
+
                 --, tooltip below (localisedTooltip location toolId "routetip")
                 ]
                 { onChange = wrap << UserChangedRouteId

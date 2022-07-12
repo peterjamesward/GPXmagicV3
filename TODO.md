@@ -5,21 +5,16 @@
 
 # WIP
 
-David Ogle:
-```text
-[Say] the orange marker is near the end of the course and I select a trackpoint nearby,  
-it tends to select the one at the start of the course, instead of the one I was trying  
-to select near the end. So I'm thinking if you've got 2 trackpoints in the same position, 
-on selection (mouse click), it'd be good to select the one closest to the current position.
-```
+Rewrite DomainModel.nearestToLonLat to use Leaf index and "nearest to current" rule.
+Only challenge is the possibility of routes across IDL.
+(Aim is to remove redundant stuff in the DomainModel.)
 
 ---
 
 # BACKLOG
 
-## Load
+## Load from URL
 
-Download from URL.
 > CORS issues.
 
 ## Tools organisation

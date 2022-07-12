@@ -357,8 +357,6 @@ queryNearestToAxisUsing current axis valuation initialState =
             -> FoldStateForNearest contentType Meters coords
             -> FoldStateForNearest contentType Meters coords
         helperWithPoint node point2d inputState =
-            --TODO: These two cases are structurally so similar, there may be a refactoring.
-            --HINT: It's the pruning test `boundsWithinThreshold`.
             case node of
                 Blank ->
                     inputState

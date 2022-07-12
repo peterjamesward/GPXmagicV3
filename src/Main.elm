@@ -2189,6 +2189,8 @@ performActionsOnModel actions model =
                                 startGpx
                                 track.currentPosition
                                 track.trackTree
+                                track.referenceLonLat
+                                track.leafIndex
 
                         positionBeforeDrag =
                             gpxPointFromIndex index track.trackTree

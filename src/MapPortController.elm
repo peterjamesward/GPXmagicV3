@@ -336,6 +336,8 @@ processMapPortMessage lastState track json =
                                     gpxPoint
                                     track.currentPosition
                                     track.trackTree
+                                    track.referenceLonLat
+                                    track.leafIndex
                         in
                         ( { lastState
                             | lastClickLon = lon1
