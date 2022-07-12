@@ -3,9 +3,13 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.3.18 (9ced8ef7)
+# GPXmagic v3.3.19 (9ced8ef7)
 
 **GPXmagic V3 works (by far) best with Chrome (and some derivatives)**
+
+## In 3.3.19
+
+* Uses the 3.3.18 method for click detect on the Map view.
 
 ## In 3.3.18
 
