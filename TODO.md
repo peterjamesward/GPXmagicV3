@@ -5,10 +5,6 @@
 
 # WIP
 
-Rewrite DomainModel.nearestToLonLat to use Leaf index and "nearest to current" rule.
-Only challenge is the possibility of routes across IDL.
-(Aim is to remove redundant stuff in the DomainModel.)
-
 ---
 
 # BACKLOG

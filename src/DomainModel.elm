@@ -52,7 +52,6 @@ module DomainModel exposing
 
 import Angle exposing (Angle)
 import Axis3d exposing (Axis3d)
-import BoundingBox2d
 import BoundingBox3d exposing (BoundingBox3d)
 import Dict exposing (Dict)
 import Direction2d exposing (Direction2d)
@@ -64,9 +63,7 @@ import List.Extra
 import LocalCoords exposing (LocalCoords)
 import Point3d exposing (Point3d)
 import Quantity exposing (Quantity)
-import SketchPlane3d
 import SpatialIndex
-import Sphere3d exposing (Sphere3d)
 import Spherical as Spherical exposing (range)
 
 
@@ -107,11 +104,6 @@ type alias RoadSection =
     --, sphere : Sphere3d Meters LocalCoords
     , trueLength : Quantity Float Meters
     , skipCount : Int
-
-    -- For efficient detection of map clicks...
-    , medianLongitude : Direction2d LocalCoords
-    , eastwardExtent : Angle
-    , westwardExtent : Angle
 
     -- Basic route statistics...
     , altitudeGained : Quantity Float Meters
@@ -172,46 +164,6 @@ endPoint treeNode =
     treeNode |> asRecord |> .endPoint
 
 
-isLongitudeContained : Direction2d LocalCoords -> PeteTree -> Bool
-isLongitudeContained longitude treeNode =
-    let
-        turnFromMedianToGiven =
-            Direction2d.angleFrom (medianLongitude treeNode) longitude
-    in
-    (turnFromMedianToGiven |> Quantity.greaterThanOrEqualTo (westwardTurn treeNode))
-        && (turnFromMedianToGiven |> Quantity.lessThanOrEqualTo (eastwardTurn treeNode))
-
-
-rotationAwayFrom : Direction2d LocalCoords -> PeteTree -> Angle
-rotationAwayFrom longitude treeNode =
-    -- By how much, in any direction, would we need to move the longitude
-    -- to make it "contained". This is for selecting a branch if neither side is "contained".
-    let
-        nodeEast =
-            medianLongitude treeNode |> Direction2d.rotateBy (eastwardTurn treeNode)
-
-        nodeWest =
-            medianLongitude treeNode |> Direction2d.rotateBy (westwardTurn treeNode)
-    in
-    Quantity.min
-        (Quantity.abs <| Direction2d.angleFrom longitude nodeEast)
-        (Quantity.abs <| Direction2d.angleFrom longitude nodeWest)
-
-
-bestAvailableDistanceGuess : GPXSource -> PeteTree -> Length
-bestAvailableDistanceGuess target node =
-    -- Use above two functions to decide whether a node MAY be close to a given point.
-    if isLongitudeContained target.longitude node then
-        Quantity.zero
-
-    else
-        rotationAwayFrom target.longitude node
-            |> Angle.inDegrees
-            |> (*) Spherical.metresPerDegree
-            |> (*) (Angle.cos target.latitude)
-            |> Length.meters
-
-
 trueLength : PeteTree -> Quantity Float Meters
 trueLength treeNode =
     treeNode |> asRecord |> .trueLength
@@ -230,27 +182,6 @@ skipCount treeNode =
 boundingBox : PeteTree -> BoundingBox3d Meters LocalCoords
 boundingBox treeNode =
     treeNode |> asRecord |> .boundingBox
-
-
-
---sphere : PeteTree -> Sphere3d Meters LocalCoords
---sphere treeNode =
---    treeNode |> asRecord |> .sphere
-
-
-medianLongitude : PeteTree -> Direction2d LocalCoords
-medianLongitude treeNode =
-    treeNode |> asRecord |> .medianLongitude
-
-
-eastwardTurn : PeteTree -> Angle
-eastwardTurn treeNode =
-    treeNode |> asRecord |> .eastwardExtent
-
-
-westwardTurn : PeteTree -> Angle
-westwardTurn treeNode =
-    treeNode |> asRecord |> .westwardExtent
 
 
 pointFromGpxWithReference : GPXSource -> GPXSource -> EarthPoint
@@ -364,17 +295,6 @@ makeRoadSectionKnowingLocalCoords ( earth1, local1 ) ( earth2, local2 ) =
     --, sphere = containingSphere box
     , trueLength = range
     , skipCount = 1
-    , medianLongitude = medianLon
-    , eastwardExtent =
-        Quantity.max Quantity.zero <|
-            Quantity.max
-                (Direction2d.angleFrom medianLon earth1.longitude)
-                (Direction2d.angleFrom medianLon earth2.longitude)
-    , westwardExtent =
-        Quantity.min Quantity.zero <|
-            Quantity.min
-                (Direction2d.angleFrom medianLon earth1.longitude)
-                (Direction2d.angleFrom medianLon earth2.longitude)
     , altitudeGained = Quantity.max Quantity.zero altitudeChange
     , altitudeLost = Quantity.max Quantity.zero <| Quantity.negate altitudeChange
     , distanceClimbing =
@@ -404,11 +324,6 @@ combineInfo info1 info2 =
     let
         box =
             BoundingBox3d.union (boundingBox info1) (boundingBox info2)
-
-        sharedMedian =
-            medianLongitude info1
-                |> Direction2d.rotateBy
-                    (Direction2d.angleFrom (medianLongitude info1) (medianLongitude info2) |> Quantity.half)
     in
     { sourceData = ( Tuple.first (sourceData info1), Tuple.second (sourceData info2) )
     , startPoint = startPoint info1
@@ -418,27 +333,6 @@ combineInfo info1 info2 =
     --, sphere = containingSphere box
     , trueLength = Quantity.plus (trueLength info1) (trueLength info2)
     , skipCount = skipCount info1 + skipCount info2
-    , medianLongitude = sharedMedian
-    , eastwardExtent =
-        Quantity.max
-            (medianLongitude info1
-                |> Direction2d.rotateBy (eastwardTurn info1)
-                |> Direction2d.angleFrom sharedMedian
-            )
-            (medianLongitude info2
-                |> Direction2d.rotateBy (eastwardTurn info2)
-                |> Direction2d.angleFrom sharedMedian
-            )
-    , westwardExtent =
-        Quantity.min
-            (medianLongitude info1
-                |> Direction2d.rotateBy (westwardTurn info1)
-                |> Direction2d.angleFrom sharedMedian
-            )
-            (medianLongitude info2
-                |> Direction2d.rotateBy (westwardTurn info2)
-                |> Direction2d.angleFrom sharedMedian
-            )
     , altitudeGained =
         Quantity.plus
             (info1 |> asRecord |> .altitudeGained)
