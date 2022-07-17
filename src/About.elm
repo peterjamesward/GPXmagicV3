@@ -15,9 +15,9 @@ aboutText =
 
 In David Ogle's words:
 
-> [Say] the orange marker is near the end of the course and I select a trackpoint nearby,
+> [Say] the orange marker is near the end of the course and I select a track point nearby,
   it tends to select the one at the start of the course, instead of the one I was trying
-  to select near the end. So I'm thinking if you've got 2 trackpoints in the same position,
+  to select near the end. So I'm thinking if you've got 2 track points in the same position,
   on selection (mouse click), it'd be good to select the one closest to the current position.
 
 It's subtle, but nicer, and might provide slightly better performance on some routes, not all.

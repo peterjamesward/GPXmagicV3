@@ -5,6 +5,14 @@
 
 # WIP
 
+## On refactoring Action interpeter in Main.
+
+?? Would it help to have a classification of Actions ??:
+- Edits with given fromStart, fromEnd;
+- Edits with tool-derived fromStart, fromEnd;
+- Side-effects only, e.g. map, localStorage, Http;
+- Pointer movements and other non-edits.
+
 ---
 
 # BACKLOG
@@ -31,14 +39,12 @@ Need more work on number formats.
 
 ## Technical debt
 
-**Can use Axis3d instead of line equation representation??**
-
-**Tagged types for Point v Line indices to avoid confusion??**
+Tagged types for Point v Line indices to avoid confusion.
 
 Variant of "request from local storage" that takes a wrapped message so that the return value
 can be directed to a tool or a view.
 
-Remove tool-specific stuff in Main.performActions.
+Remove tool-specific stuff in Main.performActions. (WIP)
 
 Put all Font, Colour etc into a Palette/Style module for ease of change.
 
@@ -58,14 +64,6 @@ Scales?
 Drag Curve Former circle directly in Plan View. (Add an SVG "handle" to hit detect.)
 Ditto for Move & Stretch, possibly Nudge.
 Provide info text capability on top bar and on view panes.
-Specific areas within tools as needed.
-
-## De-noise / Simplify
-
-This could be improved. Should preferentially remove any points where the triangle has a large
-deflection and a short baseline, not just based on area. Also, an effective quality filter
-would be to restrict the angular change in both planes. Will do this prior to curvature analysis.
-> Obviated by smart smoother?
 
 ## Tools: old, updated, & new
 

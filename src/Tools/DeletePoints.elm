@@ -195,7 +195,11 @@ deleteSinglePoint fromStart fromEnd track =
     )
 
 
-deletePointsBetween : Int -> Int -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+deletePointsBetween :
+    Int
+    -> Int
+    -> TrackLoaded msg
+    -> ( Maybe PeteTree, List GPXSource, (Int, Int) )
 deletePointsBetween fromStart fromEnd track =
     let
         newTree =
@@ -216,4 +220,5 @@ deletePointsBetween fromStart fromEnd track =
     in
     ( newTree
     , oldPoints |> List.map Tuple.second
+    , (fromStart, fromEnd)
     )

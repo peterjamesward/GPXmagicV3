@@ -1458,15 +1458,15 @@ performActionsOnModel actions model =
 
                 ( DeletePointsBetween fromStart fromEnd, Just track ) ->
                     let
-                        ( newTree, oldPoints ) =
+                        ( newTree, oldPoints, (actualFromStart, actualFromEnd) ) =
                             DeletePoints.deletePointsBetween fromStart fromEnd track
 
                         newTrack =
                             track
                                 |> TrackLoaded.addToUndoStack
                                     action
-                                    fromStart
-                                    fromEnd
+                                    actualFromStart
+                                    actualFromEnd
                                     oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
