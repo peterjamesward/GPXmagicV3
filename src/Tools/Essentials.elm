@@ -366,7 +366,7 @@ viewUndoRedo location msgWrapper track =
                             text <|
                                 String.Interpolate.interpolate
                                     (I18N.localisedString location toolId "undo")
-                                    [ Actions.interpretAction location undo.action ]
+                                    [ Actions.actionTextForUndo location undo.action ]
                         }
             , case track.redos of
                 [] ->
@@ -382,6 +382,6 @@ viewUndoRedo location msgWrapper track =
                             text <|
                                 String.Interpolate.interpolate
                                     (I18N.localisedString location toolId "redo")
-                                    [ Actions.interpretAction location redo.action ]
+                                    [ Actions.actionTextForUndo location redo.action ]
                         }
             ]

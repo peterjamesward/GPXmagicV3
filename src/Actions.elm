@@ -109,8 +109,8 @@ type ToolAction msg
     | WidenBend (List Int) (Quantity Float Meters)
 
 
-interpretAction : I18NOptions.Location -> ToolAction msg -> String
-interpretAction location action =
+actionTextForUndo : I18NOptions.Location -> ToolAction msg -> String
+actionTextForUndo location action =
     -- Only needed for track modifying actions that go in the undo stack.
     I18N.localisedString location "action" <|
         case action of
