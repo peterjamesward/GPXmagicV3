@@ -1458,7 +1458,7 @@ performActionsOnModel actions model =
 
                 ( DeletePointsBetween fromStart fromEnd, Just track ) ->
                     let
-                        ( newTree, oldPoints, (actualFromStart, actualFromEnd) ) =
+                        ( newTree, oldPoints, ( actualFromStart, actualFromEnd ) ) =
                             DeletePoints.deletePointsBetween fromStart fromEnd track
 
                         newTrack =
@@ -2703,13 +2703,6 @@ performActionsOnModel actions model =
                                     , redos = []
                                 }
                     }
-
-                ( LockToolOpen open id, _ ) ->
-                    let
-                        newToolOptions =
-                            ToolsController.lockToolOpen open id foldedModel.toolOptions
-                    in
-                    { foldedModel | toolOptions = newToolOptions }
 
                 _ ->
                     foldedModel
