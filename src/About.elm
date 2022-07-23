@@ -7,22 +7,10 @@ aboutText =
 
 **GPXmagic V3 works (by far) best with Chrome (and some derivatives)**
 
-## In 3.3.19
+## In 3.3.20
 
-* Uses the 3.3.18 method for click detect on the Map view.
-
-## In 3.3.18
-
-In David Ogle's words:
-
-> [Say] the orange marker is near the end of the course and I select a track point nearby,
-  it tends to select the one at the start of the course, instead of the one I was trying
-  to select near the end. So I'm thinking if you've got 2 track points in the same position,
-  on selection (mouse click), it'd be good to select the one closest to the current position.
-
-It's subtle, but nicer, and might provide slightly better performance on some routes, not all.
-
-Quite a few internal changes to support this, maybe Save more often, just in case.
+* Fixed bug where click detect did not work properly because not all edits correctly updated
+the track point spatial index.
 
 ## Acknowledgements
 

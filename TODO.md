@@ -7,11 +7,8 @@
 
 ## On refactoring Action interpeter in Main.
 
-?? Would it help to have a classification of Actions ??:
-- Edits with given fromStart, fromEnd;
-- Edits with tool-derived fromStart, fromEnd;
-- Side-effects only, e.g. map, localStorage, Http;
-- Pointer movements and other non-edits.
+Main difference is how the pointers are repositioned.
+There's only two or three cases, if not a single general one.
 
 ---
 

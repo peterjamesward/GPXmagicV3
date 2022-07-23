@@ -31,7 +31,6 @@ type alias TrackLoaded msg =
     }
 
 
-
 type alias UndoEntry msg =
     { action : ToolAction msg
     , originalPoints : List GPXSource -- for reconstructing the original tree
@@ -357,6 +356,7 @@ internalUseTree newTree oldTrack =
         | trackTree = newTree
         , currentPosition = newOrange
         , markerPosition = newPurple
+        , leafIndex = indexLeaves newTree
     }
 
 
