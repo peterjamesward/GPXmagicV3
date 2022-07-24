@@ -80,7 +80,7 @@ import Tools.StravaDataLoad
 import Tools.StravaTools
 import Tools.TrackInfoBox
 import ToolsController exposing (ToolEntry, encodeColour, encodeToolState)
-import TrackLoaded exposing (TrackLoaded)
+import TrackLoaded exposing (TrackLoaded, indexLeaves)
 import Url exposing (Url)
 import Url.Builder as Builder
 import UtilsForViews exposing (uiColourHexString)
@@ -1878,6 +1878,9 @@ performActionsOnModel actions model =
                                             | trackTree = Maybe.withDefault trk.trackTree newTree
                                             , currentPosition = newOrange
                                             , markerPosition = newPurple
+                                            , leafIndex =
+                                                indexLeaves <|
+                                                    Maybe.withDefault trk.trackTree newTree
                                         }
                                    )
 

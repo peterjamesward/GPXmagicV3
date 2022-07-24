@@ -7,10 +7,10 @@ aboutText =
 
 **GPXmagic V3 works (by far) best with Chrome (and some derivatives)**
 
-## In 3.3.20
+## In 3.3.21
 
 * Fixed bug where click detect did not work properly because not all edits correctly updated
-the track point spatial index.
+the track point spatial index. Also works now after One-Click Quick-Fix.
 
 ## Acknowledgements
 
