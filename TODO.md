@@ -5,14 +5,22 @@
 
 # WIP
 
+---
+
+# BACKLOG
+
+## Timestamps (Jonathan Colledge)
+
+> I wonder if you might consider adding timestamp functionality to GPX Magic - this would open up the user base to all the Kinomap video makers and would make GPX Magic a one-stop shop for GPX video synchronisation.
+
+>Here is a video that summarises the issues in the workflow: https://youtu.be/mN7MZwTizAY
+
+> The only thing not mentioned in the video is how I slow the GPX down (say if I was slowing the video from 60 fps to 30 fps) - I would interpolate to 0.5 s intervals, then relabel them all at 1 second intervals, thus slowing the GPX to match a slowed video.
+
 ## On refactoring Action interpeter in Main.
 
 Main difference is how the pointers are repositioned.
 There's only two or three cases, if not a single general one.
-
----
-
-# BACKLOG
 
 ## Load from URL
 
