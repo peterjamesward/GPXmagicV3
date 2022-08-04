@@ -797,6 +797,7 @@ You must first authenticate with Strava using the button on the top bar; do that
                 , ( "descent", """Descent""" )
                 , ( "climbing", """Climbing""" )
                 , ( "descending", """Descending""" )
+                , ( "duration", """Duration""")
                 , ( "steepest", """Steepest""" )
                 , ( "number", """Number""" )
                 , ( "distance", """Distance""" )

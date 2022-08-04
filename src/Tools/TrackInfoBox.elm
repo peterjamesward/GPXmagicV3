@@ -10,6 +10,9 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (labelHidden)
 import FlatColors.ChinesePalette
+import Iso8601
+import String.Interpolate
+import Time
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
@@ -83,6 +86,35 @@ trackInfoList =
       )
     , ( "steepest"
       , \imperial info -> info.steepestClimb |> showDecimal2 |> text
+      )
+    , ( "duration"
+      , \imperial info ->
+            case info.transitTime of
+                Just isTime ->
+                    let
+                        hours =
+                            Time.toHour Time.utc isTime
+
+                        minutes =
+                            Time.toMinute Time.utc isTime
+
+                        seconds =
+                            Time.toSecond Time.utc isTime
+
+                        millis =
+                            Time.toMillis Time.utc isTime
+                    in
+                    text <|
+                        String.Interpolate.interpolate
+                            "{0}:{1}:{2}.{3}"
+                            [ String.fromInt hours
+                            , UtilsForViews.withLeadingZeros 2 <| String.fromInt minutes
+                            , UtilsForViews.withLeadingZeros 2 <| String.fromInt seconds
+                            , UtilsForViews.withLeadingZeros 3 <| String.fromInt millis
+                            ]
+
+                Nothing ->
+                    text "- - -"
       )
     ]
 
