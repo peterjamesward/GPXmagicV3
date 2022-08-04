@@ -287,11 +287,15 @@ makeRoadSectionKnowingLocalCoords ( earth1, local1 ) ( earth2, local2 ) =
     , startPoint = local1
     , endPoint = local2
     , boundingBox = box
-
-    --, sphere = containingSphere box
     , trueLength = range
     , skipCount = 1
-    , transitTime = Nothing
+    , transitTime =
+        case ( earth1.timestamp, earth2.timestamp ) of
+            ( Just startTime, Just endTime ) ->
+                Just <| Time.millisToPosix <| Time.posixToMillis endTime - Time.posixToMillis startTime
+
+            _ ->
+                Nothing
     , altitudeGained = Quantity.max Quantity.zero altitudeChange
     , altitudeLost = Quantity.max Quantity.zero <| Quantity.negate altitudeChange
     , distanceClimbing =
@@ -321,57 +325,48 @@ combineInfo info1 info2 =
     let
         box =
             BoundingBox3d.union (boundingBox info1) (boundingBox info2)
-    in
-    { sourceData = ( Tuple.first (sourceData info1), Tuple.second (sourceData info2) )
-    , startPoint = startPoint info1
-    , endPoint = endPoint info2
-    , boundingBox = box
 
-    --, sphere = containingSphere box
-    , trueLength = Quantity.plus (trueLength info1) (trueLength info2)
-    , skipCount = skipCount info1 + skipCount info2
-    , transitTime = Nothing
-    , altitudeGained =
-        Quantity.plus
-            (info1 |> asRecord |> .altitudeGained)
-            (info2 |> asRecord |> .altitudeGained)
-    , altitudeLost =
-        Quantity.plus
-            (info1 |> asRecord |> .altitudeLost)
-            (info2 |> asRecord |> .altitudeLost)
-    , distanceClimbing =
-        Quantity.plus
-            (info1 |> asRecord |> .distanceClimbing)
-            (info2 |> asRecord |> .distanceClimbing)
-    , distanceDescending =
-        Quantity.plus
-            (info1 |> asRecord |> .distanceDescending)
-            (info2 |> asRecord |> .distanceDescending)
-    , steepestClimb =
-        max (info1 |> asRecord |> .steepestClimb)
-            (info2 |> asRecord |> .steepestClimb)
-    , gradientAtStart = info1 |> asRecord |> .gradientAtStart
-    , gradientAtEnd = info2 |> asRecord |> .gradientAtEnd
+        ( asRecord1, asRecord2 ) =
+            ( asRecord info1, asRecord info2 )
+    in
+    { sourceData = ( Tuple.first asRecord1.sourceData, Tuple.second asRecord2.sourceData )
+    , startPoint = asRecord1.startPoint
+    , endPoint = asRecord2.endPoint
+    , boundingBox = box
+    , trueLength = Quantity.plus asRecord1.trueLength asRecord2.trueLength
+    , skipCount = asRecord1.skipCount + asRecord2.skipCount
+    , transitTime =
+        case ( asRecord1.transitTime, asRecord2.transitTime ) of
+            ( Just time1, Just time2 ) ->
+                Just <| Time.millisToPosix <| Time.posixToMillis time1 + Time.posixToMillis time2
+
+            _ ->
+                Nothing
+    , altitudeGained = Quantity.plus asRecord1.altitudeGained asRecord2.altitudeGained
+    , altitudeLost = Quantity.plus asRecord1.altitudeLost asRecord2.altitudeLost
+    , distanceClimbing = Quantity.plus asRecord1.distanceClimbing asRecord2.distanceClimbing
+    , distanceDescending = Quantity.plus asRecord1.distanceDescending asRecord2.distanceDescending
+    , steepestClimb = max asRecord1.steepestClimb asRecord2.steepestClimb
+    , gradientAtStart = asRecord1.gradientAtStart
+    , gradientAtEnd = asRecord2.gradientAtEnd
     , gradientChangeMaximumAbs =
         Maybe.withDefault 0.0 <|
             List.maximum
-                [ info1 |> asRecord |> .gradientChangeMaximumAbs
-                , info2 |> asRecord |> .gradientChangeMaximumAbs
-                , abs <|
-                    (info1 |> asRecord |> .gradientAtEnd)
-                        - (info2 |> asRecord |> .gradientAtStart)
+                [ asRecord1.gradientChangeMaximumAbs
+                , asRecord2.gradientChangeMaximumAbs
+                , abs (asRecord1.gradientAtEnd - asRecord2.gradientAtStart)
                 ]
-    , directionAtStart = info1 |> asRecord |> .directionAtStart
-    , directionAtEnd = info2 |> asRecord |> .directionAtEnd
+    , directionAtStart = asRecord1.directionAtStart
+    , directionAtEnd = asRecord2.directionAtEnd
     , directionChangeMaximumAbs =
         Maybe.withDefault Quantity.zero <|
             Quantity.maximum
-                [ info1 |> asRecord |> .directionChangeMaximumAbs
-                , info2 |> asRecord |> .directionChangeMaximumAbs
+                [ asRecord1.directionChangeMaximumAbs
+                , asRecord2.directionChangeMaximumAbs
                 , Quantity.abs <|
                     Direction2d.angleFrom
-                        (info1 |> asRecord |> .directionAtEnd)
-                        (info2 |> asRecord |> .directionAtStart)
+                        asRecord1.directionAtEnd
+                        asRecord2.directionAtStart
                 ]
     }
 
