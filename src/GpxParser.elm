@@ -4,11 +4,12 @@ import Angle
 import Direction2d
 import DomainModel exposing (GPXSource)
 import ElmEscapeHtml
+import Iso8601
 import Length
 import List.Extra
+import Maybe.Extra
 import Quantity
 import Regex
-import Spherical
 
 
 asRegex t =
@@ -133,7 +134,23 @@ parseGPXPoints xml =
             Regex.find (asRegex "lon=\\\"([\\d\\.-]*)\\\"") trkpt |> matches
 
         elevation trkpt =
-            Regex.find (asRegex "<ele>([\\d\\.-]*)<\\/ele>") trkpt |> matches
+            case
+                Regex.find (asRegex "<ele>([\\d\\.-]*)<\\/ele>") trkpt |> matches
+            of
+                (Just alt) :: _ ->
+                    Length.meters alt
+
+                _ ->
+                    Quantity.zero
+
+        timestamp trkpt =
+            trkpt
+                |> Regex.find (asRegex "<time>(.*)<\\/time>")
+                |> List.head
+                |> Maybe.map .submatches
+                |> Maybe.andThen List.head
+                |> Maybe.Extra.join
+                |> Maybe.andThen (Iso8601.toTime >> Result.toMaybe)
 
         earthVector : Regex.Match -> Maybe ( GPXSource, Int )
         earthVector trkpt =
@@ -142,22 +159,14 @@ parseGPXPoints xml =
                 trkptString =
                     trkpt.match
             in
-            case ( latitude trkptString, longitude trkptString, elevation trkptString ) of
-                ( (Just lat) :: _, (Just lon) :: _, (Just alt) :: _ ) ->
+            case ( latitude trkptString, longitude trkptString ) of
+                ( (Just lat) :: _, (Just lon) :: _ ) ->
                     Just <|
                         ( GPXSource
                             (Direction2d.fromAngle <| Angle.degrees lon)
                             (Angle.degrees lat)
-                            (Length.meters alt)
-                        , trkpt.index
-                        )
-
-                ( (Just lat) :: _, (Just lon) :: _, _ ) ->
-                    Just <|
-                        ( GPXSource
-                            (Direction2d.fromAngle <| Angle.degrees lon)
-                            (Angle.degrees lat)
-                            (Length.meters 0)
+                            (elevation trkptString)
+                            (timestamp trkptString)
                         , trkpt.index
                         )
 

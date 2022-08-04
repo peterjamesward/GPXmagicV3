@@ -170,6 +170,7 @@ computeRecentredPoints ( lon, lat ) track =
             { longitude = Direction2d.fromAngle <| Angle.degrees lon
             , latitude = Angle.degrees lat
             , altitude = Quantity.zero
+            , timestamp = Nothing
             }
 
         shiftFn : RoadSection -> List EarthPoint -> List EarthPoint

@@ -2129,6 +2129,7 @@ performActionsOnModel actions model =
                                     { longitude = Direction2d.fromAngle <| Angle.degrees lon
                                     , latitude = Angle.degrees lat
                                     , altitude = Quantity.zero
+                                    , timestamp = Nothing
                                     }
                             in
                             { track | referenceLonLat = newReference }
@@ -2185,6 +2186,7 @@ performActionsOnModel actions model =
                             { longitude = Direction2d.fromAngle <| Angle.degrees startLon
                             , latitude = Angle.degrees startLat
                             , altitude = Quantity.zero
+                            , timestamp = Nothing
                             }
 
                         index =
@@ -2202,6 +2204,7 @@ performActionsOnModel actions model =
                             { longitude = Direction2d.fromAngle <| Angle.degrees endLon
                             , latitude = Angle.degrees endLat
                             , altitude = positionBeforeDrag.altitude
+                            , timestamp = Nothing
                             }
 
                         newTree =

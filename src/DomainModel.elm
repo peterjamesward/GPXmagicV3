@@ -65,6 +65,7 @@ import Point3d exposing (Point3d)
 import Quantity exposing (Quantity)
 import SpatialIndex
 import Spherical as Spherical exposing (range)
+import Time
 
 
 type alias GPXSource =
@@ -72,6 +73,7 @@ type alias GPXSource =
     { longitude : Direction2d LocalCoords
     , latitude : Angle
     , altitude : Quantity Float Meters
+    , timestamp : Maybe Time.Posix
     }
 
 
@@ -100,10 +102,9 @@ type alias RoadSection =
 
     -- For rapid location of points using non-map views...
     , boundingBox : BoundingBox3d Meters LocalCoords
-
-    --, sphere : Sphere3d Meters LocalCoords
     , trueLength : Quantity Float Meters
     , skipCount : Int
+    , transitTime : Maybe Time.Posix
 
     -- Basic route statistics...
     , altitudeGained : Quantity Float Meters
@@ -225,6 +226,7 @@ gpxFromPointWithReference reference point =
         (Direction2d.fromAngle longitude)
         latitude
         (Length.meters altitude)
+        Nothing
 
 
 makeLeaf : GPXSource -> GPXSource -> GPXSource -> PeteTree
@@ -259,12 +261,6 @@ makeRoadSectionKnowingLocalCoords ( earth1, local1 ) ( earth2, local2 ) =
                     ( Direction2d.toAngle earth1.longitude, earth1.latitude )
                     ( Direction2d.toAngle earth2.longitude, earth2.latitude )
 
-        medianLon =
-            -- Careful, don't average because of -pi/+pi, work out half the turn.
-            earth1.longitude
-                |> Direction2d.rotateBy
-                    (Direction2d.angleFrom earth1.longitude earth2.longitude |> Quantity.half)
-
         altitudeChange =
             Point3d.zCoordinate local2 |> Quantity.minus (Point3d.zCoordinate local1)
 
@@ -295,6 +291,7 @@ makeRoadSectionKnowingLocalCoords ( earth1, local1 ) ( earth2, local2 ) =
     --, sphere = containingSphere box
     , trueLength = range
     , skipCount = 1
+    , transitTime = Nothing
     , altitudeGained = Quantity.max Quantity.zero altitudeChange
     , altitudeLost = Quantity.max Quantity.zero <| Quantity.negate altitudeChange
     , distanceClimbing =
@@ -333,6 +330,7 @@ combineInfo info1 info2 =
     --, sphere = containingSphere box
     , trueLength = Quantity.plus (trueLength info1) (trueLength info2)
     , skipCount = skipCount info1 + skipCount info2
+    , transitTime = Nothing
     , altitudeGained =
         Quantity.plus
             (info1 |> asRecord |> .altitudeGained)
@@ -643,7 +641,7 @@ treeFromSourcePoints track =
             -- From which, arbitrarily, we compute metre offsets.
             -- We won't be here without a track, so default is harmless.
             List.head track
-                |> Maybe.withDefault (GPXSource Direction2d.x Quantity.zero Quantity.zero)
+                |> Maybe.withDefault (GPXSource Direction2d.x Quantity.zero Quantity.zero Nothing)
     in
     treeFromSourcesWithExistingReference referencePoint track
 

@@ -5,17 +5,61 @@
 
 # WIP
 
+## Timestamps (Jonathan Colledge)
+
+> I wonder if you might consider adding timestamp functionality to GPX Magic -
+> this would open up the user base to all the Kinomap video makers and would make
+> GPX Magic a one-stop shop for GPX video synchronisation.
+
+> Here is a video that summarises the issues in the workflow: https://youtu.be/mN7MZwTizAY
+
+> The only thing not mentioned in the video is how I slow the GPX down (say if I
+> was slowing the video from 60 fps to 30 fps) - I would interpolate to 0.5 s intervals,
+> then relabel them all at 1 second intervals, thus slowing the GPX to match a slowed video.
+
+OK. I think I have a plan for a new “Timestamp” tool. The start and end time will
+be recorded at Track level. Internally, I store time intervals between points. This reduces 
+the upkeep — it’s the same for distance. This means that trivial edits such as delete “just work”. 
+
+Complex edits such as bend arcs will result in new points that have fractional time intervals. 
+> Or should we maintain the "tick" spacing; I like that as an idea.
+
+There will be an option to “interpolate time-wise” to fill in any missing points.
+
+What do we do about Komoot tracks with fractional second timings.
+
+Another option to change (“scale”) the interval to one of 0.5, 1.0, 2.0 seconds. 
+This will just scale the intervals internally. The Orange and Purple pointers will show time 
+when available. Purpose is to allow sync with different video frame rates.
+
+A final option will replace and “fractional” points (by local interpolation) 
+to the exact seconds (this may drop or create points). 
+
+Might allow adding timestamps to an untimed GPX based on track length and average speed.
+
+> Wondering if I could use the Interpolate tool as this overlaps functionally.
+
+
+```xml
+<gpx xmlns#...>
+  <metadata>
+    <link href#"http://www.garmin.com">
+      <text>Garmin International</text>
+    </link>
+    <time>2009-10-17T22:58:43Z</time>
+  </metadata>
+  <trk>
+    <name>Example GPX Document</name>
+    <trkseg>
+        <trkpt lat="51.618243" lon="-0.303295">
+            <ele>83.748270</ele>
+            <time>2020-08-30T07:19:38.436Z</time>
+        </trkpt>
+```
+
 ---
 
 # BACKLOG
-
-## Timestamps (Jonathan Colledge)
-
-> I wonder if you might consider adding timestamp functionality to GPX Magic - this would open up the user base to all the Kinomap video makers and would make GPX Magic a one-stop shop for GPX video synchronisation.
-
->Here is a video that summarises the issues in the workflow: https://youtu.be/mN7MZwTizAY
-
-> The only thing not mentioned in the video is how I slow the GPX down (say if I was slowing the video from 60 fps to 30 fps) - I would interpolate to 0.5 s intervals, then relabel them all at 1 second intervals, thus slowing the GPX to match a slowed video.
 
 ## On refactoring Action interpeter in Main.
 

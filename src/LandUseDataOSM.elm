@@ -76,6 +76,7 @@ fetchAltitudesFromMap raw =
                         { longitude = rawNode.lon |> Angle.degrees |> Direction2d.fromAngle
                         , latitude = rawNode.lat |> Angle.degrees
                         , altitude = Quantity.zero
+                        , timestamp = Nothing
                         }
                     )
     in
@@ -120,6 +121,7 @@ applyAltitudes altitudes track =
                                             { longitude = rawNode.lon |> Angle.degrees |> Direction2d.fromAngle
                                             , latitude = rawNode.lat |> Angle.degrees
                                             , altitude = Length.meters altitude
+                                            , timestamp = Nothing
                                             }
                                   , tags = rawNode.tags
                                   }
@@ -133,6 +135,7 @@ applyAltitudes altitudes track =
                                             { longitude = rawNode.lon |> Angle.degrees |> Direction2d.fromAngle
                                             , latitude = rawNode.lat |> Angle.degrees
                                             , altitude = groundLevel
+                                            , timestamp = Nothing
                                             }
                                   , tags = rawNode.tags
                                   }

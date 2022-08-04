@@ -106,6 +106,7 @@ emptyGraph =
         { latitude = Angle.degrees 0
         , longitude = Direction2d.positiveX
         , altitude = Quantity.zero
+        , timestamp = Nothing
         }
     }
 

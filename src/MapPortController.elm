@@ -329,6 +329,7 @@ processMapPortMessage lastState track json =
                                 { longitude = Direction2d.fromAngle <| Angle.degrees lon1
                                 , latitude = Angle.degrees lat1
                                 , altitude = Length.meters 0.0
+                                , timestamp = Nothing
                                 }
 
                             index =

@@ -242,6 +242,7 @@ processXML options content =
                             { longitude = Direction2d.fromAngle <| Angle.degrees lon
                             , latitude = Angle.degrees lat
                             , altitude = Length.meters 0
+                            , timestamp = Nothing
                             }
 
                         gpxPoints =

@@ -276,12 +276,14 @@ extractFromLngLat latlng =
             { longitude = Direction2d.fromAngle <| Angle.degrees longitude
             , latitude = Angle.degrees latitude
             , altitude = Quantity.zero
+            , timestamp = Nothing
             }
 
         _ ->
             { longitude = Direction2d.positiveX
             , latitude = Quantity.zero
             , altitude = Quantity.zero
+            , timestamp = Nothing
             }
 
 
@@ -312,6 +314,7 @@ pointsFromStreams track segment streams =
                         (Direction2d.fromAngle <| Angle.degrees latLon.lng)
                         (Angle.degrees latLon.lat)
                         (Length.meters alt)
+                        Nothing
                 )
                 streams.latLngs.data
                 streams.altitude.data
