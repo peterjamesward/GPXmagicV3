@@ -17,45 +17,25 @@
 > was slowing the video from 60 fps to 30 fps) - I would interpolate to 0.5 s intervals,
 > then relabel them all at 1 second intervals, thus slowing the GPX to match a slowed video.
 
-OK. I think I have a plan for a new “Timestamp” tool. The start and end time will
-be recorded at Track level. Internally, I store time intervals between points. This reduces 
-the upkeep — it’s the same for distance. This means that trivial edits such as delete “just work”. 
+Time for a point is a valid coordinate similar to altitude. 
+It can be interpolated analogously.
+Will compute intervals in tree as this may be useful later for interpolation.
 
-Complex edits such as bend arcs will result in new points that have fractional time intervals. 
-> Or should we maintain the "tick" spacing; I like that as an idea.
+Edits preserve start and end times of range. 
+Points preserve their time.
+New points used an interpolated time between the extremes (like altitude on bend smoothing).
 
-There will be an option to “interpolate time-wise” to fill in any missing points.
+Use markers to designate a range for a time-wise "nudge" adjustment.
+e.g. after delete, bring remaining track earlier in time.
+Maybe default from Orange to track end.
+(May need option to Shift or Stretch.)
 
-What do we do about Komoot tracks with fractional second timings.
-
-Another option to change (“scale”) the interval to one of 0.5, 1.0, 2.0 seconds. 
+Option to change (“scale”) the interval to one of 0.5, 1.0, 2.0 seconds. 
 This will just scale the intervals internally. The Orange and Purple pointers will show time 
-when available. Purpose is to allow sync with different video frame rates.
-
-A final option will replace and “fractional” points (by local interpolation) 
-to the exact seconds (this may drop or create points). 
+when available. Purpose is to allow videos to run at half-speed (e.g. car recorded).
 
 Might allow adding timestamps to an untimed GPX based on track length and average speed.
-
-> Wondering if I could use the Interpolate tool as this overlaps functionally.
-
-
-```xml
-<gpx xmlns#...>
-  <metadata>
-    <link href#"http://www.garmin.com">
-      <text>Garmin International</text>
-    </link>
-    <time>2009-10-17T22:58:43Z</time>
-  </metadata>
-  <trk>
-    <name>Example GPX Document</name>
-    <trkseg>
-        <trkpt lat="51.618243" lon="-0.303295">
-            <ele>83.748270</ele>
-            <time>2020-08-30T07:19:38.436Z</time>
-        </trkpt>
-```
+Or even a very simple physics model, because it's there.
 
 ---
 

@@ -91,32 +91,36 @@ trackInfoList =
       , \imperial info ->
             case info.transitTime of
                 Just isTime ->
-                    let
-                        hours =
-                            Time.toHour Time.utc isTime
-
-                        minutes =
-                            Time.toMinute Time.utc isTime
-
-                        seconds =
-                            Time.toSecond Time.utc isTime
-
-                        millis =
-                            Time.toMillis Time.utc isTime
-                    in
-                    text <|
-                        String.Interpolate.interpolate
-                            "{0}:{1}:{2}.{3}"
-                            [ String.fromInt hours
-                            , UtilsForViews.withLeadingZeros 2 <| String.fromInt minutes
-                            , UtilsForViews.withLeadingZeros 2 <| String.fromInt seconds
-                            , UtilsForViews.withLeadingZeros 3 <| String.fromInt millis
-                            ]
+                    formattedTime isTime
 
                 Nothing ->
                     text "- - -"
       )
     ]
+
+
+formattedTime isTime =
+    let
+        hours =
+            Time.toHour Time.utc isTime
+
+        minutes =
+            Time.toMinute Time.utc isTime
+
+        seconds =
+            Time.toSecond Time.utc isTime
+
+        millis =
+            Time.toMillis Time.utc isTime
+    in
+    text <|
+        String.Interpolate.interpolate
+            "{0}:{1}:{2}.{3}"
+            [ String.fromInt hours
+            , UtilsForViews.withLeadingZeros 2 <| String.fromInt minutes
+            , UtilsForViews.withLeadingZeros 2 <| String.fromInt seconds
+            , UtilsForViews.withLeadingZeros 3 <| String.fromInt millis
+            ]
 
 
 displayInfoForPoint : I18NOptions.Location -> Bool -> TrackLoaded msg -> Element msg
@@ -133,7 +137,7 @@ displayInfoForPoint location imperial track =
         distance =
             distanceFromIndex index track.trackTree
 
-        { longitude, latitude, altitude } =
+        { longitude, latitude, altitude, timestamp } =
             gpxPoint
 
         bearing =
@@ -150,6 +154,7 @@ displayInfoForPoint location imperial track =
             , "altitude"
             , "bearing"
             , "gradient"
+            , "time"
             ]
     in
     row
@@ -165,6 +170,7 @@ displayInfoForPoint location imperial track =
             , text <| showShortMeasure imperial altitude
             , text <| showDecimal2 <| bearing
             , text <| showDecimal2 leaf.gradientAtStart
+            , Maybe.map formattedTime timestamp |> Maybe.withDefault (text "- - -")
             ]
         ]
 

@@ -804,6 +804,7 @@ You must first authenticate with Strava using the button on the top bar; do that
                 , ( "longitude", """Longitude""" )
                 , ( "latitude", """Latitude""" )
                 , ( "altitude", """Altitude""" )
+                , ( "time", """Time""")
                 , ( "bearing", """Bearing""" )
                 , ( "gradient", """Gradient""" )
                 , ( "none", """Not available""" )
