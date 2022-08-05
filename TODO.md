@@ -1,6 +1,8 @@
 
 # BUGS
 
+Just reading and writing a GPX moves the track a bit!
+
 --- 
 
 # WIP
@@ -29,6 +31,8 @@ Use markers to designate a range for a time-wise "nudge" adjustment.
 e.g. after delete, bring remaining track earlier in time.
 Maybe default from Orange to track end.
 (May need option to Shift or Stretch.)
+
+Function to interpolate at 1s boundaries.
 
 Option to change (“scale”) the interval to one of 0.5, 1.0, 2.0 seconds. 
 This will just scale the intervals internally. The Orange and Purple pointers will show time 

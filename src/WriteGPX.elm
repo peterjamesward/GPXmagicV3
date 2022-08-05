@@ -4,6 +4,7 @@ import Angle
 import Direction2d
 import DomainModel exposing (GPXSource)
 import ElmEscapeHtml
+import Iso8601
 import Length
 import String.Interpolate
 import Tools.NamedSegmentOptions exposing (NamedSegment)
@@ -91,15 +92,23 @@ writePreamble trackName rgtOptions =
 
 writeTrackPoint : GPXSource -> String
 writeTrackPoint gpx =
-    "<trkpt lat=\""
-        ++ (String.fromFloat <| Angle.inDegrees gpx.latitude)
-        ++ "\" lon=\""
-        ++ (String.fromFloat <| Angle.inDegrees <| Direction2d.toAngle gpx.longitude)
-        ++ "\">"
-        ++ "<ele>"
-        ++ (String.fromFloat <| Length.inMeters gpx.altitude)
-        ++ "</ele>"
-        ++ "</trkpt>\n"
+    case gpx.timestamp of
+        Just isTimed ->
+            String.Interpolate.interpolate
+                "<trkpt lat=\"{0}\" lon=\"{1}\"><ele>{2}</ele><time>{3}</time></trkpt>\n"
+                [ String.fromFloat <| Angle.inDegrees gpx.latitude
+                , String.fromFloat <| Angle.inDegrees <| Direction2d.toAngle gpx.longitude
+                , String.fromFloat <| Length.inMeters gpx.altitude
+                , Iso8601.fromTime isTimed
+                ]
+
+        Nothing ->
+            String.Interpolate.interpolate
+                "<trkpt lat=\"{0}\" lon=\"{1}\"><ele>{2}</ele></trkpt>\n"
+                [ String.fromFloat <| Angle.inDegrees gpx.latitude
+                , String.fromFloat <| Angle.inDegrees <| Direction2d.toAngle gpx.longitude
+                , String.fromFloat <| Length.inMeters gpx.altitude
+                ]
 
 
 writeSegment : Maybe String -> List GPXSource -> String
