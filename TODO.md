@@ -11,28 +11,17 @@
 > this would open up the user base to all the Kinomap video makers and would make
 > GPX Magic a one-stop shop for GPX video synchronisation.
 
-> Here is a video that summarises the issues in the workflow: https://youtu.be/mN7MZwTizAY
+### Update
 
-> The only thing not mentioned in the video is how I slow the GPX down (say if I
-> was slowing the video from 60 fps to 30 fps) - I would interpolate to 0.5 s intervals,
-> then relabel them all at 1 second intervals, thus slowing the GPX to match a slowed video.
-
-Time for a point is a valid coordinate similar to altitude. 
-It can be interpolated analogously.
-Will compute intervals in tree as this may be useful later for interpolation.
-
-Edits preserve start and end times of range. 
-Points preserve their time.
-New points used an interpolated time between the extremes (like altitude on bend smoothing).
+All compiles with new space/time coords. But need to finesse all the edit changes
+as some clearly erroneous times coming out!
 
 Use markers to designate a range for a time-wise "nudge" adjustment.
 e.g. after delete, bring remaining track earlier in time.
 Maybe default from Orange to track end.
 (May need option to Shift or Stretch.)
 
-Function to interpolate at 1s boundaries.
-
-Option to change (“scale”) the interval to one of 0.5, 1.0, 2.0 seconds. 
+Option to change (“scale”) the interval to x2, x0.5.
 This will just scale the intervals internally. The Orange and Purple pointers will show time 
 when available. Purpose is to allow videos to run at half-speed (e.g. car recorded).
 
