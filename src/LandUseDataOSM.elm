@@ -197,9 +197,10 @@ applyAltitudes altitudes track =
                         Just hasName ->
                             let
                                 centroid =
-                                    Maybe.withDefault Point3d.origin <|
-                                        Point3d.centroidN <|
-                                            List.map .at way.nodes
+                                    DomainModel.withoutTime <|
+                                        Maybe.withDefault Point3d.origin <|
+                                            Point3d.centroidN <|
+                                                List.map (.at >> .space) way.nodes
                             in
                             Dict.insert hasName centroid names
 
@@ -262,13 +263,17 @@ queryFromBoundingBox track =
             BoundingBox3d.extrema (DomainModel.boundingBox track.trackTree)
 
         ( sw, ne ) =
-            ( Point3d.xyz minX minY minZ
-            , Point3d.xyz maxX maxY maxZ
+            ( DomainModel.withoutTime <| Point3d.xyz minX minY minZ
+            , DomainModel.withoutTime <| Point3d.xyz maxX maxY maxZ
             )
 
         ( minLon, maxLon ) =
-            ( Direction2d.toAngle <| .longitude <| DomainModel.gpxFromPointWithReference track.referenceLonLat sw
-            , Direction2d.toAngle <| .longitude <| DomainModel.gpxFromPointWithReference track.referenceLonLat ne
+            ( Direction2d.toAngle <|
+                .longitude <|
+                    DomainModel.gpxFromPointWithReference track.referenceLonLat sw
+            , Direction2d.toAngle <|
+                .longitude <|
+                    DomainModel.gpxFromPointWithReference track.referenceLonLat ne
             )
 
         ( minLat, maxLat ) =

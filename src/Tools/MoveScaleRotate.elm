@@ -185,6 +185,7 @@ computeRecentredPoints ( lon, lat ) track =
             case track.markerPosition of
                 Just purple ->
                     DomainModel.earthPointFromIndex purple track.trackTree
+                        |> .space
                         |> Point3d.projectOnto Plane3d.xy
 
                 Nothing ->
@@ -193,8 +194,10 @@ computeRecentredPoints ( lon, lat ) track =
         shiftVector =
             Vector3d.from shiftBasis Point3d.origin
 
-        shiftPoint =
-            Point3d.translateBy shiftVector
+        shiftPoint xyzt =
+            { space = xyzt.space |> Point3d.translateBy shiftVector
+            , time = xyzt.time
+            }
     in
     shiftedTrackPoints
         |> List.map
@@ -218,7 +221,7 @@ rotateAndScale settings track =
         axisOfRotation =
             -- Rotate acts around Orange marker
             Axis3d.through
-                (DomainModel.earthPointFromIndex track.currentPosition track.trackTree)
+                (.space <| DomainModel.earthPointFromIndex track.currentPosition track.trackTree)
                 Direction3d.z
 
         scaleFactor =
@@ -228,19 +231,29 @@ rotateAndScale settings track =
 
         rotateAndScaleEndPoint : RoadSection -> List EarthPoint -> List EarthPoint
         rotateAndScaleEndPoint road outputs =
-            (road.endPoint
-                |> Point3d.rotateAround axisOfRotation settings.rotateAngle
-                |> Point3d.scaleAbout centre scaleFactor
-            )
+            { space =
+                road.endPoint.space
+                    |> Point3d.rotateAround axisOfRotation settings.rotateAngle
+                    |> Point3d.scaleAbout centre scaleFactor
+            , time = road.endPoint.time
+            }
                 :: outputs
 
         transformedEndPoints =
             DomainModel.foldOverRouteRL rotateAndScaleEndPoint track.trackTree []
 
         transformedStartPoint =
-            DomainModel.earthPointFromIndex 0 track.trackTree
-                |> Point3d.rotateAround axisOfRotation settings.rotateAngle
-                |> Point3d.scaleAbout centre scaleFactor
+            let
+                theStart =
+                    DomainModel.earthPointFromIndex 0 track.trackTree
+            in
+            { theStart
+                | space =
+                    DomainModel.earthPointFromIndex 0 track.trackTree
+                        |> .space
+                        |> Point3d.rotateAround axisOfRotation settings.rotateAngle
+                        |> Point3d.scaleAbout centre scaleFactor
+            }
     in
     TrackLoaded.asPreviewPoints track
         Quantity.zero

@@ -48,6 +48,8 @@ module DomainModel exposing
     , treeFromSourcesWithExistingReference
     , trueLength
     , updatePointByIndexInSitu
+    , withTime
+    , withoutTime
     )
 
 import Angle exposing (Angle)
@@ -66,6 +68,7 @@ import Quantity exposing (Quantity)
 import SpatialIndex
 import Spherical as Spherical exposing (range)
 import Time
+import Utils
 
 
 type alias GPXSource =
@@ -78,7 +81,10 @@ type alias GPXSource =
 
 
 type alias EarthPoint =
-    Point3d Meters LocalCoords
+    --Ooh, 4D.
+    { space : Point3d Meters LocalCoords
+    , time : Maybe Time.Posix
+    }
 
 
 type alias TrackPoint =
@@ -134,6 +140,16 @@ type
         }
 
 
+withoutTime : Point3d Meters LocalCoords -> EarthPoint
+withoutTime pt =
+    { space = pt, time = Nothing }
+
+
+withTime : Maybe Time.Posix -> Point3d Meters LocalCoords -> EarthPoint
+withTime time pt =
+    { space = pt, time = time }
+
+
 asRecord : PeteTree -> RoadSection
 asRecord treeNode =
     -- Because is daft writing accessors for every field.
@@ -187,27 +203,30 @@ boundingBox treeNode =
 
 pointFromGpxWithReference : GPXSource -> GPXSource -> EarthPoint
 pointFromGpxWithReference reference gpx =
-    Point3d.xyz
-        (Direction2d.angleFrom reference.longitude gpx.longitude
-            |> Angle.inDegrees
-            |> (*) Spherical.metresPerDegree
-            |> (*) (Angle.cos gpx.latitude)
-            |> Length.meters
-        )
-        (gpx.latitude
-            |> Quantity.minus reference.latitude
-            |> Angle.inDegrees
-            |> (*) Spherical.metresPerDegree
-            |> Length.meters
-        )
-        gpx.altitude
+    { space =
+        Point3d.xyz
+            (Direction2d.angleFrom reference.longitude gpx.longitude
+                |> Angle.inDegrees
+                |> (*) Spherical.metresPerDegree
+                |> (*) (Angle.cos gpx.latitude)
+                |> Length.meters
+            )
+            (gpx.latitude
+                |> Quantity.minus reference.latitude
+                |> Angle.inDegrees
+                |> (*) Spherical.metresPerDegree
+                |> Length.meters
+            )
+            gpx.altitude
+    , time = gpx.timestamp
+    }
 
 
 gpxFromPointWithReference : GPXSource -> EarthPoint -> GPXSource
 gpxFromPointWithReference reference point =
     let
         ( x, y, z ) =
-            Point3d.toTuple Length.inMeters point
+            Point3d.toTuple Length.inMeters point.space
 
         longitude =
             Angle.degrees <|
@@ -226,7 +245,7 @@ gpxFromPointWithReference reference point =
         (Direction2d.fromAngle longitude)
         latitude
         (Length.meters altitude)
-        Nothing
+        point.time
 
 
 makeLeaf : GPXSource -> GPXSource -> GPXSource -> PeteTree
@@ -252,7 +271,7 @@ makeRoadSectionKnowingLocalCoords :
 makeRoadSectionKnowingLocalCoords ( earth1, local1 ) ( earth2, local2 ) =
     let
         box =
-            BoundingBox3d.from local1 local2
+            BoundingBox3d.from local1.space local2.space
 
         range : Length.Length
         range =
@@ -262,7 +281,7 @@ makeRoadSectionKnowingLocalCoords ( earth1, local1 ) ( earth2, local2 ) =
                     ( Direction2d.toAngle earth2.longitude, earth2.latitude )
 
         altitudeChange =
-            Point3d.zCoordinate local2 |> Quantity.minus (Point3d.zCoordinate local1)
+            Point3d.zCoordinate local2.space |> Quantity.minus (Point3d.zCoordinate local1.space)
 
         gradient =
             if
@@ -851,10 +870,17 @@ interpolateTrack distance treeNode =
     case treeNode of
         Leaf info ->
             ( 0
-            , Point3d.interpolateFrom
-                info.startPoint
-                info.endPoint
-                (Quantity.ratio distance info.trueLength)
+            , { space =
+                    Point3d.interpolateFrom
+                        info.startPoint.space
+                        info.endPoint.space
+                        (Quantity.ratio distance info.trueLength)
+              , time =
+                    Utils.interpolateTimes
+                        (Quantity.ratio distance info.trueLength)
+                        info.startPoint.time
+                        info.endPoint.time
+              }
             )
 
         Node info ->
@@ -889,8 +915,8 @@ nearestToRay ray tree leafIndex current =
                     asRecord <| leafFromIndex leafEntry.leafIndex tree
             in
             Quantity.min
-                (Point3d.distanceFromAxis ray leafToTest.startPoint)
-                (Point3d.distanceFromAxis ray leafToTest.endPoint)
+                (Point3d.distanceFromAxis ray leafToTest.startPoint.space)
+                (Point3d.distanceFromAxis ray leafToTest.endPoint.space)
 
         nearestLeafs =
             SpatialIndex.queryNearestToAxisUsing
@@ -914,9 +940,9 @@ nearestToRay ray tree leafIndex current =
                     asRecord <| leafFromIndex indexOfLeaf tree
             in
             if
-                Point3d.distanceFromAxis ray leafToTest.startPoint
+                Point3d.distanceFromAxis ray leafToTest.startPoint.space
                     |> Quantity.lessThanOrEqualTo
-                        (Point3d.distanceFromAxis ray leafToTest.endPoint)
+                        (Point3d.distanceFromAxis ray leafToTest.endPoint.space)
             then
                 indexOfLeaf
 
@@ -953,7 +979,7 @@ nearestToLonLat click current treeNode referenceLonLat leafIndex =
             pointFromGpxWithReference referenceLonLat click
 
         asRay =
-            Axis3d.withDirection Direction3d.negativeZ asEarthPoint
+            Axis3d.withDirection Direction3d.negativeZ asEarthPoint.space
     in
     nearestToRay asRay treeNode leafIndex current
 
@@ -1329,9 +1355,9 @@ trackPointsForOutput tree =
 
 gradientFromNode treeNode =
     Quantity.ratio
-        (Point3d.zCoordinate (endPoint treeNode)
+        (Point3d.zCoordinate (.space <| endPoint treeNode)
             |> Quantity.minus
-                (Point3d.zCoordinate (startPoint treeNode))
+                (Point3d.zCoordinate (.space <| startPoint treeNode))
         )
         (trueLength treeNode)
         |> (*) 100.0

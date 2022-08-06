@@ -15,7 +15,7 @@ import List.Extra
 import LocalCoords exposing (LocalCoords)
 import Plane3d
 import Point2d
-import Point3d
+import Point3d exposing (Point3d)
 import Polyline3d exposing (Polyline3d)
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity exposing (Quantity)
@@ -180,8 +180,10 @@ toolStateChange opened colour options track =
             let
                 ( first, last ) =
                     ( DomainModel.earthPointFromIndex 0 theTrack.trackTree
+                        |> .space
                         |> Point3d.projectInto SketchPlane3d.xy
                     , DomainModel.earthPointFromIndex (skipCount theTrack.trackTree) theTrack.trackTree
+                        |> .space
                         |> Point3d.projectInto SketchPlane3d.xy
                     )
 
@@ -231,13 +233,13 @@ closeTheLoop track =
             )
 
         ( midOfLast, midOfFirst ) =
-            ( Point3d.midpoint lastLeaf.startPoint lastLeaf.endPoint
-            , Point3d.midpoint firstLeaf.startPoint firstLeaf.endPoint
+            ( Point3d.midpoint lastLeaf.startPoint.space lastLeaf.endPoint.space
+            , Point3d.midpoint firstLeaf.startPoint.space firstLeaf.endPoint.space
             )
 
         ( ( b1, c1 ), ( a2, b2 ) ) =
-            ( ( midOfLast, lastLeaf.endPoint )
-            , ( firstLeaf.startPoint, midOfFirst )
+            ( ( midOfLast, lastLeaf.endPoint.space )
+            , ( firstLeaf.startPoint.space, midOfFirst )
             )
 
         spline : CubicSpline3d Meters LocalCoords
@@ -255,7 +257,9 @@ closeTheLoop track =
         vertices : List EarthPoint
         vertices =
             Polyline3d.vertices polylineFromSpline
+                |> List.map (DomainModel.withTime lastLeaf.endPoint.time)
     in
+    --TODO: Proper times for new points.
     TrackLoaded.asPreviewPoints track (trueLength track.trackTree) vertices
 
 
@@ -275,6 +279,7 @@ applyCloseLoop options track =
                 |> List.Extra.minimumBy
                     (\( idx, preview ) ->
                         preview.earthPoint
+                            |> .space
                             |> Point3d.distanceFrom Point3d.origin
                             |> Length.inMeters
                     )
@@ -360,9 +365,11 @@ addPens track =
             )
 
         ( newStart, newEnd ) =
-            ( Point3d.translateBy startVector firstLeaf.startPoint
+            ( Point3d.translateBy startVector firstLeaf.startPoint.space
+                |> DomainModel.withTime firstLeaf.startPoint.time
                 |> gpxFromPointWithReference track.referenceLonLat
-            , Point3d.translateBy endVector lastLeaf.endPoint
+            , Point3d.translateBy endVector lastLeaf.endPoint.space
+                |> DomainModel.withTime lastLeaf.endPoint.time
                 |> gpxFromPointWithReference track.referenceLonLat
             )
 

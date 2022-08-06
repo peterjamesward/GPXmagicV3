@@ -223,12 +223,12 @@ deriveCamera treeNode context currentPosition =
         eyePoint =
             Point3d.translateBy
                 (Vector3d.meters 0.0 0.0 5000.0)
-                lookingAt
+                lookingAt.space
 
         viewpoint =
             -- Fixing "up is North" so that 2-way drag works well.
             Viewpoint3d.lookAt
-                { focalPoint = lookingAt
+                { focalPoint = lookingAt.space
                 , eyePoint = eyePoint
                 , upDirection = Direction3d.positiveY
                 }
@@ -288,7 +288,10 @@ update msg msgWrapper track area context =
                     in
                     ( { context
                         | focalPoint =
-                            context.focalPoint |> Point3d.translateBy shiftVector
+                            context.focalPoint
+                                |> .space
+                                |> Point3d.translateBy shiftVector
+                                |> DomainModel.withoutTime
                         , orbiting = Just ( dx, dy )
                       }
                     , []

@@ -290,13 +290,13 @@ centroidAverage isLoop options fromStart fromEnd treeNode =
                 Just roadMinusOne ->
                     let
                         originalPoint =
-                            road.startPoint
+                            road.startPoint.space
 
                         triangle =
                             Triangle3d.from
-                                roadMinusOne.startPoint
+                                roadMinusOne.startPoint.space
                                 originalPoint
-                                road.endPoint
+                                road.endPoint.space
 
                         centroid =
                             Triangle3d.centroid triangle
@@ -324,7 +324,9 @@ centroidAverage isLoop options fromStart fromEnd treeNode =
                                 Vector3d.zero
 
                         adjustedPoint =
-                            originalPoint |> Point3d.translateBy shiftWithOptions
+                            { space = originalPoint |> Point3d.translateBy shiftWithOptions
+                            , time = road.startPoint.time
+                            }
                     in
                     { state
                         | roadMinusOne = Just road

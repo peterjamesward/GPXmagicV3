@@ -73,7 +73,7 @@ render3dView settings track =
                 , fullDepthRenderingBoxSize
                 , fullDepthRenderingBoxSize
                 )
-                (startPoint <| leafFromIndex track.currentPosition track.trackTree)
+                (.space <| startPoint <| leafFromIndex track.currentPosition track.trackTree)
 
         groundPlane =
             let
@@ -126,7 +126,7 @@ render3dView settings track =
                         road.gradientAtStart
 
                     roadAsSegment =
-                        LineSegment3d.from road.startPoint road.endPoint
+                        LineSegment3d.from road.startPoint.space road.endPoint.space
 
                     curtainHem =
                         LineSegment3d.projectOnto floorPlane roadAsSegment
@@ -144,15 +144,15 @@ render3dView settings track =
                 paintSomethingBetween
                     roadWidth
                     (Material.matte Color.grey)
-                    road.startPoint
-                    road.endPoint
+                    road.startPoint.space
+                    road.endPoint.space
 
              else
                 [ Scene3d.point { radius = Pixels.pixels 2 }
                     (Material.color Color.black)
-                    road.endPoint
+                    road.endPoint.space
                 , Scene3d.lineSegment (Material.color Color.lightCharcoal) <|
-                    LineSegment3d.from road.startPoint road.endPoint
+                    LineSegment3d.from road.startPoint.space road.endPoint.space
                 ]
             )
                 ++ gradientCurtain road
@@ -166,7 +166,7 @@ render3dView settings track =
         renderPointZero =
             Scene3d.point { radius = Pixels.pixels 2 }
                 (Material.color Color.black)
-                (DomainModel.getFirstLeaf track.trackTree |> .startPoint)
+                (DomainModel.getFirstLeaf track.trackTree |> .startPoint |> .space)
 
         foldFn : RoadSection -> List (Entity LocalCoords) -> List (Entity LocalCoords)
         foldFn road scene =
@@ -176,13 +176,13 @@ render3dView settings track =
         renderCurrentMarkers =
             [ Scene3d.point { radius = Pixels.pixels 15 }
                 (Material.color lightOrange)
-                (earthPointFromIndex track.currentPosition track.trackTree)
+                (.space <| earthPointFromIndex track.currentPosition track.trackTree)
             ]
                 ++ (case track.markerPosition of
                         Just marker ->
                             [ Scene3d.point { radius = Pixels.pixels 12 }
                                 (Material.color <| Color.fromRgba <| Element.toRgb <| FlatColors.AussiePalette.blurple)
-                                (earthPointFromIndex marker track.trackTree)
+                                (.space <| earthPointFromIndex marker track.trackTree)
                             ]
 
                         Nothing ->
@@ -253,7 +253,7 @@ makeLandUsePlanar landUse index track groundPlane =
                 nearestPoint =
                     DomainModel.earthPointFromIndex
                         (DomainModel.nearestToRay
-                            (Axis3d.withDirection Direction3d.positiveZ at)
+                            (Axis3d.withDirection Direction3d.positiveZ at.space)
                             track.trackTree
                             track.leafIndex
                             track.currentPosition
@@ -262,9 +262,9 @@ makeLandUsePlanar landUse index track groundPlane =
 
                 altitudeAdjusted =
                     Point3d.xyz
-                        (Point3d.xCoordinate at)
-                        (Point3d.yCoordinate at)
-                        (Point3d.zCoordinate nearestPoint)
+                        (Point3d.xCoordinate at.space)
+                        (Point3d.yCoordinate at.space)
+                        (Point3d.zCoordinate nearestPoint.space)
 
                 tip =
                     Point3d.translateBy
@@ -275,11 +275,11 @@ makeLandUsePlanar landUse index track groundPlane =
                 Just cone ->
                     Just
                         ( Scene3d.cone (Material.color colour) cone
-                        , { content = { leafIndex = -1, altitude = Point3d.zCoordinate nearestPoint }
+                        , { content = { leafIndex = -1, altitude = Point3d.zCoordinate nearestPoint.space }
                           , box =
                                 BoundingBox2d.withDimensions
                                     ( Length.meters 8, Length.meters 8 )
-                                    (at |> Point3d.projectInto SketchPlane3d.xy)
+                                    (at.space |> Point3d.projectInto SketchPlane3d.xy)
                           }
                         )
 
@@ -296,7 +296,7 @@ makeLandUsePlanar landUse index track groundPlane =
             let
                 polygon =
                     nodes
-                        |> List.map (.at >> Point3d.projectInto SketchPlane3d.xy)
+                        |> List.map (.at >> .space >> Point3d.projectInto SketchPlane3d.xy)
                         |> Polygon2d.singleLoop
 
                 { minAltitude, resultBox, count } =
@@ -432,7 +432,7 @@ makeLandUseSloped landUse index tree groundPlane =
     let
         drawCone :
             Color
-            -> EarthPoint
+            -> Point3d Meters LocalCoords
             -> Maybe ( Entity LocalCoords, SpatialContent IndexEntry Meters LocalCoords )
         drawCone colour at =
             let
@@ -458,7 +458,7 @@ makeLandUseSloped landUse index tree groundPlane =
 
         drawPolygon :
             Color
-            -> List EarthPoint
+            -> List (Point3d Meters LocalCoords)
             -> ( Entity LocalCoords, List (SpatialContent IndexEntry Meters LocalCoords) )
         drawPolygon colour nodes =
             -- TODO: See if any road(s) traverse the polygon.
@@ -503,8 +503,8 @@ makeLandUseSloped landUse index tree groundPlane =
                                         DomainModel.leafFromIndex leafIndex tree
 
                                 ( start2d, end2d ) =
-                                    ( Point3d.projectInto SketchPlane3d.xy leaf.startPoint
-                                    , Point3d.projectInto SketchPlane3d.xy leaf.endPoint
+                                    ( Point3d.projectInto SketchPlane3d.xy leaf.startPoint.space
+                                    , Point3d.projectInto SketchPlane3d.xy leaf.endPoint.space
                                     )
                             in
                             (not <| Polygon2d.contains start2d polygon)
@@ -530,8 +530,8 @@ makeLandUseSloped landUse index tree groundPlane =
                                                 DomainModel.leafFromIndex testIndex tree
 
                                         ( start2d, end2d ) =
-                                            ( Point3d.projectInto SketchPlane3d.xy leaf.startPoint
-                                            , Point3d.projectInto SketchPlane3d.xy leaf.endPoint
+                                            ( Point3d.projectInto SketchPlane3d.xy leaf.startPoint.space
+                                            , Point3d.projectInto SketchPlane3d.xy leaf.endPoint.space
                                             )
                                     in
                                     if testIndex > skipCount tree then
@@ -571,7 +571,7 @@ makeLandUseSloped landUse index tree groundPlane =
                         Just goesIn ->
                             let
                                 entryLine =
-                                    LineSegment3d.from goesIn.startPoint goesIn.endPoint
+                                    LineSegment3d.from goesIn.startPoint.space goesIn.endPoint.space
                                         |> LineSegment3d.projectInto SketchPlane3d.xy
 
                                 polygonEdgesInOrder =
@@ -647,7 +647,7 @@ makeLandUseSloped landUse index tree groundPlane =
                         Just isLeaf ->
                             let
                                 exitLine =
-                                    LineSegment3d.from isLeaf.startPoint isLeaf.endPoint
+                                    LineSegment3d.from isLeaf.startPoint.space isLeaf.endPoint.space
                                         |> LineSegment3d.projectInto SketchPlane3d.xy
 
                                 polygonEdgesInOrder =
@@ -697,8 +697,8 @@ makeLandUseSloped landUse index tree groundPlane =
                                 ( roadNudgedLeft, roadNudgedRight ) =
                                     nudgeHelper ( 1 + inRoad.content.leafIndex, outRoad ) tree
                             in
-                            ( roadNudgedLeft ++ leftBoundary
-                            , rightBoundary ++ roadNudgedRight
+                            ( (List.map .space roadNudgedLeft) ++ leftBoundary
+                            , (rightBoundary) ++ (List.map .space roadNudgedRight)
                             )
 
                         _ ->
@@ -798,7 +798,7 @@ makeLandUseSloped landUse index tree groundPlane =
                             case Dict.get natural landUseColours of
                                 Just colour ->
                                     -- Careful, the drawing could (compiler-wise) fail.
-                                    case drawCone colour node.at of
+                                    case drawCone colour node.at.space of
                                         Just ( gotCone, indexEntry ) ->
                                             { scenes = gotCone :: stuff.scenes
                                             , unknownTags = stuff.unknownTags
@@ -846,7 +846,7 @@ makeLandUseSloped landUse index tree groundPlane =
                             -- Only draw polygons we know how to colour!
                             let
                                 ( polygon, indexEntries ) =
-                                    drawPolygon colour <| List.map .at way.nodes
+                                    drawPolygon colour <| List.map (.at >> .space) way.nodes
                             in
                             { scenes = polygon :: stuff.scenes
                             , unknownTags = stuff.unknownTags
@@ -935,8 +935,8 @@ previewAsLine color points =
             paintSomethingBetween
                 (Length.meters 0.5)
                 material
-                p1
-                p2
+                p1.space
+                p2.space
     in
     List.map2 preview points (List.drop 1 points) |> List.concat
 
@@ -948,7 +948,7 @@ previewAsPoints color points =
             Material.color <| Color.fromRgba <| Element.toRgb color
 
         highlightPoint p =
-            Scene3d.point { radius = Pixels.pixels 7 } material p
+            Scene3d.point { radius = Pixels.pixels 7 } material p.space
     in
     List.map highlightPoint points
 
@@ -994,8 +994,8 @@ centreLineBetween colouringFn road =
     paintSomethingBetween
         (Length.meters 0.5)
         (Material.color <| colouringFn gradient)
-        (smallUpshiftTo road.startPoint)
-        (smallUpshiftTo road.endPoint)
+        (smallUpshiftTo road.startPoint.space)
+        (smallUpshiftTo road.endPoint.space)
 
 
 
@@ -1027,7 +1027,7 @@ indexTerrain box trackTree =
         indexRoadSection road ( leafIndex, spaceIndex ) =
             let
                 halfWidthVector =
-                    Vector3d.from road.startPoint road.endPoint
+                    Vector3d.from road.startPoint.space road.endPoint.space
                         |> Vector3d.projectOnto Plane3d.xy
                         |> Vector3d.scaleTo roadWidth
 
@@ -1037,13 +1037,13 @@ indexTerrain box trackTree =
                     )
 
                 ( leftNearKerb, rightNearKerb ) =
-                    ( Point3d.translateBy leftKerbVector road.startPoint
-                    , Point3d.translateBy rightKerbVector road.startPoint
+                    ( Point3d.translateBy leftKerbVector road.startPoint.space
+                    , Point3d.translateBy rightKerbVector road.startPoint.space
                     )
 
                 ( leftFarKerb, rightFarKerb ) =
-                    ( Point3d.translateBy leftKerbVector road.endPoint
-                    , Point3d.translateBy rightKerbVector road.endPoint
+                    ( Point3d.translateBy leftKerbVector road.endPoint.space
+                    , Point3d.translateBy rightKerbVector road.endPoint.space
                     )
 
                 localBounds =

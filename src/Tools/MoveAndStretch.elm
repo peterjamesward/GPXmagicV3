@@ -459,9 +459,13 @@ movePoints options region =
         zShift =
             heightOffset options.heightSliderSetting
 
-        translation =
-            -- Negate y because SVG coordinates go downards.
-            Point3d.translateBy (Vector3d.xyz xShift (Quantity.negate yShift) zShift)
+        translation pt =
+            -- Negate y because SVG coordinates go downwards.
+            { space =
+                pt.space
+                    |> Point3d.translateBy (Vector3d.xyz xShift (Quantity.negate yShift) zShift)
+            , time = pt.time
+            }
     in
     List.map translation region
 
@@ -478,7 +482,8 @@ stretchPoints options drag track =
             DomainModel.skipCount track.trackTree - fromEnd
 
         stretcher =
-            DomainModel.earthPointFromIndex drag track.trackTree
+            .space <|
+                DomainModel.earthPointFromIndex drag track.trackTree
 
         ( xShift, yShift ) =
             Vector2d.components options.vector
@@ -512,13 +517,13 @@ stretchPoints options drag track =
             )
 
         ( firstPartAxis, secondPartAxis ) =
-            ( Axis3d.throughPoints startAnchor stretcher
-            , Axis3d.throughPoints endAnchor stretcher
+            ( Axis3d.throughPoints startAnchor.space stretcher
+            , Axis3d.throughPoints endAnchor.space stretcher
             )
 
         ( firstPartDistance, secondPartDistance ) =
-            ( Point3d.distanceFrom startAnchor stretcher
-            , Point3d.distanceFrom endAnchor stretcher
+            ( Point3d.distanceFrom startAnchor.space stretcher
+            , Point3d.distanceFrom endAnchor.space stretcher
             )
 
         distanceAlong maybeAxis p =
@@ -538,22 +543,28 @@ stretchPoints options drag track =
             let
                 proportion =
                     Quantity.ratio
-                        (pt |> distanceAlong firstPartAxis)
+                        (pt.space |> distanceAlong firstPartAxis)
                         firstPartDistance
             in
-            pt
-                |> Point3d.translateBy (horizontalTranslation |> Vector3d.scaleBy proportion)
-                |> Point3d.translateBy (zShiftMax |> Vector3d.scaleBy proportion)
+            { space =
+                pt.space
+                    |> Point3d.translateBy (horizontalTranslation |> Vector3d.scaleBy proportion)
+                    |> Point3d.translateBy (zShiftMax |> Vector3d.scaleBy proportion)
+            , time = pt.time
+            }
 
         adjustRelativeToEnd pt =
             let
                 proportion =
                     Quantity.ratio
-                        (pt |> distanceAlong secondPartAxis)
+                        (pt.space |> distanceAlong secondPartAxis)
                         secondPartDistance
             in
-            pt
-                |> Point3d.translateBy (horizontalTranslation |> Vector3d.scaleBy proportion)
-                |> Point3d.translateBy (zShiftMax |> Vector3d.scaleBy proportion)
+            { space =
+                pt.space
+                    |> Point3d.translateBy (horizontalTranslation |> Vector3d.scaleBy proportion)
+                    |> Point3d.translateBy (zShiftMax |> Vector3d.scaleBy proportion)
+            , time = pt.time
+            }
     in
     adjustedFirstPoints ++ adjustedSecondPoints

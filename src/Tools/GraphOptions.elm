@@ -5,6 +5,7 @@ import Dict exposing (Dict)
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree)
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
+import Point3d exposing (Point3d)
 import Quantity exposing (Quantity)
 import TrackLoaded exposing (TrackLoaded)
 
@@ -108,6 +109,6 @@ type alias NearbyPoints =
 
 
 type alias Cluster =
-    { centroid : EarthPoint
+    { centroid : Point3d Meters LocalCoords
     , pointsToAdjust : List Int
     }

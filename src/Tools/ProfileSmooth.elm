@@ -338,15 +338,22 @@ useUniformGradient bumpiness track =
                                     (altitudeIfUniform |> Quantity.multiplyBy (1.0 - bumpiness))
                                     (oldGPX.altitude |> Quantity.multiplyBy bumpiness)
                         in
-                        ( Point3d.xyz
-                            (Point3d.xCoordinate road.endPoint)
-                            (Point3d.yCoordinate road.endPoint)
-                            newAltitude
+                        ( { space =
+                                Point3d.xyz
+                                    (Point3d.xCoordinate road.endPoint.space)
+                                    (Point3d.yCoordinate road.endPoint.space)
+                                    newAltitude
+                          , time = road.endPoint.time
+                          }
                         , { oldGPX | altitude = newAltitude }
                         )
 
                     else
-                        ( road.endPoint, Tuple.second road.sourceData )
+                        ( { space = road.endPoint.space
+                          , time = road.endPoint.time
+                          }
+                        , Tuple.second road.sourceData
+                        )
             in
             ( index + 1, newPoint :: outputs )
     in
@@ -387,12 +394,12 @@ limitGradientsWithRedistribution options track =
 
         ( startDistance, startAltitude ) =
             ( distanceFromIndex fromStart track.trackTree
-            , earthPointFromIndex fromStart track.trackTree |> Point3d.zCoordinate
+            , earthPointFromIndex fromStart track.trackTree |> .space |> Point3d.zCoordinate
             )
 
         ( endDistance, endAltitude ) =
             ( distanceFromIndex endIndex track.trackTree
-            , earthPointFromIndex endIndex track.trackTree |> Point3d.zCoordinate
+            , earthPointFromIndex endIndex track.trackTree |> .space |> Point3d.zCoordinate
             )
 
         averageSlope =
@@ -413,8 +420,8 @@ limitGradientsWithRedistribution options track =
             let
                 altitudeChange : Length.Length
                 altitudeChange =
-                    zCoordinate road.endPoint
-                        |> Quantity.minus (zCoordinate road.startPoint)
+                    zCoordinate road.endPoint.space
+                        |> Quantity.minus (zCoordinate road.startPoint.space)
 
                 clampedSlope : Float
                 clampedSlope =
@@ -601,7 +608,7 @@ smoothAltitudesWithWindowAverage options track =
                                 let
                                     mergeListsForAltitude =
                                         (newLeading ++ newTrailing)
-                                            |> List.map (zCoordinate << Tuple.first)
+                                            |> List.map (zCoordinate << .space << Tuple.first)
 
                                     averageAltitude =
                                         Quantity.sum mergeListsForAltitude
@@ -637,7 +644,7 @@ smoothAltitudesWithWindowAverage options track =
                     let
                         mergeListsForAltitude =
                             (leading ++ trailing)
-                                |> List.map (zCoordinate << Tuple.first)
+                                |> List.map (zCoordinate << .space << Tuple.first)
 
                         averageAltitude =
                             Quantity.sum mergeListsForAltitude
@@ -826,7 +833,7 @@ averageGradientsWithWindow options track =
                                 , Tuple.second justPassedRoad.sourceData
                                 )
                                     :: outputs
-                            , lastAltitude = zCoordinate justPassedRoad.endPoint
+                            , lastAltitude = zCoordinate justPassedRoad.endPoint.space
                             , index = index + 1
                             }
 

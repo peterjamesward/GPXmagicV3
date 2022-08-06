@@ -9,6 +9,7 @@ import Element.Input as Input exposing (button)
 import FeatherIcons
 import FlatColors.ChinesePalette
 import Length
+import LocalCoords exposing (LocalCoords)
 import Point3d exposing (Point3d)
 import Quantity
 import Speed
@@ -36,8 +37,8 @@ type Msg
 
 
 type alias Flythrough =
-    { cameraPosition : EarthPoint
-    , focusPoint : EarthPoint
+    { cameraPosition : Point3d Length.Meters LocalCoords
+    , focusPoint : Point3d Length.Meters LocalCoords
     , metresFromRouteStart : Length.Length
     , lastUpdated : Time.Posix
     , running : RunState
@@ -150,16 +151,16 @@ advanceInternal newTime status speed track =
                             (Vector3d.xyz Quantity.zero Quantity.zero eyeHeight)
                         <|
                             Point3d.interpolateFrom
-                                currentRoad.startPoint
-                                currentRoad.endPoint
+                                currentRoad.startPoint.space
+                                currentRoad.endPoint.space
                                 segFraction
 
                     lookingAt =
                         -- Should be looking at the next point, until we are close
                         -- enough to start looking at the one beyond that.
                         Point3d.interpolateFrom
-                            currentRoad.endPoint
-                            nextRoad.endPoint
+                            currentRoad.endPoint.space
+                            nextRoad.endPoint.space
                             headTurnFraction
                             |> Point3d.translateBy
                                 (Vector3d.xyz Quantity.zero Quantity.zero eyeHeight)
@@ -374,12 +375,12 @@ prepareFlythrough track options =
                 |> asRecord
 
         eyePoint =
-            currentRoad.startPoint
+            currentRoad.startPoint.space
                 |> Point3d.translateBy
                     (Vector3d.xyz Quantity.zero Quantity.zero eyeHeight)
 
         focusPoint =
-            currentRoad.endPoint
+            currentRoad.endPoint.space
                 |> Point3d.translateBy
                     (Vector3d.xyz Quantity.zero Quantity.zero eyeHeight)
 

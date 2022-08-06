@@ -111,10 +111,7 @@ computeNewPoints options track =
             endDistance |> Quantity.minus startDistance
 
         idealLine =
-            LineSegment3d.from startPoint endPoint
-
-        straightLineDistance =
-            LineSegment3d.length idealLine
+            LineSegment3d.from startPoint.space endPoint.space
 
         applyAdjustment :
             RoadSection
@@ -126,11 +123,13 @@ computeNewPoints options track =
                     Quantity.ratio distance trackDistance
 
                 interpolatedPoint =
-                    LineSegment3d.interpolate idealLine proportionOfTrackDistance
+                    { space = LineSegment3d.interpolate idealLine proportionOfTrackDistance
+                    , time = road.startPoint.time
+                    }
 
                 newPoint =
                     if options.preserveAltitude then
-                        adjustAltitude (zCoordinate road.startPoint) interpolatedPoint
+                        adjustAltitude (zCoordinate road.startPoint.space) interpolatedPoint
 
                     else
                         interpolatedPoint

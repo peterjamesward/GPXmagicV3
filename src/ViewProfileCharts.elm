@@ -151,26 +151,28 @@ deriveAltitudeCamera treeNode context currentPosition ( width, height ) =
             Length.meters <| metresPerPixel * (toFloat <| Pixels.inPixels height)
 
         lookingAt =
-            if context.followSelectedPoint then
-                Point3d.xyz
-                    (distanceFromIndex currentPosition treeNode)
-                    Quantity.zero
-                    (earthPointFromIndex currentPosition treeNode
-                        |> Point3d.zCoordinate
-                        |> Quantity.multiplyBy context.emphasis
-                    )
+            DomainModel.withoutTime <|
+                if context.followSelectedPoint then
+                    Point3d.xyz
+                        (distanceFromIndex currentPosition treeNode)
+                        Quantity.zero
+                        (earthPointFromIndex currentPosition treeNode
+                            |> .space
+                            |> Point3d.zCoordinate
+                            |> Quantity.multiplyBy context.emphasis
+                        )
 
-            else
-                context.focalPoint
+                else
+                    context.focalPoint.space
 
         eyePoint =
             Point3d.translateBy
                 (Vector3d.meters 0.0 -50000.0 0.0)
-                lookingAt
+                lookingAt.space
 
         viewpoint =
             Viewpoint3d.lookAt
-                { focalPoint = lookingAt
+                { focalPoint = lookingAt.space
                 , eyePoint = eyePoint
                 , upDirection = Direction3d.positiveZ
                 }
@@ -193,26 +195,28 @@ deriveGradientCamera treeNode context currentPosition ( width, height ) =
             Length.meters <| metresPerPixel * (toFloat <| Pixels.inPixels height)
 
         lookingAt =
-            if context.followSelectedPoint then
-                Point3d.xyz
-                    (distanceFromIndex currentPosition treeNode)
-                    Quantity.zero
-                    (earthPointFromIndex currentPosition treeNode
-                        |> Point3d.zCoordinate
-                        |> Quantity.multiplyBy context.emphasis
-                    )
+            DomainModel.withoutTime <|
+                if context.followSelectedPoint then
+                    Point3d.xyz
+                        (distanceFromIndex currentPosition treeNode)
+                        Quantity.zero
+                        (earthPointFromIndex currentPosition treeNode
+                            |> .space
+                            |> Point3d.zCoordinate
+                            |> Quantity.multiplyBy context.emphasis
+                        )
 
-            else
-                context.focalPoint
+                else
+                    context.focalPoint.space
 
         eyePoint =
             Point3d.translateBy
                 (Vector3d.meters 0.0 0.0 1000.0)
-                lookingAt
+                lookingAt.space
 
         viewpoint =
             Viewpoint3d.lookAt
-                { focalPoint = lookingAt
+                { focalPoint = lookingAt.space
                 , eyePoint = eyePoint
                 , upDirection = Direction3d.positiveY
                 }
@@ -318,7 +322,9 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
                         newContext =
                             { context
                                 | focalPoint =
-                                    context.focalPoint |> Point3d.translateBy shiftVector
+                                    context.focalPoint.space
+                                        |> Point3d.translateBy shiftVector
+                                        |> DomainModel.withoutTime
                                 , orbiting = Just ( dx, dy )
                             }
                     in
@@ -348,10 +354,11 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
             ( { context
                 | followSelectedPoint = not context.followSelectedPoint
                 , focalPoint =
-                    Point3d.xyz
-                        currentDistance
-                        Quantity.zero
-                        currentAltitude
+                    DomainModel.withoutTime <|
+                        Point3d.xyz
+                            currentDistance
+                            Quantity.zero
+                            currentAltitude
               }
             , []
             )
@@ -372,10 +379,11 @@ pointInAltitudeView context i tree =
         altitude =
             DomainModel.gpxPointFromIndex i tree |> .altitude
     in
-    Point3d.xyz
-        distance
-        Quantity.zero
-        (altitude |> Quantity.multiplyBy context.emphasis)
+    DomainModel.withoutTime <|
+        Point3d.xyz
+            distance
+            Quantity.zero
+            (altitude |> Quantity.multiplyBy context.emphasis)
 
 
 pointInGradientView : Context -> Int -> PeteTree -> EarthPoint
@@ -392,10 +400,11 @@ pointInGradientView context i tree =
             -- Empirical!
             2.0 * g * (0.5 ^ context.zoomLevel) * (Length.inKilometers <| trueLength tree)
     in
-    Point3d.xyz
-        distance
-        (Length.meters <| compensateForZoom gradient)
-        Quantity.zero
+    DomainModel.withoutTime <|
+        Point3d.xyz
+            distance
+            (Length.meters <| compensateForZoom gradient)
+            Quantity.zero
 
 
 view :
@@ -434,7 +443,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
         fullRenderBox =
             BoundingBox3d.withDimensions
                 ( Length.kilometer, Length.kilometer, Length.kilometer )
-                currentPoint
+                currentPoint.space
 
         trackLengthInView =
             trueLength track.trackTree |> Quantity.multiplyBy (0.5 ^ context.zoomLevel)
@@ -470,7 +479,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
             [ Point3d.xyz
                 distance
                 (Length.meters road.gradientAtStart)
-                (road.startPoint |> Point3d.zCoordinate |> Quantity.multiplyBy context.emphasis)
+                (road.startPoint.space |> Point3d.zCoordinate |> Quantity.multiplyBy context.emphasis)
             ]
 
         foldFn :
@@ -489,7 +498,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
             , Just road
             )
 
-        renderProfileData : TrackLoaded msg -> List EarthPoint
+        renderProfileData : TrackLoaded msg -> List (Point3d Meters LocalCoords)
         renderProfileData trackToRender =
             let
                 ( leftIndex, rightIndex ) =
@@ -521,7 +530,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
                     Point3d.xyz
                         rightEdge
                         (Length.meters leaf.gradientAtStart)
-                        (leaf.endPoint |> Point3d.zCoordinate |> Quantity.multiplyBy context.emphasis)
+                        (leaf.endPoint.space |> Point3d.zCoordinate |> Quantity.multiplyBy context.emphasis)
             in
             (finalSvgPoint :: altitudeSvgPoints) |> List.reverse
 
@@ -738,6 +747,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
 
         orangeAltitude2d =
             pointInAltitudeView context track.currentPosition track.trackTree
+                |> .space
                 |> Point3d.toScreenSpace altitudeCamera altitudeScreenRectangle
 
         orangeAltitudeSvg =
@@ -750,6 +760,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
 
         orangeGradient2d =
             pointInGradientView context track.currentPosition track.trackTree
+                |> .space
                 |> Point3d.toScreenSpace gradientCamera gradientScreenRectangle
 
         orangeGradientSvg =
@@ -766,6 +777,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
                     let
                         purple2d =
                             pointInAltitudeView context purple track.trackTree
+                                |> .space
                                 |> Point3d.toScreenSpace altitudeCamera altitudeScreenRectangle
                     in
                     [ Svg.circle2d
@@ -802,7 +814,7 @@ view context ( givenWidth, givenHeight ) track msgWrapper previews =
 
         orangeText =
             [ textLine 1 <| (showDecimal2 orangeLeaf.gradientAtStart ++ "%")
-            , textLine 2 <| showShortMeasure False <| Point3d.zCoordinate <| orangePoint
+            , textLine 2 <| showShortMeasure False <| Point3d.zCoordinate <| orangePoint.space
             , textLine 3 <|
                 showLongMeasure False <|
                     DomainModel.distanceFromIndex track.currentPosition track.trackTree
@@ -846,10 +858,13 @@ initialiseView current treeNode currentContext =
                 , zoomLevel = 0.0
                 , defaultZoomLevel = 0.0
                 , focalPoint =
-                    Point3d.xyz
-                        currentDistance
-                        Quantity.zero
-                        (Point3d.zCoordinate currentPoint |> Quantity.multiplyBy context.emphasis)
+                    DomainModel.withoutTime <|
+                        Point3d.xyz
+                            currentDistance
+                            Quantity.zero
+                            (Point3d.zCoordinate currentPoint.space
+                                |> Quantity.multiplyBy context.emphasis
+                            )
                 , metresPerPixel = 10.0
                 , waitingForClickDelay = False
             }
@@ -860,10 +875,11 @@ initialiseView current treeNode currentContext =
             , zoomLevel = 0.0
             , defaultZoomLevel = 0.0
             , focalPoint =
-                Point3d.xyz
-                    currentDistance
-                    Quantity.zero
-                    (currentPoint |> Point3d.zCoordinate)
+                DomainModel.withoutTime <|
+                    Point3d.xyz
+                        currentDistance
+                        Quantity.zero
+                        (currentPoint.space |> Point3d.zCoordinate)
             , followSelectedPoint = True
             , metresPerPixel = 10.0
             , waitingForClickDelay = False

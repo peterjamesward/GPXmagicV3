@@ -177,7 +177,7 @@ placesOverlay display ( givenWidth, givenHeight ) track camera =
             track.landUseData.places
                 |> Dict.map
                     (\name place ->
-                        place |> Point3d.toScreenSpace camera screenRectangle
+                        place.space |> Point3d.toScreenSpace camera screenRectangle
                     )
 
         textAttributes atPoint =

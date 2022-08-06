@@ -76,7 +76,7 @@ deriveViewPointAndCamera context track mFlythrough =
             case mFlythrough of
                 Nothing ->
                     Viewpoint3d.orbitZ
-                        { focalPoint = localRoad.startPoint
+                        { focalPoint = localRoad.startPoint.space
                         , azimuth =
                             localRoad.directionAtStart
                                 |> Direction2d.reverse

@@ -1,8 +1,6 @@
 
 # BUGS
 
-Just reading and writing a GPX moves the track a bit!
-
 --- 
 
 # WIP

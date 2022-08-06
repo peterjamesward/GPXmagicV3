@@ -125,8 +125,8 @@ zoomMapToFitTrack track =
             ( Point3d.xyz minX minY minZ, Point3d.xyz maxX maxY minZ )
 
         ( swGpx, neGpx ) =
-            ( DomainModel.gpxFromPointWithReference track.referenceLonLat swCorner
-            , DomainModel.gpxFromPointWithReference track.referenceLonLat neCorner
+            ( DomainModel.gpxFromPointWithReference track.referenceLonLat <| DomainModel.withoutTime swCorner
+            , DomainModel.gpxFromPointWithReference track.referenceLonLat <| DomainModel.withoutTime neCorner
             )
 
         ( swLonLat, neLonLat ) =

@@ -54,7 +54,10 @@ toolStateChange opened colour options track =
                         , fullDepthRenderingBoxSize
                         , fullDepthRenderingBoxSize
                         )
-                        (startPoint <| leafFromIndex theTrack.currentPosition theTrack.trackTree)
+                        (.space <|
+                            startPoint <|
+                                leafFromIndex theTrack.currentPosition theTrack.trackTree
+                        )
 
                 ( fromStart, fromEnd ) =
                     TrackLoaded.getRangeFromMarkers theTrack
@@ -199,7 +202,7 @@ deletePointsBetween :
     Int
     -> Int
     -> TrackLoaded msg
-    -> ( Maybe PeteTree, List GPXSource, (Int, Int) )
+    -> ( Maybe PeteTree, List GPXSource, ( Int, Int ) )
 deletePointsBetween fromStart fromEnd track =
     let
         newTree =
@@ -220,5 +223,5 @@ deletePointsBetween fromStart fromEnd track =
     in
     ( newTree
     , oldPoints |> List.map Tuple.second
-    , (fromStart, fromEnd)
+    , ( fromStart, fromEnd )
     )

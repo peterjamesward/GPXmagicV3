@@ -287,11 +287,11 @@ nudgeTrackPoint options fade index tree =
                     |> Vector3d.scaleBy fade
 
             newXYZ =
-                current
+                current.space
                     |> Point3d.translateBy horizontalVector
                     |> Point3d.translateBy verticalVector
         in
-        newXYZ
+        { current | space = newXYZ }
 
 
 update :

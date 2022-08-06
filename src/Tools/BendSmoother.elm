@@ -28,6 +28,7 @@ import Tools.BendSmootherOptions exposing (..)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
+import Utils
 import UtilsForViews exposing (showShortMeasure)
 import Vector2d
 import Vector3d
@@ -58,17 +59,6 @@ type Msg
     | SetSegments Int
     | ApplySmoothPoint
     | DisplayInfo String String
-
-
-computeNewPoints : Options -> TrackLoaded msg -> List PreviewPoint
-computeNewPoints options track =
-    -- Already computed and saved in options.
-    case options.smoothedBend of
-        Just bend ->
-            bend.nodes
-
-        Nothing ->
-            []
 
 
 tryBendSmoother : TrackLoaded msg -> Options -> Options
@@ -173,7 +163,10 @@ softenSinglePoint numSegments index track =
                 gpxPoints =
                     Arc3d.segments numSegments arc
                         |> Polyline3d.vertices
-                        |> List.map (DomainModel.gpxFromPointWithReference track.referenceLonLat)
+                        |> List.map
+                            (DomainModel.withoutTime
+                                >> DomainModel.gpxFromPointWithReference track.referenceLonLat
+                            )
 
                 newTree =
                     DomainModel.replaceRange
@@ -211,7 +204,7 @@ arc3dFromThreePoints pa pb pc =
     -- Must have three points to play with!
     let
         ( beforeLength, afterLength ) =
-            ( Point3d.distanceFrom pa pb, Point3d.distanceFrom pb pc )
+            ( Point3d.distanceFrom pa.space pb.space, Point3d.distanceFrom pb.space pc.space )
 
         amountToStealFromFirstSegment =
             Quantity.min (meters 4.0) (Quantity.half beforeLength)
@@ -224,18 +217,18 @@ arc3dFromThreePoints pa pb pc =
 
         arcStart =
             Point3d.interpolateFrom
-                pb
-                pa
+                pb.space
+                pa.space
                 (Quantity.ratio commonAmountToSteal beforeLength)
 
         arcEnd =
             Point3d.interpolateFrom
-                pb
-                pc
+                pb.space
+                pc.space
                 (Quantity.ratio commonAmountToSteal afterLength)
 
         trianglePlane =
-            SketchPlane3d.throughPoints pa pb pc
+            SketchPlane3d.throughPoints pa.space pb.space pc.space
     in
     case trianglePlane of
         -- Points necessarily co-planar but type requires us to check!
@@ -244,7 +237,7 @@ arc3dFromThreePoints pa pb pc =
                 ( planarA, planarB, planarC ) =
                     -- I think if we project into 2d, the classic logic will hold.
                     ( arcStart |> Point3d.projectInto plane
-                    , pb |> Point3d.projectInto plane
+                    , pb.space |> Point3d.projectInto plane
                     , arcEnd |> Point3d.projectInto plane
                     )
 
@@ -534,12 +527,12 @@ segmentSlider imperial options wrap =
 roadToGeometry : RoadSection -> G.Road
 roadToGeometry road =
     { startAt =
-        { x = Length.inMeters <| xCoordinate <| road.startPoint
-        , y = Length.inMeters <| yCoordinate <| road.startPoint
+        { x = Length.inMeters <| xCoordinate <| road.startPoint.space
+        , y = Length.inMeters <| yCoordinate <| road.startPoint.space
         }
     , endsAt =
-        { x = Length.inMeters <| xCoordinate <| road.endPoint
-        , y = Length.inMeters <| yCoordinate <| road.endPoint
+        { x = Length.inMeters <| xCoordinate <| road.endPoint.space
+        , y = Length.inMeters <| yCoordinate <| road.endPoint.space
         }
     }
 
@@ -551,6 +544,7 @@ lookForSmoothBendOption :
     -> Int
     -> Maybe SmoothedBend
 lookForSmoothBendOption trackPointSpacing track pointA pointD =
+    --NOTE that this really does all the work; "Apply" just takes this and uses it.
     let
         ( roadAB, roadCD ) =
             ( DomainModel.asRecord <| DomainModel.leafFromIndex pointA track.trackTree
@@ -591,8 +585,8 @@ lookForSmoothBendOption trackPointSpacing track pointA pointD =
                             (case nodes of
                                 p1 :: pRest ->
                                     Point3d.distanceFrom
-                                        (DomainModel.earthPointFromIndex pointA track.trackTree)
-                                        p1
+                                        (.space <| DomainModel.earthPointFromIndex pointA track.trackTree)
+                                        p1.space
 
                                 _ ->
                                     Quantity.zero
@@ -631,6 +625,7 @@ makeSmoothBend :
     -> List EarthPoint
 makeSmoothBend trackPointSpacing roadAB roadCD arc =
     -- Note return list here includes points A and D.
+    --TODO: Interpolate timestamps if present. BUT HERE IS EARTHPOINTS.
     let
         trueArcLength =
             (abs <| Angle.inRadians <| Arc2d.sweptAngle arc)
@@ -654,8 +649,13 @@ makeSmoothBend trackPointSpacing roadAB roadCD arc =
             )
 
         ( elevationAtA, elevationAtD ) =
-            ( Length.inMeters <| zCoordinate roadAB.startPoint
-            , Length.inMeters <| zCoordinate roadCD.endPoint
+            ( Length.inMeters <| zCoordinate roadAB.startPoint.space
+            , Length.inMeters <| zCoordinate roadCD.endPoint.space
+            )
+
+        ( timeAtA, timeAtD ) =
+            ( roadAB.sourceData |> Tuple.first |> .timestamp
+            , roadCD.sourceData |> Tuple.second |> .timestamp
             )
 
         ( tang1, tang2 ) =
@@ -665,8 +665,8 @@ makeSmoothBend trackPointSpacing roadAB roadCD arc =
             )
 
         ( entryStraightLength, exitStraightLength ) =
-            ( Length.inMeters <| Point3d.distanceFrom roadAB.startPoint tang1
-            , Length.inMeters <| Point3d.distanceFrom tang2 roadCD.endPoint
+            ( Length.inMeters <| Point3d.distanceFrom roadAB.startPoint.space tang1
+            , Length.inMeters <| Point3d.distanceFrom tang2 roadCD.endPoint.space
             )
 
         totalNewLength =
@@ -678,13 +678,24 @@ makeSmoothBend trackPointSpacing roadAB roadCD arc =
             , elevationAtD + (exitStraightLength / totalNewLength) * (elevationAtA - elevationAtD)
             )
 
+        ( tangent1Time, tangent2Time ) =
+            ( Utils.interpolateTimes (entryStraightLength / totalNewLength) timeAtA timeAtD
+            , Utils.interpolateTimes (exitStraightLength / totalNewLength) timeAtD timeAtA
+            )
+
         ( newEntryPoint, newExitPoint ) =
-            ( Point3d.translateBy
-                (Vector3d.fromMeters { x = 0, y = 0, z = tangent1Elevation - elevationAtA })
-                tang1
-            , Point3d.translateBy
-                (Vector3d.fromMeters { x = 0, y = 0, z = tangent2Elevation - elevationAtD })
-                tang2
+            ( { space =
+                    Point3d.translateBy
+                        (Vector3d.fromMeters { x = 0, y = 0, z = tangent1Elevation - elevationAtA })
+                        tang1
+              , time = tangent1Time
+              }
+            , { space =
+                    Point3d.translateBy
+                        (Vector3d.fromMeters { x = 0, y = 0, z = tangent2Elevation - elevationAtD })
+                        tang2
+              , time = tangent2Time
+              }
             )
 
         eleIncrement =
@@ -701,9 +712,15 @@ makeSmoothBend trackPointSpacing roadAB roadCD arc =
                 (List.map LineSegment2d.startPoint <| List.drop 1 segments)
                 (List.range 1 (numberPointsOnArc - 1))
 
+        newArcTimes =
+            Utils.equalIntervals
+                (List.length segments)
+                tangent1Time
+                tangent2Time
+
         newEarthPoints =
             [ roadAB.startPoint, newEntryPoint ]
-                ++ newArcPoints
+                ++ List.map2 DomainModel.withTime newArcTimes newArcPoints
                 ++ [ newExitPoint, roadCD.endPoint ]
     in
     List.drop 1 <| List.take (List.length newEarthPoints - 1) newEarthPoints
@@ -713,7 +730,7 @@ toPlanarPoint : EarthPoint -> G.Point
 toPlanarPoint pt =
     let
         { x, y, z } =
-            Point3d.toRecord inMeters pt
+            Point3d.toRecord inMeters pt.space
     in
     { x = x, y = y }
 

@@ -366,8 +366,8 @@ view location context ( width, height ) options msgWrapper =
                                     asRecord <| leafFromIndex midPoint edgeInfo.track.trackTree
 
                                 ( p1, p2 ) =
-                                    ( midLeaf.startPoint |> Point3d.toScreenSpace camera screenRectangle
-                                    , midLeaf.endPoint |> Point3d.toScreenSpace camera screenRectangle
+                                    ( midLeaf.startPoint.space |> Point3d.toScreenSpace camera screenRectangle
+                                    , midLeaf.endPoint.space |> Point3d.toScreenSpace camera screenRectangle
                                     )
 
                                 rotation =
@@ -416,7 +416,7 @@ view location context ( width, height ) options msgWrapper =
             -> List (Point2d.Point2d Pixels coordinates)
             -> List (Point2d.Point2d Pixels coordinates)
         edgeFold road outputs =
-            Point3d.toScreenSpace camera screenRectangle road.endPoint
+            Point3d.toScreenSpace camera screenRectangle road.endPoint.space
                 :: outputs
 
         renderEdge : Int -> PeteTree -> Svg msg
@@ -434,6 +434,7 @@ view location context ( width, height ) options msgWrapper =
 
                 startPoint =
                     DomainModel.earthPointFromIndex 0 tree
+                        |> .space
                         |> Point3d.toScreenSpace camera screenRectangle
             in
             svgPoints |> pointsAsPolyline edgeIndex
@@ -444,10 +445,13 @@ view location context ( width, height ) options msgWrapper =
             let
                 ( start, mid, end ) =
                     ( DomainModel.earthPointFromIndex 0 tree
+                        |> .space
                         |> Point3d.toScreenSpace camera screenRectangle
                     , DomainModel.earthPointFromIndex (skipCount tree // 2) tree
+                        |> .space
                         |> Point3d.toScreenSpace camera screenRectangle
                     , DomainModel.earthPointFromIndex (skipCount tree) tree
+                        |> .space
                         |> Point3d.toScreenSpace camera screenRectangle
                     )
             in
@@ -493,6 +497,7 @@ view location context ( width, height ) options msgWrapper =
                                 earthPointFromIndex
                                     (skipCount edgeInfo.track.trackTree // 2)
                                     edgeInfo.track.trackTree
+                                    |> .space
                                     |> Point3d.toScreenSpace camera screenRectangle
                         in
                         Svg.text_
@@ -565,12 +570,12 @@ deriveCamera context =
         eyePoint =
             Point3d.translateBy
                 (Vector3d.meters 0.0 0.0 5000.0)
-                lookingAt
+                lookingAt.space
 
         viewpoint =
             -- Fixing "up is North" so that 2-way drag works well.
             Viewpoint3d.lookAt
-                { focalPoint = lookingAt
+                { focalPoint = lookingAt.space
                 , eyePoint = eyePoint
                 , upDirection = Direction3d.positiveY
                 }
@@ -630,7 +635,9 @@ update msg msgWrapper graph area context =
                     in
                     ( { context
                         | focalPoint =
-                            context.focalPoint |> Point3d.translateBy shiftVector
+                            context.focalPoint.space
+                                |> Point3d.translateBy shiftVector
+                                |> DomainModel.withoutTime
                         , orbiting = Just ( dx, dy )
                       }
                     , []
@@ -688,11 +695,14 @@ update msg msgWrapper graph area context =
                         |> Vector2d.mirrorAcross Axis2d.x
 
                 newFocalPoint =
-                    context.focalPoint
+                    context.focalPoint.space
                         |> Point3d.translateBy
                             (Vector3d.on SketchPlane3d.xy shift)
             in
-            ( { context | zoomLevel = newZoom, focalPoint = newFocalPoint }
+            ( { context
+                | zoomLevel = newZoom
+                , focalPoint = DomainModel.withoutTime newFocalPoint
+              }
             , []
             )
 
@@ -820,6 +830,7 @@ detectHit event graph ( w, h ) context =
 
                             thisEdgeNearestPoint =
                                 earthPointFromIndex thisEdgeNearestIndex edgeInfo.track.trackTree
+                                    |> .space
                                     |> Point3d.toScreenSpace camera screenRectangle
                         in
                         ( edgeIndex

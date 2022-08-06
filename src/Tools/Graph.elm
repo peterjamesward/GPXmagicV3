@@ -116,7 +116,7 @@ makeXY earth =
     -- As in v2, allowing a tolerance of one foot albeit rather crudely.
     let
         ( x, y, _ ) =
-            Point3d.toTuple Length.inFeet earth
+            Point3d.toTuple Length.inFeet earth.space
 
         ( xRounded, yRounded ) =
             ( toFloat <| round x, toFloat <| round y )
@@ -550,7 +550,7 @@ addSelfLoop node options =
                                 )
 
                         loopOpposite =
-                            endPoint
+                            endPoint.space
                                 |> Point3d.translateBy
                                     (Vector3d.withLength
                                         (Quantity.twice options.minimumRadiusAtPlaces)
@@ -558,14 +558,14 @@ addSelfLoop node options =
                                     )
 
                         loopCentre =
-                            Point3d.midpoint endPoint loopOpposite
+                            Point3d.midpoint endPoint.space loopOpposite
 
                         axis =
                             Axis3d.withDirection Direction3d.positiveZ loopCentre
 
                         ( arcStart, arcEnd ) =
-                            ( endPoint |> Point3d.rotateAround axis (Angle.degrees 30)
-                            , endPoint |> Point3d.rotateAround axis (Angle.degrees -30)
+                            ( endPoint.space |> Point3d.rotateAround axis (Angle.degrees 30)
+                            , endPoint.space |> Point3d.rotateAround axis (Angle.degrees -30)
                             )
 
                         arc =
@@ -578,12 +578,13 @@ addSelfLoop node options =
                                     isArc
                                         |> Arc3d.approximate (Length.meters 0.1)
                                         |> Polyline3d.vertices
+                                        |> List.map DomainModel.withoutTime
                                         |> List.map (DomainModel.gpxFromPointWithReference graph.referenceLonLat)
 
                                 newEdgeInfo =
                                     { lowNode = node
                                     , highNode = node
-                                    , via = makeXY loopOpposite
+                                    , via = makeXY <| DomainModel.withoutTime loopOpposite
                                     }
 
                                 newEdgeTree =
@@ -1140,7 +1141,7 @@ identifyPointsToBeMerged tolerance track =
                 { content = { pointIndex = pointNumber }
                 , box =
                     BoundingBox2d.singleton <|
-                        Point3d.projectInto SketchPlane3d.xy leaf.endPoint
+                        Point3d.projectInto SketchPlane3d.xy leaf.endPoint.space
                 }
                 indexBuild
             )
@@ -1157,10 +1158,10 @@ identifyPointsToBeMerged tolerance track =
                     DomainModel.earthPointFromIndex pointNumber track.trackTree
 
                 thisPoint2d =
-                    Point3d.projectInto SketchPlane3d.xy pt
+                    Point3d.projectInto SketchPlane3d.xy pt.space
 
                 results =
-                    SpatialIndex.query track.leafIndex (pointWithTolerance pt)
+                    SpatialIndex.query track.leafIndex (pointWithTolerance pt.space)
                         |> List.map (.content >> .leafIndex)
                         |> List.Extra.unique
 
@@ -1173,18 +1174,18 @@ identifyPointsToBeMerged tolerance track =
 
                         axis2d =
                             Axis2d.through
-                                (leaf.startPoint |> Point3d.projectInto SketchPlane3d.xy)
+                                (leaf.startPoint.space |> Point3d.projectInto SketchPlane3d.xy)
                                 leaf.directionAtStart
 
                         axis3d =
-                            Axis3d.throughPoints leaf.startPoint leaf.endPoint
+                            Axis3d.throughPoints leaf.startPoint.space leaf.endPoint.space
                                 |> Maybe.withDefault Axis3d.z
 
                         ( along, from, foot ) =
                             -- Proximity test in 2D as altitudes may vary greatly.
-                            ( pt |> Point3d.signedDistanceAlong axis3d
+                            ( pt.space |> Point3d.signedDistanceAlong axis3d
                             , thisPoint2d |> Point2d.signedDistanceFrom axis2d |> Quantity.abs
-                            , pt |> Point3d.projectOntoAxis axis3d
+                            , pt.space |> Point3d.projectOntoAxis axis3d
                             )
 
                         isShortPerp =
@@ -1204,7 +1205,7 @@ identifyPointsToBeMerged tolerance track =
                             { sourcePointNumber = pointNumber
                             , leafNumber = leafNumber
                             , distanceAlong = along
-                            , earthPoint = foot
+                            , earthPoint = DomainModel.withoutTime foot
                             }
 
                     else
@@ -1320,7 +1321,8 @@ identifyPointsToBeMerged tolerance track =
                     { content = { pointIndex = 0 }
                     , box =
                         pointWithTolerance <|
-                            DomainModel.earthPointFromIndex 0 treeWithAddedPoints
+                            .space <|
+                                DomainModel.earthPointFromIndex 0 treeWithAddedPoints
                     }
                     emptyPointIndex
                 )
@@ -1338,10 +1340,10 @@ identifyPointsToBeMerged tolerance track =
                     DomainModel.earthPointFromIndex pointNumber tree
 
                 thisPoint2d =
-                    Point3d.projectInto SketchPlane3d.xy pt
+                    Point3d.projectInto SketchPlane3d.xy pt.space
 
                 results =
-                    SpatialIndex.query pointIndex (pointWithTolerance pt)
+                    SpatialIndex.query pointIndex (pointWithTolerance pt.space)
                         |> List.map (.content >> .pointIndex)
 
                 thisPointTrackDistance =
@@ -1351,6 +1353,7 @@ identifyPointsToBeMerged tolerance track =
                 |> List.filter
                     (\ptidx ->
                         DomainModel.earthPointFromIndex ptidx tree
+                            |> .space
                             |> Point3d.projectInto SketchPlane3d.xy
                             |> Point2d.equalWithin tolerance thisPoint2d
                     )
@@ -1447,14 +1450,17 @@ identifyPointsToBeMerged tolerance track =
                     { centroid =
                         case
                             pointNumbers
-                                |> List.map (\pt -> DomainModel.earthPointFromIndex pt treeWithAddedPoints)
+                                |> List.map
+                                    (\pt ->
+                                        DomainModel.earthPointFromIndex pt treeWithAddedPoints
+                                    )
                         of
                             [] ->
                                 --We already know this is a non-empty list.
                                 Point3d.origin
 
                             pt1 :: more ->
-                                Point3d.centroid pt1 more
+                                Point3d.centroid pt1.space (List.map .space more)
                     , pointsToAdjust = pointNumbers
                     }
             in
@@ -1473,7 +1479,9 @@ identifyPointsToBeMerged tolerance track =
                     --Each move modifies tree so must be a fold.
                     let
                         asGPS =
-                            DomainModel.gpxFromPointWithReference track.referenceLonLat cluster.centroid
+                            DomainModel.gpxFromPointWithReference
+                                track.referenceLonLat
+                                (DomainModel.withoutTime cluster.centroid)
                     in
                     List.foldl
                         (movePoint asGPS)
@@ -1854,7 +1862,8 @@ buildGraph track =
                                 [ ( startEarth, startGpx ), ( endEarth, endGpx ) ] ->
                                     let
                                         midEarth =
-                                            Point3d.midpoint startEarth endEarth
+                                            DomainModel.withoutTime <|
+                                                Point3d.midpoint startEarth.space endEarth.space
 
                                         midGpx =
                                             DomainModel.gpxFromPointWithReference
@@ -2213,19 +2222,19 @@ makeNewRoute options =
                                         outEdge.track.trackTree
 
                         ( inboundDirection, outboundDirection ) =
-                            ( Direction3d.from inboundTrimPoint actualVertex
+                            ( Direction3d.from inboundTrimPoint.space actualVertex.space
                                 |> Maybe.withDefault Direction3d.positiveZ
                                 |> Direction3d.projectInto planeFor2dArc
                                 |> Maybe.withDefault Direction2d.positiveX
-                            , Direction3d.from actualVertex outboundTrimPoint
+                            , Direction3d.from actualVertex.space outboundTrimPoint.space
                                 |> Maybe.withDefault Direction3d.positiveZ
                                 |> Direction3d.projectInto planeFor2dArc
                                 |> Maybe.withDefault Direction2d.positiveX
                             )
 
                         ( inboundRoad, outboundRoad ) =
-                            ( LineSegment3d.from inboundTrimPoint actualVertex
-                            , LineSegment3d.from actualVertex outboundTrimPoint
+                            ( LineSegment3d.from inboundTrimPoint.space actualVertex.space
+                            , LineSegment3d.from actualVertex.space outboundTrimPoint.space
                             )
 
                         turnAngle =
@@ -2241,8 +2250,8 @@ makeNewRoute options =
                         meanHeight =
                             Quantity.half <|
                                 Quantity.plus
-                                    (Point3d.zCoordinate inboundTrimPoint)
-                                    (Point3d.zCoordinate outboundTrimPoint)
+                                    (Point3d.zCoordinate inboundTrimPoint.space)
+                                    (Point3d.zCoordinate outboundTrimPoint.space)
 
                         -- If we now apply offset to the start and end (which we can), we
                         -- make the offset arc not the centre line arc here.
@@ -2251,8 +2260,8 @@ makeNewRoute options =
                                 |> SketchPlane3d.translateBy (Vector3d.xyz Quantity.zero Quantity.zero meanHeight)
 
                         ( inboundTrim2d, outboundTrim2d ) =
-                            ( inboundTrimPoint |> Point3d.projectInto planeFor2dArc
-                            , outboundTrimPoint |> Point3d.projectInto planeFor2dArc
+                            ( inboundTrimPoint.space |> Point3d.projectInto planeFor2dArc
+                            , outboundTrimPoint.space |> Point3d.projectInto planeFor2dArc
                             )
 
                         ( offsetInboundTrimPoint, offsetOutboundTrimPoint ) =
@@ -2322,6 +2331,7 @@ makeNewRoute options =
                     arc
                         |> Arc3d.approximate (Length.meters 0.1)
                         |> Polyline3d.vertices
+                        |> List.map DomainModel.withoutTime
 
                 Nothing ->
                     []

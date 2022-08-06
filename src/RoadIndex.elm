@@ -73,7 +73,7 @@ checkLeafForIntersections :
 checkLeafForIntersections myRoad ( myLeafNumber, index, intersects ) =
     let
         thisSegment =
-            LineSegment3d.from myRoad.startPoint myRoad.endPoint
+            LineSegment3d.from myRoad.startPoint.space myRoad.endPoint.space
                 |> LineSegment3d.projectInto SketchPlane3d.xy
 
         prepContent : SpatialContent ( Int, RoadSection ) Meters LocalCoords
@@ -84,7 +84,7 @@ checkLeafForIntersections myRoad ( myLeafNumber, index, intersects ) =
 
         thisAxis =
             Axis2d.through
-                (myRoad.startPoint |> Point3d.projectInto SketchPlane3d.xy)
+                (myRoad.startPoint.space |> Point3d.projectInto SketchPlane3d.xy)
                 myRoad.directionAtStart
 
         candidates : List ( Int, RoadSection )
@@ -97,7 +97,7 @@ checkLeafForIntersections myRoad ( myLeafNumber, index, intersects ) =
             -- Work out what type of overlap this is and add to index.
             let
                 otherSegment =
-                    LineSegment3d.from otherRoad.startPoint otherRoad.endPoint
+                    LineSegment3d.from otherRoad.startPoint.space otherRoad.endPoint.space
                         |> LineSegment3d.projectInto SketchPlane3d.xy
 
                 intersectPoint =
@@ -122,10 +122,10 @@ checkLeafForIntersections myRoad ( myLeafNumber, index, intersects ) =
 
                 ( startAlongAxis, endAlongAxis ) =
                     -- Should allow us to determine direction
-                    ( otherRoad.startPoint
+                    ( otherRoad.startPoint.space
                         |> Point3d.projectInto SketchPlane3d.xy
                         |> Point2d.signedDistanceAlong thisAxis
-                    , otherRoad.endPoint
+                    , otherRoad.endPoint.space
                         |> Point3d.projectInto SketchPlane3d.xy
                         |> Point2d.signedDistanceAlong thisAxis
                     )

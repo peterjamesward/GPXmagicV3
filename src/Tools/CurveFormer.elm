@@ -43,6 +43,7 @@ import Tools.CurveFormerOptions exposing (GradientSmoothing(..), Options, Point)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
+import Utils
 import UtilsForViews exposing (flatBox, showShortMeasure)
 import Vector2d
 import Vector3d
@@ -538,11 +539,11 @@ getCircle options track =
         centre =
             case options.referencePoint of
                 Just localReference ->
-                    localReference
+                    localReference.space
                         |> Point3d.translateBy translation
 
                 Nothing ->
-                    orange
+                    orange.space
                         |> Point3d.translateBy translation
     in
     Circle3d.withRadius options.pushRadius Direction3d.positiveZ centre
@@ -563,11 +564,11 @@ getOuterCircle options track =
         centre =
             case options.referencePoint of
                 Just localReference ->
-                    localReference
+                    localReference.space
                         |> Point3d.translateBy translation
 
                 Nothing ->
-                    orange
+                    orange.space
                         |> Point3d.translateBy translation
 
         outerRadius =
@@ -643,10 +644,10 @@ highlightPoints color points track =
 
         highlightPoint index =
             let
-                xyz =
+                xyzt =
                     DomainModel.earthPointFromIndex index track.trackTree
             in
-            Scene3d.point { radius = Pixels.pixels 5 } material xyz
+            Scene3d.point { radius = Pixels.pixels 5 } material xyzt.space
     in
     List.map highlightPoint points
 
@@ -741,7 +742,7 @@ makeCurveIfPossible track options =
         pointsWithinCircle =
             let
                 collector index road dict =
-                    if isWithinPushRadius road.startPoint then
+                    if isWithinPushRadius road.startPoint.space then
                         Dict.insert index road dict
 
                     else
@@ -757,7 +758,7 @@ makeCurveIfPossible track options =
         pointsWithinDisc =
             let
                 collector index road dict =
-                    if isWithinDisc road.startPoint then
+                    if isWithinDisc road.startPoint.space then
                         Dict.insert index road dict
 
                     else
@@ -815,8 +816,8 @@ makeCurveIfPossible track options =
 
                 entryLineSegment =
                     LineSegment2d.from
-                        (Point3d.projectInto drawingPlane tp1)
-                        (Point3d.projectInto drawingPlane tp2)
+                        (Point3d.projectInto drawingPlane tp1.space)
+                        (Point3d.projectInto drawingPlane tp2.space)
 
                 entryLineAxis =
                     Axis2d.throughPoints
@@ -1114,7 +1115,9 @@ makeCurveIfPossible track options =
                                         in
                                         ( Quantity.ratio (thisPointDistanceFromStart |> Quantity.minus startDistance)
                                             length
-                                        , Point3d.zCoordinate <| DomainModel.earthPointFromIndex idx track.trackTree
+                                        , Point3d.zCoordinate <|
+                                            .space <|
+                                                DomainModel.earthPointFromIndex idx track.trackTree
                                         )
                                     )
                     in
@@ -1165,9 +1168,11 @@ makeCurveIfPossible track options =
         -- Given we interpolate using interval [0..1], we can figure out the
         -- original altitude by interpolation using this as a proportion of
         -- distance along the original section of track.
+        newBendEntirely : List EarthPoint
         newBendEntirely =
             -- We (probably) have a bend, but it's flat. We need to interpolate altitudes.
             -- We can do this uniformly, or based on the original profile (by distance portion).
+            --TODO: Interpolate times.
             case ( entryInformation, exitInformation ) of
                 ( Just entry, Just exit ) ->
                     let
@@ -1178,7 +1183,7 @@ makeCurveIfPossible track options =
                                 ++ exitCurve
                                 ++ [ LineSegment2d.from
                                         exit.tangentPoint
-                                        (Point3d.projectInto drawingPlane exit.originalTrackPoint)
+                                        (Point3d.projectInto drawingPlane exit.originalTrackPoint.space)
                                    ]
 
                         actualNewLength =
@@ -1186,8 +1191,8 @@ makeCurveIfPossible track options =
 
                         altitudeChange =
                             Quantity.minus
-                                (Point3d.zCoordinate entry.originalTrackPoint)
-                                (Point3d.zCoordinate exit.originalTrackPoint)
+                                (Point3d.zCoordinate entry.originalTrackPoint.space)
+                                (Point3d.zCoordinate exit.originalTrackPoint.space)
 
                         cumulativeDistances =
                             completeSegments
@@ -1195,10 +1200,18 @@ makeCurveIfPossible track options =
                                     (\seg run -> Quantity.plus run (LineSegment2d.length seg))
                                     Quantity.zero
 
+                        times =
+                            entry.originalTrackPoint.time
+                                :: Utils.equalIntervals
+                                    (List.length completeSegments)
+                                    entry.originalTrackPoint.time
+                                    exit.originalTrackPoint.time
+                                ++ [ exit.originalTrackPoint.time ]
+
                         adjustedAltitudes =
                             -- Can make this return the altitude adjusted end track point.
-                            List.map2
-                                (\seg dist ->
+                            List.map3
+                                (\seg dist time ->
                                     let
                                         originalSegmentStart =
                                             LineSegment2d.startPoint seg
@@ -1212,19 +1225,23 @@ makeCurveIfPossible track options =
                                         newAltitude =
                                             case options.smoothGradient of
                                                 Holistic ->
-                                                    Point3d.zCoordinate entry.originalTrackPoint
+                                                    Point3d.zCoordinate entry.originalTrackPoint.space
                                                         |> Quantity.plus adjustment
 
                                                 Piecewise ->
                                                     interpolateOriginalAltitudesByDistance proportionalDistance
                                     in
-                                    Point3d.xyz
-                                        (Point2d.xCoordinate originalSegmentStart)
-                                        (Point2d.yCoordinate originalSegmentStart)
-                                        newAltitude
+                                    { space =
+                                        Point3d.xyz
+                                            (Point2d.xCoordinate originalSegmentStart)
+                                            (Point2d.yCoordinate originalSegmentStart)
+                                            newAltitude
+                                    , time = time
+                                    }
                                 )
                                 (List.drop 0 completeSegments)
                                 cumulativeDistances
+                                times
                     in
                     adjustedAltitudes
 

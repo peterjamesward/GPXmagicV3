@@ -247,7 +247,10 @@ processXML options content =
 
                         gpxPoints =
                             finalPathState.outputs
-                                |> List.map (DomainModel.gpxFromPointWithReference pointZero)
+                                |> List.map
+                                    (DomainModel.withoutTime
+                                        >> DomainModel.gpxFromPointWithReference pointZero
+                                    )
 
                         newTrack =
                             TrackLoaded.trackFromPoints

@@ -10,6 +10,7 @@ import Dict exposing (Dict)
 import Direction2d exposing (Direction2d)
 import Direction3d exposing (Direction3d)
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, endPoint, skipCount, startPoint)
+import Duration exposing (Seconds)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (button)
@@ -21,9 +22,10 @@ import Point2d exposing (Point2d)
 import Point3d exposing (Point3d)
 import Polyline3d exposing (Polyline3d)
 import PreviewData exposing (PreviewData, PreviewPoint, PreviewShape(..))
-import Quantity exposing (Quantity)
+import Quantity exposing (Quantity, Rate)
 import SketchPlane3d
 import String.Interpolate
+import Time
 import Tools.BendSmoother
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
@@ -71,17 +73,35 @@ type alias WindowSettings =
 type alias Window =
     -- Internal state that applies limits in options.
     -- Do this forwards and backwards, average the deltas at each point, see what comes out!
+    -- For times, wonder if speed will help here.
     { nextDistance : Quantity Float Meters -- from start, in one metre increments
     , lastTrackIndex : Int -- grab a new point based on `distance`
     , lastTrackDirection : Direction2d LocalCoords
     , outputDeltaTheta : List Angle
     , outputDeltaPhi : List Angle
+    , intervals : List (Maybe Time.Posix)
     , unspentDeltaTheta : Angle
     , lastDeltaTheta : Angle
     , targetPhi : Angle
     , lastPhi : Angle
     , unspentPhi : Angle
+    , speed : Maybe Float -- Meters per second for a Leaf
     }
+
+
+speedForLeaf : RoadSection -> Maybe Float
+speedForLeaf leaf =
+    -- If there are timings, use them.
+    case ( leaf.startPoint.time, leaf.endPoint.time ) of
+        ( Just startTime, Just endTime ) ->
+            let
+                timeInterval =
+                    Time.posixToMillis endTime - Time.posixToMillis startTime
+            in
+            Just <| Length.inMeters leaf.trueLength / toFloat timeInterval
+
+        _ ->
+            Nothing
 
 
 computeNewPoints : Options -> TrackLoaded msg -> List PreviewPoint
@@ -135,9 +155,11 @@ computeNewPoints options track =
             , targetPhi = targetPhi
             , outputDeltaTheta = []
             , outputDeltaPhi = []
+            , intervals = [ firstLeaf.startPoint.time ]
             , unspentDeltaTheta = Quantity.zero
             , unspentPhi = Quantity.zero
             , lastDeltaTheta = Quantity.zero
+            , speed = speedForLeaf firstLeaf
             }
 
         withDeltaConstraints window unspentDeltaTheta =
@@ -155,6 +177,17 @@ computeNewPoints options track =
                 (Quantity.negate settings.maxDeltaPhi)
                 settings.maxDeltaPhi
                 (targetPhi |> Quantity.minus window.lastPhi)
+
+        nextTimeStamp : Window -> Maybe Time.Posix
+        nextTimeStamp window =
+            case ( window.speed, window.intervals ) of
+                ( Just speed, (Just lastTime) :: _ ) ->
+                    Utils.addTimes
+                        (Just lastTime)
+                        (Just <| Time.millisToPosix <| truncate <| 1.0 / speed)
+
+                _ ->
+                    Nothing
 
         filterForwards : Window -> Window
         filterForwards window =
@@ -179,6 +212,7 @@ computeNewPoints options track =
                         , lastDeltaTheta = availableDeltaTheta
                         , lastPhi = window.lastPhi |> Quantity.plus availableDeltaPhi
                         , nextDistance = window.nextDistance |> Quantity.plus Length.meter
+                        , intervals = nextTimeStamp window :: window.intervals
                     }
 
                 else
@@ -205,6 +239,7 @@ computeNewPoints options track =
                                 , unspentDeltaTheta = window.unspentDeltaTheta |> Quantity.minus availableDeltaTheta
                                 , lastDeltaTheta = availableDeltaTheta
                                 , lastPhi = window.lastPhi |> Quantity.plus availableDeltaPhi
+                                , intervals = nextTimeStamp window :: window.intervals
                             }
 
                         else
@@ -242,6 +277,8 @@ computeNewPoints options track =
                                 , lastDeltaTheta = availableDeltaTheta
                                 , lastPhi = window.lastPhi |> Quantity.plus availableDeltaPhi
                                 , targetPhi = targetPhi
+                                , speed = speedForLeaf newLeaf
+                                , intervals = nextTimeStamp window :: window.intervals
                             }
                 in
                 -- This I hope is properly tail recursive.
@@ -277,9 +314,11 @@ computeNewPoints options track =
             , targetPhi = targetPhi
             , outputDeltaTheta = []
             , outputDeltaPhi = []
+            , intervals = [] -- Not in reverse!
             , unspentDeltaTheta = Quantity.zero
             , unspentPhi = Quantity.zero
             , lastDeltaTheta = Quantity.zero
+            , speed = speedForLeaf firstLeaf
             }
 
         filterReverse : Window -> Window
@@ -369,6 +408,7 @@ computeNewPoints options track =
                                 , lastDeltaTheta = availableDeltaTheta
                                 , lastPhi = window.lastPhi |> Quantity.plus availableDeltaPhi
                                 , targetPhi = targetPhi
+                                , speed = speedForLeaf newLeaf
                             }
                 in
                 -- This I hope is properly tail recursive.
@@ -385,7 +425,7 @@ computeNewPoints options track =
                     DomainModel.asRecord <|
                         DomainModel.leafFromIndex fromStart track.trackTree
 
-                ( forwardsDeltaThetas, forwardsDeltaPhis ) =
+                ( forwardsDeltaThetas, forwardsDeltaPhis, intervals ) =
                     let
                         finalWindow =
                             filterForwards forwardWindow
@@ -393,6 +433,7 @@ computeNewPoints options track =
                     -- These were consed so we reverse them here.
                     ( List.reverse finalWindow.outputDeltaTheta
                     , List.reverse finalWindow.outputDeltaPhi
+                    , List.reverse finalWindow.intervals
                     )
 
                 ( reverseDeltaThetas, reverseDeltaPhis ) =
@@ -407,8 +448,7 @@ computeNewPoints options track =
 
                 combineDeltas : Angle -> Angle -> Angle -> Angle -> ( Angle, Angle )
                 combineDeltas forwardDTheta forwardDPhi reverseDTheta reverseDPhi =
-                    ( --Quantity.half <|
-                      Quantity.plus
+                    ( Quantity.plus
                         (forwardDTheta |> Quantity.multiplyBy options.blend)
                         (Quantity.negate reverseDTheta |> Quantity.multiplyBy (1.0 - options.blend))
                     , forwardDPhi
@@ -428,21 +468,26 @@ computeNewPoints options track =
                         (Angle.atan <| firstLeaf.gradientAtStart / 100.0)
 
                 accumulate :
-                    Point3d Meters LocalCoords
+                    EarthPoint
                     -> Direction3d LocalCoords
                     -> List ( Angle, Angle )
+                    -> List (Maybe Time.Posix)
                     -> List EarthPoint
                     -> List EarthPoint
-                accumulate point direction deltas outputs =
+                accumulate point direction deltas timeIntervals outputs =
                     -- Note this will cons into a reversed list.
-                    case deltas of
-                        ( dTheta, dPhi ) :: moreDeltas ->
+                    case ( deltas, timeIntervals ) of
+                        ( ( dTheta, dPhi ) :: moreDeltas, interval :: moreIntervals ) ->
                             let
                                 vector =
                                     Vector3d.withLength Length.meter direction
 
                                 newPoint =
-                                    point |> Point3d.translateBy vector
+                                    { space =
+                                        point.space |> Point3d.translateBy vector
+                                    , time =
+                                        Utils.addTimes point.time interval
+                                    }
 
                                 newDirection =
                                     Direction3d.xyZ
@@ -459,6 +504,7 @@ computeNewPoints options track =
                                 newPoint
                                 newDirection
                                 moreDeltas
+                                moreIntervals
                                 (newPoint :: outputs)
 
                         _ ->
@@ -468,6 +514,7 @@ computeNewPoints options track =
                 firstLeaf.startPoint
                 startDirection
                 combinedDeltaLists
+                intervals
                 [ firstLeaf.startPoint ]
     in
     derivedTrackForwards

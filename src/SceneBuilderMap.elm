@@ -155,7 +155,7 @@ renderMapJson track =
             lngLatPair <| mapLocation <| Tuple.first <| sourceData treeNode
 
         current =
-            startPoint <| leafFromIndex track.currentPosition track.trackTree
+            .space <| startPoint <| leafFromIndex track.currentPosition track.trackTree
 
         detailBox =
             BoundingBox3d.withDimensions ( boxSide, boxSide, boxSide ) current
@@ -239,6 +239,7 @@ trackPointsToJSON track =
 
         fullRenderBox =
             earthPointFromIndex track.currentPosition track.trackTree
+                |> .space
                 |> BoundingBox3d.singleton
                 |> BoundingBox3d.expandBy fullRenderBoxSize
 

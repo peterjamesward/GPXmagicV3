@@ -59,9 +59,9 @@ findSimplifications options tree =
                     , ( index
                       , Triangle3d.area <|
                             Triangle3d.from
-                                previous.startPoint
-                                road.startPoint
-                                road.endPoint
+                                previous.startPoint.space
+                                road.startPoint.space
+                                road.endPoint.space
                       )
                         :: outputs
                     )

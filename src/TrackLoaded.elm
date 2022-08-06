@@ -477,7 +477,10 @@ asPreviewPoints track startDistance earths =
 
 adjustAltitude : Length.Length -> EarthPoint -> EarthPoint
 adjustAltitude alt pt =
-    Point3d.xyz
-        (Point3d.xCoordinate pt)
-        (Point3d.yCoordinate pt)
-        alt
+    { pt
+        | space =
+            Point3d.xyz
+                (Point3d.xCoordinate pt.space)
+                (Point3d.yCoordinate pt.space)
+                alt
+    }

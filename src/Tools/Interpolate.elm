@@ -16,6 +16,7 @@ import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.InterpolateOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
+import Utils
 import UtilsForViews exposing (showShortMeasure)
 import ViewPureStyles exposing (..)
 
@@ -79,10 +80,17 @@ computeNewPoints excludeExisting options track =
                     List.range interpolateStartIndex (intervalsNeeded - 1)
                         |> List.map
                             (\n ->
-                                Point3d.interpolateFrom
-                                    road.startPoint
-                                    road.endPoint
-                                    (fractionalIncrement * toFloat n)
+                                { space =
+                                    Point3d.interpolateFrom
+                                        road.startPoint.space
+                                        road.endPoint.space
+                                        (fractionalIncrement * toFloat n)
+                                , time =
+                                    Utils.interpolateTimes
+                                        (fractionalIncrement * toFloat n)
+                                        road.startPoint.time
+                                        road.endPoint.time
+                                }
                             )
             in
             List.reverse interpolatedPoints ++ new

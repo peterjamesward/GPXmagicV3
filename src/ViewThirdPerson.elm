@@ -87,7 +87,7 @@ deriveCamera treeNode context currentPosition =
 
         cameraViewpoint =
             Viewpoint3d.orbitZ
-                { focalPoint = lookingAt
+                { focalPoint = lookingAt.space
                 , azimuth = Direction2d.toAngle context.cameraAzimuth
                 , elevation = context.cameraElevation
                 , distance =
@@ -281,7 +281,9 @@ update msg msgWrapper track area context =
                         newContext =
                             { context
                                 | focalPoint =
-                                    context.focalPoint |> Point3d.translateBy shiftVector
+                                    context.focalPoint.space
+                                        |> Point3d.translateBy shiftVector
+                                        |> DomainModel.withoutTime
                                 , orbiting = Just ( dx, dy )
                             }
                     in

@@ -103,7 +103,7 @@ apply options track =
             -- extend first leaf back to find point on turn
             let
                 leafAxis =
-                    Axis3d.throughPoints homeLeaf.startPoint homeLeaf.endPoint
+                    Axis3d.throughPoints homeLeaf.startPoint.space homeLeaf.endPoint.space
             in
             case leafAxis of
                 Just axis ->
@@ -112,7 +112,7 @@ apply options track =
                         (Quantity.negate <| Length.meters <| abs options.offset)
 
                 Nothing ->
-                    homeLeaf.startPoint
+                    homeLeaf.startPoint.space
 
         awayLeaf =
             getLastLeaf track.trackTree
@@ -121,7 +121,7 @@ apply options track =
             -- extend last leaf to find point on turn
             let
                 leafAxis =
-                    Axis3d.throughPoints awayLeaf.endPoint awayLeaf.startPoint
+                    Axis3d.throughPoints awayLeaf.endPoint.space awayLeaf.startPoint.space
             in
             case leafAxis of
                 Just axis ->
@@ -130,7 +130,7 @@ apply options track =
                         (Quantity.negate <| Length.meters <| abs options.offset)
 
                 Nothing ->
-                    awayLeaf.endPoint
+                    awayLeaf.endPoint.space
 
         awayTurn =
             -- arc through midpoint joining outward and return legs
@@ -144,9 +144,9 @@ apply options track =
             case ( finalOutwardPoint, firstInwardPoint ) of
                 ( Just outEarth, Just backEarth ) ->
                     Arc3d.throughPoints
-                        outEarth
+                        outEarth.space
                         awayTurnMidpoint
-                        backEarth
+                        backEarth.space
 
                 _ ->
                     Nothing
@@ -163,9 +163,9 @@ apply options track =
             case ( finalInwardPoint, firstOutwardPoint ) of
                 ( Just inEarth, Just outEarth ) ->
                     Arc3d.throughPoints
-                        inEarth
+                        inEarth.space
                         homeTurnMidpoint
-                        outEarth
+                        outEarth.space
 
                 _ ->
                     Nothing
@@ -182,7 +182,7 @@ apply options track =
                     arc
                         |> Arc3d.approximate (Length.meters 0.1)
                         |> Polyline3d.vertices
-                        |> List.map (gpxFromPointWithReference track.referenceLonLat)
+                        |> List.map (DomainModel.withoutTime >> gpxFromPointWithReference track.referenceLonLat)
 
                 Nothing ->
                     []
@@ -193,7 +193,7 @@ apply options track =
                     arc
                         |> Arc3d.approximate (Length.meters 0.1)
                         |> Polyline3d.vertices
-                        |> List.map (gpxFromPointWithReference track.referenceLonLat)
+                        |> List.map (DomainModel.withoutTime >> gpxFromPointWithReference track.referenceLonLat)
 
                 Nothing ->
                     []

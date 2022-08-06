@@ -1,6 +1,51 @@
 module Utils exposing (..)
 
 import Http exposing (Error(..))
+import Time
+
+
+equalIntervals : Int -> Maybe Time.Posix -> Maybe Time.Posix -> List (Maybe Time.Posix)
+equalIntervals pointsToAdd fromTime toTime =
+    List.range 1 pointsToAdd
+        |> List.map
+            (\pointNum ->
+                interpolateTimes
+                    (toFloat pointNum / (1.0 + toFloat pointsToAdd))
+                    fromTime
+                    toTime
+            )
+
+
+interpolateTimes : Float -> Maybe Time.Posix -> Maybe Time.Posix -> Maybe Time.Posix
+interpolateTimes proportion fromTime toTime =
+    case ( fromTime, toTime ) of
+        ( Just timeA, Just timeB ) ->
+            let
+                ( floatTimeA, floatTimeB ) =
+                    ( toFloat <| Time.posixToMillis timeA
+                    , toFloat <| Time.posixToMillis timeB
+                    )
+            in
+            Just <|
+                Time.millisToPosix <|
+                    truncate <|
+                        (1.0 - proportion)
+                            * floatTimeA
+                            + proportion
+                            * floatTimeB
+
+        _ ->
+            Nothing
+
+
+addTimes : Maybe Time.Posix -> Maybe Time.Posix -> Maybe Time.Posix
+addTimes time1 time2 =
+    case ( time1, time2 ) of
+        ( Just t1, Just t2 ) ->
+            Just <| Time.millisToPosix (Time.posixToMillis t1 + Time.posixToMillis t2)
+
+        _ ->
+            Nothing
 
 
 reversingCons : List a -> List a -> List a

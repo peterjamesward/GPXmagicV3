@@ -11,13 +11,15 @@ import LineSegment3d exposing (LineSegment3d)
 import LocalCoords exposing (LocalCoords)
 import Point3d exposing (Point3d)
 import Polyline3d exposing (Polyline3d)
+import Time
 import Triangle3d exposing (Triangle3d)
+import Utils
 import Vector3d
 
 
 type alias ControlPoint =
     -- For clarity.
-    EarthPoint
+    Point3d Meters LocalCoords
 
 
 type alias SplineFoldState =
@@ -25,6 +27,11 @@ type alias SplineFoldState =
     , roadMinusTwo : Maybe RoadSection
     , newPoints : List EarthPoint
     }
+
+
+combinePointAndTime : Point3d Meters LocalCoords -> Maybe Time.Posix -> EarthPoint
+combinePointAndTime place time =
+    { space = place, time = time }
 
 
 bezierSplinesThroughExistingPoints : Bool -> Float -> Float -> Int -> Int -> PeteTree -> List EarthPoint
@@ -52,15 +59,15 @@ bezierSplinesThroughExistingPoints isLoop tension tolerance startIndx endIndex t
                         triangle1 =
                             -- Minor inefficiency re-creating triangles is not worth worrying about.
                             Triangle3d.from
-                                roadMinusTwo.startPoint
-                                roadMinusTwo.endPoint
-                                roadMinusOne.endPoint
+                                roadMinusTwo.startPoint.space
+                                roadMinusTwo.endPoint.space
+                                roadMinusOne.endPoint.space
 
                         triangle2 =
                             Triangle3d.from
-                                roadMinusOne.startPoint
-                                roadMinusOne.endPoint
-                                road.endPoint
+                                roadMinusOne.startPoint.space
+                                roadMinusOne.endPoint.space
+                                road.endPoint.space
 
                         ( ( c1, b1, a1 ), ( c2, b2, a2 ) ) =
                             -- Might not be the order you expected.
@@ -80,16 +87,32 @@ bezierSplinesThroughExistingPoints isLoop tension tolerance startIndx endIndex t
                                 (Length.meters <| 0.2 * tolerance)
                                 spline
 
-                        vertices : List EarthPoint
+                        vertices : List (Point3d Meters LocalCoords)
                         vertices =
                             Polyline3d.vertices polylineFromSpline
                                 |> List.drop 1
                                 |> List.reverse
+
+                        ( timeAtStart, timeAtEnd ) =
+                            ( road.startPoint.time, road.endPoint.time )
+
+                        times : List (Maybe Time.Posix)
+                        times =
+                            List.range 0 (List.length vertices - 1)
+                                |> List.map
+                                    (\vertexNum ->
+                                        Utils.interpolateTimes
+                                            (toFloat vertexNum / toFloat (List.length vertices))
+                                            timeAtStart
+                                            timeAtEnd
+                                    )
                     in
                     { state
                         | roadMinusTwo = state.roadMinusOne
                         , roadMinusOne = Just road
-                        , newPoints = vertices ++ state.newPoints
+                        , newPoints =
+                            List.map2 combinePointAndTime vertices times
+                                ++ state.newPoints
                     }
 
         foldOutput =
@@ -167,7 +190,7 @@ bezierSplineApproximation isLoop tension tolerance startIndx endIndex treeNode =
     let
         midPoint : RoadSection -> Point3d Meters LocalCoords
         midPoint road =
-            Point3d.midpoint road.startPoint road.endPoint
+            Point3d.midpoint road.startPoint.space road.endPoint.space
 
         foldFn : RoadSection -> SplineFoldState -> SplineFoldState
         foldFn road state =
@@ -179,8 +202,8 @@ bezierSplineApproximation isLoop tension tolerance startIndx endIndex treeNode =
                 Just roadMinusOne ->
                     let
                         ( ( b1, c1 ), ( a2, b2 ) ) =
-                            ( ( midPoint roadMinusOne, roadMinusOne.endPoint )
-                            , ( road.startPoint, midPoint road )
+                            ( ( midPoint roadMinusOne, roadMinusOne.endPoint.space )
+                            , ( road.startPoint.space, midPoint road )
                             )
 
                         spline : CubicSpline3d Meters LocalCoords
@@ -195,16 +218,30 @@ bezierSplineApproximation isLoop tension tolerance startIndx endIndex treeNode =
                                 (Length.meters <| 0.2 * tolerance)
                                 spline
 
-                        vertices : List EarthPoint
+                        vertices : List (Point3d Meters LocalCoords)
                         vertices =
                             Polyline3d.vertices polylineFromSpline
                                 |> List.drop 1
                                 |> List.reverse
+
+                        ( timeAtStart, timeAtEnd ) =
+                            ( road.startPoint.time, road.endPoint.time )
+
+                        times : List (Maybe Time.Posix)
+                        times =
+                            timeAtStart
+                                :: Utils.equalIntervals
+                                    (List.length vertices)
+                                    timeAtStart
+                                    timeAtEnd
+                                ++ [ timeAtEnd ]
                     in
                     { state
                         | roadMinusTwo = state.roadMinusOne
                         , roadMinusOne = Just road
-                        , newPoints = vertices ++ state.newPoints
+                        , newPoints =
+                            List.map2 combinePointAndTime vertices times
+                                ++ state.newPoints
                     }
 
         foldOutput =
