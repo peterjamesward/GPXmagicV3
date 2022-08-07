@@ -16,6 +16,13 @@
 All compiles with new space/time coords. But need to finesse all the edit changes
 as some clearly erroneous times coming out!
 
+* Bezier, Centroid and Insert look OK.
+* Smooth with arcs OK
+* Radiused bends OK
+* Insert OK
+* One-click may be OK
+* Smart smoother is wild.
+
 Use markers to designate a range for a time-wise "nudge" adjustment.
 e.g. after delete, bring remaining track earlier in time.
 Maybe default from Orange to track end.

@@ -25,14 +25,20 @@ interpolateTimes proportion fromTime toTime =
                     ( toFloat <| Time.posixToMillis timeA
                     , toFloat <| Time.posixToMillis timeB
                     )
+
+                newFloat =
+                    (1.0 - proportion)
+                        * floatTimeA
+                        + proportion
+                        * floatTimeB
+
+                newInt =
+                    floor newFloat
+
+                intermediate =
+                    Time.millisToPosix newInt
             in
-            Just <|
-                Time.millisToPosix <|
-                    truncate <|
-                        (1.0 - proportion)
-                            * floatTimeA
-                            + proportion
-                            * floatTimeB
+            Just intermediate
 
         _ ->
             Nothing

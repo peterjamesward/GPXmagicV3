@@ -229,12 +229,12 @@ bezierSplineApproximation isLoop tension tolerance startIndx endIndex treeNode =
 
                         times : List (Maybe Time.Posix)
                         times =
-                            timeAtStart
+                            timeAtEnd
                                 :: Utils.equalIntervals
                                     (List.length vertices)
-                                    timeAtStart
                                     timeAtEnd
-                                ++ [ timeAtEnd ]
+                                    timeAtStart
+                                ++ [ timeAtStart ]
                     in
                     { state
                         | roadMinusTwo = state.roadMinusOne
