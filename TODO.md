@@ -11,17 +11,7 @@
 > this would open up the user base to all the Kinomap video makers and would make
 > GPX Magic a one-stop shop for GPX video synchronisation.
 
-### Update
-
-All compiles with new space/time coords. But need to finesse all the edit changes
-as some clearly erroneous times coming out!
-
-* Bezier, Centroid and Insert look OK.
-* Smooth with arcs OK
-* Radiused bends OK
-* Insert OK
-* One-click may be OK
-* Smart smoother is wild.
+### New Tool
 
 Use markers to designate a range for a time-wise "nudge" adjustment.
 e.g. after delete, bring remaining track earlier in time.

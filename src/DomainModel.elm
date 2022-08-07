@@ -10,6 +10,7 @@ module DomainModel exposing
     , earthPointFromIndex
     , effectiveLatitude
     , endPoint
+    , estimateTimeAtDistance
     , extractPointsInRange
     , foldOverRoute
     , foldOverRouteRL
@@ -863,6 +864,31 @@ indexFromDistance distance treeNode =
             else
                 skipCount info.left
                     + indexFromDistance (distance |> Quantity.minus (trueLength info.left)) info.right
+
+
+estimateTimeAtDistance : Length.Length -> PeteTree -> Maybe Time.Posix
+estimateTimeAtDistance distance tree =
+    let
+        index =
+            indexFromDistance distance tree
+
+        leaf =
+            asRecord <| leafFromIndex index tree
+
+        leafStartDistance =
+            distanceFromIndex index tree
+
+        proportionOfDistance =
+            Quantity.ratio
+                (distance |> Quantity.minus leafStartDistance)
+                leaf.trueLength
+
+        _ = Debug.log "INDEX" index
+    in
+    Utils.interpolateTimes
+        proportionOfDistance
+        leaf.startPoint.time
+        leaf.endPoint.time
 
 
 interpolateTrack : Length.Length -> PeteTree -> ( Int, EarthPoint )
