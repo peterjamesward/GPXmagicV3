@@ -505,6 +505,15 @@ spacing varies from one section to another.
 """ )
                 ]
           )
+        , ( "timestamps"
+          , Dict.fromList
+                [ ( "label", """Timestamps""" )
+                , ( "usage", """Use both markers to apply to a range, otherwise applies to whole track""" )
+                , ( "spacing", """Spacing: {0}""" )
+                , ( "info", """
+""" )
+                ]
+          )
         , ( "intersections"
           , Dict.fromList
                 [ ( "label", """Intersections""" )
