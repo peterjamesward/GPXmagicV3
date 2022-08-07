@@ -1594,6 +1594,7 @@ performActionsOnModel actions model =
                                         | trackTree = gotNewTree
                                         , currentPosition = newOrange
                                         , markerPosition = newPurple
+                                        , leafIndex = indexLeaves gotNewTree
                                     }
 
                                 Nothing ->
