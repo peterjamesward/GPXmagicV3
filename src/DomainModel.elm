@@ -882,13 +882,17 @@ estimateTimeAtDistance distance tree =
             Quantity.ratio
                 (distance |> Quantity.minus leafStartDistance)
                 leaf.trueLength
-
-        _ = Debug.log "INDEX" index
     in
     Utils.interpolateTimes
         proportionOfDistance
         leaf.startPoint.time
         leaf.endPoint.time
+
+
+interpolateAtTime : Time.Posix -> PeteTree -> EarthPoint
+interpolateAtTime time tree =
+    --TODO. Find leaf using transit times, interpolate the leaf.
+    earthPointFromIndex 0 tree
 
 
 interpolateTrack : Length.Length -> PeteTree -> ( Int, EarthPoint )

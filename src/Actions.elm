@@ -107,6 +107,11 @@ type ToolAction msg
     | MakeRouteFromGraph
     | CombineNearbyPoints
     | WidenBend (List Int) (Quantity Float Meters)
+    | AdjustTimes
+    | SetTimeTicks
+    | TimeDoubling
+    | RemoveTimes
+    | EstimateTimes
 
 
 actionTextForUndo : I18NOptions.Location -> ToolAction msg -> String
@@ -206,6 +211,21 @@ actionTextForUndo location action =
 
             CombineNearbyPoints ->
                 "combine"
+
+            AdjustTimes ->
+                "adjusttimes"
+
+            SetTimeTicks ->
+                "settimeticks"
+
+            TimeDoubling ->
+                "timedoubling"
+
+            RemoveTimes ->
+                "removetimes"
+
+            EstimateTimes ->
+                "estimatetimes"
 
             _ ->
                 "unknown"

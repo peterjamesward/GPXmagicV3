@@ -54,6 +54,16 @@ addTimes time1 time2 =
             Nothing
 
 
+subtractTimes : Maybe Time.Posix -> Maybe Time.Posix -> Maybe Time.Posix
+subtractTimes startTime endTime =
+    case ( startTime, endTime ) of
+        ( Just start, Just end ) ->
+            Just <| Time.millisToPosix (Time.posixToMillis end - Time.posixToMillis start)
+
+        _ ->
+            Nothing
+
+
 reversingCons : List a -> List a -> List a
 reversingCons xs ys =
     -- Use this for speed when order can be ignored.

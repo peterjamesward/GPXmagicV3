@@ -5,13 +5,45 @@ import BoundingBox2d exposing (BoundingBox2d)
 import BoundingBox3d exposing (BoundingBox3d)
 import Color exposing (rgb)
 import Color.Convert exposing (colorToHex)
-import Element
+import Element exposing (Element)
 import FormatNumber exposing (format)
 import FormatNumber.Locales exposing (Decimals(..), usLocale)
 import Hex
 import Http
 import Length
 import Speed exposing (Speed)
+import String.Interpolate
+import Time
+
+
+formattedTime : Maybe Time.Posix -> Element msg
+formattedTime isTime =
+    case isTime of
+        Just yesIsTime ->
+            let
+                hours =
+                    Time.toHour Time.utc yesIsTime
+
+                minutes =
+                    Time.toMinute Time.utc yesIsTime
+
+                seconds =
+                    Time.toSecond Time.utc yesIsTime
+
+                millis =
+                    Time.toMillis Time.utc yesIsTime
+            in
+            Element.text <|
+                String.Interpolate.interpolate
+                    "{0}:{1}:{2}.{3}"
+                    [ String.fromInt hours
+                    , withLeadingZeros 2 <| String.fromInt minutes
+                    , withLeadingZeros 2 <| String.fromInt seconds
+                    , withLeadingZeros 3 <| String.fromInt millis
+                    ]
+
+        Nothing ->
+            Element.text "- - -"
 
 
 elmuiColour : Color.Color -> Element.Color

@@ -88,39 +88,9 @@ trackInfoList =
       , \imperial info -> info.steepestClimb |> showDecimal2 |> text
       )
     , ( "duration"
-      , \imperial info ->
-            case info.transitTime of
-                Just isTime ->
-                    formattedTime isTime
-
-                Nothing ->
-                    text "- - -"
+      , \imperial info -> UtilsForViews.formattedTime info.transitTime
       )
     ]
-
-
-formattedTime isTime =
-    let
-        hours =
-            Time.toHour Time.utc isTime
-
-        minutes =
-            Time.toMinute Time.utc isTime
-
-        seconds =
-            Time.toSecond Time.utc isTime
-
-        millis =
-            Time.toMillis Time.utc isTime
-    in
-    text <|
-        String.Interpolate.interpolate
-            "{0}:{1}:{2}.{3}"
-            [ String.fromInt hours
-            , UtilsForViews.withLeadingZeros 2 <| String.fromInt minutes
-            , UtilsForViews.withLeadingZeros 2 <| String.fromInt seconds
-            , UtilsForViews.withLeadingZeros 3 <| String.fromInt millis
-            ]
 
 
 displayInfoForPoint : I18NOptions.Location -> Bool -> TrackLoaded msg -> Element msg
@@ -170,7 +140,7 @@ displayInfoForPoint location imperial track =
             , text <| showShortMeasure imperial altitude
             , text <| showDecimal2 <| bearing
             , text <| showDecimal2 leaf.gradientAtStart
-            , Maybe.map formattedTime timestamp |> Maybe.withDefault (text "- - -")
+            , UtilsForViews.formattedTime timestamp
             ]
         ]
 

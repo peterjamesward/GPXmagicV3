@@ -1,20 +1,19 @@
 module Tools.Timestamp exposing (..)
 
 import Actions exposing (ToolAction(..))
-import Dict exposing (Dict)
+import ColourPalette
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
+import Element.Border as Border
 import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
-import Length exposing (Meters, inMeters, meters)
-import Point3d
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity
-import String.Interpolate
+import Time
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
-import Tools.InterpolateOptions exposing (..)
+import Tools.TimestampOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import Utils
 import UtilsForViews exposing (showShortMeasure)
@@ -27,94 +26,41 @@ toolId =
 
 defaultOptions : Options
 defaultOptions =
-    { minimumSpacing = Length.meters 10.0
-    , extent = ExtentIsRange
+    { extent = ExtentOrangeToEnd
+    , desiredRangeStartOffset = Time.millisToPosix 0
+    , desiredRangeEndOffset = Time.millisToPosix 0
+    , startMilliseconds = 0
+    , endMilliseconds = 0
+    , desiredTickInterval = Time.millisToPosix 0
+    , stretchTimes = False
+    , precision = SliderOneSecond
     }
 
 
 type Msg
     = Apply
-    | SetSpacing Float
     | SetExtent ExtentOption
     | DisplayInfo String String
+    | SetRangeStartOffset Time.Posix
+    | SetRangeEndOffset Time.Posix
+    | SetStartMilliseconds Int
+    | SetEndMilliseconds Int
+    | SetTickInterval Time.Posix
+    | SetSliderPrecision SliderPrecision
 
 
 computeNewPoints : Bool -> Options -> TrackLoaded msg -> List PreviewPoint
 computeNewPoints excludeExisting options track =
     let
-        ( fromStart, fromEnd ) =
-            case options.extent of
-                ExtentIsRange ->
-                    TrackLoaded.getRangeFromMarkers track
-
-                ExtentIsTrack ->
-                    ( 0, 0 )
-
-        startPoint =
-            earthPointFromIndex fromStart track.trackTree
-
-        interpolateStartIndex =
-            -- Sneaky (?) skip existing start points for preview.
-            if excludeExisting then
-                1
-
-            else
-                0
-
-        -- This is a fold over the leaves, interpolating each as needed.
-        interpolateRoadSection : RoadSection -> List EarthPoint -> List EarthPoint
-        interpolateRoadSection road new =
-            let
-                intervalsNeeded =
-                    Quantity.ratio road.trueLength options.minimumSpacing
-                        |> ceiling
-
-                spacingOnThisSegment =
-                    road.trueLength |> Quantity.divideBy (toFloat intervalsNeeded)
-
-                fractionalIncrement =
-                    Quantity.ratio spacingOnThisSegment road.trueLength
-
-                interpolatedPoints =
-                    -- Includes start point!
-                    List.range interpolateStartIndex (intervalsNeeded - 1)
-                        |> List.map
-                            (\n ->
-                                { space =
-                                    Point3d.interpolateFrom
-                                        road.startPoint.space
-                                        road.endPoint.space
-                                        (fractionalIncrement * toFloat n)
-                                , time =
-                                    Utils.interpolateTimes
-                                        (fractionalIncrement * toFloat n)
-                                        road.startPoint.time
-                                        road.endPoint.time
-                                }
-                            )
-            in
-            List.reverse interpolatedPoints ++ new
-
         newPoints =
-            -- If fold function conses the start points (reversing them),
-            -- then we need to reverse back. But we drop the initial start point
-            -- so that the splicing works as expected without duplication.
-            DomainModel.traverseTreeBetweenLimitsToDepth
-                fromStart
-                (skipCount track.trackTree - fromEnd)
-                (always Nothing)
-                0
-                track.trackTree
-                interpolateRoadSection
-                []
-                |> List.reverse
+            []
 
         previews =
             -- But these are based on distance from first mark, need to
             -- be based on first point.
             TrackLoaded.asPreviewPoints
                 track
-                (DomainModel.distanceFromIndex fromStart track.trackTree)
+                Quantity.zero
                 newPoints
     in
     previews
@@ -125,11 +71,13 @@ apply options track =
     let
         ( fromStart, fromEnd ) =
             case options.extent of
-                ExtentIsRange ->
+                ExtentMarkers ->
                     TrackLoaded.getRangeFromMarkers track
 
-                ExtentIsTrack ->
-                    ( 0, 0 )
+                ExtentOrangeToEnd ->
+                    ( TrackLoaded.getRangeFromMarkers track |> Tuple.first
+                    , 0
+                    )
 
         newCourse =
             computeNewPoints False options track
@@ -154,15 +102,6 @@ apply options track =
     )
 
 
-interpolateFor1CQF : TrackLoaded msg -> PeteTree
-interpolateFor1CQF track =
-    let
-        ( outputTree, oldPoints ) =
-            apply defaultOptions track
-    in
-    outputTree |> Maybe.withDefault track.trackTree
-
-
 toolStateChange :
     Bool
     -> Element.Color
@@ -178,34 +117,28 @@ toolStateChange opened colour options track =
                         | extent =
                             case theTrack.markerPosition of
                                 Just purple ->
-                                    ExtentIsRange
+                                    ExtentMarkers
 
                                 Nothing ->
-                                    ExtentIsTrack
+                                    ExtentOrangeToEnd
                     }
             in
             ( newOptions, actions newOptions colour theTrack )
 
         _ ->
-            ( options, [ HidePreview "interpolate" ] )
+            ( options, [ HidePreview "timestamps" ] )
 
 
 actions : Options -> Color -> TrackLoaded msg -> List (ToolAction a)
 actions newOptions previewColour track =
-    --case newOptions.extent of
-    --    ExtentIsRange ->
-    [ ShowPreview
-        { tag = "interpolate"
-        , shape = PreviewCircle
-        , colour = previewColour
-        , points = computeNewPoints True newOptions track
-        }
-    ]
-
-
-
---ExtentIsTrack ->
---    []
+    --[ ShowPreview
+    --    { tag = "timestamps"
+    --    , shape = PreviewCircle
+    --    , colour = previewColour
+    --    , points = computeNewPoints True newOptions track
+    --    }
+    --]
+    []
 
 
 update :
@@ -216,17 +149,45 @@ update :
     -> ( Options, List (ToolAction msg) )
 update msg options previewColour hasTrack =
     case ( hasTrack, msg ) of
-        ( Just track, SetSpacing spacing ) ->
+        ( Just track, SetRangeStartOffset offset ) ->
             let
                 newOptions =
-                    { options | minimumSpacing = Length.meters spacing }
+                    { options | desiredRangeStartOffset = offset }
             in
             ( newOptions, actions newOptions previewColour track )
 
-        ( Just track, SetExtent extent ) ->
+        ( Just track, SetRangeEndOffset offset ) ->
             let
                 newOptions =
-                    { options | extent = extent }
+                    { options | desiredRangeEndOffset = offset }
+            in
+            ( newOptions, actions newOptions previewColour track )
+
+        ( Just track, SetStartMilliseconds millis ) ->
+            let
+                newOptions =
+                    { options | startMilliseconds = millis }
+            in
+            ( newOptions, actions newOptions previewColour track )
+
+        ( Just track, SetEndMilliseconds millis ) ->
+            let
+                newOptions =
+                    { options | endMilliseconds = millis }
+            in
+            ( newOptions, actions newOptions previewColour track )
+
+        ( Just track, SetTickInterval interval ) ->
+            let
+                newOptions =
+                    { options | desiredTickInterval = interval }
+            in
+            ( newOptions, actions newOptions previewColour track )
+
+        ( Just track, SetSliderPrecision precision ) ->
+            let
+                newOptions =
+                    { options | precision = precision }
             in
             ( newOptions, actions newOptions previewColour track )
 
@@ -237,14 +198,14 @@ update msg options previewColour hasTrack =
                         | extent =
                             case track.markerPosition of
                                 Just purple ->
-                                    ExtentIsRange
+                                    ExtentMarkers
 
                                 Nothing ->
-                                    ExtentIsTrack
+                                    ExtentOrangeToEnd
                     }
             in
             ( newOptions
-            , [ Actions.ApplyInterpolateWithOptions newOptions
+            , [ Actions.AdjustTimes
               , TrackHasChanged
               ]
             )
@@ -253,42 +214,180 @@ update msg options previewColour hasTrack =
             ( options, [] )
 
 
+sliderStyles =
+    [ height <| px 20
+    , width <| px 300
+    , centerY
+    , centerX
+    , behindContent <|
+        -- Slider track
+        el
+            [ width <| px 300
+            , height <| px 2
+            , centerY
+            , centerX
+            , Border.rounded 6
+            , Background.color ColourPalette.scrollbarBackground
+            ]
+            Element.none
+    ]
+
+
+effectiveTime precision approximate milliseconds =
+    case precision of
+        SliderMillisecond ->
+            Time.millisToPosix <|
+                (+)
+                    (Time.posixToMillis approximate)
+                    milliseconds
+
+        SliderHalfSecond ->
+            let
+                inMillis =
+                    Time.posixToMillis approximate
+            in
+            Time.millisToPosix <| inMillis - modBy 500 inMillis
+
+        _ ->
+            approximate
+
+
 view : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
-view location imperial wrapper options track =
+view location imperial wrapper options mTrack =
     let
         i18n =
             I18N.text location toolId
 
-        fixButton =
-            button
-                neatToolsBorder
-                { onPress = Just <| wrapper Apply
-                , label = text "Insert points"
-                }
+        trackStartTime : TrackLoaded msg -> Maybe Time.Posix
+        trackStartTime track =
+            DomainModel.getFirstLeaf track.trackTree
+                |> .startPoint
+                |> .time
 
-        extent =
+        markedRegion track =
+            case options.extent of
+                ExtentMarkers ->
+                    TrackLoaded.getRangeFromMarkers track
+
+                ExtentOrangeToEnd ->
+                    ( TrackLoaded.getRangeFromMarkers track |> Tuple.first
+                    , 0
+                    )
+
+        extent track =
             el [ centerX, width fill ] <|
-                paragraph [ centerX ]
-                    [ i18n "usage" ]
+                paragraph [ centerX ] <|
+                    if track.markerPosition == Nothing then
+                        [ i18n "ExtentOrangeToEnd" ]
 
-        spacingSlider =
-            Input.slider
-                commonShortHorizontalSliderStyles
-                { onChange = wrapper << SetSpacing
-                , label =
-                    Input.labelBelow [] <|
-                        text <|
-                            String.Interpolate.interpolate
-                                (I18N.localisedString location toolId "spacing")
-                                [ showShortMeasure imperial options.minimumSpacing ]
-                , min = 1.0
-                , max = 50.0
-                , step = Just 0.5
-                , value = Length.inMeters options.minimumSpacing
-                , thumb = Input.defaultThumb
+                    else
+                        [ i18n "ExtentMarkers" ]
+
+        earliestAllowableStartOffset : TrackLoaded msg -> Maybe Time.Posix
+        earliestAllowableStartOffset track =
+            let
+                ( fromStart, fromEnd ) =
+                    markedRegion track
+
+                previousPoint =
+                    DomainModel.earthPointFromIndex
+                        (max 0 (fromStart - 1))
+                        track.trackTree
+            in
+            Utils.subtractTimes (trackStartTime track) previousPoint.time
+
+        selectPrecision =
+            Input.radioRow [ centerX, spacing 5 ]
+                { onChange = wrapper << SetSliderPrecision
+                , options =
+                    [ Input.option SliderOneSecond (i18n "second")
+                    , Input.option SliderHalfSecond (i18n "half")
+                    , Input.option SliderMillisecond (i18n "millis")
+                    ]
+                , selected = Just options.precision
+                , label = Input.labelHidden "precision"
                 }
+
+        approximatedTime : Int -> Int
+        approximatedTime time =
+            let
+                modulus =
+                    case options.precision of
+                        SliderMillisecond ->
+                            1
+
+                        SliderHalfSecond ->
+                            500
+
+                        SliderOneSecond ->
+                            1000
+            in
+            time - modBy modulus time
+
+        timeAdjustments track =
+            column [ centerX, width fill, spacing 4, Border.width 1 ]
+                [ wrappedRow [ spacing 6, padding 3 ]
+                    [ i18n "start"
+                    , UtilsForViews.formattedTime <|
+                        Utils.addTimes
+                            (Just <|
+                                effectiveTime
+                                    options.precision
+                                    options.desiredRangeStartOffset
+                                    options.startMilliseconds
+                            )
+                            (earliestAllowableStartOffset track)
+                    ]
+                , el [ centerX ] <|
+                    Input.slider sliderStyles
+                        { onChange = wrapper << SetRangeStartOffset << Time.millisToPosix << round
+                        , label = Input.labelHidden "no label"
+                        , min = 10
+                        , max = 60 * 60 * 1000
+                        , step =
+                            Just <|
+                                case options.precision of
+                                    SliderOneSecond ->
+                                        1000
+
+                                    SliderHalfSecond ->
+                                        500
+
+                                    SliderMillisecond ->
+                                        -- Use secondary slider for this
+                                        1000
+                        , value =
+                            toFloat <|
+                                approximatedTime <|
+                                    Time.posixToMillis options.desiredRangeStartOffset
+                        , thumb = Input.defaultThumb
+                        }
+                , if options.precision == SliderMillisecond then
+                    el [ centerX ] <|
+                        Input.slider sliderStyles
+                            { onChange = floor >> SetStartMilliseconds >> wrapper
+                            , label = Input.labelHidden "milliseconds"
+                            , min = 0.0
+                            , max = 1000
+                            , step = Just 1
+                            , value = toFloat options.startMilliseconds
+                            , thumb = Input.defaultThumb
+                            }
+
+                  else
+                    none
+                ]
+
+        equiSpacing track =
+            none
+
+        doubleTimes track =
+            none
+
+        removeTimes track =
+            none
     in
-    case track of
+    case mTrack of
         Just isTrack ->
             column
                 [ padding 5
@@ -297,9 +396,12 @@ view location imperial wrapper options track =
                 , centerX
                 , Background.color FlatColors.ChinesePalette.antiFlashWhite
                 ]
-                [ el [ centerX ] <| spacingSlider
-                , el [ centerX ] extent
-                , el [ centerX ] <| fixButton
+                [ el [ centerX ] <| extent isTrack
+                , selectPrecision
+                , timeAdjustments isTrack
+                , equiSpacing isTrack
+                , doubleTimes isTrack
+                , removeTimes isTrack
                 ]
 
         Nothing ->

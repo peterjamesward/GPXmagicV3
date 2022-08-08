@@ -14,16 +14,21 @@
 ### New Tool
 
 Use markers to designate a range for a time-wise "nudge" adjustment.
-e.g. after delete, bring remaining track earlier in time.
+E.g. after delete, bring remaining track earlier in time (but earlier than previous point).
 Maybe default from Orange to track end.
-(May need option to Shift or Stretch.)
+(May need option to Shift or Stretch; perhaps by independent setting of two times.)
+(NB These times need to be relative to start time, hence time into video.)
 
 Option to change (“scale”) the interval to x2, x0.5.
 This will just scale the intervals internally. The Orange and Purple pointers will show time 
 when available. Purpose is to allow videos to run at half-speed (e.g. car recorded).
 
-Might allow adding timestamps to an untimed GPX based on track length and average speed.
+Option to replace all points with points spaced every 1.0 (or 0.5) seconds.
+(This would be by interpolation timewise in DomainModel, like `estimateTimeAtDistance`)
+
+Might allow adding timestamps to an **untimed** GPX based on track length and average speed.
 Or even a very simple physics model, because it's there.
+(I guess removal of all times is an obvious symmetry.)
 
 ---
 

@@ -450,6 +450,7 @@ Also, access a quick description of what the tool does and how (and when) to use
                 , ( "smart", """smart smoother""" )
                 , ( "unknown", """(what was that?)""" )
                 , ( "combine", """combine nearby points""" )
+                , ( "adjusttimes", """adjust timings""")
                 ]
           )
         , ( "essentials"
@@ -508,9 +509,23 @@ spacing varies from one section to another.
         , ( "timestamps"
           , Dict.fromList
                 [ ( "label", """Timestamps""" )
-                , ( "usage", """Use both markers to apply to a range, otherwise applies to whole track""" )
+                , ( "ExtentMarkers", """Changes will apply between and including the markers.""" )
+                , ( "ExtentOrangeToEnd", """Changes will apply from Orange marker to end of track.""" )
                 , ( "spacing", """Spacing: {0}""" )
+                , ( "progressive", """You can either keep the duration of the range constant,
+moving it earlier or later in time, or you can stretch (or shrink) the range to match two timing points.""")
+                , ( "apply", """Apply time changes""")
+                , ( "remove", """Remove all timings""")
+                , ( "double", """Halve playback speed""")
+                , ( "physics", """Estimate timings""")
+                , ( "uniform", """Replace track points with points at regular time intervals""")
+                , ( "start", """Start time offset in video:""")
+                , ( "end", """End time offset in video:""")
+                , ( "second", """Seconds""")
+                , ( "half", """Half-second""")
+                , ( "millis", """Millisecond""")
                 , ( "info", """
+Change track point timestamps to match video timings.
 """ )
                 ]
           )

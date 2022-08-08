@@ -65,6 +65,8 @@ import Tools.StartFinishTypes exposing (Loopiness(..))
 import Tools.Straightener
 import Tools.StravaOptions
 import Tools.StravaTools
+import Tools.Timestamp
+import Tools.TimestampOptions
 import Tools.TrackInfoBox as TrackInfoBox
 import TrackLoaded exposing (TrackLoaded)
 import ViewPureStyles exposing (..)
@@ -108,6 +110,8 @@ type ToolType
     | ToolLandUse
     | ToolSmartSmoother
     | ToolNamedSegments
+    | ToolTimestamps
+
 
 type ToolCategory
     = TcInformation
@@ -150,6 +154,7 @@ type alias Options msg =
     , landUseOptions : Tools.LandUse.Options
     , smartSmootherOptions : Tools.SmartSmootherOptions.Options
     , namedSegmentOptions : Tools.NamedSegmentOptions.Options
+    , timestampOptions : Tools.TimestampOptions.Options
     }
 
 
@@ -185,6 +190,7 @@ defaultOptions =
     , landUseOptions = Tools.LandUse.defaultOptions
     , smartSmootherOptions = Tools.SmartSmoother.defaultOptions
     , namedSegmentOptions = Tools.NamedSegment.defaultOptions
+    , timestampOptions = Tools.Timestamp.defaultOptions
     }
 
 
@@ -225,6 +231,7 @@ type ToolMsg
     | ToolLandUseMsg Tools.LandUse.Msg
     | ToolSmartSmootherMsg Tools.SmartSmoother.Msg
     | ToolNamedSegmentMsg Tools.NamedSegment.Msg
+    | ToolTimestampMsg Tools.Timestamp.Msg
 
 
 type alias ToolEntry =
@@ -270,6 +277,7 @@ defaultTools =
     , straightenTool
     , graphTool
     , landUseTool
+    , timestampTool
     ]
 
 
@@ -353,7 +361,7 @@ essentialsTool =
     , tabColour = FlatColors.FlatUIPalette.orange
     , textColour = contrastingColour FlatColors.FlatUIPalette.orange
     , isPopupOpen = False
-    , categories = [ ] -- Always visible anyway
+    , categories = [] -- Always visible anyway
     }
 
 
@@ -665,6 +673,20 @@ landUseTool =
     }
 
 
+timestampTool : ToolEntry
+timestampTool =
+    { toolType = ToolTimestamps
+    , toolId = Tools.Timestamp.toolId
+    , video = Nothing
+    , state = Contracted
+    , dock = DockUpperRight
+    , tabColour = FlatColors.FlatUIPalette.emerald
+    , textColour = contrastingColour FlatColors.FlatUIPalette.emerald
+    , isPopupOpen = False
+    , categories = [ TcInformation ]
+    }
+
+
 toggleToolPopup : ToolType -> ToolEntry -> ToolEntry
 toggleToolPopup toolType tool =
     if tool.toolType == toolType then
@@ -842,6 +864,19 @@ update toolMsg isTrack msgWrapper options =
                         isTrack
             in
             ( { options | gradientProblemOptions = newOptions }
+            , actions
+            )
+
+        ToolTimestampMsg msg ->
+            let
+                ( newOptions, actions ) =
+                    Tools.Timestamp.update
+                        msg
+                        options.timestampOptions
+                        (getColour ToolGradientProblems options.tools)
+                        isTrack
+            in
+            ( { options | timestampOptions = newOptions }
             , actions
             )
 
@@ -1458,6 +1493,20 @@ toolStateHasChanged toolType newState isTrack options =
             in
             ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
 
+        ToolTimestamps ->
+            let
+                ( newToolOptions, actions ) =
+                    Tools.Timestamp.toolStateChange
+                        (newState == Expanded)
+                        (getColour toolType options.tools)
+                        options.timestampOptions
+                        isTrack
+
+                newOptions =
+                    { options | timestampOptions = newToolOptions }
+            in
+            ( newOptions, (StoreLocally "tools" <| encodeToolState options) :: actions )
+
         ToolProfileSmooth ->
             let
                 ( newToolOptions, actions ) =
@@ -1924,6 +1973,14 @@ viewToolByType location msgWrapper entry isTrack options =
         [ centerX, padding 2, width fill, Border.rounded 4 ]
     <|
         case entry.toolType of
+            ToolTimestamps ->
+                Tools.Timestamp.view
+                    location
+                    options.imperial
+                    (msgWrapper << ToolTimestampMsg)
+                    options.timestampOptions
+                    isTrack
+
             ToolTrackInfo ->
                 TrackInfoBox.view
                     location
@@ -2215,6 +2272,9 @@ type alias ColourTriplet =
 encodeType : ToolType -> String
 encodeType toolType =
     case toolType of
+        ToolTimestamps ->
+            "ToolTimestamps"
+
         ToolTrackInfo ->
             "ToolTrackInfo"
 
@@ -2298,7 +2358,6 @@ encodeType toolType =
 
         ToolNamedSegments ->
             "ToolNamedSegments"
-
 
 
 encodeColour : Element.Color -> E.Value
