@@ -11,28 +11,23 @@
 > this would open up the user base to all the Kinomap video makers and would make
 > GPX Magic a one-stop shop for GPX video synchronisation.
 
-### New Tool
+**Initially:**
 
-Just do Orange to end, defer the range option.
-Need to show range offsets in absolute & relative times.
-
-Stop over-egging it. Allow user to set H:MM:SS of offset (maybe 1/100s) by sliders.
-Do this for start and optionally end of range.
-Can "lock" end to be start + duration, or undo lock and set separate times.
-In either case, times in region will be translated to suit, stretched if necessary.
-Times after region will retain their intervals from the new end point.
+Start by doing "start to track end" only.
+Start with no stretch option.
 
 Option to change (“scale”) the interval to x2.
 This will just scale the intervals internally. The Orange and Purple pointers will show time 
 when available. Purpose is to allow videos to run at half-speed (e.g. car recorded).
-**NOTE** this is special case of above.
+
+**Later:** 
 
 Option to replace all points with points spaced every 1.0 (or 0.5) seconds.
 (This would be by interpolation timewise in DomainModel, like `estimateTimeAtDistance`)
 
 Might allow adding timestamps to an **untimed** GPX based on track length and average speed.
 Or even a very simple physics model, because it's there.
-(I guess removal of all times is an obvious symmetry.)
+(Removal of recorded times is an obvious symmetry.)
 
 ---
 

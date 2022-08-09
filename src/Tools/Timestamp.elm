@@ -238,29 +238,55 @@ viewWithTrack location imperial wrapper options track =
                             [ i18n "ExtentOrangeToEnd" ]
 
         startTimeAdjustments =
+            --TODO: Use i18n, not text.
             column [ centerX, width fill, spacing 4, Border.width 1 ]
                 [ row [ spaceEvenly ]
-                    [ text "start absolute "
+                    [ i18n "start absolute"
                     , UtilsForViews.formattedTime <|
                         Just <|
                             Time.millisToPosix <|
-                                absoluteMillisToPoint <|
-                                    fromStart
+                                absoluteMillisToPoint fromStart
                     ]
                 , row [ spaceEvenly ]
-                    [ text "start relative "
+                    [ i18n "start relative"
                     , UtilsForViews.formattedTime <|
                         Just <|
                             Time.millisToPosix <|
-                                relativeMillisToPoint <|
-                                    fromStart
+                                relativeMillisToPoint fromStart
+                    ]
+
+                --TODO: Add time display with up/down widgets for H,M,S,ms.
+                , row [ spaceEvenly ]
+                    [ i18n "desired start"
+                    , text <| String.fromInt <| relativeMillisToPoint fromStart // 1000 // 60 // 60
+                    , text ":"
+                    , text <|
+                        UtilsForViews.withLeadingZeros 2 <|
+                            String.fromInt <|
+                                modBy 60 <|
+                                    relativeMillisToPoint fromStart
+                                        // 1000
+                                        // 60
+                    , text ":"
+                    , text <|
+                        UtilsForViews.withLeadingZeros 2 <|
+                            String.fromInt <|
+                                modBy 60 <|
+                                    relativeMillisToPoint fromStart
+                                        // 1000
+                    , text "."
+                    , text <|
+                        UtilsForViews.withLeadingZeros 3 <|
+                            String.fromInt <|
+                                modBy 1000 <|
+                                    relativeMillisToPoint fromStart
                     ]
                 ]
 
         endTimeAdjustments =
             column [ centerX, width fill, spacing 4, Border.width 1 ]
                 [ row [ spaceEvenly ]
-                    [ text "end absolute "
+                    [ i18n "end absolute"
                     , UtilsForViews.formattedTime <|
                         Just <|
                             Time.millisToPosix <|
@@ -268,7 +294,7 @@ viewWithTrack location imperial wrapper options track =
                                     endIndex
                     ]
                 , row [ spaceEvenly ]
-                    [ text "end relative "
+                    [ i18n "end relative"
                     , UtilsForViews.formattedTime <|
                         Just <|
                             Time.millisToPosix <|
@@ -296,7 +322,8 @@ viewWithTrack location imperial wrapper options track =
         [ none
         , extent
         , startTimeAdjustments
-        , endTimeAdjustments
+
+        --, endTimeAdjustments
         , equiSpacing
         , doubleTimes
         , removeTimes
