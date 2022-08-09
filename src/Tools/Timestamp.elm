@@ -7,6 +7,7 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Input as Input exposing (button)
+import FeatherIcons
 import FlatColors.ChinesePalette
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity
@@ -258,28 +259,47 @@ viewWithTrack location imperial wrapper options track =
                 --TODO: Add time display with up/down widgets for H,M,S,ms.
                 , row [ spaceEvenly ]
                     [ i18n "desired start"
-                    , text <| String.fromInt <| relativeMillisToPoint fromStart // 1000 // 60 // 60
+                    , column []
+                        [ el [ centerX ] <| useIconWithSize 12 FeatherIcons.chevronUp
+                        , text <| String.fromInt <| relativeMillisToPoint fromStart // 1000 // 60 // 60
+                        , el [ centerX ] <| useIconWithSize 12 FeatherIcons.chevronDown
+                        ]
                     , text ":"
-                    , text <|
-                        UtilsForViews.withLeadingZeros 2 <|
-                            String.fromInt <|
-                                modBy 60 <|
-                                    relativeMillisToPoint fromStart
-                                        // 1000
-                                        // 60
+                    , column []
+                        [ el [ centerX ] <| useIconWithSize 12 FeatherIcons.chevronUp
+                        , text <|
+                            UtilsForViews.withLeadingZeros 2 <|
+                                String.fromInt <|
+                                    modBy 60 <|
+                                        relativeMillisToPoint fromStart
+                                            // 1000
+                                            // 60
+                        , el [ centerX ] <| useIconWithSize 12 FeatherIcons.chevronDown
+                        ]
                     , text ":"
-                    , text <|
-                        UtilsForViews.withLeadingZeros 2 <|
-                            String.fromInt <|
-                                modBy 60 <|
-                                    relativeMillisToPoint fromStart
-                                        // 1000
+                    , column []
+                        [ el [ centerX ] <| useIconWithSize 12 FeatherIcons.chevronUp
+                        , text <|
+                            UtilsForViews.withLeadingZeros 2 <|
+                                String.fromInt <|
+                                    modBy 60 <|
+                                        relativeMillisToPoint fromStart
+                                            // 1000
+                        , el [ centerX ] <| useIconWithSize 12 FeatherIcons.chevronDown
+                        ]
                     , text "."
-                    , text <|
-                        UtilsForViews.withLeadingZeros 3 <|
-                            String.fromInt <|
-                                modBy 1000 <|
-                                    relativeMillisToPoint fromStart
+                    , column []
+                        [ row []
+                            [ el [ centerX ] <| useIconWithSize 12 FeatherIcons.chevronUp
+                            , el [ centerX ] <| useIconWithSize 12 FeatherIcons.x
+                            ]
+                        , text <|
+                            UtilsForViews.withLeadingZeros 3 <|
+                                String.fromInt <|
+                                    modBy 1000 <|
+                                        relativeMillisToPoint fromStart
+                        , el [ centerX ] <| useIconWithSize 12 FeatherIcons.chevronDown
+                        ]
                     ]
                 ]
 
