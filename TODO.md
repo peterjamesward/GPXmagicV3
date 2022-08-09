@@ -13,11 +13,8 @@
 
 ### New Tool
 
-Use markers to designate a range for a time-wise "nudge" adjustment.
-E.g. after delete, bring remaining track earlier in time (but earlier than previous point).
-Maybe default from Orange to track end.
-(May need option to Shift or Stretch; perhaps by independent setting of two times.)
-(NB These times need to be relative to start time, hence time into video.)
+Just do Orange to end, defer the range option.
+Need to show Orange point current offset from start time.
 
 Option to change (“scale”) the interval to x2, x0.5.
 This will just scale the intervals internally. The Orange and Purple pointers will show time 

@@ -27,11 +27,11 @@ toolId =
 defaultOptions : Options
 defaultOptions =
     { extent = ExtentOrangeToEnd
-    , desiredRangeStartOffset = Time.millisToPosix 0
-    , desiredRangeEndOffset = Time.millisToPosix 0
+    , desiredRangeStartOffsetSeconds = 0
+    , desiredRangeEndOffsetSeconds = 0
     , startMilliseconds = 0
     , endMilliseconds = 0
-    , desiredTickInterval = Time.millisToPosix 0
+    , desiredTickIntervalMillis = 0
     , stretchTimes = False
     , precision = SliderOneSecond
     }
@@ -41,11 +41,11 @@ type Msg
     = Apply
     | SetExtent ExtentOption
     | DisplayInfo String String
-    | SetRangeStartOffset Time.Posix
-    | SetRangeEndOffset Time.Posix
+    | SetRangeStartOffset Int
+    | SetRangeEndOffset Int
     | SetStartMilliseconds Int
     | SetEndMilliseconds Int
-    | SetTickInterval Time.Posix
+    | SetTickInterval Int
     | SetSliderPrecision SliderPrecision
 
 
@@ -141,6 +141,16 @@ actions newOptions previewColour track =
     []
 
 
+timeModuloBy : Int -> Time.Posix -> Time.Posix
+timeModuloBy modulus time =
+    time |> Time.posixToMillis |> modBy modulus |> Time.millisToPosix
+
+
+timeRemainderBy : Int -> Time.Posix -> Time.Posix
+timeRemainderBy modulus time =
+    time |> Time.posixToMillis |> (//) modulus |> (*) modulus |> Time.millisToPosix
+
+
 update :
     Msg
     -> Options
@@ -152,14 +162,20 @@ update msg options previewColour hasTrack =
         ( Just track, SetRangeStartOffset offset ) ->
             let
                 newOptions =
-                    { options | desiredRangeStartOffset = offset }
+                    { options
+                        | desiredRangeStartOffsetSeconds = 0
+                        , startMilliseconds = 0
+                    }
             in
             ( newOptions, actions newOptions previewColour track )
 
         ( Just track, SetRangeEndOffset offset ) ->
             let
                 newOptions =
-                    { options | desiredRangeEndOffset = offset }
+                    { options
+                        | desiredRangeEndOffsetSeconds = 0
+                        , endMilliseconds = 0
+                    }
             in
             ( newOptions, actions newOptions previewColour track )
 
@@ -180,7 +196,7 @@ update msg options previewColour hasTrack =
         ( Just track, SetTickInterval interval ) ->
             let
                 newOptions =
-                    { options | desiredTickInterval = interval }
+                    { options | desiredTickIntervalMillis = interval }
             in
             ( newOptions, actions newOptions previewColour track )
 
@@ -233,23 +249,13 @@ sliderStyles =
     ]
 
 
-effectiveTime precision approximate milliseconds =
+effectiveTime precision seconds milliseconds =
     case precision of
-        SliderMillisecond ->
-            Time.millisToPosix <|
-                (+)
-                    (Time.posixToMillis approximate)
-                    milliseconds
-
-        SliderHalfSecond ->
-            let
-                inMillis =
-                    Time.posixToMillis approximate
-            in
-            Time.millisToPosix <| inMillis - modBy 500 inMillis
+        SliderOneSecond ->
+            Time.millisToPosix <| seconds * 1000
 
         _ ->
-            approximate
+            Time.millisToPosix <| seconds * 1000 + milliseconds
 
 
 view : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
@@ -283,19 +289,6 @@ view location imperial wrapper options mTrack =
                     else
                         [ i18n "ExtentMarkers" ]
 
-        earliestAllowableStartOffset : TrackLoaded msg -> Maybe Time.Posix
-        earliestAllowableStartOffset track =
-            let
-                ( fromStart, fromEnd ) =
-                    markedRegion track
-
-                previousPoint =
-                    DomainModel.earthPointFromIndex
-                        (max 0 (fromStart - 1))
-                        track.trackTree
-            in
-            Utils.subtractTimes (trackStartTime track) previousPoint.time
-
         selectPrecision =
             Input.radioRow [ centerX, spacing 5 ]
                 { onChange = wrapper << SetSliderPrecision
@@ -308,71 +301,68 @@ view location imperial wrapper options mTrack =
                 , label = Input.labelHidden "precision"
                 }
 
-        approximatedTime : Int -> Int
-        approximatedTime time =
-            let
-                modulus =
-                    case options.precision of
-                        SliderMillisecond ->
-                            1
+        timeSlider sliderMsg value =
+            Input.slider sliderStyles
+                { onChange = wrapper << sliderMsg << floor
+                , label = Input.labelHidden "no label"
+                , min = 10
+                , max = 60 * 60 * 1000
+                , step =
+                    Just <|
+                        case options.precision of
+                            SliderOneSecond ->
+                                1000
 
-                        SliderHalfSecond ->
-                            500
+                            SliderHalfSecond ->
+                                500
 
-                        SliderOneSecond ->
-                            1000
-            in
-            time - modBy modulus time
+                            SliderMillisecond ->
+                                -- Use secondary slider for this
+                                1000
+                , value = toFloat value
+                , thumb = Input.defaultThumb
+                }
 
-        timeAdjustments track =
+        millisecondSlider sliderMsg value =
+            Input.slider sliderStyles
+                { onChange = floor >> sliderMsg >> wrapper
+                , label = Input.labelHidden "milliseconds"
+                , min = 0.0
+                , max = 1000
+                , step = Just 1
+                , value = toFloat value
+                , thumb = Input.defaultThumb
+                }
+
+        startTimeAdjustments track =
             column [ centerX, width fill, spacing 4, Border.width 1 ]
                 [ wrappedRow [ spacing 6, padding 3 ]
                     [ i18n "start"
-                    , UtilsForViews.formattedTime <|
-                        Utils.addTimes
-                            (Just <|
-                                effectiveTime
-                                    options.precision
-                                    options.desiredRangeStartOffset
-                                    options.startMilliseconds
-                            )
-                            (earliestAllowableStartOffset track)
+
+                    -- Show current start of range absolute time.
+                    -- Show current start of range relative to start.
+                    -- Show selected new start relative time.
                     ]
-                , el [ centerX ] <|
-                    Input.slider sliderStyles
-                        { onChange = wrapper << SetRangeStartOffset << Time.millisToPosix << round
-                        , label = Input.labelHidden "no label"
-                        , min = 10
-                        , max = 60 * 60 * 1000
-                        , step =
-                            Just <|
-                                case options.precision of
-                                    SliderOneSecond ->
-                                        1000
-
-                                    SliderHalfSecond ->
-                                        500
-
-                                    SliderMillisecond ->
-                                        -- Use secondary slider for this
-                                        1000
-                        , value =
-                            toFloat <|
-                                approximatedTime <|
-                                    Time.posixToMillis options.desiredRangeStartOffset
-                        , thumb = Input.defaultThumb
-                        }
+                , el [ centerX ] <| timeSlider SetRangeStartOffset options.desiredRangeStartOffsetSeconds
                 , if options.precision == SliderMillisecond then
-                    el [ centerX ] <|
-                        Input.slider sliderStyles
-                            { onChange = floor >> SetStartMilliseconds >> wrapper
-                            , label = Input.labelHidden "milliseconds"
-                            , min = 0.0
-                            , max = 1000
-                            , step = Just 1
-                            , value = toFloat options.startMilliseconds
-                            , thumb = Input.defaultThumb
-                            }
+                    el [ centerX ] <| millisecondSlider SetStartMilliseconds options.startMilliseconds
+
+                  else
+                    none
+                ]
+
+        endTimeAdjustments track =
+            column [ centerX, width fill, spacing 4, Border.width 1 ]
+                [ wrappedRow [ spacing 6, padding 3 ]
+                    [ i18n "end"
+
+                    -- Show current end of range absolute time.
+                    -- Show current end of range relative to start.
+                    -- Show selected new end relative time.
+                    ]
+                , el [ centerX ] <| timeSlider SetRangeEndOffset options.desiredRangeEndOffsetSeconds
+                , if options.precision == SliderMillisecond then
+                    el [ centerX ] <| millisecondSlider SetEndMilliseconds options.endMilliseconds
 
                   else
                     none
@@ -396,9 +386,17 @@ view location imperial wrapper options mTrack =
                 , centerX
                 , Background.color FlatColors.ChinesePalette.antiFlashWhite
                 ]
-                [ el [ centerX ] <| extent isTrack
+                [ none
+                , el [ centerX ] <| extent isTrack
                 , selectPrecision
-                , timeAdjustments isTrack
+                , startTimeAdjustments isTrack
+
+                --TODO: "Stretch mode"
+                --, if options.extent == ExtentMarkers then
+                --    endTimeAdjustments isTrack
+                --
+                --  else
+                --    none
                 , equiSpacing isTrack
                 , doubleTimes isTrack
                 , removeTimes isTrack

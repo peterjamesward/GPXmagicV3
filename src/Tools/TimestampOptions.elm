@@ -7,11 +7,11 @@ import Time
 
 type alias Options =
     { extent : ExtentOption
-    , desiredRangeStartOffset : Time.Posix
+    , desiredRangeStartOffsetSeconds : Int
     , startMilliseconds : Int
-    , desiredRangeEndOffset : Time.Posix
+    , desiredRangeEndOffsetSeconds : Int
     , endMilliseconds : Int
-    , desiredTickInterval : Time.Posix
+    , desiredTickIntervalMillis : Int
     , stretchTimes : Bool
     , precision : SliderPrecision
     }

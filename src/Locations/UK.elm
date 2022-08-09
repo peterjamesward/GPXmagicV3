@@ -509,7 +509,8 @@ spacing varies from one section to another.
         , ( "timestamps"
           , Dict.fromList
                 [ ( "label", """Timestamps""" )
-                , ( "ExtentMarkers", """Changes will apply between and including the markers.""" )
+                , ( "ExtentMarkers", """Changes will apply between and including the markers.
+Times beyond the markers will retain their current spacing.""" )
                 , ( "ExtentOrangeToEnd", """Changes will apply from Orange marker to end of track.""" )
                 , ( "spacing", """Spacing: {0}""" )
                 , ( "progressive", """You can either keep the duration of the range constant,
@@ -525,7 +526,8 @@ moving it earlier or later in time, or you can stretch (or shrink) the range to 
                 , ( "half", """Half-second""")
                 , ( "millis", """Millisecond""")
                 , ( "info", """
-Change track point timestamps to match video timings.
+Change track point timestamps to match video timings. Note that editing the track may disrupt
+the timings, though we have tried to preserve this information where possible.
 """ )
                 ]
           )
