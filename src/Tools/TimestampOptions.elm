@@ -2,27 +2,22 @@ module Tools.TimestampOptions exposing (..)
 
 -- Putting these in a separate module means we can use with Action, without an import loop.
 
-import Time
-
 
 type alias Options =
     { extent : ExtentOption
-    , desiredRangeStartOffsetSeconds : Int
-    , startMilliseconds : Int
-    , desiredRangeEndOffsetSeconds : Int
-    , endMilliseconds : Int
+    , startOffsetHours : Int
+    , startOffsetMinutes : Int
+    , startOffsetSeconds : Int
+    , startOffsetMilliseconds : Int
+    , endOffsetHours : Int
+    , endOffsetMinutes : Int
+    , endOffsetSeconds : Int
+    , endOffsetMilliseconds : Int
     , desiredTickIntervalMillis : Int
-    , stretchTimes : Bool
-    , precision : SliderPrecision
+    , endLockedToStart : Bool
     }
 
 
 type ExtentOption
     = ExtentMarkers
     | ExtentOrangeToEnd
-
-
-type SliderPrecision
-    = SliderOneSecond
-    | SliderHalfSecond
-    | SliderMillisecond

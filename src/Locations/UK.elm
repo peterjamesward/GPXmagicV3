@@ -509,8 +509,7 @@ spacing varies from one section to another.
         , ( "timestamps"
           , Dict.fromList
                 [ ( "label", """Timestamps""" )
-                , ( "ExtentMarkers", """Changes will apply between and including the markers.
-Times beyond the markers will retain their current spacing.""" )
+                , ( "ExtentMarkers", """Changes will apply between and including the markers.""" )
                 , ( "ExtentOrangeToEnd", """Changes will apply from Orange marker to end of track.""" )
                 , ( "spacing", """Spacing: {0}""" )
                 , ( "progressive", """You can either keep the duration of the range constant,
