@@ -28,14 +28,7 @@ toolId =
 defaultOptions : Options
 defaultOptions =
     { extent = ExtentOrangeToEnd
-    , startOffsetHours = 0
-    , startOffsetMinutes = 0
-    , startOffsetSeconds = 0
-    , startOffsetMilliseconds = 0
-    , endOffsetHours = 0
-    , endOffsetMinutes = 0
-    , endOffsetSeconds = 0
-    , endOffsetMilliseconds = 0
+    , desiredStartMillis = 0
     , desiredTickIntervalMillis = 1000
     , endLockedToStart = True
     }
@@ -43,9 +36,10 @@ defaultOptions =
 
 type Msg
     = Apply
-    | DisplayInfo String String
+      --| DisplayInfo String String
     | SetTickInterval Int
-    | SetEndMode Bool
+    | TimeChange Int
+    | ClearMilliseconds
 
 
 computeNewPoints : Bool -> Options -> TrackLoaded msg -> List PreviewPoint
@@ -165,6 +159,28 @@ update msg options previewColour hasTrack =
             in
             ( newOptions, actions newOptions previewColour track )
 
+        ( Just track, TimeChange change ) ->
+            let
+                newOptions =
+                    { options
+                        | desiredStartMillis =
+                            options.desiredStartMillis
+                                + change
+                                |> max 0
+                    }
+            in
+            ( newOptions, actions newOptions previewColour track )
+
+        ( Just track, ClearMilliseconds ) ->
+            let
+                newOptions =
+                    { options
+                        | desiredStartMillis =
+                            1000 * (options.desiredStartMillis // 1000)
+                    }
+            in
+            ( newOptions, actions newOptions previewColour track )
+
         ( Just track, Apply ) ->
             let
                 newOptions =
@@ -184,7 +200,7 @@ update msg options previewColour hasTrack =
               ]
             )
 
-        _ ->
+        ( Nothing, _ ) ->
             ( options, [] )
 
 
@@ -215,111 +231,101 @@ viewWithTrack location imperial wrapper options track =
         relativeMillisToPoint pointIndex =
             absoluteMillisToPoint pointIndex - trackStartTime
 
-        ( fromStart, fromEnd ) =
-            case options.extent of
-                ExtentMarkers ->
-                    TrackLoaded.getRangeFromMarkers track
-
-                ExtentOrangeToEnd ->
-                    ( TrackLoaded.getRangeFromMarkers track |> Tuple.first
-                    , 0
-                    )
-
-        endIndex =
-            skipCount track.trackTree - fromEnd
-
-        extent =
-            el [ centerX, width fill ] <|
-                paragraph [ centerX ] <|
-                    case options.extent of
-                        ExtentMarkers ->
-                            [ i18n "ExtentMarkers" ]
-
-                        ExtentOrangeToEnd ->
-                            [ i18n "ExtentOrangeToEnd" ]
-
         startTimeAdjustments =
             --TODO: Use i18n, not text.
-            column [ centerX, width fill, spacing 4, Border.width 1 ]
-                [ row [ spaceEvenly ]
+            column [ centerX, width fill, spacing 4, padding 4, Border.width 1 ]
+                [ row [ alignRight, spacing 10 ]
                     [ i18n "start absolute"
                     , UtilsForViews.formattedTime <|
                         Just <|
                             Time.millisToPosix <|
-                                absoluteMillisToPoint fromStart
+                                absoluteMillisToPoint track.currentPosition
                     ]
-                , row [ spaceEvenly ]
+                , row [ alignRight, spacing 10 ]
                     [ i18n "start relative"
                     , UtilsForViews.formattedTime <|
                         Just <|
                             Time.millisToPosix <|
-                                relativeMillisToPoint fromStart
+                                relativeMillisToPoint track.currentPosition
                     ]
 
                 --TODO: Add time display with up/down widgets for H,M,S,ms.
-                , row [ spaceEvenly ]
+                , row [ alignRight, spacing 4 ]
                     [ i18n "desired start"
                     , column []
-                        [ el [ centerX ] <| useIconWithSize 12 FeatherIcons.chevronUp
-                        , text <| String.fromInt <| relativeMillisToPoint fromStart // 1000 // 60 // 60
-                        , el [ centerX ] <| useIconWithSize 12 FeatherIcons.chevronDown
+                        [ Input.button [ centerX ]
+                            { onPress = Just <| wrapper <| TimeChange 3600000
+                            , label = useIconWithSize 12 FeatherIcons.chevronUp
+                            }
+                        , el [ alignRight ] <|
+                            text <|
+                                String.fromInt <|
+                                    options.desiredStartMillis
+                                        // 1000
+                                        // 60
+                                        // 60
+                        , Input.button [ centerX ]
+                            { onPress = Just <| wrapper <| TimeChange -3600000
+                            , label = useIconWithSize 12 FeatherIcons.chevronDown
+                            }
                         ]
                     , text ":"
                     , column []
-                        [ el [ centerX ] <| useIconWithSize 12 FeatherIcons.chevronUp
+                        [ Input.button [ centerX ]
+                            { onPress = Just <| wrapper <| TimeChange 60000
+                            , label = useIconWithSize 12 FeatherIcons.chevronUp
+                            }
                         , text <|
                             UtilsForViews.withLeadingZeros 2 <|
                                 String.fromInt <|
                                     modBy 60 <|
-                                        relativeMillisToPoint fromStart
+                                        options.desiredStartMillis
                                             // 1000
                                             // 60
-                        , el [ centerX ] <| useIconWithSize 12 FeatherIcons.chevronDown
+                        , Input.button [ centerX ]
+                            { onPress = Just <| wrapper <| TimeChange -60000
+                            , label = useIconWithSize 12 FeatherIcons.chevronDown
+                            }
                         ]
                     , text ":"
                     , column []
-                        [ el [ centerX ] <| useIconWithSize 12 FeatherIcons.chevronUp
+                        [ Input.button [ centerX ]
+                            { onPress = Just <| wrapper <| TimeChange 1000
+                            , label = useIconWithSize 12 FeatherIcons.chevronUp
+                            }
                         , text <|
                             UtilsForViews.withLeadingZeros 2 <|
                                 String.fromInt <|
                                     modBy 60 <|
-                                        relativeMillisToPoint fromStart
+                                        options.desiredStartMillis
                                             // 1000
-                        , el [ centerX ] <| useIconWithSize 12 FeatherIcons.chevronDown
+                        , Input.button [ centerX ]
+                            { onPress = Just <| wrapper <| TimeChange 1000
+                            , label = useIconWithSize 12 FeatherIcons.chevronDown
+                            }
                         ]
                     , text "."
                     , column []
                         [ row []
-                            [ el [ centerX ] <| useIconWithSize 12 FeatherIcons.chevronUp
-                            , el [ centerX ] <| useIconWithSize 12 FeatherIcons.x
+                            [ Input.button [ centerX ]
+                                { onPress = Just <| wrapper <| TimeChange 1
+                                , label = useIconWithSize 12 FeatherIcons.chevronUp
+                                }
+                            , Input.button [ centerX ]
+                                { onPress = Just <| wrapper <| ClearMilliseconds
+                                , label = useIconWithSize 12 FeatherIcons.x
+                                }
                             ]
                         , text <|
                             UtilsForViews.withLeadingZeros 3 <|
                                 String.fromInt <|
                                     modBy 1000 <|
-                                        relativeMillisToPoint fromStart
-                        , el [ centerX ] <| useIconWithSize 12 FeatherIcons.chevronDown
+                                        options.desiredStartMillis
+                        , Input.button [ centerX ]
+                            { onPress = Just <| wrapper <| TimeChange -1
+                            , label = useIconWithSize 12 FeatherIcons.chevronDown
+                            }
                         ]
-                    ]
-                ]
-
-        endTimeAdjustments =
-            column [ centerX, width fill, spacing 4, Border.width 1 ]
-                [ row [ spaceEvenly ]
-                    [ i18n "end absolute"
-                    , UtilsForViews.formattedTime <|
-                        Just <|
-                            Time.millisToPosix <|
-                                absoluteMillisToPoint <|
-                                    endIndex
-                    ]
-                , row [ spaceEvenly ]
-                    [ i18n "end relative"
-                    , UtilsForViews.formattedTime <|
-                        Just <|
-                            Time.millisToPosix <|
-                                relativeMillisToPoint <|
-                                    endIndex
                     ]
                 ]
 
@@ -340,10 +346,7 @@ viewWithTrack location imperial wrapper options track =
         , Background.color FlatColors.ChinesePalette.antiFlashWhite
         ]
         [ none
-        , extent
         , startTimeAdjustments
-
-        --, endTimeAdjustments
         , equiSpacing
         , doubleTimes
         , removeTimes

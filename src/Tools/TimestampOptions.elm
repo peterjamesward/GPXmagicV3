@@ -5,14 +5,7 @@ module Tools.TimestampOptions exposing (..)
 
 type alias Options =
     { extent : ExtentOption
-    , startOffsetHours : Int
-    , startOffsetMinutes : Int
-    , startOffsetSeconds : Int
-    , startOffsetMilliseconds : Int
-    , endOffsetHours : Int
-    , endOffsetMinutes : Int
-    , endOffsetSeconds : Int
-    , endOffsetMilliseconds : Int
+    , desiredStartMillis : Int
     , desiredTickIntervalMillis : Int
     , endLockedToStart : Bool
     }

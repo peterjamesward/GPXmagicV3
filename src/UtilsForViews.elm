@@ -35,7 +35,7 @@ formattedTime isTime =
             in
             Element.text <|
                 String.Interpolate.interpolate
-                    "{0}:{1}:{2}.{3}"
+                    "{0} : {1} : {2} . {3}"
                     [ String.fromInt hours
                     , withLeadingZeros 2 <| String.fromInt minutes
                     , withLeadingZeros 2 <| String.fromInt seconds
