@@ -37,7 +37,7 @@ defaultOptions =
 
 
 type Msg
-    = Apply
+    = ApplyNewTimes
       --| DisplayInfo String String
     | SetTickInterval Int
     | TimeChange Int
@@ -64,36 +64,35 @@ computeNewPoints excludeExisting options track =
 apply : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
 apply options track =
     let
-        ( fromStart, fromEnd ) =
-            case options.extent of
-                ExtentMarkers ->
-                    TrackLoaded.getRangeFromMarkers track
+        orangeOffsetMillis =
+            relativeMillisToPoint track.currentPosition track
 
-                ExtentOrangeToEnd ->
-                    ( TrackLoaded.getRangeFromMarkers track |> Tuple.first
-                    , 0
-                    )
+        requiredAdjustment =
+            Just <| Time.millisToPosix <| options.desiredStartMillis - orangeOffsetMillis
+
+        adjustedPoint gpx =
+            { gpx | timestamp = Utils.addTimes gpx.timestamp requiredAdjustment }
 
         newCourse =
-            computeNewPoints False options track
-                |> List.map .gpx
+            List.map adjustedPoint oldPoints
 
         newTree =
             DomainModel.replaceRange
-                fromStart
-                (fromEnd + 1)
+                track.currentPosition
+                0
                 track.referenceLonLat
                 newCourse
                 track.trackTree
 
         oldPoints =
-            DomainModel.extractPointsInRange
-                fromStart
-                fromEnd
-                track.trackTree
+            List.map Tuple.second <|
+                DomainModel.extractPointsInRange
+                    track.currentPosition
+                    0
+                    track.trackTree
     in
     ( newTree
-    , oldPoints |> List.map Tuple.second
+    , oldPoints
     )
 
 
@@ -181,21 +180,9 @@ update msg options previewColour hasTrack =
             in
             ( newOptions, actions newOptions previewColour track )
 
-        ( Just track, Apply ) ->
-            let
-                newOptions =
-                    { options
-                        | extent =
-                            case track.markerPosition of
-                                Just purple ->
-                                    ExtentMarkers
-
-                                Nothing ->
-                                    ExtentOrangeToEnd
-                    }
-            in
-            ( newOptions
-            , [ Actions.AdjustTimes
+        ( Just track, ApplyNewTimes ) ->
+            ( options
+            , [ Actions.AdjustTimes options
               , TrackHasChanged
               ]
             )
@@ -317,7 +304,7 @@ viewWithTrack location imperial wrapper options track =
                     , column [ Border.width 1, Border.color FlatColors.AmericanPalette.soothingBreeze ]
                         [ row []
                             [ Input.button [ centerX ]
-                                { onPress = Just <| wrapper <| TimeChange 1
+                                { onPress = Just <| wrapper <| TimeChange 10
                                 , label = useIconWithSize 12 FeatherIcons.chevronUp
                                 }
                             , Input.button [ centerX ]
@@ -331,7 +318,7 @@ viewWithTrack location imperial wrapper options track =
                                     modBy 1000 <|
                                         options.desiredStartMillis
                         , Input.button [ centerX ]
-                            { onPress = Just <| wrapper <| TimeChange -1
+                            { onPress = Just <| wrapper <| TimeChange -10
                             , label = useIconWithSize 12 FeatherIcons.chevronDown
                             }
                         ]
@@ -344,7 +331,12 @@ viewWithTrack location imperial wrapper options track =
                         [ i18n "tooEarly" ]
 
                   else
-                    paragraph [ width fill ] [ i18n "ok" ]
+                    column [ width fill ]
+                        [ Input.button neatToolsBorder
+                            { onPress = Just (wrapper ApplyNewTimes)
+                            , label = paragraph [] [ i18n "ok" ]
+                            }
+                        ]
                 ]
 
         equiSpacing =

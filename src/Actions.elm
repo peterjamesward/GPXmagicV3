@@ -27,6 +27,7 @@ import Tools.SmartSmootherOptions
 import Tools.StartFinishTypes
 import Tools.StravaOptions
 import Tools.StravaTypes exposing (StravaRoute, StravaSegment, StravaSegmentStreams)
+import Tools.TimestampOptions
 
 
 type ToolAction msg
@@ -107,7 +108,7 @@ type ToolAction msg
     | MakeRouteFromGraph
     | CombineNearbyPoints
     | WidenBend (List Int) (Quantity Float Meters)
-    | AdjustTimes
+    | AdjustTimes Tools.TimestampOptions.Options
     | SetTimeTicks
     | TimeDoubling
     | RemoveTimes
@@ -212,7 +213,7 @@ actionTextForUndo location action =
             CombineNearbyPoints ->
                 "combine"
 
-            AdjustTimes ->
+            AdjustTimes _ ->
                 "adjusttimes"
 
             SetTimeTicks ->

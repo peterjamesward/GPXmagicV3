@@ -78,6 +78,7 @@ import Tools.StartFinish
 import Tools.Straightener
 import Tools.StravaDataLoad
 import Tools.StravaTools
+import Tools.Timestamp
 import Tools.TrackInfoBox
 import ToolsController exposing (ToolEntry, encodeColour, encodeToolState)
 import TrackLoaded exposing (TrackLoaded, indexLeaves)
@@ -1993,6 +1994,21 @@ performActionsOnModel actions model =
                         | track = Just newTrack
                         , needsRendering = True
                     }
+
+                ( AdjustTimes options, Just track ) ->
+                    let
+                        ( newTree, oldPoints ) =
+                            Tools.Timestamp.apply options track
+
+                        newTrack =
+                            track
+                                |> TrackLoaded.addToUndoStack action
+                                    0
+                                    0
+                                    oldPoints
+                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                    in
+                    { foldedModel | track = Just newTrack }
 
                 ( CloseLoopWithOptions options, Just track ) ->
                     let

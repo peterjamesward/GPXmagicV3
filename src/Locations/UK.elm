@@ -528,7 +528,7 @@ moving it earlier or later in time, or you can stretch (or shrink) the range to 
                 , ( "second", """Seconds""")
                 , ( "half", """Half-second""")
                 , ( "millis", """Millisecond""")
-                , ( "ok", """Change the time at Orange and all subsequent points.""")
+                , ( "ok", """Change the time at Orange and all subsequent points by the same amount.""")
                 , ( "tooEarly", """Must be later than the previous point.""")
                 , ( "info", """
 Change track point timestamps to match video timings. Note that editing the track may disrupt
