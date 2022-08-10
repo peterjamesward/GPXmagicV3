@@ -248,7 +248,7 @@ viewWithTrack location imperial wrapper options track =
             relativeMillisToPoint (track.currentPosition - 1) track
 
         startTimeAdjustments =
-            column [ alignLeft, width fill, spacing 4, padding 4, Border.width 1 ]
+            column [ centerX, width fill, spacing 4, padding 4, Border.width 1 ]
                 [ row [ alignRight, spacing 10 ]
                     [ i18n "start absolute"
                     , UtilsForViews.formattedTime orangeMillis
@@ -359,7 +359,7 @@ viewWithTrack location imperial wrapper options track =
     column
         [ padding 5
         , spacing 5
-        , width fill
+        , width <| px 250
         , centerX
         , Background.color FlatColors.ChinesePalette.antiFlashWhite
         ]
