@@ -1,13 +1,15 @@
 module Tools.Timestamp exposing (..)
 
 import Actions exposing (ToolAction(..))
-import ColourPalette
+import ColourPalette exposing (warningColor)
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Input as Input exposing (button)
 import FeatherIcons
+import FlatColors.AmericanPalette
+import FlatColors.BritishPalette
 import FlatColors.ChinesePalette
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity
@@ -107,13 +109,8 @@ toolStateChange opened colour options track =
             let
                 newOptions =
                     { options
-                        | extent =
-                            case theTrack.markerPosition of
-                                Just purple ->
-                                    ExtentMarkers
-
-                                Nothing ->
-                                    ExtentOrangeToEnd
+                        | extent = ExtentOrangeToEnd
+                        , desiredStartMillis = relativeMillisToPoint theTrack.currentPosition theTrack
                     }
             in
             ( newOptions, actions newOptions colour theTrack )
@@ -161,12 +158,15 @@ update msg options previewColour hasTrack =
 
         ( Just track, TimeChange change ) ->
             let
+                previousPointOffsetMillis =
+                    relativeMillisToPoint (track.currentPosition - 1) track
+
                 newOptions =
                     { options
                         | desiredStartMillis =
                             options.desiredStartMillis
                                 + change
-                                |> max 0
+                                |> max previousPointOffsetMillis
                     }
             in
             ( newOptions, actions newOptions previewColour track )
@@ -204,6 +204,24 @@ update msg options previewColour hasTrack =
             ( options, [] )
 
 
+absoluteMillisToPoint : Int -> TrackLoaded msg -> Int
+absoluteMillisToPoint pointIndex track =
+    DomainModel.earthPointFromIndex pointIndex track.trackTree
+        |> .time
+        |> Maybe.map Time.posixToMillis
+        |> Maybe.withDefault 0
+
+
+relativeMillisToPoint : Int -> TrackLoaded msg -> Int
+relativeMillisToPoint pointIndex track =
+    absoluteMillisToPoint pointIndex track - trackStartTime track
+
+
+trackStartTime : TrackLoaded msg -> Int
+trackStartTime track =
+    absoluteMillisToPoint 0 track
+
+
 viewWithTrack :
     I18NOptions.Location
     -> Bool
@@ -216,43 +234,34 @@ viewWithTrack location imperial wrapper options track =
         i18n =
             I18N.text location toolId
 
-        absoluteMillisToPoint : Int -> Int
-        absoluteMillisToPoint pointIndex =
-            DomainModel.earthPointFromIndex pointIndex track.trackTree
-                |> .time
-                |> Maybe.map Time.posixToMillis
-                |> Maybe.withDefault 0
+        orangeMillis =
+            Just <|
+                Time.millisToPosix <|
+                    absoluteMillisToPoint track.currentPosition track
 
-        trackStartTime : Int
-        trackStartTime =
-            absoluteMillisToPoint 0
+        orangeOffsetMillis =
+            Just <|
+                Time.millisToPosix <|
+                    relativeMillisToPoint track.currentPosition track
 
-        relativeMillisToPoint : Int -> Int
-        relativeMillisToPoint pointIndex =
-            absoluteMillisToPoint pointIndex - trackStartTime
+        previousPointOffsetMillis =
+            relativeMillisToPoint (track.currentPosition - 1) track
 
         startTimeAdjustments =
-            --TODO: Use i18n, not text.
-            column [ centerX, width fill, spacing 4, padding 4, Border.width 1 ]
+            column [ alignLeft, width fill, spacing 4, padding 4, Border.width 1 ]
                 [ row [ alignRight, spacing 10 ]
                     [ i18n "start absolute"
-                    , UtilsForViews.formattedTime <|
-                        Just <|
-                            Time.millisToPosix <|
-                                absoluteMillisToPoint track.currentPosition
+                    , UtilsForViews.formattedTime orangeMillis
                     ]
                 , row [ alignRight, spacing 10 ]
                     [ i18n "start relative"
-                    , UtilsForViews.formattedTime <|
-                        Just <|
-                            Time.millisToPosix <|
-                                relativeMillisToPoint track.currentPosition
+                    , UtilsForViews.formattedTime orangeOffsetMillis
                     ]
 
-                --TODO: Add time display with up/down widgets for H,M,S,ms.
+                --DONE: Add time display with up/down widgets for H,M,S,ms.
                 , row [ alignRight, spacing 4 ]
                     [ i18n "desired start"
-                    , column []
+                    , column [ Border.width 1, Border.color FlatColors.AmericanPalette.soothingBreeze ]
                         [ Input.button [ centerX ]
                             { onPress = Just <| wrapper <| TimeChange 3600000
                             , label = useIconWithSize 12 FeatherIcons.chevronUp
@@ -270,7 +279,7 @@ viewWithTrack location imperial wrapper options track =
                             }
                         ]
                     , text ":"
-                    , column []
+                    , column [ Border.width 1, Border.color FlatColors.AmericanPalette.soothingBreeze ]
                         [ Input.button [ centerX ]
                             { onPress = Just <| wrapper <| TimeChange 60000
                             , label = useIconWithSize 12 FeatherIcons.chevronUp
@@ -288,7 +297,7 @@ viewWithTrack location imperial wrapper options track =
                             }
                         ]
                     , text ":"
-                    , column []
+                    , column [ Border.width 1, Border.color FlatColors.AmericanPalette.soothingBreeze ]
                         [ Input.button [ centerX ]
                             { onPress = Just <| wrapper <| TimeChange 1000
                             , label = useIconWithSize 12 FeatherIcons.chevronUp
@@ -300,12 +309,12 @@ viewWithTrack location imperial wrapper options track =
                                         options.desiredStartMillis
                                             // 1000
                         , Input.button [ centerX ]
-                            { onPress = Just <| wrapper <| TimeChange 1000
+                            { onPress = Just <| wrapper <| TimeChange -1000
                             , label = useIconWithSize 12 FeatherIcons.chevronDown
                             }
                         ]
                     , text "."
-                    , column []
+                    , column [ Border.width 1, Border.color FlatColors.AmericanPalette.soothingBreeze ]
                         [ row []
                             [ Input.button [ centerX ]
                                 { onPress = Just <| wrapper <| TimeChange 1
@@ -327,6 +336,15 @@ viewWithTrack location imperial wrapper options track =
                             }
                         ]
                     ]
+                , if options.desiredStartMillis == previousPointOffsetMillis then
+                    paragraph
+                        [ Background.color warningColor
+                        , width fill
+                        ]
+                        [ i18n "tooEarly" ]
+
+                  else
+                    paragraph [ width fill ] [ i18n "ok" ]
                 ]
 
         equiSpacing =

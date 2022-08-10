@@ -519,8 +519,8 @@ moving it earlier or later in time, or you can stretch (or shrink) the range to 
                 , ( "double", """Halve playback speed""")
                 , ( "physics", """Estimate timings""")
                 , ( "uniform", """Replace track points with points at regular time intervals""")
-                , ( "start absolute", """Recorded time: """)
-                , ( "end absolute", """Recorded time at end of range: """)
+                , ( "start absolute", """Clock time: """)
+                , ( "end absolute", """Clock time at end of range: """)
                 , ( "start relative", """Ride time: """)
                 , ( "end relative", """Ride time at end of range: """)
                 , ( "desired start", """New ride time: """)
@@ -528,6 +528,8 @@ moving it earlier or later in time, or you can stretch (or shrink) the range to 
                 , ( "second", """Seconds""")
                 , ( "half", """Half-second""")
                 , ( "millis", """Millisecond""")
+                , ( "ok", """Time is valid.""")
+                , ( "tooEarly", """Must be later than the previous point.""")
                 , ( "info", """
 Change track point timestamps to match video timings. Note that editing the track may disrupt
 the timings, though we have tried to preserve this information where possible.
