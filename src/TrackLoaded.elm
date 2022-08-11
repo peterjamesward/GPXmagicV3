@@ -287,6 +287,7 @@ undoLastAction track =
                         , trackTree = isTree
                         , currentPosition = undo.currentPosition
                         , markerPosition = undo.markerPosition
+                        , leafIndex = indexLeaves isTree
                     }
 
                 Nothing ->

@@ -11,23 +11,16 @@
 > this would open up the user base to all the Kinomap video makers and would make
 > GPX Magic a one-stop shop for GPX video synchronisation.
 
-**Initially:**
+**WIP**
 
-Start by doing "start to track end" only.
-Start with no stretch option.
-
-Option to change (“scale”) the interval to x2.
-This will just scale the intervals internally. The Orange and Purple pointers will show time 
-when available. Purpose is to allow videos to run at half-speed (e.g. car recorded).
+Time shifting now broke after equi-times.
 
 **Later:** 
 
-Option to replace all points with points spaced every 1.0 (or 0.5) seconds.
-(This would be by interpolation timewise in DomainModel, like `estimateTimeAtDistance`)
-
-Might allow adding timestamps to an **untimed** GPX based on track length and average speed.
-Or even a very simple physics model, because it's there.
+Might allow adding timestamps to an **untimed** GPX with simple physics model, because it's there.
 (Removal of recorded times is an obvious symmetry.)
+
+Time stretching instead of just shuffle.
 
 ---
 
