@@ -11,6 +11,7 @@ import FeatherIcons
 import FlatColors.AmericanPalette
 import FlatColors.BritishPalette
 import FlatColors.ChinesePalette
+import Point3d
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity
 import Time
@@ -133,47 +134,82 @@ applyDoubling track =
 
 applyTicks : Int -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
 applyTicks tickSpacing track =
-    --TODO: Map over all the times, interpolating the model as we go. It's that easy.
     let
-        startTimeAbsolute =
+        routeStartTime =
             DomainModel.earthPointFromIndex 0 track.trackTree
                 |> .time
+                |> Maybe.map (\t -> (Time.posixToMillis t // 1000) * 1000)
+                |> Maybe.withDefault 0
 
-        lastCurrentTime =
-            DomainModel.getLastLeaf track.trackTree
-                |> .endPoint
-                |> .time
+        ( _, newCourse ) =
+            DomainModel.foldOverRoute
+                emitTicks
+                track.trackTree
+                ( routeStartTime
+                , []
+                )
 
-        newCourse baselineStart baselineEnd =
-            let
-                howManyTicks =
-                    (baselineEnd - baselineStart) // tickSpacing
+        emitTicks : RoadSection -> ( Int, List GPXSource ) -> ( Int, List GPXSource )
+        emitTicks road ( nextTick, reversedOutputs ) =
+            case ( road.startPoint.time, road.endPoint.time ) of
+                ( Just start, Just end ) ->
+                    if nextTick < Time.posixToMillis end then
+                        let
+                            _ =
+                                Debug.log "IN" nextTick
+                        in
+                        -- At least one (more) tick in this road section
+                        emitTicks
+                            road
+                            ( nextTick + tickSpacing
+                            , interpolateAtTime nextTick road :: reversedOutputs
+                            )
 
-                ticks =
-                    List.range 0 howManyTicks
+                    else
+                        let
+                            _ =
+                                Debug.log "OUT" nextTick
+                        in
+                        -- No (more) ticks in this road section
+                        ( nextTick, reversedOutputs )
 
-                pointByTickNumber tick =
-                    DomainModel.interpolateGpxByTime
-                        track.trackTree
-                        (Time.millisToPosix <| tick * tickSpacing)
-            in
-            List.map pointByTickNumber ticks
+                _ ->
+                    ( 0, [] )
 
-        newTree baselineStart baselineEnd =
-            DomainModel.treeFromSourcePoints <|
-                newCourse baselineStart baselineEnd
+        interpolateAtTime : Int -> RoadSection -> GPXSource
+        interpolateAtTime tick road =
+            case ( road.transitTime, road.startPoint.time ) of
+                ( Just transit, Just start ) ->
+                    let
+                        numerator =
+                            tick - Time.posixToMillis start
+
+                        denominator =
+                            Time.posixToMillis transit
+
+                        proportion =
+                            toFloat numerator / toFloat denominator
+                    in
+                    DomainModel.gpxFromPointWithReference
+                        track.referenceLonLat
+                        { time = Just <| Time.millisToPosix tick
+                        , space =
+                            Point3d.interpolateFrom
+                                road.startPoint.space
+                                road.endPoint.space
+                                proportion
+                        }
+
+                _ ->
+                    Tuple.first road.sourceData
+
+        newTree =
+            DomainModel.treeFromSourcePoints <| List.reverse newCourse
 
         oldPoints =
             DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
     in
-    case ( startTimeAbsolute, lastCurrentTime ) of
-        ( Just baselineStart, Just baselineEnd ) ->
-            ( newTree (Time.posixToMillis baselineStart) (Time.posixToMillis baselineEnd)
-            , oldPoints
-            )
-
-        _ ->
-            ( Nothing, [] )
+    ( newTree, oldPoints )
 
 
 toolStateChange :
