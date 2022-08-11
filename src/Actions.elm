@@ -220,7 +220,7 @@ actionTextForUndo location action =
                 "settimeticks"
 
             TimeDoubling ->
-                "timedoubling"
+                "double"
 
             RemoveTimes ->
                 "removetimes"

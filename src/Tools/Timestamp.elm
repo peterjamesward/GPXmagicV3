@@ -42,6 +42,7 @@ type Msg
     | SetTickInterval Int
     | TimeChange Int
     | ClearMilliseconds
+    | DoubleRelativeTimes
 
 
 computeNewPoints : Bool -> Options -> TrackLoaded msg -> List PreviewPoint
@@ -94,6 +95,39 @@ apply options track =
     ( newTree
     , oldPoints
     )
+
+
+applyDoubling : TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyDoubling track =
+    let
+        startTimeAbsolute =
+            DomainModel.earthPointFromIndex 0 track.trackTree
+                |> .time
+
+        adjustedPoint gpx =
+            let
+                relative =
+                    Utils.subtractTimes startTimeAbsolute gpx.timestamp
+            in
+            { gpx | timestamp = Utils.addTimes gpx.timestamp relative }
+
+        newCourse =
+            List.map adjustedPoint oldPoints
+
+        newTree =
+            DomainModel.treeFromSourcePoints newCourse
+
+        oldPoints =
+            DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
+    in
+    case startTimeAbsolute of
+        Just baseline ->
+            ( newTree
+            , oldPoints
+            )
+
+        Nothing ->
+            ( Nothing, [] )
 
 
 toolStateChange :
@@ -183,6 +217,13 @@ update msg options previewColour hasTrack =
         ( Just track, ApplyNewTimes ) ->
             ( options
             , [ Actions.AdjustTimes options
+              , TrackHasChanged
+              ]
+            )
+
+        ( Just track, DoubleRelativeTimes ) ->
+            ( options
+            , [ Actions.TimeDoubling
               , TrackHasChanged
               ]
             )
@@ -323,7 +364,14 @@ viewWithTrack location imperial wrapper options track =
                             }
                         ]
                     ]
-                , if options.desiredStartMillis == previousPointOffsetMillis then
+                , if  track.currentPosition == 0 then
+                    paragraph
+                        [ Background.color warningColor
+                        , width fill
+                        ]
+                        [ i18n "atStart" ]
+
+                  else if options.desiredStartMillis == previousPointOffsetMillis then
                     paragraph
                         [ Background.color warningColor
                         , width fill
@@ -343,7 +391,13 @@ viewWithTrack location imperial wrapper options track =
             none
 
         doubleTimes =
-            none
+            column [ centerX, width fill, spacing 4, padding 4, Border.width 1 ]
+                [ paragraph [ width fill ] [ i18n "doubling" ]
+                , Input.button neatToolsBorder
+                    { onPress = Just (wrapper DoubleRelativeTimes)
+                    , label = paragraph [] [ i18n "double" ]
+                    }
+                ]
 
         removeTimes =
             none
@@ -351,7 +405,7 @@ viewWithTrack location imperial wrapper options track =
     column
         [ padding 5
         , spacing 5
-        , width <| px 250
+        , width <| px 300
         , centerX
         , Background.color FlatColors.ChinesePalette.antiFlashWhite
         ]

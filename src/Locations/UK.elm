@@ -451,6 +451,7 @@ Also, access a quick description of what the tool does and how (and when) to use
                 , ( "unknown", """(what was that?)""" )
                 , ( "combine", """combine nearby points""" )
                 , ( "adjusttimes", """adjust timings""")
+                , ( "double", "double relative times")
                 ]
           )
         , ( "essentials"
@@ -516,20 +517,24 @@ spacing varies from one section to another.
 moving it earlier or later in time, or you can stretch (or shrink) the range to match two timing points.""")
                 , ( "apply", """Apply time changes""")
                 , ( "remove", """Remove all timings""")
-                , ( "double", """Halve playback speed""")
+                , ( "double", """Double all time intervals""")
+                , ( "doubling", """You may want to slow a 60fps video, perhaps because it was
+recorded in a car. Doubling all the time intervals is a way of saying "half speed".
+""")
                 , ( "physics", """Estimate timings""")
                 , ( "uniform", """Replace track points with points at regular time intervals""")
-                , ( "start absolute", """Clock time: """)
+                , ( "start absolute", """Clock time at Orange: """)
                 , ( "end absolute", """Clock time at end of range: """)
-                , ( "start relative", """Ride time: """)
+                , ( "start relative", """Ride time to Orange: """)
                 , ( "end relative", """Ride time at end of range: """)
-                , ( "desired start", """New ride time: """)
+                , ( "desired start", """New ride time at Orange: """)
                 , ( "desired end", """New ride time at end of range: """)
                 , ( "second", """Seconds""")
                 , ( "half", """Half-second""")
                 , ( "millis", """Millisecond""")
                 , ( "ok", """Change the time at Orange and all subsequent points by the same amount.""")
                 , ( "tooEarly", """Must be later than the previous point.""")
+                , ( "atStart", """Can't change first point time, please move marker.""")
                 , ( "info", """
 Change track point timestamps to match video timings. Note that editing the track may disrupt
 the timings, though we have tried to preserve this information where possible.
