@@ -132,29 +132,47 @@ applyDoubling track =
 
 
 applyTicks : Int -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
-applyTicks tick track =
+applyTicks tickSpacing track =
     --TODO: Map over all the times, interpolating the model as we go. It's that easy.
     let
         startTimeAbsolute =
             DomainModel.earthPointFromIndex 0 track.trackTree
                 |> .time
 
-        newCourse =
-            []
+        lastCurrentTime =
+            DomainModel.getLastLeaf track.trackTree
+                |> .endPoint
+                |> .time
 
-        newTree =
-            DomainModel.treeFromSourcePoints newCourse
+        newCourse baselineStart baselineEnd =
+            let
+                howManyTicks =
+                    (baselineEnd - baselineStart) // tickSpacing
+
+                ticks =
+                    List.range 0 howManyTicks
+
+                pointByTickNumber tick =
+                    DomainModel.interpolateGpxByTime
+                        track.trackTree
+                        (Time.millisToPosix <| tick * tickSpacing)
+            in
+            List.map pointByTickNumber ticks
+
+        newTree baselineStart baselineEnd =
+            DomainModel.treeFromSourcePoints <|
+                newCourse baselineStart baselineEnd
 
         oldPoints =
             DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
     in
-    case startTimeAbsolute of
-        Just baseline ->
-            ( newTree
+    case ( startTimeAbsolute, lastCurrentTime ) of
+        ( Just baselineStart, Just baselineEnd ) ->
+            ( newTree (Time.posixToMillis baselineStart) (Time.posixToMillis baselineEnd)
             , oldPoints
             )
 
-        Nothing ->
+        _ ->
             ( Nothing, [] )
 
 

@@ -29,6 +29,7 @@ module DomainModel exposing
     , indexFromDistanceRoundedDown
     , indexFromDistanceRoundedUp
     , insertPointsIntoLeaf
+    , interpolateGpxByTime
     , interpolateTrack
     , leafFromIndex
     , lngLatPair
@@ -889,10 +890,61 @@ estimateTimeAtDistance distance tree =
         leaf.endPoint.time
 
 
-interpolateAtTime : Time.Posix -> PeteTree -> EarthPoint
-interpolateAtTime time tree =
-    --TODO. Find leaf using transit times, interpolate the leaf.
-    earthPointFromIndex 0 tree
+indexFromTime : Maybe Time.Posix -> PeteTree -> Int
+indexFromTime relativeTime treeNode =
+    case treeNode of
+        Leaf info ->
+            if relativeTime |> Utils.timeLessThanOrEqualTo info.transitTime then
+                0
+
+            else
+                1
+
+        Node info ->
+            let
+                leftAsRecord =
+                    asRecord info.left
+            in
+            if relativeTime |> Utils.timeLessThanOrEqualTo leftAsRecord.transitTime then
+                indexFromTime relativeTime info.left
+
+            else
+                skipCount info.left
+                    + indexFromTime
+                        (relativeTime |> Utils.subtractTimes leftAsRecord.transitTime)
+                        info.right
+
+
+interpolateGpxByTime : PeteTree -> Time.Posix -> GPXSource
+interpolateGpxByTime tree relativeTime =
+    --Find leaf using transit times, interpolate the leaf. If no times, should not be used.
+    let
+        bestLeafIndex =
+            indexFromTime (Just relativeTime) tree
+
+        bestLeaf =
+            asRecord <| leafFromIndex bestLeafIndex tree
+
+        timeIntoLeaf =
+            Utils.subtractTimes bestLeaf.startPoint.time (Just relativeTime)
+
+        proportion =
+            case ( bestLeaf.transitTime, timeIntoLeaf ) of
+                ( Just transitTime, Just leafTime ) ->
+                    (toFloat <| Time.posixToMillis leafTime) / (toFloat <| Time.posixToMillis transitTime)
+
+                _ ->
+                    0
+
+        ( gpxStart, gpxEnd ) =
+            bestLeaf.sourceData
+    in
+    --TODO: Should be OK to do this.
+    { longitude = Utils.interpolateLongitude proportion gpxStart.longitude gpxEnd.longitude
+    , latitude = Utils.interpolateLatitude proportion gpxStart.latitude gpxEnd.latitude
+    , altitude = Utils.interpolateAltitude proportion gpxStart.altitude gpxEnd.altitude
+    , timestamp = Utils.interpolateTimes proportion gpxStart.timestamp gpxEnd.timestamp
+    }
 
 
 interpolateTrack : Length.Length -> PeteTree -> ( Int, EarthPoint )

@@ -1,6 +1,11 @@
 module Utils exposing (..)
 
+import Angle exposing (Angle)
+import Direction2d exposing (Direction2d)
 import Http exposing (Error(..))
+import Length exposing (Meters)
+import LocalCoords exposing (LocalCoords)
+import Quantity exposing (Quantity)
 import Time
 
 
@@ -44,6 +49,28 @@ interpolateTimes proportion fromTime toTime =
             Nothing
 
 
+interpolateLongitude : Float -> Direction2d LocalCoords -> Direction2d LocalCoords -> Direction2d LocalCoords
+interpolateLongitude proportion directionA directionB =
+    let
+        netTurn =
+            directionB |> Direction2d.angleFrom directionA
+
+        newTurn =
+            netTurn |> Quantity.multiplyBy proportion
+    in
+    directionA |> Direction2d.rotateBy newTurn
+
+
+interpolateLatitude : Float -> Angle -> Angle -> Angle
+interpolateLatitude proportion directionA directionB =
+    Quantity.interpolateFrom directionA directionB proportion
+
+
+interpolateAltitude : Float -> Quantity Float Meters -> Quantity Float Meters -> Quantity Float Meters
+interpolateAltitude proportion altA altB =
+    Quantity.interpolateFrom altA altB proportion
+
+
 addTimes : Maybe Time.Posix -> Maybe Time.Posix -> Maybe Time.Posix
 addTimes time1 time2 =
     case ( time1, time2 ) of
@@ -62,6 +89,16 @@ subtractTimes startTime endTime =
 
         _ ->
             Nothing
+
+
+timeLessThanOrEqualTo : Maybe Time.Posix -> Maybe Time.Posix -> Bool
+timeLessThanOrEqualTo baseline sample =
+    case ( baseline, sample ) of
+        ( Just isBaseline, Just isSample ) ->
+            Time.posixToMillis isSample <= Time.posixToMillis isBaseline
+
+        _ ->
+            True
 
 
 reversingCons : List a -> List a -> List a
