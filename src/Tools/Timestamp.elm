@@ -43,6 +43,7 @@ type Msg
     | TimeChange Int
     | ClearMilliseconds
     | DoubleRelativeTimes
+    | ApplyTickInterval Int
 
 
 computeNewPoints : Bool -> Options -> TrackLoaded msg -> List PreviewPoint
@@ -113,6 +114,33 @@ applyDoubling track =
 
         newCourse =
             List.map adjustedPoint oldPoints
+
+        newTree =
+            DomainModel.treeFromSourcePoints newCourse
+
+        oldPoints =
+            DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
+    in
+    case startTimeAbsolute of
+        Just baseline ->
+            ( newTree
+            , oldPoints
+            )
+
+        Nothing ->
+            ( Nothing, [] )
+
+
+applyTicks : Int -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyTicks tick track =
+    --TODO: Map over all the times, interpolating the model as we go. It's that easy.
+    let
+        startTimeAbsolute =
+            DomainModel.earthPointFromIndex 0 track.trackTree
+                |> .time
+
+        newCourse =
+            []
 
         newTree =
             DomainModel.treeFromSourcePoints newCourse
@@ -217,6 +245,13 @@ update msg options previewColour hasTrack =
         ( Just track, ApplyNewTimes ) ->
             ( options
             , [ Actions.AdjustTimes options
+              , TrackHasChanged
+              ]
+            )
+
+        ( Just track, ApplyTickInterval tick ) ->
+            ( options
+            , [ Actions.SetTimeTicks tick
               , TrackHasChanged
               ]
             )
@@ -364,7 +399,7 @@ viewWithTrack location imperial wrapper options track =
                             }
                         ]
                     ]
-                , if  track.currentPosition == 0 then
+                , if track.currentPosition == 0 then
                     paragraph
                         [ Background.color warningColor
                         , width fill
@@ -379,21 +414,36 @@ viewWithTrack location imperial wrapper options track =
                         [ i18n "tooEarly" ]
 
                   else
-                    column [ width fill ]
-                        [ Input.button neatToolsBorder
-                            { onPress = Just (wrapper ApplyNewTimes)
-                            , label = paragraph [] [ i18n "ok" ]
-                            }
-                        ]
+                    Input.button (centerX :: neatToolsBorder)
+                        { onPress = Just <| wrapper <| ApplyNewTimes
+                        , label = paragraph [] [ i18n "apply" ]
+                        }
                 ]
 
         equiSpacing =
-            none
+            column [ centerX, width fill, spacing 4, padding 4, Border.width 1 ]
+                [ paragraph [] [ i18n "uniform" ]
+                , el [ centerX, width fill ] <|
+                    Input.radioRow [ spacing 8, width fill, centerX ]
+                        { onChange = wrapper << SetTickInterval
+                        , options =
+                            [ Input.option 500 (i18n "half")
+                            , Input.option 1000 (i18n "second")
+                            , Input.option 5000 (i18n "five")
+                            ]
+                        , selected = Just options.desiredTickIntervalMillis
+                        , label = Input.labelHidden "tick"
+                        }
+                , Input.button (centerX :: neatToolsBorder)
+                    { onPress = Just <| wrapper <| ApplyTickInterval options.desiredTickIntervalMillis
+                    , label = paragraph [] [ i18n "usetick" ]
+                    }
+                ]
 
         doubleTimes =
             column [ centerX, width fill, spacing 4, padding 4, Border.width 1 ]
                 [ paragraph [ width fill ] [ i18n "doubling" ]
-                , Input.button neatToolsBorder
+                , Input.button (centerX :: neatToolsBorder)
                     { onPress = Just (wrapper DoubleRelativeTimes)
                     , label = paragraph [] [ i18n "double" ]
                     }

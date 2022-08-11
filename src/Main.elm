@@ -2025,6 +2025,21 @@ performActionsOnModel actions model =
                     in
                     { foldedModel | track = Just newTrack }
 
+                ( SetTimeTicks ticks, Just track ) ->
+                    let
+                        ( newTree, oldPoints ) =
+                            Tools.Timestamp.applyTicks ticks track
+
+                        newTrack =
+                            track
+                                |> TrackLoaded.addToUndoStack action
+                                    0
+                                    0
+                                    oldPoints
+                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                    in
+                    { foldedModel | track = Just newTrack }
+
                 ( CloseLoopWithOptions options, Just track ) ->
                     let
                         ( newTree, oldPoints ) =

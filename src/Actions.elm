@@ -109,7 +109,7 @@ type ToolAction msg
     | CombineNearbyPoints
     | WidenBend (List Int) (Quantity Float Meters)
     | AdjustTimes Tools.TimestampOptions.Options
-    | SetTimeTicks
+    | SetTimeTicks Int
     | TimeDoubling
     | RemoveTimes
     | EstimateTimes
@@ -216,7 +216,7 @@ actionTextForUndo location action =
             AdjustTimes _ ->
                 "adjusttimes"
 
-            SetTimeTicks ->
+            SetTimeTicks _ ->
                 "settimeticks"
 
             TimeDoubling ->
