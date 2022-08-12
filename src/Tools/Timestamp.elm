@@ -64,8 +64,8 @@ computeNewPoints excludeExisting options track =
     previews
 
 
-apply : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
-apply options track =
+applyTimeShift : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyTimeShift options track =
     let
         orangeOffsetMillis =
             relativeMillisToPoint track.currentPosition track
@@ -95,7 +95,7 @@ apply options track =
                     track.trackTree
     in
     ( newTree
-    , oldPoints
+    , DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
     )
 
 
@@ -154,10 +154,6 @@ applyTicks tickSpacing track =
             case ( road.startPoint.time, road.endPoint.time ) of
                 ( Just start, Just end ) ->
                     if nextTick < Time.posixToMillis end then
-                        let
-                            _ =
-                                Debug.log "IN" nextTick
-                        in
                         -- At least one (more) tick in this road section
                         emitTicks
                             road
@@ -166,10 +162,6 @@ applyTicks tickSpacing track =
                             )
 
                     else
-                        let
-                            _ =
-                                Debug.log "OUT" nextTick
-                        in
                         -- No (more) ticks in this road section
                         ( nextTick, reversedOutputs )
 

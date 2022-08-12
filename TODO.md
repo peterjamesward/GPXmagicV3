@@ -13,7 +13,8 @@
 
 **WIP**
 
-Time shifting now broke after equi-times.
+Time shifting now broke after equi-times?
+Undo loses the track before the shift point!
 
 **Later:** 
 

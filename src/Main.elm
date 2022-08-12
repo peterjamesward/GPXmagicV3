@@ -1998,7 +1998,7 @@ performActionsOnModel actions model =
                 ( AdjustTimes options, Just track ) ->
                     let
                         ( newTree, oldPoints ) =
-                            Tools.Timestamp.apply options track
+                            Tools.Timestamp.applyTimeShift options track
 
                         newTrack =
                             track
