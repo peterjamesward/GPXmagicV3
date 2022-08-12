@@ -1,6 +1,8 @@
 module Tools.TimestampOptions exposing (..)
 
--- Putting these in a separate module means we can use with Action, without an import loop.
+import Mass exposing (Mass)
+import Power exposing (Power, Watts)
+import Speed exposing (Speed)
 
 
 type alias Options =
@@ -8,6 +10,9 @@ type alias Options =
     , desiredStartMillis : Int
     , desiredTickIntervalMillis : Int
     , endLockedToStart : Bool
+    , steadyPower : Power
+    , maxDownhill : Speed
+    , mass : Mass
     }
 
 

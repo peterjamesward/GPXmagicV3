@@ -11,9 +11,12 @@ import FeatherIcons
 import FlatColors.AmericanPalette
 import FlatColors.BritishPalette
 import FlatColors.ChinesePalette
+import Mass exposing (Mass)
 import Point3d
+import Power exposing (Power)
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
-import Quantity
+import Quantity exposing (Quantity)
+import Speed exposing (Speed)
 import Time
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
@@ -34,6 +37,9 @@ defaultOptions =
     , desiredStartMillis = 0
     , desiredTickIntervalMillis = 1000
     , endLockedToStart = True
+    , steadyPower = Power.watts 200
+    , maxDownhill = Speed.kilometersPerHour 80
+    , mass = Mass.kilograms 75
     }
 
 
@@ -45,6 +51,9 @@ type Msg
     | ClearMilliseconds
     | DoubleRelativeTimes
     | ApplyTickInterval Int
+    | SetPower Power
+    | SetMass Mass
+    | SetTerminal Speed
 
 
 computeNewPoints : Bool -> Options -> TrackLoaded msg -> List PreviewPoint
@@ -255,15 +264,51 @@ update :
     -> Maybe (TrackLoaded msg)
     -> ( Options, List (ToolAction msg) )
 update msg options previewColour hasTrack =
-    case ( hasTrack, msg ) of
-        ( Just track, SetTickInterval interval ) ->
+    case hasTrack of
+        Just track ->
+            updateWithTrack msg options previewColour track
+
+        Nothing ->
+            ( options, [] )
+
+
+updateWithTrack :
+    Msg
+    -> Options
+    -> Element.Color
+    -> TrackLoaded msg
+    -> ( Options, List (ToolAction msg) )
+updateWithTrack msg options previewColour track =
+    case msg of
+        SetTickInterval interval ->
             let
                 newOptions =
                     { options | desiredTickIntervalMillis = interval }
             in
             ( newOptions, actions newOptions previewColour track )
 
-        ( Just track, TimeChange change ) ->
+        SetPower watts ->
+            let
+                newOptions =
+                    { options | steadyPower = watts }
+            in
+            ( newOptions, actions newOptions previewColour track )
+
+        SetMass kg ->
+            let
+                newOptions =
+                    { options | mass = kg }
+            in
+            ( newOptions, actions newOptions previewColour track )
+
+        SetTerminal kph ->
+            let
+                newOptions =
+                    { options | maxDownhill = kph }
+            in
+            ( newOptions, actions newOptions previewColour track )
+
+        TimeChange change ->
             let
                 previousPointOffsetMillis =
                     relativeMillisToPoint (track.currentPosition - 1) track
@@ -278,7 +323,7 @@ update msg options previewColour hasTrack =
             in
             ( newOptions, actions newOptions previewColour track )
 
-        ( Just track, ClearMilliseconds ) ->
+        ClearMilliseconds ->
             let
                 newOptions =
                     { options
@@ -288,29 +333,26 @@ update msg options previewColour hasTrack =
             in
             ( newOptions, actions newOptions previewColour track )
 
-        ( Just track, ApplyNewTimes ) ->
+        ApplyNewTimes ->
             ( options
             , [ Actions.AdjustTimes options
               , TrackHasChanged
               ]
             )
 
-        ( Just track, ApplyTickInterval tick ) ->
+        ApplyTickInterval tick ->
             ( options
             , [ Actions.SetTimeTicks tick
               , TrackHasChanged
               ]
             )
 
-        ( Just track, DoubleRelativeTimes ) ->
+        DoubleRelativeTimes ->
             ( options
             , [ Actions.TimeDoubling
               , TrackHasChanged
               ]
             )
-
-        ( Nothing, _ ) ->
-            ( options, [] )
 
 
 absoluteMillisToPoint : Int -> TrackLoaded msg -> Int
@@ -495,8 +537,28 @@ viewWithTrack location imperial wrapper options track =
                     }
                 ]
 
-        removeTimes =
-            none
+        doSomePhysics =
+            column [ centerX, width fill, spacing 4, padding 4, Border.width 1 ]
+                [ paragraph [ width fill ] [ i18n "physics" ]
+                , powerSlider
+                ]
+
+        powerSlider =
+            el [ centerX ] <|
+                Input.slider
+                    commonShortHorizontalSliderStyles
+                    { onChange = Power.watts >> SetPower >> wrapper
+                    , label =
+                        Input.labelBelow [ centerX ] <|
+                            text <|
+                                (UtilsForViews.showDecimal0 <|
+                                    Power.inWatts options.steadyPower) ++ "W"
+                    , min = 80
+                    , max = 400
+                    , step = Just 20
+                    , value = Power.inWatts options.steadyPower
+                    , thumb = Input.defaultThumb
+                    }
     in
     column
         [ padding 5
@@ -509,7 +571,7 @@ viewWithTrack location imperial wrapper options track =
         , startTimeAdjustments
         , equiSpacing
         , doubleTimes
-        , removeTimes
+        , doSomePhysics
         ]
 
 
