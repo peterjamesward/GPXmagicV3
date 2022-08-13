@@ -523,6 +523,7 @@ moving it earlier or later in time, or you can stretch (or shrink) the range to 
 recorded in a car. Doubling all the time intervals is a way of saying "half speed".
 """ )
                 , ( "physics", """Estimate timings based on a really simple physics model.""" )
+                , ( "applyPhysics", """Compute timings""")
                 , ( "uniform", """Replace track points with points at regular time intervals of:""" )
                 , ( "start absolute", """Clock time at Orange: """ )
                 , ( "end absolute", """Clock time at end of range: """ )

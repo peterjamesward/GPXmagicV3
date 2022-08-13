@@ -54,6 +54,7 @@ type Msg
     | SetPower Power
     | SetMass Mass
     | SetTerminal Speed
+    | ComputeTimes
 
 
 computeNewPoints : Bool -> Options -> TrackLoaded msg -> List PreviewPoint
@@ -213,6 +214,40 @@ applyTicks tickSpacing track =
     ( newTree, oldPoints )
 
 
+applyPhysics : Int -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyPhysics tickSpacing track =
+    let
+        initialPoint =
+            DomainModel.gpxPointFromIndex 0 track.trackTree
+
+        ( _, newCourse ) =
+            DomainModel.foldOverRoute
+                computeSpeedAndTimes
+                track.trackTree
+                ( Speed.kilometersPerHour 0
+                , [ { initialPoint | timestamp = Just <| Time.millisToPosix 0 }
+                  ]
+                )
+
+        computeSpeedAndTimes : RoadSection -> ( Speed, List GPXSource ) -> ( Speed, List GPXSource )
+        computeSpeedAndTimes road ( entrySpeed, reversedOutputs ) =
+            let
+                untimedNextPoint =
+                    Tuple.second road.sourceData
+            in
+            ( entrySpeed
+            , { untimedNextPoint | timestamp = Just <| Time.millisToPosix 0 } :: reversedOutputs
+            )
+
+        newTree =
+            DomainModel.treeFromSourcePoints <| List.reverse newCourse
+
+        oldPoints =
+            DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
+    in
+    ( newTree, oldPoints )
+
+
 toolStateChange :
     Bool
     -> Element.Color
@@ -351,6 +386,12 @@ updateWithTrack msg options previewColour track =
             ( options
             , [ Actions.TimeDoubling
               , TrackHasChanged
+              ]
+            )
+
+        ComputeTimes ->
+            ( options
+            , [ TrackHasChanged
               ]
             )
 
@@ -541,6 +582,10 @@ viewWithTrack location imperial wrapper options track =
             column [ centerX, width fill, spacing 4, padding 4, Border.width 1 ]
                 [ paragraph [ width fill ] [ i18n "physics" ]
                 , powerSlider
+                , Input.button (centerX :: neatToolsBorder)
+                    { onPress = Just (wrapper ComputeTimes)
+                    , label = paragraph [] [ i18n "double" ]
+                    }
                 ]
 
         powerSlider =
@@ -552,10 +597,12 @@ viewWithTrack location imperial wrapper options track =
                         Input.labelBelow [ centerX ] <|
                             text <|
                                 (UtilsForViews.showDecimal0 <|
-                                    Power.inWatts options.steadyPower) ++ "W"
+                                    Power.inWatts options.steadyPower
+                                )
+                                    ++ "W"
                     , min = 80
                     , max = 400
-                    , step = Just 20
+                    , step = Just 10
                     , value = Power.inWatts options.steadyPower
                     , thumb = Input.defaultThumb
                     }
