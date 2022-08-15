@@ -277,7 +277,7 @@ defaultTools =
     , straightenTool
     , graphTool
     , landUseTool
-    , timestampTool
+    --, timestampTool
     ]
 
 
