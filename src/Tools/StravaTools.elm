@@ -40,7 +40,7 @@ type Msg
     | HandleSegmentStreams (Result Http.Error StravaSegmentStreams)
     | HandleRouteData (Result Http.Error StravaRoute)
     | GpxDownloaded (Result Http.Error String)
-    | ActivityDownloaded (Result Http.Error StravaActivityStreams)
+    | ActivityDownloaded (Result Http.Error StravaActivity)
     | UserChangedSegmentId String
     | LoadSegmentStreams
     | LoadExternalSegment
@@ -251,11 +251,11 @@ update msg settings wrap track =
 
         ActivityDownloaded response ->
             case response of
-                Ok activity ->
+                Ok header ->
                     let
                         newSettings =
                             { settings
-                                | activity = StravaActivityOk activity
+                                | activity = StravaActivityGotHeader header
                             }
                     in
                     ( newSettings, [] )
@@ -318,6 +318,12 @@ extractFromLngLat latlng =
             , altitude = Quantity.zero
             , timestamp = Nothing
             }
+
+
+trackFromActivity : StravaActivityStreams -> Maybe (TrackLoaded msg)
+trackFromActivity activity =
+    --TODO: Need activity header to get a name.
+    TrackLoaded.trackFromPoints "name" []
 
 
 pointsFromStreams :

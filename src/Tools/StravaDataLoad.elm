@@ -128,8 +128,28 @@ requestStravaSegmentStreams msg segmentId token =
         }
 
 
-requestStravaActivity : (Result Http.Error StravaActivityStreams -> msg) -> String -> Token -> Cmd msg
+requestStravaActivity : (Result Http.Error StravaActivity -> msg) -> String -> Token -> Cmd msg
 requestStravaActivity msg activityId token =
+    Http.request
+        { method = "GET"
+        , headers = useToken token []
+        , url =
+            Builder.crossOrigin stravaApiRoot
+                [ "api"
+                , "v3"
+                , "activities"
+                , activityId
+                ]
+                []
+        , body = Http.emptyBody
+        , expect = Http.expectJson msg decodeStravaActivity
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+requestStravaActivityStreams : (Result Http.Error StravaActivityStreams -> msg) -> String -> Token -> Cmd msg
+requestStravaActivityStreams msg activityId token =
     Http.request
         { method = "GET"
         , headers = useToken token []
@@ -192,6 +212,13 @@ decodeStravaSegmentStreams =
         (field "0" decodeLatLngStream)
         (field "1" decodeStravaDistanceStream)
         (field "2" decodeStravaAltitudeStream)
+
+
+decodeStravaActivity : D.Decoder StravaActivity
+decodeStravaActivity =
+    D.map2 StravaActivity
+        (D.field "name" D.string)
+        (D.field "start_date" D.string)
 
 
 decodeStravaActivityStreams : D.Decoder StravaActivityStreams

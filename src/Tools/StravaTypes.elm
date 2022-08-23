@@ -8,9 +8,6 @@ type alias StravaSegment =
     , elevation_low : Float
     , start_latlng : List Float
     , end_latlng : List Float
-
-    --, start_latitude : Float
-    --, start_longitude : Float
     }
 
 
@@ -71,6 +68,12 @@ type alias StravaSegmentStreams =
     }
 
 
+type alias StravaActivity =
+    { activityName : String
+    , activityStart : String
+    }
+
+
 type alias StravaActivityStreams =
     { latLngs : List StravaLatLng
     , altitude : List Float
@@ -97,5 +100,6 @@ type StravaRouteStatus
 type StravaActivityStatus
     = StravaActivityNone
     | StravaActivityRequested
-    | StravaActivityOk StravaActivityStreams
+    | StravaActivityGotHeader StravaActivity
+    | StravaActivityOk StravaActivity StravaActivityStreams
     | StravaActivityError String
