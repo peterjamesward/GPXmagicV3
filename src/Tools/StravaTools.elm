@@ -280,10 +280,10 @@ update msg settings wrap track =
                 Ok streams ->
                     case settings.activity of
                         StravaActivityGotHeader header ->
-                            --TODO: Make track from streams data
-                            --TODO: Don't need it in setting anymore once working.
+                            --Make track from streams data
+                            --Don't need it in setting anymore once working.
                             ( { settings
-                                | activity = StravaActivityOk header streams
+                                | activity = StravaActivityNone
                               }
                             , [ Actions.TrackFromStravaActivity header streams ]
                             )
