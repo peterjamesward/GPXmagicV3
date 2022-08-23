@@ -45,11 +45,9 @@ configuration =
             (Json.field "id" Json.int)
             (Json.field "firstname" Json.string)
             (Json.field "lastname" Json.string)
-    , clientId =
-        "59195"
+    , clientId = "59195"
     , clientSecret = StravaClientSecret.clientSecret
-    , scope =
-        [ "read_all" ]
+    , scope = [ "read_all,activity:read_all" ]
     }
 
 

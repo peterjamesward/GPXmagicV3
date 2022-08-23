@@ -5,27 +5,13 @@
 
 # WIP
 
-## Timestamps (Jonathan Colledge)
-
-> I wonder if you might consider adding timestamp functionality to GPX Magic -
-> this would open up the user base to all the Kinomap video makers and would make
-> GPX Magic a one-stop shop for GPX video synchronisation.
-
-**WIP**
-
-Time shifting now broke after equi-times?
-Undo loses the track before the shift point!
-
-**Later:** 
-
-Might allow adding timestamps to an **untimed** GPX with simple physics model, because it's there.
-(Removal of recorded times is an obvious symmetry.)
-
-Time stretching instead of just shuffle.
-
 ---
 
 # BACKLOG
+
+## Adding timestamps with physics
+
+Yes, that.
 
 ## On refactoring Action interpeter in Main.
 

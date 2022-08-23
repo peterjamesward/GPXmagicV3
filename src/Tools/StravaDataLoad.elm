@@ -6,10 +6,10 @@ import Http
 import Json.Decode as D exposing (Decoder, field)
 import Length
 import LocalCoords exposing (LocalCoords)
-import OAuth exposing (Token, errorCodeToString, useToken)
+import OAuth exposing (Token, errorCodeToString, tokenToString, useToken)
 import Point2d
 import Tools.StravaTypes as StravaTypes exposing (..)
-import Url.Builder as Builder
+import Url.Builder as Builder exposing (string)
 import UtilsForViews exposing (httpErrorString)
 
 
@@ -128,6 +128,29 @@ requestStravaSegmentStreams msg segmentId token =
         }
 
 
+requestStravaActivity : (Result Http.Error StravaActivityStreams -> msg) -> String -> Token -> Cmd msg
+requestStravaActivity msg activityId token =
+    Http.request
+        { method = "GET"
+        , headers = useToken token []
+        , url =
+            Builder.crossOrigin stravaApiRoot
+                [ "api"
+                , "v3"
+                , "activities"
+                , activityId
+                , "streams"
+                ]
+                [ string "keys" "latlng,altitude,time"
+                , string "key_by_type" "true"
+                ]
+        , body = Http.emptyBody
+        , expect = Http.expectJson msg decodeStravaActivityStreams
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
 requestStravaRoute : (Result Http.Error String -> msg) -> String -> Token -> Cmd msg
 requestStravaRoute msg routeId token =
     Http.request
@@ -171,6 +194,14 @@ decodeStravaSegmentStreams =
         (field "2" decodeStravaAltitudeStream)
 
 
+decodeStravaActivityStreams : D.Decoder StravaActivityStreams
+decodeStravaActivityStreams =
+    D.map3 StravaActivityStreams
+        (D.at [ "latlng", "data" ] (D.list decodeStravaLatLng))
+        (D.at [ "altitude", "data" ] (D.list D.float))
+        (D.at [ "time", "data" ] (D.list D.int))
+
+
 decodeStravaLatLng : D.Decoder StravaLatLng
 decodeStravaLatLng =
     D.map2 StravaLatLng
@@ -203,6 +234,16 @@ decodeStravaAltitudeStream =
     D.map5 StravaAltitudeStream
         (field "type" D.string)
         (field "data" (D.list D.float))
+        (field "series_type" D.string)
+        (field "original_size" D.int)
+        (field "resolution" D.string)
+
+
+decodeStravaTimeStream : D.Decoder StravaTimeStream
+decodeStravaTimeStream =
+    D.map5 StravaTimeStream
+        (field "type" D.string)
+        (field "data" (D.list D.int))
         (field "series_type" D.string)
         (field "original_size" D.int)
         (field "resolution" D.string)

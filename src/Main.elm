@@ -475,26 +475,25 @@ update msg model =
             ( model
             , case model.loadFromUrl of
                 Just url ->
-                    Http.get
-                        { url = url
+                    let
+                        properUrl =
+                            Builder.crossOrigin url [] []
+                    in
+                    --Http.get
+                    --    { url = url
+                    --    , expect = Http.expectString GpxFromUrl
+                    --    }
+                    Http.request
+                        { method = "GET"
+                        , headers =
+                            [ Http.header "Access-Control-Allow-Origin" url ]
+                        , url = properUrl
+                        , body = Http.emptyBody
                         , expect = Http.expectString GpxFromUrl
+                        , timeout = Nothing
+                        , tracker = Nothing
                         }
 
-                {-
-                   Http.request
-                       { method = "GET"
-                       , headers = []
-
-                       --[ Http.header "Access-Control-Allow-Origin" "*"
-                       --, Http.header "Origin" ""
-                       --]
-                       , url = Builder.crossOrigin url [] []
-                       , body = Http.emptyBody
-                       , expect = Http.expectString GpxFromUrl
-                       , timeout = Nothing
-                       , tracker = Nothing
-                       }
-                -}
                 Nothing ->
                     Cmd.none
             )
@@ -2892,6 +2891,13 @@ performActionCommands actions model =
                     Tools.StravaDataLoad.requestStravaRoute
                         msg
                         routeId
+                        token
+
+                ( RequestStravaActivity msg activityId token, _ ) ->
+                    --TODO: Get the header for the base time, then the streams.
+                    Tools.StravaDataLoad.requestStravaActivity
+                        msg
+                        activityId
                         token
 
                 ( RequestStravaSegment msg segmentId token, _ ) ->

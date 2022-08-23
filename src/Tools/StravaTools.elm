@@ -35,10 +35,12 @@ toolId =
 type Msg
     = UserChangedRouteId String
     | LoadExternalRoute
+    | LoadActivity
     | HandleSegmentData (Result Http.Error StravaSegment)
     | HandleSegmentStreams (Result Http.Error StravaSegmentStreams)
     | HandleRouteData (Result Http.Error StravaRoute)
     | GpxDownloaded (Result Http.Error String)
+    | ActivityDownloaded (Result Http.Error StravaActivityStreams)
     | UserChangedSegmentId String
     | LoadSegmentStreams
     | LoadExternalSegment
@@ -55,6 +57,7 @@ defaultOptions =
     , externalRouteId = ""
     , externalSegment = SegmentNone
     , stravaRoute = StravaRouteNone
+    , activity = StravaActivityNone
     , stravaStreams = Nothing
     , lastHttpError = Nothing
     , preview = []
@@ -125,6 +128,22 @@ update msg settings wrap track =
                     ( { settings | stravaRoute = StravaRouteRequested }
                     , [ Actions.RequestStravaRouteHeader
                             (wrap << HandleRouteData)
+                            settings.externalRouteId
+                            token
+                      ]
+                    )
+
+                StravaDisconnected ->
+                    ( settings, [] )
+
+        LoadActivity ->
+            -- It's a bit convoluted because a tool cannot issue commands, but
+            -- must send instruction by way of Action back to Main.
+            case settings.stravaStatus of
+                StravaConnected token ->
+                    ( settings
+                    , [ Actions.RequestStravaActivity
+                            (wrap << ActivityDownloaded)
                             settings.externalRouteId
                             token
                       ]
@@ -225,6 +244,23 @@ update msg settings wrap track =
                     ( newSettings, previewActions newSettings stravaOrange isTrack )
 
                 ( _, Err err, _ ) ->
+                    ( { settings | lastHttpError = Just err }, [] )
+
+                _ ->
+                    ( settings, [] )
+
+        ActivityDownloaded response ->
+            case ( response, settings.externalSegment ) of
+                ( Ok activity, SegmentOk segment ) ->
+                    let
+                        newSettings =
+                            { settings
+                                | activity = StravaActivityOk activity
+                            }
+                    in
+                    ( newSettings, [] )
+
+                ( Err err, _ ) ->
                     ( { settings | lastHttpError = Just err }, [] )
 
                 _ ->
@@ -529,6 +565,13 @@ viewStravaTab location options wrap track =
                 { onPress = Just <| wrap LoadExternalRoute
                 , label = i18n "route"
                 }
+
+        activityButton =
+            button
+                neatToolsBorder
+                { onPress = Just <| wrap LoadActivity
+                , label = i18n "activity"
+                }
     in
     column
         [ spacing 10
@@ -543,6 +586,7 @@ viewStravaTab location options wrap track =
                 , row [ spacing 10 ]
                     [ routeIdField
                     , routeButton
+                    , activityButton
                     ]
                 , row [ spacing 10 ]
                     [ segmentIdField
@@ -556,6 +600,7 @@ viewStravaTab location options wrap track =
                 [ stravaLink
                 , routeIdField
                 , routeButton
+                , activityButton
                 , paragraph [] [ i18n "about" ]
                 ]
 
