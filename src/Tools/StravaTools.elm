@@ -41,6 +41,7 @@ type Msg
     | HandleRouteData (Result Http.Error StravaRoute)
     | GpxDownloaded (Result Http.Error String)
     | ActivityDownloaded (Result Http.Error StravaActivity)
+    | ActivityStreamsDownloaded (Result Http.Error StravaActivityStreams)
     | UserChangedSegmentId String
     | LoadSegmentStreams
     | LoadExternalSegment
@@ -250,15 +251,45 @@ update msg settings wrap track =
                     ( settings, [] )
 
         ActivityDownloaded response ->
-            case response of
-                Ok header ->
+            case ( settings.stravaStatus, response ) of
+                ( StravaConnected token, Ok header ) ->
                     let
                         newSettings =
                             { settings
                                 | activity = StravaActivityGotHeader header
                             }
                     in
-                    ( newSettings, [] )
+                    ( newSettings
+                    , [ Actions.RequestStravaActivityStreams
+                            (wrap << ActivityStreamsDownloaded)
+                            settings.externalRouteId
+                            token
+                      ]
+                    )
+
+                ( _, Err err ) ->
+                    ( { settings | lastHttpError = Just err }, [] )
+
+                _ ->
+                    ( settings, [] )
+
+        ActivityStreamsDownloaded response ->
+            case response of
+                Ok streams ->
+                    case settings.activity of
+                        StravaActivityGotHeader header ->
+                            ( { settings
+                                | activity = StravaActivityOk header streams
+                              }
+                            , []
+                            )
+
+                        _ ->
+                            ( { settings
+                                | activity = StravaActivityError "state error"
+                              }
+                            , []
+                            )
 
                 Err err ->
                     ( { settings | lastHttpError = Just err }, [] )

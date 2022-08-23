@@ -2900,6 +2900,13 @@ performActionCommands actions model =
                         activityId
                         token
 
+                ( RequestStravaActivityStreams msg activityId token, _ ) ->
+                    --TODO: Get the header for the base time, then the streams.
+                    Tools.StravaDataLoad.requestStravaActivityStreams
+                        msg
+                        activityId
+                        token
+
                 ( RequestStravaSegment msg segmentId token, _ ) ->
                     Tools.StravaDataLoad.requestStravaSegment
                         msg

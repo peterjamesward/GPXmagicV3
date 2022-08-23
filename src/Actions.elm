@@ -83,6 +83,7 @@ type ToolAction msg
     | RequestStravaRouteHeader (Result Http.Error StravaRoute -> msg) String OAuth.Token
     | RequestStravaRoute (Result Http.Error String -> msg) String OAuth.Token
     | RequestStravaActivity (Result Http.Error StravaActivity -> msg) String OAuth.Token
+    | RequestStravaActivityStreams (Result Http.Error StravaActivityStreams -> msg) String OAuth.Token
     | LoadGpxFromStrava String
     | RequestStravaSegment (Result Http.Error StravaSegment -> msg) String OAuth.Token
     | RequestStravaSegmentStreams (Result Http.Error StravaSegmentStreams -> msg) String OAuth.Token
