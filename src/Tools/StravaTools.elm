@@ -250,8 +250,8 @@ update msg settings wrap track =
                     ( settings, [] )
 
         ActivityDownloaded response ->
-            case ( response, settings.externalSegment ) of
-                ( Ok activity, SegmentOk segment ) ->
+            case response of
+                Ok activity ->
                     let
                         newSettings =
                             { settings
@@ -260,11 +260,8 @@ update msg settings wrap track =
                     in
                     ( newSettings, [] )
 
-                ( Err err, _ ) ->
+                Err err ->
                     ( { settings | lastHttpError = Just err }, [] )
-
-                _ ->
-                    ( settings, [] )
 
         PasteSegment ->
             case ( track, settings.externalSegment ) of
