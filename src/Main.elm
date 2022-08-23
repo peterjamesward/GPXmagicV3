@@ -2515,6 +2515,20 @@ performActionsOnModel actions model =
                     in
                     modelWithNewTrack
 
+                ( TrackFromStravaActivity header streams, _ ) ->
+                    let
+                        newTrack =
+                            Tools.StravaTools.trackFromActivity header streams
+                    in
+                    case newTrack of
+                        Just track ->
+                            adoptTrackInModel track [] foldedModel
+
+                        Nothing ->
+                            { foldedModel | modalMessage = Just "nosvg" }
+
+
+
                 ( Actions.WidenBend points adjustment, Just track ) ->
                     -- This for one contiguous set of points, i.e. one bend.
                     let

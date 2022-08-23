@@ -12,11 +12,13 @@ import Element.Font as Font
 import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
 import Http
+import Iso8601
 import Length
 import List.Extra
 import OAuth as O
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity
+import Time
 import ToolTip exposing (localisedTooltip, myTooltip, tooltip)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
@@ -278,10 +280,12 @@ update msg settings wrap track =
                 Ok streams ->
                     case settings.activity of
                         StravaActivityGotHeader header ->
+                            --TODO: Make track from streams data
+                            --TODO: Don't need it in setting anymore once working.
                             ( { settings
                                 | activity = StravaActivityOk header streams
                               }
-                            , []
+                            , [ Actions.TrackFromStravaActivity header streams ]
                             )
 
                         _ ->
@@ -351,10 +355,33 @@ extractFromLngLat latlng =
             }
 
 
-trackFromActivity : StravaActivityStreams -> Maybe (TrackLoaded msg)
-trackFromActivity activity =
+trackFromActivity : StravaActivity -> StravaActivityStreams -> Maybe (TrackLoaded msg)
+trackFromActivity header streams =
     --TODO: Need activity header to get a name.
-    TrackLoaded.trackFromPoints "name" []
+    let
+        baseTimeMillis =
+            Iso8601.toTime header.activityStart
+                |> Result.toMaybe
+                |> Maybe.withDefault (Time.millisToPosix 0)
+                |> Time.posixToMillis
+
+        pointTime t =
+            Time.millisToPosix <| baseTimeMillis + (1000 * t)
+
+        gpx =
+            List.map3 makePoint
+                streams.latLngs
+                streams.altitude
+                streams.time
+
+        makePoint latLng alt time =
+            GPXSource
+                (Direction2d.fromAngle <| Angle.degrees latLng.lng)
+                (Angle.degrees latLng.lat)
+                (Length.meters alt)
+                (Just <| pointTime time)
+    in
+    TrackLoaded.trackFromPoints header.activityName gpx
 
 
 pointsFromStreams :
