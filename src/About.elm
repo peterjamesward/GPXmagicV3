@@ -48,6 +48,11 @@ half-second, second, or 5 seconds.
 recorded a 60fps video from a motor vehicle, and if played at half-speed, it would sync. well
 for a bike ride. (This does not require that you first use time interpolation.)
 
+### Strava Activity import
+
+In the Strava tool you can now load both Routes and Activities directly into GPXmagic. Activities
+will (of course) have time information available.
+
 ## Acknowledgements
 
 * Thanks to all those who've provided support, comments, bug reports, and help along the way.

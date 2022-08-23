@@ -800,7 +800,7 @@ keeping the altitudes and squishing the points up increases gradients.
                 , ( "segmenttip", """Paste in a segment number or URL""" )
                 , ( "segmentid", """Segment ID""" )
                 , ( "routetip", """Paste in a route number or URL""" )
-                , ( "routeid", """Route ID""" )
+                , ( "routeid", """Route or Activity ID""" )
                 , ( "preview", """Preview""" )
                 , ( "paste", """Paste""" )
                 , ( "fetch", """Fetch info""" )

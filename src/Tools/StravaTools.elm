@@ -525,14 +525,11 @@ viewStravaTab location options wrap track =
 
         routeIdField =
             Input.text
-                [ width (minimum 150 <| fill)
-
-                --, tooltip below (localisedTooltip location toolId "routetip")
-                ]
+                [ width <| px 150 ]
                 { onChange = wrap << UserChangedRouteId
                 , text = options.externalRouteId
                 , placeholder = Just <| Input.placeholder [] <| i18n "routeid"
-                , label = Input.labelHidden "Strava route ID"
+                , label = Input.labelHidden "Strava route or activity ID"
                 }
 
         segmentButton =
@@ -659,9 +656,11 @@ viewStravaTab location options wrap track =
 
             ( StravaConnected token, Nothing ) ->
                 [ stravaLink
-                , routeIdField
-                , routeButton
-                , activityButton
+                , row [ spacing 10 ]
+                    [ routeIdField
+                    , routeButton
+                    , activityButton
+                    ]
                 , paragraph [] [ i18n "about" ]
                 ]
 
