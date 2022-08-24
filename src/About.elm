@@ -27,7 +27,7 @@ interpolated from the existing track.
 * Edits that delete points will not change the timing of remaining points.
 (Example: Delete.)
 
-* Route planner doesn't make any sense, not does out and back.
+* Route planner doesn't make any sense, nor does out and back.
 
 * Errors are quite likely, at this stage in development.
 
