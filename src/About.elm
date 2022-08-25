@@ -7,7 +7,12 @@ aboutText =
 
 **GPXmagic V3 works (by far) best with Chrome (and some derivatives)**
 
-## In 3.4
+## In 3.4.2
+
+You can Hide a tool directly from the tool setting control. If you do this, you will need
+to use the Tools summary control to restore it.
+
+## In 3.4.1
 
 ### New Timestamps tool
 
