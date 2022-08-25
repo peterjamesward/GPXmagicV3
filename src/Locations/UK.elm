@@ -405,6 +405,7 @@ You can show these "flat" or "sloped" Be warned, when "sloped", it may obscure t
                 [ ( "label", """Tool summary""" )
                 , ( "left", """Move to left""" )
                 , ( "right", """Move to right""" )
+                , ( "hide", """Hide (restore in Tools Summary)""")
                 , ( "onleft", """Left""" )
                 , ( "onright", """Right""" )
                 , ( "hidden", """Hidden""" )

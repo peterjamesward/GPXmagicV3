@@ -1888,7 +1888,7 @@ showDockOptions : I18NOptions.Location -> (ToolMsg -> msg) -> ToolEntry -> Eleme
 showDockOptions location msgWrapper toolEntry =
     if toolEntry.isPopupOpen then
         row
-            neatToolsBorder
+            (spacing 4 :: neatToolsBorder)
             [ Input.button
                 [ tooltip below (localisedTooltip location "tools" "left") ]
                 { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockUpperLeft
@@ -1899,6 +1899,22 @@ showDockOptions location msgWrapper toolEntry =
                 { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockUpperRight
                 , label = useIcon FeatherIcons.arrowRight
                 }
+            , if
+                toolEntry.toolType
+                    /= ToolSettings
+                    && toolEntry.toolType
+                    /= ToolEssentials
+              then
+                Input.button
+                    [ tooltip below (localisedTooltip location "tools" "hide")
+                    , paddingEach { left = 20, right = 0, top = 0, bottom = 0 }
+                    ]
+                    { onPress = Just <| msgWrapper <| ToolDockSelect toolEntry.toolType DockNone
+                    , label = useIcon FeatherIcons.eyeOff
+                    }
+
+              else
+                none
             ]
 
     else
