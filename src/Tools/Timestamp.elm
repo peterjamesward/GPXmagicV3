@@ -217,108 +217,54 @@ applyTicks tickSpacing track =
     ( newTree, oldPoints )
 
 
+applyPhysics : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyPhysics options track =
+    ( Nothing, [] )
 
-{-
 
-   applyPhysics : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
-   applyPhysics options track =
-       let
-           initialPoint =
-               DomainModel.gpxPointFromIndex 0 track.trackTree
 
-           ( _, newCourse ) =
-               DomainModel.foldOverRoute
-                   computeSpeedAndTimes
-                   track.trackTree
-                   ( Speed.metersPerSecond 1
-                   , [ { initialPoint | timestamp = Just <| Time.millisToPosix 0 }
-                     ]
-                   )
-
-           computeSpeedAndTimes : RoadSection -> ( Speed, List GPXSource ) -> ( Speed, List GPXSource )
-           computeSpeedAndTimes road ( entrySpeed, reversedOutputs ) =
-               {- Plan here is to numerically solve force equations over one second intervals.
-                  If the track section is too short, we could probably make do with a linear
-                  interpolation of entry and exit speeds. (Better is solve the quadratic for t.)
-                  If a second does not use up the track section, repeat on the remainder.
-
-                  May output the one-second ticks for quick insight into how well it works ...
-               -}
-               let
-                   untimedNextPoint =
-                       Tuple.second road.sourceData
-
-                   riderForce =
-                       -- Known power at known speed for one second.
-                       -- Power is Force x Distance moved / Time.
-                       -- Distance is Speed x Time.
-                       -- Hence Power is Force x Speed (which we knew).
-                       -- Hence Force is Power / Speed.
-                       options.steadyPower |> Quantity.per entrySpeed
-
-                   accelerationFromRider =
-                       riderForce |> Quantity.per options.mass
-
-                   g : Acceleration
-                   g =
-                       Acceleration.metersPerSecondSquared 9.8
-
-                   gradientAsAngle =
-                       Angle.atan <| road.gradientAtStart / 100.0
-
-                   accelerationFromSlope =
-                       -- Gravity and slope combine here.
-                       g |> Quantity.times (Angle.sin gradientAsAngle)
-
-                   accelerationFromDrag =
-                       -- Guessing ...
-                       Speed.inMetersPerSecond entrySpeed ^ 2 / 5
-
-                   netAcceleration =
-                       accelerationFromRider
-                           |> Quantity.minus accelerationFromSlope
-                           |> Quantity.minus accelerationFromDrag
-
-                   newSpeed =
-                       -- After each one-second tick. Clamped for sanity.
-                       entrySpeed
-                           |> Quantity.plus (netAcceleration |> Quantity.times Duration.second)
-                           |> Quantity.clamp Quantity.zero options.maxDownhill
-
-                   distanceInTick =
-                       -- s = ut + 0.5 a t^2
-                       entrySpeed
-                           |> Quantity.times Duration.second
-                           |> Quantity.plus
-                               (netAcceleration
-                                   |> Quantity.times Duration.second
-                                   |> Quantity.times Duration.second
-                                   |> Quantity.half
-                               )
-
-                   exitSpeed =
-                       if
-                           distanceInTick
-                               |> Quantity.greaterThanOrEqualTo
-                                   (DomainModel.trueLength road)
-                       then
-                           estimateSpeedAtEnd
-
-                       else
-                           recurseOnRemaingRoad
-               in
-               ( exitSpeed
-               , { untimedNextPoint | timestamp = Just <| Time.millisToPosix 0 } :: reversedOutputs
-               )
-
-           newTree =
-               DomainModel.treeFromSourcePoints <| List.reverse newCourse
-
-           oldPoints =
-               DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
-       in
-       ( newTree, oldPoints )
--}
+--let
+--    initialPoint =
+--        DomainModel.gpxPointFromIndex 0 track.trackTree
+--
+--    ( _, newCourse ) =
+--        DomainModel.foldOverRoute
+--            computeSpeedAndTimes
+--            track.trackTree
+--            ( Speed.metersPerSecond 1
+--            , [ { initialPoint | timestamp = Just <| Time.millisToPosix 0 }
+--              ]
+--            )
+--
+--    computeSpeedAndTimes : RoadSection -> ( Speed, List GPXSource ) -> ( Speed, List GPXSource )
+--    computeSpeedAndTimes road ( entrySpeed, reversedOutputs ) =
+--        {-
+--        Adopting Dan Connelly's idea to not use power but just derive speed from slope
+--        e.g. y = 42 - 3x + 0.003x^3 , x clamped to [-18, + 18] gives max 80kph, min 5.5kps.
+--        but with provisos:
+--        1. Inertia smooths speed changes (some 'a' along each straight;
+--        2. Curvature (direction change) limits speed at any point.
+--        - e.g. y = 80 - x + 0.003 x^2 , x in [0, 90] degrees.
+--        - curvature-derived deceleration not limited (brakes!)
+--        -}
+--        let
+--            exitSpeed =
+--                entrySpeed
+--
+--            untimedNextPoint =
+--                road.endPoint
+--        in
+--        ( exitSpeed
+--        , { untimedNextPoint | timestamp = Just <| Time.millisToPosix 0 } :: reversedOutputs
+--        )
+--
+--    newTree =
+--        DomainModel.treeFromSourcePoints <| List.reverse newCourse
+--
+--    oldPoints =
+--        DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
+--in
+--( newTree, oldPoints )
 
 
 toolStateChange :

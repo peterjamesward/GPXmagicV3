@@ -737,6 +737,8 @@ shape of the route.
                 , ( "pens", """Allow for RGT start and end pens""" )
                 , ( "1CQF", """Apply one-click quick fix to each section""" )
                 , ( "split", """Split into {0} files of {1}""" )
+                , ( "orange", """Split at Orange marker""")
+                , ( "between", """Write section between markers""")
                 , ( "append", """Append a GPX file""" )
                 , ( "note", """Files will be written to Downloads folder at two second intervals.""" )
                 , ( "info", """

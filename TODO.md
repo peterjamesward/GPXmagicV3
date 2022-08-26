@@ -5,6 +5,18 @@
 
 # WIP
 
+Jan Deca:
+
+> Hello Peter, I wanted to log a quick feature request. In the current Split&Join tool of GPXmagic 
+> you can happily split routes (which is amazing). The tool currently splits a route in say X equal 
+> chunks. It would be awesome to be able to set how the route is split. For example, I'm currently 
+> building a 160km road, which has a big climb between 70-90 km. The current tool would split the 
+> road at 80km, i.e., halfway up the climb. There are workarounds by using, e.g., the delete tool, 
+> but it'd be awesome to have the possibility to tell the tool to split the road at 90km, in order 
+> to keep the climb intact. Thanks a bunch!
+
+= Add "Split at Orange" button.
+
 ---
 
 # BACKLOG
@@ -21,16 +33,6 @@ There's only two or three cases, if not a single general one.
 ## Load from URL
 
 > CORS issues.
-
-## Tools organisation
-
-**Filter** by tag:
-- Curves,
-- Gradients,
-- Issues,
-- ???
-
-Each tool may have more than one tag.
 
 ## Languages
 

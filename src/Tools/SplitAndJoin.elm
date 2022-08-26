@@ -34,6 +34,7 @@ toolId =
 
 type Msg
     = SplitTrack
+    | SplitAtMarkers
     | SetSplitLimit Length.Length
     | WriteSection (List ( Int, Float, Float ))
     | ToggleBuffers Bool
@@ -83,6 +84,38 @@ update msg settings mTrack wrap =
             let
                 trackSplits =
                     calculateSections (trueLength mTrack.trackTree) settings
+            in
+            ( settings
+            , [ Actions.WriteTrackSections trackSplits
+              , Actions.DelayMessage 2000 <| wrap <| WriteSection <| List.drop 1 trackSplits
+              ]
+            )
+
+        SplitAtMarkers ->
+            let
+                orangeDistance =
+                    Length.inMeters <|
+                        DomainModel.distanceFromIndex mTrack.currentPosition mTrack.trackTree
+
+                trackSplits =
+                    case mTrack.markerPosition of
+                        Just purple ->
+                            let
+                                purpleDistance =
+                                    Length.inMeters <|
+                                        DomainModel.distanceFromIndex purple mTrack.trackTree
+
+                                ( near, far ) =
+                                    ( min orangeDistance purpleDistance
+                                    , max orangeDistance purpleDistance
+                                    )
+                            in
+                            [ ( 1, near, far ) ]
+
+                        Nothing ->
+                            [ ( 1, 0, orangeDistance )
+                            , ( 2, orangeDistance, Length.inMeters <| trueLength mTrack.trackTree )
+                            ]
             in
             ( settings
             , [ Actions.WriteTrackSections trackSplits
@@ -317,6 +350,21 @@ view location imperial options wrapper track =
                             ]
                 }
 
+        splitUsingMarkersButton =
+            let
+                labelDependsOnPurple =
+                    if track.markerPosition == Nothing then
+                        "orange"
+
+                    else
+                        "between"
+            in
+            button
+                neatToolsBorder
+                { onPress = Just <| wrapper <| SplitAtMarkers
+                , label = i18n labelDependsOnPurple
+                }
+
         appendFileButton =
             button
                 neatToolsBorder
@@ -333,6 +381,7 @@ view location imperial options wrapper track =
         , endPenCheckbox
         , quickFixCheckbox
         , el [ centerX ] splitButton
+        , el [ centerX ] splitUsingMarkersButton
         , el [ centerX ] <|
             paragraph []
                 [ i18n "note" ]

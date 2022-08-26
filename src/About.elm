@@ -7,10 +7,18 @@ aboutText =
 
 **GPXmagic V3 works (by far) best with Chrome (and some derivatives)**
 
+## In 3.4.3
+
+In Split and Join, you can control where the splits are. If you only need one split, use
+the Orange marker only and it will write two files, one up to the Orange marker and one
+beyond. If you place the Purple marker, it will write the section between the markers, so
+you can dairly easily hop along the route and write out your chosen sections. Thanks to
+Jan Deca for this suggestion.
+
 ## In 3.4.2
 
 You can Hide a tool directly from the tool setting control. If you do this, you will need
-to use the Tools summary control to restore it.
+to use the Tools summary control to restore it. Thanks to David Ogle for this suggestion.
 
 ## In 3.4.1
 
