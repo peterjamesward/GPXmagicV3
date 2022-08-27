@@ -3,9 +3,14 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.4.3 (6b96e98b)
+# GPXmagic v3.4.4 (6b96e98b)
 
 **GPXmagic V3 works (by far) best with Chrome (and some derivatives)**
+
+## In 3.4.4
+
+Culls place names in 3D view so that only those visible are painted. More responsive and
+way less confusing.
 
 ## In 3.4.3
 

@@ -175,9 +175,19 @@ placesOverlay display ( givenWidth, givenHeight ) track camera =
 
         nodes2d =
             track.landUseData.places
+                |> Dict.filter
+                    (\name place ->
+                        place.space
+                            |> Point3d.depth camera
+                            |> Quantity.greaterThanZero
+                    )
                 |> Dict.map
                     (\name place ->
                         place.space |> Point3d.toScreenSpace camera screenRectangle
+                    )
+                |> Dict.filter
+                    (\name screenPoint ->
+                        Rectangle2d.contains screenPoint screenRectangle
                     )
 
         textAttributes atPoint =
@@ -193,21 +203,21 @@ placesOverlay display ( givenWidth, givenHeight ) track camera =
         placeNames =
             nodes2d
                 |> Dict.map
-                    (\name vertex ->
+                    (\name place ->
                         Svg.g []
                             [ Svg.circle2d
                                 [ Svg.Attributes.stroke "white"
                                 , Svg.Attributes.strokeWidth "1"
                                 , Svg.Attributes.fill "none"
                                 ]
-                                (Circle2d.withRadius (Pixels.float 3) vertex)
+                                (Circle2d.withRadius (Pixels.float 3) place)
                             , Svg.text_
-                                (textAttributes vertex)
+                                (textAttributes place)
                                 [ Svg.text name ]
                                 -- Hack: flip the text upside down since our later
                                 -- 'Svg.relativeTo topLeftFrame' call will flip it
                                 -- back right side up
-                                |> Svg.mirrorAcross (Axis2d.through vertex Direction2d.x)
+                                |> Svg.mirrorAcross (Axis2d.through place Direction2d.x)
                             ]
                     )
                 |> Dict.values
