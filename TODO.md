@@ -1,6 +1,20 @@
 
 # BUGS
 
+## Named segments
+
+Something certainly wrong with writing segments. Seen it on Hillingdon with three segments.
+1. Create a segment A.
+2. Create a segment B beyond A.
+3. Select segment A in segment list.
+4. Move pointers to beyond segment B.
+5. "Update" segment A with new locations.
+
+A: Erroneous error message displayed.
+B: Written GPX has points out of order.
+
+Maybe am assuming something about the order of the segments not changing.
+
 --- 
 
 # WIP

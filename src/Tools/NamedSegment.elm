@@ -128,7 +128,7 @@ view location imperial wrapper options track =
                               , view =
                                     \i t ->
                                         Input.text (dataStyles (Just i == options.selectedSegment))
-                                            { onChange = wrapper << (ChangeName i)
+                                            { onChange = wrapper << ChangeName i
                                             , text = t.name
                                             , placeholder = Nothing
                                             , label = Input.labelHidden "name"
@@ -384,7 +384,10 @@ update msg options track wrapper =
                                     }
                             in
                             ( { options
-                                | namedSegments = List.Extra.updateAt index (always updated) options.namedSegments
+                                | namedSegments =
+                                    options.namedSegments
+                                        |> List.Extra.updateAt index (always updated)
+                                        |> List.sortBy (.startDistance >> Length.inMeters)
                               }
                             , []
                             )
