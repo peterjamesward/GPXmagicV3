@@ -995,14 +995,14 @@ view model =
                 [ el
                     [ width fill
                     , Border.widthEach { edges | bottom = 6 }
-                    , Border.color ukraineBlue
+                    , Border.color black --ukraineBlue
                     ]
                   <|
                     topLoadingBar model
                 , el
                     [ width fill
                     , Border.widthEach { edges | top = 6 }
-                    , Border.color ukraineYellow
+                    , Border.color black --ukraineYellow
                     ]
                   <|
                     html <|
@@ -2526,8 +2526,6 @@ performActionsOnModel actions model =
 
                         Nothing ->
                             { foldedModel | modalMessage = Just "nosvg" }
-
-
 
                 ( Actions.WidenBend points adjustment, Just track ) ->
                     -- This for one contiguous set of points, i.e. one bend.

@@ -7,6 +7,10 @@ aboutText =
 
 **GPXmagic V3 works (by far) best with Chrome (and some derivatives)**
 
+## 3.4.6
+
+The Ukrainian stripes are replaced by a black stripe of mourning for Queen Elizabeth II.
+
 ## In 3.4.5
 
 Fix bug where updating a Named Segment such that it changes the segment order results

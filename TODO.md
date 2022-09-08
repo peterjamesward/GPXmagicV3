@@ -1,20 +1,6 @@
 
 # BUGS
 
-## Named segments
-
-Something certainly wrong with writing segments. Seen it on Hillingdon with three segments.
-1. Create a segment A.
-2. Create a segment B beyond A.
-3. Select segment A in segment list.
-4. Move pointers to beyond segment B.
-5. "Update" segment A with new locations.
-
-A: Erroneous error message displayed.
-B: Written GPX has points out of order.
-
-Maybe am assuming something about the order of the segments not changing.
-
 --- 
 
 # WIP
@@ -22,10 +8,6 @@ Maybe am assuming something about the order of the segments not changing.
 ---
 
 # BACKLOG
-
-## Adding timestamps with physics
-
-Yes, that.
 
 ## On refactoring Action interpeter in Main.
 
@@ -38,7 +20,7 @@ There's only two or three cases, if not a single general one.
 
 ## Languages
 
-Awaiting French support from Muriel.
+Awaiting French support.
 Possible sign-ups for German, Dutch, Spanish.
 Need more work on number formats.
 
@@ -52,6 +34,10 @@ can be directed to a tool or a view.
 Remove tool-specific stuff in Main.performActions. (WIP)
 
 Put all Font, Colour etc into a Palette/Style module for ease of change.
+
+## Adding timestamps with physics
+
+Yes, that.
 
 ## Land use 3D rendering
 
