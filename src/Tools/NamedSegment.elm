@@ -154,31 +154,30 @@ view location imperial wrapper options track =
                               , width = fillPortion 1
                               , view =
                                     \i t ->
-                                        if Just i == options.selectedSegment then
-                                            row [ spaceEvenly ]
-                                                [ Input.button
-                                                    [ tooltip onLeft (localisedTooltip location toolId "update")
-                                                    ]
-                                                    { label = useIcon FeatherIcons.checkCircle
-                                                    , onPress = Just <| wrapper UpdateSegment
-                                                    }
-                                                , Input.button
-                                                    [ tooltip onLeft (localisedTooltip location toolId "delete")
-                                                    ]
-                                                    { label = useIcon FeatherIcons.trash2
-                                                    , onPress = Just <| wrapper DeleteSegment
-                                                    }
-                                                ]
+                                        row [ spaceEvenly ] <|
+                                            Input.button
+                                                [ tooltip onLeft (localisedTooltip location toolId "show") ]
+                                                { label = useIcon FeatherIcons.eye
+                                                , onPress = Just <| wrapper (SelectSegment i)
+                                                }
+                                                :: (if Just i == options.selectedSegment then
+                                                        [ Input.button
+                                                            [ tooltip onLeft (localisedTooltip location toolId "update")
+                                                            ]
+                                                            { label = useIcon FeatherIcons.checkCircle
+                                                            , onPress = Just <| wrapper UpdateSegment
+                                                            }
+                                                        , Input.button
+                                                            [ tooltip onLeft (localisedTooltip location toolId "delete")
+                                                            ]
+                                                            { label = useIcon FeatherIcons.trash2
+                                                            , onPress = Just <| wrapper DeleteSegment
+                                                            }
+                                                        ]
 
-                                        else
-                                            row [ spaceEvenly ]
-                                                [ Input.button
-                                                    [ tooltip onLeft (localisedTooltip location toolId "show")
-                                                    ]
-                                                    { label = useIcon FeatherIcons.eye
-                                                    , onPress = Just <| wrapper (SelectSegment i)
-                                                    }
-                                                ]
+                                                    else
+                                                        []
+                                                   )
                               }
                             ]
                         }

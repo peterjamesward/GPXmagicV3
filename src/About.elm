@@ -3,9 +3,13 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.4.4 (69aab686)
+# GPXmagic v3.4.6 (69aab686)
 
 **GPXmagic V3 works (by far) best with Chrome (and some derivatives)**
+
+## 3.4.7
+
+In Named Segments, the "eye" icon is always visible for all segments. Thanks, Jan Langkjær Hansen.
 
 ## 3.4.6
 
