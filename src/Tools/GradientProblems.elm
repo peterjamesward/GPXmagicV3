@@ -244,7 +244,7 @@ update msg options previewColour hasTrack =
                     Maybe.withDefault ( 0, 0 ) <|
                         List.Extra.getAt breachIndex newOptions.breaches
             in
-            ( newOptions, [ SetCurrent position ] )
+            ( newOptions, [ SetCurrent position, MapCenterOnCurrent ] )
 
         ViewPrevious ->
             let
@@ -258,10 +258,10 @@ update msg options previewColour hasTrack =
                     Maybe.withDefault ( 0, 0 ) <|
                         List.Extra.getAt breachIndex newOptions.breaches
             in
-            ( newOptions, [ SetCurrent position ] )
+            ( newOptions, [ SetCurrent position, MapCenterOnCurrent ] )
 
         SetCurrentPosition position ->
-            ( options, [ SetCurrent position ] )
+            ( options, [ SetCurrent position, MapCenterOnCurrent ] )
 
         SetThreshold value ->
             let

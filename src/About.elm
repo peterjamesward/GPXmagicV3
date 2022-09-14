@@ -3,9 +3,14 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.4.7 (80775357)
+# GPXmagic v3.4.8 (80775357)
 
 **GPXmagic V3 works (by far) best with Chrome (and some derivatives)**
+
+## 3.4.8
+
+In Bend Problems and Gradient Problems, clicking on the next / current / previous buttons
+will centre the Map view on the problem, regardless of the status of the padlock in the view.
 
 ## 3.4.7
 

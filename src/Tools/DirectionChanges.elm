@@ -289,7 +289,7 @@ update msg options previewColour track =
                             Maybe.withDefault ( 0, Angle.degrees 0 ) <|
                                 List.Extra.getAt breachIndex newOptions.singlePointBreaches
                     in
-                    ( newOptions, [ SetCurrent position ] )
+                    ( newOptions, [ SetCurrent position, MapCenterOnCurrent ] )
 
                 DirectionChangeWithRadius ->
                     let
@@ -308,7 +308,7 @@ update msg options previewColour track =
                             ( newOptions, [] )
 
                         position :: _ ->
-                            ( newOptions, [ SetCurrent position ] )
+                            ( newOptions, [ SetCurrent position, MapCenterOnCurrent ] )
 
         ViewPrevious ->
             case options.mode of
@@ -324,7 +324,7 @@ update msg options previewColour track =
                             Maybe.withDefault ( 0, Angle.degrees 0 ) <|
                                 List.Extra.getAt breachIndex newOptions.singlePointBreaches
                     in
-                    ( newOptions, [ SetCurrent position ] )
+                    ( newOptions, [ SetCurrent position, MapCenterOnCurrent ] )
 
                 DirectionChangeWithRadius ->
                     let
@@ -343,15 +343,15 @@ update msg options previewColour track =
                             ( newOptions, [] )
 
                         position :: _ ->
-                            ( newOptions, [ SetCurrent position ] )
+                            ( newOptions, [ SetCurrent position, MapCenterOnCurrent ] )
 
         SetCurrentPosition position ->
             case options.mode of
                 DirectionChangeAbrupt ->
-                    ( options, [ SetCurrent position ] )
+                    ( options, [ SetCurrent position, MapCenterOnCurrent ] )
 
                 DirectionChangeWithRadius ->
-                    ( options, [ SetCurrent position ] )
+                    ( options, [ SetCurrent position, MapCenterOnCurrent ] )
 
         SetThreshold angle ->
             let
@@ -612,6 +612,7 @@ view location imperial msgWrapper options isTrack =
                         { onPress = Just (msgWrapper NudgeOne)
                         , label = i18n "adjust"
                         }
+
                     --    }
                     ]
 
