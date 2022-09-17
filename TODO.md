@@ -1,6 +1,8 @@
 
 # BUGS
 
+Map projection suffering at 60N ??
+
 --- 
 
 # WIP
