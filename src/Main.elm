@@ -994,15 +994,15 @@ view model =
             column [ width fill, height fill ]
                 [ el
                     [ width fill
-                    , Border.widthEach { edges | bottom = 6 }
-                    , Border.color black --ukraineBlue
+                    , Border.widthEach { edges | bottom = 1 }
+                    , Border.color ukraineBlue
                     ]
                   <|
                     topLoadingBar model
                 , el
                     [ width fill
-                    , Border.widthEach { edges | top = 6 }
-                    , Border.color black --ukraineYellow
+                    , Border.widthEach { edges | top = 1 }
+                    , Border.color ukraineYellow
                     ]
                   <|
                     html <|
