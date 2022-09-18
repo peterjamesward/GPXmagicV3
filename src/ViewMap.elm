@@ -35,7 +35,8 @@ type Msg
 
 
 type MapStyle
-    = MapStreets
+    = MapBasic
+    | MapStreets
     | MapSatellite
     | MapSatelliteStreets
     | MapOutdoors
@@ -44,6 +45,9 @@ type MapStyle
 mapUrl : MapStyle -> String
 mapUrl style =
     case style of
+        MapBasic ->
+            "mapbox://styles/peterjamesward/ckj0benrl8i1k19rp4m1t3pkz"
+
         MapStreets ->
             "mapbox://styles/mapbox/streets-v11"
 
@@ -198,6 +202,7 @@ view location ( viewWidth, viewHeight ) mContext msgWrapper =
                     , options =
                         [ Input.option MapStreets (text "Streets")
                         , Input.option MapOutdoors (text "Outdoors")
+                        , Input.option MapBasic (text "Basic")
                         , Input.option MapSatellite (text "Satellite")
                         , Input.option MapSatelliteStreets (text "Satellite streets")
                         ]

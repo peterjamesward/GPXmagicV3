@@ -3,9 +3,17 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.4.8 (266d38b2)
+# GPXmagic v3.4.9 (266d38b2)
 
 **GPXmagic V3 works (by far) best with Chrome (and some derivatives)**
+
+## 3.4.9
+
+Bumps the Mapbox component from v2.6 to v2.10.
+
+Switches to "globe" projection instead of Mercator.
+
+Added a new "Basic" map option with no terrain.
 
 ## 3.4.8
 

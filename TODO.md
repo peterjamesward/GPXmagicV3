@@ -1,7 +1,13 @@
 
 # BUGS
 
-Map projection suffering at 60N ??
+Map projection suffering at 60N ?? No, not a bug.
+
+Artefact of elevation on map view. Helicopter view needs a tweak.
+
+Add 2D map style option!!
+map style terrain exaggeration = 0 should fix it.
+No. Are there standard styles with no elevation??
 
 --- 
 
