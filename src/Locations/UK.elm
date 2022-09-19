@@ -435,6 +435,7 @@ Also, access a quick description of what the tool does and how (and when) to use
                 , ( "limit", """limit gradients""" )
                 , ( "altitudes", """smooth altitudes""" )
                 , ( "gradients", """smooth gradients""" )
+                , ( "move", """relocate""" )
                 , ( "scale", """rotate and scale""" )
                 , ( "elevations", """use altitudes from map""" )
                 , ( "segment", """insert segment from Strava""" )
