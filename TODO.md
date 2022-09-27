@@ -1,16 +1,9 @@
 
 # BUGS
 
-## Map projection suffering at 60N ?? 
+## Strava route not showing on Map!
 
-No, not a bug.
-Artefact of elevation on map view. Helicopter view needs a tweak.
-
-Add 2D map style option!!
-map style terrain exaggeration = 0 should fix it.
-No. Are there standard styles with no elevation??
-
-## No Undo text for route move.
+## File open not working after Strava route loaded.
 
 --- 
 

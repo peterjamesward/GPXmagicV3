@@ -2510,7 +2510,7 @@ performActionsOnModel actions model =
 
                 ( LoadGpxFromStrava gpxContent, _ ) ->
                     let
-                        ( modelWithNewTrack, _ ) =
+                        ( modelWithNewTrack, innerActions ) =
                             update (GpxLoaded gpxContent) foldedModel
                     in
                     modelWithNewTrack
@@ -2891,6 +2891,9 @@ performActionCommands actions model =
                     Task.perform message (File.toString file)
 
                 ( TrackFromGpx gpxContent, Just track ) ->
+                    showTrackOnMapCentered model.mapPointsDraggable track
+
+                ( LoadGpxFromStrava gpxContent, Just track ) ->
                     showTrackOnMapCentered model.mapPointsDraggable track
 
                 ( RequestStravaRouteHeader msg routeId token, _ ) ->
