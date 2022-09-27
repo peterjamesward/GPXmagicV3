@@ -1,10 +1,6 @@
 
 # BUGS
 
-## Strava route not showing on Map!
-
-## File open not working after Strava route loaded.
-
 --- 
 
 # WIP

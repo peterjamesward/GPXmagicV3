@@ -1,14 +1,19 @@
 module Tools.StravaDataLoad exposing (..)
 
+import Angle
 import BoundingBox2d
 import BoundingBox3d exposing (BoundingBox3d)
+import Direction2d
+import DomainModel
 import Http
 import Json.Decode as D exposing (Decoder, field)
 import Length
 import LocalCoords exposing (LocalCoords)
 import OAuth exposing (Token, errorCodeToString, tokenToString, useToken)
 import Point2d
+import Spherical
 import Tools.StravaTypes as StravaTypes exposing (..)
+import TrackLoaded exposing (TrackLoaded)
 import Url.Builder as Builder exposing (string)
 import UtilsForViews exposing (httpErrorString)
 
@@ -54,33 +59,43 @@ requestStravaSegment msg segmentId token =
 
 stravaProcessSegment :
     Result Http.Error StravaSegment
-    -> BoundingBox3d Length.Meters LocalCoords
+    -> TrackLoaded msg
     -> StravaSegmentStatus
-stravaProcessSegment response box =
+stravaProcessSegment response track =
     let
-        { minX, maxX, minY, maxY, minZ, maxZ } =
-            BoundingBox3d.extrema box
-
-        segmentInBox segment =
-            let
-                flatBox =
-                    BoundingBox2d.fromExtrema { minX = minX, maxX = maxX, minY = minY, maxY = maxY }
-            in
+        isNearTheTrack segment =
             case ( segment.start_latlng, segment.end_latlng ) of
                 ( [ start_latitude, start_longitude ], [ end_latitude, end_longitude ] ) ->
-                    BoundingBox2d.contains
-                        (Point2d.meters start_longitude start_latitude)
-                        flatBox
-                        && BoundingBox2d.contains
-                            (Point2d.meters start_longitude start_latitude)
-                            flatBox
+                    let
+                        gpxPoint =
+                            { longitude = Direction2d.fromAngle <| Angle.degrees start_longitude
+                            , latitude = Angle.degrees start_latitude
+                            , altitude = Length.meters 0.0
+                            , timestamp = Nothing
+                            }
+
+                        index =
+                            DomainModel.nearestToLonLat
+                                gpxPoint
+                                track.currentPosition
+                                track.trackTree
+                                track.referenceLonLat
+                                track.leafIndex
+
+                        nearestGps =
+                            DomainModel.gpxPointFromIndex index track.trackTree
+                    in
+                    Spherical.range
+                        ( Angle.degrees start_longitude, Angle.degrees start_latitude )
+                        ( Direction2d.toAngle nearestGps.longitude, nearestGps.latitude )
+                        < 100
 
                 _ ->
                     False
     in
     case response of
         Ok segment ->
-            if segmentInBox segment then
+            if isNearTheTrack segment then
                 SegmentOk segment
 
             else

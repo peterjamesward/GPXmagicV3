@@ -3,9 +3,15 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.4.9 (2f12a628)
+# GPXmagic v3.4.10 (2f12a628)
 
 **GPXmagic V3 works (by far) best with Chrome (and some derivatives)**
+
+## 3.4.10
+
+Displays route on Map when route loaded from Strava.
+
+Corrected segment proximity to route check that was failing in Southern hemisphere.
 
 ## 3.4.9
 

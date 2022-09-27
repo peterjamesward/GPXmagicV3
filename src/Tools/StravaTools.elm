@@ -207,7 +207,7 @@ update msg settings wrap track =
                         | externalSegment =
                             stravaProcessSegment
                                 response
-                                (boundingBox isTrack.trackTree)
+                                isTrack
                       }
                     , []
                     )
