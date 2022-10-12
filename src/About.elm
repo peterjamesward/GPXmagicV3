@@ -7,6 +7,14 @@ aboutText =
 
 **GPXmagic V3 works (by far) best with Chrome (and some derivatives)**
 
+## 3.4.11
+
+Small changes to Move, Scale, Rotate:
+
+* Track length matches current length when tool is opened.
+* Track length can be adjusted in 10m or 17.6 yard increments (click on the slider then use the
+left and right arrows to adjust finely.)
+
 ## 3.4.10
 
 Displays route on Map when route loaded from Strava.

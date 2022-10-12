@@ -596,11 +596,13 @@ other uses as well, but this was the justification.
                 , ( "rotation", """Rotation: {0}""" )
                 , ( "imperial", """Length {0} miles""" )
                 , ( "metric", """Length {0} km""" )
+                , ( "yards", """{0} yards""" )
+                , ( "metres", """{0} m""" )
                 , ( "apply", """Rotate and Scale""" )
                 , ( "move", """Move to
 {0}
 {1}""" )
-                , ( "Zero", "Zero sliders" )
+                , ( "Zero", "Reset sliders" )
                 , ( "elevations", """Use elevations from Mapbox""" )
                 , ( "info"
                   , """

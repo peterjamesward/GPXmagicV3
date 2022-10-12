@@ -325,15 +325,21 @@ view location imperial options wrapper maybeTrack =
                             if imperial then
                                 String.Interpolate.interpolate
                                     (I18N.localisedString location toolId "imperial")
-                                    [ showDecimal0 <| Length.inMiles options.desiredTrackLength ]
+                                    [ showDecimal2 <| Length.inMiles options.desiredTrackLength ]
 
                             else
                                 String.Interpolate.interpolate
                                     (I18N.localisedString location toolId "metric")
-                                    [ showDecimal0 <| Length.inKilometers options.desiredTrackLength ]
+                                    [ showDecimal2 <| Length.inKilometers options.desiredTrackLength ]
                 , min = 1.0
                 , max = 100.0
-                , step = Just 1.0
+                , step =
+                    Just <|
+                        if imperial then
+                            Length.inKilometers <| Length.yards 17.6
+
+                        else
+                            Length.inKilometers <| Length.meters 10
                 , value = Length.inKilometers options.desiredTrackLength
                 , thumb = Input.defaultThumb
                 }
