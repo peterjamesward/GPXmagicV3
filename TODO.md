@@ -5,11 +5,21 @@
 
 # WIP
 
+## Move, Scale, Rotate
+
+1. On opening tool, set length to current length.
+2. Another slider for metres/yards (multiples of 10).
+
 ---
 
 # BACKLOG
 
-## On refactoring Action interpeter in Main.
+## Estimate duration
+
+Show estimated time for route given wattage and rider weight.
+Not full physics, just allow for gradient on each section.
+
+## On refactoring Action interpreter in Main.
 
 Main difference is how the pointers are repositioned.
 There's only two or three cases, if not a single general one.
@@ -34,10 +44,6 @@ can be directed to a tool or a view.
 Remove tool-specific stuff in Main.performActions. (WIP)
 
 Put all Font, Colour etc into a Palette/Style module for ease of change.
-
-## Adding timestamps with physics
-
-Yes, that.
 
 ## Land use 3D rendering
 

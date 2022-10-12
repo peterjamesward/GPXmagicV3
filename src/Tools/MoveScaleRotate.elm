@@ -58,8 +58,12 @@ toolStateChange :
 toolStateChange opened colour options track =
     case ( opened, track ) of
         ( True, Just theTrack ) ->
-            ( options
-            , actions options colour theTrack
+            let
+                newSettings =
+                    { defaultOptions | desiredTrackLength = DomainModel.trueLength theTrack.trackTree }
+            in
+            ( newSettings
+            , actions newSettings colour theTrack
             )
 
         _ ->

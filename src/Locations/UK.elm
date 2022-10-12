@@ -803,6 +803,8 @@ keeping the altitudes and squishing the points up increases gradients.
                 [ ( "label", """Strava""" )
                 , ( "segmenttip", """Paste in a segment number or URL""" )
                 , ( "segmentid", """Segment ID""" )
+                , ( "altitude", """Match start altitude""")
+                , ( "altitudeHelp", """Adjust segment elevations to match the route""")
                 , ( "routetip", """Paste in a route number or URL""" )
                 , ( "routeid", """Route or Activity ID""" )
                 , ( "preview", """Preview""" )

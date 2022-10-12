@@ -51,6 +51,7 @@ type Msg
     | ClearSegment
     | ConnectionInfo O.Token
     | DisplayInfo String String
+    | SetAltitudeMatch Bool
 
 
 defaultOptions : Options
@@ -64,6 +65,7 @@ defaultOptions =
     , stravaStreams = Nothing
     , lastHttpError = Nothing
     , preview = []
+    , adjustSegmentAltitude = True
     }
 
 
@@ -122,6 +124,30 @@ update msg settings wrap track =
               }
             , []
             )
+
+        SetAltitudeMatch match ->
+            case ( track, settings.stravaStreams, settings.externalSegment ) of
+                ( Just isTrack, Just streams, SegmentOk segment ) ->
+                    let
+                        newSettings =
+                            { settings | adjustSegmentAltitude = match }
+
+                        withNewPreview =
+                            { newSettings
+                                | preview =
+                                    pointsFromStreams
+                                        isTrack
+                                        settings
+                                        segment
+                                        streams
+                            }
+                    in
+                    ( withNewPreview
+                    , previewActions withNewPreview stravaOrange isTrack
+                    )
+
+                _ ->
+                    ( { settings | adjustSegmentAltitude = match }, [] )
 
         LoadExternalRoute ->
             -- It's a bit convoluted because a tool cannot issue commands, but
@@ -240,6 +266,7 @@ update msg settings wrap track =
                                 , preview =
                                     pointsFromStreams
                                         isTrack
+                                        settings
                                         segment
                                         streams
                             }
@@ -386,10 +413,11 @@ trackFromActivity header streams =
 
 pointsFromStreams :
     TrackLoaded msg
+    -> Options
     -> StravaSegment
     -> StravaSegmentStreams
     -> List PreviewPoint
-pointsFromStreams track segment streams =
+pointsFromStreams track options segment streams =
     -- We need to apply the base point shift but using the original base point.
     -- We can fudge this by consing it to the track.
     let
@@ -404,13 +432,30 @@ pointsFromStreams track segment streams =
                 track.referenceLonLat
                 track.leafIndex
 
+        altitudeAdjustment =
+            let
+                altitudeInRoute =
+                    DomainModel.gpxPointFromIndex fromStart track.trackTree
+                        |> .altitude
+                        |> Length.inMeters
+
+                segmentAltitude =
+                    List.head streams.altitude.data
+                        |> Maybe.withDefault altitudeInRoute
+            in
+            if options.adjustSegmentAltitude then
+                altitudeInRoute - segmentAltitude
+
+            else
+                0
+
         asGpx =
             List.map2
                 (\latLon alt ->
                     GPXSource
                         (Direction2d.fromAngle <| Angle.degrees latLon.lng)
                         (Angle.degrees latLon.lat)
-                        (Length.meters alt)
+                        (Length.meters <| alt + altitudeAdjustment)
                         Nothing
                 )
                 streams.latLngs.data
@@ -443,7 +488,7 @@ paste :
     -> ( Maybe PeteTree, List GPXSource, ( Int, Int ) )
 paste options track =
     -- This will auto-reverse the segment if needed to match our direction of travel.
-    -- That's just based on track indexes. Might be a proble if we traverse it
+    -- That's just based on track indexes. Might be a problem if we traverse it
     -- more than once, but let's park that thought.
     case ( options.externalSegment, options.preview ) of
         ( SegmentPreviewed segment, x1 :: xs ) ->
@@ -482,12 +527,36 @@ paste options track =
                     else
                         ( options.preview, pStartingTrackPoint, pEndingTrackPoint )
 
+                altitudeAdjustment =
+                    let
+                        altitudeInRoute =
+                            DomainModel.gpxPointFromIndex pStartingTrackPoint track.trackTree
+                                |> .altitude
+
+                        segmentAltitude =
+                            case readyToPaste of
+                                head :: rest ->
+                                    head.gpx.altitude
+
+                                [] ->
+                                    altitudeInRoute
+                    in
+                    altitudeInRoute |> Quantity.minus segmentAltitude
+
+                adjustAltitude : GPXSource -> GPXSource
+                adjustAltitude gps =
+                    if options.adjustSegmentAltitude then
+                        { gps | altitude = gps.altitude |> Quantity.plus altitudeAdjustment }
+
+                    else
+                        gps
+
                 newTree =
                     DomainModel.replaceRange
                         useStart
                         (skipCount track.trackTree - useEnd)
                         track.referenceLonLat
-                        (List.map .gpx readyToPaste)
+                        (List.map (adjustAltitude << .gpx) readyToPaste)
                         track.trackTree
 
                 oldPoints =
@@ -525,7 +594,7 @@ viewStravaTab location options wrap track =
 
         routeIdField =
             Input.text
-                [ width <| px 150 ]
+                [ width (minimum 150 <| fill) ]
                 { onChange = wrap << UserChangedRouteId
                 , text = options.externalRouteId
                 , placeholder = Just <| Input.placeholder [] <| i18n "routeid"
@@ -563,6 +632,17 @@ viewStravaTab location options wrap track =
 
                 _ ->
                     none
+
+        segmentAltitudeMatch =
+            Input.checkbox
+                [ padding 5
+                , spacing 5
+                ]
+                { onChange = wrap << SetAltitudeMatch
+                , checked = options.adjustSegmentAltitude
+                , label = Input.labelRight [] <| i18n "altitude"
+                , icon = Input.defaultCheckbox
+                }
 
         clearButton =
             case options.externalSegment of
@@ -641,14 +721,15 @@ viewStravaTab location options wrap track =
         case ( options.stravaStatus, track ) of
             ( StravaConnected token, Just _ ) ->
                 [ stravaLink
-                , row [ spacing 10 ]
+                , wrappedRow [ spacing 10 ]
                     [ routeIdField
                     , routeButton
                     , activityButton
                     ]
-                , row [ spacing 10 ]
+                , wrappedRow [ spacing 10 ]
                     [ segmentIdField
                     , segmentButton
+                    , segmentAltitudeMatch
                     ]
                 , clearButton
                 , segmentInfo

@@ -17,6 +17,7 @@ type alias Options =
     , stravaStreams : Maybe StravaSegmentStreams
     , lastHttpError : Maybe Http.Error
     , preview : List PreviewPoint
+    , adjustSegmentAltitude : Bool
     }
 
 
