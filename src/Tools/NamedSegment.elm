@@ -5,6 +5,7 @@ module Tools.NamedSegment exposing (..)
 -- of track points multiple times and in each direction.
 
 import Actions exposing (ToolAction)
+import Dict
 import DomainModel exposing (RoadSection)
 import Element exposing (..)
 import Element.Background as Background
@@ -17,13 +18,14 @@ import FlatColors.ChinesePalette
 import Length exposing (Meters)
 import List.Extra
 import Quantity exposing (Quantity)
+import String.Interpolate
 import ToolTip exposing (localisedTooltip, tooltip)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.NamedSegmentOptions exposing (NamedSegment, Options)
 import TrackLoaded exposing (TrackLoaded)
-import UtilsForViews exposing (showDecimal2, showLongMeasure, showShortMeasure)
-import ViewPureStyles exposing (neatToolsBorder, rgtDark, rgtPurple, useIcon, useIconWithSize)
+import UtilsForViews exposing (showDecimal0, showDecimal2, showLongMeasure, showShortMeasure)
+import ViewPureStyles exposing (infoButton, neatToolsBorder, rgtDark, rgtPurple, sliderThumb, useIcon, useIconWithSize)
 
 
 toolId =
@@ -34,6 +36,7 @@ defaultOptions : Options
 defaultOptions =
     { selectedSegment = Nothing
     , namedSegments = []
+    , landUseProximity = Nothing
     }
 
 
@@ -44,12 +47,16 @@ type Msg
     | ChangeName Int String
     | DeleteSegment
     | CreateSegment
+    | EnableAutoSuggest Bool
+    | LandUseProximity Length.Length
+    | DisplayInfo String String
 
 
 initialise : List NamedSegment -> Options
 initialise segments =
     { namedSegments = segments
     , selectedSegment = Nothing
+    , landUseProximity = Nothing
     }
 
 
@@ -251,6 +258,52 @@ view location imperial wrapper options track =
                     , label = i18n "create"
                     }
 
+        autoSuggestButton =
+            -- If we have named places from Land Use, they may provide segment names.
+            el [ centerX ] <|
+                if Dict.isEmpty track.landUseData.places then
+                    none
+
+                else
+                    column []
+                        [ row []
+                            [ Input.checkbox
+                                [ padding 5
+                                , spacing 5
+                                ]
+                                { onChange = wrapper << EnableAutoSuggest
+                                , checked = options.landUseProximity /= Nothing
+                                , label = Input.labelRight [] <| i18n "landuse"
+                                , icon = Input.defaultCheckbox
+                                }
+                            , infoButton (wrapper <| DisplayInfo toolId "landusetip")
+                            ]
+                        , if options.landUseProximity == Nothing then
+                            none
+
+                          else
+                            Input.slider
+                                ViewPureStyles.shortSliderStyles
+                                { onChange = Length.meters >> LandUseProximity >> wrapper
+                                , value =
+                                    Maybe.map Length.inMeters options.landUseProximity
+                                        |> Maybe.withDefault 0
+                                , label =
+                                    Input.labelBelow [] <|
+                                        text <|
+                                            String.Interpolate.interpolate
+                                                (I18N.localisedString location toolId "proximity")
+                                                [ showDecimal0 <|
+                                                    Maybe.withDefault 0 <|
+                                                        Maybe.map Length.inMeters options.landUseProximity
+                                                ]
+                                , min = 10
+                                , max = 1000
+                                , step = Just 10
+                                , thumb = sliderThumb
+                                }
+                        ]
+
         goodSeparation : List NamedSegment -> Bool
         goodSeparation segs =
             -- Note the list should be sorted beforehand!
@@ -313,6 +366,7 @@ view location imperial wrapper options track =
             [ segmentsTable
             , selectedSegmentDetail
             , newSegmentButton
+            , autoSuggestButton
             , overlapWarning
             , duplicateWarning
             ]
@@ -338,6 +392,9 @@ update msg options track wrapper =
     case msg of
         NoOp ->
             ( { options | selectedSegment = Nothing }, [] )
+
+        DisplayInfo tool tag ->
+            ( options, [ Actions.DisplayInfo tool tag ] )
 
         SelectSegment seg ->
             case List.Extra.getAt seg options.namedSegments of
@@ -441,6 +498,25 @@ update msg options track wrapper =
                     }
             in
             ( addSegment newSegment options
+            , []
+            )
+
+        LandUseProximity distance ->
+            ( { options | landUseProximity = Just distance }
+            , []
+            )
+
+        EnableAutoSuggest enabled ->
+            -- Add segments based on nearby Land Use names.
+            ( { options
+                | landUseProximity =
+                    case enabled of
+                        True ->
+                            Just <| Length.meters 50
+
+                        False ->
+                            Nothing
+              }
             , []
             )
 

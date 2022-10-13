@@ -7,6 +7,7 @@ import Quantity exposing (Quantity)
 type alias Options =
     { selectedSegment : Maybe Int
     , namedSegments : List NamedSegment
+    , landUseProximity : Maybe Length.Length
     }
 
 

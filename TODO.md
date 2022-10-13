@@ -5,10 +5,10 @@
 
 # WIP
 
-## Move, Scale, Rotate
+## Use POIs for named segments
 
-1. On opening tool, set length to current length.
-2. Another slider for metres/yards (multiples of 10).
+1. For each named POI find nearest track point.
+2. Create named segments with "some" length, not too close together.
 
 ---
 

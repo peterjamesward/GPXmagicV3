@@ -928,6 +928,15 @@ It's also _really_ good at removing noise from IRL rides.
                 , ( "update", """Update with current marker positions""" )
                 , ( "delete", """Delete this segment (no Undo!)""" )
                 , ( "create", """Create from markers""" )
+                , ( "landuse", """Use nearby named places""" )
+                , ( "proximity", """Within {0} metres""")
+                , ( "landusetip", """If Land Use data are available, this attempts to
+derive segments from named features near the route.
+
+As you increase the threshold, features further away are preferred and will create
+longer segments than those closer to the route.
+
+Note that each time you change the threshold, **all** previous segments will be forgotten.""")
                 , ( "newname", """TYPE NAME HERE""" )
                 , ( "warning", """
 Named segments should be at least 110m from the start, 190m from the end, and at least 50m apart.
