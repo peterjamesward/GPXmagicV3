@@ -8,6 +8,7 @@ type alias Options =
     { selectedSegment : Maybe Int
     , namedSegments : List NamedSegment
     , landUseProximity : Maybe Length.Length
+    , landUsePreferCloser : Bool
     }
 
 

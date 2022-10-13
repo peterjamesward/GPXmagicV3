@@ -37,6 +37,7 @@ defaultOptions =
     { selectedSegment = Nothing
     , namedSegments = []
     , landUseProximity = Nothing
+    , landUsePreferCloser = False
     }
 
 
@@ -48,6 +49,7 @@ type Msg
     | DeleteSegment
     | CreateSegment
     | EnableAutoSuggest Bool
+    | TogglePreferCloser Bool
     | LandUseProximity Length.Length
     | DisplayInfo String String
 
@@ -57,6 +59,7 @@ initialise segments =
     { namedSegments = segments
     , selectedSegment = Nothing
     , landUseProximity = Nothing
+    , landUsePreferCloser = False
     }
 
 
@@ -262,7 +265,7 @@ view location imperial wrapper options track =
             -- If we have named places from Land Use, they may provide segment names.
             el [ centerX ] <|
                 if Dict.isEmpty track.landUseData.places then
-                    none
+                    i18n "nolanduse"
 
                 else
                     column []
@@ -301,6 +304,19 @@ view location imperial wrapper options track =
                                 , max = 1000
                                 , step = Just 10
                                 , thumb = sliderThumb
+                                }
+                        , if options.landUseProximity == Nothing then
+                            none
+
+                          else
+                            Input.checkbox
+                                [ padding 5
+                                , spacing 5
+                                ]
+                                { onChange = wrapper << TogglePreferCloser
+                                , checked = options.landUsePreferCloser
+                                , label = Input.labelRight [] <| i18n "closer"
+                                , icon = Input.defaultCheckbox
                                 }
                         ]
 
@@ -517,6 +533,11 @@ update msg options track wrapper =
                         False ->
                             Nothing
               }
+            , []
+            )
+
+        TogglePreferCloser bool ->
+            ( { options | landUsePreferCloser = bool }
             , []
             )
 

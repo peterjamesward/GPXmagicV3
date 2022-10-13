@@ -929,12 +929,15 @@ It's also _really_ good at removing noise from IRL rides.
                 , ( "delete", """Delete this segment (no Undo!)""" )
                 , ( "create", """Create from markers""" )
                 , ( "landuse", """Use nearby named places""" )
+                , ( "nolanduse", """Waiting for Land Use data""")
+                , ( "closer", """Prefer closer places""")
                 , ( "proximity", """Within {0} metres""")
                 , ( "landusetip", """If Land Use data are available, this attempts to
 derive segments from named features near the route.
 
 As you increase the threshold, features further away are preferred and will create
-longer segments than those closer to the route.
+longer segments than those closer to the route. You can switch this behaviour to prefer
+closer places.
 
 Note that each time you change the threshold, **all** previous segments will be forgotten.""")
                 , ( "newname", """TYPE NAME HERE""" )
