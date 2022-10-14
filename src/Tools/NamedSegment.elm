@@ -110,7 +110,7 @@ view location imperial wrapper options track =
             in
             column
                 [ width <| maximum 500 fill
-                , height <| px 150
+                --, height <| px 150
                 , spacing 10
                 , padding 5
                 , Border.width 2
