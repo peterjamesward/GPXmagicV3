@@ -7,8 +7,11 @@
 
 ## Use POIs for named segments
 
-1. For each named POI find nearest track point.
-2. Create named segments with "some" length, not too close together.
+1. Distinguish between Auto and Manual segments.
+2. Do not erase Manual.
+3. Edit Auto becomes Manual.
+4. Do not erase Auto when disable auto mode.
+5. Try highlight showing all starts & ends.
 
 ---
 

@@ -110,6 +110,7 @@ view location imperial wrapper options track =
             in
             column
                 [ width <| maximum 500 fill
+
                 --, height <| px 150
                 , spacing 10
                 , padding 5
@@ -527,18 +528,25 @@ update msg options track wrapper =
 
         EnableAutoSuggest enabled ->
             -- Add segments based on nearby Land Use names.
-            ( { options
-                | landUseProximity =
-                    case enabled of
-                        True ->
-                            Just <| Length.meters 50
+            if enabled then
+                ( { options
+                    | landUseProximity =
+                        case enabled of
+                            True ->
+                                Just <| Length.meters 50
 
-                        False ->
-                            Nothing
-              }
-                |> segmentsFromPlaces track
-            , []
-            )
+                            False ->
+                                Nothing
+                  }
+                    |> segmentsFromPlaces track
+                , []
+                )
+
+            else
+                -- when disabling, do npt clear the iist
+                ( { options | landUseProximity = Nothing }
+                , []
+                )
 
         TogglePreferCloser bool ->
             ( { options | landUsePreferCloser = bool }
