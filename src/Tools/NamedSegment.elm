@@ -6,7 +6,7 @@ module Tools.NamedSegment exposing (..)
 
 import Actions exposing (ToolAction)
 import Dict
-import DomainModel exposing (RoadSection)
+import DomainModel exposing (EarthPoint, RoadSection)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -17,6 +17,7 @@ import FlatColors.AmericanPalette
 import FlatColors.ChinesePalette
 import Length exposing (Meters)
 import List.Extra
+import Point3d
 import Quantity exposing (Quantity)
 import String.Interpolate
 import ToolTip exposing (localisedTooltip, tooltip)
@@ -540,6 +541,75 @@ update msg options track wrapper =
             ( { options | landUsePreferCloser = bool }
             , []
             )
+
+
+type alias SegmentCandidate =
+    { name : String
+    , place : EarthPoint
+    , nearestTrackPointIndex : Int
+    , distanceAway : Length.Length
+    }
+
+
+segmentsFromPlaces : TrackLoaded msg -> Options -> Options
+segmentsFromPlaces track options =
+    {-
+       1. Filter names places within threshold.
+       2. Sort by increasing or decreasing distance.
+       3. Folding the segment list across the sorted places:
+           3.1 Find nearest track point
+           3.2 Derive segment start and end (formula TBD)
+           3.3 If not overlapping existing segment, make new segment (also RGT rule check)
+       4. Return track with new segment list.
+    -}
+    let
+        withinThreshold : Length.Length -> SegmentCandidate -> Bool
+        withinThreshold threshold candidate =
+            candidate.distanceAway |> Quantity.lessThanOrEqualTo threshold
+
+        makeCandidate ( name, place ) =
+            let
+                nearestTrackPointIndex =
+                    DomainModel.nearestToEarthPoint place track.currentPosition track.trackTree track.leafIndex
+
+                nearestTrackPoint =
+                    DomainModel.earthPointFromIndex nearestTrackPointIndex track.trackTree
+            in
+            { name = name
+            , place = place
+            , nearestTrackPointIndex = nearestTrackPointIndex
+            , distanceAway = Point3d.distanceFrom place.space nearestTrackPoint.space
+            }
+
+        sortMethod =
+            if options.landUsePreferCloser then
+                .distanceAway >> Length.inMeters
+
+            else
+                .distanceAway >> Quantity.negate >> Length.inMeters
+
+        orderedCandidates =
+            case options.landUseProximity of
+                Just threshold ->
+                    track.landUseData.places
+                        |> Dict.toList
+                        |> List.map makeCandidate
+                        |> List.filter (withinThreshold threshold)
+                        |> List.sortBy sortMethod
+
+                Nothing ->
+                    []
+
+        addSegmentIfNoConflict : SegmentCandidate -> List NamedSegment -> List NamedSegment
+        addSegmentIfNoConflict candidate outputs =
+            outputs
+    in
+    { options
+        | namedSegments =
+            orderedCandidates
+                |> List.foldl addSegmentIfNoConflict []
+                |> List.sortBy (.startDistance >> Length.inMeters)
+    }
 
 
 

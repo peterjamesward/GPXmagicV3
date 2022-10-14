@@ -35,6 +35,7 @@ module DomainModel exposing
     , lngLatPair
     , makeLeaf
     , makeRoadSection
+    , nearestToEarthPoint
     , nearestToLonLat
     , nearestToRay
     , pointFromGpxWithReference
@@ -1059,11 +1060,22 @@ nearestToLonLat click current treeNode referenceLonLat leafIndex =
     let
         asEarthPoint =
             pointFromGpxWithReference referenceLonLat click
-
-        asRay =
-            Axis3d.withDirection Direction3d.negativeZ asEarthPoint.space
     in
-    nearestToRay asRay treeNode leafIndex current
+    nearestToEarthPoint asEarthPoint current treeNode leafIndex
+
+
+nearestToEarthPoint :
+    EarthPoint
+    -> Int
+    -> PeteTree
+    -> LeafIndex
+    -> Int
+nearestToEarthPoint earthPoint current treeNode leafIndex =
+    let
+        ray =
+            Axis3d.withDirection Direction3d.negativeZ earthPoint.space
+    in
+    nearestToRay ray treeNode leafIndex current
 
 
 lngLatPair : ( Angle, Angle, Length.Length ) -> E.Value
