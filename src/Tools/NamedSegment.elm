@@ -24,7 +24,7 @@ import String.Interpolate
 import ToolTip exposing (localisedTooltip, tooltip)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
-import Tools.NamedSegmentOptions exposing (NamedSegment, Options)
+import Tools.NamedSegmentOptions exposing (CreateMode(..), NamedSegment, Options)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showDecimal0, showDecimal2, showLongMeasure, showShortMeasure)
 import ViewPureStyles exposing (infoButton, neatToolsBorder, rgtDark, rgtPurple, sliderThumb, useIcon, useIconWithSize)
@@ -456,6 +456,7 @@ update msg options track wrapper =
                                     { segment
                                         | startDistance = DomainModel.distanceFromIndex fromStart track.trackTree
                                         , endDistance = DomainModel.distanceFromIndex endIndex track.trackTree
+                                        , createMode = ManualSegment
                                     }
                             in
                             ( { options
@@ -514,6 +515,7 @@ update msg options track wrapper =
                             (DomainModel.skipCount track.trackTree - fromEnd)
                             track.trackTree
                     , name = "ENTER NAME HERE"
+                    , createMode = ManualSegment
                     }
             in
             ( addSegment newSegment options
@@ -575,6 +577,11 @@ segmentsFromPlaces track options =
        4. Return track with new segment list.
     -}
     let
+        retainedSegments =
+            -- Always scrap previously auto-found segments.
+            options.namedSegments
+                |> List.filter (\seg -> seg.createMode == ManualSegment)
+
         withinThreshold : Length.Length -> SegmentCandidate -> Bool
         withinThreshold threshold candidate =
             candidate.distanceAway |> Quantity.lessThanOrEqualTo threshold
@@ -674,13 +681,14 @@ segmentsFromPlaces track options =
                 { name = candidate.name
                 , startDistance = actualStart
                 , endDistance = actualEnd
+                , createMode = AutoSegment
                 }
                     :: outputs
     in
     { options
         | namedSegments =
             orderedCandidates
-                |> List.foldl addSegmentIfNoConflict []
+                |> List.foldl addSegmentIfNoConflict retainedSegments
                 |> List.sortBy (.startDistance >> Length.inMeters)
     }
 

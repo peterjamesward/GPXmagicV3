@@ -12,7 +12,7 @@ import Point3d
 import PreviewData exposing (PreviewPoint)
 import Quantity exposing (Quantity)
 import SpatialIndex
-import Tools.NamedSegmentOptions exposing (NamedSegment)
+import Tools.NamedSegmentOptions exposing (CreateMode(..), NamedSegment)
 import UtilsForViews
 
 
@@ -118,6 +118,7 @@ trackFromSegments trackName ( allPoints, segments ) =
                                 { startDistance = seg1.startDistance
                                 , endDistance = seg2.endDistance
                                 , name = seg1.name
+                                , createMode = ManualSegment
                                 }
                         in
                         combineContiguousSameNameSegments (combined :: more)
@@ -134,6 +135,7 @@ trackFromSegments trackName ( allPoints, segments ) =
             { startDistance = distanceFromIndex offset track.trackTree
             , endDistance = distanceFromIndex nextOffset track.trackTree
             , name = name
+            , createMode = ManualSegment
             }
     in
     case baseTrack of

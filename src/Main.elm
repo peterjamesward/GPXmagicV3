@@ -65,7 +65,7 @@ import Tools.InterpolateOptions
 import Tools.MoveAndStretch
 import Tools.MoveScaleRotate
 import Tools.NamedSegment
-import Tools.NamedSegmentOptions exposing (NamedSegment)
+import Tools.NamedSegmentOptions exposing (CreateMode(..), NamedSegment)
 import Tools.Nudge
 import Tools.OneClickQuickFix
 import Tools.OutAndBack
@@ -1665,6 +1665,7 @@ performActionsOnModel actions model =
                                         { name = name
                                         , startDistance = distanceFromIndex entry track.trackTree
                                         , endDistance = distanceFromIndex exit track.trackTree
+                                        , createMode = ManualSegment
                                         }
 
                                 Nothing ->

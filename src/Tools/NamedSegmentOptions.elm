@@ -18,4 +18,10 @@ type alias NamedSegment =
     { startDistance : Quantity Float Meters
     , endDistance : Quantity Float Meters
     , name : String
+    , createMode : CreateMode
     }
+
+
+type CreateMode
+    = ManualSegment
+    | AutoSegment
