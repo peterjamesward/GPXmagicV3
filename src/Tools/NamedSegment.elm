@@ -19,6 +19,7 @@ import Length exposing (Meters)
 import List.Extra
 import Point3d
 import Quantity exposing (Quantity)
+import Quantity.Interval as Interval
 import String.Interpolate
 import ToolTip exposing (localisedTooltip, tooltip)
 import Tools.I18N as I18N
@@ -301,9 +302,9 @@ view location imperial wrapper options track =
                                                     Maybe.withDefault 0 <|
                                                         Maybe.map Length.inMeters options.landUseProximity
                                                 ]
-                                , min = 10
-                                , max = 1000
-                                , step = Just 10
+                                , min = 50
+                                , max = 5000
+                                , step = Just 50
                                 , thumb = sliderThumb
                                 }
                         , if options.landUseProximity == Nothing then
@@ -520,6 +521,7 @@ update msg options track wrapper =
 
         LandUseProximity distance ->
             ( { options | landUseProximity = Just distance }
+                |> segmentsFromPlaces track
             , []
             )
 
@@ -534,11 +536,13 @@ update msg options track wrapper =
                         False ->
                             Nothing
               }
+                |> segmentsFromPlaces track
             , []
             )
 
         TogglePreferCloser bool ->
             ( { options | landUsePreferCloser = bool }
+                |> segmentsFromPlaces track
             , []
             )
 
@@ -600,9 +604,70 @@ segmentsFromPlaces track options =
                 Nothing ->
                     []
 
+        padInterval padding interval =
+            Interval.from
+                (Interval.minValue interval |> Quantity.minus padding)
+                (Interval.maxValue interval |> Quantity.plus padding)
+
         addSegmentIfNoConflict : SegmentCandidate -> List NamedSegment -> List NamedSegment
         addSegmentIfNoConflict candidate outputs =
-            outputs
+            let
+                newSegmentCentre =
+                    DomainModel.distanceFromIndex candidate.nearestTrackPointIndex track.trackTree
+
+                newSegmentHalfLength =
+                    Quantity.half candidate.distanceAway
+                        |> Quantity.max (Length.meters 50)
+
+                startBuffer =
+                    Interval.fromEndpoints ( Length.meters 0, Length.meters 120 )
+
+                endBuffer =
+                    Interval.from
+                        (DomainModel.trueLength track.trackTree |> Quantity.minus (Length.meters 200))
+                        (DomainModel.trueLength track.trackTree)
+
+                ( idealStart, idealEnd ) =
+                    ( newSegmentCentre |> Quantity.minus newSegmentHalfLength
+                    , newSegmentCentre |> Quantity.plus newSegmentHalfLength
+                    )
+
+                actualStart =
+                    DomainModel.distanceFromIndex
+                        (DomainModel.indexFromDistanceRoundedDown idealStart track.trackTree)
+                        track.trackTree
+
+                actualEnd =
+                    DomainModel.distanceFromIndex
+                        (DomainModel.indexFromDistanceRoundedUp idealEnd track.trackTree)
+                        track.trackTree
+
+                newSegmentInterval =
+                    Interval.fromEndpoints ( actualStart, actualEnd )
+
+                intervalFrom segment =
+                    -- Include RGT separation requirement here.
+                    Interval.from segment.startDistance segment.endDistance
+                        |> padInterval (Length.meters 50)
+
+                hasIntersectionWith existing =
+                    Interval.intersects
+                        (intervalFrom existing)
+                        newSegmentInterval
+            in
+            if
+                List.any hasIntersectionWith outputs
+                    || Interval.intersects newSegmentInterval startBuffer
+                    || Interval.intersects newSegmentInterval endBuffer
+            then
+                outputs
+
+            else
+                { name = candidate.name
+                , startDistance = actualStart
+                , endDistance = actualEnd
+                }
+                    :: outputs
     in
     { options
         | namedSegments =
