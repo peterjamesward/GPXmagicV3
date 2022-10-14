@@ -5,6 +5,7 @@ module Tools.NamedSegment exposing (..)
 -- of track points multiple times and in each direction.
 
 import Actions exposing (ToolAction)
+import Color
 import Dict
 import DomainModel exposing (EarthPoint, RoadSection)
 import Element exposing (..)
@@ -14,10 +15,12 @@ import Element.Font as Font
 import Element.Input as Input
 import FeatherIcons
 import FlatColors.AmericanPalette
+import FlatColors.BritishPalette
 import FlatColors.ChinesePalette
 import Length exposing (Meters)
 import List.Extra
 import Point3d
+import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (Quantity)
 import Quantity.Interval as Interval
 import String.Interpolate
@@ -74,11 +77,26 @@ toolStateChange :
 toolStateChange opened colour options track =
     case ( opened, track ) of
         ( True, Just theTrack ) ->
-            ( options, [] )
+            let
+                getStartIndex segment =
+                    DomainModel.indexFromDistanceRoundedDown segment.startDistance theTrack.trackTree
+            in
+            ( options
+            , [ Actions.ShowPreview
+                    { tag = "segmentStarts"
+                    , shape = PreviewCircle
+                    , colour = FlatColors.BritishPalette.downloadProgress
+                    , points =
+                        TrackLoaded.buildPreview
+                            (List.map getStartIndex options.namedSegments)
+                            theTrack.trackTree
+                    }
+              ]
+            )
 
         _ ->
             -- Hide preview
-            ( options, [] )
+            ( options, [ Actions.HidePreview "segmentStarts" ] )
 
 
 view : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
@@ -408,6 +426,10 @@ update :
     -> (Msg -> msg)
     -> ( Options, List (Actions.ToolAction msg) )
 update msg options track wrapper =
+    let
+        getStartIndex segment =
+            DomainModel.indexFromDistanceRoundedDown segment.startDistance track.trackTree
+    in
     case msg of
         NoOp ->
             ( { options | selectedSegment = Nothing }, [] )
@@ -525,7 +547,16 @@ update msg options track wrapper =
         LandUseProximity distance ->
             ( { options | landUseProximity = Just distance }
                 |> segmentsFromPlaces track
-            , []
+            , [ Actions.ShowPreview
+                    { tag = "segmentStarts"
+                    , shape = PreviewCircle
+                    , colour = FlatColors.BritishPalette.downloadProgress
+                    , points =
+                        TrackLoaded.buildPreview
+                            (List.map getStartIndex options.namedSegments)
+                            track.trackTree
+                    }
+              ]
             )
 
         EnableAutoSuggest enabled ->
@@ -541,7 +572,16 @@ update msg options track wrapper =
                                 Nothing
                   }
                     |> segmentsFromPlaces track
-                , []
+                , [ Actions.ShowPreview
+                        { tag = "segmentStarts"
+                        , shape = PreviewCircle
+                        , colour = FlatColors.BritishPalette.downloadProgress
+                        , points =
+                            TrackLoaded.buildPreview
+                                (List.map getStartIndex options.namedSegments)
+                                track.trackTree
+                        }
+                  ]
                 )
 
             else
@@ -553,7 +593,16 @@ update msg options track wrapper =
         TogglePreferCloser bool ->
             ( { options | landUsePreferCloser = bool }
                 |> segmentsFromPlaces track
-            , []
+            , [ Actions.ShowPreview
+                    { tag = "segmentStarts"
+                    , shape = PreviewCircle
+                    , colour = FlatColors.BritishPalette.downloadProgress
+                    , points =
+                        TrackLoaded.buildPreview
+                            (List.map getStartIndex options.namedSegments)
+                            track.trackTree
+                    }
+              ]
             )
 
 
