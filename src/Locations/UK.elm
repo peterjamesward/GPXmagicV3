@@ -405,7 +405,7 @@ You can show these "flat" or "sloped" Be warned, when "sloped", it may obscure t
                 [ ( "label", """Tool summary""" )
                 , ( "left", """Move to left""" )
                 , ( "right", """Move to right""" )
-                , ( "hide", """Hide (restore in Tools Summary)""")
+                , ( "hide", """Hide (restore in Tools Summary)""" )
                 , ( "onleft", """Left""" )
                 , ( "onright", """Right""" )
                 , ( "hidden", """Hidden""" )
@@ -454,7 +454,7 @@ Also, access a quick description of what the tool does and how (and when) to use
                 , ( "combine", """combine nearby points""" )
                 , ( "adjusttimes", """adjust timings""" )
                 , ( "double", "double relative times" )
-                , ( "settimeticks", "equal time spacing")
+                , ( "settimeticks", "equal time spacing" )
                 ]
           )
         , ( "essentials"
@@ -525,7 +525,7 @@ moving it earlier or later in time, or you can stretch (or shrink) the range to 
 recorded in a car. Doubling all the time intervals is a way of saying "half speed".
 """ )
                 , ( "physics", """Estimate timings based on a really simple physics model.""" )
-                , ( "applyPhysics", """Compute timings""")
+                , ( "applyPhysics", """Compute timings""" )
                 , ( "uniform", """Replace track points with points at regular time intervals of:""" )
                 , ( "start absolute", """Clock time at Orange: """ )
                 , ( "end absolute", """Clock time at end of range: """ )
@@ -740,8 +740,8 @@ shape of the route.
                 , ( "pens", """Allow for RGT start and end pens""" )
                 , ( "1CQF", """Apply one-click quick fix to each section""" )
                 , ( "split", """Split into {0} files of {1}""" )
-                , ( "orange", """Split at Orange marker""")
-                , ( "between", """Write section between markers""")
+                , ( "orange", """Split at Orange marker""" )
+                , ( "between", """Write section between markers""" )
                 , ( "append", """Append a GPX file""" )
                 , ( "note", """Files will be written to Downloads folder at two second intervals.""" )
                 , ( "info", """
@@ -805,8 +805,8 @@ keeping the altitudes and squishing the points up increases gradients.
                 [ ( "label", """Strava""" )
                 , ( "segmenttip", """Paste in a segment number or URL""" )
                 , ( "segmentid", """Segment ID""" )
-                , ( "altitude", """Match start altitude""")
-                , ( "altitudeHelp", """Adjust segment elevations to match the route""")
+                , ( "altitude", """Match start altitude""" )
+                , ( "altitudeHelp", """Adjust segment elevations to match the route""" )
                 , ( "routetip", """Paste in a route number or URL""" )
                 , ( "routeid", """Route or Activity ID""" )
                 , ( "preview", """Preview""" )
@@ -819,7 +819,7 @@ keeping the altitudes and squishing the points up increases gradients.
                 , ( "loaded", """In preview""" )
                 , ( "view", """View on Strava""" )
                 , ( "route", """Fetch route""" )
-                , ( "activity", """Fetch activity""")
+                , ( "activity", """Fetch activity""" )
                 , ( "about", """To load a segment from Strava, you need a route
 that contains the segment geographicaly.""" )
                 , ( "connect", """Please connect to Strava""" )
@@ -929,17 +929,17 @@ It's also _really_ good at removing noise from IRL rides.
                 , ( "delete", """Delete this segment (no Undo!)""" )
                 , ( "create", """Create from markers""" )
                 , ( "landuse", """Use nearby named places""" )
-                , ( "nolanduse", """Waiting for Land Use data""")
-                , ( "closer", """Prefer closer places""")
-                , ( "proximity", """Within {0} metres""")
+                , ( "nolanduse", """Waiting for Land Use data""" )
+                , ( "closer", """Prefer closer places""" )
+                , ( "proximity", """Within {0} metres""" )
                 , ( "landusetip", """If Land Use data are available, this attempts to
 derive segments from named features near the route.
 
-As you increase the threshold, features further away are preferred and will create
-longer segments than those closer to the route. You can switch this behaviour to prefer
-closer places.
+As you increase the threshold, features further away are considered. You choose whether to 
+start from farther-away points which make longer segments, or prefer closer points with 
+shorter segments.
 
-Note that each time you change the threshold, **all** previous segments will be forgotten.""")
+Pre-existing manual (or Strava) segments have precedence over auto-segments.""" )
                 , ( "newname", """TYPE NAME HERE""" )
                 , ( "warning", """
 Named segments should be at least 110m from the start, 190m from the end, and at least 50m apart.
