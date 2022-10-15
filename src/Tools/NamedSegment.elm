@@ -77,26 +77,35 @@ toolStateChange :
 toolStateChange opened colour options track =
     case ( opened, track ) of
         ( True, Just theTrack ) ->
-            let
-                getStartIndex segment =
-                    DomainModel.indexFromDistanceRoundedDown segment.startDistance theTrack.trackTree
-            in
             ( options
-            , [ Actions.ShowPreview
-                    { tag = "segmentStarts"
-                    , shape = PreviewCircle
-                    , colour = FlatColors.BritishPalette.downloadProgress
-                    , points =
-                        TrackLoaded.buildPreview
-                            (List.map getStartIndex options.namedSegments)
-                            theTrack.trackTree
-                    }
-              ]
+            , [ makePreview options theTrack ]
             )
 
         _ ->
             -- Hide preview
-            ( options, [ Actions.HidePreview "segmentStarts" ] )
+            ( options, [ Actions.HidePreview "segments" ] )
+
+
+makePreview options track =
+    let
+        getStartIndex segment =
+            DomainModel.indexFromDistanceRoundedUp segment.startDistance track.trackTree
+
+        getEndIndex segment =
+            DomainModel.indexFromDistanceRoundedDown segment.endDistance track.trackTree
+
+        segmentIndices segment =
+            List.range (getStartIndex segment) (getEndIndex segment)
+    in
+    Actions.ShowPreview
+        { tag = "segments"
+        , shape = PreviewCircle
+        , colour = FlatColors.BritishPalette.downloadProgress
+        , points =
+            TrackLoaded.buildPreview
+                (List.concatMap segmentIndices options.namedSegments)
+                track.trackTree
+        }
 
 
 view : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
@@ -547,16 +556,7 @@ update msg options track wrapper =
         LandUseProximity distance ->
             ( { options | landUseProximity = Just distance }
                 |> segmentsFromPlaces track
-            , [ Actions.ShowPreview
-                    { tag = "segmentStarts"
-                    , shape = PreviewCircle
-                    , colour = FlatColors.BritishPalette.downloadProgress
-                    , points =
-                        TrackLoaded.buildPreview
-                            (List.map getStartIndex options.namedSegments)
-                            track.trackTree
-                    }
-              ]
+            , [ makePreview options track ]
             )
 
         EnableAutoSuggest enabled ->
@@ -572,16 +572,7 @@ update msg options track wrapper =
                                 Nothing
                   }
                     |> segmentsFromPlaces track
-                , [ Actions.ShowPreview
-                        { tag = "segmentStarts"
-                        , shape = PreviewCircle
-                        , colour = FlatColors.BritishPalette.downloadProgress
-                        , points =
-                            TrackLoaded.buildPreview
-                                (List.map getStartIndex options.namedSegments)
-                                track.trackTree
-                        }
-                  ]
+                , [ makePreview options track ]
                 )
 
             else
@@ -593,16 +584,7 @@ update msg options track wrapper =
         TogglePreferCloser bool ->
             ( { options | landUsePreferCloser = bool }
                 |> segmentsFromPlaces track
-            , [ Actions.ShowPreview
-                    { tag = "segmentStarts"
-                    , shape = PreviewCircle
-                    , colour = FlatColors.BritishPalette.downloadProgress
-                    , points =
-                        TrackLoaded.buildPreview
-                            (List.map getStartIndex options.namedSegments)
-                            track.trackTree
-                    }
-              ]
+            , [ makePreview options track ]
             )
 
 
