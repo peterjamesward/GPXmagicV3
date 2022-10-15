@@ -1288,6 +1288,7 @@ update toolMsg isTrack msgWrapper options =
                                 msg
                                 options.namedSegmentOptions
                                 track
+                                (getColour ToolNamedSegments options.tools)
                                 (msgWrapper << ToolNamedSegmentMsg)
                     in
                     ( { options | namedSegmentOptions = newOptions }

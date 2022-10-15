@@ -78,7 +78,7 @@ toolStateChange opened colour options track =
     case ( opened, track ) of
         ( True, Just theTrack ) ->
             ( options
-            , [ makePreview options theTrack ]
+            , [ makePreview colour options theTrack ]
             )
 
         _ ->
@@ -86,7 +86,7 @@ toolStateChange opened colour options track =
             ( options, [ Actions.HidePreview "segments" ] )
 
 
-makePreview options track =
+makePreview colour options track =
     let
         getStartIndex segment =
             DomainModel.indexFromDistanceRoundedUp segment.startDistance track.trackTree
@@ -100,7 +100,7 @@ makePreview options track =
     Actions.ShowPreview
         { tag = "segments"
         , shape = PreviewCircle
-        , colour = FlatColors.BritishPalette.downloadProgress
+        , colour = colour
         , points =
             TrackLoaded.buildPreview
                 (List.concatMap segmentIndices options.namedSegments)
@@ -432,9 +432,10 @@ update :
     Msg
     -> Options
     -> TrackLoaded msg
+    -> Element.Color
     -> (Msg -> msg)
     -> ( Options, List (Actions.ToolAction msg) )
-update msg options track wrapper =
+update msg options track previewColour wrapper =
     let
         getStartIndex segment =
             DomainModel.indexFromDistanceRoundedDown segment.startDistance track.trackTree
@@ -489,14 +490,17 @@ update msg options track wrapper =
                                         , endDistance = DomainModel.distanceFromIndex endIndex track.trackTree
                                         , createMode = ManualSegment
                                     }
+
+                                newOptions =
+                                    { options
+                                        | namedSegments =
+                                            options.namedSegments
+                                                |> List.Extra.updateAt index (always updated)
+                                                |> List.sortBy (.startDistance >> Length.inMeters)
+                                    }
                             in
-                            ( { options
-                                | namedSegments =
-                                    options.namedSegments
-                                        |> List.Extra.updateAt index (always updated)
-                                        |> List.sortBy (.startDistance >> Length.inMeters)
-                              }
-                            , []
+                            ( newOptions
+                            , [ makePreview previewColour newOptions track ]
                             )
 
         DeleteSegment ->
@@ -510,11 +514,15 @@ update msg options track wrapper =
                             ( { options | selectedSegment = Nothing }, [] )
 
                         Just segment ->
-                            ( { options
-                                | namedSegments = List.Extra.removeAt index options.namedSegments
-                                , selectedSegment = Nothing
-                              }
-                            , []
+                            let
+                                newOptions =
+                                    { options
+                                        | namedSegments = List.Extra.removeAt index options.namedSegments
+                                        , selectedSegment = Nothing
+                                    }
+                            in
+                            ( newOptions
+                            , [ makePreview previewColour newOptions track ]
                             )
 
         ChangeName index newName ->
@@ -548,43 +556,62 @@ update msg options track wrapper =
                     , name = "ENTER NAME HERE"
                     , createMode = ManualSegment
                     }
+
+                newOptions =
+                    addSegment newSegment options
             in
-            ( addSegment newSegment options
-            , []
+            ( newOptions
+            , [ makePreview previewColour newOptions track ]
             )
 
         LandUseProximity distance ->
-            ( { options | landUseProximity = Just distance }
-                |> segmentsFromPlaces track
-            , [ makePreview options track ]
+            let
+                newOptions =
+                    { options | landUseProximity = Just distance }
+                        |> segmentsFromPlaces track
+            in
+            ( newOptions
+            , [ makePreview previewColour newOptions track ]
             )
 
         EnableAutoSuggest enabled ->
             -- Add segments based on nearby Land Use names.
             if enabled then
-                ( { options
-                    | landUseProximity =
-                        case enabled of
-                            True ->
-                                Just <| Length.meters 50
+                let
+                    newOptions =
+                        { options
+                            | landUseProximity =
+                                case enabled of
+                                    True ->
+                                        Just <| Length.meters 50
 
-                            False ->
-                                Nothing
-                  }
-                    |> segmentsFromPlaces track
-                , [ makePreview options track ]
+                                    False ->
+                                        Nothing
+                        }
+                            |> segmentsFromPlaces track
+                in
+                ( newOptions
+                , [ makePreview previewColour newOptions track ]
                 )
 
             else
                 -- when disabling, do npt clear the iist
-                ( { options | landUseProximity = Nothing }
-                , []
+                let
+                    newOptions =
+                        { options | landUseProximity = Nothing }
+                in
+                ( newOptions
+                , [ makePreview previewColour newOptions track ]
                 )
 
         TogglePreferCloser bool ->
-            ( { options | landUsePreferCloser = bool }
-                |> segmentsFromPlaces track
-            , [ makePreview options track ]
+            let
+                newOptions =
+                    { options | landUsePreferCloser = bool }
+                        |> segmentsFromPlaces track
+            in
+            ( newOptions
+            , [ makePreview previewColour newOptions track ]
             )
 
 
