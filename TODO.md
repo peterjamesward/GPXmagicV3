@@ -7,7 +7,7 @@
 
 ## Use POIs for named segments
 
-* Try highlight showing all starts & ends.
+Video.
 
 ---
 

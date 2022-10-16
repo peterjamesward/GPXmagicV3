@@ -3,9 +3,15 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.4.11 (b8acb139)
+# GPXmagic v3.5.0 (b8acb139)
 
 **GPXmagic V3 works (by far) best with Chrome (and some derivatives)**
+
+## 3.5.0
+
+A satisfying liaison between Land Use data and Named Segments provides automatic creation
+(or "seeding" if you prefer) of segments near named features on the route, given available
+Open Street Map data.
 
 ## 3.4.11
 
