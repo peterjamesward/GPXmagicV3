@@ -523,7 +523,7 @@ namedSegmentTool : ToolEntry
 namedSegmentTool =
     { toolType = ToolNamedSegments
     , toolId = Tools.NamedSegment.toolId
-    , video = Nothing
+    , video = Just "https://youtu.be/PaJeI8yahBI"
     , state = Contracted
     , dock = DockUpperRight
     , tabColour = rgtPurple

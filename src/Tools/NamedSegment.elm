@@ -164,7 +164,7 @@ view location imperial wrapper options track =
                         { data = options.namedSegments
                         , columns =
                             [ { header = none
-                              , width = fillPortion 2
+                              , width = fillPortion 3
                               , view =
                                     \i t ->
                                         Input.text (dataStyles (Just i == options.selectedSegment))
