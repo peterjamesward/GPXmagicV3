@@ -449,9 +449,9 @@ checkForRuleBreaches track options =
         validate previous current next =
             { current
                 | startOk =
-                    (previous.endDistance
-                        |> Quantity.plus (Length.meters 50)
-                        |> Quantity.lessThan current.startDistance
+                    (current.startDistance
+                        |> Quantity.greaterThan
+                            (previous.endDistance |> Quantity.plus (Length.meters 50))
                     )
                         && (current.startDistance |> Quantity.greaterThan (Length.meters 110))
                 , endOk =
