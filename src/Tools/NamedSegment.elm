@@ -111,6 +111,9 @@ makePreview colour options track =
 view : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
 view location imperial wrapper options track =
     let
+        validated =
+            checkForRuleBreaches track options
+
         i18n =
             I18N.text location toolId
 
@@ -124,6 +127,16 @@ view location imperial wrapper options track =
 
             else
                 [ Font.color rgtDark, padding 2 ]
+
+        highlightErrors isOk =
+            if isOk then
+                [ Font.color rgtDark, padding 2 ]
+
+            else
+                [ Font.bold
+                , Background.color FlatColors.AmericanPalette.brightYarrow
+                , padding 2
+                ]
 
         segmentsTable : Element msg
         segmentsTable =
@@ -161,7 +174,7 @@ view location imperial wrapper options track =
                         , scrollbarY
                         , spacing 4
                         ]
-                        { data = options.namedSegments
+                        { data = validated.namedSegments
                         , columns =
                             [ { header = none
                               , width = fillPortion 3
@@ -178,7 +191,7 @@ view location imperial wrapper options track =
                               , width = fillPortion 1
                               , view =
                                     \i t ->
-                                        el (dataStyles (Just i == options.selectedSegment)) <|
+                                        el (highlightErrors t.startOk) <|
                                             text <|
                                                 showLongMeasure imperial t.startDistance
                               }
@@ -186,7 +199,7 @@ view location imperial wrapper options track =
                               , width = fillPortion 1
                               , view =
                                     \i t ->
-                                        el (dataStyles (Just i == options.selectedSegment)) <|
+                                        el (highlightErrors t.endOk) <|
                                             text <|
                                                 showLongMeasure imperial t.endDistance
                               }
@@ -350,30 +363,13 @@ view location imperial wrapper options track =
                                 }
                         ]
 
-        goodSeparation : List NamedSegment -> Bool
-        goodSeparation segs =
-            -- Note the list should be sorted beforehand!
-            case segs of
-                seg1 :: seg2 :: moreSegs ->
-                    (seg1.startDistance |> Quantity.greaterThan (Length.meters 110))
-                        && (seg1.endDistance
-                                |> Quantity.plus (Length.meters 50)
-                                |> Quantity.lessThan seg2.startDistance
-                           )
-                        && goodSeparation (seg2 :: moreSegs)
-
-                [ lastSeg ] ->
-                    (lastSeg.startDistance |> Quantity.greaterThan (Length.meters 110))
-                        && (lastSeg.endDistance
-                                |> Quantity.plus (Length.meters 200)
-                                |> Quantity.lessThan (DomainModel.trueLength track.trackTree)
-                           )
-
-                [] ->
-                    True
+        goodSeparation segments =
+            segments
+                |> List.all
+                    (\seg -> seg.startOk && seg.endOk)
 
         overlapWarning =
-            if goodSeparation options.namedSegments then
+            if goodSeparation validated.namedSegments then
                 none
 
             else
@@ -425,6 +421,58 @@ addSegment segment options =
             List.sortBy
                 (.startDistance >> Length.inMeters)
                 (segment :: options.namedSegments)
+    }
+
+
+checkForRuleBreaches : TrackLoaded msg -> Options -> Options
+checkForRuleBreaches track options =
+    -- Note the list MUST be sorted beforehand!
+    let
+        dummyFirst =
+            { startDistance = Quantity.zero
+            , endDistance = Quantity.zero
+            , name = "dummy"
+            , createMode = AutoSegment
+            , startOk = True
+            , endOk = True
+            }
+
+        dummyLast =
+            { startDistance = DomainModel.trueLength track.trackTree
+            , endDistance = DomainModel.trueLength track.trackTree
+            , name = "dummy"
+            , createMode = AutoSegment
+            , startOk = True
+            , endOk = True
+            }
+
+        validate previous current next =
+            { current
+                | startOk =
+                    (previous.endDistance
+                        |> Quantity.plus (Length.meters 50)
+                        |> Quantity.lessThan current.startDistance
+                    )
+                        && (current.startDistance |> Quantity.greaterThan (Length.meters 110))
+                , endOk =
+                    (current.endDistance
+                        |> Quantity.plus (Length.meters 50)
+                        |> Quantity.lessThan next.startDistance
+                    )
+                        && (current.endDistance
+                                |> Quantity.plus (Length.meters 200)
+                                |> Quantity.lessThan (DomainModel.trueLength track.trackTree)
+                           )
+            }
+
+        validated =
+            List.map3 validate
+                (dummyFirst :: options.namedSegments)
+                options.namedSegments
+                (List.drop 1 options.namedSegments ++ [ dummyLast ])
+    in
+    { options
+        | namedSegments = validated
     }
 
 
@@ -555,6 +603,8 @@ update msg options track previewColour wrapper =
                             track.trackTree
                     , name = "ENTER NAME HERE"
                     , createMode = ManualSegment
+                    , startOk = True
+                    , endOk = True
                     }
 
                 newOptions =
@@ -740,6 +790,8 @@ segmentsFromPlaces track options =
                 , startDistance = actualStart
                 , endDistance = actualEnd
                 , createMode = AutoSegment
+                , startOk = True
+                , endOk = True
                 }
                     :: outputs
     in

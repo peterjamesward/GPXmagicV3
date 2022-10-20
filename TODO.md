@@ -5,9 +5,9 @@
 
 # WIP
 
-## Use POIs for named segments
+## Named Segments
 
-Video.
+Show which segments overlap by highlighting start and end values.
 
 ---
 

@@ -119,6 +119,8 @@ trackFromSegments trackName ( allPoints, segments ) =
                                 , endDistance = seg2.endDistance
                                 , name = seg1.name
                                 , createMode = ManualSegment
+                                , startOk = seg1.startOk
+                                , endOk = seg2.endOk
                                 }
                         in
                         combineContiguousSameNameSegments (combined :: more)
@@ -136,6 +138,8 @@ trackFromSegments trackName ( allPoints, segments ) =
             , endDistance = distanceFromIndex nextOffset track.trackTree
             , name = name
             , createMode = ManualSegment
+            , startOk = True
+            , endOk = True
             }
     in
     case baseTrack of

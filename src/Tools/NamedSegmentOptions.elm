@@ -15,10 +15,12 @@ type alias Options =
 type alias NamedSegment =
     -- Used for RGT timed segments.
     -- Using length not index gives some robustness against edits (e.g. 1CQF!)
-    { startDistance : Quantity Float Meters
-    , endDistance : Quantity Float Meters
+    { startDistance : Length.Length
+    , endDistance : Length.Length
     , name : String
     , createMode : CreateMode
+    , startOk : Bool
+    , endOk : Bool
     }
 
 

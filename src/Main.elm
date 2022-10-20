@@ -1666,6 +1666,8 @@ performActionsOnModel actions model =
                                         , startDistance = distanceFromIndex entry track.trackTree
                                         , endDistance = distanceFromIndex exit track.trackTree
                                         , createMode = ManualSegment
+                                        , startOk = True
+                                        , endOk = True
                                         }
 
                                 Nothing ->
