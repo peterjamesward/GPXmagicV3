@@ -7,11 +7,11 @@ aboutText =
 
 **GPXmagic V3 works (by far) best with Chrome (and some derivatives)**
 
-## 3.5.0
+## 3.5.1
 
 A satisfying liaison between Land Use data and Named Segments provides automatic creation
 (or "seeding" if you prefer) of segments near named features on the route, given available
-Open Street Map data.
+Open Street Map data. 3.5.1 makes it easier to detect incorrect segments.
 
 ## 3.4.11
 
