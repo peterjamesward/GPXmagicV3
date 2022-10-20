@@ -5,10 +5,6 @@
 
 # WIP
 
-## Named Segments
-
-Show which segments overlap by highlighting start and end values.
-
 ---
 
 # BACKLOG
@@ -25,6 +21,8 @@ There's only two or three cases, if not a single general one.
 
 ## Load from URL
 
+This needs sorting as RGT may get round to providing an "Edit" link one day.
+
 > CORS issues.
 
 ## Languages
@@ -40,7 +38,7 @@ Tagged types for Point v Line indices to avoid confusion.
 Variant of "request from local storage" that takes a wrapped message so that the return value
 can be directed to a tool or a view.
 
-Remove tool-specific stuff in Main.performActions. (WIP)
+Remove tool-specific stuff in Main.performActions.
 
 Put all Font, Colour etc into a Palette/Style module for ease of change.
 
