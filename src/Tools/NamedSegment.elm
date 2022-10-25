@@ -79,7 +79,9 @@ toolStateChange opened colour options track =
     case ( opened, track ) of
         ( True, Just theTrack ) ->
             ( options
-            , exclusionZones theTrack :: makePreview colour options theTrack
+            , [ exclusionZones theTrack
+              , makePreview colour options theTrack
+              ]
             )
 
         _ ->
@@ -108,19 +110,12 @@ makePreview colour options track =
                 (List.concatMap segmentIndices options.namedSegments)
                 track.trackTree
     in
-    [ Actions.ShowPreview
+    Actions.ShowPreview
         { tag = "segments"
         , shape = PreviewCircle
         , colour = colour
         , points = previewPoints
         }
-    , Actions.ShowPreview
-        { tag = "segmentprofile"
-        , shape = PreviewProfile track.trackTree
-        , colour = colour
-        , points = previewPoints
-        }
-    ]
 
 
 exclusionZones track =
@@ -594,7 +589,9 @@ update msg options track previewColour wrapper =
                                     }
                             in
                             ( newOptions
-                            , exclusionZones track :: makePreview previewColour options track
+                            , [ exclusionZones track
+                              , makePreview previewColour options track
+                              ]
                             )
 
         DeleteSegment ->
@@ -616,7 +613,9 @@ update msg options track previewColour wrapper =
                                     }
                             in
                             ( newOptions
-                            , exclusionZones track :: makePreview previewColour options track
+                            , [ exclusionZones track
+                              , makePreview previewColour options track
+                              ]
                             )
 
         ChangeName index newName ->
@@ -657,7 +656,9 @@ update msg options track previewColour wrapper =
                     addSegment newSegment options
             in
             ( newOptions
-            , exclusionZones track :: makePreview previewColour options track
+            , [ exclusionZones track
+              , makePreview previewColour options track
+              ]
             )
 
         LandUseProximity distance ->
@@ -667,7 +668,9 @@ update msg options track previewColour wrapper =
                         |> segmentsFromPlaces track
             in
             ( newOptions
-            , exclusionZones track :: makePreview previewColour options track
+            , [ exclusionZones track
+              , makePreview previewColour options track
+              ]
             )
 
         EnableAutoSuggest enabled ->
@@ -687,7 +690,9 @@ update msg options track previewColour wrapper =
                             |> segmentsFromPlaces track
                 in
                 ( newOptions
-                , exclusionZones track :: makePreview previewColour options track
+                , [ exclusionZones track
+                  , makePreview previewColour options track
+                  ]
                 )
 
             else
@@ -697,7 +702,9 @@ update msg options track previewColour wrapper =
                         { options | landUseProximity = Nothing }
                 in
                 ( newOptions
-                , exclusionZones track :: makePreview previewColour options track
+                , [ exclusionZones track
+                  , makePreview previewColour options track
+                  ]
                 )
 
         TogglePreferCloser bool ->
@@ -707,7 +714,9 @@ update msg options track previewColour wrapper =
                         |> segmentsFromPlaces track
             in
             ( newOptions
-            , exclusionZones track :: makePreview previewColour options track
+            , [ exclusionZones track
+              , makePreview previewColour options track
+              ]
             )
 
 

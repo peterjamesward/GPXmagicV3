@@ -1094,6 +1094,7 @@ viewPaneArea model =
             model.location
             PaneMsg
             model.track
+            model.toolOptions.namedSegmentOptions.namedSegments
             model.toolOptions.graphOptions
             model.toolOptions.displaySettings
             model.contentArea

@@ -38,6 +38,7 @@ import Rectangle2d
 import Scene3d exposing (Entity)
 import Svg exposing (Svg)
 import Svg.Attributes exposing (..)
+import Tools.NamedSegmentOptions exposing (NamedSegment)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (colourHexString, showDecimal2, showLongMeasure, showShortMeasure, uiColourHexString)
 import Vector3d
@@ -411,10 +412,11 @@ view :
     Context
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> TrackLoaded msg
+    -> List NamedSegment
     -> (Msg -> msg)
     -> Dict String PreviewData
     -> Element msg
-view context ( givenWidth, givenHeight ) track msgWrapper previews =
+view context ( givenWidth, givenHeight ) track segments msgWrapper previews =
     let
         ( altitudeWidth, altitudeHeight ) =
             ( givenWidth

@@ -28,6 +28,7 @@ import Tools.Flythrough
 import Tools.GraphOptions exposing (Graph)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
+import Tools.NamedSegmentOptions exposing (NamedSegment)
 import ToolsController
 import TrackLoaded exposing (TrackLoaded)
 import View3dCommonElements
@@ -689,6 +690,7 @@ viewPanes :
     I18NOptions.Location
     -> (Msg -> msg)
     -> Maybe (TrackLoaded msg)
+    -> List NamedSegment
     -> Tools.GraphOptions.Options msg
     -> Tools.DisplaySettingsOptions.Options
     -> ( Quantity Int Pixels, Quantity Int Pixels )
@@ -696,7 +698,7 @@ viewPanes :
     -> Maybe Tools.Flythrough.Flythrough
     -> Dict String PreviewData
     -> Element msg
-viewPanes location msgWrapper mTrack graphOptions displayOptions ( w, h ) options mFlythrough previews =
+viewPanes location msgWrapper mTrack segments graphOptions displayOptions ( w, h ) options mFlythrough previews =
     let
         ( paneWidth, paneHeight ) =
             dimensionsWithLayout options.paneLayout ( w, h )
@@ -766,6 +768,7 @@ viewPanes location msgWrapper mTrack graphOptions displayOptions ( w, h ) option
                                 context
                                 ( paneWidth, paneHeight )
                                 track
+                                segments
                                 (msgWrapper << ProfileViewMessage pane.paneId)
                                 previews
 
