@@ -860,6 +860,7 @@ You must first authenticate with Strava using the button on the top bar; do that
                 , ( "limit", """Heap limit""" )
                 , ( "size", """Heap size""" )
                 , ( "heap", """Used heap""" )
+                , ( "streetview", """Google Street View here""")
                 , ( "notrack", """Information will show here when a track is loaded.""" )
                 , ( "info", """
 View information about the current point, the whole track, and memory usage.

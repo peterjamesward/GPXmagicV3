@@ -7,6 +7,13 @@ aboutText =
 
 **GPXmagic V3 works (by far) best with Chrome (and some derivatives)**
 
+## 3.5.2
+
+In the Strava tool, when a Strava route is loaded, the "view on Strava" link now works.
+
+In the Information tool, under "Point", there is a link that will attempt to open Google
+Street View, looking along the route from the location of the Orange marker.
+
 ## 3.5.1
 
 A satisfying liaison between Land Use data and Named Segments provides automatic creation

@@ -10,12 +10,15 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (labelHidden)
 import FlatColors.ChinesePalette
+import Html.Events.Extra.Mouse as Mouse
 import Iso8601
 import String.Interpolate
 import Time
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
+import Url
+import Url.Builder
 import UtilsForViews exposing (showDecimal0, showDecimal2, showDecimal6, showLongMeasure, showShortMeasure)
 
 
@@ -127,21 +130,65 @@ displayInfoForPoint location imperial track =
             , "time"
             ]
     in
-    row
-        [ padding 10
-        , spacing 5
-        ]
-        [ column [ spacing 5 ] <| List.map (I18N.text location "info") labels
-        , column [ spacing 5 ]
-            [ text <| String.fromInt index
-            , text <| showLongMeasure imperial distance
-            , text <| UtilsForViews.longitudeString <| Direction2d.toAngle longitude
-            , text <| UtilsForViews.latitudeString <| latitude
-            , text <| showShortMeasure imperial altitude
-            , text <| showDecimal2 <| bearing
-            , text <| showDecimal2 leaf.gradientAtStart
-            , UtilsForViews.formattedTime timestamp
+    column []
+        [ row
+            [ padding 10
+            , spacing 5
             ]
+            [ column [ spacing 5 ] <| List.map (I18N.text location "info") labels
+            , column [ spacing 5 ]
+                [ text <| String.fromInt index
+                , text <| showLongMeasure imperial distance
+                , text <| UtilsForViews.longitudeString <| Direction2d.toAngle longitude
+                , text <| UtilsForViews.latitudeString <| latitude
+                , text <| showShortMeasure imperial altitude
+                , text <| showDecimal2 <| bearing
+                , text <| showDecimal2 leaf.gradientAtStart
+                , UtilsForViews.formattedTime timestamp
+                ]
+            ]
+        , newTabLink [ centerX]
+            { url = makeLinkUrl track
+            , label = I18N.text location toolId "streetview"
+            }
+        ]
+
+
+makeLinkUrl : TrackLoaded msg -> String
+makeLinkUrl track =
+    let
+        index =
+            track.currentPosition
+
+        ( leaf, gpxPoint ) =
+            ( leafFromIndex index track.trackTree |> asRecord
+            , gpxPointFromIndex index track.trackTree
+            )
+
+        { longitude, latitude, altitude, timestamp } =
+            gpxPoint
+
+        viewpoint =
+            String.Interpolate.interpolate
+                "{0},{1}"
+                [ String.fromFloat <| Angle.inDegrees latitude
+                , String.fromFloat <| Angle.inDegrees <| Direction2d.toAngle longitude
+                ]
+
+        bearing =
+            leaf.directionAtStart
+                |> Direction2d.angleFrom Direction2d.positiveY
+                |> Angle.inDegrees
+                |> negate
+                |> round
+    in
+    Url.Builder.crossOrigin
+        "https://www.google.com"
+        [ "maps", "@" ]
+        [ Url.Builder.int "api" 1
+        , Url.Builder.string "map_action" "pano"
+        , Url.Builder.string "viewpoint" viewpoint
+        , Url.Builder.int "heading" bearing
         ]
 
 

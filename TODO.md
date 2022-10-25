@@ -5,14 +5,49 @@
 
 # WIP
 
+## Named Segments (David Ogle)
+
+1) When the named segments tool is open, display where the segment limit is at the start/end.
+    The validation message shows the limit is 110m from the start and 190m from the end, 
+but it'd be good to visually see that on the track, to avoid creating invalid segments in the first place.
+
+2) Show the named segments on the Profile view.
+
+## Make Map changes declarative; tidy Action code
+
+This would largely but not entirely obviate Main.performActionCommands.
+
+Since the old and new track (not just the tree) are available post-update,
+I could 'diff' them and output the commands required.
+
+Don't need to diff the tree, as any track change requires re-drawing the whole route on the map.
+(Presuming in Elm that tree /= tree'.)
+
+What changes are there that reflect on the map?
+See MapPortController and Main.performActionCommands.
+Any changes to route, pointers, preview, and of course the map settings.
+
+**This is a worthwhile 'experiment'**
+
+It may also be the key to unlock the Actions space, which has become untidy.
+e.g. Main.performActionsOnModel is largely about positioning pointers post-edit!
+There are some cross-module cases solved with Actions to avoid import cycles,
+but they might factor out.
+
+**Approach**
+
+1. Rework MapController so comparison of states emits the commands; better: MapOptions.
+2. Purge the Actions code so that model is updated directly. 
+3. Repeat for other actions.
+
 ---
 
 # BACKLOG
 
-## Estimate duration
+## Estimate ride duration
 
 Show estimated time for route given wattage and rider weight.
-Not full physics, just allow for gradient on each section.
+Not full physics. momentum-free, just allow for gradient on each section.
 
 ## On refactoring Action interpreter in Main.
 

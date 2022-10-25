@@ -987,7 +987,7 @@ view model =
                         else
                             none
                    )
-                :: (htmlAttribute <| Mouse.onClick BackgroundClick)
+                --:: (htmlAttribute <| Mouse.onClick BackgroundClick)
                 :: commonLayoutStyles
             )
           <|
@@ -1088,7 +1088,7 @@ centralAreaView model =
 viewPaneArea : Model -> Html Msg
 viewPaneArea model =
     layoutWith { options = [ noStaticStyleSheet ] }
-        commonLayoutStyles
+        ((htmlAttribute <| Mouse.onClick BackgroundClick) :: commonLayoutStyles)
     <|
         PaneLayoutManager.viewPanes
             model.location
@@ -1225,6 +1225,7 @@ topLoadingBar model =
             ++ [ spacing 20
                , padding 10
                , width fill
+               , htmlAttribute <| Mouse.onClick BackgroundClick
                ]
         )
         [ globalOptions model
