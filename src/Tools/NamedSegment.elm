@@ -87,6 +87,7 @@ toolStateChange opened colour options track =
             ( options
             , [ Actions.HidePreview "segments"
               , Actions.HidePreview "deadzones"
+              , Actions.HidePreview "segmentprofile"
               ]
             )
 
@@ -101,15 +102,23 @@ makePreview colour options track =
 
         segmentIndices segment =
             List.range (getStartIndex segment) (getEndIndex segment)
+
+        previewPoints =
+            TrackLoaded.buildPreview
+                (List.concatMap segmentIndices options.namedSegments)
+                track.trackTree
     in
     [ Actions.ShowPreview
         { tag = "segments"
         , shape = PreviewCircle
         , colour = colour
-        , points =
-            TrackLoaded.buildPreview
-                (List.concatMap segmentIndices options.namedSegments)
-                track.trackTree
+        , points = previewPoints
+        }
+    , Actions.ShowPreview
+        { tag = "segmentprofile"
+        , shape = PreviewProfile track.trackTree
+        , colour = colour
+        , points = previewPoints
         }
     ]
 

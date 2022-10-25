@@ -7,11 +7,11 @@
 
 ## Named Segments (David Ogle)
 
-1) When the named segments tool is open, display where the segment limit is at the start/end.
-    The validation message shows the limit is 110m from the start and 190m from the end, 
-but it'd be good to visually see that on the track, to avoid creating invalid segments in the first place.
-
 2) Show the named segments on the Profile view.
+
+---
+
+# BACKLOG
 
 ## Make Map changes declarative; tidy Action code
 
@@ -37,12 +37,8 @@ but they might factor out.
 **Approach**
 
 1. Rework MapController so comparison of states emits the commands; better: MapOptions.
-2. Purge the Actions code so that model is updated directly. 
+2. Purge the Actions code so that model is updated directly.
 3. Repeat for other actions.
-
----
-
-# BACKLOG
 
 ## Estimate ride duration
 
