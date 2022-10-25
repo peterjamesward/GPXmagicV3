@@ -17,6 +17,7 @@ import FeatherIcons
 import FlatColors.AmericanPalette
 import FlatColors.BritishPalette
 import FlatColors.ChinesePalette
+import FlatColors.FlatUIPalette
 import Length exposing (Meters)
 import List.Extra
 import Point3d
@@ -78,12 +79,16 @@ toolStateChange opened colour options track =
     case ( opened, track ) of
         ( True, Just theTrack ) ->
             ( options
-            , [ makePreview colour options theTrack ]
+            , exclusionZones theTrack :: makePreview colour options theTrack
             )
 
         _ ->
             -- Hide preview
-            ( options, [ Actions.HidePreview "segments" ] )
+            ( options
+            , [ Actions.HidePreview "segments"
+              , Actions.HidePreview "deadzones"
+              ]
+            )
 
 
 makePreview colour options track =
@@ -97,13 +102,45 @@ makePreview colour options track =
         segmentIndices segment =
             List.range (getStartIndex segment) (getEndIndex segment)
     in
-    Actions.ShowPreview
+    [ Actions.ShowPreview
         { tag = "segments"
         , shape = PreviewCircle
         , colour = colour
         , points =
             TrackLoaded.buildPreview
                 (List.concatMap segmentIndices options.namedSegments)
+                track.trackTree
+        }
+    ]
+
+
+exclusionZones track =
+    let
+        fromStart =
+            List.range 0
+                (DomainModel.indexFromDistanceRoundedDown
+                    (Length.meters 110)
+                    track.trackTree
+                )
+
+        trackLength =
+            DomainModel.trueLength track.trackTree
+
+        fromEnd =
+            List.range
+                (DomainModel.indexFromDistanceRoundedUp
+                    (trackLength |> Quantity.minus (Length.meters 190))
+                    track.trackTree
+                )
+                (DomainModel.skipCount track.trackTree)
+    in
+    Actions.ShowPreview
+        { tag = "deadzones"
+        , shape = PreviewCircle
+        , colour = FlatColors.FlatUIPalette.clouds
+        , points =
+            TrackLoaded.buildPreview
+                (fromStart ++ fromEnd)
                 track.trackTree
         }
 
@@ -460,7 +497,7 @@ checkForRuleBreaches track options =
                         |> Quantity.lessThan next.startDistance
                     )
                         && (current.endDistance
-                                |> Quantity.plus (Length.meters 200)
+                                |> Quantity.plus (Length.meters 190)
                                 |> Quantity.lessThan (DomainModel.trueLength track.trackTree)
                            )
             }
@@ -548,7 +585,7 @@ update msg options track previewColour wrapper =
                                     }
                             in
                             ( newOptions
-                            , [ makePreview previewColour newOptions track ]
+                            , exclusionZones track :: makePreview previewColour options track
                             )
 
         DeleteSegment ->
@@ -570,7 +607,7 @@ update msg options track previewColour wrapper =
                                     }
                             in
                             ( newOptions
-                            , [ makePreview previewColour newOptions track ]
+                            , exclusionZones track :: makePreview previewColour options track
                             )
 
         ChangeName index newName ->
@@ -611,7 +648,7 @@ update msg options track previewColour wrapper =
                     addSegment newSegment options
             in
             ( newOptions
-            , [ makePreview previewColour newOptions track ]
+            , exclusionZones track :: makePreview previewColour options track
             )
 
         LandUseProximity distance ->
@@ -621,7 +658,7 @@ update msg options track previewColour wrapper =
                         |> segmentsFromPlaces track
             in
             ( newOptions
-            , [ makePreview previewColour newOptions track ]
+            , exclusionZones track :: makePreview previewColour options track
             )
 
         EnableAutoSuggest enabled ->
@@ -641,7 +678,7 @@ update msg options track previewColour wrapper =
                             |> segmentsFromPlaces track
                 in
                 ( newOptions
-                , [ makePreview previewColour newOptions track ]
+                , exclusionZones track :: makePreview previewColour options track
                 )
 
             else
@@ -651,7 +688,7 @@ update msg options track previewColour wrapper =
                         { options | landUseProximity = Nothing }
                 in
                 ( newOptions
-                , [ makePreview previewColour newOptions track ]
+                , exclusionZones track :: makePreview previewColour options track
                 )
 
         TogglePreferCloser bool ->
@@ -661,7 +698,7 @@ update msg options track previewColour wrapper =
                         |> segmentsFromPlaces track
             in
             ( newOptions
-            , [ makePreview previewColour newOptions track ]
+            , exclusionZones track :: makePreview previewColour options track
             )
 
 

@@ -7,6 +7,11 @@ aboutText =
 
 **GPXmagic V3 works (by far) best with Chrome (and some derivatives)**
 
+## 3.5.3
+
+When Named Segment tool is open, the buffer zones at the start and end of the route
+are marked with a pale colour. (Best not use this colour for the tool.)
+
 ## 3.5.2
 
 In the Strava tool, when a Strava route is loaded, the "view on Strava" link now works.
