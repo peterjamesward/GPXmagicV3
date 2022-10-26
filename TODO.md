@@ -1,6 +1,10 @@
 
 # BUGS
 
+Disabling nearby Named Segments does not remove non-thawed segments from list.
+
+Newly created segment not showing in preview.
+
 --- 
 
 # WIP

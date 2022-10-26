@@ -536,6 +536,65 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews =
             in
             (finalSvgPoint :: altitudeSvgPoints) |> List.reverse
 
+        pointsWithinSegments : List Bool
+        pointsWithinSegments =
+            --Separate traversal for clarity: needed for shading segments.
+            let
+                ( leftIndex, rightIndex ) =
+                    -- Make sure we always have a spare point outside the image if possible.
+                    ( indexFromDistance leftEdge track.trackTree - 1
+                    , indexFromDistance rightEdge track.trackTree + 1
+                    )
+
+                trueLeftEdge =
+                    distanceFromIndex leftIndex track.trackTree
+
+                isPointWithinSegment :
+                    RoadSection
+                    -> ( Length.Length, List Bool, List NamedSegment )
+                    -> ( Length.Length, List Bool, List NamedSegment )
+                isPointWithinSegment roadSection ( fromStart, outputs, remainingSegments ) =
+                    case remainingSegments of
+                        [] ->
+                            -- No segments, all is False
+                            ( fromStart |> Quantity.plus roadSection.trueLength
+                            , False :: outputs
+                            , []
+                            )
+
+                        seg1 :: moreSegs ->
+                            if fromStart |> Quantity.greaterThanOrEqualTo seg1.endDistance then
+                                -- Beyond segment, but may not be beyond the next
+                                isPointWithinSegment
+                                    roadSection
+                                    ( fromStart, outputs, moreSegs )
+
+                            else if fromStart |> Quantity.greaterThanOrEqualTo seg1.startDistance then
+                                -- Ah, we are in a segment, output should be shaded.
+                                ( fromStart |> Quantity.plus roadSection.trueLength
+                                , True :: outputs
+                                , remainingSegments
+                                )
+
+                            else
+                                -- Well, we must be before the first segment still
+                                ( fromStart |> Quantity.plus roadSection.trueLength
+                                , False :: outputs
+                                , remainingSegments
+                                )
+
+                ( _, withinSegments, _ ) =
+                    DomainModel.traverseTreeBetweenLimitsToDepth
+                        leftIndex
+                        rightIndex
+                        depthFn
+                        0
+                        track.trackTree
+                        isPointWithinSegment
+                        ( trueLeftEdge, [], segments )
+            in
+            (False :: withinSegments) |> List.reverse
+
         altitudePreviews : List (Svg msg)
         altitudePreviews =
             Dict.foldl makeAltitudePreview [] previews
@@ -591,8 +650,8 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews =
                 ]
                 (Polyline2d.fromVertices pointsInScreenSpace)
 
-        pointsToColouredCurtain : List (Point3d Meters LocalCoords) -> Svg msg
-        pointsToColouredCurtain points =
+        pointsToColouredCurtain : List (Point3d Meters LocalCoords) -> List Bool -> Svg msg
+        pointsToColouredCurtain points inSegments =
             let
                 pointsInScreenSpace =
                     List.map
@@ -608,26 +667,50 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews =
                     Point2d Pixels LocalCoords
                     -> Point2d Pixels LocalCoords
                     -> Color.Color
+                    -> Bool
                     -> Svg msg
-                makeSection pt1 pt2 colour =
-                    Svg.polygon2d
-                        [ Svg.Attributes.stroke "none"
-                        , Svg.Attributes.fill <| colourHexString colour
-                        ]
-                    <|
-                        Polygon2d.singleLoop
-                            [ pt1
-                            , pt2
-                            , pt2 |> Point2d.projectOnto Axis2d.x
-                            , pt1 |> Point2d.projectOnto Axis2d.x
-                            ]
+                makeSection pt1 pt2 colour inSegment =
+                    let
+                        colourBar =
+                            Svg.polygon2d
+                                [ Svg.Attributes.stroke "none"
+                                , Svg.Attributes.fill <| colourHexString colour
+                                ]
+                            <|
+                                Polygon2d.singleLoop
+                                    [ pt1
+                                    , pt2
+                                    , pt2 |> Point2d.projectOnto Axis2d.x
+                                    , pt1 |> Point2d.projectOnto Axis2d.x
+                                    ]
+
+                        segmentHatch =
+                            Svg.polygon2d
+                                [ Svg.Attributes.stroke "none"
+                                , Svg.Attributes.fill <| "grey"
+                                , Svg.Attributes.opacity "50%"
+                                ]
+                            <|
+                                Polygon2d.singleLoop
+                                    [ pt1
+                                    , pt2
+                                    , pt2 |> Point2d.projectOnto Axis2d.x
+                                    , pt1 |> Point2d.projectOnto Axis2d.x
+                                    ]
+                    in
+                    if inSegment then
+                        Svg.g [] [ colourBar, segmentHatch ]
+
+                    else
+                        colourBar
 
                 steppedLines =
-                    List.map3
+                    List.map4
                         makeSection
                         pointsInScreenSpace
                         (List.drop 1 pointsInScreenSpace)
                         gradients
+                        inSegments
             in
             Svg.g [] steppedLines
 
@@ -715,7 +798,7 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews =
                 [ Svg.relativeTo topLeftFrame <|
                     Svg.g []
                         [ pointsAsAltitudePolyline "black" <| renderDataOnce
-                        , pointsToColouredCurtain <| renderDataOnce
+                        , pointsToColouredCurtain renderDataOnce pointsWithinSegments
                         , Svg.g [] (orangeAltitudeSvg :: orangeText ++ purpleSvg)
                         , Svg.g [] altitudePreviews
                         ]
