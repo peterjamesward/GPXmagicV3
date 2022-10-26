@@ -542,8 +542,8 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews =
             let
                 ( leftIndex, rightIndex ) =
                     -- Make sure we always have a spare point outside the image if possible.
-                    ( indexFromDistance leftEdge track.trackTree - 1
-                    , indexFromDistance rightEdge track.trackTree + 1
+                    ( indexFromDistanceRoundedDown leftEdge track.trackTree - 1
+                    , indexFromDistanceRoundedUp rightEdge track.trackTree + 1
                     )
 
                 trueLeftEdge =
@@ -577,7 +577,7 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews =
                                 )
 
                             else
-                                -- Well, we must be before the first segment still
+                                -- Well, we must be before the next segment still
                                 ( fromStart |> Quantity.plus roadSection.trueLength
                                 , False :: outputs
                                 , remainingSegments

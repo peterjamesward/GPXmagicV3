@@ -190,7 +190,7 @@ view location imperial wrapper options track =
                     ]
             in
             column
-                [ width <| maximum 500 fill
+                [ width <| minimum 200 <| maximum 500 fill
 
                 --, height <| px 150
                 , spacing 10
@@ -590,7 +590,7 @@ update msg options track previewColour wrapper =
                             in
                             ( newOptions
                             , [ exclusionZones track
-                              , makePreview previewColour options track
+                              , makePreview previewColour newOptions track
                               ]
                             )
 
@@ -614,7 +614,7 @@ update msg options track previewColour wrapper =
                             in
                             ( newOptions
                             , [ exclusionZones track
-                              , makePreview previewColour options track
+                              , makePreview previewColour newOptions track
                               ]
                             )
 
@@ -657,7 +657,7 @@ update msg options track previewColour wrapper =
             in
             ( newOptions
             , [ exclusionZones track
-              , makePreview previewColour options track
+              , makePreview previewColour newOptions track
               ]
             )
 
@@ -669,7 +669,7 @@ update msg options track previewColour wrapper =
             in
             ( newOptions
             , [ exclusionZones track
-              , makePreview previewColour options track
+              , makePreview previewColour newOptions track
               ]
             )
 
@@ -691,7 +691,7 @@ update msg options track previewColour wrapper =
                 in
                 ( newOptions
                 , [ exclusionZones track
-                  , makePreview previewColour options track
+                  , makePreview previewColour newOptions track
                   ]
                 )
 
@@ -699,11 +699,17 @@ update msg options track previewColour wrapper =
                 -- when disabling, do npt clear the iist
                 let
                     newOptions =
-                        { options | landUseProximity = Nothing }
+                        { options
+                            | landUseProximity = Nothing
+                            , namedSegments =
+                                options.namedSegments
+                                    |> List.filter
+                                        (\seg -> seg.createMode == ManualSegment)
+                        }
                 in
                 ( newOptions
                 , [ exclusionZones track
-                  , makePreview previewColour options track
+                  , makePreview previewColour newOptions track
                   ]
                 )
 
@@ -715,7 +721,7 @@ update msg options track previewColour wrapper =
             in
             ( newOptions
             , [ exclusionZones track
-              , makePreview previewColour options track
+              , makePreview previewColour newOptions track
               ]
             )
 

@@ -1,7 +1,9 @@
 
 # BUGS
 
-Disabling nearby Named Segments does not remove non-thawed segments from list.
+Profile preview ends wrong when zooming.
+
+Disabling nearby Named Segments should remove non-thawed segments from list.
 
 Newly created segment not showing in preview.
 
