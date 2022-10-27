@@ -571,10 +571,18 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews =
 
                             else if fromStart |> Quantity.greaterThanOrEqualTo seg1.startDistance then
                                 -- Ah, we are in a segment, output should be shaded.
-                                ( fromStart |> Quantity.plus roadSection.trueLength
-                                , True :: outputs
-                                , remainingSegments
-                                )
+                                -- BUt watch out for the last point in the segment.
+                                if fromStart |> Quantity.equalWithin (Length.centimeters 10) seg1.endDistance then
+                                    ( fromStart |> Quantity.plus roadSection.trueLength
+                                    , False :: outputs
+                                    , moreSegs
+                                    )
+
+                                else
+                                    ( fromStart |> Quantity.plus roadSection.trueLength
+                                    , True :: outputs
+                                    , remainingSegments
+                                    )
 
                             else
                                 -- Well, we must be before the next segment still

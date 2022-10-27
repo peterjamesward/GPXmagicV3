@@ -8,7 +8,8 @@
 ## Named Segments (David Ogle)
 
 2) Show the named segments on the Profile view.
-> Want to use hatching, diagonal pattern needed.
+
+> Edd out by one. Rounding? State? Logic?
 
 ---
 
