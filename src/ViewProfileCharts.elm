@@ -563,7 +563,7 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews =
                             )
 
                         seg1 :: moreSegs ->
-                            if fromStart |> Quantity.greaterThanOrEqualTo seg1.endDistance then
+                            if fromStart |> Quantity.greaterThan seg1.endDistance then
                                 -- Beyond segment, but may not be beyond the next
                                 isPointWithinSegment
                                     roadSection
@@ -687,7 +687,7 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews =
                         segmentHatch =
                             Svg.polygon2d
                                 [ Svg.Attributes.stroke "none"
-                                , Svg.Attributes.fill <| "grey"
+                                , Svg.Attributes.fill "purple" --"#hatch"
                                 , Svg.Attributes.opacity "50%"
                                 ]
                             <|
@@ -713,6 +713,41 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews =
                         inSegments
             in
             Svg.g [] steppedLines
+
+        hatchPattern =
+            {-
+               <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+                   <style type="text/css">
+                       line { stroke: #ccc; }
+                   </style>
+               <defs>
+               <pattern id="diagonalHatch" width="10" height="10" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+                 <line x1="0" y1="0" x2="0" y2="10" />
+               </pattern>
+               </defs>
+                   <rect width="100%" height="100%" fill="url(#diagonalHatch)" />
+               </svg>
+            -}
+            Svg.defs []
+                [ Svg.pattern
+                    [ Svg.Attributes.id "hatch"
+                    , Svg.Attributes.width "10"
+                    , Svg.Attributes.height "10"
+                    , Svg.Attributes.patternTransform "rotate(45)"
+                    , Svg.Attributes.patternUnits "userSpaceOnUse"
+                    ]
+                    [ Svg.line
+                        [ Svg.Attributes.x1 "0"
+                        , Svg.Attributes.y1 "0"
+                        , Svg.Attributes.x2 "0"
+                        , Svg.Attributes.y2 "10"
+                        , Svg.Attributes.stroke "white"
+                        , Svg.Attributes.strokeWidth "1"
+                        , Svg.Attributes.opacity "50%"
+                        ]
+                        []
+                    ]
+                ]
 
         pointsAsGradientPolyline : String -> List (Point3d Meters LocalCoords) -> Svg msg
         pointsAsGradientPolyline colour points =
@@ -797,7 +832,8 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews =
                 ]
                 [ Svg.relativeTo topLeftFrame <|
                     Svg.g []
-                        [ pointsAsAltitudePolyline "black" <| renderDataOnce
+                        [ --hatchPattern
+                          pointsAsAltitudePolyline "black" <| renderDataOnce
                         , pointsToColouredCurtain renderDataOnce pointsWithinSegments
                         , Svg.g [] (orangeAltitudeSvg :: orangeText ++ purpleSvg)
                         , Svg.g [] altitudePreviews
