@@ -1,12 +1,6 @@
 
 # BUGS
 
-Profile preview ends wrong when zooming.
-
-Disabling nearby Named Segments should remove non-thawed segments from list.
-
-Newly created segment not showing in preview.
-
 --- 
 
 # WIP
@@ -14,6 +8,8 @@ Newly created segment not showing in preview.
 ## Named Segments (David Ogle)
 
 2) Show the named segments on the Profile view.
+> Profile preview ends wrong when zooming.
+> Want to use hatching, diagonal pattern needed.
 
 ---
 

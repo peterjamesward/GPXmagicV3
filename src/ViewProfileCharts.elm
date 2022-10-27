@@ -506,7 +506,7 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews =
                 ( leftIndex, rightIndex ) =
                     -- Make sure we always have a spare point outside the image if possible.
                     ( indexFromDistance leftEdge trackToRender.trackTree - 1
-                    , indexFromDistance rightEdge trackToRender.trackTree + 1
+                    , indexFromDistanceRoundedUp rightEdge trackToRender.trackTree + 1
                     )
 
                 ( trueLeftEdge, trueRightEdge ) =
@@ -542,8 +542,8 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews =
             let
                 ( leftIndex, rightIndex ) =
                     -- Make sure we always have a spare point outside the image if possible.
-                    ( indexFromDistanceRoundedDown leftEdge track.trackTree - 1
-                    , indexFromDistanceRoundedUp rightEdge track.trackTree + 1
+                    ( indexFromDistance leftEdge track.trackTree - 1
+                    , indexFromDistance rightEdge track.trackTree + 1
                     )
 
                 trueLeftEdge =
