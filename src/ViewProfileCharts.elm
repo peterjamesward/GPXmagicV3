@@ -475,14 +475,18 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews =
             else
                 Just <| round <| 10 + context.zoomLevel
 
-        makeSvgPoint : Length.Length -> RoadSection -> List (Point3d Meters LocalCoords)
+        makeSvgPointAsList : Length.Length -> RoadSection -> List (Point3d Meters LocalCoords)
+        makeSvgPointAsList distance road =
+            -- Variant to use existing foldFn. Silly.
+            [ makeSvgPoint distance road ]
+
+        makeSvgPoint : Length.Length -> RoadSection -> Point3d Meters LocalCoords
         makeSvgPoint distance road =
             -- This is crucial, note that we put distance in X, altitude in Z and gradient in Y
-            [ Point3d.xyz
+            Point3d.xyz
                 distance
                 (Length.meters road.gradientAtStart)
                 (road.startPoint.space |> Point3d.zCoordinate |> Quantity.multiplyBy context.emphasis)
-            ]
 
         foldFn :
             (Length.Length -> RoadSection -> List renderable)
@@ -521,7 +525,7 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews =
                         depthFn
                         0
                         trackToRender.trackTree
-                        (foldFn makeSvgPoint)
+                        (foldFn makeSvgPointAsList)
                         ( trueLeftEdge, [], Nothing )
 
                 finalSvgPoint =
@@ -535,73 +539,6 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews =
                         (leaf.endPoint.space |> Point3d.zCoordinate |> Quantity.multiplyBy context.emphasis)
             in
             (finalSvgPoint :: altitudeSvgPoints) |> List.reverse
-
-        pointsWithinSegments : List Bool
-        pointsWithinSegments =
-            --Separate traversal for clarity: needed for shading segments.
-            let
-                ( leftIndex, rightIndex ) =
-                    -- Make sure we always have a spare point outside the image if possible.
-                    ( indexFromDistance leftEdge track.trackTree - 1
-                    , indexFromDistance rightEdge track.trackTree + 1
-                    )
-
-                trueLeftEdge =
-                    distanceFromIndex leftIndex track.trackTree
-
-                isPointWithinSegment :
-                    RoadSection
-                    -> ( Length.Length, List Bool, List NamedSegment )
-                    -> ( Length.Length, List Bool, List NamedSegment )
-                isPointWithinSegment roadSection ( fromStart, outputs, remainingSegments ) =
-                    case remainingSegments of
-                        [] ->
-                            -- No segments, all is False
-                            ( fromStart |> Quantity.plus roadSection.trueLength
-                            , False :: outputs
-                            , []
-                            )
-
-                        seg1 :: moreSegs ->
-                            if fromStart |> Quantity.greaterThan seg1.endDistance then
-                                -- Beyond segment, but may not be beyond the next
-                                isPointWithinSegment
-                                    roadSection
-                                    ( fromStart, outputs, moreSegs )
-
-                            else if fromStart |> Quantity.greaterThanOrEqualTo seg1.startDistance then
-                                -- Ah, we are in a segment, output should be shaded.
-                                -- BUt watch out for the last point in the segment.
-                                if fromStart |> Quantity.equalWithin (Length.centimeters 10) seg1.endDistance then
-                                    ( fromStart |> Quantity.plus roadSection.trueLength
-                                    , False :: outputs
-                                    , moreSegs
-                                    )
-
-                                else
-                                    ( fromStart |> Quantity.plus roadSection.trueLength
-                                    , True :: outputs
-                                    , remainingSegments
-                                    )
-
-                            else
-                                -- Well, we must be before the next segment still
-                                ( fromStart |> Quantity.plus roadSection.trueLength
-                                , False :: outputs
-                                , remainingSegments
-                                )
-
-                ( _, withinSegments, _ ) =
-                    DomainModel.traverseTreeBetweenLimitsToDepth
-                        leftIndex
-                        rightIndex
-                        depthFn
-                        0
-                        track.trackTree
-                        isPointWithinSegment
-                        ( trueLeftEdge, [], segments )
-            in
-            (False :: withinSegments) |> List.reverse
 
         altitudePreviews : List (Svg msg)
         altitudePreviews =
@@ -658,8 +595,8 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews =
                 ]
                 (Polyline2d.fromVertices pointsInScreenSpace)
 
-        pointsToColouredCurtain : List (Point3d Meters LocalCoords) -> List Bool -> Svg msg
-        pointsToColouredCurtain points inSegments =
+        pointsToColouredCurtain : List (Point3d Meters LocalCoords) -> Svg msg
+        pointsToColouredCurtain points =
             let
                 pointsInScreenSpace =
                     List.map
@@ -675,9 +612,8 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews =
                     Point2d Pixels LocalCoords
                     -> Point2d Pixels LocalCoords
                     -> Color.Color
-                    -> Bool
                     -> Svg msg
-                makeSection pt1 pt2 colour inSegment =
+                makeSection pt1 pt2 colour =
                     let
                         colourBar =
                             Svg.polygon2d
@@ -691,71 +627,83 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews =
                                     , pt2 |> Point2d.projectOnto Axis2d.x
                                     , pt1 |> Point2d.projectOnto Axis2d.x
                                     ]
-
-                        segmentHatch =
-                            Svg.polygon2d
-                                [ Svg.Attributes.stroke "none"
-                                , Svg.Attributes.fill "purple" --"#hatch"
-                                , Svg.Attributes.opacity "50%"
-                                ]
-                            <|
-                                Polygon2d.singleLoop
-                                    [ pt1
-                                    , pt2
-                                    , pt2 |> Point2d.projectOnto Axis2d.x
-                                    , pt1 |> Point2d.projectOnto Axis2d.x
-                                    ]
                     in
-                    if inSegment then
-                        Svg.g [] [ colourBar, segmentHatch ]
-
-                    else
-                        colourBar
+                    colourBar
 
                 steppedLines =
-                    List.map4
+                    List.map3
                         makeSection
                         pointsInScreenSpace
                         (List.drop 1 pointsInScreenSpace)
                         gradients
-                        inSegments
             in
             Svg.g [] steppedLines
 
-        hatchPattern =
-            {-
-               <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-                   <style type="text/css">
-                       line { stroke: #ccc; }
-                   </style>
-               <defs>
-               <pattern id="diagonalHatch" width="10" height="10" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
-                 <line x1="0" y1="0" x2="0" y2="10" />
-               </pattern>
-               </defs>
-                   <rect width="100%" height="100%" fill="url(#diagonalHatch)" />
-               </svg>
-            -}
-            Svg.defs []
-                [ Svg.pattern
-                    [ Svg.Attributes.id "hatch"
-                    , Svg.Attributes.width "10"
-                    , Svg.Attributes.height "10"
-                    , Svg.Attributes.patternTransform "rotate(45)"
-                    , Svg.Attributes.patternUnits "userSpaceOnUse"
-                    ]
-                    [ Svg.line
-                        [ Svg.Attributes.x1 "0"
-                        , Svg.Attributes.y1 "0"
-                        , Svg.Attributes.x2 "0"
-                        , Svg.Attributes.y2 "10"
-                        , Svg.Attributes.stroke "white"
-                        , Svg.Attributes.strokeWidth "1"
-                        , Svg.Attributes.opacity "50%"
-                        ]
-                        []
-                    ]
+        paintSegments =
+            Svg.g [] <|
+                List.map paintSegment segments
+
+        paintSegment segment =
+            let
+                ( leftIndex, rightIndex ) =
+                    -- Make sure we always have a spare point outside the image if possible.
+                    ( indexFromDistance segment.startDistance track.trackTree
+                    , indexFromDistance segment.endDistance track.trackTree
+                    )
+
+                ( _, svgShapes ) =
+                    DomainModel.traverseTreeBetweenLimitsToDepth
+                        leftIndex
+                        rightIndex
+                        (always Nothing)
+                        0
+                        track.trackTree
+                        makeShadedBlock
+                        ( segment.startDistance, [] )
+
+                makeShadedBlock :
+                    RoadSection
+                    -> ( Length.Length, List (Svg msg) )
+                    -> ( Length.Length, List (Svg msg) )
+                makeShadedBlock road ( left, outputs ) =
+                    let
+                        right =
+                            left |> Quantity.plus road.trueLength
+
+                        pt1 =
+                            Point3d.xyz
+                                left
+                                Quantity.zero
+                                (road.startPoint.space |> Point3d.zCoordinate |> Quantity.multiplyBy context.emphasis)
+                                |> Point3d.toScreenSpace altitudeCamera gradientScreenRectangle
+
+                        pt2 =
+                            Point3d.xyz
+                                right
+                                Quantity.zero
+                                (road.endPoint.space |> Point3d.zCoordinate |> Quantity.multiplyBy context.emphasis)
+                                |> Point3d.toScreenSpace altitudeCamera gradientScreenRectangle
+                    in
+                    ( right
+                    , segmentHatch pt1 pt2
+                        :: outputs
+                    )
+            in
+            Svg.g [] svgShapes
+
+        segmentHatch pt1 pt2 =
+            Svg.polygon2d
+                [ Svg.Attributes.stroke "none"
+                , Svg.Attributes.fill "black"
+                , Svg.Attributes.opacity "40%"
                 ]
+            <|
+                Polygon2d.singleLoop
+                    [ pt1
+                    , pt2
+                    , pt2 |> Point2d.projectOnto Axis2d.x
+                    , pt1 |> Point2d.projectOnto Axis2d.x
+                    ]
 
         pointsAsGradientPolyline : String -> List (Point3d Meters LocalCoords) -> Svg msg
         pointsAsGradientPolyline colour points =
@@ -840,9 +788,9 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews =
                 ]
                 [ Svg.relativeTo topLeftFrame <|
                     Svg.g []
-                        [ --hatchPattern
-                          pointsAsAltitudePolyline "black" <| renderDataOnce
-                        , pointsToColouredCurtain renderDataOnce pointsWithinSegments
+                        [ pointsAsAltitudePolyline "black" <| renderDataOnce
+                        , pointsToColouredCurtain renderDataOnce
+                        , paintSegments
                         , Svg.g [] (orangeAltitudeSvg :: orangeText ++ purpleSvg)
                         , Svg.g [] altitudePreviews
                         ]

@@ -9,7 +9,8 @@
 
 2) Show the named segments on the Profile view.
 
-> Edd out by one. Rounding? State? Logic?
+> Just paint them: for each segment, fold over tree to full depth.
+> Try hatching again.
 
 ---
 
