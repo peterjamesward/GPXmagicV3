@@ -10,8 +10,10 @@ aboutText =
 ## 3.5.4
 
 Shades segments on Profile view, all the time.
+
 Fixes some refresh errors on Named Segments previews.
-Add a "Google Stree View" link to the Information tool (Point mode).
+
+Add a "Google Street View" link to the Information tool (Point mode).
 
 ## 3.5.3
 
