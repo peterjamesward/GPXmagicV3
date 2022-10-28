@@ -7,6 +7,12 @@ aboutText =
 
 **GPXmagic V3 works (by far) best with Chrome (and some derivatives)**
 
+## 3.5.4
+
+Shades segments on Profile view, all the time.
+Fixes some refresh errors on Named Segments previews.
+Add a "Google Stree View" link to the Information tool (Point mode).
+
 ## 3.5.3
 
 When Named Segment tool is open, the buffer zones at the start and end of the route
