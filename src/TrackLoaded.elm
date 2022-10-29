@@ -73,7 +73,7 @@ removeAdjacentDuplicates gpxs =
         areSame a b =
             a.latitude == b.latitude && a.longitude == b.longitude
     in
-    List.reverse <| Utils.deDupe areSame gpxs []
+    Utils.deDupe areSame gpxs
 
 
 trackFromSegments :
