@@ -13,6 +13,7 @@ import PreviewData exposing (PreviewPoint)
 import Quantity exposing (Quantity)
 import SpatialIndex
 import Tools.NamedSegmentOptions exposing (CreateMode(..), NamedSegment)
+import Utils
 import UtilsForViews
 
 
@@ -71,32 +72,8 @@ removeAdjacentDuplicates gpxs =
         areSame : GPXSource -> GPXSource -> Bool
         areSame a b =
             a.latitude == b.latitude && a.longitude == b.longitude
-
-        helper inputs outputs =
-            -- Conses non-stationary points on to outputs.
-            -- Note that outputs therefore also has last point at its head.
-            case ( inputs, outputs ) of
-                ( [], _ ) ->
-                    outputs
-
-                ( firstInput :: moreInputs, [] ) ->
-                    helper moreInputs [ firstInput ]
-
-                ( finalInput :: [], previousOutput :: _ ) ->
-                    if areSame finalInput previousOutput then
-                        outputs
-
-                    else
-                        finalInput :: outputs
-
-                ( someInput :: moreInputs, previousOutput :: _ ) ->
-                    if areSame someInput previousOutput then
-                        helper moreInputs outputs
-
-                    else
-                        helper moreInputs (someInput :: outputs)
     in
-    List.reverse <| helper gpxs []
+    List.reverse <| Utils.deDupe areSame gpxs []
 
 
 trackFromSegments :

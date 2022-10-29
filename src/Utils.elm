@@ -9,6 +9,31 @@ import Quantity exposing (Quantity)
 import Time
 
 
+deDupe areSame inputs outputs =
+    -- Conses non-stationary points on to outputs.
+    -- Note that outputs therefore also has last point at its head.
+    case ( inputs, outputs ) of
+        ( [], _ ) ->
+            outputs
+
+        ( firstInput :: moreInputs, [] ) ->
+            deDupe areSame moreInputs [ firstInput ]
+
+        ( finalInput :: [], previousOutput :: _ ) ->
+            if areSame finalInput previousOutput then
+                outputs
+
+            else
+                finalInput :: outputs
+
+        ( someInput :: moreInputs, previousOutput :: _ ) ->
+            if areSame someInput previousOutput then
+                deDupe areSame moreInputs outputs
+
+            else
+                deDupe areSame moreInputs (someInput :: outputs)
+
+
 equalIntervals : Int -> Maybe Time.Posix -> Maybe Time.Posix -> List (Maybe Time.Posix)
 equalIntervals pointsToAdd fromTime toTime =
     List.range 1 pointsToAdd
