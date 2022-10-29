@@ -10,6 +10,7 @@ import List.Extra
 import Maybe.Extra
 import Quantity
 import Regex
+import Utils
 
 
 asRegex t =
@@ -183,5 +184,11 @@ parseGPXPoints xml =
 
                 _ ->
                     Nothing
+
+        sameLocation ( a, _ ) ( b, _ ) =
+            a.latitude == b.latitude && a.longitude == b.longitude
     in
-    trkpts |> List.map earthVector |> List.filterMap identity
+    trkpts
+        |> List.map earthVector
+        |> List.filterMap identity
+        |> Utils.deDupe sameLocation

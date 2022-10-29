@@ -3,9 +3,13 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.5.0 (d7daff89)
+# GPXmagic v3.5.5 (d7daff89)
 
 **GPXmagic V3 works (by far) best with Chrome (and some derivatives)**
+
+## 3.5.5
+
+Fixes bug that misplaced segments on routes with named segments and duplicate adjacent trackpoints.
 
 ## 3.5.4
 

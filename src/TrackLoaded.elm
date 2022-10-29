@@ -203,7 +203,8 @@ trackFromPoints trackName gpxTrack =
         landuse =
             LandUseDataTypes.emptyLandUse
     in
-    case treeFromSourcePoints <| removeAdjacentDuplicates gpxTrack of
+    --case treeFromSourcePoints <| removeAdjacentDuplicates gpxTrack of
+    case treeFromSourcePoints gpxTrack of
         Just aTree ->
             Just
                 { trackTree = aTree

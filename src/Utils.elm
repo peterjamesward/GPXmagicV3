@@ -9,6 +9,37 @@ import Quantity exposing (Quantity)
 import Time
 
 
+deDupe : (a -> a -> Bool) -> List a -> List a
+deDupe areSame inputList =
+    -- Simply removing stationary points fixes many problems.
+    let
+        helper inputs outputs =
+            -- Conses non-stationary points on to outputs.
+            -- Note that outputs therefore also has last point at its head.
+            case ( inputs, outputs ) of
+                ( [], _ ) ->
+                    outputs
+
+                ( firstInput :: moreInputs, [] ) ->
+                    helper moreInputs [ firstInput ]
+
+                ( finalInput :: [], previousOutput :: _ ) ->
+                    if areSame finalInput previousOutput then
+                        outputs
+
+                    else
+                        finalInput :: outputs
+
+                ( someInput :: moreInputs, previousOutput :: _ ) ->
+                    if areSame someInput previousOutput then
+                        helper moreInputs outputs
+
+                    else
+                        helper moreInputs (someInput :: outputs)
+    in
+    List.reverse <| helper inputList []
+
+
 equalIntervals : Int -> Maybe Time.Posix -> Maybe Time.Posix -> List (Maybe Time.Posix)
 equalIntervals pointsToAdd fromTime toTime =
     List.range 1 pointsToAdd
