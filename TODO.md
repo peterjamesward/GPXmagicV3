@@ -1,13 +1,6 @@
 
 # BUGS
 
-In trackFromSegments, the segment start end indices apply to the input track
-but the tree has duplicate points removed so these indices are wrong.
-Should not convert seg start and end to indices!!
--- Only do this if named segments are present.
-
-Probrblg better is to de-dup whilst doing the segment and point correspondence.
-
 --- 
 
 # WIP
