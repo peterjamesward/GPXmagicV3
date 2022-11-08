@@ -415,8 +415,9 @@ view :
     -> List NamedSegment
     -> (Msg -> msg)
     -> Dict String PreviewData
+    -> Bool
     -> Element msg
-view context ( givenWidth, givenHeight ) track segments msgWrapper previews =
+view context ( givenWidth, givenHeight ) track segments msgWrapper previews imperial =
     let
         ( altitudeWidth, altitudeHeight ) =
             ( givenWidth
@@ -891,9 +892,12 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews =
 
         orangeText =
             [ textLine 1 <| (showDecimal2 orangeLeaf.gradientAtStart ++ "%")
-            , textLine 2 <| showShortMeasure False <| Point3d.zCoordinate <| orangePoint.space
+            , textLine 2 <|
+                showShortMeasure imperial <|
+                    Point3d.zCoordinate <|
+                        orangePoint.space
             , textLine 3 <|
-                showLongMeasure False <|
+                showLongMeasure imperial <|
                     DomainModel.distanceFromIndex track.currentPosition track.trackTree
             ]
 

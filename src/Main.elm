@@ -1101,6 +1101,7 @@ viewPaneArea model =
             model.paneLayoutOptions
             model.toolOptions.flythroughSettings.flythrough
             model.previews
+            model.toolOptions.imperial
 
 
 topLoadingBar model =

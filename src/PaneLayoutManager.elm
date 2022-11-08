@@ -697,8 +697,9 @@ viewPanes :
     -> Options
     -> Maybe Tools.Flythrough.Flythrough
     -> Dict String PreviewData
+    -> Bool
     -> Element msg
-viewPanes location msgWrapper mTrack segments graphOptions displayOptions ( w, h ) options mFlythrough previews =
+viewPanes location msgWrapper mTrack segments graphOptions displayOptions ( w, h ) options mFlythrough previews imperial =
     let
         ( paneWidth, paneHeight ) =
             dimensionsWithLayout options.paneLayout ( w, h )
@@ -771,6 +772,7 @@ viewPanes location msgWrapper mTrack segments graphOptions displayOptions ( w, h
                                 segments
                                 (msgWrapper << ProfileViewMessage pane.paneId)
                                 previews
+                                imperial
 
                         _ ->
                             none
