@@ -18,10 +18,10 @@ The original search was:
 out body;
 >;
 out skel qt;
-
+/*
 Use https://overpass-turbo.eu
 
-Return "ways" which are simply polygons of "nodes" with long & lat:
+Returns "ways" -- polygons of "nodes" with long & lat:
 
 {
   "version": 0.6,
@@ -72,3 +72,4 @@ Return "ways" which are simply polygons of "nodes" with long & lat:
   ]
 }
 
+*/
