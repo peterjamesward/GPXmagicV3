@@ -75,7 +75,7 @@ mean something to the Wahoo RGT Magic Roads parser. They have no effect here in 
           )
         , ( "panes"
           , Dict.fromList
-                [ ( "layout", """Choose layout""" )
+                [ ( "layout", """Layout""" )
                 , ( "one", """Large one""" )
                 , ( "tall", """Cupboards""" )
                 , ( "flat", """Drawers""" )

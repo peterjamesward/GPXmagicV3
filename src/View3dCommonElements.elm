@@ -13,6 +13,7 @@ import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
 import FeatherIcons
+import FlatColors.AussiePalette
 import FlatColors.ChinesePalette exposing (white)
 import Frame2d
 import Geometry.Svg as Svg
@@ -107,11 +108,14 @@ zoomButtons location msgWrapper context =
         [ alignTop
         , alignRight
         , moveDown 5
-        , moveLeft 5
+        , moveLeft 10
         , Background.color white
         , Font.size 40
         , padding 6
         , spacing 8
+        , Border.width 1
+        , Border.rounded 4
+        , Border.color FlatColors.AussiePalette.blurple
         , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always ImageNoOp >> msgWrapper)
         , htmlAttribute <| Mouse.onWithOptions "dblclick" stopProp (always ImageNoOp >> msgWrapper)
         , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ImageNoOp >> msgWrapper)

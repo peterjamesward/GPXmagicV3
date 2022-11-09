@@ -7,8 +7,6 @@
 
 Move Layout tool.
 
-Add Imperial support to Profile view.
-
 ---
 
 # BACKLOG

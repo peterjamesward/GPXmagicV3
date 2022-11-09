@@ -1252,7 +1252,7 @@ topLoadingBar model =
         , row [ alignRight, spacing 5 ]
             [ Tools.OneClickQuickFix.oneClickQuickFixButton model.location OneClickMsg model.track
             , StravaAuth.stravaButton model.stravaAuthentication OAuthMessage
-            , PaneLayoutManager.paneLayoutMenu model.location PaneMsg model.paneLayoutOptions
+            --, PaneLayoutManager.paneLayoutMenu model.location PaneMsg model.paneLayoutOptions
             , buyMeACoffeeButton
             ]
         ]

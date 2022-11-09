@@ -175,7 +175,7 @@ showOptionsMenu location msgWrapper options =
     if options.popupVisible then
         el
             [ moveDown 30
-            , moveLeft 30
+            , moveLeft 80
             , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always PaneNoOp >> msgWrapper)
             , htmlAttribute <| Mouse.onWithOptions "dblclick" stopProp (always PaneNoOp >> msgWrapper)
             , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always PaneNoOp >> msgWrapper)
@@ -611,8 +611,13 @@ initialisePane track options pane =
     }
 
 
-viewModeChoices : I18NOptions.Location -> (Msg -> msg) -> PaneContext -> Element msg
-viewModeChoices location msgWrapper context =
+viewModeChoices :
+    I18NOptions.Location
+    -> (Msg -> msg)
+    -> PaneContext
+    -> Options
+    -> Element msg
+viewModeChoices location msgWrapper context options =
     let
         localise =
             radioButton << I18N.localisedString location "panes"
@@ -627,15 +632,23 @@ viewModeChoices location msgWrapper context =
             , Input.optionWith ViewInfo <| localise "About"
             ]
     in
-    Input.radioRow
-        [ spacing 5
-        , paddingEach { top = 4, left = 4, bottom = 0, right = 0 }
+    row [ width fill ]
+        [ Input.radioRow
+            [ spacing 5
+            , paddingEach { top = 4, left = 4, bottom = 0, right = 0 }
+            ]
+            { onChange = msgWrapper << SetViewMode context.paneId
+            , selected = Just context.activeView
+            , label = Input.labelHidden "Choose view"
+            , options = fullOptionList
+            }
+        , el
+            [ alignRight
+            , paddingEach { top = 4, left = 4, bottom = 0, right = 10 }
+            ]
+          <|
+            paneLayoutMenu location msgWrapper options
         ]
-        { onChange = msgWrapper << SetViewMode context.paneId
-        , selected = Just context.activeView
-        , label = Input.labelHidden "Choose view"
-        , options = fullOptionList
-        }
 
 
 viewModeChoicesNoMap : I18NOptions.Location -> (Msg -> msg) -> PaneContext -> Element msg
@@ -785,7 +798,7 @@ viewPanes location msgWrapper mTrack segments graphOptions displayOptions ( w, h
             -- The Map DIV must be constructed once only, even before we have a Track,
             -- or the map gets upset. So we use CSS to show and hide these elements.
             column [ width fill, centerX ]
-                [ viewModeChoices location msgWrapper pane
+                [ viewModeChoices location msgWrapper pane options
                 , conditionallyVisible (pane.activeView /= ViewMap) <|
                     showNonMapViews pane
                 , conditionallyVisible (pane.activeView == ViewMap) <|
