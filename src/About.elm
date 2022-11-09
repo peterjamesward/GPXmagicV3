@@ -7,6 +7,13 @@ aboutText =
 
 **GPXmagic V3 works (by far) best with Chrome (and some derivatives)**
 
+## 3.5.6
+
+Moved Pane Layout menu to top right of the first view pane, instead of being buried in the
+top bar.
+
+Profile view now respects option to use Imperial measures.
+
 ## 3.5.5
 
 Fixes bug that misplaced segments on routes with named segments and duplicate adjacent trackpoints.
