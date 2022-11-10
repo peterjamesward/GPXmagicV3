@@ -27,7 +27,7 @@ import GpxParser exposing (parseSegments)
 import Html exposing (Html, div)
 import Html.Attributes exposing (id, style)
 import Html.Events.Extra.Mouse as Mouse
-import Http
+import Http exposing (header)
 import Json.Decode as D
 import Json.Encode as E exposing (string)
 import LandUseDataOSM
@@ -82,7 +82,7 @@ import Tools.Timestamp
 import Tools.TrackInfoBox
 import ToolsController exposing (ToolEntry, encodeColour, encodeToolState)
 import TrackLoaded exposing (TrackLoaded, indexLeaves)
-import Url exposing (Url)
+import Url exposing (Protocol(..), Url)
 import Url.Builder as Builder
 import UtilsForViews exposing (uiColourHexString)
 import ViewMap
@@ -475,23 +475,9 @@ update msg model =
             ( model
             , case model.loadFromUrl of
                 Just url ->
-                    let
-                        properUrl =
-                            Builder.crossOrigin url [] []
-                    in
-                    --Http.get
-                    --    { url = url
-                    --    , expect = Http.expectString GpxFromUrl
-                    --    }
-                    Http.request
-                        { method = "GET"
-                        , headers =
-                            [ Http.header "Access-Control-Allow-Origin" url ]
-                        , url = properUrl
-                        , body = Http.emptyBody
+                    Http.get
+                        { url = url
                         , expect = Http.expectString GpxFromUrl
-                        , timeout = Nothing
-                        , tracker = Nothing
                         }
 
                 Nothing ->
@@ -1132,7 +1118,7 @@ topLoadingBar model =
                             [ SvgPathExtractor.view SvgMsg model.ipInfo
 
                             -- Hidden until CORS thing sorted.
-                            --, loadFromUrl
+                            , loadFromUrl
                             ]
 
                     else
@@ -1252,6 +1238,7 @@ topLoadingBar model =
         , row [ alignRight, spacing 5 ]
             [ Tools.OneClickQuickFix.oneClickQuickFixButton model.location OneClickMsg model.track
             , StravaAuth.stravaButton model.stravaAuthentication OAuthMessage
+
             --, PaneLayoutManager.paneLayoutMenu model.location PaneMsg model.paneLayoutOptions
             , buyMeACoffeeButton
             ]

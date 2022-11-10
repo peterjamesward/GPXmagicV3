@@ -5,11 +5,16 @@
 
 # WIP
 
-Move Layout tool.
-
 ---
 
 # BACKLOG
+
+## Load from URL
+
+This needs sorting as RGT may get round to providing an "Edit" link one day.
+Could also ask the `magicroads.com` people to add an "open in GPXmagic" link.
+
+> CORS issues.
 
 ## Make Map changes declarative; tidy Action code
 
@@ -47,12 +52,6 @@ Not full physics. momentum-free, just allow for gradient on each section.
 
 Main difference is how the pointers are repositioned.
 There's only two or three cases, if not a single general one.
-
-## Load from URL
-
-This needs sorting as RGT may get round to providing an "Edit" link one day.
-
-> CORS issues.
 
 ## Languages
 
