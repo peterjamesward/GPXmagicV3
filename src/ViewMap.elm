@@ -7,6 +7,7 @@ import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input exposing (button, labelHidden)
 import FeatherIcons
+import FlatColors.AussiePalette
 import FlatColors.ChinesePalette
 import Html.Attributes exposing (id)
 import Pixels exposing (Pixels, inPixels)
@@ -142,6 +143,9 @@ view location ( viewWidth, viewHeight ) mContext msgWrapper =
                 , Font.size 40
                 , padding 6
                 , spacing 8
+                , Border.width 1
+                , Border.rounded 4
+                , Border.color FlatColors.AussiePalette.blurple
                 ]
                 [ Input.button
                     [ tooltip onLeft <|

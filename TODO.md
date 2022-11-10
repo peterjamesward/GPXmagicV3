@@ -14,8 +14,6 @@
 This needs sorting as RGT may get round to providing an "Edit" link one day.
 Could also ask the `magicroads.com` people to add an "open in GPXmagic" link.
 
-> CORS issues.
-
 ## Make Map changes declarative; tidy Action code
 
 This would largely but not entirely obviate Main.performActionCommands.
