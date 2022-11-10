@@ -11,7 +11,7 @@
 
 ## Load from URL
 
-This needs sorting as RGT may get round to providing an "Edit" link one day.
+Need to be able to use a query URL.
 Could also ask the `magicroads.com` people to add an "open in GPXmagic" link.
 
 ## Make Map changes declarative; tidy Action code

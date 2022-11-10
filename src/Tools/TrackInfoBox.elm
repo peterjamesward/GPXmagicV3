@@ -47,7 +47,7 @@ type InformationContext
 
 defaultOptions : Options
 defaultOptions =
-    { displayMode = InfoForTrack
+    { displayMode = InfoForPoint
     , memoryInfo = Nothing
     }
 
