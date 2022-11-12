@@ -11,8 +11,9 @@
 
 ## Load from URL
 
-Need to be able to use a query URL.
-Could also ask the `magicroads.com` people to add an "open in GPXmagic" link.
+Need to design a "Open in GPXmagic" button.
+Need to handle the query URL in `init`.
+Anyone who uses it must add our domain to their server's allowed origin list.
 
 ## Make Map changes declarative; tidy Action code
 
