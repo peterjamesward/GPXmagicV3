@@ -1119,7 +1119,7 @@ topLoadingBar model =
                             , Border.width 2
                             ]
                             [ SvgPathExtractor.view SvgMsg model.ipInfo
-
+                            -- Can't have "open" URL field, as server must have CORS support.
                             --, loadFromUrl
                             ]
 

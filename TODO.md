@@ -5,15 +5,20 @@
 
 # WIP
 
----
-
-# BACKLOG
-
 ## Load from URL
 
 Need to design a "Open in GPXmagic" button.
 Need to handle the query URL in `init`.
 Anyone who uses it must add our domain to their server's allowed origin list.
+
+---
+
+# BACKLOG
+
+## Estimate ride duration, set timestamps
+
+Show estimated time for route given wattage and rider weight.
+Not full physics. momentum-free, just allow for gradient on each section.
 
 ## Make Map changes declarative; tidy Action code
 
@@ -41,11 +46,6 @@ but they might factor out.
 1. Rework MapController so comparison of states emits the commands; better: MapOptions.
 2. Purge the Actions code so that model is updated directly.
 3. Repeat for other actions.
-
-## Estimate ride duration
-
-Show estimated time for route given wattage and rider weight.
-Not full physics. momentum-free, just allow for gradient on each section.
 
 ## On refactoring Action interpreter in Main.
 
