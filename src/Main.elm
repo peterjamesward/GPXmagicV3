@@ -32,9 +32,11 @@ import Json.Decode as D
 import Json.Encode as E exposing (string)
 import LandUseDataOSM
 import LandUseDataTypes
+import List.Extra
 import LocalStorage
 import MapPortController
 import Markdown
+import Maybe.Extra
 import MyIP
 import OAuthPorts as O exposing (randomBytes)
 import OAuthTypes as O exposing (OAuthMsg(..))
@@ -246,6 +248,10 @@ init mflags origin navigationKey =
 
         withRouteUrl =
             Maybe.map parseQueryPart origin.query
+                |> Maybe.Extra.join
+
+        parseQueryPart queryString =
+            List.Extra.getAt 1 <| String.split "=" queryString
     in
     ( { filename = Nothing
       , time = Time.millisToPosix 0
@@ -295,7 +301,15 @@ init mflags origin navigationKey =
         , LocalStorage.storageGetItem "location"
         , LocalStorage.storageGetMemoryUsage
         , LocalStorage.storageGetItem "welcome"
-        , Delay.after 100 DisplayWelcome
+        , case withRouteUrl of
+            Nothing ->
+                Delay.after 100 DisplayWelcome
+
+            Just routeUrl ->
+                Http.get
+                    { url = routeUrl
+                    , expect = Http.expectString GpxFromUrl
+                    }
         ]
     )
 
@@ -1119,6 +1133,7 @@ topLoadingBar model =
                             , Border.width 2
                             ]
                             [ SvgPathExtractor.view SvgMsg model.ipInfo
+
                             -- Can't have "open" URL field, as server must have CORS support.
                             --, loadFromUrl
                             ]
