@@ -243,6 +243,9 @@ init mflags origin navigationKey =
     let
         ( authData, authCmd ) =
             StravaAuth.init mflags origin navigationKey OAuthMessage
+
+        withRouteUrl =
+            Maybe.map parseQueryPart origin.query
     in
     ( { filename = Nothing
       , time = Time.millisToPosix 0
@@ -1117,8 +1120,7 @@ topLoadingBar model =
                             ]
                             [ SvgPathExtractor.view SvgMsg model.ipInfo
 
-                            -- Hidden until CORS thing sorted.
-                            , loadFromUrl
+                            --, loadFromUrl
                             ]
 
                     else
