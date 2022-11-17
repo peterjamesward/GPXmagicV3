@@ -5,14 +5,19 @@
 
 # WIP
 
----
+## "Open in GPXmagic"
 
-# BACKLOG
+Design a button. 
+Write the How-To.
 
 ## Estimate ride duration, set timestamps
 
 Show estimated time for route given wattage and rider weight.
 Not full physics. momentum-free, just allow for gradient on each section.
+
+---
+
+# BACKLOG
 
 ## Make Map changes declarative; tidy Action code
 
