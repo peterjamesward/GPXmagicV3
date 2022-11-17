@@ -5,11 +5,6 @@
 
 # WIP
 
-## "Open in GPXmagic"
-
-Design a button. 
-Write the How-To.
-
 ## Estimate ride duration, set timestamps
 
 Show estimated time for route given wattage and rider weight.

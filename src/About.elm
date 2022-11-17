@@ -3,9 +3,17 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.5.5 (fb46e089)
+# GPXmagic v3.5.7 (fb46e089)
 
 **GPXmagic V3 works (by far) best with Chrome (and some derivatives)**
+
+## 3.5.7
+
+Adds support for "Open in GPXmagic button". If you have a site that hosts GPX files, you
+can add this button (or any button of your choice), so that GPXmagic will launch and load
+the GPX file from the URL provided. **Please note** for this to work, you must ensure that
+the site allows CORS access from http://stepwiserefinement.co.uk.s3-website-eu-west-1.amazonaws.com
+-- if you don't know what that means, you probably won't be able to make it work :)
 
 ## 3.5.6
 
