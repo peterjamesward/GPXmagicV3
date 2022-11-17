@@ -5,12 +5,6 @@
 
 # WIP
 
-## Load from URL
-
-Need to design a "Open in GPXmagic" button.
-Need to handle the query URL in `init`.
-Anyone who uses it must add our domain to their server's allowed origin list.
-
 ---
 
 # BACKLOG

@@ -96,8 +96,6 @@ type Msg
     = GpxRequested
     | GpxSelected File
     | GpxLoaded String
-    | LoadFromUrlChanged String
-    | LoadFromUrl
     | GpxFromUrl (Result Http.Error String)
     | ToggleLoadOptionMenu
     | ToggleRGTOptions
@@ -261,7 +259,7 @@ init mflags origin navigationKey =
       , loadOptionsMenuOpen = False
       , svgFileOptions = SvgPathExtractor.defaultOptions
       , rgtOptionsVisible = False
-      , loadFromUrl = Nothing
+      , loadFromUrl = withRouteUrl
       , location = I18N.defaultLocation
       , track = Nothing
       , mapPointsDraggable = False
@@ -301,15 +299,7 @@ init mflags origin navigationKey =
         , LocalStorage.storageGetItem "location"
         , LocalStorage.storageGetMemoryUsage
         , LocalStorage.storageGetItem "welcome"
-        , case withRouteUrl of
-            Nothing ->
-                Delay.after 100 DisplayWelcome
-
-            Just routeUrl ->
-                Http.get
-                    { url = routeUrl
-                    , expect = Http.expectString GpxFromUrl
-                    }
+        , Delay.after 100 DisplayWelcome
         ]
     )
 
@@ -372,12 +362,28 @@ update msg model =
     in
     case msg of
         DisplayWelcome ->
+            let
+                -- Try loading remote data now, after map may have initialised
+                loadCmd =
+                    case model.loadFromUrl of
+                        Nothing ->
+                            Cmd.none
+
+                        Just routeUrl ->
+                            Http.get
+                                { url = routeUrl
+                                , expect = Http.expectString GpxFromUrl
+                                }
+            in
             if model.welcomeDisplayed then
-                ( model, Cmd.none )
+                ( model, loadCmd )
 
             else
                 ( { model | infoText = Just ( "main", "welcome" ) }
-                , LocalStorage.storageSetItem "welcome" (E.bool True)
+                , Cmd.batch
+                    [ LocalStorage.storageSetItem "welcome" (E.bool True)
+                    , loadCmd
+                    ]
                 )
 
         RGTOptions options ->
@@ -475,31 +481,6 @@ update msg model =
 
         IpInfoAcknowledged _ ->
             ( model, Cmd.none )
-
-        LoadFromUrlChanged url ->
-            ( { model
-                | loadFromUrl =
-                    if url == "" then
-                        Nothing
-
-                    else
-                        Just url
-              }
-            , Cmd.none
-            )
-
-        LoadFromUrl ->
-            ( model
-            , case model.loadFromUrl of
-                Just url ->
-                    Http.get
-                        { url = url
-                        , expect = Http.expectString GpxFromUrl
-                        }
-
-                Nothing ->
-                    Cmd.none
-            )
 
         GpxFromUrl result ->
             case result of
@@ -1145,29 +1126,6 @@ topLoadingBar model =
                 { onPress = Just ToggleLoadOptionMenu
                 , label = useIconWithSize 12 FeatherIcons.moreHorizontal
                 }
-
-        loadFromUrl =
-            row []
-                [ Input.text
-                    [ padding 5
-                    , width <| minimum 200 <| fill
-                    , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always NoOp)
-                    ]
-                    { text = model.loadFromUrl |> Maybe.withDefault ""
-                    , onChange = LoadFromUrlChanged
-                    , placeholder = Just <| Input.placeholder [] <| localHelper "urlhelp"
-                    , label = Input.labelHidden "URL"
-                    }
-                , button
-                    [ padding 5
-                    , Background.color FlatColors.ChinesePalette.antiFlashWhite
-                    , Border.color FlatColors.FlatUIPalette.peterRiver
-                    , Border.width 2
-                    ]
-                    { onPress = Just LoadFromUrl
-                    , label = localHelper "loadurl"
-                    }
-                ]
 
         loadGpxButton =
             button
@@ -2905,6 +2863,17 @@ performActionCommands actions model =
 
                 ( LoadGpxFromStrava gpxContent, Just track ) ->
                     showTrackOnMapCentered model.mapPointsDraggable track
+
+                ( RemoteLoadIfUrlProvided, _ ) ->
+                    case model.loadFromUrl of
+                        Nothing ->
+                            Cmd.none
+
+                        Just url ->
+                            Http.get
+                                { url = url
+                                , expect = Http.expectString GpxFromUrl
+                                }
 
                 ( RequestStravaRouteHeader msg routeId token, _ ) ->
                     Tools.StravaDataLoad.requestStravaRouteHeader
