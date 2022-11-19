@@ -36,7 +36,6 @@ import List.Extra
 import LocalStorage
 import MapPortController
 import Markdown
-import Maybe.Extra
 import MyIP
 import OAuthPorts as O exposing (randomBytes)
 import OAuthTypes as O exposing (OAuthMsg(..))
@@ -86,6 +85,8 @@ import ToolsController exposing (ToolEntry, encodeColour, encodeToolState)
 import TrackLoaded exposing (TrackLoaded, indexLeaves)
 import Url exposing (Protocol(..), Url)
 import Url.Builder as Builder
+import Url.Parser exposing (..)
+import Url.Parser.Query as Query
 import UtilsForViews exposing (uiColourHexString)
 import ViewMap
 import ViewPureStyles exposing (..)
@@ -96,6 +97,7 @@ type Msg
     = GpxRequested
     | GpxSelected File
     | GpxLoaded String
+    | TryRemoteLoad
     | GpxFromUrl (Result Http.Error String)
     | ToggleLoadOptionMenu
     | ToggleRGTOptions
@@ -145,7 +147,7 @@ type alias Model =
     , svgFileOptions : SvgPathExtractor.Options
     , location : I18NOptions.Location
     , rgtOptionsVisible : Bool
-    , loadFromUrl : Maybe String
+    , loadFromUrl : Maybe Url
 
     -- Track stuff
     , track : Maybe (TrackLoaded Msg)
@@ -244,12 +246,12 @@ init mflags origin navigationKey =
         ( authData, authCmd ) =
             StravaAuth.init mflags origin navigationKey OAuthMessage
 
-        withRouteUrl =
-            Maybe.map parseQueryPart origin.query
-                |> Maybe.Extra.join
-
-        parseQueryPart queryString =
-            List.Extra.getAt 1 <| String.split "=" queryString
+        remoteUrl =
+            origin.query
+                |> Maybe.map (String.split "=")
+                |> Maybe.andThen (List.Extra.getAt 1)
+                |> Maybe.andThen Url.percentDecode
+                |> Maybe.andThen Url.fromString
     in
     ( { filename = Nothing
       , time = Time.millisToPosix 0
@@ -259,7 +261,7 @@ init mflags origin navigationKey =
       , loadOptionsMenuOpen = False
       , svgFileOptions = SvgPathExtractor.defaultOptions
       , rgtOptionsVisible = False
-      , loadFromUrl = withRouteUrl
+      , loadFromUrl = remoteUrl
       , location = I18N.defaultLocation
       , track = Nothing
       , mapPointsDraggable = False
@@ -365,15 +367,7 @@ update msg model =
             let
                 -- Try loading remote data now, after map may have initialised
                 loadCmd =
-                    case model.loadFromUrl of
-                        Nothing ->
-                            Cmd.none
-
-                        Just routeUrl ->
-                            Http.get
-                                { url = routeUrl
-                                , expect = Http.expectString GpxFromUrl
-                                }
+                    Delay.after 500 TryRemoteLoad
             in
             if model.welcomeDisplayed then
                 ( model, loadCmd )
@@ -481,6 +475,19 @@ update msg model =
 
         IpInfoAcknowledged _ ->
             ( model, Cmd.none )
+
+        TryRemoteLoad ->
+            ( model
+            , case model.loadFromUrl of
+                Nothing ->
+                    Cmd.none
+
+                Just url ->
+                    Http.get
+                        { url = Url.toString url
+                        , expect = Http.expectString GpxFromUrl
+                        }
+            )
 
         GpxFromUrl result ->
             case result of
@@ -2774,6 +2781,17 @@ performActionCommands actions model =
         performAction : ToolAction Msg -> Cmd Msg
         performAction action =
             case ( action, model.track ) of
+                ( TryRemoteLoadIfGiven, _ ) ->
+                    case model.loadFromUrl of
+                        Nothing ->
+                            Cmd.none
+
+                        Just url ->
+                            Http.get
+                                { url = Url.toString url
+                                , expect = Http.expectString GpxFromUrl
+                                }
+
                 ( SetCurrent position, Just track ) ->
                     MapPortController.addMarkersToMap track
 
@@ -2863,17 +2881,6 @@ performActionCommands actions model =
 
                 ( LoadGpxFromStrava gpxContent, Just track ) ->
                     showTrackOnMapCentered model.mapPointsDraggable track
-
-                ( RemoteLoadIfUrlProvided, _ ) ->
-                    case model.loadFromUrl of
-                        Nothing ->
-                            Cmd.none
-
-                        Just url ->
-                            Http.get
-                                { url = url
-                                , expect = Http.expectString GpxFromUrl
-                                }
 
                 ( RequestStravaRouteHeader msg routeId token, _ ) ->
                     Tools.StravaDataLoad.requestStravaRouteHeader

@@ -116,7 +116,7 @@ type ToolAction msg
     | TimeDoubling
     | RemoveTimes
     | EstimateTimes
-    | RemoteLoadIfUrlProvided
+    | TryRemoteLoadIfGiven
 
 
 actionTextForUndo : I18NOptions.Location -> ToolAction msg -> String

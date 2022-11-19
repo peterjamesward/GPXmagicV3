@@ -143,7 +143,7 @@ function onUp(e) {
 
 function mapMessageHandler(msg) {
 //    console.log('behold, a message from the land of Elm');
-    //console.log(msg);
+    console.log(msg);
 
     switch (msg.Cmd) {
         case 'Init':
@@ -303,7 +303,7 @@ function makeTheMap(msg) {
     var element = document.getElementById("map");
     if(typeof(element) != 'undefined' && element != null && !isMapCreated)
     {
-        //console.log('making the map now');
+        console.log('making the map now');
 
         map = new mapboxgl.Map({
             container: 'map',
@@ -317,7 +317,7 @@ function makeTheMap(msg) {
         });
 
         map.on('load', function (m) {
-            //console.log('tell Elm the map is ready');
+            console.log('tell Elm the map is ready');
             isMapCreated = true;
             canvas  = map.getCanvasContainer();
             // Add zoom and rotation controls to the map.

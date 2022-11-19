@@ -9,11 +9,13 @@ aboutText =
 
 ## 3.5.7
 
-Adds support for "Open in GPXmagic button". If you have a site that hosts GPX files, you
+Adds support for "Open in GPXmagic" button. If you have a site that hosts GPX files, you
 can add this button (or any button of your choice), so that GPXmagic will launch and load
 the GPX file from the URL provided. **Please note** for this to work, you must ensure that
 the site allows CORS access from http://stepwiserefinement.co.uk.s3-website-eu-west-1.amazonaws.com
 -- if you don't know what that means, you probably won't be able to make it work :)
+
+See https://s3.eu-west-1.amazonaws.com/stepwiserefinement.co.uk/GPXmagic/TestRemoteLoad.html for usage.
 
 ## 3.5.6
 
