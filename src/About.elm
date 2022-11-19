@@ -7,6 +7,12 @@ aboutText =
 
 **GPXmagic V3 works (by far) best with Chrome (and some derivatives)**
 
+## 3.5.8
+
+Load from remote URL now understands (and requires) uuencoded URLs.
+
+Remote load should display route on Map view correctly.
+
 ## 3.5.7
 
 Adds support for "Open in GPXmagic" button. If you have a site that hosts GPX files, you
