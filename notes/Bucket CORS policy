@@ -1,0 +1,17 @@
+[
+    {
+        "AllowedHeaders": [
+            "*"
+        ],
+        "AllowedMethods": [
+            "GET"
+        ],
+        "AllowedOrigins": [
+            "http://stepwiserefinement.co.uk.s3-website-eu-west-1.amazonaws.com",
+            "https://s3.eu-west-1.amazonaws.com",
+            "http://localhost:8000"
+        ],
+        "ExposeHeaders": [],
+        "MaxAgeSeconds": 3000
+    }
+]

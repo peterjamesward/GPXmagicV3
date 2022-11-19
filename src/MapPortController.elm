@@ -311,9 +311,6 @@ processMapPortMessage lastState track json =
 
         elevations =
             D.decodeValue (D.field "elevations" (D.list (D.nullable D.float))) json
-
-        _ =
-            Debug.log "MSG" jsonMsg
     in
     case jsonMsg of
         Ok "map ready" ->

@@ -5,12 +5,6 @@
 
 # WIP
 
-## Remote load
-
-Need to know how to properly parse URL query params.
-Need to uuencode url param. 
-Need to ensure cross-origin URL.
-
 ## Estimate ride duration, set timestamps
 
 Show estimated time for route given wattage and rider weight.
