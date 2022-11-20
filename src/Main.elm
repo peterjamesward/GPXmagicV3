@@ -1999,6 +1999,23 @@ performActionsOnModel actions model =
                     in
                     { foldedModel | track = Just newTrack }
 
+                ( UsePhysicsModel, Just track ) ->
+                    let
+                        ( newTree, oldPoints ) =
+                            Tools.Timestamp.applyPhysics
+                                model.toolOptions.timestampOptions
+                                track
+
+                        newTrack =
+                            track
+                                |> TrackLoaded.addToUndoStack action
+                                    0
+                                    0
+                                    oldPoints
+                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                    in
+                    { foldedModel | track = Just newTrack }
+
                 ( SetTimeTicks ticks, Just track ) ->
                     let
                         ( newTree, oldPoints ) =

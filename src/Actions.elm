@@ -114,6 +114,7 @@ type ToolAction msg
     | AdjustTimes Tools.TimestampOptions.Options
     | SetTimeTicks Int
     | TimeDoubling
+    | UsePhysicsModel
     | RemoveTimes
     | EstimateTimes
     | TryRemoteLoadIfGiven
@@ -225,6 +226,9 @@ actionTextForUndo location action =
 
             TimeDoubling ->
                 "double"
+
+            UsePhysicsModel ->
+                "physics"
 
             RemoveTimes ->
                 "removetimes"

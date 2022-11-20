@@ -286,15 +286,14 @@ durationForSection power section =
             30 - (2 * effectiveGradient) + 0.002 * effectiveGradient ^ 3
 
         modifiedSpeed =
-            -- Yes, this is silly to do this for each point.
+            -- TODO: Factor out to just modify the overall time!
             Quantity.ratio power defaultOptions.steadyPower
                 |> sqrt
                 |> (*) baselineSpeed
                 |> Speed.kilometersPerHour
 
         duration =
-            section.trueLength
-                |> Quantity.at_ modifiedSpeed
+            section.trueLength |> Quantity.at_ modifiedSpeed
     in
     duration
 
@@ -483,7 +482,8 @@ updateWithTrack msg options previewColour track =
 
         ComputeTimes ->
             ( options
-            , [ TrackHasChanged
+            , [ Actions.UsePhysicsModel
+              , TrackHasChanged
               ]
             )
 
