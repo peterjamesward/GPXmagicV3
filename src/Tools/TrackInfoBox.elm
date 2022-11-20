@@ -19,6 +19,7 @@ import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import Url
 import Url.Builder
+import Utils
 import UtilsForViews exposing (showDecimal0, showDecimal2, showDecimal6, showLongMeasure, showShortMeasure)
 
 
@@ -147,7 +148,7 @@ displayInfoForPoint location imperial track =
                 , UtilsForViews.formattedTime timestamp
                 ]
             ]
-        , newTabLink [ centerX]
+        , newTabLink [ centerX ]
             { url = makeLinkUrl track
             , label = I18N.text location toolId "streetview"
             }
@@ -202,13 +203,26 @@ displayValuesWithTrack location imperial infoList track =
     let
         info =
             asRecord <| track.trackTree
+
+        timeAtStart =
+            gpxPointFromIndex 0 track.trackTree |> .timestamp
+
+        timeAtEnd =
+            gpxPointFromIndex (skipCount track.trackTree) track.trackTree |> .timestamp
+
+        duration =
+            Utils.subtractTimes timeAtStart timeAtEnd
+
+        infoWithDuration =
+            -- Fix because some missing timestamps give null duration.
+            { info | transitTime = duration }
     in
     row
         [ padding 10
         , spacing 5
         ]
         [ column [ spacing 5 ] <| List.map (\( txt, _ ) -> I18N.text location "info" txt) infoList
-        , column [ spacing 5 ] <| List.map (\( _, fn ) -> fn imperial info) infoList
+        , column [ spacing 5 ] <| List.map (\( _, fn ) -> fn imperial infoWithDuration) infoList
         ]
 
 

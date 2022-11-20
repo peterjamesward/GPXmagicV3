@@ -453,7 +453,7 @@ Also, access a quick description of what the tool does and how (and when) to use
                 , ( "unknown", """(what was that?)""" )
                 , ( "combine", """combine nearby points""" )
                 , ( "adjusttimes", """adjust timings""" )
-                , ( "double", "double relative times" )
+                , ( "double", """double relative times""" )
                 , ( "settimeticks", "equal time spacing" )
                 ]
           )
@@ -524,8 +524,12 @@ moving it earlier or later in time, or you can stretch (or shrink) the range to 
                 , ( "doubling", """You may want to slow a 60fps video, perhaps because it was
 recorded in a car. Doubling all the time intervals is a way of saying "half speed".
 """ )
-                , ( "physics", """Estimate timings based on a really simple physics model.""" )
-                , ( "applyPhysics", """Compute timings""" )
+                , ( "physics", """Estimate timings with a really simple physics model,
+relative to an 80kg rider with an FTP of 200W (me, roughly).""" )
+                , ( "applyPhysics", """Apply estimated timings""" )
+                , ( "actual", """Use timestamps in GPX""")
+                , ( "estimated", """Use physics model""")
+                , ( "estimate", """Expected duration""")
                 , ( "uniform", """Replace track points with points at regular time intervals of:""" )
                 , ( "start absolute", """Clock time at Orange: """ )
                 , ( "end absolute", """Clock time at end of range: """ )

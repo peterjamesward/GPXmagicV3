@@ -5,11 +5,11 @@ import Actions exposing (ToolAction(..))
 import Angle
 import ColourPalette exposing (warningColor)
 import DomainModel exposing (..)
-import Duration
+import Duration exposing (Duration)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
-import Element.Input as Input exposing (button)
+import Element.Input as Input exposing (button, labelHidden)
 import FeatherIcons
 import FlatColors.AmericanPalette
 import FlatColors.BritishPalette
@@ -26,7 +26,7 @@ import Tools.I18NOptions as I18NOptions
 import Tools.TimestampOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import Utils
-import UtilsForViews exposing (showShortMeasure)
+import UtilsForViews exposing (showDecimal0, showShortMeasure)
 import ViewPureStyles exposing (..)
 
 
@@ -42,7 +42,9 @@ defaultOptions =
     , endLockedToStart = True
     , steadyPower = Power.watts 200
     , maxDownhill = Speed.kilometersPerHour 80
-    , mass = Mass.kilograms 75
+    , mass = Mass.kilograms 80
+    , estimatedDuration = Quantity.zero
+    , mode = Actual
     }
 
 
@@ -58,6 +60,7 @@ type Msg
     | SetMass Mass
     | SetTerminal Speed
     | ComputeTimes
+    | SetMode TimestampMode
 
 
 computeNewPoints : Bool -> Options -> TrackLoaded msg -> List PreviewPoint
@@ -219,52 +222,105 @@ applyTicks tickSpacing track =
 
 applyPhysics : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
 applyPhysics options track =
-    ( Nothing, [] )
+    -- Returns a track with new timestamps.
+    let
+        initialPoint =
+            DomainModel.gpxPointFromIndex 0 track.trackTree
+
+        ( _, newCourse ) =
+            DomainModel.foldOverRoute
+                computeSpeedAndTimes
+                track.trackTree
+                ( Quantity.zero
+                , [ { initialPoint | timestamp = Just <| Time.millisToPosix 0 } ]
+                )
+
+        computeSpeedAndTimes :
+            RoadSection
+            -> ( Duration, List GPXSource )
+            -> ( Duration, List GPXSource )
+        computeSpeedAndTimes road ( inputTime, reversedOutputs ) =
+            let
+                untimedNextPoint =
+                    Tuple.second road.sourceData
+
+                thisSection =
+                    durationForSection options.steadyPower road
+
+                cumulative =
+                    inputTime |> Quantity.plus thisSection
+            in
+            ( cumulative
+            , { untimedNextPoint
+                | timestamp =
+                    Just <|
+                        Time.millisToPosix <|
+                            floor <|
+                                Duration.inMilliseconds cumulative
+              }
+                :: reversedOutputs
+            )
+
+        newTree =
+            DomainModel.treeFromSourcePoints <| List.reverse newCourse
+
+        oldPoints =
+            DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
+    in
+    ( newTree, oldPoints )
 
 
+durationForSection : Power -> RoadSection -> Duration
+durationForSection power section =
+    {-
+       Adopting Dan Connelly's idea to not use power but just derive speed from slope
+       e.g. y = 30 - 2x + 0.002x^3 , x clamped to [-20, + 20] gives max 55kph, min 5kph.
+       But modify that with (say) uplift speed by sqrt(power/200).
+    -}
+    let
+        effectiveGradient =
+            clamp -20 20 section.gradientAtStart
 
---let
---    initialPoint =
---        DomainModel.gpxPointFromIndex 0 track.trackTree
---
---    ( _, newCourse ) =
---        DomainModel.foldOverRoute
---            computeSpeedAndTimes
---            track.trackTree
---            ( Speed.metersPerSecond 1
---            , [ { initialPoint | timestamp = Just <| Time.millisToPosix 0 }
---              ]
---            )
---
---    computeSpeedAndTimes : RoadSection -> ( Speed, List GPXSource ) -> ( Speed, List GPXSource )
---    computeSpeedAndTimes road ( entrySpeed, reversedOutputs ) =
---        {-
---        Adopting Dan Connelly's idea to not use power but just derive speed from slope
---        e.g. y = 42 - 3x + 0.003x^3 , x clamped to [-18, + 18] gives max 80kph, min 5.5kps.
---        but with provisos:
---        1. Inertia smooths speed changes (some 'a' along each straight;
---        2. Curvature (direction change) limits speed at any point.
---        - e.g. y = 80 - x + 0.003 x^2 , x in [0, 90] degrees.
---        - curvature-derived deceleration not limited (brakes!)
---        -}
---        let
---            exitSpeed =
---                entrySpeed
---
---            untimedNextPoint =
---                road.endPoint
---        in
---        ( exitSpeed
---        , { untimedNextPoint | timestamp = Just <| Time.millisToPosix 0 } :: reversedOutputs
---        )
---
---    newTree =
---        DomainModel.treeFromSourcePoints <| List.reverse newCourse
---
---    oldPoints =
---        DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
---in
---( newTree, oldPoints )
+        baselineSpeed =
+            -- Yes, this is our "physics model". Derive kph from gradient.
+            30 - (2 * effectiveGradient) + 0.002 * effectiveGradient ^ 3
+
+        modifiedSpeed =
+            -- Yes, this is silly to do this for each point.
+            Quantity.ratio power defaultOptions.steadyPower
+                |> sqrt
+                |> (*) baselineSpeed
+                |> Speed.kilometersPerHour
+
+        duration =
+            section.trueLength
+                |> Quantity.at_ modifiedSpeed
+    in
+    duration
+
+
+estimatedTime : Power -> TrackLoaded msg -> Duration
+estimatedTime power track =
+    -- Returns only the total new duration.
+    let
+        initialPoint =
+            DomainModel.gpxPointFromIndex 0 track.trackTree
+
+        newDuration =
+            DomainModel.foldOverRoute
+                computeSpeedAndTimes
+                track.trackTree
+                Quantity.zero
+
+        computeSpeedAndTimes : RoadSection -> Duration -> Duration
+        computeSpeedAndTimes road inputTime =
+            let
+                thisSectionDuration =
+                    durationForSection power road
+            in
+            inputTime |> Quantity.plus thisSectionDuration
+    in
+    newDuration
 
 
 toolStateChange :
@@ -281,6 +337,13 @@ toolStateChange opened colour options track =
                     { options
                         | extent = ExtentOrangeToEnd
                         , desiredStartMillis = relativeMillisToPoint theTrack.currentPosition theTrack
+                        , estimatedDuration = estimatedTime options.steadyPower theTrack
+                        , mode =
+                            if trackHasTimestamps theTrack then
+                                options.mode
+
+                            else
+                                Estimated
                     }
             in
             ( newOptions, actions newOptions colour theTrack )
@@ -334,6 +397,13 @@ updateWithTrack :
     -> ( Options, List (ToolAction msg) )
 updateWithTrack msg options previewColour track =
     case msg of
+        SetMode mode ->
+            let
+                newOptions =
+                    { options | mode = mode }
+            in
+            ( newOptions, actions newOptions previewColour track )
+
         SetTickInterval interval ->
             let
                 newOptions =
@@ -344,7 +414,10 @@ updateWithTrack msg options previewColour track =
         SetPower watts ->
             let
                 newOptions =
-                    { options | steadyPower = watts }
+                    { options
+                        | steadyPower = watts
+                        , estimatedDuration = estimatedTime watts track
+                    }
             in
             ( newOptions, actions newOptions previewColour track )
 
@@ -431,6 +504,12 @@ relativeMillisToPoint pointIndex track =
 trackStartTime : TrackLoaded msg -> Int
 trackStartTime track =
     absoluteMillisToPoint 0 track
+
+
+trackHasTimestamps track =
+    DomainModel.earthPointFromIndex 0 track.trackTree
+        |> .time
+        |> (/=) Nothing
 
 
 viewWithTrack :
@@ -601,10 +680,22 @@ viewWithTrack location imperial wrapper options track =
             column [ centerX, width fill, spacing 4, padding 4, Border.width 1 ]
                 [ paragraph [ width fill ] [ i18n "physics" ]
                 , powerSlider
+                , durationEstimate
                 , Input.button (centerX :: neatToolsBorder)
                     { onPress = Just (wrapper ComputeTimes)
-                    , label = paragraph [] [ i18n "double" ]
+                    , label = paragraph [] [ i18n "applyPhysics" ]
                     }
+                ]
+
+        durationEstimate =
+            row [ centerX, spacing 10 ]
+                [ i18n "estimate"
+                , UtilsForViews.formattedTime <|
+                    Just <|
+                        Time.millisToPosix <|
+                            floor <|
+                                Duration.inMilliseconds
+                                    options.estimatedDuration
                 ]
 
         powerSlider =
@@ -625,6 +716,17 @@ viewWithTrack location imperial wrapper options track =
                     , value = Power.inWatts options.steadyPower
                     , thumb = Input.defaultThumb
                     }
+
+        modeSelection =
+            Input.radio [ centerX, spacing 5 ]
+                { onChange = wrapper << SetMode
+                , options =
+                    [ Input.option Actual (i18n "actual")
+                    , Input.option Estimated (i18n "estimated")
+                    ]
+                , selected = Just options.mode
+                , label = labelHidden "mode"
+                }
     in
     column
         [ padding 5
@@ -633,13 +735,22 @@ viewWithTrack location imperial wrapper options track =
         , centerX
         , Background.color FlatColors.ChinesePalette.antiFlashWhite
         ]
-        [ none
-        , startTimeAdjustments
-        , equiSpacing
-        , doubleTimes
+    <|
+        if trackHasTimestamps track && options.mode == Actual then
+            [ modeSelection
+            , startTimeAdjustments
+            , equiSpacing
+            , doubleTimes
+            ]
 
-        --, doSomePhysics
-        ]
+        else
+            [ if trackHasTimestamps track then
+                modeSelection
+
+              else
+                none
+            , doSomePhysics
+            ]
 
 
 view : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
