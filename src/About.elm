@@ -3,9 +3,14 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.5.8 (f92fdd8a)
+# GPXmagic v3.6.0 (f92fdd8a)
 
 **GPXmagic V3 works (by far) best with Chrome (and some derivatives)**
+
+## 3.6.0
+
+Adds new functionality to Timestamp tool, allowing you to estimate the ride duration
+and (if you wish) create fictitious timestamps for each point.
 
 ## 3.5.8
 

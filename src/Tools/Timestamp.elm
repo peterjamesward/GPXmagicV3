@@ -731,7 +731,7 @@ viewWithTrack location imperial wrapper options track =
     column
         [ padding 5
         , spacing 5
-        , width <| px 300
+        , width fill --<| px 300
         , centerX
         , Background.color FlatColors.ChinesePalette.antiFlashWhite
         ]
