@@ -5,7 +5,7 @@ aboutText =
     """
 # GPXmagic v3.6.0 (4e80821a)
 
-**GPXmagic V3 works (by far) best with Chrome (and some derivatives)**
+**GPXmagic V3 works best with Chrome (and some derivatives)**
 
 ## 3.6.0
 

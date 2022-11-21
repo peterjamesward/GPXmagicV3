@@ -1,15 +1,11 @@
 
 # BUGS
 
+Title bar display not showing track name when loaded from URL.
+
 --- 
 
 # WIP
-
-## Estimate ride duration, set timestamps
-
-Show estimated time for route given wattage and rider weight.
-Not full physics. momentum-free, just allow for gradient on each section.
-(Timestamps tool mode when there are no timestamps.)
 
 ---
 
@@ -66,7 +62,7 @@ Put all Font, Colour etc into a Palette/Style module for ease of change.
 
 ## Land use 3D rendering
 
-Experiment proved the idea but not the implementation.
+Experiment proved the idea (of roads partitioning polygons) but implementation was weak.
 Roads should divide polygons, but care needed over directionality and crossing points.
 It needs doing properly, including the start and finish cases.
 
