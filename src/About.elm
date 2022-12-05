@@ -3,9 +3,15 @@ module About exposing (..)
 
 aboutText =
     """
-# GPXmagic v3.6.0 (4e80821a)
+# GPXmagic v3.6.1 (4e80821a)
 
 **GPXmagic V3 works best with Chrome (and some derivatives)**
+
+## 3.6.1
+
+Use Mapbox GL JS version 2.11.0.
+
+Use latest versions of Mapbox maps for "Outdoors", "Streets" and "Satellite streets".
 
 ## 3.6.0
 

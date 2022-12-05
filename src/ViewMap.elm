@@ -50,16 +50,16 @@ mapUrl style =
             "mapbox://styles/peterjamesward/ckj0benrl8i1k19rp4m1t3pkz"
 
         MapStreets ->
-            "mapbox://styles/mapbox/streets-v11"
+            "mapbox://styles/mapbox/streets-v12"
 
         MapSatellite ->
             "mapbox://styles/mapbox/satellite-v9"
 
         MapSatelliteStreets ->
-            "mapbox://styles/mapbox/satellite-streets-v11"
+            "mapbox://styles/mapbox/satellite-streets-v12"
 
         MapOutdoors ->
-            "mapbox://styles/mapbox/outdoors-v11"
+            "mapbox://styles/mapbox/outdoors-v12"
 
 
 defaultStyle =
