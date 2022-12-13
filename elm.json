@@ -40,6 +40,8 @@
             "icidasset/elm-binary": "2.1.0",
             "jinjor/elm-xml-parser": "2.0.0",
             "justgook/alt-linear-algebra": "2.0.0",
+            "lamdera/codecs": "1.0.0",
+            "lamdera/core": "1.0.0",
             "lukewestby/elm-string-interpolate": "1.0.4",
             "marcosh/elm-html-to-unicode": "1.0.4",
             "mdgriffith/elm-ui": "1.1.8",

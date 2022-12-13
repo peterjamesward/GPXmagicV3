@@ -83,6 +83,7 @@ import Tools.Timestamp
 import Tools.TrackInfoBox
 import ToolsController exposing (ToolEntry, encodeColour, encodeToolState)
 import TrackLoaded exposing (TrackLoaded, indexLeaves)
+import Types exposing (FrontendModel)
 import Url exposing (Protocol(..), Url)
 import Url.Builder as Builder
 import Url.Parser exposing (..)
@@ -138,46 +139,7 @@ type Msg
 
 
 type alias Model =
-    { filename : Maybe String
-    , time : Time.Posix
-    , zone : Time.Zone
-    , ipInfo : Maybe IpInfo
-    , stravaAuthentication : O.Model
-    , loadOptionsMenuOpen : Bool
-    , svgFileOptions : SvgPathExtractor.Options
-    , location : I18NOptions.Location
-    , rgtOptionsVisible : Bool
-    , loadFromUrl : Maybe Url
-
-    -- Track stuff
-    , track : Maybe (TrackLoaded Msg)
-
-    -- Visuals (scenes now in PaneLayoutManager)
-    , previews : Dict String PreviewData
-    , flythroughRunning : Bool
-    , needsRendering : Bool
-    , mapPointsDraggable : Bool
-
-    -- Layout stuff
-    , windowSize : ( Float, Float )
-    , contentArea : ( Quantity Int Pixels, Quantity Int Pixels )
-    , modalMessage : Maybe String
-    , paneLayoutOptions : PaneLayoutManager.Options
-    , infoText : Maybe ( String, String )
-    , welcomeDisplayed : Bool
-
-    -- Splitters
-    , leftDockRightEdge : SplitPane.State
-    , rightDockLeftEdge : SplitPane.State
-
-    -- Tools
-    , toolOptions : ToolsController.Options Msg
-    , isPopupOpen : Bool
-    , backgroundColour : Element.Color
-    , languageEditorOpen : Bool
-    , languageEditor : I18NOptions.Options
-    , rgtOptions : Tools.RGTOptions.Options
-    }
+    Types.FrontendModel
 
 
 encodeSplitValues : Model -> E.Value
