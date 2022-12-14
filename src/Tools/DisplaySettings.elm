@@ -1,10 +1,9 @@
-module Tools.DisplaySettings exposing (..)
+module Tools.DisplaySettings exposing (Msg(..), defaultOptions, restoreSettings, toolId, update, view)
 
 import Actions exposing (ToolAction(..))
-import Dict exposing (Dict)
 import Element exposing (..)
 import Element.Background as Background
-import Element.Input as Input exposing (button)
+import Element.Input as Input
 import FlatColors.ChinesePalette
 import Json.Decode as D
 import LandUseDataTypes
@@ -40,7 +39,6 @@ type Msg
     | SetTerrainFineness Float
     | DisplayInfo String String
     | SetPlaceNames Bool
-    | SetConstraintLevel Int
 
 
 restoreSettings : D.Value -> Options -> Options
@@ -106,20 +104,6 @@ update msg options =
             let
                 newOptions =
                     { options | terrainFineness = terrain }
-            in
-            ( newOptions, actions newOptions )
-
-        SetConstraintLevel level ->
-            let
-                newOptions =
-                    { options
-                        | showConstraintsAtLevel =
-                            if level > 0 then
-                                Just level
-
-                            else
-                                Nothing
-                    }
             in
             ( newOptions, actions newOptions )
 

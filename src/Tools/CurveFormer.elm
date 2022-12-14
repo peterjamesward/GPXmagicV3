@@ -1,4 +1,4 @@
-module Tools.CurveFormer exposing (..)
+module Tools.CurveFormer exposing (Msg(..), TransitionMode(..), applyUsingOptions, defaultOptions, highlightPoints, toolId, toolStateChange, update, view)
 
 import Actions exposing (ToolAction(..))
 import Angle
@@ -11,10 +11,10 @@ import Color
 import Dict exposing (Dict)
 import Direction2d exposing (Direction2d)
 import Direction3d
-import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, endPoint, skipCount, startPoint)
+import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, skipCount)
 import Element exposing (..)
 import Element.Background as Background
-import Element.Input as Input exposing (button)
+import Element.Input as Input
 import FlatColors.ChinesePalette
 import Geometry101
 import Html.Attributes
@@ -30,7 +30,7 @@ import Point2d exposing (Point2d)
 import Point3d
 import Polyline2d
 import Polyline3d
-import PreviewData exposing (PreviewPoint, PreviewShape(..))
+import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
 import Scene3d.Material as Material
@@ -47,7 +47,7 @@ import Utils
 import UtilsForViews exposing (flatBox, showShortMeasure)
 import Vector2d
 import Vector3d
-import ViewPureStyles exposing (commonShortHorizontalSliderStyles, edges, neatToolsBorder, noTrackMessage, prettyButtonStyles, subtleToolStyles, useIcon)
+import ViewPureStyles exposing (commonShortHorizontalSliderStyles, edges, neatToolsBorder, noTrackMessage, subtleToolStyles)
 
 
 toolId =
@@ -88,7 +88,6 @@ type Msg
     | SetSpacing Float
     | ToggleUsePullRadius Bool
     | ApplyWithOptions
-    | DisplayInfo String String
 
 
 applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource, ( Int, Int ) )
@@ -263,7 +262,7 @@ update msg options previewColour hasTrack =
             in
             ( newOptions, previewActions newOptions previewColour track )
 
-        ( Just track, ApplyWithOptions ) ->
+        ( Just _, ApplyWithOptions ) ->
             ( options
             , [ Actions.CurveFormerApplyWithOptions options
               , TrackHasChanged
@@ -283,92 +282,6 @@ view location imperial wrapper options track =
         squared x =
             x * x
 
-        showPushRadiusSlider =
-            Input.slider commonShortHorizontalSliderStyles
-                { onChange = wrapper << SetPushRadius << squared
-                , label =
-                    Input.labelBelow [] <|
-                        text <|
-                            String.Interpolate.interpolate
-                                (I18N.localisedString location toolId "radius")
-                                [ showShortMeasure imperial options.pushRadius ]
-                , min = 2.0
-                , max = 10.0
-                , step = Nothing
-                , value = options.pushRadius |> Length.inMeters |> sqrt
-                , thumb = Input.defaultThumb
-                }
-
-        showTransitionRadiusSlider =
-            Input.slider commonShortHorizontalSliderStyles
-                { onChange = wrapper << SetTransitionRadius << squared
-                , label =
-                    Input.labelBelow [] <|
-                        text <|
-                            String.Interpolate.interpolate
-                                (I18N.localisedString location toolId "join")
-                                [ showShortMeasure imperial options.transitionRadius ]
-                , min = 2.0
-                , max = 10.0
-                , step = Nothing
-                , value = options.transitionRadius |> Length.inMeters |> sqrt
-                , thumb = Input.defaultThumb
-                }
-
-        showPullRadiusSlider =
-            Input.slider commonShortHorizontalSliderStyles
-                { onChange = wrapper << SetDiscWidth
-                , label =
-                    Input.labelBelow [] <|
-                        text <|
-                            String.Interpolate.interpolate
-                                (I18N.localisedString location toolId "join")
-                                [ showShortMeasure imperial options.pullRadius ]
-                , min = 1.0
-                , max = 40.0
-                , step = Nothing
-                , value = options.pullRadius |> Quantity.minus options.pushRadius |> Length.inMeters
-                , thumb = Input.defaultThumb
-                }
-
-        showSpacingSlider =
-            Input.slider commonShortHorizontalSliderStyles
-                { onChange = wrapper << SetSpacing
-                , label =
-                    Input.labelBelow [] <|
-                        text <|
-                            String.Interpolate.interpolate
-                                (I18N.localisedString location toolId "spacing")
-                                [ showShortMeasure imperial options.spacing ]
-                , min = 2.0
-                , max = 10.0
-                , step = Nothing
-                , value = options.spacing |> Length.inMeters
-                , thumb = Input.defaultThumb
-                }
-
-        showActionButtons =
-            row [ padding 5, spacing 5, width fill ]
-                [ Input.button neatToolsBorder
-                    { label = i18n "Reset"
-                    , onPress = Just <| wrapper DraggerReset
-                    }
-                , case ( List.length options.newTrackPoints >= 3, options.pointsAreContiguous ) of
-                    ( _, True ) ->
-                        Input.button
-                            neatToolsBorder
-                            { label = i18n "Apply"
-                            , onPress = Just <| wrapper ApplyWithOptions
-                            }
-
-                    ( _, False ) ->
-                        Input.button
-                            (width fill :: subtleToolStyles)
-                            { label = paragraph [ width fill ] <| [ i18n "none" ]
-                            , onPress = Nothing
-                            }
-                ]
-
         showModeSelection =
             Input.checkbox []
                 { onChange =
@@ -385,17 +298,88 @@ view location imperial wrapper options track =
                 , checked = options.smoothGradient == Holistic
                 , label = Input.labelRight [ centerY ] (i18n "gradient")
                 }
-
-        showPullSelection =
-            Input.checkbox []
-                { onChange = wrapper << ToggleUsePullRadius
-                , icon = Input.defaultCheckbox
-                , checked = options.usePullRadius
-                , label = Input.labelRight [ centerY ] (i18n "outliers")
-                }
     in
     case track of
-        Just isTrack ->
+        Just _ ->
+            let
+                showPushRadiusSlider =
+                    Input.slider commonShortHorizontalSliderStyles
+                        { onChange = wrapper << SetPushRadius << squared
+                        , label =
+                            Input.labelBelow [] <|
+                                text <|
+                                    String.Interpolate.interpolate
+                                        (I18N.localisedString location toolId "radius")
+                                        [ showShortMeasure imperial options.pushRadius ]
+                        , min = 2.0
+                        , max = 10.0
+                        , step = Nothing
+                        , value = options.pushRadius |> Length.inMeters |> sqrt
+                        , thumb = Input.defaultThumb
+                        }
+
+                showTransitionRadiusSlider =
+                    Input.slider commonShortHorizontalSliderStyles
+                        { onChange = wrapper << SetTransitionRadius << squared
+                        , label =
+                            Input.labelBelow [] <|
+                                text <|
+                                    String.Interpolate.interpolate
+                                        (I18N.localisedString location toolId "join")
+                                        [ showShortMeasure imperial options.transitionRadius ]
+                        , min = 2.0
+                        , max = 10.0
+                        , step = Nothing
+                        , value = options.transitionRadius |> Length.inMeters |> sqrt
+                        , thumb = Input.defaultThumb
+                        }
+
+                showSpacingSlider =
+                    Input.slider commonShortHorizontalSliderStyles
+                        { onChange = wrapper << SetSpacing
+                        , label =
+                            Input.labelBelow [] <|
+                                text <|
+                                    String.Interpolate.interpolate
+                                        (I18N.localisedString location toolId "spacing")
+                                        [ showShortMeasure imperial options.spacing ]
+                        , min = 2.0
+                        , max = 10.0
+                        , step = Nothing
+                        , value = options.spacing |> Length.inMeters
+                        , thumb = Input.defaultThumb
+                        }
+
+                showActionButtons =
+                    row [ padding 5, spacing 5, width fill ]
+                        [ Input.button neatToolsBorder
+                            { label = i18n "Reset"
+                            , onPress = Just <| wrapper DraggerReset
+                            }
+                        , case ( List.length options.newTrackPoints >= 3, options.pointsAreContiguous ) of
+                            ( _, True ) ->
+                                Input.button
+                                    neatToolsBorder
+                                    { label = i18n "Apply"
+                                    , onPress = Just <| wrapper ApplyWithOptions
+                                    }
+
+                            ( _, False ) ->
+                                Input.button
+                                    (width fill :: subtleToolStyles)
+                                    { label = paragraph [ width fill ] <| [ i18n "none" ]
+                                    , onPress = Nothing
+                                    }
+                        ]
+
+                showPullSelection =
+                    Input.checkbox []
+                        { onChange = wrapper << ToggleUsePullRadius
+                        , icon = Input.defaultCheckbox
+                        , checked = options.usePullRadius
+                        , label = Input.labelRight [ centerY ] (i18n "outliers")
+                        }
+            in
             row
                 [ paddingEach { edges | right = 10 }
                 , spacing 5
@@ -414,7 +398,20 @@ view location imperial wrapper options track =
                         , showSpacingSlider
                         , showPullSelection
                         , if options.usePullRadius then
-                            showPullRadiusSlider
+                            Input.slider commonShortHorizontalSliderStyles
+                                { onChange = wrapper << SetDiscWidth
+                                , label =
+                                    Input.labelBelow [] <|
+                                        text <|
+                                            String.Interpolate.interpolate
+                                                (I18N.localisedString location toolId "join")
+                                                [ showShortMeasure imperial options.pullRadius ]
+                                , min = 1.0
+                                , max = 40.0
+                                , step = Nothing
+                                , value = options.pullRadius |> Quantity.minus options.pushRadius |> Length.inMeters
+                                , thumb = Input.defaultThumb
+                                }
 
                           else
                             none
@@ -487,31 +484,6 @@ twoWayDragControl options wrapper =
         ]
 
 
-type alias FoldState =
-    { newPoints : List EarthPoint
-    }
-
-
-formCurveWithOptions : Bool -> Options -> Int -> Int -> PeteTree -> List EarthPoint
-formCurveWithOptions isLoop options fromStart fromEnd treeNode =
-    let
-        foldFn : RoadSection -> FoldState -> FoldState
-        foldFn road state =
-            state
-
-        foldOutput =
-            DomainModel.traverseTreeBetweenLimitsToDepth
-                fromStart
-                (skipCount treeNode - fromEnd)
-                (always Nothing)
-                0
-                treeNode
-                foldFn
-                (FoldState [])
-    in
-    foldOutput.newPoints |> List.reverse
-
-
 
 -- Some 3d views that arguably should not be in here but where else?
 
@@ -527,9 +499,6 @@ showToolTrackInteractions options track =
 getCircle : Options -> TrackLoaded msg -> Circle3d Meters LocalCoords
 getCircle options track =
     let
-        orange =
-            DomainModel.earthPointFromIndex track.currentPosition track.trackTree
-
         translation =
             -- Flip Y because drag control is SVG coordinate based.
             Vector3d.xyz (Vector2d.xComponent options.vector)
@@ -543,38 +512,14 @@ getCircle options track =
                         |> Point3d.translateBy translation
 
                 Nothing ->
+                    let
+                        orange =
+                            DomainModel.earthPointFromIndex track.currentPosition track.trackTree
+                    in
                     orange.space
                         |> Point3d.translateBy translation
     in
     Circle3d.withRadius options.pushRadius Direction3d.positiveZ centre
-
-
-getOuterCircle : Options -> TrackLoaded msg -> Circle3d Meters LocalCoords
-getOuterCircle options track =
-    let
-        orange =
-            DomainModel.earthPointFromIndex track.currentPosition track.trackTree
-
-        translation =
-            -- Flip Y because drag control is SVG coordinate based.
-            Vector3d.xyz (Vector2d.xComponent options.vector)
-                (Vector2d.yComponent options.vector |> Quantity.negate)
-                Quantity.zero
-
-        centre =
-            case options.referencePoint of
-                Just localReference ->
-                    localReference.space
-                        |> Point3d.translateBy translation
-
-                Nothing ->
-                    orange.space
-                        |> Point3d.translateBy translation
-
-        outerRadius =
-            options.pullRadius
-    in
-    Circle3d.withRadius outerRadius Direction3d.positiveZ centre
 
 
 showCircle : Options -> TrackLoaded msg -> List (Entity LocalCoords)
@@ -582,8 +527,7 @@ showCircle options track =
     let
         circle =
             getCircle options track
-    in
-    let
+
         arc =
             Circle3d.toArc circle
 
@@ -602,27 +546,6 @@ showCircle options track =
 showDisc : Options -> TrackLoaded msg -> List (Entity LocalCoords)
 showDisc options track =
     let
-        circle =
-            getCircle options track
-
-        centre =
-            Circle3d.centerPoint circle
-
-        direction =
-            Circle3d.axialDirection circle
-
-        outerCircle =
-            Circle3d.withRadius
-                options.pullRadius
-                direction
-                centre
-
-        arc =
-            Circle3d.toArc outerCircle
-
-        segments =
-            Arc3d.segments 20 arc |> Polyline3d.segments
-
         material =
             Material.color Color.lightYellow
 
@@ -630,6 +553,28 @@ showDisc options track =
             Scene3d.lineSegment material segment
     in
     if options.usePullRadius then
+        let
+            circle =
+                getCircle options track
+
+            centre =
+                Circle3d.centerPoint circle
+
+            direction =
+                Circle3d.axialDirection circle
+
+            outerCircle =
+                Circle3d.withRadius
+                    options.pullRadius
+                    direction
+                    centre
+
+            arc =
+                Circle3d.toArc outerCircle
+
+            segments =
+                Arc3d.segments 20 arc |> Polyline3d.segments
+        in
         List.map drawSegment segments
 
     else
@@ -955,12 +900,6 @@ makeCurveIfPossible track options =
 
         entryCurveSeeker : Int -> Int -> Maybe IntersectionInformation
         entryCurveSeeker limit index =
-            let
-                ( tp1, tp2 ) =
-                    ( DomainModel.earthPointFromIndex (index - 1) track.trackTree
-                    , DomainModel.earthPointFromIndex index track.trackTree
-                    )
-            in
             case findAcceptableTransition EntryMode (index - 1) index of
                 Just transition ->
                     Just transition
@@ -974,12 +913,6 @@ makeCurveIfPossible track options =
 
         exitCurveSeeker : Int -> Int -> Maybe IntersectionInformation
         exitCurveSeeker limit index =
-            let
-                ( tp1, tp2 ) =
-                    ( DomainModel.earthPointFromIndex index track.trackTree
-                    , DomainModel.earthPointFromIndex (index + 1) track.trackTree
-                    )
-            in
             case findAcceptableTransition ExitMode index (index + 1) of
                 Just transition ->
                     Just transition
@@ -1008,7 +941,7 @@ makeCurveIfPossible track options =
 
         entryCurve =
             case entryInformation of
-                Just { intersection, distanceAlong, tangentPoint, joinsBendAt } ->
+                Just { tangentPoint, joinsBendAt } ->
                     Arc2d.withRadius
                         options.transitionRadius
                         (if isLeftHandBend then
@@ -1027,7 +960,7 @@ makeCurveIfPossible track options =
 
         exitCurve =
             case exitInformation of
-                Just { intersection, distanceAlong, tangentPoint, joinsBendAt } ->
+                Just { tangentPoint, joinsBendAt } ->
                     Arc2d.withRadius
                         options.transitionRadius
                         (if isLeftHandBend then
@@ -1088,13 +1021,6 @@ makeCurveIfPossible track options =
             case attachmentPoints of
                 Just ( start, end ) ->
                     let
-                        originalSection =
-                            DomainModel.extractPointsInRange
-                                start
-                                (skipCount track.trackTree - end)
-                                track.trackTree
-                                |> List.map Tuple.first
-
                         startDistance =
                             DomainModel.distanceFromIndex start track.trackTree
 
@@ -1103,25 +1029,21 @@ makeCurveIfPossible track options =
 
                         length =
                             endDistance |> Quantity.minus startDistance
-
-                        altitudesByFraction =
-                            -- Not the most efficient but staying close to v2.
-                            List.range start end
-                                |> List.map
-                                    (\idx ->
-                                        let
-                                            thisPointDistanceFromStart =
-                                                DomainModel.distanceFromIndex idx track.trackTree
-                                        in
-                                        ( Quantity.ratio (thisPointDistanceFromStart |> Quantity.minus startDistance)
-                                            length
-                                        , Point3d.zCoordinate <|
-                                            .space <|
-                                                DomainModel.earthPointFromIndex idx track.trackTree
-                                        )
-                                    )
                     in
-                    altitudesByFraction
+                    List.range start end
+                        |> List.map
+                            (\idx ->
+                                let
+                                    thisPointDistanceFromStart =
+                                        DomainModel.distanceFromIndex idx track.trackTree
+                                in
+                                ( Quantity.ratio (thisPointDistanceFromStart |> Quantity.minus startDistance)
+                                    length
+                                , Point3d.zCoordinate <|
+                                    .space <|
+                                        DomainModel.earthPointFromIndex idx track.trackTree
+                                )
+                            )
 
                 Nothing ->
                     []
@@ -1150,11 +1072,11 @@ makeCurveIfPossible track options =
                                 (Quantity.multiplyBy beforeContribution priorAltitude)
                                 (Quantity.multiplyBy afterContribution nextAltitude)
 
-                        ( Just ( priorFraction, priorAltitude ), Nothing ) ->
+                        ( Just ( _, priorAltitude ), Nothing ) ->
                             -- Might happen at the end.
                             priorAltitude
 
-                        ( Nothing, Just ( nextFraction, nextAltitude ) ) ->
+                        ( Nothing, Just ( _, nextAltitude ) ) ->
                             -- Probably should not happen, but
                             nextAltitude
 
@@ -1177,8 +1099,7 @@ makeCurveIfPossible track options =
                 ( Just entry, Just exit ) ->
                     let
                         completeSegments =
-                            []
-                                ++ entryCurve
+                            entryCurve
                                 ++ theArcItself
                                 ++ exitCurve
                                 ++ [ LineSegment2d.from
@@ -1207,43 +1128,40 @@ makeCurveIfPossible track options =
                                     entry.originalTrackPoint.time
                                     exit.originalTrackPoint.time
                                 ++ [ exit.originalTrackPoint.time ]
-
-                        adjustedAltitudes =
-                            -- Can make this return the altitude adjusted end track point.
-                            List.map3
-                                (\seg dist time ->
-                                    let
-                                        originalSegmentStart =
-                                            LineSegment2d.startPoint seg
-
-                                        proportionalDistance =
-                                            Quantity.ratio dist actualNewLength
-
-                                        adjustment =
-                                            altitudeChange |> Quantity.multiplyBy proportionalDistance
-
-                                        newAltitude =
-                                            case options.smoothGradient of
-                                                Holistic ->
-                                                    Point3d.zCoordinate entry.originalTrackPoint.space
-                                                        |> Quantity.plus adjustment
-
-                                                Piecewise ->
-                                                    interpolateOriginalAltitudesByDistance proportionalDistance
-                                    in
-                                    { space =
-                                        Point3d.xyz
-                                            (Point2d.xCoordinate originalSegmentStart)
-                                            (Point2d.yCoordinate originalSegmentStart)
-                                            newAltitude
-                                    , time = time
-                                    }
-                                )
-                                (List.drop 0 completeSegments)
-                                cumulativeDistances
-                                times
                     in
-                    adjustedAltitudes
+                    List.map3
+                        (\seg dist time ->
+                            let
+                                originalSegmentStart =
+                                    LineSegment2d.startPoint seg
+
+                                proportionalDistance =
+                                    Quantity.ratio dist actualNewLength
+
+                                newAltitude =
+                                    case options.smoothGradient of
+                                        Holistic ->
+                                            let
+                                                adjustment =
+                                                    altitudeChange |> Quantity.multiplyBy proportionalDistance
+                                            in
+                                            Point3d.zCoordinate entry.originalTrackPoint.space
+                                                |> Quantity.plus adjustment
+
+                                        Piecewise ->
+                                            interpolateOriginalAltitudesByDistance proportionalDistance
+                            in
+                            { space =
+                                Point3d.xyz
+                                    (Point2d.xCoordinate originalSegmentStart)
+                                    (Point2d.yCoordinate originalSegmentStart)
+                                    newAltitude
+                            , time = time
+                            }
+                        )
+                        completeSegments
+                        cumulativeDistances
+                        times
 
                 _ ->
                     []

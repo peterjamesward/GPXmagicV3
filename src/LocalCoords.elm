@@ -1,4 +1,4 @@
-module LocalCoords exposing (..)
+module LocalCoords exposing (LocalCoords(..))
 
 
 type LocalCoords

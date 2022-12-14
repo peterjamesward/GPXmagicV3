@@ -1,4 +1,4 @@
-module LeafIndex exposing (..)
+module LeafIndex exposing (LeafIndex, LeafIndexEntry)
 
 import Length
 import LocalCoords exposing (LocalCoords)

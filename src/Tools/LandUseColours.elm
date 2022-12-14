@@ -1,4 +1,4 @@
-module Tools.LandUseColours exposing (..)
+module Tools.LandUseColours exposing (landUseColours)
 
 import Color
 import Dict

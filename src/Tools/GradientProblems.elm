@@ -1,11 +1,10 @@
-module Tools.GradientProblems exposing (..)
+module Tools.GradientProblems exposing (GradientProblem(..), Msg(..), Options, ResultMode(..), defaultOptions, toolId, toolStateChange, update, view)
 
 import Actions exposing (ToolAction(..))
-import Dict exposing (Dict)
-import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), RoadSection, asRecord, skipCount)
+import DomainModel exposing (PeteTree, RoadSection, skipCount)
 import Element exposing (..)
 import Element.Background as Background
-import Element.Input as Input exposing (labelHidden)
+import Element.Input as Input
 import FeatherIcons
 import FlatColors.ChinesePalette
 import List.Extra
@@ -15,7 +14,7 @@ import ToolTip exposing (buttonStylesWithTooltip)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
-import UtilsForViews exposing (showAngle, showDecimal2, showLongMeasure)
+import UtilsForViews exposing (showDecimal2, showLongMeasure)
 import ViewPureStyles exposing (infoButton, neatToolsBorder, noTrackMessage, sliderThumb, useIcon)
 
 
@@ -144,7 +143,7 @@ findSteepDescents options tree =
             -> ( Int, List ( Int, Float ) )
             -> ( Int, List ( Int, Float ) )
         foldFn road ( index, outputs ) =
-            if (0.0 - road.gradientAtStart) > options.threshold then
+            if -road.gradientAtStart > options.threshold then
                 ( index + 1, ( index, road.gradientAtStart ) :: outputs )
 
             else
@@ -319,47 +318,12 @@ view location imperial msgWrapper options isTrack =
         i18n =
             I18N.text location toolId
 
-        modeSelection =
-            Input.radio [ centerX, spacing 5 ]
-                { onChange = msgWrapper << SetMode
-                , options =
-                    [ Input.option AbruptChange (i18n "usepoint")
-                    , Input.option SteepClimb (i18n "climbs")
-                    , Input.option SteepDescent (i18n "descents")
-                    ]
-                , selected = Just options.mode
-                , label = Input.labelHidden "Mode"
-                }
-
-        resultModeSelection =
-            Input.radioRow [ centerX, spacing 5 ]
-                { onChange = msgWrapper << SetResultMode
-                , options =
-                    [ Input.option ResultNavigation (i18n "summary")
-                    , Input.option ResultList (i18n "list")
-                    ]
-                , selected = Just options.resultMode
-                , label = Input.labelHidden "Results mode"
-                }
-
-        thresholdSlider =
-            Input.slider
-                ViewPureStyles.shortSliderStyles
-                { onChange = SetThreshold >> msgWrapper
-                , value = options.threshold
-                , label = Input.labelHidden "Threshold"
-                , min = 3
-                , max = 20
-                , step = Just 1
-                , thumb = sliderThumb
-                }
-
         resultsNavigation =
             case options.breaches of
                 [] ->
                     el [ centerX, centerY ] <| i18n "none"
 
-                a :: b ->
+                _ :: _ ->
                     let
                         ( position, turn ) =
                             Maybe.withDefault ( 0, 0 ) <|
@@ -402,24 +366,60 @@ view location imperial msgWrapper options isTrack =
                         showLongMeasure imperial <|
                             DomainModel.distanceFromIndex point track
                 }
-
-        autofixButton =
-            if options.breaches == [] then
-                none
-
-            else
-                row [ spacing 4 ]
-                    [ none
-                    , infoButton (msgWrapper <| DisplayInfo "gradients" "autofix")
-                    , Input.button
-                        (alignTop :: neatToolsBorder)
-                        { onPress = Just (msgWrapper Autofix)
-                        , label = i18n "smooth"
-                        }
-                    ]
     in
     case isTrack of
         Just track ->
+            let
+                modeSelection =
+                    Input.radio [ centerX, spacing 5 ]
+                        { onChange = msgWrapper << SetMode
+                        , options =
+                            [ Input.option AbruptChange (i18n "usepoint")
+                            , Input.option SteepClimb (i18n "climbs")
+                            , Input.option SteepDescent (i18n "descents")
+                            ]
+                        , selected = Just options.mode
+                        , label = Input.labelHidden "Mode"
+                        }
+
+                resultModeSelection =
+                    Input.radioRow [ centerX, spacing 5 ]
+                        { onChange = msgWrapper << SetResultMode
+                        , options =
+                            [ Input.option ResultNavigation (i18n "summary")
+                            , Input.option ResultList (i18n "list")
+                            ]
+                        , selected = Just options.resultMode
+                        , label = Input.labelHidden "Results mode"
+                        }
+
+                thresholdSlider =
+                    Input.slider
+                        ViewPureStyles.shortSliderStyles
+                        { onChange = SetThreshold >> msgWrapper
+                        , value = options.threshold
+                        , label = Input.labelHidden "Threshold"
+                        , min = 3
+                        , max = 20
+                        , step = Just 1
+                        , thumb = sliderThumb
+                        }
+
+                autofixButton =
+                    if options.breaches == [] then
+                        none
+
+                    else
+                        row [ spacing 4 ]
+                            [ none
+                            , infoButton (msgWrapper <| DisplayInfo "gradients" "autofix")
+                            , Input.button
+                                (alignTop :: neatToolsBorder)
+                                { onPress = Just (msgWrapper Autofix)
+                                , label = i18n "smooth"
+                                }
+                            ]
+            in
             el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
                 column [ centerX, padding 4, spacing 6 ]
                     [ el [ centerX ] modeSelection

@@ -1,11 +1,10 @@
-module Tools.StravaTools exposing (..)
+module Tools.StravaTools exposing (Msg(..), defaultOptions, paste, segmentName, toolId, toolStateChange, trackFromActivity, update, viewStravaTab)
 
 import Actions exposing (ToolAction(..))
 import Angle
 import ColourPalette exposing (stravaOrange)
-import Dict exposing (Dict)
 import Direction2d
-import DomainModel exposing (EarthPoint, GPXSource, PeteTree, boundingBox, skipCount)
+import DomainModel exposing (GPXSource, PeteTree, skipCount)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Font as Font
@@ -19,7 +18,6 @@ import OAuth as O
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity
 import Time
-import ToolTip exposing (localisedTooltip, myTooltip, tooltip)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.StravaDataLoad exposing (..)
@@ -27,7 +25,7 @@ import Tools.StravaOptions exposing (Options, StravaStatus(..))
 import Tools.StravaTypes exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import Url.Builder as Builder
-import ViewPureStyles exposing (displayName, neatToolsBorder, prettyButtonStyles)
+import ViewPureStyles exposing (displayName, neatToolsBorder)
 
 
 toolId =
@@ -50,7 +48,6 @@ type Msg
     | PasteSegment
     | ClearSegment
     | ConnectionInfo O.Token
-    | DisplayInfo String String
     | SetAltitudeMatch Bool
 
 
@@ -78,7 +75,7 @@ toolStateChange :
 toolStateChange opened colour options track =
     --TODO: When opened, request Auth state.
     case ( opened, track ) of
-        ( True, Just theTrack ) ->
+        ( True, Just _ ) ->
             ( options, [] )
 
         _ ->
@@ -327,7 +324,7 @@ update msg settings wrap track =
 
         PasteSegment ->
             case ( track, settings.externalSegment ) of
-                ( Just isTrack, SegmentPreviewed segment ) ->
+                ( Just _, SegmentPreviewed _ ) ->
                     -- Note that we pass the OLD settings to the paste action.
                     ( { settings
                         | stravaStreams = Nothing
@@ -347,9 +344,6 @@ update msg settings wrap track =
             ( { settings | stravaStreams = Nothing, externalSegment = SegmentNone }
             , []
             )
-
-        DisplayInfo tool tag ->
-            ( settings, [ Actions.DisplayInfo tool tag ] )
 
 
 segmentName : Options -> Maybe String
@@ -433,17 +427,17 @@ pointsFromStreams track options segment streams =
                 track.leafIndex
 
         altitudeAdjustment =
-            let
-                altitudeInRoute =
-                    DomainModel.gpxPointFromIndex fromStart track.trackTree
-                        |> .altitude
-                        |> Length.inMeters
-
-                segmentAltitude =
-                    List.head streams.altitude.data
-                        |> Maybe.withDefault altitudeInRoute
-            in
             if options.adjustSegmentAltitude then
+                let
+                    altitudeInRoute =
+                        DomainModel.gpxPointFromIndex fromStart track.trackTree
+                            |> .altitude
+                            |> Length.inMeters
+
+                    segmentAltitude =
+                        List.head streams.altitude.data
+                            |> Maybe.withDefault altitudeInRoute
+                in
                 altitudeInRoute - segmentAltitude
 
             else
@@ -491,7 +485,7 @@ paste options track =
     -- That's just based on track indexes. Might be a problem if we traverse it
     -- more than once, but let's park that thought.
     case ( options.externalSegment, options.preview ) of
-        ( SegmentPreviewed segment, x1 :: xs ) ->
+        ( SegmentPreviewed segment, _ :: _ ) ->
             let
                 segmentStartGpx =
                     extractFromLngLat segment.start_latlng
@@ -535,7 +529,7 @@ paste options track =
 
                         segmentAltitude =
                             case readyToPaste of
-                                head :: rest ->
+                                head :: _ ->
                                     head.gpx.altitude
 
                                 [] ->
@@ -580,18 +574,6 @@ viewStravaTab location options wrap track =
         i18n =
             I18N.text location toolId
 
-        segmentIdField =
-            Input.text
-                [ width (minimum 150 <| fill)
-
-                --, tooltip below (localisedTooltip location toolId "segmenttip")
-                ]
-                { onChange = wrap << UserChangedSegmentId
-                , text = options.externalSegmentId
-                , placeholder = Just <| Input.placeholder [] <| i18n "segmentid"
-                , label = Input.labelHidden "Segment ID"
-                }
-
         routeIdField =
             Input.text
                 [ width (minimum 150 <| fill) ]
@@ -600,61 +582,6 @@ viewStravaTab location options wrap track =
                 , placeholder = Just <| Input.placeholder [] <| i18n "routeid"
                 , label = Input.labelHidden "Strava route or activity ID"
                 }
-
-        segmentButton =
-            -- Make this button serve two functions.
-            -- 1. After a URL change, to load the segment header;
-            -- 2. After header loaded, to load and paste the streams.
-            case options.externalSegment of
-                SegmentOk segment ->
-                    button
-                        neatToolsBorder
-                        { onPress = Just <| wrap LoadSegmentStreams
-                        , label = i18n "preview"
-                        }
-
-                SegmentPreviewed segment ->
-                    button
-                        neatToolsBorder
-                        { onPress = Just <| wrap PasteSegment
-                        , label = i18n "paste"
-                        }
-
-                SegmentNone ->
-                    button
-                        neatToolsBorder
-                        { onPress = Just <| wrap LoadExternalSegment
-                        , label = i18n "fetch"
-                        }
-
-                SegmentNotInRoute _ ->
-                    i18n "badsegment"
-
-                _ ->
-                    none
-
-        segmentAltitudeMatch =
-            Input.checkbox
-                [ padding 5
-                , spacing 5
-                ]
-                { onChange = wrap << SetAltitudeMatch
-                , checked = options.adjustSegmentAltitude
-                , label = Input.labelRight [] <| i18n "altitude"
-                , icon = Input.defaultCheckbox
-                }
-
-        clearButton =
-            case options.externalSegment of
-                SegmentNone ->
-                    none
-
-                _ ->
-                    button
-                        neatToolsBorder
-                        { onPress = Just <| wrap ClearSegment
-                        , label = i18n "clear"
-                        }
 
         segmentInfo =
             case options.externalSegment of
@@ -670,19 +597,19 @@ viewStravaTab location options wrap track =
                 SegmentOk segment ->
                     text segment.name
 
-                SegmentPreviewed segment ->
+                SegmentPreviewed _ ->
                     i18n "loaded"
 
                 SegmentNotInRoute segment ->
                     text segment.name
 
         stravaLink =
-            let
-                stravaUrl =
-                    Builder.crossOrigin stravaApiRoot [ "routes", options.externalRouteId ] []
-            in
             case options.stravaRoute of
                 StravaRouteOk _ ->
+                    let
+                        stravaUrl =
+                            Builder.crossOrigin stravaApiRoot [ "routes", options.externalRouteId ] []
+                    in
                     column [ Font.size 14, padding 5 ]
                         [ displayName <| Just options.externalRouteId
                         , newTabLink [ Font.color stravaOrange ]
@@ -719,7 +646,75 @@ viewStravaTab location options wrap track =
         ]
     <|
         case ( options.stravaStatus, track ) of
-            ( StravaConnected token, Just _ ) ->
+            ( StravaConnected _, Just _ ) ->
+                let
+                    segmentButton =
+                        -- Make this button serve two functions.
+                        -- 1. After a URL change, to load the segment header;
+                        -- 2. After header loaded, to load and paste the streams.
+                        case options.externalSegment of
+                            SegmentOk _ ->
+                                button
+                                    neatToolsBorder
+                                    { onPress = Just <| wrap LoadSegmentStreams
+                                    , label = i18n "preview"
+                                    }
+
+                            SegmentPreviewed _ ->
+                                button
+                                    neatToolsBorder
+                                    { onPress = Just <| wrap PasteSegment
+                                    , label = i18n "paste"
+                                    }
+
+                            SegmentNone ->
+                                button
+                                    neatToolsBorder
+                                    { onPress = Just <| wrap LoadExternalSegment
+                                    , label = i18n "fetch"
+                                    }
+
+                            SegmentNotInRoute _ ->
+                                i18n "badsegment"
+
+                            _ ->
+                                none
+
+                    segmentIdField =
+                        Input.text
+                            [ width (minimum 150 <| fill)
+
+                            --, tooltip below (localisedTooltip location toolId "segmenttip")
+                            ]
+                            { onChange = wrap << UserChangedSegmentId
+                            , text = options.externalSegmentId
+                            , placeholder = Just <| Input.placeholder [] <| i18n "segmentid"
+                            , label = Input.labelHidden "Segment ID"
+                            }
+
+                    segmentAltitudeMatch =
+                        Input.checkbox
+                            [ padding 5
+                            , spacing 5
+                            ]
+                            { onChange = wrap << SetAltitudeMatch
+                            , checked = options.adjustSegmentAltitude
+                            , label = Input.labelRight [] <| i18n "altitude"
+                            , icon = Input.defaultCheckbox
+                            }
+
+                    clearButton =
+                        case options.externalSegment of
+                            SegmentNone ->
+                                none
+
+                            _ ->
+                                button
+                                    neatToolsBorder
+                                    { onPress = Just <| wrap ClearSegment
+                                    , label = i18n "clear"
+                                    }
+                in
                 [ stravaLink
                 , wrappedRow [ spacing 10 ]
                     [ routeIdField
@@ -735,7 +730,7 @@ viewStravaTab location options wrap track =
                 , segmentInfo
                 ]
 
-            ( StravaConnected token, Nothing ) ->
+            ( StravaConnected _, Nothing ) ->
                 [ stravaLink
                 , row [ spacing 10 ]
                     [ routeIdField

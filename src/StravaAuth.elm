@@ -1,11 +1,11 @@
-module StravaAuth exposing (..)
+module StravaAuth exposing (convertBytes, getStravaToken, init, stravaButton, update)
 
 import Base64.Encode as Base64
 import Browser.Navigation as Navigation exposing (Key)
 import Bytes exposing (Bytes)
 import Bytes.Encode as Bytes
 import ColourPalette exposing (stravaOrange)
-import Delay exposing (after)
+import Delay
 import Element exposing (..)
 import Element.Background as Background
 import Element.Font as Font
@@ -284,15 +284,6 @@ convertBytes =
     toBytes >> base64 >> (\state -> { state = state })
 
 
-oauthErrorToString : { error : OAuth.ErrorCode, errorDescription : Maybe String } -> String
-oauthErrorToString { error, errorDescription } =
-    let
-        desc =
-            errorDescription |> Maybe.withDefault "" |> String.replace "+" " "
-    in
-    OAuth.errorCodeToString error ++ ": " ++ desc
-
-
 defaultHttpsUrl : Url
 defaultHttpsUrl =
     { protocol = Https
@@ -306,13 +297,6 @@ defaultHttpsUrl =
 
 stravaButton : Model -> (OAuthMsg -> msg) -> Element msg
 stravaButton model msgWrapper =
-    let
-        styles =
-            [ height <| px 24, moveUp 10 ]
-
-        imgUrl =
-            Builder.relative [ "images", "btn_strava_connectwith_orange.png" ] []
-    in
     case model.flow of
         Done userInfo _ ->
             column
@@ -330,6 +314,13 @@ stravaButton model msgWrapper =
                 ]
 
         _ ->
+            let
+                styles =
+                    [ height <| px 24, moveUp 10 ]
+
+                imgUrl =
+                    Builder.relative [ "images", "btn_strava_connectwith_orange.png" ] []
+            in
             button
                 styles
                 { onPress = Just <| msgWrapper SignInRequested
@@ -347,21 +338,11 @@ stravaButton model msgWrapper =
 getStravaToken : Model -> Maybe OAuth.Token
 getStravaToken model =
     case model.flow of
-        Done info token ->
+        Done _ token ->
             Just token
 
         Authenticated token ->
             Just token
-
-        _ ->
-            Nothing
-
-
-getStravaAthlete : Model -> Maybe Int
-getStravaAthlete model =
-    case model.flow of
-        Done info token ->
-            Just info.id
 
         _ ->
             Nothing

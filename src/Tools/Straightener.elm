@@ -1,8 +1,6 @@
-module Tools.Straightener exposing (..)
+module Tools.Straightener exposing (Msg(..), Options, apply, defaultOptions, toolId, update, view)
 
 import Actions
-import Axis3d
-import Dict exposing (Dict)
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection)
 import Element exposing (..)
 import Element.Background as Background
@@ -15,7 +13,7 @@ import Quantity
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded, adjustAltitude)
-import ViewPureStyles exposing (neatToolsBorder, prettyButtonStyles)
+import ViewPureStyles exposing (neatToolsBorder)
 
 
 toolId =
@@ -25,7 +23,6 @@ toolId =
 type Msg
     = StraightenStraight
     | SetPreserveAltitude Bool
-    | DisplayInfo String String
 
 
 type alias Options =
@@ -49,22 +46,12 @@ update msg options =
         SetPreserveAltitude bool ->
             ( { options | preserveAltitude = bool }, [] )
 
-        DisplayInfo tool tag ->
-            ( options, [ Actions.DisplayInfo tool tag ] )
-
 
 view : I18NOptions.Location -> (Msg -> msg) -> Options -> TrackLoaded msg -> Element msg
 view location wrapper options track =
     let
         i18n =
             I18N.text location toolId
-
-        straightenButton =
-            button
-                neatToolsBorder
-                { onPress = Just <| wrapper StraightenStraight
-                , label = i18n "straight"
-                }
     in
     column
         [ spacing 10
@@ -74,6 +61,14 @@ view location wrapper options track =
         ]
     <|
         if track.markerPosition /= Nothing then
+            let
+                straightenButton =
+                    button
+                        neatToolsBorder
+                        { onPress = Just <| wrapper StraightenStraight
+                        , label = i18n "straight"
+                        }
+            in
             [ el [ centerX ] <|
                 Input.checkbox []
                     { onChange = wrapper << SetPreserveAltitude

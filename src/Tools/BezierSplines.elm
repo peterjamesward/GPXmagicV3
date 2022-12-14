@@ -1,23 +1,20 @@
-module Tools.BezierSplines exposing (..)
+module Tools.BezierSplines exposing (Msg(..), applyUsingOptions, bezierApproximationFor1CQF, defaultOptions, toolId, toolStateChange, update, view)
 
 import Actions exposing (ToolAction(..))
 import BezierSplines
-import Dict exposing (Dict)
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
-import Point3d
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
-import Quantity
 import String.Interpolate
 import Tools.BezierOptions as BezierOptions exposing (..)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
-import UtilsForViews exposing (fullDepthRenderingBoxSize, showDecimal2)
-import ViewPureStyles exposing (commonShortHorizontalSliderStyles, neatToolsBorder, prettyButtonStyles)
+import UtilsForViews exposing (showDecimal2)
+import ViewPureStyles exposing (commonShortHorizontalSliderStyles, neatToolsBorder)
 
 
 toolId =
@@ -38,8 +35,6 @@ type Msg
     | SetBezierTolerance Float
     | BezierApplyWithOptions
     | SetBezierStyle BezierStyle
-    | SetExtent ExtentOption
-    | DisplayInfo String String
 
 
 computeNewPoints : Options -> TrackLoaded msg -> List PreviewPoint
@@ -71,11 +66,8 @@ computeNewPoints options track =
                 fromStart
                 (skipCount track.trackTree - fromEnd)
                 track.trackTree
-
-        previewPoints =
-            TrackLoaded.asPreviewPoints track distanceToPreview splineEarthPoints
     in
-    previewPoints
+    TrackLoaded.asPreviewPoints track distanceToPreview splineEarthPoints
 
 
 applyUsingOptions :
@@ -115,7 +107,7 @@ applyUsingOptions options track =
 bezierApproximationFor1CQF : TrackLoaded msg -> PeteTree
 bezierApproximationFor1CQF track =
     let
-        ( outputTree, oldPoints, _ ) =
+        ( outputTree, _, _ ) =
             applyUsingOptions defaultOptions track
     in
     outputTree |> Maybe.withDefault track.trackTree
@@ -145,14 +137,6 @@ actions options previewColour track =
             -- What would the track become if applied?
             applyUsingOptions options track
 
-        normalPreview =
-            ShowPreview
-                { tag = "bezier"
-                , shape = PreviewCircle
-                , colour = previewColour
-                , points = computeNewPoints options track
-                }
-
         profilePreview ptree =
             ShowPreview
                 { tag = "bezierprofile"
@@ -163,6 +147,15 @@ actions options previewColour track =
     in
     case ( options.extent, previewTree ) of
         ( ExtentIsRange, Just ptree ) ->
+            let
+                normalPreview =
+                    ShowPreview
+                        { tag = "bezier"
+                        , shape = PreviewCircle
+                        , colour = previewColour
+                        , points = computeNewPoints options track
+                        }
+            in
             [ normalPreview, profilePreview ptree ]
 
         ( ExtentIsTrack, Just ptree ) ->
@@ -194,7 +187,7 @@ update msg options previewColour hasTrack =
             in
             ( newOptions, actions newOptions previewColour track )
 
-        ( Just track, BezierApplyWithOptions ) ->
+        ( Just _, BezierApplyWithOptions ) ->
             ( options
             , [ Actions.BezierApplyWithOptions options
               , TrackHasChanged
@@ -205,13 +198,6 @@ update msg options previewColour hasTrack =
             let
                 newOptions =
                     { options | bezierStyle = style }
-            in
-            ( newOptions, actions newOptions previewColour track )
-
-        ( Just track, SetExtent extent ) ->
-            let
-                newOptions =
-                    { options | extent = extent }
             in
             ( newOptions, actions newOptions previewColour track )
 

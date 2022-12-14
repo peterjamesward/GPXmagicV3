@@ -1,4 +1,4 @@
-module StravaClientSecret exposing (..)
+module StravaClientSecret exposing (clientSecret)
 
 
 clientSecret =

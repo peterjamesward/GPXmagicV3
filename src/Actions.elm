@@ -1,4 +1,4 @@
-module Actions exposing (..)
+module Actions exposing (ToolAction(..), actionTextForUndo)
 
 -- This wee DSL allows any tool to ask Main to update the model and display stuff
 -- (including on the Map) without the tools needing knowledge of the model or ports.
@@ -115,8 +115,6 @@ type ToolAction msg
     | SetTimeTicks Int
     | TimeDoubling
     | UsePhysicsModel
-    | RemoveTimes
-    | EstimateTimes
     | TryRemoteLoadIfGiven
 
 
@@ -125,49 +123,49 @@ actionTextForUndo location action =
     -- Only needed for track modifying actions that go in the undo stack.
     I18N.localisedString location "action" <|
         case action of
-            DeletePointsBetween fromStart fromEnd ->
+            DeletePointsBetween _ _ ->
                 "deleteN"
 
-            DeleteSinglePoint fromStart fromEnd ->
+            DeleteSinglePoint _ _ ->
                 "delete1"
 
-            BezierApplyWithOptions options ->
+            BezierApplyWithOptions _ ->
                 "spline"
 
-            CentroidAverageApplyWithOptions options ->
+            CentroidAverageApplyWithOptions _ ->
                 "centroid"
 
-            CurveFormerApplyWithOptions options ->
+            CurveFormerApplyWithOptions _ ->
                 "radius"
 
-            BendSmootherApplyWithOptions options ->
+            BendSmootherApplyWithOptions _ ->
                 "arc"
 
             PointMovedOnMap _ _ _ _ ->
                 "map"
 
-            NudgeApplyWithOptions options ->
+            NudgeApplyWithOptions _ ->
                 "nudge"
 
-            OutAndBackApplyWithOptions options ->
+            OutAndBackApplyWithOptions _ ->
                 "outback"
 
             ApplySimplify ->
                 "simplify"
 
-            ApplyInterpolateWithOptions options ->
+            ApplyInterpolateWithOptions _ ->
                 "insert"
 
             OneClickQuickFix ->
                 "1CQF"
 
-            LimitGradientWithOptions options ->
+            LimitGradientWithOptions _ ->
                 "limit"
 
-            SmoothAltitudes options ->
+            SmoothAltitudes _ ->
                 "altitudes"
 
-            SmoothGradients options ->
+            SmoothGradients _ ->
                 "gradients"
 
             ApplyRotateAndScale _ ->
@@ -229,12 +227,6 @@ actionTextForUndo location action =
 
             UsePhysicsModel ->
                 "physics"
-
-            RemoveTimes ->
-                "removetimes"
-
-            EstimateTimes ->
-                "estimatetimes"
 
             _ ->
                 "unknown"

@@ -1,20 +1,19 @@
-module ViewAbout exposing (..)
+module ViewAbout exposing (view)
 
 import About
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
-import FlatColors.ChinesePalette
 import FlatColors.FlatUIPalette
 import Markdown
 import Pixels exposing (Pixels)
-import Quantity exposing (Quantity, toFloatQuantity)
+import Quantity exposing (Quantity)
 
 
 view :
     ( Quantity Int Pixels, Quantity Int Pixels )
     -> Element msg
-view (contentWidth, contentHeight ) =
+view ( contentWidth, contentHeight ) =
     el
         [ width (px <| Pixels.inPixels contentWidth)
         , height (px <| Pixels.inPixels contentHeight)

@@ -1,19 +1,16 @@
-module Tools.OutAndBack exposing (..)
+module Tools.OutAndBack exposing (Msg(..), apply, defaultOptions, toolId, update, view)
 
 import Actions exposing (ToolAction(..))
-import Arc3d exposing (Arc3d)
+import Arc3d
 import Axis3d
-import Dict exposing (Dict)
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
-import Length exposing (Meters, inMeters, meters)
+import Length
 import List.Extra
-import LocalCoords exposing (LocalCoords)
-import Point2d exposing (Point2d)
-import Point3d exposing (Point3d, xCoordinate, yCoordinate, zCoordinate)
+import Point3d
 import Polyline3d
 import Quantity
 import String.Interpolate
@@ -35,32 +32,9 @@ defaultOptions =
     { offset = 0.0 }
 
 
-type alias Point =
-    Point2d Meters LocalCoords
-
-
 type Msg
     = ApplyOutAndBack
     | SetOffset Float
-    | DisplayInfo String String
-
-
-computeNewPoints : Options -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
-computeNewPoints options track =
-    let
-        ( fromStart, fromEnd ) =
-            TrackLoaded.getRangeFromMarkers track
-
-        previewPoints points =
-            points
-                |> List.map
-                    (\earth ->
-                        ( earth
-                        , DomainModel.gpxFromPointWithReference track.referenceLonLat earth
-                        )
-                    )
-    in
-    []
 
 
 apply : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
@@ -96,12 +70,12 @@ apply options track =
             List.map (useNudgeTool nudge) (List.range 0 (skipCount track.trackTree))
                 |> List.reverse
 
-        homeLeaf =
-            getFirstLeaf track.trackTree
-
         homeTurnMidpoint =
             -- extend first leaf back to find point on turn
             let
+                homeLeaf =
+                    getFirstLeaf track.trackTree
+
                 leafAxis =
                     Axis3d.throughPoints homeLeaf.startPoint.space homeLeaf.endPoint.space
             in
@@ -114,12 +88,12 @@ apply options track =
                 Nothing ->
                     homeLeaf.startPoint.space
 
-        awayLeaf =
-            getLastLeaf track.trackTree
-
         awayTurnMidpoint =
             -- extend last leaf to find point on turn
             let
+                awayLeaf =
+                    getLastLeaf track.trackTree
+
                 leafAxis =
                     Axis3d.throughPoints awayLeaf.endPoint.space awayLeaf.startPoint.space
             in
@@ -215,21 +189,6 @@ apply options track =
     )
 
 
-toolStateChange :
-    Bool
-    -> Element.Color
-    -> Options
-    -> Maybe (TrackLoaded msg)
-    -> ( Options, List (ToolAction msg) )
-toolStateChange opened colour options track =
-    case ( opened, track ) of
-        ( True, Just theTrack ) ->
-            ( options, [] )
-
-        _ ->
-            ( options, [] )
-
-
 update :
     Msg
     -> Options
@@ -237,14 +196,14 @@ update :
     -> ( Options, List (ToolAction msg) )
 update msg options hasTrack =
     case ( hasTrack, msg ) of
-        ( Just track, SetOffset offset ) ->
+        ( Just _, SetOffset offset ) ->
             let
                 newOptions =
                     { options | offset = offset }
             in
             ( newOptions, [] )
 
-        ( Just track, ApplyOutAndBack ) ->
+        ( Just _, ApplyOutAndBack ) ->
             ( options
             , [ Actions.OutAndBackApplyWithOptions options
               , TrackHasChanged
@@ -257,48 +216,48 @@ update msg options hasTrack =
 
 view : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
 view location imperial wrapper options track =
-    let
-        i18n =
-            I18N.text location toolId
-
-        offsetSlider =
-            Input.slider
-                commonShortHorizontalSliderStyles
-                { onChange = wrapper << SetOffset
-                , label =
-                    Input.labelBelow [] <|
-                        text <|
-                            String.Interpolate.interpolate
-                                (I18N.localisedString location toolId "offset")
-                                [ showShortMeasure imperial (Length.meters options.offset) ]
-                , min =
-                    Length.inMeters <|
-                        if imperial then
-                            Length.feet -16.0
-
-                        else
-                            Length.meters -5.0
-                , max =
-                    Length.inMeters <|
-                        if imperial then
-                            Length.feet 16.0
-
-                        else
-                            Length.meters 5.0
-                , step = Just 0.5
-                , value = options.offset
-                , thumb = Input.defaultThumb
-                }
-
-        fixButton =
-            button
-                neatToolsBorder
-                { onPress = Just <| wrapper ApplyOutAndBack
-                , label = i18n "apply"
-                }
-    in
     case track of
-        Just isTrack ->
+        Just _ ->
+            let
+                i18n =
+                    I18N.text location toolId
+
+                offsetSlider =
+                    Input.slider
+                        commonShortHorizontalSliderStyles
+                        { onChange = wrapper << SetOffset
+                        , label =
+                            Input.labelBelow [] <|
+                                text <|
+                                    String.Interpolate.interpolate
+                                        (I18N.localisedString location toolId "offset")
+                                        [ showShortMeasure imperial (Length.meters options.offset) ]
+                        , min =
+                            Length.inMeters <|
+                                if imperial then
+                                    Length.feet -16.0
+
+                                else
+                                    Length.meters -5.0
+                        , max =
+                            Length.inMeters <|
+                                if imperial then
+                                    Length.feet 16.0
+
+                                else
+                                    Length.meters 5.0
+                        , step = Just 0.5
+                        , value = options.offset
+                        , thumb = Input.defaultThumb
+                        }
+
+                fixButton =
+                    button
+                        neatToolsBorder
+                        { onPress = Just <| wrapper ApplyOutAndBack
+                        , label = i18n "apply"
+                        }
+            in
             column
                 [ padding 5
                 , spacing 5

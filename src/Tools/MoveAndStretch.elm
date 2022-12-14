@@ -1,9 +1,8 @@
-module Tools.MoveAndStretch exposing (..)
+module Tools.MoveAndStretch exposing (Msg(..), apply, defaultOptions, toolId, toolStateChange, update, view)
 
 import Actions exposing (ToolAction(..))
 import Axis3d
 import Color
-import Dict exposing (Dict)
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree)
 import Element exposing (..)
 import Element.Background as Background
@@ -54,7 +53,6 @@ type Msg
     | DraggerMarker Int
     | DraggerApply
     | StretchHeight Float
-    | DisplayInfo String String
 
 
 radius =
@@ -74,14 +72,6 @@ heightOffset sliderValue =
 point : ( Float, Float ) -> Point
 point ( x, y ) =
     Point2d.fromMeters { x = x, y = y }
-
-
-settingNotZero : Options -> Bool
-settingNotZero model =
-    Vector2d.direction model.vector
-        /= Nothing
-        || model.heightSliderSetting
-        /= 0.0
 
 
 twoWayDragControl : Options -> (Msg -> msg) -> Element msg
@@ -178,13 +168,14 @@ computeNewPoints options track =
         ( fromStart, fromEnd ) =
             TrackLoaded.getRangeFromMarkers track
 
-        currentPoints =
-            List.map Tuple.first <|
-                DomainModel.extractPointsInRange fromStart fromEnd track.trackTree
-
         newPoints =
             case options.mode of
                 Translate ->
+                    let
+                        currentPoints =
+                            List.map Tuple.first <|
+                                DomainModel.extractPointsInRange fromStart fromEnd track.trackTree
+                    in
                     movePoints options currentPoints
 
                 Stretch drag ->
@@ -232,10 +223,6 @@ update :
     -> TrackLoaded msg
     -> ( Options, List (Actions.ToolAction msg) )
 update message options wrapper previewColour track =
-    let
-        ( fromStart, fromEnd ) =
-            TrackLoaded.getRangeFromMarkers track
-    in
     case message of
         DraggerGrab offset ->
             ( { options | dragging = Just offset }, [] )
@@ -271,13 +258,17 @@ update message options wrapper previewColour track =
             , []
             )
 
-        DraggerModeToggle bool ->
+        DraggerModeToggle _ ->
             let
                 newOptions =
                     { options
                         | mode =
                             case options.mode of
                                 Translate ->
+                                    let
+                                        ( fromStart, _ ) =
+                                            TrackLoaded.getRangeFromMarkers track
+                                    in
                                     Stretch fromStart
 
                                 Stretch _ ->
@@ -344,9 +335,6 @@ update message options wrapper previewColour track =
             ( optionsWithPreview
             , previewActions optionsWithPreview previewColour track
             )
-
-        DisplayInfo tool tag ->
-            ( options, [ Actions.DisplayInfo tool tag ] )
 
 
 view : I18NOptions.Location -> Bool -> Options -> (Msg -> msg) -> TrackLoaded msg -> Element msg

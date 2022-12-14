@@ -1,4 +1,4 @@
-port module LocalStorage exposing (..)
+port module LocalStorage exposing (processStoragePortMessage, storageGetItem, storageGetMemoryUsage, storageResponses, storageSetItem)
 
 import Actions exposing (ToolAction(..))
 import Json.Decode as D exposing (Decoder, field, string)
@@ -36,22 +36,6 @@ storageGetItem key =
         E.object
             [ ( "Cmd", E.string "storage.get" )
             , ( "key", E.string key )
-            ]
-
-
-storageListKeys : Cmd msg
-storageListKeys =
-    storageCommands <|
-        E.object
-            [ ( "Cmd", E.string "storage.list" )
-            ]
-
-
-storageClear : Cmd msg
-storageClear =
-    storageCommands <|
-        E.object
-            [ ( "Cmd", E.string "storage.clear" )
             ]
 
 

@@ -1,4 +1,4 @@
-module Tools.StravaTypes exposing (..)
+module Tools.StravaTypes exposing (StravaActivity, StravaActivityStatus(..), StravaActivityStreams, StravaAltitudeStream, StravaDistanceStream, StravaLatLng, StravaLatLngStream, StravaRoute, StravaRouteStatus(..), StravaSegment, StravaSegmentStatus(..), StravaSegmentStreams)
 
 
 type alias StravaSegment =
@@ -31,15 +31,6 @@ type alias StravaDistanceStream =
 type alias StravaAltitudeStream =
     { is_type : String
     , data : List Float
-    , series_type : String
-    , original_size : Int
-    , resolution : String
-    }
-
-
-type alias StravaTimeStream =
-    { is_type : String
-    , data : List Int
     , series_type : String
     , original_size : Int
     , resolution : String
@@ -99,7 +90,5 @@ type StravaRouteStatus
 
 type StravaActivityStatus
     = StravaActivityNone
-    | StravaActivityRequested
     | StravaActivityGotHeader StravaActivity
-    | StravaActivityOk StravaActivity StravaActivityStreams
     | StravaActivityError String

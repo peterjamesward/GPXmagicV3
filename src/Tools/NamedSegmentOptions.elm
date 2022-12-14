@@ -1,7 +1,6 @@
-module Tools.NamedSegmentOptions exposing (..)
+module Tools.NamedSegmentOptions exposing (CreateMode(..), NamedSegment, Options)
 
-import Length exposing (Meters)
-import Quantity exposing (Quantity)
+import Length
 
 
 type alias Options =

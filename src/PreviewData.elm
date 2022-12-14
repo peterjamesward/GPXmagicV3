@@ -1,8 +1,7 @@
-module PreviewData exposing (..)
+module PreviewData exposing (PreviewData, PreviewPoint, PreviewShape(..))
 
-import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, distanceFromIndex, earthPointFromIndex, foldOverRouteRL, gpxPointFromIndex, gradientFromNode, leafFromIndex)
+import DomainModel exposing (EarthPoint, GPXSource, PeteTree)
 import Element
-import Length
 import LocalCoords exposing (LocalCoords)
 import Scene3d exposing (Entity)
 

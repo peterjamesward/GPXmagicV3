@@ -1,17 +1,17 @@
-module Tools.Graph exposing (..)
+module Tools.Graph exposing (Msg(..), PointIndexEntry, addSelfLoop, addTraversal, changeActiveTrack, combineNearbyPoints, defaultOptions, deleteEdge, edgeCanBeAdded, edgeCanBeDeleted, enterRoutePlanningMode, getTrack, loopCanBeAdded, makeNewRoute, toolId, toolStateChange, trivialGraph, undoWalkRoute, update, view)
 
 -- Attempt to co-locate the logic to do with having a level of indirection
 -- between the road (nodes) and the trackpoints, so we can traverse sections
 -- of track points multiple times and in each direction.
 
 import Actions exposing (ToolAction)
-import Angle exposing (Angle)
+import Angle
 import Arc2d exposing (Arc2d)
 import Arc3d exposing (Arc3d)
 import Axis2d
 import Axis3d
-import BoundingBox2d exposing (BoundingBox2d)
-import BoundingBox3d exposing (BoundingBox3d)
+import BoundingBox2d
+import BoundingBox3d
 import Color
 import Dict exposing (Dict)
 import Direction2d
@@ -26,7 +26,7 @@ import FeatherIcons
 import FlatColors.AmericanPalette
 import FlatColors.ChinesePalette
 import Geometry101
-import Length exposing (Length, Meters, inMeters, meters)
+import Length exposing (Meters, inMeters, meters)
 import LineSegment2d
 import LineSegment3d
 import List.Extra
@@ -36,14 +36,14 @@ import Point2d
 import Point3d
 import Polyline3d
 import PreviewData exposing (PreviewShape(..))
-import Quantity exposing (Quantity, zero)
+import Quantity exposing (Quantity)
 import Scene3d exposing (Entity)
 import Scene3d.Material as Material
 import Set exposing (Set)
 import SketchPlane3d
-import SpatialIndex exposing (SpatialContent)
+import SpatialIndex
 import String.Interpolate
-import ToolTip exposing (localisedTooltip, myTooltip, tooltip)
+import ToolTip exposing (localisedTooltip, tooltip)
 import Tools.GraphOptions exposing (..)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
@@ -120,12 +120,9 @@ makeXY earth =
 
         ( xRounded, yRounded ) =
             ( toFloat <| round x, toFloat <| round y )
-
-        ( useX, useY ) =
-            Point2d.fromTuple Length.feet ( xRounded, yRounded )
-                |> Point2d.toTuple Length.inMeters
     in
-    ( useX, useY )
+    Point2d.fromTuple Length.feet ( xRounded, yRounded )
+        |> Point2d.toTuple Length.inMeters
 
 
 edgeCanBeAdded : Int -> Options msg -> Bool
@@ -192,26 +189,6 @@ loopCanBeAdded node options =
                     False
 
         Nothing ->
-            False
-
-
-edgeCanBeFlipped : Int -> Options msg -> Bool
-edgeCanBeFlipped newEdge options =
-    -- Edge can be flipped if either is only traversal or is self-loop.
-    case
-        ( options.graph.userRoute
-        , Dict.get newEdge options.graph.edges
-        )
-    of
-        ( [ traversal ], Just edgeInfo ) ->
-            -- Can flip because only edge (if it's the same edge
-            traversal.edge == newEdge
-
-        ( t1 :: t2 :: tN, Just edgeInfo ) ->
-            -- Can be flipped if self-loop
-            edgeInfo.lowNode == edgeInfo.highNode
-
-        _ ->
             False
 
 
@@ -470,23 +447,25 @@ addTraversal newEdge options =
             case Dict.get traversal.edge graph.edges of
                 Just lastEdgeInfo ->
                     let
-                        finalNode =
-                            if traversal.direction == Natural then
-                                lastEdgeInfo.highNode
-
-                            else
-                                lastEdgeInfo.lowNode
-
                         newEdgeDirection =
                             -- Special case if added section is a loop.
                             if addedEdgeInfo.lowNode == addedEdgeInfo.highNode then
                                 Natural
 
-                            else if finalNode == addedEdgeInfo.lowNode then
-                                Natural
-
                             else
-                                Reverse
+                                let
+                                    finalNode =
+                                        if traversal.direction == Natural then
+                                            lastEdgeInfo.highNode
+
+                                        else
+                                            lastEdgeInfo.lowNode
+                                in
+                                if finalNode == addedEdgeInfo.lowNode then
+                                    Natural
+
+                                else
+                                    Reverse
 
                         newGraph =
                             { graph
@@ -502,7 +481,7 @@ addTraversal newEdge options =
                 Nothing ->
                     options
 
-        ( Nothing, Just addedEdgeInfo ) ->
+        ( Nothing, Just _ ) ->
             let
                 newGraph =
                     { graph
@@ -532,7 +511,7 @@ addSelfLoop node options =
             case Dict.get traversal.edge graph.edges of
                 Just edgeInfo ->
                     let
-                        ( finalNode, edgeDirection, endPoint ) =
+                        ( _, edgeDirection, endPoint ) =
                             if traversal.direction == Natural then
                                 ( edgeInfo.highNode
                                 , DomainModel.getLastLeaf edgeInfo.track.trackTree |> .directionAtEnd
@@ -581,12 +560,6 @@ addSelfLoop node options =
                                         |> List.map DomainModel.withoutTime
                                         |> List.map (DomainModel.gpxFromPointWithReference graph.referenceLonLat)
 
-                                newEdgeInfo =
-                                    { lowNode = node
-                                    , highNode = node
-                                    , via = makeXY <| DomainModel.withoutTime loopOpposite
-                                    }
-
                                 newEdgeTree =
                                     DomainModel.treeFromSourcesWithExistingReference
                                         edgeInfo.track.referenceLonLat
@@ -596,12 +569,19 @@ addSelfLoop node options =
                                     Maybe.map (TrackLoaded.newTrackFromTree edgeInfo.track.referenceLonLat)
                                         newEdgeTree
 
-                                newEdgeIndex =
-                                    Dict.size graph.edges
-
                                 newGraph =
                                     case newEdgeTrack of
                                         Just newTrack ->
+                                            let
+                                                newEdgeInfo =
+                                                    { lowNode = node
+                                                    , highNode = node
+                                                    , via = makeXY <| DomainModel.withoutTime loopOpposite
+                                                    }
+
+                                                newEdgeIndex =
+                                                    Dict.size graph.edges
+                                            in
                                             { graph
                                                 | edges =
                                                     Dict.insert
@@ -692,141 +672,6 @@ view location imperial wrapper options =
         i18n =
             I18N.text location toolId
 
-        offset =
-            Length.inMeters options.centreLineOffset
-
-        radius =
-            Length.inMeters options.minimumRadiusAtPlaces
-
-        analyseButton =
-            row [ spacing 3, width fill ]
-                [ infoButton (wrapper <| DisplayInfo "graph" "info")
-                , I.button neatToolsBorder
-                    { onPress = Just (wrapper GraphAnalyse)
-                    , label = i18n "find"
-                    }
-                ]
-
-        adoptTrackButton =
-            row [ spacing 3, width fill ]
-                [ infoButton (wrapper <| DisplayInfo "graph" "adoptInfo")
-                , I.button neatToolsBorder
-                    { onPress = Just (wrapper AdoptNewTrack)
-                    , label = i18n "adopt"
-                    }
-                ]
-
-        clearRouteButton =
-            I.button neatToolsBorder
-                { onPress = Just (wrapper ClearRoute)
-                , label = i18n "clear"
-                }
-
-        revertButton =
-            I.button neatToolsBorder
-                { onPress = Just (wrapper RevertToTrack)
-                , label = i18n "revert"
-                }
-
-        finishButton =
-            if not <| List.isEmpty options.graph.userRoute then
-                row [ spacing 3 ]
-                    [ infoButton (wrapper <| DisplayInfo "graph" "render")
-                    , I.button
-                        neatToolsBorder
-                        { onPress = Just (wrapper ConvertFromGraph)
-                        , label = i18n "convert"
-                        }
-                    ]
-
-            else
-                none
-
-        undoButton =
-            if not <| List.isEmpty options.graphUndos then
-                row [ spacing 3 ]
-                    [ I.button
-                        neatToolsBorder
-                        { onPress = Just (wrapper UndoDeleteRoad)
-                        , label = i18n "undo"
-                        }
-                    ]
-
-            else
-                none
-
-        toleranceSlider =
-            row [ spacing 5 ]
-                [ none
-                , infoButton (wrapper <| DisplayInfo "graph" "tolerance")
-                , I.slider
-                    commonShortHorizontalSliderStyles
-                    { onChange = wrapper << SetTolerance << Length.meters
-                    , label =
-                        I.labelBelow [] <|
-                            text <|
-                                String.Interpolate.interpolate
-                                    (I18N.localisedString location toolId "isTolerance")
-                                    [ showShortMeasure imperial options.matchingTolerance ]
-                    , min = 0.0
-                    , max = 5.0
-                    , step = Nothing
-                    , value = Length.inMeters options.matchingTolerance
-                    , thumb = I.defaultThumb
-                    }
-                ]
-
-        offsetSlider =
-            row [ spacing 5 ]
-                [ none
-                , infoButton (wrapper <| DisplayInfo "graph" "offset")
-                , I.slider
-                    commonShortHorizontalSliderStyles
-                    { onChange = wrapper << CentreLineOffset << Length.meters
-                    , label =
-                        I.labelBelow [] <|
-                            text <|
-                                String.Interpolate.interpolate
-                                    (I18N.localisedString location toolId "isOffset")
-                                    [ showDecimal2 <| abs offset
-                                    , if offset < 0.0 then
-                                        I18N.localisedString location toolId "left"
-
-                                      else if offset > 0.0 then
-                                        I18N.localisedString location toolId "right"
-
-                                      else
-                                        ""
-                                    ]
-                    , min = -5.0
-                    , max = 5.0
-                    , step = Just 0.25
-                    , value = offset
-                    , thumb = I.defaultThumb
-                    }
-                ]
-
-        minRadiusSlider =
-            row [ spacing 5 ]
-                [ none
-                , infoButton (wrapper <| DisplayInfo "graph" "radius")
-                , I.slider
-                    commonShortHorizontalSliderStyles
-                    { onChange = wrapper << MinimumRadius << Length.meters
-                    , label =
-                        I.labelBelow [] <|
-                            text <|
-                                String.Interpolate.interpolate
-                                    (I18N.localisedString location toolId "isRadius")
-                                    [ showDecimal2 <| abs radius ]
-                    , min = 1.0
-                    , max = 15.0
-                    , step = Just 1.0
-                    , value = radius
-                    , thumb = I.defaultThumb
-                    }
-                ]
-
         traversals : List TraversalDisplay
         traversals =
             -- Display-ready version of the route.
@@ -862,9 +707,6 @@ view location imperial wrapper options =
                                         }
                     )
 
-        totalLength =
-            traversals |> List.map .length |> Quantity.sum
-
         dataStyles selected =
             if selected then
                 [ Font.color FlatColors.ChinesePalette.antiFlashWhite
@@ -879,6 +721,9 @@ view location imperial wrapper options =
         traversalsTable : Element msg
         traversalsTable =
             let
+                totalLength =
+                    traversals |> List.map .length |> Quantity.sum
+
                 headerAttrs =
                     [ Font.bold
                     , Font.color rgtDark
@@ -1012,26 +857,6 @@ view location imperial wrapper options =
                     ]
                 ]
 
-        traversalNext =
-            I.button neatToolsBorder
-                { onPress =
-                    Just <|
-                        wrapper <|
-                            HighlightTraversal <|
-                                min (List.length traversals - 1) (options.selectedTraversal + 1)
-                , label = useIconWithSize 16 FeatherIcons.chevronRight
-                }
-
-        traversalPrevious =
-            I.button neatToolsBorder
-                { onPress =
-                    Just <|
-                        wrapper <|
-                            HighlightTraversal <|
-                                max 0 (options.selectedTraversal - 1)
-                , label = useIconWithSize 16 FeatherIcons.chevronLeft
-                }
-
         guidanceText =
             row
                 [ Background.color FlatColors.AmericanPalette.lightGreenishBlue
@@ -1058,6 +883,123 @@ view location imperial wrapper options =
         ]
         [ guidanceText
         , if options.analyzed then
+            let
+                offset =
+                    Length.inMeters options.centreLineOffset
+
+                radius =
+                    Length.inMeters options.minimumRadiusAtPlaces
+
+                clearRouteButton =
+                    I.button neatToolsBorder
+                        { onPress = Just (wrapper ClearRoute)
+                        , label = i18n "clear"
+                        }
+
+                revertButton =
+                    I.button neatToolsBorder
+                        { onPress = Just (wrapper RevertToTrack)
+                        , label = i18n "revert"
+                        }
+
+                finishButton =
+                    if not <| List.isEmpty options.graph.userRoute then
+                        row [ spacing 3 ]
+                            [ infoButton (wrapper <| DisplayInfo "graph" "render")
+                            , I.button
+                                neatToolsBorder
+                                { onPress = Just (wrapper ConvertFromGraph)
+                                , label = i18n "convert"
+                                }
+                            ]
+
+                    else
+                        none
+
+                undoButton =
+                    if not <| List.isEmpty options.graphUndos then
+                        row [ spacing 3 ]
+                            [ I.button
+                                neatToolsBorder
+                                { onPress = Just (wrapper UndoDeleteRoad)
+                                , label = i18n "undo"
+                                }
+                            ]
+
+                    else
+                        none
+
+                offsetSlider =
+                    row [ spacing 5 ]
+                        [ none
+                        , infoButton (wrapper <| DisplayInfo "graph" "offset")
+                        , I.slider
+                            commonShortHorizontalSliderStyles
+                            { onChange = wrapper << CentreLineOffset << Length.meters
+                            , label =
+                                I.labelBelow [] <|
+                                    text <|
+                                        String.Interpolate.interpolate
+                                            (I18N.localisedString location toolId "isOffset")
+                                            [ showDecimal2 <| abs offset
+                                            , if offset < 0.0 then
+                                                I18N.localisedString location toolId "left"
+
+                                              else if offset > 0.0 then
+                                                I18N.localisedString location toolId "right"
+
+                                              else
+                                                ""
+                                            ]
+                            , min = -5.0
+                            , max = 5.0
+                            , step = Just 0.25
+                            , value = offset
+                            , thumb = I.defaultThumb
+                            }
+                        ]
+
+                minRadiusSlider =
+                    row [ spacing 5 ]
+                        [ none
+                        , infoButton (wrapper <| DisplayInfo "graph" "radius")
+                        , I.slider
+                            commonShortHorizontalSliderStyles
+                            { onChange = wrapper << MinimumRadius << Length.meters
+                            , label =
+                                I.labelBelow [] <|
+                                    text <|
+                                        String.Interpolate.interpolate
+                                            (I18N.localisedString location toolId "isRadius")
+                                            [ showDecimal2 <| abs radius ]
+                            , min = 1.0
+                            , max = 15.0
+                            , step = Just 1.0
+                            , value = radius
+                            , thumb = I.defaultThumb
+                            }
+                        ]
+
+                traversalNext =
+                    I.button neatToolsBorder
+                        { onPress =
+                            Just <|
+                                wrapper <|
+                                    HighlightTraversal <|
+                                        min (List.length traversals - 1) (options.selectedTraversal + 1)
+                        , label = useIconWithSize 16 FeatherIcons.chevronRight
+                        }
+
+                traversalPrevious =
+                    I.button neatToolsBorder
+                        { onPress =
+                            Just <|
+                                wrapper <|
+                                    HighlightTraversal <|
+                                        max 0 (options.selectedTraversal - 1)
+                        , label = useIconWithSize 16 FeatherIcons.chevronLeft
+                        }
+            in
             column [ width fill, padding 4, spacing 10 ]
                 [ row [ centerX, width fill, spacing 10 ]
                     [ traversalPrevious
@@ -1072,6 +1014,46 @@ view location imperial wrapper options =
                 ]
 
           else
+            let
+                analyseButton =
+                    row [ spacing 3, width fill ]
+                        [ infoButton (wrapper <| DisplayInfo "graph" "info")
+                        , I.button neatToolsBorder
+                            { onPress = Just (wrapper GraphAnalyse)
+                            , label = i18n "find"
+                            }
+                        ]
+
+                adoptTrackButton =
+                    row [ spacing 3, width fill ]
+                        [ infoButton (wrapper <| DisplayInfo "graph" "adoptInfo")
+                        , I.button neatToolsBorder
+                            { onPress = Just (wrapper AdoptNewTrack)
+                            , label = i18n "adopt"
+                            }
+                        ]
+
+                toleranceSlider =
+                    row [ spacing 5 ]
+                        [ none
+                        , infoButton (wrapper <| DisplayInfo "graph" "tolerance")
+                        , I.slider
+                            commonShortHorizontalSliderStyles
+                            { onChange = wrapper << SetTolerance << Length.meters
+                            , label =
+                                I.labelBelow [] <|
+                                    text <|
+                                        String.Interpolate.interpolate
+                                            (I18N.localisedString location toolId "isTolerance")
+                                            [ showShortMeasure imperial options.matchingTolerance ]
+                            , min = 0.0
+                            , max = 5.0
+                            , step = Nothing
+                            , value = Length.inMeters options.matchingTolerance
+                            , thumb = I.defaultThumb
+                            }
+                        ]
+            in
             wrappedRow [ centerX, width fill, spacing 10 ]
                 [ toleranceSlider
                 , adoptTrackButton
@@ -1127,12 +1109,6 @@ identifyPointsToBeMerged tolerance track =
             -- The last parameter here is not the quality, it
             -- only affects the index efficiency.
             SpatialIndex.empty growBox (Length.meters 100.0)
-
-        localBounds road =
-            -- Use to form a query for each leaf.
-            DomainModel.boundingBox (Leaf road)
-                |> flatBox
-                |> addTolerance
 
         indexPoint : RoadSection -> ( Int, PointIndex ) -> ( Int, PointIndex )
         indexPoint leaf ( pointNumber, indexBuild ) =
@@ -1210,11 +1186,8 @@ identifyPointsToBeMerged tolerance track =
 
                     else
                         Nothing
-
-                geometricallyClose =
-                    results |> List.filterMap isThisLeafClose
             in
-            geometricallyClose
+            results |> List.filterMap isThisLeafClose
 
         --|> List.Extra.uniqueBy .leafNumber
         findNearbyLeavesFoldFn :
@@ -1232,16 +1205,6 @@ identifyPointsToBeMerged tolerance track =
             )
 
         --findAllNearbyLeaves : ( Int, List ( Int, List InsertedPointOnLeaf ) )
-        ( _, findAllNearbyLeaves ) =
-            -- Want "nearby" for all points. Our model traverses leaves, so we
-            -- preload the start point and use the end point of each leaf.
-            DomainModel.foldOverRoute
-                findNearbyLeavesFoldFn
-                track.trackTree
-                ( 0
-                , findNearbyLeaves 0
-                )
-
         --_ =
         --    Debug.log "LEAVES" findAllNearbyLeaves
         {-
@@ -1252,6 +1215,16 @@ identifyPointsToBeMerged tolerance track =
         perpendicularFeetGroupedByLeaf =
             -- Can't see a suitable function in List.Extra, so do it by hand.
             let
+                ( _, findAllNearbyLeaves ) =
+                    -- Want "nearby" for all points. Our model traverses leaves, so we
+                    -- preload the start point and use the end point of each leaf.
+                    DomainModel.foldOverRoute
+                        findNearbyLeavesFoldFn
+                        track.trackTree
+                        ( 0
+                        , findNearbyLeaves 0
+                        )
+
                 addToLeafDict newEntry dict =
                     case Dict.get newEntry.leafNumber dict of
                         Just prevEntries ->
@@ -1345,9 +1318,6 @@ identifyPointsToBeMerged tolerance track =
                 results =
                     SpatialIndex.query pointIndex (pointWithTolerance pt.space)
                         |> List.map (.content >> .pointIndex)
-
-                thisPointTrackDistance =
-                    DomainModel.distanceFromIndex pointNumber tree
             in
             results
                 |> List.filter
@@ -1422,7 +1392,7 @@ identifyPointsToBeMerged tolerance track =
                     in
                     case remaining of
                         -- Nothing left here, drop it.
-                        pt1 :: pt2 :: _ ->
+                        _ :: _ :: _ ->
                             -- Only interested if not empty and not singleton
                             ( Set.fromList remaining |> Set.union claimed
                             , remaining :: retained
@@ -1720,11 +1690,6 @@ showNewPoints pointInfo track =
 
         highlightPoint point =
             Scene3d.point { radius = Pixels.pixels 3 } material point
-
-        showVector newPoint oldPoint =
-            Scene3d.lineSegment
-                material
-                (LineSegment3d.from oldPoint newPoint.adjustedPoint)
     in
     List.map highlightPoint locations
 
@@ -1895,7 +1860,7 @@ buildGraph track =
                             )
                     in
                     case Dict.get ( lowNode, highNode, discriminator ) inputState.edgeResolverDict of
-                        Just ( edgeIndex, edgeTree ) ->
+                        Just ( edgeIndex, _ ) ->
                             -- So, we don't add this edge
                             -- but we record the traversal
                             let
@@ -2096,7 +2061,7 @@ makeNewRoute options =
             let
                 ( _, flags ) =
                     List.foldl
-                        (\{ edge, direction } ( traversed, outputs ) ->
+                        (\{ edge } ( traversed, outputs ) ->
                             ( Set.insert edge traversed
                             , Set.member edge traversed :: outputs
                             )
@@ -2197,7 +2162,7 @@ makeNewRoute options =
                                         0
                                         inEdge.track.trackTree
 
-                        ( inboundTrimIndex, inboundTrimPoint ) =
+                        ( _, inboundTrimPoint ) =
                             case inbound.direction of
                                 Natural ->
                                     DomainModel.interpolateTrack
@@ -2209,7 +2174,7 @@ makeNewRoute options =
                                         trim
                                         inEdge.track.trackTree
 
-                        ( outboundTrimIndex, outboundTrimPoint ) =
+                        ( _, outboundTrimPoint ) =
                             case outbound.direction of
                                 Natural ->
                                     DomainModel.interpolateTrack
@@ -2237,9 +2202,6 @@ makeNewRoute options =
                             , LineSegment3d.from actualVertex.space outboundTrimPoint.space
                             )
 
-                        turnAngle =
-                            Direction2d.angleFrom inboundDirection outboundDirection
-
                         ( offsetVectorInbound, offsetVectorOutbound ) =
                             ( Vector2d.withLength options.centreLineOffset
                                 (Direction2d.rotateClockwise inboundDirection)
@@ -2262,11 +2224,6 @@ makeNewRoute options =
                         ( inboundTrim2d, outboundTrim2d ) =
                             ( inboundTrimPoint.space |> Point3d.projectInto planeFor2dArc
                             , outboundTrimPoint.space |> Point3d.projectInto planeFor2dArc
-                            )
-
-                        ( offsetInboundTrimPoint, offsetOutboundTrimPoint ) =
-                            ( inboundTrim2d |> Point2d.translateBy offsetVectorInbound
-                            , outboundTrim2d |> Point2d.translateBy offsetVectorOutbound
                             )
 
                         ( inboundRoad2d, outboundRoad2d ) =
@@ -2306,6 +2263,15 @@ makeNewRoute options =
                         arc =
                             case arcCentre of
                                 Just centre ->
+                                    let
+                                        ( offsetInboundTrimPoint, _ ) =
+                                            ( inboundTrim2d |> Point2d.translateBy offsetVectorInbound
+                                            , outboundTrim2d |> Point2d.translateBy offsetVectorOutbound
+                                            )
+
+                                        turnAngle =
+                                            Direction2d.angleFrom inboundDirection outboundDirection
+                                    in
                                     Just <| Arc2d.sweptAround centre turnAngle offsetInboundTrimPoint
 
                                 Nothing ->

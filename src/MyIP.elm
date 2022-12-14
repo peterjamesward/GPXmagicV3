@@ -1,10 +1,7 @@
-module MyIP exposing (processIpInfo, requestIpInformation, sendIpInfo)
+module MyIP exposing (processIpInfo, requestIpInformation)
 
-import GeoCodeDecoders exposing (IpInfo, encodeIpInfo, encodeLogInfo, ipInfoDecoder)
-import Http exposing (header)
-import Iso8601
-import M3O exposing (m3O_API_TOKEN)
-import Time exposing (Posix)
+import GeoCodeDecoders exposing (IpInfo, ipInfoDecoder)
+import Http
 import Url.Builder as Builder
 
 
@@ -35,10 +32,6 @@ apiRoot =
     "http://ip-api.com"
 
 
-loggerRoot =
-    "https://api.m3o.com"
-
-
 requestIpInformation : (Result Http.Error IpInfo -> msg) -> Cmd msg
 requestIpInformation msg =
     Http.request
@@ -60,38 +53,6 @@ processIpInfo response =
 
         Err _ ->
             Nothing
-
-
-sendIpInfo : Posix -> (Result Http.Error () -> msg) -> Maybe IpInfo -> Cmd msg
-sendIpInfo time msg ipInfo =
-    case ipInfo of
-        Just info ->
-            let
-                logInfo =
-                    { timestamp = String.left 10 <| Iso8601.fromTime time
-                    , ip = info.ip
-                    , country = info.country
-                    , region = info.region
-                    , city = info.city
-                    , zip = info.zip
-                    , latitude = info.latitude
-                    , longitude = info.longitude
-                    }
-            in
-            Http.request
-                { method = "POST"
-                , headers =
-                    [ Http.header "Authorization" ("Bearer " ++ m3O_API_TOKEN)
-                    ]
-                , url = Builder.crossOrigin loggerRoot [ "v1", "db", "Create" ] []
-                , body = Http.jsonBody <| encodeLogInfo logInfo
-                , expect = Http.expectWhatever msg
-                , timeout = Nothing
-                , tracker = Nothing
-                }
-
-        Nothing ->
-            Cmd.none
 
 
 

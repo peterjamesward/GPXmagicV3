@@ -1,8 +1,7 @@
-module Tools.CentroidAverage exposing (..)
+module Tools.CentroidAverage exposing (Msg(..), applyUsingOptions, centroidAverageFor1CQF, defaultOptions, toolId, toolStateChange, update, view)
 
 import Actions exposing (ToolAction(..))
-import Dict exposing (Dict)
-import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, getDualCoords, leafFromIndex, skipCount, startPoint, traverseTreeBetweenLimitsToDepth)
+import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, skipCount)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (button)
@@ -17,9 +16,9 @@ import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import Triangle3d
-import UtilsForViews exposing (fullDepthRenderingBoxSize, showDecimal2)
+import UtilsForViews exposing (showDecimal2)
 import Vector3d
-import ViewPureStyles exposing (commonShortHorizontalSliderStyles, neatToolsBorder, prettyButtonStyles)
+import ViewPureStyles exposing (commonShortHorizontalSliderStyles, neatToolsBorder)
 
 
 toolId =
@@ -38,9 +37,7 @@ type Msg
     = SetWeighting Float
     | ToggleAltitude Bool
     | TogglePosition Bool
-    | SetExtent Extent
     | ApplyWithOptions
-    | DisplayInfo String String
 
 
 computeNewPoints : Options -> TrackLoaded msg -> List PreviewPoint
@@ -99,7 +96,7 @@ applyUsingOptions options track =
 centroidAverageFor1CQF : TrackLoaded msg -> PeteTree
 centroidAverageFor1CQF track =
     let
-        ( outputTree, oldPoints ) =
+        ( outputTree, _ ) =
             applyUsingOptions defaultOptions track
     in
     outputTree |> Maybe.withDefault track.trackTree
@@ -126,14 +123,6 @@ actions newOptions previewColour track =
         ( previewTree, _ ) =
             applyUsingOptions newOptions track
 
-        normalPreview =
-            ShowPreview
-                { tag = "centroid"
-                , shape = PreviewCircle
-                , colour = previewColour
-                , points = computeNewPoints newOptions track
-                }
-
         profilePreview tree =
             ShowPreview
                 { tag = "centroidprofile"
@@ -144,6 +133,15 @@ actions newOptions previewColour track =
     in
     case previewTree of
         Just tree ->
+            let
+                normalPreview =
+                    ShowPreview
+                        { tag = "centroid"
+                        , shape = PreviewCircle
+                        , colour = previewColour
+                        , points = computeNewPoints newOptions track
+                        }
+            in
             [ normalPreview, profilePreview tree ]
 
         _ ->
@@ -179,7 +177,7 @@ update msg options previewColour hasTrack =
             in
             ( newOptions, actions newOptions previewColour track )
 
-        ( Just track, ApplyWithOptions ) ->
+        ( Just _, ApplyWithOptions ) ->
             ( options
             , [ Actions.CentroidAverageApplyWithOptions options
               , TrackHasChanged

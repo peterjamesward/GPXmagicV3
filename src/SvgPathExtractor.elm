@@ -1,14 +1,13 @@
-module SvgPathExtractor exposing (..)
+module SvgPathExtractor exposing (Msg(..), Options, PathAndTransform, PathInfo, PathState, defaultOptions, trackFromSvg, update, view)
 
 import Actions exposing (ToolAction(..))
 import AltMath.Matrix4 as AltMath
 import AltMath.Vector3
 import Angle
-import BoundingBox3d
 import CubicSpline3d
 import Direction2d
 import DomainModel
-import Element exposing (Element, moveDown, moveLeft, padding, text)
+import Element exposing (Element, padding, text)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Input as Input
@@ -30,7 +29,6 @@ import Quantity exposing (Quantity(..))
 import Regex
 import TrackLoaded exposing (TrackLoaded)
 import Vector3d
-import ViewPureStyles exposing (neatToolsBorder, prettyButtonStyles)
 import XmlParser exposing (Node(..))
 
 
@@ -51,12 +49,6 @@ type Msg
     = ReadFile (Maybe GeoCodeDecoders.IpInfo)
     | FileSelected File
     | FileLoaded String
-
-
-type alias Path =
-    { style : String
-    , d : String
-    }
 
 
 update : Msg -> Options -> (Msg -> msg) -> ( Options, List (ToolAction msg) )
@@ -121,16 +113,14 @@ parseTransform text =
             --TODO: Optional y scale value!
             text
                 |> Regex.find (asRegex "scale\\((-?\\d*\\.?\\d*)\\)")
-                |> List.map .submatches
-                |> List.concat
+                |> List.concatMap .submatches
                 |> List.filterMap value
                 |> List.head
 
         hasMatrix =
             text
                 |> Regex.find (asRegex "matrix\\((-?\\d*\\.?\\d*),(-?\\d*\\.?\\d*),(-?\\d*\\.?\\d*),(-?\\d*\\.?\\d*),(-?\\d*\\.?\\d*),(-?\\d*\\.?\\d*)\\)")
-                |> List.map .submatches
-                |> List.concat
+                |> List.concatMap .submatches
                 |> List.filterMap value
 
         applyScale baseMatrix =
@@ -202,9 +192,9 @@ processXML options content =
                     ( 0, 52 )
     in
     case xmlParse of
-        Ok { processingInstructions, docType, root } ->
+        Ok { root } ->
             case root of
-                XmlParser.Element tag attributes children ->
+                XmlParser.Element _ _ _ ->
                     let
                         pathNodes =
                             root
@@ -251,29 +241,26 @@ processXML options content =
                                     (DomainModel.withoutTime
                                         >> DomainModel.gpxFromPointWithReference pointZero
                                     )
-
-                        newTrack =
-                            TrackLoaded.trackFromPoints
-                                options.svgFilename
-                                gpxPoints
                     in
-                    newTrack
+                    TrackLoaded.trackFromPoints
+                        options.svgFilename
+                        gpxPoints
 
                 _ ->
                     Nothing
 
-        Err error ->
+        Err _ ->
             Nothing
 
 
 getAllXmlTags : XmlParser.Node -> List ( String, XmlParser.Node )
 getAllXmlTags node =
     case node of
-        XmlParser.Element tag attributes children ->
+        XmlParser.Element tag _ children ->
             ( tag, node )
                 :: List.concatMap getAllXmlTags children
 
-        Text string ->
+        Text _ ->
             []
 
 
@@ -283,7 +270,7 @@ getAttribute attribute node =
         XmlParser.Element _ attributes _ ->
             attributes
                 |> List.Extra.find
-                    (\{ name, value } -> name == attribute)
+                    (\{ name } -> name == attribute)
                 |> Maybe.map .value
 
         Text _ ->
@@ -336,8 +323,7 @@ convertToPoints pathAndTransform pathState =
                 |> List.map flipY
     in
     { pathState
-        | currentPoint = pathState.currentPoint --applyTransform newLocalPathState.currentPoint
-        , outputs = pathState.outputs ++ pointsFromThisPath
+        | outputs = pathState.outputs ++ pointsFromThisPath
     }
 
 

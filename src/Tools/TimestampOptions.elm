@@ -1,8 +1,8 @@
-module Tools.TimestampOptions exposing (..)
+module Tools.TimestampOptions exposing (ExtentOption(..), Options, TimestampMode(..))
 
 import Duration exposing (Duration)
 import Mass exposing (Mass)
-import Power exposing (Power, Watts)
+import Power exposing (Power)
 import Speed exposing (Speed)
 
 
@@ -25,5 +25,4 @@ type TimestampMode
 
 
 type ExtentOption
-    = ExtentMarkers
-    | ExtentOrangeToEnd
+    = ExtentOrangeToEnd

@@ -1,7 +1,6 @@
-module Tools.I18N exposing (..)
+module Tools.I18N exposing (Msg(..), availableI18N, defaultLocation, defaultOptions, editor, fromCountryCode, localisedString, requestDictionary, text, update)
 
-import Countries exposing (Country)
-import Dict exposing (Dict)
+import Dict
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -11,7 +10,6 @@ import File exposing (File)
 import File.Download as Download
 import File.Select as Select
 import FlatColors.ChinesePalette
-import FormatNumber.Locales exposing (frenchLocale)
 import Http
 import Json.Decode as D
 import Json.Encode as E
@@ -49,18 +47,9 @@ defaultOptions =
 availableI18N : List Location
 availableI18N =
     [ Locations.UK.location
+
     --, frLocation
     ]
-
-
-frLocation =
-    -- Selecting an available country with empty dicts will download the dictionary
-    -- with filename "languages/<country code>.JSON.
-    -- Se we can have many countries without a large download.
-    { country = Country "France" "FR" "🇫🇷"
-    , locale = frenchLocale
-    , textDictionary = Dict.empty
-    }
 
 
 fromCountryCode code =

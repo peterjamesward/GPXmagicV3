@@ -1,10 +1,9 @@
-module Tools.BendSmoother exposing (..)
+module Tools.BendSmoother exposing (Msg(..), Point, applyUsingOptions, defaultOptions, softenMultiplePoints, toolId, toolStateChange, update, view)
 
 import Actions exposing (ToolAction(..))
 import Angle
 import Arc2d exposing (Arc2d)
 import Arc3d exposing (Arc3d)
-import Dict exposing (Dict)
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, endPoint, skipCount, startPoint)
 import Element exposing (..)
 import Element.Background as Background
@@ -13,15 +12,13 @@ import FlatColors.ChinesePalette
 import Geometry101 as G exposing (distance, findIntercept, interpolateLine, isAfter, isBefore, lineEquationFromTwoPoints, lineIntersection, linePerpendicularTo, pointAlongRoad, pointsToGeometry)
 import Length exposing (Meters, inMeters, meters)
 import LineSegment2d
-import List.Extra
 import LocalCoords exposing (LocalCoords)
-import Plane3d
 import Point2d exposing (Point2d)
 import Point3d exposing (Point3d, xCoordinate, yCoordinate, zCoordinate)
 import Polyline2d
 import Polyline3d
-import PreviewData exposing (PreviewData, PreviewPoint, PreviewShape(..))
-import Quantity exposing (Quantity(..), minus)
+import PreviewData exposing (PreviewShape(..))
+import Quantity
 import SketchPlane3d
 import String.Interpolate
 import Tools.BendSmootherOptions exposing (..)
@@ -57,8 +54,6 @@ type Msg
     | SetBendTrackPointSpacing Float
     | SetMode SmoothMode
     | SetSegments Int
-    | ApplySmoothPoint
-    | DisplayInfo String String
 
 
 tryBendSmoother : TrackLoaded msg -> Options -> Options
@@ -70,18 +65,15 @@ tryBendSmoother track options =
         ( startPoint, endPoint ) =
             -- Legacy code is zero based from start.
             ( fromStart, skipCount track.trackTree - fromEnd )
-
-        updatedOptions =
-            { options
-                | smoothedBend =
-                    if endPoint >= startPoint + 2 then
-                        lookForSmoothBendOption options.bendTrackPointSpacing track startPoint endPoint
-
-                    else
-                        Nothing
-            }
     in
-    updatedOptions
+    { options
+        | smoothedBend =
+            if endPoint >= startPoint + 2 then
+                lookForSmoothBendOption options.bendTrackPointSpacing track startPoint endPoint
+
+            else
+                Nothing
+    }
 
 
 applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
@@ -142,7 +134,7 @@ softenMultiplePoints options indices track =
                 ( Nothing, lastSetOfOldPoints ) ->
                     ( track.trackTree, lastSetOfOldPoints )
 
-        ( finalTree, oldPoints ) =
+        ( finalTree, _ ) =
             -- Indices must be in descending order or we lose context.
             indices
                 |> List.sort
@@ -192,7 +184,7 @@ singlePoint3dArc track index =
     let
         ( pa, pb, pc ) =
             ( DomainModel.earthPointFromIndex (index - 1) track.trackTree
-            , DomainModel.earthPointFromIndex (index + 0) track.trackTree
+            , DomainModel.earthPointFromIndex index track.trackTree
             , DomainModel.earthPointFromIndex (index + 1) track.trackTree
             )
     in
@@ -206,27 +198,6 @@ arc3dFromThreePoints pa pb pc =
         ( beforeLength, afterLength ) =
             ( Point3d.distanceFrom pa.space pb.space, Point3d.distanceFrom pb.space pc.space )
 
-        amountToStealFromFirstSegment =
-            Quantity.min (meters 4.0) (Quantity.half beforeLength)
-
-        amountToStealFromSecondSegment =
-            Quantity.min (meters 4.0) (Quantity.half afterLength)
-
-        commonAmountToSteal =
-            Quantity.min amountToStealFromFirstSegment amountToStealFromSecondSegment
-
-        arcStart =
-            Point3d.interpolateFrom
-                pb.space
-                pa.space
-                (Quantity.ratio commonAmountToSteal beforeLength)
-
-        arcEnd =
-            Point3d.interpolateFrom
-                pb.space
-                pc.space
-                (Quantity.ratio commonAmountToSteal afterLength)
-
         trianglePlane =
             SketchPlane3d.throughPoints pa.space pb.space pc.space
     in
@@ -234,6 +205,27 @@ arc3dFromThreePoints pa pb pc =
         -- Points necessarily co-planar but type requires us to check!
         Just plane ->
             let
+                amountToStealFromFirstSegment =
+                    Quantity.min (meters 4.0) (Quantity.half beforeLength)
+
+                amountToStealFromSecondSegment =
+                    Quantity.min (meters 4.0) (Quantity.half afterLength)
+
+                commonAmountToSteal =
+                    Quantity.min amountToStealFromFirstSegment amountToStealFromSecondSegment
+
+                arcStart =
+                    Point3d.interpolateFrom
+                        pb.space
+                        pa.space
+                        (Quantity.ratio commonAmountToSteal beforeLength)
+
+                arcEnd =
+                    Point3d.interpolateFrom
+                        pb.space
+                        pc.space
+                        (Quantity.ratio commonAmountToSteal afterLength)
+
                 ( planarA, planarB, planarC ) =
                     -- I think if we project into 2d, the classic logic will hold.
                     ( arcStart |> Point3d.projectInto plane
@@ -355,16 +347,6 @@ update msg options previewColour track =
             in
             ( newOptions, [] )
 
-        ApplySmoothPoint ->
-            ( options
-            , [ Actions.BendSmootherApplyWithOptions options
-              , TrackHasChanged
-              ]
-            )
-
-        DisplayInfo tool tag ->
-            ( options, [ Actions.DisplayInfo tool tag ] )
-
 
 viewBendControls :
     I18NOptions.Location
@@ -397,7 +379,7 @@ viewBendControls location imperial wrapper options track =
                 }
     in
     case track of
-        Just isTrack ->
+        Just _ ->
             column
                 [ padding 5
                 , spacing 5
@@ -414,16 +396,16 @@ viewBendControls location imperial wrapper options track =
 
 viewPointControls : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
 viewPointControls location imperial wrapper options track =
-    let
-        fixButton =
-            button
-                neatToolsBorder
-                { onPress = Just <| wrapper ApplySmoothBend
-                , label = text "Smooth points"
-                }
-    in
     case track of
-        Just isTrack ->
+        Just _ ->
+            let
+                fixButton =
+                    button
+                        neatToolsBorder
+                        { onPress = Just <| wrapper ApplySmoothBend
+                        , label = text "Smooth points"
+                        }
+            in
             column
                 [ padding 5
                 , spacing 5
@@ -583,7 +565,7 @@ lookForSmoothBendOption trackPointSpacing track pointA pointD =
                     DomainModel.distanceFromIndex pointA track.trackTree
                         |> Quantity.plus
                             (case nodes of
-                                p1 :: pRest ->
+                                p1 :: _ ->
                                     Point3d.distanceFrom
                                         (.space <| DomainModel.earthPointFromIndex pointA track.trackTree)
                                         p1.space
@@ -729,7 +711,7 @@ makeSmoothBend trackPointSpacing roadAB roadCD arc =
 toPlanarPoint : EarthPoint -> G.Point
 toPlanarPoint pt =
     let
-        { x, y, z } =
+        { x, y } =
             Point3d.toRecord inMeters pt.space
     in
     { x = x, y = y }
@@ -851,12 +833,12 @@ parallelFindSemicircle r1 r2 =
               )
             )
 
-        ( midAB, midBC ) =
+        ( _, midBC ) =
             ( interpolateLine 0.5 pa pb
             , interpolateLine 0.5 pb pc
             )
 
-        ( midCD, midDA ) =
+        ( _, midDA ) =
             ( interpolateLine 0.5 pc pd
             , interpolateLine 0.5 pd pa
             )
@@ -864,9 +846,6 @@ parallelFindSemicircle r1 r2 =
         middle =
             -- As lines are parallel, we can use this as the circle centre.
             interpolateLine 0.5 midBC midDA
-
-        centreLine =
-            { startAt = middle, endsAt = midBC }
 
         ( r1Equation, r2Equation ) =
             ( lineEquationFromTwoPoints pa pb, lineEquationFromTwoPoints pc pd )
@@ -884,11 +863,15 @@ parallelFindSemicircle r1 r2 =
             let
                 radius =
                     distance middle t1
-
-                midArcPoint =
-                    pointAlongRoad centreLine radius
             in
             if radius > 0.0 && radius < 1000.0 then
+                let
+                    centreLine =
+                        { startAt = middle, endsAt = midBC }
+
+                    midArcPoint =
+                        pointAlongRoad centreLine radius
+                in
                 Arc2d.throughPoints
                     (Point2d.meters t1.x t1.y)
                     (Point2d.meters midArcPoint.x midArcPoint.y)

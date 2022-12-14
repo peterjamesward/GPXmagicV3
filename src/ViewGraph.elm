@@ -1,4 +1,4 @@
-module ViewGraph exposing (..)
+module ViewGraph exposing (Context, DragAction(..), EdgeMode(..), Msg(..), initialiseView, update, view)
 
 {-
    This clone of ViewPlan is to be modified to draw SVG and add some interactive elements.
@@ -7,12 +7,12 @@ module ViewGraph exposing (..)
 import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
 import Arc2d
-import Axis2d exposing (Axis2d)
+import Axis2d
 import Camera3d exposing (Camera3d)
 import Circle2d
 import Dict
-import Direction2d exposing (Direction2d, toAngle)
-import Direction3d exposing (negativeZ, positiveY, positiveZ)
+import Direction2d exposing (toAngle)
+import Direction3d
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
@@ -26,16 +26,16 @@ import Frame2d
 import Geometry.Svg as Svg
 import Html.Attributes as Attributes
 import Html.Events as HE
-import Html.Events.Extra.Mouse as Mouse exposing (Button(..))
+import Html.Events.Extra.Mouse as Mouse
 import Html.Events.Extra.Wheel as Wheel
 import Json.Decode as D
 import Json.Encode as E
-import Length exposing (Length, Meters, inMeters, meters)
+import Length exposing (Meters, meters)
 import List.Extra
 import LocalCoords exposing (LocalCoords)
 import Pixels exposing (Pixels, inPixels)
 import Point2d exposing (Point2d)
-import Point3d exposing (Point3d)
+import Point3d
 import Point3d.Projection as Point3d
 import Polyline2d
 import Quantity exposing (Quantity, toFloatQuantity)
@@ -48,11 +48,11 @@ import ToolTip exposing (myTooltip, tooltip)
 import Tools.Graph
 import Tools.GraphOptions exposing (ClickDetect(..), Direction(..), Graph)
 import Tools.I18NOptions as I18NOptions
-import UtilsForViews exposing (colourHexString, showShortMeasure, uiColourHexString)
+import UtilsForViews exposing (showShortMeasure, uiColourHexString)
 import Vector2d
 import Vector3d
 import ViewPureStyles exposing (rgtDark, rgtPurple, useIcon)
-import Viewpoint3d exposing (Viewpoint3d)
+import Viewpoint3d
 
 
 type Msg
@@ -279,9 +279,6 @@ view :
     -> Element msg
 view location context ( width, height ) options msgWrapper =
     let
-        dragging =
-            context.dragAction
-
         camera =
             deriveCamera context
 
@@ -298,7 +295,7 @@ view location context ( width, height ) options msgWrapper =
         nodes2d =
             graph.nodes
                 |> Dict.map
-                    (\idx pt ->
+                    (\_ pt ->
                         pt
                             |> Point2d.fromTuple meters
                             |> Point3d.on SketchPlane3d.xy
@@ -309,7 +306,7 @@ view location context ( width, height ) options msgWrapper =
         svgNodes =
             nodes2d
                 |> Dict.map
-                    (\index vertex ->
+                    (\_ vertex ->
                         Svg.circle2d
                             [ Svg.Attributes.stroke "red"
                             , Svg.Attributes.strokeWidth "3"
@@ -365,7 +362,7 @@ view location context ( width, height ) options msgWrapper =
                                 midLeaf =
                                     asRecord <| leafFromIndex midPoint edgeInfo.track.trackTree
 
-                                ( p1, p2 ) =
+                                ( p1, _ ) =
                                     ( midLeaf.startPoint.space |> Point3d.toScreenSpace camera screenRectangle
                                     , midLeaf.endPoint.space |> Point3d.toScreenSpace camera screenRectangle
                                     )
@@ -626,11 +623,9 @@ update msg msgWrapper graph area context =
                                 (dy - startY)
                                 0.0
                                 |> Vector3d.scaleBy
-                                    (1.0
-                                        -- Empirical
-                                        * Spherical.metresPerPixel
-                                            context.zoomLevel
-                                            (Angle.degrees 30)
+                                    (Spherical.metresPerPixel
+                                        context.zoomLevel
+                                        (Angle.degrees 30)
                                     )
                     in
                     ( { context
@@ -844,7 +839,7 @@ detectHit event graph ( w, h ) context =
         bestCandidate =
             candidates
                 |> List.Extra.minimumBy
-                    (\( edge, ( point, isEnd, dist ) ) -> Pixels.inPixels dist)
+                    (\( _, ( _, _, dist ) ) -> Pixels.inPixels dist)
 
         returnStartNode edgeIndex =
             case Dict.get edgeIndex graph.edges of
@@ -866,7 +861,7 @@ detectHit event graph ( w, h ) context =
         Nothing ->
             ClickNone
 
-        Just ( edgeIndex, ( pointIndex, isEnd, dist ) ) ->
+        Just ( edgeIndex, ( pointIndex, isEnd, _ ) ) ->
             if pointIndex == 0 then
                 returnStartNode edgeIndex
 

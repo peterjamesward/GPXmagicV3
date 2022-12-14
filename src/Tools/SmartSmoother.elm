@@ -1,40 +1,28 @@
-module Tools.SmartSmoother exposing (..)
+module Tools.SmartSmoother exposing (Msg(..), applyUsingOptions, defaultOptions, toolId, toolStateChange, update, view)
 
 import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
-import Arc3d
-import Axis3d
-import BezierSplines
-import CubicSpline3d exposing (CubicSpline3d)
-import Dict exposing (Dict)
 import Direction2d exposing (Direction2d)
 import Direction3d exposing (Direction3d)
-import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, endPoint, skipCount, startPoint)
-import Duration exposing (Seconds)
+import DomainModel exposing (EarthPoint, GPXSource, PeteTree, skipCount)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
-import Length exposing (Meters, inMeters, meters)
+import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
-import Loop
-import Point2d exposing (Point2d)
-import Point3d exposing (Point3d)
-import Polyline3d exposing (Polyline3d)
-import PreviewData exposing (PreviewData, PreviewPoint, PreviewShape(..))
-import Quantity exposing (Quantity, Rate)
+import Point3d
+import PreviewData exposing (PreviewPoint, PreviewShape(..))
+import Quantity exposing (Quantity)
 import SketchPlane3d
 import String.Interpolate
-import Time
-import Tools.BendSmoother
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.SmartSmootherOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
-import Triangle3d
 import Utils
 import UtilsForViews exposing (showDecimal2, showShortMeasure)
-import Vector3d exposing (Vector3d)
+import Vector3d
 import ViewPureStyles exposing (..)
 
 
@@ -87,21 +75,6 @@ type alias Window =
     }
 
 
-speedForLeaf : RoadSection -> Maybe Float
-speedForLeaf leaf =
-    -- If there are timings, use them.
-    case ( leaf.startPoint.time, leaf.endPoint.time ) of
-        ( Just startTime, Just endTime ) ->
-            let
-                timeInterval =
-                    Time.posixToMillis endTime - Time.posixToMillis startTime
-            in
-            Just <| Length.inMeters leaf.trueLength / toFloat timeInterval
-
-        _ ->
-            Nothing
-
-
 computeNewPoints : Options -> TrackLoaded msg -> List PreviewPoint
 computeNewPoints options track =
     --TODO: Nice easy way of applying times, perhaps based on proportional distance.
@@ -118,9 +91,6 @@ computeNewPoints options track =
             ( DomainModel.distanceFromIndex fromStart track.trackTree
             , DomainModel.distanceFromIndex (skipCount track.trackTree - fromEnd) track.trackTree
             )
-
-        hasTimings =
-            (track.trackTree |> DomainModel.asRecord |> .transitTime) /= Nothing
 
         settings : WindowSettings
         settings =
@@ -577,14 +547,6 @@ previewActions options colour track =
         ( previewTree, _ ) =
             applyUsingOptions options track
 
-        normalPreview =
-            ShowPreview
-                { tag = "smart"
-                , shape = PreviewCircle
-                , colour = colour
-                , points = computeNewPoints options track
-                }
-
         profilePreview tree =
             ShowPreview
                 { tag = "smartprofile"
@@ -595,6 +557,15 @@ previewActions options colour track =
     in
     case previewTree of
         Just pTree ->
+            let
+                normalPreview =
+                    ShowPreview
+                        { tag = "smart"
+                        , shape = PreviewCircle
+                        , colour = colour
+                        , points = computeNewPoints options track
+                        }
+            in
             [ normalPreview, profilePreview pTree ]
 
         _ ->

@@ -1,4 +1,4 @@
-port module MapPortController exposing (..)
+port module MapPortController exposing (MapInfo, MapMsg(..), MapState, addFullTrackToMap, addMarkersToMap, addTrackToMap, centreMapOnCurrent, createMap, defaultMapState, fetchElevationsForPoints, hidePreview, mapResponses, refreshMap, requestElevations, setMapStyle, showPreview, toggleDragging, update, zoomMapToFitTrack)
 
 import Actions exposing (ToolAction(..))
 import Angle
@@ -68,39 +68,10 @@ refreshMap =
             ]
 
 
-centreMap :
-    { m
-        | trackTree : Maybe PeteTree
-        , renderDepth : Int
-        , currentPosition : Int
-        , referenceLonLat : GPXSource
-    }
-    -> Cmd msg
-centreMap model =
-    -- Centre map
-    case model.trackTree of
-        Just tree ->
-            let
-                { longitude, latitude, altitude } =
-                    earthPointFromIndex model.currentPosition tree
-                        |> gpxFromPointWithReference model.referenceLonLat
-            in
-            mapCommands <|
-                E.object
-                    [ ( "Cmd", E.string "Centre" )
-                    , ( "token", E.string mapboxKey )
-                    , ( "lon", E.float <| Angle.inDegrees <| Direction2d.toAngle longitude )
-                    , ( "lat", E.float <| Angle.inDegrees latitude )
-                    ]
-
-        Nothing ->
-            Cmd.none
-
-
 centreMapOnCurrent : TrackLoaded msg -> Cmd msg
 centreMapOnCurrent track =
     let
-        { longitude, latitude, altitude } =
+        { longitude, latitude } =
             gpxPointFromIndex track.currentPosition track.trackTree
     in
     mapCommands <|
@@ -115,10 +86,7 @@ centreMapOnCurrent track =
 zoomMapToFitTrack : TrackLoaded msg -> Cmd msg
 zoomMapToFitTrack track =
     let
-        { longitude, latitude, altitude } =
-            gpxPointFromIndex track.currentPosition track.trackTree
-
-        { minX, maxX, minY, maxY, minZ, maxZ } =
+        { minX, maxX, minY, maxY, minZ } =
             BoundingBox3d.extrema <| boundingBox track.trackTree
 
         ( swCorner, neCorner ) =
@@ -226,7 +194,7 @@ addFullTrackToMap : TrackLoaded msg -> Cmd msg
 addFullTrackToMap track =
     -- This is to add the route as a polyline, without selective rendering
     let
-        { longitude, latitude, altitude } =
+        { longitude, latitude } =
             gpxPointFromIndex track.currentPosition track.trackTree
     in
     mapCommands <|

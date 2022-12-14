@@ -1,6 +1,5 @@
-module Tools.MoveAndStretchOptions exposing (..)
+module Tools.MoveAndStretchOptions exposing (Mode(..), Options, Point)
 
-import DomainModel exposing (EarthPoint, GPXSource)
 import Length
 import LocalCoords exposing (LocalCoords)
 import Point2d

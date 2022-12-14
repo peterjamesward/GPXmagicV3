@@ -26,7 +26,6 @@ import Tools.BezierSplines
 import Tools.CentroidAverage
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
-import Tools.Interpolate
 import Tools.Simplify
 import TrackLoaded exposing (TrackLoaded)
 import ViewPureStyles exposing (prettyButtonStyles)
@@ -65,10 +64,6 @@ apply originalTrack =
 
             else
                 { anyTrack | trackTree = treeWithOneRoundOfPointsRemoved }
-
-        interpolateTrack : TrackLoaded msg -> TrackLoaded msg
-        interpolateTrack track =
-            { track | trackTree = Tools.Interpolate.interpolateFor1CQF track }
 
         smoothTrack : TrackLoaded msg -> TrackLoaded msg
         smoothTrack track =
@@ -109,7 +104,7 @@ update :
     -> List (ToolAction msg)
 update msg hasTrack =
     case ( hasTrack, msg ) of
-        ( Just track, Apply ) ->
+        ( Just _, Apply ) ->
             [ Actions.OneClickQuickFix, Actions.TrackHasChanged ]
 
         _ ->

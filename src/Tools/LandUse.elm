@@ -1,16 +1,13 @@
-module Tools.LandUse exposing (..)
+module Tools.LandUse exposing (Mode(..), Msg(..), Options, defaultOptions, toolId, update, view)
 
-import Actions exposing (ToolAction(..))
+import Actions exposing (ToolAction)
 import Color
-import Dict exposing (Dict)
-import DomainModel exposing (EarthPoint)
+import Dict
 import Element exposing (..)
 import Element.Background as Background
 import Element.Font as Font
-import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
 import LandUseDataTypes
-import SceneBuilder3D
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOPtions
 import Tools.LandUseColours exposing (landUseColours)
@@ -29,7 +26,6 @@ type alias Options =
 
 type Mode
     = Legend
-    | Names
 
 
 defaultOptions : Options
@@ -40,8 +36,6 @@ defaultOptions =
 
 type Msg
     = SetMode Mode
-    | CentreOnPlace String
-    | DisplayInfo String String
 
 
 update :
@@ -53,12 +47,6 @@ update msg wrapper options =
     case msg of
         SetMode mode ->
             ( { options | mode = mode }, [] )
-
-        CentreOnPlace name ->
-            ( options, [] )
-
-        DisplayInfo tool tag ->
-            ( options, [ Actions.DisplayInfo tool tag ] )
 
 
 view : I18NOPtions.Location -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
@@ -92,7 +80,7 @@ view location wrap options maybeTrack =
     el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
         column [ padding 4, spacing 6, width fill ]
             [ none
-            , paragraph [] [  status ]
+            , paragraph [] [ status ]
             , legend
             ]
 
@@ -119,23 +107,3 @@ legend =
     <|
         List.map showLegendEntry <|
             Dict.toList landUseColours
-
-
-names : LandUseDataTypes.LandUseData -> Element msg
-names landUse =
-    let
-        showNameEntry : ( String, EarthPoint ) -> Element msg
-        showNameEntry ( name, position ) =
-            el
-                [ padding 5
-                , Font.bold
-                ]
-            <|
-                text name
-    in
-    wrappedRow
-        [ spacingXY 6 6
-        , alignTop
-        , padding 6
-        ]
-        (landUse.places |> Dict.toList |> List.map showNameEntry)

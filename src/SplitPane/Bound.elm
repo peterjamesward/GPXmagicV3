@@ -1,20 +1,8 @@
-module SplitPane.Bound
-    exposing
-        ( Bound
-        , Bounded
-        , putValue
-        , getValue
-        , updateValue
-        , putBound
-        , createBound
-        , createBounded
-        )
+module SplitPane.Bound exposing (Bound, Bounded, getValue, updateValue, createBound, createBounded)
 
-{-|
+{-| This module defines a value that is between two other values.
 
-This module defines a value that is between two other values.
-
-@docs Bound, Bounded, getValue, putValue, updateValue, putBound, createBound, createBounded
+@docs Bound, Bounded, getValue, updateValue, createBound, createBounded
 
 -}
 
@@ -57,13 +45,6 @@ putValue ( _, bound ) value =
 updateValue : (comparable -> comparable) -> Bounded comparable -> Bounded comparable
 updateValue f ( value, bound ) =
     ( boundTo bound (f value), bound )
-
-
-{-| Change the bound of the bounded value.
--}
-putBound : Bounded comparable -> Bound comparable -> Bounded comparable
-putBound ( value, _ ) bound =
-    ( value, bound )
 
 
 {-| Create a new bound that can be used to restrict a value.

@@ -1,4 +1,4 @@
-module OAuthTypes exposing (..)
+module OAuthTypes exposing (Configuration, Error(..), Flow(..), Model, OAuthMsg(..), UserInfo)
 
 import Http
 import Json.Decode as Json

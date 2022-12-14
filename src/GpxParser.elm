@@ -1,4 +1,4 @@
-module GpxParser exposing (..)
+module GpxParser exposing (asRegex, parseSegments, parseTrackName)
 
 import Angle
 import Direction2d
@@ -36,26 +36,6 @@ parseSegments : String -> ( List GPXSource, List ( String, Int, Int ) )
 parseSegments xml =
     -- Return available segment names with the range of included track point indices.
     let
-        rgtNamespace =
-            Maybe.withDefault "rgt" <|
-                case
-                    Regex.find
-                        (asRegex
-                            "xmlns:(.*)=\\\"http:\\/\\/www\\.rgtcycling\\.com\\/XML\\/GpxExtensions"
-                        )
-                        xml
-                of
-                    match :: _ ->
-                        case match.submatches of
-                            n :: _ ->
-                                n
-
-                            [] ->
-                                Nothing
-
-                    [] ->
-                        Nothing
-
         trackPoints =
             parseGPXPoints xml
 
@@ -189,6 +169,5 @@ parseGPXPoints xml =
             a.latitude == b.latitude && a.longitude == b.longitude
     in
     trkpts
-        |> List.map earthVector
-        |> List.filterMap identity
+        |> List.filterMap earthVector
         |> Utils.deDupe sameLocation

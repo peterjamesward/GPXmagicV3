@@ -1,11 +1,10 @@
-module Tools.Intersections exposing (..)
+module Tools.Intersections exposing (Msg(..), Options, ResultMode(..), defaultOptions, toolId, toolStateChange, update, view)
 
 import Actions exposing (ToolAction(..))
-import Dict exposing (Dict)
-import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), RoadSection, asRecord, skipCount)
+import DomainModel
 import Element exposing (..)
 import Element.Background as Background
-import Element.Input as Input exposing (labelHidden)
+import Element.Input as Input
 import FeatherIcons
 import FlatColors.ChinesePalette
 import List.Extra
@@ -16,8 +15,8 @@ import ToolTip exposing (buttonStylesWithTooltip)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
-import UtilsForViews exposing (showDecimal0, showLongMeasure, showShortMeasure)
-import ViewPureStyles exposing (infoButton, neatToolsBorder, noTrackMessage, useIcon)
+import UtilsForViews exposing (showLongMeasure)
+import ViewPureStyles exposing (infoButton, neatToolsBorder, useIcon)
 
 
 toolId =
@@ -161,7 +160,7 @@ view location imperial msgWrapper options track =
                 [] ->
                     el [ centerX, centerY ] <| i18n "none"
 
-                a :: b ->
+                a :: _ ->
                     column [ spacing 4, centerX ]
                         [ el [ centerX ] <|
                             text <|
@@ -196,7 +195,7 @@ view location imperial msgWrapper options track =
 
                 categoryText =
                     case category of
-                        RoadIndex.Crossing pointXY ->
+                        RoadIndex.Crossing _ ->
                             "crosses"
 
                         RoadIndex.SameDirection ->

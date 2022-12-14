@@ -68,10 +68,10 @@ of this flow.
 import Base64.Encode as Base64
 import Bytes exposing (Bytes)
 import Http
-import Internal as Internal exposing (..)
+import Internal exposing (..)
 import Json.Decode as Json
 import OAuth exposing (ErrorCode, Token, errorCodeFromString)
-import SHA256 as SHA256
+import SHA256
 import Url exposing (Url)
 import Url.Builder as Builder
 import Url.Parser as Url exposing ((<?>))

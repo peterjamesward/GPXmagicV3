@@ -2,7 +2,7 @@ module TipJar exposing (info, tipJar)
 
 import Element exposing (..)
 import FeatherIcons
-import ViewPureStyles exposing (useIcon, useIconWithSize)
+import ViewPureStyles exposing (useIconWithSize)
 
 
 info =

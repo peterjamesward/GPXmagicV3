@@ -1,4 +1,4 @@
-module Tools.DisplaySettingsOptions exposing (..)
+module Tools.DisplaySettingsOptions exposing (CurtainStyle(..), Options, decode, encode)
 
 -- Putting these in a separate module means we can use with Action, without an import loop.
 
@@ -65,7 +65,7 @@ decode json current =
             , showConstraintsAtLevel = Nothing
             }
 
-        Err error ->
+        Err _ ->
             current
 
 

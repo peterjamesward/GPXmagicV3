@@ -1,27 +1,25 @@
-module Tools.DirectionChanges exposing (..)
+module Tools.DirectionChanges exposing (DirectionChangeMode(..), Msg(..), Options, ResultMode(..), defaultOptions, toolId, toolStateChange, update, view, widenBend)
 
 import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
-import Dict exposing (Dict)
-import Direction2d exposing (Direction2d)
-import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), RoadSection, asRecord, skipCount)
+import Direction2d
+import DomainModel exposing (GPXSource, PeteTree(..), RoadSection, asRecord, skipCount)
 import Element exposing (..)
 import Element.Background as Background
-import Element.Input as Input exposing (labelHidden)
+import Element.Input as Input
 import FeatherIcons
 import FlatColors.ChinesePalette
 import Length exposing (Meters)
 import List.Extra
-import LocalCoords exposing (LocalCoords)
 import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (Quantity)
 import String.Interpolate
-import ToolTip exposing (buttonStylesWithTooltip, myTooltip, tooltip)
+import ToolTip exposing (buttonStylesWithTooltip)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.Nudge
 import TrackLoaded exposing (TrackLoaded)
-import UtilsForViews exposing (showAngle, showDecimal0, showLongMeasure, showShortMeasure)
+import UtilsForViews exposing (showAngle, showLongMeasure, showShortMeasure)
 import ViewPureStyles exposing (infoButton, neatToolsBorder, noTrackMessage, sliderThumb, useIcon)
 
 
@@ -74,7 +72,6 @@ type Msg
     | SetResultMode ResultMode
     | Autofix
     | NudgeOne
-    | NudgeAll
     | DisplayInfo String String
 
 
@@ -192,7 +189,7 @@ findBendsWithRadius tree options =
                         [] ->
                             0
 
-                        [ onlyOne ] ->
+                        [ _ ] ->
                             0
 
                         ( _, first ) :: ( n, second ) :: more ->
@@ -403,17 +400,8 @@ update msg options previewColour track =
               ]
             )
 
-        NudgeAll ->
-            ( options
-            , []
-            )
-
         DisplayInfo id tag ->
             ( options, [ Actions.DisplayInfo id tag ] )
-
-
-add1 x =
-    x + 1
 
 
 actions options previewColour track =
@@ -442,62 +430,6 @@ view location imperial msgWrapper options isTrack =
         i18n =
             I18N.text location toolId
 
-        modeSelection =
-            Input.radioRow [ centerX, spacing 5 ]
-                { onChange = msgWrapper << SetMode
-                , options =
-                    [ Input.option DirectionChangeAbrupt (i18n "usepoint")
-                    , Input.option DirectionChangeWithRadius (i18n "useradius")
-                    ]
-                , selected = Just options.mode
-                , label = Input.labelHidden "Mode"
-                }
-
-        resultModeSelection =
-            Input.radioRow [ centerX, spacing 5 ]
-                { onChange = msgWrapper << SetResultMode
-                , options =
-                    [ Input.option ResultNavigation (i18n "summary")
-                    , Input.option ResultList (i18n "list")
-                    ]
-                , selected = Just options.resultMode
-                , label = Input.labelHidden "Results mode"
-                }
-
-        angleSelection =
-            Input.slider
-                ViewPureStyles.shortSliderStyles
-                { onChange = Angle.degrees >> SetThreshold >> msgWrapper
-                , value = Angle.inDegrees options.threshold
-                , label =
-                    Input.labelBelow [] <|
-                        text <|
-                            String.Interpolate.interpolate
-                                (I18N.localisedString location toolId "change")
-                                [ String.fromInt <| round <| Angle.inDegrees options.threshold ]
-                , min = 15
-                , max = 170
-                , step = Just 1
-                , thumb = sliderThumb
-                }
-
-        radiusSelection =
-            Input.slider
-                ViewPureStyles.shortSliderStyles
-                { onChange = Length.meters >> SetRadius >> msgWrapper
-                , value = Length.inMeters options.radius
-                , label =
-                    Input.labelBelow [] <|
-                        text <|
-                            String.Interpolate.interpolate
-                                (I18N.localisedString location toolId "radius")
-                                [ showShortMeasure imperial options.radius ]
-                , min = 4.0
-                , max = 100.0
-                , step = Just 1
-                , thumb = sliderThumb
-                }
-
         commonButtons current =
             row [ centerX, spacing 10 ]
                 [ infoButton <| msgWrapper <| DisplayInfo "bends" "locate"
@@ -523,7 +455,7 @@ view location imperial msgWrapper options isTrack =
                 [] ->
                     el [ centerX, centerY ] <| i18n "none"
 
-                a :: b ->
+                _ :: _ ->
                     let
                         ( position, turn ) =
                             Maybe.withDefault ( 0, Angle.degrees 0 ) <|
@@ -546,7 +478,7 @@ view location imperial msgWrapper options isTrack =
                 [] ->
                     el [ centerX, centerY ] <| i18n "none"
 
-                a :: b ->
+                _ :: _ ->
                     let
                         ( window, radius ) =
                             Maybe.withDefault ( [ 0 ], Quantity.zero ) <|
@@ -584,38 +516,6 @@ view location imperial msgWrapper options isTrack =
                 Nothing ->
                     none
 
-        autofixButton =
-            if options.singlePointBreaches == [] || options.mode == DirectionChangeWithRadius then
-                none
-
-            else
-                row [ spacing 4 ]
-                    [ none
-                    , infoButton (msgWrapper <| DisplayInfo "bends" "autofix")
-                    , Input.button
-                        (alignTop :: neatToolsBorder)
-                        { onPress = Just (msgWrapper Autofix)
-                        , label = i18n "smooth"
-                        }
-                    ]
-
-        bendButtonFix =
-            if options.bendBreaches == [] || options.mode == DirectionChangeAbrupt then
-                none
-
-            else
-                wrappedRow [ spacing 4 ]
-                    [ none
-                    , infoButton (msgWrapper <| DisplayInfo "bends" "widen")
-                    , Input.button
-                        (alignTop :: neatToolsBorder)
-                        { onPress = Just (msgWrapper NudgeOne)
-                        , label = i18n "adjust"
-                        }
-
-                    --    }
-                    ]
-
         wrappedRowStyle breaches =
             -- Pain getting this wrapped row to look OK.
             [ scrollbarY
@@ -630,12 +530,98 @@ view location imperial msgWrapper options isTrack =
     in
     case isTrack of
         Just track ->
+            let
+                modeSelection =
+                    Input.radioRow [ centerX, spacing 5 ]
+                        { onChange = msgWrapper << SetMode
+                        , options =
+                            [ Input.option DirectionChangeAbrupt (i18n "usepoint")
+                            , Input.option DirectionChangeWithRadius (i18n "useradius")
+                            ]
+                        , selected = Just options.mode
+                        , label = Input.labelHidden "Mode"
+                        }
+
+                resultModeSelection =
+                    Input.radioRow [ centerX, spacing 5 ]
+                        { onChange = msgWrapper << SetResultMode
+                        , options =
+                            [ Input.option ResultNavigation (i18n "summary")
+                            , Input.option ResultList (i18n "list")
+                            ]
+                        , selected = Just options.resultMode
+                        , label = Input.labelHidden "Results mode"
+                        }
+
+                angleSelection =
+                    Input.slider
+                        ViewPureStyles.shortSliderStyles
+                        { onChange = Angle.degrees >> SetThreshold >> msgWrapper
+                        , value = Angle.inDegrees options.threshold
+                        , label =
+                            Input.labelBelow [] <|
+                                text <|
+                                    String.Interpolate.interpolate
+                                        (I18N.localisedString location toolId "change")
+                                        [ String.fromInt <| round <| Angle.inDegrees options.threshold ]
+                        , min = 15
+                        , max = 170
+                        , step = Just 1
+                        , thumb = sliderThumb
+                        }
+
+                autofixButton =
+                    if options.singlePointBreaches == [] || options.mode == DirectionChangeWithRadius then
+                        none
+
+                    else
+                        row [ spacing 4 ]
+                            [ none
+                            , infoButton (msgWrapper <| DisplayInfo "bends" "autofix")
+                            , Input.button
+                                (alignTop :: neatToolsBorder)
+                                { onPress = Just (msgWrapper Autofix)
+                                , label = i18n "smooth"
+                                }
+                            ]
+
+                bendButtonFix =
+                    if options.bendBreaches == [] || options.mode == DirectionChangeAbrupt then
+                        none
+
+                    else
+                        wrappedRow [ spacing 4 ]
+                            [ none
+                            , infoButton (msgWrapper <| DisplayInfo "bends" "widen")
+                            , Input.button
+                                (alignTop :: neatToolsBorder)
+                                { onPress = Just (msgWrapper NudgeOne)
+                                , label = i18n "adjust"
+                                }
+
+                            --    }
+                            ]
+            in
             el [ width fill, Background.color FlatColors.ChinesePalette.antiFlashWhite ] <|
                 column [ padding 4, spacing 6, width fill ]
                     [ modeSelection
                     , angleSelection
                     , if options.mode == DirectionChangeWithRadius then
-                        radiusSelection
+                        Input.slider
+                            ViewPureStyles.shortSliderStyles
+                            { onChange = Length.meters >> SetRadius >> msgWrapper
+                            , value = Length.inMeters options.radius
+                            , label =
+                                Input.labelBelow [] <|
+                                    text <|
+                                        String.Interpolate.interpolate
+                                            (I18N.localisedString location toolId "radius")
+                                            [ showShortMeasure imperial options.radius ]
+                            , min = 4.0
+                            , max = 100.0
+                            , step = Just 1
+                            , thumb = sliderThumb
+                            }
 
                       else
                         none

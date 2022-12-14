@@ -1,10 +1,9 @@
-module UtilsForViews exposing (..)
+module UtilsForViews exposing (colorFromElmUiColour, colourHexString, elmuiColour, flatBox, formattedTime, fullDepthRenderingBoxSize, httpErrorString, latitudeString, longitudeString, showAngle, showDecimal0, showDecimal1, showDecimal2, showLongMeasure, showShortMeasure, showSpeed, uiColourHexString, withLeadingZeros)
 
 import Angle
 import BoundingBox2d exposing (BoundingBox2d)
 import BoundingBox3d exposing (BoundingBox3d)
-import Color exposing (rgb)
-import Color.Convert exposing (colorToHex)
+import Color
 import Element exposing (Element)
 import FormatNumber exposing (format)
 import FormatNumber.Locales exposing (Decimals(..), usLocale)
@@ -49,7 +48,7 @@ formattedTime isTime =
 elmuiColour : Color.Color -> Element.Color
 elmuiColour c =
     let
-        { red, green, blue, alpha } =
+        { red, green, blue } =
             Color.toRgba c
     in
     Element.rgb red green blue
@@ -168,22 +167,10 @@ showDecimal1 x =
     format locale x
 
 
-showDecimal6 x =
-    let
-        locale =
-            { usLocale
-                | decimals = Exact 6
-                , thousandSeparator = ""
-                , negativePrefix = "-"
-            }
-    in
-    format locale x
-
-
 uiColourHexString : Element.Color -> String
 uiColourHexString colour =
     let
-        { red, green, blue, alpha } =
+        { red, green, blue } =
             Element.toRgb colour
 
         ( redInt, greenInt, blueInt ) =
@@ -204,7 +191,7 @@ uiColourHexString colour =
 colourHexString : Color.Color -> String
 colourHexString colour =
     let
-        { red, green, blue, alpha } =
+        { red, green, blue } =
             Color.toRgba colour
 
         ( redInt, greenInt, blueInt ) =
@@ -230,7 +217,7 @@ fullDepthRenderingBoxSize =
 flatBox : BoundingBox3d m c -> BoundingBox2d m c
 flatBox box =
     let
-        { minX, maxX, minY, maxY, minZ, maxZ } =
+        { minX, maxX, minY, maxY } =
             BoundingBox3d.extrema box
     in
     BoundingBox2d.fromExtrema { minX = minX, maxX = maxX, minY = minY, maxY = maxY }

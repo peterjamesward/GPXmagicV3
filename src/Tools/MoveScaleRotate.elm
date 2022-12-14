@@ -1,10 +1,9 @@
-module Tools.MoveScaleRotate exposing (..)
+module Tools.MoveScaleRotate exposing (Msg(..), applyMapElevations, applyRecentre, applyRotateAndScale, defaultOptions, toolId, toolStateChange, update, view)
 
 import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
 import Axis3d
 import BoundingBox3d
-import Dict exposing (Dict)
 import Direction2d
 import Direction3d
 import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection)
@@ -12,7 +11,7 @@ import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
-import Length exposing (Meters)
+import Length
 import Plane3d
 import Point3d
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
@@ -23,7 +22,7 @@ import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.MoveScaleRotateOptions exposing (Options)
 import TrackLoaded exposing (TrackLoaded)
-import UtilsForViews exposing (showDecimal0, showDecimal2, showLongMeasure)
+import UtilsForViews exposing (showDecimal0, showDecimal2)
 import Vector3d
 import ViewPureStyles exposing (..)
 
@@ -39,7 +38,6 @@ type Msg
     | SetTrackLength Float
     | Zero
     | UseMapElevations
-    | DisplayInfo String String
 
 
 defaultOptions : Options
@@ -107,7 +105,7 @@ update msg settings previewColour hasTrack =
             , actions newSettings previewColour track
             )
 
-        ( RotateAndScale, Just track ) ->
+        ( RotateAndScale, Just _ ) ->
             ( settings
             , [ ApplyRotateAndScale settings, TrackHasChanged ]
             )
@@ -126,7 +124,7 @@ update msg settings previewColour hasTrack =
             , actions newSettings previewColour track
             )
 
-        ( UseMapElevations, Just track ) ->
+        ( UseMapElevations, Just _ ) ->
             -- This is problematic if the map points are elided due to quantity.
             -- "Best" option is here to force a new set of points, then
             -- do the fetch.
@@ -295,62 +293,6 @@ view :
     -> Element msg
 view location imperial options wrapper maybeTrack =
     let
-        i18n =
-            I18N.text location toolId
-
-        rotationSlider =
-            Input.slider
-                commonShortHorizontalSliderStyles
-                { onChange = wrapper << SetRotateAngle << Angle.degrees
-                , label =
-                    Input.labelBelow [] <|
-                        text <|
-                            String.Interpolate.interpolate
-                                (I18N.localisedString location toolId "rotation")
-                                [ showDecimal0 <| Angle.inDegrees options.rotateAngle ]
-                , min = -30.0
-                , max = 30.0
-                , step = Just 1.0
-                , value = Angle.inDegrees <| options.rotateAngle
-                , thumb = Input.defaultThumb
-                }
-
-        scaleSlider =
-            Input.slider
-                commonShortHorizontalSliderStyles
-                { onChange = wrapper << SetTrackLength
-                , label =
-                    Input.labelBelow [] <|
-                        text <|
-                            if imperial then
-                                String.Interpolate.interpolate
-                                    (I18N.localisedString location toolId "imperial")
-                                    [ showDecimal2 <| Length.inMiles options.desiredTrackLength ]
-
-                            else
-                                String.Interpolate.interpolate
-                                    (I18N.localisedString location toolId "metric")
-                                    [ showDecimal2 <| Length.inKilometers options.desiredTrackLength ]
-                , min = 1.0
-                , max = 100.0
-                , step =
-                    Just <|
-                        if imperial then
-                            Length.inKilometers <| Length.yards 17.6
-
-                        else
-                            Length.inKilometers <| Length.meters 10
-                , value = Length.inKilometers options.desiredTrackLength
-                , thumb = Input.defaultThumb
-                }
-
-        rotateButton =
-            button
-                neatToolsBorder
-                { onPress = Just <| wrapper RotateAndScale
-                , label = i18n "apply"
-                }
-
         recentreButton =
             case maybeTrack of
                 Just track ->
@@ -372,23 +314,80 @@ view location imperial options wrapper maybeTrack =
 
                 Nothing ->
                     none
-
-        zeroButton =
-            button
-                neatToolsBorder
-                { onPress = Just <| wrapper Zero
-                , label = i18n "Zero"
-                }
-
-        elevationFetchButton =
-            button
-                (buttonStylesWithTooltip below "First, tilt the Map view to get elevation data")
-                { onPress = Just <| wrapper UseMapElevations
-                , label = i18n "elevations"
-                }
     in
     case maybeTrack of
-        Just track ->
+        Just _ ->
+            let
+                i18n =
+                    I18N.text location toolId
+
+                rotationSlider =
+                    Input.slider
+                        commonShortHorizontalSliderStyles
+                        { onChange = wrapper << SetRotateAngle << Angle.degrees
+                        , label =
+                            Input.labelBelow [] <|
+                                text <|
+                                    String.Interpolate.interpolate
+                                        (I18N.localisedString location toolId "rotation")
+                                        [ showDecimal0 <| Angle.inDegrees options.rotateAngle ]
+                        , min = -30.0
+                        , max = 30.0
+                        , step = Just 1.0
+                        , value = Angle.inDegrees <| options.rotateAngle
+                        , thumb = Input.defaultThumb
+                        }
+
+                scaleSlider =
+                    Input.slider
+                        commonShortHorizontalSliderStyles
+                        { onChange = wrapper << SetTrackLength
+                        , label =
+                            Input.labelBelow [] <|
+                                text <|
+                                    if imperial then
+                                        String.Interpolate.interpolate
+                                            (I18N.localisedString location toolId "imperial")
+                                            [ showDecimal2 <| Length.inMiles options.desiredTrackLength ]
+
+                                    else
+                                        String.Interpolate.interpolate
+                                            (I18N.localisedString location toolId "metric")
+                                            [ showDecimal2 <| Length.inKilometers options.desiredTrackLength ]
+                        , min = 1.0
+                        , max = 100.0
+                        , step =
+                            Just <|
+                                if imperial then
+                                    Length.inKilometers <| Length.yards 17.6
+
+                                else
+                                    Length.inKilometers <| Length.meters 10
+                        , value = Length.inKilometers options.desiredTrackLength
+                        , thumb = Input.defaultThumb
+                        }
+
+                rotateButton =
+                    button
+                        neatToolsBorder
+                        { onPress = Just <| wrapper RotateAndScale
+                        , label = i18n "apply"
+                        }
+
+                zeroButton =
+                    button
+                        neatToolsBorder
+                        { onPress = Just <| wrapper Zero
+                        , label = i18n "Zero"
+                        }
+
+                elevationFetchButton =
+                    button
+                        (buttonStylesWithTooltip below "First, tilt the Map view to get elevation data")
+                        { onPress = Just <| wrapper UseMapElevations
+                        , label = i18n "elevations"
+                        }
+            in
             column
                 [ spacing 6
                 , padding 6

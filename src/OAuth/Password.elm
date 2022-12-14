@@ -36,9 +36,9 @@ request.
 -}
 
 import Http
-import Internal as Internal exposing (..)
+import Internal exposing (..)
 import Json.Decode as Json
-import OAuth exposing (ErrorCode(..), Token, errorCodeFromString)
+import OAuth exposing (ErrorCode, Token, errorCodeFromString)
 import Url exposing (Url)
 import Url.Builder as Builder
 

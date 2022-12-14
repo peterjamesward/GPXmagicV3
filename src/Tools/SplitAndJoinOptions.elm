@@ -1,4 +1,4 @@
-module Tools.SplitAndJoinOptions exposing (..)
+module Tools.SplitAndJoinOptions exposing (Options)
 
 import Length
 

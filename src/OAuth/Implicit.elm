@@ -43,8 +43,8 @@ request.
 -}
 
 import Internal exposing (..)
-import OAuth exposing (ErrorCode(..), Token, errorCodeFromString)
-import Url exposing (Protocol(..), Url)
+import OAuth exposing (ErrorCode, Token, errorCodeFromString)
+import Url exposing (Url)
 import Url.Parser as Url exposing ((<?>))
 import Url.Parser.Query as Query
 

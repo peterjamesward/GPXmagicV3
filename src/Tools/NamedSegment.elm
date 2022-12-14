@@ -1,11 +1,10 @@
-module Tools.NamedSegment exposing (..)
+module Tools.NamedSegment exposing (Msg(..), addSegment, defaultOptions, initialise, toolId, toolStateChange, update, view)
 
 -- Attempt to co-locate the logic to do with having a level of indirection
 -- between the road (nodes) and the track points, so we can traverse sections
 -- of track points multiple times and in each direction.
 
 import Actions exposing (ToolAction)
-import Color
 import Dict
 import DomainModel exposing (EarthPoint, RoadSection)
 import Element exposing (..)
@@ -15,7 +14,6 @@ import Element.Font as Font
 import Element.Input as Input
 import FeatherIcons
 import FlatColors.AmericanPalette
-import FlatColors.BritishPalette
 import FlatColors.ChinesePalette
 import FlatColors.FlatUIPalette
 import Length exposing (Meters)
@@ -48,8 +46,7 @@ defaultOptions =
 
 
 type Msg
-    = NoOp
-    | SelectSegment Int
+    = SelectSegment Int
     | UpdateSegment
     | ChangeName Int String
     | DeleteSegment
@@ -231,7 +228,7 @@ view location imperial wrapper options track =
                             , { header = none
                               , width = fillPortion 1
                               , view =
-                                    \i t ->
+                                    \_ t ->
                                         el (highlightErrors t.startOk) <|
                                             text <|
                                                 showLongMeasure imperial t.startDistance
@@ -239,7 +236,7 @@ view location imperial wrapper options track =
                             , { header = none
                               , width = fillPortion 1
                               , view =
-                                    \i t ->
+                                    \_ t ->
                                         el (highlightErrors t.endOk) <|
                                             text <|
                                                 showLongMeasure imperial t.endDistance
@@ -247,7 +244,7 @@ view location imperial wrapper options track =
                             , { header = none
                               , width = fillPortion 1
                               , view =
-                                    \i t ->
+                                    \i _ ->
                                         row [ spaceEvenly ] <|
                                             Input.button
                                                 [ tooltip onLeft (localisedTooltip location toolId "show") ]
@@ -277,13 +274,6 @@ view location imperial wrapper options track =
                         }
                 ]
 
-        labels =
-            [ "distance"
-            , "ascent"
-            , "descent"
-            , "steepest"
-            ]
-
         selectedSegmentDetail =
             case options.selectedSegment of
                 Just selected ->
@@ -294,6 +284,13 @@ view location imperial wrapper options track =
 
                         Just segment ->
                             let
+                                labels =
+                                    [ "distance"
+                                    , "ascent"
+                                    , "descent"
+                                    , "steepest"
+                                    ]
+
                                 ( startIndex, endIndex ) =
                                     ( DomainModel.indexFromDistance segment.startDistance track.trackTree
                                     , DomainModel.indexFromDistance segment.endDistance track.trackTree
@@ -525,14 +522,7 @@ update :
     -> (Msg -> msg)
     -> ( Options, List (Actions.ToolAction msg) )
 update msg options track previewColour wrapper =
-    let
-        getStartIndex segment =
-            DomainModel.indexFromDistanceRoundedDown segment.startDistance track.trackTree
-    in
     case msg of
-        NoOp ->
-            ( { options | selectedSegment = Nothing }, [] )
-
         DisplayInfo tool tag ->
             ( options, [ Actions.DisplayInfo tool tag ] )
 
@@ -604,7 +594,7 @@ update msg options track previewColour wrapper =
                         Nothing ->
                             ( { options | selectedSegment = Nothing }, [] )
 
-                        Just segment ->
+                        Just _ ->
                             let
                                 newOptions =
                                     { options
@@ -680,12 +670,7 @@ update msg options track previewColour wrapper =
                     newOptions =
                         { options
                             | landUseProximity =
-                                case enabled of
-                                    True ->
-                                        Just <| Length.meters 50
-
-                                    False ->
-                                        Nothing
+                                Just <| Length.meters 50
                         }
                             |> segmentsFromPlaces track
                 in
@@ -769,16 +754,17 @@ segmentsFromPlaces track options =
             , distanceAway = Point3d.distanceFrom place.space nearestTrackPoint.space
             }
 
-        sortMethod =
-            if options.landUsePreferCloser then
-                .distanceAway >> Length.inMeters
-
-            else
-                .distanceAway >> Quantity.negate >> Length.inMeters
-
         orderedCandidates =
             case options.landUseProximity of
                 Just threshold ->
+                    let
+                        sortMethod =
+                            if options.landUsePreferCloser then
+                                .distanceAway >> Length.inMeters
+
+                            else
+                                .distanceAway >> Quantity.negate >> Length.inMeters
+                    in
                     track.landUseData.places
                         |> Dict.toList
                         |> List.map makeCandidate

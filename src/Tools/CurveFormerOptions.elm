@@ -1,8 +1,7 @@
-module Tools.CurveFormerOptions exposing (..)
+module Tools.CurveFormerOptions exposing (GradientSmoothing(..), Options, Point)
 
 -- Putting these in a separate module means we can use with Action, without an import loop.
 
-import Circle3d exposing (Circle3d)
 import Dict exposing (Dict)
 import DomainModel exposing (EarthPoint, RoadSection)
 import Length exposing (Meters)
@@ -34,6 +33,7 @@ type alias Options =
     , usePullRadius : Bool
     , pointsWithinCircle : Dict Int RoadSection
     , pointsWithinDisc : Dict Int RoadSection
+
     --, circle : Maybe (Circle3d Meters LocalCoords)
     , pointsAreContiguous : Bool
     , newTrackPoints : List PreviewPoint

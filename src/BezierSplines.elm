@@ -1,4 +1,4 @@
-module BezierSplines exposing (..)
+module BezierSplines exposing (ControlPoint, bezierSplineApproximation, bezierSplinesThroughExistingPoints)
 
 {-
    This is the "math" for the splines, the controls are in the Tools section.
@@ -7,7 +7,7 @@ module BezierSplines exposing (..)
 import CubicSpline3d exposing (CubicSpline3d)
 import DomainModel exposing (EarthPoint, PeteTree, RoadSection)
 import Length exposing (Meters)
-import LineSegment3d exposing (LineSegment3d)
+import LineSegment3d
 import LocalCoords exposing (LocalCoords)
 import Point3d exposing (Point3d)
 import Polyline3d exposing (Polyline3d)
@@ -45,13 +45,13 @@ bezierSplinesThroughExistingPoints isLoop tension tolerance startIndx endIndex t
                     -- Defer action until we have three road pieces.
                     { state | roadMinusOne = Just road }
 
-                ( Just previousRoad, Nothing ) ->
+                ( Just _, Nothing ) ->
                     { state
                         | roadMinusTwo = state.roadMinusOne
                         , roadMinusOne = Just road
                     }
 
-                ( Nothing, Just cantHappen ) ->
+                ( Nothing, Just _ ) ->
                     state
 
                 ( Just roadMinusOne, Just roadMinusTwo ) ->
@@ -69,7 +69,7 @@ bezierSplinesThroughExistingPoints isLoop tension tolerance startIndx endIndex t
                                 roadMinusOne.endPoint.space
                                 road.endPoint.space
 
-                        ( ( c1, b1, a1 ), ( c2, b2, a2 ) ) =
+                        ( ( c1, b1, _ ), ( _, b2, a2 ) ) =
                             -- Might not be the order you expected.
                             ( controlPointsFromTriangle tension triangle1
                             , controlPointsFromTriangle tension triangle2
@@ -155,7 +155,7 @@ controlPointsFromTriangle tension triangle =
         ( entryEdge, exitEdge, oppositeEdge ) =
             Triangle3d.edges triangle
 
-        ( ab, ac, bc ) =
+        ( ab, _, bc ) =
             ( Length.inMeters <| LineSegment3d.length entryEdge
             , Length.inMeters <| LineSegment3d.length oppositeEdge
             , Length.inMeters <| LineSegment3d.length exitEdge

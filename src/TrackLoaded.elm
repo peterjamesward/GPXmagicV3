@@ -1,16 +1,13 @@
-module TrackLoaded exposing (..)
+module TrackLoaded exposing (MarkerColour(..), TrackLoaded, UndoEntry, addToUndoStack, adjustAltitude, asPreviewPoints, buildPreview, getRangeFromMarkers, indexLeaves, newTrackFromTree, previewFromTree, removeAdjacentDuplicates, trackFromPoints, trackFromSegments, undoLastAction, useTreeWithRepositionedMarkers)
 
 import Actions exposing (ToolAction)
 import DomainModel exposing (..)
-import Json.Encode as E
 import LandUseDataTypes
 import LeafIndex exposing (LeafIndex)
-import Length exposing (Meters, inMeters)
-import List.Extra
-import LocalCoords exposing (LocalCoords)
+import Length
 import Point3d
 import PreviewData exposing (PreviewPoint)
-import Quantity exposing (Quantity)
+import Quantity
 import SpatialIndex
 import Tools.NamedSegmentOptions exposing (CreateMode(..), NamedSegment)
 import Utils
@@ -39,13 +36,6 @@ type alias UndoEntry msg =
     , fromEnd : Int
     , currentPosition : Int
     , markerPosition : Maybe Int
-    }
-
-
-type alias Options msg =
-    -- Do the stacks live here or in Model? That's a good one.
-    { undos : List (UndoEntry msg)
-    , redos : List (UndoEntry msg)
     }
 
 
@@ -176,13 +166,12 @@ indexLeaves tree =
 
 trackFromPoints : String -> List GPXSource -> Maybe (TrackLoaded msg)
 trackFromPoints trackName gpxTrack =
-    let
-        landuse =
-            LandUseDataTypes.emptyLandUse
-    in
-    --case treeFromSourcePoints <| removeAdjacentDuplicates gpxTrack of
     case treeFromSourcePoints gpxTrack of
         Just aTree ->
+            let
+                landuse =
+                    LandUseDataTypes.emptyLandUse
+            in
             Just
                 { trackTree = aTree
                 , currentPosition = 0
@@ -352,35 +341,6 @@ internalUseTree newTree oldTrack =
 -- We need for GPX: lon, lat, alt; for profile JSON: distance, alt, gradient.
 -- In both cases, it's point-based, not RoadSection.
 -- Welcome back, TrackPoint as a hybrid of EarthPoint and GPXSource.
-
-
-profilePointEncode : TrackPoint -> E.Value
-profilePointEncode tp =
-    E.object
-        [ ( "distance", E.float <| inMeters tp.distanceFromStart )
-        , ( "altitude", E.float <| inMeters tp.altitude )
-        , ( "gradient", E.float tp.gradient )
-        ]
-
-
-jsonProfileData : TrackLoaded msg -> String
-jsonProfileData track =
-    -- Get profile data from domain model
-    -- Make JSON
-    -- Convert to string
-    let
-        points =
-            List.reverse <|
-                DomainModel.trackPointsForOutput track.trackTree
-
-        json =
-            E.list identity <| List.map profilePointEncode points
-
-        output =
-            E.encode 0 json
-    in
-    -- Nicely indented, why not.
-    output
 
 
 getAsPreviewPoint : PeteTree -> Int -> PreviewPoint

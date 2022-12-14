@@ -1,7 +1,6 @@
-module Tools.ProfileSmoothOptions exposing (..)
+module Tools.ProfileSmoothOptions exposing (ExtentOption(..), Options, SmoothMethod(..))
 
 import DomainModel exposing (PeteTree)
-import Length
 
 
 type alias Options =
@@ -25,4 +24,3 @@ type SmoothMethod
 
 type ExtentOption
     = ExtentIsRange
-    | ExtentIsTrack

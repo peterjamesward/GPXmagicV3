@@ -1,7 +1,7 @@
-module ViewPureStyles exposing (..)
+module ViewPureStyles exposing (commonLayoutStyles, commonShortHorizontalSliderStyles, commonShortVerticalSliderStyles, compactRadioButton, conditionallyVisible, contrastingColour, displayName, edges, infoButton, neatToolsBorder, noTrackMessage, onEnter, prettyButtonStyles, radioButton, rgtDark, rgtPurple, shortSliderStyles, showModalMessage, sliderThumb, stopProp, subtleToolStyles, ukraineBlue, ukraineYellow, useIcon, useIconWithSize, wideSliderStylesWithWidth)
 
-import Color exposing (black, blue)
-import ColourPalette exposing (buttonBackground, buttonShadow, buttonText, collapsedTabBorder, radioButtonDefault, radioButtonSelected, radioButtonText, scrollbarBackground)
+import Color exposing (blue)
+import ColourPalette exposing (scrollbarBackground)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -9,7 +9,6 @@ import Element.Font as Font
 import Element.Input as Input exposing (Thumb, thumb)
 import FeatherIcons
 import FlatColors.AussiePalette
-import FlatColors.BritishPalette
 import FlatColors.ChinesePalette exposing (white)
 import Html.Attributes exposing (style)
 import Html.Events
@@ -20,17 +19,6 @@ import Pixels exposing (Pixels)
 import Quantity exposing (Quantity)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
-
-
-defaultRowLayout =
-    []
-
-
-toolRowLayout =
-    [ spacing 10
-    , paddingXY 20 10
-    , width fill
-    ]
 
 
 rgtPurple =
@@ -49,16 +37,8 @@ ukraineYellow =
     rgb255 255 221 0
 
 
-black =
-    rgb255 0 0 0
-
-
 edges =
     { left = 0, right = 0, top = 0, bottom = 0 }
-
-
-defaultColumnLayout =
-    [ spacing 5, padding 5, alignTop, width fill ]
 
 
 commonLayoutStyles =
@@ -87,18 +67,6 @@ prettyButtonStyles =
     --    [ Background.color buttonText, Font.color buttonBackground ]
     --, focused
     --    [ Border.shadow { offset = ( 4, 0 ), size = 3, blur = 5, color = buttonShadow } ]
-    ]
-
-
-disabledButtonStyles =
-    [ padding 10
-    , Border.width 2
-    , Border.rounded 4
-    , Border.color FlatColors.BritishPalette.riseNShine
-    , Background.color FlatColors.BritishPalette.riseNShine
-    , Font.color FlatColors.ChinesePalette.antiFlashWhite
-    , Font.size 16
-    , width fill
     ]
 
 
@@ -151,36 +119,9 @@ commonShortVerticalSliderStyles =
     ]
 
 
-checkboxIcon : Bool -> Element msg
-checkboxIcon isChecked =
-    el
-        [ width <| px 32
-        , height <| px 32
-        , centerY
-        , padding 4
-        , Border.rounded 4
-        , Border.width 2
-        , Border.color FlatColors.ChinesePalette.frenchSkyBlue
-        ]
-    <|
-        el
-            [ width fill
-            , height fill
-            , Border.rounded 4
-            , Background.color <|
-                if isChecked then
-                    FlatColors.ChinesePalette.bruschettaTomato
-
-                else
-                    FlatColors.ChinesePalette.twinkleBlue
-            ]
-        <|
-            none
-
-
 contrastingColour col =
     let
-        { red, green, blue, alpha } =
+        { red, green, blue } =
             toRgb col
 
         grey =
@@ -304,10 +245,6 @@ wideSliderStylesWithWidth w =
             ]
             Element.none
     ]
-
-
-wideSliderStyles =
-    wideSliderStylesWithWidth (Pixels.int 400)
 
 
 neatToolsBorder =

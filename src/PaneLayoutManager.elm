@@ -1,12 +1,12 @@
-module PaneLayoutManager exposing (..)
+module PaneLayoutManager exposing (Msg(..), Options, PaneContext, PaneId(..), PaneLayout(..), PaneType(..), SliderState(..), StoredPane, ViewContext(..), ViewMode(..), defaultOptions, exitRouteView, forceRouteView, initialise, render, restoreStoredValues, update, viewPanes)
 
 import Actions exposing (..)
 import Dict exposing (Dict)
 import DomainModel exposing (skipCount)
-import Element as E exposing (..)
+import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
-import Element.Input as Input exposing (..)
+import Element.Input as Input
 import FeatherIcons
 import FlatColors.ChinesePalette
 import FlatColors.FlatUIPalette
@@ -14,7 +14,6 @@ import Html.Attributes exposing (style)
 import Html.Events.Extra.Mouse as Mouse
 import Json.Decode as D
 import Json.Encode as E
-import LandUseDataTypes
 import List.Extra
 import LocalCoords exposing (LocalCoords)
 import MapPortController
@@ -54,15 +53,10 @@ type ViewMode
 
 type ViewContext
     = ThirdPersonContext View3dCommonElements.Context
-    | MapContext ViewMap.Context
-    | InfoContext
-    | ProfileContext
-    | GraphContext
 
 
 type PaneType
     = PaneWithMap
-    | PaneNoMap
 
 
 type PaneLayout
@@ -109,7 +103,6 @@ type alias Options =
 type SliderState
     = SliderIdle
     | SliderMoved
-    | SliderWaitingForTimeout
 
 
 defaultPaneContext : PaneContext
@@ -764,7 +757,7 @@ viewPanes location msgWrapper mTrack segments graphOptions displayOptions ( w, h
 
                 ViewGraph ->
                     case ( pane.graphContext, mTrack ) of
-                        ( Just context, Just track ) ->
+                        ( Just context, Just _ ) ->
                             ViewGraph.view
                                 location
                                 context
@@ -986,7 +979,7 @@ restoreStoredValues options values =
                 , pane4 = applyStoredPaneDetails fromStorage.pane4
             }
 
-        Err error ->
+        Err _ ->
             options
 
 

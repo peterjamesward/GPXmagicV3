@@ -1,13 +1,12 @@
-module Tools.ProfileSmooth exposing (..)
+module Tools.ProfileSmooth exposing (Msg(..), SlopeStatus(..), SlopeStuff, apply, defaultOptions, toolId, toolStateChange, update, view)
 
 import Actions exposing (ToolAction(..))
-import Dict exposing (Dict)
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
-import Length exposing (Meters, inMeters, meters)
+import Length
 import Point3d exposing (zCoordinate)
 import PreviewData exposing (PreviewShape(..))
 import Quantity exposing (multiplyBy, zero)
@@ -17,7 +16,7 @@ import Tools.I18NOptions as I18NOptions
 import Tools.ProfileSmoothOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded, adjustAltitude)
 import UtilsForViews exposing (showDecimal0)
-import ViewPureStyles exposing (commonShortHorizontalSliderStyles, neatToolsBorder, prettyButtonStyles)
+import ViewPureStyles exposing (commonShortHorizontalSliderStyles, neatToolsBorder)
 
 
 toolId =
@@ -30,12 +29,9 @@ type Msg
     | SmoothGradients
     | SetMaximumAscent Float
     | SetMaximumDescent Float
-    | SetExtent ExtentOption
     | SetWindowSize Int
     | SetBumpiness Float
     | ChooseMethod SmoothMethod
-    | SetRedistribution Bool
-    | DisplayInfo String String
 
 
 defaultOptions : Options
@@ -64,18 +60,19 @@ actions newOptions previewColour track =
                         Nothing ->
                             ( 0, 0 )
 
-                normalPreview =
-                    TrackLoaded.previewFromTree
-                        previewTree
-                        start
-                        (skipCount previewTree - end)
-                        10
-
                 ( newTreeForProfilePreview, _ ) =
                     apply newOptions track
             in
             case newTreeForProfilePreview of
                 Just newTree ->
+                    let
+                        normalPreview =
+                            TrackLoaded.previewFromTree
+                                previewTree
+                                start
+                                (skipCount previewTree - end)
+                                10
+                    in
                     [ ShowPreview
                         { tag = "limit"
                         , shape = PreviewCircle
@@ -120,16 +117,6 @@ update :
     -> ( Options, List (ToolAction msg) )
 update msg options previewColour track =
     case msg of
-        SetExtent extent ->
-            let
-                newOptions =
-                    { options | extent = extent }
-                        |> putPreviewInOptions track
-            in
-            ( newOptions
-            , actions newOptions previewColour track
-            )
-
         SetMaximumAscent up ->
             let
                 newOptions =
@@ -200,19 +187,6 @@ update msg options previewColour track =
             ( newOptions
             , actions newOptions previewColour track
             )
-
-        SetRedistribution flag ->
-            let
-                newOptions =
-                    { options | limitRedistributes = flag }
-                        |> putPreviewInOptions track
-            in
-            ( newOptions
-            , actions newOptions previewColour track
-            )
-
-        DisplayInfo tool tag ->
-            ( options, [ Actions.DisplayInfo tool tag ] )
 
 
 apply : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
@@ -320,7 +294,7 @@ useUniformGradient bumpiness track =
                             distanceHere =
                                 distanceFromIndex index track.trackTree
 
-                            ( distanceFromStart, distanceFromEnd ) =
+                            ( distanceFromStart, _ ) =
                                 ( distanceHere |> Quantity.minus startDistance
                                 , endDistance |> Quantity.minus distanceHere
                                 )
@@ -427,7 +401,7 @@ limitGradientsWithRedistribution options track =
                 clampedSlope =
                     -- Easier to use fractions here.
                     0.01
-                        * clamp (0 - options.maximumDescent)
+                        * clamp -options.maximumDescent
                             options.maximumAscent
                             road.gradientAtStart
 
@@ -451,7 +425,7 @@ limitGradientsWithRedistribution options track =
                         road.gradientAtStart
                             <= options.maximumAscent
                             && road.gradientAtStart
-                            >= (0 - options.maximumDescent)
+                            >= -options.maximumDescent
                     then
                         NotClamped road availableToOffer
 
@@ -596,7 +570,7 @@ smoothAltitudesWithWindowAverage options track =
                         [] ->
                             outputs
 
-                        ( justPassedEarthPoint, justPassedGpx ) :: others ->
+                        ( justPassedEarthPoint, justPassedGpx ) :: _ ->
                             if
                                 index
                                     - options.windowSize
@@ -640,18 +614,19 @@ smoothAltitudesWithWindowAverage options track =
                 [] ->
                     List.reverse outputs
 
-                ( justPassedEarthPoint, justPassedGpx ) :: others ->
+                ( justPassedEarthPoint, justPassedGpx ) :: _ ->
                     let
-                        mergeListsForAltitude =
-                            (leading ++ trailing)
-                                |> List.map (zCoordinate << .space << Tuple.first)
-
-                        averageAltitude =
-                            Quantity.sum mergeListsForAltitude
-                                |> Quantity.divideBy (toFloat <| List.length mergeListsForAltitude)
-
                         ( revisedEarthPoint, revisedGpx ) =
                             if index > fromStart && index < endIndex then
+                                let
+                                    mergeListsForAltitude =
+                                        (leading ++ trailing)
+                                            |> List.map (zCoordinate << .space << Tuple.first)
+
+                                    averageAltitude =
+                                        Quantity.sum mergeListsForAltitude
+                                            |> Quantity.divideBy (toFloat <| List.length mergeListsForAltitude)
+                                in
                                 ( adjustAltitude averageAltitude justPassedEarthPoint
                                 , { justPassedGpx | altitude = averageAltitude }
                                 )
@@ -738,7 +713,7 @@ averageGradientsWithWindow options track =
                         [] ->
                             ( outputs, lastAltitude )
 
-                        justPassedRoad :: others ->
+                        justPassedRoad :: _ ->
                             let
                                 mergeListsForGradient =
                                     -- At this stage, newTrailing has the "current" entry.
@@ -791,7 +766,7 @@ averageGradientsWithWindow options track =
                 [] ->
                     List.reverse outputs
 
-                justPassedRoad :: others ->
+                justPassedRoad :: _ ->
                     if index > fromStart && index < endIndex then
                         let
                             mergeListsForGradient =
@@ -884,7 +859,7 @@ simpleLimitGradients options track =
                 newGradient =
                     if index > fromStart && index < endIndex then
                         clamp
-                            (0 - options.maximumDescent)
+                            -options.maximumDescent
                             options.maximumAscent
                             road.gradientAtStart
 
@@ -947,40 +922,6 @@ view location options wrapper track =
         i18n =
             I18N.text location toolId
 
-        maxAscentSlider =
-            Input.slider
-                commonShortHorizontalSliderStyles
-                { onChange = wrapper << SetMaximumAscent
-                , label =
-                    Input.labelBelow [] <|
-                        text <|
-                            String.Interpolate.interpolate
-                                (I18N.localisedString location toolId "uphill")
-                                [ showDecimal0 options.maximumAscent ]
-                , min = 10.0
-                , max = 25.0
-                , step = Just 1.0
-                , value = options.maximumAscent
-                , thumb = Input.defaultThumb
-                }
-
-        maxDescentSlider =
-            Input.slider
-                commonShortHorizontalSliderStyles
-                { onChange = wrapper << SetMaximumDescent
-                , label =
-                    Input.labelBelow [] <|
-                        text <|
-                            String.Interpolate.interpolate
-                                (I18N.localisedString location toolId "downhill")
-                                [ showDecimal0 options.maximumDescent ]
-                , min = 10.0
-                , max = 25.0
-                , step = Just 1.0
-                , value = options.maximumDescent
-                , thumb = Input.defaultThumb
-                }
-
         windowSizeSlider =
             Input.slider
                 commonShortHorizontalSliderStyles
@@ -997,77 +938,6 @@ view location options wrapper track =
                 , value = toFloat options.windowSize
                 , thumb = Input.defaultThumb
                 }
-
-        bumpinessSlider =
-            Input.slider
-                commonShortHorizontalSliderStyles
-                { onChange = wrapper << SetBumpiness
-                , label =
-                    Input.labelBelow [] <|
-                        text <|
-                            String.Interpolate.interpolate
-                                (I18N.localisedString location toolId "bumpiness")
-                                [ showDecimal0 <| 100.0 * options.bumpiness ]
-                , min = 0.0
-                , max = 1.0
-                , step = Just 0.05
-                , value = options.bumpiness
-                , thumb = Input.defaultThumb
-                }
-
-        limitGradientsMethod =
-            column [ spacing 10, centerX ]
-                [ el [ centerX ] <| maxAscentSlider
-                , el [ centerX ] <| maxDescentSlider
-                , extent
-                , el [ centerX ] <|
-                    button
-                        neatToolsBorder
-                        { onPress = Just <| wrapper <| LimitGradient
-                        , label = paragraph [] [ i18n "apply" ]
-                        }
-                ]
-
-        smoothAltitudes =
-            column [ spacing 10, centerX ]
-                [ el [ centerX ] <| windowSizeSlider
-                , extent
-                , el [ centerX ] <|
-                    button
-                        neatToolsBorder
-                        { onPress = Just <| wrapper <| SmoothAltitudes
-                        , label = paragraph [] [ i18n "altitudes" ]
-                        }
-                ]
-
-        smoothGradients =
-            column [ spacing 10, centerX ]
-                [ el [ centerX ] <| windowSizeSlider
-                , extent
-                , el [ centerX ] <|
-                    button
-                        neatToolsBorder
-                        { onPress = Just <| wrapper <| SmoothGradients
-                        , label = paragraph [] [ i18n "gradients" ]
-                        }
-                ]
-
-        smoothUniform =
-            column [ spacing 10, centerX ]
-                [ el [ centerX ] <| bumpinessSlider
-                , paragraph [] <|
-                    if track.markerPosition == Nothing then
-                        [ i18n "needpart" ]
-
-                    else
-                        [ i18n "part" ]
-                , el [ centerX ] <|
-                    button
-                        neatToolsBorder
-                        { onPress = Just <| wrapper <| SmoothGradients
-                        , label = paragraph [] [ i18n "uniform" ]
-                        }
-                ]
 
         modeChoice =
             Input.radio
@@ -1102,14 +972,109 @@ view location options wrapper track =
         [ modeChoice
         , case options.smoothMethod of
             MethodLimit ->
-                limitGradientsMethod
+                let
+                    maxAscentSlider =
+                        Input.slider
+                            commonShortHorizontalSliderStyles
+                            { onChange = wrapper << SetMaximumAscent
+                            , label =
+                                Input.labelBelow [] <|
+                                    text <|
+                                        String.Interpolate.interpolate
+                                            (I18N.localisedString location toolId "uphill")
+                                            [ showDecimal0 options.maximumAscent ]
+                            , min = 10.0
+                            , max = 25.0
+                            , step = Just 1.0
+                            , value = options.maximumAscent
+                            , thumb = Input.defaultThumb
+                            }
+
+                    maxDescentSlider =
+                        Input.slider
+                            commonShortHorizontalSliderStyles
+                            { onChange = wrapper << SetMaximumDescent
+                            , label =
+                                Input.labelBelow [] <|
+                                    text <|
+                                        String.Interpolate.interpolate
+                                            (I18N.localisedString location toolId "downhill")
+                                            [ showDecimal0 options.maximumDescent ]
+                            , min = 10.0
+                            , max = 25.0
+                            , step = Just 1.0
+                            , value = options.maximumDescent
+                            , thumb = Input.defaultThumb
+                            }
+                in
+                column [ spacing 10, centerX ]
+                    [ el [ centerX ] <| maxAscentSlider
+                    , el [ centerX ] <| maxDescentSlider
+                    , extent
+                    , el [ centerX ] <|
+                        button
+                            neatToolsBorder
+                            { onPress = Just <| wrapper <| LimitGradient
+                            , label = paragraph [] [ i18n "apply" ]
+                            }
+                    ]
 
             MethodAltitudes ->
-                smoothAltitudes
+                column [ spacing 10, centerX ]
+                    [ el [ centerX ] <| windowSizeSlider
+                    , extent
+                    , el [ centerX ] <|
+                        button
+                            neatToolsBorder
+                            { onPress = Just <| wrapper <| SmoothAltitudes
+                            , label = paragraph [] [ i18n "altitudes" ]
+                            }
+                    ]
 
             MethodGradients ->
-                smoothGradients
+                column [ spacing 10, centerX ]
+                    [ el [ centerX ] <| windowSizeSlider
+                    , extent
+                    , el [ centerX ] <|
+                        button
+                            neatToolsBorder
+                            { onPress = Just <| wrapper <| SmoothGradients
+                            , label = paragraph [] [ i18n "gradients" ]
+                            }
+                    ]
 
             MethodUniform ->
-                smoothUniform
+                let
+                    bumpinessSlider =
+                        Input.slider
+                            commonShortHorizontalSliderStyles
+                            { onChange = wrapper << SetBumpiness
+                            , label =
+                                Input.labelBelow [] <|
+                                    text <|
+                                        String.Interpolate.interpolate
+                                            (I18N.localisedString location toolId "bumpiness")
+                                            [ showDecimal0 <| 100.0 * options.bumpiness ]
+                            , min = 0.0
+                            , max = 1.0
+                            , step = Just 0.05
+                            , value = options.bumpiness
+                            , thumb = Input.defaultThumb
+                            }
+                in
+                column [ spacing 10, centerX ]
+                    [ el [ centerX ] <| bumpinessSlider
+                    , paragraph [] <|
+                        if track.markerPosition == Nothing then
+                            [ i18n "needpart" ]
+
+                        else
+                            [ i18n "part" ]
+                    , el [ centerX ] <|
+                        button
+                            neatToolsBorder
+                            { onPress = Just <| wrapper <| SmoothGradients
+                            , label = paragraph [] [ i18n "uniform" ]
+                            }
+                    ]
         ]

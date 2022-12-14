@@ -1,4 +1,4 @@
-module Tools.RGTOptions exposing (..)
+module Tools.RGTOptions exposing (Msg(..), Options, defaults, update, view)
 
 {-
    <extensions>
@@ -17,7 +17,7 @@ import FlatColors.ChinesePalette
 import String.Interpolate
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18N
-import ViewPureStyles exposing (commonShortHorizontalSliderStyles, infoButton)
+import ViewPureStyles exposing (commonShortHorizontalSliderStyles)
 
 
 type alias Options =

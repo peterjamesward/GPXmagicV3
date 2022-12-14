@@ -1,8 +1,7 @@
-module Tools.Essentials exposing (..)
+module Tools.Essentials exposing (Msg(..), Options, defaultOptions, toolId, toolStateChange, update, view)
 
 import Actions exposing (ToolAction(..))
-import Dict exposing (Dict)
-import DomainModel exposing (EarthPoint, GPXSource, PeteTree(..), asRecord, skipCount)
+import DomainModel exposing (PeteTree, skipCount)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
@@ -46,7 +45,6 @@ type Msg
     | MarkerBackwardOne
     | Undo
     | Redo
-    | DisplayInfo String String
 
 
 toolStateChange :
@@ -121,7 +119,7 @@ update msg options previewColour hasTrack =
                 PointerRewind ->
                     let
                         position =
-                            restrictToTrack orange (0 - skipCount track.trackTree // 20)
+                            restrictToTrack orange -(skipCount track.trackTree // 20)
                     in
                     ( { options | orange = position }
                     , [ SetCurrent position, PointerChange ]
@@ -178,9 +176,6 @@ update msg options previewColour hasTrack =
                     ( options
                     , [ RedoUndoneAction, TrackHasChanged ]
                     )
-
-                DisplayInfo tool tag ->
-                    ( options, [ Actions.DisplayInfo tool tag ] )
 
 
 positionDescription : I18NOptions.Location -> Bool -> Int -> PeteTree -> String
@@ -269,7 +264,7 @@ viewPointers location imperial msgWrapper options track =
             ]
         , el [ centerX, width fill ] <|
             case options.purple of
-                Just something ->
+                Just _ ->
                     el
                         [ Background.color FlatColors.AussiePalette.blurple
                         , Font.color FlatColors.AussiePalette.coastalBreeze
@@ -306,7 +301,7 @@ viewPointers location imperial msgWrapper options track =
                             , onPress = Just <| msgWrapper <| DropMarker
                             }
         , case options.purple of
-            Just something ->
+            Just _ ->
                 row
                     [ centerX
                     , spacing 10

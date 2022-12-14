@@ -1,11 +1,11 @@
-module ToolsController exposing (..)
+module ToolsController exposing (ColourTriplet, DockSettings, Options, ToolCategory(..), ToolDock(..), ToolEntry, ToolMsg(..), ToolState(..), ToolType(..), clearPopups, colourDecoder, decodeColour, defaultOptions, encodeColour, flythroughTick, imperialToggleMenuEntry, refreshOpenTools, restoreDockSettings, restoreMeasure, restoreStoredValues, setToolState, toolsForDock, update)
 
 import Actions exposing (ToolAction(..))
 import ColourPalette exposing (stravaOrange)
 import Dict exposing (Dict)
 import Element exposing (..)
-import Element.Background as Background exposing (color)
-import Element.Border as Border exposing (roundEach)
+import Element.Background as Background
+import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
 import Element.Lazy
@@ -16,7 +16,7 @@ import FlatColors.SwedishPalette
 import Html.Attributes exposing (style)
 import Html.Events.Extra.Mouse as Mouse
 import Json.Decode as D exposing (field)
-import Json.Encode as E exposing (string)
+import Json.Encode as E
 import List.Extra
 import Time
 import ToolTip exposing (localisedTooltip, myTooltip, tooltip)
@@ -61,7 +61,7 @@ import Tools.SmartSmootherOptions
 import Tools.SplitAndJoin
 import Tools.SplitAndJoinOptions
 import Tools.StartFinish
-import Tools.StartFinishTypes exposing (Loopiness(..))
+import Tools.StartFinishTypes
 import Tools.Straightener
 import Tools.StravaOptions
 import Tools.StravaTools
@@ -199,8 +199,6 @@ type ToolMsg
     | ToolDockSelect ToolType ToolDock
     | ToolColourSelect ToolType Element.Color
     | ToolStateToggle ToolType ToolState
-    | DockPopupToggle String
-    | DockNameChange String String
     | DisplayInfo String String
     | DirectionChanges DirectionChanges.Msg
     | DeletePoints DeletePoints.Msg
@@ -727,29 +725,6 @@ nextToolState state =
             SettingsOpen
 
 
-lockToolOpen : Bool -> String -> Options msg -> Options msg
-lockToolOpen keepOpen id options =
-    let
-        tools =
-            options.tools
-
-        newTools =
-            tools
-                |> List.Extra.updateIf (\tool -> tool.toolId == id)
-                    (\tool ->
-                        { tool
-                            | state =
-                                if keepOpen then
-                                    AlwaysOpen
-
-                                else
-                                    Expanded
-                        }
-                    )
-    in
-    { options | tools = newTools }
-
-
 setDock : ToolType -> ToolDock -> ToolEntry -> ToolEntry
 setDock toolType dock tool =
     if tool.toolType == toolType then
@@ -1072,40 +1047,6 @@ update toolMsg isTrack msgWrapper options =
                 Nothing ->
                     ( options, [] )
 
-        DockPopupToggle id ->
-            case Dict.get id options.docks of
-                Just dock ->
-                    let
-                        newDocks =
-                            Dict.insert id
-                                { dock | dockPopupOpen = not dock.dockPopupOpen }
-                                options.docks
-
-                        newOptions =
-                            { options | docks = newDocks }
-                    in
-                    ( newOptions, [] )
-
-                Nothing ->
-                    ( options, [] )
-
-        DockNameChange int string ->
-            case Dict.get int options.docks of
-                Just dock ->
-                    let
-                        newDocks =
-                            Dict.insert int
-                                { dock | dockLabel = string }
-                                options.docks
-
-                        newOptions =
-                            { options | docks = newDocks }
-                    in
-                    ( newOptions, [ StoreLocally "docks" <| encodeDockState newOptions.docks ] )
-
-                Nothing ->
-                    ( options, [] )
-
         ToolMoveScaleRotateMsg msg ->
             let
                 ( newOptions, actions ) =
@@ -1205,7 +1146,7 @@ update toolMsg isTrack msgWrapper options =
 
         ToolIntersectionMsg msg ->
             case isTrack of
-                Just track ->
+                Just _ ->
                     let
                         ( newOptions, actions ) =
                             Tools.Intersections.update
@@ -1364,7 +1305,7 @@ toolStateHasChanged toolType newState isTrack options =
 
         ToolEssentials ->
             let
-                ( newToolOptions, actions ) =
+                ( newToolOptions, _ ) =
                     Tools.Essentials.toolStateChange
                         (newState == Expanded)
                         (getColour toolType options.tools)
@@ -2219,7 +2160,7 @@ viewToolByType location msgWrapper entry isTrack options =
 
             ToolGraph ->
                 case isTrack of
-                    Just track ->
+                    Just _ ->
                         Tools.Graph.view
                             location
                             options.imperial
@@ -2380,7 +2321,7 @@ encodeType toolType =
 encodeColour : Element.Color -> E.Value
 encodeColour colour =
     let
-        { red, green, blue, alpha } =
+        { red, green, blue } =
             toRgb colour
     in
     E.object
@@ -2510,13 +2451,6 @@ encodeToolState options =
     E.list identity <| List.map encodeOneTool options.tools
 
 
-encodeDockState : Dict String DockSettings -> E.Value
-encodeDockState docks =
-    docks
-        |> Dict.map (\k v -> v.dockLabel)
-        |> E.dict identity E.string
-
-
 colourDecoder =
     D.map3 ColourTriplet
         (field "red" D.float)
@@ -2558,7 +2492,7 @@ restoreStoredValues options values =
         Ok stored ->
             { options | tools = List.map (useStoredSettings stored) options.tools }
 
-        Err error ->
+        Err _ ->
             options
 
 
@@ -2589,7 +2523,7 @@ restoreDockSettings options values =
         Ok stored ->
             { options | docks = useStoredSettings stored }
 
-        Err error ->
+        Err _ ->
             options
 
 
@@ -2604,7 +2538,7 @@ restoreMeasure options value =
         Ok setting ->
             { options | imperial = setting }
 
-        Err error ->
+        Err _ ->
             options
 
 
@@ -2651,65 +2585,6 @@ dockList =
     , ( "4", DockSettings False "Lower right" defaultDockColour )
     , ( "5", DockSettings False "Upper right" defaultDockColour )
     ]
-
-
-showDockHeader : (ToolMsg -> msg) -> ToolDock -> Dict String DockSettings -> Element msg
-showDockHeader msgWrapper dockId docks =
-    let
-        dockNumber =
-            case dockId of
-                DockUpperLeft ->
-                    "1"
-
-                DockLowerLeft ->
-                    "2"
-
-                DockUpperRight ->
-                    "5"
-
-                DockLowerRight ->
-                    "4"
-
-                DockBottom ->
-                    "3"
-
-                DockNone ->
-                    "0"
-
-        dock =
-            Dict.get dockNumber docks
-    in
-    case dock of
-        Nothing ->
-            none
-
-        Just dockSettings ->
-            row
-                [ width fill
-                , spacing 8
-                , height <| px 24
-                , Background.color dockSettings.dockLabelColour
-                , Font.color <| contrastingColour dockSettings.dockLabelColour
-                ]
-                [ Input.button [ tooltip below (myTooltip "Click to edit label") ]
-                    { onPress = Just <| msgWrapper <| DockPopupToggle dockNumber
-                    , label = useIcon FeatherIcons.edit
-                    }
-                , case dockSettings.dockPopupOpen of
-                    True ->
-                        Input.text
-                            [ Font.color defaultDockColour
-                            , onEnter (DockPopupToggle dockNumber |> msgWrapper)
-                            ]
-                            { onChange = DockNameChange dockNumber >> msgWrapper
-                            , text = dockSettings.dockLabel
-                            , placeholder = Nothing
-                            , label = Input.labelHidden "name"
-                            }
-
-                    False ->
-                        text dockSettings.dockLabel
-                ]
 
 
 flythroughTick : Options msg -> Time.Posix -> TrackLoaded msg -> ( Options msg, List (ToolAction msg) )

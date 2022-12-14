@@ -1,6 +1,6 @@
 module OAuth exposing
-    ( Token, useToken, tokenToString, tokenFromString
-    , ErrorCode(..), errorCodeToString, errorCodeFromString
+    ( Token, useToken
+    , ErrorCode(..), errorCodeFromString
     , TokenType, TokenString, makeToken, makeRefreshToken
     )
 
@@ -36,12 +36,12 @@ used.
 
 ## Token
 
-@docs Token, useToken, tokenToString, tokenFromString
+@docs Token, useToken
 
 
 ## ErrorCode
 
-@docs ErrorCode, errorCodeToString, errorCodeFromString
+@docs ErrorCode, errorCodeFromString
 
 
 ## Decoders & Parsers Utils (advanced)
@@ -50,8 +50,8 @@ used.
 
 -}
 
+import Http
 import Maybe.Extra as Maybe
-import Http as Http
 
 
 
@@ -145,21 +145,6 @@ tokenToString (Bearer t) =
     "Bearer " ++ t
 
 
-{-| Parse a token from an 'Authorization' header string.
-
-      tokenFromString (tokenToString token) == Just token
-
--}
-tokenFromString : String -> Maybe Token
-tokenFromString str =
-    case ( String.left 6 str, String.dropLeft 7 str ) of
-        ( "Bearer", t ) ->
-            Just (Bearer t)
-
-        _ ->
-            Nothing
-
-
 
 --
 -- Error
@@ -202,36 +187,6 @@ type ErrorCode
     | ServerError
     | TemporarilyUnavailable
     | Custom String
-
-
-{-| Get the `String` representation of an `ErrorCode`.
--}
-errorCodeToString : ErrorCode -> String
-errorCodeToString err =
-    case err of
-        InvalidRequest ->
-            "invalid_request"
-
-        UnauthorizedClient ->
-            "unauthorized_client"
-
-        AccessDenied ->
-            "access_denied"
-
-        UnsupportedResponseType ->
-            "unsupported_response_type"
-
-        InvalidScope ->
-            "invalid_scope"
-
-        ServerError ->
-            "server_error"
-
-        TemporarilyUnavailable ->
-            "temporarily_unavailable"
-
-        Custom str ->
-            str
 
 
 {-| Build a string back into an error code. Returns `Custom _`

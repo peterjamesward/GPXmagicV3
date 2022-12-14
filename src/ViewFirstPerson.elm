@@ -1,4 +1,4 @@
-module ViewFirstPerson exposing (..)
+module ViewFirstPerson exposing (view)
 
 import Angle
 import Camera3d exposing (Camera3d)
@@ -12,7 +12,7 @@ import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
 import FlatColors.ChinesePalette exposing (white)
-import Length exposing (meters)
+import Length
 import LocalCoords exposing (LocalCoords)
 import Pixels exposing (Pixels)
 import Quantity exposing (Quantity)
@@ -43,7 +43,7 @@ view context contentArea track scene msgWrapper mFlythrough =
                     inFront none
     in
     el
-        (flythroughHUD :: (common3dSceneAttributes msgWrapper context))
+        (flythroughHUD :: common3dSceneAttributes msgWrapper context)
     <|
         html <|
             Scene3d.sunny
@@ -65,16 +65,17 @@ deriveViewPointAndCamera :
     -> Camera3d Length.Meters LocalCoords
 deriveViewPointAndCamera context track mFlythrough =
     let
-        localRoad =
-            DomainModel.leafFromIndex track.currentPosition track.trackTree
-                |> asRecord
-
-        gradientAsAngle =
-            Angle.atan <| localRoad.gradientAtStart / 100.0
-
         cameraViewpoint =
             case mFlythrough of
                 Nothing ->
+                    let
+                        localRoad =
+                            DomainModel.leafFromIndex track.currentPosition track.trackTree
+                                |> asRecord
+
+                        gradientAsAngle =
+                            Angle.atan <| localRoad.gradientAtStart / 100.0
+                    in
                     Viewpoint3d.orbitZ
                         { focalPoint = localRoad.startPoint.space
                         , azimuth =

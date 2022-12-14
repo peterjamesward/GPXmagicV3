@@ -1,11 +1,11 @@
-module ViewThirdPerson exposing (..)
+module ViewThirdPerson exposing (initialiseView, update, view)
 
 import Actions exposing (ToolAction(..))
-import Angle exposing (Angle)
+import Angle
 import Axis3d
 import Camera3d exposing (Camera3d)
 import Color
-import Direction2d exposing (Direction2d)
+import Direction2d
 import Direction3d exposing (negativeZ, positiveZ)
 import DomainModel exposing (..)
 import Element exposing (..)
@@ -24,7 +24,7 @@ import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import Vector3d
 import View3dCommonElements exposing (..)
-import Viewpoint3d exposing (Viewpoint3d)
+import Viewpoint3d
 
 
 view :
@@ -94,14 +94,11 @@ deriveCamera treeNode context currentPosition =
                     --TODO: Some fudging going on here that should not be needed.
                     Length.meters <| 100.0 * Spherical.metresPerPixel context.zoomLevel latitude
                 }
-
-        perspectiveCamera =
-            Camera3d.perspective
-                { viewpoint = cameraViewpoint
-                , verticalFieldOfView = context.fieldOfView
-                }
     in
-    perspectiveCamera
+    Camera3d.perspective
+        { viewpoint = cameraViewpoint
+        , verticalFieldOfView = context.fieldOfView
+        }
 
 
 detectHit :
@@ -292,7 +289,7 @@ update msg msgWrapper track area context =
                 _ ->
                     ( context, [] )
 
-        ImageRelease event ->
+        ImageRelease _ ->
             let
                 newContext =
                     { context
@@ -310,7 +307,7 @@ update msg msgWrapper track area context =
             , []
             )
 
-        SetEmphasis int ->
+        SetEmphasis _ ->
             ( context, [] )
 
         MouseMove _ ->

@@ -1,18 +1,14 @@
-module Tools.StravaDataLoad exposing (..)
+module Tools.StravaDataLoad exposing (requestStravaActivity, requestStravaActivityStreams, requestStravaRoute, requestStravaRouteHeader, requestStravaSegment, requestStravaSegmentStreams, stravaApiRoot, stravaProcessRoute, stravaProcessSegment)
 
 import Angle
-import BoundingBox2d
-import BoundingBox3d exposing (BoundingBox3d)
 import Direction2d
 import DomainModel
 import Http
-import Json.Decode as D exposing (Decoder, field)
+import Json.Decode as D exposing (field)
 import Length
-import LocalCoords exposing (LocalCoords)
-import OAuth exposing (Token, errorCodeToString, tokenToString, useToken)
-import Point2d
+import OAuth exposing (Token, useToken)
 import Spherical
-import Tools.StravaTypes as StravaTypes exposing (..)
+import Tools.StravaTypes exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import Url.Builder as Builder exposing (string)
 import UtilsForViews exposing (httpErrorString)
@@ -32,16 +28,6 @@ stravaProcessRoute response =
 
         Err err ->
             StravaRouteError (httpErrorString err)
-
-
-stravaRouteName : StravaRouteStatus -> Maybe String
-stravaRouteName stravaRoute =
-    case stravaRoute of
-        StravaRouteOk route ->
-            Just route.name
-
-        _ ->
-            Nothing
 
 
 requestStravaSegment : (Result Http.Error StravaSegment -> msg) -> String -> Token -> Cmd msg
@@ -65,7 +51,7 @@ stravaProcessSegment response track =
     let
         isNearTheTrack segment =
             case ( segment.start_latlng, segment.end_latlng ) of
-                ( [ start_latitude, start_longitude ], [ end_latitude, end_longitude ] ) ->
+                ( [ start_latitude, start_longitude ], [ _, _ ] ) ->
                     let
                         gpxPoint =
                             { longitude = Direction2d.fromAngle <| Angle.degrees start_longitude
@@ -276,16 +262,6 @@ decodeStravaAltitudeStream =
     D.map5 StravaAltitudeStream
         (field "type" D.string)
         (field "data" (D.list D.float))
-        (field "series_type" D.string)
-        (field "original_size" D.int)
-        (field "resolution" D.string)
-
-
-decodeStravaTimeStream : D.Decoder StravaTimeStream
-decodeStravaTimeStream =
-    D.map5 StravaTimeStream
-        (field "type" D.string)
-        (field "data" (D.list D.int))
         (field "series_type" D.string)
         (field "original_size" D.int)
         (field "resolution" D.string)

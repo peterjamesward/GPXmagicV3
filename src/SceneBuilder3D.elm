@@ -1,18 +1,17 @@
-module SceneBuilder3D exposing (..)
+module SceneBuilder3D exposing (Index, IndexEntry, LocationContext(..), TerrainFoldState, render3dView, renderPreviews)
 
 -- In V3 there is only one 3d model, used for first, third, and Plan views.
 -- Profile is 2d drawing (or chart).
 
-import Angle exposing (Angle)
+import Angle
 import Array
 import Axis3d
 import BoundingBox2d exposing (BoundingBox2d)
 import BoundingBox3d exposing (BoundingBox3d)
-import Color exposing (Color, black, darkGreen, green, lightOrange)
-import ColourPalette exposing (gradientColourPastel, gradientHue, gradientHue2)
+import Color exposing (Color, lightOrange)
+import ColourPalette exposing (gradientColourPastel)
 import Cone3d
 import Dict exposing (Dict)
-import Direction2d
 import Direction3d
 import DomainModel exposing (..)
 import Element
@@ -21,9 +20,7 @@ import FlatColors.FlatUIPalette
 import FlatColors.IndianPalette
 import LandUseDataTypes
 import Length exposing (Meters)
-import LineSegment2d exposing (LineSegment2d)
 import LineSegment3d
-import List.Extra
 import LocalCoords exposing (LocalCoords)
 import Pixels
 import Plane3d exposing (Plane3d)
@@ -39,7 +36,6 @@ import SketchPlane3d
 import SpatialIndex exposing (SpatialContent)
 import Tools.DisplaySettingsOptions exposing (CurtainStyle(..))
 import Tools.LandUseColours exposing (landUseColours)
-import Tools.Nudge
 import TrackLoaded exposing (TrackLoaded)
 import TriangularMesh
 import UtilsForViews exposing (colorFromElmUiColour, flatBox, fullDepthRenderingBoxSize)
@@ -77,16 +73,17 @@ render3dView settings track =
 
         groundPlane =
             let
-                { minX, maxX, minY, maxY, minZ, maxZ } =
+                { minX, maxX, minY, maxY } =
                     BoundingBox3d.extrema nearbySpace
-
-                modelMinZ =
-                    -- Drop an inch to prevent flicker.
-                    boundingBox track.trackTree
-                        |> BoundingBox3d.minZ
-                        |> Quantity.minus (Length.inches 6)
             in
             if settings.groundPlane && settings.terrainFineness == 0.0 then
+                let
+                    modelMinZ =
+                        -- Drop an inch to prevent flicker.
+                        boundingBox track.trackTree
+                            |> BoundingBox3d.minZ
+                            |> Quantity.minus (Length.inches 6)
+                in
                 [ Scene3d.quad (Material.color <| colorFromElmUiColour FlatColors.IndianPalette.keppel)
                     (Point3d.xyz minX minY modelMinZ)
                     (Point3d.xyz minX maxY modelMinZ)
@@ -174,11 +171,10 @@ render3dView settings track =
 
         renderCurrentMarkers : List (Entity LocalCoords)
         renderCurrentMarkers =
-            [ Scene3d.point { radius = Pixels.pixels 15 }
+            Scene3d.point { radius = Pixels.pixels 15 }
                 (Material.color lightOrange)
                 (.space <| earthPointFromIndex track.currentPosition track.trackTree)
-            ]
-                ++ (case track.markerPosition of
+                :: (case track.markerPosition of
                         Just marker ->
                             [ Scene3d.point { radius = Pixels.pixels 12 }
                                 (Material.color <| Color.fromRgba <| Element.toRgb <| FlatColors.AussiePalette.blurple)
@@ -299,7 +295,7 @@ makeLandUsePlanar landUse index track groundPlane =
                         |> List.map (.at >> .space >> Point3d.projectInto SketchPlane3d.xy)
                         |> Polygon2d.singleLoop
 
-                { minAltitude, resultBox, count } =
+                { minAltitude } =
                     queryAltitudeFromIndex index
                         (Maybe.withDefault (BoundingBox2d.singleton Point2d.origin) <|
                             Polygon2d.boundingBox polygon
@@ -412,15 +408,6 @@ makeLandUsePlanar landUse index track groundPlane =
     ( wayStuff.scenes, wayStuff.updatedIndex )
 
 
-type alias PolygonSplitter =
-    { leftPolygonBeforeEntry : List EarthPoint
-    , newPointsForRoad : List EarthPoint
-    , leftPolygonAfterEntry : List EarthPoint
-    , rightPolygon : List EarthPoint
-    , foundCrossings : Int
-    }
-
-
 makeLandUseSloped :
     LandUseDataTypes.LandUseData
     -> Index
@@ -473,243 +460,34 @@ makeLandUseSloped landUse index tree groundPlane =
             -- Will be a bit trickier because the left and right polygon road
             -- edges take altitude from road, not from the land use.
             let
-                polygon =
-                    -- Triangulation works in 2D, so we briefly lose altitude info.
-                    -- But that works better for road intersection as well!
-                    nodes
-                        |> List.map (Point3d.projectInto SketchPlane3d.xy)
-                        |> Polygon2d.singleLoop
-
-                nearbyRoads =
-                    case Polygon2d.boundingBox polygon of
-                        Just polygonBox ->
-                            SpatialIndex.query index polygonBox
-
-                        Nothing ->
-                            []
-
-                entryRoadIndex =
-                    -- Ignoring an obvious special case or three, if any of the roads pass
-                    -- through the polygon, there will be one that starts outside and ends
-                    -- inside, and if more than one, one will have the lowest index.
-                    let
-                        isEntryRoad { content, box } =
-                            let
-                                { leafIndex, altitude } =
-                                    content
-
-                                leaf =
-                                    DomainModel.asRecord <|
-                                        DomainModel.leafFromIndex leafIndex tree
-
-                                ( start2d, end2d ) =
-                                    ( Point3d.projectInto SketchPlane3d.xy leaf.startPoint.space
-                                    , Point3d.projectInto SketchPlane3d.xy leaf.endPoint.space
-                                    )
-                            in
-                            (not <| Polygon2d.contains start2d polygon)
-                                && Polygon2d.contains end2d polygon
-                    in
-                    List.filter isEntryRoad nearbyRoads
-                        |> List.Extra.minimumBy (.content >> .leafIndex)
-
-                exitRoadIndex =
-                    -- If there is an exit road, let us proceed along it until we find
-                    -- the leaf that leaves (good joke that).
-                    case entryRoadIndex of
-                        Just isEntryRoad ->
-                            let
-                                entryIndex =
-                                    isEntryRoad.content.leafIndex
-
-                                walker testIndex =
-                                    -- Small risk of stack explosion here.
-                                    let
-                                        leaf =
-                                            DomainModel.asRecord <|
-                                                DomainModel.leafFromIndex testIndex tree
-
-                                        ( start2d, end2d ) =
-                                            ( Point3d.projectInto SketchPlane3d.xy leaf.startPoint.space
-                                            , Point3d.projectInto SketchPlane3d.xy leaf.endPoint.space
-                                            )
-                                    in
-                                    if testIndex > skipCount tree then
-                                        -- Avoid embarrassing infinite recurse!
-                                        -- Split the polygon here.
-                                        Just testIndex
-
-                                    else if
-                                        Polygon2d.contains start2d polygon
-                                            && (not <| Polygon2d.contains end2d polygon)
-                                    then
-                                        Just testIndex
-
-                                    else
-                                        walker <| testIndex + 1
-                            in
-                            walker <| entryIndex + 1
-
-                        Nothing ->
-                            Nothing
-
-                ( entryLeaf, exitLeaf ) =
-                    case ( entryRoadIndex, exitRoadIndex ) of
-                        ( Just goesIn, Just comesOut ) ->
-                            ( Just <| asRecord <| DomainModel.leafFromIndex goesIn.content.leafIndex tree
-                            , Just <| asRecord <| DomainModel.leafFromIndex comesOut tree
-                            )
-
-                        _ ->
-                            ( Nothing, Nothing )
-
                 -- If there is an entry road, we need to find which polygon edge it crosses,
                 -- and where, so that we can create the new vertices along the left of the road.
                 -- (We don't know yet which way round the nodes are organised.)
-                ( entryRoadEntersAfterVertex, polygonIsClockwise ) =
-                    case entryLeaf of
-                        Just goesIn ->
-                            let
-                                entryLine =
-                                    LineSegment3d.from goesIn.startPoint.space goesIn.endPoint.space
-                                        |> LineSegment3d.projectInto SketchPlane3d.xy
-
-                                polygonEdgesInOrder =
-                                    List.map2 Tuple.pair nodes (List.drop 1 nodes)
-
-                                edgeIndexIntersectWithEntry =
-                                    polygonEdgesInOrder
-                                        |> List.indexedMap Tuple.pair
-                                        |> List.filterMap
-                                            (\( edgeIndex, ( start, end ) ) ->
-                                                let
-                                                    edgeLine2d =
-                                                        LineSegment3d.from start end
-                                                            |> LineSegment3d.projectInto SketchPlane3d.xy
-                                                in
-                                                case LineSegment2d.intersectionPoint edgeLine2d entryLine of
-                                                    Just _ ->
-                                                        Just ( edgeIndex, edgeLine2d )
-
-                                                    Nothing ->
-                                                        Nothing
-                                            )
-                                        |> List.head
-                            in
-                            case edgeIndexIntersectWithEntry of
-                                Just ( edgeIndex, edgeLine2d ) ->
-                                    let
-                                        ( roadDirection, edgeDirection ) =
-                                            ( LineSegment2d.direction entryLine |> Maybe.withDefault Direction2d.x
-                                            , LineSegment2d.direction edgeLine2d |> Maybe.withDefault Direction2d.x
-                                            )
-
-                                        turn =
-                                            Direction2d.angleFrom roadDirection edgeDirection
-                                    in
-                                    ( Just edgeIndex, Just <| Quantity.greaterThanZero turn )
-
-                                Nothing ->
-                                    ( Nothing, Nothing )
-
-                        _ ->
-                            ( Nothing, Nothing )
-
                 {-
                    We should now know, if the road intersects the polygon, enough to construct
                    two separate polygons, one each side of the road. Polygon2d are always constructed
                    anti-clockwise but we can't rely on OSM for that.
                    This operation should start with the node left of the incoming road.
                 -}
-                correctNodeOrder =
-                    case ( polygonIsClockwise, entryRoadEntersAfterVertex ) of
-                        ( Just True, Just vertex ) ->
-                            List.reverse <| rotateLeft (1 + vertex) nodes
-
-                        ( Just False, Just vertex ) ->
-                            rotateLeft vertex nodes
-
-                        _ ->
-                            nodes
-
-                rotateLeft shift list =
-                    let
-                        ( beginning, end ) =
-                            List.Extra.splitAt shift list
-                    in
-                    end ++ beginning
-
-                exitEdge =
-                    case exitLeaf of
-                        Nothing ->
-                            Nothing
-
-                        Just isLeaf ->
-                            let
-                                exitLine =
-                                    LineSegment3d.from isLeaf.startPoint.space isLeaf.endPoint.space
-                                        |> LineSegment3d.projectInto SketchPlane3d.xy
-
-                                polygonEdgesInOrder =
-                                    List.map2 Tuple.pair correctNodeOrder (List.drop 1 correctNodeOrder)
-
-                                edgeIndexIntersectWithExit =
-                                    polygonEdgesInOrder
-                                        |> List.indexedMap Tuple.pair
-                                        |> List.filterMap
-                                            (\( edgeIndex, ( start, end ) ) ->
-                                                let
-                                                    edgeLine2d =
-                                                        LineSegment3d.from start end
-                                                            |> LineSegment3d.projectInto SketchPlane3d.xy
-                                                in
-                                                case LineSegment2d.intersectionPoint edgeLine2d exitLine of
-                                                    Just _ ->
-                                                        Just ( edgeIndex, edgeLine2d )
-
-                                                    Nothing ->
-                                                        Nothing
-                                            )
-                                        |> List.head
-                                        |> Maybe.map Tuple.first
-                            in
-                            edgeIndexIntersectWithExit
-
                 -- Hmm. Not efficient but now we have reliably ordered nodes, we should find the
                 -- "correct" places where the road crosses the boundary.
                 -- Now it's decision time. If there is a transiting road, we must make two
                 -- polygon and recurse. If not, we can just make a mesh for this polygon.
                 -- (Now's as good a time as any to apologise for this odd coding style;
                 -- I've been deferring this inevitable crux.)
-                ( leftSubPolygon, rightSubPolygon ) =
-                    case
-                        ( ( entryRoadIndex, exitRoadIndex )
-                        , exitEdge
-                        )
-                    of
-                        ( ( Just inRoad, Just outRoad ), Just outVertex ) ->
-                            let
-                                ( rightBoundary, leftBoundary ) =
-                                    -- Correctly ordered nodes should start at entry and proceed CCW.
-                                    -- and we know the exit point relative to this list.
-                                    List.Extra.splitAt outVertex correctNodeOrder
-
-                                ( roadNudgedLeft, roadNudgedRight ) =
-                                    nudgeHelper ( 1 + inRoad.content.leafIndex, outRoad ) tree
-                            in
-                            ( (List.map .space roadNudgedLeft) ++ leftBoundary
-                            , (rightBoundary) ++ (List.map .space roadNudgedRight)
-                            )
-
-                        _ ->
-                            ( [], [] )
-
-                mesh2d =
-                    Polygon2d.triangulate polygon
-
                 mesh3d =
                     -- Make a 3D mesh using the original polygon vertices with altitudes.
                     let
+                        polygon =
+                            -- Triangulation works in 2D, so we briefly lose altitude info.
+                            -- But that works better for road intersection as well!
+                            nodes
+                                |> List.map (Point3d.projectInto SketchPlane3d.xy)
+                                |> Polygon2d.singleLoop
+
+                        mesh2d =
+                            Polygon2d.triangulate polygon
+
                         faceIndices =
                             TriangularMesh.faceIndices mesh2d
 
@@ -866,40 +644,6 @@ makeLandUseSloped landUse index tree groundPlane =
                 |> List.foldl drawWay nodeStuff
     in
     ( wayStuff.scenes, wayStuff.updatedIndex )
-
-
-nudgeHelper : ( Int, Int ) -> PeteTree -> ( List EarthPoint, List EarthPoint )
-nudgeHelper ( fromIdx, toIdx ) tree =
-    -- So we can make a new polygon boundary along the road edges.
-    let
-        noNudge =
-            Tools.Nudge.defaultOptions
-
-        useNudgeTool nudgeOption index =
-            -- Simple wrapper to use internal operation in Nudge
-            Tools.Nudge.nudgeTrackPoint
-                nudgeOption
-                1.0
-                index
-                tree
-
-        leftEdge =
-            let
-                nudge =
-                    { noNudge | horizontal = Length.meters -4 }
-            in
-            List.map (useNudgeTool nudge) (List.range fromIdx toIdx)
-
-        rightEdge =
-            let
-                nudge =
-                    { noNudge | horizontal = Length.meters 4 }
-            in
-            List.map (useNudgeTool nudge) (List.range fromIdx toIdx)
-    in
-    ( leftEdge
-    , List.reverse rightEdge
-    )
 
 
 renderPreviews : Dict String PreviewData -> List (Entity LocalCoords)
@@ -1142,14 +886,8 @@ terrainFromIndex myBox enclosingBox orientation options baseElevation index =
             -- Just avoid interference with road surface.
             topBeforeAdjustment |> Quantity.minus Length.foot
 
-        elevationIncrease =
-            topBeforeAdjustment |> Quantity.minus baseElevation
-
         myExtrema =
             BoundingBox2d.extrema myBox
-
-        parentExtrema =
-            BoundingBox2d.extrema enclosingBox
 
         contentBox =
             -- This box encloses our points. It defines the top of the frustrum and the base for the next level.
@@ -1161,17 +899,6 @@ terrainFromIndex myBox enclosingBox orientation options baseElevation index =
 
                 Nothing ->
                     myBox
-
-        contentExtrema =
-            BoundingBox2d.extrema contentBox
-
-        plateauExtrema =
-            -- How big would the top be if we sloped the sides at 45 degrees?
-            { minX = Quantity.min contentExtrema.minX (myExtrema.minX |> Quantity.plus elevationIncrease)
-            , minY = Quantity.min contentExtrema.minY (myExtrema.minY |> Quantity.plus elevationIncrease)
-            , maxX = Quantity.max contentExtrema.maxX (myExtrema.maxX |> Quantity.minus elevationIncrease)
-            , maxY = Quantity.max contentExtrema.maxY (myExtrema.maxY |> Quantity.minus elevationIncrease)
-            }
 
         { nwChildBox, neChildBox, swChildBox, seChildBox } =
             { nwChildBox =
@@ -1205,74 +932,92 @@ terrainFromIndex myBox enclosingBox orientation options baseElevation index =
                 && count
                 > 1
 
-        topColour =
-            terrainColourFromHeight <| Length.inMeters top
-
-        sideColour =
-            terrainColourFromHeight <| 0.5 * (Length.inMeters top + Length.inMeters baseElevation)
-
-        northernBottomEdge =
-            if orientation == NW || orientation == NE then
-                parentExtrema.maxY
-
-            else
-                myExtrema.maxY
-
-        southernBottomEdge =
-            if orientation == SW || orientation == SE then
-                parentExtrema.minY
-
-            else
-                myExtrema.minY
-
-        easternBottomEdge =
-            if orientation == NE || orientation == SE then
-                parentExtrema.maxX
-
-            else
-                myExtrema.maxX
-
-        westernBottomEdge =
-            if orientation == NW || orientation == SW then
-                parentExtrema.minX
-
-            else
-                myExtrema.minX
-
-        northernSlope =
-            -- Better to write this slowly. Use inner minX, maxX at top
-            Scene3d.quad (Material.matte sideColour)
-                (Point3d.xyz plateauExtrema.minX plateauExtrema.maxY top)
-                (Point3d.xyz plateauExtrema.maxX plateauExtrema.maxY top)
-                (Point3d.xyz easternBottomEdge northernBottomEdge baseElevation)
-                (Point3d.xyz westernBottomEdge northernBottomEdge baseElevation)
-
-        southernSlope =
-            -- Better to write this slowly. Use inner minX, maxX at top
-            Scene3d.quad (Material.matte sideColour)
-                (Point3d.xyz plateauExtrema.minX plateauExtrema.minY top)
-                (Point3d.xyz plateauExtrema.maxX plateauExtrema.minY top)
-                (Point3d.xyz easternBottomEdge southernBottomEdge baseElevation)
-                (Point3d.xyz westernBottomEdge southernBottomEdge baseElevation)
-
-        westernSlope =
-            -- Better to write this slowly. Use inner minX, maxX at top
-            Scene3d.quad (Material.matte sideColour)
-                (Point3d.xyz plateauExtrema.minX plateauExtrema.minY top)
-                (Point3d.xyz plateauExtrema.minX plateauExtrema.maxY top)
-                (Point3d.xyz westernBottomEdge northernBottomEdge baseElevation)
-                (Point3d.xyz westernBottomEdge southernBottomEdge baseElevation)
-
-        easternSlope =
-            -- Better to write this slowly. Use inner minX, maxX at top
-            Scene3d.quad (Material.matte sideColour)
-                (Point3d.xyz plateauExtrema.maxX plateauExtrema.minY top)
-                (Point3d.xyz plateauExtrema.maxX plateauExtrema.maxY top)
-                (Point3d.xyz easternBottomEdge northernBottomEdge baseElevation)
-                (Point3d.xyz easternBottomEdge southernBottomEdge baseElevation)
-
         thisLevelSceneElements =
             if top |> Quantity.greaterThan baseElevation then
+                let
+                    elevationIncrease =
+                        topBeforeAdjustment |> Quantity.minus baseElevation
+
+                    parentExtrema =
+                        BoundingBox2d.extrema enclosingBox
+
+                    contentExtrema =
+                        BoundingBox2d.extrema contentBox
+
+                    plateauExtrema =
+                        -- How big would the top be if we sloped the sides at 45 degrees?
+                        { minX = Quantity.min contentExtrema.minX (myExtrema.minX |> Quantity.plus elevationIncrease)
+                        , minY = Quantity.min contentExtrema.minY (myExtrema.minY |> Quantity.plus elevationIncrease)
+                        , maxX = Quantity.max contentExtrema.maxX (myExtrema.maxX |> Quantity.minus elevationIncrease)
+                        , maxY = Quantity.max contentExtrema.maxY (myExtrema.maxY |> Quantity.minus elevationIncrease)
+                        }
+
+                    topColour =
+                        terrainColourFromHeight <| Length.inMeters top
+
+                    sideColour =
+                        terrainColourFromHeight <| 0.5 * (Length.inMeters top + Length.inMeters baseElevation)
+
+                    northernBottomEdge =
+                        if orientation == NW || orientation == NE then
+                            parentExtrema.maxY
+
+                        else
+                            myExtrema.maxY
+
+                    southernBottomEdge =
+                        if orientation == SW || orientation == SE then
+                            parentExtrema.minY
+
+                        else
+                            myExtrema.minY
+
+                    easternBottomEdge =
+                        if orientation == NE || orientation == SE then
+                            parentExtrema.maxX
+
+                        else
+                            myExtrema.maxX
+
+                    westernBottomEdge =
+                        if orientation == NW || orientation == SW then
+                            parentExtrema.minX
+
+                        else
+                            myExtrema.minX
+
+                    northernSlope =
+                        -- Better to write this slowly. Use inner minX, maxX at top
+                        Scene3d.quad (Material.matte sideColour)
+                            (Point3d.xyz plateauExtrema.minX plateauExtrema.maxY top)
+                            (Point3d.xyz plateauExtrema.maxX plateauExtrema.maxY top)
+                            (Point3d.xyz easternBottomEdge northernBottomEdge baseElevation)
+                            (Point3d.xyz westernBottomEdge northernBottomEdge baseElevation)
+
+                    southernSlope =
+                        -- Better to write this slowly. Use inner minX, maxX at top
+                        Scene3d.quad (Material.matte sideColour)
+                            (Point3d.xyz plateauExtrema.minX plateauExtrema.minY top)
+                            (Point3d.xyz plateauExtrema.maxX plateauExtrema.minY top)
+                            (Point3d.xyz easternBottomEdge southernBottomEdge baseElevation)
+                            (Point3d.xyz westernBottomEdge southernBottomEdge baseElevation)
+
+                    westernSlope =
+                        -- Better to write this slowly. Use inner minX, maxX at top
+                        Scene3d.quad (Material.matte sideColour)
+                            (Point3d.xyz plateauExtrema.minX plateauExtrema.minY top)
+                            (Point3d.xyz plateauExtrema.minX plateauExtrema.maxY top)
+                            (Point3d.xyz westernBottomEdge northernBottomEdge baseElevation)
+                            (Point3d.xyz westernBottomEdge southernBottomEdge baseElevation)
+
+                    easternSlope =
+                        -- Better to write this slowly. Use inner minX, maxX at top
+                        Scene3d.quad (Material.matte sideColour)
+                            (Point3d.xyz plateauExtrema.maxX plateauExtrema.minY top)
+                            (Point3d.xyz plateauExtrema.maxX plateauExtrema.maxY top)
+                            (Point3d.xyz easternBottomEdge northernBottomEdge baseElevation)
+                            (Point3d.xyz easternBottomEdge southernBottomEdge baseElevation)
+                in
                 [ Scene3d.quad (Material.matte topColour)
                     (Point3d.xyz plateauExtrema.maxX plateauExtrema.maxY top)
                     (Point3d.xyz plateauExtrema.maxX plateauExtrema.minY top)

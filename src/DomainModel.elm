@@ -3,7 +3,6 @@ module DomainModel exposing
     , GPXSource
     , PeteTree(..)
     , RoadSection
-    , TrackPoint
     , asRecord
     , boundingBox
     , distanceFromIndex
@@ -14,8 +13,6 @@ module DomainModel exposing
     , extractPointsInRange
     , foldOverRoute
     , foldOverRouteRL
-    , foldOverRouteRLwithDepthLimit
-    , getAllEarthPointsInNaturalOrder
     , getAllGPXPointsInDict
     , getAllGPXPointsInNaturalOrder
     , getDualCoords
@@ -29,23 +26,17 @@ module DomainModel exposing
     , indexFromDistanceRoundedDown
     , indexFromDistanceRoundedUp
     , insertPointsIntoLeaf
-    , interpolateGpxByTime
     , interpolateTrack
     , leafFromIndex
     , lngLatPair
-    , makeLeaf
-    , makeRoadSection
     , nearestToEarthPoint
     , nearestToLonLat
     , nearestToRay
     , pointFromGpxWithReference
     , queryRoadsUsingFilter
-    , rebuildTree
     , replaceRange
     , skipCount
-    , sourceData
     , startPoint
-    , trackPointsForOutput
     , traverseTreeBetweenLimitsToDepth
     , treeFromSourcePoints
     , treeFromSourcesWithExistingReference
@@ -63,13 +54,13 @@ import Direction2d exposing (Direction2d)
 import Direction3d
 import Json.Encode as E
 import LeafIndex exposing (LeafIndex, LeafIndexEntry)
-import Length exposing (Length, Meters, inMeters)
+import Length exposing (Meters)
 import List.Extra
 import LocalCoords exposing (LocalCoords)
 import Point3d exposing (Point3d)
 import Quantity exposing (Quantity)
 import SpatialIndex
-import Spherical as Spherical exposing (range)
+import Spherical exposing (range)
 import Time
 import Utils
 
@@ -87,17 +78,6 @@ type alias EarthPoint =
     --Ooh, 4D.
     { space : Point3d Meters LocalCoords
     , time : Maybe Time.Posix
-    }
-
-
-type alias TrackPoint =
-    -- A type designed for output, not for computation!
-    { distanceFromStart : Quantity Float Meters
-    , longitude : Angle
-    , latitude : Angle
-    , altitude : Quantity Float Meters
-    , gradient : Float
-    , trueLength : Quantity Float Meters
     }
 
 
@@ -192,7 +172,7 @@ trueLength treeNode =
 skipCount : PeteTree -> Int
 skipCount treeNode =
     case treeNode of
-        Leaf leaf ->
+        Leaf _ ->
             1
 
         Node node ->
@@ -249,11 +229,6 @@ gpxFromPointWithReference reference point =
         latitude
         (Length.meters altitude)
         point.time
-
-
-makeLeaf : GPXSource -> GPXSource -> GPXSource -> PeteTree
-makeLeaf reference earth1 earth2 =
-    Leaf <| makeRoadSection reference earth1 earth2
 
 
 makeRoadSection : GPXSource -> GPXSource -> GPXSource -> RoadSection
@@ -393,18 +368,6 @@ combineInfo info1 info2 =
     }
 
 
-rebuildTree : GPXSource -> Maybe PeteTree -> Maybe PeteTree
-rebuildTree referencePoint treeNode =
-    case treeNode of
-        Just something ->
-            something
-                |> getAllGPXPointsInNaturalOrder
-                |> treeFromSourcesWithExistingReference referencePoint
-
-        Nothing ->
-            Nothing
-
-
 replaceRange :
     Int
     -> Int
@@ -465,122 +428,6 @@ takePointsFromRight numPoints tree =
             |> Maybe.withDefault []
 
 
-replaceRangeInternal :
-    Int
-    -> Int
-    -> GPXSource
-    -> List GPXSource
-    -> PeteTree
-    -> Maybe PeteTree
-replaceRangeInternal fromStart fromEnd withReferencePoint newPoints currentTree =
-    {--
-        This is our key edit function for external use.
-
-        Internally, we make minimal tree changes to make it so, at lowest level possible.
-        Of course, we reconstruct affected nodes.
-        The fromStart, fromEnd is because it makes life easier for Undo, and it has symmetry.
-        So, the rules:
-        If you can delegate to one child, do so, and safeJoin result to sibling.
-        Otherwise, you have to handle it.
-        (I briefly thought about passing one half to each child, but that would be bad.)
-
-        Simplest and sort of neatest way here is to make a single list (yes, list) from the
-        parts we keep and the new parts, then use existing logic to form a new node.
-        Locally balanced, not too shabby, if many edits are sort of "like for like".
-        Key semantic point - this works in POINT index space and the values are inclusive
-        (otherwise, how could we do a whole track edit?).
-
-        To be clear, if our points are <ABC> and we use `replaceRange 0 0 []`,
-        the track would disappear, and we would return a Nothing. (It's not our job to stop that.)
-        Likewise `replaceRange 1 1 []' returns <AC> (a single Leaf).
-
-        Also, note the caller MUST have previously derived GPX co-ords, not local metric points,
-        using functions that belong in TrackLoaded.
-    --}
-    case currentTree of
-        Leaf _ ->
-            buildNewNodeWithRange fromStart fromEnd withReferencePoint newPoints currentTree
-
-        Node node ->
-            let
-                containedInLeft =
-                    -- These are '<' not '<=', validated by tests.
-                    fromStart
-                        < skipCount node.left
-                        && (fromEnd - skipCount node.right > 0)
-
-                containedInRight =
-                    fromEnd
-                        < skipCount node.right
-                        && (fromStart - skipCount node.left > 0)
-            in
-            case ( containedInLeft, containedInRight ) of
-                ( True, True ) ->
-                    -- Really, how can that be? Better take control.
-                    buildNewNodeWithRange
-                        fromStart
-                        fromEnd
-                        withReferencePoint
-                        newPoints
-                        currentTree
-
-                ( False, False ) ->
-                    -- The buck stops here.
-                    buildNewNodeWithRange
-                        fromStart
-                        fromEnd
-                        withReferencePoint
-                        newPoints
-                        currentTree
-
-                ( True, False ) ->
-                    -- Delegate to left
-                    safeJoin
-                        (replaceRange
-                            fromStart
-                            (fromEnd - skipCount node.right)
-                            withReferencePoint
-                            newPoints
-                            node.left
-                        )
-                        (Just node.right)
-
-                ( False, True ) ->
-                    -- Delegate to right
-                    safeJoin
-                        (Just node.left)
-                        (replaceRange
-                            (fromStart - skipCount node.left)
-                            fromEnd
-                            withReferencePoint
-                            newPoints
-                            node.right
-                        )
-
-
-buildNewNodeWithRange : Int -> Int -> GPXSource -> List GPXSource -> PeteTree -> Maybe PeteTree
-buildNewNodeWithRange fromStart fromEnd withReferencePoint newPoints currentTree =
-    {-
-       The decision is made, we simply make a new node.
-       No need for finesse, at least initially.
-       We should be a few levels down the tree in most cases.
-    -}
-    let
-        currentGpx =
-            recreateGpxSources <| Just currentTree
-
-        intro =
-            List.take fromStart currentGpx
-
-        outro =
-            List.drop (1 + skipCount currentTree - fromEnd) currentGpx
-
-        updatedGpx =
-            intro ++ newPoints ++ outro
-    in
-    treeFromSourcesWithExistingReference withReferencePoint updatedGpx
-
-
 joiningNode : PeteTree -> PeteTree -> PeteTree
 joiningNode left right =
     -- Joins two nodes, with no special care needed.
@@ -598,51 +445,11 @@ safeJoin left right =
         ( Just leftTree, Just rightTree ) ->
             Just <| joiningNode leftTree rightTree
 
-        ( Just leftTree, Nothing ) ->
+        ( Just _, Nothing ) ->
             left
 
-        ( Nothing, Just rightTree ) ->
+        ( Nothing, Just _ ) ->
             right
-
-        ( Nothing, Nothing ) ->
-            Nothing
-
-
-joinReplacingEndPointsWithNewLeaf : PeteTree -> PeteTree -> Maybe PeteTree
-joinReplacingEndPointsWithNewLeaf left right =
-    -- Joins two nodes but in the case where we do not want to keep the
-    -- innermost points of each side but replace them with a new leaf.
-    let
-        newLeaf =
-            Just <|
-                Leaf <|
-                    makeRoadSectionKnowingLocalCoords (penultimatePoint left) (secondPoint right)
-
-        truncatedLeft =
-            takeFromLeft (skipCount left - 1) left
-
-        truncatedRight =
-            takeFromRight (skipCount right - 1) right
-    in
-    if skipCount left > skipCount right then
-        -- Attach to smaller side
-        safeJoin truncatedLeft (safeJoin newLeaf truncatedRight)
-
-    else
-        safeJoin (safeJoin truncatedLeft newLeaf) truncatedRight
-
-
-safeJoinReplacingEndPointsWithNewLeaf : Maybe PeteTree -> Maybe PeteTree -> Maybe PeteTree
-safeJoinReplacingEndPointsWithNewLeaf mLeft mRight =
-    case ( mLeft, mRight ) of
-        ( Just left, Just right ) ->
-            joinReplacingEndPointsWithNewLeaf left right
-
-        ( Just left, Nothing ) ->
-            takeFromLeft (skipCount left - 1) left
-
-        ( Nothing, Just right ) ->
-            takeFromRight (skipCount right - 1) right
 
         ( Nothing, Nothing ) ->
             Nothing
@@ -750,7 +557,7 @@ treeFromSourcesWithExistingReference referencePoint track =
 leafFromIndex : Int -> PeteTree -> PeteTree
 leafFromIndex index treeNode =
     case treeNode of
-        Leaf info ->
+        Leaf _ ->
             treeNode
 
         Node info ->
@@ -821,7 +628,7 @@ indexFromDistanceRoundedDown : Length.Length -> PeteTree -> Int
 indexFromDistanceRoundedDown distance treeNode =
     -- Must behave this way for flythrough
     case treeNode of
-        Leaf info ->
+        Leaf _ ->
             0
 
         Node info ->
@@ -837,7 +644,7 @@ indexFromDistanceRoundedUp : Length.Length -> PeteTree -> Int
 indexFromDistanceRoundedUp distance treeNode =
     -- Must behave this way for Smart Smoother
     case treeNode of
-        Leaf info ->
+        Leaf _ ->
             1
 
         Node info ->
@@ -889,63 +696,6 @@ estimateTimeAtDistance distance tree =
         proportionOfDistance
         leaf.startPoint.time
         leaf.endPoint.time
-
-
-indexFromTime : Maybe Time.Posix -> PeteTree -> Int
-indexFromTime relativeTime treeNode =
-    case treeNode of
-        Leaf info ->
-            if relativeTime |> Utils.timeLessThanOrEqualTo info.transitTime then
-                0
-
-            else
-                1
-
-        Node info ->
-            let
-                leftAsRecord =
-                    asRecord info.left
-            in
-            if relativeTime |> Utils.timeLessThanOrEqualTo leftAsRecord.transitTime then
-                indexFromTime relativeTime info.left
-
-            else
-                skipCount info.left
-                    + indexFromTime
-                        (relativeTime |> Utils.subtractTimes leftAsRecord.transitTime)
-                        info.right
-
-
-interpolateGpxByTime : PeteTree -> Time.Posix -> GPXSource
-interpolateGpxByTime tree relativeTime =
-    --Find leaf using transit times, interpolate the leaf. If no times, should not be used.
-    let
-        bestLeafIndex =
-            indexFromTime (Just relativeTime) tree
-
-        bestLeaf =
-            asRecord <| leafFromIndex bestLeafIndex tree
-
-        timeIntoLeaf =
-            Utils.subtractTimes bestLeaf.startPoint.time (Just relativeTime)
-
-        proportion =
-            case ( bestLeaf.transitTime, timeIntoLeaf ) of
-                ( Just transitTime, Just leafTime ) ->
-                    (toFloat <| Time.posixToMillis leafTime) / (toFloat <| Time.posixToMillis transitTime)
-
-                _ ->
-                    0
-
-        ( gpxStart, gpxEnd ) =
-            bestLeaf.sourceData
-    in
-    --TODO: Should be OK to do this.
-    { longitude = Utils.interpolateLongitude proportion gpxStart.longitude gpxEnd.longitude
-    , latitude = Utils.interpolateLatitude proportion gpxStart.latitude gpxEnd.latitude
-    , altitude = Utils.interpolateAltitude proportion gpxStart.altitude gpxEnd.altitude
-    , timestamp = Utils.interpolateTimes proportion gpxStart.timestamp gpxEnd.timestamp
-    }
 
 
 interpolateTrack : Length.Length -> PeteTree -> ( Int, EarthPoint )
@@ -1039,10 +789,6 @@ nearestToRay ray tree leafIndex current =
 
 gpxDistance : GPXSource -> GPXSource -> Length.Length
 gpxDistance p1 p2 =
-    let
-        lon p =
-            p.longitude |> Direction2d.toAngle
-    in
     Length.meters <|
         range
             ( Direction2d.toAngle p1.longitude, p1.latitude )
@@ -1101,7 +847,7 @@ takeFromLeft leavesFromLeft treeNode =
 
     else
         case treeNode of
-            Leaf roadSection ->
+            Leaf _ ->
                 -- Awkward, can't split a leaf
                 Nothing
 
@@ -1121,7 +867,7 @@ takeFromRight leavesFromRight treeNode =
 
     else
         case treeNode of
-            Leaf roadSection ->
+            Leaf _ ->
                 -- Awkward, can't split a leaf
                 Nothing
 
@@ -1129,25 +875,6 @@ takeFromRight leavesFromRight treeNode =
                 safeJoin
                     (takeFromRight (leavesFromRight - skipCount record.right) record.left)
                     (takeFromRight leavesFromRight record.right)
-
-
-splitTreeAt : Int -> PeteTree -> ( Maybe PeteTree, Maybe PeteTree )
-splitTreeAt leavesToTheLeft thisNode =
-    -- This may be less efficient than the single pass version, but look at it.
-    -- Note that the given point is included in both sides. I.e. this splits by road segment.
-    ( takeFromLeft leavesToTheLeft thisNode
-    , takeFromRight (skipCount thisNode - leavesToTheLeft) thisNode
-    )
-
-
-safeSplitTreeAt : Int -> Maybe PeteTree -> ( Maybe PeteTree, Maybe PeteTree )
-safeSplitTreeAt index mTree =
-    case mTree of
-        Just isTree ->
-            splitTreeAt index isTree
-
-        Nothing ->
-            ( Nothing, Nothing )
 
 
 getFirstLeaf : PeteTree -> RoadSection
@@ -1168,24 +895,6 @@ getLastLeaf someNode =
 
         Node node ->
             getLastLeaf node.right
-
-
-secondPoint : PeteTree -> ( GPXSource, EarthPoint )
-secondPoint tree =
-    let
-        leaf =
-            getFirstLeaf tree
-    in
-    ( Tuple.second leaf.sourceData, leaf.endPoint )
-
-
-penultimatePoint : PeteTree -> ( GPXSource, EarthPoint )
-penultimatePoint tree =
-    let
-        leaf =
-            getLastLeaf tree
-    in
-    ( Tuple.first leaf.sourceData, leaf.startPoint )
 
 
 extractPointsInRange : Int -> Int -> PeteTree -> List ( EarthPoint, GPXSource )
@@ -1212,41 +921,6 @@ extractPointsInRange fromStart fromEnd trackTree =
                 []
 
 
-safeEnumerateEndPoints : Maybe PeteTree -> List ( EarthPoint, GPXSource )
-safeEnumerateEndPoints mTree =
-    case mTree of
-        Just tree ->
-            enumerateEndPoints tree []
-
-        Nothing ->
-            []
-
-
-recreateGpxSources : Maybe PeteTree -> List GPXSource
-recreateGpxSources mTree =
-    case mTree of
-        Just fromTree ->
-            (getFirstLeaf fromTree |> .sourceData |> Tuple.first)
-                :: (enumerateEndPoints fromTree [] |> List.map Tuple.second)
-
-        Nothing ->
-            []
-
-
-enumerateEndPoints : PeteTree -> List ( EarthPoint, GPXSource ) -> List ( EarthPoint, GPXSource )
-enumerateEndPoints treeNode accum =
-    -- The name describes the output, not the method!
-    -- Note it gives end points, you need to add the start point somewhere!
-    case treeNode of
-        Leaf leaf ->
-            ( leaf.endPoint, Tuple.second leaf.sourceData ) :: accum
-
-        Node node ->
-            accum
-                |> enumerateEndPoints node.right
-                |> enumerateEndPoints node.left
-
-
 foldOverRoute : (RoadSection -> a -> a) -> PeteTree -> a -> a
 foldOverRoute foldFn treeNode startValues =
     traverseTreeBetween
@@ -1270,23 +944,6 @@ foldOverRouteRL foldFn treeNode accum =
                 |> foldOverRouteRL foldFn node.left
 
 
-foldOverRouteRLwithDepthLimit : Int -> (RoadSection -> a -> a) -> PeteTree -> a -> a
-foldOverRouteRLwithDepthLimit depth foldFn treeNode accum =
-    -- A right to left walk allow the fold fn to cons and not need reversing.
-    case treeNode of
-        Leaf leaf ->
-            foldFn leaf accum
-
-        Node node ->
-            if depth > 0 then
-                accum
-                    |> foldOverRouteRLwithDepthLimit (depth - 1) foldFn node.right
-                    |> foldOverRouteRLwithDepthLimit (depth - 1) foldFn node.left
-
-            else
-                foldFn node.nodeContent accum
-
-
 getAllGPXPointsInNaturalOrder : PeteTree -> List GPXSource
 getAllGPXPointsInNaturalOrder treeNode =
     -- A right-to-left traversal that is POINT focused.
@@ -1300,21 +957,6 @@ getAllGPXPointsInNaturalOrder treeNode =
             foldOverRouteRL internalFoldFn treeNode []
     in
     gpxPointFromIndex 0 treeNode :: endPoints
-
-
-getAllEarthPointsInNaturalOrder : PeteTree -> List EarthPoint
-getAllEarthPointsInNaturalOrder treeNode =
-    -- A right-to-left traversal that is POINT focused.
-    -- Really handy for output or for tree rebuilding.
-    let
-        internalFoldFn : RoadSection -> List EarthPoint -> List EarthPoint
-        internalFoldFn road accum =
-            road.endPoint :: accum
-
-        endPoints =
-            foldOverRouteRL internalFoldFn treeNode []
-    in
-    earthPointFromIndex 0 treeNode :: endPoints
 
 
 getAllGPXPointsInDict : PeteTree -> Dict Int GPXSource
@@ -1337,13 +979,6 @@ getAllGPXPointsInDict treeNode =
                 ( 1, Dict.insert 0 (gpxPointFromIndex 0 treeNode) Dict.empty )
     in
     outputs
-
-
-treeToRoadSectionList : PeteTree -> List RoadSection
-treeToRoadSectionList someNode =
-    -- By way of example use of all-purpose traversal function,
-    -- this will do the whole tree with no depth limit.
-    foldOverRoute (::) someNode []
 
 
 traverseTreeBetween :
@@ -1418,33 +1053,6 @@ traverseTreeBetweenLimitsToDepth startingAt endingAt depthFunction currentDepth 
                             (currentDepth + 1)
                             node.right
                             foldFn
-
-
-trackPointsForOutput : PeteTree -> List TrackPoint
-trackPointsForOutput tree =
-    --NOTE: This ignores the final point, caller must add.
-    let
-        foldFn : RoadSection -> List TrackPoint -> List TrackPoint
-        foldFn node accum =
-            let
-                distance =
-                    case accum of
-                        prevPoint :: _ ->
-                            prevPoint.distanceFromStart |> Quantity.plus prevPoint.trueLength
-
-                        [] ->
-                            Quantity.zero
-            in
-            { distanceFromStart = distance
-            , longitude = Direction2d.toAngle <| .longitude <| Tuple.first <| node.sourceData
-            , latitude = .latitude <| Tuple.first <| node.sourceData
-            , altitude = .altitude <| Tuple.first <| node.sourceData
-            , gradient = node.gradientAtStart
-            , trueLength = node.trueLength
-            }
-                :: accum
-    in
-    foldOverRoute foldFn tree []
 
 
 gradientFromNode treeNode =

@@ -1,4 +1,4 @@
-module Tools.GraphOptions exposing (..)
+module Tools.GraphOptions exposing (ClickDetect(..), Cluster, Direction(..), Edge, Graph, InsertedPointOnLeaf, Options, Traversal, TraversalDisplay, XY)
 
 import BoundingBox3d exposing (BoundingBox3d)
 import Dict exposing (Dict)
@@ -80,17 +80,6 @@ type alias TraversalDisplay =
     }
 
 
-type alias Route =
-    List Traversal
-
-
-type alias MappedPoint =
-    -- for expressing that a point needs to be moved by pre-processor.
-    { mapSubject : Int
-    , mapPosition : EarthPoint
-    }
-
-
 type alias InsertedPointOnLeaf =
     -- for expressing that we need a new point inserted in a leaf, it being the
     -- point closest to a "nearby" point.
@@ -98,13 +87,6 @@ type alias InsertedPointOnLeaf =
     , leafNumber : Int
     , distanceAlong : Quantity Float Meters
     , earthPoint : EarthPoint
-    }
-
-
-type alias NearbyPoints =
-    { owner : Int
-    , nearby : List Int
-    , count : Int
     }
 
 

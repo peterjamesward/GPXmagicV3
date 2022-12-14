@@ -1,22 +1,17 @@
-module Tools.SplitAndJoin exposing (..)
+module Tools.SplitAndJoin exposing (Msg(..), defaultOptions, parseAndAppend, toolId, toolStateChange, update, view, writeOneSection)
 
 import Actions exposing (ToolAction)
-import Delay
-import Dict exposing (Dict)
 import DomainModel exposing (GPXSource, PeteTree, indexFromDistance, skipCount, trueLength)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (button)
 import File exposing (File)
 import File.Download as Download
-import File.Select as Select
 import FlatColors.ChinesePalette
 import GpxParser
 import Length
-import List.Extra
 import Quantity
 import String.Interpolate
-import Task
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.OneClickQuickFix as OneClickQuickFix
@@ -42,7 +37,6 @@ type Msg
     | FileSelected File
     | FileLoaded String
     | ToggleAutofix Bool
-    | DisplayInfo String String
 
 
 defaultOptions : Options
@@ -125,7 +119,7 @@ update msg settings mTrack wrap =
 
         WriteSection moreSections ->
             case moreSections of
-                section1 :: evenMoreSections ->
+                _ :: evenMoreSections ->
                     ( settings
                     , [ Actions.WriteTrackSections moreSections
                       , Actions.DelayMessage 2000 <| wrap <| WriteSection <| evenMoreSections
@@ -134,9 +128,6 @@ update msg settings mTrack wrap =
 
                 [] ->
                     ( settings, [] )
-
-        DisplayInfo tool tag ->
-            ( settings, [ Actions.DisplayInfo tool tag ] )
 
 
 writeOneSection :
@@ -147,7 +138,7 @@ writeOneSection :
     -> Cmd msg
 writeOneSection sections options track rgtOptions =
     case sections of
-        ( index, start, end ) :: rest ->
+        ( index, start, end ) :: _ ->
             let
                 ( metricStart, metricEnd ) =
                     if options.addBuffers then
@@ -225,12 +216,7 @@ toolStateChange :
     -> Maybe (TrackLoaded msg)
     -> ( Options, List (ToolAction msg) )
 toolStateChange opened colour options track =
-    case ( opened, track ) of
-        ( True, Just theTrack ) ->
-            ( options, [] )
-
-        _ ->
-            ( options, [] )
+    ( options, [] )
 
 
 calculateSections : Length.Length -> Options -> List ( Int, Float, Float )

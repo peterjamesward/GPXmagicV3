@@ -1,4 +1,4 @@
-module RoadIndex exposing (..)
+module RoadIndex exposing (Intersection, IntersectionType(..), PointXY, RoadIndex, findFeatures)
 
 {-
    Here we compile a dictionary of Leaf so that we can see which Leafs:
@@ -12,8 +12,8 @@ module RoadIndex exposing (..)
 
 import Axis2d
 import DomainModel exposing (PeteTree, RoadSection, foldOverRoute)
-import Length exposing (Length, Meters)
-import LineSegment2d exposing (LineSegment2d)
+import Length exposing (Meters)
+import LineSegment2d
 import LineSegment3d
 import LocalCoords exposing (LocalCoords)
 import Point2d exposing (Point2d)
@@ -96,75 +96,72 @@ checkLeafForIntersections myRoad ( myLeafNumber, index, intersects ) =
         roadHasOverlap ( otherIndex, otherRoad ) =
             -- Work out what type of overlap this is and add to index.
             let
-                otherSegment =
-                    LineSegment3d.from otherRoad.startPoint.space otherRoad.endPoint.space
-                        |> LineSegment3d.projectInto SketchPlane3d.xy
-
-                intersectPoint =
-                    -- See if lines cross (not Nothing)
-                    LineSegment2d.intersectionPoint thisSegment otherSegment
-
-                axisIntersection =
-                    -- Nothing means co-linear, in either direction
-                    otherSegment |> LineSegment2d.intersectionWithAxis thisAxis
-
-                axisSeparation =
-                    otherSegment |> LineSegment2d.signedDistanceFrom thisAxis
-
-                proximal =
-                    axisSeparation |> Interval.contains Quantity.zero
-
                 notAdjacent =
                     abs (myLeafNumber - otherIndex) > 1
-
-                parallelAndClose =
-                    proximal && axisIntersection == Nothing
-
-                ( startAlongAxis, endAlongAxis ) =
-                    -- Should allow us to determine direction
-                    ( otherRoad.startPoint.space
-                        |> Point3d.projectInto SketchPlane3d.xy
-                        |> Point2d.signedDistanceAlong thisAxis
-                    , otherRoad.endPoint.space
-                        |> Point3d.projectInto SketchPlane3d.xy
-                        |> Point2d.signedDistanceAlong thisAxis
-                    )
-
-                sameDirection =
-                    startAlongAxis |> Quantity.lessThanOrEqualTo Quantity.zero
-
-                intersection : Maybe Intersection
-                intersection =
-                    if notAdjacent then
-                        case ( intersectPoint, parallelAndClose, sameDirection ) of
-                            ( Just pt, _, _ ) ->
-                                Just
-                                    { thisSegment = myLeafNumber
-                                    , otherSegment = otherIndex
-                                    , category = Crossing pt
-                                    }
-
-                            ( Nothing, True, True ) ->
-                                Just
-                                    { thisSegment = myLeafNumber
-                                    , otherSegment = otherIndex
-                                    , category = SameDirection
-                                    }
-
-                            ( Nothing, True, False ) ->
-                                Just
-                                    { thisSegment = myLeafNumber
-                                    , otherSegment = otherIndex
-                                    , category = ContraDirection
-                                    }
-
-                            _ ->
-                                Nothing
-
-                    else
-                        Nothing
             in
-            intersection
+            if notAdjacent then
+                let
+                    ( startAlongAxis, _ ) =
+                        -- Should allow us to determine direction
+                        ( otherRoad.startPoint.space
+                            |> Point3d.projectInto SketchPlane3d.xy
+                            |> Point2d.signedDistanceAlong thisAxis
+                        , otherRoad.endPoint.space
+                            |> Point3d.projectInto SketchPlane3d.xy
+                            |> Point2d.signedDistanceAlong thisAxis
+                        )
+
+                    otherSegment =
+                        LineSegment3d.from otherRoad.startPoint.space otherRoad.endPoint.space
+                            |> LineSegment3d.projectInto SketchPlane3d.xy
+
+                    intersectPoint =
+                        -- See if lines cross (not Nothing)
+                        LineSegment2d.intersectionPoint thisSegment otherSegment
+
+                    axisIntersection =
+                        -- Nothing means co-linear, in either direction
+                        otherSegment |> LineSegment2d.intersectionWithAxis thisAxis
+
+                    axisSeparation =
+                        otherSegment |> LineSegment2d.signedDistanceFrom thisAxis
+
+                    proximal =
+                        axisSeparation |> Interval.contains Quantity.zero
+
+                    parallelAndClose =
+                        proximal && axisIntersection == Nothing
+
+                    sameDirection =
+                        startAlongAxis |> Quantity.lessThanOrEqualTo Quantity.zero
+                in
+                case ( intersectPoint, parallelAndClose, sameDirection ) of
+                    ( Just pt, _, _ ) ->
+                        Just
+                            { thisSegment = myLeafNumber
+                            , otherSegment = otherIndex
+                            , category = Crossing pt
+                            }
+
+                    ( Nothing, True, True ) ->
+                        Just
+                            { thisSegment = myLeafNumber
+                            , otherSegment = otherIndex
+                            , category = SameDirection
+                            }
+
+                    ( Nothing, True, False ) ->
+                        Just
+                            { thisSegment = myLeafNumber
+                            , otherSegment = otherIndex
+                            , category = ContraDirection
+                            }
+
+                    _ ->
+                        Nothing
+
+            else
+                Nothing
     in
     ( myLeafNumber + 1
     , SpatialIndex.add prepContent index

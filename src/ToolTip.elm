@@ -1,24 +1,13 @@
-module ToolTip exposing (..)
+module ToolTip exposing (buttonStylesWithTooltip, localisedTooltip, myTooltip, tooltip)
 
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
-import Html exposing (Html)
 import Html.Attributes
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import ViewPureStyles exposing (neatToolsBorder, rgtPurple)
-
-
-example : Html msg
-example =
-    layout [ width fill, height fill ] <|
-        column
-            [ centerX, centerY ]
-            [ el [ tooltip above (myTooltip "foo") ] (text "foo")
-            , el [ tooltip below (myTooltip "bar") ] (text "bar")
-            ]
 
 
 localisedTooltip : I18NOptions.Location -> String -> String -> Element msg

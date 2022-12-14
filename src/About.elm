@@ -1,4 +1,4 @@
-module About exposing (..)
+module About exposing (aboutText)
 
 
 aboutText =

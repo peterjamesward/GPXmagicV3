@@ -1,4 +1,4 @@
-module Tools.InterpolateOptions exposing (..)
+module Tools.InterpolateOptions exposing (ExtentOption(..), Options)
 
 -- Putting these in a separate module means we can use with Action, without an import loop.
 

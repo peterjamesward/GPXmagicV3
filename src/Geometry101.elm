@@ -1,9 +1,6 @@
-module Geometry101 exposing (..)
+module Geometry101 exposing (Circle, Column, LineEquation, Matrix, Point, Road, distance, findIntercept, interpolateLine, isAfter, isBefore, lineCircleIntersections, lineEquationFromTwoPoints, lineIntersection, linePerpendicularTo, pointAlongRoad, pointsToGeometry)
 
-import Arc2d
-import Length
 import List
-import Point2d exposing (xCoordinate, yCoordinate)
 
 
 type alias Point =
@@ -43,24 +40,6 @@ type alias Column =
     { t : Float
     , b : Float
     }
-
-
-type alias Row =
-    { l : Float
-    , r : Float
-    }
-
-
-det v1 v2 =
-    v1.x * v2.x + v1.y * v2.y
-
-
-dot v1 v2 =
-    v1.x * v2.y - v1.y * v2.x
-
-
-angle v1 v2 =
-    atan2 (det v1 v2) (dot v1 v2)
 
 
 distance p1 p2 =
@@ -160,93 +139,6 @@ antiInterpolate p pa pb =
 -}
 
 
-findIncircleFromRoads : List Road -> Maybe Circle
-findIncircleFromRoads roads =
-    case roads of
-        [] ->
-            Nothing
-
-        [ _ ] ->
-            Nothing
-
-        [ r1, r2 ] ->
-            findIncircleFromTwoRoads r1 r2
-
-        r1 :: rs ->
-            findIncircleFromRoads <| r1 :: List.take 1 (List.reverse rs)
-
-
-findIncircleFromTwoRoads : Road -> Road -> Maybe Circle
-findIncircleFromTwoRoads r1 r2 =
-    let
-        intersection =
-            if r1.endsAt == r2.startAt then
-                Just r1.endsAt
-
-            else
-                findIntercept r1 r2
-    in
-    case intersection of
-        Just p ->
-            Just <| findIncircle r1.startAt r2.endsAt p
-
-        Nothing ->
-            Nothing
-
-
-findIncircle : Point -> Point -> Point -> Circle
-findIncircle pA pB pC =
-    {-
-       The centre of the inscribed triangle (incentre) requires the lengths of the sides.
-       (The naming convention is that side b is opposite angle B, etc.)
-       |b| = |CP| = 2.0
-       |c| = |BP| = 1.0
-       |p| = |BC| = sqrt 5 = 2.236
-
-       X = (|b|.Bx + |c|.Cx + |p|.Px) / (|b| + |c| + |p|)
-         = (2.0 * 3 + 1.0 * 4 + 2.236 * 4) / 5.236
-         = 3.618
-
-       Y = (|b|.By + |c|.Cy + |p|.Py) / (|b| + |c| + |p|)
-         = (2.0 * 5 + 1.0 * 3 + 2.236 * 5) / 5.236
-         = 4.618
-
-       We also derive the radius of the incircle:
-
-       r = sqrt <| (s - b)(s - c)(s - p)/s, where s = (b + c + p)/2
-
-       That should give us enough information to determine the tangent points.
-       (The triangle formed by these touchpoints is the Gergonne triangle.)
-
-       In our case, s = 2.618
-       r = sqrt <| (2.618 - 2)(2.618 - 1)(2.618 - 2.236)/2.618
-         = sqrt 0.1459
-         = 0.382
-    -}
-    let
-        ( a, b, c ) =
-            ( distance pB pC, distance pA pC, distance pA pB )
-
-        perimeter =
-            a + b + c
-
-        semi =
-            perimeter / 2.0
-
-        r =
-            sqrt <| (semi - a) * (semi - b) * (semi - c) / semi
-
-        x =
-            (a * pA.x + b * pB.x + c * pC.x) / perimeter
-
-        y =
-            (a * pA.y + b * pB.y + c * pC.y) / perimeter
-    in
-    { centre = { x = x, y = y }
-    , radius = r
-    }
-
-
 findIntercept : Road -> Road -> Maybe Point
 findIntercept r1 r2 =
     {-
@@ -288,15 +180,15 @@ lineIntersection l1 l2 =
             , br = l2.b
             }
 
-        column =
-            { t = -1.0 * l1.c, b = -1.0 * l2.c }
-
         inv =
             matrixInverse matrix
     in
     case inv of
         Just inverse ->
             let
+                column =
+                    { t = -1.0 * l1.c, b = -1.0 * l2.c }
+
                 col =
                     matrixMultiplyColumn inverse column
             in
@@ -313,11 +205,11 @@ solveQuadratic a b c =
             b * b - 4 * a * c
     in
     if disc == 0 then
-        [ 0 - b / (a + a) ]
+        [ -(b / (a + a)) ]
 
     else if disc > 0 then
-        [ (0 - b - sqrt disc) / (a + a)
-        , (0 - b + sqrt disc) / (a + a)
+        [ (-b - sqrt disc) / (a + a)
+        , (-b + sqrt disc) / (a + a)
         ]
 
     else
@@ -344,7 +236,7 @@ lineCircleIntersections { a, b, c } { centre, radius } =
             List.map ((+) centre.x) xSolutionsShifted
 
         ySolutions =
-            List.map (\x -> 0 - (a * x + c) / b) xSolutions
+            List.map (\x -> -((a * x + c) / b)) xSolutions
     in
     List.map2 Point xSolutions ySolutions
 

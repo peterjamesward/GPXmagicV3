@@ -1,4 +1,4 @@
-module Tools.CentroidAverageOptions exposing (..)
+module Tools.CentroidAverageOptions exposing (Extent(..), Options)
 
 -- Putting these in a separate module means we can use with Action, without an import loop.
 
@@ -11,5 +11,4 @@ type alias Options =
 
 
 type Extent
-    = ExtentRange
-    | ExtentTrack
+    = ExtentTrack

@@ -1,8 +1,7 @@
-module Tools.SmartSmootherOptions exposing (..)
+module Tools.SmartSmootherOptions exposing (Options)
 
 -- A separate module means we can use with Action, without an import loop.
 
-import Angle exposing (Angle)
 import Length exposing (Meters)
 import PreviewData exposing (PreviewPoint)
 import Quantity exposing (Quantity)
@@ -16,4 +15,3 @@ type alias Options =
     , newPoints : List PreviewPoint
     , blend : Float -- [0,1] relative proportions of forward and reverse deltas.
     }
-

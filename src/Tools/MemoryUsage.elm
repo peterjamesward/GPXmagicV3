@@ -1,4 +1,4 @@
-module Tools.MemoryUsage exposing (..)
+module Tools.MemoryUsage exposing (HeapStatus)
 
 {-
    In Chrome, performance.memory gives

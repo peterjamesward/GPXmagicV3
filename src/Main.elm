@@ -1,9 +1,9 @@
-module Main exposing (main)
+module Main exposing (Model, Msg, main)
 
 import Actions exposing (ToolAction(..))
 import Angle
 import Browser exposing (application)
-import Browser.Dom as Dom exposing (getViewport, getViewportOf)
+import Browser.Dom as Dom
 import Browser.Events
 import Browser.Navigation exposing (Key)
 import Delay
@@ -23,13 +23,13 @@ import FlatColors.AussiePalette
 import FlatColors.ChinesePalette
 import FlatColors.FlatUIPalette
 import GeoCodeDecoders exposing (IpInfo)
-import GpxParser exposing (parseSegments)
+import GpxParser
 import Html exposing (Html, div)
-import Html.Attributes exposing (id, style)
+import Html.Attributes exposing (style)
 import Html.Events.Extra.Mouse as Mouse
-import Http exposing (header)
+import Http
 import Json.Decode as D
-import Json.Encode as E exposing (string)
+import Json.Encode as E
 import LandUseDataOSM
 import LandUseDataTypes
 import List.Extra
@@ -37,9 +37,9 @@ import LocalStorage
 import MapPortController
 import Markdown
 import MyIP
-import OAuthPorts as O exposing (randomBytes)
+import OAuthPorts exposing (randomBytes)
 import OAuthTypes as O exposing (OAuthMsg(..))
-import PaneLayoutManager exposing (Msg(..), ViewMode(..))
+import PaneLayoutManager exposing (Msg(..))
 import Pixels exposing (Pixels)
 import PreviewData exposing (PreviewData, PreviewShape(..))
 import Quantity exposing (Quantity)
@@ -58,7 +58,6 @@ import Tools.DeletePoints as DeletePoints
 import Tools.DirectionChanges
 import Tools.DisplaySettings
 import Tools.Graph
-import Tools.GraphOptions exposing (Graph)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.Interpolate
@@ -81,12 +80,10 @@ import Tools.StravaDataLoad
 import Tools.StravaTools
 import Tools.Timestamp
 import Tools.TrackInfoBox
-import ToolsController exposing (ToolEntry, encodeColour, encodeToolState)
+import ToolsController exposing (encodeColour)
 import TrackLoaded exposing (TrackLoaded, indexLeaves)
-import Url exposing (Protocol(..), Url)
-import Url.Builder as Builder
+import Url exposing (Url)
 import Url.Parser exposing (..)
-import Url.Parser.Query as Query
 import UtilsForViews exposing (uiColourHexString)
 import ViewMap
 import ViewPureStyles exposing (..)
@@ -103,9 +100,7 @@ type Msg
     | ToggleRGTOptions
     | OAuthMessage OAuthMsg
     | AdjustTimeZone Time.Zone
-    | SetRenderDepth Int
     | ReceivedIpDetails (Result Http.Error IpInfo)
-    | IpInfoAcknowledged (Result Http.Error ())
     | StorageMessage E.Value
     | SplitLeftDockRightEdge SplitPane.Msg
     | SplitRightDockLeftEdge SplitPane.Msg
@@ -114,7 +109,6 @@ type Msg
     | ToolsMsg ToolsController.ToolMsg
     | DismissModalMessage
     | PaneMsg PaneLayoutManager.Msg
-    | RepaintMap
     | ToggleToolPopup
     | BackgroundColour Element.Color
     | Language I18NOptions.Location
@@ -204,14 +198,15 @@ decodeSplitValues values model =
 
         decoded =
             D.decodeValue decoder values
-
-        ( width, height ) =
-            ( truncate <| Tuple.first model.windowSize
-            , truncate <| Tuple.second model.windowSize
-            )
     in
     case decoded of
         Ok data ->
+            let
+                ( width, _ ) =
+                    ( truncate <| Tuple.first model.windowSize
+                    , truncate <| Tuple.second model.windowSize
+                    )
+            in
             { model
                 | leftDockRightEdge =
                     SplitPane.init Horizontal
@@ -464,17 +459,10 @@ update msg model =
                             }
             in
             ( { model | ipInfo = ipInfo }
-            , Cmd.batch
-                [ MapPortController.createMap
-                    ViewMap.defaultStyleUrl
-                    mapInfoWithLocation
-
-                --, MyIP.sendIpInfo model.time IpInfoAcknowledged ipInfo
-                ]
+            , MapPortController.createMap
+                ViewMap.defaultStyleUrl
+                mapInfoWithLocation
             )
-
-        IpInfoAcknowledged _ ->
-            ( model, Cmd.none )
 
         TryRemoteLoad ->
             ( model
@@ -494,7 +482,7 @@ update msg model =
                 Ok content ->
                     processGpxContent content
 
-                Err err ->
+                Err _ ->
                     ( model, Cmd.none )
 
         GpxRequested ->
@@ -512,21 +500,6 @@ update msg model =
 
         GpxLoaded content ->
             processGpxContent content
-
-        SetRenderDepth depth ->
-            case model.track of
-                Just track ->
-                    let
-                        newTrack =
-                            { track | renderDepth = depth }
-
-                        newModel =
-                            { model | track = Just track }
-                    in
-                    ( newModel, showTrackOnMapCentered model.mapPointsDraggable newTrack )
-
-                Nothing ->
-                    ( model, Cmd.none )
 
         --Delegate wrapped OAuthmessages.
         --For v3, we're copying the state into the Tool, which is not ideal
@@ -621,7 +594,7 @@ update msg model =
                     , performActionCommands [ MapRefresh ] newModel
                     )
 
-                Err error ->
+                Err _ ->
                     ( model, Cmd.none )
 
         ToolsMsg toolMsg ->
@@ -663,9 +636,6 @@ update msg model =
             , performActionCommands actions newModel
             )
 
-        RepaintMap ->
-            ( model, MapPortController.refreshMap )
-
         ToggleToolPopup ->
             ( { model | isPopupOpen = not model.isPopupOpen }, Cmd.none )
 
@@ -688,9 +658,6 @@ update msg model =
             let
                 newModel =
                     { model | toolOptions = ToolsController.defaultOptions }
-
-                actions =
-                    [ StoreLocally "tools" <| encodeToolState newModel.toolOptions ]
             in
             ( newModel
             , Cmd.none
@@ -862,18 +829,14 @@ adoptTrackInModel track segments model =
             [ TrackHasChanged
             , MapRefresh
             ]
-
-        modelAfterActions =
-            -- e.g. collect previews and render ...
-            performActionsOnModel actions modelWithTrack
     in
-    modelAfterActions
+    performActionsOnModel actions modelWithTrack
 
 
 allocateSpaceForDocksAndContent : Int -> Int -> Model -> Model
 allocateSpaceForDocksAndContent newWidth newHeight model =
     let
-        ( startWidth, startHeight ) =
+        ( startWidth, _ ) =
             model.windowSize
 
         currentLeftSplit =
@@ -905,7 +868,7 @@ allocateSpaceForDocksAndContent newWidth newHeight model =
 adjustSpaceForContent : Model -> Model
 adjustSpaceForContent model =
     let
-        ( width, height ) =
+        ( _, height ) =
             ( Tuple.first model.windowSize
             , Tuple.second model.windowSize
             )
@@ -932,7 +895,7 @@ composeTitle model =
         Nothing ->
             "GPXmagic"
 
-        Just track ->
+        Just _ ->
             "GPXmagic - " ++ bestTrackName model
 
 
@@ -1244,15 +1207,15 @@ infoTextPopup :
     -> Maybe ( String, String )
     -> Element Msg
 infoTextPopup location maybeSomething =
-    let
-        close =
-            Input.button [ Font.color rgtPurple, alignRight ]
-                { onPress = Just HideInfoPopup
-                , label = useIconWithSize 20 FeatherIcons.x
-                }
-    in
     case maybeSomething of
         Just ( tool, tag ) ->
+            let
+                close =
+                    Input.button [ Font.color rgtPurple, alignRight ]
+                        { onPress = Just HideInfoPopup
+                        , label = useIconWithSize 20 FeatherIcons.x
+                        }
+            in
             column
                 [ Background.color FlatColors.ChinesePalette.antiFlashWhite
                 , padding 10
@@ -1318,15 +1281,16 @@ showOptionsMenu model =
                 { label = el [ centerX ] <| text location.country.flag
                 , onPress = Just <| Language location
                 }
-
-        languageEditor =
-            Input.button
-                subtleToolStyles
-                { label = text "Show/Hide language file editor"
-                , onPress = Just ToggleLanguageEditor
-                }
     in
     if model.isPopupOpen then
+        let
+            languageEditor =
+                Input.button
+                    subtleToolStyles
+                    { label = text "Show/Hide language file editor"
+                    , onPress = Just ToggleLanguageEditor
+                    }
+        in
         column (spacing 4 :: subtleToolStyles)
             [ row (alignRight :: width fill :: subtleToolStyles)
                 [ colourBlock FlatColors.FlatUIPalette.silver
@@ -1407,7 +1371,7 @@ performActionsOnModel actions model =
                         , needsRendering = True
                     }
 
-                ( ShowPreview previewData, Just track ) ->
+                ( ShowPreview previewData, Just _ ) ->
                     -- Put preview into the scene.
                     -- After some thought, it is sensible to collect the preview data
                     -- since it's handy, as the alternative is another complex case
@@ -1418,14 +1382,14 @@ performActionsOnModel actions model =
                         , needsRendering = True
                     }
 
-                ( HidePreview tag, Just track ) ->
+                ( HidePreview tag, Just _ ) ->
                     { foldedModel
                         | previews =
                             Dict.remove tag foldedModel.previews
                         , needsRendering = True
                     }
 
-                ( DelayMessage int msg, Just track ) ->
+                ( DelayMessage _ _, Just _ ) ->
                     foldedModel
 
                 ( DeletePointsBetween fromStart fromEnd, Just track ) ->
@@ -1537,13 +1501,6 @@ performActionsOnModel actions model =
                                     Nothing
                             )
 
-                        newTrack =
-                            track
-                                |> TrackLoaded.addToUndoStack action
-                                    fromStart
-                                    fromEnd
-                                    oldPoints
-
                         ( newOrange, newPurple ) =
                             case newTree of
                                 Just gotNewTree ->
@@ -1562,6 +1519,14 @@ performActionsOnModel actions model =
                         trackWithMarkers =
                             case newTree of
                                 Just gotNewTree ->
+                                    let
+                                        newTrack =
+                                            track
+                                                |> TrackLoaded.addToUndoStack action
+                                                    fromStart
+                                                    fromEnd
+                                                    oldPoints
+                                    in
                                     { newTrack
                                         | trackTree = gotNewTree
                                         , currentPosition = newOrange
@@ -1759,13 +1724,6 @@ performActionsOnModel actions model =
                                     Nothing
                             )
 
-                        newTrack =
-                            track
-                                |> TrackLoaded.addToUndoStack action
-                                    fromStart
-                                    fromEnd
-                                    oldPoints
-
                         ( newOrange, newPurple ) =
                             case newTree of
                                 Just gotNewTree ->
@@ -1784,6 +1742,14 @@ performActionsOnModel actions model =
                         trackWithMarkers =
                             case newTree of
                                 Just gotNewTree ->
+                                    let
+                                        newTrack =
+                                            track
+                                                |> TrackLoaded.addToUndoStack action
+                                                    fromStart
+                                                    fromEnd
+                                                    oldPoints
+                                    in
                                     { newTrack
                                         | trackTree = gotNewTree
                                         , currentPosition = newOrange
@@ -2332,7 +2298,7 @@ performActionsOnModel actions model =
                         , paneLayoutOptions = newPaneLayout
                     }
 
-                ( ExitRoutePlanning, Just track ) ->
+                ( ExitRoutePlanning, Just _ ) ->
                     let
                         toolOptions =
                             foldedModel.toolOptions
@@ -2354,7 +2320,7 @@ performActionsOnModel actions model =
                         , paneLayoutOptions = newPaneLayout
                     }
 
-                ( AddTraversal edge, Just track ) ->
+                ( AddTraversal edge, Just _ ) ->
                     let
                         toolOptions =
                             foldedModel.toolOptions
@@ -2370,7 +2336,7 @@ performActionsOnModel actions model =
                     in
                     { foldedModel | toolOptions = newToolOptions }
 
-                ( AddSelfLoop node, Just track ) ->
+                ( AddSelfLoop node, Just _ ) ->
                     let
                         toolOptions =
                             foldedModel.toolOptions
@@ -2386,7 +2352,7 @@ performActionsOnModel actions model =
                     in
                     { foldedModel | toolOptions = newToolOptions }
 
-                ( DeleteEdge edge, Just track ) ->
+                ( DeleteEdge edge, Just _ ) ->
                     let
                         toolOptions =
                             foldedModel.toolOptions
@@ -2399,7 +2365,7 @@ performActionsOnModel actions model =
                     in
                     { foldedModel | toolOptions = newToolOptions }
 
-                ( ChangeActiveTrack edge, Just track ) ->
+                ( ChangeActiveTrack edge, Just _ ) ->
                     let
                         toolOptions =
                             foldedModel.toolOptions
@@ -2419,7 +2385,7 @@ performActionsOnModel actions model =
                         , needsRendering = True
                     }
 
-                ( MakeRouteFromGraph, Just track ) ->
+                ( MakeRouteFromGraph, Just _ ) ->
                     let
                         toolOptions =
                             foldedModel.toolOptions
@@ -2502,7 +2468,7 @@ performActionsOnModel actions model =
 
                 ( LoadGpxFromStrava gpxContent, _ ) ->
                     let
-                        ( modelWithNewTrack, innerActions ) =
+                        ( modelWithNewTrack, _ ) =
                             update (GpxLoaded gpxContent) foldedModel
                     in
                     modelWithNewTrack
@@ -2541,7 +2507,7 @@ performActionsOnModel actions model =
                         , needsRendering = True
                     }
 
-                ( TrackHasChanged, Just track ) ->
+                ( TrackHasChanged, Just _ ) ->
                     -- Must be wary of looping here.
                     -- Purpose is to refresh all tools' options and all presentations.
                     --TODO: Isolate what this is supposed to achieve, and just do it.
@@ -2560,7 +2526,7 @@ performActionsOnModel actions model =
                         | needsRendering = True
                     }
 
-                ( PointerChange, Just track ) ->
+                ( PointerChange, Just _ ) ->
                     -- Unlike above, do not repaint map.
                     --TODO: Isolate what this is supposed to achieve, and just do it.
                     let
@@ -2589,10 +2555,10 @@ performActionsOnModel actions model =
                         --, needsRendering = True
                     }
 
-                ( StartFlythoughTicks, Just track ) ->
+                ( StartFlythoughTicks, Just _ ) ->
                     { foldedModel | flythroughRunning = True }
 
-                ( StopFlythroughTicks, Just track ) ->
+                ( StopFlythroughTicks, Just _ ) ->
                     { foldedModel | flythroughRunning = False }
 
                 ( StoredValueRetrieved key value, _ ) ->
@@ -2684,11 +2650,8 @@ performActionsOnModel actions model =
 
                         newTools =
                             { currentTools | infoOptions = newInfo }
-
-                        revisedModel =
-                            { foldedModel | toolOptions = newTools }
                     in
-                    revisedModel
+                    { foldedModel | toolOptions = newTools }
 
                 ( UndoLastAction, Just track ) ->
                     -- Without massive replumbing, I'm making the "graph walker" undo special.
@@ -2809,32 +2772,32 @@ performActionCommands actions model =
                                 , expect = Http.expectString GpxFromUrl
                                 }
 
-                ( SetCurrent position, Just track ) ->
+                ( SetCurrent _, Just track ) ->
                     MapPortController.addMarkersToMap track
 
-                ( SetCurrentFromMapClick position, Just track ) ->
+                ( SetCurrentFromMapClick _, Just _ ) ->
                     Cmd.none
 
                 --MapPortController.addMarkersToMap track
                 ( MapCenterOnCurrent, Just track ) ->
                     MapPortController.centreMapOnCurrent track
 
-                ( MapRefresh, Just track ) ->
+                ( MapRefresh, Just _ ) ->
                     MapPortController.refreshMap
 
                 ( MakeMapPointsDraggable flag, Just track ) ->
                     MapPortController.toggleDragging flag track
 
-                ( ShowPreview previewData, Just track ) ->
+                ( ShowPreview previewData, Just _ ) ->
                     -- Add source and layer to map, via Port commands.
                     -- Use preview data from model dictionary, as that could be
                     -- more up to date than this version.
                     showPreviewOnMap previewData.tag
 
-                ( HidePreview tag, Just track ) ->
+                ( HidePreview tag, Just _ ) ->
                     MapPortController.hidePreview tag
 
-                ( DelayMessage int msg, Just track ) ->
+                ( DelayMessage int msg, Just _ ) ->
                     -- This used to "debounce" some clicks.
                     Delay.after int msg
 
@@ -2854,7 +2817,7 @@ performActionCommands actions model =
                         MapPortController.addMarkersToMap track
                             :: List.map showPreviewOnMap (Dict.keys model.previews)
 
-                ( SetMarker maybeMarker, Just track ) ->
+                ( SetMarker _, Just track ) ->
                     MapPortController.addMarkersToMap track
 
                 ( StoreLocally key value, _ ) ->
@@ -2884,7 +2847,7 @@ performActionCommands actions model =
                 ( LoadSvgFile message file, _ ) ->
                     Task.perform message (File.toString file)
 
-                ( TrackFromSvg svgContent, Just track ) ->
+                ( TrackFromSvg _, Just track ) ->
                     showTrackOnMapCentered model.mapPointsDraggable track
 
                 ( SelectGpxFile message, _ ) ->
@@ -2893,10 +2856,10 @@ performActionCommands actions model =
                 ( LoadGpxFile message file, _ ) ->
                     Task.perform message (File.toString file)
 
-                ( TrackFromGpx gpxContent, Just track ) ->
+                ( TrackFromGpx _, Just track ) ->
                     showTrackOnMapCentered model.mapPointsDraggable track
 
-                ( LoadGpxFromStrava gpxContent, Just track ) ->
+                ( LoadGpxFromStrava _, Just track ) ->
                     showTrackOnMapCentered model.mapPointsDraggable track
 
                 ( RequestStravaRouteHeader msg routeId token, _ ) ->

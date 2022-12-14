@@ -1,6 +1,5 @@
-module Tools.StravaOptions exposing (..)
+module Tools.StravaOptions exposing (Options, StravaStatus(..))
 
-import DomainModel exposing (EarthPoint, GPXSource)
 import Http
 import OAuth as O
 import PreviewData exposing (PreviewPoint)

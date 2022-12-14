@@ -1,4 +1,4 @@
-module ViewProfileCharts exposing (..)
+module ViewProfileCharts exposing (ClickZone(..), Context, DragAction(..), initialiseView, update, view)
 
 import Actions exposing (ToolAction(..))
 import Axis2d
@@ -22,7 +22,7 @@ import FlatColors.AussiePalette
 import FlatColors.ChinesePalette exposing (white)
 import Frame2d
 import Geometry.Svg as Svg
-import Html.Events.Extra.Mouse as Mouse exposing (Button(..))
+import Html.Events.Extra.Mouse as Mouse
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
 import Pixels exposing (Pixels)
@@ -32,7 +32,7 @@ import Point3d exposing (Point3d)
 import Point3d.Projection as Point3d
 import Polygon2d
 import Polyline2d
-import PreviewData exposing (PreviewData, PreviewPoint, PreviewShape(..))
+import PreviewData exposing (PreviewData, PreviewShape(..))
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity)
@@ -48,8 +48,7 @@ import Viewpoint3d
 
 
 type ClickZone
-    = ZoneAltitude
-    | ZoneGradient
+    = ZoneGradient
 
 
 type DragAction
@@ -133,11 +132,6 @@ zoomButtons msgWrapper context =
             , label = text "x1"
             }
         ]
-
-
-splitProportion =
-    -- Fraction of height for the altitude, remainder for gradient.
-    0.5
 
 
 deriveAltitudeCamera treeNode context currentPosition ( width, height ) =
@@ -237,10 +231,6 @@ update :
     -> Context
     -> ( Context, List (ToolAction msg) )
 update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
-    let
-        maxZoom =
-            (logBase 2 <| toFloat <| skipCount track.trackTree) - 2
-    in
     case msg of
         SetEmphasis emphasis ->
             ( { context | emphasis = toFloat emphasis }
@@ -281,6 +271,9 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
 
         ImageMouseWheel deltaY ->
             let
+                maxZoom =
+                    (logBase 2 <| toFloat <| skipCount track.trackTree) - 2
+
                 increment =
                     -0.001 * deltaY
 
@@ -312,7 +305,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
                     event.offsetPos
             in
             case ( context.dragAction, context.orbiting ) of
-                ( DragPan, Just ( startX, startY ) ) ->
+                ( DragPan, Just ( startX, _ ) ) ->
                     let
                         shiftVector =
                             Vector3d.meters
@@ -334,7 +327,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
                 _ ->
                     ( context, [] )
 
-        ImageRelease event ->
+        ImageRelease _ ->
             ( { context
                 | orbiting = Nothing
                 , dragAction = DragNone
@@ -364,7 +357,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
             , []
             )
 
-        ImageDoubleClick event ->
+        ImageDoubleClick _ ->
             ( context, [] )
 
         MouseMove event ->
@@ -514,7 +507,7 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews impe
                     , indexFromDistanceRoundedUp rightEdge trackToRender.trackTree + 1
                     )
 
-                ( trueLeftEdge, trueRightEdge ) =
+                ( trueLeftEdge, _ ) =
                     ( distanceFromIndex leftIndex trackToRender.trackTree
                     , distanceFromIndex rightIndex trackToRender.trackTree
                     )
@@ -615,21 +608,17 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews impe
                     -> Color.Color
                     -> Svg msg
                 makeSection pt1 pt2 colour =
-                    let
-                        colourBar =
-                            Svg.polygon2d
-                                [ Svg.Attributes.stroke "none"
-                                , Svg.Attributes.fill <| colourHexString colour
-                                ]
-                            <|
-                                Polygon2d.singleLoop
-                                    [ pt1
-                                    , pt2
-                                    , pt2 |> Point2d.projectOnto Axis2d.x
-                                    , pt1 |> Point2d.projectOnto Axis2d.x
-                                    ]
-                    in
-                    colourBar
+                    Svg.polygon2d
+                        [ Svg.Attributes.stroke "none"
+                        , Svg.Attributes.fill <| colourHexString colour
+                        ]
+                    <|
+                        Polygon2d.singleLoop
+                            [ pt1
+                            , pt2
+                            , pt2 |> Point2d.projectOnto Axis2d.x
+                            , pt1 |> Point2d.projectOnto Axis2d.x
+                            ]
 
                 steppedLines =
                     List.map3

@@ -1,9 +1,8 @@
-module Tools.DeletePoints exposing (..)
+module Tools.DeletePoints exposing (Msg(..), Options, defaultOptions, deletePointsBetween, deleteSinglePoint, toolId, toolStateChange, update, view)
 
 import Actions exposing (ToolAction(..))
 import BoundingBox3d
-import Dict exposing (Dict)
-import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, earthPointFromIndex, getDualCoords, leafFromIndex, skipCount, startPoint, traverseTreeBetweenLimitsToDepth)
+import DomainModel exposing (EarthPoint, GPXSource, PeteTree, RoadSection, earthPointFromIndex, leafFromIndex, skipCount, startPoint, traverseTreeBetweenLimitsToDepth)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input
@@ -34,8 +33,7 @@ defaultOptions =
 
 
 type Msg
-    = DeletePointOrPoints -- One button serves both cases.
-    | DisplayInfo String String
+    = DeletePointOrPoints
 
 
 toolStateChange :

@@ -1,10 +1,10 @@
-module ViewPlan exposing (..)
+module ViewPlan exposing (Context, DragAction(..), Msg(..), initialiseView, update, view)
 
 import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
 import Camera3d exposing (Camera3d)
 import Color
-import Direction3d exposing (negativeZ, positiveY, positiveZ)
+import Direction3d exposing (negativeZ, positiveZ)
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
@@ -14,14 +14,14 @@ import Element.Input as Input
 import FeatherIcons
 import FlatColors.ChinesePalette exposing (white)
 import Html.Events as HE
-import Html.Events.Extra.Mouse as Mouse exposing (Button(..))
+import Html.Events.Extra.Mouse as Mouse
 import Html.Events.Extra.Wheel as Wheel
 import Json.Decode as D
 import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
-import Pixels exposing (Pixels, inPixels)
+import Pixels exposing (Pixels)
 import Point2d
-import Point3d exposing (Point3d)
+import Point3d
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity, backgroundColor)
@@ -31,7 +31,7 @@ import TrackLoaded exposing (TrackLoaded)
 import Vector3d
 import View3dCommonElements exposing (placesOverlay)
 import ViewPureStyles exposing (useIcon)
-import Viewpoint3d exposing (Viewpoint3d)
+import Viewpoint3d
 
 
 type Msg
@@ -279,11 +279,9 @@ update msg msgWrapper track area context =
                                 (dy - startY)
                                 0.0
                                 |> Vector3d.scaleBy
-                                    (1.0
-                                        -- Empirical
-                                        * Spherical.metresPerPixel
-                                            context.zoomLevel
-                                            (Angle.degrees 30)
+                                    (Spherical.metresPerPixel
+                                        context.zoomLevel
+                                        (Angle.degrees 30)
                                     )
                     in
                     ( { context

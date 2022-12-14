@@ -1,18 +1,18 @@
-module ViewMap exposing (..)
+module ViewMap exposing (Context, MapStyle(..), Msg(..), defaultStyleUrl, initialiseContext, update, view)
 
 import Actions exposing (ToolAction(..))
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 import Element.Font as Font
-import Element.Input as Input exposing (button, labelHidden)
+import Element.Input as Input exposing (labelHidden)
 import FeatherIcons
 import FlatColors.AussiePalette
 import FlatColors.ChinesePalette
 import Html.Attributes exposing (id)
 import Pixels exposing (Pixels, inPixels)
 import Quantity exposing (Quantity)
-import ToolTip exposing (localisedTooltip, myTooltip, tooltip)
+import ToolTip exposing (localisedTooltip, tooltip)
 import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import ViewPureStyles exposing (useIcon)
@@ -149,12 +149,11 @@ view location ( viewWidth, viewHeight ) mContext msgWrapper =
                 ]
                 [ Input.button
                     [ tooltip onLeft <|
-                        case context.followOrange of
-                            True ->
-                                localisedTooltip location "panes" "locked"
+                        if context.followOrange then
+                            localisedTooltip location "panes" "locked"
 
-                            False ->
-                                localisedTooltip location "panes" "unlocked"
+                        else
+                            localisedTooltip location "panes" "unlocked"
                     ]
                     { onPress = Just <| msgWrapper ToggleFollowOrange
                     , label =
@@ -166,12 +165,11 @@ view location ( viewWidth, viewHeight ) mContext msgWrapper =
                     }
                 , Input.button
                     [ tooltip onLeft <|
-                        case context.draggable of
-                            True ->
-                                localisedTooltip location "panes" "drag"
+                        if context.draggable then
+                            localisedTooltip location "panes" "drag"
 
-                            False ->
-                                localisedTooltip location "panes" "nodrag"
+                        else
+                            localisedTooltip location "panes" "nodrag"
                     ]
                     { onPress = Just <| msgWrapper ToggleDraggable
                     , label =

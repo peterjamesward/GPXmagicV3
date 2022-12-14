@@ -1,4 +1,4 @@
-module Locations.UK exposing (..)
+module Locations.UK exposing (location)
 
 import Countries exposing (Country)
 import Dict exposing (Dict)
@@ -455,7 +455,7 @@ Also, access a quick description of what the tool does and how (and when) to use
                 , ( "adjusttimes", """adjust timings""" )
                 , ( "double", """double relative times""" )
                 , ( "settimeticks", """equal time spacing""" )
-                , ( "physics", """use estimated times""")
+                , ( "physics", """use estimated times""" )
                 ]
           )
         , ( "essentials"
@@ -528,9 +528,9 @@ recorded in a car. Doubling all the time intervals is a way of saying "half spee
                 , ( "physics", """Estimate timings with a very simple physics model,
 relative to an 80kg rider with an FTP of 200W (me, roughly).""" )
                 , ( "applyPhysics", """Apply estimated timings""" )
-                , ( "actual", """Use timestamps in GPX""")
-                , ( "estimated", """Use physics model""")
-                , ( "estimate", """Expected duration""")
+                , ( "actual", """Use timestamps in GPX""" )
+                , ( "estimated", """Use physics model""" )
+                , ( "estimate", """Expected duration""" )
                 , ( "uniform", """Replace track points with points at regular time intervals of:""" )
                 , ( "start absolute", """Clock time at Orange: """ )
                 , ( "end absolute", """Clock time at end of range: """ )
@@ -865,7 +865,7 @@ You must first authenticate with Strava using the button on the top bar; do that
                 , ( "limit", """Heap limit""" )
                 , ( "size", """Heap size""" )
                 , ( "heap", """Used heap""" )
-                , ( "streetview", """Google Street View here""")
+                , ( "streetview", """Google Street View here""" )
                 , ( "notrack", """Information will show here when a track is loaded.""" )
                 , ( "info", """
 View information about the current point, the whole track, and memory usage.

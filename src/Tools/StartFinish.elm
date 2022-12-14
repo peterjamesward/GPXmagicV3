@@ -1,9 +1,7 @@
-module Tools.StartFinish exposing (..)
+module Tools.StartFinish exposing (Msg(..), addPens, applyCloseLoop, applyMoveStart, applyReverse, defaultOptions, toolId, toolStateChange, update, view)
 
 import Actions exposing (ToolAction(..))
-import Axis3d
 import CubicSpline3d exposing (CubicSpline3d)
-import Dict exposing (Dict)
 import Direction3d
 import DomainModel exposing (..)
 import Element exposing (..)
@@ -13,18 +11,17 @@ import FlatColors.ChinesePalette
 import Length exposing (Meters)
 import List.Extra
 import LocalCoords exposing (LocalCoords)
-import Plane3d
 import Point2d
-import Point3d exposing (Point3d)
+import Point3d
 import Polyline3d exposing (Polyline3d)
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
-import Quantity exposing (Quantity)
+import Quantity
 import SketchPlane3d
 import String.Interpolate
 import ToolTip exposing (buttonStylesWithTooltip)
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
-import Tools.StartFinishTypes exposing (ClosingInfo, Loopiness(..), Options)
+import Tools.StartFinishTypes exposing (Loopiness(..), Options)
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showShortMeasure)
 import Vector3d
@@ -40,7 +37,6 @@ type Msg
     | ReverseTrack
     | ChangeLoopStart Int
     | AddRiderPens
-    | DisplayInfo String String
 
 
 defaultOptions : Options
@@ -153,7 +149,7 @@ update msg options track =
             , [ Actions.ReverseTrack, TrackHasChanged ]
             )
 
-        ChangeLoopStart tp ->
+        ChangeLoopStart _ ->
             ( { options | pointsToClose = [] }
             , [ Actions.MoveStartPoint track.currentPosition, TrackHasChanged ]
             )
@@ -162,9 +158,6 @@ update msg options track =
             ( { options | pointsToClose = [] }
             , [ Actions.AddRiderPens, TrackHasChanged ]
             )
-
-        DisplayInfo tool tag ->
-            ( options, [ Actions.DisplayInfo tool tag ] )
 
 
 toolStateChange :
@@ -277,7 +270,7 @@ applyCloseLoop options track =
             -- Take the nearest to the current start as the new start.
             numberedSplinePoints
                 |> List.Extra.minimumBy
-                    (\( idx, preview ) ->
+                    (\( _, preview ) ->
                         preview.earthPoint
                             |> .space
                             |> Point3d.distanceFrom Point3d.origin
@@ -295,11 +288,6 @@ applyCloseLoop options track =
                 Nothing ->
                     -- Hmm. Put them at the end.
                     ( newGpxPoints, [] )
-
-        collecEndPointsInReverse : RoadSection -> List GPXSource -> List GPXSource
-        collecEndPointsInReverse road outputs =
-            -- We don't want the very start or the very end.
-            Tuple.second road.sourceData :: outputs
 
         oldPoints =
             DomainModel.getAllGPXPointsInNaturalOrder track.trackTree

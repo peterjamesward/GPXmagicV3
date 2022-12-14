@@ -1,8 +1,7 @@
-module LandUseDataTypes exposing (..)
+module LandUseDataTypes exposing (LandUseData, LandUseDisplay(..), LandUseNode, LandUseStatus(..), LandUseTags, LandUseWay, OSMLandUseData, OSMLandUseElement(..), OSMLandUseNode, OSMLandUseWay, emptyLandUse)
 
 import Dict exposing (Dict)
 import DomainModel exposing (EarthPoint)
-import Http
 
 
 type LandUseDisplay

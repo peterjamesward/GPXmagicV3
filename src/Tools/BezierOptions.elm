@@ -1,4 +1,4 @@
-module Tools.BezierOptions exposing (..)
+module Tools.BezierOptions exposing (BezierStyle(..), ExtentOption(..), Options)
 
 -- Putting these in a separate module means we can use with Action, without an import loop.
 

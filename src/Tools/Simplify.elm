@@ -1,4 +1,4 @@
-module Tools.Simplify exposing (..)
+module Tools.Simplify exposing (Msg(..), Options, apply, defaultOptions, simplifyFor1CQF, toolId, toolStateChange, update, view)
 
 import Actions exposing (ToolAction(..))
 import Dict exposing (Dict)
@@ -33,7 +33,6 @@ defaultOptions =
 type Msg
     = Seek
     | Apply
-    | DisplayInfo String String
     | FlushUndo
 
 
@@ -81,7 +80,7 @@ findSimplifications options tree =
             -- Find smallest 20%; number removed usually reduced by adjacency test.
             triangleInfo
                 |> List.sortWith
-                    (\( idx1, area1 ) ( idx2, area2 ) ->
+                    (\( _, area1 ) ( _, area2 ) ->
                         if area1 |> Quantity.lessThanOrEqualTo area2 then
                             LT
 
@@ -94,7 +93,7 @@ findSimplifications options tree =
         nonAdjacentEntries =
             -- Using a dict here just removes need to sort again by index.
             List.foldl
-                (\( idx, area ) outputs ->
+                (\( idx, _ ) outputs ->
                     if Dict.member (idx + 1) outputs || Dict.member (idx - 1) outputs then
                         outputs
 
@@ -118,7 +117,7 @@ apply options track =
         newCourse : Dict Int GPXSource
         newCourse =
             Dict.foldl
-                (\k v out -> Dict.remove k out)
+                (\k _ out -> Dict.remove k out)
                 originalCourse
                 options.pointsToRemove
 
@@ -143,7 +142,7 @@ simplifyFor1CQF track =
         options =
             findSimplifications defaultOptions track.trackTree
 
-        ( outputTree, oldPoints ) =
+        ( outputTree, _ ) =
             apply options track
     in
     outputTree |> Maybe.withDefault track.trackTree
@@ -209,18 +208,15 @@ update msg options previewColour track =
         FlushUndo ->
             ( options, [ Actions.FlushUndo ] )
 
-        DisplayInfo tool tag ->
-            ( options, [ Actions.DisplayInfo tool tag ] )
-
 
 view : I18NOptions.Location -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
 view location msgWrapper options isTrack =
-    let
-        i18n =
-            I18N.text location toolId
-    in
     case isTrack of
-        Just track ->
+        Just _ ->
+            let
+                i18n =
+                    I18N.text location toolId
+            in
             column
                 [ width fill
                 , padding 10
@@ -256,12 +252,3 @@ view location msgWrapper options isTrack =
 
         Nothing ->
             noTrackMessage location
-
-
-guidanceText =
-    """Intended mainly for recorded real-life rides, this tool searches
-for points with the least contribution to the overall shape, avoiding
-removing adjacent points.
-Mostly, this removes noise, but there's no way to remove the 
-possibility of removing or eliding features.
-"""

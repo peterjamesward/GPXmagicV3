@@ -1,15 +1,13 @@
-module SceneBuilderMap exposing (..)
+module SceneBuilderMap exposing (latLonPairFromGpx, renderMapJsonWithoutCulling, renderPreview, trackPointsToJSON, trackPointsToJSONwithoutCulling)
 
 import Angle exposing (Angle)
-import BoundingBox3d exposing (BoundingBox3d)
+import BoundingBox3d
 import Direction2d
 import DomainModel exposing (..)
 import Json.Encode as E
-import Length exposing (Meters)
-import LocalCoords exposing (LocalCoords)
+import Length
 import PreviewData exposing (PreviewData, PreviewShape(..))
 import TrackLoaded exposing (TrackLoaded)
-import UtilsForViews
 
 
 renderPreview : PreviewData -> E.Value
@@ -97,83 +95,6 @@ latLonPairFromGpx { longitude, latitude, altitude } =
     E.list E.float
         [ Angle.inDegrees <| Direction2d.toAngle longitude
         , Angle.inDegrees latitude
-        ]
-
-
-renderMapJson : TrackLoaded msg -> E.Value
-renderMapJson track =
-    -- This version gives track suitable for map.addTrack.
-    -- Sadly, mapbox requires a different format for the track points.
-    let
-        boxSide =
-            UtilsForViews.fullDepthRenderingBoxSize
-
-        makeVisibleSegment : PeteTree -> E.Value
-        makeVisibleSegment node =
-            lngLatPair <| mapLocation <| Tuple.second <| sourceData node
-
-        renderTree : Int -> PeteTree -> List E.Value -> List E.Value
-        renderTree depth someNode accum =
-            case someNode of
-                Leaf leafNode ->
-                    makeVisibleSegment someNode :: accum
-
-                Node notLeaf ->
-                    if depth <= 0 then
-                        makeVisibleSegment someNode :: accum
-
-                    else
-                        accum
-                            |> renderTree (depth - 1) notLeaf.right
-                            |> renderTree (depth - 1) notLeaf.left
-
-        renderTreeSelectively :
-            BoundingBox3d Meters LocalCoords
-            -> Int
-            -> PeteTree
-            -> List E.Value
-            -> List E.Value
-        renderTreeSelectively box depth someNode accum =
-            case someNode of
-                Leaf leafNode ->
-                    makeVisibleSegment someNode :: accum
-
-                Node notLeaf ->
-                    if notLeaf.nodeContent.boundingBox |> BoundingBox3d.intersects box then
-                        -- Ignore depth cutoff near or in the box
-                        accum
-                            |> renderTreeSelectively box (depth - 1) notLeaf.right
-                            |> renderTreeSelectively box (depth - 1) notLeaf.left
-
-                    else
-                        -- Outside box, apply cutoff.
-                        accum
-                            |> renderTree (depth - 1) notLeaf.right
-                            |> renderTree (depth - 1) notLeaf.left
-
-        renderFirstPoint treeNode =
-            lngLatPair <| mapLocation <| Tuple.first <| sourceData treeNode
-
-        current =
-            .space <| startPoint <| leafFromIndex track.currentPosition track.trackTree
-
-        detailBox =
-            BoundingBox3d.withDimensions ( boxSide, boxSide, boxSide ) current
-
-        geometry =
-            E.object
-                [ ( "type", E.string "LineString" )
-                , ( "coordinates", E.list identity coordinates )
-                ]
-
-        coordinates =
-            renderFirstPoint track.trackTree
-                :: renderTreeSelectively detailBox track.renderDepth track.trackTree []
-    in
-    E.object
-        [ ( "type", E.string "Feature" )
-        , ( "properties", E.object [] )
-        , ( "geometry", geometry )
         ]
 
 

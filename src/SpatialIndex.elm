@@ -1,14 +1,12 @@
 module SpatialIndex exposing
-    ( SpatialContent
+    ( FoldStateForNearest
+    , SpatialContent
     , SpatialNode
     , add
     , empty
     , query
-    , queryAllContaining
     , queryNearestToAxisUsing
-    , queryWithFilter
     , queryWithFold
-    , toList
     )
 
 {-
@@ -24,7 +22,7 @@ import LineSegment2d
 import Plane3d
 import Point2d
 import Point3d
-import Quantity exposing (Quantity(..))
+import Quantity exposing (Quantity)
 import Quantity.Interval as Interval
 import SketchPlane3d
 
@@ -147,16 +145,6 @@ query current queryArea =
         |> List.concat
 
 
-queryWithFilter :
-    SpatialNode contentType units coords
-    -> BoundingBox2d.BoundingBox2d units coords
-    -> (contentType -> Bool)
-    -> List (SpatialContent contentType units coords)
-queryWithFilter current queryArea queryFilter =
-    queryInternal current queryArea queryFilter []
-        |> List.concat
-
-
 queryInternal :
     SpatialNode contentType units coords
     -> BoundingBox2d.BoundingBox2d units coords
@@ -207,12 +195,12 @@ queryWithFold current queryArea folder accumulator =
             accumulator
 
         SpatialNode node ->
-            let
-                fromThisNode : List (SpatialContent contentType units coords)
-                fromThisNode =
-                    node.contents |> List.filter (.box >> BoundingBox2d.intersects queryArea)
-            in
             if node.box |> BoundingBox2d.intersects queryArea then
+                let
+                    fromThisNode : List (SpatialContent contentType units coords)
+                    fromThisNode =
+                        node.contents |> List.filter (.box >> BoundingBox2d.intersects queryArea)
+                in
                 List.foldl folder accumulator fromThisNode
                     |> queryWithFold node.nw queryArea folder
                     |> queryWithFold node.ne queryArea folder
@@ -221,31 +209,6 @@ queryWithFold current queryArea folder accumulator =
 
             else
                 accumulator
-
-
-queryAllContaining :
-    SpatialNode contentType units coords
-    -> Point2d.Point2d units coords
-    -> List (SpatialContent contentType units coords)
-queryAllContaining current point =
-    case current of
-        Blank ->
-            []
-
-        SpatialNode node ->
-            if node.box |> BoundingBox2d.contains point then
-                [ List.filter
-                    (.box >> BoundingBox2d.contains point)
-                    node.contents
-                , queryAllContaining node.nw point
-                , queryAllContaining node.ne point
-                , queryAllContaining node.se point
-                , queryAllContaining node.sw point
-                ]
-                    |> List.concat
-
-            else
-                []
 
 
 type alias FoldStateForNearest contentType units coords =
@@ -413,28 +376,3 @@ queryNearestToAxisUsing current axis valuation initialState =
 
         _ ->
             initialState
-
-
-toList : SpatialNode contentType units coords -> List (SpatialContent contentType units coords)
-toList current =
-    -- Helper reduces lift shuffling.
-    List.concat <| toListInternal current []
-
-
-toListInternal :
-    SpatialNode contentType units coords
-    -> List (List (SpatialContent contentType units coords))
-    -> List (List (SpatialContent contentType units coords))
-toListInternal current accum =
-    case current of
-        SpatialNode node ->
-            node.contents
-                :: (toListInternal node.nw <|
-                        toListInternal node.ne <|
-                            toListInternal node.se <|
-                                toListInternal node.sw <|
-                                    accum
-                   )
-
-        Blank ->
-            accum

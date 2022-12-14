@@ -1,4 +1,4 @@
-module View3dCommonElements exposing (..)
+module View3dCommonElements exposing (Context, DragAction(..), Msg(..), common3dSceneAttributes, placesOverlay, zoomButtons)
 
 import Angle exposing (Angle)
 import Axis2d
@@ -30,7 +30,7 @@ import Quantity exposing (Quantity)
 import Rectangle2d
 import Svg
 import Svg.Attributes
-import ToolTip exposing (localisedTooltip, myTooltip, tooltip)
+import ToolTip exposing (localisedTooltip, tooltip)
 import Tools.DisplaySettingsOptions
 import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
@@ -159,11 +159,6 @@ placesOverlay :
     -> Element msg
 placesOverlay display ( givenWidth, givenHeight ) track camera =
     let
-        topLeftFrame =
-            Frame2d.atPoint
-                (Point2d.xy Quantity.zero (Quantity.toFloatQuantity givenHeight))
-                |> Frame2d.reverseY
-
         ( svgWidth, svgHeight ) =
             ( String.fromInt <| Pixels.inPixels givenWidth
             , String.fromInt <| Pixels.inPixels givenHeight
@@ -180,17 +175,17 @@ placesOverlay display ( givenWidth, givenHeight ) track camera =
         nodes2d =
             track.landUseData.places
                 |> Dict.filter
-                    (\name place ->
+                    (\_ place ->
                         place.space
                             |> Point3d.depth camera
                             |> Quantity.greaterThanZero
                     )
                 |> Dict.map
-                    (\name place ->
+                    (\_ place ->
                         place.space |> Point3d.toScreenSpace camera screenRectangle
                     )
                 |> Dict.filter
-                    (\name screenPoint ->
+                    (\_ screenPoint ->
                         Rectangle2d.contains screenPoint screenRectangle
                     )
 
@@ -234,6 +229,12 @@ placesOverlay display ( givenWidth, givenHeight ) track camera =
         none
 
     else
+        let
+            topLeftFrame =
+                Frame2d.atPoint
+                    (Point2d.xy Quantity.zero (Quantity.toFloatQuantity givenHeight))
+                    |> Frame2d.reverseY
+        in
         html <|
             Svg.svg
                 [ Svg.Attributes.width svgWidth

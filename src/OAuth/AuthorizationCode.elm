@@ -1,9 +1,8 @@
 module OAuth.AuthorizationCode exposing
     ( makeAuthorizationUrl, parseCode, Authorization, AuthorizationCode, AuthorizationResult(..), AuthorizationSuccess, AuthorizationError
     , makeTokenRequest, Authentication, Credentials, AuthenticationSuccess, AuthenticationError, RequestParts
-    , defaultAuthenticationSuccessDecoder, defaultAuthenticationErrorDecoder
-    , defaultExpiresInDecoder, defaultScopeDecoder, lenientScopeDecoder, defaultTokenDecoder, defaultRefreshTokenDecoder, defaultErrorDecoder, defaultErrorDescriptionDecoder, defaultErrorUriDecoder
-    , parseCodeWith, Parsers, defaultParsers, defaultCodeParser, defaultErrorParser, defaultAuthorizationSuccessParser, defaultAuthorizationErrorParser
+    , defaultAuthenticationErrorDecoder
+    , Parsers
     )
 
 {-| The authorization code grant type is used to obtain both access
@@ -64,25 +63,22 @@ request.
 
 ## JSON Decoders
 
-@docs defaultAuthenticationSuccessDecoder, defaultAuthenticationErrorDecoder
+@docs defaultAuthenticationErrorDecoder
 
 
 ## JSON Decoders (advanced)
 
-@docs defaultExpiresInDecoder, defaultScopeDecoder, lenientScopeDecoder, defaultTokenDecoder, defaultRefreshTokenDecoder, defaultErrorDecoder, defaultErrorDescriptionDecoder, defaultErrorUriDecoder
-
 
 ## Query Parsers (advanced)
 
-@docs parseCodeWith, Parsers, defaultParsers, defaultCodeParser, defaultErrorParser, defaultAuthorizationSuccessParser, defaultAuthorizationErrorParser
+@docs Parsers
 
 -}
 
-import Browser exposing (UrlRequest(..))
 import Http
-import OAuth.Internal as Internal exposing (..)
 import Json.Decode as Json
 import OAuth exposing (ErrorCode, Token, errorCodeFromString)
+import OAuth.Internal as Internal exposing (..)
 import Url exposing (Url)
 import Url.Builder as Builder
 import Url.Parser as Url exposing ((<?>))
@@ -457,23 +453,6 @@ makeTokenRequest toMsg { credentials, code, url, redirectUri } =
 --
 
 
-{-| Json decoder for a positive response. You may provide a custom response decoder using other decoders
-from this module, or some of your own craft.
-
-    defaultAuthenticationSuccessDecoder : Decoder AuthenticationSuccess
-    defaultAuthenticationSuccessDecoder =
-        D.map4 AuthenticationSuccess
-            tokenDecoder
-            refreshTokenDecoder
-            expiresInDecoder
-            scopeDecoder
-
--}
-defaultAuthenticationSuccessDecoder : Json.Decoder AuthenticationSuccess
-defaultAuthenticationSuccessDecoder =
-    Internal.authenticationSuccessDecoder
-
-
 {-| Json decoder for an errored response.
 
     case res of
@@ -494,57 +473,8 @@ defaultAuthenticationErrorDecoder =
     Internal.authenticationErrorDecoder defaultErrorDecoder
 
 
-{-| Json decoder for an 'expire' timestamp
--}
-defaultExpiresInDecoder : Json.Decoder (Maybe Int)
-defaultExpiresInDecoder =
-    Internal.expiresInDecoder
-
-
-{-| Json decoder for a 'scope'
--}
-defaultScopeDecoder : Json.Decoder (List String)
-defaultScopeDecoder =
-    Internal.scopeDecoder
-
-
-{-| Json decoder for a 'scope', allowing comma- or space-separated scopes
--}
-lenientScopeDecoder : Json.Decoder (List String)
-lenientScopeDecoder =
-    Internal.lenientScopeDecoder
-
-
-{-| Json decoder for an 'access\_token'
--}
-defaultTokenDecoder : Json.Decoder Token
-defaultTokenDecoder =
-    Internal.tokenDecoder
-
-
-{-| Json decoder for a 'refresh\_token'
--}
-defaultRefreshTokenDecoder : Json.Decoder (Maybe Token)
-defaultRefreshTokenDecoder =
-    Internal.refreshTokenDecoder
-
-
 {-| Json decoder for 'error' field
 -}
 defaultErrorDecoder : Json.Decoder ErrorCode
 defaultErrorDecoder =
     Internal.errorDecoder errorCodeFromString
-
-
-{-| Json decoder for 'error\_description' field
--}
-defaultErrorDescriptionDecoder : Json.Decoder (Maybe String)
-defaultErrorDescriptionDecoder =
-    Internal.errorDescriptionDecoder
-
-
-{-| Json decoder for 'error\_uri' field
--}
-defaultErrorUriDecoder : Json.Decoder (Maybe String)
-defaultErrorUriDecoder =
-    Internal.errorUriDecoder

@@ -1,4 +1,4 @@
-module Tools.I18NOptions exposing (..)
+module Tools.I18NOptions exposing (Location, Options, TwoLevelDict)
 
 import Countries exposing (Country)
 import Dict exposing (Dict)

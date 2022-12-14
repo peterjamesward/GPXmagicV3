@@ -1,4 +1,4 @@
-module Tools.StartFinishTypes exposing (..)
+module Tools.StartFinishTypes exposing (Loopiness(..), Options)
 
 import Length
 import PreviewData exposing (PreviewPoint)
@@ -13,11 +13,4 @@ type Loopiness
 type alias Options =
     { loopiness : Loopiness
     , pointsToClose : List PreviewPoint
-    }
-
-
-type alias ClosingInfo =
-    { originalEnd : Int
-    , pointWasAdded : Bool
-    , willClose : Bool
     }

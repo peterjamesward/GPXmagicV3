@@ -1,13 +1,12 @@
-module Tools.Interpolate exposing (..)
+module Tools.Interpolate exposing (Msg(..), apply, defaultOptions, toolId, toolStateChange, update, view)
 
 import Actions exposing (ToolAction(..))
-import Dict exposing (Dict)
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
-import Length exposing (Meters, inMeters, meters)
+import Length
 import Point3d
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity
@@ -35,8 +34,6 @@ defaultOptions =
 type Msg
     = Apply
     | SetSpacing Float
-    | SetExtent ExtentOption
-    | DisplayInfo String String
 
 
 computeNewPoints : Bool -> Options -> TrackLoaded msg -> List PreviewPoint
@@ -49,9 +46,6 @@ computeNewPoints excludeExisting options track =
 
                 ExtentIsTrack ->
                     ( 0, 0 )
-
-        startPoint =
-            earthPointFromIndex fromStart track.trackTree
 
         interpolateStartIndex =
             -- Sneaky (?) skip existing start points for preview.
@@ -108,16 +102,11 @@ computeNewPoints excludeExisting options track =
                 interpolateRoadSection
                 []
                 |> List.reverse
-
-        previews =
-            -- But these are based on distance from first mark, need to
-            -- be based on first point.
-            TrackLoaded.asPreviewPoints
-                track
-                (DomainModel.distanceFromIndex fromStart track.trackTree)
-                newPoints
     in
-    previews
+    TrackLoaded.asPreviewPoints
+        track
+        (DomainModel.distanceFromIndex fromStart track.trackTree)
+        newPoints
 
 
 apply : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
@@ -154,15 +143,6 @@ apply options track =
     )
 
 
-interpolateFor1CQF : TrackLoaded msg -> PeteTree
-interpolateFor1CQF track =
-    let
-        ( outputTree, oldPoints ) =
-            apply defaultOptions track
-    in
-    outputTree |> Maybe.withDefault track.trackTree
-
-
 toolStateChange :
     Bool
     -> Element.Color
@@ -177,7 +157,7 @@ toolStateChange opened colour options track =
                     { options
                         | extent =
                             case theTrack.markerPosition of
-                                Just purple ->
+                                Just _ ->
                                     ExtentIsRange
 
                                 Nothing ->
@@ -223,20 +203,13 @@ update msg options previewColour hasTrack =
             in
             ( newOptions, actions newOptions previewColour track )
 
-        ( Just track, SetExtent extent ) ->
-            let
-                newOptions =
-                    { options | extent = extent }
-            in
-            ( newOptions, actions newOptions previewColour track )
-
         ( Just track, Apply ) ->
             let
                 newOptions =
                     { options
                         | extent =
                             case track.markerPosition of
-                                Just purple ->
+                                Just _ ->
                                     ExtentIsRange
 
                                 Nothing ->
@@ -255,41 +228,41 @@ update msg options previewColour hasTrack =
 
 view : I18NOptions.Location -> Bool -> (Msg -> msg) -> Options -> Maybe (TrackLoaded msg) -> Element msg
 view location imperial wrapper options track =
-    let
-        i18n =
-            I18N.text location toolId
-
-        fixButton =
-            button
-                neatToolsBorder
-                { onPress = Just <| wrapper Apply
-                , label = text "Insert points"
-                }
-
-        extent =
-            el [ centerX, width fill ] <|
-                paragraph [ centerX ]
-                    [ i18n "usage" ]
-
-        spacingSlider =
-            Input.slider
-                commonShortHorizontalSliderStyles
-                { onChange = wrapper << SetSpacing
-                , label =
-                    Input.labelBelow [] <|
-                        text <|
-                            String.Interpolate.interpolate
-                                (I18N.localisedString location toolId "spacing")
-                                [ showShortMeasure imperial options.minimumSpacing ]
-                , min = 1.0
-                , max = 50.0
-                , step = Just 0.5
-                , value = Length.inMeters options.minimumSpacing
-                , thumb = Input.defaultThumb
-                }
-    in
     case track of
-        Just isTrack ->
+        Just _ ->
+            let
+                i18n =
+                    I18N.text location toolId
+
+                fixButton =
+                    button
+                        neatToolsBorder
+                        { onPress = Just <| wrapper Apply
+                        , label = text "Insert points"
+                        }
+
+                extent =
+                    el [ centerX, width fill ] <|
+                        paragraph [ centerX ]
+                            [ i18n "usage" ]
+
+                spacingSlider =
+                    Input.slider
+                        commonShortHorizontalSliderStyles
+                        { onChange = wrapper << SetSpacing
+                        , label =
+                            Input.labelBelow [] <|
+                                text <|
+                                    String.Interpolate.interpolate
+                                        (I18N.localisedString location toolId "spacing")
+                                        [ showShortMeasure imperial options.minimumSpacing ]
+                        , min = 1.0
+                        , max = 50.0
+                        , step = Just 0.5
+                        , value = Length.inMeters options.minimumSpacing
+                        , thumb = Input.defaultThumb
+                        }
+            in
             column
                 [ padding 5
                 , spacing 5

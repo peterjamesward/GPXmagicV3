@@ -1,12 +1,12 @@
-module LandUseDataOSM exposing (..)
+module LandUseDataOSM exposing (applyAltitudes, processLandUseData, requestLandUseData)
 
 import Angle
-import BoundingBox3d exposing (BoundingBox3d)
+import BoundingBox3d
 import Dict exposing (Dict)
 import Direction2d
-import DomainModel exposing (GPXSource)
+import DomainModel
 import Http
-import Json.Decode as D exposing (Decoder)
+import Json.Decode as D
 import LandUseDataTypes exposing (..)
 import Length
 import MapPortController
@@ -164,8 +164,7 @@ applyAltitudes altitudes track =
         convertWay rawWay =
             { nodes =
                 rawWay.nodes
-                    |> List.map (\node -> Dict.get node nodeDict)
-                    |> List.filterMap identity
+                    |> List.filterMap (\node -> Dict.get node nodeDict)
             , tags = rawWay.tags
             }
 

@@ -1,7 +1,6 @@
-module Tools.Nudge exposing (..)
+module Tools.Nudge exposing (Msg(..), applyUsingOptions, defaultOptions, nudgeTrackPoint, toolId, toolStateChange, update, view, widenBendHelper)
 
 import Actions exposing (ToolAction(..))
-import Dict exposing (Dict)
 import Direction2d exposing (Direction2d)
 import Direction3d
 import DomainModel exposing (..)
@@ -11,8 +10,7 @@ import Element.Input as Input exposing (button)
 import FlatColors.ChinesePalette
 import Length exposing (Meters, inMeters)
 import LocalCoords exposing (LocalCoords)
-import Point2d exposing (Point2d)
-import Point3d exposing (Point3d, xCoordinate, yCoordinate, zCoordinate)
+import Point3d
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity exposing (Quantity)
 import SketchPlane3d
@@ -36,7 +34,6 @@ type Msg
     | ZeroNudgeFactors
     | ApplyWithOptions
     | NudgeButton (Quantity Float Meters)
-    | DisplayInfo String String
 
 
 defaultOptions : Options
@@ -45,10 +42,6 @@ defaultOptions =
     , vertical = Quantity.zero
     , fadeExtent = Quantity.zero
     }
-
-
-type alias Point =
-    Point2d Meters LocalCoords
 
 
 applyUsingOptions :
@@ -254,13 +247,9 @@ effectiveDirection index tree =
 
         halfDeviation =
             Quantity.half deviation
-
-        bisectedAngle =
-            precedingLeaf.directionAtStart
-                |> Direction2d.rotateBy halfDeviation
     in
-    -- This formulation intended to avoid -180/+180 issues.
-    bisectedAngle
+    precedingLeaf.directionAtStart
+        |> Direction2d.rotateBy halfDeviation
 
 
 nudgeTrackPoint : Options -> Float -> Int -> PeteTree -> EarthPoint
@@ -340,9 +329,6 @@ update msg options previewColour track =
               ]
             )
 
-        DisplayInfo tool tag ->
-            ( options, [ Actions.DisplayInfo tool tag ] )
-
 
 view : I18NOptions.Location -> Bool -> Options -> (Msg -> msg) -> Maybe (TrackLoaded msg) -> Element msg
 view location imperial options msgWrapper track =
@@ -350,133 +336,134 @@ view location imperial options msgWrapper track =
         i18n =
             I18N.text location toolId
 
-        horizontalNudgeSlider =
-            Input.slider
-                commonShortHorizontalSliderStyles
-                { onChange = Length.meters >> SetHorizontalNudgeFactor >> msgWrapper
-                , label = Input.labelBelow [ centerX ] <| text <| showShortMeasure imperial options.horizontal
-                , min =
-                    Length.inMeters <|
-                        if imperial then
-                            Length.feet -21.0
-
-                        else
-                            Length.meters -7.0
-                , max =
-                    Length.inMeters <|
-                        if imperial then
-                            Length.feet 21.0
-
-                        else
-                            Length.meters 7.0
-                , step =
-                    Just <|
-                        Length.inMeters <|
-                            if imperial then
-                                Length.inches 2
-
-                            else
-                                Length.centimeters 5
-                , value = Length.inMeters options.horizontal
-                , thumb = Input.defaultThumb
-                }
-
-        fadeSlider =
-            Input.slider
-                commonShortHorizontalSliderStyles
-                { onChange = Length.meters >> SetFadeExtent >> msgWrapper
-                , label = Input.labelBelow [ centerX ] <| text <| showShortMeasure imperial options.fadeExtent
-                , min = 0.0
-                , max =
-                    Length.inMeters <|
-                        if imperial then
-                            Length.feet 160.0
-
-                        else
-                            Length.meters 50.0
-                , step = Nothing
-                , value = Length.inMeters options.fadeExtent
-                , thumb = Input.defaultThumb
-                }
-
-        verticalNudgeSlider =
-            el [ width fill, alignRight, paddingEach { edges | left = 10 } ] <|
-                Input.slider
-                    commonShortVerticalSliderStyles
-                    { onChange = Length.meters >> SetVerticalNudgeFactor >> msgWrapper
-                    , label = Input.labelBelow [ centerY ] <| text <| showShortMeasure imperial options.vertical
-                    , min =
-                        Length.inMeters <|
-                            if imperial then
-                                Length.feet -21.0
-
-                            else
-                                Length.meters -7.0
-                    , max =
-                        Length.inMeters <|
-                            if imperial then
-                                Length.feet 21.0
-
-                            else
-                                Length.meters 7.0
-                    , step =
-                        Just <|
-                            Length.inMeters <|
-                                if imperial then
-                                    Length.inches 2
-
-                                else
-                                    Length.centimeters 5
-                    , value = Length.inMeters options.vertical
-                    , thumb = Input.defaultThumb
-                    }
-
-        nudgeButton =
-            button
-                neatToolsBorder
-                { onPress = Just <| msgWrapper ApplyWithOptions
-                , label = i18n "Apply"
-                }
-
-        zeroButton =
-            button
-                neatToolsBorder
-                { onPress = Just <| msgWrapper ZeroNudgeFactors
-                , label = i18n "Zero"
-                }
-
         vertical label increment =
             button
                 (width fill :: neatToolsBorder)
                 { onPress = Just <| msgWrapper <| NudgeButton increment
                 , label = i18n label
                 }
-
-        verticalNudgeButtons =
-            column [ alignRight ] <|
-                if imperial then
-                    [ vertical "+1yd" <| Length.yard
-                    , vertical "+1ft" <| Length.foot
-                    , vertical "+1in" <| Length.inch
-                    , vertical "-1in" <| Quantity.negate Length.inch
-                    , vertical "-1ft" <| Quantity.negate Length.foot
-                    , vertical "-1yd" <| Quantity.negate Length.yard
-                    ]
-
-                else
-                    [ vertical "+1m" <| Length.meter
-                    , vertical "+10cm" <| Length.centimeters 10
-                    , vertical "+1cm" <| Length.centimeter
-                    , vertical "-1cm" <| Quantity.negate Length.centimeter
-                    , vertical "-10cm" <| Quantity.negate <| Length.centimeters 10
-                    , vertical "-1m" <| Quantity.negate Length.meter
-                    ]
     in
     case track of
         Nothing ->
             noTrackMessage location
 
-        Just isTrack ->
+        Just _ ->
+            let
+                horizontalNudgeSlider =
+                    Input.slider
+                        commonShortHorizontalSliderStyles
+                        { onChange = Length.meters >> SetHorizontalNudgeFactor >> msgWrapper
+                        , label = Input.labelBelow [ centerX ] <| text <| showShortMeasure imperial options.horizontal
+                        , min =
+                            Length.inMeters <|
+                                if imperial then
+                                    Length.feet -21.0
+
+                                else
+                                    Length.meters -7.0
+                        , max =
+                            Length.inMeters <|
+                                if imperial then
+                                    Length.feet 21.0
+
+                                else
+                                    Length.meters 7.0
+                        , step =
+                            Just <|
+                                Length.inMeters <|
+                                    if imperial then
+                                        Length.inches 2
+
+                                    else
+                                        Length.centimeters 5
+                        , value = Length.inMeters options.horizontal
+                        , thumb = Input.defaultThumb
+                        }
+
+                fadeSlider =
+                    Input.slider
+                        commonShortHorizontalSliderStyles
+                        { onChange = Length.meters >> SetFadeExtent >> msgWrapper
+                        , label = Input.labelBelow [ centerX ] <| text <| showShortMeasure imperial options.fadeExtent
+                        , min = 0.0
+                        , max =
+                            Length.inMeters <|
+                                if imperial then
+                                    Length.feet 160.0
+
+                                else
+                                    Length.meters 50.0
+                        , step = Nothing
+                        , value = Length.inMeters options.fadeExtent
+                        , thumb = Input.defaultThumb
+                        }
+
+                verticalNudgeSlider =
+                    el [ width fill, alignRight, paddingEach { edges | left = 10 } ] <|
+                        Input.slider
+                            commonShortVerticalSliderStyles
+                            { onChange = Length.meters >> SetVerticalNudgeFactor >> msgWrapper
+                            , label = Input.labelBelow [ centerY ] <| text <| showShortMeasure imperial options.vertical
+                            , min =
+                                Length.inMeters <|
+                                    if imperial then
+                                        Length.feet -21.0
+
+                                    else
+                                        Length.meters -7.0
+                            , max =
+                                Length.inMeters <|
+                                    if imperial then
+                                        Length.feet 21.0
+
+                                    else
+                                        Length.meters 7.0
+                            , step =
+                                Just <|
+                                    Length.inMeters <|
+                                        if imperial then
+                                            Length.inches 2
+
+                                        else
+                                            Length.centimeters 5
+                            , value = Length.inMeters options.vertical
+                            , thumb = Input.defaultThumb
+                            }
+
+                nudgeButton =
+                    button
+                        neatToolsBorder
+                        { onPress = Just <| msgWrapper ApplyWithOptions
+                        , label = i18n "Apply"
+                        }
+
+                zeroButton =
+                    button
+                        neatToolsBorder
+                        { onPress = Just <| msgWrapper ZeroNudgeFactors
+                        , label = i18n "Zero"
+                        }
+
+                verticalNudgeButtons =
+                    column [ alignRight ] <|
+                        if imperial then
+                            [ vertical "+1yd" <| Length.yard
+                            , vertical "+1ft" <| Length.foot
+                            , vertical "+1in" <| Length.inch
+                            , vertical "-1in" <| Quantity.negate Length.inch
+                            , vertical "-1ft" <| Quantity.negate Length.foot
+                            , vertical "-1yd" <| Quantity.negate Length.yard
+                            ]
+
+                        else
+                            [ vertical "+1m" <| Length.meter
+                            , vertical "+10cm" <| Length.centimeters 10
+                            , vertical "+1cm" <| Length.centimeter
+                            , vertical "-1cm" <| Quantity.negate Length.centimeter
+                            , vertical "-10cm" <| Quantity.negate <| Length.centimeters 10
+                            , vertical "-1m" <| Quantity.negate Length.meter
+                            ]
+            in
             row
                 [ width fill
                 , padding 5

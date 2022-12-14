@@ -1,32 +1,28 @@
-module Tools.Timestamp exposing (..)
+module Tools.Timestamp exposing (Msg(..), applyDoubling, applyPhysics, applyTicks, applyTimeShift, defaultOptions, toolId, toolStateChange, update, view)
 
-import Acceleration exposing (Acceleration)
 import Actions exposing (ToolAction(..))
-import Angle
 import ColourPalette exposing (warningColor)
 import DomainModel exposing (..)
 import Duration exposing (Duration)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
-import Element.Input as Input exposing (button, labelHidden)
+import Element.Input as Input exposing (labelHidden)
 import FeatherIcons
 import FlatColors.AmericanPalette
-import FlatColors.BritishPalette
 import FlatColors.ChinesePalette
-import Mass exposing (Mass)
+import Mass
 import Point3d
 import Power exposing (Power)
-import PreviewData exposing (PreviewPoint, PreviewShape(..))
-import Quantity exposing (Quantity)
-import Speed exposing (Speed)
+import Quantity
+import Speed
 import Time
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.TimestampOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
 import Utils
-import UtilsForViews exposing (showDecimal0, showShortMeasure)
+import UtilsForViews
 import ViewPureStyles exposing (..)
 
 
@@ -57,27 +53,8 @@ type Msg
     | DoubleRelativeTimes
     | ApplyTickInterval Int
     | SetPower Power
-    | SetMass Mass
-    | SetTerminal Speed
     | ComputeTimes
     | SetMode TimestampMode
-
-
-computeNewPoints : Bool -> Options -> TrackLoaded msg -> List PreviewPoint
-computeNewPoints excludeExisting options track =
-    let
-        newPoints =
-            []
-
-        previews =
-            -- But these are based on distance from first mark, need to
-            -- be based on first point.
-            TrackLoaded.asPreviewPoints
-                track
-                Quantity.zero
-                newPoints
-    in
-    previews
 
 
 applyTimeShift : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
@@ -128,18 +105,19 @@ applyDoubling track =
                     Utils.subtractTimes startTimeAbsolute gpx.timestamp
             in
             { gpx | timestamp = Utils.addTimes gpx.timestamp relative }
-
-        newCourse =
-            List.map adjustedPoint oldPoints
-
-        newTree =
-            DomainModel.treeFromSourcePoints newCourse
-
-        oldPoints =
-            DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
     in
     case startTimeAbsolute of
-        Just baseline ->
+        Just _ ->
+            let
+                oldPoints =
+                    DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
+
+                newCourse =
+                    List.map adjustedPoint oldPoints
+
+                newTree =
+                    DomainModel.treeFromSourcePoints newCourse
+            in
             ( newTree
             , oldPoints
             )
@@ -168,7 +146,7 @@ applyTicks tickSpacing track =
         emitTicks : RoadSection -> ( Int, List GPXSource ) -> ( Int, List GPXSource )
         emitTicks road ( nextTick, reversedOutputs ) =
             case ( road.startPoint.time, road.endPoint.time ) of
-                ( Just start, Just end ) ->
+                ( Just _, Just end ) ->
                     if nextTick < Time.posixToMillis end then
                         -- At least one (more) tick in this road section
                         emitTicks
@@ -291,26 +269,14 @@ durationForSection power section =
                 |> sqrt
                 |> (*) baselineSpeed
                 |> Speed.kilometersPerHour
-
-        duration =
-            section.trueLength |> Quantity.at_ modifiedSpeed
     in
-    duration
+    section.trueLength |> Quantity.at_ modifiedSpeed
 
 
 estimatedTime : Power -> TrackLoaded msg -> Duration
 estimatedTime power track =
     -- Returns only the total new duration.
     let
-        initialPoint =
-            DomainModel.gpxPointFromIndex 0 track.trackTree
-
-        newDuration =
-            DomainModel.foldOverRoute
-                computeSpeedAndTimes
-                track.trackTree
-                Quantity.zero
-
         computeSpeedAndTimes : RoadSection -> Duration -> Duration
         computeSpeedAndTimes road inputTime =
             let
@@ -319,7 +285,10 @@ estimatedTime power track =
             in
             inputTime |> Quantity.plus thisSectionDuration
     in
-    newDuration
+    DomainModel.foldOverRoute
+        computeSpeedAndTimes
+        track.trackTree
+        Quantity.zero
 
 
 toolStateChange :
@@ -361,16 +330,6 @@ actions newOptions previewColour track =
     --    }
     --]
     []
-
-
-timeModuloBy : Int -> Time.Posix -> Time.Posix
-timeModuloBy modulus time =
-    time |> Time.posixToMillis |> modBy modulus |> Time.millisToPosix
-
-
-timeRemainderBy : Int -> Time.Posix -> Time.Posix
-timeRemainderBy modulus time =
-    time |> Time.posixToMillis |> (//) modulus |> (*) modulus |> Time.millisToPosix
 
 
 update :
@@ -417,20 +376,6 @@ updateWithTrack msg options previewColour track =
                         | steadyPower = watts
                         , estimatedDuration = estimatedTime watts track
                     }
-            in
-            ( newOptions, actions newOptions previewColour track )
-
-        SetMass kg ->
-            let
-                newOptions =
-                    { options | mass = kg }
-            in
-            ( newOptions, actions newOptions previewColour track )
-
-        SetTerminal kph ->
-            let
-                newOptions =
-                    { options | maxDownhill = kph }
             in
             ( newOptions, actions newOptions previewColour track )
 
@@ -524,199 +469,6 @@ viewWithTrack location imperial wrapper options track =
         i18n =
             I18N.text location toolId
 
-        orangeMillis =
-            Just <|
-                Time.millisToPosix <|
-                    absoluteMillisToPoint track.currentPosition track
-
-        orangeOffsetMillis =
-            Just <|
-                Time.millisToPosix <|
-                    relativeMillisToPoint track.currentPosition track
-
-        previousPointOffsetMillis =
-            relativeMillisToPoint (track.currentPosition - 1) track
-
-        startTimeAdjustments =
-            column [ centerX, width fill, spacing 4, padding 4, Border.width 1 ]
-                [ row [ alignRight, spacing 10 ]
-                    [ i18n "start absolute"
-                    , UtilsForViews.formattedTime orangeMillis
-                    ]
-                , row [ alignRight, spacing 10 ]
-                    [ i18n "start relative"
-                    , UtilsForViews.formattedTime orangeOffsetMillis
-                    ]
-
-                --DONE: Add time display with up/down widgets for H,M,S,ms.
-                , row [ alignRight, spacing 4 ]
-                    [ i18n "desired start"
-                    , column [ Border.width 1, Border.color FlatColors.AmericanPalette.soothingBreeze ]
-                        [ Input.button [ centerX ]
-                            { onPress = Just <| wrapper <| TimeChange 3600000
-                            , label = useIconWithSize 12 FeatherIcons.chevronUp
-                            }
-                        , el [ alignRight ] <|
-                            text <|
-                                String.fromInt <|
-                                    options.desiredStartMillis
-                                        // 1000
-                                        // 60
-                                        // 60
-                        , Input.button [ centerX ]
-                            { onPress = Just <| wrapper <| TimeChange -3600000
-                            , label = useIconWithSize 12 FeatherIcons.chevronDown
-                            }
-                        ]
-                    , text ":"
-                    , column [ Border.width 1, Border.color FlatColors.AmericanPalette.soothingBreeze ]
-                        [ Input.button [ centerX ]
-                            { onPress = Just <| wrapper <| TimeChange 60000
-                            , label = useIconWithSize 12 FeatherIcons.chevronUp
-                            }
-                        , text <|
-                            UtilsForViews.withLeadingZeros 2 <|
-                                String.fromInt <|
-                                    modBy 60 <|
-                                        options.desiredStartMillis
-                                            // 1000
-                                            // 60
-                        , Input.button [ centerX ]
-                            { onPress = Just <| wrapper <| TimeChange -60000
-                            , label = useIconWithSize 12 FeatherIcons.chevronDown
-                            }
-                        ]
-                    , text ":"
-                    , column [ Border.width 1, Border.color FlatColors.AmericanPalette.soothingBreeze ]
-                        [ Input.button [ centerX ]
-                            { onPress = Just <| wrapper <| TimeChange 1000
-                            , label = useIconWithSize 12 FeatherIcons.chevronUp
-                            }
-                        , text <|
-                            UtilsForViews.withLeadingZeros 2 <|
-                                String.fromInt <|
-                                    modBy 60 <|
-                                        options.desiredStartMillis
-                                            // 1000
-                        , Input.button [ centerX ]
-                            { onPress = Just <| wrapper <| TimeChange -1000
-                            , label = useIconWithSize 12 FeatherIcons.chevronDown
-                            }
-                        ]
-                    , text "."
-                    , column [ Border.width 1, Border.color FlatColors.AmericanPalette.soothingBreeze ]
-                        [ row []
-                            [ Input.button [ centerX ]
-                                { onPress = Just <| wrapper <| TimeChange 10
-                                , label = useIconWithSize 12 FeatherIcons.chevronUp
-                                }
-                            , Input.button [ centerX ]
-                                { onPress = Just <| wrapper <| ClearMilliseconds
-                                , label = useIconWithSize 12 FeatherIcons.x
-                                }
-                            ]
-                        , text <|
-                            UtilsForViews.withLeadingZeros 3 <|
-                                String.fromInt <|
-                                    modBy 1000 <|
-                                        options.desiredStartMillis
-                        , Input.button [ centerX ]
-                            { onPress = Just <| wrapper <| TimeChange -10
-                            , label = useIconWithSize 12 FeatherIcons.chevronDown
-                            }
-                        ]
-                    ]
-                , if track.currentPosition == 0 then
-                    paragraph
-                        [ Background.color warningColor
-                        , width fill
-                        ]
-                        [ i18n "atStart" ]
-
-                  else if options.desiredStartMillis == previousPointOffsetMillis then
-                    paragraph
-                        [ Background.color warningColor
-                        , width fill
-                        ]
-                        [ i18n "tooEarly" ]
-
-                  else
-                    Input.button (centerX :: neatToolsBorder)
-                        { onPress = Just <| wrapper <| ApplyNewTimes
-                        , label = paragraph [] [ i18n "apply" ]
-                        }
-                ]
-
-        equiSpacing =
-            column [ centerX, width fill, spacing 4, padding 4, Border.width 1 ]
-                [ paragraph [] [ i18n "uniform" ]
-                , el [ centerX, width fill ] <|
-                    Input.radioRow [ spacing 8, width fill, centerX ]
-                        { onChange = wrapper << SetTickInterval
-                        , options =
-                            [ Input.option 500 (i18n "half")
-                            , Input.option 1000 (i18n "second")
-                            , Input.option 5000 (i18n "five")
-                            ]
-                        , selected = Just options.desiredTickIntervalMillis
-                        , label = Input.labelHidden "tick"
-                        }
-                , Input.button (centerX :: neatToolsBorder)
-                    { onPress = Just <| wrapper <| ApplyTickInterval options.desiredTickIntervalMillis
-                    , label = paragraph [] [ i18n "usetick" ]
-                    }
-                ]
-
-        doubleTimes =
-            column [ centerX, width fill, spacing 4, padding 4, Border.width 1 ]
-                [ paragraph [ width fill ] [ i18n "doubling" ]
-                , Input.button (centerX :: neatToolsBorder)
-                    { onPress = Just (wrapper DoubleRelativeTimes)
-                    , label = paragraph [] [ i18n "double" ]
-                    }
-                ]
-
-        doSomePhysics =
-            column [ centerX, width fill, spacing 4, padding 4, Border.width 1 ]
-                [ paragraph [ width fill ] [ i18n "physics" ]
-                , powerSlider
-                , durationEstimate
-                , Input.button (centerX :: neatToolsBorder)
-                    { onPress = Just (wrapper ComputeTimes)
-                    , label = paragraph [] [ i18n "applyPhysics" ]
-                    }
-                ]
-
-        durationEstimate =
-            row [ centerX, spacing 10 ]
-                [ i18n "estimate"
-                , UtilsForViews.formattedTime <|
-                    Just <|
-                        Time.millisToPosix <|
-                            floor <|
-                                Duration.inMilliseconds
-                                    options.estimatedDuration
-                ]
-
-        powerSlider =
-            el [ centerX ] <|
-                Input.slider
-                    commonShortHorizontalSliderStyles
-                    { onChange = Power.watts >> SetPower >> wrapper
-                    , label =
-                        Input.labelBelow [ centerX ] <|
-                            text <|
-                                (UtilsForViews.showDecimal0 <|
-                                    Power.inWatts options.steadyPower
-                                )
-                                    ++ "W"
-                    , min = 80
-                    , max = 400
-                    , step = Just 10
-                    , value = Power.inWatts options.steadyPower
-                    , thumb = Input.defaultThumb
-                    }
-
         modeSelection =
             Input.radio [ centerX, spacing 5 ]
                 { onChange = wrapper << SetMode
@@ -737,6 +489,161 @@ viewWithTrack location imperial wrapper options track =
         ]
     <|
         if trackHasTimestamps track && options.mode == Actual then
+            let
+                orangeMillis =
+                    Just <|
+                        Time.millisToPosix <|
+                            absoluteMillisToPoint track.currentPosition track
+
+                orangeOffsetMillis =
+                    Just <|
+                        Time.millisToPosix <|
+                            relativeMillisToPoint track.currentPosition track
+
+                startTimeAdjustments =
+                    column [ centerX, width fill, spacing 4, padding 4, Border.width 1 ]
+                        [ row [ alignRight, spacing 10 ]
+                            [ i18n "start absolute"
+                            , UtilsForViews.formattedTime orangeMillis
+                            ]
+                        , row [ alignRight, spacing 10 ]
+                            [ i18n "start relative"
+                            , UtilsForViews.formattedTime orangeOffsetMillis
+                            ]
+
+                        --DONE: Add time display with up/down widgets for H,M,S,ms.
+                        , row [ alignRight, spacing 4 ]
+                            [ i18n "desired start"
+                            , column [ Border.width 1, Border.color FlatColors.AmericanPalette.soothingBreeze ]
+                                [ Input.button [ centerX ]
+                                    { onPress = Just <| wrapper <| TimeChange 3600000
+                                    , label = useIconWithSize 12 FeatherIcons.chevronUp
+                                    }
+                                , el [ alignRight ] <|
+                                    text <|
+                                        String.fromInt <|
+                                            options.desiredStartMillis
+                                                // 1000
+                                                // 60
+                                                // 60
+                                , Input.button [ centerX ]
+                                    { onPress = Just <| wrapper <| TimeChange -3600000
+                                    , label = useIconWithSize 12 FeatherIcons.chevronDown
+                                    }
+                                ]
+                            , text ":"
+                            , column [ Border.width 1, Border.color FlatColors.AmericanPalette.soothingBreeze ]
+                                [ Input.button [ centerX ]
+                                    { onPress = Just <| wrapper <| TimeChange 60000
+                                    , label = useIconWithSize 12 FeatherIcons.chevronUp
+                                    }
+                                , text <|
+                                    UtilsForViews.withLeadingZeros 2 <|
+                                        String.fromInt <|
+                                            modBy 60 <|
+                                                options.desiredStartMillis
+                                                    // 1000
+                                                    // 60
+                                , Input.button [ centerX ]
+                                    { onPress = Just <| wrapper <| TimeChange -60000
+                                    , label = useIconWithSize 12 FeatherIcons.chevronDown
+                                    }
+                                ]
+                            , text ":"
+                            , column [ Border.width 1, Border.color FlatColors.AmericanPalette.soothingBreeze ]
+                                [ Input.button [ centerX ]
+                                    { onPress = Just <| wrapper <| TimeChange 1000
+                                    , label = useIconWithSize 12 FeatherIcons.chevronUp
+                                    }
+                                , text <|
+                                    UtilsForViews.withLeadingZeros 2 <|
+                                        String.fromInt <|
+                                            modBy 60 <|
+                                                options.desiredStartMillis
+                                                    // 1000
+                                , Input.button [ centerX ]
+                                    { onPress = Just <| wrapper <| TimeChange -1000
+                                    , label = useIconWithSize 12 FeatherIcons.chevronDown
+                                    }
+                                ]
+                            , text "."
+                            , column [ Border.width 1, Border.color FlatColors.AmericanPalette.soothingBreeze ]
+                                [ row []
+                                    [ Input.button [ centerX ]
+                                        { onPress = Just <| wrapper <| TimeChange 10
+                                        , label = useIconWithSize 12 FeatherIcons.chevronUp
+                                        }
+                                    , Input.button [ centerX ]
+                                        { onPress = Just <| wrapper <| ClearMilliseconds
+                                        , label = useIconWithSize 12 FeatherIcons.x
+                                        }
+                                    ]
+                                , text <|
+                                    UtilsForViews.withLeadingZeros 3 <|
+                                        String.fromInt <|
+                                            modBy 1000 <|
+                                                options.desiredStartMillis
+                                , Input.button [ centerX ]
+                                    { onPress = Just <| wrapper <| TimeChange -10
+                                    , label = useIconWithSize 12 FeatherIcons.chevronDown
+                                    }
+                                ]
+                            ]
+                        , if track.currentPosition == 0 then
+                            paragraph
+                                [ Background.color warningColor
+                                , width fill
+                                ]
+                                [ i18n "atStart" ]
+
+                          else
+                            let
+                                previousPointOffsetMillis =
+                                    relativeMillisToPoint (track.currentPosition - 1) track
+                            in
+                            if options.desiredStartMillis == previousPointOffsetMillis then
+                                paragraph
+                                    [ Background.color warningColor
+                                    , width fill
+                                    ]
+                                    [ i18n "tooEarly" ]
+
+                            else
+                                Input.button (centerX :: neatToolsBorder)
+                                    { onPress = Just <| wrapper <| ApplyNewTimes
+                                    , label = paragraph [] [ i18n "apply" ]
+                                    }
+                        ]
+
+                equiSpacing =
+                    column [ centerX, width fill, spacing 4, padding 4, Border.width 1 ]
+                        [ paragraph [] [ i18n "uniform" ]
+                        , el [ centerX, width fill ] <|
+                            Input.radioRow [ spacing 8, width fill, centerX ]
+                                { onChange = wrapper << SetTickInterval
+                                , options =
+                                    [ Input.option 500 (i18n "half")
+                                    , Input.option 1000 (i18n "second")
+                                    , Input.option 5000 (i18n "five")
+                                    ]
+                                , selected = Just options.desiredTickIntervalMillis
+                                , label = Input.labelHidden "tick"
+                                }
+                        , Input.button (centerX :: neatToolsBorder)
+                            { onPress = Just <| wrapper <| ApplyTickInterval options.desiredTickIntervalMillis
+                            , label = paragraph [] [ i18n "usetick" ]
+                            }
+                        ]
+
+                doubleTimes =
+                    column [ centerX, width fill, spacing 4, padding 4, Border.width 1 ]
+                        [ paragraph [ width fill ] [ i18n "doubling" ]
+                        , Input.button (centerX :: neatToolsBorder)
+                            { onPress = Just (wrapper DoubleRelativeTimes)
+                            , label = paragraph [] [ i18n "double" ]
+                            }
+                        ]
+            in
             [ modeSelection
             , startTimeAdjustments
             , equiSpacing
@@ -744,6 +651,48 @@ viewWithTrack location imperial wrapper options track =
             ]
 
         else
+            let
+                durationEstimate =
+                    row [ centerX, spacing 10 ]
+                        [ i18n "estimate"
+                        , UtilsForViews.formattedTime <|
+                            Just <|
+                                Time.millisToPosix <|
+                                    floor <|
+                                        Duration.inMilliseconds
+                                            options.estimatedDuration
+                        ]
+
+                powerSlider =
+                    el [ centerX ] <|
+                        Input.slider
+                            commonShortHorizontalSliderStyles
+                            { onChange = Power.watts >> SetPower >> wrapper
+                            , label =
+                                Input.labelBelow [ centerX ] <|
+                                    text <|
+                                        (UtilsForViews.showDecimal0 <|
+                                            Power.inWatts options.steadyPower
+                                        )
+                                            ++ "W"
+                            , min = 80
+                            , max = 400
+                            , step = Just 10
+                            , value = Power.inWatts options.steadyPower
+                            , thumb = Input.defaultThumb
+                            }
+
+                doSomePhysics =
+                    column [ centerX, width fill, spacing 4, padding 4, Border.width 1 ]
+                        [ paragraph [ width fill ] [ i18n "physics" ]
+                        , powerSlider
+                        , durationEstimate
+                        , Input.button (centerX :: neatToolsBorder)
+                            { onPress = Just (wrapper ComputeTimes)
+                            , label = paragraph [] [ i18n "applyPhysics" ]
+                            }
+                        ]
+            in
             [ if trackHasTimestamps track then
                 modeSelection
 

@@ -1,10 +1,9 @@
 module SplitPane.SplitPane exposing
     ( view, createViewConfig
     , update, subscriptions
-    , State, init, configureSplitter, orientation, draggable
-    , percentage, px
+    , State, init, configureSplitter
+    , px
     , Msg, Orientation(..), SizeUnit(..), ViewConfig, UpdateConfig, CustomSplitter, HtmlDetails
-    , customUpdate, createUpdateConfig, createCustomSplitter
     , getPosition
     )
 
@@ -27,12 +26,12 @@ Check out the [examples] to see how it works.
 
 # State
 
-@docs State, init, configureSplitter, orientation, draggable
+@docs State, init, configureSplitter
 
 
 # Helpers
 
-@docs percentage, px
+@docs px
 
 
 # Definitions
@@ -42,10 +41,14 @@ Check out the [examples] to see how it works.
 
 # Customization
 
-@docs customUpdate, createUpdateConfig, createCustomSplitter
-
 -}
 
+import Browser.Events
+import Html exposing (Attribute, Html, div, span)
+import Html.Attributes exposing (class, style)
+import Html.Events
+import Json.Decode as D exposing (at, field)
+import Maybe
 import SplitPane.Bound
     exposing
         ( Bounded
@@ -54,12 +57,6 @@ import SplitPane.Bound
         , getValue
         , updateValue
         )
-import Browser.Events
-import Html exposing (Attribute, Html, div, span)
-import Html.Attributes exposing (class, style)
-import Html.Events
-import Json.Decode as D exposing (at, field)
-import Maybe
 
 
 
@@ -77,7 +74,6 @@ type SizeUnit
 -}
 type Orientation
     = Horizontal
-    | Vertical
 
 
 {-| Keeps dimensions of pane.
@@ -100,7 +96,6 @@ type alias DragInfo =
 -}
 type DragState
     = Draggable (Maybe DragInfo)
-    | NotDraggable
 
 
 {-| Tracks state of pane.
@@ -137,28 +132,6 @@ getPosition (State s) =
 
         Px pixels ->
             getValue pixels |> toFloat
-
-
-{-| Sets whether the pane is draggable or not
--}
-draggable : Bool -> State -> State
-draggable isDraggable (State state) =
-    State
-        { state
-            | dragState =
-                if isDraggable then
-                    Draggable Nothing
-
-                else
-                    NotDraggable
-        }
-
-
-{-| Changes orientation of the pane.
--}
-orientation : Orientation -> State -> State
-orientation ori (State state) =
-    State { state | orientation = ori }
 
 
 {-| Change the splitter position and limit
@@ -363,14 +336,6 @@ resize ori splitterPosition step paneWidth paneHeight =
                 Percentage p ->
                     Percentage <| updateValue (\v -> v + toFloat step.x / toFloat paneWidth) p
 
-        Vertical ->
-            case splitterPosition of
-                Px p ->
-                    Px <| updateValue (\v -> v + step.y) p
-
-                Percentage p ->
-                    Percentage <| updateValue (\v -> v + toFloat step.y / toFloat paneHeight) p
-
 
 
 -- VIEW
@@ -396,12 +361,6 @@ createDefaultSplitterDetails ori dragState =
         Horizontal ->
             { attributes =
                 defaultHorizontalSplitterStyle dragState
-            , children = []
-            }
-
-        Vertical ->
-            { attributes =
-                defaultVerticalSplitterStyle dragState
             , children = []
             }
 
@@ -532,9 +491,6 @@ paneContainerStyle ori =
         case ori of
             Horizontal ->
                 "row"
-
-            Vertical ->
-                "column"
     , style "justifyContent" "center"
     , style "alignItems" "center"
     , style "width" "100%"
@@ -547,24 +503,15 @@ firstChildViewStyle : State -> List (Attribute a)
 firstChildViewStyle (State state) =
     case state.splitterPosition of
         Px p ->
-            let
-                v =
-                    (String.fromFloat <| toFloat (getValue p)) ++ "px"
-            in
             case state.orientation of
                 Horizontal ->
+                    let
+                        v =
+                            (String.fromFloat <| toFloat (getValue p)) ++ "px"
+                    in
                     [ style "display" "flex"
                     , style "width" v
                     , style "height" "100%"
-                    , style "overflow" "hidden"
-                    , style "boxSizing" "border-box"
-                    , style "position" "relative"
-                    ]
-
-                Vertical ->
-                    [ style "display" "flex"
-                    , style "width" "100%"
-                    , style "height" v
                     , style "overflow" "hidden"
                     , style "boxSizing" "border-box"
                     , style "position" "relative"
@@ -613,24 +560,6 @@ secondChildViewStyle (State state) =
             ]
 
 
-defaultVerticalSplitterStyle : DragState -> List (Attribute a)
-defaultVerticalSplitterStyle dragState =
-    baseDefaultSplitterStyles
-        ++ [ style "height" "11px"
-           , style "width" "100%"
-           , style "margin" "-5px 0"
-           , style "borderTop" "5px solid rgba(255, 255, 255, 0)"
-           , style "borderBottom" "5px solid rgba(255, 255, 255, 0)"
-           ]
-        ++ (case dragState of
-                Draggable _ ->
-                    [ style "cursor" "row-resize" ]
-
-                NotDraggable ->
-                    []
-           )
-
-
 defaultHorizontalSplitterStyle : DragState -> List (Attribute a)
 defaultHorizontalSplitterStyle dragState =
     baseDefaultSplitterStyles
@@ -643,9 +572,6 @@ defaultHorizontalSplitterStyle dragState =
         ++ (case dragState of
                 Draggable _ ->
                     [ style "cursor" "col-resize" ]
-
-                NotDraggable ->
-                    []
            )
 
 

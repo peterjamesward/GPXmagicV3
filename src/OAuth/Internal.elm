@@ -6,40 +6,19 @@ module OAuth.Internal exposing
     , RequestParts
     , ResponseType(..)
     , authenticationErrorDecoder
-    , authenticationSuccessDecoder
     , authorizationErrorParser
-    , decoderFromJust
-    , decoderFromResult
     , errorDecoder
-    , errorDescriptionDecoder
-    , errorDescriptionParser
     , errorParser
-    , errorUriDecoder
-    , errorUriParser
-    , expiresInDecoder
-    , expiresInParser
-    , extractTokenString
-    , lenientScopeDecoder
     , makeAuthorizationUrl
     , makeHeaders
     , makeRedirectUri
     , makeRequest
     , parseUrlQuery
-    , protocolToString
-    , refreshTokenDecoder
-    , responseTypeToString
-    , scopeDecoder
-    , scopeParser
-    , spaceSeparatedListParser
     , stateParser
-    , tokenDecoder
-    , tokenParser
-    , urlAddList
-    , urlAddMaybe
     )
 
 import Base64.Encode as Base64
-import Http as Http
+import Http
 import Json.Decode as Json
 import OAuth exposing (..)
 import Url exposing (Protocol(..), Url)
@@ -86,19 +65,6 @@ expiresInDecoder =
 scopeDecoder : Json.Decoder (List String)
 scopeDecoder =
     Json.map (Maybe.withDefault []) <| Json.maybe <| Json.field "scope" (Json.list Json.string)
-
-
-{-| Json decoder for a scope, allowing comma- or space-separated scopes
--}
-lenientScopeDecoder : Json.Decoder (List String)
-lenientScopeDecoder =
-    Json.map (Maybe.withDefault []) <|
-        Json.maybe <|
-            Json.field "scope" <|
-                Json.oneOf
-                    [ Json.list Json.string
-                    , Json.map (String.split ",") Json.string
-                    ]
 
 
 {-| Json decoder for an access token
@@ -150,19 +116,6 @@ decoderFromJust msg =
     Maybe.map Json.succeed >> Maybe.withDefault (Json.fail msg)
 
 
-{-| Combinator for JSON decoders to extact values from a `Result _ _` or fail
-with an appropriate message
--}
-decoderFromResult : Result String a -> Json.Decoder a
-decoderFromResult res =
-    case res of
-        Err msg ->
-            Json.fail msg
-
-        Ok a ->
-            Json.succeed a
-
-
 
 --
 -- Query Parsers
@@ -177,27 +130,10 @@ authorizationErrorParser errorCode =
         stateParser
 
 
-tokenParser : Query.Parser (Maybe Token)
-tokenParser =
-    Query.map2 makeToken
-        (Query.string "token_type")
-        (Query.string "access_token")
-
-
 errorParser : (String -> e) -> Query.Parser (Maybe e)
 errorParser errorCodeFromString =
     Query.map (Maybe.map errorCodeFromString)
         (Query.string "error")
-
-
-expiresInParser : Query.Parser (Maybe Int)
-expiresInParser =
-    Query.int "expires_in"
-
-
-scopeParser : Query.Parser (List String)
-scopeParser =
-    spaceSeparatedListParser "scope"
 
 
 stateParser : Query.Parser (Maybe String)
@@ -213,20 +149,6 @@ errorDescriptionParser =
 errorUriParser : Query.Parser (Maybe String)
 errorUriParser =
     Query.string "error_uri"
-
-
-spaceSeparatedListParser : String -> Query.Parser (List String)
-spaceSeparatedListParser param =
-    Query.map
-        (\s ->
-            case s of
-                Nothing ->
-                    []
-
-                Just str ->
-                    String.split " " str
-        )
-        (Query.string param)
 
 
 urlAddList : String -> List String -> List QueryParameter -> List QueryParameter
@@ -329,9 +251,6 @@ responseTypeToString r =
         Code ->
             "code"
 
-        Token ->
-            "token"
-
 
 {-| Gets the `String` representation of an `Protocol`
 -}
@@ -356,21 +275,12 @@ parseUrlQuery url def parser =
     Maybe.withDefault def <| Url.parse (Url.query parser) url
 
 
-{-| Extracts the intrinsic value of a `Token`. Careful with this, we don't have
-access to the `Token` constructors, so it's a bit Houwje-Touwje
--}
-extractTokenString : Token -> String
-extractTokenString =
-    tokenToString >> String.dropLeft 7
-
-
 {-| Describes the desired type of response to an authorization. Use `Code` to ask for an
 authorization code and continue with the according flow. Use `Token` to do an implicit
 authentication and directly retrieve a `Token` from the authorization.
 -}
 type ResponseType
     = Code
-    | Token
 
 
 

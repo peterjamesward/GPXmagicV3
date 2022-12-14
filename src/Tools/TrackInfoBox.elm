@@ -1,26 +1,19 @@
-module Tools.TrackInfoBox exposing (..)
+module Tools.TrackInfoBox exposing (InformationContext(..), MemoryInfo, Msg(..), Options, defaultOptions, toolId, update, updateMemory, view)
 
-import Actions exposing (ToolAction)
 import Angle
-import Axis2d
-import Dict exposing (Dict)
 import Direction2d
 import DomainModel exposing (..)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (labelHidden)
 import FlatColors.ChinesePalette
-import Html.Events.Extra.Mouse as Mouse
-import Iso8601
 import String.Interpolate
-import Time
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
-import Url
 import Url.Builder
 import Utils
-import UtilsForViews exposing (showDecimal0, showDecimal2, showDecimal6, showLongMeasure, showShortMeasure)
+import UtilsForViews exposing (showDecimal2, showLongMeasure, showShortMeasure)
 
 
 toolId =
@@ -55,7 +48,6 @@ defaultOptions =
 
 type Msg
     = ChooseDisplayMode InformationContext
-    | DisplayInfo String String
 
 
 update : Msg -> Options -> Options
@@ -64,14 +56,11 @@ update msg options =
         ChooseDisplayMode mode ->
             { options | displayMode = mode }
 
-        DisplayInfo _ _ ->
-            options
-
 
 trackInfoList : List ( String, Bool -> RoadSection -> Element msg )
 trackInfoList =
     [ ( "points"
-      , \imperial info -> info.skipCount |> (+) 1 |> String.fromInt |> text
+      , \_ info -> info.skipCount |> (+) 1 |> String.fromInt |> text
       )
     , ( "length"
       , \imperial info -> info.trueLength |> showLongMeasure imperial |> text
@@ -89,10 +78,10 @@ trackInfoList =
       , \imperial info -> info.distanceDescending |> showLongMeasure imperial |> text
       )
     , ( "steepest"
-      , \imperial info -> info.steepestClimb |> showDecimal2 |> text
+      , \_ info -> info.steepestClimb |> showDecimal2 |> text
       )
     , ( "duration"
-      , \imperial info -> UtilsForViews.formattedTime info.transitTime
+      , \_ info -> UtilsForViews.formattedTime info.transitTime
       )
     ]
 
@@ -166,7 +155,7 @@ makeLinkUrl track =
             , gpxPointFromIndex index track.trackTree
             )
 
-        { longitude, latitude, altitude, timestamp } =
+        { longitude, latitude } =
             gpxPoint
 
         viewpoint =
@@ -270,12 +259,6 @@ updateMemory memory options =
 displayMemoryDetails : I18NOptions.Location -> Options -> Element msg
 displayMemoryDetails location options =
     let
-        labels =
-            [ "limit"
-            , "size"
-            , "heap"
-            ]
-
         asMB value =
             (toFloat value
                 / 1024
@@ -289,6 +272,13 @@ displayMemoryDetails location options =
             I18N.text location "info" "none"
 
         Just memory ->
+            let
+                labels =
+                    [ "limit"
+                    , "size"
+                    , "heap"
+                    ]
+            in
             row
                 [ padding 10
                 , spacing 5

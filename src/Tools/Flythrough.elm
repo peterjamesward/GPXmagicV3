@@ -1,8 +1,7 @@
-module Tools.Flythrough exposing (..)
+module Tools.Flythrough exposing (Flythrough, Msg(..), Options, RunState(..), advanceFlythrough, defaultOptions, toolId, toolStateChange, update, view)
 
 import Actions exposing (ToolAction)
-import Dict exposing (Dict)
-import DomainModel exposing (EarthPoint, asRecord)
+import DomainModel exposing (asRecord)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Input as Input exposing (button)
@@ -20,7 +19,7 @@ import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (showLongMeasure, showSpeed)
 import Vector3d
-import ViewPureStyles exposing (commonShortHorizontalSliderStyles, neatToolsBorder, prettyButtonStyles, useIcon)
+import ViewPureStyles exposing (commonShortHorizontalSliderStyles, neatToolsBorder, useIcon)
 
 
 toolId =
@@ -33,7 +32,6 @@ type Msg
     | PauseFlythrough
     | ResumeFlythrough
     | ResetFlythrough
-    | DisplayInfo String String
 
 
 type alias Flythrough =
@@ -47,8 +45,7 @@ type alias Flythrough =
 
 
 type RunState
-    = Idle
-    | AwaitingFirstTick
+    = AwaitingFirstTick
     | Running
     | Ended
     | Paused
@@ -79,32 +76,7 @@ advanceInternal :
     -> TrackLoaded msg
     -> Maybe Flythrough
 advanceInternal newTime status speed track =
-    let
-        tempus =
-            toFloat (Time.posixToMillis newTime - Time.posixToMillis status.lastUpdated) / 1000.0
-
-        newDistance =
-            status.metresFromRouteStart
-                |> Quantity.plus (Length.meters <| tempus * 10.0 ^ speed)
-
-        lastPointPassedIndex =
-            DomainModel.indexFromDistanceRoundedDown newDistance track.trackTree
-
-        currentRoad =
-            DomainModel.leafFromIndex lastPointPassedIndex track.trackTree
-                |> asRecord
-
-        nextRoad =
-            DomainModel.leafFromIndex (lastPointPassedIndex + 1) track.trackTree
-                |> asRecord
-
-        lastPointDistance =
-            DomainModel.distanceFromIndex lastPointPassedIndex track.trackTree
-    in
     case status.running of
-        Idle ->
-            Just status
-
         AwaitingFirstTick ->
             Just
                 { status
@@ -127,6 +99,27 @@ advanceInternal newTime status speed track =
 
             else
                 let
+                    tempus =
+                        toFloat (Time.posixToMillis newTime - Time.posixToMillis status.lastUpdated) / 1000.0
+
+                    newDistance =
+                        status.metresFromRouteStart
+                            |> Quantity.plus (Length.meters <| tempus * 10.0 ^ speed)
+
+                    lastPointPassedIndex =
+                        DomainModel.indexFromDistanceRoundedDown newDistance track.trackTree
+
+                    currentRoad =
+                        DomainModel.leafFromIndex lastPointPassedIndex track.trackTree
+                            |> asRecord
+
+                    nextRoad =
+                        DomainModel.leafFromIndex (lastPointPassedIndex + 1) track.trackTree
+                            |> asRecord
+
+                    lastPointDistance =
+                        DomainModel.distanceFromIndex lastPointPassedIndex track.trackTree
+
                     segInsetMetres =
                         newDistance |> Quantity.minus lastPointDistance
 
@@ -178,9 +171,6 @@ advanceInternal newTime status speed track =
 view : I18NOptions.Location -> Bool -> Options -> (Msg -> msg) -> Element msg
 view location imperial options wrapper =
     let
-        i18n =
-            I18N.text location toolId
-
         speed =
             Speed.metersPerSecond (10.0 ^ options.flythroughSpeed)
 
@@ -208,13 +198,6 @@ view location imperial options wrapper =
                 , label = useIcon FeatherIcons.rewind
                 }
 
-        playButton =
-            button
-                neatToolsBorder
-                { onPress = Just <| wrapper StartFlythrough
-                , label = useIcon FeatherIcons.play
-                }
-
         pauseButton state =
             button
                 neatToolsBorder
@@ -233,7 +216,11 @@ view location imperial options wrapper =
         playPauseButton =
             case options.flythrough of
                 Nothing ->
-                    playButton
+                    button
+                        neatToolsBorder
+                        { onPress = Just <| wrapper StartFlythrough
+                        , label = useIcon FeatherIcons.play
+                        }
 
                 Just flying ->
                     pauseButton flying.running
@@ -272,7 +259,7 @@ toolStateChange :
     -> ( Options, List (ToolAction msg) )
 toolStateChange opened colour options track =
     case ( opened, track ) of
-        ( True, Just theTrack ) ->
+        ( True, Just _ ) ->
             ( options, [] )
 
         _ ->
@@ -324,9 +311,6 @@ update options msg track =
               , Actions.SetCurrent options.savedCurrentPosition
               ]
             )
-
-        DisplayInfo tool tag ->
-            ( options, [ Actions.DisplayInfo tool tag ] )
 
 
 advanceFlythrough :
@@ -383,9 +367,6 @@ prepareFlythrough track options =
             currentRoad.endPoint.space
                 |> Point3d.translateBy
                     (Vector3d.xyz Quantity.zero Quantity.zero eyeHeight)
-
-        cameraShift =
-            Point3d.interpolateFrom eyePoint focusPoint -1.0
     in
     Just
         { metresFromRouteStart = DomainModel.distanceFromIndex track.currentPosition track.trackTree
@@ -408,38 +389,3 @@ startFlythrough track options =
 
         Nothing ->
             options
-
-
-togglePause : Options -> Options
-togglePause options =
-    case options.flythrough of
-        Just flying ->
-            { options
-                | flythrough =
-                    Just
-                        { flying
-                            | running =
-                                case flying.running of
-                                    Paused ->
-                                        Running
-
-                                    Running ->
-                                        Paused
-
-                                    _ ->
-                                        flying.running
-                        }
-            }
-
-        Nothing ->
-            options
-
-
-isActive : Options -> Bool
-isActive options =
-    case options.flythrough of
-        Just fly ->
-            fly.running == Running
-
-        Nothing ->
-            False
