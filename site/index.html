@@ -171,13 +171,9 @@ function mapMessageHandler(msg) {
 
         case 'Snap':
             if (isMapCreated) {
-    //            const mapContainer = document.getElementById("map");
-    //            const mapCanvas = mapContainer.querySelector('.mapboxgl-canvas');
-                mapCanvas = document.getElementsByClassName('mapboxgl-canvas');
-                mapCanvas.item(0).toBlob(function(blob) {
-                    console.log("EXPORT MAP IMAGE");
-                    saveAs(blob, msg.filename);
-                });
+                const mapContainer = document.getElementById('map');
+                const mapCanvas = mapContainer.querySelector('.mapboxgl-canvas');
+                mapCanvas.toBlob(function(blob){ saveAs(blob, msg.filename); });
             }
             break;
 
@@ -327,7 +323,8 @@ function makeTheMap(msg) {
             //style: 'mapbox://styles/mapbox/outdoors-v11',
             style: msg.style,
             center: [msg.lon, msg.lat],
-            zoom: msg.zoom
+            zoom: msg.zoom,
+            preserveDrawingBuffer: true
         });
 
         map.on('load', function (m) {
@@ -410,7 +407,7 @@ function addLineToMap(data, points) {
             },
             'paint': {
                 'line-color': '#2846c0',
-                'line-width': 8
+                'line-width': 6
             }
         });
 

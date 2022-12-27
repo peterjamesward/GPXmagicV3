@@ -347,7 +347,7 @@ update msg model =
                     ( adoptTrackInModel track segments model
                     , Cmd.batch
                         [ showTrackOnMapCentered model.mapPointsDraggable track
-                        --, Delay.after 1000 SnapshotMapImage
+                        , Delay.after 1000 SnapshotMapImage
                         ]
                     )
 
@@ -378,8 +378,7 @@ update msg model =
             case model.track of
                 Just track ->
                     ( model
-                    , MapPortController.createImageFileFromMap <|
-                        Maybe.withDefault "MAP" track.trackName
+                    , MapPortController.createImageFileFromMap "MY_MAP.png"
                     )
 
                 Nothing ->

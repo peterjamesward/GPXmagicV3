@@ -87,7 +87,9 @@ zoomMapToFitTrack : TrackLoaded msg -> Cmd msg
 zoomMapToFitTrack track =
     let
         { minX, maxX, minY, maxY, minZ } =
-            BoundingBox3d.extrema <| boundingBox track.trackTree
+            BoundingBox3d.extrema <|
+            BoundingBox3d.expandBy (Length.kilometers 2) <|
+            boundingBox track.trackTree
 
         ( swCorner, neCorner ) =
             ( Point3d.xyz minX minY minZ, Point3d.xyz maxX maxY minZ )
