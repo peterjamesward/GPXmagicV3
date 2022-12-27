@@ -2925,4 +2925,5 @@ showTrackOnMapCentered useFull track =
         [ MapPortController.addFullTrackToMap track
         , MapPortController.zoomMapToFitTrack track
         , MapPortController.addMarkersToMap track
+        , MapPortController.createImageFileFromMap "test"
         ]

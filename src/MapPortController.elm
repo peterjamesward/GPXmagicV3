@@ -1,4 +1,4 @@
-port module MapPortController exposing (MapInfo, MapMsg(..), MapState, addFullTrackToMap, addMarkersToMap, addTrackToMap, centreMapOnCurrent, createMap, defaultMapState, fetchElevationsForPoints, hidePreview, mapResponses, refreshMap, requestElevations, setMapStyle, showPreview, toggleDragging, update, zoomMapToFitTrack)
+port module MapPortController exposing (..)
 
 import Actions exposing (ToolAction(..))
 import Angle
@@ -206,6 +206,15 @@ addFullTrackToMap track =
             , ( "zoom", E.float 10.0 )
             , ( "data", SceneBuilderMap.renderMapJsonWithoutCulling track ) -- Route as polyline
             , ( "points", SceneBuilderMap.trackPointsToJSONwithoutCulling track ) -- Make track points draggable
+            ]
+
+
+createImageFileFromMap : String -> Cmd msg
+createImageFileFromMap filename =
+    mapCommands <|
+        E.object
+            [ ( "Cmd", E.string "Track" )
+            , ( "filename", E.string filename )
             ]
 
 

@@ -165,8 +165,14 @@ function mapMessageHandler(msg) {
             if (isMapCreated) {
                 addLineToMap(msg.data, msg.points);
                 setClickMode(false, msg.points);
-                var canvas = document.getElementById("map");
-                canvas.toBlob(function(blob) {
+            }
+            break;
+
+        case 'Snap':
+            if (isMapCreated) {
+                const mapContainer = document.getElementById("map");
+                const mapCanvas = mapContainer.querySelector('.mapboxgl-canvas');
+                mapCanvas.toBlob(function(blob) {
                     saveAs(blob, "mymap.png");
                 });
             }
@@ -415,7 +421,7 @@ function addLineToMap(data, points) {
         e;
     });
 
-    addDecorations();
+    //addDecorations();
 
 };
 
