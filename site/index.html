@@ -6,6 +6,7 @@
     <title>GPXmagic Labs</title>
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
     <script type="text/javascript" src="js/FileSaver.js"></script>
+    <script type="text/javascript" src="js/dom-to-image.js"></script>
     <script type="text/javascript" src="main.js?ver=3.6.1"></script>
     <script src='https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.js'></script>
     <link href='https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.css' rel='stylesheet' />
@@ -164,16 +165,18 @@ function mapMessageHandler(msg) {
         case 'Track':
             if (isMapCreated) {
                 addLineToMap(msg.data, msg.points);
-                setClickMode(false, msg.points);
+                //setClickMode(false, msg.points);
             }
             break;
 
         case 'Snap':
             if (isMapCreated) {
-                const mapContainer = document.getElementById("map");
-                const mapCanvas = mapContainer.querySelector('.mapboxgl-canvas');
-                mapCanvas.toBlob(function(blob) {
-                    saveAs(blob, "mymap.png");
+    //            const mapContainer = document.getElementById("map");
+    //            const mapCanvas = mapContainer.querySelector('.mapboxgl-canvas');
+                mapCanvas = document.getElementsByClassName('mapboxgl-canvas');
+                mapCanvas.item(0).toBlob(function(blob) {
+                    console.log("EXPORT MAP IMAGE");
+                    saveAs(blob, msg.filename);
                 });
             }
             break;
@@ -390,27 +393,30 @@ function addLineToMap(data, points) {
     }
 
     //console.log('adding geojson data');
-    map.addSource('route', {
-        'type': 'geojson',
-        'data': data
+    if (!trackAdded) {
+        map.addSource('route', {
+            'type': 'geojson',
+            'data': data
+            });
+
+        console.log('adding route layer');
+        map.addLayer({
+            'id': 'route',
+            'type': 'line',
+            'source': 'route',
+            'layout': {
+            'line-join': 'round',
+            'line-cap': 'round'
+            },
+            'paint': {
+                'line-color': '#2846c0',
+                'line-width': 8
+            }
         });
 
-    //console.log('adding route layer');
-    map.addLayer({
-        'id': 'route',
-        'type': 'line',
-        'source': 'route',
-        'layout': {
-        'line-join': 'round',
-        'line-cap': 'round'
-        },
-        'paint': {
-            'line-color': '#2846c0',
-            'line-width': 8
-        }
-    });
+        trackAdded = true;
+    }
 
-    trackAdded = true;
     map.on('click', function(e) {
       app.ports.mapResponses.send
         ( { 'msg' : 'click'

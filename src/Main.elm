@@ -95,6 +95,7 @@ type Msg
     | GpxSelected File
     | GpxLoaded String
     | TryRemoteLoad
+    | SnapshotMapImage
     | GpxFromUrl (Result Http.Error String)
     | ToggleLoadOptionMenu
     | ToggleRGTOptions
@@ -346,9 +347,7 @@ update msg model =
                     ( adoptTrackInModel track segments model
                     , Cmd.batch
                         [ showTrackOnMapCentered model.mapPointsDraggable track
-                        , LandUseDataOSM.requestLandUseData
-                            ReceivedLandUseData
-                            track
+                        --, Delay.after 1000 SnapshotMapImage
                         ]
                     )
 
@@ -374,6 +373,17 @@ update msg model =
                     , loadCmd
                     ]
                 )
+
+        SnapshotMapImage ->
+            case model.track of
+                Just track ->
+                    ( model
+                    , MapPortController.createImageFileFromMap <|
+                        Maybe.withDefault "MAP" track.trackName
+                    )
+
+                Nothing ->
+                    ( model, Cmd.none )
 
         RGTOptions options ->
             ( { model | rgtOptions = Tools.RGTOptions.update options model.rgtOptions }
@@ -1064,6 +1074,12 @@ topLoadingBar model =
         localHelper =
             text << I18N.localisedString model.location "main"
 
+        snapButton =
+            button []
+                { onPress = Just SnapshotMapImage
+                , label = useIconWithSize 12 FeatherIcons.camera
+                }
+
         moreOptionsButton =
             button
                 [ padding 5
@@ -1163,7 +1179,7 @@ topLoadingBar model =
         )
         [ globalOptions model
         , loadGpxButton
-        , moreOptionsButton
+        , snapButton
         , case model.filename of
             Just filename ->
                 Input.text
@@ -2925,5 +2941,4 @@ showTrackOnMapCentered useFull track =
         [ MapPortController.addFullTrackToMap track
         , MapPortController.zoomMapToFitTrack track
         , MapPortController.addMarkersToMap track
-        , MapPortController.createImageFileFromMap "test"
         ]

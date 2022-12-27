@@ -213,7 +213,7 @@ createImageFileFromMap : String -> Cmd msg
 createImageFileFromMap filename =
     mapCommands <|
         E.object
-            [ ( "Cmd", E.string "Track" )
+            [ ( "Cmd", E.string "Snap" )
             , ( "filename", E.string filename )
             ]
 
