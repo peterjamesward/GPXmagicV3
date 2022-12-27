@@ -2,14 +2,15 @@
 <html>
 
 <head>
-  <meta charset="UTF-8">
-  <title>GPXmagic Labs</title>
-  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
-  <script type="text/javascript" src="main.js?ver=3.6.1"></script>
-  <script src='https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.js'></script>
-  <link href='https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.css' rel='stylesheet' />
-  <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.2.2/mapbox-gl-draw.js"></script>
-  <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.2.2/mapbox-gl-draw.css" type="text/css">
+    <meta charset="UTF-8">
+    <title>GPXmagic Labs</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <script type="text/javascript" src="js/FileSaver.js"></script>
+    <script type="text/javascript" src="main.js?ver=3.6.1"></script>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.11.0/mapbox-gl.css' rel='stylesheet' />
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.2.2/mapbox-gl-draw.js"></script>
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.2.2/mapbox-gl-draw.css" type="text/css">
 </head>
 
 <body>
@@ -164,6 +165,10 @@ function mapMessageHandler(msg) {
             if (isMapCreated) {
                 addLineToMap(msg.data, msg.points);
                 setClickMode(false, msg.points);
+                var canvas = document.getElementById("map");
+                canvas.toBlob(function(blob) {
+                    saveAs(blob, "mymap.png");
+                });
             }
             break;
 
@@ -394,7 +399,7 @@ function addLineToMap(data, points) {
         'line-cap': 'round'
         },
         'paint': {
-            'line-color': '#888',
+            'line-color': '#2846c0',
             'line-width': 8
         }
     });
