@@ -201,12 +201,47 @@ imperialProfileChart track =
                 , ( "options", options )
                 ]
 
+        trackLength =
+            trueLength track.trackTree
+                |> Length.inMiles
+                |> ceiling
+
         options =
             E.object
-                [ ( "scales"
+                [ ( "plugins"
                   , E.object
-                        [ ( "x", E.object [ ( "type", E.string "linear" ) ] )
-                        , ( "y", E.object [ ( "type", E.string "linear" ) ] )
+                        [ ( "legend"
+                          , E.object
+                                [ ( "display", E.bool False )
+                                ]
+                          )
+                        ]
+                  )
+                , ( "scales"
+                  , E.object
+                        [ ( "x"
+                          , E.object
+                                [ ( "type", E.string "linear" )
+                                , ( "max", E.int trackLength )
+                                , ( "title"
+                                  , E.object
+                                        [ ( "text", E.string "Miles" )
+                                        , ( "display", E.bool True )
+                                        ]
+                                  )
+                                ]
+                          )
+                        , ( "y"
+                          , E.object
+                                [ ( "type", E.string "linear" )
+                                , ( "title"
+                                  , E.object
+                                        [ ( "text", E.string "Feet" )
+                                        , ( "display", E.bool True )
+                                        ]
+                                  )
+                                ]
+                          )
                         ]
                   )
                 ]
@@ -235,7 +270,7 @@ imperialProfileChart track =
 
                 distance =
                     DomainModel.distanceFromIndex sequence track.trackTree
-                        |> Length.inYards
+                        |> Length.inMiles
             in
             E.object
                 [ ( "x", E.float distance )
