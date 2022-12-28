@@ -96,6 +96,7 @@ type Msg
     | GpxLoaded String
     | TryRemoteLoad
     | SnapshotMapImage
+    | SnapshotProfileImage
     | GpxFromUrl (Result Http.Error String)
     | ToggleLoadOptionMenu
     | ToggleRGTOptions
@@ -377,12 +378,35 @@ update msg model =
         SnapshotMapImage ->
             case model.track of
                 Just track ->
+                    let
+                        useName =
+                            Maybe.withDefault "NO IDEA" <|
+                                List.head <|
+                                    String.split "." <|
+                                        Maybe.withDefault "TRACK.gpx" track.trackName
+                    in
                     ( model
-                    , MapPortController.createImageFileFromMap <|
-                        Maybe.withDefault "NO IDEA" <|
-                            List.head <|
-                                String.split "." <|
-                                    Maybe.withDefault "TRACK.gpx" track.trackName
+                    , Cmd.batch
+                        [ MapPortController.createImageFileFromMap useName
+                        , Delay.after 500 SnapshotProfileImage
+                        ]
+                    )
+
+                Nothing ->
+                    ( model, Cmd.none )
+
+        SnapshotProfileImage ->
+            case model.track of
+                Just track ->
+                    let
+                        useName =
+                            Maybe.withDefault "NO IDEA" <|
+                                List.head <|
+                                    String.split "." <|
+                                        Maybe.withDefault "TRACK.gpx" track.trackName
+                    in
+                    ( model
+                    , MapPortController.createImageFileFromProfile useName
                     )
 
                 Nothing ->
