@@ -127,27 +127,118 @@ renderMapJsonWithoutCulling track =
         ]
 
 
+
+{- EXAMPLE AS BASIS
+   d0 = [{x:1, y:1}, {x:2, y:11},{x:3, y:1},{x:4, y:11},{x:5, y:10}, {x:6, y:8},{x:7, y:15},{x:8, y:2}]
+
+   d1= [{x:1, y:1}, {x:2, y:5}, {x:4, y:1}, {x:5, y:3}, {x:5.5, y:4},{x:7, y:5},{x:8, y:3}]
+
+   const ctx = document.getElementById("chart").getContext("2d");
+   const chart = new Chart(ctx, {
+     type: "line",
+     data: {
+       datasets: [
+         {
+           backgroundColor: "rgba(50,200,50,0.6)",
+           borderColor: "rgba(50,200,50,0.6)",
+           data: d0,
+           fill: "stack"
+         },
+         {
+           backgroundColor: "rgba(200,50,50,0.6)",
+           borderColor: "rgba(200,50,50,0.6)",
+           data: d1,
+           fill: "stack"
+         }
+       ]
+     },
+     options: {
+       scales: {
+         x: {
+           type: "linear"
+         },
+         y: {
+           stacked: true,
+         }
+       },
+       elements: {
+         line: {
+            tension: 0.2
+         },
+         point: {
+           radius: 0
+         }
+       },
+       tooltips: {
+         mode: "nearest",
+         intersect: false,
+         axis: "x"
+       },
+       hover: {
+         mode: "nearest",
+         intersect: false,
+         axis: "x"
+       }
+     }
+   });
+-}
+
+
 imperialProfileChart : TrackLoaded msg -> E.Value
 imperialProfileChart track =
     -- Provide distance in yards and height in feet for Steve Taylor's profile chart.
     -- Use JSON as per chart.js demands.
     -- Indeed, built the entire chart here, not in JS.
     let
-        geometry =
+        profileDataset =
             E.object
-                [ ( "type", E.string "LineString" )
-                , ( "coordinates", E.list identity coordinates )
+                [ ( "backgroundColor", E.string "rgba(50,200,50,0.6)" )
+                , ( "borderColor", E.string "rgba(50,200,60,0.6" )
+                , ( "data", E.list identity coordinates )
+                , ( "fill", E.string "stack" )
                 ]
 
+        chartStuff =
+            E.object
+                [ ( "type", E.string "line" )
+                , ( "datasets", E.list identity [ profileDataset ] )
+                , ( "options", options )
+                ]
+
+        options =
+            E.object
+                [ ( "scales"
+                  , E.object
+                        [ ( "x", E.object [ ( "type", E.string "linear" ) ] )
+                        , ( "y", E.object [ ( "stacked", E.bool True ) ] )
+                        ]
+                  )
+                ]
+
+        coordinates : List E.Value
         coordinates =
-            DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
-                |> List.map latLonPairFromGpx
+            -- Simple, safe, slow.
+            List.map makeProfilePoint (List.range 0 (skipCount track.trackTree))
+
+        makeProfilePoint : Int -> E.Value
+        makeProfilePoint sequence =
+            let
+                gpx =
+                    DomainModel.gpxPointFromIndex sequence track.trackTree
+
+                altitude =
+                    Length.inFeet gpx.altitude
+
+                distance =
+                    DomainModel.distanceFromIndex sequence track.trackTree
+                        |> Length.inYards
+            in
+            E.object
+                [ ( "x", E.float distance )
+                , ( "y", E.float altitude )
+                ]
     in
-    E.object
-        [ ( "type", E.string "Feature" )
-        , ( "properties", E.object [] )
-        , ( "geometry", geometry )
-        ]
+    chartStuff
 
 
 makeFeatureFromGPX : GPXSource -> E.Value
