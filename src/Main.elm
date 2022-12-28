@@ -378,7 +378,11 @@ update msg model =
             case model.track of
                 Just track ->
                     ( model
-                    , MapPortController.createImageFileFromMap "MY_MAP.png"
+                    , MapPortController.createImageFileFromMap <|
+                        Maybe.withDefault "NO IDEA" <|
+                            List.head <|
+                                String.split "." <|
+                                    Maybe.withDefault "TRACK.gpx" track.trackName
                     )
 
                 Nothing ->

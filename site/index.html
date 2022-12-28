@@ -177,7 +177,10 @@ function mapMessageHandler(msg) {
             if (isMapCreated) {
                 const mapContainer = document.getElementById('map');
                 const mapCanvas = mapContainer.querySelector('.mapboxgl-canvas');
-                mapCanvas.toBlob(function(blob){ saveAs(blob, msg.filename); });
+                mapCanvas.toBlob(function(blob){ saveAs(blob, msg.filename + '-map.png'); });
+
+                const profile = document.getElementById('profileCanvas');
+                profile.toBlob(function(blob){ saveAs(blob, msg.filename + '-profile.png'); });
             }
             break;
 
