@@ -46,6 +46,7 @@ import Quantity exposing (Quantity)
 import SceneBuilderMap
 import SplitPane.SplitPane as SplitPane exposing (..)
 import StravaAuth exposing (getStravaToken)
+import String.Interpolate
 import SvgPathExtractor
 import Task
 import Time
@@ -83,6 +84,7 @@ import Tools.TrackInfoBox
 import ToolsController exposing (encodeColour)
 import TrackLoaded exposing (TrackLoaded, indexLeaves)
 import Url exposing (Url)
+import Url.Builder
 import Url.Parser exposing (..)
 import UtilsForViews exposing (uiColourHexString)
 import ViewMap
@@ -95,8 +97,9 @@ type Msg
     | GpxSelected File
     | GpxLoaded String
     | TryRemoteLoad
-    | SnapshotMapImage
-    | SnapshotProfileImage
+    | AroundTheWorld Int
+    | SnapshotMapImage Int
+    | SnapshotProfileImage Int
     | GpxFromUrl (Result Http.Error String)
     | ToggleLoadOptionMenu
     | ToggleRGTOptions
@@ -327,6 +330,16 @@ render model =
             model
 
 
+
+-- Helper for Around the World stages.
+
+
+stageName sequence =
+    String.Interpolate.interpolate
+        "Stage {0} - Around The World In 800 Days"
+        [ String.fromInt sequence ]
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
@@ -346,10 +359,7 @@ update msg model =
             case TrackLoaded.trackFromSegments trackName gpxSegments of
                 Just ( track, segments ) ->
                     ( adoptTrackInModel track segments model
-                    , Cmd.batch
-                        [ showTrackOnMapCentered model.mapPointsDraggable track
-                        , Delay.after 1000 SnapshotMapImage
-                        ]
+                    , showTrackOnMapCentered model.mapPointsDraggable track
                     )
 
                 Nothing ->
@@ -375,38 +385,43 @@ update msg model =
                     ]
                 )
 
-        SnapshotMapImage ->
+        AroundTheWorld sequence ->
+            -- Here we automate the creation of many map and profile images.
+            ( model
+            , Cmd.batch
+                [ Http.get
+                    { url = "GPX/" ++ stageName sequence ++ ".gpx"
+                    , expect = Http.expectString GpxFromUrl
+                    }
+                , Delay.after 1000 (SnapshotMapImage sequence)
+                ]
+            )
+
+        SnapshotMapImage sequence ->
             case model.track of
                 Just track ->
-                    let
-                        useName =
-                            Maybe.withDefault "NO IDEA" <|
-                                List.head <|
-                                    String.split "." <|
-                                        Maybe.withDefault "TRACK.gpx" track.trackName
-                    in
                     ( model
                     , Cmd.batch
-                        [ MapPortController.createImageFileFromMap useName
-                        , Delay.after 500 SnapshotProfileImage
+                        [ MapPortController.createImageFileFromMap (stageName sequence)
+                        , Delay.after 500 <| SnapshotProfileImage sequence
                         ]
                     )
 
                 Nothing ->
                     ( model, Cmd.none )
 
-        SnapshotProfileImage ->
+        SnapshotProfileImage sequence ->
             case model.track of
                 Just track ->
-                    let
-                        useName =
-                            Maybe.withDefault "NO IDEA" <|
-                                List.head <|
-                                    String.split "." <|
-                                        Maybe.withDefault "TRACK.gpx" track.trackName
-                    in
                     ( model
-                    , MapPortController.createImageFileFromProfile useName
+                    , Cmd.batch
+                        [ MapPortController.createImageFileFromProfile (stageName sequence)
+                        , if sequence < 800 then
+                            Delay.after 500 <| AroundTheWorld (sequence + 1)
+
+                          else
+                            Cmd.none
+                        ]
                     )
 
                 Nothing ->
@@ -1103,7 +1118,7 @@ topLoadingBar model =
 
         snapButton =
             button []
-                { onPress = Just SnapshotMapImage
+                { onPress = Just (AroundTheWorld 1)
                 , label = useIconWithSize 12 FeatherIcons.camera
                 }
 
