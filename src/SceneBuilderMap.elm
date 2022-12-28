@@ -188,20 +188,16 @@ imperialProfileChart : TrackLoaded msg -> E.Value
 imperialProfileChart track =
     -- Provide distance in yards and height in feet for Steve Taylor's profile chart.
     -- Use JSON as per chart.js demands.
-    -- Indeed, built the entire chart here, not in JS.
+    -- Indeed, declare the entire chart here, not in JS.
     let
-        profileDataset =
-            E.object
-                [ ( "backgroundColor", E.string "rgba(50,200,50,0.6)" )
-                , ( "borderColor", E.string "rgba(50,200,60,0.6" )
-                , ( "data", E.list identity coordinates )
-                , ( "fill", E.string "stack" )
-                ]
-
         chartStuff =
             E.object
                 [ ( "type", E.string "line" )
-                , ( "datasets", E.list identity [ profileDataset ] )
+                , ( "data"
+                  , E.object
+                        [ ( "datasets", E.list identity [ profileDataset ] )
+                        ]
+                  )
                 , ( "options", options )
                 ]
 
@@ -210,9 +206,17 @@ imperialProfileChart track =
                 [ ( "scales"
                   , E.object
                         [ ( "x", E.object [ ( "type", E.string "linear" ) ] )
-                        , ( "y", E.object [ ( "stacked", E.bool True ) ] )
+                        , ( "y", E.object [ ( "type", E.string "linear" ) ] )
                         ]
                   )
+                ]
+
+        profileDataset =
+            E.object
+                [ ( "backgroundColor", E.string "rgba(50,200,50,0.6)" )
+                , ( "borderColor", E.string "rgba(50,200,60,0.6" )
+                , ( "data", E.list identity coordinates )
+                , ( "fill", E.string "stack" )
                 ]
 
         coordinates : List E.Value
