@@ -213,8 +213,8 @@ imperialProfileChart track =
 
         profileDataset =
             E.object
-                [ ( "backgroundColor", E.string "rgba(50,200,50,0.6)" )
-                , ( "borderColor", E.string "rgba(50,200,60,0.6" )
+                [ ( "backgroundColor", E.string "rgba(182,198,237,0.6)" )
+                , ( "borderColor", E.string "rgba(77,110,205,0.6" )
                 , ( "data", E.list identity coordinates )
                 , ( "fill", E.string "stack" )
                 ]
