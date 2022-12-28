@@ -1,4 +1,11 @@
-module SceneBuilderMap exposing (latLonPairFromGpx, renderMapJsonWithoutCulling, renderPreview, trackPointsToJSON, trackPointsToJSONwithoutCulling)
+module SceneBuilderMap exposing
+    ( imperialProfileChart
+    , latLonPairFromGpx
+    , renderMapJsonWithoutCulling
+    , renderPreview
+    , trackPointsToJSON
+    , trackPointsToJSONwithoutCulling
+    )
 
 import Angle exposing (Angle)
 import BoundingBox3d
@@ -102,6 +109,29 @@ renderMapJsonWithoutCulling : TrackLoaded msg -> E.Value
 renderMapJsonWithoutCulling track =
     -- This version gives track suitable for map.addTrack.
     -- Sadly, mapbox requires a different format for the track points.
+    let
+        geometry =
+            E.object
+                [ ( "type", E.string "LineString" )
+                , ( "coordinates", E.list identity coordinates )
+                ]
+
+        coordinates =
+            DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
+                |> List.map latLonPairFromGpx
+    in
+    E.object
+        [ ( "type", E.string "Feature" )
+        , ( "properties", E.object [] )
+        , ( "geometry", geometry )
+        ]
+
+
+imperialProfileChart : TrackLoaded msg -> E.Value
+imperialProfileChart track =
+    -- Provide distance in yards and height in feet for Steve Taylor's profile chart.
+    -- Use JSON as per chart.js demands.
+    -- Indeed, built the entire chart here, not in JS.
     let
         geometry =
             E.object

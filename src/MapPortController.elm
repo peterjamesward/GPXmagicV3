@@ -88,8 +88,8 @@ zoomMapToFitTrack track =
     let
         { minX, maxX, minY, maxY, minZ } =
             BoundingBox3d.extrema <|
-            BoundingBox3d.expandBy (Length.kilometers 2) <|
-            boundingBox track.trackTree
+                BoundingBox3d.expandBy (Length.kilometers 2) <|
+                    boundingBox track.trackTree
 
         ( swCorner, neCorner ) =
             ( Point3d.xyz minX minY minZ, Point3d.xyz maxX maxY minZ )
@@ -208,6 +208,7 @@ addFullTrackToMap track =
             , ( "zoom", E.float 10.0 )
             , ( "data", SceneBuilderMap.renderMapJsonWithoutCulling track ) -- Route as polyline
             , ( "points", SceneBuilderMap.trackPointsToJSONwithoutCulling track ) -- Make track points draggable
+            , ( "profile", SceneBuilderMap.imperialProfileChart track )
             ]
 
 

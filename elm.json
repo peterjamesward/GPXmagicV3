@@ -36,6 +36,7 @@
             "ianmackenzie/elm-units": "2.9.0",
             "ianmackenzie/elm-units-interval": "2.3.0",
             "jinjor/elm-xml-parser": "2.0.0",
+            "joakin/elm-canvas": "5.0.0",
             "justgook/alt-linear-algebra": "2.0.0",
             "lukewestby/elm-string-interpolate": "1.0.4",
             "marcosh/elm-html-to-unicode": "1.0.4",
