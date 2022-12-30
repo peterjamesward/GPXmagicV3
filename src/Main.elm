@@ -367,8 +367,16 @@ update msg model =
             in
             case TrackLoaded.trackFromSegments trackName gpxSegments of
                 Just ( track, segments ) ->
-                    ( adoptTrackInModel track segments model
-                    , showTrackOnMapCentered model.mapPointsDraggable track
+                    let
+                        steveTrack =
+                            { track
+                                | markerPosition = Just <| skipCount track.trackTree
+                            }
+                    in
+                    ( adoptTrackInModel steveTrack segments model
+                    , showTrackOnMapCentered
+                        model.mapPointsDraggable
+                        steveTrack
                     )
 
                 Nothing ->

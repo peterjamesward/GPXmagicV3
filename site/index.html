@@ -352,24 +352,25 @@ function makeTheMap(msg) {
             map.addControl(new mapboxgl.NavigationControl());
             map.setProjection('globe');
 
-            app.ports.mapResponses.send({ 'msg' : 'map ready' });
-            map.resize();
-
             map.loadImage(
                 'images/start.png',
                 (error, image) => {
                     if (error) throw error;
                     map.addImage('start', image);
-                });
-            });
+                }
+            );
 
             map.loadImage(
                 'images/flag.png',
                 (error, image) => {
                     if (error) throw error;
                     map.addImage('flag', image);
-                });
-            });
+                }
+            );
+
+            app.ports.mapResponses.send({ 'msg' : 'map ready' });
+            map.resize();
+        });
 
     } else {
         //No 'map' node, we have to keep checking.
@@ -377,8 +378,6 @@ function makeTheMap(msg) {
         app.ports.mapResponses.send({ 'msg' : 'no node' });
     };
 };
-
-
 
 function addDecorations() {
 
@@ -562,6 +561,15 @@ function addOptionals(msg) {
         }
     });
 
+    map.addLayer({
+        'id': 'orange',
+        'type': 'symbol',
+        'source': 'orange',
+        'layout': {
+            'icon-image': 'start',
+        }
+    });
+
     map.addSource('purple', {
         'type': 'geojson',
         'data': {
@@ -581,15 +589,6 @@ function addOptionals(msg) {
                     }
                 }
             ]
-        }
-    });
-
-    map.addLayer({
-        'id': 'orange',
-        'type': 'symbol',
-        'source': 'orange',
-        'layout': {
-            'icon-image': 'start',
         }
     });
 
