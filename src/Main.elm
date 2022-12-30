@@ -393,7 +393,7 @@ update msg model =
                     { url = "GPX/" ++ stageName sequence ++ ".gpx"
                     , expect = Http.expectString GpxFromUrl
                     }
-                , Delay.after 1000 (SnapshotMapImage sequence)
+                , Delay.after 2000 (SnapshotMapImage sequence)
                 ]
             )
 
