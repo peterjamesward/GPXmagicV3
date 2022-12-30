@@ -57,6 +57,7 @@ var dragPointStart;
 var dragging = false;
 var clickToDrag = false;
 var pointsLayerAdded = false;
+var markersAdded = false;
 
 var canvas;
 // Make dummy feature just for making drag point feedback.
@@ -321,6 +322,7 @@ function storageMessageHandler(msg) {
     }
 };
 
+
 function makeTheMap(msg) {
     //console.log('create the map');
 
@@ -353,8 +355,21 @@ function makeTheMap(msg) {
             app.ports.mapResponses.send({ 'msg' : 'map ready' });
             map.resize();
 
-        });
+            map.loadImage(
+                'images/start.png',
+                (error, image) => {
+                    if (error) throw error;
+                    map.addImage('start', image);
+                });
+            });
 
+            map.loadImage(
+                'images/flag.png',
+                (error, image) => {
+                    if (error) throw error;
+                    map.addImage('flag', image);
+                });
+            });
 
     } else {
         //No 'map' node, we have to keep checking.
@@ -362,6 +377,7 @@ function makeTheMap(msg) {
         app.ports.mapResponses.send({ 'msg' : 'no node' });
     };
 };
+
 
 
 function addDecorations() {
@@ -514,32 +530,80 @@ var purpleMarker = new mapboxgl.Marker({ color: "#800080", scale: 0.8 });
 var whiteMarker = new mapboxgl.Marker({ color: "#FFFFFF", scale: 0.8 });
 
 function addOptionals(msg) {
-    if (typeof(msg.orange) != 'undefined') {
-        orangeMarker
-            .remove()
-            .setLngLat([msg.orange.lon, msg.orange.lat])
-            .addTo(map);
+
+    if (markersAdded) {
+        //console.log('removing existing track');
+        map.removeLayer('orange')
+           .removeSource('orange');
+        map.removeLayer('purple')
+           .removeSource('purple');
+        markersAdded = false;
     }
 
-    if (typeof(msg.purple) === 'undefined') {
-        purpleMarker.remove();
-    } else {
-        purpleMarker
-            .setLngLat([msg.purple.lon, msg.purple.lat])
-            .addTo(map);
-    };
+    map.addSource('orange', {
+        'type': 'geojson',
+        'data': {
+            'type': 'FeatureCollection',
+            'features': [
+                {
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [
+                            msg.orange.lon,
+                            msg.orange.lat
+                        ]
+                    },
+                    'properties': {
+                        'title': 'Start'
+                    }
+                }
+            ]
+        }
+    });
 
-    setTimeout(function() { map.resize(); }, 50);
+    map.addSource('purple', {
+        'type': 'geojson',
+        'data': {
+            'type': 'FeatureCollection',
+            'features': [
+                {
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': [
+                            msg.purple.lon,
+                            msg.purple.lat
+                        ]
+                    },
+                    'properties': {
+                        'title': 'Finish'
+                    }
+                }
+            ]
+        }
+    });
+
+    map.addLayer({
+        'id': 'orange',
+        'type': 'symbol',
+        'source': 'orange',
+        'layout': {
+            'icon-image': 'start',
+        }
+    });
+
+    map.addLayer({
+        'id': 'purple',
+        'type': 'symbol',
+        'source': 'purple',
+        'layout': {
+            'icon-image': 'flag',
+        }
+    });
+
+    markersAdded = true;
 };
-
-    //    E.object
-    //        [ ( "Cmd", E.string "ShowPreview" )
-    //        , ( "token", E.string mapboxKey )
-    //        , ( "label", E.string tag )
-    //        , ( "shape", E.string shape )
-    //        , ( "colour", E.string colour )
-    //        , ( "data", geoJson )
-    //        ]
 
 function showPreview(msg) {
 

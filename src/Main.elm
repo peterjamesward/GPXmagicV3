@@ -340,6 +340,15 @@ stageName sequence =
         [ String.fromInt sequence ]
 
 
+automation =
+    { startStage = 1
+    , endStage = 800
+    , fetchPause = 10
+    , mapPause = 2000
+    , profilePause = 500
+    }
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
@@ -393,7 +402,7 @@ update msg model =
                     { url = "GPX/" ++ stageName sequence ++ ".gpx"
                     , expect = Http.expectString GpxFromUrl
                     }
-                , Delay.after 2000 (SnapshotMapImage sequence)
+                , Delay.after automation.mapPause (SnapshotMapImage sequence)
                 ]
             )
 
@@ -403,7 +412,7 @@ update msg model =
                     ( model
                     , Cmd.batch
                         [ MapPortController.createImageFileFromMap (stageName sequence)
-                        , Delay.after 500 <| SnapshotProfileImage sequence
+                        , Delay.after automation.profilePause <| SnapshotProfileImage sequence
                         ]
                     )
 
@@ -416,8 +425,8 @@ update msg model =
                     ( model
                     , Cmd.batch
                         [ MapPortController.createImageFileFromProfile (stageName sequence)
-                        , if sequence < 800 then
-                            Delay.after 500 <| AroundTheWorld (sequence + 1)
+                        , if sequence < automation.endStage then
+                            Delay.after automation.fetchPause <| AroundTheWorld (sequence + 1)
 
                           else
                             Cmd.none
@@ -1118,7 +1127,7 @@ topLoadingBar model =
 
         snapButton =
             button []
-                { onPress = Just (AroundTheWorld 1)
+                { onPress = Just (AroundTheWorld automation.startStage)
                 , label = useIconWithSize 12 FeatherIcons.camera
                 }
 
