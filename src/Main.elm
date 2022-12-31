@@ -341,11 +341,11 @@ stageName sequence =
 
 
 automation =
-    { startStage = 785
-    , endStage = 785
+    { startStage = 1
+    , endStage = 800
     , fetchPause = 1000
-    , mapPause = 4000
-    , profilePause = 500
+    , mapPause = 2000
+    , profilePause = 50
     }
 
 
@@ -432,7 +432,8 @@ update msg model =
                 Just track ->
                     ( model
                     , Cmd.batch
-                        [ MapPortController.createImageFileFromProfile (stageName sequence)
+                        [ --MapPortController.createImageFileFromProfile (stageName sequence)
+                          Cmd.none
                         , if sequence < automation.endStage then
                             Delay.after automation.fetchPause <| AroundTheWorld (sequence + 1)
 

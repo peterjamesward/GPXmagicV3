@@ -65,8 +65,13 @@ mapUrl style =
         MapLight ->
             "mapbox://styles/mapbox/light-v11"
 
+
 defaultStyle =
-    MapOutdoors
+    MapLight
+
+
+
+--MapOutdoors
 
 
 defaultStyleUrl =
@@ -234,7 +239,7 @@ view location ( viewWidth, viewHeight ) mContext msgWrapper =
                     none
                 , el
                     [ width <| px <| inPixels viewWidth
-                    , height <| px <| (inPixels viewHeight) // 3
+                    , height <| px <| inPixels viewHeight // 3
                     , alignLeft
                     , alignTop
                     , Border.width 2

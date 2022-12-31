@@ -228,6 +228,7 @@ function mapMessageHandler(msg) {
             if (isMapCreated) {
                 //console.log(msg.bbox);
                 map.fitBounds(msg.bbox, { animate : false });
+                map.setZoom(2);
             }
             break;
 
