@@ -41,6 +41,7 @@ type MapStyle
     | MapSatellite
     | MapSatelliteStreets
     | MapOutdoors
+    | MapLight
 
 
 mapUrl : MapStyle -> String
@@ -61,6 +62,8 @@ mapUrl style =
         MapOutdoors ->
             "mapbox://styles/mapbox/outdoors-v12"
 
+        MapLight ->
+            "mapbox://styles/mapbox/light-v11"
 
 defaultStyle =
     MapOutdoors
@@ -231,7 +234,7 @@ view location ( viewWidth, viewHeight ) mContext msgWrapper =
                     none
                 , el
                     [ width <| px <| inPixels viewWidth
-                    , height <| px <| inPixels viewHeight
+                    , height <| px <| (inPixels viewHeight) // 3
                     , alignLeft
                     , alignTop
                     , Border.width 2

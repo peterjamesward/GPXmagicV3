@@ -217,6 +217,14 @@ imperialProfileChart track =
                           )
                         ]
                   )
+                , ( "element"
+                  , E.object
+                        [ ( "point"
+                          , E.object
+                                [ ( "pointStyle", E.bool False ) ]
+                          )
+                        ]
+                  )
                 , ( "scales"
                   , E.object
                         [ ( "x"

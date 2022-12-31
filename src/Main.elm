@@ -341,10 +341,10 @@ stageName sequence =
 
 
 automation =
-    { startStage = 1
-    , endStage = 800
-    , fetchPause = 10
-    , mapPause = 2000
+    { startStage = 785
+    , endStage = 785
+    , fetchPause = 1000
+    , mapPause = 4000
     , profilePause = 500
     }
 
