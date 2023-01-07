@@ -580,6 +580,19 @@ but that's where _Route builder_ comes to play.
                 , ( "apply", """Apply""" )
                 , ( "Stretch", """Stretch""" )
                 , ( "height", """Height {0}""" )
+                , ( "+1yd", """+1yd""" )
+                , ( "+1ft", """+1ft""" )
+                , ( "+1in", """+1in""" )
+                , ( "-1in", """-1in""" )
+                , ( "-1ft", """-1ft""" )
+                , ( "-1yd", """-1yd""" )
+                , ( "+1m", """+1m""" )
+                , ( "0", """Reset""" )
+                , ( "+10cm", """+10cm""" )
+                , ( "+1cm", """+1cm""" )
+                , ( "-1cm", """-1cm""" )
+                , ( "-10cm", """-10cm""" )
+                , ( "-1m", """-1m""" )
                 , ( "info", """
 Think of this as _Nudge_, supercharged. Use the markers to define a section of track,
 then the circular 2-way drag control to move this section freely. There's a height adjustment

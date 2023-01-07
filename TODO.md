@@ -7,6 +7,10 @@ Title bar display not showing track name when loaded from URL.
 
 # WIP
 
+## Add height buttons to Move & Stretch
+
+So that John Bytheway can make easy, precise height adjustments.
+
 ---
 
 # BACKLOG

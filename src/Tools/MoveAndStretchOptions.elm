@@ -4,6 +4,7 @@ import Length
 import LocalCoords exposing (LocalCoords)
 import Point2d
 import PreviewData exposing (PreviewPoint)
+import Quantity exposing (Quantity)
 import Vector2d
 
 
@@ -22,5 +23,5 @@ type alias Options =
     , dragging : Maybe Point
     , preview : List PreviewPoint
     , mode : Mode
-    , heightSliderSetting : Float
+    , heightSliderSetting : Quantity Float Length.Meters
     }

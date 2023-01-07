@@ -3,9 +3,15 @@ module About exposing (aboutText)
 
 aboutText =
     """
-# GPXmagic v3.6.1 (40f6a859)
+# GPXmagic v3.7.0 (40f6a859)
 
 **GPXmagic V3 works best with Chrome (and some derivatives)**
+
+## 3.7.0
+
+In Move & Stretch tool, change the vertical slider into a set of buttons (like Nudge). This makes
+it easier to adjust altitudes to centimeter precision, and can be used then to make your peaks
+and valleys agree exactly with the road book. A video will explain in due course.
 
 ## 3.6.1
 

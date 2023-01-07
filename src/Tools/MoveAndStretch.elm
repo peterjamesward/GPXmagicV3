@@ -10,11 +10,11 @@ import Element.Input as Input
 import FlatColors.ChinesePalette
 import Html.Attributes
 import Html.Events.Extra.Pointer as Pointer
-import Length exposing (meters)
+import Length exposing (Meters, meters)
 import Point2d
 import Point3d
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
-import Quantity
+import Quantity exposing (Quantity)
 import String.Interpolate
 import Svg
 import Svg.Attributes as SA
@@ -40,7 +40,7 @@ defaultOptions =
     , dragging = Nothing
     , preview = []
     , mode = Translate
-    , heightSliderSetting = 0.0 -- Note this is not the length.
+    , heightSliderSetting = Quantity.zero -- Note this is not the length.
     }
 
 
@@ -53,20 +53,11 @@ type Msg
     | DraggerMarker Int
     | DraggerApply
     | StretchHeight Float
+    | NudgeButton (Quantity Float Meters)
 
 
 radius =
     100
-
-
-heightOffset sliderValue =
-    -- Using cube here gives large range, preserves sign, more control in the centre.
-    let
-        clamped =
-            -- Just to be sure.
-            clamp -1.0 1.0 sliderValue
-    in
-    Length.meters <| 100.0 * clamped * clamped * clamped
 
 
 point : ( Float, Float ) -> Point
@@ -291,7 +282,7 @@ update message options wrapper previewColour track =
                     { options
                         | dragging = Nothing
                         , vector = Vector2d.zero
-                        , heightSliderSetting = 0.0
+                        , heightSliderSetting = Quantity.zero
                         , preview = []
                     }
             in
@@ -324,7 +315,7 @@ update message options wrapper previewColour track =
         StretchHeight x ->
             let
                 newOptions =
-                    { options | heightSliderSetting = x }
+                    { options | heightSliderSetting = Length.meters x }
 
                 preview =
                     computeNewPoints newOptions track
@@ -335,6 +326,17 @@ update message options wrapper previewColour track =
             ( optionsWithPreview
             , previewActions optionsWithPreview previewColour track
             )
+
+        NudgeButton value ->
+            let
+                newOptions =
+                    if Quantity.equalWithin Length.millimeter Quantity.zero value then
+                        { options | heightSliderSetting = Quantity.zero }
+
+                    else
+                        { options | heightSliderSetting = options.heightSliderSetting |> Quantity.plus value }
+            in
+            ( newOptions, previewActions newOptions previewColour track )
 
 
 view : I18NOptions.Location -> Bool -> Options -> (Msg -> msg) -> TrackLoaded msg -> Element msg
@@ -357,18 +359,46 @@ view location imperial options wrapper track =
                 Stretch drag ->
                     nearEnd < drag && drag < farEnd
 
-        heightSlider =
-            Input.slider commonShortVerticalSliderStyles
-                { onChange = wrapper << StretchHeight
-                , label = Input.labelHidden "Height"
-                , min = -1.0
-                , max = 1.0
-                , step = Nothing
-                , value = options.heightSliderSetting
-                , thumb =
-                    Input.defaultThumb
+        verticalButton label increment =
+            Input.button
+                (width fill :: neatToolsBorder)
+                { onPress = Just <| wrapper <| NudgeButton increment
+                , label = i18n label
                 }
 
+        verticalNudgeButtons =
+            column [ alignRight ] <|
+                if imperial then
+                    [ verticalButton "+1yd" <| Length.yard
+                    , verticalButton "+1ft" <| Length.foot
+                    , verticalButton "+1in" <| Length.inch
+                    , verticalButton "0" <| Quantity.zero
+                    , verticalButton "-1in" <| Quantity.negate Length.inch
+                    , verticalButton "-1ft" <| Quantity.negate Length.foot
+                    , verticalButton "-1yd" <| Quantity.negate Length.yard
+                    ]
+
+                else
+                    [ verticalButton "+1m" <| Length.meter
+                    , verticalButton "+10cm" <| Length.centimeters 10
+                    , verticalButton "+1cm" <| Length.centimeter
+                    , verticalButton "0" <| Quantity.zero
+                    , verticalButton "-1cm" <| Quantity.negate Length.centimeter
+                    , verticalButton "-10cm" <| Quantity.negate <| Length.centimeters 10
+                    , verticalButton "-1m" <| Quantity.negate Length.meter
+                    ]
+
+        --heightSlider =
+        --    Input.slider commonShortVerticalSliderStyles
+        --        { onChange = wrapper << StretchHeight
+        --        , label = Input.labelHidden "Height"
+        --        , min = -1.0
+        --        , max = 1.0
+        --        , step = Nothing
+        --        , value = options.heightSliderSetting
+        --        , thumb =
+        --            Input.defaultThumb
+        --        }
         showSliderInStretchMode =
             case options.mode of
                 Stretch drag ->
@@ -431,9 +461,11 @@ view location imperial options wrapper track =
                 text <|
                     String.Interpolate.interpolate
                         (I18N.localisedString location toolId "height")
-                        [ showShortMeasure imperial (heightOffset options.heightSliderSetting) ]
+                        [ showShortMeasure imperial options.heightSliderSetting ]
             ]
-        , heightSlider
+        , verticalNudgeButtons
+
+        --, heightSlider
         ]
 
 
@@ -445,7 +477,7 @@ movePoints options region =
             Vector2d.components options.vector
 
         zShift =
-            heightOffset options.heightSliderSetting
+            options.heightSliderSetting
 
         translation pt =
             -- Negate y because SVG coordinates go downwards.
@@ -480,7 +512,7 @@ stretchPoints options drag track =
             Vector3d.xyz
                 Quantity.zero
                 Quantity.zero
-                (heightOffset options.heightSliderSetting)
+                options.heightSliderSetting
 
         horizontalTranslation =
             -- Negate y because SVG coordinates go downards.
