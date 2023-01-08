@@ -574,7 +574,7 @@ but that's where _Route builder_ comes to play.
         , ( "stretch"
           , Dict.fromList
                 [ ( "label", """Move and Stretch""" )
-                , ( "white", """Choose point to drag""" )
+                , ( "white", """Dragging point {0}""" )
                 , ( "Zero", """Zero""" )
                 , ( "invalid", """Not valid""" )
                 , ( "apply", """Apply""" )

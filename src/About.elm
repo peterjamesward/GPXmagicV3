@@ -7,6 +7,8 @@ aboutText =
 
 **GPXmagic V3 works best with Chrome (and some derivatives)**
 
+**N.B.** Apple has npw fixed Safari so it works pretty well with GPXmagic.
+
 ## 3.7.0
 
 In Move & Stretch tool, change the vertical slider into a set of buttons (like Nudge). This makes

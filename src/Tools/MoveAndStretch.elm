@@ -260,7 +260,7 @@ update message options wrapper previewColour track =
                                         ( fromStart, _ ) =
                                             TrackLoaded.getRangeFromMarkers track
                                     in
-                                    Stretch fromStart
+                                    Stretch (fromStart + 1)
 
                                 Stretch _ ->
                                     Translate
@@ -402,14 +402,20 @@ view location imperial options wrapper track =
         showSliderInStretchMode =
             case options.mode of
                 Stretch drag ->
+                    let
+                        sliderText =
+                            String.Interpolate.interpolate
+                                (I18N.localisedString location toolId "white")
+                                [ String.fromInt drag ]
+                    in
                     Input.slider commonShortHorizontalSliderStyles
                         { onChange = wrapper << DraggerMarker << round
                         , label =
-                            Input.labelBelow [] (i18n "white")
-                        , min = toFloat <| nearEnd + 1
-                        , max = toFloat <| farEnd - 1
+                            Input.labelBelow [] <| text sliderText
+                        , min = toFloat nearEnd + 1
+                        , max = toFloat farEnd - 1
                         , step = Just 1.0
-                        , value = drag |> toFloat
+                        , value = toFloat drag
                         , thumb = Input.defaultThumb
                         }
 
@@ -494,11 +500,12 @@ stretchPoints : Options -> Int -> TrackLoaded msg -> List EarthPoint
 stretchPoints options drag track =
     -- This used by preview and action.
     -- Here we move points either side of the stretch marker.
+    -- Note we move by relative straight line distance not track distance.
     let
         ( fromStart, fromEnd ) =
             TrackLoaded.getRangeFromMarkers track
 
-        toEnd =
+        farEnd =
             DomainModel.skipCount track.trackTree - fromEnd
 
         stretcher =
@@ -515,24 +522,24 @@ stretchPoints options drag track =
                 options.heightSliderSetting
 
         horizontalTranslation =
-            -- Negate y because SVG coordinates go downards.
+            -- Negate y because SVG coordinates go downwards.
             Vector3d.xyz xShift (Quantity.negate yShift) (meters 0)
 
         ( startAnchor, endAnchor ) =
             ( DomainModel.earthPointFromIndex fromStart track.trackTree
-            , DomainModel.earthPointFromIndex toEnd track.trackTree
+            , DomainModel.earthPointFromIndex farEnd track.trackTree
             )
 
         ( firstPart, secondPart ) =
             ( List.map Tuple.first <|
                 DomainModel.extractPointsInRange
-                    (fromStart + 1)
-                    (DomainModel.skipCount track.trackTree - drag)
+                    fromStart
+                    (DomainModel.skipCount track.trackTree - drag + 1)
                     track.trackTree
             , List.map Tuple.first <|
                 DomainModel.extractPointsInRange
-                    (drag + 1)
-                    (fromEnd + 1)
+                    drag
+                    fromEnd
                     track.trackTree
             )
 
