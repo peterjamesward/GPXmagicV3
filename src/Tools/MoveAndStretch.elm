@@ -335,8 +335,16 @@ update message options wrapper previewColour track =
 
                     else
                         { options | heightSliderSetting = options.heightSliderSetting |> Quantity.plus value }
+
+                preview =
+                    computeNewPoints newOptions track
+
+                optionsWithPreview =
+                    { newOptions | preview = preview }
             in
-            ( newOptions, previewActions newOptions previewColour track )
+            ( optionsWithPreview
+            , previewActions optionsWithPreview previewColour track
+            )
 
 
 view : I18NOptions.Location -> Bool -> Options -> (Msg -> msg) -> TrackLoaded msg -> Element msg
@@ -404,14 +412,37 @@ view location imperial options wrapper track =
                 Stretch drag ->
                     let
                         sliderText =
-                            String.Interpolate.interpolate
-                                (I18N.localisedString location toolId "white")
-                                [ String.fromInt drag ]
+                            text <|
+                                String.Interpolate.interpolate
+                                    (I18N.localisedString location toolId "white")
+                                    [ String.fromInt drag ]
+
+                        fineButtons =
+                            [ Input.button neatToolsBorder
+                                { label = text "<"
+                                , onPress =
+                                    Just <|
+                                        wrapper <|
+                                            DraggerMarker <|
+                                                max (nearEnd + 1) <|
+                                                    (drag - 1)
+                                }
+                            , Input.button neatToolsBorder
+                                { label = text ">"
+                                , onPress =
+                                    Just <|
+                                        wrapper <|
+                                            DraggerMarker <|
+                                                min (farEnd - 1) <|
+                                                    (drag + 1)
+                                }
+                            ]
                     in
                     Input.slider commonShortHorizontalSliderStyles
                         { onChange = wrapper << DraggerMarker << round
                         , label =
-                            Input.labelBelow [] <| text sliderText
+                            Input.labelBelow [] <|
+                                row [ spacing 5 ] (sliderText :: fineButtons)
                         , min = toFloat nearEnd + 1
                         , max = toFloat farEnd - 1
                         , step = Just 1.0

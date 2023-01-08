@@ -3,6 +3,8 @@
 
 Title bar display not showing track name when loaded from URL.
 
+Redo Stretch operation error on track.
+
 --- 
 
 # WIP
