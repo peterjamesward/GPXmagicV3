@@ -562,16 +562,8 @@ stretchPoints options drag track =
             )
 
         ( firstPart, secondPart ) =
-            ( List.map Tuple.first <|
-                DomainModel.extractPointsInRange
-                    fromStart
-                    (DomainModel.skipCount track.trackTree - drag + 1)
-                    track.trackTree
-            , List.map Tuple.first <|
-                DomainModel.extractPointsInRange
-                    drag
-                    fromEnd
-                    track.trackTree
+            ( List.range fromStart (drag - 1)
+            , List.range drag farEnd
             )
 
         ( firstPartAxis, secondPartAxis ) =
@@ -582,6 +574,17 @@ stretchPoints options drag track =
         ( firstPartDistance, secondPartDistance ) =
             ( Point3d.distanceFrom startAnchor.space stretcher
             , Point3d.distanceFrom endAnchor.space stretcher
+            )
+
+        ( trackDistanceToNearAnchor, trackDistanceToStretcher, trackDistanceToFarAnchor ) =
+            ( DomainModel.distanceFromIndex fromStart track.trackTree
+            , DomainModel.distanceFromIndex drag track.trackTree
+            , DomainModel.distanceFromIndex farEnd track.trackTree
+            )
+
+        ( firstPartTrackDistance, secondPartTrackDistance ) =
+            ( trackDistanceToStretcher |> Quantity.minus trackDistanceToNearAnchor
+            , trackDistanceToFarAnchor |> Quantity.minus trackDistanceToStretcher
             )
 
         distanceAlong maybeAxis p =
@@ -597,31 +600,53 @@ stretchPoints options drag track =
             , List.map adjustRelativeToEnd secondPart
             )
 
-        adjustRelativeToStart pt =
+        adjustRelativeToStart ptIndex =
             let
+                pt =
+                    DomainModel.earthPointFromIndex ptIndex track.trackTree
+
+                trackDistance =
+                    DomainModel.distanceFromIndex ptIndex track.trackTree
+
                 proportion =
                     Quantity.ratio
                         (pt.space |> distanceAlong firstPartAxis)
                         firstPartDistance
+
+                proportionalDistance =
+                    Quantity.ratio
+                        (trackDistance |> Quantity.minus trackDistanceToNearAnchor)
+                        firstPartTrackDistance
             in
             { space =
                 pt.space
                     |> Point3d.translateBy (horizontalTranslation |> Vector3d.scaleBy proportion)
-                    |> Point3d.translateBy (zShiftMax |> Vector3d.scaleBy proportion)
+                    |> Point3d.translateBy (zShiftMax |> Vector3d.scaleBy proportionalDistance)
             , time = pt.time
             }
 
-        adjustRelativeToEnd pt =
+        adjustRelativeToEnd ptIndex =
             let
+                pt =
+                    DomainModel.earthPointFromIndex ptIndex track.trackTree
+
+                trackDistance =
+                    DomainModel.distanceFromIndex ptIndex track.trackTree
+
                 proportion =
                     Quantity.ratio
                         (pt.space |> distanceAlong secondPartAxis)
                         secondPartDistance
+
+                proportionalDistance =
+                    Quantity.ratio
+                        (trackDistanceToFarAnchor |> Quantity.minus trackDistance)
+                        secondPartTrackDistance
             in
             { space =
                 pt.space
                     |> Point3d.translateBy (horizontalTranslation |> Vector3d.scaleBy proportion)
-                    |> Point3d.translateBy (zShiftMax |> Vector3d.scaleBy proportion)
+                    |> Point3d.translateBy (zShiftMax |> Vector3d.scaleBy proportionalDistance)
             , time = pt.time
             }
     in

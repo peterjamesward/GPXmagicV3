@@ -13,6 +13,8 @@ Redo Stretch operation error on track.
 
 So that John Bytheway can make easy, precise height adjustments.
 
+Height must be pro-rata'd by track distance.
+
 ---
 
 # BACKLOG
