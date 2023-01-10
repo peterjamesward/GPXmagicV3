@@ -9,6 +9,10 @@ Redo of Stretch operation sometimes gives error on track (e.g. Lacets).
 
 # WIP
 
+## Undo with Session Storage.
+
+- Using a branch for this as it's significant change but not really a V4.
+
 Look into using session storage for Undo & Redo stacks - hold entire track point list!
 May spur me on to a bit of a tidy up of Undo/Redo logic and pointer placement.
 
