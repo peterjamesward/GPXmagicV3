@@ -9,11 +9,7 @@ Redo Stretch operation error on track.
 
 # WIP
 
-## Add height buttons to Move & Stretch
-
-So that John Bytheway can make easy, precise height adjustments.
-
-Height must be pro-rata'd by track distance.
+Look into using LocalStorage / LocalDB for Undo & Redo stacks - hold entire track point list!
 
 ---
 
