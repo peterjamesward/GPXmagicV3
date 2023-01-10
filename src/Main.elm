@@ -346,9 +346,8 @@ update msg model =
                     ( adoptTrackInModel track segments model
                     , Cmd.batch
                         [ showTrackOnMapCentered model.mapPointsDraggable track
-                        , LandUseDataOSM.requestLandUseData
-                            ReceivedLandUseData
-                            track
+                        , LandUseDataOSM.requestLandUseData ReceivedLandUseData track
+                        , LocalStorage.sessionClear
                         ]
                     )
 

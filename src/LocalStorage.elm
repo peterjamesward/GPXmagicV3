@@ -1,10 +1,10 @@
 port module LocalStorage exposing
-    ( processStoragePortMessage
+    ( fetchMemoryUsage
+    , processStoragePortMessage
     , sessionClear
     , sessionGetItem
     , sessionSetItem
     , storageGetItem
-    , fetchMemoryUsage
     , storageResponses
     , storageSetItem
     )
@@ -58,8 +58,8 @@ sessionSetItem key value =
             ]
 
 
-sessionClear : String -> E.Value -> Cmd msg
-sessionClear key value =
+sessionClear : Cmd msg
+sessionClear =
     storageCommands <|
         E.object
             [ ( "Cmd", E.string "session.clear" ) ]
