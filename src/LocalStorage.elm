@@ -1,4 +1,13 @@
-port module LocalStorage exposing (processStoragePortMessage, storageGetItem, storageGetMemoryUsage, storageResponses, storageSetItem)
+port module LocalStorage exposing
+    ( processStoragePortMessage
+    , sessionClear
+    , sessionGetItem
+    , sessionSetItem
+    , storageGetItem
+    , fetchMemoryUsage
+    , storageResponses
+    , storageSetItem
+    )
 
 import Actions exposing (ToolAction(..))
 import Json.Decode as D exposing (Decoder, field, string)
@@ -12,8 +21,8 @@ port storageCommands : E.Value -> Cmd msg
 port storageResponses : (E.Value -> msg) -> Sub msg
 
 
-storageGetMemoryUsage : Cmd msg
-storageGetMemoryUsage =
+fetchMemoryUsage : Cmd msg
+fetchMemoryUsage =
     -- I know it's not storage but it doesn't merit another port pair.
     storageCommands <|
         E.object
@@ -35,6 +44,32 @@ storageGetItem key =
     storageCommands <|
         E.object
             [ ( "Cmd", E.string "storage.get" )
+            , ( "key", E.string key )
+            ]
+
+
+sessionSetItem : String -> E.Value -> Cmd msg
+sessionSetItem key value =
+    storageCommands <|
+        E.object
+            [ ( "Cmd", E.string "session.set" )
+            , ( "key", E.string key )
+            , ( "value", value )
+            ]
+
+
+sessionClear : String -> E.Value -> Cmd msg
+sessionClear key value =
+    storageCommands <|
+        E.object
+            [ ( "Cmd", E.string "session.clear" ) ]
+
+
+sessionGetItem : String -> Cmd msg
+sessionGetItem key =
+    storageCommands <|
+        E.object
+            [ ( "Cmd", E.string "session.get" )
             , ( "key", E.string key )
             ]
 

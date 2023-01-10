@@ -270,6 +270,35 @@ function storageMessageHandler(msg) {
             localStorage.clear();
             break;
 
+        case 'session.set':
+            //console.log(msg.key); console.log(msg.value);
+            sessionStorage.setItem(msg.key, JSON.stringify( msg.value ) );
+            break;
+
+        case 'session.get':
+            var val = null;
+            try {
+              val = JSON.parse(sessionStorage.getItem(msg.key))
+            } catch (e) {
+            };
+            app.ports.storageResponses.send({ 'msg' : 'session.got', 'key' : msg.key, 'value' : val });
+            break;
+
+        case 'session.list':
+            var keys = [];
+            var cnt = sessionStorage.length;
+            for (var i = 0; i < cnt; i++) {
+                var key = sessionStorage.key(i);
+                keys.push(key);
+            };
+            //console.log(keys);
+            app.ports.storageResponses.send({ 'msg' : 'session.keys', 'keys' : keys });
+            break;
+
+        case 'session.clear':
+            sessionStorage.clear();
+            break;
+
         case 'memory':
             app.ports.storageResponses.send({ 'msg' : 'memory', 'memory' : performance.memory });
             break;

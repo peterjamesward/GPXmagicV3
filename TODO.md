@@ -9,7 +9,8 @@ Redo Stretch operation error on track.
 
 # WIP
 
-Look into using LocalStorage / LocalDB for Undo & Redo stacks - hold entire track point list!
+Look into using session storage for Undo & Redo stacks - hold entire track point list!
+May spur me on to a bit of a tidy up of Undo/Redo logic and pointer placement.
 
 ---
 

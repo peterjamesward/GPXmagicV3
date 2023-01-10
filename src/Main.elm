@@ -294,7 +294,7 @@ init mflags origin navigationKey =
         , LocalStorage.storageGetItem "visuals"
         , LocalStorage.storageGetItem "docks"
         , LocalStorage.storageGetItem "location"
-        , LocalStorage.storageGetMemoryUsage
+        , LocalStorage.fetchMemoryUsage
         , LocalStorage.storageGetItem "welcome"
         , Delay.after 100 DisplayWelcome
         ]
@@ -701,7 +701,7 @@ update msg model =
             )
 
         TimeToUpdateMemory ->
-            ( model, LocalStorage.storageGetMemoryUsage )
+            ( model, LocalStorage.fetchMemoryUsage )
 
         OneClickMsg oneClickMsg ->
             let

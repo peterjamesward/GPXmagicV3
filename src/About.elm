@@ -7,7 +7,7 @@ aboutText =
 
 **GPXmagic V3 works best with Chrome (and some derivatives)**
 
-**N.B.** Apple has npw fixed Safari so it works pretty well with GPXmagic.
+**N.B.** Apple fixed Safari so it works pretty well with GPXmagic.
 
 ## 3.7.0
 
