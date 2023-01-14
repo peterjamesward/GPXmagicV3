@@ -1,6 +1,22 @@
-module TrackLoaded exposing (MarkerColour(..), TrackLoaded, UndoEntry, addToUndoStack, adjustAltitude, asPreviewPoints, buildPreview, getRangeFromMarkers, indexLeaves, newTrackFromTree, previewFromTree, removeAdjacentDuplicates, trackFromPoints, trackFromSegments, undoLastAction, useTreeWithRepositionedMarkers)
+module TrackLoaded exposing
+    ( MarkerColour(..)
+    , TrackLoaded
+    , addToUndoStack
+    , adjustAltitude
+    , asPreviewPoints
+    , buildPreview
+    , getRangeFromMarkers
+    , indexLeaves
+    , newTrackFromTree
+    , previewFromTree
+    , removeAdjacentDuplicates
+    , trackFromPoints
+    , trackFromSegments
+    , undoLastAction
+    , useTreeWithRepositionedMarkers
+    )
 
-import Actions exposing (ToolAction)
+import Actions exposing (ToolAction, UndoEntry)
 import DomainModel exposing (..)
 import LandUseDataTypes
 import LeafIndex exposing (LeafIndex)
@@ -26,16 +42,6 @@ type alias TrackLoaded msg =
     , lastMapClick : ( Float, Float )
     , landUseData : LandUseDataTypes.LandUseData
     , leafIndex : LeafIndex
-    }
-
-
-type alias UndoEntry msg =
-    { action : ToolAction msg
-    , originalPoints : List GPXSource -- for reconstructing the original tree
-    , fromStart : Int -- so we do not need to decode the action.
-    , fromEnd : Int
-    , currentPosition : Int
-    , markerPosition : Maybe Int
     }
 
 

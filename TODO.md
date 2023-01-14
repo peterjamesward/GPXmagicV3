@@ -16,17 +16,22 @@ Redo of Stretch operation sometimes gives error on track (e.g. Lacets).
 Look into using session storage for Undo & Redo stacks - hold entire track point list!
 May spur me on to a bit of a tidy up of Undo/Redo logic and pointer placement.
 
-> Careful state management required as this is asynchronous. But I think we can create
-> the storage task where the value is the whole current trackTree, then apply the edit
-> and use the resulting trackTree'. When the task completes, the old trackTree storage
-> will be reclaimable.
-> The actual Undo/Redo is also async, but that's easy. We do it when the storage message arrives.
+Careful state management required as this is asynchronous. But I think we can create
+the storage task where the value is the whole current trackTree, then apply the edit
+and use the resulting trackTree'. When the task completes, the old trackTree storage
+will be reclaimable.
+The actual Undo/Redo is also async, but that's easy. We do it when the storage message arrives.
 
-> It may make sense to distinguish, for all tools, between actions that EditTheTrack and
-> actions that do not. Then Main can wrap all edit actions in a "withUndo oldTrack ...".
-> Note here that each tool is responsible for updating Orange and Purple positions.
+It may make sense to distinguish, for all tools, between actions that EditTheTrack and
+actions that do not. Then Main can wrap all edit actions in a "withUndo oldTrack ...".
+Note here that each tool is responsible for updating Orange and Purple positions.
+No, no. Just create a new action "PushOnUndoStack <editAction>", and handle it in Main.
+(This latter option does not require or imply using sessionStorage.)
 
-> Each action needs a key. We can perhaps use model.time for that.
+Each action needs a key in sessionStorage. We can perhaps use model.time for that.
+ 
+Beware getting caught out by Graph (Route Planner). That's a bugger for Undo.
+
 
 ---
 

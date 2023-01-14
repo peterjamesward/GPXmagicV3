@@ -1,8 +1,9 @@
-module Actions exposing (ToolAction(..), actionTextForUndo)
+module Actions exposing (ToolAction(..), UndoEntry, actionTextForUndo)
 
 -- This wee DSL allows any tool to ask Main to update the model and display stuff
 -- (including on the Map) without the tools needing knowledge of the model or ports.
 
+import DomainModel exposing (GPXSource)
 import File exposing (File)
 import Http
 import Json.Decode as E
@@ -28,6 +29,16 @@ import Tools.StartFinishTypes
 import Tools.StravaOptions
 import Tools.StravaTypes exposing (StravaActivity, StravaActivityStreams, StravaRoute, StravaSegment, StravaSegmentStreams)
 import Tools.TimestampOptions
+
+
+type alias UndoEntry msg =
+    { action : ToolAction msg
+    , originalPoints : List GPXSource -- for reconstructing the original tree
+    , fromStart : Int -- so we do not need to decode the action.
+    , fromEnd : Int
+    , currentPosition : Int
+    , markerPosition : Maybe Int
+    }
 
 
 type ToolAction msg
