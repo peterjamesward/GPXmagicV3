@@ -145,8 +145,8 @@ update msg options previewColour hasTrack =
                         let
                             oldPoints =
                                 DomainModel.extractPointsInRange
-                                    (fromStart - 1)
-                                    (fromEnd - 1)
+                                    fromStart
+                                    fromEnd
                                     track.trackTree
                         in
                         { action = DeletePointsBetween fromStart fromEnd

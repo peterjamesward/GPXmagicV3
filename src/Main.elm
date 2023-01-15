@@ -1423,6 +1423,7 @@ performActionsOnModel actions model =
                     }
 
                 ( DeletePointsBetween fromStart fromEnd, Just track ) ->
+                    --TODO: Combine Delete actions.
                     let
                         newTree =
                             DeletePoints.deletePointsBetween fromStart fromEnd track
