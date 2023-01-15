@@ -1392,6 +1392,7 @@ performActionsOnModel actions model =
                     foldedModel
 
                 ( WithUndo undoInfo, Just track ) ->
+                    -- Finally, we can do this only once.
                     let
                         newTrack =
                             TrackLoaded.addToUndoStack
@@ -1423,17 +1424,13 @@ performActionsOnModel actions model =
 
                 ( DeletePointsBetween fromStart fromEnd, Just track ) ->
                     let
-                        ( newTree, oldPoints, ( actualFromStart, actualFromEnd ) ) =
+                        newTree =
                             DeletePoints.deletePointsBetween fromStart fromEnd track
 
                         newTrack =
-                            track
-                                |> TrackLoaded.addToUndoStack
-                                    action
-                                    actualFromStart
-                                    actualFromEnd
-                                    oldPoints
-                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                            TrackLoaded.useTreeWithRepositionedMarkers
+                                newTree
+                                track
                     in
                     { foldedModel
                         | track = Just newTrack
@@ -1442,19 +1439,16 @@ performActionsOnModel actions model =
 
                 ( DeleteSinglePoint fromStart fromEnd, Just track ) ->
                     let
-                        ( newTree, oldPoints ) =
+                        newTree =
                             DeletePoints.deleteSinglePoint
                                 fromStart
                                 fromEnd
                                 track
 
                         newTrack =
-                            track
-                                |> TrackLoaded.addToUndoStack action
-                                    fromStart
-                                    fromEnd
-                                    oldPoints
-                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                            TrackLoaded.useTreeWithRepositionedMarkers
+                                newTree
+                                track
                     in
                     { foldedModel
                         | track = Just newTrack

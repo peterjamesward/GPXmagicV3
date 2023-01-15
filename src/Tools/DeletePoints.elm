@@ -121,19 +121,46 @@ update msg options previewColour hasTrack =
                 ( fromStart, fromEnd ) =
                     TrackLoaded.getRangeFromMarkers track
 
-                action =
+                undoInfo =
                     -- Curious semantics here. If no marker, delete single point (hence inclusive, explicitly).
-                    -- but with marker, more sensible if the markers themselves are not deletes (hence, exclusive).
+                    -- but with marker, more sensible if the markers themselves are not deleted (hence, exclusive).
                     -- This attempts to be explicit.
                     if track.markerPosition == Nothing then
-                        DeleteSinglePoint fromStart fromEnd
+                        let
+                            oldPoints =
+                                DomainModel.extractPointsInRange
+                                    (fromStart + 1)
+                                    (fromEnd + 1)
+                                    track.trackTree
+                        in
+                        { action = Actions.DeleteSinglePoint fromStart fromEnd
+                        , originalPoints = List.map Tuple.second oldPoints
+                        , fromStart = fromStart
+                        , fromEnd = fromEnd
+                        , currentPosition = track.currentPosition
+                        , markerPosition = track.markerPosition
+                        }
 
                     else
-                        DeletePointsBetween fromStart fromEnd
+                        let
+                            oldPoints =
+                                DomainModel.extractPointsInRange
+                                    (fromStart - 1)
+                                    (fromEnd - 1)
+                                    track.trackTree
+                        in
+                        { action = DeletePointsBetween fromStart fromEnd
+                        , originalPoints = List.map Tuple.second oldPoints
+                        , fromStart = fromStart
+                        , fromEnd = fromEnd
+                        , currentPosition = track.currentPosition
+                        , markerPosition = track.markerPosition
+                        }
             in
             ( options
-            , [ action
+            , [ undoInfo.action
               , TrackHasChanged
+              , WithUndo undoInfo
               ]
             )
 
@@ -175,7 +202,7 @@ view location msgWrapper options track =
 -- This function finally does the deed, driven by the Action interpreter in Main.
 
 
-deleteSinglePoint : Int -> Int -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+deleteSinglePoint : Int -> Int -> TrackLoaded msg -> Maybe PeteTree
 deleteSinglePoint fromStart fromEnd track =
     -- Clearer to deal with this case separately.
     -- If they are combined later, I'd be happy with that also.
@@ -187,20 +214,15 @@ deleteSinglePoint fromStart fromEnd track =
                 track.referenceLonLat
                 []
                 track.trackTree
-
-        oldPoints =
-            [ DomainModel.gpxPointFromIndex track.currentPosition track.trackTree ]
     in
-    ( newTree
-    , oldPoints
-    )
+    newTree
 
 
 deletePointsBetween :
     Int
     -> Int
     -> TrackLoaded msg
-    -> ( Maybe PeteTree, List GPXSource, ( Int, Int ) )
+    -> Maybe PeteTree
 deletePointsBetween fromStart fromEnd track =
     let
         newTree =
@@ -210,16 +232,5 @@ deletePointsBetween fromStart fromEnd track =
                 track.referenceLonLat
                 []
                 track.trackTree
-
-        oldPoints =
-            -- The Nothing here means no depth limit, so we get all the points.
-            -- Note we have to reverse them.
-            DomainModel.extractPointsInRange
-                (fromStart - 1)
-                (fromEnd - 1)
-                track.trackTree
     in
-    ( newTree
-    , oldPoints |> List.map Tuple.second
-    , ( fromStart, fromEnd )
-    )
+    newTree

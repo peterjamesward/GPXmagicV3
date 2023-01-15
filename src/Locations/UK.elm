@@ -425,7 +425,7 @@ Also, access a quick description of what the tool does and how (and when) to use
                 , ( "spline", """smooth with splines""" )
                 , ( "centroid", """smooth with 3D average""" )
                 , ( "radius", """radiused bend""" )
-                , ( "arc", """circular arc""" )
+                , ( "arc", """arc smoother""" )
                 , ( "map", """move on map""" )
                 , ( "nudge", """nudge""" )
                 , ( "outback", """out and back""" )
