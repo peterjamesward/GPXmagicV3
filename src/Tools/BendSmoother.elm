@@ -303,8 +303,8 @@ undoEntryFrom options track =
 
         oldPoints =
             DomainModel.extractPointsInRange
-                fromStart
-                fromEnd
+                (fromStart + 1)
+                (fromEnd + 1)
                 track.trackTree
     in
     { action = Actions.BendSmootherApplyWithOptions options
