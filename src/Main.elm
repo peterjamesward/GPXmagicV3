@@ -1391,6 +1391,36 @@ performActionsOnModel actions model =
                 ( DelayMessage _ _, Just _ ) ->
                     foldedModel
 
+                ( WithUndo undoInfo, Just track ) ->
+                    let
+                        newTrack =
+                            TrackLoaded.addToUndoStack
+                                undoInfo.action
+                                undoInfo.fromStart
+                                undoInfo.fromEnd
+                                undoInfo.originalPoints
+                                track
+                    in
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
+
+                ( BendSmootherApplyWithOptions options, Just track ) ->
+                    let
+                        newTree =
+                            Tools.BendSmoother.applyUsingOptions options track
+
+                        newTrack =
+                            TrackLoaded.useTreeWithRepositionedMarkers
+                                newTree
+                                track
+                    in
+                    { foldedModel
+                        | track = Just newTrack
+                        , needsRendering = True
+                    }
+
                 ( DeletePointsBetween fromStart fromEnd, Just track ) ->
                     let
                         ( newTree, oldPoints, ( actualFromStart, actualFromEnd ) ) =
@@ -1639,45 +1669,18 @@ performActionsOnModel actions model =
                         , toolOptions = newToolOptions
                     }
 
-                ( BendSmootherApplyWithOptions options, Just track ) ->
-                    let
-                        ( newTree, oldPoints ) =
-                            Tools.BendSmoother.applyUsingOptions options track
-
-                        ( fromStart, fromEnd ) =
-                            TrackLoaded.getRangeFromMarkers track
-
-                        newTrack =
-                            track
-                                |> TrackLoaded.addToUndoStack action
-                                    fromStart
-                                    fromEnd
-                                    oldPoints
-                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
-                    in
-                    { foldedModel
-                        | track = Just newTrack
-                        , needsRendering = True
-                    }
-
                 ( Autofix indices, Just track ) ->
                     let
-                        ( newTree, oldPoints ) =
+                        newTree =
                             Tools.BendSmoother.softenMultiplePoints
                                 model.toolOptions.bendSmootherOptions
                                 indices
                                 track
 
-                        ( fromStart, fromEnd ) =
-                            ( 0, 0 )
-
                         newTrack =
-                            track
-                                |> TrackLoaded.addToUndoStack action
-                                    fromStart
-                                    fromEnd
-                                    oldPoints
-                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                            TrackLoaded.useTreeWithRepositionedMarkers
+                                newTree
+                                track
                     in
                     { foldedModel
                         | track = Just newTrack

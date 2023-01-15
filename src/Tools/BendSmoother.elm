@@ -76,7 +76,7 @@ tryBendSmoother track options =
     }
 
 
-applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyUsingOptions : Options -> TrackLoaded msg -> Maybe PeteTree
 applyUsingOptions options track =
     case options.mode of
         SmoothPoint ->
@@ -86,7 +86,7 @@ applyUsingOptions options track =
             applyClassicBendSmoother options track
 
 
-applyClassicBendSmoother : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyClassicBendSmoother : Options -> TrackLoaded msg -> Maybe PeteTree
 applyClassicBendSmoother options track =
     let
         ( fromStart, fromEnd ) =
@@ -107,46 +107,36 @@ applyClassicBendSmoother options track =
                 track.referenceLonLat
                 gpxPoints
                 track.trackTree
-
-        oldPoints =
-            DomainModel.extractPointsInRange
-                fromStart
-                fromEnd
-                track.trackTree
     in
-    ( newTree
-    , oldPoints |> List.map Tuple.second
-    )
+    newTree
 
 
-softenMultiplePoints : Options -> List Int -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+softenMultiplePoints : Options -> List Int -> TrackLoaded msg -> Maybe PeteTree
 softenMultiplePoints options indices track =
     -- There may be a more efficient way...
     let
-        helper : Int -> ( PeteTree, List GPXSource ) -> ( PeteTree, List GPXSource )
-        helper index ( previousTree, _ ) =
+        helper : Int -> PeteTree -> PeteTree
+        helper index previousTree =
             case
                 softenSinglePoint options.segments index { track | trackTree = previousTree }
             of
-                ( Just newTree, lastSetOfOldPoints ) ->
-                    ( newTree, lastSetOfOldPoints )
+                Just newTree ->
+                    newTree
 
-                ( Nothing, lastSetOfOldPoints ) ->
-                    ( track.trackTree, lastSetOfOldPoints )
+                Nothing ->
+                    track.trackTree
 
-        ( finalTree, _ ) =
+        finalTree =
             -- Indices must be in descending order or we lose context.
             indices
                 |> List.sort
                 |> List.reverse
-                |> List.foldl helper ( track.trackTree, [] )
+                |> List.foldl helper track.trackTree
     in
-    ( Just finalTree
-    , DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
-    )
+    Just finalTree
 
 
-softenSinglePoint : Int -> Int -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+softenSinglePoint : Int -> Int -> TrackLoaded msg -> Maybe PeteTree
 softenSinglePoint numSegments index track =
     -- Apply the new bend smoother to a single point, if possible.
     case singlePoint3dArc track index of
@@ -167,16 +157,11 @@ softenSinglePoint numSegments index track =
                         track.referenceLonLat
                         gpxPoints
                         track.trackTree
-
-                oldPoints =
-                    [ DomainModel.getDualCoords track.trackTree index ]
             in
-            ( newTree
-            , oldPoints |> List.map Tuple.second
-            )
+            newTree
 
         Nothing ->
-            ( Just track.trackTree, [] )
+            Just track.trackTree
 
 
 singlePoint3dArc : TrackLoaded msg -> Int -> Maybe (Arc3d Meters LocalCoords)
@@ -310,6 +295,27 @@ previewActions options colour track =
             [ HidePreview "bend" ]
 
 
+undoEntryFrom : Options -> TrackLoaded msg -> Actions.UndoEntry msg
+undoEntryFrom options track =
+    let
+        ( fromStart, fromEnd ) =
+            TrackLoaded.getRangeFromMarkers track
+
+        oldPoints =
+            DomainModel.extractPointsInRange
+                fromStart
+                fromEnd
+                track.trackTree
+    in
+    { action = Actions.BendSmootherApplyWithOptions options
+    , originalPoints = List.map Tuple.second oldPoints
+    , fromStart = fromStart
+    , fromEnd = fromEnd
+    , currentPosition = track.currentPosition
+    , markerPosition = track.markerPosition
+    }
+
+
 update :
     Msg
     -> Options
@@ -329,7 +335,8 @@ update msg options previewColour track =
         ApplySmoothBend ->
             ( options
             , [ Actions.BendSmootherApplyWithOptions options
-              , TrackHasChanged
+              , Actions.WithUndo (undoEntryFrom options track)
+              , Actions.TrackHasChanged
               ]
             )
 
