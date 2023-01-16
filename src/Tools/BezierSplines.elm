@@ -73,7 +73,7 @@ computeNewPoints options track =
 applyUsingOptions :
     Options
     -> TrackLoaded msg
-    -> ( Maybe PeteTree, List GPXSource, ( Int, Int ) )
+    -> Maybe PeteTree
 applyUsingOptions options track =
     let
         ( fromStart, fromEnd ) =
@@ -90,24 +90,14 @@ applyUsingOptions options track =
                 track.referenceLonLat
                 (List.map .gpx <| computeNewPoints options track)
                 track.trackTree
-
-        oldPoints =
-            -- +1s here?
-            DomainModel.extractPointsInRange
-                fromStart
-                fromEnd
-                track.trackTree
     in
-    ( newTree
-    , oldPoints |> List.map Tuple.second
-    , ( fromStart, fromEnd )
-    )
+    newTree
 
 
 bezierApproximationFor1CQF : TrackLoaded msg -> PeteTree
 bezierApproximationFor1CQF track =
     let
-        ( outputTree, _, _ ) =
+        outputTree =
             applyUsingOptions defaultOptions track
     in
     outputTree |> Maybe.withDefault track.trackTree
@@ -133,7 +123,7 @@ toolStateChange opened colour options track =
 
 actions options previewColour track =
     let
-        ( previewTree, _, _ ) =
+        previewTree =
             -- What would the track become if applied?
             applyUsingOptions options track
 
@@ -187,10 +177,34 @@ update msg options previewColour hasTrack =
             in
             ( newOptions, actions newOptions previewColour track )
 
-        ( Just _, BezierApplyWithOptions ) ->
+        ( Just track, BezierApplyWithOptions ) ->
+            let
+                ( fromStart, fromEnd ) =
+                    if track.markerPosition /= Nothing then
+                        TrackLoaded.getRangeFromMarkers track
+
+                    else
+                        ( 0, 0 )
+
+                oldPoints =
+                    DomainModel.extractPointsInRange
+                        fromStart
+                        fromEnd
+                        track.trackTree
+
+                undoInfo =
+                    { action = Actions.BezierApplyWithOptions options
+                    , originalPoints = List.map Tuple.second oldPoints
+                    , fromStart = fromStart
+                    , fromEnd = fromEnd
+                    , currentPosition = track.currentPosition
+                    , markerPosition = track.markerPosition
+                    }
+            in
             ( options
             , [ Actions.BezierApplyWithOptions options
               , TrackHasChanged
+              , WithUndo undoInfo
               ]
             )
 

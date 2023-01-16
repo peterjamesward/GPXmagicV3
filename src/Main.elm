@@ -1442,18 +1442,13 @@ performActionsOnModel actions model =
 
                 ( BezierApplyWithOptions options, Just track ) ->
                     let
-                        ( newTree, oldPoints, ( fromStart, fromEnd ) ) =
+                        newTree =
                             Tools.BezierSplines.applyUsingOptions
                                 options
                                 track
 
                         newTrack =
-                            track
-                                |> TrackLoaded.addToUndoStack action
-                                    fromStart
-                                    fromEnd
-                                    oldPoints
-                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
                     in
                     { foldedModel
                         | track = Just newTrack
