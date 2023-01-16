@@ -1460,21 +1460,8 @@ performActionsOnModel actions model =
                         ( newTree, oldPoints ) =
                             Tools.CentroidAverage.applyUsingOptions options track
 
-                        ( fromStart, fromEnd ) =
-                            case track.markerPosition of
-                                Just _ ->
-                                    TrackLoaded.getRangeFromMarkers track
-
-                                Nothing ->
-                                    ( 0, 0 )
-
                         newTrack =
-                            track
-                                |> TrackLoaded.addToUndoStack action
-                                    fromStart
-                                    fromEnd
-                                    oldPoints
-                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
                     in
                     { foldedModel
                         | track = Just newTrack
