@@ -1422,23 +1422,7 @@ performActionsOnModel actions model =
                         , needsRendering = True
                     }
 
-                ( DeletePointsBetween fromStart fromEnd, Just track ) ->
-                    --TODO: Combine Delete actions.
-                    let
-                        newTree =
-                            DeletePoints.deletePointsBetween fromStart fromEnd track
-
-                        newTrack =
-                            TrackLoaded.useTreeWithRepositionedMarkers
-                                newTree
-                                track
-                    in
-                    { foldedModel
-                        | track = Just newTrack
-                        , needsRendering = True
-                    }
-
-                ( DeleteSinglePoint fromStart fromEnd, Just track ) ->
+                ( DeletePointOrPoints fromStart fromEnd, Just track ) ->
                     let
                         newTree =
                             DeletePoints.deleteSinglePoint

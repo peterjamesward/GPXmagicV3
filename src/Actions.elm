@@ -55,8 +55,8 @@ type ToolAction msg
     | MapRefresh -- generally because layout has changed.
     | StoreLocally String E.Value -- save something in local storage
     | StoredValueRetrieved String E.Value -- retrieve from local storage
-    | DeletePointsBetween Int Int -- fromStart, fromEnd
-    | DeleteSinglePoint Int Int -- fromStart, fromEnd
+      --| DeletePointsBetween Int Int -- fromStart, fromEnd
+    | DeletePointOrPoints Int Int -- fromStart, fromEnd
     | TrackHasChanged -- Tools need to update to reflect any change in track
     | PointerChange -- Need to refresh views, but not replace the track on map
     | SetMarker (Maybe Int) -- position the purple marker
@@ -135,10 +135,7 @@ actionTextForUndo location action =
     -- Only needed for track modifying actions that go in the undo stack.
     I18N.localisedString location "action" <|
         case action of
-            DeletePointsBetween _ _ ->
-                "deleteN"
-
-            DeleteSinglePoint _ _ ->
+            DeletePointOrPoints _ _ ->
                 "delete1"
 
             BezierApplyWithOptions _ ->

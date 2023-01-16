@@ -421,7 +421,7 @@ Also, access a quick description of what the tool does and how (and when) to use
         , ( "action"
           , Dict.fromList
                 [ ( "deleteN", """deletion of points""" )
-                , ( "delete1", """delete one point""" )
+                , ( "delete1", """delete""" )
                 , ( "spline", """smooth with splines""" )
                 , ( "centroid", """smooth with 3D average""" )
                 , ( "radius", """radiused bend""" )
