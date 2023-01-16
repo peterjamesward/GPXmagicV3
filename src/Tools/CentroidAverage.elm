@@ -177,10 +177,34 @@ update msg options previewColour hasTrack =
             in
             ( newOptions, actions newOptions previewColour track )
 
-        ( Just _, ApplyWithOptions ) ->
+        ( Just track, ApplyWithOptions ) ->
+            let
+                ( fromStart, fromEnd ) =
+                    if track.markerPosition /= Nothing then
+                        TrackLoaded.getRangeFromMarkers track
+
+                    else
+                        ( 0, 0 )
+
+                oldPoints =
+                    DomainModel.extractPointsInRange
+                        fromStart
+                        fromEnd
+                        track.trackTree
+
+                undoInfo =
+                    { action = Actions.CentroidAverageApplyWithOptions options
+                    , originalPoints = List.map Tuple.second oldPoints
+                    , fromStart = fromStart
+                    , fromEnd = fromEnd
+                    , currentPosition = track.currentPosition
+                    , markerPosition = track.markerPosition
+                    }
+            in
             ( options
             , [ Actions.CentroidAverageApplyWithOptions options
               , TrackHasChanged
+              , WithUndo undoInfo
               ]
             )
 
