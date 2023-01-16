@@ -47,7 +47,7 @@ defaultOptions =
 applyUsingOptions :
     Options
     -> TrackLoaded msg
-    -> ( Maybe PeteTree, List GPXSource, ( Int, Int ) )
+    -> Maybe PeteTree
 applyUsingOptions options track =
     let
         ( ( actualStart, actualEnd ), newPoints ) =
@@ -60,17 +60,8 @@ applyUsingOptions options track =
                 track.referenceLonLat
                 (List.map .gpx newPoints)
                 track.trackTree
-
-        oldPoints =
-            DomainModel.extractPointsInRange
-                actualStart
-                (skipCount track.trackTree - actualEnd)
-                track.trackTree
     in
-    ( newTree
-    , List.map Tuple.second oldPoints
-    , ( actualStart, actualEnd )
-    )
+    newTree
 
 
 widenBendHelper :
@@ -323,9 +314,30 @@ update msg options previewColour track =
             ( defaultOptions, [ HidePreview "nudge" ] )
 
         ApplyWithOptions ->
+            let
+                ( ( actualStart, actualEnd ), _ ) =
+                    --TODO: Avoid calling this twice.
+                    computeNudgedPoints options track
+
+                oldPoints =
+                    DomainModel.extractPointsInRange
+                        actualStart
+                        (skipCount track.trackTree - actualEnd)
+                        track.trackTree
+
+                undoInfo =
+                    { action = Actions.NudgeApplyWithOptions options
+                    , originalPoints = List.map Tuple.second oldPoints
+                    , fromStart = actualStart
+                    , fromEnd = skipCount track.trackTree - actualEnd
+                    , currentPosition = track.currentPosition
+                    , markerPosition = track.markerPosition
+                    }
+            in
             ( options
-            , [ Actions.NudgeApplyWithOptions options
+            , [ undoInfo.action
               , TrackHasChanged
+              , WithUndo undoInfo
               ]
             )
 

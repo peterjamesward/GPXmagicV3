@@ -1532,19 +1532,11 @@ performActionsOnModel actions model =
 
                 ( NudgeApplyWithOptions options, Just track ) ->
                     let
-                        ( newTree, oldPoints, ( entry, exit ) ) =
+                        newTree =
                             Tools.Nudge.applyUsingOptions options track
 
-                        ( fromStart, fromEnd ) =
-                            ( entry, skipCount track.trackTree - exit )
-
                         newTrack =
-                            track
-                                |> TrackLoaded.addToUndoStack action
-                                    fromStart
-                                    fromEnd
-                                    oldPoints
-                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
                     in
                     { foldedModel
                         | track = Just newTrack
