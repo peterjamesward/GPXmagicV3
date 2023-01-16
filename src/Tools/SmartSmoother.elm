@@ -581,9 +581,33 @@ update :
 update msg options previewColour track =
     case msg of
         Apply ->
+            let
+                ( fromStart, fromEnd ) =
+                    if track.markerPosition /= Nothing then
+                        TrackLoaded.getRangeFromMarkers track
+
+                    else
+                        ( 0, 0 )
+
+                oldPoints =
+                    DomainModel.extractPointsInRange
+                        fromStart
+                        fromEnd
+                        track.trackTree
+
+                undoInfo =
+                    { action = Actions.SmartSmootherApplyWithOptions options
+                    , originalPoints = List.map Tuple.second oldPoints
+                    , fromStart = fromStart
+                    , fromEnd = fromEnd
+                    , currentPosition = track.currentPosition
+                    , markerPosition = track.markerPosition
+                    }
+            in
             ( options
-            , [ Actions.SmartSmootherApplyWithOptions options
+            , [ undoInfo.action
               , TrackHasChanged
+              , WithUndo undoInfo
               ]
             )
 

@@ -1473,14 +1473,6 @@ performActionsOnModel actions model =
                         ( newTree, oldPoints ) =
                             Tools.SmartSmoother.applyUsingOptions options track
 
-                        ( fromStart, fromEnd ) =
-                            case track.markerPosition of
-                                Just _ ->
-                                    TrackLoaded.getRangeFromMarkers track
-
-                                Nothing ->
-                                    ( 0, 0 )
-
                         ( orangeDistance, purpleDistance ) =
                             ( DomainModel.distanceFromIndex track.currentPosition track.trackTree
                             , case track.markerPosition of
@@ -1509,15 +1501,7 @@ performActionsOnModel actions model =
                         trackWithMarkers =
                             case newTree of
                                 Just gotNewTree ->
-                                    let
-                                        newTrack =
-                                            track
-                                                |> TrackLoaded.addToUndoStack action
-                                                    fromStart
-                                                    fromEnd
-                                                    oldPoints
-                                    in
-                                    { newTrack
+                                    { track
                                         | trackTree = gotNewTree
                                         , currentPosition = newOrange
                                         , markerPosition = newPurple
@@ -2656,7 +2640,11 @@ performActionsOnModel actions model =
                             -- More care needed or the repeated edit will flush the Redo stack.
                             let
                                 modelAfterRedo =
-                                    performActionsOnModel [ redo.action ] model
+                                    performActionsOnModel
+                                        [ redo.action
+                                        , WithUndo redo
+                                        ]
+                                        model
                             in
                             case modelAfterRedo.track of
                                 Just trackAfterRedo ->
