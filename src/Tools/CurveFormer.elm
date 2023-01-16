@@ -90,7 +90,7 @@ type Msg
     | ApplyWithOptions
 
 
-applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource, ( Int, Int ) )
+applyUsingOptions : Options -> TrackLoaded msg -> Maybe PeteTree
 applyUsingOptions options track =
     case options.fixedAttachmentPoints of
         Just ( entryPoint, exitPoint ) ->
@@ -112,13 +112,10 @@ applyUsingOptions options track =
                         fromEnd
                         track.trackTree
             in
-            ( newTree
-            , oldPoints |> List.map Tuple.second
-            , ( entryPoint, exitPoint )
-            )
+            newTree
 
         Nothing ->
-            ( Just track.trackTree, [], ( 0, 0 ) )
+            Just track.trackTree
 
 
 toolStateChange :
@@ -262,10 +259,34 @@ update msg options previewColour hasTrack =
             in
             ( newOptions, previewActions newOptions previewColour track )
 
-        ( Just _, ApplyWithOptions ) ->
+        ( Just track, ApplyWithOptions ) ->
+            let
+                ( fromStart, fromEnd ) =
+                    if track.markerPosition /= Nothing then
+                        TrackLoaded.getRangeFromMarkers track
+
+                    else
+                        ( 0, 0 )
+
+                oldPoints =
+                    DomainModel.extractPointsInRange
+                        fromStart
+                        fromEnd
+                        track.trackTree
+
+                undoInfo =
+                    { action = Actions.CurveFormerApplyWithOptions options
+                    , originalPoints = List.map Tuple.second oldPoints
+                    , fromStart = fromStart
+                    , fromEnd = fromEnd
+                    , currentPosition = track.currentPosition
+                    , markerPosition = track.markerPosition
+                    }
+            in
             ( options
-            , [ Actions.CurveFormerApplyWithOptions options
+            , [ undoInfo.action
               , TrackHasChanged
+              , WithUndo undoInfo
               ]
             )
 

@@ -5,9 +5,7 @@ Title bar display not showing track name when loaded from URL.
 
 Redo of Stretch operation sometimes gives error on track (e.g. Lacets).
 
-Undo should restore markers.
-
-Delete should display "Sorry" message when almost all track is selected.
+Delete should display "Sorry" message when _almost_ all track is selected.
 
 --- 
 
