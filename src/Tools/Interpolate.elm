@@ -109,7 +109,7 @@ computeNewPoints excludeExisting options track =
         newPoints
 
 
-apply : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+apply : Options -> TrackLoaded msg -> Maybe PeteTree
 apply options track =
     let
         ( fromStart, fromEnd ) =
@@ -131,16 +131,8 @@ apply options track =
                 track.referenceLonLat
                 newCourse
                 track.trackTree
-
-        oldPoints =
-            DomainModel.extractPointsInRange
-                fromStart
-                fromEnd
-                track.trackTree
     in
-    ( newTree
-    , oldPoints |> List.map Tuple.second
-    )
+    newTree
 
 
 toolStateChange :
@@ -205,7 +197,7 @@ update msg options previewColour hasTrack =
 
         ( Just track, Apply ) ->
             let
-                newOptions =
+                ensureCorrectExtent =
                     { options
                         | extent =
                             case track.markerPosition of
@@ -215,9 +207,29 @@ update msg options previewColour hasTrack =
                                 Nothing ->
                                     ExtentIsTrack
                     }
+
+                ( fromStart, fromEnd ) =
+                    TrackLoaded.getRangeFromMarkers track
+
+                oldPoints =
+                    List.map Tuple.second <|
+                        DomainModel.extractPointsInRange
+                            fromStart
+                            fromEnd
+                            track.trackTree
+
+                undoInfo =
+                    { action = Actions.ApplyInterpolateWithOptions ensureCorrectExtent
+                    , originalPoints = oldPoints
+                    , fromStart = fromStart
+                    , fromEnd = fromEnd
+                    , currentPosition = track.currentPosition
+                    , markerPosition = track.markerPosition
+                    }
             in
-            ( newOptions
-            , [ Actions.ApplyInterpolateWithOptions newOptions
+            ( ensureCorrectExtent
+            , [ WithUndo undoInfo
+              , undoInfo.action
               , TrackHasChanged
               ]
             )

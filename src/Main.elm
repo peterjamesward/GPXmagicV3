@@ -1740,25 +1740,11 @@ performActionsOnModel actions model =
 
                 ( ApplyInterpolateWithOptions options, Just track ) ->
                     let
-                        ( newTree, oldPoints ) =
+                        newTree =
                             Tools.Interpolate.apply options track
 
-                        ( fromStart, fromEnd ) =
-                            -- Repetition of this is untidy.
-                            case options.extent of
-                                Tools.InterpolateOptions.ExtentIsRange ->
-                                    TrackLoaded.getRangeFromMarkers track
-
-                                Tools.InterpolateOptions.ExtentIsTrack ->
-                                    ( 0, 0 )
-
                         newTrack =
-                            track
-                                |> TrackLoaded.addToUndoStack action
-                                    fromStart
-                                    fromEnd
-                                    oldPoints
-                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
                     in
                     { foldedModel
                         | track = Just newTrack
