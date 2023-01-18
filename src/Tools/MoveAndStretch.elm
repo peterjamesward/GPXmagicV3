@@ -178,7 +178,7 @@ computeNewPoints options track =
         newPoints
 
 
-apply : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+apply : Options -> TrackLoaded msg -> Maybe PeteTree
 apply options track =
     let
         ( fromStart, fromEnd ) =
@@ -194,16 +194,8 @@ apply options track =
                 track.referenceLonLat
                 gpxPoints
                 track.trackTree
-
-        oldPoints =
-            DomainModel.extractPointsInRange
-                fromStart
-                fromEnd
-                track.trackTree
     in
-    ( newTree
-    , oldPoints |> List.map Tuple.second
-    )
+    newTree
 
 
 update :
@@ -304,8 +296,29 @@ update message options wrapper previewColour track =
             )
 
         DraggerApply ->
+            let
+                ( fromStart, fromEnd ) =
+                    TrackLoaded.getRangeFromMarkers track
+
+                oldPoints =
+                    List.map Tuple.second <|
+                        DomainModel.extractPointsInRange
+                            fromStart
+                            fromEnd
+                            track.trackTree
+
+                undoInfo =
+                    { action = MoveAndStretchWithOptions options
+                    , originalPoints = oldPoints
+                    , fromStart = fromStart
+                    , fromEnd = fromEnd
+                    , currentPosition = track.currentPosition
+                    , markerPosition = track.markerPosition
+                    }
+            in
             ( options
-            , [ MoveAndStretchWithOptions options
+            , [ WithUndo undoInfo
+              , undoInfo.action
               , TrackHasChanged
               , HidePreview "stretch"
               , HidePreview "stretchMark"

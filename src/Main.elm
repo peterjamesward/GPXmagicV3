@@ -1687,19 +1687,11 @@ performActionsOnModel actions model =
 
                 ( MoveAndStretchWithOptions settings, Just track ) ->
                     let
-                        ( newTree, oldPoints ) =
+                        newTree =
                             Tools.MoveAndStretch.apply settings track
 
-                        ( fromStart, fromEnd ) =
-                            TrackLoaded.getRangeFromMarkers track
-
                         newTrack =
-                            track
-                                |> TrackLoaded.addToUndoStack action
-                                    fromStart
-                                    fromEnd
-                                    oldPoints
-                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
                     in
                     { foldedModel
                         | track = Just newTrack
