@@ -37,7 +37,7 @@ type Msg
     | SetOffset Float
 
 
-apply : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+apply : Options -> TrackLoaded msg -> Maybe PeteTree
 apply options track =
     let
         noNudge =
@@ -177,16 +177,8 @@ apply options track =
 
         newTree =
             DomainModel.treeFromSourcePoints newCourse
-
-        -- New tree built from four parts:
-        -- Out (nudged one way), away turn, back (nudged other way), home turn.
-        oldPoints =
-            -- All the points.
-            getAllGPXPointsInNaturalOrder track.trackTree
     in
-    ( newTree
-    , oldPoints
-    )
+    newTree
 
 
 update :
@@ -203,10 +195,21 @@ update msg options hasTrack =
             in
             ( newOptions, [] )
 
-        ( Just _, ApplyOutAndBack ) ->
+        ( Just track, ApplyOutAndBack ) ->
+            let
+                undoInfo =
+                    { action = Actions.OutAndBackApplyWithOptions options
+                    , originalPoints = DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
+                    , fromStart = 0
+                    , fromEnd = 0
+                    , currentPosition = track.currentPosition
+                    , markerPosition = track.markerPosition
+                    }
+            in
             ( options
-            , [ Actions.OutAndBackApplyWithOptions options
+            , [ undoInfo.action
               , TrackHasChanged
+              , WithUndo undoInfo
               ]
             )
 

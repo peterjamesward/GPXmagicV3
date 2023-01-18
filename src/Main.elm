@@ -1626,19 +1626,11 @@ performActionsOnModel actions model =
 
                 ( OutAndBackApplyWithOptions options, Just track ) ->
                     let
-                        ( newTree, oldPoints ) =
+                        newTree =
                             Tools.OutAndBack.apply options track
 
-                        ( fromStart, fromEnd ) =
-                            ( 0, 0 )
-
                         newTrack =
-                            track
-                                |> TrackLoaded.addToUndoStack action
-                                    fromStart
-                                    fromEnd
-                                    oldPoints
-                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
                     in
                     { foldedModel
                         | track = Just newTrack
