@@ -19,6 +19,8 @@ Just removes repetitive code from Main and reduces tool abstraction leakage.
 
 Note that _many_ update | ApplyWithOptions methods may now be identical and could be factored out.
 
+** Simplify Undo wrong **
+
 ---
 
 # BACKLOG

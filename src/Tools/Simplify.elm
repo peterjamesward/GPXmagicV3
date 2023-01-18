@@ -106,7 +106,7 @@ findSimplifications options tree =
     { options | pointsToRemove = nonAdjacentEntries }
 
 
-apply : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+apply : Options -> TrackLoaded msg -> Maybe PeteTree
 apply options track =
     -- Deleting arbitrary collection of non-adjacent points implies rebuild.
     let
@@ -116,24 +116,17 @@ apply options track =
 
         newCourse : Dict Int GPXSource
         newCourse =
-            Dict.foldl
-                (\k _ out -> Dict.remove k out)
-                originalCourse
-                options.pointsToRemove
+            options.pointsToRemove
+                |> Dict.foldl
+                    (\k _ out -> Dict.remove k out)
+                    originalCourse
 
         newTree : Maybe PeteTree
         newTree =
             DomainModel.treeFromSourcesWithExistingReference track.referenceLonLat <|
                 Dict.values newCourse
-
-        oldPoints : List GPXSource
-        oldPoints =
-            -- All the points.
-            Dict.values originalCourse
     in
-    ( newTree
-    , oldPoints
-    )
+    newTree
 
 
 simplifyFor1CQF : TrackLoaded msg -> PeteTree
@@ -142,7 +135,7 @@ simplifyFor1CQF track =
         options =
             findSimplifications defaultOptions track.trackTree
 
-        ( outputTree, _ ) =
+        outputTree =
             apply options track
     in
     outputTree |> Maybe.withDefault track.trackTree
@@ -203,7 +196,25 @@ update msg options previewColour track =
             ( newOptions, actions previewColour newOptions track )
 
         Apply ->
-            ( options, [ Actions.ApplySimplify, TrackHasChanged ] )
+            let
+                oldPoints =
+                    DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
+
+                undoInfo =
+                    { action = Actions.ApplySimplify
+                    , originalPoints = oldPoints
+                    , fromStart = 0
+                    , fromEnd = 0
+                    , currentPosition = track.currentPosition
+                    , markerPosition = track.markerPosition
+                    }
+            in
+            ( options
+            , [ WithUndo undoInfo
+              , undoInfo.action
+              , TrackHasChanged
+              ]
+            )
 
         FlushUndo ->
             ( options, [ Actions.FlushUndo ] )

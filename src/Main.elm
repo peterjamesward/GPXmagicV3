@@ -1639,11 +1639,8 @@ performActionsOnModel actions model =
 
                 ( ApplySimplify, Just track ) ->
                     let
-                        ( newTree, oldPoints ) =
+                        newTree =
                             Tools.Simplify.apply foldedModel.toolOptions.simplifySettings track
-
-                        ( fromStart, fromEnd ) =
-                            ( 0, 0 )
 
                         ( orangeDistance, purpleDistance ) =
                             ( DomainModel.distanceFromIndex track.currentPosition track.trackTree
@@ -1673,15 +1670,7 @@ performActionsOnModel actions model =
                         trackWithMarkers =
                             case newTree of
                                 Just gotNewTree ->
-                                    let
-                                        newTrack =
-                                            track
-                                                |> TrackLoaded.addToUndoStack action
-                                                    fromStart
-                                                    fromEnd
-                                                    oldPoints
-                                    in
-                                    { newTrack
+                                    { track
                                         | trackTree = gotNewTree
                                         , currentPosition = newOrange
                                         , markerPosition = newPurple
