@@ -35,7 +35,7 @@ type Msg
     = Apply
 
 
-apply : TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+apply : TrackLoaded msg -> Maybe PeteTree
 apply originalTrack =
     let
         trackWithNoMarkers =
@@ -79,9 +79,7 @@ apply originalTrack =
                 |> bezierApprox
                 |> Loop.for 3 smoothTrack
     in
-    ( Just finalTrack.trackTree
-    , DomainModel.getAllGPXPointsInNaturalOrder originalTrack.trackTree
-    )
+    Just finalTrack.trackTree
 
 
 oneClickQuickFixButton : I18NOptions.Location -> (Msg -> msg) -> Maybe (TrackLoaded msg) -> Element msg
@@ -104,8 +102,24 @@ update :
     -> List (ToolAction msg)
 update msg hasTrack =
     case ( hasTrack, msg ) of
-        ( Just _, Apply ) ->
-            [ Actions.OneClickQuickFix, Actions.TrackHasChanged ]
+        ( Just track, Apply ) ->
+            let
+                oldPoints =
+                    DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
+
+                undoInfo =
+                    { action = Actions.OneClickQuickFix
+                    , originalPoints = oldPoints
+                    , fromStart = 0
+                    , fromEnd = 0
+                    , currentPosition = track.currentPosition
+                    , markerPosition = track.markerPosition
+                    }
+            in
+            [ Actions.WithUndo undoInfo
+            , undoInfo.action
+            , Actions.TrackHasChanged
+            ]
 
         _ ->
             []

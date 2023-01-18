@@ -179,7 +179,7 @@ writeOneSection sections options track rgtOptions =
                     if options.applyAutofix then
                         \atrack ->
                             let
-                                ( fixedTree, _ ) =
+                                fixedTree =
                                     OneClickQuickFix.apply atrack
                             in
                             { atrack

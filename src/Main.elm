@@ -1700,7 +1700,7 @@ performActionsOnModel actions model =
 
                 ( OneClickQuickFix, Just track ) ->
                     let
-                        ( newTree, oldPoints ) =
+                        newTree =
                             Tools.OneClickQuickFix.apply track
 
                         ( fromStart, fromEnd ) =
@@ -1722,21 +1722,14 @@ performActionsOnModel actions model =
                             )
 
                         newTrack =
-                            track
-                                |> TrackLoaded.addToUndoStack action
-                                    fromStart
-                                    fromEnd
-                                    oldPoints
-                                |> (\trk ->
-                                        { trk
-                                            | trackTree = Maybe.withDefault trk.trackTree newTree
-                                            , currentPosition = newOrange
-                                            , markerPosition = newPurple
-                                            , leafIndex =
-                                                indexLeaves <|
-                                                    Maybe.withDefault trk.trackTree newTree
-                                        }
-                                   )
+                            { track
+                                | trackTree = Maybe.withDefault track.trackTree newTree
+                                , currentPosition = newOrange
+                                , markerPosition = newPurple
+                                , leafIndex =
+                                    indexLeaves <|
+                                        Maybe.withDefault track.trackTree newTree
+                            }
 
                         --|> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
