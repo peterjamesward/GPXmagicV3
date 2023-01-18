@@ -5,7 +5,6 @@ module TrackLoaded exposing
     , adjustAltitude
     , asPreviewPoints
     , buildPreview
-    , defaultUndoFromTrack
     , getRangeFromMarkers
     , indexLeaves
     , newTrackFromTree
@@ -13,6 +12,9 @@ module TrackLoaded exposing
     , removeAdjacentDuplicates
     , trackFromPoints
     , trackFromSegments
+    , undoInfoWholeTrack
+    , undoInfoWithSinglePointDefault
+    , undoInfoWithWholeTrackDefault
     , undoLastAction
     , useTreeWithRepositionedMarkers
     )
@@ -246,8 +248,8 @@ addToUndoStack action fromStart fromEnd oldPoints oldTrack =
     }
 
 
-defaultUndoFromTrack : Actions.ToolAction msg -> TrackLoaded msg -> UndoEntry msg
-defaultUndoFromTrack action track =
+undoInfoWithSinglePointDefault : Actions.ToolAction msg -> TrackLoaded msg -> UndoEntry msg
+undoInfoWithSinglePointDefault action track =
     let
         ( fromStart, fromEnd ) =
             getRangeFromMarkers track
@@ -263,6 +265,47 @@ defaultUndoFromTrack action track =
     , originalPoints = oldPoints
     , fromStart = fromStart
     , fromEnd = fromEnd
+    , currentPosition = track.currentPosition
+    , markerPosition = track.markerPosition
+    }
+
+
+undoInfoWithWholeTrackDefault : Actions.ToolAction msg -> TrackLoaded msg -> UndoEntry msg
+undoInfoWithWholeTrackDefault action track =
+    let
+        ( fromStart, fromEnd ) =
+            if track.markerPosition == Nothing then
+                ( 0, 0 )
+
+            else
+                getRangeFromMarkers track
+
+        oldPoints =
+            List.map Tuple.second <|
+                DomainModel.extractPointsInRange
+                    fromStart
+                    fromEnd
+                    track.trackTree
+    in
+    { action = action
+    , originalPoints = oldPoints
+    , fromStart = fromStart
+    , fromEnd = fromEnd
+    , currentPosition = track.currentPosition
+    , markerPosition = track.markerPosition
+    }
+
+
+undoInfoWholeTrack : Actions.ToolAction msg -> TrackLoaded msg -> UndoEntry msg
+undoInfoWholeTrack action track =
+    let
+        oldPoints =
+            DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
+    in
+    { action = action
+    , originalPoints = oldPoints
+    , fromStart = 0
+    , fromEnd = 0
     , currentPosition = track.currentPosition
     , markerPosition = track.markerPosition
     }

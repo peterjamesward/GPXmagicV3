@@ -179,27 +179,20 @@ update msg options previewColour hasTrack =
 
         ( Just track, BezierApplyWithOptions ) ->
             let
-                ( fromStart, fromEnd ) =
+                undoInfo =
                     if track.markerPosition /= Nothing then
-                        TrackLoaded.getRangeFromMarkers track
+                        TrackLoaded.undoInfoWithSinglePointDefault
+                            (Actions.BezierApplyWithOptions options)
+                            track
 
                     else
-                        ( 0, 0 )
-
-                oldPoints =
-                    DomainModel.extractPointsInRange
-                        fromStart
-                        fromEnd
-                        track.trackTree
-
-                undoInfo =
-                    { action = Actions.BezierApplyWithOptions options
-                    , originalPoints = List.map Tuple.second oldPoints
-                    , fromStart = fromStart
-                    , fromEnd = fromEnd
-                    , currentPosition = track.currentPosition
-                    , markerPosition = track.markerPosition
-                    }
+                        { action = Actions.BezierApplyWithOptions options
+                        , originalPoints = DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
+                        , fromStart = 0
+                        , fromEnd = 0
+                        , currentPosition = track.currentPosition
+                        , markerPosition = track.markerPosition
+                        }
             in
             ( options
             , [ Actions.BezierApplyWithOptions options

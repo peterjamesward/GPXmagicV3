@@ -137,41 +137,14 @@ update msg options previewColour hasTrack =
                     -- but with marker, more sensible if the markers themselves are not deleted (hence, exclusive).
                     -- This attempts to be explicit.
                     --if track.markerPosition == Nothing then
-                    let
-                        oldPoints =
-                            DomainModel.extractPointsInRange
-                                fromStart
-                                fromEnd
-                                track.trackTree
-                    in
-                    { action = Actions.DeletePointOrPoints fromStart fromEnd
-                    , originalPoints = List.map Tuple.second oldPoints
-                    , fromStart = fromStart
-                    , fromEnd = fromEnd
-                    , currentPosition = track.currentPosition
-                    , markerPosition = track.markerPosition
-                    }
-
-                --else
-                --    let
-                --        oldPoints =
-                --            DomainModel.extractPointsInRange
-                --                fromStart
-                --                fromEnd
-                --                track.trackTree
-                --    in
-                --    { action = DeletePointsBetween fromStart fromEnd
-                --    , originalPoints = List.map Tuple.second oldPoints
-                --    , fromStart = fromStart
-                --    , fromEnd = fromEnd
-                --    , currentPosition = track.currentPosition
-                --    , markerPosition = track.markerPosition
-                --    }
+                    TrackLoaded.undoInfoWithSinglePointDefault
+                        (Actions.DeletePointOrPoints fromStart fromEnd)
+                        track
             in
             ( options
-            , [ undoInfo.action
+            , [ WithUndo undoInfo
+              , undoInfo.action
               , TrackHasChanged
-              , WithUndo undoInfo
               ]
             )
 

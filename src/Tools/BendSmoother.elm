@@ -297,6 +297,7 @@ previewActions options colour track =
 
 undoEntryFrom : Options -> TrackLoaded msg -> Actions.UndoEntry msg
 undoEntryFrom options track =
+    -- Note does not use default undo because of start and end.
     let
         ( fromStart, fromEnd ) =
             TrackLoaded.getRangeFromMarkers track

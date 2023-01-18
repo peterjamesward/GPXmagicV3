@@ -308,13 +308,9 @@ update message options wrapper previewColour track =
                             track.trackTree
 
                 undoInfo =
-                    { action = MoveAndStretchWithOptions options
-                    , originalPoints = oldPoints
-                    , fromStart = fromStart
-                    , fromEnd = fromEnd
-                    , currentPosition = track.currentPosition
-                    , markerPosition = track.markerPosition
-                    }
+                    TrackLoaded.undoInfoWithSinglePointDefault
+                        (MoveAndStretchWithOptions options)
+                        track
             in
             ( options
             , [ WithUndo undoInfo

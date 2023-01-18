@@ -198,13 +198,9 @@ update msg options hasTrack =
         ( Just track, ApplyOutAndBack ) ->
             let
                 undoInfo =
-                    { action = Actions.OutAndBackApplyWithOptions options
-                    , originalPoints = DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
-                    , fromStart = 0
-                    , fromEnd = 0
-                    , currentPosition = track.currentPosition
-                    , markerPosition = track.markerPosition
-                    }
+                    TrackLoaded.undoInfoWholeTrack
+                        (Actions.OutAndBackApplyWithOptions options)
+                        track
             in
             ( options
             , [ undoInfo.action

@@ -209,7 +209,7 @@ update msg options previewColour hasTrack =
                     }
 
                 undoInfo =
-                    TrackLoaded.defaultUndoFromTrack
+                    TrackLoaded.undoInfoWithWholeTrackDefault
                         (Actions.ApplyInterpolateWithOptions ensureCorrectExtent)
                         track
             in

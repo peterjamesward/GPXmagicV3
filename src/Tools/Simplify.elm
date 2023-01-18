@@ -201,13 +201,9 @@ update msg options previewColour track =
                     DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
 
                 undoInfo =
-                    { action = Actions.ApplySimplify
-                    , originalPoints = oldPoints
-                    , fromStart = 0
-                    , fromEnd = 0
-                    , currentPosition = track.currentPosition
-                    , markerPosition = track.markerPosition
-                    }
+                    TrackLoaded.undoInfoWholeTrack
+                        Actions.ApplySimplify
+                        track
             in
             ( options
             , [ WithUndo undoInfo

@@ -261,27 +261,10 @@ update msg options previewColour hasTrack =
 
         ( Just track, ApplyWithOptions ) ->
             let
-                ( fromStart, fromEnd ) =
-                    if track.markerPosition /= Nothing then
-                        TrackLoaded.getRangeFromMarkers track
-
-                    else
-                        ( 0, 0 )
-
-                oldPoints =
-                    DomainModel.extractPointsInRange
-                        fromStart
-                        fromEnd
-                        track.trackTree
-
                 undoInfo =
-                    { action = Actions.CurveFormerApplyWithOptions options
-                    , originalPoints = List.map Tuple.second oldPoints
-                    , fromStart = fromStart
-                    , fromEnd = fromEnd
-                    , currentPosition = track.currentPosition
-                    , markerPosition = track.markerPosition
-                    }
+                    TrackLoaded.undoInfoWithWholeTrackDefault
+                        (Actions.CurveFormerApplyWithOptions options)
+                        track
             in
             ( options
             , [ undoInfo.action

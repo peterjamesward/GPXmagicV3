@@ -60,7 +60,7 @@ computeNewPoints options track =
     TrackLoaded.asPreviewPoints track distanceToPreview earthPoints
 
 
-applyUsingOptions : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyUsingOptions : Options -> TrackLoaded msg -> Maybe PeteTree
 applyUsingOptions options track =
     let
         ( fromStart, fromEnd ) =
@@ -81,22 +81,14 @@ applyUsingOptions options track =
                 track.referenceLonLat
                 (List.map .gpx <| newPoints)
                 track.trackTree
-
-        oldPoints =
-            DomainModel.extractPointsInRange
-                fromStart
-                fromEnd
-                track.trackTree
     in
-    ( newTree
-    , oldPoints |> List.map Tuple.second
-    )
+    newTree
 
 
 centroidAverageFor1CQF : TrackLoaded msg -> PeteTree
 centroidAverageFor1CQF track =
     let
-        ( outputTree, _ ) =
+        outputTree =
             applyUsingOptions defaultOptions track
     in
     outputTree |> Maybe.withDefault track.trackTree
@@ -120,7 +112,7 @@ toolStateChange opened colour options track =
 
 actions newOptions previewColour track =
     let
-        ( previewTree, _ ) =
+        previewTree =
             applyUsingOptions newOptions track
 
         profilePreview tree =
@@ -179,27 +171,10 @@ update msg options previewColour hasTrack =
 
         ( Just track, ApplyWithOptions ) ->
             let
-                ( fromStart, fromEnd ) =
-                    if track.markerPosition /= Nothing then
-                        TrackLoaded.getRangeFromMarkers track
-
-                    else
-                        ( 0, 0 )
-
-                oldPoints =
-                    DomainModel.extractPointsInRange
-                        fromStart
-                        fromEnd
-                        track.trackTree
-
                 undoInfo =
-                    { action = Actions.CentroidAverageApplyWithOptions options
-                    , originalPoints = List.map Tuple.second oldPoints
-                    , fromStart = fromStart
-                    , fromEnd = fromEnd
-                    , currentPosition = track.currentPosition
-                    , markerPosition = track.markerPosition
-                    }
+                        TrackLoaded.undoInfoWithWholeTrackDefault
+                            (Actions.CentroidAverageApplyWithOptions options)
+                            track
             in
             ( options
             , [ Actions.CentroidAverageApplyWithOptions options

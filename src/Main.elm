@@ -1457,7 +1457,7 @@ performActionsOnModel actions model =
 
                 ( CentroidAverageApplyWithOptions options, Just track ) ->
                     let
-                        ( newTree, oldPoints ) =
+                        newTree =
                             Tools.CentroidAverage.applyUsingOptions options track
 
                         newTrack =
