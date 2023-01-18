@@ -5,6 +5,7 @@ module TrackLoaded exposing
     , adjustAltitude
     , asPreviewPoints
     , buildPreview
+    , defaultUndoFromTrack
     , getRangeFromMarkers
     , indexLeaves
     , newTrackFromTree
@@ -242,6 +243,28 @@ addToUndoStack action fromStart fromEnd oldPoints oldTrack =
     { oldTrack
         | undos = undoEntry :: oldTrack.undos
         , redos = []
+    }
+
+
+defaultUndoFromTrack : Actions.ToolAction msg -> TrackLoaded msg -> UndoEntry msg
+defaultUndoFromTrack action track =
+    let
+        ( fromStart, fromEnd ) =
+            getRangeFromMarkers track
+
+        oldPoints =
+            List.map Tuple.second <|
+                DomainModel.extractPointsInRange
+                    fromStart
+                    fromEnd
+                    track.trackTree
+    in
+    { action = action
+    , originalPoints = oldPoints
+    , fromStart = fromStart
+    , fromEnd = fromEnd
+    , currentPosition = track.currentPosition
+    , markerPosition = track.markerPosition
     }
 
 

@@ -208,24 +208,10 @@ update msg options previewColour hasTrack =
                                     ExtentIsTrack
                     }
 
-                ( fromStart, fromEnd ) =
-                    TrackLoaded.getRangeFromMarkers track
-
-                oldPoints =
-                    List.map Tuple.second <|
-                        DomainModel.extractPointsInRange
-                            fromStart
-                            fromEnd
-                            track.trackTree
-
                 undoInfo =
-                    { action = Actions.ApplyInterpolateWithOptions ensureCorrectExtent
-                    , originalPoints = oldPoints
-                    , fromStart = fromStart
-                    , fromEnd = fromEnd
-                    , currentPosition = track.currentPosition
-                    , markerPosition = track.markerPosition
-                    }
+                    TrackLoaded.defaultUndoFromTrack
+                        (Actions.ApplyInterpolateWithOptions ensureCorrectExtent)
+                        track
             in
             ( ensureCorrectExtent
             , [ WithUndo undoInfo
