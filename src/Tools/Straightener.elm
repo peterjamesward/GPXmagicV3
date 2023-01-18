@@ -37,11 +37,21 @@ defaultOptions =
 update :
     Msg
     -> Options
+    -> TrackLoaded msg
     -> ( Options, List (Actions.ToolAction msg) )
-update msg options =
+update msg options track =
     case msg of
         StraightenStraight ->
-            ( options, [ Actions.Straighten, Actions.TrackHasChanged ] )
+            let
+                undoInfo =
+                    TrackLoaded.undoInfoWithSinglePointDefault Actions.Straighten track
+            in
+            ( options
+            , [ Actions.WithUndo undoInfo
+              , undoInfo.action
+              , Actions.TrackHasChanged
+              ]
+            )
 
         SetPreserveAltitude bool ->
             ( { options | preserveAltitude = bool }, [] )
@@ -153,7 +163,7 @@ computeNewPoints options track =
             )
 
 
-apply : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+apply : Options -> TrackLoaded msg -> Maybe PeteTree
 apply options track =
     let
         ( fromStart, fromEnd ) =
@@ -169,13 +179,5 @@ apply options track =
                 track.referenceLonLat
                 (List.map Tuple.second newPoints)
                 track.trackTree
-
-        oldPoints =
-            DomainModel.extractPointsInRange
-                fromStart
-                fromEnd
-                track.trackTree
     in
-    ( newTree
-    , oldPoints |> List.map Tuple.second
-    )
+    newTree

@@ -1162,15 +1162,20 @@ update toolMsg isTrack msgWrapper options =
                     ( options, [] )
 
         ToolStraightenMsg msg ->
-            let
-                ( newOptions, actions ) =
-                    Tools.Straightener.update
-                        msg
-                        options.straightenOptions
-            in
-            ( { options | straightenOptions = newOptions }
-            , actions
-            )
+            case isTrack of
+                Just track ->
+                    let
+                        ( newOptions, actions ) =
+                            Tools.Straightener.update
+                                msg
+                                options.straightenOptions
+                                track
+                    in
+                    ( { options | straightenOptions = newOptions }
+                    , actions
+                    )
+                Nothing ->
+                    ( options, [] )
 
         ToolGraphMsg msg ->
             case isTrack of

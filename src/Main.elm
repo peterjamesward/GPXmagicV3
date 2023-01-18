@@ -1753,19 +1753,11 @@ performActionsOnModel actions model =
 
                 ( Straighten, Just track ) ->
                     let
-                        ( newTree, oldPoints ) =
+                        newTree =
                             Tools.Straightener.apply model.toolOptions.straightenOptions track
 
-                        ( fromStart, fromEnd ) =
-                            TrackLoaded.getRangeFromMarkers track
-
                         newTrack =
-                            track
-                                |> TrackLoaded.addToUndoStack action
-                                    fromStart
-                                    fromEnd
-                                    oldPoints
-                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
                     in
                     { foldedModel
                         | track = Just newTrack
