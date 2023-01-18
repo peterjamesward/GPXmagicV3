@@ -101,6 +101,7 @@ type ToolAction msg
     | RequestStravaSegment (Result Http.Error StravaSegment -> msg) String OAuth.Token
     | RequestStravaSegmentStreams (Result Http.Error StravaSegmentStreams -> msg) String OAuth.Token
     | PasteStravaSegment Tools.StravaOptions.Options
+    | ClearStravaSegmentData
     | MoveAndStretchWithOptions Tools.MoveAndStretchOptions.Options
     | CloseLoopWithOptions Tools.StartFinishTypes.Options
     | ReverseTrack

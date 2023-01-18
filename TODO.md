@@ -17,7 +17,7 @@ Just removes repetitive code from Main and reduces tool abstraction leakage.
 
 - Using a branch for this as it's significant change but not really a V4.
 
-Note that many update | ApplyWithOptions methods may now be identical and could be factored out.
+Note that _many_ update | ApplyWithOptions methods may now be identical and could be factored out.
 
 ---
 

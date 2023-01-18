@@ -1547,11 +1547,12 @@ performActionsOnModel actions model =
                     -- This is like Nudge in that the affected area is given
                     -- by the tool, not by the range markers.
                     let
-                        ( newTree, oldPoints, ( entry, exit ) ) =
+                        ( newTree, _, ( entry, exit ) ) =
+                            -- Need the extra returns for the segment.
                             Tools.StravaTools.paste options track
 
-                        ( fromStart, fromEnd ) =
-                            ( entry, skipCount track.trackTree - exit )
+                        toolOptions =
+                            foldedModel.toolOptions
 
                         namedSegment =
                             case Tools.StravaTools.segmentName options of
@@ -1568,9 +1569,6 @@ performActionsOnModel actions model =
                                 Nothing ->
                                     Nothing
 
-                        toolOptions =
-                            model.toolOptions
-
                         newSegmentOptions =
                             case namedSegment of
                                 Just segment ->
@@ -1585,17 +1583,27 @@ performActionsOnModel actions model =
                             { toolOptions | namedSegmentOptions = newSegmentOptions }
 
                         newTrack =
-                            track
-                                |> TrackLoaded.addToUndoStack action
-                                    fromStart
-                                    fromEnd
-                                    oldPoints
-                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
                     in
                     { foldedModel
                         | track = Just newTrack
                         , needsRendering = True
                         , toolOptions = newToolOptions
+                    }
+
+                ( ClearStravaSegmentData, _ ) ->
+                    let
+                        toolOptions =
+                            foldedModel.toolOptions
+
+                        newStravaSettings =
+                            Tools.StravaTools.clearSegmentData toolOptions.stravaSettings
+                    in
+                    { foldedModel
+                        | toolOptions =
+                            { toolOptions
+                                | stravaSettings = newStravaSettings
+                            }
                     }
 
                 ( Autofix indices, Just track ) ->

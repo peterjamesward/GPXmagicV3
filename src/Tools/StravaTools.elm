@@ -1,4 +1,15 @@
-module Tools.StravaTools exposing (Msg(..), defaultOptions, paste, segmentName, toolId, toolStateChange, trackFromActivity, update, viewStravaTab)
+module Tools.StravaTools exposing
+    ( Msg(..)
+    , clearSegmentData
+    , defaultOptions
+    , paste
+    , segmentName
+    , toolId
+    , toolStateChange
+    , trackFromActivity
+    , update
+    , viewStravaTab
+    )
 
 import Actions exposing (ToolAction(..))
 import Angle
@@ -324,16 +335,62 @@ update msg settings wrap track =
 
         PasteSegment ->
             case ( track, settings.externalSegment ) of
-                ( Just _, SegmentPreviewed _ ) ->
-                    -- Note that we pass the OLD settings to the paste action.
-                    ( { settings
-                        | stravaStreams = Nothing
-                        , externalSegment = SegmentNone
-                        , preview = []
-                      }
-                    , [ PasteStravaSegment settings
-                      , HidePreview "strava"
+                ( Just isTrack, SegmentPreviewed segment ) ->
+                    let
+                        ( segmentStartGpx, segmentEndGpx ) =
+                            ( extractFromLngLat segment.start_latlng
+                            , extractFromLngLat segment.end_latlng
+                            )
+
+                        pStartingTrackPoint =
+                            -- Our first track point will be replaced with the first stream point
+                            DomainModel.nearestToLonLat
+                                segmentStartGpx
+                                0
+                                isTrack.trackTree
+                                isTrack.referenceLonLat
+                                isTrack.leafIndex
+
+                        pEndingTrackPoint =
+                            -- Our last track point will be replaced with the last stream point
+                            DomainModel.nearestToLonLat
+                                segmentEndGpx
+                                0
+                                isTrack.trackTree
+                                isTrack.referenceLonLat
+                                isTrack.leafIndex
+
+                        ( useStart, useEnd ) =
+                            if pEndingTrackPoint < pStartingTrackPoint then
+                                ( pEndingTrackPoint
+                                , pStartingTrackPoint
+                                )
+
+                            else
+                                ( pStartingTrackPoint, pEndingTrackPoint )
+
+                        oldPoints =
+                            DomainModel.extractPointsInRange
+                                useStart
+                                (skipCount isTrack.trackTree - useEnd)
+                                isTrack.trackTree
+
+                        undoInfo =
+                            -- Note that we pass the CURRENT settings to the paste action.
+                            { action = Actions.PasteStravaSegment settings
+                            , originalPoints = List.map Tuple.second oldPoints
+                            , fromStart = useStart
+                            , fromEnd = skipCount isTrack.trackTree - useEnd
+                            , currentPosition = isTrack.currentPosition
+                            , markerPosition = isTrack.markerPosition
+                            }
+                    in
+                    ( settings
+                    , [ WithUndo undoInfo
+                      , undoInfo.action
                       , TrackHasChanged
+                      , HidePreview "strava"
+                      , ClearStravaSegmentData
                       ]
                     )
 
@@ -341,9 +398,18 @@ update msg settings wrap track =
                     ( settings, [] )
 
         ClearSegment ->
-            ( { settings | stravaStreams = Nothing, externalSegment = SegmentNone }
+            ( clearSegmentData settings
             , []
             )
+
+
+clearSegmentData : Options -> Options
+clearSegmentData settings =
+    { settings
+        | stravaStreams = Nothing
+        , externalSegment = SegmentNone
+        , preview = []
+    }
 
 
 segmentName : Options -> Maybe String
