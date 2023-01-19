@@ -1766,16 +1766,11 @@ performActionsOnModel actions model =
 
                 ( LimitGradientWithOptions options, Just track ) ->
                     let
-                        ( newTree, oldPoints ) =
+                        newTree =
                             Tools.ProfileSmooth.apply options track
 
                         newTrack =
-                            track
-                                |> TrackLoaded.addToUndoStack action
-                                    0
-                                    0
-                                    oldPoints
-                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
                     in
                     { foldedModel
                         | track = Just newTrack
@@ -1784,16 +1779,11 @@ performActionsOnModel actions model =
 
                 ( SmoothAltitudes options, Just track ) ->
                     let
-                        ( newTree, oldPoints ) =
+                        newTree =
                             Tools.ProfileSmooth.apply options track
 
                         newTrack =
-                            track
-                                |> TrackLoaded.addToUndoStack action
-                                    0
-                                    0
-                                    oldPoints
-                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
                     in
                     { foldedModel
                         | track = Just newTrack
@@ -1802,16 +1792,11 @@ performActionsOnModel actions model =
 
                 ( SmoothGradients options, Just track ) ->
                     let
-                        ( newTree, oldPoints ) =
+                        newTree =
                             Tools.ProfileSmooth.apply options track
 
                         newTrack =
-                            track
-                                |> TrackLoaded.addToUndoStack action
-                                    0
-                                    0
-                                    oldPoints
-                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
                     in
                     { foldedModel
                         | track = Just newTrack
@@ -1820,63 +1805,43 @@ performActionsOnModel actions model =
 
                 ( AdjustTimes options, Just track ) ->
                     let
-                        ( newTree, oldPoints ) =
+                        newTree =
                             Tools.Timestamp.applyTimeShift options track
 
                         newTrack =
-                            track
-                                |> TrackLoaded.addToUndoStack action
-                                    0
-                                    0
-                                    oldPoints
-                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
                     in
                     { foldedModel | track = Just newTrack }
 
                 ( TimeDoubling, Just track ) ->
                     let
-                        ( newTree, oldPoints ) =
+                        newTree =
                             Tools.Timestamp.applyDoubling track
 
                         newTrack =
-                            track
-                                |> TrackLoaded.addToUndoStack action
-                                    0
-                                    0
-                                    oldPoints
-                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
                     in
                     { foldedModel | track = Just newTrack }
 
                 ( UsePhysicsModel, Just track ) ->
                     let
-                        ( newTree, oldPoints ) =
+                        newTree =
                             Tools.Timestamp.applyPhysics
                                 model.toolOptions.timestampOptions
                                 track
 
                         newTrack =
-                            track
-                                |> TrackLoaded.addToUndoStack action
-                                    0
-                                    0
-                                    oldPoints
-                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
                     in
                     { foldedModel | track = Just newTrack }
 
                 ( SetTimeTicks ticks, Just track ) ->
                     let
-                        ( newTree, oldPoints ) =
+                        newTree =
                             Tools.Timestamp.applyTicks ticks track
 
                         newTrack =
-                            track
-                                |> TrackLoaded.addToUndoStack action
-                                    0
-                                    0
-                                    oldPoints
-                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
                     in
                     { foldedModel | track = Just newTrack }
 

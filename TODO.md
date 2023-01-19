@@ -17,13 +17,19 @@ Just removes repetitive code from Main and reduces tool abstraction leakage.
 
 - Using a branch for this as it's significant change but not really a V4.
 
-Note that _many_ update | ApplyWithOptions methods may now be identical and could be factored out.
-
-** Simplify Undo wrong **
-
 ---
 
 # BACKLOG
+
+## Gradient smoothing ranges are wrong.
+
+Not really, but it goes weird when the average window meets the range.
+It should probably sample beyond the markers but only apply within them,
+or whatever it's doing now, change it (!).
+
+## Test cases for most edits.
+
+You could do this you know, just not for the visuals.
 
 ## Make Map changes declarative; tidy Action code
 
@@ -51,11 +57,6 @@ but they might factor out.
 1. Rework MapController so comparison of states emits the commands; better: MapOptions.
 2. Purge the Actions code so that model is updated directly.
 3. Repeat for other actions.
-
-## On refactoring Action interpreter in Main.
-
-Main difference is how the pointers are repositioned.
-There's only two or three cases, if not a single general one.
 
 ## Languages
 

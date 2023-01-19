@@ -47,8 +47,8 @@ defaultOptions =
     }
 
 
-actions : Options -> Element.Color -> TrackLoaded msg -> List (ToolAction msg)
-actions newOptions previewColour track =
+previewActions : Options -> Element.Color -> TrackLoaded msg -> List (ToolAction msg)
+previewActions newOptions previewColour track =
     case newOptions.previewData of
         Just previewTree ->
             let
@@ -60,7 +60,7 @@ actions newOptions previewColour track =
                         Nothing ->
                             ( 0, 0 )
 
-                ( newTreeForProfilePreview, _ ) =
+                newTreeForProfilePreview =
                     apply newOptions track
             in
             case newTreeForProfilePreview of
@@ -124,7 +124,7 @@ update msg options previewColour track =
                         |> putPreviewInOptions track
             in
             ( newOptions
-            , actions newOptions previewColour track
+            , previewActions newOptions previewColour track
             )
 
         SetMaximumDescent down ->
@@ -134,7 +134,7 @@ update msg options previewColour track =
                         |> putPreviewInOptions track
             in
             ( newOptions
-            , actions newOptions previewColour track
+            , previewActions newOptions previewColour track
             )
 
         SetBumpiness bumpiness ->
@@ -144,27 +144,48 @@ update msg options previewColour track =
                         |> putPreviewInOptions track
             in
             ( newOptions
-            , actions newOptions previewColour track
+            , previewActions newOptions previewColour track
             )
 
         LimitGradient ->
+            let
+                undoInfo =
+                    TrackLoaded.undoInfoWithWholeTrackDefault
+                        (Actions.LimitGradientWithOptions options)
+                        track
+            in
             ( options
-            , [ Actions.LimitGradientWithOptions options
+            , [ WithUndo undoInfo
+              , undoInfo.action
               , TrackHasChanged
               ]
             )
 
         SmoothAltitudes ->
+            let
+                undoInfo =
+                    TrackLoaded.undoInfoWithWholeTrackDefault
+                        (Actions.SmoothAltitudes options)
+                        track
+            in
             ( options
-            , [ Actions.SmoothAltitudes options
+            , [ WithUndo undoInfo
+              , undoInfo.action
               , TrackHasChanged
               ]
             )
 
         SmoothGradients ->
+            let
+                undoInfo =
+                    TrackLoaded.undoInfoWithWholeTrackDefault
+                        (Actions.SmoothGradients options)
+                        track
+            in
             ( options
-            , [ Actions.SmoothGradients options
-              , TrackHasChanged
+            , [ WithUndo undoInfo
+              , undoInfo.action
+              , Actions.TrackHasChanged
               ]
             )
 
@@ -175,7 +196,7 @@ update msg options previewColour track =
                         |> putPreviewInOptions track
             in
             ( newOptions
-            , actions newOptions previewColour track
+            , previewActions newOptions previewColour track
             )
 
         ChooseMethod smoothMethod ->
@@ -185,15 +206,20 @@ update msg options previewColour track =
                         |> putPreviewInOptions track
             in
             ( newOptions
-            , actions newOptions previewColour track
+            , previewActions newOptions previewColour track
             )
 
 
-apply : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+apply : Options -> TrackLoaded msg -> Maybe PeteTree
 apply options track =
     let
         ( fromStart, fromEnd ) =
-            ( 0, 0 )
+            case track.markerPosition of
+                Just _ ->
+                    TrackLoaded.getRangeFromMarkers track
+
+                Nothing ->
+                    ( 0, 0 )
 
         newCourse =
             computeNewPoints options track
@@ -206,16 +232,8 @@ apply options track =
                 track.referenceLonLat
                 newCourse
                 track.trackTree
-
-        oldPoints =
-            DomainModel.extractPointsInRange
-                fromStart
-                fromEnd
-                track.trackTree
     in
-    ( newTree
-    , oldPoints |> List.map Tuple.second
-    )
+    newTree
 
 
 type SlopeStatus
@@ -909,7 +927,7 @@ toolStateChange opened colour options track =
                     putPreviewInOptions theTrack options
             in
             ( newOptions
-            , actions newOptions colour theTrack
+            , previewActions newOptions colour theTrack
             )
 
         _ ->

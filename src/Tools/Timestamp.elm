@@ -57,7 +57,7 @@ type Msg
     | SetMode TimestampMode
 
 
-applyTimeShift : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyTimeShift : Options -> TrackLoaded msg -> Maybe PeteTree
 applyTimeShift options track =
     let
         orangeOffsetMillis =
@@ -87,12 +87,10 @@ applyTimeShift options track =
                     0
                     track.trackTree
     in
-    ( newTree
-    , DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
-    )
+    newTree
 
 
-applyDoubling : TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyDoubling : TrackLoaded msg -> Maybe PeteTree
 applyDoubling track =
     let
         startTimeAbsolute =
@@ -118,15 +116,13 @@ applyDoubling track =
                 newTree =
                     DomainModel.treeFromSourcePoints newCourse
             in
-            ( newTree
-            , oldPoints
-            )
+            newTree
 
         Nothing ->
-            ( Nothing, [] )
+            Nothing
 
 
-applyTicks : Int -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyTicks : Int -> TrackLoaded msg -> Maybe PeteTree
 applyTicks tickSpacing track =
     let
         routeStartTime =
@@ -191,14 +187,11 @@ applyTicks tickSpacing track =
 
         newTree =
             DomainModel.treeFromSourcePoints <| List.reverse newCourse
-
-        oldPoints =
-            DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
     in
-    ( newTree, oldPoints )
+    newTree
 
 
-applyPhysics : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyPhysics : Options -> TrackLoaded msg -> Maybe PeteTree
 applyPhysics options track =
     -- Returns a track with new timestamps.
     let
@@ -241,11 +234,8 @@ applyPhysics options track =
 
         newTree =
             DomainModel.treeFromSourcePoints <| List.reverse newCourse
-
-        oldPoints =
-            DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
     in
-    ( newTree, oldPoints )
+    newTree
 
 
 durationForSection : Power -> RoadSection -> Duration
@@ -405,29 +395,57 @@ updateWithTrack msg options previewColour track =
             ( newOptions, actions newOptions previewColour track )
 
         ApplyNewTimes ->
+            let
+                undoInfo =
+                    TrackLoaded.undoInfoWholeTrack
+                        (Actions.AdjustTimes options)
+                        track
+            in
             ( options
-            , [ Actions.AdjustTimes options
+            , [ WithUndo undoInfo
+              , undoInfo.action
               , TrackHasChanged
               ]
             )
 
         ApplyTickInterval tick ->
+            let
+                undoInfo =
+                    TrackLoaded.undoInfoWholeTrack
+                        (Actions.SetTimeTicks tick)
+                        track
+            in
             ( options
-            , [ Actions.SetTimeTicks tick
+            , [ WithUndo undoInfo
+              , undoInfo.action
               , TrackHasChanged
               ]
             )
 
         DoubleRelativeTimes ->
+            let
+                undoInfo =
+                    TrackLoaded.undoInfoWholeTrack
+                        (Actions.TimeDoubling)
+                        track
+            in
             ( options
-            , [ Actions.TimeDoubling
+            , [ WithUndo undoInfo
+              , undoInfo.action
               , TrackHasChanged
               ]
             )
 
         ComputeTimes ->
+            let
+                undoInfo =
+                    TrackLoaded.undoInfoWholeTrack
+                        (Actions.UsePhysicsModel)
+                        track
+            in
             ( options
-            , [ Actions.UsePhysicsModel
+            , [ WithUndo undoInfo
+              , undoInfo.action
               , TrackHasChanged
               ]
             )
