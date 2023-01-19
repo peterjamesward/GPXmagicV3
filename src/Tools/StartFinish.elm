@@ -138,25 +138,36 @@ update :
     -> TrackLoaded msg
     -> ( Options, List (Actions.ToolAction msg) )
 update msg options track =
+    let
+        makeActions actionCode =
+            let
+                undoInfo =
+                    TrackLoaded.undoInfoWholeTrack actionCode track
+            in
+            [ WithUndo undoInfo
+            , undoInfo.action
+            , TrackHasChanged
+            ]
+    in
     case msg of
         CloseTheLoop ->
             ( { options | pointsToClose = [], loopiness = IsALoop }
-            , [ CloseLoopWithOptions options, TrackHasChanged ]
+            , makeActions <| Actions.CloseLoopWithOptions options
             )
 
         ReverseTrack ->
             ( { options | pointsToClose = [] }
-            , [ Actions.ReverseTrack, TrackHasChanged ]
+            , makeActions Actions.ReverseTrack
             )
 
         ChangeLoopStart _ ->
             ( { options | pointsToClose = [] }
-            , [ Actions.MoveStartPoint track.currentPosition, TrackHasChanged ]
+            , makeActions <| Actions.MoveStartPoint track.currentPosition
             )
 
         AddRiderPens ->
             ( { options | pointsToClose = [] }
-            , [ Actions.AddRiderPens, TrackHasChanged ]
+            , makeActions Actions.AddRiderPens
             )
 
 
@@ -256,7 +267,7 @@ closeTheLoop track =
     TrackLoaded.asPreviewPoints track (trueLength track.trackTree) vertices
 
 
-applyCloseLoop : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyCloseLoop : Options -> TrackLoaded msg -> Maybe PeteTree
 applyCloseLoop options track =
     -- Let's deem the new start to be the spline point nearest the origin.
     let
@@ -270,7 +281,7 @@ applyCloseLoop options track =
             -- Take the nearest to the current start as the new start.
             numberedSplinePoints
                 |> List.Extra.minimumBy
-                    (\( _, preview ) ->
+                    (\( idx, preview ) ->
                         preview.earthPoint
                             |> .space
                             |> Point3d.distanceFrom Point3d.origin
@@ -289,6 +300,11 @@ applyCloseLoop options track =
                     -- Hmm. Put them at the end.
                     ( newGpxPoints, [] )
 
+        collecEndPointsInReverse : RoadSection -> List GPXSource -> List GPXSource
+        collecEndPointsInReverse road outputs =
+            -- We don't want the very start or the very end.
+            Tuple.second road.sourceData :: outputs
+
         oldPoints =
             DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
 
@@ -297,23 +313,19 @@ applyCloseLoop options track =
                 ++ (List.drop 1 <| List.take (skipCount track.trackTree - 1) oldPoints)
                 ++ newEndPoints
     in
-    ( DomainModel.treeFromSourcePoints newPoints
-    , oldPoints
-    )
+    DomainModel.treeFromSourcePoints newPoints
 
 
-applyReverse : TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyReverse : TrackLoaded msg -> Maybe PeteTree
 applyReverse track =
     let
         oldPoints =
             DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
     in
-    ( DomainModel.treeFromSourcePoints <| List.reverse oldPoints
-    , oldPoints
-    )
+    DomainModel.treeFromSourcePoints <| List.reverse oldPoints
 
 
-applyMoveStart : Int -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyMoveStart : Int -> TrackLoaded msg -> Maybe PeteTree
 applyMoveStart index track =
     -- A littel more care needed.
     -- Where the S/F join we have two points; one must be removed.
@@ -328,9 +340,7 @@ applyMoveStart index track =
         newPoints =
             afterNewStart ++ List.drop 1 beforeNewStart ++ List.take 1 afterNewStart
     in
-    ( DomainModel.treeFromSourcePoints newPoints
-    , oldPoints
-    )
+    DomainModel.treeFromSourcePoints newPoints
 
 
 addPens : TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
