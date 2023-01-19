@@ -86,6 +86,17 @@ update :
     -> Maybe (TrackLoaded msg)
     -> ( Options, List (ToolAction msg) )
 update msg settings previewColour hasTrack =
+    let
+        makeActions actionCode track =
+            let
+                undoInfo =
+                    TrackLoaded.undoInfoWholeTrack actionCode track
+            in
+            [ WithUndo undoInfo
+            , undoInfo.action
+            , TrackHasChanged
+            ]
+    in
     case ( msg, hasTrack ) of
         ( SetRotateAngle theta, Just track ) ->
             let
@@ -105,14 +116,14 @@ update msg settings previewColour hasTrack =
             , actions newSettings previewColour track
             )
 
-        ( RotateAndScale, Just _ ) ->
+        ( RotateAndScale, Just track ) ->
             ( settings
-            , [ ApplyRotateAndScale settings, TrackHasChanged ]
+            , makeActions (ApplyRotateAndScale settings) track
             )
 
         ( Recentre, Just track ) ->
             ( settings
-            , [ ApplyRecentre track.lastMapClick, TrackHasChanged, HidePreview "affine" ]
+            , makeActions (ApplyRecentre track.lastMapClick) track ++ [ HidePreview "affine" ]
             )
 
         ( Zero, Just track ) ->
@@ -124,19 +135,19 @@ update msg settings previewColour hasTrack =
             , actions newSettings previewColour track
             )
 
-        ( UseMapElevations, Just _ ) ->
+        ( UseMapElevations, Just track ) ->
             -- This is problematic if the map points are elided due to quantity.
             -- "Best" option is here to force a new set of points, then
             -- do the fetch.
             ( settings
-            , [ AddFullTrackToMap ]
+            , makeActions AddFullTrackToMapForElevations track
             )
 
         _ ->
             ( settings, [] )
 
 
-applyMapElevations : List (Maybe Float) -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyMapElevations : List (Maybe Float) -> TrackLoaded msg -> Maybe PeteTree
 applyMapElevations elevations track =
     -- We have previously forced a full load into the map (caveat user).
     -- So these should be in order to match up with the domain model.
@@ -155,11 +166,9 @@ applyMapElevations elevations track =
         adjustedPoints =
             List.map2 useNewElevation currentPoints elevations
     in
-    ( DomainModel.treeFromSourcesWithExistingReference
+    DomainModel.treeFromSourcesWithExistingReference
         track.referenceLonLat
         adjustedPoints
-    , currentPoints
-    )
 
 
 computeRecentredPoints : ( Float, Float ) -> TrackLoaded msg -> List ( EarthPoint, GPXSource )
@@ -262,26 +271,22 @@ rotateAndScale settings track =
         (transformedStartPoint :: transformedEndPoints)
 
 
-applyRotateAndScale : Options -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyRotateAndScale : Options -> TrackLoaded msg -> Maybe PeteTree
 applyRotateAndScale options track =
     let
         newPoints =
             rotateAndScale options track
     in
-    ( DomainModel.treeFromSourcePoints <| List.map .gpx newPoints
-    , DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
-    )
+    DomainModel.treeFromSourcePoints <| List.map .gpx newPoints
 
 
-applyRecentre : ( Float, Float ) -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+applyRecentre : ( Float, Float ) -> TrackLoaded msg -> Maybe PeteTree
 applyRecentre newReference track =
     let
         newPoints =
             computeRecentredPoints newReference track
     in
-    ( DomainModel.treeFromSourcePoints <| List.map Tuple.second newPoints
-    , DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
-    )
+    DomainModel.treeFromSourcePoints <| List.map Tuple.second newPoints
 
 
 view :

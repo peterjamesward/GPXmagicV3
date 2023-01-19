@@ -83,7 +83,7 @@ type ToolAction msg
     | SmoothGradients Tools.ProfileSmoothOptions.Options
     | ApplyRotateAndScale Tools.MoveScaleRotateOptions.Options
     | ApplyRecentre ( Float, Float )
-    | AddFullTrackToMap
+    | AddFullTrackToMapForElevations
     | FetchMapElevations
     | ApplyMapElevations (List (Maybe Float))
     | ApplyLandUseAltitudes (List (Maybe Float))
@@ -185,6 +185,9 @@ actionTextForUndo location action =
                 "move"
 
             ApplyMapElevations _ ->
+                "elevations"
+
+            AddFullTrackToMapForElevations ->
                 "elevations"
 
             PasteStravaSegment _ ->

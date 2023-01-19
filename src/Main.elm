@@ -1919,11 +1919,8 @@ performActionsOnModel actions model =
 
                 ( ApplyRotateAndScale options, Just track ) ->
                     let
-                        ( newTree, oldPoints ) =
+                        newTree =
                             Tools.MoveScaleRotate.applyRotateAndScale options track
-
-                        ( fromStart, fromEnd ) =
-                            ( 0, 0 )
 
                         newTrack =
                             { track
@@ -1935,10 +1932,6 @@ performActionsOnModel actions model =
                                         Nothing ->
                                             track.referenceLonLat
                             }
-                                |> TrackLoaded.addToUndoStack action
-                                    fromStart
-                                    fromEnd
-                                    oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
                     { foldedModel
@@ -1948,11 +1941,8 @@ performActionsOnModel actions model =
 
                 ( ApplyRecentre coords, Just track ) ->
                     let
-                        ( newTree, oldPoints ) =
+                        newTree =
                             Tools.MoveScaleRotate.applyRecentre coords track
-
-                        ( fromStart, fromEnd ) =
-                            ( 0, 0 )
 
                         newTrack =
                             let
@@ -1967,10 +1957,6 @@ performActionsOnModel actions model =
                                     }
                             in
                             { track | referenceLonLat = newReference }
-                                |> TrackLoaded.addToUndoStack action
-                                    fromStart
-                                    fromEnd
-                                    oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
                     { foldedModel
@@ -1980,18 +1966,11 @@ performActionsOnModel actions model =
 
                 ( ApplyMapElevations elevations, Just track ) ->
                     let
-                        ( newTree, oldPoints ) =
+                        newTree =
                             Tools.MoveScaleRotate.applyMapElevations elevations track
-
-                        ( fromStart, fromEnd ) =
-                            ( 0, 0 )
 
                         newTrack =
                             track
-                                |> TrackLoaded.addToUndoStack action
-                                    fromStart
-                                    fromEnd
-                                    oldPoints
                                 |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
                     { foldedModel
@@ -2660,7 +2639,7 @@ performActionCommands actions model =
                 ( HeapStatusUpdate _, _ ) ->
                     Delay.after 5000 TimeToUpdateMemory
 
-                ( AddFullTrackToMap, Just track ) ->
+                ( AddFullTrackToMapForElevations, Just track ) ->
                     Cmd.batch
                         [ MapPortController.addFullTrackToMap track
                         , Delay.after 100 FetchElevationsFromMap
