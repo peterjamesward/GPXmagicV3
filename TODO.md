@@ -11,12 +11,6 @@ Delete should display "Sorry" message when _almost_ all track is selected.
 
 # WIP
 
-## Undo with action
-
-Just removes repetitive code from Main and reduces tool abstraction leakage.
-
-- Using a branch for this as it's significant change but not really a V4.
-
 ---
 
 # BACKLOG
@@ -70,8 +64,6 @@ Tagged types for Point v Line indices to avoid confusion.
 
 Variant of "request from local storage" that takes a wrapped message so that the return value
 can be directed to a tool or a view.
-
-Remove tool-specific stuff in Main.performActions.
 
 Put all Font, Colour etc into a Palette/Style module for ease of change.
 
