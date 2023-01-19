@@ -3,11 +3,16 @@ module About exposing (aboutText)
 
 aboutText =
     """
-# GPXmagic v3.7.0 (92dd6ef0)
+# GPXmagic v3.8.0 (92dd6ef0)
 
 **GPXmagic V3 works best with Chrome (and some derivatives)**
 
 **N.B.** Apple fixed Safari so it works pretty well with GPXmagic.
+
+## 3.8.0
+
+Internal changes to be more consistent in how Undo is managed. This manages to reduce the
+code download from 631228 bytes to 618400, so it's good for the planet as well.
 
 ## 3.7.0
 
