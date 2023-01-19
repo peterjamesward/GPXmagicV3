@@ -1,4 +1,24 @@
-module PaneLayoutManager exposing (Msg(..), Options, PaneContext, PaneId(..), PaneLayout(..), PaneType(..), SliderState(..), StoredPane, ViewContext(..), ViewMode(..), defaultOptions, exitRouteView, forceRouteView, initialise, render, restoreStoredValues, update, viewPanes)
+module PaneLayoutManager exposing
+    ( Msg(..)
+    , Options
+    , PaneContext
+    , PaneId(..)
+    , PaneLayout(..)
+    , PaneType(..)
+    , SliderState(..)
+    , StoredPane
+    , ViewContext(..)
+    , ViewMode(..)
+    , defaultOptions
+    , exitRouteView
+    , forceRouteView
+    , forceMapView
+    , initialise
+    , render
+    , restoreStoredValues
+    , update
+    , viewPanes
+    )
 
 import Actions exposing (..)
 import Dict exposing (Dict)
@@ -544,6 +564,21 @@ forceRouteView options =
         { options
             | pane1 = { pane1 | activeView = ViewGraph }
             , viewBeforeRouteViewForced = Just options.pane1.activeView
+        }
+
+
+forceMapView : Options -> Options
+forceMapView options =
+    if isViewVisible ViewMap options then
+        options
+
+    else
+        let
+            pane1 =
+                options.pane1
+        in
+        { options
+            | pane1 = { pane1 | activeView = ViewMap }
         }
 
 

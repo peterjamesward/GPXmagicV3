@@ -479,7 +479,16 @@ update msg model =
         GpxFromUrl result ->
             case result of
                 Ok content ->
-                    processGpxContent content
+                    let
+                        ( newModel, cmds ) =
+                            processGpxContent content
+
+                        newPaneLayout =
+                            PaneLayoutManager.forceMapView newModel.paneLayoutOptions
+                    in
+                    ( { newModel | paneLayoutOptions = newPaneLayout }
+                    , cmds
+                    )
 
                 Err _ ->
                     ( model, Cmd.none )
