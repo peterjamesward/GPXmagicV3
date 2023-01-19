@@ -72,7 +72,16 @@ update msg settings mTrack wrap =
 
         --, ActionCommand <| Task.perform (msgWrapper << FileLoaded) (File.toString file)
         FileLoaded content ->
-            ( settings, [ Actions.ParseAndAppend content, Actions.TrackHasChanged ] )
+            let
+                undoInfo =
+                    TrackLoaded.undoInfoWholeTrack (Actions.ParseAndAppend content) mTrack
+            in
+            ( settings
+            , [ Actions.WithUndo undoInfo
+              , Actions.ParseAndAppend content
+              , Actions.TrackHasChanged
+              ]
+            )
 
         SplitTrack ->
             let
@@ -375,7 +384,7 @@ view location imperial options wrapper track =
         ]
 
 
-parseAndAppend : String -> TrackLoaded msg -> ( Maybe PeteTree, List GPXSource )
+parseAndAppend : String -> TrackLoaded msg -> Maybe PeteTree
 parseAndAppend content track =
     let
         track2 =
@@ -388,4 +397,4 @@ parseAndAppend content track =
         newTree =
             (currentGpx ++ track2) |> DomainModel.treeFromSourcePoints
     in
-    ( newTree, currentGpx )
+    newTree

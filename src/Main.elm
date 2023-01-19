@@ -2065,16 +2065,11 @@ performActionsOnModel actions model =
 
                 ( ParseAndAppend gpxContent, Just track ) ->
                     let
-                        ( newTree, oldPoints ) =
+                        newTree =
                             Tools.SplitAndJoin.parseAndAppend gpxContent track
 
                         newTrack =
-                            track
-                                |> TrackLoaded.addToUndoStack action
-                                    0
-                                    0
-                                    oldPoints
-                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                            track |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
                     { foldedModel
                         | track = Just newTrack
@@ -2240,9 +2235,6 @@ performActionsOnModel actions model =
                         newToolOptions =
                             { oldToolOptions | graphOptions = newGraphOptions }
 
-                        oldPoints =
-                            DomainModel.getAllGPXPointsInNaturalOrder track.trackTree
-
                         ( newOrange, newPurple ) =
                             ( indexFromDistance
                                 (distanceFromIndex track.currentPosition track.trackTree)
@@ -2259,15 +2251,11 @@ performActionsOnModel actions model =
                             )
 
                         newTrack =
-                            track
-                                |> TrackLoaded.addToUndoStack action 0 0 oldPoints
-                                |> (\trk ->
-                                        { trk
-                                            | trackTree = newTree
-                                            , currentPosition = newOrange
-                                            , markerPosition = newPurple
-                                        }
-                                   )
+                            { track
+                                | trackTree = newTree
+                                , currentPosition = newOrange
+                                , markerPosition = newPurple
+                            }
                     in
                     { foldedModel
                         | track = Just newTrack
@@ -2297,19 +2285,11 @@ performActionsOnModel actions model =
                 ( Actions.WidenBend points adjustment, Just track ) ->
                     -- This for one contiguous set of points, i.e. one bend.
                     let
-                        ( newTree, oldPoints, ( entry, exit ) ) =
+                        newTree =
                             Tools.DirectionChanges.widenBend points adjustment track
 
-                        ( fromStart, fromEnd ) =
-                            ( entry, skipCount track.trackTree - exit )
-
                         newTrack =
-                            track
-                                |> TrackLoaded.addToUndoStack action
-                                    fromStart
-                                    fromEnd
-                                    oldPoints
-                                |> TrackLoaded.useTreeWithRepositionedMarkers newTree
+                            track |> TrackLoaded.useTreeWithRepositionedMarkers newTree
                     in
                     { foldedModel
                         | track = Just newTrack

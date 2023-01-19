@@ -68,7 +68,7 @@ widenBendHelper :
     List Int
     -> Quantity Float Meters
     -> TrackLoaded msg
-    -> ( Maybe PeteTree, List GPXSource, ( Int, Int ) )
+    -> Maybe PeteTree
 widenBendHelper points adjustment track =
     -- See DirectionChanges for where this used.
     case ( List.minimum points, List.maximum points ) of
@@ -93,20 +93,11 @@ widenBendHelper points adjustment track =
                         track.referenceLonLat
                         (List.map .gpx newPoints)
                         track.trackTree
-
-                oldPoints =
-                    DomainModel.extractPointsInRange
-                        actualStart
-                        (skipCount track.trackTree - actualEnd)
-                        track.trackTree
             in
-            ( newTree
-            , List.map Tuple.second oldPoints
-            , ( actualStart, actualEnd )
-            )
+            newTree
 
         _ ->
-            ( Nothing, [], ( 0, 0 ) )
+            Nothing
 
 
 toolStateChange :

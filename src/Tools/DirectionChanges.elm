@@ -250,6 +250,10 @@ update :
     -> TrackLoaded msg
     -> ( Options, List (ToolAction msg) )
 update msg options previewColour track =
+    let
+        undoInfo action =
+            TrackLoaded.undoInfoWholeTrack action track
+    in
     case msg of
         SetMode mode ->
             let
@@ -375,8 +379,13 @@ update msg options previewColour track =
             )
 
         Autofix ->
+            let
+                action =
+                    Actions.Autofix <| List.map Tuple.first options.singlePointBreaches
+            in
             ( options
-            , [ Actions.Autofix <| List.map Tuple.first options.singlePointBreaches
+            , [ Actions.WithUndo (undoInfo action)
+              , action
               , TrackHasChanged
               ]
             )
@@ -393,9 +402,13 @@ update msg options previewColour track =
 
                     else
                         Quantity.negate options.radius
+
+                action =
+                    Actions.WidenBend points (Quantity.minus desired estimatedRadius)
             in
             ( options
-            , [ Actions.WidenBend points (Quantity.minus desired estimatedRadius)
+            , [ Actions.WithUndo (undoInfo action)
+              , action
               , TrackHasChanged
               ]
             )
@@ -656,6 +669,6 @@ widenBend :
     List Int
     -> Quantity Float Meters
     -> TrackLoaded msg
-    -> ( Maybe PeteTree, List GPXSource, ( Int, Int ) )
+    -> Maybe PeteTree
 widenBend points adjustment track =
     Tools.Nudge.widenBendHelper points adjustment track

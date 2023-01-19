@@ -302,11 +302,23 @@ update msg options previewColour hasTrack =
                     ( newOptions, [] )
 
         Autofix ->
-            ( options
-            , [ Actions.Autofix <| List.map Tuple.first options.breaches
-              , TrackHasChanged
-              ]
-            )
+            case hasTrack of
+                Just track ->
+                    let
+                        undoInfo =
+                            TrackLoaded.undoInfoWholeTrack
+                                (Actions.Autofix <| List.map Tuple.first options.breaches)
+                                track
+                    in
+                    ( options
+                    , [ Actions.WithUndo undoInfo
+                      , undoInfo.action
+                      , TrackHasChanged
+                      ]
+                    )
+
+                Nothing ->
+                    ( options, [] )
 
         DisplayInfo id tag ->
             ( options, [ Actions.DisplayInfo id tag ] )

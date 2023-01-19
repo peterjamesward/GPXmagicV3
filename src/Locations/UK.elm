@@ -446,7 +446,7 @@ Also, access a quick description of what the tool does and how (and when) to use
                 , ( "pens", """add RGT rider pens""" )
                 , ( "append", """append GPX track""" )
                 , ( "straighten", """straighten""" )
-                , ( "autofix", """autofix""" )
+                , ( "autofix", """point smoothing""" )
                 , ( "route", """turn route into new track""" )
                 , ( "widen", """widen bend""" )
                 , ( "smart", """smart smoother""" )

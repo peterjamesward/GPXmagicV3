@@ -1497,24 +1497,31 @@ update :
     -> (Msg -> msg)
     -> ( Options msg, List (Actions.ToolAction msg) )
 update msg options track wrapper =
+    let
+        undoInfo =
+            TrackLoaded.undoInfoWholeTrack Actions.CombineNearbyPoints track
+    in
     case msg of
         AdoptNewTrack ->
             ( options
-            , [ Actions.CombineNearbyPoints
+            , [ Actions.WithUndo undoInfo
+              , Actions.CombineNearbyPoints
               , Actions.TrackHasChanged
               ]
             )
 
         GraphAnalyse ->
             ( options
-            , [ if options.matchingTolerance |> Quantity.greaterThanZero then
-                    Actions.CombineNearbyPoints
+            , if options.matchingTolerance |> Quantity.greaterThanZero then
+                [ Actions.CombineNearbyPoints
+                , Actions.StartRoutePlanning
+                , Actions.HidePreview "graph"
+                ]
 
-                else
-                    Actions.NoAction
-              , Actions.StartRoutePlanning
-              , Actions.HidePreview "graph"
-              ]
+              else
+                [ Actions.StartRoutePlanning
+                , Actions.HidePreview "graph"
+                ]
             )
 
         RevertToTrack ->
