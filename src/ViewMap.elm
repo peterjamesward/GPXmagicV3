@@ -67,11 +67,7 @@ mapUrl style =
 
 
 defaultStyle =
-    MapLight
-
-
-
---MapOutdoors
+    MapOutdoors
 
 
 defaultStyleUrl =

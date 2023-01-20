@@ -375,49 +375,6 @@ update msg model =
                     ]
                 )
 
-        AroundTheWorld sequence ->
-            -- Here we automate the creation of many map and profile images.
-            ( model
-            , Cmd.batch
-                [ Http.get
-                    { url = "GPX/" ++ stageName sequence ++ ".gpx"
-                    , expect = Http.expectString GpxFromUrl
-                    }
-                , Delay.after automation.mapPause (SnapshotMapImage sequence)
-                ]
-            )
-
-        SnapshotMapImage sequence ->
-            case model.track of
-                Just track ->
-                    ( model
-                    , Cmd.batch
-                        [ MapPortController.createImageFileFromMap (stageName sequence)
-                        , Delay.after automation.profilePause <| SnapshotProfileImage sequence
-                        ]
-                    )
-
-                Nothing ->
-                    ( model, Cmd.none )
-
-        SnapshotProfileImage sequence ->
-            case model.track of
-                Just track ->
-                    ( model
-                    , Cmd.batch
-                        [ --MapPortController.createImageFileFromProfile (stageName sequence)
-                          Cmd.none
-                        , if sequence < automation.endStage then
-                            Delay.after automation.fetchPause <| AroundTheWorld (sequence + 1)
-
-                          else
-                            Cmd.none
-                        ]
-                    )
-
-                Nothing ->
-                    ( model, Cmd.none )
-
         RGTOptions options ->
             ( { model | rgtOptions = Tools.RGTOptions.update options model.rgtOptions }
             , Cmd.none
@@ -753,7 +710,7 @@ update msg model =
             )
 
         TimeToUpdateMemory ->
-            ( model, LocalStorage.storageGetMemoryUsage )
+            ( model, LocalStorage.fetchMemoryUsage )
 
         OneClickMsg oneClickMsg ->
             let
@@ -1116,12 +1073,6 @@ topLoadingBar model =
         localHelper =
             text << I18N.localisedString model.location "main"
 
-        snapButton =
-            button []
-                { onPress = Just (AroundTheWorld automation.startStage)
-                , label = useIconWithSize 12 FeatherIcons.camera
-                }
-
         moreOptionsButton =
             button
                 [ padding 5
@@ -1221,7 +1172,7 @@ topLoadingBar model =
         )
         [ globalOptions model
         , loadGpxButton
-        , snapButton
+        , moreOptionsButton
         , case model.filename of
             Just filename ->
                 Input.text

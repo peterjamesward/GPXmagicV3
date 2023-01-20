@@ -11,6 +11,16 @@ Delete should display "Sorry" message when _almost_ all track is selected.
 
 # WIP
 
+## Canvas profile chart
+
+From ATW
+Zoom
+Sideways scroll
+Fixed y-axis
+Optional curtain colours
+Segments
+Previews
+
 ---
 
 # BACKLOG

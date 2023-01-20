@@ -191,6 +191,15 @@ function mapMessageHandler(msg) {
             }
             break;
 
+        case 'Profile':
+            if (isMapCreated) {
+                const profile = document.getElementById('profileCanvas');
+                profile.toBlob(function(blob){
+                    saveAs(blob, msg.filename + '-profile.png');
+                });
+            }
+            break;
+
         case 'Style':
             if (isMapCreated) {
                 map.setStyle(msg.style);
@@ -569,3 +578,26 @@ function hidePreview(label) {
 
 }
 
+function profileAsChart(chartInfo) {
+
+    //console.log(chartInfo);
+
+    var profileDiv = document.getElementById("profile");
+    while (profileDiv.hasChildNodes()) {
+      profileDiv.removeChild(profileDiv.firstChild);
+    }
+
+    var canvas = document.createElement('canvas');
+    canvas.id     = "profileCanvas";
+    canvas.width  = profileDiv.width;
+    canvas.height = profileDiv.height;
+    canvas.style.zIndex   = 8;
+    canvas.style.position = "absolute";
+    canvas.style.border   = "1px solid";
+    profileDiv.appendChild(canvas);
+
+    new Chart(
+        document.getElementById('profileCanvas'),
+        chartInfo
+    );
+}
