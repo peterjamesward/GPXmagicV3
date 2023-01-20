@@ -192,12 +192,8 @@ function mapMessageHandler(msg) {
             break;
 
         case 'Profile':
-            if (isMapCreated) {
-                const profile = document.getElementById('profileCanvas');
-                profile.toBlob(function(blob){
-                    saveAs(blob, msg.filename + '-profile.png');
-                });
-            }
+            //TODO: Repurpose to add chart data to canvas.
+            profileAsChart(msg.containerDiv, msg.chartData);
             break;
 
         case 'Style':
@@ -578,11 +574,11 @@ function hidePreview(label) {
 
 }
 
-function profileAsChart(chartInfo) {
+function profileAsChart(canvasContainerDiv, chartInfo) {
 
     //console.log(chartInfo);
 
-    var profileDiv = document.getElementById("profile");
+    var profileDiv = document.getElementById(canvasContainerDiv);
     while (profileDiv.hasChildNodes()) {
       profileDiv.removeChild(profileDiv.firstChild);
     }

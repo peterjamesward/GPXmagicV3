@@ -25,13 +25,7 @@ Previews
 
 # BACKLOG
 
-## Gradient smoothing ranges are wrong.
-
-Not really, but it goes weird when the average window meets the range.
-It should probably sample beyond the markers but only apply within them,
-or whatever it's doing now, change it (!).
-
-## Test cases for most edits.
+## Test cases for edits.
 
 You could do this you know, just not for the visuals.
 
