@@ -1,4 +1,4 @@
-port module MapPortController exposing (MapInfo, MapMsg(..), MapState, addFullTrackToMap, addMarkersToMap, addTrackToMap, centreMapOnCurrent, createMap, defaultMapState, fetchElevationsForPoints, hidePreview, mapResponses, refreshMap, requestElevations, setMapStyle, showPreview, toggleDragging, update, zoomMapToFitTrack)
+port module MapPortController exposing (..)
 
 import Actions exposing (ToolAction(..))
 import Angle
@@ -87,7 +87,9 @@ zoomMapToFitTrack : TrackLoaded msg -> Cmd msg
 zoomMapToFitTrack track =
     let
         { minX, maxX, minY, maxY, minZ } =
-            BoundingBox3d.extrema <| boundingBox track.trackTree
+            BoundingBox3d.extrema <|
+                BoundingBox3d.expandBy (Length.kilometers 2) <|
+                    boundingBox track.trackTree
 
         ( swCorner, neCorner ) =
             ( Point3d.xyz minX minY minZ, Point3d.xyz maxX maxY minZ )
@@ -206,6 +208,25 @@ addFullTrackToMap track =
             , ( "zoom", E.float 10.0 )
             , ( "data", SceneBuilderMap.renderMapJsonWithoutCulling track ) -- Route as polyline
             , ( "points", SceneBuilderMap.trackPointsToJSONwithoutCulling track ) -- Make track points draggable
+            , ( "profile", SceneBuilderMap.imperialProfileChart track )
+            ]
+
+
+createImageFileFromMap : String -> Cmd msg
+createImageFileFromMap filename =
+    mapCommands <|
+        E.object
+            [ ( "Cmd", E.string "Snap" )
+            , ( "filename", E.string filename )
+            ]
+
+
+createImageFileFromProfile : String -> Cmd msg
+createImageFileFromProfile filename =
+    mapCommands <|
+        E.object
+            [ ( "Cmd", E.string "Profile" )
+            , ( "filename", E.string filename )
             ]
 
 
@@ -242,18 +263,15 @@ addMarkersToMap track =
                 [ ( "lon", E.float <| Angle.inDegrees <| Direction2d.toAngle longitude )
                 , ( "lat", E.float <| Angle.inDegrees latitude )
                 ]
+
+        lastPoint =
+            DomainModel.skipCount track.trackTree
     in
     mapCommands <|
         E.object
             [ ( "Cmd", E.string "Mark" )
             , ( "orange", encodePos <| gpxPointFromIndex track.currentPosition track.trackTree )
-            , case track.markerPosition of
-                Just mark ->
-                    ( "purple", encodePos <| gpxPointFromIndex mark track.trackTree )
-
-                Nothing ->
-                    ( "ignore", E.null )
-            , ( "previews", E.null )
+            , ( "purple", encodePos <| gpxPointFromIndex lastPoint track.trackTree )
             ]
 
 

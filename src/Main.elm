@@ -46,6 +46,7 @@ import Quantity exposing (Quantity)
 import SceneBuilderMap
 import SplitPane.SplitPane as SplitPane exposing (..)
 import StravaAuth exposing (getStravaToken)
+import String.Interpolate
 import SvgPathExtractor
 import Task
 import Time
@@ -373,6 +374,49 @@ update msg model =
                     , loadCmd
                     ]
                 )
+
+        AroundTheWorld sequence ->
+            -- Here we automate the creation of many map and profile images.
+            ( model
+            , Cmd.batch
+                [ Http.get
+                    { url = "GPX/" ++ stageName sequence ++ ".gpx"
+                    , expect = Http.expectString GpxFromUrl
+                    }
+                , Delay.after automation.mapPause (SnapshotMapImage sequence)
+                ]
+            )
+
+        SnapshotMapImage sequence ->
+            case model.track of
+                Just track ->
+                    ( model
+                    , Cmd.batch
+                        [ MapPortController.createImageFileFromMap (stageName sequence)
+                        , Delay.after automation.profilePause <| SnapshotProfileImage sequence
+                        ]
+                    )
+
+                Nothing ->
+                    ( model, Cmd.none )
+
+        SnapshotProfileImage sequence ->
+            case model.track of
+                Just track ->
+                    ( model
+                    , Cmd.batch
+                        [ --MapPortController.createImageFileFromProfile (stageName sequence)
+                          Cmd.none
+                        , if sequence < automation.endStage then
+                            Delay.after automation.fetchPause <| AroundTheWorld (sequence + 1)
+
+                          else
+                            Cmd.none
+                        ]
+                    )
+
+                Nothing ->
+                    ( model, Cmd.none )
 
         RGTOptions options ->
             ( { model | rgtOptions = Tools.RGTOptions.update options model.rgtOptions }
@@ -709,7 +753,7 @@ update msg model =
             )
 
         TimeToUpdateMemory ->
-            ( model, LocalStorage.fetchMemoryUsage )
+            ( model, LocalStorage.storageGetMemoryUsage )
 
         OneClickMsg oneClickMsg ->
             let
@@ -1072,6 +1116,12 @@ topLoadingBar model =
         localHelper =
             text << I18N.localisedString model.location "main"
 
+        snapButton =
+            button []
+                { onPress = Just (AroundTheWorld automation.startStage)
+                , label = useIconWithSize 12 FeatherIcons.camera
+                }
+
         moreOptionsButton =
             button
                 [ padding 5
@@ -1171,7 +1221,7 @@ topLoadingBar model =
         )
         [ globalOptions model
         , loadGpxButton
-        , moreOptionsButton
+        , snapButton
         , case model.filename of
             Just filename ->
                 Input.text

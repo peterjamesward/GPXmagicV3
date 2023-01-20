@@ -41,6 +41,7 @@ type MapStyle
     | MapSatellite
     | MapSatelliteStreets
     | MapOutdoors
+    | MapLight
 
 
 mapUrl : MapStyle -> String
@@ -61,9 +62,16 @@ mapUrl style =
         MapOutdoors ->
             "mapbox://styles/mapbox/outdoors-v12"
 
+        MapLight ->
+            "mapbox://styles/mapbox/light-v11"
+
 
 defaultStyle =
-    MapOutdoors
+    MapLight
+
+
+
+--MapOutdoors
 
 
 defaultStyleUrl =
@@ -217,7 +225,7 @@ view location ( viewWidth, viewHeight ) mContext msgWrapper =
     in
     case mContext of
         Just context ->
-            row
+            column
                 [ inFront <| handyMapControls context ]
                 [ el
                     [ width <| px <| inPixels viewWidth
@@ -229,8 +237,21 @@ view location ( viewWidth, viewHeight ) mContext msgWrapper =
                     , htmlAttribute (id "map")
                     ]
                     none
+                , el
+                    [ width <| px <| inPixels viewWidth
+                    , height <| px <| inPixels viewHeight // 3
+                    , alignLeft
+                    , alignTop
+                    , Border.width 2
+                    , Border.color FlatColors.ChinesePalette.peace
+                    , htmlAttribute (id "profile")
+                    ]
+                    none
                 ]
 
         Nothing ->
             -- Keep the DOM hierarchy consistent.
-            row [] [ el [ htmlAttribute (id "map") ] none ]
+            column []
+                [ el [ htmlAttribute (id "map") ] none
+                , el [ htmlAttribute (id "profile") ] none
+                ]

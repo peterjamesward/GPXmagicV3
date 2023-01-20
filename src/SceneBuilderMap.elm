@@ -1,4 +1,11 @@
-module SceneBuilderMap exposing (latLonPairFromGpx, renderMapJsonWithoutCulling, renderPreview, trackPointsToJSON, trackPointsToJSONwithoutCulling)
+module SceneBuilderMap exposing
+    ( imperialProfileChart
+    , latLonPairFromGpx
+    , renderMapJsonWithoutCulling
+    , renderPreview
+    , trackPointsToJSON
+    , trackPointsToJSONwithoutCulling
+    )
 
 import Angle exposing (Angle)
 import BoundingBox3d
@@ -118,6 +125,167 @@ renderMapJsonWithoutCulling track =
         , ( "properties", E.object [] )
         , ( "geometry", geometry )
         ]
+
+
+
+{- EXAMPLE AS BASIS
+   d0 = [{x:1, y:1}, {x:2, y:11},{x:3, y:1},{x:4, y:11},{x:5, y:10}, {x:6, y:8},{x:7, y:15},{x:8, y:2}]
+
+   d1= [{x:1, y:1}, {x:2, y:5}, {x:4, y:1}, {x:5, y:3}, {x:5.5, y:4},{x:7, y:5},{x:8, y:3}]
+
+   const ctx = document.getElementById("chart").getContext("2d");
+   const chart = new Chart(ctx, {
+     type: "line",
+     data: {
+       datasets: [
+         {
+           backgroundColor: "rgba(50,200,50,0.6)",
+           borderColor: "rgba(50,200,50,0.6)",
+           data: d0,
+           fill: "stack"
+         },
+         {
+           backgroundColor: "rgba(200,50,50,0.6)",
+           borderColor: "rgba(200,50,50,0.6)",
+           data: d1,
+           fill: "stack"
+         }
+       ]
+     },
+     options: {
+       scales: {
+         x: {
+           type: "linear"
+         },
+         y: {
+           stacked: true,
+         }
+       },
+       elements: {
+         line: {
+            tension: 0.2
+         },
+         point: {
+           radius: 0
+         }
+       },
+       tooltips: {
+         mode: "nearest",
+         intersect: false,
+         axis: "x"
+       },
+       hover: {
+         mode: "nearest",
+         intersect: false,
+         axis: "x"
+       }
+     }
+   });
+-}
+
+
+imperialProfileChart : TrackLoaded msg -> E.Value
+imperialProfileChart track =
+    -- Provide distance in yards and height in feet for Steve Taylor's profile chart.
+    -- Use JSON as per chart.js demands.
+    -- Indeed, declare the entire chart here, not in JS.
+    let
+        chartStuff =
+            E.object
+                [ ( "type", E.string "line" )
+                , ( "data"
+                  , E.object
+                        [ ( "datasets", E.list identity [ profileDataset ] )
+                        ]
+                  )
+                , ( "options", options )
+                ]
+
+        trackLength =
+            trueLength track.trackTree
+                |> Length.inMiles
+                |> ceiling
+
+        options =
+            E.object
+                [ ( "plugins"
+                  , E.object
+                        [ ( "legend"
+                          , E.object
+                                [ ( "display", E.bool False )
+                                ]
+                          )
+                        ]
+                  )
+                , ( "element"
+                  , E.object
+                        [ ( "point"
+                          , E.object
+                                [ ( "pointStyle", E.bool False ) ]
+                          )
+                        ]
+                  )
+                , ( "scales"
+                  , E.object
+                        [ ( "x"
+                          , E.object
+                                [ ( "type", E.string "linear" )
+                                , ( "max", E.int trackLength )
+                                , ( "title"
+                                  , E.object
+                                        [ ( "text", E.string "Miles" )
+                                        , ( "display", E.bool True )
+                                        ]
+                                  )
+                                ]
+                          )
+                        , ( "y"
+                          , E.object
+                                [ ( "type", E.string "linear" )
+                                , ( "title"
+                                  , E.object
+                                        [ ( "text", E.string "Feet" )
+                                        , ( "display", E.bool True )
+                                        ]
+                                  )
+                                ]
+                          )
+                        ]
+                  )
+                ]
+
+        profileDataset =
+            E.object
+                [ ( "backgroundColor", E.string "rgba(182,198,237,0.6)" )
+                , ( "borderColor", E.string "rgba(77,110,205,0.6" )
+                , ( "data", E.list identity coordinates )
+                , ( "fill", E.string "stack" )
+                ]
+
+        coordinates : List E.Value
+        coordinates =
+            -- Simple, safe, slow.
+            List.map makeProfilePoint (List.range 0 (skipCount track.trackTree))
+
+        makeProfilePoint : Int -> E.Value
+        makeProfilePoint sequence =
+            let
+                gpx =
+                    DomainModel.gpxPointFromIndex sequence track.trackTree
+
+                altitude =
+                    Length.inFeet gpx.altitude
+
+                distance =
+                    DomainModel.distanceFromIndex sequence track.trackTree
+                        |> Length.inMiles
+            in
+            E.object
+                [ ( "x", E.float distance )
+                , ( "y", E.float altitude )
+                ]
+    in
+    chartStuff
 
 
 makeFeatureFromGPX : GPXSource -> E.Value
