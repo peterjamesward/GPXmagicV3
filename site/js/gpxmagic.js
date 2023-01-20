@@ -580,7 +580,10 @@ function profileAsChart(canvasContainerDiv, chartInfo) {
 
     var profileDiv = document.getElementById(canvasContainerDiv);
 
-    if ( profileDiv === undefined || profileDiv === null) return;
+    if ( profileDiv === undefined || profileDiv === null) {
+        console.log('No profile container ' + canvasContainerDiv);
+        return;
+    }
 
     while (profileDiv.hasChildNodes()) {
       profileDiv.removeChild(profileDiv.firstChild);

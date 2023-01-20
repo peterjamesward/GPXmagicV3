@@ -130,6 +130,7 @@ type Msg
     | BackgroundClick Mouse.Event
     | DisplayWelcome
     | RGTOptions Tools.RGTOptions.Msg
+    | ProfilePaint
     | NoOp
 
 
@@ -355,6 +356,7 @@ update msg model =
                             ReceivedLandUseData
                             track
                         , LocalStorage.sessionClear
+                        , Delay.after 100 ProfilePaint -- wait for container to paint.
                         ]
                     )
 
@@ -385,6 +387,19 @@ update msg model =
             ( { model | rgtOptions = Tools.RGTOptions.update options model.rgtOptions }
             , Cmd.none
             )
+
+        ProfilePaint ->
+            case model.track of
+                Just track ->
+                    ( model
+                    , PaneLayoutManager.paintProfileCharts
+                        model.paneLayoutOptions
+                        model.toolOptions.imperial
+                        track
+                    )
+
+                Nothing ->
+                    ( model, Cmd.none )
 
         BackgroundClick _ ->
             let
@@ -2728,8 +2743,4 @@ showTrackOnMapCentered panes imperial track =
         [ MapPortController.addFullTrackToMap track
         , MapPortController.zoomMapToFitTrack track
         , MapPortController.addMarkersToMap track
-        , PaneLayoutManager.paintProfileCharts
-            panes
-            imperial
-            track
         ]

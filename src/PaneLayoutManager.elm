@@ -766,13 +766,13 @@ viewPanes location msgWrapper mTrack segments graphOptions displayOptions ( w, h
                             none
 
                 ViewProfile ->
-                    case ( pane.profileContext, mTrack ) of
-                        ( Just context, Just track ) ->
+                    case pane.profileContext of
+                        Just context ->
                             ViewProfileCharts.view
                                 context
                                 pane.paneId
                                 ( paneWidth, paneHeight )
-                                track
+                                mTrack
                                 segments
                                 (msgWrapper << ProfileViewMessage pane.paneId)
                                 previews

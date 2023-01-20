@@ -203,15 +203,14 @@ view :
     ProfileContext
     -> PaneId
     -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> TrackLoaded msg
+    -> Maybe (TrackLoaded msg)
     -> List NamedSegment
     -> (Msg -> msg)
     -> Dict String PreviewData
     -> Bool
     -> Element msg
 view context paneId ( givenWidth, givenHeight ) track segments msgWrapper previews imperial =
-    -- We just declare the container for profile, the data is provided through a port.
-    --TODO: Container name relative to view pane.
+    -- We just declare the container for the profile canvas, the data are provided through a port.
     let
         tenPercentHeight =
             inPixels givenHeight // 10
