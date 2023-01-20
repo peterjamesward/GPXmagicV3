@@ -347,8 +347,13 @@ update msg model =
                 Just ( track, segments ) ->
                     ( adoptTrackInModel track segments model
                     , Cmd.batch
-                        [ showTrackOnMapCentered model.mapPointsDraggable track
-                        , LandUseDataOSM.requestLandUseData ReceivedLandUseData track
+                        [ showTrackOnMapCentered
+                            model.paneLayoutOptions
+                            model.toolOptions.imperial
+                            track
+                        , LandUseDataOSM.requestLandUseData
+                            ReceivedLandUseData
+                            track
                         , LocalStorage.sessionClear
                         ]
                     )
@@ -2652,7 +2657,7 @@ performActionCommands actions model =
                     Task.perform message (File.toString file)
 
                 ( TrackFromSvg _, Just track ) ->
-                    showTrackOnMapCentered model.mapPointsDraggable track
+                    showTrackOnMapCentered model.paneLayoutOptions model.toolOptions.imperial track
 
                 ( SelectGpxFile message, _ ) ->
                     Select.file [ "text/gpx" ] message
@@ -2661,10 +2666,10 @@ performActionCommands actions model =
                     Task.perform message (File.toString file)
 
                 ( TrackFromGpx _, Just track ) ->
-                    showTrackOnMapCentered model.mapPointsDraggable track
+                    showTrackOnMapCentered model.paneLayoutOptions model.toolOptions.imperial track
 
                 ( LoadGpxFromStrava _, Just track ) ->
-                    showTrackOnMapCentered model.mapPointsDraggable track
+                    showTrackOnMapCentered model.paneLayoutOptions model.toolOptions.imperial track
 
                 ( RequestStravaRouteHeader msg routeId token, _ ) ->
                     Tools.StravaDataLoad.requestStravaRouteHeader
@@ -2717,16 +2722,14 @@ performActionCommands actions model =
     Cmd.batch <| List.map performAction actions
 
 
-showTrackOnMapCentered : Bool -> TrackLoaded msg -> Cmd msg
-showTrackOnMapCentered useFull track =
+showTrackOnMapCentered : PaneContext.PaneLayoutOptions -> Bool -> TrackLoaded msg -> Cmd msg
+showTrackOnMapCentered panes imperial track =
     Cmd.batch
-        -- Selective rendering on Map unpopular.
-        --[ if useFull then
-        --    MapPortController.addFullTrackToMap track
-        --
-        --  else
-        --    MapPortController.addTrackToMap track
         [ MapPortController.addFullTrackToMap track
         , MapPortController.zoomMapToFitTrack track
         , MapPortController.addMarkersToMap track
+        , PaneLayoutManager.paintProfileCharts
+            panes
+            imperial
+            track
         ]

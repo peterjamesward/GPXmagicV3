@@ -1,7 +1,7 @@
 module PaneContext exposing (..)
 
 import LocalCoords exposing (LocalCoords)
-import MapPortController
+import MapTypes
 import Scene3d exposing (Entity)
 import View3dCommonElements
 import ViewGraphContext
@@ -33,7 +33,7 @@ type alias PaneLayoutOptions =
     , pane4 : PaneContext
     , sliderState : SliderState
     , scene3d : List (Entity LocalCoords)
-    , mapState : MapPortController.MapState
+    , mapState : MapTypes.MapState
     , viewBeforeRouteViewForced : Maybe ViewMode
     }
 

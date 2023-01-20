@@ -671,15 +671,11 @@ paintProfileCharts : PaneLayoutOptions -> Bool -> TrackLoaded msg -> Cmd msg
 paintProfileCharts panes imperial track =
     let
         paintIfProfileVisible pane =
-            let
-                _ =
-                    Debug.log "PANE" pane
-            in
             if pane.activeView == ViewProfile then
                 MapPortController.paintCanvasProfileChart
+                    pane
                     imperial
                     track
-                    ("altitude" ++ paneIdToString pane.paneId)
 
             else
                 Cmd.none

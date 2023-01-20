@@ -8,7 +8,9 @@ import DomainModel exposing (..)
 import Json.Decode as D exposing (Decoder, field, string)
 import Json.Encode as E
 import Length
+import MapTypes
 import MapboxKey exposing (mapboxKey)
+import PaneContext exposing (PaneContext, paneIdToString)
 import Point3d
 import SceneBuilderMap exposing (latLonPairFromGpx)
 import SceneBuilderProfile
@@ -19,22 +21,7 @@ type MapMsg
     = MapPortMessage E.Value
 
 
-type alias MapInfo =
-    -- Mainly used to set the map up.
-    { mapZoom : Float -- track values from user map interactions.
-    , centreLon : Float
-    , centreLat : Float
-    }
-
-
-type alias MapState =
-    -- Introduced to debounce map messages.
-    { lastClickLon : Float
-    , lastClickLat : Float
-    }
-
-
-defaultMapState : MapState
+defaultMapState : MapTypes.MapState
 defaultMapState =
     { lastClickLon = 0.0
     , lastClickLat = 0.0
@@ -47,7 +34,7 @@ port mapCommands : E.Value -> Cmd msg
 port mapResponses : (E.Value -> msg) -> Sub msg
 
 
-createMap : String -> MapInfo -> Cmd msg
+createMap : String -> MapTypes.MapInfo -> Cmd msg
 createMap style info =
     mapCommands <|
         E.object
@@ -123,8 +110,8 @@ zoomMapToFitTrack track =
 update :
     MapMsg
     -> TrackLoaded msg
-    -> MapState
-    -> ( MapState, List (ToolAction msg) )
+    -> MapTypes.MapState
+    -> ( MapTypes.MapState, List (ToolAction msg) )
 update mapMsg track lastState =
     case mapMsg of
         MapPortMessage value ->
@@ -212,14 +199,19 @@ addFullTrackToMap track =
             ]
 
 
-paintCanvasProfileChart : Bool -> TrackLoaded msg -> String -> Cmd msg
-paintCanvasProfileChart imperial track container =
-    mapCommands <|
-        E.object
-            [ ( "Cmd", E.string "Profile" )
-            , ( "container", E.string container )
-            , ( "chart", SceneBuilderProfile.profileChart imperial track )
-            ]
+paintCanvasProfileChart : PaneContext -> Bool -> TrackLoaded msg -> Cmd msg
+paintCanvasProfileChart paneContext imperial track =
+    case paneContext.profileContext of
+        Just profileContext ->
+            mapCommands <|
+                E.object
+                    [ ( "Cmd", E.string "Profile" )
+                    , ( "container", E.string <| "altitude" ++ paneIdToString paneContext.paneId )
+                    , ( "chart", SceneBuilderProfile.profileChart profileContext imperial track )
+                    ]
+
+        Nothing ->
+            Cmd.none
 
 
 showPreview : String -> String -> String -> E.Value -> Cmd msg
@@ -273,10 +265,10 @@ msgDecoder =
 
 
 processMapPortMessage :
-    MapState
+    MapTypes.MapState
     -> TrackLoaded msg
     -> E.Value
-    -> ( MapState, List (ToolAction msg) )
+    -> ( MapTypes.MapState, List (ToolAction msg) )
 processMapPortMessage lastState track json =
     let
         jsonMsg =

@@ -19,21 +19,23 @@ Need to send command when profile view is selected or open.
 NB: Update by mutation 
 -- https://www.chartjs.org/docs/latest/developers/updates.html (?optimisation)
 
-TODO: Multiple profile views each with own context
-TODO: Tree depth culling
-TODO: Orange and Purple 
-TODO: Zoom
+WIP: Tree depth culling
+WIP: Zoom
+TODO: Orange and Purple
 TODO: Sideways scroll
 TODO: Toggle Follow Orange
-TODO: Fixed y-axis when scrolling (optional)
+TODO: Fix y-axis limits when scrolling (optional)
 TODO: Toggle curtain colours (may be tricky)
 TODO: Segments
 TODO: Previews
-TODO: Gradient chart
+TODO: Gradient chart (perhaps use curtain colours here as bars)
 TODO: Click detect
+TODO: Paint on load, resize, marker move, etc.
+TODO: Optimise data changes if needed.
 
 DONE: Base from ATW
 DONE: Metric/Imperial
+DONE: Multiple profile views each with own context
 
 ---
 

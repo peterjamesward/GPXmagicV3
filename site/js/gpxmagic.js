@@ -576,15 +576,18 @@ function hidePreview(label) {
 
 function profileAsChart(canvasContainerDiv, chartInfo) {
 
-    console.log(canvasContainerDiv);
+    //console.log(canvasContainerDiv);
 
     var profileDiv = document.getElementById(canvasContainerDiv);
+
+    if ( profileDiv === undefined || profileDiv === null) return;
+
     while (profileDiv.hasChildNodes()) {
       profileDiv.removeChild(profileDiv.firstChild);
     }
 
     var canvas = document.createElement('canvas');
-    canvas.id     = "profileCanvas";
+    canvas.id     = canvasContainerDiv + 'profileCanvas';
     canvas.width  = profileDiv.width;
     canvas.height = profileDiv.height;
     canvas.style.zIndex   = 8;
@@ -593,7 +596,7 @@ function profileAsChart(canvasContainerDiv, chartInfo) {
     profileDiv.appendChild(canvas);
 
     new Chart(
-        document.getElementById('profileCanvas'),
+        document.getElementById(canvasContainerDiv + 'profileCanvas'),
         chartInfo
     );
 }

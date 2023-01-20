@@ -59,10 +59,11 @@ import DomainModel
 import Json.Encode as E
 import Length
 import TrackLoaded exposing (TrackLoaded)
+import ViewProfileChartContext exposing (ProfileContext)
 
 
-profileChart : Bool -> TrackLoaded msg -> E.Value
-profileChart imperial track =
+profileChart : ProfileContext -> Bool -> TrackLoaded msg -> E.Value
+profileChart profile imperial track =
     -- Use JSON as per chart.js demands.
     -- Indeed, declare the entire chart here, not in JS.
     let
@@ -85,8 +86,7 @@ profileChart imperial track =
                 [ ( "type", E.string "line" )
                 , ( "data"
                   , E.object
-                        [ ( "datasets", E.list identity [ profileDataset ] )
-                        ]
+                        [ ( "datasets", E.list identity [ profileDataset ] ) ]
                   )
                 , ( "options", options )
                 ]
@@ -101,9 +101,7 @@ profileChart imperial track =
                 , ( "plugins"
                   , E.object
                         [ ( "legend"
-                          , E.object
-                                [ ( "display", E.bool False )
-                                ]
+                          , E.object [ ( "display", E.bool False ) ]
                           )
                         ]
                   )
@@ -155,7 +153,7 @@ profileChart imperial track =
 
         coordinates : List E.Value
         coordinates =
-            -- Simple, safe, slow.
+            -- TODO: Use a fold, so we can readily support zooming.
             List.map makeProfilePoint (List.range 0 (DomainModel.skipCount track.trackTree))
 
         makeProfilePoint : Int -> E.Value
