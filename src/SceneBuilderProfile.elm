@@ -94,7 +94,6 @@ profileChart imperial track =
         trackLength =
             DomainModel.trueLength track.trackTree
                 |> distanceFunction
-                |> ceiling
 
         options =
             E.object
@@ -121,7 +120,7 @@ profileChart imperial track =
                         [ ( "x"
                           , E.object
                                 [ ( "type", E.string "linear" )
-                                , ( "max", E.int trackLength )
+                                , ( "max", E.float trackLength )
                                 , ( "title"
                                   , E.object
                                         [ ( "text", E.string distanceUnits )
