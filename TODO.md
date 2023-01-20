@@ -19,8 +19,12 @@ Need to send command when profile view is selected or open.
 NB: Update by mutation 
 -- https://www.chartjs.org/docs/latest/developers/updates.html (?optimisation)
 
+> Before proceeding, tidy up the loading code so it works always.
+> Painting, and initialising, not happening.
+
 WIP: Tree depth culling
 WIP: Zoom
+
 TODO: Orange and Purple
 TODO: Sideways scroll
 TODO: Toggle Follow Orange

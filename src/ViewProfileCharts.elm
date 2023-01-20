@@ -185,19 +185,9 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
             let
                 currentDistance =
                     distanceFromIndex track.currentPosition track.trackTree
-
-                currentAltitude =
-                    gpxPointFromIndex track.currentPosition track.trackTree
-                        |> .altitude
             in
             ( { context
                 | followSelectedPoint = not context.followSelectedPoint
-                , focalPoint =
-                    DomainModel.withoutTime <|
-                        Point3d.xyz
-                            currentDistance
-                            Quantity.zero
-                            currentAltitude
               }
             , []
             )
@@ -272,14 +262,7 @@ initialiseView orangePosition treeNode currentContext =
                 | dragAction = DragNone
                 , zoomLevel = 0.0
                 , defaultZoomLevel = 0.0
-                , focalPoint =
-                    DomainModel.withoutTime <|
-                        Point3d.xyz
-                            currentDistance
-                            Quantity.zero
-                            (Point3d.zCoordinate currentPoint.space
-                                |> Quantity.multiplyBy context.emphasis
-                            )
+                , focalPoint = Quantity.half <| DomainModel.trueLength treeNode
                 , metresPerPixel = 10.0
                 , waitingForClickDelay = False
             }
@@ -288,13 +271,8 @@ initialiseView orangePosition treeNode currentContext =
             { dragAction = DragNone
             , zoomLevel = 0.0
             , defaultZoomLevel = 0.0
-            , focalPoint =
-                DomainModel.withoutTime <|
-                    Point3d.xyz
-                        currentDistance
-                        Quantity.zero
-                        (currentPoint.space |> Point3d.zCoordinate)
-            , followSelectedPoint = True
+            , focalPoint = Quantity.half <| DomainModel.trueLength treeNode
+            , followSelectedPoint = False
             , metresPerPixel = 10.0
             , waitingForClickDelay = False
             , emphasis = 1.0

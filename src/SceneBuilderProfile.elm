@@ -55,9 +55,10 @@ module SceneBuilderProfile exposing (profileChart)
    });
 -}
 
-import DomainModel
+import DomainModel exposing (GPXSource, RoadSection)
 import Json.Encode as E
-import Length
+import Length exposing (Meters)
+import Quantity exposing (Quantity)
 import TrackLoaded exposing (TrackLoaded)
 import ViewProfileChartContext exposing (ProfileContext)
 
@@ -151,26 +152,65 @@ profileChart profile imperial track =
                 , ( "fill", E.string "stack" )
                 ]
 
+        halfOfView =
+            DomainModel.trueLength track.trackTree
+                |> Quantity.half
+                |> Quantity.multiplyBy (0.5 ^ profile.zoomLevel)
+
+        _ = Debug.log "PROFILE" profile
+
+        ( startDistance, endDistance ) =
+            ( profile.focalPoint |> Quantity.minus halfOfView
+            , profile.focalPoint |> Quantity.plus halfOfView
+            )
+
+        ( firstPointIndex, lastPointIndex ) =
+            --TODO: Interpolate to exact range ends
+            ( DomainModel.indexFromDistanceRoundedDown startDistance track.trackTree
+            , DomainModel.indexFromDistanceRoundedUp endDistance track.trackTree
+            )
+
+        coordinateCollector :
+            RoadSection
+            -> ( Quantity Float Meters, List E.Value )
+            -> ( Quantity Float Meters, List E.Value )
+        coordinateCollector road ( lastDistance, outputs ) =
+            let
+                newDistance =
+                    lastDistance |> Quantity.plus road.trueLength
+            in
+            ( newDistance
+            , makeProfilePoint (Tuple.second road.sourceData) newDistance
+                :: outputs
+            )
+
         coordinates : List E.Value
         coordinates =
-            -- TODO: Use a fold, so we can readily support zooming.
-            List.map makeProfilePoint (List.range 0 (DomainModel.skipCount track.trackTree))
-
-        makeProfilePoint : Int -> E.Value
-        makeProfilePoint sequence =
+            -- TODO: Set depth function sensibly to aim for 1000 points.
             let
-                gpx =
-                    DomainModel.gpxPointFromIndex sequence track.trackTree
+                ( _, points ) =
+                    DomainModel.traverseTreeBetweenLimitsToDepth
+                        firstPointIndex
+                        lastPointIndex
+                        (always <| Just 10)
+                        0
+                        track.trackTree
+                        coordinateCollector
+                        ( startDistance, [] )
+            in
+            List.reverse points
 
+        makeProfilePoint : GPXSource -> Quantity Float Meters -> E.Value
+        makeProfilePoint gpx distance =
+            let
                 altitude =
                     altitudeFunction gpx.altitude
 
-                distance =
-                    DomainModel.distanceFromIndex sequence track.trackTree
-                        |> distanceFunction
+                fDistance =
+                    distanceFunction distance
             in
             E.object
-                [ ( "x", E.float distance )
+                [ ( "x", E.float fDistance )
                 , ( "y", E.float altitude )
                 ]
     in

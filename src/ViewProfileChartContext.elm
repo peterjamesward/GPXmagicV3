@@ -2,6 +2,8 @@ module ViewProfileChartContext exposing (..)
 
 import DomainModel exposing (EarthPoint)
 import Html.Events.Extra.Mouse as Mouse
+import Length exposing (Meters)
+import Quantity exposing (Quantity)
 
 
 type Msg
@@ -30,7 +32,7 @@ type alias ProfileContext =
     { dragAction : DragAction
     , zoomLevel : Float -- 0 = whole track, 1 = half, etc.
     , defaultZoomLevel : Float
-    , focalPoint : EarthPoint
+    , focalPoint : Quantity Float Meters  -- NB route extrema clamped to chart edges.
     , followSelectedPoint : Bool
     , metresPerPixel : Float -- Helps with dragging accurately.
     , waitingForClickDelay : Bool
