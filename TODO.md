@@ -13,6 +13,10 @@ Delete should display "Sorry" message when _almost_ all track is selected.
 
 ## Canvas profile chart
 
+Culling is needed for long routes!
+
+Need to send command when profile view is selected (or open).
+
 From ATW
 Zoom
 Sideways scroll
@@ -20,6 +24,9 @@ Fixed y-axis
 Optional curtain colours
 Segments
 Previews
+Gradient chart
+Metric/Imperial
+Click detect
 
 ---
 

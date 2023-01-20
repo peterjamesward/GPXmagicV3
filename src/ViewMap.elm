@@ -233,21 +233,9 @@ view location ( viewWidth, viewHeight ) mContext msgWrapper =
                     , htmlAttribute (id "map")
                     ]
                     none
-                , el
-                    [ width <| px <| inPixels viewWidth
-                    , height <| px <| inPixels viewHeight // 3
-                    , alignLeft
-                    , alignTop
-                    , Border.width 2
-                    , Border.color FlatColors.ChinesePalette.peace
-                    , htmlAttribute (id "profile")
-                    ]
-                    none
                 ]
 
         Nothing ->
             -- Keep the DOM hierarchy consistent.
             column []
-                [ el [ htmlAttribute (id "map") ] none
-                , el [ htmlAttribute (id "profile") ] none
-                ]
+                [ el [ htmlAttribute (id "map") ] none ]

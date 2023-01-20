@@ -208,7 +208,16 @@ addFullTrackToMap track =
             , ( "zoom", E.float 10.0 )
             , ( "data", SceneBuilderMap.renderMapJsonWithoutCulling track ) -- Route as polyline
             , ( "points", SceneBuilderMap.trackPointsToJSONwithoutCulling track ) -- Make track points draggable
-            , ( "profile", SceneBuilderMap.imperialProfileChart track )
+            ]
+
+
+paintCanvasProfileChart : TrackLoaded msg -> String -> Cmd msg
+paintCanvasProfileChart track container =
+    mapCommands <|
+        E.object
+            [ ( "Cmd", E.string "Profile" )
+            , ( "container", E.string container )
+            , ( "chart", SceneBuilderMap.imperialProfileChart track )
             ]
 
 

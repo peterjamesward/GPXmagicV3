@@ -193,7 +193,7 @@ function mapMessageHandler(msg) {
 
         case 'Profile':
             //TODO: Repurpose to add chart data to canvas.
-            profileAsChart(msg.containerDiv, msg.chartData);
+            profileAsChart(msg.container, msg.chart);
             break;
 
         case 'Style':
