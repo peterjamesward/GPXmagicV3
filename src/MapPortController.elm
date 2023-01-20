@@ -11,6 +11,7 @@ import Length
 import MapboxKey exposing (mapboxKey)
 import Point3d
 import SceneBuilderMap exposing (latLonPairFromGpx)
+import SceneBuilderProfile
 import TrackLoaded exposing (TrackLoaded)
 
 
@@ -217,7 +218,7 @@ paintCanvasProfileChart track container =
         E.object
             [ ( "Cmd", E.string "Profile" )
             , ( "container", E.string container )
-            , ( "chart", SceneBuilderMap.imperialProfileChart track )
+            , ( "chart", SceneBuilderProfile.imperialProfileChart track )
             ]
 
 

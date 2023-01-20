@@ -13,20 +13,23 @@ Delete should display "Sorry" message when _almost_ all track is selected.
 
 ## Canvas profile chart
 
-Culling is needed for long routes!
+Need to send command when profile view is selected or open.
+(This will be a map over open profile views, indeed.)
 
-Need to send command when profile view is selected (or open).
+TODO: Depth culling
+TODO: Orange and Purple
+TODO: Zoom
+TODO: Sideways scroll
+TODO: Toggle Follow Orange
+TODO: Fixed y-axis when scrolling (optional)
+TODO: Toggle curtain colours
+TODO: Segments
+TODO: Previews
+TODO: Gradient chart
+TODO: Metric/Imperial
+TODO: Click detect
 
-From ATW
-Zoom
-Sideways scroll
-Fixed y-axis
-Optional curtain colours
-Segments
-Previews
-Gradient chart
-Metric/Imperial
-Click detect
+DONE: Base from ATW
 
 ---
 
