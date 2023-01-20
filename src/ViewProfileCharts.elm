@@ -1,8 +1,6 @@
 module ViewProfileCharts exposing (ClickZone(..), Context, DragAction(..), initialiseView, update, view)
 
 import Actions exposing (ToolAction(..))
-import Axis3d
-import Camera3d
 import Dict exposing (Dict)
 import DomainModel exposing (..)
 import Element exposing (..)
@@ -13,18 +11,16 @@ import Element.Input as Input
 import FeatherIcons
 import FlatColors.AussiePalette
 import FlatColors.ChinesePalette exposing (white)
+import Html.Attributes exposing (id)
 import Html.Events.Extra.Mouse as Mouse
-import Length exposing (Meters)
 import LocalCoords exposing (LocalCoords)
 import Pixels exposing (Pixels, inPixels)
-import Plane3d
 import Point2d exposing (Point2d, xCoordinate, yCoordinate)
 import Point3d exposing (Point3d)
 import PreviewData exposing (PreviewData, PreviewShape(..))
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
 import Scene3d exposing (Entity)
-import Svg.Attributes exposing (..)
 import Tools.NamedSegmentOptions exposing (NamedSegment)
 import TrackLoaded exposing (TrackLoaded)
 import Vector3d

@@ -2613,7 +2613,10 @@ performActionCommands actions model =
                             MapPortController.addTrackToMap track
                         , MapPortController.addMarkersToMap track
                         , Cmd.batch <| List.map showPreviewOnMap (Dict.keys model.previews)
-                        , MapPortController.paintCanvasProfileChart track "profile"
+                        , MapPortController.paintCanvasProfileChart
+                            model.toolOptions.imperial
+                            track
+                            "profile"
                         ]
 
                 ( PointerChange, Just track ) ->

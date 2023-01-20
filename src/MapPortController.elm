@@ -212,13 +212,13 @@ addFullTrackToMap track =
             ]
 
 
-paintCanvasProfileChart : TrackLoaded msg -> String -> Cmd msg
-paintCanvasProfileChart track container =
+paintCanvasProfileChart : Bool -> TrackLoaded msg -> String -> Cmd msg
+paintCanvasProfileChart imperial track container =
     mapCommands <|
         E.object
             [ ( "Cmd", E.string "Profile" )
             , ( "container", E.string container )
-            , ( "chart", SceneBuilderProfile.imperialProfileChart track )
+            , ( "chart", SceneBuilderProfile.profileChart imperial track )
             ]
 
 

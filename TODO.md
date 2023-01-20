@@ -26,10 +26,10 @@ TODO: Toggle curtain colours
 TODO: Segments
 TODO: Previews
 TODO: Gradient chart
-TODO: Metric/Imperial
 TODO: Click detect
 
 DONE: Base from ATW
+DONE: Metric/Imperial
 
 ---
 

@@ -1,4 +1,4 @@
-module SceneBuilderProfile exposing (imperialProfileChart)
+module SceneBuilderProfile exposing (profileChart)
 
 {- EXAMPLE AS BASIS
    d0 = [{x:1, y:1}, {x:2, y:11},{x:3, y:1},{x:4, y:11},{x:5, y:10}, {x:6, y:8},{x:7, y:15},{x:8, y:2}]
@@ -61,12 +61,25 @@ import Length
 import TrackLoaded exposing (TrackLoaded)
 
 
-imperialProfileChart : TrackLoaded msg -> E.Value
-imperialProfileChart track =
-    -- Provide distance in yards and height in feet for Steve Taylor's profile chart.
+profileChart : Bool -> TrackLoaded msg -> E.Value
+profileChart imperial track =
     -- Use JSON as per chart.js demands.
     -- Indeed, declare the entire chart here, not in JS.
     let
+        ( distanceFunction, altitudeFunction ) =
+            if imperial then
+                ( Length.inMiles, Length.inFeet )
+
+            else
+                ( Length.inKilometers, Length.inMeters )
+
+        ( distanceUnits, altitudeUnits ) =
+            if imperial then
+                ( "Miles", "Feet" )
+
+            else
+                ( "Kilometers", "Meters" )
+
         chartStuff =
             E.object
                 [ ( "type", E.string "line" )
@@ -80,7 +93,7 @@ imperialProfileChart track =
 
         trackLength =
             DomainModel.trueLength track.trackTree
-                |> Length.inMiles
+                |> distanceFunction
                 |> ceiling
 
         options =
@@ -111,7 +124,7 @@ imperialProfileChart track =
                                 , ( "max", E.int trackLength )
                                 , ( "title"
                                   , E.object
-                                        [ ( "text", E.string "Miles" )
+                                        [ ( "text", E.string distanceUnits )
                                         , ( "display", E.bool True )
                                         ]
                                   )
@@ -122,7 +135,7 @@ imperialProfileChart track =
                                 [ ( "type", E.string "linear" )
                                 , ( "title"
                                   , E.object
-                                        [ ( "text", E.string "Feet" )
+                                        [ ( "text", E.string altitudeUnits )
                                         , ( "display", E.bool True )
                                         ]
                                   )
@@ -152,11 +165,11 @@ imperialProfileChart track =
                     DomainModel.gpxPointFromIndex sequence track.trackTree
 
                 altitude =
-                    Length.inFeet gpx.altitude
+                    altitudeFunction gpx.altitude
 
                 distance =
                     DomainModel.distanceFromIndex sequence track.trackTree
-                        |> Length.inMiles
+                        |> distanceFunction
             in
             E.object
                 [ ( "x", E.float distance )
