@@ -269,6 +269,10 @@ view :
 view context ( givenWidth, givenHeight ) track segments msgWrapper previews imperial =
     -- We just declare the container for profile, the data is provided through a port.
     --TODO: Container name relative to view pane.
+    let
+        tenPercentHeight =
+            inPixels givenHeight // 10
+    in
     column
         (pointer
             :: Background.color FlatColors.ChinesePalette.antiFlashWhite
@@ -278,12 +282,22 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews impe
         )
         [ el
             [ Element.width <| px <| inPixels givenWidth
-            , Element.height <| px <| inPixels givenHeight
+            , Element.height <| px <| 7 * tenPercentHeight
             , alignLeft
             , alignTop
             , Border.width 2
             , Border.color FlatColors.ChinesePalette.peace
-            , htmlAttribute (id "profile")
+            , htmlAttribute (id "altitude")
+            ]
+            none
+        , el
+            [ Element.width <| px <| inPixels givenWidth
+            , Element.height <| px <| 3 * tenPercentHeight
+            , alignLeft
+            , alignTop
+            , Border.width 2
+            , Border.color FlatColors.ChinesePalette.peace
+            , htmlAttribute (id "gradient")
             ]
             none
         ]

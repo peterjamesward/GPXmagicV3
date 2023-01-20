@@ -149,6 +149,7 @@ profileChart imperial track =
             E.object
                 [ ( "backgroundColor", E.string "rgba(182,198,237,0.6)" )
                 , ( "borderColor", E.string "rgba(77,110,205,0.6" )
+                , ( "pointStyle", E.bool False )
                 , ( "data", E.list identity coordinates )
                 , ( "fill", E.string "stack" )
                 ]

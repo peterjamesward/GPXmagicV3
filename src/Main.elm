@@ -2616,7 +2616,7 @@ performActionCommands actions model =
                         , MapPortController.paintCanvasProfileChart
                             model.toolOptions.imperial
                             track
-                            "profile"
+                            "altitude"
                         ]
 
                 ( PointerChange, Just track ) ->

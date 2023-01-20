@@ -16,7 +16,7 @@ Delete should display "Sorry" message when _almost_ all track is selected.
 Need to send command when profile view is selected or open.
 (This will be a map over open profile views, indeed.)
 
-TODO: Depth culling
+TODO: Tree depth culling
 TODO: Orange and Purple
 TODO: Zoom
 TODO: Sideways scroll
