@@ -39,6 +39,7 @@ import Markdown
 import MyIP
 import OAuthPorts exposing (randomBytes)
 import OAuthTypes as O exposing (OAuthMsg(..))
+import PaneContext
 import PaneLayoutManager exposing (Msg(..))
 import Pixels exposing (Pixels)
 import PreviewData exposing (PreviewData, PreviewShape(..))
@@ -157,7 +158,7 @@ type alias Model =
     , windowSize : ( Float, Float )
     , contentArea : ( Quantity Int Pixels, Quantity Int Pixels )
     , modalMessage : Maybe String
-    , paneLayoutOptions : PaneLayoutManager.Options
+    , paneLayoutOptions : PaneContext.PaneLayoutOptions
     , infoText : Maybe ( String, String )
     , welcomeDisplayed : Bool
 
@@ -2606,17 +2607,13 @@ performActionCommands actions model =
 
                 ( TrackHasChanged, Just track ) ->
                     Cmd.batch
-                        [ if model.mapPointsDraggable then
-                            MapPortController.addFullTrackToMap track
-
-                          else
-                            MapPortController.addTrackToMap track
+                        [ MapPortController.addFullTrackToMap track
                         , MapPortController.addMarkersToMap track
                         , Cmd.batch <| List.map showPreviewOnMap (Dict.keys model.previews)
-                        , MapPortController.paintCanvasProfileChart
+                        , PaneLayoutManager.paintProfileCharts
+                            model.paneLayoutOptions
                             model.toolOptions.imperial
                             track
-                            "altitude"
                         ]
 
                 ( PointerChange, Just track ) ->

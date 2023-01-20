@@ -1,4 +1,9 @@
-module ViewProfileCharts exposing (ClickZone(..), Context, DragAction(..), initialiseView, update, view)
+module ViewProfileCharts exposing
+    ( ClickZone(..)
+    , initialiseView
+    , update
+    , view
+    )
 
 import Actions exposing (ToolAction(..))
 import Dict exposing (Dict)
@@ -13,18 +18,17 @@ import FlatColors.AussiePalette
 import FlatColors.ChinesePalette exposing (white)
 import Html.Attributes exposing (id)
 import Html.Events.Extra.Mouse as Mouse
-import LocalCoords exposing (LocalCoords)
+import PaneContext exposing (PaneId, paneIdToString)
 import Pixels exposing (Pixels, inPixels)
 import Point2d exposing (Point2d, xCoordinate, yCoordinate)
 import Point3d exposing (Point3d)
 import PreviewData exposing (PreviewData, PreviewShape(..))
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
-import Scene3d exposing (Entity)
 import Tools.NamedSegmentOptions exposing (NamedSegment)
 import TrackLoaded exposing (TrackLoaded)
 import Vector3d
-import View3dCommonElements exposing (Msg(..), common3dSceneAttributes)
+import ViewProfileChartContext exposing (DragAction(..), Msg(..), ProfileContext)
 import ViewPureStyles exposing (useIcon)
 
 
@@ -32,31 +36,11 @@ type ClickZone
     = ZoneGradient
 
 
-type DragAction
-    = DragNone
-    | DragPan
-
-
-type alias Context =
-    { dragAction : DragAction
-    , orbiting : Maybe ( Float, Float )
-    , zoomLevel : Float -- 0 = whole track, 1 = half, etc.
-    , defaultZoomLevel : Float
-    , focalPoint : EarthPoint
-    , followSelectedPoint : Bool
-    , metresPerPixel : Float -- Helps with dragging accurately.
-    , waitingForClickDelay : Bool
-    , profileScene : List (Entity LocalCoords)
-    , emphasis : Float
-    , mouseEvent : Maybe Mouse.Event
-    }
-
-
 stopProp =
     { stopPropagation = True, preventDefault = False }
 
 
-zoomButtons : (Msg -> msg) -> Context -> Element msg
+zoomButtons : (Msg -> msg) -> ProfileContext -> Element msg
 zoomButtons msgWrapper context =
     column
         [ alignTop
@@ -121,8 +105,8 @@ update :
     -> TrackLoaded msg
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Dict String PreviewData
-    -> Context
-    -> ( Context, List (ToolAction msg) )
+    -> ProfileContext
+    -> ( ProfileContext, List (ToolAction msg) )
 update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
     case msg of
         SetEmphasis emphasis ->
@@ -183,8 +167,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
             let
                 newContext =
                     { context
-                        | orbiting = Just event.offsetPos
-                        , dragAction = DragPan
+                        | dragAction = DragPan
                         , waitingForClickDelay = True
                     }
             in
@@ -193,41 +176,10 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
             )
 
         ImageDrag event ->
-            let
-                ( dx, dy ) =
-                    event.offsetPos
-            in
-            case ( context.dragAction, context.orbiting ) of
-                ( DragPan, Just ( startX, _ ) ) ->
-                    let
-                        shiftVector =
-                            Vector3d.meters
-                                ((startX - dx) * context.metresPerPixel)
-                                0
-                                0
-
-                        newContext =
-                            { context
-                                | focalPoint =
-                                    context.focalPoint.space
-                                        |> Point3d.translateBy shiftVector
-                                        |> DomainModel.withoutTime
-                                , orbiting = Just ( dx, dy )
-                            }
-                    in
-                    ( newContext, [] )
-
-                _ ->
-                    ( context, [] )
+            ( context, [] )
 
         ImageRelease _ ->
-            ( { context
-                | orbiting = Nothing
-                , dragAction = DragNone
-                , waitingForClickDelay = False
-              }
-            , []
-            )
+            ( context, [] )
 
         ToggleFollowOrange ->
             let
@@ -258,7 +210,8 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
 
 
 view :
-    Context
+    ProfileContext
+    -> PaneId
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> TrackLoaded msg
     -> List NamedSegment
@@ -266,7 +219,7 @@ view :
     -> Dict String PreviewData
     -> Bool
     -> Element msg
-view context ( givenWidth, givenHeight ) track segments msgWrapper previews imperial =
+view context paneId ( givenWidth, givenHeight ) track segments msgWrapper previews imperial =
     -- We just declare the container for profile, the data is provided through a port.
     --TODO: Container name relative to view pane.
     let
@@ -274,12 +227,9 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews impe
             inPixels givenHeight // 10
     in
     column
-        (pointer
-            :: Background.color FlatColors.ChinesePalette.antiFlashWhite
-            :: (inFront <| zoomButtons msgWrapper context)
-            --:: (htmlAttribute <| Mouse.onMove (MouseMove >> msgWrapper))
-            :: common3dSceneAttributes msgWrapper context
-        )
+        [ pointer
+        , Background.color FlatColors.ChinesePalette.antiFlashWhite
+        ]
         [ el
             [ Element.width <| px <| inPixels givenWidth
             , Element.height <| px <| 7 * tenPercentHeight
@@ -287,7 +237,7 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews impe
             , alignTop
             , Border.width 2
             , Border.color FlatColors.ChinesePalette.peace
-            , htmlAttribute (id "altitude")
+            , htmlAttribute (id <| "altitude" ++ paneIdToString paneId)
             ]
             none
         , el
@@ -297,7 +247,7 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews impe
             , alignTop
             , Border.width 2
             , Border.color FlatColors.ChinesePalette.peace
-            , htmlAttribute (id "gradient")
+            , htmlAttribute (id <| "gradient" ++ paneIdToString paneId)
             ]
             none
         ]
@@ -306,21 +256,20 @@ view context ( givenWidth, givenHeight ) track segments msgWrapper previews impe
 initialiseView :
     Int
     -> PeteTree
-    -> Maybe Context
-    -> Context
-initialiseView current treeNode currentContext =
+    -> Maybe ProfileContext
+    -> ProfileContext
+initialiseView orangePosition treeNode currentContext =
     let
         currentPoint =
-            earthPointFromIndex current treeNode
+            earthPointFromIndex orangePosition treeNode
 
         currentDistance =
-            distanceFromIndex current treeNode
+            distanceFromIndex orangePosition treeNode
     in
     case currentContext of
         Just context ->
             { context
-                | orbiting = Nothing
-                , dragAction = DragNone
+                | dragAction = DragNone
                 , zoomLevel = 0.0
                 , defaultZoomLevel = 0.0
                 , focalPoint =
@@ -336,8 +285,7 @@ initialiseView current treeNode currentContext =
             }
 
         Nothing ->
-            { orbiting = Nothing
-            , dragAction = DragNone
+            { dragAction = DragNone
             , zoomLevel = 0.0
             , defaultZoomLevel = 0.0
             , focalPoint =
@@ -349,7 +297,6 @@ initialiseView current treeNode currentContext =
             , followSelectedPoint = True
             , metresPerPixel = 10.0
             , waitingForClickDelay = False
-            , profileScene = []
             , emphasis = 1.0
             , mouseEvent = Nothing
             }
@@ -359,7 +306,7 @@ detectHit :
     Mouse.Event
     -> TrackLoaded msg
     -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> Context
+    -> ProfileContext
     -> Int
 detectHit event track ( w, h ) context =
     let

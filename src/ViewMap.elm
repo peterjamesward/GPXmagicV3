@@ -1,4 +1,10 @@
-module ViewMap exposing (Context, MapStyle(..), Msg(..), defaultStyleUrl, initialiseContext, update, view)
+module ViewMap exposing
+    ( Msg(..)
+    , defaultStyleUrl
+    , initialiseContext
+    , update
+    , view
+    )
 
 import Actions exposing (ToolAction(..))
 import Element exposing (..)
@@ -15,17 +21,8 @@ import Quantity exposing (Quantity)
 import ToolTip exposing (localisedTooltip, tooltip)
 import Tools.I18NOptions as I18NOptions
 import TrackLoaded exposing (TrackLoaded)
+import ViewMapContext exposing (MapContext, MapStyle(..))
 import ViewPureStyles exposing (useIcon)
-
-
-type alias Context =
-    { mapClickDebounce : Bool
-    , lastMapClick : ( Float, Float )
-    , followOrange : Bool
-    , draggable : Bool
-    , mapStyleMenuOpen : Bool
-    , mapStyle : MapStyle
-    }
 
 
 type Msg
@@ -33,15 +30,6 @@ type Msg
     | ToggleDraggable
     | ToggleMapStyleMenu
     | ChooseMapStyle MapStyle
-
-
-type MapStyle
-    = MapBasic
-    | MapStreets
-    | MapSatellite
-    | MapSatelliteStreets
-    | MapOutdoors
-    | MapLight
 
 
 mapUrl : MapStyle -> String
@@ -74,7 +62,7 @@ defaultStyleUrl =
     mapUrl defaultStyle
 
 
-initialiseContext : Maybe Context -> Context
+initialiseContext : Maybe MapContext -> MapContext
 initialiseContext currentContext =
     case currentContext of
         Just context ->
@@ -98,8 +86,8 @@ update :
     -> (Msg -> msg)
     -> TrackLoaded msg
     -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> Context
-    -> ( Context, List (ToolAction msg) )
+    -> MapContext
+    -> ( MapContext, List (ToolAction msg) )
 update msg msgWrapper track area context =
     case msg of
         ToggleFollowOrange ->
@@ -132,7 +120,7 @@ update msg msgWrapper track area context =
 view :
     I18NOptions.Location
     -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> Maybe Context
+    -> Maybe MapContext
     -> (Msg -> msg)
     -> Element msg
 view location ( viewWidth, viewHeight ) mContext msgWrapper =
@@ -192,7 +180,7 @@ view location ( viewWidth, viewHeight ) mContext msgWrapper =
                     }
                 ]
 
-        mapStyleChoices : Context -> Element msg
+        mapStyleChoices : MapContext -> Element msg
         mapStyleChoices context =
             if context.mapStyleMenuOpen then
                 Input.radio

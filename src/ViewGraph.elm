@@ -1,4 +1,9 @@
-module ViewGraph exposing (Context, DragAction(..), EdgeMode(..), Msg(..), initialiseView, update, view)
+module ViewGraph exposing
+    ( Msg(..)
+    , initialiseView
+    , update
+    , view
+    )
 
 {-
    This clone of ViewPlan is to be modified to draw SVG and add some interactive elements.
@@ -51,6 +56,7 @@ import Tools.I18NOptions as I18NOptions
 import UtilsForViews exposing (showShortMeasure, uiColourHexString)
 import Vector2d
 import Vector3d
+import ViewGraphContext exposing (DragAction(..), EdgeMode(..), GraphContext)
 import ViewPureStyles exposing (rgtDark, rgtPurple, useIcon)
 import Viewpoint3d
 
@@ -74,38 +80,11 @@ type Msg
     | AddSelfLoop Int
 
 
-type DragAction
-    = DragNone
-    | DragPan
-
-
-type EdgeMode
-    = EdgeArc
-    | EdgeSketch
-
-
-type alias Context =
-    { fieldOfView : Angle
-    , orbiting : Maybe ( Float, Float )
-    , dragAction : DragAction
-    , zoomLevel : Float
-    , defaultZoomLevel : Float
-    , focalPoint : EarthPoint
-    , waitingForClickDelay : Bool
-    , followSelectedPoint : Bool
-    , clickPoint : Maybe ( Float, Float )
-    , clickFeature : ClickDetect
-    , edgeMode : EdgeMode
-    , haveDisplayedEditingReminder : Bool
-    , mouseHere : Point2d Pixels LocalCoords
-    }
-
-
 initialiseView :
     Int
     -> PeteTree
-    -> Maybe Context
-    -> Context
+    -> Maybe GraphContext
+    -> GraphContext
 initialiseView current treeNode currentContext =
     case currentContext of
         Just context ->
@@ -142,7 +121,7 @@ stopProp =
     { stopPropagation = True, preventDefault = False }
 
 
-zoomButtons : (Msg -> msg) -> Context -> Element msg
+zoomButtons : (Msg -> msg) -> GraphContext -> Element msg
 zoomButtons msgWrapper context =
     column
         [ alignTop
@@ -179,7 +158,7 @@ zoomButtons msgWrapper context =
         ]
 
 
-popup : (Msg -> msg) -> Context -> Tools.GraphOptions.Options msg -> Element msg
+popup : (Msg -> msg) -> GraphContext -> Tools.GraphOptions.Options msg -> Element msg
 popup msgWrapper context options =
     let
         popupMenu =
@@ -272,7 +251,7 @@ onContextMenu msg =
 
 view :
     I18NOptions.Location
-    -> Context
+    -> GraphContext
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> Tools.GraphOptions.Options msg
     -> (Msg -> msg)
@@ -553,7 +532,7 @@ view location context ( width, height ) options msgWrapper =
 
 
 deriveCamera :
-    Context
+    GraphContext
     -> Camera3d Meters LocalCoords
 deriveCamera context =
     let
@@ -588,8 +567,8 @@ update :
     -> (Msg -> msg)
     -> Graph msg
     -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> Context
-    -> ( Context, List (ToolAction msg) )
+    -> GraphContext
+    -> ( GraphContext, List (ToolAction msg) )
 update msg msgWrapper graph area context =
     -- Second return value indicates whether selection needs to change.
     case msg of
@@ -782,7 +761,7 @@ detectHit :
     Mouse.Event
     -> Graph msg
     -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> Context
+    -> GraphContext
     -> ClickDetect
 detectHit event graph ( w, h ) context =
     -- Need to see which edge is best.

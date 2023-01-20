@@ -1,19 +1,14 @@
 module PaneLayoutManager exposing
     ( Msg(..)
-    , Options
-    , PaneContext
-    , PaneId(..)
-    , PaneLayout(..)
     , PaneType(..)
-    , SliderState(..)
     , StoredPane
     , ViewContext(..)
-    , ViewMode(..)
     , defaultOptions
     , exitRouteView
-    , forceRouteView
     , forceMapView
+    , forceRouteView
     , initialise
+    , paintProfileCharts
     , render
     , restoreStoredValues
     , update
@@ -35,12 +30,11 @@ import Html.Events.Extra.Mouse as Mouse
 import Json.Decode as D
 import Json.Encode as E
 import List.Extra
-import LocalCoords exposing (LocalCoords)
 import MapPortController
+import PaneContext exposing (PaneContext, PaneId(..), PaneLayout(..), PaneLayoutOptions, SliderState(..), paneIdToString)
 import Pixels exposing (Pixels)
 import PreviewData exposing (PreviewData)
 import Quantity exposing (Quantity)
-import Scene3d exposing (Entity)
 import SceneBuilder3D
 import Tools.DisplaySettingsOptions
 import Tools.Flythrough
@@ -55,20 +49,12 @@ import ViewAbout
 import ViewFirstPerson
 import ViewGraph
 import ViewMap
+import ViewMode exposing (ViewMode(..))
 import ViewPlan
+import ViewProfileChartContext
 import ViewProfileCharts
 import ViewPureStyles exposing (..)
 import ViewThirdPerson
-
-
-type ViewMode
-    = ViewInfo
-    | ViewThird
-    | ViewFirst
-    | ViewPlan
-    | ViewProfile
-    | ViewMap
-    | ViewGraph
 
 
 type ViewContext
@@ -77,52 +63,6 @@ type ViewContext
 
 type PaneType
     = PaneWithMap
-
-
-type PaneLayout
-    = PanesOne
-    | PanesLeftRight
-    | PanesUpperLower
-    | PanesOnePlusTwo
-    | PanesGrid
-
-
-type PaneId
-    = Pane1
-    | Pane2
-    | Pane3
-    | Pane4
-
-
-type alias PaneContext =
-    { paneId : PaneId
-    , activeView : ViewMode
-    , thirdPersonContext : Maybe View3dCommonElements.Context
-    , firstPersonContext : Maybe View3dCommonElements.Context
-    , mapContext : Maybe ViewMap.Context
-    , profileContext : Maybe ViewProfileCharts.Context
-    , planContext : Maybe ViewPlan.Context
-    , graphContext : Maybe ViewGraph.Context
-    }
-
-
-type alias Options =
-    { paneLayout : PaneLayout
-    , popupVisible : Bool
-    , pane1 : PaneContext
-    , pane2 : PaneContext
-    , pane3 : PaneContext
-    , pane4 : PaneContext
-    , sliderState : SliderState
-    , scene3d : List (Entity LocalCoords)
-    , mapState : MapPortController.MapState
-    , viewBeforeRouteViewForced : Maybe ViewMode
-    }
-
-
-type SliderState
-    = SliderIdle
-    | SliderMoved
 
 
 defaultPaneContext : PaneContext
@@ -138,7 +78,7 @@ defaultPaneContext =
     }
 
 
-defaultOptions : Options
+defaultOptions : PaneLayoutOptions
 defaultOptions =
     { paneLayout = PanesOne
     , popupVisible = False
@@ -159,7 +99,7 @@ type Msg
     | TogglePopup
     | SetViewMode PaneId ViewMode
     | ThirdPersonViewMessage PaneId View3dCommonElements.Msg
-    | ProfileViewMessage PaneId View3dCommonElements.Msg
+    | ProfileViewMessage PaneId ViewProfileChartContext.Msg
     | PlanViewMessage PaneId ViewPlan.Msg
     | GraphViewMessage PaneId ViewGraph.Msg
     | MapPortsMessage MapPortController.MapMsg
@@ -168,7 +108,7 @@ type Msg
     | PaneNoOp
 
 
-paneLayoutMenu : I18NOptions.Location -> (Msg -> msg) -> Options -> Element msg
+paneLayoutMenu : I18NOptions.Location -> (Msg -> msg) -> PaneLayoutOptions -> Element msg
 paneLayoutMenu location msgWrapper options =
     Input.button
         [ padding 5
@@ -183,7 +123,7 @@ paneLayoutMenu location msgWrapper options =
         }
 
 
-showOptionsMenu : I18NOptions.Location -> (Msg -> msg) -> Options -> Element msg
+showOptionsMenu : I18NOptions.Location -> (Msg -> msg) -> PaneLayoutOptions -> Element msg
 showOptionsMenu location msgWrapper options =
     if options.popupVisible then
         el
@@ -224,11 +164,11 @@ optionList location =
 
 render :
     ToolsController.Options msg
-    -> Options
+    -> PaneLayoutOptions
     -> Quantity Int Pixels
     -> TrackLoaded msg
     -> Dict String PreviewData
-    -> Options
+    -> PaneLayoutOptions
 render toolSettings options width track previews =
     --Profile stuff now lives in the pane context, as each pane could
     --have different version!
@@ -245,15 +185,15 @@ update :
     -> Maybe (TrackLoaded msg)
     -> Graph msg
     -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> Options
+    -> PaneLayoutOptions
     -> Dict String PreviewData
-    -> ( Options, List (ToolAction msg) )
+    -> ( PaneLayoutOptions, List (ToolAction msg) )
 update paneMsg msgWrapper mTrack graph contentArea options previews =
     let
         updatePaneWith :
             PaneId
             -> (PaneContext -> ( PaneContext, List (ToolAction msg) ))
-            -> ( Options, List (ToolAction msg) )
+            -> ( PaneLayoutOptions, List (ToolAction msg) )
         updatePaneWith id updateFn =
             -- Helper avoids tedious repetition of these case statements.
             let
@@ -531,7 +471,7 @@ update paneMsg msgWrapper mTrack graph contentArea options previews =
             )
 
 
-isViewVisible : ViewMode -> Options -> Bool
+isViewVisible : ViewMode -> PaneLayoutOptions -> Bool
 isViewVisible mode options =
     List.any (\pane -> pane.activeView == mode) <|
         case options.paneLayout of
@@ -551,7 +491,7 @@ isViewVisible mode options =
                 [ options.pane1, options.pane2, options.pane3, options.pane4 ]
 
 
-forceRouteView : Options -> Options
+forceRouteView : PaneLayoutOptions -> PaneLayoutOptions
 forceRouteView options =
     if isViewVisible ViewGraph options then
         options
@@ -567,7 +507,7 @@ forceRouteView options =
         }
 
 
-forceMapView : Options -> Options
+forceMapView : PaneLayoutOptions -> PaneLayoutOptions
 forceMapView options =
     if isViewVisible ViewMap options then
         options
@@ -582,7 +522,7 @@ forceMapView options =
         }
 
 
-exitRouteView : Options -> Options
+exitRouteView : PaneLayoutOptions -> PaneLayoutOptions
 exitRouteView options =
     let
         pane1 =
@@ -599,7 +539,7 @@ exitRouteView options =
             options
 
 
-initialise : TrackLoaded msg -> Options -> Options
+initialise : TrackLoaded msg -> PaneLayoutOptions -> PaneLayoutOptions
 initialise track options =
     { options
         | pane1 = initialisePane track options options.pane1
@@ -609,7 +549,7 @@ initialise track options =
     }
 
 
-initialisePane : TrackLoaded msg -> Options -> PaneContext -> PaneContext
+initialisePane : TrackLoaded msg -> PaneLayoutOptions -> PaneContext -> PaneContext
 initialisePane track options pane =
     { pane
         | activeView =
@@ -643,7 +583,7 @@ viewModeChoices :
     I18NOptions.Location
     -> (Msg -> msg)
     -> PaneContext
-    -> Options
+    -> PaneLayoutOptions
     -> Element msg
 viewModeChoices location msgWrapper context options =
     let
@@ -727,6 +667,31 @@ dimensionsWithLayout layout ( w, h ) =
             ( takeHalf w, takeHalf h |> Quantity.minus (Pixels.pixels 20) )
 
 
+paintProfileCharts : PaneLayoutOptions -> Bool -> TrackLoaded msg -> Cmd msg
+paintProfileCharts panes imperial track =
+    let
+        paintIfProfileVisible pane =
+            let
+                _ =
+                    Debug.log "PANE" pane
+            in
+            if pane.activeView == ViewProfile then
+                MapPortController.paintCanvasProfileChart
+                    imperial
+                    track
+                    ("altitude" ++ paneIdToString pane.paneId)
+
+            else
+                Cmd.none
+    in
+    Cmd.batch
+        [ paintIfProfileVisible panes.pane1
+        , paintIfProfileVisible panes.pane2
+        , paintIfProfileVisible panes.pane3
+        , paintIfProfileVisible panes.pane4
+        ]
+
+
 viewPanes :
     I18NOptions.Location
     -> (Msg -> msg)
@@ -735,7 +700,7 @@ viewPanes :
     -> Tools.GraphOptions.Options msg
     -> Tools.DisplaySettingsOptions.Options
     -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> Options
+    -> PaneLayoutOptions
     -> Maybe Tools.Flythrough.Flythrough
     -> Dict String PreviewData
     -> Bool
@@ -745,6 +710,7 @@ viewPanes location msgWrapper mTrack segments graphOptions displayOptions ( w, h
         ( paneWidth, paneHeight ) =
             dimensionsWithLayout options.paneLayout ( w, h )
 
+        showNonMapViews : PaneContext -> Element msg
         showNonMapViews pane =
             case pane.activeView of
                 ViewThird ->
@@ -808,6 +774,7 @@ viewPanes location msgWrapper mTrack segments graphOptions displayOptions ( w, h
                         ( Just context, Just track ) ->
                             ViewProfileCharts.view
                                 context
+                                pane.paneId
                                 ( paneWidth, paneHeight )
                                 track
                                 segments
@@ -822,6 +789,7 @@ viewPanes location msgWrapper mTrack segments graphOptions displayOptions ( w, h
                     ViewAbout.view
                         ( paneWidth, paneHeight )
 
+        viewPaneZeroWithMap : PaneContext -> Element msg
         viewPaneZeroWithMap pane =
             -- The Map DIV must be constructed once only, even before we have a Track,
             -- or the map gets upset. So we use CSS to show and hide these elements.
@@ -837,6 +805,7 @@ viewPanes location msgWrapper mTrack segments graphOptions displayOptions ( w, h
                         (msgWrapper << MapViewMessage)
                 ]
 
+        viewPaneNoMap : PaneContext -> Element msg
         viewPaneNoMap pane =
             column [ width fill, alignTop, centerX ]
                 [ viewModeChoicesNoMap location msgWrapper pane
@@ -903,7 +872,7 @@ viewPanes location msgWrapper mTrack segments graphOptions displayOptions ( w, h
         ]
 
 
-encodePaneState : Options -> E.Value
+encodePaneState : PaneLayoutOptions -> E.Value
 encodePaneState options =
     E.object
         [ ( "layout", E.string <| encodePanesLayout options.paneLayout )
@@ -1001,7 +970,7 @@ decodeView view =
         |> Tuple.first
 
 
-restoreStoredValues : Options -> D.Value -> Options
+restoreStoredValues : PaneLayoutOptions -> D.Value -> PaneLayoutOptions
 restoreStoredValues options values =
     case D.decodeValue paneStateDecoder values of
         Ok fromStorage ->

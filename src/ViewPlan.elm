@@ -1,4 +1,9 @@
-module ViewPlan exposing (Context, DragAction(..), Msg(..), initialiseView, update, view)
+module ViewPlan exposing
+    ( Msg(..)
+    , initialiseView
+    , update
+    , view
+    )
 
 import Actions exposing (ToolAction(..))
 import Angle exposing (Angle)
@@ -30,6 +35,7 @@ import Tools.DisplaySettingsOptions
 import TrackLoaded exposing (TrackLoaded)
 import Vector3d
 import View3dCommonElements exposing (placesOverlay)
+import ViewPlanContext exposing (DragAction(..), PlanContext)
 import ViewPureStyles exposing (useIcon)
 import Viewpoint3d
 
@@ -49,28 +55,11 @@ type Msg
     | ToggleFollowOrange
 
 
-type DragAction
-    = DragNone
-    | DragPan
-
-
-type alias Context =
-    { fieldOfView : Angle
-    , orbiting : Maybe ( Float, Float )
-    , dragAction : DragAction
-    , zoomLevel : Float
-    , defaultZoomLevel : Float
-    , focalPoint : EarthPoint
-    , waitingForClickDelay : Bool
-    , followSelectedPoint : Bool
-    }
-
-
 initialiseView :
     Int
     -> PeteTree
-    -> Maybe Context
-    -> Context
+    -> Maybe PlanContext
+    -> PlanContext
 initialiseView current treeNode currentContext =
     case currentContext of
         Just context ->
@@ -102,7 +91,7 @@ stopProp =
     { stopPropagation = True, preventDefault = False }
 
 
-zoomButtons : (Msg -> msg) -> Context -> Element msg
+zoomButtons : (Msg -> msg) -> PlanContext -> Element msg
 zoomButtons msgWrapper context =
     column
         [ alignTop
@@ -155,7 +144,7 @@ onContextMenu msg =
 
 
 view :
-    Context
+    PlanContext
     -> Tools.DisplaySettingsOptions.Options
     -> ( Quantity Int Pixels, Quantity Int Pixels )
     -> TrackLoaded msg
@@ -207,7 +196,7 @@ view context display contentArea track scene msgWrapper =
                 }
 
 
-deriveCamera : PeteTree -> Context -> Int -> Camera3d Meters LocalCoords
+deriveCamera : PeteTree -> PlanContext -> Int -> Camera3d Meters LocalCoords
 deriveCamera treeNode context currentPosition =
     let
         latitude =
@@ -244,8 +233,8 @@ update :
     -> (Msg -> msg)
     -> TrackLoaded msg
     -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> Context
-    -> ( Context, List (ToolAction msg) )
+    -> PlanContext
+    -> ( PlanContext, List (ToolAction msg) )
 update msg msgWrapper track area context =
     -- Second return value indicates whether selection needs to change.
     case msg of
@@ -367,7 +356,7 @@ detectHit :
     Mouse.Event
     -> TrackLoaded msg
     -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> Context
+    -> PlanContext
     -> Int
 detectHit event track ( w, h ) context =
     let

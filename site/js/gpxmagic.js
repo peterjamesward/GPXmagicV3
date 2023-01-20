@@ -576,7 +576,7 @@ function hidePreview(label) {
 
 function profileAsChart(canvasContainerDiv, chartInfo) {
 
-    //console.log(chartInfo);
+    console.log(canvasContainerDiv);
 
     var profileDiv = document.getElementById(canvasContainerDiv);
     while (profileDiv.hasChildNodes()) {

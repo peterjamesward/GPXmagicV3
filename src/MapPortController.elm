@@ -222,24 +222,6 @@ paintCanvasProfileChart imperial track container =
             ]
 
 
-createImageFileFromMap : String -> Cmd msg
-createImageFileFromMap filename =
-    mapCommands <|
-        E.object
-            [ ( "Cmd", E.string "Snap" )
-            , ( "filename", E.string filename )
-            ]
-
-
-createImageFileFromProfile : String -> Cmd msg
-createImageFileFromProfile filename =
-    mapCommands <|
-        E.object
-            [ ( "Cmd", E.string "Profile" )
-            , ( "filename", E.string filename )
-            ]
-
-
 showPreview : String -> String -> String -> E.Value -> Cmd msg
 showPreview tag shape colour geoJson =
     mapCommands <|
