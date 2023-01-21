@@ -49,62 +49,54 @@ defaultOptions =
 
 previewActions : Options -> Element.Color -> TrackLoaded msg -> List (ToolAction msg)
 previewActions newOptions previewColour track =
+    let
+        ( start, end ) =
+            case track.markerPosition of
+                Just _ ->
+                    TrackLoaded.getRangeFromMarkers track
+
+                Nothing ->
+                    ( 0, 0 )
+    in
     case newOptions.previewData of
         Just previewTree ->
             let
-                ( start, end ) =
-                    case track.markerPosition of
-                        Just _ ->
-                            TrackLoaded.getRangeFromMarkers track
-
-                        Nothing ->
-                            ( 0, 0 )
-
-                newTreeForProfilePreview =
-                    apply newOptions track
+                normalPreview =
+                    TrackLoaded.previewFromTree
+                        previewTree
+                        start
+                        (skipCount previewTree - end)
+                        10
             in
-            case newTreeForProfilePreview of
-                Just newTree ->
-                    let
-                        normalPreview =
-                            TrackLoaded.previewFromTree
-                                previewTree
-                                start
-                                (skipCount previewTree - end)
-                                10
-                    in
-                    [ ShowPreview
-                        { tag = "limit"
-                        , shape = PreviewCircle
-                        , colour = previewColour
-                        , points = normalPreview
-                        }
-                    , ShowPreview
-                        { tag = "limitProfile"
-                        , shape = PreviewProfile newTree
-                        , colour = previewColour
-                        , points = []
-                        }
-                    , RenderProfile
-                    ]
-
-                Nothing ->
-                    [ HidePreview "limit", HidePreview "limitprofile" ]
+            [ ShowPreview
+                { tag = "limit"
+                , shape = PreviewCircle
+                , colour = previewColour
+                , points = normalPreview
+                }
+            , ShowPreview
+                { tag = "limitProfile"
+                , shape = PreviewProfile previewTree
+                , colour = previewColour
+                , points = []
+                }
+            , RenderProfile
+            ]
 
         Nothing ->
             [ HidePreview "limit", HidePreview "limitprofile" ]
 
 
 putPreviewInOptions : TrackLoaded msg -> Options -> Options
-putPreviewInOptions track options =
+putPreviewInOptions modifiedTrack options =
     let
         adjustedPoints =
-            computeNewPoints options track
+            computeNewPoints options modifiedTrack
     in
     { options
         | previewData =
             DomainModel.treeFromSourcesWithExistingReference
-                (DomainModel.gpxPointFromIndex 0 track.trackTree)
+                (DomainModel.gpxPointFromIndex 0 modifiedTrack.trackTree)
                 (List.map Tuple.second adjustedPoints)
     }
 
@@ -278,7 +270,7 @@ useUniformGradient bumpiness track =
     -- This is the original v1 bump smoother. Astonished that people want this.
     -- This implementation uses a fold over the whole track, really just to be
     -- consistent with others here and because it's not really less efficient
-    -- than multiple modifications in situ, each of which essential builds a new tree.
+    -- than multiple modifications in situ, each of which essentially builds a new tree.
     let
         ( startIndex, fromEnd ) =
             -- Note that this option is permitted only when there's a range.
@@ -707,11 +699,11 @@ averageGradientsWithWindow options track =
             , index = 0
             }
 
-        slidingWindowSnoother :
+        slidingWindowSmoother :
             RoadSection
             -> GradientSmootherState
             -> GradientSmootherState
-        slidingWindowSnoother road { leading, trailing, outputs, lastAltitude, index } =
+        slidingWindowSmoother road { leading, trailing, outputs, lastAltitude, index } =
             let
                 extendedLeadingBuffer =
                     leading ++ [ road ]
@@ -837,7 +829,7 @@ averageGradientsWithWindow options track =
                 (always Nothing)
                 0
                 track.trackTree
-                slidingWindowSnoother
+                slidingWindowSmoother
                 startState
     in
     flusher finalState
