@@ -3,11 +3,15 @@ module About exposing (aboutText)
 
 aboutText =
     """
-# GPXmagic v3.8.0 (07a39f32)
+# GPXmagic v3.8.1 (07a39f32)
 
 **GPXmagic V3 works best with Chrome (and some derivatives)**
 
 **N.B.** Apple fixed Safari so it works pretty well with GPXmagic.
+
+## 3.8.1
+
+Fixed Profile Smoother bug introduced in 3.8.0.
 
 ## 3.8.0
 
