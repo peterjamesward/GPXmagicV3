@@ -78,9 +78,7 @@ type ToolAction msg
     | FlushUndo
     | ApplyInterpolateWithOptions Tools.InterpolateOptions.Options
     | OneClickQuickFix
-    | LimitGradientWithOptions Tools.ProfileSmoothOptions.Options
-    | SmoothAltitudes Tools.ProfileSmoothOptions.Options
-    | SmoothGradients Tools.ProfileSmoothOptions.Options
+    | ApplySmoothProfile Tools.ProfileSmoothOptions.Options
     | ApplyRotateAndScale Tools.MoveScaleRotateOptions.Options
     | ApplyRecentre ( Float, Float )
     | AddFullTrackToMapForElevations
@@ -169,14 +167,8 @@ actionTextForUndo location action =
             OneClickQuickFix ->
                 "1CQF"
 
-            LimitGradientWithOptions _ ->
-                "limit"
-
-            SmoothAltitudes _ ->
-                "altitudes"
-
-            SmoothGradients _ ->
-                "gradients"
+            ApplySmoothProfile _ ->
+                "profile"
 
             ApplyRotateAndScale _ ->
                 "scale"

@@ -7,6 +7,8 @@ Redo of Stretch operation sometimes gives error on track (e.g. Lacets).
 
 Delete should display "Sorry" message when _almost_ all track is selected.
 
+**WEIRD** Applying profile smooth changes zoom in profile view!
+
 --- 
 
 # WIP

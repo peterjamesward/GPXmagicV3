@@ -432,7 +432,7 @@ Also, access a quick description of what the tool does and how (and when) to use
                 , ( "simplify", """simplify""" )
                 , ( "insert", """insert points""" )
                 , ( "1CQF", """one-click quick fix""" )
-                , ( "limit", """limit gradients""" )
+                , ( "profile", """smooth profile""" )
                 , ( "altitudes", """smooth altitudes""" )
                 , ( "gradients", """smooth gradients""" )
                 , ( "move", """relocate""" )

@@ -24,9 +24,7 @@ toolId =
 
 
 type Msg
-    = LimitGradient
-    | SmoothAltitudes
-    | SmoothGradients
+    = ApplyPreview
     | SetMaximumAscent Float
     | SetMaximumDescent Float
     | SetWindowSize Int
@@ -139,45 +137,17 @@ update msg options previewColour track =
             , previewActions newOptions previewColour track
             )
 
-        LimitGradient ->
+        ApplyPreview ->
             let
                 undoInfo =
                     TrackLoaded.undoInfoWithWholeTrackDefault
-                        (Actions.LimitGradientWithOptions options)
+                        (Actions.ApplySmoothProfile options)
                         track
             in
             ( options
             , [ WithUndo undoInfo
               , undoInfo.action
               , TrackHasChanged
-              ]
-            )
-
-        SmoothAltitudes ->
-            let
-                undoInfo =
-                    TrackLoaded.undoInfoWithWholeTrackDefault
-                        (Actions.SmoothAltitudes options)
-                        track
-            in
-            ( options
-            , [ WithUndo undoInfo
-              , undoInfo.action
-              , TrackHasChanged
-              ]
-            )
-
-        SmoothGradients ->
-            let
-                undoInfo =
-                    TrackLoaded.undoInfoWithWholeTrackDefault
-                        (Actions.SmoothGradients options)
-                        track
-            in
-            ( options
-            , [ WithUndo undoInfo
-              , undoInfo.action
-              , Actions.TrackHasChanged
               ]
             )
 
@@ -972,6 +942,13 @@ view location options wrapper track =
 
                 else
                     [ i18n "part" ]
+
+        applyButton tag =
+            button
+                neatToolsBorder
+                { onPress = Just <| wrapper <| ApplyPreview
+                , label = paragraph [] [ i18n tag ]
+                }
     in
     wrappedRow
         [ spacing 6
@@ -1017,28 +994,14 @@ view location options wrapper track =
                             , thumb = Input.defaultThumb
                             }
                 in
-                column [ spacing 10, centerX ]
-                    [ el [ centerX ] <| maxAscentSlider
-                    , el [ centerX ] <| maxDescentSlider
-                    , extent
-                    , el [ centerX ] <|
-                        button
-                            neatToolsBorder
-                            { onPress = Just <| wrapper <| LimitGradient
-                            , label = paragraph [] [ i18n "apply" ]
-                            }
-                    ]
+                applyButton "apply"
 
             MethodAltitudes ->
                 column [ spacing 10, centerX ]
                     [ el [ centerX ] <| windowSizeSlider
                     , extent
                     , el [ centerX ] <|
-                        button
-                            neatToolsBorder
-                            { onPress = Just <| wrapper <| SmoothAltitudes
-                            , label = paragraph [] [ i18n "altitudes" ]
-                            }
+                        applyButton "altitudes"
                     ]
 
             MethodGradients ->
@@ -1046,11 +1009,7 @@ view location options wrapper track =
                     [ el [ centerX ] <| windowSizeSlider
                     , extent
                     , el [ centerX ] <|
-                        button
-                            neatToolsBorder
-                            { onPress = Just <| wrapper <| SmoothGradients
-                            , label = paragraph [] [ i18n "gradients" ]
-                            }
+                        applyButton "gradients"
                     ]
 
             MethodUniform ->
@@ -1080,11 +1039,6 @@ view location options wrapper track =
 
                         else
                             [ i18n "part" ]
-                    , el [ centerX ] <|
-                        button
-                            neatToolsBorder
-                            { onPress = Just <| wrapper <| SmoothGradients
-                            , label = paragraph [] [ i18n "uniform" ]
-                            }
+                    , applyButton "uniform"
                     ]
         ]
