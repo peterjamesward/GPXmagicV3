@@ -1,8 +1,6 @@
 
 # BUGS
 
-**Profile smoother** doing weird stuff outside marker zone.
-
 Title bar display not showing track name when loaded from URL.
 
 Redo of Stretch operation sometimes gives error on track (e.g. Lacets).
