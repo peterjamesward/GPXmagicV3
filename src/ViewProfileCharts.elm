@@ -203,13 +203,9 @@ view :
     ProfileContext
     -> PaneId
     -> ( Quantity Int Pixels, Quantity Int Pixels )
-    -> Maybe (TrackLoaded msg)
-    -> List NamedSegment
     -> (Msg -> msg)
-    -> Dict String PreviewData
-    -> Bool
     -> Element msg
-view context paneId ( givenWidth, givenHeight ) track segments msgWrapper previews imperial =
+view context paneId ( givenWidth, givenHeight ) msgWrapper =
     -- We just declare the container for the profile canvas, the data are provided through a port.
     let
         tenPercentHeight =
@@ -228,7 +224,8 @@ view context paneId ( givenWidth, givenHeight ) track segments msgWrapper previe
             , Border.color FlatColors.ChinesePalette.peace
             , htmlAttribute (id <| "altitude" ++ paneIdToString paneId)
             ]
-            none
+          <|
+            el [ centerY, centerX ] (text "Altitude chart goes here")
         , el
             [ Element.width <| px <| inPixels givenWidth
             , Element.height <| px <| 3 * tenPercentHeight
@@ -238,7 +235,8 @@ view context paneId ( givenWidth, givenHeight ) track segments msgWrapper previe
             , Border.color FlatColors.ChinesePalette.peace
             , htmlAttribute (id <| "gradient" ++ paneIdToString paneId)
             ]
-            none
+          <|
+            el [ centerY, centerX ] (text "Gradient chart goes here")
         ]
 
 

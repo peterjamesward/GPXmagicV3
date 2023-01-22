@@ -22,6 +22,7 @@ NB: Update by mutation
 > Before proceeding, tidy up the loading code so it works always.
 > Painting, and initialising, not happening.
 
+WIP: Paint on track load after app launch.
 WIP: Tree depth culling
 WIP: Zoom
 

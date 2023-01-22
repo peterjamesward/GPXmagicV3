@@ -346,17 +346,19 @@ update msg model =
             in
             case TrackLoaded.trackFromSegments trackName gpxSegments of
                 Just ( track, segments ) ->
-                    ( adoptTrackInModel track segments model
+                    let
+                        modelWithTrack =
+                            adoptTrackInModel track segments model
+                    in
+                    ( modelWithTrack
                     , Cmd.batch
                         [ showTrackOnMapCentered
-                            model.paneLayoutOptions
-                            model.toolOptions.imperial
+                            modelWithTrack.paneLayoutOptions
+                            modelWithTrack.toolOptions.imperial
                             track
-                        , LandUseDataOSM.requestLandUseData
-                            ReceivedLandUseData
-                            track
+                        , LandUseDataOSM.requestLandUseData ReceivedLandUseData track
                         , LocalStorage.sessionClear
-                        , Delay.after 100 ProfilePaint -- wait for container to paint.
+                        , Delay.after 1000 ProfilePaint -- wait for container to paint.
                         ]
                     )
 

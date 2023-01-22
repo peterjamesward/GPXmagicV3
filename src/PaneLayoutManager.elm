@@ -671,14 +671,14 @@ paintProfileCharts : PaneLayoutOptions -> Bool -> TrackLoaded msg -> Cmd msg
 paintProfileCharts panes imperial track =
     let
         paintIfProfileVisible pane =
-            if pane.activeView == ViewProfile then
-                MapPortController.paintCanvasProfileChart
-                    pane
-                    imperial
-                    track
+            --if pane.activeView == ViewProfile then
+            MapPortController.paintCanvasProfileChart
+                pane
+                imperial
+                track
 
-            else
-                Cmd.none
+        --else
+        --    Cmd.none
     in
     Cmd.batch
         [ paintIfProfileVisible panes.pane1
@@ -708,8 +708,9 @@ viewPanes location msgWrapper mTrack segments graphOptions displayOptions ( w, h
 
         showNonMapViews : PaneContext -> Element msg
         showNonMapViews pane =
-            case pane.activeView of
-                ViewThird ->
+            -- Try having all the DIVs there but hidden.
+            column []
+                [ conditionallyVisible (pane.activeView == ViewThird) <|
                     case ( pane.thirdPersonContext, mTrack ) of
                         ( Just context, Just track ) ->
                             ViewThirdPerson.view
@@ -723,8 +724,7 @@ viewPanes location msgWrapper mTrack segments graphOptions displayOptions ( w, h
 
                         _ ->
                             none
-
-                ViewFirst ->
+                , conditionallyVisible (pane.activeView == ViewFirst) <|
                     case ( pane.thirdPersonContext, mTrack ) of
                         ( Just context, Just track ) ->
                             ViewFirstPerson.view
@@ -737,8 +737,7 @@ viewPanes location msgWrapper mTrack segments graphOptions displayOptions ( w, h
 
                         _ ->
                             none
-
-                ViewPlan ->
+                , conditionallyVisible (pane.activeView == ViewPlan) <|
                     case ( pane.planContext, mTrack ) of
                         ( Just context, Just track ) ->
                             ViewPlan.view
@@ -751,8 +750,7 @@ viewPanes location msgWrapper mTrack segments graphOptions displayOptions ( w, h
 
                         _ ->
                             none
-
-                ViewGraph ->
+                , conditionallyVisible (pane.activeView == ViewGraph) <|
                     case ( pane.graphContext, mTrack ) of
                         ( Just context, Just _ ) ->
                             ViewGraph.view
@@ -764,26 +762,20 @@ viewPanes location msgWrapper mTrack segments graphOptions displayOptions ( w, h
 
                         _ ->
                             none
-
-                ViewProfile ->
+                , conditionallyVisible (pane.activeView == ViewProfile) <|
                     case pane.profileContext of
                         Just context ->
                             ViewProfileCharts.view
                                 context
                                 pane.paneId
                                 ( paneWidth, paneHeight )
-                                mTrack
-                                segments
                                 (msgWrapper << ProfileViewMessage pane.paneId)
-                                previews
-                                imperial
 
                         _ ->
                             none
-
-                _ ->
-                    ViewAbout.view
-                        ( paneWidth, paneHeight )
+                , conditionallyVisible (pane.activeView == ViewInfo) <|
+                    ViewAbout.view ( paneWidth, paneHeight )
+                ]
 
         viewPaneZeroWithMap : PaneContext -> Element msg
         viewPaneZeroWithMap pane =
@@ -791,8 +783,7 @@ viewPanes location msgWrapper mTrack segments graphOptions displayOptions ( w, h
             -- or the map gets upset. So we use CSS to show and hide these elements.
             column [ width fill, centerX ]
                 [ viewModeChoices location msgWrapper pane options
-                , conditionallyVisible (pane.activeView /= ViewMap) <|
-                    showNonMapViews pane
+                , showNonMapViews pane
                 , conditionallyVisible (pane.activeView == ViewMap) <|
                     ViewMap.view
                         location
@@ -824,7 +815,7 @@ viewPanes location msgWrapper mTrack segments graphOptions displayOptions ( w, h
                             }
 
                 Nothing ->
-                    none
+                    el [ centerX, centerY ] <| text "Please load a route"
     in
     column [ alignTop, width fill ]
         [ wrappedRow [ centerX, width fill ] <|

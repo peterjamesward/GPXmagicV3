@@ -576,19 +576,26 @@ function hidePreview(label) {
 
 function profileAsChart(canvasContainerDiv, chartInfo) {
 
-    //console.log(canvasContainerDiv);
-
     var profileDiv = document.getElementById(canvasContainerDiv);
 
     if ( profileDiv === undefined || profileDiv === null) {
         console.log('No profile container ' + canvasContainerDiv);
+
+        //app.ports.mapResponses.send(
+        //  { 'msg' : 'nocontainer'
+        //  , 'container' : canvasContainerDiv
+        //  }
+        //);
         return;
     }
 
+    console.log('Check for existing children');
     while (profileDiv.hasChildNodes()) {
-      profileDiv.removeChild(profileDiv.firstChild);
+        console.log('Removing child');
+        profileDiv.removeChild(profileDiv.firstChild);
     }
 
+    console.log('Adding new canvas');
     var canvas = document.createElement('canvas');
     canvas.id     = canvasContainerDiv + 'profileCanvas';
     canvas.width  = profileDiv.width;
@@ -598,6 +605,7 @@ function profileAsChart(canvasContainerDiv, chartInfo) {
     canvas.style.border   = "1px solid";
     profileDiv.appendChild(canvas);
 
+    console.log('Making chart');
     new Chart(
         document.getElementById(canvasContainerDiv + 'profileCanvas'),
         chartInfo
