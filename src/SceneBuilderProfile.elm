@@ -195,7 +195,7 @@ profileChart profile imperial track =
                     DomainModel.traverseTreeBetweenLimitsToDepth
                         firstPointIndex
                         lastPointIndex
-                        (always <| Just <| floor <| profile.zoomLevel + 10)
+                        (always <| Just <| floor <| profile.zoomLevel + 8)
                         0
                         track.trackTree
                         coordinateCollector
