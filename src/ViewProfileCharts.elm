@@ -214,18 +214,17 @@ view context paneId ( givenWidth, givenHeight ) msgWrapper =
     column
         [ pointer
         , Background.color FlatColors.ChinesePalette.antiFlashWhite
+        , inFront <| zoomButtons msgWrapper context
         ]
         [ el
             [ Element.width <| px <| inPixels givenWidth
             , Element.height <| px <| 7 * tenPercentHeight
             , alignLeft
             , alignTop
-            , Border.width 2
-            , Border.color FlatColors.ChinesePalette.peace
             , htmlAttribute (id <| "altitude" ++ paneIdToString paneId)
             ]
           <|
-            el [ centerY, centerX ] (text "Altitude chart goes here")
+            el [ centerY, centerX ] (text "Altitude chart")
         , el
             [ Element.width <| px <| inPixels givenWidth
             , Element.height <| px <| 3 * tenPercentHeight
@@ -236,7 +235,7 @@ view context paneId ( givenWidth, givenHeight ) msgWrapper =
             , htmlAttribute (id <| "gradient" ++ paneIdToString paneId)
             ]
           <|
-            el [ centerY, centerX ] (text "Gradient chart goes here")
+            el [ centerY, centerX ] (text "Gradient chart")
         ]
 
 
