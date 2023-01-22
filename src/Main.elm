@@ -391,6 +391,8 @@ update msg model =
             )
 
         ProfilePaint ->
+            -- This does a deferred paint of profiles after a track is loaded
+            -- as the needed DIVs are not reliably there on loading the app.
             case model.track of
                 Just track ->
                     ( model
@@ -2708,6 +2710,12 @@ performActionCommands actions model =
                         model.toolOptions.splitAndJoinOptions
                         track
                         model.rgtOptions
+
+                ( RenderProfile context, Just track ) ->
+                    MapPortController.paintCanvasProfileChart
+                        context
+                        model.toolOptions.imperial
+                        track
 
                 _ ->
                     Cmd.none

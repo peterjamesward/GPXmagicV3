@@ -566,7 +566,10 @@ initialisePane track options pane =
                 ViewThirdPerson.initialiseView 0 track.trackTree pane.firstPersonContext
         , profileContext =
             Just <|
-                ViewProfileCharts.initialiseView 0 track.trackTree pane.profileContext
+                ViewProfileCharts.initialiseView
+                    (paneIdToString pane.paneId)
+                    track.trackTree
+                    pane.profileContext
         , planContext =
             Just <|
                 ViewPlan.initialiseView 0 track.trackTree pane.planContext
@@ -671,15 +674,21 @@ paintProfileCharts : PaneLayoutOptions -> Bool -> TrackLoaded msg -> Cmd msg
 paintProfileCharts panes imperial track =
     let
         paintIfProfileVisible pane =
-            --if pane.activeView == ViewProfile then
-            MapPortController.paintCanvasProfileChart
-                pane
-                imperial
-                track
+            if pane.activeView == ViewProfile then
+                case pane.profileContext of
+                    Just context ->
+                        MapPortController.paintCanvasProfileChart
+                            context
+                            imperial
+                            track
 
-        --else
-        --    Cmd.none
+                    Nothing ->
+                        Cmd.none
+
+            else
+                Cmd.none
     in
+    --TODO: Consider the pane layout.
     Cmd.batch
         [ paintIfProfileVisible panes.pane1
         , paintIfProfileVisible panes.pane2

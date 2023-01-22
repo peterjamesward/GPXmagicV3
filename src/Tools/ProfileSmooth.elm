@@ -78,7 +78,6 @@ previewActions newOptions previewColour track =
                 , colour = previewColour
                 , points = []
                 }
-            , RenderProfile
             ]
 
         Nothing ->

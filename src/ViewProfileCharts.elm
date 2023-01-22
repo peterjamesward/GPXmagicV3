@@ -16,18 +16,15 @@ import Element.Input as Input
 import FeatherIcons
 import FlatColors.AussiePalette
 import FlatColors.ChinesePalette exposing (white)
-import Html.Attributes exposing (id)
+import Html.Attributes exposing (id, style)
 import Html.Events.Extra.Mouse as Mouse
 import PaneContext exposing (PaneId, paneIdToString)
 import Pixels exposing (Pixels, inPixels)
 import Point2d exposing (Point2d, xCoordinate, yCoordinate)
-import Point3d exposing (Point3d)
 import PreviewData exposing (PreviewData, PreviewShape(..))
 import Quantity exposing (Quantity, toFloatQuantity)
 import Rectangle2d
-import Tools.NamedSegmentOptions exposing (NamedSegment)
 import TrackLoaded exposing (TrackLoaded)
-import Vector3d
 import ViewProfileChartContext exposing (DragAction(..), Msg(..), ProfileContext)
 import ViewPureStyles exposing (useIcon)
 
@@ -58,6 +55,7 @@ zoomButtons msgWrapper context =
         , htmlAttribute <| Mouse.onWithOptions "dblclick" stopProp (always ImageNoOp >> msgWrapper)
         , htmlAttribute <| Mouse.onWithOptions "mousedown" stopProp (always ImageNoOp >> msgWrapper)
         , htmlAttribute <| Mouse.onWithOptions "mouseup" stopProp (always ImageNoOp >> msgWrapper)
+        , htmlAttribute (style "z-index" "20")
         ]
         [ Input.button []
             { onPress = Just <| msgWrapper ImageZoomIn
@@ -80,22 +78,6 @@ zoomButtons msgWrapper context =
                 else
                     useIcon FeatherIcons.unlock
             }
-        , Input.button [ Font.size 14, centerX ]
-            { onPress = Just <| msgWrapper (SetEmphasis 8)
-            , label = text "x8"
-            }
-        , Input.button [ Font.size 14, centerX ]
-            { onPress = Just <| msgWrapper (SetEmphasis 4)
-            , label = text "x4"
-            }
-        , Input.button [ Font.size 14, centerX ]
-            { onPress = Just <| msgWrapper (SetEmphasis 2)
-            , label = text "x2"
-            }
-        , Input.button [ Font.size 14, centerX ]
-            { onPress = Just <| msgWrapper (SetEmphasis 1)
-            , label = text "x1"
-            }
         ]
 
 
@@ -115,18 +97,30 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
             )
 
         ImageZoomIn ->
-            ( { context | zoomLevel = clamp 0 10 <| context.zoomLevel + 0.5 }
-            , []
+            let
+                newContext =
+                    { context | zoomLevel = clamp 0 10 <| context.zoomLevel + 0.5 }
+            in
+            ( newContext
+            , [ Actions.RenderProfile newContext ]
             )
 
         ImageZoomOut ->
-            ( { context | zoomLevel = clamp 0 10 <| context.zoomLevel - 0.5 }
-            , []
+            let
+                newContext =
+                    { context | zoomLevel = clamp 0 10 <| context.zoomLevel - 0.5 }
+            in
+            ( newContext
+            , [ Actions.RenderProfile newContext ]
             )
 
         ImageReset ->
-            ( initialiseView track.currentPosition track.trackTree (Just context)
-            , []
+            let
+                newContext =
+                    { context | zoomLevel = 0 }
+            in
+            ( newContext
+            , [ Actions.RenderProfile newContext ]
             )
 
         ImageNoOp ->
@@ -240,18 +234,11 @@ view context paneId ( givenWidth, givenHeight ) msgWrapper =
 
 
 initialiseView :
-    Int
+    String
     -> PeteTree
     -> Maybe ProfileContext
     -> ProfileContext
-initialiseView orangePosition treeNode currentContext =
-    let
-        currentPoint =
-            earthPointFromIndex orangePosition treeNode
-
-        currentDistance =
-            distanceFromIndex orangePosition treeNode
-    in
+initialiseView suffix treeNode currentContext =
     case currentContext of
         Just context ->
             { context
@@ -264,7 +251,8 @@ initialiseView orangePosition treeNode currentContext =
             }
 
         Nothing ->
-            { dragAction = DragNone
+            { contextSuffix = suffix
+            , dragAction = DragNone
             , zoomLevel = 0.0
             , defaultZoomLevel = 0.0
             , focalPoint = Quantity.half <| DomainModel.trueLength treeNode

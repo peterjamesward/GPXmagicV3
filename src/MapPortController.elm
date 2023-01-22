@@ -15,6 +15,7 @@ import Point3d
 import SceneBuilderMap exposing (latLonPairFromGpx)
 import SceneBuilderProfile
 import TrackLoaded exposing (TrackLoaded)
+import ViewProfileChartContext
 
 
 type MapMsg
@@ -199,19 +200,14 @@ addFullTrackToMap track =
             ]
 
 
-paintCanvasProfileChart : PaneContext -> Bool -> TrackLoaded msg -> Cmd msg
-paintCanvasProfileChart paneContext imperial track =
-    case paneContext.profileContext of
-        Just profileContext ->
-            mapCommands <|
-                E.object
-                    [ ( "Cmd", E.string "Profile" )
-                    , ( "container", E.string <| "altitude" ++ paneIdToString paneContext.paneId )
-                    , ( "chart", SceneBuilderProfile.profileChart profileContext imperial track )
-                    ]
-
-        Nothing ->
-            Cmd.none
+paintCanvasProfileChart : ViewProfileChartContext.ProfileContext -> Bool -> TrackLoaded msg -> Cmd msg
+paintCanvasProfileChart profileContext imperial track =
+    mapCommands <|
+        E.object
+            [ ( "Cmd", E.string "Profile" )
+            , ( "container", E.string <| "altitude" ++ profileContext.contextSuffix )
+            , ( "chart", SceneBuilderProfile.profileChart profileContext imperial track )
+            ]
 
 
 showPreview : String -> String -> String -> E.Value -> Cmd msg

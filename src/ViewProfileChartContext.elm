@@ -1,6 +1,5 @@
 module ViewProfileChartContext exposing (..)
 
-import DomainModel exposing (EarthPoint)
 import Html.Events.Extra.Mouse as Mouse
 import Length exposing (Meters)
 import Quantity exposing (Quantity)
@@ -29,7 +28,8 @@ type DragAction
 
 
 type alias ProfileContext =
-    { dragAction : DragAction
+    { contextSuffix : String -- needed to issue paint directives to canvas chart.
+    , dragAction : DragAction
     , zoomLevel : Float -- 0 = whole track, 1 = half, etc.
     , defaultZoomLevel : Float
     , focalPoint : Quantity Float Meters  -- NB route extrema clamped to chart edges.

@@ -29,6 +29,7 @@ import Tools.StartFinishTypes
 import Tools.StravaOptions
 import Tools.StravaTypes exposing (StravaActivity, StravaActivityStreams, StravaRoute, StravaSegment, StravaSegmentStreams)
 import Tools.TimestampOptions
+import ViewProfileChartContext
 
 
 type alias UndoEntry msg =
@@ -63,7 +64,7 @@ type ToolAction msg
     | UndoLastAction
     | RedoUndoneAction
     | HeapStatusUpdate Tools.MemoryUsage.HeapStatus
-    | RenderProfile -- rebuild the altitude and gradient charts
+    | RenderProfile ViewProfileChartContext.ProfileContext -- rebuild the altitude and gradient charts
     | BezierApplyWithOptions Tools.BezierOptions.Options
     | CentroidAverageApplyWithOptions Tools.CentroidAverageOptions.Options
     | CurveFormerApplyWithOptions Tools.CurveFormerOptions.Options

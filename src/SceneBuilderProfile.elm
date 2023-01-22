@@ -119,7 +119,7 @@ profileChart profile imperial track =
                         [ ( "x"
                           , E.object
                                 [ ( "type", E.string "linear" )
-                                , ( "max", E.float trackLength )
+                                --, ( "max", E.float trackLength )
                                 , ( "title"
                                   , E.object
                                         [ ( "text", E.string distanceUnits )
@@ -153,12 +153,12 @@ profileChart profile imperial track =
                 ]
 
         halfOfView =
+            -- Zoom level zero shows whole track.
             DomainModel.trueLength track.trackTree
-                |> Quantity.half
                 |> Quantity.multiplyBy (0.5 ^ profile.zoomLevel)
+                |> Quantity.half
 
-        _ = Debug.log "PROFILE" profile
-
+        --_ = Debug.log "PROFILE" profile
         ( startDistance, endDistance ) =
             ( profile.focalPoint |> Quantity.minus halfOfView
             , profile.focalPoint |> Quantity.plus halfOfView
@@ -184,19 +184,21 @@ profileChart profile imperial track =
                 :: outputs
             )
 
+        firstPoint =
+            DomainModel.gpxPointFromIndex firstPointIndex track.trackTree
+
         coordinates : List E.Value
         coordinates =
-            -- TODO: Set depth function sensibly to aim for 1000 points.
             let
                 ( _, points ) =
                     DomainModel.traverseTreeBetweenLimitsToDepth
                         firstPointIndex
                         lastPointIndex
-                        (always <| Just 10)
+                        (always <| Just <| floor <| profile.zoomLevel + 10)
                         0
                         track.trackTree
                         coordinateCollector
-                        ( startDistance, [] )
+                        ( startDistance, [ makeProfilePoint firstPoint startDistance ] )
             in
             List.reverse points
 
