@@ -85,16 +85,16 @@ previewActions newOptions previewColour track =
             [ HidePreview "limit", HidePreview "limitprofile" ]
 
 
-putPreviewInOptions : TrackLoaded msg -> Options -> Options
-putPreviewInOptions modifiedTrack options =
+previewWithNewOptions : TrackLoaded msg -> Options -> Options
+previewWithNewOptions track options =
     let
         adjustedPoints =
-            computeNewPoints options modifiedTrack
+            computeNewPoints options track
     in
     { options
         | previewData =
             DomainModel.treeFromSourcesWithExistingReference
-                (DomainModel.gpxPointFromIndex 0 modifiedTrack.trackTree)
+                (DomainModel.gpxPointFromIndex 0 track.trackTree)
                 (List.map Tuple.second adjustedPoints)
     }
 
@@ -111,7 +111,7 @@ update msg options previewColour track =
             let
                 newOptions =
                     { options | maximumAscent = up }
-                        |> putPreviewInOptions track
+                        |> previewWithNewOptions track
             in
             ( newOptions
             , previewActions newOptions previewColour track
@@ -121,7 +121,7 @@ update msg options previewColour track =
             let
                 newOptions =
                     { options | maximumDescent = down }
-                        |> putPreviewInOptions track
+                        |> previewWithNewOptions track
             in
             ( newOptions
             , previewActions newOptions previewColour track
@@ -131,7 +131,7 @@ update msg options previewColour track =
             let
                 newOptions =
                     { options | bumpiness = bumpiness }
-                        |> putPreviewInOptions track
+                        |> previewWithNewOptions track
             in
             ( newOptions
             , previewActions newOptions previewColour track
@@ -155,7 +155,7 @@ update msg options previewColour track =
             let
                 newOptions =
                     { options | windowSize = size }
-                        |> putPreviewInOptions track
+                        |> previewWithNewOptions track
             in
             ( newOptions
             , previewActions newOptions previewColour track
@@ -165,7 +165,7 @@ update msg options previewColour track =
             let
                 newOptions =
                     { options | smoothMethod = smoothMethod }
-                        |> putPreviewInOptions track
+                        |> previewWithNewOptions track
             in
             ( newOptions
             , previewActions newOptions previewColour track
@@ -189,8 +189,8 @@ apply options track =
 
         newTree =
             DomainModel.replaceRange
-                fromStart
-                fromEnd
+                0
+                0
                 track.referenceLonLat
                 newCourse
                 track.trackTree
@@ -886,7 +886,7 @@ toolStateChange opened colour options track =
         ( True, Just theTrack ) ->
             let
                 newOptions =
-                    putPreviewInOptions theTrack options
+                    previewWithNewOptions theTrack options
             in
             ( newOptions
             , previewActions newOptions colour theTrack

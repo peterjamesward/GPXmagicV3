@@ -1778,7 +1778,7 @@ performActionsOnModel actions model =
                         newTrack =
                             case Tools.ProfileSmooth.apply options track of
                                 Just newTree ->
-                                    { track | trackTree = newTree }
+                                    TrackLoaded.useTreeWithRepositionedMarkers (Just newTree) track
 
                                 Nothing ->
                                     track
