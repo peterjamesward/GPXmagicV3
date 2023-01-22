@@ -574,40 +574,58 @@ function hidePreview(label) {
 
 }
 
+function addData(chart, label, data) {
+    chart.data.labels.push(label);
+    chart.data.datasets.forEach((dataset) => {
+        dataset.data.push(data);
+    });
+    chart.update();
+}
+
+function removeData(chart) {
+    chart.data.labels.pop();
+    chart.data.datasets.forEach((dataset) => {
+        dataset.data.pop();
+    });
+    chart.update();
+}
+
 function profileAsChart(canvasContainerDiv, chartInfo) {
 
     var profileDiv = document.getElementById(canvasContainerDiv);
+    var canvasId = canvasContainerDiv + 'profileCanvas';
+    var chart = Chart.getChart(canvasId);
 
     if ( profileDiv === undefined || profileDiv === null) {
         console.log('No profile container ' + canvasContainerDiv);
-
-        //app.ports.mapResponses.send(
-        //  { 'msg' : 'nocontainer'
-        //  , 'container' : canvasContainerDiv
-        //  }
-        //);
         return;
     }
 
-    console.log('Check for existing children');
-    while (profileDiv.hasChildNodes()) {
-        console.log('Removing child');
-        profileDiv.removeChild(profileDiv.firstChild);
-    }
+    // If the canvas is there, just swap the data in.
+    if (chart != undefined && chart != null) {
 
-    console.log('Adding new canvas');
-    var canvas = document.createElement('canvas');
-    canvas.id     = canvasContainerDiv + 'profileCanvas';
-    canvas.width  = profileDiv.width;
-    canvas.height = profileDiv.height;
-    canvas.style.zIndex   = 8;
-    canvas.style.position = "absolute";
-    canvas.style.border   = "1px solid";
-    profileDiv.appendChild(canvas);
+        console.log('Updating chart data');
+        chart.data.datasets[0] = chartInfo.data.datasets[0];
+        chart.options.scales = chartInfo.options.scales;
+        chart.update();
 
-    console.log('Making chart');
-    new Chart(
-        document.getElementById(canvasContainerDiv + 'profileCanvas'),
-        chartInfo
-    );
+    } else {
+
+        console.log('Adding new canvas');
+        var canvas = document.createElement('canvas');
+        canvas.id     = canvasId;
+        canvas.width  = profileDiv.width;
+        canvas.height = profileDiv.height;
+        canvas.style.zIndex   = 8;
+        canvas.style.position = "absolute";
+        canvas.style.border   = "1px solid";
+        profileDiv.appendChild(canvas);
+
+        console.log('Making chart');
+        new Chart(
+            document.getElementById(canvasContainerDiv + 'profileCanvas'),
+            chartInfo
+        );
+    };
+
 }

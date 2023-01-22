@@ -119,7 +119,8 @@ profileChart profile imperial track =
                         [ ( "x"
                           , E.object
                                 [ ( "type", E.string "linear" )
-                                --, ( "max", E.float trackLength )
+                                , ( "min", E.float <| distanceFunction startDistance )
+                                , ( "max", E.float <| distanceFunction endDistance )
                                 , ( "title"
                                   , E.object
                                         [ ( "text", E.string distanceUnits )
