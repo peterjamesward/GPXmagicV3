@@ -1795,39 +1795,15 @@ performActionsOnModel actions model =
                         , needsRendering = True
                     }
 
-                ( LimitGradientWithOptions options, Just track ) ->
+                ( ApplySmoothProfile options, Just track ) ->
                     let
-                        newTree =
-                            Tools.ProfileSmooth.apply options track
-
                         newTrack =
-                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
-                    in
-                    { foldedModel
-                        | track = Just newTrack
-                        , needsRendering = True
-                    }
+                            case Tools.ProfileSmooth.apply options track of
+                                Just newTree ->
+                                    TrackLoaded.useTreeWithRepositionedMarkers (Just newTree) track
 
-                ( SmoothAltitudes options, Just track ) ->
-                    let
-                        newTree =
-                            Tools.ProfileSmooth.apply options track
-
-                        newTrack =
-                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
-                    in
-                    { foldedModel
-                        | track = Just newTrack
-                        , needsRendering = True
-                    }
-
-                ( SmoothGradients options, Just track ) ->
-                    let
-                        newTree =
-                            Tools.ProfileSmooth.apply options track
-
-                        newTrack =
-                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
+                                Nothing ->
+                                    track
                     in
                     { foldedModel
                         | track = Just newTrack

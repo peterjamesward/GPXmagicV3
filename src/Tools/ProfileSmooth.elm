@@ -24,9 +24,7 @@ toolId =
 
 
 type Msg
-    = LimitGradient
-    | SmoothAltitudes
-    | SmoothGradients
+    = ApplyPreview
     | SetMaximumAscent Float
     | SetMaximumDescent Float
     | SetWindowSize Int
@@ -49,54 +47,46 @@ defaultOptions =
 
 previewActions : Options -> Element.Color -> TrackLoaded msg -> List (ToolAction msg)
 previewActions newOptions previewColour track =
+    let
+        ( start, end ) =
+            case track.markerPosition of
+                Just _ ->
+                    TrackLoaded.getRangeFromMarkers track
+
+                Nothing ->
+                    ( 0, 0 )
+    in
     case newOptions.previewData of
         Just previewTree ->
             let
-                ( start, end ) =
-                    case track.markerPosition of
-                        Just _ ->
-                            TrackLoaded.getRangeFromMarkers track
-
-                        Nothing ->
-                            ( 0, 0 )
-
-                newTreeForProfilePreview =
-                    apply newOptions track
+                normalPreview =
+                    TrackLoaded.previewFromTree
+                        previewTree
+                        start
+                        (skipCount previewTree - end)
+                        10
             in
-            case newTreeForProfilePreview of
-                Just newTree ->
-                    let
-                        normalPreview =
-                            TrackLoaded.previewFromTree
-                                previewTree
-                                start
-                                (skipCount previewTree - end)
-                                10
-                    in
-                    [ ShowPreview
-                        { tag = "limit"
-                        , shape = PreviewCircle
-                        , colour = previewColour
-                        , points = normalPreview
-                        }
-                    , ShowPreview
-                        { tag = "limitProfile"
-                        , shape = PreviewProfile newTree
-                        , colour = previewColour
-                        , points = []
-                        }
-                    , RenderProfile
-                    ]
-
-                Nothing ->
-                    [ HidePreview "limit", HidePreview "limitprofile" ]
+            [ ShowPreview
+                { tag = "limit"
+                , shape = PreviewCircle
+                , colour = previewColour
+                , points = normalPreview
+                }
+            , ShowPreview
+                { tag = "limitProfile"
+                , shape = PreviewProfile previewTree
+                , colour = previewColour
+                , points = []
+                }
+            , RenderProfile
+            ]
 
         Nothing ->
             [ HidePreview "limit", HidePreview "limitprofile" ]
 
 
-putPreviewInOptions : TrackLoaded msg -> Options -> Options
-putPreviewInOptions track options =
+previewWithNewOptions : TrackLoaded msg -> Options -> Options
+previewWithNewOptions track options =
     let
         adjustedPoints =
             computeNewPoints options track
@@ -121,7 +111,7 @@ update msg options previewColour track =
             let
                 newOptions =
                     { options | maximumAscent = up }
-                        |> putPreviewInOptions track
+                        |> previewWithNewOptions track
             in
             ( newOptions
             , previewActions newOptions previewColour track
@@ -131,7 +121,7 @@ update msg options previewColour track =
             let
                 newOptions =
                     { options | maximumDescent = down }
-                        |> putPreviewInOptions track
+                        |> previewWithNewOptions track
             in
             ( newOptions
             , previewActions newOptions previewColour track
@@ -141,51 +131,23 @@ update msg options previewColour track =
             let
                 newOptions =
                     { options | bumpiness = bumpiness }
-                        |> putPreviewInOptions track
+                        |> previewWithNewOptions track
             in
             ( newOptions
             , previewActions newOptions previewColour track
             )
 
-        LimitGradient ->
+        ApplyPreview ->
             let
                 undoInfo =
                     TrackLoaded.undoInfoWithWholeTrackDefault
-                        (Actions.LimitGradientWithOptions options)
+                        (Actions.ApplySmoothProfile options)
                         track
             in
             ( options
             , [ WithUndo undoInfo
               , undoInfo.action
               , TrackHasChanged
-              ]
-            )
-
-        SmoothAltitudes ->
-            let
-                undoInfo =
-                    TrackLoaded.undoInfoWithWholeTrackDefault
-                        (Actions.SmoothAltitudes options)
-                        track
-            in
-            ( options
-            , [ WithUndo undoInfo
-              , undoInfo.action
-              , TrackHasChanged
-              ]
-            )
-
-        SmoothGradients ->
-            let
-                undoInfo =
-                    TrackLoaded.undoInfoWithWholeTrackDefault
-                        (Actions.SmoothGradients options)
-                        track
-            in
-            ( options
-            , [ WithUndo undoInfo
-              , undoInfo.action
-              , Actions.TrackHasChanged
               ]
             )
 
@@ -193,7 +155,7 @@ update msg options previewColour track =
             let
                 newOptions =
                     { options | windowSize = size }
-                        |> putPreviewInOptions track
+                        |> previewWithNewOptions track
             in
             ( newOptions
             , previewActions newOptions previewColour track
@@ -203,7 +165,7 @@ update msg options previewColour track =
             let
                 newOptions =
                     { options | smoothMethod = smoothMethod }
-                        |> putPreviewInOptions track
+                        |> previewWithNewOptions track
             in
             ( newOptions
             , previewActions newOptions previewColour track
@@ -227,8 +189,8 @@ apply options track =
 
         newTree =
             DomainModel.replaceRange
-                fromStart
-                fromEnd
+                0
+                0
                 track.referenceLonLat
                 newCourse
                 track.trackTree
@@ -278,7 +240,7 @@ useUniformGradient bumpiness track =
     -- This is the original v1 bump smoother. Astonished that people want this.
     -- This implementation uses a fold over the whole track, really just to be
     -- consistent with others here and because it's not really less efficient
-    -- than multiple modifications in situ, each of which essential builds a new tree.
+    -- than multiple modifications in situ, each of which essentially builds a new tree.
     let
         ( startIndex, fromEnd ) =
             -- Note that this option is permitted only when there's a range.
@@ -707,11 +669,11 @@ averageGradientsWithWindow options track =
             , index = 0
             }
 
-        slidingWindowSnoother :
+        slidingWindowSmoother :
             RoadSection
             -> GradientSmootherState
             -> GradientSmootherState
-        slidingWindowSnoother road { leading, trailing, outputs, lastAltitude, index } =
+        slidingWindowSmoother road { leading, trailing, outputs, lastAltitude, index } =
             let
                 extendedLeadingBuffer =
                     leading ++ [ road ]
@@ -837,7 +799,7 @@ averageGradientsWithWindow options track =
                 (always Nothing)
                 0
                 track.trackTree
-                slidingWindowSnoother
+                slidingWindowSmoother
                 startState
     in
     flusher finalState
@@ -924,7 +886,7 @@ toolStateChange opened colour options track =
         ( True, Just theTrack ) ->
             let
                 newOptions =
-                    putPreviewInOptions theTrack options
+                    previewWithNewOptions theTrack options
             in
             ( newOptions
             , previewActions newOptions colour theTrack
@@ -980,6 +942,13 @@ view location options wrapper track =
 
                 else
                     [ i18n "part" ]
+
+        applyButton tag =
+            button
+                neatToolsBorder
+                { onPress = Just <| wrapper <| ApplyPreview
+                , label = paragraph [] [ i18n tag ]
+                }
     in
     wrappedRow
         [ spacing 6
@@ -1025,28 +994,14 @@ view location options wrapper track =
                             , thumb = Input.defaultThumb
                             }
                 in
-                column [ spacing 10, centerX ]
-                    [ el [ centerX ] <| maxAscentSlider
-                    , el [ centerX ] <| maxDescentSlider
-                    , extent
-                    , el [ centerX ] <|
-                        button
-                            neatToolsBorder
-                            { onPress = Just <| wrapper <| LimitGradient
-                            , label = paragraph [] [ i18n "apply" ]
-                            }
-                    ]
+                applyButton "apply"
 
             MethodAltitudes ->
                 column [ spacing 10, centerX ]
                     [ el [ centerX ] <| windowSizeSlider
                     , extent
                     , el [ centerX ] <|
-                        button
-                            neatToolsBorder
-                            { onPress = Just <| wrapper <| SmoothAltitudes
-                            , label = paragraph [] [ i18n "altitudes" ]
-                            }
+                        applyButton "altitudes"
                     ]
 
             MethodGradients ->
@@ -1054,11 +1009,7 @@ view location options wrapper track =
                     [ el [ centerX ] <| windowSizeSlider
                     , extent
                     , el [ centerX ] <|
-                        button
-                            neatToolsBorder
-                            { onPress = Just <| wrapper <| SmoothGradients
-                            , label = paragraph [] [ i18n "gradients" ]
-                            }
+                        applyButton "gradients"
                     ]
 
             MethodUniform ->
@@ -1088,11 +1039,6 @@ view location options wrapper track =
 
                         else
                             [ i18n "part" ]
-                    , el [ centerX ] <|
-                        button
-                            neatToolsBorder
-                            { onPress = Just <| wrapper <| SmoothGradients
-                            , label = paragraph [] [ i18n "uniform" ]
-                            }
+                    , applyButton "uniform"
                     ]
         ]
