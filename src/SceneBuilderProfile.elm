@@ -87,14 +87,16 @@ profileChart profile imperial track =
                 [ ( "type", E.string "line" )
                 , ( "data"
                   , E.object
-                        [ ( "datasets", E.list identity [ profileDataset ] ) ]
+                        [ ( "datasets"
+                          , E.list identity
+                                [ profileDataset
+                                , orangeDataset
+                                ]
+                          )
+                        ]
                   )
                 , ( "options", options )
                 ]
-
-        trackLength =
-            DomainModel.trueLength track.trackTree
-                |> distanceFunction
 
         options =
             E.object
@@ -151,6 +153,17 @@ profileChart profile imperial track =
                 , ( "pointStyle", E.bool False )
                 , ( "data", E.list identity coordinates )
                 , ( "fill", E.string "stack" )
+                , ( "label", E.string "altitude" )
+                ]
+
+        orangeDataset =
+            E.object
+                [ ( "backgroundColor", E.string "orange" )
+                , ( "borderColor", E.string "rgba(255,0,0,1.0" )
+                , ( "pointStyle", E.string "circle" )
+                , ( "pointRadius", E.float 10 )
+                , ( "data", E.list identity orangePoint )
+                , ( "label", E.string "orange" )
                 ]
 
         halfOfView =
@@ -187,6 +200,17 @@ profileChart profile imperial track =
 
         firstPoint =
             DomainModel.gpxPointFromIndex firstPointIndex track.trackTree
+
+        orangePoint : List E.Value
+        orangePoint =
+            let
+                asGPX =
+                    DomainModel.gpxPointFromIndex track.currentPosition track.trackTree
+
+                asDist =
+                    DomainModel.distanceFromIndex track.currentPosition track.trackTree
+            in
+            [ makeProfilePoint asGPX asDist ]
 
         coordinates : List E.Value
         coordinates =

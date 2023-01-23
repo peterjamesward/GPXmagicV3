@@ -329,7 +329,9 @@ processMapPortMessage lastState track json =
 
         Ok "profileClick" ->
             -- Not really a map thing but not worth another port.
-            --{ 'msg' : 'profilelick'
+            -- Need to kick it into Main, where we have imperial, and
+            -- should then probably go to PaneLayoutManager.
+            --{ 'msg' : 'profileClick'
             --, 'container' : name of the container for the canvas
             --, 'x' : distance
             --}
