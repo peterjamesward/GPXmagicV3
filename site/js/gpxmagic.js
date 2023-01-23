@@ -600,7 +600,7 @@ const eventPlugin = {
             // Substitute the appropriate scale IDs
             const dataX = chart.scales.x.getValueForPixel(canvasPosition.x);
             //const dataY = chart.scales.y.getValueForPixel(canvasPosition.y);
-            console.log("CLICKED!" + dataX);
+            console.log("CLICKED AT " + dataX + " IN " + chart.canvas.parentElement.id);
         }
     }
 }
