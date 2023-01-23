@@ -601,6 +601,7 @@ const eventPlugin = {
 
             app.ports.mapResponses.send (
                 { 'msg' : 'profileClick'
+                , 'container' : chart.canvas.parentElement.id
                 , 'x' : dataX
                 }
             );

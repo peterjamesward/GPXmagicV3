@@ -1385,6 +1385,8 @@ performActionsOnModel actions model =
                                 | currentPosition =
                                     DomainModel.indexFromDistance trackDistance track.trackTree
                             }
+
+                        _ = Debug.log "ORANGE" newTrack.currentPosition
                     in
                     { foldedModel
                         | track = Just newTrack
