@@ -205,7 +205,7 @@ paintCanvasProfileChart profileContext imperial track =
     mapCommands <|
         E.object
             [ ( "Cmd", E.string "Profile" )
-            , ( "container", E.string <| "altitude" ++ profileContext.contextSuffix )
+            , ( "container", E.string <| "altitude." ++ profileContext.contextSuffix )
             , ( "chart", SceneBuilderProfile.profileChart profileContext imperial track )
             ]
 
