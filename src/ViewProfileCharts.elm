@@ -173,7 +173,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
             ( context, [] )
 
         ImageRelease _ ->
-            ( context, [] )
+            ( { context | dragAction = DragNone }, [] )
 
         ToggleFollowOrange ->
             let
@@ -206,11 +206,23 @@ view context paneId ( givenWidth, givenHeight ) msgWrapper =
             inPixels givenHeight // 10
     in
     column
-        [ pointer
-        , Background.color FlatColors.ChinesePalette.antiFlashWhite
-        , inFront <| zoomButtons msgWrapper context
-        , htmlAttribute <| Wheel.onWheel (\event -> msgWrapper (ImageMouseWheel event.deltaY))
-        ]
+        ([ Background.color FlatColors.ChinesePalette.antiFlashWhite
+         , inFront <| zoomButtons msgWrapper context
+         , htmlAttribute <| Wheel.onWheel (\event -> msgWrapper (ImageMouseWheel event.deltaY))
+         , htmlAttribute <| Mouse.onDown (ImageGrab >> msgWrapper)
+         , htmlAttribute <| Mouse.onUp (ImageRelease >> msgWrapper)
+         , htmlAttribute <| Mouse.onClick (ImageClick >> msgWrapper)
+         , htmlAttribute <| Mouse.onDoubleClick (ImageDoubleClick >> msgWrapper)
+         ]
+            ++ (if context.dragAction == DragPan then
+                    [ htmlAttribute <| Mouse.onMove (ImageDrag >> msgWrapper)
+                    , pointer
+                    ]
+
+                else
+                    []
+               )
+        )
         [ el
             [ Element.width <| px <| inPixels givenWidth
             , Element.height <| px <| 7 * tenPercentHeight
