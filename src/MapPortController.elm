@@ -275,6 +275,11 @@ processMapPortMessage lastState track json =
             , D.decodeValue (D.field "lon" D.float) json
             )
 
+        ( container, distance ) =
+            ( D.decodeValue (D.field "container" D.string) json
+            , D.decodeValue (D.field "x" D.float) json
+            )
+
         elevations =
             D.decodeValue (D.field "elevations" (D.list (D.nullable D.float))) json
     in
@@ -318,6 +323,20 @@ processMapPortMessage lastState track json =
                           , PointerChange
                           ]
                         )
+
+                _ ->
+                    ( lastState, [] )
+
+        Ok "profileClick" ->
+            --{ 'msg' : 'profilelick'
+            --, 'container' : name of the container for the canvas
+            --, 'x' : distance
+            --}
+            case ( container, distance ) of
+                ( Ok container1, Ok distance1 ) ->
+                    ( lastState
+                    , [ ProfileClick container1 distance1 ]
+                    )
 
                 _ ->
                     ( lastState, [] )

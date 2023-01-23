@@ -128,6 +128,7 @@ type ToolAction msg
     | TimeDoubling
     | UsePhysicsModel
     | TryRemoteLoadIfGiven
+    | ProfileClick String Float --- CAUTION, check units.
 
 
 actionTextForUndo : I18NOptions.Location -> ToolAction msg -> String

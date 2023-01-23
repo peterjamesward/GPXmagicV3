@@ -596,11 +596,14 @@ const eventPlugin = {
         //console.log(args.event);
         if (args.event.type === 'click') {
             const canvasPosition = Chart.helpers.getRelativePosition(args.event, chart);
-
-            // Substitute the appropriate scale IDs
             const dataX = chart.scales.x.getValueForPixel(canvasPosition.x);
-            //const dataY = chart.scales.y.getValueForPixel(canvasPosition.y);
-            console.log("CLICKED AT " + dataX + " IN " + chart.canvas.parentElement.id);
+            //console.log("CLICKED AT " + dataX + " IN " + chart.canvas.parentElement.id);
+
+            app.ports.mapResponses.send (
+                { 'msg' : 'profileClick'
+                , 'x' : dataX
+                }
+            );
         }
     }
 }

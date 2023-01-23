@@ -32,6 +32,7 @@ import Json.Decode as D
 import Json.Encode as E
 import LandUseDataOSM
 import LandUseDataTypes
+import Length
 import List.Extra
 import LocalStorage
 import MapPortController
@@ -1370,6 +1371,25 @@ performActionsOnModel actions model =
         performAction : ToolAction Msg -> Model -> Model
         performAction action foldedModel =
             case ( action, foldedModel.track ) of
+                ( ProfileClick container x, Just track ) ->
+                    let
+                        trackDistance =
+                            if model.toolOptions.imperial then
+                                Length.miles x
+
+                            else
+                                Length.kilometers x
+
+                        newTrack =
+                            { track
+                                | currentPosition =
+                                    DomainModel.indexFromDistance trackDistance track.trackTree
+                            }
+                    in
+                    { foldedModel
+                        | track = Just newTrack
+                    }
+
                 ( MakeMapPointsDraggable flag, _ ) ->
                     { foldedModel | mapPointsDraggable = flag }
 
