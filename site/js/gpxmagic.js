@@ -592,8 +592,19 @@ function removeData(chart) {
 
 const eventPlugin = {
     id: 'clicks',
-    afterEvent: (chart, args, options) => { console.log(args.event); }
+    afterEvent: (chart, args, options) => {
+        //console.log(args.event);
+        if (args.event.type === 'click') {
+            const canvasPosition = Chart.helpers.getRelativePosition(args.event, chart);
+
+            // Substitute the appropriate scale IDs
+            const dataX = chart.scales.x.getValueForPixel(canvasPosition.x);
+            //const dataY = chart.scales.y.getValueForPixel(canvasPosition.y);
+            console.log("CLICKED!" + dataX);
+        }
+    }
 }
+
 
 Chart.register(eventPlugin);
 
@@ -637,12 +648,3 @@ function profileAsChart(canvasContainerDiv, chartInfo) {
 
 }
 
-function clickHelper(e)
-{
-    console.log("CLICKED!");
-    const canvasPosition = Chart.helpers.getRelativePosition(e, chart);
-
-    // Substitute the appropriate scale IDs
-    const dataX = chart.scales.x.getValueForPixel(canvasPosition.x);
-    const dataY = chart.scales.y.getValueForPixel(canvasPosition.y);
-}
