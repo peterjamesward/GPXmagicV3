@@ -16,23 +16,14 @@ Delete should display "Sorry" message when _almost_ all track is selected.
 Need to send command when profile view is selected or open.
 (This will be a map over open profile views, indeed.)
 
-TODO: Click detect
 TODO: Sideways scroll
 TODO: Toggle Follow Orange
-TODO: Orange and Purple (use a different dataset)
-TODO: Toggle curtain colours (may be tricky)
-TODO: Segments (another dataset)
-TODO: Previews (more datasets)
+TODO: Orange and Purple (use a different dataset and overlay chart)
 TODO: Gradient chart (perhaps use curtain colours here as bars)
-TODO: Paint on load, resize, marker move, etc.
-
-DONE: Base from ATW
-DONE: Metric/Imperial
-DONE: Multiple profile views each with own context
-DONE: Paint on track load after app launch.
-DONE: Tree depth culling
-DONE: Zoom
-DONE: Mouse wheel zoom
+TODO: Toggle curtain colours (may be tricky, could try gradient buckets)
+TODO: Segments (another dataset, need to label them)
+TODO: Previews (more datasets, need to label them)
+TODO: Check painting on load, resize, marker move, etc.
 
 ---
 
