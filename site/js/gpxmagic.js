@@ -611,7 +611,7 @@ Chart.register(eventPlugin);
 function profileAsChart(canvasContainerDiv, chartInfo) {
 
     var profileDiv = document.getElementById(canvasContainerDiv);
-    var canvasId = canvasContainerDiv + 'profileCanvas';
+    var canvasId = canvasContainerDiv + '.profile.';
     var chart = Chart.getChart(canvasId);
 
     if ( profileDiv === undefined || profileDiv === null) {
@@ -641,7 +641,7 @@ function profileAsChart(canvasContainerDiv, chartInfo) {
 
         console.log('Making chart');
         new Chart(
-            document.getElementById(canvasContainerDiv + 'profileCanvas'),
+            document.getElementById(canvasId),
             chartInfo
         );
     };
