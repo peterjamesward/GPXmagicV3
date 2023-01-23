@@ -16,20 +16,15 @@ Delete should display "Sorry" message when _almost_ all track is selected.
 Need to send command when profile view is selected or open.
 (This will be a map over open profile views, indeed.)
 
-NB: Update by mutation 
--- https://www.chartjs.org/docs/latest/developers/updates.html (?optimisation)
-
+TODO: Click detect
 TODO: Sideways scroll
 TODO: Toggle Follow Orange
 TODO: Orange and Purple (use a different dataset)
-TODO: Fix y-axis limits when scrolling (optional)
 TODO: Toggle curtain colours (may be tricky)
 TODO: Segments (another dataset)
 TODO: Previews (more datasets)
 TODO: Gradient chart (perhaps use curtain colours here as bars)
-TODO: Click detect
 TODO: Paint on load, resize, marker move, etc.
-TODO: Optimise data changes if needed.
 
 DONE: Base from ATW
 DONE: Metric/Imperial

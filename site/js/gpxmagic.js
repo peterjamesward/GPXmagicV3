@@ -590,6 +590,13 @@ function removeData(chart) {
     chart.update();
 }
 
+const eventPlugin = {
+    id: 'clicks',
+    afterEvent: (chart, args, options) => { console.log(args.event); }
+}
+
+Chart.register(eventPlugin);
+
 function profileAsChart(canvasContainerDiv, chartInfo) {
 
     var profileDiv = document.getElementById(canvasContainerDiv);
@@ -628,4 +635,14 @@ function profileAsChart(canvasContainerDiv, chartInfo) {
         );
     };
 
+}
+
+function clickHelper(e)
+{
+    console.log("CLICKED!");
+    const canvasPosition = Chart.helpers.getRelativePosition(e, chart);
+
+    // Substitute the appropriate scale IDs
+    const dataX = chart.scales.x.getValueForPixel(canvasPosition.x);
+    const dataY = chart.scales.y.getValueForPixel(canvasPosition.y);
 }

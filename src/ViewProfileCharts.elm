@@ -147,9 +147,6 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
                     { context
                         | zoomLevel = clamp 0 10 <| context.zoomLevel - deltaY * 0.001
                     }
-
-                _ =
-                    Debug.log "CONTEXT" newContext
             in
             ( newContext
             , [ Actions.RenderProfile newContext ]
