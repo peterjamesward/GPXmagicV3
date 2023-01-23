@@ -20,8 +20,8 @@ NB: Update by mutation
 -- https://www.chartjs.org/docs/latest/developers/updates.html (?optimisation)
 
 TODO: Sideways scroll
-TODO: Orange and Purple (use a different dataset)
 TODO: Toggle Follow Orange
+TODO: Orange and Purple (use a different dataset)
 TODO: Fix y-axis limits when scrolling (optional)
 TODO: Toggle curtain colours (may be tricky)
 TODO: Segments (another dataset)
