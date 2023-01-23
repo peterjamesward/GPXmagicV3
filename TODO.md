@@ -19,19 +19,13 @@ Need to send command when profile view is selected or open.
 NB: Update by mutation 
 -- https://www.chartjs.org/docs/latest/developers/updates.html (?optimisation)
 
-> Try initialising Canvases with nil data, then swap the data in.
-
-WIP: Paint on track load after app launch.
-WIP: Tree depth culling
-WIP: Zoom
-
-TODO: Orange and Purple
 TODO: Sideways scroll
+TODO: Orange and Purple (use a different dataset)
 TODO: Toggle Follow Orange
 TODO: Fix y-axis limits when scrolling (optional)
 TODO: Toggle curtain colours (may be tricky)
-TODO: Segments
-TODO: Previews
+TODO: Segments (another dataset)
+TODO: Previews (more datasets)
 TODO: Gradient chart (perhaps use curtain colours here as bars)
 TODO: Click detect
 TODO: Paint on load, resize, marker move, etc.
@@ -40,6 +34,10 @@ TODO: Optimise data changes if needed.
 DONE: Base from ATW
 DONE: Metric/Imperial
 DONE: Multiple profile views each with own context
+DONE: Paint on track load after app launch.
+DONE: Tree depth culling
+DONE: Zoom
+DONE: Mouse wheel zoom
 
 ---
 

@@ -18,6 +18,7 @@ import FlatColors.AussiePalette
 import FlatColors.ChinesePalette exposing (white)
 import Html.Attributes exposing (id, style)
 import Html.Events.Extra.Mouse as Mouse
+import Html.Events.Extra.Wheel as Wheel
 import PaneContext exposing (PaneId, paneIdToString)
 import Pixels exposing (Pixels, inPixels)
 import Point2d exposing (Point2d, xCoordinate, yCoordinate)
@@ -142,18 +143,17 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
 
         ImageMouseWheel deltaY ->
             let
-                maxZoom =
-                    (logBase 2 <| toFloat <| skipCount track.trackTree) - 2
+                newContext =
+                    { context
+                        | zoomLevel = clamp 0 10 <| context.zoomLevel - deltaY * 0.001
+                    }
 
-                increment =
-                    -0.001 * deltaY
-
-                zoomLevel =
-                    clamp 0 maxZoom <|
-                        context.zoomLevel
-                            + increment
+                _ =
+                    Debug.log "CONTEXT" newContext
             in
-            ( { context | zoomLevel = zoomLevel }, [] )
+            ( newContext
+            , [ Actions.RenderProfile newContext ]
+            )
 
         ImageGrab event ->
             -- Mouse behaviour depends which view is in use...
@@ -209,6 +209,7 @@ view context paneId ( givenWidth, givenHeight ) msgWrapper =
         [ pointer
         , Background.color FlatColors.ChinesePalette.antiFlashWhite
         , inFront <| zoomButtons msgWrapper context
+        , htmlAttribute <| Wheel.onWheel (\event -> msgWrapper (ImageMouseWheel event.deltaY))
         ]
         [ el
             [ Element.width <| px <| inPixels givenWidth
