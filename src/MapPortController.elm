@@ -328,6 +328,7 @@ processMapPortMessage lastState track json =
                     ( lastState, [] )
 
         Ok "profileClick" ->
+            -- Not really a map thing but not worth another port.
             --{ 'msg' : 'profilelick'
             --, 'container' : name of the container for the canvas
             --, 'x' : distance
@@ -335,7 +336,9 @@ processMapPortMessage lastState track json =
             case ( container, distance ) of
                 ( Ok container1, Ok distance1 ) ->
                     ( lastState
-                    , [ ProfileClick container1 distance1 ]
+                    , [ ProfileClick container1 distance1
+                      , PointerChange
+                      ]
                     )
 
                 _ ->

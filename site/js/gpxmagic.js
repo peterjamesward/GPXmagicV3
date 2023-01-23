@@ -593,7 +593,7 @@ function removeData(chart) {
 const eventPlugin = {
     id: 'clicks',
     afterEvent: (chart, args, options) => {
-        //console.log(args.event);
+
         if (args.event.type === 'click') {
             const canvasPosition = Chart.helpers.getRelativePosition(args.event, chart);
             const dataX = chart.scales.x.getValueForPixel(canvasPosition.x);
