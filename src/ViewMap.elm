@@ -199,6 +199,7 @@ view location ( viewWidth, viewHeight ) mContext msgWrapper =
                         , Input.option MapBasic (text "Basic")
                         , Input.option MapSatellite (text "Satellite")
                         , Input.option MapSatelliteStreets (text "Satellite streets")
+                        , Input.option MapLight (text "Light")
                         ]
                     , selected = Just context.mapStyle
                     , label = labelHidden "map styles"

@@ -1386,7 +1386,8 @@ performActionsOnModel actions model =
                                     DomainModel.indexFromDistance trackDistance track.trackTree
                             }
 
-                        _ = Debug.log "ORANGE" newTrack.currentPosition
+                        _ =
+                            Debug.log "ORANGE" newTrack.currentPosition
                     in
                     { foldedModel
                         | track = Just newTrack
@@ -2640,7 +2641,11 @@ performActionCommands actions model =
 
                 ( PointerChange, Just track ) ->
                     Cmd.batch <|
-                        MapPortController.addMarkersToMap track
+                        PaneLayoutManager.paintProfileCharts
+                            model.paneLayoutOptions
+                            model.toolOptions.imperial
+                            track
+                            :: MapPortController.addMarkersToMap track
                             :: List.map showPreviewOnMap (Dict.keys model.previews)
 
                 ( SetMarker _, Just track ) ->
