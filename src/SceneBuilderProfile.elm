@@ -90,6 +90,7 @@ profileChart profile imperial track =
                         [ ( "datasets"
                           , E.list identity
                                 [ profileDataset
+                                , purpleDataset
                                 , orangeDataset
                                 ]
                           )
@@ -166,6 +167,22 @@ profileChart profile imperial track =
                 , ( "label", E.string "orange" )
                 ]
 
+        purpleDataset =
+            case track.markerPosition of
+                Just purple ->
+                    E.object
+                        [ ( "backgroundColor", E.string "purple" )
+                        , ( "borderColor", E.string "rgba(255,0,0,1.0" )
+                        , ( "pointStyle", E.string "circle" )
+                        , ( "pointRadius", E.float 10 )
+                        , ( "data", E.list identity <| [ profilePointFromIndex purple ] )
+                        , ( "label", E.string "purple" )
+                        ]
+
+                Nothing ->
+                    E.object
+                        [ ( "data", E.list identity [] ) ]
+
         ( leftmostCentreDistance, rightmostCentreDistance ) =
             ( halfOfView
             , DomainModel.trueLength track.trackTree |> Quantity.minus halfOfView
@@ -183,7 +200,6 @@ profileChart profile imperial track =
 
             else
                 profile.focalPoint
-
 
         halfOfView =
             -- Zoom level zero shows whole track.
@@ -224,16 +240,20 @@ profileChart profile imperial track =
         firstPoint =
             DomainModel.gpxPointFromIndex firstPointIndex track.trackTree
 
-        orangePoint : List E.Value
-        orangePoint =
+        profilePointFromIndex : Int -> E.Value
+        profilePointFromIndex index =
             let
                 asGPX =
-                    DomainModel.gpxPointFromIndex track.currentPosition track.trackTree
+                    DomainModel.gpxPointFromIndex index track.trackTree
 
                 asDist =
-                    DomainModel.distanceFromIndex track.currentPosition track.trackTree
+                    DomainModel.distanceFromIndex index track.trackTree
             in
-            [ makeProfilePoint asGPX asDist ]
+            makeProfilePoint asGPX asDist
+
+        orangePoint : List E.Value
+        orangePoint =
+            [ profilePointFromIndex track.currentPosition ]
 
         coordinates : List E.Value
         coordinates =

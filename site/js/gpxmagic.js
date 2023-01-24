@@ -631,6 +631,7 @@ function profileAsChart(canvasContainerDiv, chartInfo) {
         console.log('Updating chart data');
         chart.data.datasets[0] = chartInfo.data.datasets[0];
         chart.data.datasets[1] = chartInfo.data.datasets[1];
+        chart.data.datasets[2] = chartInfo.data.datasets[2];
         chart.options.scales = chartInfo.options.scales;
         chart.update('none');
 
