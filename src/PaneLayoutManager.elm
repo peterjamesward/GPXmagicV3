@@ -9,6 +9,7 @@ module PaneLayoutManager exposing
     , forceRouteView
     , initialise
     , paintProfileCharts
+    , profileViewHandlesClick
     , render
     , restoreStoredValues
     , update
@@ -29,6 +30,7 @@ import Html.Attributes exposing (style)
 import Html.Events.Extra.Mouse as Mouse
 import Json.Decode as D
 import Json.Encode as E
+import Length
 import List.Extra
 import MapPortController
 import PaneContext exposing (PaneContext, PaneId(..), PaneLayout(..), PaneLayoutOptions, SliderState(..), paneIdToString)
@@ -695,6 +697,25 @@ paintProfileCharts panes imperial track =
         , paintIfProfileVisible panes.pane3
         , paintIfProfileVisible panes.pane4
         ]
+
+
+profileViewHandlesClick : String -> Length.Length -> PaneLayoutOptions -> TrackLoaded msg -> Maybe Int
+profileViewHandlesClick container trackDistance options track =
+    case container |> String.split "." |> List.Extra.last of
+        Just "1" ->
+            ViewProfileCharts.handleClick trackDistance options.pane1.profileContext track
+
+        Just "2" ->
+            ViewProfileCharts.handleClick trackDistance options.pane2.profileContext track
+
+        Just "3" ->
+            ViewProfileCharts.handleClick trackDistance options.pane3.profileContext track
+
+        Just "4" ->
+            ViewProfileCharts.handleClick trackDistance options.pane4.profileContext track
+
+        _ ->
+            Nothing
 
 
 viewPanes :

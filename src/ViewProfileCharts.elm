@@ -1,5 +1,6 @@
 module ViewProfileCharts exposing
     ( ClickZone(..)
+    , handleClick
     , initialiseView
     , update
     , view
@@ -83,6 +84,21 @@ zoomButtons msgWrapper context =
         ]
 
 
+handleClick : Length.Length -> Maybe ProfileContext -> TrackLoaded msg -> Maybe Int
+handleClick trackDistance context track =
+    case context of
+        Just isContext ->
+            if isContext.waitingForClickDelay then
+                Just <| DomainModel.indexFromDistance trackDistance track.trackTree
+
+            else
+                --Too slow for a click to count.
+                Nothing
+
+        Nothing ->
+            Nothing
+
+
 update :
     Msg
     -> (Msg -> msg)
@@ -125,7 +141,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
 
         ImageClick event ->
             -- For profile charts, this comes through as an event from the Chart.
-            -- See the MapPortController.
+            -- See the MapPortController and 'handleClick' above.
             ( context, [] )
 
         ClickDelayExpired ->
@@ -183,7 +199,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
                         shiftVector =
                             -- The plus two is empirical.
                             Length.kilometers (startX - dx)
-                                |> Quantity.multiplyBy (0.5 ^ (context.zoomLevel + 2))
+                                |> Quantity.multiplyBy (0.5 ^ (context.zoomLevel + 2.5))
 
                         newContext =
                             { context

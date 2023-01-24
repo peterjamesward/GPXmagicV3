@@ -1372,7 +1372,16 @@ performActionsOnModel actions model =
         performAction action foldedModel =
             case ( action, foldedModel.track ) of
                 ( ProfileClick container x, Just track ) ->
+                    --TODO: This must be handled with the right context, to prevent
+                    --TODO: sideways scroll being interpreted as a click.
                     let
+                        newOrangeIndex =
+                            PaneLayoutManager.profileViewHandlesClick
+                                container
+                                trackDistance
+                                model.paneLayoutOptions
+                                track
+
                         trackDistance =
                             if model.toolOptions.imperial then
                                 Length.miles x
@@ -1381,13 +1390,12 @@ performActionsOnModel actions model =
                                 Length.kilometers x
 
                         newTrack =
-                            { track
-                                | currentPosition =
-                                    DomainModel.indexFromDistance trackDistance track.trackTree
-                            }
+                            case newOrangeIndex of
+                                Just newOrange ->
+                                    { track | currentPosition = newOrange }
 
-                        _ =
-                            Debug.log "ORANGE" newTrack.currentPosition
+                                Nothing ->
+                                    track
                     in
                     { foldedModel
                         | track = Just newTrack
