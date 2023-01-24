@@ -13,17 +13,13 @@ Delete should display "Sorry" message when _almost_ all track is selected.
 
 ## Canvas profile chart
 
-Need to send command when profile view is selected or open.
-(This will be a map over open profile views, indeed.)
-
-TODO: Sideways scroll
 TODO: Toggle Follow Orange
-TODO: Orange and Purple (use a different dataset and overlay chart)
+TODO: Purple (use a different dataset and overlay chart)
 TODO: Gradient chart (perhaps use curtain colours here as bars)
-TODO: Toggle curtain colours (may be tricky, could try gradient buckets)
+TODO: Toggle curtain colours (may be tricky, could try gradient buckets as datasets)
 TODO: Segments (another dataset, need to label them)
 TODO: Previews (more datasets, need to label them)
-TODO: Check painting on load, resize, marker move, etc.
+TODO: Check painting on load, resize, marker move, view change, layout change, etc.
 
 ---
 
