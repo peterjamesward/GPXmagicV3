@@ -29,6 +29,11 @@ TODO: Check painting on load, resize, marker move, etc.
 
 # BACKLOG
 
+## Create nice road book page
+
+One view that combines Map with Profile, overlaid with route text that we would need to 
+embed in the GPX.
+
 ## Test cases for edits.
 
 You could do this you know, just not for the visuals.
