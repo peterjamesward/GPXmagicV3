@@ -24,7 +24,7 @@ type Msg
 
 type DragAction
     = DragNone
-    | DragPan
+    | DragPan Float
 
 
 type alias ProfileContext =

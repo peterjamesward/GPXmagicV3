@@ -19,6 +19,7 @@ import FlatColors.ChinesePalette exposing (white)
 import Html.Attributes exposing (id, style)
 import Html.Events.Extra.Mouse as Mouse
 import Html.Events.Extra.Wheel as Wheel
+import Length
 import PaneContext exposing (PaneId, paneIdToString)
 import Pixels exposing (Pixels, inPixels)
 import Point2d exposing (Point2d, xCoordinate, yCoordinate)
@@ -128,16 +129,10 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
             ( context, [] )
 
         ImageClick event ->
-            -- Click moves pointer but does not re-centre view. (Double click will.)
-            --if context.waitingForClickDelay then
-            ( context
-            , [ SetCurrent <| detectHit event track ( givenWidth, givenHeight ) context
-              , TrackHasChanged
-              ]
-            )
+            -- For profile charts, this comes through as an event from the Chart.
+            -- See the MapPortController.
+            ( context, [] )
 
-        --else
-        --    ( context, [] )
         ClickDelayExpired ->
             ( { context | waitingForClickDelay = False }, [] )
 
@@ -153,12 +148,10 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
             )
 
         ImageGrab event ->
-            -- Mouse behaviour depends which view is in use...
-            -- Right-click or ctrl-click to mean rotate; otherwise pan.
             let
                 newContext =
                     { context
-                        | dragAction = DragPan
+                        | dragAction = DragPan <| Tuple.first event.offsetPos
                         , waitingForClickDelay = True
                     }
             in
@@ -167,7 +160,29 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
             )
 
         ImageDrag event ->
-            ( context, [] )
+            -- Sideways scroll reflecting zoom level. May have to estimate metres per pixel.
+            let
+                ( dx, dy ) =
+                    event.offsetPos
+            in
+            case context.dragAction of
+                DragPan startX ->
+                    let
+                        shiftVector =
+                            Length.kilometers (startX - dx)
+
+                        newContext =
+                            { context
+                                | focalPoint =
+                                    context.focalPoint |> Quantity.plus shiftVector
+                            }
+                    in
+                    ( newContext
+                    , [ Actions.RenderProfile newContext ]
+                    )
+
+                _ ->
+                    ( context, [] )
 
         ImageRelease _ ->
             ( { context | dragAction = DragNone }, [] )
@@ -211,13 +226,14 @@ view context paneId ( givenWidth, givenHeight ) msgWrapper =
          , htmlAttribute <| Mouse.onClick (ImageClick >> msgWrapper)
          , htmlAttribute <| Mouse.onDoubleClick (ImageDoubleClick >> msgWrapper)
          ]
-            ++ (if context.dragAction == DragPan then
-                    [ htmlAttribute <| Mouse.onMove (ImageDrag >> msgWrapper)
-                    , pointer
-                    ]
+            ++ (case context.dragAction of
+                    DragPan _ ->
+                        [ htmlAttribute <| Mouse.onMove (ImageDrag >> msgWrapper)
+                        , pointer
+                        ]
 
-                else
-                    []
+                    DragNone ->
+                        []
                )
         )
         [ el

@@ -29,10 +29,12 @@ TODO: Check painting on load, resize, marker move, etc.
 
 # BACKLOG
 
-## Create nice road book page
+## Create nice road book page with export capability
 
 One view that combines Map with Profile, overlaid with route text that we would need to 
 embed in the GPX.
+
+Export pandoc-ready data including PNGs of canvasses.
 
 ## Test cases for edits.
 
