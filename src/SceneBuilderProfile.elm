@@ -184,6 +184,12 @@ profileChart profile imperial track =
             , DomainModel.indexFromDistanceRoundedUp endDistance track.trackTree
             )
 
+        ( firstPointDistance, lastPointDistance ) =
+            --TODO: Interpolate to exact range ends
+            ( DomainModel.distanceFromIndex firstPointIndex track.trackTree
+            , DomainModel.distanceFromIndex lastPointIndex track.trackTree
+            )
+
         coordinateCollector :
             RoadSection
             -> ( Quantity Float Meters, List E.Value )
@@ -223,7 +229,7 @@ profileChart profile imperial track =
                         0
                         track.trackTree
                         coordinateCollector
-                        ( startDistance, [ makeProfilePoint firstPoint startDistance ] )
+                        ( startDistance, [ makeProfilePoint firstPoint firstPointDistance ] )
             in
             List.reverse points
 
