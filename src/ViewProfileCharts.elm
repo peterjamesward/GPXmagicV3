@@ -169,8 +169,8 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
 
                         newContext =
                             { context
-                                | focalPoint =
-                                    context.focalPoint |> Quantity.plus shiftVector
+                                | focalPoint = context.focalPoint |> Quantity.plus shiftVector
+                                , dragAction = DragPan dx
                             }
                     in
                     ( newContext
