@@ -166,6 +166,25 @@ profileChart profile imperial track =
                 , ( "label", E.string "orange" )
                 ]
 
+        ( leftmostCentreDistance, rightmostCentreDistance ) =
+            ( halfOfView
+            , DomainModel.trueLength track.trackTree |> Quantity.minus halfOfView
+            )
+
+        orangeDistance =
+            DomainModel.distanceFromIndex track.currentPosition track.trackTree
+
+        focalPoint =
+            if profile.followSelectedPoint then
+                orangeDistance
+                    |> Quantity.clamp
+                        leftmostCentreDistance
+                        rightmostCentreDistance
+
+            else
+                profile.focalPoint
+
+
         halfOfView =
             -- Zoom level zero shows whole track.
             DomainModel.trueLength track.trackTree
@@ -174,8 +193,8 @@ profileChart profile imperial track =
 
         --_ = Debug.log "PROFILE" profile
         ( startDistance, endDistance ) =
-            ( profile.focalPoint |> Quantity.minus halfOfView
-            , profile.focalPoint |> Quantity.plus halfOfView
+            ( focalPoint |> Quantity.minus halfOfView
+            , focalPoint |> Quantity.plus halfOfView
             )
 
         ( firstPointIndex, lastPointIndex ) =

@@ -108,6 +108,24 @@ update :
     -> ProfileContext
     -> ( ProfileContext, List (ToolAction msg) )
 update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
+    let
+        ( leftmostCentreDistance, rightmostCentreDistance ) =
+            ( halfOfView
+            , trueLength track.trackTree |> Quantity.minus halfOfView
+            )
+
+        halfOfView =
+            -- Zoom level zero shows whole track.
+            DomainModel.trueLength track.trackTree
+                |> Quantity.multiplyBy (0.5 ^ context.zoomLevel)
+                |> Quantity.half
+
+        --_ = Debug.log "PROFILE" profile
+        ( startDistance, endDistance ) =
+            ( context.focalPoint |> Quantity.minus halfOfView
+            , context.focalPoint |> Quantity.plus halfOfView
+            )
+    in
     case msg of
         ImageZoomIn ->
             let
@@ -175,23 +193,6 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
             let
                 ( dx, dy ) =
                     event.offsetPos
-
-                halfOfView =
-                    -- Zoom level zero shows whole track.
-                    DomainModel.trueLength track.trackTree
-                        |> Quantity.multiplyBy (0.5 ^ context.zoomLevel)
-                        |> Quantity.half
-
-                --_ = Debug.log "PROFILE" profile
-                ( startDistance, endDistance ) =
-                    ( context.focalPoint |> Quantity.minus halfOfView
-                    , context.focalPoint |> Quantity.plus halfOfView
-                    )
-
-                ( leftmostCentreDistance, rightmostCentreDistance ) =
-                    ( halfOfView
-                    , trueLength track.trackTree |> Quantity.minus halfOfView
-                    )
             in
             case context.dragAction of
                 DragPan startX ->
@@ -226,10 +227,26 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
             let
                 currentDistance =
                     distanceFromIndex track.currentPosition track.trackTree
+
+                contextWithNewSetting =
+                    { context
+                        | followSelectedPoint = not context.followSelectedPoint
+                    }
+
+                contextWithNewFocus =
+                    { contextWithNewSetting
+                        | focalPoint =
+                            if contextWithNewSetting.followSelectedPoint then
+                                currentDistance
+                                    |> Quantity.clamp
+                                        leftmostCentreDistance
+                                        rightmostCentreDistance
+
+                            else
+                                contextWithNewSetting.focalPoint
+                    }
             in
-            ( { context
-                | followSelectedPoint = not context.followSelectedPoint
-              }
+            ( contextWithNewFocus
             , []
             )
 

@@ -13,7 +13,6 @@ Delete should display "Sorry" message when _almost_ all track is selected.
 
 ## Canvas profile chart
 
-TODO: Toggle Follow Orange
 TODO: Purple (similar to Orange, obviously)
 TODO: Gradient chart (perhaps use curtain colours here as bars)
 TODO: Toggle curtain colours (may be tricky, could try gradient buckets as datasets)
