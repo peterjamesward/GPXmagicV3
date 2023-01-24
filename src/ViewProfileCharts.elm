@@ -159,17 +159,40 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
             let
                 ( dx, dy ) =
                     event.offsetPos
+
+                halfOfView =
+                    -- Zoom level zero shows whole track.
+                    DomainModel.trueLength track.trackTree
+                        |> Quantity.multiplyBy (0.5 ^ context.zoomLevel)
+                        |> Quantity.half
+
+                --_ = Debug.log "PROFILE" profile
+                ( startDistance, endDistance ) =
+                    ( context.focalPoint |> Quantity.minus halfOfView
+                    , context.focalPoint |> Quantity.plus halfOfView
+                    )
+
+                ( leftmostCentreDistance, rightmostCentreDistance ) =
+                    ( halfOfView
+                    , trueLength track.trackTree |> Quantity.minus halfOfView
+                    )
             in
             case context.dragAction of
                 DragPan startX ->
                     let
                         shiftVector =
+                            -- The plus two is empirical.
                             Length.kilometers (startX - dx)
-                                |> Quantity.multiplyBy (0.5 ^ context.zoomLevel)
+                                |> Quantity.multiplyBy (0.5 ^ (context.zoomLevel + 2))
 
                         newContext =
                             { context
-                                | focalPoint = context.focalPoint |> Quantity.plus shiftVector
+                                | focalPoint =
+                                    context.focalPoint
+                                        |> Quantity.plus shiftVector
+                                        |> Quantity.clamp
+                                            leftmostCentreDistance
+                                            rightmostCentreDistance
                                 , dragAction = DragPan dx
                             }
                     in
@@ -177,7 +200,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
                     , [ Actions.RenderProfile newContext ]
                     )
 
-                _ ->
+                DragNone ->
                     ( context, [] )
 
         ImageRelease _ ->
