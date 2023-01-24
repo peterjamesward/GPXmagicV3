@@ -13,13 +13,8 @@ Delete should display "Sorry" message when _almost_ all track is selected.
 
 ## Canvas profile chart
 
-**BUG**  At high zooms, the Orange disagrees with the track. The track may be wrong here,
-        as it disagrees with the Information panel as well. This relates to zooming?
-**AH** -- the distances are not set correctly from left edge! 
-I can see that zooming in slightly on delta1 route moves point zero from the origin!
-
 TODO: Toggle Follow Orange
-TODO: Purple (use a different dataset and overlay chart)
+TODO: Purple (similar to Orange, obviously)
 TODO: Gradient chart (perhaps use curtain colours here as bars)
 TODO: Toggle curtain colours (may be tricky, could try gradient buckets as datasets)
 TODO: Segments (another dataset, need to label them)

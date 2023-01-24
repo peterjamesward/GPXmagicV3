@@ -275,8 +275,7 @@ view context paneId ( givenWidth, givenHeight ) msgWrapper =
             , alignTop
             , htmlAttribute (id <| "altitude." ++ paneIdToString paneId)
             ]
-          <|
-            el [ centerY, centerX ] (text "Altitude chart")
+            none
         , el
             [ Element.width <| px <| inPixels givenWidth
             , Element.height <| px <| 3 * tenPercentHeight
@@ -286,8 +285,7 @@ view context paneId ( givenWidth, givenHeight ) msgWrapper =
             , Border.color FlatColors.ChinesePalette.peace
             , htmlAttribute (id <| "gradient." ++ paneIdToString paneId)
             ]
-          <|
-            el [ centerY, centerX ] (text "Gradient chart")
+            none
         ]
 
 

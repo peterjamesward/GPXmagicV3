@@ -614,7 +614,7 @@ Chart.register(eventPlugin);
 
 function profileAsChart(canvasContainerDiv, chartInfo) {
 
-    console.log(chartInfo);
+    //console.log(chartInfo);
 
     var profileDiv = document.getElementById(canvasContainerDiv);
     var canvasId = canvasContainerDiv + '.profile.';
@@ -632,7 +632,7 @@ function profileAsChart(canvasContainerDiv, chartInfo) {
         chart.data.datasets[0] = chartInfo.data.datasets[0];
         chart.data.datasets[1] = chartInfo.data.datasets[1];
         chart.options.scales = chartInfo.options.scales;
-        chart.update();
+        chart.update('none');
 
     } else {
 
