@@ -18,8 +18,6 @@ type Msg
     | ImageReset
     | ClickDelayExpired
     | ToggleFollowOrange
-    | SetEmphasis Int
-    | MouseMove Mouse.Event
 
 
 type DragAction

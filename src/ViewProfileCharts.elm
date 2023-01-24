@@ -93,11 +93,6 @@ update :
     -> ( ProfileContext, List (ToolAction msg) )
 update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
     case msg of
-        SetEmphasis emphasis ->
-            ( { context | emphasis = toFloat emphasis }
-            , []
-            )
-
         ImageZoomIn ->
             let
                 newContext =
@@ -170,6 +165,7 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
                     let
                         shiftVector =
                             Length.kilometers (startX - dx)
+                                |> Quantity.multiplyBy (0.5 ^ context.zoomLevel)
 
                         newContext =
                             { context
@@ -200,9 +196,6 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
 
         ImageDoubleClick _ ->
             ( context, [] )
-
-        MouseMove event ->
-            ( { context | mouseEvent = Just event }, [] )
 
 
 view :
