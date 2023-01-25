@@ -1,6 +1,7 @@
 module SceneBuilderProfile exposing
     ( gradientChart
     , profileChart
+    , profileChartWithColours
     )
 
 {- EXAMPLE AS BASIS
@@ -348,6 +349,7 @@ profileChartWithColours profile imperial track =
     -- Question is whether clearer to use one fold or one per class.
     -- The subtlety is that we need start and end points for each region,
     -- so it's somewhat fussy.
+    -- BUT FIRST, what about having one dataset for each road section ?!?!?!
     let
         commonInfo =
             commonChartScales profile imperial track False
@@ -358,25 +360,38 @@ profileChartWithColours profile imperial track =
                 , ( "data"
                   , E.object
                         [ ( "datasets"
-                          , E.list identity
-                                [ profileDataset
-                                , purpleDataset
-                                , orangeDataset
-                                ]
+                          , E.list identity <|
+                                roadSections
+                                    ++ [ purpleDataset
+                                       , orangeDataset
+                                       ]
                           )
                         ]
                   )
                 , ( "options", commonInfo.options )
                 ]
 
-        profileDataset =
+        datasetForRoadSection : RoadSection -> Length.Length -> E.Value
+        datasetForRoadSection road distanceAtStart =
+            -- Each road section makes its own dataset. Crazy.
             E.object
-                [ ( "backgroundColor", E.string "rgba(182,198,237,0.6)" )
+                [ ( "backgroundColor"
+                  , E.string <|
+                        colourHexString <|
+                            gradientColourPastel road.gradientAtStart
+                  )
                 , ( "borderColor", E.string "rgba(77,110,205,0.6" )
                 , ( "pointStyle", E.bool False )
-                , ( "data", E.list identity coordinates )
+                , ( "data"
+                  , E.list identity
+                        [ makeProfilePoint (Tuple.first road.sourceData)
+                            distanceAtStart
+                        , makeProfilePoint (Tuple.second road.sourceData)
+                            (distanceAtStart |> Quantity.plus road.trueLength)
+                        ]
+                  )
                 , ( "fill", E.string "stack" )
-                , ( "label", E.string "altitude" )
+                , ( "spanGaps", E.bool False )
                 ]
 
         orangeDataset =
@@ -405,17 +420,13 @@ profileChartWithColours profile imperial track =
                     E.object
                         [ ( "data", E.list identity [] ) ]
 
-        coordinateCollector :
+        roadSectionCollector :
             RoadSection
             -> ( Quantity Float Meters, List E.Value )
             -> ( Quantity Float Meters, List E.Value )
-        coordinateCollector road ( lastDistance, outputs ) =
-            let
-                newDistance =
-                    lastDistance |> Quantity.plus road.trueLength
-            in
-            ( newDistance
-            , makeProfilePoint (Tuple.second road.sourceData) newDistance
+        roadSectionCollector road ( lastDistance, outputs ) =
+            ( lastDistance |> Quantity.plus road.trueLength
+            , datasetForRoadSection road lastDistance
                 :: outputs
             )
 
@@ -437,8 +448,8 @@ profileChartWithColours profile imperial track =
         orangePoint =
             [ profilePointFromIndex track.currentPosition ]
 
-        coordinates : List E.Value
-        coordinates =
+        roadSections : List E.Value
+        roadSections =
             let
                 ( _, points ) =
                     DomainModel.traverseTreeBetweenLimitsToDepth
@@ -447,7 +458,7 @@ profileChartWithColours profile imperial track =
                         (always <| Just <| floor <| profile.zoomLevel + 8)
                         0
                         track.trackTree
-                        coordinateCollector
+                        roadSectionCollector
                         ( commonInfo.firstPointDistance
                         , [ makeProfilePoint firstPoint commonInfo.firstPointDistance ]
                         )
