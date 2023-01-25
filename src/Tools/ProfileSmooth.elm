@@ -994,7 +994,12 @@ view location options wrapper track =
                             , thumb = Input.defaultThumb
                             }
                 in
-                applyButton "apply"
+                column [ spacing 10, centerX ]
+                    [ el [ centerX ] <| maxAscentSlider
+                    , el [ centerX ] <| maxDescentSlider
+                    , extent
+                    , applyButton "apply"
+                    ]
 
             MethodAltitudes ->
                 column [ spacing 10, centerX ]

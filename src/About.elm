@@ -9,6 +9,10 @@ aboutText =
 
 **N.B.** Apple fixed Safari so it works pretty well with GPXmagic.
 
+## 3.8.2
+
+Reinstate slider for gradient limits in Profile Smoother.
+
 ## 3.8.1
 
 Fixed Profile Smoother bug introduced in 3.8.0.
