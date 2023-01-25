@@ -398,6 +398,7 @@ profileChartWithColours profile imperial track =
         datasetForGradientBucket : Int -> List ( Length.Length, RoadSection ) -> E.Value
         datasetForGradientBucket bucket roadSections =
             -- Each road section bucket makes its own dataset.
+            --TODO: Relevant colour for each bucket.
             E.object
                 [ ( "backgroundColor"
                   , E.string <|
@@ -414,8 +415,43 @@ profileChartWithColours profile imperial track =
 
         dataSetFromBucket : List ( Length.Length, RoadSection ) -> List E.Value
         dataSetFromBucket sections =
-            --TODO: Force in a null value just beyond each contiguous group of sections.
-            []
+            --Fold over list, look for contiguous sections.
+            --Force in a null value just beyond each contiguous group of sections.
+            --NOTE the lists are reversed by creation, so we use a right fold.
+            let
+                ( lastEndDistance, datasetData ) =
+                    sections
+                        |> List.reverse
+                        |> List.foldl nextRoadSection ( commonInfo.startDistance, [] )
+
+                nextRoadSection :
+                    ( Length.Length, RoadSection )
+                    -> ( Length.Length, List E.Value )
+                    -> ( Length.Length, List E.Value )
+                nextRoadSection ( thisSectionStart, section ) ( previousEnd, outputs ) =
+                    if thisSectionStart |> Quantity.equalWithin Length.centimeter previousEnd then
+                        -- Treat as contiguous, no nulls to output, just the end point
+                        ( thisSectionStart |> Quantity.plus section.trueLength
+                        , makeProfilePoint
+                            (section.sourceData |> Tuple.second)
+                            (thisSectionStart |> Quantity.plus section.trueLength)
+                            :: outputs
+                        )
+
+                    else
+                        -- There is a gap so we need to close the previous segment with a null
+                        -- start a new segment with a null,
+                        -- output the start of the section as well as the end.
+                        ( thisSectionStart |> Quantity.plus section.trueLength
+                        , makeProfilePoint
+                            (section.sourceData |> Tuple.second)
+                            (thisSectionStart |> Quantity.plus section.trueLength)
+                            :: makeNullPoint (thisSectionStart |> Quantity.minus Length.centimeter)
+                            :: makeNullPoint (previousEnd |> Quantity.plus Length.centimeter)
+                            :: outputs
+                        )
+            in
+            List.reverse datasetData
 
         orangeDataset =
             E.object
@@ -510,6 +546,17 @@ profileChartWithColours profile imperial track =
             E.object
                 [ ( "x", E.float fDistance )
                 , ( "y", E.float altitude )
+                ]
+
+        makeNullPoint : Quantity Float Meters -> E.Value
+        makeNullPoint distance =
+            let
+                fDistance =
+                    commonInfo.distanceFunction distance
+            in
+            E.object
+                [ ( "x", E.float fDistance )
+                , ( "y", E.null )
                 ]
     in
     chartStuff
