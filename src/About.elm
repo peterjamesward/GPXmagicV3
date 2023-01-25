@@ -3,11 +3,15 @@ module About exposing (aboutText)
 
 aboutText =
     """
-# GPXmagic v3.8.1 (0630263f)
+# GPXmagic v3.8.1 (bb2d70ca)
 
 **GPXmagic V3 works best with Chrome (and some derivatives)**
 
 **N.B.** Apple fixed Safari so it works pretty well with GPXmagic.
+
+## 3.8.2
+
+Reinstate slider for gradient limits in Profile Smoother.
 
 ## 3.8.1
 
