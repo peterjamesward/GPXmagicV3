@@ -206,7 +206,7 @@ paintCanvasProfileChart profileContext imperial track =
         E.object
             [ ( "Cmd", E.string "Profile" )
             , ( "container", E.string <| "altitude." ++ profileContext.contextSuffix )
-            , ( "chart", SceneBuilderProfile.profileChartWithColours profileContext imperial track )
+            , ( "chart", SceneBuilderProfile.profileChart profileContext imperial track )
             ]
 
 

@@ -659,7 +659,7 @@ function profileAsChart(canvasContainerDiv, chartInfo) {
 
 function gradientChart(canvasContainerDiv, chartInfo) {
 
-    console.log(chartInfo);
+    //console.log(chartInfo);
 
     var profileDiv = document.getElementById(canvasContainerDiv);
     var canvasId = canvasContainerDiv + '.gradient.';
@@ -674,9 +674,10 @@ function gradientChart(canvasContainerDiv, chartInfo) {
     if (chart != undefined && chart != null) {
 
         //console.log('Updating chart data');
-        chart.data.datasets[0] = chartInfo.data.datasets[0]; // Gradient
-        chart.data.datasets[1] = chartInfo.data.datasets[1]; // Orange
-        chart.data.datasets[2] = chartInfo.data.datasets[2]; // Purple
+        chart.data.datasets = chartInfo.data.datasets; // ALL
+//        chart.data.datasets[0] = chartInfo.data.datasets[0]; // Gradient
+//        chart.data.datasets[1] = chartInfo.data.datasets[1]; // Orange
+//        chart.data.datasets[2] = chartInfo.data.datasets[2]; // Purple
         chart.options.scales = chartInfo.options.scales;
 
     } else {

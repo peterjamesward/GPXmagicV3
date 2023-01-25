@@ -60,6 +60,7 @@ module SceneBuilderProfile exposing
 -}
 
 import ColourPalette exposing (gradientColourPastel)
+import Dict exposing (Dict)
 import DomainModel exposing (GPXSource, RoadSection)
 import Json.Encode as E
 import Length exposing (Meters)
@@ -349,8 +350,26 @@ profileChartWithColours profile imperial track =
     -- Question is whether clearer to use one fold or one per class.
     -- The subtlety is that we need start and end points for each region,
     -- so it's somewhat fussy.
-    -- BUT FIRST, what about having one dataset for each road section ?!?!?!
     let
+        maxBucket =
+            -- Increase until performance suffers.
+            5
+
+        emptyBuckets : Dict Int (List ( Length.Length, RoadSection ))
+        emptyBuckets =
+            -- Let's see if this is a neat way to organise.
+            List.range 0 maxBucket
+                |> List.map (\n -> ( n, [] ))
+                |> Dict.fromList
+
+        percentPerBucket =
+            -- Gradient range for colouring is -20 to +20.
+            40 / toFloat maxBucket
+
+        bucketNumber : Float -> Int
+        bucketNumber gradient =
+            round <| (gradient + 20) / percentPerBucket
+
         commonInfo =
             commonChartScales profile imperial track False
 
@@ -361,7 +380,7 @@ profileChartWithColours profile imperial track =
                   , E.object
                         [ ( "datasets"
                           , E.list identity <|
-                                roadSections
+                                roadSectionDatasets
                                     ++ [ purpleDataset
                                        , orangeDataset
                                        ]
@@ -371,28 +390,32 @@ profileChartWithColours profile imperial track =
                 , ( "options", commonInfo.options )
                 ]
 
-        datasetForRoadSection : RoadSection -> Length.Length -> E.Value
-        datasetForRoadSection road distanceAtStart =
-            -- Each road section makes its own dataset. Crazy.
+        roadSectionDatasets : List E.Value
+        roadSectionDatasets =
+            Dict.map datasetForGradientBucket roadSectionCollections
+                |> Dict.values
+
+        datasetForGradientBucket : Int -> List ( Length.Length, RoadSection ) -> E.Value
+        datasetForGradientBucket bucket roadSections =
+            -- Each road section bucket makes its own dataset.
             E.object
                 [ ( "backgroundColor"
                   , E.string <|
                         colourHexString <|
-                            gradientColourPastel road.gradientAtStart
+                            gradientColourPastel <|
+                                toFloat bucket
                   )
                 , ( "borderColor", E.string "rgba(77,110,205,0.6" )
                 , ( "pointStyle", E.bool False )
-                , ( "data"
-                  , E.list identity
-                        [ makeProfilePoint (Tuple.first road.sourceData)
-                            distanceAtStart
-                        , makeProfilePoint (Tuple.second road.sourceData)
-                            (distanceAtStart |> Quantity.plus road.trueLength)
-                        ]
-                  )
+                , ( "data", E.list identity (dataSetFromBucket roadSections) )
                 , ( "fill", E.string "stack" )
                 , ( "spanGaps", E.bool False )
                 ]
+
+        dataSetFromBucket : List ( Length.Length, RoadSection ) -> List E.Value
+        dataSetFromBucket sections =
+            --TODO: Force in a null value just beyond each contiguous group of sections.
+            []
 
         orangeDataset =
             E.object
@@ -422,12 +445,22 @@ profileChartWithColours profile imperial track =
 
         roadSectionCollector :
             RoadSection
-            -> ( Quantity Float Meters, List E.Value )
-            -> ( Quantity Float Meters, List E.Value )
-        roadSectionCollector road ( lastDistance, outputs ) =
+            -> ( Quantity Float Meters, Dict Int (List ( Length.Length, RoadSection )) )
+            -> ( Quantity Float Meters, Dict Int (List ( Length.Length, RoadSection )) )
+        roadSectionCollector road ( lastDistance, buckets ) =
+            let
+                bucket =
+                    bucketNumber road.gradientAtStart
+
+                bucketContent =
+                    Maybe.withDefault [] <|
+                        Dict.get bucket buckets
+
+                updatedBuckets =
+                    Dict.insert bucket (( lastDistance, road ) :: bucketContent) buckets
+            in
             ( lastDistance |> Quantity.plus road.trueLength
-            , datasetForRoadSection road lastDistance
-                :: outputs
+            , updatedBuckets
             )
 
         firstPoint =
@@ -448,10 +481,10 @@ profileChartWithColours profile imperial track =
         orangePoint =
             [ profilePointFromIndex track.currentPosition ]
 
-        roadSections : List E.Value
-        roadSections =
+        roadSectionCollections : Dict Int (List ( Length.Length, RoadSection ))
+        roadSectionCollections =
             let
-                ( _, points ) =
+                ( _, buckets ) =
                     DomainModel.traverseTreeBetweenLimitsToDepth
                         commonInfo.firstPointIndex
                         commonInfo.lastPointIndex
@@ -460,10 +493,10 @@ profileChartWithColours profile imperial track =
                         track.trackTree
                         roadSectionCollector
                         ( commonInfo.firstPointDistance
-                        , [ makeProfilePoint firstPoint commonInfo.firstPointDistance ]
+                        , emptyBuckets
                         )
             in
-            List.reverse points
+            buckets
 
         makeProfilePoint : GPXSource -> Quantity Float Meters -> E.Value
         makeProfilePoint gpx distance =
