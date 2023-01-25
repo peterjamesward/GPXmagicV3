@@ -154,6 +154,7 @@ commonChartScales profile imperial track isGradients =
         options =
             E.object
                 [ ( "animations", E.bool False )
+                , ( "responsive", E.bool True )
                 , ( "plugins"
                   , E.object
                         [ ( "legend"
