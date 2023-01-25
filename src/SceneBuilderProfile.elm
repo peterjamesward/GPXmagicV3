@@ -373,7 +373,7 @@ gradientChart profile imperial track =
                 , ( "data", E.list identity coordinates )
                 , ( "fill", E.bool True )
                 , ( "label", E.string "gradient" )
-                , ( "step", E.bool True )
+                , ( "stepped", E.bool True )
                 ]
 
         orangeDataset =
