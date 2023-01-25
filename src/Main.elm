@@ -2747,10 +2747,16 @@ performActionCommands actions model =
                         model.rgtOptions
 
                 ( RenderProfile context, Just track ) ->
-                    MapPortController.paintCanvasProfileChart
-                        context
-                        model.toolOptions.imperial
-                        track
+                    Cmd.batch
+                        [ MapPortController.paintCanvasProfileChart
+                            context
+                            model.toolOptions.imperial
+                            track
+                        , MapPortController.paintCanvasGradientChart
+                            context
+                            model.toolOptions.imperial
+                            track
+                        ]
 
                 _ ->
                     Cmd.none

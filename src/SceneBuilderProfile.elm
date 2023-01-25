@@ -1,4 +1,7 @@
-module SceneBuilderProfile exposing (profileChart)
+module SceneBuilderProfile exposing
+    ( gradientChart
+    , profileChart
+    )
 
 {- EXAMPLE AS BASIS
    d0 = [{x:1, y:1}, {x:2, y:11},{x:3, y:1},{x:4, y:11},{x:5, y:10}, {x:6, y:8},{x:7, y:15},{x:8, y:2}]
@@ -55,18 +58,32 @@ module SceneBuilderProfile exposing (profileChart)
    });
 -}
 
+import ColourPalette exposing (gradientColourPastel)
 import DomainModel exposing (GPXSource, RoadSection)
 import Json.Encode as E
 import Length exposing (Meters)
 import Quantity exposing (Quantity)
 import TrackLoaded exposing (TrackLoaded)
+import UtilsForViews exposing (colourHexString)
 import ViewProfileChartContext exposing (ProfileContext)
 
 
-profileChart : ProfileContext -> Bool -> TrackLoaded msg -> E.Value
-profileChart profile imperial track =
-    -- Use JSON as per chart.js demands.
-    -- Indeed, declare the entire chart here, not in JS.
+type alias CommonChartInfo =
+    { options : E.Value
+    , distanceFunction : Length.Length -> Float
+    , altitudeFunction : Length.Length -> Float
+    , firstPointIndex : Int
+    , lastPointIndex : Int
+    , firstPointDistance : Length.Length
+    , lastPointDistance : Length.Length
+    , focalPoint : Length.Length
+    , startDistance : Length.Length
+    , endDistance : Length.Length
+    }
+
+
+commonChartScales : ProfileContext -> Bool -> TrackLoaded msg -> Bool -> CommonChartInfo
+commonChartScales profile imperial track isGradients =
     let
         ( distanceFunction, altitudeFunction ) =
             if imperial then
@@ -75,29 +92,64 @@ profileChart profile imperial track =
             else
                 ( Length.inKilometers, Length.inMeters )
 
-        ( distanceUnits, altitudeUnits ) =
-            if imperial then
-                ( "Miles", "Feet" )
+        ( leftmostCentreDistance, rightmostCentreDistance ) =
+            ( halfOfView
+            , DomainModel.trueLength track.trackTree |> Quantity.minus halfOfView
+            )
+
+        orangeDistance =
+            DomainModel.distanceFromIndex track.currentPosition track.trackTree
+
+        focalPoint =
+            if profile.followSelectedPoint then
+                orangeDistance
+                    |> Quantity.clamp
+                        leftmostCentreDistance
+                        rightmostCentreDistance
 
             else
-                ( "Kilometers", "Meters" )
+                profile.focalPoint
 
-        chartStuff =
-            E.object
-                [ ( "type", E.string "line" )
-                , ( "data"
-                  , E.object
-                        [ ( "datasets"
-                          , E.list identity
-                                [ profileDataset
-                                , purpleDataset
-                                , orangeDataset
-                                ]
-                          )
-                        ]
-                  )
-                , ( "options", options )
-                ]
+        halfOfView =
+            -- Zoom level zero shows whole track.
+            DomainModel.trueLength track.trackTree
+                |> Quantity.multiplyBy (0.5 ^ profile.zoomLevel)
+                |> Quantity.half
+
+        --_ = Debug.log "PROFILE" profile
+        ( startDistance, endDistance ) =
+            ( focalPoint |> Quantity.minus halfOfView
+            , focalPoint |> Quantity.plus halfOfView
+            )
+
+        ( firstPointIndex, lastPointIndex ) =
+            ( DomainModel.indexFromDistanceRoundedDown startDistance track.trackTree
+            , DomainModel.indexFromDistanceRoundedUp endDistance track.trackTree
+            )
+
+        ( firstPointDistance, lastPointDistance ) =
+            ( DomainModel.distanceFromIndex firstPointIndex track.trackTree
+            , DomainModel.distanceFromIndex lastPointIndex track.trackTree
+            )
+
+        ( distanceUnits, altitudeUnits ) =
+            if imperial then
+                ( "Miles"
+                , if isGradients then
+                    "%"
+
+                  else
+                    "Feet"
+                )
+
+            else
+                ( "Kilometers"
+                , if isGradients then
+                    "%"
+
+                  else
+                    "Meters"
+                )
 
         options =
             E.object
@@ -146,6 +198,44 @@ profileChart profile imperial track =
                         ]
                   )
                 ]
+    in
+    { options = options
+    , distanceFunction = distanceFunction
+    , altitudeFunction = altitudeFunction
+    , firstPointIndex = firstPointIndex
+    , lastPointIndex = lastPointIndex
+    , firstPointDistance = firstPointDistance
+    , lastPointDistance = lastPointDistance
+    , focalPoint = focalPoint
+    , startDistance = startDistance
+    , endDistance = endDistance
+    }
+
+
+profileChart : ProfileContext -> Bool -> TrackLoaded msg -> E.Value
+profileChart profile imperial track =
+    -- Use JSON as per chart.js demands.
+    -- Indeed, declare the entire chart here, not in JS.
+    let
+        commonInfo =
+            commonChartScales profile imperial track False
+
+        chartStuff =
+            E.object
+                [ ( "type", E.string "line" )
+                , ( "data"
+                  , E.object
+                        [ ( "datasets"
+                          , E.list identity
+                                [ profileDataset
+                                , purpleDataset
+                                , orangeDataset
+                                ]
+                          )
+                        ]
+                  )
+                , ( "options", commonInfo.options )
+                ]
 
         profileDataset =
             E.object
@@ -183,46 +273,6 @@ profileChart profile imperial track =
                     E.object
                         [ ( "data", E.list identity [] ) ]
 
-        ( leftmostCentreDistance, rightmostCentreDistance ) =
-            ( halfOfView
-            , DomainModel.trueLength track.trackTree |> Quantity.minus halfOfView
-            )
-
-        orangeDistance =
-            DomainModel.distanceFromIndex track.currentPosition track.trackTree
-
-        focalPoint =
-            if profile.followSelectedPoint then
-                orangeDistance
-                    |> Quantity.clamp
-                        leftmostCentreDistance
-                        rightmostCentreDistance
-
-            else
-                profile.focalPoint
-
-        halfOfView =
-            -- Zoom level zero shows whole track.
-            DomainModel.trueLength track.trackTree
-                |> Quantity.multiplyBy (0.5 ^ profile.zoomLevel)
-                |> Quantity.half
-
-        --_ = Debug.log "PROFILE" profile
-        ( startDistance, endDistance ) =
-            ( focalPoint |> Quantity.minus halfOfView
-            , focalPoint |> Quantity.plus halfOfView
-            )
-
-        ( firstPointIndex, lastPointIndex ) =
-            ( DomainModel.indexFromDistanceRoundedDown startDistance track.trackTree
-            , DomainModel.indexFromDistanceRoundedUp endDistance track.trackTree
-            )
-
-        ( firstPointDistance, lastPointDistance ) =
-            ( DomainModel.distanceFromIndex firstPointIndex track.trackTree
-            , DomainModel.distanceFromIndex lastPointIndex track.trackTree
-            )
-
         coordinateCollector :
             RoadSection
             -> ( Quantity Float Meters, List E.Value )
@@ -238,7 +288,7 @@ profileChart profile imperial track =
             )
 
         firstPoint =
-            DomainModel.gpxPointFromIndex firstPointIndex track.trackTree
+            DomainModel.gpxPointFromIndex commonInfo.firstPointIndex track.trackTree
 
         profilePointFromIndex : Int -> E.Value
         profilePointFromIndex index =
@@ -260,14 +310,14 @@ profileChart profile imperial track =
             let
                 ( _, points ) =
                     DomainModel.traverseTreeBetweenLimitsToDepth
-                        firstPointIndex
-                        lastPointIndex
+                        commonInfo.firstPointIndex
+                        commonInfo.lastPointIndex
                         (always <| Just <| floor <| profile.zoomLevel + 8)
                         0
                         track.trackTree
                         coordinateCollector
-                        ( firstPointDistance
-                        , [ makeProfilePoint firstPoint firstPointDistance ]
+                        ( commonInfo.firstPointDistance
+                        , [ makeProfilePoint firstPoint commonInfo.firstPointDistance ]
                         )
             in
             List.reverse points
@@ -276,14 +326,147 @@ profileChart profile imperial track =
         makeProfilePoint gpx distance =
             let
                 altitude =
-                    altitudeFunction gpx.altitude
+                    commonInfo.altitudeFunction gpx.altitude
 
                 fDistance =
-                    distanceFunction distance
+                    commonInfo.distanceFunction distance
             in
             E.object
                 [ ( "x", E.float fDistance )
                 , ( "y", E.float altitude )
+                ]
+    in
+    chartStuff
+
+
+gradientChart : ProfileContext -> Bool -> TrackLoaded msg -> E.Value
+gradientChart profile imperial track =
+    -- Use JSON as per chart.js demands.
+    -- Indeed, declare the entire chart here, not in JS.
+    let
+        commonInfo =
+            commonChartScales profile imperial track True
+
+        chartStuff =
+            E.object
+                [ ( "type", E.string "line" )
+                , ( "data"
+                  , E.object
+                        [ ( "datasets"
+                          , E.list identity
+                                [ gradientDataset
+
+                                --, purpleDataset
+                                --, orangeDataset
+                                ]
+                          )
+                        ]
+                  )
+                , ( "options", commonInfo.options )
+                ]
+
+        gradientDataset =
+            E.object
+                [ ( "backgroundColor", E.string "rgba(182,198,237,0.6)" )
+                , ( "borderColor", E.string "rgba(77,110,205,0.6" )
+                , ( "pointStyle", E.bool False )
+                , ( "data", E.list identity coordinates )
+                , ( "fill", E.bool True )
+                , ( "label", E.string "gradient" )
+                , ( "step", E.bool True )
+                ]
+
+        orangeDataset =
+            E.object
+                [ ( "backgroundColor", E.string "orange" )
+                , ( "borderColor", E.string "rgba(255,0,0,1.0" )
+                , ( "pointStyle", E.string "circle" )
+                , ( "pointRadius", E.float 10 )
+                , ( "data", E.list identity orangePoint )
+                , ( "label", E.string "orange" )
+                ]
+
+        purpleDataset =
+            case track.markerPosition of
+                Just purple ->
+                    E.object
+                        [ ( "backgroundColor", E.string "purple" )
+                        , ( "borderColor", E.string "rgba(255,0,0,1.0" )
+                        , ( "pointStyle", E.string "circle" )
+                        , ( "pointRadius", E.float 10 )
+                        , ( "data", E.list identity <| [ gradientPointFromIndex purple ] )
+                        , ( "label", E.string "purple" )
+                        ]
+
+                Nothing ->
+                    E.object
+                        [ ( "data", E.list identity [] ) ]
+
+        orangeDistance =
+            DomainModel.distanceFromIndex track.currentPosition track.trackTree
+
+        coordinateCollector :
+            RoadSection
+            -> ( Quantity Float Meters, List E.Value )
+            -> ( Quantity Float Meters, List E.Value )
+        coordinateCollector road ( lastDistance, outputs ) =
+            let
+                newDistance =
+                    lastDistance |> Quantity.plus road.trueLength
+            in
+            ( newDistance
+            , makeGradientPoint
+                (Tuple.second road.sourceData)
+                newDistance
+                road.gradientAtStart
+                :: outputs
+            )
+
+        gradientPointFromIndex : Int -> E.Value
+        gradientPointFromIndex index =
+            let
+                asGPX =
+                    DomainModel.gpxPointFromIndex index track.trackTree
+
+                asDist =
+                    DomainModel.distanceFromIndex index track.trackTree
+            in
+            makeGradientPoint asGPX asDist 0
+
+        orangePoint : List E.Value
+        orangePoint =
+            [ gradientPointFromIndex track.currentPosition ]
+
+        coordinates : List E.Value
+        coordinates =
+            let
+                ( _, points ) =
+                    DomainModel.traverseTreeBetweenLimitsToDepth
+                        commonInfo.firstPointIndex
+                        commonInfo.lastPointIndex
+                        (always <| Just <| floor <| profile.zoomLevel + 8)
+                        0
+                        track.trackTree
+                        coordinateCollector
+                        ( commonInfo.firstPointDistance
+                        , []
+                        )
+            in
+            List.reverse points
+
+        makeGradientPoint : GPXSource -> Quantity Float Meters -> Float -> E.Value
+        makeGradientPoint gpx distance gradient =
+            let
+                altitude =
+                    commonInfo.altitudeFunction gpx.altitude
+
+                fDistance =
+                    commonInfo.distanceFunction distance
+            in
+            E.object
+                [ ( "x", E.float fDistance )
+                , ( "y", E.float gradient )
+                , ( "colour", E.string <| colourHexString <| gradientColourPastel gradient )
                 ]
     in
     chartStuff

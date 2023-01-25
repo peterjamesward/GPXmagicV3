@@ -679,10 +679,16 @@ paintProfileCharts panes imperial track =
             if pane.activeView == ViewProfile then
                 case pane.profileContext of
                     Just context ->
-                        MapPortController.paintCanvasProfileChart
-                            context
-                            imperial
-                            track
+                        Cmd.batch
+                            [ MapPortController.paintCanvasProfileChart
+                                context
+                                imperial
+                                track
+                            , MapPortController.paintCanvasGradientChart
+                                context
+                                imperial
+                                track
+                            ]
 
                     Nothing ->
                         Cmd.none

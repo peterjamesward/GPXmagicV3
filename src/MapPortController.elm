@@ -210,6 +210,16 @@ paintCanvasProfileChart profileContext imperial track =
             ]
 
 
+paintCanvasGradientChart : ViewProfileChartContext.ProfileContext -> Bool -> TrackLoaded msg -> Cmd msg
+paintCanvasGradientChart profileContext imperial track =
+    mapCommands <|
+        E.object
+            [ ( "Cmd", E.string "Gradient" )
+            , ( "container", E.string <| "gradient." ++ profileContext.contextSuffix )
+            , ( "chart", SceneBuilderProfile.gradientChart profileContext imperial track )
+            ]
+
+
 showPreview : String -> String -> String -> E.Value -> Cmd msg
 showPreview tag shape colour geoJson =
     mapCommands <|

@@ -192,8 +192,11 @@ function mapMessageHandler(msg) {
             break;
 
         case 'Profile':
-            //TODO: Repurpose to add chart data to canvas.
             profileAsChart(msg.container, msg.chart);
+            break;
+
+        case 'Gradient':
+            gradientChart(msg.container, msg.chart);
             break;
 
         case 'Style':
@@ -609,7 +612,6 @@ const eventPlugin = {
     }
 }
 
-
 Chart.register(eventPlugin);
 
 function profileAsChart(canvasContainerDiv, chartInfo) {
@@ -628,16 +630,16 @@ function profileAsChart(canvasContainerDiv, chartInfo) {
     // If the canvas is there, just swap the data in.
     if (chart != undefined && chart != null) {
 
-        console.log('Updating chart data');
-        chart.data.datasets[0] = chartInfo.data.datasets[0];
-        chart.data.datasets[1] = chartInfo.data.datasets[1];
-        chart.data.datasets[2] = chartInfo.data.datasets[2];
+        //console.log('Updating chart data');
+        chart.data.datasets[0] = chartInfo.data.datasets[0]; // Profile
+        chart.data.datasets[1] = chartInfo.data.datasets[1]; // Orange
+        chart.data.datasets[2] = chartInfo.data.datasets[2]; // Purple
         chart.options.scales = chartInfo.options.scales;
-        chart.update('none');
+        chart.update('none'); //update the chart
 
     } else {
 
-        console.log('Adding new canvas');
+        //console.log('Adding new canvas');
         var canvas = document.createElement('canvas');
         canvas.id     = canvasId;
         canvas.width  = profileDiv.width;
@@ -647,12 +649,70 @@ function profileAsChart(canvasContainerDiv, chartInfo) {
         canvas.style.border   = "1px solid";
         profileDiv.appendChild(canvas);
 
-        console.log('Making chart');
-        new Chart(
+        //console.log('Making chart');
+        chart = new Chart(
+            document.getElementById(canvasId),
+            chartInfo
+        );
+    };
+}
+
+function gradientChart(canvasContainerDiv, chartInfo) {
+
+    console.log(chartInfo);
+
+    var profileDiv = document.getElementById(canvasContainerDiv);
+    var canvasId = canvasContainerDiv + '.gradient.';
+    var chart = Chart.getChart(canvasId);
+
+    if ( profileDiv === undefined || profileDiv === null) {
+        console.log('No gradient container ' + canvasContainerDiv);
+        return;
+    }
+
+    // If the canvas is there, just swap the data in.
+    if (chart != undefined && chart != null) {
+
+        //console.log('Updating chart data');
+        chart.data.datasets[0] = chartInfo.data.datasets[0]; // Gradient
+        //chart.data.datasets[1] = chartInfo.data.datasets[1]; // Orange
+        //chart.data.datasets[2] = chartInfo.data.datasets[2]; // Purple
+        chart.options.scales = chartInfo.options.scales;
+
+    } else {
+
+        console.log('Adding gradient canvas');
+        var canvas = document.createElement('canvas');
+        canvas.id     = canvasId;
+        canvas.width  = profileDiv.width;
+        canvas.height = profileDiv.height;
+        canvas.style.zIndex   = 8;
+        canvas.style.position = "absolute";
+        canvas.style.border   = "1px solid";
+        profileDiv.appendChild(canvas);
+
+        console.log('Making gradient chart');
+        chart = new Chart(
             document.getElementById(canvasId),
             chartInfo
         );
     };
 
+        console.log(chart.data);
+
+   //// Chart.js requires us to manually override colours for the gradient chart
+   //if (chart != undefined && chart != null) {
+   //    var bars = chart.data.datasets[0].bars;
+   //    //TODO: Is this loop necessary?
+   //    for( i = 0 ; i < bars.length ; i++ ) {
+   //        bars[i].fillColor = chartInfo.data.datasets[0].data.colour[i];
+   //    }
+   //} else {
+   //    console.log('Unable to set colours.')
+   //}
+
+    chart.update('none'); //update the chart
+
 }
+
 
