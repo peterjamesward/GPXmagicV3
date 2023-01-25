@@ -15,11 +15,11 @@ Delete should display "Sorry" message when _almost_ all track is selected.
 
 > Eek, will we be able to adjust the left padding so the scales match up??
 
-TODO: Gradient chart (perhaps use curtain colours here as bars)
 TODO: Toggle curtain colours (may be tricky, could try gradient buckets as datasets)
 TODO: Segments (another dataset, need to label them)
 TODO: Previews (more datasets, need to label them)
 TODO: Check painting on load, resize, marker move, view change, layout change, etc.
+TODO: Tweak DIV padding and spacing on N-pane views.
 
 ---
 
