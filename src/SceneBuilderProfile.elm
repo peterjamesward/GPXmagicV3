@@ -340,6 +340,137 @@ profileChart profile imperial track =
     chartStuff
 
 
+profileChartWithColours : ProfileContext -> Bool -> TrackLoaded msg -> E.Value
+profileChartWithColours profile imperial track =
+    -- We cannot change the fill area dynamically under a line chart, so we create
+    -- multiple charts with common axes, representing different gradient classes
+    -- (steep up, up, flat, down, steep down, say).
+    -- Question is whether clearer to use one fold or one per class.
+    -- The subtlety is that we need start and end points for each region,
+    -- so it's somewhat fussy.
+    let
+        commonInfo =
+            commonChartScales profile imperial track False
+
+        chartStuff =
+            E.object
+                [ ( "type", E.string "line" )
+                , ( "data"
+                  , E.object
+                        [ ( "datasets"
+                          , E.list identity
+                                [ profileDataset
+                                , purpleDataset
+                                , orangeDataset
+                                ]
+                          )
+                        ]
+                  )
+                , ( "options", commonInfo.options )
+                ]
+
+        profileDataset =
+            E.object
+                [ ( "backgroundColor", E.string "rgba(182,198,237,0.6)" )
+                , ( "borderColor", E.string "rgba(77,110,205,0.6" )
+                , ( "pointStyle", E.bool False )
+                , ( "data", E.list identity coordinates )
+                , ( "fill", E.string "stack" )
+                , ( "label", E.string "altitude" )
+                ]
+
+        orangeDataset =
+            E.object
+                [ ( "backgroundColor", E.string "orange" )
+                , ( "borderColor", E.string "rgba(255,0,0,1.0" )
+                , ( "pointStyle", E.string "circle" )
+                , ( "pointRadius", E.float 10 )
+                , ( "data", E.list identity orangePoint )
+                , ( "label", E.string "orange" )
+                ]
+
+        purpleDataset =
+            case track.markerPosition of
+                Just purple ->
+                    E.object
+                        [ ( "backgroundColor", E.string "purple" )
+                        , ( "borderColor", E.string "rgba(255,0,0,1.0" )
+                        , ( "pointStyle", E.string "circle" )
+                        , ( "pointRadius", E.float 10 )
+                        , ( "data", E.list identity <| [ profilePointFromIndex purple ] )
+                        , ( "label", E.string "purple" )
+                        ]
+
+                Nothing ->
+                    E.object
+                        [ ( "data", E.list identity [] ) ]
+
+        coordinateCollector :
+            RoadSection
+            -> ( Quantity Float Meters, List E.Value )
+            -> ( Quantity Float Meters, List E.Value )
+        coordinateCollector road ( lastDistance, outputs ) =
+            let
+                newDistance =
+                    lastDistance |> Quantity.plus road.trueLength
+            in
+            ( newDistance
+            , makeProfilePoint (Tuple.second road.sourceData) newDistance
+                :: outputs
+            )
+
+        firstPoint =
+            DomainModel.gpxPointFromIndex commonInfo.firstPointIndex track.trackTree
+
+        profilePointFromIndex : Int -> E.Value
+        profilePointFromIndex index =
+            let
+                asGPX =
+                    DomainModel.gpxPointFromIndex index track.trackTree
+
+                asDist =
+                    DomainModel.distanceFromIndex index track.trackTree
+            in
+            makeProfilePoint asGPX asDist
+
+        orangePoint : List E.Value
+        orangePoint =
+            [ profilePointFromIndex track.currentPosition ]
+
+        coordinates : List E.Value
+        coordinates =
+            let
+                ( _, points ) =
+                    DomainModel.traverseTreeBetweenLimitsToDepth
+                        commonInfo.firstPointIndex
+                        commonInfo.lastPointIndex
+                        (always <| Just <| floor <| profile.zoomLevel + 8)
+                        0
+                        track.trackTree
+                        coordinateCollector
+                        ( commonInfo.firstPointDistance
+                        , [ makeProfilePoint firstPoint commonInfo.firstPointDistance ]
+                        )
+            in
+            List.reverse points
+
+        makeProfilePoint : GPXSource -> Quantity Float Meters -> E.Value
+        makeProfilePoint gpx distance =
+            let
+                altitude =
+                    commonInfo.altitudeFunction gpx.altitude
+
+                fDistance =
+                    commonInfo.distanceFunction distance
+            in
+            E.object
+                [ ( "x", E.float fDistance )
+                , ( "y", E.float altitude )
+                ]
+    in
+    chartStuff
+
+
 gradientChart : ProfileContext -> Bool -> TrackLoaded msg -> E.Value
 gradientChart profile imperial track =
     -- Use JSON as per chart.js demands.
