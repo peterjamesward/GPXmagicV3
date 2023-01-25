@@ -675,8 +675,8 @@ function gradientChart(canvasContainerDiv, chartInfo) {
 
         //console.log('Updating chart data');
         chart.data.datasets[0] = chartInfo.data.datasets[0]; // Gradient
-        //chart.data.datasets[1] = chartInfo.data.datasets[1]; // Orange
-        //chart.data.datasets[2] = chartInfo.data.datasets[2]; // Purple
+        chart.data.datasets[1] = chartInfo.data.datasets[1]; // Orange
+        chart.data.datasets[2] = chartInfo.data.datasets[2]; // Purple
         chart.options.scales = chartInfo.options.scales;
 
     } else {
@@ -697,19 +697,6 @@ function gradientChart(canvasContainerDiv, chartInfo) {
             chartInfo
         );
     };
-
-        console.log(chart.data);
-
-   //// Chart.js requires us to manually override colours for the gradient chart
-   //if (chart != undefined && chart != null) {
-   //    var bars = chart.data.datasets[0].bars;
-   //    //TODO: Is this loop necessary?
-   //    for( i = 0 ; i < bars.length ; i++ ) {
-   //        bars[i].fillColor = chartInfo.data.datasets[0].data.colour[i];
-   //    }
-   //} else {
-   //    console.log('Unable to set colours.')
-   //}
 
     chart.update('none'); //update the chart
 

@@ -356,9 +356,8 @@ gradientChart profile imperial track =
                         [ ( "datasets"
                           , E.list identity
                                 [ gradientDataset
-
-                                --, purpleDataset
-                                --, orangeDataset
+                                , purpleDataset
+                                , orangeDataset
                                 ]
                           )
                         ]
@@ -418,7 +417,7 @@ gradientChart profile imperial track =
             ( newDistance
             , makeGradientPoint
                 (Tuple.second road.sourceData)
-                newDistance
+                lastDistance
                 road.gradientAtStart
                 :: outputs
             )
@@ -431,8 +430,13 @@ gradientChart profile imperial track =
 
                 asDist =
                     DomainModel.distanceFromIndex index track.trackTree
+
+                gradient =
+                    DomainModel.leafFromIndex index track.trackTree
+                        |> DomainModel.asRecord
+                        |> .gradientAtStart
             in
-            makeGradientPoint asGPX asDist 0
+            makeGradientPoint asGPX asDist gradient
 
         orangePoint : List E.Value
         orangePoint =
@@ -467,7 +471,6 @@ gradientChart profile imperial track =
             E.object
                 [ ( "x", E.float fDistance )
                 , ( "y", E.float gradient )
-                , ( "colour", E.string <| colourHexString <| gradientColourPastel gradient )
                 ]
     in
     chartStuff
