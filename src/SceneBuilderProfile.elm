@@ -342,6 +342,12 @@ profileChart profile imperial track =
     chartStuff
 
 
+type alias GradientBucketEntry =
+    { bucketEndsAt : Length.Length
+    , chartEntries : List E.Value
+    }
+
+
 profileChartWithColours : ProfileContext -> Bool -> TrackLoaded msg -> E.Value
 profileChartWithColours profile imperial track =
     -- We cannot change the fill area dynamically under a line chart, so we create
@@ -351,24 +357,10 @@ profileChartWithColours profile imperial track =
     -- The subtlety is that we need start and end points for each region,
     -- so it's somewhat fussy.
     let
-        maxBucket =
-            -- Increase until performance suffers.
-            5
-
-        emptyBuckets : Dict Int (List ( Length.Length, RoadSection ))
-        emptyBuckets =
-            -- Let's see if this is a neat way to organise.
-            List.range 0 maxBucket
-                |> List.map (\n -> ( n, [] ))
-                |> Dict.fromList
-
-        percentPerBucket =
-            -- Gradient range for colouring is -20 to +20.
-            40 / toFloat maxBucket
-
         bucketNumber : Float -> Int
         bucketNumber gradient =
-            round <| (gradient + 20) / percentPerBucket
+            -- If this works with 40 buckets, we're good.
+            gradient |> round |> clamp -20 20
 
         commonInfo =
             commonChartScales profile imperial track False
@@ -392,66 +384,111 @@ profileChartWithColours profile imperial track =
 
         roadSectionDatasets : List E.Value
         roadSectionDatasets =
-            Dict.map datasetForGradientBucket roadSectionCollections
+            roadSectionCollections
+                |> Dict.map datasetForGradientBucket
                 |> Dict.values
 
-        datasetForGradientBucket : Int -> List ( Length.Length, RoadSection ) -> E.Value
-        datasetForGradientBucket bucket roadSections =
+        roadSectionCollections : Dict Int GradientBucketEntry
+        roadSectionCollections =
+            -- Partition road into buckets by gradient.
+            -- Keep track of final extent of each bucket to test for contiguity.
+            let
+                ( _, buckets ) =
+                    DomainModel.traverseTreeBetweenLimitsToDepth
+                        commonInfo.firstPointIndex
+                        commonInfo.lastPointIndex
+                        (always <| Just <| floor <| profile.zoomLevel + 8)
+                        0
+                        track.trackTree
+                        roadSectionCollector
+                        ( commonInfo.startDistance, Dict.empty )
+            in
+            buckets
+
+        roadSectionCollector :
+            RoadSection
+            -> ( Length.Length, Dict Int GradientBucketEntry )
+            -> ( Length.Length, Dict Int GradientBucketEntry )
+        roadSectionCollector road ( distanceAtStart, buckets ) =
+            {-
+               A few possibilities here:
+               1. The start of the section is left of, at, or right of the left edge.
+                   - This (partly) determines whether we may need a preceding null.
+               2. The bucket is empty or not.
+                   - If empty, we need a preceding null unless the start is at or left of the left edge.
+               3. If not, the last bucket entry is contiguous or not.
+                   - If contiguous, just add the road end,
+                   - otherwise:
+                       - a null between previous and new segments, road start & road end.
+               4. The end of the section is left of, at, or right of the right edge.
+                   - No, this doesn't matter.
+            -}
+            let
+                distanceAtEnd =
+                    distanceAtStart |> Quantity.plus road.trueLength
+
+                ( startWithinView, endWithinView ) =
+                    ( distanceAtStart |> Quantity.greaterThanOrEqualTo commonInfo.startDistance
+                    , distanceAtEnd |> Quantity.lessThanOrEqualTo commonInfo.endDistance
+                    )
+
+                ( startForChart, endForChart ) =
+                    ( makeProfilePoint (Tuple.first road.sourceData) distanceAtStart
+                    , makeProfilePoint (Tuple.second road.sourceData) distanceAtEnd
+                    )
+
+                bucketKey =
+                    bucketNumber road.gradientAtStart
+
+                newPoints =
+                    case Dict.get bucketKey buckets of
+                        Just bucket ->
+                            -- Non-empty by presence. Check for contiguity.
+                            if distanceAtStart |> Quantity.lessThanOrEqualTo bucket.bucketEndsAt then
+                                -- Contiguous, just add the end
+                                startForChart :: bucket.chartEntries
+
+                            else
+                                -- Non-contiguous, insert null and start also
+                                let
+                                    interveningNull =
+                                        makeNullPoint <|
+                                            Quantity.half <|
+                                                Quantity.plus distanceAtStart distanceAtEnd
+                                in
+                                [ endForChart, interveningNull, startForChart ]
+                                    ++ bucket.chartEntries
+
+                        Nothing ->
+                            -- First entry in this bucket
+                            [ endForChart, startForChart ]
+
+                newBucket : GradientBucketEntry
+                newBucket =
+                    { bucketEndsAt = distanceAtEnd
+                    , chartEntries = newPoints
+                    }
+            in
+            ( distanceAtEnd
+            , Dict.insert bucketKey newBucket buckets
+            )
+
+        datasetForGradientBucket : Int -> GradientBucketEntry -> E.Value
+        datasetForGradientBucket bucketKey { bucketEndsAt, chartEntries } =
             -- Each road section bucket makes its own dataset.
-            --TODO: Relevant colour for each bucket.
             E.object
                 [ ( "backgroundColor"
                   , E.string <|
                         colourHexString <|
                             gradientColourPastel <|
-                                toFloat bucket
+                                toFloat bucketKey
                   )
                 , ( "borderColor", E.string "rgba(77,110,205,0.6" )
                 , ( "pointStyle", E.bool False )
-                , ( "data", E.list identity (dataSetFromBucket roadSections) )
+                , ( "data", E.list identity (List.reverse chartEntries) )
                 , ( "fill", E.string "stack" )
                 , ( "spanGaps", E.bool False )
                 ]
-
-        dataSetFromBucket : List ( Length.Length, RoadSection ) -> List E.Value
-        dataSetFromBucket sections =
-            --Fold over list, look for contiguous sections.
-            --Force in a null value just beyond each contiguous group of sections.
-            --NOTE the lists are reversed by creation, so we use a right fold.
-            let
-                ( lastEndDistance, datasetData ) =
-                    sections
-                        |> List.reverse
-                        |> List.foldl nextRoadSection ( commonInfo.startDistance, [] )
-
-                nextRoadSection :
-                    ( Length.Length, RoadSection )
-                    -> ( Length.Length, List E.Value )
-                    -> ( Length.Length, List E.Value )
-                nextRoadSection ( thisSectionStart, section ) ( previousEnd, outputs ) =
-                    if thisSectionStart |> Quantity.equalWithin Length.centimeter previousEnd then
-                        -- Treat as contiguous, no nulls to output, just the end point
-                        ( thisSectionStart |> Quantity.plus section.trueLength
-                        , makeProfilePoint
-                            (section.sourceData |> Tuple.second)
-                            (thisSectionStart |> Quantity.plus section.trueLength)
-                            :: outputs
-                        )
-
-                    else
-                        -- There is a gap so we need to close the previous segment with a null
-                        -- start a new segment with a null,
-                        -- output the start of the section as well as the end.
-                        ( thisSectionStart |> Quantity.plus section.trueLength
-                        , makeProfilePoint
-                            (section.sourceData |> Tuple.second)
-                            (thisSectionStart |> Quantity.plus section.trueLength)
-                            :: makeNullPoint (thisSectionStart |> Quantity.minus Length.centimeter)
-                            :: makeNullPoint (previousEnd |> Quantity.plus Length.centimeter)
-                            :: outputs
-                        )
-            in
-            List.reverse datasetData
 
         orangeDataset =
             E.object
@@ -479,26 +516,6 @@ profileChartWithColours profile imperial track =
                     E.object
                         [ ( "data", E.list identity [] ) ]
 
-        roadSectionCollector :
-            RoadSection
-            -> ( Quantity Float Meters, Dict Int (List ( Length.Length, RoadSection )) )
-            -> ( Quantity Float Meters, Dict Int (List ( Length.Length, RoadSection )) )
-        roadSectionCollector road ( lastDistance, buckets ) =
-            let
-                bucket =
-                    bucketNumber road.gradientAtStart
-
-                bucketContent =
-                    Maybe.withDefault [] <|
-                        Dict.get bucket buckets
-
-                updatedBuckets =
-                    Dict.insert bucket (( lastDistance, road ) :: bucketContent) buckets
-            in
-            ( lastDistance |> Quantity.plus road.trueLength
-            , updatedBuckets
-            )
-
         firstPoint =
             DomainModel.gpxPointFromIndex commonInfo.firstPointIndex track.trackTree
 
@@ -516,23 +533,6 @@ profileChartWithColours profile imperial track =
         orangePoint : List E.Value
         orangePoint =
             [ profilePointFromIndex track.currentPosition ]
-
-        roadSectionCollections : Dict Int (List ( Length.Length, RoadSection ))
-        roadSectionCollections =
-            let
-                ( _, buckets ) =
-                    DomainModel.traverseTreeBetweenLimitsToDepth
-                        commonInfo.firstPointIndex
-                        commonInfo.lastPointIndex
-                        (always <| Just <| floor <| profile.zoomLevel + 8)
-                        0
-                        track.trackTree
-                        roadSectionCollector
-                        ( commonInfo.firstPointDistance
-                        , emptyBuckets
-                        )
-            in
-            buckets
 
         makeProfilePoint : GPXSource -> Quantity Float Meters -> E.Value
         makeProfilePoint gpx distance =
