@@ -405,7 +405,7 @@ profileChartWithColours profile imperial track =
                         0
                         track.trackTree
                         roadSectionCollector
-                        ( commonInfo.startDistance, Dict.empty )
+                        ( commonInfo.firstPointDistance, Dict.empty )
             in
             buckets
 
@@ -508,6 +508,8 @@ profileChartWithColours profile imperial track =
                 , ( "borderColor", E.string "rgba(77,110,205,0.6" )
                 , ( "pointStyle", E.bool False )
                 , ( "data", E.list identity chartEntries )
+                , ( "min", E.float <| commonInfo.distanceFunction commonInfo.startDistance )
+                , ( "max", E.float <| commonInfo.distanceFunction commonInfo.endDistance )
                 , ( "fill", E.string "stack" )
                 , ( "spanGaps", E.bool False )
                 ]
