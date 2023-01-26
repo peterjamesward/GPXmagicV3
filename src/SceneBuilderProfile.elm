@@ -274,7 +274,7 @@ profileChart profile imperial track =
 
                 Nothing ->
                     E.object
-                        [ ( "data", E.list identity [] ) ]
+                        [ ( "data", E.null ) ]
 
         coordinateCollector :
             RoadSection
@@ -360,11 +360,11 @@ profileChartWithColours profile imperial track =
         bucketNumberFromGradient : Float -> Int
         bucketNumberFromGradient gradient =
             -- If this works with 40 buckets, we're good. (It didn't).
-            gradient / 4 |> round |> clamp -5 5 |> (+) 6
+            gradient / 10 |> round |> clamp -2 3 |> (+) 5
 
         gradientFromBucketNumber : Int -> Float
         gradientFromBucketNumber bucket =
-            (bucket - 6) * 4 |> toFloat
+            (bucket - 5) * 10 |> toFloat
 
         commonInfo =
             commonChartScales profile imperial track False
@@ -377,9 +377,7 @@ profileChartWithColours profile imperial track =
                         [ ( "datasets"
                           , E.list identity <|
                                 roadSectionDatasets
-                                    ++ [ purpleDataset
-                                       , orangeDataset
-                                       ]
+                                    ++ [ orangeDataset ]
                           )
                         ]
                   )
@@ -391,7 +389,6 @@ profileChartWithColours profile imperial track =
             roadSectionCollections
                 |> Dict.map datasetForGradientBucket
                 |> Dict.values
-                |> List.reverse
 
         roadSectionCollections : Dict Int GradientBucketEntry
         roadSectionCollections =
@@ -449,10 +446,9 @@ profileChartWithColours profile imperial track =
                         Just bucket ->
                             -- Non-empty by presence. Check for contiguity.
                             if
-                                distanceAtStart
-                                    |> Quantity.equalWithin
-                                        Length.centimeter
-                                        bucket.bucketEndsAt
+                                Quantity.equalWithin Length.centimeter
+                                    bucket.bucketEndsAt
+                                    distanceAtStart
                             then
                                 -- Contiguous, just add the end
                                 endOfThisSegment :: bucket.chartEntries
@@ -463,7 +459,9 @@ profileChartWithColours profile imperial track =
                                     interveningNull =
                                         makeNullPoint <|
                                             Quantity.half <|
-                                                Quantity.plus bucket.bucketEndsAt distanceAtStart
+                                                Quantity.plus
+                                                    bucket.bucketEndsAt
+                                                    distanceAtStart
                                 in
                                 endOfThisSegment
                                     :: startOfThisSegment
@@ -507,9 +505,7 @@ profileChartWithColours profile imperial track =
                   )
                 , ( "borderColor", E.string "rgba(77,110,205,0.6" )
                 , ( "pointStyle", E.bool False )
-                , ( "data", E.list identity chartEntries )
-                , ( "min", E.float <| commonInfo.distanceFunction commonInfo.startDistance )
-                , ( "max", E.float <| commonInfo.distanceFunction commonInfo.endDistance )
+                , ( "data", E.list identity <| List.reverse chartEntries )
                 , ( "fill", E.string "stack" )
                 , ( "spanGaps", E.bool False )
                 ]
@@ -538,7 +534,7 @@ profileChartWithColours profile imperial track =
 
                 Nothing ->
                     E.object
-                        [ ( "data", E.list identity [] ) ]
+                        [ ( "data", E.null ) ]
 
         firstPoint =
             DomainModel.gpxPointFromIndex commonInfo.firstPointIndex track.trackTree
@@ -646,7 +642,7 @@ gradientChart profile imperial track =
 
                 Nothing ->
                     E.object
-                        [ ( "data", E.list identity [] ) ]
+                        [ ( "data", E.null ) ]
 
         orangeDistance =
             DomainModel.distanceFromIndex track.currentPosition track.trackTree

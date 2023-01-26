@@ -616,7 +616,7 @@ Chart.register(eventPlugin);
 
 function profileAsChart(canvasContainerDiv, chartInfo) {
 
-    //console.log(chartInfo);
+    console.log(chartInfo);
 
     var profileDiv = document.getElementById(canvasContainerDiv);
     var canvasId = canvasContainerDiv + '.profile.';
