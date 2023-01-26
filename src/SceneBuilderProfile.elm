@@ -454,7 +454,7 @@ profileChartWithColours profile imperial track =
                                     interveningNull =
                                         makeNullPoint <|
                                             Quantity.half <|
-                                                Quantity.plus distanceAtStart distanceAtEnd
+                                                Quantity.plus bucket.bucketEndsAt distanceAtStart
                                 in
                                 endOfThisSegment
                                     :: startOfThisSegment
