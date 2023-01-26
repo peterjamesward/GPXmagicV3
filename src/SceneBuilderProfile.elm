@@ -357,10 +357,14 @@ profileChartWithColours profile imperial track =
     -- The subtlety is that we need start and end points for each region,
     -- so it's somewhat fussy.
     let
-        bucketNumber : Float -> Int
-        bucketNumber gradient =
-            -- If this works with 40 buckets, we're good.
-            gradient |> round |> clamp -20 20
+        bucketNumberFromGradient : Float -> Int
+        bucketNumberFromGradient gradient =
+            -- If this works with 40 buckets, we're good. (It didn't).
+            gradient / 4 |> round |> clamp -5 5 |> (+) 6
+
+        gradientFromBucketNumber : Int -> Float
+        gradientFromBucketNumber bucket =
+            (bucket - 6) * 4 |> toFloat
 
         commonInfo =
             commonChartScales profile imperial track False
@@ -387,11 +391,11 @@ profileChartWithColours profile imperial track =
             roadSectionCollections
                 |> Dict.map datasetForGradientBucket
                 |> Dict.values
+                |> List.reverse
 
         roadSectionCollections : Dict Int GradientBucketEntry
         roadSectionCollections =
             -- Partition road into buckets by gradient.
-            -- Keep track of final extent of each bucket to test for contiguity.
             let
                 ( _, buckets ) =
                     DomainModel.traverseTreeBetweenLimitsToDepth
@@ -438,13 +442,18 @@ profileChartWithColours profile imperial track =
                     )
 
                 bucketKey =
-                    bucketNumber road.gradientAtStart
+                    bucketNumberFromGradient road.gradientAtStart
 
                 newPoints =
                     case Dict.get bucketKey buckets of
                         Just bucket ->
                             -- Non-empty by presence. Check for contiguity.
-                            if distanceAtStart |> Quantity.lessThanOrEqualTo bucket.bucketEndsAt then
+                            if
+                                distanceAtStart
+                                    |> Quantity.equalWithin
+                                        Length.centimeter
+                                        bucket.bucketEndsAt
+                            then
                                 -- Contiguous, just add the end
                                 endOfThisSegment :: bucket.chartEntries
 
@@ -478,12 +487,23 @@ profileChartWithColours profile imperial track =
         datasetForGradientBucket : Int -> GradientBucketEntry -> E.Value
         datasetForGradientBucket bucketKey { bucketEndsAt, chartEntries } =
             -- Each road section bucket makes its own dataset.
+            -- Will try putting null values for start and end into each collection
+            let
+                dummyStart =
+                    makeNullPoint commonInfo.startDistance
+
+                dummyEnd =
+                    makeNullPoint commonInfo.endDistance
+
+                paddedEntries =
+                    dummyStart :: chartEntries ++ [ dummyEnd ]
+            in
             E.object
                 [ ( "backgroundColor"
                   , E.string <|
                         colourHexString <|
                             gradientColourPastel <|
-                                toFloat bucketKey
+                                gradientFromBucketNumber bucketKey
                   )
                 , ( "borderColor", E.string "rgba(77,110,205,0.6" )
                 , ( "pointStyle", E.bool False )

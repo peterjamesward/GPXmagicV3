@@ -15,7 +15,10 @@ Delete should display "Sorry" message when _almost_ all track is selected.
 
 > Eek, will we be able to adjust the left padding so the scales match up??
 
-TODO: Toggle curtain colours (may be tricky, could try gradient buckets as datasets)
+WIP: Toggle curtain colours (may be tricky, could try gradient buckets as datasets)
+> Weird that only some buckets seem to drift.
+> Sums are wrong. Fix that first.
+
 TODO: Segments (another dataset, with missing data)
 TODO: Previews (more datasets, need to label them (optimisation for hide & show))
 TODO: Check painting on load, resize, marker move, view change, layout change, etc.
