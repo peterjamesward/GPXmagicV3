@@ -446,7 +446,7 @@ profileChartWithColours profile imperial track =
                             -- Non-empty by presence. Check for contiguity.
                             if distanceAtStart |> Quantity.lessThanOrEqualTo bucket.bucketEndsAt then
                                 -- Contiguous, just add the end
-                                startOfThisSegment :: bucket.chartEntries
+                                endOfThisSegment :: bucket.chartEntries
 
                             else
                                 -- Non-contiguous, insert null and start also
