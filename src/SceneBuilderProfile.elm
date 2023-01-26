@@ -432,7 +432,7 @@ profileChartWithColours profile imperial track =
                     , distanceAtEnd |> Quantity.lessThanOrEqualTo commonInfo.endDistance
                     )
 
-                ( startForChart, endForChart ) =
+                ( startOfThisSegment, endOfThisSegment ) =
                     ( makeProfilePoint (Tuple.first road.sourceData) distanceAtStart
                     , makeProfilePoint (Tuple.second road.sourceData) distanceAtEnd
                     )
@@ -446,7 +446,7 @@ profileChartWithColours profile imperial track =
                             -- Non-empty by presence. Check for contiguity.
                             if distanceAtStart |> Quantity.lessThanOrEqualTo bucket.bucketEndsAt then
                                 -- Contiguous, just add the end
-                                startForChart :: bucket.chartEntries
+                                startOfThisSegment :: bucket.chartEntries
 
                             else
                                 -- Non-contiguous, insert null and start also
@@ -456,12 +456,14 @@ profileChartWithColours profile imperial track =
                                             Quantity.half <|
                                                 Quantity.plus distanceAtStart distanceAtEnd
                                 in
-                                [ endForChart, interveningNull, startForChart ]
-                                    ++ bucket.chartEntries
+                                endOfThisSegment
+                                    :: startOfThisSegment
+                                    :: interveningNull
+                                    :: bucket.chartEntries
 
                         Nothing ->
                             -- First entry in this bucket
-                            [ endForChart, startForChart ]
+                            [ endOfThisSegment, startOfThisSegment ]
 
                 newBucket : GradientBucketEntry
                 newBucket =
@@ -485,7 +487,7 @@ profileChartWithColours profile imperial track =
                   )
                 , ( "borderColor", E.string "rgba(77,110,205,0.6" )
                 , ( "pointStyle", E.bool False )
-                , ( "data", E.list identity (List.reverse chartEntries) )
+                , ( "data", E.list identity chartEntries )
                 , ( "fill", E.string "stack" )
                 , ( "spanGaps", E.bool False )
                 ]
