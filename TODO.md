@@ -11,13 +11,6 @@ Delete should display "Sorry" message when _almost_ all track is selected.
 
 # WIP
 
-## Canvas profile chart
-
-> Eek, """There are too many active WebGL contexts on this page, the oldest context will be lost."""
-
-TODO: Tweak DIV padding and spacing on N-pane views.
-TODO: Customise tooltip to show only one altitude when coloured.
-
 ---
 
 # BACKLOG
