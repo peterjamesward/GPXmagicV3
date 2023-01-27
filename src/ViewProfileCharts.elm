@@ -321,7 +321,6 @@ view context paneId ( givenWidth, givenHeight ) msgWrapper =
             , Element.height <| px <| 3 * tenPercentHeight
             , alignLeft
             , alignTop
-            , Border.width 2
             , Border.color FlatColors.ChinesePalette.peace
             , htmlAttribute (id <| "gradient." ++ paneIdToString paneId)
             ]

@@ -644,7 +644,6 @@ function profileAsChart(canvasContainerDiv, chartInfo) {
         canvas.height = profileDiv.height;
         canvas.style.zIndex   = 8;
         canvas.style.position = "absolute";
-        canvas.style.border   = "1px solid";
         profileDiv.appendChild(canvas);
 
         //console.log('Making chart');
@@ -685,7 +684,6 @@ function gradientChart(canvasContainerDiv, chartInfo) {
         canvas.height = profileDiv.height;
         canvas.style.zIndex   = 8;
         canvas.style.position = "absolute";
-        canvas.style.border   = "1px solid";
         profileDiv.appendChild(canvas);
 
         console.log('Making gradient chart');
