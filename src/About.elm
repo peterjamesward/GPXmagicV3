@@ -9,6 +9,20 @@ aboutText =
 
 **N.B.** Apple fixed Safari so it works pretty well with GPXmagic.
 
+## 3.9.0
+
+**New chart alert**. We've found a rather nice charting library. If you're interested in the
+technical stuff, it uses an HTML5 canvas instead of SVG.
+
+* Toggle between gradient colours or monochrome
+* Monochrome chart shows segments and previews for Profile Smoother
+* Zoom using mouse wheel
+* Click and drag sideways to pan (when zoomed in)
+* Default view is whole track
+* Mouseover will show altitude, gradient, segment name, smoothing method as appropriate
+
+Note that track detail may be elided when zoomed out, to maintain performance.
+
 ## 3.8.2
 
 Reinstate slider for gradient limits in Profile Smoother.
