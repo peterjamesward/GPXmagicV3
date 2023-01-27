@@ -65,6 +65,7 @@ import DomainModel exposing (GPXSource, RoadSection)
 import Json.Encode as E
 import Length exposing (Meters)
 import Quantity exposing (Quantity)
+import Quantity.Interval as Interval
 import Tools.NamedSegmentOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (colourHexString)
@@ -269,19 +270,61 @@ profileChartMonochrome profile imperial track segments =
                 , ( "label", E.string "altitude" )
                 ]
 
-        segmentDataset : Tools.NamedSegmentOptions.NamedSegment -> E.Value
-        segmentDataset segment =
-            E.object
-                [ ( "backgroundColor", E.string "pink" )
-                , ( "borderColor", E.string "rgba(77,110,205,0.6" )
-                , ( "pointStyle", E.bool False )
-                , ( "data", E.list identity coordinates )
-                , ( "fill", E.string "stack" )
-                , ( "label", E.string segment.name )
-                ]
-
         segmentDatasets =
-            List.map segmentDataset segments
+            List.filterMap segmentDataset segments
+
+        segmentDataset : Tools.NamedSegmentOptions.NamedSegment -> Maybe E.Value
+        segmentDataset segment =
+            let
+                segmentCoordinates : List E.Value
+                segmentCoordinates =
+                    let
+                        segmentStartIndex =
+                            DomainModel.indexFromDistance
+                                segment.startDistance
+                                track.trackTree
+
+                        segmentEndIndex =
+                            DomainModel.indexFromDistance
+                                segment.endDistance
+                                track.trackTree
+
+                        segmentStartPoint =
+                            DomainModel.gpxPointFromIndex segmentStartIndex track.trackTree
+
+                        ( _, points ) =
+                            DomainModel.traverseTreeBetweenLimitsToDepth
+                                segmentStartIndex
+                                segmentEndIndex
+                                (always Nothing)
+                                0
+                                track.trackTree
+                                coordinateCollector
+                                ( segment.startDistance
+                                , [ makeProfilePoint segmentStartPoint segment.startDistance ]
+                                )
+                    in
+                    List.reverse points
+
+                segmentInterval =
+                    Interval.from segment.startDistance segment.endDistance
+
+                windowInterval =
+                    Interval.from commonInfo.startDistance commonInfo.endDistance
+            in
+            if Interval.intersects segmentInterval windowInterval then
+                Just <|
+                    E.object
+                        [ ( "backgroundColor", E.string "#ffc0cb" )
+                        , ( "borderColor", E.string "#ffc0cb" )
+                        , ( "pointStyle", E.bool False )
+                        , ( "data", E.list identity segmentCoordinates )
+                        , ( "fill", E.bool True )
+                        , ( "label", E.string segment.name )
+                        ]
+
+            else
+                Nothing
 
         orangeDataset =
             E.object
