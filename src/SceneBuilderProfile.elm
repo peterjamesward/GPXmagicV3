@@ -255,8 +255,8 @@ profileChartMonochrome profile imperial track segments previews =
                         [ ( "datasets"
                           , E.list identity <|
                                 profileDataset
-                                    :: segmentDatasets
-                                    ++ previewDatasets
+                                    :: previewDatasets
+                                    ++ segmentDatasets
                                     ++ [ purpleDataset, orangeDataset ]
                           )
                         ]
