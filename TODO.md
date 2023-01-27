@@ -13,11 +13,9 @@ Delete should display "Sorry" message when _almost_ all track is selected.
 
 ## Electron
 
-See if we can package with Electron. 
-Opens door to multiple windows, AppStore (money).
-Two things to look at:
-1. mdgriffiths has a TODOMVC app on Electron
-2. "Fiddle" allows for easy experiments.
+Made a good start.
+How to get Maps and Chart libraries installed.
+Is OAuth possible? I suspect not.
 
 ---
 
