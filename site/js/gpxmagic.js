@@ -1,3 +1,4 @@
+
 const app = Elm.Main.init({
     node: document.getElementById("myapp"),
     flags: rememberedBytes()
@@ -9,17 +10,6 @@ function rememberedBytes() {
     const bytes = localStorage.getItem("bytes");
     return bytes ? bytes.split(",").map(x => parseInt(x,10)) : null;
 }
-
-/* Generate high entropy random bytes using the Web Crypto API and
-remember them so that they are preserved between redirections. This
-allows to protect for XSS & authorization code attacks */
-app.ports.genRandomBytes.subscribe(n => {
-    const buffer = new Uint8Array(n);
-    crypto.getRandomValues(buffer);
-    const bytes = Array.from(buffer);
-    localStorage.setItem("bytes", bytes);
-    app.ports.randomBytes.send(bytes);
-});
 
 app.ports.mapCommands.subscribe(mapMessageHandler);
 app.ports.storageCommands.subscribe(storageMessageHandler);

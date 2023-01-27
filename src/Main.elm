@@ -268,7 +268,6 @@ init _ =
         , LocalStorage.storageGetItem "location"
         , LocalStorage.fetchMemoryUsage
         , LocalStorage.storageGetItem "welcome"
-        , Delay.after 100 DisplayWelcome
         ]
     )
 
