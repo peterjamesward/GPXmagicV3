@@ -15,15 +15,11 @@ Delete should display "Sorry" message when _almost_ all track is selected.
 
 > Eek, will we be able to adjust the left padding so the scales match up??
 
-WIP: Toggle curtain colours 
-
-> Try not using gapped datasets - use gradient ranges but start a new dataset 
-> on each change. A List of datasets, not a Dict.
-
 TODO: Segments (another dataset, with missing data)
 TODO: Previews (more datasets, need to label them (optimisation for hide & show))
 TODO: Check painting on load, resize, marker move, view change, layout change, etc.
 TODO: Tweak DIV padding and spacing on N-pane views.
+TODO: Customise tooltip to show only one altitude when coloured.
 
 ---
 

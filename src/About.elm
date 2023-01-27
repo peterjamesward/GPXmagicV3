@@ -215,6 +215,8 @@ Map component provided by MapBox.com.
 
 Land use data courtesy of Open Street Map via the Overpass API.
 
+Icons from www.flaticon.com/free-icons/.
+
 Your IP address may be logged for the purpose of aggregate usage recording; no personal details are stored.
 
 Cookie policy is "use no cookies". This may not apply to third-party components.

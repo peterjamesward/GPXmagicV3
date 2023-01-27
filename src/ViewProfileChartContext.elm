@@ -18,6 +18,7 @@ type Msg
     | ImageReset
     | ClickDelayExpired
     | ToggleFollowOrange
+    | ToggleColours
 
 
 type DragAction
@@ -36,4 +37,5 @@ type alias ProfileContext =
     , waitingForClickDelay : Bool
     , emphasis : Float
     , mouseEvent : Maybe Mouse.Event
+    , colouredChart : Bool
     }

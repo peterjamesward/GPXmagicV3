@@ -81,6 +81,22 @@ zoomButtons msgWrapper context =
                 else
                     useIcon FeatherIcons.unlock
             }
+        , Input.button []
+            { onPress = Just <| msgWrapper ToggleColours
+            , label =
+                image
+                    [ width <| px 20
+                    , height <| px 20
+                    ]
+                    { src =
+                        if context.colouredChart then
+                            "images/crayons-2.png"
+
+                        else
+                            "images/crayons.png"
+                    , description = "Toggle colours"
+                    }
+            }
         ]
 
 
@@ -253,6 +269,13 @@ update msg msgWrapper track ( givenWidth, givenHeight ) previews context =
         ImageDoubleClick _ ->
             ( context, [] )
 
+        ToggleColours ->
+            let
+                newContext =
+                    { context | colouredChart = not context.colouredChart }
+            in
+            ( newContext, [ Actions.RenderProfile newContext ] )
+
 
 view :
     ProfileContext
@@ -334,6 +357,7 @@ initialiseView suffix treeNode currentContext =
             , waitingForClickDelay = False
             , emphasis = 1.0
             , mouseEvent = Nothing
+            , colouredChart = False
             }
 
 

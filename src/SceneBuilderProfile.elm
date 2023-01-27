@@ -217,6 +217,15 @@ commonChartScales profile imperial track isGradients =
 
 profileChart : ProfileContext -> Bool -> TrackLoaded msg -> E.Value
 profileChart profile imperial track =
+    if profile.colouredChart then
+        profileChartWithColours profile imperial track
+
+    else
+        profileChartMonochrome profile imperial track
+
+
+profileChartMonochrome : ProfileContext -> Bool -> TrackLoaded msg -> E.Value
+profileChartMonochrome profile imperial track =
     -- Use JSON as per chart.js demands.
     -- Indeed, declare the entire chart here, not in JS.
     let
