@@ -14,6 +14,7 @@ import PaneContext exposing (PaneContext, paneIdToString)
 import Point3d
 import SceneBuilderMap exposing (latLonPairFromGpx)
 import SceneBuilderProfile
+import Tools.NamedSegmentOptions
 import TrackLoaded exposing (TrackLoaded)
 import ViewProfileChartContext
 
@@ -200,13 +201,24 @@ addFullTrackToMap track =
             ]
 
 
-paintCanvasProfileChart : ViewProfileChartContext.ProfileContext -> Bool -> TrackLoaded msg -> Cmd msg
-paintCanvasProfileChart profileContext imperial track =
+paintCanvasProfileChart :
+    ViewProfileChartContext.ProfileContext
+    -> Bool
+    -> TrackLoaded msg
+    -> List Tools.NamedSegmentOptions.NamedSegment
+    -> Cmd msg
+paintCanvasProfileChart profileContext imperial track segments =
     mapCommands <|
         E.object
             [ ( "Cmd", E.string "Profile" )
             , ( "container", E.string <| "altitude." ++ profileContext.contextSuffix )
-            , ( "chart", SceneBuilderProfile.profileChart profileContext imperial track )
+            , ( "chart"
+              , SceneBuilderProfile.profileChart
+                    profileContext
+                    imperial
+                    track
+                    segments
+              )
             ]
 
 

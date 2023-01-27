@@ -401,6 +401,7 @@ update msg model =
                         model.paneLayoutOptions
                         model.toolOptions.imperial
                         track
+                        model.toolOptions.namedSegmentOptions.namedSegments
                     )
 
                 Nothing ->
@@ -2645,6 +2646,7 @@ performActionCommands actions model =
                             model.paneLayoutOptions
                             model.toolOptions.imperial
                             track
+                            model.toolOptions.namedSegmentOptions.namedSegments
                         ]
 
                 ( PointerChange, Just track ) ->
@@ -2653,6 +2655,7 @@ performActionCommands actions model =
                             model.paneLayoutOptions
                             model.toolOptions.imperial
                             track
+                            model.toolOptions.namedSegmentOptions.namedSegments
                             :: MapPortController.addMarkersToMap track
                             :: List.map showPreviewOnMap (Dict.keys model.previews)
 
@@ -2752,6 +2755,7 @@ performActionCommands actions model =
                             context
                             model.toolOptions.imperial
                             track
+                            model.toolOptions.namedSegmentOptions.namedSegments
                         , MapPortController.paintCanvasGradientChart
                             context
                             model.toolOptions.imperial

@@ -65,6 +65,7 @@ import DomainModel exposing (GPXSource, RoadSection)
 import Json.Encode as E
 import Length exposing (Meters)
 import Quantity exposing (Quantity)
+import Tools.NamedSegmentOptions
 import TrackLoaded exposing (TrackLoaded)
 import UtilsForViews exposing (colourHexString)
 import ViewProfileChartContext exposing (ProfileContext)
@@ -215,17 +216,27 @@ commonChartScales profile imperial track isGradients =
     }
 
 
-profileChart : ProfileContext -> Bool -> TrackLoaded msg -> E.Value
-profileChart profile imperial track =
+profileChart :
+    ProfileContext
+    -> Bool
+    -> TrackLoaded msg
+    -> List Tools.NamedSegmentOptions.NamedSegment
+    -> E.Value
+profileChart profile imperial track segments =
     if profile.colouredChart then
         profileChartWithColours profile imperial track
 
     else
-        profileChartMonochrome profile imperial track
+        profileChartMonochrome profile imperial track segments
 
 
-profileChartMonochrome : ProfileContext -> Bool -> TrackLoaded msg -> E.Value
-profileChartMonochrome profile imperial track =
+profileChartMonochrome :
+    ProfileContext
+    -> Bool
+    -> TrackLoaded msg
+    -> List Tools.NamedSegmentOptions.NamedSegment
+    -> E.Value
+profileChartMonochrome profile imperial track segments =
     -- Use JSON as per chart.js demands.
     -- Indeed, declare the entire chart here, not in JS.
     let
@@ -238,11 +249,10 @@ profileChartMonochrome profile imperial track =
                 , ( "data"
                   , E.object
                         [ ( "datasets"
-                          , E.list identity
-                                [ profileDataset
-                                , purpleDataset
-                                , orangeDataset
-                                ]
+                          , E.list identity <|
+                                profileDataset
+                                    :: segmentDatasets
+                                    ++ [ purpleDataset, orangeDataset ]
                           )
                         ]
                   )
@@ -258,6 +268,20 @@ profileChartMonochrome profile imperial track =
                 , ( "fill", E.string "stack" )
                 , ( "label", E.string "altitude" )
                 ]
+
+        segmentDataset : Tools.NamedSegmentOptions.NamedSegment -> E.Value
+        segmentDataset segment =
+            E.object
+                [ ( "backgroundColor", E.string "pink" )
+                , ( "borderColor", E.string "rgba(77,110,205,0.6" )
+                , ( "pointStyle", E.bool False )
+                , ( "data", E.list identity coordinates )
+                , ( "fill", E.string "stack" )
+                , ( "label", E.string segment.name )
+                ]
+
+        segmentDatasets =
+            List.map segmentDataset segments
 
         orangeDataset =
             E.object

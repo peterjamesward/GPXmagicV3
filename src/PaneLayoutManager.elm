@@ -672,8 +672,13 @@ dimensionsWithLayout layout ( w, h ) =
             ( takeHalf w, takeHalf h |> Quantity.minus (Pixels.pixels 20) )
 
 
-paintProfileCharts : PaneLayoutOptions -> Bool -> TrackLoaded msg -> Cmd msg
-paintProfileCharts panes imperial track =
+paintProfileCharts :
+    PaneLayoutOptions
+    -> Bool
+    -> TrackLoaded msg
+    -> List Tools.NamedSegmentOptions.NamedSegment
+    -> Cmd msg
+paintProfileCharts panes imperial track segments =
     let
         paintIfProfileVisible pane =
             if pane.activeView == ViewProfile then
@@ -684,6 +689,7 @@ paintProfileCharts panes imperial track =
                                 context
                                 imperial
                                 track
+                                segments
                             , MapPortController.paintCanvasGradientChart
                                 context
                                 imperial
