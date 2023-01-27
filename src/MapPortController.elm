@@ -3,6 +3,7 @@ port module MapPortController exposing (..)
 import Actions exposing (ToolAction(..))
 import Angle
 import BoundingBox3d
+import Dict exposing (Dict)
 import Direction2d
 import DomainModel exposing (..)
 import Json.Decode as D exposing (Decoder, field, string)
@@ -12,6 +13,7 @@ import MapTypes
 import MapboxKey exposing (mapboxKey)
 import PaneContext exposing (PaneContext, paneIdToString)
 import Point3d
+import PreviewData exposing (PreviewData)
 import SceneBuilderMap exposing (latLonPairFromGpx)
 import SceneBuilderProfile
 import Tools.NamedSegmentOptions
@@ -206,8 +208,9 @@ paintCanvasProfileChart :
     -> Bool
     -> TrackLoaded msg
     -> List Tools.NamedSegmentOptions.NamedSegment
+    -> Dict String PreviewData
     -> Cmd msg
-paintCanvasProfileChart profileContext imperial track segments =
+paintCanvasProfileChart profileContext imperial track segments previews =
     mapCommands <|
         E.object
             [ ( "Cmd", E.string "Profile" )
@@ -218,6 +221,7 @@ paintCanvasProfileChart profileContext imperial track segments =
                     imperial
                     track
                     segments
+                    previews
               )
             ]
 

@@ -677,8 +677,9 @@ paintProfileCharts :
     -> Bool
     -> TrackLoaded msg
     -> List Tools.NamedSegmentOptions.NamedSegment
+    -> Dict String PreviewData
     -> Cmd msg
-paintProfileCharts panes imperial track segments =
+paintProfileCharts panes imperial track segments previews =
     let
         paintIfProfileVisible pane =
             if pane.activeView == ViewProfile then
@@ -690,6 +691,7 @@ paintProfileCharts panes imperial track segments =
                                 imperial
                                 track
                                 segments
+                                previews
                             , MapPortController.paintCanvasGradientChart
                                 context
                                 imperial

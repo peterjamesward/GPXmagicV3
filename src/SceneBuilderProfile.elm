@@ -64,11 +64,12 @@ import Dict exposing (Dict)
 import DomainModel exposing (GPXSource, RoadSection)
 import Json.Encode as E
 import Length exposing (Meters)
+import PreviewData exposing (PreviewData, PreviewShape(..))
 import Quantity exposing (Quantity)
 import Quantity.Interval as Interval
 import Tools.NamedSegmentOptions
 import TrackLoaded exposing (TrackLoaded)
-import UtilsForViews exposing (colourHexString)
+import UtilsForViews exposing (colourHexString, uiColourHexString)
 import ViewProfileChartContext exposing (ProfileContext)
 
 
@@ -222,13 +223,14 @@ profileChart :
     -> Bool
     -> TrackLoaded msg
     -> List Tools.NamedSegmentOptions.NamedSegment
+    -> Dict String PreviewData
     -> E.Value
-profileChart profile imperial track segments =
+profileChart profile imperial track segments previews =
     if profile.colouredChart then
         profileChartWithColours profile imperial track
 
     else
-        profileChartMonochrome profile imperial track segments
+        profileChartMonochrome profile imperial track segments previews
 
 
 profileChartMonochrome :
@@ -236,8 +238,9 @@ profileChartMonochrome :
     -> Bool
     -> TrackLoaded msg
     -> List Tools.NamedSegmentOptions.NamedSegment
+    -> Dict String PreviewData
     -> E.Value
-profileChartMonochrome profile imperial track segments =
+profileChartMonochrome profile imperial track segments previews =
     -- Use JSON as per chart.js demands.
     -- Indeed, declare the entire chart here, not in JS.
     let
@@ -253,6 +256,7 @@ profileChartMonochrome profile imperial track segments =
                           , E.list identity <|
                                 profileDataset
                                     :: segmentDatasets
+                                    ++ previewDatasets
                                     ++ [ purpleDataset, orangeDataset ]
                           )
                         ]
@@ -265,7 +269,7 @@ profileChartMonochrome profile imperial track segments =
                 [ ( "backgroundColor", E.string "rgba(182,198,237,0.6)" )
                 , ( "borderColor", E.string "rgba(77,110,205,0.6" )
                 , ( "pointStyle", E.bool False )
-                , ( "data", E.list identity coordinates )
+                , ( "data", E.list identity <| chartCoordinates track.trackTree )
                 , ( "fill", E.string "stack" )
                 , ( "label", E.string "altitude" )
                 ]
@@ -326,6 +330,33 @@ profileChartMonochrome profile imperial track segments =
             else
                 Nothing
 
+        previewDatasets =
+            previews
+                |> Dict.map previewDataset
+                |> Dict.values
+                |> List.filterMap identity
+
+        previewDataset : String -> PreviewData -> Maybe E.Value
+        previewDataset tag preview =
+            case preview.shape of
+                PreviewProfile tree ->
+                    let
+                        colour =
+                            uiColourHexString preview.colour
+                    in
+                    Just <|
+                        E.object
+                            [ ( "backgroundColor", E.string colour )
+                            , ( "borderColor", E.string colour )
+                            , ( "pointStyle", E.bool False )
+                            , ( "data", E.list identity <| chartCoordinates tree )
+                            , ( "fill", E.bool False )
+                            , ( "label", E.string tag )
+                            ]
+
+                _ ->
+                    Nothing
+
         orangeDataset =
             E.object
                 [ ( "backgroundColor", E.string "orange" )
@@ -384,8 +415,8 @@ profileChartMonochrome profile imperial track segments =
         orangePoint =
             [ profilePointFromIndex track.currentPosition ]
 
-        coordinates : List E.Value
-        coordinates =
+        chartCoordinates : DomainModel.PeteTree -> List E.Value
+        chartCoordinates tree =
             let
                 ( _, points ) =
                     DomainModel.traverseTreeBetweenLimitsToDepth
@@ -393,7 +424,7 @@ profileChartMonochrome profile imperial track segments =
                         commonInfo.lastPointIndex
                         (always <| Just <| floor <| profile.zoomLevel + 8)
                         0
-                        track.trackTree
+                        tree
                         coordinateCollector
                         ( commonInfo.firstPointDistance
                         , [ makeProfilePoint firstPoint commonInfo.firstPointDistance ]
