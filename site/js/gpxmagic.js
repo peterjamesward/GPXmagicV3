@@ -631,9 +631,7 @@ function profileAsChart(canvasContainerDiv, chartInfo) {
     if (chart != undefined && chart != null) {
 
         //console.log('Updating chart data');
-        chart.data.datasets[0] = chartInfo.data.datasets[0]; // Profile
-        chart.data.datasets[1] = chartInfo.data.datasets[1]; // Orange
-        chart.data.datasets[2] = chartInfo.data.datasets[2]; // Purple
+        chart.data.datasets = chartInfo.data.datasets; // Profile
         chart.options.scales = chartInfo.options.scales;
         chart.update('none'); //update the chart
 
