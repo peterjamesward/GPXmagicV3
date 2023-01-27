@@ -11,7 +11,7 @@ aboutText =
 
 ## 3.9.0
 
-**New chart alert**. We've found a rather nice charting library. If you're interested in the
+**New profile chart alert**. We've found a rather nice charting library. If you're interested in the
 technical stuff, it uses an HTML5 canvas instead of SVG.
 
 * Toggle between gradient colours or monochrome
