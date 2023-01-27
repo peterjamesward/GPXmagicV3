@@ -2,10 +2,9 @@ module Main exposing (Model, Msg, main)
 
 import Actions exposing (ToolAction(..))
 import Angle
-import Browser exposing (application)
+import Browser
 import Browser.Dom as Dom
 import Browser.Events
-import Browser.Navigation exposing (Key)
 import Delay
 import Dict exposing (Dict)
 import Direction2d
@@ -33,13 +32,10 @@ import Json.Encode as E
 import LandUseDataOSM
 import LandUseDataTypes
 import Length
-import List.Extra
 import LocalStorage
 import MapPortController
 import Markdown
 import MyIP
-import OAuthPorts exposing (randomBytes)
-import OAuthTypes as O exposing (OAuthMsg(..))
 import PaneContext
 import PaneLayoutManager exposing (Msg(..))
 import Pixels exposing (Pixels)
@@ -47,8 +43,6 @@ import PreviewData exposing (PreviewData, PreviewShape(..))
 import Quantity exposing (Quantity)
 import SceneBuilderMap
 import SplitPane.SplitPane as SplitPane exposing (..)
-import StravaAuth exposing (getStravaToken)
-import String.Interpolate
 import SvgPathExtractor
 import Task
 import Time
@@ -64,7 +58,6 @@ import Tools.Graph
 import Tools.I18N as I18N
 import Tools.I18NOptions as I18NOptions
 import Tools.Interpolate
-import Tools.InterpolateOptions
 import Tools.MoveAndStretch
 import Tools.MoveScaleRotate
 import Tools.NamedSegment
@@ -85,8 +78,6 @@ import Tools.Timestamp
 import Tools.TrackInfoBox
 import ToolsController exposing (encodeColour)
 import TrackLoaded exposing (TrackLoaded, indexLeaves)
-import Url exposing (Url)
-import Url.Parser exposing (..)
 import UtilsForViews exposing (uiColourHexString)
 import ViewMap
 import ViewPureStyles exposing (..)
@@ -97,11 +88,8 @@ type Msg
     = GpxRequested
     | GpxSelected File
     | GpxLoaded String
-    | TryRemoteLoad
-    | GpxFromUrl (Result Http.Error String)
     | ToggleLoadOptionMenu
     | ToggleRGTOptions
-    | OAuthMessage OAuthMsg
     | AdjustTimeZone Time.Zone
     | ReceivedIpDetails (Result Http.Error IpInfo)
     | StorageMessage E.Value
@@ -140,12 +128,10 @@ type alias Model =
     , time : Time.Posix
     , zone : Time.Zone
     , ipInfo : Maybe IpInfo
-    , stravaAuthentication : O.Model
     , loadOptionsMenuOpen : Bool
     , svgFileOptions : SvgPathExtractor.Options
     , location : I18NOptions.Location
     , rgtOptionsVisible : Bool
-    , loadFromUrl : Maybe Url
 
     -- Track stuff
     , track : Maybe (TrackLoaded Msg)
@@ -225,42 +211,25 @@ decodeSplitValues values model =
             model
 
 
-main : Program (Maybe (List Int)) Model Msg
+main : Program () Model Msg
 main =
-    -- This is the 'main' from OAuth example.
-    application
-        { init = Maybe.map StravaAuth.convertBytes >> init
+    Browser.element
+        { init = init
+        , view = view
         , update = update
         , subscriptions = subscriptions
-        , onUrlRequest = always (OAuthMessage O.NoOp)
-        , onUrlChange = always (OAuthMessage O.NoOp)
-        , view = view
         }
 
 
-init : Maybe { state : String } -> Url -> Key -> ( Model, Cmd Msg )
-init mflags origin navigationKey =
-    -- We stitch in the OAuth init stuff somehow here.
-    let
-        ( authData, authCmd ) =
-            StravaAuth.init mflags origin navigationKey OAuthMessage
-
-        remoteUrl =
-            origin.query
-                |> Maybe.map (String.split "=")
-                |> Maybe.andThen (List.Extra.getAt 1)
-                |> Maybe.andThen Url.percentDecode
-                |> Maybe.andThen Url.fromString
-    in
+init : () -> ( Model, Cmd Msg )
+init _ =
     ( { filename = Nothing
       , time = Time.millisToPosix 0
       , zone = Time.utc
       , ipInfo = Nothing
-      , stravaAuthentication = authData
       , loadOptionsMenuOpen = False
       , svgFileOptions = SvgPathExtractor.defaultOptions
       , rgtOptionsVisible = False
-      , loadFromUrl = remoteUrl
       , location = I18N.defaultLocation
       , track = Nothing
       , mapPointsDraggable = False
@@ -287,8 +256,7 @@ init mflags origin navigationKey =
       , rgtOptions = Tools.RGTOptions.defaults
       }
     , Cmd.batch
-        [ authCmd
-        , Task.perform AdjustTimeZone Time.here
+        [ Task.perform AdjustTimeZone Time.here
         , Task.attempt GotWindowSize Dom.getViewport
         , LocalStorage.storageGetItem "splits"
         , LocalStorage.storageGetItem "tools"
@@ -370,21 +338,12 @@ update msg model =
     in
     case msg of
         DisplayWelcome ->
-            let
-                -- Try loading remote data now, after map may have initialised
-                loadCmd =
-                    Delay.after 500 TryRemoteLoad
-            in
-            if model.welcomeDisplayed then
-                ( model, loadCmd )
-
-            else
-                ( { model | infoText = Just ( "main", "welcome" ) }
-                , Cmd.batch
-                    [ LocalStorage.storageSetItem "welcome" (E.bool True)
-                    , loadCmd
-                    ]
-                )
+            ( { model | infoText = Just ( "main", "welcome" ) }
+            , Cmd.batch
+                [ LocalStorage.storageSetItem "welcome" (E.bool True)
+                , Cmd.none
+                ]
+            )
 
         RGTOptions options ->
             ( { model | rgtOptions = Tools.RGTOptions.update options model.rgtOptions }
@@ -492,36 +451,6 @@ update msg model =
                 mapInfoWithLocation
             )
 
-        TryRemoteLoad ->
-            ( model
-            , case model.loadFromUrl of
-                Nothing ->
-                    Cmd.none
-
-                Just url ->
-                    Http.get
-                        { url = Url.toString url
-                        , expect = Http.expectString GpxFromUrl
-                        }
-            )
-
-        GpxFromUrl result ->
-            case result of
-                Ok content ->
-                    let
-                        ( newModel, cmds ) =
-                            processGpxContent content
-
-                        newPaneLayout =
-                            PaneLayoutManager.forceMapView newModel.paneLayoutOptions
-                    in
-                    ( { newModel | paneLayoutOptions = newPaneLayout }
-                    , cmds
-                    )
-
-                Err _ ->
-                    ( model, Cmd.none )
-
         GpxRequested ->
             ( { model | modalMessage = Just "askgpx" }
             , Select.file [ "text/gpx" ] GpxSelected
@@ -537,34 +466,6 @@ update msg model =
 
         GpxLoaded content ->
             processGpxContent content
-
-        --Delegate wrapped OAuthmessages.
-        --For v3, we're copying the state into the Tool, which is not ideal
-        --but most of the tools have no need to know about this.
-        OAuthMessage authMsg ->
-            let
-                ( newAuthData, authCmd ) =
-                    StravaAuth.update authMsg model.stravaAuthentication
-
-                isToken =
-                    getStravaToken newAuthData
-
-                ( withSharedToken, _ ) =
-                    case isToken of
-                        Just token ->
-                            update
-                                (ToolsMsg <|
-                                    ToolsController.ToolStravaMsg <|
-                                        Tools.StravaTools.ConnectionInfo token
-                                )
-                                model
-
-                        Nothing ->
-                            ( model, Cmd.none )
-            in
-            ( { withSharedToken | stravaAuthentication = newAuthData }
-            , Cmd.map OAuthMessage authCmd
-            )
 
         StorageMessage json ->
             let
@@ -952,62 +853,58 @@ bestTrackName model =
                             (I18N.localisedString model.location "main" "unnamed")
 
 
-view : Model -> Browser.Document Msg
+view : Model -> Html Msg
 view model =
-    { title = composeTitle model
-    , body =
-        [ layout
-            (Background.color model.backgroundColour
-                :: (inFront <|
-                        case model.modalMessage of
-                            Just message ->
-                                showModalMessage
-                                    model.location
-                                    (Pixels.inPixels <| Tuple.first model.contentArea)
-                                    (I18N.localisedString model.location "main" message)
-                                    DismissModalMessage
+    layout
+        (Background.color model.backgroundColour
+            :: (inFront <|
+                    case model.modalMessage of
+                        Just message ->
+                            showModalMessage
+                                model.location
+                                (Pixels.inPixels <| Tuple.first model.contentArea)
+                                (I18N.localisedString model.location "main" message)
+                                DismissModalMessage
 
-                            Nothing ->
-                                none
-                   )
-                :: (inFront <| infoTextPopup model.location model.infoText)
-                :: (inFront <|
-                        if model.languageEditorOpen then
-                            I18N.editor I18NMsg model.location model.languageEditor
-
-                        else
+                        Nothing ->
                             none
-                   )
-                --:: (htmlAttribute <| Mouse.onClick BackgroundClick)
-                :: commonLayoutStyles
-            )
-          <|
-            column [ width fill, height fill ]
-                [ el
-                    [ width fill
-                    , Border.widthEach { edges | bottom = 1 }
-                    , Border.color ukraineBlue
-                    ]
-                  <|
-                    topLoadingBar model
-                , el
-                    [ width fill
-                    , Border.widthEach { edges | top = 1 }
-                    , Border.color ukraineYellow
-                    ]
-                  <|
-                    html <|
-                        div
-                            [ style "width" "100%", style "height" "100%" ]
-                            [ SplitPane.view
-                                rightDockConfig
-                                (notTheRightDockView model)
-                                (rightDockView model)
-                                model.rightDockLeftEdge
-                            ]
+               )
+            :: (inFront <| infoTextPopup model.location model.infoText)
+            :: (inFront <|
+                    if model.languageEditorOpen then
+                        I18N.editor I18NMsg model.location model.languageEditor
+
+                    else
+                        none
+               )
+            --:: (htmlAttribute <| Mouse.onClick BackgroundClick)
+            :: commonLayoutStyles
+        )
+    <|
+        column [ width fill, height fill ]
+            [ el
+                [ width fill
+                , Border.widthEach { edges | bottom = 1 }
+                , Border.color ukraineBlue
                 ]
-        ]
-    }
+              <|
+                topLoadingBar model
+            , el
+                [ width fill
+                , Border.widthEach { edges | top = 1 }
+                , Border.color ukraineYellow
+                ]
+              <|
+                html <|
+                    div
+                        [ style "width" "100%", style "height" "100%" ]
+                        [ SplitPane.view
+                            rightDockConfig
+                            (notTheRightDockView model)
+                            (rightDockView model)
+                            model.rightDockLeftEdge
+                        ]
+            ]
 
 
 leftDockConfig : ViewConfig Msg
@@ -1219,9 +1116,6 @@ topLoadingBar model =
         , saveButton
         , row [ alignRight, spacing 5 ]
             [ Tools.OneClickQuickFix.oneClickQuickFixButton model.location OneClickMsg model.track
-            , StravaAuth.stravaButton model.stravaAuthentication OAuthMessage
-
-            --, PaneLayoutManager.paneLayoutMenu model.location PaneMsg model.paneLayoutOptions
             , buyMeACoffeeButton
             ]
         ]
@@ -1353,8 +1247,7 @@ showOptionsMenu model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ randomBytes (\ints -> OAuthMessage (GotRandomBytes ints))
-        , MapPortController.mapResponses (PaneMsg << MapPortsMessage << MapPortController.MapPortMessage)
+        [ MapPortController.mapResponses (PaneMsg << MapPortsMessage << MapPortController.MapPortMessage)
         , LocalStorage.storageResponses StorageMessage
         , Sub.map SplitLeftDockRightEdge <| SplitPane.subscriptions model.leftDockRightEdge
         , Sub.map SplitRightDockLeftEdge <| SplitPane.subscriptions model.rightDockLeftEdge
@@ -2598,17 +2491,6 @@ performActionCommands actions model =
         performAction : ToolAction Msg -> Cmd Msg
         performAction action =
             case ( action, model.track ) of
-                ( TryRemoteLoadIfGiven, _ ) ->
-                    case model.loadFromUrl of
-                        Nothing ->
-                            Cmd.none
-
-                        Just url ->
-                            Http.get
-                                { url = Url.toString url
-                                , expect = Http.expectString GpxFromUrl
-                                }
-
                 ( SetCurrent _, Just track ) ->
                     MapPortController.addMarkersToMap track
 
