@@ -15,7 +15,7 @@ Delete should display "Sorry" message when _almost_ all track is selected.
 
 > Eek, will we be able to adjust the left padding so the scales match up??
 
-WIP: Toggle curtain colours (may be tricky, could try gradient buckets as datasets)
+WIP: Toggle curtain colours 
 
 > Try not using gapped datasets - use gradient ranges but start a new dataset 
 > on each change. A List of datasets, not a Dict.

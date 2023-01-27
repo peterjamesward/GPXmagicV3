@@ -360,11 +360,11 @@ profileChartWithColours profile imperial track =
         bucketNumberFromGradient : Float -> Int
         bucketNumberFromGradient gradient =
             -- If this works with 40 buckets, we're good. (It didn't).
-            gradient / 10 |> round |> clamp -2 3 |> (+) 5
+            gradient / 5 |> round |> clamp -4 4
 
         gradientFromBucketNumber : Int -> Float
         gradientFromBucketNumber bucket =
-            (bucket - 5) * 10 |> toFloat
+            bucket * 4 |> toFloat
 
         commonInfo =
             commonChartScales profile imperial track False
@@ -377,7 +377,9 @@ profileChartWithColours profile imperial track =
                         [ ( "datasets"
                           , E.list identity <|
                                 roadSectionDatasets
-                                    ++ [ orangeDataset ]
+                                    ++ [ purpleDataset
+                                       , orangeDataset
+                                       ]
                           )
                         ]
                   )
