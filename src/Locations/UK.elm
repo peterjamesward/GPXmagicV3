@@ -81,7 +81,7 @@ mean something to the Wahoo RGT Magic Roads parser. They have no effect here in 
                 , ( "flat", """Drawers""" )
                 , ( "grid", """Grid of four""" )
                 , ( "Map", """Map""" )
-                , ( "Perspective", """Perspective""" )
+                , ( "Perspective", """3-D""" )
                 , ( "Rider", """Rider""" )
                 , ( "Profile", """Profile""" )
                 , ( "Plan", """Plan""" )

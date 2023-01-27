@@ -11,6 +11,10 @@ Delete should display "Sorry" message when _almost_ all track is selected.
 
 # WIP
 
+## Profile
+
+Choice between "old" and "new" Profile, as separate view modes.
+
 ---
 
 # BACKLOG

@@ -22,6 +22,7 @@ import DomainModel exposing (skipCount)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
+import Element.Font as Font
 import Element.Input as Input
 import FeatherIcons
 import FlatColors.ChinesePalette
@@ -605,7 +606,7 @@ viewModeChoices location msgWrapper context options =
             , Input.optionWith ViewInfo <| localise "About"
             ]
     in
-    row [ width fill ]
+    row [ width fill, Font.size 12 ]
         [ Input.radioRow
             [ spacing 5
             , paddingEach { top = 4, left = 4, bottom = 0, right = 0 }
@@ -638,15 +639,17 @@ viewModeChoicesNoMap location msgWrapper pane =
             , Input.optionWith ViewGraph <| localise "Route"
             ]
     in
-    Input.radioRow
-        [ spacing 5
-        , paddingEach { top = 4, left = 4, bottom = 0, right = 0 }
+    row [ width fill, Font.size 12 ]
+        [ Input.radioRow
+            [ spacing 5
+            , paddingEach { top = 4, left = 4, bottom = 0, right = 0 }
+            ]
+            { onChange = msgWrapper << SetViewMode pane.paneId
+            , selected = Just pane.activeView
+            , label = Input.labelHidden "Choose view"
+            , options = reducedOptionList
+            }
         ]
-        { onChange = msgWrapper << SetViewMode pane.paneId
-        , selected = Just pane.activeView
-        , label = Input.labelHidden "Choose view"
-        , options = reducedOptionList
-        }
 
 
 takeHalf qty =
@@ -703,14 +706,25 @@ paintProfileCharts panes imperial track segments previews =
 
             else
                 Cmd.none
+
+        visiblePanes =
+            case panes.paneLayout of
+                PanesOne ->
+                    [ panes.pane1 ]
+
+                PanesLeftRight ->
+                    [ panes.pane1, panes.pane2 ]
+
+                PanesUpperLower ->
+                    [ panes.pane1, panes.pane2 ]
+
+                PanesOnePlusTwo ->
+                    [ panes.pane1, panes.pane2, panes.pane3 ]
+
+                PanesGrid ->
+                    [ panes.pane1, panes.pane2, panes.pane3, panes.pane4 ]
     in
-    --TODO: Consider the pane layout.
-    Cmd.batch
-        [ paintIfProfileVisible panes.pane1
-        , paintIfProfileVisible panes.pane2
-        , paintIfProfileVisible panes.pane3
-        , paintIfProfileVisible panes.pane4
-        ]
+    Cmd.batch <| List.map paintIfProfileVisible visiblePanes
 
 
 profileViewHandlesClick : String -> Length.Length -> PaneLayoutOptions -> TrackLoaded msg -> Maybe Int
