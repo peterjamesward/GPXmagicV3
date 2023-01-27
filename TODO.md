@@ -13,9 +13,8 @@ Delete should display "Sorry" message when _almost_ all track is selected.
 
 ## Canvas profile chart
 
-> Eek, will we be able to adjust the left padding so the scales match up??
+> Eek, """There are too many active WebGL contexts on this page, the oldest context will be lost."""
 
-TODO: Check painting on load, resize, marker move, view change, layout change, etc.
 TODO: Tweak DIV padding and spacing on N-pane views.
 TODO: Customise tooltip to show only one altitude when coloured.
 

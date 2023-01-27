@@ -640,7 +640,7 @@ viewModeChoicesNoMap location msgWrapper pane =
     in
     Input.radioRow
         [ spacing 5
-        , padding 5
+        , paddingEach { top = 4, left = 4, bottom = 0, right = 0 }
         ]
         { onChange = msgWrapper << SetViewMode pane.paneId
         , selected = Just pane.activeView
@@ -753,6 +753,7 @@ viewPanes location msgWrapper mTrack segments graphOptions displayOptions ( w, h
         showNonMapViews : PaneContext -> Element msg
         showNonMapViews pane =
             -- Try having all the DIVs there but hidden.
+            --TODO: This code could be tidied quite a bit.
             column []
                 [ conditionallyVisible (pane.activeView == ViewThird) <|
                     case ( pane.thirdPersonContext, mTrack ) of
@@ -838,7 +839,7 @@ viewPanes location msgWrapper mTrack segments graphOptions displayOptions ( w, h
 
         viewPaneNoMap : PaneContext -> Element msg
         viewPaneNoMap pane =
-            column [ width fill, alignTop, centerX ]
+            column [ width fill, centerX ]
                 [ viewModeChoicesNoMap location msgWrapper pane
                 , showNonMapViews pane
                 ]

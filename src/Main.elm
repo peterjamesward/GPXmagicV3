@@ -2619,8 +2619,17 @@ performActionCommands actions model =
                 ( MapCenterOnCurrent, Just track ) ->
                     MapPortController.centreMapOnCurrent track
 
-                ( MapRefresh, Just _ ) ->
-                    MapPortController.refreshMap
+                ( MapRefresh, Just track ) ->
+                    -- Lazy, use this to refresh profile as well.
+                    Cmd.batch
+                        [ MapPortController.refreshMap
+                        , PaneLayoutManager.paintProfileCharts
+                            model.paneLayoutOptions
+                            model.toolOptions.imperial
+                            track
+                            model.toolOptions.namedSegmentOptions.namedSegments
+                            model.previews
+                        ]
 
                 ( MakeMapPointsDraggable flag, Just track ) ->
                     MapPortController.toggleDragging flag track
