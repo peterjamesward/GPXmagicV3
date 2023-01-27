@@ -2625,14 +2625,30 @@ performActionCommands actions model =
                 ( MakeMapPointsDraggable flag, Just track ) ->
                     MapPortController.toggleDragging flag track
 
-                ( ShowPreview previewData, Just _ ) ->
+                ( ShowPreview previewData, Just track ) ->
                     -- Add source and layer to map, via Port commands.
                     -- Use preview data from model dictionary, as that could be
                     -- more up to date than this version.
-                    showPreviewOnMap previewData.tag
+                    Cmd.batch
+                        [ showPreviewOnMap previewData.tag
+                        , PaneLayoutManager.paintProfileCharts
+                            model.paneLayoutOptions
+                            model.toolOptions.imperial
+                            track
+                            model.toolOptions.namedSegmentOptions.namedSegments
+                            model.previews
+                        ]
 
-                ( HidePreview tag, Just _ ) ->
-                    MapPortController.hidePreview tag
+                ( HidePreview tag, Just track ) ->
+                    Cmd.batch
+                        [ MapPortController.hidePreview tag
+                        , PaneLayoutManager.paintProfileCharts
+                            model.paneLayoutOptions
+                            model.toolOptions.imperial
+                            track
+                            model.toolOptions.namedSegmentOptions.namedSegments
+                            model.previews
+                        ]
 
                 ( DelayMessage int msg, Just _ ) ->
                     -- This used to "debounce" some clicks.

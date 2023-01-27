@@ -15,7 +15,6 @@ Delete should display "Sorry" message when _almost_ all track is selected.
 
 > Eek, will we be able to adjust the left padding so the scales match up??
 
-TODO: Previews (more datasets, need to label them (optimisation for hide & show))
 TODO: Check painting on load, resize, marker move, view change, layout change, etc.
 TODO: Tweak DIV padding and spacing on N-pane views.
 TODO: Customise tooltip to show only one altitude when coloured.
