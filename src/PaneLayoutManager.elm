@@ -1022,6 +1022,7 @@ viewHelper =
     , ( ViewFirst, "first" )
     , ( ViewPlan, "plan" )
     , ( ViewProfileCanvas, "profile" )
+    , ( ViewProfileWebGL, "profNew")
     , ( ViewMap, "map" )
     , ( ViewGraph, "route" )
     ]

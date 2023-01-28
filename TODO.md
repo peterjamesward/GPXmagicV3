@@ -19,6 +19,10 @@ Choice between "old" and "new" Profile, as separate view modes.
 
 # BACKLOG
 
+## Picture button
+
+Add button to images to allow screen capture. Because easy.
+
 ## Create nice road book page with export capability
 
 One view that combines Map with Profile, overlaid with route text that we would need to 
