@@ -11,17 +11,17 @@ Delete should display "Sorry" message when _almost_ all track is selected.
 
 # WIP
 
-## Profile
+## Picture button
 
-Choice between "old" and "new" Profile, as separate view modes.
+Add button to images to allow screen capture. Because easy.
+
+## Electron
+
+See branch. Installable, possibly multiple windows. App stores for £.
 
 ---
 
 # BACKLOG
-
-## Picture button
-
-Add button to images to allow screen capture. Because easy.
 
 ## Create nice road book page with export capability
 

@@ -3,11 +3,16 @@ module About exposing (aboutText)
 
 aboutText =
     """
-# GPXmagic v3.9.0 (e15ca346)
+# GPXmagic v3.9.1 (e15ca346)
 
 **GPXmagic V3 works best with Chrome (and some derivatives)**
 
 **N.B.** Apple fixed Safari so it works pretty well with GPXmagic.
+
+## 3.9.1
+
+Previous Profile view available as "Profile 2". You can have them both open, either, none,
+to suit your M.O.
 
 ## 3.9.0
 
