@@ -129,6 +129,14 @@ previewActions newOptions colour track =
     ]
 
 
+type alias Nudgeable =
+    -- Need location and clue as to how to Nudge it.
+    { point : EarthPoint
+    , effectiveDirection : Direction2d LocalCoords
+    , fade : Float
+    }
+
+
 computeNudgedPoints :
     Options
     -> TrackLoaded msg
@@ -136,6 +144,38 @@ computeNudgedPoints :
 computeNudgedPoints settings track =
     --TODO: Add easing with interpolated point across fade zones.
     let
+        interpolatePoints : Length.Length -> Length.Length -> Length.Length -> List Nudgeable
+        interpolatePoints interval start end =
+            let
+                pointCount =
+                    floor <| Quantity.ratio (end |> Quantity.minus start) interval
+
+                sampling =
+                    List.range 0 pointCount
+
+                interpolateSampleAt sample =
+                    let
+                        sampleDistance =
+                            interval
+                                |> Quantity.multiplyBy (toFloat sample)
+                                |> Quantity.plus start
+
+                        ( precedingIndex, point ) =
+                            DomainModel.interpolateTrack sampleDistance track.trackTree
+                    in
+                    { point = point
+                    , effectiveDirection =
+                        DomainModel.leafFromIndex precedingIndex track.trackTree
+                            |> asRecord
+                            |> .directionAtStart
+                    , fade =
+                        Quantity.ratio
+                            (sampleDistance |> Quantity.minus start)
+                            (end |> Quantity.minus start)
+                    }
+            in
+            List.map interpolateSampleAt sampling
+
         ( fromStart, fromEnd ) =
             TrackLoaded.getRangeFromMarkers track
 
@@ -154,69 +194,65 @@ computeNudgedPoints settings track =
         fadeOutEndDistance =
             endDistance |> Quantity.plus settings.fadeExtent
 
-        startIncludingFade =
-            indexFromDistance fadeInStartDistance track.trackTree
+        ( fadeInStartIndex, fadeOutEndIndex ) =
+            ( DomainModel.indexFromDistanceRoundedUp fadeInStartDistance track.trackTree
+            , DomainModel.indexFromDistanceRoundedDown fadeOutEndDistance track.trackTree
+            )
 
-        endIncludingFade =
-            indexFromDistance fadeOutEndDistance track.trackTree
+        ( fadeInZonePoints, fadeOutZonePoints ) =
+            -- Efficiency NOT a concern here, though we should make a fold.
+            ( interpolatePoints settings.easingSpacing fadeInStartDistance startDistance
+            , interpolatePoints settings.easingSpacing endDistance fadeOutEndDistance
+            )
 
-        fader pointDistance referenceDistance =
-            let
-                ( place, base ) =
-                    ( inMeters pointDistance, inMeters referenceDistance )
+        ( fadeInZoneNudged, fadeOutZoneNudged ) =
+            ( List.map nudgeFadeInZonePoint fadeInZonePoints
+            , List.map nudgeFadeOutZonePoint fadeOutZonePoints
+            )
 
-                x =
-                    abs <| (place - base) / inMeters settings.fadeExtent
-            in
+        nudgeFadeInZonePoint : Nudgeable -> EarthPoint
+        nudgeFadeInZonePoint nudgeable =
+            nudgeEarthPoint
+                settings
+                (fader nudgeable.fade)
+                nudgeable.effectiveDirection
+                nudgeable.point
+
+        nudgeFadeOutZonePoint : Nudgeable -> EarthPoint
+        nudgeFadeOutZonePoint nudgeable =
+            nudgeEarthPoint
+                settings
+                (fader (1 - nudgeable.fade))
+                nudgeable.effectiveDirection
+                nudgeable.point
+
+        fader x =
             if settings.cosineEasing then
-                (1 + cos (x * pi)) / 2
+                (1 - cos (x * pi)) / 2
 
             else
-                1.0 - x
+                x
 
         liesWithin ( lo, hi ) given =
             (given |> Quantity.greaterThanOrEqualTo lo)
                 && (given |> Quantity.lessThanOrEqualTo hi)
 
         nudge index =
-            let
-                pointDistance =
-                    DomainModel.distanceFromIndex index track.trackTree
-
-                fade =
-                    if
-                        pointDistance
-                            |> liesWithin ( startDistance, endDistance )
-                    then
-                        1.0
-
-                    else if
-                        pointDistance
-                            |> liesWithin ( fadeInStartDistance, startDistance )
-                    then
-                        fader pointDistance startDistance
-
-                    else if
-                        pointDistance
-                            |> liesWithin ( endDistance, fadeOutEndDistance )
-                    then
-                        fader pointDistance endDistance
-
-                    else
-                        0.0
-            in
-            nudgeTrackPoint settings fade index track.trackTree
+            -- Now only using this for in-range points
+            nudgeTrackPoint settings 1 index track.trackTree
 
         newEarthPoints =
-            List.map nudge <| List.range startIncludingFade endIncludingFade
+            fadeInZoneNudged
+                ++ (List.map nudge <| List.range fromNode toNode)
+                ++ fadeOutZoneNudged
 
         previewPoints =
             TrackLoaded.asPreviewPoints
                 track
-                (DomainModel.distanceFromIndex startIncludingFade track.trackTree)
+                fadeInStartDistance
                 newEarthPoints
     in
-    ( ( startIncludingFade, endIncludingFade ), previewPoints )
+    ( ( fadeInStartIndex, fadeOutEndIndex ), previewPoints )
 
 
 effectiveDirection : Int -> PeteTree -> Direction2d LocalCoords
@@ -243,6 +279,28 @@ effectiveDirection index tree =
         |> Direction2d.rotateBy halfDeviation
 
 
+nudgeEarthPoint : Options -> Float -> Direction2d LocalCoords -> EarthPoint -> EarthPoint
+nudgeEarthPoint options fade direction rawPoint =
+    let
+        horizontalVector =
+            direction
+                |> Direction2d.rotateClockwise
+                |> Direction3d.on SketchPlane3d.xy
+                |> Vector3d.withLength options.horizontal
+                |> Vector3d.scaleBy fade
+
+        verticalVector =
+            Vector3d.xyz Quantity.zero Quantity.zero options.vertical
+                |> Vector3d.scaleBy fade
+
+        newXYZ =
+            rawPoint.space
+                |> Point3d.translateBy horizontalVector
+                |> Point3d.translateBy verticalVector
+    in
+    { rawPoint | space = newXYZ }
+
+
 nudgeTrackPoint : Options -> Float -> Int -> PeteTree -> EarthPoint
 nudgeTrackPoint options fade index tree =
     if fade == 0 then
@@ -250,28 +308,13 @@ nudgeTrackPoint options fade index tree =
 
     else
         let
-            current =
+            unNudged =
                 earthPointFromIndex index tree
 
             horizontalDirection =
                 effectiveDirection index tree
-                    |> Direction2d.rotateClockwise
-                    |> Direction3d.on SketchPlane3d.xy
-
-            horizontalVector =
-                Vector3d.withLength options.horizontal horizontalDirection
-                    |> Vector3d.scaleBy fade
-
-            verticalVector =
-                Vector3d.xyz Quantity.zero Quantity.zero options.vertical
-                    |> Vector3d.scaleBy fade
-
-            newXYZ =
-                current.space
-                    |> Point3d.translateBy horizontalVector
-                    |> Point3d.translateBy verticalVector
         in
-        { current | space = newXYZ }
+        nudgeEarthPoint options fade horizontalDirection unNudged
 
 
 update :
