@@ -386,8 +386,8 @@ update msg options previewColour track =
             in
             ( options
             , [ undoInfo.action
-              , TrackHasChanged
               , WithUndo undoInfo
+              , TrackHasChanged
               ]
             )
 

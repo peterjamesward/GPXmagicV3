@@ -502,6 +502,7 @@ var purpleMarker = new mapboxgl.Marker({ color: "#800080", scale: 0.8 });
 var whiteMarker = new mapboxgl.Marker({ color: "#FFFFFF", scale: 0.8 });
 
 function addOptionals(msg) {
+
     if (typeof(msg.orange) != 'undefined') {
         orangeMarker
             .remove()
@@ -509,9 +510,8 @@ function addOptionals(msg) {
             .addTo(map);
     }
 
-    if (typeof(msg.purple) === 'undefined') {
-        purpleMarker.remove();
-    } else {
+    purpleMarker.remove();
+    if (typeof(msg.purple) != 'undefined') {
         purpleMarker
             .setLngLat([msg.purple.lon, msg.purple.lat])
             .addTo(map);
