@@ -55,7 +55,7 @@ import ViewMap
 import ViewMode exposing (ViewMode(..))
 import ViewPlan
 import ViewProfileChartContext
-import ViewProfileCharts
+import ViewProfileChartsCanvas
 import ViewPureStyles exposing (..)
 import ViewThirdPerson
 
@@ -385,7 +385,7 @@ update paneMsg msgWrapper mTrack graph contentArea options previews =
                                 ( Just track, Just profile ) ->
                                     let
                                         ( new, act ) =
-                                            ViewProfileCharts.update
+                                            ViewProfileChartsCanvas.update
                                                 imageMsg
                                                 (msgWrapper << ProfileViewMessage Pane1)
                                                 track
@@ -569,7 +569,7 @@ initialisePane track options pane =
                 ViewThirdPerson.initialiseView 0 track.trackTree pane.firstPersonContext
         , profileContext =
             Just <|
-                ViewProfileCharts.initialiseView
+                ViewProfileChartsCanvas.initialiseView
                     (paneIdToString pane.paneId)
                     track.trackTree
                     pane.profileContext
@@ -600,7 +600,8 @@ viewModeChoices location msgWrapper context options =
             [ Input.optionWith ViewMap <| localise "Map"
             , Input.optionWith ViewThird <| localise "Perspective"
             , Input.optionWith ViewFirst <| localise "Rider"
-            , Input.optionWith ViewProfile <| localise "Profile"
+            , Input.optionWith ViewProfileCanvas <| localise "Profile"
+            , Input.optionWith ViewProfileWebGL <| localise "OldProfile"
             , Input.optionWith ViewPlan <| localise "Plan"
             , Input.optionWith ViewGraph <| localise "Route"
             , Input.optionWith ViewInfo <| localise "About"
@@ -634,7 +635,8 @@ viewModeChoicesNoMap location msgWrapper pane =
         reducedOptionList =
             [ Input.optionWith ViewThird <| localise "Perspective"
             , Input.optionWith ViewFirst <| localise "Rider"
-            , Input.optionWith ViewProfile <| localise "Profile"
+            , Input.optionWith ViewProfileCanvas <| localise "Profile"
+            , Input.optionWith ViewProfileWebGL <| localise "OldProfile"
             , Input.optionWith ViewPlan <| localise "Plan"
             , Input.optionWith ViewGraph <| localise "Route"
             ]
@@ -685,7 +687,7 @@ paintProfileCharts :
 paintProfileCharts panes imperial track segments previews =
     let
         paintIfProfileVisible pane =
-            if pane.activeView == ViewProfile then
+            if pane.activeView == ViewProfileCanvas then
                 case pane.profileContext of
                     Just context ->
                         Cmd.batch
@@ -731,16 +733,16 @@ profileViewHandlesClick : String -> Length.Length -> PaneLayoutOptions -> TrackL
 profileViewHandlesClick container trackDistance options track =
     case container |> String.split "." |> List.Extra.last of
         Just "1" ->
-            ViewProfileCharts.handleClick trackDistance options.pane1.profileContext track
+            ViewProfileChartsCanvas.handleClick trackDistance options.pane1.profileContext track
 
         Just "2" ->
-            ViewProfileCharts.handleClick trackDistance options.pane2.profileContext track
+            ViewProfileChartsCanvas.handleClick trackDistance options.pane2.profileContext track
 
         Just "3" ->
-            ViewProfileCharts.handleClick trackDistance options.pane3.profileContext track
+            ViewProfileChartsCanvas.handleClick trackDistance options.pane3.profileContext track
 
         Just "4" ->
-            ViewProfileCharts.handleClick trackDistance options.pane4.profileContext track
+            ViewProfileChartsCanvas.handleClick trackDistance options.pane4.profileContext track
 
         _ ->
             Nothing
@@ -821,10 +823,21 @@ viewPanes location msgWrapper mTrack segments graphOptions displayOptions ( w, h
 
                         _ ->
                             none
-                , conditionallyVisible (pane.activeView == ViewProfile) <|
+                , conditionallyVisible (pane.activeView == ViewProfileCanvas) <|
                     case pane.profileContext of
                         Just context ->
-                            ViewProfileCharts.view
+                            ViewProfileChartsCanvas.view
+                                context
+                                pane.paneId
+                                ( paneWidth, paneHeight )
+                                (msgWrapper << ProfileViewMessage pane.paneId)
+
+                        _ ->
+                            none
+                , conditionallyVisible (pane.activeView == ViewProfileWebGL) <|
+                    case pane.profileContext of
+                        Just context ->
+                            ViewProfileChartsCanvas.view
                                 context
                                 pane.paneId
                                 ( paneWidth, paneHeight )
@@ -994,7 +1007,7 @@ viewHelper =
     , ( ViewThird, "third" )
     , ( ViewFirst, "first" )
     , ( ViewPlan, "plan" )
-    , ( ViewProfile, "profile" )
+    , ( ViewProfileCanvas, "profile" )
     , ( ViewMap, "map" )
     , ( ViewGraph, "route" )
     ]

@@ -6,6 +6,7 @@ type ViewMode
     | ViewThird
     | ViewFirst
     | ViewPlan
-    | ViewProfile
+    | ViewProfileCanvas
+    | ViewProfileWebGL
     | ViewMap
     | ViewGraph

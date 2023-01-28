@@ -1,4 +1,4 @@
-module ViewProfileCharts exposing
+module ViewProfileChartsCanvas exposing
     ( ClickZone(..)
     , handleClick
     , initialiseView
