@@ -28,13 +28,14 @@ toolId =
 
 
 type Msg
-    = SetHorizontalNudgeFactor (Quantity Float Meters)
-    | SetVerticalNudgeFactor (Quantity Float Meters)
-    | SetFadeExtent (Quantity Float Meters)
+    = SetHorizontalNudgeFactor Length.Length
+    | SetVerticalNudgeFactor Length.Length
+    | SetFadeExtent Length.Length
     | ZeroNudgeFactors
     | ApplyWithOptions
-    | NudgeButton (Quantity Float Meters)
+    | NudgeButton Length.Length
     | SetCosineEasing Bool
+    | SetEasingSpacing Length.Length
 
 
 defaultOptions : Options
@@ -43,6 +44,7 @@ defaultOptions =
     , vertical = Quantity.zero
     , fadeExtent = Quantity.zero
     , cosineEasing = True
+    , easingSpacing = Length.meters 5
     }
 
 
@@ -132,6 +134,7 @@ computeNudgedPoints :
     -> TrackLoaded msg
     -> ( ( Int, Int ), List PreviewPoint )
 computeNudgedPoints settings track =
+    --TODO: Add easing with interpolated point across fade zones.
     let
         ( fromStart, fromEnd ) =
             TrackLoaded.getRangeFromMarkers track
@@ -165,7 +168,11 @@ computeNudgedPoints settings track =
                 x =
                     abs <| (place - base) / inMeters settings.fadeExtent
             in
-            1.0 - x
+            if settings.cosineEasing then
+                (1 + cos (x * pi)) / 2
+
+            else
+                1.0 - x
 
         liesWithin ( lo, hi ) given =
             (given |> Quantity.greaterThanOrEqualTo lo)
@@ -279,6 +286,13 @@ update msg options previewColour track =
             let
                 newOptions =
                     { options | horizontal = value }
+            in
+            ( newOptions, previewActions newOptions previewColour track )
+
+        SetEasingSpacing value ->
+            let
+                newOptions =
+                    { options | easingSpacing = value }
             in
             ( newOptions, previewActions newOptions previewColour track )
 
@@ -396,7 +410,10 @@ view location imperial options msgWrapper track =
                     Input.slider
                         commonShortHorizontalSliderStyles
                         { onChange = Length.meters >> SetFadeExtent >> msgWrapper
-                        , label = Input.labelBelow [ centerX ] <| text <| showShortMeasure imperial options.fadeExtent
+                        , label =
+                            Input.labelBelow [ centerX ] <|
+                                text <|
+                                    showShortMeasure imperial options.fadeExtent
                         , min = 0.0
                         , max =
                             Length.inMeters <|
@@ -411,13 +428,30 @@ view location imperial options msgWrapper track =
                         }
 
                 easingOptions =
-                    row []
+                    column []
                         [ Input.checkbox []
                             { onChange = SetCosineEasing >> msgWrapper
                             , icon = Input.defaultCheckbox
                             , checked = options.cosineEasing
                             , label = Input.labelRight [] (i18n "easing")
                             }
+                        , if options.cosineEasing then
+                            Input.slider
+                                commonShortHorizontalSliderStyles
+                                { onChange = Length.meters >> SetEasingSpacing >> msgWrapper
+                                , label =
+                                    Input.labelBelow [ centerX ] <|
+                                        text <|
+                                            showShortMeasure imperial options.easingSpacing
+                                , min = 1 -- metres
+                                , max = 10 -- metres
+                                , step = Nothing
+                                , value = Length.inMeters options.easingSpacing
+                                , thumb = Input.defaultThumb
+                                }
+
+                          else
+                            none
                         ]
 
                 verticalNudgeSlider =
