@@ -142,7 +142,6 @@ computeNudgedPoints :
     -> TrackLoaded msg
     -> ( ( Int, Int ), List PreviewPoint )
 computeNudgedPoints settings track =
-    --TODO: Add easing with interpolated point across fade zones.
     let
         interpolatePoints : Length.Length -> Length.Length -> Length.Length -> List Nudgeable
         interpolatePoints interval start end =
@@ -206,9 +205,13 @@ computeNudgedPoints settings track =
             )
 
         ( fadeInZoneNudged, fadeOutZoneNudged ) =
-            ( List.map nudgeFadeInZonePoint fadeInZonePoints
-            , List.map nudgeFadeOutZonePoint fadeOutZonePoints
-            )
+            if settings.fadeExtent |> Quantity.greaterThanZero then
+                ( List.map nudgeFadeInZonePoint fadeInZonePoints
+                , List.map nudgeFadeOutZonePoint fadeOutZonePoints
+                )
+
+            else
+                ( [], [] )
 
         nudgeFadeInZonePoint : Nudgeable -> EarthPoint
         nudgeFadeInZonePoint nudgeable =

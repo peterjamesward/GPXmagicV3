@@ -1,9 +1,6 @@
 
 # BUGS
 
-**PURPLE** marker showing on map when not dropped, won't lift.
-> Track has no marker, but map shows it at track end.
-
 Title bar display not showing track name when loaded from URL.
 
 Redo of Stretch operation sometimes gives error on track (e.g. Lacets).
@@ -15,8 +12,6 @@ Delete should display "Sorry" message when _almost_ all track is selected.
 # WIP
 
 ## Cosine easing for Nudge, with interpolation when needed.
-
-Fix fail on fade zero.
 
 Fix marker positions after apply.
 
