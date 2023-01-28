@@ -34,6 +34,7 @@ type Msg
     | ZeroNudgeFactors
     | ApplyWithOptions
     | NudgeButton (Quantity Float Meters)
+    | SetCosineEasing Bool
 
 
 defaultOptions : Options
@@ -41,6 +42,7 @@ defaultOptions =
     { horizontal = Quantity.zero
     , vertical = Quantity.zero
     , fadeExtent = Quantity.zero
+    , cosineEasing = True
     }
 
 
@@ -332,6 +334,13 @@ update msg options previewColour track =
               ]
             )
 
+        SetCosineEasing bool ->
+            let
+                newOptions =
+                    { options | cosineEasing = bool }
+            in
+            ( newOptions, previewActions newOptions previewColour track )
+
 
 view : I18NOptions.Location -> Bool -> Options -> (Msg -> msg) -> Maybe (TrackLoaded msg) -> Element msg
 view location imperial options msgWrapper track =
@@ -400,6 +409,16 @@ view location imperial options msgWrapper track =
                         , value = Length.inMeters options.fadeExtent
                         , thumb = Input.defaultThumb
                         }
+
+                easingOptions =
+                    row []
+                        [ Input.checkbox []
+                            { onChange = SetCosineEasing >> msgWrapper
+                            , icon = Input.defaultCheckbox
+                            , checked = options.cosineEasing
+                            , label = Input.labelRight [] (i18n "easing")
+                            }
+                        ]
 
                 verticalNudgeSlider =
                     el [ width fill, alignRight, paddingEach { edges | left = 10 } ] <|
@@ -483,5 +502,6 @@ view location imperial options msgWrapper track =
                         ]
                     , i18n "fade"
                     , fadeSlider
+                    , easingOptions
                     ]
                 ]

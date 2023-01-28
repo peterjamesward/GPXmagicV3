@@ -11,6 +11,8 @@ Delete should display "Sorry" message when _almost_ all track is selected.
 
 # WIP
 
+## Cosine easing for Nudge, with interpolation when needed.
+
 ## Picture button
 
 Add button to images to allow screen capture. Because easy.

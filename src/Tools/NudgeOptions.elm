@@ -10,4 +10,5 @@ type alias Options =
     { horizontal : Quantity Float Meters
     , vertical : Quantity Float Meters
     , fadeExtent : Quantity Float Meters
+    , cosineEasing : Bool
     }
