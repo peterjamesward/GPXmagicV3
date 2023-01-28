@@ -9,6 +9,13 @@ aboutText =
 
 **N.B.** Apple fixed Safari so it works pretty well with GPXmagic.
 
+## 3.9.2
+
+Fix bug that caused Purple marker to appear on map when route loaded.
+
+Added "smooth blend" option to Nudge. This creates a smooth curve either end of the nudged
+zone, using a cosine function, after persistent (and correct) badgering from DC.
+
 ## 3.9.1
 
 Previous Profile view available as "Profile 2". You can have them both open, either, none,
