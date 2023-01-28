@@ -3,11 +3,15 @@ module About exposing (aboutText)
 
 aboutText =
     """
-# GPXmagic v3.9.1 (a3ba12b0)
+# GPXmagic v3.9.2 (a3ba12b0)
 
 **GPXmagic V3 works best with Chrome (and some derivatives)**
 
 **N.B.** Apple fixed Safari so it works pretty well with GPXmagic.
+
+## 3.9.2
+
+Fix bug where Purple marker appears on map at track end after loading a route.
 
 ## 3.9.1
 
