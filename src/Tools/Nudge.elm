@@ -1,4 +1,14 @@
-module Tools.Nudge exposing (Msg(..), applyUsingOptions, defaultOptions, nudgeTrackPoint, toolId, toolStateChange, update, view, widenBendHelper)
+module Tools.Nudge exposing
+    ( Msg(..)
+    , applyUsingOptions
+    , defaultOptions
+    , nudgeTrackPoint
+    , toolId
+    , toolStateChange
+    , update
+    , view
+    , widenBendHelper
+    )
 
 import Actions exposing (ToolAction(..))
 import Direction2d exposing (Direction2d)
@@ -14,7 +24,7 @@ import Point3d
 import PreviewData exposing (PreviewPoint, PreviewShape(..))
 import Quantity exposing (Quantity)
 import SketchPlane3d
-import Tools.I18N as I18N
+import Tools.I18N as I18N exposing (localisedString)
 import Tools.I18NOptions as I18NOptions
 import Tools.NudgeOptions exposing (..)
 import TrackLoaded exposing (TrackLoaded)
@@ -43,29 +53,70 @@ defaultOptions =
     { horizontal = Quantity.zero
     , vertical = Quantity.zero
     , fadeExtent = Quantity.zero
-    , cosineEasing = True
-    , easingSpacing = Length.meters 5
+    , cosineEasing = False
+    , easingSpacing = Length.meters 10
     }
 
 
 applyUsingOptions :
     Options
     -> TrackLoaded msg
-    -> Maybe PeteTree
+    -> TrackLoaded msg
 applyUsingOptions options track =
     let
         ( ( actualStart, actualEnd ), newPoints ) =
             computeNudgedPoints options track
 
-        newTree =
-            DomainModel.replaceRange
-                actualStart
-                (skipCount track.trackTree - actualEnd)
-                track.referenceLonLat
-                (List.map .gpx newPoints)
-                track.trackTree
+        ( fromStart, fromEnd ) =
+            if track.markerPosition == Nothing then
+                ( track.currentPosition
+                , skipCount track.trackTree - track.currentPosition
+                )
+
+            else
+                TrackLoaded.getRangeFromMarkers track
+
+        endIndex =
+            DomainModel.skipCount track.trackTree - fromEnd
+
+        originalMarkedLength =
+            endIndex - fromStart
+
+        pointsInEachFadeZone =
+            (List.length newPoints - originalMarkedLength) // 2
+
+        startAdjustment =
+            pointsInEachFadeZone - (fromStart - actualStart)
+
+        ( newOrange, newPurple ) =
+            case track.markerPosition of
+                Just purple ->
+                    ( track.currentPosition + startAdjustment
+                    , Just <| purple + startAdjustment
+                    )
+
+                Nothing ->
+                    ( track.currentPosition + startAdjustment
+                    , Nothing
+                    )
     in
-    newTree
+    case
+        DomainModel.replaceRange
+            actualStart
+            (skipCount track.trackTree - actualEnd)
+            track.referenceLonLat
+            (List.map .gpx newPoints)
+            track.trackTree
+    of
+        Just newTree ->
+            { track
+                | trackTree = newTree
+                , currentPosition = newOrange
+                , markerPosition = newPurple
+            }
+
+        Nothing ->
+            track
 
 
 widenBendHelper :
@@ -176,7 +227,13 @@ computeNudgedPoints settings track =
             List.map interpolateSampleAt sampling
 
         ( fromStart, fromEnd ) =
-            TrackLoaded.getRangeFromMarkers track
+            if track.markerPosition == Nothing then
+                ( track.currentPosition
+                , skipCount track.trackTree - track.currentPosition
+                )
+
+            else
+                TrackLoaded.getRangeFromMarkers track
 
         ( fromNode, toNode ) =
             -- Shim for legacy code; not worth re-writing what is already quite clear.
@@ -188,20 +245,31 @@ computeNudgedPoints settings track =
             )
 
         fadeInStartDistance =
-            startDistance |> Quantity.minus settings.fadeExtent
+            startDistance
+                |> Quantity.minus settings.fadeExtent
+                |> Quantity.max Quantity.zero
 
         fadeOutEndDistance =
-            endDistance |> Quantity.plus settings.fadeExtent
+            endDistance
+                |> Quantity.plus settings.fadeExtent
+                |> Quantity.min (trueLength track.trackTree)
 
-        ( fadeInStartIndex, fadeOutEndIndex ) =
-            ( DomainModel.indexFromDistanceRoundedUp fadeInStartDistance track.trackTree
-            , DomainModel.indexFromDistanceRoundedDown fadeOutEndDistance track.trackTree
-            )
+        ( firstReplacedPoint, lastReplacedPoint ) =
+            if settings.fadeExtent |> Quantity.greaterThanZero then
+                ( DomainModel.indexFromDistanceRoundedUp fadeInStartDistance track.trackTree
+                , DomainModel.indexFromDistanceRoundedDown fadeOutEndDistance track.trackTree
+                )
+
+            else
+                ( fromNode
+                , toNode
+                )
 
         ( fadeInZonePoints, fadeOutZonePoints ) =
             -- Efficiency NOT a concern here, though we should make a fold.
             ( interpolatePoints settings.easingSpacing fadeInStartDistance startDistance
-            , interpolatePoints settings.easingSpacing endDistance fadeOutEndDistance
+            , List.drop 1 <|
+                interpolatePoints settings.easingSpacing endDistance fadeOutEndDistance
             )
 
         ( fadeInZoneNudged, fadeOutZoneNudged ) =
@@ -236,17 +304,19 @@ computeNudgedPoints settings track =
             else
                 x
 
-        liesWithin ( lo, hi ) given =
-            (given |> Quantity.greaterThanOrEqualTo lo)
-                && (given |> Quantity.lessThanOrEqualTo hi)
-
         nudge index =
             -- Now only using this for in-range points
             nudgeTrackPoint settings 1 index track.trackTree
 
+        fullyNudgedPoints =
+            List.map nudge <| List.range fromNode toNode
+
+        _ =
+            Debug.log "BUDGED" (List.length fullyNudgedPoints)
+
         newEarthPoints =
             fadeInZoneNudged
-                ++ (List.map nudge <| List.range fromNode toNode)
+                ++ fullyNudgedPoints
                 ++ fadeOutZoneNudged
 
         previewPoints =
@@ -255,7 +325,7 @@ computeNudgedPoints settings track =
                 fadeInStartDistance
                 newEarthPoints
     in
-    ( ( fadeInStartIndex, fadeOutEndIndex ), previewPoints )
+    ( ( firstReplacedPoint, lastReplacedPoint ), previewPoints )
 
 
 effectiveDirection : Int -> PeteTree -> Direction2d LocalCoords
@@ -388,8 +458,8 @@ update msg options previewColour track =
                     }
             in
             ( options
-            , [ undoInfo.action
-              , WithUndo undoInfo
+            , [ WithUndo undoInfo
+              , undoInfo.action
               , TrackHasChanged
               ]
             )
@@ -459,7 +529,9 @@ view location imperial options msgWrapper track =
                         , label =
                             Input.labelBelow [ centerX ] <|
                                 text <|
-                                    showShortMeasure imperial options.fadeExtent
+                                    (localisedString location toolId "fade"
+                                        ++ showShortMeasure imperial options.fadeExtent
+                                    )
                         , min = 0.0
                         , max =
                             Length.inMeters <|
@@ -474,30 +546,28 @@ view location imperial options msgWrapper track =
                         }
 
                 easingOptions =
-                    column []
-                        [ Input.checkbox []
+                    column [ centerX, spacing 5 ]
+                        [ Input.slider
+                            commonShortHorizontalSliderStyles
+                            { onChange = Length.meters >> SetEasingSpacing >> msgWrapper
+                            , label =
+                                Input.labelBelow [ centerX ] <|
+                                    text
+                                        (localisedString location toolId "spacing"
+                                            ++ showShortMeasure imperial options.easingSpacing
+                                        )
+                            , min = 1 -- metres
+                            , max = 10 -- metres
+                            , step = Nothing
+                            , value = Length.inMeters options.easingSpacing
+                            , thumb = Input.defaultThumb
+                            }
+                        , Input.checkbox []
                             { onChange = SetCosineEasing >> msgWrapper
                             , icon = Input.defaultCheckbox
                             , checked = options.cosineEasing
                             , label = Input.labelRight [] (i18n "easing")
                             }
-                        , if options.cosineEasing then
-                            Input.slider
-                                commonShortHorizontalSliderStyles
-                                { onChange = Length.meters >> SetEasingSpacing >> msgWrapper
-                                , label =
-                                    Input.labelBelow [ centerX ] <|
-                                        text <|
-                                            showShortMeasure imperial options.easingSpacing
-                                , min = 1 -- metres
-                                , max = 10 -- metres
-                                , step = Nothing
-                                , value = Length.inMeters options.easingSpacing
-                                , thumb = Input.defaultThumb
-                                }
-
-                          else
-                            none
                         ]
 
                 verticalNudgeSlider =
@@ -580,7 +650,6 @@ view location imperial options msgWrapper track =
                         [ nudgeButton
                         , zeroButton
                         ]
-                    , i18n "fade"
                     , fadeSlider
                     , easingOptions
                     ]

@@ -3,18 +3,20 @@ module About exposing (aboutText)
 
 aboutText =
     """
-# GPXmagic v3.9.1 (a3ba12b0)
+# GPXmagic v3.9.3 (a3ba12b0)
 
 **GPXmagic V3 works best with Chrome (and some derivatives)**
 
 **N.B.** Apple fixed Safari so it works pretty well with GPXmagic.
 
+## 3.9.3
+
+Added "smooth blend" option to Nudge. This creates a smooth curve either end of the nudged
+zone, using a cosine function. Thanks to DC for persistence..
+
 ## 3.9.2
 
 Fix bug that caused Purple marker to appear on map when route loaded.
-
-Added "smooth blend" option to Nudge. This creates a smooth curve either end of the nudged
-zone, using a cosine function, after persistent (and correct) badgering from DC.
 
 ## 3.9.1
 

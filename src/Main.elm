@@ -1599,15 +1599,8 @@ performActionsOnModel actions model =
                     }
 
                 ( NudgeApplyWithOptions options, Just track ) ->
-                    let
-                        newTree =
-                            Tools.Nudge.applyUsingOptions options track
-
-                        newTrack =
-                            TrackLoaded.useTreeWithRepositionedMarkers newTree track
-                    in
                     { foldedModel
-                        | track = Just newTrack
+                        | track = Just <| Tools.Nudge.applyUsingOptions options track
                         , needsRendering = True
                     }
 

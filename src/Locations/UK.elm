@@ -652,10 +652,11 @@ Purple marker, the Purple marker is moved there; this can give you more control 
                 , ( "-1cm", """-1cm""" )
                 , ( "-10cm", """-10cm""" )
                 , ( "-1m", """-1m""" )
-                , ( "fade", """Fade in/out""" )
+                , ( "fade", """Fade in/out """ )
                 , ( "Apply", """Apply""" )
                 , ( "Zero", """Reset sliders""" )
                 , ( "easing", """Smooth blend""")
+                , ( "spacing", """Spacing """)
                 , ( "info", """
 Sometimes all it takes is a little _Nudge_.
 
