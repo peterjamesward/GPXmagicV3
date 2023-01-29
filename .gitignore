@@ -3,9 +3,9 @@ site/main.js
 Main.min.js
 src/M3O.elm
 /personal_notes/
-/personal_notes/*
 site/GPX/*
 out/*
 node_modules/*
 out/
 /node_modules/
+/.idea/shelf/
