@@ -12,7 +12,7 @@ aboutText =
 ## 3.9.3
 
 Added "smooth blend" option to Nudge. This creates a smooth curve either end of the nudged
-zone, using a cosine function. Thanks to DC for persistence..
+zone, using a cosine function. Thanks to DC for your persistence.
 
 ## 3.9.2
 

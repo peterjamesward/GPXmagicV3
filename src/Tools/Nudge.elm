@@ -311,9 +311,6 @@ computeNudgedPoints settings track =
         fullyNudgedPoints =
             List.map nudge <| List.range fromNode toNode
 
-        _ =
-            Debug.log "BUDGED" (List.length fullyNudgedPoints)
-
         newEarthPoints =
             fadeInZoneNudged
                 ++ fullyNudgedPoints
