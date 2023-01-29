@@ -3,11 +3,15 @@ module About exposing (aboutText)
 
 aboutText =
     """
-# GPXmagic v3.9.3 (d243aa27)
+# GPXmagic v3.9.4 (d243aa27)
 
 **GPXmagic V3 works best with Chrome (and some derivatives)**
 
 **N.B.** Apple fixed Safari so it works pretty well with GPXmagic.
+
+## 3.9.4
+
+"Buy Me A Coffee" should work now!
 
 ## 3.9.3
 
