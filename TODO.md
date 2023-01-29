@@ -13,9 +13,22 @@ Delete should display "Sorry" message when _almost_ all track is selected.
 
 ## Electron
 
-Made a good start.
-How to get Maps and Chart libraries installed.
-Is OAuth possible? I suspect not.
+Works!
+
+How to make installers.
+> electron-forge, works now I have the latest Node.js.
+
+Is OAuth possible?
+>https://medium.com/@chamerling/using-oauth-in-an-electron-application-abb0376c2ae0
+
+Local storage perhaps not working (state not restored).
+> Seems to remember tool state but not the splitters.
+
+Multiple windows sharing views on common model?
+> Need to understand the Electron process model and how stuff can be shared.
+
+Merge from master.
+> Need some updates.
 
 ---
 
