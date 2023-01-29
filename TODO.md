@@ -13,10 +13,6 @@ No preview for single point nudge without fade.
 
 # WIP
 
-## Picture button
-
-Add button to images to allow screen capture. Because easy.
-
 ## Electron
 
 See branch. Installable, possibly multiple windows. App stores for £.
@@ -25,10 +21,17 @@ See branch. Installable, possibly multiple windows. App stores for £.
 
 # BACKLOG
 
+## Picture button
+
+Add button to images to allow screen capture. Because easy.
+
 ## Refactor Main -> Tools
 
 Follow the Nudge example of the Tool providing the new Orange & Purple locations.
 (Further tidies up repetitive code in Main.)
+
+I genuinely think this will open the door to a much cleaner control flow, perhaps deprecating
+actions (yes, after all that) and using the track/newTrack diff to drive command generation.
 
 ## Create nice road book page with export capability
 
