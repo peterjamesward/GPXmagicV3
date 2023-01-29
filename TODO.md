@@ -7,21 +7,11 @@ Redo of Stretch operation sometimes gives error on track (e.g. Lacets).
 
 Delete should display "Sorry" message unless one leaf remains.
 
+No preview for single point nudge without fade.
+
 --- 
 
 # WIP
-
-## Cosine easing for Nudge, with interpolation when needed.
-
-Nudge apply wrong with single point. Replicating point?
-
-Nudge with linear fade also interpolates - do we want this?
-
-Fade must truncate at track ends.
-
-No preview for single point without fade.
-
-Undo with fade is wrong.
 
 ## Picture button
 
