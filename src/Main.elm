@@ -1220,8 +1220,6 @@ topLoadingBar model =
         , row [ alignRight, spacing 5 ]
             [ Tools.OneClickQuickFix.oneClickQuickFixButton model.location OneClickMsg model.track
             , StravaAuth.stravaButton model.stravaAuthentication OAuthMessage
-
-            --, PaneLayoutManager.paneLayoutMenu model.location PaneMsg model.paneLayoutOptions
             , buyMeACoffeeButton
             ]
         ]
@@ -1229,7 +1227,9 @@ topLoadingBar model =
 
 buyMeACoffeeButton =
     newTabLink
-        [ alignRight ]
+        [ alignRight
+        , htmlAttribute <| Mouse.onWithOptions "click" stopProp (always NoOp)
+        ]
         { url = "https://www.buymeacoffee.com/Peterward"
         , label =
             image [ height (Element.px 30), width (Element.px 130) ]
