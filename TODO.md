@@ -30,6 +30,8 @@ Multiple windows sharing views on common model?
 Merge from master.
 > Need some updates.
 
+Maybe Google street view window can follow Orange.
+
 ---
 
 # BACKLOG
