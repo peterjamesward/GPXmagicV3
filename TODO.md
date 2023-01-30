@@ -19,6 +19,7 @@ How to make installers.
 > electron-forge, works now I have the latest Node.js.
 
 Is OAuth possible?
+Yes, if Strava accepts localhost.
 >https://medium.com/@chamerling/using-oauth-in-an-electron-application-abb0376c2ae0
 
 Local storage perhaps not working (state not restored).
