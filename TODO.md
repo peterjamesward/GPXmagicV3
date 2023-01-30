@@ -15,6 +15,8 @@ Delete should display "Sorry" message when _almost_ all track is selected.
 
 Works!
 
+**CHECKOUT** https://www.npmjs.com/package/elm-desktop-app
+
 How to make installers.
 > electron-forge, works now I have the latest Node.js.
 
