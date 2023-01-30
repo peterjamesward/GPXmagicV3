@@ -21,7 +21,9 @@ How to make installers.
 > electron-forge, works now I have the latest Node.js.
 
 Is OAuth possible?
-Yes, if Strava accepts localhost.
+Yes, if Strava accepts localhost (and it seems that it does).
+Put the Strava login button inside the Strava tool.
+Have to use the Electron main process to do the request.
 >https://medium.com/@chamerling/using-oauth-in-an-electron-application-abb0376c2ae0
 
 Local storage perhaps not working (state not restored).
@@ -34,6 +36,7 @@ Merge from master.
 > Need some updates.
 
 Maybe Google street view window can follow Orange.
+> Undoubtedly, it becomes another view, but would worry about rate limits.
 
 ---
 
