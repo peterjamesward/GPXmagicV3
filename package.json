@@ -1,6 +1,6 @@
 {
-  "name": "elm-electron-todomvc",
-  "version": "0.1.0",
+  "name": "GPXmagic",
+  "version": "3.9.2",
   "main": "electron-start.js",
   "dependencies": {
     "electron-squirrel-startup": "^1.0.0"
